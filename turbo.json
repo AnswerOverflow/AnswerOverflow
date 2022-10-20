@@ -18,6 +18,8 @@
   "globalEnv": [
     "NODE_ENV",
     "DISCORD_TOKEN",
-    "OWNERS"
+    "OWNERS",
+    "VERCEL_URL",
+    "PORT"
   ]
 }

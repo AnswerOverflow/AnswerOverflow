@@ -6,10 +6,7 @@
 		"tsBuildInfoFile": "dist/.tsbuildinfo",
 		"noUnusedLocals": true,
 		"noUnusedParameters": false,		
-		"skipLibCheck": true,		
-		"target": "ES2017",
-		"module": "esnext"
-
+		"skipLibCheck": true,
 	},
 	"include": ["src"],
 	"exclude": ["node_modules"]

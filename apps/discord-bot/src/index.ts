@@ -39,4 +39,4 @@ const main = async () => {
   }
 };
 
-await main();
+void main();
