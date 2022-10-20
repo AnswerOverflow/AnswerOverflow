@@ -25,6 +25,7 @@
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
+    "@sapphire/eslint-config": "^4.3.8",
     "@sapphire/prettier-config": "^1.4.4",
     "@sapphire/ts-config": "^3.3.4",
     "@types/node": "^18.8.3",
@@ -34,14 +35,14 @@
     "tsc-watch": "^5.0.3",
     "tsup": "^6.3.0",
     "typescript": "^4.8.4"
-  },  
+  },
   "scripts": {
     "build": "tsup --format cjs",
     "watch": "tsc -w",
     "start": "node dist/index.js",
-    "lint": "tsc --noEmit",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix --ext .ts",
     "dev": "tsup --format cjs --watch --onSuccess \"node dist/index.js\"",
     "format": "prettier --write \"src/**/*.ts\""
-  },
-  "prettier": "@sapphire/prettier-config"  
+  }
 }

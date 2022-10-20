@@ -4,9 +4,12 @@
 		"rootDir": "src",
 		"outDir": "dist",
 		"tsBuildInfoFile": "dist/.tsbuildinfo",
-		"noUnusedLocals": false,
+		"noUnusedLocals": true,
 		"noUnusedParameters": false,		
 		"skipLibCheck": true,		
+		"target": "ES2017",
+		"module": "esnext"
+
 	},
 	"include": ["src"],
 	"exclude": ["node_modules"]
