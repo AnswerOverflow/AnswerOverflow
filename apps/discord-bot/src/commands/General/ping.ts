@@ -37,7 +37,7 @@ export class UserCommand extends Command {
 	// slash command
 	public async chatInputRun(interaction: Command.ChatInputInteraction) {
 		const msg = await interaction.reply({ content: 'Ping?', fetchReply: true });
-		const content = `Pong! ${add(1, 4)}`;
+		const content = `Pong! ${add(10, 4)}`;
 
 		return await interaction.editReply({
 			content: content

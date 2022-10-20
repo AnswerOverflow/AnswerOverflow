@@ -18,13 +18,14 @@
     "@sapphire/type": "^2.2.4",
     "@sapphire/utilities": "^3.10.1",
     "colorette": "^2.0.19",
+    "core": "*",
     "discord-api-types": "^0.33.5",
     "discord.js": "^13.11.0",
     "dotenv-cra": "^3.0.2",
-    "reflect-metadata": "^0.1.13",
-    "core": "*"
+    "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
+    "core": "*",
     "@sapphire/prettier-config": "^1.4.4",
     "@sapphire/ts-config": "^3.3.4",
     "@types/node": "^18.8.3",
@@ -32,17 +33,15 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^2.7.1",
     "tsc-watch": "^5.0.3",
+    "tsup": "^6.3.0",
     "typescript": "^4.8.4"
-  },
-  "bundledDependencies": [
-    "core"
-  ],
+  },  
   "scripts": {
-    "build": "tsc",
+    "build": "tsup --format cjs",
     "watch": "tsc -w",
     "start": "node dist/index.js",
-    "dev": "tsc-watch --onSuccess \"node ./dist/index.js\"",
+    "dev": "tsup --format cjs --watch --onSuccess \"node dist/index.js\"",
     "format": "prettier --write \"src/**/*.ts\""
   },
-  "prettier": "@sapphire/prettier-config"
+  "prettier": "@sapphire/prettier-config"  
 }

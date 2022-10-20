@@ -11,5 +11,13 @@
     "dev": {
       "cache": false
     }
-  }
+  },
+  "globalDependencies": [
+    ".env.local"
+  ],
+  "globalEnv": [
+    "NODE_ENV",
+    "DISCORD_TOKEN",
+    "OWNERS"
+  ]
 }
