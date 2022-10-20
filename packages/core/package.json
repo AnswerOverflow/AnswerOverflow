@@ -1,0 +1,8 @@
+{
+    "name": "core",
+    "main": "src/index.ts",
+    "types": "src/index.ts",    
+    "dependencies": {      
+        "typescript": "^4.5.2"
+    }
+}

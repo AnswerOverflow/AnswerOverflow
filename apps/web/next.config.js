@@ -1,4 +1,4 @@
-const withTM = require("next-transpile-modules")(["ui"]);
+const withTM = require("next-transpile-modules")(["ui", "core"]);
 
 module.exports = withTM({
   webpack: (config) => {
