@@ -22,7 +22,9 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "superjson": "1.9.1",
-    "zod": "^3.18.0"
+    "zod": "^3.18.0",
+    "core": "*",
+    "ui": "*"
   },
   "devDependencies": {
     "@types/node": "18.0.0",
@@ -33,6 +35,7 @@
     "autoprefixer": "^10.4.7",
     "eslint": "8.22.0",
     "eslint-config-next": "12.3.1",
+    "next-transpile-modules": "^9.1.0",
     "postcss": "^8.4.14",
     "prettier": "^2.7.1",
     "prettier-plugin-tailwindcss": "^0.1.13",

@@ -2,6 +2,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { trpc } from "../utils/trpc";
+import { add } from "core";
 
 const Home: NextPage = () => {
   const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
@@ -15,7 +16,7 @@ const Home: NextPage = () => {
       </Head>
       <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
         <h1 className="text-5xl font-extrabold leading-normal text-gray-700 md:text-[5rem]">
-          Create <span className="text-purple-300">T3</span> App
+          Create <span className="text-purple-300">{add(1, 10)}</span> App
         </h1>
         <p className="text-2xl text-gray-700">This stack uses:</p>
         <div className="mt-3 grid gap-3 pt-3 text-center md:grid-cols-3 lg:w-2/3">
