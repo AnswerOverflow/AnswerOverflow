@@ -59,6 +59,12 @@
       "[typescript]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint"
       },
-      "files.eol": "\n",
+      "javascript.suggest.autoImports": true,
+      "typescript.suggest.autoImports": true,
+      "javascript.updateImportsOnFileMove.enabled": "always",
+      "typescript.updateImportsOnFileMove.enabled": "always",
+      "source.organizeImports": true,    
+      "editor.bracketPairColorization.enabled": true,
+      "editor.guides.bracketPairs":"active"    
   }
   }
