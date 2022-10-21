@@ -24,13 +24,13 @@ export default withTM(["ui", "core"])(
     locales: ["en"],
     defaultLocale: "en",
   },
-  webpack: (config) => {
-    // Support hot reload in dev containers
-    config.watchOptions = {
-      poll: 1000,   // Check for changes every second
-      aggregateTimeout: 300,   // delay before rebuilding
-    };
-    return config;
-  },
+  //webpack: (config) => {
+  //  // Support hot reload in dev containers
+  //  config.watchOptions = {
+  //    poll: 1000,   // Check for changes every second
+  //    aggregateTimeout: 300,   // delay before rebuilding
+  //  };
+  //  return config;
+  //},
 })
 );
