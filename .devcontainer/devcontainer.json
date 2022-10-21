@@ -19,7 +19,8 @@
 				"dbaeumer.vscode-eslint",
 				"GitHub.copilot",
 				"eamodio.gitlens",
-				"2gua.rainbow-brackets"
+				"2gua.rainbow-brackets",
+				"Prisma.prisma"
 			]
 		}
 	},

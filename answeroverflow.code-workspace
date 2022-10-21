@@ -7,8 +7,13 @@
       },
       {
         // 
-        "name": "discod-bot",
+        "name": "discord-bot",
         "path": "apps/discord-bot",
+      },
+      {
+        // 
+        "name": "storybook",
+        "path": "apps/storybook",
       },
       {
         // 
