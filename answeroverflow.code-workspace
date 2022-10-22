@@ -77,7 +77,8 @@
   },
   "extensions": {
     "recommendations": [
-      "vscode-icons-team.vscode-icons"
+      "vscode-icons-team.vscode-icons",
+      "ms-vscode-remote.vscode-remote-extensionpack"
     ]
   }
   }
