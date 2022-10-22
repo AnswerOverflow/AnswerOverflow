@@ -1,5 +1,11 @@
 import "./lib/setup";
-import { LogLevel, SapphireClient } from "@sapphire/framework";
+import { container, LogLevel, SapphireClient } from "@sapphire/framework";
+
+declare module "@sapphire/pieces" {
+  interface Container {
+    answerOverflow: string;
+  }
+}
 
 const client = new SapphireClient({
   defaultPrefix: "!",
@@ -27,11 +33,11 @@ const client = new SapphireClient({
 const main = async () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require("dotenv").config();
-
   try {
     client.logger.info("Logging in");
     await client.login(process.env.DISCORD_TOKEN);
     client.logger.info("logged in");
+    container.answerOverflow = "Hello Answer Overflow!";
   } catch (error) {
     client.logger.fatal(error);
     client.destroy();

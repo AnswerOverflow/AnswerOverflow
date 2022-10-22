@@ -12,11 +12,6 @@
       },
       {
         // 
-        "name": "storybook",
-        "path": "apps/storybook",
-      },
-      {
-        // 
         "name": "web",
         "path": "apps/web"
       },      
@@ -35,19 +30,27 @@
       {
         "name": "tsconfig",
         "path": "packages/tsconfig"
+      },
+      {
+        "name": "jest-presets",
+        "path": "packages/jest-presets"
+      },
+      {
+        "name": "utils",
+        "path": "packages/utils"
       }
     ],
 	  "settings": {
     "files.exclude": {
       "node_modules/": true,
-      "apps/": true,
-	    "packages/": true,
+      "apps/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
+	    "packages/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
       ".turbo": true,
       "dist": true,
       ".next": true
     },
     "jest.autoRun": "off",
-    "jest.disabledWorkspaceFolders": ["Root"],
+    "jest.disabledWorkspaceFolders": ["root"], // Including the root workspace duplicates tests
      "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
       },
@@ -71,5 +74,10 @@
       "source.organizeImports": true,    
       "editor.bracketPairColorization.enabled": true,
       "editor.guides.bracketPairs":"active"    
+  },
+  "extensions": {
+    "recommendations": [
+      "vscode-icons-team.vscode-icons"
+    ]
   }
   }
