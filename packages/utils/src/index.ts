@@ -1,3 +1,3 @@
 export const log = (str: string) => {
-    console.log(str);
-}
+  console.log(str);
+};
