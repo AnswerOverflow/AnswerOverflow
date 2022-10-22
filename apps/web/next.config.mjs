@@ -24,6 +24,9 @@ export default withTM(["ui", "core"])(
     locales: ["en"],
     defaultLocale: "en",
   },
+  images: {
+    domains: ["www.answeroverflow.com"],
+  },
   //webpack: (config) => {
   //  // Support hot reload in dev containers
   //  config.watchOptions = {
