@@ -1,5 +1,5 @@
 {
-  "name": "discord-bot",
+  "name": "@answeroverflow/discord-bot",
   "version": "1.0.0",
   "main": "dist/index.js",
   "author": "@sapphire",
