@@ -1,4 +1,4 @@
-import { UserManager } from "./users/userManager";
+import { UserManager } from "./users/user-manager";
 
 export class AnswerOverflowClient {
   public users: UserManager = new UserManager();

@@ -68,7 +68,10 @@
       "javascript.updateImportsOnFileMove.enabled": "always",
       "typescript.updateImportsOnFileMove.enabled": "always",
       "editor.bracketPairColorization.enabled": true,
-      "editor.guides.bracketPairs":"active"    
+      "editor.guides.bracketPairs": "active",
+      "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+      }
   },
   "extensions": {
     "recommendations": [
