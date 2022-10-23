@@ -1,5 +1,5 @@
 {
-    "name": "core",
+    "name": "@answeroverflow/core",
     "main": "./dist/index.js",
     "source": "./src/index.ts",
     "types": "./dist/index.d.ts",

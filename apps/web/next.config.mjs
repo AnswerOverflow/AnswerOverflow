@@ -14,26 +14,25 @@ function defineNextConfig(config) {
   return config;
 }
 
-
-export default withTM(["ui", "core"])(
+export default withTM(["ui", "@answeroverflow/core"])(
   defineNextConfig({
-  reactStrictMode: true,
-  swcMinify: true,
-  // Next.js i18n docs: https://nextjs.org/docs/advanced-features/i18n-routing
-  i18n: {
-    locales: ["en"],
-    defaultLocale: "en",
-  },
-  images: {
-    domains: ["www.answeroverflow.com"],
-  },
-  //webpack: (config) => {
-  //  // Support hot reload in dev containers
-  //  config.watchOptions = {
-  //    poll: 1000,   // Check for changes every second
-  //    aggregateTimeout: 300,   // delay before rebuilding
-  //  };
-  //  return config;
-  //},
-})
+    reactStrictMode: true,
+    swcMinify: true,
+    // Next.js i18n docs: https://nextjs.org/docs/advanced-features/i18n-routing
+    i18n: {
+      locales: ["en"],
+      defaultLocale: "en",
+    },
+    images: {
+      domains: ["www.answeroverflow.com"],
+    },
+    //webpack: (config) => {
+    //  // Support hot reload in dev containers
+    //  config.watchOptions = {
+    //    poll: 1000,   // Check for changes every second
+    //    aggregateTimeout: 300,   // delay before rebuilding
+    //  };
+    //  return config;
+    //},
+  })
 );

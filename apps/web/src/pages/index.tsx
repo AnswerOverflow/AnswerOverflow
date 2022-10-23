@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { trpc } from "../utils/trpc";
-import { add } from "core";
+import { AnswerOverflowClient } from "@answeroverflow/core";
 import { NextImageTest } from "ui";
 
 const Home: NextPage = () => {
@@ -17,7 +17,11 @@ const Home: NextPage = () => {
       </Head>
       <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
         <h1 className="text-5xl font-extrabold leading-normal text-gray-700 md:text-[5rem]">
-          Create <span className="text-purple-300">{add(1, 10)}</span> App
+          Create{" "}
+          <span className="text-purple-300">
+            {new AnswerOverflowClient().hi}
+          </span>{" "}
+          App
         </h1>
         <NextImageTest />
         <p className="text-2xl text-gray-700">This stack uses:</p>

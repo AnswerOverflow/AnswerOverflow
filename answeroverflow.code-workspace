@@ -34,10 +34,6 @@
       {
         "name": "jest-presets",
         "path": "packages/jest-presets"
-      },
-      {
-        "name": "utils",
-        "path": "packages/utils"
       }
     ],
 	  "settings": {

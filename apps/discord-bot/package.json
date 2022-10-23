@@ -18,7 +18,7 @@
     "@sapphire/type": "^2.2.4",
     "@sapphire/utilities": "^3.10.1",
     "colorette": "^2.0.19",
-    "core": "*",
+    "@answeroverflow/core": "*",
     "discord-api-types": "^0.33.5",
     "discord.js": "^13.11.0",
     "dotenv-cra": "^3.0.2",
