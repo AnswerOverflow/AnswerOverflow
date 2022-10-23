@@ -14,7 +14,7 @@ function defineNextConfig(config) {
   return config;
 }
 
-export default withTM(["ui", "@answeroverflow/core"])(
+export default withTM(["@answeroverflow/ui", "@answeroverflow/core"])(
   defineNextConfig({
     reactStrictMode: true,
     swcMinify: true,
