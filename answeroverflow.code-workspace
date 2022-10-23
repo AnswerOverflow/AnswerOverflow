@@ -71,7 +71,6 @@
       "typescript.suggest.autoImports": true,
       "javascript.updateImportsOnFileMove.enabled": "always",
       "typescript.updateImportsOnFileMove.enabled": "always",
-      "source.organizeImports": true,    
       "editor.bracketPairColorization.enabled": true,
       "editor.guides.bracketPairs":"active"    
   },
