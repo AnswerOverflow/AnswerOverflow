@@ -2,12 +2,14 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { trpc } from "../utils/trpc";
-import { AnswerOverflowClient } from "@answeroverflow/core";
+
 import { NextImageTest } from "@answeroverflow/ui";
+import { AnswerOverflowClient } from "@answeroverflow/core";
+
+const answer_overflow_client = new AnswerOverflowClient();
 
 const Home: NextPage = () => {
   const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
-
   return (
     <>
       <Head>
@@ -18,9 +20,7 @@ const Home: NextPage = () => {
       <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
         <h1 className="text-5xl font-extrabold leading-normal text-gray-700 md:text-[5rem]">
           Create{" "}
-          <span className="text-purple-300">
-            {new AnswerOverflowClient().hi}
-          </span>{" "}
+          <span className="text-purple-300">{answer_overflow_client.hi}</span>{" "}
           App
         </h1>
         <NextImageTest />

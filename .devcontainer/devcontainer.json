@@ -20,7 +20,8 @@
 				"GitHub.copilot",
 				"eamodio.gitlens",
 				"2gua.rainbow-brackets",
-				"Prisma.prisma"
+				"Prisma.prisma",
+				"Orta.vscode-jest"
 			]
 		}
 	},
