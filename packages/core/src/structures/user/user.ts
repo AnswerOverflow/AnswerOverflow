@@ -5,7 +5,8 @@ export class User {
   public password: string;
   public created: Date;
   public updated: Date;
-  constructor() {
+  // eslint-disable-next-line no-unused-vars
+  constructor(data: any) {
     this.id = "1";
     this.name = "John Doe";
     this.email = "rhys@example.com";

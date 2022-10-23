@@ -2,8 +2,13 @@
   "$schema": "https://turborepo.org/schema.json",
   "pipeline": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ]
     },
     "lint": {
       "outputs": []
@@ -20,6 +25,7 @@
     "DISCORD_TOKEN",
     "OWNERS",
     "VERCEL_URL",
-    "PORT"
+    "PORT",
+    "DATABASE_URL"
   ]
 }

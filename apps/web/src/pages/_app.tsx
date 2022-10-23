@@ -9,9 +9,10 @@ const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
+  const AnyComponent = Component as any; // Fix type errors on component, TODO: Revisit and see why failing
   return (
     <SessionProvider session={session}>
-      <Component {...pageProps} />
+      <AnyComponent {...pageProps} />
     </SessionProvider>
   );
 };

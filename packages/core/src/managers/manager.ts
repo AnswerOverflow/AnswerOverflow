@@ -8,4 +8,6 @@ export abstract class Manager<Type> {
   };
   // eslint-disable-next-line no-unused-vars
   public abstract fetch(id: string): Type;
+  // eslint-disable-next-line no-unused-vars
+  public abstract edit(id: string, data: any): Type;
 }
