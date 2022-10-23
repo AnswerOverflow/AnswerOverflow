@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { UserManager } from "./managers/users/user-manager";
 
 export class AnswerOverflowClient {
-  public users: UserManager = new UserManager();
+  public users: UserManager = new UserManager(this);
   public hi: string = "HELLO  TEST";
   public prisma: PrismaClient = new PrismaClient();
 }

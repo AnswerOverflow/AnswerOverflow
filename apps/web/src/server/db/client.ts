@@ -1,19 +1,15 @@
 // src/server/db/client.ts
-import { PrismaClient } from "@prisma/client";
+import { AnswerOverflowClient } from "@answeroverflow/core";
 import { env } from "../../env/server.mjs";
 
 declare global {
   // eslint-disable-next-line no-var
-  var prisma: PrismaClient | undefined;
+  var answer_overflow_client: AnswerOverflowClient | undefined;
 }
 
-export const prisma =
-  global.prisma ||
-  new PrismaClient({
-    log:
-      env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
-  });
+export const answer_overflow_client =
+  global.answer_overflow_client || new AnswerOverflowClient();
 
 if (env.NODE_ENV !== "production") {
-  global.prisma = prisma;
+  global.answer_overflow_client = answer_overflow_client;
 }

@@ -1,17 +1,17 @@
+import { User as DBUser } from ".prisma/client";
+
 export class User {
-  public id: string;
-  public name: string;
-  public email: string;
-  public password: string;
-  public created: Date;
-  public updated: Date;
+  name: string | null;
+  email: string;
+  id: number;
   // eslint-disable-next-line no-unused-vars
-  constructor(data: any) {
-    this.id = "1";
-    this.name = "John Doe";
-    this.email = "rhys@example.com";
-    this.password = "password";
-    this.created = new Date();
-    this.updated = new Date();
+  constructor(name: string | null, email: string, id: number) {
+    this.name = name;
+    this.email = email;
+    this.id = id;
+  }
+
+  public static fromPrisma(data: DBUser): User {
+    return new User(data.name, data.email, data.id);
   }
 }
