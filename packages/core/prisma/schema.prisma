@@ -1,6 +1,9 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
+// naming convention: https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#naming-conventions
 
+// General concept for laying out the fields:
+// ids go first, then then fields, then at the bottom are the references to other tables
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,8 +13,91 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Users
+
 model User {
-  id      Int      @id @default(autoincrement())
-  email   String   @unique
-  name    String?
+  id         BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  name       String  @db.VarChar(32)
+  email      String? @db.VarChar(320)
+  avatar     String? @db.VarChar(45)
+  created_at Int?
+
+  user_channel_settings UserChannelSettings[]
+  user_server_settings  UserServerSettings[]
+}
+
+model UserChannelSettings {
+  user_id    BigInt @db.UnsignedBigInt
+  channel_id BigInt @db.UnsignedBigInt
+  settings   Int
+
+  user    User    @relation(fields: [user_id], references: [id])
+  channel Channel @relation(fields: [channel_id], references: [id])
+
+  @@id([user_id, channel_id])
+}
+
+model UserServerSettings {
+  user_id     BigInt @db.UnsignedBigInt
+  server_id   BigInt @db.UnsignedBigInt
+  permissions Int
+
+  user   User   @relation(fields: [user_id], references: [id])
+  server Server @relation(fields: [server_id], references: [id])
+
+  @@id([user_id, server_id])
+}
+
+model DeletedUser {
+  deleted_user_id BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+}
+
+// Servers
+
+model Server {
+  id          BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  name        String  @db.VarChar(100)
+  icon        String? @db.VarChar(45)
+  kicked_time Int?
+
+  user_server_settings UserServerSettings[]
+  channels             Channel[]
+}
+
+model ServerSettings {
+  server_id   BigInt @id @db.UnsignedBigInt
+  permissions Int
+}
+
+// Channels
+
+model Channel {
+  id        BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  server_id BigInt @db.UnsignedBigInt
+  name      String @db.VarChar(100)
+  type      Int
+
+  server                Server                @relation(fields: [server_id], references: [id])
+  user_channel_settings UserChannelSettings[]
+  channel_settings      ChannelSettings[]
+  ForumChannelTag       ForumChannelTag[]
+}
+
+model ChannelSettings {
+  channel_id             BigInt  @id @db.UnsignedBigInt
+  permissions            Int
+  last_indexed_snowflake BigInt? @db.UnsignedBigInt
+  invite_code            String? @db.VarChar(15)
+  solution_tag_id        BigInt? @db.UnsignedBigInt
+
+  channel Channel @relation(fields: [channel_id], references: [id])
+}
+
+model ForumChannelTag {
+  id         BigInt  @db.UnsignedBigInt
+  channel_id BigInt  @db.UnsignedBigInt
+  channel    Channel @relation(fields: [channel_id], references: [id])
+  name       String  @db.VarChar(20)
+
+  @@id([id, channel_id])
 }

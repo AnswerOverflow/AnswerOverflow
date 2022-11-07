@@ -1,9 +1,10 @@
 import "./lib/setup";
 import { container, LogLevel, SapphireClient } from "@sapphire/framework";
+import { AnswerOverflowClient } from "@answeroverflow/core";
 
 declare module "@sapphire/pieces" {
   interface Container {
-    answerOverflow: string;
+    answerOverflow: AnswerOverflowClient;
   }
 }
 
@@ -37,7 +38,7 @@ const main = async () => {
     client.logger.info("Logging in");
     await client.login(process.env.DISCORD_TOKEN);
     client.logger.info("logged in");
-    container.answerOverflow = "Hello Answer Overflow!";
+    container.answerOverflow = new AnswerOverflowClient();
   } catch (error) {
     client.logger.fatal(error);
     client.destroy();

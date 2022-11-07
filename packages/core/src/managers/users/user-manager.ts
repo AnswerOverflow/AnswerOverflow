@@ -1,34 +1,20 @@
 import { AnswerOverflowClient } from "../../answer-overflow-client";
-import { User } from "../../structures/user/user";
-import { Manager } from "../manager";
 import { Prisma } from "@prisma/client";
+import { user } from "@prisma/client";
 
-export class UserManager extends Manager<User> {
+export class UserManager {
   // eslint-disable-next-line no-unused-vars
-  public client: AnswerOverflowClient;
-  constructor(client: AnswerOverflowClient) {
-    super();
-    this.client = client;
-  }
-
-  // eslint-disable-next-line no-unused-vars
-  public async edit(id: number, data: any): Promise<User | null> {
-    return this.fetch(id);
-  }
-
-  public async fetch(id: number): Promise<User | null> {
-    const user = await this.client.prisma.user.findUnique({
-      where: {
-        id: id,
-      },
+  constructor(private answer_overflow_client: AnswerOverflowClient) {}
+  public async createUser(data: Prisma.userCreateInput): Promise<user | null> {
+    const user = await this.answer_overflow_client.prisma.user.create({
+      data,
     });
-    return user ? User.fromPrisma(user) : null;
+    return user;
   }
-
-  public async create(data: Prisma.UserCreateInput): Promise<User> {
-    const user = await this.client.prisma.user.create({
-      data: data,
-    });
-    return User.fromPrisma(user);
+  public async getUser<T extends Prisma.userFindUniqueArgs>(
+    args: Prisma.SelectSubset<T, Prisma.userFindUniqueArgs>
+  ) {
+    const user = await this.answer_overflow_client.prisma.user.findUnique(args);
+    return user;
   }
 }

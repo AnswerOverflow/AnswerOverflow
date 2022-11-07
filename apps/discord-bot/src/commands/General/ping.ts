@@ -2,7 +2,7 @@ import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
 import { send } from "@sapphire/plugin-editable-commands";
 import { Message } from "discord.js";
-import { AnswerOverflowClient } from "@answeroverflow/core";
+
 @ApplyOptions<Command.Options>({
   description: "ping pong",
 })
@@ -38,9 +38,7 @@ export class UserCommand extends Command {
   // slash command
   public async chatInputRun(interaction: Command.ChatInputInteraction) {
     await interaction.reply({ content: "Ping?", fetchReply: true });
-    const content = `Pong! ${new AnswerOverflowClient().hi} ${
-      this.container.answerOverflow
-    }`;
+    const content = `Pong! ${this.container.answerOverflow.hi}`;
     return interaction.editReply({ content });
   }
 

@@ -11,6 +11,7 @@
     "build:cacheless": "turbo run build --no-cache",
     "dev": "turbo run dev --parallel --no-cache",
     "lint": "turbo run lint",
+    "dev:discord-bot": "turbo run dev --filter=discord-bot... --parallel --no-cache",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {

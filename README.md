@@ -1,73 +1,30 @@
-# Turborepo starter
+<p align='center'>
+        <a href='https://answeroverflow.com/'>
+        <img src="https://www.answeroverflow.com/content/branding/AnswerOverflowLOGO.png">
+    </a>
+</p>
 
-This is an official npm starter turborepo.
+<div align="center">
+  <h1>Answer Overflow</h1>
+  <h3>Improve & Google Index Discord Help Channels</h3>  
+</div>
 
-## What's inside?
+## Developing
 
-This turborepo uses [npm](https://www.npmjs.com/) as a package manager. It includes the following packages/apps:
+### Environment Setup
 
-### Apps and Packages
+Answer Overflow utilizes VSCode features such as workspaces and development containers to provide a fast and consistent cross platform development experience. If you already have VSCode and Docker installed then setting up should be as quick as opening the cloned project in VSCode and running `reopen project in container` along with `open workspace`
 
-- `docs`: a [Next.js](https://nextjs.org) app
-- `web`: another [Next.js](https://nextjs.org) app
-- `ui`: a stub React component library shared by both `web` and `docs` applications
-- `eslint-config-custom`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `tsconfig`: `tsconfig.json`s used throughout the monorepo
+#### Windows
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+1. [Install VSCode](https://code.visualstudio.com/)
 
-### Utilities
+2. [Setup WSL](https://www.youtube.com/watch?v=r7ltoASUiX4)
 
-This turborepo has some additional tools already setup for you:
+3. [Install Docker](https://www.docker.com/)
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-npm run build
-```
+4. Clone & Open 
 
 ### Develop
 
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-npm run dev
-```
-
-### Remote Caching
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.org/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Pipelines](https://turborepo.org/docs/core-concepts/pipelines)
-- [Caching](https://turborepo.org/docs/core-concepts/caching)
-- [Remote Caching](https://turborepo.org/docs/core-concepts/remote-caching)
-- [Scoped Tasks](https://turborepo.org/docs/core-concepts/scopes)
-- [Configuration Options](https://turborepo.org/docs/reference/configuration)
-- [CLI Usage](https://turborepo.org/docs/reference/command-line-reference)
+With Visual Studio opened in a development container, open a folder in the root workspace and run `yarn run dev` and all services should start uo

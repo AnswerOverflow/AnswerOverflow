@@ -7,7 +7,7 @@ export abstract class Manager<Type> {
     return this.fetch(id);
   };
   // eslint-disable-next-line no-unused-vars
-  public abstract fetch(id: number): Promise<Type | null>;
+  public abstract fetch(id: any): Promise<Type | null>;
   // eslint-disable-next-line no-unused-vars
   public abstract edit(id: number, data: any): Promise<Type | null>;
 }
