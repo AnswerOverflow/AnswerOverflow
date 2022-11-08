@@ -38,15 +38,14 @@ export class UserCommand extends Command {
   // slash command
   public async chatInputRun(interaction: Command.ChatInputInteraction) {
     await interaction.reply({ content: "Ping?", fetchReply: true });
-    const content = `Pong! ${this.container.answerOverflow.hi}`;
+    const content = `Pong! ${this.container.answer_overflow.hi}`;
     return interaction.editReply({ content });
   }
 
   // context menu command
   public async contextMenuRun(interaction: Command.ContextMenuInteraction) {
     const msg = await interaction.reply({ content: "Ping?", fetchReply: true });
-    const createdTime =
-      msg instanceof Message ? msg.createdTimestamp : Date.parse(msg.timestamp);
+    const createdTime = msg instanceof Message ? msg.createdTimestamp : Date.parse(msg.timestamp);
 
     const content = `Pong! Bot Latency ${Math.round(
       this.container.client.ws.ping

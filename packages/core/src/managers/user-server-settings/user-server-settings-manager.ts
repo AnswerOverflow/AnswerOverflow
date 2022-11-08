@@ -1,8 +1,6 @@
 import { Prisma, UserServerSettings } from "@prisma/client";
-import {
-  PermissionsBitField,
-  UserServerSettingsFlags,
-} from "../../structures/user-server-settings";
+import { UserServerSettingsFlags } from "../../structures/user-server-settings";
+import { addBitfield, changeBits } from "../../utils/bitfield";
 import { Manager } from "../manager";
 
 export class UserServerSettingsManager extends Manager {
@@ -11,10 +9,14 @@ export class UserServerSettingsManager extends Manager {
   ) {
     const user_server_settings =
       await this.answer_overflow_client.prisma.userServerSettings.findUnique(args);
-    return user_server_settings;
+    if (!user_server_settings) return null;
+    return addBitfield<typeof UserServerSettingsFlags, typeof user_server_settings>(
+      UserServerSettingsFlags,
+      user_server_settings.permissions,
+      user_server_settings
+    );
   }
-
-  public async upsertUserServerSettings(
+  private async upsertUserServerSettings(
     user: Prisma.UserCreateInput,
     server: Prisma.ServerCreateInput,
     user_server_settings: UserServerSettings
@@ -50,25 +52,39 @@ export class UserServerSettingsManager extends Manager {
           },
         },
       });
-    return updated_user_server_settings;
+    if (!updated_user_server_settings) return null;
+    return addBitfield<typeof UserServerSettingsFlags, typeof user_server_settings>(
+      UserServerSettingsFlags,
+      updated_user_server_settings.permissions,
+      user_server_settings
+    );
   }
 
-  public async disableIndexing(
+  private async _changeUserServerSettingsFlag(
     user: Prisma.UserCreateInput,
     server: Prisma.ServerCreateInput,
+    flag: keyof typeof UserServerSettingsFlags,
+    active: boolean,
     user_server_settings?: UserServerSettings
   ) {
-    return await this.upsertUserServerSettings(
+    const updated_permissions = changeBits<typeof UserServerSettingsFlags>(
+      UserServerSettingsFlags,
+      user_server_settings?.permissions ?? 0,
+      active,
+      flag
+    );
+    const updated_user_server_settings = await this.upsertUserServerSettings(
       user,
       server,
       user_server_settings
         ? user_server_settings
         : {
-            permissions: 1,
+            permissions: updated_permissions.value,
             user_id: user.id,
             server_id: server.id,
           }
     );
+    return updated_user_server_settings;
   }
 
   public async revokeUserConsent(
@@ -76,21 +92,12 @@ export class UserServerSettingsManager extends Manager {
     server: Prisma.ServerCreateInput,
     user_server_settings?: UserServerSettings
   ) {
-    const new_permissions = new PermissionsBitField<typeof UserServerSettingsFlags>(
-      UserServerSettingsFlags,
-      user_server_settings?.permissions ?? 0
-    );
-    new_permissions.clearFlag("ALLOWED_TO_SHOW_MESSAGES");
-    return await this.upsertUserServerSettings(
+    return this._changeUserServerSettingsFlag(
       user,
       server,
+      "ALLOWED_TO_SHOW_MESSAGES",
+      false,
       user_server_settings
-        ? user_server_settings
-        : {
-            permissions: new_permissions.value,
-            user_id: user.id,
-            server_id: server.id,
-          }
     );
   }
 
@@ -99,21 +106,40 @@ export class UserServerSettingsManager extends Manager {
     server: Prisma.ServerCreateInput,
     user_server_settings?: UserServerSettings
   ) {
-    const new_permissions = new PermissionsBitField<typeof UserServerSettingsFlags>(
-      UserServerSettingsFlags,
-      user_server_settings?.permissions ?? 0
-    );
-    new_permissions.setFlag("ALLOWED_TO_SHOW_MESSAGES");
-    return await this.upsertUserServerSettings(
+    return this._changeUserServerSettingsFlag(
       user,
       server,
+      "ALLOWED_TO_SHOW_MESSAGES",
+      true,
       user_server_settings
-        ? user_server_settings
-        : {
-            permissions: new_permissions.value,
-            user_id: user.id,
-            server_id: server.id,
-          }
+    );
+  }
+
+  public async disableIndexing(
+    user: Prisma.UserCreateInput,
+    server: Prisma.ServerCreateInput,
+    user_server_settings?: UserServerSettings
+  ) {
+    return this._changeUserServerSettingsFlag(
+      user,
+      server,
+      "SERVER_DISABLE_INDEXING",
+      true,
+      user_server_settings
+    );
+  }
+
+  public async enableIndexing(
+    user: Prisma.UserCreateInput,
+    server: Prisma.ServerCreateInput,
+    user_server_settings?: UserServerSettings
+  ) {
+    return this._changeUserServerSettingsFlag(
+      user,
+      server,
+      "SERVER_DISABLE_INDEXING",
+      false,
+      user_server_settings
     );
   }
 }

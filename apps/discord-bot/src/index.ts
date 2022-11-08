@@ -4,7 +4,7 @@ import { AnswerOverflowClient } from "@answeroverflow/core";
 
 declare module "@sapphire/pieces" {
   interface Container {
-    answerOverflow: AnswerOverflowClient;
+    answer_overflow: AnswerOverflowClient;
   }
 }
 
@@ -38,7 +38,7 @@ const main = async () => {
     client.logger.info("Logging in");
     await client.login(process.env.DISCORD_TOKEN);
     client.logger.info("logged in");
-    container.answerOverflow = new AnswerOverflowClient();
+    container.answer_overflow = new AnswerOverflowClient();
   } catch (error) {
     client.logger.fatal(error);
     client.destroy();

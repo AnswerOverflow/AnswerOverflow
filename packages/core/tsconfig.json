@@ -4,6 +4,7 @@
         "outDir": "./dist",
         "rootDir": "./src",
         "target": "ES6",
+        "experimentalDecorators": true,
         "lib": ["dom", "dom.iterable", "esnext"],        
         "sourceMap": true,
         "esModuleInterop": true
