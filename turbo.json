@@ -15,6 +15,9 @@
     },
     "dev": {
       "cache": false
+    },
+    "test": {
+      "outputs": []
     }
   },
   "globalDependencies": [
@@ -30,6 +33,10 @@
     "ELASTIC_IP",
     "ELASTIC_USERNAME",
     "ELASTIC_PASSWORD",
-    "ELASTIC_API_KEY"
+    "ELASTIC_API_KEY",
+    "VITE_DATABASE_URL",
+    "VITE_ELASTIC_USERNAME",
+    "VITE_ELASTIC_PASSWORD",
+    "VITE_ELASTIC_IP"
   ]
 }

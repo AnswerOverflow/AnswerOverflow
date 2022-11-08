@@ -31,10 +31,6 @@
         "name": "tsconfig",
         "path": "packages/tsconfig"
       },
-      {
-        "name": "jest-presets",
-        "path": "packages/jest-presets"
-      }
     ],
 	  "settings": {
     "files.exclude": {
@@ -45,8 +41,9 @@
       "dist": true,
       ".next": true
     },
-    "jest.autoRun": "off",
-    "jest.disabledWorkspaceFolders": ["root"], // Including the root workspace duplicates tests
+    "vitest.enable": true,
+    "vitest.disabledWorkspaceFolders": [
+      "root"],
      "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
       },

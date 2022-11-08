@@ -23,7 +23,7 @@
 				"eamodio.gitlens",
 				"2gua.rainbow-brackets",
 				"Prisma.prisma",
-				"Orta.vscode-jest"
+				"ZixuanChen.vitest-explorer"
 			]
 		}
 	},	
@@ -31,7 +31,7 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "npm install jest --global",
+	"postCreateCommand": "yarn install",
 
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "node"

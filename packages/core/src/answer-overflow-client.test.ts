@@ -5,7 +5,7 @@ describe("Client Tests", () => {
     const client = new AnswerOverflowClient();
     expect(client).toBeDefined();
     const resp = await client.elastic.ping();
-    expect(resp).toBeDefined();
+    expect(resp).toBeTruthy();
     //const users = await client.prisma.user.findMany();
   });
 });

@@ -1,11 +1,5 @@
 module.exports = {
-  extends: [
-    "next",
-    "turbo",
-    "prettier",
-    "eslint:recommended",
-    "plugin:jest/recommended",
-  ],
+  extends: ["next", "turbo", "prettier", "eslint:recommended", "plugin:jest/recommended"],
   plugins: ["prettier", "jest"],
   rules: {
     "@next/next/no-html-link-for-pages": "off",

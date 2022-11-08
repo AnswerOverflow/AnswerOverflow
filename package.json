@@ -12,12 +12,15 @@
     "dev": "turbo run dev --parallel --no-cache",
     "lint": "turbo run lint",
     "dev:discord-bot": "turbo run dev --filter=discord-bot... --parallel --no-cache",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "test": "turbo run test"
   },
   "devDependencies": {
     "@answeroverflow/eslint-config-custom": "*",
+    "@vitest/coverage-c8": "^0.25.1",
     "prettier": "latest",
-    "turbo": "latest"
+    "turbo": "latest",
+    "vitest": "^0.25.1"
   },
   "engines": {
     "node": ">=14.0.0"
