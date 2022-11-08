@@ -26,6 +26,10 @@
     "OWNERS",
     "VERCEL_URL",
     "PORT",
-    "DATABASE_URL"
+    "DATABASE_URL",
+    "ELASTIC_IP",
+    "ELASTIC_USERNAME",
+    "ELASTIC_PASSWORD",
+    "ELASTIC_API_KEY"
   ]
 }
