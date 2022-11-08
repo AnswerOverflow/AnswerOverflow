@@ -1,12 +1,12 @@
 {
 	"extends": "@sapphire/ts-config",
 	"compilerOptions": {
-		"rootDir": "src",
 		"outDir": "dist",
 		"tsBuildInfoFile": "dist/.tsbuildinfo",
 		"noUnusedLocals": true,
 		"noUnusedParameters": false,		
 		"skipLibCheck": true,
 	},
+	"include": ["src"],
 	"exclude": ["node_modules"]
 }

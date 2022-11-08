@@ -1,10 +1,10 @@
 module.exports ={
     endOfLine: "lf",
-    printWidth: 150,
     quoteProps: "as-needed",
     semi: true,
     singleQuote: true,
     tabWidth: 4,
+    printWidth: 100,
     trailingComma: "none",
     useTabs: true,
     overrides: [

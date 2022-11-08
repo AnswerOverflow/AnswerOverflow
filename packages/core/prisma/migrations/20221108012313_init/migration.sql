@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE `User` (
-    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(32) NOT NULL,
     `email` VARCHAR(320) NULL,
     `avatar` VARCHAR(45) NULL,
@@ -11,8 +11,8 @@ CREATE TABLE `User` (
 
 -- CreateTable
 CREATE TABLE `UserChannelSettings` (
-    `user_id` BIGINT UNSIGNED NOT NULL,
-    `channel_id` BIGINT UNSIGNED NOT NULL,
+    `user_id` VARCHAR(191) NOT NULL,
+    `channel_id` VARCHAR(191) NOT NULL,
     `settings` INTEGER NOT NULL,
 
     PRIMARY KEY (`user_id`, `channel_id`)
@@ -20,8 +20,8 @@ CREATE TABLE `UserChannelSettings` (
 
 -- CreateTable
 CREATE TABLE `UserServerSettings` (
-    `user_id` BIGINT UNSIGNED NOT NULL,
-    `server_id` BIGINT UNSIGNED NOT NULL,
+    `user_id` VARCHAR(191) NOT NULL,
+    `server_id` VARCHAR(191) NOT NULL,
     `permissions` INTEGER NOT NULL,
 
     PRIMARY KEY (`user_id`, `server_id`)
@@ -29,14 +29,14 @@ CREATE TABLE `UserServerSettings` (
 
 -- CreateTable
 CREATE TABLE `DeletedUser` (
-    `deleted_user_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `deleted_user_id` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`deleted_user_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Server` (
-    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(100) NOT NULL,
     `icon` VARCHAR(45) NULL,
     `kicked_time` INTEGER NULL,
@@ -46,7 +46,7 @@ CREATE TABLE `Server` (
 
 -- CreateTable
 CREATE TABLE `ServerSettings` (
-    `server_id` BIGINT UNSIGNED NOT NULL,
+    `server_id` VARCHAR(191) NOT NULL,
     `permissions` INTEGER NOT NULL,
 
     PRIMARY KEY (`server_id`)
@@ -54,8 +54,8 @@ CREATE TABLE `ServerSettings` (
 
 -- CreateTable
 CREATE TABLE `Channel` (
-    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `server_id` BIGINT UNSIGNED NOT NULL,
+    `id` VARCHAR(191) NOT NULL,
+    `server_id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(100) NOT NULL,
     `type` INTEGER NOT NULL,
 
@@ -64,19 +64,19 @@ CREATE TABLE `Channel` (
 
 -- CreateTable
 CREATE TABLE `ChannelSettings` (
-    `channel_id` BIGINT UNSIGNED NOT NULL,
+    `channel_id` VARCHAR(191) NOT NULL,
     `permissions` INTEGER NOT NULL,
-    `last_indexed_snowflake` BIGINT UNSIGNED NULL,
+    `last_indexed_snowflake` VARCHAR(191) NULL,
     `invite_code` VARCHAR(15) NULL,
-    `solution_tag_id` BIGINT UNSIGNED NULL,
+    `solution_tag_id` VARCHAR(191) NULL,
 
     PRIMARY KEY (`channel_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `ForumChannelTag` (
-    `id` BIGINT UNSIGNED NOT NULL,
-    `channel_id` BIGINT UNSIGNED NOT NULL,
+    `id` VARCHAR(191) NOT NULL,
+    `channel_id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(20) NOT NULL,
 
     PRIMARY KEY (`id`, `channel_id`)

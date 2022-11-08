@@ -11,6 +11,7 @@ module.exports = {
     "@next/next/no-html-link-for-pages": "off",
     "react/jsx-key": "off",
     "prettier/prettier": ["error"],
+    //"@typescript-eslint/explicit-function-return-type": "warn"
   },
   env: {
     jest: true,

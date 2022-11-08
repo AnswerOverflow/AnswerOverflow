@@ -16,7 +16,7 @@ datasource db {
 // Users
 
 model User {
-  id         BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  id         String  @id
   name       String  @db.VarChar(32)
   email      String? @db.VarChar(320)
   avatar     String? @db.VarChar(45)
@@ -27,8 +27,8 @@ model User {
 }
 
 model UserChannelSettings {
-  user_id    BigInt @db.UnsignedBigInt
-  channel_id BigInt @db.UnsignedBigInt
+  user_id    String
+  channel_id String
   settings   Int
 
   user    User    @relation(fields: [user_id], references: [id])
@@ -38,8 +38,8 @@ model UserChannelSettings {
 }
 
 model UserServerSettings {
-  user_id     BigInt @db.UnsignedBigInt
-  server_id   BigInt @db.UnsignedBigInt
+  user_id     String
+  server_id   String
   permissions Int
 
   user   User   @relation(fields: [user_id], references: [id])
@@ -49,13 +49,13 @@ model UserServerSettings {
 }
 
 model DeletedUser {
-  deleted_user_id BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  deleted_user_id String @id
 }
 
 // Servers
 
 model Server {
-  id          BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  id          String  @id
   name        String  @db.VarChar(100)
   icon        String? @db.VarChar(45)
   kicked_time Int?
@@ -65,15 +65,15 @@ model Server {
 }
 
 model ServerSettings {
-  server_id   BigInt @id @db.UnsignedBigInt
+  server_id   String @id
   permissions Int
 }
 
 // Channels
 
 model Channel {
-  id        BigInt @id @default(autoincrement()) @db.UnsignedBigInt
-  server_id BigInt @db.UnsignedBigInt
+  id        String @id
+  server_id String
   name      String @db.VarChar(100)
   type      Int
 
@@ -84,18 +84,18 @@ model Channel {
 }
 
 model ChannelSettings {
-  channel_id             BigInt  @id @db.UnsignedBigInt
+  channel_id             String  @id
   permissions            Int
-  last_indexed_snowflake BigInt? @db.UnsignedBigInt
+  last_indexed_snowflake String?
   invite_code            String? @db.VarChar(15)
-  solution_tag_id        BigInt? @db.UnsignedBigInt
+  solution_tag_id        String?
 
   channel Channel @relation(fields: [channel_id], references: [id])
 }
 
 model ForumChannelTag {
-  id         BigInt  @db.UnsignedBigInt
-  channel_id BigInt  @db.UnsignedBigInt
+  id         String
+  channel_id String
   channel    Channel @relation(fields: [channel_id], references: [id])
   name       String  @db.VarChar(20)
 

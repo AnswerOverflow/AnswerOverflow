@@ -8,3 +8,5 @@ Misc commands that are used while working with prisma
 * Run a single app
 
     ```yarn turbo run dev --filter='app-name'```
+* Install a package
+    ```yarn workspace <workspace> add <package>```
