@@ -72,6 +72,7 @@
       "[prisma]": {
         "editor.defaultFormatter": "Prisma.prisma"
       },
+      "search.useIgnoreFiles": true,
   },
   "extensions": {
     "recommendations": [
