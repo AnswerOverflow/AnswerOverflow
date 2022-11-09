@@ -1,6 +1,6 @@
 import { Prisma, UserServerSettings } from "@prisma/client";
 import { UserServerSettingsFlags } from "../../structures/user-server-settings";
-import { addBitfield, changeBits } from "../../utils/bitfield";
+import { addBitfield, changeFlag } from "../../utils/bitfield";
 import { Manager } from "../manager";
 
 export class UserServerSettingsManager extends Manager {
@@ -60,14 +60,14 @@ export class UserServerSettingsManager extends Manager {
     );
   }
 
-  private async _changeUserServerSettingsFlag(
+  private async changeUserServerSettingsFlag(
     user: Prisma.UserCreateInput,
     server: Prisma.ServerCreateInput,
     flag: keyof typeof UserServerSettingsFlags,
     active: boolean,
     user_server_settings?: UserServerSettings
   ) {
-    const updated_permissions = changeBits<typeof UserServerSettingsFlags>(
+    const updated_permissions = changeFlag<typeof UserServerSettingsFlags>(
       UserServerSettingsFlags,
       user_server_settings?.permissions ?? 0,
       active,
@@ -92,7 +92,7 @@ export class UserServerSettingsManager extends Manager {
     server: Prisma.ServerCreateInput,
     user_server_settings?: UserServerSettings
   ) {
-    return this._changeUserServerSettingsFlag(
+    return this.changeUserServerSettingsFlag(
       user,
       server,
       "ALLOWED_TO_SHOW_MESSAGES",
@@ -106,7 +106,7 @@ export class UserServerSettingsManager extends Manager {
     server: Prisma.ServerCreateInput,
     user_server_settings?: UserServerSettings
   ) {
-    return this._changeUserServerSettingsFlag(
+    return this.changeUserServerSettingsFlag(
       user,
       server,
       "ALLOWED_TO_SHOW_MESSAGES",
@@ -120,7 +120,7 @@ export class UserServerSettingsManager extends Manager {
     server: Prisma.ServerCreateInput,
     user_server_settings?: UserServerSettings
   ) {
-    return this._changeUserServerSettingsFlag(
+    return this.changeUserServerSettingsFlag(
       user,
       server,
       "SERVER_DISABLE_INDEXING",
@@ -134,7 +134,7 @@ export class UserServerSettingsManager extends Manager {
     server: Prisma.ServerCreateInput,
     user_server_settings?: UserServerSettings
   ) {
-    return this._changeUserServerSettingsFlag(
+    return this.changeUserServerSettingsFlag(
       user,
       server,
       "SERVER_DISABLE_INDEXING",

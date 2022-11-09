@@ -55,10 +55,6 @@ export class UserCommand extends Subcommand {
   @RequiresGuildContext((message: Message) =>
     send(message, "This sub-command can only be used in servers")
   )
-  public async messageRemove(message: Message) {
-    return send(message, "Removing!");
-  }
-
   @RequiresDMContext((message: Message) =>
     send(message, "This sub-command can only be used in DMs")
   )

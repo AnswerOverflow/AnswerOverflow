@@ -32,6 +32,7 @@ describe("User Server Settings - Grant Consent", () => {
     );
     expect(user_server_settings!.bitfield.checkFlag("ALLOWED_TO_SHOW_MESSAGES")).toBeTruthy();
   });
+
   it("GIVEN a new user and existing server THEN mark as consenting succesfully", async () => {
     const created_server = await answer_overflow_client.prisma.server.create({
       data: TEST_SERVER_1,
@@ -42,6 +43,7 @@ describe("User Server Settings - Grant Consent", () => {
     );
     expect(user_server_settings!.bitfield.checkFlag("ALLOWED_TO_SHOW_MESSAGES")).toBeTruthy();
   });
+
   it("Existing User New Server", async () => {
     const created_user = await answer_overflow_client.users.createUser(TEST_USER_1);
     const user_server_settings = await answer_overflow_client.user_server_settings.grantUserConsent(
@@ -50,6 +52,7 @@ describe("User Server Settings - Grant Consent", () => {
     );
     expect(user_server_settings!.bitfield.checkFlag("ALLOWED_TO_SHOW_MESSAGES")).toBeTruthy();
   });
+
   it("Existing User Existing Server", async () => {
     const created_user = await answer_overflow_client.prisma.user.create({
       data: TEST_USER_1,

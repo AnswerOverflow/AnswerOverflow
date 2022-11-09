@@ -1,6 +1,6 @@
 import { BitField } from "@sapphire/bitfield";
 
-export function changeBits<T extends Record<string, number>>(
+export function changeFlag<T extends Record<string, number>>(
   flags: T,
   current_permissions: number,
   active: boolean,
