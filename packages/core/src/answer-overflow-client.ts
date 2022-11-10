@@ -1,5 +1,6 @@
 import { Client } from "@elastic/elasticsearch";
 import { PrismaClient } from "@prisma/client";
+import { ChannelSettingsManager } from "./managers/channel-settings/channel-settings-manager";
 import { ServerManager } from "./managers/servers/server-manager";
 import { UserServerSettingsManager } from "./managers/user-server-settings/user-server-settings-manager";
 import { UserManager } from "./managers/users/user-manager";
@@ -8,6 +9,7 @@ export class AnswerOverflowClient {
   public users = new UserManager(this);
   public servers = new ServerManager(this);
   public user_server_settings = new UserServerSettingsManager(this);
+  public channel_settings = new ChannelSettingsManager(this);
   public prisma = new PrismaClient({
     datasources: {
       db: {

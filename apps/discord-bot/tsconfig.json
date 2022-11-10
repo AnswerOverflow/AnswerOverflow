@@ -6,6 +6,10 @@
 		"noUnusedLocals": true,
 		"noUnusedParameters": false,		
 		"skipLibCheck": true,
+		"baseUrl": "src",
+		"paths": {
+			"@utils/*": ["utils/*"],
+		},
 	},
 	"include": ["src"],
 	"exclude": ["node_modules"]

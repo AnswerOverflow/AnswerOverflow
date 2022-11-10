@@ -39,7 +39,7 @@ CREATE TABLE `Server` (
     `id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(100) NOT NULL,
     `icon` VARCHAR(45) NULL,
-    `kicked_time` INTEGER NULL,
+    `kicked_time` DATETIME(3) NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

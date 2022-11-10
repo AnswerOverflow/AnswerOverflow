@@ -27,4 +27,22 @@ export class ServerManager extends Manager {
     const server = await this.answer_overflow_client.prisma.server.upsert(args);
     return server;
   }
+
+  public async markServerAsKicked(server: Server) {
+    const kicked_time = new Date();
+    return this.upsertServer({
+      where: {
+        id: server.id,
+      },
+      update: {
+        kicked_time,
+      },
+      create: {
+        id: server.id,
+        name: server.name,
+        icon: server.icon,
+        kicked_time,
+      },
+    });
+  }
 }

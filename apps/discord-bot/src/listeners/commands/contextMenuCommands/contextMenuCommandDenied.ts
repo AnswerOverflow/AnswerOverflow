@@ -1,12 +1,7 @@
-import type {
-  ContextMenuCommandDeniedPayload,
-  Events,
-} from "@sapphire/framework";
+import type { ContextMenuCommandDeniedPayload, Events } from "@sapphire/framework";
 import { Listener, UserError } from "@sapphire/framework";
 
-export class UserEvent extends Listener<
-  typeof Events.ContextMenuCommandDenied
-> {
+export class UserEvent extends Listener<typeof Events.ContextMenuCommandDenied> {
   public async run(
     { context, message: content }: UserError,
     { interaction }: ContextMenuCommandDeniedPayload

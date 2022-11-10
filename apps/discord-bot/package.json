@@ -5,6 +5,7 @@
   "author": "@sapphire",
   "license": "UNLICENSE",
   "dependencies": {
+    "@answeroverflow/core": "*",
     "@sapphire/decorators": "^5.0.0",
     "@sapphire/discord-utilities": "^2.11.6",
     "@sapphire/discord.js-utilities": "^5.0.1",
@@ -18,7 +19,6 @@
     "@sapphire/type": "^2.2.4",
     "@sapphire/utilities": "^3.10.1",
     "colorette": "^2.0.19",
-    "@answeroverflow/core": "*",
     "discord-api-types": "^0.33.5",
     "discord.js": "^13.11.0",
     "dotenv-cra": "^3.0.2",
@@ -34,7 +34,8 @@
     "prettier": "^2.7.1",
     "tsc-watch": "^5.0.3",
     "tsup": "^6.3.0",
-    "typescript": "^4.8.4"
+    "typescript": "^4.8.4",
+    "vitest": "^0.25.1"
   },
   "scripts": {
     "build": "tsup --format cjs",
@@ -42,7 +43,7 @@
     "start": "node dist/index.js",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix --ext .ts",
-    "dev": "tsup --format cjs --watch --onSuccess \"node dist/index.js\"",
+    "dev": "rm -r dist/; tsup --format cjs --watch --onSuccess \"node dist/index.js\"",
     "format": "prettier --write \"src/**/*.ts\""
   }
 }

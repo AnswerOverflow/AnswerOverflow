@@ -55,10 +55,10 @@ model DeletedUser {
 // Servers
 
 model Server {
-  id          String  @id
-  name        String  @db.VarChar(100)
-  icon        String? @db.VarChar(45)
-  kicked_time Int?
+  id          String    @id
+  name        String    @db.VarChar(100)
+  icon        String?   @db.VarChar(45)
+  kicked_time DateTime?
 
   user_server_settings UserServerSettings[]
   channels             Channel[]

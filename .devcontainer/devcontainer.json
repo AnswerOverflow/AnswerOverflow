@@ -9,9 +9,9 @@
 	// The 'service' property is the name of the service for the container that VS Code should
 	// use. Update this value and .devcontainer/docker-compose.yml to the real service name.
 	"service": "workspace",
-	
+
 	"workspaceFolder": "/workspace",
-	
+
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.
@@ -23,10 +23,11 @@
 				"eamodio.gitlens",
 				"2gua.rainbow-brackets",
 				"Prisma.prisma",
-				"ZixuanChen.vitest-explorer"
+				"ZixuanChen.vitest-explorer",
+        "EditorConfig.EditorConfig"
 			]
 		}
-	},	
+	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 

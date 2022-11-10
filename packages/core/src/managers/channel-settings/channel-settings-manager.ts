@@ -1,35 +1,74 @@
-import { ChannelSettings, Prisma } from "@prisma/client";
+import { Channel, ChannelSettings, Prisma, Server } from "@prisma/client";
 import { ChannelSettingsFlags } from "../../structures/channel-settings";
-import { changeFlag } from "../../utils/bitfield";
+import { addBitfield, changeFlag, PermissionsBitField } from "../../utils/bitfield";
 import { Manager } from "../manager";
 
 export class ChannelSettingsManager extends Manager {
-  private upsertChannelSettings(
-    channel: Prisma.ChannelCreateInput,
-    channel_settings: ChannelSettings
+  public async get<T extends Prisma.ChannelSettingsFindUniqueArgs>(
+    args: Prisma.SelectSubset<T, Prisma.ChannelSettingsFindUniqueArgs>
   ) {
-    return this.answer_overflow_client.prisma.channelSettings.upsert({
-      create: {
-        channel: {
-          connectOrCreate: {
-            create: channel,
-            where: {
-              id: channel.id,
-            },
-          },
-        },
-        permissions: channel_settings.permissions,
-      },
-      update: {
-        permissions: channel_settings.permissions,
-      },
+    return await this.answer_overflow_client.prisma.channelSettings.findUnique({
+      ...args,
+    });
+  }
+
+  public async edit(
+    channel: Channel,
+    server: Server,
+    old_settings: ChannelSettings | undefined,
+    new_settings: ChannelSettings
+  ) {
+    const new_permissions = new PermissionsBitField(ChannelSettingsFlags, new_settings.permissions);
+    if (!new_permissions.checkFlag("INDEXING_ENABLED")) {
+      new_settings.invite_code = null;
+      new_settings.last_indexed_snowflake = null;
+    }
+    const updated_settings = await this.answer_overflow_client.prisma.channelSettings.upsert({
       where: {
         channel_id: channel.id,
       },
+      create: {
+        channel: {
+          connectOrCreate: {
+            where: {
+              id: channel.id,
+            },
+            create: {
+              id: channel.id,
+              name: channel.name,
+              type: channel.type,
+              server: {
+                connectOrCreate: {
+                  where: {
+                    id: server.id,
+                  },
+                  create: {
+                    id: server.id,
+                    name: server.name,
+                    icon: server.icon,
+                  },
+                },
+              },
+            },
+          },
+        },
+        permissions: new_settings.permissions,
+        invite_code: new_settings.invite_code,
+        solution_tag_id: new_settings.solution_tag_id,
+        last_indexed_snowflake: new_settings.last_indexed_snowflake,
+      },
+      update: {
+        permissions: new_settings.permissions,
+        invite_code: new_settings.invite_code,
+        solution_tag_id: new_settings.solution_tag_id,
+        last_indexed_snowflake: new_settings.last_indexed_snowflake,
+      },
     });
+    return addBitfield(ChannelSettingsFlags, new_settings.permissions, updated_settings);
   }
+
   private changeChannelSettingsFlag(
-    channel: Prisma.ChannelCreateInput,
+    channel: Channel,
     flag: keyof typeof ChannelSettingsFlags,
     active: boolean,
     channel_settings?: ChannelSettings
@@ -49,42 +88,36 @@ export class ChannelSettingsManager extends Manager {
         solution_tag_id: null,
       };
     channel_settings.permissions = updated_permissions.value;
-    return this.upsertChannelSettings(channel, channel_settings);
+    return channel_settings;
   }
 
   public async enableIndexing(
-    channel: Prisma.ChannelCreateInput,
+    channel: Channel,
+    server: Server,
     invite_code: string,
-    channel_settings?: ChannelSettings
+    old_channel_settings?: ChannelSettings
   ) {
-    return this.changeChannelSettingsFlag(channel, "INDEXING_ENABLED", true, channel_settings);
+    const new_channel_settings = this.changeChannelSettingsFlag(
+      channel,
+      "INDEXING_ENABLED",
+      true,
+      old_channel_settings
+    );
+    new_channel_settings.invite_code = invite_code;
+    return this.edit(channel, server, old_channel_settings, new_channel_settings);
   }
+
   public async disableIndexing(
-    channel: Prisma.ChannelCreateInput,
-    channel_settings?: ChannelSettings
+    channel: Channel,
+    server: Server,
+    old_channel_settings?: ChannelSettings
   ) {
-    return this.changeChannelSettingsFlag(
+    const new_channel_settings = this.changeChannelSettingsFlag(
       channel,
-      "MARK_SOLUTION_ENABLED",
+      "INDEXING_ENABLED",
       false,
-      channel_settings
+      old_channel_settings
     );
-  }
-  public async enableMarkSolution(
-    channel: Prisma.ChannelCreateInput,
-    channel_settings?: ChannelSettings
-  ) {
-    return this.changeChannelSettingsFlag(channel, "MARK_SOLUTION_ENABLED", true, channel_settings);
-  }
-  public async disableMarkSolution(
-    channel: Prisma.ChannelCreateInput,
-    channel_settings?: ChannelSettings
-  ) {
-    return this.changeChannelSettingsFlag(
-      channel,
-      "MARK_SOLUTION_ENABLED",
-      false,
-      channel_settings
-    );
+    return this.edit(channel, server, old_channel_settings, new_channel_settings);
   }
 }
