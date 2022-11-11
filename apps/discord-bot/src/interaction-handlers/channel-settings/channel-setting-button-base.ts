@@ -2,14 +2,14 @@ import type { Channel, Server, ChannelSettingsWithBitfield } from "@answeroverfl
 import type { Option } from "@sapphire/framework";
 import { discordGuildToPrismaServer, discordChannelToPrismaChannel } from "@utils/conversion";
 import { makeChannelSettingsResponse } from "../../commands/settings/channel-settings";
-import type { ButtonInteraction, CacheType } from "discord.js";
+import type { ButtonInteraction, CacheType, Interaction } from "discord.js";
 import type { GuildTextChannel } from "@utils/types";
 import { GuildTextChannelButtonHandler } from "@interaction-handlers/primitives/guild-text-channel-button";
 export class InvalidChannelError extends Error {}
 export class ChannelSettingsChangeError extends Error {}
 
-export abstract class ChannelSettingButtonBaseHandler extends GuildTextChannelButtonHandler {
-  public abstract updateSettings(
+export interface ChannelSettingsInteractionHandler {
+  updateSettings(
     // eslint-disable-next-line no-unused-vars
     target_channel: GuildTextChannel,
     // eslint-disable-next-line no-unused-vars
@@ -19,9 +19,12 @@ export abstract class ChannelSettingButtonBaseHandler extends GuildTextChannelBu
     // eslint-disable-next-line no-unused-vars
     old_settings: ChannelSettingsWithBitfield | null,
     // eslint-disable-next-line no-unused-vars
-    interaction: ButtonInteraction<CacheType>
+    interaction: Interaction<CacheType>
   ): Promise<ChannelSettingsWithBitfield>;
+}
 
+export abstract class ChannelSettingButtonBaseHandler extends GuildTextChannelButtonHandler {
+  public abstract interactionHandler: ChannelSettingsInteractionHandler;
   public async runGuildTextChannelButton(
     // eslint-disable-next-line no-unused-vars
     interaction: ButtonInteraction<CacheType>,
@@ -37,7 +40,7 @@ export abstract class ChannelSettingButtonBaseHandler extends GuildTextChannelBu
     });
     let updated_settings: ChannelSettingsWithBitfield;
     try {
-      updated_settings = await this.updateSettings(
+      updated_settings = await this.interactionHandler.updateSettings(
         target_channel,
         discordChannelToPrismaChannel(target_channel),
         discordGuildToPrismaServer(target_channel.guild),

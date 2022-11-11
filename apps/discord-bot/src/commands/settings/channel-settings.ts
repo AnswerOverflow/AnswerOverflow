@@ -1,6 +1,6 @@
 import type { ChannelSettingsWithBitfield } from "@answeroverflow/core";
-import { ToggleIndexingButton } from "@interaction-handlers/channel-settings/indexing/toggle-indexing-button";
-import { ToggleMarkSolutionButton } from "@interaction-handlers/channel-settings/mark-solution/toggle-mark-solution-button";
+import { ToggleIndexingButton } from "@interaction-handlers/channel-settings/indexing/buttons/toggle-indexing-button";
+import { ToggleMarkSolutionButton } from "@interaction-handlers/channel-settings/mark-solution/buttons/toggle-mark-solution-button";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
 import { InteractionReplyOptions, MessageActionRow } from "discord.js";

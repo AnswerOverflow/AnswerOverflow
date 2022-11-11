@@ -1,32 +1,20 @@
 import {
   Channel,
-  Server,
+  ChannelSettings,
+  ChannelSettingsFlags,
   ChannelSettingsWithBitfield,
   PermissionsBitField,
-  ChannelSettingsFlags,
-  ChannelSettings,
+  Server,
 } from "@answeroverflow/core";
-import { ButtonBase } from "@interaction-handlers/primitives/button-base";
-import type {
-  NewsChannel,
-  TextChannel,
-  ButtonInteraction,
-  CacheType,
-  MessageButtonStyleResolvable,
-} from "discord.js";
-import { ChannelSettingButtonBaseHandler } from "../channel-setting-button-base";
+import { container } from "@sapphire/framework";
+import type { TextChannel, NewsChannel, ButtonInteraction, CacheType } from "discord.js";
+import type { ChannelSettingsInteractionHandler } from "../channel-setting-button-base";
 
-export class DisableMarkSolutionButton extends ButtonBase {
-  public id = "disable-mark-solution";
-  public label = "Disable Mark Solution";
-  public style = "DANGER" as MessageButtonStyleResolvable;
-}
-
-export class DisableMarkSolutionButtonHandler extends ChannelSettingButtonBaseHandler {
-  public display: ButtonBase = new DisableMarkSolutionButton();
-
+export class ToggleMarkSolutionInteractionHandler implements ChannelSettingsInteractionHandler {
+  // eslint-disable-next-line no-unused-vars
+  constructor(public readonly enable: boolean) {}
   public async updateSettings(
-    target_channel: NewsChannel | TextChannel,
+    target_channel: TextChannel | NewsChannel,
     converted_channel: Channel,
     converted_server: Server,
     old_settings: ChannelSettingsWithBitfield | null,
@@ -49,11 +37,13 @@ export class DisableMarkSolutionButtonHandler extends ChannelSettingButtonBaseHa
       ChannelSettingsFlags,
       old_settings?.permissions ?? 0
     );
-
-    updated_permissions_bitfield.clearFlag("MARK_SOLUTION_ENABLED");
-
+    if (this.enable) {
+      updated_permissions_bitfield.setFlag("MARK_SOLUTION_ENABLED");
+    } else {
+      updated_permissions_bitfield.clearFlag("MARK_SOLUTION_ENABLED");
+    }
     new_settings.permissions = updated_permissions_bitfield.value;
-    return await this.container.answer_overflow.channel_settings.edit(
+    return await container.answer_overflow.channel_settings.edit(
       converted_channel,
       converted_server,
       old_settings,
