@@ -4,7 +4,7 @@ import { discordGuildToPrismaServer, discordChannelToPrismaChannel } from "@util
 import { makeChannelSettingsResponse } from "../../commands/settings/channel-settings";
 import type { ButtonInteraction, CacheType, Interaction } from "discord.js";
 import type { GuildTextChannel } from "@utils/types";
-import { GuildTextChannelButtonHandler } from "@interaction-handlers/primitives/guild-text-channel-button";
+import { GuildTextChannelButtonHandler } from "@interaction-handlers/primitives/buttons/guild-text-channel-button";
 export class InvalidChannelError extends Error {}
 export class ChannelSettingsChangeError extends Error {}
 

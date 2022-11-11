@@ -2,7 +2,7 @@ import {
   ChannelSettingButtonBaseHandler,
   type ChannelSettingsInteractionHandler,
 } from "@interaction-handlers/channel-settings/channel-setting-button-base";
-import { ButtonBase } from "@interaction-handlers/primitives/button-base";
+import { ButtonBase } from "@interaction-handlers/primitives/buttons/button-base";
 import type { MessageButtonStyleResolvable } from "discord.js";
 import { ToggleMarkSolutionInteractionHandler } from "../mark-solution-interaction-handler";
 

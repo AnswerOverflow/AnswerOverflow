@@ -1,4 +1,4 @@
-import { ToggleButton } from "@interaction-handlers/primitives/toggle-button";
+import { ToggleButton } from "@interaction-handlers/primitives/buttons/toggle-button";
 import { DisableIndexingButton } from "./disable-indexing-button";
 import { EnableIndexingButton } from "./enable-indexing-button";
 
