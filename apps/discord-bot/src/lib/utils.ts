@@ -8,7 +8,7 @@ import { container } from "@sapphire/framework";
 import { send } from "@sapphire/plugin-editable-commands";
 import { cyan } from "colorette";
 import type { APIUser } from "discord-api-types/v9";
-import { Guild, Message, MessageEmbed, User } from "discord.js";
+import { Guild, Message, MessageButton, MessageEmbed, User } from "discord.js";
 import { RandomLoadingMessage } from "./constants";
 
 /**
@@ -29,9 +29,7 @@ export function pickRandom<T>(array: readonly T[]): T {
 export function sendLoadingMessage(message: Message): Promise<typeof message> {
   return send(message, {
     embeds: [
-      new MessageEmbed()
-        .setDescription(pickRandom(RandomLoadingMessage))
-        .setColor("#FF0000"),
+      new MessageEmbed().setDescription(pickRandom(RandomLoadingMessage)).setColor("#FF0000"),
     ],
   });
 }
@@ -63,11 +61,7 @@ export function logSuccessCommand(
   );
 }
 
-export function getSuccessLoggerData(
-  guild: Guild | null,
-  user: User,
-  command: Command
-) {
+export function getSuccessLoggerData(guild: Guild | null, user: User, command: Command) {
   const shard = getShardInfo(guild?.shardId ?? 0);
   const commandName = getCommandInfo(command);
   const author = getAuthorInfo(user);
@@ -91,4 +85,8 @@ function getAuthorInfo(author: User | APIUser) {
 function getGuildInfo(guild: Guild | null) {
   if (guild === null) return "Direct Messages";
   return `${guild.name}[${cyan(guild.id)}]`;
+}
+
+export interface ButtonCreator {
+  makeButton(): MessageButton;
 }

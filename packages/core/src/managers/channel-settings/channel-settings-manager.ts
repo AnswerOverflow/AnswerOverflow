@@ -7,15 +7,17 @@ export class ChannelSettingsManager extends Manager {
   public async get<T extends Prisma.ChannelSettingsFindUniqueArgs>(
     args: Prisma.SelectSubset<T, Prisma.ChannelSettingsFindUniqueArgs>
   ) {
-    return await this.answer_overflow_client.prisma.channelSettings.findUnique({
-      ...args,
-    });
+    const results = await this.answer_overflow_client.prisma.channelSettings.findUnique(args);
+    if (results == null) {
+      return null;
+    }
+    return addBitfield(ChannelSettingsFlags, results?.permissions ?? 0, results);
   }
 
   public async edit(
     channel: Channel,
     server: Server,
-    old_settings: ChannelSettings | undefined,
+    old_settings: ChannelSettings | null,
     new_settings: ChannelSettings
   ) {
     const new_permissions = new PermissionsBitField(ChannelSettingsFlags, new_settings.permissions);
@@ -71,7 +73,7 @@ export class ChannelSettingsManager extends Manager {
     channel: Channel,
     flag: keyof typeof ChannelSettingsFlags,
     active: boolean,
-    channel_settings?: ChannelSettings
+    channel_settings: ChannelSettings | null
   ) {
     const updated_permissions = changeFlag<typeof ChannelSettingsFlags>(
       ChannelSettingsFlags,
@@ -95,7 +97,7 @@ export class ChannelSettingsManager extends Manager {
     channel: Channel,
     server: Server,
     invite_code: string,
-    old_channel_settings?: ChannelSettings
+    old_channel_settings: ChannelSettings | null
   ) {
     const new_channel_settings = this.changeChannelSettingsFlag(
       channel,
@@ -110,7 +112,7 @@ export class ChannelSettingsManager extends Manager {
   public async disableIndexing(
     channel: Channel,
     server: Server,
-    old_channel_settings?: ChannelSettings
+    old_channel_settings: ChannelSettings | null
   ) {
     const new_channel_settings = this.changeChannelSettingsFlag(
       channel,

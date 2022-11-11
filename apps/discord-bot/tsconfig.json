@@ -4,11 +4,12 @@
 		"outDir": "dist",
 		"tsBuildInfoFile": "dist/.tsbuildinfo",
 		"noUnusedLocals": true,
-		"noUnusedParameters": false,		
+		"noUnusedParameters": false,
 		"skipLibCheck": true,
 		"baseUrl": "src",
 		"paths": {
 			"@utils/*": ["utils/*"],
+			"@interaction-handlers/*": ["interaction-handlers/*"],
 		},
 	},
 	"include": ["src"],
