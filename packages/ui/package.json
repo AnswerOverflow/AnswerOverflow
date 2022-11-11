@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "TIMING=1 eslint \"**/*.ts*\"",
-    "dev": "start-storybook -p 6006 --quiet",
+    "dev": "start-storybook -p 6006 --quiet --no-open",
     "build-storybook": "build-storybook"
   },
   "devDependencies": {

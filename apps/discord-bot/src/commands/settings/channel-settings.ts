@@ -1,6 +1,6 @@
 import type { ChannelSettingsWithBitfield } from "@answeroverflow/core";
-import { IndexingButtonToggle } from "@interaction-handlers/channel-settings.ts/toggle-indexing-button";
-import { MarkSolutionButtonToggle } from "@interaction-handlers/channel-settings.ts/toggle-mark-solution-button";
+import { ToggleIndexingButton } from "@interaction-handlers/channel-settings/indexing/toggle-indexing-button";
+import { ToggleMarkSolutionButton } from "@interaction-handlers/channel-settings/mark-solution/toggle-mark-solution-button";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
 import { InteractionReplyOptions, MessageActionRow } from "discord.js";
@@ -10,8 +10,8 @@ export const makeChannelSettingsResponse = (
 ): InteractionReplyOptions => {
   const settings_buttons = new MessageActionRow();
   settings_buttons.addComponents([
-    new IndexingButtonToggle(channel_settings.bitfield.checkFlag("INDEXING_ENABLED")).makeButton(),
-    new MarkSolutionButtonToggle(
+    new ToggleIndexingButton(channel_settings.bitfield.checkFlag("INDEXING_ENABLED")).makeButton(),
+    new ToggleMarkSolutionButton(
       channel_settings.bitfield.checkFlag("MARK_SOLUTION_ENABLED")
     ).makeButton(),
   ]);

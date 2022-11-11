@@ -1,7 +1,9 @@
 import { InteractionHandler, InteractionHandlerTypes, PieceContext } from "@sapphire/framework";
 import { isNullishOrEmpty } from "@sapphire/utilities";
 import { ButtonInteraction, MessageButton, MessageButtonStyleResolvable } from "discord.js";
-import type { ButtonCreator } from "lib/utils";
+export interface ButtonCreator {
+  makeButton(): MessageButton;
+}
 
 export abstract class ButtonBase implements ButtonCreator {
   public abstract id: string;

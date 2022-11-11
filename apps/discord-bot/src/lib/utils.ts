@@ -8,7 +8,7 @@ import { container } from "@sapphire/framework";
 import { send } from "@sapphire/plugin-editable-commands";
 import { cyan } from "colorette";
 import type { APIUser } from "discord-api-types/v9";
-import { Guild, Message, MessageButton, MessageEmbed, User } from "discord.js";
+import { Guild, Message, MessageEmbed, User } from "discord.js";
 import { RandomLoadingMessage } from "./constants";
 
 /**
@@ -85,8 +85,4 @@ function getAuthorInfo(author: User | APIUser) {
 function getGuildInfo(guild: Guild | null) {
   if (guild === null) return "Direct Messages";
   return `${guild.name}[${cyan(guild.id)}]`;
-}
-
-export interface ButtonCreator {
-  makeButton(): MessageButton;
 }
