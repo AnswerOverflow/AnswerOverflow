@@ -2,10 +2,8 @@ import type { Channel, ChannelSettingsWithBitfield, Server } from "@answeroverfl
 import { container } from "@sapphire/framework";
 import type { GuildTextChannel } from "@utils/types";
 import type { Interaction, CacheType } from "discord.js";
-import {
-  type ChannelSettingsInteractionHandler,
-  ChannelSettingsChangeError,
-} from "../channel-setting-button-base";
+import { ChannelSettingsChangeError } from "../../../interaction-handlers/channel-settings/buttons/channel-setting-button-base";
+import type { ChannelSettingsInteractionHandler } from "./channel-settings-interaction-handler";
 
 export class DisableIndexingInteractionHandler implements ChannelSettingsInteractionHandler {
   public async updateSettings(

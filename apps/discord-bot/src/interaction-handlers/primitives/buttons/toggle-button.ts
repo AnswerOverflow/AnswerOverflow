@@ -1,5 +1,5 @@
 import type { MessageButton } from "discord.js";
-import type { ButtonBase, ButtonCreator } from "./buttons/button-base";
+import type { ButtonBase, ButtonCreator } from "./button-base";
 
 export abstract class ToggleButton implements ButtonCreator {
   public abstract enable: ButtonBase;

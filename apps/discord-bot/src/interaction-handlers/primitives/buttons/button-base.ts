@@ -13,7 +13,6 @@ export abstract class ButtonBase implements ButtonCreator {
     return new MessageButton().setCustomId(this.id).setLabel(this.label).setStyle(this.style);
   }
 }
-
 export abstract class ButtonBaseHandler extends InteractionHandler {
   public abstract display: ButtonBase;
   public constructor(ctx: PieceContext, options: InteractionHandler.Options) {
@@ -22,9 +21,16 @@ export abstract class ButtonBaseHandler extends InteractionHandler {
       interactionHandlerType: InteractionHandlerTypes.Button,
     });
   }
-  public override parse(interaction: ButtonInteraction) {
-    if (isNullishOrEmpty(this.display)) return this.none();
-    if (!interaction.customId.startsWith(this.display.id)) return this.none();
+
+  protected checkIfButtonIDMatches(interaction: ButtonInteraction) {
+    if (isNullishOrEmpty(this.display)) return false;
+    if (!interaction.customId.startsWith(this.display.id)) return false;
+    return true;
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  public override async parse(interaction: ButtonInteraction) {
+    if (!this.checkIfButtonIDMatches(interaction)) return this.none();
     return this.some({});
   }
 }

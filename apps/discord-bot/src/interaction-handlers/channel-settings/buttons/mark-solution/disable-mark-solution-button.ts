@@ -1,10 +1,8 @@
-import {
-  ChannelSettingButtonBaseHandler,
-  type ChannelSettingsInteractionHandler,
-} from "@interaction-handlers/channel-settings/channel-setting-button-base";
 import { ButtonBase } from "@interaction-handlers/primitives/buttons/button-base";
+import type { ChannelSettingsInteractionHandler } from "@utils/interactions/channel-settings/channel-settings-interaction-handler";
+import { ToggleMarkSolutionInteractionHandler } from "@utils/interactions/channel-settings/mark-solution-interaction-handler";
 import type { MessageButtonStyleResolvable } from "discord.js";
-import { ToggleMarkSolutionInteractionHandler } from "../mark-solution-interaction-handler";
+import { ChannelSettingButtonBaseHandler } from "../channel-setting-button-base";
 
 export class DisableMarkSolutionButton extends ButtonBase {
   public id = "disable-mark-solution";

@@ -8,7 +8,7 @@ import {
 } from "@answeroverflow/core";
 import { container } from "@sapphire/framework";
 import type { TextChannel, NewsChannel, ButtonInteraction, CacheType } from "discord.js";
-import type { ChannelSettingsInteractionHandler } from "../channel-setting-button-base";
+import type { ChannelSettingsInteractionHandler } from "./channel-settings-interaction-handler";
 
 export class ToggleMarkSolutionInteractionHandler implements ChannelSettingsInteractionHandler {
   // eslint-disable-next-line no-unused-vars
