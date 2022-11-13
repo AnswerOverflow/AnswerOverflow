@@ -1,8 +1,8 @@
-import { InvalidChannelError } from "@interaction-handlers/channel-settings/buttons/channel-setting-button-base";
 import { container } from "@sapphire/framework";
 import { discordChannelToPrismaChannel, discordGuildToPrismaServer } from "@utils/conversion";
 import type { GuildTextChannel } from "@utils/types";
 import type { Interaction, CacheType } from "discord.js";
+import { InvalidChannelError } from "./channel-settings/channel-settings-interaction-handler";
 
 function findSettingsTargetChannel(interaction: Interaction<CacheType>) {
   if (interaction.channel == null) {
@@ -26,9 +26,13 @@ function findSettingsTargetChannel(interaction: Interaction<CacheType>) {
   return interaction.channel;
 }
 
-export function addTargetChannelToInteraction<T extends {}>(interaction: Interaction, data: T) {
-  const parent_channel = findSettingsTargetChannel(interaction);
-  return { parent_channel, ...data };
+export function addRootChannelToInteraction<T extends {}>(interaction: Interaction, data: T) {
+  try {
+    const root_channel = findSettingsTargetChannel(interaction);
+    return { root_channel, ...data };
+  } catch (error) {
+    return null;
+  }
 }
 
 export async function addChannelSettingsParseDataToInteraction<T extends {}>(

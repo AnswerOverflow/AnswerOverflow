@@ -9,6 +9,7 @@
 		"baseUrl": "src",
 		"paths": {
 			"@utils/*": ["utils/*"],
+			"@primitives/*": ["primitives/*"],
 			"@interaction-handlers/*": ["interaction-handlers/*"],
 		},
 	},

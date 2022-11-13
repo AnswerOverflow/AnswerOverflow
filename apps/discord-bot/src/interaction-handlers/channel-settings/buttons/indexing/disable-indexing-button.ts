@@ -1,16 +1,10 @@
-import { ButtonBase } from "@interaction-handlers/primitives/buttons/button-base";
 import type { ChannelSettingsInteractionHandler } from "@utils/interactions/channel-settings/channel-settings-interaction-handler";
-import type { MessageButtonStyleResolvable } from "discord.js";
-import { DisableIndexingInteractionHandler } from "../../../../utils/interactions/channel-settings/disable-indexing-interaction-handler";
-import { ChannelSettingButtonBaseHandler } from "../channel-setting-button-base";
+import { DisableIndexingInteractionHandler } from "@utils/interactions/channel-settings/disable-indexing-interaction-handler";
+import { ChannelSettingButtonBase } from "@primitives/interactions/channel-settings/channel-setting-button-base";
+import type { ButtonBase } from "@primitives/message-components/buttons/button";
+import { DisableIndexingButton } from "@primitives/message-components/buttons/channel-settings/indexing-buttons";
 
-export class DisableIndexingButton extends ButtonBase {
-  public id = "disable-indexing";
-  public label = "Disable Indexing";
-  public style = "DANGER" as MessageButtonStyleResolvable;
-}
-
-export class DisableIndexingButtonHandler extends ChannelSettingButtonBaseHandler {
+export class DisableIndexingButtonHandler extends ChannelSettingButtonBase {
   public interactionHandler: ChannelSettingsInteractionHandler =
     new DisableIndexingInteractionHandler();
   public display: ButtonBase = new DisableIndexingButton();

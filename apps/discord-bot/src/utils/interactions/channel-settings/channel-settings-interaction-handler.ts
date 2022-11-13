@@ -2,6 +2,9 @@ import type { Channel, ChannelSettingsWithBitfield, Server } from "@answeroverfl
 import type { GuildTextChannel } from "@utils/types";
 import type { Interaction, CacheType } from "discord.js";
 
+export class InvalidChannelError extends Error {}
+export class ChannelSettingsChangeError extends Error {}
+
 export interface ChannelSettingsInteractionHandler {
   updateSettings(
     // eslint-disable-next-line no-unused-vars

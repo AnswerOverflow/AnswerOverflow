@@ -1,9 +1,10 @@
 import type { ChannelSettingsWithBitfield } from "@answeroverflow/core";
-import { ToggleIndexingButton } from "@interaction-handlers/channel-settings/buttons/indexing/toggle-indexing-button";
-import { ToggleMarkSolutionButton } from "@interaction-handlers/channel-settings/buttons/mark-solution/toggle-mark-solution-button";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import { InteractionReplyOptions, MessageActionRow } from "discord.js";
+import { type InteractionReplyOptions, MessageActionRow } from "discord.js";
+import { ToggleIndexingButton } from "@primitives/message-components/buttons/channel-settings/indexing-buttons";
+import { ToggleMarkSolutionButton } from "@primitives/message-components/buttons/channel-settings/mark-solution-buttons";
+import { MarkAsSolvedTagSelectMenu } from "@primitives/message-components/select-menu/channel-settings/mark-as-solved-tag-select-menu";
 
 export const makeChannelSettingsResponse = (
   channel_settings: ChannelSettingsWithBitfield
@@ -14,6 +15,21 @@ export const makeChannelSettingsResponse = (
     new ToggleMarkSolutionButton(
       channel_settings.bitfield.checkFlag("MARK_SOLUTION_ENABLED")
     ).makeButton(),
+  ]);
+  const forum_tag_row = new MessageActionRow().addComponents([
+    new MarkAsSolvedTagSelectMenu(
+      [
+        {
+          label: "Solved",
+          value: "solved",
+        },
+        {
+          label: "Typescript",
+          value: "typescript",
+        },
+      ],
+      "Solved"
+    ).makeSelectMenu(),
   ]);
 
   const content: string[] = [];
@@ -29,7 +45,11 @@ export const makeChannelSettingsResponse = (
   } else {
     content.push("**Enable Mark As Solution** - Enables users to mark their questions as solved");
   }
-  return { content: content.join("\n\n"), components: [settings_buttons], ephemeral: true };
+  return {
+    content: content.join("\n\n"),
+    components: [settings_buttons, forum_tag_row],
+    ephemeral: true,
+  };
 };
 
 @ApplyOptions<Command.Options>({

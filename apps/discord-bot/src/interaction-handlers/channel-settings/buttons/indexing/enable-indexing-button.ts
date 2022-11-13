@@ -1,16 +1,10 @@
-import { ButtonBase } from "@interaction-handlers/primitives/buttons/button-base";
 import type { ChannelSettingsInteractionHandler } from "@utils/interactions/channel-settings/channel-settings-interaction-handler";
 import { EnableIndexingInteractionHandler } from "@utils/interactions/channel-settings/enable-indexing-interaction-handler";
-import type { MessageButtonStyleResolvable } from "discord.js";
-import { ChannelSettingButtonBaseHandler } from "../channel-setting-button-base";
+import { ChannelSettingButtonBase } from "@primitives/interactions/channel-settings/channel-setting-button-base";
+import type { ButtonBase } from "@primitives/message-components/buttons/button";
+import { EnableIndexingButton } from "@primitives/message-components/buttons/channel-settings/indexing-buttons";
 
-export class EnableIndexingButton extends ButtonBase {
-  public id = "enable-indexing";
-  public label = "Enable Indexing";
-  public style = "SUCCESS" as MessageButtonStyleResolvable;
-}
-
-export class EnableIndexingButtonHandler extends ChannelSettingButtonBaseHandler {
+export class EnableIndexingButtonHandler extends ChannelSettingButtonBase {
   public interactionHandler: ChannelSettingsInteractionHandler =
     new EnableIndexingInteractionHandler();
   public display: ButtonBase = new EnableIndexingButton();
