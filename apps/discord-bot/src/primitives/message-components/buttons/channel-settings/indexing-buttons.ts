@@ -15,6 +15,7 @@ export class EnableIndexingButton extends ButtonBase {
 }
 
 export class ToggleIndexingButton extends ToggleButton {
-  public enable = new EnableIndexingButton();
-  public disable = new DisableIndexingButton();
+  constructor(is_already_enabled: boolean) {
+    super(is_already_enabled, new EnableIndexingButton(), new DisableIndexingButton());
+  }
 }

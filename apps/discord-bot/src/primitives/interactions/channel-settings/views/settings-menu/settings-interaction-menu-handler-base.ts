@@ -8,8 +8,12 @@ import type { SettingsInteractionHandler } from "./settings-interaction-handler"
 export abstract class SettingsInteractionMenuBaseHandler<
   T extends SettingsInteractionHandlerTypes
 > extends GuildTextChannelButtonHandler {
-  // eslint-disable-next-line no-unused-vars
-  public abstract getReply(data: T): Promise<SettingsMenuView<T>>;
+  public abstract getReply(
+    // eslint-disable-next-line no-unused-vars
+    new_settings: T,
+    // eslint-disable-next-line no-unused-vars
+    data: InteractionHandler.ParseResult<this>
+  ): Promise<SettingsMenuView<T>>;
 
   public abstract getInteractionHandler(
     // eslint-disable-next-line no-unused-vars
@@ -25,7 +29,7 @@ export abstract class SettingsInteractionMenuBaseHandler<
     try {
       const interaction_handler = await this.getInteractionHandler(interaction, parsedData);
       const data = await interaction_handler.updateSettings(interaction);
-      const reply = await this.getReply(data);
+      const reply = await this.getReply(data, parsedData);
       const view = await reply.getView();
       await interaction.update(view);
     } catch (error) {

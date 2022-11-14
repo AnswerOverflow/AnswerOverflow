@@ -10,8 +10,7 @@ export abstract class InteractionBase extends InteractionHandler {
   public abstract display: InteractionDisplay;
   protected checkIfIdMatches(interaction: MessageComponentInteraction) {
     if (isNullishOrEmpty(this.display)) return false;
-    if (!interaction.customId.startsWith(this.display.getId())) return false;
-    return true;
+    return interaction.customId === this.display.getId();
   }
 
   // eslint-disable-next-line no-unused-vars

@@ -10,7 +10,7 @@ export class MarkAsSolvedTagSelectMenu extends SelectMenuBase {
     if (placeholder) {
       this.placeholder = tags.find((tag) => tag.value === placeholder)?.label ?? placeholder;
     } else {
-      this.placeholder = "Select a tag";
+      this.placeholder = "Select a Solved Tag";
     }
     this.options = tags.map((tag) => tag);
   }

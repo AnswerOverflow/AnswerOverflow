@@ -15,6 +15,7 @@ export class EnableMarkSolutionButton extends ButtonBase {
 }
 
 export class ToggleMarkSolutionButton extends ToggleButton {
-  public enable = new EnableMarkSolutionButton();
-  public disable = new DisableMarkSolutionButton();
+  constructor(is_already_enabled: boolean) {
+    super(is_already_enabled, new EnableMarkSolutionButton(), new DisableMarkSolutionButton());
+  }
 }

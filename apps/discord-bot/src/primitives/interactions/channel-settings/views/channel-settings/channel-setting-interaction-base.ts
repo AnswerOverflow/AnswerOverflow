@@ -1,5 +1,6 @@
 import type { ChannelSettingsWithBitfield } from "@answeroverflow/core";
 import { ChannelSettingsMenuView } from "@primitives/views/channel-settings-view";
+import type { InteractionHandler } from "@sapphire/framework";
 import { discordChannelToPrismaChannel, discordGuildToPrismaServer } from "@utils/conversion";
 import type { MessageComponentInteraction } from "discord.js";
 import { SettingsInteractionMenuBaseHandler } from "../settings-menu/settings-interaction-menu-handler-base";
@@ -20,7 +21,10 @@ export abstract class ChannelSettingsInteractionViewBase extends SettingsInterac
     });
   }
 
-  public async getReply(data: ChannelSettingsWithBitfield) {
-    return new ChannelSettingsMenuView(data);
+  public async getReply(
+    new_settings: ChannelSettingsWithBitfield,
+    data: InteractionHandler.ParseResult<this>
+  ) {
+    return new ChannelSettingsMenuView(new_settings, data.root_channel);
   }
 }

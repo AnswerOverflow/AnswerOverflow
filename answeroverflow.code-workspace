@@ -6,15 +6,15 @@
       "path": "./"
       },
       {
-        // 
+        //
         "name": "discord-bot",
         "path": "apps/discord-bot",
-      },
+      },  
       {
-        // 
+        //
         "name": "web",
         "path": "apps/web"
-      },      
+      },
       {
         "name": "core",
         "path": "packages/core"

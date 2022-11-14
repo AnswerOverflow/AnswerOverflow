@@ -1,6 +1,7 @@
 import { ChannelSettingsMenuView } from "@primitives/views/channel-settings-view";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
+import { findRootChannel } from "@utils/add-to-parse-data";
 
 @ApplyOptions<Command.Options>({
   name: "channel-settings",
@@ -28,7 +29,15 @@ export class UserCommand extends Command {
       await interaction.reply({ content: "Channel settings not found", ephemeral: true });
       return;
     }
-    const channel_settings_view = new ChannelSettingsMenuView(channel_settings);
+    const root_channel = findRootChannel(interaction);
+    if (root_channel == null) {
+      await interaction.reply({
+        content: "Could not find a channel to update settings for",
+        ephemeral: true,
+      });
+      return;
+    }
+    const channel_settings_view = new ChannelSettingsMenuView(channel_settings, root_channel);
     const components = await channel_settings_view.getView();
     await interaction.reply({ ...components, ephemeral: true });
   }

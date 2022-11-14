@@ -25,6 +25,11 @@ export class ChannelSettingsManager extends Manager {
       new_settings.invite_code = null;
       new_settings.last_indexed_snowflake = null;
     }
+    if (!new_permissions.checkFlag("MARK_SOLUTION_ENABLED")) {
+      new_permissions.clearFlag("SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS");
+    }
+
+    new_settings.permissions = new_permissions.value;
     const updated_settings = await this.answer_overflow_client.prisma.channelSettings.upsert({
       where: {
         channel_id: channel.id,

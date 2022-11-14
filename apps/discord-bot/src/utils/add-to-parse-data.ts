@@ -4,7 +4,7 @@ import { discordChannelToPrismaChannel, discordGuildToPrismaServer } from "@util
 import type { GuildRootChannel } from "@utils/types";
 import type { Interaction, CacheType } from "discord.js";
 
-function findSettingsTargetChannel(interaction: Interaction<CacheType>) {
+export function findRootChannel(interaction: Interaction<CacheType>) {
   if (interaction.channel == null) {
     throw new InvalidChannelError("Could not find a channel to update settings for");
   }
@@ -28,7 +28,7 @@ function findSettingsTargetChannel(interaction: Interaction<CacheType>) {
 
 export function addRootChannelToInteraction<T extends {}>(interaction: Interaction, data: T) {
   try {
-    const root_channel = findSettingsTargetChannel(interaction);
+    const root_channel = findRootChannel(interaction);
     return { root_channel, ...data };
   } catch (error) {
     return null;

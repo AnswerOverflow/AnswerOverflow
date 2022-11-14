@@ -15,11 +15,14 @@ export abstract class SelectMenuBase implements SelectMenuCreator, InteractionDi
   public abstract label: string;
   public abstract options: MessageSelectOptionData[];
   public placeholder?: string;
+  public disabled: boolean = false;
+
   public makeSelectMenu() {
     const select_menu = new MessageSelectMenu().setCustomId(this.id).addOptions(this.options);
     if (this.placeholder) {
       select_menu.setPlaceholder(this.placeholder);
     }
+    select_menu.setDisabled(this.disabled);
 
     return select_menu;
   }
