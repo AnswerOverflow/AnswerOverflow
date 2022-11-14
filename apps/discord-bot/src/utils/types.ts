@@ -1,3 +1,5 @@
+import type { ChannelSettingsWithBitfield } from "@answeroverflow/core";
 import type { NewsChannel, TextChannel } from "discord.js";
 
-export type GuildTextChannel = NewsChannel | TextChannel;
+export type GuildRootChannel = NewsChannel | TextChannel;
+export type SettingsInteractionHandlerTypes = ChannelSettingsWithBitfield;

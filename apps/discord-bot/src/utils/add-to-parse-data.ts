@@ -1,8 +1,8 @@
+import { InvalidChannelError } from "@primitives/interactions/channel-settings/views/channel-settings/channel-settings-interaction-handler";
 import { container } from "@sapphire/framework";
 import { discordChannelToPrismaChannel, discordGuildToPrismaServer } from "@utils/conversion";
-import type { GuildTextChannel } from "@utils/types";
+import type { GuildRootChannel } from "@utils/types";
 import type { Interaction, CacheType } from "discord.js";
-import { InvalidChannelError } from "./channel-settings/channel-settings-interaction-handler";
 
 function findSettingsTargetChannel(interaction: Interaction<CacheType>) {
   if (interaction.channel == null) {
@@ -36,7 +36,7 @@ export function addRootChannelToInteraction<T extends {}>(interaction: Interacti
 }
 
 export async function addChannelSettingsParseDataToInteraction<T extends {}>(
-  target_channel: GuildTextChannel,
+  target_channel: GuildRootChannel,
   data: T
 ) {
   const converted_channel = discordChannelToPrismaChannel(target_channel);

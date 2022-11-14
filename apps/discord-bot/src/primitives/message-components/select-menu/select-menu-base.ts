@@ -20,6 +20,7 @@ export abstract class SelectMenuBase implements SelectMenuCreator, InteractionDi
     if (this.placeholder) {
       select_menu.setPlaceholder(this.placeholder);
     }
+
     return select_menu;
   }
 }

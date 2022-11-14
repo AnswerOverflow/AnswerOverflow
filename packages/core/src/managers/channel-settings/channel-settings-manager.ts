@@ -122,4 +122,23 @@ export class ChannelSettingsManager extends Manager {
     );
     return this.edit(channel, server, old_channel_settings, new_channel_settings);
   }
+
+  public async setSolvedTagId(
+    channel: Channel,
+    server: Server,
+    old_settings: ChannelSettings | null,
+    tag_id: string | null
+  ) {
+    let new_settings = old_settings;
+    if (!new_settings)
+      new_settings = {
+        channel_id: channel.id,
+        permissions: 0,
+        invite_code: null,
+        last_indexed_snowflake: null,
+        solution_tag_id: null,
+      };
+    new_settings.solution_tag_id = tag_id;
+    return this.edit(channel, server, old_settings, new_settings);
+  }
 }

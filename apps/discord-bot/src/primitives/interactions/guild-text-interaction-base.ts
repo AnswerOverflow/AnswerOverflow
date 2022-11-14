@@ -1,4 +1,4 @@
-import { addRootChannelToInteraction } from "@utils/interactions/add-to-parse-data";
+import { addRootChannelToInteraction } from "@utils/add-to-parse-data";
 import type { MessageComponentInteraction } from "discord.js";
 import { InteractionBase } from "./interaction-base";
 
