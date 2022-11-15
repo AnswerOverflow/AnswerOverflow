@@ -1,40 +1,36 @@
-import { Channel, ChannelSettings, Prisma, Server } from "@prisma/client";
-import { ChannelSettingsFlags } from "../../structures/channel-settings";
-import { addBitfield, changeFlag, PermissionsBitField } from "../../utils/bitfield";
+import { Channel, ChannelSettings, Server } from "@prisma/client";
+import {
+  ChannelSettingsFlags,
+  EditableChannelSettings,
+  getDefaultChannelSettings,
+} from "../../structures/channel-settings";
+import { PermissionsBitField } from "../../utils/bitfield";
 import { Manager } from "../manager";
 
 export class ChannelSettingsManager extends Manager {
-  public async get<T extends Prisma.ChannelSettingsFindUniqueArgs>(
-    args: Prisma.SelectSubset<T, Prisma.ChannelSettingsFindUniqueArgs>
-  ) {
-    const results = await this.answer_overflow_client.prisma.channelSettings.findUnique(args);
+  public readonly cache = new Map<string, EditableChannelSettings>();
+  public async get(channel_id: string): Promise<EditableChannelSettings | null> {
+    const cached = this.cache.get(channel_id);
+    if (cached) return cached;
+
+    const results = await this.answer_overflow_client.prisma.channelSettings.findUnique({
+      where: { channel_id },
+    });
     if (results == null) {
       return null;
     }
-    return addBitfield(ChannelSettingsFlags, results?.permissions ?? 0, results);
+    const editable_channel_settings = new EditableChannelSettings(results, this);
+    this.cache.set(channel_id, editable_channel_settings);
+    return editable_channel_settings;
   }
 
-  public async edit(
-    channel: Channel,
-    server: Server,
-    old_settings: ChannelSettings | null,
-    new_settings: ChannelSettings
-  ) {
-    const new_permissions = new PermissionsBitField(ChannelSettingsFlags, new_settings.permissions);
-    if (!new_permissions.checkFlag("INDEXING_ENABLED")) {
-      new_settings.invite_code = null;
-      new_settings.last_indexed_snowflake = null;
-    }
-    if (!new_permissions.checkFlag("MARK_SOLUTION_ENABLED")) {
-      new_permissions.clearFlag("SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS");
+  public async create(channel: Channel, server: Server, settings?: ChannelSettings) {
+    if (!settings) {
+      settings = getDefaultChannelSettings(channel.id);
     }
 
-    new_settings.permissions = new_permissions.value;
-    const updated_settings = await this.answer_overflow_client.prisma.channelSettings.upsert({
-      where: {
-        channel_id: channel.id,
-      },
-      create: {
+    return await this.answer_overflow_client.prisma.channelSettings.create({
+      data: {
         channel: {
           connectOrCreate: {
             where: {
@@ -59,91 +55,39 @@ export class ChannelSettingsManager extends Manager {
             },
           },
         },
-        permissions: new_settings.permissions,
-        invite_code: new_settings.invite_code,
-        solution_tag_id: new_settings.solution_tag_id,
-        last_indexed_snowflake: new_settings.last_indexed_snowflake,
-      },
-      update: {
-        permissions: new_settings.permissions,
-        invite_code: new_settings.invite_code,
-        solution_tag_id: new_settings.solution_tag_id,
-        last_indexed_snowflake: new_settings.last_indexed_snowflake,
+        permissions: settings.permissions,
+        invite_code: settings.invite_code,
+        solution_tag_id: settings.solution_tag_id,
+        last_indexed_snowflake: settings.last_indexed_snowflake,
       },
     });
-    return addBitfield(ChannelSettingsFlags, new_settings.permissions, updated_settings);
   }
 
-  private changeChannelSettingsFlag(
-    channel: Channel,
-    flag: keyof typeof ChannelSettingsFlags,
-    active: boolean,
-    channel_settings: ChannelSettings | null
-  ) {
-    const updated_permissions = changeFlag<typeof ChannelSettingsFlags>(
-      ChannelSettingsFlags,
-      channel_settings?.permissions ?? 0,
-      active,
-      flag
-    );
-    if (!channel_settings)
-      channel_settings = {
-        channel_id: channel.id,
-        permissions: updated_permissions.value,
-        invite_code: null,
-        last_indexed_snowflake: null,
-        solution_tag_id: null,
-      };
-    channel_settings.permissions = updated_permissions.value;
-    return channel_settings;
-  }
+  public async edit(
+    settings: EditableChannelSettings,
+    data: ChannelSettings
+  ): Promise<EditableChannelSettings> {
+    if (!settings.indexing_enabled) {
+      data.invite_code = null;
+      data.last_indexed_snowflake = null;
+    }
+    if (!settings.mark_solution_enabled) {
+      data.permissions = new PermissionsBitField(ChannelSettingsFlags, data.permissions).setFlag(
+        "SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS"
+      ).value;
+    }
 
-  public async enableIndexing(
-    channel: Channel,
-    server: Server,
-    invite_code: string,
-    old_channel_settings: ChannelSettings | null
-  ) {
-    const new_channel_settings = this.changeChannelSettingsFlag(
-      channel,
-      "INDEXING_ENABLED",
-      true,
-      old_channel_settings
-    );
-    new_channel_settings.invite_code = invite_code;
-    return this.edit(channel, server, old_channel_settings, new_channel_settings);
-  }
-
-  public async disableIndexing(
-    channel: Channel,
-    server: Server,
-    old_channel_settings: ChannelSettings | null
-  ) {
-    const new_channel_settings = this.changeChannelSettingsFlag(
-      channel,
-      "INDEXING_ENABLED",
-      false,
-      old_channel_settings
-    );
-    return this.edit(channel, server, old_channel_settings, new_channel_settings);
-  }
-
-  public async setSolvedTagId(
-    channel: Channel,
-    server: Server,
-    old_settings: ChannelSettings | null,
-    tag_id: string | null
-  ) {
-    let new_settings = old_settings;
-    if (!new_settings)
-      new_settings = {
-        channel_id: channel.id,
-        permissions: 0,
-        invite_code: null,
-        last_indexed_snowflake: null,
-        solution_tag_id: null,
-      };
-    new_settings.solution_tag_id = tag_id;
-    return this.edit(channel, server, old_settings, new_settings);
+    const updated_data = await this.answer_overflow_client.prisma.channelSettings.update({
+      where: {
+        channel_id: data.channel_id,
+      },
+      data: {
+        permissions: data.permissions,
+        invite_code: data.invite_code,
+        solution_tag_id: data.solution_tag_id,
+        last_indexed_snowflake: data.last_indexed_snowflake,
+      },
+    });
+    return new EditableChannelSettings(updated_data, this);
   }
 }

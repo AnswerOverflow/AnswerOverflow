@@ -38,11 +38,13 @@ export class PermissionsBitField<Flags extends Record<string, number>> extends B
   }
   public setFlag(flag: keyof Flags) {
     this.value = new BitField(this.flags).resolve([this.value, flag as string]);
+    return this;
   }
   public clearFlag(flag: keyof Flags) {
     this.value = new BitField(this.flags).intersection(
       this.value,
       new BitField(this.flags).complement(flag as string)
     );
+    return this;
   }
 }

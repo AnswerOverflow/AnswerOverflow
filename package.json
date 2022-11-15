@@ -2,10 +2,15 @@
   "name": "ao-monorepo",
   "version": "0.0.0",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/eslint-config-custom"
+    ]
+  },
   "scripts": {
     "build": "turbo run build",
     "build:cacheless": "turbo run build --no-cache",
