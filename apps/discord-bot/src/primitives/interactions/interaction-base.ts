@@ -12,10 +12,10 @@ export abstract class InteractionBase extends InteractionHandler {
     if (isNullishOrEmpty(this.display)) return false;
     return interaction.customId === this.display.getId();
   }
-
   // eslint-disable-next-line no-unused-vars
   public override async parse(interaction: MessageComponentInteraction) {
     if (!this.checkIfIdMatches(interaction)) return this.none();
+
     return this.some({});
   }
 }

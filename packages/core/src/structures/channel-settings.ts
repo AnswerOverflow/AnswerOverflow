@@ -12,3 +12,14 @@ export const ChannelSettingsFlags = {
 export type ChannelSettingsWithBitfield = {
   bitfield: PermissionsBitField<typeof ChannelSettingsFlags>;
 } & ChannelSettings;
+
+export function getDefaultChannelSettings(channel_id: string): ChannelSettingsWithBitfield {
+  return {
+    bitfield: new PermissionsBitField(ChannelSettingsFlags, 0),
+    channel_id: channel_id,
+    invite_code: null,
+    last_indexed_snowflake: null,
+    permissions: 0,
+    solution_tag_id: null,
+  };
+}
