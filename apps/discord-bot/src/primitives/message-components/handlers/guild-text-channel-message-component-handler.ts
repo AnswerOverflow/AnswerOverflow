@@ -1,8 +1,8 @@
 import { findRootChannel } from "@utils/add-to-parse-data";
 import type { MessageComponentInteraction } from "discord.js";
-import { InteractionBase } from "./interaction-base";
+import { MessageComponentHandler } from "./message-component-handler";
 
-export abstract class GuildTextChannelButtonHandler extends InteractionBase {
+export abstract class GuildTextChannelMessageComponentHandler extends MessageComponentHandler {
   public override async parse(interaction: MessageComponentInteraction) {
     const data = await super.parse(interaction);
     if (data.isNone()) return this.none();

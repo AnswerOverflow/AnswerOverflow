@@ -1,23 +1,16 @@
 import type { ChannelSettingsWithBitfield } from "@answeroverflow/core";
 import { ChannelSettingsMenuView } from "@primitives/views/channel-settings-view";
 import type { InteractionHandler } from "@sapphire/framework";
-import { discordChannelToPrismaChannel, discordGuildToPrismaServer } from "@utils/conversion";
 import type { MessageComponentInteraction } from "discord.js";
-import { SettingsInteractionMenuBaseHandler } from "../settings-menu/settings-interaction-menu-handler-base";
+import { SettingsMessageComponentHandler } from "../settings-message-component-handler";
 
-export abstract class ChannelSettingsInteractionViewBase extends SettingsInteractionMenuBaseHandler<ChannelSettingsWithBitfield> {
+export abstract class ChannelSettingsMessageComponentHandler extends SettingsMessageComponentHandler<ChannelSettingsWithBitfield> {
   public override async parse(interaction: MessageComponentInteraction) {
     const some = await super.parse(interaction);
     if (some.isNone()) return some;
     const data = some.unwrap();
-    const channel_settings = await this.container.answer_overflow.channel_settings.get({
-      where: { channel_id: data.root_channel.id },
-    });
     return this.some({
       ...data,
-      channel_settings,
-      converted_channel: discordChannelToPrismaChannel(data.root_channel),
-      converted_server: discordGuildToPrismaServer(data.root_channel.guild),
     });
   }
 

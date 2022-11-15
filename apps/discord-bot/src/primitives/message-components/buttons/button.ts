@@ -1,5 +1,5 @@
 import { type MessageButtonStyleResolvable, MessageButton } from "discord.js";
-import type { InteractionDisplay } from "@primitives/interactions/interaction-base";
+import type { InteractionDisplay } from "../handlers/message-component-handler";
 
 export interface ButtonCreator {
   makeButton(): MessageButton;

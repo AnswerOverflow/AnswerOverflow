@@ -1,13 +1,13 @@
-import { GuildTextChannelButtonHandler } from "@primitives/interactions/guild-text-interaction-base";
+import type { SettingsMenuView } from "@primitives/views/settings-view";
 import type { InteractionHandler } from "@sapphire/framework";
 import type { SettingsInteractionHandlerTypes } from "@utils/types";
 import type { MessageComponentInteraction, CacheType } from "discord.js";
-import type { SettingsMenuView } from "@primitives/views/settings-view";
-import type { SettingsInteractionHandler } from "./settings-interaction-handler";
+import type { SettingsInteractionHandler } from "../../../interactions/settings/settings-interaction-handler";
+import { GuildTextChannelMessageComponentHandler } from "../guild-text-channel-message-component-handler";
 
-export abstract class SettingsInteractionMenuBaseHandler<
+export abstract class SettingsMessageComponentHandler<
   T extends SettingsInteractionHandlerTypes
-> extends GuildTextChannelButtonHandler {
+> extends GuildTextChannelMessageComponentHandler {
   public abstract getReply(
     // eslint-disable-next-line no-unused-vars
     new_settings: T,
@@ -28,7 +28,7 @@ export abstract class SettingsInteractionMenuBaseHandler<
   ) {
     try {
       const interaction_handler = await this.getInteractionHandler(interaction, parsedData);
-      const data = await interaction_handler.updateSettings(interaction);
+      const data = await interaction_handler.execute();
       const reply = await this.getReply(data, parsedData);
       const view = await reply.getView();
       await interaction.update(view);
