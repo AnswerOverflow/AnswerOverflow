@@ -1,5 +1,8 @@
-import { ChannelSettings, Prisma } from "@prisma/client";
-import { ChannelSettingsManager } from "../managers/channel-settings/channel-settings-manager";
+import { ChannelSettings } from "@prisma/client";
+import {
+  ChannelSettingsManager,
+  ChannelSettingsUpdateArgs,
+} from "../managers/channel-settings/channel-settings-manager";
 import { PermissionsBitField } from "../utils/bitfield";
 import { ExtendedBase } from "./base";
 
@@ -26,13 +29,21 @@ export function getDefaultChannelSettings(channel_id: string): ChannelSettingsWi
   };
 }
 
-export class ChannelSettingsExtended extends ExtendedBase<ChannelSettings> {
+export class ChannelSettingsExtended extends ExtendedBase<
+  ChannelSettings,
+  ChannelSettingsUpdateArgs
+> {
   public getCacheId(): string {
     return this.data.channel_id;
   }
   public updateCacheEntry(data: ChannelSettings): void {
     this.data = data;
   }
+
+  get channel_id() {
+    return this.data.channel_id;
+  }
+
   get settings() {
     return new PermissionsBitField(ChannelSettingsFlags, this.data.permissions);
   }
@@ -40,9 +51,9 @@ export class ChannelSettingsExtended extends ExtendedBase<ChannelSettings> {
     // eslint-disable-next-line no-unused-vars
     data: ChannelSettings,
     // eslint-disable-next-line no-unused-vars
-    manager: ChannelSettingsManager
+    public readonly manager: ChannelSettingsManager
   ) {
-    super(data, manager);
+    super(data);
   }
 
   get invite_code() {
@@ -77,8 +88,8 @@ export class ChannelSettingsExtended extends ExtendedBase<ChannelSettings> {
     return this.settings.checkFlag("AUTO_THREAD_ENABLED");
   }
 
-  public async edit<T extends Prisma.ChannelSettingsUpdateInput>(update_data: T) {
-    return await super.edit(update_data);
+  public override async update(args: ChannelSettingsUpdateArgs) {
+    return this.manager.update(this, args);
   }
 
   private changeSetting(flag: keyof typeof ChannelSettingsFlags, enabled: boolean) {
@@ -93,22 +104,22 @@ export class ChannelSettingsExtended extends ExtendedBase<ChannelSettings> {
     Indexing
   */
   public async setLastIndexedSnowflake(snowflake: string | null) {
-    return this.edit({ last_indexed_snowflake: snowflake });
+    return this.update({ last_indexed_snowflake: snowflake });
   }
 
   public async setConsentPromptInPostGuidelines(enabled: boolean) {
     this.changeSetting("CONSENT_PROMPT_IN_POST_GUIDELINES", enabled);
-    return await this.edit({ permissions: this.settings.value });
+    return await this.update({ permissions: this.settings.value });
   }
 
   public async enableIndexing(invite_code: string) {
     this.changeSetting("INDEXING_ENABLED", true);
-    return this.edit({ permissions: this.settings.value, invite_code });
+    return this.update({ permissions: this.settings.value, invite_code });
   }
 
   public async disableIndexing() {
     this.changeSetting("INDEXING_ENABLED", false);
-    return this.edit({ permissions: this.settings.value });
+    return this.update({ permissions: this.settings.value });
   }
 
   /*
@@ -116,20 +127,20 @@ export class ChannelSettingsExtended extends ExtendedBase<ChannelSettings> {
   */
   public async setMarkSolutionEnabled(enabled: boolean) {
     this.changeSetting("MARK_SOLUTION_ENABLED", enabled);
-    return await this.edit({ permissions: this.settings.value });
+    return await this.update({ permissions: this.settings.value });
   }
 
   public async setSendMarkSolutionInstructionsInNewThreads(enabled: boolean) {
     this.changeSetting("SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS", enabled);
-    return await this.edit({ permissions: this.settings.value });
+    return await this.update({ permissions: this.settings.value });
   }
 
   public async setAutoThreadEnabled(enabled: boolean) {
     this.changeSetting("AUTO_THREAD_ENABLED", enabled);
-    return await this.edit({ permissions: this.settings.value });
+    return await this.update({ permissions: this.settings.value });
   }
 
   public async setSolvedTagId(tag_id: string | null) {
-    return this.edit({ solution_tag_id: tag_id });
+    return this.update({ solution_tag_id: tag_id });
   }
 }

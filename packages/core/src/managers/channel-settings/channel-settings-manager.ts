@@ -5,18 +5,31 @@ import {
 } from "../../structures/channel-settings";
 import { Manager } from "../manager";
 
-export class ChannelSettingsManager extends Manager<ChannelSettings, ChannelSettingsExtended> {
-  public async edit(data: ChannelSettings): Promise<ChannelSettingsExtended> {
+export type ChannelSettingsCreateArgs = {
+  channel: Channel;
+  server: Server;
+  settings?: ChannelSettings;
+};
+
+export type ChannelSettingsImmutable = {
+  channel_id: string;
+};
+export type ChannelSettingsUpdateArgs = Partial<Omit<ChannelSettings, "channel_id">>;
+export class ChannelSettingsManager extends Manager<
+  ChannelSettings,
+  ChannelSettingsExtended,
+  ChannelSettingsCreateArgs,
+  ChannelSettingsUpdateArgs
+> {
+  public async update(
+    current: ChannelSettingsExtended,
+    data: ChannelSettingsUpdateArgs
+  ): Promise<ChannelSettingsExtended> {
     const updated_data = await this.answer_overflow_client.prisma.channelSettings.update({
       where: {
-        channel_id: data.channel_id,
+        channel_id: current.channel_id,
       },
-      data: {
-        permissions: data.permissions,
-        invite_code: data.invite_code,
-        solution_tag_id: data.solution_tag_id,
-        last_indexed_snowflake: data.last_indexed_snowflake,
-      },
+      data,
     });
     const updated_entry = new ChannelSettingsExtended(updated_data, this);
     return this.updateCache(updated_entry);
@@ -40,12 +53,13 @@ export class ChannelSettingsManager extends Manager<ChannelSettings, ChannelSett
     return editable_channel_settings;
   }
 
-  public async create(channel: Channel, server: Server, settings?: ChannelSettings) {
+  public async create(args: ChannelSettingsCreateArgs) {
+    const { channel, server } = args;
+    let { settings } = args;
     if (!settings) {
       settings = getDefaultChannelSettings(channel.id);
     }
-
-    return await this.answer_overflow_client.prisma.channelSettings.create({
+    const created_settings = await this.answer_overflow_client.prisma.channelSettings.create({
       data: {
         channel: {
           connectOrCreate: {
@@ -77,5 +91,6 @@ export class ChannelSettingsManager extends Manager<ChannelSettings, ChannelSett
         last_indexed_snowflake: settings.last_indexed_snowflake,
       },
     });
+    return new ChannelSettingsExtended(created_settings, this);
   }
 }

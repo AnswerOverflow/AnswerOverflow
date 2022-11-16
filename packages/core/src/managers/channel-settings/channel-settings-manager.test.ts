@@ -29,12 +29,18 @@ const TEST_CHANNEL_1: Channel = {
 
 describe("ChannelSettingsManager", () => {
   it("should create a new channel settings object", async () => {
-    await answer_overflow_client.channel_settings.create(TEST_CHANNEL_1, TEST_SERVER_1);
+    await answer_overflow_client.channel_settings.create({
+      channel: TEST_CHANNEL_1,
+      server: TEST_SERVER_1,
+    });
     const new_settings = await answer_overflow_client.channel_settings.get(TEST_CHANNEL_1.id);
     expect(new_settings).not.toBeNull();
   });
   it("Should enable indexing in a channel", async () => {
-    await answer_overflow_client.channel_settings.create(TEST_CHANNEL_1, TEST_SERVER_1);
+    await answer_overflow_client.channel_settings.create({
+      channel: TEST_CHANNEL_1,
+      server: TEST_SERVER_1,
+    });
     await answer_overflow_client.channel_settings.get(TEST_CHANNEL_1.id);
     const new_settings = await answer_overflow_client.channel_settings.get(TEST_CHANNEL_1.id);
     expect(new_settings).not.toBeNull();
