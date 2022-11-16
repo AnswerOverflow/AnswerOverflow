@@ -1,6 +1,7 @@
 import { ChannelSettings, Prisma } from "@prisma/client";
 import { ChannelSettingsManager } from "../managers/channel-settings/channel-settings-manager";
 import { PermissionsBitField } from "../utils/bitfield";
+import { Base } from "./base";
 
 export const ChannelSettingsFlags = {
   INDEXING_ENABLED: 1 << 0,
@@ -25,15 +26,17 @@ export function getDefaultChannelSettings(channel_id: string): ChannelSettingsWi
   };
 }
 
-export class EditableChannelSettings {
-  public readonly settings: PermissionsBitField<typeof ChannelSettingsFlags>;
+export class EditableChannelSettings extends Base<ChannelSettings> {
+  get settings() {
+    return new PermissionsBitField(ChannelSettingsFlags, this.data.permissions);
+  }
   constructor(
     // eslint-disable-next-line no-unused-vars
-    private data: ChannelSettings,
+    data: ChannelSettings,
     // eslint-disable-next-line no-unused-vars
-    public readonly channel_settings_manager: ChannelSettingsManager
+    manager: ChannelSettingsManager
   ) {
-    this.settings = new PermissionsBitField(ChannelSettingsFlags, data.permissions);
+    super(data, manager);
   }
 
   get invite_code() {
@@ -69,15 +72,14 @@ export class EditableChannelSettings {
   }
 
   public async edit<T extends Prisma.ChannelSettingsUpdateInput>(update_data: T) {
-    const new_data = { ...this.data, ...update_data };
-    return await this.channel_settings_manager.edit(this, new_data);
+    return await super.edit(update_data);
   }
 
   private changeSetting(flag: keyof typeof ChannelSettingsFlags, enabled: boolean) {
     if (enabled) {
-      this.settings.setFlag(flag).value;
+      this.data.permissions = this.settings.setFlag(flag).value;
     } else {
-      this.settings.clearFlag(flag).value;
+      this.data.permissions = this.settings.clearFlag(flag).value;
     }
   }
 
@@ -94,12 +96,13 @@ export class EditableChannelSettings {
   }
 
   public async enableIndexing(invite_code: string) {
-    return this.edit({ invite_code });
+    this.changeSetting("INDEXING_ENABLED", true);
+    return this.edit({ permissions: this.settings.value, invite_code });
   }
 
   public async disableIndexing() {
-    const updated_permissions = this.settings.clearFlag("INDEXING_ENABLED").value;
-    return this.edit({ permissions: updated_permissions });
+    this.changeSetting("INDEXING_ENABLED", false);
+    return this.edit({ permissions: this.settings.value });
   }
 
   /*

@@ -1,13 +1,31 @@
 import { Channel, ChannelSettings, Server } from "@prisma/client";
 import {
-  ChannelSettingsFlags,
   EditableChannelSettings,
   getDefaultChannelSettings,
 } from "../../structures/channel-settings";
-import { PermissionsBitField } from "../../utils/bitfield";
 import { Manager } from "../manager";
 
-export class ChannelSettingsManager extends Manager {
+export class ChannelSettingsManager extends Manager<ChannelSettings> {
+  public async edit(data: ChannelSettings): Promise<EditableChannelSettings> {
+    const updated_data = await this.answer_overflow_client.prisma.channelSettings.update({
+      where: {
+        channel_id: data.channel_id,
+      },
+      data: {
+        permissions: data.permissions,
+        invite_code: data.invite_code,
+        solution_tag_id: data.solution_tag_id,
+        last_indexed_snowflake: data.last_indexed_snowflake,
+      },
+    });
+    const cached_data = this.cache.get(data.channel_id);
+    if (cached_data) {
+      cached_data.data = updated_data;
+    } else {
+      this.cache.set(data.channel_id, new EditableChannelSettings(updated_data, this));
+    }
+    return new EditableChannelSettings(updated_data, this);
+  }
   public readonly cache = new Map<string, EditableChannelSettings>();
   public async get(channel_id: string): Promise<EditableChannelSettings | null> {
     const cached = this.cache.get(channel_id);
@@ -61,33 +79,5 @@ export class ChannelSettingsManager extends Manager {
         last_indexed_snowflake: settings.last_indexed_snowflake,
       },
     });
-  }
-
-  public async edit(
-    settings: EditableChannelSettings,
-    data: ChannelSettings
-  ): Promise<EditableChannelSettings> {
-    if (!settings.indexing_enabled) {
-      data.invite_code = null;
-      data.last_indexed_snowflake = null;
-    }
-    if (!settings.mark_solution_enabled) {
-      data.permissions = new PermissionsBitField(ChannelSettingsFlags, data.permissions).setFlag(
-        "SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS"
-      ).value;
-    }
-
-    const updated_data = await this.answer_overflow_client.prisma.channelSettings.update({
-      where: {
-        channel_id: data.channel_id,
-      },
-      data: {
-        permissions: data.permissions,
-        invite_code: data.invite_code,
-        solution_tag_id: data.solution_tag_id,
-        last_indexed_snowflake: data.last_indexed_snowflake,
-      },
-    });
-    return new EditableChannelSettings(updated_data, this);
   }
 }

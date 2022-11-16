@@ -30,19 +30,18 @@ const TEST_CHANNEL_1: Channel = {
 describe("ChannelSettingsManager", () => {
   it("should create a new channel settings object", async () => {
     await answer_overflow_client.channel_settings.create(TEST_CHANNEL_1, TEST_SERVER_1);
-
     const new_settings = await answer_overflow_client.channel_settings.get(TEST_CHANNEL_1.id);
-
     expect(new_settings).not.toBeNull();
-
-    await new_settings!.enableIndexing("test");
-    expect(new_settings!.indexing_enabled).toBe(true);
-
+  });
+  it("Should enable indexing in a channel", async () => {
+    await answer_overflow_client.channel_settings.create(TEST_CHANNEL_1, TEST_SERVER_1);
+    await answer_overflow_client.channel_settings.get(TEST_CHANNEL_1.id);
+    const new_settings = await answer_overflow_client.channel_settings.get(TEST_CHANNEL_1.id);
+    expect(new_settings).not.toBeNull();
+    await new_settings!.enableIndexing("Potato");
     const updated_settings = await answer_overflow_client.channel_settings.get(TEST_CHANNEL_1.id);
+    expect(updated_settings).not.toBeNull();
     expect(updated_settings!.indexing_enabled).toBe(true);
-
-    await updated_settings?.disableIndexing();
-    expect(updated_settings!.indexing_enabled).toBe(false);
-    expect(new_settings!.indexing_enabled).toBe(false);
+    expect(updated_settings!.invite_code).toBe("Potato");
   });
 });
