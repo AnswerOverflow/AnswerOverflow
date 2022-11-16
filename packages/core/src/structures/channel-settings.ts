@@ -29,7 +29,10 @@ export function getDefaultChannelSettings(channel_id: string): ChannelSettingsWi
   };
 }
 
-export class ChannelSettingsExtended extends ExtendedBase<ChannelSettings> {
+export class ChannelSettingsExtended extends ExtendedBase<
+  ChannelSettings,
+  ChannelSettingsUpdateArgs
+> {
   public getCacheId(): string {
     return this.data.channel_id;
   }

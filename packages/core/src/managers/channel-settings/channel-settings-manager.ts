@@ -17,11 +17,7 @@ export type ChannelSettingsCreateArgs = {
 };
 
 export type ChannelSettingsGetArgs = string;
-export class ChannelSettingsUpdateCommand extends UpdateCommand<
-  ChannelSettings,
-  ChannelSettingsExtended,
-  ChannelSettingsUpdateArgs
-> {
+export class ChannelSettingsUpdateCommand extends UpdateCommand<ChannelSettingsExtended> {
   public async execute(): Promise<ChannelSettingsExtended> {
     const updated_data = await this.answer_overflow_client.prisma.channelSettings.update({
       where: {
@@ -34,7 +30,6 @@ export class ChannelSettingsUpdateCommand extends UpdateCommand<
 }
 
 export class ChannelSettingsGetCommand extends GetCommand<
-  ChannelSettings,
   ChannelSettingsExtended,
   ChannelSettingsGetArgs
 > {
@@ -56,7 +51,6 @@ export class ChannelSettingsGetCommand extends GetCommand<
 }
 
 export class ChannelSettingsCreateCommand extends CreateCommand<
-  ChannelSettings,
   ChannelSettingsExtended,
   ChannelSettingsCreateArgs
 > {
@@ -113,11 +107,9 @@ export class ChannelSettingsCreateCommand extends CreateCommand<
 }
 
 export class ChannelSettingsManager extends Manager<
-  ChannelSettings,
   ChannelSettingsExtended,
-  ChannelSettingsCreateArgs,
-  ChannelSettingsUpdateArgs,
-  ChannelSettingsGetArgs
+  ChannelSettingsGetArgs,
+  ChannelSettingsCreateArgs
 > {
   public get(where: ChannelSettingsGetArgs): Promise<ChannelSettingsExtended | null> {
     return this._get(new ChannelSettingsGetCommand(this.answer_overflow_client, where));
