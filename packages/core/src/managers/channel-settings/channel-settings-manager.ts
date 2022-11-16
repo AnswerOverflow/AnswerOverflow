@@ -1,12 +1,12 @@
 import { Channel, ChannelSettings, Server } from "@prisma/client";
 import {
-  EditableChannelSettings,
+  ChannelSettingsExtended,
   getDefaultChannelSettings,
 } from "../../structures/channel-settings";
 import { Manager } from "../manager";
 
-export class ChannelSettingsManager extends Manager<ChannelSettings> {
-  public async edit(data: ChannelSettings): Promise<EditableChannelSettings> {
+export class ChannelSettingsManager extends Manager<ChannelSettings, ChannelSettingsExtended> {
+  public async edit(data: ChannelSettings): Promise<ChannelSettingsExtended> {
     const updated_data = await this.answer_overflow_client.prisma.channelSettings.update({
       where: {
         channel_id: data.channel_id,
@@ -18,27 +18,25 @@ export class ChannelSettingsManager extends Manager<ChannelSettings> {
         last_indexed_snowflake: data.last_indexed_snowflake,
       },
     });
-    const cached_data = this.cache.get(data.channel_id);
-    if (cached_data) {
-      cached_data.data = updated_data;
-    } else {
-      this.cache.set(data.channel_id, new EditableChannelSettings(updated_data, this));
-    }
-    return new EditableChannelSettings(updated_data, this);
+    const updated_entry = new ChannelSettingsExtended(updated_data, this);
+    return this.updateCache(updated_entry);
   }
-  public readonly cache = new Map<string, EditableChannelSettings>();
-  public async get(channel_id: string): Promise<EditableChannelSettings | null> {
+
+  public async get(channel_id: string): Promise<ChannelSettingsExtended | null> {
     const cached = this.cache.get(channel_id);
-    if (cached) return cached;
+    if (cached) {
+      return cached;
+    }
 
     const results = await this.answer_overflow_client.prisma.channelSettings.findUnique({
       where: { channel_id },
     });
+
     if (results == null) {
       return null;
     }
-    const editable_channel_settings = new EditableChannelSettings(results, this);
-    this.cache.set(channel_id, editable_channel_settings);
+
+    const editable_channel_settings = new ChannelSettingsExtended(results, this);
     return editable_channel_settings;
   }
 

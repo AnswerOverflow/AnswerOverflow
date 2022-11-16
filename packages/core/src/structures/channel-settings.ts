@@ -1,7 +1,7 @@
 import { ChannelSettings, Prisma } from "@prisma/client";
 import { ChannelSettingsManager } from "../managers/channel-settings/channel-settings-manager";
 import { PermissionsBitField } from "../utils/bitfield";
-import { Base } from "./base";
+import { ExtendedBase } from "./base";
 
 export const ChannelSettingsFlags = {
   INDEXING_ENABLED: 1 << 0,
@@ -26,7 +26,13 @@ export function getDefaultChannelSettings(channel_id: string): ChannelSettingsWi
   };
 }
 
-export class EditableChannelSettings extends Base<ChannelSettings> {
+export class ChannelSettingsExtended extends ExtendedBase<ChannelSettings> {
+  public getCacheId(): string {
+    return this.data.channel_id;
+  }
+  public updateCacheEntry(data: ChannelSettings): void {
+    this.data = data;
+  }
   get settings() {
     return new PermissionsBitField(ChannelSettingsFlags, this.data.permissions);
   }
