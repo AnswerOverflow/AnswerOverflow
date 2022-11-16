@@ -29,10 +29,7 @@ export function getDefaultChannelSettings(channel_id: string): ChannelSettingsWi
   };
 }
 
-export class ChannelSettingsExtended extends ExtendedBase<
-  ChannelSettings,
-  ChannelSettingsUpdateArgs
-> {
+export class ChannelSettingsExtended extends ExtendedBase<ChannelSettings> {
   public getCacheId(): string {
     return this.data.channel_id;
   }
@@ -88,7 +85,7 @@ export class ChannelSettingsExtended extends ExtendedBase<
     return this.settings.checkFlag("AUTO_THREAD_ENABLED");
   }
 
-  public override async update(args: ChannelSettingsUpdateArgs) {
+  public async update(args: ChannelSettingsUpdateArgs) {
     return this.manager.update(this, args);
   }
 
