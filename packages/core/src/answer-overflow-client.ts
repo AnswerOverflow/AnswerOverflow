@@ -1,11 +1,9 @@
 import { Client } from "@elastic/elasticsearch";
 import { PrismaClient } from "@prisma/client";
-import { Cache } from "./primitives/manager";
-import { User_Manager } from "./features/user/manager";
-import { User_Extended } from "./features/user/data";
+import { UserManager } from "./features/user/manager";
 
 export class AnswerOverflowClient {
-  public users = new User_Manager(this, new Cache<User_Extended>());
+  public users = new UserManager(this);
   //public servers = new ServerManager(this);
   //public user_server_settings = new UserServerSettingsManager(this);
   //public channel_settings = new ChannelSettingsManager(this, new Cache<ChannelSettings_Extended>());

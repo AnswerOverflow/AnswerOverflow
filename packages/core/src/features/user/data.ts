@@ -1,6 +1,6 @@
 import { User } from "@prisma/client";
 import { BaseManaged } from "../../primitives/base";
-import { User_Manager } from "./manager";
+import { UserManager } from "./manager";
 
 export function getDefaultUser(id: string, name: string): User {
   return {
@@ -16,7 +16,7 @@ export type User_Creatable = Pick<User, "id" | "name"> & Partial<User_Updateable
 
 export class User_Extended extends BaseManaged<User> {
   // eslint-disable-next-line no-unused-vars
-  constructor(data: User, public readonly manager: User_Manager) {
+  constructor(data: User, public readonly manager: UserManager) {
     super(data, manager);
   }
 

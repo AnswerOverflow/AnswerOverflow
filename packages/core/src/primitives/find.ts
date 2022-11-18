@@ -1,17 +1,8 @@
-import { EBase, DatabaseCommand } from "./manager";
-
-export interface FindUnique<Command extends GetUniqueCommand<any, any>> {
-  // eslint-disable-next-line no-unused-vars
-  get(query: Command["query"]): ReturnType<Command["execute"]>;
-}
-
-export interface FindMany<Command extends GetManyCommand<any, any>> {
-  // eslint-disable-next-line no-unused-vars
-  findMany(query: Command["query"]): ReturnType<Command["execute"]>;
-}
+import { BaseManaged } from "./base";
+import { DatabaseCommand } from "./manager";
 
 export abstract class GetCommand<
-  T extends EBase,
+  T extends BaseManaged<any>,
   GetArgs,
   GetType = T | null | T[]
 > extends DatabaseCommand<T, GetArgs, GetType> {
@@ -19,7 +10,7 @@ export abstract class GetCommand<
   protected abstract fetch(): Promise<GetType | null>;
 }
 
-export abstract class GetUniqueCommand<T extends EBase, GetArgs> extends GetCommand<
+export abstract class GetUniqueCommand<T extends BaseManaged<any>, GetArgs> extends GetCommand<
   T,
   GetArgs,
   T | null
@@ -37,7 +28,7 @@ export abstract class GetUniqueCommand<T extends EBase, GetArgs> extends GetComm
   }
 }
 
-export abstract class GetManyCommand<T extends EBase, GetManyArgs> extends GetCommand<
+export abstract class GetManyCommand<T extends BaseManaged<any>, GetManyArgs> extends GetCommand<
   T,
   GetManyArgs,
   T[]
