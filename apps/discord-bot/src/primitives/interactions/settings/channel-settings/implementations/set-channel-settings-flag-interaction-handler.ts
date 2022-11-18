@@ -37,14 +37,14 @@ export class SetChannelSettingsFlagInteractionHandler extends ChannelSettingsInt
     }
     const updated_permissions_bitfield = new PermissionsBitField(
       ChannelSettingsFlags,
-      old_settings?.permissions ?? 0
+      old_settings?.settings ?? 0
     );
     if (this.enable) {
       updated_permissions_bitfield.setFlag(this.flag);
     } else {
       updated_permissions_bitfield.clearFlag(this.flag);
     }
-    new_settings.permissions = updated_permissions_bitfield.value;
+    new_settings.settings = updated_permissions_bitfield.value;
     return await container.answer_overflow.channel_settings.edit(
       converted_channel,
       converted_server,

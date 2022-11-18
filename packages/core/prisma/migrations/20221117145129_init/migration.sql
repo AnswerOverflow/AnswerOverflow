@@ -13,7 +13,7 @@ CREATE TABLE `User` (
 CREATE TABLE `UserChannelSettings` (
     `user_id` VARCHAR(191) NOT NULL,
     `channel_id` VARCHAR(191) NOT NULL,
-    `settings` INTEGER NOT NULL,
+    `settings` INTEGER NOT NULL DEFAULT 0,
 
     PRIMARY KEY (`user_id`, `channel_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -22,7 +22,7 @@ CREATE TABLE `UserChannelSettings` (
 CREATE TABLE `UserServerSettings` (
     `user_id` VARCHAR(191) NOT NULL,
     `server_id` VARCHAR(191) NOT NULL,
-    `permissions` INTEGER NOT NULL,
+    `settings` INTEGER NOT NULL DEFAULT 0,
 
     PRIMARY KEY (`user_id`, `server_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -47,7 +47,7 @@ CREATE TABLE `Server` (
 -- CreateTable
 CREATE TABLE `ServerSettings` (
     `server_id` VARCHAR(191) NOT NULL,
-    `permissions` INTEGER NOT NULL,
+    `settings` INTEGER NOT NULL DEFAULT 0,
 
     PRIMARY KEY (`server_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -65,7 +65,7 @@ CREATE TABLE `Channel` (
 -- CreateTable
 CREATE TABLE `ChannelSettings` (
     `channel_id` VARCHAR(191) NOT NULL,
-    `permissions` INTEGER NOT NULL,
+    `settings` INTEGER NOT NULL DEFAULT 0,
     `last_indexed_snowflake` VARCHAR(191) NULL,
     `invite_code` VARCHAR(15) NULL,
     `solution_tag_id` VARCHAR(191) NULL,

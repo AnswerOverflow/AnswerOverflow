@@ -29,7 +29,7 @@ model User {
 model UserChannelSettings {
   user_id    String
   channel_id String
-  settings   Int
+  settings   Int    @default(0)
 
   user    User    @relation(fields: [user_id], references: [id])
   channel Channel @relation(fields: [channel_id], references: [id])
@@ -38,9 +38,9 @@ model UserChannelSettings {
 }
 
 model UserServerSettings {
-  user_id     String
-  server_id   String
-  permissions Int
+  user_id   String
+  server_id String
+  settings  Int    @default(0)
 
   user   User   @relation(fields: [user_id], references: [id])
   server Server @relation(fields: [server_id], references: [id])
@@ -65,8 +65,8 @@ model Server {
 }
 
 model ServerSettings {
-  server_id   String @id
-  permissions Int
+  server_id String @id
+  settings  Int    @default(0)
 }
 
 // Channels
@@ -85,7 +85,7 @@ model Channel {
 
 model ChannelSettings {
   channel_id             String  @id
-  permissions            Int
+  settings               Int     @default(0)
   last_indexed_snowflake String?
   invite_code            String? @db.VarChar(15)
   solution_tag_id        String?

@@ -1,18 +1,17 @@
-{        
+{
     "extends": "@answeroverflow/tsconfig/base.json",
     "compilerOptions": {
         "outDir": "./dist",
         "rootDir": "./src",
         "target": "ES6",
         "experimentalDecorators": true,
-        "lib": ["dom", "dom.iterable", "esnext"],        
+        "lib": ["dom", "dom.iterable", "esnext"],
         "sourceMap": true,
         "esModuleInterop": true
     },
     "include":[
-        "src"
-    ],"exclude":[        
+        "src",
+    ],"exclude":[
         "dist"
     ]
 }
-  

@@ -12,6 +12,6 @@ export type {
   Server,
   ServerSettings,
 } from "@prisma/client";
-export { ChannelSettingsFlags } from "./structures/channel-settings";
-export type { ChannelSettingsWithBitfield } from "./structures/channel-settings";
+export { ChannelSettingsFlags } from "./features/channel-settings/channel-settings";
+export type { ChannelSettingsWithBitfield } from "./features/channel-settings/channel-settings";
 export { PermissionsBitField } from "./utils/bitfield";

@@ -45,11 +45,11 @@ describe("ChannelSettingsManager", () => {
     await answer_overflow_client.channel_settings.get(TEST_CHANNEL_1.id);
     const new_settings = await answer_overflow_client.channel_settings.get(TEST_CHANNEL_1.id);
     expect(new_settings).not.toBeNull();
-    await new_settings!.enableIndexing("Potato");
+    await new_settings.enableIndexing("Potato");
 
     const updated_settings = await answer_overflow_client.channel_settings.get(TEST_CHANNEL_1.id);
     expect(updated_settings).not.toBeNull();
-    expect(updated_settings!.indexing_enabled).toBe(true);
-    expect(updated_settings!.invite_code).toBe("Potato");
+    expect(updated_settings.indexing_enabled).toBe(true);
+    expect(updated_settings.invite_code).toBe("Potato");
   });
 });

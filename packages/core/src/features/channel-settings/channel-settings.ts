@@ -1,11 +1,7 @@
 import { ChannelSettings } from "@prisma/client";
-import {
-  ChannelSettingsManager,
-  ChannelSettingsUpdateArgs,
-} from "../managers/channel-settings/channel-settings-manager";
-import { PermissionsBitField } from "../utils/bitfield";
-import { ExtendedBase } from "./base";
-
+import { BaseManaged } from "../../primitives/base";
+import { PermissionsBitField } from "../../utils/bitfield";
+import { ChannelSettings_Manager } from "./manager";
 export const ChannelSettingsFlags = {
   INDEXING_ENABLED: 1 << 0,
   MARK_SOLUTION_ENABLED: 1 << 1,
@@ -18,21 +14,21 @@ export type ChannelSettingsWithBitfield = {
   bitfield: PermissionsBitField<typeof ChannelSettingsFlags>;
 } & ChannelSettings;
 
-export function getDefaultChannelSettings(channel_id: string): ChannelSettingsWithBitfield {
+export function getDefaultChannelSettings(channel_id: string): ChannelSettings {
   return {
-    bitfield: new PermissionsBitField(ChannelSettingsFlags, 0),
     channel_id: channel_id,
     invite_code: null,
     last_indexed_snowflake: null,
-    permissions: 0,
+    settings: 0,
     solution_tag_id: null,
   };
 }
 
-export class ChannelSettingsExtended extends ExtendedBase<
-  ChannelSettings,
-  ChannelSettingsUpdateArgs
-> {
+export class ChannelSettings_Extended extends BaseManaged<ChannelSettings> {
+  constructor(public data: ChannelSettings, public readonly manager: ChannelSettings_Manager) {
+    super(data, manager);
+  }
+
   public getCacheId(): string {
     return this.data.channel_id;
   }
@@ -45,17 +41,8 @@ export class ChannelSettingsExtended extends ExtendedBase<
   }
 
   get settings() {
-    return new PermissionsBitField(ChannelSettingsFlags, this.data.permissions);
+    return new PermissionsBitField(ChannelSettingsFlags, this.data.settings);
   }
-  constructor(
-    // eslint-disable-next-line no-unused-vars
-    data: ChannelSettings,
-    // eslint-disable-next-line no-unused-vars
-    public readonly manager: ChannelSettingsManager
-  ) {
-    super(data);
-  }
-
   get invite_code() {
     return this.data.invite_code;
   }
@@ -88,15 +75,11 @@ export class ChannelSettingsExtended extends ExtendedBase<
     return this.settings.checkFlag("AUTO_THREAD_ENABLED");
   }
 
-  public async update(args: ChannelSettingsUpdateArgs) {
-    return this.manager.update(this, args);
-  }
-
   private changeSetting(flag: keyof typeof ChannelSettingsFlags, enabled: boolean) {
     if (enabled) {
-      this.data.permissions = this.settings.setFlag(flag).value;
+      this.data.settings = this.settings.setFlag(flag).value;
     } else {
-      this.data.permissions = this.settings.clearFlag(flag).value;
+      this.data.settings = this.settings.clearFlag(flag).value;
     }
   }
 
@@ -109,17 +92,17 @@ export class ChannelSettingsExtended extends ExtendedBase<
 
   public async setConsentPromptInPostGuidelines(enabled: boolean) {
     this.changeSetting("CONSENT_PROMPT_IN_POST_GUIDELINES", enabled);
-    return await this.update({ permissions: this.settings.value });
+    return await this.update({ settings: this.settings.value });
   }
 
   public async enableIndexing(invite_code: string) {
     this.changeSetting("INDEXING_ENABLED", true);
-    return this.update({ permissions: this.settings.value, invite_code });
+    return this.update({ settings: this.settings.value, invite_code });
   }
 
   public async disableIndexing() {
     this.changeSetting("INDEXING_ENABLED", false);
-    return this.update({ permissions: this.settings.value });
+    return this.update({ settings: this.settings.value });
   }
 
   /*
@@ -127,17 +110,17 @@ export class ChannelSettingsExtended extends ExtendedBase<
   */
   public async setMarkSolutionEnabled(enabled: boolean) {
     this.changeSetting("MARK_SOLUTION_ENABLED", enabled);
-    return await this.update({ permissions: this.settings.value });
+    return await this.update({ settings: this.settings.value });
   }
 
   public async setSendMarkSolutionInstructionsInNewThreads(enabled: boolean) {
     this.changeSetting("SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS", enabled);
-    return await this.update({ permissions: this.settings.value });
+    return await this.update({ settings: this.settings.value });
   }
 
   public async setAutoThreadEnabled(enabled: boolean) {
     this.changeSetting("AUTO_THREAD_ENABLED", enabled);
-    return await this.update({ permissions: this.settings.value });
+    return await this.update({ settings: this.settings.value });
   }
 
   public async setSolvedTagId(tag_id: string | null) {
