@@ -12,6 +12,14 @@ beforeEach(async () => {
 });
 
 describe("UserManager", () => {
+  it("should find first user", async () => {
+    const user = await answer_overflow_client.users.findFirst({
+      where: {
+        id: "1",
+      },
+    });
+    expect(user).toBeNull();
+  });
   it("should create a user", async () => {
     const user = await answer_overflow_client.users.create({
       data: {
@@ -19,6 +27,7 @@ describe("UserManager", () => {
         name: "test",
       },
     });
+
     expect(user).toBeDefined();
     expect(user.id).toBe("1");
     expect(user.name).toBe("test");
@@ -118,5 +127,56 @@ describe("UserManager", () => {
     });
     expect(users).toBeDefined();
     expect(users.count).toBe(2);
+  });
+  it("should delete a user", async () => {
+    await answer_overflow_client.users.create({
+      data: {
+        id: "1",
+        name: "test",
+      },
+    });
+    const user = await answer_overflow_client.users.delete({
+      where: {
+        id: "1",
+      },
+    });
+    expect(user).toBeDefined();
+    expect(user.id).toBe("1");
+    expect(user.name).toBe("test");
+  });
+  it("should delete multiple users", async () => {
+    await answer_overflow_client.users.createMany({
+      data: [
+        {
+          id: "1",
+          name: "test",
+        },
+        {
+          id: "2",
+          name: "test",
+        },
+      ],
+    });
+    const users = await answer_overflow_client.users.deleteMany({
+      where: {
+        id: {
+          in: ["1", "2"],
+        },
+      },
+    });
+    expect(users).toBeDefined();
+    expect(users.count).toBe(2);
+  });
+  it("should find a user by id", async () => {
+    await answer_overflow_client.users.create({
+      data: {
+        id: "1",
+        name: "test",
+      },
+    });
+    const user = await answer_overflow_client.users.findById("1");
+    expect(user).toBeDefined();
+    expect(user!.id).toBe("1");
+    expect(user!.name).toBe("test");
   });
 });

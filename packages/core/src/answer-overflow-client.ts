@@ -1,11 +1,13 @@
 import { Client } from "@elastic/elasticsearch";
 import { PrismaClient } from "@prisma/client";
+import { ServerManager } from "./features/server/manager";
 import { UserManager } from "./features/user/manager";
 
 export class AnswerOverflowClient {
   public prisma: PrismaClient;
   public elastic: Client;
   public users: UserManager;
+  public servers: ServerManager;
   constructor() {
     this.prisma = new PrismaClient({
       datasources: {
@@ -15,6 +17,7 @@ export class AnswerOverflowClient {
       },
     });
     this.users = new UserManager(this.prisma.user);
+    this.servers = new ServerManager(this.prisma.server);
     this.elastic =
       process.env.NODE_ENV == "development"
         ? new Client({
