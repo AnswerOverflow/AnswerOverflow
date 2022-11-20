@@ -15,115 +15,108 @@ describe("UserManager", () => {
   it("should create a user", async () => {
     const user = await answer_overflow_client.users.create({
       data: {
-        id: "123",
+        id: "1",
         name: "test",
       },
     });
-    expect(user.id).toBe("123");
+    expect(user).toBeDefined();
+    expect(user.id).toBe("1");
+    expect(user.name).toBe("test");
   });
   it("should create multiple users", async () => {
     const users = await answer_overflow_client.users.createMany({
       data: [
         {
-          id: "123",
+          id: "1",
           name: "test",
         },
         {
-          id: "456",
-          name: "test2",
+          id: "2",
+          name: "test",
         },
       ],
     });
-    expect(users).toBe(2);
+    expect(users).toBeDefined();
+    expect(users.count).toBe(2);
   });
   it("should find a user", async () => {
     await answer_overflow_client.users.create({
       data: {
-        id: "123",
+        id: "1",
         name: "test",
       },
     });
     const user = await answer_overflow_client.users.findUnique({
       where: {
-        id: "123",
+        id: "1",
       },
     });
-    expect(user?.id).toBe("123");
+    expect(user).toBeDefined();
+    expect(user!.id).toBe("1");
+    expect(user!.name).toBe("test");
   });
   it("should find multiple users", async () => {
-    const number_created = await answer_overflow_client.users.createMany({
+    await answer_overflow_client.users.createMany({
       data: [
         {
-          id: "123",
+          id: "1",
           name: "test",
         },
         {
-          id: "456",
-          name: "test2",
+          id: "2",
+          name: "test",
         },
       ],
     });
-    expect(number_created).toBe(2);
     const users = await answer_overflow_client.users.findMany({
-      where: {
-        id: {
-          in: ["123", "456"],
-        },
-      },
+      take: 2,
     });
+    expect(users).toBeDefined();
     expect(users.length).toBe(2);
-    expect(users[0]!.id).toBe("123");
-    expect(users[1]!.id).toBe("456");
   });
   it("should update a user", async () => {
     await answer_overflow_client.users.create({
       data: {
-        id: "123",
+        id: "1",
         name: "test",
       },
     });
     const user = await answer_overflow_client.users.update({
-      where: {
-        id: "123",
-      },
       data: {
         name: "test2",
       },
+      where: {
+        id: "1",
+      },
     });
+    expect(user).toBeDefined();
+    expect(user.id).toBe("1");
     expect(user.name).toBe("test2");
   });
   it("should update multiple users", async () => {
     await answer_overflow_client.users.createMany({
       data: [
         {
-          id: "123",
+          id: "1",
           name: "test",
         },
         {
-          id: "456",
-          name: "test2",
+          id: "2",
+          name: "test",
         },
       ],
     });
-    const number_updated = await answer_overflow_client.users.updateMany({
-      where: {
-        id: {
-          in: ["123", "456"],
-        },
-      },
+    const users = await answer_overflow_client.users.updateMany({
       data: {
-        name: "test3",
+        name: "test2",
       },
-    });
-    expect(number_updated).toBe(2);
-    const users = await answer_overflow_client.users.findMany({
       where: {
         id: {
-          in: ["123", "456"],
+          in: ["1", "2"],
         },
       },
     });
-    expect(users[0]!.name).toBe("test3");
-    expect(users[1]!.name).toBe("test3");
+    expect(users).toBeDefined();
+    expect(users.count).toBe(2);
   });
 });
