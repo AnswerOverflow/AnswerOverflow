@@ -9,7 +9,7 @@
         //
         "name": "discord-bot",
         "path": "apps/discord-bot",
-      },  
+      },
       {
         //
         "name": "web",

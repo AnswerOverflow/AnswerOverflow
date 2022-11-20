@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 import { Prisma } from "@prisma/client";
+import { AnswerOverflowClient } from "../answer-overflow-client";
 
 export interface DbMethods {
   findFirst(data: unknown): Promise<unknown>;
@@ -16,6 +17,8 @@ export interface DbMethods {
 
 export type Delegates =
   | Prisma.UserDelegate<false>
+  | Prisma.UserServerSettingsDelegate<false>
+  | Prisma.UserChannelSettingsDelegate<false>
   | Prisma.ServerDelegate<false>
   | Prisma.ServerSettingsDelegate<false>
   | Prisma.ChannelDelegate<false>
@@ -98,41 +101,41 @@ export interface PrismaOperationTypeMap<
 }
 
 export abstract class TableManager<Table extends DbMethods, T extends DbTypeMap> {
-  constructor(protected db: Table) {}
+  constructor(protected db: Table, protected client: AnswerOverflowClient) {}
 
-  public findFirst(data: T["findFirst"]): Promise<T["findFirstReturn"]> {
-    return this.db.findFirst(data);
+  public async findFirst(data: T["findFirst"]): Promise<T["findFirstReturn"]> {
+    return await this.db.findFirst(data);
   }
 
-  public findUnique(data: T["findUnique"]): Promise<T["findUniqueReturn"]> {
-    return this.db.findUnique(data);
+  public async findUnique(data: T["findUnique"]): Promise<T["findUniqueReturn"]> {
+    return await this.db.findUnique(data);
   }
 
-  public findMany(data: T["findMany"]): Promise<T["findManyReturn"]> {
-    return this.db.findMany(data);
+  public async findMany(data: T["findMany"]): Promise<T["findManyReturn"]> {
+    return await this.db.findMany(data);
   }
 
-  public create(data: T["create"]): Promise<T["createReturn"]> {
-    return this.db.create(data);
+  public async create(data: T["create"]): Promise<T["createReturn"]> {
+    return await this.db.create(data);
   }
 
-  public createMany(data: T["createMany"]): Promise<T["createManyReturn"]> {
-    return this.db.createMany(data);
+  public async createMany(data: T["createMany"]): Promise<T["createManyReturn"]> {
+    return await this.db.createMany(data);
   }
 
-  public update(data: T["update"]): Promise<T["updateReturn"]> {
-    return this.db.update(data);
+  public async update(data: T["update"]): Promise<T["updateReturn"]> {
+    return await this.db.update(data);
   }
 
-  public updateMany(data: T["updateMany"]): Promise<T["updateManyReturn"]> {
-    return this.db.updateMany(data);
+  public async updateMany(data: T["updateMany"]): Promise<T["updateManyReturn"]> {
+    return await this.db.updateMany(data);
   }
 
-  public delete(data: T["delete"]): Promise<T["deleteReturn"]> {
-    return this.db.delete(data);
+  public async delete(data: T["delete"]): Promise<T["deleteReturn"]> {
+    return await this.db.delete(data);
   }
 
-  public deleteMany(data: T["deleteMany"]): Promise<T["deleteManyReturn"]> {
-    return this.db.deleteMany(data);
+  public async deleteMany(data: T["deleteMany"]): Promise<T["deleteManyReturn"]> {
+    return await this.db.deleteMany(data);
   }
 }

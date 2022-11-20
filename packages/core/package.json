@@ -1,31 +1,31 @@
 {
-    "name": "@answeroverflow/core",
-    "main": "./dist/index.js",
-    "source": "./src/index.ts",
-    "types": "./dist/index.d.ts",
-    "version": "0.0.0",
-    "files": [
-        "dist/**"
-    ],
-    "scripts": {
-        "build": "tsc",
-        "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
-        "dev": "tsc -w",
-        "lint": "TIMING=1 eslint \"src/**/*.ts*\"",
-        "test": "vitest run",
-        "coverage": "vitest run --coverage"
-    },
-    "devDependencies": {
-        "@answeroverflow/eslint-config-custom": "*",
-        "@answeroverflow/tsconfig": "*",
-        "@vitest/coverage-c8": "^0.25.1",
-        "prisma": "^4.5.0",
-        "typescript": "^4.8.3",
-        "vitest": "^0.25.1"
-    },
-    "dependencies": {
-        "@elastic/elasticsearch": "^8.5.0",
-        "@prisma/client": "^4.5.0",
-        "@sapphire/bitfield": "^1.0.0"
-    }
+  "name": "@answeroverflow/core",
+  "main": "./dist/index.js",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "version": "0.0.0",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "dev": "tsc -w",
+    "lint": "TIMING=1 eslint \"src/**/*.ts*\"",
+    "test": "vitest run --no-threads",
+    "coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@answeroverflow/eslint-config-custom": "*",
+    "@answeroverflow/tsconfig": "*",
+    "@vitest/coverage-c8": "^0.25.1",
+    "prisma": "^4.5.0",
+    "typescript": "^4.8.3",
+    "vitest": "^0.25.1"
+  },
+  "dependencies": {
+    "@elastic/elasticsearch": "^8.5.0",
+    "@prisma/client": "^4.5.0",
+    "@sapphire/bitfield": "^1.0.0"
+  }
 }
