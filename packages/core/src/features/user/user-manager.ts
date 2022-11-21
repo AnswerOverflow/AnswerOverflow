@@ -1,6 +1,6 @@
 import { Prisma, User } from "@prisma/client";
 import { PrismaOperationTypeMap, TableManager } from "../../primitives/manager";
-import { findCreateReusable } from "../../utils/operations";
+import { findOrCreate } from "../../utils/operations";
 
 export type User_Mutable = Partial<Pick<Prisma.UserCreateInput, "name" | "avatar" | "email">>;
 export type User_Create = Prisma.UserCreateInput & User_Mutable;
@@ -15,8 +15,8 @@ export class UserManager extends TableManager<UserDelegate, SafeUserPrismaOperat
     return this.findUnique({ where: { id } });
   }
   public async findCreate(input: User_Create): Promise<User> {
-    return findCreateReusable(
-      () => this.findUnique({ where: { id: input.id } }),
+    return findOrCreate(
+      () => this.findById(input.id),
       () => this.create({ data: input })
     );
   }

@@ -1,7 +1,7 @@
 import { Prisma, UserServerSettings } from "@prisma/client";
 import { PrismaOperationTypeMap, TableManager } from "../../primitives/manager";
-import { Server_CreateInput } from "../server/manager";
-import { User_Create } from "../user/manager";
+import { Server_CreateInput } from "../server/server-manager";
+import { User_Create } from "../user/user-manager";
 
 export type UserServerSettings_Mutable = Partial<
   Pick<Prisma.UserServerSettingsCreateInput, "settings">
@@ -10,8 +10,6 @@ export type UserServerSettings_Create = UserServerSettings_Mutable & {
   user_id: string;
   server_id: string;
 };
-
-export type UserServerSettings_CreateInput = Prisma.UserServerSettingsCreateInput;
 
 type UserServerSettingsDelegate = Prisma.UserServerSettingsDelegate<false>;
 

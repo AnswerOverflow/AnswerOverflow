@@ -1,14 +1,9 @@
 import { AnswerOverflowClient } from "../../answer-overflow-client";
+import { clearDatabase } from "../../utils/test-constants";
 let answer_overflow_client: AnswerOverflowClient;
 beforeEach(async () => {
   answer_overflow_client = new AnswerOverflowClient();
-  await answer_overflow_client.prisma.userServerSettings.deleteMany({});
-  await answer_overflow_client.prisma.userChannelSettings.deleteMany({});
-  await answer_overflow_client.prisma.serverSettings.deleteMany({});
-  await answer_overflow_client.prisma.channelSettings.deleteMany({});
-  await answer_overflow_client.prisma.channel.deleteMany({});
-  await answer_overflow_client.prisma.server.deleteMany({});
-  await answer_overflow_client.prisma.user.deleteMany({});
+  await clearDatabase(answer_overflow_client);
 });
 
 describe("UserManager", () => {
