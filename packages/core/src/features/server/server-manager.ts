@@ -13,6 +13,13 @@ interface SafeServerOperations
   extends PrismaOperationTypeMap<Server, ServerDelegate, Server_CreateInput, Server_Mutable> {}
 
 export class ServerManager extends TableManager<ServerDelegate, SafeServerOperations> {
+  public async upsert(data: Server_CreateInput): Promise<Server> {
+    const server = await this.findUnique({ where: { id: data.id } });
+    if (server) {
+      return this.update({ where: { id: data.id }, data });
+    }
+    return this.create({ data });
+  }
   public async findCreate(input: Server_CreateInput): Promise<Server> {
     return findOrCreate(
       () => this.findUnique({ where: { id: input.id } }),

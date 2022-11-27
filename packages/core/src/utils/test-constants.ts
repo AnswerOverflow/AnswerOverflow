@@ -1,9 +1,14 @@
-import { User } from "@prisma/client";
 import { AnswerOverflowClient } from "../answer-overflow-client";
+import { Server_CreateInput } from "../features/server/server-manager";
+import { User_Create } from "../features/user/user-manager";
 
-export const TEST_USER_1: User = {
+export const TEST_SERVER_1: Server_CreateInput = {
+  id: "1",
+  name: "Test Server 1",
+};
+
+export const TEST_USER_1: User_Create = {
   avatar: "test",
-  created_at: 0,
   email: "test",
   id: "1",
   name: "test",

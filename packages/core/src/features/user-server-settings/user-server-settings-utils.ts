@@ -5,12 +5,26 @@ const USER_SERVER_SETTINGS_BITFIELD = {
   MESSAGE_INDEXING_DISABLED: 1 << 1,
 };
 
+export type UserServerSettingsFields = ReturnType<typeof parseUserServerSettings>;
+
 export function parseUserServerSettings(value: number) {
   const bitfield = getUserServerSettingsBitfield();
   return {
     allowed_to_show_messages: bitfield.has(value, "ALLOWED_TO_SHOW_MESSAGES"),
     message_indexing_disabled: bitfield.has(value, "MESSAGE_INDEXING_DISABLED"),
   };
+}
+
+export function serializeUserServerSettings(settings: UserServerSettingsFields) {
+  const bitfield = getUserServerSettingsBitfield();
+  const flags: number[] = [];
+  if (settings.allowed_to_show_messages) {
+    flags.push(USER_SERVER_SETTINGS_BITFIELD.ALLOWED_TO_SHOW_MESSAGES);
+  }
+  if (settings.message_indexing_disabled) {
+    flags.push(USER_SERVER_SETTINGS_BITFIELD.MESSAGE_INDEXING_DISABLED);
+  }
+  return bitfield.resolve(flags);
 }
 
 function getUserServerSettingsBitfield() {

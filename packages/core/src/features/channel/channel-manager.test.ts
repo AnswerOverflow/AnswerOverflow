@@ -29,79 +29,15 @@ const TEST_CHANNEL_2: Channel_CreateInput = {
 };
 
 describe("Channel Manager", () => {
-  it("should find first channel", async () => {
-    const channel = await answer_overflow_client.channels.findFirst({
-      where: {
-        id: "1",
-      },
+  it("should create a new channel", async () => {
+    const server = await answer_overflow_client.servers.findCreate(TEST_SERVER_1);
+    const channel = await answer_overflow_client.channels.findCreate({
+      create: {
+        data: TEST_CHANNEL_1,
+        server: TEST_SERVER_1,
+      }
     });
-    expect(channel).toBeNull();
-  });
-  it("should create a channel", async () => {
-    await answer_overflow_client.servers.create({
-      data: TEST_SERVER_1,
-    });
-    const channel = await answer_overflow_client.channels.create({
-      data: TEST_CHANNEL_1,
-    });
-
-    expect(channel).toBeDefined();
-    expect(channel.id).toBe("1");
-    expect(channel.name).toBe("test");
-  });
-  it("should create multiple channels", async () => {
-    await answer_overflow_client.servers.create({
-      data: TEST_SERVER_1,
-    });
-    const channels = await answer_overflow_client.channels.createMany({
-      data: [TEST_CHANNEL_1, TEST_CHANNEL_2],
-    });
-    expect(channels).toBeDefined();
-    expect(channels.count).toBe(2);
-  });
-  it("should find a channel", async () => {
-    await answer_overflow_client.servers.create({
-      data: TEST_SERVER_1,
-    });
-    await answer_overflow_client.channels.create({
-      data: TEST_CHANNEL_1,
-    });
-    const channel = await answer_overflow_client.channels.findUnique({
-      where: {
-        id: "1",
-      },
-    });
-    expect(channel).toBeDefined();
-    expect(channel?.id).toBe("1");
-  });
-  it("should find a channel with server", async () => {
-    await answer_overflow_client.servers.create({
-      data: TEST_SERVER_1,
-    });
-    await answer_overflow_client.channels.create({
-      data: TEST_CHANNEL_1,
-    });
-    const channel = await answer_overflow_client.channels.findUnique({
-      where: {
-        id: "1",
-      },
-    });
-    expect(channel).toBeDefined();
-    expect(channel?.id).toBe("1");
-  });
-  it("should find a channel by id", async () => {
-    await answer_overflow_client.servers.create({
-      data: TEST_SERVER_1,
-    });
-    await answer_overflow_client.channels.create({
-      data: TEST_CHANNEL_1,
-    });
-    const channel = await answer_overflow_client.channels.findFirst({
-      where: {
-        id: "1",
-      },
-    });
-    expect(channel).toBeDefined();
-    expect(channel?.id).toBe("1");
-  });
+    expect(channel).toBeTruthy();
+    expect(channel.server_id).toBe(server.id);
+  }
 });

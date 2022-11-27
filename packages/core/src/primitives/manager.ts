@@ -4,9 +4,9 @@ import { Prisma } from "@prisma/client";
 import { AnswerOverflowClient } from "../answer-overflow-client";
 
 export interface DbMethods {
-  findFirst(data: unknown): Promise<unknown>;
-  findUnique(data: unknown): Promise<unknown>;
-  findMany(data: unknown): Promise<unknown>;
+  findFirst(data: unknown): Promise<unknown | null>;
+  findUnique(data: unknown): Promise<unknown | null>;
+  findMany(data: unknown): Promise<unknown | null>;
   create(data: unknown): Promise<unknown>;
   createMany(data: unknown): Promise<unknown>;
   update(data: unknown): Promise<unknown>;
@@ -25,32 +25,23 @@ export type Delegates =
   | Prisma.ChannelSettingsDelegate<false>;
 
 export interface DbTypeMap {
+  data: unknown;
+  data_extended: this["data"];
+
   findFirst: unknown;
-  findFirstReturn: unknown;
-
   findUnique: unknown;
-  findUniqueReturn: unknown;
-
   findMany: unknown;
-  findManyReturn: unknown;
 
   create: unknown;
-  createReturn: unknown;
-
   createMany: unknown;
-  createManyReturn: unknown;
 
   update: unknown;
-  updateReturn: unknown;
-
   updateMany: unknown;
-  updateManyReturn: unknown;
+
+  upsert: unknown;
 
   delete: unknown;
-  deleteReturn: unknown;
-
   deleteMany: unknown;
-  deleteManyReturn: unknown;
 }
 
 type OmitSelectInclude<T> = {
@@ -74,68 +65,71 @@ export interface PrismaOperationTypeMap<
   CreateData extends FirstParam<T["create"]>["data"],
   UpdateData extends FirstParam<T["update"]>["data"]
 > {
+  data: Data;
+  data_extended: Data;
+
   // type is the first parameter of find first in T, omitting where
   findFirst: OmitSelectInclude<FirstParam<T["findFirst"]>>;
-  findFirstReturn: Data | null;
 
   findUnique: OmitSelectInclude<FirstParam<T["findUnique"]>>;
-  findUniqueReturn: Data | null;
 
   findMany: OmitSelectInclude<FirstParam<T["findMany"]>>;
-  findManyReturn: Data[];
 
   create: OmitSelectInclude<ModifyUniqueDataField<FirstParam<T["create"]>, CreateData>>;
-  createReturn: Data;
   createMany: OmitSelectInclude<ModifyManyDataField<FirstParam<T["createMany"]>, CreateData>>;
-  createManyReturn: Prisma.BatchPayload;
 
   update: OmitSelectInclude<ModifyUniqueDataField<FirstParam<T["update"]>, UpdateData>>;
-  updateReturn: Data;
   updateMany: OmitSelectInclude<ModifyManyDataField<FirstParam<T["updateMany"]>, UpdateData>>;
-  updateManyReturn: Prisma.BatchPayload;
+
+  upsert: unknown;
+  upsertReturn: unknown;
 
   delete: OmitSelectInclude<FirstParam<T["delete"]>>;
-  deleteReturn: Data;
   deleteMany: OmitSelectInclude<FirstParam<T["deleteMany"]>>;
-  deleteManyReturn: Prisma.BatchPayload;
 }
 
 export abstract class TableManager<Table extends DbMethods, T extends DbTypeMap> {
   constructor(protected db: Table, protected client: AnswerOverflowClient) {}
 
-  public async findFirst(data: T["findFirst"]): Promise<T["findFirstReturn"]> {
-    return await this.db.findFirst(data);
+  protected convertResponse(data: T["data"]): T["data_extended"] {
+    return data;
   }
 
-  public async findUnique(data: T["findUnique"]): Promise<T["findUniqueReturn"]> {
-    return await this.db.findUnique(data);
+  public async findFirst(data: T["findFirst"]): Promise<T["data_extended"] | null> {
+    return this.convertResponse(await this.db.findFirst(data));
   }
 
-  public async findMany(data: T["findMany"]): Promise<T["findManyReturn"]> {
-    return await this.db.findMany(data);
+  public async findUnique(data: T["findUnique"]): Promise<T["data_extended"] | null> {
+    return this.convertResponse(await this.db.findUnique(data));
   }
 
-  public async create(data: T["create"]): Promise<T["createReturn"]> {
-    return await this.db.create(data);
+  public async findMany(data: T["findMany"]): Promise<T["data_extended"] | null> {
+    return this.convertResponse(await this.db.findMany(data));
   }
 
-  public async createMany(data: T["createMany"]): Promise<T["createManyReturn"]> {
-    return await this.db.createMany(data);
+  protected async create(data: T["create"]): Promise<T["data_extended"]> {
+    return this.convertResponse(await this.db.create(data));
   }
 
-  public async update(data: T["update"]): Promise<T["updateReturn"]> {
-    return await this.db.update(data);
+  protected async createMany(data: T["createMany"]): Promise<T["data_extended"]> {
+    return this.convertResponse(await this.db.createMany(data));
   }
 
-  public async updateMany(data: T["updateMany"]): Promise<T["updateManyReturn"]> {
-    return await this.db.updateMany(data);
+  protected async update(data: T["update"]): Promise<T["data_extended"]> {
+    return this.convertResponse(await this.db.update(data));
   }
 
-  public async delete(data: T["delete"]): Promise<T["deleteReturn"]> {
-    return await this.db.delete(data);
+  protected async updateMany(data: T["updateMany"]): Promise<T["data_extended"]> {
+    return this.convertResponse(await this.db.updateMany(data));
   }
 
-  public async deleteMany(data: T["deleteMany"]): Promise<T["deleteManyReturn"]> {
-    return await this.db.deleteMany(data);
+  public async delete(data: T["delete"]): Promise<T["data_extended"]> {
+    return this.convertResponse(await this.db.delete(data));
   }
+
+  public async deleteMany(data: T["deleteMany"]): Promise<T["data_extended"]> {
+    return this.convertResponse(await this.db.deleteMany(data));
+  }
+
+  public abstract upsert(data: T["upsert"]): Promise<unknown>;
 }
