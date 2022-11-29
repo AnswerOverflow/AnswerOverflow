@@ -7,7 +7,8 @@ export class UserEvent extends Listener<typeof Events.MentionPrefixOnly> {
     const prefix = this.container.client.options.defaultPrefix;
     return message.channel.send(
       prefix
-        ? `My prefix in this guild is: \`${prefix}\``
+        ? // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          `My prefix in this guild is: \`${prefix}\``
         : "Cannot find any Prefix for Message Commands."
     );
   }

@@ -3,7 +3,7 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
     bundle: true,
     dts: false,
-    entry: ['src/**/*.ts', '!src/**/*.d.ts'],
+    entry: ['src/**/*.ts', '!src/**/*.d.ts', 'src/**/*.tsx'],
     format: ['cjs'],
     minify: false,
     tsconfig: 'tsconfig.json',
@@ -13,5 +13,5 @@ export default defineConfig({
     sourcemap: true,
     shims: true,
     keepNames: true,
-    noExternal: ['@answeroverflow/core'],
+    noExternal: [],
 });

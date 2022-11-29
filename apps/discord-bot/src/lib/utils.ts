@@ -8,7 +8,7 @@ import { container } from "@sapphire/framework";
 import { send } from "@sapphire/plugin-editable-commands";
 import { cyan } from "colorette";
 import type { APIUser } from "discord-api-types/v9";
-import { Guild, Message, MessageEmbed, User } from "discord.js";
+import { Guild, Message, EmbedBuilder, User } from "discord.js";
 import { RandomLoadingMessage } from "./constants";
 
 /**
@@ -29,7 +29,7 @@ export function pickRandom<T>(array: readonly T[]): T {
 export function sendLoadingMessage(message: Message): Promise<typeof message> {
   return send(message, {
     embeds: [
-      new MessageEmbed().setDescription(pickRandom(RandomLoadingMessage)).setColor("#FF0000"),
+      new EmbedBuilder().setDescription(pickRandom(RandomLoadingMessage)).setColor("#FF0000"),
     ],
   });
 }

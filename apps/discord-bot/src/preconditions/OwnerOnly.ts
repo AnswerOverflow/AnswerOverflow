@@ -1,10 +1,5 @@
 import { AllFlowsPrecondition } from "@sapphire/framework";
-import type {
-  CommandInteraction,
-  ContextMenuInteraction,
-  Message,
-  Snowflake,
-} from "discord.js";
+import type { CommandInteraction, ContextMenuInteraction, Message, Snowflake } from "discord.js";
 import { envParseArray } from "../lib/env-parser";
 
 const OWNERS = envParseArray("OWNERS");
@@ -25,13 +20,12 @@ export class UserPrecondition extends AllFlowsPrecondition {
   }
 
   private doOwnerCheck(userId: Snowflake) {
-    return OWNERS.includes(userId)
-      ? this.ok()
-      : this.error({ message: this.#message });
+    return OWNERS.includes(userId) ? this.ok() : this.error({ message: this.#message });
   }
 }
 
 declare module "@sapphire/framework" {
+  // eslint-disable-next-line no-unused-vars
   interface Preconditions {
     OwnerOnly: never;
   }

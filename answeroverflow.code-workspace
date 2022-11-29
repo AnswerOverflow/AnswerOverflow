@@ -50,7 +50,7 @@
       "apps/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
 	    "packages/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
       ".turbo": true,
-      "dist": true,
+      "dist": false,
       ".next": true
     },
     "vitest.enable": true,
