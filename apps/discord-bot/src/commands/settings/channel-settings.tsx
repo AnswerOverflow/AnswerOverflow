@@ -17,6 +17,13 @@ export class ChannelSettingsCommand extends Command {
     // eslint-disable-next-line no-unused-vars
     context: ChatInputCommand.RunContext
   ) {
-    this.container.reacord.reply(interaction, <ChannelSettingsMenu />);
+    if (!interaction.channel) {
+      return;
+    }
+
+    this.container.reacord.ephemeralReply(
+      interaction,
+      <ChannelSettingsMenu channel={interaction.channel} />
+    );
   }
 }
