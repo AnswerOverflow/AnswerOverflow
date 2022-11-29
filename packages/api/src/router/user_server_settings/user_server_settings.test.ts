@@ -1,6 +1,6 @@
 import { createContextInner } from "../../context";
 import { userServerSettingsRouter } from "./user_server_settings";
-import {prisma} from '@answeroverflow/db'
+import { prisma } from "@answeroverflow/db";
 
 // eslint-disable-next-line no-unused-vars
 let user_server_settings_caller: ReturnType<typeof userServerSettingsRouter["createCaller"]>;
@@ -20,10 +20,10 @@ beforeEach(async () => {
 
 describe("userRouter", () => {
   it("should create user server settings", async () => {
-    const missing_user_settings = await user_server_settings_caller.byId({
+    const missing_user_settings = await user_server_settings_caller.findById({
       user_id: "1",
       server_id: "1",
-    })
+    });
     expect(missing_user_settings).toBeNull();
     const created_user_settings = await user_server_settings_caller.upsert({
       user: {
@@ -36,21 +36,21 @@ describe("userRouter", () => {
       },
       user_server_settings: {
         flags: {
-          display_messages: true,
-          disabled_indexing: false,
+          allowed_to_show_messages: true,
+          message_indexing_disabled: false,
         },
       },
     });
     expect(created_user_settings).toBeDefined();
-    expect(created_user_settings!.user_id).toBe("1");
-    expect(created_user_settings!.server_id).toBe("1");
-    expect(created_user_settings!.bitfield).toBe(0);
+    expect(created_user_settings.user_id).toBe("1");
+    expect(created_user_settings.server_id).toBe("1");
+    expect(created_user_settings.bitfield).toBe(0);
   });
   it("should update user server settings", async () => {
-    const missing_user_settings = await user_server_settings_caller.byId({
+    const missing_user_settings = await user_server_settings_caller.findById({
       user_id: "1",
       server_id: "1",
-    })
+    });
     expect(missing_user_settings).toBeNull();
     const created_user_settings = await user_server_settings_caller.upsert({
       user: {
@@ -63,15 +63,15 @@ describe("userRouter", () => {
       },
       user_server_settings: {
         flags: {
-          display_messages: true,
-          disabled_indexing: false,
+          allowed_to_show_messages: true,
+          message_indexing_disabled: false,
         },
       },
     });
     expect(created_user_settings).toBeDefined();
-    expect(created_user_settings!.user_id).toBe("1");
-    expect(created_user_settings!.server_id).toBe("1");
-    expect(created_user_settings!.bitfield).toBe(0);
+    expect(created_user_settings.user_id).toBe("1");
+    expect(created_user_settings.server_id).toBe("1");
+    expect(created_user_settings.bitfield).toBe(0);
     const updated_user_settings = await user_server_settings_caller.upsert({
       user: {
         name: "test",
@@ -83,15 +83,14 @@ describe("userRouter", () => {
       },
       user_server_settings: {
         flags: {
-          display_messages: false,
-          disabled_indexing: true,
+          message_indexing_disabled: false,
+          allowed_to_show_messages: true,
         },
       },
     });
     expect(updated_user_settings).toBeDefined();
-    expect(updated_user_settings!.user_id).toBe("1");
-    expect(updated_user_settings!.server_id).toBe("1");
-    expect(updated_user_settings!.bitfield).toBe(1);
-
+    expect(updated_user_settings.user_id).toBe("1");
+    expect(updated_user_settings.server_id).toBe("1");
+    expect(updated_user_settings.bitfield).toBe(1);
   });
 });

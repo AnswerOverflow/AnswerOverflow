@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { publicProcedure, router } from "../../trpc";
+import { findOrCreate } from "../../utils/operations";
 export const server_create_input = z.object({ name: z.string(), id: z.string() });
 
 export const serverRouter = router({
@@ -13,3 +14,13 @@ export const serverRouter = router({
     return ctx.prisma.server.create({ data: input });
   }),
 });
+
+export async function findOrCreateServer(
+  caller: ReturnType<typeof serverRouter["createCaller"]>,
+  create_input: z.infer<typeof server_create_input>
+) {
+  return findOrCreate(
+    () => caller.byId(create_input.id),
+    () => caller.create(create_input)
+  );
+}

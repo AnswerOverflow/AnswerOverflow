@@ -6,9 +6,6 @@
     "packages": [
       "apps/*",
       "packages/*"
-    ],
-    "nohoist": [
-      "**/eslint-config-custom"
     ]
   },
   "scripts": {
