@@ -1,13 +1,15 @@
-import { createContextInner } from "../../context";
+import { clearDatabase } from "../../test/utils";
+import { createContextInner } from "../context";
 import { userRouter } from "./user";
 
 // eslint-disable-next-line no-unused-vars
 let users: ReturnType<typeof userRouter["createCaller"]>;
-beforeAll(async () => {
+beforeEach(async () => {
   const a = await createContextInner({
     session: null,
   });
   users = userRouter.createCaller(a);
+  await clearDatabase();
 });
 
 describe("userRouter", () => {
@@ -21,7 +23,15 @@ describe("userRouter", () => {
   });
   it("should find a user by id", async () => {
     const user = await users.byId("1");
-    expect(user).toBeDefined();
-    expect(user!.name).toBe("test");
+    expect(user).toBeNull();
+    const new_user = await users.create({
+      name: "test",
+      id: "1",
+    });
+    expect(new_user).toBeDefined();
+    expect(new_user.name).toBe("test");
+    const found_user = await users.byId("1");
+    expect(found_user).toBeDefined();
+    expect(found_user!.name).toBe("test");
   });
 });

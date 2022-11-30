@@ -1,4 +1,4 @@
-import { createContextInner } from "../../context";
+import { createContextInner } from "../context";
 import { userServerSettingsRouter } from "./user_server_settings";
 import { prisma } from "@answeroverflow/db";
 

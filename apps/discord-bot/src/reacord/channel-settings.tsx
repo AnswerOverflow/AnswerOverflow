@@ -1,29 +1,7 @@
 import { ChannelType, GuildForumTag, TextBasedChannel } from "discord.js";
-import { Button, Select, Option } from "reacord";
+import { Select, Option } from "reacord";
 import React from "react";
-
-function ToggleButton({
-  enable,
-  label,
-  setEnabled: setEnabled,
-}: {
-  enable: boolean;
-  label: string;
-  // eslint-disable-next-line no-unused-vars
-  setEnabled: (enabled: boolean) => void;
-}) {
-  const label_prefix = enable ? "Enable" : "Disable";
-  const style = enable ? "success" : "danger";
-  return (
-    <Button
-      label={label_prefix + " " + label}
-      style={style}
-      onClick={() => {
-        setEnabled(!enable);
-      }}
-    />
-  );
-}
+import { ToggleButton } from "./components/toggle-button";
 
 const getTagNameWithEmoji = (tag: GuildForumTag) =>
   tag.emoji?.name ? tag.emoji.name + " " + tag.name : tag.name;
@@ -33,11 +11,16 @@ export function ChannelSettingsMenu({ channel }: { channel: TextBasedChannel }) 
   const [indexingEnabled, setIndexingEnabled] = React.useState(false);
   return (
     <>
-      <ToggleButton enable={indexingEnabled} label={"Indexing"} setEnabled={setIndexingEnabled} />
+      <ToggleButton
+        enable={indexingEnabled}
+        disable_label={"Disable Indexing"}
+        enable_label={"Enable Indexing"}
+        setEnabled={setIndexingEnabled}
+      />
       {is_forum_channel && (
-        <Select multiple={true}>
+        <Select>
           {channel.parent.availableTags.map((tag) => (
-            <Option label={getTagNameWithEmoji(tag)} value={tag.id} />
+            <Option label={getTagNameWithEmoji(tag)} value={tag.id} key={tag.id} />
           ))}
         </Select>
       )}

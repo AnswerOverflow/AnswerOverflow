@@ -1,6 +1,15 @@
 import { router } from "../trpc";
-import { userRouter } from "./user";
 import { authRouter } from "./auth";
+import { channelRouter } from "./channel";
+import { serverRouter } from "./server";
+import { userRouter } from "./user";
+
+export const botRouter = router({
+  users: userRouter,
+  servers: serverRouter,
+  channels: channelRouter,
+  channel_settings: channelRouter,
+});
 
 export const appRouter = router({
   post: userRouter,

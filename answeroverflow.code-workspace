@@ -46,11 +46,12 @@
     ],
 	  "settings": {
     "files.exclude": {
-      "node_modules/": false,
+      "node_modules/": true,
       "apps/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
 	    "packages/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
       ".turbo": true,
-      "dist": false,
+      "dist": true,
+      "coverage": true,
       ".next": true
     },
     "vitest.enable": true,

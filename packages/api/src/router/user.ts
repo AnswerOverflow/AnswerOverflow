@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../../trpc";
-import { findOrCreate } from "../../utils/operations";
+import { publicProcedure, router } from "../trpc";
+import { findOrCreate } from "../utils/operations";
 
 export const user_create_input = z.object({ name: z.string(), id: z.string() });
 

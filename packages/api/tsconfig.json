@@ -2,6 +2,7 @@
   "extends": "@answeroverflow/tsconfig/base.json",
   "include": [
     "src",
+    "test",
     "index.ts",
     "transformer.ts",
     "node_modules/@answeroverflow/auth/next-auth.d.ts"
