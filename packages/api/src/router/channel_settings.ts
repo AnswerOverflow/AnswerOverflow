@@ -1,17 +1,38 @@
+import { ChannelSettings } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, publicProcedure, router } from "../trpc";
+import { bitfieldToDict, toZObject } from "../utils/bitfield";
 import { channelRouter, channel_upsert_input } from "./channel";
+
+const channel_settings_flags = [
+  "indexing_enabled",
+  "auto_thread_enabled",
+  "mark_solution_enabled",
+  "send_mark_solution_instructions_in_new_threads",
+  "forum_guidelines_consent_enabled",
+] as const;
+
+const z_channel_settings_flags = toZObject(...channel_settings_flags);
+
+const bitfieldToChannelSettingsFlags = (bitfield: number) =>
+  bitfieldToDict(bitfield, channel_settings_flags);
+
+const addChannelSettingsFlagsToChannelSettings = (channel_settings: ChannelSettings) => ({
+  ...channel_settings,
+  flags: bitfieldToChannelSettingsFlags(channel_settings.bitfield),
+});
+
 const z_channel_settings = z.object({
   channel_id: z.string(),
   bitfield: z.number(),
 });
 
 const z_channel_settings_update_input = z.object({
-  bitfield: z.optional(z.number()),
+  flags: z.optional(z_channel_settings_flags),
 });
 
 const z_channel_settings_create_input = z.object({
-  bitfield: z.number(),
+  flags: z.optional(z_channel_settings_flags),
 });
 
 const channelSettingsCreateUpdate = router({
@@ -19,7 +40,7 @@ const channelSettingsCreateUpdate = router({
     .input(z.object({ channel: channel_upsert_input, data: z_channel_settings_create_input }))
     .mutation(async ({ ctx, input }) => {
       const channel = await channelRouter.createCaller(ctx).upsert(input.channel);
-      return ctx.prisma.channelSettings.create({
+      const data = await ctx.prisma.channelSettings.create({
         data: {
           ...input.data,
           channel: {
@@ -29,6 +50,7 @@ const channelSettingsCreateUpdate = router({
           },
         },
       });
+      return addChannelSettingsFlagsToChannelSettings(data);
     }),
   update: publicProcedure
     .input(
@@ -38,25 +60,28 @@ const channelSettingsCreateUpdate = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      console.log(input.update.flags);
       const data = await ctx.prisma.channelSettings.update({
         where: {
           channel_id: input.old.channel_id,
         },
         data: {
-          ...input.update,
+          bitfield: input.update.flags?.indexing_enabled ? 1 : 0, // TODO: implement bitfield
         },
       });
-      return data;
+      return addChannelSettingsFlagsToChannelSettings(data);
     }),
 });
 
 const channelSettingFind = router({
   byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    return ctx.prisma.channelSettings.findUnique({
+    const data = await ctx.prisma.channelSettings.findUnique({
       where: {
         channel_id: input,
       },
     });
+    if (!data) return null;
+    return addChannelSettingsFlagsToChannelSettings(data);
   }),
 });
 
@@ -66,7 +91,7 @@ const channelSettingsUpsert = router({
     .mutation(async ({ ctx, input }) => {
       const existing_channel_settings = await channelSettingFind
         .createCaller(ctx)
-        .byId(input.channel.channel.create.id);
+        .byId(input.channel.create.id);
 
       if (existing_channel_settings) {
         return channelSettingsCreateUpdate.createCaller(ctx).update({
@@ -76,7 +101,7 @@ const channelSettingsUpsert = router({
           old: existing_channel_settings,
         });
       } else {
-        return channelSettingsCreateUpdate.createCaller(ctx).create({
+        return await channelSettingsCreateUpdate.createCaller(ctx).create({
           channel: input.channel,
           data: input.data,
         });

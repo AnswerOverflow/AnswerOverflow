@@ -1,20 +1,36 @@
 {
-	"extends": "@sapphire/ts-config",
-	"compilerOptions": {
-		"outDir": "dist",
-		"tsBuildInfoFile": "dist/.tsbuildinfo",
-		"noUnusedLocals": true,
-		"noUnusedParameters": false,
-		"skipLibCheck": true,
-		"baseUrl": "src",
+  "extends": "@sapphire/ts-config",
+  "compilerOptions": {
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "skipLibCheck": true,
+    "baseUrl": "src",
     "jsx": "react",
-		"paths": {
-			"@utils/*": ["utils/*"],
-			"@primitives/*": ["primitives/*"],
-			"@interaction-handlers/*": ["interaction-handlers/*"],
-      "@reacord/*": ["reacord/*"]
-		},
-	},
-  "include": ["**/*.ts", "**/*.tsx"],
-	"exclude": ["node_modules"]
+    "paths": {
+      "@utils/*": [
+        "utils/*"
+      ],
+      "@primitives/*": [
+        "primitives/*"
+      ],
+      "@interaction-handlers/*": [
+        "interaction-handlers/*"
+      ],
+      "@reacord/*": [
+        "reacord/*"
+      ],
+      "@trpc/*": [
+        "trpc/*"
+      ]
+    },
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

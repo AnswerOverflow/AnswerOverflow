@@ -5,6 +5,7 @@
   "author": "@sapphire",
   "license": "UNLICENSE",
   "dependencies": {
+    "@answeroverflow/api": "*",
     "@sapphire/decorators": "^5.1.0-pr-434.9fcf7df.0",
     "@sapphire/discord-utilities": "^2.11.6",
     "@sapphire/fetch": "^2.4.1",
@@ -16,6 +17,7 @@
     "@sapphire/time-utilities": "^1.7.8",
     "@sapphire/type": "^2.2.4",
     "@sapphire/utilities": "^3.10.1",
+    "@trpc/server": "^10.4.2",
     "@vitest/coverage-c8": "^0.25.3",
     "colorette": "^2.0.19",
     "discord-api-types": "^0.33.5",

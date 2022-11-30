@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "main": "./index.ts",
   "types": "./index.ts",
+  "type": "module",
   "license": "MIT",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",

@@ -13,10 +13,8 @@ export const channel_update_input = z.object({
 });
 
 export const channel_upsert_input = z.object({
-  channel: z.object({
-    create: channel_create_input,
-    update: channel_update_input,
-  }),
+  create: channel_create_input,
+  update: channel_update_input,
   server: server_upsert_input,
 });
 
@@ -82,15 +80,15 @@ const channelUpsert = router({
   upsert: publicProcedure.input(channel_upsert_input).mutation(async ({ ctx, input }) => {
     const channel_fetch = channelFetchRouter.createCaller(ctx);
     const channel_update_create = channelCreateUpdate.createCaller(ctx);
-    const existing_channel = await channel_fetch.byId(input.channel.create.id);
+    const existing_channel = await channel_fetch.byId(input.create.id);
     if (existing_channel) {
       return channel_update_create.update({
         old: existing_channel,
-        update: input.channel.update,
+        update: input.update,
       });
     } else {
       return channel_update_create.create({
-        channel: input.channel.create,
+        channel: input.create,
         server: input.server,
       });
     }
