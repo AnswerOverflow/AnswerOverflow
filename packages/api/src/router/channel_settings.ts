@@ -1,7 +1,7 @@
 import { ChannelSettings } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, publicProcedure, router } from "../trpc";
-import { bitfieldToDict, toZObject } from "../utils/bitfield";
+import { bitfieldToDict, dictToBitfield, toZObject } from "../utils/bitfield";
 import { channelRouter, channel_upsert_input } from "./channel";
 
 const channel_settings_flags = [
@@ -27,22 +27,30 @@ const z_channel_settings = z.object({
   bitfield: z.number(),
 });
 
-const z_channel_settings_update_input = z.object({
-  flags: z.optional(z_channel_settings_flags),
-});
-
 const z_channel_settings_create_input = z.object({
   flags: z.optional(z_channel_settings_flags),
+  channel: channel_upsert_input,
+});
+
+const z_channel_settings_update_input = z.object({
+  flags: z.optional(z_channel_settings_flags),
+  last_indexed_snowflake: z.optional(z.string()),
+  invite_code: z.optional(z.string()),
+  solution_tag_id: z.optional(z.nullable(z.string())),
+});
+
+const z_channel_settings_upsert_input = z.object({
+  create: z_channel_settings_create_input,
+  update: z_channel_settings_update_input,
 });
 
 const channelSettingsCreateUpdate = router({
   create: publicProcedure
-    .input(z.object({ channel: channel_upsert_input, data: z_channel_settings_create_input }))
+    .input(z_channel_settings_create_input)
     .mutation(async ({ ctx, input }) => {
       const channel = await channelRouter.createCaller(ctx).upsert(input.channel);
       const data = await ctx.prisma.channelSettings.create({
         data: {
-          ...input.data,
           channel: {
             connect: {
               id: channel.id,
@@ -60,13 +68,18 @@ const channelSettingsCreateUpdate = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      console.log(input.update.flags);
+      const old_flags = bitfieldToChannelSettingsFlags(input.old.bitfield);
+      const new_flags = { ...old_flags, ...input.update.flags };
+      const flags_to_bitfield_value = dictToBitfield(new_flags, channel_settings_flags);
+      // eslint-disable-next-line no-unused-vars
+      const { flags, ...update_data_without_flags } = input.update;
       const data = await ctx.prisma.channelSettings.update({
         where: {
           channel_id: input.old.channel_id,
         },
         data: {
-          bitfield: input.update.flags?.indexing_enabled ? 1 : 0, // TODO: implement bitfield
+          ...update_data_without_flags,
+          bitfield: flags_to_bitfield_value,
         },
       });
       return addChannelSettingsFlagsToChannelSettings(data);
@@ -87,24 +100,21 @@ const channelSettingFind = router({
 
 const channelSettingsUpsert = router({
   upsert: publicProcedure
-    .input(z.object({ channel: channel_upsert_input, data: z_channel_settings_create_input }))
+    .input(z_channel_settings_upsert_input)
     .mutation(async ({ ctx, input }) => {
       const existing_channel_settings = await channelSettingFind
         .createCaller(ctx)
-        .byId(input.channel.create.id);
+        .byId(input.create.channel.create.id);
 
       if (existing_channel_settings) {
         return channelSettingsCreateUpdate.createCaller(ctx).update({
           update: {
-            ...input.data,
+            ...input.update,
           },
           old: existing_channel_settings,
         });
       } else {
-        return await channelSettingsCreateUpdate.createCaller(ctx).create({
-          channel: input.channel,
-          data: input.data,
-        });
+        return await channelSettingsCreateUpdate.createCaller(ctx).create(input.create);
       }
     }),
 });

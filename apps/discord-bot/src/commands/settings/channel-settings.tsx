@@ -27,8 +27,10 @@ export class ChannelSettingsCommand extends Command {
     }
     const api_caller = await makeAPICaller();
     const settings = await api_caller.channel_settings.upsert({
-      data: {},
-      channel: makeChannelUpsert(interaction.channel, interaction.guild),
+      update: {},
+      create: {
+        channel: makeChannelUpsert(interaction.channel, interaction.guild),
+      },
     });
     this.container.reacord.ephemeralReply(
       interaction,

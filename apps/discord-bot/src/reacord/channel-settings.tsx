@@ -1,12 +1,14 @@
 import type { ChannelSettingsOutput, ChannelSettingsUpsertInput } from "@answeroverflow/api";
 import { ChannelType, GuildForumTag, TextBasedChannel } from "discord.js";
-import { Select, Option, ButtonClickEvent } from "reacord";
+import { Select, Option, ButtonClickEvent, SelectChangeEvent } from "reacord";
 import React from "react";
 import { makeAPICaller, makeChannelUpsert } from "@trpc/create-caller";
 import { ToggleButton } from "./components/toggle-button";
 
 const getTagNameWithEmoji = (tag: GuildForumTag) =>
   tag.emoji?.name ? tag.emoji.name + " " + tag.name : tag.name;
+
+const CLEAR_TAG_VALUE = "clear";
 
 export function ChannelSettingsMenu({
   channel,
@@ -20,7 +22,7 @@ export function ChannelSettingsMenu({
 
   const updateChannelSettings = async (
     interaction: ButtonClickEvent,
-    data: ChannelSettingsUpsertInput["data"]
+    data: ChannelSettingsUpsertInput["update"]
   ) => {
     const api = await makeAPICaller();
 
@@ -30,14 +32,16 @@ export function ChannelSettingsMenu({
     }
 
     const updated_settings = await api.channel_settings.upsert({
-      data: { ...data },
-      channel: {
-        ...makeChannelUpsert(channel, channel.guild),
+      update: data,
+      create: {
+        channel: {
+          ...makeChannelUpsert(channel, channel.guild),
+        },
       },
     });
     setChannelSettings(updated_settings);
   };
-
+  console.log(channelSettings.solution_tag_id);
   return (
     <>
       <ToggleButton
@@ -52,8 +56,46 @@ export function ChannelSettingsMenu({
           });
         }}
       />
+      <ToggleButton
+        enable={channelSettings.flags.mark_solution_enabled}
+        disable_label={"Disable Mark Solution"}
+        enable_label={"Enable Mark Solution"}
+        onClick={(interaction: ButtonClickEvent) => {
+          void updateChannelSettings(interaction, {
+            flags: {
+              mark_solution_enabled: !channelSettings.flags.mark_solution_enabled,
+            },
+          });
+        }}
+      />
+      <ToggleButton
+        enable={channelSettings.flags.send_mark_solution_instructions_in_new_threads}
+        disable_label={"Disable Send Mark Solution Instructions"}
+        enable_label={"Enable Send Mark Solution Instructions"}
+        onClick={(interaction: ButtonClickEvent) => {
+          void updateChannelSettings(interaction, {
+            flags: {
+              send_mark_solution_instructions_in_new_threads:
+                !channelSettings.flags.send_mark_solution_instructions_in_new_threads,
+            },
+          });
+        }}
+      />
       {is_forum_channel && (
-        <Select>
+        <Select
+          placeholder="Select a tag to use on mark as solved"
+          value={channelSettings.solution_tag_id ?? ""}
+          onChangeValue={(value: string, event: SelectChangeEvent) => {
+            const new_solved_tag = value == CLEAR_TAG_VALUE ? null : value;
+            void updateChannelSettings(event, {
+              solution_tag_id: new_solved_tag,
+            });
+          }}
+        >
+          <Option
+            label={channel.parent.availableTags.length > 0 ? "(Clear)" : "No Tags Found"}
+            value={CLEAR_TAG_VALUE}
+          />
           {channel.parent.availableTags.map((tag) => (
             <Option label={getTagNameWithEmoji(tag)} value={tag.id} key={tag.id} />
           ))}

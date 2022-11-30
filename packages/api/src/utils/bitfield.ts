@@ -23,37 +23,24 @@ export function toZObject<T extends readonly string[]>(
   return z.object(toDict(() => z.boolean().optional(), ...keys));
 }
 
-export function bitfieldToDict<Flags extends readonly string[]>(
+export function bitfieldToDict<T extends readonly string[]>(
   value: number,
-  flags: Flags
-): Record<Flags[number], boolean> {
+  flags: T
+): Record<T[number], boolean> {
   const bitfield = new BitField(toBitfield(...flags));
   return toDict((key) => bitfield.has(value, key), ...flags);
 }
 
-export function enableBitfieldFlag<Flags extends Record<string, number>>(
-  value: number,
-  flags: Flags,
-  flag_to_enable: keyof Flags
-) {
-  const bitfield = new BitField(flags);
-  return bitfield.resolve([value, flag_to_enable as string]);
-}
-
-export function disableBitfieldFlag<Flags extends Record<string, number>>(
-  value: number,
-  flags: Flags,
-  flag_to_disable: keyof Flags
-) {
-  const bitfield = new BitField(flags);
-  return bitfield.intersection(value, bitfield.complement(flag_to_disable as string));
-}
-
-export function mergeBitfields<Flags extends Record<string, number>>(
-  old_value: number,
-  new_value: number,
-  flags: Flags
-) {
-  const bitfield = new BitField(flags);
-  return bitfield.resolve([old_value, new_value]);
+export function dictToBitfield<
+  T extends readonly string[],
+  FlagDict extends Record<T[number], boolean>
+>(dict: FlagDict, flags: T) {
+  const bitfield = new BitField(toBitfield(...flags));
+  const enabled_flags: string[] = [];
+  for (const key in dict) {
+    if (dict[key]) {
+      enabled_flags.push(key);
+    }
+  }
+  return bitfield.resolve(enabled_flags) as number; // TODO: Possibly a bug? Needs to be revisited if bitfields ever exceed the size of a number
 }
