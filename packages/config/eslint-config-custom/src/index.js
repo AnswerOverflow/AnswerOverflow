@@ -4,11 +4,10 @@ module.exports = {
     "turbo",
     "prettier",
     "eslint:recommended",
-    "plugin:jest/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
   ],
   root: true,
-  plugins: ["prettier", "jest"],
+  plugins: ["prettier"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     project: ["./tsconfig.json"],
@@ -22,8 +21,5 @@ module.exports = {
     "@typescript-eslint/no-floating-promises": "error",
     "@typescript-eslint/prefer-as-const": "error",
     //"@typescript-eslint/explicit-function-return-type": "warn"
-  },
-  env: {
-    jest: true,
   },
 };

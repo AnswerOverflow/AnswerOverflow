@@ -2,16 +2,14 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { signIn, signOut } from "next-auth/react";
 import { trpc } from "../utils/trpc";
-import {inferProcedureOutput} from '@trpc/server'
+import { inferProcedureOutput } from "@trpc/server";
 import { AppRouter } from "@answeroverflow/api";
 const PostCard: React.FC<{
-  server: inferProcedureOutput<AppRouter['servers']['all']>[0];
+  server: inferProcedureOutput<AppRouter["servers"]["all"]>[0];
 }> = ({ server }) => {
   return (
     <div className="max-w-2xl rounded-lg border-2 border-gray-500 p-4 transition-all hover:scale-[101%]">
-      <h2 className="text-2xl font-bold text-[hsl(280,100%,70%)]">
-        {server.name}
-      </h2>
+      <h2 className="text-2xl font-bold text-[hsl(280,100%,70%)]">{server.name}</h2>
       <p>{server.icon}</p>
     </div>
   );
@@ -58,9 +56,11 @@ const AuthShowcase: React.FC = () => {
 
   const { data: secretMessage } = trpc.auth.getSecretMessage.useQuery(
     undefined, // no input
-    { enabled: !!session?.user },
+    { enabled: !!session?.user }
   );
 
+  const { data: servers } = trpc.auth.getServers.useQuery();
+  console.log(servers);
   return (
     <div className="flex flex-col items-center justify-center gap-4">
       {session?.user && (
@@ -69,6 +69,9 @@ const AuthShowcase: React.FC = () => {
           {secretMessage && <span> - {secretMessage}</span>}
         </p>
       )}
+      {servers?.map((server) => {
+        return <div>{server.name}</div>;
+      })}
       <button
         className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
         onClick={session ? () => signOut() : () => signIn()}

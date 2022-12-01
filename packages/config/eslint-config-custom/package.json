@@ -10,7 +10,7 @@
     "eslint-config-next": "^13.0.5",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-turbo": "latest",
-    "eslint-plugin-jest": "^27.1.4",
+    "eslint-plugin-jest": "^27.1.6",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "7.31.8",
     "eslint-plugin-turbo": "^0.0.4"

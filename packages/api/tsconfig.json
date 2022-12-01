@@ -5,6 +5,6 @@
     "test",
     "index.ts",
     "transformer.ts",
-    "node_modules/@answeroverflow/auth/next-auth.d.ts"
+    "../../node_modules/@answeroverflow/auth/next-auth.d.ts"
   ]
 }

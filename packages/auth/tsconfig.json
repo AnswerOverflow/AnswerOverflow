@@ -1,4 +1,8 @@
 {
   "extends": "@answeroverflow/tsconfig/base.json",
-  "include": ["src", "src/index.ts", "next-auth.d.ts"]
+  "include": [
+    "src",
+    "index.ts",
+    "next-auth.d.ts"
+  ]
 }

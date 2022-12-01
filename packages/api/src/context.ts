@@ -1,4 +1,4 @@
-import { getServerSession, type Session } from "@answeroverflow/auth";
+import { Session, getServerSession } from "@answeroverflow/auth";
 import { prisma } from "@answeroverflow/db";
 import { type inferAsyncReturnType } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
