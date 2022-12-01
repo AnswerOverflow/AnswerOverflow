@@ -2,25 +2,32 @@ import {
   botRouter,
   ChannelUpsertInput,
   createBotContext,
-  CreateBotContextOptions,
   ServerUpsertInput,
 } from "@answeroverflow/api";
-import type { User } from "discord.js";
+import type { GuildMember } from "discord.js";
 
-export async function makeAPICaller(
-  user: User,
-  servers: Exclude<CreateBotContextOptions["user_servers"], null>
+export async function makeMemberAPICaller(
+  member: GuildMember
 ): Promise<ReturnType<typeof botRouter["createCaller"]>> {
   const ctx = await createBotContext({
     session: {
       expires: new Date().toUTCString(),
       user: {
         email: null,
-        image: user.displayAvatarURL(),
-        name: user.username,
+        image: member.displayAvatarURL(),
+        name: member.displayName,
       },
     },
-    user_servers: servers,
+    user_servers: [
+      {
+        name: member.guild.name,
+        id: member.guild.id,
+        features: member.guild.features,
+        permissions: member.permissions.bitfield.toString(),
+        icon: member.guild.iconURL(),
+        owner: member.guild.ownerId === member.id,
+      },
+    ],
   });
   return botRouter.createCaller(ctx);
 }
