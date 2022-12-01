@@ -2,23 +2,16 @@ import { Session, getServerSession } from "@answeroverflow/auth";
 import { prisma } from "@answeroverflow/db";
 import { type inferAsyncReturnType } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
+import { getUserServers } from "./utils/discord-oauth";
 
 /**
  * Replace this with an object if you want to pass things to createContextInner
  */
 
-type UserGuild = {
-  id: string;
-  name: string;
-  icon?: string | null;
-  owner?: boolean;
-  permissions: string;
-  features: string[];
-};
-
 type CreateContextOptions = {
   session: Session | null;
-  user_servers: UserGuild[] | null;
+  caller: "discord-bot" | "web-client";
+  user_servers: Awaited<ReturnType<typeof getUserServers>> | null;
 };
 
 export type CreateBotContextOptions = CreateContextOptions;
@@ -33,12 +26,13 @@ export const createContextInner = async (opts: CreateContextOptions) => {
   return {
     session: opts.session,
     user_servers: opts.user_servers,
+    caller: opts.caller,
     prisma,
   };
 };
 
-export const createBotContext = async (opts: CreateContextOptions) => {
-  return await createContextInner(opts);
+export const createBotContext = async (opts: Omit<CreateContextOptions, "caller">) => {
+  return await createContextInner({ ...opts, caller: "discord-bot" });
 };
 
 /**
@@ -51,6 +45,7 @@ export const createContext = async (opts: CreateNextContextOptions) => {
   return await createContextInner({
     session,
     user_servers: null,
+    caller: "web-client",
   });
 };
 
