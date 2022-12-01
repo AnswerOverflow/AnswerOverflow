@@ -41,6 +41,7 @@ export const authRouter = router({
         "Content-Type": "application/json",
       },
     });
+
     const data = serversSchema.parse(await servers.json());
     return data;
   }),
@@ -49,7 +50,7 @@ export const authRouter = router({
 const serverSchema = z.object({
   id: z.string(),
   name: z.string(),
-  icon: z.string().optional(),
+  icon: z.string().optional().nullable(),
   owner: z.boolean(),
   permissions: z.number(),
   features: z.array(z.string()),
