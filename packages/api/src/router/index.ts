@@ -13,7 +13,7 @@ export const botRouter = router({
 });
 
 export const appRouter = router({
-  post: userRouter,
+  servers: serverRouter,
   auth: authRouter,
 });
 

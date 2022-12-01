@@ -1,91 +1,84 @@
 // Reference: https://medium.com/rewrite-tech/visual-studio-code-tips-for-monorepo-development-with-multi-root-workspaces-and-extension-6b69420ecd12
 {
-    "folders": [
-      {
+  "folders": [
+    {
       "name": "root",
       "path": "./"
-      },
-      {
-        //
-        "name": "discord-bot",
-        "path": "apps/discord-bot",
-      },
-      {
-        //
-        "name": "web",
-        "path": "apps/web"
-      },
-      {
-        "name": "core",
-        "path": "packages/core"
-      },
-      {
-        "name": "ui",
-        "path": "packages/ui"
-      },
-      {
-        "name": "eslint-config-custom",
-        "path": "packages/eslint-config-custom"
-      },
-      {
-        "name": "api",
-        "path": "packages/api"
-      },
-      {
-        "name": "auth",
-        "path": "packages/auth"
-      },
-      {
-        "name": "db",
-        "path": "packages/db",
-      },
-      {
-        "name": "tsconfig",
-        "path": "packages/tsconfig"
-      },
-    ],
-	  "settings": {
+    },
+    {
+      //
+      "name": "web",
+      "path": "apps/nextjs"
+    },
+    {
+      "name": "ui",
+      "path": "packages/ui"
+    },
+    {
+      //
+      "name": "discord-bot",
+      "path": "apps/discord-bot",
+    },
+    {
+      "name": "api",
+      "path": "packages/api"
+    },
+    {
+      "name": "auth",
+      "path": "packages/auth"
+    },
+    {
+      "name": "db",
+      "path": "packages/db",
+    },
+    {
+      "name": "config",
+      "path": "packages/config"
+    },
+  ],
+  "settings": {
     "files.exclude": {
-      "node_modules/": true,
+      "**/node_modules/": true,
       "apps/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
-	    "packages/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
+      "packages/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
       ".turbo": true,
       "dist": true,
-      "coverage": true,
+      "**/coverage": true,
       ".next": true
     },
     "vitest.enable": true,
     "vitest.disabledWorkspaceFolders": [
-      "root"],
-     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
-      },
-      "eslint.validate": [
-        "javascript",
-        "javascriptreact",
-        "html",
-        "typescriptreact",
-        "typescript"
-      ],
-      "editor.defaultFormatter": "dbaeumer.vscode-eslint",
-      "eslint.format.enable": true,
-      "eslint.alwaysShowStatus": true,
-      "[typescript]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-      },
-      "javascript.suggest.autoImports": true,
-      "typescript.suggest.autoImports": true,
-      "javascript.updateImportsOnFileMove.enabled": "always",
-      "typescript.updateImportsOnFileMove.enabled": "always",
-      "editor.bracketPairColorization.enabled": true,
-      "editor.guides.bracketPairs": "active",
-      "[json]": {
-        "editor.defaultFormatter": "vscode.json-language-features"
-      },
-      "[prisma]": {
-        "editor.defaultFormatter": "Prisma.prisma"
-      },
-      "search.useIgnoreFiles": true,
+      "root"
+    ],
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    },
+    "eslint.validate": [
+      "javascript",
+      "javascriptreact",
+      "html",
+      "typescriptreact",
+      "typescript"
+    ],
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "eslint.format.enable": true,
+    "eslint.alwaysShowStatus": true,
+    "[typescript]": {
+      "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "javascript.suggest.autoImports": true,
+    "typescript.suggest.autoImports": true,
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": "active",
+    "[json]": {
+      "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[prisma]": {
+      "editor.defaultFormatter": "Prisma.prisma"
+    },
+    "search.useIgnoreFiles": true,
   },
   "extensions": {
     "recommendations": [
@@ -93,4 +86,4 @@
       "ms-vscode-remote.vscode-remote-extensionpack",
     ]
   }
-  }
+}

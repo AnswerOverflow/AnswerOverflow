@@ -1,4 +1,3 @@
-import type { ChannelSettingsWithBitfield } from "@answeroverflow/core";
 import type {
   NewsChannel,
   PrivateThreadChannel,
@@ -7,7 +6,6 @@ import type {
 } from "discord.js";
 
 export type GuildRootChannel = NewsChannel | TextChannel;
-export type SettingsInteractionHandlerTypes = ChannelSettingsWithBitfield;
 export type GuildTextChannel =
   | NewsChannel
   | TextChannel

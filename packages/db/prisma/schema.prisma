@@ -43,12 +43,11 @@ model Session {
 }
 
 model User {
-  id         String  @id
-  name       String?
-  email      String? @unique
-  image      String?
-  avatar     String? @db.VarChar(45)
-  created_at Int?
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
 
   user_channel_settings UserChannelSettings[]
   user_server_settings  UserServerSettings[]
