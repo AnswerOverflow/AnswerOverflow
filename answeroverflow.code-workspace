@@ -78,6 +78,15 @@
     "[prisma]": {
       "editor.defaultFormatter": "Prisma.prisma"
     },
+    "editor.quickSuggestions": {
+      "strings": true
+    },
+    "tailwindCSS.includeLanguages": {
+      "plaintext": "html"
+    },
+    "files.associations": {
+      "*.css": "tailwindcss"
+    },
     "search.useIgnoreFiles": true,
   },
   "extensions": {

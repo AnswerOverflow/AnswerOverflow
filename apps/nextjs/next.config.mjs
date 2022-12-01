@@ -13,6 +13,9 @@ const config = {
     // Enables hot-reload and easy integration for local packages
     transpilePackages: ["@answeroverflow/api", "@answeroverflow/auth", "@answeroverflow/db"],
   },
+  images: {
+    domains: ["cdn.discordapp.com"],
+  },
   // We already do linting on GH actions
   eslint: {
     ignoreDuringBuilds: !!process.env.CI,
