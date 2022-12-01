@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+
 import { protectedProcedure, publicProcedure, router } from "../trpc";
+import { getUserServers } from "../utils/discord-oauth";
 
 export const authRouter = router({
   getSession: publicProcedure.query(({ ctx }) => {
@@ -34,26 +35,6 @@ export const authRouter = router({
         code: "UNAUTHORIZED",
       });
     }
-    // TODO: This needs to be cached as it's going to be called a lot and we need to avoid rate limits
-    const servers = await fetch("https://discordapp.com/api/users/@me/guilds", {
-      headers: {
-        Authorization: "Bearer " + discord_account.access_token,
-        "Content-Type": "application/json",
-      },
-    });
-
-    const data = serversSchema.parse(await servers.json());
-    return data;
+    return await getUserServers(discord_account.access_token);
   }),
 });
-
-const serverSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  icon: z.string().optional().nullable(),
-  owner: z.boolean(),
-  permissions: z.number(),
-  features: z.array(z.string()),
-});
-
-const serversSchema = z.array(serverSchema);

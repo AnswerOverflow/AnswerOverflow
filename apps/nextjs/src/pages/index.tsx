@@ -60,7 +60,6 @@ const AuthShowcase: React.FC = () => {
   );
 
   const { data: servers } = trpc.auth.getServers.useQuery();
-  console.log(servers);
   return (
     <div className="flex flex-col items-center justify-center gap-4">
       {session?.user && (
