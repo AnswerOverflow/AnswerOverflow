@@ -1,30 +1,34 @@
-# TypeScript Sapphire Bot example
+# Answer Overflow Discord Bot
 
-This is a basic setup of a Discord bot using the [sapphire framework][sapphire] written in TypeScript
+## Folder Structure
 
-## How to use it?
+## commands
+    Slash & Application commands go here.
 
-### Prerequisite
+## components
+    React components used for building out menus. These components should be **ephemeral** only as they do not persist on a restart. They are mainly used for handling menu style interactions.
 
-```sh
-npm install
-```
+    Example: /manage_account menu.
 
-### Development
+## interaction_handlers
+    Long running button interactions that need to run again on a bot restart.
 
-This example can be run with `tsc-watch` to watch the files and automatically restart your bot.
+    Example: The consent button is sent in announcement channels and can be used months after sending it, it's important to capture this interaction
 
-```sh
-npm run watch:start
-```
+## precondiitons
+    Checks to run before executing a command
 
-### Production
+## listeners
+    Any events the bot needs to respond to go here.
 
-You can also run the bot with `npm dev`, this will first build your code and then run `node ./dist/index.js`. But this is not the recommended way to run a bot in production.
+    Example: On Guild Join -> Sync server to database
 
-## License
+## routes
+    Used to expose API calls to remotely manage the bot
 
-Dedicated to the public domain via the [Unlicense], courtesy of the Sapphire Community and its contributors.
+    Example: Refresh server API endpoint called when viewing from the web dashboard
 
-[sapphire]: https://github.com/sapphiredev/framework
-[unlicense]: https://github.com/sapphiredev/examples/blob/main/LICENSE.md
+## utils
+    Misc utility functions. Try to keep related functions in the same files as they may be extracted out into their own packages.
+
+    Example: Converting data types from Discord -> Answer Overflow

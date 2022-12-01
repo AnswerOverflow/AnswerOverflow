@@ -18,8 +18,8 @@
       "@interaction-handlers/*": [
         "interaction-handlers/*"
       ],
-      "@reacord/*": [
-        "reacord/*"
+      "@components/*": [
+        "components/*"
       ],
       "@trpc/*": [
         "trpc/*"

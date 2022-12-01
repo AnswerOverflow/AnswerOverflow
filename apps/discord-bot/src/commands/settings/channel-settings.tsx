@@ -1,7 +1,7 @@
 import React from "react";
-import { makeMemberAPICaller, makeChannelUpsert } from "@trpc/create-caller";
+import { makeMemberAPICaller, makeChannelUpsert } from "@utils/trpc/create-caller";
 import type { ChannelSettingsOutput, ChannelSettingsUpsertInput } from "@answeroverflow/api";
-import { ToggleButton } from "@reacord/components/toggle-button";
+import { ToggleButton } from "@components/toggle-button";
 import {
   type ChatInputCommandInteraction,
   type GuildForumTag,

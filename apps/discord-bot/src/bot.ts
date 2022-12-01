@@ -1,4 +1,4 @@
-import "./lib/setup";
+import "@utils/setup";
 import { container, LogLevel, SapphireClient } from "@sapphire/framework";
 import "@sapphire/plugin-api/register";
 import { ReacordDiscordJs } from "reacord";
@@ -6,7 +6,6 @@ import { Partials } from "discord.js";
 declare module "@sapphire/pieces" {
   // eslint-disable-next-line no-unused-vars
   interface Container {
-    answer_overflow: unknown;
     reacord: ReacordDiscordJs;
   }
 }
@@ -42,7 +41,6 @@ export const login = async () => {
     await client.login(process.env.DISCORD_TOKEN);
 
     client.logger.info("logged in");
-    container.answer_overflow = null;
     container.reacord = new ReacordDiscordJs(client);
   } catch (error) {
     client.logger.fatal(error);
