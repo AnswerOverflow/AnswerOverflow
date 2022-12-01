@@ -24,13 +24,21 @@ export function ChannelSettingsMenu({
     interaction: ButtonClickEvent,
     data: ChannelSettingsUpsertInput["update"]
   ) => {
-    const api = await makeAPICaller();
-
     if (channel.isDMBased()) {
       interaction.ephemeralReply("Does not work in DMs");
       return;
     }
-
+    const member = await channel.guild.members.fetch(interaction.user.id);
+    const api = await makeAPICaller(member.user, [
+      {
+        name: channel.guild.name,
+        id: channel.guild.id,
+        features: channel.guild.features,
+        permissions: member.permissions.bitfield.toString(),
+        icon: channel.guild.iconURL(),
+        owner: channel.guild.ownerId === member.id,
+      },
+    ]);
     const updated_settings = await api.channel_settings.upsert({
       update: data,
       create: {

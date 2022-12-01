@@ -2,11 +2,26 @@ import {
   botRouter,
   ChannelUpsertInput,
   createBotContext,
+  CreateBotContextOptions,
   ServerUpsertInput,
 } from "@answeroverflow/api";
+import type { User } from "discord.js";
 
-export async function makeAPICaller(): Promise<ReturnType<typeof botRouter["createCaller"]>> {
-  const ctx = await createBotContext();
+export async function makeAPICaller(
+  user: User,
+  servers: Exclude<CreateBotContextOptions["user_servers"], null>
+): Promise<ReturnType<typeof botRouter["createCaller"]>> {
+  const ctx = await createBotContext({
+    session: {
+      expires: new Date().toUTCString(),
+      user: {
+        email: null,
+        image: user.displayAvatarURL(),
+        name: user.username,
+      },
+    },
+    user_servers: servers,
+  });
   return botRouter.createCaller(ctx);
 }
 
@@ -22,11 +37,11 @@ export function makeChannelUpsert(channel: Channel, server: Server): ChannelUpse
       id: channel.id,
       name: channel.name,
       type: channel.type,
+      server: { ...makeServerUpsert(server) },
     },
     update: {
       name: channel.name,
     },
-    server: { ...makeServerUpsert(server) },
   };
 }
 

@@ -1,7 +1,8 @@
 import { ChannelSettings } from "@answeroverflow/db";
 import { z } from "zod";
-import { mergeRouters, publicProcedure, router } from "../trpc";
+import { mergeRouters, protectedProcedureWithUserServers, publicProcedure, router } from "../trpc";
 import { bitfieldToDict, dictToBitfield, toZObject } from "../utils/bitfield";
+import { assertCanEditServer } from "../utils/permissions";
 import { channelRouter, channel_upsert_input } from "./channel";
 
 const channel_settings_flags = [
@@ -45,10 +46,11 @@ const z_channel_settings_upsert_input = z.object({
 });
 
 const channelSettingsCreateUpdate = router({
-  create: publicProcedure
+  create: protectedProcedureWithUserServers
     .input(z_channel_settings_create_input)
     .mutation(async ({ ctx, input }) => {
       const channel = await channelRouter.createCaller(ctx).upsert(input.channel);
+      assertCanEditServer(ctx, channel.server_id);
       const data = await ctx.prisma.channelSettings.create({
         data: {
           channel: {
@@ -60,14 +62,17 @@ const channelSettingsCreateUpdate = router({
       });
       return addChannelSettingsFlagsToChannelSettings(data);
     }),
-  update: publicProcedure
+  update: protectedProcedureWithUserServers
     .input(
       z.object({
         update: z_channel_settings_update_input,
         old: z_channel_settings,
+        server_id: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
+      assertCanEditServer(ctx, input.server_id);
+
       const old_flags = bitfieldToChannelSettingsFlags(input.old.bitfield);
       const new_flags = { ...old_flags, ...input.update.flags };
       const flags_to_bitfield_value = dictToBitfield(new_flags, channel_settings_flags);
@@ -99,7 +104,7 @@ const channelSettingFind = router({
 });
 
 const channelSettingsUpsert = router({
-  upsert: publicProcedure
+  upsert: protectedProcedureWithUserServers
     .input(z_channel_settings_upsert_input)
     .mutation(async ({ ctx, input }) => {
       const existing_channel_settings = await channelSettingFind
@@ -112,6 +117,7 @@ const channelSettingsUpsert = router({
             ...input.update,
           },
           old: existing_channel_settings,
+          server_id: input.create.channel.create.server.create.id,
         });
       } else {
         return await channelSettingsCreateUpdate.createCaller(ctx).create(input.create);

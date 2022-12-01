@@ -6,6 +6,7 @@ export const channel_create_input = z.object({
   name: z.string(),
   id: z.string(),
   type: z.number(),
+  server: server_upsert_input,
 });
 
 export const channel_update_input = z.object({
@@ -15,7 +16,6 @@ export const channel_update_input = z.object({
 export const channel_upsert_input = z.object({
   create: channel_create_input,
   update: channel_update_input,
-  server: server_upsert_input,
 });
 
 const z_channel = z.object({
@@ -44,27 +44,20 @@ const channelCreateUpdate = router({
       });
       return data;
     }),
-  create: publicProcedure
-    .input(
-      z.object({
-        channel: channel_create_input,
-        server: server_upsert_input,
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const server = await serverRouter.createCaller(ctx).upsert(input.server);
-
-      return ctx.prisma.channel.create({
-        data: {
-          ...input.channel,
-          server: {
-            connect: {
-              id: server.id,
-            },
+  create: publicProcedure.input(channel_create_input).mutation(async ({ ctx, input }) => {
+    const { server, ...channel } = input;
+    const updated_server = await serverRouter.createCaller(ctx).upsert(server);
+    return ctx.prisma.channel.create({
+      data: {
+        ...channel,
+        server: {
+          connect: {
+            id: updated_server.id,
           },
         },
-      });
-    }),
+      },
+    });
+  }),
 });
 
 const channelFetchRouter = router({
@@ -87,10 +80,7 @@ const channelUpsert = router({
         update: input.update,
       });
     } else {
-      return channel_update_create.create({
-        channel: input.create,
-        server: input.server,
-      });
+      return channel_update_create.create(input.create);
     }
   }),
 });

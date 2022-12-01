@@ -1,102 +1,90 @@
+import { TRPCError } from "@trpc/server";
+import { PermissionsBitField } from "discord.js";
 import { botRouter } from ".";
 import { clearDatabase, TEST_CHANNEL_1, TEST_SERVER_1 } from "../../test/utils";
-import { createContextInner } from "../context";
+import { createBotContext } from "../context";
 
 // eslint-disable-next-line no-unused-vars
-let router: ReturnType<typeof botRouter["createCaller"]>;
+let router_manage_guilds: ReturnType<typeof botRouter["createCaller"]>;
+let router_no_permissions: ReturnType<typeof botRouter["createCaller"]>;
 
 beforeEach(async () => {
-  const a = await createContextInner({
-    session: null,
+  const manageGuildContext = await createBotContext({
+    session: {
+      expires: new Date().toUTCString(),
+      user: {
+        email: null,
+        image: "https://example.com",
+        name: "test",
+      },
+    },
+    user_servers: [
+      {
+        features: [],
+        icon: null,
+        id: TEST_SERVER_1.id,
+        name: TEST_SERVER_1.name,
+        owner: false,
+        permissions: PermissionsBitField.resolve("ManageGuild").toString(),
+      },
+    ],
   });
-  router = botRouter.createCaller(a);
+  const noPermissionsContext = await createBotContext({
+    session: {
+      expires: new Date().toUTCString(),
+      user: {
+        email: null,
+        image: "https://example.com",
+        name: "test",
+      },
+    },
+    user_servers: [
+      {
+        features: [],
+        icon: null,
+        id: TEST_SERVER_1.id,
+        name: TEST_SERVER_1.name,
+        owner: false,
+        permissions: "0",
+      },
+    ],
+  });
+
+  router_no_permissions = botRouter.createCaller(noPermissionsContext);
+  router_manage_guilds = botRouter.createCaller(manageGuildContext);
   await clearDatabase();
 });
 
+const TEST_CREATE_CHANNEL_SETTINGS = {
+  create: {
+    channel: {
+      create: {
+        ...TEST_CHANNEL_1,
+        server: {
+          create: {
+            ...TEST_SERVER_1,
+          },
+          update: {
+            ...TEST_SERVER_1,
+          },
+        },
+      },
+      update: {
+        ...TEST_CHANNEL_1,
+      },
+    },
+  },
+  update: {},
+};
+
 describe("channelRouter", () => {
-  it("should create new channel settings", async () => {
-    const channelSettings = await router.channel_settings.upsert({
-      channel: {
-        create: TEST_CHANNEL_1,
-        update: {
-          ...TEST_CHANNEL_1,
-        },
-      },
-      server: {
-        create: TEST_SERVER_1,
-        update: {
-          ...TEST_SERVER_1,
-        },
-      },
-    });
-    expect(channelSettings).toMatchObject(TEST_CHANNEL_1);
+  it("should upsert channel settings with no permissions", async () => {
+    await expect(
+      router_no_permissions.channel_settings.upsert(TEST_CREATE_CHANNEL_SETTINGS)
+    ).rejects.toThrow(TRPCError);
   });
-  it("should create a channel settings and then update it", async () => {
-    const channelSettings = await router.channel_settings.upsert({
-      channel: {
-        create: TEST_CHANNEL_1,
-        update: {
-          ...TEST_CHANNEL_1,
-        },
-      },
-      server: {
-        create: TEST_SERVER_1,
-        update: {
-          ...TEST_SERVER_1,
-        },
-      },
-    });
-    expect(channelSettings).toMatchObject(TEST_CHANNEL_1);
-    const updatedChannelSettings = await router.channel_settings.upsert({
-      channel: {
-        create: TEST_CHANNEL_1,
-        update: {
-          ...TEST_CHANNEL_1,
-          name: "updated",
-        },
-      },
-      server: {
-        create: TEST_SERVER_1,
-        update: {
-          ...TEST_SERVER_1,
-        },
-      },
-    });
-    expect(updatedChannelSettings).toMatchObject({
-      ...TEST_CHANNEL_1,
-      name: "updated",
-    });
-  });
-  it("should create a channel and then channel settings", async () => {
-    const channel = await router.channels.upsert({
-      channel: {
-        create: TEST_CHANNEL_1,
-        update: {
-          ...TEST_CHANNEL_1,
-        },
-      },
-      server: {
-        create: TEST_SERVER_1,
-        update: {
-          ...TEST_SERVER_1,
-        },
-      },
-    });
-    expect(channel).toMatchObject(TEST_CHANNEL_1);
-    const channelSettings = await router.channel_settings.upsert({
-      channel: {
-        create: TEST_CHANNEL_1,
-        update: {
-          ...TEST_CHANNEL_1,
-        },
-      },
-      server: {
-        create: TEST_SERVER_1,
-        update: {
-          ...TEST_SERVER_1,
-        },
-      },
-    });
-    expect(channelSettings).toMatchObject(TEST_CHANNEL_1);
+  it("should upsert channel settings with manage guilds permissions", async () => {
+    const result = await router_manage_guilds.channel_settings.upsert(TEST_CREATE_CHANNEL_SETTINGS);
+    expect(result).toBeDefined();
   });
 });
