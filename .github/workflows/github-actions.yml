@@ -16,13 +16,13 @@ jobs:
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
+          username: ${{ secrets.CONTAINER_OWNER }}
           password: ${{ secrets.CONTAINER_TOKEN }}
 
       - name: Pre-build image and run make ci-build in dev container
         uses: devcontainers/ci@v0.2
         with:
-          imageName: ghcr.io/${{github.repository_owner}}/AnswerOverflow-devcontainer
-          cacheFrom: ghcr.io/${{github.repository_owner}}/AnswerOverflow-devcontainer
+          imageName: ghcr.io/${{secrets.CONTAINER_OWNER}}/AnswerOverflow-devcontainer
+          cacheFrom: ghcr.io/${{secrets.CONTAINER_OWNER}}/AnswerOverflow-devcontainer
           push: always
           runCmd: yarn lint
