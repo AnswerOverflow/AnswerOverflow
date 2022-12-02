@@ -1,20 +1,45 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
+  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/tsconfig.json",
   "display": "Default",
+  "compileOnSave": true,
   "compilerOptions": {
-    "composite": false,
+    "allowSyntheticDefaultImports": true,
+    "alwaysStrict": true,
     "declaration": true,
     "declarationMap": true,
+    "emitDecoratorMetadata": true,
     "esModuleInterop": true,
+    "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
-    "inlineSources": false,
-    "isolatedModules": true,
-    "moduleResolution": "node",
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "preserveWatchOutput": true,
-    "skipLibCheck": true,
-    "strict": true
+    "importHelpers": true,
+    "importsNotUsedAsValues": "error",
+    "incremental": true,
+    "lib": [
+      "esnext"
+    ],
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "newLine": "lf",
+    "noEmitHelpers": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "preserveConstEnums": true,
+    "pretty": true,
+    "removeComments": false,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "exactOptionalPropertyTypes": false,
+    "noImplicitOverride": true,
+    "outDir": "dist"
   },
-  "exclude": ["node_modules"]
+  "exclude": [
+    "dist"
+  ]
 }

@@ -16,7 +16,8 @@
     "eslint-plugin-turbo": "^0.0.4"
   },
   "devDependencies": {
-    "typescript": "^4.7.4"
+    "typescript": "^4.7.4",
+    "@answeroverflow/tsconfig": "*"
   },
   "publishConfig": {
     "access": "public"

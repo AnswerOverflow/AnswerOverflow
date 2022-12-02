@@ -1,14 +1,9 @@
 {
-  "extends": "@sapphire/ts-config",
+  "extends": "@answeroverflow/tsconfig/base.json",
   "compilerOptions": {
-    "outDir": "dist",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
-    "noUnusedLocals": true,
-    "noUnusedParameters": false,
-    "skipLibCheck": true,
-    "importsNotUsedAsValues": "preserve",
-    "baseUrl": "src",
     "rootDir": "./src",
+    "baseUrl": "src",
     "jsx": "react",
     "paths": {
       "@utils/*": [
@@ -32,7 +27,4 @@
     "src",
     "../../node_modules/@answeroverflow/auth/next-auth.d.ts"
   ],
-  "exclude": [
-    "dist"
-  ]
 }

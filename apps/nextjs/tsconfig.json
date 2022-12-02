@@ -1,26 +1,6 @@
 {
-  "extends": "@answeroverflow/tsconfig/base.json",
-  "exclude": [],
+  "extends": "@answeroverflow/tsconfig/nextjs.json",
   "include": [
-    "next-env.d.ts",
     "../../node_modules/@answeroverflow/auth/next-auth.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.cjs",
-    "**/*.mjs"
   ],
-  "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "noEmit": true,
-    "incremental": true,
-    "module": "esnext",
-    "resolveJsonModule": true,
-    "jsx": "preserve"
-  }
 }
