@@ -1,4 +1,4 @@
-import type {  NextAuthOptions } from "next-auth";
+import type { NextAuthOptions } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 
 import { prisma } from "@answeroverflow/db";

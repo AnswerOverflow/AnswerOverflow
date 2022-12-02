@@ -1,6 +1,7 @@
 {
   "extends": "@answeroverflow/tsconfig/nextjs.json",
   "include": [
+    "src",
     "../../node_modules/@answeroverflow/auth/next-auth.d.ts",
   ],
 }

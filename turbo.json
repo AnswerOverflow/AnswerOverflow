@@ -13,6 +13,9 @@
     "lint": {
       "outputs": []
     },
+    "lint:fix": {
+      "outputs": []
+    },
     "dev": {
       "cache": false
     },
@@ -37,6 +40,8 @@
     "VITE_DATABASE_URL",
     "VITE_ELASTIC_USERNAME",
     "VITE_ELASTIC_PASSWORD",
-    "VITE_ELASTIC_IP"
+    "VITE_ELASTIC_IP",
+    "DISCORD_CLIENT_ID",
+    "DISCORD_CLIENT_SECRET"
   ]
 }

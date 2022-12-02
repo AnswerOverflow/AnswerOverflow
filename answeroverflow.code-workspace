@@ -2,10 +2,6 @@
 {
   "folders": [
     {
-      "name": "root",
-      "path": "./"
-    },
-    {
       //
       "name": "web",
       "path": "apps/nextjs"
@@ -34,6 +30,10 @@
     {
       "name": "config",
       "path": "packages/config"
+    },
+    {
+      "name": "root",
+      "path": "./"
     },
   ],
   "settings": {

@@ -3,8 +3,8 @@ import Head from "next/head";
 import Image from "next/image";
 import { signIn, signOut } from "next-auth/react";
 import { trpc } from "../utils/trpc";
-import { inferProcedureOutput } from "@trpc/server";
-import { AppRouter } from "@answeroverflow/api";
+import type { inferProcedureOutput } from "@trpc/server";
+import type { AppRouter } from "@answeroverflow/api";
 
 const ServerCard: React.FC<{
   server: Exclude<inferProcedureOutput<AppRouter["auth"]["getServers"]>, null | undefined>[0];
@@ -65,6 +65,7 @@ const AuthShowcase: React.FC = () => {
       )}
       <button
         className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onClick={session ? () => signOut() : () => signIn()}
       >
         {session ? "Sign out" : "Sign in"}

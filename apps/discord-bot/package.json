@@ -52,7 +52,7 @@
     "build": "tsup --format cjs",
     "start": "node dist/index.js",
     "lint": "eslint src",
-    "lint:fix": "eslint src --fix --ext .ts",
+    "lint:fix": "eslint src --fix",
     "format": "prettier --write \"src/**/*.ts\""
   }
 }

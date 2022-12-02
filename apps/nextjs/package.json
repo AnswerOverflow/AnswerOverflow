@@ -8,6 +8,7 @@
     "clean": "rm -rf .next .turbo node_modules",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@answeroverflow/tsconfig": "*",
+    "@answeroverflow/eslint-config-custom": "*",
     "@types/node": "^18.0.0",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.9",

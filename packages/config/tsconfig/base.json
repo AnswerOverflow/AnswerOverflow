@@ -17,6 +17,9 @@
     "lib": [
       "esnext"
     ],
+    "types": [
+      "vitest/globals"
+    ],
     "module": "CommonJS",
     "moduleResolution": "Node",
     "newLine": "lf",

@@ -13,6 +13,7 @@
     "build:cacheless": "turbo run build --no-cache",
     "dev": "turbo run dev --parallel --no-cache",
     "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
     "dev:discord-bot": "turbo run dev --filter=discord-bot... --parallel --no-cache",
     "build:discord-bot": "turbo run build --filter=discord-bot... --parallel --no-cache",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",

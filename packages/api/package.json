@@ -7,7 +7,8 @@
   "license": "MIT",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "lint": "eslint . --ext .ts,.tsx",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "test": "vitest run --no-threads",
     "type-check": "tsc --noEmit"
   },
