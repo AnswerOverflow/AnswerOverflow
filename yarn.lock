@@ -1876,6 +1876,14 @@
     "@skyra/editable-commands" "^2.1.4"
     tslib "^2.4.0"
 
+"@sapphire/plugin-hmr@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@sapphire/plugin-hmr/-/plugin-hmr-2.0.0.tgz#3b58f642bc836f8c38fedb80569d6ae4bfee3c06"
+  integrity sha512-lJy+QzHHRlCjdEhqnol6xDApTVQsLiOuEKg6hTVwC+Ldc6LrOtnQPPYxBcbPmGTGj08/MEv+f47HA8kv+TsTKQ==
+  dependencies:
+    chokidar "^3.5.3"
+    tslib "2.x"
+
 "@sapphire/plugin-logger@^3.0.1":
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/@sapphire/plugin-logger/-/plugin-logger-3.0.1.tgz#4b411eebb4dd49ad03b89dc93f5280aaa8fbf2d0"
@@ -12018,15 +12026,15 @@ tsconfig-paths@^4.0.0:
     minimist "^1.2.6"
     strip-bom "^3.0.0"
 
+tslib@2.x, tslib@^2.0.0, tslib@^2.0.1, tslib@^2.0.3, tslib@^2.1.0, tslib@^2.3.1, tslib@^2.4.0, tslib@^2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.1.tgz#0d0bfbaac2880b91e22df0768e55be9753a5b17e"
+  integrity sha512-tGyy4dAjRIEwI7BzsB0lynWgOpfqjUdq91XXAlIWD2OwKBH7oCl/GZG/HT4BOHrTlPMOASlMQ7veyTqpmRcrNA==
+
 tslib@^1.8.1, tslib@^1.9.3:
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
-
-tslib@^2.0.0, tslib@^2.0.1, tslib@^2.0.3, tslib@^2.1.0, tslib@^2.3.1, tslib@^2.4.0, tslib@^2.4.1:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.1.tgz#0d0bfbaac2880b91e22df0768e55be9753a5b17e"
-  integrity sha512-tGyy4dAjRIEwI7BzsB0lynWgOpfqjUdq91XXAlIWD2OwKBH7oCl/GZG/HT4BOHrTlPMOASlMQ7veyTqpmRcrNA==
 
 tsup@^6.3.0:
   version "6.5.0"

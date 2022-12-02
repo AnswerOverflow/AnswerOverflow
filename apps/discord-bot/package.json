@@ -12,6 +12,7 @@
     "@sapphire/framework": "^3.2.0-pr-512.244de39.0",
     "@sapphire/plugin-api": "^4.0.1",
     "@sapphire/plugin-editable-commands": "^2.0.1",
+    "@sapphire/plugin-hmr": "^2.0.0",
     "@sapphire/plugin-logger": "^3.0.1",
     "@sapphire/plugin-subcommands": "^3.2.2",
     "@sapphire/time-utilities": "^1.7.8",
@@ -45,12 +46,12 @@
     "vitest": "^0.25.1"
   },
   "scripts": {
+    "dev": "run-p watch start",
+    "watch": "tsup  --format cjs --watch . --watch ../../packages/api/src/",
     "build": "tsup --format cjs",
-    "watch": "tsc -w",
     "start": "node dist/index.js",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix --ext .ts",
-    "dev": "rm -r dist/; tsup --format cjs --watch --onSuccess \"node dist/index.js\"",
     "format": "prettier --write \"src/**/*.ts\""
   }
 }

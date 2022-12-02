@@ -6,7 +6,9 @@
     "noUnusedLocals": true,
     "noUnusedParameters": false,
     "skipLibCheck": true,
+    "importsNotUsedAsValues": "preserve",
     "baseUrl": "src",
+    "rootDir": "./src",
     "jsx": "react",
     "paths": {
       "@utils/*": [
@@ -27,10 +29,9 @@
     },
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx"
+    "src"
   ],
   "exclude": [
-    "node_modules"
+    "dist"
   ]
 }

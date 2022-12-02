@@ -1,7 +1,8 @@
 // Unless explicitly defined, set NODE_ENV as development:
-process.env.NODE_ENV ??= "development";
+process.env = { ...process.env, NODE_ENV: process.env.NODE_ENV ?? "development" };
 
 import "reflect-metadata";
+import "@sapphire/plugin-hmr/register";
 import "@sapphire/plugin-api/register";
 import "@sapphire/plugin-editable-commands/register";
 import "@sapphire/plugin-logger/register";

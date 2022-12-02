@@ -31,6 +31,9 @@ const client = new SapphireClient({
   ],
   partials: [Partials.Channel],
   loadMessageCommandListeners: true,
+  hmr: {
+    enabled: process.env.NODE_ENV === "development",
+  },
 });
 
 export const login = async () => {

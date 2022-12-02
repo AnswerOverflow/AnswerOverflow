@@ -1,6 +1,6 @@
 import { botRouter, BotRouterCaller, createBotContext } from "@answeroverflow/api";
 import { container } from "@sapphire/framework";
-import type { TRPCError } from "@trpc/server";
+import { TRPCError } from "@trpc/server";
 import type { CommandInteraction, GuildMember } from "discord.js";
 import type { ComponentEvent } from "reacord";
 
@@ -30,6 +30,7 @@ export async function createBotRouter(member?: GuildMember): Promise<BotRouterCa
           email: null,
           image: member.displayAvatarURL(),
           name: member.displayName,
+          id: member.id,
         },
       },
       user_servers: [
@@ -55,7 +56,7 @@ export async function callAPI<T>({ ApiCall, Ok, Error, member }: TRPCall<T>): Pr
     const data = await ApiCall(caller); // Pass in the caller we created to ApiCall to make the request
     Ok(data); // If no errors, Ok gets called with the API data
   } catch (error) {
-    Error(error as TRPCError); // TODO: Handle other error types, just doing tRPC for now
+    Error(error as TRPCError);
   }
 }
 
