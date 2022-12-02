@@ -1,6 +1,6 @@
 import { ChannelSettings } from "@answeroverflow/db";
 import { z } from "zod";
-import { mergeRouters, protectedProcedureWithUserServers, publicProcedure, router } from "../trpc";
+import { mergeRouters, protectedProcedureWithUserServers, router } from "../trpc";
 import { bitfieldToDict, dictToBitfield, toZObject } from "../utils/bitfield";
 import { assertCanEditServer } from "../utils/permissions";
 import { channelRouter, channel_upsert_input } from "./channel";
@@ -92,7 +92,7 @@ const channelSettingsCreateUpdate = router({
 });
 
 const channelSettingFind = router({
-  byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
+  byId: protectedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
     const data = await ctx.prisma.channelSettings.findUnique({
       where: {
         channel_id: input,
