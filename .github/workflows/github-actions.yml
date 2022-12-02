@@ -1,7 +1,5 @@
 name: CI
 
-
-
 on: # rebuild any PRs and main branch changes
   pull_request:
   push:
@@ -10,6 +8,7 @@ on: # rebuild any PRs and main branch changes
 
 env:
   DATABASE_URL: ${{secrets.DATABASE_URL}}
+  VITE_DATABASE_URL: ${{secrets.DATABASE_URL}}
 
 jobs:
   build:
