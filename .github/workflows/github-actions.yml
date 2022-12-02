@@ -8,6 +8,9 @@ on: # rebuild any PRs and main branch changes
     branches:
       - main
 
+env:
+  DATABASE_URL: ${{secrets.DATABASE_URL}}
+
 jobs:
   build:
       name: Build and Test
