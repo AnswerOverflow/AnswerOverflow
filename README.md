@@ -6,7 +6,7 @@
 
 <div align="center">
   <h1>Answer Overflow</h1>
-  <h3>Improve & Google Index Discord Help Channels</h3>  
+  <h3>Improve & Google Index Discord Help Channels</h3>
 </div>
 
 ## Developing
@@ -19,12 +19,19 @@ Answer Overflow utilizes VSCode features such as workspaces and development cont
 
 1. [Install VSCode](https://code.visualstudio.com/)
 
-2. [Setup WSL](https://www.youtube.com/watch?v=r7ltoASUiX4)
+2. [Install Docker](https://www.docker.com/)
 
-3. [Install Docker](https://www.docker.com/)
-
-4. Clone & Open 
+3. Clone & Open
 
 ### Develop
 
-With Visual Studio opened in a development container, open a folder in the root workspace and run `yarn run dev` and all services should start uo
+With Visual Studio opened in a development container, open a folder in the root workspace
+
+* Run the whole project
+
+    ```yarn run dev```
+* Run a single app
+
+    ```yarn turbo run dev --filter='app-name'```
+* Install a package
+    ```yarn workspace <workspace> add <package>```

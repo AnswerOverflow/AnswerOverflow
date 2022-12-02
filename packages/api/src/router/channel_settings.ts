@@ -18,7 +18,7 @@ const z_channel_settings_flags = toZObject(...channel_settings_flags);
 const bitfieldToChannelSettingsFlags = (bitfield: number) =>
   bitfieldToDict(bitfield, channel_settings_flags);
 
-const addChannelSettingsFlagsToChannelSettings = (channel_settings: ChannelSettings) => ({
+export const addChannelSettingsFlagsToChannelSettings = (channel_settings: ChannelSettings) => ({
   ...channel_settings,
   flags: bitfieldToChannelSettingsFlags(channel_settings.bitfield),
 });
@@ -97,8 +97,12 @@ const channelSettingFind = router({
       where: {
         channel_id: input,
       },
+      include: {
+        channel: true,
+      },
     });
     if (!data) return null;
+    assertCanEditServer(ctx, data.channel.server_id);
     return addChannelSettingsFlagsToChannelSettings(data);
   }),
 });
