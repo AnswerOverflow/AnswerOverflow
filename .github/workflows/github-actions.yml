@@ -19,16 +19,16 @@ jobs:
 
       steps:
       - name: Checkout (GitHub)
-        uses: actions/checkout@v2
-
-      - name: Start containers # TODO: Use dev container docker-compose instead if possible
-        run: docker-compose -f "docker-compose.yml" up -d --build
+        uses: actions/checkout@v3
 
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: 'yarn'
+
+      - name: Start containers # TODO: Use dev container docker-compose instead if possible
+        run: docker-compose -f "docker-compose.yml" up -d --build
 
       - name: Install dependencies
         run: yarn
