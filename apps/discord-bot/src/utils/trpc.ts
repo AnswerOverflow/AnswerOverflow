@@ -2,6 +2,7 @@ import { botRouter, BotRouterCaller, createBotContext } from "@answeroverflow/ap
 import { container } from "@sapphire/framework";
 import type { TRPCError } from "@trpc/server";
 import type { CommandInteraction, GuildMember } from "discord.js";
+import type { ComponentEvent } from "reacord";
 
 type TRPCall<T> = {
   // eslint-disable-next-line no-unused-vars
@@ -66,6 +67,18 @@ export async function callApiWithEphemeralErrorHandler<T>(
     ...call,
     Error(error) {
       container.reacord.ephemeralReply(interaction, "Error: " + error.message);
+    },
+  });
+}
+
+export async function callApiWithButtonErrorHandler<T>(
+  call: Omit<TRPCall<T>, "Error">,
+  interaction: ComponentEvent
+) {
+  await callAPI({
+    ...call,
+    Error(error) {
+      interaction.ephemeralReply("Error: " + error.message);
     },
   });
 }
