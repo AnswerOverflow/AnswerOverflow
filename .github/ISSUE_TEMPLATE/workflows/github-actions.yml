@@ -4,7 +4,6 @@ on: # rebuild any PRs and main branch changes
   push:
     branches:
       - main
-      - Turbo-Repo-Base
 
 jobs:
   build:
