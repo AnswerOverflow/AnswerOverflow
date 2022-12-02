@@ -22,7 +22,7 @@ jobs:
       - name: Pre-build image and run make ci-build in dev container
         uses: devcontainers/ci@v0.2
         with:
-          imageName: ghcr.io/${{github.repository_owner}}/answeroverflow-devcontainer
-          cacheFrom: ghcr.io/${{github.repository_owner}}/answeroverflow-devcontainer
+          imageName: ghcr.io/${{secrets.CONTAINER_TOKEN}}/answeroverflow-devcontainer
+          cacheFrom: ghcr.io/${{secrets.CONTAINER_TOKEN}}/answeroverflow-devcontainer
           push: always
           runCmd: yarn lint
