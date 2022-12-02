@@ -29,7 +29,8 @@
     },
   },
   "include": [
-    "src"
+    "src",
+    "../../node_modules/@answeroverflow/auth/next-auth.d.ts"
   ],
   "exclude": [
     "dist"
