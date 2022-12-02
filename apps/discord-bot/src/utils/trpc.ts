@@ -1,80 +1,7 @@
-import {
-  botRouter,
-  BotRouterCaller,
-  ChannelUpsertInput,
-  createBotContext,
-  ServerUpsertInput,
-} from "@answeroverflow/api";
+import { botRouter, BotRouterCaller, createBotContext } from "@answeroverflow/api";
 import { container } from "@sapphire/framework";
 import type { TRPCError } from "@trpc/server";
 import type { CommandInteraction, GuildMember } from "discord.js";
-
-export async function makeMemberAPICaller(member?: GuildMember): Promise<BotRouterCaller> {
-  let ctx = await createBotContext({
-    session: null,
-    user_servers: null,
-  });
-  if (member) {
-    ctx = await createBotContext({
-      session: {
-        expires: new Date().toUTCString(),
-        user: {
-          email: null,
-          image: member.displayAvatarURL(),
-          name: member.displayName,
-        },
-      },
-      user_servers: [
-        {
-          name: member.guild.name,
-          id: member.guild.id,
-          features: member.guild.features,
-          permissions: member.permissions.bitfield.toString(),
-          icon: member.guild.iconURL(),
-          owner: member.guild.ownerId === member.id,
-        },
-      ],
-    });
-  }
-  return botRouter.createCaller(ctx);
-}
-
-interface Channel {
-  id: string;
-  name: string;
-  type: number;
-}
-
-export function makeChannelUpsert(channel: Channel, server: Server): ChannelUpsertInput {
-  return {
-    create: {
-      id: channel.id,
-      name: channel.name,
-      type: channel.type,
-      server: { ...makeServerUpsert(server) },
-    },
-    update: {
-      name: channel.name,
-    },
-  };
-}
-
-interface Server {
-  id: string;
-  name: string;
-}
-
-export function makeServerUpsert(server: Server): ServerUpsertInput {
-  return {
-    create: {
-      id: server.id,
-      name: server.name,
-    },
-    update: {
-      name: server.name,
-    },
-  };
-}
 
 type TRPCall<T> = {
   // eslint-disable-next-line no-unused-vars
@@ -86,17 +13,52 @@ type TRPCall<T> = {
   member?: GuildMember;
 };
 
+// TODO: This function can be cleaned up
+export async function createBotRouter(member?: GuildMember): Promise<BotRouterCaller> {
+  let ctx = await createBotContext({
+    session: null, // Some bot calls may be performed without a member, this allows that to happen
+    user_servers: null,
+  });
+  if (member) {
+    const guild = member.guild;
+    ctx = await createBotContext({
+      session: {
+        expires: new Date().toUTCString(),
+        // TODO: Create a real user object & pass it here, currently mocking with fake user data.
+        user: {
+          email: null,
+          image: member.displayAvatarURL(),
+          name: member.displayName,
+        },
+      },
+      user_servers: [
+        // The only server that we care about is the one we are currently interacting with, so only having 1 server makes sense here
+        {
+          name: guild.name,
+          id: guild.id,
+          features: guild.features,
+          // Permissions are the member permissions that tRPC validates match the required flags
+          permissions: member.permissions.bitfield.toString(),
+          icon: guild.iconURL(),
+          owner: guild.ownerId === member.id,
+        },
+      ],
+    });
+  }
+  return botRouter.createCaller(ctx);
+}
+
 export async function callAPI<T>({ ApiCall, Ok, Error, member }: TRPCall<T>): Promise<void> {
   try {
-    const caller = await makeMemberAPICaller(member);
-    const data = await ApiCall(caller);
-    Ok(data);
+    const caller = await createBotRouter(member); // Create the trpcCaller passing in member to make the context
+    const data = await ApiCall(caller); // Pass in the caller we created to ApiCall to make the request
+    Ok(data); // If no errors, Ok gets called with the API data
   } catch (error) {
-    Error(error as TRPCError);
+    Error(error as TRPCError); // TODO: Handle other error types, just doing tRPC for now
   }
 }
 
-export async function callAPIEphemeralErrorHandler<T>(
+export async function callApiWithEphemeralErrorHandler<T>(
   call: Omit<TRPCall<T>, "Error">,
   interaction: CommandInteraction
 ) {

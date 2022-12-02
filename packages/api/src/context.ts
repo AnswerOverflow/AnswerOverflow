@@ -10,7 +10,9 @@ import { getUserServers } from "./utils/discord-oauth";
 
 type CreateContextOptions = {
   session: Session | null;
+  // If the web client, then we need to fetch the user servers
   caller: "discord-bot" | "web-client";
+  // Used for ensuring that the user has the right access to the data they are trying to fetch
   user_servers: Awaited<ReturnType<typeof getUserServers>> | null;
 };
 

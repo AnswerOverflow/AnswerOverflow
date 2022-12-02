@@ -28,6 +28,7 @@ const isAuthed = t.middleware(({ ctx, next }) => {
 const hasUserServers = t.middleware(async ({ ctx, next }) => {
   // The bot passes in only the server that it is editing.
   // On the server we need to fetch what guilds the user is allowed to edit
+  // TODO: Could possibly be improved, but is fine for now
   if (ctx.caller === "web-client" && ctx.session) {
     const discord_account = await getDiscordAccount(ctx.prisma, ctx.session.user.id);
     if (!discord_account.access_token) {

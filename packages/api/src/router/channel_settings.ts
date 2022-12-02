@@ -102,6 +102,7 @@ const channelSettingFind = router({
       },
     });
     if (!data) return null;
+    // TODO: This would work create as a middleware / in some other place but it relies on data from this function
     assertCanEditServer(ctx, data.channel.server_id);
     return addChannelSettingsFlagsToChannelSettings(data);
   }),

@@ -2,7 +2,7 @@ import { getDefaultChannelSettings } from "@answeroverflow/api";
 import { ChannelSettingsMenu } from "@components/channel-settings-menu";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command, container, type ChatInputCommand } from "@sapphire/framework";
-import { callAPIEphemeralErrorHandler } from "@utils/trpc";
+import { callApiWithEphemeralErrorHandler } from "@utils/trpc";
 import {
   SlashCommandBuilder,
   PermissionsBitField,
@@ -48,7 +48,7 @@ export class ChannelSettingsCommand extends Command {
     const channel = interaction.channel;
     const member = await guild.members.fetch(interaction.user.id);
 
-    await callAPIEphemeralErrorHandler(
+    await callApiWithEphemeralErrorHandler(
       {
         async ApiCall(router) {
           return await router.channel_settings.byId(interaction.channelId);

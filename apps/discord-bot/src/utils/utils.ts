@@ -1,3 +1,4 @@
+import type { ChannelUpsertInput, ServerUpsertInput } from "@answeroverflow/api";
 import type {
   ChatInputCommandSuccessPayload,
   Command,
@@ -85,4 +86,41 @@ function getAuthorInfo(author: User | APIUser) {
 function getGuildInfo(guild: Guild | null) {
   if (guild === null) return "Direct Messages";
   return `${guild.name}[${cyan(guild.id)}]`;
+}
+
+interface Channel {
+  id: string;
+  name: string;
+  type: number;
+}
+
+export function makeChannelUpsert(channel: Channel, server: Server): ChannelUpsertInput {
+  return {
+    create: {
+      id: channel.id,
+      name: channel.name,
+      type: channel.type,
+      server: { ...makeServerUpsert(server) },
+    },
+    update: {
+      name: channel.name,
+    },
+  };
+}
+
+interface Server {
+  id: string;
+  name: string;
+}
+
+export function makeServerUpsert(server: Server): ServerUpsertInput {
+  return {
+    create: {
+      id: server.id,
+      name: server.name,
+    },
+    update: {
+      name: server.name,
+    },
+  };
 }
