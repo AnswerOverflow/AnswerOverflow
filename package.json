@@ -9,6 +9,7 @@
     ]
   },
   "scripts": {
+    "init": "turbo run init",
     "build": "turbo run build",
     "build:cacheless": "turbo run build --no-cache",
     "dev": "turbo run dev --parallel --no-cache",

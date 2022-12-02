@@ -10,6 +10,7 @@
         ".next/**"
       ]
     },
+    "init": {},
     "lint": {
       "outputs": []
     },

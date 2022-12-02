@@ -1,5 +1,7 @@
 name: CI
 
+
+
 on: # rebuild any PRs and main branch changes
   pull_request:
   push:
@@ -32,6 +34,9 @@ jobs:
 
       - name: Install dependencies
         run: yarn
+
+      - name: Setup Database
+        run: yarn init
 
       - name: Lint
         run: yarn lint
