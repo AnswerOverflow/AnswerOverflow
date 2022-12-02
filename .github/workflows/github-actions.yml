@@ -7,7 +7,7 @@ on: # rebuild any PRs and main branch changes
       - main
 
 env:
-  DATABASE_UR: ${{secrets.DATABASE_URL}}
+  DATABASE_URL: ${{secrets.DATABASE_URL}}
 
 jobs:
   build:
