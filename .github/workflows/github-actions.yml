@@ -39,7 +39,7 @@ jobs:
         run: yarn
 
       - name: Setup Database
-        run: yarn init
+        run: yarn migrate
 
       - name: Lint
         run: yarn lint

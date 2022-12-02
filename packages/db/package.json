@@ -7,6 +7,7 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "init": "npx prisma migrate dev",
+    "migrate": "npx prisma migrate deploy",
     "with-env": "dotenv -e ../../.env --",
     "dev": "yarn with-env prisma studio --port 5556 --browser none",
     "lint": "TIMING=1 eslint \"*.ts*\"",
