@@ -1,4 +1,4 @@
-import { ChannelSettings } from "@answeroverflow/db";
+import type { ChannelSettings } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "../trpc";
 import { bitfieldToDict, dictToBitfield, toZObject } from "../utils/bitfield";

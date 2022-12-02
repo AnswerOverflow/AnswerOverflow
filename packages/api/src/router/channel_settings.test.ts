@@ -16,6 +16,7 @@ beforeEach(async () => {
         email: null,
         image: "https://example.com",
         name: "test",
+        id: "1",
       },
     },
     user_servers: [
@@ -36,6 +37,7 @@ beforeEach(async () => {
         email: null,
         image: "https://example.com",
         name: "test",
+        id: "1",
       },
     },
     user_servers: [

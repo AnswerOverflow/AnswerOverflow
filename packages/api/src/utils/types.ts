@@ -1,5 +1,5 @@
-import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
-import { botRouter } from "../router";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import type { botRouter } from "../router";
 
 export type BotRouter = typeof botRouter;
 export type BotRouterCaller = ReturnType<BotRouter["createCaller"]>;

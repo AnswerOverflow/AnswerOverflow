@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { PermissionsBitField } from "discord.js";
-import { Context } from "../context";
+import type { Context } from "../context";
 
 export function assertCanEditServer(ctx: Context, server_id: string) {
   if (!ctx.user_servers) {

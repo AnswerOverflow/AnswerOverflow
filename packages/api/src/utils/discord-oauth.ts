@@ -1,4 +1,4 @@
-import { PrismaClient } from "@answeroverflow/db";
+import type { PrismaClient } from "@answeroverflow/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 function discordFetch(url: string, token: string) {

@@ -7,6 +7,8 @@ let servers: ReturnType<typeof serverRouter["createCaller"]>;
 beforeEach(async () => {
   const a = await createContextInner({
     session: null,
+    caller: "discord-bot",
+    user_servers: null,
   });
   servers = serverRouter.createCaller(a);
   await clearDatabase();

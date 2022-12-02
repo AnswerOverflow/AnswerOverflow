@@ -1,6 +1,6 @@
-import { ChannelSettings } from "@answeroverflow/db";
+import type { ChannelSettings } from "@answeroverflow/db";
 import { addChannelSettingsFlagsToChannelSettings } from "../router/channel_settings";
-import { ChannelSettingsOutput } from "./types";
+import type { ChannelSettingsOutput } from "./types";
 
 export function getDefaultChannelSettings(channel_id: string): ChannelSettingsOutput {
   const default_settings: ChannelSettings = {

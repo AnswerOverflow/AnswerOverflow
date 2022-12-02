@@ -14,7 +14,7 @@ function toDict<T extends readonly string[], Result>(
 }
 
 export function toBitfield<T extends readonly string[]>(...keys: T): Record<T[number], number> {
-  return toDict((key, index) => 1 << index, ...keys);
+  return toDict((_key, index) => 1 << index, ...keys);
 }
 
 export function toZObject<T extends readonly string[]>(
