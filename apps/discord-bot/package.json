@@ -46,7 +46,8 @@
     "vitest": "^0.25.1"
   },
   "scripts": {
-    "dev": "run-p watch start",
+    "dev": "rm -rf dist && yarn run build && run-p watch start",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "watch": "tsup  --format cjs --watch . --watch ../../packages/api/src/",
     "build": "tsup --format cjs",
     "start": "node dist/index.js",
