@@ -89,4 +89,29 @@ describe("channelRouter", () => {
     const result = await router_manage_guilds.channel_settings.upsert(TEST_CREATE_CHANNEL_SETTINGS);
     expect(result).toBeDefined();
   });
+  it("should upsert a channel and then upsert channel settings", async () => {
+    const result = await router_manage_guilds.channels.upsert({
+      create: {
+        ...TEST_CHANNEL_1,
+      },
+      update: {
+        ...TEST_CHANNEL_1,
+      },
+    });
+    expect(result).toBeDefined();
+    const result2 = await router_manage_guilds.channel_settings.upsert({
+      create: {
+        channel: {
+          create: {
+            ...TEST_CHANNEL_1,
+          },
+          update: {
+            ...TEST_CHANNEL_1,
+          },
+        },
+      },
+      update: {},
+    });
+    expect(result2).toBeDefined();
+  });
 });

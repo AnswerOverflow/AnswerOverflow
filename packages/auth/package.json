@@ -14,13 +14,13 @@
     "@answeroverflow/db": "*",
     "@answeroverflow/tsconfig": "*",
     "@next-auth/prisma-adapter": "^1.0.5",
-    "next": "^13.0.5",
+    "next": "^13.0.6",
     "next-auth": "^4.17.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
   "devDependencies": {
-    "eslint": "^8.28.0",
+    "eslint": "^8.29.0",
     "typescript": "^4.9.3"
   }
 }
