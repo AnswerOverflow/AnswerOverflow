@@ -70,7 +70,7 @@ const AuthShowcase: React.FC = () => {
       >
         {session ? "Sign out" : "Sign in"}
       </button>
-      <div className="grid grid-cols-4 overflow-y-scroll max-h-[70vh] gap-4">
+      <div className="grid max-h-[70vh] grid-cols-4 gap-4 overflow-y-scroll">
         {servers?.map((server) => {
           return <ServerCard server={server} key={server.id} />;
         })}
