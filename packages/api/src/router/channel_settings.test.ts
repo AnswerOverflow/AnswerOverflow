@@ -1,7 +1,7 @@
+import { TEST_SERVER_1, clearDatabase, TEST_CHANNEL_1 } from "@test/utils";
 import { TRPCError } from "@trpc/server";
 import { PermissionsBitField } from "discord.js";
 import { botRouter } from ".";
-import { clearDatabase, TEST_CHANNEL_1, TEST_SERVER_1 } from "../../test/utils";
 import { createBotContext } from "../context";
 
 // eslint-disable-next-line no-unused-vars

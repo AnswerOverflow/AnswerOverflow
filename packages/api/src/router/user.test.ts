@@ -1,4 +1,4 @@
-import { clearDatabase } from "../../test/utils";
+import { clearDatabase } from "@test/utils";
 import { createContextInner } from "../context";
 import { userRouter } from "./user";
 

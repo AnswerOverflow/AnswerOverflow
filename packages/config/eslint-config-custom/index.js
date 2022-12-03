@@ -20,6 +20,12 @@ module.exports = {
     "prettier/prettier": ["error"],
     "@typescript-eslint/no-floating-promises": "error",
     "@typescript-eslint/prefer-as-const": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        patterns: ["../..*"],
+      },
+    ],
     //"@typescript-eslint/explicit-function-return-type": "warn"
   },
 };

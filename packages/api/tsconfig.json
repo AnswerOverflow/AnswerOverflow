@@ -1,5 +1,16 @@
 {
   "extends": "@answeroverflow/tsconfig/base.json",
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@router/*": [
+        "router/*"
+      ],
+      "@test/*": [
+        "../test/*"
+      ]
+    }
+  },
   "include": [
     "src",
     "test",
