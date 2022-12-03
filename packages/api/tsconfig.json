@@ -1,0 +1,24 @@
+{
+  "extends": "@answeroverflow/tsconfig/base.json",
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@router/*": [
+        "router/*"
+      ],
+      "@testing/*": [
+        "test/*"
+      ],
+      "@utils/*": [
+        "utils/*"
+      ]
+    }
+  },
+  "include": [
+    "src",
+    "index.ts",
+    "transformer.ts",
+    "vitest.config.ts",
+    "../../node_modules/@answeroverflow/auth/next-auth.d.ts"
+  ]
+}

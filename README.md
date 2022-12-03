@@ -1,16 +1,37 @@
-### Hi there 👋
+<p align='center'>
+        <a href='https://answeroverflow.com/'>
+        <img src="https://www.answeroverflow.com/content/branding/AnswerOverflowLOGO.png">
+    </a>
+</p>
 
-<!--
-**AnswerOverflow/AnswerOverflow** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+<div align="center">
+  <h1>Answer Overflow</h1>
+  <h3>Improve & Google Index Discord Help Channels</h3>
+</div>
 
-Here are some ideas to get you started:
+## Developing
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+### Environment Setup
+
+Answer Overflow utilizes VSCode features such as workspaces and development containers to provide a fast and consistent cross platform development experience. If you already have VSCode and Docker installed then setting up should be as quick as opening the cloned project in VSCode and running `reopen project in container` along with `open workspace`
+
+#### Windows
+
+1. [Install VSCode](https://code.visualstudio.com/)
+
+2. [Install Docker](https://www.docker.com/)
+
+3. Clone & Open
+
+### Develop
+
+With Visual Studio opened in a development container, open a folder in the root workspace
+
+* Run the whole project
+
+    ```yarn run dev```
+* Run a single app
+
+    ```yarn turbo run dev --filter='app-name'```
+* Install a package
+    ```yarn workspace <workspace> add <package>```

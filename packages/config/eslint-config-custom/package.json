@@ -1,0 +1,26 @@
+{
+  "name": "@answeroverflow/eslint-config-custom",
+  "version": "0.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.43.0",
+    "eslint": "^8.29.0",
+    "eslint-config-next": "^13.0.6",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-turbo": "0.0.7",
+    "eslint-plugin-jest": "^27.1.6",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "7.31.11",
+    "eslint-plugin-turbo": "^0.0.7",
+    "prettier": "^2.8.0"
+  },
+  "devDependencies": {
+    "@answeroverflow/tsconfig": "*",
+    "typescript": "^4.7.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
