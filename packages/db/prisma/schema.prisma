@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// General concept for laying out the fields:
+// ids go first, then then fields, then at the bottom are the references to other tables
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// NextAuth.js Models
+// NOTE: When using postgresql, mysql or sqlserver,
+// uncomment the @db.Text annotations below
+// @see https://next-auth.js.org/schemas/models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? // @db.Text
+  access_token      String? // @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? // @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+
+  user_channel_settings UserChannelSettings[]
+  user_server_settings  UserServerSettings[]
+  accounts              Account[]
+  sessions              Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model UserChannelSettings {
+  user_id    String
+  channel_id String
+  bitfield   Int    @default(0)
+
+  user    User    @relation(fields: [user_id], references: [id])
+  channel Channel @relation(fields: [channel_id], references: [id])
+
+  @@id([user_id, channel_id])
+}
+
+model UserServerSettings {
+  user_id   String
+  server_id String
+  bitfield  Int    @default(0)
+
+  user   User   @relation(fields: [user_id], references: [id])
+  server Server @relation(fields: [server_id], references: [id])
+
+  @@id([user_id, server_id])
+}
+
+model DeletedUser {
+  deleted_user_id String @id
+}
+
+// Servers
+
+model Server {
+  id          String    @id
+  name        String    @db.VarChar(100)
+  icon        String?   @db.VarChar(45)
+  kicked_time DateTime?
+
+  user_server_settings UserServerSettings[]
+  channels             Channel[]
+}
+
+model ServerSettings {
+  server_id String @id
+  bitfield  Int    @default(0)
+}
+
+// Channels
+
+model Channel {
+  id        String @id
+  server_id String
+  name      String @db.VarChar(100)
+  type      Int
+
+  server                Server                @relation(fields: [server_id], references: [id])
+  user_channel_settings UserChannelSettings[]
+  channel_settings      ChannelSettings[]
+  ForumChannelTag       ForumChannelTag[]
+}
+
+model ChannelSettings {
+  channel_id             String  @id
+  bitfield               Int     @default(0)
+  last_indexed_snowflake String?
+  invite_code            String? @db.VarChar(15)
+  solution_tag_id        String?
+
+  channel Channel @relation(fields: [channel_id], references: [id])
+}
+
+model ForumChannelTag {
+  id         String
+  channel_id String
+  channel    Channel @relation(fields: [channel_id], references: [id])
+  name       String  @db.VarChar(20)
+
+  @@id([id, channel_id])
+}

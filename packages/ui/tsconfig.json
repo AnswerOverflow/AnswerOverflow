@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+  },
+  "extends": "@answeroverflow/tsconfig/nextjs.json",
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.cjs",
+    "**/*.mjs"
+  ],
+}

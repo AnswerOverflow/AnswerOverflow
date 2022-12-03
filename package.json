@@ -1,0 +1,33 @@
+{
+  "name": "ao-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/**/*",
+      "packages/**/*"
+    ]
+  },
+  "scripts": {
+    "init": "turbo run init",
+    "build": "turbo run build",
+    "build:cacheless": "turbo run build --no-cache",
+    "dev": "turbo run dev --parallel --no-cache",
+    "lint": "turbo run lint",
+    "migrate": "turbo run migrate",
+    "lint:fix": "turbo run lint:fix",
+    "dev:discord-bot": "turbo run dev --filter=discord-bot... --parallel --no-cache",
+    "build:discord-bot": "turbo run build --filter=discord-bot... --parallel --no-cache",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "test": "turbo run test"
+  },
+  "devDependencies": {
+    "@answeroverflow/eslint-config-custom": "*",
+    "@vitest/coverage-c8": "^0.25.1",
+    "turbo": "latest"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {}
+}

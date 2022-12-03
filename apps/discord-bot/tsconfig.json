@@ -1,0 +1,30 @@
+{
+  "extends": "@answeroverflow/tsconfig/base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "rootDir": "./src",
+    "baseUrl": "src",
+    "jsx": "react",
+    "paths": {
+      "@utils/*": [
+        "utils/*"
+      ],
+      "@primitives/*": [
+        "primitives/*"
+      ],
+      "@interaction-handlers/*": [
+        "interaction-handlers/*"
+      ],
+      "@components/*": [
+        "components/*"
+      ],
+      "@trpc/*": [
+        "trpc/*"
+      ]
+    },
+  },
+  "include": [
+    "src",
+    "../../node_modules/@answeroverflow/auth/next-auth.d.ts"
+  ],
+}

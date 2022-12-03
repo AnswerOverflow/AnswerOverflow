@@ -1,28 +1,54 @@
-name: 'build'
+name: CI
+
 on: # rebuild any PRs and main branch changes
   pull_request:
   push:
     branches:
       - main
 
+env:
+  DATABASE_URL: ${{secrets.DATABASE_URL}}
+  VITE_DATABASE_URL: ${{secrets.DATABASE_URL}}
+
 jobs:
   build:
-    runs-on: ubuntu-latest
-    steps:
+      name: Build and Test
+      timeout-minutes: 15
+      runs-on: ubuntu-latest
+
+    # To use Remote Caching, uncomment the next lines and follow the steps below.
+    # env:
+    #  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+    #  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+      steps:
       - name: Checkout (GitHub)
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
         with:
-          registry: ghcr.io
-          username: ${{ secrets.CONTAINER_OWNER }}
-          password: ${{ secrets.CONTAINER_TOKEN }}
+          node-version: 16
+          cache: 'yarn'
 
-      - name: Pre-build image and run make ci-build in dev container
-        uses: devcontainers/ci@v0.2
-        with:
-          imageName: ghcr.io/${{secrets.CONTAINER_OWNER}}/AnswerOverflow-devcontainer
-          cacheFrom: ghcr.io/${{secrets.CONTAINER_OWNER}}/AnswerOverflow-devcontainer
-          push: always
-          runCmd: yarn lint
+      - name: Start containers # TODO: Use dev container docker-compose instead if possible
+        run: docker-compose -f "docker-compose.yml" up -d --build
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Setup Database
+        run: yarn migrate
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Build
+        run: yarn build
+
+      - name: Test
+        run: yarn test
+
+      - name: Stop containers
+        if: always()
+        run: docker-compose -f "docker-compose.yml" down

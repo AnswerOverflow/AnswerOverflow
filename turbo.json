@@ -1,0 +1,51 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "pipeline": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ]
+    },
+    "init": {},
+    "migrate": {},
+    "lint": {
+      "outputs": []
+    },
+    "lint:fix": {
+      "outputs": []
+    },
+    "dev": {
+      "cache": false
+    },
+    "test": {
+      "outputs": []
+    }
+  },
+  "globalDependencies": [
+    ".env.local"
+  ],
+  "globalEnv": [
+    "NODE_ENV",
+    "DISCORD_TOKEN",
+    "OWNERS",
+    "VERCEL_URL",
+    "PORT",
+    "DATABASE_URL",
+    "ELASTIC_IP",
+    "ELASTIC_USERNAME",
+    "ELASTIC_PASSWORD",
+    "ELASTIC_API_KEY",
+    "VITE_DATABASE_URL",
+    "VITE_ELASTIC_USERNAME",
+    "VITE_ELASTIC_PASSWORD",
+    "VITE_ELASTIC_IP",
+    "DISCORD_CLIENT_ID",
+    "DISCORD_CLIENT_SECRET",
+    "SKIP_ENV_VALIDATION",
+    "CI"
+  ]
+}
