@@ -1,4 +1,4 @@
-import { clearDatabase, TEST_SERVER_1 } from "@test/utils";
+import { clearDatabase, TEST_SERVER_1 } from "@testing/utils";
 import { createContextInner } from "../context";
 import { serverRouter } from "./server";
 

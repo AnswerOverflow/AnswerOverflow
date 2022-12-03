@@ -6,16 +6,19 @@
       "@router/*": [
         "router/*"
       ],
-      "@test/*": [
-        "../test/*"
+      "@testing/*": [
+        "test/*"
+      ],
+      "@utils/*": [
+        "utils/*"
       ]
     }
   },
   "include": [
     "src",
-    "test",
     "index.ts",
     "transformer.ts",
+    "vitest.config.ts",
     "../../node_modules/@answeroverflow/auth/next-auth.d.ts"
   ]
 }

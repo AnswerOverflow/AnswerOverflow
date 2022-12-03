@@ -1,4 +1,4 @@
-import { TEST_SERVER_1, clearDatabase, TEST_CHANNEL_1 } from "@test/utils";
+import { TEST_SERVER_1, clearDatabase, TEST_CHANNEL_1 } from "@testing/utils";
 import { TRPCError } from "@trpc/server";
 import { PermissionsBitField } from "discord.js";
 import { botRouter } from ".";
