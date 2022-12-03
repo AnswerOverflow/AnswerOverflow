@@ -1,3 +1,5 @@
+
+
 <p align='center'>
         <a href='https://answeroverflow.com/'>
         <img src="https://www.answeroverflow.com/content/branding/AnswerOverflowLOGO.png">
@@ -7,6 +9,8 @@
 <div align="center">
   <h1>Answer Overflow</h1>
   <h3>Improve & Google Index Discord Help Channels</h3>
+  <h4>⚠ Currently In Breaking Development ⚠</h4>
+  <p>While you are welcome to submit issues / PRs - while the project base is created a lot of changes will be happening to the repo</p>
 </div>
 
 ## Developing
