@@ -4,6 +4,7 @@
     "allowJs": true,
   },
   "include": [
-    "index.js"
+    "index.js",
+    "postcss.js"
   ]
 }

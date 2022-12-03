@@ -24,9 +24,7 @@
   "devDependencies": {
     "@answeroverflow/eslint-config-custom": "*",
     "@vitest/coverage-c8": "^0.25.1",
-    "prettier": "latest",
-    "turbo": "latest",
-    "vitest": "^0.25.1"
+    "turbo": "latest"
   },
   "engines": {
     "node": ">=14.0.0"

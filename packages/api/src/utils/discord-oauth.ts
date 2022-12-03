@@ -14,7 +14,7 @@ const serverSchema = z.object({
   name: z.string(),
   icon: z.string().nullable(),
   owner: z.boolean(),
-  permissions: z.string(),
+  permissions: z.number(),
   features: z.array(z.string()),
 });
 

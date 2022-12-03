@@ -1,4 +1,3 @@
 /** @type {import("tailwindcss").Config} */
-module.exports = {
-  presets: [require("@answeroverflow/tailwind-config")],
-};
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+module.exports = require("@answeroverflow/tailwind-config");
