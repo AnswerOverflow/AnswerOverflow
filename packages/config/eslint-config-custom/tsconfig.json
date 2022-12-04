@@ -4,6 +4,6 @@
     "allowJs": true,
   },
   "include": [
-    "index.js"
+    "*.js"
   ]
 }
