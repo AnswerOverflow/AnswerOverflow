@@ -2,6 +2,9 @@
   "name": "@answeroverflow/eslint-config-custom",
   "version": "0.0.0",
   "main": "index.js",
+  "files": [
+    "next.js"
+  ],
   "license": "MIT",
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^5.45.0",
