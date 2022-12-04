@@ -9,6 +9,10 @@
       "dom.iterable",
       "esnext"
     ],
+    "types": [
+      "vitest/globals",
+      "@vitest/ui"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
