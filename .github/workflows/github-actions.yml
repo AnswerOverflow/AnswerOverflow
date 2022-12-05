@@ -35,7 +35,8 @@ jobs:
         run: docker-compose -f "docker-compose.yml" up -d --build
 
       - name: Install dependencies
-        run: yarn
+        # Playright is used for storybook, possible move that into package.json instead?
+        run: yarn && npx playwright install-deps
 
       - name: Setup Database
         run: yarn migrate
