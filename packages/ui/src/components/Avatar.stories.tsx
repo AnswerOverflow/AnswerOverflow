@@ -1,6 +1,7 @@
 import type { ComponentStory, Meta } from "@storybook/react";
 import Avatar, { AvatarProps } from "./Avatar";
-
+import { within } from "@storybook/testing-library";
+import { expect } from "@storybook/jest";
 export default {
   title: "Avatar",
   component: Avatar,
@@ -12,6 +13,12 @@ const Template: ComponentStory<typeof Avatar> = (args: AvatarProps) => <Avatar {
 //👇 Each story then reuses that template
 export const Primary = Template.bind({});
 Primary.args = { user: { name: "John Doe" } };
+
+Primary.play = async ({ canvasElement }) => {
+  const canvas = within(canvasElement);
+  const icon = await canvas.findByText("John Doe");
+  expect(icon.innerText).toBe("John Doe");
+};
 
 export const Secondary = Template.bind({});
 Secondary.args = {
