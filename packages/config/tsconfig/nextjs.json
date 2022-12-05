@@ -10,8 +10,7 @@
       "esnext"
     ],
     "types": [
-      "vitest/globals",
-      "@vitest/ui"
+      "vitest/globals"
     ],
     "allowJs": true,
     "skipLibCheck": true,
