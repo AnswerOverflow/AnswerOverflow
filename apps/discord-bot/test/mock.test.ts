@@ -1,6 +1,6 @@
 // TODO: Write tests that validate each phase of the Sapphire input parsing to easily debug where mocked data fails
 
-import { ChatInputCommand, Events } from "@sapphire/framework";
+import { Events } from "@sapphire/framework";
 import {
   type APIChatInputApplicationCommandInteraction,
   ApplicationCommandType,

@@ -8,7 +8,7 @@
     "dev": "start-storybook -p 6006 --quiet",
     "test-storybook": "test-storybook",
     "test": "yarn build && npx concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"npx http-server storybook-static --port 6006 --silent\" \"npx wait-on tcp:6006 && yarn test-storybook\"",
-    "build": "build-storybook"
+    "build": "build-storybook --quiet"
   },
   "dependencies": {
     "next": "13.0.2",

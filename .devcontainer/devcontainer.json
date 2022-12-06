@@ -24,7 +24,8 @@
         "Prisma.prisma",
         "ZixuanChen.vitest-explorer",
         "EditorConfig.EditorConfig",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "DavidAnson.vscode-markdownlint"
       ]
     }
   },

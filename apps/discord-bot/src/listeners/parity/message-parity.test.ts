@@ -15,6 +15,7 @@ describe("Bot", () => {
     expect(sync_delete).toBeDefined();
     vitest.spyOn(sync_delete, "run" as never);
     bot.client.emit("messageDelete", bot.message);
-    expect(sync_delete.run).toHaveBeenCalled();
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(sync_delete!.run).toHaveBeenCalled();
   });
 });

@@ -7,7 +7,7 @@ import {
 import MockDiscord from "~test/mock";
 
 describe("Channel Settings Slash Command", () => {
-  it("Should open the channel settings menu", async () => {
+  it("Should fail to open the channel settings menu due to missing permission", async () => {
     const bot = new MockDiscord();
     await bot.client.login("test");
 
@@ -47,6 +47,6 @@ describe("Channel Settings Slash Command", () => {
     expect(interaction.isCommand()).toBeTruthy();
     expect(has_run).toBeTruthy();
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(settings_command.chatInputRun).toHaveBeenCalledOnce();
+    expect(settings_command.chatInputRun).not.toHaveBeenCalled();
   });
 });

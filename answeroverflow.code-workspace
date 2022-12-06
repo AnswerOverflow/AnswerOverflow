@@ -88,6 +88,9 @@
       "*.css": "tailwindcss"
     },
     "search.useIgnoreFiles": true,
+    "[markdown]": {
+      "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+    },
   },
   "extensions": {
     "recommendations": [
