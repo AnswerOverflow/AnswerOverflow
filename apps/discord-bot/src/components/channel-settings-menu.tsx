@@ -1,6 +1,6 @@
 import type { ChannelSettingsOutput, ChannelSettingsUpsertInput } from "@answeroverflow/api";
-import { callApiWithButtonErrorHandler } from "@utils/trpc";
-import { makeChannelUpsert } from "@utils/utils";
+import { callApiWithButtonErrorHandler } from "~utils/trpc";
+import { makeChannelUpsert } from "~utils/utils";
 import { type GuildForumTag, type TextBasedChannel, ChannelType, ForumChannel } from "discord.js";
 import { ButtonClickEvent, Select, SelectChangeEvent, Option } from "reacord";
 import React from "react";

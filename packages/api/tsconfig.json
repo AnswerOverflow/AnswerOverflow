@@ -9,7 +9,7 @@
       "@testing/*": [
         "test/*"
       ],
-      "@utils/*": [
+      "~utils/*": [
         "utils/*"
       ]
     }

@@ -1,4 +1,4 @@
-import "@utils/setup";
+import "~utils/setup";
 import { container, LogLevel, SapphireClient } from "@sapphire/framework";
 import "@sapphire/plugin-api/register";
 import { ReacordDiscordJs } from "reacord";
@@ -42,7 +42,6 @@ export const login = async () => {
   try {
     client.logger.info("Logging in");
     await client.login(process.env.DISCORD_TOKEN);
-
     client.logger.info("logged in");
     container.reacord = new ReacordDiscordJs(client);
   } catch (error) {

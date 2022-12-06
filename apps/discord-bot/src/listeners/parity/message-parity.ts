@@ -1,17 +1,16 @@
-import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
-import type { Channel, Collection, Message, Snowflake } from "discord.js";
+import type { Message } from "discord.js";
 
-@ApplyOptions<Listener.Options>({ event: "messageDelete" })
 export class SyncMessageDelete extends Listener {
+  public constructor(context: Listener.Context, options: Listener.Options) {
+    super(context, {
+      ...options,
+      event: "messageDelete",
+      name: "MessageDeletedWatcher",
+    });
+  }
+
   public run(message: Message) {
     console.log("Deleting message: ", message.id);
-  }
-}
-
-@ApplyOptions<Listener.Options>({ event: "messageDeleteBulk" })
-export class SyncBulkMessageDelete extends Listener {
-  public run(messages: Collection<Snowflake, Message>, channel: Channel) {
-    console.log("Bulk deleting messages in channel ", messages.size, channel.id);
   }
 }

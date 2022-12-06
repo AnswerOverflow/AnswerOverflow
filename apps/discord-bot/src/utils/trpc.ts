@@ -1,6 +1,6 @@
 import { botRouter, BotRouterCaller, createBotContext } from "@answeroverflow/api";
 import { container } from "@sapphire/framework";
-import { TRPCError } from "@trpc/server";
+import type { TRPCError } from "@trpc/server";
 import type { CommandInteraction, GuildMember } from "discord.js";
 import type { ComponentEvent } from "reacord";
 
@@ -40,7 +40,7 @@ export async function createBotRouter(member?: GuildMember): Promise<BotRouterCa
           id: guild.id,
           features: guild.features,
           // Permissions are the member permissions that tRPC validates match the required flags
-          permissions: member.permissions.bitfield.toString(),
+          permissions: member.permissions.bitfield as unknown as number, // TODO: Handle bigint better
           icon: guild.iconURL(),
           owner: guild.ownerId === member.id,
         },

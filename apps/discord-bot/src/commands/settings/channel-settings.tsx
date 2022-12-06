@@ -1,8 +1,8 @@
 import { getDefaultChannelSettings } from "@answeroverflow/api";
-import { ChannelSettingsMenu } from "@components/channel-settings-menu";
+import { ChannelSettingsMenu } from "~components/channel-settings-menu";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command, container, type ChatInputCommand } from "@sapphire/framework";
-import { callApiWithEphemeralErrorHandler } from "@utils/trpc";
+import { callApiWithEphemeralErrorHandler } from "~utils/trpc";
 import {
   SlashCommandBuilder,
   PermissionsBitField,
@@ -13,21 +13,16 @@ import React from "react";
 @ApplyOptions<Command.Options>({
   name: "channel-settings",
   description: "Configure channel settings",
-  preconditions: ["GuildOnly"],
-  runIn: ["GUILD_ANY"],
-  //requiredUserPermissions: ["ManageGuild"],
 })
 export class ChannelSettingsCommand extends Command {
   public getSlashCommandBuilder(): SlashCommandBuilder {
-    return new SlashCommandBuilder()
-      .setName(this.name)
-      .setDescription(this.description)
-      .setDMPermission(false)
-      .setDefaultMemberPermissions(PermissionsBitField.resolve("AddReactions"));
+    return new SlashCommandBuilder().setName(this.name).setDescription(this.description);
   }
 
   public override registerApplicationCommands(registry: ChatInputCommand.Registry) {
-    registry.registerChatInputCommand(this.getSlashCommandBuilder());
+    registry.registerChatInputCommand(this.getSlashCommandBuilder(), {
+      idHints: ["1048055954618454026"],
+    });
   }
 
   public override async chatInputRun(

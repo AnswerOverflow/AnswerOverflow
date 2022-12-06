@@ -3,7 +3,7 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
     bundle: true,
     dts: false,
-    entry: ['src/**/*.ts', '!src/**/*.d.ts', 'src/**/*.tsx'],
+    entry: ['src/**/*.ts', '!src/**/*.d.ts', 'src/**/*.tsx', '!src/**/*.test.ts'],
     format: ['cjs'],
     minify: false,
     tsconfig: 'tsconfig.json',
