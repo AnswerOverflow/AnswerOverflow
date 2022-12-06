@@ -47,6 +47,6 @@ describe("Channel Settings Slash Command", () => {
     expect(interaction.isCommand()).toBeTruthy();
     expect(has_run).toBeTruthy();
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    //expect(settings_command.chatInputRun).toHaveBeenCalledOnce();
+    expect(settings_command.chatInputRun).toHaveBeenCalledOnce();
   });
 });

@@ -13,10 +13,17 @@ import React from "react";
 @ApplyOptions<Command.Options>({
   name: "channel-settings",
   description: "Configure channel settings",
+  preconditions: ["GuildOnly"],
+  runIn: ["GUILD_ANY"],
+  requiredUserPermissions: ["ManageGuild"],
 })
 export class ChannelSettingsCommand extends Command {
   public getSlashCommandBuilder(): SlashCommandBuilder {
-    return new SlashCommandBuilder().setName(this.name).setDescription(this.description);
+    return new SlashCommandBuilder()
+      .setName(this.name)
+      .setDescription(this.description)
+      .setDMPermission(false)
+      .setDefaultMemberPermissions(PermissionsBitField.resolve("AddReactions"));
   }
 
   public override registerApplicationCommands(registry: ChatInputCommand.Registry) {
