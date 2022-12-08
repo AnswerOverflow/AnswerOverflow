@@ -13,5 +13,6 @@ export default defineConfig({
     sourcemap: true,
     shims: true,
     keepNames: true,
+    
     noExternal: ['@answeroverflow/api', '@answeroverflow/auth', '@answeroverflow/db'],
 });

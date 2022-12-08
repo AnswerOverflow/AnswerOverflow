@@ -13,8 +13,6 @@ import React from "react";
 @ApplyOptions<Command.Options>({
   name: "channel-settings",
   description: "Configure channel settings",
-  preconditions: ["GuildOnly"],
-  runIn: ["GUILD_ANY"],
   requiredUserPermissions: ["ManageGuild"],
 })
 export class ChannelSettingsCommand extends Command {
@@ -23,7 +21,7 @@ export class ChannelSettingsCommand extends Command {
       .setName(this.name)
       .setDescription(this.description)
       .setDMPermission(false)
-      .setDefaultMemberPermissions(PermissionsBitField.resolve("AddReactions"));
+      .setDefaultMemberPermissions(PermissionsBitField.resolve("ManageGuild"));
   }
 
   public override registerApplicationCommands(registry: ChatInputCommand.Registry) {

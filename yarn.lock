@@ -15,6 +15,17 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
+"@answeroverflow/reacord@^0.5.6":
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/@answeroverflow/reacord/-/reacord-0.5.6.tgz#0ea8fb30274dad340ac889ea1ea282f352950ba1"
+  integrity sha512-lA9Z+wHKc+7g5T6LB8+lAlIT9TamD4/PX3+l+NXQ/QTaaw697sb/Up28tAVlel1S1RbaYpQY/BHcQW8tYtCQ2Q==
+  dependencies:
+    "@types/node" "*"
+    "@types/react" "*"
+    "@types/react-reconciler" "^0.28.0"
+    react-reconciler "^0.29.0"
+    rxjs "^7.5.6"
+
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.10.4", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.18.6", "@babel/code-frame@^7.5.5", "@babel/code-frame@^7.8.3":
   version "7.18.6"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.18.6.tgz#3b25d38c89600baa2dcc219edfa88a74eb2c427a"
@@ -3821,13 +3832,13 @@
     c8 "^7.12.0"
     vitest "0.25.3"
 
-"@vitest/coverage-c8@^0.25.4":
-  version "0.25.4"
-  resolved "https://registry.yarnpkg.com/@vitest/coverage-c8/-/coverage-c8-0.25.4.tgz#68f3b9634a426191476aca229d33b09d16f2d278"
-  integrity sha512-3ozqZUr3x8woBCBXJRzt1P8DRGKsIxajfzRu3ySKJE0bCkIl2hofzHYzkHBZafhfhMOt+hR6L395Io7gyMmpUQ==
+"@vitest/coverage-c8@^0.25.5":
+  version "0.25.5"
+  resolved "https://registry.yarnpkg.com/@vitest/coverage-c8/-/coverage-c8-0.25.5.tgz#515c06d7c00eed2337ca0aa317616bfbe9482c59"
+  integrity sha512-tXlg0QVkTQ+7dqhsuwRFovP5vjgYGyBrRREFS55IQ20IsiSaRug9sRblRsckTXmGtz1OMJy/Lxv1gFVo24/ipA==
   dependencies:
     c8 "^7.12.0"
-    vitest "0.25.4"
+    vitest "0.25.5"
 
 "@webassemblyjs/ast@1.11.1":
   version "1.11.1"
@@ -11737,17 +11748,6 @@ raw-loader@^4.0.2:
     loader-utils "^2.0.0"
     schema-utils "^3.0.0"
 
-reacord@^0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/reacord/-/reacord-0.5.2.tgz#e80294ca87ef08cdf87faa31ddf7af99ea16ffd8"
-  integrity sha512-5DweN3f7SqL8ha8ImtRCGJ23lA7F602npLGcA4vKTadr/3eb+YlMWPxWq+3GJlnxT0+CB2gBaEU0GaL8UcYpew==
-  dependencies:
-    "@types/node" "*"
-    "@types/react" "*"
-    "@types/react-reconciler" "^0.28.0"
-    react-reconciler "^0.29.0"
-    rxjs "^7.5.6"
-
 react-docgen-typescript@^2.1.1:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/react-docgen-typescript/-/react-docgen-typescript-2.2.2.tgz#4611055e569edc071204aadb20e1c93e1ab1659c"
@@ -12293,9 +12293,9 @@ rxjs@^6.6.3:
     tslib "^1.9.0"
 
 rxjs@^7.5.6:
-  version "7.5.7"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.5.7.tgz#2ec0d57fdc89ece220d2e702730ae8f1e49def39"
-  integrity sha512-z9MzKh/UcOqB3i20H6rtrlaE/CgjLOvheWK/9ILrbhROGTweAi1BaFsTT9FbwZi5Trr1qNRs+MXkhmR06awzQA==
+  version "7.6.0"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.6.0.tgz#361da5362b6ddaa691a2de0b4f2d32028f1eb5a2"
+  integrity sha512-DDa7d8TFNUalGC9VqXvQ1euWNN7sc63TrUCuM9J998+ViviahMIjKSOU7rfcgFOF+FCD71BhDRv4hrFz+ImDLQ==
   dependencies:
     tslib "^2.1.0"
 
@@ -14024,7 +14024,27 @@ vitest@0.25.3, vitest@^0.25.1:
     tinyspy "^1.0.2"
     vite "^3.0.0"
 
-vitest@0.25.4, vitest@^0.25.4:
+vitest@0.25.5:
+  version "0.25.5"
+  resolved "https://registry.yarnpkg.com/vitest/-/vitest-0.25.5.tgz#efb8bf0dc0438af11346cb8ecde47cd5ad830934"
+  integrity sha512-lFKSTZV+AjuL44/yNC0aDPKTiasYSqOQ97Gg2G4P2LnjyzQ21ZUs4rQOscHK3lrSnVuir3+1QavHzbDgH4tWQA==
+  dependencies:
+    "@types/chai" "^4.3.3"
+    "@types/chai-subset" "^1.3.3"
+    "@types/node" "*"
+    acorn "^8.8.0"
+    acorn-walk "^8.2.0"
+    chai "^4.3.6"
+    debug "^4.3.4"
+    local-pkg "^0.4.2"
+    source-map "^0.6.1"
+    strip-literal "^1.0.0"
+    tinybench "^2.3.1"
+    tinypool "^0.3.0"
+    tinyspy "^1.0.2"
+    vite "^3.0.0"
+
+vitest@^0.25.4:
   version "0.25.4"
   resolved "https://registry.yarnpkg.com/vitest/-/vitest-0.25.4.tgz#11134b4c9199ed64bd5cc2945d98435381c50ef9"
   integrity sha512-v/qoSEYPrf8qa1CbKIKYK+1GGmPPEJyXFbkuD6jhh080cfNBsuUDAdMu6hV2h9Uv34EMiUrVETL/wB+EHxFtbA==

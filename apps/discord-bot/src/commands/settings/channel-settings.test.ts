@@ -3,6 +3,7 @@ import {
   APIChatInputApplicationCommandInteraction,
   ApplicationCommandType,
   InteractionType,
+  PermissionsBitField,
 } from "discord.js";
 import MockDiscord from "~test/mock";
 
@@ -19,10 +20,26 @@ describe("Channel Settings Slash Command", () => {
     const data: APIChatInputApplicationCommandInteraction = {
       application_id: "1048055954618454026",
       channel_id: "1048055954618454026",
+      member: {
+        deaf: false,
+        mute: false,
+        nick: "nick",
+        joined_at: new Date("2020-01-01").getTime().toString(),
+        user: {
+          id: "user-id",
+          username: "USERNAME",
+          discriminator: "user#0000",
+          avatar: "user avatar url",
+          bot: false,
+        },
+        roles: [],
+        permissions: PermissionsBitField.resolve("ManageGuild").toString(),
+      },
       data: {
         id: "1048055954618454026",
         name: "channel-settings",
         type: ApplicationCommandType.ChatInput,
+        guild_id: "1048055954618454026",
       },
       id: "1048055954618454026",
       locale: "en-US",
@@ -33,11 +50,12 @@ describe("Channel Settings Slash Command", () => {
       version: 1,
     };
     const interaction = bot.mockInteracion(data);
+    expect(interaction.memberPermissions!.has("ManageGuild")).toBeTruthy();
+    expect(interaction.guildId).toBeDefined();
     interaction.isChatInputCommand = () => true;
-
     vitest.spyOn(settings_command, "chatInputRun" as never);
-    let has_run = false;
-    bot.client.addListener(Events.PossibleChatInputCommand, () => {
+    let has_run = true;
+    bot.client.addListener(Events.ChatInputCommandDenied, () => {
       has_run = true;
     });
     console.log("emitting event");
@@ -47,6 +65,6 @@ describe("Channel Settings Slash Command", () => {
     expect(interaction.isCommand()).toBeTruthy();
     expect(has_run).toBeTruthy();
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(settings_command.chatInputRun).not.toHaveBeenCalled();
+    expect(settings_command.chatInputRun).toHaveBeenCalled();
   });
 });

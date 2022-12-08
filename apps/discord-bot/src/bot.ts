@@ -1,7 +1,7 @@
 import "~utils/setup";
 import { container, LogLevel, SapphireClient } from "@sapphire/framework";
 import "@sapphire/plugin-api/register";
-import { ReacordDiscordJs } from "reacord";
+import { ReacordDiscordJs } from "@answeroverflow/reacord";
 import { Partials } from "discord.js";
 declare module "@sapphire/pieces" {
   // eslint-disable-next-line no-unused-vars

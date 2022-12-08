@@ -15,4 +15,7 @@ export default createVitestConfig({
       "~listeners": path.resolve(__dirname, "./src/listeners"),
     },
   },
+  test: {
+    testTimeout: 10000,
+  },
 });
