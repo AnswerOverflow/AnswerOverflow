@@ -1,19 +1,16 @@
 // TODO: Write tests that validate each phase of the Sapphire input parsing to easily debug where mocked data fails
 
 import { Events } from "@sapphire/framework";
-import {
-  type APIChatInputApplicationCommandInteraction,
-  ApplicationCommandType,
-  InteractionType,
-} from "discord.js";
-import MockDiscord from "./mock";
+import { ApplicationCommandType, InteractionType, PermissionsBitField } from "discord.js";
+import type { RawInteractionData } from "discord.js/typings/rawDataTypes";
+import { mockClient, mockInteracion } from "./mock";
 
 describe("Mock tests", () => {
   it("should pass", async () => {
-    const bot = new MockDiscord();
-    await bot.client.login("test");
+    const bot = mockClient();
+    await bot.login("test");
 
-    const data: APIChatInputApplicationCommandInteraction = {
+    const data: RawInteractionData = {
       application_id: "1048055954618454026",
       channel_id: "1048055954618454026",
       data: {
@@ -28,28 +25,42 @@ describe("Mock tests", () => {
       guild_locale: "en-US",
       type: InteractionType.ApplicationCommand,
       version: 1,
+      member: {
+        deaf: false,
+        mute: false,
+        nick: "nick",
+        user: {
+          id: "100",
+          username: "USERNAME",
+          avatar: "user avatar url",
+          discriminator: "user#0000",
+        },
+        joined_at: "2021-09-01T00:00:00.000Z",
+        roles: [],
+        permissions: PermissionsBitField.resolve("ManageGuild").toString(),
+      },
     };
 
-    const interaction = bot.mockInteracion(data);
+    const interaction = mockInteracion(bot, data);
     interaction.isChatInputCommand = () => true;
 
-    const command_store = bot.client.stores.get("commands");
+    const command_store = bot.stores.get("commands");
     console.log(interaction.commandId, interaction.commandName);
     const command =
       command_store.get(interaction.commandId) ?? command_store.get(interaction.commandName);
     expect(command).toBeDefined();
 
     let isPossibleChatInputCommand = false;
-    bot.client.addListener(Events.PossibleChatInputCommand, () => {
+    bot.addListener(Events.PossibleChatInputCommand, () => {
       isPossibleChatInputCommand = true;
     });
 
     let unknownChatInputCommand = false;
-    bot.client.addListener(Events.UnknownChatInputCommand, () => {
+    bot.addListener(Events.UnknownChatInputCommand, () => {
       unknownChatInputCommand = true;
     });
 
-    bot.client.emit(Events.InteractionCreate, interaction);
+    bot.emit(Events.InteractionCreate, interaction);
     expect(isPossibleChatInputCommand).toBeTruthy();
     expect(unknownChatInputCommand).toBeFalsy();
   });

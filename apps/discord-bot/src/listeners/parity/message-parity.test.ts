@@ -1,20 +1,19 @@
-import MockDiscord from "~test/mock";
+import { mockClient, mockGuild, mockMessage, mockTextChannel } from "~test/mock";
 
 describe("Bot", () => {
   it("should be able to create a new bot", () => {
-    const bot = new MockDiscord();
+    const bot = mockClient();
     expect(bot).toBeDefined();
-    expect(bot.client).toBeDefined();
   });
   it("should create and listen to a simple listener", async () => {
-    const bot = new MockDiscord();
-    await bot.client.login("test");
-    const sync_delete = bot.client.stores
+    const bot = mockClient();
+    await bot.login("test");
+    const sync_delete = bot.stores
       .get("listeners")
       .find((listener) => listener.name === "MessageDeletedWatcher");
     expect(sync_delete).toBeDefined();
     vitest.spyOn(sync_delete, "run" as never);
-    bot.client.emit("messageDelete", bot.message);
+    bot.emit("messageDelete", mockMessage(bot, mockTextChannel(mockGuild(bot)), "test"));
     // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(sync_delete!.run).toHaveBeenCalled();
   });

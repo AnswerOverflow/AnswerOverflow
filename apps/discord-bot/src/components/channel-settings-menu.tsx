@@ -71,13 +71,13 @@ export function ChannelSettingsMenu({
       currently_enabled={channelSettings.flags.mark_solution_enabled}
       disable_label={"Disable Mark Solution"}
       enable_label={"Enable Mark Solution"}
-      onClick={(interaction: ButtonClickEvent) => {
+      onClick={(interaction: ButtonClickEvent) =>
         void updateChannelSettings(interaction, {
           flags: {
             mark_solution_enabled: !channelSettings.flags.mark_solution_enabled,
           },
-        });
-      }}
+        })
+      }
     />
   );
 
