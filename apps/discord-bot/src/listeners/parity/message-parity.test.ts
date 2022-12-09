@@ -1,5 +1,11 @@
 import { ChannelType } from "discord.js";
-import { mockClient, mockGuild, mockMessage, mockGuildChannel, mockUser } from "~test/mock";
+import {
+  mockClient,
+  mockGuild,
+  mockMessage,
+  mockGuildChannel,
+  mockUser,
+} from "~test/discordjs/mock";
 
 describe("Bot", () => {
   it("should be able to create a new bot", () => {

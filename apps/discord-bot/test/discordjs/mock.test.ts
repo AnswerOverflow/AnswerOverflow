@@ -1,12 +1,11 @@
 // TODO: Write tests that validate each phase of the Sapphire input parsing to easily debug where mocked data fails
 
-import { ChannelType, Events, PermissionsBitField } from "discord.js";
+import { ChannelType, Events } from "discord.js";
 import {
   mockClient,
   mockGuild,
   mockGuildChannel,
   mockGuildMember,
-  mockInteracion,
   mockMessage,
   mockSlashCommand,
   mockUser,
@@ -40,6 +39,7 @@ describe("Mock tests", () => {
     await bot.login();
     const user = mockUser(bot);
     const guild = mockGuild(bot, user);
+    mockGuildMember(bot, guild);
 
     const text_channel = mockGuildChannel(bot, guild, ChannelType.GuildText);
     expect(text_channel).toBeDefined();
@@ -48,6 +48,9 @@ describe("Mock tests", () => {
     expect(text_channel.type).toBe(ChannelType.GuildText);
     expect(guild.channels.cache.get(text_channel.id)).toBeDefined();
     expect(bot.channels.cache.get(text_channel.id)).toBeDefined();
+
+    expect(guild.members.cache.get(user.id)).toBeDefined();
+    await expect(text_channel.guild.members.fetch(user.id)).resolves.toBeDefined();
 
     const voice_channel = mockGuildChannel(bot, guild, ChannelType.GuildVoice);
     expect(voice_channel).toBeDefined();
@@ -63,7 +66,7 @@ describe("Mock tests", () => {
     const user = mockUser(bot);
     const guild = mockGuild(bot, user);
     const member = guild.members.cache.get(user.id);
-    expect(member).toBeUndefined();
+    expect(member).toBeDefined();
     const created_member = mockGuildMember(bot, guild);
     expect(created_member).toBeDefined();
     expect(guild.members.cache.get(created_member.id)).toBeDefined();
@@ -101,7 +104,9 @@ describe("Mock tests", () => {
     const bot = mockClient();
     await bot.login("test");
 
-    const user = mockUser(bot);
+    const user = mockUser(bot, {
+      id: "1000",
+    });
     const guild = mockGuild(bot, user);
     const text_channel = mockGuildChannel(bot, guild, ChannelType.GuildText);
 
@@ -109,14 +114,36 @@ describe("Mock tests", () => {
       client: bot,
       guild,
       channel: text_channel,
-      permissions: [],
+      permissions: ["ManageGuild"],
+      user: {
+        id: "235234",
+      },
       data: {
         id: "123",
         name: "test",
       },
     });
+    const member = await text_channel.guild.members.fetch(slash_command.user.id);
+    expect(member).toBeDefined();
+    expect(slash_command.guild).toBeDefined();
+
+    const owner = await slash_command.guild!.members.fetch(slash_command.guild!.ownerId);
+    expect(owner).toBeDefined();
+    expect(owner.permissions.has("ManageGuild")).toBe(true);
+
+    const everyone = guild.roles.everyone;
+    expect(guild.roles.cache.get(guild.id)).toBeDefined();
+    expect(everyone).toBeDefined();
+    expect(everyone.id).toBeDefined();
+
+    expect(member.user.id).toBeDefined();
+    expect(member.guild.ownerId).toBeDefined();
+    expect(member.roles).toBeDefined();
+    expect(member.permissions.has("ManageGuild")).toBeTruthy();
+    expect(slash_command.memberPermissions!.has("ManageGuild")).toBeTruthy();
 
     expect(guild.members.cache.get(slash_command.user.id)).toBeDefined();
+
     expect(bot.users.cache.get(slash_command.user.id)).toBeDefined();
 
     let has_run = false;

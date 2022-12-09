@@ -18,10 +18,13 @@ import {
   APIChatInputApplicationCommandInteractionData,
   PermissionsBitField,
   PermissionResolvable,
+  APIUser,
+  Role,
 } from "discord.js";
 import type {
   RawInteractionData,
   RawMessageData,
+  RawRoleData,
   RawUserData,
 } from "discord.js/typings/rawDataTypes";
 // References: https://dev.to/heymarkkop/how-to-implement-test-and-mock-discordjs-v13-slash-commands-with-typescript-22lc
@@ -58,6 +61,19 @@ export function getMockGuildData(data: Partial<APIGuild> = {}): APIGuild {
     mfa_level: 0,
     hub_type: 0,
     features: [],
+    roles: [
+      {
+        color: 0,
+        hoist: false,
+        id: data.id ?? "400",
+        managed: false,
+        mentionable: false,
+        name: "everyone",
+        permissions: PermissionsBitField.Default.toString(),
+        position: 0,
+        tags: undefined,
+      } as RawRoleData,
+    ],
     name: "guild name",
     description: "guild description",
     default_message_notifications: 0,
@@ -78,6 +94,20 @@ export function mockGuild(
     getMockGuildData({ ...data, owner_id: owner.id }),
   ]) as Guild;
   client.guilds.cache.set(guild.id, guild);
+  mockGuildMember(client, guild, {
+    user: {
+      id: owner.id,
+      avatar: owner.avatar,
+      username: owner.username,
+      discriminator: owner.discriminator,
+    },
+  });
+  // replace guild members fetched with accessing from the cache of the fetched user id in the fetch argument
+  guild.members.fetch = vitest.fn().mockImplementation((id: string) => {
+    const member = guild.members.cache.get(id);
+    if (member) return Promise.resolve(member);
+    return Promise.reject(new Error("Member not found"));
+  });
   return guild;
 }
 
@@ -216,9 +246,15 @@ export function mockSlashCommand(options: {
   data: Partial<Omit<APIChatInputApplicationCommandInteractionData, "guild_id" | "type">> &
     Pick<APIChatInputApplicationCommandInteractionData, "name" | "id">;
   permissions: PermissionResolvable;
-  user?: Partial<APIInteractionGuildMember>;
+  user?: Partial<APIUser>;
 }): ChatInputCommandInteraction {
   const { client, guild, channel, user, data, permissions } = options;
+  const role = mockRole({
+    client,
+    permissions,
+    guild,
+  }); // Create a custom role representing the permissions of the slash command user
+
   const cmd_data: APIApplicationCommandInteraction = {
     application_id: "123456789",
     channel_id: channel.id,
@@ -234,7 +270,7 @@ export function mockSlashCommand(options: {
       joined_at: "33",
       mute: false,
       permissions: PermissionsBitField.resolve(permissions).toString(),
-      roles: [],
+      roles: [role.id, guild.id],
       user: {
         id: "123456789",
         username: "test",
@@ -252,5 +288,29 @@ export function mockSlashCommand(options: {
     client,
     cmd_data,
   ]) as ChatInputCommandInteraction;
+
   return cmd;
+}
+
+export function mockRole(data: {
+  client: SapphireClient;
+  permissions: PermissionResolvable;
+  guild: Guild;
+  role?: Partial<RawRoleData>;
+}) {
+  const { client, permissions, guild, role } = data;
+  const role_data: RawRoleData = {
+    color: 0,
+    hoist: false,
+    id: "1",
+    managed: false,
+    mentionable: false,
+    name: "test",
+    position: 0,
+    permissions: PermissionsBitField.resolve(permissions).toString(),
+    ...role,
+  };
+  const created_role = Reflect.construct(Role, [client, role_data, guild]) as Role;
+  guild.roles.cache.set(created_role.id, created_role);
+  return created_role;
 }

@@ -1,6 +1,12 @@
 import type { ChatInputCommand } from "@sapphire/framework";
 import { ChannelType, Events } from "discord.js";
-import { mockClient, mockGuild, mockGuildChannel, mockSlashCommand, mockUser } from "~test/mock";
+import {
+  mockClient,
+  mockGuild,
+  mockGuildChannel,
+  mockSlashCommand,
+  mockUser,
+} from "~test/discordjs/mock";
 
 describe("Channel Settings Slash Command", () => {
   it("Should fail to open the channel settings menu due to missing permission", async () => {
