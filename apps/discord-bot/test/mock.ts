@@ -1,28 +1,30 @@
 import { SapphireClient } from "@sapphire/framework";
-import { Channel } from "diagnostics_channel";
 import {
   User,
   Message,
   GuildMember,
   Guild,
   TextChannel,
-  GuildChannel,
   Client,
   ChatInputCommandInteraction,
-  PermissionsBitField,
   ChannelType,
+  APIGuild,
+  APIGuildChannel,
+  APIInteractionGuildMember,
+  ApplicationCommandType,
+  InteractionType,
+  GuildChannel,
+  APIApplicationCommandInteraction,
+  APIChatInputApplicationCommandInteractionData,
+  PermissionsBitField,
+  PermissionResolvable,
 } from "discord.js";
 import type {
-  RawChannelData,
-  RawGuildChannelData,
-  RawGuildData,
-  RawGuildMemberData,
   RawInteractionData,
   RawMessageData,
   RawUserData,
 } from "discord.js/typings/rawDataTypes";
 // References: https://dev.to/heymarkkop/how-to-implement-test-and-mock-discordjs-v13-slash-commands-with-typescript-22lc
-// Needs extension, just getting the concepts in for testing
 
 export function mockClient() {
   const client = new SapphireClient({ intents: [] });
@@ -30,166 +32,225 @@ export function mockClient() {
   return client;
 }
 
+export function getMockUserData(data: Partial<RawUserData> = {}): RawUserData {
+  return {
+    id: "100",
+    username: "USERNAME",
+    discriminator: "user#0000",
+    avatar: "user avatar url",
+    bot: false,
+    ...data,
+  } as RawUserData;
+}
+
+export function mockUser(client: SapphireClient, data: Partial<RawUserData> = {}) {
+  const user = Reflect.construct(User, [client, getMockUserData(data)]) as User;
+  client.users.cache.set(user.id, user);
+  return user;
+}
+
+export function getMockGuildData(data: Partial<APIGuild> = {}): APIGuild {
+  return {
+    id: "400",
+    verification_level: 0,
+    emojis: [],
+    icon: "guild icon url",
+    mfa_level: 0,
+    hub_type: 0,
+    features: [],
+    name: "guild name",
+    description: "guild description",
+    default_message_notifications: 0,
+    banner: "guild banner url",
+    splash: "guild splash url",
+    discovery_splash: "guild discovery splash url",
+    ...data,
+  } as APIGuild;
+}
+
+export function mockGuild(
+  client: SapphireClient,
+  owner: User,
+  data: Partial<Omit<APIGuild, "owner_id">> = {}
+) {
+  const guild = Reflect.construct(Guild, [
+    client,
+    getMockGuildData({ ...data, owner_id: owner.id }),
+  ]) as Guild;
+  client.guilds.cache.set(guild.id, guild);
+  return guild;
+}
+
+export function getMockGuildChannelData<T extends ChannelType>(data: Partial<APIGuildChannel<T>>) {
+  return {
+    id: "900",
+    name: "guild-channel",
+    position: 1,
+    parent_id: "123456789",
+    permission_overwrites: [],
+    guild_id: "400",
+    applied_tags: [],
+    available_tags: [],
+    default_reaction_emoji: [],
+    default_sort_order: 1,
+    topic: "topic",
+    nsfw: false,
+    last_message_id: "123456789",
+    rate_limit_per_user: 0,
+    ...data,
+  } as APIGuildChannel<T>;
+}
+
+export function mockGuildChannel<T extends ChannelType>(
+  client: SapphireClient,
+  guild: Guild,
+  type: T,
+  data: Partial<Omit<APIGuildChannel<T>, "type">> = {}
+) {
+  const channel = Reflect.construct(TextChannel, [
+    guild,
+    getMockGuildChannelData({ ...data, type, guild_id: guild.id }),
+  ]) as TextChannel;
+  client.channels.cache.set(channel.id, channel);
+  guild.channels.cache.set(channel.id, channel);
+  return channel;
+}
+
+export function getMockInteractionGuildMember(data: Partial<APIInteractionGuildMember>) {
+  return {
+    user: getMockUserData(),
+    permissions: "0",
+    roles: [],
+    deaf: false,
+    joined_at: "33",
+    mute: false,
+    ...data,
+  } as APIInteractionGuildMember;
+}
+
+export function mockGuildMember(
+  client: SapphireClient,
+  guild: Guild,
+  data: Partial<APIInteractionGuildMember> = {}
+) {
+  const member = Reflect.construct(GuildMember, [
+    client,
+    getMockInteractionGuildMember(data),
+    guild,
+  ]) as GuildMember;
+  guild.members.cache.set(member.id, member);
+  return member;
+}
+
+export function getMockMessageData(data: Partial<RawMessageData> = {}) {
+  return {
+    id: "123456789",
+    attachments: [],
+    author: getMockUserData(),
+    content: "",
+    edited_timestamp: null,
+    embeds: [],
+    mention_everyone: false,
+    mention_roles: [],
+    mentions: [],
+    pinned: false,
+    tts: false,
+    type: 0,
+    ...data,
+  } as RawMessageData;
+}
+
+export function mockMessage(
+  client: SapphireClient,
+  textChannel: TextChannel,
+  data: Partial<RawMessageData> = {}
+) {
+  return Reflect.construct(Message, [
+    client,
+    getMockMessageData({ ...data, channel_id: textChannel.id }),
+    textChannel,
+  ]) as Message;
+}
+
+export function getMockInteractionData(
+  guild: Guild,
+  channel: GuildChannel,
+  name: string,
+  id: string,
+  data: Partial<RawInteractionData> = {}
+) {
+  return {
+    guild_id: guild.id,
+    application_id: "123456789",
+    channel_id: channel.id,
+    data: {
+      id: id,
+      name: name,
+      type: ApplicationCommandType.ChatInput,
+    },
+    type: InteractionType.ApplicationCommand,
+    version: 1,
+    member: getMockInteractionGuildMember({}),
+    ...data,
+  } as RawInteractionData;
+}
+
 export function mockInteracion(
   client: SapphireClient,
-  command: RawInteractionData
+  guild: Guild,
+  channel: GuildChannel,
+  name: string,
+  id: string,
+  data: Partial<RawInteractionData> = {}
 ): ChatInputCommandInteraction {
   return Reflect.construct(ChatInputCommandInteraction, [
     client,
-    command,
+    getMockInteractionData(guild, channel, name, id, data),
   ]) as ChatInputCommandInteraction;
 }
 
-export function mockUser(client: SapphireClient) {
-  return Reflect.construct(User, [
-    client,
-    {
-      id: "100",
-      username: "USERNAME",
-      discriminator: "user#0000",
-      avatar: "user avatar url",
-      avatarUrl: () => "user avatar url",
-      bot: false,
-    } as RawUserData,
-  ]) as User;
-}
-
-export function mockGuild(client: SapphireClient) {
-  return Reflect.construct(Guild, [
-    client,
-    {
-      unavailable: false,
-      id: "400",
-      name: "mocked js guild",
-      icon: "mocked guild icon url",
-      splash: "mocked guild splash url",
-      region: "eu-west",
-      member_count: 42,
-      large: false,
-      features: [],
-      application_id: "application-id",
-      afkTimeout: 1000,
-      afk_channel_id: "afk-channel-id",
-      system_channel_id: "system-channel-id",
-      embed_enabled: true,
-      verification_level: 2,
-      explicit_content_filter: 3,
-      mfa_level: 8,
-      joined_at: new Date("2018-01-01").getTime(),
-      owner_id: "100", // owner id has to have been created
-      channels: [],
-      roles: [],
-      presences: [],
-      voice_states: [],
-      emojis: [],
-    } as RawGuildData,
-  ]) as Guild;
-}
-
-export function mockChannel(client: SapphireClient) {
-  return Reflect.construct(Channel, [
-    client,
-    {
-      id: "900",
-    } as RawChannelData,
-  ]) as Channel;
-}
-
-export function mockGuildChannel(guild: Guild) {
-  return Reflect.construct(GuildChannel, [
-    guild,
-    {
-      id: "900",
-      permissions: [],
-      type: ChannelType.GuildText,
-      name: "guild-channel",
-      position: 1,
-      parent_id: "123456789",
-      permission_overwrites: [],
-      guild_id: "400",
-      applied_tags: [],
-      available_tags: [],
-      default_reaction_emoji: [],
-      default_sort_order: 1,
-    } as RawGuildChannelData,
-  ]) as GuildChannel;
-}
-
-export function mockTextChannel(guild: Guild) {
-  return Reflect.construct(TextChannel, [
-    guild,
-    {
-      id: "900",
-      permissions: [],
-      type: ChannelType.GuildText,
-      name: "guild-channel",
-      position: 1,
-      parent_id: "123456789",
-      permission_overwrites: [],
-      guild_id: "400",
-      applied_tags: [],
-      available_tags: [],
-      default_reaction_emoji: [],
-      default_sort_order: 1,
-      topic: "topic",
-      nsfw: false,
-      last_message_id: "123456789",
-      lastPinTimestamp: new Date("2019-01-01").getTime(),
-      rate_limit_per_user: 0,
-    } as RawGuildChannelData,
-  ]) as TextChannel;
-}
-
-export function mockGuildMember(client: SapphireClient, guild: Guild) {
-  return Reflect.construct(GuildMember, [
-    client,
-    {
-      id: BigInt(1),
+export function mockSlashCommand(options: {
+  client: SapphireClient;
+  guild: Guild;
+  channel: GuildChannel;
+  data: Partial<Omit<APIChatInputApplicationCommandInteractionData, "guild_id" | "type">> &
+    Pick<APIChatInputApplicationCommandInteractionData, "name" | "id">;
+  permissions: PermissionResolvable;
+  user?: Partial<APIInteractionGuildMember>;
+}): ChatInputCommandInteraction {
+  const { client, guild, channel, user, data, permissions } = options;
+  const cmd_data: APIApplicationCommandInteraction = {
+    application_id: "123456789",
+    channel_id: channel.id,
+    data: {
+      ...data,
+      guild_id: guild.id,
+      type: ApplicationCommandType.ChatInput,
+    },
+    id: data.id,
+    guild_id: guild.id,
+    member: {
       deaf: false,
+      joined_at: "33",
       mute: false,
-      self_mute: false,
-      self_deaf: false,
-      session_id: "session-id",
-      channel_id: "900",
-      nick: "nick",
-      joined_at: new Date("2020-01-01").getTime(),
-      user: {
-        id: "100",
-        username: "USERNAME",
-      },
-      guild_id: "400",
+      permissions: PermissionsBitField.resolve(permissions).toString(),
       roles: [],
-      permissions: PermissionsBitField.resolve("ManageGuild"),
-    } as RawGuildMemberData,
-    guild,
-  ]) as GuildMember;
-}
-
-export function mockMessage(client: SapphireClient, textChannel: TextChannel, content: string) {
-  return Reflect.construct(Message, [
-    client,
-    {
-      id: "123456789",
-      attachments: [],
-      author: {
-        id: "100",
-        username: "USERNAME",
-        avatar: "user avatar url",
-        discriminator: "user#0000",
+      user: {
+        id: "123456789",
+        username: "test",
+        avatar: "123456789",
+        discriminator: "1234",
+        ...user,
       },
-      channel_id: "900",
-      content: content,
-      edited_timestamp: null,
-      embeds: [],
-      guild_id: "400",
-      mention_everyone: false,
-      mention_roles: [],
-      mentions: [],
-      pinned: false,
-      timestamp: "33",
-      tts: false,
-      type: 0,
-    } as RawMessageData,
-    textChannel,
-  ]) as Message;
+    },
+    locale: "en-US",
+    token: "123456789",
+    type: InteractionType.ApplicationCommand,
+    version: 1,
+  };
+  const cmd = Reflect.construct(ChatInputCommandInteraction, [
+    client,
+    cmd_data,
+  ]) as ChatInputCommandInteraction;
+  return cmd;
 }

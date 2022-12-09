@@ -1,17 +1,19 @@
 import { getDefaultChannelSettings } from "@answeroverflow/api";
 import { ReacordTester } from "@answeroverflow/reacord";
+import { ChannelType } from "discord.js";
 
 import React from "react";
-import { mockClient, mockGuild, mockGuildMember, mockTextChannel } from "~test/mock";
+import { mockClient, mockGuild, mockGuildMember, mockGuildChannel, mockUser } from "~test/mock";
 
 import { ChannelSettingsMenu } from "./channel-settings-menu";
 
 describe("ChannelSettingsMenu", () => {
   it("should render", async () => {
     const bot = mockClient();
-    const guild = mockGuild(bot);
+    const guild_owner = mockUser(bot);
+    const guild = mockGuild(bot, guild_owner);
     const member = mockGuildMember(bot, guild);
-    const textChannel = mockTextChannel(guild);
+    const textChannel = mockGuildChannel(bot, guild, ChannelType.GuildText);
     textChannel.guild.members.fetch = vi.fn().mockReturnValue(member);
 
     expect(member).toBeDefined();
