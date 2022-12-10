@@ -32,8 +32,17 @@ import type {
 
 export function mockClient() {
   const client = new SapphireClient({ intents: [] });
-  client.stores.get("listeners").paths.add("/workspace/apps/discord-bot/src/listeners");
 
+  // TODO: This is so ugly please fix this
+  client.stores.forEach((store) => {
+    store.paths.add(`/workspace/apps/discord-bot/src/${store.name}`);
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    store.strategy.supportedExtensions.push(".ts", ".cts", ".mts", ".tsx");
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    store.strategy.filterDtsFiles = true;
+  });
   Client.prototype.login = jest.fn();
   container.reacord = new ReacordTester();
   return client;

@@ -1,7 +1,6 @@
-import { Button, ReacordDiscordJs, ReacordTester, TestMessage } from "@answeroverflow/reacord";
+import type { ReacordDiscordJs, ReacordTester, TestMessage } from "@answeroverflow/reacord";
 import type { CommandInteraction } from "discord.js";
 import type { ReactNode } from "react";
-import React from "react";
 
 export function messageHasButton(message: TestMessage, label: string, reacord: ReacordTester) {
   return message.findButtonByLabel(label, reacord) !== undefined;
