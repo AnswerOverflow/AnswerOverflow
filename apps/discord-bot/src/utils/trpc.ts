@@ -3,6 +3,7 @@ import { container } from "@sapphire/framework";
 import { TRPCError } from "@trpc/server";
 import type { CommandInteraction, GuildMember } from "discord.js";
 import type { ComponentEvent } from "@answeroverflow/reacord";
+import { ephemeralReply } from "~test/reacord/reacord-utils";
 
 type TRPCall<T> = {
   // eslint-disable-next-line no-unused-vars
@@ -56,7 +57,11 @@ export async function callAPI<T>({ ApiCall, Ok, Error, member }: TRPCall<T>): Pr
     const data = await ApiCall(caller); // Pass in the caller we created to ApiCall to make the request
     Ok(data); // If no errors, Ok gets called with the API data
   } catch (error) {
-    Error(error as TRPCError);
+    if (error instanceof TRPCError) {
+      Error(error);
+    } else {
+      throw error;
+    }
   }
 }
 
@@ -67,7 +72,7 @@ export async function callApiWithEphemeralErrorHandler<T>(
   await callAPI({
     ...call,
     Error(error) {
-      container.reacord.ephemeralReply(interaction, "Error: " + error.message);
+      ephemeralReply(container.reacord, "Error: " + error.message, interaction);
     },
   });
 }
@@ -79,11 +84,7 @@ export async function callApiWithButtonErrorHandler<T>(
   await callAPI({
     ...call,
     Error(error) {
-      if (error instanceof TRPCError) {
-        interaction.ephemeralReply("Error: " + error.message);
-      } else {
-        throw error;
-      }
+      interaction.ephemeralReply("Error: " + error.message);
     },
   });
 }

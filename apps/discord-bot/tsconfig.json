@@ -1,7 +1,6 @@
 {
   "extends": "@answeroverflow/tsconfig/base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "dist/.tsbuildinfo",
     "baseUrl": "src",
     "jsx": "react",
     "paths": {

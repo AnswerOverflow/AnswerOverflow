@@ -51,6 +51,7 @@
     "test:watch": "vitest watch",
     "test:watch-build": "run-p watch test:watch",
     "lint:fix": "eslint src --fix",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "install-local-reacord": "cp -r ~/repos/reacord/packages/reacord/dist/ /workspace/node_modules/@answeroverflow/reacord/"
   }
 }

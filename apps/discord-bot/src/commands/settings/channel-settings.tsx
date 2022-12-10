@@ -9,6 +9,7 @@ import {
   type ChatInputCommandInteraction,
 } from "discord.js";
 import React from "react";
+import { ephemeralReply } from "~test/reacord/reacord-utils";
 
 @ApplyOptions<Command.Options>({
   name: "channel-settings",
@@ -33,7 +34,7 @@ export class ChannelSettingsCommand extends Command {
   public override async chatInputRun(
     interaction: ChatInputCommandInteraction,
     // eslint-disable-next-line no-unused-vars
-    context: ChatInputCommand.RunContext
+    _context: ChatInputCommand.RunContext
   ) {
     if (interaction.guild == null) {
       return;
@@ -57,10 +58,8 @@ export class ChannelSettingsCommand extends Command {
           if (!result) {
             result = getDefaultChannelSettings(interaction.channelId);
           }
-          container.reacord.ephemeralReply(
-            interaction,
-            <ChannelSettingsMenu channel={channel} settings={result} />
-          );
+          const menu = <ChannelSettingsMenu channel={channel} settings={result} />;
+          ephemeralReply(container.reacord, menu, interaction);
         },
         member,
       },

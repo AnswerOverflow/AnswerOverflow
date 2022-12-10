@@ -1,4 +1,5 @@
-import { SapphireClient } from "@sapphire/framework";
+import { ReacordTester } from "@answeroverflow/reacord";
+import { container, SapphireClient } from "@sapphire/framework";
 import {
   User,
   Message,
@@ -31,8 +32,15 @@ import type {
 
 export function mockClient() {
   const client = new SapphireClient({ intents: [] });
+  client.stores.get("listeners").paths.add("/workspace/apps/discord-bot/src/listeners");
+
   Client.prototype.login = vitest.fn();
+  container.reacord = new ReacordTester();
   return client;
+}
+
+export function mockReacord() {
+  return container.reacord as ReacordTester;
 }
 
 export function getMockUserData(data: Partial<RawUserData> = {}): RawUserData {
