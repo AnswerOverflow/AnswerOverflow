@@ -34,7 +34,7 @@ export function mockClient() {
   const client = new SapphireClient({ intents: [] });
   client.stores.get("listeners").paths.add("/workspace/apps/discord-bot/src/listeners");
 
-  Client.prototype.login = vitest.fn();
+  Client.prototype.login = jest.fn();
   container.reacord = new ReacordTester();
   return client;
 }
@@ -111,7 +111,7 @@ export function mockGuild(
     },
   });
   // replace guild members fetched with accessing from the cache of the fetched user id in the fetch argument
-  guild.members.fetch = vitest.fn().mockImplementation((id: string) => {
+  guild.members.fetch = jest.fn().mockImplementation((id: string) => {
     const member = guild.members.cache.get(id);
     if (member) return Promise.resolve(member);
     return Promise.reject(new Error("Member not found"));

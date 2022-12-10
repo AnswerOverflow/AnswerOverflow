@@ -33,8 +33,8 @@ describe("Channel Settings Slash Command", () => {
         name: "channel-settings",
       },
     });
-    vi.spyOn(settings_command, "chatInputRun");
-    vi.spyOn(reacord, "ephemeralReply");
+    jest.spyOn(settings_command, "chatInputRun");
+    jest.spyOn(reacord, "ephemeralReply");
 
     expect(settings_command).toBeDefined();
 

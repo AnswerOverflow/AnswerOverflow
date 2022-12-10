@@ -19,7 +19,7 @@ describe("Bot", () => {
       .get("listeners")
       .find((listener) => listener.name === "MessageDeletedWatcher");
     expect(sync_delete).toBeDefined();
-    vi.spyOn(sync_delete!, "run");
+    jest.spyOn(sync_delete!, "run");
     bot.emit(
       "messageDelete",
       mockMessage(bot, mockGuildChannel(bot, mockGuild(bot, mockUser(bot)), ChannelType.GuildText))

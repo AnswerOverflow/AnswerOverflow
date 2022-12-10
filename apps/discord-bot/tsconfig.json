@@ -23,11 +23,20 @@
         "../test/*"
       ]
     },
+    "types": [
+      "jest"
+    ]
+  },
+  "ts-node": {
+    "transpileOnly": true,
+    "require": [
+      "tsconfig-paths/register"
+    ]
   },
   "include": [
     "src",
     "test",
-    "vitest.config.ts",
+    "jest.config.js",
     "../../node_modules/@answeroverflow/auth/next-auth.d.ts"
   ],
 }

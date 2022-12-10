@@ -25,7 +25,7 @@ describe("ChannelSettingsMenu", () => {
     const guild = mockGuild(bot, guild_owner);
     const member = mockGuildMember(bot, guild);
     const textChannel = mockGuildChannel(bot, guild, ChannelType.GuildText);
-    textChannel.guild.members.fetch = vi.fn().mockReturnValue(member);
+    textChannel.guild.members.fetch = jest.fn().mockReturnValue(member);
     const settings = getDefaultChannelSettings("1");
 
     const menu = <ChannelSettingsMenu channel={textChannel} settings={settings} />;
@@ -39,12 +39,12 @@ describe("ChannelSettingsMenu", () => {
 
     const enable_indexing = message.findButtonByLabel("Enable Indexing", reacord);
     expect(enable_indexing).toBeDefined();
-    await enable_indexing.click();
+    await enable_indexing!.click();
 
     expect(messageHasButton(message, "Enable Indexing", reacord)).toBeFalsy();
     const disable_indexing = message.findButtonByLabel("Disable Indexing", reacord);
     expect(disable_indexing).toBeDefined();
-    await disable_indexing.click();
+    await disable_indexing!.click();
 
     expect(messageHasButton(message, "Disable Indexing", reacord)).toBeFalsy();
   });
