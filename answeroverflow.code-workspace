@@ -86,6 +86,10 @@
     "[markdown]": {
       "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
     },
+    "jest.disabledWorkspaceFolders": [
+      "root"
+    ],
+    "jest.autoRun": "false"
   },
   "extensions": {
     "recommendations": [
