@@ -49,4 +49,17 @@ describe("Normal Scenario Tests", () => {
     expect(text_channel.type).toBe(ChannelType.GuildText);
     expect(text_channel.guildId).toBe(guild.id);
   });
+  it("should verify all members are in the same guild", async () => {
+    const {
+      guild,
+      guild_member_owner,
+      guild_member_default,
+      guild_member_manage_guild,
+      guild_member_admin,
+    } = await createNormalScenario();
+    expect(guild_member_owner.guild.id).toBe(guild.id);
+    expect(guild_member_default.guild.id).toBe(guild.id);
+    expect(guild_member_manage_guild.guild.id).toBe(guild.id);
+    expect(guild_member_admin.guild.id).toBe(guild.id);
+  });
 });
