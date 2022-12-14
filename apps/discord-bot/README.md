@@ -50,3 +50,4 @@ Misc utility functions. Try to keep related functions in the same files as they 
 2. Feel free to hack the mock data a bit to get it to work
 3. Test as much as possible outside of the Discord bot package, this is mainly used for ensuring events are firing
 4. For testing Reacord - The goal is to eventually build that fork out into a good testing library but for now hacking it together works
+5. I encountered issues getting Vitest and Sapphire to work together - brownie points if you submit a PR getting that to work

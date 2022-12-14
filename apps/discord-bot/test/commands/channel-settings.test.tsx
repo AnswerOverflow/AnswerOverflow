@@ -1,51 +1,86 @@
-import type { ChatInputCommand } from "@sapphire/framework";
-import { ChannelType, Events } from "discord.js";
+import type { SapphireClient } from "@sapphire/framework";
+import { Events, Interaction } from "discord.js";
+import { mockInteracion } from "~test/utils/discordjs/interaction-mock";
+import { createNormalScenario } from "~test/utils/discordjs/scenarios";
 
-import {
-  mockClient,
-  mockGuild,
-  mockGuildChannel,
-  mockReacord,
-  mockSlashCommand,
-  mockUser,
-} from "~test/discordjs/mock";
+async function runCommand(client: SapphireClient, command: Interaction): Promise<Interaction> {
+  let ran_interaction: Interaction | undefined;
+  client.addListener(Events.InteractionCreate, (interaction: Interaction) => {
+    ran_interaction = interaction;
+  });
+  client.emit(Events.InteractionCreate, command);
+  while (!ran_interaction) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  return ran_interaction;
+}
 
 describe("Channel Settings Slash Command", () => {
-  it("Should fail to open the channel settings menu due to missing permission", async () => {
-    const bot = mockClient();
-    await bot.login();
-    const reacord = mockReacord();
-    await new Promise((resolve) => setTimeout(resolve));
-
-    const settings_command = bot.stores
-      .get("commands")
-      .find((command) => command.name === "channel-settings") as ChatInputCommand;
-    const user = mockUser(bot);
-    const guild = mockGuild(bot, user);
-    const text_channel = mockGuildChannel(bot, guild, ChannelType.GuildText);
-    const interaction = mockSlashCommand({
-      channel: text_channel,
-      client: bot,
+  it("uses /channel-settings without manage guild permissions", async () => {
+    const { client, guild, text_channel, guild_member_default } = await createNormalScenario();
+    const command = mockInteracion(
+      client,
+      "channel-settings",
+      "1048055954618454026",
       guild,
-      permissions: ["ManageGuild"],
-      data: {
-        id: "1048055954618454026",
-        name: "channel-settings",
-      },
-    });
-    jest.spyOn(settings_command, "chatInputRun");
-    jest.spyOn(reacord, "ephemeralReply");
+      text_channel,
+      guild_member_default
+    );
+    const stored_command = client.stores
+      .get("commands")
+      .find((command) => command.name === "channel-settings");
 
-    expect(settings_command).toBeDefined();
+    expect(stored_command).toBeDefined();
+    jest.spyOn(stored_command!, "chatInputRun");
 
-    // const menu = (
-    //   <ChannelSettingsMenu channel={text_channel} settings={getDefaultChannelSettings("1")} />
-    // );
-    // ephemeralReply(reacord, menu, interaction);
-
-    bot.emit(Events.InteractionCreate, interaction);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(settings_command.chatInputRun).toHaveBeenCalled();
+    await runCommand(client, command);
+    expect(stored_command!.chatInputRun).not.toHaveBeenCalled();
   });
+  it("uses /channel-settings as an admin", async () => {
+    const { client, guild, text_channel, guild_member_admin } = await createNormalScenario();
+    const command = mockInteracion(
+      client,
+      "channel-settings",
+      "1048055954618454026",
+      guild,
+      text_channel,
+      guild_member_admin
+    );
+    const stored_command = client.stores
+      .get("commands")
+      .find((command) => command.name === "channel-settings");
+
+    expect(stored_command).toBeDefined();
+    jest.spyOn(stored_command!, "chatInputRun");
+
+    await runCommand(client, command);
+    expect(stored_command!.chatInputRun).toHaveBeenCalled();
+  });
+  it("uses /channel-settings with manage guild permissions", async () => {
+    const { client, guild, text_channel, guild_member_manage_guild } = await createNormalScenario();
+    const command = mockInteracion(
+      client,
+      "channel-settings",
+      "1048055954618454026",
+      guild,
+      text_channel,
+      guild_member_manage_guild
+    );
+    const stored_command = client.stores
+      .get("commands")
+      .find((command) => command.name === "channel-settings");
+
+    expect(stored_command).toBeDefined();
+    jest.spyOn(stored_command!, "chatInputRun");
+
+    await runCommand(client, command);
+    expect(stored_command!.chatInputRun).toHaveBeenCalled();
+  });
+  test.todo("Verify default member permissions");
+  test.todo("Verify bot permissions");
+  test.todo("Verify channel type");
+  test.todo("Verify running in guild");
+  test.todo("Verify error handling for missing permissions");
+  test.todo("Verify error handling for backend");
 });

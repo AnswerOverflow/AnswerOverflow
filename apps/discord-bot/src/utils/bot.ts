@@ -1,6 +1,4 @@
-import "~utils/setup";
 import { container, LogLevel, SapphireClient } from "@sapphire/framework";
-import "@sapphire/plugin-api/register";
 import { ReacordDiscordJs, ReacordTester } from "@answeroverflow/reacord";
 import { Partials } from "discord.js";
 declare module "@sapphire/pieces" {
@@ -10,33 +8,35 @@ declare module "@sapphire/pieces" {
   }
 }
 
-const client = new SapphireClient({
-  defaultPrefix: "!",
-  regexPrefix: /^(hey +)?bot[,! ]/i,
-  caseInsensitiveCommands: true,
-  logger: {
-    level: LogLevel.Debug,
-  },
-  shards: "auto",
-  intents: [
-    "Guilds",
-    "GuildMembers",
-    "GuildBans",
-    "GuildEmojisAndStickers",
-    "GuildVoiceStates",
-    "GuildMessages",
-    "GuildMessageReactions",
-    "DirectMessages",
-    "DirectMessageReactions",
-  ],
-  partials: [Partials.Channel],
-  loadMessageCommandListeners: true,
-  hmr: {
-    enabled: process.env.NODE_ENV === "development",
-  },
-});
+export function createClient() {
+  return new SapphireClient({
+    defaultPrefix: "!",
+    regexPrefix: /^(hey +)?bot[,! ]/i,
+    caseInsensitiveCommands: true,
+    logger: {
+      level: LogLevel.Debug,
+    },
+    shards: "auto",
+    intents: [
+      "Guilds",
+      "GuildMembers",
+      "GuildBans",
+      "GuildEmojisAndStickers",
+      "GuildVoiceStates",
+      "GuildMessages",
+      "GuildMessageReactions",
+      "DirectMessages",
+      "DirectMessageReactions",
+    ],
+    partials: [Partials.Channel],
+    loadMessageCommandListeners: true,
+    hmr: {
+      enabled: process.env.NODE_ENV === "development",
+    },
+  });
+}
 
-export const login = async () => {
+export const login = async (client: SapphireClient) => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
   require("dotenv").config();
   try {

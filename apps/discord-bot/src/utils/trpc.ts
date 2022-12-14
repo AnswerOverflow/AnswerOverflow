@@ -3,7 +3,7 @@ import { container } from "@sapphire/framework";
 import { TRPCError } from "@trpc/server";
 import type { CommandInteraction, GuildMember } from "discord.js";
 import type { ComponentEvent } from "@answeroverflow/reacord";
-import { ephemeralReply } from "~test/reacord/reacord-utils";
+import { ephemeralReply } from "~test/utils/reacord/reacord-utils";
 
 type TRPCall<T> = {
   // eslint-disable-next-line no-unused-vars

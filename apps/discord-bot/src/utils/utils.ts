@@ -9,7 +9,7 @@ import { container } from "@sapphire/framework";
 import { send } from "@sapphire/plugin-editable-commands";
 import { cyan } from "colorette";
 import type { APIUser } from "discord-api-types/v9";
-import { Guild, Message, EmbedBuilder, User } from "discord.js";
+import { Guild, Message, EmbedBuilder, User, SnowflakeUtil } from "discord.js";
 import { RandomLoadingMessage } from "./constants";
 
 /**
@@ -123,4 +123,18 @@ export function makeServerUpsert(server: Server): ServerUpsertInput {
       name: server.name,
     },
   };
+}
+
+function getRandomTime(start?: Date, end?: Date) {
+  if (!start) {
+    start = new Date(2015, 0, 1);
+  }
+  if (!end) {
+    end = new Date();
+  }
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+}
+
+export function randomSnowflake(start?: Date, end?: Date) {
+  return SnowflakeUtil.generate({ timestamp: getRandomTime(start, end) });
 }

@@ -9,11 +9,12 @@ import {
   type ChatInputCommandInteraction,
 } from "discord.js";
 import React from "react";
-import { ephemeralReply } from "~test/reacord/reacord-utils";
+import { ephemeralReply } from "~test/utils/reacord/reacord-utils";
 
 @ApplyOptions<Command.Options>({
   name: "channel-settings",
   description: "Configure channel settings",
+  runIn: ["GUILD_ANY"],
   requiredUserPermissions: ["ManageGuild"],
 })
 export class ChannelSettingsCommand extends Command {

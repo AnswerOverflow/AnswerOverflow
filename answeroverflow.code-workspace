@@ -87,7 +87,8 @@
       "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
     },
     "jest.disabledWorkspaceFolders": [
-      "root"
+      "root",
+      "api"
     ],
     "jest.autoRun": "false"
   },
