@@ -83,4 +83,5 @@ describe("Channel Settings Slash Command", () => {
   test.todo("Verify running in guild");
   test.todo("Verify error handling for missing permissions");
   test.todo("Verify error handling for backend");
+  test.todo("Verify reacord reply is called with right args");
 });

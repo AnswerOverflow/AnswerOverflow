@@ -1,6 +1,9 @@
 import { container, LogLevel, SapphireClient } from "@sapphire/framework";
 import { ReacordDiscordJs, ReacordTester } from "@answeroverflow/reacord";
 import { Partials } from "discord.js";
+
+import "~utils/setup";
+
 declare module "@sapphire/pieces" {
   // eslint-disable-next-line no-unused-vars
   interface Container {
@@ -32,6 +35,9 @@ export function createClient() {
     loadMessageCommandListeners: true,
     hmr: {
       enabled: process.env.NODE_ENV === "development",
+    },
+    api: {
+      automaticallyConnect: process.env.NODE_ENV !== "test", // TODO: Bit of a hack? No point starting API during testing but would be good to verify it
     },
   });
 }
