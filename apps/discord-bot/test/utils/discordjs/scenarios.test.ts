@@ -9,7 +9,7 @@ describe("Normal Scenario Tests", () => {
   it("should verify the guild", async () => {
     const { guild } = await createNormalScenario();
     expect(guild).toBeDefined();
-    expect(guild.channels.cache.size).toBe(2);
+    expect(guild.channels.cache.size).toBe(3);
     expect(guild.members.cache.size).toBe(4);
   });
   it("should verify the guild owner", async () => {
@@ -61,5 +61,10 @@ describe("Normal Scenario Tests", () => {
     expect(guild_member_default.guild.id).toBe(guild.id);
     expect(guild_member_manage_guild.guild.id).toBe(guild.id);
     expect(guild_member_admin.guild.id).toBe(guild.id);
+  });
+  it("should verify forum thread", async () => {
+    const { forum_thread, forum_channel } = await createNormalScenario();
+    expect(forum_thread).toBeDefined();
+    expect(forum_thread.parentId).toBe(forum_channel.id);
   });
 });

@@ -1,22 +1,22 @@
-import { ReacordDiscordJs, ReacordTester, TestMessage } from "@answeroverflow/reacord";
-import type { CommandInteraction } from "discord.js";
+import type { ReacordTester, TestMessage } from "@answeroverflow/reacord";
 import type { ReactNode } from "react";
+import { ephemeralReply } from "~utils/utils";
+import { delay } from "../helpers";
 
 export function messageHasButton(message: TestMessage, label: string, reacord: ReacordTester) {
   return message.findButtonByLabel(label, reacord) !== undefined;
 }
 
-export function ephemeralReply(
-  reacord: ReacordTester | ReacordDiscordJs,
-  content: ReactNode,
-  interaction?: CommandInteraction
+export function messageHasSelectMenu(
+  message: TestMessage,
+  placeholder: string,
+  reacord: ReacordTester
 ) {
-  if (reacord instanceof ReacordTester) {
-    reacord.ephemeralReply(content);
-    return;
-  } else if (interaction && reacord instanceof ReacordDiscordJs) {
-    reacord.ephemeralReply(interaction, content);
-    return;
-  }
-  throw new Error(`Invalid reacord instance`);
+  return message.findSelectByPlaceholder(placeholder, reacord) !== undefined;
+}
+
+export async function reply(reacord: ReacordTester, content: ReactNode) {
+  ephemeralReply(reacord, content);
+  await delay();
+  return reacord.messages[0];
 }

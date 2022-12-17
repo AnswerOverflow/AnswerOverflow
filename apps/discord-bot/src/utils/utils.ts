@@ -1,4 +1,5 @@
 import type { ChannelUpsertInput, ServerUpsertInput } from "@answeroverflow/api";
+import { ReacordTester, ReacordDiscordJs } from "@answeroverflow/reacord";
 import type {
   ChatInputCommandSuccessPayload,
   Command,
@@ -9,7 +10,8 @@ import { container } from "@sapphire/framework";
 import { send } from "@sapphire/plugin-editable-commands";
 import { cyan } from "colorette";
 import type { APIUser } from "discord-api-types/v9";
-import { Guild, Message, EmbedBuilder, User, SnowflakeUtil } from "discord.js";
+import { Guild, Message, EmbedBuilder, User, SnowflakeUtil, CommandInteraction } from "discord.js";
+import type { ReactNode } from "react";
 import { RandomLoadingMessage } from "./constants";
 
 /**
@@ -137,4 +139,19 @@ function getRandomTime(start?: Date, end?: Date) {
 
 export function randomSnowflake(start?: Date, end?: Date) {
   return SnowflakeUtil.generate({ timestamp: getRandomTime(start, end) });
+}
+
+export function ephemeralReply(
+  reacord: ReacordTester | ReacordDiscordJs,
+  content: ReactNode,
+  interaction?: CommandInteraction
+) {
+  if (reacord instanceof ReacordTester) {
+    reacord.ephemeralReply(content);
+    return;
+  } else if (interaction && reacord instanceof ReacordDiscordJs) {
+    reacord.ephemeralReply(interaction, content);
+    return;
+  }
+  throw new Error(`Invalid reacord instance`);
 }

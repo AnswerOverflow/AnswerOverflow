@@ -36,6 +36,7 @@ export function ChannelSettingsMenu({
           return await router.channel_settings.upsert({
             update: data,
             create: {
+              ...data,
               channel: {
                 ...makeChannelUpsert(channel, channel.guild),
               },

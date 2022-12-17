@@ -2,6 +2,7 @@ import type { SapphireClient } from "@sapphire/framework";
 import { Events, Interaction } from "discord.js";
 import { mockInteracion } from "~test/utils/discordjs/interaction-mock";
 import { createNormalScenario } from "~test/utils/discordjs/scenarios";
+import { delay } from "~test/utils/helpers";
 
 async function runCommand(client: SapphireClient, command: Interaction): Promise<Interaction> {
   let ran_interaction: Interaction | undefined;
@@ -10,9 +11,9 @@ async function runCommand(client: SapphireClient, command: Interaction): Promise
   });
   client.emit(Events.InteractionCreate, command);
   while (!ran_interaction) {
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await delay();
   }
-  await new Promise((resolve) => setTimeout(resolve, 100));
+  await delay();
   return ran_interaction;
 }
 

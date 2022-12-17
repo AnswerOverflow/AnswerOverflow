@@ -9,7 +9,7 @@ import {
   type ChatInputCommandInteraction,
 } from "discord.js";
 import React from "react";
-import { ephemeralReply } from "~test/utils/reacord/reacord-utils";
+import { ephemeralReply } from "~utils/utils";
 
 @ApplyOptions<Command.Options>({
   name: "channel-settings",

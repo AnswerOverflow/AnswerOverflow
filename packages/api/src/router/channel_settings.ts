@@ -50,6 +50,9 @@ const channelSettingsCreateUpdate = router({
     .input(z_channel_settings_create_input)
     .mutation(async ({ ctx, input }) => {
       const channel = await channelRouter.createCaller(ctx).upsert(input.channel);
+      const old_flags = bitfieldToChannelSettingsFlags(0);
+      const new_flags = { ...old_flags, ...input.flags };
+      const bitfield = dictToBitfield(new_flags, channel_settings_flags);
       assertCanEditServer(ctx, channel.server_id);
       const data = await ctx.prisma.channelSettings.create({
         data: {
@@ -58,6 +61,7 @@ const channelSettingsCreateUpdate = router({
               id: channel.id,
             },
           },
+          bitfield,
         },
       });
       return addChannelSettingsFlagsToChannelSettings(data);

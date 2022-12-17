@@ -43,7 +43,8 @@
     },
     "vitest.enable": true,
     "vitest.disabledWorkspaceFolders": [
-      "root"
+      "root",
+      "discord-bot"
     ],
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
@@ -88,9 +89,15 @@
     },
     "jest.disabledWorkspaceFolders": [
       "root",
-      "api"
+      "api",
+      "ui",
+      "web",
+      "db",
+      "api",
+      "auth",
+      "config"
     ],
-    "jest.autoRun": "false"
+    "jest.autoRun": "true",
   },
   "extensions": {
     "recommendations": [

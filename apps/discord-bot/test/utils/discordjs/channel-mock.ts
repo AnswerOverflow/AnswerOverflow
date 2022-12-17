@@ -9,6 +9,9 @@ import {
   APIGuildTextChannel,
   GuildBasedChannel,
   ForumChannel,
+  APIThreadChannel,
+  ThreadChannel,
+  PublicThreadChannel,
 } from "discord.js";
 import { randomSnowflake } from "~utils/utils";
 import { mockGuild } from "./guild-mock";
@@ -62,6 +65,47 @@ export function mockTextChannel(
       ...data,
     };
     const channel = Reflect.construct(TextChannel, [guild, raw_data, client]) as TextChannel;
+    return channel;
+  });
+}
+
+export function mockThreadChannel(
+  client: SapphireClient,
+  guild?: Guild,
+  parent?: ForumChannel | TextChannel,
+  data: Partial<APIThreadChannel> = {}
+) {
+  return setupMockedChannel(client, guild, (guild) => {
+    if (!parent) {
+      parent = mockTextChannel(client, guild);
+    }
+    // TODO: Make the ID match the message ID?
+    const raw_data: APIThreadChannel = {
+      ...getGuildTextChannelMockDataBase(ChannelType.PublicThread, guild),
+      member: {
+        id: randomSnowflake().toString(),
+        user_id: randomSnowflake().toString(),
+        join_timestamp: new Date().toISOString(),
+        flags: 0,
+      },
+      guild_id: guild.id,
+      parent_id: parent.id,
+      applied_tags: [],
+      message_count: 0,
+      member_count: 0,
+      thread_metadata: {
+        archived: false,
+        auto_archive_duration: 60,
+        archive_timestamp: new Date().toISOString(),
+        locked: false,
+      },
+      ...data,
+    };
+    const channel: PublicThreadChannel = Reflect.construct(ThreadChannel, [
+      guild,
+      raw_data,
+      client,
+    ]) as PublicThreadChannel;
     return channel;
   });
 }

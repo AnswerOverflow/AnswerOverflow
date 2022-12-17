@@ -1,7 +1,7 @@
 import { PermissionFlagsBits } from "discord.js";
-import { mockForumChannel, mockTextChannel } from "./channel-mock";
+import { mockForumChannel, mockTextChannel, mockThreadChannel } from "./channel-mock";
 import { mockGuild } from "./guild-mock";
-import { mockClient } from "./mock";
+import { mockClient, mockReacord } from "./mock";
 import { mockGuildMember, mockUser } from "./user-mock";
 
 // Helper function to do a bunch of setup for a normal scenario
@@ -20,7 +20,7 @@ import { mockGuildMember, mockUser } from "./user-mock";
 export async function createNormalScenario() {
   const client = mockClient();
   await client.login();
-
+  const reacord = mockReacord();
   const guild = mockGuild(client);
   const guild_member_owner = await guild.members.fetch(guild.ownerId);
   const guild_member_default = mockGuildMember(client, undefined, guild);
@@ -37,16 +37,19 @@ export async function createNormalScenario() {
     PermissionFlagsBits.Administrator
   );
   const forum_channel = mockForumChannel(client, guild);
+  const forum_thread = mockThreadChannel(client, guild, forum_channel);
   const text_channel = mockTextChannel(client, guild);
   const user_in_no_guilds = mockUser(client);
   return {
     client,
+    reacord,
     guild,
     guild_member_owner,
     guild_member_default,
     guild_member_manage_guild,
     guild_member_admin,
     forum_channel,
+    forum_thread,
     text_channel,
     user_in_no_guilds,
   };

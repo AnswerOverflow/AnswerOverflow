@@ -1,5 +1,6 @@
 import type { SapphireClient } from "@sapphire/framework";
 import { Events, Interaction } from "discord.js";
+import { delay } from "../helpers";
 import { mockInteracion } from "./interaction-mock";
 import { mockClient } from "./mock";
 
@@ -13,8 +14,9 @@ export async function runMockInteraction(
   });
   client.emit(Events.InteractionCreate, interaction);
   while (!received_interaction) {
-    await new Promise((resolve) => setTimeout(resolve, 100)); // TODO: This is ugly
+    await delay();
   }
+  await delay();
   return received_interaction;
 }
 
