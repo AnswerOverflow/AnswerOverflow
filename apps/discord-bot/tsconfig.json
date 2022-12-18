@@ -1,28 +1,7 @@
 {
   "extends": "@answeroverflow/tsconfig/base.json",
   "compilerOptions": {
-    "baseUrl": "src",
     "jsx": "react",
-    "paths": {
-      "~discord-bot/utils/*": [
-        "utils/*"
-      ],
-      "~discord-bot/listeners": [
-        "listeners/*"
-      ],
-      "~discord-bot/primitives/*": [
-        "primitives/*"
-      ],
-      "~discord-bot/interaction-handlers/*": [
-        "interaction-handlers/*"
-      ],
-      "~discord-bot/components/*": [
-        "components/*"
-      ],
-      "~discord-bot/test/*": [
-        "../test/*"
-      ]
-    },
     "types": [
       "jest"
     ]
