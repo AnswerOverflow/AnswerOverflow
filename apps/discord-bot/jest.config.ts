@@ -1,5 +1,6 @@
 import type { JestConfigWithTsJest } from "ts-jest";
-
+// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+require("dotenv").config();
 const jestConfig: JestConfigWithTsJest = {
   // [...]
   // Replace `ts-jest` with the preset you want to use
