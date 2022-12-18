@@ -1,5 +1,5 @@
 import { prisma, Server } from "@answeroverflow/db";
-import type { ChannelUpsertInput } from "@utils/types";
+import type { ChannelUpsertInput } from "~utils/types";
 
 export async function clearDatabase() {
   await prisma.userServerSettings.deleteMany({});

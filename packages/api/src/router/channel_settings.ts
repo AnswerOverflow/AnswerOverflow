@@ -28,16 +28,15 @@ const z_channel_settings = z.object({
   bitfield: z.number(),
 });
 
-const z_channel_settings_create_input = z.object({
-  flags: z.optional(z_channel_settings_flags),
-  channel: channel_upsert_input,
-});
-
 const z_channel_settings_update_input = z.object({
   flags: z.optional(z_channel_settings_flags),
   last_indexed_snowflake: z.optional(z.string()),
   invite_code: z.optional(z.string()),
   solution_tag_id: z.optional(z.nullable(z.string())),
+});
+
+const z_channel_settings_create_input = z.object({
+  channel: channel_upsert_input,
 });
 
 const z_channel_settings_upsert_input = z.object({
@@ -50,6 +49,7 @@ const channelSettingsCreateUpdate = router({
     .input(z_channel_settings_create_input)
     .mutation(async ({ ctx, input }) => {
       const channel = await channelRouter.createCaller(ctx).upsert(input.channel);
+
       assertCanEditServer(ctx, channel.server_id);
       const data = await ctx.prisma.channelSettings.create({
         data: {
@@ -112,21 +112,22 @@ const channelSettingsUpsert = router({
   upsert: protectedProcedureWithUserServers
     .input(z_channel_settings_upsert_input)
     .mutation(async ({ ctx, input }) => {
-      const existing_channel_settings = await channelSettingFind
+      let existing_channel_settings = await channelSettingFind
         .createCaller(ctx)
         .byId(input.create.channel.create.id);
 
-      if (existing_channel_settings) {
-        return channelSettingsCreateUpdate.createCaller(ctx).update({
-          update: {
-            ...input.update,
-          },
-          old: existing_channel_settings,
-          server_id: input.create.channel.create.server.create.id,
-        });
-      } else {
-        return await channelSettingsCreateUpdate.createCaller(ctx).create(input.create);
+      if (!existing_channel_settings) {
+        existing_channel_settings = await channelSettingsCreateUpdate
+          .createCaller(ctx)
+          .create(input.create);
       }
+      return channelSettingsCreateUpdate.createCaller(ctx).update({
+        update: {
+          ...input.update,
+        },
+        old: existing_channel_settings,
+        server_id: input.create.channel.create.server.create.id,
+      });
     }),
 });
 

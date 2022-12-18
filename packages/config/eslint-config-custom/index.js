@@ -28,4 +28,15 @@ module.exports = {
     ],
     //"@typescript-eslint/explicit-function-return-type": "warn"
   },
+  overrides: [
+    {
+      files: ["*.test.*"],
+      plugins: ["jest"],
+      rules: {
+        // you should turn the original rule off *only* for test files
+        "@typescript-eslint/unbound-method": "off",
+        "jest/unbound-method": "error",
+      },
+    },
+  ],
 };

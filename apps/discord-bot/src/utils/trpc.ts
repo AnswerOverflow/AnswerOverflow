@@ -2,7 +2,8 @@ import { botRouter, BotRouterCaller, createBotContext } from "@answeroverflow/ap
 import { container } from "@sapphire/framework";
 import { TRPCError } from "@trpc/server";
 import type { CommandInteraction, GuildMember } from "discord.js";
-import type { ComponentEvent } from "reacord";
+import type { ComponentEvent } from "@answeroverflow/reacord";
+import { ephemeralReply } from "./utils";
 
 type TRPCall<T> = {
   // eslint-disable-next-line no-unused-vars
@@ -40,7 +41,7 @@ export async function createBotRouter(member?: GuildMember): Promise<BotRouterCa
           id: guild.id,
           features: guild.features,
           // Permissions are the member permissions that tRPC validates match the required flags
-          permissions: member.permissions.bitfield.toString(),
+          permissions: member.permissions.bitfield as unknown as number, // TODO: Handle bigint better
           icon: guild.iconURL(),
           owner: guild.ownerId === member.id,
         },
@@ -56,7 +57,11 @@ export async function callAPI<T>({ ApiCall, Ok, Error, member }: TRPCall<T>): Pr
     const data = await ApiCall(caller); // Pass in the caller we created to ApiCall to make the request
     Ok(data); // If no errors, Ok gets called with the API data
   } catch (error) {
-    Error(error as TRPCError);
+    if (error instanceof TRPCError) {
+      Error(error);
+    } else {
+      throw error;
+    }
   }
 }
 
@@ -67,7 +72,7 @@ export async function callApiWithEphemeralErrorHandler<T>(
   await callAPI({
     ...call,
     Error(error) {
-      container.reacord.ephemeralReply(interaction, "Error: " + error.message);
+      ephemeralReply(container.reacord, "Error: " + error.message, interaction);
     },
   });
 }

@@ -1,4 +1,4 @@
-import { Button } from "reacord";
+import { Button } from "@answeroverflow/reacord";
 import React from "react";
 
 export function Counter({ initialCount }: { initialCount: number }) {

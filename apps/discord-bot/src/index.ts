@@ -1,3 +1,4 @@
-import { login } from "./bot";
+import { createClient, login } from "./utils/bot";
 
-void login();
+const client = createClient();
+void login(client);

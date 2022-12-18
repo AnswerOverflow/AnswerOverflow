@@ -1,21 +1,21 @@
 import { getDefaultChannelSettings } from "@answeroverflow/api";
-import { ChannelSettingsMenu } from "@components/channel-settings-menu";
+import { ChannelSettingsMenu } from "~components/channel-settings-menu";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command, container, type ChatInputCommand } from "@sapphire/framework";
-import { callApiWithEphemeralErrorHandler } from "@utils/trpc";
+import { callApiWithEphemeralErrorHandler } from "~utils/trpc";
 import {
   SlashCommandBuilder,
   PermissionsBitField,
   type ChatInputCommandInteraction,
 } from "discord.js";
 import React from "react";
+import { ephemeralReply } from "~utils/utils";
 
 @ApplyOptions<Command.Options>({
   name: "channel-settings",
   description: "Configure channel settings",
-  preconditions: ["GuildOnly"],
   runIn: ["GUILD_ANY"],
-  //requiredUserPermissions: ["ManageGuild"],
+  requiredUserPermissions: ["ManageGuild"],
 })
 export class ChannelSettingsCommand extends Command {
   public getSlashCommandBuilder(): SlashCommandBuilder {
@@ -23,17 +23,19 @@ export class ChannelSettingsCommand extends Command {
       .setName(this.name)
       .setDescription(this.description)
       .setDMPermission(false)
-      .setDefaultMemberPermissions(PermissionsBitField.resolve("AddReactions"));
+      .setDefaultMemberPermissions(PermissionsBitField.resolve("ManageGuild"));
   }
 
   public override registerApplicationCommands(registry: ChatInputCommand.Registry) {
-    registry.registerChatInputCommand(this.getSlashCommandBuilder());
+    registry.registerChatInputCommand(this.getSlashCommandBuilder(), {
+      idHints: ["1048055954618454026"],
+    });
   }
 
   public override async chatInputRun(
     interaction: ChatInputCommandInteraction,
     // eslint-disable-next-line no-unused-vars
-    context: ChatInputCommand.RunContext
+    _context: ChatInputCommand.RunContext
   ) {
     if (interaction.guild == null) {
       return;
@@ -57,10 +59,8 @@ export class ChannelSettingsCommand extends Command {
           if (!result) {
             result = getDefaultChannelSettings(interaction.channelId);
           }
-          container.reacord.ephemeralReply(
-            interaction,
-            <ChannelSettingsMenu channel={channel} settings={result} />
-          );
+          const menu = <ChannelSettingsMenu channel={channel} settings={result} />;
+          ephemeralReply(container.reacord, menu, interaction);
         },
         member,
       },
