@@ -15,10 +15,10 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@answeroverflow/reacord@^0.5.6":
-  version "0.5.6"
-  resolved "https://registry.yarnpkg.com/@answeroverflow/reacord/-/reacord-0.5.6.tgz#0ea8fb30274dad340ac889ea1ea282f352950ba1"
-  integrity sha512-lA9Z+wHKc+7g5T6LB8+lAlIT9TamD4/PX3+l+NXQ/QTaaw697sb/Up28tAVlel1S1RbaYpQY/BHcQW8tYtCQ2Q==
+"@answeroverflow/reacord@^0.5.7":
+  version "0.5.7"
+  resolved "https://registry.yarnpkg.com/@answeroverflow/reacord/-/reacord-0.5.7.tgz#91e91f3757994eed5aba52aa21dcf38b719e3a64"
+  integrity sha512-wtvXfr8YAYFUTvLd2RawmHkGAkkQ+3vEAyoOVYU9GugbihCbY3xYPZkyAsAAVtrNvD3Zd9FV2Uz+4RvNeFrzfw==
   dependencies:
     "@types/node" "*"
     "@types/react" "*"

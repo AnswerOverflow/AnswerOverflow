@@ -6,7 +6,7 @@
   "license": "UNLICENSE",
   "dependencies": {
     "@answeroverflow/api": "*",
-    "@answeroverflow/reacord": "^0.5.6",
+    "@answeroverflow/reacord": "^0.5.7",
     "@sapphire/decorators": "^5.1.0-pr-434.9fcf7df.0",
     "@sapphire/discord-utilities": "^2.11.6",
     "@sapphire/fetch": "^2.4.1",

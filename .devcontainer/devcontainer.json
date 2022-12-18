@@ -25,7 +25,8 @@
         "ZixuanChen.vitest-explorer",
         "EditorConfig.EditorConfig",
         "bradlc.vscode-tailwindcss",
-        "DavidAnson.vscode-markdownlint"
+        "DavidAnson.vscode-markdownlint",
+        "Orta.vscode-jest"
       ]
     }
   },
