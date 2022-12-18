@@ -20,7 +20,8 @@ export function mockClient() {
     };
 
     // Add the source path to the store
-    store.paths.add(`/workspace/apps/discord-bot/src/${store.name}`);
+    const path = process.cwd();
+    store.paths.add(path + `/src/${store.name}`);
 
     // Add the typescript extensions to be able to be parsed
     // @ts-ignore
