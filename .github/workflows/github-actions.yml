@@ -8,8 +8,8 @@ on: # rebuild any PRs and main branch changes
 
 env:
   # None of these are real secrets although this should probably be updated
-  DATABASE_URL: mysql://root:mysql@localhost/api_dev
-  VITE_DATABASE_URL: mysql://root:mysql@localhost:3306/api_dev
+  DATABASE_URL: mysql://root:mysql@localhost:33306/api_dev
+  VITE_DATABASE_URL: mysql://root:mysql@localhost:33306/api_dev
   OWNERS: "[]"
 
 jobs:
