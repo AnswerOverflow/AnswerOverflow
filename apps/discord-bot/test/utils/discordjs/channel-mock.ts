@@ -118,7 +118,15 @@ export function mockForumChannel(
   return setupMockedChannel(client, guild, (guild) => {
     const raw_data: APIGuildForumChannel = {
       ...getGuildTextChannelMockDataBase(ChannelType.GuildForum, guild),
-      available_tags: [],
+      available_tags: [
+        {
+          id: randomSnowflake().toString(),
+          name: "test tag",
+          emoji_id: null,
+          emoji_name: null,
+          moderated: false,
+        },
+      ],
       default_reaction_emoji: null,
       default_sort_order: null,
       ...data,

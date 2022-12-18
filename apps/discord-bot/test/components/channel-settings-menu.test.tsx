@@ -1,9 +1,8 @@
 import { createNormalScenario } from "~test/utils/discordjs/scenarios";
 import { ChannelSettingsMenu } from "~components/channel-settings-menu";
-import { messageHasButton, messageHasSelectMenu, reply } from "~test/utils/reacord/reacord-utils";
+import { reply } from "~test/utils/reacord/reacord-utils";
 import React from "react";
 import { getDefaultChannelSettings } from "@answeroverflow/api";
-import { delay } from "~test/utils/helpers";
 
 describe("ChannelSettingsMenu", () => {
   it("should render correctly in a text channel", async () => {
@@ -13,14 +12,12 @@ describe("ChannelSettingsMenu", () => {
       reacord,
       <ChannelSettingsMenu settings={default_settings} channel={text_channel} />
     );
-    expect(messageHasButton(message, "Enable Indexing", reacord)).toBeTruthy();
-    expect(messageHasButton(message, "Enable Mark Solution", reacord)).toBeTruthy();
     expect(
-      messageHasButton(message, "Enable Send Mark Solution Instructions", reacord)
+      message.hasComponents(
+        ["Enable Indexing", "Enable Mark Solution", "Enable Send Mark Solution Instructions"],
+        []
+      )
     ).toBeTruthy();
-    expect(
-      messageHasSelectMenu(message, "Select a tag to use on mark as solved", reacord)
-    ).toBeFalsy();
   });
   it("should render correctly in a forum thread", async () => {
     const { reacord, forum_thread } = await createNormalScenario();
@@ -29,13 +26,11 @@ describe("ChannelSettingsMenu", () => {
       reacord,
       <ChannelSettingsMenu settings={default_settings} channel={forum_thread} />
     );
-    expect(messageHasButton(message, "Enable Indexing", reacord)).toBeTruthy();
-    expect(messageHasButton(message, "Enable Mark Solution", reacord)).toBeTruthy();
     expect(
-      messageHasButton(message, "Enable Send Mark Solution Instructions", reacord)
-    ).toBeTruthy();
-    expect(
-      messageHasSelectMenu(message, "Select a tag to use on mark as solved", reacord)
+      message.hasComponents(
+        ["Enable Indexing", "Enable Mark Solution", "Enable Send Mark Solution Instructions"],
+        ["Select a tag to use on mark as solved"]
+      )
     ).toBeTruthy();
   });
   test.todo("should render correctly in a text channel thread");
@@ -52,12 +47,33 @@ describe("Toggle Indexing Button", () => {
     const enable_indexing_button = message.findButtonByLabel("Enable Indexing", reacord);
     expect(enable_indexing_button).toBeDefined();
     await enable_indexing_button!.click(text_channel, guild_member_owner);
-    await delay();
-    await delay();
-    await delay();
-    await delay();
-    expect(messageHasButton(message, "Enable Indexing", reacord)).toBeFalsy();
+
+    expect(message.hasButton("Enable Indexing", reacord)).toBeFalsy();
     const button = message.findButtonByLabel("Disable Indexing", reacord);
     expect(button).toBeDefined();
+  });
+});
+
+describe("Select mark solved tag", () => {
+  it("should select a tag", async () => {
+    const { reacord, forum_thread, forum_channel, guild_member_owner } =
+      await createNormalScenario();
+    const default_settings = getDefaultChannelSettings(forum_thread.parent!.id);
+    const message = await reply(
+      reacord,
+      <ChannelSettingsMenu settings={default_settings} channel={forum_thread} />
+    );
+    const select = message.findSelectByPlaceholder(
+      "Select a tag to use on mark as solved",
+      reacord
+    );
+    expect(select).toBeDefined();
+    await select?.select(forum_thread, guild_member_owner, forum_channel.availableTags[0].id);
+    const select2 = message.findSelectByPlaceholder(
+      "Select a tag to use on mark as solved",
+      reacord
+    );
+    expect(select2?.values).toHaveLength(1);
+    expect(select2!.values![0]).toBe(forum_channel.availableTags[0].id);
   });
 });

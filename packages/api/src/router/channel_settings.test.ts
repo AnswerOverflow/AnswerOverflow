@@ -117,9 +117,6 @@ describe("channelRouter", () => {
   it("should enable indexing on a channel", async () => {
     const result = await router_manage_guilds.channel_settings.upsert({
       create: {
-        flags: {
-          indexing_enabled: true,
-        },
         channel: {
           create: {
             ...TEST_CHANNEL_1,
@@ -137,5 +134,24 @@ describe("channelRouter", () => {
     });
     expect(result).toBeDefined();
     expect(result.flags.indexing_enabled).toBe(true);
+  });
+  it("should set the solution_tag_id on a channel", async () => {
+    const result = await router_manage_guilds.channel_settings.upsert({
+      create: {
+        channel: {
+          create: {
+            ...TEST_CHANNEL_1,
+          },
+          update: {
+            ...TEST_CHANNEL_1,
+          },
+        },
+      },
+      update: {
+        solution_tag_id: "1",
+      },
+    });
+    expect(result).toBeDefined();
+    expect(result.solution_tag_id).toBe("1");
   });
 });

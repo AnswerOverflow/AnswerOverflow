@@ -23,7 +23,8 @@ describe("Channel Mock", () => {
     expect(forum_channel.guild.channels.cache.get(forum_channel.id)).toBeDefined();
     expect(forum_channel.type).toBe(ChannelType.GuildForum);
     expect(forum_channel.availableTags).toBeDefined();
-    expect(forum_channel.availableTags.length).toBe(0);
+    expect(forum_channel.availableTags.length).toBe(1);
+    expect(forum_channel.availableTags[0].name).toBe("test tag");
   });
   it("should create a thread channel", async () => {
     const client = mockClient();
