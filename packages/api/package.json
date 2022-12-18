@@ -10,6 +10,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "vitest run --no-threads",
+    "test:watch": "vitest --no-threads",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

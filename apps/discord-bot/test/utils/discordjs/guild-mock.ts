@@ -1,0 +1,94 @@
+import type { SapphireClient } from "@sapphire/framework";
+import {
+  type APIGuild,
+  PermissionsBitField,
+  Guild,
+  User,
+  PermissionResolvable,
+  Role,
+} from "discord.js";
+import type { RawRoleData } from "discord.js/typings/rawDataTypes";
+import { randomSnowflake } from "~utils/utils";
+import { mockGuildMember, mockUser } from "./user-mock";
+
+export function mockGuild(client: SapphireClient, owner?: User, data: Partial<APIGuild> = {}) {
+  // Create the guild
+  if (!owner) {
+    owner = mockUser(client);
+  }
+  const guild_id = data.id ?? randomSnowflake().toString();
+  const raw_data: APIGuild = {
+    id: guild_id,
+    owner_id: owner.id,
+    verification_level: 0,
+    emojis: [],
+    icon: "guild icon url",
+    mfa_level: 0,
+    hub_type: 0,
+    features: [],
+    roles: [],
+    name: "guild name",
+    description: "guild description",
+    default_message_notifications: 0,
+    banner: "guild banner url",
+    splash: "guild splash url",
+    discovery_splash: "guild discovery splash url",
+    region: "",
+    afk_channel_id: null,
+    afk_timeout: 60,
+    explicit_content_filter: 0,
+    application_id: null,
+    system_channel_id: null,
+    system_channel_flags: 0,
+    rules_channel_id: null,
+    vanity_url_code: null,
+    premium_tier: 0,
+    preferred_locale: "",
+    public_updates_channel_id: null,
+    nsfw_level: 0,
+    stickers: [],
+    premium_progress_bar_enabled: false,
+    ...data,
+  };
+  const guild = Reflect.construct(Guild, [client, raw_data]) as Guild;
+
+  // Create the default role
+  mockRole(client, PermissionsBitField.Default, guild, { name: "everyone", id: guild.id });
+
+  // Update client cache
+  client.guilds.cache.set(guild.id, guild);
+  mockGuildMember(client, owner, guild);
+
+  // replace guild members fetched with accessing from the cache of the fetched user id in the fetch argument
+  guild.members.fetch = jest.fn().mockImplementation((id: string) => {
+    const member = guild.members.cache.get(id);
+    if (member) return Promise.resolve(member);
+    return Promise.reject(new Error("Member not found"));
+  });
+  return guild;
+}
+
+export function mockRole(
+  client: SapphireClient,
+  permissions: PermissionResolvable,
+  guild?: Guild,
+  role: Partial<RawRoleData> = {}
+) {
+  if (!guild) {
+    guild = mockGuild(client);
+  }
+  const role_data: RawRoleData = {
+    color: 0,
+    hoist: false,
+    id: randomSnowflake().toString(),
+    managed: false,
+    mentionable: false,
+    name: "test",
+    position: 0,
+    permissions: PermissionsBitField.resolve(permissions).toString(),
+    ...role,
+  };
+  const created_role = Reflect.construct(Role, [client, role_data, guild]) as Role;
+  guild.roles.cache.set(created_role.id, created_role);
+  return created_role;
+}
