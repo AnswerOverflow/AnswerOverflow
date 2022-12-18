@@ -15,7 +15,7 @@ const jestConfig: JestConfigWithTsJest = {
     "~discord-bot/primitives/(.*)": "<rootDir>/src/primitives/$1",
     "~discord-bot/interaction-handlers/(.*)": "<rootDir>/src/interaction-handlers/$1",
     "~discord-bot/components/(.*)": "<rootDir>/src/components/$1",
-    "~utils/(.*)": "<rootDir>/../../packages/api/src/utils/$1",
+    "~api/utils/(.*)": "<rootDir>/../../packages/api/src/utils/$1",
   },
   transform: {
     "^.+\\.(t|j)sx?$": "@swc/jest",

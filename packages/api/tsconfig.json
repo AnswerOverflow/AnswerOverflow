@@ -3,13 +3,13 @@
   "compilerOptions": {
     "baseUrl": "src",
     "paths": {
-      "@router/*": [
+      "~api/router/*": [
         "router/*"
       ],
-      "@testing/*": [
+      "~api/test/*": [
         "test/*"
       ],
-      "~utils/*": [
+      "~api/utils/*": [
         "utils/*"
       ]
     }

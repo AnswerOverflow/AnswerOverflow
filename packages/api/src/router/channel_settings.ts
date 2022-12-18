@@ -6,9 +6,9 @@ import {
 import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "../trpc";
 import { dictToBitfield } from "@answeroverflow/db";
-import { assertCanEditServer } from "../utils/permissions";
 import { channelRouter, channel_upsert_input } from "./channel";
-import { toZObject } from "~utils/zod-utils";
+import { assertCanEditServer } from "~api/utils/permissions";
+import { toZObject } from "~api/utils/zod-utils";
 
 const z_channel_settings_flags = toZObject(...channel_settings_flags);
 

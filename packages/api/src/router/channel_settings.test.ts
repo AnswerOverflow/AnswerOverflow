@@ -1,5 +1,5 @@
 import { clearDatabase } from "@answeroverflow/db";
-import { TEST_SERVER_1, TEST_CHANNEL_1 } from "@testing/utils";
+import { TEST_SERVER_1, TEST_CHANNEL_1 } from "~api/test/utils";
 import { TRPCError } from "@trpc/server";
 import { PermissionsBitField } from "discord.js";
 import { botRouter } from ".";

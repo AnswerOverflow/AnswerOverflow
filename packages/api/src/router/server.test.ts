@@ -1,5 +1,5 @@
 import { clearDatabase } from "@answeroverflow/db";
-import { TEST_SERVER_1 } from "@testing/utils";
+import { TEST_SERVER_1 } from "~api/test/utils";
 import { createContextInner } from "../context";
 import { serverRouter } from "./server";
 

@@ -1,5 +1,5 @@
 import type { Server } from "@answeroverflow/db";
-import type { ChannelUpsertInput } from "~utils/types";
+import type { ChannelUpsertInput } from "~api/utils/types";
 
 export const TEST_SERVER_1: Server = {
   id: "test",
