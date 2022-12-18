@@ -7,8 +7,8 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@typescript-eslint/parser": "^5.46.1",
     "@typescript-eslint/eslint-plugin": "^5.46.1",
-    "@typescript-eslint/parser": "^5.43.0",
     "eslint": "^8.29.0",
     "eslint-config-next": "^13.0.6",
     "eslint-config-prettier": "^8.3.0",
