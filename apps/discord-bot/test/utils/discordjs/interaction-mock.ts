@@ -7,9 +7,8 @@ import {
   GuildBasedChannel,
   Guild,
   GuildMember,
-  PermissionsBitField,
 } from "discord.js";
-import { randomSnowflake } from "~utils/utils";
+import { randomSnowflake } from "~discord-bot/utils/utils";
 import { mockTextChannel } from "./channel-mock";
 import { mockGuild } from "./guild-mock";
 import { mockGuildMember } from "./user-mock";

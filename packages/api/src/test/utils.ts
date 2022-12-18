@@ -1,15 +1,5 @@
-import { prisma, Server } from "@answeroverflow/db";
+import type { Server } from "@answeroverflow/db";
 import type { ChannelUpsertInput } from "~utils/types";
-
-export async function clearDatabase() {
-  await prisma.userServerSettings.deleteMany({});
-  await prisma.userChannelSettings.deleteMany({});
-  await prisma.serverSettings.deleteMany({});
-  await prisma.channelSettings.deleteMany({});
-  await prisma.channel.deleteMany({});
-  await prisma.server.deleteMany({});
-  await prisma.user.deleteMany({});
-}
 
 export const TEST_SERVER_1: Server = {
   id: "test",

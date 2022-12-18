@@ -19,6 +19,7 @@
     "index.ts",
     "transformer.ts",
     "vitest.config.ts",
-    "../../node_modules/@answeroverflow/auth/next-auth.d.ts"
+    "../../node_modules/@answeroverflow/auth/next-auth.d.ts",
+    "../db/src/utils/bitfield.ts"
   ]
 }

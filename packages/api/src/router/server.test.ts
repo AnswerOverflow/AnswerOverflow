@@ -1,4 +1,5 @@
-import { clearDatabase, TEST_SERVER_1 } from "@testing/utils";
+import { clearDatabase } from "@answeroverflow/db";
+import { TEST_SERVER_1 } from "@testing/utils";
 import { createContextInner } from "../context";
 import { serverRouter } from "./server";
 

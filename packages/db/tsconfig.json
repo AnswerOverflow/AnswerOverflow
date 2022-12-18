@@ -1,4 +1,8 @@
 {
   "extends": "@answeroverflow/tsconfig/base.json",
-  "include": ["index.ts"]
+  "include": [
+    "index.ts",
+    "src",
+    "vitest.config.ts"
+  ]
 }

@@ -1,27 +1,16 @@
-import type { ChannelSettings } from "@answeroverflow/db";
+import {
+  addChannelSettingsFlagsToChannelSettings,
+  bitfieldToChannelSettingsFlags,
+  channel_settings_flags,
+} from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "../trpc";
-import { bitfieldToDict, dictToBitfield, toZObject } from "../utils/bitfield";
+import { dictToBitfield } from "@answeroverflow/db";
 import { assertCanEditServer } from "../utils/permissions";
 import { channelRouter, channel_upsert_input } from "./channel";
-
-const channel_settings_flags = [
-  "indexing_enabled",
-  "auto_thread_enabled",
-  "mark_solution_enabled",
-  "send_mark_solution_instructions_in_new_threads",
-  "forum_guidelines_consent_enabled",
-] as const;
+import { toZObject } from "~utils/zod-utils";
 
 const z_channel_settings_flags = toZObject(...channel_settings_flags);
-
-const bitfieldToChannelSettingsFlags = (bitfield: number) =>
-  bitfieldToDict(bitfield, channel_settings_flags);
-
-export const addChannelSettingsFlagsToChannelSettings = (channel_settings: ChannelSettings) => ({
-  ...channel_settings,
-  flags: bitfieldToChannelSettingsFlags(channel_settings.bitfield),
-});
 
 const z_channel_settings = z.object({
   channel_id: z.string(),

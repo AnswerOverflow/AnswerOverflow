@@ -1,7 +1,6 @@
 import { BitField } from "@sapphire/bitfield";
-import { z } from "zod";
 
-function toDict<T extends readonly string[], Result>(
+export function toDict<T extends readonly string[], Result>(
   // eslint-disable-next-line no-unused-vars
   operation: (key: T[number], index: number) => Result,
   ...keys: T
@@ -15,12 +14,6 @@ function toDict<T extends readonly string[], Result>(
 
 export function toBitfield<T extends readonly string[]>(...keys: T): Record<T[number], number> {
   return toDict((_key, index) => 1 << index, ...keys);
-}
-
-export function toZObject<T extends readonly string[]>(
-  ...keys: T
-): z.ZodObject<Record<T[number], z.ZodOptional<z.ZodBoolean>>> {
-  return z.object(toDict(() => z.boolean().optional(), ...keys));
 }
 
 export function bitfieldToDict<T extends readonly string[]>(

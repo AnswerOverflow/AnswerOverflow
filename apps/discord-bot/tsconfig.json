@@ -4,22 +4,22 @@
     "baseUrl": "src",
     "jsx": "react",
     "paths": {
-      "~utils/*": [
+      "~discord-bot/utils/*": [
         "utils/*"
       ],
-      "~listeners": [
+      "~discord-bot/listeners": [
         "listeners/*"
       ],
-      "~primitives/*": [
+      "~discord-bot/primitives/*": [
         "primitives/*"
       ],
-      "~interaction-handlers/*": [
+      "~discord-bot/interaction-handlers/*": [
         "interaction-handlers/*"
       ],
-      "~components/*": [
+      "~discord-bot/components/*": [
         "components/*"
       ],
-      "~test/*": [
+      "~discord-bot/test/*": [
         "../test/*"
       ]
     },
