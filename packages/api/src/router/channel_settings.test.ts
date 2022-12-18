@@ -26,7 +26,7 @@ beforeEach(async () => {
         id: TEST_SERVER_1.id,
         name: TEST_SERVER_1.name,
         owner: false,
-        permissions: PermissionsBitField.resolve("ManageGuild").toString(),
+        permissions: Number(PermissionsBitField.resolve("ManageGuild")),
       },
     ],
   });
@@ -47,7 +47,7 @@ beforeEach(async () => {
         id: TEST_SERVER_1.id,
         name: TEST_SERVER_1.name,
         owner: false,
-        permissions: "0",
+        permissions: 0,
       },
     ],
   });
@@ -113,5 +113,45 @@ describe("channelRouter", () => {
       update: {},
     });
     expect(result2).toBeDefined();
+  });
+  it("should enable indexing on a channel", async () => {
+    const result = await router_manage_guilds.channel_settings.upsert({
+      create: {
+        channel: {
+          create: {
+            ...TEST_CHANNEL_1,
+          },
+          update: {
+            ...TEST_CHANNEL_1,
+          },
+        },
+      },
+      update: {
+        flags: {
+          indexing_enabled: true,
+        },
+      },
+    });
+    expect(result).toBeDefined();
+    expect(result.flags.indexing_enabled).toBe(true);
+  });
+  it("should set the solution_tag_id on a channel", async () => {
+    const result = await router_manage_guilds.channel_settings.upsert({
+      create: {
+        channel: {
+          create: {
+            ...TEST_CHANNEL_1,
+          },
+          update: {
+            ...TEST_CHANNEL_1,
+          },
+        },
+      },
+      update: {
+        solution_tag_id: "1",
+      },
+    });
+    expect(result).toBeDefined();
+    expect(result.solution_tag_id).toBe("1");
   });
 });

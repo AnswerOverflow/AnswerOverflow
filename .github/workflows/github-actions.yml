@@ -9,6 +9,7 @@ on: # rebuild any PRs and main branch changes
 env:
   DATABASE_URL: ${{secrets.DATABASE_URL}}
   VITE_DATABASE_URL: ${{secrets.DATABASE_URL}}
+  OWNERS: "[]"
 
 jobs:
   build:

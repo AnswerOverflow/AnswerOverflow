@@ -1,8 +1,8 @@
 import type { ChannelSettingsOutput, ChannelSettingsUpsertInput } from "@answeroverflow/api";
-import { callApiWithButtonErrorHandler } from "@utils/trpc";
-import { makeChannelUpsert } from "@utils/utils";
+import { callApiWithButtonErrorHandler } from "~utils/trpc";
+import { makeChannelUpsert } from "~utils/utils";
 import { type GuildForumTag, type TextBasedChannel, ChannelType, ForumChannel } from "discord.js";
-import { ButtonClickEvent, Select, SelectChangeEvent, Option } from "reacord";
+import { ButtonClickEvent, Select, SelectChangeEvent, Option } from "@answeroverflow/reacord";
 import React from "react";
 import { ToggleButton } from "./toggle-button";
 
@@ -36,6 +36,7 @@ export function ChannelSettingsMenu({
           return await router.channel_settings.upsert({
             update: data,
             create: {
+              ...data,
               channel: {
                 ...makeChannelUpsert(channel, channel.guild),
               },
@@ -53,7 +54,7 @@ export function ChannelSettingsMenu({
 
   const ToggleIndexingButton = () => (
     <ToggleButton
-      enable={channelSettings.flags.indexing_enabled}
+      currently_enabled={channelSettings.flags.indexing_enabled}
       disable_label={"Disable Indexing"}
       enable_label={"Enable Indexing"}
       onClick={(interaction: ButtonClickEvent) => {
@@ -68,22 +69,22 @@ export function ChannelSettingsMenu({
 
   const ToggleMarkSolutionButton = () => (
     <ToggleButton
-      enable={channelSettings.flags.mark_solution_enabled}
+      currently_enabled={channelSettings.flags.mark_solution_enabled}
       disable_label={"Disable Mark Solution"}
       enable_label={"Enable Mark Solution"}
-      onClick={(interaction: ButtonClickEvent) => {
+      onClick={(interaction: ButtonClickEvent) =>
         void updateChannelSettings(interaction, {
           flags: {
             mark_solution_enabled: !channelSettings.flags.mark_solution_enabled,
           },
-        });
-      }}
+        })
+      }
     />
   );
 
   const ToggleSendMarkSolutionInstructionsButton = () => (
     <ToggleButton
-      enable={channelSettings.flags.send_mark_solution_instructions_in_new_threads}
+      currently_enabled={channelSettings.flags.send_mark_solution_instructions_in_new_threads}
       disable_label={"Disable Send Mark Solution Instructions"}
       enable_label={"Enable Send Mark Solution Instructions"}
       onClick={(interaction: ButtonClickEvent) => {

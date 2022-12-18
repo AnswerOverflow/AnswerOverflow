@@ -38,17 +38,13 @@
   ],
   "settings": {
     "files.exclude": {
-      "**/node_modules/": true,
-      "apps/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
-      "packages/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
-      ".turbo": true,
-      "dist": true,
-      "**/coverage": true,
-      ".next": true
+      "apps/": true, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
+      "packages/": true, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
     },
     "vitest.enable": true,
     "vitest.disabledWorkspaceFolders": [
-      "root"
+      "root",
+      "discord-bot"
     ],
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
@@ -88,6 +84,20 @@
       "*.css": "tailwindcss"
     },
     "search.useIgnoreFiles": true,
+    "[markdown]": {
+      "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+    },
+    "jest.disabledWorkspaceFolders": [
+      "root",
+      "api",
+      "ui",
+      "web",
+      "db",
+      "api",
+      "auth",
+      "config"
+    ],
+    "jest.autoRun": "true",
   },
   "extensions": {
     "recommendations": [
