@@ -7,8 +7,9 @@ on: # rebuild any PRs and main branch changes
       - main
 
 env:
-  DATABASE_URL: ${{secrets.DATABASE_URL}}
-  VITE_DATABASE_URL: ${{secrets.DATABASE_URL}}
+  # None of these are real secrets although this should probably be updated
+  DATABASE_URL: mysql://root:mysql@localhost:33306/api_dev
+  VITE_DATABASE_URL: mysql://root:mysql@localhost:33306/api_dev
   OWNERS: "[]"
 
 jobs:
