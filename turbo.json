@@ -24,6 +24,10 @@
     "test": {
       "outputs": [],
       "cache": false
+    },
+    "test:watch": {
+      "outputs": [],
+      "cache": false
     }
   },
   "globalDependencies": [

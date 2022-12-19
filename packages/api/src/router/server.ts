@@ -36,12 +36,14 @@ const serverUpsertRouter = router({
   upsert: publicProcedure.input(server_upsert_input).mutation(async ({ ctx, input }) => {
     const server_fetch = serverFetchRouter.createCaller(ctx);
     const server_update_create = serverCreateUpdateRouter.createCaller(ctx);
-    const existing_server = await server_fetch.byId(input.create.id);
-    if (existing_server) {
-      return server_update_create.update({ old: existing_server, data: input.update });
-    } else {
-      return server_update_create.create(input.create);
+    let existing_server = await server_fetch.byId(input.create.id);
+    if (existing_server == null) {
+      existing_server = await server_update_create.create(input.create);
     }
+    return await server_update_create.update({
+      old: existing_server,
+      data: input.update,
+    });
   }),
 });
 

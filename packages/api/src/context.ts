@@ -1,5 +1,5 @@
 import { Session, getServerSession } from "@answeroverflow/auth";
-import { prisma } from "@answeroverflow/db";
+import { prisma, elastic } from "@answeroverflow/db";
 import type { inferAsyncReturnType } from "@trpc/server";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
 import type { getUserServers } from "./utils/discord-oauth";
@@ -30,6 +30,7 @@ export const createContextInner = async (opts: CreateContextOptions) => {
     user_servers: opts.user_servers,
     caller: opts.caller,
     prisma,
+    elastic,
   };
 };
 

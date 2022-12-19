@@ -1,4 +1,4 @@
-import { elastic } from "../index";
+import { elastic, Message } from "../index";
 
 describe("ElasticSearch tests", () => {
   it("should return a 200 response", async () => {
@@ -14,42 +14,60 @@ describe("ElasticSearch tests", () => {
     const indexed_message = await elastic.indexMessage({
       id: "1",
       channel_id: "1",
-      author_id: "1",
-      type: 1,
-      mentions: ["1"],
-      mention_everyone: false,
       content: "hello",
-      has: 0,
-      author_type: 1,
-      guild_id: "1",
-      attachment_extensions: [],
-      attachment_filenames: [],
-      link_hostnames: [],
-      embed_providers: [],
-      embed_types: [],
+      images: [],
+      replies_to: "1",
+      thread_id: "1",
+      server_id: "1",
+      solutions: [],
+      author_id: "1",
+      child_thread: "1",
     });
-    expect(indexed_message.result).toBe("created");
+    expect(indexed_message).toBeDefined();
   });
   it("should search for a message", async () => {
     await elastic.createMessagesIndex();
-    await elastic.indexMessage({
-      id: "1",
+    const msg: Message = {
+      id: "1054158565633441823",
       channel_id: "1",
-      author_id: "1",
-      type: 1,
-      mentions: ["1"],
-      mention_everyone: false,
       content: "hello",
-      has: 0,
-      author_type: 1,
-      guild_id: "1",
-      attachment_extensions: [],
-      attachment_filenames: [],
-      link_hostnames: [],
-      embed_providers: [],
-      embed_types: [],
-    });
-    const fetched_message = elastic.getMessage("1");
-    expect(fetched_message).toBeTruthy();
+      images: [],
+      replies_to: "1",
+      thread_id: "1",
+      server_id: "843301848295014421",
+      solutions: [],
+      author_id: "523949187663134754",
+      child_thread: "1",
+    };
+    await elastic.indexMessage(msg);
+    const fetched_message = await elastic.getMessage("1054158565633441823");
+    expect(fetched_message).toBeDefined();
+    expect(fetched_message!.id).toBe("1054158565633441823");
+    expect(fetched_message).toEqual(msg);
+  });
+  it("should delete a message", async () => {
+    await elastic.createMessagesIndex();
+    const msg: Message = {
+      id: "1054158565633441823",
+      channel_id: "1",
+      content: "hello",
+      images: [],
+      replies_to: "1",
+      thread_id: "1",
+      server_id: "843301848295014421",
+      solutions: [],
+      author_id: "523949187663134754",
+      child_thread: "1",
+    };
+    await elastic.indexMessage(msg);
+    const deleted_message = await elastic.deleteMessage("1054158565633441823");
+    expect(deleted_message).toBeTruthy();
+    const fetched_deleted_message = await elastic.getMessage("1054158565633441823");
+    expect(fetched_deleted_message).toBeNull();
+  });
+  it("should delete a message that does not exist", async () => {
+    await elastic.createMessagesIndex();
+    const deleted_message = await elastic.deleteMessage("1054158565633441823");
+    expect(deleted_message).toBeFalsy();
   });
 });

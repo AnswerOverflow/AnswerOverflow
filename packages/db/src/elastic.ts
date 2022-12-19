@@ -1,4 +1,4 @@
-import { Client, ClientOptions } from "@elastic/elasticsearch";
+import { Client, ClientOptions, errors } from "@elastic/elasticsearch";
 
 declare global {
   // eslint-disable-next-line no-var, no-unused-vars
@@ -47,20 +47,15 @@ function getElasticClient(): Elastic {
 // https://discord.com/developers/docs/resources/channel#message-objects
 export type Message = {
   id: string;
+  server_id: string;
   channel_id: string;
-  guild_id?: string;
-  author_id: string;
-  author_type: number;
-  type: number;
-  mentions: string[];
-  mention_everyone: boolean;
+  author_id?: string;
   content: string;
-  has: number;
-  link_hostnames: string[];
-  embed_providers: string[];
-  embed_types: string[];
-  attachment_extensions: string[];
-  attachment_filenames: string[];
+  images: string[];
+  replies_to: string | null;
+  thread_id?: string | null;
+  child_thread?: string | null;
+  solutions: string[];
 };
 
 export class Elastic extends Client {
@@ -85,20 +80,65 @@ export class Elastic extends Client {
     });
   }
 
-  public getMessage(id: string) {
-    return this.get({
-      index: this.messages_index,
-      id,
-    });
+  public async getMessage(id: string) {
+    try {
+      const message = await this.get<Message>({
+        index: this.messages_index,
+        id,
+      });
+      if (message.found === false) return null;
+      return message._source ?? null;
+    } catch (error) {
+      if (error instanceof errors.ResponseError && error.statusCode === 404) {
+        return null;
+      } else {
+        throw error;
+      }
+    }
   }
 
-  public indexMessage(message: Message) {
-    return this.update({
+  public async deleteMessage(id: string) {
+    try {
+      const message = await this.delete({
+        index: this.messages_index,
+        id,
+      });
+      switch (message.result) {
+        case "deleted":
+          return true;
+        case "not_found":
+          return false;
+        default:
+          throw new Error("Unknown message delete error");
+      }
+    } catch (error) {
+      if (error instanceof errors.ResponseError && error.statusCode === 404) {
+        return false;
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  public async indexMessage(message: Message) {
+    const fetched_message = await this.update({
       index: this.messages_index,
       id: message.id,
       doc: message,
       upsert: message,
     });
+    switch (fetched_message.result) {
+      case "created":
+      case "updated":
+      case "noop": // Update changed no data
+        return message;
+      case "not_found":
+        throw new Error("Message not found when it should have been indexed");
+      case "deleted":
+        throw new Error("Message deleted when it should have been indexed");
+      default:
+        throw new Error("Unknown message index error error");
+    }
   }
 
   public async createMessagesIndex() {
@@ -115,58 +155,16 @@ export class Elastic extends Client {
           excludes: ["tags"],
         },
         properties: {
-          id: {
-            type: "long",
-          },
-          channel_id: {
-            type: "long",
-          },
-          guild_id: {
-            type: "long",
-          },
-          author_id: {
-            type: "long",
-          },
-          author_type: {
-            type: "byte",
-          },
-          type: {
-            type: "short",
-          },
-          mentions: {
-            type: "long",
-          },
-          mention_everyone: {
-            type: "boolean",
-          },
-          content: {
-            type: "text",
-            fields: {
-              lang_analyzed: {
-                type: "text",
-                analyzer: "english",
-              },
-            },
-          },
-          has: {
-            type: "short",
-          },
-          link_hostnames: {
-            type: "keyword",
-          },
-          embed_providers: {
-            type: "keyword",
-          },
-          embed_types: {
-            type: "keyword",
-          },
-          attachment_extensions: {
-            type: "keyword",
-          },
-          attachment_filenames: {
-            type: "text",
-            analyzer: "simple",
-          },
+          id: { type: "long" },
+          server_id: { type: "long" },
+          channel_id: { type: "long" },
+          author_id: { type: "long" },
+          hidden: { type: "boolean" },
+          content: { type: "text" },
+          replies_to: { type: "long" },
+          thread_id: { type: "long" },
+          child_thread: { type: "long" },
+          images: { type: "text" },
         },
       },
     });

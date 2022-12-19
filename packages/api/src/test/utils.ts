@@ -2,14 +2,14 @@ import type { Server } from "@answeroverflow/db";
 import type { ChannelUpsertInput } from "~api/utils/types";
 
 export const TEST_SERVER_1: Server = {
-  id: "test",
+  id: "1003",
   name: "test",
   icon: null,
   kicked_time: null,
 };
 
 export const TEST_CHANNEL_1: ChannelUpsertInput["create"] = {
-  id: "test",
+  id: "301",
   name: "test",
   type: 0,
   server: {
