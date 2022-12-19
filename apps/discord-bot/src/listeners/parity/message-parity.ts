@@ -1,15 +1,9 @@
+import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
-import type { Message } from "discord.js";
+import { Message, Events } from "discord.js";
 
-export class SyncMessageDelete extends Listener {
-  public constructor(context: Listener.Context, options: Listener.Options) {
-    super(context, {
-      ...options,
-      event: "messageDelete",
-      name: "MessageDeletedWatcher",
-    });
-  }
-
+@ApplyOptions<Listener.Options>({ event: Events.MessageDelete, name: "Message Delete Watcher" })
+export class OnMessage extends Listener {
   public run(message: Message) {
     console.log("Deleting message: ", message.id);
   }

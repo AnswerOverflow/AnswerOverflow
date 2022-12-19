@@ -12,9 +12,15 @@ import {
   APIThreadChannel,
   ThreadChannel,
   PublicThreadChannel,
+  Message,
+  Channel,
+  User,
+  MessageType,
 } from "discord.js";
+import type { RawMessageData } from "discord.js/typings/rawDataTypes";
 import { randomSnowflake } from "~discord-bot/utils/utils";
 import { mockGuild } from "./guild-mock";
+import { mockGuildMember, mockUser } from "./user-mock";
 
 export function getGuildTextChannelMockDataBase<Type extends GuildTextChannelType>(
   type: Type,
@@ -134,4 +140,47 @@ export function mockForumChannel(
     const channel: ForumChannel = Reflect.construct(ForumChannel, [guild, raw_data, client]);
     return channel;
   });
+}
+
+export function mockMessage(client: SapphireClient, author?: User, channel?: Channel) {
+  if (!channel) {
+    channel = mockTextChannel(client);
+  }
+  if (!author) {
+    author = mockUser(client);
+    if (!channel.isDMBased()) {
+      mockGuildMember(client, author, channel.guild);
+    }
+  }
+  const raw_data: RawMessageData = {
+    id: randomSnowflake().toString(),
+    channel_id: channel.id,
+    author: {
+      // TODO: Use a helper function to get properties
+      id: author.id,
+      username: author.username,
+      discriminator: author.discriminator,
+      avatar: author.avatar,
+    },
+    content: "",
+    timestamp: "",
+    edited_timestamp: null,
+    tts: false,
+    mention_everyone: false,
+    mentions: [],
+    mention_roles: [],
+    attachments: [],
+    embeds: [],
+    pinned: false,
+    type: MessageType.Default,
+    reactions: [],
+  };
+  const message = Reflect.construct(Message, [client, raw_data]) as Message;
+  if (channel.isTextBased()) {
+    // TODO: Fix ts ignore?
+    // @ts-ignore
+    channel.messages.cache.set(message.id, message);
+  }
+
+  return message;
 }
