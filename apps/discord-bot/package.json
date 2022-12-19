@@ -55,7 +55,7 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "dev": "yarn with-env rm -rf dist && yarn run build && run-p watch start",
     "start": "yarn with-env node dist/index.js",
-    "test": "yarn with-env jest",
+    "test:discord-bot": "yarn with-env jest",
     "test:watch": "yarn with-env jest --watch",
     "install-local-reacord": "cp -r ~/repos/reacord/packages/reacord/dist/ /workspace/node_modules/@answeroverflow/reacord/"
   }

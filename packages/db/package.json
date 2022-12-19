@@ -12,7 +12,7 @@
     "init": "yarn with-env npx prisma migrate dev",
     "migrate": "yarn with-env npx prisma migrate deploy",
     "dev": "yarn with-env prisma studio --port 5556 --browser none",
-    "test": "yarn with-env vitest run --no-threads",
+    "test:db": "yarn with-env vitest run --no-threads",
     "test:watch": "yarn with-env vitest --no-threads",
     "db-push": "yarn with-env prisma db push",
     "db-generate": "yarn with-env prisma generate"

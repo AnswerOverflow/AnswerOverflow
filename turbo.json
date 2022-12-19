@@ -22,7 +22,30 @@
       "cache": false
     },
     "test": {
+      "dependsOn": [
+        "test:discord-bot"
+      ],
       "outputs": [],
+      "cache": false
+    },
+    "test:db": {
+      "dependsOn": [
+        "^test:db"
+      ],
+      "cache": false
+    },
+    "test:api": {
+      "dependsOn": [
+        "test:db",
+        "^test:api"
+      ],
+      "cache": false
+    },
+    "test:discord-bot": {
+      "dependsOn": [
+        "test:api",
+        "^test:discord-bot"
+      ],
       "cache": false
     },
     "test:watch": {
