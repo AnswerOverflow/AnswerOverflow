@@ -5,9 +5,9 @@ import path from "path";
 export default createVitestConfig({
   resolve: {
     alias: {
-      "@router": path.resolve(__dirname, "./src/router/"),
-      "@testing": path.resolve(__dirname, "./src/test/"),
-      "~utils": path.resolve(__dirname, "./src/utils/"),
+      "~api/router": path.resolve(__dirname, "./src/router/"),
+      "~api/test": path.resolve(__dirname, "./src/test/"),
+      "~api/utils": path.resolve(__dirname, "./src/utils/"),
     },
   },
 });

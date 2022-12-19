@@ -5,7 +5,7 @@ import type {
   Message,
   Snowflake,
 } from "discord.js";
-import { envParseArray } from "~utils/env-parser";
+import { envParseArray } from "~discord-bot/utils/env-parser";
 
 const OWNERS = envParseArray("OWNERS");
 

@@ -1,4 +1,4 @@
-import { clearDatabase } from "@testing/utils";
+import { clearDatabase } from "@answeroverflow/db";
 import { createContextInner } from "../context";
 import { userRouter } from "./user";
 

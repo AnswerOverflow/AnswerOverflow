@@ -1,7 +1,7 @@
 import { ReacordTester } from "@answeroverflow/reacord";
 import { container } from "@sapphire/framework";
 import { Client } from "discord.js";
-import { createClient } from "~utils/bot";
+import { createClient } from "~discord-bot/utils/bot";
 
 // References: https://dev.to/heymarkkop/how-to-implement-test-and-mock-discordjs-v13-slash-commands-with-typescript-22lc
 
