@@ -1,7 +1,7 @@
 import type { SapphireClient } from "@sapphire/framework";
 import { Guild, GuildMember, PermissionResolvable, PermissionsBitField, User } from "discord.js";
 import type { RawGuildMemberData, RawUserData } from "discord.js/typings/rawDataTypes";
-import { randomSnowflake } from "~utils/utils";
+import { randomSnowflake } from "~discord-bot/utils/utils";
 import { mockGuild, mockRole } from "./guild-mock";
 
 export function mockUser(client: SapphireClient, data: Partial<RawUserData> = {}) {

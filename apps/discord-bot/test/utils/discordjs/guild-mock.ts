@@ -8,7 +8,7 @@ import {
   Role,
 } from "discord.js";
 import type { RawRoleData } from "discord.js/typings/rawDataTypes";
-import { randomSnowflake } from "~utils/utils";
+import { randomSnowflake } from "~discord-bot/utils/utils";
 import { mockGuildMember, mockUser } from "./user-mock";
 
 export function mockGuild(client: SapphireClient, owner?: User, data: Partial<APIGuild> = {}) {

@@ -13,7 +13,7 @@ import {
   ThreadChannel,
   PublicThreadChannel,
 } from "discord.js";
-import { randomSnowflake } from "~utils/utils";
+import { randomSnowflake } from "~discord-bot/utils/utils";
 import { mockGuild } from "./guild-mock";
 
 export function getGuildTextChannelMockDataBase<Type extends GuildTextChannelType>(

@@ -4,7 +4,7 @@ import {
   publicProcedure,
   router,
 } from "../trpc";
-import { getDiscordAccount } from "../utils/discord-oauth";
+import { getDiscordAccount } from "~api/utils/discord-oauth";
 
 export const authRouter = router({
   getSession: publicProcedure.query(({ ctx }) => {

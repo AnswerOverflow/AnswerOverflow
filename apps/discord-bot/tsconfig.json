@@ -1,28 +1,7 @@
 {
   "extends": "@answeroverflow/tsconfig/base.json",
   "compilerOptions": {
-    "baseUrl": "src",
     "jsx": "react",
-    "paths": {
-      "~utils/*": [
-        "utils/*"
-      ],
-      "~listeners": [
-        "listeners/*"
-      ],
-      "~primitives/*": [
-        "primitives/*"
-      ],
-      "~interaction-handlers/*": [
-        "interaction-handlers/*"
-      ],
-      "~components/*": [
-        "components/*"
-      ],
-      "~test/*": [
-        "../test/*"
-      ]
-    },
     "types": [
       "jest"
     ]

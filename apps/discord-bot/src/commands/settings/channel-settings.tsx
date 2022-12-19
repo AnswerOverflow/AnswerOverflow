@@ -1,15 +1,15 @@
-import { getDefaultChannelSettings } from "@answeroverflow/api";
-import { ChannelSettingsMenu } from "~components/channel-settings-menu";
+import { ChannelSettingsMenu } from "~discord-bot/components/channel-settings-menu";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command, container, type ChatInputCommand } from "@sapphire/framework";
-import { callApiWithEphemeralErrorHandler } from "~utils/trpc";
+import { callApiWithEphemeralErrorHandler } from "~discord-bot/utils/trpc";
 import {
   SlashCommandBuilder,
   PermissionsBitField,
   type ChatInputCommandInteraction,
 } from "discord.js";
 import React from "react";
-import { ephemeralReply } from "~utils/utils";
+import { ephemeralReply } from "~discord-bot/utils/utils";
+import { getDefaultChannelSettingsWithFlags } from "@answeroverflow/db";
 
 @ApplyOptions<Command.Options>({
   name: "channel-settings",
@@ -57,7 +57,7 @@ export class ChannelSettingsCommand extends Command {
         },
         Ok(result) {
           if (!result) {
-            result = getDefaultChannelSettings(interaction.channelId);
+            result = getDefaultChannelSettingsWithFlags(interaction.channelId);
           }
           const menu = <ChannelSettingsMenu channel={channel} settings={result} />;
           ephemeralReply(container.reacord, menu, interaction);

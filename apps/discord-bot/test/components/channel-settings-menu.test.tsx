@@ -1,13 +1,13 @@
-import { createNormalScenario } from "~test/utils/discordjs/scenarios";
-import { ChannelSettingsMenu } from "~components/channel-settings-menu";
-import { reply } from "~test/utils/reacord/reacord-utils";
+import { createNormalScenario } from "~discord-bot/test/utils/discordjs/scenarios";
+import { ChannelSettingsMenu } from "~discord-bot/components/channel-settings-menu";
+import { reply } from "~discord-bot/test/utils/reacord/reacord-utils";
 import React from "react";
-import { getDefaultChannelSettings } from "@answeroverflow/api";
+import { getDefaultChannelSettingsWithFlags } from "@answeroverflow/db";
 
 describe("ChannelSettingsMenu", () => {
   it("should render correctly in a text channel", async () => {
     const { reacord, text_channel } = await createNormalScenario();
-    const default_settings = getDefaultChannelSettings(text_channel.id);
+    const default_settings = getDefaultChannelSettingsWithFlags(text_channel.id);
     const message = await reply(
       reacord,
       <ChannelSettingsMenu settings={default_settings} channel={text_channel} />
@@ -21,7 +21,7 @@ describe("ChannelSettingsMenu", () => {
   });
   it("should render correctly in a forum thread", async () => {
     const { reacord, forum_thread } = await createNormalScenario();
-    const default_settings = getDefaultChannelSettings(forum_thread.parent!.id);
+    const default_settings = getDefaultChannelSettingsWithFlags(forum_thread.parent!.id);
     const message = await reply(
       reacord,
       <ChannelSettingsMenu settings={default_settings} channel={forum_thread} />
@@ -39,7 +39,7 @@ describe("ChannelSettingsMenu", () => {
 describe("Toggle Indexing Button", () => {
   it("should enable indexing", async () => {
     const { reacord, text_channel, guild_member_owner } = await createNormalScenario();
-    const default_settings = getDefaultChannelSettings(text_channel.id);
+    const default_settings = getDefaultChannelSettingsWithFlags(text_channel.id);
     const message = await reply(
       reacord,
       <ChannelSettingsMenu settings={default_settings} channel={text_channel} />
@@ -58,7 +58,7 @@ describe("Select mark solved tag", () => {
   it("should select a tag", async () => {
     const { reacord, forum_thread, forum_channel, guild_member_owner } =
       await createNormalScenario();
-    const default_settings = getDefaultChannelSettings(forum_thread.parent!.id);
+    const default_settings = getDefaultChannelSettingsWithFlags(forum_thread.parent!.id);
     const message = await reply(
       reacord,
       <ChannelSettingsMenu settings={default_settings} channel={forum_thread} />
