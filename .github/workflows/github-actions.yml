@@ -10,6 +10,11 @@ env:
   # None of these are real secrets although this should probably be updated
   DATABASE_URL: mysql://root:mysql@localhost:33306/api_dev
   VITE_DATABASE_URL: mysql://root:mysql@localhost:33306/api_dev
+  VITE_ELASTICSEARCH_URL: http://localhost:9200
+  VITE_ELASTICSEARCH_MESSAGE_INDEX: messages
+  VITE_ELASTICSEARCH_INDEX: api_dev
+  VITE_ELASTICSEARCH_USERNAME: elastic
+  VITE_ELASTICSEARCH_PASSWORD: changeme
   OWNERS: "[]"
 
 jobs:
