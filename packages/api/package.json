@@ -6,11 +6,12 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
+    "with-env": "dotenv -e ../../.env --",
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "test": "vitest run --no-threads",
-    "test:watch": "vitest --no-threads",
+    "test": "yarn with-env vitest run --no-threads",
+    "test:watch": "yarn with-env vitest --no-threads",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@answeroverflow/tsconfig": "*",
     "@vitest/coverage-c8": "^0.25.1",
+    "dotenv-cli": "^6.0.0",
     "eslint": "^8.28.0",
     "typescript": "^4.9.3",
     "vitest": "^0.25.1"
