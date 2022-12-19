@@ -6,20 +6,21 @@
   "license": "MIT",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "init": "npx prisma migrate dev",
-    "migrate": "npx prisma migrate deploy",
     "with-env": "dotenv -e ../../.env --",
-    "dev": "yarn with-env prisma studio --port 5556 --browser none",
     "lint": "eslint \"*.ts*\"",
     "lint:fix": "eslint \"*.ts*\" --fix",
-    "test": "vitest run --no-threads",
-    "test:watch": "vitest --no-threads",
+    "init": "yarn with-env npx prisma migrate dev",
+    "migrate": "yarn with-env npx prisma migrate deploy",
+    "dev": "yarn with-env prisma studio --port 5556 --browser none",
+    "test": "yarn with-env vitest run --no-threads",
+    "test:watch": "yarn with-env vitest --no-threads",
     "db-push": "yarn with-env prisma db push",
     "db-generate": "yarn with-env prisma generate"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.5.0",
-    "@prisma/client": "^4.7.1"
+    "@prisma/client": "^4.7.1",
+    "dotenv-mono": "^1.3.8"
   },
   "devDependencies": {
     "@answeroverflow/tsconfig": "*",

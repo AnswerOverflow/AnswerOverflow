@@ -30,9 +30,5 @@ dist/
 .env.test.local
 .env.production.local
 
-# Link the .env file from the root repo
-!packages/**/.env
-!apps/**/.env
-
 # turbo
 .turbo
