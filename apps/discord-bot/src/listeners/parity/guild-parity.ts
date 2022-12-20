@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
-import type { Guild } from "discord.js";
+import { Events, Guild } from "discord.js";
 
 /*
   Guild relevated events are tracked here, this may make sense to split into multiple files as the complexity grows.
@@ -15,14 +15,14 @@ export class SyncOnReady extends Listener {
   }
 }
 
-@ApplyOptions<Listener.Options>({ event: "guildCreate" })
+@ApplyOptions<Listener.Options>({ event: Events.GuildCreate, name: "Sync On Join" })
 export class SyncOnJoin extends Listener {
   public async run(guild: Guild) {
     // Call syncServer with the guild
   }
 }
 
-@ApplyOptions<Listener.Options>({ event: "guildDelete" })
+@ApplyOptions<Listener.Options>({ event: Events.GuildDelete, name: "Sync On Delete" })
 export class SyncOnDelete extends Listener {
   public async run(guild: Guild) {
     // Mark the server as kicked
