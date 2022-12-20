@@ -45,4 +45,7 @@ export const messageRouter = router({
   delete: publicProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     return ctx.elastic.deleteMessage(input);
   }),
+  deleteBulk: publicProcedure.input(z.array(z.string())).mutation(async ({ ctx, input }) => {
+    return ctx.elastic.bulkDeleteMessages(input);
+  }),
 });

@@ -49,12 +49,12 @@ export type Message = {
   id: string;
   server_id: string;
   channel_id: string;
-  author_id?: string;
+  author_id: string;
   content: string;
   images: string[];
   replies_to: string | null;
-  thread_id?: string | null;
-  child_thread?: string | null;
+  thread_id: string | null;
+  child_thread: string | null;
   solutions: string[];
 };
 
@@ -118,6 +118,16 @@ export class Elastic extends Client {
         throw error;
       }
     }
+  }
+
+  public async bulkDeleteMessages(ids: string[]) {
+    const body = ids.flatMap((id) => [{ delete: { _index: this.messages_index, _id: id } }]);
+    const result = await this.bulk({ body });
+    if (result.errors) {
+      console.error(result);
+      return false;
+    }
+    return true;
   }
 
   public async indexMessage(message: Message) {
