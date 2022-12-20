@@ -2,6 +2,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import { Events, Guild } from "discord.js";
+import { callAPI } from "~discord-bot/utils/trpc";
 
 /*
   Guild relevated events are tracked here, this may make sense to split into multiple files as the complexity grows.
@@ -14,17 +15,73 @@ export class SyncOnReady extends Listener {
     // 2. For any servers that are in the database and not in the guilds the bot is in, mark them as kicked
   }
 }
-
 @ApplyOptions<Listener.Options>({ event: Events.GuildCreate, name: "Sync On Join" })
 export class SyncOnJoin extends Listener {
   public async run(guild: Guild) {
-    // Call syncServer with the guild
+    await callAPI({
+      async ApiCall(router) {
+        return await router.servers.upsert({
+          create: {
+            id: guild.id,
+            name: guild.name,
+          },
+          update: {
+            name: guild.name,
+            kicked_time: null,
+          },
+        });
+      },
+      Ok() {},
+      Error() {},
+    });
   }
 }
 
+/*
+ * On delete, we want to mark the server as kicked, but we don't want to delete it from the database.
+ * This is incase someone is just temporarily kicking the bot, and we don't want to lose all of the data.
+ * A background job will periodically clean up servers that have been kicked for a long time.
+ */
 @ApplyOptions<Listener.Options>({ event: Events.GuildDelete, name: "Sync On Delete" })
 export class SyncOnDelete extends Listener {
   public async run(guild: Guild) {
-    // Mark the server as kicked
+    await callAPI({
+      async ApiCall(router) {
+        return await router.servers.upsert({
+          create: {
+            id: guild.id,
+            name: guild.name,
+            kicked_time: new Date(),
+          },
+          update: {
+            name: guild.name,
+            kicked_time: new Date(),
+          },
+        });
+      },
+      Ok() {},
+      Error() {},
+    });
+  }
+}
+
+@ApplyOptions<Listener.Options>({ event: Events.GuildUpdate, name: "Sync On Update" })
+export class SyncOnUpdate extends Listener {
+  public async run(oldGuild: Guild, newGuild: Guild) {
+    await callAPI({
+      async ApiCall(router) {
+        return await router.servers.upsert({
+          create: {
+            id: newGuild.id,
+            name: newGuild.name,
+          },
+          update: {
+            name: newGuild.name,
+          },
+        });
+      },
+      Ok() {},
+      Error() {},
+    });
   }
 }

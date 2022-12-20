@@ -4,9 +4,17 @@ import { mergeRouters, publicProcedure, router } from "../trpc";
 export const z_server = z.object({
   id: z.string(),
   name: z.string(),
+  kicked_time: z.date().nullable(),
 });
-export const server_create_input = z.object({ name: z.string(), id: z.string() });
-export const server_update_input = z.object({ name: z.optional(z.string()) });
+export const server_create_input = z.object({
+  name: z.string(),
+  id: z.string(),
+  kicked_time: z.date().nullable().optional(),
+});
+export const server_update_input = z.object({
+  name: z.string().optional(),
+  kicked_time: z.date().nullable().optional(),
+});
 export const server_upsert_input = z.object({
   create: server_create_input,
   update: server_update_input,
