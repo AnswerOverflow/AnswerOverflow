@@ -75,7 +75,7 @@ describe("Normal Scenario Tests", () => {
     expect(forum_thread_message_from_default.author.id).toEqual(guild_member_default.id);
     expect(forum_thread_message_from_default.guildId).toEqual(guild_member_default.guild.id);
   });
-  it("should verify text thread channel message", async () => {
+  it("should verify text channel message", async () => {
     const { text_channel_message_from_default, text_channel, guild_member_default } =
       await createNormalScenario();
     expect(text_channel_message_from_default).toBeDefined();
