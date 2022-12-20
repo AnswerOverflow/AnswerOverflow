@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import { Events, Guild } from "discord.js";
@@ -67,7 +66,7 @@ export class SyncOnDelete extends Listener {
 
 @ApplyOptions<Listener.Options>({ event: Events.GuildUpdate, name: "Sync On Update" })
 export class SyncOnUpdate extends Listener {
-  public async run(oldGuild: Guild, newGuild: Guild) {
+  public async run(_oldGuild: Guild, newGuild: Guild) {
     await callAPI({
       async ApiCall(router) {
         return await router.servers.upsert({
