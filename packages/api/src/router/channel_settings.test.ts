@@ -1,5 +1,5 @@
 import { clearDatabase } from "@answeroverflow/db";
-import { TEST_SERVER_1, TEST_CHANNEL_1 } from "~api/test/utils";
+import { TEST_SERVER_1, TEST_CHANNEL_UPSERT_CREATE_1 } from "~api/test/utils";
 import { TRPCError } from "@trpc/server";
 import { PermissionsBitField } from "discord.js";
 import { botRouter } from ".";
@@ -62,7 +62,7 @@ const TEST_CREATE_CHANNEL_SETTINGS = {
   create: {
     channel: {
       create: {
-        ...TEST_CHANNEL_1,
+        ...TEST_CHANNEL_UPSERT_CREATE_1,
         server: {
           create: {
             ...TEST_SERVER_1,
@@ -73,7 +73,7 @@ const TEST_CREATE_CHANNEL_SETTINGS = {
         },
       },
       update: {
-        ...TEST_CHANNEL_1,
+        ...TEST_CHANNEL_UPSERT_CREATE_1,
       },
     },
   },
@@ -93,10 +93,10 @@ describe("channelRouter", () => {
   it("should upsert a channel and then upsert channel settings", async () => {
     const result = await router_manage_guilds.channels.upsert({
       create: {
-        ...TEST_CHANNEL_1,
+        ...TEST_CHANNEL_UPSERT_CREATE_1,
       },
       update: {
-        ...TEST_CHANNEL_1,
+        ...TEST_CHANNEL_UPSERT_CREATE_1,
       },
     });
     expect(result).toBeDefined();
@@ -104,10 +104,10 @@ describe("channelRouter", () => {
       create: {
         channel: {
           create: {
-            ...TEST_CHANNEL_1,
+            ...TEST_CHANNEL_UPSERT_CREATE_1,
           },
           update: {
-            ...TEST_CHANNEL_1,
+            ...TEST_CHANNEL_UPSERT_CREATE_1,
           },
         },
       },
@@ -120,10 +120,10 @@ describe("channelRouter", () => {
       create: {
         channel: {
           create: {
-            ...TEST_CHANNEL_1,
+            ...TEST_CHANNEL_UPSERT_CREATE_1,
           },
           update: {
-            ...TEST_CHANNEL_1,
+            ...TEST_CHANNEL_UPSERT_CREATE_1,
           },
         },
       },
@@ -141,10 +141,10 @@ describe("channelRouter", () => {
       create: {
         channel: {
           create: {
-            ...TEST_CHANNEL_1,
+            ...TEST_CHANNEL_UPSERT_CREATE_1,
           },
           update: {
-            ...TEST_CHANNEL_1,
+            ...TEST_CHANNEL_UPSERT_CREATE_1,
           },
         },
       },

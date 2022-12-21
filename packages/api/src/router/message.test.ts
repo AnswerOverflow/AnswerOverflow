@@ -1,5 +1,5 @@
 import { clearDatabase } from "@answeroverflow/db";
-import { TEST_CHANNEL_1, TEST_SERVER_1 } from "~api/test/utils";
+import { TEST_CHANNEL_UPSERT_CREATE_1, TEST_SERVER_1 } from "~api/test/utils";
 import { PermissionsBitField } from "discord.js";
 import { botRouter } from ".";
 import { createBotContext } from "../context";
@@ -45,10 +45,10 @@ const msg_upsert: Parameters<typeof router["messages"]["upsert"]>[0] = {
   },
   channel: {
     create: {
-      ...TEST_CHANNEL_1,
+      ...TEST_CHANNEL_UPSERT_CREATE_1,
     },
     update: {
-      ...TEST_CHANNEL_1,
+      ...TEST_CHANNEL_UPSERT_CREATE_1,
     },
   },
   author: {

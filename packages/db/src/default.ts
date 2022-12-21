@@ -1,4 +1,4 @@
-import type { ChannelSettings, Server, User } from "@prisma/client";
+import type { Channel, ChannelSettings, Server, User } from "@prisma/client";
 import { addChannelSettingsFlagsToChannelSettings } from "./channel-settings";
 import type { Message } from "./elastic";
 
@@ -52,6 +52,18 @@ export function getDefaultServer(override: Partial<Server> & { id: string; name:
     icon: null,
     kicked_time: null,
     ...override,
+  };
+  return data;
+}
+
+export function getDefaultChannel(
+  override: Partial<Channel> & { id: string; name: string; server_id: string; type: number }
+): Channel {
+  const data: Channel = {
+    id: override.id,
+    name: override.name,
+    server_id: override.server_id,
+    type: 0,
   };
   return data;
 }

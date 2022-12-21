@@ -1,3 +1,4 @@
+import { getDefaultChannel } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, publicProcedure, router } from "../trpc";
 import { serverRouter, server_upsert_input } from "./server";
@@ -26,6 +27,49 @@ const z_channel = z.object({
 });
 
 const channelCreateUpdate = router({
+  create: publicProcedure.input(channel_create_input).mutation(async ({ ctx, input }) => {
+    const { server, ...channel } = input;
+    const updated_server = await serverRouter.createCaller(ctx).upsert(server);
+    return ctx.prisma.channel.create({
+      data: {
+        ...channel,
+        server: {
+          connect: {
+            id: updated_server.id,
+          },
+        },
+      },
+    });
+  }),
+  createBulk: publicProcedure
+    .input(z.array(channel_create_input))
+    .mutation(async ({ ctx, input }) => {
+      // 1. Ensure all foreign keys are created
+      // Get a unique list of servers
+      const servers = Array.from(new Set(input.map((channel) => channel.server.create)));
+      await serverRouter.createCaller(ctx).upsertBulk(
+        servers.map((server) => ({
+          create: server,
+          update: server,
+        }))
+      );
+
+      // 2. Create all channels
+      await ctx.prisma.channel.createMany({
+        data: input.map((channel) => {
+          const { server, ...channel_data } = channel;
+          return {
+            ...channel_data,
+            server_id: server.create.id,
+          };
+        }),
+        skipDuplicates: true,
+      });
+
+      return input.map((channel) =>
+        getDefaultChannel({ ...channel, server_id: channel.server.create.id })
+      );
+    }),
   update: publicProcedure
     .input(
       z.object({
@@ -44,20 +88,29 @@ const channelCreateUpdate = router({
       });
       return data;
     }),
-  create: publicProcedure.input(channel_create_input).mutation(async ({ ctx, input }) => {
-    const { server, ...channel } = input;
-    const updated_server = await serverRouter.createCaller(ctx).upsert(server);
-    return ctx.prisma.channel.create({
-      data: {
-        ...channel,
-        server: {
-          connect: {
-            id: updated_server.id,
-          },
-        },
-      },
-    });
-  }),
+  updateBulk: publicProcedure
+    .input(
+      z.array(
+        z.object({
+          update: channel_update_input,
+          old: z_channel,
+        })
+      )
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.prisma.$transaction(
+        input.map((channel) =>
+          ctx.prisma.channel.update({
+            where: {
+              id: channel.old.id,
+            },
+            data: {
+              ...channel.update,
+            },
+          })
+        )
+      );
+    }),
 });
 
 const channelFetchRouter = router({
@@ -66,6 +119,9 @@ const channelFetchRouter = router({
   }),
   byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
     return ctx.prisma.channel.findFirst({ where: { id: input } });
+  }),
+  byIdBulk: publicProcedure.input(z.array(z.string())).query(({ ctx, input }) => {
+    return ctx.prisma.channel.findMany({ where: { id: { in: input } } });
   }),
 });
 
@@ -83,6 +139,25 @@ const channelUpsert = router({
       return channel_update_create.create(input.create);
     }
   }),
+  upsertBulk: publicProcedure
+    .input(z.array(channel_upsert_input))
+    .mutation(async ({ ctx, input }) => {
+      const channel_create_update = channelCreateUpdate.createCaller(ctx);
+
+      const created_channels = await channel_create_update.createBulk(
+        input.map((channel) => channel.create)
+      );
+
+      const old_channel_data_lookup = new Map(
+        created_channels.map((channel) => [channel.id, channel])
+      );
+      return await channel_create_update.updateBulk(
+        input.map((channel) => ({
+          old: old_channel_data_lookup.get(channel.create.id)!,
+          update: channel.update,
+        }))
+      );
+    }),
 });
 
 export const channelRouter = mergeRouters(channelFetchRouter, channelUpsert);
