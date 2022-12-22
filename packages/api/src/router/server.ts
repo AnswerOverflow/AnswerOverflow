@@ -98,4 +98,8 @@ const serverUpsertRouter = router({
     }),
 });
 
-export const serverRouter = mergeRouters(serverFetchRouter, serverUpsertRouter);
+export const serverRouter = mergeRouters(
+  serverFetchRouter,
+  serverUpsertRouter,
+  serverCreateUpdateRouter
+);

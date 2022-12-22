@@ -19,7 +19,7 @@ export class SyncOnJoin extends Listener {
   public async run(guild: Guild) {
     await callAPI({
       async ApiCall(router) {
-        return await router.servers.upsert({
+        await router.servers.upsert({
           create: {
             id: guild.id,
             name: guild.name,
@@ -29,6 +29,21 @@ export class SyncOnJoin extends Listener {
             kicked_time: null,
           },
         });
+        await router.channels.upsertBulk(
+          guild.channels.cache.map((channel) => {
+            return {
+              create: {
+                id: channel.id,
+                name: channel.name,
+                type: channel.type,
+                server_id: channel.guildId,
+              },
+              update: {
+                name: channel.name,
+              },
+            };
+          })
+        );
       },
       Ok() {},
       Error() {},

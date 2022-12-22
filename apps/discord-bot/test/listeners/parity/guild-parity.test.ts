@@ -16,13 +16,16 @@ beforeEach(async () => {
 
 describe("Guild Create Parity", () => {
   it("should sync a server on join", async () => {
+    const { client, guild } = await createNormalScenario();
     client.emit(Events.GuildCreate, guild);
     await delay();
     const created_server = await prisma.server.findUnique({
       where: { id: guild.id },
+      include: { channels: true },
     });
     expect(created_server).toBeDefined();
     expect(created_server?.name).toBe(guild.name);
+    expect(created_server?.channels).toHaveLength(guild.channels.cache.size);
   });
   it("should update an existing server on rejoin", async () => {
     client.emit(Events.GuildCreate, guild);
