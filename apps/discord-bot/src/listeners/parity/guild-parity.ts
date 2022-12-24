@@ -1,3 +1,4 @@
+import { ALLOWED_CHANNEL_TYPES } from "@answeroverflow/api";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import { Events, Guild } from "discord.js";
@@ -25,24 +26,26 @@ export class SyncOnJoin extends Listener {
             name: guild.name,
           },
           update: {
+            id: guild.id,
             name: guild.name,
             kicked_time: null,
           },
         });
-        await router.channels.upsertBulk(
-          guild.channels.cache.map((channel) => {
-            return {
+        await router.channels.upsertMany(
+          guild.channels.cache
+            .filter((channel) => ALLOWED_CHANNEL_TYPES.has(channel.type))
+            .map((channel) => ({
               create: {
                 id: channel.id,
                 name: channel.name,
+                server_id: guild.id,
                 type: channel.type,
-                server_id: channel.guildId,
               },
               update: {
+                id: channel.id,
                 name: channel.name,
               },
-            };
-          })
+            }))
         );
       },
       Ok() {},
@@ -70,6 +73,7 @@ export class SyncOnDelete extends Listener {
           update: {
             name: guild.name,
             kicked_time: new Date(),
+            id: guild.id,
           },
         });
       },
@@ -90,7 +94,9 @@ export class SyncOnUpdate extends Listener {
             name: newGuild.name,
           },
           update: {
+            id: newGuild.id,
             name: newGuild.name,
+            kicked_time: null,
           },
         });
       },

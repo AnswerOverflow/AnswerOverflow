@@ -1,10 +1,14 @@
-import type { ChannelSettingsOutput, ChannelSettingsUpsertInput } from "@answeroverflow/api";
+import type {
+  ChannelSettingsOutput,
+  ChannelSettingsUpsertInput,
+  ChannelSettingsUpsertWithDeps,
+} from "@answeroverflow/api";
 import { callApiWithButtonErrorHandler } from "~discord-bot/utils/trpc";
-import { makeChannelUpsert } from "~discord-bot/utils/utils";
 import { type GuildForumTag, type TextBasedChannel, ChannelType, ForumChannel } from "discord.js";
 import { ButtonClickEvent, Select, SelectChangeEvent, Option } from "@answeroverflow/reacord";
 import React from "react";
 import { ToggleButton } from "./toggle-button";
+import { getRootChannel, makeChannelUpsertWithDeps } from "~discord-bot/utils/utils";
 
 const getTagNameWithEmoji = (tag: GuildForumTag) =>
   tag.emoji?.name ? tag.emoji.name + " " + tag.name : tag.name;
@@ -23,25 +27,37 @@ export function ChannelSettingsMenu({
 
   const updateChannelSettings = async (
     interaction: ButtonClickEvent,
-    data: ChannelSettingsUpsertInput["update"]
+    data: Omit<ChannelSettingsUpsertInput["update"], "channel_id">
   ) => {
     if (channel.isDMBased()) {
       interaction.ephemeralReply("Does not work in DMs");
       return;
     }
+
+    const target_channel = getRootChannel(channel);
+    if (!target_channel) {
+      interaction.ephemeralReply("Could not find root channel");
+      return;
+    }
+
     const member = await channel.guild.members.fetch(interaction.user.id);
     await callApiWithButtonErrorHandler(
       {
         async ApiCall(router) {
-          return await router.channel_settings.upsert({
-            update: data,
+          const upsert_data: ChannelSettingsUpsertWithDeps = {
             create: {
-              ...data,
-              channel: {
-                ...makeChannelUpsert(channel, channel.guild),
+              channel: makeChannelUpsertWithDeps(target_channel),
+              settings: {
+                channel_id: target_channel.id,
+                ...data,
               },
             },
-          });
+            update: {
+              channel_id: target_channel.id,
+              ...data,
+            },
+          };
+          return await router.channel_settings.upsertWithDeps(upsert_data);
         },
         Ok(result) {
           setChannelSettings(result);

@@ -1,221 +1,149 @@
 import { getDefaultChannel } from "@answeroverflow/db";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { mergeRouters, publicProcedure, router } from "../trpc";
-import { serverRouter, server_upsert_input } from "./server";
+import { mergeRouters, protectedProcedureWithUserServers, router } from "../trpc";
+import { upsert, upsertMany } from "../utils/operations";
+import { assertCanEditServer } from "../utils/permissions";
+import { ALLOWED_CHANNEL_TYPES } from "../utils/types";
+import { serverRouter, z_server_upsert } from "./server";
 
-export const channel_create_input = z.object({
-  name: z.string(),
+const z_channel_create = z.object({
   id: z.string(),
-  type: z.number(),
+  name: z.string(),
   server_id: z.string(),
+  type: z
+    .number()
+    .refine(
+      (n) => ALLOWED_CHANNEL_TYPES.has(n),
+      "Channel type can only be guild forum, text, or announcement"
+    ), // TODO: Make a type error if possible
 });
 
-export const channel_create_with_deps_input = z.object({
-  channel: channel_create_input,
-  server: server_upsert_input,
+const z_channel_create_with_deps = z.object({
+  channel: z_channel_create,
+  server: z_server_upsert,
 });
 
-export const channel_update_input = z.object({
-  name: z.optional(z.string()),
+const z_channel_update = z.object({
+  id: z.string(),
+  name: z.string().optional(),
 });
 
-export const channel_upsert_input = z.object({
-  create: channel_create_input,
-  update: channel_update_input,
-});
-
-export const channel_upsert_with_deps_input = z.object({
-  create: channel_create_with_deps_input,
-  update: channel_update_input,
-});
-
-const channelCreateUpdate = router({
-  create: publicProcedure.input(channel_create_input).mutation(async ({ ctx, input }) => {
-    return ctx.prisma.channel.create({
-      data: {
-        ...input,
-      },
-    });
+const channelCreateUpdateRouter = router({
+  create: protectedProcedureWithUserServers.input(z_channel_create).mutation(({ ctx, input }) => {
+    assertCanEditServer(ctx, input.server_id);
+    return ctx.prisma.channel.create({ data: input });
   }),
-  createBulk: publicProcedure
-    .input(z.array(channel_create_input))
+  createMany: protectedProcedureWithUserServers
+    .input(z.array(z_channel_create))
     .mutation(async ({ ctx, input }) => {
-      await ctx.prisma.channel.createMany({
-        data: input.map((channel) => {
-          return {
-            ...channel,
-          };
-        }),
-        skipDuplicates: true,
-      });
-
-      return input.map((channel) => getDefaultChannel({ ...channel }));
-    }),
-  update: publicProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        update: channel_update_input,
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const data = await ctx.prisma.channel.update({
-        where: {
-          id: input.id,
-        },
-        data: {
-          ...input.update,
-        },
-      });
-      return data;
-    }),
-  updateBulk: publicProcedure
-    .input(
-      z.array(
-        z.object({
-          id: z.string(),
-          update: channel_update_input,
+      const server_ids = input.map((c) => c.server_id);
+      server_ids.forEach((id) => assertCanEditServer(ctx, id));
+      await ctx.prisma.channel.createMany({ data: input, skipDuplicates: true });
+      return input.map((c) =>
+        getDefaultChannel({
+          ...c,
         })
-      )
-    )
+      );
+    }),
+  update: protectedProcedureWithUserServers
+    .input(z_channel_update)
     .mutation(async ({ ctx, input }) => {
+      const existing_channel = await channelFetchRouter.createCaller(ctx).byId(input.id);
+      if (!existing_channel) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Channel does not exist",
+        });
+      }
+      assertCanEditServer(ctx, existing_channel.server_id); // technically covered byId but doesnt hurt to have here
+      return ctx.prisma.channel.update({ where: { id: input.id }, data: input });
+    }),
+  updateMany: protectedProcedureWithUserServers
+    .input(z.array(z_channel_update))
+    .mutation(async ({ ctx, input }) => {
+      const existing_channels = await channelFetchRouter
+        .createCaller(ctx)
+        .byIdMany(input.map((c) => c.id));
+      const server_ids = existing_channels.map((c) => c.server_id);
+      server_ids.forEach((id) => assertCanEditServer(ctx, id));
       return ctx.prisma.$transaction(
-        input.map((data) =>
-          ctx.prisma.channel.update({
-            where: {
-              id: data.id,
-            },
-            data: {
-              ...data.update,
-            },
-          })
-        )
+        input.map((c) => ctx.prisma.channel.update({ where: { id: c.id }, data: c }))
       );
     }),
 });
 
-const channelCreateWithDeps = router({
-  createWithDeps: publicProcedure
-    .input(channel_create_with_deps_input)
+const channelCreateWithDepsRouter = router({
+  createWithDeps: protectedProcedureWithUserServers
+    .input(z_channel_create_with_deps)
     .mutation(async ({ ctx, input }) => {
-      const { server, channel } = input;
-      await serverRouter.createCaller(ctx).upsert(server);
-      const channelCreateCaller = channelCreateUpdate.createCaller(ctx);
-      return await channelCreateCaller.create(channel);
-    }),
-  createBulkWithDeps: publicProcedure
-    .input(z.array(channel_create_with_deps_input))
-    .mutation(async ({ ctx, input }) => {
-      const servers = Array.from(new Set(input.map((channel) => channel.server.create)));
-      await serverRouter.createCaller(ctx).upsertBulk(
-        servers.map((server) => ({
-          create: server,
-          update: server,
-        }))
-      );
-
-      return await channelCreateUpdate
-        .createCaller(ctx)
-        .createBulk(input.map((channel) => channel.channel));
+      await serverRouter.createCaller(ctx).upsert(input.server);
+      return await channelCreateUpdateRouter.createCaller(ctx).create(input.channel);
     }),
 });
 
 const channelFetchRouter = router({
-  all: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.channel.findMany();
+  byId: protectedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
+    const channel = await ctx.prisma.channel.findFirst({ where: { id: input } });
+    if (channel) {
+      assertCanEditServer(ctx, channel.server_id);
+    }
+    return channel;
   }),
-  byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
-    return ctx.prisma.channel.findFirst({ where: { id: input } });
-  }),
-  byIdBulk: publicProcedure.input(z.array(z.string())).query(({ ctx, input }) => {
-    return ctx.prisma.channel.findMany({ where: { id: { in: input } } });
-  }),
+  byIdMany: protectedProcedureWithUserServers
+    .input(z.array(z.string()))
+    .query(async ({ ctx, input }) => {
+      const channels = await ctx.prisma.channel.findMany({ where: { id: { in: input } } });
+      channels.forEach((channel) => assertCanEditServer(ctx, channel.server_id));
+      return channels;
+    }),
 });
 
-const channelUpsert = router({
-  upsert: publicProcedure.input(channel_upsert_input).mutation(async ({ ctx, input }) => {
-    const channel_fetch = channelFetchRouter.createCaller(ctx);
-    const channel_update_create = channelCreateUpdate.createCaller(ctx);
-    const existing_channel = await channel_fetch.byId(input.create.id);
-    if (existing_channel) {
-      return channel_update_create.update({
-        id: input.create.id,
-        update: input.update,
+export const z_channel_upsert = z.object({ create: z_channel_create, update: z_channel_update });
+export const z_channel_upsert_many = z.array(z_channel_upsert);
+export const z_channel_upsert_with_deps = z.object({
+  create: z_channel_create_with_deps,
+  update: z_channel_update,
+});
+
+const channelUpsertRouter = router({
+  upsert: protectedProcedureWithUserServers
+    .input(z_channel_upsert)
+    .mutation(async ({ ctx, input }) => {
+      return upsert(
+        () => channelFetchRouter.createCaller(ctx).byId(input.create.id),
+        () => channelCreateUpdateRouter.createCaller(ctx).create(input.create),
+        () => channelCreateUpdateRouter.createCaller(ctx).update(input.update)
+      );
+    }),
+  upsertMany: protectedProcedureWithUserServers
+    .input(z_channel_upsert_many)
+    .mutation(async ({ ctx, input }) => {
+      return upsertMany({
+        find: () => channelFetchRouter.createCaller(ctx).byIdMany(input.map((c) => c.create.id)),
+        getToCreate: (existing) =>
+          input.map((c) => c.create).filter((c) => !existing.map((e) => e.id).includes(c.id)),
+        getToUpdate: (existing) =>
+          input.map((c) => c.update).filter((c) => existing.map((e) => e.id).includes(c.id)),
+        create: (create) => channelCreateUpdateRouter.createCaller(ctx).createMany(create),
+        update: (update) => channelCreateUpdateRouter.createCaller(ctx).updateMany(update),
       });
-    } else {
-      return channel_update_create.create(input.create);
-    }
-  }),
-  upsertBulk: publicProcedure
-    .input(z.array(channel_upsert_input))
-    .mutation(async ({ ctx, input }) => {
-      const channel_create_update = channelCreateUpdate.createCaller(ctx);
-
-      await channel_create_update.createBulk(input.map((channel) => channel.create));
-
-      const updated_channels = await channel_create_update.updateBulk(
-        input.map((channel) => ({
-          id: channel.create.id,
-          update: channel.update,
-        }))
-      );
-      return updated_channels;
     }),
-  upsertWithDeps: publicProcedure
-    .input(channel_create_with_deps_input)
+
+  upsertWithDeps: protectedProcedureWithUserServers
+    .input(z_channel_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
-      const { server, channel } = input;
-      await serverRouter.createCaller(ctx).upsert(server);
-      const channel_fetch = channelFetchRouter.createCaller(ctx);
-      const existing_channel = await channel_fetch.byId(channel.id);
-      if (!existing_channel) {
-        const channel_create_with_deps = channelCreateWithDeps.createCaller(ctx);
-        return channel_create_with_deps.createWithDeps(input);
-      } else {
-        const channel_update = channelCreateUpdate.createCaller(ctx);
-        return channel_update.update({
-          id: existing_channel.id,
-          update: channel,
-        });
-      }
-    }),
-  upsertBulkWithDeps: publicProcedure
-    .input(z.array(channel_create_with_deps_input))
-    .mutation(async ({ ctx, input }) => {
-      const channel_fetch = channelFetchRouter.createCaller(ctx);
-      const existing_channels = await channel_fetch.byIdBulk(
-        input.map((channel) => channel.channel.id)
+      return upsert(
+        () => channelFetchRouter.createCaller(ctx).byId(input.create.channel.id),
+        () => channelCreateWithDepsRouter.createCaller(ctx).createWithDeps(input.create),
+        () => channelCreateUpdateRouter.createCaller(ctx).update(input.update)
       );
-      const existing_channel_lookup = new Map(
-        existing_channels.map((channel) => [channel.id, channel])
-      );
-
-      const channels_to_create = input.filter(
-        (channel) => !existing_channel_lookup.has(channel.channel.id)
-      );
-
-      const channels_to_update = input.filter((channel) =>
-        existing_channel_lookup.has(channel.channel.id)
-      );
-
-      const channel_create_with_deps = channelCreateWithDeps.createCaller(ctx);
-      const created_channels = await channel_create_with_deps.createBulkWithDeps(
-        channels_to_create
-      );
-      const channel_update = channelCreateUpdate.createCaller(ctx);
-      const updated_channels = await channel_update.updateBulk(
-        channels_to_update.map((data) => ({
-          id: data.channel.id,
-          update: data.channel,
-        }))
-      );
-      return [...created_channels, ...updated_channels]; // TODO: Sort by input order?
     }),
 });
 
 export const channelRouter = mergeRouters(
+  channelCreateUpdateRouter,
+  channelCreateWithDepsRouter,
   channelFetchRouter,
-  channelUpsert,
-  channelCreateUpdate,
-  channelCreateWithDeps
+  channelUpsertRouter
 );

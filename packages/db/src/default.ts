@@ -60,10 +60,7 @@ export function getDefaultChannel(
   override: Partial<Channel> & { id: string; name: string; server_id: string; type: number }
 ): Channel {
   const data: Channel = {
-    id: override.id,
-    name: override.name,
-    server_id: override.server_id,
-    type: 0,
+    ...override,
   };
   return data;
 }

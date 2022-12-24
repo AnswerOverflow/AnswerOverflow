@@ -18,7 +18,15 @@ type TRPCall<T> = {
 // TODO: This function can be cleaned up
 export async function createBotRouter(member?: GuildMember): Promise<BotRouterCaller> {
   let ctx = await createBotContext({
-    session: null, // Some bot calls may be performed without a member, this allows that to happen
+    session: {
+      expires: new Date().toUTCString(),
+      user: {
+        email: null,
+        image: null,
+        name: null,
+        id: "AnswerOverflow", // todo: use bot id
+      },
+    }, // Some bot calls may be performed without a member, this allows that to happen
     user_servers: null,
   });
   if (member) {

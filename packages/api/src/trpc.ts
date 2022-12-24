@@ -40,7 +40,7 @@ const hasUserServers = t.middleware(async ({ ctx, next }) => {
     const user_servers = await getUserServers(discord_account.access_token);
     ctx.user_servers = user_servers;
   }
-  if (!ctx.user_servers) {
+  if (!ctx.user_servers && ctx.session && ctx.session.user.id !== "AnswerOverflow") {
     throw new TRPCError({
       code: "BAD_REQUEST",
       message: "No server permissions found",

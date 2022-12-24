@@ -1,112 +1,77 @@
 import { clearDatabase } from "@answeroverflow/db";
-import { TEST_SERVER_1, TEST_SERVER_2 } from "~api/test/utils";
-import { createContextInner } from "../context";
+import { TRPCError } from "@trpc/server";
+import { getGeneralScenario, ServerTestData } from "../test/utils";
 import { serverRouter } from "./server";
 
-// eslint-disable-next-line no-unused-vars
-let servers: ReturnType<typeof serverRouter["createCaller"]>;
+let manage_guild_router: ReturnType<typeof serverRouter["createCaller"]>;
+let default_router: ReturnType<typeof serverRouter["createCaller"]>;
+let data: ServerTestData;
 beforeEach(async () => {
-  const a = await createContextInner({
-    session: null,
-    caller: "discord-bot",
-    user_servers: null,
-  });
-  servers = serverRouter.createCaller(a);
+  const { data: server_data, manage_guild_ctx, default_ctx } = await getGeneralScenario();
+  manage_guild_router = serverRouter.createCaller(manage_guild_ctx);
+  default_router = serverRouter.createCaller(default_ctx);
+  data = server_data;
   await clearDatabase();
 });
 
-describe("serverRouter", () => {
-  it("should create a new server", async () => {
-    const server = await servers.upsert({
-      create: TEST_SERVER_1,
-      update: {
-        ...TEST_SERVER_1,
-      },
-    });
-    expect(server).toMatchObject(TEST_SERVER_1);
+describe("Server Create", () => {
+  it("should succeed creating a server with manage guild", async () => {
+    const server = await manage_guild_router.create(data.server);
+    expect(server).toEqual(data.server);
   });
-  it("should create a server and then update it", async () => {
-    const server = await servers.upsert({
-      create: TEST_SERVER_1,
-      update: {
-        ...TEST_SERVER_1,
-      },
-    });
-    expect(server).toMatchObject(TEST_SERVER_1);
-    const updatedServer = await servers.upsert({
-      create: TEST_SERVER_1,
-      update: {
-        ...TEST_SERVER_1,
-        name: "updated",
-      },
-    });
-    expect(updatedServer).toMatchObject({
-      ...TEST_SERVER_1,
-      name: "updated",
-    });
-  });
-  it("should find a server by its id", async () => {
-    const server = await servers.upsert({
-      create: TEST_SERVER_1,
-      update: {
-        ...TEST_SERVER_1,
-      },
-    });
-    expect(server).toMatchObject(TEST_SERVER_1);
-    const foundServer = await servers.byId(TEST_SERVER_1.id);
-    expect(foundServer).toMatchObject(TEST_SERVER_1);
+  it("should fail creating a server with default permissions", async () => {
+    await expect(default_router.create(data.server)).rejects.toThrow(TRPCError);
   });
 });
 
-describe("Server Upsert Bulk", () => {
-  it("should bulk create servers", async () => {
-    const upserted_servers = await servers.upsertBulk([
-      {
-        create: TEST_SERVER_1,
-        update: TEST_SERVER_1,
-      },
-      {
-        create: TEST_SERVER_2,
-        update: TEST_SERVER_2,
-      },
-    ]);
-    expect(upserted_servers).toHaveLength(2);
-    const foundServer = await servers.byId(TEST_SERVER_1.id);
-    expect(foundServer).toBeDefined();
-  });
-  it("should create a server and then bulk update servers", async () => {
-    const upserted_server = await servers.upsert({
-      create: TEST_SERVER_1,
-      update: TEST_SERVER_1,
+describe("Server Update", () => {
+  it("should succeed updating a server with manage guild", async () => {
+    await manage_guild_router.create(data.server);
+    const server = await manage_guild_router.update({
+      id: data.server.id,
+      name: "new name",
     });
-    expect(upserted_server).toMatchObject(TEST_SERVER_1);
-    await servers.upsertBulk([
-      {
-        create: TEST_SERVER_1,
-        update: {
-          ...TEST_SERVER_1,
-          name: "updated",
-        },
-      },
-      {
-        create: TEST_SERVER_2,
-        update: {
-          ...TEST_SERVER_2,
-          name: "updated",
-        },
-      },
-    ]);
-    const fetched_servers = await servers.byIdMany([TEST_SERVER_1.id, TEST_SERVER_2.id]);
-    expect(fetched_servers).toHaveLength(2);
-    expect(fetched_servers).toMatchObject([
-      {
-        ...TEST_SERVER_1,
-        name: "updated",
-      },
-      {
-        ...TEST_SERVER_2,
-        name: "updated",
-      },
-    ]);
+    expect(server).toEqual({ ...data.server, name: "new name" });
+  });
+  it("should fail updating a server with default permissions", async () => {
+    await manage_guild_router.create(data.server);
+    await expect(default_router.update({ id: data.server.id, name: "new name" })).rejects.toThrow(
+      TRPCError
+    );
+  });
+});
+
+describe("Server Fetch", () => {
+  it("should succeed fetching a server with manage guild", async () => {
+    await manage_guild_router.create(data.server);
+    const server = await manage_guild_router.byId(data.server.id);
+    expect(server).toEqual(data.server);
+  });
+  it("should fail fetching a server with default permissions", async () => {
+    await manage_guild_router.create(data.server);
+    await expect(default_router.byId(data.server.id)).rejects.toThrow(TRPCError);
+  });
+});
+
+describe("Server Upsert", () => {
+  it("should succeed upserting a new server with manage guild", async () => {
+    const server = await manage_guild_router.upsert({
+      create: data.server,
+      update: { id: data.server.id, name: "new name" },
+    });
+    expect(server).toEqual(data.server);
+    expect(await manage_guild_router.byId(data.server.id)).toEqual(data.server);
+  });
+  it("should succeed upserting an existing server with manage guild", async () => {
+    await manage_guild_router.create(data.server);
+    const server = await manage_guild_router.upsert({
+      create: data.server,
+      update: { id: data.server.id, name: "new name" },
+    });
+    expect(server).toEqual({ ...data.server, name: "new name" });
+    expect(await manage_guild_router.byId(data.server.id)).toEqual({
+      ...data.server,
+      name: "new name",
+    });
   });
 });

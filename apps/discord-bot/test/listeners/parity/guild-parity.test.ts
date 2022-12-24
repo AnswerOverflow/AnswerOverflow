@@ -25,7 +25,7 @@ describe("Guild Create Parity", () => {
     });
     expect(created_server).toBeDefined();
     expect(created_server?.name).toBe(guild.name);
-    expect(created_server?.channels).toHaveLength(guild.channels.cache.size);
+    expect(created_server?.channels).toHaveLength(2);
   });
   it("should update an existing server on rejoin", async () => {
     client.emit(Events.GuildCreate, guild);
