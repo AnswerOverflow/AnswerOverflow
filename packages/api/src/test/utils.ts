@@ -38,6 +38,12 @@ export function getServerTestData(server_id: string = "101") {
             server_id: server_id,
             author_id: "1",
           }),
+          getDefaultMessage({
+            id: "304",
+            channel_id: text_channel.id,
+            server_id: server_id,
+            author_id: "1",
+          }),
         ],
       },
       {
