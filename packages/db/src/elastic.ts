@@ -130,7 +130,26 @@ export class Elastic extends Client {
     return true;
   }
 
-  public async indexMessage(message: Message) {
+  public async updateMessage(message: Message) {
+    const fetched_message = await this.update({
+      index: this.messages_index,
+      id: message.id,
+      doc: message,
+    });
+    switch (fetched_message.result) {
+      case "updated":
+      case "noop": // Update changed no data
+        return message;
+      case "not_found":
+        throw new Error("Message not found when it should have been updated");
+      case "deleted":
+        throw new Error("Message deleted when it should have been updated");
+      default:
+        throw new Error("Unknown message update error");
+    }
+  }
+
+  public async upsertMessage(message: Message) {
     const fetched_message = await this.update({
       index: this.messages_index,
       id: message.id,

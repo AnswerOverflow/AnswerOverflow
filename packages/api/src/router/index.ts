@@ -2,6 +2,7 @@ import { router } from "../trpc";
 import { authRouter } from "./auth";
 import { channelRouter } from "./channel";
 import { channelSettingsRouter } from "./channel_settings";
+import { messageRouter } from "./message";
 
 //import { messageRouter } from "./message";
 import { serverRouter } from "./server";
@@ -12,7 +13,7 @@ export const botRouter = router({
   servers: serverRouter,
   channels: channelRouter,
   channel_settings: channelSettingsRouter,
-  //messages: messageRouter,
+  messages: messageRouter,
 });
 
 export const appRouter = router({

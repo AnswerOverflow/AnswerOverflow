@@ -1,4 +1,4 @@
-import { getDefaultChannel, getDefaultServer } from "@answeroverflow/db";
+import { getDefaultChannel, getDefaultMessage, getDefaultServer } from "@answeroverflow/db";
 import { ChannelType, PermissionResolvable, PermissionsBitField } from "discord.js";
 import { createContextInner } from "../context";
 
@@ -10,24 +10,47 @@ export async function getGeneralScenario() {
 }
 
 export function getServerTestData(server_id: string = "101") {
+  const server = getDefaultServer({
+    id: server_id,
+    name: "test",
+  });
+  const text_channel = getDefaultChannel({
+    id: "201",
+    name: "name",
+    server_id: server_id,
+    type: ChannelType.GuildText,
+  });
+  const forum_channel = getDefaultChannel({
+    id: "202",
+    name: "name2",
+    server_id: server_id,
+    type: ChannelType.GuildForum,
+  });
   return {
-    server: getDefaultServer({
-      id: server_id,
-      name: "test",
-    }),
+    server,
     channels: [
-      getDefaultChannel({
-        id: "201",
-        name: "name",
-        server_id: server_id,
-        type: ChannelType.GuildText,
-      }),
-      getDefaultChannel({
-        id: "202",
-        name: "name2",
-        server_id: server_id,
-        type: ChannelType.GuildForum,
-      }),
+      {
+        channel: text_channel,
+        messages: [
+          getDefaultMessage({
+            id: "300",
+            channel_id: text_channel.id,
+            server_id: server_id,
+            author_id: "1",
+          }),
+        ],
+      },
+      {
+        channel: forum_channel,
+        messages: [
+          getDefaultMessage({
+            id: "301",
+            channel_id: forum_channel.id,
+            server_id: server_id,
+            author_id: "1",
+          }),
+        ],
+      },
     ],
   };
 }

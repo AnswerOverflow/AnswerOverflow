@@ -27,22 +27,21 @@ export function getDefaultUser(user_id: string): User {
 }
 
 export function getDefaultMessage(
-  message_id: string,
-  author_id: string,
-  channel_id: string,
-  server_id: string
+  override: Partial<Message> & {
+    id: string;
+    channel_id: string;
+    server_id: string;
+    author_id: string;
+  }
 ): Message {
   const data: Message = {
-    id: message_id,
-    author_id: author_id,
-    channel_id: channel_id,
     content: "",
-    server_id: server_id,
     images: [],
     replies_to: null,
     thread_id: null,
     child_thread: null,
     solutions: [],
+    ...override,
   };
   return data;
 }

@@ -29,12 +29,12 @@ describe("ElasticSearch tests", () => {
   });
   it("should index a message", async () => {
     await elastic.createMessagesIndex();
-    const indexed_message = await elastic.indexMessage(msg1);
+    const indexed_message = await elastic.upsertMessage(msg1);
     expect(indexed_message).toBeDefined();
   });
   it("should search for a message", async () => {
     await elastic.createMessagesIndex();
-    await elastic.indexMessage(msg1);
+    await elastic.upsertMessage(msg1);
     const fetched_message = await elastic.getMessage("1054158565633441823");
     expect(fetched_message).toBeDefined();
     expect(fetched_message!.id).toBe("1054158565633441823");
@@ -43,7 +43,7 @@ describe("ElasticSearch tests", () => {
   it("should delete a message", async () => {
     await elastic.createMessagesIndex();
 
-    await elastic.indexMessage(msg1);
+    await elastic.upsertMessage(msg1);
     const deleted_message = await elastic.deleteMessage("1054158565633441823");
     expect(deleted_message).toBeTruthy();
     const fetched_deleted_message = await elastic.getMessage("1054158565633441823");
@@ -56,8 +56,8 @@ describe("ElasticSearch tests", () => {
   });
   it("should bulk delete messages that exist", async () => {
     await elastic.createMessagesIndex();
-    await elastic.indexMessage(msg1);
-    await elastic.indexMessage(msg2);
+    await elastic.upsertMessage(msg1);
+    await elastic.upsertMessage(msg2);
     const deleted_messages = await elastic.bulkDeleteMessages([msg1.id, msg2.id]);
     expect(deleted_messages).toBeTruthy();
     const fetched_deleted_message1 = await elastic.getMessage(msg1.id);
@@ -72,7 +72,7 @@ describe("ElasticSearch tests", () => {
   });
   it("should bulk delete a message that does exist and one that does not", async () => {
     await elastic.createMessagesIndex();
-    await elastic.indexMessage(msg1);
+    await elastic.upsertMessage(msg1);
     const deleted_messages = await elastic.bulkDeleteMessages([msg1.id, msg2.id]);
     expect(deleted_messages).toBeTruthy();
     const fetched_deleted_message1 = await elastic.getMessage(msg1.id);
