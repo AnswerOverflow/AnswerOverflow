@@ -20,19 +20,19 @@ beforeEach(async () => {
 describe("Channel Create", () => {
   it("should succeed creating a channel with manage guild", async () => {
     await manage_guild_router.create(data.server);
-    const channel = await manage_channel_router.create(data.channels[0].channel);
-    expect(channel).toEqual(data.channels[0].channel);
+    const channel = await manage_channel_router.create(data.text_channels[0].channel);
+    expect(channel).toEqual(data.text_channels[0].channel);
   });
   it("should fail creating a channel with default permissions", async () => {
     await manage_guild_router.create(data.server);
-    await expect(default_channel_router.create(data.channels[0].channel)).rejects.toThrow(
+    await expect(default_channel_router.create(data.text_channels[0].channel)).rejects.toThrow(
       TRPCError
     );
   });
   it("should create a channel with dependencies", async () => {
     const channel = await manage_channel_router.createWithDeps({
       channel: {
-        ...data.channels[0].channel,
+        ...data.text_channels[0].channel,
       },
       server: {
         create: {
@@ -43,25 +43,25 @@ describe("Channel Create", () => {
         },
       },
     });
-    expect(channel).toEqual(data.channels[0].channel);
+    expect(channel).toEqual(data.text_channels[0].channel);
   });
 });
 
 describe("Channel Update", () => {
   it("should succeed updating a channel with manage guild", async () => {
     await manage_guild_router.create(data.server);
-    await manage_channel_router.create(data.channels[0].channel);
+    await manage_channel_router.create(data.text_channels[0].channel);
     const channel = await manage_channel_router.update({
-      id: data.channels[0].channel.id,
+      id: data.text_channels[0].channel.id,
       name: "new name",
     });
-    expect(channel).toEqual({ ...data.channels[0].channel, name: "new name" });
+    expect(channel).toEqual({ ...data.text_channels[0].channel, name: "new name" });
   });
   it("should fail updating a channel with default permissions", async () => {
     await manage_guild_router.create(data.server);
-    await manage_channel_router.create(data.channels[0].channel);
+    await manage_channel_router.create(data.text_channels[0].channel);
     await expect(
-      default_channel_router.update({ id: data.channels[0].channel.id, name: "new name" })
+      default_channel_router.update({ id: data.text_channels[0].channel.id, name: "new name" })
     ).rejects.toThrow(TRPCError);
   });
 });
@@ -70,17 +70,17 @@ describe("Channel Upsert", () => {
   it("should succeed upserting a new channel with manage guild", async () => {
     await manage_guild_router.create(data.server);
     const channel = await manage_channel_router.upsert({
-      create: data.channels[0].channel,
-      update: { id: data.channels[0].channel.id, name: "new name" },
+      create: data.text_channels[0].channel,
+      update: { id: data.text_channels[0].channel.id, name: "new name" },
     });
-    expect(channel).toEqual(data.channels[0].channel);
+    expect(channel).toEqual(data.text_channels[0].channel);
   });
   it("should fail upserting a new channel with default permissions", async () => {
     await manage_guild_router.create(data.server);
     await expect(
       default_channel_router.upsert({
-        create: data.channels[0].channel,
-        update: { id: data.channels[0].channel.id, name: "new name" },
+        create: data.text_channels[0].channel,
+        update: { id: data.text_channels[0].channel.id, name: "new name" },
       })
     ).rejects.toThrow(TRPCError);
   });
@@ -88,7 +88,7 @@ describe("Channel Upsert", () => {
     const channel = await manage_channel_router.upsertWithDeps({
       create: {
         channel: {
-          ...data.channels[0].channel,
+          ...data.text_channels[0].channel,
         },
         server: {
           create: {
@@ -100,20 +100,20 @@ describe("Channel Upsert", () => {
         },
       },
       update: {
-        id: data.channels[0].channel.id,
+        id: data.text_channels[0].channel.id,
         name: "new name",
       },
     });
-    expect(channel).toEqual(data.channels[0].channel);
+    expect(channel).toEqual(data.text_channels[0].channel);
   });
   it("should succeed upserting many channels", async () => {
     await manage_guild_router.create(data.server);
     const channels = await manage_channel_router.upsertMany(
-      data.channels.map((channel) => ({
+      data.text_channels.map((channel) => ({
         create: channel.channel,
         update: { id: channel.channel.id, name: "new name" },
       }))
     );
-    expect(channels).toEqual(data.channels.map((channel) => channel.channel));
+    expect(channels).toEqual(data.text_channels.map((channel) => channel.channel));
   });
 });

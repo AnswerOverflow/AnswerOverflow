@@ -18,7 +18,7 @@ describe("Channel Settings Upsert With Deps", () => {
         channel: {
           create: {
             channel: {
-              ...data.channels[0].channel,
+              ...data.text_channels[0].channel,
             },
             server: {
               create: {
@@ -30,16 +30,16 @@ describe("Channel Settings Upsert With Deps", () => {
             },
           },
           update: {
-            id: data.channels[0].channel.id,
+            id: data.text_channels[0].channel.id,
           },
         },
         settings: {
-          channel_id: data.channels[0].channel.id,
+          channel_id: data.text_channels[0].channel.id,
           solution_tag_id: "101",
         },
       },
       update: {
-        channel_id: data.channels[0].channel.id,
+        channel_id: data.text_channels[0].channel.id,
       },
     });
     expect(channel_settings).toBeDefined();

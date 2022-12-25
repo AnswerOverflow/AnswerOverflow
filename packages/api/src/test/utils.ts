@@ -28,7 +28,20 @@ export function getServerTestData(server_id: string = "101") {
   });
   return {
     server,
-    channels: [
+    forum_channels: [
+      {
+        channel: forum_channel,
+        messages: [
+          getDefaultMessage({
+            id: "301",
+            channel_id: forum_channel.id,
+            server_id: server_id,
+            author_id: "1",
+          }),
+        ],
+      },
+    ],
+    text_channels: [
       {
         channel: text_channel,
         messages: [
@@ -41,17 +54,6 @@ export function getServerTestData(server_id: string = "101") {
           getDefaultMessage({
             id: "304",
             channel_id: text_channel.id,
-            server_id: server_id,
-            author_id: "1",
-          }),
-        ],
-      },
-      {
-        channel: forum_channel,
-        messages: [
-          getDefaultMessage({
-            id: "301",
-            channel_id: forum_channel.id,
             server_id: server_id,
             author_id: "1",
           }),

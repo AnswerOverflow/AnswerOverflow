@@ -9,8 +9,8 @@ let message2: Message;
 beforeEach(async () => {
   const { data: server_data, manage_guild_ctx } = await getGeneralScenario();
   data = server_data;
-  message = data.channels[0].messages[0];
-  message2 = data.channels[0].messages[1];
+  message = data.text_channels[0].messages[0];
+  message2 = data.text_channels[0].messages[1];
   messages_router = messageRouter.createCaller(manage_guild_ctx);
   await clearDatabase();
 });
