@@ -1,4 +1,4 @@
-import { clearDatabase } from "@answeroverflow/db";
+import { Channel, clearDatabase } from "@answeroverflow/db";
 import type { SapphireClient } from "@sapphire/framework";
 import { Events } from "discord.js";
 import { createNormalScenario } from "~discord-bot/test/utils/discordjs/scenarios";
@@ -21,35 +21,36 @@ describe("Channel Update Parity", () => {
       async ApiCall(router) {
         return router.channels.createWithDeps(toChannelCreateWithDeps(data.text_channel));
       },
-      Ok() {},
-      Error() {},
     });
     const new_channel = Object.assign(data.text_channel, { name: "new_name" });
     client.emit(Events.ChannelUpdate, data.text_channel, new_channel);
     await delay();
+    let updated: Channel | null = null;
     await callAPI({
       async ApiCall(router) {
         return router.channels.byId(new_channel.id);
       },
       Ok(channel) {
-        expect(channel!.name).toBe(new_channel.name);
+        updated = channel;
       },
-      Error() {},
     });
+    expect(updated).not.toBeNull();
+    expect(updated!.name).toBe(new_channel.name);
   });
   it("should not update a channel that doesn't exist", async () => {
     const new_channel = Object.assign(data.text_channel, { name: "new_name" });
     client.emit(Events.ChannelUpdate, data.text_channel, new_channel);
     await delay();
+    let updated: Channel | null = null;
     await callAPI({
       async ApiCall(router) {
         return router.channels.byId(new_channel.id);
       },
       Ok(channel) {
-        expect(channel).toBeNull();
+        updated = channel;
       },
-      Error() {},
     });
+    expect(updated).toBeNull();
   });
 });
 
@@ -59,20 +60,19 @@ describe("Channel Delete Parity", () => {
       async ApiCall(router) {
         return router.channels.createWithDeps(toChannelCreateWithDeps(data.text_channel));
       },
-      Ok() {},
-      Error() {},
     });
     client.emit(Events.ChannelDelete, data.text_channel);
     await delay();
+    let deleted: Channel | null = null;
     await callAPI({
       async ApiCall(router) {
         return router.channels.byId(data.text_channel.id);
       },
       Ok(channel) {
-        expect(channel).toBeNull();
+        deleted = channel;
       },
-      Error() {},
     });
+    expect(deleted).toBeNull();
   });
   it("should not delete a channel that doesn't exist", async () => {
     client.emit(Events.ChannelDelete, data.text_channel);
@@ -84,7 +84,6 @@ describe("Channel Delete Parity", () => {
       Ok(channel) {
         expect(channel).toBeNull();
       },
-      Error() {},
     });
   });
 });
@@ -104,17 +103,17 @@ describe("Thread Delete Parity", () => {
           },
         });
       },
-      Ok() {},
-      Error() {},
     });
+    let created: Channel | null = null;
     await callAPI({
       async ApiCall(router) {
         return router.channels.byId(data.forum_thread.id);
       },
       Ok(channel) {
-        expect(channel).not.toBeNull();
+        created = channel;
       },
     });
+    expect(created).not.toBeNull();
     client.emit(Events.ThreadDelete, data.forum_thread);
     await delay();
     await callAPI({
@@ -125,5 +124,53 @@ describe("Thread Delete Parity", () => {
         expect(channel).toBeNull();
       },
     });
+  });
+});
+
+describe("Thread Update Parity", () => {
+  it("should update an existing thread", async () => {
+    await callAPI({
+      async ApiCall(router) {
+        return router.channels.createThreadWithDeps({
+          parent: toChannelUpsertWithDeps(data.forum_channel),
+          thread: {
+            id: data.forum_thread.id,
+            name: data.forum_thread.name,
+            parent_id: data.forum_channel.id,
+            type: data.forum_thread.type,
+            server_id: data.forum_thread.guild.id,
+          },
+        });
+      },
+    });
+    const new_thread = Object.assign(data.forum_thread, { name: "new_name" });
+    client.emit(Events.ThreadUpdate, data.forum_thread, new_thread);
+    await delay();
+    let updated: Channel | null = null;
+    await callAPI({
+      async ApiCall(router) {
+        return router.channels.byId(new_thread.id);
+      },
+      Ok(channel) {
+        updated = channel;
+      },
+    });
+    expect(updated).not.toBeNull();
+    expect(updated!.name).toBe(new_thread.name);
+  });
+  it("should not update a thread that doesn't exist", async () => {
+    const new_thread = Object.assign(data.forum_thread, { name: "new_name" });
+    client.emit(Events.ThreadUpdate, data.forum_thread, new_thread);
+    await delay();
+    let updated: Channel | null = null;
+    await callAPI({
+      async ApiCall(router) {
+        return router.channels.byId(new_thread.id);
+      },
+      Ok(channel) {
+        updated = channel;
+      },
+    });
+    expect(updated).toBeNull();
   });
 });

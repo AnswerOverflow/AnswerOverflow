@@ -79,3 +79,30 @@ export class ThreadSyncOnDelete extends Listener {
     });
   }
 }
+
+@ApplyOptions<Listener.Options>({ event: Events.ThreadUpdate, name: "Thread Sync On Update" })
+export class ThreadSyncOnUpdate extends Listener {
+  public async run(_oldThread: ThreadChannel, newThread: ThreadChannel) {
+    await callAPI({
+      async ApiCall(router) {
+        return router.channels.update({
+          id: newThread.id,
+          name: newThread.name,
+        });
+      },
+      Ok() {
+        console.log("Updated thread", newThread.id);
+      },
+      Error(error) {
+        if (error instanceof TRPCError) {
+          if (error.code === "NOT_FOUND") {
+            // We don't have this channel in the database, so no need to do anything
+            return;
+          }
+        } else {
+          console.error(error);
+        }
+      },
+    });
+  }
+}
