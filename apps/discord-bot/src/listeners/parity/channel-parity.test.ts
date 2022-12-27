@@ -1,6 +1,7 @@
-import { Channel, clearDatabase } from "@answeroverflow/db";
+import { Channel, ChannelSettings, clearDatabase } from "@answeroverflow/db";
 import type { SapphireClient } from "@sapphire/framework";
 import { Events } from "discord.js";
+import { mockInvite } from "~discord-bot/test/utils/discordjs/channel-mock";
 import { createNormalScenario } from "~discord-bot/test/utils/discordjs/scenarios";
 import { delay } from "~discord-bot/test/utils/helpers";
 import { toChannelCreateWithDeps, toChannelUpsertWithDeps } from "~discord-bot/utils/conversions";
@@ -172,5 +173,41 @@ describe("Thread Update Parity", () => {
       },
     });
     expect(updated).toBeNull();
+  });
+});
+
+describe("Invite Parity", () => {
+  it("should sync delete of an invite", async () => {
+    let settings: ChannelSettings | null = null;
+    await callAPI({
+      async ApiCall(router) {
+        return router.channel_settings.createWithDeps({
+          channel: toChannelUpsertWithDeps(data.text_channel),
+          settings: {
+            channel_id: data.text_channel.id,
+            invite_code: "1234",
+          },
+        });
+      },
+      Ok(created) {
+        settings = created;
+      },
+    });
+    expect(settings).not.toBeNull();
+    expect(settings!.invite_code).toBe("1234");
+    const invite_mock = mockInvite(client, undefined, { code: settings!.invite_code! });
+    client.emit(Events.InviteDelete, invite_mock);
+    await delay();
+
+    let updated_settings: ChannelSettings | null = null;
+    await callAPI({
+      async ApiCall(router) {
+        return router.channel_settings.byId(data.text_channel.id);
+      },
+      Ok(updated) {
+        updated_settings = updated;
+      },
+    });
+    expect(updated_settings!.invite_code).toBeNull();
   });
 });

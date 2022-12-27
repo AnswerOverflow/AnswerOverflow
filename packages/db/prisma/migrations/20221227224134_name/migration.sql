@@ -113,6 +113,7 @@ CREATE TABLE `ChannelSettings` (
     `invite_code` VARCHAR(15) NULL,
     `solution_tag_id` VARCHAR(191) NULL,
 
+    UNIQUE INDEX `ChannelSettings_invite_code_key`(`invite_code`),
     PRIMARY KEY (`channel_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

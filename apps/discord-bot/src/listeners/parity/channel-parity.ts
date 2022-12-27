@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import { TRPCError } from "@trpc/server";
-import { Channel, DMChannel, Events, GuildChannel, ThreadChannel } from "discord.js";
+import { Channel, DMChannel, Events, GuildChannel, Invite, ThreadChannel } from "discord.js";
 import { callAPI } from "~discord-bot/utils/trpc";
 
 @ApplyOptions<Listener.Options>({ event: Events.ChannelUpdate, name: "Channel Sync On Update" })
@@ -92,6 +92,35 @@ export class ThreadSyncOnUpdate extends Listener {
       },
       Ok() {
         console.log("Updated thread", newThread.id);
+      },
+      Error(error) {
+        if (error instanceof TRPCError) {
+          if (error.code === "NOT_FOUND") {
+            // We don't have this channel in the database, so no need to do anything
+            return;
+          }
+        } else {
+          console.error(error);
+        }
+      },
+    });
+  }
+}
+
+@ApplyOptions<Listener.Options>({ event: Events.InviteDelete, name: "Invite Sync On Delete" })
+export class InviteSyncOnDelete extends Listener {
+  public async run(invite: Invite) {
+    await callAPI({
+      async ApiCall(router) {
+        const to_update = await router.channel_settings.byInviteCode(invite.code);
+        if (!to_update) return;
+        return router.channel_settings.update({
+          channel_id: to_update.channel_id,
+          invite_code: null,
+        });
+      },
+      Ok(result) {
+        console.log("Deleted invite", invite.code, result);
       },
       Error(error) {
         if (error instanceof TRPCError) {

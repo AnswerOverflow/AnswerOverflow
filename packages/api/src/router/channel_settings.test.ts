@@ -46,3 +46,29 @@ describe("Channel Settings Upsert With Deps", () => {
     expect(channel_settings.solution_tag_id).toBe("101");
   });
 });
+
+describe("Channel Settings Fetch", () => {
+  it("should fetch by invite code", async () => {
+    const channel_settings = await manage_channel_settings_router.createWithDeps({
+      channel: {
+        create: {
+          channel: data.text_channels[0].channel,
+          server: {
+            create: data.server,
+            update: data.server,
+          },
+        },
+        update: data.text_channels[0].channel,
+      },
+      settings: {
+        channel_id: data.text_channels[0].channel.id,
+        invite_code: "1234",
+      },
+    });
+    expect(channel_settings).toBeDefined();
+    expect(channel_settings.invite_code).toBe("1234");
+
+    const updated_channel_settings = await manage_channel_settings_router.byInviteCode("1234");
+    expect(updated_channel_settings).toBeDefined();
+  });
+});

@@ -16,6 +16,9 @@ import {
   Channel,
   User,
   MessageType,
+  Invite,
+  APIInvite,
+  GuildChannel,
 } from "discord.js";
 import type { RawMessageData } from "discord.js/typings/rawDataTypes";
 import { randomSnowflake } from "~discord-bot/utils/utils";
@@ -183,4 +186,25 @@ export function mockMessage(client: SapphireClient, author?: User, channel?: Cha
   }
 
   return message;
+}
+
+export function mockInvite(
+  client: SapphireClient,
+  channel: GuildChannel | undefined,
+  override: Partial<APIInvite> = {}
+) {
+  if (!channel) {
+    channel = mockTextChannel(client);
+  }
+  const invite_data: APIInvite = {
+    code: "test",
+    channel: {
+      id: channel.id,
+      name: channel.name,
+      type: channel.type,
+    },
+    ...override,
+  };
+  const invite = Reflect.construct(Invite, [client, invite_data]) as Invite;
+  return invite;
 }

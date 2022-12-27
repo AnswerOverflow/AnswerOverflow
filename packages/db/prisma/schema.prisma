@@ -127,7 +127,7 @@ model ChannelSettings {
   channel_id             String  @id
   bitfield               Int     @default(0)
   last_indexed_snowflake String?
-  invite_code            String? @db.VarChar(15)
+  invite_code            String? @unique @db.VarChar(15)
   solution_tag_id        String?
 
   channel Channel @relation(fields: [channel_id], references: [id])

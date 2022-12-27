@@ -20,7 +20,7 @@ const z_channel_settings_update = z.object({
   channel_id: z.string(),
   flags: z.optional(z_channel_settings_flags),
   last_indexed_snowflake: z.optional(z.string()),
-  invite_code: z.optional(z.string()),
+  invite_code: z.string().nullable().optional(),
   solution_tag_id: z.optional(z.nullable(z.string())),
 });
 
@@ -125,6 +125,25 @@ const channelSettingFind = router({
     assertCanEditServer(ctx, data.channel.server_id);
     return addChannelSettingsFlagsToChannelSettings(data);
   }),
+  byInviteCode: protectedProcedureWithUserServers
+    .input(z.string())
+    .query(async ({ ctx, input }) => {
+      const data = await ctx.prisma.channelSettings.findUnique({
+        where: {
+          invite_code: input,
+        },
+        include: {
+          channel: {
+            select: {
+              server_id: true,
+            },
+          },
+        },
+      });
+      if (!data) return null;
+      assertCanEditServer(ctx, data.channel.server_id);
+      return addChannelSettingsFlagsToChannelSettings(data);
+    }),
 });
 
 const z_channel_settings_upsert_with_deps = z.object({
@@ -156,5 +175,6 @@ const channelSettingsUpsert = router({
 export const channelSettingsRouter = mergeRouters(
   channelSettingsUpsert,
   channelSettingFind,
+  channelSettingsCreateUpdate,
   channelSettingsCreateWithDeps
 );
