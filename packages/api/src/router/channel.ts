@@ -29,7 +29,7 @@ const z_channel_update = z.object({
   name: z.string().optional(),
 });
 
-const channelCreateUpdateRouter = router({
+const create_update_delete_router = router({
   create: protectedProcedureWithUserServers.input(z_channel_create).mutation(({ ctx, input }) => {
     assertCanEditServer(ctx, input.server_id);
     return ctx.prisma.channel.create({ data: input });
@@ -49,7 +49,7 @@ const channelCreateUpdateRouter = router({
   update: protectedProcedureWithUserServers
     .input(z_channel_update)
     .mutation(async ({ ctx, input }) => {
-      const existing_channel = await channelFetchRouter.createCaller(ctx).byId(input.id);
+      const existing_channel = await fetch_router.createCaller(ctx).byId(input.id);
       if (!existing_channel) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -62,7 +62,7 @@ const channelCreateUpdateRouter = router({
   updateMany: protectedProcedureWithUserServers
     .input(z.array(z_channel_update))
     .mutation(async ({ ctx, input }) => {
-      const existing_channels = await channelFetchRouter
+      const existing_channels = await fetch_router
         .createCaller(ctx)
         .byIdMany(input.map((c) => c.id));
       const server_ids = existing_channels.map((c) => c.server_id);
@@ -71,18 +71,29 @@ const channelCreateUpdateRouter = router({
         input.map((c) => ctx.prisma.channel.update({ where: { id: c.id }, data: c }))
       );
     }),
+  delete: protectedProcedureWithUserServers.input(z.string()).mutation(async ({ ctx, input }) => {
+    const existing_channel = await fetch_router.createCaller(ctx).byId(input);
+    if (!existing_channel) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Channel does not exist",
+      });
+    }
+    assertCanEditServer(ctx, existing_channel.server_id); // technically covered byId but doesnt hurt to have here
+    return ctx.prisma.channel.delete({ where: { id: input } });
+  }),
 });
 
-const channelCreateWithDepsRouter = router({
+const create_with_deps_router = router({
   createWithDeps: protectedProcedureWithUserServers
     .input(z_channel_create_with_deps)
     .mutation(async ({ ctx, input }) => {
       await serverRouter.createCaller(ctx).upsert(input.server);
-      return await channelCreateUpdateRouter.createCaller(ctx).create(input.channel);
+      return await create_update_delete_router.createCaller(ctx).create(input.channel);
     }),
 });
 
-const channelFetchRouter = router({
+const fetch_router = router({
   byId: protectedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
     const channel = await ctx.prisma.channel.findFirst({ where: { id: input } });
     if (channel) {
@@ -106,27 +117,27 @@ export const z_channel_upsert_with_deps = z.object({
   update: z_channel_update,
 });
 
-const channelUpsertRouter = router({
+const upsert_router = router({
   upsert: protectedProcedureWithUserServers
     .input(z_channel_upsert)
     .mutation(async ({ ctx, input }) => {
       return upsert(
-        () => channelFetchRouter.createCaller(ctx).byId(input.create.id),
-        () => channelCreateUpdateRouter.createCaller(ctx).create(input.create),
-        () => channelCreateUpdateRouter.createCaller(ctx).update(input.update)
+        () => fetch_router.createCaller(ctx).byId(input.create.id),
+        () => create_update_delete_router.createCaller(ctx).create(input.create),
+        () => create_update_delete_router.createCaller(ctx).update(input.update)
       );
     }),
   upsertMany: protectedProcedureWithUserServers
     .input(z_channel_upsert_many)
     .mutation(async ({ ctx, input }) => {
       return upsertMany({
-        find: () => channelFetchRouter.createCaller(ctx).byIdMany(input.map((c) => c.create.id)),
+        find: () => fetch_router.createCaller(ctx).byIdMany(input.map((c) => c.create.id)),
         getToCreate: (existing) =>
           input.map((c) => c.create).filter((c) => !existing.map((e) => e.id).includes(c.id)),
         getToUpdate: (existing) =>
           input.map((c) => c.update).filter((c) => existing.map((e) => e.id).includes(c.id)),
-        create: (create) => channelCreateUpdateRouter.createCaller(ctx).createMany(create),
-        update: (update) => channelCreateUpdateRouter.createCaller(ctx).updateMany(update),
+        create: (create) => create_update_delete_router.createCaller(ctx).createMany(create),
+        update: (update) => create_update_delete_router.createCaller(ctx).updateMany(update),
       });
     }),
 
@@ -134,16 +145,16 @@ const channelUpsertRouter = router({
     .input(z_channel_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(
-        () => channelFetchRouter.createCaller(ctx).byId(input.create.channel.id),
-        () => channelCreateWithDepsRouter.createCaller(ctx).createWithDeps(input.create),
-        () => channelCreateUpdateRouter.createCaller(ctx).update(input.update)
+        () => fetch_router.createCaller(ctx).byId(input.create.channel.id),
+        () => create_with_deps_router.createCaller(ctx).createWithDeps(input.create),
+        () => create_update_delete_router.createCaller(ctx).update(input.update)
       );
     }),
 });
 
 export const channelRouter = mergeRouters(
-  channelCreateUpdateRouter,
-  channelCreateWithDepsRouter,
-  channelFetchRouter,
-  channelUpsertRouter
+  create_update_delete_router,
+  create_with_deps_router,
+  fetch_router,
+  upsert_router
 );

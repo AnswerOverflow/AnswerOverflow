@@ -13,6 +13,7 @@ export type ChannelSettingsUpsertWithDeps = botRouterInput["channel_settings"]["
 export type ChannelUpsertWithDepsInput = botRouterInput["channels"]["upsertWithDeps"];
 
 export type ChannelUpsertInput = botRouterInput["channels"]["upsert"];
+export type ChannelCreateWithDepsInput = botRouterInput["channels"]["createWithDeps"];
 export type ServerUpsertInput = botRouterInput["servers"]["upsert"];
 export type UserUpsertInput = botRouterInput["users"]["upsert"];
 export const ALLOWED_CHANNEL_TYPES = new Set([

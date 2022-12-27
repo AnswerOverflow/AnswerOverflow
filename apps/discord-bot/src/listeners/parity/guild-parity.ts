@@ -15,7 +15,7 @@ export class SyncOnReady extends Listener {
     // 2. For any servers that are in the database and not in the guilds the bot is in, mark them as kicked
   }
 }
-@ApplyOptions<Listener.Options>({ event: Events.GuildCreate, name: "Sync On Join" })
+@ApplyOptions<Listener.Options>({ event: Events.GuildCreate, name: "Guild Sync On Join" })
 export class SyncOnJoin extends Listener {
   public async run(guild: Guild) {
     await callAPI({
@@ -59,7 +59,7 @@ export class SyncOnJoin extends Listener {
  * This is incase someone is just temporarily kicking the bot, and we don't want to lose all of the data.
  * A background job will periodically clean up servers that have been kicked for a long time.
  */
-@ApplyOptions<Listener.Options>({ event: Events.GuildDelete, name: "Sync On Delete" })
+@ApplyOptions<Listener.Options>({ event: Events.GuildDelete, name: "Guild Sync On Delete" })
 export class SyncOnDelete extends Listener {
   public async run(guild: Guild) {
     await callAPI({
@@ -83,7 +83,7 @@ export class SyncOnDelete extends Listener {
   }
 }
 
-@ApplyOptions<Listener.Options>({ event: Events.GuildUpdate, name: "Sync On Update" })
+@ApplyOptions<Listener.Options>({ event: Events.GuildUpdate, name: "Guild Sync On Update" })
 export class SyncOnUpdate extends Listener {
   public async run(_oldGuild: Guild, newGuild: Guild) {
     await callAPI({

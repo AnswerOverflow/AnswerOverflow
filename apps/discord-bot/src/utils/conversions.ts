@@ -1,6 +1,10 @@
 import type { GuildTextBasedChannel, Message, User } from "discord.js";
 import type { Message as AOMessage } from "@answeroverflow/db";
-import type { ChannelUpsertInput, UserUpsertInput } from "@answeroverflow/api";
+import type {
+  ChannelCreateWithDepsInput,
+  ChannelUpsertInput,
+  UserUpsertInput,
+} from "@answeroverflow/api";
 export function toAOMessage(message: Message): AOMessage {
   if (!message.guild) throw new Error("Message is not in a guild");
   const converted_message: AOMessage = {
@@ -32,18 +36,33 @@ export function toChannelUpsert(channel: GuildTextBasedChannel) {
       id: channel.id,
       name: channel.name,
       type: channel.type,
-      server: {
-        create: {
-          id: channel.guild.id,
-          name: channel.guild.name,
-        },
-        update: {
-          name: channel.guild.name,
-        },
-      },
+      server_id: channel.guild.id,
     },
     update: {
+      id: channel.id,
       name: channel.name,
+    },
+  };
+  return converted_channel;
+}
+
+export function toChannelCreateWithDeps(channel: GuildTextBasedChannel) {
+  const converted_channel: ChannelCreateWithDepsInput = {
+    channel: {
+      id: channel.id,
+      name: channel.name,
+      type: channel.type,
+      server_id: channel.guild.id,
+    },
+    server: {
+      create: {
+        id: channel.guild.id,
+        name: channel.guild.name,
+      },
+      update: {
+        id: channel.guild.id,
+        name: channel.guild.name,
+      },
     },
   };
   return converted_channel;
