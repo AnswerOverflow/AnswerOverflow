@@ -1,8 +1,9 @@
-import type { GuildTextBasedChannel, Message, User } from "discord.js";
+import type { ForumChannel, GuildTextBasedChannel, Message, User } from "discord.js";
 import type { Message as AOMessage } from "@answeroverflow/db";
 import type {
   ChannelCreateWithDepsInput,
   ChannelUpsertInput,
+  ChannelUpsertWithDepsInput,
   UserUpsertInput,
 } from "@answeroverflow/api";
 export function toAOMessage(message: Message): AOMessage {
@@ -46,7 +47,7 @@ export function toChannelUpsert(channel: GuildTextBasedChannel) {
   return converted_channel;
 }
 
-export function toChannelCreateWithDeps(channel: GuildTextBasedChannel) {
+export function toChannelCreateWithDeps(channel: GuildTextBasedChannel | ForumChannel) {
   const converted_channel: ChannelCreateWithDepsInput = {
     channel: {
       id: channel.id,
@@ -63,6 +64,17 @@ export function toChannelCreateWithDeps(channel: GuildTextBasedChannel) {
         id: channel.guild.id,
         name: channel.guild.name,
       },
+    },
+  };
+  return converted_channel;
+}
+
+export function toChannelUpsertWithDeps(channel: GuildTextBasedChannel | ForumChannel) {
+  const converted_channel: ChannelUpsertWithDepsInput = {
+    create: toChannelCreateWithDeps(channel),
+    update: {
+      id: channel.id,
+      name: channel.name,
     },
   };
   return converted_channel;

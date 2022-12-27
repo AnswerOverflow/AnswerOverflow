@@ -9,9 +9,9 @@ type TRPCall<T> = {
   // eslint-disable-next-line no-unused-vars
   ApiCall: (router: BotRouterCaller) => Promise<T>;
   // eslint-disable-next-line no-unused-vars
-  Ok: (result: T) => void;
+  Ok?: (result: T) => void;
   // eslint-disable-next-line no-unused-vars
-  Error: (error: TRPCError) => void;
+  Error?: (error: TRPCError) => void;
   member?: GuildMember;
 };
 

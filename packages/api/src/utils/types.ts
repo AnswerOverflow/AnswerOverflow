@@ -10,10 +10,11 @@ export type botRouterOutput = inferRouterOutputs<BotRouter>;
 export type ChannelSettingsUpsertInput = botRouterInput["channel_settings"]["upsert"];
 export type ChannelSettingsOutput = botRouterOutput["channel_settings"]["upsert"];
 export type ChannelSettingsUpsertWithDeps = botRouterInput["channel_settings"]["upsertWithDeps"];
-export type ChannelUpsertWithDepsInput = botRouterInput["channels"]["upsertWithDeps"];
 
 export type ChannelUpsertInput = botRouterInput["channels"]["upsert"];
 export type ChannelCreateWithDepsInput = botRouterInput["channels"]["createWithDeps"];
+export type ChannelUpsertWithDepsInput = botRouterInput["channels"]["upsertWithDeps"];
+
 export type ServerUpsertInput = botRouterInput["servers"]["upsert"];
 export type UserUpsertInput = botRouterInput["users"]["upsert"];
 export const ALLOWED_CHANNEL_TYPES = new Set([

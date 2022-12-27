@@ -192,6 +192,7 @@ const upsert_router = router({
 
 export const channelRouter = mergeRouters(
   create_update_delete_router,
+  create_thread_with_deps_router,
   create_with_deps_router,
   fetch_router,
   upsert_router
