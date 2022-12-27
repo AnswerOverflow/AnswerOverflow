@@ -1,4 +1,5 @@
 import type { Channel, ChannelSettings, Server, User } from "@prisma/client";
+import type { Thread } from "..";
 import { addChannelSettingsFlagsToChannelSettings } from "./channel-settings";
 import type { Message } from "./elastic";
 
@@ -59,6 +60,22 @@ export function getDefaultChannel(
   override: Partial<Channel> & { id: string; name: string; server_id: string; type: number }
 ): Channel {
   const data: Channel = {
+    ...override,
+    parent_id: null,
+  };
+  return data;
+}
+
+export function getDefaultThread(
+  override: Partial<Thread> & {
+    id: string;
+    name: string;
+    server_id: string;
+    type: number;
+    parent_id: string;
+  }
+): Thread {
+  const data: Thread = {
     ...override,
   };
   return data;

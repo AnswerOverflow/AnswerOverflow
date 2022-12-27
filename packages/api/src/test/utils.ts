@@ -1,4 +1,9 @@
-import { getDefaultChannel, getDefaultMessage, getDefaultServer } from "@answeroverflow/db";
+import {
+  getDefaultChannel,
+  getDefaultMessage,
+  getDefaultServer,
+  getDefaultThread,
+} from "@answeroverflow/db";
 import { ChannelType, PermissionResolvable, PermissionsBitField } from "discord.js";
 import { createContextInner } from "../context";
 
@@ -20,6 +25,7 @@ export function getServerTestData(server_id: string = "101") {
     server_id: server_id,
     type: ChannelType.GuildText,
   });
+
   const forum_channel = getDefaultChannel({
     id: "202",
     name: "name2",
@@ -44,6 +50,15 @@ export function getServerTestData(server_id: string = "101") {
     text_channels: [
       {
         channel: text_channel,
+        threads: [
+          getDefaultThread({
+            id: "401",
+            name: "name",
+            parent_id: "201",
+            server_id: server_id,
+            type: ChannelType.PublicThread,
+          }),
+        ],
         messages: [
           getDefaultMessage({
             id: "300",

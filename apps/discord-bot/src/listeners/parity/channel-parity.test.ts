@@ -88,3 +88,17 @@ describe("Channel Delete Parity", () => {
     });
   });
 });
+
+describe("Thread Delete Parity", () => {
+  it("should delete an existing thread", async () => {
+    await callAPI({
+      async ApiCall(router) {
+        return router.channels.createWithDeps(toChannelCreateWithDeps(data.));
+      },
+      Ok() {},
+      Error() {},
+    });
+    client.emit(Events.ThreadDelete, data.thread_channel);
+    await delay();
+  });
+});

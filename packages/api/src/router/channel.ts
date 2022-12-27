@@ -4,7 +4,7 @@ import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "../trpc";
 import { upsert, upsertMany } from "../utils/operations";
 import { assertCanEditServer } from "../utils/permissions";
-import { ALLOWED_CHANNEL_TYPES } from "../utils/types";
+import { ALLOWED_CHANNEL_TYPES, ALLOWED_THREAD_TYPES } from "../utils/types";
 import { serverRouter, z_server_upsert } from "./server";
 
 const z_channel_create = z.object({
@@ -19,14 +19,35 @@ const z_channel_create = z.object({
     ), // TODO: Make a type error if possible
 });
 
+const z_thread_create = z_channel_create.extend({
+  parent_id: z.string(),
+  type: z.number().refine((n) => ALLOWED_THREAD_TYPES.has(n), "Can only create public threads"), // TODO: Make a type error if possible
+});
+
 const z_channel_create_with_deps = z.object({
   channel: z_channel_create,
   server: z_server_upsert,
 });
-
 const z_channel_update = z.object({
   id: z.string(),
   name: z.string().optional(),
+});
+
+export const z_channel_upsert = z.object({ create: z_channel_create, update: z_channel_update });
+export const z_channel_upsert_many = z.array(z_channel_upsert);
+export const z_channel_upsert_with_deps = z.object({
+  create: z_channel_create_with_deps,
+  update: z_channel_update,
+});
+
+const z_thread_create_with_deps = z.object({
+  thread: z_thread_create,
+  parent: z_channel_upsert_with_deps,
+});
+
+const z_thread_upsert_with_deps = z.object({
+  create: z_thread_create_with_deps,
+  update: z_channel_update,
 });
 
 const create_update_delete_router = router({
@@ -34,6 +55,12 @@ const create_update_delete_router = router({
     assertCanEditServer(ctx, input.server_id);
     return ctx.prisma.channel.create({ data: input });
   }),
+  createThread: protectedProcedureWithUserServers
+    .input(z_thread_create)
+    .mutation(({ ctx, input }) => {
+      assertCanEditServer(ctx, input.server_id);
+      return ctx.prisma.channel.create({ data: input });
+    }),
   createMany: protectedProcedureWithUserServers
     .input(z.array(z_channel_create))
     .mutation(async ({ ctx, input }) => {
@@ -93,6 +120,15 @@ const create_with_deps_router = router({
     }),
 });
 
+const create_thread_with_deps_router = router({
+  createThreadWithDeps: protectedProcedureWithUserServers
+    .input(z_thread_create_with_deps)
+    .mutation(async ({ ctx, input }) => {
+      await upsert_router.createCaller(ctx).upsertWithDeps(input.parent);
+      return create_update_delete_router.createCaller(ctx).createThread(input.thread);
+    }),
+});
+
 const fetch_router = router({
   byId: protectedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
     const channel = await ctx.prisma.channel.findFirst({ where: { id: input } });
@@ -108,13 +144,6 @@ const fetch_router = router({
       channels.forEach((channel) => assertCanEditServer(ctx, channel.server_id));
       return channels;
     }),
-});
-
-export const z_channel_upsert = z.object({ create: z_channel_create, update: z_channel_update });
-export const z_channel_upsert_many = z.array(z_channel_upsert);
-export const z_channel_upsert_with_deps = z.object({
-  create: z_channel_create_with_deps,
-  update: z_channel_update,
 });
 
 const upsert_router = router({
@@ -147,6 +176,15 @@ const upsert_router = router({
       return upsert(
         () => fetch_router.createCaller(ctx).byId(input.create.channel.id),
         () => create_with_deps_router.createCaller(ctx).createWithDeps(input.create),
+        () => create_update_delete_router.createCaller(ctx).update(input.update)
+      );
+    }),
+  upsertThreadWithDeps: protectedProcedureWithUserServers
+    .input(z_thread_upsert_with_deps)
+    .mutation(async ({ ctx, input }) => {
+      return upsert(
+        () => fetch_router.createCaller(ctx).byId(input.create.thread.id),
+        () => create_thread_with_deps_router.createCaller(ctx).createThreadWithDeps(input.create),
         () => create_update_delete_router.createCaller(ctx).update(input.update)
       );
     }),

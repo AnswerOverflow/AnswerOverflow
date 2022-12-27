@@ -117,3 +117,37 @@ describe("Channel Upsert", () => {
     expect(channels).toEqual(data.text_channels.map((channel) => channel.channel));
   });
 });
+
+describe("Thread Upsert", () => {
+  it("should succeed upserting a new thread with manage guild", async () => {
+    await manage_guild_router.create(data.server);
+    const thread = await manage_channel_router.upsertThreadWithDeps({
+      create: {
+        thread: data.text_channels[0].threads[0],
+        parent: {
+          create: {
+            channel: {
+              ...data.text_channels[0].channel,
+            },
+            server: {
+              create: {
+                ...data.server,
+              },
+              update: {
+                id: data.server.id,
+              },
+            },
+          },
+          update: {
+            id: data.text_channels[0].channel.id,
+          },
+        },
+      },
+      update: {
+        id: data.text_channels[0].threads[0].id,
+        name: "new name",
+      },
+    });
+    expect(thread).toEqual(data.text_channels[0].threads[0]);
+  });
+});

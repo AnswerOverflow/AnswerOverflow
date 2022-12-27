@@ -120,6 +120,21 @@ export class Elastic extends Client {
     }
   }
 
+  public async deleteMessagesByThreadId(thread_id: string) {
+    const body = {
+      query: {
+        match: {
+          thread_id,
+        },
+      },
+    };
+    const result = await this.deleteByQuery({
+      index: this.messages_index,
+      body,
+    });
+    return result.deleted;
+  }
+
   public async bulkDeleteMessages(ids: string[]) {
     const body = ids.flatMap((id) => [{ delete: { _index: this.messages_index, _id: id } }]);
     const result = await this.bulk({ body });

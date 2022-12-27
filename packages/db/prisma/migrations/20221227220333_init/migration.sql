@@ -99,7 +99,9 @@ CREATE TABLE `Channel` (
     `server_id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(100) NOT NULL,
     `type` INTEGER NOT NULL,
+    `parent_id` VARCHAR(191) NULL,
 
+    UNIQUE INDEX `Channel_parent_id_key`(`parent_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -140,6 +142,9 @@ ALTER TABLE `UserServerSettings` ADD CONSTRAINT `UserServerSettings_user_id_fkey
 
 -- AddForeignKey
 ALTER TABLE `UserServerSettings` ADD CONSTRAINT `UserServerSettings_server_id_fkey` FOREIGN KEY (`server_id`) REFERENCES `Server`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Channel` ADD CONSTRAINT `Channel_parent_id_fkey` FOREIGN KEY (`parent_id`) REFERENCES `Channel`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Channel` ADD CONSTRAINT `Channel_server_id_fkey` FOREIGN KEY (`server_id`) REFERENCES `Server`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -21,3 +21,5 @@ export const ALLOWED_CHANNEL_TYPES = new Set([
   ChannelType.GuildText,
   ChannelType.GuildAnnouncement,
 ]);
+
+export const ALLOWED_THREAD_TYPES = new Set([ChannelType.PublicThread]);

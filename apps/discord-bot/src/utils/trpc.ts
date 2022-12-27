@@ -59,7 +59,12 @@ export async function createBotRouter(member?: GuildMember): Promise<BotRouterCa
   return botRouter.createCaller(ctx);
 }
 
-export async function callAPI<T>({ ApiCall, Ok, Error, member }: TRPCall<T>): Promise<void> {
+export async function callAPI<T>({
+  ApiCall,
+  Ok = () => {},
+  Error = () => {},
+  member,
+}: TRPCall<T>): Promise<void> {
   try {
     const caller = await createBotRouter(member); // Create the trpcCaller passing in member to make the context
     const data = await ApiCall(caller); // Pass in the caller we created to ApiCall to make the request
