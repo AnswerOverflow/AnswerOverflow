@@ -16,7 +16,7 @@ beforeEach(async () => {
 
 describe("userRouter", () => {
   it("should create a user", async () => {
-    const new_user = await users.create({
+    const new_user = await users.upsert({
       name: "test",
       id: "1",
     });
@@ -26,7 +26,7 @@ describe("userRouter", () => {
   it("should find a user by id", async () => {
     const user = await users.byId("1");
     expect(user).toBeNull();
-    const new_user = await users.create({
+    const new_user = await users.upsert({
       name: "test",
       id: "1",
     });

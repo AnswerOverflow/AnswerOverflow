@@ -10,4 +10,9 @@ export default createVitestConfig({
       "~api/utils": path.resolve(__dirname, "./src/utils/"),
     },
   },
+  test: {
+    coverage: {
+      provider: "c8",
+    },
+  },
 });

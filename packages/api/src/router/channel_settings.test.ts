@@ -1,158 +1,74 @@
 import { clearDatabase } from "@answeroverflow/db";
-import { TEST_SERVER_1, TEST_CHANNEL_1 } from "~api/test/utils";
-import { TRPCError } from "@trpc/server";
-import { PermissionsBitField } from "discord.js";
-import { botRouter } from ".";
-import { createBotContext } from "../context";
+import { getGeneralScenario, ServerTestData } from "../test/utils";
+import { channelSettingsRouter } from "./channel_settings";
 
-// eslint-disable-next-line no-unused-vars
-let router_manage_guilds: ReturnType<typeof botRouter["createCaller"]>;
-let router_no_permissions: ReturnType<typeof botRouter["createCaller"]>;
-
+let data: ServerTestData;
+let manage_channel_settings_router: ReturnType<typeof channelSettingsRouter["createCaller"]>;
 beforeEach(async () => {
-  const manageGuildContext = await createBotContext({
-    session: {
-      expires: new Date().toUTCString(),
-      user: {
-        email: null,
-        image: "https://example.com",
-        name: "test",
-        id: "1",
-      },
-    },
-    user_servers: [
-      {
-        features: [],
-        icon: null,
-        id: TEST_SERVER_1.id,
-        name: TEST_SERVER_1.name,
-        owner: false,
-        permissions: Number(PermissionsBitField.resolve("ManageGuild")),
-      },
-    ],
-  });
-  const noPermissionsContext = await createBotContext({
-    session: {
-      expires: new Date().toUTCString(),
-      user: {
-        email: null,
-        image: "https://example.com",
-        name: "test",
-        id: "1",
-      },
-    },
-    user_servers: [
-      {
-        features: [],
-        icon: null,
-        id: TEST_SERVER_1.id,
-        name: TEST_SERVER_1.name,
-        owner: false,
-        permissions: 0,
-      },
-    ],
-  });
-
-  router_no_permissions = botRouter.createCaller(noPermissionsContext);
-  router_manage_guilds = botRouter.createCaller(manageGuildContext);
+  const { data: server_data, manage_guild_ctx } = await getGeneralScenario();
+  data = server_data;
+  manage_channel_settings_router = channelSettingsRouter.createCaller(manage_guild_ctx);
   await clearDatabase();
 });
 
-const TEST_CREATE_CHANNEL_SETTINGS = {
-  create: {
-    channel: {
+describe("Channel Settings Upsert With Deps", () => {
+  it("should succeed upserting a channel settings with manage guild", async () => {
+    const channel_settings = await manage_channel_settings_router.upsertWithDeps({
       create: {
-        ...TEST_CHANNEL_1,
-        server: {
+        channel: {
           create: {
-            ...TEST_SERVER_1,
+            channel: {
+              ...data.text_channels[0].channel,
+            },
+            server: {
+              create: {
+                ...data.server,
+              },
+              update: {
+                id: data.server.id,
+              },
+            },
           },
           update: {
-            ...TEST_SERVER_1,
+            id: data.text_channels[0].channel.id,
           },
+        },
+        settings: {
+          channel_id: data.text_channels[0].channel.id,
+          solution_tag_id: "101",
         },
       },
       update: {
-        ...TEST_CHANNEL_1,
+        channel_id: data.text_channels[0].channel.id,
       },
-    },
-  },
-  update: {},
-};
+    });
+    expect(channel_settings).toBeDefined();
+    expect(channel_settings.solution_tag_id).toBe("101");
+  });
+});
 
-describe("channelRouter", () => {
-  it("should upsert channel settings with no permissions", async () => {
-    await expect(
-      router_no_permissions.channel_settings.upsert(TEST_CREATE_CHANNEL_SETTINGS)
-    ).rejects.toThrow(TRPCError);
-  });
-  it("should upsert channel settings with manage guilds permissions", async () => {
-    const result = await router_manage_guilds.channel_settings.upsert(TEST_CREATE_CHANNEL_SETTINGS);
-    expect(result).toBeDefined();
-  });
-  it("should upsert a channel and then upsert channel settings", async () => {
-    const result = await router_manage_guilds.channels.upsert({
-      create: {
-        ...TEST_CHANNEL_1,
-      },
-      update: {
-        ...TEST_CHANNEL_1,
-      },
-    });
-    expect(result).toBeDefined();
-    const result2 = await router_manage_guilds.channel_settings.upsert({
-      create: {
-        channel: {
-          create: {
-            ...TEST_CHANNEL_1,
-          },
-          update: {
-            ...TEST_CHANNEL_1,
+describe("Channel Settings Fetch", () => {
+  it("should fetch by invite code", async () => {
+    const channel_settings = await manage_channel_settings_router.createWithDeps({
+      channel: {
+        create: {
+          channel: data.text_channels[0].channel,
+          server: {
+            create: data.server,
+            update: data.server,
           },
         },
+        update: data.text_channels[0].channel,
       },
-      update: {},
-    });
-    expect(result2).toBeDefined();
-  });
-  it("should enable indexing on a channel", async () => {
-    const result = await router_manage_guilds.channel_settings.upsert({
-      create: {
-        channel: {
-          create: {
-            ...TEST_CHANNEL_1,
-          },
-          update: {
-            ...TEST_CHANNEL_1,
-          },
-        },
-      },
-      update: {
-        flags: {
-          indexing_enabled: true,
-        },
+      settings: {
+        channel_id: data.text_channels[0].channel.id,
+        invite_code: "1234",
       },
     });
-    expect(result).toBeDefined();
-    expect(result.flags.indexing_enabled).toBe(true);
-  });
-  it("should set the solution_tag_id on a channel", async () => {
-    const result = await router_manage_guilds.channel_settings.upsert({
-      create: {
-        channel: {
-          create: {
-            ...TEST_CHANNEL_1,
-          },
-          update: {
-            ...TEST_CHANNEL_1,
-          },
-        },
-      },
-      update: {
-        solution_tag_id: "1",
-      },
-    });
-    expect(result).toBeDefined();
-    expect(result.solution_tag_id).toBe("1");
+    expect(channel_settings).toBeDefined();
+    expect(channel_settings.invite_code).toBe("1234");
+
+    const updated_channel_settings = await manage_channel_settings_router.byInviteCode("1234");
+    expect(updated_channel_settings).toBeDefined();
   });
 });

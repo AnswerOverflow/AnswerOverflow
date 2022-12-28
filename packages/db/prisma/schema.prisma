@@ -109,22 +109,25 @@ model ServerSettings {
 // Channels
 
 model Channel {
-  id        String @id
+  id        String  @id
   server_id String
-  name      String @db.VarChar(100)
+  name      String  @db.VarChar(100)
   type      Int
+  parent_id String? @unique
 
+  parent                Channel?              @relation("ParentChannel", fields: [parent_id], references: [id])
   server                Server                @relation(fields: [server_id], references: [id])
   user_channel_settings UserChannelSettings[]
   channel_settings      ChannelSettings[]
   ForumChannelTag       ForumChannelTag[]
+  threads               Channel[]             @relation("ParentChannel")
 }
 
 model ChannelSettings {
   channel_id             String  @id
   bitfield               Int     @default(0)
   last_indexed_snowflake String?
-  invite_code            String? @db.VarChar(15)
+  invite_code            String? @unique @db.VarChar(15)
   solution_tag_id        String?
 
   channel Channel @relation(fields: [channel_id], references: [id])

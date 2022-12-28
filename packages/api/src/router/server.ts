@@ -1,48 +1,63 @@
 import { z } from "zod";
-import { mergeRouters, publicProcedure, router } from "../trpc";
+import { mergeRouters, protectedProcedureWithUserServers, router } from "../trpc";
+import { upsert } from "../utils/operations";
+import { assertCanEditServer } from "../utils/permissions";
 
 export const z_server = z.object({
   id: z.string(),
   name: z.string(),
+  kicked_time: z.date().nullable(),
 });
-export const server_create_input = z.object({ name: z.string(), id: z.string() });
-export const server_update_input = z.object({ name: z.optional(z.string()) });
-export const server_upsert_input = z.object({
-  create: server_create_input,
-  update: server_update_input,
+export const z_server_create = z.object({
+  name: z.string(),
+  id: z.string(),
+  kicked_time: z.date().nullable().optional(),
+});
+export const z_server_update = z.object({
+  id: z.string(),
+  name: z.string().optional(),
+  kicked_time: z.date().nullable().optional(),
+});
+export const z_server_upsert = z.object({
+  create: z_server_create,
+  update: z_server_update,
 });
 
 const serverCreateUpdateRouter = router({
-  create: publicProcedure.input(server_create_input).mutation(({ ctx, input }) => {
+  create: protectedProcedureWithUserServers.input(z_server_create).mutation(({ ctx, input }) => {
+    assertCanEditServer(ctx, input.id);
     return ctx.prisma.server.create({ data: input });
   }),
-  update: publicProcedure
-    .input(z.object({ old: z_server, data: server_update_input }))
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.server.update({ where: { id: input.old.id }, data: input.data });
-    }),
+  update: protectedProcedureWithUserServers.input(z_server_update).mutation(({ ctx, input }) => {
+    assertCanEditServer(ctx, input.id);
+    return ctx.prisma.server.update({ where: { id: input.id }, data: input });
+  }),
 });
 
 const serverFetchRouter = router({
-  all: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.server.findMany();
-  }),
-  byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
-    return ctx.prisma.server.findFirst({ where: { id: input } });
+  byId: protectedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
+    const server = await ctx.prisma.server.findFirst({ where: { id: input } });
+    if (server) {
+      assertCanEditServer(ctx, server.id);
+    }
+    return server;
   }),
 });
 
 const serverUpsertRouter = router({
-  upsert: publicProcedure.input(server_upsert_input).mutation(async ({ ctx, input }) => {
-    const server_fetch = serverFetchRouter.createCaller(ctx);
-    const server_update_create = serverCreateUpdateRouter.createCaller(ctx);
-    const existing_server = await server_fetch.byId(input.create.id);
-    if (existing_server) {
-      return server_update_create.update({ old: existing_server, data: input.update });
-    } else {
-      return server_update_create.create(input.create);
-    }
-  }),
+  upsert: protectedProcedureWithUserServers
+    .input(z_server_upsert)
+    .mutation(async ({ ctx, input }) => {
+      return upsert(
+        () => serverFetchRouter.createCaller(ctx).byId(input.create.id),
+        () => serverCreateUpdateRouter.createCaller(ctx).create(input.create),
+        () => serverCreateUpdateRouter.createCaller(ctx).update(input.update)
+      );
+    }),
 });
 
-export const serverRouter = mergeRouters(serverFetchRouter, serverUpsertRouter);
+export const serverRouter = mergeRouters(
+  serverFetchRouter,
+  serverUpsertRouter,
+  serverCreateUpdateRouter
+);

@@ -2,6 +2,7 @@ name: CI
 
 on: # rebuild any PRs and main branch changes
   pull_request:
+    types: [review_requested, ready_for_review, synchronize]
   push:
     branches:
       - main
