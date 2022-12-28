@@ -1,5 +1,5 @@
 import { clearDatabase, Message } from "@answeroverflow/db";
-import { getGeneralScenario, ServerTestData } from "../test/utils";
+import { getGeneralScenario, ServerTestData } from "~api/test/utils";
 import { messageRouter } from "./message";
 
 let data: ServerTestData;

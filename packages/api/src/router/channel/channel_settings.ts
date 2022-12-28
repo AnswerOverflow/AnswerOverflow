@@ -6,13 +6,13 @@ import {
   getDefaultChannelSettings,
 } from "@answeroverflow/db";
 import { z } from "zod";
-import { mergeRouters, protectedProcedureWithUserServers, router } from "../trpc";
+import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
 import { dictToBitfield } from "@answeroverflow/db";
 import { channelRouter, z_channel_upsert_with_deps } from "./channel";
 import { assertCanEditServer } from "~api/utils/permissions";
 import { toZObject } from "~api/utils/zod-utils";
 import { TRPCError } from "@trpc/server";
-import { upsert } from "../utils/operations";
+import { upsert } from "~api/utils/operations";
 
 const z_channel_settings_flags = toZObject(...channel_settings_flags);
 

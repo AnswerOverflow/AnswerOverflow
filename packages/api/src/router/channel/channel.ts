@@ -1,11 +1,11 @@
 import { getDefaultChannel } from "@answeroverflow/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { mergeRouters, protectedProcedureWithUserServers, router } from "../trpc";
-import { upsert, upsertMany } from "../utils/operations";
-import { assertCanEditServer } from "../utils/permissions";
-import { ALLOWED_CHANNEL_TYPES, ALLOWED_THREAD_TYPES } from "../utils/types";
-import { serverRouter, z_server_upsert } from "./server";
+import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
+import { upsert, upsertMany } from "~api/utils/operations";
+import { assertCanEditServer } from "~api/utils/permissions";
+import { ALLOWED_CHANNEL_TYPES, ALLOWED_THREAD_TYPES } from "~api/utils/types";
+import { serverRouter, z_server_upsert } from "../server/server";
 
 const z_channel_create = z.object({
   id: z.string(),

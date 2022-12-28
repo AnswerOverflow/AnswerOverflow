@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { mergeRouters, publicProcedure, router } from "../trpc";
+import { mergeRouters, publicProcedure, router } from "~api/router/trpc";
 
 export const user_create_input = z.object({ name: z.string(), id: z.string() });
 

@@ -3,7 +3,7 @@ import {
   protectedProcedureWithUserServers,
   publicProcedure,
   router,
-} from "../trpc";
+} from "./trpc";
 import { getDiscordAccount } from "~api/utils/discord-oauth";
 
 export const authRouter = router({

@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { PermissionsBitField } from "discord.js";
-import type { Context } from "../context";
+import type { Context } from "~api/router/context";
 
 export function assertCanEditServer(ctx: Context, server_id: string) {
   if (ctx.session && ctx.session.user.id === "AnswerOverflow") return;

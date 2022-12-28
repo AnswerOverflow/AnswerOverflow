@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../trpc";
+import { publicProcedure, router } from "~api/router/trpc";
 
 export const z_message = z.object({
   id: z.string(),

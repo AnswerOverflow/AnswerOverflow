@@ -1,6 +1,6 @@
 import { clearDatabase } from "@answeroverflow/db";
 import { TRPCError } from "@trpc/server";
-import { getGeneralScenario, ServerTestData } from "../test/utils";
+import { getGeneralScenario, ServerTestData } from "~api/test/utils";
 import { serverRouter } from "./server";
 
 let manage_guild_router: ReturnType<typeof serverRouter["createCaller"]>;

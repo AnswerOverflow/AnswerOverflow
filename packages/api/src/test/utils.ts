@@ -5,7 +5,7 @@ import {
   getDefaultThread,
 } from "@answeroverflow/db";
 import { ChannelType, PermissionResolvable, PermissionsBitField } from "discord.js";
-import { createContextInner } from "../context";
+import { createContextInner } from "~api/router/context";
 
 export async function getGeneralScenario() {
   const data = getServerTestData();

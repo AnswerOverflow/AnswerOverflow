@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { mergeRouters, protectedProcedureWithUserServers, router } from "../trpc";
-import { upsert } from "../utils/operations";
-import { assertCanEditServer } from "../utils/permissions";
+import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
+import { upsert } from "~api/utils/operations";
+import { assertCanEditServer } from "~api/utils/permissions";
 
 export const z_server = z.object({
   id: z.string(),
