@@ -1,4 +1,4 @@
-import type { ChannelUpsertInput, ServerUpsertInput } from "@answeroverflow/api";
+import type { ChannelUpsertWithDepsInput } from "@answeroverflow/api";
 import { ReacordTester, ReacordDiscordJs } from "@answeroverflow/reacord";
 import type {
   ChatInputCommandSuccessPayload,
@@ -10,7 +10,16 @@ import { container } from "@sapphire/framework";
 import { send } from "@sapphire/plugin-editable-commands";
 import { cyan } from "colorette";
 import type { APIUser } from "discord-api-types/v9";
-import { Guild, Message, EmbedBuilder, User, SnowflakeUtil, CommandInteraction } from "discord.js";
+import {
+  Guild,
+  Message,
+  EmbedBuilder,
+  User,
+  SnowflakeUtil,
+  CommandInteraction,
+  GuildTextBasedChannel,
+  GuildChannel,
+} from "discord.js";
 import type { ReactNode } from "react";
 import { RandomLoadingMessage } from "./constants";
 
@@ -90,43 +99,6 @@ function getGuildInfo(guild: Guild | null) {
   return `${guild.name}[${cyan(guild.id)}]`;
 }
 
-interface Channel {
-  id: string;
-  name: string;
-  type: number;
-}
-
-export function makeChannelUpsert(channel: Channel, server: Server): ChannelUpsertInput {
-  return {
-    create: {
-      id: channel.id,
-      name: channel.name,
-      type: channel.type,
-      server: { ...makeServerUpsert(server) },
-    },
-    update: {
-      name: channel.name,
-    },
-  };
-}
-
-interface Server {
-  id: string;
-  name: string;
-}
-
-export function makeServerUpsert(server: Server): ServerUpsertInput {
-  return {
-    create: {
-      id: server.id,
-      name: server.name,
-    },
-    update: {
-      name: server.name,
-    },
-  };
-}
-
 function getRandomTime(start?: Date, end?: Date) {
   if (!start) {
     start = new Date(2015, 0, 1);
@@ -154,4 +126,44 @@ export function ephemeralReply(
     return;
   }
   throw new Error(`Invalid reacord instance`);
+}
+
+export function makeChannelUpsertWithDeps(channel: GuildChannel): ChannelUpsertWithDepsInput {
+  const data: ChannelUpsertWithDepsInput = {
+    create: {
+      channel: {
+        id: channel.id,
+        name: channel.name,
+        type: channel.type,
+        server_id: channel.guild.id,
+      },
+      server: {
+        create: {
+          id: channel.guild.id,
+          name: channel.guild.name,
+        },
+        update: {
+          id: channel.guild.id,
+          name: channel.guild.name,
+        },
+      },
+    },
+    update: {
+      id: channel.id,
+      name: channel.name,
+    },
+  };
+  return data;
+}
+
+export function getRootChannel(channel: GuildTextBasedChannel) {
+  if (channel.isVoiceBased()) return undefined;
+  if (!channel.isTextBased()) return undefined;
+  if (channel.isThread()) {
+    if (!channel.parent) {
+      return undefined;
+    }
+    return channel.parent;
+  }
+  return channel;
 }

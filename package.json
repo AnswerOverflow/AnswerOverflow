@@ -19,7 +19,8 @@
     "dev:discord-bot": "turbo run dev --filter=discord-bot... --parallel --no-cache",
     "build:discord-bot": "turbo run build --filter=discord-bot... --parallel --no-cache",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch"
   },
   "devDependencies": {
     "@answeroverflow/eslint-config-custom": "*",

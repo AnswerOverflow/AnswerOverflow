@@ -12,7 +12,11 @@ export const channel_settings_flags = [
 export const bitfieldToChannelSettingsFlags = (bitfield: number) =>
   bitfieldToDict(bitfield, channel_settings_flags);
 
-export const addChannelSettingsFlagsToChannelSettings = (channel_settings: ChannelSettings) => ({
-  ...channel_settings,
-  flags: bitfieldToChannelSettingsFlags(channel_settings.bitfield),
-});
+export function addChannelSettingsFlagsToChannelSettings<T extends ChannelSettings>(
+  channel_settings: T
+) {
+  return {
+    ...channel_settings,
+    flags: bitfieldToChannelSettingsFlags(channel_settings.bitfield),
+  };
+}

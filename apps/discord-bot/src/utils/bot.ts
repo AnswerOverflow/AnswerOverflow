@@ -31,7 +31,7 @@ export function createClient() {
       "DirectMessages",
       "DirectMessageReactions",
     ],
-    partials: [Partials.Channel],
+    partials: [Partials.Channel, Partials.Message, Partials.GuildMember],
     loadMessageCommandListeners: true,
     hmr: {
       enabled: process.env.NODE_ENV === "development",

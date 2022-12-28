@@ -9,16 +9,24 @@ type TRPCall<T> = {
   // eslint-disable-next-line no-unused-vars
   ApiCall: (router: BotRouterCaller) => Promise<T>;
   // eslint-disable-next-line no-unused-vars
-  Ok: (result: T) => void;
+  Ok?: (result: T) => void;
   // eslint-disable-next-line no-unused-vars
-  Error: (error: TRPCError) => void;
+  Error?: (error: TRPCError) => void;
   member?: GuildMember;
 };
 
 // TODO: This function can be cleaned up
 export async function createBotRouter(member?: GuildMember): Promise<BotRouterCaller> {
   let ctx = await createBotContext({
-    session: null, // Some bot calls may be performed without a member, this allows that to happen
+    session: {
+      expires: new Date().toUTCString(),
+      user: {
+        email: null,
+        image: null,
+        name: null,
+        id: "AnswerOverflow", // todo: use bot id
+      },
+    }, // Some bot calls may be performed without a member, this allows that to happen
     user_servers: null,
   });
   if (member) {
@@ -51,7 +59,12 @@ export async function createBotRouter(member?: GuildMember): Promise<BotRouterCa
   return botRouter.createCaller(ctx);
 }
 
-export async function callAPI<T>({ ApiCall, Ok, Error, member }: TRPCall<T>): Promise<void> {
+export async function callAPI<T>({
+  ApiCall,
+  Ok = () => {},
+  Error = () => {},
+  member,
+}: TRPCall<T>): Promise<void> {
   try {
     const caller = await createBotRouter(member); // Create the trpcCaller passing in member to make the context
     const data = await ApiCall(caller); // Pass in the caller we created to ApiCall to make the request

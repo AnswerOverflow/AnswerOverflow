@@ -67,4 +67,20 @@ describe("Normal Scenario Tests", () => {
     expect(forum_thread).toBeDefined();
     expect(forum_thread.parentId).toBe(forum_channel.id);
   });
+  it("should verify forum thread message", async () => {
+    const { forum_thread_message_from_default, forum_thread, guild_member_default } =
+      await createNormalScenario();
+    expect(forum_thread_message_from_default).toBeDefined();
+    expect(forum_thread_message_from_default.channel).toEqual(forum_thread);
+    expect(forum_thread_message_from_default.author.id).toEqual(guild_member_default.id);
+    expect(forum_thread_message_from_default.guildId).toEqual(guild_member_default.guild.id);
+  });
+  it("should verify text channel message", async () => {
+    const { text_channel_message_from_default, text_channel, guild_member_default } =
+      await createNormalScenario();
+    expect(text_channel_message_from_default).toBeDefined();
+    expect(text_channel_message_from_default.channel).toEqual(text_channel);
+    expect(text_channel_message_from_default.author.id).toEqual(guild_member_default.id);
+    expect(text_channel_message_from_default.guildId).toEqual(guild_member_default.guild.id);
+  });
 });

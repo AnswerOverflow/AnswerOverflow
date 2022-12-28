@@ -1,4 +1,4 @@
-import { prisma } from "..";
+import { prisma, elastic } from "..";
 
 export async function clearDatabase() {
   await prisma.userServerSettings.deleteMany({});
@@ -8,4 +8,5 @@ export async function clearDatabase() {
   await prisma.channel.deleteMany({});
   await prisma.server.deleteMany({});
   await prisma.user.deleteMany({});
+  await elastic.createMessagesIndex();
 }
