@@ -38,8 +38,8 @@
   ],
   "settings": {
     "files.exclude": {
-      "apps/": true, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
-      "packages/": true, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
+      "apps/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
+      "packages/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
     },
     "vitest.enable": true,
     "vitest.disabledWorkspaceFolders": [

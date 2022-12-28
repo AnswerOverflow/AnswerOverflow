@@ -5,9 +5,9 @@ import { channelSettingsRouter } from "./channel_settings";
 let data: ServerTestData;
 let manage_channel_settings_router: ReturnType<typeof channelSettingsRouter["createCaller"]>;
 beforeEach(async () => {
-  const { data: server_data, manage_guild_ctx } = await getGeneralScenario();
-  data = server_data;
-  manage_channel_settings_router = channelSettingsRouter.createCaller(manage_guild_ctx);
+  const { data1 } = await getGeneralScenario();
+  data = data1;
+  manage_channel_settings_router = channelSettingsRouter.createCaller(data1.manage_guild_ctx);
   await clearDatabase();
 });
 

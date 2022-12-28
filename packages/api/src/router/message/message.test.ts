@@ -7,11 +7,11 @@ let messages_router: ReturnType<typeof messageRouter["createCaller"]>;
 let message: Message;
 let message2: Message;
 beforeEach(async () => {
-  const { data: server_data, manage_guild_ctx } = await getGeneralScenario();
-  data = server_data;
+  const { data1 } = await getGeneralScenario();
+  data = data1;
   message = data.text_channels[0].messages[0];
   message2 = data.text_channels[0].messages[1];
-  messages_router = messageRouter.createCaller(manage_guild_ctx);
+  messages_router = messageRouter.createCaller(data1.default_ctx);
   await clearDatabase();
 });
 

@@ -9,11 +9,11 @@ let manage_channel_router: ReturnType<typeof channelRouter["createCaller"]>;
 let default_channel_router: ReturnType<typeof channelRouter["createCaller"]>;
 let data: ServerTestData;
 beforeEach(async () => {
-  const { data: server_data, manage_guild_ctx, default_ctx } = await getGeneralScenario();
-  manage_guild_router = serverRouter.createCaller(manage_guild_ctx);
-  manage_channel_router = channelRouter.createCaller(manage_guild_ctx);
-  default_channel_router = channelRouter.createCaller(default_ctx);
-  data = server_data;
+  const { data1 } = await getGeneralScenario();
+  manage_guild_router = serverRouter.createCaller(data1.manage_guild_ctx);
+  manage_channel_router = channelRouter.createCaller(data1.manage_guild_ctx);
+  default_channel_router = channelRouter.createCaller(data1.default_ctx);
+  data = data1;
   await clearDatabase();
 });
 
@@ -123,7 +123,7 @@ describe("Thread Upsert", () => {
     await manage_guild_router.create(data.server);
     const thread = await manage_channel_router.upsertThreadWithDeps({
       create: {
-        thread: data.text_channels[0].threads[0],
+        thread: data.text_channels[0].threads[0].thread,
         parent: {
           create: {
             channel: {
@@ -144,10 +144,10 @@ describe("Thread Upsert", () => {
         },
       },
       update: {
-        id: data.text_channels[0].threads[0].id,
+        id: data.text_channels[0].threads[0].thread.id,
         name: "new name",
       },
     });
-    expect(thread).toEqual(data.text_channels[0].threads[0]);
+    expect(thread).toEqual(data.text_channels[0].threads[0].thread);
   });
 });

@@ -8,13 +8,11 @@ import { ChannelType, PermissionResolvable, PermissionsBitField } from "discord.
 import { createContextInner } from "~api/router/context";
 
 export async function getGeneralScenario() {
-  const data = getServerTestData();
-  const manage_guild_ctx = await createManageGuildContext(data.server.id, data.server.name);
-  const default_ctx = await createDefaultPermissionCtx(data.server.id, data.server.name);
-  return { data, manage_guild_ctx, default_ctx };
+  const data1 = await getServerTestData();
+  return { data1 };
 }
 
-export function getServerTestData(server_id: string = "101") {
+export async function getServerTestData(server_id: string = "101") {
   const server = getDefaultServer({
     id: server_id,
     name: "test",
@@ -32,8 +30,12 @@ export function getServerTestData(server_id: string = "101") {
     server_id: server_id,
     type: ChannelType.GuildForum,
   });
+  const manage_guild_ctx = await createManageGuildContext(server.id, server.name);
+  const default_ctx = await createDefaultPermissionCtx(server.id, server.name);
   return {
     server,
+    manage_guild_ctx,
+    default_ctx,
     forum_channels: [
       {
         channel: forum_channel,
@@ -51,13 +53,16 @@ export function getServerTestData(server_id: string = "101") {
       {
         channel: text_channel,
         threads: [
-          getDefaultThread({
-            id: "401",
-            name: "name",
-            parent_id: "201",
-            server_id: server_id,
-            type: ChannelType.PublicThread,
-          }),
+          {
+            thread: getDefaultThread({
+              id: "401",
+              name: "name",
+              parent_id: "201",
+              server_id: server_id,
+              type: ChannelType.PublicThread,
+            }),
+            messages: [],
+          },
         ],
         messages: [
           getDefaultMessage({
@@ -113,4 +118,4 @@ export function createCtxWithServers(
   });
 }
 
-export type ServerTestData = ReturnType<typeof getServerTestData>;
+export type ServerTestData = Awaited<ReturnType<typeof getServerTestData>>;
