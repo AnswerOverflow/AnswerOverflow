@@ -97,7 +97,7 @@
       "auth",
       "config"
     ],
-    "jest.autoRun": "true",
+    "jest.autoRun": "off",
   },
   "extensions": {
     "recommendations": [

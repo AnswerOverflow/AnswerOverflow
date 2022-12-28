@@ -20,7 +20,6 @@
         "dbaeumer.vscode-eslint",
         "GitHub.copilot",
         "eamodio.gitlens",
-        "2gua.rainbow-brackets",
         "Prisma.prisma",
         "ZixuanChen.vitest-explorer",
         "EditorConfig.EditorConfig",
@@ -33,7 +32,7 @@
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "yarn install; npx playwright install-deps",
+  "postCreateCommand": "yarn install; npx playwright install-deps;  npx playwright install",
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
   "remoteUser": "node",
   "mounts": [

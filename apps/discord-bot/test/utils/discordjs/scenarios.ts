@@ -1,5 +1,5 @@
 import { PermissionFlagsBits } from "discord.js";
-import { mockForumChannel, mockTextChannel, mockThreadChannel } from "./channel-mock";
+import { mockForumChannel, mockMessage, mockTextChannel, mockThreadChannel } from "./channel-mock";
 import { mockGuild } from "./guild-mock";
 import { mockClient, mockReacord } from "./mock";
 import { mockGuildMember, mockUser } from "./user-mock";
@@ -17,6 +17,9 @@ import { mockGuildMember, mockUser } from "./user-mock";
 // 9. Thread (Text Channel)
 // 10. Thread (Forum Channel)
 // 11. User in no guilds
+// 12. Message in a text channel
+// 13. Message in a thread (text channel)
+// 14. Message in a thread (forum channel)
 export async function createNormalScenario() {
   const client = mockClient();
   await client.login();
@@ -40,6 +43,16 @@ export async function createNormalScenario() {
   const forum_thread = mockThreadChannel(client, guild, forum_channel);
   const text_channel = mockTextChannel(client, guild);
   const user_in_no_guilds = mockUser(client);
+  const forum_thread_message_from_default = mockMessage(
+    client,
+    guild_member_default.user,
+    forum_thread
+  );
+  const text_channel_message_from_default = mockMessage(
+    client,
+    guild_member_default.user,
+    text_channel
+  );
   return {
     client,
     reacord,
@@ -52,5 +65,7 @@ export async function createNormalScenario() {
     forum_thread,
     text_channel,
     user_in_no_guilds,
+    forum_thread_message_from_default,
+    text_channel_message_from_default,
   };
 }
