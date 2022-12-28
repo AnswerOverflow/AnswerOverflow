@@ -1,4 +1,4 @@
-import type { Channel, ChannelSettings, Server, User } from "@prisma/client";
+import type { Channel, ChannelSettings, Server, ServerSettings, User } from "@prisma/client";
 import type { Thread } from "..";
 import { addChannelSettingsFlagsToChannelSettings } from "./channel-settings";
 import type { Message } from "./elastic";
@@ -10,6 +10,15 @@ export function getDefaultChannelSettings(channel_id: string): ChannelSettings {
     invite_code: null,
     last_indexed_snowflake: null,
     solution_tag_id: null,
+  };
+}
+
+export function getDefaultServerSettings(
+  override: Partial<ServerSettings> & { server_id: string }
+) {
+  return {
+    bitfield: 0,
+    ...override,
   };
 }
 

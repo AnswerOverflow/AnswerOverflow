@@ -1,5 +1,5 @@
 import type { Channel } from "@prisma/client";
-
+export * from "./src/server_settings";
 export * from "@prisma/client";
 export * from "./src/elastic";
 export { prisma } from "./src/prisma";

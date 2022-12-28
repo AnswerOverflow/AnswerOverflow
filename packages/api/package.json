@@ -10,7 +10,6 @@
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "build": "tsc",
     "test:api": "yarn with-env vitest run --no-threads ",
     "test:watch": "yarn with-env vitest --no-threads --coverage",
     "type-check": "tsc --noEmit"
