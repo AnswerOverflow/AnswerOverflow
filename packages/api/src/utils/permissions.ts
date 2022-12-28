@@ -10,6 +10,7 @@ export function assertCanEditServer(ctx: Context, server_id: string) {
       message: "You are not authorized to edit this server",
     });
   }
+
   const server_to_check_permissions_of = ctx.user_servers.find(
     (user_server) => user_server.id === server_id
   );
@@ -27,5 +28,13 @@ export function assertCanEditServer(ctx: Context, server_id: string) {
       code: "FORBIDDEN",
       message: "You do not have permission to edit this server",
     });
+  }
+}
+
+export function assertCanEditServers(ctx: Context, server_id: string | string[]) {
+  if (Array.isArray(server_id)) {
+    server_id.forEach((id) => assertCanEditServer(ctx, id));
+  } else {
+    assertCanEditServer(ctx, server_id);
   }
 }

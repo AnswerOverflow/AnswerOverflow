@@ -26,11 +26,13 @@ describe("Channel Settings Upsert With Deps", () => {
               },
               update: {
                 id: data.server.id,
+                data: {},
               },
             },
           },
           update: {
             id: data.text_channels[0].channel.id,
+            data: {},
           },
         },
         settings: {
@@ -40,6 +42,7 @@ describe("Channel Settings Upsert With Deps", () => {
       },
       update: {
         channel_id: data.text_channels[0].channel.id,
+        data: {},
       },
     });
     expect(channel_settings).toBeDefined();
@@ -55,10 +58,16 @@ describe("Channel Settings Fetch", () => {
           channel: data.text_channels[0].channel,
           server: {
             create: data.server,
-            update: data.server,
+            update: {
+              id: data.server.id,
+              data: {},
+            },
           },
         },
-        update: data.text_channels[0].channel,
+        update: {
+          id: data.text_channels[0].channel.id,
+          data: {},
+        },
       },
       settings: {
         channel_id: data.text_channels[0].channel.id,

@@ -9,20 +9,10 @@ import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
 import { dictToBitfield } from "@answeroverflow/db";
 import { channelRouter, z_channel_upsert_with_deps } from "./channel";
-import { assertCanEditServer } from "~api/utils/permissions";
 import { toZObject } from "~api/utils/zod-utils";
-import { TRPCError } from "@trpc/server";
-import { upsert } from "~api/utils/operations";
+import { protectedFetch, protectedOperationFetchFirst, upsert } from "~api/utils/operations";
 
 const z_channel_settings_flags = toZObject(...channel_settings_flags);
-
-const z_channel_settings_update = z.object({
-  channel_id: z.string(),
-  flags: z.optional(z_channel_settings_flags),
-  last_indexed_snowflake: z.optional(z.string()),
-  invite_code: z.string().nullable().optional(),
-  solution_tag_id: z.optional(z.nullable(z.string())),
-});
 
 const z_channel_settings_create = z.object({
   channel_id: z.string(),
@@ -32,6 +22,13 @@ const z_channel_settings_create = z.object({
   solution_tag_id: z.string().nullable().optional(),
 });
 
+const z_channel_settings_mutable = z_channel_settings_create.omit({ channel_id: true }).partial();
+
+const z_channel_settings_update = z.object({
+  channel_id: z.string(),
+  data: z_channel_settings_mutable,
+});
+
 const z_channel_settings_upsert = z.object({
   create: z_channel_settings_create,
   update: z_channel_settings_update,
@@ -39,7 +36,7 @@ const z_channel_settings_upsert = z.object({
 
 function mergeChannelSettings(
   old: ChannelSettings,
-  updated: z.infer<typeof z_channel_settings_update>
+  updated: z.infer<typeof z_channel_settings_mutable>
 ) {
   const old_flags = bitfieldToChannelSettingsFlags(old.bitfield);
   const new_flags = { ...old_flags, ...updated.flags };
@@ -52,43 +49,53 @@ function mergeChannelSettings(
   };
 }
 
+async function transformChannelSettingsReturn<T extends ChannelSettings>(
+  channel_settings: () => Promise<T>
+) {
+  const data = await channel_settings();
+  return addChannelSettingsFlagsToChannelSettings(data);
+}
+
 const channelSettingsCreateUpdate = router({
   create: protectedProcedureWithUserServers
     .input(z_channel_settings_create)
     .mutation(async ({ ctx, input }) => {
-      const channel = await channelRouter.createCaller(ctx).byId(input.channel_id);
-      if (!channel) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Channel does not exist",
-        });
-      }
-      assertCanEditServer(ctx, channel.server_id);
-      const new_settings = mergeChannelSettings(getDefaultChannelSettings(input.channel_id), input);
-      const data = await ctx.prisma.channelSettings.create({ data: new_settings });
-      return addChannelSettingsFlagsToChannelSettings(data);
+      return transformChannelSettingsReturn(() =>
+        protectedOperationFetchFirst({
+          fetch: () => channelRouter.createCaller(ctx).byId(input.channel_id),
+          getServerId: (data) => data.server_id,
+          operation: async (channel) => {
+            const new_settings = mergeChannelSettings(getDefaultChannelSettings(channel.id), input);
+            const data = await ctx.prisma.channelSettings.create({
+              data: { ...new_settings, channel_id: channel.id },
+            });
+            return data;
+          },
+          ctx,
+          not_found_message: "Channel not found",
+        })
+      );
     }),
   update: protectedProcedureWithUserServers
     .input(z_channel_settings_update)
     .mutation(async ({ ctx, input }) => {
-      const existing_channel_settings = await channelSettingFind
-        .createCaller(ctx)
-        .byId(input.channel_id);
-      if (!existing_channel_settings) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Channel settings do not exist",
-        });
-      }
-      assertCanEditServer(ctx, existing_channel_settings.channel.server_id);
-      const new_settings = mergeChannelSettings(existing_channel_settings, input);
-      const data = await ctx.prisma.channelSettings.update({
-        where: {
-          channel_id: input.channel_id,
-        },
-        data: new_settings,
-      });
-      return addChannelSettingsFlagsToChannelSettings(data);
+      return transformChannelSettingsReturn(() =>
+        protectedOperationFetchFirst({
+          fetch: () => channelSettingFind.createCaller(ctx).byId(input.channel_id),
+          getServerId: (data) => data.channel.server_id,
+          operation: async (existing_settings) => {
+            const new_settings = mergeChannelSettings(existing_settings, input.data);
+            return ctx.prisma.channelSettings.update({
+              where: {
+                channel_id: input.channel_id,
+              },
+              data: new_settings,
+            });
+          },
+          ctx,
+          not_found_message: "Channel settings not found",
+        })
+      );
     }),
 });
 
@@ -108,41 +115,50 @@ const channelSettingsCreateWithDeps = router({
 
 const channelSettingFind = router({
   byId: protectedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
-    const data = await ctx.prisma.channelSettings.findUnique({
-      where: {
-        channel_id: input,
-      },
-      include: {
-        channel: {
-          select: {
-            server_id: true,
-          },
-        },
-      },
-    });
-    if (!data) return null;
-    // TODO: This would work create as a middleware / in some other place but it relies on data from this function
-    assertCanEditServer(ctx, data.channel.server_id);
-    return addChannelSettingsFlagsToChannelSettings(data);
+    return transformChannelSettingsReturn(() =>
+      protectedFetch({
+        fetch: () =>
+          ctx.prisma.channelSettings.findUnique({
+            where: {
+              channel_id: input,
+            },
+            include: {
+              channel: {
+                select: {
+                  server_id: true,
+                },
+              },
+            },
+          }),
+        ctx,
+        getServerId: (channel_settings) => channel_settings.channel.server_id,
+        not_found_message: "Channel settings not found",
+      })
+    );
   }),
   byInviteCode: protectedProcedureWithUserServers
     .input(z.string())
     .query(async ({ ctx, input }) => {
-      const data = await ctx.prisma.channelSettings.findUnique({
-        where: {
-          invite_code: input,
-        },
-        include: {
-          channel: {
-            select: {
-              server_id: true,
-            },
-          },
-        },
-      });
-      if (!data) return null;
-      assertCanEditServer(ctx, data.channel.server_id);
-      return addChannelSettingsFlagsToChannelSettings(data);
+      return transformChannelSettingsReturn(() =>
+        protectedFetch({
+          fetch: () =>
+            ctx.prisma.channelSettings.findUnique({
+              where: {
+                invite_code: input,
+              },
+              include: {
+                channel: {
+                  select: {
+                    server_id: true,
+                  },
+                },
+              },
+            }),
+          ctx,
+          getServerId: (channel_settings) => channel_settings.channel.server_id,
+          not_found_message: "Channel settings not found",
+        })
+      );
     }),
 });
 

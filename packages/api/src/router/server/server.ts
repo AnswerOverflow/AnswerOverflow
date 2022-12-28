@@ -1,23 +1,24 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
-import { upsert } from "~api/utils/operations";
-import { assertCanEditServer } from "~api/utils/permissions";
+import { protectedFetch, protectedOperation, upsert } from "~api/utils/operations";
 
 export const z_server = z.object({
   id: z.string(),
   name: z.string(),
   kicked_time: z.date().nullable(),
 });
+
 export const z_server_create = z.object({
   name: z.string(),
   id: z.string(),
   kicked_time: z.date().nullable().optional(),
 });
-export const z_server_update = z.object({
-  id: z.string(),
-  name: z.string().optional(),
-  kicked_time: z.date().nullable().optional(),
-});
+
+export const z_server_mutable = z_server_create.omit({ id: true }).partial();
+
+export const z_server_update = z.object({ id: z.string(), data: z_server_mutable });
+
 export const z_server_upsert = z.object({
   create: z_server_create,
   update: z_server_update,
@@ -25,22 +26,35 @@ export const z_server_upsert = z.object({
 
 const serverCreateUpdateRouter = router({
   create: protectedProcedureWithUserServers.input(z_server_create).mutation(({ ctx, input }) => {
-    assertCanEditServer(ctx, input.id);
-    return ctx.prisma.server.create({ data: input });
+    return protectedOperation({
+      ctx,
+      server_id: input.id,
+      operation: () => ctx.prisma.server.create({ data: input }),
+    });
   }),
   update: protectedProcedureWithUserServers.input(z_server_update).mutation(({ ctx, input }) => {
-    assertCanEditServer(ctx, input.id);
-    return ctx.prisma.server.update({ where: { id: input.id }, data: input });
+    return protectedOperation({
+      ctx,
+      server_id: input.id,
+      operation: () => ctx.prisma.server.update({ where: { id: input.id }, data: input.data }),
+    });
   }),
 });
 
 const serverFetchRouter = router({
   byId: protectedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
-    const server = await ctx.prisma.server.findFirst({ where: { id: input } });
-    if (server) {
-      assertCanEditServer(ctx, server.id);
-    }
-    return server;
+    return protectedFetch({
+      async fetch() {
+        const server = await ctx.prisma.server.findUnique({ where: { id: input } });
+        if (!server) throw new TRPCError({ code: "NOT_FOUND", message: "Server not found" });
+        return server;
+      },
+      getServerId(data) {
+        return data.id;
+      },
+      ctx,
+      not_found_message: "Server not found",
+    });
   }),
 });
 

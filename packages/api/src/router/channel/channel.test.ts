@@ -1,153 +1,189 @@
-import { clearDatabase } from "@answeroverflow/db";
+import { Channel, clearDatabase, Server, Thread } from "@answeroverflow/db";
 import { TRPCError } from "@trpc/server";
 import { type ServerTestData, getGeneralScenario } from "~api/test/utils";
 import { channelRouter } from "./channel";
 import { serverRouter } from "../server/server";
+import type { ChannelUpsertWithDepsInput } from "~api/utils/types";
 
 let manage_guild_router: ReturnType<typeof serverRouter["createCaller"]>;
 let manage_channel_router: ReturnType<typeof channelRouter["createCaller"]>;
 let default_channel_router: ReturnType<typeof channelRouter["createCaller"]>;
-let data: ServerTestData;
+let test_data_1: ServerTestData;
+let channel_1: Channel;
+let thread_1: Thread;
 beforeEach(async () => {
   const { data1 } = await getGeneralScenario();
-  manage_guild_router = serverRouter.createCaller(data1.manage_guild_ctx);
-  manage_channel_router = channelRouter.createCaller(data1.manage_guild_ctx);
-  default_channel_router = channelRouter.createCaller(data1.default_ctx);
-  data = data1;
+  test_data_1 = data1;
+  default_channel_router = channelRouter.createCaller(test_data_1.default_ctx);
+  manage_channel_router = channelRouter.createCaller(test_data_1.manage_guild_ctx);
+  manage_guild_router = serverRouter.createCaller(test_data_1.manage_guild_ctx);
+  channel_1 = test_data_1.text_channels[0].channel;
+  thread_1 = test_data_1.text_channels[0].threads[0].thread;
   await clearDatabase();
 });
 
 describe("Channel Create", () => {
   it("should succeed creating a channel with manage guild", async () => {
-    await manage_guild_router.create(data.server);
-    const channel = await manage_channel_router.create(data.text_channels[0].channel);
-    expect(channel).toEqual(data.text_channels[0].channel);
+    await manage_guild_router.create(test_data_1.server);
+    const channel = await manage_channel_router.create(channel_1);
+    expect(channel).toEqual(channel_1);
   });
   it("should fail creating a channel with default permissions", async () => {
-    await manage_guild_router.create(data.server);
-    await expect(default_channel_router.create(data.text_channels[0].channel)).rejects.toThrow(
-      TRPCError
-    );
+    await manage_guild_router.create(test_data_1.server);
+    await expect(default_channel_router.create(channel_1)).rejects.toThrow(TRPCError);
   });
   it("should create a channel with dependencies", async () => {
     const channel = await manage_channel_router.createWithDeps({
-      channel: {
-        ...data.text_channels[0].channel,
-      },
+      channel: channel_1,
       server: {
         create: {
-          ...data.server,
+          ...test_data_1.server,
         },
         update: {
-          id: data.server.id,
+          id: test_data_1.server.id,
+          data: {},
         },
       },
     });
-    expect(channel).toEqual(data.text_channels[0].channel);
+    expect(channel).toEqual(channel_1);
   });
 });
 
 describe("Channel Update", () => {
   it("should succeed updating a channel with manage guild", async () => {
-    await manage_guild_router.create(data.server);
-    await manage_channel_router.create(data.text_channels[0].channel);
+    await manage_guild_router.create(test_data_1.server);
+    await manage_channel_router.create(channel_1);
     const channel = await manage_channel_router.update({
-      id: data.text_channels[0].channel.id,
-      name: "new name",
+      id: channel_1.id,
+      data: {
+        name: "new name",
+      },
     });
-    expect(channel).toEqual({ ...data.text_channels[0].channel, name: "new name" });
+    expect(channel).toEqual({ ...channel_1, name: "new name" });
   });
   it("should fail updating a channel with default permissions", async () => {
-    await manage_guild_router.create(data.server);
-    await manage_channel_router.create(data.text_channels[0].channel);
+    await manage_guild_router.create(test_data_1.server);
+    await manage_channel_router.create(channel_1);
     await expect(
-      default_channel_router.update({ id: data.text_channels[0].channel.id, name: "new name" })
+      default_channel_router.update({
+        id: channel_1.id,
+        data: {
+          name: "new name",
+        },
+      })
     ).rejects.toThrow(TRPCError);
   });
 });
 
 describe("Channel Upsert", () => {
   it("should succeed upserting a new channel with manage guild", async () => {
-    await manage_guild_router.create(data.server);
+    await manage_guild_router.create(test_data_1.server);
     const channel = await manage_channel_router.upsert({
-      create: data.text_channels[0].channel,
-      update: { id: data.text_channels[0].channel.id, name: "new name" },
+      create: channel_1,
+      update: {
+        id: channel_1.id,
+        data: {
+          name: "new name",
+        },
+      },
     });
-    expect(channel).toEqual(data.text_channels[0].channel);
+    expect(channel).toEqual(channel_1);
   });
   it("should fail upserting a new channel with default permissions", async () => {
-    await manage_guild_router.create(data.server);
+    await manage_guild_router.create(test_data_1.server);
     await expect(
       default_channel_router.upsert({
-        create: data.text_channels[0].channel,
-        update: { id: data.text_channels[0].channel.id, name: "new name" },
+        create: channel_1,
+        update: {
+          id: channel_1.id,
+          data: {
+            name: "new name",
+          },
+        },
       })
     ).rejects.toThrow(TRPCError);
   });
   it("should upsert a channel with dependencies", async () => {
     const channel = await manage_channel_router.upsertWithDeps({
       create: {
-        channel: {
-          ...data.text_channels[0].channel,
-        },
+        channel: channel_1,
         server: {
-          create: {
-            ...data.server,
-          },
+          create: test_data_1.server,
           update: {
-            id: data.server.id,
+            id: test_data_1.server.id,
+            data: {
+              name: "new name",
+            },
           },
         },
       },
       update: {
-        id: data.text_channels[0].channel.id,
-        name: "new name",
+        id: channel_1.id,
+        data: {
+          name: "new name",
+        },
       },
     });
-    expect(channel).toEqual(data.text_channels[0].channel);
+    expect(channel).toEqual(channel_1);
   });
   it("should succeed upserting many channels", async () => {
-    await manage_guild_router.create(data.server);
+    await manage_guild_router.create(test_data_1.server);
     const channels = await manage_channel_router.upsertMany(
-      data.text_channels.map((channel) => ({
+      test_data_1.text_channels.map((channel) => ({
         create: channel.channel,
-        update: { id: channel.channel.id, name: "new name" },
+        update: {
+          id: channel.channel.id,
+          data: {
+            name: "new name",
+          },
+        },
       }))
     );
-    expect(channels).toEqual(data.text_channels.map((channel) => channel.channel));
+    expect(channels).toEqual(test_data_1.text_channels.map((channel) => channel.channel));
   });
 });
 
-describe("Thread Upsert", () => {
-  it("should succeed upserting a new thread with manage guild", async () => {
-    await manage_guild_router.create(data.server);
-    const thread = await manage_channel_router.upsertThreadWithDeps({
-      create: {
-        thread: data.text_channels[0].threads[0].thread,
-        parent: {
-          create: {
-            channel: {
-              ...data.text_channels[0].channel,
-            },
-            server: {
-              create: {
-                ...data.server,
-              },
-              update: {
-                id: data.server.id,
-              },
-            },
-          },
-          update: {
-            id: data.text_channels[0].channel.id,
+export function makeChannelUpsertWithDeps(
+  channel: Channel,
+  server: Server
+): ChannelUpsertWithDepsInput {
+  return {
+    create: {
+      channel: channel,
+      server: {
+        create: server,
+        update: {
+          id: server.id,
+          data: {
+            name: "new name",
           },
         },
       },
-      update: {
-        id: data.text_channels[0].threads[0].thread.id,
+    },
+    update: {
+      id: channel.id,
+      data: {
         name: "new name",
       },
+    },
+  };
+}
+
+describe("Thread Upsert", () => {
+  it("should succeed upserting a new thread with manage guild", async () => {
+    await manage_guild_router.create(test_data_1.server);
+    const thread = await manage_channel_router.upsertThreadWithDeps({
+      create: {
+        thread: thread_1,
+        parent: makeChannelUpsertWithDeps(channel_1, test_data_1.server),
+      },
+      update: {
+        id: thread_1.id,
+        data: {
+          name: "new name",
+        },
+      },
     });
-    expect(thread).toEqual(data.text_channels[0].threads[0].thread);
+    expect(thread).toEqual(test_data_1.text_channels[0].threads[0].thread);
   });
 });
