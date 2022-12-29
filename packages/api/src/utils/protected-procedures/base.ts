@@ -1,0 +1,36 @@
+import { findOrThrowNotFound } from "../operations";
+
+export type ProtectedFetchInput<T> = {
+  fetch: () => Promise<T | null>;
+  // eslint-disable-next-line no-unused-vars
+  assertPermissions: (data: T) => void;
+  not_found_message: string;
+};
+export type ProtectedMutationInput<T> = {
+  operation: () => Promise<T>;
+  assertPermissions: () => void;
+};
+export type ProtectedMutationFetchFirstInput<T, F> = ProtectedFetchInput<T> & {
+  // eslint-disable-next-line no-unused-vars
+  operation: (data: T) => Promise<F>;
+};
+
+export async function protectedFetch<T>(input: ProtectedFetchInput<T>) {
+  const { fetch, assertPermissions, not_found_message } = input;
+  const data = await findOrThrowNotFound(fetch, not_found_message);
+  assertPermissions(data);
+  return data;
+}
+
+export async function protectedMutation<T>(input: ProtectedMutationInput<T>) {
+  const { operation, assertPermissions } = input;
+  assertPermissions();
+  return operation();
+}
+
+export async function protectedMutationFetchFirst<T, F>(
+  input: ProtectedMutationFetchFirstInput<T, F>
+) {
+  const data = await protectedFetch(input);
+  return input.operation(data);
+}

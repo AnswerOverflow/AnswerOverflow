@@ -2,14 +2,13 @@ import { Channel, getDefaultChannel, Server, Thread } from "@answeroverflow/db";
 import { inferRouterInputs, TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
+import { addDefaultValues, upsert, upsertMany } from "~api/utils/operations";
+
 import {
-  addDefaultValues,
   protectedServerManagerFetch,
   protectedServerManagerMutation,
   protectedServerManagerMutationFetchFirst,
-  upsert,
-  upsertMany,
-} from "~api/utils/operations";
+} from "~api/utils/protected-procedures/server-manager-procedures";
 import { ALLOWED_CHANNEL_TYPES, ALLOWED_THREAD_TYPES } from "~api/utils/types";
 import { makeServerUpsert, serverRouter, z_server_upsert } from "../server/server";
 

@@ -4,7 +4,7 @@ import {
   protectedMessageFetch,
   protectedMessageMutation,
   protectedMessageMutationFetchFirst,
-} from "~api/utils/operations";
+} from "~api/utils/protected-procedures/message-editor-procedures";
 
 export const z_message = z.object({
   id: z.string(),

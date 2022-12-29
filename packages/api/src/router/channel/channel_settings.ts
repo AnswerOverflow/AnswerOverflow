@@ -15,9 +15,9 @@ import { toZObject } from "~api/utils/zod-utils";
 import {
   protectedServerManagerFetch,
   protectedServerManagerMutationFetchFirst,
-  upsert,
-} from "~api/utils/operations";
+} from "~api/utils/protected-procedures/server-manager-procedures";
 import type { inferRouterInputs } from "@trpc/server";
+import { upsert } from "~api/utils/operations";
 
 const z_channel_settings_flags = toZObject(...channel_settings_flags);
 

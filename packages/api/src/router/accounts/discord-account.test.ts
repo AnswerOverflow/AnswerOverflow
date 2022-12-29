@@ -1,16 +1,12 @@
 import { clearDatabase } from "@answeroverflow/db";
-import { createContextInner } from "~api/router/context";
+import { getGeneralScenario } from "~api/test/utils";
 import { discordAccountRouter } from "./discord-accounts";
 
 // eslint-disable-next-line no-unused-vars
 let discord_accounts: ReturnType<typeof discordAccountRouter["createCaller"]>;
 beforeEach(async () => {
-  const a = await createContextInner({
-    session: null,
-    caller: "discord-bot",
-    user_servers: [],
-  });
-  discord_accounts = discordAccountRouter.createCaller(a);
+  const { data1 } = await getGeneralScenario();
+  discord_accounts = discordAccountRouter.createCaller(data1.bot_caller_ctx);
   await clearDatabase();
 });
 

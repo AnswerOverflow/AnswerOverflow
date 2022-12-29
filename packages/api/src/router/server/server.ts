@@ -2,11 +2,11 @@ import type { Server } from "@answeroverflow/db";
 import { inferRouterInputs, TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
+import { upsert } from "~api/utils/operations";
 import {
   protectedServerManagerFetch,
   protectedServerManagerMutation,
-  upsert,
-} from "~api/utils/operations";
+} from "~api/utils/protected-procedures/server-manager-procedures";
 
 export const z_server = z.object({
   id: z.string(),

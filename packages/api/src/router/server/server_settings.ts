@@ -10,12 +10,13 @@ import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
 import { makeServerUpsert, serverRouter, z_server_upsert } from "./server";
 import { toZObject } from "~api/utils/zod-utils";
+import { upsert } from "~api/utils/operations";
+
 import {
   protectedServerManagerFetch,
   protectedServerManagerMutation,
   protectedServerManagerMutationFetchFirst,
-  upsert,
-} from "~api/utils/operations";
+} from "~api/utils/protected-procedures/server-manager-procedures";
 import type { inferRouterInputs } from "@trpc/server";
 
 const z_server_settings_flags = toZObject(...server_settings_flags);
