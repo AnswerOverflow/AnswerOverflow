@@ -32,9 +32,11 @@ export async function getServerTestData(server_id: string = "101") {
   });
   const manage_guild_ctx = await createManageGuildContext(server.id, server.name);
   const default_ctx = await createDefaultPermissionCtx(server.id, server.name);
+  const bot_caller_ctx = await createBotCallerCtx();
   return {
     server,
     manage_guild_ctx,
+    bot_caller_ctx,
     default_ctx,
     forum_channels: [
       {
@@ -81,6 +83,22 @@ export async function getServerTestData(server_id: string = "101") {
       },
     ],
   };
+}
+
+export function createBotCallerCtx() {
+  return createContextInner({
+    session: {
+      user: {
+        id: "AnswerOverflow",
+        name: "test",
+        email: null,
+        image: null,
+      },
+      expires: new Date().toString(),
+    },
+    caller: "discord-bot",
+    user_servers: undefined,
+  });
 }
 
 export function createManageGuildContext(server_id: string, server_name: string) {

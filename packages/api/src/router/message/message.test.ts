@@ -1,4 +1,5 @@
 import { clearDatabase, Message } from "@answeroverflow/db";
+import { TRPCError } from "@trpc/server";
 import { getGeneralScenario, ServerTestData } from "~api/test/utils";
 import { messageRouter } from "./message";
 
@@ -11,7 +12,7 @@ beforeEach(async () => {
   data = data1;
   message = data.text_channels[0].messages[0];
   message2 = data.text_channels[0].messages[1];
-  messages_router = messageRouter.createCaller(data1.default_ctx);
+  messages_router = messageRouter.createCaller(data1.bot_caller_ctx);
   await clearDatabase();
 });
 
@@ -49,8 +50,7 @@ describe("Message Delete", () => {
     expect(deleted).toBe(true);
   });
   it("should fail to delete a message that doesn't exist", async () => {
-    const deleted = await messages_router.delete(message!.id);
-    expect(deleted).toBe(false);
+    await expect(messages_router.delete("awd")).rejects.toThrow(TRPCError);
   });
 });
 
@@ -73,7 +73,6 @@ describe("Message Get", () => {
     expect(fetched).toBeDefined();
   });
   it("should fail to get a message that doesn't exist", async () => {
-    const fetched = await messages_router.byId(message.id);
-    expect(fetched).toBeNull();
+    await expect(messages_router.byId(message.id)).rejects.toThrow(TRPCError);
   });
 });

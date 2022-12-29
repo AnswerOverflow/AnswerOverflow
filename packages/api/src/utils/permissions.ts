@@ -4,8 +4,15 @@ import type { Context } from "~api/router/context";
 
 export const MISSING_PERMISSIONS_MESSAGE = "You are missing the required permissions to do this";
 
+export function isSuperUser(ctx: Context) {
+  if (ctx.session && ctx.session.user.id === "AnswerOverflow") return true;
+  if (ctx.session && ctx.session.user.id === "523949187663134754") return true; // This is the ID of Rhys - TODO: Swap to an env var
+  return false;
+}
+
 export function assertCanEditServer(ctx: Context, server_id: string) {
-  if (ctx.session && ctx.session.user.id === "AnswerOverflow") return;
+  if (isSuperUser(ctx)) return;
+
   if (!ctx.user_servers) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
@@ -38,5 +45,23 @@ export function assertCanEditServers(ctx: Context, server_id: string | string[])
     server_id.forEach((id) => assertCanEditServer(ctx, id));
   } else {
     assertCanEditServer(ctx, server_id);
+  }
+}
+
+export function assertCanEditMessage(ctx: Context, author_id: string) {
+  if (isSuperUser(ctx)) return;
+  if (ctx.session?.user.id !== author_id) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: MISSING_PERMISSIONS_MESSAGE,
+    });
+  }
+}
+
+export function assertCanEditMessages(ctx: Context, author_id: string | string[]) {
+  if (Array.isArray(author_id)) {
+    author_id.forEach((id) => assertCanEditMessage(ctx, id));
+  } else {
+    assertCanEditMessage(ctx, author_id);
   }
 }

@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import type { Context } from "../router/context";
-import { assertCanEditServers } from "./permissions";
+import { assertCanEditMessages, assertCanEditServers } from "./permissions";
 
 export async function upsert<T>(
   find: () => Promise<T>,
@@ -74,11 +74,12 @@ export async function protectedMutation<T>(input: ProtectedMutationInput<T>) {
   return operation();
 }
 
+type ProtectedMutationFetchFirstInput<T, F> = ProtectedFetchInput<T> & {
+  // eslint-disable-next-line no-unused-vars
+  operation: (data: T) => Promise<F>;
+};
 export async function protectedMutationFetchFirst<T, F>(
-  input: ProtectedFetchInput<T> & {
-    // eslint-disable-next-line no-unused-vars
-    operation: (data: T) => Promise<F>;
-  }
+  input: ProtectedMutationFetchFirstInput<T, F>
 ) {
   const data = await protectedFetch(input);
   return input.operation(data);
@@ -108,11 +109,53 @@ export async function protectedServerManagerMutation<T>(input: ServerManagerProt
 }
 
 export async function protectedServerManagerMutationFetchFirst<T, F>(
-  input: ServerManagerProtectedFetch<T> & {
+  input: Omit<ProtectedMutationFetchFirstInput<T, F>, "assertPermissions"> & {
+    ctx: Context;
     // eslint-disable-next-line no-unused-vars
-    operation: (data: T) => Promise<F>;
+    getServerId: (data: T) => string | string[];
   }
 ) {
-  const data = await protectedServerManagerFetch(input);
-  return input.operation(data);
+  return protectedMutationFetchFirst({
+    ...input,
+    assertPermissions(data) {
+      assertCanEditServers(input.ctx, input.getServerId(data));
+    },
+  });
+}
+
+export async function protectedMessageMutation<T>(
+  input: Omit<ProtectedMutationInput<T>, "assertPermissions"> & {
+    author_id: string;
+    ctx: Context;
+  }
+) {
+  return protectedMutation({
+    ...input,
+    assertPermissions: () => assertCanEditMessages(input.ctx, input.author_id),
+  });
+}
+
+export async function protectedMessageFetch<T>(
+  input: Omit<ProtectedFetchInput<T>, "assertPermissions"> & {
+    author_id: string | string[];
+    ctx: Context;
+  }
+) {
+  return protectedFetch({
+    ...input,
+    assertPermissions: () => assertCanEditMessages(input.ctx, input.author_id),
+  });
+}
+
+export async function protectedMessageMutationFetchFirst<T, F>(
+  input: Omit<ProtectedMutationFetchFirstInput<T, F>, "assertPermissions"> & {
+    // eslint-disable-next-line no-unused-vars
+    getAuthorId: (data: T) => string | string[];
+    ctx: Context;
+  }
+) {
+  return protectedMutationFetchFirst({
+    ...input,
+    assertPermissions: (data) => assertCanEditMessages(input.ctx, input.getAuthorId(data)),
+  });
 }
