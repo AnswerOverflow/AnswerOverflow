@@ -1,7 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
-import { protectedFetch, protectedOperation, upsert } from "~api/utils/operations";
+import {
+  protectedServerManagerFetch,
+  protectedServerManagerMutation,
+  upsert,
+} from "~api/utils/operations";
 
 export const z_server = z.object({
   id: z.string(),
@@ -26,14 +30,14 @@ export const z_server_upsert = z.object({
 
 const serverCreateUpdateRouter = router({
   create: protectedProcedureWithUserServers.input(z_server_create).mutation(({ ctx, input }) => {
-    return protectedOperation({
+    return protectedServerManagerMutation({
       ctx,
       server_id: input.id,
       operation: () => ctx.prisma.server.create({ data: input }),
     });
   }),
   update: protectedProcedureWithUserServers.input(z_server_update).mutation(({ ctx, input }) => {
-    return protectedOperation({
+    return protectedServerManagerMutation({
       ctx,
       server_id: input.id,
       operation: () => ctx.prisma.server.update({ where: { id: input.id }, data: input.data }),
@@ -43,7 +47,7 @@ const serverCreateUpdateRouter = router({
 
 const serverFetchRouter = router({
   byId: protectedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
-    return protectedFetch({
+    return protectedServerManagerFetch({
       async fetch() {
         const server = await ctx.prisma.server.findUnique({ where: { id: input } });
         if (!server) throw new TRPCError({ code: "NOT_FOUND", message: "Server not found" });

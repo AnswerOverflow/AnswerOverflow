@@ -10,7 +10,11 @@ import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/ro
 import { dictToBitfield } from "@answeroverflow/db";
 import { channelRouter, z_channel_upsert_with_deps } from "./channel";
 import { toZObject } from "~api/utils/zod-utils";
-import { protectedFetch, protectedOperationFetchFirst, upsert } from "~api/utils/operations";
+import {
+  protectedServerManagerFetch,
+  protectedServerManagerMutationFetchFirst,
+  upsert,
+} from "~api/utils/operations";
 
 const z_channel_settings_flags = toZObject(...channel_settings_flags);
 
@@ -61,7 +65,7 @@ const channelSettingsCreateUpdate = router({
     .input(z_channel_settings_create)
     .mutation(async ({ ctx, input }) => {
       return transformChannelSettingsReturn(() =>
-        protectedOperationFetchFirst({
+        protectedServerManagerMutationFetchFirst({
           fetch: () => channelRouter.createCaller(ctx).byId(input.channel_id),
           getServerId: (data) => data.server_id,
           operation: async (channel) => {
@@ -80,7 +84,7 @@ const channelSettingsCreateUpdate = router({
     .input(z_channel_settings_update)
     .mutation(async ({ ctx, input }) => {
       return transformChannelSettingsReturn(() =>
-        protectedOperationFetchFirst({
+        protectedServerManagerMutationFetchFirst({
           fetch: () => channelSettingFind.createCaller(ctx).byId(input.channel_id),
           getServerId: (data) => data.channel.server_id,
           operation: async (existing_settings) => {
@@ -116,7 +120,7 @@ const channelSettingsCreateWithDeps = router({
 const channelSettingFind = router({
   byId: protectedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
     return transformChannelSettingsReturn(() =>
-      protectedFetch({
+      protectedServerManagerFetch({
         fetch: () =>
           ctx.prisma.channelSettings.findUnique({
             where: {
@@ -140,7 +144,7 @@ const channelSettingFind = router({
     .input(z.string())
     .query(async ({ ctx, input }) => {
       return transformChannelSettingsReturn(() =>
-        protectedFetch({
+        protectedServerManagerFetch({
           fetch: () =>
             ctx.prisma.channelSettings.findUnique({
               where: {

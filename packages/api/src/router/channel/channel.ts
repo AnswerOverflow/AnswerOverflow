@@ -4,9 +4,9 @@ import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
 import {
   addDefaultValues,
-  protectedFetch,
-  protectedOperation,
-  protectedOperationFetchFirst,
+  protectedServerManagerFetch,
+  protectedServerManagerMutation,
+  protectedServerManagerMutationFetchFirst,
   upsert,
   upsertMany,
 } from "~api/utils/operations";
@@ -59,7 +59,7 @@ const z_thread_upsert_with_deps = z.object({
 
 const create_update_delete_router = router({
   create: protectedProcedureWithUserServers.input(z_channel_create).mutation(({ ctx, input }) => {
-    return protectedOperation({
+    return protectedServerManagerMutation({
       operation: () => ctx.prisma.channel.create({ data: input }),
       server_id: input.server_id,
       ctx,
@@ -68,7 +68,7 @@ const create_update_delete_router = router({
   createThread: protectedProcedureWithUserServers
     .input(z_thread_create)
     .mutation(({ ctx, input }) => {
-      return protectedOperation({
+      return protectedServerManagerMutation({
         operation: () => ctx.prisma.channel.create({ data: input }),
         server_id: input.server_id,
         ctx,
@@ -77,7 +77,7 @@ const create_update_delete_router = router({
   createMany: protectedProcedureWithUserServers
     .input(z.array(z_channel_create))
     .mutation(async ({ ctx, input }) => {
-      await protectedOperation({
+      await protectedServerManagerMutation({
         operation: () => ctx.prisma.channel.createMany({ data: input }),
         server_id: input.map((c) => c.server_id),
         ctx,
@@ -87,7 +87,7 @@ const create_update_delete_router = router({
   update: protectedProcedureWithUserServers
     .input(z_channel_update)
     .mutation(async ({ ctx, input }) => {
-      return protectedOperationFetchFirst({
+      return protectedServerManagerMutationFetchFirst({
         fetch: () => fetch_router.createCaller(ctx).byId(input.id),
         operation: () => ctx.prisma.channel.update({ where: { id: input.id }, data: input.data }),
         getServerId: (data) => data.server_id,
@@ -98,7 +98,7 @@ const create_update_delete_router = router({
   updateMany: protectedProcedureWithUserServers
     .input(z.array(z_channel_update))
     .mutation(async ({ ctx, input }) => {
-      return protectedOperationFetchFirst({
+      return protectedServerManagerMutationFetchFirst({
         fetch: () => fetch_router.createCaller(ctx).byIdMany(input.map((c) => c.id)),
         operation: () =>
           ctx.prisma.$transaction(
@@ -110,7 +110,7 @@ const create_update_delete_router = router({
       });
     }),
   delete: protectedProcedureWithUserServers.input(z.string()).mutation(async ({ ctx, input }) => {
-    return protectedOperationFetchFirst({
+    return protectedServerManagerMutationFetchFirst({
       fetch: () => fetch_router.createCaller(ctx).byId(input),
       operation: () => ctx.prisma.channel.delete({ where: { id: input } }),
       getServerId: (data) => data.server_id,
@@ -122,7 +122,7 @@ const create_update_delete_router = router({
 
 const fetch_router = router({
   byId: protectedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
-    return protectedFetch({
+    return protectedServerManagerFetch({
       fetch: async () => {
         const channel = await ctx.prisma.channel.findUnique({ where: { id: input } });
         if (!channel) {
@@ -141,7 +141,7 @@ const fetch_router = router({
   byIdMany: protectedProcedureWithUserServers
     .input(z.array(z.string()))
     .query(async ({ ctx, input }) => {
-      return protectedFetch({
+      return protectedServerManagerFetch({
         fetch: async () => {
           return await ctx.prisma.channel.findMany({ where: { id: { in: input } } });
         },

@@ -36,50 +36,6 @@ export async function upsertMany<T, CreateInput, UpdateInput>(calls: {
   return [...created, ...updated];
 }
 
-// Scenarios:
-// 1. Fetch then assert
-// 2. Assert then create
-// 3. Fetch then assert then create
-
-// 1. Scenario 1, we need to fetch the data before we can assertCanEditServer
-type ProtectedFetchInput<T> = {
-  fetch: () => Promise<T | null>;
-  // eslint-disable-next-line no-unused-vars
-  getServerId: (data: T) => string | string[];
-  not_found_message: string;
-  ctx: Context;
-};
-export async function protectedFetch<T>(input: ProtectedFetchInput<T>) {
-  const { fetch, ctx, not_found_message } = input;
-  const data = await findOrThrowNotFound(fetch, not_found_message);
-  const server_id = input.getServerId(data);
-  assertCanEditServers(ctx, server_id);
-  return data;
-}
-
-// 2. Scenario 2, we already have the data and can assertCanEditServer
-export async function protectedOperation<T>(input: {
-  operation: () => Promise<T>;
-  // eslint-disable-next-line no-unused-vars
-  server_id: string | string[];
-  ctx: Context;
-}) {
-  const { operation, server_id, ctx } = input;
-  assertCanEditServers(ctx, server_id);
-  return operation();
-}
-
-// 3. Scenario 3, we need to fetch the data before we can assertCanEditServer
-export async function protectedOperationFetchFirst<T, F>(
-  input: ProtectedFetchInput<T> & {
-    // eslint-disable-next-line no-unused-vars
-    operation: (data: T) => Promise<F>;
-  }
-) {
-  const data = await protectedFetch(input);
-  return input.operation(data);
-}
-
 // eslint-disable-next-line no-unused-vars
 export function addDefaultValues<T, F>(input: T[], getDefaultValue: (input: T) => F) {
   return input.map((v) => getDefaultValue(v));
@@ -89,4 +45,74 @@ export async function findOrThrowNotFound<T>(find: () => Promise<T | null>, mess
   const data = await find();
   if (!data) throw new TRPCError({ code: "NOT_FOUND", message });
   return data;
+}
+// Scenarios:
+// 1. Fetch then assert
+// 2. Assert then create
+// 3. Fetch then assert then create
+
+type ProtectedFetchInput<T> = {
+  fetch: () => Promise<T | null>;
+  // eslint-disable-next-line no-unused-vars
+  assertPermissions: (data: T) => void;
+  not_found_message: string;
+};
+export async function protectedFetch<T>(input: ProtectedFetchInput<T>) {
+  const { fetch, assertPermissions, not_found_message } = input;
+  const data = await findOrThrowNotFound(fetch, not_found_message);
+  assertPermissions(data);
+  return data;
+}
+
+type ProtectedMutationInput<T> = {
+  operation: () => Promise<T>;
+  assertPermissions: () => void;
+};
+export async function protectedMutation<T>(input: ProtectedMutationInput<T>) {
+  const { operation, assertPermissions } = input;
+  assertPermissions();
+  return operation();
+}
+
+export async function protectedMutationFetchFirst<T, F>(
+  input: ProtectedFetchInput<T> & {
+    // eslint-disable-next-line no-unused-vars
+    operation: (data: T) => Promise<F>;
+  }
+) {
+  const data = await protectedFetch(input);
+  return input.operation(data);
+}
+
+type ServerManagerProtectedFetch<T> = Omit<ProtectedFetchInput<T>, "assertPermissions"> & {
+  // eslint-disable-next-line no-unused-vars
+  getServerId: (data: T) => string | string[];
+  ctx: Context;
+};
+export async function protectedServerManagerFetch<T>(input: ServerManagerProtectedFetch<T>) {
+  return protectedFetch({
+    ...input,
+    assertPermissions: (data) => assertCanEditServers(input.ctx, input.getServerId(data)),
+  });
+}
+
+type ServerManagerProtectedMutation<T> = Omit<ProtectedMutationInput<T>, "assertPermissions"> & {
+  server_id: string | string[];
+  ctx: Context;
+};
+export async function protectedServerManagerMutation<T>(input: ServerManagerProtectedMutation<T>) {
+  return protectedMutation({
+    ...input,
+    assertPermissions: () => assertCanEditServers(input.ctx, input.server_id),
+  });
+}
+
+export async function protectedServerManagerMutationFetchFirst<T, F>(
+  input: ServerManagerProtectedFetch<T> & {
+    // eslint-disable-next-line no-unused-vars
+    operation: (data: T) => Promise<F>;
+  }
+) {
+  const data = await protectedServerManagerFetch(input);
+  return input.operation(data);
 }
