@@ -22,7 +22,9 @@
   "dependencies": {
     "@elastic/elasticsearch": "^8.5.0",
     "@prisma/client": "^4.7.1",
-    "dotenv-mono": "^1.3.8"
+    "dotenv-mono": "^1.3.8",
+    "node-fetch": "^3.3.0",
+    "zod": "^3.20.2"
   },
   "devDependencies": {
     "@answeroverflow/tsconfig": "*",

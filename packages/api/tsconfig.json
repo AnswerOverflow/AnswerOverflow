@@ -6,6 +6,7 @@
     "transformer.ts",
     "vitest.config.ts",
     "../../node_modules/@answeroverflow/auth/next-auth.d.ts",
-    "../db/src/utils/bitfield.ts"
+    "../db/src/utils/bitfield.ts",
+    "../auth/src/discord-oauth.ts"
   ]
 }

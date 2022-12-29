@@ -1,7 +1,8 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { Context } from "./context";
 import superjson from "superjson";
-import { getDiscordAccount, getUserServers } from "~api/utils/discord-oauth";
+import { getDiscordAccount } from "../utils/discord-operations";
+import { getUserServers } from "@answeroverflow/auth/src/discord-oauth";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,

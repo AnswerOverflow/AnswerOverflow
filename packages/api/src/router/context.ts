@@ -1,8 +1,8 @@
 import { Session, getServerSession } from "@answeroverflow/auth";
+import type { getUserServers } from "@answeroverflow/auth/src/discord-oauth";
 import { prisma, elastic } from "@answeroverflow/db";
 import type { inferAsyncReturnType } from "@trpc/server";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import type { getUserServers } from "~api/utils/discord-oauth";
 
 /**
  * Replace this with an object if you want to pass things to createContextInner

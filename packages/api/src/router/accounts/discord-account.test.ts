@@ -17,10 +17,9 @@ beforeEach(async () => {
 describe("Discord Account Create", () => {
   it("should create a discord account", async () => {
     const new_account = await discord_accounts.create({
-      providerAccountId: "523949187663134754",
-      providerAccountName: "test",
+      id: "523949187663134754",
+      name: "test",
     });
     expect(new_account).toBeDefined();
-    expect(new_account.providerAccountId).toBe("523949187663134754");
   });
 });
