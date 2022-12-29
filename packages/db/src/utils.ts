@@ -7,6 +7,7 @@ export async function clearDatabase() {
   await prisma.channelSettings.deleteMany({});
   await prisma.channel.deleteMany({});
   await prisma.server.deleteMany({});
+  await prisma.account.deleteMany({});
   await prisma.user.deleteMany({});
   await elastic.createMessagesIndex();
 }

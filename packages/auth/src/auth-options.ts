@@ -3,10 +3,29 @@ import DiscordProvider from "next-auth/providers/discord";
 
 import { prisma } from "@answeroverflow/db";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import type { AdapterAccount } from "next-auth/adapters";
 
 export const authOptions: NextAuthOptions = {
   // Configure one or more authentication providers
-  adapter: PrismaAdapter(prisma),
+  adapter: {
+    ...PrismaAdapter(prisma),
+    linkAccount(account) {
+      return prisma.account.upsert({
+        where: {
+          provider_providerAccountId: {
+            provider: account.provider,
+            providerAccountId: account.providerAccountId,
+          },
+        },
+        create: {
+          ...account,
+        },
+        update: {
+          ...account,
+        },
+      }) as unknown as AdapterAccount;
+    },
+  },
   providers: [
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID as string,

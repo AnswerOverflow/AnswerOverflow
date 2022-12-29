@@ -1,10 +1,11 @@
 -- CreateTable
 CREATE TABLE `Account` (
     `id` VARCHAR(191) NOT NULL,
-    `userId` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NULL,
     `type` VARCHAR(191) NOT NULL,
     `provider` VARCHAR(191) NOT NULL,
     `providerAccountId` VARCHAR(191) NOT NULL,
+    `providerAccountName` VARCHAR(191) NULL,
     `refresh_token` VARCHAR(191) NULL,
     `access_token` VARCHAR(191) NULL,
     `expires_at` INTEGER NULL,
