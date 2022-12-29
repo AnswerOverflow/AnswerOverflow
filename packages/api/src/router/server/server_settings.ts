@@ -1,29 +1,35 @@
 import {
-  addserverSettingsFlagsToserverSettings,
-  bitfieldToserverSettingsFlags,
+  addserverSettingsFlagsToserverSettings as addFlagsToServerSettings,
   ServerSettings,
   server_settings_flags,
   getDefaultServerSettings,
+  mergeServerSettingsFlags,
 } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
-import { dictToBitfield } from "@answeroverflow/db";
 import { serverRouter, z_server_upsert } from "./server";
-import { assertCanEditServer } from "~api/utils/permissions";
 import { toZObject } from "~api/utils/zod-utils";
-import { TRPCError } from "@trpc/server";
-import { upsert } from "~api/utils/operations";
+import {
+  protectedServerManagerFetch,
+  protectedServerManagerMutation,
+  protectedServerManagerMutationFetchFirst,
+  upsert,
+} from "~api/utils/operations";
 
 const z_server_settings_flags = toZObject(...server_settings_flags);
-
-const z_server_settings_update = z.object({
-  server_id: z.string(),
-  flags: z.optional(z_server_settings_flags),
-});
 
 const z_server_settings_create = z.object({
   server_id: z.string(),
   flags: z.optional(z_server_settings_flags),
+});
+
+const z_server_settings_mutable = z_server_settings_create.extend({}).partial().omit({
+  server_id: true,
+});
+
+const z_server_settings_update = z.object({
+  server_id: z.string(),
+  data: z_server_settings_mutable,
 });
 
 const z_server_settings_upsert = z.object({
@@ -31,69 +37,91 @@ const z_server_settings_upsert = z.object({
   update: z_server_settings_update,
 });
 
-function mergeserverSettings(
+function mergeServerSettings<T extends z.infer<typeof z_server_settings_mutable>>(
   old: ServerSettings,
-  updated: z.infer<typeof z_server_settings_update>
+  updated: T
 ) {
-  const old_flags = bitfieldToserverSettingsFlags(old.bitfield);
-  const new_flags = { ...old_flags, ...updated.flags };
-  const flags_to_bitfield_value = dictToBitfield(new_flags, server_settings_flags);
-  // eslint-disable-next-line no-unused-vars
   const { flags, ...update_data_without_flags } = updated;
   return {
     ...update_data_without_flags,
-    bitfield: flags_to_bitfield_value,
+    bitfield: flags ? mergeServerSettingsFlags(old.bitfield, flags) : undefined,
   };
 }
+
+export async function transformServerSettings<T extends ServerSettings>(
+  server_settings: Promise<T>
+) {
+  return addFlagsToServerSettings(await server_settings);
+}
+
+const serverSettingFind = router({
+  byId: protectedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
+    return transformServerSettings(
+      protectedServerManagerFetch({
+        fetch: () => ctx.prisma.serverSettings.findUnique({ where: { server_id: input } }),
+        getServerId(data) {
+          return data.server_id;
+        },
+        ctx,
+        not_found_message: "Server settings not found",
+      })
+    );
+  }),
+});
 
 const serverSettingsCreateUpdate = router({
   create: protectedProcedureWithUserServers
     .input(z_server_settings_create)
     .mutation(async ({ ctx, input }) => {
-      const server = await serverRouter.createCaller(ctx).byId(input.server_id);
-      if (!server) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "server does not exist",
-        });
-      }
-      assertCanEditServer(ctx, server.id);
-      const new_settings = mergeserverSettings(
-        getDefaultServerSettings({
-          server_id: server.id,
-        }),
-        input
+      return transformServerSettings(
+        protectedServerManagerMutation({
+          ctx,
+          server_id: input.server_id,
+          operation: () => {
+            const new_settings = mergeServerSettings(
+              getDefaultServerSettings({
+                server_id: input.server_id,
+              }),
+              input
+            );
+            return ctx.prisma.serverSettings.create({ data: new_settings });
+          },
+        })
       );
-      const data = await ctx.prisma.serverSettings.create({ data: new_settings });
-      return addserverSettingsFlagsToserverSettings(data);
     }),
   update: protectedProcedureWithUserServers
     .input(z_server_settings_update)
     .mutation(async ({ ctx, input }) => {
-      const existing_server_settings = await serverSettingFind
-        .createCaller(ctx)
-        .byId(input.server_id);
-      if (!existing_server_settings) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "server settings do not exist",
-        });
-      }
-      assertCanEditServer(ctx, existing_server_settings.server_id);
-      const new_settings = mergeserverSettings(existing_server_settings, input);
-      const data = await ctx.prisma.serverSettings.update({
-        where: {
-          server_id: input.server_id,
-        },
-        data: new_settings,
-      });
-      return addserverSettingsFlagsToserverSettings(data);
+      return transformServerSettings(
+        protectedServerManagerMutationFetchFirst({
+          ctx,
+          fetch: () => serverSettingFind.createCaller(ctx).byId(input.server_id),
+          getServerId(data) {
+            return data.server_id;
+          },
+          async operation(existing) {
+            const new_settings = mergeServerSettings(existing, input.data);
+            return await ctx.prisma.serverSettings.update({
+              where: {
+                server_id: input.server_id,
+              },
+              data: new_settings,
+            });
+          },
+          not_found_message: "Server settings not found",
+        })
+      );
     }),
 });
 
 const z_server_settings_create_with_deps = z.object({
   server: z_server_upsert,
   settings: z_server_settings_create,
+});
+
+const z_server_settings_upsert_with_deps = z.object({
+  create: z_server_settings_create_with_deps,
+  update: z_server_settings_update,
 });
 
 const serverSettingsCreateWithDeps = router({
@@ -103,25 +131,6 @@ const serverSettingsCreateWithDeps = router({
       await serverRouter.createCaller(ctx).upsert(input.server);
       return serverSettingsCreateUpdate.createCaller(ctx).create(input.settings);
     }),
-});
-
-const serverSettingFind = router({
-  byId: protectedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
-    const data = await ctx.prisma.serverSettings.findUnique({
-      where: {
-        server_id: input,
-      },
-    });
-    if (!data) return null;
-    // TODO: This would work create as a middleware / in some other place but it relies on data from this function
-    assertCanEditServer(ctx, data.server_id);
-    return addserverSettingsFlagsToserverSettings(data);
-  }),
-});
-
-const z_server_settings_upsert_with_deps = z.object({
-  create: z_server_settings_create_with_deps,
-  update: z_server_settings_update,
 });
 
 const serverSettingsUpsert = router({
