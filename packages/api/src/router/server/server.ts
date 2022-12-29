@@ -1,4 +1,5 @@
-import { TRPCError } from "@trpc/server";
+import type { Server } from "@answeroverflow/db";
+import { inferRouterInputs, TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
 import {
@@ -79,3 +80,13 @@ export const serverRouter = mergeRouters(
   serverUpsertRouter,
   serverCreateUpdateRouter
 );
+
+export function makeServerUpsert(
+  server: Server,
+  update: z.infer<typeof z_server_mutable> | undefined = undefined
+): inferRouterInputs<typeof serverUpsertRouter>["upsert"] {
+  return {
+    create: server,
+    update: { id: server.id, data: update ?? server },
+  };
+}

@@ -1,7 +1,7 @@
 import { clearDatabase, Server } from "@answeroverflow/db";
 import { TRPCError } from "@trpc/server";
 import { getGeneralScenario, ServerTestData } from "~api/test/utils";
-import { serverRouter } from "./server";
+import { makeServerUpsert, serverRouter } from "./server";
 
 let manage_guild_router: ReturnType<typeof serverRouter["createCaller"]>;
 let default_router: ReturnType<typeof serverRouter["createCaller"]>;
@@ -57,19 +57,17 @@ describe("Server Fetch", () => {
 
 describe("Server Upsert", () => {
   it("should succeed upserting a new server with manage guild", async () => {
-    const server = await manage_guild_router.upsert({
-      create: server_1,
-      update: { id: server_1.id, data: { name: "new name" } },
-    });
+    const server = await manage_guild_router.upsert(makeServerUpsert(server_1));
     expect(server).toEqual(server_1);
     expect(await manage_guild_router.byId(server_1.id)).toEqual(server_1);
   });
   it("should succeed upserting an existing server with manage guild", async () => {
     await manage_guild_router.create(server_1);
-    const server = await manage_guild_router.upsert({
-      create: server_1,
-      update: { id: server_1.id, data: { name: "new name" } },
-    });
+    const server = await manage_guild_router.upsert(
+      makeServerUpsert(server_1, {
+        name: "new name",
+      })
+    );
     expect(server).toEqual({ ...server_1, name: "new name" });
     expect(await manage_guild_router.byId(server_1.id)).toEqual({
       ...server_1,

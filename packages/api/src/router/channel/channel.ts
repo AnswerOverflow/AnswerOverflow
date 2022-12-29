@@ -1,5 +1,5 @@
-import { getDefaultChannel } from "@answeroverflow/db";
-import { TRPCError } from "@trpc/server";
+import { Channel, getDefaultChannel, Server, Thread } from "@answeroverflow/db";
+import { inferRouterInputs, TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
 import {
@@ -11,7 +11,7 @@ import {
   upsertMany,
 } from "~api/utils/operations";
 import { ALLOWED_CHANNEL_TYPES, ALLOWED_THREAD_TYPES } from "~api/utils/types";
-import { serverRouter, z_server_upsert } from "../server/server";
+import { makeServerUpsert, serverRouter, z_server_upsert } from "../server/server";
 
 const z_channel_create = z.object({
   id: z.string(),
@@ -223,3 +223,53 @@ export const channelRouter = mergeRouters(
   fetch_router,
   upsert_router
 );
+
+export function makeChannelUpsert(
+  channel: Channel,
+  update: z.infer<typeof z_channel_mutable> | undefined = undefined
+): inferRouterInputs<typeof upsert_router>["upsert"] {
+  return {
+    create: channel,
+    update: { id: channel.id, data: update ?? channel },
+  };
+}
+
+export function makeChannelCreateWithDepsInput(
+  channel: Channel,
+  server: Server
+): inferRouterInputs<typeof create_with_deps_router>["createWithDeps"] {
+  return {
+    channel,
+    server: makeServerUpsert(server),
+  };
+}
+
+export function makeChannelUpsertWithDeps(
+  channel: Channel,
+  server: Server,
+  update: z.infer<typeof z_channel_mutable> | undefined = undefined
+): inferRouterInputs<typeof upsert_router>["upsertWithDeps"] {
+  return {
+    create: makeChannelCreateWithDepsInput(channel, server),
+    update: { id: channel.id, data: update ?? channel },
+  };
+}
+
+export function makeThreadUpsertWithDeps(
+  thread: Thread,
+  parent: Channel,
+  server: Server
+): inferRouterInputs<typeof upsert_router>["upsertThreadWithDeps"] {
+  return {
+    create: {
+      thread,
+      parent: makeChannelUpsertWithDeps(parent, server),
+    },
+    update: {
+      id: thread.id,
+      data: {
+        name: "new name",
+      },
+    },
+  };
+}

@@ -1,20 +1,23 @@
 import {
   addChannelSettingsFlagsToChannelSettings,
   bitfieldToChannelSettingsFlags,
+  Channel,
   ChannelSettings,
   channel_settings_flags,
   getDefaultChannelSettings,
+  Server,
 } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
 import { dictToBitfield } from "@answeroverflow/db";
-import { channelRouter, z_channel_upsert_with_deps } from "./channel";
+import { channelRouter, z_channel_upsert_with_deps, makeChannelUpsertWithDeps } from "./channel";
 import { toZObject } from "~api/utils/zod-utils";
 import {
   protectedServerManagerFetch,
   protectedServerManagerMutationFetchFirst,
   upsert,
 } from "~api/utils/operations";
+import type { inferRouterInputs } from "@trpc/server";
 
 const z_channel_settings_flags = toZObject(...channel_settings_flags);
 
@@ -198,3 +201,31 @@ export const channelSettingsRouter = mergeRouters(
   channelSettingsCreateUpdate,
   channelSettingsCreateWithDeps
 );
+
+export function makeChannelSettingsCreateWithDepsInput(
+  channel: Channel,
+  server: Server,
+  initial: z.infer<typeof z_channel_settings_mutable>
+): inferRouterInputs<typeof channelSettingsCreateWithDeps>["createWithDeps"] {
+  return {
+    channel: makeChannelUpsertWithDeps(channel, server),
+    settings: {
+      channel_id: channel.id,
+      ...initial,
+    },
+  };
+}
+
+export function makeChannelSettingsUpsertWithDeps(
+  channel: Channel,
+  server: Server,
+  update: z.infer<typeof z_channel_settings_mutable>
+): inferRouterInputs<typeof channelSettingsUpsert>["upsertWithDeps"] {
+  return {
+    create: makeChannelSettingsCreateWithDepsInput(channel, server, update),
+    update: {
+      channel_id: channel.id,
+      data: update,
+    },
+  };
+}
