@@ -2,6 +2,8 @@ import { TRPCError } from "@trpc/server";
 import { PermissionsBitField } from "discord.js";
 import type { Context } from "~api/router/context";
 
+export const MISSING_PERMISSIONS_MESSAGE = "You are missing the required permissions to do this";
+
 export function assertCanEditServer(ctx: Context, server_id: string) {
   if (ctx.session && ctx.session.user.id === "AnswerOverflow") return;
   if (!ctx.user_servers) {
@@ -26,7 +28,7 @@ export function assertCanEditServer(ctx: Context, server_id: string) {
   if (!permission_bitfield.has("ManageGuild")) {
     throw new TRPCError({
       code: "FORBIDDEN",
-      message: "You do not have permission to edit this server",
+      message: MISSING_PERMISSIONS_MESSAGE,
     });
   }
 }

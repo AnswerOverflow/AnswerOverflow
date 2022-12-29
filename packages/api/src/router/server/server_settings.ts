@@ -4,10 +4,11 @@ import {
   server_settings_flags,
   getDefaultServerSettings,
   mergeServerSettingsFlags,
+  Server,
 } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
-import { serverRouter, z_server_upsert } from "./server";
+import { makeServerUpsert, serverRouter, z_server_upsert } from "./server";
 import { toZObject } from "~api/utils/zod-utils";
 import {
   protectedServerManagerFetch,
@@ -15,6 +16,7 @@ import {
   protectedServerManagerMutationFetchFirst,
   upsert,
 } from "~api/utils/operations";
+import type { inferRouterInputs } from "@trpc/server";
 
 const z_server_settings_flags = toZObject(...server_settings_flags);
 
@@ -160,3 +162,32 @@ export const serverSettingsRouter = mergeRouters(
   serverSettingsCreateUpdate,
   serverSettingsCreateWithDeps
 );
+
+export function makeServerSettingsCreateWithDepsInput(
+  server: Server,
+  settings: z.infer<typeof z_server_settings_mutable> = {}
+): inferRouterInputs<typeof serverSettingsCreateWithDeps>["createWithDeps"] {
+  return {
+    server: makeServerUpsert(server),
+    settings: {
+      server_id: server.id,
+      ...settings,
+    },
+  };
+}
+
+export function makeServerSettingsUpsertInput(
+  server: Server,
+  settings: z.infer<typeof z_server_settings_mutable>
+): inferRouterInputs<typeof serverSettingsUpsert>["upsert"] {
+  return {
+    create: {
+      server_id: server.id,
+      ...settings,
+    },
+    update: {
+      server_id: server.id,
+      data: settings,
+    },
+  };
+}
