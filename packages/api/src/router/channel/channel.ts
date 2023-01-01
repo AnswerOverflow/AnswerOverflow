@@ -185,11 +185,14 @@ const upsert_router = router({
     .input(z_channel_upsert_many)
     .mutation(async ({ ctx, input }) => {
       return upsertMany({
+        input: input,
         find: () => fetch_router.createCaller(ctx).byIdMany(input.map((c) => c.create.id)),
-        getToCreate: (existing) =>
-          input.map((c) => c.create).filter((c) => !existing.map((e) => e.id).includes(c.id)),
-        getToUpdate: (existing) =>
-          input.map((c) => c.update).filter((c) => existing.map((e) => e.id).includes(c.id)),
+        getInputId(input) {
+          return input.create.id;
+        },
+        getFetchedDataId(input) {
+          return input.id;
+        },
         create: (create) => create_update_delete_router.createCaller(ctx).createMany(create),
         update: (update) => create_update_delete_router.createCaller(ctx).updateMany(update),
       });

@@ -1,4 +1,11 @@
-import type { Channel, ChannelSettings, Server, ServerSettings, User } from "@prisma/client";
+import type {
+  Channel,
+  ChannelSettings,
+  DiscordAccount,
+  Server,
+  ServerSettings,
+  User,
+} from "@prisma/client";
 import type { Thread } from "..";
 import { addChannelSettingsFlagsToChannelSettings } from "./channel-settings";
 import type { Message } from "./elastic";
@@ -85,6 +92,16 @@ export function getDefaultThread(
   }
 ): Thread {
   const data: Thread = {
+    ...override,
+  };
+  return data;
+}
+
+export function getDefaultDiscordAccount(
+  override: Partial<DiscordAccount> & { id: string; name: string }
+): DiscordAccount {
+  const data: DiscordAccount = {
+    avatar: null,
     ...override,
   };
   return data;

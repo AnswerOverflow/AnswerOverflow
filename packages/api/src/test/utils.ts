@@ -1,5 +1,7 @@
 import {
+  DiscordAccount,
   getDefaultChannel,
+  getDefaultDiscordAccount,
   getDefaultMessage,
   getDefaultServer,
   getDefaultThread,
@@ -13,6 +15,14 @@ export async function getGeneralScenario() {
 }
 
 export async function getServerTestData(server_id: string = "101") {
+  const guild_owner_member = getDefaultDiscordAccount({
+    id: "1",
+    name: "test-user-owner",
+  });
+  const guild_default_member = getDefaultDiscordAccount({
+    id: "2",
+    name: "test-user-default",
+  });
   const server = getDefaultServer({
     id: server_id,
     name: "test",
@@ -30,13 +40,28 @@ export async function getServerTestData(server_id: string = "101") {
     server_id: server_id,
     type: ChannelType.GuildForum,
   });
-  const manage_guild_ctx = await createManageGuildContext(server.id, server.name);
-  const default_ctx = await createDefaultPermissionCtx(server.id, server.name);
+  const manage_guild_ctx = await createManageGuildContext({
+    server: {
+      id: server.id,
+      name: server.name,
+    },
+    user: guild_owner_member,
+  });
+  const default_ctx = await createDefaultPermissionCtx({
+    server: {
+      id: server.id,
+      name: server.name,
+    },
+    user: guild_default_member,
+  });
   const bot_caller_ctx = await createBotCallerCtx();
+
   return {
     server,
     manage_guild_ctx,
     bot_caller_ctx,
+    guild_default_member,
+    guild_owner_member,
     default_ctx,
     forum_channels: [
       {
@@ -101,24 +126,35 @@ export function createBotCallerCtx() {
   });
 }
 
-export function createManageGuildContext(server_id: string, server_name: string) {
-  return createCtxWithServers(server_id, server_name, "ManageGuild");
+type CtxOverride = {
+  server: {
+    id: string;
+    name: string;
+  };
+  permissions: PermissionResolvable;
+  user: DiscordAccount;
+};
+
+export function createManageGuildContext(input: Omit<CtxOverride, "permissions">) {
+  return createCtxWithServers({
+    ...input,
+    permissions: PermissionsBitField.resolve("ManageGuild"),
+  });
 }
 
-export function createDefaultPermissionCtx(server_id: string, server_name: string) {
-  return createCtxWithServers(server_id, server_name, PermissionsBitField.Default);
+export function createDefaultPermissionCtx(input: Omit<CtxOverride, "permissions">) {
+  return createCtxWithServers({
+    ...input,
+    permissions: PermissionsBitField.Default,
+  });
 }
 
-export function createCtxWithServers(
-  server_id: string,
-  server_name: string,
-  permissions: PermissionResolvable
-) {
+export function createCtxWithServers(input: CtxOverride) {
   return createContextInner({
     session: {
       user: {
-        id: "1",
-        name: "test",
+        id: input.user.id,
+        name: input.user.name,
       },
       expires: new Date().toString(),
     },
@@ -126,11 +162,11 @@ export function createCtxWithServers(
     user_servers: [
       {
         features: [],
-        id: server_id,
-        name: server_name,
+        id: input.server.id,
+        name: input.server.name,
         owner: true,
         icon: null,
-        permissions: Number(PermissionsBitField.resolve(permissions)),
+        permissions: Number(PermissionsBitField.resolve(input.permissions)),
       },
     ],
   });

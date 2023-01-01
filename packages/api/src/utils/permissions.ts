@@ -4,10 +4,23 @@ import type { Context } from "~api/router/context";
 
 export const MISSING_PERMISSIONS_MESSAGE = "You are missing the required permissions to do this";
 
-export function isSuperUser(ctx: Context) {
+export function isAnswerOverflowBot(ctx: Context) {
   if (ctx.session && ctx.session.user.id === "AnswerOverflow") return true;
+  return false;
+}
+
+export function isSuperUser(ctx: Context) {
   if (ctx.session && ctx.session.user.id === "523949187663134754") return true; // This is the ID of Rhys - TODO: Swap to an env var
   return false;
+}
+
+export function assertIsBot(ctx: Context) {
+  if (isSuperUser(ctx)) return;
+  if (isAnswerOverflowBot(ctx)) return;
+  throw new TRPCError({
+    code: "UNAUTHORIZED",
+    message: "You are not authorized to do this",
+  });
 }
 
 export function assertCanEditServer(ctx: Context, server_id: string) {
@@ -50,6 +63,7 @@ export function assertCanEditServers(ctx: Context, server_id: string | string[])
 
 export function assertCanEditMessage(ctx: Context, author_id: string) {
   if (isSuperUser(ctx)) return;
+  if (isAnswerOverflowBot(ctx)) return;
   if (ctx.session?.user.id !== author_id) {
     throw new TRPCError({
       code: "FORBIDDEN",

@@ -3,6 +3,7 @@ import type { Context } from "./context";
 import superjson from "superjson";
 import { getDiscordAccount } from "../utils/discord-operations";
 import { getUserServers } from "@answeroverflow/auth/src/discord-oauth";
+import { assertIsBot } from "../utils/permissions";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
@@ -54,8 +55,14 @@ const hasUserServers = t.middleware(async ({ ctx, next }) => {
   });
 });
 
+const isBot = t.middleware(({ ctx, next }) => {
+  assertIsBot(ctx);
+  return next();
+});
+
 export const router = t.router;
 export const mergeRouters = t.mergeRouters;
 export const publicProcedure = t.procedure;
 export const protectedProcedure = t.procedure.use(isAuthed);
+export const botOnlyProcedure = protectedProcedure.use(isBot);
 export const protectedProcedureWithUserServers = protectedProcedure.use(hasUserServers);

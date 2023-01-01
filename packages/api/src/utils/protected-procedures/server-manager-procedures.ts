@@ -2,14 +2,14 @@ import type { Context } from "~api/router/context";
 import { assertCanEditServers } from "../permissions";
 import {
   protectedFetch,
-  ProtectedFetchInput,
+  ProtectedFetchInputExtendable,
   protectedMutation,
   protectedMutationFetchFirst,
-  ProtectedMutationFetchFirstInput,
-  ProtectedMutationInput,
+  ProtectedMutationFetchFirstInputExtendable,
+  ProtectedMutationInputExtendable,
 } from "./base";
 
-type ServerManagerProtectedFetch<T> = Omit<ProtectedFetchInput<T>, "assertPermissions"> & {
+type ServerManagerProtectedFetch<T> = ProtectedFetchInputExtendable<T> & {
   // eslint-disable-next-line no-unused-vars
   getServerId: (data: T) => string | string[];
   ctx: Context;
@@ -21,7 +21,7 @@ export async function protectedServerManagerFetch<T>(input: ServerManagerProtect
   });
 }
 
-type ServerManagerProtectedMutation<T> = Omit<ProtectedMutationInput<T>, "assertPermissions"> & {
+type ServerManagerProtectedMutation<T> = ProtectedMutationInputExtendable<T> & {
   server_id: string | string[];
   ctx: Context;
 };
@@ -33,7 +33,7 @@ export async function protectedServerManagerMutation<T>(input: ServerManagerProt
 }
 
 export async function protectedServerManagerMutationFetchFirst<T, F>(
-  input: Omit<ProtectedMutationFetchFirstInput<T, F>, "assertPermissions"> & {
+  input: ProtectedMutationFetchFirstInputExtendable<T, F> & {
     ctx: Context;
     // eslint-disable-next-line no-unused-vars
     getServerId: (data: T) => string | string[];
