@@ -9,6 +9,9 @@
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
+    "with-env": "dotenv -e ../../.env --",
+    "test:auth": "yarn with-env vitest run --no-threads ",
+    "test:watch": "yarn with-env vitest --no-threads --coverage",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -22,7 +25,10 @@
     "react-dom": "18.2.0"
   },
   "devDependencies": {
+    "@vitest/coverage-c8": "^0.26.2",
+    "dotenv-cli": "^6.0.0",
     "eslint": "^8.29.0",
-    "typescript": "^4.9.3"
+    "typescript": "^4.9.3",
+    "vitest": "^0.26.2"
   }
 }

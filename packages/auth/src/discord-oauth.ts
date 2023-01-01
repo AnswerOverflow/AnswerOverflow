@@ -33,7 +33,7 @@ export async function getUserServers(access_token: string) {
 }
 
 // https://discord.com/developers/docs/resources/user#user-object
-const z_user_schema = z.object({
+export const z_user_schema = z.object({
   id: z.string(),
   username: z.string(),
   discriminator: z.string(),
