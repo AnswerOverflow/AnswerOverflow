@@ -27,6 +27,7 @@ beforeEach(async () => {
 });
 
 describe("Discord Auth", () => {
+  // This is the first time we have ever seen this user, we need to generate information for them
   it("should create a Discord user for a new account", async () => {
     const created_user = await extendedAdapter.createUser({
       email: mock_discord_account.email!,
@@ -50,6 +51,7 @@ describe("Discord Auth", () => {
       avatar: mock_discord_account.avatar,
     });
   });
+  // We have first seen their account on Discord from indexing their messages, we are linking their indexed account to what was signed in with
   it("should link to a Discord user for an existing account", async () => {
     await prisma.discordAccount.create({
       data: {
