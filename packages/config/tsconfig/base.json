@@ -18,7 +18,7 @@
       "esnext",
       "dom"
     ],
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "module": "CommonJS",
     "moduleResolution": "Node",
     "newLine": "lf",
