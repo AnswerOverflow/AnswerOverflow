@@ -13,10 +13,12 @@
     "init": {},
     "migrate": {},
     "lint": {
-      "outputs": []
+      "outputs": [],
+      "cache": false
     },
     "lint:fix": {
-      "outputs": []
+      "outputs": [],
+      "cache": false
     },
     "dev": {
       "cache": false
