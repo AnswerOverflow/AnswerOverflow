@@ -10,6 +10,7 @@ import {
 import React from "react";
 import { ephemeralReply } from "~discord-bot/utils/utils";
 import { getDefaultChannelSettingsWithFlags } from "@answeroverflow/db";
+import { TRPCError } from "@trpc/server";
 
 @ApplyOptions<Command.Options>({
   name: "channel-settings",
@@ -53,11 +54,24 @@ export class ChannelSettingsCommand extends Command {
     await callApiWithEphemeralErrorHandler(
       {
         async ApiCall(router) {
-          return await router.channel_settings.byId(interaction.channelId);
+          try {
+            return await router.channel_settings.byId(interaction.channelId);
+          } catch (error) {
+            if (error instanceof TRPCError && error.code == "NOT_FOUND") {
+              return null;
+            } else {
+              throw error;
+            }
+          }
         },
         Ok(result) {
           if (!result) {
-            result = getDefaultChannelSettingsWithFlags(interaction.channelId);
+            result = {
+              ...getDefaultChannelSettingsWithFlags(interaction.channelId),
+              channel: {
+                server_id: guild.id,
+              },
+            };
           }
           const menu = <ChannelSettingsMenu channel={channel} settings={result} />;
           ephemeralReply(container.reacord, menu, interaction);

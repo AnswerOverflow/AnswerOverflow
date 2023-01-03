@@ -3,8 +3,10 @@
   "compilerOptions": {
     "jsx": "react",
     "types": [
-      "jest"
-    ]
+      "jest",
+      "node",
+      "@types/jest"
+    ],
   },
   "ts-node": {
     "transpileOnly": true

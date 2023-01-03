@@ -1,8 +1,17 @@
 {
   "extends": "@answeroverflow/tsconfig/base.json",
+  "compilerOptions": {
+    "types": [
+      "vitest/globals"
+    ]
+  },
   "include": [
     "index.ts",
     "src",
     "vitest.config.ts"
-  ]
+  ],
+  "exclude": [
+    "node_modules",
+    "../../node_modules/*"
+  ],
 }

@@ -3,7 +3,9 @@ import {
   getDefaultChannel,
   getDefaultChannelSettings,
   getDefaultChannelSettingsWithFlags,
+  getDefaultServerSettings,
   getDefaultThread,
+  getDefaultUserServerSettings,
 } from "./default";
 import { clearDatabase } from "./utils";
 
@@ -117,6 +119,54 @@ describe("Default Channel Values", () => {
       type: 1,
       server_id: "100",
       parent_id: "123",
+    });
+    expect(defaults).toEqual(expected_defaults);
+  });
+});
+
+describe("Default Server Settings Values", () => {
+  it("should verify server settings default values are correct", async () => {
+    await prisma.server.create({
+      data: {
+        id: "100",
+        name: "test",
+      },
+    });
+    const expected_defaults = await prisma.serverSettings.create({
+      data: {
+        server_id: "100",
+      },
+    });
+    const defaults = getDefaultServerSettings({
+      server_id: "100",
+    });
+    expect(defaults).toEqual(expected_defaults);
+  });
+});
+
+describe("Default User Server Settings Values", () => {
+  it("should verify user server settings default values are correct", async () => {
+    await prisma.server.create({
+      data: {
+        id: "100",
+        name: "test",
+      },
+    });
+    await prisma.discordAccount.create({
+      data: {
+        id: "200",
+        name: "test",
+      },
+    });
+    const expected_defaults = await prisma.userServerSettings.create({
+      data: {
+        user_id: "200",
+        server_id: "100",
+      },
+    });
+    const defaults = getDefaultUserServerSettings({
+      user_id: "200",
+      server_id: "100",
     });
     expect(defaults).toEqual(expected_defaults);
   });

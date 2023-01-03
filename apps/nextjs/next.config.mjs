@@ -10,15 +10,12 @@
 const config = {
   reactStrictMode: true,
   swcMinify: true,
-  experimental: {
-    // Enables hot-reload and easy integration for local packages
-    transpilePackages: [
-      "@answeroverflow/api",
-      "@answeroverflow/auth",
-      "@answeroverflow/db",
-      "@answeroverflow/tailwind-config",
-    ],
-  },
+  transpilePackages: [
+    "@answeroverflow/api",
+    "@answeroverflow/auth",
+    "@answeroverflow/db",
+    "@answeroverflow/tailwind-config",
+  ],
   images: {
     domains: ["cdn.discordapp.com"],
   },

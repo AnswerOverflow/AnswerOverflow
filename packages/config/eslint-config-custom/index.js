@@ -26,6 +26,13 @@ module.exports = {
         patterns: ["../..*"],
       },
     ],
+    "prefer-arrow-callback": [
+      "error",
+      {
+        allowNamedFunctions: true,
+        allowUnboundThis: true,
+      },
+    ],
     //"@typescript-eslint/explicit-function-return-type": "warn"
   },
   overrides: [

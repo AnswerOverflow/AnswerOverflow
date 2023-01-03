@@ -13,10 +13,12 @@
     "init": {},
     "migrate": {},
     "lint": {
-      "outputs": []
+      "outputs": [],
+      "cache": false
     },
     "lint:fix": {
-      "outputs": []
+      "outputs": [],
+      "cache": false
     },
     "dev": {
       "cache": false
@@ -34,9 +36,16 @@
       ],
       "cache": false
     },
-    "test:api": {
+    "test:auth": {
       "dependsOn": [
         "test:db",
+        "^test:auth"
+      ],
+      "cache": false
+    },
+    "test:api": {
+      "dependsOn": [
+        "test:auth",
         "^test:api"
       ],
       "cache": false

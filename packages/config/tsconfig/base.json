@@ -17,16 +17,14 @@
     "lib": [
       "esnext"
     ],
-    "types": [
-      "vitest/globals"
-    ],
+    "skipLibCheck": true,
     "module": "CommonJS",
     "moduleResolution": "Node",
     "newLine": "lf",
     "noEmitHelpers": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "noUnusedParameters": true,
     "preserveConstEnums": true,
     "pretty": true,
@@ -74,5 +72,9 @@
   },
   "exclude": [
     "dist"
+  ],
+  "include": [
+    "src",
+    "node_modules"
   ]
 }

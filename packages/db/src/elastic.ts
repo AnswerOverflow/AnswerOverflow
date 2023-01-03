@@ -97,6 +97,27 @@ export class Elastic extends Client {
     }
   }
 
+  public async bulkGetMessages(ids: string[]) {
+    try {
+      const messages = await this.mget<Message>({
+        docs: ids.map((id) => ({ _index: this.messages_index, _id: id, _source: true })),
+      });
+      return messages.docs.map((doc) => {
+        if (!("error" in doc) && doc._source) {
+          return doc._source;
+        } else {
+          throw new Error("Error getting message");
+        }
+      });
+    } catch (error) {
+      if (error instanceof errors.ResponseError && error.statusCode === 404) {
+        return [];
+      } else {
+        throw error;
+      }
+    }
+  }
+
   public async deleteMessage(id: string) {
     try {
       const message = await this.delete({

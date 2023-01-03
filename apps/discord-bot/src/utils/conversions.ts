@@ -41,7 +41,9 @@ export function toChannelUpsert(channel: GuildTextBasedChannel) {
     },
     update: {
       id: channel.id,
-      name: channel.name,
+      data: {
+        name: channel.name,
+      },
     },
   };
   return converted_channel;
@@ -62,7 +64,9 @@ export function toChannelCreateWithDeps(channel: GuildTextBasedChannel | ForumCh
       },
       update: {
         id: channel.guild.id,
-        name: channel.guild.name,
+        data: {
+          name: channel.guild.name,
+        },
       },
     },
   };
@@ -74,7 +78,9 @@ export function toChannelUpsertWithDeps(channel: GuildTextBasedChannel | ForumCh
     create: toChannelCreateWithDeps(channel),
     update: {
       id: channel.id,
-      name: channel.name,
+      data: {
+        name: channel.name,
+      },
     },
   };
   return converted_channel;
