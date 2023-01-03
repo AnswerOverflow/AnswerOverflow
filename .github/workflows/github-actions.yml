@@ -19,9 +19,7 @@ env:
   OWNERS: "[]"
 
 jobs:
-
-  build:
-      if: ! github.event.pull_request.draft
+  build:      
       name: Build and Test
       timeout-minutes: 15
       runs-on: ubuntu-latest
