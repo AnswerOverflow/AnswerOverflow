@@ -7,6 +7,7 @@ import {
   GuildBasedChannel,
   Guild,
   GuildMember,
+  PermissionsBitField,
 } from "discord.js";
 import { randomSnowflake } from "~discord-bot/utils/utils";
 import { mockTextChannel } from "./channel-mock";
@@ -37,6 +38,7 @@ export function mockInteracion(
     type: InteractionType.ApplicationCommand,
     token: "123456789",
     version: 1,
+    app_permissions: PermissionsBitField.Default.toString(),
     locale: "en-US",
     guild_id: guild.id,
     member: {

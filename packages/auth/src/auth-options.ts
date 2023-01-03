@@ -1,12 +1,10 @@
 import type { NextAuthOptions } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
-
-import { prisma } from "@answeroverflow/db";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { extendedAdapter } from "./adapter";
 
 export const authOptions: NextAuthOptions = {
   // Configure one or more authentication providers
-  adapter: PrismaAdapter(prisma),
+  adapter: extendedAdapter,
   providers: [
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID as string,

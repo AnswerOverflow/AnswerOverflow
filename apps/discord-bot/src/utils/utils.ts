@@ -144,13 +144,17 @@ export function makeChannelUpsertWithDeps(channel: GuildChannel): ChannelUpsertW
         },
         update: {
           id: channel.guild.id,
-          name: channel.guild.name,
+          data: {
+            name: channel.guild.name,
+          },
         },
       },
     },
     update: {
       id: channel.id,
-      name: channel.name,
+      data: {
+        name: channel.name,
+      },
     },
   };
   return data;

@@ -1,20 +1,28 @@
 import {
+  DiscordAccount,
   getDefaultChannel,
+  getDefaultDiscordAccount,
   getDefaultMessage,
   getDefaultServer,
   getDefaultThread,
 } from "@answeroverflow/db";
 import { ChannelType, PermissionResolvable, PermissionsBitField } from "discord.js";
-import { createContextInner } from "../context";
+import { createContextInner } from "~api/router/context";
 
 export async function getGeneralScenario() {
-  const data = getServerTestData();
-  const manage_guild_ctx = await createManageGuildContext(data.server.id, data.server.name);
-  const default_ctx = await createDefaultPermissionCtx(data.server.id, data.server.name);
-  return { data, manage_guild_ctx, default_ctx };
+  const data1 = await getServerTestData();
+  return { data1 };
 }
 
-export function getServerTestData(server_id: string = "101") {
+export async function getServerTestData(server_id: string = "101") {
+  const guild_manager_member = getDefaultDiscordAccount({
+    id: "1",
+    name: "test-user-owner",
+  });
+  const guild_default_member = getDefaultDiscordAccount({
+    id: "2",
+    name: "test-user-default",
+  });
   const server = getDefaultServer({
     id: server_id,
     name: "test",
@@ -32,8 +40,29 @@ export function getServerTestData(server_id: string = "101") {
     server_id: server_id,
     type: ChannelType.GuildForum,
   });
+  const manage_guild_ctx = await createManageGuildContext({
+    server: {
+      id: server.id,
+      name: server.name,
+    },
+    user: guild_manager_member,
+  });
+  const default_ctx = await createDefaultPermissionCtx({
+    server: {
+      id: server.id,
+      name: server.name,
+    },
+    user: guild_default_member,
+  });
+  const bot_caller_ctx = await createBotCallerCtx();
+
   return {
     server,
+    manage_guild_ctx,
+    bot_caller_ctx,
+    guild_default_member,
+    guild_manager_member,
+    default_ctx,
     forum_channels: [
       {
         channel: forum_channel,
@@ -51,13 +80,16 @@ export function getServerTestData(server_id: string = "101") {
       {
         channel: text_channel,
         threads: [
-          getDefaultThread({
-            id: "401",
-            name: "name",
-            parent_id: "201",
-            server_id: server_id,
-            type: ChannelType.PublicThread,
-          }),
+          {
+            thread: getDefaultThread({
+              id: "401",
+              name: "name",
+              parent_id: "201",
+              server_id: server_id,
+              type: ChannelType.PublicThread,
+            }),
+            messages: [],
+          },
         ],
         messages: [
           getDefaultMessage({
@@ -78,24 +110,51 @@ export function getServerTestData(server_id: string = "101") {
   };
 }
 
-export function createManageGuildContext(server_id: string, server_name: string) {
-  return createCtxWithServers(server_id, server_name, "ManageGuild");
-}
-
-export function createDefaultPermissionCtx(server_id: string, server_name: string) {
-  return createCtxWithServers(server_id, server_name, PermissionsBitField.Default);
-}
-
-export function createCtxWithServers(
-  server_id: string,
-  server_name: string,
-  permissions: PermissionResolvable
-) {
+export function createBotCallerCtx() {
   return createContextInner({
     session: {
       user: {
-        id: "1",
+        id: "AnswerOverflow",
         name: "test",
+        email: null,
+        image: null,
+      },
+      expires: new Date().toString(),
+    },
+    caller: "discord-bot",
+    user_servers: undefined,
+  });
+}
+
+type CtxOverride = {
+  server: {
+    id: string;
+    name: string;
+  };
+  permissions: PermissionResolvable;
+  user: DiscordAccount;
+};
+
+export function createManageGuildContext(input: Omit<CtxOverride, "permissions">) {
+  return createCtxWithServers({
+    ...input,
+    permissions: PermissionsBitField.resolve("ManageGuild"),
+  });
+}
+
+export function createDefaultPermissionCtx(input: Omit<CtxOverride, "permissions">) {
+  return createCtxWithServers({
+    ...input,
+    permissions: PermissionsBitField.Default,
+  });
+}
+
+export function createCtxWithServers(input: CtxOverride) {
+  return createContextInner({
+    session: {
+      user: {
+        id: input.user.id,
+        name: input.user.name,
       },
       expires: new Date().toString(),
     },
@@ -103,14 +162,14 @@ export function createCtxWithServers(
     user_servers: [
       {
         features: [],
-        id: server_id,
-        name: server_name,
+        id: input.server.id,
+        name: input.server.name,
         owner: true,
         icon: null,
-        permissions: Number(PermissionsBitField.resolve(permissions)),
+        permissions: Number(PermissionsBitField.resolve(input.permissions)),
       },
     ],
   });
 }
 
-export type ServerTestData = ReturnType<typeof getServerTestData>;
+export type ServerTestData = Awaited<ReturnType<typeof getServerTestData>>;

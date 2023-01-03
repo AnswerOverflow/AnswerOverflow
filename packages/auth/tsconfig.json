@@ -1,8 +1,17 @@
 {
   "extends": "@answeroverflow/tsconfig/base.json",
+  "compilerOptions": {
+    "types": [
+      "vitest/globals"
+    ]
+  },
   "include": [
     "src",
     "index.ts",
-    "next-auth.d.ts"
+    "next-auth.d.ts",
+    "vitest.config.ts",
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }

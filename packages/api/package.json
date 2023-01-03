@@ -8,7 +8,7 @@
   "scripts": {
     "with-env": "dotenv -e ../../.env --",
     "clean": "rm -rf .turbo node_modules",
-    "lint": "eslint src",
+    "lint": "eslint src && tsc --noEmit",
     "lint:fix": "eslint src --fix",
     "test:api": "yarn with-env vitest run --no-threads ",
     "test:watch": "yarn with-env vitest --no-threads --coverage",
@@ -29,7 +29,7 @@
     "@vitest/coverage-c8": "^0.25.1",
     "dotenv-cli": "^6.0.0",
     "eslint": "^8.28.0",
-    "typescript": "^4.9.3",
+    "typescript": "^4.9.4",
     "vitest": "^0.25.1"
   }
 }

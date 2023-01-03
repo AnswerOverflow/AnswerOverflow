@@ -1,12 +1,10 @@
-import { router } from "../trpc";
+import { router } from "./trpc";
 import { authRouter } from "./auth";
-import { channelRouter } from "./channel";
-import { channelSettingsRouter } from "./channel_settings";
-import { messageRouter } from "./message";
-
-//import { messageRouter } from "./message";
-import { serverRouter } from "./server";
-import { userRouter } from "./user";
+import { channelRouter } from "~api/router/channel/channel";
+import { channelSettingsRouter } from "~api/router/channel/channel_settings";
+import { messageRouter } from "~api/router/message/message";
+import { serverRouter } from "~api/router/server/server";
+import { userRouter } from "~api/router/user/user";
 
 export const botRouter = router({
   users: userRouter,

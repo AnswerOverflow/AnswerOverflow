@@ -27,8 +27,10 @@ export class SyncOnJoin extends Listener {
           },
           update: {
             id: guild.id,
-            name: guild.name,
-            kicked_time: null,
+            data: {
+              name: guild.name,
+              kicked_time: null,
+            },
           },
         });
         await router.channels.upsertMany(
@@ -43,7 +45,9 @@ export class SyncOnJoin extends Listener {
               },
               update: {
                 id: channel.id,
-                name: channel.name,
+                data: {
+                  name: channel.name,
+                },
               },
             }))
         );
@@ -71,9 +75,11 @@ export class SyncOnDelete extends Listener {
             kicked_time: new Date(),
           },
           update: {
-            name: guild.name,
-            kicked_time: new Date(),
             id: guild.id,
+            data: {
+              name: guild.name,
+              kicked_time: new Date(),
+            },
           },
         });
       },
@@ -95,8 +101,11 @@ export class SyncOnUpdate extends Listener {
           },
           update: {
             id: newGuild.id,
-            name: newGuild.name,
-            kicked_time: null,
+            data: {
+              name: newGuild.name,
+
+              kicked_time: null,
+            },
           },
         });
       },

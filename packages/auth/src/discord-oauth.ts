@@ -1,6 +1,6 @@
-import type { PrismaClient } from "@answeroverflow/db";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import fetch from "node-fetch";
+
 function discordFetch(url: string, token: string) {
   return fetch("https://discordapp.com/api" + url, {
     headers: {
@@ -20,8 +20,8 @@ const serverSchema = z.object({
 
 const serverArrayShema = z.array(serverSchema);
 
-// TODO: This basic caching is fine for now but this should probably move to redis when going serverless
 const user_servers_cache = new Map<string, ReturnType<typeof serverArrayShema.parse>>();
+
 export async function getUserServers(access_token: string) {
   if (user_servers_cache.has(access_token)) {
     return user_servers_cache.get(access_token);
@@ -32,29 +32,27 @@ export async function getUserServers(access_token: string) {
   return servers;
 }
 
-export async function getDiscordAccount(prisma: PrismaClient, user_id: string) {
-  const user = await prisma.user.findUnique({
-    where: {
-      id: user_id,
-    },
-    include: {
-      accounts: {
-        where: {
-          provider: "discord",
-        },
-      },
-    },
-  });
-  if (!user) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-    });
-  }
-  const discord_account = user.accounts[0];
-  if (!discord_account || !discord_account.access_token) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-    });
-  }
-  return discord_account;
+// https://discord.com/developers/docs/resources/user#user-object
+export const z_user_schema = z.object({
+  id: z.string(),
+  username: z.string(),
+  discriminator: z.string(),
+  avatar: z.string().nullable(),
+  bot: z.boolean().optional(),
+  system: z.boolean().optional(),
+  mfa_enabled: z.boolean().optional(),
+  banner: z.string().nullable().optional(),
+  accent_color: z.number().optional(),
+  locale: z.string().optional(),
+  verified: z.boolean().optional(),
+  email: z.string().nullable().optional(),
+  flags: z.number().optional(),
+  premium_type: z.number().optional(),
+  public_flags: z.number().optional(),
+});
+
+export async function getDiscordUser(access_token: string) {
+  const data = await discordFetch("/users/@me", access_token);
+  const parsed = await z_user_schema.parseAsync(await data.json());
+  return parsed;
 }

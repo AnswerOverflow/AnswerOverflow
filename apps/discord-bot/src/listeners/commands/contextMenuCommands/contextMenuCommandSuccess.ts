@@ -7,7 +7,7 @@ export class UserListener extends Listener {
     logSuccessCommand(payload);
   }
 
-  public onLoad() {
+  public override onLoad() {
     this.enabled = (this.container.logger as Logger).level <= LogLevel.Debug;
     return super.onLoad();
   }
