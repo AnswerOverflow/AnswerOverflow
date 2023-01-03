@@ -25,7 +25,7 @@ const z_channel_settings_create = z.object({
   channel_id: z.string(),
   flags: z.optional(z_channel_settings_flags),
   last_indexed_snowflake: z.optional(z.string()),
-  invite_code: z.optional(z.string()),
+  invite_code: z.string().nullable().optional(),
   solution_tag_id: z.string().nullable().optional(),
 });
 

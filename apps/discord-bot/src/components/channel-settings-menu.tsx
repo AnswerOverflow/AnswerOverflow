@@ -75,8 +75,10 @@ export function ChannelSettingsMenu({
       enable_label={"Enable Indexing"}
       onClick={(interaction: ButtonClickEvent) => {
         void updateChannelSettings(interaction, {
-          flags: {
-            indexing_enabled: !channelSettings.flags.indexing_enabled,
+          data: {
+            flags: {
+              indexing_enabled: !channelSettings.flags.indexing_enabled,
+            },
           },
         });
       }}
@@ -90,8 +92,10 @@ export function ChannelSettingsMenu({
       enable_label={"Enable Mark Solution"}
       onClick={(interaction: ButtonClickEvent) =>
         void updateChannelSettings(interaction, {
-          flags: {
-            mark_solution_enabled: !channelSettings.flags.mark_solution_enabled,
+          data: {
+            flags: {
+              mark_solution_enabled: !channelSettings.flags.mark_solution_enabled,
+            },
           },
         })
       }
@@ -105,9 +109,11 @@ export function ChannelSettingsMenu({
       enable_label={"Enable Send Mark Solution Instructions"}
       onClick={(interaction: ButtonClickEvent) => {
         void updateChannelSettings(interaction, {
-          flags: {
-            send_mark_solution_instructions_in_new_threads:
-              !channelSettings.flags.send_mark_solution_instructions_in_new_threads,
+          data: {
+            flags: {
+              send_mark_solution_instructions_in_new_threads:
+                !channelSettings.flags.send_mark_solution_instructions_in_new_threads,
+            },
           },
         });
       }}
@@ -121,7 +127,9 @@ export function ChannelSettingsMenu({
       onChangeValue={(value: string, event: SelectChangeEvent) => {
         const new_solved_tag = value == CLEAR_TAG_VALUE ? null : value;
         void updateChannelSettings(event, {
-          solution_tag_id: new_solved_tag,
+          data: {
+            solution_tag_id: new_solved_tag,
+          },
         });
       }}
     >

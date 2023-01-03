@@ -7,7 +7,7 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "with-env": "dotenv -e ../../.env --",
-    "lint": "eslint \"*.ts*\"",
+    "lint": "eslint \"*.ts*\" && tsc --noEmit",
     "lint:fix": "eslint \"*.ts*\" --fix",
     "init": "yarn with-env npx prisma migrate dev",
     "migrate": "yarn with-env npx prisma migrate deploy",
@@ -31,7 +31,7 @@
     "@vitest/coverage-c8": "^0.25.8",
     "dotenv-cli": "^6.0.0",
     "prisma": "^4.7.1",
-    "typescript": "^4.9.3",
+    "typescript": "^4.9.4",
     "vitest": "^0.25.8"
   }
 }

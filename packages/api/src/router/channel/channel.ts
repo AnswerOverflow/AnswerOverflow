@@ -1,5 +1,5 @@
 import { Channel, getDefaultChannel, Server, Thread } from "@answeroverflow/db";
-import { inferRouterInputs, TRPCError } from "@trpc/server";
+import type { inferRouterInputs } from "@trpc/server";
 import { z } from "zod";
 import { mergeRouters, authedProcedureWithUserServers, router } from "~api/router/trpc";
 import { addDefaultValues, upsert, upsertMany } from "~api/utils/operations";
@@ -120,16 +120,7 @@ const create_update_delete_router = router({
 const fetch_router = router({
   byId: authedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
     return protectedServerManagerFetch({
-      fetch: async () => {
-        const channel = await ctx.prisma.channel.findUnique({ where: { id: input } });
-        if (!channel) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Channel does not exist",
-          });
-        }
-        return channel;
-      },
+      fetch: async () => await ctx.prisma.channel.findUnique({ where: { id: input } }),
       getServerId: (data) => data.server_id,
       ctx,
       not_found_message: "Channel does not exist",
@@ -139,9 +130,7 @@ const fetch_router = router({
     .input(z.array(z.string()))
     .query(async ({ ctx, input }) => {
       return protectedServerManagerFetch({
-        fetch: async () => {
-          return await ctx.prisma.channel.findMany({ where: { id: { in: input } } });
-        },
+        fetch: async () => await ctx.prisma.channel.findMany({ where: { id: { in: input } } }),
         getServerId(data) {
           return data.map((c) => c.server_id);
         },

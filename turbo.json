@@ -34,9 +34,16 @@
       ],
       "cache": false
     },
-    "test:api": {
+    "test:auth": {
       "dependsOn": [
         "test:db",
+        "^test:auth"
+      ],
+      "cache": false
+    },
+    "test:api": {
+      "dependsOn": [
+        "test:auth",
         "^test:api"
       ],
       "cache": false

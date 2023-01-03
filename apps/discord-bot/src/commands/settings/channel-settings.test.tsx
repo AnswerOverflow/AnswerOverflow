@@ -33,10 +33,10 @@ describe("Channel Settings Slash Command", () => {
       .find((command) => command.name === "channel-settings");
 
     expect(stored_command).toBeDefined();
-    jest.spyOn(stored_command, "chatInputRun");
+    jest.spyOn(stored_command!, "chatInputRun");
 
     await runCommand(client, command);
-    expect(stored_command.chatInputRun).not.toHaveBeenCalled();
+    expect(stored_command!.chatInputRun).not.toHaveBeenCalled();
   });
   it("uses /channel-settings as an admin", async () => {
     const { client, guild, text_channel, guild_member_admin } = await createNormalScenario();
@@ -53,10 +53,10 @@ describe("Channel Settings Slash Command", () => {
       .find((command) => command.name === "channel-settings");
 
     expect(stored_command).toBeDefined();
-    jest.spyOn(stored_command, "chatInputRun");
+    jest.spyOn(stored_command!, "chatInputRun");
 
     await runCommand(client, command);
-    expect(stored_command.chatInputRun).toHaveBeenCalled();
+    expect(stored_command!.chatInputRun).toHaveBeenCalled();
   });
   it("uses /channel-settings with manage guild permissions", async () => {
     const { client, guild, text_channel, guild_member_manage_guild } = await createNormalScenario();
@@ -73,10 +73,10 @@ describe("Channel Settings Slash Command", () => {
       .find((command) => command.name === "channel-settings");
 
     expect(stored_command).toBeDefined();
-    jest.spyOn(stored_command, "chatInputRun");
+    jest.spyOn(stored_command!, "chatInputRun");
 
     await runCommand(client, command);
-    expect(stored_command.chatInputRun).toHaveBeenCalled();
+    expect(stored_command!.chatInputRun).toHaveBeenCalled();
   });
   test.todo("Verify default member permissions");
   test.todo("Verify bot permissions");

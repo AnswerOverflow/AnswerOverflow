@@ -25,7 +25,7 @@ export function assertIsBot(ctx: Context) {
 
 export function assertCanEditServer(ctx: Context, server_id: string) {
   if (isSuperUser(ctx)) return;
-
+  if (isAnswerOverflowBot(ctx)) return;
   if (!ctx.user_servers) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
