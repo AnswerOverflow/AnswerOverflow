@@ -15,8 +15,7 @@
     "importsNotUsedAsValues": "error",
     "incremental": true,
     "lib": [
-      "esnext",
-      "dom"
+      "esnext"
     ],
     "skipLibCheck": true,
     "module": "CommonJS",
