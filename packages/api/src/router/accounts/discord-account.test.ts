@@ -9,7 +9,7 @@ let account2: DiscordAccount;
 beforeEach(async () => {
   const { data1 } = await getGeneralScenario();
   discord_accounts_router = discordAccountRouter.createCaller(data1.bot_caller_ctx);
-  account1 = data1.guild_owner_member;
+  account1 = data1.guild_manager_member;
   account2 = data1.guild_default_member;
   await clearDatabase();
 });

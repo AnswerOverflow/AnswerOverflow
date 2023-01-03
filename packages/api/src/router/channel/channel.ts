@@ -1,7 +1,7 @@
 import { Channel, getDefaultChannel, Server, Thread } from "@answeroverflow/db";
 import { inferRouterInputs, TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
+import { mergeRouters, authedProcedureWithUserServers, router } from "~api/router/trpc";
 import { addDefaultValues, upsert, upsertMany } from "~api/utils/operations";
 
 import {
@@ -57,23 +57,21 @@ const z_thread_upsert_with_deps = z.object({
 });
 
 const create_update_delete_router = router({
-  create: protectedProcedureWithUserServers.input(z_channel_create).mutation(({ ctx, input }) => {
+  create: authedProcedureWithUserServers.input(z_channel_create).mutation(({ ctx, input }) => {
     return protectedServerManagerMutation({
       operation: () => ctx.prisma.channel.create({ data: input }),
       server_id: input.server_id,
       ctx,
     });
   }),
-  createThread: protectedProcedureWithUserServers
-    .input(z_thread_create)
-    .mutation(({ ctx, input }) => {
-      return protectedServerManagerMutation({
-        operation: () => ctx.prisma.channel.create({ data: input }),
-        server_id: input.server_id,
-        ctx,
-      });
-    }),
-  createMany: protectedProcedureWithUserServers
+  createThread: authedProcedureWithUserServers.input(z_thread_create).mutation(({ ctx, input }) => {
+    return protectedServerManagerMutation({
+      operation: () => ctx.prisma.channel.create({ data: input }),
+      server_id: input.server_id,
+      ctx,
+    });
+  }),
+  createMany: authedProcedureWithUserServers
     .input(z.array(z_channel_create))
     .mutation(async ({ ctx, input }) => {
       await protectedServerManagerMutation({
@@ -83,7 +81,7 @@ const create_update_delete_router = router({
       });
       return addDefaultValues(input, getDefaultChannel);
     }),
-  update: protectedProcedureWithUserServers
+  update: authedProcedureWithUserServers
     .input(z_channel_update)
     .mutation(async ({ ctx, input }) => {
       return protectedServerManagerMutationFetchFirst({
@@ -94,7 +92,7 @@ const create_update_delete_router = router({
         not_found_message: "Channel does not exist",
       });
     }),
-  updateMany: protectedProcedureWithUserServers
+  updateMany: authedProcedureWithUserServers
     .input(z.array(z_channel_update))
     .mutation(async ({ ctx, input }) => {
       return protectedServerManagerMutationFetchFirst({
@@ -108,7 +106,7 @@ const create_update_delete_router = router({
         not_found_message: "Channel does not exist",
       });
     }),
-  delete: protectedProcedureWithUserServers.input(z.string()).mutation(async ({ ctx, input }) => {
+  delete: authedProcedureWithUserServers.input(z.string()).mutation(async ({ ctx, input }) => {
     return protectedServerManagerMutationFetchFirst({
       fetch: () => fetch_router.createCaller(ctx).byId(input),
       operation: () => ctx.prisma.channel.delete({ where: { id: input } }),
@@ -120,7 +118,7 @@ const create_update_delete_router = router({
 });
 
 const fetch_router = router({
-  byId: protectedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
+  byId: authedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
     return protectedServerManagerFetch({
       fetch: async () => {
         const channel = await ctx.prisma.channel.findUnique({ where: { id: input } });
@@ -137,7 +135,7 @@ const fetch_router = router({
       not_found_message: "Channel does not exist",
     });
   }),
-  byIdMany: protectedProcedureWithUserServers
+  byIdMany: authedProcedureWithUserServers
     .input(z.array(z.string()))
     .query(async ({ ctx, input }) => {
       return protectedServerManagerFetch({
@@ -154,7 +152,7 @@ const fetch_router = router({
 });
 
 const create_with_deps_router = router({
-  createWithDeps: protectedProcedureWithUserServers
+  createWithDeps: authedProcedureWithUserServers
     .input(z_channel_create_with_deps)
     .mutation(async ({ ctx, input }) => {
       await serverRouter.createCaller(ctx).upsert(input.server);
@@ -163,7 +161,7 @@ const create_with_deps_router = router({
 });
 
 const create_thread_with_deps_router = router({
-  createThreadWithDeps: protectedProcedureWithUserServers
+  createThreadWithDeps: authedProcedureWithUserServers
     .input(z_thread_create_with_deps)
     .mutation(async ({ ctx, input }) => {
       await upsert_router.createCaller(ctx).upsertWithDeps(input.parent);
@@ -172,7 +170,7 @@ const create_thread_with_deps_router = router({
 });
 
 const upsert_router = router({
-  upsert: protectedProcedureWithUserServers
+  upsert: authedProcedureWithUserServers
     .input(z_channel_upsert)
     .mutation(async ({ ctx, input }) => {
       return upsert(
@@ -181,7 +179,7 @@ const upsert_router = router({
         () => create_update_delete_router.createCaller(ctx).update(input.update)
       );
     }),
-  upsertMany: protectedProcedureWithUserServers
+  upsertMany: authedProcedureWithUserServers
     .input(z_channel_upsert_many)
     .mutation(async ({ ctx, input }) => {
       return upsertMany({
@@ -198,7 +196,7 @@ const upsert_router = router({
       });
     }),
 
-  upsertWithDeps: protectedProcedureWithUserServers
+  upsertWithDeps: authedProcedureWithUserServers
     .input(z_channel_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(
@@ -207,7 +205,7 @@ const upsert_router = router({
         () => create_update_delete_router.createCaller(ctx).update(input.update)
       );
     }),
-  upsertThreadWithDeps: protectedProcedureWithUserServers
+  upsertThreadWithDeps: authedProcedureWithUserServers
     .input(z_thread_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(

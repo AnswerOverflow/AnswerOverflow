@@ -63,6 +63,6 @@ const isBot = t.middleware(({ ctx, next }) => {
 export const router = t.router;
 export const mergeRouters = t.mergeRouters;
 export const publicProcedure = t.procedure;
-export const protectedProcedure = t.procedure.use(isAuthed);
-export const botOnlyProcedure = protectedProcedure.use(isBot);
-export const protectedProcedureWithUserServers = protectedProcedure.use(hasUserServers);
+export const authedProcedure = t.procedure.use(isAuthed);
+export const authedProcedureWithUserServers = authedProcedure.use(hasUserServers);
+export const botOnlyProcedure = authedProcedure.use(isBot);

@@ -15,7 +15,7 @@ export async function getGeneralScenario() {
 }
 
 export async function getServerTestData(server_id: string = "101") {
-  const guild_owner_member = getDefaultDiscordAccount({
+  const guild_manager_member = getDefaultDiscordAccount({
     id: "1",
     name: "test-user-owner",
   });
@@ -45,7 +45,7 @@ export async function getServerTestData(server_id: string = "101") {
       id: server.id,
       name: server.name,
     },
-    user: guild_owner_member,
+    user: guild_manager_member,
   });
   const default_ctx = await createDefaultPermissionCtx({
     server: {
@@ -61,7 +61,7 @@ export async function getServerTestData(server_id: string = "101") {
     manage_guild_ctx,
     bot_caller_ctx,
     guild_default_member,
-    guild_owner_member,
+    guild_manager_member,
     default_ctx,
     forum_channels: [
       {

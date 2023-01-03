@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { mergeRouters, protectedProcedure, router } from "~api/router/trpc";
+import { mergeRouters, authedProcedure, router } from "~api/router/trpc";
 import {
   protectedMessageFetch,
   protectedMessageMutation,
@@ -20,7 +20,7 @@ export const z_message = z.object({
 });
 
 const message_find_router = router({
-  byId: protectedProcedure.input(z.string()).query(async ({ ctx, input }) => {
+  byId: authedProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedMessageFetch({
       ctx,
       author_id: input,
@@ -28,7 +28,7 @@ const message_find_router = router({
       not_found_message: "Message not found",
     });
   }),
-  byIdBulk: protectedProcedure.input(z.array(z.string())).query(async ({ ctx, input }) => {
+  byIdBulk: authedProcedure.input(z.array(z.string())).query(async ({ ctx, input }) => {
     return protectedMessageFetch({
       ctx,
       author_id: input.map((i) => i),
@@ -39,21 +39,21 @@ const message_find_router = router({
 });
 
 const message_crud_router = router({
-  update: protectedProcedure.input(z_message).mutation(async ({ ctx, input }) => {
+  update: authedProcedure.input(z_message).mutation(async ({ ctx, input }) => {
     return protectedMessageMutation({
       ctx,
       author_id: input.id,
       operation: () => ctx.elastic.updateMessage(input),
     });
   }),
-  upsert: protectedProcedure.input(z_message).mutation(async ({ ctx, input }) => {
+  upsert: authedProcedure.input(z_message).mutation(async ({ ctx, input }) => {
     return protectedMessageMutation({
       ctx,
       author_id: input.id,
       operation: () => ctx.elastic.upsertMessage(input),
     });
   }),
-  delete: protectedProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
+  delete: authedProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     return protectedMessageMutationFetchFirst({
       ctx,
       getAuthorId: (data) => data.author_id,
@@ -62,7 +62,7 @@ const message_crud_router = router({
       not_found_message: "Message not found",
     });
   }),
-  deleteByThreadId: protectedProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
+  deleteByThreadId: authedProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     return protectedMessageMutationFetchFirst({
       ctx,
       getAuthorId: (data) => data.author_id,
@@ -71,7 +71,7 @@ const message_crud_router = router({
       not_found_message: "Message not found",
     });
   }),
-  deleteBulk: protectedProcedure.input(z.array(z.string())).mutation(async ({ ctx, input }) => {
+  deleteBulk: authedProcedure.input(z.array(z.string())).mutation(async ({ ctx, input }) => {
     return protectedMessageMutationFetchFirst({
       ctx,
       getAuthorId: (data) => data.map((d) => d.author_id),

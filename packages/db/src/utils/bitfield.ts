@@ -37,3 +37,14 @@ export function dictToBitfield<
   }
   return bitfield.resolve(enabled_flags) as number; // TODO: Possibly a bug? Needs to be revisited if bitfields ever exceed the size of a number
 }
+
+export function mergeFlags(
+  getOldFlags: () => Record<string, boolean>,
+  new_flags: Record<string, boolean>,
+  // eslint-disable-next-line no-unused-vars
+  flagsToBitfield: (flags: Record<string, boolean>) => number
+) {
+  const old_flags = getOldFlags();
+  const merged_flags = { ...old_flags, ...new_flags };
+  return flagsToBitfield(merged_flags);
+}

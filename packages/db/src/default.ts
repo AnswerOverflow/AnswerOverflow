@@ -5,6 +5,7 @@ import type {
   Server,
   ServerSettings,
   User,
+  UserServerSettings,
 } from "@prisma/client";
 import type { Thread } from "..";
 import { addChannelSettingsFlagsToChannelSettings } from "./channel-settings";
@@ -102,6 +103,16 @@ export function getDefaultDiscordAccount(
 ): DiscordAccount {
   const data: DiscordAccount = {
     avatar: null,
+    ...override,
+  };
+  return data;
+}
+
+export function getDefaultUserServerSettings(
+  override: Partial<UserServerSettings> & { user_id: string; server_id: string }
+): UserServerSettings {
+  const data: UserServerSettings = {
+    bitfield: 0,
     ...override,
   };
   return data;

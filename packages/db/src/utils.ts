@@ -2,7 +2,6 @@ import { prisma, elastic } from "..";
 
 export async function clearDatabase() {
   await prisma.userServerSettings.deleteMany({});
-  await prisma.userChannelSettings.deleteMany({});
   await prisma.serverSettings.deleteMany({});
   await prisma.channelSettings.deleteMany({});
   await prisma.channel.deleteMany({});

@@ -7,7 +7,7 @@ import {
   Server,
 } from "@answeroverflow/db";
 import { z } from "zod";
-import { mergeRouters, protectedProcedureWithUserServers, router } from "~api/router/trpc";
+import { mergeRouters, authedProcedureWithUserServers, router } from "~api/router/trpc";
 import { makeServerUpsert, serverRouter, z_server_upsert } from "./server";
 import { toZObject } from "~api/utils/zod-utils";
 import { upsert } from "~api/utils/operations";
@@ -58,7 +58,7 @@ export async function transformServerSettings<T extends ServerSettings>(
 }
 
 const serverSettingFind = router({
-  byId: protectedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
+  byId: authedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
     return transformServerSettings(
       protectedServerManagerFetch({
         fetch: () => ctx.prisma.serverSettings.findUnique({ where: { server_id: input } }),
@@ -73,7 +73,7 @@ const serverSettingFind = router({
 });
 
 const serverSettingsCreateUpdate = router({
-  create: protectedProcedureWithUserServers
+  create: authedProcedureWithUserServers
     .input(z_server_settings_create)
     .mutation(async ({ ctx, input }) => {
       return transformServerSettings(
@@ -92,7 +92,7 @@ const serverSettingsCreateUpdate = router({
         })
       );
     }),
-  update: protectedProcedureWithUserServers
+  update: authedProcedureWithUserServers
     .input(z_server_settings_update)
     .mutation(async ({ ctx, input }) => {
       return transformServerSettings(
@@ -128,7 +128,7 @@ const z_server_settings_upsert_with_deps = z.object({
 });
 
 const serverSettingsCreateWithDeps = router({
-  createWithDeps: protectedProcedureWithUserServers
+  createWithDeps: authedProcedureWithUserServers
     .input(z_server_settings_create_with_deps)
     .mutation(async ({ ctx, input }) => {
       await serverRouter.createCaller(ctx).upsert(input.server);
@@ -137,7 +137,7 @@ const serverSettingsCreateWithDeps = router({
 });
 
 const serverSettingsUpsert = router({
-  upsert: protectedProcedureWithUserServers
+  upsert: authedProcedureWithUserServers
     .input(z_server_settings_upsert)
     .mutation(async ({ ctx, input }) => {
       return upsert(
@@ -146,7 +146,7 @@ const serverSettingsUpsert = router({
         () => serverSettingsCreateUpdate.createCaller(ctx).update(input.update)
       );
     }),
-  upsertWithDeps: protectedProcedureWithUserServers
+  upsertWithDeps: authedProcedureWithUserServers
     .input(z_server_settings_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(

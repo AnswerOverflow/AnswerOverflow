@@ -1,7 +1,12 @@
-import { getDefaultDiscordAccount } from "@answeroverflow/db";
+import { DiscordAccount, getDefaultDiscordAccount } from "@answeroverflow/db";
+import type { inferRouterInputs } from "@trpc/server";
 import { z } from "zod";
-import { findOrThrowNotFound, upsert, upsertMany } from "~api/utils/operations";
-import { botOnlyProcedure, mergeRouters, router } from "../trpc";
+import { upsert, upsertMany } from "~api/utils/operations";
+import {
+  protectedUserOnlyFetch,
+  protectedUserOnlyMutation,
+} from "~api/utils/protected-procedures/user-only";
+import { authedProcedure, mergeRouters, router } from "../trpc";
 
 const z_discord_account_create_input = z.object({
   id: z.string(),
@@ -19,61 +24,81 @@ const z_discord_account_update_input = z.object({
   update: z_discord_account_mutable,
 });
 
-const z_discord_account_upser_input = z.object({
+export const z_discord_account_upser_input = z.object({
   create: z_discord_account_create_input,
   update: z_discord_account_update_input,
 });
 
 const account_find_router = router({
-  byId: botOnlyProcedure.input(z.string()).query(({ ctx, input }) => {
-    return findOrThrowNotFound(
-      () => ctx.prisma.discordAccount.findUnique({ where: { id: input } }),
-      "Could not find discord account"
-    );
+  byId: authedProcedure.input(z.string()).query(({ ctx, input }) => {
+    return protectedUserOnlyFetch({
+      fetch: () => ctx.prisma.discordAccount.findUnique({ where: { id: input } }),
+      ctx,
+      user_id: input,
+      not_found_message: "Could not find discord account",
+    });
   }),
-  byIdMany: botOnlyProcedure.input(z.array(z.string())).query(({ ctx, input }) => {
-    return ctx.prisma.discordAccount.findMany({ where: { id: { in: input } } });
+  byIdMany: authedProcedure.input(z.array(z.string())).query(({ ctx, input }) => {
+    return protectedUserOnlyFetch({
+      fetch: () => ctx.prisma.discordAccount.findMany({ where: { id: { in: input } } }),
+      ctx,
+      user_id: input,
+      not_found_message: "Could not find discord account",
+    });
   }),
 });
 
 const account_crud_router = router({
-  create: botOnlyProcedure.input(z_discord_account_create_input).mutation(({ ctx, input }) => {
-    return ctx.prisma.discordAccount.create({ data: input });
+  create: authedProcedure.input(z_discord_account_create_input).mutation(({ ctx, input }) => {
+    return protectedUserOnlyMutation({
+      ctx,
+      user_id: input.id,
+      operation: () => ctx.prisma.discordAccount.create({ data: input }),
+    });
   }),
-  createBulk: botOnlyProcedure
+  createBulk: authedProcedure
     .input(z.array(z_discord_account_create_input))
     .mutation(async ({ ctx, input }) => {
-      await ctx.prisma.discordAccount.createMany({
-        data: input,
+      await protectedUserOnlyMutation({
+        ctx,
+        user_id: input.map((i) => i.id),
+        operation: () => ctx.prisma.discordAccount.createMany({ data: input }),
       });
       return input.map((i) => getDefaultDiscordAccount(i));
     }),
-  update: botOnlyProcedure.input(z_discord_account_update_input).mutation(({ ctx, input }) => {
-    return ctx.prisma.discordAccount.update({
-      where: {
-        id: input.id,
-      },
-      data: input.update,
+  update: authedProcedure.input(z_discord_account_update_input).mutation(({ ctx, input }) => {
+    return protectedUserOnlyMutation({
+      ctx,
+      user_id: input.id,
+      operation: () =>
+        ctx.prisma.discordAccount.update({ where: { id: input.id }, data: input.update }),
     });
   }),
-  updateBulk: botOnlyProcedure
+  updateBulk: authedProcedure
     .input(z.array(z_discord_account_update_input))
     .mutation(({ ctx, input }) => {
-      return ctx.prisma.$transaction(
-        input.map((i) => ctx.prisma.discordAccount.update({ where: { id: i.id }, data: i.update }))
-      );
+      return protectedUserOnlyMutation({
+        ctx,
+        user_id: input.map((i) => i.id),
+        operation: () =>
+          ctx.prisma.$transaction(
+            input.map((i) =>
+              ctx.prisma.discordAccount.update({ where: { id: i.id }, data: i.update })
+            )
+          ),
+      });
     }),
 });
 
 const account_upsert_router = router({
-  upsert: botOnlyProcedure.input(z_discord_account_upser_input).mutation(({ ctx, input }) => {
+  upsert: authedProcedure.input(z_discord_account_upser_input).mutation(({ ctx, input }) => {
     return upsert(
       () => account_find_router.createCaller(ctx).byId(input.create.id),
       () => account_crud_router.createCaller(ctx).create(input.create),
       () => account_crud_router.createCaller(ctx).update(input.update)
     );
   }),
-  upsertBulk: botOnlyProcedure
+  upsertBulk: authedProcedure
     .input(z.array(z_discord_account_upser_input))
     .mutation(async ({ ctx, input }) => {
       return upsertMany({
@@ -92,3 +117,18 @@ export const discordAccountRouter = mergeRouters(
   account_find_router,
   account_upsert_router
 );
+
+export function makeDiscordAccountUpsert(
+  account: DiscordAccount,
+  update: z.infer<typeof z_discord_account_mutable>
+): inferRouterInputs<typeof account_upsert_router>["upsert"] {
+  return {
+    create: account,
+    update: {
+      update: {
+        ...update,
+      },
+      id: account.id,
+    },
+  };
+}

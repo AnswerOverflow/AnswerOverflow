@@ -79,3 +79,34 @@ export function assertCanEditMessages(ctx: Context, author_id: string | string[]
     assertCanEditMessage(ctx, author_id);
   }
 }
+
+export function assertIsUser(ctx: Context, target_user_id: string) {
+  if (isSuperUser(ctx)) return;
+  if (isAnswerOverflowBot(ctx)) return;
+  if (!ctx.session) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You are not authorized to do this",
+    });
+  }
+  if (ctx.session.user.id !== target_user_id) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You are not authorized to do this",
+    });
+  }
+}
+
+export function assertIsUsers(ctx: Context, target_user_id: string | string[]) {
+  if (!ctx.session) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You are not authorized to do this",
+    });
+  }
+  if (Array.isArray(target_user_id)) {
+    target_user_id.forEach((id) => assertIsUser(ctx, id));
+  } else {
+    assertIsUser(ctx, target_user_id);
+  }
+}

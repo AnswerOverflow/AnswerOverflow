@@ -7,4 +7,5 @@ export * from "./src/utils";
 export * from "./src/default";
 export * from "./src/channel-settings";
 export * from "./src/utils/bitfield";
+export * from "./src/user-server-settings";
 export type Thread = Channel & { parent_id: string };
