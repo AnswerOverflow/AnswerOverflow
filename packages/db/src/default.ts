@@ -98,8 +98,10 @@ export function getDefaultThread(
   return data;
 }
 
+export type DiscordAccountRequired = { id: string; name: string };
+
 export function getDefaultDiscordAccount(
-  override: Partial<DiscordAccount> & { id: string; name: string }
+  override: Partial<DiscordAccount> & DiscordAccountRequired
 ): DiscordAccount {
   const data: DiscordAccount = {
     avatar: null,

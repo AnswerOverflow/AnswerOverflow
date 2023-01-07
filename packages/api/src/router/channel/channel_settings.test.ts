@@ -1,10 +1,6 @@
 import { clearDatabase } from "@answeroverflow/db";
 import { getGeneralScenario, ServerTestData } from "~api/test/utils";
-import {
-  channelSettingsRouter,
-  makeChannelSettingsCreateWithDepsInput,
-  makeChannelSettingsUpsertWithDeps,
-} from "./channel_settings";
+import { channelSettingsRouter } from "./channel_settings";
 
 let data: ServerTestData;
 let manage_channel_settings_router: ReturnType<typeof channelSettingsRouter["createCaller"]>;
@@ -17,11 +13,15 @@ beforeEach(async () => {
 
 describe("Channel Settings Upsert With Deps", () => {
   it("should succeed upserting a channel settings with manage guild", async () => {
-    const channel_settings = await manage_channel_settings_router.upsertWithDeps(
-      makeChannelSettingsUpsertWithDeps(data.text_channels[0].channel, data.server, {
+    const channel_settings = await manage_channel_settings_router.upsertWithDeps({
+      channel: {
+        channel: data.text_channels[0].channel,
+        server: data.server,
+      },
+      settings: {
         solution_tag_id: "101",
-      })
-    );
+      },
+    });
     expect(channel_settings).toBeDefined();
     expect(channel_settings.solution_tag_id).toBe("101");
   });
@@ -29,11 +29,15 @@ describe("Channel Settings Upsert With Deps", () => {
 
 describe("Channel Settings Fetch", () => {
   it("should fetch by invite code", async () => {
-    const channel_settings = await manage_channel_settings_router.createWithDeps(
-      makeChannelSettingsCreateWithDepsInput(data.text_channels[0].channel, data.server, {
+    const channel_settings = await manage_channel_settings_router.createWithDeps({
+      channel: {
+        channel: data.text_channels[0].channel,
+        server: data.server,
+      },
+      settings: {
         invite_code: "1234",
-      })
-    );
+      },
+    });
     expect(channel_settings).toBeDefined();
     expect(channel_settings.invite_code).toBe("1234");
 

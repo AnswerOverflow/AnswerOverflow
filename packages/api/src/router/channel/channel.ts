@@ -1,5 +1,4 @@
-import { Channel, getDefaultChannel, Server, Thread } from "@answeroverflow/db";
-import type { inferRouterInputs } from "@trpc/server";
+import { getDefaultChannel } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, authedProcedureWithUserServers, router } from "~api/router/trpc";
 import { addDefaultValues, upsert, upsertMany } from "~api/utils/operations";
@@ -10,19 +9,31 @@ import {
   protectedServerManagerMutationFetchFirst,
 } from "~api/utils/protected-procedures/server-manager-procedures";
 import { ALLOWED_CHANNEL_TYPES, ALLOWED_THREAD_TYPES } from "~api/utils/types";
-import { makeServerUpsert, serverRouter, z_server_upsert } from "../server/server";
+import { serverRouter, z_server_upsert } from "../server/server";
 
-const z_channel_create = z.object({
+const z_channel = z.object({
   id: z.string(),
   name: z.string(),
   server_id: z.string(),
-  type: z
-    .number()
-    .refine(
-      (n) => ALLOWED_CHANNEL_TYPES.has(n),
-      "Channel type can only be guild forum, text, or announcement"
-    ), // TODO: Make a type error if possible
+  type: z.number().refine(
+    (n) => ALLOWED_CHANNEL_TYPES.has(n),
+    "Channel type can only be guild forum, text, or announcement" // TODO: Make a type error if possible
+  ),
+  parent_id: z.string().nullable(),
 });
+
+const z_channel_required = z_channel.pick({
+  id: true,
+  name: true,
+  server_id: true,
+  type: true,
+});
+
+const z_channel_mutable = z_channel.pick({
+  name: true,
+});
+
+const z_channel_create = z_channel_mutable.merge(z_channel_required);
 
 const z_thread_create = z_channel_create.extend({
   parent_id: z.string(),
@@ -30,31 +41,31 @@ const z_thread_create = z_channel_create.extend({
 });
 
 const z_channel_create_with_deps = z.object({
-  channel: z_channel_create,
+  channel: z_channel_create.omit({
+    server_id: true, // Taken from server
+  }),
   server: z_server_upsert,
 });
 
-const z_channel_mutable = z_channel_create
-  .omit({ id: true, type: true, server_id: true })
-  .partial();
-const z_channel_update = z.object({ id: z.string(), data: z_channel_mutable });
+const z_channel_update = z_channel_mutable.merge(
+  z_channel_required.pick({
+    id: true,
+  })
+);
 
-export const z_channel_upsert = z.object({ create: z_channel_create, update: z_channel_update });
+export const z_channel_upsert = z_channel_create;
 export const z_channel_upsert_many = z.array(z_channel_upsert);
-export const z_channel_upsert_with_deps = z.object({
-  create: z_channel_create_with_deps,
-  update: z_channel_update,
-});
+export const z_channel_upsert_with_deps = z_channel_create_with_deps;
 
 const z_thread_create_with_deps = z.object({
-  thread: z_thread_create,
+  thread: z_thread_create.omit({
+    parent_id: true, // Taken from parent
+    server_id: true, // Taken from parent
+  }),
   parent: z_channel_upsert_with_deps,
 });
 
-const z_thread_upsert_with_deps = z.object({
-  create: z_thread_create_with_deps,
-  update: z_channel_update,
-});
+const z_thread_upsert_with_deps = z_thread_create_with_deps;
 
 const create_update_delete_router = router({
   create: authedProcedureWithUserServers.input(z_channel_create).mutation(({ ctx, input }) => {
@@ -86,7 +97,7 @@ const create_update_delete_router = router({
     .mutation(async ({ ctx, input }) => {
       return protectedServerManagerMutationFetchFirst({
         fetch: () => fetch_router.createCaller(ctx).byId(input.id),
-        operation: () => ctx.prisma.channel.update({ where: { id: input.id }, data: input.data }),
+        operation: () => ctx.prisma.channel.update({ where: { id: input.id }, data: input }),
         getServerId: (data) => data.server_id,
         ctx,
         not_found_message: "Channel does not exist",
@@ -145,7 +156,10 @@ const create_with_deps_router = router({
     .input(z_channel_create_with_deps)
     .mutation(async ({ ctx, input }) => {
       await serverRouter.createCaller(ctx).upsert(input.server);
-      return await create_update_delete_router.createCaller(ctx).create(input.channel);
+      return await create_update_delete_router.createCaller(ctx).create({
+        server_id: input.server.id,
+        ...input.channel,
+      });
     }),
 });
 
@@ -154,7 +168,11 @@ const create_thread_with_deps_router = router({
     .input(z_thread_create_with_deps)
     .mutation(async ({ ctx, input }) => {
       await upsert_router.createCaller(ctx).upsertWithDeps(input.parent);
-      return create_update_delete_router.createCaller(ctx).createThread(input.thread);
+      return create_update_delete_router.createCaller(ctx).createThread({
+        parent_id: input.parent.channel.id,
+        server_id: input.parent.server.id,
+        ...input.thread,
+      });
     }),
 });
 
@@ -163,9 +181,9 @@ const upsert_router = router({
     .input(z_channel_upsert)
     .mutation(async ({ ctx, input }) => {
       return upsert(
-        () => fetch_router.createCaller(ctx).byId(input.create.id),
-        () => create_update_delete_router.createCaller(ctx).create(input.create),
-        () => create_update_delete_router.createCaller(ctx).update(input.update)
+        () => fetch_router.createCaller(ctx).byId(input.id),
+        () => create_update_delete_router.createCaller(ctx).create(input),
+        () => create_update_delete_router.createCaller(ctx).update(input)
       );
     }),
   upsertMany: authedProcedureWithUserServers
@@ -173,9 +191,9 @@ const upsert_router = router({
     .mutation(async ({ ctx, input }) => {
       return upsertMany({
         input: input,
-        find: () => fetch_router.createCaller(ctx).byIdMany(input.map((c) => c.create.id)),
+        find: () => fetch_router.createCaller(ctx).byIdMany(input.map((c) => c.id)),
         getInputId(input) {
-          return input.create.id;
+          return input.id;
         },
         getFetchedDataId(input) {
           return input.id;
@@ -189,18 +207,18 @@ const upsert_router = router({
     .input(z_channel_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(
-        () => fetch_router.createCaller(ctx).byId(input.create.channel.id),
-        () => create_with_deps_router.createCaller(ctx).createWithDeps(input.create),
-        () => create_update_delete_router.createCaller(ctx).update(input.update)
+        () => fetch_router.createCaller(ctx).byId(input.channel.id),
+        () => create_with_deps_router.createCaller(ctx).createWithDeps(input),
+        () => create_update_delete_router.createCaller(ctx).update(input.channel)
       );
     }),
   upsertThreadWithDeps: authedProcedureWithUserServers
     .input(z_thread_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(
-        () => fetch_router.createCaller(ctx).byId(input.create.thread.id),
-        () => create_thread_with_deps_router.createCaller(ctx).createThreadWithDeps(input.create),
-        () => create_update_delete_router.createCaller(ctx).update(input.update)
+        () => fetch_router.createCaller(ctx).byId(input.thread.id),
+        () => create_thread_with_deps_router.createCaller(ctx).createThreadWithDeps(input),
+        () => create_update_delete_router.createCaller(ctx).update(input.thread)
       );
     }),
 });
@@ -212,53 +230,3 @@ export const channelRouter = mergeRouters(
   fetch_router,
   upsert_router
 );
-
-export function makeChannelUpsert(
-  channel: Channel,
-  update: z.infer<typeof z_channel_mutable> | undefined = undefined
-): inferRouterInputs<typeof upsert_router>["upsert"] {
-  return {
-    create: channel,
-    update: { id: channel.id, data: update ?? channel },
-  };
-}
-
-export function makeChannelCreateWithDepsInput(
-  channel: Channel,
-  server: Server
-): inferRouterInputs<typeof create_with_deps_router>["createWithDeps"] {
-  return {
-    channel,
-    server: makeServerUpsert(server),
-  };
-}
-
-export function makeChannelUpsertWithDeps(
-  channel: Channel,
-  server: Server,
-  update: z.infer<typeof z_channel_mutable> | undefined = undefined
-): inferRouterInputs<typeof upsert_router>["upsertWithDeps"] {
-  return {
-    create: makeChannelCreateWithDepsInput(channel, server),
-    update: { id: channel.id, data: update ?? channel },
-  };
-}
-
-export function makeThreadUpsertWithDeps(
-  thread: Thread,
-  parent: Channel,
-  server: Server
-): inferRouterInputs<typeof upsert_router>["upsertThreadWithDeps"] {
-  return {
-    create: {
-      thread,
-      parent: makeChannelUpsertWithDeps(parent, server),
-    },
-    update: {
-      id: thread.id,
-      data: {
-        name: "new name",
-      },
-    },
-  };
-}

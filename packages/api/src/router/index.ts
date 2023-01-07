@@ -5,13 +5,22 @@ import { channelSettingsRouter } from "~api/router/channel/channel_settings";
 import { messageRouter } from "~api/router/message/message";
 import { serverRouter } from "~api/router/server/server";
 import { userRouter } from "~api/router/user/user";
+import { serverSettingsRouter } from "./server/server_settings";
+import { discordAccountRouter } from "./accounts/discord-accounts";
+import { userServerSettingsRouter } from "./user-server-settings/user-server-settings";
 
 export const botRouter = router({
-  users: userRouter,
+  // Discord:
   servers: serverRouter,
+  server_settings: serverSettingsRouter,
   channels: channelRouter,
   channel_settings: channelSettingsRouter,
+  discord_accounts: discordAccountRouter,
+  user_server_settings: userServerSettingsRouter,
   messages: messageRouter,
+
+  // Other:
+  users: userRouter,
 });
 
 export const appRouter = router({

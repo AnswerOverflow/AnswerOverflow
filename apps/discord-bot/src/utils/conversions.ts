@@ -1,9 +1,21 @@
-import type { ForumChannel, GuildTextBasedChannel, Message, User } from "discord.js";
-import type { Message as AOMessage } from "@answeroverflow/db";
 import type {
+  ForumChannel,
+  Guild,
+  GuildMember,
+  GuildTextBasedChannel,
+  Message,
+  User,
+} from "discord.js";
+import {
+  getDefaultDiscordAccount,
+  getDefaultServer,
+  Message as AOMessage,
+} from "@answeroverflow/db";
+import {
   ChannelCreateWithDepsInput,
   ChannelUpsertInput,
   ChannelUpsertWithDepsInput,
+  makeUserServerSettingsUpsertWithDeps,
   UserUpsertInput,
 } from "@answeroverflow/api";
 export function toAOMessage(message: Message): AOMessage {
@@ -84,4 +96,40 @@ export function toChannelUpsertWithDeps(channel: GuildTextBasedChannel | ForumCh
     },
   };
   return converted_channel;
+}
+
+export function memberToAODiscordAccount(member: GuildMember) {
+  return getDefaultDiscordAccount({
+    id: member.id,
+    name: member.user.username,
+    avatar: member.avatar,
+  });
+}
+
+export function guildToAOServer(guild: Guild) {
+  return getDefaultServer({
+    id: guild.id,
+    name: guild.name,
+    icon: guild.icon,
+  });
+}
+
+export function makeGuildMemberUserServerSettingsUpsertWithDeps(
+  guild_member: GuildMember,
+  update: Parameters<typeof makeUserServerSettingsUpsertWithDeps>[0]["update"]
+) {
+  return makeUserServerSettingsUpsertWithDeps({
+    server_id: guild_member.guild.id,
+    user: {
+      create: {
+        id: guild_member.id,
+        name: guild_member.user.username,
+      },
+      update: {
+        avatar: guild_member.user.avatar,
+        name: guild_member.user.username,
+      },
+    },
+    update,
+  });
 }

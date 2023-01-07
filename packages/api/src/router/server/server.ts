@@ -1,5 +1,4 @@
-import type { Server } from "@answeroverflow/db";
-import { inferRouterInputs, TRPCError } from "@trpc/server";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { mergeRouters, authedProcedureWithUserServers, router } from "~api/router/trpc";
 import { upsert } from "~api/utils/operations";
@@ -14,20 +13,26 @@ export const z_server = z.object({
   kicked_time: z.date().nullable(),
 });
 
-export const z_server_create = z.object({
-  name: z.string(),
-  id: z.string(),
-  kicked_time: z.date().nullable().optional(),
+const z_server_required = z_server.pick({
+  id: true,
+  name: true,
 });
 
-export const z_server_mutable = z_server_create.omit({ id: true }).partial();
+const z_server_mutable = z_server
+  .omit({
+    id: true,
+  })
+  .partial();
 
-export const z_server_update = z.object({ id: z.string(), data: z_server_mutable });
+const z_server_create = z_server_mutable.merge(z_server_required);
 
-export const z_server_upsert = z.object({
-  create: z_server_create,
-  update: z_server_update,
-});
+const z_server_update = z_server_mutable.merge(
+  z_server_required.pick({
+    id: true,
+  })
+);
+
+export const z_server_upsert = z_server_create;
 
 const serverCreateUpdateRouter = router({
   create: authedProcedureWithUserServers.input(z_server_create).mutation(({ ctx, input }) => {
@@ -41,7 +46,7 @@ const serverCreateUpdateRouter = router({
     return protectedServerManagerMutation({
       ctx,
       server_id: input.id,
-      operation: () => ctx.prisma.server.update({ where: { id: input.id }, data: input.data }),
+      operation: () => ctx.prisma.server.update({ where: { id: input.id }, data: input }),
     });
   }),
 });
@@ -66,9 +71,9 @@ const serverFetchRouter = router({
 const serverUpsertRouter = router({
   upsert: authedProcedureWithUserServers.input(z_server_upsert).mutation(async ({ ctx, input }) => {
     return upsert(
-      () => serverFetchRouter.createCaller(ctx).byId(input.create.id),
-      () => serverCreateUpdateRouter.createCaller(ctx).create(input.create),
-      () => serverCreateUpdateRouter.createCaller(ctx).update(input.update)
+      () => serverFetchRouter.createCaller(ctx).byId(input.id),
+      () => serverCreateUpdateRouter.createCaller(ctx).create(input),
+      () => serverCreateUpdateRouter.createCaller(ctx).update(input)
     );
   }),
 });
@@ -78,13 +83,3 @@ export const serverRouter = mergeRouters(
   serverUpsertRouter,
   serverCreateUpdateRouter
 );
-
-export function makeServerUpsert(
-  server: Server,
-  update: z.infer<typeof z_server_mutable> | undefined = undefined
-): inferRouterInputs<typeof serverUpsertRouter>["upsert"] {
-  return {
-    create: server,
-    update: { id: server.id, data: update ?? server },
-  };
-}

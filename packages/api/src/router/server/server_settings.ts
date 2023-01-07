@@ -4,11 +4,10 @@ import {
   server_settings_flags,
   getDefaultServerSettings,
   mergeServerSettingsFlags,
-  Server,
 } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, authedProcedureWithUserServers, router } from "~api/router/trpc";
-import { makeServerUpsert, serverRouter, z_server_upsert } from "./server";
+import { serverRouter, z_server_upsert } from "./server";
 import { toZObject } from "~api/utils/zod-utils";
 import { upsert } from "~api/utils/operations";
 
@@ -17,28 +16,47 @@ import {
   protectedServerManagerMutation,
   protectedServerManagerMutationFetchFirst,
 } from "~api/utils/protected-procedures/server-manager-procedures";
-import type { inferRouterInputs } from "@trpc/server";
 
 const z_server_settings_flags = toZObject(...server_settings_flags);
 
-const z_server_settings_create = z.object({
+const z_server_settings = z.object({
   server_id: z.string(),
-  flags: z.optional(z_server_settings_flags),
+  dog: z.string(),
+  flags: z_server_settings_flags,
 });
 
-const z_server_settings_mutable = z_server_settings_create.extend({}).partial().omit({
+const z_server_settings_required = z_server_settings.pick({
   server_id: true,
 });
 
-const z_server_settings_update = z.object({
-  server_id: z.string(),
-  data: z_server_settings_mutable,
+const z_server_settings_mutable = z_server_settings
+  .omit({
+    server_id: true,
+  })
+  .partial();
+
+const z_server_settings_create = z_server_settings_mutable.merge(z_server_settings_required);
+
+const z_server_settings_update = z_server_settings_mutable.merge(
+  z_server_settings.pick({
+    server_id: true,
+  })
+);
+
+const z_server_settings_upsert = z_server_settings_create;
+
+const z_server_settings_create_with_deps = z.object({
+  server: z_server_upsert,
+  settings: z_server_settings_create
+    .omit({
+      server_id: true, // Taken from server
+    })
+    .default({
+      flags: {},
+    }),
 });
 
-const z_server_settings_upsert = z.object({
-  create: z_server_settings_create,
-  update: z_server_settings_update,
-});
+const z_server_settings_upsert_with_deps = z_server_settings_create_with_deps;
 
 function mergeServerSettings<T extends z.infer<typeof z_server_settings_mutable>>(
   old: ServerSettings,
@@ -103,7 +121,7 @@ const serverSettingsCreateUpdate = router({
             return data.server_id;
           },
           async operation(existing) {
-            const new_settings = mergeServerSettings(existing, input.data);
+            const new_settings = mergeServerSettings(existing, input);
             return await ctx.prisma.serverSettings.update({
               where: {
                 server_id: input.server_id,
@@ -117,22 +135,14 @@ const serverSettingsCreateUpdate = router({
     }),
 });
 
-const z_server_settings_create_with_deps = z.object({
-  server: z_server_upsert,
-  settings: z_server_settings_create,
-});
-
-const z_server_settings_upsert_with_deps = z.object({
-  create: z_server_settings_create_with_deps,
-  update: z_server_settings_update,
-});
-
 const serverSettingsCreateWithDeps = router({
   createWithDeps: authedProcedureWithUserServers
     .input(z_server_settings_create_with_deps)
     .mutation(async ({ ctx, input }) => {
       await serverRouter.createCaller(ctx).upsert(input.server);
-      return serverSettingsCreateUpdate.createCaller(ctx).create(input.settings);
+      return serverSettingsCreateUpdate
+        .createCaller(ctx)
+        .create({ ...input.settings, server_id: input.server.id });
     }),
 });
 
@@ -141,18 +151,21 @@ const serverSettingsUpsert = router({
     .input(z_server_settings_upsert)
     .mutation(async ({ ctx, input }) => {
       return upsert(
-        () => serverSettingFind.createCaller(ctx).byId(input.create.server_id),
-        () => serverSettingsCreateUpdate.createCaller(ctx).create(input.create),
-        () => serverSettingsCreateUpdate.createCaller(ctx).update(input.update)
+        () => serverSettingFind.createCaller(ctx).byId(input.server_id),
+        () => serverSettingsCreateUpdate.createCaller(ctx).create(input),
+        () => serverSettingsCreateUpdate.createCaller(ctx).update(input)
       );
     }),
   upsertWithDeps: authedProcedureWithUserServers
     .input(z_server_settings_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(
-        () => serverSettingFind.createCaller(ctx).byId(input.create.settings.server_id),
-        () => serverSettingsCreateWithDeps.createCaller(ctx).createWithDeps(input.create),
-        () => serverSettingsCreateUpdate.createCaller(ctx).update(input.update)
+        () => serverSettingFind.createCaller(ctx).byId(input.server.id),
+        () => serverSettingsCreateWithDeps.createCaller(ctx).createWithDeps(input),
+        () =>
+          serverSettingsCreateUpdate
+            .createCaller(ctx)
+            .update({ server_id: input.server.id, ...input })
       );
     }),
 });
@@ -163,32 +176,3 @@ export const serverSettingsRouter = mergeRouters(
   serverSettingsCreateUpdate,
   serverSettingsCreateWithDeps
 );
-
-export function makeServerSettingsCreateWithDepsInput(
-  server: Server,
-  settings: z.infer<typeof z_server_settings_mutable> = {}
-): inferRouterInputs<typeof serverSettingsCreateWithDeps>["createWithDeps"] {
-  return {
-    server: makeServerUpsert(server),
-    settings: {
-      server_id: server.id,
-      ...settings,
-    },
-  };
-}
-
-export function makeServerSettingsUpsertInput(
-  server: Server,
-  settings: z.infer<typeof z_server_settings_mutable>
-): inferRouterInputs<typeof serverSettingsUpsert>["upsert"] {
-  return {
-    create: {
-      server_id: server.id,
-      ...settings,
-    },
-    update: {
-      server_id: server.id,
-      data: settings,
-    },
-  };
-}
