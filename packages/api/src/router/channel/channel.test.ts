@@ -34,7 +34,7 @@ describe("Channel Operations", () => {
     });
     it("should create a channel with dependencies", async () => {
       const channel = await manage_channel_router.createWithDeps({
-        channel: channel_1,
+        ...channel_1,
         server: test_data_1.server,
       });
       expect(channel).toEqual(channel_1);
@@ -76,7 +76,7 @@ describe("Channel Operations", () => {
     });
     it("should upsert a channel with dependencies", async () => {
       const channel = await manage_channel_router.upsertWithDeps({
-        channel: channel_1,
+        ...channel_1,
         server: test_data_1.server,
       });
       expect(channel).toEqual(channel_1);
@@ -96,7 +96,7 @@ describe("Channel Operations", () => {
       const thread = await manage_channel_router.upsertThreadWithDeps({
         thread: thread_1,
         parent: {
-          channel: channel_1,
+          ...channel_1,
           server: test_data_1.server,
         },
       });

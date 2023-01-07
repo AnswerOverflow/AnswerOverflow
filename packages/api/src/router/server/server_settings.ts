@@ -45,16 +45,13 @@ const z_server_settings_update = z_server_settings_mutable.merge(
 
 const z_server_settings_upsert = z_server_settings_create;
 
-const z_server_settings_create_with_deps = z.object({
-  server: z_server_upsert,
-  settings: z_server_settings_create
-    .omit({
-      server_id: true, // Taken from server
-    })
-    .default({
-      flags: {},
-    }),
-});
+const z_server_settings_create_with_deps = z_server_settings_create
+  .omit({
+    server_id: true, // Taken from server
+  })
+  .extend({
+    server: z_server_upsert,
+  });
 
 const z_server_settings_upsert_with_deps = z_server_settings_create_with_deps;
 
@@ -142,7 +139,7 @@ const serverSettingsCreateWithDeps = router({
       await serverRouter.createCaller(ctx).upsert(input.server);
       return serverSettingsCreateUpdate
         .createCaller(ctx)
-        .create({ ...input.settings, server_id: input.server.id });
+        .create({ ...input, server_id: input.server.id });
     }),
 });
 

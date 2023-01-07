@@ -21,7 +21,9 @@ beforeEach(async () => {
 describe("Server Settings Operations", () => {
   describe("Server Settings Find", () => {
     it("should find server settings by id", async () => {
-      await server_settings_router_manage_guild.createWithDeps({ server });
+      await server_settings_router_manage_guild.createWithDeps({
+        server,
+      });
       const server_settings = await server_settings_router_manage_guild.byId(server.id);
       expect(server_settings).toBeDefined();
     });

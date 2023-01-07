@@ -44,9 +44,7 @@ describe("User Server Settings Create With Deps", () => {
     await server_router.create(server);
     const user_server_settings = await user_2_router.createWithDeps({
       user: user2,
-      user_server_settings: {
-        server_id: server.id,
-      },
+      server_id: server.id,
     });
     expect(user_server_settings).toBeDefined();
   });
@@ -54,9 +52,7 @@ describe("User Server Settings Create With Deps", () => {
     await expect(
       user_2_router.createWithDeps({
         user: user2,
-        user_server_settings: {
-          server_id: server.id,
-        },
+        server_id: server.id,
       })
     ).rejects.toThrowError(SERVER_NOT_SETUP_MESSAGE);
   });
@@ -81,11 +77,9 @@ describe("User Server Settings Upsert With Deps", () => {
     await server_router.create(server);
     const user_server_settings = await user_2_router.upsertWithDeps({
       user: user2,
-      user_server_settings: {
-        server_id: server.id,
-        flags: {
-          can_publicly_display_messages: true,
-        },
+      server_id: server.id,
+      flags: {
+        can_publicly_display_messages: true,
       },
     });
     expect(user_server_settings).toBeDefined();
@@ -94,9 +88,7 @@ describe("User Server Settings Upsert With Deps", () => {
     await expect(
       user_2_router.upsertWithDeps({
         user: user2,
-        user_server_settings: {
-          server_id: server.id,
-        },
+        server_id: server.id,
       })
     ).rejects.toThrowError(SERVER_NOT_SETUP_MESSAGE);
   });
@@ -109,11 +101,9 @@ describe("User Server Settings Upsert With Deps", () => {
     });
     const user_server_settings = await user_2_router.upsertWithDeps({
       user: user2,
-      user_server_settings: {
-        server_id: server.id,
-        flags: {
-          can_publicly_display_messages: true,
-        },
+      server_id: server.id,
+      flags: {
+        can_publicly_display_messages: true,
       },
     });
     expect(user_server_settings.flags.can_publicly_display_messages).toBeTruthy();

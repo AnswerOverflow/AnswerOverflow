@@ -38,12 +38,13 @@ const z_channel_settings_mutable = z_channel_settings
 
 const z_channel_settings_create = z_channel_settings_mutable.merge(z_channel_settings_required);
 
-const z_channel_settings_create_with_deps = z.object({
-  channel: z_channel_upsert_with_deps,
-  settings: z_channel_settings_create.omit({
+const z_channel_settings_create_with_deps = z_channel_settings_create
+  .omit({
     channel_id: true, // Taken from channel
-  }),
-});
+  })
+  .extend({
+    channel: z_channel_upsert_with_deps,
+  });
 
 const z_channel_settings_update = z_channel_settings_mutable.merge(
   z_channel_settings.pick({
@@ -124,10 +125,11 @@ const channelSettingsCreateWithDeps = router({
   createWithDeps: authedProcedureWithUserServers
     .input(z_channel_settings_create_with_deps)
     .mutation(async ({ ctx, input }) => {
-      await channelRouter.createCaller(ctx).upsertWithDeps(input.channel);
+      const { channel, ...settings } = input;
+      await channelRouter.createCaller(ctx).upsertWithDeps(channel);
       return channelSettingsCreateUpdate
         .createCaller(ctx)
-        .create({ channel_id: input.channel.channel.id, ...input.settings });
+        .create({ channel_id: channel.id, ...settings });
     }),
 });
 
@@ -192,13 +194,12 @@ const channelSettingsUpsert = router({
     .input(z_channel_settings_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(
-        () => channelSettingFind.createCaller(ctx).byId(input.channel.channel.id),
+        () => channelSettingFind.createCaller(ctx).byId(input.channel.id),
         () => channelSettingsCreateWithDeps.createCaller(ctx).createWithDeps(input),
         () =>
-          channelSettingsCreateUpdate.createCaller(ctx).update({
-            channel_id: input.channel.channel.id,
-            ...input.settings,
-          })
+          channelSettingsCreateUpdate
+            .createCaller(ctx)
+            .update({ channel_id: input.channel.id, ...input })
       );
     }),
 });

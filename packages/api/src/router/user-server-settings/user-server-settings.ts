@@ -45,12 +45,13 @@ const z_user_server_settings_find = z_user_server_settings_required;
 const z_user_server_settings_create = z_user_server_settings_mutable.merge(
   z_user_server_settings_required
 );
-const z_user_server_settings_create_with_deps = z.object({
-  user_server_settings: z_user_server_settings_create.omit({
+const z_user_server_settings_create_with_deps = z_user_server_settings_create
+  .omit({
     user_id: true, // we infer this from the user
-  }),
-  user: z_discord_account_upsert,
-});
+  })
+  .extend({
+    user: z_discord_account_upsert,
+  });
 
 const z_user_server_settings_update = z_user_server_settings_mutable.merge(
   z_user_server_settings_find
@@ -148,7 +149,7 @@ const user_server_settings_with_deps_router = router({
           async operation() {
             // We do not create the server as a dependency as that action should only be handled by the server owner or Answer Overflow bot
             try {
-              await serverRouter.createCaller(ctx).byId(input.user_server_settings.server_id);
+              await serverRouter.createCaller(ctx).byId(input.server_id);
             } catch (error) {
               if (error instanceof TRPCError) {
                 if (error.code === "NOT_FOUND") {
@@ -164,15 +165,17 @@ const user_server_settings_with_deps_router = router({
             const merged_data = mergeUserServerSettings(
               getDefaultUserServerSettings({
                 user_id: input.user.id,
-                ...input.user_server_settings,
+                ...input,
               }),
               {
                 user_id: input.user.id,
-                ...input.user_server_settings,
+                ...input,
               }
             );
+            // eslint-disable-next-line no-unused-vars
+            const { user, ...data_without_user } = merged_data;
             return ctx.prisma.userServerSettings.create({
-              data: merged_data,
+              data: data_without_user,
             });
           },
         })
@@ -199,18 +202,13 @@ const user_server_settings_upsert = router({
         () =>
           user_server_settings_fetch_router.createCaller(ctx).byId({
             user_id: input.user.id,
-            server_id: input.user_server_settings.server_id,
+            server_id: input.server_id,
           }),
+        () => user_server_settings_with_deps_router.createCaller(ctx).createWithDeps(input),
         () =>
-          user_server_settings_with_deps_router.createCaller(ctx).createWithDeps({
-            user: input.user,
-            user_server_settings: input.user_server_settings,
-          }),
-        () =>
-          user_server_settings_mutation_router.createCaller(ctx).update({
-            user_id: input.user.id,
-            ...input.user_server_settings,
-          })
+          user_server_settings_mutation_router
+            .createCaller(ctx)
+            .update({ ...input, user_id: input.user.id })
       );
     }),
 });

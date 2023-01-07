@@ -1,23 +1,10 @@
-import type {
-  ForumChannel,
-  Guild,
-  GuildMember,
-  GuildTextBasedChannel,
-  Message,
-  User,
-} from "discord.js";
+import type { Guild, GuildMember, Message } from "discord.js";
 import {
   getDefaultDiscordAccount,
   getDefaultServer,
   Message as AOMessage,
 } from "@answeroverflow/db";
-import {
-  ChannelCreateWithDepsInput,
-  ChannelUpsertInput,
-  ChannelUpsertWithDepsInput,
-  makeUserServerSettingsUpsertWithDeps,
-  UserUpsertInput,
-} from "@answeroverflow/api";
+
 export function toAOMessage(message: Message): AOMessage {
   if (!message.guild) throw new Error("Message is not in a guild");
   const converted_message: AOMessage = {
@@ -35,69 +22,6 @@ export function toAOMessage(message: Message): AOMessage {
   return converted_message;
 }
 
-export function toAOUser(user: User) {
-  const converted_user: UserUpsertInput = {
-    id: user.id,
-    name: user.username,
-  };
-  return converted_user;
-}
-
-export function toChannelUpsert(channel: GuildTextBasedChannel) {
-  const converted_channel: ChannelUpsertInput = {
-    create: {
-      id: channel.id,
-      name: channel.name,
-      type: channel.type,
-      server_id: channel.guild.id,
-    },
-    update: {
-      id: channel.id,
-      data: {
-        name: channel.name,
-      },
-    },
-  };
-  return converted_channel;
-}
-
-export function toChannelCreateWithDeps(channel: GuildTextBasedChannel | ForumChannel) {
-  const converted_channel: ChannelCreateWithDepsInput = {
-    channel: {
-      id: channel.id,
-      name: channel.name,
-      type: channel.type,
-      server_id: channel.guild.id,
-    },
-    server: {
-      create: {
-        id: channel.guild.id,
-        name: channel.guild.name,
-      },
-      update: {
-        id: channel.guild.id,
-        data: {
-          name: channel.guild.name,
-        },
-      },
-    },
-  };
-  return converted_channel;
-}
-
-export function toChannelUpsertWithDeps(channel: GuildTextBasedChannel | ForumChannel) {
-  const converted_channel: ChannelUpsertWithDepsInput = {
-    create: toChannelCreateWithDeps(channel),
-    update: {
-      id: channel.id,
-      data: {
-        name: channel.name,
-      },
-    },
-  };
-  return converted_channel;
-}
-
 export function memberToAODiscordAccount(member: GuildMember) {
   return getDefaultDiscordAccount({
     id: member.id,
@@ -111,25 +35,5 @@ export function guildToAOServer(guild: Guild) {
     id: guild.id,
     name: guild.name,
     icon: guild.icon,
-  });
-}
-
-export function makeGuildMemberUserServerSettingsUpsertWithDeps(
-  guild_member: GuildMember,
-  update: Parameters<typeof makeUserServerSettingsUpsertWithDeps>[0]["update"]
-) {
-  return makeUserServerSettingsUpsertWithDeps({
-    server_id: guild_member.guild.id,
-    user: {
-      create: {
-        id: guild_member.id,
-        name: guild_member.user.username,
-      },
-      update: {
-        avatar: guild_member.user.avatar,
-        name: guild_member.user.username,
-      },
-    },
-    update,
   });
 }

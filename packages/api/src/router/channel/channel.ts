@@ -40,12 +40,13 @@ const z_thread_create = z_channel_create.extend({
   type: z.number().refine((n) => ALLOWED_THREAD_TYPES.has(n), "Can only create public threads"), // TODO: Make a type error if possible
 });
 
-const z_channel_create_with_deps = z.object({
-  channel: z_channel_create.omit({
+const z_channel_create_with_deps = z_channel_create
+  .omit({
     server_id: true, // Taken from server
-  }),
-  server: z_server_upsert,
-});
+  })
+  .extend({
+    server: z_server_upsert,
+  });
 
 const z_channel_update = z_channel_mutable.merge(
   z_channel_required.pick({
@@ -155,10 +156,11 @@ const create_with_deps_router = router({
   createWithDeps: authedProcedureWithUserServers
     .input(z_channel_create_with_deps)
     .mutation(async ({ ctx, input }) => {
-      await serverRouter.createCaller(ctx).upsert(input.server);
+      const { server, ...channel } = input;
+      await serverRouter.createCaller(ctx).upsert(server);
       return await create_update_delete_router.createCaller(ctx).create({
         server_id: input.server.id,
-        ...input.channel,
+        ...channel,
       });
     }),
 });
@@ -169,7 +171,7 @@ const create_thread_with_deps_router = router({
     .mutation(async ({ ctx, input }) => {
       await upsert_router.createCaller(ctx).upsertWithDeps(input.parent);
       return create_update_delete_router.createCaller(ctx).createThread({
-        parent_id: input.parent.channel.id,
+        parent_id: input.parent.id,
         server_id: input.parent.server.id,
         ...input.thread,
       });
@@ -207,9 +209,9 @@ const upsert_router = router({
     .input(z_channel_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(
-        () => fetch_router.createCaller(ctx).byId(input.channel.id),
+        () => fetch_router.createCaller(ctx).byId(input.id),
         () => create_with_deps_router.createCaller(ctx).createWithDeps(input),
-        () => create_update_delete_router.createCaller(ctx).update(input.channel)
+        () => create_update_delete_router.createCaller(ctx).update(input)
       );
     }),
   upsertThreadWithDeps: authedProcedureWithUserServers

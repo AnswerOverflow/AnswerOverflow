@@ -4,7 +4,6 @@ import { Events } from "discord.js";
 import { mockInvite } from "~discord-bot/test/utils/discordjs/channel-mock";
 import { createNormalScenario } from "~discord-bot/test/utils/discordjs/scenarios";
 import { delay } from "~discord-bot/test/utils/helpers";
-import { toChannelCreateWithDeps, toChannelUpsertWithDeps } from "~discord-bot/utils/conversions";
 import { callAPI } from "~discord-bot/utils/trpc";
 
 let data: Awaited<ReturnType<typeof createNormalScenario>>;
