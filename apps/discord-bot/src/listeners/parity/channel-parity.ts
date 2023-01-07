@@ -12,9 +12,7 @@ export class SyncOnUpdate extends Listener {
       async ApiCall(router) {
         return router.channels.update({
           id: newChannel.id,
-          data: {
-            name: newChannel.name,
-          },
+          name: newChannel.name,
         });
       },
       Ok() {
@@ -89,9 +87,7 @@ export class ThreadSyncOnUpdate extends Listener {
       async ApiCall(router) {
         return router.channels.update({
           id: newThread.id,
-          data: {
-            name: newThread.name,
-          },
+          name: newThread.name,
         });
       },
       Ok() {
@@ -120,9 +116,7 @@ export class InviteSyncOnDelete extends Listener {
         if (!to_update) return;
         return router.channel_settings.update({
           channel_id: to_update.channel_id,
-          data: {
-            invite_code: null,
-          },
+          invite_code: null,
         });
       },
       Ok(result) {

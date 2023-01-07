@@ -94,7 +94,7 @@ describe("Channel Operations", () => {
     it("should succeed upserting a new thread with manage guild", async () => {
       await manage_guild_router.create(test_data_1.server);
       const thread = await manage_channel_router.upsertThreadWithDeps({
-        thread: thread_1,
+        ...thread_1,
         parent: {
           ...channel_1,
           server: test_data_1.server,

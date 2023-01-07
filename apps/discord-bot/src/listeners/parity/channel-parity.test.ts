@@ -4,6 +4,7 @@ import { Events } from "discord.js";
 import { mockInvite } from "~discord-bot/test/utils/discordjs/channel-mock";
 import { createNormalScenario } from "~discord-bot/test/utils/discordjs/scenarios";
 import { delay } from "~discord-bot/test/utils/helpers";
+import { toAOChannelWithServer, toAOThread } from "~discord-bot/utils/conversions";
 import { callAPI } from "~discord-bot/utils/trpc";
 
 let data: Awaited<ReturnType<typeof createNormalScenario>>;
@@ -19,7 +20,7 @@ describe("Channel Update Parity", () => {
   it("should update an existing channel", async () => {
     await callAPI({
       async ApiCall(router) {
-        return router.channels.createWithDeps(toChannelCreateWithDeps(data.text_channel));
+        return router.channels.createWithDeps(toAOChannelWithServer(data.text_channel));
       },
     });
     const new_channel = Object.assign(data.text_channel, { name: "new_name" });
@@ -58,7 +59,7 @@ describe("Channel Delete Parity", () => {
   it("should delete an existing channel", async () => {
     await callAPI({
       async ApiCall(router) {
-        return router.channels.createWithDeps(toChannelCreateWithDeps(data.text_channel));
+        return router.channels.createWithDeps(toAOChannelWithServer(data.text_channel));
       },
     });
     client.emit(Events.ChannelDelete, data.text_channel);
@@ -93,14 +94,8 @@ describe("Thread Delete Parity", () => {
     await callAPI({
       async ApiCall(router) {
         return router.channels.createThreadWithDeps({
-          parent: toChannelUpsertWithDeps(data.forum_channel),
-          thread: {
-            id: data.forum_thread.id,
-            name: data.forum_thread.name,
-            parent_id: data.forum_channel.id,
-            type: data.forum_thread.type,
-            server_id: data.forum_thread.guild.id,
-          },
+          parent: toAOChannelWithServer(data.forum_thread.parent!),
+          ...toAOThread(data.forum_thread),
         });
       },
     });
@@ -132,14 +127,8 @@ describe("Thread Update Parity", () => {
     await callAPI({
       async ApiCall(router) {
         return router.channels.createThreadWithDeps({
-          parent: toChannelUpsertWithDeps(data.forum_channel),
-          thread: {
-            id: data.forum_thread.id,
-            name: data.forum_thread.name,
-            parent_id: data.forum_channel.id,
-            type: data.forum_thread.type,
-            server_id: data.forum_thread.guild.id,
-          },
+          parent: toAOChannelWithServer(data.forum_thread.parent!),
+          ...toAOThread(data.forum_thread),
         });
       },
     });
@@ -181,11 +170,8 @@ describe("Invite Parity", () => {
     await callAPI({
       async ApiCall(router) {
         return router.channel_settings.createWithDeps({
-          channel: toChannelUpsertWithDeps(data.text_channel),
-          settings: {
-            channel_id: data.text_channel.id,
-            invite_code: "1234",
-          },
+          channel: toAOChannelWithServer(data.text_channel),
+          invite_code: "1234",
         });
       },
       Ok(created) {

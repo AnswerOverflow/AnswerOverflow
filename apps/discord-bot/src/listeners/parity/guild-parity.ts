@@ -2,6 +2,7 @@ import { ALLOWED_CHANNEL_TYPES } from "@answeroverflow/api";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import { Events, Guild } from "discord.js";
+import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
 import { callAPI } from "~discord-bot/utils/trpc";
 
 /*
@@ -20,36 +21,11 @@ export class SyncOnJoin extends Listener {
   public async run(guild: Guild) {
     await callAPI({
       async ApiCall(router) {
-        await router.servers.upsert({
-          create: {
-            id: guild.id,
-            name: guild.name,
-          },
-          update: {
-            id: guild.id,
-            data: {
-              name: guild.name,
-              kicked_time: null,
-            },
-          },
-        });
+        await router.servers.upsert(toAOServer(guild));
         await router.channels.upsertMany(
           guild.channels.cache
             .filter((channel) => ALLOWED_CHANNEL_TYPES.has(channel.type))
-            .map((channel) => ({
-              create: {
-                id: channel.id,
-                name: channel.name,
-                server_id: guild.id,
-                type: channel.type,
-              },
-              update: {
-                id: channel.id,
-                data: {
-                  name: channel.name,
-                },
-              },
-            }))
+            .map((channel) => toAOChannel(channel))
         );
       },
       Ok() {},
@@ -69,18 +45,8 @@ export class SyncOnDelete extends Listener {
     await callAPI({
       async ApiCall(router) {
         return await router.servers.upsert({
-          create: {
-            id: guild.id,
-            name: guild.name,
-            kicked_time: new Date(),
-          },
-          update: {
-            id: guild.id,
-            data: {
-              name: guild.name,
-              kicked_time: new Date(),
-            },
-          },
+          ...toAOServer(guild),
+          kicked_time: new Date(),
         });
       },
       Ok() {},
@@ -94,20 +60,7 @@ export class SyncOnUpdate extends Listener {
   public async run(_oldGuild: Guild, newGuild: Guild) {
     await callAPI({
       async ApiCall(router) {
-        return await router.servers.upsert({
-          create: {
-            id: newGuild.id,
-            name: newGuild.name,
-          },
-          update: {
-            id: newGuild.id,
-            data: {
-              name: newGuild.name,
-
-              kicked_time: null,
-            },
-          },
-        });
+        return await router.servers.upsert(toAOServer(newGuild));
       },
       Ok() {},
       Error() {},

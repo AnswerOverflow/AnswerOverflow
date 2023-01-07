@@ -58,13 +58,14 @@ export const z_channel_upsert = z_channel_create;
 export const z_channel_upsert_many = z.array(z_channel_upsert);
 export const z_channel_upsert_with_deps = z_channel_create_with_deps;
 
-const z_thread_create_with_deps = z.object({
-  thread: z_thread_create.omit({
+const z_thread_create_with_deps = z_thread_create
+  .omit({
     parent_id: true, // Taken from parent
     server_id: true, // Taken from parent
-  }),
-  parent: z_channel_upsert_with_deps,
-});
+  })
+  .extend({
+    parent: z_channel_upsert_with_deps,
+  });
 
 const z_thread_upsert_with_deps = z_thread_create_with_deps;
 
@@ -169,11 +170,13 @@ const create_thread_with_deps_router = router({
   createThreadWithDeps: authedProcedureWithUserServers
     .input(z_thread_create_with_deps)
     .mutation(async ({ ctx, input }) => {
+      const { parent, ...thread } = input;
       await upsert_router.createCaller(ctx).upsertWithDeps(input.parent);
+
       return create_update_delete_router.createCaller(ctx).createThread({
-        parent_id: input.parent.id,
-        server_id: input.parent.server.id,
-        ...input.thread,
+        parent_id: parent.id,
+        server_id: parent.server.id,
+        ...thread,
       });
     }),
 });
@@ -218,9 +221,9 @@ const upsert_router = router({
     .input(z_thread_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(
-        () => fetch_router.createCaller(ctx).byId(input.thread.id),
+        () => fetch_router.createCaller(ctx).byId(input.id),
         () => create_thread_with_deps_router.createCaller(ctx).createThreadWithDeps(input),
-        () => create_update_delete_router.createCaller(ctx).update(input.thread)
+        () => create_update_delete_router.createCaller(ctx).update(input)
       );
     }),
 });

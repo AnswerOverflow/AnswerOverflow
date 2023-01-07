@@ -27,6 +27,9 @@ export async function createNormalScenario() {
   const guild = mockGuild(client);
   const guild_member_owner = await guild.members.fetch(guild.ownerId);
   const guild_member_default = mockGuildMember(client, undefined, guild);
+  const pending_guild_member_default = mockGuildMember(client, undefined, guild, undefined, {
+    pending: true,
+  });
   const guild_member_manage_guild = mockGuildMember(
     client,
     undefined,
@@ -59,6 +62,7 @@ export async function createNormalScenario() {
     guild,
     guild_member_owner,
     guild_member_default,
+    pending_guild_member_default,
     guild_member_manage_guild,
     guild_member_admin,
     forum_channel,
