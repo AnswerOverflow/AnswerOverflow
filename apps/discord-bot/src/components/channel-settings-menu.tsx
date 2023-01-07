@@ -6,6 +6,7 @@ import React from "react";
 import { ToggleButton } from "./toggle-button";
 import { getRootChannel } from "~discord-bot/utils/utils";
 import { toAOChannelWithServer } from "~discord-bot/utils/conversions";
+import { createMemberCtx } from "~discord-bot/utils/context";
 
 const getTagNameWithEmoji = (tag: GuildForumTag) =>
   tag.emoji?.name ? tag.emoji.name + " " + tag.name : tag.name;
@@ -49,7 +50,7 @@ export function ChannelSettingsMenu({
         Ok(result) {
           setChannelSettings(result);
         },
-        member,
+        getCtx: () => createMemberCtx(member),
       },
       interaction
     );

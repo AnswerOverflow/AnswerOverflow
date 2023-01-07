@@ -5,7 +5,7 @@ import {
   protectedUserOnlyFetch,
   protectedUserOnlyMutation,
 } from "~api/utils/protected-procedures/user-only";
-import { authedProcedure, mergeRouters, router } from "../trpc";
+import { withDiscordAccountProcedure, mergeRouters, router } from "../trpc";
 
 const z_discord_account = z.object({
   id: z.string(),
@@ -31,7 +31,7 @@ const z_discord_account_update = z_discord_account_mutable.merge(
 export const z_discord_account_upsert = z_discord_account_create;
 
 const account_find_router = router({
-  byId: authedProcedure.input(z.string()).query(({ ctx, input }) => {
+  byId: withDiscordAccountProcedure.input(z.string()).query(({ ctx, input }) => {
     return protectedUserOnlyFetch({
       fetch: () => ctx.prisma.discordAccount.findUnique({ where: { id: input } }),
       ctx,
@@ -39,7 +39,7 @@ const account_find_router = router({
       not_found_message: "Could not find discord account",
     });
   }),
-  byIdMany: authedProcedure.input(z.array(z.string())).query(({ ctx, input }) => {
+  byIdMany: withDiscordAccountProcedure.input(z.array(z.string())).query(({ ctx, input }) => {
     return protectedUserOnlyFetch({
       fetch: () => ctx.prisma.discordAccount.findMany({ where: { id: { in: input } } }),
       ctx,
@@ -50,14 +50,14 @@ const account_find_router = router({
 });
 
 const account_crud_router = router({
-  create: authedProcedure.input(z_discord_account_create).mutation(({ ctx, input }) => {
+  create: withDiscordAccountProcedure.input(z_discord_account_create).mutation(({ ctx, input }) => {
     return protectedUserOnlyMutation({
       ctx,
       user_id: input.id,
       operation: () => ctx.prisma.discordAccount.create({ data: input }),
     });
   }),
-  createBulk: authedProcedure
+  createBulk: withDiscordAccountProcedure
     .input(z.array(z_discord_account_create))
     .mutation(async ({ ctx, input }) => {
       await protectedUserOnlyMutation({
@@ -67,14 +67,14 @@ const account_crud_router = router({
       });
       return input.map((i) => getDefaultDiscordAccount(i));
     }),
-  update: authedProcedure.input(z_discord_account_update).mutation(({ ctx, input }) => {
+  update: withDiscordAccountProcedure.input(z_discord_account_update).mutation(({ ctx, input }) => {
     return protectedUserOnlyMutation({
       ctx,
       user_id: input.id,
       operation: () => ctx.prisma.discordAccount.update({ where: { id: input.id }, data: input }),
     });
   }),
-  updateBulk: authedProcedure
+  updateBulk: withDiscordAccountProcedure
     .input(z.array(z_discord_account_update))
     .mutation(({ ctx, input }) => {
       return protectedUserOnlyMutation({
@@ -89,14 +89,14 @@ const account_crud_router = router({
 });
 
 const account_upsert_router = router({
-  upsert: authedProcedure.input(z_discord_account_upsert).mutation(({ ctx, input }) => {
+  upsert: withDiscordAccountProcedure.input(z_discord_account_upsert).mutation(({ ctx, input }) => {
     return upsert(
       () => account_find_router.createCaller(ctx).byId(input.id),
       () => account_crud_router.createCaller(ctx).create(input),
       () => account_crud_router.createCaller(ctx).update(input)
     );
   }),
-  upsertBulk: authedProcedure
+  upsertBulk: withDiscordAccountProcedure
     .input(z.array(z_discord_account_upsert))
     .mutation(async ({ ctx, input }) => {
       return upsertMany({

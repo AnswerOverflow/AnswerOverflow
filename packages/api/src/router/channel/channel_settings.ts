@@ -6,7 +6,7 @@ import {
   getDefaultChannelSettings,
 } from "@answeroverflow/db";
 import { z } from "zod";
-import { mergeRouters, authedProcedureWithUserServers, router } from "~api/router/trpc";
+import { mergeRouters, withUserServersProcedure, router } from "~api/router/trpc";
 import { dictToBitfield } from "@answeroverflow/db";
 import { channelRouter, z_channel_upsert_with_deps } from "./channel";
 import { toZObject } from "~api/utils/zod-utils";
@@ -79,7 +79,7 @@ async function transformChannelSettingsReturn<T extends ChannelSettings>(
 }
 
 const channelSettingsCreateUpdate = router({
-  create: authedProcedureWithUserServers
+  create: withUserServersProcedure
     .input(z_channel_settings_create)
     .mutation(async ({ ctx, input }) => {
       return transformChannelSettingsReturn(() =>
@@ -98,7 +98,7 @@ const channelSettingsCreateUpdate = router({
         })
       );
     }),
-  update: authedProcedureWithUserServers
+  update: withUserServersProcedure
     .input(z_channel_settings_update)
     .mutation(async ({ ctx, input }) => {
       return transformChannelSettingsReturn(() =>
@@ -122,7 +122,7 @@ const channelSettingsCreateUpdate = router({
 });
 
 const channelSettingsCreateWithDeps = router({
-  createWithDeps: authedProcedureWithUserServers
+  createWithDeps: withUserServersProcedure
     .input(z_channel_settings_create_with_deps)
     .mutation(async ({ ctx, input }) => {
       const { channel, ...settings } = input;
@@ -134,7 +134,7 @@ const channelSettingsCreateWithDeps = router({
 });
 
 const channelSettingFind = router({
-  byId: authedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
+  byId: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return transformChannelSettingsReturn(() =>
       protectedServerManagerFetch({
         fetch: () =>
@@ -156,7 +156,7 @@ const channelSettingFind = router({
       })
     );
   }),
-  byInviteCode: authedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
+  byInviteCode: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return transformChannelSettingsReturn(() =>
       protectedServerManagerFetch({
         fetch: () =>
@@ -181,7 +181,7 @@ const channelSettingFind = router({
 });
 
 const channelSettingsUpsert = router({
-  upsert: authedProcedureWithUserServers
+  upsert: withUserServersProcedure
     .input(z_channel_settings_upsert)
     .mutation(async ({ ctx, input }) => {
       return upsert(
@@ -190,7 +190,7 @@ const channelSettingsUpsert = router({
         () => channelSettingsCreateUpdate.createCaller(ctx).update(input)
       );
     }),
-  upsertWithDeps: authedProcedureWithUserServers
+  upsertWithDeps: withUserServersProcedure
     .input(z_channel_settings_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(

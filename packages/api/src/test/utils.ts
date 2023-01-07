@@ -112,17 +112,15 @@ export async function getServerTestData(server_id: string = "101") {
 
 export function createBotCallerCtx() {
   return createContextInner({
-    session: {
-      user: {
-        id: "AnswerOverflow",
-        name: "test",
-        email: null,
-        image: null,
-      },
-      expires: new Date().toString(),
-    },
+    session: null,
     caller: "discord-bot",
     user_servers: undefined,
+    discord_account: {
+      id: process.env.DISCORD_CLIENT_ID ?? process.env.VITE_DISCORD_CLIENT_ID,
+      avatar: null,
+      username: "test",
+      discriminator: "0000",
+    },
   });
 }
 
@@ -151,14 +149,14 @@ export function createDefaultPermissionCtx(input: Omit<CtxOverride, "permissions
 
 export function createCtxWithServers(input: CtxOverride) {
   return createContextInner({
-    session: {
-      user: {
-        id: input.user.id,
-        name: input.user.name,
-      },
-      expires: new Date().toString(),
-    },
+    session: null,
     caller: "discord-bot",
+    discord_account: {
+      id: input.user.id,
+      avatar: null,
+      username: input.user.name,
+      discriminator: "0000",
+    },
     user_servers: [
       {
         features: [],

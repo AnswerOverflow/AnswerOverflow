@@ -5,12 +5,16 @@ import type { Context } from "~api/router/context";
 export const MISSING_PERMISSIONS_MESSAGE = "You are missing the required permissions to do this";
 
 export function isAnswerOverflowBot(ctx: Context) {
-  if (ctx.session && ctx.session.user.id === "AnswerOverflow") return true;
+  const bot_id =
+    process.env.NODE_ENV === "test"
+      ? process.env.VITE_DISCORD_CLIENT_ID
+      : process.env.DISCORD_CLIENT_ID;
+  if (ctx.discord_account?.id === bot_id) return true;
   return false;
 }
 
 export function isSuperUser(ctx: Context) {
-  if (ctx.session && ctx.session.user.id === "523949187663134754") return true; // This is the ID of Rhys - TODO: Swap to an env var
+  if (ctx.discord_account?.id === "523949187663134754") return true; // This is the ID of Rhys - TODO: Swap to an env var
   return false;
 }
 
@@ -64,7 +68,7 @@ export function assertCanEditServers(ctx: Context, server_id: string | string[])
 export function assertCanEditMessage(ctx: Context, author_id: string) {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
-  if (ctx.session?.user.id !== author_id) {
+  if (ctx.discord_account?.id !== author_id) {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: MISSING_PERMISSIONS_MESSAGE,
@@ -83,13 +87,7 @@ export function assertCanEditMessages(ctx: Context, author_id: string | string[]
 export function assertIsUser(ctx: Context, target_user_id: string) {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
-  if (!ctx.session) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "You are not authorized to do this",
-    });
-  }
-  if (ctx.session.user.id !== target_user_id) {
+  if (ctx.discord_account?.id !== target_user_id) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
       message: "You are not authorized to do this",
@@ -98,12 +96,6 @@ export function assertIsUser(ctx: Context, target_user_id: string) {
 }
 
 export function assertIsUsers(ctx: Context, target_user_id: string | string[]) {
-  if (!ctx.session) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "You are not authorized to do this",
-    });
-  }
   if (Array.isArray(target_user_id)) {
     target_user_id.forEach((id) => assertIsUser(ctx, id));
   } else {

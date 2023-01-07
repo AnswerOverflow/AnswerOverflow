@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { mergeRouters, authedProcedureWithUserServers, router } from "~api/router/trpc";
+import { mergeRouters, withUserServersProcedure, router } from "~api/router/trpc";
 import { upsert } from "~api/utils/operations";
 import {
   protectedServerManagerFetch,
@@ -35,14 +35,14 @@ const z_server_update = z_server_mutable.merge(
 export const z_server_upsert = z_server_create;
 
 const serverCreateUpdateRouter = router({
-  create: authedProcedureWithUserServers.input(z_server_create).mutation(({ ctx, input }) => {
+  create: withUserServersProcedure.input(z_server_create).mutation(({ ctx, input }) => {
     return protectedServerManagerMutation({
       ctx,
       server_id: input.id,
       operation: () => ctx.prisma.server.create({ data: input }),
     });
   }),
-  update: authedProcedureWithUserServers.input(z_server_update).mutation(({ ctx, input }) => {
+  update: withUserServersProcedure.input(z_server_update).mutation(({ ctx, input }) => {
     return protectedServerManagerMutation({
       ctx,
       server_id: input.id,
@@ -52,7 +52,7 @@ const serverCreateUpdateRouter = router({
 });
 
 const serverFetchRouter = router({
-  byId: authedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
+  byId: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedServerManagerFetch({
       async fetch() {
         const server = await ctx.prisma.server.findUnique({ where: { id: input } });
@@ -69,7 +69,7 @@ const serverFetchRouter = router({
 });
 
 const serverUpsertRouter = router({
-  upsert: authedProcedureWithUserServers.input(z_server_upsert).mutation(async ({ ctx, input }) => {
+  upsert: withUserServersProcedure.input(z_server_upsert).mutation(async ({ ctx, input }) => {
     return upsert(
       () => serverFetchRouter.createCaller(ctx).byId(input.id),
       () => serverCreateUpdateRouter.createCaller(ctx).create(input),

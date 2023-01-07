@@ -12,7 +12,7 @@ import {
   protectedUserOnlyMutation,
   protectedUserOnlyMutationFetchFirst,
 } from "~api/utils/protected-procedures/user-only";
-import { authedProcedure, mergeRouters, router } from "../trpc";
+import { withDiscordAccountProcedure, mergeRouters, router } from "../trpc";
 import { upsert } from "~api/utils/operations";
 import { discordAccountRouter, z_discord_account_upsert } from "../accounts/discord-accounts";
 import { serverRouter } from "../server/server";
@@ -75,71 +75,77 @@ function mergeUserServerSettings<T extends z.infer<typeof z_user_server_settings
 }
 
 const user_server_settings_fetch_router = router({
-  byId: authedProcedure.input(z_user_server_settings_find).query(async ({ input, ctx }) => {
-    return transformUserServerSettings(
-      protectedUserOnlyFetch({
-        ctx,
-        user_id: input.user_id,
-        fetch() {
-          return ctx.prisma.userServerSettings.findUnique({
-            where: {
-              user_id_server_id: input,
-            },
-          });
-        },
-        not_found_message: "User server settings not found",
-      })
-    );
-  }),
+  byId: withDiscordAccountProcedure
+    .input(z_user_server_settings_find)
+    .query(async ({ input, ctx }) => {
+      return transformUserServerSettings(
+        protectedUserOnlyFetch({
+          ctx,
+          user_id: input.user_id,
+          fetch() {
+            return ctx.prisma.userServerSettings.findUnique({
+              where: {
+                user_id_server_id: input,
+              },
+            });
+          },
+          not_found_message: "User server settings not found",
+        })
+      );
+    }),
 });
 
 const user_server_settings_mutation_router = router({
-  create: authedProcedure.input(z_user_server_settings_create).mutation(async ({ input, ctx }) => {
-    return transformUserServerSettings(
-      protectedUserOnlyMutation({
-        ctx,
-        user_id: input.user_id,
-        operation: () =>
-          ctx.prisma.userServerSettings.create({
-            data: mergeUserServerSettings(
-              getDefaultUserServerSettings({
-                ...input,
-              }),
-              input
-            ),
-          }),
-      })
-    );
-  }),
-  update: authedProcedure.input(z_user_server_settings_update).mutation(async ({ input, ctx }) => {
-    return transformUserServerSettings(
-      protectedUserOnlyMutationFetchFirst({
-        ctx,
-        user_id: input.user_id,
-        fetch() {
-          return user_server_settings_fetch_router.createCaller(ctx).byId({
-            user_id: input.user_id,
-            server_id: input.server_id,
-          });
-        },
-        not_found_message: "User server settings not found",
-        operation: (old) =>
-          ctx.prisma.userServerSettings.update({
-            where: {
-              user_id_server_id: {
-                user_id: input.user_id,
-                server_id: input.server_id,
+  create: withDiscordAccountProcedure
+    .input(z_user_server_settings_create)
+    .mutation(async ({ input, ctx }) => {
+      return transformUserServerSettings(
+        protectedUserOnlyMutation({
+          ctx,
+          user_id: input.user_id,
+          operation: () =>
+            ctx.prisma.userServerSettings.create({
+              data: mergeUserServerSettings(
+                getDefaultUserServerSettings({
+                  ...input,
+                }),
+                input
+              ),
+            }),
+        })
+      );
+    }),
+  update: withDiscordAccountProcedure
+    .input(z_user_server_settings_update)
+    .mutation(async ({ input, ctx }) => {
+      return transformUserServerSettings(
+        protectedUserOnlyMutationFetchFirst({
+          ctx,
+          user_id: input.user_id,
+          fetch() {
+            return user_server_settings_fetch_router.createCaller(ctx).byId({
+              user_id: input.user_id,
+              server_id: input.server_id,
+            });
+          },
+          not_found_message: "User server settings not found",
+          operation: (old) =>
+            ctx.prisma.userServerSettings.update({
+              where: {
+                user_id_server_id: {
+                  user_id: input.user_id,
+                  server_id: input.server_id,
+                },
               },
-            },
-            data: mergeUserServerSettings(old, input),
-          }),
-      })
-    );
-  }),
+              data: mergeUserServerSettings(old, input),
+            }),
+        })
+      );
+    }),
 });
 
 const user_server_settings_with_deps_router = router({
-  createWithDeps: authedProcedure
+  createWithDeps: withDiscordAccountProcedure
     .input(z_user_server_settings_create_with_deps)
     .mutation(async ({ input, ctx }) => {
       return transformUserServerSettings(
@@ -184,18 +190,20 @@ const user_server_settings_with_deps_router = router({
 });
 
 const user_server_settings_upsert = router({
-  upsert: authedProcedure.input(z_user_server_settings_create).mutation(async ({ input, ctx }) => {
-    return upsert(
-      () =>
-        user_server_settings_fetch_router.createCaller(ctx).byId({
-          user_id: input.user_id,
-          server_id: input.server_id,
-        }),
-      () => user_server_settings_mutation_router.createCaller(ctx).create(input),
-      () => user_server_settings_mutation_router.createCaller(ctx).update(input)
-    );
-  }),
-  upsertWithDeps: authedProcedure
+  upsert: withDiscordAccountProcedure
+    .input(z_user_server_settings_create)
+    .mutation(async ({ input, ctx }) => {
+      return upsert(
+        () =>
+          user_server_settings_fetch_router.createCaller(ctx).byId({
+            user_id: input.user_id,
+            server_id: input.server_id,
+          }),
+        () => user_server_settings_mutation_router.createCaller(ctx).create(input),
+        () => user_server_settings_mutation_router.createCaller(ctx).update(input)
+      );
+    }),
+  upsertWithDeps: withDiscordAccountProcedure
     .input(z_user_server_settings_create_with_deps)
     .mutation(async ({ input, ctx }) => {
       return upsert(

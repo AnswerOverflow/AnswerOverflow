@@ -11,6 +11,7 @@ import React from "react";
 import { ephemeralReply } from "~discord-bot/utils/utils";
 import { getDefaultChannelSettingsWithFlags } from "@answeroverflow/db";
 import { TRPCError } from "@trpc/server";
+import { createMemberCtx } from "~discord-bot/utils/context";
 
 @ApplyOptions<Command.Options>({
   name: "channel-settings",
@@ -76,7 +77,7 @@ export class ChannelSettingsCommand extends Command {
           const menu = <ChannelSettingsMenu channel={channel} settings={result} />;
           ephemeralReply(container.reacord, menu, interaction);
         },
-        member,
+        getCtx: () => createMemberCtx(member),
       },
       interaction
     );

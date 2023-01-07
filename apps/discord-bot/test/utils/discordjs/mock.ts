@@ -4,6 +4,7 @@ import { Client } from "discord.js";
 import { basename, extname } from "path";
 
 import { createClient } from "~discord-bot/utils/bot";
+import { mockClientUser } from "./user-mock";
 
 // References: https://dev.to/heymarkkop/how-to-implement-test-and-mock-discordjs-v13-slash-commands-with-typescript-22lc
 
@@ -59,6 +60,9 @@ export function mockClient() {
 
   Client.prototype.login = jest.fn();
   container.reacord = new ReacordTester();
+  mockClientUser(client, {
+    id: process.env.DISCORD_CLIENT_ID,
+  });
   return client;
 }
 
