@@ -29,12 +29,8 @@ export class OnMessageBulkDelete extends Listener {
       async ApiCall(router) {
         return router.messages.deleteBulk(messages.map((message) => message.id));
       },
-      error_message: `Error deleting messages: ${messages
-        .map((message) => message.id)
-        .join(", ")}`,
-      success_message: `Deleted messages: ${messages
-        .map((message) => message.id)
-        .join(", ")}`,
+      error_message: `Error deleting messages: ${messages.map((message) => message.id).join(", ")}`,
+      success_message: `Deleted messages: ${messages.map((message) => message.id).join(", ")}`,
       getCtx: createAnswerOveflowBotCtx,
     });
   }
