@@ -29,8 +29,8 @@ export class SyncOnJoin extends Listener {
             .map((channel) => toAOChannel(channel))
         );
       },
-      console_error_message: `Error syncing server: ${guild.id}`,
-      console_success_message: `Synced server: ${guild.id}`,
+      error_message: `Error syncing server: ${guild.id}`,
+      success_message: `Synced server: ${guild.id}`,
       getCtx: createAnswerOveflowBotCtx,
     });
   }
@@ -51,8 +51,8 @@ export class SyncOnDelete extends Listener {
           kicked_time: new Date(),
         });
       },
-      console_error_message: `Error syncing delete server: ${guild.id}`,
-      console_success_message: `Synced kicked from server: ${guild.id}`,
+      error_message: `Error syncing delete server: ${guild.id}`,
+      success_message: `Synced kicked from server: ${guild.id}`,
       getCtx: createAnswerOveflowBotCtx,
     });
   }
@@ -65,8 +65,8 @@ export class SyncOnUpdate extends Listener {
       async ApiCall(router) {
         return await router.servers.upsert(toAOServer(newGuild));
       },
-      console_error_message: `Error syncing update server: ${newGuild.id}`,
-      console_success_message: `Synced update to server: ${newGuild.id}`,
+      error_message: `Error syncing update server: ${newGuild.id}`,
+      success_message: `Synced update to server: ${newGuild.id}`,
       getCtx: createAnswerOveflowBotCtx,
     });
   }

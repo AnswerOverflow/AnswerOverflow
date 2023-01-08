@@ -12,8 +12,8 @@ export class OnMessage extends Listener {
       ApiCall(router) {
         return router.messages.delete(message.id);
       },
-      console_error_message: `Error deleting message: ${message.id}`,
-      console_success_message: `Deleted message: ${message.id}`,
+      error_message: `Error deleting message: ${message.id}`,
+      success_message: `Deleted message: ${message.id}`,
       getCtx: createAnswerOveflowBotCtx,
     });
   }
@@ -29,10 +29,10 @@ export class OnMessageBulkDelete extends Listener {
       async ApiCall(router) {
         return router.messages.deleteBulk(messages.map((message) => message.id));
       },
-      console_error_message: `Error deleting messages: ${messages
+      error_message: `Error deleting messages: ${messages
         .map((message) => message.id)
         .join(", ")}`,
-      console_success_message: `Deleted messages: ${messages
+      success_message: `Deleted messages: ${messages
         .map((message) => message.id)
         .join(", ")}`,
       getCtx: createAnswerOveflowBotCtx,
@@ -47,8 +47,8 @@ export class OnMessageUpdate extends Listener {
       async ApiCall(router) {
         return router.messages.update(toAOMessage(new_message));
       },
-      console_error_message: `Error updating message: ${new_message.id}`,
-      console_success_message: `Updated message: ${new_message.id}`,
+      error_message: `Error updating message: ${new_message.id}`,
+      success_message: `Updated message: ${new_message.id}`,
       getCtx: createAnswerOveflowBotCtx,
     });
   }
