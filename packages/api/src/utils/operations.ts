@@ -15,22 +15,17 @@ export async function upsert<T>(
   }
 }
 
-export async function upsertMany<
-  T,
-  CreateInput,
-  UpdateInput,
-  F extends { create: CreateInput; update: UpdateInput }
->(calls: {
-  input: F[];
+export async function upsertMany<T, Data>(calls: {
+  input: Data[];
   find: () => Promise<T[]>;
   // eslint-disable-next-line no-unused-vars
-  getInputId: (input: F) => string;
+  getInputId: (input: Data) => string;
   // eslint-disable-next-line no-unused-vars
   getFetchedDataId: (input: T) => string;
   // eslint-disable-next-line no-unused-vars
-  create: (input: F["create"][]) => Promise<T[]>;
+  create: (input: Data[]) => Promise<T[]>;
   // eslint-disable-next-line no-unused-vars
-  update: (input: F["update"][]) => Promise<T[]>;
+  update: (input: Data[]) => Promise<T[]>;
 }) {
   const { find, create, getInputId, getFetchedDataId, input, update } = calls;
   const existing = await find();
@@ -40,8 +35,8 @@ export async function upsertMany<
     return acc;
   }, {} as Record<string, T>);
 
-  const toCreate = input.filter((c) => !existingMap[getInputId(c)]).map((c) => c.create);
-  const toUpdate = input.filter((c) => existingMap[getInputId(c)]).map((c) => c.update);
+  const toCreate = input.filter((c) => !existingMap[getInputId(c)]).map((c) => c);
+  const toUpdate = input.filter((c) => existingMap[getInputId(c)]).map((c) => c);
   const [created, updated] = await Promise.all([update(toUpdate), create(toCreate)]);
   return [...created, ...updated];
 }

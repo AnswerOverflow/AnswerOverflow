@@ -1,14 +1,12 @@
-import type {
-  ChannelSettingsOutput,
-  ChannelSettingsUpsertInput,
-  ChannelSettingsUpsertWithDeps,
-} from "@answeroverflow/api";
+import type { ChannelSettingsOutput, ChannelSettingsUpsertInput } from "@answeroverflow/api";
 import { callApiWithButtonErrorHandler } from "~discord-bot/utils/trpc";
 import { type GuildForumTag, type TextBasedChannel, ChannelType, ForumChannel } from "discord.js";
 import { ButtonClickEvent, Select, SelectChangeEvent, Option } from "@answeroverflow/reacord";
 import React from "react";
 import { ToggleButton } from "./toggle-button";
-import { getRootChannel, makeChannelUpsertWithDeps } from "~discord-bot/utils/utils";
+import { getRootChannel } from "~discord-bot/utils/utils";
+import { toAOChannelWithServer } from "~discord-bot/utils/conversions";
+import { createMemberCtx } from "~discord-bot/utils/context";
 
 const getTagNameWithEmoji = (tag: GuildForumTag) =>
   tag.emoji?.name ? tag.emoji.name + " " + tag.name : tag.name;
@@ -27,7 +25,7 @@ export function ChannelSettingsMenu({
 
   const updateChannelSettings = async (
     interaction: ButtonClickEvent,
-    data: Omit<ChannelSettingsUpsertInput["update"], "channel_id">
+    data: Omit<ChannelSettingsUpsertInput, "channel_id">
   ) => {
     if (channel.isDMBased()) {
       interaction.ephemeralReply("Does not work in DMs");
@@ -44,25 +42,15 @@ export function ChannelSettingsMenu({
     await callApiWithButtonErrorHandler(
       {
         async ApiCall(router) {
-          const upsert_data: ChannelSettingsUpsertWithDeps = {
-            create: {
-              channel: makeChannelUpsertWithDeps(target_channel),
-              settings: {
-                channel_id: target_channel.id,
-                ...data,
-              },
-            },
-            update: {
-              channel_id: target_channel.id,
-              ...data,
-            },
-          };
-          return await router.channel_settings.upsertWithDeps(upsert_data);
+          return await router.channel_settings.upsertWithDeps({
+            channel: toAOChannelWithServer(target_channel),
+            ...data,
+          });
         },
         Ok(result) {
           setChannelSettings(result);
         },
-        member,
+        getCtx: () => createMemberCtx(member),
       },
       interaction
     );
@@ -75,10 +63,8 @@ export function ChannelSettingsMenu({
       enable_label={"Enable Indexing"}
       onClick={(interaction: ButtonClickEvent) => {
         void updateChannelSettings(interaction, {
-          data: {
-            flags: {
-              indexing_enabled: !channelSettings.flags.indexing_enabled,
-            },
+          flags: {
+            indexing_enabled: !channelSettings.flags.indexing_enabled,
           },
         });
       }}
@@ -92,10 +78,8 @@ export function ChannelSettingsMenu({
       enable_label={"Enable Mark Solution"}
       onClick={(interaction: ButtonClickEvent) =>
         void updateChannelSettings(interaction, {
-          data: {
-            flags: {
-              mark_solution_enabled: !channelSettings.flags.mark_solution_enabled,
-            },
+          flags: {
+            mark_solution_enabled: !channelSettings.flags.mark_solution_enabled,
           },
         })
       }
@@ -109,11 +93,9 @@ export function ChannelSettingsMenu({
       enable_label={"Enable Send Mark Solution Instructions"}
       onClick={(interaction: ButtonClickEvent) => {
         void updateChannelSettings(interaction, {
-          data: {
-            flags: {
-              send_mark_solution_instructions_in_new_threads:
-                !channelSettings.flags.send_mark_solution_instructions_in_new_threads,
-            },
+          flags: {
+            send_mark_solution_instructions_in_new_threads:
+              !channelSettings.flags.send_mark_solution_instructions_in_new_threads,
           },
         });
       }}
@@ -127,9 +109,7 @@ export function ChannelSettingsMenu({
       onChangeValue={(value: string, event: SelectChangeEvent) => {
         const new_solved_tag = value == CLEAR_TAG_VALUE ? null : value;
         void updateChannelSettings(event, {
-          data: {
-            solution_tag_id: new_solved_tag,
-          },
+          solution_tag_id: new_solved_tag,
         });
       }}
     >

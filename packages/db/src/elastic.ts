@@ -7,9 +7,6 @@ declare global {
 
 function getElasticClient(): Elastic {
   if (process.env.NODE_ENV === "test") {
-    if (!process.env.VITE_ELASTICSEARCH_URL) throw new Error("Missing elastic url");
-    if (!process.env.VITE_ELASTICSEARCH_USERNAME) throw new Error("Missing elastic username");
-    if (!process.env.VITE_ELASTICSEARCH_PASSWORD) throw new Error("Missing elastic password");
     return new Elastic({
       node: process.env.VITE_ELASTICSEARCH_URL,
       auth: {
@@ -18,9 +15,6 @@ function getElasticClient(): Elastic {
       },
     });
   } else if (process.env.NODE_ENV === "development") {
-    if (!process.env.ELASTICSEARCH_URL) throw new Error("Missing elastic url");
-    if (!process.env.ELASTICSEARCH_USERNAME) throw new Error("Missing elastic username");
-    if (!process.env.ELASTICSEARCH_PASSWORD) throw new Error("Missing elastic password");
     return new Elastic({
       node: process.env.ELASTICSEARCH_URL,
       auth: {
@@ -29,8 +23,6 @@ function getElasticClient(): Elastic {
       },
     });
   } else if (process.env.NODE_ENV === "production") {
-    if (!process.env.ELASTICSEARCH_CLOUD_ID) throw new Error("Missing elastic cloud id");
-    if (!process.env.ELASTICSEARCH_API_KEY) throw new Error("Missing elastic api key");
     return new Elastic({
       cloud: {
         id: process.env.ELASTICSEARCH_CLOUD_ID,
@@ -64,12 +56,8 @@ export class Elastic extends Client {
   constructor(opts: ClientOptions) {
     super(opts);
     if (process.env.NODE_ENV === "test") {
-      if (process.env.VITE_ELASTICSEARCH_MESSAGE_INDEX === undefined)
-        throw new Error("Missing elastic message index");
       this.messages_index = process.env.VITE_ELASTICSEARCH_MESSAGE_INDEX;
     } else {
-      if (process.env.ELASTICSEARCH_MESSAGE_INDEX === undefined)
-        throw new Error("Missing elastic message index");
       this.messages_index = process.env.ELASTICSEARCH_MESSAGE_INDEX;
     }
   }

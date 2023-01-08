@@ -3,13 +3,7 @@ import { clearDatabase, DiscordAccount, Server } from "@answeroverflow/db";
 import { getGeneralScenario, ServerTestData } from "~api/test/utils";
 import { discordAccountRouter } from "../accounts/discord-accounts";
 import { serverRouter } from "../server/server";
-import {
-  makeUserServerSettingsCreateWithDeps,
-  makeUserServerSettingsUpsert,
-  makeUserServerSettingsUpsertWithDeps,
-  SERVER_NOT_SETUP_MESSAGE,
-  userServerSettingsRouter,
-} from "./user-server-settings";
+import { SERVER_NOT_SETUP_MESSAGE, userServerSettingsRouter } from "./user-server-settings";
 
 let data: ServerTestData;
 let user_1_router: ReturnType<typeof userServerSettingsRouter["createCaller"]>;
@@ -48,14 +42,18 @@ describe("User Server Settings Create", () => {
 describe("User Server Settings Create With Deps", () => {
   it("should create user server settings with user deps", async () => {
     await server_router.create(server);
-    const user_server_settings = await user_2_router.createWithDeps(
-      makeUserServerSettingsCreateWithDeps(user2, server)
-    );
+    const user_server_settings = await user_2_router.createWithDeps({
+      user: user2,
+      server_id: server.id,
+    });
     expect(user_server_settings).toBeDefined();
   });
   it("should fail to create user server settings with deps if the server does not exist yet", async () => {
     await expect(
-      user_2_router.createWithDeps(makeUserServerSettingsCreateWithDeps(user2, server))
+      user_2_router.createWithDeps({
+        user: user2,
+        server_id: server.id,
+      })
     ).rejects.toThrowError(SERVER_NOT_SETUP_MESSAGE);
   });
 });
@@ -66,9 +64,10 @@ describe("User Server Settings Upsert", () => {
     await discord_account_router.create(user1);
   });
   it("should upsert new user server settings", async () => {
-    const user_server_settings = await user_1_router.upsert(
-      makeUserServerSettingsUpsert(user1, server)
-    );
+    const user_server_settings = await user_1_router.upsert({
+      server_id: server.id,
+      user_id: user1.id,
+    });
     expect(user_server_settings).toBeDefined();
   });
 });
@@ -76,14 +75,21 @@ describe("User Server Settings Upsert", () => {
 describe("User Server Settings Upsert With Deps", () => {
   it("should upsert user server settings with user deps", async () => {
     await server_router.create(server);
-    const user_server_settings = await user_2_router.upsertWithDeps(
-      makeUserServerSettingsUpsertWithDeps(user2, server)
-    );
+    const user_server_settings = await user_2_router.upsertWithDeps({
+      user: user2,
+      server_id: server.id,
+      flags: {
+        can_publicly_display_messages: true,
+      },
+    });
     expect(user_server_settings).toBeDefined();
   });
   it("should fail to upsert user server settings with deps if the server does not exist yet", async () => {
     await expect(
-      user_2_router.upsertWithDeps(makeUserServerSettingsUpsertWithDeps(user2, server))
+      user_2_router.upsertWithDeps({
+        user: user2,
+        server_id: server.id,
+      })
     ).rejects.toThrowError(SERVER_NOT_SETUP_MESSAGE);
   });
   it("should update user server settings with user deps", async () => {
@@ -93,13 +99,13 @@ describe("User Server Settings Upsert With Deps", () => {
       server_id: server.id,
       user_id: user2.id,
     });
-    const user_server_settings = await user_2_router.upsertWithDeps(
-      makeUserServerSettingsUpsertWithDeps(user2, server, {
-        flags: {
-          can_publicly_display_messages: true,
-        },
-      })
-    );
+    const user_server_settings = await user_2_router.upsertWithDeps({
+      user: user2,
+      server_id: server.id,
+      flags: {
+        can_publicly_display_messages: true,
+      },
+    });
     expect(user_server_settings.flags.can_publicly_display_messages).toBeTruthy();
   });
 });

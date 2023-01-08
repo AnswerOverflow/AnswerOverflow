@@ -3,3 +3,14 @@ import { createClient, login } from "./utils/bot";
 require("dotenv-mono").load();
 const client = createClient();
 void login(client);
+
+declare global {
+  // eslint-disable-next-line no-unused-vars
+  namespace NodeJS {
+    // eslint-disable-next-line no-unused-vars
+    interface ProcessEnv {
+      /* Discord Bot */
+      DISCORD_TOKEN: string;
+    }
+  }
+}

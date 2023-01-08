@@ -147,7 +147,12 @@ export function mockForumChannel(
   });
 }
 
-export function mockMessage(client: SapphireClient, author?: User, channel?: Channel) {
+export function mockMessage(
+  client: SapphireClient,
+  author?: User,
+  channel?: Channel,
+  override: Partial<RawMessageData> = {}
+) {
   if (!channel) {
     channel = mockTextChannel(client);
   }
@@ -179,6 +184,7 @@ export function mockMessage(client: SapphireClient, author?: User, channel?: Cha
     pinned: false,
     type: MessageType.Default,
     reactions: [],
+    ...override,
   };
   const message = Reflect.construct(Message, [client, raw_data]) as Message;
   if (channel.isTextBased()) {

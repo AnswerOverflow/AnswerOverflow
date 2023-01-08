@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { mergeRouters, authedProcedure, router } from "~api/router/trpc";
+import { mergeRouters, withDiscordAccountProcedure, router } from "~api/router/trpc";
 import {
   protectedMessageFetch,
   protectedMessageMutation,
@@ -20,7 +20,7 @@ export const z_message = z.object({
 });
 
 const message_find_router = router({
-  byId: authedProcedure.input(z.string()).query(async ({ ctx, input }) => {
+  byId: withDiscordAccountProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedMessageFetch({
       ctx,
       author_id: input,
@@ -28,7 +28,7 @@ const message_find_router = router({
       not_found_message: "Message not found",
     });
   }),
-  byIdBulk: authedProcedure.input(z.array(z.string())).query(async ({ ctx, input }) => {
+  byIdBulk: withDiscordAccountProcedure.input(z.array(z.string())).query(async ({ ctx, input }) => {
     return protectedMessageFetch({
       ctx,
       author_id: input.map((i) => i),
@@ -39,21 +39,21 @@ const message_find_router = router({
 });
 
 const message_crud_router = router({
-  update: authedProcedure.input(z_message).mutation(async ({ ctx, input }) => {
+  update: withDiscordAccountProcedure.input(z_message).mutation(async ({ ctx, input }) => {
     return protectedMessageMutation({
       ctx,
       author_id: input.id,
       operation: () => ctx.elastic.updateMessage(input),
     });
   }),
-  upsert: authedProcedure.input(z_message).mutation(async ({ ctx, input }) => {
+  upsert: withDiscordAccountProcedure.input(z_message).mutation(async ({ ctx, input }) => {
     return protectedMessageMutation({
       ctx,
       author_id: input.id,
       operation: () => ctx.elastic.upsertMessage(input),
     });
   }),
-  delete: authedProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
+  delete: withDiscordAccountProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     return protectedMessageMutationFetchFirst({
       ctx,
       getAuthorId: (data) => data.author_id,
@@ -62,24 +62,28 @@ const message_crud_router = router({
       not_found_message: "Message not found",
     });
   }),
-  deleteByThreadId: authedProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
-    return protectedMessageMutationFetchFirst({
-      ctx,
-      getAuthorId: (data) => data.author_id,
-      fetch: () => message_find_router.createCaller(ctx).byId(input),
-      operation: () => ctx.elastic.deleteMessagesByThreadId(input),
-      not_found_message: "Message not found",
-    });
-  }),
-  deleteBulk: authedProcedure.input(z.array(z.string())).mutation(async ({ ctx, input }) => {
-    return protectedMessageMutationFetchFirst({
-      ctx,
-      getAuthorId: (data) => data.map((d) => d.author_id),
-      fetch: () => message_find_router.createCaller(ctx).byIdBulk(input),
-      operation: () => ctx.elastic.bulkDeleteMessages(input),
-      not_found_message: "Message not found",
-    });
-  }),
+  deleteByThreadId: withDiscordAccountProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      return protectedMessageMutationFetchFirst({
+        ctx,
+        getAuthorId: (data) => data.author_id,
+        fetch: () => message_find_router.createCaller(ctx).byId(input),
+        operation: () => ctx.elastic.deleteMessagesByThreadId(input),
+        not_found_message: "Message not found",
+      });
+    }),
+  deleteBulk: withDiscordAccountProcedure
+    .input(z.array(z.string()))
+    .mutation(async ({ ctx, input }) => {
+      return protectedMessageMutationFetchFirst({
+        ctx,
+        getAuthorId: (data) => data.map((d) => d.author_id),
+        fetch: () => message_find_router.createCaller(ctx).byIdBulk(input),
+        operation: () => ctx.elastic.bulkDeleteMessages(input),
+        not_found_message: "Message not found",
+      });
+    }),
 });
 
 export const messageRouter = mergeRouters(message_find_router, message_crud_router);

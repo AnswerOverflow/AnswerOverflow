@@ -30,9 +30,7 @@ describe("Discord Account Update", () => {
     const created_account = await discord_accounts_router.create(account1);
     const updated_account = await discord_accounts_router.update({
       id: created_account.id,
-      update: {
-        name: "updated-name",
-      },
+      name: "updated-name",
     });
     expect(updated_account).toStrictEqual({
       ...created_account,
@@ -44,15 +42,11 @@ describe("Discord Account Update", () => {
     const updated_accounts = await discord_accounts_router.updateBulk([
       {
         id: created_accounts[0].id,
-        update: {
-          name: "updated-name",
-        },
+        name: "updated-name",
       },
       {
         id: created_accounts[1].id,
-        update: {
-          name: "updated-name",
-        },
+        name: "updated-name",
       },
     ]);
     expect(updated_accounts).toStrictEqual([
@@ -70,27 +64,14 @@ describe("Discord Account Update", () => {
 
 describe("Discord Account Upsert", () => {
   it("should upsert a new discord account", async () => {
-    const upserted_account = await discord_accounts_router.upsert({
-      create: account1,
-      update: {
-        id: account1.id,
-        update: {
-          name: "updated-name",
-        },
-      },
-    });
+    const upserted_account = await discord_accounts_router.upsert(account1);
     expect(upserted_account).toStrictEqual(account1);
   });
   it("should upsert an existing discord account", async () => {
     const created_account = await discord_accounts_router.create(account1);
     const upserted_account = await discord_accounts_router.upsert({
-      create: account1,
-      update: {
-        id: created_account.id,
-        update: {
-          name: "updated-name",
-        },
-      },
+      id: created_account.id,
+      name: "updated-name",
     });
     expect(upserted_account).toStrictEqual({
       ...created_account,
@@ -98,48 +79,19 @@ describe("Discord Account Upsert", () => {
     });
   });
   it("should bulk upsert create multiple discord accounts", async () => {
-    const upserted_accounts = await discord_accounts_router.upsertBulk([
-      {
-        create: account1,
-        update: {
-          id: account1.id,
-          update: {
-            name: "updated-name",
-          },
-        },
-      },
-      {
-        create: account2,
-        update: {
-          id: account2.id,
-          update: {
-            name: "updated-name",
-          },
-        },
-      },
-    ]);
+    const upserted_accounts = await discord_accounts_router.upsertBulk([account1, account2]);
     expect(upserted_accounts).toStrictEqual([account1, account2]);
   });
   it("should bulk upsert update multiple discord accounts", async () => {
     const created_accounts = await discord_accounts_router.createBulk([account1, account2]);
     const upserted_accounts = await discord_accounts_router.upsertBulk([
       {
-        create: account1,
-        update: {
-          id: created_accounts[0].id,
-          update: {
-            name: "updated-name",
-          },
-        },
+        id: created_accounts[0].id,
+        name: "updated-name",
       },
       {
-        create: account2,
-        update: {
-          id: created_accounts[1].id,
-          update: {
-            name: "updated-name2",
-          },
-        },
+        name: "updated-name2",
+        id: created_accounts[1].id,
       },
     ]);
     expect(upserted_accounts).toStrictEqual([
@@ -157,23 +109,10 @@ describe("Discord Account Upsert", () => {
     const created_account = await discord_accounts_router.create(account1);
     const upserted_accounts = await discord_accounts_router.upsertBulk([
       {
-        create: account1,
-        update: {
-          id: created_account.id,
-          update: {
-            name: "updated-name",
-          },
-        },
+        id: created_account.id,
+        name: "updated-name",
       },
-      {
-        create: account2,
-        update: {
-          id: account2.id,
-          update: {
-            name: "updated-name2",
-          },
-        },
-      },
+      account2,
     ]);
     expect(upserted_accounts).toStrictEqual([
       {

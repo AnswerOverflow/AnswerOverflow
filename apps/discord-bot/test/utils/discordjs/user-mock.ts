@@ -1,5 +1,12 @@
 import type { SapphireClient } from "@sapphire/framework";
-import { Guild, GuildMember, PermissionResolvable, PermissionsBitField, User } from "discord.js";
+import {
+  ClientUser,
+  Guild,
+  GuildMember,
+  PermissionResolvable,
+  PermissionsBitField,
+  User,
+} from "discord.js";
 import type { RawGuildMemberData, RawUserData } from "discord.js/typings/rawDataTypes";
 import { randomSnowflake } from "~discord-bot/utils/utils";
 import { mockGuild, mockRole } from "./guild-mock";
@@ -16,6 +23,20 @@ export function mockUser(client: SapphireClient, data: Partial<RawUserData> = {}
   const user = Reflect.construct(User, [client, raw_data]) as User;
   client.users.cache.set(user.id, user);
   return user;
+}
+
+export function mockClientUser(client: SapphireClient, override: Partial<RawUserData> = {}) {
+  const raw_data: RawUserData = {
+    id: "0",
+    username: "test",
+    discriminator: "0000",
+    avatar: null,
+    bot: false,
+    ...override,
+  };
+  const client_user = Reflect.construct(ClientUser, [client, raw_data]) as ClientUser;
+  client.user = client_user;
+  return client_user;
 }
 
 export function mockGuildMember(
