@@ -1,21 +1,7 @@
-import type { SapphireClient } from "@sapphire/framework";
-import { Events, Interaction } from "discord.js";
+import { Events } from "discord.js";
 import { mockInteracion } from "~discord-bot/test/utils/discordjs/interaction-mock";
 import { createNormalScenario } from "~discord-bot/test/utils/discordjs/scenarios";
-import { delay } from "~discord-bot/test/utils/helpers";
-
-async function runCommand(client: SapphireClient, command: Interaction): Promise<Interaction> {
-  let ran_interaction: Interaction | undefined;
-  client.addListener(Events.InteractionCreate, (interaction: Interaction) => {
-    ran_interaction = interaction;
-  });
-  client.emit(Events.InteractionCreate, command);
-  while (!ran_interaction) {
-    await delay();
-  }
-  await delay();
-  return ran_interaction;
-}
+import { emitEvent } from "~discord-bot/test/utils/helpers";
 
 describe("Channel Settings Slash Command", () => {
   it("uses /channel-settings without manage guild permissions", async () => {
@@ -34,8 +20,7 @@ describe("Channel Settings Slash Command", () => {
 
     expect(stored_command).toBeDefined();
     jest.spyOn(stored_command!, "chatInputRun");
-
-    await runCommand(client, command);
+    await emitEvent(client, Events.InteractionCreate, command);
     expect(stored_command!.chatInputRun).not.toHaveBeenCalled();
   });
   it("uses /channel-settings as an admin", async () => {
@@ -55,7 +40,7 @@ describe("Channel Settings Slash Command", () => {
     expect(stored_command).toBeDefined();
     jest.spyOn(stored_command!, "chatInputRun");
 
-    await runCommand(client, command);
+    await emitEvent(client, Events.InteractionCreate, command);
     expect(stored_command!.chatInputRun).toHaveBeenCalled();
   });
   it("uses /channel-settings with manage guild permissions", async () => {
@@ -75,7 +60,7 @@ describe("Channel Settings Slash Command", () => {
     expect(stored_command).toBeDefined();
     jest.spyOn(stored_command!, "chatInputRun");
 
-    await runCommand(client, command);
+    await emitEvent(client, Events.InteractionCreate, command);
     expect(stored_command!.chatInputRun).toHaveBeenCalled();
   });
   test.todo("Verify default member permissions");

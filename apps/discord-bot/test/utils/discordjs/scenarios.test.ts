@@ -10,7 +10,7 @@ describe("Normal Scenario Tests", () => {
     const { guild } = await createNormalScenario();
     expect(guild).toBeDefined();
     expect(guild.channels.cache.size).toBe(3);
-    expect(guild.members.cache.size).toBe(4);
+    expect(guild.members.cache.size).toBe(6);
   });
   it("should verify the guild owner", async () => {
     const { guild_member_owner, guild } = await createNormalScenario();

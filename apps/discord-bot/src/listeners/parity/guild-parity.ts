@@ -2,7 +2,9 @@ import { ALLOWED_CHANNEL_TYPES } from "@answeroverflow/api";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import { Events, Guild } from "discord.js";
-import { callAPI } from "~discord-bot/utils/trpc";
+import { createAnswerOveflowBotCtx } from "~discord-bot/utils/context";
+import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
+import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
 
 /*
   Guild relevated events are tracked here, this may make sense to split into multiple files as the complexity grows.
@@ -18,42 +20,18 @@ export class SyncOnReady extends Listener {
 @ApplyOptions<Listener.Options>({ event: Events.GuildCreate, name: "Guild Sync On Join" })
 export class SyncOnJoin extends Listener {
   public async run(guild: Guild) {
-    await callAPI({
+    await callApiWithConsoleStatusHandler({
       async ApiCall(router) {
-        await router.servers.upsert({
-          create: {
-            id: guild.id,
-            name: guild.name,
-          },
-          update: {
-            id: guild.id,
-            data: {
-              name: guild.name,
-              kicked_time: null,
-            },
-          },
-        });
+        await router.servers.upsert(toAOServer(guild));
         await router.channels.upsertMany(
           guild.channels.cache
             .filter((channel) => ALLOWED_CHANNEL_TYPES.has(channel.type))
-            .map((channel) => ({
-              create: {
-                id: channel.id,
-                name: channel.name,
-                server_id: guild.id,
-                type: channel.type,
-              },
-              update: {
-                id: channel.id,
-                data: {
-                  name: channel.name,
-                },
-              },
-            }))
+            .map((channel) => toAOChannel(channel))
         );
       },
-      Ok() {},
-      Error() {},
+      error_message: `Error syncing server: ${guild.id}`,
+      success_message: `Synced server: ${guild.id}`,
+      getCtx: createAnswerOveflowBotCtx,
     });
   }
 }
@@ -66,25 +44,16 @@ export class SyncOnJoin extends Listener {
 @ApplyOptions<Listener.Options>({ event: Events.GuildDelete, name: "Guild Sync On Delete" })
 export class SyncOnDelete extends Listener {
   public async run(guild: Guild) {
-    await callAPI({
+    await callApiWithConsoleStatusHandler({
       async ApiCall(router) {
         return await router.servers.upsert({
-          create: {
-            id: guild.id,
-            name: guild.name,
-            kicked_time: new Date(),
-          },
-          update: {
-            id: guild.id,
-            data: {
-              name: guild.name,
-              kicked_time: new Date(),
-            },
-          },
+          ...toAOServer(guild),
+          kicked_time: new Date(),
         });
       },
-      Ok() {},
-      Error() {},
+      error_message: `Error syncing delete server: ${guild.id}`,
+      success_message: `Synced kicked from server: ${guild.id}`,
+      getCtx: createAnswerOveflowBotCtx,
     });
   }
 }
@@ -92,25 +61,13 @@ export class SyncOnDelete extends Listener {
 @ApplyOptions<Listener.Options>({ event: Events.GuildUpdate, name: "Guild Sync On Update" })
 export class SyncOnUpdate extends Listener {
   public async run(_oldGuild: Guild, newGuild: Guild) {
-    await callAPI({
+    await callApiWithConsoleStatusHandler({
       async ApiCall(router) {
-        return await router.servers.upsert({
-          create: {
-            id: newGuild.id,
-            name: newGuild.name,
-          },
-          update: {
-            id: newGuild.id,
-            data: {
-              name: newGuild.name,
-
-              kicked_time: null,
-            },
-          },
-        });
+        return await router.servers.upsert(toAOServer(newGuild));
       },
-      Ok() {},
-      Error() {},
+      error_message: `Error syncing update server: ${newGuild.id}`,
+      success_message: `Synced update to server: ${newGuild.id}`,
+      getCtx: createAnswerOveflowBotCtx,
     });
   }
 }

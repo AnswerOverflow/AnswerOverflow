@@ -1,4 +1,3 @@
-import type { ChannelUpsertWithDepsInput } from "@answeroverflow/api";
 import { ReacordTester, ReacordDiscordJs } from "@answeroverflow/reacord";
 import type {
   ChatInputCommandSuccessPayload,
@@ -18,7 +17,6 @@ import {
   SnowflakeUtil,
   CommandInteraction,
   GuildTextBasedChannel,
-  GuildChannel,
 } from "discord.js";
 import type { ReactNode } from "react";
 import { RandomLoadingMessage } from "./constants";
@@ -127,39 +125,6 @@ export function ephemeralReply(
   }
   throw new Error(`Invalid reacord instance`);
 }
-
-export function makeChannelUpsertWithDeps(channel: GuildChannel): ChannelUpsertWithDepsInput {
-  const data: ChannelUpsertWithDepsInput = {
-    create: {
-      channel: {
-        id: channel.id,
-        name: channel.name,
-        type: channel.type,
-        server_id: channel.guild.id,
-      },
-      server: {
-        create: {
-          id: channel.guild.id,
-          name: channel.guild.name,
-        },
-        update: {
-          id: channel.guild.id,
-          data: {
-            name: channel.guild.name,
-          },
-        },
-      },
-    },
-    update: {
-      id: channel.id,
-      data: {
-        name: channel.name,
-      },
-    },
-  };
-  return data;
-}
-
 export function getRootChannel(channel: GuildTextBasedChannel) {
   if (channel.isVoiceBased()) return undefined;
   if (!channel.isTextBased()) return undefined;

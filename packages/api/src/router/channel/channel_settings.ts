@@ -1,45 +1,60 @@
 import {
   addChannelSettingsFlagsToChannelSettings,
   bitfieldToChannelSettingsFlags,
-  Channel,
   ChannelSettings,
   channel_settings_flags,
   getDefaultChannelSettings,
-  Server,
 } from "@answeroverflow/db";
 import { z } from "zod";
-import { mergeRouters, authedProcedureWithUserServers, router } from "~api/router/trpc";
+import { mergeRouters, withUserServersProcedure, router } from "~api/router/trpc";
 import { dictToBitfield } from "@answeroverflow/db";
-import { channelRouter, z_channel_upsert_with_deps, makeChannelUpsertWithDeps } from "./channel";
+import { channelRouter, z_channel_upsert_with_deps } from "./channel";
 import { toZObject } from "~api/utils/zod-utils";
 import {
   protectedServerManagerFetch,
   protectedServerManagerMutationFetchFirst,
 } from "~api/utils/protected-procedures/server-manager-procedures";
-import type { inferRouterInputs } from "@trpc/server";
 import { upsert } from "~api/utils/operations";
 
 const z_channel_settings_flags = toZObject(...channel_settings_flags);
 
-const z_channel_settings_create = z.object({
+const z_channel_settings = z.object({
   channel_id: z.string(),
-  flags: z.optional(z_channel_settings_flags),
-  last_indexed_snowflake: z.optional(z.string()),
-  invite_code: z.string().nullable().optional(),
-  solution_tag_id: z.string().nullable().optional(),
+  flags: z_channel_settings_flags,
+  last_indexed_snowflake: z.string().nullable(),
+  invite_code: z.string().nullable(),
+  solution_tag_id: z.string().nullable(),
 });
 
-const z_channel_settings_mutable = z_channel_settings_create.omit({ channel_id: true }).partial();
-
-const z_channel_settings_update = z.object({
-  channel_id: z.string(),
-  data: z_channel_settings_mutable,
+const z_channel_settings_required = z_channel_settings.pick({
+  channel_id: true,
 });
 
-const z_channel_settings_upsert = z.object({
-  create: z_channel_settings_create,
-  update: z_channel_settings_update,
-});
+const z_channel_settings_mutable = z_channel_settings
+  .omit({
+    channel_id: true,
+  })
+  .partial();
+
+const z_channel_settings_create = z_channel_settings_mutable.merge(z_channel_settings_required);
+
+const z_channel_settings_create_with_deps = z_channel_settings_create
+  .omit({
+    channel_id: true, // Taken from channel
+  })
+  .extend({
+    channel: z_channel_upsert_with_deps,
+  });
+
+const z_channel_settings_update = z_channel_settings_mutable.merge(
+  z_channel_settings.pick({
+    channel_id: true,
+  })
+);
+
+const z_channel_settings_upsert = z_channel_settings_create;
+
+const z_channel_settings_upsert_with_deps = z_channel_settings_create_with_deps;
 
 function mergeChannelSettings(
   old: ChannelSettings,
@@ -64,7 +79,7 @@ async function transformChannelSettingsReturn<T extends ChannelSettings>(
 }
 
 const channelSettingsCreateUpdate = router({
-  create: authedProcedureWithUserServers
+  create: withUserServersProcedure
     .input(z_channel_settings_create)
     .mutation(async ({ ctx, input }) => {
       return transformChannelSettingsReturn(() =>
@@ -83,7 +98,7 @@ const channelSettingsCreateUpdate = router({
         })
       );
     }),
-  update: authedProcedureWithUserServers
+  update: withUserServersProcedure
     .input(z_channel_settings_update)
     .mutation(async ({ ctx, input }) => {
       return transformChannelSettingsReturn(() =>
@@ -91,7 +106,7 @@ const channelSettingsCreateUpdate = router({
           fetch: () => channelSettingFind.createCaller(ctx).byId(input.channel_id),
           getServerId: (data) => data.channel.server_id,
           operation: async (existing_settings) => {
-            const new_settings = mergeChannelSettings(existing_settings, input.data);
+            const new_settings = mergeChannelSettings(existing_settings, input);
             return ctx.prisma.channelSettings.update({
               where: {
                 channel_id: input.channel_id,
@@ -106,22 +121,20 @@ const channelSettingsCreateUpdate = router({
     }),
 });
 
-const z_channel_settings_create_with_deps = z.object({
-  channel: z_channel_upsert_with_deps,
-  settings: z_channel_settings_create,
-});
-
 const channelSettingsCreateWithDeps = router({
-  createWithDeps: authedProcedureWithUserServers
+  createWithDeps: withUserServersProcedure
     .input(z_channel_settings_create_with_deps)
     .mutation(async ({ ctx, input }) => {
-      await channelRouter.createCaller(ctx).upsertWithDeps(input.channel);
-      return channelSettingsCreateUpdate.createCaller(ctx).create(input.settings);
+      const { channel, ...settings } = input;
+      await channelRouter.createCaller(ctx).upsertWithDeps(channel);
+      return channelSettingsCreateUpdate
+        .createCaller(ctx)
+        .create({ channel_id: channel.id, ...settings });
     }),
 });
 
 const channelSettingFind = router({
-  byId: authedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
+  byId: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return transformChannelSettingsReturn(() =>
       protectedServerManagerFetch({
         fetch: () =>
@@ -143,7 +156,7 @@ const channelSettingFind = router({
       })
     );
   }),
-  byInviteCode: authedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
+  byInviteCode: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return transformChannelSettingsReturn(() =>
       protectedServerManagerFetch({
         fetch: () =>
@@ -167,28 +180,26 @@ const channelSettingFind = router({
   }),
 });
 
-const z_channel_settings_upsert_with_deps = z.object({
-  create: z_channel_settings_create_with_deps,
-  update: z_channel_settings_update,
-});
-
 const channelSettingsUpsert = router({
-  upsert: authedProcedureWithUserServers
+  upsert: withUserServersProcedure
     .input(z_channel_settings_upsert)
     .mutation(async ({ ctx, input }) => {
       return upsert(
-        () => channelSettingFind.createCaller(ctx).byId(input.create.channel_id),
-        () => channelSettingsCreateUpdate.createCaller(ctx).create(input.create),
-        () => channelSettingsCreateUpdate.createCaller(ctx).update(input.update)
+        () => channelSettingFind.createCaller(ctx).byId(input.channel_id),
+        () => channelSettingsCreateUpdate.createCaller(ctx).create(input),
+        () => channelSettingsCreateUpdate.createCaller(ctx).update(input)
       );
     }),
-  upsertWithDeps: authedProcedureWithUserServers
+  upsertWithDeps: withUserServersProcedure
     .input(z_channel_settings_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(
-        () => channelSettingFind.createCaller(ctx).byId(input.create.channel.create.channel.id),
-        () => channelSettingsCreateWithDeps.createCaller(ctx).createWithDeps(input.create),
-        () => channelSettingsCreateUpdate.createCaller(ctx).update(input.update)
+        () => channelSettingFind.createCaller(ctx).byId(input.channel.id),
+        () => channelSettingsCreateWithDeps.createCaller(ctx).createWithDeps(input),
+        () =>
+          channelSettingsCreateUpdate
+            .createCaller(ctx)
+            .update({ channel_id: input.channel.id, ...input })
       );
     }),
 });
@@ -199,31 +210,3 @@ export const channelSettingsRouter = mergeRouters(
   channelSettingsCreateUpdate,
   channelSettingsCreateWithDeps
 );
-
-export function makeChannelSettingsCreateWithDepsInput(
-  channel: Channel,
-  server: Server,
-  initial: z.infer<typeof z_channel_settings_mutable>
-): inferRouterInputs<typeof channelSettingsCreateWithDeps>["createWithDeps"] {
-  return {
-    channel: makeChannelUpsertWithDeps(channel, server),
-    settings: {
-      channel_id: channel.id,
-      ...initial,
-    },
-  };
-}
-
-export function makeChannelSettingsUpsertWithDeps(
-  channel: Channel,
-  server: Server,
-  update: z.infer<typeof z_channel_settings_mutable>
-): inferRouterInputs<typeof channelSettingsUpsert>["upsertWithDeps"] {
-  return {
-    create: makeChannelSettingsCreateWithDepsInput(channel, server, update),
-    update: {
-      channel_id: channel.id,
-      data: update,
-    },
-  };
-}

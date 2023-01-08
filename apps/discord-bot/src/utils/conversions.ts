@@ -1,11 +1,20 @@
-import type { ForumChannel, GuildTextBasedChannel, Message, User } from "discord.js";
-import type { Message as AOMessage } from "@answeroverflow/db";
 import type {
-  ChannelCreateWithDepsInput,
-  ChannelUpsertInput,
-  ChannelUpsertWithDepsInput,
-  UserUpsertInput,
-} from "@answeroverflow/api";
+  Guild,
+  GuildBasedChannel,
+  GuildChannel,
+  Message,
+  PublicThreadChannel,
+  User,
+} from "discord.js";
+import {
+  getDefaultServer,
+  Message as AOMessage,
+  Channel as AOChannel,
+  Thread as AOThread,
+  Server as AOServer,
+  DiscordAccount as AODiscordAccount,
+} from "@answeroverflow/db";
+
 export function toAOMessage(message: Message): AOMessage {
   if (!message.guild) throw new Error("Message is not in a guild");
   const converted_message: AOMessage = {
@@ -23,65 +32,51 @@ export function toAOMessage(message: Message): AOMessage {
   return converted_message;
 }
 
-export function toAOUser(user: User) {
-  const converted_user: UserUpsertInput = {
+export function toAODiscordAccount(user: User): AODiscordAccount {
+  const converted_user: AODiscordAccount = {
     id: user.id,
+    avatar: user.avatar,
     name: user.username,
   };
   return converted_user;
 }
 
-export function toChannelUpsert(channel: GuildTextBasedChannel) {
-  const converted_channel: ChannelUpsertInput = {
-    create: {
-      id: channel.id,
-      name: channel.name,
-      type: channel.type,
-      server_id: channel.guild.id,
-    },
-    update: {
-      id: channel.id,
-      data: {
-        name: channel.name,
-      },
-    },
+export function toAOServer(guild: Guild) {
+  return getDefaultServer({
+    id: guild.id,
+    name: guild.name,
+    icon: guild.icon,
+  });
+}
+
+export function toAOChannel(channel: GuildChannel | GuildBasedChannel): AOChannel {
+  if (!channel.guild) throw new Error("Channel is not in a guild");
+  const converted_channel: AOChannel = {
+    id: channel.id,
+    name: channel.name,
+    type: channel.type,
+    parent_id: channel.parentId,
+    server_id: channel.guild.id,
   };
   return converted_channel;
 }
 
-export function toChannelCreateWithDeps(channel: GuildTextBasedChannel | ForumChannel) {
-  const converted_channel: ChannelCreateWithDepsInput = {
-    channel: {
-      id: channel.id,
-      name: channel.name,
-      type: channel.type,
-      server_id: channel.guild.id,
-    },
-    server: {
-      create: {
-        id: channel.guild.id,
-        name: channel.guild.name,
-      },
-      update: {
-        id: channel.guild.id,
-        data: {
-          name: channel.guild.name,
-        },
-      },
-    },
+export function toAOChannelWithServer(channel: GuildChannel): AOChannel & { server: AOServer } {
+  const converted = toAOChannel(channel);
+  return {
+    ...converted,
+    server: toAOServer(channel.guild),
   };
-  return converted_channel;
 }
 
-export function toChannelUpsertWithDeps(channel: GuildTextBasedChannel | ForumChannel) {
-  const converted_channel: ChannelUpsertWithDepsInput = {
-    create: toChannelCreateWithDeps(channel),
-    update: {
-      id: channel.id,
-      data: {
-        name: channel.name,
-      },
-    },
+export function toAOThread(thread: PublicThreadChannel): AOThread {
+  if (!thread.parent) throw new Error("Thread has no parent");
+  const converted_thread: AOThread = {
+    id: thread.id,
+    name: thread.name,
+    parent_id: thread.parent.id,
+    type: thread.type,
+    server_id: thread.guild.id,
   };
-  return converted_channel;
+  return converted_thread;
 }

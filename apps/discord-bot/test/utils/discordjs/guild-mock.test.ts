@@ -35,8 +35,8 @@ describe("Guild Mock", () => {
     expect(client.users.cache.get(guild.ownerId)).toBeDefined();
     expect(random_user.id).not.toBe(guild.ownerId);
     expect(guild.members.cache.get(guild.ownerId)).toBeDefined();
-    expect(client.users.cache.size).toBe(2);
-    expect(guild.members.cache.size).toBe(1);
+    expect(client.users.cache.size).toBe(3);
+    expect(guild.members.cache.size).toBe(2);
     expect(guild.members.cache.get(random_user.id)).toBeUndefined();
   });
   it("should have a @everyone default role", async () => {

@@ -2,7 +2,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import type { Context } from "./context";
 import superjson from "superjson";
 import { getDiscordAccount } from "../utils/discord-operations";
-import { getUserServers } from "@answeroverflow/auth/src/discord-oauth";
+import { getDiscordUser, getUserServers } from "@answeroverflow/auth/src/discord-oauth";
 import { assertIsBot } from "../utils/permissions";
 
 const t = initTRPC.context<Context>().create({
@@ -12,14 +12,29 @@ const t = initTRPC.context<Context>().create({
   },
 });
 
-const isAuthed = t.middleware(({ ctx, next }) => {
+async function getDiscordOauth(ctx: Context) {
   if (!ctx.session) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
       message: "Not authenticated",
     });
   }
+  const discord_oauth = await getDiscordAccount(ctx.prisma, ctx.session.user.id);
+  return discord_oauth;
+}
 
+const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
+  if (ctx.caller === "web-client") {
+    const discord_oauth = await getDiscordOauth(ctx);
+    if (!discord_oauth.access_token) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Not authenticated",
+      });
+    }
+    const discord_account = await getDiscordUser(discord_oauth.access_token);
+    ctx.discord_account = discord_account;
+  }
   return next({
     ctx: {
       session: ctx.session,
@@ -27,22 +42,21 @@ const isAuthed = t.middleware(({ ctx, next }) => {
   });
 });
 
-const hasUserServers = t.middleware(async ({ ctx, next }) => {
-  // The bot passes in only the server that it is editing.
-  // On the server we need to fetch what guilds the user is allowed to edit
-  // TODO: Could possibly be improved, but is fine for now
-  if (ctx.caller === "web-client" && ctx.session) {
-    const discord_account = await getDiscordAccount(ctx.prisma, ctx.session.user.id);
-    if (!discord_account.access_token) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "Not authenticated",
-      });
+const addUserServers = t.middleware(async ({ ctx, next }) => {
+  if (ctx.caller === "web-client") {
+    if (ctx.session) {
+      const discord_oauth = await getDiscordOauth(ctx);
+      if (!discord_oauth.access_token) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Not authenticated",
+        });
+      }
+      const user_servers = await getUserServers(discord_oauth.access_token);
+      ctx.user_servers = user_servers;
     }
-    const user_servers = await getUserServers(discord_account.access_token);
-    ctx.user_servers = user_servers;
   }
-  if (!ctx.user_servers && ctx.session && ctx.session.user.id !== "AnswerOverflow") {
+  if (!ctx.user_servers) {
     throw new TRPCError({
       code: "BAD_REQUEST",
       message: "No server permissions found",
@@ -63,6 +77,6 @@ const isBot = t.middleware(({ ctx, next }) => {
 export const router = t.router;
 export const mergeRouters = t.mergeRouters;
 export const publicProcedure = t.procedure;
-export const authedProcedure = t.procedure.use(isAuthed);
-export const authedProcedureWithUserServers = authedProcedure.use(hasUserServers);
-export const botOnlyProcedure = authedProcedure.use(isBot);
+export const withDiscordAccountProcedure = t.procedure.use(addDiscordAccount);
+export const withUserServersProcedure = withDiscordAccountProcedure.use(addUserServers);
+export const botOnlyProcedure = withDiscordAccountProcedure.use(isBot);
