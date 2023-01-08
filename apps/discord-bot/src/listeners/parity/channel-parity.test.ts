@@ -21,18 +21,17 @@ describe("Channel Update Parity", () => {
       router.channels.createWithDeps(toAOChannelWithServer(data.text_channel))
     );
 
-    const new_channel = copyClass(data.text_channel, { name: "new_name" });
+    const new_channel = copyClass(data.text_channel, client, { name: "new_name" });
     await emitEvent(client, Events.ChannelUpdate, data.text_channel, new_channel);
 
     const updated_channel = await testOnlyAPICall((router) => router.channels.byId(new_channel.id));
     expect(updated_channel!.name).toBe(new_channel.name);
   });
   it("should not update a channel that doesn't exist", async () => {
-    const new_channel = copyClass(data.text_channel, { name: "new_name" });
+    const new_channel = copyClass(data.text_channel, client, { name: "new_name" });
     await emitEvent(client, Events.ChannelUpdate, data.text_channel, new_channel);
-    await expect(
-      testOnlyAPICall((router) => router.channels.byId(new_channel.id))
-    ).rejects.toThrow();
+    const updated = await testOnlyAPICall((router) => router.channels.byId(new_channel.id));
+    expect(updated).toBeNull();
   });
 });
 
@@ -42,15 +41,13 @@ describe("Channel Delete Parity", () => {
       router.channels.createWithDeps(toAOChannelWithServer(data.text_channel))
     );
     await emitEvent(client, Events.ChannelDelete, data.text_channel);
-    await expect(
-      testOnlyAPICall((router) => router.channels.byId(data.text_channel.id))
-    ).rejects.toThrow();
+    const deleted = await testOnlyAPICall((router) => router.channels.byId(data.text_channel.id));
+    expect(deleted).toBeNull();
   });
   it("should not delete a channel that doesn't exist", async () => {
     await emitEvent(client, Events.ChannelDelete, data.text_channel);
-    await expect(
-      testOnlyAPICall((router) => router.channels.byId(data.text_channel.id))
-    ).rejects.toThrow();
+    const deleted = await testOnlyAPICall((router) => router.channels.byId(data.text_channel.id));
+    expect(deleted).toBeNull();
   });
 });
 
@@ -65,9 +62,9 @@ describe("Thread Delete Parity", () => {
     const created = await testOnlyAPICall((router) => router.channels.byId(data.forum_thread.id));
     expect(created).not.toBeNull();
     await emitEvent(client, Events.ThreadDelete, data.forum_thread);
-    await expect(
-      testOnlyAPICall((router) => router.channels.byId(data.forum_thread.id))
-    ).rejects.toThrow();
+
+    const deleted = await testOnlyAPICall((router) => router.channels.byId(data.forum_thread.id));
+    expect(deleted).toBeNull();
   });
 });
 
@@ -79,7 +76,7 @@ describe("Thread Update Parity", () => {
         ...toAOThread(data.forum_thread),
       })
     );
-    const new_thread = copyClass(data.forum_thread, { name: "new_name" });
+    const new_thread = copyClass(data.forum_thread, client, { name: "new_name" });
 
     await emitEvent(client, Events.ThreadUpdate, data.forum_thread, new_thread);
     const updated = await testOnlyAPICall((router) => router.channels.byId(new_thread.id));
@@ -88,11 +85,10 @@ describe("Thread Update Parity", () => {
     expect(updated!.name).toBe(new_thread.name);
   });
   it("should not update a thread that doesn't exist", async () => {
-    const new_thread = copyClass(data.forum_thread, { name: "new_name" });
+    const new_thread = copyClass(data.forum_thread, client, { name: "new_name" });
     await emitEvent(client, Events.ThreadUpdate, data.forum_thread, new_thread);
-    await expect(
-      testOnlyAPICall((router) => router.channels.byId(new_thread.id))
-    ).rejects.toThrow();
+    const updated = await testOnlyAPICall((router) => router.channels.byId(new_thread.id));
+    expect(updated).toBeNull();
   });
 });
 

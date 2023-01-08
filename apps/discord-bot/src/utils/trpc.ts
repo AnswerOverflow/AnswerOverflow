@@ -80,12 +80,3 @@ export async function callApiWithConsoleStatusHandler<T>(
     },
   });
 }
-
-export async function callApiWithThrowingErrorHandler<T>(call: Omit<TRPCall<T>, "Error">) {
-  return await callAPI({
-    ...call,
-    Error(error) {
-      throw error;
-    },
-  });
-}
