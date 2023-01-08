@@ -14,7 +14,7 @@ import {
 } from "~api/utils/protected-procedures/user-only";
 import { withDiscordAccountProcedure, mergeRouters, router } from "../trpc";
 import { upsert } from "~api/utils/operations";
-import { discordAccountRouter, z_discord_account_upsert } from "../accounts/discord-accounts";
+import { discordAccountRouter, z_discord_account_upsert } from "../users/accounts/discord-accounts";
 import { serverRouter } from "../server/server";
 import { TRPCError } from "@trpc/server";
 

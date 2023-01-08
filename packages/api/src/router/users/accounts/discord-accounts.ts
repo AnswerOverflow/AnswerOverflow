@@ -5,7 +5,7 @@ import {
   protectedUserOnlyFetch,
   protectedUserOnlyMutation,
 } from "~api/utils/protected-procedures/user-only";
-import { withDiscordAccountProcedure, mergeRouters, router } from "../trpc";
+import { withDiscordAccountProcedure, mergeRouters, router } from "~api/router/trpc";
 
 const z_discord_account = z.object({
   id: z.string(),
