@@ -15,8 +15,8 @@ export class SyncOnUpdate extends Listener {
           name: newChannel.name,
         });
       },
-      console_error_message: `Error updating channel: ${newChannel.id}`,
-      console_success_message: `Updated channel: ${newChannel.id}`,
+      error_message: `Error updating channel: ${newChannel.id}`,
+      success_message: `Updated channel: ${newChannel.id}`,
       getCtx: createAnswerOveflowBotCtx,
     });
   }
@@ -29,8 +29,8 @@ export class ChannelSyncOnDelete extends Listener {
       async ApiCall(router) {
         return router.channels.delete(channel.id);
       },
-      console_error_message: `Error deleting channel: ${channel.id}`,
-      console_success_message: `Deleted channel: ${channel.id}`,
+      error_message: `Error deleting channel: ${channel.id}`,
+      success_message: `Deleted channel: ${channel.id}`,
       getCtx: createAnswerOveflowBotCtx,
     });
   }
@@ -43,8 +43,8 @@ export class ThreadSyncOnDelete extends Listener {
       async ApiCall(router) {
         return router.channels.delete(thread.id);
       },
-      console_error_message: `Error deleting thread: ${thread.id}`,
-      console_success_message: `Deleted thread: ${thread.id}`,
+      error_message: `Error deleting thread: ${thread.id}`,
+      success_message: `Deleted thread: ${thread.id}`,
       getCtx: createAnswerOveflowBotCtx,
     });
   }
@@ -60,8 +60,8 @@ export class ThreadSyncOnUpdate extends Listener {
           name: newThread.name,
         });
       },
-      console_error_message: `Error updating thread: ${newThread.id}`,
-      console_success_message: `Updated thread: ${newThread.id}`,
+      error_message: `Error updating thread: ${newThread.id}`,
+      success_message: `Updated thread: ${newThread.id}`,
       getCtx: createAnswerOveflowBotCtx,
     });
   }
@@ -79,8 +79,8 @@ export class InviteSyncOnDelete extends Listener {
           invite_code: null,
         });
       },
-      console_error_message: `Error deleting invite: ${invite.code}`,
-      console_success_message: `Deleted invite: ${invite.code}`,
+      error_message: `Error deleting invite: ${invite.code}`,
+      success_message: `Deleted invite: ${invite.code}`,
       getCtx: createAnswerOveflowBotCtx,
     });
   }

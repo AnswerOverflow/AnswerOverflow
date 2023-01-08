@@ -61,11 +61,22 @@ export function mockGuild(client: SapphireClient, owner?: User, data: Partial<AP
   mockGuildMember(client, client.user!, guild); // it is expected that the bot is a member of the guild
 
   // replace guild members fetched with accessing from the cache of the fetched user id in the fetch argument
-  guild.members.fetch = jest.fn().mockImplementation((id: string) => {
-    const member = guild.members.cache.get(id);
-    if (member) return Promise.resolve(member);
-    return Promise.reject(new Error("Member not found"));
-  });
+  guild.members.fetch = jest.fn().mockImplementation(
+    (
+      id:
+        | string
+        | {
+            user: string;
+          }
+    ) => {
+      if (typeof id === "object") {
+        id = id.user;
+      }
+      const member = guild.members.cache.get(id);
+      if (member) return Promise.resolve(member);
+      return Promise.reject(new Error("Member not found"));
+    }
+  );
   return guild;
 }
 
