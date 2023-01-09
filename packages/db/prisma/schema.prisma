@@ -81,8 +81,8 @@ model UserServerSettings {
   @@id([user_id, server_id])
 }
 
-model DeletedUser {
-  deleted_user_id String @id
+model IgnoredDiscordAccount {
+  id String @id @unique
 }
 
 // Servers
