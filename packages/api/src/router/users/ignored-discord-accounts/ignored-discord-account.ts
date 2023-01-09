@@ -27,4 +27,14 @@ export const ignored_discord_account_router = router({
       "Ignored Discord account not found"
     );
   }),
+  byIdMany: publicProcedure.input(z.array(z.string())).query(({ ctx, input }) => {
+    return ctx.prisma.ignoredDiscordAccount.findMany({ where: { id: { in: input } } });
+  }),
+  stopIgnoring: withDiscordAccountProcedure.input(z.string()).mutation(({ ctx, input }) => {
+    return protectedUserOnlyMutation({
+      ctx,
+      user_id: input,
+      operation: () => ctx.prisma.ignoredDiscordAccount.delete({ where: { id: input } }),
+    });
+  }),
 });

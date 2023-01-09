@@ -1,4 +1,4 @@
-import { getDefaultDiscordAccount } from "@answeroverflow/db";
+import { getDefaultDiscordAccount, Prisma } from "@answeroverflow/db";
 import { z } from "zod";
 import { upsert, upsertMany } from "~api/utils/operations";
 import {
@@ -6,6 +6,8 @@ import {
   protectedUserOnlyMutation,
 } from "~api/utils/protected-procedures/user-only";
 import { withDiscordAccountProcedure, mergeRouters, router } from "~api/router/trpc";
+import { ignored_discord_account_router } from "../ignored-discord-accounts/ignored-discord-account";
+import { TRPCError } from "@trpc/server";
 
 const z_discord_account = z.object({
   id: z.string(),
@@ -50,22 +52,46 @@ const account_find_router = router({
 });
 
 const account_crud_router = router({
-  create: withDiscordAccountProcedure.input(z_discord_account_create).mutation(({ ctx, input }) => {
-    return protectedUserOnlyMutation({
-      ctx,
-      user_id: input.id,
-      operation: () => ctx.prisma.discordAccount.create({ data: input }),
-    });
-  }),
+  create: withDiscordAccountProcedure
+    .input(z_discord_account_create)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ignored_discord_account_router.createCaller(ctx).byId(input.id);
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message:
+            "Cannot create discord account for ignored user. Enable indexing of your account first",
+        });
+      } catch (error) {
+        if (error instanceof TRPCError && error.code === "NOT_FOUND") {
+          return protectedUserOnlyMutation({
+            ctx,
+            user_id: input.id,
+            async operation() {
+              return ctx.prisma.discordAccount.create({ data: input });
+            },
+          });
+        } else {
+          throw error;
+        }
+      }
+    }),
   createBulk: withDiscordAccountProcedure
     .input(z.array(z_discord_account_create))
     .mutation(async ({ ctx, input }) => {
+      const ignored_accounts = await ignored_discord_account_router
+        .createCaller(ctx)
+        .byIdMany(input.map((i) => i.id));
+      const ignored_ids_lookup = new Set(ignored_accounts.map((i) => i.id));
+      const allowed_to_create_accounts = input.filter((x) => !ignored_ids_lookup.has(x.id));
       await protectedUserOnlyMutation({
         ctx,
         user_id: input.map((i) => i.id),
-        operation: () => ctx.prisma.discordAccount.createMany({ data: input }),
+        async operation() {
+          return ctx.prisma.discordAccount.createMany({ data: allowed_to_create_accounts });
+        },
       });
-      return input.map((i) => getDefaultDiscordAccount(i));
+      return allowed_to_create_accounts.map((i) => getDefaultDiscordAccount(i));
     }),
   update: withDiscordAccountProcedure.input(z_discord_account_update).mutation(({ ctx, input }) => {
     return protectedUserOnlyMutation({
@@ -86,6 +112,28 @@ const account_crud_router = router({
           ),
       });
     }),
+  delete: withDiscordAccountProcedure.input(z.string()).mutation(({ ctx, input }) => {
+    return protectedUserOnlyMutation({
+      ctx,
+      user_id: input,
+      async operation() {
+        try {
+          await ctx.prisma.discordAccount.delete({ where: { id: input } });
+        } catch (error) {
+          if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Could not find discord account to delete",
+            });
+          } else {
+            throw error;
+          }
+        }
+        await ignored_discord_account_router.createCaller(ctx).upsert(input);
+        return true;
+      },
+    });
+  }),
 });
 
 const account_upsert_router = router({
