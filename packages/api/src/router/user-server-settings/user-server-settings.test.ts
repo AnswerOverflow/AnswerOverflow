@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { clearDatabase, DiscordAccount, Server } from "@answeroverflow/db";
 import { getGeneralScenario, ServerTestData } from "~api/test/utils";
-import { discordAccountRouter } from "../accounts/discord-accounts";
+import { discordAccountRouter } from "../users/accounts/discord-accounts";
 import { serverRouter } from "../server/server";
 import { SERVER_NOT_SETUP_MESSAGE, userServerSettingsRouter } from "./user-server-settings";
 

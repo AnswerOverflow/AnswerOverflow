@@ -71,10 +71,11 @@ CREATE TABLE `UserServerSettings` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `DeletedUser` (
-    `deleted_user_id` VARCHAR(191) NOT NULL,
+CREATE TABLE `IgnoredDiscordAccount` (
+    `id` VARCHAR(191) NOT NULL,
 
-    PRIMARY KEY (`deleted_user_id`)
+    UNIQUE INDEX `IgnoredDiscordAccount_id_key`(`id`),
+    PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
