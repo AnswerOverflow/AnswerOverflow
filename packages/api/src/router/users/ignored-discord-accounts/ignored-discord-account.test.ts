@@ -3,7 +3,6 @@ import { clearDatabase, DiscordAccount } from "@answeroverflow/db";
 import { getGeneralScenario } from "~api/test/utils";
 import { ignored_discord_account_router } from "./ignored-discord-account";
 
-// eslint-disable-next-line no-unused-vars
 let ignored_account_bot_caller: ReturnType<typeof ignored_discord_account_router["createCaller"]>;
 let account1_ignored_account_caller: ReturnType<
   typeof ignored_discord_account_router["createCaller"]
