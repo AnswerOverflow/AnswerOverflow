@@ -1,9 +1,9 @@
 import type {
+  AnyThreadChannel,
   Guild,
   GuildBasedChannel,
   GuildChannel,
   Message,
-  PublicThreadChannel,
   User,
 } from "discord.js";
 import {
@@ -69,7 +69,7 @@ export function toAOChannelWithServer(channel: GuildChannel): AOChannel & { serv
   };
 }
 
-export function toAOThread(thread: PublicThreadChannel): AOThread {
+export function toAOThread(thread: AnyThreadChannel): AOThread {
   if (!thread.parent) throw new Error("Thread has no parent");
   const converted_thread: AOThread = {
     id: thread.id,

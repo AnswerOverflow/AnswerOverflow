@@ -7,7 +7,9 @@ let manage_channel_settings_router: ReturnType<typeof channelSettingsRouter["cre
 beforeEach(async () => {
   const { data1 } = await getGeneralScenario();
   data = data1;
-  manage_channel_settings_router = channelSettingsRouter.createCaller(data1.manage_guild_ctx);
+  manage_channel_settings_router = channelSettingsRouter.createCaller(
+    data1.account1_guild_manager_ctx
+  );
   await clearDatabase();
 });
 

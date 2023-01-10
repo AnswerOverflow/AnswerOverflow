@@ -17,12 +17,12 @@ let server: Server;
 beforeEach(async () => {
   const { data1 } = await getGeneralScenario();
   data = data1;
-  user_1_router = userServerSettingsRouter.createCaller(data1.manage_guild_ctx);
-  user_2_router = userServerSettingsRouter.createCaller(data1.default_ctx);
-  server_router = serverRouter.createCaller(data1.manage_guild_ctx);
+  user_1_router = userServerSettingsRouter.createCaller(data1.account1_guild_manager_ctx);
+  user_2_router = userServerSettingsRouter.createCaller(data1.account2_default_member_ctx);
+  server_router = serverRouter.createCaller(data1.account1_guild_manager_ctx);
   discord_account_router = discordAccountRouter.createCaller(data1.bot_caller_ctx);
-  user1 = data1.guild_manager_member;
-  user2 = data1.guild_default_member;
+  user1 = data1.account1_guild_manager;
+  user2 = data1.account2_default_member;
   server = data1.server;
   await clearDatabase();
 });

@@ -202,6 +202,19 @@ export class Elastic extends Client {
     }
   }
 
+  public async bulkUpsertMessages(messages: Message[]) {
+    const body = messages.flatMap((message) => [
+      { update: { _index: this.messages_index, _id: message.id } },
+      { doc: message, doc_as_upsert: true },
+    ]);
+    const result = await this.bulk({ body });
+    if (result.errors) {
+      console.error(result);
+      return false;
+    }
+    return true;
+  }
+
   public async createMessagesIndex() {
     const exists = await this.indices.exists({
       index: this.messages_index,

@@ -5,6 +5,9 @@ import {
   protectedMessageMutation,
   protectedMessageMutationFetchFirst,
 } from "~api/utils/protected-procedures/message-editor-procedures";
+import { ignored_discord_account_router } from "../users/ignored-discord-accounts/ignored-discord-account";
+import { assertIsNotDeletedUser } from "~api/router/users/ignored-discord-accounts/ignored-discord-account";
+import { TRPCError } from "@trpc/server";
 
 export const z_message = z.object({
   id: z.string(),
@@ -47,12 +50,39 @@ const message_crud_router = router({
     });
   }),
   upsert: withDiscordAccountProcedure.input(z_message).mutation(async ({ ctx, input }) => {
+    await assertIsNotDeletedUser(ctx, input.author_id);
     return protectedMessageMutation({
       ctx,
       author_id: input.id,
-      operation: () => ctx.elastic.upsertMessage(input),
+      operation() {
+        return ctx.elastic.upsertMessage(input);
+      },
     });
   }),
+  upsertBulk: withDiscordAccountProcedure
+    .input(z.array(z_message))
+    .mutation(async ({ ctx, input }) => {
+      const author_ids = new Set(input.map((msg) => msg.author_id));
+      const ignored_accounts = await ignored_discord_account_router
+        .createCaller(ctx)
+        .byIdMany([...author_ids]);
+      const ignored_account_ids = new Set(ignored_accounts.map((i) => i.id));
+      const filtered_messages = input.filter((msg) => !ignored_account_ids.has(msg.author_id));
+      const status = await protectedMessageMutation({
+        ctx,
+        author_id: filtered_messages.map((msg) => msg.author_id),
+        operation() {
+          return ctx.elastic.bulkUpsertMessages(filtered_messages);
+        },
+      });
+      if (!status) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to upsert messages",
+        });
+      }
+      return filtered_messages;
+    }),
   delete: withDiscordAccountProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     return protectedMessageMutationFetchFirst({
       ctx,
