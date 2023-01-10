@@ -2,7 +2,6 @@ import type { DiscordAccount, Thread, Message as AOMessage } from "@answeroverfl
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import {
-  AnyThreadChannel,
   ChannelType,
   Client,
   Events,
@@ -22,43 +21,59 @@ import {
   toAOMessage,
   toAOThread,
 } from "~discord-bot/utils/conversions";
+import { container } from "@sapphire/framework";
 import { callAPI, callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
 
 @ApplyOptions<Listener.Options>({ once: true, event: Events.ClientReady })
-export class OnMessage extends Listener {
-  public run(client: Client) {
+export class Indexing extends Listener {
+  public async run(client: Client) {
+    const interval_in_hours = parseInt(process.env.INDEXING_INTERVAL_IN_HOURS) ?? 24;
+    container.logger.info(`Indexing all servers every ${interval_in_hours} hours`);
+    const interval_in_ms = interval_in_hours * 60 * 60 * 1000;
+    await indexServers(client);
     setInterval(() => {
       void indexServers(client);
-    }, process.env.INDEXING_INTERVAL_IN_HOURS);
+    }, interval_in_ms);
   }
 }
 
 async function indexServers(client: Client) {
+  container.logger.info(`Indexing ${client.guilds.cache.size} servers`);
   for (const guild of client.guilds.cache.values()) {
     await indexServer(guild);
   }
 }
 
 async function indexServer(guild: Guild) {
+  container.logger.info(`Indexing server ${guild.id}`);
   for (const channel of guild.channels.cache.values()) {
-    await indexRootChannel(channel);
+    const is_indexable_channel_type =
+      channel.type === ChannelType.GuildText ||
+      channel.type === ChannelType.GuildAnnouncement ||
+      channel.type === ChannelType.GuildForum;
+    if (is_indexable_channel_type) {
+      await indexRootChannel(channel);
+    }
   }
 }
 
-async function indexRootChannel(channel: GuildBasedChannel) {
+async function indexRootChannel(channel: TextChannel | NewsChannel | ForumChannel) {
+  container.logger.info(`Attempting to indexing channel ${channel.id} | ${channel.name}`);
+
   const settings = await callApiWithConsoleStatusHandler({
     ApiCall: (router) => router.channel_settings.byId(channel.id),
     getCtx: createAnswerOveflowBotCtx,
     error_message: `Failed to get channel settings for channel ${channel.id}`,
     success_message: `Got channel settings for channel ${channel.id}`,
   });
-  const has_indexing_enabled = !settings || !settings.flags.indexing_enabled;
-  const is_indexable_channel_type =
-    channel.type === ChannelType.GuildText ||
-    channel.type === ChannelType.GuildAnnouncement ||
-    channel.type === ChannelType.GuildForum;
 
-  if (!has_indexing_enabled || !is_indexable_channel_type) {
+  if (!settings) {
+    container.logger.info(`Channel ${channel.id} ${channel.name} has no settings, skipping`);
+    return;
+  }
+
+  if (!settings.flags.indexing_enabled) {
+    container.logger.info(`Channel ${channel.id} ${channel.name} has indexing disabled, skipping`);
     return;
   }
 
@@ -80,9 +95,13 @@ async function indexRootChannel(channel: GuildBasedChannel) {
 
   await callAPI({
     async ApiCall(router) {
+      container.logger.debug(`Upserting ${converted_users.length} users`);
       await router.discord_accounts.upsertBulk(converted_users);
+      container.logger.debug(`Upserting channel ${channel.id}`);
       await router.channels.upsertWithDeps(toAOChannelWithServer(channel));
+      container.logger.debug(`Upserting ${converted_threads.length} threads`);
       await router.channels.upsertMany(converted_threads);
+      container.logger.debug(`Upserting ${converted_messages.length} messages`);
       await router.messages.upsertBulk(converted_messages);
       await router.channel_settings.upsert({
         channel_id: channel.id,
@@ -131,20 +150,20 @@ function addSolutionsToMessages(
 function convertToAODataTypes(messages: Message[]) {
   // Sets are used to avoid any duplicates
   // the only one of these that is expected to have a duplicate is converted users but the extra safety doesnt hurt
-  const converted_users = new Set<DiscordAccount>();
-  const converted_threads = new Set<Thread>();
-  const converted_messages = new Set<AOMessage>();
+  const converted_users = new Map<string, DiscordAccount>();
+  const converted_threads = new Map<string, Thread>();
+  const converted_messages = new Map<string, AOMessage>();
   for (const msg of messages) {
-    converted_users.add(toAODiscordAccount(msg.author));
+    converted_users.set(msg.author.id, toAODiscordAccount(msg.author));
     if (msg.thread) {
-      converted_threads.add(toAOThread(msg.thread));
+      converted_threads.set(msg.thread.id, toAOThread(msg.thread));
     }
-    converted_messages.add(toAOMessage(msg));
+    converted_messages.set(msg.id, toAOMessage(msg));
   }
   return {
-    converted_users: [...converted_users],
-    converted_threads: [...converted_threads],
-    converted_messages: [...converted_messages],
+    converted_users: [...converted_users.values()],
+    converted_threads: [...converted_threads.values()],
+    converted_messages: [...converted_messages.values()],
   };
 }
 
@@ -180,6 +199,11 @@ async function fetchAllChannelMessagesWithThreads(
   channel: ForumChannel | NewsChannel | TextChannel,
   options: MessageFetchOptions = {}
 ) {
+  container.logger.info(`
+    Fetching all messages for channel ${channel.id} ${channel.name} with options ${JSON.stringify(
+    options
+  )}
+  `);
   const collected_messages: Message[] = [];
   if (channel.type === ChannelType.GuildForum) {
     const archived_threads = await channel.threads.fetchArchived({
@@ -189,7 +213,7 @@ async function fetchAllChannelMessagesWithThreads(
     const active_threads = await channel.threads.fetchActive();
     const threads = [...archived_threads.threads.values(), ...active_threads.threads.values()];
     for (const thread of threads) {
-      const thread_messages = await fetchAllThreadMessages(thread);
+      const thread_messages = await fetchAllMesages(thread);
       collected_messages.push(...thread_messages);
     }
   } else if (
@@ -209,15 +233,11 @@ async function fetchAllChannelMessages(
   let all_messages = await fetchAllMesages(channel, options);
   for (const message of all_messages) {
     if (message.thread) {
-      const thread_messages = await fetchAllThreadMessages(message.thread, options);
+      const thread_messages = await fetchAllMesages(message.thread, options);
       all_messages = all_messages.concat(thread_messages);
     }
   }
   return all_messages;
-}
-
-async function fetchAllThreadMessages(thread: AnyThreadChannel, options: MessageFetchOptions = {}) {
-  return fetchAllMesages(thread, options);
 }
 
 async function fetchAllMesages(
@@ -231,11 +251,13 @@ async function fetchAllMesages(
     .then((messagePage) => (messagePage.size === 1 ? messagePage.at(0) : null));
 
   while (message && (limit === undefined || messages.length < limit)) {
+    // container.logger.debug(`Fetching from ${message.id}`);
     await channel.messages.fetch({ limit: 100, after: message.id }).then((messagePage) => {
-      messagePage.forEach((msg) => messages.push(msg));
-
+      // container.logger.debug(`Received ${messagePage.size} messages`);
+      const sorted_messages_by_id = messagePage.sorted((a, b) => a.id.localeCompare(b.id));
+      messages.push(...sorted_messages_by_id.values());
       // Update our message pointer to be last message in page of messages
-      message = 0 < messagePage.size ? messagePage.at(messagePage.size - 1) : null;
+      message = 0 < sorted_messages_by_id.size ? sorted_messages_by_id.last() : null;
     });
   }
   return messages;

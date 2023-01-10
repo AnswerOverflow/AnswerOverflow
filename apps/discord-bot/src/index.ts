@@ -11,7 +11,7 @@ declare global {
     interface ProcessEnv {
       /* Discord Bot */
       DISCORD_TOKEN: string;
-      INDEXING_INTERVAL_IN_HOURS: number;
+      INDEXING_INTERVAL_IN_HOURS: string;
     }
   }
 }
