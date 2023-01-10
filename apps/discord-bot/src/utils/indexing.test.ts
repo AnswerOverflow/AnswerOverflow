@@ -1,3 +1,9 @@
+import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
+
+beforeEach(async () => {
+  const data = await setupBot();
+});
+
 describe("Indexing", () => {
   describe("Index Root Channel", () => {
     it("should index root channel with a text channel", async () => {});
@@ -20,5 +26,9 @@ describe("Indexing", () => {
     it("should fetch all channel messages with no threads", async () => {});
     it("should fetch all channel messages and all thread messages", async () => {});
   });
-  describe("Fetch All Messages", () => {});
+  describe("Fetch All Messages", () => {
+    it("should fetch all messages", async () => {});
+    it("should fetch all messages with a limit", async () => {});
+    it("should fetch all messages with a limit and a start", async () => {});
+  });
 });

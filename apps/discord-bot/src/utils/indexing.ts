@@ -1,10 +1,7 @@
 import type { DiscordAccount, Thread, Message as AOMessage } from "@answeroverflow/db";
-import { ApplyOptions } from "@sapphire/decorators";
-import { Listener } from "@sapphire/framework";
 import {
   ChannelType,
   Client,
-  Events,
   ForumChannel,
   Guild,
   GuildBasedChannel,
@@ -24,20 +21,7 @@ import {
 import { container } from "@sapphire/framework";
 import { callAPI, callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
 
-@ApplyOptions<Listener.Options>({ once: true, event: Events.ClientReady })
-export class Indexing extends Listener {
-  public async run(client: Client) {
-    const interval_in_hours = parseInt(process.env.INDEXING_INTERVAL_IN_HOURS) ?? 24;
-    container.logger.info(`Indexing all servers every ${interval_in_hours} hours`);
-    const interval_in_ms = interval_in_hours * 60 * 60 * 1000;
-    await indexServers(client);
-    setInterval(() => {
-      void indexServers(client);
-    }, interval_in_ms);
-  }
-}
-
-async function indexServers(client: Client) {
+export async function indexServers(client: Client) {
   container.logger.info(`Indexing ${client.guilds.cache.size} servers`);
   for (const guild of client.guilds.cache.values()) {
     await indexServer(guild);
@@ -240,7 +224,7 @@ async function fetchAllChannelMessages(
   return all_messages;
 }
 
-async function fetchAllMesages(
+export async function fetchAllMesages(
   channel: TextBasedChannel,
   { start, limit }: MessageFetchOptions = {}
 ) {
@@ -254,7 +238,9 @@ async function fetchAllMesages(
     // container.logger.debug(`Fetching from ${message.id}`);
     await channel.messages.fetch({ limit: 100, after: message.id }).then((messagePage) => {
       // container.logger.debug(`Received ${messagePage.size} messages`);
-      const sorted_messages_by_id = messagePage.sorted((a, b) => a.id.localeCompare(b.id));
+      const sorted_messages_by_id = messagePage.sorted((a, b) =>
+        BigInt(a.id) < BigInt(b.id) ? -1 : BigInt(a.id) > BigInt(b.id) ? 1 : 0
+      );
       messages.push(...sorted_messages_by_id.values());
       // Update our message pointer to be last message in page of messages
       message = 0 < sorted_messages_by_id.size ? sorted_messages_by_id.last() : null;
