@@ -85,4 +85,20 @@ describe("ElasticSearch", () => {
       expect(fetched_message).toEqual(msg1);
     });
   });
+
+  describe("Message Fetch Bulk", () => {
+    it("should bulk fetch messages", async () => {
+      await elastic.upsertMessage(msg1);
+      await elastic.upsertMessage(msg2);
+      const fetched_messages = await elastic.bulkGetMessages([msg1.id, msg2.id]);
+      expect(fetched_messages).toBeDefined();
+      expect(fetched_messages).toHaveLength(2);
+      expect(fetched_messages).toEqual([msg1, msg2]);
+    });
+    it("should return an empty array if no messages are found", async () => {
+      const fetched_messages = await elastic.bulkGetMessages([msg1.id, msg2.id]);
+      expect(fetched_messages).toBeDefined();
+      expect(fetched_messages).toHaveLength(0);
+    });
+  });
 });

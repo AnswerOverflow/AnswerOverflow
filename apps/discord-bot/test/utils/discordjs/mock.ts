@@ -60,9 +60,10 @@ export function mockClient(override: Partial<ClientOptions> = {}) {
 
   Client.prototype.login = jest.fn();
   container.reacord = new ReacordTester();
-  mockClientUser(client, {
+  const user = mockClientUser(client, {
     id: process.env.DISCORD_CLIENT_ID,
   });
+  client.id = user.id;
   return client;
 }
 

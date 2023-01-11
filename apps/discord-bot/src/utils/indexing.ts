@@ -1,4 +1,4 @@
-import type { DiscordAccount, Thread, Message as AOMessage } from "@answeroverflow/db";
+import type { Message as AOMessage } from "@answeroverflow/db";
 import {
   ChannelType,
   Client,
@@ -7,19 +7,20 @@ import {
   GuildBasedChannel,
   Message,
   NewsChannel,
+  PublicThreadChannel,
   Snowflake,
   TextBasedChannel,
   TextChannel,
 } from "discord.js";
 import { createAnswerOveflowBotCtx } from "~discord-bot/utils/context";
 import {
+  extractUsersSetFromMessages,
+  messagesToAOMessagesSet,
   toAOChannelWithServer,
-  toAODiscordAccount,
-  toAOMessage,
   toAOThread,
 } from "~discord-bot/utils/conversions";
 import { container } from "@sapphire/framework";
-import { callAPI, callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
+import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
 import { sortMessagesById } from "./utils";
 
 export async function indexServers(client: Client) {
@@ -42,7 +43,7 @@ async function indexServer(guild: Guild) {
   }
 }
 
-async function indexRootChannel(channel: TextChannel | NewsChannel | ForumChannel) {
+export async function indexRootChannel(channel: TextChannel | NewsChannel | ForumChannel) {
   container.logger.info(`Attempting to indexing channel ${channel.id} | ${channel.name}`);
 
   const settings = await callApiWithConsoleStatusHandler({
@@ -52,47 +53,50 @@ async function indexRootChannel(channel: TextChannel | NewsChannel | ForumChanne
     success_message: `Got channel settings for channel ${channel.id}`,
   });
 
-  if (!settings) {
-    container.logger.info(`Channel ${channel.id} ${channel.name} has no settings, skipping`);
-    return;
-  }
-
-  if (!settings.flags.indexing_enabled) {
-    container.logger.info(`Channel ${channel.id} ${channel.name} has indexing disabled, skipping`);
+  if (!settings || !settings.flags.indexing_enabled) {
     return;
   }
 
   // Collect all messages
-  const messages_to_parse = await fetchAllChannelMessagesWithThreads(channel);
+  const { messages: messages_to_parse, threads } = await fetchAllChannelMessagesWithThreads(
+    channel
+  );
 
   // Filter out messages from users with indexing disabled or from the system
   const filtered_messages = await filterMessages(messages_to_parse, channel);
 
   // Convert to Answer Overflow data types
-  const { converted_users, converted_threads, converted_messages } =
-    convertToAODataTypes(filtered_messages);
+
+  const converted_users = extractUsersSetFromMessages(filtered_messages);
+  const converted_threads = threads.map((x) => toAOThread(x));
+  const converted_messages = messagesToAOMessagesSet(filtered_messages);
 
   if (channel.client.id == null) {
     throw new Error("Received a null client id when indexing");
   }
 
-  addSolutionsToMessages(filtered_messages, converted_messages, channel.client.id);
+  addSolutionsToMessages(filtered_messages, converted_messages);
 
-  await callAPI({
+  await callApiWithConsoleStatusHandler({
     async ApiCall(router) {
       container.logger.debug(`Upserting ${converted_users.length} users`);
       await router.discord_accounts.upsertBulk(converted_users);
+
       container.logger.debug(`Upserting channel ${channel.id}`);
       await router.channels.upsertWithDeps(toAOChannelWithServer(channel));
-      container.logger.debug(`Upserting ${converted_threads.length} threads`);
-      await router.channels.upsertMany(converted_threads);
+
       container.logger.debug(`Upserting ${converted_messages.length} messages`);
       await router.messages.upsertBulk(converted_messages);
+
+      container.logger.debug(`Upserting ${converted_threads.length} threads`);
+      await router.channels.upsertMany(converted_threads);
+
       await router.channel_settings.upsert({
         channel_id: channel.id,
         last_indexed_snowflake: converted_messages[converted_messages.length - 1].id,
       });
     },
+    error_message: `Failed to index channel ${channel.id}`,
     getCtx: createAnswerOveflowBotCtx,
   });
 }
@@ -102,54 +106,35 @@ type MessageFetchOptions = {
   limit?: number | undefined;
 };
 
-function addSolutionsToMessages(
-  messages: Message[],
-  converted_messages: AOMessage[],
-  bot_id: Snowflake
-) {
+export function addSolutionsToMessages(messages: Message[], converted_messages: AOMessage[]) {
   // Loop through filtered messages for everything from the Answer Overflow bot
   // Put the solution messages on the relevant messages
   const message_lookup = new Map(converted_messages.map((x) => [x.id, x]));
   for (const msg of messages) {
-    if (msg.author.id != bot_id) {
-      continue;
-    }
-    for (const embed of msg.embeds) {
-      let question_id: string | null = null;
-      let solution_id: string | null = null;
-      for (const field of embed.fields) {
-        if (field.name === "Question Message ID") {
-          question_id = field.value;
-        }
-        if (field.name === "Solution Message ID") {
-          solution_id = field.value;
-        }
-      }
-      if (question_id && solution_id && message_lookup.has(question_id)) {
-        message_lookup.get(question_id)!.solutions.push(solution_id);
-      }
+    const { question_id, solution_id } = findSolutionsToMessage(msg);
+    if (question_id && solution_id && message_lookup.has(question_id)) {
+      message_lookup.get(question_id)!.solutions.push(solution_id);
     }
   }
 }
 
-function convertToAODataTypes(messages: Message[]) {
-  // Sets are used to avoid any duplicates
-  // the only one of these that is expected to have a duplicate is converted users but the extra safety doesnt hurt
-  const converted_users = new Map<string, DiscordAccount>();
-  const converted_threads = new Map<string, Thread>();
-  const converted_messages = new Map<string, AOMessage>();
-  for (const msg of messages) {
-    converted_users.set(msg.author.id, toAODiscordAccount(msg.author));
-    if (msg.thread) {
-      converted_threads.set(msg.thread.id, toAOThread(msg.thread));
-    }
-    converted_messages.set(msg.id, toAOMessage(msg));
+export function findSolutionsToMessage(msg: Message) {
+  let question_id: string | null = null;
+  let solution_id: string | null = null;
+  if (msg.author.id != msg.client.user.id) {
+    return { question_id, solution_id };
   }
-  return {
-    converted_users: [...converted_users.values()],
-    converted_threads: [...converted_threads.values()],
-    converted_messages: [...converted_messages.values()],
-  };
+  for (const embed of msg.embeds) {
+    for (const field of embed.fields) {
+      if (field.name === "Question Message ID") {
+        question_id = field.value;
+      }
+      if (field.name === "Solution Message ID") {
+        solution_id = field.value;
+      }
+    }
+  }
+  return { question_id, solution_id };
 }
 
 export async function filterMessages(messages: Message[], channel: GuildBasedChannel) {
@@ -193,35 +178,49 @@ export async function fetchAllChannelMessagesWithThreads(
     options
   )}
   `);
+  let threads: PublicThreadChannel[] = [];
   const collected_messages: Message[] = [];
+
+  /*
+      Handles indexing of forum channels
+      Forum channels have no messages in them, so we have to fetch the threads
+  */
   if (channel.type === ChannelType.GuildForum) {
     const archived_threads = await channel.threads.fetchArchived({
       type: "public",
       fetchAll: true,
     });
     const active_threads = await channel.threads.fetchActive();
-    const threads = [
-      ...archived_threads.threads.values(),
-      ...active_threads.threads.values(),
-    ].filter((x) => x.type === ChannelType.PublicThread);
-    for (const thread of threads) {
-      const thread_messages = await fetchAllMesages(thread);
-      collected_messages.push(...thread_messages);
-    }
-  } else if (
-    channel.type === ChannelType.GuildAnnouncement ||
-    channel.type === ChannelType.GuildText
-  ) {
+    threads = [...archived_threads.threads.values(), ...active_threads.threads.values()]
+      .filter((x) => x.type === ChannelType.PublicThread)
+      .map((x) => x as PublicThreadChannel);
+  } else {
+    /*
+      Handles indexing of text channels and news channels
+      Text channels and news channels have messages in them, so we have to fetch the messages
+      We also add any threads we find to the threads array
+      Threads can be found from normal messages or system create messages
+      TODO: Handle threads without any parent messages in the channel
+      */
     const messages = await fetchAllMesages(channel, options);
     for (const message of messages) {
-      if (message.thread) {
-        const thread_messages = await fetchAllMesages(message.thread, options);
-        collected_messages.push(...thread_messages);
+      if (
+        message.thread &&
+        (message.thread.type === ChannelType.PublicThread ||
+          message.thread.type === ChannelType.AnnouncementThread)
+      ) {
+        threads.push(message.thread);
       }
     }
     collected_messages.push(...messages);
   }
-  return collected_messages;
+
+  for (const thread of threads) {
+    const thread_messages = await fetchAllMesages(thread);
+    collected_messages.push(...thread_messages);
+  }
+
+  return { messages: collected_messages, threads };
 }
 
 export async function fetchAllMesages(

@@ -12,6 +12,9 @@ declare global {
       /* Discord Bot */
       DISCORD_TOKEN: string;
       INDEXING_INTERVAL_IN_HOURS: string;
+      BOT_DEV_LOG_LEVEL: string | undefined;
+      BOT_TEST_LOG_LEVEL: string | undefined;
+      BOT_PROD_LOG_LEVEL: string | undefined;
     }
   }
 }

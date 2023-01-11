@@ -34,7 +34,6 @@ beforeEach(async () => {
   forum_channel = mockForumChannel(client, guild);
   forum_thread = mockPublicThread({
     client,
-    guild,
     parent_channel: forum_channel,
   });
 });

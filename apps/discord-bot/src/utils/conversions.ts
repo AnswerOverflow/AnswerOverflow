@@ -80,3 +80,29 @@ export function toAOThread(thread: AnyThreadChannel): AOThread {
   };
   return converted_thread;
 }
+
+export function extractUsersSetFromMessages(messages: Message[]) {
+  const users = new Map<string, AODiscordAccount>();
+  for (const msg of messages) {
+    users.set(msg.author.id, toAODiscordAccount(msg.author));
+  }
+  return Array.from(users.values());
+}
+
+export function extractThreadsSetFromMessages(messages: Message[]) {
+  const threads = new Map<string, AOThread>();
+  for (const msg of messages) {
+    if (msg.thread) {
+      threads.set(msg.thread.id, toAOThread(msg.thread));
+    }
+  }
+  return Array.from(threads.values());
+}
+
+export function messagesToAOMessagesSet(messages: Message[]) {
+  const ao_messages = new Map<string, AOMessage>();
+  for (const msg of messages) {
+    ao_messages.set(msg.id, toAOMessage(msg));
+  }
+  return Array.from(ao_messages.values());
+}

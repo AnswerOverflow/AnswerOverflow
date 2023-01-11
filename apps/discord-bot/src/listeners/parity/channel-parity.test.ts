@@ -1,4 +1,3 @@
-import { clearDatabase } from "@answeroverflow/db";
 import type { SapphireClient } from "@sapphire/framework";
 import { Events, PublicThreadChannel, TextChannel } from "discord.js";
 import {
@@ -15,7 +14,6 @@ let client: SapphireClient;
 let text_channel: TextChannel;
 let thread: PublicThreadChannel;
 beforeEach(async () => {
-  await clearDatabase();
   data = await setupBot();
   client = data.client;
   text_channel = mockTextChannel(client);

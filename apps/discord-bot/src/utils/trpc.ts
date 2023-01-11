@@ -64,7 +64,7 @@ export async function callApiWithButtonErrorHandler<T>(
 export async function callApiWithConsoleStatusHandler<T>(
   call: Omit<
     TRPCall<T> & {
-      success_message: string;
+      success_message?: string | undefined;
       error_message: string;
     },
     "Error" | "Ok"
@@ -73,10 +73,12 @@ export async function callApiWithConsoleStatusHandler<T>(
   return await callAPI({
     ...call,
     Error(error) {
-      console.log(call.error_message, error.code);
+      container.logger.error(call.error_message, error.code, error.message);
     },
     Ok() {
-      console.log(call.success_message);
+      if (call.success_message) {
+        container.logger.info(call.success_message);
+      }
     },
   });
 }

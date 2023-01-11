@@ -26,6 +26,8 @@ import {
   SnowflakeUtil,
   FetchedThreads,
   AnyThreadChannel,
+  APINewsChannel,
+  NewsChannel,
 } from "discord.js";
 import type { RawMessageData } from "discord.js/typings/rawDataTypes";
 import {
@@ -240,6 +242,7 @@ export function mockPublicThread(input: {
       },
       ...data,
     };
+
     const thread: PublicThreadChannel = Reflect.construct(ThreadChannel, [
       guild,
       raw_data,
@@ -274,7 +277,22 @@ export function mockForumChannel(
       default_sort_order: null,
       ...data,
     };
-    const channel: ForumChannel = Reflect.construct(ForumChannel, [guild, raw_data, client]);
+    const channel = Reflect.construct(ForumChannel, [guild, raw_data, client]);
+    return channel;
+  });
+}
+
+export function mockNewsChannel(input: {
+  client: SapphireClient;
+  guild?: Guild;
+  data?: Partial<APINewsChannel>;
+}) {
+  return setupMockedChannel(input.client, input.guild, (guild) => {
+    const raw_data: APINewsChannel = {
+      ...getGuildTextChannelMockDataBase(ChannelType.GuildAnnouncement, guild),
+      ...input.data,
+    };
+    const channel = Reflect.construct(NewsChannel, [guild, raw_data, input.client]) as NewsChannel;
     return channel;
   });
 }
@@ -286,9 +304,6 @@ export function mockMessages(channel: TextBasedChannel, number_of_messages: numb
       mockMessage({
         client: channel.client,
         channel: channel,
-        override: {
-          id: `${id}`,
-        },
       })
     );
   }
@@ -345,6 +360,38 @@ export function mockMessage(input: {
   // @ts-ignore
   channel.messages.cache.set(message.id, message);
   return message;
+}
+
+export function mockMarkedAsSolvedReply(
+  client: Client,
+  question_id: string,
+  solution_id: string,
+  override: Partial<RawMessageData> = {}
+) {
+  const marked_as_solved_reply = mockMessage({
+    client,
+    author: client.user!,
+    override: {
+      embeds: [
+        {
+          fields: [
+            {
+              name: "Solution Message ID",
+              value: solution_id,
+              inline: true,
+            },
+            {
+              name: "Question Message ID",
+              value: question_id,
+              inline: true,
+            },
+          ],
+        },
+      ],
+      ...override,
+    },
+  });
+  return marked_as_solved_reply;
 }
 
 export function mockInvite(

@@ -2,10 +2,11 @@ import { Client, ClientOptions, Guild, PermissionFlagsBits } from "discord.js";
 import { mockGuild } from "./guild-mock";
 import { mockClient, mockReacord } from "./mock";
 import { mockGuildMember } from "./user-mock";
-
+import { clearDatabase } from "@answeroverflow/db";
 export type ScenarioData = Awaited<ReturnType<typeof setupBot>>;
 
 export async function setupBot(override: Partial<ClientOptions> = {}) {
+  await clearDatabase();
   const client = mockClient(override);
   await client.login();
   const reacord = mockReacord();
