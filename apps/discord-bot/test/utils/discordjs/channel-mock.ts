@@ -195,7 +195,11 @@ export function mockThreadFromParentMessage(input: {
 }) {
   const { client, parent_message, data = {} } = input;
   if (parent_message) {
-    if (parent_message && parent_message.channel.type === ChannelType.GuildText) {
+    if (
+      parent_message &&
+      (parent_message.channel.type === ChannelType.GuildText ||
+        parent_message.channel.type === ChannelType.GuildAnnouncement)
+    ) {
       return mockPublicThread({
         client,
         parent_channel: parent_message.channel,
@@ -211,7 +215,7 @@ export function mockThreadFromParentMessage(input: {
 
 export function mockPublicThread(input: {
   client: SapphireClient;
-  parent_channel?: TextChannel | ForumChannel;
+  parent_channel?: TextChannel | ForumChannel | NewsChannel;
   data?: Partial<APIThreadChannel>;
 }) {
   const { client, data = {} } = input;

@@ -1,5 +1,6 @@
 import {
   AnyThreadChannel,
+  ChannelType,
   Client,
   ForumChannel,
   Message,
@@ -127,14 +128,31 @@ describe("Indexing", () => {
       });
       expect(settings.flags.indexing_enabled).toBeTruthy();
       const messages = mockMessages(news_channel, 100);
+      const thread1 = mockThreadFromParentMessage({
+        client,
+        parent_message: messages[0],
+        data: {
+          type: ChannelType.AnnouncementThread,
+        },
+      });
+      messages.push(...mockMessages(thread1, 10));
+      const thread2 = mockThreadFromParentMessage({
+        client,
+        parent_message: messages[1],
+        data: {
+          type: ChannelType.AnnouncementThread,
+        },
+      });
+      messages.push(...mockMessages(thread2, 10));
 
       await indexRootChannel(news_channel);
 
       await validateIndexingResults({
         messages,
-        expected_threads: 0,
-        expected_users: 100,
-        expected_messages: 100,
+        threads: [thread1, thread2],
+        expected_threads: 2,
+        expected_users: 120,
+        expected_messages: 120,
       });
     });
     it("should index a forum channel", async () => {
@@ -367,7 +385,55 @@ describe("Indexing", () => {
         );
       });
     });
-    describe("News Channel", () => {});
+    describe("News Channel", () => {
+      it("should fetch all messages from a news channel with no threads", async () => {
+        const number_of_messages = 1245;
+        mockMessages(news_channel, number_of_messages);
+        const { messages } = await fetchAllChannelMessagesWithThreads(news_channel);
+        expect(messages.length).toBe(number_of_messages);
+      });
+      it("should fetch all messages from a news channel with one archived thread", async () => {
+        const thread = mockThreadFromParentMessage({
+          client,
+          data: {
+            thread_metadata: {
+              auto_archive_duration: 60,
+              archive_timestamp: new Date().toISOString(),
+              archived: true,
+            },
+            type: ChannelType.AnnouncementThread,
+          },
+          parent_message: mockMessage({ client, channel: news_channel }),
+        });
+        const number_of_thread_messages = 300;
+        mockMessages(thread, number_of_thread_messages);
+        const number_of_news_channel_messages = 1245;
+        mockMessages(news_channel, number_of_news_channel_messages);
+        const { messages, threads } = await fetchAllChannelMessagesWithThreads(news_channel);
+        expect(messages.length).toBe(
+          number_of_thread_messages + number_of_news_channel_messages + 1
+        );
+        expect(threads.length).toBe(1);
+      });
+      it("should fetch all messages from a news channel with one active thread", async () => {
+        const thread = mockThreadFromParentMessage({
+          client,
+          data: {
+            type: ChannelType.AnnouncementThread,
+          },
+          parent_message: mockMessage({ client, channel: news_channel }),
+        });
+        const number_of_thread_messages = 300;
+        mockMessages(thread, number_of_thread_messages);
+        const number_of_news_channel_messages = 1245;
+        mockMessages(news_channel, number_of_news_channel_messages);
+        const { messages, threads } = await fetchAllChannelMessagesWithThreads(news_channel);
+        expect(messages.length).toBe(
+          number_of_news_channel_messages + number_of_thread_messages + 1
+        );
+        expect(threads.length).toBe(1);
+      });
+    });
     describe("Forum Channel", () => {
       it("should fetch all messages from a forum channel with no threads", async () => {
         const { messages } = await fetchAllChannelMessagesWithThreads(forum_channel);
