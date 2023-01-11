@@ -1,6 +1,6 @@
 import { container, LogLevel, SapphireClient } from "@sapphire/framework";
 import { ReacordDiscordJs, ReacordTester } from "@answeroverflow/reacord";
-import { Partials } from "discord.js";
+import { ClientOptions, Partials } from "discord.js";
 
 import "~discord-bot/utils/setup";
 
@@ -11,7 +11,7 @@ declare module "@sapphire/pieces" {
   }
 }
 
-export function createClient() {
+export function createClient(override: Partial<ClientOptions> = {}) {
   return new SapphireClient({
     defaultPrefix: "!",
     regexPrefix: /^(hey +)?bot[,! ]/i,
@@ -39,6 +39,7 @@ export function createClient() {
     api: {
       automaticallyConnect: process.env.NODE_ENV !== "test", // TODO: Bit of a hack? No point starting API during testing but would be good to verify it
     },
+    ...override,
   });
 }
 

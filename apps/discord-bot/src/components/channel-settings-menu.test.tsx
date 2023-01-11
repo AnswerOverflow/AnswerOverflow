@@ -13,7 +13,7 @@ import type { ForumChannel, Guild, PublicThreadChannel, TextChannel } from "disc
 import {
   mockForumChannel,
   mockTextChannel,
-  mockThreadChannel,
+  mockPublicThread,
 } from "~discord-bot/test/utils/discordjs/channel-mock";
 import { mockGuild } from "~discord-bot/test/utils/discordjs/guild-mock";
 
@@ -32,7 +32,11 @@ beforeEach(async () => {
   members = await createGuildMemberVariants(client);
   text_channel = mockTextChannel(client, guild);
   forum_channel = mockForumChannel(client, guild);
-  forum_thread = mockThreadChannel(client, guild, forum_channel);
+  forum_thread = mockPublicThread({
+    client,
+    guild,
+    parent_channel: forum_channel,
+  });
 });
 
 describe("ChannelSettingsMenu", () => {

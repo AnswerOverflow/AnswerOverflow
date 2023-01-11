@@ -1,12 +1,12 @@
-import { Client, Guild, PermissionFlagsBits } from "discord.js";
+import { Client, ClientOptions, Guild, PermissionFlagsBits } from "discord.js";
 import { mockGuild } from "./guild-mock";
 import { mockClient, mockReacord } from "./mock";
 import { mockGuildMember } from "./user-mock";
 
 export type ScenarioData = Awaited<ReturnType<typeof setupBot>>;
 
-export async function setupBot() {
-  const client = mockClient();
+export async function setupBot(override: Partial<ClientOptions> = {}) {
+  const client = mockClient(override);
   await client.login();
   const reacord = mockReacord();
   return {
@@ -23,22 +23,24 @@ export async function createGuildMemberVariants(
 ) {
   if (!guild) guild = mockGuild(client);
   const guild_member_owner = await guild.members.fetch(guild.ownerId);
-  const guild_member_default = mockGuildMember(client, undefined, guild);
-  const pending_guild_member_default = mockGuildMember(client, undefined, guild, undefined, {
-    pending: true,
+  const guild_member_default = mockGuildMember({ client, guild });
+  const pending_guild_member_default = mockGuildMember({
+    client,
+    guild,
+    data: {
+      pending: true,
+    },
   });
-  const guild_member_manage_guild = mockGuildMember(
+  const guild_member_manage_guild = mockGuildMember({
     client,
-    undefined,
     guild,
-    PermissionFlagsBits.ManageGuild
-  );
-  const guild_member_admin = mockGuildMember(
+    permissions: PermissionFlagsBits.ManageGuild,
+  });
+  const guild_member_admin = mockGuildMember({
     client,
-    undefined,
     guild,
-    PermissionFlagsBits.Administrator
-  );
+    permissions: PermissionFlagsBits.Administrator,
+  });
 
   return {
     guild_member_owner,

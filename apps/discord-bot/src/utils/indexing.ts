@@ -20,6 +20,7 @@ import {
 } from "~discord-bot/utils/conversions";
 import { container } from "@sapphire/framework";
 import { callAPI, callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
+import { sortMessagesById } from "./utils";
 
 export async function indexServers(client: Client) {
   container.logger.info(`Indexing ${client.guilds.cache.size} servers`);
@@ -151,7 +152,7 @@ function convertToAODataTypes(messages: Message[]) {
   };
 }
 
-async function filterMessages(messages: Message[], channel: GuildBasedChannel) {
+export async function filterMessages(messages: Message[], channel: GuildBasedChannel) {
   const seen_user_ids = [...new Set(messages.map((message) => message.author.id))];
   const user_server_settings = await callApiWithConsoleStatusHandler({
     ApiCall(router) {
@@ -176,10 +177,14 @@ async function filterMessages(messages: Message[], channel: GuildBasedChannel) {
     user_server_settings.filter((x) => x.flags.message_indexing_disabled).map((x) => x.user_id)
   );
 
-  return messages.filter((x) => !users_to_remove.has(x.author.id) || x.system);
+  return messages.filter((x) => {
+    const is_ignored_user = users_to_remove.has(x.author.id);
+    const is_system_message = x.system;
+    return !is_ignored_user && !is_system_message;
+  });
 }
 
-async function fetchAllChannelMessagesWithThreads(
+export async function fetchAllChannelMessagesWithThreads(
   channel: ForumChannel | NewsChannel | TextChannel,
   options: MessageFetchOptions = {}
 ) {
@@ -195,7 +200,10 @@ async function fetchAllChannelMessagesWithThreads(
       fetchAll: true,
     });
     const active_threads = await channel.threads.fetchActive();
-    const threads = [...archived_threads.threads.values(), ...active_threads.threads.values()];
+    const threads = [
+      ...archived_threads.threads.values(),
+      ...active_threads.threads.values(),
+    ].filter((x) => x.type === ChannelType.PublicThread);
     for (const thread of threads) {
       const thread_messages = await fetchAllMesages(thread);
       collected_messages.push(...thread_messages);
@@ -204,24 +212,16 @@ async function fetchAllChannelMessagesWithThreads(
     channel.type === ChannelType.GuildAnnouncement ||
     channel.type === ChannelType.GuildText
   ) {
-    const messages = await fetchAllChannelMessages(channel, options);
+    const messages = await fetchAllMesages(channel, options);
+    for (const message of messages) {
+      if (message.thread) {
+        const thread_messages = await fetchAllMesages(message.thread, options);
+        collected_messages.push(...thread_messages);
+      }
+    }
     collected_messages.push(...messages);
   }
   return collected_messages;
-}
-
-async function fetchAllChannelMessages(
-  channel: NewsChannel | TextChannel,
-  options: MessageFetchOptions = {}
-) {
-  let all_messages = await fetchAllMesages(channel, options);
-  for (const message of all_messages) {
-    if (message.thread) {
-      const thread_messages = await fetchAllMesages(message.thread, options);
-      all_messages = all_messages.concat(thread_messages);
-    }
-  }
-  return all_messages;
 }
 
 export async function fetchAllMesages(
@@ -230,21 +230,21 @@ export async function fetchAllMesages(
 ) {
   const messages: Message[] = [];
   // Create message pointer
-  let message = await channel.messages
-    .fetch({ limit: 1, after: start ?? "0" }) // TODO: Check if 0 works correctly for starting at the beginning
-    .then((messagePage) => (messagePage.size === 1 ? messagePage.at(0) : null));
-
+  const initial_fetch = await channel.messages.fetch({ limit: 1, after: start ?? "0" }); // TODO: Check if 0 works correctly for starting at the beginning
+  let message = initial_fetch.size === 1 ? initial_fetch.first() : null;
+  messages.push(...initial_fetch.values());
   while (message && (limit === undefined || messages.length < limit)) {
     // container.logger.debug(`Fetching from ${message.id}`);
     await channel.messages.fetch({ limit: 100, after: message.id }).then((messagePage) => {
       // container.logger.debug(`Received ${messagePage.size} messages`);
-      const sorted_messages_by_id = messagePage.sorted((a, b) =>
-        BigInt(a.id) < BigInt(b.id) ? -1 : BigInt(a.id) > BigInt(b.id) ? 1 : 0
-      );
+      const sorted_messages_by_id = sortMessagesById([...messagePage.values()]);
       messages.push(...sorted_messages_by_id.values());
       // Update our message pointer to be last message in page of messages
-      message = 0 < sorted_messages_by_id.size ? sorted_messages_by_id.last() : null;
+      message = 0 < sorted_messages_by_id.length ? sorted_messages_by_id.at(-1) : null;
     });
+  }
+  if (limit) {
+    return messages.slice(0, limit);
   }
   return messages;
 }

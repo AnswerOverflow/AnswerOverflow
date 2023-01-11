@@ -40,6 +40,9 @@ export function copyClass<T extends { client: Client }>(
 export async function testOnlyAPICall<T>(ApiCall: (router: BotRouterCaller) => Promise<T>) {
   return await callAPI({
     ApiCall,
+    Error(error) {
+      console.log(error);
+    },
     getCtx: () => createAnswerOveflowBotCtx(),
   });
 }

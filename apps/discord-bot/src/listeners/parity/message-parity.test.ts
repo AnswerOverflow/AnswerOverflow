@@ -14,7 +14,7 @@ beforeEach(async () => {
   data = await setupBot();
   client = data.client;
   text_channel = mockTextChannel(client);
-  message = mockMessage(client, undefined, text_channel);
+  message = mockMessage({ client, channel: text_channel });
 });
 
 describe("Message Delete Tests", () => {

@@ -4,7 +4,7 @@ import { Events, PublicThreadChannel, TextChannel } from "discord.js";
 import {
   mockInvite,
   mockTextChannel,
-  mockThreadChannel,
+  mockPublicThread,
 } from "~discord-bot/test/utils/discordjs/channel-mock";
 import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
 import { copyClass, emitEvent, testOnlyAPICall } from "~discord-bot/test/utils/helpers";
@@ -19,7 +19,7 @@ beforeEach(async () => {
   data = await setupBot();
   client = data.client;
   text_channel = mockTextChannel(client);
-  thread = mockThreadChannel(client);
+  thread = mockPublicThread({ client });
 });
 
 describe("Channel Update Parity", () => {
