@@ -6,12 +6,12 @@ import { serverRouter } from "../server/server";
 import { SERVER_NOT_SETUP_MESSAGE, userServerSettingsRouter } from "./user-server-settings";
 
 let data: ServerTestData;
-let user_1_router: ReturnType<typeof userServerSettingsRouter["createCaller"]>;
-let user_2_router: ReturnType<typeof userServerSettingsRouter["createCaller"]>;
+let user_1_router: ReturnType<(typeof userServerSettingsRouter)["createCaller"]>;
+let user_2_router: ReturnType<(typeof userServerSettingsRouter)["createCaller"]>;
 let user1: DiscordAccount;
 let user2: DiscordAccount;
-let discord_account_router: ReturnType<typeof discordAccountRouter["createCaller"]>;
-let server_router: ReturnType<typeof serverRouter["createCaller"]>;
+let discord_account_router: ReturnType<(typeof discordAccountRouter)["createCaller"]>;
+let server_router: ReturnType<(typeof serverRouter)["createCaller"]>;
 let server: Server;
 
 beforeEach(async () => {

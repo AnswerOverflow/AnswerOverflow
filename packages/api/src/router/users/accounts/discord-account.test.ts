@@ -3,9 +3,9 @@ import { getGeneralScenario } from "~api/test/utils";
 import { ignored_discord_account_router } from "../ignored-discord-accounts/ignored-discord-account";
 import { discordAccountRouter } from "./discord-accounts";
 
-let discord_account_router_bot_caller: ReturnType<typeof discordAccountRouter["createCaller"]>;
+let discord_account_router_bot_caller: ReturnType<(typeof discordAccountRouter)["createCaller"]>;
 let ignored_account_router_account1_caller: ReturnType<
-  typeof ignored_discord_account_router["createCaller"]
+  (typeof ignored_discord_account_router)["createCaller"]
 >;
 let account1: DiscordAccount;
 let account2: DiscordAccount;

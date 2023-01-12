@@ -3,12 +3,12 @@ import { clearDatabase, DiscordAccount } from "@answeroverflow/db";
 import { getGeneralScenario } from "~api/test/utils";
 import { ignored_discord_account_router } from "./ignored-discord-account";
 
-let ignored_account_bot_caller: ReturnType<typeof ignored_discord_account_router["createCaller"]>;
+let ignored_account_bot_caller: ReturnType<(typeof ignored_discord_account_router)["createCaller"]>;
 let account1_ignored_account_caller: ReturnType<
-  typeof ignored_discord_account_router["createCaller"]
+  (typeof ignored_discord_account_router)["createCaller"]
 >;
 let account2_ignored_account_caller: ReturnType<
-  typeof ignored_discord_account_router["createCaller"]
+  (typeof ignored_discord_account_router)["createCaller"]
 >;
 let account1: DiscordAccount;
 let account2: DiscordAccount;

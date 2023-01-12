@@ -3,8 +3,8 @@ import { TRPCError } from "@trpc/server";
 import { getGeneralScenario, ServerTestData } from "~api/test/utils";
 import { serverRouter } from "./server";
 
-let manage_guild_router: ReturnType<typeof serverRouter["createCaller"]>;
-let default_router: ReturnType<typeof serverRouter["createCaller"]>;
+let manage_guild_router: ReturnType<(typeof serverRouter)["createCaller"]>;
+let default_router: ReturnType<(typeof serverRouter)["createCaller"]>;
 let test_data_1: ServerTestData;
 let server_1: Server;
 beforeEach(async () => {
