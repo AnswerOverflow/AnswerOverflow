@@ -3,7 +3,7 @@ import { createContextInner } from "~api/router/context";
 import { userRouter } from "./user";
 
 // eslint-disable-next-line no-unused-vars
-let users: ReturnType<typeof userRouter["createCaller"]>;
+let users: ReturnType<(typeof userRouter)["createCaller"]>;
 beforeEach(async () => {
   const a = await createContextInner({
     session: null,

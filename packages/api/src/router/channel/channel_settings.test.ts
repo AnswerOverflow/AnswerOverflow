@@ -3,7 +3,7 @@ import { getGeneralScenario, ServerTestData } from "~api/test/utils";
 import { channelSettingsRouter } from "./channel_settings";
 
 let data: ServerTestData;
-let manage_channel_settings_router: ReturnType<typeof channelSettingsRouter["createCaller"]>;
+let manage_channel_settings_router: ReturnType<(typeof channelSettingsRouter)["createCaller"]>;
 beforeEach(async () => {
   const { data1 } = await getGeneralScenario();
   data = data1;
