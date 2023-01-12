@@ -58,9 +58,20 @@ const z_user_server_settings_update = z_user_server_settings_mutable.merge(
 );
 
 async function transformUserServerSettings<T extends UserServerSettings>(
-  user_server_settings: Promise<T>
+  user_server_settings: Promise<T> | T
 ) {
   return addFlagsToUserServerSettings(await user_server_settings);
+}
+
+async function transformUserServerSettingsArray<T extends UserServerSettings>(
+  user_server_settings: Promise<T[]>
+) {
+  const awaited_settings = await user_server_settings;
+  const converted_settings: Awaited<ReturnType<typeof transformUserServerSettings>>[] = [];
+  for (const settings of awaited_settings) {
+    converted_settings.push(await transformUserServerSettings(settings));
+  }
+  return converted_settings;
 }
 
 function mergeUserServerSettings<T extends z.infer<typeof z_user_server_settings_mutable>>(
@@ -90,6 +101,33 @@ const user_server_settings_fetch_router = router({
             });
           },
           not_found_message: "User server settings not found",
+        })
+      );
+    }),
+  byIdMany: withDiscordAccountProcedure
+    .input(z.array(z_user_server_settings_find))
+    .query(async ({ input, ctx }) => {
+      const user_ids = input.map((x) => x.user_id);
+      const server_ids = input.map((x) => x.server_id);
+      return transformUserServerSettingsArray(
+        protectedUserOnlyFetch({
+          ctx,
+          user_id: user_ids,
+          fetch: () => {
+            return ctx.prisma.userServerSettings.findMany({
+              where: {
+                AND: {
+                  user_id: {
+                    in: user_ids,
+                  },
+                  server_id: {
+                    in: server_ids,
+                  },
+                },
+              },
+            });
+          },
+          not_found_message: "Could not find user server settings for users",
         })
       );
     }),

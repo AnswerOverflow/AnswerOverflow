@@ -1,14 +1,18 @@
-import { Client, Events, GuildMember } from "discord.js";
-import { createNormalScenario } from "~discord-bot/test/utils/discordjs/scenarios";
+import { Client, Events } from "discord.js";
+import {
+  createGuildMemberVariants,
+  GuildMemberVariants,
+  setupBot,
+} from "~discord-bot/test/utils/discordjs/scenarios";
 import { copyClass, emitEvent, testOnlyAPICall } from "~discord-bot/test/utils/helpers";
 import { toAOServer } from "~discord-bot/utils/conversions";
 
 let client: Client;
-let pending_member: GuildMember;
+let members: GuildMemberVariants;
 beforeEach(async () => {
-  const data = await createNormalScenario();
+  const data = await setupBot();
   client = data.client;
-  pending_member = data.pending_guild_member_default;
+  members = await createGuildMemberVariants(client);
 });
 
 describe("Read the rules consent", () => {
@@ -16,7 +20,7 @@ describe("Read the rules consent", () => {
     // setup
     await testOnlyAPICall((router) =>
       router.server_settings.upsertWithDeps({
-        server: toAOServer(pending_member.guild),
+        server: toAOServer(members.pending_guild_member_default.guild),
         flags: {
           read_the_rules_consent_enabled: true,
         },
@@ -24,9 +28,14 @@ describe("Read the rules consent", () => {
     );
 
     // act
-    const full_member = copyClass(pending_member, client);
+    const full_member = copyClass(members.pending_guild_member_default, client);
     full_member.pending = false;
-    await emitEvent(client, Events.GuildMemberUpdate, pending_member, full_member);
+    await emitEvent(
+      client,
+      Events.GuildMemberUpdate,
+      members.pending_guild_member_default,
+      full_member
+    );
 
     // assert
     const updated_settings = await testOnlyAPICall((router) =>
@@ -42,7 +51,7 @@ describe("Read the rules consent", () => {
     // setup
     await testOnlyAPICall((router) =>
       router.server_settings.upsertWithDeps({
-        server: toAOServer(pending_member.guild),
+        server: toAOServer(members.pending_guild_member_default.guild),
         flags: {
           read_the_rules_consent_enabled: false,
         },
@@ -50,9 +59,14 @@ describe("Read the rules consent", () => {
     );
 
     // act
-    const full_member = copyClass(pending_member, client);
+    const full_member = copyClass(members.pending_guild_member_default, client);
     full_member.pending = false;
-    await emitEvent(client, Events.GuildMemberUpdate, pending_member, full_member);
+    await emitEvent(
+      client,
+      Events.GuildMemberUpdate,
+      members.pending_guild_member_default,
+      full_member
+    );
 
     // assert
     const updated_settings = await testOnlyAPICall((router) =>

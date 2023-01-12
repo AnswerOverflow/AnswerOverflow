@@ -13,10 +13,10 @@ beforeEach(async () => {
   const { data1 } = await getGeneralScenario();
   discord_account_router_bot_caller = discordAccountRouter.createCaller(data1.bot_caller_ctx);
   ignored_account_router_account1_caller = ignored_discord_account_router.createCaller(
-    data1.manage_guild_ctx
+    data1.account1_guild_manager_ctx
   );
-  account1 = data1.guild_manager_member;
-  account2 = data1.guild_default_member;
+  account1 = data1.account1_guild_manager;
+  account2 = data1.account2_default_member;
   await clearDatabase();
 });
 describe("Discord Account Operations", () => {

@@ -11,7 +11,7 @@ import {
 
 export async function protectedMessageMutation<T>(
   input: ProtectedMutationInputExtendable<T> & {
-    author_id: string;
+    author_id: string | string[];
     ctx: Context;
   }
 ) {

@@ -90,13 +90,13 @@ export class Elastic extends Client {
       const messages = await this.mget<Message>({
         docs: ids.map((id) => ({ _index: this.messages_index, _id: id, _source: true })),
       });
-      return messages.docs.map((doc) => {
-        if (!("error" in doc) && doc._source) {
-          return doc._source;
-        } else {
-          throw new Error("Error getting message");
-        }
-      });
+      return messages.docs
+        .filter((doc) => "found" in doc && doc.found)
+        .map((doc) => {
+          if (!("error" in doc) && doc._source) {
+            return doc._source;
+          } else throw new Error("Unknown error in bulk get messages");
+        });
     } catch (error) {
       if (error instanceof errors.ResponseError && error.statusCode === 404) {
         return [];
@@ -200,6 +200,19 @@ export class Elastic extends Client {
       default:
         throw new Error("Unknown message index error error");
     }
+  }
+
+  public async bulkUpsertMessages(messages: Message[]) {
+    const body = messages.flatMap((message) => [
+      { update: { _index: this.messages_index, _id: message.id } },
+      { doc: message, doc_as_upsert: true },
+    ]);
+    const result = await this.bulk({ body });
+    if (result.errors) {
+      console.error(result);
+      return false;
+    }
+    return true;
   }
 
   public async createMessagesIndex() {

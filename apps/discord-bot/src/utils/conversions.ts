@@ -1,9 +1,9 @@
 import type {
+  AnyThreadChannel,
   Guild,
   GuildBasedChannel,
   GuildChannel,
   Message,
-  PublicThreadChannel,
   User,
 } from "discord.js";
 import {
@@ -69,7 +69,7 @@ export function toAOChannelWithServer(channel: GuildChannel): AOChannel & { serv
   };
 }
 
-export function toAOThread(thread: PublicThreadChannel): AOThread {
+export function toAOThread(thread: AnyThreadChannel): AOThread {
   if (!thread.parent) throw new Error("Thread has no parent");
   const converted_thread: AOThread = {
     id: thread.id,
@@ -79,4 +79,30 @@ export function toAOThread(thread: PublicThreadChannel): AOThread {
     server_id: thread.guild.id,
   };
   return converted_thread;
+}
+
+export function extractUsersSetFromMessages(messages: Message[]) {
+  const users = new Map<string, AODiscordAccount>();
+  for (const msg of messages) {
+    users.set(msg.author.id, toAODiscordAccount(msg.author));
+  }
+  return Array.from(users.values());
+}
+
+export function extractThreadsSetFromMessages(messages: Message[]) {
+  const threads = new Map<string, AOThread>();
+  for (const msg of messages) {
+    if (msg.thread) {
+      threads.set(msg.thread.id, toAOThread(msg.thread));
+    }
+  }
+  return Array.from(threads.values());
+}
+
+export function messagesToAOMessagesSet(messages: Message[]) {
+  const ao_messages = new Map<string, AOMessage>();
+  for (const msg of messages) {
+    ao_messages.set(msg.id, toAOMessage(msg));
+  }
+  return Array.from(ao_messages.values());
 }

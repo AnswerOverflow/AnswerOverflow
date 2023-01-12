@@ -1,12 +1,45 @@
-import { createNormalScenario } from "~discord-bot/test/utils/discordjs/scenarios";
+import {
+  createGuildMemberVariants,
+  setupBot,
+  GuildMemberVariants,
+  ScenarioData,
+} from "~discord-bot/test/utils/discordjs/scenarios";
 import { ChannelSettingsMenu } from "~discord-bot/components/channel-settings-menu";
 import { reply } from "~discord-bot/test/utils/reacord/reacord-utils";
 import React from "react";
 import { getDefaultChannelSettingsWithFlags } from "@answeroverflow/db";
+import type { ReacordTester } from "@answeroverflow/reacord";
+import type { ForumChannel, Guild, PublicThreadChannel, TextChannel } from "discord.js";
+import {
+  mockForumChannel,
+  mockTextChannel,
+  mockPublicThread,
+} from "~discord-bot/test/utils/discordjs/channel-mock";
+import { mockGuild } from "~discord-bot/test/utils/discordjs/guild-mock";
+
+let data: ScenarioData;
+let reacord: ReacordTester;
+let text_channel: TextChannel;
+let forum_thread: PublicThreadChannel;
+let forum_channel: ForumChannel;
+let guild: Guild;
+let members: GuildMemberVariants;
+beforeEach(async () => {
+  data = await setupBot();
+  reacord = data.reacord;
+  const client = data.client;
+  guild = mockGuild(client);
+  members = await createGuildMemberVariants(client);
+  text_channel = mockTextChannel(client, guild);
+  forum_channel = mockForumChannel(client, guild);
+  forum_thread = mockPublicThread({
+    client,
+    parent_channel: forum_channel,
+  });
+});
 
 describe("ChannelSettingsMenu", () => {
   it("should render correctly in a text channel", async () => {
-    const { reacord, text_channel } = await createNormalScenario();
     const default_settings = getDefaultChannelSettingsWithFlags(text_channel.id);
     const message = await reply(
       reacord,
@@ -20,7 +53,6 @@ describe("ChannelSettingsMenu", () => {
     ).toBeTruthy();
   });
   it("should render correctly in a forum thread", async () => {
-    const { reacord, forum_thread } = await createNormalScenario();
     const default_settings = getDefaultChannelSettingsWithFlags(forum_thread.parent!.id);
     const message = await reply(
       reacord,
@@ -38,7 +70,6 @@ describe("ChannelSettingsMenu", () => {
 
 describe("Toggle Indexing Button", () => {
   it("should enable indexing", async () => {
-    const { reacord, text_channel, guild_member_owner } = await createNormalScenario();
     const default_settings = getDefaultChannelSettingsWithFlags(text_channel.id);
     const message = await reply(
       reacord,
@@ -46,7 +77,7 @@ describe("Toggle Indexing Button", () => {
     );
     const enable_indexing_button = message.findButtonByLabel("Enable Indexing", reacord);
     expect(enable_indexing_button).toBeDefined();
-    await enable_indexing_button!.click(text_channel, guild_member_owner);
+    await enable_indexing_button!.click(text_channel, members.guild_member_owner);
 
     expect(message.hasButton("Enable Indexing", reacord)).toBeFalsy();
     const button = message.findButtonByLabel("Disable Indexing", reacord);
@@ -56,8 +87,6 @@ describe("Toggle Indexing Button", () => {
 
 describe("Select mark solved tag", () => {
   it("should select a tag", async () => {
-    const { reacord, forum_thread, forum_channel, guild_member_owner } =
-      await createNormalScenario();
     const default_settings = getDefaultChannelSettingsWithFlags(forum_thread.parent!.id);
     const message = await reply(
       reacord,
@@ -68,7 +97,11 @@ describe("Select mark solved tag", () => {
       reacord
     );
     expect(select).toBeDefined();
-    await select?.select(forum_thread, guild_member_owner, forum_channel.availableTags[0].id);
+    await select?.select(
+      forum_thread,
+      members.guild_member_owner,
+      forum_channel.availableTags[0].id
+    );
     const select2 = message.findSelectByPlaceholder(
       "Select a tag to use on mark as solved",
       reacord

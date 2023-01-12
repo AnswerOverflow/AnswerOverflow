@@ -13,9 +13,9 @@ let thread_1: Thread;
 beforeEach(async () => {
   const { data1 } = await getGeneralScenario();
   test_data_1 = data1;
-  default_channel_router = channelRouter.createCaller(test_data_1.default_ctx);
-  manage_channel_router = channelRouter.createCaller(test_data_1.manage_guild_ctx);
-  manage_guild_router = serverRouter.createCaller(test_data_1.manage_guild_ctx);
+  default_channel_router = channelRouter.createCaller(test_data_1.account2_default_member_ctx);
+  manage_channel_router = channelRouter.createCaller(test_data_1.account1_guild_manager_ctx);
+  manage_guild_router = serverRouter.createCaller(test_data_1.account1_guild_manager_ctx);
   channel_1 = test_data_1.text_channels[0].channel;
   thread_1 = test_data_1.text_channels[0].threads[0].thread;
   await clearDatabase();

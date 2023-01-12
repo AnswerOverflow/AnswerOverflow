@@ -1,7 +1,22 @@
 import { z } from "zod";
 import { protectedUserOnlyMutation } from "~api/utils/protected-procedures/user-only";
 import { withDiscordAccountProcedure, router, publicProcedure } from "~api/router/trpc";
-import { findOrThrowNotFound } from "~api/utils/operations";
+import { findAllowNull, findOrThrowNotFound } from "~api/utils/operations";
+import type { Context } from "~api/router/context";
+import { TRPCError } from "@trpc/server";
+
+export async function assertIsNotDeletedUser(ctx: Context, target_user_id: string) {
+  const deleted_account = await findAllowNull(() =>
+    ignored_discord_account_router.createCaller(ctx).byId(target_user_id)
+  );
+  if (deleted_account) {
+    throw new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message:
+        "Cannot create discord account for ignored user. Enable indexing of your account first",
+    });
+  }
+}
 
 export const ignored_discord_account_router = router({
   upsert: withDiscordAccountProcedure.input(z.string()).mutation(({ ctx, input }) => {
@@ -28,7 +43,13 @@ export const ignored_discord_account_router = router({
     );
   }),
   byIdMany: publicProcedure.input(z.array(z.string())).query(({ ctx, input }) => {
-    return ctx.prisma.ignoredDiscordAccount.findMany({ where: { id: { in: input } } });
+    return ctx.prisma.ignoredDiscordAccount.findMany({
+      where: {
+        id: {
+          in: input,
+        },
+      },
+    });
   }),
   stopIgnoring: withDiscordAccountProcedure.input(z.string()).mutation(({ ctx, input }) => {
     return protectedUserOnlyMutation({

@@ -1,22 +1,24 @@
 import type { SapphireClient } from "@sapphire/framework";
 import { Events, Guild } from "discord.js";
-import { createNormalScenario } from "~discord-bot/test/utils/discordjs/scenarios";
+import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
 import { copyClass, emitEvent } from "~discord-bot/test/utils/helpers";
-import { clearDatabase, prisma } from "@answeroverflow/db";
-let data: Awaited<ReturnType<typeof createNormalScenario>>;
+import { prisma } from "@answeroverflow/db";
+import { mockGuild } from "~discord-bot/test/utils/discordjs/guild-mock";
+import { mockForumChannel, mockTextChannel } from "~discord-bot/test/utils/discordjs/channel-mock";
+let data: Awaited<ReturnType<typeof setupBot>>;
 let client: SapphireClient;
 let guild: Guild;
 
 beforeEach(async () => {
-  await clearDatabase();
-  data = await createNormalScenario();
+  data = await setupBot();
   client = data.client;
-  guild = data.guild;
+  guild = mockGuild(client);
 });
 
 describe("Guild Create Parity", () => {
   it("should sync a server on join", async () => {
-    const { client, guild } = await createNormalScenario();
+    mockTextChannel(client, guild);
+    mockForumChannel(client, guild);
     await emitEvent(client, Events.GuildCreate, guild);
     const created_server = await prisma.server.findUnique({
       where: { id: guild.id },

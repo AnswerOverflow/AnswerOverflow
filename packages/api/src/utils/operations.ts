@@ -51,3 +51,15 @@ export async function findOrThrowNotFound<T>(find: () => Promise<T | null>, mess
   if (!data) throw new TRPCError({ code: "NOT_FOUND", message });
   return data;
 }
+
+export async function findAllowNull<T>(find: () => Promise<T>) {
+  try {
+    return await find();
+  } catch (error) {
+    if (error instanceof TRPCError && error.code === "NOT_FOUND") {
+      return null;
+    } else {
+      throw error;
+    }
+  }
+}
