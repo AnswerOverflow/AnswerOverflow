@@ -2,9 +2,14 @@ import { Client, Events } from "discord.js";
 import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
 import { delay, emitEvent } from "~discord-bot/test/utils/helpers";
 import { indexServers } from "~discord-bot/utils/indexing";
-
+/*
+  Ref: https://www.chakshunyu.com/blog/how-to-mock-only-one-function-from-a-module-in-jest/
+  Spying on the function wasn't working so we ended up with this hacky solution
+*/
 jest.mock("~discord-bot/utils/indexing", () => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const original = jest.requireActual("~discord-bot/utils/indexing");
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
     ...original,
     indexServers: jest.fn(),
@@ -14,15 +19,15 @@ jest.mock("~discord-bot/utils/indexing", () => {
 describe("Indexing Loop", () => {
   it("should index all servers", async () => {
     // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     indexServers.mockImplementation(async () => {});
-
-    process.env.INDEXING_INTERVAL_IN_HOURS = "0.0001";
-    const interval_in_ms = parseInt(process.env.INDEXING_INTERVAL_IN_HOURS) * 60 * 60 * 1000; // 360 ms
+    jest.useFakeTimers({
+      doNotFake: ["setTimeout"],
+    });
     const data = await setupBot();
     await emitEvent(data.client, Events.ClientReady, data.client as Client);
-
-    await delay(interval_in_ms + 100);
-
+    jest.advanceTimersByTime(86400000); // advance time by 24 hours in ms
+    await delay(2000); // doesn't run correctly without this
     expect(indexServers).toHaveBeenCalledTimes(2);
   });
 });

@@ -1,6 +1,6 @@
 name: CI
 
-on:  
+on:
   push:
   pull_request:
     branches:
@@ -16,9 +16,10 @@ env:
   VITE_ELASTICSEARCH_USERNAME: elastic
   VITE_ELASTICSEARCH_PASSWORD: changeme
   OWNERS: "[]"
+  DISCORD_CLIENT_ID: "123"
 
 jobs:
-  build:      
+  build:
       name: Build and Test
       timeout-minutes: 15
       runs-on: ubuntu-latest
