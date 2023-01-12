@@ -34,7 +34,7 @@ import {
 } from "./indexing";
 import type { inferRouterInputs } from "@trpc/server";
 import type { botRouter } from "@answeroverflow/api";
-import { isSnowflakeLargerAsInt } from "./utils";
+import { isSnowflakeLargerAsInt, randomSnowflake } from "./utils";
 
 let client: Client;
 let text_channel: TextChannel;
@@ -313,7 +313,7 @@ describe("Indexing", () => {
         solution_message.id,
         {
           author: {
-            id: "123",
+            id: randomSnowflake().toString(),
             avatar: "123",
             username: "123",
             discriminator: "123",
