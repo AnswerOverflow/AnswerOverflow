@@ -10,8 +10,8 @@ let server_1: Server;
 beforeEach(async () => {
   const { data1 } = await getGeneralScenario();
   test_data_1 = data1;
-  manage_guild_router = serverRouter.createCaller(test_data_1.manage_guild_ctx);
-  default_router = serverRouter.createCaller(test_data_1.default_ctx);
+  manage_guild_router = serverRouter.createCaller(test_data_1.account1_guild_manager_ctx);
+  default_router = serverRouter.createCaller(test_data_1.account2_default_member_ctx);
   server_1 = test_data_1.server;
   await clearDatabase();
 });

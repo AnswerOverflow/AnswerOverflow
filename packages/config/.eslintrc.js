@@ -4,6 +4,5 @@ module.exports = {
   extends: ["@answeroverflow/eslint-config-custom"],
   parserOptions: {
     project: ["./*/tsconfig.json"],
-    sourceType: "module",
   },
 };

@@ -8,6 +8,7 @@ import {
 import { withDiscordAccountProcedure, mergeRouters, router } from "~api/router/trpc";
 import { ignored_discord_account_router } from "../ignored-discord-accounts/ignored-discord-account";
 import { TRPCError } from "@trpc/server";
+import { assertIsNotDeletedUser } from "~api/router/users/ignored-discord-accounts/ignored-discord-account";
 
 const z_discord_account = z.object({
   id: z.string(),
@@ -55,26 +56,14 @@ const account_crud_router = router({
   create: withDiscordAccountProcedure
     .input(z_discord_account_create)
     .mutation(async ({ ctx, input }) => {
-      try {
-        await ignored_discord_account_router.createCaller(ctx).byId(input.id);
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
-          message:
-            "Cannot create discord account for ignored user. Enable indexing of your account first",
-        });
-      } catch (error) {
-        if (error instanceof TRPCError && error.code === "NOT_FOUND") {
-          return protectedUserOnlyMutation({
-            ctx,
-            user_id: input.id,
-            async operation() {
-              return ctx.prisma.discordAccount.create({ data: input });
-            },
-          });
-        } else {
-          throw error;
-        }
-      }
+      await assertIsNotDeletedUser(ctx, input.id);
+      return protectedUserOnlyMutation({
+        ctx,
+        user_id: input.id,
+        async operation() {
+          return ctx.prisma.discordAccount.create({ data: input });
+        },
+      });
     }),
   createBulk: withDiscordAccountProcedure
     .input(z.array(z_discord_account_create))

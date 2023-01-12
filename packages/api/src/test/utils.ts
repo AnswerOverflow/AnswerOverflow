@@ -15,11 +15,11 @@ export async function getGeneralScenario() {
 }
 
 export async function getServerTestData(server_id: string = "101") {
-  const guild_manager_member = getDefaultDiscordAccount({
+  const account1_guild_manager = getDefaultDiscordAccount({
     id: "1",
     name: "test-user-owner",
   });
-  const guild_default_member = getDefaultDiscordAccount({
+  const account2_default_member = getDefaultDiscordAccount({
     id: "2",
     name: "test-user-default",
   });
@@ -40,40 +40,42 @@ export async function getServerTestData(server_id: string = "101") {
     server_id: server_id,
     type: ChannelType.GuildForum,
   });
-  const manage_guild_ctx = await createManageGuildContext({
+  const account1_guild_manager_ctx = await createManageGuildContext({
     server: {
       id: server.id,
       name: server.name,
     },
-    user: guild_manager_member,
+    user: account1_guild_manager,
   });
-  const default_ctx = await createDefaultPermissionCtx({
+  const account2_default_member_ctx = await createDefaultPermissionCtx({
     server: {
       id: server.id,
       name: server.name,
     },
-    user: guild_default_member,
+    user: account2_default_member,
   });
   const bot_caller_ctx = await createBotCallerCtx();
 
   return {
     server,
-    manage_guild_ctx,
     bot_caller_ctx,
-    guild_default_member,
-    guild_manager_member,
-    default_ctx,
+    account1_guild_manager,
+    account1_guild_manager_ctx,
+    account2_default_member,
+    account2_default_member_ctx,
     forum_channels: [
       {
         channel: forum_channel,
-        messages: [
-          getDefaultMessage({
-            id: "301",
-            channel_id: forum_channel.id,
-            server_id: server_id,
-            author_id: "1",
-          }),
-        ],
+        messages: {
+          account1_messages: [
+            getDefaultMessage({
+              id: "301",
+              channel_id: forum_channel.id,
+              server_id: server_id,
+              author_id: account1_guild_manager.id,
+            }),
+          ],
+        },
       },
     ],
     text_channels: [
@@ -91,20 +93,24 @@ export async function getServerTestData(server_id: string = "101") {
             messages: [],
           },
         ],
-        messages: [
-          getDefaultMessage({
-            id: "300",
-            channel_id: text_channel.id,
-            server_id: server_id,
-            author_id: "1",
-          }),
-          getDefaultMessage({
-            id: "304",
-            channel_id: text_channel.id,
-            server_id: server_id,
-            author_id: "1",
-          }),
-        ],
+        messages: {
+          account1_messages: [
+            getDefaultMessage({
+              id: "300",
+              channel_id: text_channel.id,
+              server_id: server_id,
+              author_id: account1_guild_manager.id,
+            }),
+          ],
+          account2_messages: [
+            getDefaultMessage({
+              id: "304",
+              channel_id: text_channel.id,
+              server_id: server_id,
+              author_id: account2_default_member.id,
+            }),
+          ],
+        },
       },
     ],
   };

@@ -11,18 +11,31 @@ import {
   ForumChannel,
   APIThreadChannel,
   ThreadChannel,
-  PublicThreadChannel,
   Message,
   ForumLayoutType,
-  Channel,
   User,
   MessageType,
   Invite,
   APIInvite,
   GuildChannel,
+  Collection,
+  TextBasedChannel,
+  Client,
+  PublicThreadChannel,
+  FetchArchivedThreadOptions,
+  SnowflakeUtil,
+  FetchedThreads,
+  AnyThreadChannel,
+  APINewsChannel,
+  NewsChannel,
 } from "discord.js";
 import type { RawMessageData } from "discord.js/typings/rawDataTypes";
-import { randomSnowflake } from "~discord-bot/utils/utils";
+import {
+  isSnowflakeLarger,
+  isSnowflakeLargerAsInt,
+  randomSnowflake,
+  sortMessagesById,
+} from "~discord-bot/utils/utils";
 import { mockGuild } from "./guild-mock";
 import { mockGuildMember, mockUser } from "./user-mock";
 
@@ -59,6 +72,102 @@ function setupMockedChannel<T extends GuildBasedChannel>(
     guild = mockGuild(client);
   }
   const channel = create_mock_data(guild);
+  if (
+    channel.type === ChannelType.GuildText ||
+    channel.type === ChannelType.GuildAnnouncement ||
+    channel.type === ChannelType.GuildForum
+  ) {
+    channel.threads.fetchActive = jest.fn().mockImplementation(() => {
+      const active_threads = [...channel.threads.cache.values()].filter(
+        (thread) => !thread.archived || thread.archived == null
+      );
+      const output: FetchedThreads = {
+        threads: new Collection(
+          active_threads.map((thread) => [thread.id, thread as AnyThreadChannel])
+        ),
+        hasMore: false,
+      };
+      return Promise.resolve(output);
+    });
+    channel.threads.fetchArchived = jest
+      .fn()
+      .mockImplementation((options: FetchArchivedThreadOptions = {}) => {
+        let filtered_threads = [
+          ...channel.threads.cache.sorted((a, b) => isSnowflakeLargerAsInt(a.id, b.id)).values(),
+        ].filter((thread) => thread.archived);
+        if (options.type) {
+          filtered_threads = filtered_threads.filter((thread) => {
+            const is_public_thread = thread.type === ChannelType.PublicThread;
+            const is_private_thread = thread.type === ChannelType.PrivateThread;
+            if (options.type === "public" && is_public_thread) {
+              return true;
+            }
+            if (options.type === "private" && is_private_thread) {
+              return true;
+            }
+            return false;
+          });
+        }
+
+        filtered_threads = filtered_threads.filter((thread) => {
+          let before_time = options.before;
+          if (before_time == undefined) {
+            return true;
+          }
+          if (before_time instanceof Date || typeof before_time === "number") {
+            before_time = SnowflakeUtil.generate({ timestamp: before_time }).toString();
+          }
+          if (before_time instanceof ThreadChannel) {
+            before_time = before_time.id;
+          }
+          return isSnowflakeLarger(thread.id, before_time);
+        });
+
+        if (options.limit) {
+          filtered_threads = filtered_threads.slice(0, options.limit);
+        }
+
+        const output: FetchedThreads = {
+          threads: new Collection(
+            filtered_threads.map((thread) => [thread.id, thread as AnyThreadChannel])
+          ),
+          hasMore: false, // TODO: set this
+        };
+        return Promise.resolve(output);
+      });
+  }
+  if (channel.isTextBased()) {
+    channel.messages.fetch = jest.fn().mockImplementation(
+      ({
+        limit,
+        after,
+      }: {
+        limit?: number;
+        before?: string;
+        after?: string;
+        around?: string;
+      } = {}) => {
+        if (!limit) {
+          limit = 100; // Default Discord limit
+        }
+
+        // 1. sort by id
+        const sorted_cached_messages = sortMessagesById(
+          Array.from(channel.messages.cache.values())
+        );
+        // 2. filter to only above the id
+        const filtered_messages = sorted_cached_messages.filter((message) => {
+          if (!after) return true;
+          return isSnowflakeLarger(message.id, after);
+        });
+        // 3. take up to limit
+        const messages = filtered_messages.slice(0, limit);
+
+        const as_collection = new Collection(messages.map((message) => [message.id, message]));
+        return Promise.resolve(as_collection);
+      }
+    );
+  }
   client.channels.cache.set(channel.id, channel);
   guild.channels.cache.set(channel.id, channel);
   return channel;
@@ -79,17 +188,43 @@ export function mockTextChannel(
   });
 }
 
-export function mockThreadChannel(
-  client: SapphireClient,
-  guild?: Guild,
-  parent?: ForumChannel | TextChannel,
-  data: Partial<APIThreadChannel> = {}
-) {
-  return setupMockedChannel(client, guild, (guild) => {
-    if (!parent) {
-      parent = mockTextChannel(client, guild);
+export function mockThreadFromParentMessage(input: {
+  client: Client;
+  parent_message: Message;
+  data?: Partial<APIThreadChannel>;
+}) {
+  const { client, parent_message, data = {} } = input;
+  if (parent_message) {
+    if (
+      parent_message &&
+      (parent_message.channel.type === ChannelType.GuildText ||
+        parent_message.channel.type === ChannelType.GuildAnnouncement)
+    ) {
+      return mockPublicThread({
+        client,
+        parent_channel: parent_message.channel,
+        data: {
+          id: parent_message.id,
+          ...data,
+        },
+      });
     }
-    // TODO: Make the ID match the message ID?
+  }
+  throw new Error("Invalid parent message");
+}
+
+export function mockPublicThread(input: {
+  client: SapphireClient;
+  parent_channel?: TextChannel | ForumChannel | NewsChannel;
+  data?: Partial<APIThreadChannel>;
+}) {
+  const { client, data = {} } = input;
+  let { parent_channel } = input;
+
+  return setupMockedChannel(client, parent_channel?.guild, (guild) => {
+    if (!parent_channel) {
+      parent_channel = mockTextChannel(client, guild);
+    }
     const raw_data: APIThreadChannel = {
       ...getGuildTextChannelMockDataBase(ChannelType.PublicThread, guild),
       member: {
@@ -99,7 +234,7 @@ export function mockThreadChannel(
         flags: 0,
       },
       guild_id: guild.id,
-      parent_id: parent.id,
+      parent_id: parent_channel.id,
       applied_tags: [],
       message_count: 0,
       member_count: 0,
@@ -111,12 +246,16 @@ export function mockThreadChannel(
       },
       ...data,
     };
-    const channel: PublicThreadChannel = Reflect.construct(ThreadChannel, [
+
+    const thread: PublicThreadChannel = Reflect.construct(ThreadChannel, [
       guild,
       raw_data,
       client,
     ]) as PublicThreadChannel;
-    return channel;
+
+    // @ts-ignore
+    parent_channel.threads.cache.set(thread.id, thread);
+    return thread;
   });
 }
 
@@ -142,24 +281,58 @@ export function mockForumChannel(
       default_sort_order: null,
       ...data,
     };
-    const channel: ForumChannel = Reflect.construct(ForumChannel, [guild, raw_data, client]);
+    const channel = Reflect.construct(ForumChannel, [guild, raw_data, client]);
     return channel;
   });
 }
 
-export function mockMessage(
-  client: SapphireClient,
-  author?: User,
-  channel?: Channel,
-  override: Partial<RawMessageData> = {}
-) {
+export function mockNewsChannel(input: {
+  client: SapphireClient;
+  guild?: Guild;
+  data?: Partial<APINewsChannel>;
+}) {
+  return setupMockedChannel(input.client, input.guild, (guild) => {
+    const raw_data: APINewsChannel = {
+      ...getGuildTextChannelMockDataBase(ChannelType.GuildAnnouncement, guild),
+      ...input.data,
+    };
+    const channel = Reflect.construct(NewsChannel, [guild, raw_data, input.client]) as NewsChannel;
+    return channel;
+  });
+}
+
+export function mockMessages(channel: TextBasedChannel, number_of_messages: number) {
+  const messages: Message[] = [];
+  for (let id = 1; id <= number_of_messages; id++) {
+    messages.push(
+      mockMessage({
+        client: channel.client,
+        channel: channel,
+      })
+    );
+  }
+  return messages;
+}
+
+export function mockMessage(input: {
+  client: SapphireClient;
+  author?: User;
+  channel?: TextBasedChannel;
+  override?: Partial<RawMessageData>;
+}) {
+  const { client, override = {} } = input;
+  let { author, channel } = input;
   if (!channel) {
     channel = mockTextChannel(client);
   }
   if (!author) {
     author = mockUser(client);
     if (!channel.isDMBased()) {
-      mockGuildMember(client, author, channel.guild);
+      mockGuildMember({
+        client,
+        user: author,
+        guild: channel.guild,
+      });
     }
   }
   const raw_data: RawMessageData = {
@@ -187,13 +360,42 @@ export function mockMessage(
     ...override,
   };
   const message = Reflect.construct(Message, [client, raw_data]) as Message;
-  if (channel.isTextBased()) {
-    // TODO: Fix ts ignore?
-    // @ts-ignore
-    channel.messages.cache.set(message.id, message);
-  }
-
+  // TODO: Fix ts ignore?
+  // @ts-ignore
+  channel.messages.cache.set(message.id, message);
   return message;
+}
+
+export function mockMarkedAsSolvedReply(
+  client: Client,
+  question_id: string,
+  solution_id: string,
+  override: Partial<RawMessageData> = {}
+) {
+  const marked_as_solved_reply = mockMessage({
+    client,
+    author: client.user!,
+    override: {
+      embeds: [
+        {
+          fields: [
+            {
+              name: "Solution Message ID",
+              value: solution_id,
+              inline: true,
+            },
+            {
+              name: "Question Message ID",
+              value: question_id,
+              inline: true,
+            },
+          ],
+        },
+      ],
+      ...override,
+    },
+  });
+  return marked_as_solved_reply;
 }
 
 export function mockInvite(

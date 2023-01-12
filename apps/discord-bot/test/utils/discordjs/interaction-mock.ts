@@ -29,7 +29,7 @@ export function mockInteracion(
     channel = mockTextChannel(client, guild);
   }
   if (!member) {
-    member = mockGuildMember(client, undefined, guild);
+    member = mockGuildMember({ client, guild });
   }
   const raw_data: APIChatInputApplicationCommandInteraction = {
     application_id: client.id?.toString() ?? randomSnowflake.toString(), // TODO: This probably should be an assert
