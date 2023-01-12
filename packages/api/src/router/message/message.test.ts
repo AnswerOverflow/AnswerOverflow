@@ -5,9 +5,9 @@ import { ignored_discord_account_router } from "../users/ignored-discord-account
 import { messageRouter } from "./message";
 
 let data: ServerTestData;
-let messages_router: ReturnType<typeof messageRouter["createCaller"]>;
+let messages_router: ReturnType<(typeof messageRouter)["createCaller"]>;
 let account1_ignored_account_router: ReturnType<
-  typeof ignored_discord_account_router["createCaller"]
+  (typeof ignored_discord_account_router)["createCaller"]
 >;
 let account1_message: Message;
 let account2_message: Message;

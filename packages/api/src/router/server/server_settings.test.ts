@@ -6,8 +6,8 @@ import { serverSettingsRouter } from "./server_settings";
 
 // eslint-disable-next-line no-unused-vars
 let data: ServerTestData;
-let server_settings_router_manage_guild: ReturnType<typeof serverSettingsRouter["createCaller"]>;
-let server_settings_no_permissions: ReturnType<typeof serverSettingsRouter["createCaller"]>;
+let server_settings_router_manage_guild: ReturnType<(typeof serverSettingsRouter)["createCaller"]>;
+let server_settings_no_permissions: ReturnType<(typeof serverSettingsRouter)["createCaller"]>;
 let server: Server;
 beforeEach(async () => {
   const { data1 } = await getGeneralScenario();

@@ -4,9 +4,9 @@ import { type ServerTestData, getGeneralScenario } from "~api/test/utils";
 import { channelRouter } from "./channel";
 import { serverRouter } from "../server/server";
 
-let manage_guild_router: ReturnType<typeof serverRouter["createCaller"]>;
-let manage_channel_router: ReturnType<typeof channelRouter["createCaller"]>;
-let default_channel_router: ReturnType<typeof channelRouter["createCaller"]>;
+let manage_guild_router: ReturnType<(typeof serverRouter)["createCaller"]>;
+let manage_channel_router: ReturnType<(typeof channelRouter)["createCaller"]>;
+let default_channel_router: ReturnType<(typeof channelRouter)["createCaller"]>;
 let test_data_1: ServerTestData;
 let channel_1: Channel;
 let thread_1: Thread;
