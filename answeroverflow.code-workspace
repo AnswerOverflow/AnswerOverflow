@@ -83,7 +83,7 @@
     "files.associations": {
       "*.css": "tailwindcss"
     },
-    "search.useIgnoreFiles": true,
+    "search.useParentIgnoreFiles": true,
     "[markdown]": {
       "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
     },
