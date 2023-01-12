@@ -17,6 +17,7 @@ env:
   VITE_ELASTICSEARCH_PASSWORD: changeme
   OWNERS: "[]"
   DISCORD_CLIENT_ID: "123"
+  VITE_DISCORD_CLIENT_ID: "123"
 
 jobs:
   build:

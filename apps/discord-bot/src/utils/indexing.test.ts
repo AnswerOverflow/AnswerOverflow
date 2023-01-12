@@ -34,6 +34,7 @@ import {
 } from "./indexing";
 import type { inferRouterInputs } from "@trpc/server";
 import type { botRouter } from "@answeroverflow/api";
+import { isSnowflakeLargerAsInt } from "./utils";
 
 let client: Client;
 let text_channel: TextChannel;
@@ -153,6 +154,58 @@ describe("Indexing", () => {
         expected_threads: 2,
         expected_users: 120,
         expected_messages: 120,
+      });
+    });
+    it("should update last indexed snowflake after indexing", async () => {
+      const settings = await upsertChannelSettings(text_channel, {
+        flags: {
+          indexing_enabled: true,
+        },
+      });
+      expect(settings.flags.indexing_enabled).toBeTruthy();
+      const messages = mockMessages(text_channel, 100);
+      await indexRootChannel(text_channel);
+      const largest_id = messages.sort((a, b) => isSnowflakeLargerAsInt(a.id, b.id)).at(-1)!.id;
+      const updated_settings = await testOnlyAPICall((router) =>
+        router.channel_settings.byId(text_channel.id)
+      );
+      expect(updated_settings!.last_indexed_snowflake).toBe(largest_id);
+    });
+    it("should start indexing from the last indexed snowflake", async () => {
+      await upsertChannelSettings(text_channel, {
+        flags: {
+          indexing_enabled: true,
+        },
+        last_indexed_snowflake: "100",
+      });
+
+      for (let i = 0; i < 100; i++) {
+        mockMessage({
+          client,
+          channel: text_channel,
+          override: {
+            id: `${i}`,
+          },
+        });
+      }
+      const messages: Message[] = [];
+      for (let i = 100; i <= 200; i++) {
+        messages.push(
+          mockMessage({
+            client,
+            channel: text_channel,
+            override: {
+              id: `${i}`,
+            },
+          })
+        );
+      }
+      await indexRootChannel(text_channel);
+      await validateIndexingResults({
+        messages,
+        expected_threads: 0,
+        expected_users: 100,
+        expected_messages: 100,
       });
     });
     it("should index a forum channel", async () => {

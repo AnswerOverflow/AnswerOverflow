@@ -59,7 +59,13 @@ export async function indexRootChannel(channel: TextChannel | NewsChannel | Foru
 
   // Collect all messages
   const { messages: messages_to_parse, threads } = await fetchAllChannelMessagesWithThreads(
-    channel
+    channel,
+    {
+      start: settings.last_indexed_snowflake == null ? undefined : settings.last_indexed_snowflake,
+      limit: process.env.MAXIMUM_CHANNEL_MESSAGES_PER_INDEX
+        ? parseInt(process.env.MAXIMUM_CHANNEL_MESSAGES_PER_INDEX)
+        : undefined,
+    }
   );
 
   // Filter out messages from users with indexing disabled or from the system
