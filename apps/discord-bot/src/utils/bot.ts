@@ -1,6 +1,6 @@
 import { container, LogLevel, SapphireClient } from "@sapphire/framework";
 import { ReacordDiscordJs, ReacordTester } from "@answeroverflow/reacord";
-import { Partials } from "discord.js";
+import { ClientOptions, Partials } from "discord.js";
 
 import "~discord-bot/utils/setup";
 
@@ -11,13 +11,32 @@ declare module "@sapphire/pieces" {
   }
 }
 
-export function createClient() {
+function getLogLevel() {
+  switch (process.env.NODE_ENV) {
+    case "development":
+      return process.env.BOT_DEV_LOG_LEVEL
+        ? parseInt(process.env.BOT_DEV_LOG_LEVEL)
+        : LogLevel.None;
+    case "test":
+      return process.env.BOT_TEST_LOG_LEVEL
+        ? parseInt(process.env.BOT_TEST_LOG_LEVEL)
+        : LogLevel.None;
+    case "production":
+      return process.env.BOT_PROD_LOG_LEVEL
+        ? parseInt(process.env.BOT_PROD_LOG_LEVEL)
+        : LogLevel.Info;
+    default:
+      return LogLevel.Info;
+  }
+}
+
+export function createClient(override: Partial<ClientOptions> = {}) {
   return new SapphireClient({
     defaultPrefix: "!",
     regexPrefix: /^(hey +)?bot[,! ]/i,
     caseInsensitiveCommands: true,
     logger: {
-      level: LogLevel.Debug,
+      level: getLogLevel(),
     },
     shards: "auto",
     intents: [
@@ -39,6 +58,7 @@ export function createClient() {
     api: {
       automaticallyConnect: process.env.NODE_ENV !== "test", // TODO: Bit of a hack? No point starting API during testing but would be good to verify it
     },
+    ...override,
   });
 }
 

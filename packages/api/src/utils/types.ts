@@ -17,10 +17,14 @@ export type ChannelUpsertWithDepsInput = botRouterInput["channels"]["upsertWithD
 
 export type ServerUpsertInput = botRouterInput["servers"]["upsert"];
 export type UserUpsertInput = botRouterInput["users"]["upsert"];
+export const ALLOWED_THREAD_TYPES = new Set([
+  ChannelType.PublicThread,
+  ChannelType.AnnouncementThread,
+]);
+
 export const ALLOWED_CHANNEL_TYPES = new Set([
   ChannelType.GuildForum,
   ChannelType.GuildText,
   ChannelType.GuildAnnouncement,
+  ...ALLOWED_THREAD_TYPES,
 ]);
-
-export const ALLOWED_THREAD_TYPES = new Set([ChannelType.PublicThread]);

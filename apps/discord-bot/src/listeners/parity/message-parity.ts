@@ -6,7 +6,7 @@ import { toAOMessage } from "~discord-bot/utils/conversions";
 import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
 
 @ApplyOptions<Listener.Options>({ event: Events.MessageDelete, name: "Message Delete Watcher" })
-export class OnMessage extends Listener {
+export class OnMessageDelete extends Listener {
   public async run(message: Message) {
     await callApiWithConsoleStatusHandler({
       ApiCall(router) {

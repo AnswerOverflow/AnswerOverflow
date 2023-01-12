@@ -12,8 +12,12 @@ let server: Server;
 beforeEach(async () => {
   const { data1 } = await getGeneralScenario();
   data = data1;
-  server_settings_router_manage_guild = serverSettingsRouter.createCaller(data1.manage_guild_ctx);
-  server_settings_no_permissions = serverSettingsRouter.createCaller(data1.default_ctx);
+  server_settings_router_manage_guild = serverSettingsRouter.createCaller(
+    data1.account1_guild_manager_ctx
+  );
+  server_settings_no_permissions = serverSettingsRouter.createCaller(
+    data1.account2_default_member_ctx
+  );
   server = data1.server;
   await clearDatabase();
 });

@@ -26,7 +26,7 @@ export class UserEvent extends Listener {
     // Offset Pad
     const pad = " ".repeat(7);
 
-    console.log(
+    this.container.logger.info(
       String.raw`
       ${line01} ${pad}${blc("1.0.0")}
       ${line02} ${pad}[${success}] Gateway

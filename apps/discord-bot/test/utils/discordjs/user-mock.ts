@@ -39,13 +39,15 @@ export function mockClientUser(client: SapphireClient, override: Partial<RawUser
   return client_user;
 }
 
-export function mockGuildMember(
-  client: SapphireClient,
-  user?: User,
-  guild?: Guild,
-  permissions: PermissionResolvable = PermissionsBitField.Default,
-  data: Partial<RawGuildMemberData> = {}
-) {
+export function mockGuildMember(input: {
+  client: SapphireClient;
+  user?: User;
+  guild?: Guild;
+  permissions?: PermissionResolvable;
+  data?: Partial<RawGuildMemberData>;
+}) {
+  const { client, permissions = PermissionsBitField.Default, data = {} } = input;
+  let { user, guild } = input;
   if (!user) {
     user = mockUser(client);
   }
