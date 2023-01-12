@@ -67,6 +67,18 @@
       ],
       "~api/utils/*": [
         "../../../packages/api/src/utils/*"
+      ],
+      "~ui/utils/*": [
+        "../../../packages/ui/src/utils/*"
+      ],
+      "~ui/components/*": [
+        "../../../packages/ui/src/components/*"
+      ],
+      "~ui/test/*": [
+        "../../../packages/ui/test/*"
+      ],
+      "~ui/pages/*": [
+        "../../../packages/ui/src/pages/*"
       ]
     }
   },

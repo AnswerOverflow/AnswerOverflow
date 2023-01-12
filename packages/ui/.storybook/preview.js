@@ -18,3 +18,7 @@ export const parameters = {
     },
   },
 }
+
+export const globalTypes = {
+  // darkMode: true, // 👈 uncomment this line to enable dark mode by default
+};
