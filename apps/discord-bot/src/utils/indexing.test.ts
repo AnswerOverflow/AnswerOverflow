@@ -89,6 +89,7 @@ async function upsertChannelSettings(
 }
 
 describe("Indexing", () => {
+  test.todo("Validate Message Fetch Options");
   describe("Index Root Channel", () => {
     it("should skip a channel with indexing disabled", async () => {
       const settings = await upsertChannelSettings(text_channel);
