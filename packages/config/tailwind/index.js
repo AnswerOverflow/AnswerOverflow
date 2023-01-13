@@ -6,7 +6,11 @@ module.exports = {
   // eslint-disable-next-line no-undef
   plugins: [require("flowbite/plugin")],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        mono: ["var(--font-poppins)"],
+      },
+    },
   },
   darkMode: "class",
 };

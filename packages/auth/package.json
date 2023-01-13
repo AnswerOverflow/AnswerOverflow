@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@types/cookie": "^0.5.1",
+    "@types/node-fetch": "^2.6.2",
     "@vitest/coverage-c8": "^0.26.2",
     "dotenv-cli": "^6.0.0",
     "eslint": "^8.29.0",

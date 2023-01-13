@@ -6,6 +6,8 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
+    "test",
+    "src",
     "**/*.tsx",
     "**/*.cjs",
     "**/*.mjs"

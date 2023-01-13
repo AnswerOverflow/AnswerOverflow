@@ -7,7 +7,7 @@ module.exports = {
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
   ],
-  plugins: ["prettier", "@typescript-eslint"],
+  plugins: ["prettier", "@typescript-eslint", "import"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     project: ["./tsconfig.json"],
@@ -46,4 +46,12 @@ module.exports = {
       },
     },
   ],
+  settings: {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"],
+    },
+    "import/resolver": {
+      typescript: {},
+    },
+  },
 };

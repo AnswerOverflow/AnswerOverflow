@@ -4,7 +4,7 @@
  * https://discord.com/developers/docs/reference#snowflakes-snowflake-id-format-structure-left-to-right
  */
 
-export type Snowflake = `${bigint}`;
+export type Snowflake = string;
 
 export const EPOCH = BigInt(1420070400000);
 

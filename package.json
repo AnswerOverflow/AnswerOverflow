@@ -12,6 +12,7 @@
     "init": "turbo run init",
     "build": "turbo run build",
     "build:cacheless": "turbo run build --no-cache",
+    "generate": "yarn && cd packages/db && yarn generate",
     "dev": "turbo run dev --parallel --no-cache",
     "lint": "turbo run lint",
     "migrate": "turbo run migrate",

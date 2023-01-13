@@ -1,4 +1,4 @@
-import { mergeRouters, router } from "./trpc";
+import { router } from "./trpc";
 import { authRouter } from "./auth";
 import { channelRouter } from "~api/router/channel/channel";
 import { channelSettingsRouter } from "~api/router/channel/channel_settings";
@@ -23,7 +23,19 @@ export const botRouter = router({
   users: userRouter,
 });
 
-export const appRouter = mergeRouters(authRouter, botRouter);
+export const appRouter = router({
+  servers: serverRouter,
+  server_settings: serverSettingsRouter,
+  channels: channelRouter,
+  channel_settings: channelSettingsRouter,
+  discord_accounts: discordAccountRouter,
+  user_server_settings: userServerSettingsRouter,
+  messages: messageRouter,
+
+  // Other:
+  users: userRouter,
+  auth: authRouter,
+});
 
 // export type definition of API
 export type AppRouter = typeof appRouter;

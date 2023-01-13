@@ -24,7 +24,7 @@ export type MessageProps = {
 
 // TODO: Align text to be same level with the avatar
 export function Message({ message }: MessageProps) {
-  const date_of_message = getSnowflakeUTCDate(`${BigInt(message.id)}`);
+  const date_of_message = getSnowflakeUTCDate(message.id);
 
   return (
     <div className="flex break-words p-1 dark:bg-zinc-700">

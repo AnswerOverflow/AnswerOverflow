@@ -10,12 +10,14 @@
     "clean": "rm -rf node_modules"
   },
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.47.0",
-    "@typescript-eslint/parser": "^5.47.0",
+    "@typescript-eslint/eslint-plugin": "^5.48.1",
+    "@typescript-eslint/parser": "^5.48.1",
     "eslint": "^8.31.0",
     "eslint-config-next": "^13.1.2",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-turbo": "0.0.7",
+    "eslint-import-resolver-typescript": "^3.5.3",
+    "eslint-plugin-import": "^2.27.4",
     "eslint-plugin-jest": "^27.2.1",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "7.31.11",
