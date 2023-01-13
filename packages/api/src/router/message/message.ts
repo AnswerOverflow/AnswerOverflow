@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { mergeRouters, withDiscordAccountProcedure, router } from "~api/router/trpc";
+import {
+  mergeRouters,
+  withDiscordAccountProcedure,
+  router,
+  publicProcedure,
+} from "~api/router/trpc";
 import {
   protectedMessageFetch,
   protectedMessageMutation,
@@ -8,6 +13,7 @@ import {
 import { ignored_discord_account_router } from "../users/ignored-discord-accounts/ignored-discord-account";
 import { assertIsNotDeletedUser } from "~api/router/users/ignored-discord-accounts/ignored-discord-account";
 import { TRPCError } from "@trpc/server";
+import { findOrThrowNotFound } from "~api/utils/operations";
 
 export const z_message = z.object({
   id: z.string(),
@@ -23,13 +29,8 @@ export const z_message = z.object({
 });
 
 const message_find_router = router({
-  byId: withDiscordAccountProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    return protectedMessageFetch({
-      ctx,
-      author_id: input,
-      fetch: () => ctx.elastic.getMessage(input),
-      not_found_message: "Message not found",
-    });
+  byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
+    return findOrThrowNotFound(() => ctx.elastic.getMessage(input), "Message not found");
   }),
   byIdBulk: withDiscordAccountProcedure.input(z.array(z.string())).query(async ({ ctx, input }) => {
     return protectedMessageFetch({

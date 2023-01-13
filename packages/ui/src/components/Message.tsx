@@ -1,5 +1,5 @@
-import Avatar, { AvatarProps } from "./Avatar";
-import { getUTCDate as getSnowflakeUTCDate } from "~ui/utils/snowflake";
+import { AvatarProps, Avatar } from "./Avatar";
+import { getSnowflakeUTCDate } from "~ui/utils/snowflake";
 import Image from "next/image";
 export type MessageProps = {
   message: {
@@ -23,7 +23,7 @@ export type MessageProps = {
 };
 
 // TODO: Align text to be same level with the avatar
-function Message({ message }: MessageProps) {
+export function Message({ message }: MessageProps) {
   const date_of_message = getSnowflakeUTCDate(`${BigInt(message.id)}`);
 
   return (
@@ -51,6 +51,7 @@ function Message({ message }: MessageProps) {
                 height = max_height;
                 width = (max_height / image.height) * image.width;
               }
+
               const aspect_ratio = width / height;
               return (
                 <div key={image.url}>

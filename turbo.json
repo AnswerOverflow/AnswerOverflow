@@ -23,6 +23,9 @@
     "dev": {
       "cache": false
     },
+    "clean": {
+      "cache": false
+    },
     "test": {
       "dependsOn": [
         "test:discord-bot"

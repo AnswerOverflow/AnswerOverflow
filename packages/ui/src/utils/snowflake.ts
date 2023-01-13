@@ -20,7 +20,7 @@ export function getDate(snowflake: Snowflake) {
   return new Date(getTimestamp(snowflake));
 }
 
-export function getUTCDate(snowflake: Snowflake) {
+export function getSnowflakeUTCDate(snowflake: Snowflake) {
   const date = getDate(snowflake);
   return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear()}`;
 }

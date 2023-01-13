@@ -34,6 +34,10 @@ export const createContextInner = async (opts: CreateContextOptions) => {
   };
 };
 
+export const createSSGContext = async () => {
+  return await createContextInner({ caller: "web-client", session: null });
+};
+
 export type BotContextCreate = Omit<CreateContextOptions, "caller">;
 
 export const createBotContext = async (opts: BotContextCreate) => {

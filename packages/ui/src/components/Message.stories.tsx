@@ -1,11 +1,11 @@
 import type { ComponentStory, Meta } from "@storybook/react";
 import { within } from "@storybook/testing-library";
 import { expect } from "@storybook/jest";
-import Message, { MessageProps } from "./Message";
+import { MessageProps, Message } from "./Message";
 import { with_image } from "~ui/test/props";
 export default {
   component: Message,
-} satisfies Meta;
+} as Meta;
 
 //👇 We create a “template” of how args map to rendering
 const Template: ComponentStory<typeof Message> = (args: MessageProps) => <Message {...args} />;

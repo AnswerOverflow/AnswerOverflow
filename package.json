@@ -16,6 +16,7 @@
     "lint": "turbo run lint",
     "migrate": "turbo run migrate",
     "lint:fix": "turbo run lint:fix",
+    "clean": "turbo run clean && rm -rf node_modules",
     "dev:discord-bot": "turbo run dev --filter=discord-bot... --parallel --no-cache",
     "build:discord-bot": "turbo run build --filter=discord-bot... --parallel --no-cache",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",

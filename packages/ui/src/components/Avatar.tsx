@@ -20,7 +20,7 @@ const makeUserIconLink = (
   return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=${size}`;
 };
 
-function Avatar({ user }: AvatarProps) {
+export function Avatar({ user }: AvatarProps) {
   const profilePictureUrl = makeUserIconLink(user, 48);
   return (
     <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-500">
@@ -35,5 +35,3 @@ function Avatar({ user }: AvatarProps) {
     </span>
   );
 }
-
-export default Avatar;
