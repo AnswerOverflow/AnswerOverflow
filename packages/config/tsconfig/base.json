@@ -41,44 +41,44 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "~discord-bot/utils/*": [
-        "../../../apps/discord-bot/src/utils/*"
-      ],
-      "~discord-bot/listeners": [
-        "../../../apps/discord-bot/src/listeners/*"
-      ],
-      "~discord-bot/primitives/*": [
-        "../../../apps/discord-bot/src/primitives/*"
-      ],
-      "~discord-bot/interaction-handlers/*": [
-        "../../../apps/discord-bot/src/interaction-handlers/*"
-      ],
-      "~discord-bot/components/*": [
-        "../../../apps/discord-bot/src/components/*"
-      ],
-      "~discord-bot/test/*": [
-        "../../../apps/discord-bot/test/*"
-      ],
-      "~api/router/*": [
-        "../../../packages/api/src/router/*"
-      ],
-      "~api/test/*": [
-        "../../../packages/api/src/test/*"
-      ],
-      "~api/utils/*": [
-        "../../../packages/api/src/utils/*"
-      ],
       "~ui/utils/*": [
-        "../../../packages/ui/src/utils/*"
+        "./packages/ui/src/utils/*"
       ],
       "~ui/components/*": [
-        "../../../packages/ui/src/components/*"
+        "./packages/ui/src/components/*"
       ],
       "~ui/test/*": [
-        "../../../packages/ui/test/*"
+        "./packages/ui/test/*"
       ],
       "~ui/pages/*": [
-        "../../../packages/ui/src/pages/*"
+        "./packages/ui/src/pages/*"
+      ],
+      "~discord-bot/utils/*": [
+        "./apps/discord-bot/src/utils/*"
+      ],
+      "~discord-bot/listeners": [
+        "./apps/discord-bot/src/listeners/*"
+      ],
+      "~discord-bot/primitives/*": [
+        "./apps/discord-bot/src/primitives/*"
+      ],
+      "~discord-bot/interaction-handlers/*": [
+        "./apps/discord-bot/src/interaction-handlers/*"
+      ],
+      "~discord-bot/components/*": [
+        "./apps/discord-bot/src/components/*"
+      ],
+      "~discord-bot/test/*": [
+        "./apps/discord-bot/test/*"
+      ],
+      "~api/router/*": [
+        "./packages/api/src/router/*"
+      ],
+      "~api/test/*": [
+        "./packages/api/src/test/*"
+      ],
+      "~api/utils/*": [
+        "./packages/api/src/utils/*"
       ]
     }
   },

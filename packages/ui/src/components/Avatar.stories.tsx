@@ -12,7 +12,7 @@ const Template: StoryFn<typeof Avatar> = (args: AvatarProps) => <Avatar {...args
 
 //👇 Each story then reuses that template
 export const Primary = Template.bind({});
-Primary.args = default_avatar as AvatarProps;
+Primary.args = default_avatar;
 
 Primary.play = async ({ canvasElement }) => {
   const canvas = within(canvasElement);
@@ -23,7 +23,7 @@ Primary.play = async ({ canvasElement }) => {
 export const Secondary = Template.bind({});
 Secondary.args = {
   ...Primary.args,
-  ...(with_image as AvatarProps),
+  ...with_image,
 };
 
 export const Tertiary = Template.bind({});

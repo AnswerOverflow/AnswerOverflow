@@ -3,7 +3,6 @@ import { within } from "@storybook/testing-library";
 import { expect } from "@storybook/jest";
 import { MessageProps, Message } from "./Message";
 import { with_image } from "~ui/test/props";
-import type { AvatarProps } from "./Avatar";
 export default {
   component: Message,
 } as Meta;
@@ -46,7 +45,7 @@ OverflowLetters.args = {
     ...default_message.message,
     content:
       "Helloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo",
-    author: (with_image as AvatarProps).user,
+    author: with_image.user,
   },
 };
 

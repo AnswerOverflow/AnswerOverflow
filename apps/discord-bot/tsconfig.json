@@ -7,6 +7,7 @@
       "node",
       "@types/jest"
     ],
+    "baseUrl": "../../"
   },
   "ts-node": {
     "transpileOnly": true

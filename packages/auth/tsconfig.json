@@ -3,7 +3,8 @@
   "compilerOptions": {
     "types": [
       "vitest/globals"
-    ]
+    ],
+    "baseUrl": "../../"
   },
   "include": [
     "src",
