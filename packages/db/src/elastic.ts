@@ -23,14 +23,25 @@ function getElasticClient(): Elastic {
       },
     });
   } else if (process.env.NODE_ENV === "production") {
-    return new Elastic({
-      cloud: {
-        id: process.env.ELASTICSEARCH_CLOUD_ID,
-      },
-      auth: {
-        apiKey: process.env.ELASTICSEARCH_API_KEY,
-      },
-    });
+    // Allow for building locally
+    if (!process.env.ELASTICSEARCH_CLOUD_ID || !process.env.ELASTICSEARCH_API_KEY) {
+      return new Elastic({
+        node: process.env.ELASTICSEARCH_URL,
+        auth: {
+          password: process.env.ELASTICSEARCH_PASSWORD,
+          username: process.env.ELASTICSEARCH_USERNAME,
+        },
+      });
+    } else {
+      return new Elastic({
+        cloud: {
+          id: process.env.ELASTICSEARCH_CLOUD_ID,
+        },
+        auth: {
+          apiKey: process.env.ELASTICSEARCH_API_KEY,
+        },
+      });
+    }
   } else {
     throw new Error("Invalid environment to connect to elastic");
   }
@@ -228,7 +239,11 @@ export class Elastic extends Client {
     ]);
     const result = await this.bulk({ body });
     if (result.errors) {
-      console.error(result);
+      console.error(
+        result.errors,
+        `Wrote ${result.took} successfully out of ${messages.length} messages`,
+        result.items.map((item) => item.update?.error)
+      );
       return false;
     }
     return true;
@@ -257,7 +272,14 @@ export class Elastic extends Client {
           replies_to: { type: "long" },
           thread_id: { type: "long" },
           child_thread: { type: "long" },
-          images: { type: "text" },
+          images: {
+            properties: {
+              url: { type: "text" },
+              width: { type: "integer" },
+              height: { type: "integer" },
+              description: { type: "text" },
+            },
+          },
         },
       },
     });

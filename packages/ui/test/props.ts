@@ -1,7 +1,7 @@
 import type { AvatarProps } from "../src/components/Avatar";
 
 export const default_avatar: AvatarProps = {
-  user: { name: "El Doe", id: "0" },
+  user: { name: "El Doe", id: "0", avatar: null },
 };
 
 export const with_image: AvatarProps = {

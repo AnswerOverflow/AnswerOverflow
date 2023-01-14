@@ -15,7 +15,7 @@ function getLogLevel() {
     case "development":
       return process.env.BOT_DEV_LOG_LEVEL
         ? parseInt(process.env.BOT_DEV_LOG_LEVEL)
-        : LogLevel.None;
+        : LogLevel.Debug;
     case "test":
       return process.env.BOT_TEST_LOG_LEVEL
         ? parseInt(process.env.BOT_TEST_LOG_LEVEL)

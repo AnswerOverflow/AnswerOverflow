@@ -1,6 +1,9 @@
 import { prisma, elastic } from "..";
 
 export async function clearDatabase() {
+  if (process.env.NODE_ENV !== "test") {
+    throw new Error("clearDatabase can only be used in test environment");
+  }
   await prisma.userServerSettings.deleteMany({});
   await prisma.serverSettings.deleteMany({});
   await prisma.channelSettings.deleteMany({});

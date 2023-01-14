@@ -51,17 +51,21 @@ export async function indexRootChannel(channel: TextChannel | NewsChannel | Foru
     getCtx: createAnswerOveflowBotCtx,
     error_message: `Failed to get channel settings for channel ${channel.id}`,
     success_message: `Got channel settings for channel ${channel.id}`,
+    allowed_errors: "NOT_FOUND",
   });
 
   if (!settings || !settings.flags.indexing_enabled) {
     return;
   }
-
+  let start = settings.last_indexed_snowflake == null ? undefined : settings.last_indexed_snowflake;
+  if (process.env.NODE_ENV === "development") {
+    start = undefined; // always index from the beginning in development for ease of testing
+  }
   // Collect all messages
   const { messages: messages_to_parse, threads } = await fetchAllChannelMessagesWithThreads(
     channel,
     {
-      start: settings.last_indexed_snowflake == null ? undefined : settings.last_indexed_snowflake,
+      start,
       limit: process.env.MAXIMUM_CHANNEL_MESSAGES_PER_INDEX
         ? parseInt(process.env.MAXIMUM_CHANNEL_MESSAGES_PER_INDEX)
         : undefined,
@@ -157,6 +161,7 @@ export async function filterMessages(messages: Message[], channel: GuildBasedCha
       );
     },
     error_message: "Failed to fetch user server settings in indexing",
+    allowed_errors: "NOT_FOUND",
     getCtx: createAnswerOveflowBotCtx,
     success_message: `Fetched ${seen_user_ids.length} user server settings`,
   });
