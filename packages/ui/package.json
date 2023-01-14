@@ -21,6 +21,7 @@
     "flowbite": "^1.6.2",
     "flowbite-react": "^0.3.7",
     "next": "13.0.2",
+    "style-loader": "^3.3.1",
     "zod": "^3.18.0"
   },
   "devDependencies": {
@@ -47,12 +48,15 @@
     "@types/react-dom": "^18.0.5",
     "autoprefixer": "^10.4.7",
     "babel-loader": "^8.3.0",
+    "css-loader": "^6.7.3",
     "postcss": "^8.4.14",
+    "postcss-loader": "^7.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "require-from-string": "^2.0.2",
     "storybook": "^7.0.0-beta.25",
     "tailwindcss": "^3.2.0",
+    "tslib": "^2.4.1",
     "typescript": "^4.9.4",
     "webpack": "^5.75.0"
   },
