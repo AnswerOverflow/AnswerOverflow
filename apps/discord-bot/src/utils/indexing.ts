@@ -103,7 +103,7 @@ export async function indexRootChannel(channel: TextChannel | NewsChannel | Foru
 
       await router.channel_settings.upsert({
         channel_id: channel.id,
-        last_indexed_snowflake: converted_messages[converted_messages.length - 1].id,
+        last_indexed_snowflake: converted_messages[converted_messages.length - 1]!.id,
       });
     },
     error_message: `Failed to index channel ${channel.id}`,

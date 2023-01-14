@@ -17,7 +17,7 @@ describe("Channel Settings Upsert With Deps", () => {
   it("should succeed upserting a channel settings with manage guild", async () => {
     const channel_settings = await manage_channel_settings_router.upsertWithDeps({
       channel: {
-        ...data.text_channels[0].channel,
+        ...data.text_channels[0]!.channel,
         server: data.server,
       },
       solution_tag_id: "101",
@@ -31,7 +31,7 @@ describe("Channel Settings Fetch", () => {
   it("should fetch by invite code", async () => {
     const channel_settings = await manage_channel_settings_router.createWithDeps({
       channel: {
-        ...data.text_channels[0].channel,
+        ...data.text_channels[0]!.channel,
         server: data.server,
       },
       invite_code: "1234",

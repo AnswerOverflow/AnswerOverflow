@@ -22,7 +22,6 @@ export function Avatar({ user }: AvatarProps) {
         height={48}
         className="inline-block rounded-full"
       />
-      {/* <span className="text-xs font-medium leading-none text-white">{user.name}</span> */}
     </span>
   );
 }

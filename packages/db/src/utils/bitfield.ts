@@ -6,13 +6,14 @@ export function toDict<T extends readonly string[], Result>(
 ): Record<T[number], Result> {
   const obj: Record<string, Result> = {};
   for (let i = 0; i < keys.length; i++) {
-    obj[keys[i]] = operation(keys[i], i);
+    const key = keys[i]!;
+    obj[key] = operation(key, i);
   }
-  return obj;
+  return obj as Record<T[number], Result>;
 }
 
 export function toBitfield<T extends readonly string[]>(...keys: T): Record<T[number], number> {
-  return toDict((_key, index) => 1 << index, ...keys);
+  return toDict((_key, index) => 1 << index, ...keys) as Record<T[number], number>;
 }
 
 export function bitfieldToDict<T extends readonly string[]>(
@@ -20,7 +21,7 @@ export function bitfieldToDict<T extends readonly string[]>(
   flags: T
 ): Record<T[number], boolean> {
   const bitfield = new BitField(toBitfield(...flags));
-  return toDict((key) => bitfield.has(value, key), ...flags);
+  return toDict((key) => bitfield.has(value, key), ...flags) as Record<T[number], boolean>;
 }
 
 export function dictToBitfield<

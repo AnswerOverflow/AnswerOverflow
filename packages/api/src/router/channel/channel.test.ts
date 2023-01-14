@@ -16,8 +16,8 @@ beforeEach(async () => {
   default_channel_router = channelRouter.createCaller(test_data_1.account2_default_member_ctx);
   manage_channel_router = channelRouter.createCaller(test_data_1.account1_guild_manager_ctx);
   manage_guild_router = serverRouter.createCaller(test_data_1.account1_guild_manager_ctx);
-  channel_1 = test_data_1.text_channels[0].channel;
-  thread_1 = test_data_1.text_channels[0].threads[0].thread;
+  channel_1 = test_data_1.text_channels[0]!.channel;
+  thread_1 = test_data_1.text_channels[0]!.threads[0]!.thread;
   await clearDatabase();
 });
 
@@ -100,7 +100,7 @@ describe("Channel Operations", () => {
           server: test_data_1.server,
         },
       });
-      expect(thread).toEqual(test_data_1.text_channels[0].threads[0].thread);
+      expect(thread).toEqual(test_data_1.text_channels[0]!.threads[0]!.thread);
     });
   });
 });

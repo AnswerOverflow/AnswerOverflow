@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "target": "es2017",
-    "baseUrl": "../../"
+    "baseUrl": "../../",
+    "preserveSymlinks": true
   },
   "extends": "@answeroverflow/tsconfig/nextjs.json",
   "include": [
@@ -12,6 +13,5 @@
     "**/*.tsx",
     "**/*.cjs",
     "**/*.mjs",
-    "node_modules/@answeroverflow/api/node_modules/@answeroverflow/auth/next-auth.d.ts"
   ],
 }

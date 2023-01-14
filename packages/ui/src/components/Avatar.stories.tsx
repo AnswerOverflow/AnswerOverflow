@@ -16,8 +16,8 @@ Primary.args = default_avatar;
 
 Primary.play = async ({ canvasElement }) => {
   const canvas = within(canvasElement);
-  const icon = await canvas.findByText("John Doe");
-  expect(icon.innerText).toBe("John Doe");
+  const icon = await canvas.findByAltText("John Doe");
+  expect(icon).toBeInTheDocument();
 };
 
 export const Secondary = Template.bind({});

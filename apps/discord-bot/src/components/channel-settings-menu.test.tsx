@@ -46,7 +46,7 @@ describe("ChannelSettingsMenu", () => {
       <ChannelSettingsMenu settings={default_settings} channel={text_channel} />
     );
     expect(
-      message.hasComponents(
+      message!.hasComponents(
         ["Enable Indexing", "Enable Mark Solution", "Enable Send Mark Solution Instructions"],
         []
       )
@@ -59,7 +59,7 @@ describe("ChannelSettingsMenu", () => {
       <ChannelSettingsMenu settings={default_settings} channel={forum_thread} />
     );
     expect(
-      message.hasComponents(
+      message!.hasComponents(
         ["Enable Indexing", "Enable Mark Solution", "Enable Send Mark Solution Instructions"],
         ["Select a tag to use on mark as solved"]
       )
@@ -75,12 +75,12 @@ describe("Toggle Indexing Button", () => {
       reacord,
       <ChannelSettingsMenu settings={default_settings} channel={text_channel} />
     );
-    const enable_indexing_button = message.findButtonByLabel("Enable Indexing", reacord);
+    const enable_indexing_button = message!.findButtonByLabel("Enable Indexing", reacord);
     expect(enable_indexing_button).toBeDefined();
     await enable_indexing_button!.click(text_channel, members.guild_member_owner);
 
-    expect(message.hasButton("Enable Indexing", reacord)).toBeFalsy();
-    const button = message.findButtonByLabel("Disable Indexing", reacord);
+    expect(message!.hasButton("Enable Indexing", reacord)).toBeFalsy();
+    const button = message!.findButtonByLabel("Disable Indexing", reacord);
     expect(button).toBeDefined();
   });
 });
@@ -92,7 +92,7 @@ describe("Select mark solved tag", () => {
       reacord,
       <ChannelSettingsMenu settings={default_settings} channel={forum_thread} />
     );
-    const select = message.findSelectByPlaceholder(
+    const select = message!.findSelectByPlaceholder(
       "Select a tag to use on mark as solved",
       reacord
     );
@@ -100,13 +100,13 @@ describe("Select mark solved tag", () => {
     await select?.select(
       forum_thread,
       members.guild_member_owner,
-      forum_channel.availableTags[0].id
+      forum_channel.availableTags[0]!.id
     );
-    const select2 = message.findSelectByPlaceholder(
+    const select2 = message!.findSelectByPlaceholder(
       "Select a tag to use on mark as solved",
       reacord
     );
     expect(select2?.values).toHaveLength(1);
-    expect(select2!.values![0]).toBe(forum_channel.availableTags[0].id);
+    expect(select2!.values![0]).toBe(forum_channel.availableTags[0]!.id);
   });
 });
