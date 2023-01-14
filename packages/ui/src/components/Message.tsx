@@ -1,25 +1,9 @@
-import { AvatarProps, Avatar } from "./Avatar";
+import { Avatar } from "./Avatar";
 import { getSnowflakeUTCDate } from "~ui/utils/snowflake";
 import Image from "next/image";
+import type { MessageWithDiscordAccount } from "~api/router/index";
 export type MessageProps = {
-  message: {
-    id: string;
-    channel_id: string;
-    server_id: string;
-    content: string;
-    images: {
-      url: string;
-      width: number;
-      height: number;
-      description?: string;
-    }[];
-    solutions: string[];
-    author: AvatarProps["user"];
-    replies_to?: string;
-    thread_id?: string;
-    child_thread?: string;
-    reply_count?: number;
-  };
+  message: MessageWithDiscordAccount;
 };
 
 // TODO: Align text to be same level with the avatar
@@ -42,31 +26,47 @@ export function Message({ message }: MessageProps) {
             {message.images.map((image) => {
               let width = image.width;
               let height = image.height;
+
+              if (!width || !height)
+                return (
+                  <Image
+                    key={image.url}
+                    src={image.url}
+                    alt={image.description ? image.description : "No alt text"}
+                    style={{
+                      maxWidth: "400px",
+                      maxHeight: "300px",
+                    }}
+                  />
+                );
+              const original_width = width;
+              const original_height = height;
               const max_width = 400;
               const max_height = 300;
-              if (width > height) {
-                width = max_width;
-                height = (max_width / image.width) * image.height;
-              } else {
-                height = max_height;
-                width = (max_height / image.height) * image.width;
+              if (width && height) {
+                if (width > height) {
+                  width = max_width;
+                  height = (max_width / width) * height;
+                } else if (height) {
+                  height = max_height;
+                  width = (max_height / height) * width;
+                }
               }
 
               const aspect_ratio = width / height;
               return (
-                <div key={image.url}>
-                  <Image
-                    src={image.url}
-                    width={image.width}
-                    height={image.height}
-                    alt={image.description ? image.description : "No alt text"}
-                    style={{
-                      maxWidth: `${width}px`,
-                      maxHeight: `${max_height}px`,
-                      aspectRatio: `${aspect_ratio}`,
-                    }}
-                  />
-                </div>
+                <Image
+                  key={image.url}
+                  src={image.url}
+                  width={original_width}
+                  height={original_height}
+                  alt={image.description ? image.description : "No alt text"}
+                  style={{
+                    maxWidth: `${width}px`,
+                    maxHeight: `${max_height}px`,
+                    aspectRatio: `${aspect_ratio}`,
+                  }}
+                />
               );
             })}
           </div>

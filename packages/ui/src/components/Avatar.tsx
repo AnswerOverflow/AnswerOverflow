@@ -1,23 +1,14 @@
 import Image from "next/image";
+import type { DiscordAccountPublic } from "~api/router/index";
 
 export type AvatarProps = {
-  user: {
-    name: string;
-    id: string;
-    avatar?: string;
-  };
+  user: DiscordAccountPublic;
 };
 
-const makeUserIconLink = (
-  user: {
-    id: string;
-    avatar?: string;
-  },
-  size: number = 64
-) => {
-  if (user.avatar == undefined)
-    return `https://cdn.discordapp.com/embed/avatars/${parseInt(user.id) % 5}.png?size=${size}`;
-  return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=${size}`;
+const makeUserIconLink = (user: Pick<DiscordAccountPublic, "id" | "avatar">, size: number = 64) => {
+  if (user.avatar)
+    return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=${size}`;
+  return `https://cdn.discordapp.com/embed/avatars/${parseInt(user.id) % 5}.png?size=${size}`;
 };
 
 export function Avatar({ user }: AvatarProps) {

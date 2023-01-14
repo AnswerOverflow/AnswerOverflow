@@ -65,7 +65,6 @@ export function getGuildTextChannelMockDataBase<Type extends GuildTextChannelTyp
 function setupMockedChannel<T extends GuildBasedChannel>(
   client: SapphireClient,
   guild: Guild | undefined,
-  // eslint-disable-next-line no-unused-vars
   create_mock_data: (guild: Guild) => T
 ): T {
   if (!guild) {

@@ -11,6 +11,7 @@
     "src",
     "**/*.tsx",
     "**/*.cjs",
-    "**/*.mjs"
+    "**/*.mjs",
+    "../../node_modules/@answeroverflow/auth/next-auth.d.ts"
   ],
 }

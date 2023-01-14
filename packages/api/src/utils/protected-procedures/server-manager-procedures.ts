@@ -10,7 +10,6 @@ import {
 } from "./base";
 
 type ServerManagerProtectedFetch<T> = ProtectedFetchInputExtendable<T> & {
-  // eslint-disable-next-line no-unused-vars
   getServerId: (data: T) => string | string[];
   ctx: Context;
 };
@@ -35,7 +34,6 @@ export async function protectedServerManagerMutation<T>(input: ServerManagerProt
 export async function protectedServerManagerMutationFetchFirst<T, F>(
   input: ProtectedMutationFetchFirstInputExtendable<T, F> & {
     ctx: Context;
-    // eslint-disable-next-line no-unused-vars
     getServerId: (data: T) => string | string[];
   }
 ) {

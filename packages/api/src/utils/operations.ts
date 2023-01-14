@@ -3,7 +3,6 @@ import { TRPCError } from "@trpc/server";
 export async function upsert<T>(
   find: () => Promise<T>,
   create: () => Promise<T>,
-  // eslint-disable-next-line no-unused-vars
   update: (old: T) => Promise<T>
 ) {
   try {
@@ -18,13 +17,9 @@ export async function upsert<T>(
 export async function upsertMany<T, Data>(calls: {
   input: Data[];
   find: () => Promise<T[]>;
-  // eslint-disable-next-line no-unused-vars
   getInputId: (input: Data) => string;
-  // eslint-disable-next-line no-unused-vars
   getFetchedDataId: (input: T) => string;
-  // eslint-disable-next-line no-unused-vars
   create: (input: Data[]) => Promise<T[]>;
-  // eslint-disable-next-line no-unused-vars
   update: (input: Data[]) => Promise<T[]>;
 }) {
   const { find, create, getInputId, getFetchedDataId, input, update } = calls;
@@ -41,7 +36,6 @@ export async function upsertMany<T, Data>(calls: {
   return [...created, ...updated];
 }
 
-// eslint-disable-next-line no-unused-vars
 export function addDefaultValues<T, F>(input: T[], getDefaultValue: (input: T) => F) {
   return input.map((v) => getDefaultValue(v));
 }

@@ -4,7 +4,7 @@ import { getGeneralScenario, ServerTestData } from "~api/test/utils";
 import { MISSING_PERMISSIONS_MESSAGE } from "~api/utils/permissions";
 import { serverSettingsRouter } from "./server_settings";
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let data: ServerTestData;
 let server_settings_router_manage_guild: ReturnType<(typeof serverSettingsRouter)["createCaller"]>;
 let server_settings_no_permissions: ReturnType<(typeof serverSettingsRouter)["createCaller"]>;

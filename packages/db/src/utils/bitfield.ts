@@ -1,7 +1,6 @@
 import { BitField } from "@sapphire/bitfield";
 
 export function toDict<T extends readonly string[], Result>(
-  // eslint-disable-next-line no-unused-vars
   operation: (key: T[number], index: number) => Result,
   ...keys: T
 ): Record<T[number], Result> {
@@ -41,7 +40,6 @@ export function dictToBitfield<
 export function mergeFlags(
   getOldFlags: () => Record<string, boolean>,
   new_flags: Record<string, boolean>,
-  // eslint-disable-next-line no-unused-vars
   flagsToBitfield: (flags: Record<string, boolean>) => number
 ) {
   const old_flags = getOldFlags();

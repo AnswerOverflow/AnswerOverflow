@@ -43,7 +43,12 @@ export type Message = {
   channel_id: string;
   author_id: string;
   content: string;
-  images: string[];
+  images: {
+    url: string;
+    width: number | null;
+    height: number | null;
+    description: string | null;
+  }[];
   replies_to: string | null;
   thread_id: string | null;
   child_thread: string | null;
@@ -104,6 +109,20 @@ export class Elastic extends Client {
         throw error;
       }
     }
+  }
+
+  public async getAllMessages() {
+    const body = {
+      query: {
+        match_all: {},
+      },
+    };
+    const result = await this.search<Message>({
+      index: this.messages_index,
+      body,
+    });
+
+    return result.hits.hits.filter((hit) => hit._source).map((hit) => hit._source!);
   }
 
   public async deleteMessage(id: string) {

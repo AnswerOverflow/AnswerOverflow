@@ -5,7 +5,6 @@ import { ClientOptions, Partials } from "discord.js";
 import "~discord-bot/utils/setup";
 
 declare module "@sapphire/pieces" {
-  // eslint-disable-next-line no-unused-vars
   interface Container {
     reacord: ReacordDiscordJs | ReacordTester;
   }

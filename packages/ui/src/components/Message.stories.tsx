@@ -21,11 +21,15 @@ const default_message: MessageProps = {
     author: {
       name: "John Doe",
       id: "0",
+      avatar: null,
     },
     images: [],
     channel_id: "0",
     server_id: "0",
     solutions: [],
+    child_thread: null,
+    replies_to: null,
+    thread_id: null,
   },
 };
 
@@ -61,11 +65,19 @@ WithImages.args = {
         url: "https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.png",
         width: 897,
         height: 672,
+        description: null,
       },
       {
         url: "https://cdn.discordapp.com/attachments/1037547270733832242/1063121784578261033/image.png",
         width: 1440,
         height: 2560,
+        description: null,
+      },
+      {
+        url: "https://cdn.discordapp.com/attachments/1037547270733832242/1063121784578261033/image.png",
+        width: null,
+        height: null,
+        description: null,
       },
     ],
   },

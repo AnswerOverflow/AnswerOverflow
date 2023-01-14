@@ -2,14 +2,12 @@ import { appRouter } from "@answeroverflow/api";
 import { createSSGContext } from "@answeroverflow/api/src/router/context";
 import { Message } from "@answeroverflow/ui";
 import { createProxySSGHelpers } from "@trpc/react-query/ssg";
-import type { InferGetStaticPropsType } from "next";
 import Head from "next/head";
 import superjson from "superjson";
 import { trpc } from "../utils/trpc";
 
-export default function Home(props: InferGetStaticPropsType<typeof getStaticProps>) {
-  const { id } = props;
-  const postQuery = trpc.messages.byId.useQuery(id);
+export default function Home() {
+  const postQuery = trpc.messages.all.useQuery();
   if (postQuery.status !== "success") {
     // won't happen since we're using `fallback: "blocking"`
     return <>Loading...</>;
@@ -25,25 +23,9 @@ export default function Home(props: InferGetStaticPropsType<typeof getStaticProp
       </Head>
       <main className="flex h-screen flex-col items-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
         <div>
-          <Message
-            message={{
-              id,
-              channel_id: "",
-              server_id: "",
-              content: data.content,
-              images: [],
-              solutions: [],
-              author: {
-                name: "Rhys",
-                id: "10",
-                avatar: undefined,
-              },
-              replies_to: undefined,
-              thread_id: undefined,
-              child_thread: undefined,
-              reply_count: undefined,
-            }}
-          />
+          {data.map((message) => (
+            <Message message={message} key={message.id} />
+          ))}
         </div>
       </main>
     </>
@@ -56,13 +38,11 @@ export async function getStaticProps() {
     ctx: await createSSGContext(),
     transformer: superjson, // optional - adds superjson serialization
   });
-  const id = "1062719309673140394";
   // prefetch `post.byId`
-  await ssg.messages.byId.prefetch(id);
+  await ssg.messages.all.prefetch();
   return {
     props: {
       trpcState: ssg.dehydrate(),
-      id,
     },
     revalidate: 1,
   };

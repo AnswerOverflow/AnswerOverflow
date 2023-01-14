@@ -10,7 +10,7 @@ export function AnswerOverflowLogo() {
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 889.87 240.34"
-      className={`w-full fill-black stroke-black dark:fill-white dark:stroke-white`}
+      className={`w-40 fill-black stroke-black dark:fill-white dark:stroke-white md:w-56`}
     >
       <defs>
         <style>{".cls-3{letter-spacing:-.02em}"}</style>
@@ -64,7 +64,7 @@ export function AnswerOverflowLogo() {
     </svg>
   );
   return (
-    <div className={`w-auto max-w-lg`}>
+    <div className={`max-h-sm w-auto`}>
       <Svg />
     </div>
   );
