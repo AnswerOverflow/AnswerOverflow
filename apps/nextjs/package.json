@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "with-env": "dotenv -e ../../.env --",
-    "dev": "pnpm run with-env next dev",
-    "build": "pnpm run with-env next build",
+    "dev": "pnpm with-env next dev",
+    "build": "pnpm with-env next build",
     "clean": "rm -rf .next .turbo node_modules",
     "start": "pnpm run with-env next start",
     "lint": "next lint && tsc --noEmit",

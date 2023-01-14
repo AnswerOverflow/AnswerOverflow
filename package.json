@@ -2,7 +2,7 @@
   "name": "ao-monorepo",
   "version": "0.0.0",
   "private": true,
-  "packageManager": "pnpm@7.13.0",
+  "packageManager": "pnpm@7.13.2",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "init": "turbo run init",
