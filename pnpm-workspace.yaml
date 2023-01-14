@@ -1,0 +1,8 @@
+packages:
+  - apps/discord-bot
+  - apps/nextjs
+  - packages/api
+  - packages/auth
+  - packages/db
+  - packages/ui
+  - packages/config/*

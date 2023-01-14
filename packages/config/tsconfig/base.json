@@ -3,6 +3,11 @@
   "display": "Default",
   "compileOnSave": true,
   "compilerOptions": {
+    "allowJs": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "noUncheckedIndexedAccess": true,
     "allowSyntheticDefaultImports": true,
     "alwaysStrict": true,
     "declaration": true,
@@ -15,10 +20,12 @@
     "importsNotUsedAsValues": "error",
     "incremental": true,
     "lib": [
+      "dom",
+      "dom.iterable",
       "esnext"
     ],
     "skipLibCheck": true,
-    "module": "CommonJS",
+    "module": "esnext",
     "moduleResolution": "Node",
     "newLine": "lf",
     "noEmitHelpers": true,
@@ -32,7 +39,7 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "strict": true,
-    "target": "ESNext",
+    "target": "es2017",
     "useDefineForClassFields": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
@@ -79,6 +86,9 @@
       ],
       "~api/utils/*": [
         "./packages/api/src/utils/*"
+      ],
+      "tslib": [
+        "./node_modules/tslib/tslib.d.ts"
       ]
     }
   },

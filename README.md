@@ -1,5 +1,4 @@
 
-
 <p align='center'>
         <a href='https://answeroverflow.com/'>
         <img src="https://www.answeroverflow.com/content/branding/AnswerOverflowLOGO.png">
@@ -33,9 +32,9 @@ With Visual Studio opened in a development container, open a folder in the root 
 
 * Run the whole project
 
-    ```yarn run dev```
+    ```pnpm run dev```
 * Run a single app
 
-    ```yarn turbo run dev --filter='app-name'```
+    ```pnpm turbo run dev --filter='app-name'```
 * Install a package
-    ```yarn workspace <workspace> add <package>```
+    ```pnpm workspace <workspace> add <package>```

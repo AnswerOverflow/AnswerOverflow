@@ -10,6 +10,6 @@
     "next-env.d.ts",
     "postcss.config.cjs",
     "tailwind.config.cjs",
-    "../../node_modules/@answeroverflow/auth/next-auth.d.ts",
+    "node_modules/@answeroverflow/auth/next-auth.d.ts",
   ],
 }

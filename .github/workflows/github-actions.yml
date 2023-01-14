@@ -38,26 +38,26 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: 'yarn'
+          cache: 'pnpm'
 
       - name: Start containers # TODO: Use dev container docker-compose instead if possible
         run: docker-compose -f "docker-compose.yml" up -d --build
 
       - name: Install dependencies
         # Playright is used for storybook, possible move that into package.json instead?
-        run: yarn && npx playwright install-deps
+        run: pnpm i && npx playwright install-deps
 
       - name: Setup Database
-        run: yarn migrate
+        run: pnpm run migrate
 
       - name: Lint
-        run: yarn lint
+        run: pnpm lint
 
       - name: Build
-        run: yarn build
+        run: pnpm build
 
       - name: Test
-        run: yarn test
+        run: pnpm test
 
       - name: Stop containers
         if: always()

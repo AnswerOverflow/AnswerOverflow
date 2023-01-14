@@ -9,8 +9,8 @@
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint src && tsc --noEmit",
     "lint:fix": "eslint src --fix",
-    "test:api": "yarn with-env vitest run --no-threads ",
-    "test:watch": "yarn with-env vitest --no-threads --coverage",
+    "test:api": "pnpm run with-env vitest run --no-threads ",
+    "test:watch": "pnpm run with-env vitest --no-threads --coverage",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -28,6 +28,7 @@
     "@vitest/coverage-c8": "^0.25.1",
     "dotenv-cli": "^6.0.0",
     "eslint": "^8.28.0",
+    "tslib": "^2.4.1",
     "typescript": "^4.9.4",
     "vitest": "^0.25.1"
   }

@@ -12,6 +12,6 @@
     "**/*.tsx",
     "**/*.cjs",
     "**/*.mjs",
-    "../../node_modules/@answeroverflow/auth/next-auth.d.ts"
+    "node_modules/@answeroverflow/api/node_modules/@answeroverflow/auth/next-auth.d.ts"
   ],
 }

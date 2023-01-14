@@ -6,6 +6,7 @@
   "license": "UNLICENSE",
   "dependencies": {
     "@answeroverflow/api": "*",
+    "@answeroverflow/db": "*",
     "@answeroverflow/reacord": "^0.5.7",
     "@sapphire/decorators": "6.0.0",
     "@sapphire/discord-utilities": "3.0.0",
@@ -55,10 +56,10 @@
     "lint": "eslint src && tsc --noEmit",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write \"src/**/*.ts\"",
-    "dev": "yarn with-env rm -rf dist && yarn run build && run-p watch start",
-    "start": "yarn with-env node dist/index.js",
-    "test:discord-bot": "yarn with-env jest --runInBand",
-    "test:watch": "yarn with-env jest --watch --runInBand",
+    "dev": "pnpm run with-env rm -rf dist && pnpm run build && run-p watch start",
+    "start": "pnpm run with-env node dist/index.js",
+    "test:discord-bot": "pnpm run with-env jest --runInBand",
+    "test:watch": "pnpm run with-env jest --watch --runInBand",
     "install-local-reacord": "cp -r ~/repos/reacord/packages/reacord/dist/ /workspace/node_modules/@answeroverflow/reacord/"
   }
 }

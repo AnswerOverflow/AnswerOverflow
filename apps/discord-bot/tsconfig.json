@@ -16,6 +16,6 @@
     "src",
     "test",
     "jest.config.ts",
-    "../../node_modules/@answeroverflow/auth/next-auth.d.ts"
+    "node_modules/@answeroverflow/auth/next-auth.d.ts"
   ],
 }
