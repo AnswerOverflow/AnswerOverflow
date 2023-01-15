@@ -15,7 +15,6 @@
   "include": [
     "src",
     "test",
-    "jest.config.ts",
-    "node_modules/@answeroverflow/auth/next-auth.d.ts"
+    "jest.config.ts"
   ],
 }

@@ -29,6 +29,7 @@
     "next-auth": "^4.17.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "superjson": "^1.9.1",
     "zod": "^3.18.0"
   },
   "devDependencies": {

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es2017",
     "baseUrl": "../../",
-    "preserveSymlinks": true
+    "preserveSymlinks": true,
   },
   "extends": "@answeroverflow/tsconfig/nextjs.json",
   "include": [

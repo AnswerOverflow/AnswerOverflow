@@ -5,6 +5,9 @@
   "compilerOptions": {
     "allowJs": true,
     "noEmit": true,
+    "types": [
+      "node"
+    ],
     "jsx": "preserve",
     "noUncheckedIndexedAccess": true,
     "allowSyntheticDefaultImports": true,
@@ -22,7 +25,7 @@
       "esnext"
     ],
     "skipLibCheck": true,
-    "module": "CommonJS",
+    "module": "ESNext",
     "moduleResolution": "Node",
     "newLine": "lf",
     "noEmitHelpers": true,
@@ -43,6 +46,8 @@
     "exactOptionalPropertyTypes": false,
     "noImplicitOverride": true,
     "outDir": "dist",
+    "composite": true,
+    "preserveSymlinks": true,
     "baseUrl": ".",
     "paths": {
       "~ui/utils/*": [
