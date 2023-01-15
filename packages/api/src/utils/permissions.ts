@@ -21,7 +21,7 @@ export function isSuperUser(ctx: Context) {
 export function assertIsBot(ctx: Context) {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
-  throw new TRPCError({
+  return new TRPCError({
     code: "UNAUTHORIZED",
     message: "You are not authorized to do this",
   });
@@ -31,7 +31,7 @@ export function assertCanEditServer(ctx: Context, server_id: string) {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
   if (!ctx.user_servers) {
-    throw new TRPCError({
+    return new TRPCError({
       code: "UNAUTHORIZED",
       message: "You are not authorized to edit this server",
     });
@@ -41,7 +41,7 @@ export function assertCanEditServer(ctx: Context, server_id: string) {
     (user_server) => user_server.id === server_id
   );
   if (!server_to_check_permissions_of) {
-    throw new TRPCError({
+    return new TRPCError({
       code: "FORBIDDEN",
       message: "You are not a member of the server you are trying to create channel settings for",
     });
@@ -50,11 +50,12 @@ export function assertCanEditServer(ctx: Context, server_id: string) {
     BigInt(server_to_check_permissions_of.permissions)
   );
   if (!permission_bitfield.has("ManageGuild")) {
-    throw new TRPCError({
+    return new TRPCError({
       code: "FORBIDDEN",
       message: MISSING_PERMISSIONS_MESSAGE,
     });
   }
+  return;
 }
 
 export function assertCanEditServers(ctx: Context, server_id: string | string[]) {
@@ -69,11 +70,12 @@ export function assertCanEditMessage(ctx: Context, author_id: string) {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
   if (ctx.discord_account?.id !== author_id) {
-    throw new TRPCError({
+    return new TRPCError({
       code: "FORBIDDEN",
       message: MISSING_PERMISSIONS_MESSAGE,
     });
   }
+  return;
 }
 
 export function assertCanEditMessages(ctx: Context, author_id: string | string[]) {
@@ -88,17 +90,16 @@ export function assertIsUser(ctx: Context, target_user_id: string) {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
   if (ctx.discord_account?.id !== target_user_id) {
-    throw new TRPCError({
+    return new TRPCError({
       code: "UNAUTHORIZED",
       message: "You are not authorized to do this",
     });
   }
+  return;
 }
 
-export function assertIsUsers(ctx: Context, target_user_id: string | string[]) {
+export function assertIsUsers(ctx: Context, target_user_id: string[]) {
   if (Array.isArray(target_user_id)) {
     target_user_id.forEach((id) => assertIsUser(ctx, id));
-  } else {
-    assertIsUser(ctx, target_user_id);
   }
 }

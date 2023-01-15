@@ -10,12 +10,12 @@ import { mergeRouters, withUserServersProcedure, router } from "~api/router/trpc
 import { serverRouter, z_server_upsert } from "./server";
 import { toZObject } from "~api/utils/zod-utils";
 import { upsert } from "~api/utils/operations";
-
 import {
-  protectedServerManagerFetch,
-  protectedServerManagerMutation,
-  protectedServerManagerMutationFetchFirst,
-} from "~api/utils/protected-procedures/server-manager-procedures";
+  protectedFetch,
+  protectedMutation,
+  protectedMutationFetchFirst,
+} from "~api/utils/protected-procedures/base";
+import { assertCanEditServer } from "~api/utils/permissions";
 
 const z_server_settings_flags = toZObject(...server_settings_flags);
 
@@ -75,13 +75,10 @@ export async function transformServerSettings<T extends ServerSettings>(
 const serverSettingFind = router({
   byId: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return transformServerSettings(
-      protectedServerManagerFetch({
+      protectedFetch({
         fetch: () => ctx.prisma.serverSettings.findUnique({ where: { server_id: input } }),
-        getServerId(data) {
-          return data.server_id;
-        },
-        ctx,
         not_found_message: "Server settings not found",
+        permissions: (data) => assertCanEditServer(ctx, data.server_id),
       })
     );
   }),
@@ -92,9 +89,7 @@ const serverSettingsCreateUpdate = router({
     .input(z_server_settings_create)
     .mutation(async ({ ctx, input }) => {
       return transformServerSettings(
-        protectedServerManagerMutation({
-          ctx,
-          server_id: input.server_id,
+        protectedMutation({
           operation: () => {
             const new_settings = mergeServerSettings(
               getDefaultServerSettings({
@@ -104,6 +99,7 @@ const serverSettingsCreateUpdate = router({
             );
             return ctx.prisma.serverSettings.create({ data: new_settings });
           },
+          permissions: () => assertCanEditServer(ctx, input.server_id),
         })
       );
     }),
@@ -111,12 +107,8 @@ const serverSettingsCreateUpdate = router({
     .input(z_server_settings_update)
     .mutation(async ({ ctx, input }) => {
       return transformServerSettings(
-        protectedServerManagerMutationFetchFirst({
-          ctx,
+        protectedMutationFetchFirst({
           fetch: () => serverSettingFind.createCaller(ctx).byId(input.server_id),
-          getServerId(data) {
-            return data.server_id;
-          },
           async operation(existing) {
             const new_settings = mergeServerSettings(existing, input);
             return await ctx.prisma.serverSettings.update({
@@ -126,6 +118,7 @@ const serverSettingsCreateUpdate = router({
               data: new_settings,
             });
           },
+          permissions: () => assertCanEditServer(ctx, input.server_id),
           not_found_message: "Server settings not found",
         })
       );

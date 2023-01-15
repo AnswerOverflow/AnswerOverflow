@@ -2,12 +2,12 @@ import { getDefaultChannel } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, withUserServersProcedure, router } from "~api/router/trpc";
 import { addDefaultValues, upsert, upsertMany } from "~api/utils/operations";
-
+import { assertCanEditServer, assertCanEditServers } from "~api/utils/permissions";
 import {
-  protectedServerManagerFetch,
-  protectedServerManagerMutation,
-  protectedServerManagerMutationFetchFirst,
-} from "~api/utils/protected-procedures/server-manager-procedures";
+  protectedFetch,
+  protectedMutation,
+  protectedMutationFetchFirst,
+} from "~api/utils/protected-procedures/base";
 import { ALLOWED_CHANNEL_TYPES, ALLOWED_THREAD_TYPES } from "~api/utils/types";
 import { serverRouter, z_server_upsert } from "../server/server";
 
@@ -69,81 +69,83 @@ const z_thread_create_with_deps = z_thread_create
 
 const z_thread_upsert_with_deps = z_thread_create_with_deps;
 
+const fetch_router = router({
+  byId: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
+    return protectedFetch({
+      fetch: async () => await ctx.prisma.channel.findUnique({ where: { id: input } }),
+      permissions: (data) => assertCanEditServer(ctx, data.server_id),
+      not_found_message: "Channel does not exist",
+    });
+  }),
+  byIdMany: withUserServersProcedure.input(z.array(z.string())).query(async ({ ctx, input }) => {
+    return protectedFetch({
+      fetch: async () => await ctx.prisma.channel.findMany({ where: { id: { in: input } } }),
+      permissions: (data) =>
+        assertCanEditServers(
+          ctx,
+          data.map((c) => c.server_id)
+        ),
+      not_found_message: "Channel does not exist",
+    });
+  }),
+});
+
 const create_update_delete_router = router({
   create: withUserServersProcedure.input(z_channel_create).mutation(({ ctx, input }) => {
-    return protectedServerManagerMutation({
+    return protectedMutation({
       operation: () => ctx.prisma.channel.create({ data: input }),
-      server_id: input.server_id,
-      ctx,
+      permissions: () => assertCanEditServer(ctx, input.server_id),
     });
   }),
   createThread: withUserServersProcedure.input(z_thread_create).mutation(({ ctx, input }) => {
-    return protectedServerManagerMutation({
+    return protectedMutation({
       operation: () => ctx.prisma.channel.create({ data: input }),
-      server_id: input.server_id,
-      ctx,
+      permissions: () => assertCanEditServer(ctx, input.server_id),
     });
   }),
   createMany: withUserServersProcedure
     .input(z.array(z_channel_create))
     .mutation(async ({ ctx, input }) => {
-      await protectedServerManagerMutation({
+      await protectedMutation({
         operation: () => ctx.prisma.channel.createMany({ data: input }),
-        server_id: input.map((c) => c.server_id),
-        ctx,
+        permissions: () =>
+          assertCanEditServers(
+            ctx,
+            input.map((c) => c.server_id)
+          ),
       });
       return addDefaultValues(input, getDefaultChannel);
     }),
   update: withUserServersProcedure.input(z_channel_update).mutation(async ({ ctx, input }) => {
-    return protectedServerManagerMutationFetchFirst({
+    return protectedMutationFetchFirst({
       fetch: () => fetch_router.createCaller(ctx).byId(input.id),
       operation: () => ctx.prisma.channel.update({ where: { id: input.id }, data: input }),
-      getServerId: (data) => data.server_id,
-      ctx,
+      permissions: (data) => assertCanEditServer(ctx, data.server_id),
       not_found_message: "Channel does not exist",
     });
   }),
   updateMany: withUserServersProcedure
     .input(z.array(z_channel_update))
     .mutation(async ({ ctx, input }) => {
-      return protectedServerManagerMutationFetchFirst({
+      return protectedMutationFetchFirst({
         fetch: () => fetch_router.createCaller(ctx).byIdMany(input.map((c) => c.id)),
         operation: () =>
           ctx.prisma.$transaction(
             input.map((c) => ctx.prisma.channel.update({ where: { id: c.id }, data: c }))
           ),
-        getServerId: (data) => data.map((c) => c.server_id),
-        ctx,
+        permissions: (data) =>
+          assertCanEditServers(
+            ctx,
+            data.map((c) => c.server_id)
+          ),
         not_found_message: "Channel does not exist",
       });
     }),
   delete: withUserServersProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
-    return protectedServerManagerMutationFetchFirst({
+    return protectedMutationFetchFirst({
       fetch: () => fetch_router.createCaller(ctx).byId(input),
       operation: () => ctx.prisma.channel.delete({ where: { id: input } }),
-      getServerId: (data) => data.server_id,
-      ctx,
-      not_found_message: "Channel does not exist",
-    });
-  }),
-});
-
-const fetch_router = router({
-  byId: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    return protectedServerManagerFetch({
-      fetch: async () => await ctx.prisma.channel.findUnique({ where: { id: input } }),
-      getServerId: (data) => data.server_id,
-      ctx,
-      not_found_message: "Channel does not exist",
-    });
-  }),
-  byIdMany: withUserServersProcedure.input(z.array(z.string())).query(async ({ ctx, input }) => {
-    return protectedServerManagerFetch({
-      fetch: async () => await ctx.prisma.channel.findMany({ where: { id: { in: input } } }),
-      getServerId(data) {
-        return data.map((c) => c.server_id);
-      },
-      ctx,
+      permissions: (data) => assertCanEditServer(ctx, data.server_id),
       not_found_message: "Channel does not exist",
     });
   }),

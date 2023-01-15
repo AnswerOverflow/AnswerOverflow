@@ -2,10 +2,6 @@ import { getDefaultDiscordAccount, Prisma } from "@answeroverflow/db";
 import { z } from "zod";
 import { findOrThrowNotFound, upsert, upsertMany } from "~api/utils/operations";
 import {
-  protectedUserOnlyFetch,
-  protectedUserOnlyMutation,
-} from "~api/utils/protected-procedures/user-only";
-import {
   withDiscordAccountProcedure,
   mergeRouters,
   router,
@@ -14,6 +10,8 @@ import {
 import { ignored_discord_account_router } from "../ignored-discord-accounts/ignored-discord-account";
 import { TRPCError } from "@trpc/server";
 import { assertIsNotDeletedUser } from "~api/router/users/ignored-discord-accounts/ignored-discord-account";
+import { protectedFetch, protectedMutation } from "~api/utils/protected-procedures/base";
+import { assertIsUser, assertIsUsers } from "~api/utils/permissions";
 
 const z_discord_account = z.object({
   id: z.string(),
@@ -48,10 +46,9 @@ const unique_array = z.array(z.string()).transform((arr) => [...new Set(arr)]);
 
 const account_find_router = router({
   byId: withDiscordAccountProcedure.input(z.string()).query(({ ctx, input }) => {
-    return protectedUserOnlyFetch({
+    return protectedFetch({
       fetch: () => ctx.prisma.discordAccount.findUnique({ where: { id: input } }),
-      ctx,
-      user_id: input,
+      permissions: (data) => assertIsUser(ctx, data.id),
       not_found_message: "Could not find discord account",
     });
   }),
@@ -68,9 +65,8 @@ const account_crud_router = router({
     .input(z_discord_account_create)
     .mutation(async ({ ctx, input }) => {
       await assertIsNotDeletedUser(ctx, input.id);
-      return protectedUserOnlyMutation({
-        ctx,
-        user_id: input.id,
+      return protectedMutation({
+        permissions: () => assertIsUser(ctx, input.id),
         async operation() {
           return ctx.prisma.discordAccount.create({ data: input });
         },
@@ -84,9 +80,12 @@ const account_crud_router = router({
         .byIdMany(input.map((i) => i.id));
       const ignored_ids_lookup = new Set(ignored_accounts.map((i) => i.id));
       const allowed_to_create_accounts = input.filter((x) => !ignored_ids_lookup.has(x.id));
-      await protectedUserOnlyMutation({
-        ctx,
-        user_id: input.map((i) => i.id),
+      await protectedMutation({
+        permissions: () =>
+          assertIsUsers(
+            ctx,
+            allowed_to_create_accounts.map((i) => i.id)
+          ),
         async operation() {
           return ctx.prisma.discordAccount.createMany({ data: allowed_to_create_accounts });
         },
@@ -94,18 +93,20 @@ const account_crud_router = router({
       return allowed_to_create_accounts.map((i) => getDefaultDiscordAccount(i));
     }),
   update: withDiscordAccountProcedure.input(z_discord_account_update).mutation(({ ctx, input }) => {
-    return protectedUserOnlyMutation({
-      ctx,
-      user_id: input.id,
+    return protectedMutation({
+      permissions: () => assertIsUser(ctx, input.id),
       operation: () => ctx.prisma.discordAccount.update({ where: { id: input.id }, data: input }),
     });
   }),
   updateBulk: withDiscordAccountProcedure
     .input(z.array(z_discord_account_update))
     .mutation(({ ctx, input }) => {
-      return protectedUserOnlyMutation({
-        ctx,
-        user_id: input.map((i) => i.id),
+      return protectedMutation({
+        permissions: () =>
+          assertIsUsers(
+            ctx,
+            input.map((i) => i.id)
+          ),
         operation: () =>
           ctx.prisma.$transaction(
             input.map((i) => ctx.prisma.discordAccount.update({ where: { id: i.id }, data: i }))
@@ -113,9 +114,8 @@ const account_crud_router = router({
       });
     }),
   delete: withDiscordAccountProcedure.input(z.string()).mutation(({ ctx, input }) => {
-    return protectedUserOnlyMutation({
-      ctx,
-      user_id: input,
+    return protectedMutation({
+      permissions: () => assertIsUser(ctx, input),
       async operation() {
         try {
           await ctx.prisma.discordAccount.delete({ where: { id: input } });
