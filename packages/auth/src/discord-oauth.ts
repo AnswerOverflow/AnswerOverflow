@@ -1,8 +1,10 @@
 import { z } from "zod";
-import fetch from "node-fetch";
+// get fetch from axios
+
+import axios from "axios";
 
 function discordFetch(url: string, token: string) {
-  return fetch("https://discordapp.com/api" + url, {
+  return axios.get("https://discordapp.com/api" + url, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -27,7 +29,7 @@ export async function getUserServers(access_token: string) {
     return user_servers_cache.get(access_token);
   }
   const data = await discordFetch("/users/@me/guilds", access_token);
-  const servers = await serverArrayShema.parseAsync(await data.json());
+  const servers = serverArrayShema.parse(data.data);
   user_servers_cache.set(access_token, servers);
   return servers;
 }
@@ -53,6 +55,6 @@ export const z_user_schema = z.object({
 
 export async function getDiscordUser(access_token: string) {
   const data = await discordFetch("/users/@me", access_token);
-  const parsed = await z_user_schema.parseAsync(await data.json());
+  const parsed = z_user_schema.parse(data.data);
   return parsed;
 }

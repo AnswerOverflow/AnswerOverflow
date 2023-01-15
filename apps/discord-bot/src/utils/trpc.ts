@@ -12,15 +12,19 @@ import { ephemeralReply } from "./utils";
 
 type TRPCall<T> = {
   getCtx: () => Promise<BotContextCreate>;
-  // eslint-disable-next-line no-unused-vars
   ApiCall: (router: BotRouterCaller) => Promise<T>;
-  // eslint-disable-next-line no-unused-vars
   Ok?: (result: T) => void;
-  // eslint-disable-next-line no-unused-vars
   Error?: (error: TRPCError) => void;
+  allowed_errors?: TRPCError["code"][] | TRPCError["code"];
 };
 
-export async function callAPI<T>({ getCtx, ApiCall, Ok = () => {}, Error = () => {} }: TRPCall<T>) {
+export async function callAPI<T>({
+  getCtx,
+  ApiCall,
+  Ok = () => {},
+  Error = () => {},
+  allowed_errors = "NOT_FOUND",
+}: TRPCall<T>) {
   try {
     const converted_ctx = await createBotContext(await getCtx());
     const caller = botRouter.createCaller(converted_ctx);
@@ -29,7 +33,9 @@ export async function callAPI<T>({ getCtx, ApiCall, Ok = () => {}, Error = () =>
     return data;
   } catch (error) {
     if (error instanceof TRPCError) {
-      Error(error);
+      if (!allowed_errors.includes(error.code)) {
+        Error(error);
+      }
     } else {
       throw error;
     }

@@ -1,11 +1,9 @@
-/* eslint-disable no-unused-vars */
 import { clearDatabase, DiscordAccount, Server } from "@answeroverflow/db";
-import { getGeneralScenario, ServerTestData } from "~api/test/utils";
+import { getGeneralScenario } from "~api/test/utils";
 import { discordAccountRouter } from "../users/accounts/discord-accounts";
 import { serverRouter } from "../server/server";
 import { SERVER_NOT_SETUP_MESSAGE, userServerSettingsRouter } from "./user-server-settings";
 
-let data: ServerTestData;
 let user_1_router: ReturnType<(typeof userServerSettingsRouter)["createCaller"]>;
 let user_2_router: ReturnType<(typeof userServerSettingsRouter)["createCaller"]>;
 let user1: DiscordAccount;
@@ -16,7 +14,6 @@ let server: Server;
 
 beforeEach(async () => {
   const { data1 } = await getGeneralScenario();
-  data = data1;
   user_1_router = userServerSettingsRouter.createCaller(data1.account1_guild_manager_ctx);
   user_2_router = userServerSettingsRouter.createCaller(data1.account2_default_member_ctx);
   server_router = serverRouter.createCaller(data1.account1_guild_manager_ctx);

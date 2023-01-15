@@ -36,7 +36,6 @@ export function copyClass<T extends { client: Client }>(
   return created;
 }
 
-// eslint-disable-next-line no-unused-vars
 export async function testOnlyAPICall<T>(ApiCall: (router: BotRouterCaller) => Promise<T>) {
   return await callAPI({
     ApiCall,

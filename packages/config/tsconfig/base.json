@@ -3,10 +3,15 @@
   "display": "Default",
   "compileOnSave": true,
   "compilerOptions": {
+    "allowJs": true,
+    "noEmit": true,
+    "types": [
+      "node"
+    ],
+    "jsx": "preserve",
+    "noUncheckedIndexedAccess": true,
     "allowSyntheticDefaultImports": true,
     "alwaysStrict": true,
-    "declaration": true,
-    "declarationMap": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
@@ -18,7 +23,7 @@
       "esnext"
     ],
     "skipLibCheck": true,
-    "module": "CommonJS",
+    "module": "ESNext",
     "moduleResolution": "Node",
     "newLine": "lf",
     "noEmitHelpers": true,
@@ -41,32 +46,44 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
+      "~ui/utils/*": [
+        "./packages/ui/src/utils/*"
+      ],
+      "~ui/components/*": [
+        "./packages/ui/src/components/*"
+      ],
+      "~ui/test/*": [
+        "./packages/ui/test/*"
+      ],
+      "~ui/pages/*": [
+        "./packages/ui/src/pages/*"
+      ],
       "~discord-bot/utils/*": [
-        "../../../apps/discord-bot/src/utils/*"
+        "./apps/discord-bot/src/utils/*"
       ],
       "~discord-bot/listeners": [
-        "../../../apps/discord-bot/src/listeners/*"
+        "./apps/discord-bot/src/listeners/*"
       ],
       "~discord-bot/primitives/*": [
-        "../../../apps/discord-bot/src/primitives/*"
+        "./apps/discord-bot/src/primitives/*"
       ],
       "~discord-bot/interaction-handlers/*": [
-        "../../../apps/discord-bot/src/interaction-handlers/*"
+        "./apps/discord-bot/src/interaction-handlers/*"
       ],
       "~discord-bot/components/*": [
-        "../../../apps/discord-bot/src/components/*"
+        "./apps/discord-bot/src/components/*"
       ],
       "~discord-bot/test/*": [
-        "../../../apps/discord-bot/test/*"
+        "./apps/discord-bot/test/*"
       ],
       "~api/router/*": [
-        "../../../packages/api/src/router/*"
+        "./packages/api/src/router/*"
       ],
       "~api/test/*": [
-        "../../../packages/api/src/test/*"
+        "./packages/api/src/test/*"
       ],
       "~api/utils/*": [
-        "../../../packages/api/src/utils/*"
+        "./packages/api/src/utils/*"
       ]
     }
   },

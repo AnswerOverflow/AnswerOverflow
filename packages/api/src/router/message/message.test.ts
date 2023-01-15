@@ -14,8 +14,8 @@ let account2_message: Message;
 beforeEach(async () => {
   const { data1 } = await getGeneralScenario();
   data = data1;
-  account1_message = data.text_channels[0].messages.account1_messages[0];
-  account2_message = data.text_channels[0].messages.account2_messages[0];
+  account1_message = data.text_channels[0]!.messages.account1_messages[0]!;
+  account2_message = data.text_channels[0]!.messages.account2_messages[0]!;
   account1_ignored_account_router = ignored_discord_account_router.createCaller(
     data.account1_guild_manager_ctx
   );

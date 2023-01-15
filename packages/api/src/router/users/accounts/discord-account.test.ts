@@ -79,11 +79,11 @@ describe("Discord Account Operations", () => {
       ]);
       const updated_accounts = await discord_account_router_bot_caller.updateBulk([
         {
-          id: created_accounts[0].id,
+          id: created_accounts[0]!.id,
           name: "updated-name",
         },
         {
-          id: created_accounts[1].id,
+          id: created_accounts[1]!.id,
           name: "updated-name",
         },
       ]);
@@ -133,12 +133,12 @@ describe("Discord Account Operations", () => {
       ]);
       const upserted_accounts = await discord_account_router_bot_caller.upsertBulk([
         {
-          id: created_accounts[0].id,
+          id: created_accounts[0]!.id,
           name: "updated-name",
         },
         {
           name: "updated-name2",
-          id: created_accounts[1].id,
+          id: created_accounts[1]!.id,
         },
       ]);
       expect(upserted_accounts).toStrictEqual([

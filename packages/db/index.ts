@@ -11,9 +11,7 @@ export * from "./src/user-server-settings";
 export type Thread = Channel & { parent_id: string };
 
 declare global {
-  // eslint-disable-next-line no-unused-vars
   namespace NodeJS {
-    // eslint-disable-next-line no-unused-vars
     interface ProcessEnv {
       /* Elastic */
       VITE_ELASTICSEARCH_URL: string;

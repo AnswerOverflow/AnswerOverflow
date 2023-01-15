@@ -5,6 +5,7 @@
 // ids go first, then then fields, then at the bottom are the references to other tables
 generator client {
   provider = "prisma-client-js"
+  // output   = "../../../node_modules/.prisma/client"
 }
 
 datasource db {

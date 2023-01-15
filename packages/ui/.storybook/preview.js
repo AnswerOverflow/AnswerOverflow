@@ -1,14 +1,5 @@
 import "../src/styles/globals.css";
 
-import * as NextImage from "next/image";
-
-const OriginalNextImage = NextImage.default;
-
-Object.defineProperty(NextImage, "default", {
-  configurable: true,
-  value: (props) => <OriginalNextImage {...props} unoptimized />,
-});
-
 export const parameters = {
   actions: { argTypesRegex: "^on[A-Z].*" },
   controls: {
@@ -18,3 +9,24 @@ export const parameters = {
     },
   },
 }
+
+export const globalTypes = {
+  tailwindDarkmode: {
+    name: 'Theme',
+    description: 'Light/Dark mode for components',
+    toolbar: {
+      icon: 'mirror',
+      dynamicTitle: true,
+      items: ['light', 'dark']
+    }
+  }
+};
+
+const withTailwind = (Story, context) => {
+  const { tailwindDarkmode } = context.globals;
+  const isDark = tailwindDarkmode === 'dark';
+  document.querySelector('html').classList.toggle('dark', isDark);
+  return Story();
+}
+
+export const decorators = [withTailwind];

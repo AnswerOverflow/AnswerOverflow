@@ -38,7 +38,7 @@ describe("Forum Channel Mock", () => {
     expect(forum_channel.type).toBe(ChannelType.GuildForum);
     expect(forum_channel.availableTags).toBeDefined();
     expect(forum_channel.availableTags.length).toBe(1);
-    expect(forum_channel.availableTags[0].name).toBe("test tag");
+    expect(forum_channel.availableTags[0]!.name).toBe("test tag");
   });
   test.todo("fetch archived threads");
   test.todo("fetch active threads");

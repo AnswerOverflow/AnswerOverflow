@@ -25,8 +25,20 @@ export const botRouter = router({
 
 export const appRouter = router({
   servers: serverRouter,
+  server_settings: serverSettingsRouter,
+  channels: channelRouter,
+  channel_settings: channelSettingsRouter,
+  discord_accounts: discordAccountRouter,
+  user_server_settings: userServerSettingsRouter,
+  messages: messageRouter,
+
+  // Other:
+  users: userRouter,
   auth: authRouter,
 });
 
 // export type definition of API
 export type AppRouter = typeof appRouter;
+
+export * from "./message/types";
+export * from "./users/accounts/types";

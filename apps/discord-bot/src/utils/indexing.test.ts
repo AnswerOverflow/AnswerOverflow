@@ -132,7 +132,7 @@ describe("Indexing", () => {
       const messages = mockMessages(news_channel, 100);
       const thread1 = mockThreadFromParentMessage({
         client,
-        parent_message: messages[0],
+        parent_message: messages[0]!,
         data: {
           type: ChannelType.AnnouncementThread,
         },
@@ -140,7 +140,7 @@ describe("Indexing", () => {
       messages.push(...mockMessages(thread1, 10));
       const thread2 = mockThreadFromParentMessage({
         client,
-        parent_message: messages[1],
+        parent_message: messages[1]!,
         data: {
           type: ChannelType.AnnouncementThread,
         },
@@ -581,13 +581,13 @@ describe("Indexing", () => {
       const start = 100;
       const messages = await fetchAllMesages(text_channel, { limit, start: `${start}` });
       expect(messages.length).toBe(limit);
-      expect(messages[0].id).toBe(`${start + 1}`);
+      expect(messages[0]!.id).toBe(`${start + 1}`);
     });
     it("should return the messages sorted from oldest to newest", async () => {
       const messages = await fetchAllMesages(text_channel);
       expect(messages.length).toBe(number_of_messages);
       for (let id = 0; id < number_of_messages; id++) {
-        expect(messages[id].id).toBe(`${id + 1}`);
+        expect(messages[id]!.id).toBe(`${id + 1}`);
       }
     });
   });

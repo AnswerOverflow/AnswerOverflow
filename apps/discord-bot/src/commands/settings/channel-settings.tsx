@@ -36,7 +36,7 @@ export class ChannelSettingsCommand extends Command {
 
   public override async chatInputRun(
     interaction: ChatInputCommandInteraction,
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _context: ChatInputCommand.RunContext
   ) {
     if (interaction.guild == null) {
