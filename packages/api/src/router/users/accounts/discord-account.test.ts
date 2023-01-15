@@ -1,5 +1,6 @@
 import { clearDatabase, DiscordAccount } from "@answeroverflow/db";
 import { getGeneralScenario } from "~api/test/utils";
+import { pick } from "~api/utils/utils";
 import { ignored_discord_account_router } from "../ignored-discord-accounts/ignored-discord-account";
 import { discordAccountRouter } from "./discord-accounts";
 
@@ -7,6 +8,8 @@ let discord_account_router_bot_caller: ReturnType<(typeof discordAccountRouter)[
 let ignored_account_router_account1_caller: ReturnType<
   (typeof ignored_discord_account_router)["createCaller"]
 >;
+let account1_router: ReturnType<(typeof discordAccountRouter)["createCaller"]>;
+let account2_router: ReturnType<(typeof discordAccountRouter)["createCaller"]>;
 let account1: DiscordAccount;
 let account2: DiscordAccount;
 beforeEach(async () => {
@@ -16,6 +19,8 @@ beforeEach(async () => {
     data1.account1_guild_manager_ctx
   );
   account1 = data1.account1_guild_manager;
+  account1_router = discordAccountRouter.createCaller(data1.account1_guild_manager_ctx);
+  account2_router = discordAccountRouter.createCaller(data1.account2_default_member_ctx);
   account2 = data1.account2_default_member;
   await clearDatabase();
 });
@@ -195,6 +200,30 @@ describe("Discord Account Operations", () => {
       await expect(ignored_account_router_account1_caller.byId(account1.id)).rejects.toThrowError(
         "Ignored Discord account not found"
       );
+    });
+  });
+
+  describe("Discord Account Find By Id", () => {
+    it("should find a discord account by id", async () => {
+      const created_account = await account1_router.create(account1);
+      await expect(account1_router.byId(created_account.id)).resolves.toStrictEqual(
+        created_account
+      );
+    });
+    it("should find a discord ", async () => {
+      const created_account = await account1_router.create(account1);
+      const fetch = await account2_router.byId(created_account.id);
+      expect(fetch).toStrictEqual(pick(created_account, "avatar", "id", "name"));
+    });
+  });
+
+  describe("Discord Account Find By Id Many", () => {
+    it("should find multiple discord accounts by id", async () => {
+      const created_accounts = await account1_router.createBulk([account1, account2]);
+      const data = await account1_router.byIdMany([
+        created_accounts[0]!.id,
+        created_accounts[1]!.id,
+      ]);
     });
   });
 });

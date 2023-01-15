@@ -1,6 +1,6 @@
 import { getDefaultDiscordAccount, Prisma } from "@answeroverflow/db";
 import { z } from "zod";
-import { findOrThrowNotFound, upsert, upsertMany } from "~api/utils/operations";
+import { upsert, upsertMany } from "~api/utils/operations";
 import {
   withDiscordAccountProcedure,
   mergeRouters,
@@ -10,7 +10,7 @@ import {
 import { ignored_discord_account_router } from "../ignored-discord-accounts/ignored-discord-account";
 import { TRPCError } from "@trpc/server";
 import { assertIsNotDeletedUser } from "~api/router/users/ignored-discord-accounts/ignored-discord-account";
-import { protectedFetch, protectedMutation } from "~api/utils/protected-procedures";
+import { protectedFetchWithPublicData, protectedMutation } from "~api/utils/protected-procedures";
 import { assertIsUser, assertIsUsers } from "~api/utils/permissions";
 
 const z_discord_account = z.object({
@@ -45,18 +45,40 @@ export const z_discord_account_upsert = z_discord_account_create;
 const unique_array = z.array(z.string()).transform((arr) => [...new Set(arr)]);
 
 const account_find_router = router({
-  byId: withDiscordAccountProcedure.input(z.string()).query(({ ctx, input }) => {
-    return protectedFetch({
-      fetch: () => ctx.prisma.discordAccount.findUnique({ where: { id: input } }),
+  byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
+    return protectedFetchWithPublicData({
+      fetch: async () => {
+        const data = await ctx.prisma.discordAccount.findUnique({ where: { id: input } });
+        if (!data) {
+          return data;
+        }
+        return {
+          ...data,
+          dog: "dog",
+        };
+      },
       permissions: (data) => assertIsUser(ctx, data.id),
       not_found_message: "Could not find discord account",
+      public_data_formatter: (data) => z_discord_account_public.parse(data),
     });
   }),
   byIdMany: publicProcedure.input(unique_array).query(({ ctx, input }) => {
-    return findOrThrowNotFound(
-      () => ctx.prisma.discordAccount.findMany({ where: { id: { in: [...input] } } }),
-      "Could not find discord account"
-    );
+    return protectedFetchWithPublicData({
+      fetch: () => ctx.prisma.discordAccount.findMany({ where: { id: { in: input } } }),
+      permissions: (data) =>
+        assertIsUsers(
+          ctx,
+          data.map((i) => i.id)
+        ),
+      not_found_message: "Could not find discord accounts",
+      public_data_formatter: (data) => {
+        const converted = data.map((i) => {
+          const parsed = z_discord_account_public.parse(i);
+          return parsed;
+        });
+        return converted;
+      },
+    });
   }),
 });
 
@@ -66,7 +88,10 @@ const account_crud_router = router({
     .mutation(async ({ ctx, input }) => {
       await assertIsNotDeletedUser(ctx, input.id);
       return protectedMutation({
-        permissions: () => assertIsUser(ctx, input.id),
+        permissions: [
+          () => assertIsUser(ctx, input.id),
+          () => assertIsNotDeletedUser(ctx, input.id),
+        ],
         async operation() {
           return ctx.prisma.discordAccount.create({ data: input });
         },

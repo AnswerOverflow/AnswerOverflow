@@ -1,6 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { protectedFetchWithPublicData, protectedMutation } from "./protected-procedures";
+import {
+  protectedFetchManyWithPublicData,
+  protectedFetchWithPublicData,
+  protectedMutation,
+} from "./protected-procedures";
+import { pick } from "./utils";
 
 const z_sample_data = z.object({
   id: z.number(),
@@ -14,7 +19,12 @@ const z_public_sample_data = z_sample_data.pick({
   name: true,
 });
 
-const sample_data = { id: 1, name: "test", email: "hello", password: "world" };
+const sample_data: z.infer<typeof z_sample_data> = {
+  id: 1,
+  name: "test",
+  email: "hello",
+  password: "world",
+};
 
 describe("Protected Fetch", () => {
   it("should succeed with 1 permission check", async () => {
@@ -34,7 +44,6 @@ describe("Protected Fetch", () => {
       public_data_formatter: (data) => z_public_sample_data.parse(data),
       not_found_message: "not found",
     });
-
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { email, password, ...public_data } = sample_data;
     expect(data).toEqual(public_data);
@@ -49,6 +58,14 @@ describe("Protected Fetch", () => {
         not_found_message: "not found",
       })
     ).rejects.toThrowError();
+  });
+  it("should format an array of public data", async () => {
+    const data = await protectedFetchManyWithPublicData({
+      fetch: () => Promise.resolve([sample_data]),
+      permissions: () => new TRPCError({ code: "UNAUTHORIZED" }),
+      public_data_formatter: (data) => z_public_sample_data.parse(data),
+    });
+    expect(data).toEqual([pick(sample_data, "id", "name")]);
   });
 });
 

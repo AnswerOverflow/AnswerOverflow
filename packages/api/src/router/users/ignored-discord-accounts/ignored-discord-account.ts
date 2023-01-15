@@ -11,12 +11,13 @@ export async function assertIsNotDeletedUser(ctx: Context, target_user_id: strin
     ignored_discord_account_router.createCaller(ctx).byId(target_user_id)
   );
   if (deleted_account) {
-    throw new TRPCError({
+    return new TRPCError({
       code: "PRECONDITION_FAILED",
       message:
         "Cannot create discord account for ignored user. Enable indexing of your account first",
     });
   }
+  return;
 }
 
 export const ignored_discord_account_router = router({
