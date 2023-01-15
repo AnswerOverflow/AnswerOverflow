@@ -3,7 +3,7 @@ import { z } from "zod";
 import { mergeRouters, withUserServersProcedure, router } from "~api/router/trpc";
 import { upsert } from "~api/utils/operations";
 import { assertCanEditServer } from "~api/utils/permissions";
-import { protectedFetch, protectedMutation } from "~api/utils/protected-procedures/base";
+import { protectedFetch, protectedMutation } from "~api/utils/protected-procedures";
 
 export const z_server = z.object({
   id: z.string(),

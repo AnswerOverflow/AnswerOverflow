@@ -10,7 +10,7 @@ import {
 import { ignored_discord_account_router } from "../ignored-discord-accounts/ignored-discord-account";
 import { TRPCError } from "@trpc/server";
 import { assertIsNotDeletedUser } from "~api/router/users/ignored-discord-accounts/ignored-discord-account";
-import { protectedFetch, protectedMutation } from "~api/utils/protected-procedures/base";
+import { protectedFetch, protectedMutation } from "~api/utils/protected-procedures";
 import { assertIsUser, assertIsUsers } from "~api/utils/permissions";
 
 const z_discord_account = z.object({

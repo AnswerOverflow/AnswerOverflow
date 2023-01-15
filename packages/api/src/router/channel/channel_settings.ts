@@ -11,7 +11,7 @@ import { dictToBitfield } from "@answeroverflow/db";
 import { channelRouter, z_channel_upsert_with_deps } from "./channel";
 import { toZObject } from "~api/utils/zod-utils";
 import { upsert } from "~api/utils/operations";
-import { protectedFetch, protectedMutationFetchFirst } from "~api/utils/protected-procedures/base";
+import { protectedFetch, protectedMutationFetchFirst } from "~api/utils/protected-procedures";
 import { assertCanEditServer } from "~api/utils/permissions";
 
 const z_channel_settings_flags = toZObject(...channel_settings_flags);

@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { protectedFetchWithPublicData, protectedMutation } from "./base";
+import { protectedFetchWithPublicData, protectedMutation } from "./protected-procedures";
 
 const z_sample_data = z.object({
   id: z.number(),

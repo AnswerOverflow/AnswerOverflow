@@ -7,7 +7,7 @@ import {
   protectedFetch,
   protectedMutation,
   protectedMutationFetchFirst,
-} from "~api/utils/protected-procedures/base";
+} from "~api/utils/protected-procedures";
 import { ALLOWED_CHANNEL_TYPES, ALLOWED_THREAD_TYPES } from "~api/utils/types";
 import { serverRouter, z_server_upsert } from "../server/server";
 

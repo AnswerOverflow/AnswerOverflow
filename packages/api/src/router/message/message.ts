@@ -15,7 +15,7 @@ import {
   protectedFetch,
   protectedMutation,
   protectedMutationFetchFirst,
-} from "~api/utils/protected-procedures/base";
+} from "~api/utils/protected-procedures";
 import { assertCanEditMessage, assertCanEditMessages } from "~api/utils/permissions";
 
 const z_discord_image = z.object({

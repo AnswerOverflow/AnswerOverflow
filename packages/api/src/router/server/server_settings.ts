@@ -14,7 +14,7 @@ import {
   protectedFetch,
   protectedMutation,
   protectedMutationFetchFirst,
-} from "~api/utils/protected-procedures/base";
+} from "~api/utils/protected-procedures";
 import { assertCanEditServer } from "~api/utils/permissions";
 
 const z_server_settings_flags = toZObject(...server_settings_flags);

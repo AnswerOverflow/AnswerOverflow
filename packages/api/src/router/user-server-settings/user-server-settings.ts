@@ -16,7 +16,7 @@ import {
   protectedFetch,
   protectedMutation,
   protectedMutationFetchFirst,
-} from "~api/utils/protected-procedures/base";
+} from "~api/utils/protected-procedures";
 import { assertIsUser, assertIsUsers } from "~api/utils/permissions";
 
 export const SERVER_NOT_SETUP_MESSAGE = "Server is not setup for Answer Overflow yet";

@@ -3,7 +3,7 @@ import { withDiscordAccountProcedure, router, publicProcedure } from "~api/route
 import { findAllowNull, findOrThrowNotFound } from "~api/utils/operations";
 import type { Context } from "~api/router/context";
 import { TRPCError } from "@trpc/server";
-import { protectedMutation } from "~api/utils/protected-procedures/base";
+import { protectedMutation } from "~api/utils/protected-procedures";
 import { assertIsUser } from "~api/utils/permissions";
 
 export async function assertIsNotDeletedUser(ctx: Context, target_user_id: string) {

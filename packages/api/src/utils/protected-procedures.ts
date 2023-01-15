@@ -1,4 +1,4 @@
-import { findOrThrowNotFound } from "../operations";
+import { findOrThrowNotFound } from "./operations";
 import type { TRPCError } from "@trpc/server";
 
 type PermissionCheckResult = TRPCError | void;
