@@ -63,7 +63,7 @@ function mergeChannelSettings(
   const old_flags = bitfieldToChannelSettingsFlags(old.bitfield);
   const new_flags = { ...old_flags, ...updated.flags };
   const flags_to_bitfield_value = dictToBitfield(new_flags, channel_settings_flags);
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { flags, ...update_data_without_flags } = updated;
   return {
     ...update_data_without_flags,

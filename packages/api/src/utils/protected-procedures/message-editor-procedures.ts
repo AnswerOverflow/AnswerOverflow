@@ -35,7 +35,6 @@ export async function protectedMessageFetch<T>(
 
 export async function protectedMessageMutationFetchFirst<T, F>(
   input: ProtectedMutationFetchFirstInputExtendable<T, F> & {
-    // eslint-disable-next-line no-unused-vars
     getAuthorId: (data: T) => string | string[];
     ctx: Context;
   }

@@ -30,7 +30,6 @@ export class UserPrecondition extends AllFlowsPrecondition {
 }
 
 declare module "@sapphire/framework" {
-  // eslint-disable-next-line no-unused-vars
   interface Preconditions {
     OwnerOnly: never;
   }

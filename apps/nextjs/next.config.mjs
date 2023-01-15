@@ -15,7 +15,19 @@ const config = {
     "@answeroverflow/auth",
     "@answeroverflow/db",
     "@answeroverflow/tailwind-config",
+    "@answeroverflow/ui",
   ],
+  webpack: (config) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    config.externals = [
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      ...(config.externals || []),
+      "@prisma/client",
+    ];
+    // Important: return the modified config
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return config;
+  },
   images: {
     domains: ["cdn.discordapp.com"],
   },

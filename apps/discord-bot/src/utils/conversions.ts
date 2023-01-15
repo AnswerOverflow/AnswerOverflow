@@ -21,7 +21,14 @@ export function toAOMessage(message: Message): AOMessage {
     id: message.id,
     content: message.content,
     channel_id: message.channel.id,
-    images: message.attachments.map((attachment) => attachment.url),
+    images: message.attachments.map((attachment) => {
+      return {
+        url: attachment.url,
+        width: attachment.width,
+        height: attachment.height,
+        description: attachment.description,
+      };
+    }),
     replies_to: message.reference?.messageId ?? null,
     author_id: message.author.id,
     server_id: message.guild?.id,

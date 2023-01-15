@@ -8,7 +8,8 @@
       "outputs": [
         "dist/**",
         ".next/**"
-      ]
+      ],
+      "cache": false
     },
     "init": {},
     "migrate": {},
@@ -21,6 +22,9 @@
       "cache": false
     },
     "dev": {
+      "cache": false
+    },
+    "clean": {
       "cache": false
     },
     "test": {
@@ -60,6 +64,18 @@
     "test:watch": {
       "outputs": [],
       "cache": false
+    },
+    "db:generate": {
+      "inputs": [
+        "prisma/schema.prisma"
+      ],
+      "cache": false
+    },
+    "db:push": {
+      "inputs": [
+        "prisma/schema.prisma"
+      ],
+      "cache": false
     }
   },
   "globalDependencies": [
@@ -83,9 +99,6 @@
     "ELASTICSEARCH_CLOUD_ID",
     "ELASTICSEARCH_API_KEY",
     "VITE_DATABASE_URL",
-    "VITE_ELASTIC_USERNAME",
-    "VITE_ELASTIC_PASSWORD",
-    "VITE_ELASTIC_IP",
     "DISCORD_CLIENT_ID",
     "DISCORD_CLIENT_SECRET",
     "SKIP_ENV_VALIDATION",

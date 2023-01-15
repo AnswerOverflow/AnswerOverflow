@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { mergeRouters, withDiscordAccountProcedure, router } from "~api/router/trpc";
+import {
+  mergeRouters,
+  withDiscordAccountProcedure,
+  router,
+  publicProcedure,
+} from "~api/router/trpc";
 import {
   protectedMessageFetch,
   protectedMessageMutation,
@@ -8,11 +13,20 @@ import {
 import { ignored_discord_account_router } from "../users/ignored-discord-accounts/ignored-discord-account";
 import { assertIsNotDeletedUser } from "~api/router/users/ignored-discord-accounts/ignored-discord-account";
 import { TRPCError } from "@trpc/server";
+import { findOrThrowNotFound } from "~api/utils/operations";
+import { discordAccountRouter, z_discord_account_public } from "../users/accounts/discord-accounts";
+
+const z_discord_image = z.object({
+  url: z.string(),
+  width: z.number().nullable(),
+  height: z.number().nullable(),
+  description: z.string().nullable(),
+});
 
 export const z_message = z.object({
   id: z.string(),
   content: z.string(),
-  images: z.array(z.string()),
+  images: z.array(z_discord_image),
   solutions: z.array(z.string()),
   replies_to: z.string().nullable(),
   thread_id: z.string().nullable(),
@@ -22,14 +36,15 @@ export const z_message = z.object({
   server_id: z.string(),
 });
 
+export const z_message_with_discord_account = z_message
+  .extend({
+    author: z_discord_account_public,
+  })
+  .omit({ author_id: true });
+
 const message_find_router = router({
-  byId: withDiscordAccountProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    return protectedMessageFetch({
-      ctx,
-      author_id: input,
-      fetch: () => ctx.elastic.getMessage(input),
-      not_found_message: "Message not found",
-    });
+  byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
+    return findOrThrowNotFound(() => ctx.elastic.getMessage(input), "Message not found");
   }),
   byIdBulk: withDiscordAccountProcedure.input(z.array(z.string())).query(async ({ ctx, input }) => {
     return protectedMessageFetch({
@@ -38,6 +53,20 @@ const message_find_router = router({
       fetch: () => ctx.elastic.bulkGetMessages(input),
       not_found_message: "Message not found",
     });
+  }),
+  all: publicProcedure.query(async ({ ctx }) => {
+    const all_messages = await ctx.elastic.getAllMessages();
+    const authors = await discordAccountRouter
+      .createCaller(ctx)
+      .byIdMany(all_messages.map((m) => m.author_id));
+    const author_lookup = new Map(authors.map((a) => [a.id, a]));
+    return z
+      .array(z_message_with_discord_account)
+      .parse(
+        all_messages.map((m) =>
+          z_message_with_discord_account.parse({ ...m, author: author_lookup.get(m.author_id) })
+        )
+      );
   }),
 });
 

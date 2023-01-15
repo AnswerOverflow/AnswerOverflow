@@ -2,6 +2,7 @@
   "extends": "@answeroverflow/tsconfig/nextjs.json",
   "compilerOptions": {
     "target": "es2017",
+    "baseUrl": "../../",
   },
   "include": [
     "src",
@@ -9,6 +10,6 @@
     "next-env.d.ts",
     "postcss.config.cjs",
     "tailwind.config.cjs",
-    "../../node_modules/@answeroverflow/auth/next-auth.d.ts",
+    "next-env.d.ts"
   ],
 }

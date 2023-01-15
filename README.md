@@ -1,5 +1,4 @@
 
-
 <p align='center'>
         <a href='https://answeroverflow.com/'>
         <img src="https://www.answeroverflow.com/content/branding/AnswerOverflowLOGO.png">

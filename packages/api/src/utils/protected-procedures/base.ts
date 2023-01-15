@@ -2,7 +2,6 @@ import { findOrThrowNotFound } from "../operations";
 
 type ProtectedFetchInput<T> = {
   fetch: () => Promise<T | null>;
-  // eslint-disable-next-line no-unused-vars
   assertPermissions: (data: T) => void;
   not_found_message: string;
 };
@@ -19,7 +18,6 @@ export type ProtectedMutationInputExtendable<T> = Omit<
 >;
 
 type ProtectedMutationFetchFirstInput<T, F> = ProtectedFetchInput<T> & {
-  // eslint-disable-next-line no-unused-vars
   operation: (data: T) => Promise<F>;
 };
 

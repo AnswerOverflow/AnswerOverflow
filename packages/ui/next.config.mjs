@@ -12,5 +12,12 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  webpack: (config) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    config.externals = [...(config.externals || []), "@prisma/client"];
+    // Important: return the modified config
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return config;
+  },
 };
 export default config;

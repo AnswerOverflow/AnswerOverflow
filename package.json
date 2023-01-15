@@ -12,10 +12,14 @@
     "init": "turbo run init",
     "build": "turbo run build",
     "build:cacheless": "turbo run build --no-cache",
+    "generate": "yarn i && cd packages/db && yarn run generate",
     "dev": "turbo run dev --parallel --no-cache",
     "lint": "turbo run lint",
     "migrate": "turbo run migrate",
     "lint:fix": "turbo run lint:fix",
+    "db:generate": "turbo db:generate",
+    "db:push": "turbo db:push db:generate",
+    "clean": "turbo run clean && rm -rf node_modules",
     "dev:discord-bot": "turbo run dev --filter=discord-bot... --parallel --no-cache",
     "build:discord-bot": "turbo run build --filter=discord-bot... --parallel --no-cache",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
@@ -27,10 +31,12 @@
   },
   "devDependencies": {
     "@answeroverflow/eslint-config-custom": "*",
-    "turbo": "latest"
+    "tslib": "^2.4.1",
+    "turbo": "latest",
+    "vite": "^4.0.4",
+    "vitest": "^0.27.1"
   },
   "engines": {
     "node": ">=16.18.0"
-  },
-  "dependencies": {}
+  }
 }

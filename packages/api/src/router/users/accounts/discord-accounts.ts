@@ -1,11 +1,16 @@
 import { getDefaultDiscordAccount, Prisma } from "@answeroverflow/db";
 import { z } from "zod";
-import { upsert, upsertMany } from "~api/utils/operations";
+import { findOrThrowNotFound, upsert, upsertMany } from "~api/utils/operations";
 import {
   protectedUserOnlyFetch,
   protectedUserOnlyMutation,
 } from "~api/utils/protected-procedures/user-only";
-import { withDiscordAccountProcedure, mergeRouters, router } from "~api/router/trpc";
+import {
+  withDiscordAccountProcedure,
+  mergeRouters,
+  router,
+  publicProcedure,
+} from "~api/router/trpc";
 import { ignored_discord_account_router } from "../ignored-discord-accounts/ignored-discord-account";
 import { TRPCError } from "@trpc/server";
 import { assertIsNotDeletedUser } from "~api/router/users/ignored-discord-accounts/ignored-discord-account";
@@ -14,6 +19,12 @@ const z_discord_account = z.object({
   id: z.string(),
   name: z.string(),
   avatar: z.string().nullable(),
+});
+
+export const z_discord_account_public = z_discord_account.pick({
+  id: true,
+  name: true,
+  avatar: true,
 });
 
 const z_discord_account_required = z_discord_account.pick({
@@ -33,6 +44,8 @@ const z_discord_account_update = z_discord_account_mutable.merge(
 
 export const z_discord_account_upsert = z_discord_account_create;
 
+const unique_array = z.array(z.string()).transform((arr) => [...new Set(arr)]);
+
 const account_find_router = router({
   byId: withDiscordAccountProcedure.input(z.string()).query(({ ctx, input }) => {
     return protectedUserOnlyFetch({
@@ -42,13 +55,11 @@ const account_find_router = router({
       not_found_message: "Could not find discord account",
     });
   }),
-  byIdMany: withDiscordAccountProcedure.input(z.array(z.string())).query(({ ctx, input }) => {
-    return protectedUserOnlyFetch({
-      fetch: () => ctx.prisma.discordAccount.findMany({ where: { id: { in: input } } }),
-      ctx,
-      user_id: input,
-      not_found_message: "Could not find discord account",
-    });
+  byIdMany: publicProcedure.input(unique_array).query(({ ctx, input }) => {
+    return findOrThrowNotFound(
+      () => ctx.prisma.discordAccount.findMany({ where: { id: { in: [...input] } } }),
+      "Could not find discord account"
+    );
   }),
 });
 

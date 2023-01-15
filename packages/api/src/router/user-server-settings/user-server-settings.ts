@@ -216,7 +216,8 @@ const user_server_settings_with_deps_router = router({
                 ...input,
               }
             );
-            // eslint-disable-next-line no-unused-vars
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { user, ...data_without_user } = merged_data;
             return ctx.prisma.userServerSettings.create({
               data: data_without_user,
