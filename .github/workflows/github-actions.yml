@@ -48,7 +48,7 @@ jobs:
         run: yarn && npx playwright install-deps
 
       - name: Setup Database
-        run: yarn migrate
+        run: yarn db:push
 
       - name: Lint
         run: yarn lint
