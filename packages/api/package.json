@@ -9,8 +9,8 @@
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint src && tsc --noEmit",
     "lint:fix": "eslint src --fix",
-    "test:api": "pnpm run with-env vitest run --no-threads ",
-    "test:watch": "pnpm run with-env vitest --no-threads --coverage",
+    "test:api": "yarn run with-env vitest run --no-threads ",
+    "test:watch": "yarn run with-env vitest --no-threads --coverage",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

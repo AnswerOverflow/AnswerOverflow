@@ -8,7 +8,7 @@
       "internalConsoleOptions": "neverOpen",
       "disableOptimisticBPs": true,
       "cwd": "${workspaceFolder}",
-      "runtimeExecutable": "pnpm",
+      "runtimeExecutable": "yarn",
       "args": [
         "test",
         "--runInBand",

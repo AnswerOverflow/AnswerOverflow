@@ -9,8 +9,8 @@
     "lint": "eslint . --ext .ts && tsc --noEmit",
     "lint:fix": "eslint . --ext .ts --fix",
     "with-env": "dotenv -e ../../.env --",
-    "test:auth": "pnpm run with-env vitest run --no-threads ",
-    "test:watch": "pnpm run with-env vitest --no-threads --coverage",
+    "test:auth": "yarn run with-env vitest run --no-threads ",
+    "test:watch": "yarn run with-env vitest --no-threads --coverage",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

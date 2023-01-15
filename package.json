@@ -2,13 +2,17 @@
   "name": "ao-monorepo",
   "version": "0.0.0",
   "private": true,
-  "packageManager": "pnpm@7.13.2",
+  "workspaces": {
+    "packages": [
+      "apps/**/*",
+      "packages/**/*"
+    ]
+  },
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "init": "turbo run init",
     "build": "turbo run build",
     "build:cacheless": "turbo run build --no-cache",
-    "generate": "pnpm i && cd packages/db && pnpm run generate",
+    "generate": "yarn i && cd packages/db && yarn run generate",
     "dev": "turbo run dev --parallel --no-cache",
     "lint": "turbo run lint",
     "migrate": "turbo run migrate",

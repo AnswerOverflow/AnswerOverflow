@@ -34,47 +34,30 @@ jobs:
       - name: Checkout (GitHub)
         uses: actions/checkout@v3
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2.2.4       
-
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
         with:
           node-version: 16
-      
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        run: |
-          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
-      
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-
+          cache: 'yarn'
 
       - name: Start containers # TODO: Use dev container docker-compose instead if possible
         run: docker-compose -f "docker-compose.yml" up -d --build
 
       - name: Install dependencies
         # Playright is used for storybook, possible move that into package.json instead?
-        run: pnpm i && npx playwright install-deps
+        run: yarn && npx playwright install-deps
 
-      - name: Generate Prisma Client
-        run: pnpm turbo db:generate
+      - name: Setup Database
+        run: yarn migrate
 
       - name: Lint
-        run: pnpm lint
+        run: yarn lint
 
       - name: Build
-        run: pnpm build
+        run: yarn build
 
       - name: Test
-        run: pnpm test
+        run: yarn test
 
       - name: Stop containers
         if: always()

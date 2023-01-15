@@ -12,8 +12,6 @@
     "noUncheckedIndexedAccess": true,
     "allowSyntheticDefaultImports": true,
     "alwaysStrict": true,
-    "declaration": true,
-    "declarationMap": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
@@ -46,8 +44,6 @@
     "exactOptionalPropertyTypes": false,
     "noImplicitOverride": true,
     "outDir": "dist",
-    "composite": true,
-    "preserveSymlinks": true,
     "baseUrl": ".",
     "paths": {
       "~ui/utils/*": [

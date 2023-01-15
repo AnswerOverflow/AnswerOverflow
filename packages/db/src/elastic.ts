@@ -79,10 +79,9 @@ export class Elastic extends Client {
   }
 
   public destroyMessagesIndex() {
-    this.indices.delete({
+    return this.indices.delete({
       index: this.messages_index,
     });
-    return true;
   }
 
   public async getMessage(id: string) {
@@ -257,7 +256,7 @@ export class Elastic extends Client {
     if (exists) {
       await this.destroyMessagesIndex();
     }
-    this.indices.create({
+    return this.indices.create({
       index: "messages",
       mappings: {
         _source: {
@@ -284,7 +283,6 @@ export class Elastic extends Client {
         },
       },
     });
-    return true;
   }
 }
 

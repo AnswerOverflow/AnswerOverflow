@@ -32,9 +32,9 @@ With Visual Studio opened in a development container, open a folder in the root 
 
 * Run the whole project
 
-    ```pnpm run dev```
+    ```yarn run dev```
 * Run a single app
 
-    ```pnpm turbo run dev --filter='app-name'```
+    ```yarn turbo run dev --filter='app-name'```
 * Install a package
-    ```pnpm workspace <workspace> add <package>```
+    ```yarn workspace <workspace> add <package>```
