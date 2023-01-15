@@ -224,6 +224,7 @@ describe("Discord Account Operations", () => {
         created_accounts[0]!.id,
         created_accounts[1]!.id,
       ]);
+      expect(data).toStrictEqual(created_accounts);
     });
   });
 });

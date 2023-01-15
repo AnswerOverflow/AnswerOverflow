@@ -83,9 +83,11 @@ const message_crud_router = router({
     });
   }),
   upsert: withDiscordAccountProcedure.input(z_message).mutation(async ({ ctx, input }) => {
-    await assertIsNotDeletedUser(ctx, input.author_id);
     return protectedMutation({
-      permissions: () => assertCanEditMessage(ctx, input.author_id),
+      permissions: [
+        () => assertCanEditMessage(ctx, input.author_id),
+        () => assertIsNotDeletedUser(ctx, input.author_id),
+      ],
       operation() {
         return ctx.elastic.upsertMessage(input);
       },

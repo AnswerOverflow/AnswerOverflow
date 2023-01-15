@@ -10,7 +10,11 @@ import {
 import { ignored_discord_account_router } from "../ignored-discord-accounts/ignored-discord-account";
 import { TRPCError } from "@trpc/server";
 import { assertIsNotDeletedUser } from "~api/router/users/ignored-discord-accounts/ignored-discord-account";
-import { protectedFetchWithPublicData, protectedMutation } from "~api/utils/protected-procedures";
+import {
+  protectedFetchManyWithPublicData,
+  protectedFetchWithPublicData,
+  protectedMutation,
+} from "~api/utils/protected-procedures";
 import { assertIsUser, assertIsUsers } from "~api/utils/permissions";
 
 const z_discord_account = z.object({
@@ -47,37 +51,17 @@ const unique_array = z.array(z.string()).transform((arr) => [...new Set(arr)]);
 const account_find_router = router({
   byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
     return protectedFetchWithPublicData({
-      fetch: async () => {
-        const data = await ctx.prisma.discordAccount.findUnique({ where: { id: input } });
-        if (!data) {
-          return data;
-        }
-        return {
-          ...data,
-          dog: "dog",
-        };
-      },
+      fetch: () => ctx.prisma.discordAccount.findUnique({ where: { id: input } }),
       permissions: (data) => assertIsUser(ctx, data.id),
       not_found_message: "Could not find discord account",
       public_data_formatter: (data) => z_discord_account_public.parse(data),
     });
   }),
   byIdMany: publicProcedure.input(unique_array).query(({ ctx, input }) => {
-    return protectedFetchWithPublicData({
+    return protectedFetchManyWithPublicData({
       fetch: () => ctx.prisma.discordAccount.findMany({ where: { id: { in: input } } }),
-      permissions: (data) =>
-        assertIsUsers(
-          ctx,
-          data.map((i) => i.id)
-        ),
-      not_found_message: "Could not find discord accounts",
-      public_data_formatter: (data) => {
-        const converted = data.map((i) => {
-          const parsed = z_discord_account_public.parse(i);
-          return parsed;
-        });
-        return converted;
-      },
+      permissions: (data) => assertIsUser(ctx, data.id),
+      public_data_formatter: (data) => z_discord_account_public.parse(data),
     });
   }),
 });
