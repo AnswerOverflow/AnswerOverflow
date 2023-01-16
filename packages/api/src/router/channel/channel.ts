@@ -2,7 +2,7 @@ import { getDefaultChannel } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, withUserServersProcedure, router } from "~api/router/trpc";
 import { addDefaultValues, upsert, upsertMany } from "~api/utils/operations";
-import { assertCanEditServer, assertCanEditServers } from "~api/utils/permissions";
+import { canEditServer, canEditServers } from "~api/utils/permissions";
 import {
   protectedFetch,
   protectedMutation,
@@ -73,7 +73,7 @@ const fetch_router = router({
   byId: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedFetch({
       fetch: async () => await ctx.prisma.channel.findUnique({ where: { id: input } }),
-      permissions: (data) => assertCanEditServer(ctx, data.server_id),
+      permissions: (data) => canEditServer(ctx, data.server_id),
       not_found_message: "Channel does not exist",
     });
   }),
@@ -81,7 +81,7 @@ const fetch_router = router({
     return protectedFetch({
       fetch: async () => await ctx.prisma.channel.findMany({ where: { id: { in: input } } }),
       permissions: (data) =>
-        assertCanEditServers(
+        canEditServers(
           ctx,
           data.map((c) => c.server_id)
         ),
@@ -94,13 +94,13 @@ const create_update_delete_router = router({
   create: withUserServersProcedure.input(z_channel_create).mutation(({ ctx, input }) => {
     return protectedMutation({
       operation: () => ctx.prisma.channel.create({ data: input }),
-      permissions: () => assertCanEditServer(ctx, input.server_id),
+      permissions: () => canEditServer(ctx, input.server_id),
     });
   }),
   createThread: withUserServersProcedure.input(z_thread_create).mutation(({ ctx, input }) => {
     return protectedMutation({
       operation: () => ctx.prisma.channel.create({ data: input }),
-      permissions: () => assertCanEditServer(ctx, input.server_id),
+      permissions: () => canEditServer(ctx, input.server_id),
     });
   }),
   createMany: withUserServersProcedure
@@ -109,7 +109,7 @@ const create_update_delete_router = router({
       await protectedMutation({
         operation: () => ctx.prisma.channel.createMany({ data: input }),
         permissions: () =>
-          assertCanEditServers(
+          canEditServers(
             ctx,
             input.map((c) => c.server_id)
           ),
@@ -120,7 +120,7 @@ const create_update_delete_router = router({
     return protectedMutationFetchFirst({
       fetch: () => fetch_router.createCaller(ctx).byId(input.id),
       operation: () => ctx.prisma.channel.update({ where: { id: input.id }, data: input }),
-      permissions: (data) => assertCanEditServer(ctx, data.server_id),
+      permissions: (data) => canEditServer(ctx, data.server_id),
       not_found_message: "Channel does not exist",
     });
   }),
@@ -134,7 +134,7 @@ const create_update_delete_router = router({
             input.map((c) => ctx.prisma.channel.update({ where: { id: c.id }, data: c }))
           ),
         permissions: (data) =>
-          assertCanEditServers(
+          canEditServers(
             ctx,
             data.map((c) => c.server_id)
           ),
@@ -145,7 +145,7 @@ const create_update_delete_router = router({
     return protectedMutationFetchFirst({
       fetch: () => fetch_router.createCaller(ctx).byId(input),
       operation: () => ctx.prisma.channel.delete({ where: { id: input } }),
-      permissions: (data) => assertCanEditServer(ctx, data.server_id),
+      permissions: (data) => canEditServer(ctx, data.server_id),
       not_found_message: "Channel does not exist",
     });
   }),

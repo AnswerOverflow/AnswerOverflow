@@ -1,125 +1,54 @@
 import {
   DiscordAccount,
-  getDefaultChannel,
   getDefaultDiscordAccount,
-  getDefaultMessage,
   getDefaultServer,
-  getDefaultThread,
+  Server,
 } from "@answeroverflow/db";
-import { ChannelType, PermissionResolvable, PermissionsBitField } from "discord.js";
-import { createContextInner } from "~api/router/context";
+import type { TRPCError } from "@trpc/server";
+import { PermissionFlagsBits, PermissionResolvable, PermissionsBitField } from "discord.js";
+import { Source, sourceTypes, createContextInner } from "~api/router/context";
+import {
+  BOT_ONLY_CALL_ERROR_MESSAGE,
+  WEB_CLIENT_ONLY_CALL_ERROR_MESSAGE,
+} from "~api/utils/permissions";
 
-export async function getGeneralScenario() {
-  const data1 = await getServerTestData();
-  return { data1 };
+// returns a random snowflake as a string from 0 to 100000
+function randomId() {
+  return Math.floor(Math.random() * 100000).toString();
 }
 
-export async function getServerTestData(server_id: string = "101") {
-  const account1_guild_manager = getDefaultDiscordAccount({
-    id: "1",
+export async function mockAccount(
+  server: Server,
+  caller: Source,
+  permissions: PermissionResolvable = PermissionsBitField.Default,
+  override: Partial<DiscordAccount> = {}
+) {
+  const account = getDefaultDiscordAccount({
+    id: randomId(),
     name: "test-user-owner",
+    ...override,
   });
-  const account2_default_member = getDefaultDiscordAccount({
-    id: "2",
-    name: "test-user-default",
+  const ctx = await createCtxWithServers({
+    user: account,
+    permissions: permissions,
+    server: server,
+    caller: caller,
   });
-  const server = getDefaultServer({
-    id: server_id,
-    name: "test",
-  });
-  const text_channel = getDefaultChannel({
-    id: "201",
-    name: "name",
-    server_id: server_id,
-    type: ChannelType.GuildText,
-  });
-
-  const forum_channel = getDefaultChannel({
-    id: "202",
-    name: "name2",
-    server_id: server_id,
-    type: ChannelType.GuildForum,
-  });
-  const account1_guild_manager_ctx = await createManageGuildContext({
-    server: {
-      id: server.id,
-      name: server.name,
-    },
-    user: account1_guild_manager,
-  });
-  const account2_default_member_ctx = await createDefaultPermissionCtx({
-    server: {
-      id: server.id,
-      name: server.name,
-    },
-    user: account2_default_member,
-  });
-  const bot_caller_ctx = await createBotCallerCtx();
-
-  return {
-    server,
-    bot_caller_ctx,
-    account1_guild_manager,
-    account1_guild_manager_ctx,
-    account2_default_member,
-    account2_default_member_ctx,
-    forum_channels: [
-      {
-        channel: forum_channel,
-        messages: {
-          account1_messages: [
-            getDefaultMessage({
-              id: "301",
-              channel_id: forum_channel.id,
-              server_id: server_id,
-              author_id: account1_guild_manager.id,
-            }),
-          ],
-        },
-      },
-    ],
-    text_channels: [
-      {
-        channel: text_channel,
-        threads: [
-          {
-            thread: getDefaultThread({
-              id: "401",
-              name: "name",
-              parent_id: "201",
-              server_id: server_id,
-              type: ChannelType.PublicThread,
-            }),
-            messages: [],
-          },
-        ],
-        messages: {
-          account1_messages: [
-            getDefaultMessage({
-              id: "300",
-              channel_id: text_channel.id,
-              server_id: server_id,
-              author_id: account1_guild_manager.id,
-            }),
-          ],
-          account2_messages: [
-            getDefaultMessage({
-              id: "304",
-              channel_id: text_channel.id,
-              server_id: server_id,
-              author_id: account2_default_member.id,
-            }),
-          ],
-        },
-      },
-    ],
-  };
+  return { account, ctx };
 }
 
-export function createBotCallerCtx() {
+export function mockServer(override: Partial<Server> = {}) {
+  return getDefaultServer({
+    id: randomId(),
+    name: "test-server",
+    ...override,
+  });
+}
+
+export async function createAnswerOverflowBotCtx() {
   return createContextInner({
     session: null,
-    caller: "discord-bot",
+    source: "discord-bot",
     user_servers: undefined,
     discord_account: {
       id: process.env.DISCORD_CLIENT_ID ?? process.env.VITE_DISCORD_CLIENT_ID,
@@ -135,28 +64,15 @@ type CtxOverride = {
     id: string;
     name: string;
   };
+  caller: Source;
   permissions: PermissionResolvable;
   user: DiscordAccount;
 };
 
-export function createManageGuildContext(input: Omit<CtxOverride, "permissions">) {
-  return createCtxWithServers({
-    ...input,
-    permissions: PermissionsBitField.resolve("ManageGuild"),
-  });
-}
-
-export function createDefaultPermissionCtx(input: Omit<CtxOverride, "permissions">) {
-  return createCtxWithServers({
-    ...input,
-    permissions: PermissionsBitField.Default,
-  });
-}
-
 export function createCtxWithServers(input: CtxOverride) {
   return createContextInner({
     session: null,
-    caller: "discord-bot",
+    source: input.caller,
     discord_account: {
       id: input.user.id,
       avatar: null,
@@ -176,4 +92,79 @@ export function createCtxWithServers(input: CtxOverride) {
   });
 }
 
-export type ServerTestData = Awaited<ReturnType<typeof getServerTestData>>;
+export type PermissionVariantsTest = {
+  permissionsThatShouldWork: PermissionResolvable[];
+  sourcesThatShouldWork?: Source[];
+  failure_message: string;
+  operation: (permission: PermissionResolvable, caller: Source) => Promise<unknown>;
+};
+
+export async function testAllVariants({
+  permissionsThatShouldWork,
+  operation,
+  failure_message,
+  sourcesThatShouldWork = ["discord-bot", "web-client"],
+}: PermissionVariantsTest) {
+  await Promise.all(
+    sourceTypes.map((source) => {
+      const permissions = Object.keys(PermissionFlagsBits) as PermissionResolvable[];
+      return permissions.map(async (permission) => {
+        let error: TRPCError | null = null;
+        try {
+          await operation(permission, source);
+        } catch (err) {
+          error = err as TRPCError;
+        }
+
+        // 3 ways to fail:
+        // 1. Source is not allowed to use this endpoint and their call succeeds
+        // 2. Source is allowed to use this endpoint, but doesn't have the required permissions and their call succeeds
+        // 3. Source is allowed to use this endpoint, has the required permissions, but the operation failed
+
+        const sourceIsAllowed = sourcesThatShouldWork.includes(source);
+        const permissionsAreAllowed = permissionsThatShouldWork.includes(permission);
+        // Source is not allowed to use this endpoint and their call succeeds
+        if (!sourceIsAllowed && permissionsAreAllowed) {
+          if (error === null) {
+            expect(
+              error,
+              `Source ${source} is not allowed to use this endpoint which allows ${sourcesThatShouldWork.toString()} and their call succeeds. They have permission ${permission.toString()} - The permisions required are ${permissionsThatShouldWork.toString()}`
+            ).not.toBeNull();
+          } else {
+            const errorLookup: Record<Source, string> = {
+              "discord-bot": WEB_CLIENT_ONLY_CALL_ERROR_MESSAGE,
+              "web-client": BOT_ONLY_CALL_ERROR_MESSAGE,
+            };
+            expect(
+              error.message,
+              `Expected error message for ${source} to be "${errorLookup[source]}" but got "${error.message}"`
+            ).toBe(errorLookup[source]);
+          }
+        }
+
+        // Source is allowed to use this endpoint, but doesn't have the required permissions and their call succeeds'
+        if (sourceIsAllowed && !permissionsAreAllowed) {
+          if (error === null) {
+            expect(
+              error,
+              `Source ${source} is allowed to use this endpoint, but doesn't have the required permissions and their call succeeds. They have permission ${permission.toString()} - The permisions required are ${permissionsThatShouldWork.toString()}`
+            ).not.toBeNull();
+          } else {
+            expect(
+              error.message,
+              `Expected error message for ${source} to be ${failure_message} but got ${error.message}`
+            ).toBe(failure_message);
+          }
+        }
+
+        // Source is allowed to use this endpoint, has the required permissions, but the operation failed
+        if (sourceIsAllowed && permissionsAreAllowed) {
+          expect(
+            error,
+            `Source ${source} is allowed to use this endpoint, has the required permissions, but the operation failed. They have permission ${permission.toString()} - The permisions required are ${permissionsThatShouldWork.toString()}`
+          ).toBeNull();
+        }
+      });
+    })
+  );
+}

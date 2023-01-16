@@ -8,10 +8,13 @@ import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
  * Replace this with an object if you want to pass things to createContextInner
  */
 
+export const sourceTypes = ["web-client", "discord-bot"] as const;
+export type Source = (typeof sourceTypes)[number];
+
 type CreateContextOptions = {
   session: Session | null;
   // If the web client, then we need to fetch the user servers
-  caller: "discord-bot" | "web-client";
+  source: Source;
   // Used for ensuring that the user has the right access to the data they are trying to fetch
   user_servers?: Awaited<ReturnType<typeof getUserServers>> | null;
   discord_account?: Awaited<ReturnType<typeof getDiscordUser>> | null;
@@ -27,7 +30,7 @@ export const createContextInner = async (opts: CreateContextOptions) => {
   return {
     session: opts.session,
     user_servers: opts.user_servers,
-    caller: opts.caller,
+    caller: opts.source,
     discord_account: opts.discord_account,
     prisma,
     elastic,
@@ -35,13 +38,13 @@ export const createContextInner = async (opts: CreateContextOptions) => {
 };
 
 export const createSSGContext = async () => {
-  return await createContextInner({ caller: "web-client", session: null });
+  return await createContextInner({ source: "web-client", session: null });
 };
 
 export type BotContextCreate = Omit<CreateContextOptions, "caller">;
 
 export const createBotContext = async (opts: BotContextCreate) => {
-  return await createContextInner({ ...opts, caller: "discord-bot" });
+  return await createContextInner({ ...opts, source: "discord-bot" });
 };
 
 /**
@@ -54,7 +57,7 @@ export const createContext = async (opts: CreateNextContextOptions) => {
   return await createContextInner({
     session,
     user_servers: null,
-    caller: "web-client",
+    source: "web-client",
   });
 };
 

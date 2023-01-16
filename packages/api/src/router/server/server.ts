@@ -1,14 +1,25 @@
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { mergeRouters, withUserServersProcedure, router } from "~api/router/trpc";
+import {
+  mergeRouters,
+  router,
+  discordBotCallerOnlyProcedure,
+  publicProcedure,
+} from "~api/router/trpc";
 import { upsert } from "~api/utils/operations";
-import { assertCanEditServer } from "~api/utils/permissions";
-import { protectedFetch, protectedMutation } from "~api/utils/protected-procedures";
+import { canEditServer, isCtxCallerDiscordBot } from "~api/utils/permissions";
+import { protectedFetchWithPublicData, protectedMutation } from "~api/utils/protected-procedures";
 
 export const z_server = z.object({
   id: z.string(),
   name: z.string(),
+  icon: z.string().nullable(),
   kicked_time: z.date().nullable(),
+});
+
+export const z_server_public = z_server.pick({
+  id: true,
+  name: true,
+  icon: true,
 });
 
 const z_server_required = z_server.pick({
@@ -33,36 +44,33 @@ const z_server_update = z_server_mutable.merge(
 export const z_server_upsert = z_server_create;
 
 const serverCreateUpdateRouter = router({
-  create: withUserServersProcedure.input(z_server_create).mutation(({ ctx, input }) => {
+  create: publicProcedure.input(z_server_create).mutation(({ ctx, input }) => {
     return protectedMutation({
       operation: () => ctx.prisma.server.create({ data: input }),
-      permissions: () => assertCanEditServer(ctx, input.id),
+      permissions: [() => canEditServer(ctx, input.id), () => isCtxCallerDiscordBot(ctx)],
     });
   }),
-  update: withUserServersProcedure.input(z_server_update).mutation(({ ctx, input }) => {
+  update: publicProcedure.input(z_server_update).mutation(({ ctx, input }) => {
     return protectedMutation({
       operation: () => ctx.prisma.server.update({ where: { id: input.id }, data: input }),
-      permissions: () => assertCanEditServer(ctx, input.id),
+      permissions: [() => canEditServer(ctx, input.id), () => isCtxCallerDiscordBot(ctx)],
     });
   }),
 });
 
 const serverFetchRouter = router({
-  byId: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    return protectedFetch({
-      async fetch() {
-        const server = await ctx.prisma.server.findUnique({ where: { id: input } });
-        if (!server) throw new TRPCError({ code: "NOT_FOUND", message: "Server not found" });
-        return server;
-      },
-      permissions: () => assertCanEditServer(ctx, input),
+  byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
+    return protectedFetchWithPublicData({
+      fetch: () => ctx.prisma.server.findUnique({ where: { id: input } }),
+      permissions: [() => canEditServer(ctx, input), () => isCtxCallerDiscordBot(ctx)],
       not_found_message: "Server not found",
+      public_data_formatter: (server) => z_server_public.parse(server),
     });
   }),
 });
 
 const serverUpsertRouter = router({
-  upsert: withUserServersProcedure.input(z_server_upsert).mutation(async ({ ctx, input }) => {
+  upsert: discordBotCallerOnlyProcedure.input(z_server_upsert).mutation(async ({ ctx, input }) => {
     return upsert(
       () => serverFetchRouter.createCaller(ctx).byId(input.id),
       () => serverCreateUpdateRouter.createCaller(ctx).create(input),

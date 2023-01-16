@@ -1,7 +1,7 @@
 import { clearDatabase, Server } from "@answeroverflow/db";
 import { TRPCError } from "@trpc/server";
 import { getGeneralScenario, ServerTestData } from "~api/test/utils";
-import { MISSING_PERMISSIONS_MESSAGE } from "~api/utils/permissions";
+import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
 import { serverSettingsRouter } from "./server_settings";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -38,7 +38,7 @@ describe("Server Settings Operations", () => {
     it("should try to fetch server settings without permission", async () => {
       await server_settings_router_manage_guild.createWithDeps({ server });
       await expect(server_settings_no_permissions.byId(server.id)).rejects.toThrow(
-        MISSING_PERMISSIONS_MESSAGE
+        MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE
       );
     });
   });
@@ -50,7 +50,7 @@ describe("Server Settings Operations", () => {
     });
     it("should try to create server settings without manage guild permissions", async () => {
       await expect(server_settings_no_permissions.createWithDeps({ server })).rejects.toThrow(
-        MISSING_PERMISSIONS_MESSAGE
+        MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE
       );
     });
   });
@@ -78,7 +78,7 @@ describe("Server Settings Operations", () => {
             read_the_rules_consent_enabled: true,
           },
         })
-      ).rejects.toThrow(MISSING_PERMISSIONS_MESSAGE);
+      ).rejects.toThrow(MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE);
     });
   });
 
@@ -89,7 +89,7 @@ describe("Server Settings Operations", () => {
     });
     it("should try to create server settings without manage guild permissions", async () => {
       await expect(server_settings_no_permissions.createWithDeps({ server })).rejects.toThrow(
-        MISSING_PERMISSIONS_MESSAGE
+        MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE
       );
     });
   });
@@ -126,7 +126,7 @@ describe("Server Settings Operations", () => {
             read_the_rules_consent_enabled: true,
           },
         })
-      ).rejects.toThrow(MISSING_PERMISSIONS_MESSAGE);
+      ).rejects.toThrow(MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE);
     });
   });
 });

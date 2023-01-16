@@ -5,3 +5,10 @@ export function pick<T extends {}, K extends keyof T>(obj: T, ...keys: K[]): Pic
   }
   return result;
 }
+
+// https://stackoverflow.com/questions/53966509/typescript-type-safe-omit-function
+export const omit = <T extends object, K extends keyof T>(obj: T, ...keys: K[]): Omit<T, K> => {
+  const _ = { ...obj };
+  keys.forEach((key) => delete _[key]);
+  return _;
+};

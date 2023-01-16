@@ -1,8 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { PermissionsBitField } from "discord.js";
-import type { Context } from "~api/router/context";
+import type { Source, Context } from "~api/router/context";
 
-export const MISSING_PERMISSIONS_MESSAGE = "You are missing the required permissions to do this";
+export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
+  "You are missing the required permissions to do this";
 
 export function isAnswerOverflowBot(ctx: Context) {
   const bot_id =
@@ -18,7 +19,7 @@ export function isSuperUser(ctx: Context) {
   return false;
 }
 
-export function assertIsBot(ctx: Context) {
+export function errorIfNotAnswerOverflowBot(ctx: Context) {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
   return new TRPCError({
@@ -27,7 +28,7 @@ export function assertIsBot(ctx: Context) {
   });
 }
 
-export function assertCanEditServer(ctx: Context, server_id: string) {
+export function canEditServer(ctx: Context, server_id: string) {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
   if (!ctx.user_servers) {
@@ -52,38 +53,30 @@ export function assertCanEditServer(ctx: Context, server_id: string) {
   if (!permission_bitfield.has("ManageGuild")) {
     return new TRPCError({
       code: "FORBIDDEN",
-      message: MISSING_PERMISSIONS_MESSAGE,
+      message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
     });
   }
   return;
 }
 
-export function assertCanEditServers(ctx: Context, server_id: string | string[]) {
+export function canEditServers(ctx: Context, server_id: string | string[]) {
   if (Array.isArray(server_id)) {
-    server_id.forEach((id) => assertCanEditServer(ctx, id));
+    server_id.forEach((id) => canEditServer(ctx, id));
   } else {
-    assertCanEditServer(ctx, server_id);
+    canEditServer(ctx, server_id);
   }
 }
 
-export function assertCanEditMessage(ctx: Context, author_id: string) {
+export function canEditMessage(ctx: Context, author_id: string) {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
   if (ctx.discord_account?.id !== author_id) {
     return new TRPCError({
       code: "FORBIDDEN",
-      message: MISSING_PERMISSIONS_MESSAGE,
+      message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
     });
   }
   return;
-}
-
-export function assertCanEditMessages(ctx: Context, author_id: string | string[]) {
-  if (Array.isArray(author_id)) {
-    author_id.forEach((id) => assertCanEditMessage(ctx, id));
-  } else {
-    assertCanEditMessage(ctx, author_id);
-  }
 }
 
 export function assertIsUser(ctx: Context, target_user_id: string) {
@@ -98,8 +91,17 @@ export function assertIsUser(ctx: Context, target_user_id: string) {
   return;
 }
 
-export function assertIsUsers(ctx: Context, target_user_id: string[]) {
-  if (Array.isArray(target_user_id)) {
-    target_user_id.forEach((id) => assertIsUser(ctx, id));
+export function isCtxCaller(ctx: Context, caller: Source, error_message: string) {
+  if (ctx.caller !== caller) {
+    return new TRPCError({
+      code: "BAD_REQUEST",
+      message: error_message,
+    });
   }
+  return;
+}
+export const BOT_ONLY_CALL_ERROR_MESSAGE = "This route is only available to bots";
+export const WEB_CLIENT_ONLY_CALL_ERROR_MESSAGE = "This route is only available to the web client";
+export function isCtxCallerDiscordBot(ctx: Context) {
+  return isCtxCaller(ctx, "discord-bot", BOT_ONLY_CALL_ERROR_MESSAGE);
 }

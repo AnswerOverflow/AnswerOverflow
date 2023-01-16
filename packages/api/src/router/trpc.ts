@@ -3,7 +3,6 @@ import type { Context } from "./context";
 import superjson from "superjson";
 import { getDiscordAccount } from "../utils/discord-operations";
 import { getDiscordUser, getUserServers } from "@answeroverflow/auth/src/discord-oauth";
-import { assertIsBot } from "../utils/permissions";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
@@ -69,8 +68,13 @@ const addUserServers = t.middleware(async ({ ctx, next }) => {
   });
 });
 
-const isBot = t.middleware(({ ctx, next }) => {
-  assertIsBot(ctx);
+const isCallerDiscordBot = t.middleware(async ({ ctx, next }) => {
+  if (ctx.caller !== "discord-bot") {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "You can only perform this action via the Discord bot",
+    });
+  }
   return next();
 });
 
@@ -78,5 +82,5 @@ export const router = t.router;
 export const mergeRouters = t.mergeRouters;
 export const publicProcedure = t.procedure;
 export const withDiscordAccountProcedure = t.procedure.use(addDiscordAccount);
-export const withUserServersProcedure = withDiscordAccountProcedure.use(addUserServers);
-export const botOnlyProcedure = withDiscordAccountProcedure.use(isBot);
+export const withUserServersProcedure = t.procedure.use(addUserServers);
+export const discordBotCallerOnlyProcedure = t.procedure.use(isCallerDiscordBot);

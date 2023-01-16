@@ -12,7 +12,7 @@ import { channelRouter, z_channel_upsert_with_deps } from "./channel";
 import { toZObject } from "~api/utils/zod-utils";
 import { upsert } from "~api/utils/operations";
 import { protectedFetch, protectedMutationFetchFirst } from "~api/utils/protected-procedures";
-import { assertCanEditServer } from "~api/utils/permissions";
+import { canEditServer } from "~api/utils/permissions";
 
 const z_channel_settings_flags = toZObject(...channel_settings_flags);
 
@@ -93,8 +93,7 @@ const channelSettingFind = router({
               },
             },
           }),
-        permissions: (channel_settings) =>
-          assertCanEditServer(ctx, channel_settings.channel.server_id),
+        permissions: (channel_settings) => canEditServer(ctx, channel_settings.channel.server_id),
         not_found_message: "Channel settings not found",
       })
     );
@@ -115,8 +114,7 @@ const channelSettingFind = router({
               },
             },
           }),
-        permissions: (channel_settings) =>
-          assertCanEditServer(ctx, channel_settings.channel.server_id),
+        permissions: (channel_settings) => canEditServer(ctx, channel_settings.channel.server_id),
         not_found_message: "Channel settings not found",
       })
     );
@@ -137,7 +135,7 @@ const channelSettingsCreateUpdate = router({
             });
             return data;
           },
-          permissions: (channel) => assertCanEditServer(ctx, channel.server_id),
+          permissions: (channel) => canEditServer(ctx, channel.server_id),
           not_found_message: "Channel not found",
         })
       );
@@ -157,8 +155,7 @@ const channelSettingsCreateUpdate = router({
               data: new_settings,
             });
           },
-          permissions: (channel_settings) =>
-            assertCanEditServer(ctx, channel_settings.channel.server_id),
+          permissions: (channel_settings) => canEditServer(ctx, channel_settings.channel.server_id),
           not_found_message: "Channel settings not found",
         })
       );
