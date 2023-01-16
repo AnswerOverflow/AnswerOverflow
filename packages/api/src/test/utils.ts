@@ -92,78 +92,82 @@ export function createCtxWithServers(input: CtxOverride) {
   });
 }
 
-export type PermissionVariantsTest = {
+export type PermissionVariantsTest<T> = {
   permissionsThatShouldWork: PermissionResolvable[];
-  sourcesThatShouldWork?: Source[];
-  failure_message: string;
-  operation: (permission: PermissionResolvable, caller: Source) => Promise<unknown>;
+  Success: (result: T, permission: PermissionResolvable, is_permission_allowed: boolean) => void;
+  Err: (error: TRPCError, permission: PermissionResolvable, is_permission_allowed: boolean) => void;
+  operation: (permission: PermissionResolvable) => Promise<T>;
 };
 
-export async function testAllVariants({
+export async function testAllPermissions<T>({
+  permissionsThatShouldWork,
+  operation,
+  Success,
+  Err,
+}: PermissionVariantsTest<T>) {
+  const permissions = Object.keys(PermissionFlagsBits) as PermissionResolvable[];
+  await Promise.all(
+    permissions.map(async (permission) => {
+      let error: TRPCError | null = null;
+      const permissionsAreAllowed = permissionsThatShouldWork.includes(permission);
+      try {
+        const data = await operation(permission);
+        Success(data, permission, permissionsAreAllowed);
+      } catch (err) {
+        error = err as TRPCError;
+        Err(error, permission, permissionsAreAllowed);
+      }
+    })
+  );
+}
+
+export async function testAllVariants<T>({
   permissionsThatShouldWork,
   operation,
   failure_message,
   sourcesThatShouldWork = ["discord-bot", "web-client"],
-}: PermissionVariantsTest) {
+}: Omit<PermissionVariantsTest<T>, "operation" | "Success" | "Err"> & {
+  failure_message: string;
+  sourcesThatShouldWork?: Source[];
+  operation: (source: Source, permission: PermissionResolvable) => Promise<T>;
+}) {
   await Promise.all(
     sourceTypes.map((source) => {
-      const permissions = Object.keys(PermissionFlagsBits) as PermissionResolvable[];
-      return permissions.map(async (permission) => {
-        let error: TRPCError | null = null;
-        try {
-          await operation(permission, source);
-        } catch (err) {
-          error = err as TRPCError;
-        }
-
-        // 3 ways to fail:
-        // 1. Source is not allowed to use this endpoint and their call succeeds
-        // 2. Source is allowed to use this endpoint, but doesn't have the required permissions and their call succeeds
-        // 3. Source is allowed to use this endpoint, has the required permissions, but the operation failed
-
-        const sourceIsAllowed = sourcesThatShouldWork.includes(source);
-        const permissionsAreAllowed = permissionsThatShouldWork.includes(permission);
-        // Source is not allowed to use this endpoint and their call succeeds
-        if (!sourceIsAllowed && permissionsAreAllowed) {
-          if (error === null) {
+      const sourceIsAllowed = sourcesThatShouldWork.includes(source);
+      const errorLookup: Record<Source, string> = {
+        "discord-bot": WEB_CLIENT_ONLY_CALL_ERROR_MESSAGE,
+        "web-client": BOT_ONLY_CALL_ERROR_MESSAGE,
+      };
+      return testAllPermissions({
+        permissionsThatShouldWork,
+        operation: (permission) => operation(source, permission),
+        Success(_result, permission, is_permission_allowed) {
+          expect(
+            is_permission_allowed,
+            `Expected ${source} to be allowed to use this endpoint with permission ${permission.toString()} but they were not`
+          ).toBeTruthy();
+          expect(sourceIsAllowed).toBeTruthy();
+        },
+        Err(error, permission, is_permission_allowed) {
+          if (!is_permission_allowed && sourceIsAllowed) {
             expect(
-              error,
-              `Source ${source} is not allowed to use this endpoint which allows ${sourcesThatShouldWork.toString()} and their call succeeds. They have permission ${permission.toString()} - The permisions required are ${permissionsThatShouldWork.toString()}`
-            ).not.toBeNull();
-          } else {
-            const errorLookup: Record<Source, string> = {
-              "discord-bot": WEB_CLIENT_ONLY_CALL_ERROR_MESSAGE,
-              "web-client": BOT_ONLY_CALL_ERROR_MESSAGE,
-            };
+              error.message,
+              `Expected error message for ${source} to be "${errorLookup[source]}" but got "${error.message}"`
+            ).toBe(failure_message);
+          }
+          if (!sourceIsAllowed && is_permission_allowed) {
             expect(
               error.message,
               `Expected error message for ${source} to be "${errorLookup[source]}" but got "${error.message}"`
             ).toBe(errorLookup[source]);
           }
-        }
-
-        // Source is allowed to use this endpoint, but doesn't have the required permissions and their call succeeds'
-        if (sourceIsAllowed && !permissionsAreAllowed) {
-          if (error === null) {
+          if (is_permission_allowed && sourceIsAllowed) {
             expect(
               error,
-              `Source ${source} is allowed to use this endpoint, but doesn't have the required permissions and their call succeeds. They have permission ${permission.toString()} - The permisions required are ${permissionsThatShouldWork.toString()}`
-            ).not.toBeNull();
-          } else {
-            expect(
-              error.message,
-              `Expected error message for ${source} to be ${failure_message} but got ${error.message}`
-            ).toBe(failure_message);
+              `Expected ${source} to be allowed to use this endpoint with permission ${permission.toString()} but they were not`
+            ).toBeNull();
           }
-        }
-
-        // Source is allowed to use this endpoint, has the required permissions, but the operation failed
-        if (sourceIsAllowed && permissionsAreAllowed) {
-          expect(
-            error,
-            `Source ${source} is allowed to use this endpoint, has the required permissions, but the operation failed. They have permission ${permission.toString()} - The permisions required are ${permissionsThatShouldWork.toString()}`
-          ).toBeNull();
-        }
+        },
       });
     })
   );

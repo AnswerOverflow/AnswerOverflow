@@ -39,7 +39,7 @@ describe("Server Operations", () => {
       await testAllVariants({
         async operation(permission, caller) {
           const server = mockServer();
-          const account = await mockAccount(server, caller, permission);
+          const account = await mockAccount(server, permission, caller);
           const router = serverRouter.createCaller(account.ctx);
           await router.create(server);
         },
@@ -68,8 +68,8 @@ describe("Server Operations", () => {
       expect(server).toEqual({ ...server_1, name: "new name" });
     });
     it("should test all permission and caller variants to ensure only calls from the Discord bot with Manage Guild & Administrator can succeed", async () => {
-      await testAllVariants({
-        async operation(permission, caller) {
+      return await testAllVariants({
+        async operation(caller, permission) {
           const server = mockServer();
           await answer_overflow_bot_router.create(server);
           const account = await mockAccount(server, caller, permission);
