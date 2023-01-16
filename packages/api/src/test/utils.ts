@@ -97,78 +97,104 @@ export type PermissionVariantsTest<T> = {
   Success: (result: T, permission: PermissionResolvable, is_permission_allowed: boolean) => void;
   Err: (error: TRPCError, permission: PermissionResolvable, is_permission_allowed: boolean) => void;
   operation: (permission: PermissionResolvable) => Promise<T>;
+  failure_message: string;
 };
 
 export async function testAllPermissions<T>({
   permissionsThatShouldWork,
   operation,
+  failure_message,
   Success,
   Err,
 }: PermissionVariantsTest<T>) {
   const permissions = Object.keys(PermissionFlagsBits) as PermissionResolvable[];
   await Promise.all(
     permissions.map(async (permission) => {
-      let error: TRPCError | null = null;
       const permissionsAreAllowed = permissionsThatShouldWork.includes(permission);
       try {
         const data = await operation(permission);
+        expect(permissionsThatShouldWork.includes(permission)).toBeTruthy();
         Success(data, permission, permissionsAreAllowed);
-      } catch (err) {
-        error = err as TRPCError;
-        Err(error, permission, permissionsAreAllowed);
+      } catch (error) {
+        const err = error as TRPCError;
+        if (permissionsThatShouldWork.includes(permission)) {
+          Err(error as TRPCError, permission, permissionsAreAllowed);
+          return;
+        }
+        expect(permissionsThatShouldWork.includes(permission)).toBeFalsy();
+        expect(err.message).toEqual(failure_message);
+      }
+    })
+  );
+}
+
+export type SourceVariantsTest<T> = {
+  sourcesThatShouldWork: Source[];
+  operation: (source: Source) => Promise<T>;
+  Success: (result: T, source: Source) => void;
+  Err: (error: TRPCError, source: Source) => void;
+};
+
+export async function testAllSources<T>({
+  sourcesThatShouldWork,
+  operation,
+  Success,
+  Err,
+}: SourceVariantsTest<T>) {
+  await Promise.all(
+    sourceTypes.map(async (source) => {
+      const sourceIsAllowed = sourcesThatShouldWork.includes(source);
+      const errorLookup: Record<Source, string> = {
+        "discord-bot": WEB_CLIENT_ONLY_CALL_ERROR_MESSAGE,
+        "web-client": BOT_ONLY_CALL_ERROR_MESSAGE,
+      };
+      try {
+        const data = await operation(source);
+        expect(
+          sourceIsAllowed,
+          `Expected ${source} to be allowed to use this endpoint`
+        ).toBeTruthy();
+        Success(data, source);
+      } catch (error) {
+        const err = error as TRPCError;
+        if (sourceIsAllowed) {
+          Err(err, source);
+          return;
+        }
+        expect(
+          sourceIsAllowed,
+          `Expected ${source} to be allowed to use this endpoint`
+        ).toBeFalsy();
+        expect(err.message).toEqual(errorLookup[source]);
       }
     })
   );
 }
 
 export async function testAllVariants<T>({
-  permissionsThatShouldWork,
+  sources: { sourcesThatShouldWork },
+  permissions: { permissionsThatShouldWork, failure_message },
   operation,
-  failure_message,
-  sourcesThatShouldWork = ["discord-bot", "web-client"],
-}: Omit<PermissionVariantsTest<T>, "operation" | "Success" | "Err"> & {
-  failure_message: string;
-  sourcesThatShouldWork?: Source[];
+}: {
+  sources: Omit<SourceVariantsTest<T>, "Err" | "Success" | "operation">;
+  permissions: Omit<PermissionVariantsTest<T>, "Err" | "Success" | "operation">;
   operation: (source: Source, permission: PermissionResolvable) => Promise<T>;
 }) {
-  await Promise.all(
-    sourceTypes.map((source) => {
-      const sourceIsAllowed = sourcesThatShouldWork.includes(source);
-      const errorLookup: Record<Source, string> = {
-        "discord-bot": WEB_CLIENT_ONLY_CALL_ERROR_MESSAGE,
-        "web-client": BOT_ONLY_CALL_ERROR_MESSAGE,
-      };
-      return testAllPermissions({
+  await testAllSources({
+    sourcesThatShouldWork,
+    operation: (source) =>
+      testAllPermissions({
         permissionsThatShouldWork,
         operation: (permission) => operation(source, permission),
-        Success(_result, permission, is_permission_allowed) {
-          expect(
-            is_permission_allowed,
-            `Expected ${source} to be allowed to use this endpoint with permission ${permission.toString()} but they were not`
-          ).toBeTruthy();
-          expect(sourceIsAllowed).toBeTruthy();
+        Success() {},
+        Err(error) {
+          throw error;
         },
-        Err(error, permission, is_permission_allowed) {
-          if (!is_permission_allowed && sourceIsAllowed) {
-            expect(
-              error.message,
-              `Expected error message for ${source} to be "${errorLookup[source]}" but got "${error.message}"`
-            ).toBe(failure_message);
-          }
-          if (!sourceIsAllowed && is_permission_allowed) {
-            expect(
-              error.message,
-              `Expected error message for ${source} to be "${errorLookup[source]}" but got "${error.message}"`
-            ).toBe(errorLookup[source]);
-          }
-          if (is_permission_allowed && sourceIsAllowed) {
-            expect(
-              error,
-              `Expected ${source} to be allowed to use this endpoint with permission ${permission.toString()} but they were not`
-            ).toBeNull();
-          }
-        },
-      });
-    })
-  );
+        failure_message,
+      }),
+    Success() {},
+    Err(error) {
+      throw error;
+    },
+  });
 }

@@ -37,15 +37,19 @@ describe("Server Operations", () => {
     });
     it("should test all permission and caller variants to ensure only calls from the Discord bot with Manage Guild & Administrator can succeed", async () => {
       await testAllVariants({
+        permissions: {
+          failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+          permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        },
+        sources: {
+          sourcesThatShouldWork: ["discord-bot"],
+        },
         async operation(permission, caller) {
           const server = mockServer();
           const account = await mockAccount(server, permission, caller);
           const router = serverRouter.createCaller(account.ctx);
           await router.create(server);
         },
-        sourcesThatShouldWork: ["discord-bot"],
-        failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
-        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
       });
     });
   });
@@ -76,9 +80,13 @@ describe("Server Operations", () => {
           const router = serverRouter.createCaller(account.ctx);
           await router.update({ id: server.id, name: "new name" });
         },
-        sourcesThatShouldWork: ["discord-bot"],
-        failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
-        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        permissions: {
+          failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+          permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        },
+        sources: {
+          sourcesThatShouldWork: ["discord-bot"],
+        },
       });
     });
   });
