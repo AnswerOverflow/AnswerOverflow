@@ -91,17 +91,35 @@ export function assertIsUser(ctx: Context, target_user_id: string) {
   return;
 }
 
-export function isCtxCaller(ctx: Context, caller: Source, error_message: string) {
+export const INVALID_ROUTE_FOR_BOT_ERROR = "This route is unavaliable to be called from the bot";
+export const INVALID_ROUTER_FOR_WEB_CLIENT_ERROR =
+  "This route is unavaliable to be called from the web client";
+
+export function createInvalidSourceError(caller: Source) {
+  let message = "";
+  switch (caller) {
+    case "discord-bot":
+      message = INVALID_ROUTE_FOR_BOT_ERROR;
+      break;
+    case "web-client":
+      message = INVALID_ROUTER_FOR_WEB_CLIENT_ERROR;
+      break;
+    default:
+      throw new Error("Invalid source");
+  }
+  return new TRPCError({
+    code: "BAD_REQUEST",
+    message,
+  });
+}
+
+export function isCtxCaller(ctx: Context, caller: Source) {
   if (ctx.caller !== caller) {
-    return new TRPCError({
-      code: "BAD_REQUEST",
-      message: error_message,
-    });
+    return createInvalidSourceError(ctx.caller);
   }
   return;
 }
-export const BOT_ONLY_CALL_ERROR_MESSAGE = "This route is only available to bots";
-export const WEB_CLIENT_ONLY_CALL_ERROR_MESSAGE = "This route is only available to the web client";
+
 export function isCtxCallerDiscordBot(ctx: Context) {
-  return isCtxCaller(ctx, "discord-bot", BOT_ONLY_CALL_ERROR_MESSAGE);
+  return isCtxCaller(ctx, "discord-bot");
 }

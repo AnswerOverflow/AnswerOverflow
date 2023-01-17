@@ -4,16 +4,16 @@ import {
   getDefaultServer,
   Server,
 } from "@answeroverflow/db";
-import type { TRPCError } from "@trpc/server";
+import { TRPCError } from "@trpc/server";
 import { PermissionFlagsBits, PermissionResolvable, PermissionsBitField } from "discord.js";
 import { Source, sourceTypes, createContextInner } from "~api/router/context";
 import {
-  BOT_ONLY_CALL_ERROR_MESSAGE,
-  WEB_CLIENT_ONLY_CALL_ERROR_MESSAGE,
+  INVALID_ROUTE_FOR_BOT_ERROR,
+  INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,
 } from "~api/utils/permissions";
 
 // returns a random snowflake as a string from 0 to 100000
-function randomId() {
+export function randomId() {
   return Math.floor(Math.random() * 100000).toString();
 }
 
@@ -92,109 +92,103 @@ export function createCtxWithServers(input: CtxOverride) {
   });
 }
 
-export type PermissionVariantsTest<T> = {
-  permissionsThatShouldWork: PermissionResolvable[];
-  Success: (result: T, permission: PermissionResolvable, is_permission_allowed: boolean) => void;
-  Err: (error: TRPCError, permission: PermissionResolvable, is_permission_allowed: boolean) => void;
-  operation: (permission: PermissionResolvable) => Promise<T>;
-  failure_message: string;
-};
-
-export async function testAllPermissions<T>({
-  permissionsThatShouldWork,
+export async function handleOperationCall<T>({
   operation,
-  failure_message,
   Success,
   Err,
-}: PermissionVariantsTest<T>) {
+}: {
+  operation: () => Promise<T>;
+  Success: (result: T) => void;
+  Err: (error: TRPCError) => void;
+}) {
+  try {
+    const result = await operation();
+    Success(result);
+  } catch (error) {
+    if (error instanceof TRPCError) {
+      return Err(error);
+    }
+    throw error;
+  }
+}
+
+export type PermissionVariantsTest = {
+  permissionsThatShouldWork: PermissionResolvable[];
+  operation: (permission: PermissionResolvable, should_work: boolean) => Promise<void> | void;
+};
+
+export async function testAllPermissions({
+  permissionsThatShouldWork,
+  operation,
+}: PermissionVariantsTest) {
   const permissions = Object.keys(PermissionFlagsBits) as PermissionResolvable[];
   await Promise.all(
     permissions.map(async (permission) => {
-      const permissionsAreAllowed = permissionsThatShouldWork.includes(permission);
-      try {
-        const data = await operation(permission);
-        expect(permissionsThatShouldWork.includes(permission)).toBeTruthy();
-        Success(data, permission, permissionsAreAllowed);
-      } catch (error) {
-        const err = error as TRPCError;
-        if (permissionsThatShouldWork.includes(permission)) {
-          Err(error as TRPCError, permission, permissionsAreAllowed);
-          return;
-        }
-        expect(permissionsThatShouldWork.includes(permission)).toBeFalsy();
-        expect(err.message).toEqual(failure_message);
-      }
+      const permissionIsAllowed = permissionsThatShouldWork.includes(permission);
+      await operation(permission, permissionIsAllowed);
     })
   );
 }
 
-export type SourceVariantsTest<T> = {
+export type SourceVariantsTest = {
   sourcesThatShouldWork: Source[];
-  operation: (source: Source) => Promise<T>;
-  Success: (result: T, source: Source) => void;
-  Err: (error: TRPCError, source: Source) => void;
+  operation: (source: Source, should_source_succeed: boolean) => Promise<void> | void;
 };
 
-export async function testAllSources<T>({
-  sourcesThatShouldWork,
-  operation,
-  Success,
-  Err,
-}: SourceVariantsTest<T>) {
+export async function testAllSources({ sourcesThatShouldWork, operation }: SourceVariantsTest) {
   await Promise.all(
     sourceTypes.map(async (source) => {
       const sourceIsAllowed = sourcesThatShouldWork.includes(source);
-      const errorLookup: Record<Source, string> = {
-        "discord-bot": WEB_CLIENT_ONLY_CALL_ERROR_MESSAGE,
-        "web-client": BOT_ONLY_CALL_ERROR_MESSAGE,
-      };
-      try {
-        const data = await operation(source);
-        expect(
-          sourceIsAllowed,
-          `Expected ${source} to be allowed to use this endpoint`
-        ).toBeTruthy();
-        Success(data, source);
-      } catch (error) {
-        const err = error as TRPCError;
-        if (sourceIsAllowed) {
-          Err(err, source);
-          return;
-        }
-        expect(
-          sourceIsAllowed,
-          `Expected ${source} to be allowed to use this endpoint`
-        ).toBeFalsy();
-        expect(err.message).toEqual(errorLookup[source]);
-      }
+      await operation(source, sourceIsAllowed);
     })
   );
 }
 
-export async function testAllVariants<T>({
-  sources: { sourcesThatShouldWork },
-  permissions: { permissionsThatShouldWork, failure_message },
+export async function testAllVariants({
+  sourcesThatShouldWork,
+  permissionsThatShouldWork,
   operation,
+  permission_failure_message,
 }: {
-  sources: Omit<SourceVariantsTest<T>, "Err" | "Success" | "operation">;
-  permissions: Omit<PermissionVariantsTest<T>, "Err" | "Success" | "operation">;
-  operation: (source: Source, permission: PermissionResolvable) => Promise<T>;
+  sourcesThatShouldWork: Source[];
+  permissionsThatShouldWork: PermissionResolvable[];
+  operation: (source: Source, permission: PermissionResolvable) => Promise<void> | void;
+  permission_failure_message: string;
 }) {
   await testAllSources({
     sourcesThatShouldWork,
-    operation: (source) =>
+    operation: (source, should_source_succeed) =>
       testAllPermissions({
         permissionsThatShouldWork,
-        operation: (permission) => operation(source, permission),
-        Success() {},
-        Err(error) {
-          throw error;
+        operation: async (permission, should_permission_succeed) => {
+          try {
+            await operation(source, permission);
+            expect(should_permission_succeed).toBeTruthy();
+            expect(should_source_succeed).toBeTruthy();
+          } catch (error) {
+            const error_lookup: Record<Source, string> = {
+              "discord-bot": INVALID_ROUTE_FOR_BOT_ERROR,
+              "web-client": INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,
+            };
+            if (error instanceof TRPCError) {
+              if (should_source_succeed && should_permission_succeed) {
+                throw error;
+              }
+              if (!should_permission_succeed && should_source_succeed) {
+                expect(error.message).toBe(permission_failure_message);
+              }
+              if (!should_source_succeed && should_permission_succeed) {
+                expect(error.message).toBe(error_lookup[source]);
+              }
+              if (!should_source_succeed && !should_permission_succeed) {
+                const expected_error_message = `${error_lookup[source]}\n${permission_failure_message}`;
+                const sorted_actual_error_message = [...error.message].sort().join("");
+                const sorted_expected_error_message = [...expected_error_message].sort().join("");
+                expect(sorted_actual_error_message).toBe(sorted_expected_error_message);
+              }
+            }
+          }
         },
-        failure_message,
       }),
-    Success() {},
-    Err(error) {
-      throw error;
-    },
   });
 }
