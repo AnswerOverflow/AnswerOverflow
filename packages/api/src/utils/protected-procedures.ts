@@ -1,5 +1,5 @@
 import { findOrThrowNotFound } from "./operations";
-import type { TRPCError } from "@trpc/server";
+import { TRPCError } from "@trpc/server";
 
 type PermissionCheckResult = Promise<TRPCError | void> | (TRPCError | void);
 
@@ -12,7 +12,11 @@ async function iteratePermissionResults(
     const awaited_results = await Promise.all(results);
     const errors = awaited_results.filter((result) => result != undefined) as TRPCError[];
     if (errors.length > 0) {
-      throw errors[0];
+      const error_messages = errors.map((error) => error.message).join("\n");
+      throw new TRPCError({
+        code: "PRECONDITION_FAILED",
+        message: error_messages,
+      });
     }
   } else {
     const awaited_result = await results;
