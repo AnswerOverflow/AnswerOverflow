@@ -69,7 +69,7 @@ describe("Test All Variants", () => {
     await testAllVariants({
       sourcesThatShouldWork: sources_that_should_work,
       permissionsThatShouldWork: permissions_that_should_work,
-      operation: (source, permission) => {
+      operation: ({ source, permission }) => {
         const should_source_succeed = sources_that_should_work.includes(source);
         const should_permission_succeed = permissions_that_should_work.includes(permission);
         if (should_source_succeed && should_permission_succeed) {

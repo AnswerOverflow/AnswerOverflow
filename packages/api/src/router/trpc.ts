@@ -68,19 +68,8 @@ const addUserServers = t.middleware(async ({ ctx, next }) => {
   });
 });
 
-const isCallerDiscordBot = t.middleware(async ({ ctx, next }) => {
-  if (ctx.caller !== "discord-bot") {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "You can only perform this action via the Discord bot",
-    });
-  }
-  return next();
-});
-
 export const router = t.router;
 export const mergeRouters = t.mergeRouters;
 export const publicProcedure = t.procedure;
 export const withDiscordAccountProcedure = t.procedure.use(addDiscordAccount);
 export const withUserServersProcedure = t.procedure.use(addUserServers);
-export const discordBotCallerOnlyProcedure = t.procedure.use(isCallerDiscordBot);

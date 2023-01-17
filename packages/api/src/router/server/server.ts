@@ -1,10 +1,5 @@
 import { z } from "zod";
-import {
-  mergeRouters,
-  router,
-  discordBotCallerOnlyProcedure,
-  publicProcedure,
-} from "~api/router/trpc";
+import { mergeRouters, router, publicProcedure } from "~api/router/trpc";
 import { upsert } from "~api/utils/operations";
 import { canEditServer, isCtxCallerDiscordBot } from "~api/utils/permissions";
 import { protectedFetchWithPublicData, protectedMutation } from "~api/utils/protected-procedures";
@@ -70,7 +65,7 @@ const serverFetchRouter = router({
 });
 
 const serverUpsertRouter = router({
-  upsert: discordBotCallerOnlyProcedure.input(z_server_upsert).mutation(async ({ ctx, input }) => {
+  upsert: publicProcedure.input(z_server_upsert).mutation(async ({ ctx, input }) => {
     return upsert(
       () => serverFetchRouter.createCaller(ctx).byId(input.id),
       () => serverCreateUpdateRouter.createCaller(ctx).create(input),

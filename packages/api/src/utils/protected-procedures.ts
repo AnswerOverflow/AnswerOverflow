@@ -71,7 +71,6 @@ type ValidatedPermissionsOrFormatData<F, T extends F> = {
 
 async function validatePermissionsOrFormatData<F, T extends F>({
   permissions,
-  public_data_permissions = [],
   public_data_formatter,
   data,
 }: ValidatedPermissionsOrFormatData<F, T>): Promise<T | (Partial<T> & F)> {
@@ -79,7 +78,6 @@ async function validatePermissionsOrFormatData<F, T extends F>({
     await validatePermissionsWithData(permissions, data);
   } catch (error) {
     if (public_data_formatter) {
-      await validatePermissionsWithData(public_data_permissions, data);
       return public_data_formatter(data);
     }
     throw error;
