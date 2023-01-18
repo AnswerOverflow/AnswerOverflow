@@ -3,7 +3,9 @@ import { TRPCError } from "@trpc/server";
 
 type PermissionCheckResult = Promise<TRPCError | void> | (TRPCError | void);
 
-type PermissionsChecks = Array<() => PermissionCheckResult> | (() => PermissionCheckResult);
+type PermissionsChecks =
+  | Array<() => PermissionCheckResult | PermissionCheckResult[]>
+  | (() => PermissionCheckResult | PermissionCheckResult[]);
 
 async function iteratePermissionResults(
   results: Array<PermissionCheckResult> | PermissionCheckResult
@@ -12,7 +14,8 @@ async function iteratePermissionResults(
     const awaited_results = await Promise.all(results);
     const errors = awaited_results.filter((result) => result != undefined) as TRPCError[];
     if (errors.length > 0) {
-      const error_messages = errors.map((error) => error.message).join("\n");
+      // Ugly
+      const error_messages = [...new Set(errors.map((error) => error.message))].join("\n");
       throw new TRPCError({
         code: "PRECONDITION_FAILED",
         message: error_messages,
@@ -28,19 +31,22 @@ async function iteratePermissionResults(
 
 async function validatePermissions(permissions: PermissionsChecks) {
   if (Array.isArray(permissions)) {
-    await iteratePermissionResults(permissions.map(async (permission) => permission()));
+    await iteratePermissionResults(permissions.map((permission) => permission()).flat());
   } else {
     await iteratePermissionResults(permissions());
   }
 }
 
 type PermissionsChecksWithData<T> =
-  | Array<(data: T) => PermissionCheckResult>
-  | ((data: T) => PermissionCheckResult);
+  | Array<(data: T) => PermissionCheckResult | PermissionCheckResult[]>
+  | ((data: T) => PermissionCheckResult | PermissionCheckResult[]);
 
 async function validatePermissionsWithData<T>(permissions: PermissionsChecksWithData<T>, data: T) {
   if (Array.isArray(permissions)) {
-    await iteratePermissionResults(permissions.map(async (permission) => permission(data)));
+    const permissionResults = permissions.map((permission) => permission(data));
+    // flatten
+    const flattenedPermissionResults = permissionResults.flat();
+    await iteratePermissionResults(flattenedPermissionResults);
   } else {
     await iteratePermissionResults(permissions(data));
   }
@@ -52,7 +58,7 @@ type ProtectedFetchInput<T> = {
   not_found_message: string;
 };
 
-export async function protectedFetch<F, T extends F>({
+export async function protectedFetch<T>({
   fetch,
   permissions,
   not_found_message,

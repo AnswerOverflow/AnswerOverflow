@@ -1,18 +1,21 @@
 import { getDefaultChannel } from "@answeroverflow/db";
 import { z } from "zod";
-import { mergeRouters, withUserServersProcedure, router, publicProcedure } from "~api/router/trpc";
+import { mergeRouters, router, publicProcedure } from "~api/router/trpc";
 import { addDefaultValues, upsert, upsertMany } from "~api/utils/operations";
-import { canEditServer, canEditServers, isCtxCallerDiscordBot } from "~api/utils/permissions";
+import { canEditServer, isCtxCallerDiscordBot } from "~api/utils/permissions";
 import {
-  protectedFetch,
   protectedFetchWithPublicData,
+  protectedFetchManyWithPublicData,
   protectedMutation,
   protectedMutationFetchFirst,
 } from "~api/utils/protected-procedures";
 import { ALLOWED_CHANNEL_TYPES, ALLOWED_THREAD_TYPES } from "~api/utils/types";
+import { unique_array } from "~api/utils/zod-utils";
 import { serverRouter, z_server_upsert } from "../server/server";
 
-const z_channel = z.object({
+export const CHANNEL_NOT_FOUND_MESSAGES = "Channel does not exist";
+
+export const z_channel = z.object({
   id: z.string(),
   name: z.string(),
   server_id: z.string(),
@@ -36,6 +39,7 @@ const z_channel_required = z_channel.pick({
   name: true,
   server_id: true,
   type: true,
+  parent_id: true,
 });
 
 const z_channel_mutable = z_channel.pick({
@@ -83,19 +87,15 @@ const fetch_router = router({
     return protectedFetchWithPublicData({
       fetch: () => ctx.prisma.channel.findUnique({ where: { id: input } }),
       permissions: (data) => canEditServer(ctx, data.server_id),
-      not_found_message: "Channel does not exist",
+      not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
       public_data_formatter: (data) => z_channel_public.parse(data),
     });
   }),
-  byIdMany: publicProcedure.input(z.array(z.string())).query(async ({ ctx, input }) => {
-    return protectedFetch({
+  byIdMany: publicProcedure.input(unique_array).query(async ({ ctx, input }) => {
+    return protectedFetchManyWithPublicData({
       fetch: async () => await ctx.prisma.channel.findMany({ where: { id: { in: input } } }),
-      permissions: (data) =>
-        canEditServers(
-          ctx,
-          data.map((c) => c.server_id)
-        ),
-      not_found_message: "Channel does not exist",
+      permissions: (data) => canEditServer(ctx, data.server_id),
+      public_data_formatter: (data) => z_channel_public.parse(data),
     });
   }),
 });
@@ -107,62 +107,50 @@ const create_update_delete_router = router({
       permissions: [() => canEditServer(ctx, input.server_id), () => isCtxCallerDiscordBot(ctx)],
     });
   }),
-  createThread: withUserServersProcedure.input(z_thread_create).mutation(({ ctx, input }) => {
-    return protectedMutation({
-      operation: () => ctx.prisma.channel.create({ data: input }),
-      permissions: () => canEditServer(ctx, input.server_id),
+  createMany: publicProcedure.input(z.array(z_channel_create)).mutation(async ({ ctx, input }) => {
+    await protectedMutation({
+      operation: () => ctx.prisma.channel.createMany({ data: input }),
+      permissions: [
+        () => input.map((i) => canEditServer(ctx, i.server_id)),
+        () => isCtxCallerDiscordBot(ctx),
+      ],
     });
+    return addDefaultValues(input, getDefaultChannel);
   }),
-  createMany: withUserServersProcedure
-    .input(z.array(z_channel_create))
-    .mutation(async ({ ctx, input }) => {
-      await protectedMutation({
-        operation: () => ctx.prisma.channel.createMany({ data: input }),
-        permissions: () =>
-          canEditServers(
-            ctx,
-            input.map((c) => c.server_id)
-          ),
-      });
-      return addDefaultValues(input, getDefaultChannel);
-    }),
   update: publicProcedure.input(z_channel_update).mutation(async ({ ctx, input }) => {
     return protectedMutationFetchFirst({
       fetch: () => fetch_router.createCaller(ctx).byId(input.id),
       operation: () => ctx.prisma.channel.update({ where: { id: input.id }, data: input }),
       permissions: [(data) => canEditServer(ctx, data.server_id), () => isCtxCallerDiscordBot(ctx)],
-      not_found_message: "Channel does not exist",
+      not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
     });
   }),
-  updateMany: withUserServersProcedure
-    .input(z.array(z_channel_update))
-    .mutation(async ({ ctx, input }) => {
-      return protectedMutationFetchFirst({
-        fetch: () => fetch_router.createCaller(ctx).byIdMany(input.map((c) => c.id)),
-        operation: () =>
-          ctx.prisma.$transaction(
-            input.map((c) => ctx.prisma.channel.update({ where: { id: c.id }, data: c }))
-          ),
-        permissions: (data) =>
-          canEditServers(
-            ctx,
-            data.map((c) => c.server_id)
-          ),
-        not_found_message: "Channel does not exist",
-      });
-    }),
-  delete: withUserServersProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
+  updateMany: publicProcedure.input(z.array(z_channel_update)).mutation(async ({ ctx, input }) => {
+    return protectedMutationFetchFirst({
+      fetch: () => fetch_router.createCaller(ctx).byIdMany(input.map((c) => c.id)),
+      operation: () =>
+        ctx.prisma.$transaction(
+          input.map((c) => ctx.prisma.channel.update({ where: { id: c.id }, data: c }))
+        ),
+      permissions: [
+        () => isCtxCallerDiscordBot(ctx),
+        (data) => data.map((d) => canEditServer(ctx, d.server_id)),
+      ],
+      not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
+    });
+  }),
+  delete: publicProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     return protectedMutationFetchFirst({
       fetch: () => fetch_router.createCaller(ctx).byId(input),
       operation: () => ctx.prisma.channel.delete({ where: { id: input } }),
-      permissions: (data) => canEditServer(ctx, data.server_id),
-      not_found_message: "Channel does not exist",
+      permissions: (data) => [canEditServer(ctx, data.server_id), isCtxCallerDiscordBot(ctx)],
+      not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
     });
   }),
 });
 
 const create_with_deps_router = router({
-  createWithDeps: withUserServersProcedure
+  createWithDeps: publicProcedure
     .input(z_channel_create_with_deps)
     .mutation(async ({ ctx, input }) => {
       const { server, ...channel } = input;
@@ -174,47 +162,30 @@ const create_with_deps_router = router({
     }),
 });
 
-const create_thread_with_deps_router = router({
-  createThreadWithDeps: withUserServersProcedure
-    .input(z_thread_create_with_deps)
-    .mutation(async ({ ctx, input }) => {
-      const { parent, ...thread } = input;
-      await upsert_router.createCaller(ctx).upsertWithDeps(input.parent);
-
-      return create_update_delete_router.createCaller(ctx).createThread({
-        parent_id: parent.id,
-        server_id: parent.server.id,
-        ...thread,
-      });
-    }),
-});
-
 const upsert_router = router({
-  upsert: withUserServersProcedure.input(z_channel_upsert).mutation(async ({ ctx, input }) => {
+  upsert: publicProcedure.input(z_channel_upsert).mutation(async ({ ctx, input }) => {
     return upsert(
       () => fetch_router.createCaller(ctx).byId(input.id),
       () => create_update_delete_router.createCaller(ctx).create(input),
       () => create_update_delete_router.createCaller(ctx).update(input)
     );
   }),
-  upsertMany: withUserServersProcedure
-    .input(z_channel_upsert_many)
-    .mutation(async ({ ctx, input }) => {
-      return upsertMany({
-        input: input,
-        find: () => fetch_router.createCaller(ctx).byIdMany(input.map((c) => c.id)),
-        getInputId(input) {
-          return input.id;
-        },
-        getFetchedDataId(input) {
-          return input.id;
-        },
-        create: (create) => create_update_delete_router.createCaller(ctx).createMany(create),
-        update: (update) => create_update_delete_router.createCaller(ctx).updateMany(update),
-      });
-    }),
+  upsertMany: publicProcedure.input(z_channel_upsert_many).mutation(async ({ ctx, input }) => {
+    return upsertMany({
+      input: input,
+      find: () => fetch_router.createCaller(ctx).byIdMany(input.map((c) => c.id)),
+      getInputId(input) {
+        return input.id;
+      },
+      getFetchedDataId(input) {
+        return input.id;
+      },
+      create: (create) => create_update_delete_router.createCaller(ctx).createMany(create),
+      update: (update) => create_update_delete_router.createCaller(ctx).updateMany(update),
+    });
+  }),
 
-  upsertWithDeps: withUserServersProcedure
+  upsertWithDeps: publicProcedure
     .input(z_channel_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(
@@ -223,12 +194,20 @@ const upsert_router = router({
         () => create_update_delete_router.createCaller(ctx).update(input)
       );
     }),
-  upsertThreadWithDeps: withUserServersProcedure
+});
+
+const upsert_thread_router = router({
+  upsertThreadWithDeps: publicProcedure
     .input(z_thread_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(
         () => fetch_router.createCaller(ctx).byId(input.id),
-        () => create_thread_with_deps_router.createCaller(ctx).createThreadWithDeps(input),
+        async () => {
+          await upsert_router.createCaller(ctx).upsertWithDeps(input.parent);
+          return create_update_delete_router
+            .createCaller(ctx)
+            .create({ ...input, parent_id: input.parent.id, server_id: input.parent.server.id });
+        },
         () => create_update_delete_router.createCaller(ctx).update(input)
       );
     }),
@@ -236,8 +215,8 @@ const upsert_router = router({
 
 export const channelRouter = mergeRouters(
   create_update_delete_router,
-  create_thread_with_deps_router,
   create_with_deps_router,
+  upsert_thread_router,
   fetch_router,
   upsert_router
 );

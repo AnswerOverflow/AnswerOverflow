@@ -5,6 +5,8 @@ import type { Source, Context } from "~api/router/context";
 export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
   "You are missing the required permissions to do this";
 
+type PermissionCheckResult = TRPCError | undefined;
+
 export function isAnswerOverflowBot(ctx: Context) {
   const bot_id =
     process.env.NODE_ENV === "test"
@@ -19,7 +21,7 @@ export function isSuperUser(ctx: Context) {
   return false;
 }
 
-export function errorIfNotAnswerOverflowBot(ctx: Context) {
+export function errorIfNotAnswerOverflowBot(ctx: Context): PermissionCheckResult {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
   return new TRPCError({
@@ -28,7 +30,7 @@ export function errorIfNotAnswerOverflowBot(ctx: Context) {
   });
 }
 
-export function canEditServer(ctx: Context, server_id: string) {
+export function canEditServer(ctx: Context, server_id: string): PermissionCheckResult {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
   if (!ctx.user_servers) {
@@ -57,14 +59,6 @@ export function canEditServer(ctx: Context, server_id: string) {
     });
   }
   return;
-}
-
-export function canEditServers(ctx: Context, server_id: string | string[]) {
-  if (Array.isArray(server_id)) {
-    server_id.forEach((id) => canEditServer(ctx, id));
-  } else {
-    canEditServer(ctx, server_id);
-  }
 }
 
 export function canEditMessage(ctx: Context, author_id: string) {
