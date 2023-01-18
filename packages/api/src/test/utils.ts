@@ -222,7 +222,7 @@ export async function testAllVariants({
                 throw error;
               }
               const makeExpectErrorMessage = (expected_message: string, actual_message: string) =>
-                `Failure from ${source} with permissions ${permission.toString()}.\nExpected message:\n${expected_message}\n\nActual Message:\n${actual_message}\n`;
+                `Failure from ${source} with permissions ${permission.toString()}.\nExpected message:\n-----\n${expected_message}\n-----\n\n\nActual Message:\n\n-----\n${actual_message}\n-----\n\n`;
 
               if (!should_permission_succeed && should_source_succeed) {
                 expect(
