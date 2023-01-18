@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { router, publicProcedure } from "~api/router/trpc";
-import { findAllowNull, findOrThrowNotFound } from "~api/utils/operations";
+import { findAllowNull } from "~api/utils/operations";
 import type { Context } from "~api/router/context";
 import { TRPCError } from "@trpc/server";
-import { protectedMutation } from "~api/utils/protected-procedures";
+import { protectedFetch, protectedMutation } from "~api/utils/protected-procedures";
 import { assertIsUser } from "~api/utils/permissions";
 
 export async function assertIsNotDeletedUser(ctx: Context, target_user_id: string) {
@@ -38,18 +38,24 @@ export const ignored_discord_account_router = router({
   }),
   // TODO: Make bot only?
   byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
-    return findOrThrowNotFound(
-      () => ctx.prisma.ignoredDiscordAccount.findUnique({ where: { id: input } }),
-      "Ignored Discord account not found"
-    );
+    return protectedFetch({
+      permissions: () => assertIsUser(ctx, input),
+      not_found_message: "Ignored discord account not found",
+      fetch: () => ctx.prisma.ignoredDiscordAccount.findUnique({ where: { id: input } }),
+    });
   }),
   byIdMany: publicProcedure.input(z.array(z.string())).query(({ ctx, input }) => {
-    return ctx.prisma.ignoredDiscordAccount.findMany({
-      where: {
-        id: {
-          in: input,
-        },
-      },
+    return protectedFetch({
+      fetch: () =>
+        ctx.prisma.ignoredDiscordAccount.findMany({
+          where: {
+            id: {
+              in: input,
+            },
+          },
+        }),
+      permissions: () => input.map((id) => assertIsUser(ctx, id)),
+      not_found_message: "Ignored discord accounts not found",
     });
   }),
   stopIgnoring: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {

@@ -79,6 +79,7 @@ describe("Discord Account Operations", () => {
       );
       expect(discord_account_created).toEqual(discord_account);
     });
+    test.todo("Fail to create a deleted account");
     it("should test all varaints of creating a discord account that a user doesn't own", async () => {
       await testAllSources({
         async operation(source) {
@@ -184,6 +185,7 @@ describe("Discord Account Operations", () => {
     beforeEach(async () => {
       await discord_account_router_bot_caller.create(discord_account);
     });
+    test.todo("Verify that deleting a discord account maps it to ignored accounts");
     it("should delete a discord account", async () => {
       const discord_account_deleted = await discord_account_router_bot_caller.delete(
         discord_account.id
