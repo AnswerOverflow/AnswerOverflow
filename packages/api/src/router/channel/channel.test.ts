@@ -2,7 +2,7 @@ import { Channel, clearDatabase, Server } from "@answeroverflow/db";
 import {
   mockServer,
   mockChannel,
-  mockAccount,
+  mockAccountWithCtx,
   createAnswerOverflowBotCtx,
   testAllVariants,
 } from "~api/test/utils";
@@ -46,7 +46,7 @@ describe("Channel Operations", () => {
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
         permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
         async operation({ permission, source, should_permission_succeed, should_source_succeed }) {
-          const account = await mockAccount(server, source, permission);
+          const account = await mockAccountWithCtx(server, source, permission);
           const router = channelRouter.createCaller(account.ctx);
           const fetched = await router.byId(channel.id);
           if (should_permission_succeed && should_source_succeed) {
@@ -79,7 +79,7 @@ describe("Channel Operations", () => {
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
         permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
         async operation({ permission, source, should_permission_succeed, should_source_succeed }) {
-          const account = await mockAccount(server, source, permission);
+          const account = await mockAccountWithCtx(server, source, permission);
           const router = channelRouter.createCaller(account.ctx);
           const fetched = await router.byIdMany([channel.id, channel2.id]);
           if (should_permission_succeed && should_source_succeed) {
@@ -102,7 +102,7 @@ describe("Channel Operations", () => {
         permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
         async operation({ permission, source }) {
           const chnl = mockChannel(server);
-          const account = await mockAccount(server, source, permission);
+          const account = await mockAccountWithCtx(server, source, permission);
           const router = channelRouter.createCaller(account.ctx);
           await router.create(chnl);
         },
@@ -122,7 +122,7 @@ describe("Channel Operations", () => {
         async operation({ permission, source }) {
           const chnl = mockChannel(server);
           const chnl2 = mockChannel(server);
-          const account = await mockAccount(server, source, permission);
+          const account = await mockAccountWithCtx(server, source, permission);
           const router = channelRouter.createCaller(account.ctx);
           const results = await router.createMany([chnl, chnl2]);
           expect(results).toContainEqual(chnl);
@@ -147,7 +147,7 @@ describe("Channel Operations", () => {
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
         permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
         async operation({ permission, source }) {
-          const account = await mockAccount(server, source, permission);
+          const account = await mockAccountWithCtx(server, source, permission);
           const router = channelRouter.createCaller(account.ctx);
           await router.update({
             id: channel.id,
@@ -180,7 +180,7 @@ describe("Channel Operations", () => {
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
         permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
         async operation({ permission, source }) {
-          const account = await mockAccount(server, source, permission);
+          const account = await mockAccountWithCtx(server, source, permission);
           const router = channelRouter.createCaller(account.ctx);
           await router.updateMany([
             {
@@ -225,7 +225,7 @@ describe("Channel Operations", () => {
         async operation({ permission, source }) {
           const chnl = mockChannel(server);
           await ao_bot_channel_router.create(chnl);
-          const account = await mockAccount(server, source, permission);
+          const account = await mockAccountWithCtx(server, source, permission);
           const router = channelRouter.createCaller(account.ctx);
           await router.delete(chnl.id);
         },
@@ -247,7 +247,7 @@ describe("Channel Operations", () => {
           permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
           async operation({ permission, source }) {
             const chnl = mockChannel(server);
-            const account = await mockAccount(server, source, permission);
+            const account = await mockAccountWithCtx(server, source, permission);
             const router = channelRouter.createCaller(account.ctx);
             await router.upsert(chnl);
           },
@@ -268,7 +268,7 @@ describe("Channel Operations", () => {
           permissionsThatShouldWork: ["ManageGuild", "Administrator"],
           permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
           async operation({ permission, source }) {
-            const account = await mockAccount(server, source, permission);
+            const account = await mockAccountWithCtx(server, source, permission);
             const router = channelRouter.createCaller(account.ctx);
             await router.upsert({
               ...channel,

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { withDiscordAccountProcedure, router, publicProcedure } from "~api/router/trpc";
+import { router, publicProcedure } from "~api/router/trpc";
 import { findAllowNull, findOrThrowNotFound } from "~api/utils/operations";
 import type { Context } from "~api/router/context";
 import { TRPCError } from "@trpc/server";
@@ -21,7 +21,7 @@ export async function assertIsNotDeletedUser(ctx: Context, target_user_id: strin
 }
 
 export const ignored_discord_account_router = router({
-  upsert: withDiscordAccountProcedure.input(z.string()).mutation(({ ctx, input }) => {
+  upsert: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
     return protectedMutation({
       permissions: () => assertIsUser(ctx, input),
       operation: () =>
@@ -52,7 +52,7 @@ export const ignored_discord_account_router = router({
       },
     });
   }),
-  stopIgnoring: withDiscordAccountProcedure.input(z.string()).mutation(({ ctx, input }) => {
+  stopIgnoring: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
     return protectedMutation({
       permissions: () => assertIsUser(ctx, input),
       operation: () => ctx.prisma.ignoredDiscordAccount.delete({ where: { id: input } }),

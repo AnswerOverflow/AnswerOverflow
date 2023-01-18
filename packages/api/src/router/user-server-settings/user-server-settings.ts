@@ -17,7 +17,7 @@ import {
   protectedMutation,
   protectedMutationFetchFirst,
 } from "~api/utils/protected-procedures";
-import { assertIsUser, assertIsUsers } from "~api/utils/permissions";
+import { assertIsUser } from "~api/utils/permissions";
 
 export const SERVER_NOT_SETUP_MESSAGE = "Server is not setup for Answer Overflow yet";
 
@@ -111,7 +111,7 @@ const user_server_settings_fetch_router = router({
       const server_ids = input.map((x) => x.server_id);
       return transformUserServerSettingsArray(
         protectedFetch({
-          permissions: () => assertIsUsers(ctx, user_ids),
+          permissions: () => input.map((user) => assertIsUser(ctx, user.user_id)),
           fetch: () => {
             return ctx.prisma.userServerSettings.findMany({
               where: {

@@ -1,7 +1,7 @@
 import { clearDatabase, Server } from "@answeroverflow/db";
 import {
   createAnswerOverflowBotCtx,
-  mockAccount,
+  mockAccountWithCtx,
   mockServer,
   testAllVariants,
 } from "~api/test/utils";
@@ -16,7 +16,7 @@ let server_1: Server;
 beforeEach(async () => {
   await clearDatabase();
   server_1 = mockServer();
-  const guild_manager = await mockAccount(server_1, "discord-bot", "ManageGuild");
+  const guild_manager = await mockAccountWithCtx(server_1, "discord-bot", "ManageGuild");
   manage_guild_router_calling_from_discord = serverRouter.createCaller(guild_manager.ctx);
   const ao_bot = await createAnswerOverflowBotCtx();
   answer_overflow_bot_router = serverRouter.createCaller(ao_bot);
@@ -39,7 +39,7 @@ describe("Server Operations", () => {
         permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
         async operation({ permission, source }) {
           const server = mockServer();
-          const account = await mockAccount(server, source, permission);
+          const account = await mockAccountWithCtx(server, source, permission);
           const router = serverRouter.createCaller(account.ctx);
           await router.create(server);
         },
@@ -69,7 +69,7 @@ describe("Server Operations", () => {
         async operation({ source, permission }) {
           const server = mockServer();
           await answer_overflow_bot_router.create(server);
-          const account = await mockAccount(server, source, permission);
+          const account = await mockAccountWithCtx(server, source, permission);
           const router = serverRouter.createCaller(account.ctx);
           await router.update({ id: server.id, name: "new name" });
         },
@@ -88,7 +88,11 @@ describe("Server Operations", () => {
       await answer_overflow_bot_router.create(server_2);
     });
     it("should succeed fetching a server with manage guild", async () => {
-      const server_2_guild_manager = await mockAccount(server_2, "discord-bot", "ManageGuild");
+      const server_2_guild_manager = await mockAccountWithCtx(
+        server_2,
+        "discord-bot",
+        "ManageGuild"
+      );
       const router = serverRouter.createCaller(server_2_guild_manager.ctx);
       const server = await router.byId(server_2.id);
       expect(server as ServerAll).toEqual(server_2);
@@ -96,7 +100,7 @@ describe("Server Operations", () => {
     it("should succeed fetching a server with permission variants", async () => {
       await testAllVariants({
         async operation({ permission, should_permission_succeed, source, should_source_succeed }) {
-          const account = await mockAccount(server_2, source, permission);
+          const account = await mockAccountWithCtx(server_2, source, permission);
           const router = serverRouter.createCaller(account.ctx);
           const fetched_data = await router.byId(server_2.id);
           if (should_permission_succeed && should_source_succeed) {
@@ -128,7 +132,7 @@ describe("Server Operations", () => {
         permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
         async operation({ permission, source }) {
           const server = mockServer();
-          const account = await mockAccount(server, source, permission);
+          const account = await mockAccountWithCtx(server, source, permission);
           const router = serverRouter.createCaller(account.ctx);
           await router.upsert(server);
         },

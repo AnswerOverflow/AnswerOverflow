@@ -1,6 +1,6 @@
 import {
   createAnswerOverflowBotCtx,
-  mockAccount,
+  mockAccountWithCtx,
   mockChannel,
   mockServer,
   testAllVariants,
@@ -43,7 +43,7 @@ describe("Channel Settings Operations", () => {
     it("should test fetching channel settings with all varaints", async () => {
       await testAllVariants({
         async operation({ source, permission }) {
-          const caller = await mockAccount(server, source, permission);
+          const caller = await mockAccountWithCtx(server, source, permission);
           const router = channelSettingsRouter.createCaller(caller.ctx);
           await router.byId(channel.id);
         },
@@ -68,7 +68,7 @@ describe("Channel Settings Operations", () => {
     it("should test fetching channel settings by id with all varaints", async () => {
       await testAllVariants({
         async operation({ source, permission }) {
-          const caller = await mockAccount(server, source, permission);
+          const caller = await mockAccountWithCtx(server, source, permission);
           const router = channelSettingsRouter.createCaller(caller.ctx);
           await router.byInviteCode("potato");
         },
@@ -88,7 +88,7 @@ describe("Channel Settings Operations", () => {
     it("should test creating channel settings with all varaints", async () => {
       await testAllVariants({
         async operation({ source, permission }) {
-          const caller = await mockAccount(server, source, permission);
+          const caller = await mockAccountWithCtx(server, source, permission);
           const chnl = mockChannel(server);
           await ao_bot_channel_router.create(chnl);
           const router = channelSettingsRouter.createCaller(caller.ctx);
@@ -125,7 +125,7 @@ describe("Channel Settings Operations", () => {
     it("should test updating channel settings with all varaints", async () => {
       await testAllVariants({
         async operation({ source, permission }) {
-          const caller = await mockAccount(server, source, permission);
+          const caller = await mockAccountWithCtx(server, source, permission);
           const router = channelSettingsRouter.createCaller(caller.ctx);
           await router.update({
             channel_id: channel.id,
@@ -154,7 +154,7 @@ describe("Channel Settings Operations", () => {
       await testAllVariants({
         async operation({ source, permission }) {
           const srv = mockServer();
-          const caller = await mockAccount(srv, source, permission);
+          const caller = await mockAccountWithCtx(srv, source, permission);
           const chnl = mockChannel(server);
           const router = channelSettingsRouter.createCaller(caller.ctx);
           await router.createWithDeps({
@@ -180,7 +180,7 @@ describe("Channel Settings Operations", () => {
     it("should test upserting channel settings with all varaints", async () => {
       await testAllVariants({
         async operation({ source, permission }) {
-          const caller = await mockAccount(server, source, permission);
+          const caller = await mockAccountWithCtx(server, source, permission);
           const chnl = mockChannel(server);
           await ao_bot_channel_router.create(chnl);
           const router = channelSettingsRouter.createCaller(caller.ctx);
@@ -208,7 +208,7 @@ describe("Channel Settings Operations", () => {
       await testAllVariants({
         async operation({ source, permission }) {
           const srv = mockServer();
-          const caller = await mockAccount(srv, source, permission);
+          const caller = await mockAccountWithCtx(srv, source, permission);
           const chnl = mockChannel(server);
           const router = channelSettingsRouter.createCaller(caller.ctx);
           await router.upsertWithDeps({

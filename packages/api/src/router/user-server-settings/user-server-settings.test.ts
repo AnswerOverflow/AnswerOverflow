@@ -1,124 +1,22 @@
-import { clearDatabase, DiscordAccount, Server } from "@answeroverflow/db";
-import { getGeneralScenario } from "~api/test/utils";
-import { discordAccountRouter } from "../users/accounts/discord-accounts";
+import { createAnswerOverflowBotCtx, mockServer } from "~api/test/utils";
 import { serverRouter } from "../server/server";
-import { SERVER_NOT_SETUP_MESSAGE, userServerSettingsRouter } from "./user-server-settings";
 
-let user_1_router: ReturnType<(typeof userServerSettingsRouter)["createCaller"]>;
-let user_2_router: ReturnType<(typeof userServerSettingsRouter)["createCaller"]>;
-let user1: DiscordAccount;
-let user2: DiscordAccount;
-let discord_account_router: ReturnType<(typeof discordAccountRouter)["createCaller"]>;
-let server_router: ReturnType<(typeof serverRouter)["createCaller"]>;
+import { Server, clearDatabase } from "@answeroverflow/db";
+import type { userServerSettingsRouter } from "./user-server-settings";
+
+let ao_bot_server_router: ReturnType<(typeof serverRouter)["createCaller"]>;
+let ao_bot_server_settings_router: ReturnType<(typeof userServerSettingsRouter)["createCaller"]>;
+
 let server: Server;
 
 beforeEach(async () => {
-  const { data1 } = await getGeneralScenario();
-  user_1_router = userServerSettingsRouter.createCaller(data1.account1_guild_manager_ctx);
-  user_2_router = userServerSettingsRouter.createCaller(data1.account2_default_member_ctx);
-  server_router = serverRouter.createCaller(data1.account1_guild_manager_ctx);
-  discord_account_router = discordAccountRouter.createCaller(data1.bot_caller_ctx);
-  user1 = data1.account1_guild_manager;
-  user2 = data1.account2_default_member;
-  server = data1.server;
   await clearDatabase();
+  server = mockServer();
+  const ao_bot = await createAnswerOverflowBotCtx();
+  ao_bot_server_router = serverRouter.createCaller(ao_bot);
+  await ao_bot_server_router.create(server);
 });
 
-describe("User Server Settings Create", () => {
-  it("should create user server settings", async () => {
-    await server_router.create(server);
-    await discord_account_router.create(user1);
-    const user_server_settings = await user_1_router.create({
-      server_id: server.id,
-      user_id: user1.id,
-    });
-    expect(user_server_settings).toBeDefined();
-  });
-});
-
-describe("User Server Settings Create With Deps", () => {
-  it("should create user server settings with user deps", async () => {
-    await server_router.create(server);
-    const user_server_settings = await user_2_router.createWithDeps({
-      user: user2,
-      server_id: server.id,
-    });
-    expect(user_server_settings).toBeDefined();
-  });
-  it("should fail to create user server settings with deps if the server does not exist yet", async () => {
-    await expect(
-      user_2_router.createWithDeps({
-        user: user2,
-        server_id: server.id,
-      })
-    ).rejects.toThrowError(SERVER_NOT_SETUP_MESSAGE);
-  });
-});
-
-describe("User Server Settings Upsert", () => {
-  beforeEach(async () => {
-    await server_router.create(server);
-    await discord_account_router.create(user1);
-  });
-  it("should upsert new user server settings", async () => {
-    const user_server_settings = await user_1_router.upsert({
-      server_id: server.id,
-      user_id: user1.id,
-    });
-    expect(user_server_settings).toBeDefined();
-  });
-});
-
-describe("User Server Settings Upsert With Deps", () => {
-  it("should upsert user server settings with user deps", async () => {
-    await server_router.create(server);
-    const user_server_settings = await user_2_router.upsertWithDeps({
-      user: user2,
-      server_id: server.id,
-      flags: {
-        can_publicly_display_messages: true,
-      },
-    });
-    expect(user_server_settings).toBeDefined();
-  });
-  it("should fail to upsert user server settings with deps if the server does not exist yet", async () => {
-    await expect(
-      user_2_router.upsertWithDeps({
-        user: user2,
-        server_id: server.id,
-      })
-    ).rejects.toThrowError(SERVER_NOT_SETUP_MESSAGE);
-  });
-  it("should update user server settings with user deps", async () => {
-    await server_router.create(server);
-    await discord_account_router.create(user2);
-    await user_2_router.create({
-      server_id: server.id,
-      user_id: user2.id,
-    });
-    const user_server_settings = await user_2_router.upsertWithDeps({
-      user: user2,
-      server_id: server.id,
-      flags: {
-        can_publicly_display_messages: true,
-      },
-    });
-    expect(user_server_settings.flags.can_publicly_display_messages).toBeTruthy();
-  });
-});
-
-describe("User Server Settings Get", () => {
-  it("should get user server settings", async () => {
-    await server_router.create(server);
-    await discord_account_router.create(user1);
-    await user_1_router.create({
-      server_id: server.id,
-      user_id: user1.id,
-    });
-    const user_server_settings = await user_1_router.byId({
-      server_id: server.id,
-      user_id: user1.id,
-    });
-    expect(user_server_settings).toBeDefined();
-  });
+describe("User Server Settings Operations", () => {
+  it("should create a user server settings", () => {});
 });

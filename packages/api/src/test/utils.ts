@@ -24,22 +24,43 @@ export function randomId() {
   return Math.floor(Math.random() * 10000000).toString();
 }
 
-export async function mockAccount(
+export function mockAccount(override: Partial<DiscordAccount> = {}) {
+  const account = getDefaultDiscordAccount({
+    id: randomId(),
+    name: "test-user",
+    ...override,
+  });
+  return account;
+}
+
+export async function mockAccountWithServersCallerCtx(
   server: Server,
   caller: Source,
   permissions: PermissionResolvable = PermissionsBitField.Default,
   override: Partial<DiscordAccount> = {}
 ) {
-  const account = getDefaultDiscordAccount({
-    id: randomId(),
-    name: "test-user-owner",
-    ...override,
-  });
+  const account = mockAccount(override);
   const ctx = await createCtxWithServers({
     user: account,
     permissions: permissions,
     server: server,
     caller: caller,
+  });
+  return { account, ctx };
+}
+
+export async function mockAccountCallerCtx(caller: Source, override: Partial<DiscordAccount> = {}) {
+  const account = mockAccount(override);
+  const ctx = await createContextInner({
+    session: null,
+    source: caller,
+    discord_account: {
+      id: account.id,
+      avatar: null,
+      username: account.name,
+      discriminator: "0000",
+    },
+    user_servers: undefined,
   });
   return { account, ctx };
 }
@@ -167,11 +188,14 @@ export async function testAllPermissions({
 }
 
 export type SourceVariantsTest = {
-  sourcesThatShouldWork: Source[];
+  sourcesThatShouldWork?: Source[];
   operation: (source: Source, should_source_succeed: boolean) => Promise<void> | void;
 };
 
-export async function testAllSources({ sourcesThatShouldWork, operation }: SourceVariantsTest) {
+export async function testAllSources({
+  sourcesThatShouldWork = [...sourceTypes],
+  operation,
+}: SourceVariantsTest) {
   await Promise.all(
     sourceTypes.map(async (source) => {
       const sourceIsAllowed = sourcesThatShouldWork.includes(source);
@@ -181,20 +205,20 @@ export async function testAllSources({ sourcesThatShouldWork, operation }: Sourc
 }
 
 export async function testAllVariants({
-  sourcesThatShouldWork,
-  permissionsThatShouldWork,
+  sourcesThatShouldWork = [...sourceTypes],
+  permissionsThatShouldWork = Object.keys(PermissionFlagsBits) as PermissionResolvable[],
   operation,
-  permission_failure_message,
+  permission_failure_message = "",
 }: {
-  sourcesThatShouldWork: Source[];
-  permissionsThatShouldWork: PermissionResolvable[];
+  sourcesThatShouldWork?: Source[];
+  permissionsThatShouldWork?: PermissionResolvable[];
+  permission_failure_message?: string;
   operation: (input: {
     source: Source;
     permission: PermissionResolvable;
     should_source_succeed: boolean;
     should_permission_succeed: boolean;
   }) => Promise<void> | void;
-  permission_failure_message: string;
 }) {
   await testAllSources({
     sourcesThatShouldWork,

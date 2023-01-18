@@ -1,230 +1,384 @@
 import { clearDatabase, DiscordAccount } from "@answeroverflow/db";
-import { getGeneralScenario } from "~api/test/utils";
+import {
+  createAnswerOverflowBotCtx,
+  mockAccount,
+  mockAccountCallerCtx,
+  testAllSources,
+} from "~api/test/utils";
 import { pick } from "~api/utils/utils";
-import { ignored_discord_account_router } from "../ignored-discord-accounts/ignored-discord-account";
 import { discordAccountRouter } from "./discord-accounts";
 
 let discord_account_router_bot_caller: ReturnType<(typeof discordAccountRouter)["createCaller"]>;
-let ignored_account_router_account1_caller: ReturnType<
-  (typeof ignored_discord_account_router)["createCaller"]
->;
-let account1_router: ReturnType<(typeof discordAccountRouter)["createCaller"]>;
-let account2_router: ReturnType<(typeof discordAccountRouter)["createCaller"]>;
-let account1: DiscordAccount;
-let account2: DiscordAccount;
+let discord_account: DiscordAccount;
+let discord_account2: DiscordAccount;
+function pickPublicFields(discord_account: DiscordAccount) {
+  return pick(discord_account, ["id", "name", "avatar"]);
+}
+
 beforeEach(async () => {
-  const { data1 } = await getGeneralScenario();
-  discord_account_router_bot_caller = discordAccountRouter.createCaller(data1.bot_caller_ctx);
-  ignored_account_router_account1_caller = ignored_discord_account_router.createCaller(
-    data1.account1_guild_manager_ctx
-  );
-  account1 = data1.account1_guild_manager;
-  account1_router = discordAccountRouter.createCaller(data1.account1_guild_manager_ctx);
-  account2_router = discordAccountRouter.createCaller(data1.account2_default_member_ctx);
-  account2 = data1.account2_default_member;
   await clearDatabase();
+  const bot = await createAnswerOverflowBotCtx();
+  discord_account_router_bot_caller = discordAccountRouter.createCaller(bot);
+  discord_account = mockAccount();
+  discord_account2 = mockAccount();
 });
 describe("Discord Account Operations", () => {
+  describe("Discord Account By Id", () => {
+    beforeEach(async () => {
+      await discord_account_router_bot_caller.create(discord_account);
+    });
+    it("should find a discord account by id", async () => {
+      const discord_account_found = await discord_account_router_bot_caller.byId(
+        discord_account.id
+      );
+      expect(discord_account_found).toEqual(discord_account);
+    });
+    it("should test all varaints of finding a discord account by id", async () => {
+      await testAllSources({
+        async operation(source) {
+          const { ctx } = await mockAccountCallerCtx(source);
+          const router = discordAccountRouter.createCaller(ctx);
+          const discord_account_found = await router.byId(discord_account.id);
+          expect(discord_account_found).toEqual(pickPublicFields(discord_account));
+        },
+      });
+    });
+  });
+  describe("Discord Account By Id Many", () => {
+    beforeEach(async () => {
+      await discord_account_router_bot_caller.create(discord_account);
+      await discord_account_router_bot_caller.create(discord_account2);
+    });
+    it("should find many discord accounts by id", async () => {
+      const discord_accounts_found = await discord_account_router_bot_caller.byIdMany([
+        discord_account.id,
+        discord_account2.id,
+      ]);
+      expect(discord_accounts_found).toContainEqual(discord_account);
+      expect(discord_accounts_found).toContainEqual(discord_account2);
+    });
+    it("should test all varaints of finding many discord accounts by id", async () => {
+      await testAllSources({
+        async operation(source) {
+          const { ctx } = await mockAccountCallerCtx(source);
+          const router = discordAccountRouter.createCaller(ctx);
+          const discord_accounts_found = await router.byIdMany([
+            discord_account.id,
+            discord_account2.id,
+          ]);
+          expect(discord_accounts_found).toContainEqual(pickPublicFields(discord_account));
+          expect(discord_accounts_found).toContainEqual(pickPublicFields(discord_account2));
+        },
+      });
+    });
+  });
   describe("Discord Account Create", () => {
     it("should create a discord account", async () => {
-      const new_account = await discord_account_router_bot_caller.create(account1);
-      expect(new_account).toStrictEqual(account1);
-    });
-    it("should throw an error if the discord account is being ignored", async () => {
-      await ignored_account_router_account1_caller.upsert(account1.id);
-      await expect(discord_account_router_bot_caller.create(account1)).rejects.toThrowError(
-        "Cannot create discord account for ignored user. Enable indexing of your account first"
+      const discord_account_created = await discord_account_router_bot_caller.create(
+        discord_account
       );
+      expect(discord_account_created).toEqual(discord_account);
     });
-    it("should successfully create a discord account for a user who was once ignored and is now no longer ignored", async () => {
-      await ignored_account_router_account1_caller.upsert(account1.id);
-      await ignored_account_router_account1_caller.stopIgnoring(account1.id);
-      const new_account = await discord_account_router_bot_caller.create(account1);
-      expect(new_account).toBeDefined();
+    it("should test all varaints of creating a discord account that a user doesn't own", async () => {
+      await testAllSources({
+        async operation(source) {
+          const { ctx } = await mockAccountCallerCtx(source);
+          const router = discordAccountRouter.createCaller(ctx);
+          await expect(router.create(discord_account)).rejects.toThrowError();
+        },
+      });
+    });
+    it("should test all varaints of creating a discord account that a user owns", async () => {
+      await testAllSources({
+        async operation(source) {
+          const { ctx, account } = await mockAccountCallerCtx(source);
+          const router = discordAccountRouter.createCaller(ctx);
+          const discord_account_created = await router.create(account);
+          expect(discord_account_created).toEqual(account);
+        },
+      });
     });
   });
-
   describe("Discord Account Create Bulk", () => {
-    it("should bulk create multiple discord accounts", async () => {
-      const new_accounts = await discord_account_router_bot_caller.createBulk([account1, account2]);
-      expect(new_accounts).toStrictEqual([account1, account2]);
+    it("should create many discord accounts", async () => {
+      const discord_accounts_created = await discord_account_router_bot_caller.createBulk([
+        discord_account,
+        discord_account2,
+      ]);
+      expect(discord_accounts_created).toContainEqual(discord_account);
+      expect(discord_accounts_created).toContainEqual(discord_account2);
     });
-    it("should create only non ignored accounts", async () => {
-      await ignored_account_router_account1_caller.upsert(account1.id);
-      const new_accounts = await discord_account_router_bot_caller.createBulk([account1, account2]);
-      expect(new_accounts).toStrictEqual([account2]);
-      await expect(discord_account_router_bot_caller.byId(account1.id)).rejects.toThrowError(
-        "Could not find discord account"
-      );
-      await expect(discord_account_router_bot_caller.byId(account2.id)).resolves.toStrictEqual(
-        account2
-      );
+    it("should test all varaints of creating many discord accounts", async () => {
+      await testAllSources({
+        async operation(source) {
+          const { ctx } = await mockAccountCallerCtx(source);
+          const router = discordAccountRouter.createCaller(ctx);
+          await expect(
+            router.createBulk([discord_account, discord_account2])
+          ).rejects.toThrowError();
+        },
+      });
     });
   });
-
   describe("Discord Account Update", () => {
+    beforeEach(async () => {
+      await discord_account_router_bot_caller.create(discord_account);
+    });
     it("should update a discord account", async () => {
-      const created_account = await discord_account_router_bot_caller.create(account1);
-      const updated_account = await discord_account_router_bot_caller.update({
-        id: created_account.id,
-        name: "updated-name",
+      const discord_account_updated = await discord_account_router_bot_caller.update({
+        id: discord_account.id,
+        name: "new name",
       });
-      expect(updated_account).toStrictEqual({
-        ...created_account,
-        name: "updated-name",
+      expect(discord_account_updated).toEqual({
+        ...discord_account,
+        name: "new name",
+      });
+    });
+    it("should test all varaints of updating a discord account", async () => {
+      await testAllSources({
+        async operation(source) {
+          const { ctx } = await mockAccountCallerCtx(source);
+          const router = discordAccountRouter.createCaller(ctx);
+          await expect(
+            router.update({ id: discord_account.id, name: "new name" })
+          ).rejects.toThrowError();
+        },
       });
     });
   });
-
   describe("Discord Account Update Bulk", () => {
-    it("should bulk update multiple discord accounts", async () => {
-      const created_accounts = await discord_account_router_bot_caller.createBulk([
-        account1,
-        account2,
-      ]);
-      const updated_accounts = await discord_account_router_bot_caller.updateBulk([
-        {
-          id: created_accounts[0]!.id,
-          name: "updated-name",
-        },
-        {
-          id: created_accounts[1]!.id,
-          name: "updated-name",
-        },
-      ]);
-      expect(updated_accounts).toStrictEqual([
-        {
-          ...created_accounts[0],
-          name: "updated-name",
-        },
-        {
-          ...created_accounts[1],
-          name: "updated-name",
-        },
-      ]);
+    beforeEach(async () => {
+      await discord_account_router_bot_caller.create(discord_account);
+      await discord_account_router_bot_caller.create(discord_account2);
     });
-  });
-
-  describe("Discord Account Upsert", () => {
-    it("should upsert a new discord account", async () => {
-      const upserted_account = await discord_account_router_bot_caller.upsert(account1);
-      expect(upserted_account).toStrictEqual(account1);
-    });
-    it("should upsert an existing discord account", async () => {
-      const created_account = await discord_account_router_bot_caller.create(account1);
-      const upserted_account = await discord_account_router_bot_caller.upsert({
-        id: created_account.id,
-        name: "updated-name",
+    it("should update many discord accounts", async () => {
+      const discord_accounts_updated = await discord_account_router_bot_caller.updateBulk([
+        { id: discord_account.id, name: "new name" },
+        { id: discord_account2.id, name: "new name 2" },
+      ]);
+      expect(discord_accounts_updated).toContainEqual({
+        ...discord_account,
+        name: "new name",
       });
-      expect(upserted_account).toStrictEqual({
-        ...created_account,
-        name: "updated-name",
+      expect(discord_accounts_updated).toContainEqual({
+        ...discord_account2,
+        name: "new name 2",
+      });
+    });
+    it("should test all varaints of updating many discord accounts", async () => {
+      await testAllSources({
+        async operation(source) {
+          const { ctx } = await mockAccountCallerCtx(source);
+          const router = discordAccountRouter.createCaller(ctx);
+          await expect(
+            router.updateBulk([
+              { id: discord_account.id, name: "new name" },
+              { id: discord_account2.id, name: "new name 2" },
+            ])
+          ).rejects.toThrowError();
+        },
       });
     });
   });
-
-  describe("Discord Account Upsert Bulk", () => {
-    it("should bulk upsert create multiple discord accounts", async () => {
-      const upserted_accounts = await discord_account_router_bot_caller.upsertBulk([
-        account1,
-        account2,
-      ]);
-      expect(upserted_accounts).toStrictEqual([account1, account2]);
-    });
-    it("should bulk upsert update multiple discord accounts", async () => {
-      const created_accounts = await discord_account_router_bot_caller.createBulk([
-        account1,
-        account2,
-      ]);
-      const upserted_accounts = await discord_account_router_bot_caller.upsertBulk([
-        {
-          id: created_accounts[0]!.id,
-          name: "updated-name",
-        },
-        {
-          name: "updated-name2",
-          id: created_accounts[1]!.id,
-        },
-      ]);
-      expect(upserted_accounts).toStrictEqual([
-        {
-          ...created_accounts[0],
-          name: "updated-name",
-        },
-        {
-          ...created_accounts[1],
-          name: "updated-name2",
-        },
-      ]);
-    });
-    it("should bulk upsert create and update discord accounts", async () => {
-      const created_account = await discord_account_router_bot_caller.create(account1);
-      const upserted_accounts = await discord_account_router_bot_caller.upsertBulk([
-        {
-          id: created_account.id,
-          name: "updated-name",
-        },
-        account2,
-      ]);
-      expect(upserted_accounts).toStrictEqual([
-        {
-          ...created_account,
-          name: "updated-name",
-        },
-        account2,
-      ]);
-    });
-  });
-
   describe("Discord Account Delete", () => {
-    it("should delete a discord account", async () => {
-      const created_account = await discord_account_router_bot_caller.create(account1);
-      await discord_account_router_bot_caller.delete(created_account.id);
-      await expect(discord_account_router_bot_caller.byId(created_account.id)).rejects.toThrowError(
-        "Could not find discord account"
-      );
+    beforeEach(async () => {
+      await discord_account_router_bot_caller.create(discord_account);
     });
-    it("should add a deleted discord account to the ignored list", async () => {
-      const created_account = await discord_account_router_bot_caller.create(account1);
-      await discord_account_router_bot_caller.delete(created_account.id);
+    it("should delete a discord account", async () => {
+      const discord_account_deleted = await discord_account_router_bot_caller.delete(
+        discord_account.id
+      );
+      expect(discord_account_deleted).toBeTruthy();
       await expect(
-        ignored_account_router_account1_caller.byId(created_account.id)
-      ).resolves.toEqual({
-        id: created_account.id,
+        discord_account_router_bot_caller.byId(discord_account.id)
+      ).rejects.toThrowError();
+    });
+    it("should test all varaints of deleting a discord account that the user does not own", async () => {
+      await testAllSources({
+        async operation(source) {
+          const { ctx } = await mockAccountCallerCtx(source);
+          const router = discordAccountRouter.createCaller(ctx);
+          await expect(router.delete(discord_account.id)).rejects.toThrowError();
+          await expect(discord_account_router_bot_caller.byId(discord_account.id)).resolves.toEqual(
+            discord_account
+          );
+        },
       });
     });
-    it("should not add a deleted discord account to the deleted list if the operation fails", async () => {
-      await expect(discord_account_router_bot_caller.delete(account1.id)).rejects.toThrowError(
-        "Could not find discord account"
-      );
-      await expect(ignored_account_router_account1_caller.byId(account1.id)).rejects.toThrowError(
-        "Ignored Discord account not found"
-      );
+    it("should test all varaints of deleting a discord account that the user owns", async () => {
+      await testAllSources({
+        async operation(source) {
+          const { ctx, account } = await mockAccountCallerCtx(source);
+          await discord_account_router_bot_caller.create(account);
+          const router = discordAccountRouter.createCaller(ctx);
+          const discord_account_deleted = await router.delete(account.id);
+          expect(discord_account_deleted).toBeTruthy();
+          await expect(discord_account_router_bot_caller.byId(account.id)).rejects.toThrowError();
+        },
+      });
     });
   });
-
-  describe("Discord Account Find By Id", () => {
-    it("should find a discord account by id", async () => {
-      const created_account = await account1_router.create(account1);
-      await expect(account1_router.byId(created_account.id)).resolves.toStrictEqual(
-        created_account
-      );
+  describe("Discord Account Upsert", () => {
+    describe("Discord Account Upsert Create", () => {
+      it("should upsert create a discord account as answer overflow", async () => {
+        const discord_account_created = await discord_account_router_bot_caller.upsert(
+          discord_account
+        );
+        expect(discord_account_created).toEqual(discord_account);
+      });
+      it("should test all varaints of upsert creating a discord account that the user does not own", async () => {
+        await testAllSources({
+          async operation(source) {
+            const { ctx } = await mockAccountCallerCtx(source);
+            const router = discordAccountRouter.createCaller(ctx);
+            await expect(router.upsert(discord_account)).rejects.toThrowError();
+          },
+        });
+      });
+      it("should test all varaints of upsert creating a discord account that the user owns", async () => {
+        await testAllSources({
+          async operation(source) {
+            const { ctx, account } = await mockAccountCallerCtx(source);
+            await discord_account_router_bot_caller.create(account);
+            const router = discordAccountRouter.createCaller(ctx);
+            const discord_account_created = await router.upsert(account);
+            expect(discord_account_created).toEqual(account);
+          },
+        });
+      });
     });
-    it("should find a discord ", async () => {
-      const created_account = await account1_router.create(account1);
-      const fetch = await account2_router.byId(created_account.id);
-      expect(fetch).toStrictEqual(pick(created_account, "avatar", "id", "name"));
+    describe("Discord Account Upsert Update", () => {
+      beforeEach(async () => {
+        await discord_account_router_bot_caller.create(discord_account);
+      });
+      it("should upsert update a discord account as answer overflow", async () => {
+        const discord_account_updated = await discord_account_router_bot_caller.upsert({
+          ...discord_account,
+          name: "new name",
+        });
+        expect(discord_account_updated).toEqual({
+          ...discord_account,
+          name: "new name",
+        });
+      });
+      it("should test all varaints of upsert updating a discord account that the user does not own", async () => {
+        await testAllSources({
+          async operation(source) {
+            const { ctx } = await mockAccountCallerCtx(source);
+            const router = discordAccountRouter.createCaller(ctx);
+            await expect(
+              router.upsert({ ...discord_account, name: "new name" })
+            ).rejects.toThrowError();
+          },
+        });
+      });
+      it("should test all varaints of upsert updating a discord account that the user owns", async () => {
+        await testAllSources({
+          async operation(source) {
+            const { ctx, account } = await mockAccountCallerCtx(source);
+            await discord_account_router_bot_caller.create(account);
+            const router = discordAccountRouter.createCaller(ctx);
+            const discord_account_updated = await router.upsert({
+              ...account,
+              name: "new name",
+            });
+            expect(discord_account_updated).toEqual({
+              ...account,
+              name: "new name",
+            });
+          },
+        });
+      });
     });
   });
-
-  describe("Discord Account Find By Id Many", () => {
-    it("should find multiple discord accounts by id", async () => {
-      const created_accounts = await account1_router.createBulk([account1, account2]);
-      const data = await account1_router.byIdMany([
-        created_accounts[0]!.id,
-        created_accounts[1]!.id,
-      ]);
-      expect(data).toStrictEqual(created_accounts);
+  describe("Discord Account Bulk Upsert", () => {
+    describe("Discord Account Bulk Upsert Create", () => {
+      it("should bulk upsert create a discord account as answer overflow", async () => {
+        const discord_accounts_created = await discord_account_router_bot_caller.upsertBulk([
+          discord_account,
+          discord_account2,
+        ]);
+        expect(discord_accounts_created).toContainEqual(discord_account);
+        expect(discord_accounts_created).toContainEqual(discord_account2);
+      });
+      it("should test all varaints of bulk upsert creating a discord account that the user does not own", async () => {
+        await testAllSources({
+          async operation(source) {
+            const { ctx } = await mockAccountCallerCtx(source);
+            const router = discordAccountRouter.createCaller(ctx);
+            await expect(
+              router.upsertBulk([discord_account, discord_account2])
+            ).rejects.toThrowError();
+          },
+        });
+      });
+      it("should test all varaints of bulk upsert creating a discord account that the user owns", async () => {
+        await testAllSources({
+          async operation(source) {
+            const { ctx, account } = await mockAccountCallerCtx(source);
+            await discord_account_router_bot_caller.create(account);
+            const router = discordAccountRouter.createCaller(ctx);
+            const discord_accounts_created = await router.upsertBulk([account, account]);
+            expect(discord_accounts_created).toContainEqual(account);
+            expect(discord_accounts_created).toContainEqual(account);
+          },
+        });
+      });
+    });
+    describe("Discord Account Bulk Upsert Update", () => {
+      beforeEach(async () => {
+        await discord_account_router_bot_caller.create(discord_account);
+        await discord_account_router_bot_caller.create(discord_account2);
+      });
+      it("should bulk upsert update a discord account as answer overflow", async () => {
+        const discord_accounts_updated = await discord_account_router_bot_caller.upsertBulk([
+          { ...discord_account, name: "new name" },
+          { ...discord_account2, name: "new name" },
+        ]);
+        expect(discord_accounts_updated).toContainEqual({
+          ...discord_account,
+          name: "new name",
+        });
+        expect(discord_accounts_updated).toContainEqual({
+          ...discord_account2,
+          name: "new name",
+        });
+      });
+      it("should test all varaints of bulk upsert updating a discord account that the user does not own", async () => {
+        await testAllSources({
+          async operation(source) {
+            const { ctx } = await mockAccountCallerCtx(source);
+            const router = discordAccountRouter.createCaller(ctx);
+            await expect(
+              router.upsertBulk([
+                { ...discord_account, name: "new name" },
+                { ...discord_account2, name: "new name" },
+              ])
+            ).rejects.toThrowError();
+          },
+        });
+      });
+      it("should test all varaints of bulk upsert updating a discord account that the user owns", async () => {
+        await testAllSources({
+          async operation(source) {
+            const { ctx, account } = await mockAccountCallerCtx(source);
+            await discord_account_router_bot_caller.create(account);
+            const router = discordAccountRouter.createCaller(ctx);
+            const discord_accounts_updated = await router.upsertBulk([
+              { ...account, name: "new name" },
+              { ...account, name: "new name" },
+            ]);
+            expect(discord_accounts_updated).toContainEqual({
+              ...account,
+              name: "new name",
+            });
+            expect(discord_accounts_updated).toContainEqual({
+              ...account,
+              name: "new name",
+            });
+          },
+        });
+      });
     });
   });
 });
