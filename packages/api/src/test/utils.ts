@@ -20,9 +20,8 @@ import {
   INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,
 } from "~api/utils/permissions";
 
-// returns a random snowflake as a string from 0 to 100000
 export function randomId() {
-  return Math.floor(Math.random() * 100000).toString();
+  return Math.floor(Math.random() * 10000000).toString();
 }
 
 export async function mockAccount(

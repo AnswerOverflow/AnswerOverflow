@@ -2,7 +2,6 @@ import { getDefaultChannel } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, router, publicProcedure } from "~api/router/trpc";
 import { addDefaultValues, upsert, upsertMany } from "~api/utils/operations";
-import { canEditServer, isCtxCallerDiscordBot } from "~api/utils/permissions";
 import {
   protectedFetchWithPublicData,
   protectedFetchManyWithPublicData,
@@ -11,6 +10,7 @@ import {
 } from "~api/utils/protected-procedures";
 import { ALLOWED_CHANNEL_TYPES, ALLOWED_THREAD_TYPES } from "~api/utils/types";
 import { unique_array } from "~api/utils/zod-utils";
+import { canEditServerBotOnly } from "~api/utils/permissions";
 import { serverRouter, z_server_upsert } from "../server/server";
 
 export const CHANNEL_NOT_FOUND_MESSAGES = "Channel does not exist";
@@ -86,7 +86,7 @@ const fetch_router = router({
   byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({
       fetch: () => ctx.prisma.channel.findUnique({ where: { id: input } }),
-      permissions: (data) => canEditServer(ctx, data.server_id),
+      permissions: (data) => canEditServerBotOnly(ctx, data.server_id),
       not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
       public_data_formatter: (data) => z_channel_public.parse(data),
     });
@@ -94,7 +94,7 @@ const fetch_router = router({
   byIdMany: publicProcedure.input(unique_array).query(async ({ ctx, input }) => {
     return protectedFetchManyWithPublicData({
       fetch: async () => await ctx.prisma.channel.findMany({ where: { id: { in: input } } }),
-      permissions: (data) => canEditServer(ctx, data.server_id),
+      permissions: (data) => canEditServerBotOnly(ctx, data.server_id),
       public_data_formatter: (data) => z_channel_public.parse(data),
     });
   }),
@@ -104,16 +104,13 @@ const create_update_delete_router = router({
   create: publicProcedure.input(z_channel_create).mutation(({ ctx, input }) => {
     return protectedMutation({
       operation: () => ctx.prisma.channel.create({ data: input }),
-      permissions: [() => canEditServer(ctx, input.server_id), () => isCtxCallerDiscordBot(ctx)],
+      permissions: () => canEditServerBotOnly(ctx, input.server_id),
     });
   }),
   createMany: publicProcedure.input(z.array(z_channel_create)).mutation(async ({ ctx, input }) => {
     await protectedMutation({
       operation: () => ctx.prisma.channel.createMany({ data: input }),
-      permissions: [
-        () => input.map((i) => canEditServer(ctx, i.server_id)),
-        () => isCtxCallerDiscordBot(ctx),
-      ],
+      permissions: () => input.map((i) => canEditServerBotOnly(ctx, i.server_id)).flat(),
     });
     return addDefaultValues(input, getDefaultChannel);
   }),
@@ -121,7 +118,7 @@ const create_update_delete_router = router({
     return protectedMutationFetchFirst({
       fetch: () => fetch_router.createCaller(ctx).byId(input.id),
       operation: () => ctx.prisma.channel.update({ where: { id: input.id }, data: input }),
-      permissions: [(data) => canEditServer(ctx, data.server_id), () => isCtxCallerDiscordBot(ctx)],
+      permissions: (data) => canEditServerBotOnly(ctx, data.server_id),
       not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
     });
   }),
@@ -132,10 +129,8 @@ const create_update_delete_router = router({
         ctx.prisma.$transaction(
           input.map((c) => ctx.prisma.channel.update({ where: { id: c.id }, data: c }))
         ),
-      permissions: [
-        () => isCtxCallerDiscordBot(ctx),
-        (data) => data.map((d) => canEditServer(ctx, d.server_id)),
-      ],
+      permissions: (data) =>
+        data.map((channel) => canEditServerBotOnly(ctx, channel.server_id)).flat(),
       not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
     });
   }),
@@ -143,7 +138,7 @@ const create_update_delete_router = router({
     return protectedMutationFetchFirst({
       fetch: () => fetch_router.createCaller(ctx).byId(input),
       operation: () => ctx.prisma.channel.delete({ where: { id: input } }),
-      permissions: (data) => [canEditServer(ctx, data.server_id), isCtxCallerDiscordBot(ctx)],
+      permissions: (data) => canEditServerBotOnly(ctx, data.server_id),
       not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
     });
   }),

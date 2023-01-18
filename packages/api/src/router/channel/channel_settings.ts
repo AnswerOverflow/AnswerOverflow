@@ -6,13 +6,13 @@ import {
   getDefaultChannelSettings,
 } from "@answeroverflow/db";
 import { z } from "zod";
-import { mergeRouters, withUserServersProcedure, router } from "~api/router/trpc";
+import { mergeRouters, publicProcedure, router } from "~api/router/trpc";
 import { dictToBitfield } from "@answeroverflow/db";
 import { channelRouter, z_channel_upsert_with_deps } from "./channel";
 import { toZObject } from "~api/utils/zod-utils";
 import { upsert } from "~api/utils/operations";
 import { protectedFetch, protectedMutationFetchFirst } from "~api/utils/protected-procedures";
-import { canEditServer } from "~api/utils/permissions";
+import { canEditServerBotOnly } from "~api/utils/permissions";
 
 const z_channel_settings_flags = toZObject(...channel_settings_flags);
 
@@ -77,7 +77,7 @@ async function transformChannelSettingsReturn<T extends ChannelSettings>(
 }
 
 const channelSettingFind = router({
-  byId: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
+  byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return transformChannelSettingsReturn(() =>
       protectedFetch({
         fetch: () =>
@@ -93,12 +93,12 @@ const channelSettingFind = router({
               },
             },
           }),
-        permissions: (channel_settings) => canEditServer(ctx, channel_settings.channel.server_id),
+        permissions: (data) => canEditServerBotOnly(ctx, data.channel.server_id),
         not_found_message: "Channel settings not found",
       })
     );
   }),
-  byInviteCode: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
+  byInviteCode: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return transformChannelSettingsReturn(() =>
       protectedFetch({
         fetch: () =>
@@ -114,7 +114,7 @@ const channelSettingFind = router({
               },
             },
           }),
-        permissions: (channel_settings) => canEditServer(ctx, channel_settings.channel.server_id),
+        permissions: (data) => canEditServerBotOnly(ctx, data.channel.server_id),
         not_found_message: "Channel settings not found",
       })
     );
@@ -122,48 +122,44 @@ const channelSettingFind = router({
 });
 
 const channelSettingsCreateUpdate = router({
-  create: withUserServersProcedure
-    .input(z_channel_settings_create)
-    .mutation(async ({ ctx, input }) => {
-      return transformChannelSettingsReturn(() =>
-        protectedMutationFetchFirst({
-          fetch: () => channelRouter.createCaller(ctx).byId(input.channel_id),
-          operation: async (channel) => {
-            const new_settings = mergeChannelSettings(getDefaultChannelSettings(channel.id), input);
-            const data = await ctx.prisma.channelSettings.create({
-              data: { ...new_settings, channel_id: channel.id },
-            });
-            return data;
-          },
-          permissions: (channel) => canEditServer(ctx, channel.server_id),
-          not_found_message: "Channel not found",
-        })
-      );
-    }),
-  update: withUserServersProcedure
-    .input(z_channel_settings_update)
-    .mutation(async ({ ctx, input }) => {
-      return transformChannelSettingsReturn(() =>
-        protectedMutationFetchFirst({
-          fetch: () => channelSettingFind.createCaller(ctx).byId(input.channel_id),
-          operation: async (existing_settings) => {
-            const new_settings = mergeChannelSettings(existing_settings, input);
-            return ctx.prisma.channelSettings.update({
-              where: {
-                channel_id: input.channel_id,
-              },
-              data: new_settings,
-            });
-          },
-          permissions: (channel_settings) => canEditServer(ctx, channel_settings.channel.server_id),
-          not_found_message: "Channel settings not found",
-        })
-      );
-    }),
+  create: publicProcedure.input(z_channel_settings_create).mutation(async ({ ctx, input }) => {
+    return transformChannelSettingsReturn(() =>
+      protectedMutationFetchFirst({
+        fetch: () => channelRouter.createCaller(ctx).byId(input.channel_id),
+        operation: async (channel) => {
+          const new_settings = mergeChannelSettings(getDefaultChannelSettings(channel.id), input);
+          const data = await ctx.prisma.channelSettings.create({
+            data: { ...new_settings, channel_id: channel.id },
+          });
+          return data;
+        },
+        permissions: (data) => canEditServerBotOnly(ctx, data.server_id),
+        not_found_message: "Channel not found",
+      })
+    );
+  }),
+  update: publicProcedure.input(z_channel_settings_update).mutation(async ({ ctx, input }) => {
+    return transformChannelSettingsReturn(() =>
+      protectedMutationFetchFirst({
+        fetch: () => channelSettingFind.createCaller(ctx).byId(input.channel_id),
+        operation: async (existing_settings) => {
+          const new_settings = mergeChannelSettings(existing_settings, input);
+          return ctx.prisma.channelSettings.update({
+            where: {
+              channel_id: input.channel_id,
+            },
+            data: new_settings,
+          });
+        },
+        permissions: (data) => canEditServerBotOnly(ctx, data.channel.server_id),
+        not_found_message: "Channel settings not found",
+      })
+    );
+  }),
 });
 
 const channelSettingsCreateWithDeps = router({
-  createWithDeps: withUserServersProcedure
+  createWithDeps: publicProcedure
     .input(z_channel_settings_create_with_deps)
     .mutation(async ({ ctx, input }) => {
       const { channel, ...settings } = input;
@@ -175,16 +171,14 @@ const channelSettingsCreateWithDeps = router({
 });
 
 const channelSettingsUpsert = router({
-  upsert: withUserServersProcedure
-    .input(z_channel_settings_upsert)
-    .mutation(async ({ ctx, input }) => {
-      return upsert(
-        () => channelSettingFind.createCaller(ctx).byId(input.channel_id),
-        () => channelSettingsCreateUpdate.createCaller(ctx).create(input),
-        () => channelSettingsCreateUpdate.createCaller(ctx).update(input)
-      );
-    }),
-  upsertWithDeps: withUserServersProcedure
+  upsert: publicProcedure.input(z_channel_settings_upsert).mutation(async ({ ctx, input }) => {
+    return upsert(
+      () => channelSettingFind.createCaller(ctx).byId(input.channel_id),
+      () => channelSettingsCreateUpdate.createCaller(ctx).create(input),
+      () => channelSettingsCreateUpdate.createCaller(ctx).update(input)
+    );
+  }),
+  upsertWithDeps: publicProcedure
     .input(z_channel_settings_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(

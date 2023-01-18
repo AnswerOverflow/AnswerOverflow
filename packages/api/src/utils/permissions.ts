@@ -114,6 +114,10 @@ export function isCtxCaller(ctx: Context, caller: Source) {
   return;
 }
 
-export function isCtxCallerDiscordBot(ctx: Context) {
+export function isCtxSourceDiscordBot(ctx: Context) {
   return isCtxCaller(ctx, "discord-bot");
+}
+
+export function canEditServerBotOnly(ctx: Context, server_id: string) {
+  return [canEditServer(ctx, server_id), isCtxSourceDiscordBot(ctx)];
 }
