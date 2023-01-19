@@ -4,15 +4,16 @@ import {
   ChannelSettings,
   channel_settings_flags,
   getDefaultChannelSettings,
+  PrismaClient,
 } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, publicProcedure, router } from "~api/router/trpc";
 import { dictToBitfield } from "@answeroverflow/db";
 import { channelRouter, z_channel_upsert_with_deps } from "./channel";
 import { toZObject } from "~api/utils/zod-utils";
-import { upsert } from "~api/utils/operations";
+import { findOrThrowNotFound, upsert } from "~api/utils/operations";
 import { protectedFetch, protectedMutationFetchFirst } from "~api/utils/protected-procedures";
-import { canEditServerBotOnly } from "~api/utils/permissions";
+import { canEditServerBotOnly, canEditServer } from "~api/utils/permissions";
 
 const z_channel_settings_flags = toZObject(...channel_settings_flags);
 
@@ -76,24 +77,37 @@ async function transformChannelSettingsReturn<T extends ChannelSettings>(
   return addChannelSettingsFlagsToChannelSettings(data);
 }
 
+function findChannelSettingsById(
+  channel_id: string,
+  prisma: PrismaClient,
+  not_found_message: string
+) {
+  return transformChannelSettingsReturn(() =>
+    findOrThrowNotFound(
+      () =>
+        prisma.channelSettings.findUnique({
+          where: {
+            channel_id,
+          },
+          include: {
+            channel: {
+              select: {
+                server_id: true,
+              },
+            },
+          },
+        }),
+      not_found_message
+    )
+  );
+}
+
 const channelSettingFind = router({
   byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return transformChannelSettingsReturn(() =>
       protectedFetch({
-        fetch: () =>
-          ctx.prisma.channelSettings.findUnique({
-            where: {
-              channel_id: input,
-            },
-            include: {
-              channel: {
-                select: {
-                  server_id: true,
-                },
-              },
-            },
-          }),
-        permissions: (data) => canEditServerBotOnly(ctx, data.channel.server_id),
+        fetch: () => findChannelSettingsById(input, ctx.prisma, "Channel settings not found"),
+        permissions: (data) => canEditServer(ctx, data.channel.server_id),
         not_found_message: "Channel settings not found",
       })
     );
@@ -141,7 +155,8 @@ const channelSettingsCreateUpdate = router({
   update: publicProcedure.input(z_channel_settings_update).mutation(async ({ ctx, input }) => {
     return transformChannelSettingsReturn(() =>
       protectedMutationFetchFirst({
-        fetch: () => channelSettingFind.createCaller(ctx).byId(input.channel_id),
+        fetch: () =>
+          findChannelSettingsById(input.channel_id, ctx.prisma, "Channel settings not found"),
         operation: async (existing_settings) => {
           const new_settings = mergeChannelSettings(existing_settings, input);
           return ctx.prisma.channelSettings.update({

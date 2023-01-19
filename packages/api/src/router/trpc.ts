@@ -23,7 +23,7 @@ async function getDiscordOauth(ctx: Context) {
 }
 
 const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
-  if (ctx.caller === "web-client") {
+  if (ctx.caller === "web-client" && ctx.session) {
     const discord_oauth = await getDiscordOauth(ctx);
     if (!discord_oauth.access_token) {
       throw new TRPCError({
@@ -41,25 +41,33 @@ const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
   });
 });
 
-const addUserServers = t.middleware(async ({ ctx, next }) => {
-  if (ctx.caller === "web-client") {
-    if (ctx.session) {
-      const discord_oauth = await getDiscordOauth(ctx);
-      if (!discord_oauth.access_token) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Not authenticated",
-        });
-      }
-      const user_servers = await getUserServers(discord_oauth.access_token);
-      ctx.user_servers = user_servers;
+export const getUserServersFromCtx = async (ctx: Context) => {
+  if (ctx.session) {
+    const discord_oauth = await getDiscordOauth(ctx);
+    if (!discord_oauth.access_token) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Not authenticated with user servers",
+      });
     }
+    const user_servers = await getUserServers(discord_oauth.access_token);
+    ctx.user_servers = user_servers;
+    return user_servers;
+  } else {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Not authenticated with user servers",
+    });
+  }
+};
+
+const addUserServers = t.middleware(async ({ ctx, next }) => {
+  // In a test environment, we manually populate it
+  if (ctx.caller === "web-client" && process.env.NODE_ENV !== "test") {
+    ctx.user_servers = await getUserServersFromCtx(ctx);
   }
   if (!ctx.user_servers) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "No server permissions found",
-    });
+    ctx.user_servers = []; // TODO: Maybe throw error here instead?
   }
   return next({
     ctx: {

@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { mergeRouters, router, publicProcedure } from "~api/router/trpc";
+import { mergeRouters, router, publicProcedure, withUserServersProcedure } from "~api/router/trpc";
 import { upsert } from "~api/utils/operations";
-import { canEditServerBotOnly } from "~api/utils/permissions";
+import { canEditServer, canEditServerBotOnly } from "~api/utils/permissions";
 import { protectedFetchWithPublicData, protectedMutation } from "~api/utils/protected-procedures";
 
 export const z_server = z.object({
@@ -54,10 +54,10 @@ const serverCreateUpdateRouter = router({
 });
 
 const serverFetchRouter = router({
-  byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
+  byId: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({
       fetch: () => ctx.prisma.server.findUnique({ where: { id: input } }),
-      permissions: () => canEditServerBotOnly(ctx, input),
+      permissions: () => canEditServer(ctx, input),
       not_found_message: "Server not found",
       public_data_formatter: (server) => z_server_public.parse(server),
     });

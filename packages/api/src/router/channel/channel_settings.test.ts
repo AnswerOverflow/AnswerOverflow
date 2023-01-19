@@ -1,9 +1,9 @@
 import {
   createAnswerOverflowBotCtx,
-  mockAccountWithCtx,
+  mockAccountWithServersCallerCtx,
   mockChannel,
   mockServer,
-  testAllVariants,
+  testAllVariantsThatThrowErrors,
 } from "~api/test/utils";
 import { serverRouter } from "../server/server";
 import { channelRouter } from "./channel";
@@ -41,15 +41,15 @@ describe("Channel Settings Operations", () => {
       expect(channel_settings.channel_id).toBe(channel.id);
     });
     it("should test fetching channel settings with all varaints", async () => {
-      await testAllVariants({
+      await testAllVariantsThatThrowErrors({
         async operation({ source, permission }) {
-          const caller = await mockAccountWithCtx(server, source, permission);
+          const caller = await mockAccountWithServersCallerCtx(server, source, permission);
           const router = channelSettingsRouter.createCaller(caller.ctx);
           await router.byId(channel.id);
         },
         permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
-        sourcesThatShouldWork: ["discord-bot"],
+        sourcesThatShouldWork: ["discord-bot", "web-client"],
       });
     });
   });
@@ -66,9 +66,9 @@ describe("Channel Settings Operations", () => {
       expect(channel_settings.invite_code).toBe("potato");
     });
     it("should test fetching channel settings by id with all varaints", async () => {
-      await testAllVariants({
+      await testAllVariantsThatThrowErrors({
         async operation({ source, permission }) {
-          const caller = await mockAccountWithCtx(server, source, permission);
+          const caller = await mockAccountWithServersCallerCtx(server, source, permission);
           const router = channelSettingsRouter.createCaller(caller.ctx);
           await router.byInviteCode("potato");
         },
@@ -85,10 +85,10 @@ describe("Channel Settings Operations", () => {
       });
       expect(channel_settings.channel_id).toBe(channel.id);
     });
-    it("should test creating channel settings with all varaints", async () => {
-      await testAllVariants({
+    it.only("should test creating channel settings with all varaints", async () => {
+      await testAllVariantsThatThrowErrors({
         async operation({ source, permission }) {
-          const caller = await mockAccountWithCtx(server, source, permission);
+          const caller = await mockAccountWithServersCallerCtx(server, source, permission);
           const chnl = mockChannel(server);
           await ao_bot_channel_router.create(chnl);
           const router = channelSettingsRouter.createCaller(caller.ctx);
@@ -123,9 +123,9 @@ describe("Channel Settings Operations", () => {
       expect(channel_settings.flags.indexing_enabled).toBe(true);
     });
     it("should test updating channel settings with all varaints", async () => {
-      await testAllVariants({
+      await testAllVariantsThatThrowErrors({
         async operation({ source, permission }) {
-          const caller = await mockAccountWithCtx(server, source, permission);
+          const caller = await mockAccountWithServersCallerCtx(server, source, permission);
           const router = channelSettingsRouter.createCaller(caller.ctx);
           await router.update({
             channel_id: channel.id,
@@ -151,10 +151,10 @@ describe("Channel Settings Operations", () => {
       expect(channel_settings.channel_id).toBe(channel.id);
     });
     it("should test creating channel settings with all varaints", async () => {
-      await testAllVariants({
+      await testAllVariantsThatThrowErrors({
         async operation({ source, permission }) {
           const srv = mockServer();
-          const caller = await mockAccountWithCtx(srv, source, permission);
+          const caller = await mockAccountWithServersCallerCtx(srv, source, permission);
           const chnl = mockChannel(server);
           const router = channelSettingsRouter.createCaller(caller.ctx);
           await router.createWithDeps({
@@ -178,9 +178,9 @@ describe("Channel Settings Operations", () => {
       expect(channel_settings.channel_id).toBe(channel.id);
     });
     it("should test upserting channel settings with all varaints", async () => {
-      await testAllVariants({
+      await testAllVariantsThatThrowErrors({
         async operation({ source, permission }) {
-          const caller = await mockAccountWithCtx(server, source, permission);
+          const caller = await mockAccountWithServersCallerCtx(server, source, permission);
           const chnl = mockChannel(server);
           await ao_bot_channel_router.create(chnl);
           const router = channelSettingsRouter.createCaller(caller.ctx);
@@ -205,10 +205,10 @@ describe("Channel Settings Operations", () => {
       expect(channel_settings.channel_id).toBe(channel.id);
     });
     it("should test upserting channel settings with all varaints", async () => {
-      await testAllVariants({
+      await testAllVariantsThatThrowErrors({
         async operation({ source, permission }) {
           const srv = mockServer();
-          const caller = await mockAccountWithCtx(srv, source, permission);
+          const caller = await mockAccountWithServersCallerCtx(srv, source, permission);
           const chnl = mockChannel(server);
           const router = channelSettingsRouter.createCaller(caller.ctx);
           await router.upsertWithDeps({

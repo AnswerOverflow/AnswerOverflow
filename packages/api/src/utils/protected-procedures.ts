@@ -10,22 +10,23 @@ type PermissionsChecks =
 async function iteratePermissionResults(
   results: Array<PermissionCheckResult> | PermissionCheckResult
 ) {
+  let errors: TRPCError[] = [];
   if (Array.isArray(results)) {
     const awaited_results = await Promise.all(results);
-    const errors = awaited_results.filter((result) => result != undefined) as TRPCError[];
-    if (errors.length > 0) {
-      // Ugly
-      const error_messages = [...new Set(errors.map((error) => error.message))].join("\n");
-      throw new TRPCError({
-        code: "PRECONDITION_FAILED",
-        message: error_messages,
-      });
-    }
+    errors = awaited_results.filter((result) => result != undefined) as TRPCError[];
   } else {
     const awaited_result = await results;
     if (awaited_result != undefined) {
-      throw awaited_result;
+      errors = [awaited_result];
     }
+  }
+  if (errors.length > 0) {
+    // Ugly
+    const error_messages = [...new Set(errors.map((error) => error.message))].join("\n");
+    throw new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: error_messages,
+    });
   }
 }
 
@@ -83,9 +84,8 @@ async function validatePermissionsOrFormatData<F, T extends F>({
   try {
     await validatePermissionsWithData(permissions, data);
   } catch (error) {
-    if (public_data_formatter) {
+    if (error instanceof TRPCError && error.code === "PRECONDITION_FAILED" && public_data_formatter)
       return public_data_formatter(data);
-    }
     throw error;
   }
   return data;

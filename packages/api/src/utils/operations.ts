@@ -1,12 +1,13 @@
 import { TRPCError } from "@trpc/server";
 
 export async function upsert<T>(
-  find: () => Promise<T>,
+  find: () => Promise<T | null>,
   create: () => Promise<T>,
   update: (old: T) => Promise<T>
 ) {
   try {
     const existing = await find();
+    if (!existing) return create();
     return update(existing);
   } catch (error) {
     if (error instanceof TRPCError && error.code === "NOT_FOUND") return create();

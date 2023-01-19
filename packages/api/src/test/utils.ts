@@ -18,6 +18,7 @@ import { Source, sourceTypes, createContextInner } from "~api/router/context";
 import {
   INVALID_ROUTE_FOR_BOT_ERROR,
   INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,
+  MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
 } from "~api/utils/permissions";
 
 export function randomId() {
@@ -51,6 +52,7 @@ export async function mockAccountWithServersCallerCtx(
 
 export async function mockAccountCallerCtx(caller: Source, override: Partial<DiscordAccount> = {}) {
   const account = mockAccount(override);
+
   const ctx = await createContextInner({
     session: null,
     source: caller,
@@ -204,14 +206,93 @@ export async function testAllSources({
   );
 }
 
+export type AllVaraintsTest = {
+  sourcesThatShouldWork?: Source[];
+  permissionsThatShouldWork?: PermissionResolvable[];
+  operation: (
+    source: Source,
+    permission: PermissionResolvable,
+    should_source_succeed: boolean,
+    should_permission_succeed: boolean
+  ) => Promise<void> | void;
+};
+
 export async function testAllVariants({
   sourcesThatShouldWork = [...sourceTypes],
   permissionsThatShouldWork = Object.keys(PermissionFlagsBits) as PermissionResolvable[],
   operation,
-  permission_failure_message = "",
-}: {
-  sourcesThatShouldWork?: Source[];
-  permissionsThatShouldWork?: PermissionResolvable[];
+}: AllVaraintsTest) {
+  await testAllSources({
+    sourcesThatShouldWork,
+    operation: (source, should_source_succeed) =>
+      testAllPermissions({
+        permissionsThatShouldWork,
+        operation: async (permission, should_permission_succeed) => {
+          await operation(source, permission, should_source_succeed, should_permission_succeed);
+        },
+      }),
+  });
+}
+
+export async function testAllDataVariants<F, T extends F>({
+  permissionsThatShouldWork,
+  sourcesThatShouldWork,
+  public_data_format,
+  private_data_format,
+  fetch,
+}: Omit<AllVaraintsTest, "operation"> & {
+  public_data_format: F;
+  private_data_format: T;
+  fetch: (input: {
+    source: Source;
+    permission: PermissionResolvable;
+    should_source_succeed: boolean;
+    should_permission_succeed: boolean;
+  }) => Promise<T | F>;
+}) {
+  await testAllVariants({
+    async operation(source, permission, should_source_succeed, should_permission_succeed) {
+      try {
+        const data = await fetch({
+          source,
+          permission,
+          should_source_succeed,
+          should_permission_succeed,
+        });
+        if (should_source_succeed && should_permission_succeed) {
+          expect(
+            data,
+            `Failure from ${source} with ${permission as string} data did not match`
+          ).toStrictEqual(private_data_format);
+        } else {
+          expect(
+            data,
+            `Failure from ${source} with ${permission as string} data did not match`
+          ).toStrictEqual(public_data_format);
+        }
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw new Error(
+            `Error from ${source} with ${permission as string} \n \n \n ${error.name} \n ${
+              error.code
+            } \n ${error.message} \n  ${error.stack ?? ""}`
+          );
+        } else {
+          throw error;
+        }
+      }
+    },
+    permissionsThatShouldWork,
+    sourcesThatShouldWork,
+  });
+}
+
+export async function testAllVariantsThatThrowErrors({
+  sourcesThatShouldWork = [...sourceTypes],
+  permissionsThatShouldWork = Object.keys(PermissionFlagsBits) as PermissionResolvable[],
+  operation,
+  permission_failure_message = MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+}: Omit<AllVaraintsTest, "operation"> & {
   permission_failure_message?: string;
   operation: (input: {
     source: Source;
@@ -220,57 +301,55 @@ export async function testAllVariants({
     should_permission_succeed: boolean;
   }) => Promise<void> | void;
 }) {
-  await testAllSources({
+  await testAllVariants({
+    permissionsThatShouldWork,
     sourcesThatShouldWork,
-    operation: (source, should_source_succeed) =>
-      testAllPermissions({
-        permissionsThatShouldWork,
-        operation: async (permission, should_permission_succeed) => {
-          try {
-            await operation({
-              source,
-              permission,
-              should_source_succeed,
-              should_permission_succeed,
-            });
-            expect(should_permission_succeed).toBeTruthy();
-            expect(should_source_succeed).toBeTruthy();
-          } catch (error) {
-            const error_lookup: Record<Source, string> = {
-              "discord-bot": INVALID_ROUTE_FOR_BOT_ERROR,
-              "web-client": INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,
-            };
-            if (error instanceof TRPCError) {
-              if (should_source_succeed && should_permission_succeed) {
-                throw error;
-              }
-              const makeExpectErrorMessage = (expected_message: string, actual_message: string) =>
-                `Failure from ${source} with permissions ${permission.toString()}.\nExpected message:\n-----\n${expected_message}\n-----\n\n\nActual Message:\n\n-----\n${actual_message}\n-----\n\n`;
-
-              if (!should_permission_succeed && should_source_succeed) {
-                expect(
-                  error.message,
-                  makeExpectErrorMessage(permission_failure_message, error.message)
-                ).toBe(permission_failure_message);
-              }
-              if (!should_source_succeed && should_permission_succeed) {
-                expect(
-                  error.message,
-                  makeExpectErrorMessage(error_lookup[source], error.message)
-                ).toBe(error_lookup[source]);
-              }
-              if (!should_source_succeed && !should_permission_succeed) {
-                const expected_error_message = `${error_lookup[source]}\n${permission_failure_message}`;
-                const sorted_actual_error_message = [...error.message].sort().join("");
-                const sorted_expected_error_message = [...expected_error_message].sort().join("");
-                expect(
-                  sorted_actual_error_message,
-                  makeExpectErrorMessage(expected_error_message, error.message)
-                ).toBe(sorted_expected_error_message);
-              }
-            }
+    async operation(source, permission, should_source_succeed, should_permission_succeed) {
+      try {
+        await operation({
+          source,
+          permission,
+          should_source_succeed,
+          should_permission_succeed,
+        });
+        expect(should_permission_succeed).toBeTruthy();
+        expect(should_source_succeed).toBeTruthy();
+      } catch (error) {
+        const error_lookup: Record<Source, string> = {
+          "discord-bot": INVALID_ROUTE_FOR_BOT_ERROR,
+          "web-client": INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,
+        };
+        if (error instanceof TRPCError) {
+          if (should_source_succeed && should_permission_succeed) {
+            throw error;
           }
-        },
-      }),
+          const makeExpectErrorMessage = (expected_message: string, actual_message: string) =>
+            `Failure from ${source} with permissions ${permission.toString()}.\nExpected message:\n-----\n${expected_message}\n-----\n\n\nActual Message:\n\n-----\n${actual_message}\n-----\n\n`;
+
+          if (!should_permission_succeed && should_source_succeed) {
+            expect(
+              error.message,
+              makeExpectErrorMessage(permission_failure_message, error.message)
+            ).toBe(permission_failure_message);
+          }
+          if (!should_source_succeed && should_permission_succeed) {
+            expect(error.message, makeExpectErrorMessage(error_lookup[source], error.message)).toBe(
+              error_lookup[source]
+            );
+          }
+          if (!should_source_succeed && !should_permission_succeed) {
+            const expected_error_message = `${error_lookup[source]}\n${permission_failure_message}`;
+            const sorted_actual_error_message = [...error.message].sort().join("");
+            const sorted_expected_error_message = [...expected_error_message].sort().join("");
+            expect(
+              sorted_actual_error_message,
+              makeExpectErrorMessage(expected_error_message, error.message)
+            ).toBe(sorted_expected_error_message);
+          }
+        } else {
+          throw error;
+        }
+      }
+    },
   });
 }

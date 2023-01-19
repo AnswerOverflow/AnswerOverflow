@@ -1,132 +1,225 @@
 import { clearDatabase, Server } from "@answeroverflow/db";
-import { TRPCError } from "@trpc/server";
-import { getGeneralScenario, ServerTestData } from "~api/test/utils";
-import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
+import {
+  createAnswerOverflowBotCtx,
+  mockAccountWithServersCallerCtx,
+  mockServer,
+  testAllVariantsThatThrowErrors,
+} from "~api/test/utils";
+import { serverRouter } from "./server";
 import { serverSettingsRouter } from "./server_settings";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-let data: ServerTestData;
-let server_settings_router_manage_guild: ReturnType<(typeof serverSettingsRouter)["createCaller"]>;
-let server_settings_no_permissions: ReturnType<(typeof serverSettingsRouter)["createCaller"]>;
+let answer_overflow_bot_server_router: ReturnType<(typeof serverRouter)["createCaller"]>;
+let answer_overflow_bot_server_settings_router: ReturnType<
+  (typeof serverSettingsRouter)["createCaller"]
+>;
 let server: Server;
 beforeEach(async () => {
-  const { data1 } = await getGeneralScenario();
-  data = data1;
-  server_settings_router_manage_guild = serverSettingsRouter.createCaller(
-    data1.account1_guild_manager_ctx
-  );
-  server_settings_no_permissions = serverSettingsRouter.createCaller(
-    data1.account2_default_member_ctx
-  );
-  server = data1.server;
   await clearDatabase();
+  server = mockServer();
+  const ao_bot = await createAnswerOverflowBotCtx();
+  answer_overflow_bot_server_router = serverRouter.createCaller(ao_bot);
+  answer_overflow_bot_server_settings_router = serverSettingsRouter.createCaller(ao_bot);
+  await answer_overflow_bot_server_router.create(server);
 });
 
 describe("Server Settings Operations", () => {
-  describe("Server Settings Find", () => {
-    it("should find server settings by id", async () => {
-      await server_settings_router_manage_guild.createWithDeps({
-        server,
+  describe("Server Settings By Id", () => {
+    beforeEach(async () => {
+      await answer_overflow_bot_server_settings_router.create({ server_id: server.id });
+    });
+    it("should succeed getting a server settings by id as the answer overflow bot", async () => {
+      const found = await answer_overflow_bot_server_settings_router.byId(server.id);
+      expect(found).toBeDefined();
+      expect(found.server_id).toEqual(server.id);
+    });
+    it("should test all varaints of getting server settings by id", async () => {
+      await testAllVariantsThatThrowErrors({
+        async operation({ source, permission }) {
+          const { ctx } = await mockAccountWithServersCallerCtx(server, source, permission);
+          const router = serverSettingsRouter.createCaller(ctx);
+          await router.byId(server.id);
+        },
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        sourcesThatShouldWork: ["discord-bot", "web-client"],
       });
-      const server_settings = await server_settings_router_manage_guild.byId(server.id);
-      expect(server_settings).toBeDefined();
-    });
-
-    it("should throw error if server settings not found", async () => {
-      await expect(server_settings_router_manage_guild.byId("1241")).rejects.toThrow(TRPCError);
-    });
-    it("should try to fetch server settings without permission", async () => {
-      await server_settings_router_manage_guild.createWithDeps({ server });
-      await expect(server_settings_no_permissions.byId(server.id)).rejects.toThrow(
-        MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE
-      );
     });
   });
-
   describe("Server Settings Create", () => {
-    it("should create server settings with manage guild permissions", async () => {
-      const server_settings = await server_settings_router_manage_guild.createWithDeps({ server });
-      expect(server_settings).toBeDefined();
+    it("should succeed creating a server settings as the answer overflow bot", async () => {
+      const created = await answer_overflow_bot_server_settings_router.create({
+        server_id: server.id,
+      });
+      expect(created).toBeDefined();
+      expect(created.server_id).toEqual(server.id);
     });
-    it("should try to create server settings without manage guild permissions", async () => {
-      await expect(server_settings_no_permissions.createWithDeps({ server })).rejects.toThrow(
-        MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE
-      );
+    it("should test all varaints of creating server settings", async () => {
+      await testAllVariantsThatThrowErrors({
+        async operation({ source, permission }) {
+          const srv = mockServer();
+          await answer_overflow_bot_server_router.create(srv);
+          const { ctx } = await mockAccountWithServersCallerCtx(srv, source, permission);
+          const router = serverSettingsRouter.createCaller(ctx);
+          await router.create({ server_id: srv.id });
+        },
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        sourcesThatShouldWork: ["discord-bot"],
+      });
     });
   });
-
   describe("Server Settings Update", () => {
     beforeEach(async () => {
-      await server_settings_router_manage_guild.createWithDeps({ server });
+      await answer_overflow_bot_server_settings_router.create({ server_id: server.id });
     });
-    it("should update server settings with manage guild permissions", async () => {
-      const server_settings = await server_settings_router_manage_guild.update({
+    it("should succeed updating a server settings as the answer overflow bot", async () => {
+      const updated = await answer_overflow_bot_server_settings_router.update({
         server_id: server.id,
-        flags: {
-          read_the_rules_consent_enabled: true,
-        },
+        flags: { read_the_rules_consent_enabled: true },
       });
-      expect(server_settings).toBeDefined();
-      const updated = await server_settings_router_manage_guild.byId(server.id);
-      expect(updated?.flags.read_the_rules_consent_enabled).toBe(true);
+      expect(updated).toBeDefined();
+      expect(updated.server_id).toEqual(server.id);
+      expect(updated.flags.read_the_rules_consent_enabled).toBeTruthy();
     });
-    it("should try to update server settings without manage guild permissions", async () => {
-      await expect(
-        server_settings_no_permissions.update({
-          server_id: server.id,
-          flags: {
-            read_the_rules_consent_enabled: true,
-          },
-        })
-      ).rejects.toThrow(MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE);
+    it("should test all varaints of updating server settings", async () => {
+      await testAllVariantsThatThrowErrors({
+        async operation({ source, permission }) {
+          const { ctx } = await mockAccountWithServersCallerCtx(server, source, permission);
+          const router = serverSettingsRouter.createCaller(ctx);
+          await router.update({
+            server_id: server.id,
+            flags: { read_the_rules_consent_enabled: true },
+          });
+        },
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        sourcesThatShouldWork: ["discord-bot"],
+      });
     });
   });
-
   describe("Server Settings Create With Deps", () => {
-    it("should create server settings with manage guild permissions", async () => {
-      const server_settings = await server_settings_router_manage_guild.createWithDeps({ server });
-      expect(server_settings).toBeDefined();
+    it("should succeed creating a server settings with deps as the answer overflow bot", async () => {
+      const srv = mockServer();
+      const created = await answer_overflow_bot_server_settings_router.createWithDeps({
+        server: srv,
+      });
+      expect(created).toBeDefined();
+      expect(created.server_id).toEqual(srv.id);
     });
-    it("should try to create server settings without manage guild permissions", async () => {
-      await expect(server_settings_no_permissions.createWithDeps({ server })).rejects.toThrow(
-        MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE
-      );
+    it("should test all varaints of creating server settings with deps", async () => {
+      await testAllVariantsThatThrowErrors({
+        async operation({ source, permission }) {
+          const srv = mockServer();
+          await answer_overflow_bot_server_router.create(srv);
+          const { ctx } = await mockAccountWithServersCallerCtx(srv, source, permission);
+          const router = serverSettingsRouter.createCaller(ctx);
+          await router.createWithDeps({ server: srv });
+        },
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        sourcesThatShouldWork: ["discord-bot"],
+      });
     });
   });
-
   describe("Server Settings Upsert", () => {
-    it("should upsert new server settings with manage guild permissions", async () => {
-      const server_settings = await server_settings_router_manage_guild.upsert({
-        server_id: server.id,
-        flags: {
-          read_the_rules_consent_enabled: true,
-        },
-      });
-      expect(server_settings).toBeDefined();
-      const updated = await server_settings_router_manage_guild.byId(server.id);
-      expect(updated?.flags.read_the_rules_consent_enabled).toBe(true);
-    });
-    it("should upsert existing server settings with manage guild permissions", async () => {
-      await server_settings_router_manage_guild.createWithDeps({ server });
-      const server_settings = await server_settings_router_manage_guild.upsert({
-        server_id: server.id,
-        flags: {
-          read_the_rules_consent_enabled: true,
-        },
-      });
-      expect(server_settings).toBeDefined();
-      const updated = await server_settings_router_manage_guild.byId(server.id);
-      expect(updated?.flags.read_the_rules_consent_enabled).toBe(true);
-    });
-    it("should try to upsert server settings without manage guild permissions", async () => {
-      await expect(
-        server_settings_no_permissions.upsert({
+    describe("Server Settings Upsert Create", () => {
+      it("should succeed upserting creating a server settings as the answer overflow bot", async () => {
+        const upserted = await answer_overflow_bot_server_settings_router.upsert({
           server_id: server.id,
-          flags: {
-            read_the_rules_consent_enabled: true,
+        });
+        expect(upserted).toBeDefined();
+        expect(upserted.server_id).toEqual(server.id);
+      });
+      it("should test all varaints of upserting create server settings", async () => {
+        await testAllVariantsThatThrowErrors({
+          async operation({ source, permission }) {
+            const srv = mockServer();
+            await answer_overflow_bot_server_router.create(srv);
+            const { ctx } = await mockAccountWithServersCallerCtx(srv, source, permission);
+            const router = serverSettingsRouter.createCaller(ctx);
+            await router.upsert({ server_id: srv.id });
           },
-        })
-      ).rejects.toThrow(MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE);
+          permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+          sourcesThatShouldWork: ["discord-bot"],
+        });
+      });
+    });
+    describe("Server Settings Upsert Update", () => {
+      beforeEach(async () => {
+        await answer_overflow_bot_server_settings_router.create({ server_id: server.id });
+      });
+      it("should succeed upserting updating a server settings as the answer overflow bot", async () => {
+        const upserted = await answer_overflow_bot_server_settings_router.upsert({
+          server_id: server.id,
+          flags: { read_the_rules_consent_enabled: true },
+        });
+        expect(upserted).toBeDefined();
+        expect(upserted.server_id).toEqual(server.id);
+        expect(upserted.flags.read_the_rules_consent_enabled).toBeTruthy();
+      });
+      it("should test all varaints of upserting updating server settings", async () => {
+        await testAllVariantsThatThrowErrors({
+          async operation({ source, permission }) {
+            const { ctx } = await mockAccountWithServersCallerCtx(server, source, permission);
+            const router = serverSettingsRouter.createCaller(ctx);
+            await router.upsert({
+              server_id: server.id,
+              flags: { read_the_rules_consent_enabled: true },
+            });
+          },
+          permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+          sourcesThatShouldWork: ["discord-bot"],
+        });
+      });
+    });
+  });
+  describe("Server Settings Upsert With Deps", () => {
+    describe("Server Settings Upsert With Deps Create", () => {
+      it("should succeed upserting creating a server settings with deps as the answer overflow bot", async () => {
+        const srv = mockServer();
+        const upserted = await answer_overflow_bot_server_settings_router.upsertWithDeps({
+          server: srv,
+        });
+        expect(upserted).toBeDefined();
+        expect(upserted.server_id).toEqual(srv.id);
+      });
+      it("should test all varaints of upserting create server settings with deps", async () => {
+        await testAllVariantsThatThrowErrors({
+          async operation({ source, permission }) {
+            const srv = mockServer();
+            await answer_overflow_bot_server_router.create(srv);
+            const { ctx } = await mockAccountWithServersCallerCtx(srv, source, permission);
+            const router = serverSettingsRouter.createCaller(ctx);
+            await router.upsertWithDeps({ server: srv });
+          },
+          permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+          sourcesThatShouldWork: ["discord-bot"],
+        });
+      });
+    });
+    describe("Server Settings Upsert With Deps Update", () => {
+      beforeEach(async () => {
+        await answer_overflow_bot_server_settings_router.create({ server_id: server.id });
+      });
+      it("should succeed upserting updating a server settings with deps as the answer overflow bot", async () => {
+        const upserted = await answer_overflow_bot_server_settings_router.upsertWithDeps({
+          server: server,
+          flags: { read_the_rules_consent_enabled: true },
+        });
+        expect(upserted).toBeDefined();
+        expect(upserted.server_id).toEqual(server.id);
+        expect(upserted.flags.read_the_rules_consent_enabled).toBeTruthy();
+      });
+      it("should test all varaints of upserting updating server settings with deps", async () => {
+        await testAllVariantsThatThrowErrors({
+          async operation({ source, permission }) {
+            const { ctx } = await mockAccountWithServersCallerCtx(server, source, permission);
+            const router = serverSettingsRouter.createCaller(ctx);
+            await router.upsertWithDeps({
+              server: server,
+              flags: { read_the_rules_consent_enabled: true },
+            });
+          },
+          permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+          sourcesThatShouldWork: ["discord-bot"],
+        });
+      });
     });
   });
 });

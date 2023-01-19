@@ -89,18 +89,20 @@ model IgnoredDiscordAccount {
 // Servers
 
 model Server {
-  id          String    @id
+  id          String    @id @unique
   name        String    @db.VarChar(100)
   icon        String?   @db.VarChar(45)
   kicked_time DateTime?
 
   user_server_settings UserServerSettings[]
   channels             Channel[]
+  server_settings      ServerSettings?
 }
 
 model ServerSettings {
-  server_id String @id
+  server_id String @id @unique
   bitfield  Int    @default(0)
+  Server    Server @relation(fields: [server_id], references: [id])
 }
 
 // Channels
