@@ -16,7 +16,7 @@ import {
   protectedMutation,
   protectedMutationFetchFirst,
 } from "~api/utils/protected-procedures";
-import { canEditServer, canEditServerBotOnly } from "~api/utils/permissions";
+import { assertCanEditServer, canEditServerBotOnly } from "~api/utils/permissions";
 
 const z_server_settings_flags = toZObject(...server_settings_flags);
 
@@ -86,7 +86,7 @@ const serverSettingFind = router({
     return protectedFetch({
       fetch: () => getServerSettingsById(input, ctx.prisma, "Server settings not found"),
       not_found_message: "Server settings not found",
-      permissions: (data) => canEditServer(ctx, data.server_id),
+      permissions: (data) => assertCanEditServer(ctx, data.server_id),
     });
   }),
 });

@@ -1,6 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { PermissionsBitField } from "discord.js";
 import type { Source, Context } from "~api/router/context";
+import { discordAccountRouter } from "~api/router/users/accounts/discord-accounts";
+import { findAllowNull } from "./operations";
 
 export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
   "You are missing the required permissions to do this";
@@ -21,7 +23,7 @@ export function isSuperUser(ctx: Context) {
   return false;
 }
 
-export function errorIfNotAnswerOverflowBot(ctx: Context): PermissionCheckResult {
+export function assertIsAnswerOverflowBot(ctx: Context): PermissionCheckResult {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
   return new TRPCError({
@@ -30,7 +32,7 @@ export function errorIfNotAnswerOverflowBot(ctx: Context): PermissionCheckResult
   });
 }
 
-export function canEditServer(ctx: Context, server_id: string): PermissionCheckResult {
+export function assertCanEditServer(ctx: Context, server_id: string): PermissionCheckResult {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
   if (!ctx.user_servers) {
@@ -61,7 +63,7 @@ export function canEditServer(ctx: Context, server_id: string): PermissionCheckR
   return;
 }
 
-export function canEditMessage(ctx: Context, author_id: string) {
+export function assertCanEditMessage(ctx: Context, author_id: string) {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
   if (ctx.discord_account?.id !== author_id) {
@@ -80,6 +82,18 @@ export function assertIsUser(ctx: Context, target_user_id: string) {
     return new TRPCError({
       code: "UNAUTHORIZED",
       message: "You are not authorized to do this",
+    });
+  }
+  return;
+}
+
+export async function assertUserDoesNotExistInDB(ctx: Context, target_user_id: string) {
+  const router = discordAccountRouter.createCaller(ctx);
+  const discord_account = await findAllowNull(() => router.byId(target_user_id));
+  if (discord_account) {
+    return new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: "This user exists in the database",
     });
   }
   return;
@@ -119,5 +133,5 @@ export function isCtxSourceDiscordBot(ctx: Context) {
 }
 
 export function canEditServerBotOnly(ctx: Context, server_id: string) {
-  return [canEditServer(ctx, server_id), isCtxSourceDiscordBot(ctx)];
+  return [assertCanEditServer(ctx, server_id), isCtxSourceDiscordBot(ctx)];
 }

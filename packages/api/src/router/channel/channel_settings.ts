@@ -13,7 +13,7 @@ import { channelRouter, z_channel_upsert_with_deps } from "./channel";
 import { toZObject } from "~api/utils/zod-utils";
 import { findOrThrowNotFound, upsert } from "~api/utils/operations";
 import { protectedFetch, protectedMutationFetchFirst } from "~api/utils/protected-procedures";
-import { canEditServerBotOnly, canEditServer } from "~api/utils/permissions";
+import { canEditServerBotOnly, assertCanEditServer } from "~api/utils/permissions";
 
 const z_channel_settings_flags = toZObject(...channel_settings_flags);
 
@@ -107,7 +107,7 @@ const channelSettingFind = router({
     return transformChannelSettingsReturn(() =>
       protectedFetch({
         fetch: () => findChannelSettingsById(input, ctx.prisma, "Channel settings not found"),
-        permissions: (data) => canEditServer(ctx, data.channel.server_id),
+        permissions: (data) => assertCanEditServer(ctx, data.channel.server_id),
         not_found_message: "Channel settings not found",
       })
     );

@@ -16,7 +16,7 @@ import {
   protectedMutation,
   protectedMutationFetchFirst,
 } from "~api/utils/protected-procedures";
-import { canEditMessage, assertCanEditMessages } from "~api/utils/permissions";
+import { assertCanEditMessage, assertCanEditMessages } from "~api/utils/permissions";
 
 const z_discord_image = z.object({
   url: z.string(),
@@ -78,14 +78,14 @@ const message_find_router = router({
 const message_crud_router = router({
   update: withDiscordAccountProcedure.input(z_message).mutation(async ({ ctx, input }) => {
     return protectedMutation({
-      permissions: () => canEditMessage(ctx, input.author_id),
+      permissions: () => assertCanEditMessage(ctx, input.author_id),
       operation: () => ctx.elastic.updateMessage(input),
     });
   }),
   upsert: withDiscordAccountProcedure.input(z_message).mutation(async ({ ctx, input }) => {
     return protectedMutation({
       permissions: [
-        () => canEditMessage(ctx, input.author_id),
+        () => assertCanEditMessage(ctx, input.author_id),
         () => assertIsNotDeletedUser(ctx, input.author_id),
       ],
       operation() {
@@ -125,14 +125,14 @@ const message_crud_router = router({
       fetch: () => message_find_router.createCaller(ctx).byId(input),
       operation: () => ctx.elastic.deleteMessage(input),
       not_found_message: "Message not found",
-      permissions: (message) => canEditMessage(ctx, message.author_id),
+      permissions: (message) => assertCanEditMessage(ctx, message.author_id),
     });
   }),
   deleteByThreadId: withDiscordAccountProcedure
     .input(z.string())
     .mutation(async ({ ctx, input }) => {
       return protectedMutationFetchFirst({
-        permissions: (message) => canEditMessage(ctx, message.author_id),
+        permissions: (message) => assertCanEditMessage(ctx, message.author_id),
         fetch: () => message_find_router.createCaller(ctx).byId(input),
         operation: () => ctx.elastic.deleteMessagesByThreadId(input),
         not_found_message: "Message not found",

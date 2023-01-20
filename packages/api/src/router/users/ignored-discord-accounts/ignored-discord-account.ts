@@ -4,7 +4,7 @@ import { findAllowNull } from "~api/utils/operations";
 import type { Context } from "~api/router/context";
 import { TRPCError } from "@trpc/server";
 import { protectedFetch, protectedMutation } from "~api/utils/protected-procedures";
-import { assertIsUser } from "~api/utils/permissions";
+import { assertIsUser, assertUserDoesNotExistInDB } from "~api/utils/permissions";
 
 export const IGNORED_ACCOUNT_MESSAGE =
   "Cannot create discord account for ignored user. Enable indexing of your account first";
@@ -25,7 +25,7 @@ export async function assertIsNotDeletedUser(ctx: Context, target_user_id: strin
 export const ignored_discord_account_router = router({
   upsert: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
     return protectedMutation({
-      permissions: () => assertIsUser(ctx, input),
+      permissions: [() => assertIsUser(ctx, input), () => assertUserDoesNotExistInDB(ctx, input)],
       operation: () =>
         ctx.prisma.ignoredDiscordAccount.upsert({
           where: { id: input },
