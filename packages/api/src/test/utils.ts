@@ -180,13 +180,13 @@ export async function testAllPermissions({
   permissionsThatShouldWork,
   operation,
 }: PermissionVariantsTest) {
-  const permissions = Object.keys(PermissionFlagsBits) as PermissionResolvable[];
-  await Promise.all(
-    permissions.map(async (permission) => {
-      const permissionIsAllowed = permissionsThatShouldWork.includes(permission);
-      await operation(permission, permissionIsAllowed);
-    })
-  );
+  // Possibly swap to Promise.All - going in parallel break things sometimes
+  for await (const permission of Object.keys(PermissionFlagsBits)) {
+    const permissionIsAllowed = permissionsThatShouldWork.includes(
+      permission as PermissionResolvable
+    );
+    await operation(permission as PermissionResolvable, permissionIsAllowed);
+  }
 }
 
 export type SourceVariantsTest = {
@@ -198,12 +198,11 @@ export async function testAllSources({
   sourcesThatShouldWork = [...sourceTypes],
   operation,
 }: SourceVariantsTest) {
-  await Promise.all(
-    sourceTypes.map(async (source) => {
-      const sourceIsAllowed = sourcesThatShouldWork.includes(source);
-      await operation(source, sourceIsAllowed);
-    })
-  );
+  // Possibly swap to Promise.All - going in parallel break things sometimes
+  for await (const source of sourceTypes) {
+    const sourceIsAllowed = sourcesThatShouldWork.includes(source);
+    await operation(source, sourceIsAllowed);
+  }
 }
 
 export type AllVaraintsTest = {
