@@ -188,7 +188,7 @@ const channelSettingsCreateWithDeps = router({
 const channelSettingsUpsert = router({
   upsert: publicProcedure.input(z_channel_settings_upsert).mutation(async ({ ctx, input }) => {
     return upsert(
-      () => channelSettingFind.createCaller(ctx).byId(input.channel_id),
+      () => findChannelSettingsById(input.channel_id, ctx.prisma, "Channel settings not found"),
       () => channelSettingsCreateUpdate.createCaller(ctx).create(input),
       () => channelSettingsCreateUpdate.createCaller(ctx).update(input)
     );
@@ -197,7 +197,7 @@ const channelSettingsUpsert = router({
     .input(z_channel_settings_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(
-        () => channelSettingFind.createCaller(ctx).byId(input.channel.id),
+        () => findChannelSettingsById(input.channel.id, ctx.prisma, "Channel settings not found"),
         () => channelSettingsCreateWithDeps.createCaller(ctx).createWithDeps(input),
         () =>
           channelSettingsCreateUpdate

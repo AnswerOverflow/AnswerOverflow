@@ -85,7 +85,7 @@ describe("Channel Settings Operations", () => {
       });
       expect(channel_settings.channel_id).toBe(channel.id);
     });
-    it.only("should test creating channel settings with all varaints", async () => {
+    it("should test creating channel settings with all varaints", async () => {
       await testAllVariantsThatThrowErrors({
         async operation({ source, permission }) {
           const caller = await mockAccountWithServersCallerCtx(server, source, permission);
@@ -171,56 +171,144 @@ describe("Channel Settings Operations", () => {
     });
   });
   describe("Channel Settings Upsert", () => {
-    it("should upsert channel settings as the Answer Overflow Bot", async () => {
-      const channel_settings = await ao_bot_channel_settings_router.upsert({
-        channel_id: channel.id,
+    describe("Channel Settings Upsert Create", () => {
+      it("should upsert create channel settings as the Answer Overflow Bot", async () => {
+        const channel_settings = await ao_bot_channel_settings_router.upsert({
+          channel_id: channel.id,
+        });
+        expect(channel_settings.channel_id).toBe(channel.id);
       });
-      expect(channel_settings.channel_id).toBe(channel.id);
+      it("should test upsert creating channel settings with all varaints", async () => {
+        await testAllVariantsThatThrowErrors({
+          async operation({ source, permission }) {
+            const caller = await mockAccountWithServersCallerCtx(server, source, permission);
+            const chnl = mockChannel(server);
+            await ao_bot_channel_router.create(chnl);
+            const router = channelSettingsRouter.createCaller(caller.ctx);
+            await router.upsert({
+              channel_id: chnl.id,
+            });
+          },
+          permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+          permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+          sourcesThatShouldWork: ["discord-bot"],
+        });
+      });
     });
-    it("should test upserting channel settings with all varaints", async () => {
-      await testAllVariantsThatThrowErrors({
-        async operation({ source, permission }) {
-          const caller = await mockAccountWithServersCallerCtx(server, source, permission);
-          const chnl = mockChannel(server);
-          await ao_bot_channel_router.create(chnl);
-          const router = channelSettingsRouter.createCaller(caller.ctx);
-          await router.upsert({
-            channel_id: chnl.id,
-          });
-        },
-        permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
-        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
-        sourcesThatShouldWork: ["discord-bot"],
+    describe("Channel Settings Upsert Update", () => {
+      beforeEach(async () => {
+        await ao_bot_channel_settings_router.create({
+          channel_id: channel.id,
+          flags: {
+            indexing_enabled: false,
+          },
+        });
+      });
+
+      it("should upsert update channel settings as the Answer Overflow Bot", async () => {
+        const channel_settings = await ao_bot_channel_settings_router.upsert({
+          channel_id: channel.id,
+          flags: {
+            indexing_enabled: true,
+          },
+        });
+        expect(channel_settings.channel_id).toBe(channel.id);
+        expect(channel_settings.flags.indexing_enabled).toBe(true);
+      });
+      it("should test upsert updating channel settings with all varaints", async () => {
+        await testAllVariantsThatThrowErrors({
+          async operation({ source, permission }) {
+            const caller = await mockAccountWithServersCallerCtx(server, source, permission);
+            const router = channelSettingsRouter.createCaller(caller.ctx);
+            await router.upsert({
+              channel_id: channel.id,
+              flags: {
+                indexing_enabled: true,
+              },
+            });
+          },
+          permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+          permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+          sourcesThatShouldWork: ["discord-bot"],
+        });
       });
     });
   });
   describe("Channel Settings Upsert With Deps", () => {
-    it("should upsert channel settings as the Answer Overflow Bot", async () => {
-      const channel_settings = await ao_bot_channel_settings_router.upsertWithDeps({
-        channel: {
-          ...channel,
-          server: server,
-        },
+    describe("Channel Settings Upsert With Deps Create", () => {
+      it("should upsert create channel settings as the Answer Overflow Bot", async () => {
+        const channel_settings = await ao_bot_channel_settings_router.upsertWithDeps({
+          channel: {
+            ...channel,
+            server: server,
+          },
+        });
+        expect(channel_settings.channel_id).toBe(channel.id);
       });
-      expect(channel_settings.channel_id).toBe(channel.id);
+      it("should test upsert create channel settings with all varaints", async () => {
+        await testAllVariantsThatThrowErrors({
+          async operation({ source, permission }) {
+            const srv = mockServer();
+            const caller = await mockAccountWithServersCallerCtx(srv, source, permission);
+            const chnl = mockChannel(server);
+            const router = channelSettingsRouter.createCaller(caller.ctx);
+            await router.upsertWithDeps({
+              channel: {
+                ...chnl,
+                server: srv,
+              },
+            });
+          },
+          permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+          permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+          sourcesThatShouldWork: ["discord-bot"],
+        });
+      });
     });
-    it("should test upserting channel settings with all varaints", async () => {
-      await testAllVariantsThatThrowErrors({
-        async operation({ source, permission }) {
-          const srv = mockServer();
-          const caller = await mockAccountWithServersCallerCtx(srv, source, permission);
-          const chnl = mockChannel(server);
-          const router = channelSettingsRouter.createCaller(caller.ctx);
-          await router.upsertWithDeps({
-            channel: {
-              ...chnl,
-              server: srv,
-            },
-          });
-        },
-        permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
-        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
-        sourcesThatShouldWork: ["discord-bot"],
+    describe("Channel Settings Upsert With Deps Update", () => {
+      beforeEach(async () => {
+        await ao_bot_channel_settings_router.createWithDeps({
+          channel: {
+            ...channel,
+            server: server,
+          },
+        });
+      });
+
+      it("should upsert update channel settings as the Answer Overflow Bot", async () => {
+        const channel_settings = await ao_bot_channel_settings_router.upsertWithDeps({
+          channel: {
+            ...channel,
+            server: server,
+          },
+          flags: {
+            indexing_enabled: true,
+          },
+        });
+        expect(channel_settings.channel_id).toBe(channel.id);
+        expect(channel_settings.flags.indexing_enabled).toBe(true);
+      });
+      it("should test upsert updating channel settings with all varaints", async () => {
+        await testAllVariantsThatThrowErrors({
+          async operation({ source, permission }) {
+            const srv = mockServer();
+            const caller = await mockAccountWithServersCallerCtx(srv, source, permission);
+            const chnl = mockChannel(server);
+            const router = channelSettingsRouter.createCaller(caller.ctx);
+            await router.upsertWithDeps({
+              channel: {
+                ...chnl,
+                server: srv,
+              },
+              flags: {
+                indexing_enabled: true,
+              },
+            });
+          },
+          permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+          permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+          sourcesThatShouldWork: ["discord-bot"],
+        });
       });
     });
   });
