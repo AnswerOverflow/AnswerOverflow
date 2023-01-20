@@ -5,6 +5,7 @@ import {
   createAnswerOverflowBotCtx,
   testAllVariantsThatThrowErrors,
   mockAccountWithServersCallerCtx,
+  testAllDataVariants,
 } from "~api/test/utils";
 import { channelRouter, CHANNEL_NOT_FOUND_MESSAGES } from "./channel";
 import { serverRouter } from "../server/server";
@@ -16,11 +17,14 @@ let ao_bot_server_router: ReturnType<(typeof serverRouter)["createCaller"]>;
 let ao_bot_channel_router: ReturnType<(typeof channelRouter)["createCaller"]>;
 let server: Server;
 let channel: Channel;
+let channel2: Channel;
 
 beforeEach(async () => {
   await clearDatabase();
   server = mockServer();
   channel = mockChannel(server);
+  channel2 = mockChannel(server);
+
   const ao_bot = await createAnswerOverflowBotCtx();
   ao_bot_server_router = serverRouter.createCaller(ao_bot);
   ao_bot_channel_router = channelRouter.createCaller(ao_bot);
@@ -41,31 +45,22 @@ describe("Channel Operations", () => {
       expect(fetched).toEqual(channel);
     });
     it("tests all variants for fetching a single channel", async () => {
-      await testAllVariantsThatThrowErrors({
+      await testAllDataVariants({
         sourcesThatShouldWork: ["discord-bot"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
-        permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
-        async operation({ permission, source, should_permission_succeed, should_source_succeed }) {
+        async fetch({ permission, source }) {
           const account = await mockAccountWithServersCallerCtx(server, source, permission);
           const router = channelRouter.createCaller(account.ctx);
-          const fetched = await router.byId(channel.id);
-          if (should_permission_succeed && should_source_succeed) {
-            expect(fetched as ChannelAll).toEqual(channel);
-          } else {
-            expect(fetched).toStrictEqual(
-              pick(fetched, ["id", "name", "parent_id", "server_id", "type"])
-            );
-          }
+          return await router.byId(channel.id);
         },
+        private_data_format: channel,
+        public_data_format: pickPublicChannelData(channel),
       });
     });
   });
-
   describe("Channel Fetch Many", () => {
-    let channel2: Channel;
     beforeEach(async () => {
       await ao_bot_channel_router.create(channel);
-      channel2 = mockChannel(server);
       await ao_bot_channel_router.create(channel2);
     });
     it("should succeed fetching many channels as the answer overflow bot", async () => {
@@ -74,26 +69,19 @@ describe("Channel Operations", () => {
       expect(fetched).toContainEqual(channel2);
     });
     it("tests all variants for fetching many channels", async () => {
-      await testAllVariantsThatThrowErrors({
+      await testAllDataVariants({
         sourcesThatShouldWork: ["discord-bot", "web-client"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
-        permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
-        async operation({ permission, source, should_permission_succeed, should_source_succeed }) {
+        async fetch({ permission, source }) {
           const account = await mockAccountWithServersCallerCtx(server, source, permission);
           const router = channelRouter.createCaller(account.ctx);
-          const fetched = await router.byIdMany([channel.id, channel2.id]);
-          if (should_permission_succeed && should_source_succeed) {
-            expect(fetched).toContainEqual(channel);
-            expect(fetched).toContainEqual(channel2);
-          } else {
-            expect(fetched).toContainEqual(pickPublicChannelData(channel));
-            expect(fetched).toContainEqual(pickPublicChannelData(channel2));
-          }
+          return router.byIdMany([channel.id, channel2.id]);
         },
+        private_data_format: [channel, channel2],
+        public_data_format: [pickPublicChannelData(channel), pickPublicChannelData(channel2)],
       });
     });
   });
-
   describe("Channel Create", () => {
     it("tests all variants for creating a single channel", async () => {
       await testAllVariantsThatThrowErrors({
@@ -168,9 +156,7 @@ describe("Channel Operations", () => {
     });
   });
   describe("Channel Update Many", () => {
-    let channel2: Channel;
     beforeEach(async () => {
-      channel2 = mockChannel(server);
       await ao_bot_channel_router.create(channel);
       await ao_bot_channel_router.create(channel2);
     });
