@@ -132,6 +132,6 @@ export function isCtxSourceDiscordBot(ctx: Context) {
   return isCtxCaller(ctx, "discord-bot");
 }
 
-export function canEditServerBotOnly(ctx: Context, server_id: string) {
+export function assertCanEditServerBotOnly(ctx: Context, server_id: string) {
   return [assertCanEditServer(ctx, server_id), isCtxSourceDiscordBot(ctx)];
 }

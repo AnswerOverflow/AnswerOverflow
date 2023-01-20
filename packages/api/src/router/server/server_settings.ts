@@ -16,7 +16,7 @@ import {
   protectedMutation,
   protectedMutationFetchFirst,
 } from "~api/utils/protected-procedures";
-import { assertCanEditServer, canEditServerBotOnly } from "~api/utils/permissions";
+import { assertCanEditServer, assertCanEditServerBotOnly } from "~api/utils/permissions";
 
 const z_server_settings_flags = toZObject(...server_settings_flags);
 
@@ -106,7 +106,7 @@ const serverSettingsCreateUpdate = router({
             );
             return ctx.prisma.serverSettings.create({ data: new_settings });
           },
-          permissions: () => canEditServerBotOnly(ctx, input.server_id),
+          permissions: () => assertCanEditServerBotOnly(ctx, input.server_id),
         })
       );
     }),
@@ -126,7 +126,7 @@ const serverSettingsCreateUpdate = router({
               data: new_settings,
             });
           },
-          permissions: () => canEditServerBotOnly(ctx, input.server_id),
+          permissions: () => assertCanEditServerBotOnly(ctx, input.server_id),
           not_found_message: "Server settings not found",
         })
       );

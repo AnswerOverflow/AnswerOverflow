@@ -10,7 +10,6 @@ import {
 import { channelRouter, CHANNEL_NOT_FOUND_MESSAGES } from "./channel";
 import { serverRouter } from "../server/server";
 import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
-import type { ChannelAll } from "./types";
 import { pick } from "~api/utils/utils";
 
 let ao_bot_server_router: ReturnType<(typeof serverRouter)["createCaller"]>;

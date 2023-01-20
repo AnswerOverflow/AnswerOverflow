@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { mergeRouters, router, publicProcedure, withUserServersProcedure } from "~api/router/trpc";
 import { upsert } from "~api/utils/operations";
-import { assertCanEditServer, canEditServerBotOnly } from "~api/utils/permissions";
+import { assertCanEditServer, assertCanEditServerBotOnly } from "~api/utils/permissions";
 import { protectedFetchWithPublicData, protectedMutation } from "~api/utils/protected-procedures";
 
 export const z_server = z.object({
@@ -42,13 +42,13 @@ const serverCreateUpdateRouter = router({
   create: publicProcedure.input(z_server_create).mutation(({ ctx, input }) => {
     return protectedMutation({
       operation: () => ctx.prisma.server.create({ data: input }),
-      permissions: () => canEditServerBotOnly(ctx, input.id),
+      permissions: () => assertCanEditServerBotOnly(ctx, input.id),
     });
   }),
   update: publicProcedure.input(z_server_update).mutation(({ ctx, input }) => {
     return protectedMutation({
       operation: () => ctx.prisma.server.update({ where: { id: input.id }, data: input }),
-      permissions: () => canEditServerBotOnly(ctx, input.id),
+      permissions: () => assertCanEditServerBotOnly(ctx, input.id),
     });
   }),
 });
