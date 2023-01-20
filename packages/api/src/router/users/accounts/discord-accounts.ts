@@ -80,10 +80,8 @@ const account_crud_router = router({
       const ignored_ids_lookup = new Set(ignored_accounts.map((i) => i.id));
       const allowed_to_create_accounts = input.filter((x) => !ignored_ids_lookup.has(x.id));
       await protectedMutation({
-        permissions: [
-          input.map((i) => () => assertIsNotDeletedUser(ctx, i.id)),
-          input.map((i) => () => assertIsUser(ctx, i.id)),
-        ].flat(),
+        // We handle checking for deleted users before we perform the mutation
+        permissions: [allowed_to_create_accounts.map((i) => () => assertIsUser(ctx, i.id))].flat(),
         async operation() {
           return ctx.prisma.discordAccount.createMany({ data: allowed_to_create_accounts });
         },

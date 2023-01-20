@@ -6,6 +6,9 @@ import { TRPCError } from "@trpc/server";
 import { protectedFetch, protectedMutation } from "~api/utils/protected-procedures";
 import { assertIsUser } from "~api/utils/permissions";
 
+export const IGNORED_ACCOUNT_MESSAGE =
+  "Cannot create discord account for ignored user. Enable indexing of your account first";
+
 export async function assertIsNotDeletedUser(ctx: Context, target_user_id: string) {
   const deleted_account = await findAllowNull(() =>
     ignored_discord_account_router.createCaller(ctx).byId(target_user_id)
@@ -13,8 +16,7 @@ export async function assertIsNotDeletedUser(ctx: Context, target_user_id: strin
   if (deleted_account) {
     return new TRPCError({
       code: "PRECONDITION_FAILED",
-      message:
-        "Cannot create discord account for ignored user. Enable indexing of your account first",
+      message: IGNORED_ACCOUNT_MESSAGE,
     });
   }
   return;

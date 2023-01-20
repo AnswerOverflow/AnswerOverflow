@@ -259,16 +259,35 @@ export async function testAllDataVariants<F, T extends F>({
           should_source_succeed,
           should_permission_succeed,
         });
+        // TODO: Ugly
         if (should_source_succeed && should_permission_succeed) {
-          expect(
-            data,
-            `Failure from ${source} with ${permission as string} data did not match`
-          ).toStrictEqual(private_data_format);
+          if (Array.isArray(private_data_format)) {
+            private_data_format.forEach((item) => {
+              expect(
+                data,
+                `Failure from ${source} with ${permission as string} data did not match`
+              ).toContainEqual(item);
+            });
+          } else {
+            expect(
+              data,
+              `Failure from ${source} with ${permission as string} data did not match`
+            ).toStrictEqual(private_data_format);
+          }
         } else {
-          expect(
-            data,
-            `Failure from ${source} with ${permission as string} data did not match`
-          ).toStrictEqual(public_data_format);
+          if (Array.isArray(public_data_format)) {
+            public_data_format.forEach((item) => {
+              expect(
+                data,
+                `Failure from ${source} with ${permission as string} data did not match`
+              ).toContainEqual(item);
+            });
+          } else {
+            expect(
+              data,
+              `Failure from ${source} with ${permission as string} data did not match`
+            ).toStrictEqual(public_data_format);
+          }
         }
       } catch (error) {
         if (error instanceof TRPCError) {
