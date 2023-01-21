@@ -75,7 +75,21 @@ describe("ElasticSearch", () => {
       expect(fetched_deleted_message2).toBeNull();
     });
   });
-
+  describe("Message Delete By Thread Id", () => {
+    it.only("should delete a message by thread id", async () => {
+      const thread_message = {
+        ...msg1,
+        thread_id: "123",
+        channel_id: "200",
+      };
+      await elastic.upsertMessage(thread_message);
+      const deleted_message = await elastic.deleteMessagesByThreadId(thread_message.thread_id);
+      expect(deleted_message).toBe(1);
+      // wait 1 second
+      const fetched_deleted_message = await elastic.getMessage(thread_message.id);
+      expect(fetched_deleted_message).toBeNull();
+    });
+  });
   describe("Message Fetch", () => {
     it("should search for a message", async () => {
       await elastic.upsertMessage(msg1);

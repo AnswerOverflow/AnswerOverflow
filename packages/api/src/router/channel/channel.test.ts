@@ -50,10 +50,13 @@ describe("Channel Operations", () => {
         async fetch({ permission, source }) {
           const account = await mockAccountWithServersCallerCtx(server, source, permission);
           const router = channelRouter.createCaller(account.ctx);
-          return await router.byId(channel.id);
+          const data = await router.byId(channel.id);
+          return {
+            data,
+            private_data_format: channel,
+            public_data_format: pickPublicChannelData(channel),
+          };
         },
-        private_data_format: channel,
-        public_data_format: pickPublicChannelData(channel),
       });
     });
   });
@@ -74,10 +77,13 @@ describe("Channel Operations", () => {
         async fetch({ permission, source }) {
           const account = await mockAccountWithServersCallerCtx(server, source, permission);
           const router = channelRouter.createCaller(account.ctx);
-          return router.byIdMany([channel.id, channel2.id]);
+          const data = await router.byIdMany([channel.id, channel2.id]);
+          return {
+            data,
+            private_data_format: [channel, channel2],
+            public_data_format: [pickPublicChannelData(channel), pickPublicChannelData(channel2)],
+          };
         },
-        private_data_format: [channel, channel2],
-        public_data_format: [pickPublicChannelData(channel), pickPublicChannelData(channel2)],
       });
     });
   });

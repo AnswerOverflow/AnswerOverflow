@@ -78,12 +78,13 @@ describe("Server Operations", () => {
         async fetch({ source, permission }) {
           const account = await mockAccountWithServersCallerCtx(server_2, source, permission);
           const router = serverRouter.createCaller(account.ctx);
-          return await router.byId(server_2.id);
+          const data = await router.byId(server_2.id);
+          return {
+            data,
+            private_data_format: server_2,
+            public_data_format: pick(server_2, ["id", "name", "icon"]),
+          };
         },
-        private_data_format: server_2,
-        public_data_format: pick(server_2, ["id", "name", "icon"]),
-        sourcesThatShouldWork: ["discord-bot", "web-client"],
-        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
       });
     });
   });

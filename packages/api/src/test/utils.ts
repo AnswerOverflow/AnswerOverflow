@@ -3,8 +3,10 @@ import {
   DiscordAccount,
   getDefaultChannel,
   getDefaultDiscordAccount,
+  getDefaultMessage,
   getDefaultServer,
   getDefaultThread,
+  Message,
   Server,
 } from "@answeroverflow/db";
 import { TRPCError } from "@trpc/server";
@@ -32,6 +34,21 @@ export function mockAccount(override: Partial<DiscordAccount> = {}) {
     ...override,
   });
   return account;
+}
+
+export function mockMessage(
+  server: Server,
+  channel: Channel,
+  author: DiscordAccount,
+  override: Omit<Partial<Message>, "author_id" | "channel_id" | "server_id"> = {}
+) {
+  return getDefaultMessage({
+    id: randomId(),
+    author_id: author.id,
+    channel_id: channel.id,
+    server_id: server.id,
+    ...override,
+  });
 }
 
 export async function mockAccountWithServersCallerCtx(
@@ -236,23 +253,23 @@ export async function testAllVariants({
 export async function testAllDataVariants<F, T extends F>({
   permissionsThatShouldWork,
   sourcesThatShouldWork,
-  public_data_format,
-  private_data_format,
   fetch,
 }: Omit<AllVaraintsTest, "operation"> & {
-  public_data_format: F;
-  private_data_format: T;
   fetch: (input: {
     source: Source;
     permission: PermissionResolvable;
     should_source_succeed: boolean;
     should_permission_succeed: boolean;
-  }) => Promise<T | F>;
+  }) => Promise<{
+    data: T | F;
+    public_data_format: F;
+    private_data_format: T;
+  }>;
 }) {
   await testAllVariants({
     async operation(source, permission, should_source_succeed, should_permission_succeed) {
       try {
-        const data = await fetch({
+        const { data, public_data_format, private_data_format } = await fetch({
           source,
           permission,
           should_source_succeed,

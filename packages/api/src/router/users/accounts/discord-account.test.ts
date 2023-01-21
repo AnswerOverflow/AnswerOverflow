@@ -45,10 +45,13 @@ describe("Discord Account Operations", () => {
         async fetch({ source }) {
           const { ctx } = await mockAccountCallerCtx(source);
           const router = discordAccountRouter.createCaller(ctx);
-          return router.byId(discord_account.id);
+          const data = await router.byId(discord_account.id);
+          return {
+            data,
+            private_data_format: discord_account,
+            public_data_format: pickPublicFields(discord_account),
+          };
         },
-        private_data_format: discord_account,
-        public_data_format: pickPublicFields(discord_account),
       });
     });
   });
@@ -70,10 +73,16 @@ describe("Discord Account Operations", () => {
         async fetch({ source }) {
           const { ctx } = await mockAccountCallerCtx(source);
           const router = discordAccountRouter.createCaller(ctx);
-          return router.byIdMany([discord_account.id, discord_account2.id]);
+          const data = await router.byIdMany([discord_account.id, discord_account2.id]);
+          return {
+            data,
+            private_data_format: [discord_account, discord_account2],
+            public_data_format: [
+              pickPublicFields(discord_account),
+              pickPublicFields(discord_account2),
+            ],
+          };
         },
-        private_data_format: [discord_account, discord_account2],
-        public_data_format: [pickPublicFields(discord_account), pickPublicFields(discord_account2)],
       });
     });
   });

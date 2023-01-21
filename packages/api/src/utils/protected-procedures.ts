@@ -71,7 +71,6 @@ export async function protectedFetch<T>({
 
 type ValidatedPermissionsOrFormatData<F, T extends F> = {
   permissions: PermissionsChecksWithData<T>;
-  public_data_permissions?: PermissionsChecksWithData<T>;
   public_data_formatter: (data: T) => Partial<T> & F;
   data: T;
 };
@@ -105,7 +104,6 @@ export async function protectedFetchWithPublicData<F extends {}, T extends F>({
 
 export async function protectedFetchManyWithPublicData<G extends {}, F extends G[], T extends F>({
   public_data_formatter,
-  public_data_permissions = [],
   fetch,
   permissions,
 }: {
@@ -117,7 +115,6 @@ export async function protectedFetchManyWithPublicData<G extends {}, F extends G
       validatePermissionsOrFormatData({
         data: item,
         permissions,
-        public_data_permissions,
         public_data_formatter,
       })
     )

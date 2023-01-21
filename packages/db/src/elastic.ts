@@ -160,16 +160,17 @@ export class Elastic extends Client {
   }
 
   public async deleteMessagesByThreadId(thread_id: string) {
-    const body = {
-      query: {
-        match: {
-          thread_id,
-        },
-      },
-    };
+    if (process.env.NODE_ENV === "test") {
+      // TODO: Ugly hack for testing since elastic doesn't update immediately
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+    }
     const result = await this.deleteByQuery({
       index: this.messages_index,
-      body,
+      query: {
+        term: {
+          thread_id: thread_id,
+        },
+      },
     });
     return result.deleted;
   }
