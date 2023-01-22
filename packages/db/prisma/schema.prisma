@@ -108,17 +108,15 @@ model ServerSettings {
 // Channels
 
 model Channel {
-  id        String  @id
-  server_id String
-  name      String  @db.VarChar(100)
-  type      Int
-  parent_id String?
-
-  parent Channel? @relation("ParentChannel", fields: [parent_id], references: [id])
-  server Server   @relation(fields: [server_id], references: [id])
-
-  channel_settings ChannelSettings[]
+  id               String            @id
+  server_id        String
+  name             String            @db.VarChar(100)
+  type             Int
+  parent_id        String?
+  parent           Channel?          @relation("ParentChannel", fields: [parent_id], references: [id])
   threads          Channel[]         @relation("ParentChannel")
+  server           Server            @relation(fields: [server_id], references: [id])
+  channel_settings ChannelSettings[]
 }
 
 model ChannelSettings {
