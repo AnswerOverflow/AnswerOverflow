@@ -42,3 +42,4 @@ export type AppRouter = typeof appRouter;
 
 export * from "./message/types";
 export * from "./users/accounts/types";
+export * from "./server/types";

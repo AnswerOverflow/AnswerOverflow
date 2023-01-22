@@ -1,125 +1,127 @@
 import {
+  Channel,
   DiscordAccount,
   getDefaultChannel,
   getDefaultDiscordAccount,
   getDefaultMessage,
   getDefaultServer,
   getDefaultThread,
+  Message,
+  Server,
 } from "@answeroverflow/db";
-import { ChannelType, PermissionResolvable, PermissionsBitField } from "discord.js";
-import { createContextInner } from "~api/router/context";
+import { TRPCError } from "@trpc/server";
+import {
+  ChannelType,
+  PermissionFlagsBits,
+  PermissionResolvable,
+  PermissionsBitField,
+} from "discord.js";
+import { Source, sourceTypes, createContextInner } from "~api/router/context";
+import {
+  INVALID_ROUTE_FOR_BOT_ERROR,
+  INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,
+  MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+} from "~api/utils/permissions";
 
-export async function getGeneralScenario() {
-  const data1 = await getServerTestData();
-  return { data1 };
+export function randomId() {
+  return Math.floor(Math.random() * 10000000).toString();
 }
 
-export async function getServerTestData(server_id: string = "101") {
-  const account1_guild_manager = getDefaultDiscordAccount({
-    id: "1",
-    name: "test-user-owner",
+export function mockAccount(override: Partial<DiscordAccount> = {}) {
+  const account = getDefaultDiscordAccount({
+    id: randomId(),
+    name: "test-user",
+    ...override,
   });
-  const account2_default_member = getDefaultDiscordAccount({
-    id: "2",
-    name: "test-user-default",
+  return account;
+}
+
+export function mockMessage(
+  server: Server,
+  channel: Channel,
+  author: DiscordAccount,
+  override: Omit<Partial<Message>, "author_id" | "channel_id" | "server_id"> = {}
+) {
+  return getDefaultMessage({
+    id: randomId(),
+    author_id: author.id,
+    channel_id: channel.id,
+    server_id: server.id,
+    ...override,
   });
-  const server = getDefaultServer({
-    id: server_id,
-    name: "test",
+}
+
+export async function mockAccountWithServersCallerCtx(
+  server: Server,
+  caller: Source,
+  permissions: PermissionResolvable = PermissionsBitField.Default,
+  override: Partial<DiscordAccount> = {}
+) {
+  const account = mockAccount(override);
+  const ctx = await createCtxWithServers({
+    user: account,
+    permissions: permissions,
+    server: server,
+    caller: caller,
   });
-  const text_channel = getDefaultChannel({
-    id: "201",
-    name: "name",
-    server_id: server_id,
+  return { account, ctx };
+}
+
+export async function mockAccountCallerCtx(caller: Source, override: Partial<DiscordAccount> = {}) {
+  const account = mockAccount(override);
+
+  const ctx = await createContextInner({
+    session: null,
+    source: caller,
+    discord_account: {
+      id: account.id,
+      avatar: null,
+      username: account.name,
+      discriminator: "0000",
+    },
+    user_servers: undefined,
+  });
+  return { account, ctx };
+}
+
+export function mockServer(override: Partial<Server> = {}) {
+  return getDefaultServer({
+    id: randomId(),
+    name: "test-server",
+    icon: "ASDASDASDASDsd",
+    ...override,
+  });
+}
+
+export function mockChannel(server: Server, override?: Omit<Partial<Channel>, "server_id">) {
+  return getDefaultChannel({
+    id: randomId(),
+    name: "test-channel",
+    server_id: server?.id ?? randomId(),
     type: ChannelType.GuildText,
+    parent_id: null,
+    ...override,
   });
-
-  const forum_channel = getDefaultChannel({
-    id: "202",
-    name: "name2",
-    server_id: server_id,
-    type: ChannelType.GuildForum,
-  });
-  const account1_guild_manager_ctx = await createManageGuildContext({
-    server: {
-      id: server.id,
-      name: server.name,
-    },
-    user: account1_guild_manager,
-  });
-  const account2_default_member_ctx = await createDefaultPermissionCtx({
-    server: {
-      id: server.id,
-      name: server.name,
-    },
-    user: account2_default_member,
-  });
-  const bot_caller_ctx = await createBotCallerCtx();
-
-  return {
-    server,
-    bot_caller_ctx,
-    account1_guild_manager,
-    account1_guild_manager_ctx,
-    account2_default_member,
-    account2_default_member_ctx,
-    forum_channels: [
-      {
-        channel: forum_channel,
-        messages: {
-          account1_messages: [
-            getDefaultMessage({
-              id: "301",
-              channel_id: forum_channel.id,
-              server_id: server_id,
-              author_id: account1_guild_manager.id,
-            }),
-          ],
-        },
-      },
-    ],
-    text_channels: [
-      {
-        channel: text_channel,
-        threads: [
-          {
-            thread: getDefaultThread({
-              id: "401",
-              name: "name",
-              parent_id: "201",
-              server_id: server_id,
-              type: ChannelType.PublicThread,
-            }),
-            messages: [],
-          },
-        ],
-        messages: {
-          account1_messages: [
-            getDefaultMessage({
-              id: "300",
-              channel_id: text_channel.id,
-              server_id: server_id,
-              author_id: account1_guild_manager.id,
-            }),
-          ],
-          account2_messages: [
-            getDefaultMessage({
-              id: "304",
-              channel_id: text_channel.id,
-              server_id: server_id,
-              author_id: account2_default_member.id,
-            }),
-          ],
-        },
-      },
-    ],
-  };
 }
 
-export function createBotCallerCtx() {
+export function mockThread(
+  parent: Channel,
+  override?: Omit<Partial<Channel>, "parent_id" | "server_id">
+) {
+  return getDefaultThread({
+    id: randomId(),
+    name: "test-thread",
+    server_id: parent.server_id,
+    type: ChannelType.PublicThread,
+    parent_id: parent.id,
+    ...override,
+  });
+}
+
+export async function createAnswerOverflowBotCtx() {
   return createContextInner({
     session: null,
-    caller: "discord-bot",
+    source: "discord-bot",
     user_servers: undefined,
     discord_account: {
       id: process.env.DISCORD_CLIENT_ID ?? process.env.VITE_DISCORD_CLIENT_ID,
@@ -135,28 +137,15 @@ type CtxOverride = {
     id: string;
     name: string;
   };
+  caller: Source;
   permissions: PermissionResolvable;
   user: DiscordAccount;
 };
 
-export function createManageGuildContext(input: Omit<CtxOverride, "permissions">) {
-  return createCtxWithServers({
-    ...input,
-    permissions: PermissionsBitField.resolve("ManageGuild"),
-  });
-}
-
-export function createDefaultPermissionCtx(input: Omit<CtxOverride, "permissions">) {
-  return createCtxWithServers({
-    ...input,
-    permissions: PermissionsBitField.Default,
-  });
-}
-
 export function createCtxWithServers(input: CtxOverride) {
   return createContextInner({
     session: null,
-    caller: "discord-bot",
+    source: input.caller,
     discord_account: {
       id: input.user.id,
       avatar: null,
@@ -168,7 +157,7 @@ export function createCtxWithServers(input: CtxOverride) {
         features: [],
         id: input.server.id,
         name: input.server.name,
-        owner: true,
+        owner: false,
         icon: null,
         permissions: Number(PermissionsBitField.resolve(input.permissions)),
       },
@@ -176,4 +165,226 @@ export function createCtxWithServers(input: CtxOverride) {
   });
 }
 
-export type ServerTestData = Awaited<ReturnType<typeof getServerTestData>>;
+export async function handleOperationCall<T>({
+  operation,
+  Success,
+  Err,
+}: {
+  operation: () => Promise<T>;
+  Success: (result: T) => void;
+  Err: (error: TRPCError) => void;
+}) {
+  try {
+    const result = await operation();
+    Success(result);
+  } catch (error) {
+    if (error instanceof TRPCError) {
+      return Err(error);
+    }
+    throw error;
+  }
+}
+
+export type PermissionVariantsTest = {
+  permissionsThatShouldWork: PermissionResolvable[];
+  operation: (
+    permission: PermissionResolvable,
+    is_permission_allowed: boolean
+  ) => Promise<void> | void;
+};
+
+export async function testAllPermissions({
+  permissionsThatShouldWork,
+  operation,
+}: PermissionVariantsTest) {
+  // Possibly swap to Promise.All - going in parallel break things sometimes
+  for await (const permission of Object.keys(PermissionFlagsBits)) {
+    const permissionIsAllowed = permissionsThatShouldWork.includes(
+      permission as PermissionResolvable
+    );
+    await operation(permission as PermissionResolvable, permissionIsAllowed);
+  }
+}
+
+export type SourceVariantsTest = {
+  sourcesThatShouldWork?: Source[];
+  operation: (source: Source, should_source_succeed: boolean) => Promise<void> | void;
+};
+
+export async function testAllSources({
+  sourcesThatShouldWork = [...sourceTypes],
+  operation,
+}: SourceVariantsTest) {
+  // Possibly swap to Promise.All - going in parallel break things sometimes
+  for await (const source of sourceTypes) {
+    const sourceIsAllowed = sourcesThatShouldWork.includes(source);
+    await operation(source, sourceIsAllowed);
+  }
+}
+
+export type AllVaraintsTest = {
+  sourcesThatShouldWork?: Source[];
+  permissionsThatShouldWork?: PermissionResolvable[];
+  operation: (
+    source: Source,
+    permission: PermissionResolvable,
+    should_source_succeed: boolean,
+    should_permission_succeed: boolean
+  ) => Promise<void> | void;
+};
+
+export async function testAllVariants({
+  sourcesThatShouldWork = [...sourceTypes],
+  permissionsThatShouldWork = Object.keys(PermissionFlagsBits) as PermissionResolvable[],
+  operation,
+}: AllVaraintsTest) {
+  await testAllSources({
+    sourcesThatShouldWork,
+    operation: (source, should_source_succeed) =>
+      testAllPermissions({
+        permissionsThatShouldWork,
+        operation: async (permission, should_permission_succeed) => {
+          await operation(source, permission, should_source_succeed, should_permission_succeed);
+        },
+      }),
+  });
+}
+
+export async function testAllDataVariants<F, T extends F>({
+  permissionsThatShouldWork,
+  sourcesThatShouldWork,
+  fetch,
+}: Omit<AllVaraintsTest, "operation"> & {
+  fetch: (input: {
+    source: Source;
+    permission: PermissionResolvable;
+    should_source_succeed: boolean;
+    should_permission_succeed: boolean;
+  }) => Promise<{
+    data: T | F;
+    public_data_format: F;
+    private_data_format: T;
+  }>;
+}) {
+  await testAllVariants({
+    async operation(source, permission, should_source_succeed, should_permission_succeed) {
+      try {
+        const { data, public_data_format, private_data_format } = await fetch({
+          source,
+          permission,
+          should_source_succeed,
+          should_permission_succeed,
+        });
+        // TODO: Ugly
+        if (should_source_succeed && should_permission_succeed) {
+          if (Array.isArray(private_data_format)) {
+            private_data_format.forEach((item) => {
+              expect(
+                data,
+                `Failure from ${source} with ${permission as string} data did not match`
+              ).toContainEqual(item);
+            });
+          } else {
+            expect(
+              data,
+              `Failure from ${source} with ${permission as string} data did not match`
+            ).toStrictEqual(private_data_format);
+          }
+        } else {
+          if (Array.isArray(public_data_format)) {
+            public_data_format.forEach((item) => {
+              expect(
+                data,
+                `Failure from ${source} with ${permission as string} data did not match`
+              ).toContainEqual(item);
+            });
+          } else {
+            expect(
+              data,
+              `Failure from ${source} with ${permission as string} data did not match`
+            ).toStrictEqual(public_data_format);
+          }
+        }
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw new Error(
+            `Error from ${source} with ${permission as string} \n \n \n ${error.name} \n ${
+              error.code
+            } \n ${error.message} \n  ${error.stack ?? ""}`
+          );
+        } else {
+          throw error;
+        }
+      }
+    },
+    permissionsThatShouldWork,
+    sourcesThatShouldWork,
+  });
+}
+
+export async function testAllVariantsThatThrowErrors({
+  sourcesThatShouldWork = [...sourceTypes],
+  permissionsThatShouldWork = Object.keys(PermissionFlagsBits) as PermissionResolvable[],
+  operation,
+  permission_failure_message = MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+}: Omit<AllVaraintsTest, "operation"> & {
+  permission_failure_message?: string;
+  operation: (input: {
+    source: Source;
+    permission: PermissionResolvable;
+    should_source_succeed: boolean;
+    should_permission_succeed: boolean;
+  }) => Promise<void> | void;
+}) {
+  await testAllVariants({
+    permissionsThatShouldWork,
+    sourcesThatShouldWork,
+    async operation(source, permission, should_source_succeed, should_permission_succeed) {
+      try {
+        await operation({
+          source,
+          permission,
+          should_source_succeed,
+          should_permission_succeed,
+        });
+        expect(should_permission_succeed).toBeTruthy();
+        expect(should_source_succeed).toBeTruthy();
+      } catch (error) {
+        const error_lookup: Record<Source, string> = {
+          "discord-bot": INVALID_ROUTE_FOR_BOT_ERROR,
+          "web-client": INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,
+        };
+        if (error instanceof TRPCError) {
+          if (should_source_succeed && should_permission_succeed) {
+            throw error;
+          }
+          const makeExpectErrorMessage = (expected_message: string, actual_message: string) =>
+            `Failure from ${source} with permissions ${permission.toString()}.\nExpected message:\n-----\n${expected_message}\n-----\n\n\nActual Message:\n\n-----\n${actual_message}\n-----\n\n`;
+
+          if (!should_permission_succeed && should_source_succeed) {
+            expect(
+              error.message,
+              makeExpectErrorMessage(permission_failure_message, error.message)
+            ).toBe(permission_failure_message);
+          }
+          if (!should_source_succeed && should_permission_succeed) {
+            expect(error.message, makeExpectErrorMessage(error_lookup[source], error.message)).toBe(
+              error_lookup[source]
+            );
+          }
+          if (!should_source_succeed && !should_permission_succeed) {
+            const expected_error_message = `${error_lookup[source]}\n${permission_failure_message}`;
+            const sorted_actual_error_message = [...error.message].sort().join("");
+            const sorted_expected_error_message = [...expected_error_message].sort().join("");
+            expect(
+              sorted_actual_error_message,
+              makeExpectErrorMessage(expected_error_message, error.message)
+            ).toBe(sorted_expected_error_message);
+          }
+        } else {
+          throw error;
+        }
+      }
+    },
+  });
+}

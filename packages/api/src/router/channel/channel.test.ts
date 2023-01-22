@@ -1,106 +1,283 @@
-import { Channel, clearDatabase, Thread } from "@answeroverflow/db";
-import { TRPCError } from "@trpc/server";
-import { type ServerTestData, getGeneralScenario } from "~api/test/utils";
-import { channelRouter } from "./channel";
+import { Channel, clearDatabase, Server } from "@answeroverflow/db";
+import {
+  mockServer,
+  mockChannel,
+  createAnswerOverflowBotCtx,
+  testAllVariantsThatThrowErrors,
+  mockAccountWithServersCallerCtx,
+  testAllDataVariants,
+} from "~api/test/utils";
+import { channelRouter, CHANNEL_NOT_FOUND_MESSAGES } from "./channel";
 import { serverRouter } from "../server/server";
+import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
+import { pick } from "~api/utils/utils";
 
-let manage_guild_router: ReturnType<(typeof serverRouter)["createCaller"]>;
-let manage_channel_router: ReturnType<(typeof channelRouter)["createCaller"]>;
-let default_channel_router: ReturnType<(typeof channelRouter)["createCaller"]>;
-let test_data_1: ServerTestData;
-let channel_1: Channel;
-let thread_1: Thread;
+let ao_bot_server_router: ReturnType<(typeof serverRouter)["createCaller"]>;
+let ao_bot_channel_router: ReturnType<(typeof channelRouter)["createCaller"]>;
+let server: Server;
+let channel: Channel;
+let channel2: Channel;
+
 beforeEach(async () => {
-  const { data1 } = await getGeneralScenario();
-  test_data_1 = data1;
-  default_channel_router = channelRouter.createCaller(test_data_1.account2_default_member_ctx);
-  manage_channel_router = channelRouter.createCaller(test_data_1.account1_guild_manager_ctx);
-  manage_guild_router = serverRouter.createCaller(test_data_1.account1_guild_manager_ctx);
-  channel_1 = test_data_1.text_channels[0]!.channel;
-  thread_1 = test_data_1.text_channels[0]!.threads[0]!.thread;
   await clearDatabase();
+  server = mockServer();
+  channel = mockChannel(server);
+  channel2 = mockChannel(server);
+
+  const ao_bot = await createAnswerOverflowBotCtx();
+  ao_bot_server_router = serverRouter.createCaller(ao_bot);
+  ao_bot_channel_router = channelRouter.createCaller(ao_bot);
+  await ao_bot_server_router.create(server);
 });
 
+export function pickPublicChannelData(channel: Channel) {
+  return pick(channel, ["id", "name", "parent_id", "server_id", "type"]);
+}
+
 describe("Channel Operations", () => {
-  describe("Channel Create", () => {
-    it("should succeed creating a channel with manage guild", async () => {
-      await manage_guild_router.create(test_data_1.server);
-      const channel = await manage_channel_router.create(channel_1);
-      expect(channel).toEqual(channel_1);
+  describe("Channel Fetch", () => {
+    beforeEach(async () => {
+      await ao_bot_channel_router.create(channel);
     });
-    it("should fail creating a channel with default permissions", async () => {
-      await manage_guild_router.create(test_data_1.server);
-      await expect(default_channel_router.create(channel_1)).rejects.toThrow(TRPCError);
+    it("should succeed fetching a channel as the answer overflow bot", async () => {
+      const fetched = await ao_bot_channel_router.byId(channel.id);
+      expect(fetched).toEqual(channel);
     });
-    it("should create a channel with dependencies", async () => {
-      const channel = await manage_channel_router.createWithDeps({
-        ...channel_1,
-        server: test_data_1.server,
-      });
-      expect(channel).toEqual(channel_1);
-    });
-  });
-
-  describe("Channel Update", () => {
-    it("should succeed updating a channel with manage guild", async () => {
-      await manage_guild_router.create(test_data_1.server);
-      await manage_channel_router.create(channel_1);
-      const channel = await manage_channel_router.update({
-        id: channel_1.id,
-        name: "new name",
-      });
-      expect(channel).toEqual({ ...channel_1, name: "new name" });
-    });
-    it("should fail updating a channel with default permissions", async () => {
-      await manage_guild_router.create(test_data_1.server);
-      await manage_channel_router.create(channel_1);
-      await expect(
-        default_channel_router.update({
-          id: channel_1.id,
-
-          name: "new name",
-        })
-      ).rejects.toThrow(TRPCError);
-    });
-  });
-
-  describe("Channel Upsert", () => {
-    it("should succeed upserting a new channel with manage guild", async () => {
-      await manage_guild_router.create(test_data_1.server);
-      const channel = await manage_channel_router.upsert(channel_1);
-      expect(channel).toEqual(channel_1);
-    });
-    it("should fail upserting a new channel with default permissions", async () => {
-      await manage_guild_router.create(test_data_1.server);
-      await expect(default_channel_router.upsert(channel_1)).rejects.toThrow(TRPCError);
-    });
-    it("should upsert a channel with dependencies", async () => {
-      const channel = await manage_channel_router.upsertWithDeps({
-        ...channel_1,
-        server: test_data_1.server,
-      });
-      expect(channel).toEqual(channel_1);
-    });
-    it("should succeed upserting many channels", async () => {
-      await manage_guild_router.create(test_data_1.server);
-      const channels = await manage_channel_router.upsertMany(
-        test_data_1.text_channels.map((channel) => channel.channel)
-      );
-      expect(channels).toEqual(test_data_1.text_channels.map((channel) => channel.channel));
-    });
-  });
-
-  describe("Thread Upsert", () => {
-    it("should succeed upserting a new thread with manage guild", async () => {
-      await manage_guild_router.create(test_data_1.server);
-      const thread = await manage_channel_router.upsertThreadWithDeps({
-        ...thread_1,
-        parent: {
-          ...channel_1,
-          server: test_data_1.server,
+    it("tests all variants for fetching a single channel", async () => {
+      await testAllDataVariants({
+        sourcesThatShouldWork: ["discord-bot"],
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        async fetch({ permission, source }) {
+          const account = await mockAccountWithServersCallerCtx(server, source, permission);
+          const router = channelRouter.createCaller(account.ctx);
+          const data = await router.byId(channel.id);
+          return {
+            data,
+            private_data_format: channel,
+            public_data_format: pickPublicChannelData(channel),
+          };
         },
       });
-      expect(thread).toEqual(test_data_1.text_channels[0]!.threads[0]!.thread);
+    });
+  });
+  describe("Channel Fetch Many", () => {
+    beforeEach(async () => {
+      await ao_bot_channel_router.create(channel);
+      await ao_bot_channel_router.create(channel2);
+    });
+    it("should succeed fetching many channels as the answer overflow bot", async () => {
+      const fetched = await ao_bot_channel_router.byIdMany([channel.id, channel2.id]);
+      expect(fetched).toContainEqual(channel);
+      expect(fetched).toContainEqual(channel2);
+    });
+    it("tests all variants for fetching many channels", async () => {
+      await testAllDataVariants({
+        sourcesThatShouldWork: ["discord-bot", "web-client"],
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        async fetch({ permission, source }) {
+          const account = await mockAccountWithServersCallerCtx(server, source, permission);
+          const router = channelRouter.createCaller(account.ctx);
+          const data = await router.byIdMany([channel.id, channel2.id]);
+          return {
+            data,
+            private_data_format: [channel, channel2],
+            public_data_format: [pickPublicChannelData(channel), pickPublicChannelData(channel2)],
+          };
+        },
+      });
+    });
+  });
+  describe("Channel Create", () => {
+    it("tests all variants for creating a single channel", async () => {
+      await testAllVariantsThatThrowErrors({
+        sourcesThatShouldWork: ["discord-bot"],
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+        async operation({ permission, source }) {
+          const chnl = mockChannel(server);
+          const account = await mockAccountWithServersCallerCtx(server, source, permission);
+          const router = channelRouter.createCaller(account.ctx);
+          await router.create(chnl);
+        },
+      });
+    });
+    it("should succeed creating a channel as the answer overflow bot", async () => {
+      const created = await ao_bot_channel_router.create(channel);
+      expect(created).toEqual(channel);
+    });
+  });
+  describe("Channel Create Many", () => {
+    it("tests all variants for creating many channels", async () => {
+      await testAllVariantsThatThrowErrors({
+        sourcesThatShouldWork: ["discord-bot"],
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+        async operation({ permission, source }) {
+          const chnl = mockChannel(server);
+          const chnl2 = mockChannel(server);
+          const account = await mockAccountWithServersCallerCtx(server, source, permission);
+          const router = channelRouter.createCaller(account.ctx);
+          const results = await router.createMany([chnl, chnl2]);
+          expect(results).toContainEqual(chnl);
+          expect(results).toContainEqual(chnl2);
+        },
+      });
+    });
+    it("should succeed creating many channels as the answer overflow bot", async () => {
+      const channel2 = mockChannel(server);
+      const created = await ao_bot_channel_router.createMany([channel, channel2]);
+      expect(created).toContainEqual(channel);
+      expect(created).toContainEqual(channel2);
+    });
+  });
+  describe("Channel Update", () => {
+    beforeEach(async () => {
+      await ao_bot_channel_router.create(channel);
+    });
+    it("tests all varaints for updating a channel", async () => {
+      await testAllVariantsThatThrowErrors({
+        sourcesThatShouldWork: ["discord-bot"],
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+        async operation({ permission, source }) {
+          const account = await mockAccountWithServersCallerCtx(server, source, permission);
+          const router = channelRouter.createCaller(account.ctx);
+          await router.update({
+            id: channel.id,
+            name: "new name",
+          });
+        },
+      });
+    });
+    it("should succeed updating a channel as the answer overflow bot", async () => {
+      const updated = await ao_bot_channel_router.update({
+        id: channel.id,
+        name: "new name",
+      });
+      expect(updated).toEqual({
+        ...channel,
+        name: "new name",
+      });
+    });
+  });
+  describe("Channel Update Many", () => {
+    beforeEach(async () => {
+      await ao_bot_channel_router.create(channel);
+      await ao_bot_channel_router.create(channel2);
+    });
+    it("tests all variants for updating many channels", async () => {
+      await testAllVariantsThatThrowErrors({
+        sourcesThatShouldWork: ["discord-bot"],
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+        async operation({ permission, source }) {
+          const account = await mockAccountWithServersCallerCtx(server, source, permission);
+          const router = channelRouter.createCaller(account.ctx);
+          await router.updateMany([
+            {
+              id: channel.id,
+              name: "new name",
+            },
+            {
+              id: channel2.id,
+              name: "new name 2",
+            },
+          ]);
+        },
+      });
+    });
+    it("should succeed updating many channels as the answer overflow bot", async () => {
+      const updated = await ao_bot_channel_router.updateMany([
+        {
+          id: channel.id,
+          name: "new name",
+        },
+        {
+          id: channel2.id,
+          name: "new name 2",
+        },
+      ]);
+      expect(updated).toContainEqual({
+        ...channel,
+        name: "new name",
+      });
+      expect(updated).toContainEqual({
+        ...channel2,
+        name: "new name 2",
+      });
+    });
+  });
+  describe("Channel Delete", () => {
+    it("tests all varaints for deleting a channel", async () => {
+      await testAllVariantsThatThrowErrors({
+        sourcesThatShouldWork: ["discord-bot"],
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+        async operation({ permission, source }) {
+          const chnl = mockChannel(server);
+          await ao_bot_channel_router.create(chnl);
+          const account = await mockAccountWithServersCallerCtx(server, source, permission);
+          const router = channelRouter.createCaller(account.ctx);
+          await router.delete(chnl.id);
+        },
+      });
+    });
+    it("should succeed deleting a channel as the answer overflow bot", async () => {
+      const chnl = mockChannel(server);
+      await ao_bot_channel_router.create(chnl);
+      await ao_bot_channel_router.delete(chnl.id);
+      await expect(ao_bot_channel_router.byId(chnl.id)).rejects.toThrow(CHANNEL_NOT_FOUND_MESSAGES);
+    });
+  });
+  describe("Channel Upsert", () => {
+    describe("Upsert Create", () => {
+      it("tests all varaints for upsert creating a channel", async () => {
+        await testAllVariantsThatThrowErrors({
+          sourcesThatShouldWork: ["discord-bot"],
+          permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+          permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+          async operation({ permission, source }) {
+            const chnl = mockChannel(server);
+            const account = await mockAccountWithServersCallerCtx(server, source, permission);
+            const router = channelRouter.createCaller(account.ctx);
+            await router.upsert(chnl);
+          },
+        });
+      });
+      it("should succeed upserting a channel as the answer overflow bot", async () => {
+        const upserted = await ao_bot_channel_router.upsert(channel);
+        expect(upserted).toEqual(channel);
+      });
+    });
+    describe("Upsert Update", () => {
+      beforeEach(async () => {
+        await ao_bot_channel_router.create(channel);
+      });
+      it("tests all varaints for upsert updating a channel", async () => {
+        await testAllVariantsThatThrowErrors({
+          sourcesThatShouldWork: ["discord-bot"],
+          permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+          permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+          async operation({ permission, source }) {
+            const account = await mockAccountWithServersCallerCtx(server, source, permission);
+            const router = channelRouter.createCaller(account.ctx);
+            await router.upsert({
+              ...channel,
+              name: "new name",
+            });
+          },
+        });
+      });
+      it("should succeed upserting a channel as the answer overflow bot", async () => {
+        const upserted = await ao_bot_channel_router.upsert({
+          ...channel,
+          name: "new name",
+        });
+        expect(upserted).toEqual({
+          ...channel,
+          name: "new name",
+        });
+      });
     });
   });
 });

@@ -4,24 +4,24 @@ import {
   server_settings_flags,
   getDefaultServerSettings,
   mergeServerSettingsFlags,
+  PrismaClient,
 } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, withUserServersProcedure, router } from "~api/router/trpc";
 import { serverRouter, z_server_upsert } from "./server";
 import { toZObject } from "~api/utils/zod-utils";
-import { upsert } from "~api/utils/operations";
-
+import { findOrThrowNotFound, upsert } from "~api/utils/operations";
 import {
-  protectedServerManagerFetch,
-  protectedServerManagerMutation,
-  protectedServerManagerMutationFetchFirst,
-} from "~api/utils/protected-procedures/server-manager-procedures";
+  protectedFetch,
+  protectedMutation,
+  protectedMutationFetchFirst,
+} from "~api/utils/protected-procedures";
+import { assertCanEditServer, assertCanEditServerBotOnly } from "~api/utils/permissions";
 
 const z_server_settings_flags = toZObject(...server_settings_flags);
 
 const z_server_settings = z.object({
   server_id: z.string(),
-  dog: z.string(),
   flags: z_server_settings_flags,
 });
 
@@ -72,18 +72,22 @@ export async function transformServerSettings<T extends ServerSettings>(
   return addFlagsToServerSettings(await server_settings);
 }
 
+function getServerSettingsById(server_id: string, prisma: PrismaClient, not_found_message: string) {
+  return transformServerSettings(
+    findOrThrowNotFound(
+      () => prisma.serverSettings.findUnique({ where: { server_id } }),
+      not_found_message
+    )
+  );
+}
+
 const serverSettingFind = router({
   byId: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    return transformServerSettings(
-      protectedServerManagerFetch({
-        fetch: () => ctx.prisma.serverSettings.findUnique({ where: { server_id: input } }),
-        getServerId(data) {
-          return data.server_id;
-        },
-        ctx,
-        not_found_message: "Server settings not found",
-      })
-    );
+    return protectedFetch({
+      fetch: () => getServerSettingsById(input, ctx.prisma, "Server settings not found"),
+      not_found_message: "Server settings not found",
+      permissions: (data) => assertCanEditServer(ctx, data.server_id),
+    });
   }),
 });
 
@@ -92,9 +96,7 @@ const serverSettingsCreateUpdate = router({
     .input(z_server_settings_create)
     .mutation(async ({ ctx, input }) => {
       return transformServerSettings(
-        protectedServerManagerMutation({
-          ctx,
-          server_id: input.server_id,
+        protectedMutation({
           operation: () => {
             const new_settings = mergeServerSettings(
               getDefaultServerSettings({
@@ -104,6 +106,7 @@ const serverSettingsCreateUpdate = router({
             );
             return ctx.prisma.serverSettings.create({ data: new_settings });
           },
+          permissions: () => assertCanEditServerBotOnly(ctx, input.server_id),
         })
       );
     }),
@@ -111,12 +114,9 @@ const serverSettingsCreateUpdate = router({
     .input(z_server_settings_update)
     .mutation(async ({ ctx, input }) => {
       return transformServerSettings(
-        protectedServerManagerMutationFetchFirst({
-          ctx,
-          fetch: () => serverSettingFind.createCaller(ctx).byId(input.server_id),
-          getServerId(data) {
-            return data.server_id;
-          },
+        protectedMutationFetchFirst({
+          fetch: () =>
+            getServerSettingsById(input.server_id, ctx.prisma, "Server settings not found"),
           async operation(existing) {
             const new_settings = mergeServerSettings(existing, input);
             return await ctx.prisma.serverSettings.update({
@@ -126,6 +126,7 @@ const serverSettingsCreateUpdate = router({
               data: new_settings,
             });
           },
+          permissions: () => assertCanEditServerBotOnly(ctx, input.server_id),
           not_found_message: "Server settings not found",
         })
       );
@@ -148,7 +149,7 @@ const serverSettingsUpsert = router({
     .input(z_server_settings_upsert)
     .mutation(async ({ ctx, input }) => {
       return upsert(
-        () => serverSettingFind.createCaller(ctx).byId(input.server_id),
+        () => getServerSettingsById(input.server_id, ctx.prisma, "Server settings not found"),
         () => serverSettingsCreateUpdate.createCaller(ctx).create(input),
         () => serverSettingsCreateUpdate.createCaller(ctx).update(input)
       );
@@ -157,7 +158,7 @@ const serverSettingsUpsert = router({
     .input(z_server_settings_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert(
-        () => serverSettingFind.createCaller(ctx).byId(input.server.id),
+        () => getServerSettingsById(input.server.id, ctx.prisma, "Server settings not found"),
         () => serverSettingsCreateWithDeps.createCaller(ctx).createWithDeps(input),
         () =>
           serverSettingsCreateUpdate
