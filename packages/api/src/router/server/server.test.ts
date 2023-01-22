@@ -85,6 +85,7 @@ describe("Server Operations", () => {
             public_data_format: pick(server_2, ["id", "name", "icon"]),
           };
         },
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
       });
     });
   });

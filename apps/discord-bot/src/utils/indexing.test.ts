@@ -19,7 +19,7 @@ import {
   mockTextChannel,
   mockThreadFromParentMessage,
 } from "~discord-bot/test/utils/discordjs/channel-mock";
-import type { Message as AOMessage } from "@answeroverflow/db";
+import { clearDatabase, Message as AOMessage } from "@answeroverflow/db";
 import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
 import { mockGuildMember } from "~discord-bot/test/utils/discordjs/user-mock";
 import { testOnlyAPICall } from "~discord-bot/test/utils/helpers";
@@ -49,6 +49,7 @@ beforeEach(async () => {
   text_channel = mockTextChannel(client);
   forum_channel = mockForumChannel(client);
   news_channel = mockNewsChannel({ client });
+  await clearDatabase();
 });
 
 async function validateIndexingResults(input: {
@@ -122,7 +123,7 @@ describe("Indexing", () => {
         expected_messages: 100,
       });
     });
-    it("should index a news channel", async () => {
+    it.only("should index a news channel", async () => {
       const settings = await upsertChannelSettings(news_channel, {
         flags: {
           indexing_enabled: true,

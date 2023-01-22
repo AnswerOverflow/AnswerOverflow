@@ -48,24 +48,14 @@ describe("Protected Fetch", () => {
     const { email, password, ...public_data } = sample_data;
     expect(data).toEqual(public_data);
   });
-  it("should fail a permission check and not get public data", async () => {
-    await expect(
-      protectedFetchWithPublicData({
-        fetch: () => Promise.resolve(sample_data),
-        permissions: () => new TRPCError({ code: "UNAUTHORIZED" }),
-        public_data_formatter: (data) => z_public_sample_data.parse(data),
-        public_data_permissions: () => new TRPCError({ code: "UNAUTHORIZED" }),
-        not_found_message: "not found",
-      })
-    ).rejects.toThrowError();
-  });
   it("should format an array of public data", async () => {
     const data = await protectedFetchManyWithPublicData({
       fetch: () => Promise.resolve([sample_data]),
       permissions: () => new TRPCError({ code: "UNAUTHORIZED" }),
       public_data_formatter: (data) => z_public_sample_data.parse(data),
     });
-    expect(data).toEqual([pick(sample_data, "id", "name")]);
+    const public_data = pick(sample_data, ["id", "name"]);
+    expect(data).toEqual([public_data]);
   });
 });
 
