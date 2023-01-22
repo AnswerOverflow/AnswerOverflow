@@ -7,16 +7,17 @@ import {
 } from "@answeroverflow/db";
 import { z } from "zod";
 import { toZObject } from "~api/utils/zod-utils";
-import {
-  protectedUserOnlyFetch,
-  protectedUserOnlyMutation,
-  protectedUserOnlyMutationFetchFirst,
-} from "~api/utils/protected-procedures/user-only";
 import { withDiscordAccountProcedure, mergeRouters, router } from "../trpc";
 import { upsert } from "~api/utils/operations";
 import { discordAccountRouter, z_discord_account_upsert } from "../users/accounts/discord-accounts";
 import { serverRouter } from "../server/server";
 import { TRPCError } from "@trpc/server";
+import {
+  protectedFetch,
+  protectedMutation,
+  protectedMutationFetchFirst,
+} from "~api/utils/protected-procedures";
+import { assertIsUser } from "~api/utils/permissions";
 
 export const SERVER_NOT_SETUP_MESSAGE = "Server is not setup for Answer Overflow yet";
 
@@ -90,9 +91,8 @@ const user_server_settings_fetch_router = router({
     .input(z_user_server_settings_find)
     .query(async ({ input, ctx }) => {
       return transformUserServerSettings(
-        protectedUserOnlyFetch({
-          ctx,
-          user_id: input.user_id,
+        protectedFetch({
+          permissions: () => assertIsUser(ctx, input.user_id),
           fetch() {
             return ctx.prisma.userServerSettings.findUnique({
               where: {
@@ -110,9 +110,8 @@ const user_server_settings_fetch_router = router({
       const user_ids = input.map((x) => x.user_id);
       const server_ids = input.map((x) => x.server_id);
       return transformUserServerSettingsArray(
-        protectedUserOnlyFetch({
-          ctx,
-          user_id: user_ids,
+        protectedFetch({
+          permissions: () => input.map((user) => assertIsUser(ctx, user.user_id)),
           fetch: () => {
             return ctx.prisma.userServerSettings.findMany({
               where: {
@@ -138,9 +137,8 @@ const user_server_settings_mutation_router = router({
     .input(z_user_server_settings_create)
     .mutation(async ({ input, ctx }) => {
       return transformUserServerSettings(
-        protectedUserOnlyMutation({
-          ctx,
-          user_id: input.user_id,
+        protectedMutation({
+          permissions: () => assertIsUser(ctx, input.user_id),
           operation: () =>
             ctx.prisma.userServerSettings.create({
               data: mergeUserServerSettings(
@@ -157,9 +155,8 @@ const user_server_settings_mutation_router = router({
     .input(z_user_server_settings_update)
     .mutation(async ({ input, ctx }) => {
       return transformUserServerSettings(
-        protectedUserOnlyMutationFetchFirst({
-          ctx,
-          user_id: input.user_id,
+        protectedMutationFetchFirst({
+          permissions: () => assertIsUser(ctx, input.user_id),
           fetch() {
             return user_server_settings_fetch_router.createCaller(ctx).byId({
               user_id: input.user_id,
@@ -187,9 +184,8 @@ const user_server_settings_with_deps_router = router({
     .input(z_user_server_settings_create_with_deps)
     .mutation(async ({ input, ctx }) => {
       return transformUserServerSettings(
-        protectedUserOnlyMutation({
-          ctx,
-          user_id: input.user.id,
+        protectedMutation({
+          permissions: () => assertIsUser(ctx, input.user.id),
           async operation() {
             // We do not create the server as a dependency as that action should only be handled by the server owner or Answer Overflow bot
             try {

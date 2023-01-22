@@ -1,8 +1,13 @@
 import { TRPCError } from "@trpc/server";
 import { PermissionsBitField } from "discord.js";
-import type { Context } from "~api/router/context";
+import type { Source, Context } from "~api/router/context";
+import { discordAccountRouter } from "~api/router/users/accounts/discord-accounts";
+import { findAllowNull } from "./operations";
 
-export const MISSING_PERMISSIONS_MESSAGE = "You are missing the required permissions to do this";
+export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
+  "You are missing the required permissions to do this";
+
+type PermissionCheckResult = TRPCError | undefined;
 
 export function isAnswerOverflowBot(ctx: Context) {
   const bot_id =
@@ -18,20 +23,20 @@ export function isSuperUser(ctx: Context) {
   return false;
 }
 
-export function assertIsBot(ctx: Context) {
+export function assertIsAnswerOverflowBot(ctx: Context): PermissionCheckResult {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
-  throw new TRPCError({
+  return new TRPCError({
     code: "UNAUTHORIZED",
     message: "You are not authorized to do this",
   });
 }
 
-export function assertCanEditServer(ctx: Context, server_id: string) {
+export function assertCanEditServer(ctx: Context, server_id: string): PermissionCheckResult {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
   if (!ctx.user_servers) {
-    throw new TRPCError({
+    return new TRPCError({
       code: "UNAUTHORIZED",
       message: "You are not authorized to edit this server",
     });
@@ -41,7 +46,7 @@ export function assertCanEditServer(ctx: Context, server_id: string) {
     (user_server) => user_server.id === server_id
   );
   if (!server_to_check_permissions_of) {
-    throw new TRPCError({
+    return new TRPCError({
       code: "FORBIDDEN",
       message: "You are not a member of the server you are trying to create channel settings for",
     });
@@ -50,55 +55,83 @@ export function assertCanEditServer(ctx: Context, server_id: string) {
     BigInt(server_to_check_permissions_of.permissions)
   );
   if (!permission_bitfield.has("ManageGuild")) {
-    throw new TRPCError({
+    return new TRPCError({
       code: "FORBIDDEN",
-      message: MISSING_PERMISSIONS_MESSAGE,
+      message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
     });
   }
-}
-
-export function assertCanEditServers(ctx: Context, server_id: string | string[]) {
-  if (Array.isArray(server_id)) {
-    server_id.forEach((id) => assertCanEditServer(ctx, id));
-  } else {
-    assertCanEditServer(ctx, server_id);
-  }
+  return;
 }
 
 export function assertCanEditMessage(ctx: Context, author_id: string) {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
   if (ctx.discord_account?.id !== author_id) {
-    throw new TRPCError({
+    return new TRPCError({
       code: "FORBIDDEN",
-      message: MISSING_PERMISSIONS_MESSAGE,
+      message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
     });
   }
-}
-
-export function assertCanEditMessages(ctx: Context, author_id: string | string[]) {
-  if (Array.isArray(author_id)) {
-    author_id.forEach((id) => assertCanEditMessage(ctx, id));
-  } else {
-    assertCanEditMessage(ctx, author_id);
-  }
+  return;
 }
 
 export function assertIsUser(ctx: Context, target_user_id: string) {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;
   if (ctx.discord_account?.id !== target_user_id) {
-    throw new TRPCError({
+    return new TRPCError({
       code: "UNAUTHORIZED",
       message: "You are not authorized to do this",
     });
   }
+  return;
 }
 
-export function assertIsUsers(ctx: Context, target_user_id: string | string[]) {
-  if (Array.isArray(target_user_id)) {
-    target_user_id.forEach((id) => assertIsUser(ctx, id));
-  } else {
-    assertIsUser(ctx, target_user_id);
+export async function assertUserDoesNotExistInDB(ctx: Context, target_user_id: string) {
+  const router = discordAccountRouter.createCaller(ctx);
+  const discord_account = await findAllowNull(() => router.byId(target_user_id));
+  if (discord_account) {
+    return new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: "This user exists in the database",
+    });
   }
+  return;
+}
+
+export const INVALID_ROUTE_FOR_BOT_ERROR = "This route is unavaliable to be called from the bot";
+export const INVALID_ROUTER_FOR_WEB_CLIENT_ERROR =
+  "This route is unavaliable to be called from the web client";
+
+export function createInvalidSourceError(caller: Source) {
+  let message = "";
+  switch (caller) {
+    case "discord-bot":
+      message = INVALID_ROUTE_FOR_BOT_ERROR;
+      break;
+    case "web-client":
+      message = INVALID_ROUTER_FOR_WEB_CLIENT_ERROR;
+      break;
+    default:
+      throw new Error("Invalid source");
+  }
+  return new TRPCError({
+    code: "BAD_REQUEST",
+    message,
+  });
+}
+
+export function isCtxCaller(ctx: Context, caller: Source) {
+  if (ctx.caller !== caller) {
+    return createInvalidSourceError(ctx.caller);
+  }
+  return;
+}
+
+export function isCtxSourceDiscordBot(ctx: Context) {
+  return isCtxCaller(ctx, "discord-bot");
+}
+
+export function assertCanEditServerBotOnly(ctx: Context, server_id: string) {
+  return [assertCanEditServer(ctx, server_id), isCtxSourceDiscordBot(ctx)];
 }

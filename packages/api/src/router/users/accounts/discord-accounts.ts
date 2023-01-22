@@ -1,19 +1,16 @@
 import { getDefaultDiscordAccount, Prisma } from "@answeroverflow/db";
 import { z } from "zod";
-import { findOrThrowNotFound, upsert, upsertMany } from "~api/utils/operations";
-import {
-  protectedUserOnlyFetch,
-  protectedUserOnlyMutation,
-} from "~api/utils/protected-procedures/user-only";
-import {
-  withDiscordAccountProcedure,
-  mergeRouters,
-  router,
-  publicProcedure,
-} from "~api/router/trpc";
+import { upsert, upsertMany } from "~api/utils/operations";
+import { mergeRouters, router, publicProcedure } from "~api/router/trpc";
 import { ignored_discord_account_router } from "../ignored-discord-accounts/ignored-discord-account";
 import { TRPCError } from "@trpc/server";
 import { assertIsNotDeletedUser } from "~api/router/users/ignored-discord-accounts/ignored-discord-account";
+import {
+  protectedFetchManyWithPublicData,
+  protectedFetchWithPublicData,
+  protectedMutation,
+} from "~api/utils/protected-procedures";
+import { assertIsUser } from "~api/utils/permissions";
 
 const z_discord_account = z.object({
   id: z.string(),
@@ -47,36 +44,34 @@ export const z_discord_account_upsert = z_discord_account_create;
 const unique_array = z.array(z.string()).transform((arr) => [...new Set(arr)]);
 
 const account_find_router = router({
-  byId: withDiscordAccountProcedure.input(z.string()).query(({ ctx, input }) => {
-    return protectedUserOnlyFetch({
+  byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
+    return protectedFetchWithPublicData({
       fetch: () => ctx.prisma.discordAccount.findUnique({ where: { id: input } }),
-      ctx,
-      user_id: input,
+      permissions: (data) => assertIsUser(ctx, data.id),
       not_found_message: "Could not find discord account",
+      public_data_formatter: (data) => z_discord_account_public.parse(data),
     });
   }),
   byIdMany: publicProcedure.input(unique_array).query(({ ctx, input }) => {
-    return findOrThrowNotFound(
-      () => ctx.prisma.discordAccount.findMany({ where: { id: { in: [...input] } } }),
-      "Could not find discord account"
-    );
+    return protectedFetchManyWithPublicData({
+      fetch: () => ctx.prisma.discordAccount.findMany({ where: { id: { in: input } } }),
+      permissions: (data) => assertIsUser(ctx, data.id),
+      public_data_formatter: (data) => z_discord_account_public.parse(data),
+    });
   }),
 });
 
 const account_crud_router = router({
-  create: withDiscordAccountProcedure
-    .input(z_discord_account_create)
-    .mutation(async ({ ctx, input }) => {
-      await assertIsNotDeletedUser(ctx, input.id);
-      return protectedUserOnlyMutation({
-        ctx,
-        user_id: input.id,
-        async operation() {
-          return ctx.prisma.discordAccount.create({ data: input });
-        },
-      });
-    }),
-  createBulk: withDiscordAccountProcedure
+  create: publicProcedure.input(z_discord_account_create).mutation(async ({ ctx, input }) => {
+    await assertIsNotDeletedUser(ctx, input.id);
+    return protectedMutation({
+      permissions: [() => assertIsUser(ctx, input.id), () => assertIsNotDeletedUser(ctx, input.id)],
+      async operation() {
+        return ctx.prisma.discordAccount.create({ data: input });
+      },
+    });
+  }),
+  createBulk: publicProcedure
     .input(z.array(z_discord_account_create))
     .mutation(async ({ ctx, input }) => {
       const ignored_accounts = await ignored_discord_account_router
@@ -84,38 +79,35 @@ const account_crud_router = router({
         .byIdMany(input.map((i) => i.id));
       const ignored_ids_lookup = new Set(ignored_accounts.map((i) => i.id));
       const allowed_to_create_accounts = input.filter((x) => !ignored_ids_lookup.has(x.id));
-      await protectedUserOnlyMutation({
-        ctx,
-        user_id: input.map((i) => i.id),
+      await protectedMutation({
+        // We handle checking for deleted users before we perform the mutation
+        permissions: [allowed_to_create_accounts.map((i) => () => assertIsUser(ctx, i.id))].flat(),
         async operation() {
           return ctx.prisma.discordAccount.createMany({ data: allowed_to_create_accounts });
         },
       });
       return allowed_to_create_accounts.map((i) => getDefaultDiscordAccount(i));
     }),
-  update: withDiscordAccountProcedure.input(z_discord_account_update).mutation(({ ctx, input }) => {
-    return protectedUserOnlyMutation({
-      ctx,
-      user_id: input.id,
+  update: publicProcedure.input(z_discord_account_update).mutation(({ ctx, input }) => {
+    return protectedMutation({
+      permissions: () => assertIsUser(ctx, input.id),
       operation: () => ctx.prisma.discordAccount.update({ where: { id: input.id }, data: input }),
     });
   }),
-  updateBulk: withDiscordAccountProcedure
+  updateBulk: publicProcedure
     .input(z.array(z_discord_account_update))
     .mutation(({ ctx, input }) => {
-      return protectedUserOnlyMutation({
-        ctx,
-        user_id: input.map((i) => i.id),
+      return protectedMutation({
+        permissions: () => input.map((i) => assertIsUser(ctx, i.id)),
         operation: () =>
           ctx.prisma.$transaction(
             input.map((i) => ctx.prisma.discordAccount.update({ where: { id: i.id }, data: i }))
           ),
       });
     }),
-  delete: withDiscordAccountProcedure.input(z.string()).mutation(({ ctx, input }) => {
-    return protectedUserOnlyMutation({
-      ctx,
-      user_id: input,
+  delete: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
+    return protectedMutation({
+      permissions: () => assertIsUser(ctx, input),
       async operation() {
         try {
           await ctx.prisma.discordAccount.delete({ where: { id: input } });
@@ -137,14 +129,14 @@ const account_crud_router = router({
 });
 
 const account_upsert_router = router({
-  upsert: withDiscordAccountProcedure.input(z_discord_account_upsert).mutation(({ ctx, input }) => {
+  upsert: publicProcedure.input(z_discord_account_upsert).mutation(({ ctx, input }) => {
     return upsert(
       () => account_find_router.createCaller(ctx).byId(input.id),
       () => account_crud_router.createCaller(ctx).create(input),
       () => account_crud_router.createCaller(ctx).update(input)
     );
   }),
-  upsertBulk: withDiscordAccountProcedure
+  upsertBulk: publicProcedure
     .input(z.array(z_discord_account_upsert))
     .mutation(async ({ ctx, input }) => {
       return upsertMany({

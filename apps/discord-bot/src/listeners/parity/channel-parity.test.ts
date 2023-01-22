@@ -59,7 +59,7 @@ describe("Channel Delete Parity", () => {
 describe("Thread Delete Parity", () => {
   it("should delete an existing thread", async () => {
     await testOnlyAPICall((router) =>
-      router.channels.createThreadWithDeps({
+      router.channels.upsertThreadWithDeps({
         parent: toAOChannelWithServer(thread.parent!),
         ...toAOThread(thread),
       })
@@ -76,7 +76,7 @@ describe("Thread Delete Parity", () => {
 describe("Thread Update Parity", () => {
   it("should update an existing thread", async () => {
     await testOnlyAPICall((router) =>
-      router.channels.createThreadWithDeps({
+      router.channels.upsertThreadWithDeps({
         parent: toAOChannelWithServer(thread.parent!),
         ...toAOThread(thread),
       })

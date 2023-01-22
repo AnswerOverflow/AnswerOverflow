@@ -1,75 +1,119 @@
 import { clearDatabase, Server } from "@answeroverflow/db";
-import { TRPCError } from "@trpc/server";
-import { getGeneralScenario, ServerTestData } from "~api/test/utils";
+import {
+  createAnswerOverflowBotCtx,
+  mockAccountWithServersCallerCtx,
+  mockServer,
+  testAllDataVariants,
+  testAllVariantsThatThrowErrors,
+} from "~api/test/utils";
+import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
+import { pick } from "~api/utils/utils";
 import { serverRouter } from "./server";
 
-let manage_guild_router: ReturnType<(typeof serverRouter)["createCaller"]>;
-let default_router: ReturnType<(typeof serverRouter)["createCaller"]>;
-let test_data_1: ServerTestData;
+let answer_overflow_bot_router: ReturnType<(typeof serverRouter)["createCaller"]>;
 let server_1: Server;
 beforeEach(async () => {
-  const { data1 } = await getGeneralScenario();
-  test_data_1 = data1;
-  manage_guild_router = serverRouter.createCaller(test_data_1.account1_guild_manager_ctx);
-  default_router = serverRouter.createCaller(test_data_1.account2_default_member_ctx);
-  server_1 = test_data_1.server;
   await clearDatabase();
+  server_1 = mockServer();
+  const ao_bot = await createAnswerOverflowBotCtx();
+  answer_overflow_bot_router = serverRouter.createCaller(ao_bot);
 });
 
 describe("Server Operations", () => {
   describe("Server Create", () => {
-    it("should succeed creating a server with manage guild", async () => {
-      const server = await manage_guild_router.create(server_1);
-      expect(server).toEqual(server_1);
+    it("should succeed creating a server as the answer overflow bot", async () => {
+      await expect(answer_overflow_bot_router.create(server_1)).resolves.toEqual(server_1);
     });
-    it("should fail creating a server with default permissions", async () => {
-      await expect(default_router.create(server_1)).rejects.toThrow(TRPCError);
+    it("should test all permission and caller variants to ensure only calls from the Discord bot with Manage Guild & Administrator can succeed", async () => {
+      await testAllVariantsThatThrowErrors({
+        sourcesThatShouldWork: ["discord-bot"],
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+        async operation({ permission, source }) {
+          const server = mockServer();
+          const account = await mockAccountWithServersCallerCtx(server, source, permission);
+          const router = serverRouter.createCaller(account.ctx);
+          await router.create(server);
+        },
+      });
     });
   });
-
   describe("Server Update", () => {
-    it("should succeed updating a server with manage guild", async () => {
-      await manage_guild_router.create(server_1);
-      const server = await manage_guild_router.update({
+    it("should succeed updating a guild as the answer overflow bot", async () => {
+      await answer_overflow_bot_router.create(server_1);
+      const server = await answer_overflow_bot_router.update({
         id: server_1.id,
         name: "new name",
       });
       expect(server).toEqual({ ...server_1, name: "new name" });
     });
-    it("should fail updating a server with default permissions", async () => {
-      await manage_guild_router.create(server_1);
-      await expect(default_router.update({ id: server_1.id, name: "new name" })).rejects.toThrow(
-        TRPCError
-      );
+    it("should test all permission and caller variants to ensure only calls from the Discord bot with Manage Guild & Administrator can succeed", async () => {
+      return await testAllVariantsThatThrowErrors({
+        async operation({ source, permission }) {
+          const server = mockServer();
+          await answer_overflow_bot_router.create(server);
+          const account = await mockAccountWithServersCallerCtx(server, source, permission);
+          const router = serverRouter.createCaller(account.ctx);
+          await router.update({ id: server.id, name: "new name" });
+        },
+        sourcesThatShouldWork: ["discord-bot"],
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+      });
     });
   });
 
   describe("Server Fetch", () => {
-    it("should succeed fetching a server with manage guild", async () => {
-      await manage_guild_router.create(server_1);
-      const server = await manage_guild_router.byId(server_1.id);
-      expect(server).toEqual(server_1);
+    const server_2 = mockServer({
+      kicked_time: new Date(),
     });
-    it("should fail fetching a server with default permissions", async () => {
-      await manage_guild_router.create(server_1);
-      await expect(default_router.byId(server_1.id)).rejects.toThrow(TRPCError);
+    beforeEach(async () => {
+      await answer_overflow_bot_router.create(server_2);
+    });
+    it("should succeed fetching a server as the answer overflow bot", async () => {
+      await expect(answer_overflow_bot_router.byId(server_2.id)).resolves.toEqual(server_2);
+    });
+    it("should succeed fetching a server with permission variants", async () => {
+      await testAllDataVariants({
+        async fetch({ source, permission }) {
+          const account = await mockAccountWithServersCallerCtx(server_2, source, permission);
+          const router = serverRouter.createCaller(account.ctx);
+          const data = await router.byId(server_2.id);
+          return {
+            data,
+            private_data_format: server_2,
+            public_data_format: pick(server_2, ["id", "name", "icon"]),
+          };
+        },
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+      });
     });
   });
 
   describe("Server Upsert", () => {
-    it("should succeed upserting a new server with manage guild", async () => {
-      const server = await manage_guild_router.upsert(server_1);
-      expect(server).toEqual(server_1);
-      expect(await manage_guild_router.byId(server_1.id)).toEqual(server_1);
+    it("should succeed upserting a server as the answer overflow bot", async () => {
+      await expect(answer_overflow_bot_router.upsert(server_1)).resolves.toEqual(server_1);
     });
-    it("should succeed upserting an existing server with manage guild", async () => {
-      await manage_guild_router.create(server_1);
-      const server = await manage_guild_router.upsert({ ...server_1, name: "new name" });
-      expect(server).toEqual({ ...server_1, name: "new name" });
-      expect(await manage_guild_router.byId(server_1.id)).toEqual({
-        ...server_1,
-        name: "new name",
+    it("should test all server create upsert variants", async () => {
+      await testAllVariantsThatThrowErrors({
+        sourcesThatShouldWork: ["discord-bot"],
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+        permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+        async operation({ permission, source }) {
+          const server = mockServer();
+          const account = await mockAccountWithServersCallerCtx(server, source, permission);
+          const router = serverRouter.createCaller(account.ctx);
+          await router.upsert(server);
+        },
       });
     });
+  });
+
+  describe("Server Delete", () => {
+    test.todo("should succeed deleting a server as the answer overflow bot");
+    test.todo("should succeed deleting a server with server settings as the answer overflow bot");
+    test.todo("should succeed deleting a server with channels as the answer overflow bot");
+    test.todo("should succeed deleting a server with user server settings as answer overflow bot");
+    test.todo("should test all server create delete variants");
   });
 });
