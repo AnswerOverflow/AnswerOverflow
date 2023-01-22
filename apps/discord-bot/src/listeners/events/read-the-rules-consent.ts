@@ -4,7 +4,7 @@ import { Events, GuildMember } from "discord.js";
 import { createAnswerOveflowBotCtx, createMemberCtx } from "~discord-bot/utils/context";
 import { toAODiscordAccount } from "~discord-bot/utils/conversions";
 import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
-@ApplyOptions<Listener.Options>({ once: true, event: Events.GuildMemberUpdate })
+@ApplyOptions<Listener.Options>({ event: Events.GuildMemberUpdate })
 export class ReadTheRulesConsent extends Listener {
   public async run(oldMember: GuildMember, newMember: GuildMember) {
     if (oldMember.pending && !newMember.pending) {
