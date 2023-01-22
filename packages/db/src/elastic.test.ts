@@ -76,7 +76,7 @@ describe("ElasticSearch", () => {
     });
   });
   describe("Message Delete By Thread Id", () => {
-    it.only("should delete a message by thread id", async () => {
+    it("should delete a message by thread id", async () => {
       const thread_message = {
         ...msg1,
         thread_id: "123",

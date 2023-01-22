@@ -123,7 +123,7 @@ describe("Indexing", () => {
         expected_messages: 100,
       });
     });
-    it.only("should index a news channel", async () => {
+    it("should index a news channel", async () => {
       const settings = await upsertChannelSettings(news_channel, {
         flags: {
           indexing_enabled: true,
@@ -434,9 +434,9 @@ describe("Indexing", () => {
         const { messages } = await fetchAllChannelMessagesWithThreads(text_channel);
         expect(messages.length).toBe(
           number_of_archived_thread_messages +
-            number_of_active_thread_messages +
-            number_of_text_channel_messages +
-            2
+          number_of_active_thread_messages +
+          number_of_text_channel_messages +
+          2
         );
       });
     });
