@@ -6,3 +6,4 @@ export * from "./MessageResultPage";
 export * from "./Navbar";
 export * from "./SearchBar";
 export * from "./ServerInvite";
+export * from "./Pricing";

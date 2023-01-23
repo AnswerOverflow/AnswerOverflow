@@ -3,7 +3,7 @@ import { Button } from "./primitives/Button";
 
 export type ServerInviteProps = {
   server: ServerPublic;
-  channel: ChannelPublic;
+  channel?: ChannelPublic;
   is_user_in_server: boolean;
 };
 
@@ -31,7 +31,9 @@ export function ServerInvite({ server, channel, is_user_in_server }: ServerInvit
             <span className="text-xl font-bold text-black dark:text-neutral-300">
               {server.name}
             </span>
-            <span className="text-lg text-gray-500 dark:text-neutral-400">#{channel.name}</span>
+            {channel && (
+              <span className="text-lg text-gray-500 dark:text-neutral-400">#{channel.name}</span>
+            )}
           </div>
         </div>
       </div>
