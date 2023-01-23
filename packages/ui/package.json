@@ -28,6 +28,7 @@
     "@answeroverflow/tailwind-config": "*",
     "@answeroverflow/tsconfig": "*",
     "@babel/core": "^7.20.5",
+    "@storybook/addon-a11y": "^7.0.0-beta.31",
     "@storybook/addon-actions": "^7.0.0-beta.27",
     "@storybook/addon-essentials": "^7.0.0-beta.27",
     "@storybook/addon-interactions": "^7.0.0-beta.27",

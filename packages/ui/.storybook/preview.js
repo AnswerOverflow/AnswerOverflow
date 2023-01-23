@@ -26,6 +26,7 @@ const withTailwind = (Story, context) => {
   const { tailwindDarkmode } = context.globals;
   const isDark = tailwindDarkmode === 'dark';
   document.querySelector('html').classList.toggle('dark', isDark);
+  document.querySelector('body').className = 'dark:bg-neutral-800';
   return Story();
 }
 

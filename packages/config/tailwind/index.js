@@ -4,7 +4,7 @@
 module.exports = {
   content: ["./src/**/*.{ts,tsx}", "./src/_app.tsx"],
   // eslint-disable-next-line no-undef
-  plugins: [require("flowbite/plugin")],
+  plugins: [require("flowbite/plugin"), require("@tailwindcss/forms")],
   theme: {
     extend: {
       fontFamily: {

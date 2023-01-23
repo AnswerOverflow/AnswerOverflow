@@ -1,7 +1,7 @@
 import { Avatar } from "./Avatar";
 import { getSnowflakeUTCDate } from "~ui/utils/snowflake";
 import Image from "next/image";
-import type { MessageWithDiscordAccount } from "~api/router/index";
+import type { MessageWithDiscordAccount } from "@answeroverflow/api";
 export type MessageProps = {
   message: MessageWithDiscordAccount;
 };
@@ -59,7 +59,7 @@ export function Message({ message }: MessageProps) {
   }
 
   return (
-    <div className="flex break-words p-1 dark:bg-zinc-700">
+    <div className="flex break-words bg-neutral-50 p-1 dark:bg-zinc-700">
       <div className="mr-4 shrink-0">
         <Avatar user={message.author} />
       </div>
@@ -80,5 +80,3 @@ export function Message({ message }: MessageProps) {
     </div>
   );
 }
-
-export default Message;
