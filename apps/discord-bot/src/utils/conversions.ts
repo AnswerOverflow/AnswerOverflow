@@ -19,7 +19,7 @@ export function toAOMessage(message: Message): AOMessage {
   if (!message.guild) throw new Error("Message is not in a guild");
   const converted_message: AOMessage = {
     id: message.id,
-    content: message.content,
+    content: message.cleanContent,
     channel_id: message.channel.id,
     images: message.attachments.map((attachment) => {
       return {
@@ -62,7 +62,7 @@ export function toAOChannel(channel: GuildChannel | GuildBasedChannel): AOChanne
     id: channel.id,
     name: channel.name,
     type: channel.type,
-    parent_id: channel.parentId,
+    parent_id: channel.isThread() ? channel.parentId : null,
     server_id: channel.guild.id,
   };
   return converted_channel;

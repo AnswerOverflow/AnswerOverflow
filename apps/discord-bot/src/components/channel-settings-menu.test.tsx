@@ -29,7 +29,7 @@ beforeEach(async () => {
   reacord = data.reacord;
   const client = data.client;
   guild = mockGuild(client);
-  members = await createGuildMemberVariants(client);
+  members = await createGuildMemberVariants(client, guild);
   text_channel = mockTextChannel(client, guild);
   forum_channel = mockForumChannel(client, guild);
   forum_thread = mockPublicThread({
@@ -83,6 +83,7 @@ describe("Toggle Indexing Button", () => {
     const button = message!.findButtonByLabel("Disable Indexing", reacord);
     expect(button).toBeDefined();
   });
+  test.todo("Enable indexing in a category channel");
 });
 
 describe("Select mark solved tag", () => {
