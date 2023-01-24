@@ -1,4 +1,4 @@
-import type { ComponentStory, Meta } from "@storybook/react";
+import type { Meta, StoryFn } from "@storybook/react";
 
 import { ServerInvite, ServerInviteProps } from "./ServerInvite";
 export default {
@@ -6,7 +6,7 @@ export default {
 } as Meta;
 
 //👇 We create a “template” of how args map to rendering
-const Template: ComponentStory<typeof ServerInvite> = (args: ServerInviteProps) => (
+const Template: StoryFn<typeof ServerInvite> = (args: ServerInviteProps) => (
   <ServerInvite {...args} />
 );
 

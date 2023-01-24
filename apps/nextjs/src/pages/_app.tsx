@@ -4,7 +4,7 @@ import { SessionProvider } from "next-auth/react";
 import type { Session } from "next-auth";
 import type { AppType } from "next/app";
 
-import { trpc } from "../utils/trpc";
+import { NextTRPC, trpc } from "@answeroverflow/ui";
 import { Footer, Navbar } from "@answeroverflow/ui";
 
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -22,4 +22,4 @@ const MyApp: AppType<{ session: Session | null }> = ({
     </SessionProvider>
   );
 };
-export default trpc.withTRPC(MyApp);
+export default (trpc as NextTRPC).withTRPC(MyApp);

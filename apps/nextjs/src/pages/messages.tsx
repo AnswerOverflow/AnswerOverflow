@@ -4,7 +4,7 @@ import { MessageResultPage } from "@answeroverflow/ui";
 import { createProxySSGHelpers } from "@trpc/react-query/ssg";
 import Head from "next/head";
 import superjson from "superjson";
-import { trpc } from "../utils/trpc";
+import { trpc } from "@answeroverflow/ui";
 
 export default function Home() {
   const postQuery = trpc.messages.all.useQuery();
@@ -26,12 +26,12 @@ export default function Home() {
         channel={{
           id: "123",
           name: "general",
-          server_id: "123",
+          server_id: "843301848295014421",
           parent_id: null,
           type: 0,
         }}
         server={{
-          id: "123",
+          id: "843301848295014421",
           name: "Answer Overflow",
           icon: null,
         }}

@@ -131,6 +131,8 @@ export class Elastic extends Client {
     const result = await this.search<Message>({
       index: this.messages_index,
       body,
+      size: 1000,
+      sort: [{ id: "desc" }],
     });
 
     return result.hits.hits.filter((hit) => hit._source).map((hit) => hit._source!);

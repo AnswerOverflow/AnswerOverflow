@@ -42,7 +42,7 @@ export function mockMessageWithDiscordAccount(override: Partial<MessageWithDisco
 
 export function mockServer(override: Partial<ServerPublic> = {}) {
   const data: ServerPublic = {
-    id: "0",
+    id: "843301848295014421",
     name: "Test Server",
     icon: null,
     ...override,

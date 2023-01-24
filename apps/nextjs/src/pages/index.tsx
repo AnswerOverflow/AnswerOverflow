@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { signIn, signOut } from "next-auth/react";
-import { trpc } from "../utils/trpc";
+import { trpc } from "@answeroverflow/ui";
 import type { inferProcedureOutput } from "@trpc/server";
 import type { AppRouter } from "@answeroverflow/api";
 import { ServerInvite } from "@answeroverflow/ui";

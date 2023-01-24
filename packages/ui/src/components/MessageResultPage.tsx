@@ -1,7 +1,8 @@
 import type { ChannelPublic, MessageWithDiscordAccount, ServerPublic } from "@answeroverflow/api";
 import { Message } from "./Message";
 import { SearchBar } from "./SearchBar";
-import { ServerInvite } from "./ServerInvite";
+import { ServerInviteDriver } from "./ServerInviteDriver";
+
 export type MessageResultPageProps = {
   messages: MessageWithDiscordAccount[];
   server: ServerPublic;
@@ -13,7 +14,7 @@ export function MessageResultPage({ messages, server, channel }: MessageResultPa
   const MessageStack = ({ messages }: { messages: MessageWithDiscordAccount[] }) => (
     <div className="flex flex-col space-y-2">
       {messages.map((message) => (
-        <Message message={message} />
+        <Message message={message} key={message.id} />
       ))}
     </div>
   );
@@ -23,7 +24,7 @@ export function MessageResultPage({ messages, server, channel }: MessageResultPa
       <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
         <SearchBar className="w-full" />
         <div className="shrink-0">
-          <ServerInvite channel={channel} server={server} is_user_in_server={false} />
+          <ServerInviteDriver server={server} channel={channel} />
         </div>
       </div>
       <MessageStack messages={messages} />
