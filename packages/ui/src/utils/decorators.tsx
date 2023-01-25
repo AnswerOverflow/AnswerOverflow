@@ -32,7 +32,7 @@ export function WithTailwindTheme(
 
   const Dark = () => (
     // eslint-disable-next-line tailwindcss/no-custom-classname
-    <Flex className="dark dark:bg-neutral-800">
+    <Flex className="dark bg-neutral-800">
       <Story />
     </Flex>
   );

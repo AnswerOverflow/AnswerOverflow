@@ -1,14 +1,14 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { signIn, signOut } from "next-auth/react";
-import { trpc } from "@answeroverflow/ui";
+import { AnswerOverflowLogo, trpc } from "@answeroverflow/ui";
 import type { inferProcedureOutput } from "@trpc/server";
 import type { AppRouter } from "@answeroverflow/api";
-import { ServerInvite } from "@answeroverflow/ui";
+import { ServerInviteDriver } from "@answeroverflow/ui";
 const ServerCard: React.FC<{
   server: Exclude<inferProcedureOutput<AppRouter["auth"]["getServers"]>, null | undefined>[0];
 }> = ({ server }) => {
-  return <ServerInvite server={server} is_user_in_server={false} />;
+  return <ServerInviteDriver server={server} />;
 };
 
 const Home: NextPage = () => {
@@ -21,9 +21,7 @@ const Home: NextPage = () => {
       </Head>
       <main className="flex h-screen flex-col items-center  text-white">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-8">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Answer <span className="text-[hsl(280,100%,70%)]">Overflow</span>
-          </h1>
+          <AnswerOverflowLogo />
           <AuthShowcase />
         </div>
       </main>

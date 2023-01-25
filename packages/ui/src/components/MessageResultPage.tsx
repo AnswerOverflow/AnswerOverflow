@@ -20,15 +20,15 @@ export function MessageResultPage({ messages, server, channel }: MessageResultPa
   );
 
   return (
-    <>
-      <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
+    <div className="mx-3">
+      <div className=" flex flex-col items-center justify-between gap-2 sm:flex-row">
         <SearchBar className="w-full" />
         <div className="shrink-0">
           <ServerInviteDriver server={server} channel={channel} />
         </div>
       </div>
       <MessageStack messages={messages} />
-    </>
+    </div>
   );
 }
 

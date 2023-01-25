@@ -10,7 +10,7 @@ export type ServerInviteProps = {
 
 export function ServerInvite({ server, channel, is_user_in_server }: ServerInviteProps) {
   return (
-    <div className="flex max-w-md  items-center justify-between gap-3 rounded-lg bg-slate-50 p-3 text-black dark:bg-neutral-900 dark:text-neutral-300 sm:flex-row">
+    <div className="flex max-w-md  items-center justify-between gap-3 rounded-lg bg-neutral-100 p-3 text-black dark:bg-stone-900 dark:text-neutral-300 sm:flex-row">
       <div className="flex">
         <div className="mr-4 shrink-0">
           <ServerIcon server={server} />
@@ -27,7 +27,7 @@ export function ServerInvite({ server, channel, is_user_in_server }: ServerInvit
         </div>
       </div>
 
-      <Button className="w-full sm:w-32">{is_user_in_server ? "Joined" : "Join"}</Button>
+      <Button intent={"success"}>{is_user_in_server ? "Joined" : "Join"}</Button>
     </div>
   );
 }

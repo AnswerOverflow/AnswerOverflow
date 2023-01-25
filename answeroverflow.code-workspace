@@ -37,9 +37,18 @@
     },
   ],
   "settings": {
+    "tailwindCSS.experimental.classRegex": [
+      [
+        "cva\\(([^)]*)\\)",
+        "[\"'`]([^\"'`]*).*?[\"'`]"
+      ]
+    ],
     "files.exclude": {
-      "apps/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
-      "packages/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
+      // "apps/": true, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
+      // "packages/": true, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
+      // "node_modules/": true,
+      // "dist/": true,
+      // "coverage/": true,
     },
     "vitest.enable": true,
     "vitest.disabledWorkspaceFolders": [

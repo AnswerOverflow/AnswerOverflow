@@ -18,6 +18,7 @@
     "@headlessui/react": "^1.7.7",
     "@heroicons/react": "^2.0.13",
     "@next/font": "^13.1.2",
+    "cva": "npm:class-variance-authority",
     "flowbite": "^1.6.2",
     "flowbite-react": "^0.3.7",
     "next": "13.0.2",
