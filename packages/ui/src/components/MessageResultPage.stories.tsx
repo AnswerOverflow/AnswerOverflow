@@ -23,7 +23,7 @@ const default_message: MessageResultPageProps = {
     mockMessageWithDiscordAccount(),
   ],
   channel: mockChannel(),
-  server: mockServer(),
+  server: { ...mockServer(), id: "83730679338106880" },
 };
 
 export const Primary = Template.bind({});

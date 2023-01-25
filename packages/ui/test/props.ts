@@ -13,9 +13,13 @@ export const with_image: AvatarProps = {
   user: { name: "Rhys", id: "523949187663134754", avatar: "7716e305f7de26045526d9da6eef2dab" },
 };
 
+export function randomId() {
+  return Math.floor(Math.random() * 10000000).toString();
+}
+
 export function mockDiscordAccount(override: Partial<DiscordAccountPublic> = {}) {
   const data: DiscordAccountPublic = {
-    id: "0",
+    id: randomId(),
     name: "John Doe",
     avatar: null,
     ...override,
@@ -25,7 +29,7 @@ export function mockDiscordAccount(override: Partial<DiscordAccountPublic> = {})
 
 export function mockMessageWithDiscordAccount(override: Partial<MessageWithDiscordAccount> = {}) {
   const data: MessageWithDiscordAccount = {
-    id: "0",
+    id: randomId(),
     content: "Hello, world!",
     author: mockDiscordAccount(),
     channel_id: "0",
@@ -42,7 +46,7 @@ export function mockMessageWithDiscordAccount(override: Partial<MessageWithDisco
 
 export function mockServer(override: Partial<ServerPublic> = {}) {
   const data: ServerPublic = {
-    id: "843301848295014421",
+    id: randomId(),
     name: "Test Server",
     icon: null,
     ...override,
@@ -52,7 +56,7 @@ export function mockServer(override: Partial<ServerPublic> = {}) {
 
 export function mockChannel(override: Partial<ChannelPublic> = {}) {
   const data: ChannelPublic = {
-    id: "0",
+    id: randomId(),
     name: "general",
     server_id: "0",
     parent_id: null,
