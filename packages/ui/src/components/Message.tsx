@@ -59,7 +59,7 @@ export function Message({ message }: MessageProps) {
   }
 
   return (
-    <div className="flex break-words p-1 dark:bg-neutral-800">
+    <div className="flex break-words rounded-xl p-1 dark:bg-neutral-800">
       <div className="mr-4 shrink-0">
         <Avatar user={message.author} />
       </div>

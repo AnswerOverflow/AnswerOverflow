@@ -11,12 +11,25 @@ const Template: StoryFn<typeof MessageResultPage> = (args: MessageResultPageProp
 };
 
 //👇 Each story then reuses that template
+
 const default_message: MessageResultPageProps = {
   messages: [
-    mockMessageWithDiscordAccount(),
-    mockMessageWithDiscordAccount(),
-    mockMessageWithDiscordAccount(),
-    mockMessageWithDiscordAccount(),
+    mockMessageWithDiscordAccount({
+      id: "1",
+      solutions: ["4"],
+    }),
+    mockMessageWithDiscordAccount({
+      id: "2",
+    }),
+    mockMessageWithDiscordAccount({
+      id: "3",
+    }),
+    mockMessageWithDiscordAccount({
+      id: "4",
+    }),
+    mockMessageWithDiscordAccount({
+      id: "5",
+    }),
   ],
   channel: mockChannel(),
   server: { ...mockServer(), id: "83730679338106880" },
