@@ -6,7 +6,7 @@ import Head from "next/head";
 import superjson from "superjson";
 import { trpc } from "@answeroverflow/ui";
 
-export default function Home() {
+export default function MessageResult() {
   const postQuery = trpc.messages.all.useQuery();
   if (postQuery.status !== "success") {
     // won't happen since we're using `fallback: "blocking"`

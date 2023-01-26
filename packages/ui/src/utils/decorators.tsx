@@ -58,7 +58,7 @@ export function WithTailwindTheme(
   );
 }
 
-export function WithTRPC(
+export function WithAuth(
   Story: PartialStoryFn<ReactRenderer, Args>,
   context: StoryContext<ReactRenderer, Args>
 ) {

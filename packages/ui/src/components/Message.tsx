@@ -65,11 +65,11 @@ export function Message({ message }: MessageProps) {
       </div>
       <div className="min-w-0">
         <h3>
-          <span className="mr-1 dark:text-white">{message.author.name}</span>
-          <span className="dark:text-neutral-400">{date_of_message}</span>
+          <span className="mr-1 text-black dark:text-white">{message.author.name}</span>
+          <span className="text-neutral-800 dark:text-neutral-400">{date_of_message}</span>
         </h3>
         <div>
-          <p className="mt-1 dark:text-neutral-50">{message.content}</p>
+          <p className="mt-1 text-black dark:text-neutral-50">{message.content}</p>
           <div className="grid gap-2">
             {message.images.map((image) => (
               <MessageImage key={image.url} image={image} />

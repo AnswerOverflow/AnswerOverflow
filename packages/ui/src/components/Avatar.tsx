@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { DiscordAccountPublic } from "~api/router/index";
+import type { DiscordAccountPublic } from "@answeroverflow/api";
 
 export type AvatarProps = {
   user: DiscordAccountPublic;

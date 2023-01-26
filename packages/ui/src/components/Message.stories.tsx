@@ -2,7 +2,7 @@ import type { ComponentStory, Meta } from "@storybook/react";
 import { within } from "@storybook/testing-library";
 import { expect } from "@storybook/jest";
 import { MessageProps, Message } from "./Message";
-import { with_image } from "~ui/test/props";
+import { mockDiscordAccount } from "~ui/test/props";
 export default {
   component: Message,
 } as Meta;
@@ -49,7 +49,7 @@ OverflowLetters.args = {
     ...default_message.message,
     content:
       "Helloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo",
-    author: with_image.user,
+    author: mockDiscordAccount(),
   },
 };
 

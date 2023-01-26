@@ -5,6 +5,7 @@ export * from "./Message";
 export * from "./MessageResultPage";
 export * from "./Navbar";
 export * from "./SearchBar";
+export * from "./SearchBarDriver";
 export * from "./ServerInvite";
 export * from "./ServerInviteDriver";
 export * from "./Pricing";

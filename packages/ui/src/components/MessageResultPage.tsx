@@ -7,10 +7,12 @@ export type MessageResultPageProps = {
   messages: MessageWithDiscordAccount[];
   server: ServerPublic;
   channel: ChannelPublic;
+  // The query that lead to this result page
+  query?: string;
 };
 
 // TODO: Align text to be same level with the avatar
-export function MessageResultPage({ messages, server, channel }: MessageResultPageProps) {
+export function MessageResultPage({ messages, server, channel, query }: MessageResultPageProps) {
   let solution_message_id: string | undefined;
   const MessageStack = ({ messages }: { messages: MessageWithDiscordAccount[] }) => (
     <div className="flex flex-col space-y-2">
@@ -34,10 +36,10 @@ export function MessageResultPage({ messages, server, channel }: MessageResultPa
         // Highlight the solution message with a green border
         if (message.id === solution_message_id) {
           return (
-            <div className="border-green-700 dark:text-green-400">
+            <div className="text-green-500 dark:text-green-400">
               Solution
               <div
-                className="rounded-lg border-2 border-green-700  dark:border-green-400 "
+                className="rounded-lg border-2 border-green-500  dark:border-green-400 "
                 key={message.id}
               >
                 <Msg />
@@ -53,7 +55,7 @@ export function MessageResultPage({ messages, server, channel }: MessageResultPa
   return (
     <div className="mx-3">
       <div className=" flex flex-col items-center justify-between gap-2 sm:flex-row">
-        <SearchBar className="w-full" />
+        <SearchBar className="w-full" default_value={query} />
         <div className="shrink-0">
           <ServerInviteDriver server={server} channel={channel} />
         </div>

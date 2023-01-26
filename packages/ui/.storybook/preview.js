@@ -1,5 +1,5 @@
 import "../src/styles/globals.css";
-import {WithTailwindTheme, WithTRPC} from "../src/utils/decorators"
+import {WithAuth, WithTailwindTheme} from "../src/utils/decorators"
 
 
 export const parameters = {
@@ -34,4 +34,4 @@ export const globalTypes = {
 };
 
 
-export const decorators = [WithTailwindTheme, WithTRPC];
+export const decorators = [WithTailwindTheme, WithAuth];

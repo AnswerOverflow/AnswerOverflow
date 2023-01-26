@@ -32,6 +32,7 @@ const default_message: MessageResultPageProps = {
     }),
   ],
   channel: mockChannel(),
+  query: "",
   server: { ...mockServer(), id: "83730679338106880" },
 };
 
