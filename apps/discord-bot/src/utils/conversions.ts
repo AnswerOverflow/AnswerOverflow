@@ -34,7 +34,6 @@ export function toAOMessage(message: Message): AOMessage {
     server_id: message.guild?.id,
     solutions: [],
     child_thread: message.thread?.id ?? null,
-    thread_id: message.channel.isThread() ? message.channel.id : null,
   };
   return converted_message;
 }

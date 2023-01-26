@@ -1,4 +1,4 @@
-import { initTRPC, TRPCError } from "@trpc/server";
+import { initTRPC } from "@trpc/server";
 import type { Context } from "./context";
 import superjson from "superjson";
 import { getDiscordAccount } from "../utils/discord-operations";
@@ -13,10 +13,7 @@ const t = initTRPC.context<Context>().create({
 
 async function getDiscordOauth(ctx: Context) {
   if (!ctx.session) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "Not authenticated",
-    });
+    return null;
   }
   const discord_oauth = await getDiscordAccount(ctx.prisma, ctx.session.user.id);
   return discord_oauth;
@@ -25,14 +22,10 @@ async function getDiscordOauth(ctx: Context) {
 const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
   if (ctx.caller === "web-client" && ctx.session) {
     const discord_oauth = await getDiscordOauth(ctx);
-    if (!discord_oauth.access_token) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "Not authenticated",
-      });
+    if (discord_oauth && discord_oauth.access_token) {
+      const discord_account = await getDiscordUser(discord_oauth.access_token);
+      ctx.discord_account = discord_account;
     }
-    const discord_account = await getDiscordUser(discord_oauth.access_token);
-    ctx.discord_account = discord_account;
   }
   return next({
     ctx: {
@@ -42,23 +35,14 @@ const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
 });
 
 export const getUserServersFromCtx = async (ctx: Context) => {
-  if (ctx.session) {
-    const discord_oauth = await getDiscordOauth(ctx);
-    if (!discord_oauth.access_token) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "Not authenticated with user servers",
-      });
-    }
+  const discord_oauth = await getDiscordOauth(ctx);
+  if (discord_oauth && discord_oauth.access_token) {
     const user_servers = await getUserServers(discord_oauth.access_token);
     ctx.user_servers = user_servers;
     return user_servers;
-  } else {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "Not authenticated with user servers",
-    });
   }
+
+  return [];
 };
 
 const addUserServers = t.middleware(async ({ ctx, next }) => {

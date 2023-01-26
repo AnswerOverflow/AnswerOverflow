@@ -6,7 +6,6 @@ const msg1: Message = {
   content: "hello",
   images: [],
   replies_to: "1",
-  thread_id: "1",
   server_id: "843301848295014421",
   solutions: [],
   author_id: "523949187663134754",
@@ -75,15 +74,14 @@ describe("ElasticSearch", () => {
       expect(fetched_deleted_message2).toBeNull();
     });
   });
-  describe("Message Delete By Thread Id", () => {
+  describe("Message Delete By Channel Id", () => {
     it("should delete a message by thread id", async () => {
       const thread_message = {
         ...msg1,
-        thread_id: "123",
         channel_id: "200",
       };
       await elastic.upsertMessage(thread_message);
-      const deleted_message = await elastic.deleteMessagesByThreadId(thread_message.thread_id);
+      const deleted_message = await elastic.deleteByChannelId(thread_message.channel_id);
       expect(deleted_message).toBe(1);
       // wait 1 second
       const fetched_deleted_message = await elastic.getMessage(thread_message.id);
@@ -113,6 +111,17 @@ describe("ElasticSearch", () => {
       const fetched_messages = await elastic.bulkGetMessages([msg1.id, msg2.id]);
       expect(fetched_messages).toBeDefined();
       expect(fetched_messages).toHaveLength(0);
+    });
+  });
+
+  describe("Messages Fetch By Channel Id", () => {
+    it("should fetch messages by channel id", async () => {
+      await elastic.upsertMessage(msg1);
+      await elastic.upsertMessage(msg2);
+
+      const fetched_messages = await elastic.bulkGetMessagesByChannelId(msg1.channel_id);
+      expect(fetched_messages).toBeDefined();
+      expect(fetched_messages).toHaveLength(2);
     });
   });
 });

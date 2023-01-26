@@ -373,49 +373,6 @@ describe("Message Operations", () => {
       });
     });
   });
-  describe("Message Delete By Thread Id", () => {
-    let thread_message: Message;
-    beforeEach(async () => {
-      thread_message = mockMessage(server, channel, author, {
-        thread_id: "200",
-      });
-      const thread_message_2 = mockMessage(server, channel, author, {
-        thread_id: "200",
-      });
-      await ao_bot_message_router.upsert(thread_message);
-      await ao_bot_message_router.upsert(thread_message_2);
-    });
-    it("should delete a message by thread id as the ao bot", async () => {
-      const result = await ao_bot_message_router.deleteByThreadId(thread_message.thread_id!);
-      await expect(ao_bot_message_router.byId(thread_message.id)).rejects.toThrowError();
-      expect(result).toBe(2);
-    });
-    it("should fail trying all varaints of delete a message by thread id that the author does not own", async () => {
-      await testAllVariants({
-        async operation(source, permission) {
-          const { ctx } = await mockAccountWithServersCallerCtx(server, source, permission);
-          const message_router = messageRouter.createCaller(ctx);
-          await expect(message_router.deleteByThreadId(message.id)).rejects.toThrowError();
-        },
-      });
-    });
-    it("should fail trying all varaints of delete a message by thread id that the author does own", async () => {
-      await testAllVariants({
-        async operation(source, permission) {
-          const { ctx, account } = await mockAccountWithServersCallerCtx(
-            server,
-            source,
-            permission
-          );
-          const message_router = messageRouter.createCaller(ctx);
-          const msg = mockMessage(server, channel, account, {
-            thread_id: message.id,
-          });
-          await expect(message_router.deleteByThreadId(msg.id)).rejects.toThrowError();
-        },
-      });
-    });
-  });
   describe("Message Delete Bulk", () => {
     beforeEach(async () => {
       await ao_bot_message_router.upsertBulk([message]);

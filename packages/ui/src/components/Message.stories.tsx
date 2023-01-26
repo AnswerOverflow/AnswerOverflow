@@ -29,7 +29,6 @@ const default_message: MessageProps = {
     solutions: [],
     child_thread: null,
     replies_to: null,
-    thread_id: null,
   },
 };
 

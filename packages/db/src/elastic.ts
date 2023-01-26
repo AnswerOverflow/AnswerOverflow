@@ -61,7 +61,6 @@ export type Message = {
     description: string | null;
   }[];
   replies_to: string | null;
-  thread_id: string | null;
   child_thread: string | null;
   solutions: string[];
 };
@@ -122,6 +121,40 @@ export class Elastic extends Client {
     }
   }
 
+  public async bulkGetMessagesByChannelId(channel_id: string, after?: string, limit?: number) {
+    if (process.env.NODE_ENV === "test") {
+      // TODO: Ugly hack for testing since elastic doesn't update immediately
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+    }
+    const result = await this.search<Message>({
+      index: this.messages_index,
+      query: {
+        // TODO: Remove ts-expect-error
+        // @ts-expect-error
+        bool: {
+          must: [
+            {
+              term: {
+                channel_id,
+              },
+            },
+            {
+              range: {
+                id: {
+                  gte: after ?? "0",
+                },
+              },
+            },
+          ],
+        },
+      },
+      size: limit ?? 100,
+      sort: [{ id: "asc" }],
+    });
+
+    return result.hits.hits.filter((hit) => hit._source).map((hit) => hit._source!);
+  }
+
   public async getAllMessages() {
     const body = {
       query: {
@@ -161,7 +194,7 @@ export class Elastic extends Client {
     }
   }
 
-  public async deleteMessagesByThreadId(thread_id: string) {
+  public async deleteByChannelId(thread_id: string) {
     if (process.env.NODE_ENV === "test") {
       // TODO: Ugly hack for testing since elastic doesn't update immediately
       await new Promise((resolve) => setTimeout(resolve, 1200));
@@ -170,7 +203,7 @@ export class Elastic extends Client {
       index: this.messages_index,
       query: {
         term: {
-          thread_id: thread_id,
+          channel_id: thread_id,
         },
       },
     });
@@ -273,7 +306,6 @@ export class Elastic extends Client {
           hidden: { type: "boolean" },
           content: { type: "text" },
           replies_to: { type: "long" },
-          thread_id: { type: "long" },
           child_thread: { type: "long" },
           images: {
             properties: {
