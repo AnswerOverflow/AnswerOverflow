@@ -33,7 +33,6 @@ export const message_page_router = router({
         .byId(thread_or_parent_channel.parent_id);
       const message_fetch = messageRouter.createCaller(ctx).byChannelIdBulk({
         channel_id: thread.id,
-        after: root_message.id,
       });
       [parent_channel, messages] = await Promise.all([parent_channel_fetch, message_fetch]);
     } else {

@@ -23,23 +23,8 @@ export function MessageResultPage({
   let solution_message_id: string | undefined;
   const MessageStack = ({ messages }: { messages: MessageWithDiscordAccount[] }) => (
     <div className="mt-3 flex flex-col space-y-1 rounded-md p-1">
-      {messages.map((message, index) => {
+      {messages.map((message) => {
         const Msg = () => <Message message={message} key={message.id} thread={thread} />;
-        // Highlight the root question message with a grey border
-        if (index === 0) {
-          solution_message_id = message.solutions[0];
-          return (
-            <div className="text-neutral-700 dark:text-neutral-300" key={message.id}>
-              Question
-              <div
-                className="rounded-lg border-2 border-neutral-300 dark:border-neutral-700  "
-                key={message.id}
-              >
-                <Msg />
-              </div>
-            </div>
-          );
-        }
         // Highlight the solution message with a green border
         if (message.id === solution_message_id) {
           return (
@@ -58,7 +43,6 @@ export function MessageResultPage({
       })}
     </div>
   );
-
   return (
     <div className="mx-3 ">
       <div className=" flex flex-col items-center justify-between gap-2 sm:flex-row">
@@ -67,7 +51,11 @@ export function MessageResultPage({
           <ServerInviteDriver server={server} channel={channel} />
         </div>
       </div>
-      <MessageStack messages={messages} />
+      <div>
+        <h1 className="text-3xl dark:text-white">{thread ? thread.name : channel.name}</h1>
+
+        <MessageStack messages={messages} />
+      </div>
     </div>
   );
 }
