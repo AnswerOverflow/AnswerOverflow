@@ -87,5 +87,36 @@ WithCode.args = {
   ...Primary.args,
   message: {
     ...default_message.message,
+    content: `
+    \`\`\`typescript
+      const variable = 'hello';
+
+      function getProfile(id: string): {
+        name: string; address: string, photo: string
+      } {
+        return {
+          name: 'ben', address: "ben's house", photo: "/ben.png"
+        };
+      }
+    \`\`\`
+  `,
+  },
+};
+
+export const WithXSS = Template.bind({});
+WithXSS.args = {
+  ...Primary.args,
+  message: {
+    ...default_message.message,
+    content: "<script> alert('XSS')</script>",
+  },
+};
+
+export const WithXSSInCodeBlock = Template.bind({});
+WithXSSInCodeBlock.args = {
+  ...Primary.args,
+  message: {
+    ...default_message.message,
+    content: "```<script> alert('XSS')</script>```",
   },
 };

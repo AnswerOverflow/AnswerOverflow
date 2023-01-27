@@ -3,6 +3,7 @@ import type { DiscordAccountPublic } from "@answeroverflow/api";
 
 export type AvatarProps = {
   user: DiscordAccountPublic;
+  className?: string;
 };
 
 const makeUserIconLink = (user: Pick<DiscordAccountPublic, "id" | "avatar">, size: number = 64) => {
@@ -11,10 +12,12 @@ const makeUserIconLink = (user: Pick<DiscordAccountPublic, "id" | "avatar">, siz
   return `https://cdn.discordapp.com/embed/avatars/${parseInt(user.id) % 5}.png?size=${size}`;
 };
 
-export function Avatar({ user }: AvatarProps) {
+export function Avatar({ user, className = "" }: AvatarProps) {
   const profilePictureUrl = makeUserIconLink(user, 48);
   return (
-    <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-500">
+    <span
+      className={`inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-500 ${className}`}
+    >
       <Image
         src={profilePictureUrl}
         alt={user.name}

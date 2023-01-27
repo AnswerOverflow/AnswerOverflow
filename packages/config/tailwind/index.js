@@ -3,14 +3,22 @@
 // eslint-disable-next-line no-undef
 module.exports = {
   content: ["./src/**/*.{ts,tsx}", "./src/_app.tsx"],
-  // eslint-disable-next-line no-undef
-  plugins: [require("flowbite/plugin"), require("@tailwindcss/forms")],
+  plugins: [
+    // eslint-disable-next-line no-undef
+    require("flowbite/plugin"),
+    // eslint-disable-next-line no-undef
+    require("@tailwindcss/forms"),
+    // eslint-disable-next-line no-undef
+    require("tailwind-scrollbar-hide"),
+  ],
   theme: {
     extend: {
       fontFamily: {
         mono: ["var(--font-poppins)"],
       },
+      visibility: ["group-hover"],
     },
   },
+
   darkMode: "class",
 };

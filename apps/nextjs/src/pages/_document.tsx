@@ -16,7 +16,8 @@ class MyDocument extends Document {
 
   override render() {
     return (
-      <Html>
+      // eslint-disable-next-line tailwindcss/no-custom-classname
+      <Html className="dark">
         <Head>
           {/* TODO: Swap for Next font */}
           <link

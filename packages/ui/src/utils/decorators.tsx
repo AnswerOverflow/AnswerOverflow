@@ -5,6 +5,7 @@ import { httpBatchLink } from "@trpc/client";
 import { transformer } from "@answeroverflow/api/transformer";
 import React, { useEffect, useState } from "react";
 import { trpc, StorybookTRPC } from "./trpc";
+import hljs from "highlight.js";
 
 const storybookTRPC = trpc as StorybookTRPC;
 type Globals = {
@@ -104,4 +105,11 @@ export function WithAuth(
       <QueryClientProvider client={queryClient}>{Story()}</QueryClientProvider>
     </storybookTRPC.Provider>
   );
+}
+
+export function WithHighlightJS(Story: PartialStoryFn<ReactRenderer, Args>) {
+  useEffect(() => {
+    hljs.highlightAll();
+  }, []);
+  return <Story />;
 }

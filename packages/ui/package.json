@@ -19,8 +19,11 @@
     "@heroicons/react": "^2.0.13",
     "@next/font": "^13.1.2",
     "cva": "npm:class-variance-authority",
+    "discord-markdown": "^2.5.1",
     "flowbite": "^1.6.2",
     "flowbite-react": "^0.3.7",
+    "highlight.js": "^11.7.0",
+    "html-react-parser": "^3.0.8",
     "next": "13.0.2",
     "style-loader": "^3.3.1",
     "zod": "^3.18.0"

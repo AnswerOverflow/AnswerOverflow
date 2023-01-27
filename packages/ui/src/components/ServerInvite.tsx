@@ -9,6 +9,15 @@ export type ServerInviteProps = {
 };
 
 export function ServerInvite({ server, channel, is_user_in_server }: ServerInviteProps) {
+  const ServerNameAndChannelName = () => (
+    <div className="flex flex-col">
+      <span className="text-base font-bold text-black dark:text-neutral-300">{server.name}</span>
+      {channel && (
+        <span className="text-sm text-gray-500 dark:text-neutral-400">#{channel.name}</span>
+      )}
+    </div>
+  );
+
   return (
     <div className="flex max-w-md  items-center justify-between gap-3 rounded-lg bg-neutral-100 p-3 text-black dark:bg-stone-900 dark:text-neutral-300 sm:flex-row">
       <div className="flex">
@@ -16,18 +25,17 @@ export function ServerInvite({ server, channel, is_user_in_server }: ServerInvit
           <ServerIcon server={server} />
         </div>
         <div>
-          <div className="flex flex-col">
-            <span className="text-base font-bold text-black dark:text-neutral-300">
-              {server.name}
-            </span>
-            {channel && (
-              <span className="text-sm text-gray-500 dark:text-neutral-400">#{channel.name}</span>
-            )}
+          <div className="hidden sm:block">
+            <ServerNameAndChannelName />
           </div>
         </div>
       </div>
-
-      <Button intent={"success"}>{is_user_in_server ? "Joined" : "Join"}</Button>
+      <div>
+        <div className="sm:hidden">
+          <ServerNameAndChannelName />
+        </div>
+        <Button intent={"success"}>{is_user_in_server ? "Joined" : "Join"}</Button>
+      </div>
     </div>
   );
 }

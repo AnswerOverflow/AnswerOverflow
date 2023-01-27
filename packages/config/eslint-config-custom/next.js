@@ -16,4 +16,9 @@ module.exports = {
     },
   },
   plugins: ["tailwindcss"],
+  settings: {
+    tailwindcss: {
+      whitelist: ["scrollbar-hide", "dark"],
+    },
+  },
 };

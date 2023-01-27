@@ -1,5 +1,7 @@
-import "../src/styles/globals.css";
-import {WithAuth, WithTailwindTheme} from "../src/utils/decorators"
+import "../../../apps/nextjs/src/styles/globals.css";
+import "highlight.js/styles/github-dark.css";
+import "highlight.js/styles/github.css";
+import {WithAuth, WithTailwindTheme, WithHighlightJS} from "../src/utils/decorators"
 
 
 export const parameters = {
@@ -34,4 +36,4 @@ export const globalTypes = {
 };
 
 
-export const decorators = [WithTailwindTheme, WithAuth];
+export const decorators = [WithTailwindTheme, WithAuth, WithHighlightJS];
