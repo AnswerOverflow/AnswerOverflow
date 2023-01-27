@@ -45,6 +45,7 @@ const z_message_public = z_message.pick({
 export const z_message_with_discord_account = z_message
   .extend({
     author: z_discord_account_public,
+    public: z.boolean().default(false),
   })
   .omit({ author_id: true });
 

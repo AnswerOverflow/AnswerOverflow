@@ -89,15 +89,15 @@ WithCode.args = {
     ...default_message.message,
     content: `
     \`\`\`typescript
-      const variable = 'hello';
+  const variable = 'hello';
 
-      function getProfile(id: string): {
-        name: string; address: string, photo: string
-      } {
-        return {
-          name: 'ben', address: "ben's house", photo: "/ben.png"
-        };
-      }
+  function getProfile(id: string): {
+    name: string; address: string, photo: string
+  } {
+    return {
+      name: 'ben', address: "ben's house", photo: "/ben.png"
+    };
+  }
     \`\`\`
   `,
   },

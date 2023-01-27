@@ -24,16 +24,10 @@ export function ServerInvite({ server, channel, is_user_in_server }: ServerInvit
         <div className="mr-4 shrink-0">
           <ServerIcon server={server} />
         </div>
-        <div>
-          <div className="hidden sm:block">
-            <ServerNameAndChannelName />
-          </div>
-        </div>
+
+        <ServerNameAndChannelName />
       </div>
       <div>
-        <div className="sm:hidden">
-          <ServerNameAndChannelName />
-        </div>
         <Button intent={"success"}>{is_user_in_server ? "Joined" : "Join"}</Button>
       </div>
     </div>

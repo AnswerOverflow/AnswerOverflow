@@ -90,19 +90,18 @@ export function Message({ message, thread }: MessageProps) {
         <Avatar user={message.author} />
       </div>
       <div className="w-full">
-        <div className="flex w-full min-w-0 items-center justify-between gap-1">
-          <div className="flex min-w-0">
+        <div className="flex w-full min-w-0  justify-between">
+          <div className="flex min-w-0 gap-2">
             <Avatar user={message.author} className="shrink-0 sm:hidden" />
             <div className="flex flex-col sm:flex-row">
               <span className="mr-1 text-black dark:text-white">{message.author.name}</span>
               <span className="text-neutral-800 dark:text-neutral-400">{date_of_message}</span>
             </div>
           </div>
-
           <Link
             href={getMessageUrl({
               server_id: message.server_id,
-              channel_id: thread?.parent_id ? thread.parent_id : message.channel_id,
+              channel_id: thread && thread.parent_id ? thread.parent_id : message.channel_id,
               message_id: message.id,
               thread_id: thread?.id,
             })}
@@ -111,7 +110,7 @@ export function Message({ message, thread }: MessageProps) {
             <DiscordIcon color="blurple" />
           </Link>
         </div>
-        <div className="max-w-[80vw] text-black dark:text-neutral-50 sm:max-w-[70vw] md:max-w-full">
+        <div className="mt-2 max-w-[80vw] text-black dark:text-neutral-50 sm:mt-0 sm:max-w-[70vw] md:max-w-full">
           {parsedMessageContent}
         </div>
         <div className="grid gap-2">

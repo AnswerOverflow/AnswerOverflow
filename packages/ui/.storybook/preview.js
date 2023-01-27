@@ -22,15 +22,17 @@ export const globalTypes = {
       icon: 'mirror',
       dynamicTitle: true,
       items: ['light', 'dark', 'both']
-    }
+    },
+    defaultValue: 'both'
   },
   auth_state: {
     name: "Auth State",
     description: "Toggle between signed in and not signed in",
+    defaultValue: 'signed_in',
     toolbar: {
       icon: "user",
       dynamicTitle: true,
-      items: ['signed_in', 'signed_out']
+      items: ['signed_in', 'signed_out'],
     }
   }
 };
