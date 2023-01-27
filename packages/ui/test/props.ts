@@ -38,6 +38,7 @@ export function mockMessageWithDiscordAccount(override: Partial<MessageWithDisco
     replies_to: null,
     server_id: "0",
     solutions: [],
+    public: true,
     ...override,
   };
   return data;

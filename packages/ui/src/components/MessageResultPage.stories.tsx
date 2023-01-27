@@ -17,15 +17,18 @@ const default_message: MessageResultPageProps = {
     mockMessageWithDiscordAccount({
       id: "1",
       solutions: ["4"],
+      public: false,
     }),
     mockMessageWithDiscordAccount({
       id: "2",
     }),
     mockMessageWithDiscordAccount({
       id: "3",
+      public: false,
     }),
     mockMessageWithDiscordAccount({
       id: "4",
+      public: false,
     }),
     mockMessageWithDiscordAccount({
       id: "5",

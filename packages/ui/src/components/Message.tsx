@@ -11,12 +11,19 @@ import type { ChannelPublic } from "~api/router/channel/types";
 export type MessageProps = {
   message: MessageWithDiscordAccount;
   thread?: ChannelPublic;
+  blurred?: boolean;
+  not_public_title?: string;
 };
 
 const { toHTML } = discordMarkdown;
 
 // TODO: Align text to be same level with the avatar
-export function Message({ message, thread }: MessageProps) {
+export function Message({
+  message,
+  thread,
+  blurred = false,
+  not_public_title = "Message Not Public",
+}: MessageProps) {
   const date_of_message = getSnowflakeUTCDate(message.id);
   const convertedMessageContent = toHTML(message.content);
   const parsedMessageContent = Parser(convertedMessageContent);
@@ -84,7 +91,7 @@ export function Message({ message, thread }: MessageProps) {
     return `discord://discord.com/channels/${endpoint}`;
   }
 
-  return (
+  const Contents = () => (
     <div className="group relative flex  w-full break-words rounded-xl p-1 ">
       <div className="mr-4 hidden shrink-0 sm:block">
         <Avatar user={message.author} />
@@ -119,6 +126,39 @@ export function Message({ message, thread }: MessageProps) {
           ))}
         </div>
       </div>
+    </div>
+  );
+
+  const blur_amount = ".4rem";
+
+  return (
+    <div className="relative h-full w-full">
+      {blurred ? (
+        <>
+          <div
+            style={{
+              filter: `blur(${blur_amount})`,
+              backdropFilter: `blur(${blur_amount})`,
+              WebkitBackdropFilter: `blur(${blur_amount})`,
+              WebkitFilter: `blur(${blur_amount})`,
+              msFilter: `blur(${blur_amount})`,
+            }}
+          >
+            <Contents />
+          </div>
+          <div>
+            <div className="absolute inset-0 " />
+            <div className="absolute inset-0 flex items-center justify-center ">
+              <div className="flex flex-col items-center justify-center text-center text-black dark:text-white">
+                <div className="text-2xl ">{not_public_title}</div>
+                <div>Sign In & Join Server To View</div>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        <Contents />
+      )}
     </div>
   );
 }
