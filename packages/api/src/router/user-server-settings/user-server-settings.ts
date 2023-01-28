@@ -67,12 +67,7 @@ async function transformUserServerSettings<T extends UserServerSettings>(
 async function transformUserServerSettingsArray<T extends UserServerSettings>(
   user_server_settings: Promise<T[]>
 ) {
-  const awaited_settings = await user_server_settings;
-  const converted_settings: Awaited<ReturnType<typeof transformUserServerSettings>>[] = [];
-  for (const settings of awaited_settings) {
-    converted_settings.push(await transformUserServerSettings(settings));
-  }
-  return converted_settings;
+  return (await user_server_settings).map(addFlagsToUserServerSettings);
 }
 
 function mergeUserServerSettings<T extends z.infer<typeof z_user_server_settings_mutable>>(
@@ -101,6 +96,30 @@ const user_server_settings_fetch_router = router({
             });
           },
           not_found_message: "User server settings not found",
+        })
+      );
+    }),
+  byIdManyWithDiscordAccounts: withDiscordAccountProcedure
+    .input(
+      z.object({
+        user_ids: z.array(z.string()),
+        server_id: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      return transformUserServerSettingsArray(
+        ctx.prisma.userServerSettings.findMany({
+          where: {
+            AND: {
+              user_id: {
+                in: input.user_ids,
+              },
+              server_id: input.server_id,
+            },
+          },
+          include: {
+            user: true,
+          },
         })
       );
     }),

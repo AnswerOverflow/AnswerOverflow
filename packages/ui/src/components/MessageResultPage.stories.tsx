@@ -18,20 +18,25 @@ const default_message: MessageResultPageProps = {
       id: "1",
       solutions: ["4"],
       public: false,
+      content: " THis is the first private message",
     }),
     mockMessageWithDiscordAccount({
       id: "2",
+      content: "This is the first public message",
     }),
     mockMessageWithDiscordAccount({
       id: "3",
       public: false,
+      content: "This is the second private message",
     }),
     mockMessageWithDiscordAccount({
       id: "4",
       public: false,
+      content: "This is the third private message",
     }),
     mockMessageWithDiscordAccount({
       id: "5",
+      content: "This is the second public message",
     }),
   ],
   channel: mockChannel(),

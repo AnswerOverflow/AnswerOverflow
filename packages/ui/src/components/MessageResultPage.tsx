@@ -28,11 +28,19 @@ export function MessageResultPage({
         {messages.map((message, index) => {
           const next_message = messages.at(index + 1);
           if (!message.public) {
-            if (!next_message?.public && next_message !== undefined) {
-              consecutive_private_messages++;
+            consecutive_private_messages++;
+            if (next_message && !next_message.public) {
               return;
-            } else {
-              consecutive_private_messages++;
+            }
+          } else {
+            consecutive_private_messages = 0;
+          }
+          const Msg = ({
+            consecutive_private_messages,
+          }: {
+            consecutive_private_messages: number;
+          }) => {
+            if (!message.public) {
               return (
                 <Message
                   message={message}
@@ -46,8 +54,6 @@ export function MessageResultPage({
                 />
               );
             }
-          }
-          const Msg = () => {
             if (message.id === solution_message_id) {
               return (
                 <div className="text-green-500 dark:text-green-400">
@@ -65,7 +71,7 @@ export function MessageResultPage({
           };
           return (
             <div key={message.id} className="mb-2">
-              <Msg />
+              <Msg consecutive_private_messages={consecutive_private_messages} />
             </div>
           );
         })}

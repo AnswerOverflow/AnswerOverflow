@@ -4,13 +4,15 @@ import { mergeRouters, withDiscordAccountProcedure, router } from "~api/router/t
 import { ignored_discord_account_router } from "../users/ignored-discord-accounts/ignored-discord-account";
 import { assertIsNotDeletedUser } from "~api/router/users/ignored-discord-accounts/ignored-discord-account";
 import { TRPCError } from "@trpc/server";
-import { discordAccountRouter, z_discord_account_public } from "../users/accounts/discord-accounts";
+import { z_discord_account_public } from "../users/accounts/discord-accounts";
 import {
   protectedFetchWithPublicData,
   protectedMutation,
   protectedMutationFetchFirst,
 } from "~api/utils/protected-procedures";
 import { assertIsAnswerOverflowBot, assertIsUser } from "~api/utils/permissions";
+import { userServerSettingsRouter } from "../user-server-settings/user-server-settings";
+import { getDefaultDiscordAccount, getDefaultMessage } from "@answeroverflow/db";
 
 const z_discord_image = z.object({
   url: z.string(),
@@ -74,17 +76,37 @@ const message_find_router = router({
         public_data_formatter: (data) => data.map((d) => z_message_public.parse(d)),
         not_found_message: "Messages not found",
       });
-      const authors = await discordAccountRouter
-        .createCaller(ctx)
-        .byIdMany(messages.map((m) => m.author_id));
-      const author_lookup = new Map(authors.map((a) => [a.id, a]));
-      return z
-        .array(z_message_with_discord_account)
-        .parse(
-          messages.map((m) =>
-            z_message_with_discord_account.parse({ ...m, author: author_lookup.get(m.author_id) })
-          )
-        );
+      const authors = await userServerSettingsRouter.createCaller(ctx).byIdManyWithDiscordAccounts({
+        user_ids: messages.map((m) => m.author_id),
+        server_id: messages[0]!.server_id,
+      });
+      const filtered_authors = authors.filter(
+        (a) => a.flags.can_publicly_display_messages === false
+      );
+      const author_lookup = new Map(filtered_authors.map((a) => [a.user_id, a.user]));
+      const messages_with_private_data_removed = messages.map((m) => {
+        const author = author_lookup.get(m.author_id);
+        if (author) {
+          return z_message_with_discord_account.parse({ ...m, author, public: true });
+        } else {
+          const default_message = getDefaultMessage({
+            author_id: "0",
+            channel_id: m.channel_id,
+            server_id: m.server_id,
+            id: m.id,
+          });
+          return z_message_with_discord_account.parse({
+            ...default_message,
+            public: false,
+            author: getDefaultDiscordAccount({
+              id: "0",
+              name: "",
+              avatar: null,
+            }),
+          });
+        }
+      });
+      return messages_with_private_data_removed;
     }),
   byIdBulk: withDiscordAccountProcedure.input(z.array(z.string())).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({
