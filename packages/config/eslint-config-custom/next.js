@@ -16,9 +16,13 @@ module.exports = {
     },
   },
   plugins: ["tailwindcss"],
-  settings: {
-    tailwindcss: {
-      whitelist: ["scrollbar-hide", "dark"],
-    },
+  rules: {
+    "tailwindcss/no-custom-classname": [
+      "warn", // TODO: Renable this eventually, whitelist is not working
+      {
+        config: "./tailwind.config.cjs",
+        whitelist: ["scrollbar-hide", "dark"],
+      },
+    ],
   },
 };

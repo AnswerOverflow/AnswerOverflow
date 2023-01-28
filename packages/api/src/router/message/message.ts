@@ -81,7 +81,7 @@ const message_find_router = router({
         server_id: messages[0]!.server_id,
       });
       const filtered_authors = authors.filter(
-        (a) => a.flags.can_publicly_display_messages === false
+        (a) => a.flags.can_publicly_display_messages === true
       );
       const author_lookup = new Map(filtered_authors.map((a) => [a.user_id, a.user]));
       const messages_with_private_data_removed = messages.map((m) => {
