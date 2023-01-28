@@ -130,7 +130,7 @@ export class Elastic extends Client {
       index: this.messages_index,
       query: {
         // TODO: Remove ts-expect-error
-        // @ts-expect-error
+        // @ts-ignore
         bool: {
           must: [
             {

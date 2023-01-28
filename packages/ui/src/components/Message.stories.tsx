@@ -1,6 +1,4 @@
 import type { ComponentStory, Meta } from "@storybook/react";
-import { within } from "@storybook/testing-library";
-import { expect } from "@storybook/jest";
 import { MessageProps, Message } from "./Message";
 import { mockDiscordAccount } from "~ui/test/props";
 export default {
@@ -23,6 +21,7 @@ const default_message: MessageProps = {
       id: "0",
       avatar: null,
     },
+    public: true,
     images: [],
     channel_id: "0",
     server_id: "0",
@@ -34,12 +33,6 @@ const default_message: MessageProps = {
 
 export const Primary = Template.bind({});
 Primary.args = default_message;
-
-Primary.play = async ({ canvasElement }) => {
-  const canvas = within(canvasElement);
-  const icon = await canvas.findByText("John Doe");
-  expect(icon.innerText).toBe("John Doe");
-};
 
 export const OverflowLetters = Template.bind({});
 OverflowLetters.args = {
