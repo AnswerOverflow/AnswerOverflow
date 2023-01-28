@@ -9,3 +9,4 @@ export * from "./SearchBarDriver";
 export * from "./ServerInvite";
 export * from "./ServerInviteDriver";
 export * from "./Pricing";
+export * from "./AOHead";

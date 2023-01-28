@@ -5,7 +5,7 @@ export type ServerIconProps = {
   server: ServerPublic;
 };
 
-const makeServerIconLink = (server: ServerPublic, size: number = 64) => {
+export const makeServerIconLink = (server: ServerPublic, size: number = 64) => {
   if (!server.icon) return undefined;
   return `https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png?size=${size}`;
 };
