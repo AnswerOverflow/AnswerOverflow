@@ -41,12 +41,23 @@ function changeCodeHighlighting(dark_theme_enabled: boolean) {
     }
   }
 }
-export function toggleDarkTheme() {
+export function toggleDarkTheme(theme_override: boolean | undefined) {
   disableTransitionsTemporarily();
 
   const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
   const isSystemDarkMode = darkModeMediaQuery.matches;
-  const isDarkMode = document.documentElement.classList.toggle("dark");
+  let isDarkMode: boolean;
+  if (theme_override !== undefined) {
+    const root = window.document.documentElement;
+    isDarkMode = theme_override;
+    if (isDarkMode) {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+  } else {
+    isDarkMode = document.documentElement.classList.toggle("dark");
+  }
   changeCodeHighlighting(isDarkMode);
 
   if (isDarkMode === isSystemDarkMode) {
