@@ -21,8 +21,8 @@ import {
   getDefaultMessage,
   getDefaultUserServerSettings,
   Message,
+  PrismaClient,
 } from "@answeroverflow/db";
-import type { Context } from "../context";
 
 const z_discord_image = z.object({
   url: z.string(),
@@ -61,8 +61,12 @@ export const z_message_with_discord_account = z_message
   })
   .omit({ author_id: true });
 
-async function addAuthorsToMessages(messages: Message[], ctx: Context) {
-  const authors = await ctx.prisma.discordAccount.findMany({
+/*
+  Fetch the authors with their server settings for the messages server settings,
+
+*/
+export async function addAuthorsToMessages(messages: Message[], prisma: PrismaClient) {
+  const authors = await prisma.discordAccount.findMany({
     where: {
       id: {
         in: messages.map((m) => m.author_id),
@@ -72,40 +76,44 @@ async function addAuthorsToMessages(messages: Message[], ctx: Context) {
       user_server_settings: {
         where: {
           server_id: {
-            equals: messages[0]!.server_id,
+            in: messages.map((m) => m.server_id),
           },
         },
       },
     },
   });
 
-  const authors_with_flags = authors.map((a) => ({
-    ...a,
-    user_server_settings: addFlagsToUserServerSettings(
-      a.user_server_settings.at(0) ??
-        getDefaultUserServerSettings({
-          server_id: messages[0]!.server_id,
-          user_id: a.id,
-        })
-    ),
-  }));
+  const toAuthorServerSettingsLookupKey = (discord_id: string, server_id: string) =>
+    `${discord_id}-${server_id}`;
 
-  const author_lookup = new Map(authors_with_flags.map((a) => [a.id, a]));
+  const author_server_settings_lookup = new Map(
+    authors.flatMap((a) =>
+      a.user_server_settings.map((uss) => [
+        toAuthorServerSettingsLookupKey(uss.user_id, uss.server_id),
+        addFlagsToUserServerSettings(uss),
+      ])
+    )
+  );
+
+  const author_lookup = new Map(authors.map((a) => [a.id, a]));
+
   return messages
     .filter((m) => author_lookup.has(m.author_id))
     .map(
       (m): z.infer<typeof z_message_with_discord_account> => ({
         ...m,
         author: {
-          ...author_lookup.get(m.author_id)!,
+          ...z_discord_account_public.parse(author_lookup.get(m.author_id)!),
         },
-        public: author_lookup.get(m.author_id)!.user_server_settings.flags
-          .can_publicly_display_messages,
+        public:
+          author_server_settings_lookup.get(
+            toAuthorServerSettingsLookupKey(m.author_id, m.server_id)
+          )?.flags.can_publicly_display_messages ?? false,
       })
     );
 }
 
-function stripPrivateMessageData(
+export function stripPrivateMessageData(
   messages: z.infer<typeof z_message_with_discord_account>[]
 ): z.infer<typeof z_message_with_discord_account>[] {
   return messages.map((m) => {
@@ -162,7 +170,7 @@ const message_find_router = router({
               message: "No messages found",
             });
           }
-          return addAuthorsToMessages(messages, ctx);
+          return addAuthorsToMessages(messages, ctx.prisma);
         },
         permissions: (data) => assertIsUserInServer(ctx, data[0]!.server_id),
         public_data_formatter: (data) => stripPrivateMessageData(data),
