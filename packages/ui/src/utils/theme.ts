@@ -3,10 +3,14 @@ type CSSRule = {
     color: string;
   };
 };
+function disableTransitionsTemporarily() {
+  document.documentElement.classList.add("[&_*]:!transition-none");
+  window.setTimeout(() => {
+    document.documentElement.classList.remove("[&_*]:!transition-none");
+  }, 0);
+}
 
-export function toggleDarkTheme(dark_theme_enabled: boolean) {
-  const root = window.document.documentElement;
-
+function changeCodeHighlighting(dark_theme_enabled: boolean) {
   // This is disgusting, but it works for switching the code highlighting
   let darkStyleSheet: CSSStyleSheet | undefined;
   let lightStyleSheet: CSSStyleSheet | undefined;
@@ -27,17 +31,27 @@ export function toggleDarkTheme(dark_theme_enabled: boolean) {
       // let error pass
     }
   });
-
-  if (dark_theme_enabled) {
-    darkStyleSheet!.disabled = false;
-    lightStyleSheet!.disabled = true;
-    root.classList.add("dark");
-  } else {
-    darkStyleSheet!.disabled = true;
-    lightStyleSheet!.disabled = false;
-    root.classList.remove("dark");
+  if (darkStyleSheet && lightStyleSheet) {
+    if (dark_theme_enabled) {
+      darkStyleSheet.disabled = false;
+      lightStyleSheet.disabled = true;
+    } else {
+      darkStyleSheet.disabled = true;
+      lightStyleSheet.disabled = false;
+    }
   }
+}
+export function toggleDarkTheme() {
+  disableTransitionsTemporarily();
 
-  localStorage.setItem("theme", "dark");
-  return true;
+  const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  const isSystemDarkMode = darkModeMediaQuery.matches;
+  const isDarkMode = document.documentElement.classList.toggle("dark");
+  changeCodeHighlighting(isDarkMode);
+
+  if (isDarkMode === isSystemDarkMode) {
+    delete window.localStorage.isDarkMode;
+  } else {
+    window.localStorage.isDarkMode = isDarkMode;
+  }
 }
