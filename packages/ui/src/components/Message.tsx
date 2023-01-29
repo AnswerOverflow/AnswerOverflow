@@ -8,6 +8,7 @@ import type { MessageWithDiscordAccount } from "@answeroverflow/api";
 import { DiscordIcon } from "./icons/DiscordIcon";
 import Link from "next/link";
 import type { ChannelPublic } from "~api/router/channel/types";
+import { useIsUserInServer } from "../utils";
 export type MessageProps = {
   message: MessageWithDiscordAccount;
   thread?: ChannelPublic;
@@ -27,6 +28,10 @@ export function Message({
   const date_of_message = getSnowflakeUTCDate(message.id);
   const convertedMessageContent = toHTML(message.content);
   const parsedMessageContent = Parser(convertedMessageContent);
+  const is_user_in_server = useIsUserInServer(message.server_id);
+  if (is_user_in_server) {
+    blurred = false;
+  }
 
   function MessageImage({ image }: { image: MessageWithDiscordAccount["images"][number] }) {
     let width = image.width;

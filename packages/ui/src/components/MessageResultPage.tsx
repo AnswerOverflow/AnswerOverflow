@@ -1,4 +1,5 @@
 import type { ChannelPublic, MessageWithDiscordAccount, ServerPublic } from "@answeroverflow/api";
+import { useIsUserInServer } from "../utils";
 import { Message } from "./Message";
 import { SearchBar } from "./SearchBar";
 import { ServerInviteDriver } from "./ServerInviteDriver";
@@ -23,11 +24,12 @@ export function MessageResultPage({
   const solution_message_id = messages.at(0)?.solutions?.at(0);
   const MessageStack = ({ messages }: { messages: MessageWithDiscordAccount[] }) => {
     let consecutive_private_messages = 0;
+    const is_user_in_server = useIsUserInServer(server.id);
     return (
       <div className="mt-3 flex flex-col rounded-md sm:space-y-1 sm:p-1">
         {messages.map((message, index) => {
           const next_message = messages.at(index + 1);
-          if (!message.public) {
+          if (!message.public && !is_user_in_server) {
             consecutive_private_messages++;
             if (next_message && !next_message.public) {
               return;

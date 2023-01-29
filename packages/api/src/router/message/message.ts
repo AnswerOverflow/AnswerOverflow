@@ -10,9 +10,19 @@ import {
   protectedMutation,
   protectedMutationFetchFirst,
 } from "~api/utils/protected-procedures";
-import { assertIsAnswerOverflowBot, assertIsUser } from "~api/utils/permissions";
-import { userServerSettingsRouter } from "../user-server-settings/user-server-settings";
-import { getDefaultDiscordAccount, getDefaultMessage } from "@answeroverflow/db";
+import {
+  assertIsAnswerOverflowBot,
+  assertIsUser,
+  assertIsUserInServer,
+} from "~api/utils/permissions";
+import {
+  addFlagsToUserServerSettings,
+  getDefaultDiscordAccount,
+  getDefaultMessage,
+  getDefaultUserServerSettings,
+  Message,
+} from "@answeroverflow/db";
+import type { Context } from "../context";
 
 const z_discord_image = z.object({
   url: z.string(),
@@ -51,6 +61,76 @@ export const z_message_with_discord_account = z_message
   })
   .omit({ author_id: true });
 
+async function addAuthorsToMessages(messages: Message[], ctx: Context) {
+  const authors = await ctx.prisma.discordAccount.findMany({
+    where: {
+      id: {
+        in: messages.map((m) => m.author_id),
+      },
+    },
+    include: {
+      user_server_settings: {
+        where: {
+          server_id: {
+            equals: messages[0]!.server_id,
+          },
+        },
+      },
+    },
+  });
+
+  const authors_with_flags = authors.map((a) => ({
+    ...a,
+    user_server_settings: addFlagsToUserServerSettings(
+      a.user_server_settings.at(0) ??
+        getDefaultUserServerSettings({
+          server_id: messages[0]!.server_id,
+          user_id: a.id,
+        })
+    ),
+  }));
+
+  const author_lookup = new Map(authors_with_flags.map((a) => [a.id, a]));
+  return messages
+    .filter((m) => author_lookup.has(m.author_id))
+    .map(
+      (m): z.infer<typeof z_message_with_discord_account> => ({
+        ...m,
+        author: {
+          ...author_lookup.get(m.author_id)!,
+        },
+        public: author_lookup.get(m.author_id)!.user_server_settings.flags
+          .can_publicly_display_messages,
+      })
+    );
+}
+
+function stripPrivateMessageData(
+  messages: z.infer<typeof z_message_with_discord_account>[]
+): z.infer<typeof z_message_with_discord_account>[] {
+  return messages.map((m) => {
+    if (m.public) {
+      return m;
+    }
+    const default_author = getDefaultDiscordAccount({
+      id: "0",
+      name: "Unknown User",
+    });
+    const default_message = getDefaultMessage({
+      channel_id: m.channel_id,
+      server_id: m.server_id,
+      author_id: default_author.id,
+      id: m.id,
+      child_thread: null,
+    });
+    return {
+      ...default_message,
+      author: default_author,
+      public: false,
+    };
+  });
+}
+
 const message_find_router = router({
   byId: withDiscordAccountProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({
@@ -69,44 +149,25 @@ const message_find_router = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const messages = await protectedFetchWithPublicData({
-        fetch: () =>
-          ctx.elastic.bulkGetMessagesByChannelId(input.channel_id, input.after, input.limit),
-        permissions: (data) => data.map((d) => assertIsUser(ctx, d.author_id)),
-        public_data_formatter: (data) => data.map((d) => z_message_public.parse(d)),
+      return protectedFetchWithPublicData({
+        async fetch() {
+          const messages = await ctx.elastic.bulkGetMessagesByChannelId(
+            input.channel_id,
+            input.after,
+            input.limit
+          );
+          if (messages.length === 0) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "No messages found",
+            });
+          }
+          return addAuthorsToMessages(messages, ctx);
+        },
+        permissions: (data) => assertIsUserInServer(ctx, data[0]!.server_id),
+        public_data_formatter: (data) => stripPrivateMessageData(data),
         not_found_message: "Messages not found",
       });
-      const authors = await userServerSettingsRouter.createCaller(ctx).byIdManyWithDiscordAccounts({
-        user_ids: messages.map((m) => m.author_id),
-        server_id: messages[0]!.server_id,
-      });
-      const filtered_authors = authors.filter(
-        (a) => a.flags.can_publicly_display_messages === true
-      );
-      const author_lookup = new Map(filtered_authors.map((a) => [a.user_id, a.user]));
-      const messages_with_private_data_removed = messages.map((m) => {
-        const author = author_lookup.get(m.author_id);
-        if (author) {
-          return z_message_with_discord_account.parse({ ...m, author, public: true });
-        } else {
-          const default_message = getDefaultMessage({
-            author_id: "0",
-            channel_id: m.channel_id,
-            server_id: m.server_id,
-            id: m.id,
-          });
-          return z_message_with_discord_account.parse({
-            ...default_message,
-            public: false,
-            author: getDefaultDiscordAccount({
-              id: "0",
-              name: "",
-              avatar: null,
-            }),
-          });
-        }
-      });
-      return messages_with_private_data_removed;
     }),
   byIdBulk: withDiscordAccountProcedure.input(z.array(z.string())).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({

@@ -99,30 +99,6 @@ const user_server_settings_fetch_router = router({
         })
       );
     }),
-  byIdManyWithDiscordAccounts: withDiscordAccountProcedure
-    .input(
-      z.object({
-        user_ids: z.array(z.string()),
-        server_id: z.string(),
-      })
-    )
-    .query(async ({ input, ctx }) => {
-      return transformUserServerSettingsArray(
-        ctx.prisma.userServerSettings.findMany({
-          where: {
-            AND: {
-              user_id: {
-                in: input.user_ids,
-              },
-              server_id: input.server_id,
-            },
-          },
-          include: {
-            user: true,
-          },
-        })
-      );
-    }),
   byIdMany: withDiscordAccountProcedure
     .input(z.array(z_user_server_settings_find))
     .query(async ({ input, ctx }) => {

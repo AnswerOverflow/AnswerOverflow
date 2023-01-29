@@ -20,6 +20,8 @@ export class ConsentCommand extends Command {
         .setDMPermission(false)
     );
   }
+
+  public override messageRun() {}
   public override async chatInputRun(
     interaction: ChatInputCommandInteraction,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

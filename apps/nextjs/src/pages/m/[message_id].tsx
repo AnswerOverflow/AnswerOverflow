@@ -1,15 +1,18 @@
 import { appRouter } from "@answeroverflow/api";
 import { createSSGContext } from "@answeroverflow/api/src/router/context";
-import { MessageResultPage, AOHead } from "@answeroverflow/ui";
+import { MessageResultPage, AOHead, useIsUserInServer } from "@answeroverflow/ui";
 import { createProxySSGHelpers } from "@trpc/react-query/ssg";
 import superjson from "superjson";
 import { trpc } from "@answeroverflow/ui";
 import type { GetStaticPropsContext, InferGetStaticPropsType } from "next";
+import { TRPCError } from "@trpc/server";
 
 export default function MessageResult(props: InferGetStaticPropsType<typeof getStaticProps>) {
-  const { message_id } = props;
-
-  const postQuery = trpc.message_page.byId.useQuery(message_id);
+  const { message_id, server_id } = props;
+  const is_user_in_server = useIsUserInServer(server_id);
+  const postQuery = trpc.message_page.byId.useQuery(message_id, {
+    enabled: is_user_in_server,
+  });
   if (postQuery.status !== "success") {
     // won't happen since we're using `fallback: "blocking"`
     return <>Loading...</>;
@@ -56,18 +59,22 @@ export async function getStaticProps(context: GetStaticPropsContext<{ message_id
   }
   // prefetch `post.byId`
   try {
-    await ssg.message_page.byId.fetch(context.params.message_id);
-  } catch (error) {
+    const { server } = await ssg.message_page.byId.fetch(context.params.message_id);
     return {
-      notFound: true,
+      props: {
+        trpcState: ssg.dehydrate(),
+        message_id: context.params.message_id,
+        server_id: server.id,
+      },
+      revalidate: 60 * 10, // every 10 minutes
     };
+  } catch (error) {
+    if (error instanceof TRPCError && error.code === "NOT_FOUND") {
+      return {
+        notFound: true,
+      };
+    } else {
+      throw error;
+    }
   }
-
-  return {
-    props: {
-      trpcState: ssg.dehydrate(),
-      message_id: context.params.message_id,
-    },
-    revalidate: 60 * 10, // every 10 minutes
-  };
 }
