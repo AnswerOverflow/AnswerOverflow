@@ -1,12 +1,4 @@
-import {
-  Channel,
-  clearDatabase,
-  DiscordAccount,
-  getDefaultDiscordAccount,
-  getDefaultMessage,
-  Message,
-  Server,
-} from "@answeroverflow/db";
+import { Channel, clearDatabase, DiscordAccount, Message, Server } from "@answeroverflow/db";
 import {
   createAnswerOverflowBotCtx,
   mockAccount,
@@ -26,9 +18,12 @@ import {
   ignored_discord_account_router,
 } from "../users/ignored-discord-accounts/ignored-discord-account";
 import { addAuthorsToMessages, messageRouter, stripPrivateMessageData } from "./message";
-import type { MessageWithDiscordAccount } from "./types";
 import { prisma } from "@answeroverflow/db";
 import { userServerSettingsRouter } from "../user-server-settings/user-server-settings";
+import {
+  toMessageWithDiscordAccount,
+  toPrivateMessageWithStrippedData,
+} from "~api/test/public_data";
 let server: Server;
 let channel: Channel;
 let author: DiscordAccount;
@@ -458,16 +453,8 @@ describe("Message Operations", () => {
         channel_id: channel.id,
       });
       expect(messages).toEqual([
-        {
-          ...public_message,
-          public: true,
-          author: public_author,
-        },
-        {
-          ...private_message,
-          public: false,
-          author: private_author,
-        },
+        toMessageWithDiscordAccount(public_message, public_author, true),
+        toMessageWithDiscordAccount(private_message, private_author, false),
       ]);
     });
     it("should get all messages with only public data if users do not share a server", async () => {
@@ -476,27 +463,12 @@ describe("Message Operations", () => {
       const messages = await message_router.byChannelIdBulk({
         channel_id: channel.id,
       });
-      const default_author = getDefaultDiscordAccount({
-        id: "0",
-        name: "Unknown User",
-      });
 
       expect(messages).toEqual([
-        {
-          ...public_message,
-          public: true,
-          author: public_author,
-        },
-        {
-          ...getDefaultMessage({
-            id: private_message.id,
-            author_id: default_author.id,
-            channel_id: channel.id,
-            server_id: server.id,
-          }),
-          public: false,
-          author: default_author,
-        },
+        toMessageWithDiscordAccount(public_message, public_author, true),
+        toPrivateMessageWithStrippedData(
+          toMessageWithDiscordAccount(private_message, private_author, false)
+        ),
       ]);
     });
   });
@@ -507,13 +479,7 @@ describe("Message Utilities", () => {
     it("should add an author with no user server settings to the message", async () => {
       await ao_bot_discord_account_router.upsert(author);
       const message_with_author = await addAuthorsToMessages([message], prisma);
-      expect(message_with_author).toEqual([
-        {
-          ...message,
-          public: false,
-          author: author,
-        },
-      ]);
+      expect(message_with_author).toEqual([toMessageWithDiscordAccount(message, author, false)]);
     });
     it("should add an author with a user server settings set to not display messages to the message", async () => {
       await ao_bot_user_server_settings_router.upsertWithDeps({
@@ -524,13 +490,7 @@ describe("Message Utilities", () => {
         },
       });
       const message_with_author = await addAuthorsToMessages([message], prisma);
-      expect(message_with_author).toEqual([
-        {
-          ...message,
-          author,
-          public: false,
-        },
-      ]);
+      expect(message_with_author).toEqual([toMessageWithDiscordAccount(message, author, false)]);
     });
     it("should add an author with a user server settings set to display messages to the message", async () => {
       await ao_bot_user_server_settings_router.upsertWithDeps({
@@ -541,13 +501,7 @@ describe("Message Utilities", () => {
         },
       });
       const message_with_author = await addAuthorsToMessages([message], prisma);
-      expect(message_with_author).toEqual([
-        {
-          ...message,
-          author,
-          public: true,
-        },
-      ]);
+      expect(message_with_author).toEqual([toMessageWithDiscordAccount(message, author, true)]);
     });
     it("should add an author with two user server settings, one set to display and one set to not", async () => {
       await ao_bot_user_server_settings_router.upsertWithDeps({
@@ -571,16 +525,8 @@ describe("Message Utilities", () => {
       const message_with_author = await addAuthorsToMessages([message1, message2], prisma);
 
       expect(message_with_author).toEqual([
-        {
-          ...message1,
-          author,
-          public: true,
-        },
-        {
-          ...message2,
-          author,
-          public: false,
-        },
+        toMessageWithDiscordAccount(message1, author, true),
+        toMessageWithDiscordAccount(message2, author, false),
       ]);
     });
     it("should fail adding an author who does not exist", async () => {
@@ -592,38 +538,24 @@ describe("Message Utilities", () => {
   describe("Strip Private Message Data", () => {
     it("should preserve information on a public message", () => {
       const author = mockAccount();
-      const message: MessageWithDiscordAccount = {
-        ...mockMessage(server, channel, author),
-        author: author,
-        public: true,
-      };
-      const stripped = stripPrivateMessageData([message]);
-      expect(stripped).toEqual([message]);
+      const message_with_account = toMessageWithDiscordAccount(
+        mockMessage(server, channel, author),
+        author,
+        true
+      );
+      const stripped = stripPrivateMessageData([message_with_account]);
+      expect(stripped).toEqual([message_with_account]);
     });
     it("should strip information on a private message", () => {
       const author = mockAccount();
-      const message: MessageWithDiscordAccount = {
-        ...mockMessage(server, channel, author),
-        author: author,
-        public: false,
-      };
-      const stripped = stripPrivateMessageData([message]);
-      const default_author = getDefaultDiscordAccount({
-        id: "0",
-        name: "Unknown User",
-      });
-      expect(stripped).toEqual([
-        {
-          ...getDefaultMessage({
-            author_id: default_author.id,
-            channel_id: channel.id,
-            server_id: server.id,
-            id: message.id,
-          }),
-          author: default_author,
-          public: false,
-        },
-      ]);
+
+      const message_with_account = toMessageWithDiscordAccount(
+        mockMessage(server, channel, author),
+        author,
+        false
+      );
+      const stripped = stripPrivateMessageData([message_with_account]);
+      expect(stripped).toEqual([toPrivateMessageWithStrippedData(message_with_account)]);
     });
   });
 });

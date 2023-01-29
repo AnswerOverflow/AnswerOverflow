@@ -19,7 +19,6 @@ import {
   addFlagsToUserServerSettings,
   getDefaultDiscordAccount,
   getDefaultMessage,
-  getDefaultUserServerSettings,
   Message,
   PrismaClient,
 } from "@answeroverflow/db";

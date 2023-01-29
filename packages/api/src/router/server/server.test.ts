@@ -1,4 +1,5 @@
 import { clearDatabase, Server } from "@answeroverflow/db";
+import { pickPublicServerData } from "~api/test/public_data";
 import {
   createAnswerOverflowBotCtx,
   mockAccountWithServersCallerCtx,
@@ -7,7 +8,6 @@ import {
   testAllVariantsThatThrowErrors,
 } from "~api/test/utils";
 import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
-import { pick } from "~api/utils/utils";
 import { serverRouter } from "./server";
 
 let answer_overflow_bot_router: ReturnType<(typeof serverRouter)["createCaller"]>;
@@ -82,7 +82,7 @@ describe("Server Operations", () => {
           return {
             data,
             private_data_format: server_2,
-            public_data_format: pick(server_2, ["id", "name", "icon"]),
+            public_data_format: pickPublicServerData(server_2),
           };
         },
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
