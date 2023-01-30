@@ -1,4 +1,4 @@
-import { Channel, clearDatabase, Server } from "@answeroverflow/db";
+import { Channel, clearDatabase, getDefaultChannelSettings, Server } from "@answeroverflow/db";
 import {
   mockServer,
   mockChannel,
@@ -30,8 +30,15 @@ beforeEach(async () => {
   await ao_bot_server_router.create(server);
 });
 
-export function pickPublicChannelData(channel: Channel) {
-  return pick(channel, ["id", "name", "parent_id", "server_id", "type"]);
+export function pickPublicChannelData(
+  channel: Awaited<ReturnType<(typeof ao_bot_channel_router)["byId"]>>
+) {
+  const picked = pick(channel, ["id", "name", "parent_id", "server_id", "type"]);
+  const picked_settings = pick(channel.settings, ["invite_code"]);
+  return {
+    ...picked,
+    settings: picked_settings,
+  };
 }
 
 describe("Channel Operations", () => {
@@ -41,11 +48,14 @@ describe("Channel Operations", () => {
     });
     it("should succeed fetching a channel as the answer overflow bot", async () => {
       const fetched = await ao_bot_channel_router.byId(channel.id);
-      expect(fetched).toEqual(channel);
+      expect(fetched).toEqual({
+        ...channel,
+        settings: getDefaultChannelSettings(channel.id),
+      });
     });
     it("tests all variants for fetching a single channel", async () => {
       await testAllDataVariants({
-        sourcesThatShouldWork: ["discord-bot"],
+        sourcesThatShouldWork: ["discord-bot", "web-client"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
         async fetch({ permission, source }) {
           const account = await mockAccountWithServersCallerCtx(server, source, permission);
@@ -53,8 +63,8 @@ describe("Channel Operations", () => {
           const data = await router.byId(channel.id);
           return {
             data,
-            private_data_format: channel,
-            public_data_format: pickPublicChannelData(channel),
+            private_data_format: data,
+            public_data_format: pickPublicChannelData(data),
           };
         },
       });
@@ -67,8 +77,14 @@ describe("Channel Operations", () => {
     });
     it("should succeed fetching many channels as the answer overflow bot", async () => {
       const fetched = await ao_bot_channel_router.byIdMany([channel.id, channel2.id]);
-      expect(fetched).toContainEqual(channel);
-      expect(fetched).toContainEqual(channel2);
+      expect(fetched).toContainEqual({
+        ...channel,
+        settings: getDefaultChannelSettings(channel.id),
+      });
+      expect(fetched).toContainEqual({
+        ...channel2,
+        settings: getDefaultChannelSettings(channel2.id),
+      });
     });
     it("tests all variants for fetching many channels", async () => {
       await testAllDataVariants({
@@ -80,8 +96,8 @@ describe("Channel Operations", () => {
           const data = await router.byIdMany([channel.id, channel2.id]);
           return {
             data,
-            private_data_format: [channel, channel2],
-            public_data_format: [pickPublicChannelData(channel), pickPublicChannelData(channel2)],
+            private_data_format: data,
+            public_data_format: data.map(pickPublicChannelData),
           };
         },
       });

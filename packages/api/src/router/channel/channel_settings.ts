@@ -5,25 +5,15 @@ import {
   channel_settings_flags,
   getDefaultChannelSettings,
   PrismaClient,
+  z_channel_settings,
 } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, publicProcedure, router } from "~api/router/trpc";
 import { dictToBitfield } from "@answeroverflow/db";
 import { channelRouter, z_channel_upsert_with_deps } from "./channel";
-import { toZObject } from "~api/utils/zod-utils";
 import { findOrThrowNotFound, upsert } from "~api/utils/operations";
 import { protectedFetch, protectedMutationFetchFirst } from "~api/utils/protected-procedures";
 import { assertCanEditServerBotOnly, assertCanEditServer } from "~api/utils/permissions";
-
-const z_channel_settings_flags = toZObject(...channel_settings_flags);
-
-const z_channel_settings = z.object({
-  channel_id: z.string(),
-  flags: z_channel_settings_flags,
-  last_indexed_snowflake: z.string().nullable(),
-  invite_code: z.string().nullable(),
-  solution_tag_id: z.string().nullable(),
-});
 
 const z_channel_settings_required = z_channel_settings.pick({
   channel_id: true,

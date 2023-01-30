@@ -1,59 +1,114 @@
 import { z } from "zod";
-import {
-  mergeRouters,
-  withDiscordAccountProcedure,
-  router,
-  publicProcedure,
-} from "~api/router/trpc";
+import { mergeRouters, withDiscordAccountProcedure, router } from "~api/router/trpc";
 
 import { ignored_discord_account_router } from "../users/ignored-discord-accounts/ignored-discord-account";
 import { assertIsNotDeletedUser } from "~api/router/users/ignored-discord-accounts/ignored-discord-account";
 import { TRPCError } from "@trpc/server";
-import { discordAccountRouter, z_discord_account_public } from "../users/accounts/discord-accounts";
 import {
   protectedFetchWithPublicData,
   protectedMutation,
   protectedMutationFetchFirst,
 } from "~api/utils/protected-procedures";
-import { assertIsAnswerOverflowBot, assertIsUser } from "~api/utils/permissions";
+import {
+  assertIsAnswerOverflowBot,
+  assertIsUser,
+  assertIsUserInServer,
+} from "~api/utils/permissions";
+import {
+  addFlagsToUserServerSettings,
+  getDefaultDiscordAccount,
+  getDefaultMessage,
+  Message,
+  PrismaClient,
+  z_discord_account_public,
+  z_message,
+  z_message_public,
+} from "@answeroverflow/db";
 
-const z_discord_image = z.object({
-  url: z.string(),
-  width: z.number().nullable(),
-  height: z.number().nullable(),
-  description: z.string().nullable(),
-});
-
-export const z_message = z.object({
-  id: z.string(),
-  content: z.string(),
-  images: z.array(z_discord_image),
-  solutions: z.array(z.string()),
-  replies_to: z.string().nullable(),
-  thread_id: z.string().nullable(),
-  child_thread: z.string().nullable(),
-  author_id: z.string(),
-  channel_id: z.string(),
-  server_id: z.string(),
-});
-
-const z_message_public = z_message.pick({
-  id: true,
-  content: true,
-  images: true,
-  solutions: true,
-  replies_to: true,
-  thread_id: true,
-  child_thread: true,
-  author_id: true,
-  channel_id: true,
-  server_id: true,
-});
 export const z_message_with_discord_account = z_message
   .extend({
     author: z_discord_account_public,
+    public: z.boolean().default(false),
   })
   .omit({ author_id: true });
+
+/*
+  Fetch the authors with their server settings for the messages server settings,
+
+*/
+export async function addAuthorsToMessages(messages: Message[], prisma: PrismaClient) {
+  const authors = await prisma.discordAccount.findMany({
+    where: {
+      id: {
+        in: messages.map((m) => m.author_id),
+      },
+    },
+    include: {
+      user_server_settings: {
+        where: {
+          server_id: {
+            in: messages.map((m) => m.server_id),
+          },
+        },
+      },
+    },
+  });
+
+  const toAuthorServerSettingsLookupKey = (discord_id: string, server_id: string) =>
+    `${discord_id}-${server_id}`;
+
+  const author_server_settings_lookup = new Map(
+    authors.flatMap((a) =>
+      a.user_server_settings.map((uss) => [
+        toAuthorServerSettingsLookupKey(uss.user_id, uss.server_id),
+        addFlagsToUserServerSettings(uss),
+      ])
+    )
+  );
+
+  const author_lookup = new Map(authors.map((a) => [a.id, a]));
+
+  return messages
+    .filter((m) => author_lookup.has(m.author_id))
+    .map(
+      (m): z.infer<typeof z_message_with_discord_account> => ({
+        ...m,
+        author: {
+          ...z_discord_account_public.parse(author_lookup.get(m.author_id)!),
+        },
+        public:
+          author_server_settings_lookup.get(
+            toAuthorServerSettingsLookupKey(m.author_id, m.server_id)
+          )?.flags.can_publicly_display_messages ?? false,
+      })
+    );
+}
+
+export function stripPrivateMessageData(
+  messages: z.infer<typeof z_message_with_discord_account>[]
+): z.infer<typeof z_message_with_discord_account>[] {
+  return messages.map((m) => {
+    if (m.public) {
+      return m;
+    }
+    const default_author = getDefaultDiscordAccount({
+      id: "0",
+      name: "Unknown User",
+    });
+    const default_message = getDefaultMessage({
+      channel_id: m.channel_id,
+      server_id: m.server_id,
+      author_id: default_author.id,
+      id: m.id,
+      child_thread: null,
+    });
+    return {
+      ...default_message,
+      author: default_author,
+      public: false,
+    };
+  });
+}
 
 const message_find_router = router({
   byId: withDiscordAccountProcedure.input(z.string()).query(async ({ ctx, input }) => {
@@ -64,6 +119,35 @@ const message_find_router = router({
       public_data_formatter: (data) => z_message_public.parse(data),
     });
   }),
+  byChannelIdBulk: withDiscordAccountProcedure
+    .input(
+      z.object({
+        channel_id: z.string(),
+        after: z.string().optional(),
+        limit: z.number().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return protectedFetchWithPublicData({
+        async fetch() {
+          const messages = await ctx.elastic.bulkGetMessagesByChannelId(
+            input.channel_id,
+            input.after,
+            input.limit
+          );
+          if (messages.length === 0) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "No messages found",
+            });
+          }
+          return addAuthorsToMessages(messages, ctx.prisma);
+        },
+        permissions: (data) => assertIsUserInServer(ctx, data[0]!.server_id),
+        public_data_formatter: (data) => stripPrivateMessageData(data),
+        not_found_message: "Messages not found",
+      });
+    }),
   byIdBulk: withDiscordAccountProcedure.input(z.array(z.string())).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({
       fetch: () => ctx.elastic.bulkGetMessages(input),
@@ -71,21 +155,6 @@ const message_find_router = router({
       public_data_formatter: (data) => data.map((d) => z_message_public.parse(d)),
       not_found_message: "Messages not found",
     });
-  }),
-  // TODO: Delete
-  all: publicProcedure.query(async ({ ctx }) => {
-    const all_messages = await ctx.elastic.getAllMessages();
-    const authors = await discordAccountRouter
-      .createCaller(ctx)
-      .byIdMany(all_messages.map((m) => m.author_id));
-    const author_lookup = new Map(authors.map((a) => [a.id, a]));
-    return z
-      .array(z_message_with_discord_account)
-      .parse(
-        all_messages.map((m) =>
-          z_message_with_discord_account.parse({ ...m, author: author_lookup.get(m.author_id) })
-        )
-      );
   }),
 });
 
@@ -139,14 +208,6 @@ const message_crud_router = router({
       permissions: () => assertIsAnswerOverflowBot(ctx),
     });
   }),
-  deleteByThreadId: withDiscordAccountProcedure
-    .input(z.string())
-    .mutation(async ({ ctx, input }) => {
-      return protectedMutation({
-        permissions: () => assertIsAnswerOverflowBot(ctx),
-        operation: () => ctx.elastic.deleteMessagesByThreadId(input),
-      });
-    }),
   deleteBulk: withDiscordAccountProcedure
     .input(z.array(z.string()))
     .mutation(async ({ ctx, input }) => {

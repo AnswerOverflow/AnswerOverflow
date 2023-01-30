@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/typescript-node
 {
-  "name": "Node.js & TypeScript",
+  "name": "AnswerOverflow Dev",
   // Update the 'dockerComposeFile' list if you have more compose files or use different names.
   "dockerComposeFile": [
     "docker-compose-workspace.yml",
@@ -32,7 +32,7 @@
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "yarn i; npx playwright install-deps; npx playwright install; sudo npx playwright install-deps",
+  "postCreateCommand": "sudo yarn install; sudo npx playwright install; sudo npx playwright install-deps",
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
   "remoteUser": "node",
   "mounts": [

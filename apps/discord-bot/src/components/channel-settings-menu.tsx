@@ -1,6 +1,6 @@
 import type { ChannelSettingsOutput, ChannelSettingsUpsertInput } from "@answeroverflow/api";
 import { callApiWithButtonErrorHandler } from "~discord-bot/utils/trpc";
-import { type GuildForumTag, type TextBasedChannel, ChannelType, ForumChannel } from "discord.js";
+import { type GuildForumTag, ChannelType, ForumChannel, GuildTextBasedChannel } from "discord.js";
 import { ButtonClickEvent, Select, SelectChangeEvent, Option } from "@answeroverflow/reacord";
 import React from "react";
 import { ToggleButton } from "./toggle-button";
@@ -17,11 +17,15 @@ export function ChannelSettingsMenu({
   channel,
   settings,
 }: {
-  channel: TextBasedChannel;
+  channel: GuildTextBasedChannel;
   settings: ChannelSettingsOutput;
 }) {
   const [channelSettings, setChannelSettings] = React.useState<ChannelSettingsOutput>(settings);
   const is_forum_channel = channel.isThread() && channel.parent?.type == ChannelType.GuildForum;
+  const target_channel = getRootChannel(channel);
+  if (!target_channel) {
+    throw new Error("Could not find root channel");
+  }
 
   const updateChannelSettings = async (
     interaction: ButtonClickEvent,
@@ -29,12 +33,6 @@ export function ChannelSettingsMenu({
   ) => {
     if (channel.isDMBased()) {
       interaction.ephemeralReply("Does not work in DMs");
-      return;
-    }
-
-    const target_channel = getRootChannel(channel);
-    if (!target_channel) {
-      interaction.ephemeralReply("Could not find root channel");
       return;
     }
 
@@ -61,11 +59,25 @@ export function ChannelSettingsMenu({
       currently_enabled={channelSettings.flags.indexing_enabled}
       disable_label={"Disable Indexing"}
       enable_label={"Enable Indexing"}
-      onClick={(interaction: ButtonClickEvent) => {
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      onClick={async (interaction: ButtonClickEvent) => {
+        const indexed_enabled = !channelSettings.flags.indexing_enabled;
+        let new_invite_code: string | null = null;
+        if (indexed_enabled) {
+          const channel_invite = await target_channel.createInvite({
+            maxAge: 0,
+            maxUses: 0,
+            reason: "Channel indexing enabled invite",
+            unique: false,
+            temporary: false,
+          });
+          new_invite_code = channel_invite.code;
+        }
         void updateChannelSettings(interaction, {
           flags: {
-            indexing_enabled: !channelSettings.flags.indexing_enabled,
+            indexing_enabled: indexed_enabled,
           },
+          invite_code: new_invite_code,
         });
       }}
     />
