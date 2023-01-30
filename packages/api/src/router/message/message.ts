@@ -4,7 +4,6 @@ import { mergeRouters, withDiscordAccountProcedure, router } from "~api/router/t
 import { ignored_discord_account_router } from "../users/ignored-discord-accounts/ignored-discord-account";
 import { assertIsNotDeletedUser } from "~api/router/users/ignored-discord-accounts/ignored-discord-account";
 import { TRPCError } from "@trpc/server";
-import { z_discord_account_public } from "../users/accounts/discord-accounts";
 import {
   protectedFetchWithPublicData,
   protectedMutation,
@@ -21,38 +20,11 @@ import {
   getDefaultMessage,
   Message,
   PrismaClient,
+  z_discord_account_public,
+  z_message,
+  z_message_public,
 } from "@answeroverflow/db";
 
-const z_discord_image = z.object({
-  url: z.string(),
-  width: z.number().nullable(),
-  height: z.number().nullable(),
-  description: z.string().nullable(),
-});
-
-export const z_message = z.object({
-  id: z.string(),
-  content: z.string(),
-  images: z.array(z_discord_image),
-  solutions: z.array(z.string()),
-  replies_to: z.string().nullable(),
-  child_thread: z.string().nullable(),
-  author_id: z.string(),
-  channel_id: z.string(),
-  server_id: z.string(),
-});
-
-const z_message_public = z_message.pick({
-  id: true,
-  content: true,
-  images: true,
-  solutions: true,
-  replies_to: true,
-  child_thread: true,
-  author_id: true,
-  channel_id: true,
-  server_id: true,
-});
 export const z_message_with_discord_account = z_message
   .extend({
     author: z_discord_account_public,

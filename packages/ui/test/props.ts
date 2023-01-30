@@ -61,6 +61,9 @@ export function mockChannel(override: Partial<ChannelPublic> = {}) {
     server_id: "0",
     parent_id: null,
     type: 0,
+    settings: {
+      invite_code: null,
+    },
     ...override,
   };
   return data;

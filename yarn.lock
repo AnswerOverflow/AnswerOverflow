@@ -6238,6 +6238,11 @@ discord-api-types@^0.37.20, discord-api-types@^0.37.23, discord-api-types@^0.37.
   resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.37.28.tgz#874c7cf58c997513cb4c6f65a2ec7fd019a12a89"
   integrity sha512-K0fw7m7km9th3dCQ2AR90q/FwX3uAj+OLc+Zuo39VY9vCn0Ux/iObM4y1zJYIH3vTc+QlrksVErUvyeONjOKMQ==
 
+discord-api-types@^0.37.30:
+  version "0.37.30"
+  resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.37.30.tgz#04b43ec92b48f20a1bd055681c126f5d5b0840b2"
+  integrity sha512-TzNF28zWV63clYW1+rbKT2+2qSI+lw/aNG3lyP2fIj5NioGPz4C+bCSvwhP3Ly3uLwL7v8FxIiu8XKGDsvuwWA==
+
 discord-markdown@^2.5.1:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/discord-markdown/-/discord-markdown-2.5.1.tgz#d18773c6e3cff8df90f305654ecbbc5e38c507eb"
@@ -14051,7 +14056,7 @@ yocto-queue@^0.1.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-zod@^3.18.0:
+zod@^3.18.0, zod@^3.20.2:
   version "3.20.2"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.20.2.tgz#068606642c8f51b3333981f91c0a8ab37dfc2807"
   integrity sha512-1MzNQdAvO+54H+EaK5YpyEy0T+Ejo/7YLHS93G3RnYWh5gaotGHwGeN/ZO687qEDU2y4CdStQYXVHIgrUl5UVQ==

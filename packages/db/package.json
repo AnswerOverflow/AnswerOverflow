@@ -19,7 +19,9 @@
   "dependencies": {
     "@elastic/elasticsearch": "^8.5.0",
     "@prisma/client": "^4.8.1",
-    "@sapphire/bitfield": "^1.0.0"
+    "@sapphire/bitfield": "^1.0.0",
+    "discord-api-types": "^0.37.30",
+    "zod": "^3.20.2"
   },
   "devDependencies": {
     "@answeroverflow/tsconfig": "*",

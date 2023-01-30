@@ -40,7 +40,7 @@ export default function MessageResult(props: InferGetStaticPropsType<typeof getS
         messages={messages}
         channel={parent_channel}
         server={server}
-        thread={thread}
+        thread={thread ?? undefined}
       />
     </>
   );
@@ -74,7 +74,7 @@ export async function getStaticProps(context: GetStaticPropsContext<{ message_id
         server,
         messages,
         parent_channel,
-        thread,
+        thread: thread ?? null,
       },
       revalidate: 60 * 10, // every 10 minutes
     };

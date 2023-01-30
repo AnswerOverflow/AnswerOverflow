@@ -18,7 +18,6 @@ import {
   toMessageWithDiscordAccount,
   toPrivateMessageWithStrippedData,
 } from "~api/test/public_data";
-import type { ChannelPublic } from "../channel/types";
 
 let server: Server;
 let channel: Channel;
@@ -77,7 +76,7 @@ describe("Message Results", () => {
     });
   });
   describe("Thread Message Pages", () => {
-    let thread: ChannelPublic;
+    let thread: Channel;
     let thread_messages: Message[];
     beforeEach(async () => {
       thread = mockThread(channel);

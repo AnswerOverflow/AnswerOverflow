@@ -1,4 +1,5 @@
 import type { ServerPublic, ChannelPublic } from "@answeroverflow/api";
+import Link from "next/link";
 import { Button } from "./primitives/Button";
 import { ServerIcon } from "./ServerIcon";
 
@@ -28,7 +29,17 @@ export function ServerInvite({ server, channel, is_user_in_server }: ServerInvit
         <ServerNameAndChannelName />
       </div>
       <div>
-        <Button intent={"success"}>{is_user_in_server ? "Joined" : "Join"}</Button>
+        {channel?.settings.invite_code && (
+          <Link
+            href={`https://discord.gg/${channel?.settings.invite_code}`}
+            target={"_blank"}
+            referrerPolicy="no-referrer"
+          >
+            <Button intent={"success"} visual_only>
+              {is_user_in_server ? "Joined" : "Join"}
+            </Button>
+          </Link>
+        )}
       </div>
     </div>
   );
