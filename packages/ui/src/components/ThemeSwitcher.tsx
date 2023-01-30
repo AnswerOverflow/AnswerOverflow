@@ -24,12 +24,12 @@ export function ThemeSwitcher() {
   return (
     <button
       type="button"
-      className="flex h-7 w-7 items-center justify-center rounded-md transition hover:bg-zinc-900/5 dark:hover:bg-white/5"
+      className="flex h-9 w-9 items-center justify-center rounded-md transition hover:bg-zinc-900/5 dark:hover:bg-white/5"
       aria-label="Toggle dark mode"
       onClick={() => toggleDarkTheme()}
     >
-      <SunIcon className="h-6 w-6 stroke-zinc-900 dark:hidden" />
-      <MoonIcon className="hidden h-6 w-6 stroke-white dark:block" />
+      <SunIcon className="h-8 w-8 stroke-zinc-900 dark:hidden" />
+      <MoonIcon className="hidden h-8 w-8 stroke-white dark:block" />
     </button>
   );
 }
