@@ -1,6 +1,5 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { signIn, signOut } from "next-auth/react";
 import { AnswerOverflowLogo, trpc } from "@answeroverflow/ui";
 import type { inferProcedureOutput } from "@trpc/server";
 import type { AppRouter } from "@answeroverflow/api";
@@ -32,29 +31,9 @@ const Home: NextPage = () => {
 export default Home;
 
 const AuthShowcase: React.FC = () => {
-  const { data: session } = trpc.auth.getSession.useQuery();
-
-  const { data: secretMessage } = trpc.auth.getSecretMessage.useQuery(
-    undefined, // no input
-    { enabled: !!session?.user }
-  );
-
   const { data: servers } = trpc.auth.getServers.useQuery();
   return (
     <div className="flex flex-col items-center justify-center gap-4">
-      {session?.user && (
-        <p className="text-center text-2xl text-white">
-          {session && <span>Logged in as {session?.user?.name}</span>}
-          {secretMessage && <span> - {secretMessage}</span>}
-        </p>
-      )}
-      <button
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        onClick={session ? () => signOut() : () => signIn()}
-      >
-        {session ? "Sign out" : "Sign in"}
-      </button>
       <div className="grid max-h-[70vh] grid-cols-4 gap-4 overflow-y-scroll">
         {servers?.map((server) => {
           return <ServerCard server={server} key={server.id} />;

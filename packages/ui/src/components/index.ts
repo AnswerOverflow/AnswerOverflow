@@ -1,5 +1,5 @@
 export * from "./AnswerOverflowLogo";
-export * from "./Avatar";
+export * from "./DiscordAvatar";
 export * from "./Footer";
 export * from "./Message";
 export * from "./MessageResultPage";

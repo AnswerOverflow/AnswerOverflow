@@ -1,17 +1,9 @@
-import type { AvatarProps } from "../src/components/Avatar";
 import type {
   ChannelPublic,
   DiscordAccountPublic,
   MessageWithDiscordAccount,
   ServerPublic,
 } from "@answeroverflow/api";
-export const default_avatar: AvatarProps = {
-  user: { name: "John Doe", id: "0", avatar: null },
-};
-
-export const with_image: AvatarProps = {
-  user: { name: "Rhys", id: "523949187663134754", avatar: "7716e305f7de26045526d9da6eef2dab" },
-};
 
 export function randomId() {
   return Math.floor(Math.random() * 10000000).toString();

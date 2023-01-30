@@ -1,4 +1,4 @@
-import { Avatar } from "./Avatar";
+import { DiscordAvatar } from "./DiscordAvatar";
 import { getSnowflakeUTCDate } from "~ui/utils/snowflake";
 import Image from "next/image";
 import discordMarkdown from "discord-markdown";
@@ -99,12 +99,14 @@ export function Message({
   const Contents = () => (
     <div className="group relative flex  w-full break-words rounded-xl p-1 ">
       <div className="mr-4 hidden shrink-0 sm:block">
-        <Avatar user={message.author} />
+        <DiscordAvatar user={message.author} />
       </div>
       <div className="w-full">
         <div className="flex w-full min-w-0  justify-between">
           <div className="flex min-w-0 gap-2">
-            <Avatar user={message.author} className="shrink-0 sm:hidden" />
+            <div className="shrink-0 sm:hidden">
+              <DiscordAvatar user={message.author} />
+            </div>
             <div className="flex flex-col sm:flex-row">
               <span className="mr-1 text-black dark:text-white">{message.author.name}</span>
               <span className="text-neutral-800 dark:text-neutral-400">{date_of_message}</span>
