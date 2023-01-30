@@ -8,7 +8,7 @@ const jestConfig: JestConfigWithTsJest = {
   preset: "ts-jest",
   resetMocks: true,
   testEnvironment: "node",
-  testMatch: ["**/*.test.ts"],
+  testMatch: ["**/*.test.ts(x)?"],
   moduleNameMapper: {
     "~discord-bot/test/(.*)": "<rootDir>/test/$1",
     "~discord-bot/utils/(.*)": "<rootDir>/src/utils/$1",

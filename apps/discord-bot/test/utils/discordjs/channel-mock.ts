@@ -134,6 +134,10 @@ function setupMockedChannel<T extends GuildBasedChannel>(
         };
         return Promise.resolve(output);
       });
+    channel.createInvite = jest.fn().mockImplementation(() => {
+      const invite = mockInvite(client, channel);
+      return Promise.resolve(invite);
+    });
   }
   if (channel.isTextBased()) {
     channel.messages.fetch = jest.fn().mockImplementation(

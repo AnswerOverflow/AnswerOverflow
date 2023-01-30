@@ -75,6 +75,25 @@ export function assertCanEditMessage(ctx: Context, author_id: string) {
   return;
 }
 
+export function assertIsUserInServer(ctx: Context, target_server_id: string) {
+  if (isSuperUser(ctx)) return;
+  if (isAnswerOverflowBot(ctx)) return;
+  if (!ctx.user_servers) {
+    return new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Sign in to view this server",
+    });
+  }
+  const server = ctx.user_servers.find((server) => server.id === target_server_id);
+  if (!server) {
+    return new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You are not a part of this server",
+    });
+  }
+  return;
+}
+
 export function assertIsUser(ctx: Context, target_user_id: string) {
   if (isSuperUser(ctx)) return;
   if (isAnswerOverflowBot(ctx)) return;

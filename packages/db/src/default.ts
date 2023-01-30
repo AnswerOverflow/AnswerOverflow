@@ -56,7 +56,6 @@ export function getDefaultMessage(
     content: "",
     images: [],
     replies_to: null,
-    thread_id: null,
     child_thread: null,
     solutions: [],
     ...override,
