@@ -97,7 +97,7 @@ export function Message({
   }
 
   const Contents = () => (
-    <div className="flex group relative  w-full break-words rounded-xl p-1 ">
+    <div className="group relative flex  w-full break-words rounded-xl p-1 ">
       <div className="mr-4 hidden shrink-0 sm:block">
         <DiscordAvatar user={message.author} />
       </div>
@@ -119,7 +119,7 @@ export function Message({
               message_id: message.id,
               thread_id: thread?.id,
             })}
-            className="flex invisible h-6 w-6 group-hover:visible"
+            className="invisible flex h-6 w-6 group-hover:visible"
           >
             <DiscordIcon color="blurple" />
           </Link>
