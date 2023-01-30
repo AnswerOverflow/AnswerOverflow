@@ -13,6 +13,14 @@ export default {
     showGrid: {
       control: "boolean",
     },
+    showLegend: {
+      control: "boolean",
+      defaultValue: true,
+    },
+    showTooltip: {
+      control: "boolean",
+      defaultValue: true,
+    },
   },
 } as Meta;
 

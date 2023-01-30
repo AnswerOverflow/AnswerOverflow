@@ -57,7 +57,9 @@ export interface DefaultChartProps {
   yAxisKey?: string;
 
   // TODO: improve typing so it contains keys from line datakeys
-  data: any[];
+  data: {
+    [key in string]: string | number;
+  }[];
 }
 
 export type ChartProps = LineChartData | BarChartData;
