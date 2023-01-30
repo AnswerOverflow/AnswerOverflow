@@ -1,4 +1,4 @@
-import type { AvatarProps } from "../src/components/Avatar";
+import type { AvatarProps } from "../src/components/DiscordAvatar";
 import type {
   ChannelPublic,
   DiscordAccountPublic,
