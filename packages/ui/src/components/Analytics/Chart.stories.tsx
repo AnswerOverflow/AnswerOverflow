@@ -4,10 +4,23 @@ import type { ComponentStory, Meta } from "@storybook/react";
 import { Chart, ChartProps } from "./Chart";
 export default {
   component: Chart,
+  argTypes: {
+    type: {
+      options: ["line"],
+      control: { type: "radio" },
+    },
+    showGrid: {
+      control: "boolean",
+    },
+  },
 } as Meta;
 
 //👇 We create a “template” of how args map to rendering
-const Template: ComponentStory<typeof Chart> = (props: ChartProps) => <Chart {...props} />;
+const Template: ComponentStory<typeof Chart> = (props: ChartProps) => (
+  <div className="h-40">
+    <Chart {...props} />
+  </div>
+);
 
 //👇 Each story then reuses that template
 
@@ -15,13 +28,15 @@ export const Primary = Template.bind({});
 //👇 Each story then reuses that template
 const primProps: ChartProps = {
   type: "line",
+  showGrid: false,
   lines: [
     {
-      type: "monotone",
+      lineType: "monotone",
       dataKey: "uv",
-      stroke: "#8884d8",
+      lineColor: "#8884d8",
     },
   ],
+  xAxisKey: "name",
   // Data from rechart example
   data: [
     {
