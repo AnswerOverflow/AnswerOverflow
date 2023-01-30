@@ -28,8 +28,7 @@ let ao_bot_server_router: ReturnType<(typeof serverRouter)["createCaller"]>;
 let ao_bot_discord_account_router: ReturnType<(typeof discordAccountRouter)["createCaller"]>;
 let ao_bot_message_router: ReturnType<(typeof messageRouter)["createCaller"]>;
 let unauthed_message_page_router: ReturnType<(typeof message_page_router)["createCaller"]>;
-let message: Message;
-let message2: Message;
+
 beforeEach(async () => {
   await clearDatabase();
   server = mockServer();
@@ -53,6 +52,8 @@ describe("Message Results", () => {
     await expect(unauthed_message_page_router.byId("123")).rejects.toThrow("Message not found");
   });
   describe("Text Channel Message Pages", () => {
+    let message: Message;
+    let message2: Message;
     beforeEach(async () => {
       message = mockMessage(server, channel, author, {
         id: "1",
@@ -77,12 +78,45 @@ describe("Message Results", () => {
   });
   describe("Thread Message Pages", () => {
     let thread: ChannelPublic;
+    let thread_messages: Message[];
     beforeEach(async () => {
-      const thread = mockThread(channel);
-      message = mockMessage(server, thread, author);
-      message2 = mockMessage(server, thread, author);
+      thread = mockThread(channel);
+      thread_messages = [
+        mockMessage(server, thread, author, {
+          id: "1",
+        }),
+        mockMessage(server, thread, author, {
+          id: "2",
+        }),
+        mockMessage(server, thread, author, {
+          id: "3",
+        }),
+      ];
+      await ao_bot_channel_router.create(thread);
+      await ao_bot_message_router.upsertBulk(thread_messages);
     });
 
-    it("should get all thread messages for a thread correctly", async () => {});
+    it("should get all thread messages for a thread correctly starting from the root", async () => {
+      const messages = await unauthed_message_page_router.byId("1");
+      expect(messages).toMatchObject({
+        messages: thread_messages.map((m) =>
+          toPrivateMessageWithStrippedData(toMessageWithDiscordAccount(m, author, false))
+        ),
+        parent_channel: channel,
+        server: pickPublicServerData(server),
+        thread,
+      });
+    });
+    it("should get all thread messages for a thread correctly starting from a message in the thread", async () => {
+      const messages = await unauthed_message_page_router.byId("3");
+      expect(messages).toMatchObject({
+        messages: thread_messages.map((m) =>
+          toPrivateMessageWithStrippedData(toMessageWithDiscordAccount(m, author, false))
+        ),
+        parent_channel: channel,
+        server: pickPublicServerData(server),
+        thread,
+      });
+    });
   });
 });
