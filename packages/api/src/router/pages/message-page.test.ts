@@ -12,7 +12,7 @@ import { channelRouter } from "../channel/channel";
 import { serverRouter } from "../server/server";
 import { discordAccountRouter } from "../users/accounts/discord-accounts";
 import { messageRouter } from "../message/message";
-import { message_page_router } from "./message-result";
+import { message_page_router } from "./message-page";
 import {
   pickPublicServerData,
   toMessageWithDiscordAccount,
