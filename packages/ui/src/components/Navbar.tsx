@@ -11,10 +11,7 @@ import { trpc } from "../utils";
 import { Avatar } from "./primitives/Avatar";
 import { Button } from "./primitives/Button";
 import type { User } from "@answeroverflow/api";
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
-}
+import { classNames } from "~ui/utils/styling";
 
 const SignedInDropdownMenu = ({ signed_in_user }: { signed_in_user: User }) => (
   <Menu as="div" className="relative inline-block text-left">

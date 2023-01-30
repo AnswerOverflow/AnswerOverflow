@@ -3,7 +3,7 @@ import Image from "next/image";
 export type AvatarSize = "sm" | "md" | "lg";
 
 export type AvatarProps = {
-  size: AvatarSize;
+  size?: AvatarSize;
   url?: string | null;
   alt?: string | null;
 };
@@ -19,7 +19,7 @@ export function getAvatarSize(size: AvatarSize) {
   }
 }
 
-export function Avatar({ url, alt = "Profile Avatar", size }: AvatarProps) {
+export function Avatar({ url, alt = "Profile Avatar", size = "md" }: AvatarProps) {
   if (!alt) alt = "Profile Avatar";
   return (
     <span
