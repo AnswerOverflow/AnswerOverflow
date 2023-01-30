@@ -3,10 +3,9 @@ import {
   getDefaultUserServerSettings,
   mergeUserServerSettingsFlags,
   UserServerSettings,
-  user_server_settings_flags,
+  z_user_server_settings,
 } from "@answeroverflow/db";
 import { z } from "zod";
-import { toZObject } from "~api/utils/zod-utils";
 import { withDiscordAccountProcedure, mergeRouters, router } from "../trpc";
 import { upsert } from "~api/utils/operations";
 import { discordAccountRouter, z_discord_account_upsert } from "../users/accounts/discord-accounts";
@@ -20,14 +19,6 @@ import {
 import { assertIsUser } from "~api/utils/permissions";
 
 export const SERVER_NOT_SETUP_MESSAGE = "Server is not setup for Answer Overflow yet";
-
-const z_user_server_settings_flags = toZObject(...user_server_settings_flags);
-
-const z_user_server_settings = z.object({
-  user_id: z.string(),
-  server_id: z.string(),
-  flags: z_user_server_settings_flags,
-});
 
 const z_user_server_settings_required = z_user_server_settings.pick({
   user_id: true,
@@ -67,12 +58,7 @@ async function transformUserServerSettings<T extends UserServerSettings>(
 async function transformUserServerSettingsArray<T extends UserServerSettings>(
   user_server_settings: Promise<T[]>
 ) {
-  const awaited_settings = await user_server_settings;
-  const converted_settings: Awaited<ReturnType<typeof transformUserServerSettings>>[] = [];
-  for (const settings of awaited_settings) {
-    converted_settings.push(await transformUserServerSettings(settings));
-  }
-  return converted_settings;
+  return (await user_server_settings).map(addFlagsToUserServerSettings);
 }
 
 function mergeUserServerSettings<T extends z.infer<typeof z_user_server_settings_mutable>>(

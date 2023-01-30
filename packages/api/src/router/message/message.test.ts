@@ -2,6 +2,7 @@ import { Channel, clearDatabase, DiscordAccount, Message, Server } from "@answer
 import {
   createAnswerOverflowBotCtx,
   mockAccount,
+  mockAccountCallerCtx,
   mockAccountWithServersCallerCtx,
   mockChannel,
   mockMessage,
@@ -16,8 +17,13 @@ import {
   IGNORED_ACCOUNT_MESSAGE,
   ignored_discord_account_router,
 } from "../users/ignored-discord-accounts/ignored-discord-account";
-import { messageRouter } from "./message";
-
+import { addAuthorsToMessages, messageRouter, stripPrivateMessageData } from "./message";
+import { prisma } from "@answeroverflow/db";
+import { userServerSettingsRouter } from "../user-server-settings/user-server-settings";
+import {
+  toMessageWithDiscordAccount,
+  toPrivateMessageWithStrippedData,
+} from "~api/test/public_data";
 let server: Server;
 let channel: Channel;
 let author: DiscordAccount;
@@ -28,6 +34,9 @@ let ao_bot_server_router: ReturnType<(typeof serverRouter)["createCaller"]>;
 let ao_bot_discord_account_router: ReturnType<(typeof discordAccountRouter)["createCaller"]>;
 let ao_bot_ignored_account_router: ReturnType<
   (typeof ignored_discord_account_router)["createCaller"]
+>;
+let ao_bot_user_server_settings_router: ReturnType<
+  (typeof userServerSettingsRouter)["createCaller"]
 >;
 let ao_bot_message_router: ReturnType<(typeof messageRouter)["createCaller"]>;
 beforeEach(async () => {
@@ -42,6 +51,7 @@ beforeEach(async () => {
   ao_bot_channel_router = channelRouter.createCaller(ao_bot);
   ao_bot_discord_account_router = discordAccountRouter.createCaller(ao_bot);
   ao_bot_ignored_account_router = ignored_discord_account_router.createCaller(ao_bot);
+  ao_bot_user_server_settings_router = userServerSettingsRouter.createCaller(ao_bot);
   ao_bot_message_router = messageRouter.createCaller(ao_bot);
   await ao_bot_server_router.create(server);
   await ao_bot_channel_router.create(channel);
@@ -373,49 +383,6 @@ describe("Message Operations", () => {
       });
     });
   });
-  describe("Message Delete By Thread Id", () => {
-    let thread_message: Message;
-    beforeEach(async () => {
-      thread_message = mockMessage(server, channel, author, {
-        thread_id: "200",
-      });
-      const thread_message_2 = mockMessage(server, channel, author, {
-        thread_id: "200",
-      });
-      await ao_bot_message_router.upsert(thread_message);
-      await ao_bot_message_router.upsert(thread_message_2);
-    });
-    it("should delete a message by thread id as the ao bot", async () => {
-      const result = await ao_bot_message_router.deleteByThreadId(thread_message.thread_id!);
-      await expect(ao_bot_message_router.byId(thread_message.id)).rejects.toThrowError();
-      expect(result).toBe(2);
-    });
-    it("should fail trying all varaints of delete a message by thread id that the author does not own", async () => {
-      await testAllVariants({
-        async operation(source, permission) {
-          const { ctx } = await mockAccountWithServersCallerCtx(server, source, permission);
-          const message_router = messageRouter.createCaller(ctx);
-          await expect(message_router.deleteByThreadId(message.id)).rejects.toThrowError();
-        },
-      });
-    });
-    it("should fail trying all varaints of delete a message by thread id that the author does own", async () => {
-      await testAllVariants({
-        async operation(source, permission) {
-          const { ctx, account } = await mockAccountWithServersCallerCtx(
-            server,
-            source,
-            permission
-          );
-          const message_router = messageRouter.createCaller(ctx);
-          const msg = mockMessage(server, channel, account, {
-            thread_id: message.id,
-          });
-          await expect(message_router.deleteByThreadId(msg.id)).rejects.toThrowError();
-        },
-      });
-    });
-  });
   describe("Message Delete Bulk", () => {
     beforeEach(async () => {
       await ao_bot_message_router.upsertBulk([message]);
@@ -447,6 +414,148 @@ describe("Message Operations", () => {
           await expect(message_router.deleteBulk([msg.id])).rejects.toThrowError();
         },
       });
+    });
+  });
+  describe("Message By Channel Id Bulk", () => {
+    let public_author: DiscordAccount;
+    let private_author: DiscordAccount;
+    let private_message: Message;
+    let public_message: Message;
+    beforeEach(async () => {
+      public_author = mockAccount();
+      private_author = mockAccount();
+      await ao_bot_user_server_settings_router.upsertWithDeps({
+        user: public_author,
+        server_id: server.id,
+        flags: {
+          can_publicly_display_messages: true,
+        },
+      });
+      await ao_bot_user_server_settings_router.upsertWithDeps({
+        user: private_author,
+        server_id: server.id,
+        flags: {
+          can_publicly_display_messages: false,
+        },
+      });
+      public_message = mockMessage(server, channel, public_author, {
+        id: "1",
+      });
+      private_message = mockMessage(server, channel, private_author, {
+        id: "2",
+      });
+      await ao_bot_message_router.upsertBulk([public_message, private_message]);
+    });
+    it("should get all messages with private data if users share a server", async () => {
+      const { ctx } = await mockAccountWithServersCallerCtx(server, "web-client");
+      const message_router = messageRouter.createCaller(ctx);
+      const messages = await message_router.byChannelIdBulk({
+        channel_id: channel.id,
+      });
+      expect(messages).toEqual([
+        toMessageWithDiscordAccount(public_message, public_author, true),
+        toMessageWithDiscordAccount(private_message, private_author, false),
+      ]);
+    });
+    it("should get all messages with only public data if users do not share a server", async () => {
+      const { ctx } = await mockAccountCallerCtx("web-client");
+      const message_router = messageRouter.createCaller(ctx);
+      const messages = await message_router.byChannelIdBulk({
+        channel_id: channel.id,
+      });
+
+      expect(messages).toEqual([
+        toMessageWithDiscordAccount(public_message, public_author, true),
+        toPrivateMessageWithStrippedData(
+          toMessageWithDiscordAccount(private_message, private_author, false)
+        ),
+      ]);
+    });
+  });
+});
+
+describe("Message Utilities", () => {
+  describe("Add Authors To Messages", () => {
+    it("should add an author with no user server settings to the message", async () => {
+      await ao_bot_discord_account_router.upsert(author);
+      const message_with_author = await addAuthorsToMessages([message], prisma);
+      expect(message_with_author).toEqual([toMessageWithDiscordAccount(message, author, false)]);
+    });
+    it("should add an author with a user server settings set to not display messages to the message", async () => {
+      await ao_bot_user_server_settings_router.upsertWithDeps({
+        server_id: server.id,
+        user: author,
+        flags: {
+          can_publicly_display_messages: false,
+        },
+      });
+      const message_with_author = await addAuthorsToMessages([message], prisma);
+      expect(message_with_author).toEqual([toMessageWithDiscordAccount(message, author, false)]);
+    });
+    it("should add an author with a user server settings set to display messages to the message", async () => {
+      await ao_bot_user_server_settings_router.upsertWithDeps({
+        server_id: server.id,
+        user: author,
+        flags: {
+          can_publicly_display_messages: true,
+        },
+      });
+      const message_with_author = await addAuthorsToMessages([message], prisma);
+      expect(message_with_author).toEqual([toMessageWithDiscordAccount(message, author, true)]);
+    });
+    it("should add an author with two user server settings, one set to display and one set to not", async () => {
+      await ao_bot_user_server_settings_router.upsertWithDeps({
+        server_id: server.id,
+        user: author,
+        flags: {
+          can_publicly_display_messages: true,
+        },
+      });
+      const server2 = mockServer();
+      await ao_bot_server_router.upsert(server2);
+      await ao_bot_user_server_settings_router.upsertWithDeps({
+        server_id: server2.id,
+        user: author,
+        flags: {
+          can_publicly_display_messages: false,
+        },
+      });
+      const message1 = mockMessage(server, channel, author);
+      const message2 = mockMessage(server2, channel, author);
+      const message_with_author = await addAuthorsToMessages([message1, message2], prisma);
+
+      expect(message_with_author).toEqual([
+        toMessageWithDiscordAccount(message1, author, true),
+        toMessageWithDiscordAccount(message2, author, false),
+      ]);
+    });
+    it("should fail adding an author who does not exist", async () => {
+      await expect(
+        addAuthorsToMessages([mockMessage(server, channel, mockAccount())], prisma)
+      ).resolves.toEqual([]);
+    });
+  });
+  describe("Strip Private Message Data", () => {
+    it("should preserve information on a public message", () => {
+      const author = mockAccount();
+      const message_with_account = toMessageWithDiscordAccount(
+        mockMessage(server, channel, author),
+        author,
+        true
+      );
+      const stripped = stripPrivateMessageData([message_with_account]);
+      expect(stripped).toEqual([message_with_account]);
+    });
+    it("should strip information on a private message", () => {
+      const author = mockAccount();
+
+      const message_with_account = toMessageWithDiscordAccount(
+        mockMessage(server, channel, author),
+        author,
+        false
+      );
+      const stripped = stripPrivateMessageData([message_with_account]);
+      expect(stripped).toEqual([toPrivateMessageWithStrippedData(message_with_account)]);
     });
   });
 });

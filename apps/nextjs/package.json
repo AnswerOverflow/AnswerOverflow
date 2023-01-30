@@ -24,7 +24,6 @@
     "@trpc/next": "^10.4.3",
     "@trpc/react-query": "^10.4.3",
     "@trpc/server": "^10.4.3",
-    "flowbite-react": "^0.3.7",
     "next": "^13.0.6",
     "next-auth": "^4.17.0",
     "react": "18.2.0",

@@ -25,7 +25,7 @@
     "eslint-plugin-tailwindcss": "^3.8.0",
     "eslint-plugin-turbo": "^0.0.7",
     "prettier": "^2.8.2",
-    "prettier-plugin-tailwindcss": "^0.2.1"
+    "prettier-plugin-tailwindcss": "^0.2.2"
   },
   "devDependencies": {
     "@answeroverflow/tsconfig": "*",

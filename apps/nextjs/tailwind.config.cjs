@@ -5,7 +5,6 @@ module.exports = {
   ...data,
   content: [
     ...data.content,
-    "../../node_modules/flowbite-react/**/*.{js,jsx,ts,tsx}",
     "../../packages/ui/src/**/*.{js,ts,jsx,tsx}", // Transpile breaks without this for tailwind styles
   ],
 };

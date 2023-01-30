@@ -1,38 +1,25 @@
-import { getDefaultChannel } from "@answeroverflow/db";
+import {
+  ALLOWED_THREAD_TYPES,
+  getDefaultChannel,
+  z_unique_array,
+  z_channel,
+  getDefaultChannelSettings,
+  z_channel_public,
+} from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, router, publicProcedure } from "~api/router/trpc";
-import { addDefaultValues, upsert, upsertMany } from "~api/utils/operations";
+import { addDefaultValues, findOrThrowNotFound, upsert, upsertMany } from "~api/utils/operations";
 import {
   protectedFetchWithPublicData,
   protectedFetchManyWithPublicData,
   protectedMutation,
   protectedMutationFetchFirst,
 } from "~api/utils/protected-procedures";
-import { ALLOWED_CHANNEL_TYPES, ALLOWED_THREAD_TYPES } from "~api/utils/types";
-import { unique_array } from "~api/utils/zod-utils";
 import { assertCanEditServer, assertCanEditServerBotOnly } from "~api/utils/permissions";
 import { serverRouter, z_server_upsert } from "../server/server";
+import { omit } from "~api/utils/utils";
 
 export const CHANNEL_NOT_FOUND_MESSAGES = "Channel does not exist";
-
-export const z_channel = z.object({
-  id: z.string(),
-  name: z.string(),
-  server_id: z.string(),
-  type: z.number().refine(
-    (n) => ALLOWED_CHANNEL_TYPES.has(n),
-    "Channel type can only be guild forum, text, or announcement" // TODO: Make a type error if possible
-  ),
-  parent_id: z.string().nullable(),
-});
-
-export const z_channel_public = z_channel.pick({
-  id: true,
-  name: true,
-  server_id: true,
-  type: true,
-  parent_id: true,
-});
 
 const z_channel_required = z_channel.pick({
   id: true,
@@ -85,15 +72,41 @@ const z_thread_upsert_with_deps = z_thread_create_with_deps;
 const fetch_router = router({
   byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({
-      fetch: () => ctx.prisma.channel.findUnique({ where: { id: input } }),
+      async fetch() {
+        const channel = await findOrThrowNotFound(
+          () =>
+            ctx.prisma.channel.findUnique({
+              where: { id: input },
+              include: { channel_settings: true },
+            }),
+          CHANNEL_NOT_FOUND_MESSAGES
+        );
+        const channel_with_settings = {
+          ...omit(channel, "channel_settings"),
+          settings: channel.channel_settings ?? getDefaultChannelSettings(channel.id),
+        };
+
+        return channel_with_settings;
+      },
       permissions: (data) => assertCanEditServer(ctx, data.server_id),
       not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
-      public_data_formatter: (data) => z_channel_public.parse(data),
+      public_data_formatter: (data) => {
+        return z_channel_public.parse(data);
+      },
     });
   }),
-  byIdMany: publicProcedure.input(unique_array).query(async ({ ctx, input }) => {
+  byIdMany: publicProcedure.input(z_unique_array).query(async ({ ctx, input }) => {
     return protectedFetchManyWithPublicData({
-      fetch: async () => await ctx.prisma.channel.findMany({ where: { id: { in: input } } }),
+      async fetch() {
+        const channels = await ctx.prisma.channel.findMany({
+          where: { id: { in: input } },
+          include: { channel_settings: true },
+        });
+        return channels.map((channel) => ({
+          ...omit(channel, "channel_settings"),
+          settings: channel.channel_settings ?? getDefaultChannelSettings(channel.id),
+        }));
+      },
       permissions: (data) => assertCanEditServer(ctx, data.server_id),
       public_data_formatter: (data) => z_channel_public.parse(data),
     });
