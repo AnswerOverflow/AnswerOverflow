@@ -1,9 +1,10 @@
 import {
+  Bar,
+  BarChart,
   CartesianGrid,
   Legend,
   Line,
   LineChart,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   LineProps,
   ResponsiveContainer,
   Tooltip,
@@ -17,12 +18,26 @@ export interface LineChartLine {
   dataKey: string;
 }
 
-export interface LineChartData {
+export interface LineChartData extends DefaultChartProps {
   type: "line";
   // TODO: Find type for lines
-  lines: LineChartLine[];
-  // TODO: improve typing so it contains keys from line datakeys
-  data: any[];
+  lines: {
+    lineColor: string;
+    lineType: LineProps["type"];
+    dataKey: string;
+  }[];
+}
+
+export interface BarChartData extends DefaultChartProps {
+  type: "bar";
+  // TODO: Find type for lines
+  bars: {
+    barColor: string;
+    dataKey: string;
+  }[];
+}
+
+export interface DefaultChartProps {
   /**
    * Show a tooltip (when user hovers over point)
    * @default true
@@ -40,33 +55,55 @@ export interface LineChartData {
   showLegend?: boolean;
   xAxisKey?: string;
   yAxisKey?: string;
+
+  // TODO: improve typing so it contains keys from line datakeys
+  data: any[];
 }
 
-export type ChartProps = LineChartData;
+export type ChartProps = LineChartData | BarChartData;
 
 export const Chart = (props: ChartProps) => {
   return (
     <ResponsiveContainer width={"100%"}>
-      {props.type === "line" ? (
-        <LineChart data={props.data}>
-          {props.lines.map((line, index) => (
-            <Line
-              stroke={line.lineColor}
-              type={line.lineType}
-              dataKey={line.dataKey}
-              key={`line-${index}`}
-            />
-          ))}
-          <XAxis dataKey={props.xAxisKey} />
-          <YAxis dataKey={props.yAxisKey} />
+      {(() => {
+        switch (props.type) {
+          case "line":
+            return (
+              <LineChart data={props.data}>
+                {props.lines.map((line, index) => (
+                  <Line
+                    stroke={line.lineColor}
+                    type={line.lineType}
+                    dataKey={line.dataKey}
+                    key={`line-${index}`}
+                  />
+                ))}
 
-          {props.showGrid ? <CartesianGrid strokeDasharray="3 3" /> : null}
-          {props.showTooltip == false ? null : <Tooltip />}
-          {props.showLegend == false ? null : <Legend />}
-        </LineChart>
-      ) : (
-        <></>
-      )}
+                <XAxis dataKey={props.xAxisKey} />
+                <YAxis dataKey={props.yAxisKey} />
+
+                {props.showGrid ? <CartesianGrid strokeDasharray="3 3" /> : null}
+                {props.showTooltip == false ? null : <Tooltip />}
+                {props.showLegend == false ? null : <Legend />}
+              </LineChart>
+            );
+          case "bar":
+            return (
+              <BarChart data={props.data}>
+                {props.bars.map((line, index) => (
+                  <Bar fill={line.barColor} dataKey={line.dataKey} key={`bar-${index}`} />
+                ))}
+
+                <XAxis dataKey={props.xAxisKey} />
+                <YAxis dataKey={props.yAxisKey} />
+
+                {props.showGrid ? <CartesianGrid strokeDasharray="3 3" /> : null}
+                {props.showTooltip == false ? null : <Tooltip />}
+                {props.showLegend == false ? null : <Legend />}
+              </BarChart>
+            );
+        }
+      })()}
     </ResponsiveContainer>
   );
 };
