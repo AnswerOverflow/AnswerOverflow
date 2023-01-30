@@ -1,4 +1,8 @@
-import "../src/styles/globals.css";
+import "../../../apps/nextjs/src/styles/globals.css";
+import "highlight.js/styles/github-dark.css";
+import "highlight.js/styles/github.css";
+import {WithAuth, WithTailwindTheme, WithHighlightJS} from "../src/utils/decorators"
+
 
 export const parameters = {
   actions: { argTypesRegex: "^on[A-Z].*" },
@@ -11,22 +15,27 @@ export const parameters = {
 }
 
 export const globalTypes = {
-  tailwindDarkmode: {
+  tailwind_theme: {
     name: 'Theme',
     description: 'Light/Dark mode for components',
     toolbar: {
       icon: 'mirror',
       dynamicTitle: true,
-      items: ['light', 'dark']
+      items: ['light', 'dark', 'both']
+    },
+    defaultValue: 'both'
+  },
+  auth_state: {
+    name: "Auth State",
+    description: "Toggle between signed in and not signed in",
+    defaultValue: 'signed_in',
+    toolbar: {
+      icon: "user",
+      dynamicTitle: true,
+      items: ['signed_in', 'signed_out'],
     }
   }
 };
 
-const withTailwind = (Story, context) => {
-  const { tailwindDarkmode } = context.globals;
-  const isDark = tailwindDarkmode === 'dark';
-  document.querySelector('html').classList.toggle('dark', isDark);
-  return Story();
-}
 
-export const decorators = [withTailwind];
+export const decorators = [WithTailwindTheme, WithAuth, WithHighlightJS];

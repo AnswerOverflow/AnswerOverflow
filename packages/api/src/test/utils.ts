@@ -84,6 +84,16 @@ export async function mockAccountCallerCtx(caller: Source, override: Partial<Dis
   return { account, ctx };
 }
 
+export async function mockUnauthedCtx(caller: Source) {
+  const ctx = await createContextInner({
+    session: null,
+    source: caller,
+    discord_account: null,
+    user_servers: undefined,
+  });
+  return ctx;
+}
+
 export function mockServer(override: Partial<Server> = {}) {
   return getDefaultServer({
     id: randomId(),

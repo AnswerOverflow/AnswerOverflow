@@ -1,7 +1,7 @@
-import { ALLOWED_CHANNEL_TYPES } from "@answeroverflow/api";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import { Events, Guild } from "discord.js";
+import { ALLOWED_CHANNEL_TYPES } from "@answeroverflow/db";
 import { createAnswerOveflowBotCtx } from "~discord-bot/utils/context";
 import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
 import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";

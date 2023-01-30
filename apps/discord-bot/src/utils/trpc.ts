@@ -13,7 +13,7 @@ import { ephemeralReply } from "./utils";
 type TRPCall<T> = {
   getCtx: () => Promise<BotContextCreate>;
   ApiCall: (router: BotRouterCaller) => Promise<T>;
-  Ok?: (result: T) => void;
+  Ok?: (result: T) => void | Promise<void>;
   Error?: (error: TRPCError) => void;
   allowed_errors?: TRPCError["code"][] | TRPCError["code"];
 };
@@ -29,7 +29,7 @@ export async function callAPI<T>({
     const converted_ctx = await createBotContext(await getCtx());
     const caller = botRouter.createCaller(converted_ctx);
     const data = await ApiCall(caller); // Pass in the caller we created to ApiCall to make the request
-    Ok(data); // If no errors, Ok gets called with the API data
+    await Ok(data); // If no errors, Ok gets called with the API data
     return data;
   } catch (error) {
     if (error instanceof TRPCError) {

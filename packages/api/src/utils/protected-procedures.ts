@@ -1,5 +1,6 @@
 import { findOrThrowNotFound } from "./operations";
 import { TRPCError } from "@trpc/server";
+import type { DeepPartial } from "./types";
 
 type PermissionCheckResult = Promise<TRPCError | void> | (TRPCError | void);
 
@@ -71,7 +72,7 @@ export async function protectedFetch<T>({
 
 type ValidatedPermissionsOrFormatData<F, T extends F> = {
   permissions: PermissionsChecksWithData<T>;
-  public_data_formatter: (data: T) => Partial<T> & F;
+  public_data_formatter: (data: T) => DeepPartial<T> & F;
   data: T;
 };
 
@@ -79,7 +80,7 @@ async function validatePermissionsOrFormatData<F, T extends F>({
   permissions,
   public_data_formatter,
   data,
-}: ValidatedPermissionsOrFormatData<F, T>): Promise<T | (Partial<T> & F)> {
+}: ValidatedPermissionsOrFormatData<F, T>): Promise<T | (DeepPartial<T> & F)> {
   try {
     await validatePermissionsWithData(permissions, data);
   } catch (error) {
