@@ -8,17 +8,21 @@ import type { GetStaticPropsContext, InferGetStaticPropsType } from "next";
 import { TRPCError } from "@trpc/server";
 
 export default function MessageResult(props: InferGetStaticPropsType<typeof getStaticProps>) {
-  const { message_id, server_id } = props;
-  const is_user_in_server = useIsUserInServer(server_id);
-  const postQuery = trpc.message_page.byId.useQuery(message_id, {
-    enabled: is_user_in_server,
+  const { root_message_id, parent_channel, server, thread } = props;
+  let { messages } = props;
+
+  // For authenticated users that are in the server, we fetch the messages incase any of them are private
+  const is_user_in_server = useIsUserInServer(server.id);
+  const { data } = trpc.message_page.byId.useQuery(root_message_id, {
+    enabled: is_user_in_server && !messages.every((message) => message.public),
+    queryHash: `message_page-${root_message_id}-${is_user_in_server.toString()}`,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
-  if (postQuery.status !== "success") {
-    // won't happen since we're using `fallback: "blocking"`
-    return <>Loading...</>;
-  }
-  const { data } = postQuery;
-  const { messages, parent_channel, server, thread } = data;
+
+  messages = data?.messages ?? messages;
+
   const first_message = messages.at(0);
   const channel_name = thread?.name ?? parent_channel.name;
   const description =
@@ -29,7 +33,7 @@ export default function MessageResult(props: InferGetStaticPropsType<typeof getS
     <>
       <AOHead
         description={description}
-        path={`/m/${message_id}`}
+        path={`/m/${root_message_id}`}
         title={`${channel_name} - ${server.name}`}
       />
       <MessageResultPage
@@ -59,12 +63,18 @@ export async function getStaticProps(context: GetStaticPropsContext<{ message_id
   }
   // prefetch `post.byId`
   try {
-    const { server } = await ssg.message_page.byId.fetch(context.params.message_id);
+    const { server, messages, parent_channel, thread } = await ssg.message_page.byId.fetch(
+      context.params.message_id
+    );
+
     return {
       props: {
         trpcState: ssg.dehydrate(),
-        message_id: context.params.message_id,
-        server_id: server.id,
+        root_message_id: context.params.message_id,
+        server,
+        messages,
+        parent_channel,
+        thread,
       },
       revalidate: 60 * 10, // every 10 minutes
     };

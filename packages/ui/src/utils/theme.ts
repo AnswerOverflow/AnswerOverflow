@@ -41,7 +41,7 @@ function changeCodeHighlighting(dark_theme_enabled: boolean) {
     }
   }
 }
-export function toggleDarkTheme(theme_override: boolean | undefined) {
+export function toggleDarkTheme(theme_override?: boolean) {
   disableTransitionsTemporarily();
 
   const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
