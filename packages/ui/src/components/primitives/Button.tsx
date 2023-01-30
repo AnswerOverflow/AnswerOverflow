@@ -24,11 +24,16 @@ export const buttonStyles = cva(
 
 export interface ButtonProps extends VariantProps<typeof buttonStyles> {
   children: React.ReactNode;
+  visual_only?: boolean;
 }
 
-export function Button({ intent, size, children }: ButtonProps) {
+export function Button({ intent, size, children, visual_only }: ButtonProps) {
   return (
-    <button type="button" className={buttonStyles({ intent, size })}>
+    <button
+      type="button"
+      className={buttonStyles({ intent, size })}
+      tabIndex={visual_only ? -1 : undefined}
+    >
       {children}
     </button>
   );

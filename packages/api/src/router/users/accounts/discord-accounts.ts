@@ -1,4 +1,10 @@
-import { getDefaultDiscordAccount, Prisma } from "@answeroverflow/db";
+import {
+  getDefaultDiscordAccount,
+  Prisma,
+  z_unique_array,
+  z_discord_account,
+  z_discord_account_public,
+} from "@answeroverflow/db";
 import { z } from "zod";
 import { upsert, upsertMany } from "~api/utils/operations";
 import { mergeRouters, router, publicProcedure } from "~api/router/trpc";
@@ -11,18 +17,6 @@ import {
   protectedMutation,
 } from "~api/utils/protected-procedures";
 import { assertIsUser } from "~api/utils/permissions";
-
-const z_discord_account = z.object({
-  id: z.string(),
-  name: z.string(),
-  avatar: z.string().nullable(),
-});
-
-export const z_discord_account_public = z_discord_account.pick({
-  id: true,
-  name: true,
-  avatar: true,
-});
 
 const z_discord_account_required = z_discord_account.pick({
   id: true,
@@ -41,8 +35,6 @@ const z_discord_account_update = z_discord_account_mutable.merge(
 
 export const z_discord_account_upsert = z_discord_account_create;
 
-const unique_array = z.array(z.string()).transform((arr) => [...new Set(arr)]);
-
 const account_find_router = router({
   byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
     return protectedFetchWithPublicData({
@@ -52,7 +44,7 @@ const account_find_router = router({
       public_data_formatter: (data) => z_discord_account_public.parse(data),
     });
   }),
-  byIdMany: publicProcedure.input(unique_array).query(({ ctx, input }) => {
+  byIdMany: publicProcedure.input(z_unique_array).query(({ ctx, input }) => {
     return protectedFetchManyWithPublicData({
       fetch: () => ctx.prisma.discordAccount.findMany({ where: { id: { in: input } } }),
       permissions: (data) => assertIsUser(ctx, data.id),

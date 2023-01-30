@@ -8,7 +8,7 @@ import { serverSettingsRouter } from "./server/server_settings";
 import { discordAccountRouter } from "./users/accounts/discord-accounts";
 import { userServerSettingsRouter } from "./user-server-settings/user-server-settings";
 import { userRouter } from "./users/user/user";
-import { message_page_router } from "./pages/message-result";
+import { message_page_router } from "./pages/message-page";
 export const botRouter = router({
   // Discord:
   servers: serverRouter,

@@ -15,13 +15,13 @@ export async function upsert<T>(
   }
 }
 
-export async function upsertMany<T, Data>(calls: {
+export async function upsertMany<T, F, Data>(calls: {
   input: Data[];
   find: () => Promise<T[]>;
   getInputId: (input: Data) => string;
   getFetchedDataId: (input: T) => string;
-  create: (input: Data[]) => Promise<T[]>;
-  update: (input: Data[]) => Promise<T[]>;
+  create: (input: Data[]) => Promise<F[]>;
+  update: (input: Data[]) => Promise<F[]>;
 }) {
   const { find, create, getInputId, getFetchedDataId, input, update } = calls;
   const existing = await find();

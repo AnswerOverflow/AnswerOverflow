@@ -1,15 +1,14 @@
 import {
   addserverSettingsFlagsToserverSettings as addFlagsToServerSettings,
   ServerSettings,
-  server_settings_flags,
   getDefaultServerSettings,
   mergeServerSettingsFlags,
   PrismaClient,
+  z_server_settings,
 } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, withUserServersProcedure, router } from "~api/router/trpc";
 import { serverRouter, z_server_upsert } from "./server";
-import { toZObject } from "~api/utils/zod-utils";
 import { findOrThrowNotFound, upsert } from "~api/utils/operations";
 import {
   protectedFetch,
@@ -17,13 +16,6 @@ import {
   protectedMutationFetchFirst,
 } from "~api/utils/protected-procedures";
 import { assertCanEditServer, assertCanEditServerBotOnly } from "~api/utils/permissions";
-
-const z_server_settings_flags = toZObject(...server_settings_flags);
-
-const z_server_settings = z.object({
-  server_id: z.string(),
-  flags: z_server_settings_flags,
-});
 
 const z_server_settings_required = z_server_settings.pick({
   server_id: true,

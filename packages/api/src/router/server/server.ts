@@ -1,21 +1,9 @@
+import { z_server, z_server_public } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, router, publicProcedure, withUserServersProcedure } from "~api/router/trpc";
 import { upsert } from "~api/utils/operations";
 import { assertCanEditServer, assertCanEditServerBotOnly } from "~api/utils/permissions";
 import { protectedFetchWithPublicData, protectedMutation } from "~api/utils/protected-procedures";
-
-export const z_server = z.object({
-  id: z.string(),
-  name: z.string(),
-  icon: z.string().nullable(),
-  kicked_time: z.date().nullable(),
-});
-
-export const z_server_public = z_server.pick({
-  id: true,
-  name: true,
-  icon: true,
-});
 
 const z_server_required = z_server.pick({
   id: true,
