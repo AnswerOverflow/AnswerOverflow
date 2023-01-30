@@ -1,6 +1,6 @@
 import type { Meta, StoryFn } from "@storybook/react";
 import { ServerIcon, ServerIconProps } from "./ServerIcon";
-import { mockServer, with_image } from "~ui/test/props";
+import { mockServer } from "~ui/test/props";
 export default {
   component: ServerIcon,
 } as Meta;
@@ -14,10 +14,13 @@ Primary.args = {
   server: mockServer(),
 };
 
-export const Secondary = Template.bind({});
-Secondary.args = {
-  ...Primary.args,
-  ...with_image,
+export const WithImage = Template.bind({});
+WithImage.args = {
+  server: mockServer({
+    name: "AnswerOverflow",
+    id: "952724385238761475",
+    icon: "4e610bdea5aacf259013ed8cada0bc1d",
+  }),
 };
 
 export const Tertiary = Template.bind({});
