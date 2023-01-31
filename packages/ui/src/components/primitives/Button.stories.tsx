@@ -29,6 +29,6 @@ Secondary.args = {
 
 export const Danger = Template.bind({});
 Danger.args = {
-  intent: "secondary",
+  intent: "danger",
   children: "Danger",
 };
