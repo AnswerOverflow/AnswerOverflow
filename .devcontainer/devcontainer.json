@@ -34,7 +34,7 @@
   // Use 'postCreateCommand' to run commands after the container is created.
   "postCreateCommand": "sudo yarn install; sudo npx playwright install; sudo npx playwright install-deps",
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-  "remoteUser": "root",
+  "remoteUser": "node",
   "mounts": [
     "source=${localEnv:HOME}/repos,target=/home/node/repos,type=bind,consistency=cached"
   ]
