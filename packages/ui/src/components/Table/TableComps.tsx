@@ -16,15 +16,23 @@ export const Tbody: React.FC<PropsWithChildren> = (props) => {
 };
 
 export const Th: React.FC<PropsWithChildren> = (props) => {
-  return <th className="p-1 text-neutral-300">{props.children}</th>;
+  return <th className="p-1 text-neutral-900 dark:text-neutral-300">{props.children}</th>;
 };
 
 export const Tr: React.FC<PropsWithChildren> = (props) => {
-  return <tr className="dark:even:bg-[#2C2C2C]">{props.children}</tr>;
+  return (
+    <tr className="odd:bg-neutral-100 even:bg-neutral-200 dark:odd:bg-[#252525] dark:even:bg-[#2C2C2C]">
+      {props.children}
+    </tr>
+  );
 };
 
 export const Td: React.FC<PropsWithChildren> = (props) => {
-  return <td className="py-2 text-center font-normal text-[#E6E6E6]">{props.children}</td>;
+  return (
+    <td className="py-2 text-center font-normal text-black dark:text-[#E6E6E6]">
+      {props.children}
+    </td>
+  );
 };
 
 export const TableButtonWrapper: React.FC<PropsWithChildren> = (props) => {
