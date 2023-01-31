@@ -2,6 +2,12 @@ import type { Meta, StoryFn } from "@storybook/react";
 import { StatsCard, StatsCardProps } from "./StatsCard";
 export default {
   component: StatsCard,
+  argTypes: {
+    changeType: {
+      control: "radio",
+      options: ["increase", "decrease"],
+    },
+  },
 } as Meta;
 
 //👇 We create a “template” of how args map to rendering
