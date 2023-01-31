@@ -4,7 +4,7 @@ export interface StatsCardProps {
   /**
    * @example "Questions asked"
    */
-  subtitle: string;
+  title: string;
   /**
    * @example "123"
    */
@@ -22,20 +22,20 @@ export interface StatsCardProps {
   /**
    * @example "15 days"
    */
-  change_duration: string;
+  change_duration_in_days: string;
 }
 
 export const StatsCard = ({
-  subtitle,
+  title,
   stat,
   percentage_change,
   change_type,
   change_count,
-  change_duration,
+  change_duration_in_days,
 }: StatsCardProps) => {
   return (
     <div className="flex w-60 flex-col items-start justify-center rounded-xl bg-white p-5 dark:bg-neutral-900 dark:text-white">
-      <span className="text-xl font-light">{subtitle}</span>
+      <span className="text-xl font-light">{title}</span>
       <span className="py-1 text-3xl font-extrabold">{stat}</span>
       <div className="flex items-center justify-center">
         <div className="h-6 w-6">
@@ -46,7 +46,7 @@ export const StatsCard = ({
           )}
         </div>
         <span className="pl-2 text-sm font-medium">
-          {percentage_change} ({change_count} in {change_duration})
+          {percentage_change} ({change_count} in {change_duration_in_days})
         </span>
       </div>
     </div>

@@ -10,14 +10,14 @@ export default {
         disable: true,
       },
     },
-    showGrid: {
+    show_grid: {
       control: "boolean",
     },
-    showLegend: {
+    show_legend: {
       control: "boolean",
       defaultValue: true,
     },
-    showTooltip: {
+    show_tooltip: {
       control: "boolean",
       defaultValue: true,
     },

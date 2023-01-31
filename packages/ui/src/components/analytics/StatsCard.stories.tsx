@@ -3,7 +3,7 @@ import { StatsCard, StatsCardProps } from "./StatsCard";
 export default {
   component: StatsCard,
   argTypes: {
-    changeType: {
+    change_type: {
       control: "radio",
       options: ["increase", "decrease"],
     },
@@ -17,12 +17,12 @@ const Template: StoryFn<typeof StatsCard> = (args: StatsCardProps) => <StatsCard
 export const Primary = Template.bind({});
 
 const PrimaryArgs: StatsCardProps = {
-  subtitle: "Questions asked",
+  title: "Questions asked",
   stat: "123",
   percentage_change: "12.52%",
   change_type: "decrease",
   change_count: "12",
-  change_duration: "15 days",
+  change_duration_in_days: "15 days",
 };
 
 Primary.args = PrimaryArgs;
