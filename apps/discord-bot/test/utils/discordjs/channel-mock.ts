@@ -405,12 +405,19 @@ export function mockReaction({
   return reaction;
 }
 
-export function mockMarkedAsSolvedReply(
-  client: Client,
-  question_id: string,
-  solution_id: string,
-  override: Partial<RawMessageData> = {}
-) {
+export function mockMarkedAsSolvedReply({
+  client,
+  question_id,
+  solution_id,
+  channel,
+  override = {},
+}: {
+  client: Client;
+  question_id: string;
+  solution_id: string;
+  channel?: TextBasedChannel;
+  override?: Partial<RawMessageData>;
+}) {
   const marked_as_solved_reply = mockMessage({
     client,
     author: client.user!,
@@ -433,6 +440,7 @@ export function mockMarkedAsSolvedReply(
       ],
       ...override,
     },
+    channel,
   });
   return marked_as_solved_reply;
 }

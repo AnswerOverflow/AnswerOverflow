@@ -5,12 +5,14 @@ import { elastic } from "@answeroverflow/db";
 import type { SapphireClient } from "@sapphire/framework";
 import { toAOMessage } from "~discord-bot/utils/conversions";
 import { mockMessage, mockTextChannel } from "~discord-bot/test/utils/discordjs/channel-mock";
+import { clearDatabase } from "@answeroverflow/db";
 
 let client: SapphireClient;
 let message: Message;
 let text_channel: TextChannel;
 let data: Awaited<ReturnType<typeof setupBot>>;
 beforeEach(async () => {
+  await clearDatabase();
   data = await setupBot();
   client = data.client;
   text_channel = mockTextChannel(client);

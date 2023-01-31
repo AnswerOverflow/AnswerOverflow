@@ -94,13 +94,11 @@ function findChannelSettingsById(
 
 const channelSettingFind = router({
   byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    return transformChannelSettingsReturn(() =>
-      protectedFetch({
-        fetch: () => findChannelSettingsById(input, ctx.prisma, "Channel settings not found"),
-        permissions: (data) => assertCanEditServer(ctx, data.channel.server_id),
-        not_found_message: "Channel settings not found",
-      })
-    );
+    return protectedFetch({
+      fetch: () => findChannelSettingsById(input, ctx.prisma, "Channel settings not found"),
+      permissions: (data) => assertCanEditServer(ctx, data.channel.server_id),
+      not_found_message: "Channel settings not found",
+    });
   }),
   byInviteCode: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return transformChannelSettingsReturn(() =>

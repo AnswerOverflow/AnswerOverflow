@@ -16,6 +16,7 @@ import {
   mockPublicThread,
 } from "~discord-bot/test/utils/discordjs/channel-mock";
 import { mockGuild } from "~discord-bot/test/utils/discordjs/guild-mock";
+import { clearDatabase } from "@answeroverflow/db";
 
 let data: ScenarioData;
 let reacord: ReacordTester;
@@ -25,6 +26,7 @@ let forum_channel: ForumChannel;
 let guild: Guild;
 let members: GuildMemberVariants;
 beforeEach(async () => {
+  await clearDatabase();
   data = await setupBot();
   reacord = data.reacord;
   const client = data.client;
