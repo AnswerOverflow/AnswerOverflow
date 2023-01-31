@@ -3,57 +3,59 @@ import type { PropsWithChildren } from "react";
 /**
  * Note: Use th directly inside of thead
  */
-export const Thead: React.FC<PropsWithChildren> = (props) => {
+export const Thead: React.FC<PropsWithChildren> = ({ children }) => {
   return (
     <thead className="border-b-[0.5px] border-neutral-300 p-2 dark:border-neutral-700 dark:bg-[#2C2C2C]">
-      <tr>{props.children}</tr>
+      <tr>{children}</tr>
     </thead>
   );
 };
 
-export const Tbody: React.FC<PropsWithChildren> = (props) => {
-  return <tbody>{props.children}</tbody>;
+export const Tbody: React.FC<PropsWithChildren> = ({ children }) => {
+  return <tbody>{children}</tbody>;
 };
 
-export const Th: React.FC<PropsWithChildren> = (props) => {
-  return <th className="p-1 text-neutral-900 dark:text-neutral-300">{props.children}</th>;
+export const Th: React.FC<PropsWithChildren> = ({ children }) => {
+  return <th className="p-1 text-neutral-900 dark:text-neutral-300">{children}</th>;
 };
 
-export const Tr: React.FC<PropsWithChildren> = (props) => {
+export const Tr: React.FC<PropsWithChildren> = ({ children }) => {
   return (
     <tr className="odd:bg-neutral-100 even:bg-neutral-200 dark:odd:bg-[#252525] dark:even:bg-[#2C2C2C]">
-      {props.children}
+      {children}
     </tr>
   );
 };
 
-export const Td: React.FC<PropsWithChildren> = (props) => {
+export const Td: React.FC<PropsWithChildren> = ({ children }) => {
   return (
-    <td className="py-2 text-center font-normal text-black dark:text-[#E6E6E6]">
-      {props.children}
-    </td>
+    <td className="py-2 text-center font-normal text-black dark:text-[#E6E6E6]">{children}</td>
   );
 };
 
-export const TableButtonWrapper: React.FC<PropsWithChildren> = (props) => {
-  return <div className="flex justify-center gap-2">{props.children}</div>;
+export const TableButtonWrapper: React.FC<PropsWithChildren> = ({ children }) => {
+  return <div className="flex justify-center gap-2">{children}</div>;
 };
 
 export interface TableButtonProps {
-  backgroundColor: string;
+  background_color: string;
   onClick?: () => void;
 }
 
-export const TableButton: React.FC<PropsWithChildren<TableButtonProps>> = (props) => {
+export const TableButton: React.FC<PropsWithChildren<TableButtonProps>> = ({
+  children,
+  background_color,
+  onClick,
+}) => {
   return (
     <button
       className={`h-7 w-7 rounded-md p-[0.15rem]`}
       style={{
-        backgroundColor: props.backgroundColor,
+        backgroundColor: background_color,
       }}
-      onClick={() => props.onClick?.()}
+      onClick={() => onClick ?? undefined}
     >
-      {props.children}
+      {children}
     </button>
   );
 };
