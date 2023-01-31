@@ -81,7 +81,7 @@ WithCode.args = {
   message: {
     ...default_message.message,
     content: `
-    \`\`\`typescript
+    \`\`\`html
   const variable = 'hello';
 
   function getProfile(id: string): {

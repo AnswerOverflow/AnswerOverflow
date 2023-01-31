@@ -26,6 +26,7 @@ export function SearchBar({
           <button
             type="button"
             className="inline-flex items-center rounded-full border border-transparent p-3 text-neutral-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 dark:text-white"
+            aria-label="Search"
           >
             <MagnifyingGlassIcon className="h-6 w-6" aria-hidden="true" />
           </button>

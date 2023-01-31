@@ -1,8 +1,9 @@
 const { injectAxe, checkA11y } = require('axe-playwright');
 
+
 module.exports = {
   setup() {
-    jest.setTimeout(60000)
+    jest.setTimeout(15000)
   },
 
  async preRender(page, context) {

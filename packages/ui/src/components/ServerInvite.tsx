@@ -14,7 +14,7 @@ export function ServerInvite({ server, channel, is_user_in_server }: ServerInvit
     <div className="flex flex-col">
       <span className="text-base font-bold text-black dark:text-neutral-300">{server.name}</span>
       {channel && (
-        <span className="text-sm text-gray-500 dark:text-neutral-400">#{channel.name}</span>
+        <span className="text-sm text-gray-600 dark:text-neutral-400">#{channel.name}</span>
       )}
     </div>
   );
