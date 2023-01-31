@@ -2,9 +2,11 @@ name: CI
 
 on:
   push:
-  pull_request:
     branches:
-      - master
+    - main
+  pull_request:
+    
+      
 
 env:
   # None of these are real secrets although this should probably be updated
