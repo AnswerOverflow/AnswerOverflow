@@ -11,6 +11,9 @@
     "test-storybook": "test-storybook",
     "test": "yarn build && npx concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"npx http-server storybook-static --port 6006 --silent\" \"npx wait-on tcp:6006 && yarn test-storybook\"",
     "build": "storybook build --quiet",
+    "storybook": "start-storybook -p 6006 -s public",
+    "build-storybook": "build-storybook -s public",
+    "serve-storybook": "serve storybook-static",
     "clean": "rm -rf .next storybook-static node_modules"
   },
   "dependencies": {
