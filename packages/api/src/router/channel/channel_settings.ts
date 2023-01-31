@@ -147,6 +147,8 @@ const channelSettingsCreateUpdate = router({
       protectedMutationFetchFirst({
         fetch: () =>
           findChannelSettingsById(input.channel_id, ctx.prisma, "Channel settings not found"),
+        not_found_message: "Channel settings not found",
+        permissions: (data) => assertCanEditServerBotOnly(ctx, data.channel.server_id),
         operation: async (existing_settings) => {
           const new_settings = mergeChannelSettings(existing_settings, input);
           return ctx.prisma.channelSettings.update({
@@ -156,8 +158,6 @@ const channelSettingsCreateUpdate = router({
             data: new_settings,
           });
         },
-        permissions: (data) => assertCanEditServerBotOnly(ctx, data.channel.server_id),
-        not_found_message: "Channel settings not found",
       })
     );
   }),
