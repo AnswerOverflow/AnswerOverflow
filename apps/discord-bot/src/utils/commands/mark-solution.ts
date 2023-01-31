@@ -63,13 +63,10 @@ export async function checkIfCanMarkSolution(
   // First try to find the message that started the thread, threads are created with the same thread id as the starter message
 
   let question_message: Message | undefined;
+  // TODO: Support headless threads
   if (thread_parent.type === ChannelType.GuildForum) {
     // If we fail to find the message with the same id as the thread, fetch the first message in the thread as a fallbacck
-    const first_thread_message = await thread.messages.fetch({
-      after: "0",
-      limit: 1,
-    });
-    question_message = first_thread_message.first();
+    question_message = thread.messages.cache.get(thread.id);
   } else {
     question_message = thread_parent.messages.cache.get(thread.id);
   }
@@ -95,18 +92,30 @@ export async function checkIfCanMarkSolution(
   }
 
   // Check if the question is already solved
+  await assertMessageIsUnsolved(thread, question_message, channel_settings.solution_tag_id);
+  return {
+    question: question_message,
+    solution: possible_solution,
+    server: guild,
+    thread,
+    parent_channel: thread_parent,
+    channel_settings,
+  };
+}
 
+export async function assertMessageIsUnsolved(
+  thread: AnyThreadChannel,
+  question_message: Message,
+  solution_tag_id: string | null
+) {
   // 1. Check if the thread has a solved tag
-  if (
-    channel_settings.solution_tag_id &&
-    thread.appliedTags.includes(channel_settings.solution_tag_id)
-  ) {
+  if (solution_tag_id && thread.appliedTags.includes(solution_tag_id)) {
     throw new MarkSolutionError("This question is already marked as solved");
   }
 
   // 2. Check if the thread has a solved emoji ✅ applied by the Answer Overflow Bot
   const checkmark_emojis = question_message.reactions.cache.get("✅");
-  if (checkmark_emojis?.users.cache.has(possible_solution.client.user?.id)) {
+  if (checkmark_emojis?.users.cache.has(question_message.client.user?.id)) {
     throw new MarkSolutionError("This question is already marked as solved");
   }
 
@@ -122,14 +131,6 @@ export async function checkIfCanMarkSolution(
   if (is_solution_message_in_history) {
     throw new MarkSolutionError("This question is already marked as solved");
   }
-  return {
-    question: question_message,
-    solution: possible_solution,
-    server: guild,
-    thread,
-    parent_channel: thread_parent,
-    channel_settings,
-  };
 }
 
 export async function addSolvedIndicatorToThread(

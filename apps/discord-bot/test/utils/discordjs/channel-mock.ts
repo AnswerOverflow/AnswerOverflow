@@ -28,8 +28,9 @@ import {
   AnyThreadChannel,
   APINewsChannel,
   NewsChannel,
+  MessageReaction,
 } from "discord.js";
-import type { RawMessageData } from "discord.js/typings/rawDataTypes";
+import type { RawMessageData, RawMessageReactionData } from "discord.js/typings/rawDataTypes";
 import {
   isSnowflakeLarger,
   isSnowflakeLargerAsInt,
@@ -367,6 +368,41 @@ export function mockMessage(input: {
   // @ts-ignore
   channel.messages.cache.set(message.id, message);
   return message;
+}
+
+export function mockReaction({
+  message,
+  user,
+  override,
+}: {
+  message: Message;
+  user: User;
+  override?: Partial<RawMessageReactionData>;
+}) {
+  const data: RawMessageReactionData = {
+    channel_id: message.channel.id,
+    message_id: message.id,
+    user_id: user.id,
+    guild_id: message.guild?.id,
+    count: 1,
+    emoji: {
+      id: randomSnowflake().toString(),
+      name: "👍",
+    },
+    me: user.id === message.client.user?.id,
+    ...override,
+  };
+  const reaction = Reflect.construct(MessageReaction, [
+    message.client,
+    data,
+    message,
+  ]) as MessageReaction;
+  const emoji_id = data.emoji.name ?? data.emoji.id;
+  if (!emoji_id) {
+    throw new Error("Emoji ID and name cannot be null");
+  }
+  message.reactions.cache.set(emoji_id, reaction);
+  return reaction;
 }
 
 export function mockMarkedAsSolvedReply(
