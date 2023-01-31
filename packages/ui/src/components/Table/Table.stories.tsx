@@ -8,7 +8,7 @@ export default {
 import { TrashIcon, Cog6ToothIcon } from "@heroicons/react/24/solid";
 
 const Template: StoryFn<typeof Table> = () => (
-  <div className="xl:w-[85rem]">
+  <div className="2xl:w-[85rem]">
     <Table>
       <Thead>
         <Th>First name</Th>
