@@ -5,7 +5,7 @@ import type { PropsWithChildren } from "react";
  */
 export const Thead: React.FC<PropsWithChildren> = (props) => {
   return (
-    <thead className="border-b-[0.5px] border-neutral-300 p-2 dark:bg-[#2C2C2C]">
+    <thead className="border-b-[0.5px] border-neutral-300 p-2 dark:border-neutral-700 dark:bg-[#2C2C2C]">
       <tr>{props.children}</tr>
     </thead>
   );
