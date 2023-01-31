@@ -22,7 +22,7 @@ const PrimaryArgs: StatsCardProps = {
   percentage_change: "12.52%",
   change_type: "decrease",
   change_count: "12",
-  change_duration_in_days: "15 days",
+  change_duration: "15 days",
 };
 
 Primary.args = PrimaryArgs;

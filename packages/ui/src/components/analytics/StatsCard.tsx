@@ -22,7 +22,7 @@ export interface StatsCardProps {
   /**
    * @example "15 days"
    */
-  change_duration_in_days: string;
+  change_duration: string;
 }
 
 export const StatsCard = ({
@@ -31,7 +31,7 @@ export const StatsCard = ({
   percentage_change,
   change_type,
   change_count,
-  change_duration_in_days,
+  change_duration,
 }: StatsCardProps) => {
   return (
     <div className="flex w-60 flex-col items-start justify-center rounded-xl bg-white p-5 dark:bg-neutral-900 dark:text-white">
@@ -46,7 +46,7 @@ export const StatsCard = ({
           )}
         </div>
         <span className="pl-2 text-sm font-medium">
-          {percentage_change} ({change_count} in {change_duration_in_days})
+          {percentage_change} ({change_count} in {change_duration})
         </span>
       </div>
     </div>
