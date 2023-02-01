@@ -5,11 +5,14 @@ import { copyClass, emitEvent } from "~discord-bot/test/utils/helpers";
 import { prisma } from "@answeroverflow/db";
 import { mockGuild } from "~discord-bot/test/utils/discordjs/guild-mock";
 import { mockForumChannel, mockTextChannel } from "~discord-bot/test/utils/discordjs/channel-mock";
+import { clearDatabase } from "@answeroverflow/db";
+
 let data: Awaited<ReturnType<typeof setupBot>>;
 let client: SapphireClient;
 let guild: Guild;
 
 beforeEach(async () => {
+  await clearDatabase();
   data = await setupBot();
   client = data.client;
   guild = mockGuild(client);

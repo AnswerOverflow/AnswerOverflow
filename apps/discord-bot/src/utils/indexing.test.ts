@@ -41,6 +41,7 @@ let text_channel: TextChannel;
 let forum_channel: ForumChannel;
 let news_channel: NewsChannel;
 beforeEach(async () => {
+  await clearDatabase();
   const data = await setupBot({
     // Cache everything is used to simulate getting a response back from the API
     makeCache: Options.cacheEverything(),
@@ -49,7 +50,6 @@ beforeEach(async () => {
   text_channel = mockTextChannel(client);
   forum_channel = mockForumChannel(client);
   news_channel = mockNewsChannel({ client });
-  await clearDatabase();
 });
 
 async function validateIndexingResults(input: {
@@ -251,11 +251,11 @@ describe("Indexing", () => {
     beforeEach(() => {
       question_message = mockMessage({ client });
       solution_message = mockMessage({ client });
-      marked_as_solved_reply = mockMarkedAsSolvedReply(
+      marked_as_solved_reply = mockMarkedAsSolvedReply({
         client,
-        question_message.id,
-        solution_message.id
-      );
+        question_id: question_message.id,
+        solution_id: solution_message.id,
+      });
       messages = [question_message, solution_message, marked_as_solved_reply];
       question_message_as_ao_message = toAOMessage(question_message);
       solution_message_as_ao_message = toAOMessage(solution_message);
@@ -290,11 +290,11 @@ describe("Indexing", () => {
     it("should find solutions from a mark as solved reply", () => {
       const question_message = mockMessage({ client });
       const solution_message = mockMessage({ client });
-      const marked_as_solved_reply = mockMarkedAsSolvedReply(
+      const marked_as_solved_reply = mockMarkedAsSolvedReply({
         client,
-        question_message.id,
-        solution_message.id
-      );
+        question_id: question_message.id,
+        solution_id: solution_message.id,
+      });
       const { question_id, solution_id } = findSolutionsToMessage(marked_as_solved_reply);
       expect(question_id).toBe(question_message.id);
       expect(solution_id).toBe(solution_message.id);
@@ -308,19 +308,19 @@ describe("Indexing", () => {
     it("should not find solutions from a mark as solved reply that is not sent by the bot", () => {
       const question_message = mockMessage({ client });
       const solution_message = mockMessage({ client });
-      const marked_as_solved_reply = mockMarkedAsSolvedReply(
+      const marked_as_solved_reply = mockMarkedAsSolvedReply({
         client,
-        question_message.id,
-        solution_message.id,
-        {
+        question_id: question_message.id,
+        solution_id: solution_message.id,
+        override: {
           author: {
             id: randomSnowflake().toString(),
             avatar: "123",
             username: "123",
             discriminator: "123",
           },
-        }
-      );
+        },
+      });
       const { question_id, solution_id } = findSolutionsToMessage(marked_as_solved_reply);
       expect(question_id).toBeNull();
       expect(solution_id).toBeNull();
