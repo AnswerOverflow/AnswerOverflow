@@ -1,0 +1,29 @@
+"🤖bot":
+  - any: ["apps/discord-bot/**"]
+
+"📢 command":
+  - any: ["apps/discord-bot/src/commands/**"]
+
+"📖bot-ui":
+  - any: ["apps/discord-bot/src/components/**"]
+
+"🎆event":
+  - any: ["apps/discord-bot/src/listeners/**"]
+
+"⚡ api":
+  - any: ["packages/api/**"]
+
+"🔒auth":
+  - any: ["packages/auth/**"]
+
+"⚛ component":
+  - any: ["packages/ui/src/components/**"]
+
+"📚db":
+  - any: ["packages/db/**"]
+
+"📄 page":
+  - any: ["apps/nextjs/src/pages"]
+
+"🖥️website":
+  - any: ["packages/ui/**", "apps/nextjs/**"]
