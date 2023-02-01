@@ -2,13 +2,13 @@
   - any: ["apps/discord-bot/**"]
 
 "📢 command":
-  - any: ["apps/discord-bot/src/commands/**"]
+  - any: ["apps/discord-bot/src/commands/**", "apps/discord-bot/src/utils/commands/**"]
 
 "📖bot-ui":
-  - any: ["apps/discord-bot/src/components/**"]
+  - any: ["apps/discord-bot/src/components/**", "apps/discord-bot/src/utils/components/**"]
 
 "🎆event":
-  - any: ["apps/discord-bot/src/listeners/**"]
+  - any: ["apps/discord-bot/src/listeners/**", "apps/discord-bot/src/utils/listeners/**"]
 
 "⚡ api":
   - any: ["packages/api/**"]
