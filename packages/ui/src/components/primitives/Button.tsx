@@ -5,10 +5,10 @@ export const buttonStyles = cva(
   {
     variants: {
       intent: {
-        primary: "bg-blue-500 text-white border-transparent hover:bg-blue-600",
+        primary: "bg-blue-700 text-white border-transparent hover:bg-blue-800",
         secondary: "bg-white text-gray-800 border-gray-400 hover:bg-gray-100",
-        danger: "bg-red-500 text-white border-transparent hover:bg-red-600",
-        success: "bg-green-500 text-white border-transparent hover:bg-green-600",
+        danger: "bg-red-600 text-white border-transparent hover:bg-red-700",
+        success: "bg-green-700 text-white border-transparent hover:bg-green-800",
       },
       size: {
         small: ["text-sm", "py-1", "px-2"],
@@ -25,14 +25,22 @@ export const buttonStyles = cva(
 export interface ButtonProps extends VariantProps<typeof buttonStyles> {
   children: React.ReactNode;
   visual_only?: boolean;
+  onClick?: () => void;
 }
 
-export function Button({ intent, size, children, visual_only }: ButtonProps) {
+export function Button({
+  intent,
+  size,
+  children,
+  visual_only,
+  ...props
+}: ButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       type="button"
       className={buttonStyles({ intent, size })}
       tabIndex={visual_only ? -1 : undefined}
+      {...props}
     >
       {children}
     </button>

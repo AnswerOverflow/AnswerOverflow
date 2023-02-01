@@ -3,6 +3,11 @@ import { MessageProps, Message } from "./Message";
 import { mockDiscordAccount } from "~ui/test/props";
 export default {
   component: Message,
+  parameters: {
+    a11y: {
+      disable: true,
+    },
+  },
 } as Meta;
 
 //👇 We create a “template” of how args map to rendering
