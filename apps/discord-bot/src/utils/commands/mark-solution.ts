@@ -1,19 +1,17 @@
 import {
   ActionRowBuilder,
   AnyThreadChannel,
-  APIInteractionGuildMember,
   ButtonBuilder,
   ButtonStyle,
   ChannelType,
   EmbedBuilder,
   ForumChannel,
-  GuildMember,
   Message,
   MessageActionRowComponentBuilder,
   NewsChannel,
   PermissionResolvable,
-  PermissionsBitField,
   TextChannel,
+  User,
 } from "discord.js";
 import { ANSWER_OVERFLOW_BLUE } from "../constants";
 import { createAnswerOveflowBotCtx } from "../context";
@@ -34,7 +32,7 @@ export class MarkSolutionError extends Error {}
 
 export async function checkIfCanMarkSolution(
   possible_solution: Message,
-  user_marking_as_solved: GuildMember | APIInteractionGuildMember
+  user_marking_as_solved: User
 ) {
   const guild = possible_solution.guild;
   if (!guild)
@@ -72,19 +70,17 @@ export async function checkIfCanMarkSolution(
   // TODO: Support headless threads
   if (thread_parent.type === ChannelType.GuildForum) {
     // If we fail to find the message with the same id as the thread, fetch the first message in the thread as a fallbacck
-    question_message = thread.messages.cache.get(thread.id);
+    question_message = await thread.messages.fetch(thread.id);
   } else {
-    question_message = thread_parent.messages.cache.get(thread.id);
+    question_message = await thread_parent.messages.fetch(thread.id);
   }
 
   if (!question_message)
     throw new MarkSolutionError("Could not find the root message of the thread");
   // Check if the user has permission to mark the question as solved
-  if (question_message.author.id !== user_marking_as_solved.user.id) {
-    const user_permissions =
-      typeof user_marking_as_solved.permissions === "string"
-        ? new PermissionsBitField(user_marking_as_solved.permissions as PermissionResolvable)
-        : user_marking_as_solved.permissions;
+  const guild_member = await guild.members.fetch(user_marking_as_solved.id);
+  if (question_message.author.id !== user_marking_as_solved.id) {
+    const user_permissions = guild_member.permissions;
     const does_user_have_override_permissions = PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.some(
       (permission) => user_permissions.has(permission)
     );
@@ -210,4 +206,28 @@ export function makeMarkSolutionResponse({
   // TODO: Add view on Answer Overflow
 
   return { embed, components: components.components.length > 0 ? components : undefined };
+}
+
+export async function markAsSolved(target_message: Message, user: User) {
+  const { parent_channel, question, solution, thread, channel_settings, server } =
+    await checkIfCanMarkSolution(target_message, user);
+  await addSolvedIndicatorToThread(
+    thread,
+    parent_channel,
+    question,
+    channel_settings.solution_tag_id
+  );
+  const { embed, components } = makeMarkSolutionResponse({
+    question,
+    solution,
+    server_name: server.name,
+    settings: channel_settings,
+  });
+  return {
+    embed,
+    components,
+    solution,
+    question,
+    thread,
+  };
 }
