@@ -1,4 +1,4 @@
-import type {
+import {
   Client,
   TextChannel,
   ForumChannel,
@@ -6,6 +6,10 @@ import type {
   GuildMember,
   AnyThreadChannel,
   Message,
+  ButtonBuilder,
+  ButtonComponentData,
+  ButtonStyle,
+  EmbedData,
 } from "discord.js";
 import { clearDatabase } from "@answeroverflow/db";
 import {
@@ -18,10 +22,23 @@ import {
 } from "~discord-bot/test/utils/discordjs/channel-mock";
 import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
 import { mockGuildMember } from "~discord-bot/test/utils/discordjs/user-mock";
-import { checkIfCanMarkSolution, PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED } from "./mark-solution";
-import { overrideVariables, testOnlyAPICall } from "~discord-bot/test/utils/helpers";
+import {
+  checkIfCanMarkSolution,
+  makeMarkSolutionResponse,
+  makeRequestForConsentString,
+  PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED,
+  QUESTION_ID_FIELD_NAME,
+  SOLUTION_ID_FIELD_NAME,
+} from "./mark-solution";
+import {
+  overrideVariables,
+  testAllPermissions,
+  testOnlyAPICall,
+} from "~discord-bot/test/utils/helpers";
 import { toAOChannelWithServer } from "../conversions";
 import { mockGuild } from "~discord-bot/test/utils/discordjs/guild-mock";
+import type { ChannelSettingsWithFlags } from "@answeroverflow/api";
+import { CONSENT_BUTTON_DATA } from "../consent";
 
 let client: Client;
 let guild: Guild;
@@ -48,7 +65,7 @@ beforeEach(async () => {
   });
 });
 
-describe("Mark Solution Tests", () => {
+describe("Can Mark Solution", () => {
   describe("Check If Can Mark Solution Failures - Preconditions", () => {
     it("should fail if the possible solution message is not in a thread", async () => {
       const message = mockMessage({
@@ -263,57 +280,176 @@ describe("Mark Solution Tests", () => {
       );
     });
   });
-});
-describe("Check If Can Mark Solution Success", () => {
-  let question_message: Message;
-  let solution_message: Message;
-  beforeEach(async () => {
-    await testOnlyAPICall(async (router) => {
-      await router.channel_settings.upsertWithDeps({
-        channel: toAOChannelWithServer(text_channel),
-        solution_tag_id: "solved",
-        flags: {
-          mark_solution_enabled: true,
+  describe("Check If Can Mark Solution Success", () => {
+    let question_message: Message;
+    let solution_message: Message;
+    beforeEach(async () => {
+      await testOnlyAPICall(async (router) => {
+        await router.channel_settings.upsertWithDeps({
+          channel: toAOChannelWithServer(text_channel),
+          solution_tag_id: "solved",
+          flags: {
+            mark_solution_enabled: true,
+          },
+        });
+      });
+
+      question_message = mockMessage({
+        client,
+        channel: text_channel,
+        override: {
+          id: text_channel_thread.id,
+        },
+        author: default_author.user,
+      });
+      solution_message = mockMessage({
+        client,
+        channel: text_channel_thread,
+      });
+    });
+    it("should pass if the user is the question author", async () => {
+      const { question, solution, server, thread, parent_channel, channel_settings } =
+        await checkIfCanMarkSolution(solution_message, default_author);
+      expect(question).toEqual(question_message);
+      expect(solution).toEqual(solution_message);
+      expect(server).toEqual(text_channel.guild);
+      expect(thread).toEqual(text_channel_thread);
+      expect(parent_channel).toEqual(text_channel);
+      expect(channel_settings.solution_tag_id).toEqual("solved");
+    });
+    it("should pass if the user has administrator", async () => {
+      await testAllPermissions({
+        permissionsThatShouldWork: [
+          "Administrator",
+          "ManageChannels",
+          "ManageThreads",
+          "ManageGuild",
+        ],
+        async operation(permission, is_permission_allowed) {
+          const solver = mockGuildMember({
+            client,
+            guild: text_channel.guild,
+            permissions: permission,
+          });
+          let did_error = false;
+          try {
+            const { question, solution } = await checkIfCanMarkSolution(solution_message, solver);
+            expect(question).toEqual(question_message);
+            expect(solution).toEqual(solution_message);
+          } catch (error) {
+            did_error = true;
+          }
+          expect(did_error).toEqual(!is_permission_allowed);
         },
       });
     });
+  });
+});
 
-    question_message = mockMessage({
+describe("Make Mark Solution Response", () => {
+  let question: Message;
+  let solution: Message;
+  let settings: ChannelSettingsWithFlags;
+  let jump_to_solution_button_data: Partial<ButtonComponentData>;
+  const solution_message_without_consent_request =
+    "**Thank you for marking this question as solved!**";
+  let solution_message_with_consent_request: string;
+  let solution_embed_data: Partial<EmbedData>;
+  beforeEach(() => {
+    question = mockMessage({
       client,
       channel: text_channel,
       override: {
         id: text_channel_thread.id,
       },
-      author: default_author.user,
     });
-    solution_message = mockMessage({
+    solution = mockMessage({
       client,
       channel: text_channel_thread,
     });
+    settings = {
+      channel_id: text_channel.id,
+      flags: {
+        mark_solution_enabled: true,
+        auto_thread_enabled: true,
+        forum_guidelines_consent_enabled: true,
+        indexing_enabled: true,
+        send_mark_solution_instructions_in_new_threads: true,
+      },
+      invite_code: null,
+      solution_tag_id: "solved",
+      last_indexed_snowflake: null,
+    };
+    jump_to_solution_button_data = new ButtonBuilder()
+      .setLabel("Jump To Solution")
+      .setURL(solution.url)
+      .setStyle(ButtonStyle.Link).data;
+    solution_message_with_consent_request = [
+      `**Thank you for marking this question as solved!**`,
+      makeRequestForConsentString(text_channel.guild.name),
+    ].join("\n\n");
+    solution_embed_data = {
+      description: solution_message_with_consent_request,
+      color: 9228799,
+      fields: [
+        {
+          name: QUESTION_ID_FIELD_NAME,
+          value: question.id,
+          inline: true,
+        },
+        {
+          name: SOLUTION_ID_FIELD_NAME,
+          value: solution.id,
+          inline: true,
+        },
+        {
+          name: "Learn more",
+          value: "https://answeroverflow.com",
+        },
+      ],
+    } as EmbedData;
   });
-  it("should pass if the user is the question author", async () => {
-    const { question, solution, server, thread, parent_channel, channel_settings } =
-      await checkIfCanMarkSolution(solution_message, default_author);
-    expect(question).toEqual(question_message);
-    expect(solution).toEqual(solution_message);
-    expect(server).toEqual(text_channel.guild);
-    expect(thread).toEqual(text_channel_thread);
-    expect(parent_channel).toEqual(text_channel);
-    expect(channel_settings.solution_tag_id).toEqual("solved");
-  });
-  it("should pass if the user has administrator", async () => {
-    const solver = mockGuildMember({
-      client,
-      guild: text_channel.guild,
-      permissions: "Administrator",
+
+  it("should make a response with a consent button and prompt in a channel with indexing enabled and forum guidelines consent disabled", () => {
+    const { components, embed } = makeMarkSolutionResponse({
+      question,
+      solution,
+      server_name: text_channel.guild.name,
+      settings: {
+        ...settings,
+        flags: {
+          ...settings.flags,
+          indexing_enabled: true,
+          forum_guidelines_consent_enabled: false,
+        },
+      },
     });
-    const { question, solution, server, thread, parent_channel, channel_settings } =
-      await checkIfCanMarkSolution(solution_message, solver);
-    expect(question).toEqual(question_message);
-    expect(solution).toEqual(solution_message);
-    expect(server).toEqual(text_channel.guild);
-    expect(thread).toEqual(text_channel_thread);
-    expect(parent_channel).toEqual(text_channel);
-    expect(channel_settings.solution_tag_id).toEqual("solved");
+    expect(components!.components.map((component) => component.data)).toEqual([
+      CONSENT_BUTTON_DATA,
+      jump_to_solution_button_data,
+    ]);
+    expect(embed.data).toEqual(solution_embed_data);
+  });
+  it("should make a response with only the solution response a channel with indexing enabled and forum guidelines consent enabled", () => {
+    const { components, embed } = makeMarkSolutionResponse({
+      question,
+      solution,
+      server_name: text_channel.guild.name,
+      settings: {
+        ...settings,
+        flags: {
+          ...settings.flags,
+          indexing_enabled: true,
+          forum_guidelines_consent_enabled: true,
+        },
+      },
+    });
+    expect(components!.components.map((component) => component.data)).toEqual([
+      jump_to_solution_button_data,
+    ]);
+    expect(embed.data).toEqual({
+      ...solution_embed_data,
+      description: solution_message_without_consent_request,
+    });
   });
 });

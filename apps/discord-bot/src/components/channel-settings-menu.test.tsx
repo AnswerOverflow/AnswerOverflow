@@ -62,7 +62,12 @@ describe("ChannelSettingsMenu", () => {
     );
     expect(
       message!.hasComponents(
-        ["Enable Indexing", "Enable Mark Solution", "Enable Send Mark Solution Instructions"],
+        [
+          "Enable Indexing",
+          "Enable Mark Solution",
+          "Enable Send Mark Solution Instructions",
+          "Enable Forum Post Guidelines Consent",
+        ],
         ["Select a tag to use on mark as solved"]
       )
     ).toBeTruthy();

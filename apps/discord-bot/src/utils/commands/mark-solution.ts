@@ -1,11 +1,15 @@
 import {
+  ActionRowBuilder,
   AnyThreadChannel,
   APIInteractionGuildMember,
+  ButtonBuilder,
+  ButtonStyle,
   ChannelType,
   EmbedBuilder,
   ForumChannel,
   GuildMember,
   Message,
+  MessageActionRowComponentBuilder,
   NewsChannel,
   PermissionResolvable,
   PermissionsBitField,
@@ -15,6 +19,8 @@ import { ANSWER_OVERFLOW_BLUE } from "../constants";
 import { createAnswerOveflowBotCtx } from "../context";
 import { findSolutionsToMessage } from "../indexing";
 import { callApiWithConsoleStatusHandler } from "../trpc";
+import type { ChannelSettingsWithFlags } from "@answeroverflow/api";
+import { makeConsentButton } from "../consent";
 export const QUESTION_ID_FIELD_NAME = "Question Message ID";
 export const SOLUTION_ID_FIELD_NAME = "Solution Message ID";
 export const PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED: PermissionResolvable[] = [
@@ -147,25 +153,61 @@ export async function addSolvedIndicatorToThread(
   }
 }
 
-export function makeMarkSolutionEmbed(question_message: Message, solution_message: Message) {
+export function makeRequestForConsentString(server_name: string) {
+  return [
+    `${server_name} uses Answer Overflow to publicly index questions on search engines such as Google so that people who have similar questions can find the answers they are looking for`,
+    `Your permission is required to use your messages, if you would like to contribute your messages from ${server_name} help channels, please use the button below`,
+  ].join("\n\n");
+}
+
+export function makeMarkSolutionResponse({
+  question,
+  solution,
+  server_name,
+  settings,
+}: {
+  question: Message;
+  solution: Message;
+  server_name: string;
+  settings: ChannelSettingsWithFlags;
+}) {
+  const components = new ActionRowBuilder<MessageActionRowComponentBuilder>();
   const embed = new EmbedBuilder()
-    .setDescription("**Thank you for marking this question as solved!**")
     .addFields(
       {
         name: QUESTION_ID_FIELD_NAME,
-        value: question_message.id,
+        value: question.id,
         inline: true,
       },
       {
         name: SOLUTION_ID_FIELD_NAME,
-        value: solution_message.id,
+        value: solution.id,
         inline: true,
       },
       {
         name: "Learn more",
-        value: "https://answeroverflow.com/",
+        value: "https://answeroverflow.com",
       }
     )
     .setColor(ANSWER_OVERFLOW_BLUE);
-  return embed;
+
+  if (settings.flags.indexing_enabled && !settings.flags.forum_guidelines_consent_enabled) {
+    embed.setDescription(
+      [
+        `**Thank you for marking this question as solved!**`,
+        makeRequestForConsentString(server_name),
+      ].join("\n\n")
+    );
+    components.addComponents(makeConsentButton());
+  } else {
+    embed.setDescription("**Thank you for marking this question as solved!**");
+  }
+
+  components.addComponents(
+    new ButtonBuilder().setLabel("Jump To Solution").setURL(solution.url).setStyle(ButtonStyle.Link)
+  );
+
+  // TODO: Add view on Answer Overflow
+
+  return { embed, components: components.components.length > 0 ? components : undefined };
 }

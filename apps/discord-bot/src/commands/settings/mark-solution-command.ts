@@ -4,7 +4,7 @@ import { ApplicationCommandType, ContextMenuCommandInteraction } from "discord.j
 import {
   addSolvedIndicatorToThread,
   checkIfCanMarkSolution,
-  makeMarkSolutionEmbed,
+  makeMarkSolutionResponse,
   MarkSolutionError,
 } from "~discord-bot/utils/commands/mark-solution";
 
@@ -25,10 +25,21 @@ export class MarkSolution extends Command {
     if (!target_message) return;
     if (!interaction.member) return;
     try {
-      const { parent_channel, question, server, solution, thread, channel_settings } =
+      const { parent_channel, question, solution, thread, channel_settings, server } =
         await checkIfCanMarkSolution(target_message, interaction.member);
-      const solution_embed = makeMarkSolutionEmbed(question, solution);
-      await interaction.reply({ embeds: [solution_embed], ephemeral: true });
+      const { embed, components } = makeMarkSolutionResponse({
+        question,
+        solution,
+        server_name: server.name,
+        settings: channel_settings,
+      });
+
+      await interaction.reply({
+        embeds: [embed],
+        components: components ? [components] : undefined,
+        ephemeral: false,
+        target: solution,
+      });
       await addSolvedIndicatorToThread(
         thread,
         parent_channel,
@@ -37,7 +48,7 @@ export class MarkSolution extends Command {
       );
     } catch (error) {
       if (error instanceof MarkSolutionError)
-        return interaction.reply({ content: error.message, ephemeral: true });
+        await interaction.reply({ content: error.message, ephemeral: true });
       else throw error;
     }
     // Send the mark solution response

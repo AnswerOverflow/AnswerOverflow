@@ -60,7 +60,7 @@ function mergeChannelSettings(
   };
 }
 
-async function transformChannelSettingsReturn<T extends ChannelSettings>(
+export async function transformChannelSettingsReturn<T extends ChannelSettings>(
   channel_settings: () => Promise<T>
 ) {
   const data = await channel_settings();
