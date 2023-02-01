@@ -52,14 +52,11 @@ export class ChannelSettingsCommand extends Command {
     const channel = interaction.channel;
     const member = await guild.members.fetch(interaction.user.id);
 
-    const parent_id = channel.isThread() ? channel.parentId : channel.id;
-    if (!parent_id) return;
-
     await callApiWithEphemeralErrorHandler(
       {
         async ApiCall(router) {
           try {
-            return await router.channel_settings.byId(parent_id);
+            return await router.channel_settings.byId(interaction.channelId);
           } catch (error) {
             if (error instanceof TRPCError && error.code == "NOT_FOUND") {
               return null;
@@ -71,7 +68,7 @@ export class ChannelSettingsCommand extends Command {
         Ok(result) {
           if (!result) {
             result = {
-              ...getDefaultChannelSettingsWithFlags(parent_id),
+              ...getDefaultChannelSettingsWithFlags(interaction.channelId),
               channel: {
                 server_id: guild.id,
               },

@@ -16,7 +16,6 @@ import {
   mockPublicThread,
 } from "~discord-bot/test/utils/discordjs/channel-mock";
 import { mockGuild } from "~discord-bot/test/utils/discordjs/guild-mock";
-import { clearDatabase } from "@answeroverflow/db";
 
 let data: ScenarioData;
 let reacord: ReacordTester;
@@ -26,7 +25,6 @@ let forum_channel: ForumChannel;
 let guild: Guild;
 let members: GuildMemberVariants;
 beforeEach(async () => {
-  await clearDatabase();
   data = await setupBot();
   reacord = data.reacord;
   const client = data.client;
@@ -62,12 +60,7 @@ describe("ChannelSettingsMenu", () => {
     );
     expect(
       message!.hasComponents(
-        [
-          "Enable Indexing",
-          "Enable Mark Solution",
-          "Enable Send Mark Solution Instructions",
-          "Enable Forum Post Guidelines Consent",
-        ],
+        ["Enable Indexing", "Enable Mark Solution", "Enable Send Mark Solution Instructions"],
         ["Select a tag to use on mark as solved"]
       )
     ).toBeTruthy();

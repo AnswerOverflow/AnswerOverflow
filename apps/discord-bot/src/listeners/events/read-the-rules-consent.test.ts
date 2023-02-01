@@ -8,12 +8,10 @@ import {
 import { mockGuildMember } from "~discord-bot/test/utils/discordjs/user-mock";
 import { copyClass, emitEvent, testOnlyAPICall } from "~discord-bot/test/utils/helpers";
 import { toAOServer } from "~discord-bot/utils/conversions";
-import { clearDatabase } from "@answeroverflow/db";
 
 let client: Client;
 let members: GuildMemberVariants;
 beforeEach(async () => {
-  await clearDatabase();
   const data = await setupBot();
   client = data.client;
   members = await createGuildMemberVariants(client);

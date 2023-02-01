@@ -1,6 +1,6 @@
 import { ReacordTester } from "@answeroverflow/reacord";
 import { container } from "@sapphire/framework";
-import { Client, ClientOptions, Options } from "discord.js";
+import { Client, ClientOptions } from "discord.js";
 import { basename, extname } from "path";
 
 import { createClient } from "~discord-bot/utils/bot";
@@ -8,12 +8,7 @@ import { mockClientUser } from "./user-mock";
 
 // References: https://dev.to/heymarkkop/how-to-implement-test-and-mock-discordjs-v13-slash-commands-with-typescript-22lc
 
-export function mockClient(
-  override: Partial<ClientOptions> = {
-    // Cache everything is used to simulate API responses, removes the limit
-    makeCache: Options.cacheEverything(),
-  }
-) {
+export function mockClient(override: Partial<ClientOptions> = {}) {
   // TODO: This is so ugly please fix this
   const client = createClient(override);
   client.stores.forEach((store) => {

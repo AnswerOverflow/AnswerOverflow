@@ -1,5 +1,5 @@
 import type { BotRouterCaller } from "@answeroverflow/api";
-import { Client, ClientEvents, PermissionFlagsBits, PermissionResolvable } from "discord.js";
+import type { Client, ClientEvents } from "discord.js";
 import { createAnswerOveflowBotCtx } from "~discord-bot/utils/context";
 import { callAPI } from "~discord-bot/utils/trpc";
 
@@ -41,26 +41,4 @@ export async function testOnlyAPICall<T>(ApiCall: (router: BotRouterCaller) => P
     ApiCall,
     getCtx: () => createAnswerOveflowBotCtx(),
   });
-}
-
-// TODO: Reuse this from tRPC
-export type PermissionVariantsTest = {
-  permissionsThatShouldWork: PermissionResolvable[];
-  operation: (
-    permission: PermissionResolvable,
-    is_permission_allowed: boolean
-  ) => Promise<void> | void;
-};
-
-export async function testAllPermissions({
-  permissionsThatShouldWork,
-  operation,
-}: PermissionVariantsTest) {
-  // Possibly swap to Promise.All - going in parallel break things sometimes
-  for await (const permission of Object.keys(PermissionFlagsBits)) {
-    const permissionIsAllowed = permissionsThatShouldWork.includes(
-      permission as PermissionResolvable
-    );
-    await operation(permission as PermissionResolvable, permissionIsAllowed);
-  }
 }

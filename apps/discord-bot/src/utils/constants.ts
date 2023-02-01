@@ -10,5 +10,3 @@ export const RandomLoadingMessage = [
   "Give me a moment",
   "Loading...",
 ];
-
-export const ANSWER_OVERFLOW_BLUE = "#8CD1FF";
