@@ -82,6 +82,7 @@ export function Navbar() {
         <Link
           href="/"
           className={router.pathname === "/" && !process.env.STORYBOOK ? "invisible" : ""}
+          aria-label="Home"
         >
           <AnswerOverflowLogo />
         </Link>
