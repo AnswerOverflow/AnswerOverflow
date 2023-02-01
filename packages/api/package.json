@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "with-env": "dotenv -e ../../.env --",
-    "clean": "rm -rf .turbo node_modules",
+    "clean": "rm -rf .turbo node_modules coverage",
     "lint": "eslint src && tsc --noEmit",
     "lint:fix": "eslint src --fix",
     "test:api": "yarn run with-env vitest run --no-threads ",
