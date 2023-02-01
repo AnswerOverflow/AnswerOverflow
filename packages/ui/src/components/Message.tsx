@@ -120,6 +120,7 @@ export function Message({
               thread_id: thread?.id,
             })}
             className="invisible flex h-6 w-6 group-hover:visible"
+            aria-label="Open in Discord"
           >
             <DiscordIcon color="blurple" />
           </Link>
