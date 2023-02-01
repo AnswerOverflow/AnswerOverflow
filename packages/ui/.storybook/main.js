@@ -36,5 +36,9 @@ module.exports = {
   },
   docs: {
     autodocs: false
-  }
+  },
+  env: (config) => ({
+    ...config,
+    THEME: process.env.THEME ?? "both",
+  }),
 };
