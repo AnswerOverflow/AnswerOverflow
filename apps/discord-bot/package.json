@@ -50,7 +50,7 @@
   },
   "scripts": {
     "with-env": "dotenv -e ../../.env --",
-    "clean": "rm -rf .turbo node_modules dist",
+    "clean": "rm -rf .turbo node_modules dist coverage",
     "watch": "tsup  --silent --format cjs --watch . --watch ../../packages/api/src/",
     "build": "tsup --format cjs",
     "lint": "eslint src && tsc --noEmit",

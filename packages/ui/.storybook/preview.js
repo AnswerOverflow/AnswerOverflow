@@ -23,7 +23,7 @@ export const globalTypes = {
       dynamicTitle: true,
       items: ['light', 'dark', 'both']
     },
-    defaultValue: 'both'
+    defaultValue: process.env.THEME ?? "both"
   },
   auth_state: {
     name: "Auth State",
