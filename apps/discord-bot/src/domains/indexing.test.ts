@@ -9,7 +9,7 @@ import {
   TextChannel,
 } from "discord.js";
 
-import { clearDatabase, Message as AOMessage } from "@answeroverflow/db";
+import { Message as AOMessage } from "@answeroverflow/db";
 
 import { testOnlyAPICall } from "~discord-bot/test/helpers";
 import {
@@ -47,7 +47,6 @@ let text_channel: TextChannel;
 let forum_channel: ForumChannel;
 let news_channel: NewsChannel;
 beforeEach(async () => {
-  await clearDatabase();
   client = await setupAnswerOverflowBot();
   text_channel = mockTextChannel(client);
   forum_channel = mockForumChannel(client);

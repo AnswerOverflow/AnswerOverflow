@@ -61,7 +61,7 @@
     "dev": "yarn run with-env rm -rf dist && yarn run build && run-p watch start",
     "start": "yarn run with-env node dist/index.js",
     "test:discord-bot": "yarn run with-env jest --runInBand",
-    "test:watch": "yarn run with-env jest --watch --runInBand",
+    "test:watch": "yarn run with-env jest --watch",
     "install-local-reacord": "cp -r ~/repos/reacord/packages/reacord/dist/ /workspace/node_modules/@answeroverflow/reacord/"
   }
 }

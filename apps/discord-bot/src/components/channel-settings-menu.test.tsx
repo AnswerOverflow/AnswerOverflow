@@ -4,7 +4,6 @@ import React from "react";
 import { getDefaultChannelSettingsWithFlags } from "@answeroverflow/db";
 import type { ReacordTester } from "@answeroverflow/reacord";
 import type { ForumChannel, Guild, PublicThreadChannel, TextChannel } from "discord.js";
-import { clearDatabase } from "@answeroverflow/db";
 import { mockReacord, setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import {
   createGuildMemberVariants,
@@ -22,7 +21,6 @@ let forum_channel: ForumChannel;
 let guild: Guild;
 let members: GuildMemberVariants;
 beforeEach(async () => {
-  await clearDatabase();
   const client = await setupAnswerOverflowBot();
   reacord = mockReacord();
   guild = mockGuild(client);
