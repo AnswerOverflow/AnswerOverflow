@@ -1,11 +1,11 @@
-import { clearDatabase, Server } from "@answeroverflow/db";
+import { mockServer } from "@answeroverflow/db-mock";
+import type { Server } from "@answeroverflow/db";
 import { pickPublicServerData } from "~api/test/public_data";
 import {
   createAnswerOverflowBotCtx,
-  mockAccountWithServersCallerCtx,
-  mockServer,
-  testAllDataVariants,
   testAllVariantsThatThrowErrors,
+  mockAccountWithServersCallerCtx,
+  testAllDataVariants,
 } from "~api/test/utils";
 import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
 import { serverRouter } from "./server";
@@ -13,7 +13,6 @@ import { serverRouter } from "./server";
 let answer_overflow_bot_router: ReturnType<(typeof serverRouter)["createCaller"]>;
 let server_1: Server;
 beforeEach(async () => {
-  await clearDatabase();
   server_1 = mockServer();
   const ao_bot = await createAnswerOverflowBotCtx();
   answer_overflow_bot_router = serverRouter.createCaller(ao_bot);
@@ -64,10 +63,11 @@ describe("Server Operations", () => {
   });
 
   describe("Server Fetch", () => {
-    const server_2 = mockServer({
-      kicked_time: new Date(),
-    });
+    let server_2: Server;
     beforeEach(async () => {
+      server_2 = mockServer({
+        kicked_time: new Date(),
+      });
       await answer_overflow_bot_router.create(server_2);
     });
     it("should succeed fetching a server as the answer overflow bot", async () => {

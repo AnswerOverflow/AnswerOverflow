@@ -1,5 +1,4 @@
 import { extendedAdapter } from "./adapter";
-import { clearDatabase } from "@answeroverflow/db";
 import type { z } from "zod";
 import type { z_user_schema } from "./discord-oauth";
 import { prisma } from "@answeroverflow/db";
@@ -18,8 +17,7 @@ const mock_discord_account: z.infer<typeof z_user_schema> = {
   bot: false,
 };
 
-beforeEach(async () => {
-  await clearDatabase();
+beforeEach(() => {
   vitest.mock("./discord-oauth", () => ({
     getDiscordUser: vitest.fn(() => {
       return mock_discord_account;

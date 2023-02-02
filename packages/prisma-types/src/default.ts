@@ -55,11 +55,16 @@ export function getDefaultServer(override: Partial<Server> & { id: string; name:
 }
 
 export function getDefaultChannel(
-  override: Partial<Channel> & { id: string; name: string; server_id: string; type: number }
+  override: Partial<Channel> & {
+    id: string;
+    name: string;
+    server_id: string;
+    type: number;
+    parent_id: string | null;
+  }
 ): Channel {
   const data: Channel = {
     ...override,
-    parent_id: null,
   };
   return data;
 }

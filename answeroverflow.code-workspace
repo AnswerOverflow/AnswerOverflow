@@ -36,6 +36,10 @@
       "path": "packages/db",
     },
     {
+      "name": "db-mock",
+      "path": "packages/db-mock"
+    },
+    {
       "name": "prisma-types",
       "path": "packages/prisma-types"
     },

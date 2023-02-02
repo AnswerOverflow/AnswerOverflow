@@ -59,6 +59,7 @@ describe("Default Channel Values", () => {
       name: "test",
       type: 0,
       server_id: server_id,
+      parent_id: null,
     });
     expect(defaults).toEqual(expected_defaults);
   });

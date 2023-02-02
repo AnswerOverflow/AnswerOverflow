@@ -1,5 +1,5 @@
 export * from "./src/elastic";
-
+export * from "./src/default";
 declare global {
   namespace NodeJS {
     interface ProcessEnv {

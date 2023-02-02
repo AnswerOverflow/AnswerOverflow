@@ -1,10 +1,6 @@
-import { clearDatabase, DiscordAccount } from "@answeroverflow/db";
-import {
-  createAnswerOverflowBotCtx,
-  mockAccount,
-  mockAccountCallerCtx,
-  testAllSources,
-} from "~api/test/utils";
+import { DiscordAccount } from "@answeroverflow/db";
+import { mockAccount } from "@answeroverflow/db-mock";
+import { createAnswerOverflowBotCtx, testAllSources, mockAccountCallerCtx } from "~api/test/utils";
 import { discordAccountRouter } from "../accounts/discord-accounts";
 import { ignored_discord_account_router } from "./ignored-discord-account";
 
@@ -15,7 +11,6 @@ let ao_bot_ignored_account_router: ReturnType<
   (typeof ignored_discord_account_router)["createCaller"]
 >;
 beforeEach(async () => {
-  await clearDatabase();
   discord_account = mockAccount();
   discord_account_2 = mockAccount();
   const bot = await createAnswerOverflowBotCtx();

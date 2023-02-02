@@ -7,10 +7,12 @@
     "baseUrl": "../../"
   },
   "include": [
-    "src",
     "index.ts",
-    "transformer.ts",
+    "src",
     "vitest.config.ts",
-    "test",
-  ]
+  ],
+  "exclude": [
+    "node_modules",
+    "../../node_modules/*"
+  ],
 }
