@@ -4,6 +4,7 @@ import {
   ButtonBuilder,
   ButtonStyle,
   ChannelType,
+  DiscordAPIError,
   EmbedBuilder,
   ForumChannel,
   Message,
@@ -67,16 +68,21 @@ export async function checkIfCanMarkSolution(
   // First try to find the message that started the thread, threads are created with the same thread id as the starter message
 
   let question_message: Message | undefined;
-  // TODO: Support headless threads
-  if (thread_parent.type === ChannelType.GuildForum) {
-    // If we fail to find the message with the same id as the thread, fetch the first message in the thread as a fallbacck
-    question_message = await thread.messages.fetch(thread.id);
-  } else {
-    question_message = await thread_parent.messages.fetch(thread.id);
+  try {
+    // TODO: Support headless threads
+    if (thread_parent.type === ChannelType.GuildForum) {
+      // If we fail to find the message with the same id as the thread, fetch the first message in the thread as a fallbacck
+      question_message = await thread.messages.fetch(thread.id);
+    } else {
+      question_message = await thread_parent.messages.fetch(thread.id);
+    }
+  } catch (error) {
+    if (error instanceof DiscordAPIError && error.status === 404) {
+      throw new MarkSolutionError("Could not find the root message of the thread");
+    } else {
+      throw error;
+    }
   }
-
-  if (!question_message)
-    throw new MarkSolutionError("Could not find the root message of the thread");
   // Check if the user has permission to mark the question as solved
   const guild_member = await guild.members.fetch(user_marking_as_solved.id);
   if (question_message.author.id !== user_marking_as_solved.id) {

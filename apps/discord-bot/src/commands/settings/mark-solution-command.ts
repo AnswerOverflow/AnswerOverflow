@@ -16,7 +16,6 @@ export class MarkSolution extends Command {
   }
   public override async contextMenuRun(interaction: ContextMenuCommandInteraction) {
     if (!interaction.channel) return;
-    // TODO: Catch errors here
     const target_message = await interaction.channel.messages.fetch(interaction.targetId);
     if (!target_message) return;
     if (!interaction.member) return;

@@ -73,7 +73,7 @@ describe("Can Mark Solution", () => {
         channel: text_channel,
         author: default_author.user,
       });
-      await expect(checkIfCanMarkSolution(message, default_author)).rejects.toThrowError(
+      await expect(checkIfCanMarkSolution(message, default_author.user)).rejects.toThrowError(
         "Cannot mark a message as a solution if it's not in a thread"
       );
     });
@@ -83,7 +83,7 @@ describe("Can Mark Solution", () => {
         channel: text_channel_thread,
         author: client.user!,
       });
-      await expect(checkIfCanMarkSolution(message, default_author)).rejects.toThrowError(
+      await expect(checkIfCanMarkSolution(message, default_author.user)).rejects.toThrowError(
         "Answer Overflow Bot messages can't be marked as a solution"
       );
     });
@@ -95,7 +95,7 @@ describe("Can Mark Solution", () => {
       overrideVariables(text_channel_thread, {
         parentId: "1234567890",
       });
-      await expect(checkIfCanMarkSolution(message, default_author)).rejects.toThrowError(
+      await expect(checkIfCanMarkSolution(message, default_author.user)).rejects.toThrowError(
         "Could not find the parent channel of the thread"
       );
     });
@@ -104,7 +104,7 @@ describe("Can Mark Solution", () => {
         client,
         channel: text_channel_thread,
       });
-      await expect(checkIfCanMarkSolution(message, default_author)).rejects.toThrowError(
+      await expect(checkIfCanMarkSolution(message, default_author.user)).rejects.toThrowError(
         "Mark solution is not enabled in this channel"
       );
     });
@@ -135,9 +135,9 @@ describe("Can Mark Solution", () => {
         client,
         channel: text_channel_thread,
       });
-      await expect(checkIfCanMarkSolution(solution_message, default_author)).rejects.toThrowError(
-        "Could not find the root message of the thread"
-      );
+      await expect(
+        checkIfCanMarkSolution(solution_message, default_author.user)
+      ).rejects.toThrowError("Could not find the root message of the thread");
     });
     it("should fail if the question message is not found for a forum channel thread", async () => {
       mockMessage({
@@ -148,9 +148,9 @@ describe("Can Mark Solution", () => {
         client,
         channel: forum_channel_thread,
       });
-      await expect(checkIfCanMarkSolution(solution_message, default_author)).rejects.toThrowError(
-        "Could not find the root message of the thread"
-      );
+      await expect(
+        checkIfCanMarkSolution(solution_message, default_author.user)
+      ).rejects.toThrowError("Could not find the root message of the thread");
     });
     it("should fail if the user is not the question author and does not have override permissions", async () => {
       mockMessage({
@@ -164,7 +164,9 @@ describe("Can Mark Solution", () => {
         client,
         channel: text_channel_thread,
       });
-      await expect(checkIfCanMarkSolution(solution_message, default_author)).rejects.toThrowError(
+      await expect(
+        checkIfCanMarkSolution(solution_message, default_author.user)
+      ).rejects.toThrowError(
         `You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
           ", "
         )} can mark a question as solved.`
@@ -201,9 +203,9 @@ describe("Can Mark Solution", () => {
           },
         });
       });
-      await expect(checkIfCanMarkSolution(solution_message, default_author)).rejects.toThrowError(
-        "This question is already marked as solved"
-      );
+      await expect(
+        checkIfCanMarkSolution(solution_message, default_author.user)
+      ).rejects.toThrowError("This question is already marked as solved");
     });
     it("should fail if the solution emoji is already set", async () => {
       const root_message = mockMessage({
@@ -240,9 +242,9 @@ describe("Can Mark Solution", () => {
           },
         });
       });
-      await expect(checkIfCanMarkSolution(solution_message, default_author)).rejects.toThrowError(
-        "This question is already marked as solved"
-      );
+      await expect(
+        checkIfCanMarkSolution(solution_message, default_author.user)
+      ).rejects.toThrowError("This question is already marked as solved");
     });
     it("should fail if the solution message is already sent", async () => {
       const root_message = mockMessage({
@@ -275,9 +277,9 @@ describe("Can Mark Solution", () => {
         });
       });
 
-      await expect(checkIfCanMarkSolution(solution_message, default_author)).rejects.toThrowError(
-        "This question is already marked as solved"
-      );
+      await expect(
+        checkIfCanMarkSolution(solution_message, default_author.user)
+      ).rejects.toThrowError("This question is already marked as solved");
     });
   });
   describe("Check If Can Mark Solution Success", () => {
@@ -309,7 +311,7 @@ describe("Can Mark Solution", () => {
     });
     it("should pass if the user is the question author", async () => {
       const { question, solution, server, thread, parent_channel, channel_settings } =
-        await checkIfCanMarkSolution(solution_message, default_author);
+        await checkIfCanMarkSolution(solution_message, default_author.user);
       expect(question).toEqual(question_message);
       expect(solution).toEqual(solution_message);
       expect(server).toEqual(text_channel.guild);
@@ -333,7 +335,10 @@ describe("Can Mark Solution", () => {
           });
           let did_error = false;
           try {
-            const { question, solution } = await checkIfCanMarkSolution(solution_message, solver);
+            const { question, solution } = await checkIfCanMarkSolution(
+              solution_message,
+              solver.user
+            );
             expect(question).toEqual(question_message);
             expect(solution).toEqual(solution_message);
           } catch (error) {
