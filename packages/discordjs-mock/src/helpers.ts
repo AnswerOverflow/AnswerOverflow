@@ -1,7 +1,4 @@
-import type { BotRouterCaller } from "@answeroverflow/api";
 import { Client, ClientEvents, PermissionFlagsBits, PermissionResolvable } from "discord.js";
-import { createAnswerOveflowBotCtx } from "~discord-bot/utils/context";
-import { callAPI } from "~discord-bot/utils/trpc";
 
 // Bit of a hack of a helper function to give async tasks that aren't tracked time to run. A better approach would be to listen to dispatched events
 export async function delay(time_in_ms: number = 100) {
@@ -36,14 +33,6 @@ export function copyClass<T extends { client: Client }>(
   return created;
 }
 
-export async function testOnlyAPICall<T>(ApiCall: (router: BotRouterCaller) => Promise<T>) {
-  return await callAPI({
-    ApiCall,
-    getCtx: () => createAnswerOveflowBotCtx(),
-  });
-}
-
-// TODO: Reuse this from tRPC
 export type PermissionVariantsTest = {
   permissionsThatShouldWork: PermissionResolvable[];
   operation: (

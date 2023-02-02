@@ -1,11 +1,10 @@
 import { mockGuild } from "./guild-mock";
-import { mockClient } from "./mock";
+import { setupBot } from "./client-mock";
 import { mockUser } from "./user-mock";
 
 describe("Guild Mock", () => {
   it("should create a guild", async () => {
-    const client = mockClient();
-    await client.login();
+    const client = await setupBot();
     const guild = mockGuild(client);
     expect(guild).toBeDefined();
     expect(client.guilds.cache.get(guild.id)).toBeDefined();
@@ -14,8 +13,7 @@ describe("Guild Mock", () => {
     expect(guild.members.cache.get(guild.ownerId)).toBeDefined();
   });
   it("should create a guild with a custom owner", async () => {
-    const client = mockClient();
-    await client.login();
+    const client = await setupBot();
     const owner = mockUser(client);
     const guild = mockGuild(client, owner);
     expect(guild).toBeDefined();
@@ -25,8 +23,7 @@ describe("Guild Mock", () => {
     expect(guild.members.cache.get(guild.ownerId)).toBeDefined();
   });
   it("should create a user and then a guild ", async () => {
-    const client = mockClient();
-    await client.login();
+    const client = await setupBot();
     const random_user = mockUser(client);
     const guild = mockGuild(client);
     expect(guild).toBeDefined();
@@ -40,8 +37,7 @@ describe("Guild Mock", () => {
     expect(guild.members.cache.get(random_user.id)).toBeUndefined();
   });
   it("should have a @everyone default role", async () => {
-    const client = mockClient();
-    await client.login();
+    const client = await setupBot();
     const guild = mockGuild(client);
     expect(guild.roles.cache.get(guild.id)).toBeDefined();
     expect(guild.roles.everyone).toBeDefined();

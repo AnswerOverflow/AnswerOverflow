@@ -1,5 +1,5 @@
-import type { SapphireClient } from "@sapphire/framework";
 import {
+  Client,
   ClientUser,
   Guild,
   GuildMember,
@@ -8,10 +8,10 @@ import {
   User,
 } from "discord.js";
 import type { RawGuildMemberData, RawUserData } from "discord.js/typings/rawDataTypes";
-import { randomSnowflake } from "~discord-bot/utils/utils";
+import { randomSnowflake } from "@answeroverflow/discordjs-utils";
 import { mockGuild, mockRole } from "./guild-mock";
 
-export function mockUser(client: SapphireClient, data: Partial<RawUserData> = {}) {
+export function mockUser(client: Client, data: Partial<RawUserData> = {}) {
   const raw_data: RawUserData = {
     id: randomSnowflake().toString(),
     username: "USERNAME",
@@ -25,9 +25,12 @@ export function mockUser(client: SapphireClient, data: Partial<RawUserData> = {}
   return user;
 }
 
-export function mockClientUser(client: SapphireClient, override: Partial<RawUserData> = {}) {
+export function mockClientUser(client: Client, override: Partial<RawUserData> = {}) {
   const raw_data: RawUserData = {
-    id: "0",
+    id:
+      process.env.DISCORD_CLIENT_ID ??
+      process.env.VITEST_DISCORD_CLIENT_ID ??
+      randomSnowflake().toString(),
     username: "test",
     discriminator: "0000",
     avatar: null,
@@ -36,11 +39,12 @@ export function mockClientUser(client: SapphireClient, override: Partial<RawUser
   };
   const client_user = Reflect.construct(ClientUser, [client, raw_data]) as ClientUser;
   client.user = client_user;
+  client.user.id = raw_data.id;
   return client_user;
 }
 
 export function mockGuildMember(input: {
-  client: SapphireClient;
+  client: Client;
   user?: User;
   guild?: Guild;
   permissions?: PermissionResolvable;

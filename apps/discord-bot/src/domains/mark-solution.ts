@@ -14,12 +14,12 @@ import {
   TextChannel,
   User,
 } from "discord.js";
-import { ANSWER_OVERFLOW_BLUE } from "../constants";
-import { createAnswerOveflowBotCtx } from "../context";
-import { findSolutionsToMessage } from "../indexing";
-import { callApiWithConsoleStatusHandler } from "../trpc";
+import { ANSWER_OVERFLOW_BLUE } from "~discord-bot/utils/constants";
+import { createAnswerOveflowBotCtx } from "~discord-bot/utils/context";
+import { findSolutionsToMessage } from "./indexing";
+import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
 import type { ChannelSettingsWithFlags } from "@answeroverflow/api";
-import { makeConsentButton } from "../consent";
+import { makeConsentButton } from "./consent";
 export const QUESTION_ID_FIELD_NAME = "Question Message ID";
 export const SOLUTION_ID_FIELD_NAME = "Solution Message ID";
 export const PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED: PermissionResolvable[] = [

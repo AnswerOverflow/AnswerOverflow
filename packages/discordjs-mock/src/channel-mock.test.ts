@@ -1,18 +1,16 @@
 import { ChannelType, Client } from "discord.js";
 import {
+  mockTextChannel,
   mockForumChannel,
   mockMessage,
-  mockTextChannel,
   mockPublicThread,
   mockThreadFromParentMessage,
 } from "./channel-mock";
+import { setupBot } from "./client-mock";
 import { mockGuild } from "./guild-mock";
-import { setupBot } from "./scenarios";
-
 let client: Client;
 beforeEach(async () => {
-  const data = await setupBot();
-  client = data.client;
+  client = await setupBot();
 });
 
 describe("Text Channel Mock", () => {
