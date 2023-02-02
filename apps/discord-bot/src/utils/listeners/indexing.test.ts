@@ -23,7 +23,7 @@ import { clearDatabase, Message as AOMessage } from "@answeroverflow/db";
 import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
 import { mockGuildMember } from "~discord-bot/test/utils/discordjs/user-mock";
 import { testOnlyAPICall } from "~discord-bot/test/utils/helpers";
-import { toAOChannelWithServer, toAODiscordAccount, toAOMessage, toAOServer } from "./conversions";
+import { toAOChannelWithServer, toAODiscordAccount, toAOMessage, toAOServer } from "../conversions";
 import {
   addSolutionsToMessages,
   fetchAllChannelMessagesWithThreads,
@@ -34,7 +34,7 @@ import {
 } from "./indexing";
 import type { inferRouterInputs } from "@trpc/server";
 import type { botRouter } from "@answeroverflow/api";
-import { isSnowflakeLargerAsInt, randomSnowflake } from "./utils";
+import { isSnowflakeLargerAsInt, randomSnowflake } from "../utils";
 
 let client: Client;
 let text_channel: TextChannel;

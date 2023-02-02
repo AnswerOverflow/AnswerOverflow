@@ -1,4 +1,3 @@
-import type { SapphireClient } from "@sapphire/framework";
 import {
   type APIGuild,
   PermissionsBitField,
@@ -6,12 +5,13 @@ import {
   User,
   PermissionResolvable,
   Role,
+  Client,
 } from "discord.js";
 import type { RawRoleData } from "discord.js/typings/rawDataTypes";
-import { randomSnowflake } from "~discord-bot/utils/utils";
+import { randomSnowflake } from "@answeroverflow/discordjs-utils";
 import { mockGuildMember, mockUser } from "./user-mock";
 
-export function mockGuild(client: SapphireClient, owner?: User, data: Partial<APIGuild> = {}) {
+export function mockGuild(client: Client, owner?: User, data: Partial<APIGuild> = {}) {
   // Create the guild
   if (!owner) {
     owner = mockUser(client);
@@ -81,7 +81,7 @@ export function mockGuild(client: SapphireClient, owner?: User, data: Partial<AP
 }
 
 export function mockRole(
-  client: SapphireClient,
+  client: Client,
   permissions: PermissionResolvable,
   guild?: Guild,
   role: Partial<RawRoleData> = {}

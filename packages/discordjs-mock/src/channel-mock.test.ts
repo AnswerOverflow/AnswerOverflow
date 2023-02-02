@@ -7,12 +7,11 @@ import {
   mockThreadFromParentMessage,
 } from "./channel-mock";
 import { mockGuild } from "./guild-mock";
-import { setupBot } from "./scenarios";
+import { setupBot } from "./client-mock";
 
 let client: Client;
 beforeEach(async () => {
-  const data = await setupBot();
-  client = data.client;
+  client = await setupBot();
 });
 
 describe("Text Channel Mock", () => {

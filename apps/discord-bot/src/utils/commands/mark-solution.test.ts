@@ -38,7 +38,7 @@ import {
 import { toAOChannelWithServer } from "../conversions";
 import { mockGuild } from "~discord-bot/test/utils/discordjs/guild-mock";
 import type { ChannelSettingsWithFlags } from "@answeroverflow/api";
-import { CONSENT_BUTTON_DATA } from "../consent";
+import { CONSENT_BUTTON_DATA } from "../components/consent";
 
 let client: Client;
 let guild: Guild;

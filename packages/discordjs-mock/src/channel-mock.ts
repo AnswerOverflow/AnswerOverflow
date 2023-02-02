@@ -1,4 +1,3 @@
-import type { SapphireClient } from "@sapphire/framework";
 import {
   type Guild,
   TextChannel,
@@ -40,7 +39,7 @@ import {
   isSnowflakeLargerAsInt,
   randomSnowflake,
   sortMessagesById,
-} from "~discord-bot/utils/utils";
+} from "@answeroverflow/discordjs-utils";
 import { mockGuild } from "./guild-mock";
 import { mockGuildMember, mockUser } from "./user-mock";
 
@@ -68,7 +67,7 @@ export function getGuildTextChannelMockDataBase<Type extends GuildTextChannelTyp
 }
 
 function setupMockedChannel<T extends GuildBasedChannel>(
-  client: SapphireClient,
+  client: Client,
   guild: Guild | undefined,
   create_mock_data: (guild: Guild) => T
 ): T {
@@ -235,7 +234,7 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 }
 
 export function mockTextChannel(
-  client: SapphireClient,
+  client: Client,
   guild?: Guild,
   data: Partial<APITextChannel> = {}
 ): TextChannel {
@@ -275,7 +274,7 @@ export function mockThreadFromParentMessage(input: {
 }
 
 export function mockPublicThread(input: {
-  client: SapphireClient;
+  client: Client;
   parent_channel?: TextChannel | ForumChannel | NewsChannel;
   data?: Partial<APIThreadChannel>;
 }) {
@@ -321,7 +320,7 @@ export function mockPublicThread(input: {
 }
 
 export function mockForumChannel(
-  client: SapphireClient,
+  client: Client,
   guild?: Guild,
   data: Partial<APIGuildForumChannel> = {}
 ) {
@@ -348,7 +347,7 @@ export function mockForumChannel(
 }
 
 export function mockNewsChannel(input: {
-  client: SapphireClient;
+  client: Client;
   guild?: Guild;
   data?: Partial<APINewsChannel>;
 }) {
@@ -376,7 +375,7 @@ export function mockMessages(channel: TextBasedChannel, number_of_messages: numb
 }
 
 export function mockMessage(input: {
-  client: SapphireClient;
+  client: Client;
   author?: User;
   channel?: TextBasedChannel;
   override?: Partial<RawMessageData>;
@@ -534,7 +533,7 @@ export function mockMarkedAsSolvedReply({
 }
 
 export function mockInvite(
-  client: SapphireClient,
+  client: Client,
   channel: GuildChannel | undefined,
   override: Partial<APIInvite> = {}
 ) {

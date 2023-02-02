@@ -1,7 +1,7 @@
 import { Client, Events } from "discord.js";
 import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
 import { delay, emitEvent } from "~discord-bot/test/utils/helpers";
-import { indexServers } from "~discord-bot/utils/indexing";
+import { indexServers } from "~discord-bot/utils/listeners/indexing";
 /*
   Ref: https://www.chakshunyu.com/blog/how-to-mock-only-one-function-from-a-module-in-jest/
   Spying on the function wasn't working so we ended up with this hacky solution

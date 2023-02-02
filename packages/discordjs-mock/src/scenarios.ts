@@ -1,19 +1,6 @@
-import { Client, ClientOptions, Guild, PermissionFlagsBits } from "discord.js";
+import { Client, Guild, PermissionFlagsBits } from "discord.js";
 import { mockGuild } from "./guild-mock";
-import { mockClient, mockReacord } from "./mock";
 import { mockGuildMember } from "./user-mock";
-export type ScenarioData = Awaited<ReturnType<typeof setupBot>>;
-
-export async function setupBot(override: Partial<ClientOptions> = {}) {
-  const client = mockClient(override);
-  await client.login();
-  const reacord = mockReacord();
-  return {
-    client,
-    reacord,
-  };
-}
-
 export type GuildMemberVariants = Awaited<ReturnType<typeof createGuildMemberVariants>>;
 
 export async function createGuildMemberVariants(
