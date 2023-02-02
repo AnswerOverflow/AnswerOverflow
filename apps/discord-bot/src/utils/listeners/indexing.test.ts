@@ -6,22 +6,11 @@ import {
   Message,
   MessageType,
   NewsChannel,
-  Options,
   TextChannel,
 } from "discord.js";
-import {
-  mockForumChannel,
-  mockMarkedAsSolvedReply,
-  mockMessage,
-  mockMessages,
-  mockNewsChannel,
-  mockPublicThread,
-  mockTextChannel,
-  mockThreadFromParentMessage,
-} from "~discord-bot/test/utils/discordjs/channel-mock";
+
 import { clearDatabase, Message as AOMessage } from "@answeroverflow/db";
-import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
-import { mockGuildMember } from "~discord-bot/test/utils/discordjs/user-mock";
+
 import { testOnlyAPICall } from "~discord-bot/test/utils/helpers";
 import { toAOChannelWithServer, toAODiscordAccount, toAOMessage, toAOServer } from "../conversions";
 import {
@@ -34,7 +23,19 @@ import {
 } from "./indexing";
 import type { inferRouterInputs } from "@trpc/server";
 import type { botRouter } from "@answeroverflow/api";
-import { isSnowflakeLargerAsInt, randomSnowflake } from "../utils";
+import {
+  mockTextChannel,
+  mockForumChannel,
+  mockNewsChannel,
+  mockMessages,
+  mockThreadFromParentMessage,
+  mockMessage,
+  mockPublicThread,
+  mockMarkedAsSolvedReply,
+  mockGuildMember,
+} from "@answeroverflow/discordjs-mock";
+import { isSnowflakeLargerAsInt, randomSnowflake } from "@answeroverflow/discordjs-utils";
+import { setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
 
 let client: Client;
 let text_channel: TextChannel;
@@ -42,11 +43,7 @@ let forum_channel: ForumChannel;
 let news_channel: NewsChannel;
 beforeEach(async () => {
   await clearDatabase();
-  const data = await setupBot({
-    // Cache everything is used to simulate getting a response back from the API
-    makeCache: Options.cacheEverything(),
-  });
-  client = data.client;
+  client = await setupAnswerOverflowBot();
   text_channel = mockTextChannel(client);
   forum_channel = mockForumChannel(client);
   news_channel = mockNewsChannel({ client });

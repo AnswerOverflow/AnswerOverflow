@@ -1,22 +1,22 @@
 import { clearDatabase } from "@answeroverflow/db";
 import { Client, Events } from "discord.js";
 import {
+  emitEvent,
+  mockGuild,
+  mockGuildMember,
   mockMessage,
   mockMessageReaction,
   mockPublicThread,
   mockTextChannel,
-} from "~discord-bot/test/utils/discordjs/channel-mock";
-import { mockGuild } from "~discord-bot/test/utils/discordjs/guild-mock";
-import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
-import { mockGuildMember } from "~discord-bot/test/utils/discordjs/user-mock";
-import { emitEvent, testOnlyAPICall } from "~discord-bot/test/utils/helpers";
+} from "@answeroverflow/discordjs-mock";
+import { testOnlyAPICall } from "~discord-bot/test/utils/helpers";
+import { setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
 import { toAOChannelWithServer } from "~discord-bot/utils/conversions";
 
 let client: Client;
 beforeEach(async () => {
   await clearDatabase();
-  const data = await setupBot();
-  client = data.client;
+  client = await setupAnswerOverflowBot();
 });
 
 async function setupSolvedMessageScenario(guild_id?: string) {

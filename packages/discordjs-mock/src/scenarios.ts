@@ -1,6 +1,7 @@
 import { Client, Guild, PermissionFlagsBits } from "discord.js";
 import { mockGuild } from "./guild-mock";
 import { mockGuildMember } from "./user-mock";
+
 export type GuildMemberVariants = Awaited<ReturnType<typeof createGuildMemberVariants>>;
 
 export async function createGuildMemberVariants(

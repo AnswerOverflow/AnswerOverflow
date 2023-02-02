@@ -1,20 +1,18 @@
 import { Collection, Events, Message, TextChannel } from "discord.js";
-import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
-import { copyClass, emitEvent } from "~discord-bot/test/utils/helpers";
 import { elastic } from "@answeroverflow/db";
 import type { SapphireClient } from "@sapphire/framework";
 import { toAOMessage } from "~discord-bot/utils/conversions";
-import { mockMessage, mockTextChannel } from "~discord-bot/test/utils/discordjs/channel-mock";
 import { clearDatabase } from "@answeroverflow/db";
+import { mockTextChannel, mockMessage, emitEvent, copyClass } from "@answeroverflow/discordjs-mock";
+import { setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
 
 let client: SapphireClient;
 let message: Message;
 let text_channel: TextChannel;
-let data: Awaited<ReturnType<typeof setupBot>>;
+
 beforeEach(async () => {
   await clearDatabase();
-  data = await setupBot();
-  client = data.client;
+  client = await setupAnswerOverflowBot();
   text_channel = mockTextChannel(client);
   message = mockMessage({ client, channel: text_channel });
 });

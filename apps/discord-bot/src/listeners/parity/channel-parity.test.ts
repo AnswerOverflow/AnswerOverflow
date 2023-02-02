@@ -1,23 +1,23 @@
 import type { SapphireClient } from "@sapphire/framework";
 import { Events, PublicThreadChannel, TextChannel } from "discord.js";
-import {
-  mockInvite,
-  mockTextChannel,
-  mockPublicThread,
-} from "~discord-bot/test/utils/discordjs/channel-mock";
-import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
-import { copyClass, emitEvent, testOnlyAPICall } from "~discord-bot/test/utils/helpers";
+import { testOnlyAPICall } from "~discord-bot/test/utils/helpers";
 import { toAOChannelWithServer, toAOThread } from "~discord-bot/utils/conversions";
 import { clearDatabase } from "@answeroverflow/db";
+import {
+  mockTextChannel,
+  mockPublicThread,
+  copyClass,
+  emitEvent,
+  mockInvite,
+} from "@answeroverflow/discordjs-mock";
+import { setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
 
-let data: Awaited<ReturnType<typeof setupBot>>;
 let client: SapphireClient;
 let text_channel: TextChannel;
 let thread: PublicThreadChannel;
 beforeEach(async () => {
   await clearDatabase();
-  data = await setupBot();
-  client = data.client;
+  client = await setupAnswerOverflowBot();
   text_channel = mockTextChannel(client);
   thread = mockPublicThread({ client });
 });

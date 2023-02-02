@@ -1,14 +1,12 @@
 import { ReacordTester } from "@answeroverflow/reacord";
 import { container } from "@sapphire/framework";
-import { Client, ClientOptions, Options } from "discord.js";
+import { assert } from "console";
+import { ClientOptions, Options } from "discord.js";
+import { applyClientMocks } from "@answeroverflow/discordjs-mock/src/client-mock";
 import { basename, extname } from "path";
-
 import { createClient } from "~discord-bot/utils/bot";
-import { mockClientUser } from "./user-mock";
 
-// References: https://dev.to/heymarkkop/how-to-implement-test-and-mock-discordjs-v13-slash-commands-with-typescript-22lc
-
-export function mockClient(
+export function mockSapphireClient(
   override: Partial<ClientOptions> = {
     // Cache everything is used to simulate API responses, removes the limit
     makeCache: Options.cacheEverything(),
@@ -63,15 +61,19 @@ export function mockClient(
     });
   });
 
-  Client.prototype.login = jest.fn();
-  container.reacord = new ReacordTester();
-  const user = mockClientUser(client, {
-    id: process.env.DISCORD_CLIENT_ID,
-  });
-  client.id = user.id;
+  applyClientMocks(client);
+  assert(client.user !== null, "Client user is null");
+  client.id = client.user!.id;
   return client;
 }
 
 export function mockReacord() {
-  return container.reacord as ReacordTester;
+  container.reacord = new ReacordTester();
+  return container.reacord;
+}
+
+export async function setupAnswerOverflowBot() {
+  const client = mockSapphireClient();
+  await client.login();
+  return client;
 }

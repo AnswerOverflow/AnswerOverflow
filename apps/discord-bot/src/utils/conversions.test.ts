@@ -1,25 +1,24 @@
 import type { Client, TextChannel } from "discord.js";
 import {
-  mockMessage,
-  mockMessages,
-  mockTextChannel,
-  mockThreadFromParentMessage,
-} from "~discord-bot/test/utils/discordjs/channel-mock";
-import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
-import { mockUser } from "~discord-bot/test/utils/discordjs/user-mock";
-import {
   extractThreadsSetFromMessages,
   extractUsersSetFromMessages,
   messagesToAOMessagesSet,
 } from "./conversions";
 import { clearDatabase } from "@answeroverflow/db";
+import {
+  mockTextChannel,
+  mockMessages,
+  mockUser,
+  mockMessage,
+  mockThreadFromParentMessage,
+} from "@answeroverflow/discordjs-mock";
+import { setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
 
 let text_channel: TextChannel;
 let client: Client;
 beforeEach(async () => {
   await clearDatabase();
-  const data = await setupBot();
-  client = data.client;
+  client = await setupAnswerOverflowBot();
   text_channel = mockTextChannel(client);
 });
 

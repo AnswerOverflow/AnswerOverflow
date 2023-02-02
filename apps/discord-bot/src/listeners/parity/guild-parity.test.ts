@@ -1,20 +1,22 @@
 import type { SapphireClient } from "@sapphire/framework";
 import { Events, Guild } from "discord.js";
-import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
-import { copyClass, emitEvent } from "~discord-bot/test/utils/helpers";
 import { prisma } from "@answeroverflow/db";
-import { mockGuild } from "~discord-bot/test/utils/discordjs/guild-mock";
-import { mockForumChannel, mockTextChannel } from "~discord-bot/test/utils/discordjs/channel-mock";
 import { clearDatabase } from "@answeroverflow/db";
+import {
+  mockGuild,
+  mockTextChannel,
+  mockForumChannel,
+  emitEvent,
+  copyClass,
+} from "@answeroverflow/discordjs-mock";
+import { setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
 
-let data: Awaited<ReturnType<typeof setupBot>>;
 let client: SapphireClient;
 let guild: Guild;
 
 beforeEach(async () => {
   await clearDatabase();
-  data = await setupBot();
-  client = data.client;
+  client = await setupAnswerOverflowBot();
   guild = mockGuild(client);
 });
 
