@@ -12,7 +12,7 @@ import {
   mockMessage,
   mockThreadFromParentMessage,
 } from "@answeroverflow/discordjs-mock";
-import { setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
+import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 
 let text_channel: TextChannel;
 let client: Client;

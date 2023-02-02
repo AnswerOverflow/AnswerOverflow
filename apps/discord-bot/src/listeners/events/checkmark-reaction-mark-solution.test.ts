@@ -9,8 +9,8 @@ import {
   mockPublicThread,
   mockTextChannel,
 } from "@answeroverflow/discordjs-mock";
-import { testOnlyAPICall } from "~discord-bot/test/utils/helpers";
-import { setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
+import { testOnlyAPICall } from "~discord-bot/test/helpers";
+import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import { toAOChannelWithServer } from "~discord-bot/utils/conversions";
 
 let client: Client;

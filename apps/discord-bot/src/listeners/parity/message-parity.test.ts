@@ -4,7 +4,7 @@ import type { SapphireClient } from "@sapphire/framework";
 import { toAOMessage } from "~discord-bot/utils/conversions";
 import { clearDatabase } from "@answeroverflow/db";
 import { mockTextChannel, mockMessage, emitEvent, copyClass } from "@answeroverflow/discordjs-mock";
-import { setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
+import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 
 let client: SapphireClient;
 let message: Message;

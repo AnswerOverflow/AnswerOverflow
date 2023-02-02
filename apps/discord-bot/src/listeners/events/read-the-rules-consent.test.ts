@@ -1,5 +1,5 @@
 import { Client, Events } from "discord.js";
-import { testOnlyAPICall } from "~discord-bot/test/utils/helpers";
+import { testOnlyAPICall } from "~discord-bot/test/helpers";
 import { toAOServer } from "~discord-bot/utils/conversions";
 import { clearDatabase } from "@answeroverflow/db";
 import {
@@ -10,7 +10,7 @@ import {
   mockGuild,
   mockGuildMember,
 } from "@answeroverflow/discordjs-mock";
-import { setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
+import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 
 let client: Client;
 let members: GuildMemberVariants;

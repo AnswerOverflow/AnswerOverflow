@@ -14,10 +14,10 @@ import {
   TextChannel,
   User,
 } from "discord.js";
-import { ANSWER_OVERFLOW_BLUE } from "../constants";
-import { createAnswerOveflowBotCtx } from "../context";
+import { ANSWER_OVERFLOW_BLUE } from "~discord-bot/utils/constants";
+import { createAnswerOveflowBotCtx } from "~discord-bot/utils/context";
 import { findSolutionsToMessage } from "../listeners/indexing";
-import { callApiWithConsoleStatusHandler } from "../trpc";
+import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
 import type { ChannelSettingsWithFlags } from "@answeroverflow/api";
 import { makeConsentButton } from "../components/consent";
 export const QUESTION_ID_FIELD_NAME = "Question Message ID";

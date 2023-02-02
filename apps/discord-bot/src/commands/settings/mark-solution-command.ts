@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { ChatInputCommand, Command } from "@sapphire/framework";
 import { ApplicationCommandType, ContextMenuCommandInteraction } from "discord.js";
-import { markAsSolved, MarkSolutionError } from "~discord-bot/utils/commands/mark-solution";
+import { markAsSolved, MarkSolutionError } from "~discord-bot/domains/commands/mark-solution";
 
 @ApplyOptions<Command.Options>({
   runIn: ["GUILD_ANY"],

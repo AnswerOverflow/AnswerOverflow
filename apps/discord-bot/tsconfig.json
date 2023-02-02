@@ -15,7 +15,6 @@
   "include": [
     "src",
     "test",
-    "jest.config.ts",
-    "../../packages/discordjs-mock/src/channel-mock.test.ts"
+    "jest.config.ts"
   ],
 }

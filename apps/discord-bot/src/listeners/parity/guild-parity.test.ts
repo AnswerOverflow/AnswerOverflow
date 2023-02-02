@@ -9,7 +9,7 @@ import {
   emitEvent,
   copyClass,
 } from "@answeroverflow/discordjs-mock";
-import { setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
+import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 
 let client: SapphireClient;
 let guild: Guild;

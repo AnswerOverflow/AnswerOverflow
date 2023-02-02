@@ -11,8 +11,13 @@ import {
 
 import { clearDatabase, Message as AOMessage } from "@answeroverflow/db";
 
-import { testOnlyAPICall } from "~discord-bot/test/utils/helpers";
-import { toAOChannelWithServer, toAODiscordAccount, toAOMessage, toAOServer } from "../conversions";
+import { testOnlyAPICall } from "~discord-bot/test/helpers";
+import {
+  toAOChannelWithServer,
+  toAODiscordAccount,
+  toAOMessage,
+  toAOServer,
+} from "~discord-bot/utils/conversions";
 import {
   addSolutionsToMessages,
   fetchAllChannelMessagesWithThreads,
@@ -35,7 +40,7 @@ import {
   mockGuildMember,
 } from "@answeroverflow/discordjs-mock";
 import { isSnowflakeLargerAsInt, randomSnowflake } from "@answeroverflow/discordjs-utils";
-import { setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
+import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 
 let client: Client;
 let text_channel: TextChannel;

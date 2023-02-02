@@ -1,11 +1,11 @@
 import { ChannelSettingsMenu } from "~discord-bot/components/channel-settings-menu";
-import { reply } from "~discord-bot/test/utils/reacord/reacord-utils";
+import { reply } from "~discord-bot/test/reacord-utils";
 import React from "react";
 import { getDefaultChannelSettingsWithFlags } from "@answeroverflow/db";
 import type { ReacordTester } from "@answeroverflow/reacord";
 import type { ForumChannel, Guild, PublicThreadChannel, TextChannel } from "discord.js";
 import { clearDatabase } from "@answeroverflow/db";
-import { mockReacord, setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
+import { mockReacord, setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import {
   createGuildMemberVariants,
   GuildMemberVariants,

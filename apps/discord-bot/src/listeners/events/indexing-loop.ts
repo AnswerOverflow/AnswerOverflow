@@ -2,7 +2,7 @@ import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import { Client, Events } from "discord.js";
 import { container } from "@sapphire/framework";
-import { indexServers } from "~discord-bot/utils/listeners/indexing";
+import { indexServers } from "~discord-bot/domains/listeners/indexing";
 
 @ApplyOptions<Listener.Options>({ once: true, event: Events.ClientReady })
 export class Indexing extends Listener {

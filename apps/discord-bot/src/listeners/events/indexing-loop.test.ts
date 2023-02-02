@@ -1,14 +1,14 @@
 import { Client, Events } from "discord.js";
 import { delay, emitEvent } from "@answeroverflow/discordjs-mock";
-import { indexServers } from "~discord-bot/utils/listeners/indexing";
-import { setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
+import { indexServers } from "~discord-bot/domains/listeners/indexing";
+import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 /*
   Ref: https://www.chakshunyu.com/blog/how-to-mock-only-one-function-from-a-module-in-jest/
   Spying on the function wasn't working so we ended up with this hacky solution
 */
-jest.mock("~discord-bot/utils/listeners/indexing", () => {
+jest.mock("~discord-bot/domains/listeners/indexing", () => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const original = jest.requireActual("~discord-bot/utils/listeners/indexing");
+  const original = jest.requireActual("~discord-bot/domains/listeners/indexing");
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
     ...original,

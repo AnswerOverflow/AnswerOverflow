@@ -21,8 +21,8 @@ import {
   QUESTION_ID_FIELD_NAME,
   SOLUTION_ID_FIELD_NAME,
 } from "./mark-solution";
-import { testOnlyAPICall } from "~discord-bot/test/utils/helpers";
-import { toAOChannelWithServer } from "../conversions";
+import { testOnlyAPICall } from "~discord-bot/test/helpers";
+import { toAOChannelWithServer } from "~discord-bot/utils/conversions";
 
 import type { ChannelSettingsWithFlags } from "@answeroverflow/api";
 import { CONSENT_BUTTON_DATA } from "../components/consent";
@@ -38,7 +38,7 @@ import {
   mockMarkedAsSolvedReply,
   testAllPermissions,
 } from "@answeroverflow/discordjs-mock";
-import { setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
+import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 
 let client: Client;
 let guild: Guild;
