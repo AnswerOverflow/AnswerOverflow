@@ -28,8 +28,13 @@ import {
   AnyThreadChannel,
   APINewsChannel,
   NewsChannel,
+  MessageReaction,
+  MessageResolvable,
+  FetchMessagesOptions,
+  DiscordAPIError,
+  FetchMessageOptions,
 } from "discord.js";
-import type { RawMessageData } from "discord.js/typings/rawDataTypes";
+import type { RawMessageData, RawMessageReactionData } from "discord.js/typings/rawDataTypes";
 import {
   isSnowflakeLarger,
   isSnowflakeLargerAsInt,
@@ -140,36 +145,89 @@ function setupMockedChannel<T extends GuildBasedChannel>(
     });
   }
   if (channel.isTextBased()) {
-    channel.messages.fetch = jest.fn().mockImplementation(
-      ({
-        limit,
-        after,
-      }: {
-        limit?: number;
-        before?: string;
-        after?: string;
-        around?: string;
-      } = {}) => {
-        if (!limit) {
-          limit = 100; // Default Discord limit
+    // TODO: Add the sent message to the cache
+    channel.send = jest.fn();
+
+    channel.messages.fetch = jest
+      .fn()
+      .mockImplementation(
+        (q: MessageResolvable | FetchMessagesOptions | FetchMessageOptions = {}) => {
+          if (q instanceof Message) {
+            return Promise.resolve(q);
+          }
+          if (typeof q === "string") {
+            const message = channel.messages.cache.get(q);
+            if (!message) {
+              return Promise.reject(
+                new DiscordAPIError(
+                  {
+                    code: 10008,
+                    message: "NOT FOUND",
+                  },
+                  10008,
+                  404,
+                  "GET",
+                  "/channels/123/messages/123",
+                  {
+                    files: [],
+                  }
+                )
+              );
+            }
+            return Promise.resolve(message);
+          }
+          if ("message" in q) {
+            const resolvable = q.message;
+            // DRY? Never heard of it
+            if (resolvable instanceof Message) {
+              return Promise.resolve(q);
+            }
+            if (typeof resolvable === "string") {
+              const message = channel.messages.cache.get(resolvable);
+              if (!message) {
+                return Promise.reject(
+                  new DiscordAPIError(
+                    {
+                      code: 10008,
+                      message: "NOT FOUND",
+                    },
+                    10008,
+                    404,
+                    "GET",
+                    "/channels/123/messages/123",
+                    {
+                      files: [],
+                    }
+                  )
+                );
+              }
+              return Promise.resolve(message);
+            }
+            throw new Error("Invalid message");
+          }
+          const { after } = q;
+          let { limit } = q;
+
+          if (!limit) {
+            limit = 100; // Default Discord limit
+          }
+
+          // 1. sort by id
+          const sorted_cached_messages = sortMessagesById(
+            Array.from(channel.messages.cache.values())
+          );
+          // 2. filter to only above the id
+          const filtered_messages = sorted_cached_messages.filter((message) => {
+            if (!after) return true;
+            return isSnowflakeLarger(message.id, after);
+          });
+          // 3. take up to limit
+          const messages = filtered_messages.slice(0, limit);
+          jest.clearAllMocks();
+          const as_collection = new Collection(messages.map((message) => [message.id, message]));
+          return Promise.resolve(as_collection);
         }
-
-        // 1. sort by id
-        const sorted_cached_messages = sortMessagesById(
-          Array.from(channel.messages.cache.values())
-        );
-        // 2. filter to only above the id
-        const filtered_messages = sorted_cached_messages.filter((message) => {
-          if (!after) return true;
-          return isSnowflakeLarger(message.id, after);
-        });
-        // 3. take up to limit
-        const messages = filtered_messages.slice(0, limit);
-
-        const as_collection = new Collection(messages.map((message) => [message.id, message]));
-        return Promise.resolve(as_collection);
-      }
-    );
+      );
   }
   client.channels.cache.set(channel.id, channel);
   guild.channels.cache.set(channel.id, channel);
@@ -366,15 +424,88 @@ export function mockMessage(input: {
   // TODO: Fix ts ignore?
   // @ts-ignore
   channel.messages.cache.set(message.id, message);
+  message.react = jest.fn(); // TODO: implement
   return message;
 }
 
-export function mockMarkedAsSolvedReply(
-  client: Client,
-  question_id: string,
-  solution_id: string,
-  override: Partial<RawMessageData> = {}
-) {
+export function mockMessageReaction({
+  message,
+  reacter,
+  override,
+}: {
+  message: Message;
+  reacter: User;
+  override: Partial<RawMessageReactionData>;
+}) {
+  const data: RawMessageReactionData = {
+    channel_id: message.channel.id,
+    count: 1,
+    emoji: {
+      id: randomSnowflake().toString(),
+      name: "👍",
+    },
+    user_id: reacter.id,
+    message_id: message.id,
+    guild_id: message.guild?.id,
+    me: reacter.id === message.client.user?.id,
+    ...override,
+  };
+  const message_reaction = Reflect.construct(MessageReaction, [
+    message.client,
+    data,
+    message,
+  ]) as MessageReaction;
+  return message_reaction;
+}
+
+export function mockReaction({
+  message,
+  user,
+  override,
+}: {
+  message: Message;
+  user: User;
+  override?: Partial<RawMessageReactionData>;
+}) {
+  const data: RawMessageReactionData = {
+    channel_id: message.channel.id,
+    message_id: message.id,
+    user_id: user.id,
+    guild_id: message.guild?.id,
+    count: 1,
+    emoji: {
+      id: randomSnowflake().toString(),
+      name: "👍",
+    },
+    me: user.id === message.client.user?.id,
+    ...override,
+  };
+  const reaction = Reflect.construct(MessageReaction, [
+    message.client,
+    data,
+    message,
+  ]) as MessageReaction;
+  const emoji_id = data.emoji.name ?? data.emoji.id;
+  if (!emoji_id) {
+    throw new Error("Emoji ID and name cannot be null");
+  }
+  message.reactions.cache.set(emoji_id, reaction);
+  return reaction;
+}
+
+export function mockMarkedAsSolvedReply({
+  client,
+  question_id,
+  solution_id,
+  channel,
+  override = {},
+}: {
+  client: Client;
+  question_id: string;
+  solution_id: string;
+  channel?: TextBasedChannel;
+  override?: Partial<RawMessageData>;
+}) {
   const marked_as_solved_reply = mockMessage({
     client,
     author: client.user!,
@@ -397,6 +528,7 @@ export function mockMarkedAsSolvedReply(
       ],
       ...override,
     },
+    channel,
   });
   return marked_as_solved_reply;
 }

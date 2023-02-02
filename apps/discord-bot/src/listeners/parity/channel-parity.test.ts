@@ -8,12 +8,14 @@ import {
 import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
 import { copyClass, emitEvent, testOnlyAPICall } from "~discord-bot/test/utils/helpers";
 import { toAOChannelWithServer, toAOThread } from "~discord-bot/utils/conversions";
+import { clearDatabase } from "@answeroverflow/db";
 
 let data: Awaited<ReturnType<typeof setupBot>>;
 let client: SapphireClient;
 let text_channel: TextChannel;
 let thread: PublicThreadChannel;
 beforeEach(async () => {
+  await clearDatabase();
   data = await setupBot();
   client = data.client;
   text_channel = mockTextChannel(client);
