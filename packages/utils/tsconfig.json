@@ -10,9 +10,6 @@
     "index.ts",
     "src",
     "vitest.config.ts",
-    "../prisma/src/user-server-settings.ts",
-    "../prisma/src/server_settings.ts",
-    "../prisma-schema/src/prisma.test.ts"
   ],
   "exclude": [
     "node_modules",

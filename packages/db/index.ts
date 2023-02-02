@@ -1,13 +1,10 @@
 import type { Channel } from "@prisma/client";
-export * from "./src/server_settings";
 export * from "@prisma/client";
-export * from "./src/elastic";
 export { prisma } from "./src/prisma";
+export * from "./src/elastic";
 export * from "./src/utils";
 export * from "./src/default";
-export * from "./src/channel-settings";
 export * from "./src/utils/bitfield";
-export * from "./src/user-server-settings";
 export * from "./src/zod-schemas";
 export type Thread = Channel & { parent_id: string };
 

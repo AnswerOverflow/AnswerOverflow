@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { channel_settings_flags } from "./channel-settings";
-import { server_settings_flags } from "./server_settings";
+import { channel_settings_flags } from "../../prisma/src/channel-settings";
+import { server_settings_flags } from "../../prisma/src/server_settings";
 import { toDict } from "./utils/bitfield";
 import { ChannelType } from "discord-api-types/v10";
-import { user_server_settings_flags } from "./user-server-settings";
+import { user_server_settings_flags } from "../../prisma/src/user-server-settings";
 
 export const ALLOWED_THREAD_TYPES = new Set([
   ChannelType.PublicThread,

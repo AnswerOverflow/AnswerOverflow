@@ -36,6 +36,18 @@
       "path": "packages/db",
     },
     {
+      "name": "prisma-schema",
+      "path": "packages/prisma-schema"
+    },
+    {
+      "name": "elastic-schema",
+      "path": "packages/elastic-schema"
+    },
+    {
+      "name": "utils",
+      "path": "packages/utils"
+    },
+    {
       "name": "config",
       "path": "packages/config"
     },

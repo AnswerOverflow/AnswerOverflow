@@ -1,0 +1,21 @@
+{
+  "name": "@answeroverflow/utils",
+  "version": "0.1.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules coverage",
+    "lint": "eslint \"*.ts*\" && tsc --noEmit",
+    "lint:fix": "eslint \"*.ts*\" --fix",
+    "test": "yarn run with-env vitest run",
+    "test:watch": "yarn run with-env vitest"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@answeroverflow/tsconfig": "*",
+    "@vitest/coverage-c8": "^0.25.8",
+    "vitest": "^0.25.8"
+  }
+}

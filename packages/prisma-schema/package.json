@@ -1,5 +1,5 @@
 {
-  "name": "@answeroverflow/db",
+  "name": "@answeroverflow/prisma-schema",
   "version": "0.1.0",
   "main": "./index.ts",
   "types": "./index.ts",
@@ -13,20 +13,18 @@
     "db:generate": "yarn with-env prisma generate",
     "db:push": "yarn with-env prisma db push --skip-generate",
     "dev": "yarn with-env prisma studio --port 5556 --browser none",
-    "test:db": "yarn run with-env vitest run --no-threads",
-    "test:watch": "yarn run with-env vitest --no-threads"
+    "test:db": "yarn run with-env vitest run",
+    "test:watch": "yarn run with-env vitest"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^8.5.0",
-    "@prisma/client": "^4.8.1",
-    "@sapphire/bitfield": "^1.0.0",
-    "discord-api-types": "^0.37.30",
-    "zod": "^3.20.2"
+    "@answeroverflow/utils": "*",
+    "@prisma/client": "^4.8.1"
   },
   "devDependencies": {
     "@answeroverflow/tsconfig": "*",
     "@vitest/coverage-c8": "^0.25.8",
     "dotenv-cli": "^6.0.0",
+    "prisma": "^4.8.1",
     "vitest": "^0.25.8"
   }
 }
