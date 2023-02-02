@@ -24,7 +24,7 @@ export function WithTailwindTheme(
         {...props}
         style={{
           flexDirection: "center",
-          padding: "2rem 0 2rem",
+          padding: context.parameters.layout === "fullscreen" ? 0 : "2rem 0 2rem",
         }}
       />
     );

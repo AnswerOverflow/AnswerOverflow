@@ -97,7 +97,7 @@ export function Message({
   }
 
   const Contents = () => (
-    <div className="group relative flex  w-full break-words rounded-xl p-1 ">
+    <div className="group relative flex w-full break-words rounded-xl p-1 ">
       <div className="mr-4 hidden shrink-0 sm:block">
         <DiscordAvatar user={message.author} />
       </div>
@@ -109,9 +109,12 @@ export function Message({
             </div>
             <div className="flex flex-col sm:flex-row">
               <span className="mr-1 text-black dark:text-white">{message.author.name}</span>
-              <span className="text-neutral-800 dark:text-neutral-400">{date_of_message}</span>
+              <span className="ml-[0.25rem] flex items-center justify-center text-[0.75rem] text-[hsl(213,_9.6%,_40.8%)] dark:text-[hsl(216,_3.7%,_73.5%)]">
+                {date_of_message}
+              </span>
             </div>
           </div>
+          {/* TODO: Improve styling */}
           <Link
             href={getMessageUrl({
               server_id: message.server_id,
@@ -119,7 +122,7 @@ export function Message({
               message_id: message.id,
               thread_id: thread?.id,
             })}
-            className="invisible flex h-6 w-6 group-hover:visible"
+            className="absolute right-0 h-6 w-6 group-hover:visible"
             aria-label="Open in Discord"
           >
             <DiscordIcon color="blurple" />
@@ -140,7 +143,7 @@ export function Message({
   const blur_amount = ".4rem";
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full bg-[#FFFFFF] p-2 dark:bg-[#36393F]">
       {blurred ? (
         <>
           <div

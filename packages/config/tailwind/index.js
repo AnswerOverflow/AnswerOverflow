@@ -15,6 +15,15 @@ module.exports = {
     extend: {
       fontFamily: {
         mono: ["var(--font-poppins)"],
+        discord: ["Noto Sans", "sans-serif"],
+        header: ["Montserrat", "sans-serif"],
+        body: ["Source Sans Pro", "sans-serif"],
+      },
+      colors: {
+        ao: {
+          white: "#FAFCFF",
+          black: "#070A0D",
+        },
       },
       visibility: ["group-hover"],
     },
