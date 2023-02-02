@@ -11,5 +11,6 @@
     "index.ts",
     "transformer.ts",
     "vitest.config.ts",
+    "test",
   ]
 }

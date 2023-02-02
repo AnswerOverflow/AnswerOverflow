@@ -1,56 +1,13 @@
-import {
-  Channel,
-  DiscordAccount,
-  getDefaultChannel,
-  getDefaultDiscordAccount,
-  getDefaultMessage,
-  getDefaultServer,
-  getDefaultThread,
-  Message,
-  Server,
-} from "@answeroverflow/db";
+import type { DiscordAccount, Server } from "@answeroverflow/db";
 import { TRPCError } from "@trpc/server";
-import {
-  ChannelType,
-  PermissionFlagsBits,
-  PermissionResolvable,
-  PermissionsBitField,
-} from "discord.js";
+import { PermissionFlagsBits, PermissionResolvable, PermissionsBitField } from "discord.js";
 import { Source, sourceTypes, createContextInner } from "~api/router/context";
 import {
   INVALID_ROUTE_FOR_BOT_ERROR,
   INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,
   MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
 } from "~api/utils/permissions";
-
-export function randomId() {
-  return Math.floor(Math.random() * 10000000).toString();
-}
-
-export function mockAccount(override: Partial<DiscordAccount> = {}) {
-  const account = getDefaultDiscordAccount({
-    id: randomId(),
-    name: "test-user",
-    ...override,
-  });
-  return account;
-}
-
-export function mockMessage(
-  server: Server,
-  channel: Channel,
-  author: DiscordAccount,
-  override: Omit<Partial<Message>, "author_id" | "channel_id" | "server_id"> = {}
-) {
-  return getDefaultMessage({
-    id: randomId(),
-    author_id: author.id,
-    channel_id: channel.id,
-    server_id: server.id,
-    ...override,
-  });
-}
-
+import { mockAccount } from "@answeroverflow/db-mock";
 export async function mockAccountWithServersCallerCtx(
   server: Server,
   caller: Source,
@@ -92,40 +49,6 @@ export async function mockUnauthedCtx(caller: Source) {
     user_servers: undefined,
   });
   return ctx;
-}
-
-export function mockServer(override: Partial<Server> = {}) {
-  return getDefaultServer({
-    id: randomId(),
-    name: "test-server",
-    icon: "ASDASDASDASDsd",
-    ...override,
-  });
-}
-
-export function mockChannel(server: Server, override?: Omit<Partial<Channel>, "server_id">) {
-  return getDefaultChannel({
-    id: randomId(),
-    name: "test-channel",
-    server_id: server?.id ?? randomId(),
-    type: ChannelType.GuildText,
-    parent_id: null,
-    ...override,
-  });
-}
-
-export function mockThread(
-  parent: Channel,
-  override?: Omit<Partial<Channel>, "parent_id" | "server_id">
-) {
-  return getDefaultThread({
-    id: randomId(),
-    name: "test-thread",
-    server_id: parent.server_id,
-    type: ChannelType.PublicThread,
-    parent_id: parent.id,
-    ...override,
-  });
 }
 
 export async function createAnswerOverflowBotCtx() {

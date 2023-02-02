@@ -1,13 +1,5 @@
-import { Channel, clearDatabase, DiscordAccount, Message, Server } from "@answeroverflow/db";
-import {
-  createAnswerOverflowBotCtx,
-  mockAccount,
-  mockChannel,
-  mockMessage,
-  mockServer,
-  mockThread,
-  mockUnauthedCtx,
-} from "~api/test/utils";
+import type { Channel, DiscordAccount, Message, Server } from "@answeroverflow/db";
+import { createAnswerOverflowBotCtx, mockUnauthedCtx } from "~api/test/utils";
 import { channelRouter } from "../channel/channel";
 import { serverRouter } from "../server/server";
 import { discordAccountRouter } from "../users/accounts/discord-accounts";
@@ -18,6 +10,13 @@ import {
   toMessageWithDiscordAccount,
   toPrivateMessageWithStrippedData,
 } from "~api/test/public_data";
+import {
+  mockServer,
+  mockChannel,
+  mockAccount,
+  mockMessage,
+  mockThread,
+} from "@answeroverflow/db-mock";
 
 let server: Server;
 let channel: Channel;
@@ -29,7 +28,6 @@ let ao_bot_message_router: ReturnType<(typeof messageRouter)["createCaller"]>;
 let unauthed_message_page_router: ReturnType<(typeof message_page_router)["createCaller"]>;
 
 beforeEach(async () => {
-  await clearDatabase();
   server = mockServer();
   channel = mockChannel(server);
   author = mockAccount();

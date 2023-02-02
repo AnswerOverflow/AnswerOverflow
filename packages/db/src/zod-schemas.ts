@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { channel_settings_flags } from "./channel-settings";
-import { server_settings_flags } from "./server_settings";
+import { server_settings_flags } from "./server-settings";
 import { toDict } from "./utils/bitfield";
 import { ChannelType } from "discord-api-types/v10";
 import { user_server_settings_flags } from "./user-server-settings";

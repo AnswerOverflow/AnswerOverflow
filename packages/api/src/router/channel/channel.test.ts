@@ -1,7 +1,5 @@
-import { Channel, clearDatabase, getDefaultChannelSettings, Server } from "@answeroverflow/db";
+import { Channel, getDefaultChannelSettings, Server } from "@answeroverflow/db";
 import {
-  mockServer,
-  mockChannel,
   createAnswerOverflowBotCtx,
   testAllVariantsThatThrowErrors,
   mockAccountWithServersCallerCtx,
@@ -10,7 +8,8 @@ import {
 import { channelRouter, CHANNEL_NOT_FOUND_MESSAGES } from "./channel";
 import { serverRouter } from "../server/server";
 import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
-import { pick } from "~api/utils/utils";
+import { mockChannel, mockServer } from "@answeroverflow/db-mock";
+import { pick } from "@answeroverflow/utils";
 
 let ao_bot_server_router: ReturnType<(typeof serverRouter)["createCaller"]>;
 let ao_bot_channel_router: ReturnType<(typeof channelRouter)["createCaller"]>;
@@ -19,7 +18,6 @@ let channel: Channel;
 let channel2: Channel;
 
 beforeEach(async () => {
-  await clearDatabase();
   server = mockServer();
   channel = mockChannel(server);
   channel2 = mockChannel(server);
@@ -50,7 +48,9 @@ describe("Channel Operations", () => {
       const fetched = await ao_bot_channel_router.byId(channel.id);
       expect(fetched).toEqual({
         ...channel,
-        settings: getDefaultChannelSettings(channel.id),
+        settings: getDefaultChannelSettings({
+          channel_id: channel.id,
+        }),
       });
     });
     it("tests all variants for fetching a single channel", async () => {
@@ -79,11 +79,15 @@ describe("Channel Operations", () => {
       const fetched = await ao_bot_channel_router.byIdMany([channel.id, channel2.id]);
       expect(fetched).toContainEqual({
         ...channel,
-        settings: getDefaultChannelSettings(channel.id),
+        settings: getDefaultChannelSettings({
+          channel_id: channel.id,
+        }),
       });
       expect(fetched).toContainEqual({
         ...channel2,
-        settings: getDefaultChannelSettings(channel2.id),
+        settings: getDefaultChannelSettings({
+          channel_id: channel2.id,
+        }),
       });
     });
     it("tests all variants for fetching many channels", async () => {

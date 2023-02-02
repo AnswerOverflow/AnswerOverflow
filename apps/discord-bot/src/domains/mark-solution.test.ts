@@ -11,7 +11,6 @@ import {
   ButtonStyle,
   EmbedData,
 } from "discord.js";
-import { clearDatabase } from "@answeroverflow/db";
 
 import {
   checkIfCanMarkSolution,
@@ -48,7 +47,6 @@ let forum_channel: ForumChannel;
 let text_channel_thread: AnyThreadChannel;
 let forum_channel_thread: AnyThreadChannel;
 beforeEach(async () => {
-  await clearDatabase();
   client = await setupAnswerOverflowBot();
   guild = mockGuild(client);
   text_channel = mockTextChannel(client, guild);

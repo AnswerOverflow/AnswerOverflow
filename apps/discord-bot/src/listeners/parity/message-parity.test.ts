@@ -2,7 +2,6 @@ import { Collection, Events, Message, TextChannel } from "discord.js";
 import { elastic } from "@answeroverflow/db";
 import type { SapphireClient } from "@sapphire/framework";
 import { toAOMessage } from "~discord-bot/utils/conversions";
-import { clearDatabase } from "@answeroverflow/db";
 import { mockTextChannel, mockMessage, emitEvent, copyClass } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 
@@ -11,7 +10,6 @@ let message: Message;
 let text_channel: TextChannel;
 
 beforeEach(async () => {
-  await clearDatabase();
   client = await setupAnswerOverflowBot();
   text_channel = mockTextChannel(client);
   message = mockMessage({ client, channel: text_channel });

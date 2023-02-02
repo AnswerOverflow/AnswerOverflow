@@ -17,7 +17,7 @@ import {
 } from "~api/utils/protected-procedures";
 import { assertCanEditServer, assertCanEditServerBotOnly } from "~api/utils/permissions";
 import { serverRouter, z_server_upsert } from "../server/server";
-import { omit } from "~api/utils/utils";
+import { omit } from "@answeroverflow/utils";
 
 export const CHANNEL_NOT_FOUND_MESSAGES = "Channel does not exist";
 
@@ -83,7 +83,8 @@ const fetch_router = router({
         );
         const channel_with_settings = {
           ...omit(channel, "channel_settings"),
-          settings: channel.channel_settings ?? getDefaultChannelSettings(channel.id),
+          settings:
+            channel.channel_settings ?? getDefaultChannelSettings({ channel_id: channel.id }),
         };
 
         return channel_with_settings;
@@ -104,7 +105,8 @@ const fetch_router = router({
         });
         return channels.map((channel) => ({
           ...omit(channel, "channel_settings"),
-          settings: channel.channel_settings ?? getDefaultChannelSettings(channel.id),
+          settings:
+            channel.channel_settings ?? getDefaultChannelSettings({ channel_id: channel.id }),
         }));
       },
       permissions: (data) => assertCanEditServer(ctx, data.server_id),

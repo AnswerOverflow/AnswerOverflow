@@ -1,7 +1,6 @@
 import { Client, Events } from "discord.js";
 import { testOnlyAPICall } from "~discord-bot/test/helpers";
 import { toAOServer } from "~discord-bot/utils/conversions";
-import { clearDatabase } from "@answeroverflow/db";
 import {
   type GuildMemberVariants,
   createGuildMemberVariants,
@@ -15,7 +14,6 @@ import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 let client: Client;
 let members: GuildMemberVariants;
 beforeEach(async () => {
-  await clearDatabase();
   client = await setupAnswerOverflowBot();
   members = await createGuildMemberVariants(client);
 });

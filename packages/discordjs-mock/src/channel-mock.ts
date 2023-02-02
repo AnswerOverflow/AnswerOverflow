@@ -541,7 +541,8 @@ export function mockInvite(
     channel = mockTextChannel(client);
   }
   const invite_data: APIInvite = {
-    code: "test",
+    // random 5 letter string
+    code: Math.random().toString(36).substring(2, 7),
     channel: {
       id: channel.id,
       name: channel.name,
