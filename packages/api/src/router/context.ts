@@ -1,5 +1,5 @@
 import { Session, getServerSession } from "@answeroverflow/auth";
-import type { getDiscordUser, getUserServers } from "@answeroverflow/auth/src/discord-oauth";
+import type { getDiscordUser, getUserServers } from "@answeroverflow/auth";
 import { prisma, elastic } from "@answeroverflow/db";
 import type { inferAsyncReturnType } from "@trpc/server";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
