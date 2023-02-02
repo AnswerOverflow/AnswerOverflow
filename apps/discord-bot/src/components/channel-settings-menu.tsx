@@ -98,6 +98,22 @@ export function ChannelSettingsMenu({
     />
   );
 
+  const ToggleForumPostGuidelinesConsentButton = () => (
+    <ToggleButton
+      currently_enabled={channelSettings.flags.forum_guidelines_consent_enabled}
+      disable_label={"Disable Forum Post Guidelines Consent"}
+      enable_label={"Enable Forum Post Guidelines Consent"}
+      onClick={(interaction: ButtonClickEvent) =>
+        void updateChannelSettings(interaction, {
+          flags: {
+            forum_guidelines_consent_enabled:
+              !channelSettings.flags.forum_guidelines_consent_enabled,
+          },
+        })
+      }
+    />
+  );
+
   const ToggleSendMarkSolutionInstructionsButton = () => (
     <ToggleButton
       currently_enabled={channelSettings.flags.send_mark_solution_instructions_in_new_threads}
@@ -140,7 +156,12 @@ export function ChannelSettingsMenu({
       <ToggleIndexingButton />
       <ToggleMarkSolutionButton />
       <ToggleSendMarkSolutionInstructionsButton />
-      {is_forum_channel && <SelectMarkAsSolvedTag forum_channel={channel.parent} />}
+      {is_forum_channel && (
+        <>
+          <SelectMarkAsSolvedTag forum_channel={channel.parent} />
+          <ToggleForumPostGuidelinesConsentButton />
+        </>
+      )}
     </>
   );
 }

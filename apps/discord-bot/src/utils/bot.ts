@@ -49,7 +49,7 @@ export function createClient(override: Partial<ClientOptions> = {}) {
       "DirectMessages",
       "DirectMessageReactions",
     ],
-    partials: [Partials.Channel, Partials.Message, Partials.GuildMember],
+    partials: [Partials.Channel, Partials.Message, Partials.GuildMember, Partials.Reaction],
     loadMessageCommandListeners: true,
     hmr: {
       enabled: process.env.NODE_ENV === "development",

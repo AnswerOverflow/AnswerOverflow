@@ -12,10 +12,12 @@ import {
   extractUsersSetFromMessages,
   messagesToAOMessagesSet,
 } from "./conversions";
+import { clearDatabase } from "@answeroverflow/db";
 
 let text_channel: TextChannel;
 let client: Client;
 beforeEach(async () => {
+  await clearDatabase();
   const data = await setupBot();
   client = data.client;
   text_channel = mockTextChannel(client);
