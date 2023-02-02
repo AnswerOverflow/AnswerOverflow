@@ -129,7 +129,11 @@
       "db",
       "api",
       "auth",
-      "config"
+      "config",
+      "utils",
+      "db-mock",
+      "prisma-types",
+      "elastic-types",
     ],
     "jest.autoRun": "off",
   },
