@@ -111,7 +111,7 @@ export async function checkIfCanMarkSolution(
   };
 }
 
-export async function assertMessageIsUnsolved(
+export function assertMessageIsUnsolved(
   thread: AnyThreadChannel,
   question_message: Message,
   solution_tag_id: string | null
@@ -128,15 +128,13 @@ export async function assertMessageIsUnsolved(
   }
 
   // 3. Look at the message history to see if it contains the solution message from the Answer Overflow Bot
-  const message_history = await thread.messages.fetch({
-    before: question_message.id,
-    limit: 100,
-  });
-  const is_solution_message_in_history = message_history.some((message) => {
+  // This is more of a backup, so we only do the cached falues
+  const is_solution_in_cache = thread.messages.cache.some((message) => {
     const { question_id, solution_id } = findSolutionsToMessage(message);
     return question_id && solution_id;
   });
-  if (is_solution_message_in_history) {
+
+  if (is_solution_in_cache) {
     throw new MarkSolutionError("This question is already marked as solved");
   }
 }
