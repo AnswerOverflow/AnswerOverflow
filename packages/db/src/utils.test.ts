@@ -1,5 +1,5 @@
-import { prisma } from "..";
 import { clearDatabase } from "./utils";
+import { prisma } from "@answeroverflow/prisma-types";
 describe("Utility function tests", () => {
   it("should clear the database", async () => {
     // TODO: Validate all tables are empty

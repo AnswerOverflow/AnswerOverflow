@@ -1,4 +1,4 @@
-import type { ServerSettings } from "@prisma/client";
+import type { ServerSettings } from "@answeroverflow/prisma-types";
 import { bitfieldToDict, dictToBitfield, mergeFlags } from "./utils/bitfield";
 
 export const server_settings_flags = ["read_the_rules_consent_enabled"] as const;
