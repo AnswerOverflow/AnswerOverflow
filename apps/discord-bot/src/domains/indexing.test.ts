@@ -9,7 +9,7 @@ import {
   TextChannel,
 } from "discord.js";
 
-import { Message as AOMessage } from "@answeroverflow/db";
+import type { Message as AOMessage } from "@answeroverflow/db";
 
 import { testOnlyAPICall } from "~discord-bot/test/helpers";
 import {

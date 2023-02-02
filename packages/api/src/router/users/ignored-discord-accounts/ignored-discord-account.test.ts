@@ -1,4 +1,4 @@
-import { DiscordAccount } from "@answeroverflow/db";
+import type { DiscordAccount } from "@answeroverflow/db";
 import { mockAccount } from "@answeroverflow/db-mock";
 import { createAnswerOverflowBotCtx, testAllSources, mockAccountCallerCtx } from "~api/test/utils";
 import { discordAccountRouter } from "../accounts/discord-accounts";
