@@ -100,7 +100,7 @@ export async function checkIfCanMarkSolution(
   }
 
   // Check if the question is already solved
-  await assertMessageIsUnsolved(thread, question_message, channel_settings.solution_tag_id);
+  assertMessageIsUnsolved(thread, question_message, channel_settings.solution_tag_id);
   return {
     question: question_message,
     solution: possible_solution,
