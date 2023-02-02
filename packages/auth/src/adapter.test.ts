@@ -3,8 +3,9 @@ import { clearDatabase } from "@answeroverflow/db";
 import type { z } from "zod";
 import type { z_user_schema } from "./discord-oauth";
 import { prisma } from "@answeroverflow/db";
+import { getRandomId } from "@answeroverflow/utils";
 const mock_discord_account: z.infer<typeof z_user_schema> = {
-  id: "1234567890",
+  id: getRandomId(),
   username: "TestUser",
   avatar: "1234567890",
   discriminator: "1234",

@@ -9,12 +9,13 @@
     "lint": "eslint . --ext .ts && tsc --noEmit",
     "lint:fix": "eslint . --ext .ts --fix",
     "with-env": "dotenv -e ../../.env --",
-    "test": "yarn run with-env vitest run --no-threads ",
-    "test:watch": "yarn run with-env vitest --no-threads --coverage",
+    "test": "yarn run with-env vitest run --coverage",
+    "test:watch": "yarn run with-env vitest",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@answeroverflow/db": "*",
+    "@answeroverflow/utils": "*",
     "@answeroverflow/tsconfig": "*",
     "@next-auth/prisma-adapter": "^1.0.5",
     "@prisma/client": "^4.7.1",
