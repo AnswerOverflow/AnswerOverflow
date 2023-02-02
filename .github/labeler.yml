@@ -1,29 +1,33 @@
 "🤖bot":
-  - any: ["apps/discord-bot/**"]
+  - "apps/discord-bot/**"
 
 "📢 command":
-  - any: ["apps/discord-bot/src/commands/**", "apps/discord-bot/src/utils/commands/**"]
+    - "apps/discord-bot/src/commands/**"
+    - "apps/discord-bot/src/utils/commands/**"
 
 "📖bot-ui":
-  - any: ["apps/discord-bot/src/components/**", "apps/discord-bot/src/utils/components/**"]
+    - "apps/discord-bot/src/components/**"
+    - "apps/discord-bot/src/utils/components/**"
 
 "🎆event":
-  - any: ["apps/discord-bot/src/listeners/**", "apps/discord-bot/src/utils/listeners/**"]
+    - "apps/discord-bot/src/listeners/**" 
+    - "apps/discord-bot/src/utils/listeners/**"
 
 "⚡ api":
-  - any: ["packages/api/**"]
+  - "packages/api/**"
 
 "🔒auth":
-  - any: ["packages/auth/**"]
+  - "packages/auth/**"
 
 "⚛ component":
-  - any: ["packages/ui/src/components/**"]
+  - "packages/ui/src/components/**"
 
 "📚db":
-  - any: ["packages/db/**"]
+  - "packages/db/**"
 
 "📄 page":
-  - any: ["apps/nextjs/src/pages"]
+  - "apps/nextjs/src/pages"
 
 "🖥️website":
-  - any: ["packages/ui/**", "apps/nextjs/**"]
+  - "packages/ui/**"
+  - "apps/nextjs/**"
