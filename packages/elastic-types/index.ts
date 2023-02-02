@@ -17,10 +17,6 @@ declare global {
       ELASTICSEARCH_CLOUD_ID: string;
       ELASTICSEARCH_API_KEY: string;
 
-      /* Prisma */
-      VITE_DATABASE_URL: string;
-      DATABASE_URL: string;
-
       // common
       readonly NODE_ENV: "development" | "production" | "test";
     }
