@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import { Events, MessageReaction, User } from "discord.js";
-import { markAsSolved, MarkSolutionError } from "~discord-bot/domains/commands/mark-solution";
+import { markAsSolved, MarkSolutionError } from "~discord-bot/domains/mark-solution";
 
 /*
   This file is a nice bit of legacy code being ported over from Answer Overflow V1 since Reactiflux needed to use ✅ as a reaction to mark a message as a solution.

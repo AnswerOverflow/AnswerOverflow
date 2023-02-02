@@ -25,7 +25,7 @@ import { testOnlyAPICall } from "~discord-bot/test/helpers";
 import { toAOChannelWithServer } from "~discord-bot/utils/conversions";
 
 import type { ChannelSettingsWithFlags } from "@answeroverflow/api";
-import { CONSENT_BUTTON_DATA } from "../components/consent";
+import { CONSENT_BUTTON_DATA } from "./consent";
 import {
   mockGuild,
   mockTextChannel,
