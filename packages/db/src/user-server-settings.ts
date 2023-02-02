@@ -1,4 +1,4 @@
-import type { UserServerSettings } from "@prisma/client";
+import type { UserServerSettings } from "@answeroverflow/prisma-types";
 import { bitfieldToDict, dictToBitfield, mergeFlags } from "./utils/bitfield";
 
 export const user_server_settings_flags = [

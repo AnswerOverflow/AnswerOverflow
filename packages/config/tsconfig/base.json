@@ -83,7 +83,7 @@
         "./packages/api/src/router/*"
       ],
       "~api/test/*": [
-        "./packages/api/src/test/*"
+        "./packages/api/test/*"
       ],
       "~api/utils/*": [
         "./packages/api/src/utils/*"

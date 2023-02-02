@@ -129,7 +129,12 @@ const channelSettingsCreateUpdate = router({
       protectedMutationFetchFirst({
         fetch: () => channelRouter.createCaller(ctx).byId(input.channel_id),
         operation: async (channel) => {
-          const new_settings = mergeChannelSettings(getDefaultChannelSettings(channel.id), input);
+          const new_settings = mergeChannelSettings(
+            getDefaultChannelSettings({
+              channel_id: channel.id,
+            }),
+            input
+          );
           const data = await ctx.prisma.channelSettings.create({
             data: { ...new_settings, channel_id: channel.id },
           });

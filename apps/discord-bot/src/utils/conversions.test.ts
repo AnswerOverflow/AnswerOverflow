@@ -4,7 +4,6 @@ import {
   extractUsersSetFromMessages,
   messagesToAOMessagesSet,
 } from "./conversions";
-import { clearDatabase } from "@answeroverflow/db";
 import {
   mockTextChannel,
   mockMessages,
@@ -17,7 +16,6 @@ import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 let text_channel: TextChannel;
 let client: Client;
 beforeEach(async () => {
-  await clearDatabase();
   client = await setupAnswerOverflowBot();
   text_channel = mockTextChannel(client);
 });

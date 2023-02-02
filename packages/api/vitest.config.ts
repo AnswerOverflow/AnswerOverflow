@@ -6,7 +6,7 @@ export default createVitestConfig({
   resolve: {
     alias: {
       "~api/router": path.resolve(__dirname, "./src/router/"),
-      "~api/test": path.resolve(__dirname, "./src/test/"),
+      "~api/test": path.resolve(__dirname, "./test/"),
       "~api/utils": path.resolve(__dirname, "./src/utils/"),
     },
   },

@@ -28,40 +28,6 @@
       "cache": false
     },
     "test": {
-      "dependsOn": [
-        "test:discord-bot"
-      ],
-      "outputs": [],
-      "cache": false
-    },
-    "test:db": {
-      "dependsOn": [
-        "^test:db"
-      ],
-      "cache": false
-    },
-    "test:auth": {
-      "dependsOn": [
-        "test:db",
-        "^test:auth"
-      ],
-      "cache": false
-    },
-    "test:api": {
-      "dependsOn": [
-        "test:auth",
-        "^test:api"
-      ],
-      "cache": false
-    },
-    "test:discord-bot": {
-      "dependsOn": [
-        "test:api",
-        "^test:discord-bot"
-      ],
-      "cache": false
-    },
-    "test:watch": {
       "outputs": [],
       "cache": false
     },

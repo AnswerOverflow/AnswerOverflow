@@ -2,7 +2,6 @@ import type { SapphireClient } from "@sapphire/framework";
 import { Events, PublicThreadChannel, TextChannel } from "discord.js";
 import { testOnlyAPICall } from "~discord-bot/test/helpers";
 import { toAOChannelWithServer, toAOThread } from "~discord-bot/utils/conversions";
-import { clearDatabase } from "@answeroverflow/db";
 import {
   mockTextChannel,
   mockPublicThread,
@@ -16,7 +15,6 @@ let client: SapphireClient;
 let text_channel: TextChannel;
 let thread: PublicThreadChannel;
 beforeEach(async () => {
-  await clearDatabase();
   client = await setupAnswerOverflowBot();
   text_channel = mockTextChannel(client);
   thread = mockPublicThread({ client });

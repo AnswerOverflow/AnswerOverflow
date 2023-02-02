@@ -1,7 +1,6 @@
 import type { SapphireClient } from "@sapphire/framework";
 import { Events, Guild } from "discord.js";
 import { prisma } from "@answeroverflow/db";
-import { clearDatabase } from "@answeroverflow/db";
 import {
   mockGuild,
   mockTextChannel,
@@ -15,7 +14,6 @@ let client: SapphireClient;
 let guild: Guild;
 
 beforeEach(async () => {
-  await clearDatabase();
   client = await setupAnswerOverflowBot();
   guild = mockGuild(client);
 });

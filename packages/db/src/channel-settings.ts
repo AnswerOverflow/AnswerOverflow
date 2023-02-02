@@ -1,4 +1,4 @@
-import type { ChannelSettings } from "@prisma/client";
+import { ChannelSettings, getDefaultChannelSettings } from "@answeroverflow/prisma-types";
 import { bitfieldToDict } from "./utils/bitfield";
 
 export const channel_settings_flags = [
@@ -19,4 +19,8 @@ export function addChannelSettingsFlagsToChannelSettings<T extends ChannelSettin
     ...channel_settings,
     flags: bitfieldToChannelSettingsFlags(channel_settings.bitfield),
   };
+}
+
+export function getDefaultChannelSettingsWithFlags(channel_id: string) {
+  return addChannelSettingsFlagsToChannelSettings(getDefaultChannelSettings({ channel_id }));
 }

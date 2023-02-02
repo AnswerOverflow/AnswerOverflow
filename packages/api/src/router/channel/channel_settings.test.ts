@@ -1,15 +1,14 @@
 import {
   createAnswerOverflowBotCtx,
   mockAccountWithServersCallerCtx,
-  mockChannel,
-  mockServer,
   testAllVariantsThatThrowErrors,
 } from "~api/test/utils";
 import { serverRouter } from "../server/server";
 import { channelRouter } from "./channel";
 import { channelSettingsRouter } from "./channel_settings";
-import { Server, Channel, clearDatabase } from "@answeroverflow/db";
+import type { Server, Channel } from "@answeroverflow/db";
 import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
+import { mockChannel, mockServer } from "@answeroverflow/db-mock";
 
 let ao_bot_server_router: ReturnType<(typeof serverRouter)["createCaller"]>;
 let ao_bot_channel_router: ReturnType<(typeof channelRouter)["createCaller"]>;
@@ -18,7 +17,6 @@ let server: Server;
 let channel: Channel;
 
 beforeEach(async () => {
-  await clearDatabase();
   server = mockServer();
   channel = mockChannel(server);
   const ao_bot = await createAnswerOverflowBotCtx();
@@ -54,23 +52,26 @@ describe("Channel Settings Operations", () => {
     });
   });
   describe("Channel Settings By Invite Code", () => {
+    let invite_code: string;
     beforeEach(async () => {
+      // set to a random string to avoid collisions
+      invite_code = Math.random().toString(36).substring(7);
       await ao_bot_channel_settings_router.create({
         channel_id: channel.id,
-        invite_code: "potato",
+        invite_code,
       });
     });
-    it("should fetch channel settings by id as the Answer Overflow Bot", async () => {
-      const channel_settings = await ao_bot_channel_settings_router.byInviteCode("potato");
+    it("should fetch channel settings by invite code as the Answer Overflow Bot", async () => {
+      const channel_settings = await ao_bot_channel_settings_router.byInviteCode(invite_code);
       expect(channel_settings.channel_id).toBe(channel.id);
-      expect(channel_settings.invite_code).toBe("potato");
+      expect(channel_settings.invite_code).toBe(invite_code);
     });
-    it("should test fetching channel settings by id with all varaints", async () => {
+    it("should test fetching channel settings by invite code with all varaints", async () => {
       await testAllVariantsThatThrowErrors({
         async operation({ source, permission }) {
           const caller = await mockAccountWithServersCallerCtx(server, source, permission);
           const router = channelSettingsRouter.createCaller(caller.ctx);
-          await router.byInviteCode("potato");
+          await router.byInviteCode(invite_code);
         },
         permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],

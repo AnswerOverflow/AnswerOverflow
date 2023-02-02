@@ -1,4 +1,3 @@
-import { clearDatabase } from "@answeroverflow/db";
 import { Client, Events } from "discord.js";
 import {
   emitEvent,
@@ -15,7 +14,6 @@ import { toAOChannelWithServer } from "~discord-bot/utils/conversions";
 
 let client: Client;
 beforeEach(async () => {
-  await clearDatabase();
   client = await setupAnswerOverflowBot();
 });
 

@@ -5,8 +5,8 @@ import {
   Message,
   Server,
 } from "@answeroverflow/db";
+import { pick } from "@answeroverflow/utils";
 import type { MessageWithDiscordAccount } from "~api/router/message/types";
-import { pick } from "~api/utils/utils";
 
 export function pickPublicServerData(server: Server) {
   return pick(server, ["id", "name", "icon"]);
