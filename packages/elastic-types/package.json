@@ -1,0 +1,25 @@
+{
+  "name": "@answeroverflow/prisma-types",
+  "version": "0.1.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules coverage",
+    "with-env": "dotenv -e ../../.env --",
+    "lint": "eslint \"*.ts*\" && tsc --noEmit",
+    "lint:fix": "eslint \"*.ts*\" --fix",
+    "test:db": "yarn run with-env vitest run",
+    "test:watch": "yarn run with-env vitest"
+  },
+  "dependencies": {
+    "@answeroverflow/utils": "*"
+  },
+  "devDependencies": {
+    "@answeroverflow/tsconfig": "*",
+    "@vitest/coverage-c8": "^0.25.8",
+    "dotenv-cli": "^6.0.0",
+    "vitest": "^0.25.8"
+  }
+}

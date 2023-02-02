@@ -36,12 +36,12 @@
       "path": "packages/db",
     },
     {
-      "name": "prisma-schema",
-      "path": "packages/prisma-schema"
+      "name": "prisma-types",
+      "path": "packages/prisma-types"
     },
     {
-      "name": "elastic-schema",
-      "path": "packages/elastic-schema"
+      "name": "elastic-types",
+      "path": "packages/elastic-types"
     },
     {
       "name": "utils",

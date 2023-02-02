@@ -1,21 +1,27 @@
+import { getRandomId } from "@answeroverflow/utils";
 import { elastic, Message } from "../index";
 
-const msg1: Message = {
-  id: "1054158565633441823",
-  channel_id: "1",
-  content: "hello",
-  images: [],
-  replies_to: "1",
-  server_id: "843301848295014421",
-  solutions: [],
-  author_id: "523949187663134754",
-  child_thread: "1",
-};
+let msg1: Message;
 
-const msg2: Message = {
-  ...msg1,
-  id: "200",
-};
+let msg2: Message;
+
+beforeEach(() => {
+  msg1 = {
+    id: getRandomId(),
+    channel_id: "1",
+    content: "hello",
+    images: [],
+    replies_to: "1",
+    server_id: getRandomId(),
+    solutions: [],
+    author_id: getRandomId(),
+    child_thread: getRandomId(),
+  };
+  msg2 = {
+    ...msg1,
+    id: getRandomId(),
+  };
+});
 
 describe("ElasticSearch", () => {
   beforeEach(async () => {
@@ -39,13 +45,13 @@ describe("ElasticSearch", () => {
   describe("Message Delete", () => {
     it("should delete a message", async () => {
       await elastic.upsertMessage(msg1);
-      const deleted_message = await elastic.deleteMessage("1054158565633441823");
+      const deleted_message = await elastic.deleteMessage(msg1.id);
       expect(deleted_message).toBeTruthy();
-      const fetched_deleted_message = await elastic.getMessage("1054158565633441823");
+      const fetched_deleted_message = await elastic.getMessage(msg1.id);
       expect(fetched_deleted_message).toBeNull();
     });
     it("should delete a message that does not exist", async () => {
-      const deleted_message = await elastic.deleteMessage("1054158565633441823");
+      const deleted_message = await elastic.deleteMessage(msg1.id);
       expect(deleted_message).toBeFalsy();
     });
   });
@@ -91,9 +97,9 @@ describe("ElasticSearch", () => {
   describe("Message Fetch", () => {
     it("should search for a message", async () => {
       await elastic.upsertMessage(msg1);
-      const fetched_message = await elastic.getMessage("1054158565633441823");
+      const fetched_message = await elastic.getMessage(msg1.id);
       expect(fetched_message).toBeDefined();
-      expect(fetched_message!.id).toBe("1054158565633441823");
+      expect(fetched_message!.id).toBe(msg1.id);
       expect(fetched_message).toEqual(msg1);
     });
   });
