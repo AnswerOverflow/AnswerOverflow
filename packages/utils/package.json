@@ -9,8 +9,8 @@
     "clean": "rm -rf .turbo node_modules coverage",
     "lint": "eslint \"*.ts*\" && tsc --noEmit",
     "lint:fix": "eslint \"*.ts*\" --fix",
-    "test": "yarn run with-env vitest run",
-    "test:watch": "yarn run with-env vitest"
+    "test": "yarn run vitest run",
+    "test:watch": "yarn run vitest"
   },
   "dependencies": {},
   "devDependencies": {

@@ -17,8 +17,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "test:discord-bot": "yarn jest --runInBand",
-    "test:watch": "yarn jest --watch --runInBand",
+    "test:discord-bot": "yarn jest",
+    "test:watch": "yarn jest --watch",
     "lint": "eslint src && tsc --noEmit",
     "lint:fix": "eslint src --fix"
   },

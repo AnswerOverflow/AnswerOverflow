@@ -5,3 +5,7 @@
 export function getRandomId(): string {
   return Math.floor(Math.random() * 1000000000).toString();
 }
+
+export function getRandomEmail(): string {
+  return `${getRandomId()}@answeroverflow.com`;
+}
