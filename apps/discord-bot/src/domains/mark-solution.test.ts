@@ -12,16 +12,7 @@ import {
   EmbedData,
 } from "discord.js";
 import { clearDatabase } from "@answeroverflow/db";
-import {
-  mockTextChannel,
-  mockPublicThread,
-  mockForumChannel,
-  mockMessage,
-  mockReaction,
-  mockMarkedAsSolvedReply,
-} from "~discord-bot/test/utils/discordjs/channel-mock";
-import { setupBot } from "~discord-bot/test/utils/discordjs/scenarios";
-import { mockGuildMember } from "~discord-bot/test/utils/discordjs/user-mock";
+
 import {
   checkIfCanMarkSolution,
   makeMarkSolutionResponse,
@@ -30,15 +21,24 @@ import {
   QUESTION_ID_FIELD_NAME,
   SOLUTION_ID_FIELD_NAME,
 } from "./mark-solution";
-import {
-  overrideVariables,
-  testAllPermissions,
-  testOnlyAPICall,
-} from "~discord-bot/test/utils/helpers";
-import { toAOChannelWithServer } from "../conversions";
-import { mockGuild } from "~discord-bot/test/utils/discordjs/guild-mock";
+import { testOnlyAPICall } from "~discord-bot/test/helpers";
+import { toAOChannelWithServer } from "~discord-bot/utils/conversions";
+
 import type { ChannelSettingsWithFlags } from "@answeroverflow/api";
-import { CONSENT_BUTTON_DATA } from "../consent";
+import { CONSENT_BUTTON_DATA } from "./consent";
+import {
+  mockGuild,
+  mockTextChannel,
+  mockForumChannel,
+  mockGuildMember,
+  mockPublicThread,
+  mockMessage,
+  overrideVariables,
+  mockReaction,
+  mockMarkedAsSolvedReply,
+  testAllPermissions,
+} from "@answeroverflow/discordjs-mock";
+import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 
 let client: Client;
 let guild: Guild;
@@ -49,8 +49,7 @@ let text_channel_thread: AnyThreadChannel;
 let forum_channel_thread: AnyThreadChannel;
 beforeEach(async () => {
   await clearDatabase();
-  const data = await setupBot();
-  client = data.client;
+  client = await setupAnswerOverflowBot();
   guild = mockGuild(client);
   text_channel = mockTextChannel(client, guild);
   forum_channel = mockForumChannel(client, guild);

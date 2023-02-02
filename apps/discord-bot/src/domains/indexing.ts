@@ -21,7 +21,7 @@ import {
 } from "~discord-bot/utils/conversions";
 import { container } from "@sapphire/framework";
 import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
-import { sortMessagesById } from "./utils";
+import { sortMessagesById } from "@answeroverflow/discordjs-utils";
 
 export async function indexServers(client: Client) {
   container.logger.info(`Indexing ${client.guilds.cache.size} servers`);

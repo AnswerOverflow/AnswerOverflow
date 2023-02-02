@@ -1,4 +1,3 @@
-import type { SapphireClient } from "@sapphire/framework";
 import {
   ChatInputCommandInteraction,
   InteractionType,
@@ -8,14 +7,15 @@ import {
   Guild,
   GuildMember,
   PermissionsBitField,
+  Client,
 } from "discord.js";
-import { randomSnowflake } from "~discord-bot/utils/utils";
+import { randomSnowflake } from "@answeroverflow/discordjs-utils";
 import { mockTextChannel } from "./channel-mock";
 import { mockGuild } from "./guild-mock";
 import { mockGuildMember } from "./user-mock";
 
 export function mockInteracion(
-  client: SapphireClient,
+  client: Client,
   name: string,
   id: string,
   guild?: Guild,
@@ -32,7 +32,7 @@ export function mockInteracion(
     member = mockGuildMember({ client, guild });
   }
   const raw_data: APIChatInputApplicationCommandInteraction = {
-    application_id: client.id?.toString() ?? randomSnowflake.toString(), // TODO: This probably should be an assert
+    application_id: client.user?.id.toString() ?? randomSnowflake.toString(), // TODO: This probably should be an assert
     channel_id: channel.id,
     id, // TODO: Is this related to the command id?
     type: InteractionType.ApplicationCommand,

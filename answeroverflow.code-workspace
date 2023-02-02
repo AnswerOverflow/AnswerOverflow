@@ -16,6 +16,14 @@
       "path": "apps/discord-bot",
     },
     {
+      "name": "discordjs-mock",
+      "path": "packages/discordjs-mock"
+    },
+    {
+      "name": "discordjs-utils",
+      "path": "packages/discordjs-utils",
+    },
+    {
       "name": "api",
       "path": "packages/api"
     },

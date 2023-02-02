@@ -44,6 +44,10 @@ Misc utility functions. Try to keep related functions in the same files as they 
 
       Example: Converting data types from Discord -> Answer Overflow
 
+### domains
+
+Where the business logic of listeners / commands / components live. Code is written here instead of in the files that handle the interactions to make it more reusable
+
 ## Testing Methodology
 
 1. We're not recreating Discord, we're just ensuring each element of the bot responds correctly to interactions
