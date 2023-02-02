@@ -1,5 +1,4 @@
 import { ChannelType, Client } from "discord.js";
-import { setupAnswerOverflowBot } from "~discord-bot/test/utils/sapphire-mock";
 import {
   mockTextChannel,
   mockForumChannel,
@@ -7,10 +6,11 @@ import {
   mockPublicThread,
   mockThreadFromParentMessage,
 } from "./channel-mock";
+import { setupBot } from "./client-mock";
 import { mockGuild } from "./guild-mock";
 let client: Client;
 beforeEach(async () => {
-  client = await setupAnswerOverflowBot();
+  client = await setupBot();
 });
 
 describe("Text Channel Mock", () => {
