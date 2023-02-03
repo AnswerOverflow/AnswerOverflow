@@ -64,7 +64,7 @@ Go to [Answer Overflow](https://www.answeroverflow.com/), add the bot your serve
 
 > Answer Overflow is developed by [Rhys Sullivan](https://twitter.com/RhysSullivan)
 
-Want to contribute? First, read the <a href="https://github.com/AnswerOverflow/AnswerOverflow/blob/main/CONTRIBUTING.md">Contributing Guidelines</a> before creating PRs or issues. Need any help? Join us on <a href="https://discord.gg/Wny38ap7Tx">Discord</a>!
+Want to contribute? First, read the <a href="https://github.com/AnswerOverflow/AnswerOverflow/blob/main/CONTRIBUTING">Contributing Guidelines</a> before creating PRs or issues. Need any help? Join us on <a href="https://discord.gg/Wny38ap7Tx">Discord</a>!
 
 <a href="https://github.com/AnswerOverflow/AnswerOverflow/graphs/contributors">
   <p align="center">
