@@ -1,40 +1,75 @@
 
-<p align='center'>
-        <a href='https://answeroverflow.com/'>
-        <img src="https://www.answeroverflow.com/content/branding/AnswerOverflowLOGO.png">
-    </a>
-</p>
+<div align='center'>
+<a href='https://answeroverflow.com/' target="_blank" rel="noopener">
+  <picture>
+      <img src="https://www.answeroverflow.com/content/branding/AnswerOverflowLOGO.png">
+  </picture>
+</a>
+</div>
 
 <div align="center">
   <h1>Answer Overflow</h1>
-  <h3>Improve & Google Index Discord Help Channels</h3>
-  <h4>⚠ Currently In Breaking Development ⚠</h4>
-  <p>While you are welcome to submit issues / PRs - while the project base is created a lot of changes will be happening to the repo</p>
+  <h3>Google Index Discord Your Help Channels<br /></h3>
+  <a href="https://github.com/AnswerOverflow/AnswerOverflow/blob/main/LICENSE">
+    <img alt="AGPL License" src="https://img.shields.io/github/license/AnswerOverflow/AnswerOverflow" />
+  </a>
+  <a href="https://discord.gg/Wny38ap7Tx">
+    <img alt="Discord" src="https://img.shields.io/discord/952724385238761475?color=7389D8&label&logo=discord&logoColor=ffffff" />
+  </a>
+  <br />
+  <a href="https://twitter.com/RhysSullivan">
+    <img alt="Twitter" src="https://img.shields.io/twitter/url.svg?label=%40RhysSullivan&style=social&url=https%3A%2F%2Ftwitter.com%2RhysSullivan" />
+  </a>
+  <a href="https://twitter.com/AnswerOverflow">
+    <img alt="Twitter" src="https://img.shields.io/twitter/url.svg?label=%40AnswerOverflow&style=social&url=https%3A%2F%2Ftwitter.com%2FAnswerOverflow" />
+  </a>
+  <br />
+  <br />
+  <figure>
+  <a href='https://google.com/search?q=site%3Aansweroverflow.com+c%23' target="_blank" rel="noopener">
+    <img src="./assets/search-result-example.png" alt="Search results from Answer Overflow" />
+  </a>
+    <figcaption>
+      <p align="center">
+        These results are from questions asked <strong>in Discord help channels</strong> and are now Google indexed so that they can be found by people searching for these questions
+      </p>
+    </figcaption>
+  </figure>
 </div>
 
-## Developing
+<br />
 
-### Environment Setup
+## Intro
 
-Answer Overflow utilizes VSCode features such as workspaces and development containers to provide a fast and consistent cross platform development experience. If you already have VSCode and Docker installed then setting up should be as quick as opening the cloned project in VSCode and running `reopen project in container` along with `open workspace`
+Answer Overflow lets you index your Discord help channels into Google so that you can:
 
-#### Windows
+- Grow your community
+- Stop answering repeat questions
+- Improve the quality of life of people using your project
 
-1. [Install VSCode](https://code.visualstudio.com/)
+### Features
 
-2. [Install Docker](https://www.docker.com/)
+- 🔍&nbsp; Index questions into Google.
+- 📈&nbsp; Powerful analytics - Learn what questions are asked the most, who is most helpful, and other community insights
+- ✅&nbsp; Improved Help Channels - Mark questions as solved, organize content, and keep discussions on track
+- 🐻&nbsp; Easy - Simple menus to control settings
 
-3. Clone & Open
+## Quickstart
 
-### Develop
+Go to [Answer Overflow](https://www.answeroverflow.com/), add the bot your server, and use /channel-settings to get started
 
-With Visual Studio opened in a development container, open a folder in the root workspace
+## Star History
 
-* Run the whole project
+<a href="https://star-history.com/#AnswerOverflow/AnswerOverflow"><img src="https://api.star-history.com/svg?repos=AnswerOverflow/AnswerOverflow&type=Date" alt="Star History Chart" width="600" /></a>
 
-    ```yarn run dev```
-* Run a single app
+## All contributors ✨
 
-    ```yarn turbo run dev --filter='app-name'```
-* Install a package
-    ```yarn workspace <workspace> add <package>```
+> Answer Overflow is developed by [Rhys Sullivan](https://twitter.com/RhysSullivan)
+
+Want to contribute? First, read the <a href="https://github.com/AnswerOverflow/AnswerOverflow/blob/main/CONTRIBUTING.md">Contributing Guidelines</a> before creating PRs or issues. Need any help? Join us on <a href="https://discord.gg/Wny38ap7Tx">Discord</a>!
+
+<a href="https://github.com/AnswerOverflow/AnswerOverflow/graphs/contributors">
+  <p align="center">
+    <img src="https://contrib.rocks/image?repo=AnswerOverflow/AnswerOverflow" alt="A table of avatars from the project's contributors" />
+  </p>
+</a>

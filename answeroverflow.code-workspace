@@ -136,6 +136,9 @@
       "elastic-types",
     ],
     "jest.autoRun": "off",
+    "cSpell.words": [
+      "Turborepo"
+    ],
   },
   "extensions": {
     "recommendations": [
