@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { pick } from "@answeroverflow/utils";
+import { getRandomId, pick } from "@answeroverflow/utils";
 import { z } from "zod";
 import {
   protectedFetchManyWithPublicData,
@@ -20,7 +20,7 @@ const z_public_sample_data = z_sample_data.pick({
 });
 
 const sample_data: z.infer<typeof z_sample_data> = {
-  id: 1,
+  id: parseInt(getRandomId()),
   name: "test",
   email: "hello",
   password: "world",

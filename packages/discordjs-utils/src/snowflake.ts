@@ -14,6 +14,12 @@ export function randomSnowflake(start?: Date, end?: Date) {
   return SnowflakeUtil.generate({ timestamp: getRandomTime(start, end) });
 }
 
+export function randomSnowflakeLargerThan(start: Snowflake) {
+  return SnowflakeUtil.generate({
+    timestamp: new Date(SnowflakeUtil.timestampFrom(start) + 1000),
+  });
+}
+
 export function isSnowflakeLargerAsInt(a: Snowflake, b: Snowflake) {
   return !isSnowflakeLarger(a, b) ? -1 : isSnowflakeLarger(a, b) ? 1 : 0;
 }

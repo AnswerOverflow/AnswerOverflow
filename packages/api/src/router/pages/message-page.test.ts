@@ -17,6 +17,8 @@ import {
   mockMessage,
   mockThread,
 } from "@answeroverflow/db-mock";
+import { getRandomId } from "@answeroverflow/utils";
+import { randomSnowflakeLargerThan } from "@answeroverflow/discordjs-utils";
 
 let server: Server;
 let channel: Channel;
@@ -46,17 +48,17 @@ beforeEach(async () => {
 
 describe("Message Results", () => {
   it("should 404 if the root message doesnt exists", async () => {
-    await expect(unauthed_message_page_router.byId("123")).rejects.toThrow("Message not found");
+    await expect(unauthed_message_page_router.byId(getRandomId())).rejects.toThrow(
+      "Message not found"
+    );
   });
   describe("Text Channel Message Pages", () => {
     let message: Message;
     let message2: Message;
     beforeEach(async () => {
-      message = mockMessage(server, channel, author, {
-        id: "1",
-      });
+      message = mockMessage(server, channel, author);
       message2 = mockMessage(server, channel, author, {
-        id: "2",
+        id: randomSnowflakeLargerThan(message.id).toString(),
       });
       await ao_bot_message_router.upsertBulk([message, message2]);
     });
@@ -78,15 +80,18 @@ describe("Message Results", () => {
     let thread_messages: Message[];
     beforeEach(async () => {
       thread = mockThread(channel);
+      const start_id = thread.id;
+      const next_id = randomSnowflakeLargerThan(start_id).toString();
+      const last_id = randomSnowflakeLargerThan(next_id).toString();
       thread_messages = [
         mockMessage(server, thread, author, {
-          id: "1",
+          id: start_id,
         }),
         mockMessage(server, thread, author, {
-          id: "2",
+          id: next_id,
         }),
         mockMessage(server, thread, author, {
-          id: "3",
+          id: last_id,
         }),
       ];
       await ao_bot_channel_router.create(thread);
@@ -94,7 +99,7 @@ describe("Message Results", () => {
     });
 
     it("should get all thread messages for a thread correctly starting from the root", async () => {
-      const messages = await unauthed_message_page_router.byId("1");
+      const messages = await unauthed_message_page_router.byId(thread_messages[0]!.id);
       expect(messages).toMatchObject({
         messages: thread_messages.map((m) =>
           toPrivateMessageWithStrippedData(toMessageWithDiscordAccount(m, author, false))
@@ -105,7 +110,9 @@ describe("Message Results", () => {
       });
     });
     it("should get all thread messages for a thread correctly starting from a message in the thread", async () => {
-      const messages = await unauthed_message_page_router.byId("3");
+      const messages = await unauthed_message_page_router.byId(
+        thread_messages[thread_messages.length - 1]!.id
+      );
       expect(messages).toMatchObject({
         messages: thread_messages.map((m) =>
           toPrivateMessageWithStrippedData(toMessageWithDiscordAccount(m, author, false))

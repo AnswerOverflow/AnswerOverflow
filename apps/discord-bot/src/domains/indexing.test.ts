@@ -175,14 +175,14 @@ describe("Indexing", () => {
       expect(updated_settings!.last_indexed_snowflake).toBe(largest_id);
     });
     it("should start indexing from the last indexed snowflake", async () => {
+      const start_snowflake = 345312;
       await upsertChannelSettings(text_channel, {
         flags: {
           indexing_enabled: true,
         },
-        last_indexed_snowflake: "100",
+        last_indexed_snowflake: `${start_snowflake}`,
       });
-
-      for (let i = 0; i < 100; i++) {
+      for (let i = start_snowflake - 100; i < start_snowflake; i++) {
         mockMessage({
           client,
           channel: text_channel,
@@ -192,7 +192,7 @@ describe("Indexing", () => {
         });
       }
       const messages: Message[] = [];
-      for (let i = 100; i <= 200; i++) {
+      for (let i = start_snowflake; i <= start_snowflake + 100; i++) {
         messages.push(
           mockMessage({
             client,
