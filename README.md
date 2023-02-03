@@ -1,11 +1,9 @@
 
-<div align='center'>
+<p align='center'>
 <a href='https://answeroverflow.com/' target="_blank" rel="noopener">
-  <picture>
-      <img src="https://www.answeroverflow.com/content/branding/AnswerOverflowLOGO.png">
-  </picture>
+    <img src="https://www.answeroverflow.com/content/branding/AnswerOverflowLOGO.png">
 </a>
-</div>
+</p>
 
 <div align="center">
   <h1>Answer Overflow</h1>
