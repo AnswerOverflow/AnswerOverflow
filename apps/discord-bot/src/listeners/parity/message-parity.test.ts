@@ -1,9 +1,9 @@
 import { Collection, Events, Message, TextChannel } from "discord.js";
-import { elastic } from "@answeroverflow/db";
 import type { SapphireClient } from "@sapphire/framework";
 import { toAOMessage } from "~discord-bot/utils/conversions";
 import { mockTextChannel, mockMessage, emitEvent, copyClass } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
+import { testOnlyAPICall } from "~discord-bot/test/helpers";
 
 let client: SapphireClient;
 let message: Message;
@@ -17,9 +17,9 @@ beforeEach(async () => {
 
 describe("Message Delete Tests", () => {
   it("should deleted a cached message", async () => {
-    await elastic.upsertMessage(toAOMessage(message));
+    await testOnlyAPICall((router) => router.messages.upsert(toAOMessage(message)));
     await emitEvent(client, Events.MessageDelete, message);
-    const deleted_msg = await elastic.getMessage(message.id);
+    const deleted_msg = await testOnlyAPICall((router) => router.messages.byId(message.id));
     expect(deleted_msg).toBeNull();
   });
   test.todo("should delete an uncached message");
@@ -30,9 +30,9 @@ describe("Message Update Tests", () => {
     const updated_message = copyClass(message, client, {
       content: "updated",
     });
-    await elastic.upsertMessage(toAOMessage(message));
+    await testOnlyAPICall((router) => router.messages.upsert(toAOMessage(message)));
     await emitEvent(client, Events.MessageUpdate, message, updated_message);
-    const updated = await elastic.getMessage(message.id);
+    const updated = await testOnlyAPICall((router) => router.messages.byId(message.id));
     expect(updated!.content).toBe("updated");
   });
   test.todo("should update an uncached edited message");
@@ -40,7 +40,7 @@ describe("Message Update Tests", () => {
 
 describe("Message Bulk Delete Tests", () => {
   it("should deleted cached bulk messages", async () => {
-    await elastic.upsertMessage(toAOMessage(message));
+    await testOnlyAPICall((router) => router.messages.upsert(toAOMessage(message)));
 
     await emitEvent(
       client,
@@ -49,7 +49,7 @@ describe("Message Bulk Delete Tests", () => {
       text_channel
     );
 
-    const deleted_msg = await elastic.getMessage(message.id);
+    const deleted_msg = await testOnlyAPICall((router) => router.messages.byId(message.id));
     expect(deleted_msg).toBeNull();
   });
   test.todo("should delete an uncached bulk messages");
