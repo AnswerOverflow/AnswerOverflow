@@ -21,6 +21,7 @@ import {
   toPrivateMessageWithStrippedData,
 } from "~api/test/public_data";
 import { mockAccount, mockChannel, mockMessage, mockServer } from "@answeroverflow/db-mock";
+import { randomSnowflakeLargerThan } from "@answeroverflow/discordjs-utils";
 
 let server: Server;
 let channel: Channel;
@@ -435,11 +436,9 @@ describe("Message Operations", () => {
           can_publicly_display_messages: false,
         },
       });
-      public_message = mockMessage(server, channel, public_author, {
-        id: "1",
-      });
+      public_message = mockMessage(server, channel, public_author);
       private_message = mockMessage(server, channel, private_author, {
-        id: "2",
+        id: randomSnowflakeLargerThan(public_message.id).toString(),
       });
       await ao_bot_message_router.upsertBulk([public_message, private_message]);
     });

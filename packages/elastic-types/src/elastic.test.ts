@@ -8,7 +8,7 @@ let msg2: Message;
 beforeEach(() => {
   msg1 = {
     id: getRandomId(),
-    channel_id: "1",
+    channel_id: getRandomId(),
     content: "hello",
     images: [],
     replies_to: "1",
@@ -84,7 +84,7 @@ describe("ElasticSearch", () => {
     it("should delete a message by thread id", async () => {
       const thread_message = {
         ...msg1,
-        channel_id: "200",
+        channel_id: getRandomId(),
       };
       await elastic.upsertMessage(thread_message);
       const deleted_message = await elastic.deleteByChannelId(thread_message.channel_id);

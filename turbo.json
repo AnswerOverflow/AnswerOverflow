@@ -9,7 +9,7 @@
         "dist/**",
         ".next/**"
       ],
-      "cache": false
+      "cache": true
     },
     "init": {},
     "migrate": {},
@@ -29,7 +29,7 @@
     },
     "test": {
       "outputs": [],
-      "cache": false
+      "cache": true
     },
     "db:generate": {
       "inputs": [

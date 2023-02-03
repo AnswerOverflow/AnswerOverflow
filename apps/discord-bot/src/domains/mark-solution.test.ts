@@ -38,6 +38,7 @@ import {
   testAllPermissions,
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
+import { randomSnowflake } from "@answeroverflow/discordjs-utils";
 
 let client: Client;
 let guild: Guild;
@@ -90,7 +91,7 @@ describe("Can Mark Solution", () => {
         channel: text_channel_thread,
       });
       overrideVariables(text_channel_thread, {
-        parentId: "1234567890",
+        parentId: randomSnowflake(),
       });
       await expect(checkIfCanMarkSolution(message, default_author.user)).rejects.toThrowError(
         "Could not find the parent channel of the thread"
