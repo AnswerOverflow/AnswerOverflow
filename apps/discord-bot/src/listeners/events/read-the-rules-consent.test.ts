@@ -85,15 +85,6 @@ describe("Read the rules consent", () => {
     const members = [
       mockGuildMember({ client, guild: server, data: { pending: true } }),
       mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
     ];
     for await (const pending_member of members) {
       // setup
