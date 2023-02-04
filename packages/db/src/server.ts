@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { PrismaClient } from "..";
+import type { PrismaClient } from "@answeroverflow/prisma-types";
 import { upsert } from "./utils/operations";
 import { z_server } from "./zod-schemas";
 export const z_server_required = z_server.pick({

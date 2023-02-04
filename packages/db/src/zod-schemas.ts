@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { channel_settings_flags } from "./channel-settings";
+
 import { server_settings_flags } from "./server-settings";
-import { toDict } from "./utils/bitfield";
+import { bitfieldToDict, toDict } from "./utils/bitfield";
 import { ChannelType } from "discord-api-types/v10";
 import { user_server_settings_flags } from "./user-server-settings";
+import { ChannelSettings, getDefaultChannelSettings } from "@answeroverflow/prisma-types";
 
 export const ALLOWED_THREAD_TYPES = new Set([
   ChannelType.PublicThread,
@@ -24,6 +25,14 @@ export function toZObject<T extends readonly string[]>(
 }
 
 export const z_unique_array = z.array(z.string()).transform((arr) => [...new Set(arr)]);
+
+export const channel_settings_flags = [
+  "indexing_enabled",
+  "auto_thread_enabled",
+  "mark_solution_enabled",
+  "send_mark_solution_instructions_in_new_threads",
+  "forum_guidelines_consent_enabled",
+] as const;
 
 export const z_channel_settings_flags = toZObject(...channel_settings_flags);
 
@@ -50,6 +59,20 @@ export const z_channel = z.object({
   ),
   parent_id: z.string().nullable(),
 });
+
+export function getDefaultChannelSettingsWithFlags(channel_id: string) {
+  return addFlagsToChannelSettings(getDefaultChannelSettings({ channel_id }));
+}
+
+export const bitfieldToChannelSettingsFlags = (bitfield: number) =>
+  bitfieldToDict(bitfield, channel_settings_flags);
+
+export function addFlagsToChannelSettings<T extends ChannelSettings>(channel_settings: T) {
+  return {
+    ...channel_settings,
+    flags: bitfieldToChannelSettingsFlags(channel_settings.bitfield),
+  };
+}
 
 export const z_channel_public = z_channel.pick({
   id: true,

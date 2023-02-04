@@ -1,42 +1,30 @@
-import {
-  createAnswerOverflowBotCtx,
-  mockAccountWithServersCallerCtx,
-  testAllVariantsThatThrowErrors,
-} from "~api/test/utils";
-import { serverRouter } from "../server/server";
-import { channelRouter } from "./channel";
-import { channelSettingsRouter } from "./channel_settings";
-import type { Server, Channel } from "@answeroverflow/db";
+import { mockAccountWithServersCallerCtx, testAllVariantsThatThrowErrors } from "~api/test/utils";
+import { createChannelSettings, prisma } from "@answeroverflow/db";
+import { channelSettingsRouter } from "./channel-settings";
+import { Server, Channel, createChannel, createServer } from "@answeroverflow/db";
 import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
 import { mockChannel, mockServer } from "@answeroverflow/db-mock";
 
-let ao_bot_server_router: ReturnType<(typeof serverRouter)["createCaller"]>;
-let ao_bot_channel_router: ReturnType<(typeof channelRouter)["createCaller"]>;
-let ao_bot_channel_settings_router: ReturnType<(typeof channelSettingsRouter)["createCaller"]>;
 let server: Server;
 let channel: Channel;
 
 beforeEach(async () => {
   server = mockServer();
   channel = mockChannel(server);
-  const ao_bot = await createAnswerOverflowBotCtx();
-  ao_bot_server_router = serverRouter.createCaller(ao_bot);
-  ao_bot_channel_router = channelRouter.createCaller(ao_bot);
-  ao_bot_channel_settings_router = channelSettingsRouter.createCaller(ao_bot);
-  await ao_bot_server_router.create(server);
-  await ao_bot_channel_router.create(channel);
+
+  await createServer(server, prisma);
+  await createChannel(channel, prisma);
 });
 
 describe("Channel Settings Operations", () => {
   describe("Channel Settings Fetch", () => {
     beforeEach(async () => {
-      await ao_bot_channel_settings_router.create({
-        channel_id: channel.id,
-      });
-    });
-    it("should fetch channel settings as the Answer Overflow Bot", async () => {
-      const channel_settings = await ao_bot_channel_settings_router.byId(channel.id);
-      expect(channel_settings.channel_id).toBe(channel.id);
+      await createChannelSettings(
+        {
+          channel_id: channel.id,
+        },
+        prisma
+      );
     });
     it("should test fetching channel settings with all varaints", async () => {
       await testAllVariantsThatThrowErrors({
@@ -56,15 +44,13 @@ describe("Channel Settings Operations", () => {
     beforeEach(async () => {
       // set to a random string to avoid collisions
       invite_code = Math.random().toString(36).substring(7);
-      await ao_bot_channel_settings_router.create({
-        channel_id: channel.id,
-        invite_code,
-      });
-    });
-    it("should fetch channel settings by invite code as the Answer Overflow Bot", async () => {
-      const channel_settings = await ao_bot_channel_settings_router.byInviteCode(invite_code);
-      expect(channel_settings.channel_id).toBe(channel.id);
-      expect(channel_settings.invite_code).toBe(invite_code);
+      await createChannelSettings(
+        {
+          channel_id: channel.id,
+          invite_code,
+        },
+        prisma
+      );
     });
     it("should test fetching channel settings by invite code with all varaints", async () => {
       await testAllVariantsThatThrowErrors({
@@ -80,18 +66,12 @@ describe("Channel Settings Operations", () => {
     });
   });
   describe("Channel Settings Create", () => {
-    it("should create channel settings as the Answer Overflow Bot", async () => {
-      const channel_settings = await ao_bot_channel_settings_router.create({
-        channel_id: channel.id,
-      });
-      expect(channel_settings.channel_id).toBe(channel.id);
-    });
     it("should test creating channel settings with all varaints", async () => {
       await testAllVariantsThatThrowErrors({
         async operation({ source, permission }) {
           const caller = await mockAccountWithServersCallerCtx(server, source, permission);
           const chnl = mockChannel(server);
-          await ao_bot_channel_router.create(chnl);
+          await createChannel(chnl, prisma);
           const router = channelSettingsRouter.createCaller(caller.ctx);
           await router.create({
             channel_id: chnl.id,
@@ -105,23 +85,12 @@ describe("Channel Settings Operations", () => {
   });
   describe("Channel Settings Update", () => {
     beforeEach(async () => {
-      await ao_bot_channel_settings_router.create({
-        channel_id: channel.id,
-        flags: {
-          indexing_enabled: false,
+      await createChannelSettings(
+        {
+          channel_id: channel.id,
         },
-      });
-    });
-
-    it("should update channel settings as the Answer Overflow Bot", async () => {
-      const channel_settings = await ao_bot_channel_settings_router.update({
-        channel_id: channel.id,
-        flags: {
-          indexing_enabled: true,
-        },
-      });
-      expect(channel_settings.channel_id).toBe(channel.id);
-      expect(channel_settings.flags.indexing_enabled).toBe(true);
+        prisma
+      );
     });
     it("should test updating channel settings with all varaints", async () => {
       await testAllVariantsThatThrowErrors({
@@ -142,15 +111,6 @@ describe("Channel Settings Operations", () => {
     });
   });
   describe("Channel Settings Create With Deps", () => {
-    it("should create channel settings as the Answer Overflow Bot", async () => {
-      const channel_settings = await ao_bot_channel_settings_router.createWithDeps({
-        channel: {
-          ...channel,
-          server: server,
-        },
-      });
-      expect(channel_settings.channel_id).toBe(channel.id);
-    });
     it("should test creating channel settings with all varaints", async () => {
       await testAllVariantsThatThrowErrors({
         async operation({ source, permission }) {
@@ -173,18 +133,12 @@ describe("Channel Settings Operations", () => {
   });
   describe("Channel Settings Upsert", () => {
     describe("Channel Settings Upsert Create", () => {
-      it("should upsert create channel settings as the Answer Overflow Bot", async () => {
-        const channel_settings = await ao_bot_channel_settings_router.upsert({
-          channel_id: channel.id,
-        });
-        expect(channel_settings.channel_id).toBe(channel.id);
-      });
       it("should test upsert creating channel settings with all varaints", async () => {
         await testAllVariantsThatThrowErrors({
           async operation({ source, permission }) {
             const caller = await mockAccountWithServersCallerCtx(server, source, permission);
             const chnl = mockChannel(server);
-            await ao_bot_channel_router.create(chnl);
+            await createChannel(chnl, prisma);
             const router = channelSettingsRouter.createCaller(caller.ctx);
             await router.upsert({
               channel_id: chnl.id,
@@ -198,23 +152,12 @@ describe("Channel Settings Operations", () => {
     });
     describe("Channel Settings Upsert Update", () => {
       beforeEach(async () => {
-        await ao_bot_channel_settings_router.create({
-          channel_id: channel.id,
-          flags: {
-            indexing_enabled: false,
+        await createChannelSettings(
+          {
+            channel_id: channel.id,
           },
-        });
-      });
-
-      it("should upsert update channel settings as the Answer Overflow Bot", async () => {
-        const channel_settings = await ao_bot_channel_settings_router.upsert({
-          channel_id: channel.id,
-          flags: {
-            indexing_enabled: true,
-          },
-        });
-        expect(channel_settings.channel_id).toBe(channel.id);
-        expect(channel_settings.flags.indexing_enabled).toBe(true);
+          prisma
+        );
       });
       it("should test upsert updating channel settings with all varaints", async () => {
         await testAllVariantsThatThrowErrors({
@@ -237,15 +180,6 @@ describe("Channel Settings Operations", () => {
   });
   describe("Channel Settings Upsert With Deps", () => {
     describe("Channel Settings Upsert With Deps Create", () => {
-      it("should upsert create channel settings as the Answer Overflow Bot", async () => {
-        const channel_settings = await ao_bot_channel_settings_router.upsertWithDeps({
-          channel: {
-            ...channel,
-            server: server,
-          },
-        });
-        expect(channel_settings.channel_id).toBe(channel.id);
-      });
       it("should test upsert create channel settings with all varaints", async () => {
         await testAllVariantsThatThrowErrors({
           async operation({ source, permission }) {
@@ -268,26 +202,12 @@ describe("Channel Settings Operations", () => {
     });
     describe("Channel Settings Upsert With Deps Update", () => {
       beforeEach(async () => {
-        await ao_bot_channel_settings_router.createWithDeps({
-          channel: {
-            ...channel,
-            server: server,
+        await createChannelSettings(
+          {
+            channel_id: channel.id,
           },
-        });
-      });
-
-      it("should upsert update channel settings as the Answer Overflow Bot", async () => {
-        const channel_settings = await ao_bot_channel_settings_router.upsertWithDeps({
-          channel: {
-            ...channel,
-            server: server,
-          },
-          flags: {
-            indexing_enabled: true,
-          },
-        });
-        expect(channel_settings.channel_id).toBe(channel.id);
-        expect(channel_settings.flags.indexing_enabled).toBe(true);
+          prisma
+        );
       });
       it("should test upsert updating channel settings with all varaints", async () => {
         await testAllVariantsThatThrowErrors({

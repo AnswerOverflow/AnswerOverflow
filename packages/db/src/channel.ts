@@ -1,16 +1,16 @@
 import { z } from "zod";
-import {
-  addFlagsToChannelSettings,
-  Channel,
-  ChannelSettings,
-  getDefaultChannel,
-  getDefaultChannelSettings,
-  Prisma,
-  PrismaClient,
-} from "..";
 import { upsertServer, z_server_upsert } from "./server";
 import { upsert, upsertMany } from "./utils/operations";
-import { ALLOWED_THREAD_TYPES, z_channel } from "./zod-schemas";
+import { addFlagsToChannelSettings, ALLOWED_THREAD_TYPES, z_channel } from "./zod-schemas";
+import {
+  Prisma,
+  Channel,
+  ChannelSettings,
+  getDefaultChannelSettings,
+  PrismaClient,
+  getDefaultChannel,
+} from "@answeroverflow/prisma-types";
+import { omit } from "@answeroverflow/utils";
 
 export const z_channel_required = z_channel.pick({
   id: true,
@@ -75,7 +75,7 @@ function addSettingsToChannel<
   };
 }
 
-export async function findChannel<T extends Prisma.ChannelFindUniqueArgs>(
+export function findChannel<T extends Prisma.ChannelFindUniqueArgs>(
   args: Prisma.SelectSubset<T, Prisma.ChannelFindUniqueArgs>,
   prisma: PrismaClient
 ) {
@@ -143,7 +143,7 @@ export async function createChannelWithDeps(
   return createChannel(
     {
       server_id: data.server.id,
-      ...data,
+      ...omit(data, ["server"]),
     },
     prisma
   );
