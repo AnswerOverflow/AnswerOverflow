@@ -1,5 +1,5 @@
 import { cva, VariantProps } from "cva";
-import { ButtonStyles, convertToCva } from "./ButtonStyles";
+import { ButtonStyles, convertToCva } from "./button-styles";
 
 export type ButtonVariantProps = Required<VariantProps<typeof buttonStyles>>;
 export const buttonStyles = cva(

@@ -1,3 +1,4 @@
+import type { ClassValue } from "cva/dist/types";
 import type { Entries } from "type-fest";
 
 type Colors = "black" | "white";
@@ -6,8 +7,8 @@ type Styles = "solid" | "ghost";
 export type ButtonStylesType = {
   [key in Colors]: {
     [key in Styles]: {
-      default: string;
-      disabled: string;
+      default: ClassValue;
+      disabled: ClassValue;
     };
   };
 };
@@ -38,7 +39,7 @@ export const ButtonStyles: ButtonStylesType = {
 type compoundVariants = {
   type: Styles;
   color: Colors;
-  className: string;
+  className: ClassValue;
   disabled: boolean;
 };
 
