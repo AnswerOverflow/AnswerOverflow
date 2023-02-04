@@ -143,7 +143,7 @@ export async function createChannelWithDeps(
   return createChannel(
     {
       server_id: data.server.id,
-      ...omit(data, ["server"]),
+      ...omit(data, "server"),
     },
     prisma
   );
