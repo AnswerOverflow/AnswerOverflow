@@ -51,19 +51,17 @@ export const z_channel = z.object({
   parent_id: z.string().nullable(),
 });
 
-export const z_channel_public = z_channel
-  .pick({
-    id: true,
-    name: true,
-    server_id: true,
-    type: true,
-    parent_id: true,
-  })
-  .extend({
-    settings: z_channel_settings_public.pick({
-      invite_code: true,
-    }),
-  });
+export const z_channel_public = z_channel.pick({
+  id: true,
+  name: true,
+  server_id: true,
+  type: true,
+  parent_id: true,
+});
+
+export const z_channel_public_with_settings = z_channel_public.extend({
+  settings: z_channel_settings_public,
+});
 
 export const z_discord_image = z.object({
   url: z.string(),

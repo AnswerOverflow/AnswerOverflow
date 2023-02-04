@@ -5,7 +5,7 @@ export const buttonStyles = cva(
   {
     variants: {
       intent: {
-        primary: "bg-blue-700 text-white border-transparent hover:bg-blue-800",
+        primary: "bg-blue-700 text-white border-transparent hover:bg-blue-800 ",
         secondary: "bg-white text-gray-800 border-gray-400 hover:bg-gray-100",
         danger: "bg-red-600 text-white border-transparent hover:bg-red-700",
         success: "bg-green-700 text-white border-transparent hover:bg-green-800",

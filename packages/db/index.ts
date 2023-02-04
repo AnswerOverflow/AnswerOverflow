@@ -2,6 +2,7 @@ import type { Channel } from "@answeroverflow/prisma-types";
 
 export * from "./src/utils/bitfield";
 export * from "./src/server";
+export * from "./src/channel";
 export * from "./src/channel-settings";
 export * from "./src/server-settings";
 export * from "./src/user-server-settings";

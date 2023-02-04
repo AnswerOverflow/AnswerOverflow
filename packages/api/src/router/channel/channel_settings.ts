@@ -1,5 +1,5 @@
 import {
-  addChannelSettingsFlagsToChannelSettings,
+  addFlagsToChannelSettings,
   bitfieldToChannelSettingsFlags,
   ChannelSettings,
   channel_settings_flags,
@@ -64,7 +64,7 @@ export async function transformChannelSettingsReturn<T extends ChannelSettings>(
   channel_settings: () => Promise<T>
 ) {
   const data = await channel_settings();
-  return addChannelSettingsFlagsToChannelSettings(data);
+  return addFlagsToChannelSettings(data);
 }
 
 function findChannelSettingsById(
