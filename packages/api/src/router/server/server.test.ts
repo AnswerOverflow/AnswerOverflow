@@ -1,28 +1,16 @@
 import { mockServer } from "@answeroverflow/db-mock";
-import type { Server } from "@answeroverflow/db";
+import { createServer, Server } from "@answeroverflow/db";
 import { pickPublicServerData } from "~api/test/public_data";
 import {
-  createAnswerOverflowBotCtx,
   testAllVariantsThatThrowErrors,
   mockAccountWithServersCallerCtx,
   testAllDataVariants,
 } from "~api/test/utils";
 import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
 import { serverRouter } from "./server";
-
-let answer_overflow_bot_router: ReturnType<(typeof serverRouter)["createCaller"]>;
-let server_1: Server;
-beforeEach(async () => {
-  server_1 = mockServer();
-  const ao_bot = await createAnswerOverflowBotCtx();
-  answer_overflow_bot_router = serverRouter.createCaller(ao_bot);
-});
-
+import { prisma } from "@answeroverflow/db";
 describe("Server Operations", () => {
   describe("Server Create", () => {
-    it("should succeed creating a server as the answer overflow bot", async () => {
-      await expect(answer_overflow_bot_router.create(server_1)).resolves.toEqual(server_1);
-    });
     it("should test all permission and caller variants to ensure only calls from the Discord bot with Manage Guild & Administrator can succeed", async () => {
       await testAllVariantsThatThrowErrors({
         sourcesThatShouldWork: ["discord-bot"],
@@ -38,19 +26,11 @@ describe("Server Operations", () => {
     });
   });
   describe("Server Update", () => {
-    it("should succeed updating a guild as the answer overflow bot", async () => {
-      await answer_overflow_bot_router.create(server_1);
-      const server = await answer_overflow_bot_router.update({
-        id: server_1.id,
-        name: "new name",
-      });
-      expect(server).toEqual({ ...server_1, name: "new name" });
-    });
     it("should test all permission and caller variants to ensure only calls from the Discord bot with Manage Guild & Administrator can succeed", async () => {
       return await testAllVariantsThatThrowErrors({
         async operation({ source, permission }) {
           const server = mockServer();
-          await answer_overflow_bot_router.create(server);
+          await createServer(server, prisma);
           const account = await mockAccountWithServersCallerCtx(server, source, permission);
           const router = serverRouter.createCaller(account.ctx);
           await router.update({ id: server.id, name: "new name" });
@@ -68,10 +48,7 @@ describe("Server Operations", () => {
       server_2 = mockServer({
         kicked_time: new Date(),
       });
-      await answer_overflow_bot_router.create(server_2);
-    });
-    it("should succeed fetching a server as the answer overflow bot", async () => {
-      await expect(answer_overflow_bot_router.byId(server_2.id)).resolves.toEqual(server_2);
+      await createServer(server_2, prisma);
     });
     it("should succeed fetching a server with permission variants", async () => {
       await testAllDataVariants({
@@ -91,9 +68,6 @@ describe("Server Operations", () => {
   });
 
   describe("Server Upsert", () => {
-    it("should succeed upserting a server as the answer overflow bot", async () => {
-      await expect(answer_overflow_bot_router.upsert(server_1)).resolves.toEqual(server_1);
-    });
     it("should test all server create upsert variants", async () => {
       await testAllVariantsThatThrowErrors({
         sourcesThatShouldWork: ["discord-bot"],
@@ -110,10 +84,6 @@ describe("Server Operations", () => {
   });
 
   describe("Server Delete", () => {
-    test.todo("should succeed deleting a server as the answer overflow bot");
-    test.todo("should succeed deleting a server with server settings as the answer overflow bot");
-    test.todo("should succeed deleting a server with channels as the answer overflow bot");
-    test.todo("should succeed deleting a server with user server settings as answer overflow bot");
-    test.todo("should test all server create delete variants");
+    test.todo("should test all server delete variants");
   });
 });
