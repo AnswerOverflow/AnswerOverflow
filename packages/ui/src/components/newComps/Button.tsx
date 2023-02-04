@@ -1,4 +1,5 @@
 import { cva, VariantProps } from "cva";
+import { ButtonStyles, convertToCva } from "./ButtonStyles";
 
 export type ButtonVariantProps = Required<VariantProps<typeof buttonStyles>>;
 export const buttonStyles = cva(
@@ -21,27 +22,7 @@ export const buttonStyles = cva(
         true: "",
       },
     },
-    compoundVariants: [
-      {
-        type: "solid",
-        color: "black",
-        className:
-          "bg-ao-black text-white hover:bg-[#151D26] focus:ring-2 focus:ring-[#52BAFF] dark:focus:ring-[#4E8BB5] focus:outline-none",
-        disabled: null,
-      },
-      {
-        type: "solid",
-        color: "black",
-        className: "bg-[#BBBDBF] text-[#4E5358] focus:outline-none cursor-not-allowed",
-        disabled: true,
-      },
-      {
-        type: "solid",
-        color: "white",
-        className:
-          "bg-white text-ao-black hover:bg-[#D5D6D9] focus:ring-2 focus:ring-[#52BAFF] dark:focus:ring-[#4E8BB5] focus:outline-none",
-      },
-    ],
+    compoundVariants: [...convertToCva(ButtonStyles)],
     defaultVariants: {
       type: "solid",
       color: "black",
@@ -56,7 +37,11 @@ export interface ButtonProps extends ButtonVariantProps {
 
 export const Button = ({ text, type, color, disabled, onClick }: ButtonProps) => {
   return (
-    <button className={buttonStyles({ type, color, disabled })} onClick={() => onClick()}>
+    <button
+      className={buttonStyles({ type, color, disabled: disabled ?? false })}
+      onClick={() => onClick()}
+      disabled={disabled ?? false}
+    >
       {text}
     </button>
   );
