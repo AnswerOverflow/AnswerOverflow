@@ -3,12 +3,16 @@ import {
   getDefaultUserServerSettings,
   mergeUserServerSettingsFlags,
   UserServerSettings,
-  z_user_server_settings,
+  z_user_server_settings_create,
+  z_user_server_settings_create_with_deps,
+  z_user_server_settings_find,
+  z_user_server_settings_mutable,
+  z_user_server_settings_update,
 } from "@answeroverflow/db";
 import { z } from "zod";
 import { withDiscordAccountProcedure, mergeRouters, router } from "../trpc";
 import { upsert } from "~api/utils/operations";
-import { discordAccountRouter, z_discord_account_upsert } from "../users/accounts/discord-accounts";
+import { discordAccountRouter } from "../users/accounts/discord-accounts";
 import { serverRouter } from "../server/server";
 import { TRPCError } from "@trpc/server";
 import {
@@ -19,35 +23,6 @@ import {
 import { assertIsUser } from "~api/utils/permissions";
 
 export const SERVER_NOT_SETUP_MESSAGE = "Server is not setup for Answer Overflow yet";
-
-const z_user_server_settings_required = z_user_server_settings.pick({
-  user_id: true,
-  server_id: true,
-});
-
-const z_user_server_settings_mutable = z_user_server_settings
-  .omit({
-    user_id: true,
-    server_id: true,
-  })
-  .partial();
-
-const z_user_server_settings_find = z_user_server_settings_required;
-
-const z_user_server_settings_create = z_user_server_settings_mutable.merge(
-  z_user_server_settings_required
-);
-const z_user_server_settings_create_with_deps = z_user_server_settings_create
-  .omit({
-    user_id: true, // we infer this from the user
-  })
-  .extend({
-    user: z_discord_account_upsert,
-  });
-
-const z_user_server_settings_update = z_user_server_settings_mutable.merge(
-  z_user_server_settings_find
-);
 
 async function transformUserServerSettings<T extends UserServerSettings>(
   user_server_settings: Promise<T> | T

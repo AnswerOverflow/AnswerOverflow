@@ -1,4 +1,4 @@
-import { addFlagsToUserServerSettings } from "./user-server-settings";
+import { addFlagsToUserServerSettings } from "./zod-schemas";
 
 describe("Channel Settings", () => {
   describe("Add Flags To Channel Settings", () => {

@@ -1,8 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { PermissionsBitField } from "discord.js";
 import type { Source, Context } from "~api/router/context";
-import { discordAccountRouter } from "~api/router/users/accounts/discord-accounts";
-import { findAllowNull } from "./operations";
 
 export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
   "You are missing the required permissions to do this";
@@ -83,19 +81,6 @@ export function assertIsUser(ctx: Context, target_user_id: string) {
   }
   return;
 }
-
-export async function assertUserDoesNotExistInDB(ctx: Context, target_user_id: string) {
-  const router = discordAccountRouter.createCaller(ctx);
-  const discord_account = await findAllowNull(() => router.byId(target_user_id));
-  if (discord_account) {
-    return new TRPCError({
-      code: "PRECONDITION_FAILED",
-      message: "This user exists in the database",
-    });
-  }
-  return;
-}
-
 export const INVALID_ROUTE_FOR_BOT_ERROR = "This route is unavaliable to be called from the bot";
 export const INVALID_ROUTER_FOR_WEB_CLIENT_ERROR =
   "This route is unavaliable to be called from the web client";

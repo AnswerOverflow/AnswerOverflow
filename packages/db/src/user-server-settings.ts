@@ -1,27 +1,31 @@
-import type { UserServerSettings } from "@answeroverflow/prisma-types";
-import { bitfieldToDict, dictToBitfield, mergeFlags } from "./utils/bitfield";
+import { z_discord_account_upsert } from "./discord-account";
+import { z_user_server_settings } from "./zod-schemas";
 
-export const user_server_settings_flags = [
-  "can_publicly_display_messages",
-  "message_indexing_disabled",
-] as const;
+export const z_user_server_settings_required = z_user_server_settings.pick({
+  user_id: true,
+  server_id: true,
+});
 
-export const bitfieldToUserServerSettingsFlags = (bitfield: number) =>
-  bitfieldToDict(bitfield, user_server_settings_flags);
+export const z_user_server_settings_mutable = z_user_server_settings
+  .omit({
+    user_id: true,
+    server_id: true,
+  })
+  .partial();
 
-export function addFlagsToUserServerSettings<T extends UserServerSettings>(
-  user_server_settings: T
-) {
-  return {
-    ...user_server_settings,
-    flags: bitfieldToUserServerSettingsFlags(user_server_settings.bitfield),
-  };
-}
+export const z_user_server_settings_find = z_user_server_settings_required;
 
-export function mergeUserServerSettingsFlags(old: number, new_flags: Record<string, boolean>) {
-  return mergeFlags(
-    () => bitfieldToUserServerSettingsFlags(old),
-    new_flags,
-    (flags) => dictToBitfield(flags, user_server_settings_flags)
-  );
-}
+export const z_user_server_settings_create = z_user_server_settings_mutable.merge(
+  z_user_server_settings_required
+);
+export const z_user_server_settings_create_with_deps = z_user_server_settings_create
+  .omit({
+    user_id: true, // we infer this from the user
+  })
+  .extend({
+    user: z_discord_account_upsert,
+  });
+
+export const z_user_server_settings_update = z_user_server_settings_mutable.merge(
+  z_user_server_settings_find
+);
