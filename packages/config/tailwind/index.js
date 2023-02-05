@@ -25,6 +25,9 @@ module.exports = {
           black: "#070A0D",
         },
       },
+      borderWidth: {
+        1: "1px",
+      },
       visibility: ["group-hover"],
     },
   },
