@@ -2,6 +2,7 @@ import {
   createServerSettings,
   findServerSettingsById,
   updateServerSettings,
+  upsert,
   z_server_settings_create,
   z_server_settings_create_with_deps,
   z_server_settings_update,
@@ -11,7 +12,6 @@ import {
 import { z } from "zod";
 import { mergeRouters, withUserServersProcedure, router } from "~api/router/trpc";
 import { serverRouter } from "./server";
-import { upsert } from "~api/utils/operations";
 import {
   protectedFetch,
   protectedMutation,
@@ -62,21 +62,21 @@ const server_settings_upsert = router({
   upsert: withUserServersProcedure
     .input(z_server_settings_upsert)
     .mutation(async ({ ctx, input }) => {
-      return upsert(
-        () => findServerSettingsById(input.server_id, ctx.prisma),
-        () => server_settings_crud.createCaller(ctx).create(input),
-        () => server_settings_crud.createCaller(ctx).update(input)
-      );
+      return upsert({
+        find: () => findServerSettingsById(input.server_id, ctx.prisma),
+        create: () => server_settings_crud.createCaller(ctx).create(input),
+        update: () => server_settings_crud.createCaller(ctx).update(input),
+      });
     }),
   upsertWithDeps: withUserServersProcedure
     .input(z_server_settings_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
-      return upsert(
-        () => findServerSettingsById(input.server.id, ctx.prisma),
-        () => server_settings_create_with_deps.createCaller(ctx).createWithDeps(input),
-        () =>
-          server_settings_crud.createCaller(ctx).update({ server_id: input.server.id, ...input })
-      );
+      return upsert({
+        find: () => findServerSettingsById(input.server.id, ctx.prisma),
+        create: () => server_settings_create_with_deps.createCaller(ctx).createWithDeps(input),
+        update: () =>
+          server_settings_crud.createCaller(ctx).update({ server_id: input.server.id, ...input }),
+      });
     }),
 });
 

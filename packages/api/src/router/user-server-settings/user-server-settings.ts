@@ -4,13 +4,13 @@ import {
   getDefaultUserServerSettings,
   mergeUserServerSettings,
   updateUserServerSettings,
+  upsert,
   z_user_server_settings_create,
   z_user_server_settings_create_with_deps,
   z_user_server_settings_find,
   z_user_server_settings_update,
 } from "@answeroverflow/db";
 import { withDiscordAccountProcedure, mergeRouters, router } from "../trpc";
-import { upsert } from "~api/utils/operations";
 import { discordAccountRouter } from "../users/accounts/discord-accounts";
 import { serverRouter } from "../server/server";
 import { TRPCError } from "@trpc/server";
@@ -89,31 +89,31 @@ const user_server_settings_upsert = router({
   upsert: withDiscordAccountProcedure
     .input(z_user_server_settings_create)
     .mutation(async ({ input, ctx }) => {
-      return upsert(
-        () =>
+      return upsert({
+        find: () =>
           user_server_settings_crud_router.createCaller(ctx).byId({
             user_id: input.user_id,
             server_id: input.server_id,
           }),
-        () => user_server_settings_crud_router.createCaller(ctx).create(input),
-        () => user_server_settings_crud_router.createCaller(ctx).update(input)
-      );
+        create: () => user_server_settings_crud_router.createCaller(ctx).create(input),
+        update: () => user_server_settings_crud_router.createCaller(ctx).update(input),
+      });
     }),
   upsertWithDeps: withDiscordAccountProcedure
     .input(z_user_server_settings_create_with_deps)
     .mutation(async ({ input, ctx }) => {
-      return upsert(
-        () =>
+      return upsert({
+        find: () =>
           user_server_settings_crud_router.createCaller(ctx).byId({
             user_id: input.user.id,
             server_id: input.server_id,
           }),
-        () => user_server_settings_with_deps_router.createCaller(ctx).createWithDeps(input),
-        () =>
+        create: () => user_server_settings_with_deps_router.createCaller(ctx).createWithDeps(input),
+        update: () =>
           user_server_settings_crud_router
             .createCaller(ctx)
-            .update({ ...input, user_id: input.user.id })
-      );
+            .update({ ...input, user_id: input.user.id }),
+      });
     }),
 });
 

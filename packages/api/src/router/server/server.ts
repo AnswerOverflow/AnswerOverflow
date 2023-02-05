@@ -6,10 +6,10 @@ import {
   z_server_upsert,
   updateServer,
   findServerById,
+  upsert,
 } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, router, publicProcedure, withUserServersProcedure } from "~api/router/trpc";
-import { upsert } from "~api/utils/operations";
 import { assertCanEditServer, assertCanEditServerBotOnly } from "~api/utils/permissions";
 import { protectedFetchWithPublicData, protectedMutation } from "~api/utils/protected-procedures";
 
@@ -38,11 +38,11 @@ const serverCreateUpdateRouter = router({
 
 const serverUpsertRouter = router({
   upsert: publicProcedure.input(z_server_upsert).mutation(async ({ ctx, input }) => {
-    return upsert(
-      () => findServerById(input.id, ctx.prisma),
-      () => serverCreateUpdateRouter.createCaller(ctx).create(input),
-      () => serverCreateUpdateRouter.createCaller(ctx).update(input)
-    );
+    return upsert({
+      find: () => findServerById(input.id, ctx.prisma),
+      create: () => serverCreateUpdateRouter.createCaller(ctx).create(input),
+      update: () => serverCreateUpdateRouter.createCaller(ctx).update(input),
+    });
   }),
 });
 

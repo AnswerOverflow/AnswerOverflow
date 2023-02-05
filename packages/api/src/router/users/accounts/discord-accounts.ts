@@ -9,9 +9,9 @@ import {
   createDiscordAccount,
   updateDiscordAccount,
   deleteDiscordAccount,
+  upsert,
 } from "@answeroverflow/db";
 import { z } from "zod";
-import { upsert } from "~api/utils/operations";
 import { mergeRouters, router, publicProcedure } from "~api/router/trpc";
 import {
   protectedFetchManyWithPublicData,
@@ -58,11 +58,11 @@ const account_crud_router = router({
 
 const account_upsert_router = router({
   upsert: publicProcedure.input(z_discord_account_upsert).mutation(({ ctx, input }) => {
-    return upsert(
-      () => findDiscordAccountById(input.id, ctx.prisma),
-      () => account_crud_router.createCaller(ctx).create(input),
-      () => account_crud_router.createCaller(ctx).update(input)
-    );
+    return upsert({
+      find: () => findDiscordAccountById(input.id, ctx.prisma),
+      create: () => account_crud_router.createCaller(ctx).create(input),
+      update: () => account_crud_router.createCaller(ctx).update(input),
+    });
   }),
 });
 

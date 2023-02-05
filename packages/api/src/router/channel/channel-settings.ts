@@ -4,6 +4,7 @@ import {
   findChannelSettingsById,
   findChannelSettingsByInviteCode,
   updateChannelSettings,
+  upsert,
   z_channel_settings_create,
   z_channel_settings_create_with_deps,
   z_channel_settings_update,
@@ -13,7 +14,6 @@ import {
 import { z } from "zod";
 import { mergeRouters, publicProcedure, router } from "~api/router/trpc";
 import { channelRouter } from "./channel";
-import { upsert } from "~api/utils/operations";
 import { protectedFetch, protectedMutationFetchFirst } from "~api/utils/protected-procedures";
 import { assertCanEditServerBotOnly, assertCanEditServer } from "~api/utils/permissions";
 
@@ -64,21 +64,23 @@ const channel_settings_create_with_deps = router({
 
 const channel_settings_upsert = router({
   upsert: publicProcedure.input(z_channel_settings_upsert).mutation(async ({ ctx, input }) => {
-    return upsert(
-      () => findChannelSettingsById(input.channel_id, ctx.prisma),
-      () => channel_settings_crud.createCaller(ctx).create(input),
-      () => channel_settings_crud.createCaller(ctx).update(input)
-    );
+    return upsert({
+      find: () => findChannelSettingsById(input.channel_id, ctx.prisma),
+      create: () => channel_settings_crud.createCaller(ctx).create(input),
+      update: () => channel_settings_crud.createCaller(ctx).update(input),
+    });
   }),
   upsertWithDeps: publicProcedure
     .input(z_channel_settings_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
-      return upsert(
-        () => findChannelSettingsById(input.channel.id, ctx.prisma),
-        () => channel_settings_create_with_deps.createCaller(ctx).createWithDeps(input),
-        () =>
-          channel_settings_crud.createCaller(ctx).update({ channel_id: input.channel.id, ...input })
-      );
+      return upsert({
+        find: () => findChannelSettingsById(input.channel.id, ctx.prisma),
+        create: () => channel_settings_create_with_deps.createCaller(ctx).createWithDeps(input),
+        update: () =>
+          channel_settings_crud
+            .createCaller(ctx)
+            .update({ channel_id: input.channel.id, ...input }),
+      });
     }),
 });
 

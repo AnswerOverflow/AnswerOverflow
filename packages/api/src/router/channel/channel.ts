@@ -13,10 +13,10 @@ import {
   z_channel_upsert,
   z_channel_upsert_with_deps,
   z_thread_upsert_with_deps,
+  upsert,
 } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, router, publicProcedure } from "~api/router/trpc";
-import { upsert } from "~api/utils/operations";
 import {
   protectedFetchWithPublicData,
   protectedFetchManyWithPublicData,
@@ -80,20 +80,20 @@ const create_with_deps_router = router({
 
 const upsert_router = router({
   upsert: publicProcedure.input(z_channel_upsert).mutation(async ({ ctx, input }) => {
-    return upsert(
-      () => findChannelById(input.id, ctx.prisma),
-      () => channel_crud_router.createCaller(ctx).create(input),
-      () => channel_crud_router.createCaller(ctx).update(input)
-    );
+    return upsert({
+      create: () => channel_crud_router.createCaller(ctx).create(input),
+      update: () => channel_crud_router.createCaller(ctx).update(input),
+      find: () => findChannelById(input.id, ctx.prisma),
+    });
   }),
   upsertWithDeps: publicProcedure
     .input(z_channel_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
-      return upsert(
-        () => findChannelById(input.id, ctx.prisma),
-        () => create_with_deps_router.createCaller(ctx).createWithDeps(input),
-        () => channel_crud_router.createCaller(ctx).update(input)
-      );
+      return upsert({
+        find: () => findChannelById(input.id, ctx.prisma),
+        create: () => create_with_deps_router.createCaller(ctx).createWithDeps(input),
+        update: () => channel_crud_router.createCaller(ctx).update(input),
+      });
     }),
 });
 
@@ -101,9 +101,9 @@ const upsert_thread_router = router({
   upsertThreadWithDeps: publicProcedure
     .input(z_thread_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
-      return upsert(
-        () => findChannelById(input.parent.id, ctx.prisma),
-        async () => {
+      return upsert({
+        find: () => findChannelById(input.parent.id, ctx.prisma),
+        create: async () => {
           await upsert_router.createCaller(ctx).upsertWithDeps(input.parent);
           return channel_crud_router.createCaller(ctx).create({
             parent_id: input.parent.id,
@@ -111,8 +111,8 @@ const upsert_thread_router = router({
             ...input,
           });
         },
-        () => channel_crud_router.createCaller(ctx).update(input)
-      );
+        update: () => channel_crud_router.createCaller(ctx).update(input),
+      });
     }),
 });
 

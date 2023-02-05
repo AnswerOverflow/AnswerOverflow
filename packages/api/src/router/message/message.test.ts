@@ -8,13 +8,8 @@ import {
   Message,
   Server,
   upsertManyMessages,
-  upsertMessage,
 } from "@answeroverflow/db";
-import {
-  mockAccountCallerCtx,
-  mockAccountWithServersCallerCtx,
-  testAllDataVariants,
-} from "~api/test/utils";
+import { mockAccountCallerCtx, mockAccountWithServersCallerCtx } from "~api/test/utils";
 import { messageRouter, stripPrivateMessageData } from "./message";
 import {
   toMessageWithDiscordAccount,
@@ -27,14 +22,11 @@ import { prisma, elastic } from "@answeroverflow/db";
 let server: Server;
 let channel: Channel;
 let author: DiscordAccount;
-let message: Message;
-let message2: Message;
+
 beforeEach(async () => {
   server = mockServer();
   channel = mockChannel(server);
   author = mockAccount();
-  message = mockMessage(server, channel, author);
-  message2 = mockMessage(server, channel, author);
   await createServer(server, prisma);
   await createChannel(channel, prisma);
   await createDiscordAccount(author, prisma);
