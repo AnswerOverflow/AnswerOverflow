@@ -20,18 +20,19 @@ export const ButtonStyles: ButtonStylesType = {
       disabled: "bg-gray-300 text-gray-500 border-2 border-black",
     },
     ghost: {
-      default: "bg-black text-white",
-      disabled: "bg-gray-300 text-gray-500 border-2 border-black",
+      default: "bg-transparent text-white border-1 border-white",
+      disabled: "bg-gray-300 text-gray-500 border-1 border-white",
     },
   },
   black: {
     solid: {
-      default: "bg-black text-white",
+      default:
+        "bg-black text-white hover:bg-[#151D26] focus:outline-none focus:ring-2 focus:ring-[#0099FF]",
       disabled: "bg-gray-300 text-gray-500",
     },
     ghost: {
-      default: "bg-black text-white",
-      disabled: "bg-gray-300 text-gray-500",
+      default: "bg-transparent text-black border-1 border-black hover:bg-[#070A0D]/5",
+      disabled: "bg-gray-300 text-gray-500 border-1 border-black",
     },
   },
 };

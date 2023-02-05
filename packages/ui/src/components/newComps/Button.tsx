@@ -1,9 +1,14 @@
 import { cva, VariantProps } from "cva";
+import type { Merge, SetNonNullable } from "type-fest";
 import { ButtonStyles, convertToCva } from "./button-styles";
 
-export type ButtonVariantProps = Required<VariantProps<typeof buttonStyles>>;
+export type ButtonVariantProps = Merge<
+  SetNonNullable<Required<VariantProps<typeof buttonStyles>>>,
+  Pick<VariantProps<typeof buttonStyles>, "disabled">
+>;
+
 export const buttonStyles = cva(
-  "rounded-md px-6 py-2 font-body font-bold transition-all duration-100",
+  "rounded-md px-8 py-2 font-body font-bold transition-all duration-100",
   {
     // We don't need to declare any of these, as all the types are required, we only need to do compound variants
     variants: {
@@ -23,26 +28,27 @@ export const buttonStyles = cva(
       },
     },
     compoundVariants: [...convertToCva(ButtonStyles)],
-    defaultVariants: {
-      type: "solid",
-      color: "black",
-    },
   }
 );
 
 export interface ButtonProps extends ButtonVariantProps {
-  text: string;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
-export const Button = ({ text, type, color, disabled, onClick }: ButtonProps) => {
+export const Button: React.FC<React.PropsWithChildren<ButtonProps>> = ({
+  type,
+  color,
+  disabled,
+  onClick,
+  children,
+}) => {
   return (
     <button
       className={buttonStyles({ type, color, disabled: disabled ?? false })}
-      onClick={() => onClick()}
+      onClick={() => onClick?.()}
       disabled={disabled ?? false}
     >
-      {text}
+      {children}
     </button>
   );
 };

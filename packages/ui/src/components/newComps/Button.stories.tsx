@@ -24,11 +24,14 @@ export default {
 } as Meta<typeof Button>;
 
 //👇 We create a “template” of how args map to rendering
-const Template: StoryFn<typeof Button> = (props: ButtonProps) => <Button {...props} />;
+const Template: StoryFn<typeof Button> = (props: ButtonProps) => (
+  <Button color={props.color} disabled={props.disabled} onClick={props.onClick} type={props.type}>
+    Primary
+  </Button>
+);
 
 export const ButtonPrimary = Template.bind({});
 ButtonPrimary.args = {
-  text: "Primary",
-  type: "solid",
-  color: "black",
+  type: "ghost",
+  color: "white",
 };
