@@ -9,23 +9,39 @@ import { DiscordIcon } from "./icons/DiscordIcon";
 import Link from "next/link";
 import type { ChannelPublic } from "~api/router/channel/types";
 import { useIsUserInServer } from "../utils";
+import { forwardRef } from "react";
 export type MessageProps = {
   message: MessageWithDiscordAccount;
   thread?: ChannelPublic;
   blurred?: boolean;
   not_public_title?: string;
+  darkMode?: boolean;
+  showLinkIcon?: boolean;
+  /**
+   * @example "Today at 13:51"
+   */
+  customMessageDateString?: string;
+  ref?: React.Ref<HTMLDivElement>;
 };
 
 const { toHTML } = discordMarkdown;
 
 // TODO: Align text to be same level with the avatar
-export function Message({
-  message,
-  thread,
-  blurred = false,
-  not_public_title = "Message Not Public",
-}: MessageProps) {
-  const date_of_message = getSnowflakeUTCDate(message.id);
+export const Message = forwardRef<HTMLDivElement, MessageProps>(function MessageComp(
+  {
+    message,
+    thread,
+    blurred = false,
+    not_public_title = "Message Not Public",
+    darkMode = false,
+    showLinkIcon = true,
+    customMessageDateString,
+  },
+  ref
+) {
+  const date_of_message = customMessageDateString
+    ? customMessageDateString
+    : getSnowflakeUTCDate(message.id);
   const convertedMessageContent = toHTML(message.content);
   const parsedMessageContent = Parser(convertedMessageContent);
   const is_user_in_server = useIsUserInServer(message.server_id);
@@ -108,27 +124,39 @@ export function Message({
               <DiscordAvatar user={message.author} />
             </div>
             <div className="flex flex-col sm:flex-row">
-              <span className="mr-1 text-black dark:text-white">{message.author.name}</span>
-              <span className="ml-[0.25rem] flex items-center justify-center text-[0.75rem] text-[hsl(213,_9.6%,_40.8%)] dark:text-[hsl(216,_3.7%,_73.5%)]">
+              <span className={`mr-1 text-black ${darkMode ? "text-white" : "dark:text-white"}`}>
+                {message.author.name}
+              </span>
+              <span
+                className={`ml-[0.25rem] flex items-center justify-center text-[0.75rem] text-[hsl(213,_9.6%,_40.8%)] ${
+                  darkMode ? "text-[hsl(216,_3.7%,_73.5%)]" : "dark:text-[hsl(216,_3.7%,_73.5%)]"
+                }`}
+              >
                 {date_of_message}
               </span>
             </div>
           </div>
           {/* TODO: Improve styling */}
-          <Link
-            href={getMessageUrl({
-              server_id: message.server_id,
-              channel_id: thread && thread.parent_id ? thread.parent_id : message.channel_id,
-              message_id: message.id,
-              thread_id: thread?.id,
-            })}
-            className="absolute right-0 h-6 w-6 group-hover:visible"
-            aria-label="Open in Discord"
-          >
-            <DiscordIcon color="blurple" />
-          </Link>
+          {showLinkIcon && (
+            <Link
+              href={getMessageUrl({
+                server_id: message.server_id,
+                channel_id: thread && thread.parent_id ? thread.parent_id : message.channel_id,
+                message_id: message.id,
+                thread_id: thread?.id,
+              })}
+              className="absolute right-0 h-6 w-6 group-hover:visible"
+              aria-label="Open in Discord"
+            >
+              <DiscordIcon color="blurple" />
+            </Link>
+          )}
         </div>
-        <div className="mt-2 max-w-[80vw] text-black dark:text-neutral-50 sm:mt-0 sm:max-w-[70vw] md:max-w-full">
+        <div
+          className={`mt-2 max-w-[80vw] text-black ${
+            darkMode ? "text-neutral-50" : "dark:text-neutral-50"
+          } sm:mt-0 sm:max-w-[70vw] md:max-w-full`}
+        >
           {parsedMessageContent}
         </div>
         <div className="grid gap-2">
@@ -143,7 +171,12 @@ export function Message({
   const blur_amount = ".4rem";
 
   return (
-    <div className="relative h-full w-full bg-[#FFFFFF] p-2 dark:bg-[#36393F]">
+    <div
+      className={`relative h-full w-full bg-[#FFFFFF] p-2 ${
+        darkMode ? "bg-[#36393F]" : "dark:bg-[#36393F]"
+      }`}
+      ref={ref}
+    >
       {blurred ? (
         <>
           <div
@@ -160,7 +193,11 @@ export function Message({
           <div>
             <div className="absolute inset-0 " />
             <div className="absolute inset-0 flex items-center justify-center ">
-              <div className="flex flex-col items-center justify-center text-center text-black dark:text-white">
+              <div
+                className={`flex flex-col items-center justify-center text-center text-black ${
+                  darkMode ? "text-white" : "dark:text-white"
+                }`}
+              >
                 <div className="text-2xl ">{not_public_title}</div>
                 <div>Sign In & Join Server To View</div>
               </div>
@@ -172,4 +209,4 @@ export function Message({
       )}
     </div>
   );
-}
+});
