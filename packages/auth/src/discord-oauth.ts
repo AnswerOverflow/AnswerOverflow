@@ -11,7 +11,7 @@ function discordFetch(url: string, token: string) {
   });
 }
 
-const serverSchema = z.object({
+const server_schema = z.object({
   id: z.string(),
   name: z.string(),
   icon: z.string().nullable(),
@@ -20,9 +20,11 @@ const serverSchema = z.object({
   features: z.array(z.string()),
 });
 
-const serverArrayShema = z.array(serverSchema);
+const serverArrayShema = z.array(server_schema);
 
 const user_servers_cache = new Map<string, ReturnType<typeof serverArrayShema.parse>>();
+
+export type DiscordServer = z.infer<typeof server_schema>;
 
 export async function getUserServers(access_token: string) {
   if (user_servers_cache.has(access_token)) {

@@ -4,7 +4,7 @@ import { messageRouter } from "../message/message";
 import { serverRouter } from "../server/server";
 import { channelRouter } from "../channel/channel";
 import type { ChannelPublic } from "../channel/types";
-import type { MessageWithDiscordAccount } from "../message/types";
+import type { MessageWithDiscordAccount } from "@answeroverflow/db";
 
 export const message_page_router = router({
   byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {

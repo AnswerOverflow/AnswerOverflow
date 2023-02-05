@@ -1,6 +1,5 @@
 import {
   createUserServerSettings,
-  findManyUserServerSettings,
   findUserServerSettingsById,
   getDefaultUserServerSettings,
   mergeUserServerSettings,
@@ -10,7 +9,6 @@ import {
   z_user_server_settings_find,
   z_user_server_settings_update,
 } from "@answeroverflow/db";
-import { z } from "zod";
 import { withDiscordAccountProcedure, mergeRouters, router } from "../trpc";
 import { upsert } from "~api/utils/operations";
 import { discordAccountRouter } from "../users/accounts/discord-accounts";

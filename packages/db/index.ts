@@ -8,6 +8,7 @@ export * from "./src/server-settings";
 export * from "./src/discord-account";
 export * from "./src/ignored-discord-account";
 export * from "./src/user-server-settings";
+export * from "./src/message";
 export * from "@answeroverflow/elastic-types";
 export * from "./src/utils";
 export * from "./src/zod-schemas";
