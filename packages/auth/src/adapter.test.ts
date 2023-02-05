@@ -1,29 +1,28 @@
 import { extendedAdapter } from "./adapter";
-import { clearDatabase } from "@answeroverflow/db";
 import type { z } from "zod";
 import type { z_user_schema } from "./discord-oauth";
 import { prisma } from "@answeroverflow/db";
-const mock_discord_account: z.infer<typeof z_user_schema> = {
-  id: "1234567890",
-  username: "TestUser",
-  avatar: "1234567890",
-  discriminator: "1234",
-  public_flags: 0,
-  flags: 0,
-  locale: "en-US",
-  mfa_enabled: false,
-  email: "test@answeroverflow.com",
-  verified: true,
-  bot: false,
-};
-
-beforeEach(async () => {
-  await clearDatabase();
+import { getRandomEmail, getRandomId } from "@answeroverflow/utils";
+let mock_discord_account: z.infer<typeof z_user_schema>;
+beforeEach(() => {
   vitest.mock("./discord-oauth", () => ({
     getDiscordUser: vitest.fn(() => {
       return mock_discord_account;
     }),
   }));
+  mock_discord_account = {
+    id: getRandomId(),
+    username: "TestUser",
+    avatar: "1234567890",
+    discriminator: "1234",
+    public_flags: 0,
+    flags: 0,
+    locale: "en-US",
+    mfa_enabled: false,
+    email: getRandomEmail(),
+    verified: true,
+    bot: false,
+  };
 });
 
 describe("Discord Auth", () => {

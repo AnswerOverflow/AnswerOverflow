@@ -10,7 +10,7 @@ export const createVitestConfig = (options: UserConfig = {}) =>
       globals: true,
       coverage: {
         ...options.test?.coverage,
-        enabled: true,
+        enabled: false,
         reporter: ["text", "lcov", "clover"],
         exclude: [
           ...(options.test?.coverage?.exclude ?? []),

@@ -16,6 +16,14 @@
       "path": "apps/discord-bot",
     },
     {
+      "name": "discordjs-mock",
+      "path": "packages/discordjs-mock"
+    },
+    {
+      "name": "discordjs-utils",
+      "path": "packages/discordjs-utils",
+    },
+    {
       "name": "api",
       "path": "packages/api"
     },
@@ -26,6 +34,22 @@
     {
       "name": "db",
       "path": "packages/db",
+    },
+    {
+      "name": "db-mock",
+      "path": "packages/db-mock"
+    },
+    {
+      "name": "prisma-types",
+      "path": "packages/prisma-types"
+    },
+    {
+      "name": "elastic-types",
+      "path": "packages/elastic-types"
+    },
+    {
+      "name": "utils",
+      "path": "packages/utils"
     },
     {
       "name": "config",
@@ -105,9 +129,16 @@
       "db",
       "api",
       "auth",
-      "config"
+      "config",
+      "utils",
+      "db-mock",
+      "prisma-types",
+      "elastic-types",
     ],
     "jest.autoRun": "off",
+    "cSpell.words": [
+      "Turborepo"
+    ],
   },
   "extensions": {
     "recommendations": [

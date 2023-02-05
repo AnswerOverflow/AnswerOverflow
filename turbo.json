@@ -9,7 +9,7 @@
         "dist/**",
         ".next/**"
       ],
-      "cache": false
+      "cache": true
     },
     "init": {},
     "migrate": {},
@@ -28,44 +28,16 @@
       "cache": false
     },
     "test": {
-      "dependsOn": [
-        "test:discord-bot"
-      ],
       "outputs": [],
-      "cache": false
-    },
-    "test:db": {
-      "dependsOn": [
-        "^test:db"
-      ],
-      "cache": false
-    },
-    "test:auth": {
-      "dependsOn": [
-        "test:db",
-        "^test:auth"
-      ],
-      "cache": false
-    },
-    "test:api": {
-      "dependsOn": [
-        "test:auth",
-        "^test:api"
-      ],
-      "cache": false
-    },
-    "test:discord-bot": {
-      "dependsOn": [
-        "test:api",
-        "^test:discord-bot"
-      ],
-      "cache": false
-    },
-    "test:watch": {
-      "outputs": [],
-      "cache": false
+      "cache": true
     },
     "db:generate": {
+      "inputs": [
+        "prisma/schema.prisma"
+      ],
+      "cache": false
+    },
+    "db:wipe": {
       "inputs": [
         "prisma/schema.prisma"
       ],
@@ -109,6 +81,7 @@
     "BOT_TEST_LOG_LEVEL",
     "BOT_PROD_LOG_LEVEL",
     "MAXIMUM_CHANNEL_MESSAGES_PER_INDEX",
-    "STORYBOOK"
+    "STORYBOOK",
+    "VITEST_DISCORD_CLIENT_ID"
   ]
 }

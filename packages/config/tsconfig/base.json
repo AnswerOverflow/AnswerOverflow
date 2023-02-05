@@ -61,6 +61,9 @@
       "~discord-bot/utils/*": [
         "./apps/discord-bot/src/utils/*"
       ],
+      "~discord-bot/domains/*": [
+        "./apps/discord-bot/src/domains/*"
+      ],
       "~discord-bot/listeners": [
         "./apps/discord-bot/src/listeners/*"
       ],
@@ -80,7 +83,7 @@
         "./packages/api/src/router/*"
       ],
       "~api/test/*": [
-        "./packages/api/src/test/*"
+        "./packages/api/test/*"
       ],
       "~api/utils/*": [
         "./packages/api/src/utils/*"
