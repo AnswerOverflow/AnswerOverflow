@@ -1,12 +1,8 @@
-import { Channel, clearDatabase, DiscordAccount, Message, Server } from "@answeroverflow/db";
+import type { Channel, DiscordAccount, Message, Server } from "@answeroverflow/db";
 import {
   createAnswerOverflowBotCtx,
-  mockAccount,
   mockAccountCallerCtx,
   mockAccountWithServersCallerCtx,
-  mockChannel,
-  mockMessage,
-  mockServer,
   testAllDataVariants,
   testAllVariants,
 } from "~api/test/utils";
@@ -24,6 +20,9 @@ import {
   toMessageWithDiscordAccount,
   toPrivateMessageWithStrippedData,
 } from "~api/test/public_data";
+import { mockAccount, mockChannel, mockMessage, mockServer } from "@answeroverflow/db-mock";
+import { randomSnowflakeLargerThan } from "@answeroverflow/discordjs-utils";
+
 let server: Server;
 let channel: Channel;
 let author: DiscordAccount;
@@ -40,7 +39,6 @@ let ao_bot_user_server_settings_router: ReturnType<
 >;
 let ao_bot_message_router: ReturnType<(typeof messageRouter)["createCaller"]>;
 beforeEach(async () => {
-  await clearDatabase();
   server = mockServer();
   channel = mockChannel(server);
   author = mockAccount();
@@ -438,11 +436,9 @@ describe("Message Operations", () => {
           can_publicly_display_messages: false,
         },
       });
-      public_message = mockMessage(server, channel, public_author, {
-        id: "1",
-      });
+      public_message = mockMessage(server, channel, public_author);
       private_message = mockMessage(server, channel, private_author, {
-        id: "2",
+        id: randomSnowflakeLargerThan(public_message.id).toString(),
       });
       await ao_bot_message_router.upsertBulk([public_message, private_message]);
     });

@@ -1,8 +1,8 @@
-import { clearDatabase, Server } from "@answeroverflow/db";
+import type { Server } from "@answeroverflow/db";
+import { mockServer } from "@answeroverflow/db-mock";
 import {
   createAnswerOverflowBotCtx,
   mockAccountWithServersCallerCtx,
-  mockServer,
   testAllVariantsThatThrowErrors,
 } from "~api/test/utils";
 import { serverRouter } from "./server";
@@ -14,7 +14,6 @@ let answer_overflow_bot_server_settings_router: ReturnType<
 >;
 let server: Server;
 beforeEach(async () => {
-  await clearDatabase();
   server = mockServer();
   const ao_bot = await createAnswerOverflowBotCtx();
   answer_overflow_bot_server_router = serverRouter.createCaller(ao_bot);

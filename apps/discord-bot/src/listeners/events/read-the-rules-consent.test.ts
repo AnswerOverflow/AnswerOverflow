@@ -1,19 +1,20 @@
 import { Client, Events } from "discord.js";
-import { mockGuild } from "~discord-bot/test/utils/discordjs/guild-mock";
-import {
-  createGuildMemberVariants,
-  GuildMemberVariants,
-  setupBot,
-} from "~discord-bot/test/utils/discordjs/scenarios";
-import { mockGuildMember } from "~discord-bot/test/utils/discordjs/user-mock";
-import { copyClass, emitEvent, testOnlyAPICall } from "~discord-bot/test/utils/helpers";
+import { testOnlyAPICall } from "~discord-bot/test/helpers";
 import { toAOServer } from "~discord-bot/utils/conversions";
+import {
+  type GuildMemberVariants,
+  createGuildMemberVariants,
+  copyClass,
+  emitEvent,
+  mockGuild,
+  mockGuildMember,
+} from "@answeroverflow/discordjs-mock";
+import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 
 let client: Client;
 let members: GuildMemberVariants;
 beforeEach(async () => {
-  const data = await setupBot();
-  client = data.client;
+  client = await setupAnswerOverflowBot();
   members = await createGuildMemberVariants(client);
 });
 
@@ -82,15 +83,6 @@ describe("Read the rules consent", () => {
   it("should mark multiple users as consenting in a server with read the rules consent enabled", async () => {
     const server = mockGuild(client);
     const members = [
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
-      mockGuildMember({ client, guild: server, data: { pending: true } }),
       mockGuildMember({ client, guild: server, data: { pending: true } }),
       mockGuildMember({ client, guild: server, data: { pending: true } }),
     ];

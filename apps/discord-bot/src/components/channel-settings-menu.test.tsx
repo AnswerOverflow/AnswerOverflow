@@ -1,23 +1,19 @@
-import {
-  createGuildMemberVariants,
-  setupBot,
-  GuildMemberVariants,
-  ScenarioData,
-} from "~discord-bot/test/utils/discordjs/scenarios";
 import { ChannelSettingsMenu } from "~discord-bot/components/channel-settings-menu";
-import { reply } from "~discord-bot/test/utils/reacord/reacord-utils";
+import { reply } from "~discord-bot/test/reacord-utils";
 import React from "react";
 import { getDefaultChannelSettingsWithFlags } from "@answeroverflow/db";
 import type { ReacordTester } from "@answeroverflow/reacord";
 import type { ForumChannel, Guild, PublicThreadChannel, TextChannel } from "discord.js";
+import { mockReacord, setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import {
+  createGuildMemberVariants,
+  GuildMemberVariants,
   mockForumChannel,
-  mockTextChannel,
+  mockGuild,
   mockPublicThread,
-} from "~discord-bot/test/utils/discordjs/channel-mock";
-import { mockGuild } from "~discord-bot/test/utils/discordjs/guild-mock";
+  mockTextChannel,
+} from "@answeroverflow/discordjs-mock";
 
-let data: ScenarioData;
 let reacord: ReacordTester;
 let text_channel: TextChannel;
 let forum_thread: PublicThreadChannel;
@@ -25,9 +21,8 @@ let forum_channel: ForumChannel;
 let guild: Guild;
 let members: GuildMemberVariants;
 beforeEach(async () => {
-  data = await setupBot();
-  reacord = data.reacord;
-  const client = data.client;
+  const client = await setupAnswerOverflowBot();
+  reacord = mockReacord();
   guild = mockGuild(client);
   members = await createGuildMemberVariants(client, guild);
   text_channel = mockTextChannel(client, guild);
@@ -60,7 +55,12 @@ describe("ChannelSettingsMenu", () => {
     );
     expect(
       message!.hasComponents(
-        ["Enable Indexing", "Enable Mark Solution", "Enable Send Mark Solution Instructions"],
+        [
+          "Enable Indexing",
+          "Enable Mark Solution",
+          "Enable Send Mark Solution Instructions",
+          "Enable Forum Post Guidelines Consent",
+        ],
         ["Select a tag to use on mark as solved"]
       )
     ).toBeTruthy();

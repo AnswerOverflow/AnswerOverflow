@@ -1,15 +1,14 @@
 import {
   createAnswerOverflowBotCtx,
-  mockAccount,
   mockAccountWithServersCallerCtx,
-  mockServer,
   testAllSources,
 } from "~api/test/utils";
 import { serverRouter } from "../server/server";
 
-import { Server, clearDatabase, DiscordAccount } from "@answeroverflow/db";
+import type { Server, DiscordAccount } from "@answeroverflow/db";
 import { userServerSettingsRouter } from "./user-server-settings";
 import { discordAccountRouter } from "../users/accounts/discord-accounts";
+import { mockAccount, mockServer } from "@answeroverflow/db-mock";
 
 let ao_bot_server_router: ReturnType<(typeof serverRouter)["createCaller"]>;
 let ao_bot_discord_account_router: ReturnType<(typeof discordAccountRouter)["createCaller"]>;
@@ -21,7 +20,6 @@ let server: Server;
 let discord_account: DiscordAccount;
 let discord_account_2: DiscordAccount;
 beforeEach(async () => {
-  await clearDatabase();
   server = mockServer();
   discord_account = mockAccount();
   discord_account_2 = mockAccount();

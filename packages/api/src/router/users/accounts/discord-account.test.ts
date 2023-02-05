@@ -1,12 +1,13 @@
-import { clearDatabase, DiscordAccount } from "@answeroverflow/db";
+import type { DiscordAccount } from "@answeroverflow/db";
+import { mockAccount } from "@answeroverflow/db-mock";
+import { pick } from "@answeroverflow/utils";
 import {
   createAnswerOverflowBotCtx,
-  mockAccount,
-  mockAccountCallerCtx,
   testAllDataVariants,
+  mockAccountCallerCtx,
   testAllSources,
 } from "~api/test/utils";
-import { pick } from "~api/utils/utils";
+
 import {
   IGNORED_ACCOUNT_MESSAGE,
   ignored_discord_account_router,
@@ -24,7 +25,6 @@ function pickPublicFields(discord_account: DiscordAccount) {
 }
 
 beforeEach(async () => {
-  await clearDatabase();
   const bot = await createAnswerOverflowBotCtx();
   ao_bot_discord_account_router = discordAccountRouter.createCaller(bot);
   ao_bot_ignored_discord_account_router = ignored_discord_account_router.createCaller(bot);
