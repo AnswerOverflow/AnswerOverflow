@@ -70,8 +70,14 @@ export async function addAuthorsToMessages(messages: Message[], prisma: PrismaCl
     );
 }
 
-export function findMessageById(id: string, elastic: Elastic) {
-  return elastic.getMessage(id);
+export async function findMessageById(id: string, elastic: Elastic, prisma: PrismaClient) {
+  const msg = await elastic.getMessage(id);
+  if (!msg) {
+    return null;
+  }
+  // TODO: Maybe make it so that addAuthorsToMessages can take a single message
+  const msg_with_author = await addAuthorsToMessages([msg], prisma);
+  return msg_with_author[0]!;
 }
 
 export async function findMessagesByChannelId(

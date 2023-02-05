@@ -10,6 +10,7 @@ import {
   findMessagesByChannelId,
   z_find_messages_by_channel_id,
   bulkGetMessages,
+  findMessageById,
 } from "@answeroverflow/db";
 import type { DiscordServer } from "@answeroverflow/auth";
 
@@ -52,6 +53,14 @@ export function stripPrivateMessagesData(
 }
 
 const message_crud_router = router({
+  byId: withDiscordAccountProcedure.input(z.string()).query(async ({ ctx, input }) => {
+    return protectedFetchWithPublicData({
+      fetch: () => findMessageById(input, ctx.elastic, ctx.prisma),
+      permissions: (data) => assertIsUserInServer(ctx, data.server_id),
+      public_data_formatter: (data) => stripPrivateMessageData(data),
+      not_found_message: "Message not found",
+    });
+  }),
   byChannelIdBulk: withDiscordAccountProcedure
     .input(z_find_messages_by_channel_id)
     .query(async ({ ctx, input }) => {
@@ -67,7 +76,7 @@ const message_crud_router = router({
           return messages;
         },
         permissions: (data) => data.map((m) => assertIsUserInServer(ctx, m.server_id)),
-        public_data_formatter: (data) => stripPrivateMessagesData(data, ctx.user_servers),
+        public_data_formatter: (data) => stripPrivateMessagesData(data),
         not_found_message: "Messages not found",
       });
     }),
