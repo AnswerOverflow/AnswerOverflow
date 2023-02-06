@@ -30,7 +30,7 @@ export const CHANNEL_NOT_FOUND_MESSAGES = "Channel does not exist";
 const channel_crud_router = router({
   byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({
-      fetch: () => findChannelById(input, ctx.prisma),
+      fetch: () => findChannelById(input),
       permissions: (data) => assertCanEditServer(ctx, data.server_id),
       not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
       public_data_formatter: (data) => {
@@ -40,29 +40,29 @@ const channel_crud_router = router({
   }),
   byIdMany: publicProcedure.input(z_unique_array).query(async ({ ctx, input }) => {
     return protectedFetchManyWithPublicData({
-      fetch: () => findManyChannelsById(input, ctx.prisma),
+      fetch: () => findManyChannelsById(input),
       permissions: (data) => assertCanEditServer(ctx, data.server_id),
       public_data_formatter: (data) => z_channel_public.parse(data),
     });
   }),
   create: publicProcedure.input(z_channel_create).mutation(({ ctx, input }) => {
     return protectedMutation({
-      operation: () => createChannel(input, ctx.prisma),
+      operation: () => createChannel(input),
       permissions: () => assertCanEditServerBotOnly(ctx, input.server_id),
     });
   }),
   update: publicProcedure.input(z_channel_update).mutation(async ({ ctx, input }) => {
     return protectedMutationFetchFirst({
-      fetch: () => findChannelById(input.id, ctx.prisma),
+      fetch: () => findChannelById(input.id),
       permissions: (data) => assertCanEditServerBotOnly(ctx, data.server_id),
-      operation: () => updateChannel(input, ctx.prisma),
+      operation: () => updateChannel(input),
       not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
     });
   }),
   delete: publicProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     return protectedMutationFetchFirst({
-      fetch: () => findChannelById(input, ctx.prisma),
-      operation: () => deleteChannel(input, ctx.prisma),
+      fetch: () => findChannelById(input),
+      operation: () => deleteChannel(input),
       permissions: (data) => assertCanEditServerBotOnly(ctx, data.server_id),
       not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
     });
@@ -72,7 +72,7 @@ const channel_crud_router = router({
 const create_with_deps_router = router({
   createWithDeps: publicProcedure.input(z_channel_create_with_deps).mutation(({ ctx, input }) => {
     return protectedMutation({
-      operation: () => createChannelWithDeps(input, ctx.prisma),
+      operation: () => createChannelWithDeps(input),
       permissions: () => assertCanEditServerBotOnly(ctx, input.server.id),
     });
   }),
@@ -83,14 +83,14 @@ const upsert_router = router({
     return upsert({
       create: () => channel_crud_router.createCaller(ctx).create(input),
       update: () => channel_crud_router.createCaller(ctx).update(input),
-      find: () => findChannelById(input.id, ctx.prisma),
+      find: () => findChannelById(input.id),
     });
   }),
   upsertWithDeps: publicProcedure
     .input(z_channel_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert({
-        find: () => findChannelById(input.id, ctx.prisma),
+        find: () => findChannelById(input.id),
         create: () => create_with_deps_router.createCaller(ctx).createWithDeps(input),
         update: () => channel_crud_router.createCaller(ctx).update(input),
       });
@@ -102,7 +102,7 @@ const upsert_thread_router = router({
     .input(z_thread_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert({
-        find: () => findChannelById(input.parent.id, ctx.prisma),
+        find: () => findChannelById(input.parent.id),
         create: async () => {
           await upsert_router.createCaller(ctx).upsertWithDeps(input.parent);
           return channel_crud_router.createCaller(ctx).create({

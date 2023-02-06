@@ -16,19 +16,19 @@ import { protectedFetchWithPublicData, protectedMutation } from "~api/utils/prot
 const serverCreateUpdateRouter = router({
   create: publicProcedure.input(z_server_create).mutation(({ ctx, input }) => {
     return protectedMutation({
-      operation: () => createServer(input, ctx.prisma),
+      operation: () => createServer(input),
       permissions: () => assertCanEditServerBotOnly(ctx, input.id),
     });
   }),
   update: publicProcedure.input(z_server_update).mutation(({ ctx, input }) => {
     return protectedMutation({
-      operation: () => updateServer(input, ctx.prisma),
+      operation: () => updateServer(input),
       permissions: () => assertCanEditServerBotOnly(ctx, input.id),
     });
   }),
   byId: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({
-      fetch: () => findServerById(input, ctx.prisma),
+      fetch: () => findServerById(input),
       permissions: () => assertCanEditServer(ctx, input),
       not_found_message: "Server not found",
       public_data_formatter: (server) => z_server_public.parse(server),
@@ -39,7 +39,7 @@ const serverCreateUpdateRouter = router({
 const serverUpsertRouter = router({
   upsert: publicProcedure.input(z_server_upsert).mutation(async ({ ctx, input }) => {
     return upsert({
-      find: () => findServerById(input.id, ctx.prisma),
+      find: () => findServerById(input.id),
       create: () => serverCreateUpdateRouter.createCaller(ctx).create(input),
       update: () => serverCreateUpdateRouter.createCaller(ctx).update(input),
     });

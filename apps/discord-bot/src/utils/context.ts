@@ -1,7 +1,6 @@
 import { createBotContext, botRouter } from "@answeroverflow/api";
 import type { GuildMember } from "discord.js";
-import { container } from "@sapphire/framework";
-import assert from "assert";
+
 export async function createUnauthenticatedCtx() {
   const ctx = await createBotContext({
     session: null,
@@ -32,21 +31,6 @@ export async function createMemberCtx(member: GuildMember) {
         owner: guild.ownerId === member.id,
       },
     ],
-  });
-  return ctx;
-}
-
-export async function createAnswerOveflowBotCtx() {
-  assert(container.client.user, "Client user is not ready");
-  const ctx = await createBotContext({
-    session: null,
-    discord_account: {
-      avatar: container.client.user.displayAvatarURL(),
-      discriminator: container.client.user.discriminator,
-      username: container.client.user.username,
-      id: container.client.user.id,
-    },
-    user_servers: [],
   });
   return ctx;
 }

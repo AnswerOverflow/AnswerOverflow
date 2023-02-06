@@ -8,7 +8,7 @@ import {
 } from "~api/test/utils";
 import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
 import { serverRouter } from "./server";
-import { prisma } from "@answeroverflow/db";
+
 describe("Server Operations", () => {
   describe("Server Create", () => {
     it("should test all permission and caller variants to ensure only calls from the Discord bot with Manage Guild & Administrator can succeed", async () => {
@@ -30,7 +30,7 @@ describe("Server Operations", () => {
       return await testAllVariantsThatThrowErrors({
         async operation({ source, permission }) {
           const server = mockServer();
-          await createServer(server, prisma);
+          await createServer(server);
           const account = await mockAccountWithServersCallerCtx(server, source, permission);
           const router = serverRouter.createCaller(account.ctx);
           await router.update({ id: server.id, name: "new name" });
@@ -48,7 +48,7 @@ describe("Server Operations", () => {
       server_2 = mockServer({
         kicked_time: new Date(),
       });
-      await createServer(server_2, prisma);
+      await createServer(server_2);
     });
     it("should succeed fetching a server with permission variants", async () => {
       await testAllDataVariants({

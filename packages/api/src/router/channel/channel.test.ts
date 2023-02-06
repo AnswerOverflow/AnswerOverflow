@@ -14,7 +14,6 @@ import { channelRouter } from "./channel";
 import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
 import { mockChannel, mockServer } from "@answeroverflow/db-mock";
 import { pick } from "@answeroverflow/utils";
-import { prisma } from "@answeroverflow/db";
 
 let server: Server;
 let channel: Channel;
@@ -24,7 +23,7 @@ beforeEach(async () => {
   server = mockServer();
   channel = mockChannel(server);
   channel2 = mockChannel(server);
-  await createServer(server, prisma);
+  await createServer(server);
 });
 
 export function pickPublicChannelData(channel: Channel) {
@@ -35,7 +34,7 @@ export function pickPublicChannelData(channel: Channel) {
 describe("Channel Operations", () => {
   describe("Channel Fetch", () => {
     beforeEach(async () => {
-      await createChannel(channel, prisma);
+      await createChannel(channel);
     });
     it("tests all variants for fetching a single channel", async () => {
       await testAllDataVariants({
@@ -56,7 +55,7 @@ describe("Channel Operations", () => {
   });
   describe("Channel Fetch Many", () => {
     beforeEach(async () => {
-      await createManyChannels([channel, channel2], prisma);
+      await createManyChannels([channel, channel2]);
     });
     it("tests all variants for fetching many channels", async () => {
       await testAllDataVariants({
@@ -93,7 +92,7 @@ describe("Channel Operations", () => {
 
   describe("Channel Update", () => {
     beforeEach(async () => {
-      await createChannel(channel, prisma);
+      await createChannel(channel);
     });
     it("tests all varaints for updating a channel", async () => {
       await testAllVariantsThatThrowErrors({
@@ -120,7 +119,7 @@ describe("Channel Operations", () => {
         permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
         async operation({ permission, source }) {
           const chnl = mockChannel(server);
-          await createChannel(chnl, prisma);
+          await createChannel(chnl);
           const account = await mockAccountWithServersCallerCtx(server, source, permission);
           const router = channelRouter.createCaller(account.ctx);
           await router.delete(chnl.id);
@@ -146,7 +145,7 @@ describe("Channel Operations", () => {
     });
     describe("Upsert Update", () => {
       beforeEach(async () => {
-        await createChannel(channel, prisma);
+        await createChannel(channel);
       });
       it("tests all varaints for upsert updating a channel", async () => {
         await testAllVariantsThatThrowErrors({

@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { getDefaultServerSettings, PrismaClient, ServerSettings } from "..";
+import { getDefaultServerSettings, ServerSettings, prisma } from "@answeroverflow/prisma-types";
 import { z_server_upsert } from "./server";
 import {
   addFlagsToServerSettings,
@@ -48,24 +48,17 @@ export function mergeServerSettings<T extends z.infer<typeof z_server_settings_m
   };
 }
 
-export async function transformServerSettings<T extends ServerSettings>(
-  server_settings: Promise<T>
-) {
-  return addFlagsToServerSettings(await server_settings);
-}
-
-export function findServerSettingsById(server_id: string, prisma: PrismaClient) {
-  return prisma.serverSettings.findUnique({
+export async function findServerSettingsById(server_id: string) {
+  const server_settings = await prisma.serverSettings.findUnique({
     where: {
       server_id,
     },
   });
+  if (!server_settings) return null;
+  return addFlagsToServerSettings(server_settings);
 }
 
-export function createServerSettings(
-  input: z.infer<typeof z_server_settings_create>,
-  prisma: PrismaClient
-) {
+export function createServerSettings(input: z.infer<typeof z_server_settings_create>) {
   const new_settings = mergeServerSettings(
     getDefaultServerSettings({
       server_id: input.server_id,
@@ -77,10 +70,9 @@ export function createServerSettings(
 
 export async function updateServerSettings(
   input: z.infer<typeof z_server_settings_update>,
-  prisma: PrismaClient,
   existing: ServerSettings | null
 ) {
-  if (!existing) existing = await findServerSettingsById(input.server_id, prisma);
+  if (!existing) existing = await findServerSettingsById(input.server_id);
   if (!existing) throw new Error("Server settings not found");
   const new_settings = mergeServerSettings(existing, input);
   return await prisma.serverSettings.update({

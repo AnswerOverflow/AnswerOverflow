@@ -5,7 +5,6 @@ import {
 } from "@answeroverflow/db";
 import { mockAccount } from "@answeroverflow/db-mock";
 import { testAllSources, mockAccountCallerCtx } from "~api/test/utils";
-import { prisma } from "@answeroverflow/db";
 import { ignored_discord_account_router } from "./ignored-discord-account";
 
 let discord_account: DiscordAccount;
@@ -14,8 +13,8 @@ beforeEach(async () => {
   discord_account = mockAccount();
   discord_account_2 = mockAccount();
 
-  await createDiscordAccount(discord_account, prisma);
-  await upsertIgnoredDiscordAccount(discord_account_2.id, prisma);
+  await createDiscordAccount(discord_account);
+  await upsertIgnoredDiscordAccount(discord_account_2.id);
 });
 
 describe("Ignored Discord Account Operations", () => {
@@ -46,7 +45,7 @@ describe("Ignored Discord Account Operations", () => {
         async operation(source) {
           const account = mockAccount();
           const { ctx } = await mockAccountCallerCtx(source);
-          await upsertIgnoredDiscordAccount(account.id, prisma);
+          await upsertIgnoredDiscordAccount(account.id);
           const router = ignored_discord_account_router.createCaller(ctx);
           await expect(router.byId(account.id)).rejects.toThrowError();
         },
@@ -56,7 +55,7 @@ describe("Ignored Discord Account Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx, account } = await mockAccountCallerCtx(source);
-          await upsertIgnoredDiscordAccount(account.id, prisma);
+          await upsertIgnoredDiscordAccount(account.id);
           const router = ignored_discord_account_router.createCaller(ctx);
           await expect(router.byId(account.id)).resolves.toEqual({ id: account.id });
         },
@@ -69,7 +68,7 @@ describe("Ignored Discord Account Operations", () => {
         async operation(source) {
           const account = mockAccount();
           const { ctx } = await mockAccountCallerCtx(source);
-          await upsertIgnoredDiscordAccount(account.id, prisma);
+          await upsertIgnoredDiscordAccount(account.id);
           const router = ignored_discord_account_router.createCaller(ctx);
           await expect(router.stopIgnoring(account.id)).rejects.toThrowError();
         },
@@ -79,7 +78,7 @@ describe("Ignored Discord Account Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx, account } = await mockAccountCallerCtx(source);
-          await upsertIgnoredDiscordAccount(account.id, prisma);
+          await upsertIgnoredDiscordAccount(account.id);
           const router = ignored_discord_account_router.createCaller(ctx);
           await expect(router.stopIgnoring(account.id)).resolves.toEqual({ id: account.id });
         },

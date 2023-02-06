@@ -22,7 +22,7 @@ import { assertCanEditServer, assertCanEditServerBotOnly } from "~api/utils/perm
 const server_settings_crud = router({
   byId: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedFetch({
-      fetch: () => findServerSettingsById(input, ctx.prisma),
+      fetch: () => findServerSettingsById(input),
       not_found_message: "Server settings not found",
       permissions: (data) => assertCanEditServer(ctx, data.server_id),
     });
@@ -31,7 +31,7 @@ const server_settings_crud = router({
     .input(z_server_settings_create)
     .mutation(async ({ ctx, input }) => {
       return protectedMutation({
-        operation: () => createServerSettings(input, ctx.prisma),
+        operation: () => createServerSettings(input),
         permissions: () => assertCanEditServerBotOnly(ctx, input.server_id),
       });
     }),
@@ -39,8 +39,8 @@ const server_settings_crud = router({
     .input(z_server_settings_update)
     .mutation(async ({ ctx, input }) => {
       return protectedMutationFetchFirst({
-        fetch: () => findServerSettingsById(input.server_id, ctx.prisma),
-        operation: (data) => updateServerSettings(input, ctx.prisma, data),
+        fetch: () => findServerSettingsById(input.server_id),
+        operation: (data) => updateServerSettings(input, data),
         permissions: () => assertCanEditServerBotOnly(ctx, input.server_id),
         not_found_message: "Server settings not found",
       });
@@ -63,7 +63,7 @@ const server_settings_upsert = router({
     .input(z_server_settings_upsert)
     .mutation(async ({ ctx, input }) => {
       return upsert({
-        find: () => findServerSettingsById(input.server_id, ctx.prisma),
+        find: () => findServerSettingsById(input.server_id),
         create: () => server_settings_crud.createCaller(ctx).create(input),
         update: () => server_settings_crud.createCaller(ctx).update(input),
       });
@@ -72,7 +72,7 @@ const server_settings_upsert = router({
     .input(z_server_settings_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert({
-        find: () => findServerSettingsById(input.server.id, ctx.prisma),
+        find: () => findServerSettingsById(input.server.id),
         create: () => server_settings_create_with_deps.createCaller(ctx).createWithDeps(input),
         update: () =>
           server_settings_crud.createCaller(ctx).update({ server_id: input.server.id, ...input }),

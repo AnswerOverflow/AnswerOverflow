@@ -3,7 +3,6 @@ import {
   createManyDiscordAccounts,
   DiscordAccount,
   findDiscordAccountById,
-  prisma,
 } from "@answeroverflow/db";
 import { mockAccount } from "@answeroverflow/db-mock";
 import { pick } from "@answeroverflow/utils";
@@ -24,7 +23,7 @@ beforeEach(() => {
 describe("Discord Account Operations", () => {
   describe("Discord Account By Id", () => {
     beforeEach(async () => {
-      await createDiscordAccount(discord_account, prisma);
+      await createDiscordAccount(discord_account);
     });
 
     it("should test all varaints of finding a discord account by id", async () => {
@@ -44,7 +43,7 @@ describe("Discord Account Operations", () => {
   });
   describe("Discord Account By Id Many", () => {
     beforeEach(async () => {
-      await createManyDiscordAccounts([discord_account, discord_account2], prisma);
+      await createManyDiscordAccounts([discord_account, discord_account2]);
     });
     it("should test all varaints of finding many discord accounts by id", async () => {
       await testAllDataVariants({
@@ -88,7 +87,7 @@ describe("Discord Account Operations", () => {
   });
   describe("Discord Account Update", () => {
     beforeEach(async () => {
-      await createDiscordAccount(discord_account, prisma);
+      await createDiscordAccount(discord_account);
     });
     it("should test all varaints of updating a discord account as a user who does not own the account", async () => {
       await testAllSources({
@@ -105,7 +104,7 @@ describe("Discord Account Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx, account } = await mockAccountCallerCtx(source);
-          await createDiscordAccount(account, prisma);
+          await createDiscordAccount(account);
           const router = discordAccountRouter.createCaller(ctx);
           const discord_account_updated = await router.update({
             id: account.id,
@@ -121,7 +120,7 @@ describe("Discord Account Operations", () => {
   });
   describe("Discord Account Delete", () => {
     beforeEach(async () => {
-      await createDiscordAccount(discord_account, prisma);
+      await createDiscordAccount(discord_account);
     });
     it("should test all varaints of deleting a discord account that the user does not own", async () => {
       await testAllSources({
@@ -129,7 +128,7 @@ describe("Discord Account Operations", () => {
           const { ctx } = await mockAccountCallerCtx(source);
           const router = discordAccountRouter.createCaller(ctx);
           await expect(router.delete(discord_account.id)).rejects.toThrowError();
-          await expect(findDiscordAccountById(discord_account.id, prisma)).resolves.toEqual(
+          await expect(findDiscordAccountById(discord_account.id)).resolves.toEqual(
             discord_account
           );
         },
@@ -139,11 +138,11 @@ describe("Discord Account Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx, account } = await mockAccountCallerCtx(source);
-          await createDiscordAccount(account, prisma);
+          await createDiscordAccount(account);
           const router = discordAccountRouter.createCaller(ctx);
           const discord_account_deleted = await router.delete(account.id);
           expect(discord_account_deleted).toBeTruthy();
-          await expect(findDiscordAccountById(account.id, prisma)).resolves.toBeNull();
+          await expect(findDiscordAccountById(account.id)).resolves.toBeNull();
         },
       });
     });
@@ -163,7 +162,7 @@ describe("Discord Account Operations", () => {
         await testAllSources({
           async operation(source) {
             const { ctx, account } = await mockAccountCallerCtx(source);
-            await createDiscordAccount(account, prisma);
+            await createDiscordAccount(account);
             const router = discordAccountRouter.createCaller(ctx);
             const discord_account_created = await router.upsert(account);
             expect(discord_account_created).toEqual(account);
@@ -172,7 +171,7 @@ describe("Discord Account Operations", () => {
       });
       describe("Discord Account Upsert Update", () => {
         beforeEach(async () => {
-          await createDiscordAccount(discord_account, prisma);
+          await createDiscordAccount(discord_account);
         });
         it("should test all varaints of upsert updating a discord account that the user does not own", async () => {
           await testAllSources({
@@ -189,7 +188,7 @@ describe("Discord Account Operations", () => {
           await testAllSources({
             async operation(source) {
               const { ctx, account } = await mockAccountCallerCtx(source);
-              await createDiscordAccount(account, prisma);
+              await createDiscordAccount(account);
               const router = discordAccountRouter.createCaller(ctx);
               const discord_account_updated = await router.upsert({
                 ...account,

@@ -15,7 +15,7 @@ export const ignored_discord_account_router = router({
   upsert: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
     return protectedMutation({
       permissions: [() => assertIsUser(ctx, input)],
-      operation: () => upsertIgnoredDiscordAccount(input, ctx.prisma),
+      operation: () => upsertIgnoredDiscordAccount(input),
     });
   }),
   // TODO: Make bot only?
@@ -23,13 +23,13 @@ export const ignored_discord_account_router = router({
     return protectedFetch({
       permissions: () => assertIsUser(ctx, input),
       not_found_message: "Ignored discord account not found",
-      fetch: () => findIgnoredDiscordAccountById(input, ctx.prisma),
+      fetch: () => findIgnoredDiscordAccountById(input),
     });
   }),
   stopIgnoring: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
     return protectedMutation({
       permissions: () => assertIsUser(ctx, input),
-      operation: () => deleteIgnoredDiscordAccount(input, ctx.prisma),
+      operation: () => deleteIgnoredDiscordAccount(input),
     });
   }),
 });

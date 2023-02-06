@@ -9,7 +9,7 @@ import {
   z_message_with_discord_account,
   findMessagesByChannelId,
   z_find_messages_by_channel_id,
-  bulkGetMessages,
+  findManyMessages,
   findMessageById,
 } from "@answeroverflow/db";
 import type { DiscordServer } from "@answeroverflow/auth";
@@ -55,7 +55,7 @@ export function stripPrivateMessagesData(
 const message_crud_router = router({
   byId: withDiscordAccountProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({
-      fetch: () => findMessageById(input, ctx.elastic, ctx.prisma),
+      fetch: () => findMessageById(input),
       permissions: (data) => assertIsUserInServer(ctx, data.server_id),
       public_data_formatter: (data) => stripPrivateMessageData(data),
       not_found_message: "Message not found",
@@ -66,7 +66,7 @@ const message_crud_router = router({
     .query(async ({ ctx, input }) => {
       return protectedFetchWithPublicData({
         async fetch() {
-          const messages = await findMessagesByChannelId(input, ctx.elastic, ctx.prisma);
+          const messages = await findMessagesByChannelId(input);
           if (messages.length === 0) {
             throw new TRPCError({
               code: "NOT_FOUND",
@@ -82,7 +82,7 @@ const message_crud_router = router({
     }),
   byIdBulk: withDiscordAccountProcedure.input(z.array(z.string())).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({
-      fetch: () => bulkGetMessages(input, ctx.elastic, ctx.prisma),
+      fetch: () => findManyMessages(input),
       permissions: (data) => data.map((m) => assertIsUserInServer(ctx, m.server_id)),
       public_data_formatter: (data) => stripPrivateMessagesData(data, ctx.user_servers),
       not_found_message: "Messages not found",

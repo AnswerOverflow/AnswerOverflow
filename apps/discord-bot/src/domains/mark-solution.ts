@@ -15,11 +15,10 @@ import {
   User,
 } from "discord.js";
 import { ANSWER_OVERFLOW_BLUE } from "~discord-bot/utils/constants";
-import { createAnswerOveflowBotCtx } from "~discord-bot/utils/context";
 import { findSolutionsToMessage } from "./indexing";
-import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
 import type { ChannelSettingsWithFlags } from "@answeroverflow/api";
 import { makeConsentButton } from "./consent";
+import { callDatabaseWithErrorHandler, findChannelSettingsById } from "@answeroverflow/db";
 export const QUESTION_ID_FIELD_NAME = "Question Message ID";
 export const SOLUTION_ID_FIELD_NAME = "Solution Message ID";
 export const PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED: PermissionResolvable[] = [
@@ -52,12 +51,8 @@ export async function checkIfCanMarkSolution(
   if (!thread_parent)
     throw new MarkSolutionError("Could not find the parent channel of the thread");
 
-  const channel_settings = await callApiWithConsoleStatusHandler({
-    ApiCall(router) {
-      return router.channel_settings.byId(thread_parent.id);
-    },
-    getCtx: createAnswerOveflowBotCtx,
-    error_message: "Failed to fetch channel settings",
+  const channel_settings = await callDatabaseWithErrorHandler({
+    operation: () => findChannelSettingsById(thread_parent.id),
   });
 
   if (!channel_settings || !channel_settings.flags.mark_solution_enabled) {

@@ -1,20 +1,20 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import { Message, Events, Collection, Snowflake } from "discord.js";
-import { createAnswerOveflowBotCtx } from "~discord-bot/utils/context";
+import {
+  callDatabaseWithErrorHandler,
+  deleteManyMessages,
+  deleteMessage,
+  updateMessage,
+} from "@answeroverflow/db";
 import { toAOMessage } from "~discord-bot/utils/conversions";
-import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
 
 @ApplyOptions<Listener.Options>({ event: Events.MessageDelete, name: "Message Delete Watcher" })
 export class OnMessageDelete extends Listener {
   public async run(message: Message) {
-    await callApiWithConsoleStatusHandler({
-      ApiCall(router) {
-        return router.messages.delete(message.id);
-      },
-      error_message: `Error deleting message: ${message.id}`,
-      success_message: `Deleted message: ${message.id}`,
-      getCtx: createAnswerOveflowBotCtx,
+    await callDatabaseWithErrorHandler({
+      operation: () => deleteMessage(message.id),
+      allowed_errors: ["NOT_FOUND"],
     });
   }
 }
@@ -25,13 +25,11 @@ export class OnMessageDelete extends Listener {
 })
 export class OnMessageBulkDelete extends Listener {
   public async run(messages: Collection<Snowflake, Message>) {
-    await callApiWithConsoleStatusHandler({
-      async ApiCall(router) {
-        return router.messages.deleteBulk(messages.map((message) => message.id));
+    await callDatabaseWithErrorHandler({
+      operation: () => {
+        return deleteManyMessages(messages.map((message) => message.id));
       },
-      error_message: `Error deleting messages: ${messages.map((message) => message.id).join(", ")}`,
-      success_message: `Deleted messages: ${messages.map((message) => message.id).join(", ")}`,
-      getCtx: createAnswerOveflowBotCtx,
+      allowed_errors: ["NOT_FOUND"],
     });
   }
 }
@@ -39,13 +37,9 @@ export class OnMessageBulkDelete extends Listener {
 @ApplyOptions<Listener.Options>({ event: Events.MessageUpdate, name: "Message Update Watcher" })
 export class OnMessageUpdate extends Listener {
   public async run(_old_message: Message, new_message: Message) {
-    await callApiWithConsoleStatusHandler({
-      async ApiCall(router) {
-        return router.messages.update(toAOMessage(new_message));
-      },
-      error_message: `Error updating message: ${new_message.id}`,
-      success_message: `Updated message: ${new_message.id}`,
-      getCtx: createAnswerOveflowBotCtx,
+    await callDatabaseWithErrorHandler({
+      operation: () => updateMessage(toAOMessage(new_message)),
+      allowed_errors: ["NOT_FOUND"],
     });
   }
 }

@@ -10,6 +10,7 @@ export * from "./src/ignored-discord-account";
 export * from "./src/user-server-settings";
 export * from "./src/message";
 export * from "./src/utils";
+export * from "./src/utils/error";
 export * from "./src/zod-schemas";
 export * from "./src/utils/operations";
 export * from "@answeroverflow/prisma-types";

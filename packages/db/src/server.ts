@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { PrismaClient } from "@answeroverflow/prisma-types";
+import { prisma } from "@answeroverflow/prisma-types";
 import { upsert } from "./utils/operations";
 import { z_server } from "./zod-schemas";
 export const z_server_required = z_server.pick({
@@ -23,22 +23,22 @@ export const z_server_update = z_server_mutable.merge(
 
 export const z_server_upsert = z_server_create;
 
-export function createServer(input: z.infer<typeof z_server_create>, prisma: PrismaClient) {
+export function createServer(input: z.infer<typeof z_server_create>) {
   return prisma.server.create({ data: input });
 }
 
-export function updateServer(input: z.infer<typeof z_server_update>, prisma: PrismaClient) {
+export function updateServer(input: z.infer<typeof z_server_update>) {
   return prisma.server.update({ where: { id: input.id }, data: input });
 }
 
-export function findServerById(id: string, prisma: PrismaClient) {
+export function findServerById(id: string) {
   return prisma.server.findUnique({ where: { id } });
 }
 
-export function upsertServer(input: z.infer<typeof z_server_upsert>, prisma: PrismaClient) {
+export function upsertServer(input: z.infer<typeof z_server_upsert>) {
   return upsert({
-    create: () => createServer(input, prisma),
-    update: () => updateServer(input, prisma),
-    find: () => findServerById(input.id, prisma),
+    create: () => createServer(input),
+    update: () => updateServer(input),
+    find: () => findServerById(input.id),
   });
 }

@@ -1,4 +1,13 @@
-import type { Message as AOMessage } from "@answeroverflow/db";
+import {
+  bulkUpsertDiscordAccounts,
+  Message as AOMessage,
+  upsertManyChannels,
+  upsertManyMessages,
+  callDatabaseWithErrorHandler,
+  upsertChannel,
+  findManyUserServerSettings,
+  findChannelSettingsById,
+} from "@answeroverflow/db";
 import {
   ChannelType,
   Client,
@@ -12,7 +21,6 @@ import {
   TextBasedChannel,
   TextChannel,
 } from "discord.js";
-import { createAnswerOveflowBotCtx } from "~discord-bot/utils/context";
 import {
   extractUsersSetFromMessages,
   messagesToAOMessagesSet,
@@ -20,7 +28,6 @@ import {
   toAOThread,
 } from "~discord-bot/utils/conversions";
 import { container } from "@sapphire/framework";
-import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
 import { sortMessagesById } from "@answeroverflow/discordjs-utils";
 
 export async function indexServers(client: Client) {
@@ -46,12 +53,8 @@ async function indexServer(guild: Guild) {
 export async function indexRootChannel(channel: TextChannel | NewsChannel | ForumChannel) {
   container.logger.info(`Attempting to indexing channel ${channel.id} | ${channel.name}`);
 
-  const settings = await callApiWithConsoleStatusHandler({
-    ApiCall: (router) => router.channel_settings.byId(channel.id),
-    getCtx: createAnswerOveflowBotCtx,
-    error_message: `Failed to get channel settings for channel ${channel.id}`,
-    success_message: `Got channel settings for channel ${channel.id}`,
-    allowed_errors: "NOT_FOUND",
+  const settings = await callDatabaseWithErrorHandler({
+    operation: () => findChannelSettingsById(channel.id),
   });
 
   if (!settings || !settings.flags.indexing_enabled) {
@@ -87,27 +90,13 @@ export async function indexRootChannel(channel: TextChannel | NewsChannel | Foru
 
   addSolutionsToMessages(filtered_messages, converted_messages);
 
-  await callApiWithConsoleStatusHandler({
-    async ApiCall(router) {
-      container.logger.debug(`Upserting ${converted_users.length} users`);
-      await router.discord_accounts.upsertBulk(converted_users);
-
-      container.logger.debug(`Upserting channel ${channel.id}`);
-      await router.channels.upsertWithDeps(toAOChannelWithServer(channel));
-
-      container.logger.debug(`Upserting ${converted_messages.length} messages`);
-      await router.messages.upsertBulk(converted_messages);
-
-      container.logger.debug(`Upserting ${converted_threads.length} threads`);
-      await router.channels.upsertMany(converted_threads);
-
-      await router.channel_settings.upsert({
-        channel_id: channel.id,
-        last_indexed_snowflake: converted_messages[converted_messages.length - 1]!.id,
-      });
+  await callDatabaseWithErrorHandler({
+    operation: async () => {
+      await bulkUpsertDiscordAccounts(converted_users);
+      await upsertChannel(toAOChannelWithServer(channel));
+      await upsertManyMessages(converted_messages);
+      await upsertManyChannels(converted_threads);
     },
-    error_message: `Failed to index channel ${channel.id}`,
-    getCtx: createAnswerOveflowBotCtx,
   });
 }
 
@@ -149,26 +138,20 @@ export function findSolutionsToMessage(msg: Message) {
 
 export async function filterMessages(messages: Message[], channel: GuildBasedChannel) {
   const seen_user_ids = [...new Set(messages.map((message) => message.author.id))];
-  const user_server_settings = await callApiWithConsoleStatusHandler({
-    ApiCall(router) {
-      return router.user_server_settings.byIdMany(
-        seen_user_ids.map((x) => {
-          return {
-            server_id: channel.guildId,
-            user_id: x,
-          };
-        })
-      );
-    },
-    error_message: "Failed to fetch user server settings in indexing",
-    allowed_errors: "NOT_FOUND",
-    getCtx: createAnswerOveflowBotCtx,
-    success_message: `Fetched ${seen_user_ids.length} user server settings`,
+  const user_server_settings = await callDatabaseWithErrorHandler({
+    operation: () =>
+      findManyUserServerSettings(
+        seen_user_ids.map((x) => ({
+          server_id: channel.guildId,
+          user_id: x,
+        }))
+      ),
   });
 
   if (!user_server_settings) {
-    throw new Error("Failed to fetch user server settings");
+    throw new Error("Error fetching user server settings");
   }
+
   const users_to_remove = new Set(
     user_server_settings.filter((x) => x.flags.message_indexing_disabled).map((x) => x.user_id)
   );

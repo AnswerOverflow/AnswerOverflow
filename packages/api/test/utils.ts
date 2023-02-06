@@ -51,20 +51,6 @@ export async function mockUnauthedCtx(caller: Source) {
   return ctx;
 }
 
-export async function createAnswerOverflowBotCtx() {
-  return createContextInner({
-    session: null,
-    source: "discord-bot",
-    user_servers: undefined,
-    discord_account: {
-      id: process.env.DISCORD_CLIENT_ID ?? process.env.VITE_DISCORD_CLIENT_ID,
-      avatar: null,
-      username: "test",
-      discriminator: "0000",
-    },
-  });
-}
-
 type CtxOverride = {
   server: {
     id: string;

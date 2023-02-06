@@ -8,7 +8,6 @@ import {
 } from "@answeroverflow/db";
 import { userServerSettingsRouter } from "./user-server-settings";
 import { mockAccount, mockServer } from "@answeroverflow/db-mock";
-import { prisma } from "@answeroverflow/db";
 
 let server: Server;
 let discord_account: DiscordAccount;
@@ -18,21 +17,18 @@ beforeEach(async () => {
   discord_account = mockAccount();
   discord_account_2 = mockAccount();
 
-  await createServer(server, prisma);
-  await createDiscordAccount(discord_account, prisma);
-  await createDiscordAccount(discord_account_2, prisma);
+  await createServer(server);
+  await createDiscordAccount(discord_account);
+  await createDiscordAccount(discord_account_2);
 });
 
 describe("User Server Settings Operations", () => {
   describe("User Server Settings By Id", () => {
     beforeEach(async () => {
-      await createUserServerSettings(
-        {
-          server_id: server.id,
-          user_id: discord_account.id,
-        },
-        prisma
-      );
+      await createUserServerSettings({
+        server_id: server.id,
+        user_id: discord_account.id,
+      });
     });
     it("should fail all varaints getting user server settings by id as a different user", async () => {
       await testAllSources({
@@ -88,7 +84,7 @@ describe("User Server Settings Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx, account } = await mockAccountWithServersCallerCtx(server, source);
-          await createDiscordAccount(account, prisma);
+          await createDiscordAccount(account);
           const router = userServerSettingsRouter.createCaller(ctx);
           const user_server_settings = await router.create({
             server_id: server.id,
@@ -103,13 +99,10 @@ describe("User Server Settings Operations", () => {
   });
   describe("User Server Settings Update", () => {
     beforeEach(async () => {
-      await createUserServerSettings(
-        {
-          server_id: server.id,
-          user_id: discord_account.id,
-        },
-        prisma
-      );
+      await createUserServerSettings({
+        server_id: server.id,
+        user_id: discord_account.id,
+      });
     });
     it("should fail all variants updating user server settings as a different user", async () => {
       await testAllSources({
@@ -172,7 +165,7 @@ describe("User Server Settings Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx, account } = await mockAccountWithServersCallerCtx(server, source);
-          await createDiscordAccount(account, prisma);
+          await createDiscordAccount(account);
           const router = userServerSettingsRouter.createCaller(ctx);
           const user_server_settings = await router.createWithDeps({
             server_id: server.id,
@@ -320,14 +313,11 @@ describe("User Server Settings Operations", () => {
         await testAllSources({
           async operation(source) {
             const { ctx, account } = await mockAccountWithServersCallerCtx(server, source);
-            await createDiscordAccount(account, prisma);
-            await createUserServerSettings(
-              {
-                server_id: server.id,
-                user_id: account.id,
-              },
-              prisma
-            );
+            await createDiscordAccount(account);
+            await createUserServerSettings({
+              server_id: server.id,
+              user_id: account.id,
+            });
             const router = userServerSettingsRouter.createCaller(ctx);
             const user_server_settings = await router.upsertWithDeps({
               server_id: server.id,

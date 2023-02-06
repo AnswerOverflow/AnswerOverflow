@@ -29,7 +29,7 @@ const user_server_settings_crud_router = router({
     .query(async ({ input, ctx }) => {
       return protectedFetch({
         permissions: () => assertIsUser(ctx, input.user_id),
-        fetch: () => findUserServerSettingsById(input, ctx.prisma),
+        fetch: () => findUserServerSettingsById(input),
         not_found_message: "User server settings not found",
       });
     }),
@@ -38,7 +38,7 @@ const user_server_settings_crud_router = router({
     .mutation(async ({ input, ctx }) => {
       return protectedMutation({
         permissions: () => assertIsUser(ctx, input.user_id),
-        operation: () => createUserServerSettings(input, ctx.prisma),
+        operation: () => createUserServerSettings(input),
       });
     }),
   update: withDiscordAccountProcedure
@@ -47,8 +47,8 @@ const user_server_settings_crud_router = router({
       return protectedMutationFetchFirst({
         permissions: () => assertIsUser(ctx, input.user_id),
         not_found_message: "User server settings not found",
-        fetch: () => findUserServerSettingsById(input, ctx.prisma),
-        operation: (old) => updateUserServerSettings(input, ctx.prisma, old),
+        fetch: () => findUserServerSettingsById(input),
+        operation: (old) => updateUserServerSettings(input, old),
       });
     }),
 });
@@ -91,7 +91,7 @@ const user_server_settings_upsert = router({
     .mutation(async ({ input, ctx }) => {
       return upsert({
         find: () =>
-          user_server_settings_crud_router.createCaller(ctx).byId({
+          findUserServerSettingsById({
             user_id: input.user_id,
             server_id: input.server_id,
           }),
@@ -104,7 +104,7 @@ const user_server_settings_upsert = router({
     .mutation(async ({ input, ctx }) => {
       return upsert({
         find: () =>
-          user_server_settings_crud_router.createCaller(ctx).byId({
+          findUserServerSettingsById({
             user_id: input.user.id,
             server_id: input.server_id,
           }),

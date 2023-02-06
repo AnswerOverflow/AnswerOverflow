@@ -17,7 +17,6 @@ import {
 } from "~api/test/public_data";
 import { mockAccount, mockChannel, mockMessage, mockServer } from "@answeroverflow/db-mock";
 import { randomSnowflakeLargerThan } from "@answeroverflow/discordjs-utils";
-import { prisma, elastic } from "@answeroverflow/db";
 
 let server: Server;
 let channel: Channel;
@@ -27,9 +26,9 @@ beforeEach(async () => {
   server = mockServer();
   channel = mockChannel(server);
   author = mockAccount();
-  await createServer(server, prisma);
-  await createChannel(channel, prisma);
-  await createDiscordAccount(author, prisma);
+  await createServer(server);
+  await createChannel(channel);
+  await createDiscordAccount(author);
 });
 
 describe("Message Operations", () => {
@@ -44,33 +43,27 @@ describe("Message Operations", () => {
     beforeEach(async () => {
       public_author = mockAccount();
       private_author = mockAccount();
-      await createDiscordAccount(public_author, prisma);
-      await createDiscordAccount(private_author, prisma);
-      await createUserServerSettings(
-        {
-          server_id: server.id,
-          user_id: public_author.id,
-          flags: {
-            can_publicly_display_messages: true,
-          },
+      await createDiscordAccount(public_author);
+      await createDiscordAccount(private_author);
+      await createUserServerSettings({
+        server_id: server.id,
+        user_id: public_author.id,
+        flags: {
+          can_publicly_display_messages: true,
         },
-        prisma
-      );
-      await createUserServerSettings(
-        {
-          server_id: server.id,
-          user_id: private_author.id,
-          flags: {
-            can_publicly_display_messages: false,
-          },
+      });
+      await createUserServerSettings({
+        server_id: server.id,
+        user_id: private_author.id,
+        flags: {
+          can_publicly_display_messages: false,
         },
-        prisma
-      );
+      });
       public_message = mockMessage(server, channel, public_author);
       private_message = mockMessage(server, channel, private_author, {
         id: randomSnowflakeLargerThan(public_message.id).toString(),
       });
-      await upsertManyMessages([public_message, private_message], elastic, prisma);
+      await upsertManyMessages([public_message, private_message]);
     });
     it("should get all messages with private data if users share a server", async () => {
       const { ctx } = await mockAccountWithServersCallerCtx(server, "web-client");

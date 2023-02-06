@@ -1,11 +1,10 @@
-import {
-  ChannelSettings,
-  getDefaultChannelSettings,
-  PrismaClient,
-} from "@answeroverflow/prisma-types";
+import { ChannelSettings, getDefaultChannelSettings, prisma } from "@answeroverflow/prisma-types";
+
 import type { z } from "zod";
 import { z_channel_upsert_with_deps } from "./channel";
 import { dictToBitfield } from "./utils/bitfield";
+import { DBError } from "./utils/error";
+import { upsert } from "./utils/operations";
 import {
   addFlagsToChannelSettings,
   bitfieldToChannelSettingsFlags,
@@ -60,7 +59,7 @@ function mergeChannelSettings(
   };
 }
 
-export async function findChannelSettingsById(channel_id: string, prisma: PrismaClient) {
+export async function findChannelSettingsById(channel_id: string) {
   const settings = await prisma.channelSettings.findUnique({
     where: {
       channel_id,
@@ -77,7 +76,7 @@ export async function findChannelSettingsById(channel_id: string, prisma: Prisma
   return addFlagsToChannelSettings(settings);
 }
 
-export async function findChannelSettingsByInviteCode(invite_code: string, prisma: PrismaClient) {
+export async function findChannelSettingsByInviteCode(invite_code: string) {
   const settings = await prisma.channelSettings.findUnique({
     where: {
       invite_code,
@@ -94,10 +93,7 @@ export async function findChannelSettingsByInviteCode(invite_code: string, prism
   return addFlagsToChannelSettings(settings);
 }
 
-export async function createChannelSettings(
-  data: z.infer<typeof z_channel_settings_create>,
-  prisma: PrismaClient
-) {
+export async function createChannelSettings(data: z.infer<typeof z_channel_settings_create>) {
   const new_settings = mergeChannelSettings(
     getDefaultChannelSettings({
       channel_id: data.channel_id,
@@ -112,12 +108,11 @@ export async function createChannelSettings(
 
 export async function updateChannelSettings(
   data: z.infer<typeof z_channel_settings_update>,
-  prisma: PrismaClient,
   // The old settings are passed in to avoid an extra database query as they're sometimes avaliable, i.e in the api permission check
   old_settings: ChannelSettings | null = null
 ) {
-  if (!old_settings) old_settings = await findChannelSettingsById(data.channel_id, prisma);
-  if (!old_settings) throw new Error("Channel settings not found");
+  if (!old_settings) old_settings = await findChannelSettingsById(data.channel_id);
+  if (!old_settings) throw new DBError("Channel settings not found", "NOT_FOUND");
   const new_settings = mergeChannelSettings(old_settings, data);
   const updated = await prisma.channelSettings.update({
     where: {
@@ -126,4 +121,12 @@ export async function updateChannelSettings(
     data: new_settings,
   });
   return addFlagsToChannelSettings(updated);
+}
+
+export async function upsertChannelSettings(data: z.infer<typeof z_channel_settings_upsert>) {
+  return upsert({
+    find: () => findChannelSettingsById(data.channel_id),
+    create: () => createChannelSettings(data),
+    update: (old) => updateChannelSettings(data, old),
+  });
 }

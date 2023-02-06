@@ -1,3 +1,5 @@
+import { type DBErrorCode, DBError } from "./error";
+
 interface UpsertOptions<T> {
   find: () => Promise<T | null>;
   create: () => Promise<T>;
@@ -34,4 +36,25 @@ export async function upsertMany<T, F, Data>(calls: {
 
 export function addDefaultValues<T, F>(input: T[], getDefaultValue: (input: T) => F) {
   return input.map((v) => getDefaultValue(v));
+}
+
+export function callDatabaseWithErrorHandler<T>({
+  operation,
+  allowed_errors = [],
+}: {
+  operation: () => Promise<T>;
+  allowed_errors?: DBErrorCode[] | DBErrorCode;
+}) {
+  try {
+    return operation();
+  } catch (error) {
+    if (!Array.isArray(allowed_errors)) {
+      allowed_errors = [allowed_errors];
+    }
+    if (error instanceof DBError && allowed_errors.includes(error.code)) {
+      return;
+    } else {
+      throw error;
+    }
+  }
 }

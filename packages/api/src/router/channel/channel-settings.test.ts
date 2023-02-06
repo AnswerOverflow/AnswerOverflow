@@ -1,5 +1,5 @@
 import { mockAccountWithServersCallerCtx, testAllVariantsThatThrowErrors } from "~api/test/utils";
-import { createChannelSettings, prisma } from "@answeroverflow/db";
+import { createChannelSettings } from "@answeroverflow/db";
 import { channelSettingsRouter } from "./channel-settings";
 import { Server, Channel, createChannel, createServer } from "@answeroverflow/db";
 import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
@@ -12,19 +12,16 @@ beforeEach(async () => {
   server = mockServer();
   channel = mockChannel(server);
 
-  await createServer(server, prisma);
-  await createChannel(channel, prisma);
+  await createServer(server);
+  await createChannel(channel);
 });
 
 describe("Channel Settings Operations", () => {
   describe("Channel Settings Fetch", () => {
     beforeEach(async () => {
-      await createChannelSettings(
-        {
-          channel_id: channel.id,
-        },
-        prisma
-      );
+      await createChannelSettings({
+        channel_id: channel.id,
+      });
     });
     it("should test fetching channel settings with all varaints", async () => {
       await testAllVariantsThatThrowErrors({
@@ -44,13 +41,10 @@ describe("Channel Settings Operations", () => {
     beforeEach(async () => {
       // set to a random string to avoid collisions
       invite_code = Math.random().toString(36).substring(7);
-      await createChannelSettings(
-        {
-          channel_id: channel.id,
-          invite_code,
-        },
-        prisma
-      );
+      await createChannelSettings({
+        channel_id: channel.id,
+        invite_code,
+      });
     });
     it("should test fetching channel settings by invite code with all varaints", async () => {
       await testAllVariantsThatThrowErrors({
@@ -71,7 +65,7 @@ describe("Channel Settings Operations", () => {
         async operation({ source, permission }) {
           const caller = await mockAccountWithServersCallerCtx(server, source, permission);
           const chnl = mockChannel(server);
-          await createChannel(chnl, prisma);
+          await createChannel(chnl);
           const router = channelSettingsRouter.createCaller(caller.ctx);
           await router.create({
             channel_id: chnl.id,
@@ -85,12 +79,9 @@ describe("Channel Settings Operations", () => {
   });
   describe("Channel Settings Update", () => {
     beforeEach(async () => {
-      await createChannelSettings(
-        {
-          channel_id: channel.id,
-        },
-        prisma
-      );
+      await createChannelSettings({
+        channel_id: channel.id,
+      });
     });
     it("should test updating channel settings with all varaints", async () => {
       await testAllVariantsThatThrowErrors({
@@ -138,7 +129,7 @@ describe("Channel Settings Operations", () => {
           async operation({ source, permission }) {
             const caller = await mockAccountWithServersCallerCtx(server, source, permission);
             const chnl = mockChannel(server);
-            await createChannel(chnl, prisma);
+            await createChannel(chnl);
             const router = channelSettingsRouter.createCaller(caller.ctx);
             await router.upsert({
               channel_id: chnl.id,
@@ -152,12 +143,9 @@ describe("Channel Settings Operations", () => {
     });
     describe("Channel Settings Upsert Update", () => {
       beforeEach(async () => {
-        await createChannelSettings(
-          {
-            channel_id: channel.id,
-          },
-          prisma
-        );
+        await createChannelSettings({
+          channel_id: channel.id,
+        });
       });
       it("should test upsert updating channel settings with all varaints", async () => {
         await testAllVariantsThatThrowErrors({
@@ -202,12 +190,9 @@ describe("Channel Settings Operations", () => {
     });
     describe("Channel Settings Upsert With Deps Update", () => {
       beforeEach(async () => {
-        await createChannelSettings(
-          {
-            channel_id: channel.id,
-          },
-          prisma
-        );
+        await createChannelSettings({
+          channel_id: channel.id,
+        });
       });
       it("should test upsert updating channel settings with all varaints", async () => {
         await testAllVariantsThatThrowErrors({

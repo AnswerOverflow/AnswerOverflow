@@ -3,8 +3,6 @@ import {
   DiscordAccount,
   Message,
   Server,
-  prisma,
-  elastic,
   createServer,
   createChannel,
   createDiscordAccount,
@@ -37,9 +35,9 @@ beforeEach(async () => {
   channel = mockChannel(server);
   author = mockAccount();
 
-  await createServer(server, prisma);
-  await createChannel(channel, prisma);
-  await createDiscordAccount(author, prisma);
+  await createServer(server);
+  await createChannel(channel);
+  await createDiscordAccount(author);
   const unauthed_ctx = await mockUnauthedCtx("web-client");
   unauthed_message_page_router = message_page_router.createCaller(unauthed_ctx);
 });
@@ -58,7 +56,7 @@ describe("Message Results", () => {
       message2 = mockMessage(server, channel, author, {
         id: randomSnowflakeLargerThan(message.id).toString(),
       });
-      await upsertManyMessages([message, message2], elastic, prisma);
+      await upsertManyMessages([message, message2]);
     });
     it("should get messages for a text channel correctly", async () => {
       const messages = await unauthed_message_page_router.byId(message.id);
@@ -93,8 +91,8 @@ describe("Message Results", () => {
         }),
       ];
 
-      await createChannel(thread, prisma);
-      await upsertManyMessages(thread_messages, elastic, prisma);
+      await createChannel(thread);
+      await upsertManyMessages(thread_messages);
     });
 
     it("should get all thread messages for a thread correctly starting from the root", async () => {

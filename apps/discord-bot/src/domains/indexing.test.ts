@@ -9,11 +9,21 @@ import {
   TextChannel,
 } from "discord.js";
 
-import type { Message as AOMessage } from "@answeroverflow/db";
-
-import { testOnlyAPICall } from "~discord-bot/test/helpers";
 import {
-  toAOChannelWithServer,
+  createChannel,
+  createChannelSettings,
+  createDiscordAccount,
+  createServer,
+  createUserServerSettings,
+  findChannelSettingsById,
+  findManyChannelsById,
+  findManyDiscordAccountsById,
+  findManyMessages,
+  Message as AOMessage,
+} from "@answeroverflow/db";
+
+import {
+  toAOChannel,
   toAODiscordAccount,
   toAOMessage,
   toAOServer,
@@ -63,18 +73,16 @@ async function validateIndexingResults(input: {
   const { messages, threads = [], expected_threads, expected_users, expected_messages } = input;
   const user_ids = messages.map((msg) => msg.author.id);
 
-  const fetched_users = await testOnlyAPICall((router) =>
-    router.discord_accounts.byIdMany(user_ids)
-  );
-  expect(fetched_users!.length).toBe(expected_users);
+  const fetched_users = await findManyDiscordAccountsById(user_ids);
+  expect(fetched_users.length).toBe(expected_users);
 
   const message_ids = messages.map((msg) => msg.id);
-  const fetched_messages = await testOnlyAPICall((router) => router.messages.byIdBulk(message_ids));
-  expect(fetched_messages!.length).toBe(expected_messages);
+  const fetched_messages = await findManyMessages(message_ids);
+  expect(fetched_messages.length).toBe(expected_messages);
 
   const thread_ids = threads.map((thread) => thread.id);
-  const fetched_threads = await testOnlyAPICall((router) => router.channels.byIdMany(thread_ids));
-  expect(fetched_threads!.length).toBe(expected_threads);
+  const fetched_threads = await findManyChannelsById(thread_ids);
+  expect(fetched_threads.length).toBe(expected_threads);
 }
 
 async function upsertChannelSettings(
@@ -84,10 +92,14 @@ async function upsertChannelSettings(
     "channel"
   > = {}
 ) {
-  const settings = await testOnlyAPICall((router) =>
-    router.channel_settings.upsertWithDeps({ channel: toAOChannelWithServer(channel), ...opts })
-  );
-  return settings!;
+  await createServer(toAOServer(channel.guild));
+  await createChannel(toAOChannel(channel));
+  const settings = await createChannelSettings({
+    channel_id: channel.id,
+    ...opts,
+  });
+
+  return settings;
 }
 
 describe("Indexing", () => {
@@ -169,9 +181,7 @@ describe("Indexing", () => {
       const messages = mockMessages(text_channel, 100);
       await indexRootChannel(text_channel);
       const largest_id = messages.sort((a, b) => isSnowflakeLargerAsInt(a.id, b.id)).at(-1)!.id;
-      const updated_settings = await testOnlyAPICall((router) =>
-        router.channel_settings.byId(text_channel.id)
-      );
+      const updated_settings = await findChannelSettingsById(text_channel.id);
       expect(updated_settings!.last_indexed_snowflake).toBe(largest_id);
     });
     it("should start indexing from the last indexed snowflake", async () => {
@@ -346,17 +356,15 @@ describe("Indexing", () => {
         channel: text_channel,
         author: member_to_ignore.user,
       });
-      const settings = await testOnlyAPICall(async (router) => {
-        await router.servers.upsert(toAOServer(member_to_ignore.guild));
-        return router.user_server_settings.upsertWithDeps({
-          user: toAODiscordAccount(member_to_ignore.user),
-          server_id: member_to_ignore.guild.id,
-          flags: {
-            message_indexing_disabled: true,
-          },
-        });
+      await createDiscordAccount(toAODiscordAccount(member_to_ignore.user));
+      const settings = await createUserServerSettings({
+        user_id: member_to_ignore.user.id,
+        server_id: member_to_ignore.guild.id,
+        flags: {
+          message_indexing_disabled: true,
+        },
       });
-      expect(settings!.flags.message_indexing_disabled).toBe(true);
+      expect(settings.flags.message_indexing_disabled).toBe(true);
       const filtered_messages = await filterMessages([message_to_ignore], text_channel);
       expect(filtered_messages.length).toBe(0);
     });

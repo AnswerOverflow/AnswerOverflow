@@ -7,7 +7,7 @@ import {
   Channel,
   ChannelSettings,
   getDefaultChannelSettings,
-  PrismaClient,
+  prisma,
   getDefaultChannel,
 } from "@answeroverflow/prisma-types";
 import { omit } from "@answeroverflow/utils";
@@ -76,105 +76,84 @@ function addSettingsToChannel<
 }
 
 export function findChannel<T extends Prisma.ChannelFindUniqueArgs>(
-  args: Prisma.SelectSubset<T, Prisma.ChannelFindUniqueArgs>,
-  prisma: PrismaClient
+  args: Prisma.SelectSubset<T, Prisma.ChannelFindUniqueArgs>
 ) {
   return prisma.channel.findUnique(args);
 }
 
-export async function findChannelById(id: string, prisma: PrismaClient) {
-  return findChannel({ where: { id } }, prisma);
+export async function findChannelById(id: string) {
+  return findChannel({ where: { id } });
 }
 
-export async function findChannelByIdWithSettings(id: string, prisma: PrismaClient) {
-  const channel = await findChannel(
-    {
-      where: { id },
-      include: { channel_settings: true },
-    },
-    prisma
-  );
+export async function findChannelByIdWithSettings(id: string) {
+  const channel = await findChannel({
+    where: { id },
+    include: { channel_settings: true },
+  });
   if (!channel) return null;
   return addSettingsToChannel(channel);
 }
 
 export function findManyChannels<T extends Prisma.ChannelFindManyArgs>(
-  args: Prisma.SelectSubset<T, Prisma.ChannelFindManyArgs>,
-  prisma: PrismaClient
+  args: Prisma.SelectSubset<T, Prisma.ChannelFindManyArgs>
 ) {
   return prisma.channel.findMany(args);
 }
 
-export function findManyChannelsById(ids: string[], prisma: PrismaClient) {
-  return findManyChannels({ where: { id: { in: ids } } }, prisma);
+export function findManyChannelsById(ids: string[]) {
+  return findManyChannels({ where: { id: { in: ids } } });
 }
 
-export function createChannel(data: z.infer<typeof z_channel_create>, prisma: PrismaClient) {
+export function createChannel(data: z.infer<typeof z_channel_create>) {
   return prisma.channel.create({ data });
 }
 
-export async function createManyChannels(
-  data: z.infer<typeof z_channel_create>[],
-  prisma: PrismaClient
-) {
+export async function createManyChannels(data: z.infer<typeof z_channel_create>[]) {
   await prisma.channel.createMany({ data });
   return data.map((c) => getDefaultChannel({ ...c }));
 }
 
-export function updateChannel(data: z.infer<typeof z_channel_update>, prisma: PrismaClient) {
+export function updateChannel(data: z.infer<typeof z_channel_update>) {
   return prisma.channel.update({ where: { id: data.id }, data });
 }
 
-export function updateManyChannels(data: z.infer<typeof z_channel_update>[], prisma: PrismaClient) {
+export function updateManyChannels(data: z.infer<typeof z_channel_update>[]) {
   return prisma.$transaction(
     data.map((c) => prisma.channel.update({ where: { id: c.id }, data: c }))
   );
 }
 
-export function deleteChannel(id: string, prisma: PrismaClient) {
+export function deleteChannel(id: string) {
   return prisma.channel.delete({ where: { id } });
 }
 
-export async function createChannelWithDeps(
-  data: z.infer<typeof z_channel_create_with_deps>,
-  prisma: PrismaClient
-) {
-  await upsertServer(data.server, prisma);
-  return createChannel(
-    {
-      server_id: data.server.id,
-      ...omit(data, "server"),
-    },
-    prisma
-  );
-}
-
-export function upsertChannel(data: z.infer<typeof z_channel_upsert>, prisma: PrismaClient) {
-  return upsert({
-    create: () => createChannel(data, prisma),
-    update: () => updateChannel(data, prisma),
-    find: () => findChannelById(data.id, prisma),
+export async function createChannelWithDeps(data: z.infer<typeof z_channel_create_with_deps>) {
+  await upsertServer(data.server);
+  return createChannel({
+    server_id: data.server.id,
+    ...omit(data, "server"),
   });
 }
 
-export function upsertManyChannels(
-  data: z.infer<typeof z_channel_upsert_many>,
-  prisma: PrismaClient
-) {
+export function upsertChannel(data: z.infer<typeof z_channel_upsert>) {
+  return upsert({
+    create: () => createChannel(data),
+    update: () => updateChannel(data),
+    find: () => findChannelById(data.id),
+  });
+}
+
+export function upsertManyChannels(data: z.infer<typeof z_channel_upsert_many>) {
   return upsertMany({
     input: data,
-    find: () =>
-      findManyChannelsById(
-        data.map((c) => c.id),
-        prisma
-      ),
+    find: () => findManyChannelsById(data.map((c) => c.id)),
     getInputId(input) {
       return input.id;
     },
     getFetchedDataId(input) {
       return input.id;
     },
-    create: (create) => createManyChannels(create, prisma),
-    update: (update) => updateManyChannels(update, prisma),
+    create: (create) => createManyChannels(create),
+    update: (update) => updateManyChannels(update),
   });
 }

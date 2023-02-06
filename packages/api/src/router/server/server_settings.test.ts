@@ -2,18 +2,17 @@ import { createServer, createServerSettings, Server } from "@answeroverflow/db";
 import { mockServer } from "@answeroverflow/db-mock";
 import { mockAccountWithServersCallerCtx, testAllVariantsThatThrowErrors } from "~api/test/utils";
 import { serverSettingsRouter } from "./server_settings";
-import { prisma } from "@answeroverflow/db";
 
 let server: Server;
 beforeEach(async () => {
   server = mockServer();
-  await createServer(server, prisma);
+  await createServer(server);
 });
 
 describe("Server Settings Operations", () => {
   describe("Server Settings By Id", () => {
     beforeEach(async () => {
-      await createServerSettings({ server_id: server.id }, prisma);
+      await createServerSettings({ server_id: server.id });
     });
     it("should test all varaints of getting server settings by id", async () => {
       await testAllVariantsThatThrowErrors({
@@ -32,7 +31,7 @@ describe("Server Settings Operations", () => {
       await testAllVariantsThatThrowErrors({
         async operation({ source, permission }) {
           const srv = mockServer();
-          await createServer(srv, prisma);
+          await createServer(srv);
           const { ctx } = await mockAccountWithServersCallerCtx(srv, source, permission);
           const router = serverSettingsRouter.createCaller(ctx);
           await router.create({ server_id: srv.id });
@@ -44,7 +43,7 @@ describe("Server Settings Operations", () => {
   });
   describe("Server Settings Update", () => {
     beforeEach(async () => {
-      await createServerSettings({ server_id: server.id }, prisma);
+      await createServerSettings({ server_id: server.id });
     });
     it("should test all varaints of updating server settings", async () => {
       await testAllVariantsThatThrowErrors({
@@ -66,7 +65,7 @@ describe("Server Settings Operations", () => {
       await testAllVariantsThatThrowErrors({
         async operation({ source, permission }) {
           const srv = mockServer();
-          await createServer(srv, prisma);
+          await createServer(srv);
           const { ctx } = await mockAccountWithServersCallerCtx(srv, source, permission);
           const router = serverSettingsRouter.createCaller(ctx);
           await router.createWithDeps({ server: srv });
@@ -82,7 +81,7 @@ describe("Server Settings Operations", () => {
         await testAllVariantsThatThrowErrors({
           async operation({ source, permission }) {
             const srv = mockServer();
-            await createServer(srv, prisma);
+            await createServer(srv);
             const { ctx } = await mockAccountWithServersCallerCtx(srv, source, permission);
             const router = serverSettingsRouter.createCaller(ctx);
             await router.upsert({ server_id: srv.id });
@@ -94,7 +93,7 @@ describe("Server Settings Operations", () => {
     });
     describe("Server Settings Upsert Update", () => {
       beforeEach(async () => {
-        await createServerSettings({ server_id: server.id }, prisma);
+        await createServerSettings({ server_id: server.id });
       });
 
       it("should test all varaints of upserting updating server settings", async () => {
@@ -119,7 +118,7 @@ describe("Server Settings Operations", () => {
         await testAllVariantsThatThrowErrors({
           async operation({ source, permission }) {
             const srv = mockServer();
-            await createServer(srv, prisma);
+            await createServer(srv);
             const { ctx } = await mockAccountWithServersCallerCtx(srv, source, permission);
             const router = serverSettingsRouter.createCaller(ctx);
             await router.upsertWithDeps({ server: srv });
@@ -131,7 +130,7 @@ describe("Server Settings Operations", () => {
     });
     describe("Server Settings Upsert With Deps Update", () => {
       beforeEach(async () => {
-        await createServerSettings({ server_id: server.id }, prisma);
+        await createServerSettings({ server_id: server.id });
       });
       it("should test all varaints of upserting updating server settings with deps", async () => {
         await testAllVariantsThatThrowErrors({

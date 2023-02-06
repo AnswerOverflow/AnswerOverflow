@@ -8,9 +8,9 @@ import {
   mockPublicThread,
   mockTextChannel,
 } from "@answeroverflow/discordjs-mock";
-import { testOnlyAPICall } from "~discord-bot/test/helpers";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
-import { toAOChannelWithServer } from "~discord-bot/utils/conversions";
+import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
+import { createChannel, createChannelSettings, createServer } from "packages/db";
 
 let client: Client;
 beforeEach(async () => {
@@ -39,14 +39,14 @@ async function setupSolvedMessageScenario(guild_id?: string) {
     client,
     channel: text_channel_thread,
   });
-  await testOnlyAPICall((router) =>
-    router.channel_settings.upsertWithDeps({
-      channel: toAOChannelWithServer(text_channel),
-      flags: {
-        mark_solution_enabled: true,
-      },
-    })
-  );
+  await createServer(toAOServer(guild));
+  await createChannel(toAOChannel(text_channel));
+  await createChannelSettings({
+    channel_id: text_channel.id,
+    flags: {
+      mark_solution_enabled: true,
+    },
+  });
   return {
     text_channel,
     default_author,
