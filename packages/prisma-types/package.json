@@ -13,7 +13,7 @@
     "db:generate": "yarn with-env prisma generate",
     "db:push": "yarn with-env prisma db push --skip-generate",
     "dev": "yarn with-env prisma studio --port 5556 --browser none",
-    "test": "yarn run with-env vitest run",
+    "test": "yarn run with-env vitest run  --coverage",
     "test:watch": "yarn run with-env vitest"
   },
   "dependencies": {

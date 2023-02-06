@@ -1,10 +1,8 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import { Events, Guild } from "discord.js";
-import { ALLOWED_CHANNEL_TYPES } from "@answeroverflow/db";
-import { createAnswerOveflowBotCtx } from "~discord-bot/utils/context";
+import { ALLOWED_CHANNEL_TYPES, upsertServer, upsertManyChannels } from "@answeroverflow/db";
 import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
-import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
 
 /*
   Guild relevated events are tracked here, this may make sense to split into multiple files as the complexity grows.
@@ -20,19 +18,12 @@ export class SyncOnReady extends Listener {
 @ApplyOptions<Listener.Options>({ event: Events.GuildCreate, name: "Guild Sync On Join" })
 export class SyncOnJoin extends Listener {
   public async run(guild: Guild) {
-    await callApiWithConsoleStatusHandler({
-      async ApiCall(router) {
-        await router.servers.upsert(toAOServer(guild));
-        await router.channels.upsertMany(
-          guild.channels.cache
-            .filter((channel) => ALLOWED_CHANNEL_TYPES.has(channel.type))
-            .map((channel) => toAOChannel(channel))
-        );
-      },
-      error_message: `Error syncing server: ${guild.id}`,
-      success_message: `Synced server: ${guild.id}`,
-      getCtx: createAnswerOveflowBotCtx,
-    });
+    await upsertServer(toAOServer(guild));
+    await upsertManyChannels(
+      guild.channels.cache
+        .filter((channel) => ALLOWED_CHANNEL_TYPES.has(channel.type))
+        .map((channel) => toAOChannel(channel))
+    );
   }
 }
 
@@ -44,16 +35,9 @@ export class SyncOnJoin extends Listener {
 @ApplyOptions<Listener.Options>({ event: Events.GuildDelete, name: "Guild Sync On Delete" })
 export class SyncOnDelete extends Listener {
   public async run(guild: Guild) {
-    await callApiWithConsoleStatusHandler({
-      async ApiCall(router) {
-        return await router.servers.upsert({
-          ...toAOServer(guild),
-          kicked_time: new Date(),
-        });
-      },
-      error_message: `Error syncing delete server: ${guild.id}`,
-      success_message: `Synced kicked from server: ${guild.id}`,
-      getCtx: createAnswerOveflowBotCtx,
+    await upsertServer({
+      ...toAOServer(guild),
+      kicked_time: new Date(),
     });
   }
 }
@@ -61,13 +45,6 @@ export class SyncOnDelete extends Listener {
 @ApplyOptions<Listener.Options>({ event: Events.GuildUpdate, name: "Guild Sync On Update" })
 export class SyncOnUpdate extends Listener {
   public async run(_oldGuild: Guild, newGuild: Guild) {
-    await callApiWithConsoleStatusHandler({
-      async ApiCall(router) {
-        return await router.servers.upsert(toAOServer(newGuild));
-      },
-      error_message: `Error syncing update server: ${newGuild.id}`,
-      success_message: `Synced update to server: ${newGuild.id}`,
-      getCtx: createAnswerOveflowBotCtx,
-    });
+    await upsertServer(toAOServer(newGuild));
   }
 }

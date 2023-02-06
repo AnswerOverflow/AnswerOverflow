@@ -10,7 +10,7 @@
     "with-env": "dotenv -e ../../.env --",
     "lint": "eslint \"*.ts*\" && tsc --noEmit",
     "lint:fix": "eslint \"*.ts*\" --fix",
-    "test": "yarn run with-env vitest run",
+    "test": "yarn run with-env vitest run  --coverage",
     "test:watch": "yarn run with-env vitest"
   },
   "dependencies": {

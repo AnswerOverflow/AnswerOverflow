@@ -1,4 +1,9 @@
-import type { ChannelPublic, MessageWithDiscordAccount, ServerPublic } from "@answeroverflow/api";
+import type {
+  ChannelPublic,
+  ChannelPublicWithSettings,
+  MessageWithDiscordAccount,
+  ServerPublic,
+} from "@answeroverflow/api";
 import { useIsUserInServer } from "../utils";
 import { Message } from "./Message";
 import { SearchBar } from "./SearchBar";
@@ -7,7 +12,7 @@ import { ServerInviteDriver } from "./ServerInviteDriver";
 export type MessageResultPageProps = {
   messages: MessageWithDiscordAccount[];
   server: ServerPublic;
-  channel: ChannelPublic;
+  channel: ChannelPublicWithSettings;
   thread?: ChannelPublic;
   // The query that lead to this result page
   query?: string;

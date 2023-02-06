@@ -1,11 +1,11 @@
-import type { ServerPublic, ChannelPublic } from "@answeroverflow/api";
+import type { ServerPublic, ChannelPublicWithSettings } from "@answeroverflow/api";
 import Link from "next/link";
 import { Button } from "./primitives/Button";
 import { ServerIcon } from "./ServerIcon";
 
 export type ServerInviteProps = {
   server: ServerPublic;
-  channel?: ChannelPublic;
+  channel?: ChannelPublicWithSettings;
   is_user_in_server: boolean;
 };
 
