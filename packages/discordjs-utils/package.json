@@ -17,7 +17,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "test:discord-bot": "yarn jest",
+    "clean": "rm -rf dist .turbo coverage",
+    "test": "yarn jest --coverage",
     "test:watch": "yarn jest --watch",
     "lint": "eslint src && tsc --noEmit",
     "lint:fix": "eslint src --fix"
