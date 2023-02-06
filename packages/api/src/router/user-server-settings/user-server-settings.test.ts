@@ -7,15 +7,15 @@ import {
   createUserServerSettings,
 } from "@answeroverflow/db";
 import { userServerSettingsRouter } from "./user-server-settings";
-import { mockAccount, mockServer } from "@answeroverflow/db-mock";
+import { mockDiscordAccount, mockServer } from "@answeroverflow/db-mock";
 
 let server: Server;
 let discord_account: DiscordAccount;
 let discord_account_2: DiscordAccount;
 beforeEach(async () => {
   server = mockServer();
-  discord_account = mockAccount();
-  discord_account_2 = mockAccount();
+  discord_account = mockDiscordAccount();
+  discord_account_2 = mockDiscordAccount();
 
   await createServer(server);
   await createDiscordAccount(discord_account);

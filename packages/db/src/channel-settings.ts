@@ -3,7 +3,6 @@ import { ChannelSettings, getDefaultChannelSettings, prisma } from "@answeroverf
 import type { z } from "zod";
 import { z_channel_upsert_with_deps } from "./channel";
 import { dictToBitfield } from "./utils/bitfield";
-import { DBError } from "./utils/error";
 import { upsert } from "./utils/operations";
 import {
   addFlagsToChannelSettings,
@@ -109,10 +108,8 @@ export async function createChannelSettings(data: z.infer<typeof z_channel_setti
 export async function updateChannelSettings(
   data: z.infer<typeof z_channel_settings_update>,
   // The old settings are passed in to avoid an extra database query as they're sometimes avaliable, i.e in the api permission check
-  old_settings: ChannelSettings | null = null
+  old_settings: ChannelSettings
 ) {
-  if (!old_settings) old_settings = await findChannelSettingsById(data.channel_id);
-  if (!old_settings) throw new DBError("Channel settings not found", "NOT_FOUND");
   const new_settings = mergeChannelSettings(old_settings, data);
   const updated = await prisma.channelSettings.update({
     where: {

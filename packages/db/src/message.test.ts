@@ -56,7 +56,7 @@
 //     });
 //     it("should fail adding an author who does not exist", async () => {
 //       await expect(
-//         addAuthorsToMessages([mockMessage(server, channel, mockAccount())])
+//         addAuthorsToMessages([mockMessage(server, channel, mockDiscordAccount())])
 //       ).resolves.toEqual([]);
 //     });
 //   });

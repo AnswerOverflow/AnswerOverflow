@@ -10,7 +10,6 @@ import {
   mergeUserServerSettingsFlags,
   z_user_server_settings,
 } from "./zod-schemas";
-import { DBError } from "./utils/error";
 
 export const z_user_server_settings_required = z_user_server_settings.pick({
   user_id: true,
@@ -102,15 +101,8 @@ export async function createUserServerSettings(
 
 export async function updateUserServerSettings(
   data: z.infer<typeof z_user_server_settings_update>,
-  existing: UserServerSettings | null
+  existing: UserServerSettings
 ) {
-  if (!existing)
-    existing = await findUserServerSettingsById({
-      user_id: data.user_id,
-      server_id: data.server_id,
-    });
-  if (!existing) throw new DBError("UserServerSettings not found", "NOT_FOUND");
-
   const updated = await prisma.userServerSettings.update({
     where: {
       user_id_server_id: {

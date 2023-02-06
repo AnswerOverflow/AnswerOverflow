@@ -3,15 +3,15 @@ import {
   DiscordAccount,
   upsertIgnoredDiscordAccount,
 } from "@answeroverflow/db";
-import { mockAccount } from "@answeroverflow/db-mock";
+import { mockDiscordAccount } from "@answeroverflow/db-mock";
 import { testAllSources, mockAccountCallerCtx } from "~api/test/utils";
 import { ignored_discord_account_router } from "./ignored-discord-account";
 
 let discord_account: DiscordAccount;
 let discord_account_2: DiscordAccount;
 beforeEach(async () => {
-  discord_account = mockAccount();
-  discord_account_2 = mockAccount();
+  discord_account = mockDiscordAccount();
+  discord_account_2 = mockDiscordAccount();
 
   await createDiscordAccount(discord_account);
   await upsertIgnoredDiscordAccount(discord_account_2.id);
@@ -43,7 +43,7 @@ describe("Ignored Discord Account Operations", () => {
     it("should fail to find an ignored discord account by id that is not the user", async () => {
       await testAllSources({
         async operation(source) {
-          const account = mockAccount();
+          const account = mockDiscordAccount();
           const { ctx } = await mockAccountCallerCtx(source);
           await upsertIgnoredDiscordAccount(account.id);
           const router = ignored_discord_account_router.createCaller(ctx);
@@ -66,7 +66,7 @@ describe("Ignored Discord Account Operations", () => {
     it("should fail to stop ignoring a discord account that is not the user", async () => {
       await testAllSources({
         async operation(source) {
-          const account = mockAccount();
+          const account = mockDiscordAccount();
           const { ctx } = await mockAccountCallerCtx(source);
           await upsertIgnoredDiscordAccount(account.id);
           const router = ignored_discord_account_router.createCaller(ctx);

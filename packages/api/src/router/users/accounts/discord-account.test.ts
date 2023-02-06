@@ -4,7 +4,7 @@ import {
   DiscordAccount,
   findDiscordAccountById,
 } from "@answeroverflow/db";
-import { mockAccount } from "@answeroverflow/db-mock";
+import { mockDiscordAccount } from "@answeroverflow/db-mock";
 import { pick } from "@answeroverflow/utils";
 
 import { testAllDataVariants, mockAccountCallerCtx, testAllSources } from "~api/test/utils";
@@ -17,8 +17,8 @@ function pickPublicFields(discord_account: DiscordAccount) {
 }
 
 beforeEach(() => {
-  discord_account = mockAccount();
-  discord_account2 = mockAccount();
+  discord_account = mockDiscordAccount();
+  discord_account2 = mockDiscordAccount();
 });
 describe("Discord Account Operations", () => {
   describe("Discord Account By Id", () => {

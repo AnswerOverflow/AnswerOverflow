@@ -18,7 +18,7 @@ import {
 import {
   mockServer,
   mockChannel,
-  mockAccount,
+  mockDiscordAccount,
   mockMessage,
   mockThread,
 } from "@answeroverflow/db-mock";
@@ -33,7 +33,7 @@ let unauthed_message_page_router: ReturnType<(typeof message_page_router)["creat
 beforeEach(async () => {
   server = mockServer();
   channel = mockChannel(server);
-  author = mockAccount();
+  author = mockDiscordAccount();
 
   await createServer(server);
   await createChannel(channel);

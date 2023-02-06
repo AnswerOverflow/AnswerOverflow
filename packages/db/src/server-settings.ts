@@ -70,10 +70,8 @@ export function createServerSettings(input: z.infer<typeof z_server_settings_cre
 
 export async function updateServerSettings(
   input: z.infer<typeof z_server_settings_update>,
-  existing: ServerSettings | null
+  existing: ServerSettings
 ) {
-  if (!existing) existing = await findServerSettingsById(input.server_id);
-  if (!existing) throw new Error("Server settings not found");
   const new_settings = mergeServerSettings(existing, input);
   return await prisma.serverSettings.update({
     where: {

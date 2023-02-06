@@ -15,7 +15,7 @@ import {
   toMessageWithDiscordAccount,
   toPrivateMessageWithStrippedData,
 } from "~api/test/public_data";
-import { mockAccount, mockChannel, mockMessage, mockServer } from "@answeroverflow/db-mock";
+import { mockDiscordAccount, mockChannel, mockMessage, mockServer } from "@answeroverflow/db-mock";
 import { randomSnowflakeLargerThan } from "@answeroverflow/discordjs-utils";
 
 let server: Server;
@@ -25,7 +25,7 @@ let author: DiscordAccount;
 beforeEach(async () => {
   server = mockServer();
   channel = mockChannel(server);
-  author = mockAccount();
+  author = mockDiscordAccount();
   await createServer(server);
   await createChannel(channel);
   await createDiscordAccount(author);
@@ -41,8 +41,8 @@ describe("Message Operations", () => {
     let private_message: Message;
     let public_message: Message;
     beforeEach(async () => {
-      public_author = mockAccount();
-      private_author = mockAccount();
+      public_author = mockDiscordAccount();
+      private_author = mockDiscordAccount();
       await createDiscordAccount(public_author);
       await createDiscordAccount(private_author);
       await createUserServerSettings({
@@ -96,7 +96,7 @@ describe("Message Operations", () => {
 describe("Message Utilities", () => {
   describe("Strip Private Message Data", () => {
     it("should preserve information on a public message", () => {
-      const author = mockAccount();
+      const author = mockDiscordAccount();
       const message_with_account = toMessageWithDiscordAccount(
         mockMessage(server, channel, author),
         author,
@@ -106,7 +106,7 @@ describe("Message Utilities", () => {
       expect(stripped).toEqual(message_with_account);
     });
     it("should strip information on a private message", () => {
-      const author = mockAccount();
+      const author = mockDiscordAccount();
 
       const message_with_account = toMessageWithDiscordAccount(
         mockMessage(server, channel, author),
