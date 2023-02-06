@@ -77,11 +77,11 @@ export async function deleteDiscordAccount(id: string) {
   return true;
 }
 
-export async function bulkUpsertDiscordAccounts(data: z.infer<typeof z_discord_account_upsert>[]) {
+export async function upsertManyDiscordAccounts(data: z.infer<typeof z_discord_account_upsert>[]) {
   return upsertMany({
-    create: () => createManyDiscordAccounts(data),
-    update: () => updateManyDiscordAccounts(data),
     find: () => findManyDiscordAccountsById(data.map((i) => i.id)),
+    create: (create_input) => createManyDiscordAccounts(create_input),
+    update: (update_input) => updateManyDiscordAccounts(update_input),
     getFetchedDataId: (i) => i.id,
     getInputId: (i) => i.id,
     input: data,

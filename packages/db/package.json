@@ -18,6 +18,7 @@
   "dependencies": {
     "@answeroverflow/elastic-types": "*",
     "@answeroverflow/prisma-types": "*",
+    "@answeroverflow/db-mock": "*",
     "@answeroverflow/utils": "*",
     "@sapphire/bitfield": "^1.0.0",
     "discord-api-types": "^0.37.30",

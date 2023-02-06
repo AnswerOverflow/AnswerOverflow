@@ -1,5 +1,5 @@
 import {
-  bulkUpsertDiscordAccounts,
+  upsertManyDiscordAccounts,
   Message as AOMessage,
   upsertManyChannels,
   upsertManyMessages,
@@ -23,7 +23,7 @@ import {
 import {
   extractUsersSetFromMessages,
   messagesToAOMessagesSet,
-  toAOChannelWithServer,
+  toAOChannel,
   toAOThread,
 } from "~discord-bot/utils/conversions";
 import { container } from "@sapphire/framework";
@@ -87,8 +87,8 @@ export async function indexRootChannel(channel: TextChannel | NewsChannel | Foru
 
   addSolutionsToMessages(filtered_messages, converted_messages);
 
-  await bulkUpsertDiscordAccounts(converted_users);
-  await upsertChannel(toAOChannelWithServer(channel));
+  await upsertManyDiscordAccounts(converted_users);
+  await upsertChannel(toAOChannel(channel));
   await upsertManyMessages(converted_messages);
   await upsertManyChannels(converted_threads);
 }

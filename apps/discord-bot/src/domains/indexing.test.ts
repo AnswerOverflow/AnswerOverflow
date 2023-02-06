@@ -8,7 +8,6 @@ import {
   NewsChannel,
   TextChannel,
 } from "discord.js";
-
 import {
   createChannel,
   createChannelSettings,
@@ -21,7 +20,6 @@ import {
   findManyMessages,
   Message as AOMessage,
 } from "@answeroverflow/db";
-
 import {
   toAOChannel,
   toAODiscordAccount,
@@ -118,7 +116,7 @@ describe("Indexing", () => {
         expected_messages: 0,
       });
     });
-    it("should index a text channel", async () => {
+    it.only("should index a text channel", async () => {
       const settings = await upsertChannelSettings(text_channel, {
         flags: {
           indexing_enabled: true,

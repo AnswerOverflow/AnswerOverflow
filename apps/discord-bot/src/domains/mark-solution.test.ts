@@ -200,9 +200,6 @@ describe("Can Mark Solution", () => {
       const solution_message = mockMessage({
         client,
         channel: thread_with_solved_tag,
-        override: {
-          id: "99999999999999",
-        },
       });
 
       await createChannelWithDeps(toAOChannelWithServer(forum_channel));

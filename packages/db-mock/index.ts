@@ -9,7 +9,7 @@ import {
 } from "@answeroverflow/prisma-types";
 import { getRandomId } from "@answeroverflow/utils";
 import { ChannelType } from "discord-api-types/v10";
-export function mockAccount(override: Partial<DiscordAccount> = {}) {
+export function mockDiscordAccount(override: Partial<DiscordAccount> = {}) {
   const account = getDefaultDiscordAccount({
     id: getRandomId(),
     name: "test-user",
