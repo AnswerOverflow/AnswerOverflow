@@ -7,7 +7,7 @@
 
 <div align="center">
   <h1>Answer Overflow</h1>
-  <h3>Google Index Discord Your Help Channels<br /></h3>
+  <h3>Google Index Your Discord Help Channels<br /></h3>
   <a href="https://github.com/AnswerOverflow/AnswerOverflow/blob/main/LICENSE">
     <img alt="AGPL License" src="https://img.shields.io/github/license/AnswerOverflow/AnswerOverflow" />
   </a>
