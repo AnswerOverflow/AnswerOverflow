@@ -1,6 +1,6 @@
 import { ButtonBuilder } from "@discordjs/builders";
 import { APIButtonComponent, ButtonStyle, ChannelType, ComponentType, Message } from "discord.js";
-import { findChannelSettingsById, findUserServerSettingsById } from "@answeroverflow/db";
+import { findChannelSettingsById } from "@answeroverflow/db";
 import { createMemberCtx } from "~discord-bot/utils/context";
 import { toAODiscordAccount } from "~discord-bot/utils/conversions";
 import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
@@ -29,11 +29,18 @@ export async function provideConsentOnForumChannelMessage(message: Message): Pro
   }
   const channel_settings = await findChannelSettingsById(channel.parent.id);
   if (!channel_settings?.flags.forum_guidelines_consent_enabled) {
-    return false;
+    throw new ConsentError("Forum post guidelines consent is not enabled for this channel");
   }
-  const existing_user_settings = await findUserServerSettingsById({
-    server_id: channel.guild.id,
-    user_id: message.author.id,
+  const existing_user_settings = await callApiWithConsoleStatusHandler({
+    ApiCall(router) {
+      return router.user_server_settings.byId({
+        server_id: channel.guild.id,
+        user_id: message.author.id,
+      });
+    },
+    error_message: `Failed to find user settings for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
+    success_message: `Successfully found user settings for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
+    getCtx: () => createMemberCtx(message.member!),
   });
 
   if (existing_user_settings) {

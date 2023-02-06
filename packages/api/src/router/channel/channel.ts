@@ -14,6 +14,8 @@ import {
   z_channel_upsert_with_deps,
   z_thread_upsert_with_deps,
   upsert,
+  z_channel_public_with_settings,
+  findChannelByIdWithSettings,
 } from "@answeroverflow/db";
 import { z } from "zod";
 import { mergeRouters, router, publicProcedure } from "~api/router/trpc";
@@ -35,6 +37,16 @@ const channel_crud_router = router({
       not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
       public_data_formatter: (data) => {
         return z_channel_public.parse(data);
+      },
+    });
+  }),
+  byIdWithSettings: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
+    return protectedFetchWithPublicData({
+      fetch: () => findChannelByIdWithSettings(input),
+      permissions: (data) => assertCanEditServer(ctx, data.server_id),
+      not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
+      public_data_formatter: (data) => {
+        return z_channel_public_with_settings.parse(data);
       },
     });
   }),

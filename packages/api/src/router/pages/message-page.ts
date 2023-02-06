@@ -3,7 +3,7 @@ import { router, publicProcedure } from "~api/router/trpc";
 import { messageRouter } from "../message/message";
 import { serverRouter } from "../server/server";
 import { channelRouter } from "../channel/channel";
-import type { ChannelPublic } from "../channel/types";
+import type { ChannelPublic, ChannelPublicWithSettings } from "../channel/types";
 import type { MessageWithDiscordAccount } from "@answeroverflow/db";
 
 export const message_page_router = router({
@@ -14,7 +14,7 @@ export const message_page_router = router({
     // fetch the channel and the server the message is in
     const parent_channel_or_thread_fetch = channelRouter
       .createCaller(ctx)
-      .byId(root_message.channel_id);
+      .byIdWithSettings(root_message.channel_id);
     const server_fetch = serverRouter.createCaller(ctx).byId(root_message.server_id);
 
     const [thread_or_parent_channel, server] = await Promise.all([
@@ -23,14 +23,14 @@ export const message_page_router = router({
     ]);
 
     let thread: ChannelPublic | undefined = undefined;
-    let parent_channel: ChannelPublic = thread_or_parent_channel;
+    let parent_channel: ChannelPublicWithSettings = thread_or_parent_channel;
     let messages: MessageWithDiscordAccount[];
 
     if (thread_or_parent_channel.parent_id) {
       thread = thread_or_parent_channel;
       const parent_channel_fetch = channelRouter
         .createCaller(ctx)
-        .byId(thread_or_parent_channel.parent_id);
+        .byIdWithSettings(thread_or_parent_channel.parent_id);
       const message_fetch = messageRouter.createCaller(ctx).byChannelIdBulk({
         channel_id: thread.id,
       });

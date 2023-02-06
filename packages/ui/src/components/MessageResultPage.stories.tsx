@@ -1,5 +1,5 @@
 import type { StoryFn, Meta } from "@storybook/react";
-import { mockChannel, mockMessageWithDiscordAccount, mockServer } from "~ui/test/props";
+import { mockChannelWithSettings, mockMessageWithDiscordAccount, mockServer } from "~ui/test/props";
 import { MessageResultPage, MessageResultPageProps } from "./MessageResultPage";
 export default {
   component: MessageResultPage,
@@ -39,7 +39,7 @@ const default_message: MessageResultPageProps = {
       content: "This is the second public message",
     }),
   ],
-  channel: mockChannel(),
+  channel: mockChannelWithSettings(),
   query: "",
   server: { ...mockServer(), id: "83730679338106880" },
 };

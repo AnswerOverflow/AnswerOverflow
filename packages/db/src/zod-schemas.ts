@@ -87,7 +87,7 @@ export const z_channel_public = z_channel.pick({
 });
 
 export const z_channel_public_with_settings = z_channel_public.extend({
-  settings: z_channel_settings_public,
+  settings: z_channel_settings_public.omit({ channel_id: true }),
 });
 
 export const z_discord_image = z.object({

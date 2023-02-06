@@ -48,7 +48,7 @@ describe("Consent", () => {
         provideConsentOnForumChannelMessage(text_channel_thread_message)
       ).rejects.toThrow("Message is not in a forum channel");
     });
-    it("should fail to provide consent in a forum channel with consent disabled", async () => {
+    it("should fail to provide consent in a forum channel with forum post consent disabled", async () => {
       await expect(
         provideConsentOnForumChannelMessage(forum_channel_thread_message)
       ).rejects.toThrow("Forum post guidelines consent is not enabled for this channel");
@@ -101,11 +101,12 @@ describe("Consent", () => {
           forum_guidelines_consent_enabled: true,
         },
       });
+      await createDiscordAccount(toAODiscordAccount(forum_channel_thread_message.author));
       await createUserServerSettings({
         server_id: forum_channel.guild.id,
         user_id: forum_channel_thread_message.author.id,
         flags: {
-          can_publicly_display_messages: true,
+          can_publicly_display_messages: false,
         },
       });
       await expect(

@@ -1,1 +1,1 @@
-export { MessageWithDiscordAccount } from "@answeroverflow/db";
+export type { MessageWithDiscordAccount } from "@answeroverflow/db";
