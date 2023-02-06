@@ -16,11 +16,11 @@ export const Navbar = () => {
             <MagnifyingGlassIcon width={"1.5rem"} height={"1.5rem"} />
           </button>
         </li>
-        <li className="mx-8 flex items-center justify-center">
+        {/* <li className="mx-8 flex items-center justify-center">
           <a href="/" className="text-2xl font-normal text-ao-black hover:text-neutral-800">
             Sign In
           </a>
-        </li>
+        </li> */}
         <li className="ml-8 flex items-center justify-center">
           <Button type={"ghost"} color={"black"}>
             <span className="text-2xl">Add to server</span>

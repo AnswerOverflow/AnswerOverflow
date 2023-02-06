@@ -1,0 +1,48 @@
+import { forwardRef } from "react";
+
+export interface GooglePageProps {
+  result: {
+    url: string;
+    title: string;
+    description: string;
+  };
+}
+
+export const GooglePage = forwardRef<HTMLDivElement, GooglePageProps>(function GooglePageFunc(
+  { result },
+  ref
+) {
+  return (
+    <div className="flex min-h-[10rem] w-[36.5rem] items-center justify-center bg-[#202124]">
+      {/* Searchbar */}
+      {/* <div className="w-[538px] rounded-[24px] bg-[#303134] p-3 px-5 font-sans text-[#e8eaed]">
+        <span>How do I index my discord channels into google?</span>
+      </div> */}
+
+      {/* Result */}
+      <div className="flex flex-col items-start justify-center px-5 font-['arial']">
+        <div className="group hover:cursor-pointer">
+          <div className="flex w-full flex-row items-center justify-start">
+            <span className="text-[14px] text-[#bdc1c6]">{result.url}</span>
+            <div className="ml-[12px] h-[22px] w-[22px] hover:cursor-pointer">
+              <svg
+                focusable="false"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="#9aa0a6"
+              >
+                <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path>
+              </svg>
+            </div>
+          </div>
+          <div ref={ref}>
+            <h3 className="mb-[3px] pt-[5px] text-[20px] text-[#8ab4f8] group-hover:underline">
+              {result.title}
+            </h3>
+          </div>
+        </div>
+        <p className="text-[14px] leading-[1.58] text-[#bdc1c6]">{result.description}</p>
+      </div>
+    </div>
+  );
+});
