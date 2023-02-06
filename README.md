@@ -21,6 +21,9 @@
   <a href="https://twitter.com/AnswerOverflow">
     <img alt="Twitter" src="https://img.shields.io/twitter/url.svg?label=%40AnswerOverflow&style=social&url=https%3A%2F%2Ftwitter.com%2FAnswerOverflow" />
   </a>
+   <a href="https://codecov.io/gh/AnswerOverflow/AnswerOverflow">
+    <img alt="codecov" src="https://codecov.io/gh/AnswerOverflow/AnswerOverflow/branch/main/graph/badge.svg">
+  </a>
   <br />
   <br />
   <figure>
