@@ -23,7 +23,7 @@ let thread: PublicThreadChannel;
 beforeEach(async () => {
   client = await setupAnswerOverflowBot();
   text_channel = mockTextChannel(client);
-  thread = mockPublicThread({ client });
+  thread = mockPublicThread({ client, parent_channel: text_channel });
   await createServer(toAOServer(text_channel.guild));
 });
 
@@ -93,6 +93,7 @@ describe("Thread Update Parity", () => {
 
 describe("Invite Parity", () => {
   it("should sync delete of an invite", async () => {
+    await createChannel(toAOChannel(text_channel));
     const settings = await createChannelSettings({
       channel_id: text_channel.id,
       invite_code: "1234",
