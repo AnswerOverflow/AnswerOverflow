@@ -219,12 +219,17 @@ describe("User Server Settings Operations", () => {
       it("should fail all variants upsert updating user server settings as a different user", async () => {
         await testAllSources({
           async operation(source) {
-            const { ctx } = await mockAccountWithServersCallerCtx(server, source);
+            const { ctx, account } = await mockAccountWithServersCallerCtx(server, source);
             const router = userServerSettingsRouter.createCaller(ctx);
+            await createDiscordAccount(account);
+            await createUserServerSettings({
+              server_id: server.id,
+              user_id: account.id,
+            });
             await expect(
               router.upsert({
                 server_id: server.id,
-                user_id: discord_account.id,
+                user_id: "4",
                 flags: {
                   can_publicly_display_messages: true,
                 },
@@ -236,23 +241,27 @@ describe("User Server Settings Operations", () => {
       it("should succeed all variants upsert updating user server settings as that user", async () => {
         await testAllSources({
           async operation(source) {
-            const { ctx } = await mockAccountWithServersCallerCtx(
+            const { ctx, account } = await mockAccountWithServersCallerCtx(
               server,
               source,
-              undefined,
-              discord_account
+              undefined
             );
+            await createDiscordAccount(account);
+            await createUserServerSettings({
+              server_id: server.id,
+              user_id: account.id,
+            });
             const router = userServerSettingsRouter.createCaller(ctx);
             const user_server_settings = await router.upsert({
               server_id: server.id,
-              user_id: discord_account.id,
+              user_id: account.id,
               flags: {
                 can_publicly_display_messages: true,
               },
             });
             expect(user_server_settings).toBeDefined();
             expect(user_server_settings.server_id).toEqual(server.id);
-            expect(user_server_settings.user_id).toEqual(discord_account.id);
+            expect(user_server_settings.user_id).toEqual(account.id);
             expect(user_server_settings.flags.can_publicly_display_messages).toBeTruthy();
           },
         });

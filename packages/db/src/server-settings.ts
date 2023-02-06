@@ -37,6 +37,8 @@ export const z_server_settings_create_with_deps = z_server_settings_create
 
 export const z_server_settings_upsert_with_deps = z_server_settings_create_with_deps;
 
+export type ServerSettingsWithFlags = Awaited<ReturnType<typeof addFlagsToServerSettings>>;
+
 export function mergeServerSettings<T extends z.infer<typeof z_server_settings_mutable>>(
   old: ServerSettings,
   updated: T
@@ -58,14 +60,15 @@ export async function findServerSettingsById(server_id: string) {
   return addFlagsToServerSettings(server_settings);
 }
 
-export function createServerSettings(input: z.infer<typeof z_server_settings_create>) {
+export async function createServerSettings(input: z.infer<typeof z_server_settings_create>) {
   const new_settings = mergeServerSettings(
     getDefaultServerSettings({
       server_id: input.server_id,
     }),
     input
   );
-  return prisma.serverSettings.create({ data: new_settings });
+  const created = await prisma.serverSettings.create({ data: new_settings });
+  return addFlagsToServerSettings(created);
 }
 
 export async function updateServerSettings(
@@ -73,10 +76,11 @@ export async function updateServerSettings(
   existing: ServerSettings
 ) {
   const new_settings = mergeServerSettings(existing, input);
-  return await prisma.serverSettings.update({
+  const updated = await prisma.serverSettings.update({
     where: {
       server_id: input.server_id,
     },
     data: new_settings,
   });
+  return addFlagsToServerSettings(updated);
 }

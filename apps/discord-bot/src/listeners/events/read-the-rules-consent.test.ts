@@ -7,6 +7,7 @@ import {
   emitEvent,
   mockGuild,
   mockGuildMember,
+  delay,
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import { createServer, createServerSettings, findUserServerSettingsById } from "@answeroverflow/db";
@@ -38,6 +39,7 @@ describe("Read the rules consent", () => {
       members.pending_guild_member_default,
       full_member
     );
+    await delay();
 
     // assert
     const updated_settings = await findUserServerSettingsById({
@@ -79,6 +81,7 @@ describe("Read the rules consent", () => {
       mockGuildMember({ client, guild: server, data: { pending: true } }),
       mockGuildMember({ client, guild: server, data: { pending: true } }),
     ];
+    await createServer(toAOServer(server));
     await createServerSettings({
       server_id: server.id,
       flags: {
@@ -94,8 +97,9 @@ describe("Read the rules consent", () => {
       // assert
       const updated_settings = await findUserServerSettingsById({
         user_id: full_member.id,
-        server_id: full_member.guild.id,
+        server_id: server.id,
       });
+      await delay(1000);
       expect(updated_settings!.flags.can_publicly_display_messages).toBe(true);
     }
   });

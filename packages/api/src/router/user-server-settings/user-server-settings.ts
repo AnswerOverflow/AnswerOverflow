@@ -1,8 +1,6 @@
 import {
   createUserServerSettings,
   findUserServerSettingsById,
-  getDefaultUserServerSettings,
-  mergeUserServerSettings,
   updateUserServerSettings,
   upsert,
   z_user_server_settings_create,
@@ -47,7 +45,11 @@ const user_server_settings_crud_router = router({
       return protectedMutationFetchFirst({
         permissions: () => assertIsUser(ctx, input.user_id),
         not_found_message: "User server settings not found",
-        fetch: () => findUserServerSettingsById(input),
+        fetch: () =>
+          findUserServerSettingsById({
+            user_id: input.user_id,
+            server_id: input.server_id,
+          }),
         operation: (old) => updateUserServerSettings(input, old),
       });
     }),
@@ -71,17 +73,10 @@ const user_server_settings_with_deps_router = router({
       }
 
       await discordAccountRouter.createCaller(ctx).upsert(input.user);
-      const merged_data = mergeUserServerSettings(
-        getDefaultUserServerSettings({
-          user_id: input.user.id,
-          ...input,
-        }),
-        {
-          user_id: input.user.id,
-          ...input,
-        }
-      );
-      return user_server_settings_crud_router.createCaller(ctx).create(merged_data);
+      return user_server_settings_crud_router.createCaller(ctx).create({
+        ...input,
+        user_id: input.user.id,
+      });
     }),
 });
 

@@ -40,6 +40,8 @@ export const z_user_server_settings_update = z_user_server_settings_mutable.merg
   z_user_server_settings_find
 );
 
+export type UserServerSettingsWithFlags = Awaited<ReturnType<typeof addFlagsToUserServerSettings>>;
+
 export function mergeUserServerSettings<T extends z.infer<typeof z_user_server_settings_mutable>>(
   old: UserServerSettings,
   updated: T
