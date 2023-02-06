@@ -33,7 +33,9 @@ jobs:
   build:
       name: Build and Test
       timeout-minutes: 20
-      runs-on: mcr.microsoft.com/playwright
+      runs-on: ubuntu-latest
+      container:
+        image: mcr.microsoft.com/playwright:v1.29.0-focal
 
     # To use Remote Caching, uncomment the next lines and follow the steps below.
     # env:
