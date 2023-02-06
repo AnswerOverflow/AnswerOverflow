@@ -7,8 +7,14 @@ import {
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import { provideConsentOnForumChannelMessage } from "./consent";
-import { testOnlyAPICall } from "~discord-bot/test/helpers";
 import { toAOChannelWithServer, toAODiscordAccount } from "~discord-bot/utils/conversions";
+import {
+  createChannelWithDeps,
+  createDiscordAccount,
+  createUserServerSettings,
+  findUserServerSettingsById,
+  upsertChannelSettings,
+} from "@answeroverflow/db";
 
 let client: Client;
 let text_channel: TextChannel;
@@ -22,6 +28,8 @@ beforeEach(async () => {
   client = await setupAnswerOverflowBot();
   text_channel = mockTextChannel(client);
   forum_channel = mockForumChannel(client);
+  await createChannelWithDeps(toAOChannelWithServer(text_channel));
+  await createChannelWithDeps(toAOChannelWithServer(forum_channel));
   text_channel_thread = mockPublicThread({ client, parent_channel: text_channel });
   forum_channel_thread = mockPublicThread({ client, parent_channel: forum_channel });
   text_channel_thread_message = mockMessage({
@@ -40,46 +48,44 @@ describe("Consent", () => {
         provideConsentOnForumChannelMessage(text_channel_thread_message)
       ).rejects.toThrow("Message is not in a forum channel");
     });
-    it("should fail to provide consent in a forum channel with consent disabled", async () => {
+    it("should fail to provide consent in a forum channel with forum post consent disabled", async () => {
       await expect(
         provideConsentOnForumChannelMessage(forum_channel_thread_message)
       ).rejects.toThrow("Forum post guidelines consent is not enabled for this channel");
     });
     it("should provide consent in a forum channel with consent enabled", async () => {
-      await testOnlyAPICall((router) =>
-        router.channel_settings.upsertWithDeps({
-          channel: toAOChannelWithServer(forum_channel),
-          flags: {
-            forum_guidelines_consent_enabled: true,
-          },
-        })
-      );
+      await upsertChannelSettings({
+        channel_id: forum_channel.id,
+        flags: {
+          forum_guidelines_consent_enabled: true,
+        },
+      });
+
       await expect(
         provideConsentOnForumChannelMessage(forum_channel_thread_message)
       ).resolves.toBeTruthy();
-      const updated_settings = await testOnlyAPICall((router) =>
-        router.user_server_settings.byId({
-          server_id: forum_channel.guild.id,
-          user_id: forum_channel_thread_message.author.id,
-        })
-      );
+
+      const updated_settings = await findUserServerSettingsById({
+        server_id: forum_channel.guild.id,
+        user_id: forum_channel_thread_message.author.id,
+      });
+
       expect(updated_settings?.flags.can_publicly_display_messages).toBeTruthy();
     });
     it("should not provide consent if the user already has it", async () => {
-      await testOnlyAPICall(async (router) => {
-        await router.channel_settings.upsertWithDeps({
-          channel: toAOChannelWithServer(forum_channel),
-          flags: {
-            forum_guidelines_consent_enabled: true,
-          },
-        });
-        await router.user_server_settings.upsertWithDeps({
-          server_id: forum_channel.guild.id,
-          user: toAODiscordAccount(forum_channel_thread_message.author),
-          flags: {
-            can_publicly_display_messages: true,
-          },
-        });
+      await upsertChannelSettings({
+        channel_id: forum_channel.id,
+        flags: {
+          forum_guidelines_consent_enabled: true,
+        },
+      });
+      await createDiscordAccount(toAODiscordAccount(forum_channel_thread_message.author));
+      await createUserServerSettings({
+        server_id: forum_channel.guild.id,
+        user_id: forum_channel_thread_message.author.id,
+        flags: {
+          can_publicly_display_messages: true,
+        },
       });
 
       await expect(
@@ -89,22 +95,20 @@ describe("Consent", () => {
       );
     });
     it("should not provide consent if the user explicitly opted out", async () => {
-      await testOnlyAPICall(async (router) => {
-        await router.channel_settings.upsertWithDeps({
-          channel: toAOChannelWithServer(forum_channel),
-          flags: {
-            forum_guidelines_consent_enabled: true,
-          },
-        });
-        await router.user_server_settings.upsertWithDeps({
-          server_id: forum_channel.guild.id,
-          user: toAODiscordAccount(forum_channel_thread_message.author),
-          flags: {
-            can_publicly_display_messages: false,
-          },
-        });
+      await upsertChannelSettings({
+        channel_id: forum_channel.id,
+        flags: {
+          forum_guidelines_consent_enabled: true,
+        },
       });
-
+      await createDiscordAccount(toAODiscordAccount(forum_channel_thread_message.author));
+      await createUserServerSettings({
+        server_id: forum_channel.guild.id,
+        user_id: forum_channel_thread_message.author.id,
+        flags: {
+          can_publicly_display_messages: false,
+        },
+      });
       await expect(
         provideConsentOnForumChannelMessage(forum_channel_thread_message)
       ).rejects.toThrow(

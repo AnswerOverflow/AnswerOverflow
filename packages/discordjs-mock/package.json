@@ -6,7 +6,8 @@
   "author": "@sapphire",
   "license": "UNLICENSE",
   "dependencies": {
-    "@answeroverflow/discordjs-utils": "*"
+    "@answeroverflow/discordjs-utils": "*",
+    "@answeroverflow/utils": "*"
   },
   "devDependencies": {
     "@swc/core": "^1.3.32",
@@ -19,8 +20,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "test:discord-bot": "yarn jest --runInBand",
-    "test:watch": "yarn jest --watch --runInBand",
+    "clean": "rm -rf src dist node_modules turbo coverage",
+    "test": "yarn jest --coverage",
+    "test:watch": "yarn jest --watch",
     "lint": "eslint src && tsc --noEmit",
     "lint:fix": "eslint src --fix"
   },

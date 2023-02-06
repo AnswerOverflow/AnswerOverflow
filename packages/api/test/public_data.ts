@@ -3,10 +3,10 @@ import {
   getDefaultDiscordAccount,
   getDefaultMessage,
   Message,
+  MessageWithDiscordAccount,
   Server,
 } from "@answeroverflow/db";
 import { pick } from "@answeroverflow/utils";
-import type { MessageWithDiscordAccount } from "~api/router/message/types";
 
 export function pickPublicServerData(server: Server) {
   return pick(server, ["id", "name", "icon"]);
