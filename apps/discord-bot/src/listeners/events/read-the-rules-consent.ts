@@ -15,7 +15,7 @@ export class ReadTheRulesConsent extends Listener {
       if (!server_settings?.flags.read_the_rules_consent_enabled) {
         return;
       }
-      const updated = await callApiWithConsoleStatusHandler({
+      await callApiWithConsoleStatusHandler({
         async ApiCall(router) {
           const user = toAODiscordAccount(newMember.user);
           return router.user_server_settings.upsertWithDeps({
