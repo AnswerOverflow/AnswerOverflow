@@ -49,7 +49,7 @@ export const Home = () => {
     <div className="h-screen w-screen bg-ao-white">
       <Navbar />
       <div className="flex h-full w-full flex-row gap-72 px-[4rem] transition-all 2xl:px-[6rem]">
-        <div className="flex w-full flex-col items-start justify-center gap-4 xl:w-[50%]">
+        <div className="flex w-full flex-col items-start justify-center gap-4 xl:w-[60%]">
           <h1 className="font-header text-6xl font-bold leading-[114.5%] text-ao-black">
             Bringing your discord channels to google
           </h1>
