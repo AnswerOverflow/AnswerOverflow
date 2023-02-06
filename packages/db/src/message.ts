@@ -75,7 +75,7 @@ export async function findMessageById(id: string) {
   }
   // TODO: Maybe make it so that addAuthorsToMessages can take a single message
   const msg_with_author = await addAuthorsToMessages([msg]);
-  return msg_with_author[0]!;
+  return msg_with_author[0] ?? null;
 }
 
 export async function findMessagesByChannelId(

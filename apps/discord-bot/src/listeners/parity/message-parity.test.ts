@@ -1,9 +1,9 @@
 import { Collection, Events, Message, TextChannel } from "discord.js";
 import type { SapphireClient } from "@sapphire/framework";
-import { toAOMessage } from "~discord-bot/utils/conversions";
+import { toAODiscordAccount, toAOMessage } from "~discord-bot/utils/conversions";
 import { mockTextChannel, mockMessage, emitEvent, copyClass } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
-import { findMessageById, upsertMessage } from "@answeroverflow/db";
+import { createDiscordAccount, findMessageById, upsertMessage } from "@answeroverflow/db";
 
 let client: SapphireClient;
 let message: Message;
@@ -13,6 +13,7 @@ beforeEach(async () => {
   client = await setupAnswerOverflowBot();
   text_channel = mockTextChannel(client);
   message = mockMessage({ client, channel: text_channel });
+  await createDiscordAccount(toAODiscordAccount(message.author));
 });
 
 describe("Message Delete Tests", () => {
