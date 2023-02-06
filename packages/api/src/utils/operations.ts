@@ -1,42 +1,5 @@
 import { TRPCError } from "@trpc/server";
 
-export async function upsert<T>(
-  find: () => Promise<T | null>,
-  create: () => Promise<T>,
-  update: (old: T) => Promise<T>
-) {
-  try {
-    const existing = await find();
-    if (!existing) return create();
-    return update(existing);
-  } catch (error) {
-    if (error instanceof TRPCError && error.code === "NOT_FOUND") return create();
-    else throw error;
-  }
-}
-
-export async function upsertMany<T, F, Data>(calls: {
-  input: Data[];
-  find: () => Promise<T[]>;
-  getInputId: (input: Data) => string;
-  getFetchedDataId: (input: T) => string;
-  create: (input: Data[]) => Promise<F[]>;
-  update: (input: Data[]) => Promise<F[]>;
-}) {
-  const { find, create, getInputId, getFetchedDataId, input, update } = calls;
-  const existing = await find();
-  // map existing to id
-  const existingMap = existing.reduce((acc, cur) => {
-    acc[getFetchedDataId(cur)] = cur;
-    return acc;
-  }, {} as Record<string, T>);
-
-  const toCreate = input.filter((c) => !existingMap[getInputId(c)]).map((c) => c);
-  const toUpdate = input.filter((c) => existingMap[getInputId(c)]).map((c) => c);
-  const [created, updated] = await Promise.all([update(toUpdate), create(toCreate)]);
-  return [...created, ...updated];
-}
-
 export function addDefaultValues<T, F>(input: T[], getDefaultValue: (input: T) => F) {
   return input.map((v) => getDefaultValue(v));
 }

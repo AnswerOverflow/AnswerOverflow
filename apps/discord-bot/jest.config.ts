@@ -7,6 +7,7 @@ const jestConfig: JestConfigWithTsJest = {
   // from the above list
   preset: "ts-jest",
   resetMocks: true,
+  testTimeout: 10000,
   testEnvironment: "node",
   testMatch: ["**/*.test.ts(x)?"],
   moduleNameMapper: {

@@ -1,21 +1,17 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import { Events, GuildMember } from "discord.js";
-import { createAnswerOveflowBotCtx, createMemberCtx } from "~discord-bot/utils/context";
+import { findServerSettingsById } from "@answeroverflow/db";
+import { createMemberCtx } from "~discord-bot/utils/context";
 import { toAODiscordAccount } from "~discord-bot/utils/conversions";
 import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
+
 @ApplyOptions<Listener.Options>({ event: Events.GuildMemberUpdate })
 export class ReadTheRulesConsent extends Listener {
   public async run(oldMember: GuildMember, newMember: GuildMember) {
     if (oldMember.pending && !newMember.pending) {
-      const server_settings = await callApiWithConsoleStatusHandler({
-        async ApiCall(router) {
-          return router.server_settings.byId(oldMember.guild.id);
-        },
-        getCtx: createAnswerOveflowBotCtx,
-        success_message: `Successfully fetched server settings for server ${oldMember.guild.id}`,
-        error_message: `Failed to fetch server settings for server ${oldMember.guild.id}`,
-      });
+      const server_settings = await findServerSettingsById(newMember.guild.id);
+
       if (!server_settings?.flags.read_the_rules_consent_enabled) {
         return;
       }
