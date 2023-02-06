@@ -33,7 +33,7 @@ jobs:
   build:
       name: Build and Test
       timeout-minutes: 20
-      runs-on: ubuntu-latest
+      runs-on: docker pull mcr.microsoft.com/playwright
 
     # To use Remote Caching, uncomment the next lines and follow the steps below.
     # env:
@@ -55,7 +55,7 @@ jobs:
 
       - name: Install dependencies
         # Playright is used for storybook, possible move that into package.json instead?
-        run: yarn && npx playwright install-deps
+        run: yarn install
 
       - name: Setup Database
         run: yarn db:push
