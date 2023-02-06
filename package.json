@@ -34,7 +34,7 @@
     "@answeroverflow/eslint-config-custom": "*",
     "tslib": "^2.5.0",
     "turbo": "latest",
-    "vite": "^4.0.4",
+    "vite": "^4.1.1",
     "vitest": "^0.27.3"
   },
   "engines": {
