@@ -3,7 +3,6 @@ import {
   Message as AOMessage,
   upsertManyChannels,
   upsertManyMessages,
-  callDatabaseWithErrorHandler,
   upsertChannel,
   findManyUserServerSettings,
   findChannelSettingsById,
@@ -53,9 +52,7 @@ async function indexServer(guild: Guild) {
 export async function indexRootChannel(channel: TextChannel | NewsChannel | ForumChannel) {
   container.logger.info(`Attempting to indexing channel ${channel.id} | ${channel.name}`);
 
-  const settings = await callDatabaseWithErrorHandler({
-    operation: () => findChannelSettingsById(channel.id),
-  });
+  const settings = await findChannelSettingsById(channel.id);
 
   if (!settings || !settings.flags.indexing_enabled) {
     return;
@@ -90,14 +87,10 @@ export async function indexRootChannel(channel: TextChannel | NewsChannel | Foru
 
   addSolutionsToMessages(filtered_messages, converted_messages);
 
-  await callDatabaseWithErrorHandler({
-    operation: async () => {
-      await bulkUpsertDiscordAccounts(converted_users);
-      await upsertChannel(toAOChannelWithServer(channel));
-      await upsertManyMessages(converted_messages);
-      await upsertManyChannels(converted_threads);
-    },
-  });
+  await bulkUpsertDiscordAccounts(converted_users);
+  await upsertChannel(toAOChannelWithServer(channel));
+  await upsertManyMessages(converted_messages);
+  await upsertManyChannels(converted_threads);
 }
 
 type MessageFetchOptions = {
@@ -138,15 +131,12 @@ export function findSolutionsToMessage(msg: Message) {
 
 export async function filterMessages(messages: Message[], channel: GuildBasedChannel) {
   const seen_user_ids = [...new Set(messages.map((message) => message.author.id))];
-  const user_server_settings = await callDatabaseWithErrorHandler({
-    operation: () =>
-      findManyUserServerSettings(
-        seen_user_ids.map((x) => ({
-          server_id: channel.guildId,
-          user_id: x,
-        }))
-      ),
-  });
+  const user_server_settings = await findManyUserServerSettings(
+    seen_user_ids.map((x) => ({
+      server_id: channel.guildId,
+      user_id: x,
+    }))
+  );
 
   if (!user_server_settings) {
     throw new Error("Error fetching user server settings");

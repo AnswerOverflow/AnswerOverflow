@@ -10,7 +10,7 @@ import {
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
-import { createChannel, createChannelSettings, createServer } from "packages/db";
+import { createChannelSettings, upsertChannel, upsertServer } from "@answeroverflow/db";
 
 let client: Client;
 beforeEach(async () => {
@@ -39,8 +39,8 @@ async function setupSolvedMessageScenario(guild_id?: string) {
     client,
     channel: text_channel_thread,
   });
-  await createServer(toAOServer(guild));
-  await createChannel(toAOChannel(text_channel));
+  await upsertServer(toAOServer(guild));
+  await upsertChannel(toAOChannel(text_channel));
   await createChannelSettings({
     channel_id: text_channel.id,
     flags: {

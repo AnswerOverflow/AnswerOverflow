@@ -10,6 +10,7 @@ import {
 import type { RawRoleData } from "discord.js/typings/rawDataTypes";
 import { randomSnowflake } from "@answeroverflow/discordjs-utils";
 import { mockGuildMember, mockUser } from "./user-mock";
+import { omit } from "@answeroverflow/utils";
 
 export function mockGuild(client: Client, owner?: User, data: Partial<APIGuild> = {}) {
   // Create the guild
@@ -48,7 +49,7 @@ export function mockGuild(client: Client, owner?: User, data: Partial<APIGuild> 
     nsfw_level: 0,
     stickers: [],
     premium_progress_bar_enabled: false,
-    ...data,
+    ...omit(data, "id"),
   };
   const guild = Reflect.construct(Guild, [client, raw_data]) as Guild;
 

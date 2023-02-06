@@ -37,8 +37,8 @@ export function findServerById(id: string) {
 
 export function upsertServer(input: z.infer<typeof z_server_upsert>) {
   return upsert({
+    find: () => findServerById(input.id),
     create: () => createServer(input),
     update: () => updateServer(input),
-    find: () => findServerById(input.id),
   });
 }

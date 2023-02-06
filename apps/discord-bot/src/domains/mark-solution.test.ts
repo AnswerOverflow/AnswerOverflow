@@ -38,7 +38,7 @@ import {
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import { randomSnowflake } from "@answeroverflow/discordjs-utils";
-import { createChannelSettings, createChannelWithDeps } from "packages/db";
+import { createChannelSettings, createChannelWithDeps } from "@answeroverflow/db";
 
 let client: Client;
 let guild: Guild;
@@ -102,6 +102,14 @@ describe("Can Mark Solution", () => {
         client,
         channel: text_channel_thread,
       });
+      await createChannelWithDeps(toAOChannelWithServer(text_channel));
+      await createChannelSettings({
+        channel_id: text_channel.id,
+        solution_tag_id: "solved",
+        flags: {
+          mark_solution_enabled: false,
+        },
+      });
       await expect(checkIfCanMarkSolution(message, default_author.user)).rejects.toThrowError(
         "Mark solution is not enabled in this channel"
       );
@@ -139,6 +147,14 @@ describe("Can Mark Solution", () => {
         client,
         channel: forum_channel_thread,
       });
+      await createChannelWithDeps(toAOChannelWithServer(forum_channel));
+      await createChannelSettings({
+        channel_id: forum_channel.id,
+        solution_tag_id: "solved",
+        flags: {
+          mark_solution_enabled: true,
+        },
+      });
       await expect(
         checkIfCanMarkSolution(solution_message, default_author.user)
       ).rejects.toThrowError("Could not find the root message of the thread");
@@ -168,14 +184,14 @@ describe("Can Mark Solution", () => {
     it("should fail if the solution tag is already set", async () => {
       const thread_with_solved_tag = mockPublicThread({
         client,
-        parent_channel: text_channel,
+        parent_channel: forum_channel,
         data: {
           applied_tags: ["solved"],
         },
       });
       mockMessage({
         client,
-        channel: text_channel,
+        channel: thread_with_solved_tag,
         author: default_author.user,
         override: {
           id: thread_with_solved_tag.id,
@@ -184,10 +200,15 @@ describe("Can Mark Solution", () => {
       const solution_message = mockMessage({
         client,
         channel: thread_with_solved_tag,
+        override: {
+          id: "99999999999999",
+        },
       });
-      await createChannelWithDeps(toAOChannelWithServer(text_channel));
+
+      await createChannelWithDeps(toAOChannelWithServer(forum_channel));
       await createChannelSettings({
-        channel_id: text_channel.id,
+        channel_id: forum_channel.id,
+        solution_tag_id: "solved",
         flags: {
           mark_solution_enabled: true,
         },
