@@ -68,7 +68,10 @@ jobs:
 
       - name: Test
         run: yarn test
-
+      
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        
       - name: Stop containers
         if: always()
         run: docker-compose -f "docker-compose.yml" down
