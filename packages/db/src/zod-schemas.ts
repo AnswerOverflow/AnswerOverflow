@@ -77,7 +77,15 @@ export const z_message = z.object({
   content: z.string(),
   images: z.array(z_discord_image),
   solutions: z.array(z.string()),
-  replies_to: z.string().nullable(),
+  replies_to: z
+    .object({
+      message_content: z.string(),
+      /**
+       * The author of the message that is being replied to.
+       */
+      author_avatar: z.string().nullable(),
+    })
+    .nullable(),
   child_thread: z.string().nullable(),
   author_id: z.string(),
   channel_id: z.string(),

@@ -113,56 +113,65 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
   }
 
   const Contents = () => (
-    <div className="group relative flex w-full break-words rounded-xl p-1 ">
-      <div className="mr-4 hidden shrink-0 sm:block">
-        <DiscordAvatar user={message.author} />
-      </div>
-      <div className="w-full">
-        <div className="flex w-full min-w-0  justify-between">
-          <div className="flex min-w-0 gap-2">
-            <div className="shrink-0 sm:hidden">
-              <DiscordAvatar user={message.author} />
+    <div className="flex w-full flex-col items-start justify-center">
+      {message.replies_to && (
+        <div className="relative flex w-full flex-row items-center justify-start">
+          <span className="ml-[calc(40px+2rem)] before:absolute before:top-1/2 before:right-[93%] before:h-[1rem] before:w-[2rem] before:rounded-tl-[6px] before:border-t-2 before:border-l-2 before:border-black">
+            {message.replies_to.message_content}
+          </span>
+        </div>
+      )}
+      <div className="group relative flex w-full break-words rounded-xl p-1 ">
+        <div className="mr-4 hidden shrink-0 sm:block">
+          <DiscordAvatar user={message.author} />
+        </div>
+        <div className="w-full">
+          <div className="flex w-full min-w-0  justify-between">
+            <div className="flex min-w-0 gap-2">
+              <div className="shrink-0 sm:hidden">
+                <DiscordAvatar user={message.author} />
+              </div>
+              <div className="flex flex-col sm:flex-row">
+                <span className={`mr-1 text-black ${darkMode ? "text-white" : "dark:text-white"}`}>
+                  {message.author.name}
+                </span>
+                <span
+                  className={`ml-[0.25rem] flex items-center justify-center text-[0.75rem] text-[hsl(213,_9.6%,_40.8%)] ${
+                    darkMode ? "text-[hsl(216,_3.7%,_73.5%)]" : "dark:text-[hsl(216,_3.7%,_73.5%)]"
+                  }`}
+                >
+                  {date_of_message}
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col sm:flex-row">
-              <span className={`mr-1 text-black ${darkMode ? "text-white" : "dark:text-white"}`}>
-                {message.author.name}
-              </span>
-              <span
-                className={`ml-[0.25rem] flex items-center justify-center text-[0.75rem] text-[hsl(213,_9.6%,_40.8%)] ${
-                  darkMode ? "text-[hsl(216,_3.7%,_73.5%)]" : "dark:text-[hsl(216,_3.7%,_73.5%)]"
-                }`}
+            {/* TODO: Improve styling */}
+            {showLinkIcon && (
+              <Link
+                href={getMessageUrl({
+                  server_id: message.server_id,
+                  channel_id: thread && thread.parent_id ? thread.parent_id : message.channel_id,
+                  message_id: message.id,
+                  thread_id: thread?.id,
+                })}
+                className="absolute right-0 h-6 w-6 group-hover:visible"
+                aria-label="Open in Discord"
               >
-                {date_of_message}
-              </span>
-            </div>
+                <DiscordIcon color="blurple" />
+              </Link>
+            )}
           </div>
-          {/* TODO: Improve styling */}
-          {showLinkIcon && (
-            <Link
-              href={getMessageUrl({
-                server_id: message.server_id,
-                channel_id: thread && thread.parent_id ? thread.parent_id : message.channel_id,
-                message_id: message.id,
-                thread_id: thread?.id,
-              })}
-              className="absolute right-0 h-6 w-6 group-hover:visible"
-              aria-label="Open in Discord"
-            >
-              <DiscordIcon color="blurple" />
-            </Link>
-          )}
-        </div>
-        <div
-          className={`mt-2 max-w-[80vw] text-black ${
-            darkMode ? "text-neutral-50" : "dark:text-neutral-50"
-          } sm:mt-0 sm:max-w-[70vw] md:max-w-full`}
-        >
-          {parsedMessageContent}
-        </div>
-        <div className="grid gap-2">
-          {message.images.map((image) => (
-            <MessageImage key={image.url} image={image} />
-          ))}
+          <div
+            className={`mt-2 max-w-[80vw] text-black ${
+              darkMode ? "text-neutral-50" : "dark:text-neutral-50"
+            } sm:mt-0 sm:max-w-[70vw] md:max-w-full`}
+          >
+            {parsedMessageContent}
+          </div>
+          <div className="grid gap-2">
+            {message.images.map((image) => (
+              <MessageImage key={image.url} image={image} />
+            ))}
+          </div>
         </div>
       </div>
     </div>

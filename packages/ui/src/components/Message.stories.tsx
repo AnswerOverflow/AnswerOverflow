@@ -118,3 +118,15 @@ WithXSSInCodeBlock.args = {
     content: "```<script> alert('XSS')</script>```",
   },
 };
+
+export const ReplyMessage = Template.bind({});
+ReplyMessage.args = {
+  ...Primary.args,
+  message: {
+    ...default_message.message,
+    replies_to: {
+      message_content: "Hello",
+      author_avatar: "https://cdn.discordapp.com/avatars/0/0.png",
+    },
+  },
+};
