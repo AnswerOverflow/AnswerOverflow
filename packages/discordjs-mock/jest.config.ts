@@ -4,6 +4,7 @@ require("dotenv").config();
 const jestConfig: JestConfigWithTsJest = {
   preset: "ts-jest",
   resetMocks: true,
+  testTimeout: 10000,
   testEnvironment: "node",
   testMatch: ["**/*.test.ts(x)?"],
   transform: {

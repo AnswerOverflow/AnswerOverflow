@@ -1,7 +1,7 @@
 import { router } from "./trpc";
 import { authRouter } from "./auth";
 import { channelRouter } from "~api/router/channel/channel";
-import { channelSettingsRouter } from "~api/router/channel/channel_settings";
+import { channelSettingsRouter } from "~api/router/channel/channel-settings";
 import { messageRouter } from "~api/router/message/message";
 import { serverRouter } from "~api/router/server/server";
 import { serverSettingsRouter } from "./server/server_settings";

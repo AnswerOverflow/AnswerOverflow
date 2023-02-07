@@ -9,7 +9,7 @@
     "clean": "rm -rf .turbo node_modules coverage",
     "lint": "eslint \"*.ts*\" && tsc --noEmit",
     "lint:fix": "eslint \"*.ts*\" --fix",
-    "test": "yarn run vitest run",
+    "test": "yarn run vitest run  --coverage",
     "test:watch": "yarn run vitest"
   },
   "dependencies": {},

@@ -1,9 +1,14 @@
 import { z } from "zod";
-import { channel_settings_flags } from "./channel-settings";
-import { server_settings_flags } from "./server-settings";
-import { toDict } from "./utils/bitfield";
+import { bitfieldToDict, dictToBitfield, mergeFlags, toDict } from "./utils/bitfield";
 import { ChannelType } from "discord-api-types/v10";
-import { user_server_settings_flags } from "./user-server-settings";
+import {
+  ChannelSettings,
+  getDefaultChannelSettings,
+  ServerSettings,
+  UserServerSettings,
+} from "@answeroverflow/prisma-types";
+
+// TODO: Split up this file, it's become a bit bloated to prevent circular dependencies
 
 export const ALLOWED_THREAD_TYPES = new Set([
   ChannelType.PublicThread,
@@ -24,6 +29,14 @@ export function toZObject<T extends readonly string[]>(
 }
 
 export const z_unique_array = z.array(z.string()).transform((arr) => [...new Set(arr)]);
+
+export const channel_settings_flags = [
+  "indexing_enabled",
+  "auto_thread_enabled",
+  "mark_solution_enabled",
+  "send_mark_solution_instructions_in_new_threads",
+  "forum_guidelines_consent_enabled",
+] as const;
 
 export const z_channel_settings_flags = toZObject(...channel_settings_flags);
 
@@ -51,19 +64,31 @@ export const z_channel = z.object({
   parent_id: z.string().nullable(),
 });
 
-export const z_channel_public = z_channel
-  .pick({
-    id: true,
-    name: true,
-    server_id: true,
-    type: true,
-    parent_id: true,
-  })
-  .extend({
-    settings: z_channel_settings_public.pick({
-      invite_code: true,
-    }),
-  });
+export function getDefaultChannelSettingsWithFlags(channel_id: string) {
+  return addFlagsToChannelSettings(getDefaultChannelSettings({ channel_id }));
+}
+
+export const bitfieldToChannelSettingsFlags = (bitfield: number) =>
+  bitfieldToDict(bitfield, channel_settings_flags);
+
+export function addFlagsToChannelSettings<T extends ChannelSettings>(channel_settings: T) {
+  return {
+    ...channel_settings,
+    flags: bitfieldToChannelSettingsFlags(channel_settings.bitfield),
+  };
+}
+
+export const z_channel_public = z_channel.pick({
+  id: true,
+  name: true,
+  server_id: true,
+  type: true,
+  parent_id: true,
+});
+
+export const z_channel_public_with_settings = z_channel_public.extend({
+  settings: z_channel_settings_public.omit({ channel_id: true }),
+});
 
 export const z_discord_image = z.object({
   url: z.string(),
@@ -104,12 +129,31 @@ export const z_message_public = z_message.pick({
   server_id: true,
 });
 
+export const server_settings_flags = ["read_the_rules_consent_enabled"] as const;
 export const z_server_settings_flags = toZObject(...server_settings_flags);
 
 export const z_server_settings = z.object({
   server_id: z.string(),
   flags: z_server_settings_flags,
 });
+
+export const bitfieldToServerSettingsFlags = (bitfield: number) =>
+  bitfieldToDict(bitfield, server_settings_flags);
+
+export function addFlagsToServerSettings<T extends ServerSettings>(server_settings: T) {
+  return {
+    ...server_settings,
+    flags: bitfieldToServerSettingsFlags(server_settings.bitfield),
+  };
+}
+
+export function mergeServerSettingsFlags(old: number, new_flags: Record<string, boolean>) {
+  return mergeFlags(
+    () => bitfieldToServerSettingsFlags(old),
+    new_flags,
+    (flags) => dictToBitfield(flags, server_settings_flags)
+  );
+}
 
 export const z_server = z.object({
   id: z.string(),
@@ -123,6 +167,31 @@ export const z_server_public = z_server.pick({
   name: true,
   icon: true,
 });
+
+export const user_server_settings_flags = [
+  "can_publicly_display_messages",
+  "message_indexing_disabled",
+] as const;
+
+export const bitfieldToUserServerSettingsFlags = (bitfield: number) =>
+  bitfieldToDict(bitfield, user_server_settings_flags);
+
+export function addFlagsToUserServerSettings<T extends UserServerSettings>(
+  user_server_settings: T
+) {
+  return {
+    ...user_server_settings,
+    flags: bitfieldToUserServerSettingsFlags(user_server_settings.bitfield),
+  };
+}
+
+export function mergeUserServerSettingsFlags(old: number, new_flags: Record<string, boolean>) {
+  return mergeFlags(
+    () => bitfieldToUserServerSettingsFlags(old),
+    new_flags,
+    (flags) => dictToBitfield(flags, user_server_settings_flags)
+  );
+}
 
 export const z_user_server_settings_flags = toZObject(...user_server_settings_flags);
 
