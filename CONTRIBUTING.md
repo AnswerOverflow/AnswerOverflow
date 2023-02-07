@@ -28,7 +28,7 @@ And an [Elastic Search](https://www.elastic.co/guide/en/elasticsearch/reference/
 
 There are shortcut buttons in the README to jumpstart running from a remote environment. When running from these remote environments, consider the following:
 
-- They require at least 8 GB of ram to runn the databases
+- They require at least 8 GB of ram to run the databases
 - If you have a slow remote machine, then the tests may fail when you run them locally if you run them all at the same time from the root directory.
   - Consider running the tests on at a time or configuring the DEFAULT_DELAY_IN_MS environment variable
 - The work you're doing may not need any databases to be running (i.e UI work)
