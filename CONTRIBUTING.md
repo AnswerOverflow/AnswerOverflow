@@ -24,6 +24,25 @@ Along with this, you will need to have a [MySQL Server](https://dev.mysql.com/do
 
 And an [Elastic Search](https://www.elastic.co/guide/en/elasticsearch/reference/current/install-elasticsearch.html) server setup
 
+## Remote Environment (Codespaces / Gitpod)
+
+There are shortcut buttons in the README to jumpstart running from a remote environment. When running from these remote environments, consider the following:
+
+- They require at least 8 GB of ram to runn the databases
+- If you have a slow remote machine, then the tests may fail when you run them locally if you run them all at the same time from the root directory.
+  - Consider running the tests on at a time or configuring the DEFAULT_DELAY_IN_MS environment variable
+- The work you're doing may not need any databases to be running (i.e UI work)
+  - In this case, consider creating a smaller machine and just running the package you're developing in
+
+### Gitpod
+
+- You must start the databases using the command docker-compose up
+- Use the localhost database urls provided in .env.example
+
+### Codespaces
+
+- I had issues making the 16 gb machine work, that's why it uses the 32 gb machine. If you can make the 16 gb machine work, make a PR
+
 ## VSCode users
 
 There is a workspace file called answeroverflow.code-workspace, VSCode lets you open this folder as that workspace and it is recommended that you do your development work inside of this workspace as it will configure all of the settings for you

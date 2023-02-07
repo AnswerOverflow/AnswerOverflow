@@ -24,10 +24,6 @@ beforeEach(() => {
 });
 
 describe("ElasticSearch", () => {
-  beforeEach(async () => {
-    await elastic.createMessagesIndex();
-  });
-
   describe("Message Create", () => {
     it("should index a message", async () => {
       const indexed_message = await elastic.upsertMessage(msg1);

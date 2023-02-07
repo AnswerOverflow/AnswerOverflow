@@ -5,3 +5,12 @@ export * from "./src/interaction-mock";
 export * from "./src/user-mock";
 export * from "./src/helpers";
 export * from "./src/scenarios";
+
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      /* Discord Bot */
+      DEFAULT_DELAY_IN_MS: number | undefined;
+    }
+  }
+}
