@@ -7,14 +7,14 @@ import {
   INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,
   MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
 } from "~api/utils/permissions";
-import { mockAccount } from "@answeroverflow/db-mock";
+import { mockDiscordAccount } from "@answeroverflow/db-mock";
 export async function mockAccountWithServersCallerCtx(
   server: Server,
   caller: Source,
   permissions: PermissionResolvable = PermissionsBitField.Default,
   override: Partial<DiscordAccount> = {}
 ) {
-  const account = mockAccount(override);
+  const account = mockDiscordAccount(override);
   const ctx = await createCtxWithServers({
     user: account,
     permissions: permissions,
@@ -25,7 +25,7 @@ export async function mockAccountWithServersCallerCtx(
 }
 
 export async function mockAccountCallerCtx(caller: Source, override: Partial<DiscordAccount> = {}) {
-  const account = mockAccount(override);
+  const account = mockDiscordAccount(override);
 
   const ctx = await createContextInner({
     session: null,
@@ -49,20 +49,6 @@ export async function mockUnauthedCtx(caller: Source) {
     user_servers: undefined,
   });
   return ctx;
-}
-
-export async function createAnswerOverflowBotCtx() {
-  return createContextInner({
-    session: null,
-    source: "discord-bot",
-    user_servers: undefined,
-    discord_account: {
-      id: process.env.DISCORD_CLIENT_ID ?? process.env.VITE_DISCORD_CLIENT_ID,
-      avatar: null,
-      username: "test",
-      discriminator: "0000",
-    },
-  });
 }
 
 type CtxOverride = {
