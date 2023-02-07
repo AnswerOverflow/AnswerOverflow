@@ -10,7 +10,7 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       /* Discord Bot */
-      DEFAULT_DELAY_IN_MS: number | undefined;
+      DEFAULT_DELAY_IN_MS: string | undefined;
     }
   }
 }

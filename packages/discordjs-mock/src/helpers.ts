@@ -2,7 +2,8 @@ import { Client, ClientEvents, PermissionFlagsBits, PermissionResolvable } from 
 
 // Bit of a hack of a helper function to give async tasks that aren't tracked time to run. A better approach would be to listen to dispatched events
 export async function delay(time_in_ms?: number) {
-  if (!time_in_ms) time_in_ms = process.env.DEFAULT_DELAY_IN_MS ?? 500;
+  if (!time_in_ms)
+    time_in_ms = process.env.DEFAULT_DELAY_IN_MS ? parseInt(process.env.DEFAULT_DELAY_IN_MS) : 500;
   await new Promise((resolve) => setTimeout(resolve, time_in_ms));
 }
 
