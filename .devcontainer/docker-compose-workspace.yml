@@ -16,15 +16,3 @@ services:
 
     # Overrides default command so things don't shut down after the process ends.
     command: /bin/sh -c "while sleep 1000; do :; done"
-
-  kibana:
-    container_name: ao-db-kibana
-    image: docker.elastic.co/kibana/kibana:8.0.0
-    environment:
-      - ELASTICSEARCH_HOSTS=http://ao-db-elastic:9200
-    depends_on:
-      - db-elastic
-    expose:
-      - 5601
-    ports:
-      - 5601:5601
