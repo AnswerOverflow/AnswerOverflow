@@ -33,7 +33,13 @@ describe("Server Operations", () => {
           await createServer(server);
           const account = await mockAccountWithServersCallerCtx(server, source, permission);
           const router = serverRouter.createCaller(account.ctx);
-          await router.update({ id: server.id, name: "new name" });
+          await router.update({
+            id: server.id,
+            name: "new name",
+            flags: {
+              read_the_rules_consent_enabled: true,
+            },
+          });
         },
         sourcesThatShouldWork: ["discord-bot"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
@@ -58,7 +64,7 @@ describe("Server Operations", () => {
           const data = await router.byId(server_2.id);
           return {
             data,
-            private_data_format: server_2,
+            private_data_format: data,
             public_data_format: pickPublicServerData(server_2),
           };
         },

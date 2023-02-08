@@ -21,7 +21,7 @@ export const z_user_server_settings_mutable = z_user_server_settings
     user_id: true,
     server_id: true,
   })
-  .partial();
+  .deepPartial();
 
 export const z_user_server_settings_find = z_user_server_settings_required;
 

@@ -1,10 +1,8 @@
 import { router } from "./trpc";
 import { authRouter } from "./auth";
 import { channelRouter } from "~api/router/channel/channel";
-import { channelSettingsRouter } from "~api/router/channel/channel-settings";
 import { messageRouter } from "~api/router/message/message";
 import { serverRouter } from "~api/router/server/server";
-import { serverSettingsRouter } from "./server/server_settings";
 import { discordAccountRouter } from "./users/accounts/discord-accounts";
 import { userServerSettingsRouter } from "./user-server-settings/user-server-settings";
 import { userRouter } from "./users/user/user";
@@ -12,9 +10,7 @@ import { message_page_router } from "./pages/message-page";
 export const botRouter = router({
   // Discord:
   servers: serverRouter,
-  server_settings: serverSettingsRouter,
   channels: channelRouter,
-  channel_settings: channelSettingsRouter,
   discord_accounts: discordAccountRouter,
   user_server_settings: userServerSettingsRouter,
   messages: messageRouter,
@@ -25,9 +21,7 @@ export const botRouter = router({
 
 export const appRouter = router({
   servers: serverRouter,
-  server_settings: serverSettingsRouter,
   channels: channelRouter,
-  channel_settings: channelSettingsRouter,
   discord_accounts: discordAccountRouter,
   user_server_settings: userServerSettingsRouter,
   messages: messageRouter,

@@ -16,9 +16,10 @@ import {
 } from "discord.js";
 import { ANSWER_OVERFLOW_BLUE } from "~discord-bot/utils/constants";
 import { findSolutionsToMessage } from "./indexing";
-import type { ChannelSettingsWithFlags } from "@answeroverflow/api";
+import type { ChannelWithFlags } from "@answeroverflow/api";
 import { makeConsentButton } from "./consent";
-import { findChannelSettingsById } from "@answeroverflow/db";
+import { findChannelById } from "@answeroverflow/db";
+
 export const QUESTION_ID_FIELD_NAME = "Question Message ID";
 export const SOLUTION_ID_FIELD_NAME = "Solution Message ID";
 export const PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED: PermissionResolvable[] = [
@@ -51,7 +52,7 @@ export async function checkIfCanMarkSolution(
   if (!thread_parent)
     throw new MarkSolutionError("Could not find the parent channel of the thread");
 
-  const channel_settings = await findChannelSettingsById(thread_parent.id);
+  const channel_settings = await findChannelById(thread_parent.id);
 
   if (!channel_settings || !channel_settings.flags.mark_solution_enabled) {
     throw new MarkSolutionError("Mark solution is not enabled in this channel");
@@ -162,7 +163,7 @@ export function makeMarkSolutionResponse({
   question: Message;
   solution: Message;
   server_name: string;
-  settings: ChannelSettingsWithFlags;
+  settings: ChannelWithFlags;
 }) {
   const components = new ActionRowBuilder<MessageActionRowComponentBuilder>();
   const embed = new EmbedBuilder()

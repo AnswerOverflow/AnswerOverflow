@@ -23,9 +23,7 @@ const default_message: ServerInviteProps = {
     server_id: "0",
     parent_id: null,
     type: 0,
-    settings: {
-      invite_code: "123456",
-    },
+    invite_code: "123456",
   },
   is_user_in_server: false,
 };

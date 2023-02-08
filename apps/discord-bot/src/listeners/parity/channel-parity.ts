@@ -12,9 +12,8 @@ import {
 import {
   deleteChannel,
   findChannelById,
-  findChannelSettingsByInviteCode,
+  findChannelByInviteCode,
   updateChannel,
-  updateChannelSettings,
 } from "@answeroverflow/db";
 
 @ApplyOptions<Listener.Options>({ event: Events.ChannelUpdate, name: "Channel Sync On Update" })
@@ -24,7 +23,7 @@ export class SyncOnUpdate extends Listener {
     const chnl = await findChannelById(newChannel.id);
     if (!chnl) return;
 
-    await updateChannel({ id: newChannel.id, name: newChannel.name });
+    await updateChannel({ id: newChannel.id, name: newChannel.name }, chnl);
   }
 }
 
@@ -51,15 +50,15 @@ export class ThreadSyncOnUpdate extends Listener {
   public async run(_oldThread: ThreadChannel, newThread: ThreadChannel) {
     const chnl = await findChannelById(newThread.id);
     if (!chnl) return;
-    await updateChannel({ id: newThread.id, name: newThread.name });
+    await updateChannel({ id: newThread.id, name: newThread.name }, chnl);
   }
 }
 
 @ApplyOptions<Listener.Options>({ event: Events.InviteDelete, name: "Invite Sync On Delete" })
 export class InviteSyncOnDelete extends Listener {
   public async run(invite: Invite) {
-    const settings = await findChannelSettingsByInviteCode(invite.code);
+    const settings = await findChannelByInviteCode(invite.code);
     if (!settings) return;
-    await updateChannelSettings({ channel_id: settings.channel_id, invite_code: null }, settings);
+    await updateChannel({ id: settings.id, invite_code: null }, settings);
   }
 }

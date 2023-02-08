@@ -6,7 +6,6 @@ import {
   mockForumChannel,
   emitEvent,
   copyClass,
-  delay,
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import { findManyChannelsById, findServerById } from "@answeroverflow/db";
@@ -24,7 +23,6 @@ describe("Guild Create Parity", () => {
     const a = mockTextChannel(client, guild);
     const b = mockForumChannel(client, guild);
     await emitEvent(client, Events.GuildCreate, guild);
-    await delay();
     const created_server = await findServerById(guild.id);
     const created_channels = await findManyChannelsById([a.id, b.id]);
     expect(created_server).toBeDefined();

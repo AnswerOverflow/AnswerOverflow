@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import { Events, GuildMember } from "discord.js";
-import { findServerSettingsById } from "@answeroverflow/db";
+import { findServerById } from "@answeroverflow/db";
 import { createMemberCtx } from "~discord-bot/utils/context";
 import { toAODiscordAccount } from "~discord-bot/utils/conversions";
 import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
@@ -10,7 +10,7 @@ import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
 export class ReadTheRulesConsent extends Listener {
   public async run(oldMember: GuildMember, newMember: GuildMember) {
     if (oldMember.pending && !newMember.pending) {
-      const server_settings = await findServerSettingsById(newMember.guild.id);
+      const server_settings = await findServerById(newMember.guild.id);
 
       if (!server_settings?.flags.read_the_rules_consent_enabled) {
         return;

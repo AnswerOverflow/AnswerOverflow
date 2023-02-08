@@ -7,13 +7,19 @@ import {
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import { provideConsentOnForumChannelMessage } from "./consent";
-import { toAOChannelWithServer, toAODiscordAccount } from "~discord-bot/utils/conversions";
+import {
+  toAOChannel,
+  toAOChannelWithServer,
+  toAODiscordAccount,
+  toAOServer,
+} from "~discord-bot/utils/conversions";
 import {
   createChannelWithDeps,
   createDiscordAccount,
+  createServer,
   createUserServerSettings,
   findUserServerSettingsById,
-  upsertChannelSettings,
+  upsertChannel,
 } from "@answeroverflow/db";
 
 let client: Client;
@@ -27,9 +33,8 @@ let forum_channel_thread_message: Message;
 beforeEach(async () => {
   client = await setupAnswerOverflowBot();
   text_channel = mockTextChannel(client);
-  forum_channel = mockForumChannel(client);
-  await createChannelWithDeps(toAOChannelWithServer(text_channel));
-  await createChannelWithDeps(toAOChannelWithServer(forum_channel));
+  forum_channel = mockForumChannel(client, text_channel.guild);
+  await createServer(toAOServer(text_channel.guild));
   text_channel_thread = mockPublicThread({ client, parent_channel: text_channel });
   forum_channel_thread = mockPublicThread({ client, parent_channel: forum_channel });
   text_channel_thread_message = mockMessage({
@@ -54,8 +59,8 @@ describe("Consent", () => {
       ).rejects.toThrow("Forum post guidelines consent is not enabled for this channel");
     });
     it("should provide consent in a forum channel with consent enabled", async () => {
-      await upsertChannelSettings({
-        channel_id: forum_channel.id,
+      await upsertChannel({
+        ...toAOChannel(forum_channel),
         flags: {
           forum_guidelines_consent_enabled: true,
         },
@@ -73,8 +78,8 @@ describe("Consent", () => {
       expect(updated_settings?.flags.can_publicly_display_messages).toBeTruthy();
     });
     it("should not provide consent if the user already has it", async () => {
-      await upsertChannelSettings({
-        channel_id: forum_channel.id,
+      await createChannelWithDeps({
+        ...toAOChannelWithServer(forum_channel),
         flags: {
           forum_guidelines_consent_enabled: true,
         },
@@ -95,8 +100,8 @@ describe("Consent", () => {
       );
     });
     it("should not provide consent if the user explicitly opted out", async () => {
-      await upsertChannelSettings({
-        channel_id: forum_channel.id,
+      await createChannelWithDeps({
+        ...toAOChannelWithServer(forum_channel),
         flags: {
           forum_guidelines_consent_enabled: true,
         },

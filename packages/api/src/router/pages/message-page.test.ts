@@ -24,6 +24,7 @@ import {
 } from "@answeroverflow/db-mock";
 import { getRandomId } from "@answeroverflow/utils";
 import { randomSnowflakeLargerThan } from "@answeroverflow/discordjs-utils";
+import { pickPublicChannelData } from "../channel/channel.test";
 
 let server: Server;
 let channel: Channel;
@@ -65,7 +66,7 @@ describe("Message Results", () => {
           toPrivateMessageWithStrippedData(toMessageWithDiscordAccount(message, author, false)),
           toPrivateMessageWithStrippedData(toMessageWithDiscordAccount(message2, author, false)),
         ],
-        parent_channel: channel,
+        parent_channel: pickPublicChannelData(channel),
         server: pickPublicServerData(server),
         thread: undefined,
       });
@@ -101,9 +102,9 @@ describe("Message Results", () => {
         messages: thread_messages.map((m) =>
           toPrivateMessageWithStrippedData(toMessageWithDiscordAccount(m, author, false))
         ),
-        parent_channel: channel,
+        parent_channel: pickPublicChannelData(channel),
         server: pickPublicServerData(server),
-        thread,
+        thread: pickPublicChannelData(thread),
       });
     });
     it("should get all thread messages for a thread correctly starting from a message in the thread", async () => {
@@ -114,9 +115,9 @@ describe("Message Results", () => {
         messages: thread_messages.map((m) =>
           toPrivateMessageWithStrippedData(toMessageWithDiscordAccount(m, author, false))
         ),
-        parent_channel: channel,
+        parent_channel: pickPublicChannelData(channel),
         server: pickPublicServerData(server),
-        thread,
+        thread: pickPublicChannelData(thread),
       });
     });
   });
