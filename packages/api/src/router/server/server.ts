@@ -42,7 +42,7 @@ const server_crud_router = router({
       fetch: () => findServerById(input),
       permissions: () => assertCanEditServer(ctx, input),
       not_found_message: "Server not found",
-      public_data_formatter: (server) => z_server_public.parse(server),
+      publicDataFormatter: (server) => z_server_public.parse(server),
     });
   }),
 });

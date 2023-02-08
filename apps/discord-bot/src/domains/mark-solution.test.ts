@@ -328,7 +328,7 @@ describe("Can Mark Solution", () => {
     });
     it("should pass if the user has administrator", async () => {
       await testAllPermissions({
-        permissionsThatShouldWork: [
+        permissions_that_should_work: [
           "Administrator",
           "ManageChannels",
           "ManageThreads",

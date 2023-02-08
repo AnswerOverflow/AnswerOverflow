@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 export { auth_options as authOptions } from "./src/auth-options";
 export { GetServerSession as getServerSession } from "./src/get-session";
 export * from "./src/discord-oauth";

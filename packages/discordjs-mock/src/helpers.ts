@@ -36,7 +36,7 @@ export function copyClass<T extends { client: Client }>(
 }
 
 export type PermissionVariantsTest = {
-  permissionsThatShouldWork: PermissionResolvable[];
+  permissions_that_should_work: PermissionResolvable[];
   operation: (
     permission: PermissionResolvable,
     is_permission_allowed: boolean
@@ -44,12 +44,12 @@ export type PermissionVariantsTest = {
 };
 
 export async function testAllPermissions({
-  permissionsThatShouldWork,
+  permissions_that_should_work,
   operation,
 }: PermissionVariantsTest) {
   // Possibly swap to Promise.All - going in parallel break things sometimes
   for await (const permission of Object.keys(PermissionFlagsBits)) {
-    const permission_is_allowed = permissionsThatShouldWork.includes(
+    const permission_is_allowed = permissions_that_should_work.includes(
       permission as PermissionResolvable
     );
     await operation(permission as PermissionResolvable, permission_is_allowed);

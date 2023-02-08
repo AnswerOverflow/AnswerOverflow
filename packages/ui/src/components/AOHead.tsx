@@ -6,9 +6,9 @@ interface HeadProps {
   title: string;
   description: string;
   image?: string;
-  addPrefix?: boolean;
-  imageWidth?: string;
-  imageHeight?: string;
+  add_prefix?: boolean;
+  image_width?: string;
+  image_height?: string;
   type?: string;
   server?: ServerPublic;
   path: string;
@@ -19,9 +19,9 @@ export const AOHead = ({
   description,
   image = "https://answeroverflow.com/content/branding/meta_header.png",
   server = undefined,
-  addPrefix = false,
-  imageWidth = "1200",
-  imageHeight = "630",
+  add_prefix: addPrefix = false,
+  image_width: imageWidth = "1200",
+  image_height: imageHeight = "630",
   type = "website",
   path,
 }: HeadProps) => {

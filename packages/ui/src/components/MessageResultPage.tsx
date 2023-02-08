@@ -88,7 +88,7 @@ export function MessageResultPage({
   return (
     <div className="sm:mx-3 ">
       <div className=" flex flex-col items-center justify-between gap-2 sm:flex-row">
-        <SearchBar className="w-full" default_value={query} />
+        <SearchBar class_name="w-full" default_value={query} />
         <div className="shrink-0 ">
           <ServerInviteDriver server={server} channel={channel} />
         </div>

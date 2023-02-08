@@ -53,6 +53,15 @@ module.exports = {
         selector: "typeLike",
         format: ["PascalCase"],
       },
+      {
+        selector: "typeProperty",
+        format: ["snake_case"],
+      },
+      {
+        selector: "typeProperty",
+        types: ["function"],
+        format: ["camelCase", "PascalCase"],
+      },
     ],
     //"@typescript-eslint/explicit-function-return-type": "warn"
   },

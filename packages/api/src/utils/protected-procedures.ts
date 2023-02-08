@@ -72,20 +72,20 @@ export async function protectedFetch<T>({
 
 type ValidatedPermissionsOrFormatData<F, T extends F> = {
   permissions: PermissionsChecksWithData<T>;
-  public_data_formatter: (data: T) => DeepPartial<T> & F;
+  publicDataFormatter: (data: T) => DeepPartial<T> & F;
   data: T;
 };
 
 async function validatePermissionsOrFormatData<F, T extends F>({
   permissions,
-  public_data_formatter,
+  publicDataFormatter,
   data,
 }: ValidatedPermissionsOrFormatData<F, T>): Promise<T | (DeepPartial<T> & F)> {
   try {
     await validatePermissionsWithData(permissions, data);
   } catch (error) {
-    if (error instanceof TRPCError && error.code === "PRECONDITION_FAILED" && public_data_formatter)
-      return public_data_formatter(data);
+    if (error instanceof TRPCError && error.code === "PRECONDITION_FAILED" && publicDataFormatter)
+      return publicDataFormatter(data);
     throw error;
   }
   return data;
@@ -104,7 +104,7 @@ export async function protectedFetchWithPublicData<F extends {}, T extends F>({
 }
 
 export async function protectedFetchManyWithPublicData<G extends {}, F extends G[], T extends F>({
-  public_data_formatter,
+  publicDataFormatter,
   fetch,
   permissions,
 }: {
@@ -116,7 +116,7 @@ export async function protectedFetchManyWithPublicData<G extends {}, F extends G
       validatePermissionsOrFormatData({
         data: item,
         permissions,
-        public_data_formatter,
+        publicDataFormatter,
       })
     )
   );

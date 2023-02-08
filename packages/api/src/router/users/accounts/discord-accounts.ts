@@ -26,14 +26,14 @@ const account_crud_router = router({
       fetch: () => findDiscordAccountById(input),
       permissions: (data) => assertIsUser(ctx, data.id),
       not_found_message: "Could not find discord account",
-      public_data_formatter: (data) => z_discord_account_public.parse(data),
+      publicDataFormatter: (data) => z_discord_account_public.parse(data),
     });
   }),
   byIdMany: public_procedure.input(z_unique_array).query(({ ctx, input }) => {
     return protectedFetchManyWithPublicData({
       fetch: () => findManyDiscordAccountsById(input),
       permissions: (data) => assertIsUser(ctx, data.id),
-      public_data_formatter: (data) => z_discord_account_public.parse(data),
+      publicDataFormatter: (data) => z_discord_account_public.parse(data),
     });
   }),
   create: public_procedure.input(z_discord_account_create).mutation(async ({ ctx, input }) => {

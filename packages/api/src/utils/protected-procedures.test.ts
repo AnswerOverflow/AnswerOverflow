@@ -31,7 +31,7 @@ describe("Protected Fetch", () => {
     const data = await protectedFetchWithPublicData({
       fetch: () => Promise.resolve(sample_data),
       permissions: () => {},
-      public_data_formatter: (data) => z_public_sample_data.parse(data),
+      publicDataFormatter: (data) => z_public_sample_data.parse(data),
       not_found_message: "not found",
     });
 
@@ -41,7 +41,7 @@ describe("Protected Fetch", () => {
     const data = await protectedFetchWithPublicData({
       fetch: () => Promise.resolve(sample_data),
       permissions: () => new TRPCError({ code: "UNAUTHORIZED" }),
-      public_data_formatter: (data) => z_public_sample_data.parse(data),
+      publicDataFormatter: (data) => z_public_sample_data.parse(data),
       not_found_message: "not found",
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -52,7 +52,7 @@ describe("Protected Fetch", () => {
     const data = await protectedFetchManyWithPublicData({
       fetch: () => Promise.resolve([sample_data]),
       permissions: () => new TRPCError({ code: "UNAUTHORIZED" }),
-      public_data_formatter: (data) => z_public_sample_data.parse(data),
+      publicDataFormatter: (data) => z_public_sample_data.parse(data),
     });
     const public_data = pick(sample_data, ["id", "name"]);
     expect(data).toEqual([public_data]);

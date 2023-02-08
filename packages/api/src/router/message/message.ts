@@ -57,7 +57,7 @@ const message_crud_router = router({
     return protectedFetchWithPublicData({
       fetch: () => findMessageById(input),
       permissions: (data) => assertIsUserInServer(ctx, data.server_id),
-      public_data_formatter: (data) => stripPrivateMessageData(data),
+      publicDataFormatter: (data) => stripPrivateMessageData(data),
       not_found_message: "Message not found",
     });
   }),
@@ -76,7 +76,7 @@ const message_crud_router = router({
           return messages;
         },
         permissions: (data) => data.map((m) => assertIsUserInServer(ctx, m.server_id)),
-        public_data_formatter: (data) => stripPrivateMessagesData(data),
+        publicDataFormatter: (data) => stripPrivateMessagesData(data),
         not_found_message: "Messages not found",
       });
     }),
@@ -86,7 +86,7 @@ const message_crud_router = router({
       return protectedFetchWithPublicData({
         fetch: () => findManyMessages(input),
         permissions: (data) => data.map((m) => assertIsUserInServer(ctx, m.server_id)),
-        public_data_formatter: (data) => stripPrivateMessagesData(data, ctx.user_servers),
+        publicDataFormatter: (data) => stripPrivateMessagesData(data, ctx.user_servers),
         not_found_message: "Messages not found",
       });
     }),

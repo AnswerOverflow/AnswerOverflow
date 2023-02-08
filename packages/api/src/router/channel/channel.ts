@@ -33,7 +33,7 @@ const channel_crud_router = router({
       fetch: () => findChannelById(input),
       permissions: (data) => assertCanEditServer(ctx, data.server_id),
       not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
-      public_data_formatter: (data) => {
+      publicDataFormatter: (data) => {
         return z_channel_public.parse(data);
       },
     });
@@ -42,7 +42,7 @@ const channel_crud_router = router({
     return protectedFetchManyWithPublicData({
       fetch: () => findManyChannelsById(input),
       permissions: (data) => assertCanEditServer(ctx, data.server_id),
-      public_data_formatter: (data) => z_channel_public.parse(data),
+      publicDataFormatter: (data) => z_channel_public.parse(data),
     });
   }),
   create: public_procedure.input(z_channel_create).mutation(({ ctx, input }) => {
