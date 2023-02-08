@@ -1,7 +1,7 @@
 // @ts-check
-import { client_env, client_schema } from "./schema.mjs";
+import { clientEnv, clientSchema } from "./schema.mjs";
 
-const _client_env = client_schema.safeParse(client_env);
+const _clientEnv = clientSchema.safeParse(clientEnv);
 
 export const formatErrors = (
   /** @type {import('zod').ZodFormattedError<Map<string,string>,string>} */
@@ -14,12 +14,12 @@ export const formatErrors = (
     })
     .filter(Boolean);
 
-if (!_client_env.success) {
-  console.error("❌ Invalid environment variables:\n", ...formatErrors(_client_env.error.format()));
+if (!_clientEnv.success) {
+  console.error("❌ Invalid environment variables:\n", ...formatErrors(_clientEnv.error.format()));
   throw new Error("Invalid environment variables");
 }
 
-for (let key of Object.keys(_client_env.data)) {
+for (let key of Object.keys(_clientEnv.data)) {
   if (!key.startsWith("NEXT_PUBLIC_")) {
     console.warn("❌ Invalid public environment variable name:", key);
 
@@ -27,4 +27,4 @@ for (let key of Object.keys(_client_env.data)) {
   }
 }
 
-export const env = _client_env.data;
+export const env = _clientEnv.data;

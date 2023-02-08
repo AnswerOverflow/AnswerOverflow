@@ -11,10 +11,10 @@ import * as colorette from "colorette";
 import { config } from "dotenv-cra";
 import { join } from "path";
 import { inspect } from "util";
-import { src_dir } from "./constants";
+import { srcDir } from "./constants";
 
 // Read env var
-config({ path: join(src_dir, ".env") });
+config({ path: join(srcDir, ".env") });
 
 // Set default inspection depth
 inspect.defaultOptions.depth = 1;

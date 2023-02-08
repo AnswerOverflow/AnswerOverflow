@@ -25,42 +25,38 @@ export function MessageResultPage({
   thread,
   query,
 }: MessageResultPageProps) {
-  const solution_message_id = messages.at(0)?.solutions?.at(0);
+  const solutionMessageId = messages.at(0)?.solutions?.at(0);
   const MessageStack = ({ messages }: { messages: MessageWithDiscordAccount[] }) => {
-    let consecutive_private_messages = 0;
-    const is_user_in_server = useIsUserInServer(server.id);
+    let consecutivePrivateMessages = 0;
+    const isUserInServer = useIsUserInServer(server.id);
     return (
       <div className="mt-3 flex flex-col rounded-md sm:space-y-1 sm:p-1">
         {messages.map((message, index) => {
-          const next_message = messages.at(index + 1);
-          if (!message.public && !is_user_in_server) {
-            consecutive_private_messages++;
-            if (next_message && !next_message.public) {
+          const nextMessage = messages.at(index + 1);
+          if (!message.public && !isUserInServer) {
+            consecutivePrivateMessages++;
+            if (nextMessage && !nextMessage.public) {
               return;
             }
           } else {
-            consecutive_private_messages = 0;
+            consecutivePrivateMessages = 0;
           }
-          const Msg = ({
-            consecutive_private_messages,
-          }: {
-            consecutive_private_messages: number;
-          }) => {
+          const Msg = ({ consecutivePrivateMessages }: { consecutivePrivateMessages: number }) => {
             if (!message.public) {
               return (
                 <Message
                   message={message}
                   thread={thread}
                   blurred={!message.public}
-                  not_public_title={
-                    consecutive_private_messages > 1
-                      ? `${consecutive_private_messages} Messages Not Public`
+                  notPublicTitle={
+                    consecutivePrivateMessages > 1
+                      ? `${consecutivePrivateMessages} Messages Not Public`
                       : undefined
                   }
                 />
               );
             }
-            if (message.id === solution_message_id) {
+            if (message.id === solutionMessageId) {
               return (
                 <div className="text-green-500 dark:text-green-400">
                   Solution
@@ -77,7 +73,7 @@ export function MessageResultPage({
           };
           return (
             <div key={message.id} className="mb-2">
-              <Msg consecutive_private_messages={consecutive_private_messages} />
+              <Msg consecutivePrivateMessages={consecutivePrivateMessages} />
             </div>
           );
         })}
@@ -88,7 +84,7 @@ export function MessageResultPage({
   return (
     <div className="sm:mx-3 ">
       <div className=" flex flex-col items-center justify-between gap-2 sm:flex-row">
-        <SearchBar class_name="w-full" default_value={query} />
+        <SearchBar className="w-full" defaultValue={query} />
         <div className="shrink-0 ">
           <ServerInviteDriver server={server} channel={channel} />
         </div>

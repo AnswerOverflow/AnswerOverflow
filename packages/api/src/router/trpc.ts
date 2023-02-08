@@ -15,16 +15,16 @@ async function getDiscordOauth(ctx: Context) {
   if (!ctx.session) {
     return null;
   }
-  const discord_oauth = await getDiscordAccount(ctx.prisma, ctx.session.user.id);
-  return discord_oauth;
+  const discordOauth = await getDiscordAccount(ctx.prisma, ctx.session.user.id);
+  return discordOauth;
 }
 
 const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
   if (ctx.caller === "web-client" && ctx.session) {
-    const discord_oauth = await getDiscordOauth(ctx);
-    if (discord_oauth && discord_oauth.access_token) {
-      const discord_account = await getDiscordUser(discord_oauth.access_token);
-      ctx.discord_account = discord_account;
+    const discordOauth = await getDiscordOauth(ctx);
+    if (discordOauth && discordOauth.access_token) {
+      const discordAccount = await getDiscordUser(discordOauth.access_token);
+      ctx.discordAccount = discordAccount;
     }
   }
   return next({
@@ -34,12 +34,12 @@ const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
   });
 });
 
-export const GetUserServersFromCtx = async (ctx: Context) => {
-  const discord_oauth = await getDiscordOauth(ctx);
-  if (discord_oauth && discord_oauth.access_token) {
-    const user_servers = await getUserServers(discord_oauth.access_token);
-    ctx.user_servers = user_servers;
-    return user_servers;
+export const getUserServersFromCtx = async (ctx: Context) => {
+  const discordOauth = await getDiscordOauth(ctx);
+  if (discordOauth && discordOauth.access_token) {
+    const userServers = await getUserServers(discordOauth.access_token);
+    ctx.userServers = userServers;
+    return userServers;
   }
 
   return [];
@@ -48,20 +48,20 @@ export const GetUserServersFromCtx = async (ctx: Context) => {
 const addUserServers = t.middleware(async ({ ctx, next }) => {
   // In a test environment, we manually populate it
   if (ctx.caller === "web-client" && process.env.NODE_ENV !== "test") {
-    ctx.user_servers = await GetUserServersFromCtx(ctx);
+    ctx.userServers = await getUserServersFromCtx(ctx);
   }
-  if (!ctx.user_servers) {
-    ctx.user_servers = []; // TODO: Maybe throw error here instead?
+  if (!ctx.userServers) {
+    ctx.userServers = []; // TODO: Maybe throw error here instead?
   }
   return next({
     ctx: {
-      user_servers: ctx.user_servers,
+      userServers: ctx.userServers,
     },
   });
 });
 
 export const router = t.router;
 export const MergeRouters = t.mergeRouters;
-export const public_procedure = t.procedure;
-export const with_discord_account_procedure = t.procedure.use(addDiscordAccount);
-export const with_user_servers_procedure = t.procedure.use(addUserServers);
+export const publicProcedure = t.procedure;
+export const withDiscordAccountProcedure = t.procedure.use(addDiscordAccount);
+export const withUserServersProcedure = t.procedure.use(addUserServers);

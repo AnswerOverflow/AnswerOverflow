@@ -1,68 +1,68 @@
 import { z } from "zod";
-import { MergeRouters, with_discord_account_procedure, router } from "~api/router/trpc";
+import { MergeRouters, withDiscordAccountProcedure, router } from "~api/router/trpc";
 import { TRPCError } from "@trpc/server";
 import { protectedFetchWithPublicData } from "~api/utils/protected-procedures";
 import { assertIsUserInServer } from "~api/utils/permissions";
 import {
   getDefaultDiscordAccount,
   getDefaultMessage,
-  z_message_with_discord_account,
+  zMessageWithDiscordAccount,
   findMessagesByChannelId,
-  z_find_messages_by_channel_id,
+  zFindMessagesByChannelId,
   findManyMessages,
   findMessageById,
 } from "@answeroverflow/db";
 import type { DiscordServer } from "@answeroverflow/auth";
 
 export function stripPrivateMessageData(
-  message: z.infer<typeof z_message_with_discord_account>,
-  user_servers: DiscordServer[] | null = null
+  message: z.infer<typeof zMessageWithDiscordAccount>,
+  userServers: DiscordServer[] | null = null
 ) {
   if (message.public) {
     return message;
   }
-  if (user_servers) {
-    const user_server = user_servers.find((s) => s.id === message.server_id);
-    if (user_server) {
+  if (userServers) {
+    const userServer = userServers.find((s) => s.id === message.serverId);
+    if (userServer) {
       return message;
     }
   }
-  const default_author = getDefaultDiscordAccount({
+  const defaultAuthor = getDefaultDiscordAccount({
     id: "0",
     name: "Unknown User",
   });
-  const default_message = getDefaultMessage({
-    channel_id: message.channel_id,
-    server_id: message.server_id,
-    author_id: default_author.id,
+  const defaultMessage = getDefaultMessage({
+    channelId: message.channelId,
+    serverId: message.serverId,
+    authorId: defaultAuthor.id,
     id: message.id,
-    child_thread: null,
+    childThread: null,
   });
   return {
-    ...default_message,
-    author: default_author,
+    ...defaultMessage,
+    author: defaultAuthor,
     public: false,
   };
 }
 
 export function stripPrivateMessagesData(
-  messages: z.infer<typeof z_message_with_discord_account>[],
-  user_servers: DiscordServer[] | null = null
+  messages: z.infer<typeof zMessageWithDiscordAccount>[],
+  userServers: DiscordServer[] | null = null
 ) {
-  return messages.map((m) => stripPrivateMessageData(m, user_servers));
+  return messages.map((m) => stripPrivateMessageData(m, userServers));
 }
 
-const message_crud_router = router({
-  byId: with_discord_account_procedure.input(z.string()).query(async ({ ctx, input }) => {
+const messageCrudRouter = router({
+  byId: withDiscordAccountProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({
       fetch: () => findMessageById(input),
-      permissions: (data) => assertIsUserInServer(ctx, data.server_id),
+      permissions: (data) => assertIsUserInServer(ctx, data.serverId),
       publicDataFormatter: (data) => stripPrivateMessageData(data),
-      not_found_message: "Message not found",
+      notFoundMessage: "Message not found",
     });
   }),
-  byChannelIdBulk: with_discord_account_procedure
-    .input(z_find_messages_by_channel_id)
+  byChannelIdBulk: withDiscordAccountProcedure
+    .input(zFindMessagesByChannelId)
     .query(async ({ ctx, input }) => {
       return protectedFetchWithPublicData({
         async fetch() {
@@ -75,21 +75,19 @@ const message_crud_router = router({
           }
           return messages;
         },
-        permissions: (data) => data.map((m) => assertIsUserInServer(ctx, m.server_id)),
+        permissions: (data) => data.map((m) => assertIsUserInServer(ctx, m.serverId)),
         publicDataFormatter: (data) => stripPrivateMessagesData(data),
-        not_found_message: "Messages not found",
+        notFoundMessage: "Messages not found",
       });
     }),
-  byIdBulk: with_discord_account_procedure
-    .input(z.array(z.string()))
-    .query(async ({ ctx, input }) => {
-      return protectedFetchWithPublicData({
-        fetch: () => findManyMessages(input),
-        permissions: (data) => data.map((m) => assertIsUserInServer(ctx, m.server_id)),
-        publicDataFormatter: (data) => stripPrivateMessagesData(data, ctx.user_servers),
-        not_found_message: "Messages not found",
-      });
-    }),
+  byIdBulk: withDiscordAccountProcedure.input(z.array(z.string())).query(async ({ ctx, input }) => {
+    return protectedFetchWithPublicData({
+      fetch: () => findManyMessages(input),
+      permissions: (data) => data.map((m) => assertIsUserInServer(ctx, m.serverId)),
+      publicDataFormatter: (data) => stripPrivateMessagesData(data, ctx.userServers),
+      notFoundMessage: "Messages not found",
+    });
+  }),
 });
 
-export const message_router = MergeRouters(message_crud_router);
+export const messageRouter = MergeRouters(messageCrudRouter);

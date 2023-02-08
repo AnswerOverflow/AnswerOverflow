@@ -31,6 +31,6 @@ export class UserPrecondition extends AllFlowsPrecondition {
 
 declare module "@sapphire/framework" {
   interface Preconditions {
-    owner_only: never;
+    ownerOnly: never;
   }
 }

@@ -15,8 +15,8 @@ export function findManyIgnoredDiscordAccountsById(ids: string[]) {
 }
 
 export async function upsertIgnoredDiscordAccount(id: string) {
-  const discord_account = await findDiscordAccountById(id);
-  if (discord_account) throw new DBError("Account is not ignored", "NOT_IGNORED_ACCOUNT");
+  const discordAccount = await findDiscordAccountById(id);
+  if (discordAccount) throw new DBError("Account is not ignored", "NOT_IGNORED_ACCOUNT");
   return prisma.ignoredDiscordAccount.upsert({
     where: { id },
     create: {

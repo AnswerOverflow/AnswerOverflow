@@ -13,11 +13,11 @@ import { Button } from "./primitives/Button";
 import type { User } from "@answeroverflow/api";
 import { classNames } from "~ui/utils/styling";
 
-const SignedInDropdownMenu = ({ signed_in_user }: { signed_in_user: User }) => (
+const SignedInDropdownMenu = ({ signedInUser }: { signedInUser: User }) => (
   <Menu as="div" className="relative inline-block text-left">
     <Menu.Button>
       <div className="flex shrink-0 flex-row items-center rounded-md p-2 transition hover:bg-zinc-900/5 dark:hover:bg-white/5">
-        <Avatar alt={signed_in_user.name} size={"sm"} url={signed_in_user.image} />
+        <Avatar alt={signedInUser.name} size={"sm"} url={signedInUser.image} />
         <EllipsisVerticalIcon className="h-7 w-7 dark:text-white hover:dark:text-neutral-400" />
       </div>
     </Menu.Button>
@@ -73,8 +73,8 @@ const SignedInDropdownMenu = ({ signed_in_user }: { signed_in_user: User }) => (
 
 export function Navbar() {
   const router = useRouter();
-  const user_query = trpc.auth.getSession.useQuery();
-  const user = user_query.data?.user;
+  const userQuery = trpc.auth.getSession.useQuery();
+  const user = userQuery.data?.user;
 
   return (
     <div className="mx-auto max-w-7xl bg-white px-2 dark:bg-neutral-800 sm:px-6 lg:px-8">
@@ -89,10 +89,10 @@ export function Navbar() {
         <div className="flex items-center gap-5">
           <ThemeSwitcher />
           {user ? (
-            <SignedInDropdownMenu signed_in_user={user} />
+            <SignedInDropdownMenu signedInUser={user} />
           ) : (
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            <Button visual_only onClick={() => signIn("discord")}>
+            <Button visualOnly onClick={() => signIn("discord")}>
               Login
             </Button>
           )}

@@ -19,7 +19,7 @@ describe("Channel Operations", () => {
         {
           ...chnl1,
           flags: {
-            forum_guidelines_consent_enabled: true,
+            forumGuidelinesConsentEnabled: true,
           },
         },
         chnl2,

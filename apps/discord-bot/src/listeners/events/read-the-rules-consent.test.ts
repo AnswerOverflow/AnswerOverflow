@@ -23,57 +23,57 @@ describe("Read the rules consent", () => {
   it("should mark a pending user as consenting in a server with read the rules consent enabled", async () => {
     // setup
     await createServer({
-      ...toAOServer(members.pending_guild_member_default.guild),
+      ...toAOServer(members.pendingGuildMemberDefault.guild),
       flags: {
-        read_the_rules_consent_enabled: true,
+        readTheRulesConsentEnabled: true,
       },
     });
 
     // act
-    const full_member = copyClass(members.pending_guild_member_default, client);
-    full_member.pending = false;
+    const fullMember = copyClass(members.pendingGuildMemberDefault, client);
+    fullMember.pending = false;
     await emitEvent(
       client,
       Events.GuildMemberUpdate,
-      members.pending_guild_member_default,
-      full_member
+      members.pendingGuildMemberDefault,
+      fullMember
     );
     await delay();
 
     // assert
-    const updated_settings = await findUserServerSettingsById({
-      user_id: full_member.id,
-      server_id: full_member.guild.id,
+    const updatedSettings = await findUserServerSettingsById({
+      userId: fullMember.id,
+      serverId: fullMember.guild.id,
     });
 
-    expect(updated_settings!.flags.can_publicly_display_messages).toBe(true);
+    expect(updatedSettings!.flags.canPubliclyDisplayMessages).toBe(true);
   });
   it("should not mark a pending user as consenting in a server with read the rules consent disabled", async () => {
     // setup
 
     await createServer({
-      ...toAOServer(members.pending_guild_member_default.guild),
+      ...toAOServer(members.pendingGuildMemberDefault.guild),
       flags: {
-        read_the_rules_consent_enabled: false,
+        readTheRulesConsentEnabled: false,
       },
     });
 
     // act
-    const full_member = copyClass(members.pending_guild_member_default, client);
-    full_member.pending = false;
+    const fullMember = copyClass(members.pendingGuildMemberDefault, client);
+    fullMember.pending = false;
     await emitEvent(
       client,
       Events.GuildMemberUpdate,
-      members.pending_guild_member_default,
-      full_member
+      members.pendingGuildMemberDefault,
+      fullMember
     );
 
     // assert
-    const updated_settings = await findUserServerSettingsById({
-      user_id: full_member.id,
-      server_id: full_member.guild.id,
+    const updatedSettings = await findUserServerSettingsById({
+      userId: fullMember.id,
+      serverId: fullMember.guild.id,
     });
-    expect(updated_settings).toBe(null);
+    expect(updatedSettings).toBe(null);
   });
   it("should mark multiple users as consenting in a server with read the rules consent enabled", async () => {
     const server = mockGuild(client);
@@ -84,23 +84,23 @@ describe("Read the rules consent", () => {
     await createServer({
       ...toAOServer(server),
       flags: {
-        read_the_rules_consent_enabled: true,
+        readTheRulesConsentEnabled: true,
       },
     });
 
-    for await (const pending_member of members) {
+    for await (const pendingMember of members) {
       // act
-      const full_member = copyClass(pending_member, client);
-      full_member.pending = false;
-      await emitEvent(client, Events.GuildMemberUpdate, pending_member, full_member);
+      const fullMember = copyClass(pendingMember, client);
+      fullMember.pending = false;
+      await emitEvent(client, Events.GuildMemberUpdate, pendingMember, fullMember);
 
       // assert
-      const updated_settings = await findUserServerSettingsById({
-        user_id: full_member.id,
-        server_id: server.id,
+      const updatedSettings = await findUserServerSettingsById({
+        userId: fullMember.id,
+        serverId: server.id,
       });
       await delay(1000);
-      expect(updated_settings!.flags.can_publicly_display_messages).toBe(true);
+      expect(updatedSettings!.flags.canPubliclyDisplayMessages).toBe(true);
     }
   });
 });

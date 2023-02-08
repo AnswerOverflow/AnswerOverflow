@@ -18,7 +18,7 @@ import {
 
 @ApplyOptions<Listener.Options>({ event: Events.ChannelUpdate, name: "Channel Sync On Update" })
 export class SyncOnUpdate extends Listener {
-  public async run(_oldChannel: DMChannel | GuildChannel, newChannel: DMChannel | GuildChannel) {
+  public async run(_: DMChannel | GuildChannel, newChannel: DMChannel | GuildChannel) {
     if (newChannel.type === ChannelType.DM) return;
     const chnl = await findChannelById(newChannel.id);
     if (!chnl) return;
@@ -47,7 +47,7 @@ export class ThreadSyncOnDelete extends Listener {
 
 @ApplyOptions<Listener.Options>({ event: Events.ThreadUpdate, name: "Thread Sync On Update" })
 export class ThreadSyncOnUpdate extends Listener {
-  public async run(_oldThread: ThreadChannel, newThread: ThreadChannel) {
+  public async run(_: ThreadChannel, newThread: ThreadChannel) {
     const chnl = await findChannelById(newThread.id);
     if (!chnl) return;
     await updateChannel({ id: newThread.id, name: newThread.name }, chnl);
@@ -59,6 +59,6 @@ export class InviteSyncOnDelete extends Listener {
   public async run(invite: Invite) {
     const settings = await findChannelByInviteCode(invite.code);
     if (!settings) return;
-    await updateChannel({ id: settings.id, invite_code: null }, settings);
+    await updateChannel({ id: settings.id, inviteCode: null }, settings);
   }
 }

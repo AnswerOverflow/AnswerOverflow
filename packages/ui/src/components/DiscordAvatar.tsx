@@ -12,6 +12,6 @@ const makeUserIconLink = (user: Pick<DiscordAccountPublic, "id" | "avatar">, siz
 };
 
 export function DiscordAvatar({ user, size = "md", ...props }: DiscordAvatarProps) {
-  const profile_picture_url = makeUserIconLink(user, getAvatarSize(size));
-  return <Avatar alt={user.name} size={size} url={profile_picture_url} {...props} />;
+  const profilePictureUrl = makeUserIconLink(user, getAvatarSize(size));
+  return <Avatar alt={user.name} size={size} url={profilePictureUrl} {...props} />;
 }

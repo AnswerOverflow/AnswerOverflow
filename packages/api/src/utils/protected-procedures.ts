@@ -13,20 +13,20 @@ async function iteratePermissionResults(
 ) {
   let errors: TRPCError[] = [];
   if (Array.isArray(results)) {
-    const awaited_results = await Promise.all(results);
-    errors = awaited_results.filter((result) => result != undefined) as TRPCError[];
+    const awaitedResults = await Promise.all(results);
+    errors = awaitedResults.filter((result) => result != undefined) as TRPCError[];
   } else {
-    const awaited_result = await results;
-    if (awaited_result != undefined) {
-      errors = [awaited_result];
+    const awaitedResult = await results;
+    if (awaitedResult != undefined) {
+      errors = [awaitedResult];
     }
   }
   if (errors.length > 0) {
     // Ugly
-    const error_messages = [...new Set(errors.map((error) => error.message))].join("\n");
+    const errorMessages = [...new Set(errors.map((error) => error.message))].join("\n");
     throw new TRPCError({
       code: "PRECONDITION_FAILED",
-      message: error_messages,
+      message: errorMessages,
     });
   }
 }
@@ -45,10 +45,10 @@ type PermissionsChecksWithData<T> =
 
 async function validatePermissionsWithData<T>(permissions: PermissionsChecksWithData<T>, data: T) {
   if (Array.isArray(permissions)) {
-    const permission_results = permissions.map((permission) => permission(data));
+    const permissionResults = permissions.map((permission) => permission(data));
     // flatten
-    const flattened_permission_results = permission_results.flat();
-    await iteratePermissionResults(flattened_permission_results);
+    const flattenedPermissionResults = permissionResults.flat();
+    await iteratePermissionResults(flattenedPermissionResults);
   } else {
     await iteratePermissionResults(permissions(data));
   }
@@ -57,15 +57,15 @@ async function validatePermissionsWithData<T>(permissions: PermissionsChecksWith
 type ProtectedFetchInput<T> = {
   fetch: () => Promise<T | null>;
   permissions: PermissionsChecksWithData<T>;
-  not_found_message: string;
+  notFoundMessage: string;
 };
 
 export async function protectedFetch<T>({
   fetch,
   permissions,
-  not_found_message,
+  notFoundMessage,
 }: ProtectedFetchInput<T>) {
-  const data = await findOrThrowNotFound(fetch, not_found_message);
+  const data = await findOrThrowNotFound(fetch, notFoundMessage);
   await validatePermissionsWithData(permissions, data);
   return data;
 }
@@ -93,10 +93,10 @@ async function validatePermissionsOrFormatData<F, T extends F>({
 
 export async function protectedFetchWithPublicData<F extends {}, T extends F>({
   fetch,
-  not_found_message,
+  notFoundMessage,
   ...validate
 }: ProtectedFetchInput<T> & Omit<ValidatedPermissionsOrFormatData<F, T>, "data">) {
-  const data = await findOrThrowNotFound(fetch, not_found_message);
+  const data = await findOrThrowNotFound(fetch, notFoundMessage);
   return validatePermissionsOrFormatData({
     ...validate,
     data,

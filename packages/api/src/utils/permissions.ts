@@ -8,32 +8,32 @@ export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
 type PermissionCheckResult = TRPCError | undefined;
 
 export function isSuperUser(ctx: Context) {
-  if (ctx.discord_account?.id === "523949187663134754") return true; // This is the ID of Rhys - TODO: Swap to an env var
+  if (ctx.discordAccount?.id === "523949187663134754") return true; // This is the ID of Rhys - TODO: Swap to an env var
   return false;
 }
 
-export function assertCanEditServer(ctx: Context, server_id: string): PermissionCheckResult {
+export function assertCanEditServer(ctx: Context, serverId: string): PermissionCheckResult {
   if (isSuperUser(ctx)) return;
-  if (!ctx.user_servers) {
+  if (!ctx.userServers) {
     return new TRPCError({
       code: "UNAUTHORIZED",
       message: "User servers missing, cannot verify if user has permission to edit server",
     });
   }
 
-  const server_to_check_permissions_of = ctx.user_servers.find(
-    (user_server) => user_server.id === server_id
+  const serverToCheckPermissionsOf = ctx.userServers.find(
+    (userServer) => userServer.id === serverId
   );
-  if (!server_to_check_permissions_of) {
+  if (!serverToCheckPermissionsOf) {
     return new TRPCError({
       code: "FORBIDDEN",
       message: "You are not a member of the server you are trying to create channel settings for",
     });
   }
-  const permission_bitfield = new PermissionsBitField(
-    BigInt(server_to_check_permissions_of.permissions)
+  const permissionBitfield = new PermissionsBitField(
+    BigInt(serverToCheckPermissionsOf.permissions)
   );
-  if (!permission_bitfield.has("ManageGuild")) {
+  if (!permissionBitfield.has("ManageGuild")) {
     return new TRPCError({
       code: "FORBIDDEN",
       message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
@@ -42,9 +42,9 @@ export function assertCanEditServer(ctx: Context, server_id: string): Permission
   return;
 }
 
-export function assertCanEditMessage(ctx: Context, author_id: string) {
+export function assertCanEditMessage(ctx: Context, authorId: string) {
   if (isSuperUser(ctx)) return;
-  if (ctx.discord_account?.id !== author_id) {
+  if (ctx.discordAccount?.id !== authorId) {
     return new TRPCError({
       code: "FORBIDDEN",
       message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
@@ -53,15 +53,15 @@ export function assertCanEditMessage(ctx: Context, author_id: string) {
   return;
 }
 
-export function assertIsUserInServer(ctx: Context, target_server_id: string) {
+export function assertIsUserInServer(ctx: Context, targetServerId: string) {
   if (isSuperUser(ctx)) return;
-  if (!ctx.user_servers) {
+  if (!ctx.userServers) {
     return new TRPCError({
       code: "UNAUTHORIZED",
       message: "Sign in to view this server",
     });
   }
-  const server = ctx.user_servers.find((server) => server.id === target_server_id);
+  const server = ctx.userServers.find((server) => server.id === targetServerId);
   if (!server) {
     return new TRPCError({
       code: "UNAUTHORIZED",
@@ -71,9 +71,9 @@ export function assertIsUserInServer(ctx: Context, target_server_id: string) {
   return;
 }
 
-export function assertIsUser(ctx: Context, target_user_id: string) {
+export function assertIsUser(ctx: Context, targetUserId: string) {
   if (isSuperUser(ctx)) return;
-  if (ctx.discord_account?.id !== target_user_id) {
+  if (ctx.discordAccount?.id !== targetUserId) {
     return new TRPCError({
       code: "UNAUTHORIZED",
       message: "You are not authorized to do this",
@@ -114,6 +114,6 @@ export function isCtxSourceDiscordBot(ctx: Context) {
   return isCtxCaller(ctx, "discord-bot");
 }
 
-export function assertCanEditServerBotOnly(ctx: Context, server_id: string) {
-  return [assertCanEditServer(ctx, server_id), isCtxSourceDiscordBot(ctx)];
+export function assertCanEditServerBotOnly(ctx: Context, serverId: string) {
+  return [assertCanEditServer(ctx, serverId), isCtxSourceDiscordBot(ctx)];
 }

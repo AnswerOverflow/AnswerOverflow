@@ -10,10 +10,10 @@ function disableTransitionsTemporarily() {
   }, 0);
 }
 
-function changeCodeHighlighting(dark_theme_enabled: boolean) {
+function changeCodeHighlighting(darkThemeEnabled: boolean) {
   // This is disgusting, but it works for switching the code highlighting
-  let dark_style_sheet: CSSStyleSheet | undefined;
-  let light_style_sheet: CSSStyleSheet | undefined;
+  let darkStyleSheet: CSSStyleSheet | undefined;
+  let lightStyleSheet: CSSStyleSheet | undefined;
   [...document.styleSheets].forEach((styleSheet) => {
     try {
       const rule = [...styleSheet.cssRules].find((rule) =>
@@ -22,47 +22,47 @@ function changeCodeHighlighting(dark_theme_enabled: boolean) {
 
       if (rule) {
         if (rule.style.color === "rgb(255, 123, 114)") {
-          dark_style_sheet = styleSheet;
+          darkStyleSheet = styleSheet;
         } else if (rule.style.color === "rgb(215, 58, 73)") {
-          light_style_sheet = styleSheet;
+          lightStyleSheet = styleSheet;
         }
       }
     } catch (error) {
       // let error pass
     }
   });
-  if (dark_style_sheet && light_style_sheet) {
-    if (dark_theme_enabled) {
-      dark_style_sheet.disabled = false;
-      light_style_sheet.disabled = true;
+  if (darkStyleSheet && lightStyleSheet) {
+    if (darkThemeEnabled) {
+      darkStyleSheet.disabled = false;
+      lightStyleSheet.disabled = true;
     } else {
-      dark_style_sheet.disabled = true;
-      light_style_sheet.disabled = false;
+      darkStyleSheet.disabled = true;
+      lightStyleSheet.disabled = false;
     }
   }
 }
-export function toggleDarkTheme(theme_override?: boolean) {
+export function toggleDarkTheme(themeOverride?: boolean) {
   disableTransitionsTemporarily();
 
-  const dark_mode_media_query = window.matchMedia("(prefers-color-scheme: dark)");
-  const is_system_dark_mode = dark_mode_media_query.matches;
-  let is_dark_mode: boolean;
-  if (theme_override !== undefined) {
+  const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  const isSystemDarkMode = darkModeMediaQuery.matches;
+  let isDarkMode: boolean;
+  if (themeOverride !== undefined) {
     const root = window.document.documentElement;
-    is_dark_mode = theme_override;
-    if (is_dark_mode) {
+    isDarkMode = themeOverride;
+    if (isDarkMode) {
       root.classList.add("dark");
     } else {
       root.classList.remove("dark");
     }
   } else {
-    is_dark_mode = document.documentElement.classList.toggle("dark");
+    isDarkMode = document.documentElement.classList.toggle("dark");
   }
-  changeCodeHighlighting(is_dark_mode);
+  changeCodeHighlighting(isDarkMode);
 
-  if (is_dark_mode === is_system_dark_mode) {
+  if (isDarkMode === isSystemDarkMode) {
     delete window.localStorage.isDarkMode;
   } else {
-    window.localStorage.isDarkMode = is_dark_mode;
+    window.localStorage.isDarkMode = isDarkMode;
   }
 }

@@ -18,14 +18,14 @@ export default {
         disable: true,
       },
     },
-    show_grid: {
+    showGrid: {
       control: "boolean",
     },
-    show_legend: {
+    showLegend: {
       control: "boolean",
       defaultValue: true,
     },
-    show_tooltip: {
+    showTooltip: {
       control: "boolean",
       defaultValue: true,
     },
@@ -45,17 +45,17 @@ LineChart.parameters = {
     disable: true,
   },
 };
-const line_props: ChartProps = {
+const lineProps: ChartProps = {
   type: "line",
-  show_grid: false,
+  showGrid: false,
   lines: [
     {
-      line_type: "monotone",
-      data_key: "uv",
-      line_color: "#8884d8",
+      lineType: "monotone",
+      dataKey: "uv",
+      lineColor: "#8884d8",
     },
   ],
-  x_axis_key: "name",
+  xAxisKey: "name",
   // Data from rechart example
   data: [
     {
@@ -103,7 +103,7 @@ const line_props: ChartProps = {
   ],
 };
 
-LineChart.args = line_props;
+LineChart.args = lineProps;
 
 export const BarChart = Template.bind({});
 BarChart.parameters = {
@@ -111,16 +111,16 @@ BarChart.parameters = {
     disable: true,
   },
 };
-const bar_props: ChartProps = {
+const barProps: ChartProps = {
   type: "bar",
-  show_grid: false,
+  showGrid: false,
   bars: [
     {
-      data_key: "uv",
-      bar_color: "#8884d8",
+      dataKey: "uv",
+      barColor: "#8884d8",
     },
   ],
-  x_axis_key: "name",
+  xAxisKey: "name",
   // Data from rechart example
   data: [
     {
@@ -161,4 +161,4 @@ const bar_props: ChartProps = {
   ],
 };
 
-BarChart.args = bar_props;
+BarChart.args = barProps;

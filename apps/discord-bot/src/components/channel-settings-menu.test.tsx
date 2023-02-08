@@ -17,9 +17,9 @@ import {
 import { toAOChannel } from "~discord-bot/utils/conversions";
 
 let reacord: ReacordTester;
-let text_channel: TextChannel;
-let forum_thread: PublicThreadChannel;
-let forum_channel: ForumChannel;
+let textChannel: TextChannel;
+let forumThread: PublicThreadChannel;
+let forumChannel: ForumChannel;
 let guild: Guild;
 let members: GuildMemberVariants;
 beforeEach(async () => {
@@ -27,20 +27,20 @@ beforeEach(async () => {
   reacord = mockReacord();
   guild = mockGuild(client);
   members = await createGuildMemberVariants(client, guild);
-  text_channel = mockTextChannel(client, guild);
-  forum_channel = mockForumChannel(client, guild);
-  forum_thread = mockPublicThread({
+  textChannel = mockTextChannel(client, guild);
+  forumChannel = mockForumChannel(client, guild);
+  forumThread = mockPublicThread({
     client,
-    parent_channel: forum_channel,
+    parentChannel: forumChannel,
   });
 });
 
 describe("ChannelSettingsMenu", () => {
   it("should render correctly in a text channel", async () => {
-    const default_settings = getDefaultChannelWithFlags(toAOChannel(text_channel));
+    const defaultSettings = getDefaultChannelWithFlags(toAOChannel(textChannel));
     const message = await reply(
       reacord,
-      <ChannelSettingsMenu settings={default_settings} channel={text_channel} />
+      <ChannelSettingsMenu settings={defaultSettings} channel={textChannel} />
     );
     expect(
       message!.hasComponents(
@@ -50,10 +50,10 @@ describe("ChannelSettingsMenu", () => {
     ).toBeTruthy();
   });
   it("should render correctly in a forum thread", async () => {
-    const default_settings = getDefaultChannelWithFlags(toAOChannel(forum_thread.parent!));
+    const defaultSettings = getDefaultChannelWithFlags(toAOChannel(forumThread.parent!));
     const message = await reply(
       reacord,
-      <ChannelSettingsMenu settings={default_settings} channel={forum_thread} />
+      <ChannelSettingsMenu settings={defaultSettings} channel={forumThread} />
     );
     expect(
       message!.hasComponents(
@@ -72,14 +72,14 @@ describe("ChannelSettingsMenu", () => {
 
 describe("Toggle Indexing Button", () => {
   it("should enable indexing", async () => {
-    const default_settings = getDefaultChannelWithFlags(toAOChannel(text_channel));
+    const defaultSettings = getDefaultChannelWithFlags(toAOChannel(textChannel));
     const message = await reply(
       reacord,
-      <ChannelSettingsMenu settings={default_settings} channel={text_channel} />
+      <ChannelSettingsMenu settings={defaultSettings} channel={textChannel} />
     );
-    const enable_indexing_button = message!.findButtonByLabel("Enable Indexing", reacord);
-    expect(enable_indexing_button).toBeDefined();
-    await enable_indexing_button!.click(text_channel, members.guild_member_owner);
+    const enableIndexingButton = message!.findButtonByLabel("Enable Indexing", reacord);
+    expect(enableIndexingButton).toBeDefined();
+    await enableIndexingButton!.click(textChannel, members.guildMemberOwner);
     await delay();
     expect(message!.hasButton("Enable Indexing", reacord)).toBeFalsy();
     const button = message!.findButtonByLabel("Disable Indexing", reacord);
@@ -90,10 +90,10 @@ describe("Toggle Indexing Button", () => {
 
 describe("Select mark solved tag", () => {
   it("should select a tag", async () => {
-    const default_settings = getDefaultChannelWithFlags(toAOChannel(forum_thread.parent!));
+    const defaultSettings = getDefaultChannelWithFlags(toAOChannel(forumThread.parent!));
     const message = await reply(
       reacord,
-      <ChannelSettingsMenu settings={default_settings} channel={forum_thread} />
+      <ChannelSettingsMenu settings={defaultSettings} channel={forumThread} />
     );
     await delay();
 
@@ -102,16 +102,12 @@ describe("Select mark solved tag", () => {
       reacord
     );
     expect(select).toBeDefined();
-    await select?.select(
-      forum_thread,
-      members.guild_member_owner,
-      forum_channel.availableTags[0]!.id
-    );
+    await select?.select(forumThread, members.guildMemberOwner, forumChannel.availableTags[0]!.id);
     const select2 = message!.findSelectByPlaceholder(
       "Select a tag to use on mark as solved",
       reacord
     );
     expect(select2?.values).toHaveLength(1);
-    expect(select2!.values![0]).toBe(forum_channel.availableTags[0]!.id);
+    expect(select2!.values![0]).toBe(forumChannel.availableTags[0]!.id);
   });
 });

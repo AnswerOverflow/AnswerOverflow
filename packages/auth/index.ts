@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-export { auth_options as authOptions } from "./src/auth-options";
-export { GetServerSession as getServerSession } from "./src/get-session";
+export { authOptions as authOptions } from "./src/auth-options";
+export { getServerSession as getServerSession } from "./src/get-session";
 export * from "./src/discord-oauth";
 export type { Session } from "next-auth";
 import type { DefaultSession } from "next-auth";

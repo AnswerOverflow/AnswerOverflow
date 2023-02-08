@@ -13,7 +13,7 @@ export type MessageProps = {
   message: MessageWithDiscordAccount;
   thread?: ChannelPublicWithFlags;
   blurred?: boolean;
-  not_public_title?: string;
+  notPublicTitle?: string;
 };
 
 const { toHTML } = discordMarkdown;
@@ -23,21 +23,21 @@ export function Message({
   message,
   thread,
   blurred = false,
-  not_public_title = "Message Not Public",
+  notPublicTitle = "Message Not Public",
 }: MessageProps) {
-  const date_of_message = getSnowflakeUTCDate(message.id);
-  const converted_message_content = toHTML(message.content);
-  const parsed_message_content = Parser(converted_message_content);
-  const is_user_in_server = useIsUserInServer(message.server_id);
-  if (is_user_in_server) {
+  const dateOfMessage = getSnowflakeUTCDate(message.id);
+  const convertedMessageContent = toHTML(message.content);
+  const parsedMessageContent = Parser(convertedMessageContent);
+  const isUserInServer = useIsUserInServer(message.serverId);
+  if (isUserInServer) {
     blurred = false;
   }
 
   function MessageImage({ image }: { image: MessageWithDiscordAccount["images"][number] }) {
     let width = image.width;
     let height = image.height;
-    const max_width = 400;
-    const max_height = 300;
+    const maxWidth = 400;
+    const maxHeight = 300;
 
     if (!width || !height)
       return (
@@ -54,45 +54,45 @@ export function Message({
           alt={image.description ? image.description : "Image"}
         />
       );
-    const original_width = width;
-    const original_height = height;
+    const originalWidth = width;
+    const originalHeight = height;
     if (width > height) {
-      width = max_width;
-      height = (max_width / original_width) * original_height;
+      width = maxWidth;
+      height = (maxWidth / originalWidth) * originalHeight;
     } else {
-      height = max_height;
-      width = (max_height / original_height) * original_width;
+      height = maxHeight;
+      width = (maxHeight / originalHeight) * originalWidth;
     }
 
-    const aspect_ratio = width / height;
+    const aspectRatio = width / height;
     return (
       <Image
         key={image.url}
         src={image.url}
-        width={original_width}
-        height={original_height}
+        width={originalWidth}
+        height={originalHeight}
         alt={image.description ? image.description : "Image"}
         style={{
           maxWidth: `${width}px`,
-          maxHeight: `${max_height}px`,
-          aspectRatio: `${aspect_ratio}`,
+          maxHeight: `${maxHeight}px`,
+          aspectRatio: `${aspectRatio}`,
         }}
       />
     );
   }
 
   function getMessageUrl({
-    server_id,
-    channel_id,
-    message_id,
-    thread_id,
+    serverId,
+    channelId,
+    messageId,
+    threadId,
   }: {
-    server_id: string;
-    channel_id: string;
-    message_id: string;
-    thread_id?: string;
+    serverId: string;
+    channelId: string;
+    messageId: string;
+    threadId?: string;
   }) {
-    const endpoint = `${server_id}/${channel_id}/${thread_id ? thread_id + "/" : ""}${message_id}`;
+    const endpoint = `${serverId}/${channelId}/${threadId ? threadId + "/" : ""}${messageId}`;
     return `discord://discord.com/channels/${endpoint}`;
   }
 
@@ -109,15 +109,15 @@ export function Message({
             </div>
             <div className="flex flex-col sm:flex-row">
               <span className="mr-1 text-black dark:text-white">{message.author.name}</span>
-              <span className="text-neutral-800 dark:text-neutral-400">{date_of_message}</span>
+              <span className="text-neutral-800 dark:text-neutral-400">{dateOfMessage}</span>
             </div>
           </div>
           <Link
             href={getMessageUrl({
-              server_id: message.server_id,
-              channel_id: thread && thread.parent_id ? thread.parent_id : message.channel_id,
-              message_id: message.id,
-              thread_id: thread?.id,
+              serverId: message.serverId,
+              channelId: thread && thread.parentId ? thread.parentId : message.channelId,
+              messageId: message.id,
+              threadId: thread?.id,
             })}
             className="invisible flex h-6 w-6 group-hover:visible"
             aria-label="Open in Discord"
@@ -126,7 +126,7 @@ export function Message({
           </Link>
         </div>
         <div className="mt-2 max-w-[80vw] text-black dark:text-neutral-50 sm:mt-0 sm:max-w-[70vw] md:max-w-full">
-          {parsed_message_content}
+          {parsedMessageContent}
         </div>
         <div className="grid gap-2">
           {message.images.map((image) => (
@@ -137,7 +137,7 @@ export function Message({
     </div>
   );
 
-  const blur_amount = ".4rem";
+  const blurAmount = ".4rem";
 
   return (
     <div className="relative h-full w-full">
@@ -145,11 +145,11 @@ export function Message({
         <>
           <div
             style={{
-              filter: `blur(${blur_amount})`,
-              backdropFilter: `blur(${blur_amount})`,
-              WebkitBackdropFilter: `blur(${blur_amount})`,
-              WebkitFilter: `blur(${blur_amount})`,
-              msFilter: `blur(${blur_amount})`,
+              filter: `blur(${blurAmount})`,
+              backdropFilter: `blur(${blurAmount})`,
+              WebkitBackdropFilter: `blur(${blurAmount})`,
+              WebkitFilter: `blur(${blurAmount})`,
+              msFilter: `blur(${blurAmount})`,
             }}
           >
             <Contents />
@@ -158,7 +158,7 @@ export function Message({
             <div className="absolute inset-0 " />
             <div className="absolute inset-0 flex items-center justify-center ">
               <div className="flex flex-col items-center justify-center text-center text-black dark:text-white">
-                <div className="text-2xl ">{not_public_title}</div>
+                <div className="text-2xl ">{notPublicTitle}</div>
                 <div>Sign In & Join Server To View</div>
               </div>
             </div>

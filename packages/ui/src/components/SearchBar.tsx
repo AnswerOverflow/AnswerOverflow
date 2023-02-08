@@ -2,23 +2,23 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 
 export type SearchBarProps = {
   placeholder?: string;
-  default_value?: string;
-  class_name?: string;
+  defaultValue?: string;
+  className?: string;
 };
 
 export function SearchBar({
   placeholder = "Search for anything",
-  class_name,
-  default_value,
+  className,
+  defaultValue,
 }: SearchBarProps) {
   return (
-    <div className={class_name}>
+    <div className={className}>
       <div className="relative mt-1 flex items-center">
         <input
           type="text"
           name="search"
           id="search"
-          defaultValue={default_value}
+          defaultValue={defaultValue}
           placeholder={placeholder}
           className="block w-full rounded-md bg-neutral-200 pr-12 shadow-sm placeholder:text-neutral-700 focus:border-indigo-500 focus:ring-indigo-500 dark:bg-neutral-800 dark:text-white placeholder:dark:text-neutral-400 sm:text-sm"
         />

@@ -24,56 +24,56 @@ describe("User Server Settings", () => {
     it("should add flags to User Server settings", () => {
       const data = addFlagsToUserServerSettings({
         bitfield: 0,
-        server_id: "server_id",
-        user_id: "user_id",
+        serverId: "serverId",
+        userId: "userId",
       });
-      expect(data.flags.can_publicly_display_messages).toBe(false);
-      expect(data.flags.message_indexing_disabled).toBe(false);
+      expect(data.flags.canPubliclyDisplayMessages).toBe(false);
+      expect(data.flags.messageIndexingDisabled).toBe(false);
     });
   });
   describe("Create User Server Settings", () => {
     it("should create user server settings with consent enabled", async () => {
       // setup
       const created = await createUserServerSettings({
-        server_id: server.id,
-        user_id: account.id,
+        serverId: server.id,
+        userId: account.id,
         flags: {
-          can_publicly_display_messages: true,
+          canPubliclyDisplayMessages: true,
         },
       });
-      expect(created.flags.can_publicly_display_messages).toBe(true);
+      expect(created.flags.canPubliclyDisplayMessages).toBe(true);
       const found = await findUserServerSettingsById({
-        server_id: server.id,
-        user_id: account.id,
+        serverId: server.id,
+        userId: account.id,
       });
-      expect(found!.flags.can_publicly_display_messages).toBe(true);
+      expect(found!.flags.canPubliclyDisplayMessages).toBe(true);
     });
   });
   describe("Update User Server Settings", () => {
     let existing: UserServerSettingsWithFlags;
     beforeEach(async () => {
       existing = await createUserServerSettings({
-        server_id: server.id,
-        user_id: account.id,
+        serverId: server.id,
+        userId: account.id,
       });
     });
     it("should update user server settings with consent enabled", async () => {
       const updated = await updateUserServerSettings(
         {
-          server_id: server.id,
-          user_id: account.id,
+          serverId: server.id,
+          userId: account.id,
           flags: {
-            can_publicly_display_messages: true,
+            canPubliclyDisplayMessages: true,
           },
         },
         existing
       );
-      expect(updated.flags.can_publicly_display_messages).toBe(true);
+      expect(updated.flags.canPubliclyDisplayMessages).toBe(true);
       const found = await findUserServerSettingsById({
-        server_id: server.id,
-        user_id: account.id,
+        serverId: server.id,
+        userId: account.id,
       });
-      expect(found!.flags.can_publicly_display_messages).toBe(true);
+      expect(found!.flags.canPubliclyDisplayMessages).toBe(true);
     });
   });
 });

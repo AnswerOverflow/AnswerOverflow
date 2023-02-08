@@ -6,39 +6,39 @@ import {
   createDiscordAccount,
   createUserServerSettings,
 } from "@answeroverflow/db";
-import { user_server_settings_router } from "./user-server-settings";
+import { userServerSettingsRouter } from "./user-server-settings";
 import { mockDiscordAccount, mockServer } from "@answeroverflow/db-mock";
 
 let server: Server;
-let discord_account: DiscordAccount;
-let discord_account_2: DiscordAccount;
+let discordAccount: DiscordAccount;
+let discordAccount2: DiscordAccount;
 beforeEach(async () => {
   server = mockServer();
-  discord_account = mockDiscordAccount();
-  discord_account_2 = mockDiscordAccount();
+  discordAccount = mockDiscordAccount();
+  discordAccount2 = mockDiscordAccount();
 
   await createServer(server);
-  await createDiscordAccount(discord_account);
-  await createDiscordAccount(discord_account_2);
+  await createDiscordAccount(discordAccount);
+  await createDiscordAccount(discordAccount2);
 });
 
 describe("User Server Settings Operations", () => {
   describe("User Server Settings By Id", () => {
     beforeEach(async () => {
       await createUserServerSettings({
-        server_id: server.id,
-        user_id: discord_account.id,
+        serverId: server.id,
+        userId: discordAccount.id,
       });
     });
     it("should fail all varaints getting user server settings by id as a different user", async () => {
       await testAllSources({
         async operation(source) {
           const { ctx } = await mockAccountWithServersCallerCtx(server, source);
-          const router = user_server_settings_router.createCaller(ctx);
+          const router = userServerSettingsRouter.createCaller(ctx);
           await expect(
             router.byId({
-              server_id: server.id,
-              user_id: discord_account.id,
+              serverId: server.id,
+              userId: discordAccount.id,
             })
           ).rejects.toThrowError();
         },
@@ -51,16 +51,16 @@ describe("User Server Settings Operations", () => {
             server,
             source,
             undefined,
-            discord_account
+            discordAccount
           );
-          const router = user_server_settings_router.createCaller(ctx);
-          const user_server_settings = await router.byId({
-            server_id: server.id,
-            user_id: discord_account.id,
+          const router = userServerSettingsRouter.createCaller(ctx);
+          const userServerSettings = await router.byId({
+            serverId: server.id,
+            userId: discordAccount.id,
           });
-          expect(user_server_settings).toBeDefined();
-          expect(user_server_settings?.server_id).toEqual(server.id);
-          expect(user_server_settings?.user_id).toEqual(discord_account.id);
+          expect(userServerSettings).toBeDefined();
+          expect(userServerSettings?.serverId).toEqual(server.id);
+          expect(userServerSettings?.userId).toEqual(discordAccount.id);
         },
       });
     });
@@ -70,11 +70,11 @@ describe("User Server Settings Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx } = await mockAccountWithServersCallerCtx(server, source);
-          const router = user_server_settings_router.createCaller(ctx);
+          const router = userServerSettingsRouter.createCaller(ctx);
           await expect(
             router.create({
-              server_id: server.id,
-              user_id: discord_account.id,
+              serverId: server.id,
+              userId: discordAccount.id,
             })
           ).rejects.toThrowError();
         },
@@ -85,14 +85,14 @@ describe("User Server Settings Operations", () => {
         async operation(source) {
           const { ctx, account } = await mockAccountWithServersCallerCtx(server, source);
           await createDiscordAccount(account);
-          const router = user_server_settings_router.createCaller(ctx);
-          const user_server_settings = await router.create({
-            server_id: server.id,
-            user_id: account.id,
+          const router = userServerSettingsRouter.createCaller(ctx);
+          const userServerSettings = await router.create({
+            serverId: server.id,
+            userId: account.id,
           });
-          expect(user_server_settings).toBeDefined();
-          expect(user_server_settings.server_id).toEqual(server.id);
-          expect(user_server_settings.user_id).toEqual(account.id);
+          expect(userServerSettings).toBeDefined();
+          expect(userServerSettings.serverId).toEqual(server.id);
+          expect(userServerSettings.userId).toEqual(account.id);
         },
       });
     });
@@ -100,21 +100,21 @@ describe("User Server Settings Operations", () => {
   describe("User Server Settings Update", () => {
     beforeEach(async () => {
       await createUserServerSettings({
-        server_id: server.id,
-        user_id: discord_account.id,
+        serverId: server.id,
+        userId: discordAccount.id,
       });
     });
     it("should fail all variants updating user server settings as a different user", async () => {
       await testAllSources({
         async operation(source) {
           const { ctx } = await mockAccountWithServersCallerCtx(server, source);
-          const router = user_server_settings_router.createCaller(ctx);
+          const router = userServerSettingsRouter.createCaller(ctx);
           await expect(
             router.update({
-              server_id: server.id,
-              user_id: discord_account.id,
+              serverId: server.id,
+              userId: discordAccount.id,
               flags: {
-                can_publicly_display_messages: true,
+                canPubliclyDisplayMessages: true,
               },
             })
           ).rejects.toThrowError();
@@ -128,20 +128,20 @@ describe("User Server Settings Operations", () => {
             server,
             source,
             undefined,
-            discord_account
+            discordAccount
           );
-          const router = user_server_settings_router.createCaller(ctx);
-          const user_server_settings = await router.update({
-            server_id: server.id,
-            user_id: discord_account.id,
+          const router = userServerSettingsRouter.createCaller(ctx);
+          const userServerSettings = await router.update({
+            serverId: server.id,
+            userId: discordAccount.id,
             flags: {
-              can_publicly_display_messages: true,
+              canPubliclyDisplayMessages: true,
             },
           });
-          expect(user_server_settings).toBeDefined();
-          expect(user_server_settings.server_id).toEqual(server.id);
-          expect(user_server_settings.user_id).toEqual(discord_account.id);
-          expect(user_server_settings.flags.can_publicly_display_messages).toBeTruthy();
+          expect(userServerSettings).toBeDefined();
+          expect(userServerSettings.serverId).toEqual(server.id);
+          expect(userServerSettings.userId).toEqual(discordAccount.id);
+          expect(userServerSettings.flags.canPubliclyDisplayMessages).toBeTruthy();
         },
       });
     });
@@ -151,11 +151,11 @@ describe("User Server Settings Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx } = await mockAccountWithServersCallerCtx(server, source);
-          const router = user_server_settings_router.createCaller(ctx);
+          const router = userServerSettingsRouter.createCaller(ctx);
           await expect(
             router.createWithDeps({
-              server_id: server.id,
-              user: discord_account,
+              serverId: server.id,
+              user: discordAccount,
             })
           ).rejects.toThrowError();
         },
@@ -166,14 +166,14 @@ describe("User Server Settings Operations", () => {
         async operation(source) {
           const { ctx, account } = await mockAccountWithServersCallerCtx(server, source);
           await createDiscordAccount(account);
-          const router = user_server_settings_router.createCaller(ctx);
-          const user_server_settings = await router.createWithDeps({
-            server_id: server.id,
+          const router = userServerSettingsRouter.createCaller(ctx);
+          const userServerSettings = await router.createWithDeps({
+            serverId: server.id,
             user: account,
           });
-          expect(user_server_settings).toBeDefined();
-          expect(user_server_settings.server_id).toEqual(server.id);
-          expect(user_server_settings.user_id).toEqual(account.id);
+          expect(userServerSettings).toBeDefined();
+          expect(userServerSettings.serverId).toEqual(server.id);
+          expect(userServerSettings.userId).toEqual(account.id);
         },
       });
     });
@@ -184,11 +184,11 @@ describe("User Server Settings Operations", () => {
         await testAllSources({
           async operation(source) {
             const { ctx } = await mockAccountWithServersCallerCtx(server, source);
-            const router = user_server_settings_router.createCaller(ctx);
+            const router = userServerSettingsRouter.createCaller(ctx);
             await expect(
               router.upsert({
-                server_id: server.id,
-                user_id: discord_account.id,
+                serverId: server.id,
+                userId: discordAccount.id,
               })
             ).rejects.toThrowError();
           },
@@ -201,16 +201,16 @@ describe("User Server Settings Operations", () => {
               server,
               source,
               undefined,
-              discord_account
+              discordAccount
             );
-            const router = user_server_settings_router.createCaller(ctx);
-            const user_server_settings = await router.upsert({
-              server_id: server.id,
-              user_id: discord_account.id,
+            const router = userServerSettingsRouter.createCaller(ctx);
+            const userServerSettings = await router.upsert({
+              serverId: server.id,
+              userId: discordAccount.id,
             });
-            expect(user_server_settings).toBeDefined();
-            expect(user_server_settings.server_id).toEqual(server.id);
-            expect(user_server_settings.user_id).toEqual(discord_account.id);
+            expect(userServerSettings).toBeDefined();
+            expect(userServerSettings.serverId).toEqual(server.id);
+            expect(userServerSettings.userId).toEqual(discordAccount.id);
           },
         });
       });
@@ -220,18 +220,18 @@ describe("User Server Settings Operations", () => {
         await testAllSources({
           async operation(source) {
             const { ctx, account } = await mockAccountWithServersCallerCtx(server, source);
-            const router = user_server_settings_router.createCaller(ctx);
+            const router = userServerSettingsRouter.createCaller(ctx);
             await createDiscordAccount(account);
             await createUserServerSettings({
-              server_id: server.id,
-              user_id: account.id,
+              serverId: server.id,
+              userId: account.id,
             });
             await expect(
               router.upsert({
-                server_id: server.id,
-                user_id: "4",
+                serverId: server.id,
+                userId: "4",
                 flags: {
-                  can_publicly_display_messages: true,
+                  canPubliclyDisplayMessages: true,
                 },
               })
             ).rejects.toThrowError();
@@ -248,21 +248,21 @@ describe("User Server Settings Operations", () => {
             );
             await createDiscordAccount(account);
             await createUserServerSettings({
-              server_id: server.id,
-              user_id: account.id,
+              serverId: server.id,
+              userId: account.id,
             });
-            const router = user_server_settings_router.createCaller(ctx);
-            const user_server_settings = await router.upsert({
-              server_id: server.id,
-              user_id: account.id,
+            const router = userServerSettingsRouter.createCaller(ctx);
+            const userServerSettings = await router.upsert({
+              serverId: server.id,
+              userId: account.id,
               flags: {
-                can_publicly_display_messages: true,
+                canPubliclyDisplayMessages: true,
               },
             });
-            expect(user_server_settings).toBeDefined();
-            expect(user_server_settings.server_id).toEqual(server.id);
-            expect(user_server_settings.user_id).toEqual(account.id);
-            expect(user_server_settings.flags.can_publicly_display_messages).toBeTruthy();
+            expect(userServerSettings).toBeDefined();
+            expect(userServerSettings.serverId).toEqual(server.id);
+            expect(userServerSettings.userId).toEqual(account.id);
+            expect(userServerSettings.flags.canPubliclyDisplayMessages).toBeTruthy();
           },
         });
       });
@@ -274,11 +274,11 @@ describe("User Server Settings Operations", () => {
         await testAllSources({
           async operation(source) {
             const { ctx } = await mockAccountWithServersCallerCtx(server, source);
-            const router = user_server_settings_router.createCaller(ctx);
+            const router = userServerSettingsRouter.createCaller(ctx);
             await expect(
               router.upsertWithDeps({
-                server_id: server.id,
-                user: discord_account,
+                serverId: server.id,
+                user: discordAccount,
               })
             ).rejects.toThrowError();
           },
@@ -288,14 +288,14 @@ describe("User Server Settings Operations", () => {
         await testAllSources({
           async operation(source) {
             const { ctx, account } = await mockAccountWithServersCallerCtx(server, source);
-            const router = user_server_settings_router.createCaller(ctx);
-            const user_server_settings = await router.upsertWithDeps({
-              server_id: server.id,
+            const router = userServerSettingsRouter.createCaller(ctx);
+            const userServerSettings = await router.upsertWithDeps({
+              serverId: server.id,
               user: account,
             });
-            expect(user_server_settings).toBeDefined();
-            expect(user_server_settings.server_id).toEqual(server.id);
-            expect(user_server_settings.user_id).toEqual(account.id);
+            expect(userServerSettings).toBeDefined();
+            expect(userServerSettings.serverId).toEqual(server.id);
+            expect(userServerSettings.userId).toEqual(account.id);
           },
         });
       });
@@ -305,13 +305,13 @@ describe("User Server Settings Operations", () => {
         await testAllSources({
           async operation(source) {
             const { ctx } = await mockAccountWithServersCallerCtx(server, source);
-            const router = user_server_settings_router.createCaller(ctx);
+            const router = userServerSettingsRouter.createCaller(ctx);
             await expect(
               router.upsertWithDeps({
-                server_id: server.id,
-                user: discord_account,
+                serverId: server.id,
+                user: discordAccount,
                 flags: {
-                  can_publicly_display_messages: true,
+                  canPubliclyDisplayMessages: true,
                 },
               })
             ).rejects.toThrowError();
@@ -324,21 +324,21 @@ describe("User Server Settings Operations", () => {
             const { ctx, account } = await mockAccountWithServersCallerCtx(server, source);
             await createDiscordAccount(account);
             await createUserServerSettings({
-              server_id: server.id,
-              user_id: account.id,
+              serverId: server.id,
+              userId: account.id,
             });
-            const router = user_server_settings_router.createCaller(ctx);
-            const user_server_settings = await router.upsertWithDeps({
-              server_id: server.id,
+            const router = userServerSettingsRouter.createCaller(ctx);
+            const userServerSettings = await router.upsertWithDeps({
+              serverId: server.id,
               user: account,
               flags: {
-                can_publicly_display_messages: true,
+                canPubliclyDisplayMessages: true,
               },
             });
-            expect(user_server_settings).toBeDefined();
-            expect(user_server_settings.server_id).toEqual(server.id);
-            expect(user_server_settings.user_id).toEqual(account.id);
-            expect(user_server_settings.flags.can_publicly_display_messages).toBeTruthy();
+            expect(userServerSettings).toBeDefined();
+            expect(userServerSettings.serverId).toEqual(server.id);
+            expect(userServerSettings.userId).toEqual(account.id);
+            expect(userServerSettings.flags.canPubliclyDisplayMessages).toBeTruthy();
           },
         });
       });

@@ -18,7 +18,7 @@
         "./packages/config/"
       ],
       "outputs": [],
-      "cache": true
+      "cache": false
     },
     "lint:fix": {
       "outputs": [],

@@ -6,9 +6,9 @@ interface HeadProps {
   title: string;
   description: string;
   image?: string;
-  add_prefix?: boolean;
-  image_width?: string;
-  image_height?: string;
+  addPrefix?: boolean;
+  imageWidth?: string;
+  imageHeight?: string;
   type?: string;
   server?: ServerPublic;
   path: string;
@@ -17,22 +17,22 @@ interface HeadProps {
 export const AOHead = ({
   title,
   description,
-  image = "https://answeroverflow.com/content/branding/meta_header.png",
+  image = "https://answeroverflow.com/content/branding/metaHeader.png",
   server = undefined,
-  add_prefix: addPrefix = false,
-  image_width: imageWidth = "1200",
-  image_height: imageHeight = "630",
+  addPrefix: addPrefix = false,
+  imageWidth: imageWidth = "1200",
+  imageHeight: imageHeight = "630",
   type = "website",
   path,
 }: HeadProps) => {
   if (server) {
-    const server_icon_image = makeServerIconLink(server, 256);
+    const serverIconImage = makeServerIconLink(server, 256);
     imageWidth = "256";
     imageHeight = "256";
-    if (server_icon_image) {
-      image = server_icon_image;
+    if (serverIconImage) {
+      image = serverIconImage;
     } else {
-      image = "https://answeroverflow.com/content/branding/logo_icon.png";
+      image = "https://answeroverflow.com/content/branding/logoIcon.png";
     }
   }
   if (addPrefix) title += " - Answer Overflow";

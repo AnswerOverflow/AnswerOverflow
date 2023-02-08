@@ -4,66 +4,64 @@ import {
   getDefaultUserServerSettings,
   UserServerSettings,
 } from "@answeroverflow/prisma-types";
-import { z_discord_account_upsert } from "./discord-account";
+import { zDiscordAccountUpsert } from "./discord-account";
 import {
   addFlagsToUserServerSettings,
   mergeUserServerSettingsFlags,
-  z_user_server_settings,
+  zUserServerSettings,
 } from "./zod-schemas";
 
-export const z_user_server_settings_required = z_user_server_settings.pick({
-  user_id: true,
-  server_id: true,
+export const zUserServerSettingsRequired = zUserServerSettings.pick({
+  userId: true,
+  serverId: true,
 });
 
-export const z_user_server_settings_mutable = z_user_server_settings
+export const zUserServerSettingsMutable = zUserServerSettings
   .omit({
-    user_id: true,
-    server_id: true,
+    userId: true,
+    serverId: true,
   })
   .deepPartial();
 
-export const z_user_server_settings_find = z_user_server_settings_required;
+export const zUserServerSettingsFind = zUserServerSettingsRequired;
 
-export const z_user_server_settings_create = z_user_server_settings_mutable.merge(
-  z_user_server_settings_required
+export const zUserServerSettingsCreate = zUserServerSettingsMutable.merge(
+  zUserServerSettingsRequired
 );
-export const z_user_server_settings_create_with_deps = z_user_server_settings_create
+export const zUserServerSettingsCreateWithDeps = zUserServerSettingsCreate
   .omit({
-    user_id: true, // we infer this from the user
+    userId: true, // we infer this from the user
   })
   .extend({
-    user: z_discord_account_upsert,
+    user: zDiscordAccountUpsert,
   });
 
-export const z_user_server_settings_update = z_user_server_settings_mutable.merge(
-  z_user_server_settings_find
-);
+export const zUserServerSettingsUpdate = zUserServerSettingsMutable.merge(zUserServerSettingsFind);
 
 export type UserServerSettingsWithFlags = Awaited<ReturnType<typeof addFlagsToUserServerSettings>>;
 
-export function mergeUserServerSettings<T extends z.infer<typeof z_user_server_settings_mutable>>(
+export function mergeUserServerSettings<T extends z.infer<typeof zUserServerSettingsMutable>>(
   old: UserServerSettings,
   updated: T
 ) {
-  const { flags, ...update_data_without_flags } = updated;
+  const { flags, ...updateDataWithoutFlags } = updated;
   return {
-    ...update_data_without_flags,
+    ...updateDataWithoutFlags,
     bitfield: flags ? mergeUserServerSettingsFlags(old.bitfield, flags) : undefined,
   };
 }
 
 interface UserServerSettingsFindById {
-  user_id: string;
-  server_id: string;
+  userId: string;
+  serverId: string;
 }
 
 export async function findUserServerSettingsById(where: UserServerSettingsFindById) {
   const data = await prisma.userServerSettings.findUnique({
     where: {
-      user_id_server_id: {
-        user_id: where.user_id,
-        server_id: where.server_id,
+      userId_serverId: {
+        userId: where.userId,
+        serverId: where.serverId,
       },
     },
   });
@@ -75,11 +73,11 @@ export async function findManyUserServerSettings(where: UserServerSettingsFindBy
   const data = await prisma.userServerSettings.findMany({
     where: {
       AND: {
-        user_id: {
-          in: where.map((x) => x.user_id),
+        userId: {
+          in: where.map((x) => x.userId),
         },
-        server_id: {
-          in: where.map((x) => x.server_id),
+        serverId: {
+          in: where.map((x) => x.serverId),
         },
       },
     },
@@ -87,9 +85,7 @@ export async function findManyUserServerSettings(where: UserServerSettingsFindBy
   return data.map(addFlagsToUserServerSettings);
 }
 
-export async function createUserServerSettings(
-  data: z.infer<typeof z_user_server_settings_create>
-) {
+export async function createUserServerSettings(data: z.infer<typeof zUserServerSettingsCreate>) {
   const created = await prisma.userServerSettings.create({
     data: mergeUserServerSettings(
       getDefaultUserServerSettings({
@@ -102,14 +98,14 @@ export async function createUserServerSettings(
 }
 
 export async function updateUserServerSettings(
-  data: z.infer<typeof z_user_server_settings_update>,
+  data: z.infer<typeof zUserServerSettingsUpdate>,
   existing: UserServerSettings
 ) {
   const updated = await prisma.userServerSettings.update({
     where: {
-      user_id_server_id: {
-        user_id: data.user_id,
-        server_id: data.server_id,
+      userId_serverId: {
+        userId: data.userId,
+        serverId: data.serverId,
       },
     },
     data: mergeUserServerSettings(existing, data),

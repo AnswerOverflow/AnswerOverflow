@@ -6,7 +6,7 @@ import { toAODiscordAccount } from "~discord-bot/utils/conversions";
 import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
 
 export const CONSENT_BUTTON_LABEL = "Publicly display my messages on Answer Overflow";
-export const CONSENT_BUTTON_ID = "consent_button";
+export const CONSENT_BUTTON_ID = "consentButton";
 export const CONSENT_BUTTON_DATA = {
   label: CONSENT_BUTTON_LABEL,
   style: ButtonStyle.Success,
@@ -30,24 +30,24 @@ export async function provideConsentOnForumChannelMessage(message: Message): Pro
   if (!(channel.isThread() && channel.parent?.type === ChannelType.GuildForum)) {
     throw new ConsentError("Message is not in a forum channel");
   }
-  const channel_settings = await findChannelById(channel.parent.id);
-  if (!channel_settings?.flags.forum_guidelines_consent_enabled) {
+  const channelSettings = await findChannelById(channel.parent.id);
+  if (!channelSettings?.flags.forumGuidelinesConsentEnabled) {
     throw new ConsentError("Forum post guidelines consent is not enabled for this channel");
   }
-  const existing_user_settings = await callApiWithConsoleStatusHandler({
+  const existingUserSettings = await callApiWithConsoleStatusHandler({
     ApiCall(router) {
-      return router.user_server_settings.byId({
-        server_id: channel.guild.id,
-        user_id: message.author.id,
+      return router.userServerSettings.byId({
+        serverId: channel.guild.id,
+        userId: message.author.id,
       });
     },
-    error_message: `Failed to find user settings for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
-    success_message: `Successfully found user settings for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
+    errorMessage: `Failed to find user settings for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
+    successMessage: `Successfully found user settings for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
     getCtx: () => createMemberCtx(message.member!),
   });
 
-  if (existing_user_settings) {
-    if (existing_user_settings.flags.can_publicly_display_messages) {
+  if (existingUserSettings) {
+    if (existingUserSettings.flags.canPubliclyDisplayMessages) {
       throw new ConsentError(
         "Cannot automatically provide consent for user who has already provided consent"
       );
@@ -60,17 +60,17 @@ export async function provideConsentOnForumChannelMessage(message: Message): Pro
 
   const data = await callApiWithConsoleStatusHandler({
     ApiCall(router) {
-      return router.user_server_settings.upsertWithDeps({
-        server_id: channel.guild.id,
+      return router.userServerSettings.upsertWithDeps({
+        serverId: channel.guild.id,
         user: toAODiscordAccount(message.author),
         flags: {
-          can_publicly_display_messages: true,
+          canPubliclyDisplayMessages: true,
         },
       });
     },
-    error_message: `Failed to provide consent for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
-    success_message: `Successfully provided consent for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
+    errorMessage: `Failed to provide consent for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
+    successMessage: `Successfully provided consent for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
     getCtx: () => createMemberCtx(message.member!),
   });
-  return data?.flags.can_publicly_display_messages ?? false;
+  return data?.flags.canPubliclyDisplayMessages ?? false;
 }

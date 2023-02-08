@@ -1,4 +1,4 @@
-// src/pages/_app.tsx
+// src/pages/App.tsx
 import "../styles/globals.css";
 import "highlight.js/styles/github.css";
 import "highlight.js/styles/github-dark.css";

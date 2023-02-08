@@ -17,51 +17,52 @@ beforeEach(async () => {
   client = await setupAnswerOverflowBot();
 });
 
-async function setupSolvedMessageScenario(guild_id?: string) {
+async function setupSolvedMessageScenario(guildId?: string) {
   const guild = mockGuild(client, undefined, {
-    id: guild_id,
+    id: guildId,
   });
-  const default_author = mockGuildMember({ client, guild });
-  const text_channel = mockTextChannel(client, guild);
-  const text_channel_thread = mockPublicThread({
+  const defaultAuthor = mockGuildMember({ client, guild });
+  const textChannel = mockTextChannel(client, guild);
+  const textChannelThread = mockPublicThread({
     client,
-    parent_channel: text_channel,
+    parentChannel: textChannel,
   });
   mockMessage({
     client,
-    channel: text_channel,
-    author: default_author.user,
+    channel: textChannel,
+    author: defaultAuthor.user,
     override: {
-      id: text_channel_thread.id,
+      id: textChannelThread.id,
     },
   });
-  const solution_message = mockMessage({
+  const solutionMessage = mockMessage({
     client,
-    channel: text_channel_thread,
+    channel: textChannelThread,
   });
   await upsertServer(toAOServer(guild));
   await createChannel({
-    ...toAOChannel(text_channel),
+    ...toAOChannel(textChannel),
     flags: {
-      mark_solution_enabled: true,
+      markSolutionEnabled: true,
     },
   });
   return {
-    text_channel,
-    default_author,
-    text_channel_thread,
+    textChannel,
+    defaultAuthor,
+    textChannelThread,
     guild,
-    solution_message,
+    solutionMessage,
   };
 }
 
 describe("Checkmark Reaction Mark Solution", () => {
   it("should not mark a message as a solution if the emoji is not a checkmark", async () => {
-    const { default_author, solution_message, text_channel_thread } =
-      await setupSolvedMessageScenario("102860784329052160");
-    const message_reaction = mockMessageReaction({
-      message: solution_message,
-      reacter: default_author.user,
+    const { defaultAuthor, solutionMessage, textChannelThread } = await setupSolvedMessageScenario(
+      "102860784329052160"
+    );
+    const messageReaction = mockMessageReaction({
+      message: solutionMessage,
+      reacter: defaultAuthor.user,
       override: {
         emoji: {
           name: "🐈",
@@ -69,16 +70,17 @@ describe("Checkmark Reaction Mark Solution", () => {
         },
       },
     });
-    jest.spyOn(text_channel_thread, "send");
-    await emitEvent(client, Events.MessageReactionAdd, message_reaction, default_author.user);
-    expect(text_channel_thread.send).not.toHaveBeenCalled();
+    jest.spyOn(textChannelThread, "send");
+    await emitEvent(client, Events.MessageReactionAdd, messageReaction, defaultAuthor.user);
+    expect(textChannelThread.send).not.toHaveBeenCalled();
   });
   it("should not mark a message as a solution if the reaction is from the bot", async () => {
-    const { default_author, solution_message, text_channel_thread } =
-      await setupSolvedMessageScenario("102860784329052160");
-    const message_reaction = mockMessageReaction({
-      message: solution_message,
-      reacter: default_author.user,
+    const { defaultAuthor, solutionMessage, textChannelThread } = await setupSolvedMessageScenario(
+      "102860784329052160"
+    );
+    const messageReaction = mockMessageReaction({
+      message: solutionMessage,
+      reacter: defaultAuthor.user,
       override: {
         emoji: {
           name: "✅",
@@ -87,16 +89,16 @@ describe("Checkmark Reaction Mark Solution", () => {
         me: true,
       },
     });
-    jest.spyOn(text_channel_thread, "send");
-    await emitEvent(client, Events.MessageReactionAdd, message_reaction, client.user!);
-    expect(text_channel_thread.send).not.toHaveBeenCalled();
+    jest.spyOn(textChannelThread, "send");
+    await emitEvent(client, Events.MessageReactionAdd, messageReaction, client.user!);
+    expect(textChannelThread.send).not.toHaveBeenCalled();
   });
   it("should not mark a message as a solution if the guild is not allowed", async () => {
-    const { default_author, solution_message, text_channel_thread } =
+    const { defaultAuthor, solutionMessage, textChannelThread } =
       await setupSolvedMessageScenario();
-    const message_reaction = mockMessageReaction({
-      message: solution_message,
-      reacter: default_author.user,
+    const messageReaction = mockMessageReaction({
+      message: solutionMessage,
+      reacter: defaultAuthor.user,
       override: {
         emoji: {
           name: "✅",
@@ -104,16 +106,17 @@ describe("Checkmark Reaction Mark Solution", () => {
         },
       },
     });
-    jest.spyOn(text_channel_thread, "send");
-    await emitEvent(client, Events.MessageReactionAdd, message_reaction, default_author.user);
-    expect(text_channel_thread.send).not.toHaveBeenCalled();
+    jest.spyOn(textChannelThread, "send");
+    await emitEvent(client, Events.MessageReactionAdd, messageReaction, defaultAuthor.user);
+    expect(textChannelThread.send).not.toHaveBeenCalled();
   });
   it("should mark a message as a solution if the emoji is a checkmark, the reaction is not from the bot, and the guild is allowed", async () => {
-    const { default_author, solution_message, text_channel_thread } =
-      await setupSolvedMessageScenario("102860784329052160");
-    const message_reaction = mockMessageReaction({
-      message: solution_message,
-      reacter: default_author.user,
+    const { defaultAuthor, solutionMessage, textChannelThread } = await setupSolvedMessageScenario(
+      "102860784329052160"
+    );
+    const messageReaction = mockMessageReaction({
+      message: solutionMessage,
+      reacter: defaultAuthor.user,
       override: {
         emoji: {
           name: "✅",
@@ -121,8 +124,8 @@ describe("Checkmark Reaction Mark Solution", () => {
         },
       },
     });
-    jest.spyOn(text_channel_thread, "send");
-    await emitEvent(client, Events.MessageReactionAdd, message_reaction, default_author.user);
-    expect(text_channel_thread.send).toHaveBeenCalled();
+    jest.spyOn(textChannelThread, "send");
+    await emitEvent(client, Events.MessageReactionAdd, messageReaction, defaultAuthor.user);
+    expect(textChannelThread.send).toHaveBeenCalled();
   });
 });

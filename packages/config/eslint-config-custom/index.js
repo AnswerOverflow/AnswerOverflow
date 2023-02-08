@@ -39,7 +39,7 @@ module.exports = {
       "warn",
       {
         selector: "variable",
-        format: ["snake_case", "UPPER_CASE"],
+        format: ["camelCase", "UPPER_CASE"],
         leadingUnderscore: "allow",
         trailingUnderscore: "allow",
       },
@@ -55,7 +55,7 @@ module.exports = {
       },
       {
         selector: "typeProperty",
-        format: ["snake_case"],
+        format: ["camelCase"],
       },
       {
         selector: "typeProperty",

@@ -40,18 +40,18 @@ export function addDefaultValues<T, F>(input: T[], getDefaultValue: (input: T) =
 
 export function callDatabaseWithErrorHandler<T>({
   operation,
-  allowed_errors = [],
+  allowedErrors = [],
 }: {
   operation: () => Promise<T>;
-  allowed_errors?: DBErrorCode[] | DBErrorCode;
+  allowedErrors?: DBErrorCode[] | DBErrorCode;
 }) {
   try {
     return operation();
   } catch (error) {
-    if (!Array.isArray(allowed_errors)) {
-      allowed_errors = [allowed_errors];
+    if (!Array.isArray(allowedErrors)) {
+      allowedErrors = [allowedErrors];
     }
-    if (error instanceof DBError && allowed_errors.includes(error.code)) {
+    if (error instanceof DBError && allowedErrors.includes(error.code)) {
       return;
     } else {
       throw error;

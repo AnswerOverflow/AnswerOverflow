@@ -8,10 +8,10 @@ import { trpc, StorybookTRPC } from "./trpc";
 import hljs from "highlight.js";
 import { toggleDarkTheme } from "./theme";
 
-const storybook_trpc = trpc as StorybookTRPC;
+const storybookTrpc = trpc as StorybookTRPC;
 type Globals = {
-  tailwind_theme: "dark" | "light" | "both";
-  auth_state: "signed_in" | "signed_out";
+  tailwindTheme: "dark" | "light" | "both";
+  authState: "signedIn" | "signedOut";
 };
 
 export function WithTailwindTheme(
@@ -30,8 +30,8 @@ export function WithTailwindTheme(
     );
   }
 
-  const { tailwind_theme } = context.globals as Globals;
-  toggleDarkTheme(tailwind_theme === "dark");
+  const { tailwindTheme } = context.globals as Globals;
+  toggleDarkTheme(tailwindTheme === "dark");
   const Dark = () => (
     // eslint-disable-next-line tailwindcss/no-custom-classname
     <Flex className="dark bg-neutral-800">
@@ -39,7 +39,7 @@ export function WithTailwindTheme(
     </Flex>
   );
 
-  if (tailwind_theme === "dark") {
+  if (tailwindTheme === "dark") {
     return <Dark />;
   }
 
@@ -49,7 +49,7 @@ export function WithTailwindTheme(
     </Flex>
   );
 
-  if (tailwind_theme === "light") {
+  if (tailwindTheme === "light") {
     return <Light />;
   }
   return (
@@ -64,10 +64,10 @@ export function WithAuth(
   Story: PartialStoryFn<ReactRenderer, Args>,
   context: StoryContext<ReactRenderer, Args>
 ) {
-  const { auth_state } = context.globals as Globals;
-  const [query_client] = useState(() => new QueryClient());
-  const [trpc_client, setTRPCClient] = useState(
-    storybook_trpc.createClient({
+  const { authState } = context.globals as Globals;
+  const [queryClient] = useState(() => new QueryClient());
+  const [trpcClient, setTRPCClient] = useState(
+    storybookTrpc.createClient({
       links: [
         httpBatchLink({
           url: "http://localhost:3000/api/trpc",
@@ -83,28 +83,28 @@ export function WithAuth(
     })
   );
   useEffect(() => {
-    query_client.clear();
-    const trpc_client = storybook_trpc.createClient({
+    queryClient.clear();
+    const trpcClient = storybookTrpc.createClient({
       links: [
         httpBatchLink({
           url: "http://localhost:3000/api/trpc",
           fetch(url, options) {
             return fetch(url, {
               ...options,
-              credentials: auth_state === "signed_in" ? "include" : "omit",
+              credentials: authState === "signedIn" ? "include" : "omit",
             });
           },
         }),
       ],
       transformer,
     });
-    console.log("auth_state", auth_state);
-    setTRPCClient(trpc_client);
-  }, [auth_state, setTRPCClient, query_client]);
+    console.log("authState", authState);
+    setTRPCClient(trpcClient);
+  }, [authState, setTRPCClient, queryClient]);
   return (
-    <storybook_trpc.Provider client={trpc_client} queryClient={query_client}>
-      <QueryClientProvider client={query_client}>{Story()}</QueryClientProvider>
-    </storybook_trpc.Provider>
+    <storybookTrpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>{Story()}</QueryClientProvider>
+    </storybookTrpc.Provider>
   );
 }
 

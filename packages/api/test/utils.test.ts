@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { PermissionFlagsBits, PermissionResolvable } from "discord.js";
-import { Source, source_types } from "~api/router/context";
+import { Source, sourceTypes } from "~api/router/context";
 import {
   createInvalidSourceError,
   MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
@@ -9,76 +9,76 @@ import { testAllPermissions, testAllSources, testAllVariantsThatThrowErrors } fr
 
 describe("Test All Permissions", () => {
   it("should validate permissions are succeeding correctly", async () => {
-    const successfull_permissions: PermissionResolvable[] = [];
+    const successfullPermissions: PermissionResolvable[] = [];
     await testAllPermissions({
       permissionsThatShouldWork: ["AddReactions"],
-      operation: (permission, should_permission_succeed) => {
-        if (should_permission_succeed) {
-          successfull_permissions.push(permission);
+      operation: (permission, shouldPermissionSucceed) => {
+        if (shouldPermissionSucceed) {
+          successfullPermissions.push(permission);
         }
       },
     });
-    expect(successfull_permissions).toEqual(["AddReactions"]);
+    expect(successfullPermissions).toEqual(["AddReactions"]);
   });
   it("should validate permissions are failing correctly", async () => {
-    const failed_permissions: PermissionResolvable[] = [];
+    const failedPermissions: PermissionResolvable[] = [];
     await testAllPermissions({
       permissionsThatShouldWork: ["AddReactions", "BanMembers"],
-      operation: (permission, should_permission_succeed) => {
-        if (!should_permission_succeed) {
-          failed_permissions.push(permission);
+      operation: (permission, shouldPermissionSucceed) => {
+        if (!shouldPermissionSucceed) {
+          failedPermissions.push(permission);
         }
       },
     });
-    expect(failed_permissions.length).toEqual(Object.keys(PermissionFlagsBits).length - 2);
+    expect(failedPermissions.length).toEqual(Object.keys(PermissionFlagsBits).length - 2);
   });
 });
 
 describe("Test All Sources", () => {
   it("should validate sources are succeeding correctly", async () => {
-    const successfull_sources: string[] = [];
+    const successfullSources: string[] = [];
     await testAllSources({
       sourcesThatShouldWork: ["discord-bot"],
-      operation: (source, should_source_succeed) => {
-        if (should_source_succeed) {
-          successfull_sources.push(source);
+      operation: (source, shouldSourceSucceed) => {
+        if (shouldSourceSucceed) {
+          successfullSources.push(source);
         }
       },
     });
-    expect(successfull_sources).toEqual(["discord-bot"]);
+    expect(successfullSources).toEqual(["discord-bot"]);
   });
   it("should validate sources are failing correctly", async () => {
-    const failed_sources: string[] = [];
+    const failedSources: string[] = [];
     await testAllSources({
       sourcesThatShouldWork: ["discord-bot"],
-      operation: (source, should_source_succeed) => {
-        if (!should_source_succeed) {
-          failed_sources.push(source);
+      operation: (source, shouldSourceSucceed) => {
+        if (!shouldSourceSucceed) {
+          failedSources.push(source);
         }
       },
     });
-    expect(failed_sources.length).toEqual(source_types.length - 1);
+    expect(failedSources.length).toEqual(sourceTypes.length - 1);
   });
 });
 
 describe("Test All Variants", () => {
   it("should validate sources and permissions are succeeding correctly", async () => {
-    const successful_variants: { source: string; permission: PermissionResolvable }[] = [];
-    const sources_that_should_work: Source[] = ["discord-bot"];
-    const permissions_that_should_work: PermissionResolvable[] = ["AddReactions"];
+    const successfulVariants: { source: string; permission: PermissionResolvable }[] = [];
+    const sourcesThatShouldWork: Source[] = ["discord-bot"];
+    const permissionsThatShouldWork: PermissionResolvable[] = ["AddReactions"];
     await testAllVariantsThatThrowErrors({
-      sourcesThatShouldWork: sources_that_should_work,
-      permissionsThatShouldWork: permissions_that_should_work,
+      sourcesThatShouldWork: sourcesThatShouldWork,
+      permissionsThatShouldWork: permissionsThatShouldWork,
       operation: ({ source, permission }) => {
-        const should_source_succeed = sources_that_should_work.includes(source);
-        const should_permission_succeed = permissions_that_should_work.includes(permission);
-        if (should_source_succeed && should_permission_succeed) {
-          successful_variants.push({ source, permission });
+        const shouldSourceSucceed = sourcesThatShouldWork.includes(source);
+        const shouldPermissionSucceed = permissionsThatShouldWork.includes(permission);
+        if (shouldSourceSucceed && shouldPermissionSucceed) {
+          successfulVariants.push({ source, permission });
           return;
         }
-        if (!should_source_succeed && should_permission_succeed) {
+        if (!shouldSourceSucceed && shouldPermissionSucceed) {
           throw createInvalidSourceError(source);
-        } else if (should_source_succeed && !should_permission_succeed) {
+        } else if (shouldSourceSucceed && !shouldPermissionSucceed) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
@@ -93,8 +93,8 @@ describe("Test All Variants", () => {
           });
         }
       },
-      permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+      permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
     });
-    expect(successful_variants).toEqual([{ source: "discord-bot", permission: "AddReactions" }]);
+    expect(successfulVariants).toEqual([{ source: "discord-bot", permission: "AddReactions" }]);
   });
 });

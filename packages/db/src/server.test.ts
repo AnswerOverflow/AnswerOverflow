@@ -15,12 +15,12 @@ describe("Server", () => {
       const created = await createServer({
         ...server,
         flags: {
-          read_the_rules_consent_enabled: true,
+          readTheRulesConsentEnabled: true,
         },
       });
-      expect(created.flags.read_the_rules_consent_enabled).toBe(true);
+      expect(created.flags.readTheRulesConsentEnabled).toBe(true);
       const found = await findServerById(server.id);
-      expect(found!.flags.read_the_rules_consent_enabled).toBe(true);
+      expect(found!.flags.readTheRulesConsentEnabled).toBe(true);
     });
   });
   describe("Update Server", () => {
@@ -33,14 +33,14 @@ describe("Server", () => {
         {
           ...server,
           flags: {
-            read_the_rules_consent_enabled: true,
+            readTheRulesConsentEnabled: true,
           },
         },
         existing
       );
-      expect(updated.flags.read_the_rules_consent_enabled).toBe(true);
+      expect(updated.flags.readTheRulesConsentEnabled).toBe(true);
       const found = await findServerById(server.id);
-      expect(found!.flags.read_the_rules_consent_enabled).toBe(true);
+      expect(found!.flags.readTheRulesConsentEnabled).toBe(true);
     });
   });
 });
