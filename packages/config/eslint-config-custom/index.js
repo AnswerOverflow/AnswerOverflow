@@ -35,6 +35,19 @@ module.exports = {
     ],
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": ["error"],
+    "@typescript-eslint/naming-convention": [
+      "warn",
+      {
+        selector: "variable",
+        format: ["snake_case", "UPPER_CASE"],
+        leadingUnderscore: "allow",
+        trailingUnderscore: "allow",
+      },
+      {
+        selector: "typeLike",
+        format: ["PascalCase"],
+      },
+    ],
     //"@typescript-eslint/explicit-function-return-type": "warn"
   },
   overrides: [
