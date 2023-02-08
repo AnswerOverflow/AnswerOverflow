@@ -7,6 +7,7 @@ import type { ForumChannel, Guild, PublicThreadChannel, TextChannel } from "disc
 import { mockReacord, setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import {
   createGuildMemberVariants,
+  delay,
   GuildMemberVariants,
   mockForumChannel,
   mockGuild,
@@ -78,7 +79,7 @@ describe("Toggle Indexing Button", () => {
     const enable_indexing_button = message!.findButtonByLabel("Enable Indexing", reacord);
     expect(enable_indexing_button).toBeDefined();
     await enable_indexing_button!.click(text_channel, members.guild_member_owner);
-
+    await delay();
     expect(message!.hasButton("Enable Indexing", reacord)).toBeFalsy();
     const button = message!.findButtonByLabel("Disable Indexing", reacord);
     expect(button).toBeDefined();
@@ -93,6 +94,8 @@ describe("Select mark solved tag", () => {
       reacord,
       <ChannelSettingsMenu settings={default_settings} channel={forum_thread} />
     );
+    await delay();
+
     const select = message!.findSelectByPlaceholder(
       "Select a tag to use on mark as solved",
       reacord
