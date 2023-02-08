@@ -16,6 +16,8 @@ We recommend the use of dev containers to make your onboarding as easy as possib
 
 Follow this [Getting Started Guide](https://code.visualstudio.com/docs/devcontainers/containers) on how to setup dev containers for your system
 
+- If you encounter issues with installing packages, change the remote user from "node" to "root" in devcontainer.json
+
 ## Local Environment
 
 We use [yarn](https://pnpm.io) as our package manager, so make sure to [install](https://yarnpkg.com/getting-started/install) it first.
@@ -33,6 +35,7 @@ There are shortcut buttons in the README to jumpstart running from a remote envi
   - Consider running the tests on at a time or configuring the DEFAULT_DELAY_IN_MS environment variable
 - The work you're doing may not need any databases to be running (i.e UI work)
   - In this case, consider creating a smaller machine and just running the package you're developing in
+  - This is only for packages that don't make any calls to the databases. If you try to run the tests on the whole project without databases setup the tests will fail
 
 ### Gitpod
 
@@ -85,7 +88,7 @@ yarn build
 
 ## Project overview
 
-This project is a monorepo using Turborepo. In order to keep documentation up to date and accurate, please view the README of the package that you are developing on.
+This project is a monorepo using Turborepo. In order to keep documentation up to date and accurate, please view the [README](./README.md) of the package that you are developing on.
 
 ## Style Guide
 
