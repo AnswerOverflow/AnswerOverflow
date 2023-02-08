@@ -1,6 +1,6 @@
 import { ButtonBuilder } from "@discordjs/builders";
 import { APIButtonComponent, ButtonStyle, ChannelType, ComponentType, Message } from "discord.js";
-import { findChannelSettingsById } from "@answeroverflow/db";
+import { findChannelById } from "@answeroverflow/db";
 import { createMemberCtx } from "~discord-bot/utils/context";
 import { toAODiscordAccount } from "~discord-bot/utils/conversions";
 import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
@@ -27,7 +27,7 @@ export async function provideConsentOnForumChannelMessage(message: Message): Pro
   if (!(channel.isThread() && channel.parent?.type === ChannelType.GuildForum)) {
     throw new ConsentError("Message is not in a forum channel");
   }
-  const channel_settings = await findChannelSettingsById(channel.parent.id);
+  const channel_settings = await findChannelById(channel.parent.id);
   if (!channel_settings?.flags.forum_guidelines_consent_enabled) {
     throw new ConsentError("Forum post guidelines consent is not enabled for this channel");
   }

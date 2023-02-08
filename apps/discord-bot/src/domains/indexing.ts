@@ -5,7 +5,7 @@ import {
   upsertManyMessages,
   upsertChannel,
   findManyUserServerSettings,
-  findChannelSettingsById,
+  findChannelById,
 } from "@answeroverflow/db";
 import {
   ChannelType,
@@ -52,7 +52,7 @@ async function indexServer(guild: Guild) {
 export async function indexRootChannel(channel: TextChannel | NewsChannel | ForumChannel) {
   container.logger.info(`Attempting to indexing channel ${channel.id} | ${channel.name}`);
 
-  const settings = await findChannelSettingsById(channel.id);
+  const settings = await findChannelById(channel.id);
 
   if (!settings || !settings.flags.indexing_enabled) {
     return;

@@ -1,7 +1,7 @@
 import { ChannelSettingsMenu } from "~discord-bot/components/channel-settings-menu";
 import { reply } from "~discord-bot/test/reacord-utils";
 import React from "react";
-import { getDefaultChannelSettingsWithFlags } from "@answeroverflow/db";
+import { getDefaultChannelWithFlags } from "@answeroverflow/db";
 import type { ReacordTester } from "@answeroverflow/reacord";
 import type { ForumChannel, Guild, PublicThreadChannel, TextChannel } from "discord.js";
 import { mockReacord, setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
@@ -14,6 +14,7 @@ import {
   mockPublicThread,
   mockTextChannel,
 } from "@answeroverflow/discordjs-mock";
+import { toAOChannel } from "~discord-bot/utils/conversions";
 
 let reacord: ReacordTester;
 let text_channel: TextChannel;
@@ -36,7 +37,7 @@ beforeEach(async () => {
 
 describe("ChannelSettingsMenu", () => {
   it("should render correctly in a text channel", async () => {
-    const default_settings = getDefaultChannelSettingsWithFlags(text_channel.id);
+    const default_settings = getDefaultChannelWithFlags(toAOChannel(text_channel));
     const message = await reply(
       reacord,
       <ChannelSettingsMenu settings={default_settings} channel={text_channel} />
@@ -49,7 +50,7 @@ describe("ChannelSettingsMenu", () => {
     ).toBeTruthy();
   });
   it("should render correctly in a forum thread", async () => {
-    const default_settings = getDefaultChannelSettingsWithFlags(forum_thread.parent!.id);
+    const default_settings = getDefaultChannelWithFlags(toAOChannel(forum_thread.parent!));
     const message = await reply(
       reacord,
       <ChannelSettingsMenu settings={default_settings} channel={forum_thread} />
@@ -71,7 +72,7 @@ describe("ChannelSettingsMenu", () => {
 
 describe("Toggle Indexing Button", () => {
   it("should enable indexing", async () => {
-    const default_settings = getDefaultChannelSettingsWithFlags(text_channel.id);
+    const default_settings = getDefaultChannelWithFlags(toAOChannel(text_channel));
     const message = await reply(
       reacord,
       <ChannelSettingsMenu settings={default_settings} channel={text_channel} />
@@ -89,7 +90,7 @@ describe("Toggle Indexing Button", () => {
 
 describe("Select mark solved tag", () => {
   it("should select a tag", async () => {
-    const default_settings = getDefaultChannelSettingsWithFlags(forum_thread.parent!.id);
+    const default_settings = getDefaultChannelWithFlags(toAOChannel(forum_thread.parent!));
     const message = await reply(
       reacord,
       <ChannelSettingsMenu settings={default_settings} channel={forum_thread} />

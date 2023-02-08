@@ -1,4 +1,4 @@
-import type { ChannelSettingsOutput, ChannelSettingsUpsertInput } from "@answeroverflow/api";
+import type { ChannelWithFlags, ChannelUpsertWithDepsInput } from "@answeroverflow/api";
 import { callApiWithButtonErrorHandler } from "~discord-bot/utils/trpc";
 import { type GuildForumTag, ChannelType, ForumChannel, GuildTextBasedChannel } from "discord.js";
 import { ButtonClickEvent, Select, SelectChangeEvent, Option } from "@answeroverflow/reacord";
@@ -18,9 +18,9 @@ export function ChannelSettingsMenu({
   settings,
 }: {
   channel: GuildTextBasedChannel;
-  settings: ChannelSettingsOutput;
+  settings: ChannelWithFlags;
 }) {
-  const [channelSettings, setChannelSettings] = React.useState<ChannelSettingsOutput>(settings);
+  const [channelSettings, setChannelSettings] = React.useState<ChannelWithFlags>(settings);
   const is_forum_channel = channel.isThread() && channel.parent?.type == ChannelType.GuildForum;
   const target_channel = getRootChannel(channel);
   if (!target_channel) {
@@ -29,7 +29,7 @@ export function ChannelSettingsMenu({
 
   const updateChannelSettings = async (
     interaction: ButtonClickEvent,
-    data: Omit<ChannelSettingsUpsertInput, "channel_id">
+    data: Omit<ChannelUpsertWithDepsInput, "id" | "server" | "type" | "name" | "parent_id">
   ) => {
     if (channel.isDMBased()) {
       interaction.ephemeralReply("Does not work in DMs");
@@ -40,8 +40,8 @@ export function ChannelSettingsMenu({
     await callApiWithButtonErrorHandler(
       {
         async ApiCall(router) {
-          return await router.channel_settings.upsertWithDeps({
-            channel: toAOChannelWithServer(target_channel),
+          return await router.channels.upsertWithDeps({
+            ...toAOChannelWithServer(target_channel),
             ...data,
           });
         },

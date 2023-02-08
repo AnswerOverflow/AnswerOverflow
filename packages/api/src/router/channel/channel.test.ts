@@ -14,6 +14,7 @@ import { channelRouter } from "./channel";
 import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
 import { mockChannel, mockServer } from "@answeroverflow/db-mock";
 import { pick } from "@answeroverflow/utils";
+import type { ChannelFindByIdOutput } from "~api/utils/types";
 
 let server: Server;
 let channel: Channel;
@@ -26,8 +27,8 @@ beforeEach(async () => {
   await createServer(server);
 });
 
-export function pickPublicChannelData(channel: Channel) {
-  const picked = pick(channel, ["id", "name", "parent_id", "server_id", "type"]);
+export function pickPublicChannelData(channel: ChannelFindByIdOutput) {
+  const picked = pick(channel, ["id", "name", "parent_id", "server_id", "type", "invite_code"]);
   return picked;
 }
 

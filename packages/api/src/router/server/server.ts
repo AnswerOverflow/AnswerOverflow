@@ -11,7 +11,11 @@ import {
 import { z } from "zod";
 import { mergeRouters, router, publicProcedure, withUserServersProcedure } from "~api/router/trpc";
 import { assertCanEditServer, assertCanEditServerBotOnly } from "~api/utils/permissions";
-import { protectedFetchWithPublicData, protectedMutation } from "~api/utils/protected-procedures";
+import {
+  protectedFetchWithPublicData,
+  protectedMutation,
+  protectedMutationFetchFirst,
+} from "~api/utils/protected-procedures";
 
 const serverCreateUpdateRouter = router({
   create: publicProcedure.input(z_server_create).mutation(({ ctx, input }) => {
@@ -21,8 +25,10 @@ const serverCreateUpdateRouter = router({
     });
   }),
   update: publicProcedure.input(z_server_update).mutation(({ ctx, input }) => {
-    return protectedMutation({
-      operation: () => updateServer(input),
+    return protectedMutationFetchFirst({
+      fetch: () => findServerById(input.id),
+      operation: (old) => updateServer(input, old),
+      not_found_message: "Server not found",
       permissions: () => assertCanEditServerBotOnly(ctx, input.id),
     });
   }),

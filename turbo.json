@@ -15,7 +15,7 @@
     "migrate": {},
     "lint": {
       "outputs": [],
-      "cache": false
+      "cache": true
     },
     "lint:fix": {
       "outputs": [],

@@ -86,45 +86,37 @@ model IgnoredDiscordAccount {
   id String @id @unique
 }
 
-// Servers
-
 model Server {
-  id          String    @id @unique
-  name        String    @db.VarChar(100)
-  icon        String?   @db.VarChar(45)
+  // Discord Data
+  id   String  @id @unique
+  name String  @db.VarChar(100)
+  icon String? @db.VarChar(45)
+
+  // Answer Overflow Settings
+  bitfield    Int       @default(0)
   kicked_time DateTime?
 
+  // Relations
   user_server_settings UserServerSettings[]
   channels             Channel[]
-  server_settings      ServerSettings?
 }
-
-model ServerSettings {
-  server_id String @id @unique
-  bitfield  Int    @default(0)
-  Server    Server @relation(fields: [server_id], references: [id])
-}
-
-// Channels
 
 model Channel {
-  id               String           @id
-  server_id        String
-  name             String           @db.VarChar(100)
-  type             Int
-  parent_id        String?
-  parent           Channel?         @relation("ParentChannel", fields: [parent_id], references: [id])
-  threads          Channel[]        @relation("ParentChannel")
-  server           Server           @relation(fields: [server_id], references: [id])
-  channel_settings ChannelSettings?
-}
+  // Discord Data
+  id          String  @id
+  server_id   String
+  name        String  @db.VarChar(100)
+  type        Int
+  parent_id   String?
+  invite_code String? @unique @db.VarChar(15)
 
-model ChannelSettings {
-  channel_id             String  @id
+  // Answer Overflow Settings
   bitfield               Int     @default(0)
   last_indexed_snowflake String?
-  invite_code            String? @unique @db.VarChar(15)
   solution_tag_id        String?
 
-  channel Channel @relation(fields: [channel_id], references: [id])
+  // Relations
+  parent  Channel?  @relation("ParentChannel", fields: [parent_id], references: [id])
+  threads Channel[] @relation("ParentChannel")
+  server  Server    @relation(fields: [server_id], references: [id])
 }

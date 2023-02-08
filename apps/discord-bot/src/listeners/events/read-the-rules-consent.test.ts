@@ -10,21 +10,20 @@ import {
   delay,
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
-import { createServer, createServerSettings, findUserServerSettingsById } from "@answeroverflow/db";
+import { createServer, findUserServerSettingsById } from "@answeroverflow/db";
 
 let client: Client;
 let members: GuildMemberVariants;
 beforeEach(async () => {
   client = await setupAnswerOverflowBot();
   members = await createGuildMemberVariants(client);
-  await createServer(toAOServer(members.pending_guild_member_default.guild));
 });
 
 describe("Read the rules consent", () => {
   it("should mark a pending user as consenting in a server with read the rules consent enabled", async () => {
     // setup
-    await createServerSettings({
-      server_id: members.pending_guild_member_default.guild.id,
+    await createServer({
+      ...toAOServer(members.pending_guild_member_default.guild),
       flags: {
         read_the_rules_consent_enabled: true,
       },
@@ -51,8 +50,9 @@ describe("Read the rules consent", () => {
   });
   it("should not mark a pending user as consenting in a server with read the rules consent disabled", async () => {
     // setup
-    await createServerSettings({
-      server_id: members.pending_guild_member_default.guild.id,
+
+    await createServer({
+      ...toAOServer(members.pending_guild_member_default.guild),
       flags: {
         read_the_rules_consent_enabled: false,
       },
@@ -81,13 +81,13 @@ describe("Read the rules consent", () => {
       mockGuildMember({ client, guild: server, data: { pending: true } }),
       mockGuildMember({ client, guild: server, data: { pending: true } }),
     ];
-    await createServer(toAOServer(server));
-    await createServerSettings({
-      server_id: server.id,
+    await createServer({
+      ...toAOServer(server),
       flags: {
         read_the_rules_consent_enabled: true,
       },
     });
+
     for await (const pending_member of members) {
       // act
       const full_member = copyClass(pending_member, client);

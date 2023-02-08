@@ -7,12 +7,7 @@ import {
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
-import {
-  createChannel,
-  createChannelSettings,
-  createServer,
-  findUserServerSettingsById,
-} from "@answeroverflow/db";
+import { createChannel, createServer, findUserServerSettingsById } from "@answeroverflow/db";
 
 let client: Client;
 let forum_channel: ForumChannel;
@@ -27,9 +22,8 @@ beforeEach(async () => {
     channel: forum_channel_thread,
   });
   await createServer(toAOServer(forum_channel.guild));
-  await createChannel(toAOChannel(forum_channel));
-  await createChannelSettings({
-    channel_id: forum_channel.id,
+  await createChannel({
+    ...toAOChannel(forum_channel),
     flags: {
       forum_guidelines_consent_enabled: true,
     },

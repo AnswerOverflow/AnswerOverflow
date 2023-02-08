@@ -1,6 +1,5 @@
 import type {
-  ChannelPublic,
-  ChannelPublicWithSettings,
+  ChannelPublicWithFlags,
   DiscordAccountPublic,
   MessageWithDiscordAccount,
   ServerPublic,
@@ -47,28 +46,27 @@ export function mockServer(override: Partial<ServerPublic> = {}) {
   return data;
 }
 
-export function mockChannel(override: Partial<ChannelPublic> = {}) {
-  const data: ChannelPublic = {
+export function mockChannel(override: Partial<ChannelPublicWithFlags> = {}) {
+  const data: ChannelPublicWithFlags = {
     id: randomId(),
     name: "general",
     server_id: "0",
     parent_id: null,
     type: 0,
+    invite_code: null,
     ...override,
   };
   return data;
 }
 
-export function mockChannelWithSettings(override: Partial<ChannelPublicWithSettings> = {}) {
-  const data: ChannelPublicWithSettings = {
+export function mockChannelWithSettings(override: Partial<ChannelPublicWithFlags> = {}) {
+  const data: ChannelPublicWithFlags = {
     id: randomId(),
     name: "general",
     server_id: "0",
     parent_id: null,
     type: 0,
-    settings: {
-      invite_code: null,
-    },
+    invite_code: null,
     ...override,
   };
   return data;

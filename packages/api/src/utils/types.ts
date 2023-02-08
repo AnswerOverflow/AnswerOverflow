@@ -6,11 +6,9 @@ export type BotRouterCaller = ReturnType<BotRouter["createCaller"]>;
 export type botRouterInput = inferRouterInputs<BotRouter>;
 export type botRouterOutput = inferRouterOutputs<BotRouter>;
 
-export type ChannelSettingsUpsertInput = botRouterInput["channel_settings"]["upsert"];
-export type ChannelSettingsOutput = botRouterOutput["channel_settings"]["upsert"];
-export type ChannelSettingsUpsertWithDeps = botRouterInput["channel_settings"]["upsertWithDeps"];
-
+export type ChannelFindByIdOutput = botRouterOutput["channels"]["byId"];
 export type ChannelUpsertInput = botRouterInput["channels"]["upsert"];
+export type ChannelUpsertOutput = botRouterOutput["channels"]["upsert"];
 export type ChannelCreateWithDepsInput = botRouterInput["channels"]["createWithDeps"];
 export type ChannelUpsertWithDepsInput = botRouterInput["channels"]["upsertWithDeps"];
 

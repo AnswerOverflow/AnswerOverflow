@@ -9,9 +9,10 @@ import {
 } from "discord.js";
 import React from "react";
 import { ephemeralReply } from "~discord-bot/utils/utils";
-import { getDefaultChannelSettingsWithFlags } from "@answeroverflow/db";
+import { ChannelWithFlags, getDefaultChannelWithFlags } from "@answeroverflow/db";
 import { TRPCError } from "@trpc/server";
 import { createMemberCtx } from "~discord-bot/utils/context";
+import { toAOChannel } from "~discord-bot/utils/conversions";
 
 @ApplyOptions<Command.Options>({
   name: "channel-settings",
@@ -59,7 +60,7 @@ export class ChannelSettingsCommand extends Command {
       {
         async ApiCall(router) {
           try {
-            return await router.channel_settings.byId(parent_id);
+            return router.channels.byId(parent_id);
           } catch (error) {
             if (error instanceof TRPCError && error.code == "NOT_FOUND") {
               return null;
@@ -70,14 +71,12 @@ export class ChannelSettingsCommand extends Command {
         },
         Ok(result) {
           if (!result) {
-            result = {
-              ...getDefaultChannelSettingsWithFlags(parent_id),
-              channel: {
-                server_id: guild.id,
-              },
-            };
+            result = getDefaultChannelWithFlags(toAOChannel(channel));
           }
-          const menu = <ChannelSettingsMenu channel={channel} settings={result} />;
+          // TODO: Maybe assert that it matches that spec instead of casting
+          const menu = (
+            <ChannelSettingsMenu channel={channel} settings={result as ChannelWithFlags} />
+          );
           ephemeralReply(container.reacord, menu, interaction);
         },
         getCtx: () => createMemberCtx(member),
