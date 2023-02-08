@@ -7,6 +7,7 @@ export const createVitestConfig = (options: UserConfig = {}) =>
     ...options,
     test: {
       ...options?.test,
+      testTimeout: 60000,
       globals: true,
       coverage: {
         ...options.test?.coverage,

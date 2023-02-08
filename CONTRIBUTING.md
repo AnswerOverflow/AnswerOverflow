@@ -16,6 +16,8 @@ We recommend the use of dev containers to make your onboarding as easy as possib
 
 Follow this [Getting Started Guide](https://code.visualstudio.com/docs/devcontainers/containers) on how to setup dev containers for your system
 
+- If you encounter issues with installing packages, change the remote user from "node" to "root" in devcontainer.json
+
 ## Local Environment
 
 We use [yarn](https://pnpm.io) as our package manager, so make sure to [install](https://yarnpkg.com/getting-started/install) it first.
@@ -23,6 +25,26 @@ We use [yarn](https://pnpm.io) as our package manager, so make sure to [install]
 Along with this, you will need to have a [MySQL Server](https://dev.mysql.com/downloads/installer/) running
 
 And an [Elastic Search](https://www.elastic.co/guide/en/elasticsearch/reference/current/install-elasticsearch.html) server setup
+
+## Remote Environment (Codespaces / Gitpod)
+
+There are shortcut buttons in the README to jumpstart running from a remote environment. When running from these remote environments, consider the following:
+
+- They require at least 8 GB of ram to run the databases
+- If you have a slow remote machine, then the tests may fail when you run them locally if you run them all at the same time from the root directory.
+  - Consider running the tests on at a time or configuring the DEFAULT_DELAY_IN_MS environment variable
+- The work you're doing may not need any databases to be running (i.e UI work)
+  - In this case, consider creating a smaller machine and just running the package you're developing in
+  - This is only for packages that don't make any calls to the databases. If you try to run the tests on the whole project without databases setup the tests will fail
+
+### Gitpod
+
+- You must start the databases using the command docker-compose up
+- Use the localhost database urls provided in .env.example
+
+### Codespaces
+
+- I had issues making the 16 gb machine work, that's why it uses the 32 gb machine. If you can make the 16 gb machine work, please open an issue
 
 ## VSCode users
 
@@ -66,7 +88,7 @@ yarn build
 
 ## Project overview
 
-This project is a monorepo using Turborepo. In order to keep documentation up to date and accurate, please view the README of the package that you are developing on.
+This project is a monorepo using Turborepo. In order to keep documentation up to date and accurate, please view the [README](./README.md) of the package that you are developing on.
 
 ## Style Guide
 
