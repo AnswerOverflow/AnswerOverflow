@@ -45,7 +45,7 @@ LineChart.parameters = {
     disable: true,
   },
 };
-const lineProps: ChartProps = {
+const line_props: ChartProps = {
   type: "line",
   show_grid: false,
   lines: [
@@ -103,7 +103,7 @@ const lineProps: ChartProps = {
   ],
 };
 
-LineChart.args = lineProps;
+LineChart.args = line_props;
 
 export const BarChart = Template.bind({});
 BarChart.parameters = {
@@ -111,7 +111,7 @@ BarChart.parameters = {
     disable: true,
   },
 };
-const barProps: ChartProps = {
+const bar_props: ChartProps = {
   type: "bar",
   show_grid: false,
   bars: [
@@ -161,4 +161,4 @@ const barProps: ChartProps = {
   ],
 };
 
-BarChart.args = barProps;
+BarChart.args = bar_props;

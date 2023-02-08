@@ -49,9 +49,9 @@ export async function testAllPermissions({
 }: PermissionVariantsTest) {
   // Possibly swap to Promise.All - going in parallel break things sometimes
   for await (const permission of Object.keys(PermissionFlagsBits)) {
-    const permissionIsAllowed = permissionsThatShouldWork.includes(
+    const permission_is_allowed = permissionsThatShouldWork.includes(
       permission as PermissionResolvable
     );
-    await operation(permission as PermissionResolvable, permissionIsAllowed);
+    await operation(permission as PermissionResolvable, permission_is_allowed);
   }
 }

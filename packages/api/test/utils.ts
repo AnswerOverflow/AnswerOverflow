@@ -1,7 +1,7 @@
 import type { DiscordAccount, Server } from "@answeroverflow/db";
 import { TRPCError } from "@trpc/server";
 import { PermissionFlagsBits, PermissionResolvable, PermissionsBitField } from "discord.js";
-import { Source, source_types, CreateContextInner } from "~api/router/context";
+import { Source, source_types, createContextInner } from "~api/router/context";
 import {
   INVALID_ROUTE_FOR_BOT_ERROR,
   INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,
@@ -27,7 +27,7 @@ export async function mockAccountWithServersCallerCtx(
 export async function mockAccountCallerCtx(caller: Source, override: Partial<DiscordAccount> = {}) {
   const account = mockDiscordAccount(override);
 
-  const ctx = await CreateContextInner({
+  const ctx = await createContextInner({
     session: null,
     source: caller,
     discord_account: {
@@ -42,7 +42,7 @@ export async function mockAccountCallerCtx(caller: Source, override: Partial<Dis
 }
 
 export async function mockUnauthedCtx(caller: Source) {
-  const ctx = await CreateContextInner({
+  const ctx = await createContextInner({
     session: null,
     source: caller,
     discord_account: null,
@@ -62,7 +62,7 @@ type CtxOverride = {
 };
 
 export function createCtxWithServers(input: CtxOverride) {
-  return CreateContextInner({
+  return createContextInner({
     session: null,
     source: input.caller,
     discord_account: {

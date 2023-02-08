@@ -10,6 +10,7 @@ const ServerCard: React.FC<{
   return <ServerInviteDriver server={server} />;
 };
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const Home: NextPage = () => {
   return (
     <>

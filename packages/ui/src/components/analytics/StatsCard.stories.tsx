@@ -16,7 +16,7 @@ const Template: StoryFn<typeof StatsCard> = (args: StatsCardProps) => <StatsCard
 //👇 Each story then reuses that template
 export const Primary = Template.bind({});
 
-const PrimaryArgs: StatsCardProps = {
+const primary_args: StatsCardProps = {
   title: "Questions asked",
   stat: "123",
   percentage_change: "12.52%",
@@ -25,4 +25,4 @@ const PrimaryArgs: StatsCardProps = {
   change_duration: "15 days",
 };
 
-Primary.args = PrimaryArgs;
+Primary.args = primary_args;

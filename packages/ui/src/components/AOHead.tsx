@@ -26,11 +26,11 @@ export const AOHead = ({
   path,
 }: HeadProps) => {
   if (server) {
-    const serverIconImage = makeServerIconLink(server, 256);
+    const server_icon_image = makeServerIconLink(server, 256);
     imageWidth = "256";
     imageHeight = "256";
-    if (serverIconImage) {
-      image = serverIconImage;
+    if (server_icon_image) {
+      image = server_icon_image;
     } else {
       image = "https://answeroverflow.com/content/branding/logo_icon.png";
     }

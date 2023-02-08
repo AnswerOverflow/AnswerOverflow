@@ -9,9 +9,9 @@ import Document, {
 
 class MyDocument extends Document {
   static override async getInitialProps(ctx: DocumentContext): Promise<DocumentInitialProps> {
-    const initialProps = await Document.getInitialProps(ctx);
+    const initial_props = await Document.getInitialProps(ctx);
 
-    return initialProps;
+    return initial_props;
   }
 
   override render() {

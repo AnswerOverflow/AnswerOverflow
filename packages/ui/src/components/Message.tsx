@@ -26,8 +26,8 @@ export function Message({
   not_public_title = "Message Not Public",
 }: MessageProps) {
   const date_of_message = getSnowflakeUTCDate(message.id);
-  const convertedMessageContent = toHTML(message.content);
-  const parsedMessageContent = Parser(convertedMessageContent);
+  const converted_message_content = toHTML(message.content);
+  const parsed_message_content = Parser(converted_message_content);
   const is_user_in_server = useIsUserInServer(message.server_id);
   if (is_user_in_server) {
     blurred = false;
@@ -126,7 +126,7 @@ export function Message({
           </Link>
         </div>
         <div className="mt-2 max-w-[80vw] text-black dark:text-neutral-50 sm:mt-0 sm:max-w-[70vw] md:max-w-full">
-          {parsedMessageContent}
+          {parsed_message_content}
         </div>
         <div className="grid gap-2">
           {message.images.map((image) => (

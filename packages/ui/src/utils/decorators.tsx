@@ -8,7 +8,7 @@ import { trpc, StorybookTRPC } from "./trpc";
 import hljs from "highlight.js";
 import { toggleDarkTheme } from "./theme";
 
-const storybookTRPC = trpc as StorybookTRPC;
+const storybook_trpc = trpc as StorybookTRPC;
 type Globals = {
   tailwind_theme: "dark" | "light" | "both";
   auth_state: "signed_in" | "signed_out";
@@ -65,9 +65,9 @@ export function WithAuth(
   context: StoryContext<ReactRenderer, Args>
 ) {
   const { auth_state } = context.globals as Globals;
-  const [queryClient] = useState(() => new QueryClient());
-  const [trpcClient, setTRPCClient] = useState(
-    storybookTRPC.createClient({
+  const [query_client] = useState(() => new QueryClient());
+  const [trpc_client, setTRPCClient] = useState(
+    storybook_trpc.createClient({
       links: [
         httpBatchLink({
           url: "http://localhost:3000/api/trpc",
@@ -83,8 +83,8 @@ export function WithAuth(
     })
   );
   useEffect(() => {
-    queryClient.clear();
-    const trpc_client = storybookTRPC.createClient({
+    query_client.clear();
+    const trpc_client = storybook_trpc.createClient({
       links: [
         httpBatchLink({
           url: "http://localhost:3000/api/trpc",
@@ -100,11 +100,11 @@ export function WithAuth(
     });
     console.log("auth_state", auth_state);
     setTRPCClient(trpc_client);
-  }, [auth_state, setTRPCClient, queryClient]);
+  }, [auth_state, setTRPCClient, query_client]);
   return (
-    <storybookTRPC.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>{Story()}</QueryClientProvider>
-    </storybookTRPC.Provider>
+    <storybook_trpc.Provider client={trpc_client} queryClient={query_client}>
+      <QueryClientProvider client={query_client}>{Story()}</QueryClientProvider>
+    </storybook_trpc.Provider>
   );
 }
 

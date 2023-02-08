@@ -19,7 +19,7 @@ async function getDiscordOauth(ctx: Context) {
   return discord_oauth;
 }
 
-const add_discord_accont = t.middleware(async ({ ctx, next }) => {
+const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
   if (ctx.caller === "web-client" && ctx.session) {
     const discord_oauth = await getDiscordOauth(ctx);
     if (discord_oauth && discord_oauth.access_token) {
@@ -45,7 +45,7 @@ export const GetUserServersFromCtx = async (ctx: Context) => {
   return [];
 };
 
-const add_user_servers = t.middleware(async ({ ctx, next }) => {
+const addUserServers = t.middleware(async ({ ctx, next }) => {
   // In a test environment, we manually populate it
   if (ctx.caller === "web-client" && process.env.NODE_ENV !== "test") {
     ctx.user_servers = await GetUserServersFromCtx(ctx);
@@ -63,5 +63,5 @@ const add_user_servers = t.middleware(async ({ ctx, next }) => {
 export const router = t.router;
 export const MergeRouters = t.mergeRouters;
 export const public_procedure = t.procedure;
-export const with_discord_account_procedure = t.procedure.use(add_discord_accont);
-export const with_user_servers_procedure = t.procedure.use(add_user_servers);
+export const with_discord_account_procedure = t.procedure.use(addDiscordAccount);
+export const with_user_servers_procedure = t.procedure.use(addUserServers);

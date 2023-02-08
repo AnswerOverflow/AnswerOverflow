@@ -1,4 +1,4 @@
-export { authOptions } from "./src/auth-options";
+export { auth_options as authOptions } from "./src/auth-options";
 export { GetServerSession as getServerSession } from "./src/get-session";
 export * from "./src/discord-oauth";
 export type { Session } from "next-auth";

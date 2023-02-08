@@ -12,8 +12,8 @@ function disableTransitionsTemporarily() {
 
 function changeCodeHighlighting(dark_theme_enabled: boolean) {
   // This is disgusting, but it works for switching the code highlighting
-  let darkStyleSheet: CSSStyleSheet | undefined;
-  let lightStyleSheet: CSSStyleSheet | undefined;
+  let dark_style_sheet: CSSStyleSheet | undefined;
+  let light_style_sheet: CSSStyleSheet | undefined;
   [...document.styleSheets].forEach((styleSheet) => {
     try {
       const rule = [...styleSheet.cssRules].find((rule) =>
@@ -22,47 +22,47 @@ function changeCodeHighlighting(dark_theme_enabled: boolean) {
 
       if (rule) {
         if (rule.style.color === "rgb(255, 123, 114)") {
-          darkStyleSheet = styleSheet;
+          dark_style_sheet = styleSheet;
         } else if (rule.style.color === "rgb(215, 58, 73)") {
-          lightStyleSheet = styleSheet;
+          light_style_sheet = styleSheet;
         }
       }
     } catch (error) {
       // let error pass
     }
   });
-  if (darkStyleSheet && lightStyleSheet) {
+  if (dark_style_sheet && light_style_sheet) {
     if (dark_theme_enabled) {
-      darkStyleSheet.disabled = false;
-      lightStyleSheet.disabled = true;
+      dark_style_sheet.disabled = false;
+      light_style_sheet.disabled = true;
     } else {
-      darkStyleSheet.disabled = true;
-      lightStyleSheet.disabled = false;
+      dark_style_sheet.disabled = true;
+      light_style_sheet.disabled = false;
     }
   }
 }
 export function toggleDarkTheme(theme_override?: boolean) {
   disableTransitionsTemporarily();
 
-  const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-  const isSystemDarkMode = darkModeMediaQuery.matches;
-  let isDarkMode: boolean;
+  const dark_mode_media_query = window.matchMedia("(prefers-color-scheme: dark)");
+  const is_system_dark_mode = dark_mode_media_query.matches;
+  let is_dark_mode: boolean;
   if (theme_override !== undefined) {
     const root = window.document.documentElement;
-    isDarkMode = theme_override;
-    if (isDarkMode) {
+    is_dark_mode = theme_override;
+    if (is_dark_mode) {
       root.classList.add("dark");
     } else {
       root.classList.remove("dark");
     }
   } else {
-    isDarkMode = document.documentElement.classList.toggle("dark");
+    is_dark_mode = document.documentElement.classList.toggle("dark");
   }
-  changeCodeHighlighting(isDarkMode);
+  changeCodeHighlighting(is_dark_mode);
 
-  if (isDarkMode === isSystemDarkMode) {
+  if (is_dark_mode === is_system_dark_mode) {
     delete window.localStorage.isDarkMode;
   } else {
-    window.localStorage.isDarkMode = isDarkMode;
+    window.localStorage.isDarkMode = is_dark_mode;
   }
 }

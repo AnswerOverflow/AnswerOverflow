@@ -26,7 +26,7 @@ type CreateContextOptions = {
  * @see https://beta.create.t3.gg/en/usage/trpc#-servertrpccontextts
  */
 // eslint-disable-next-line @typescript-eslint/require-await
-export const CreateContextInner = async (opts: CreateContextOptions) => {
+export const createContextInner = async (opts: CreateContextOptions) => {
   return {
     session: opts.session,
     user_servers: opts.user_servers,
@@ -37,28 +37,28 @@ export const CreateContextInner = async (opts: CreateContextOptions) => {
   };
 };
 
-export const CreateSSGContext = async () => {
-  return await CreateContextInner({ source: "web-client", session: null });
+export const createSSGContext = async () => {
+  return await createContextInner({ source: "web-client", session: null });
 };
 
 export type BotContextCreate = Omit<CreateContextOptions, "source">;
 
-export const CreateBotContext = async (opts: BotContextCreate) => {
-  return await CreateContextInner({ ...opts, source: "discord-bot" });
+export const createBotContext = async (opts: BotContextCreate) => {
+  return await createContextInner({ ...opts, source: "discord-bot" });
 };
 
 /**
  * This is the actual context you'll use in your router
  * @link https://trpc.io/docs/context
  **/
-export const CreateContext = async (opts: CreateNextContextOptions) => {
+export const createContext = async (opts: CreateNextContextOptions) => {
   const session = await getServerSession(opts);
 
-  return await CreateContextInner({
+  return await createContextInner({
     session,
     user_servers: null,
     source: "web-client",
   });
 };
 
-export type Context = inferAsyncReturnType<typeof CreateContext>;
+export type Context = inferAsyncReturnType<typeof createContext>;
