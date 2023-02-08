@@ -1,16 +1,16 @@
 import { getRandomId } from "@answeroverflow/utils";
-import { createContextInner } from "~api/router/context";
-import { userRouter } from "./user";
+import { CreateContextInner } from "~api/router/context";
+import { user_router } from "./user";
 
 // eslint-disable-next-line no-unused-vars
-let users: ReturnType<(typeof userRouter)["createCaller"]>;
+let users: ReturnType<(typeof user_router)["createCaller"]>;
 beforeEach(async () => {
-  const a = await createContextInner({
+  const a = await CreateContextInner({
     session: null,
     source: "discord-bot",
     user_servers: [],
   });
-  users = userRouter.createCaller(a);
+  users = user_router.createCaller(a);
 });
 
 describe("userRouter", () => {

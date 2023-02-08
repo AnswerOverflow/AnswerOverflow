@@ -10,7 +10,7 @@ import {
   upsertManyMessages,
 } from "@answeroverflow/db";
 import { mockAccountCallerCtx, mockAccountWithServersCallerCtx } from "~api/test/utils";
-import { messageRouter, stripPrivateMessageData } from "./message";
+import { message_router, stripPrivateMessageData } from "./message";
 import {
   toMessageWithDiscordAccount,
   toPrivateMessageWithStrippedData,
@@ -67,8 +67,8 @@ describe("Message Operations", () => {
     });
     it("should get all messages with private data if users share a server", async () => {
       const { ctx } = await mockAccountWithServersCallerCtx(server, "web-client");
-      const message_router = messageRouter.createCaller(ctx);
-      const messages = await message_router.byChannelIdBulk({
+      const router = message_router.createCaller(ctx);
+      const messages = await router.byChannelIdBulk({
         channel_id: channel.id,
       });
       expect(messages).toEqual([
@@ -78,8 +78,8 @@ describe("Message Operations", () => {
     });
     it("should get all messages with only public data if users do not share a server", async () => {
       const { ctx } = await mockAccountCallerCtx("web-client");
-      const message_router = messageRouter.createCaller(ctx);
-      const messages = await message_router.byChannelIdBulk({
+      const router = message_router.createCaller(ctx);
+      const messages = await router.byChannelIdBulk({
         channel_id: channel.id,
       });
 

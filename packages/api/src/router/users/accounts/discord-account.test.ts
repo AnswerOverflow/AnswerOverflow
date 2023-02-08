@@ -8,7 +8,7 @@ import { mockDiscordAccount } from "@answeroverflow/db-mock";
 import { pick } from "@answeroverflow/utils";
 
 import { testAllDataVariants, mockAccountCallerCtx, testAllSources } from "~api/test/utils";
-import { discordAccountRouter } from "./discord-accounts";
+import { discord_account_router } from "./discord-accounts";
 
 let discord_account: DiscordAccount;
 let discord_account2: DiscordAccount;
@@ -30,7 +30,7 @@ describe("Discord Account Operations", () => {
       await testAllDataVariants({
         async fetch({ source }) {
           const { ctx } = await mockAccountCallerCtx(source);
-          const router = discordAccountRouter.createCaller(ctx);
+          const router = discord_account_router.createCaller(ctx);
           const data = await router.byId(discord_account.id);
           return {
             data,
@@ -49,7 +49,7 @@ describe("Discord Account Operations", () => {
       await testAllDataVariants({
         async fetch({ source }) {
           const { ctx } = await mockAccountCallerCtx(source);
-          const router = discordAccountRouter.createCaller(ctx);
+          const router = discord_account_router.createCaller(ctx);
           const data = await router.byIdMany([discord_account.id, discord_account2.id]);
           return {
             data,
@@ -68,7 +68,7 @@ describe("Discord Account Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx } = await mockAccountCallerCtx(source);
-          const router = discordAccountRouter.createCaller(ctx);
+          const router = discord_account_router.createCaller(ctx);
           await expect(router.create(discord_account)).rejects.toThrowError();
         },
       });
@@ -77,7 +77,7 @@ describe("Discord Account Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx, account } = await mockAccountCallerCtx(source);
-          const router = discordAccountRouter.createCaller(ctx);
+          const router = discord_account_router.createCaller(ctx);
           const discord_account_created = await router.create(account);
           expect(discord_account_created).toEqual(account);
         },
@@ -93,7 +93,7 @@ describe("Discord Account Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx } = await mockAccountCallerCtx(source);
-          const router = discordAccountRouter.createCaller(ctx);
+          const router = discord_account_router.createCaller(ctx);
           await expect(
             router.update({ id: discord_account.id, name: "new name" })
           ).rejects.toThrowError();
@@ -105,7 +105,7 @@ describe("Discord Account Operations", () => {
         async operation(source) {
           const { ctx, account } = await mockAccountCallerCtx(source);
           await createDiscordAccount(account);
-          const router = discordAccountRouter.createCaller(ctx);
+          const router = discord_account_router.createCaller(ctx);
           const discord_account_updated = await router.update({
             id: account.id,
             name: "new name",
@@ -126,7 +126,7 @@ describe("Discord Account Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx } = await mockAccountCallerCtx(source);
-          const router = discordAccountRouter.createCaller(ctx);
+          const router = discord_account_router.createCaller(ctx);
           await expect(router.delete(discord_account.id)).rejects.toThrowError();
           await expect(findDiscordAccountById(discord_account.id)).resolves.toEqual(
             discord_account
@@ -139,7 +139,7 @@ describe("Discord Account Operations", () => {
         async operation(source) {
           const { ctx, account } = await mockAccountCallerCtx(source);
           await createDiscordAccount(account);
-          const router = discordAccountRouter.createCaller(ctx);
+          const router = discord_account_router.createCaller(ctx);
           const discord_account_deleted = await router.delete(account.id);
           expect(discord_account_deleted).toBeTruthy();
           await expect(findDiscordAccountById(account.id)).resolves.toBeNull();
@@ -153,7 +153,7 @@ describe("Discord Account Operations", () => {
         await testAllSources({
           async operation(source) {
             const { ctx } = await mockAccountCallerCtx(source);
-            const router = discordAccountRouter.createCaller(ctx);
+            const router = discord_account_router.createCaller(ctx);
             await expect(router.upsert(discord_account)).rejects.toThrowError();
           },
         });
@@ -163,7 +163,7 @@ describe("Discord Account Operations", () => {
           async operation(source) {
             const { ctx, account } = await mockAccountCallerCtx(source);
             await createDiscordAccount(account);
-            const router = discordAccountRouter.createCaller(ctx);
+            const router = discord_account_router.createCaller(ctx);
             const discord_account_created = await router.upsert(account);
             expect(discord_account_created).toEqual(account);
           },
@@ -177,7 +177,7 @@ describe("Discord Account Operations", () => {
           await testAllSources({
             async operation(source) {
               const { ctx } = await mockAccountCallerCtx(source);
-              const router = discordAccountRouter.createCaller(ctx);
+              const router = discord_account_router.createCaller(ctx);
               await expect(
                 router.upsert({ ...discord_account, name: "new name" })
               ).rejects.toThrowError();
@@ -189,7 +189,7 @@ describe("Discord Account Operations", () => {
             async operation(source) {
               const { ctx, account } = await mockAccountCallerCtx(source);
               await createDiscordAccount(account);
-              const router = discordAccountRouter.createCaller(ctx);
+              const router = discord_account_router.createCaller(ctx);
               const discord_account_updated = await router.upsert({
                 ...account,
                 name: "new name",

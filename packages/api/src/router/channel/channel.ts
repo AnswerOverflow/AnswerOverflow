@@ -16,7 +16,7 @@ import {
   upsert,
 } from "@answeroverflow/db";
 import { z } from "zod";
-import { mergeRouters, router, publicProcedure } from "~api/router/trpc";
+import { MergeRouters, router, public_procedure } from "~api/router/trpc";
 import {
   protectedFetchWithPublicData,
   protectedFetchManyWithPublicData,
@@ -28,7 +28,7 @@ import { assertCanEditServer, assertCanEditServerBotOnly } from "~api/utils/perm
 export const CHANNEL_NOT_FOUND_MESSAGES = "Channel does not exist";
 
 const channel_crud_router = router({
-  byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
+  byId: public_procedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({
       fetch: () => findChannelById(input),
       permissions: (data) => assertCanEditServer(ctx, data.server_id),
@@ -38,20 +38,20 @@ const channel_crud_router = router({
       },
     });
   }),
-  byIdMany: publicProcedure.input(z_unique_array).query(async ({ ctx, input }) => {
+  byIdMany: public_procedure.input(z_unique_array).query(async ({ ctx, input }) => {
     return protectedFetchManyWithPublicData({
       fetch: () => findManyChannelsById(input),
       permissions: (data) => assertCanEditServer(ctx, data.server_id),
       public_data_formatter: (data) => z_channel_public.parse(data),
     });
   }),
-  create: publicProcedure.input(z_channel_create).mutation(({ ctx, input }) => {
+  create: public_procedure.input(z_channel_create).mutation(({ ctx, input }) => {
     return protectedMutation({
       operation: () => createChannel(input),
       permissions: () => assertCanEditServerBotOnly(ctx, input.server_id),
     });
   }),
-  update: publicProcedure.input(z_channel_update).mutation(async ({ ctx, input }) => {
+  update: public_procedure.input(z_channel_update).mutation(async ({ ctx, input }) => {
     return protectedMutationFetchFirst({
       fetch: () => findChannelById(input.id),
       permissions: (data) => assertCanEditServerBotOnly(ctx, data.server_id),
@@ -59,7 +59,7 @@ const channel_crud_router = router({
       not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
     });
   }),
-  delete: publicProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
+  delete: public_procedure.input(z.string()).mutation(async ({ ctx, input }) => {
     return protectedMutationFetchFirst({
       fetch: () => findChannelById(input),
       operation: () => deleteChannel(input),
@@ -70,7 +70,7 @@ const channel_crud_router = router({
 });
 
 const create_with_deps_router = router({
-  createWithDeps: publicProcedure.input(z_channel_create_with_deps).mutation(({ ctx, input }) => {
+  createWithDeps: public_procedure.input(z_channel_create_with_deps).mutation(({ ctx, input }) => {
     return protectedMutation({
       operation: () => createChannelWithDeps(input),
       permissions: () => assertCanEditServerBotOnly(ctx, input.server.id),
@@ -79,14 +79,14 @@ const create_with_deps_router = router({
 });
 
 const upsert_router = router({
-  upsert: publicProcedure.input(z_channel_upsert).mutation(async ({ ctx, input }) => {
+  upsert: public_procedure.input(z_channel_upsert).mutation(async ({ ctx, input }) => {
     return upsert({
       create: () => channel_crud_router.createCaller(ctx).create(input),
       update: () => channel_crud_router.createCaller(ctx).update(input),
       find: () => findChannelById(input.id),
     });
   }),
-  upsertWithDeps: publicProcedure
+  upsertWithDeps: public_procedure
     .input(z_channel_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert({
@@ -98,7 +98,7 @@ const upsert_router = router({
 });
 
 const upsert_thread_router = router({
-  upsertThreadWithDeps: publicProcedure
+  upsertThreadWithDeps: public_procedure
     .input(z_thread_upsert_with_deps)
     .mutation(async ({ ctx, input }) => {
       return upsert({
@@ -116,7 +116,7 @@ const upsert_thread_router = router({
     }),
 });
 
-export const channelRouter = mergeRouters(
+export const channel_router = MergeRouters(
   create_with_deps_router,
   upsert_thread_router,
   channel_crud_router,

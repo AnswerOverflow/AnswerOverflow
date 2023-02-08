@@ -12,7 +12,7 @@ import {
   upsert,
 } from "@answeroverflow/db";
 import { z } from "zod";
-import { mergeRouters, router, publicProcedure } from "~api/router/trpc";
+import { MergeRouters, router, public_procedure } from "~api/router/trpc";
 import {
   protectedFetchManyWithPublicData,
   protectedFetchWithPublicData,
@@ -21,7 +21,7 @@ import {
 import { assertIsUser } from "~api/utils/permissions";
 
 const account_crud_router = router({
-  byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
+  byId: public_procedure.input(z.string()).query(({ ctx, input }) => {
     return protectedFetchWithPublicData({
       fetch: () => findDiscordAccountById(input),
       permissions: (data) => assertIsUser(ctx, data.id),
@@ -29,26 +29,26 @@ const account_crud_router = router({
       public_data_formatter: (data) => z_discord_account_public.parse(data),
     });
   }),
-  byIdMany: publicProcedure.input(z_unique_array).query(({ ctx, input }) => {
+  byIdMany: public_procedure.input(z_unique_array).query(({ ctx, input }) => {
     return protectedFetchManyWithPublicData({
       fetch: () => findManyDiscordAccountsById(input),
       permissions: (data) => assertIsUser(ctx, data.id),
       public_data_formatter: (data) => z_discord_account_public.parse(data),
     });
   }),
-  create: publicProcedure.input(z_discord_account_create).mutation(async ({ ctx, input }) => {
+  create: public_procedure.input(z_discord_account_create).mutation(async ({ ctx, input }) => {
     return protectedMutation({
       permissions: [() => assertIsUser(ctx, input.id)],
       operation: () => createDiscordAccount(input),
     });
   }),
-  update: publicProcedure.input(z_discord_account_update).mutation(({ ctx, input }) => {
+  update: public_procedure.input(z_discord_account_update).mutation(({ ctx, input }) => {
     return protectedMutation({
       permissions: () => assertIsUser(ctx, input.id),
       operation: () => updateDiscordAccount(input),
     });
   }),
-  delete: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
+  delete: public_procedure.input(z.string()).mutation(({ ctx, input }) => {
     return protectedMutation({
       permissions: () => assertIsUser(ctx, input),
       operation: () => deleteDiscordAccount(input),
@@ -57,7 +57,7 @@ const account_crud_router = router({
 });
 
 const account_upsert_router = router({
-  upsert: publicProcedure.input(z_discord_account_upsert).mutation(({ ctx, input }) => {
+  upsert: public_procedure.input(z_discord_account_upsert).mutation(({ ctx, input }) => {
     return upsert({
       find: () => findDiscordAccountById(input.id),
       create: () => account_crud_router.createCaller(ctx).create(input),
@@ -66,4 +66,4 @@ const account_upsert_router = router({
   }),
 });
 
-export const discordAccountRouter = mergeRouters(account_crud_router, account_upsert_router);
+export const discord_account_router = MergeRouters(account_crud_router, account_upsert_router);

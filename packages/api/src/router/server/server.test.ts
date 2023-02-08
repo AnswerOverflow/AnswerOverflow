@@ -7,7 +7,7 @@ import {
   testAllDataVariants,
 } from "~api/test/utils";
 import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
-import { serverRouter } from "./server";
+import { server_router } from "./server";
 
 describe("Server Operations", () => {
   describe("Server Create", () => {
@@ -19,7 +19,7 @@ describe("Server Operations", () => {
         async operation({ permission, source }) {
           const server = mockServer();
           const account = await mockAccountWithServersCallerCtx(server, source, permission);
-          const router = serverRouter.createCaller(account.ctx);
+          const router = server_router.createCaller(account.ctx);
           await router.create(server);
         },
       });
@@ -32,7 +32,7 @@ describe("Server Operations", () => {
           const server = mockServer();
           await createServer(server);
           const account = await mockAccountWithServersCallerCtx(server, source, permission);
-          const router = serverRouter.createCaller(account.ctx);
+          const router = server_router.createCaller(account.ctx);
           await router.update({
             id: server.id,
             name: "new name",
@@ -60,7 +60,7 @@ describe("Server Operations", () => {
       await testAllDataVariants({
         async fetch({ source, permission }) {
           const account = await mockAccountWithServersCallerCtx(server_2, source, permission);
-          const router = serverRouter.createCaller(account.ctx);
+          const router = server_router.createCaller(account.ctx);
           const data = await router.byId(server_2.id);
           return {
             data,
@@ -82,7 +82,7 @@ describe("Server Operations", () => {
         async operation({ permission, source }) {
           const server = mockServer();
           const account = await mockAccountWithServersCallerCtx(server, source, permission);
-          const router = serverRouter.createCaller(account.ctx);
+          const router = server_router.createCaller(account.ctx);
           await router.upsert(server);
         },
       });

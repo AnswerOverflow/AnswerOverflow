@@ -19,7 +19,7 @@ async function getDiscordOauth(ctx: Context) {
   return discord_oauth;
 }
 
-const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
+const add_discord_accont = t.middleware(async ({ ctx, next }) => {
   if (ctx.caller === "web-client" && ctx.session) {
     const discord_oauth = await getDiscordOauth(ctx);
     if (discord_oauth && discord_oauth.access_token) {
@@ -34,7 +34,7 @@ const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
   });
 });
 
-export const getUserServersFromCtx = async (ctx: Context) => {
+export const GetUserServersFromCtx = async (ctx: Context) => {
   const discord_oauth = await getDiscordOauth(ctx);
   if (discord_oauth && discord_oauth.access_token) {
     const user_servers = await getUserServers(discord_oauth.access_token);
@@ -45,10 +45,10 @@ export const getUserServersFromCtx = async (ctx: Context) => {
   return [];
 };
 
-const addUserServers = t.middleware(async ({ ctx, next }) => {
+const add_user_servers = t.middleware(async ({ ctx, next }) => {
   // In a test environment, we manually populate it
   if (ctx.caller === "web-client" && process.env.NODE_ENV !== "test") {
-    ctx.user_servers = await getUserServersFromCtx(ctx);
+    ctx.user_servers = await GetUserServersFromCtx(ctx);
   }
   if (!ctx.user_servers) {
     ctx.user_servers = []; // TODO: Maybe throw error here instead?
@@ -61,7 +61,7 @@ const addUserServers = t.middleware(async ({ ctx, next }) => {
 });
 
 export const router = t.router;
-export const mergeRouters = t.mergeRouters;
-export const publicProcedure = t.procedure;
-export const withDiscordAccountProcedure = t.procedure.use(addDiscordAccount);
-export const withUserServersProcedure = t.procedure.use(addUserServers);
+export const MergeRouters = t.mergeRouters;
+export const public_procedure = t.procedure;
+export const with_discord_account_procedure = t.procedure.use(add_discord_accont);
+export const with_user_servers_procedure = t.procedure.use(add_user_servers);

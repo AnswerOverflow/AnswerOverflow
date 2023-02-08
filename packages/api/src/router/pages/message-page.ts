@@ -1,21 +1,21 @@
 import { z } from "zod";
-import { router, publicProcedure } from "~api/router/trpc";
-import { messageRouter } from "../message/message";
-import { serverRouter } from "../server/server";
-import { channelRouter } from "../channel/channel";
+import { router, public_procedure } from "~api/router/trpc";
+import { message_router } from "../message/message";
+import { server_router } from "../server/server";
+import { channel_router } from "../channel/channel";
 import type { ChannelPublicWithFlags } from "../channel/types";
 import type { MessageWithDiscordAccount } from "@answeroverflow/db";
 
 export const message_page_router = router({
-  byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
+  byId: public_procedure.input(z.string()).query(async ({ ctx, input }) => {
     // fetch the root message
-    const root_message = await messageRouter.createCaller(ctx).byId(input);
+    const root_message = await message_router.createCaller(ctx).byId(input);
 
     // fetch the channel and the server the message is in
-    const parent_channel_or_thread_fetch = channelRouter
+    const parent_channel_or_thread_fetch = channel_router
       .createCaller(ctx)
       .byId(root_message.channel_id);
-    const server_fetch = serverRouter.createCaller(ctx).byId(root_message.server_id);
+    const server_fetch = server_router.createCaller(ctx).byId(root_message.server_id);
 
     const [thread_or_parent_channel, server] = await Promise.all([
       parent_channel_or_thread_fetch,
@@ -28,15 +28,15 @@ export const message_page_router = router({
 
     if (thread_or_parent_channel.parent_id) {
       thread = thread_or_parent_channel;
-      const parent_channel_fetch = channelRouter
+      const parent_channel_fetch = channel_router
         .createCaller(ctx)
         .byId(thread_or_parent_channel.parent_id);
-      const message_fetch = messageRouter.createCaller(ctx).byChannelIdBulk({
+      const message_fetch = message_router.createCaller(ctx).byChannelIdBulk({
         channel_id: thread.id,
       });
       [parent_channel, messages] = await Promise.all([parent_channel_fetch, message_fetch]);
     } else {
-      messages = await messageRouter.createCaller(ctx).byChannelIdBulk({
+      messages = await message_router.createCaller(ctx).byChannelIdBulk({
         channel_id: parent_channel.id,
         after: root_message.id,
         limit: 20,

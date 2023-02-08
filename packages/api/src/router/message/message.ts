@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { mergeRouters, withDiscordAccountProcedure, router } from "~api/router/trpc";
+import { MergeRouters, with_discord_account_procedure, router } from "~api/router/trpc";
 import { TRPCError } from "@trpc/server";
 import { protectedFetchWithPublicData } from "~api/utils/protected-procedures";
 import { assertIsUserInServer } from "~api/utils/permissions";
@@ -53,7 +53,7 @@ export function stripPrivateMessagesData(
 }
 
 const message_crud_router = router({
-  byId: withDiscordAccountProcedure.input(z.string()).query(async ({ ctx, input }) => {
+  byId: with_discord_account_procedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({
       fetch: () => findMessageById(input),
       permissions: (data) => assertIsUserInServer(ctx, data.server_id),
@@ -61,7 +61,7 @@ const message_crud_router = router({
       not_found_message: "Message not found",
     });
   }),
-  byChannelIdBulk: withDiscordAccountProcedure
+  byChannelIdBulk: with_discord_account_procedure
     .input(z_find_messages_by_channel_id)
     .query(async ({ ctx, input }) => {
       return protectedFetchWithPublicData({
@@ -80,14 +80,16 @@ const message_crud_router = router({
         not_found_message: "Messages not found",
       });
     }),
-  byIdBulk: withDiscordAccountProcedure.input(z.array(z.string())).query(async ({ ctx, input }) => {
-    return protectedFetchWithPublicData({
-      fetch: () => findManyMessages(input),
-      permissions: (data) => data.map((m) => assertIsUserInServer(ctx, m.server_id)),
-      public_data_formatter: (data) => stripPrivateMessagesData(data, ctx.user_servers),
-      not_found_message: "Messages not found",
-    });
-  }),
+  byIdBulk: with_discord_account_procedure
+    .input(z.array(z.string()))
+    .query(async ({ ctx, input }) => {
+      return protectedFetchWithPublicData({
+        fetch: () => findManyMessages(input),
+        permissions: (data) => data.map((m) => assertIsUserInServer(ctx, m.server_id)),
+        public_data_formatter: (data) => stripPrivateMessagesData(data, ctx.user_servers),
+        not_found_message: "Messages not found",
+      });
+    }),
 });
 
-export const messageRouter = mergeRouters(message_crud_router);
+export const message_router = MergeRouters(message_crud_router);

@@ -8,9 +8,9 @@ import {
   z_user_server_settings_find,
   z_user_server_settings_update,
 } from "@answeroverflow/db";
-import { withDiscordAccountProcedure, mergeRouters, router } from "../trpc";
-import { discordAccountRouter } from "../users/accounts/discord-accounts";
-import { serverRouter } from "../server/server";
+import { with_discord_account_procedure, MergeRouters, router } from "../trpc";
+import { discord_account_router } from "../users/accounts/discord-accounts";
+import { server_router } from "../server/server";
 import { TRPCError } from "@trpc/server";
 import {
   protectedFetch,
@@ -22,7 +22,7 @@ import { assertIsUser } from "~api/utils/permissions";
 export const SERVER_NOT_SETUP_MESSAGE = "Server is not setup for Answer Overflow yet";
 
 const user_server_settings_crud_router = router({
-  byId: withDiscordAccountProcedure
+  byId: with_discord_account_procedure
     .input(z_user_server_settings_find)
     .query(async ({ input, ctx }) => {
       return protectedFetch({
@@ -31,7 +31,7 @@ const user_server_settings_crud_router = router({
         not_found_message: "User server settings not found",
       });
     }),
-  create: withDiscordAccountProcedure
+  create: with_discord_account_procedure
     .input(z_user_server_settings_create)
     .mutation(async ({ input, ctx }) => {
       return protectedMutation({
@@ -39,7 +39,7 @@ const user_server_settings_crud_router = router({
         operation: () => createUserServerSettings(input),
       });
     }),
-  update: withDiscordAccountProcedure
+  update: with_discord_account_procedure
     .input(z_user_server_settings_update)
     .mutation(async ({ input, ctx }) => {
       return protectedMutationFetchFirst({
@@ -56,11 +56,11 @@ const user_server_settings_crud_router = router({
 });
 
 const user_server_settings_with_deps_router = router({
-  createWithDeps: withDiscordAccountProcedure
+  createWithDeps: with_discord_account_procedure
     .input(z_user_server_settings_create_with_deps)
     .mutation(async ({ input, ctx }) => {
       try {
-        await serverRouter.createCaller(ctx).byId(input.server_id);
+        await server_router.createCaller(ctx).byId(input.server_id);
       } catch (error) {
         if (error instanceof TRPCError) {
           if (error.code === "NOT_FOUND") {
@@ -72,7 +72,7 @@ const user_server_settings_with_deps_router = router({
         }
       }
 
-      await discordAccountRouter.createCaller(ctx).upsert(input.user);
+      await discord_account_router.createCaller(ctx).upsert(input.user);
       return user_server_settings_crud_router.createCaller(ctx).create({
         ...input,
         user_id: input.user.id,
@@ -81,7 +81,7 @@ const user_server_settings_with_deps_router = router({
 });
 
 const user_server_settings_upsert = router({
-  upsert: withDiscordAccountProcedure
+  upsert: with_discord_account_procedure
     .input(z_user_server_settings_create)
     .mutation(async ({ input, ctx }) => {
       return upsert({
@@ -94,7 +94,7 @@ const user_server_settings_upsert = router({
         update: () => user_server_settings_crud_router.createCaller(ctx).update(input),
       });
     }),
-  upsertWithDeps: withDiscordAccountProcedure
+  upsertWithDeps: with_discord_account_procedure
     .input(z_user_server_settings_create_with_deps)
     .mutation(async ({ input, ctx }) => {
       return upsert({
@@ -112,7 +112,7 @@ const user_server_settings_upsert = router({
     }),
 });
 
-export const userServerSettingsRouter = mergeRouters(
+export const user_server_settings_router = MergeRouters(
   user_server_settings_crud_router,
   user_server_settings_with_deps_router,
   user_server_settings_upsert

@@ -1,7 +1,7 @@
 import type { DiscordAccount, Server } from "@answeroverflow/db";
 import { TRPCError } from "@trpc/server";
 import { PermissionFlagsBits, PermissionResolvable, PermissionsBitField } from "discord.js";
-import { Source, sourceTypes, createContextInner } from "~api/router/context";
+import { Source, source_types, CreateContextInner } from "~api/router/context";
 import {
   INVALID_ROUTE_FOR_BOT_ERROR,
   INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,
@@ -27,7 +27,7 @@ export async function mockAccountWithServersCallerCtx(
 export async function mockAccountCallerCtx(caller: Source, override: Partial<DiscordAccount> = {}) {
   const account = mockDiscordAccount(override);
 
-  const ctx = await createContextInner({
+  const ctx = await CreateContextInner({
     session: null,
     source: caller,
     discord_account: {
@@ -42,7 +42,7 @@ export async function mockAccountCallerCtx(caller: Source, override: Partial<Dis
 }
 
 export async function mockUnauthedCtx(caller: Source) {
-  const ctx = await createContextInner({
+  const ctx = await CreateContextInner({
     session: null,
     source: caller,
     discord_account: null,
@@ -62,7 +62,7 @@ type CtxOverride = {
 };
 
 export function createCtxWithServers(input: CtxOverride) {
-  return createContextInner({
+  return CreateContextInner({
     session: null,
     source: input.caller,
     discord_account: {
@@ -131,11 +131,11 @@ export type SourceVariantsTest = {
 };
 
 export async function testAllSources({
-  sourcesThatShouldWork = [...sourceTypes],
+  sourcesThatShouldWork = [...source_types],
   operation,
 }: SourceVariantsTest) {
   // Possibly swap to Promise.All - going in parallel break things sometimes
-  for await (const source of sourceTypes) {
+  for await (const source of source_types) {
     const sourceIsAllowed = sourcesThatShouldWork.includes(source);
     await operation(source, sourceIsAllowed);
   }
@@ -153,7 +153,7 @@ export type AllVaraintsTest = {
 };
 
 export async function testAllVariants({
-  sourcesThatShouldWork = [...sourceTypes],
+  sourcesThatShouldWork = [...source_types],
   permissionsThatShouldWork = Object.keys(PermissionFlagsBits) as PermissionResolvable[],
   operation,
 }: AllVaraintsTest) {
@@ -242,7 +242,7 @@ export async function testAllDataVariants<F, T extends F>({
 }
 
 export async function testAllVariantsThatThrowErrors({
-  sourcesThatShouldWork = [...sourceTypes],
+  sourcesThatShouldWork = [...source_types],
   permissionsThatShouldWork = Object.keys(PermissionFlagsBits) as PermissionResolvable[],
   operation,
   permission_failure_message = MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,

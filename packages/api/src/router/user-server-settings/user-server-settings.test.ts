@@ -6,7 +6,7 @@ import {
   createDiscordAccount,
   createUserServerSettings,
 } from "@answeroverflow/db";
-import { userServerSettingsRouter } from "./user-server-settings";
+import { user_server_settings_router } from "./user-server-settings";
 import { mockDiscordAccount, mockServer } from "@answeroverflow/db-mock";
 
 let server: Server;
@@ -34,7 +34,7 @@ describe("User Server Settings Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx } = await mockAccountWithServersCallerCtx(server, source);
-          const router = userServerSettingsRouter.createCaller(ctx);
+          const router = user_server_settings_router.createCaller(ctx);
           await expect(
             router.byId({
               server_id: server.id,
@@ -53,7 +53,7 @@ describe("User Server Settings Operations", () => {
             undefined,
             discord_account
           );
-          const router = userServerSettingsRouter.createCaller(ctx);
+          const router = user_server_settings_router.createCaller(ctx);
           const user_server_settings = await router.byId({
             server_id: server.id,
             user_id: discord_account.id,
@@ -70,7 +70,7 @@ describe("User Server Settings Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx } = await mockAccountWithServersCallerCtx(server, source);
-          const router = userServerSettingsRouter.createCaller(ctx);
+          const router = user_server_settings_router.createCaller(ctx);
           await expect(
             router.create({
               server_id: server.id,
@@ -85,7 +85,7 @@ describe("User Server Settings Operations", () => {
         async operation(source) {
           const { ctx, account } = await mockAccountWithServersCallerCtx(server, source);
           await createDiscordAccount(account);
-          const router = userServerSettingsRouter.createCaller(ctx);
+          const router = user_server_settings_router.createCaller(ctx);
           const user_server_settings = await router.create({
             server_id: server.id,
             user_id: account.id,
@@ -108,7 +108,7 @@ describe("User Server Settings Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx } = await mockAccountWithServersCallerCtx(server, source);
-          const router = userServerSettingsRouter.createCaller(ctx);
+          const router = user_server_settings_router.createCaller(ctx);
           await expect(
             router.update({
               server_id: server.id,
@@ -130,7 +130,7 @@ describe("User Server Settings Operations", () => {
             undefined,
             discord_account
           );
-          const router = userServerSettingsRouter.createCaller(ctx);
+          const router = user_server_settings_router.createCaller(ctx);
           const user_server_settings = await router.update({
             server_id: server.id,
             user_id: discord_account.id,
@@ -151,7 +151,7 @@ describe("User Server Settings Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx } = await mockAccountWithServersCallerCtx(server, source);
-          const router = userServerSettingsRouter.createCaller(ctx);
+          const router = user_server_settings_router.createCaller(ctx);
           await expect(
             router.createWithDeps({
               server_id: server.id,
@@ -166,7 +166,7 @@ describe("User Server Settings Operations", () => {
         async operation(source) {
           const { ctx, account } = await mockAccountWithServersCallerCtx(server, source);
           await createDiscordAccount(account);
-          const router = userServerSettingsRouter.createCaller(ctx);
+          const router = user_server_settings_router.createCaller(ctx);
           const user_server_settings = await router.createWithDeps({
             server_id: server.id,
             user: account,
@@ -184,7 +184,7 @@ describe("User Server Settings Operations", () => {
         await testAllSources({
           async operation(source) {
             const { ctx } = await mockAccountWithServersCallerCtx(server, source);
-            const router = userServerSettingsRouter.createCaller(ctx);
+            const router = user_server_settings_router.createCaller(ctx);
             await expect(
               router.upsert({
                 server_id: server.id,
@@ -203,7 +203,7 @@ describe("User Server Settings Operations", () => {
               undefined,
               discord_account
             );
-            const router = userServerSettingsRouter.createCaller(ctx);
+            const router = user_server_settings_router.createCaller(ctx);
             const user_server_settings = await router.upsert({
               server_id: server.id,
               user_id: discord_account.id,
@@ -220,7 +220,7 @@ describe("User Server Settings Operations", () => {
         await testAllSources({
           async operation(source) {
             const { ctx, account } = await mockAccountWithServersCallerCtx(server, source);
-            const router = userServerSettingsRouter.createCaller(ctx);
+            const router = user_server_settings_router.createCaller(ctx);
             await createDiscordAccount(account);
             await createUserServerSettings({
               server_id: server.id,
@@ -251,7 +251,7 @@ describe("User Server Settings Operations", () => {
               server_id: server.id,
               user_id: account.id,
             });
-            const router = userServerSettingsRouter.createCaller(ctx);
+            const router = user_server_settings_router.createCaller(ctx);
             const user_server_settings = await router.upsert({
               server_id: server.id,
               user_id: account.id,
@@ -274,7 +274,7 @@ describe("User Server Settings Operations", () => {
         await testAllSources({
           async operation(source) {
             const { ctx } = await mockAccountWithServersCallerCtx(server, source);
-            const router = userServerSettingsRouter.createCaller(ctx);
+            const router = user_server_settings_router.createCaller(ctx);
             await expect(
               router.upsertWithDeps({
                 server_id: server.id,
@@ -288,7 +288,7 @@ describe("User Server Settings Operations", () => {
         await testAllSources({
           async operation(source) {
             const { ctx, account } = await mockAccountWithServersCallerCtx(server, source);
-            const router = userServerSettingsRouter.createCaller(ctx);
+            const router = user_server_settings_router.createCaller(ctx);
             const user_server_settings = await router.upsertWithDeps({
               server_id: server.id,
               user: account,
@@ -305,7 +305,7 @@ describe("User Server Settings Operations", () => {
         await testAllSources({
           async operation(source) {
             const { ctx } = await mockAccountWithServersCallerCtx(server, source);
-            const router = userServerSettingsRouter.createCaller(ctx);
+            const router = user_server_settings_router.createCaller(ctx);
             await expect(
               router.upsertWithDeps({
                 server_id: server.id,
@@ -327,7 +327,7 @@ describe("User Server Settings Operations", () => {
               server_id: server.id,
               user_id: account.id,
             });
-            const router = userServerSettingsRouter.createCaller(ctx);
+            const router = user_server_settings_router.createCaller(ctx);
             const user_server_settings = await router.upsertWithDeps({
               server_id: server.id,
               user: account,

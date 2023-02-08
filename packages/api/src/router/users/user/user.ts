@@ -1,17 +1,17 @@
 import { z } from "zod";
-import { mergeRouters, publicProcedure, router } from "~api/router/trpc";
+import { MergeRouters, public_procedure, router } from "~api/router/trpc";
 
 export const user_create_input = z.object({ name: z.string(), id: z.string() });
 
 const user_modify_router = router({
-  create: publicProcedure.input(user_create_input).mutation(({ ctx, input }) => {
+  create: public_procedure.input(user_create_input).mutation(({ ctx, input }) => {
     return ctx.prisma.user.create({
       data: {
         ...input,
       },
     });
   }),
-  update: publicProcedure
+  update: public_procedure
     .input(z.object({ name: z.string(), id: z.string() }))
     .mutation(({ ctx, input }) => {
       return ctx.prisma.user.update({
@@ -24,16 +24,16 @@ const user_modify_router = router({
 });
 
 const user_find_router = router({
-  all: publicProcedure.query(({ ctx }) => {
+  all: public_procedure.query(({ ctx }) => {
     return ctx.prisma.user.findMany();
   }),
-  byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
+  byId: public_procedure.input(z.string()).query(({ ctx, input }) => {
     return ctx.prisma.user.findFirst({ where: { id: input } });
   }),
 });
 
 const user_upsert_router = router({
-  upsert: publicProcedure.input(user_create_input).mutation(async ({ ctx, input }) => {
+  upsert: public_procedure.input(user_create_input).mutation(async ({ ctx, input }) => {
     const user_fetch = user_find_router.createCaller(ctx);
     const user_update_create = user_modify_router.createCaller(ctx);
     let existing_user = await user_fetch.byId(input.id);
@@ -44,4 +44,4 @@ const user_upsert_router = router({
   }),
 });
 
-export const userRouter = mergeRouters(user_find_router, user_upsert_router);
+export const user_router = MergeRouters(user_find_router, user_upsert_router);

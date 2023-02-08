@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { PermissionFlagsBits, PermissionResolvable } from "discord.js";
-import { Source, sourceTypes } from "~api/router/context";
+import { Source, source_types } from "~api/router/context";
 import {
   createInvalidSourceError,
   MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
@@ -57,7 +57,7 @@ describe("Test All Sources", () => {
         }
       },
     });
-    expect(failed_sources.length).toEqual(sourceTypes.length - 1);
+    expect(failed_sources.length).toEqual(source_types.length - 1);
   });
 });
 

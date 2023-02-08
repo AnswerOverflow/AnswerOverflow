@@ -45,10 +45,10 @@ type PermissionsChecksWithData<T> =
 
 async function validatePermissionsWithData<T>(permissions: PermissionsChecksWithData<T>, data: T) {
   if (Array.isArray(permissions)) {
-    const permissionResults = permissions.map((permission) => permission(data));
+    const permission_results = permissions.map((permission) => permission(data));
     // flatten
-    const flattenedPermissionResults = permissionResults.flat();
-    await iteratePermissionResults(flattenedPermissionResults);
+    const flattened_permission_results = permission_results.flat();
+    await iteratePermissionResults(flattened_permission_results);
   } else {
     await iteratePermissionResults(permissions(data));
   }
