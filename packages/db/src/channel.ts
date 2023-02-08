@@ -125,7 +125,14 @@ export async function createChannel(data: z.infer<typeof z_channel_create>) {
 }
 
 export async function createManyChannels(data: z.infer<typeof z_channel_create>[]) {
-  await prisma.channel.createMany({ data });
+  await prisma.channel.createMany({
+    data: data.map((c) =>
+      combineChannelSettingsFlagsToBitfield({
+        old: getDefaultChannel(c),
+        updated: c,
+      })
+    ),
+  });
   return data.map((c) => getDefaultChannel({ ...c }));
 }
 
