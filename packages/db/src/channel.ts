@@ -8,7 +8,7 @@ import {
   channel_bitfield_flags,
   z_channel,
 } from "./zod-schemas";
-import { prisma, getDefaultChannel } from "@answeroverflow/prisma-types";
+import { prisma, getDefaultChannel, Channel } from "@answeroverflow/prisma-types";
 import { omit } from "@answeroverflow/utils";
 import { dictToBitfield } from "./utils/bitfield";
 
@@ -20,13 +20,15 @@ export const z_channel_required = z_channel.pick({
   parent_id: true,
 });
 
-export const z_channel_mutable = z_channel.pick({
-  name: true,
-  flags: true,
-  invite_code: true,
-  solution_tag_id: true,
-  last_indexed_snowflake: true,
-});
+export const z_channel_mutable = z_channel
+  .pick({
+    name: true,
+    flags: true,
+    invite_code: true,
+    solution_tag_id: true,
+    last_indexed_snowflake: true,
+  })
+  .deepPartial();
 
 export const z_channel_create = z_channel_mutable.merge(z_channel_required);
 
@@ -55,6 +57,13 @@ export const z_channel_update = z_channel_mutable.merge(
   })
 );
 
+// We omit flags because it's too complicated to update many of them
+export const z_channel_update_many = z_channel_update
+  .omit({
+    flags: true,
+  })
+  .array();
+
 export const z_thread_create_with_deps = z_thread_create
   .omit({
     parent_id: true, // Taken from parent
@@ -68,7 +77,7 @@ export const z_thread_upsert_with_deps = z_thread_create_with_deps;
 
 function combineChannelSettingsFlagsToBitfield<
   T extends { bitfield: number },
-  F extends { flags: Record<string, boolean> }
+  F extends z.infer<typeof z_channel_mutable>
 >({ old, updated }: { old: T; updated: F }) {
   const old_flags = bitfieldToChannelFlags(old.bitfield);
   const new_flags = { ...old_flags, ...updated.flags };
@@ -94,6 +103,12 @@ export async function findChannelById(id: string) {
   return addFlagsToChannel(data);
 }
 
+export async function findChannelByInviteCode(invite_code: string) {
+  const data = await prisma.channel.findUnique({ where: { invite_code } });
+  if (!data) return null;
+  return addFlagsToChannel(data);
+}
+
 export async function findManyChannelsById(ids: string[]) {
   const data = await prisma.channel.findMany({ where: { id: { in: ids } } });
   return data.map(addFlagsToChannel);
@@ -102,7 +117,7 @@ export async function findManyChannelsById(ids: string[]) {
 export async function createChannel(data: z.infer<typeof z_channel_create>) {
   const created = await prisma.channel.create({
     data: combineChannelSettingsFlagsToBitfield({
-      old: getDefaultChannel({ ...data }),
+      old: getDefaultChannel(data),
       updated: data,
     }),
   });
@@ -114,8 +129,14 @@ export async function createManyChannels(data: z.infer<typeof z_channel_create>[
   return data.map((c) => getDefaultChannel({ ...c }));
 }
 
-export async function updateChannel(data: z.infer<typeof z_channel_update>) {
-  const updated = await prisma.channel.update({ where: { id: data.id }, data });
+export async function updateChannel(data: z.infer<typeof z_channel_update>, old: Channel) {
+  const updated = await prisma.channel.update({
+    where: { id: data.id },
+    data: combineChannelSettingsFlagsToBitfield({
+      old,
+      updated: data,
+    }),
+  });
   return addFlagsToChannel(updated);
 }
 
@@ -141,7 +162,7 @@ export async function createChannelWithDeps(data: z.infer<typeof z_channel_creat
 export function upsertChannel(data: z.infer<typeof z_channel_upsert>) {
   return upsert({
     create: () => createChannel(data),
-    update: () => updateChannel(data),
+    update: (old) => updateChannel(data, old),
     find: () => findChannelById(data.id),
   });
 }

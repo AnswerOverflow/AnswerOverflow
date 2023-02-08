@@ -17,10 +17,8 @@ export const ALLOWED_CHANNEL_TYPES = new Set([
   ...ALLOWED_THREAD_TYPES,
 ]);
 
-export function toZObject<T extends readonly string[]>(
-  ...keys: T
-): z.ZodObject<Record<T[number], z.ZodOptional<z.ZodBoolean>>> {
-  return z.object(toDict(() => z.boolean().optional(), ...keys));
+export function toZObject<T extends readonly string[]>(...keys: T) {
+  return z.object(toDict(() => z.boolean(), ...keys));
 }
 
 export const z_unique_array = z.array(z.string()).transform((arr) => [...new Set(arr)]);
@@ -50,6 +48,8 @@ export const z_channel = z.object({
   solution_tag_id: z.string().nullable(),
 });
 
+export type ChannelWithFlags = z.infer<typeof z_channel>;
+
 export const bitfieldToChannelFlags = (bitfield: number) =>
   bitfieldToDict(bitfield, channel_bitfield_flags);
 
@@ -72,6 +72,8 @@ export const z_channel_public = z_channel.pick({
   parent_id: true,
   invite_code: true,
 });
+
+export type ChannelPublicWithFlags = z.infer<typeof z_channel_public>;
 
 export const z_discord_image = z.object({
   url: z.string(),

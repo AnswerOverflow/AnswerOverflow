@@ -19,11 +19,10 @@ export class SyncOnReady extends Listener {
 export class SyncOnJoin extends Listener {
   public async run(guild: Guild) {
     await upsertServer(toAOServer(guild));
-    await upsertManyChannels(
-      guild.channels.cache
-        .filter((channel) => ALLOWED_CHANNEL_TYPES.has(channel.type))
-        .map((channel) => toAOChannel(channel))
-    );
+    const channels_to_upsert = guild.channels.cache
+      .filter((channel) => ALLOWED_CHANNEL_TYPES.has(channel.type))
+      .map((channel) => toAOChannel(channel));
+    await upsertManyChannels(channels_to_upsert);
   }
 }
 

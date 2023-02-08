@@ -22,7 +22,7 @@ import {
 } from "./mark-solution";
 import { toAOChannelWithServer } from "~discord-bot/utils/conversions";
 
-import type { ChannelSettingsWithFlags } from "@answeroverflow/api";
+import type { ChannelWithFlags } from "@answeroverflow/api";
 import { CONSENT_BUTTON_DATA } from "./consent";
 import {
   mockGuild,
@@ -38,7 +38,7 @@ import {
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import { randomSnowflake } from "@answeroverflow/discordjs-utils";
-import { createChannelSettings, createChannelWithDeps } from "@answeroverflow/db";
+import { createChannelWithDeps } from "@answeroverflow/db";
 
 let client: Client;
 let guild: Guild;
@@ -102,13 +102,12 @@ describe("Can Mark Solution", () => {
         client,
         channel: text_channel_thread,
       });
-      await createChannelWithDeps(toAOChannelWithServer(text_channel));
-      await createChannelSettings({
-        channel_id: text_channel.id,
-        solution_tag_id: "solved",
+      await createChannelWithDeps({
+        ...toAOChannelWithServer(text_channel),
         flags: {
           mark_solution_enabled: false,
         },
+        solution_tag_id: "solved",
       });
       await expect(checkIfCanMarkSolution(message, default_author.user)).rejects.toThrowError(
         "Mark solution is not enabled in this channel"
@@ -116,16 +115,13 @@ describe("Can Mark Solution", () => {
     });
   });
   describe("Check If Can Mark Solution Failures - Mark Solution Enabled", () => {
-    beforeEach(async () => {
-      await createChannelWithDeps(toAOChannelWithServer(text_channel));
-      await createChannelSettings({
-        channel_id: text_channel.id,
+    it("should fail if the question message is not found for a text channel thread", async () => {
+      await createChannelWithDeps({
+        ...toAOChannelWithServer(text_channel),
         flags: {
           mark_solution_enabled: true,
         },
       });
-    });
-    it("should fail if the question message is not found for a text channel thread", async () => {
       mockMessage({
         client,
         channel: text_channel,
@@ -139,6 +135,12 @@ describe("Can Mark Solution", () => {
       ).rejects.toThrowError("Could not find the root message of the thread");
     });
     it("should fail if the question message is not found for a forum channel thread", async () => {
+      await createChannelWithDeps({
+        ...toAOChannelWithServer(forum_channel),
+        flags: {
+          mark_solution_enabled: true,
+        },
+      });
       mockMessage({
         client,
         channel: forum_channel_thread,
@@ -147,19 +149,24 @@ describe("Can Mark Solution", () => {
         client,
         channel: forum_channel_thread,
       });
-      await createChannelWithDeps(toAOChannelWithServer(forum_channel));
-      await createChannelSettings({
-        channel_id: forum_channel.id,
-        solution_tag_id: "solved",
+      await createChannelWithDeps({
+        ...toAOChannelWithServer(text_channel),
         flags: {
           mark_solution_enabled: true,
         },
+        solution_tag_id: "solved",
       });
       await expect(
         checkIfCanMarkSolution(solution_message, default_author.user)
       ).rejects.toThrowError("Could not find the root message of the thread");
     });
     it("should fail if the user is not the question author and does not have override permissions", async () => {
+      await createChannelWithDeps({
+        ...toAOChannelWithServer(text_channel),
+        flags: {
+          mark_solution_enabled: true,
+        },
+      });
       mockMessage({
         client,
         channel: text_channel,
@@ -202,13 +209,12 @@ describe("Can Mark Solution", () => {
         channel: thread_with_solved_tag,
       });
 
-      await createChannelWithDeps(toAOChannelWithServer(forum_channel));
-      await createChannelSettings({
-        channel_id: forum_channel.id,
-        solution_tag_id: "solved",
+      await createChannelWithDeps({
+        ...toAOChannelWithServer(forum_channel),
         flags: {
           mark_solution_enabled: true,
         },
+        solution_tag_id: "solved",
       });
       await expect(
         checkIfCanMarkSolution(solution_message, default_author.user)
@@ -239,13 +245,12 @@ describe("Can Mark Solution", () => {
           },
         },
       });
-      await createChannelWithDeps(toAOChannelWithServer(text_channel));
-      await createChannelSettings({
-        channel_id: text_channel.id,
-        solution_tag_id: "solved",
+      await createChannelWithDeps({
+        ...toAOChannelWithServer(text_channel),
         flags: {
           mark_solution_enabled: true,
         },
+        solution_tag_id: "solved",
       });
 
       await expect(
@@ -273,13 +278,12 @@ describe("Can Mark Solution", () => {
         solution_id: solution_message.id,
       });
 
-      await createChannelWithDeps(toAOChannelWithServer(text_channel));
-      await createChannelSettings({
-        channel_id: text_channel.id,
-        solution_tag_id: "solved",
+      await createChannelWithDeps({
+        ...toAOChannelWithServer(text_channel),
         flags: {
           mark_solution_enabled: true,
         },
+        solution_tag_id: "solved",
       });
 
       await expect(
@@ -291,13 +295,12 @@ describe("Can Mark Solution", () => {
     let question_message: Message;
     let solution_message: Message;
     beforeEach(async () => {
-      await createChannelWithDeps(toAOChannelWithServer(text_channel));
-      await createChannelSettings({
-        channel_id: text_channel.id,
-        solution_tag_id: "solved",
+      await createChannelWithDeps({
+        ...toAOChannelWithServer(text_channel),
         flags: {
           mark_solution_enabled: true,
         },
+        solution_tag_id: "solved",
       });
 
       question_message = mockMessage({
@@ -358,7 +361,7 @@ describe("Can Mark Solution", () => {
 describe("Make Mark Solution Response", () => {
   let question: Message;
   let solution: Message;
-  let settings: ChannelSettingsWithFlags;
+  let settings: ChannelWithFlags;
   let jump_to_solution_button_data: Partial<ButtonComponentData>;
   const solution_message_without_consent_request =
     "**Thank you for marking this question as solved!**";
@@ -377,7 +380,7 @@ describe("Make Mark Solution Response", () => {
       channel: text_channel_thread,
     });
     settings = {
-      channel_id: text_channel.id,
+      ...toAOChannelWithServer(text_channel),
       flags: {
         mark_solution_enabled: true,
         auto_thread_enabled: true,

@@ -12,7 +12,7 @@ export const z_server_mutable = z_server
   .omit({
     id: true,
   })
-  .partial();
+  .deepPartial();
 
 export const z_server_create = z_server_mutable.merge(z_server_required);
 
@@ -36,7 +36,8 @@ export function combineServerSettings<
 }
 
 export function getDefaultServerWithFlags(
-  override: Partial<z.infer<typeof z_server>> & Pick<z.infer<typeof z_server>, "id" | "name">
+  override: Partial<z.infer<typeof z_server_mutable>> &
+    Pick<z.infer<typeof z_server>, "id" | "name">
 ) {
   return addFlagsToServer(getDefaultServer(override));
 }

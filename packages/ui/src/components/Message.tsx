@@ -7,11 +7,11 @@ import Parser from "html-react-parser";
 import type { MessageWithDiscordAccount } from "@answeroverflow/api";
 import { DiscordIcon } from "./icons/DiscordIcon";
 import Link from "next/link";
-import type { ChannelPublic } from "~api/router/channel/types";
+import type { ChannelPublicWithFlags } from "~api/router/channel/types";
 import { useIsUserInServer } from "../utils";
 export type MessageProps = {
   message: MessageWithDiscordAccount;
-  thread?: ChannelPublic;
+  thread?: ChannelPublicWithFlags;
   blurred?: boolean;
   not_public_title?: string;
 };

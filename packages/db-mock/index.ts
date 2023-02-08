@@ -46,7 +46,7 @@ export function mockChannel(server: Server, override?: Omit<Partial<Channel>, "s
   return getDefaultChannel({
     id: getRandomId(),
     name: "test-channel",
-    server_id: server?.id ?? getRandomId(),
+    server_id: server.id ?? getRandomId(),
     type: ChannelType.GuildText,
     parent_id: null,
     ...override,

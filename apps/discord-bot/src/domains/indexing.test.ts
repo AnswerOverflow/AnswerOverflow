@@ -10,11 +10,10 @@ import {
 } from "discord.js";
 import {
   createChannel,
-  createChannelSettings,
   createDiscordAccount,
   createServer,
   createUserServerSettings,
-  findChannelSettingsById,
+  findChannelById,
   findManyChannelsById,
   findManyDiscordAccountsById,
   findManyMessages,
@@ -86,18 +85,12 @@ async function validateIndexingResults(input: {
 async function upsertChannelSettings(
   channel: TextChannel | ForumChannel | NewsChannel,
   opts: Omit<
-    inferRouterInputs<typeof botRouter>["channel_settings"]["upsertWithDeps"],
-    "channel"
+    inferRouterInputs<typeof botRouter>["channels"]["upsertWithDeps"],
+    "id" | "server" | "name" | "type" | "parent_id"
   > = {}
 ) {
   await createServer(toAOServer(channel.guild));
-  await createChannel(toAOChannel(channel));
-  const settings = await createChannelSettings({
-    channel_id: channel.id,
-    ...opts,
-  });
-
-  return settings;
+  return await createChannel({ ...toAOChannel(channel), ...opts });
 }
 
 describe("Indexing", () => {
@@ -179,7 +172,7 @@ describe("Indexing", () => {
       const messages = mockMessages(text_channel, 100);
       await indexRootChannel(text_channel);
       const largest_id = messages.sort((a, b) => isSnowflakeLargerAsInt(a.id, b.id)).at(-1)!.id;
-      const updated_settings = await findChannelSettingsById(text_channel.id);
+      const updated_settings = await findChannelById(text_channel.id);
       expect(updated_settings!.last_indexed_snowflake).toBe(largest_id);
     });
     it("should start indexing from the last indexed snowflake", async () => {
