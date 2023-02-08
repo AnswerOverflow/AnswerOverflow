@@ -20,9 +20,9 @@ const server_schema = z.object({
   features: z.array(z.string()),
 });
 
-const serverArrayShema = z.array(server_schema);
+const server_array_schema = z.array(server_schema);
 
-const user_servers_cache = new Map<string, ReturnType<typeof serverArrayShema.parse>>();
+const user_servers_cache = new Map<string, ReturnType<typeof server_array_schema.parse>>();
 
 export type DiscordServer = z.infer<typeof server_schema>;
 
@@ -31,7 +31,7 @@ export async function getUserServers(access_token: string) {
     return user_servers_cache.get(access_token);
   }
   const data = await discordFetch("/users/@me/guilds", access_token);
-  const servers = serverArrayShema.parse(data.data);
+  const servers = server_array_schema.parse(data.data);
   user_servers_cache.set(access_token, servers);
   return servers;
 }

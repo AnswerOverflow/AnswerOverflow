@@ -3,7 +3,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { getDiscordUser } from "./discord-oauth";
 import type { Adapter, AdapterAccount } from "next-auth/adapters";
 
-export const extendedAdapter: Adapter = {
+export const extended_adapter: Adapter = {
   ...PrismaAdapter(prisma),
   async linkAccount(account) {
     if (account.provider !== "discord") {

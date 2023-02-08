@@ -39,7 +39,7 @@ module.exports = {
       "warn",
       {
         selector: "variable",
-        format: ["snake_case", "UPPER_CASE"],
+        format: ["snake_case", "UPPER_CASE", "PascalCase"],
         leadingUnderscore: "allow",
         trailingUnderscore: "allow",
       },

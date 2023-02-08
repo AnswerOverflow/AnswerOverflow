@@ -1,4 +1,4 @@
-import { extendedAdapter } from "./adapter";
+import { extended_adapter } from "./adapter";
 import type { z } from "zod";
 import type { z_user_schema } from "./discord-oauth";
 import { prisma } from "@answeroverflow/db";
@@ -28,11 +28,11 @@ beforeEach(() => {
 describe("Discord Auth", () => {
   // This is the first time we have ever seen this user, we need to generate information for them
   it("should create a Discord user for a new account", async () => {
-    const created_user = await extendedAdapter.createUser({
+    const created_user = await extended_adapter.createUser({
       email: mock_discord_account.email!,
       emailVerified: null,
     });
-    await extendedAdapter.linkAccount({
+    await extended_adapter.linkAccount({
       provider: "discord",
       providerAccountId: mock_discord_account.id,
       type: "oauth",
@@ -59,11 +59,11 @@ describe("Discord Auth", () => {
         avatar: mock_discord_account.avatar,
       },
     });
-    const created_user = await extendedAdapter.createUser({
+    const created_user = await extended_adapter.createUser({
       email: mock_discord_account.email!,
       emailVerified: null,
     });
-    await extendedAdapter.linkAccount({
+    await extended_adapter.linkAccount({
       provider: "discord",
       providerAccountId: mock_discord_account.id,
       type: "oauth",

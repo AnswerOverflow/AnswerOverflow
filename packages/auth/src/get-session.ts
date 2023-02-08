@@ -3,7 +3,7 @@ import { unstable_getServerSession } from "next-auth";
 
 import { authOptions } from "./auth-options";
 
-export const getServerSession = async (
+export const GetServerSession = async (
   ctx:
     | {
         req: GetServerSidePropsContext["req"];

@@ -1,10 +1,10 @@
 import type { NextAuthOptions } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
-import { extendedAdapter } from "./adapter";
+import { extended_adapter } from "./adapter";
 
 export const authOptions: NextAuthOptions = {
   // Configure one or more authentication providers
-  adapter: extendedAdapter,
+  adapter: extended_adapter,
   providers: [
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID,
