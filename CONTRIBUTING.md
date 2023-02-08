@@ -41,7 +41,7 @@ There are shortcut buttons in the README to jumpstart running from a remote envi
 
 ### Codespaces
 
-- I had issues making the 16 gb machine work, that's why it uses the 32 gb machine. If you can make the 16 gb machine work, make a PR
+- I had issues making the 16 gb machine work, that's why it uses the 32 gb machine. If you can make the 16 gb machine work, please open an issue
 
 ## VSCode users
 
