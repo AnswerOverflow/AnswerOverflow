@@ -25,13 +25,7 @@ export function getDefaultServer(override: Partial<Server> & { id: string; name:
 }
 
 export function getDefaultChannel(
-  override: Partial<Channel> & {
-    id: string;
-    name: string;
-    server_id: string;
-    type: number;
-    parent_id: string | null;
-  }
+  override: Partial<Channel> & Pick<Channel, "id" | "name" | "server_id" | "parent_id" | "type">
 ): Channel {
   const data: Channel = {
     bitfield: 0,

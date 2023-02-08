@@ -87,13 +87,14 @@ model IgnoredDiscordAccount {
 }
 
 model Server {
-  id          String    @id @unique
-  name        String    @db.VarChar(100)
-  icon        String?   @db.VarChar(45)
-  kicked_time DateTime?
+  // Discord Data
+  id   String  @id @unique
+  name String  @db.VarChar(100)
+  icon String? @db.VarChar(45)
 
   // Answer Overflow Settings
-  bitfield Int @default(0)
+  bitfield    Int       @default(0)
+  kicked_time DateTime?
 
   // Relations
   user_server_settings UserServerSettings[]
@@ -101,6 +102,7 @@ model Server {
 }
 
 model Channel {
+  // Discord Data
   id          String  @id
   server_id   String
   name        String  @db.VarChar(100)

@@ -6,8 +6,6 @@ export async function clearDatabase() {
     throw new Error("clearDatabase can only be used in test environment");
   }
   await prisma.userServerSettings.deleteMany({});
-  await prisma.serverSettings.deleteMany({});
-  await prisma.channelSettings.deleteMany({});
   await prisma.channel.deleteMany({});
   await prisma.server.deleteMany({});
   await prisma.account.deleteMany({});
