@@ -70,7 +70,7 @@ Want to contribute? First, read the <a href="https://github.com/AnswerOverflow/A
 
 <div align="left">
   <div>
-  <a href="https://gitpod.io/https://github.com/AnswerOverflow/AnswerOverflow">
+  <a href="https://gitpod.io/#https://github.com/AnswerOverflow/AnswerOverflow">
       <img src="https://gitpod.io/button/open-in-gitpod.svg" />
     </a>
   </div>
