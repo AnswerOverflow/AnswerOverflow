@@ -1,35 +1,4 @@
-import type {
-  Channel,
-  ChannelSettings,
-  DiscordAccount,
-  Server,
-  ServerSettings,
-  User,
-  UserServerSettings,
-} from "@prisma/client";
-
-export function getDefaultChannelSettings(
-  override: Partial<ChannelSettings> & {
-    channel_id: string;
-  }
-): ChannelSettings {
-  return {
-    bitfield: 0,
-    invite_code: null,
-    last_indexed_snowflake: null,
-    solution_tag_id: null,
-    ...override,
-  };
-}
-
-export function getDefaultServerSettings(
-  override: Partial<ServerSettings> & { server_id: string }
-) {
-  return {
-    bitfield: 0,
-    ...override,
-  };
-}
+import type { Channel, DiscordAccount, Server, User, UserServerSettings } from "@prisma/client";
 
 export function getDefaultUser(
   override: Partial<User> & {
@@ -49,6 +18,7 @@ export function getDefaultServer(override: Partial<Server> & { id: string; name:
   const data: Server = {
     icon: null,
     kicked_time: null,
+    bitfield: 0,
     ...override,
   };
   return data;
@@ -64,6 +34,10 @@ export function getDefaultChannel(
   }
 ): Channel {
   const data: Channel = {
+    bitfield: 0,
+    invite_code: null,
+    last_indexed_snowflake: null,
+    solution_tag_id: null,
     ...override,
   };
   return data;
