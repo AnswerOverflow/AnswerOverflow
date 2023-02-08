@@ -39,10 +39,15 @@ module.exports = {
       "warn",
       {
         selector: "variable",
-        // PascalCase is to allow for React components & arrow functions
-        format: ["snake_case", "UPPER_CASE", "PascalCase"],
+        format: ["snake_case", "UPPER_CASE"],
         leadingUnderscore: "allow",
         trailingUnderscore: "allow",
+      },
+      {
+        selector: "variable",
+        types: ["function"],
+        // arrow functions & react components
+        format: ["camelCase", "PascalCase"],
       },
       {
         selector: "typeLike",

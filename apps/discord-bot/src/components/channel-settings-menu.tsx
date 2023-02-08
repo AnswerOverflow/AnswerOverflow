@@ -20,7 +20,7 @@ export function ChannelSettingsMenu({
   channel: GuildTextBasedChannel;
   settings: ChannelWithFlags;
 }) {
-  const [channelSettings, setChannelSettings] = React.useState<ChannelWithFlags>(settings);
+  const [channel_settings, setChannelSettings] = React.useState<ChannelWithFlags>(settings);
   const is_forum_channel = channel.isThread() && channel.parent?.type == ChannelType.GuildForum;
   const target_channel = getRootChannel(channel);
   if (!target_channel) {
@@ -56,12 +56,12 @@ export function ChannelSettingsMenu({
 
   const ToggleIndexingButton = () => (
     <ToggleButton
-      currently_enabled={channelSettings.flags.indexing_enabled}
+      currently_enabled={channel_settings.flags.indexing_enabled}
       disable_label={"Disable Indexing"}
       enable_label={"Enable Indexing"}
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       onClick={async (interaction: ButtonClickEvent) => {
-        const indexed_enabled = !channelSettings.flags.indexing_enabled;
+        const indexed_enabled = !channel_settings.flags.indexing_enabled;
         let new_invite_code: string | null = null;
         if (indexed_enabled) {
           const channel_invite = await target_channel.createInvite({
@@ -85,13 +85,13 @@ export function ChannelSettingsMenu({
 
   const ToggleMarkSolutionButton = () => (
     <ToggleButton
-      currently_enabled={channelSettings.flags.mark_solution_enabled}
+      currently_enabled={channel_settings.flags.mark_solution_enabled}
       disable_label={"Disable Mark Solution"}
       enable_label={"Enable Mark Solution"}
       onClick={(interaction: ButtonClickEvent) =>
         void updateChannelSettings(interaction, {
           flags: {
-            mark_solution_enabled: !channelSettings.flags.mark_solution_enabled,
+            mark_solution_enabled: !channel_settings.flags.mark_solution_enabled,
           },
         })
       }
@@ -100,14 +100,14 @@ export function ChannelSettingsMenu({
 
   const ToggleForumPostGuidelinesConsentButton = () => (
     <ToggleButton
-      currently_enabled={channelSettings.flags.forum_guidelines_consent_enabled}
+      currently_enabled={channel_settings.flags.forum_guidelines_consent_enabled}
       disable_label={"Disable Forum Post Guidelines Consent"}
       enable_label={"Enable Forum Post Guidelines Consent"}
       onClick={(interaction: ButtonClickEvent) =>
         void updateChannelSettings(interaction, {
           flags: {
             forum_guidelines_consent_enabled:
-              !channelSettings.flags.forum_guidelines_consent_enabled,
+              !channel_settings.flags.forum_guidelines_consent_enabled,
           },
         })
       }
@@ -116,14 +116,14 @@ export function ChannelSettingsMenu({
 
   const ToggleSendMarkSolutionInstructionsButton = () => (
     <ToggleButton
-      currently_enabled={channelSettings.flags.send_mark_solution_instructions_in_new_threads}
+      currently_enabled={channel_settings.flags.send_mark_solution_instructions_in_new_threads}
       disable_label={"Disable Send Mark Solution Instructions"}
       enable_label={"Enable Send Mark Solution Instructions"}
       onClick={(interaction: ButtonClickEvent) => {
         void updateChannelSettings(interaction, {
           flags: {
             send_mark_solution_instructions_in_new_threads:
-              !channelSettings.flags.send_mark_solution_instructions_in_new_threads,
+              !channel_settings.flags.send_mark_solution_instructions_in_new_threads,
           },
         });
       }}
@@ -133,7 +133,7 @@ export function ChannelSettingsMenu({
   const SelectMarkAsSolvedTag = ({ forum_channel }: { forum_channel: ForumChannel }) => (
     <Select
       placeholder="Select a tag to use on mark as solved"
-      value={channelSettings.solution_tag_id ?? ""}
+      value={channel_settings.solution_tag_id ?? ""}
       onChangeValue={(value: string, event: SelectChangeEvent) => {
         const new_solved_tag = value == CLEAR_TAG_VALUE ? null : value;
         void updateChannelSettings(event, {

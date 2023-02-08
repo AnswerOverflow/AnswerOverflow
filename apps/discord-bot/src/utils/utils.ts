@@ -18,7 +18,7 @@ import {
   GuildTextBasedChannel,
 } from "discord.js";
 import type { ReactNode } from "react";
-import { RandomLoadingMessage } from "./constants";
+import { LOADING_MESSAGES } from "./constants";
 
 /**
  * Picks a random item from an array
@@ -37,9 +37,7 @@ export function pickRandom<T>(array: readonly T[]): T {
  */
 export function sendLoadingMessage(message: Message): Promise<typeof message> {
   return send(message, {
-    embeds: [
-      new EmbedBuilder().setDescription(pickRandom(RandomLoadingMessage)).setColor("#FF0000"),
-    ],
+    embeds: [new EmbedBuilder().setDescription(pickRandom(LOADING_MESSAGES)).setColor("#FF0000")],
   });
 }
 
@@ -49,16 +47,16 @@ export function logSuccessCommand(
     | ChatInputCommandSuccessPayload
     | MessageCommandSuccessPayload
 ): void {
-  let successLoggerData: ReturnType<typeof getSuccessLoggerData>;
+  let success_logger_data: ReturnType<typeof getSuccessLoggerData>;
 
   if ("interaction" in payload) {
-    successLoggerData = getSuccessLoggerData(
+    success_logger_data = getSuccessLoggerData(
       payload.interaction.guild,
       payload.interaction.user,
       payload.command
     );
   } else {
-    successLoggerData = getSuccessLoggerData(
+    success_logger_data = getSuccessLoggerData(
       payload.message.guild,
       payload.message.author,
       payload.command
@@ -66,17 +64,17 @@ export function logSuccessCommand(
   }
 
   container.logger.debug(
-    `${successLoggerData.shard} - ${successLoggerData.commandName} ${successLoggerData.author} ${successLoggerData.sentAt}`
+    `${success_logger_data.shard} - ${success_logger_data.command_name} ${success_logger_data.author} ${success_logger_data.sent_at}`
   );
 }
 
 export function getSuccessLoggerData(guild: Guild | null, user: User, command: Command) {
   const shard = getShardInfo(guild?.shardId ?? 0);
-  const commandName = getCommandInfo(command);
+  const command_name = getCommandInfo(command);
   const author = getAuthorInfo(user);
-  const sentAt = getGuildInfo(guild);
+  const sent_at = getGuildInfo(guild);
 
-  return { shard, commandName, author, sentAt };
+  return { shard, command_name, author, sent_at };
 }
 
 function getShardInfo(id: number) {

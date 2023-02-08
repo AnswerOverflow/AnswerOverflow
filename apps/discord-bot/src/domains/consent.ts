@@ -13,7 +13,10 @@ export const CONSENT_BUTTON_DATA = {
   custom_id: CONSENT_BUTTON_ID,
   type: ComponentType.Button,
 } as APIButtonComponent;
-export const makeConsentButton = () => new ButtonBuilder(CONSENT_BUTTON_DATA);
+
+export function makeConsentButton() {
+  return new ButtonBuilder(CONSENT_BUTTON_DATA);
+}
 
 export class ConsentError extends Error {
   constructor(message: string) {
