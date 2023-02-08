@@ -20,7 +20,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf src dist node_modules turbo coverage",
+    "clean": "rm -rf dist node_modules turbo coverage",
     "test": "yarn jest --coverage",
     "test:watch": "yarn jest --watch",
     "lint": "eslint src && tsc --noEmit",
