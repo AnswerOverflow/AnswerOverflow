@@ -11,7 +11,7 @@ const Template: StoryFn<typeof ServerInvite> = (args: ServerInviteProps) => (
 );
 
 //👇 Each story then reuses that template
-const default_message: ServerInviteProps = {
+const defaultMessage: ServerInviteProps = {
   server: {
     icon: null,
     id: "0",
@@ -20,15 +20,13 @@ const default_message: ServerInviteProps = {
   channel: {
     id: "0",
     name: "general",
-    server_id: "0",
-    parent_id: null,
+    serverId: "0",
+    parentId: null,
     type: 0,
-    settings: {
-      invite_code: "123456",
-    },
+    inviteCode: "123456",
   },
-  is_user_in_server: false,
+  isUserInServer: false,
 };
 
 export const Primary = Template.bind({});
-Primary.args = default_message;
+Primary.args = defaultMessage;

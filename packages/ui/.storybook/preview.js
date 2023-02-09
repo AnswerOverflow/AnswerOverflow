@@ -15,7 +15,7 @@ export const parameters = {
 }
 
 export const globalTypes = {
-  tailwind_theme: {
+  tailwindTheme: {
     name: 'Theme',
     description: 'Light/Dark mode for components',
     toolbar: {
@@ -25,14 +25,14 @@ export const globalTypes = {
     },
     defaultValue: process.env.THEME ?? "both"
   },
-  auth_state: {
+  authState: {
     name: "Auth State",
     description: "Toggle between signed in and not signed in",
-    defaultValue: 'signed_in',
+    defaultValue: 'signedIn',
     toolbar: {
       icon: "user",
       dynamicTitle: true,
-      items: ['signed_in', 'signed_out'],
+      items: ['signedIn', 'signedOut'],
     }
   }
 };

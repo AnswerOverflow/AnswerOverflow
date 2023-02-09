@@ -37,11 +37,11 @@ model Account {
 }
 
 model DiscordAccount {
-  id                   String               @id @unique
-  name                 String
-  avatar               String?
-  Account              Account?
-  user_server_settings UserServerSettings[]
+  id                 String               @id @unique
+  name               String
+  avatar             String?
+  Account            Account?
+  userServerSettings UserServerSettings[]
 }
 
 model Session {
@@ -72,59 +72,51 @@ model VerificationToken {
 }
 
 model UserServerSettings {
-  user_id   String
-  server_id String
-  bitfield  Int    @default(0)
+  userId   String
+  serverId String
+  bitfield Int    @default(0)
 
-  user   DiscordAccount @relation(fields: [user_id], references: [id])
-  server Server         @relation(fields: [server_id], references: [id])
+  user   DiscordAccount @relation(fields: [userId], references: [id])
+  server Server         @relation(fields: [serverId], references: [id])
 
-  @@id([user_id, server_id])
+  @@id([userId, serverId])
 }
 
 model IgnoredDiscordAccount {
   id String @id @unique
 }
 
-// Servers
-
 model Server {
-  id          String    @id @unique
-  name        String    @db.VarChar(100)
-  icon        String?   @db.VarChar(45)
-  kicked_time DateTime?
+  // Discord Data
+  id   String  @id @unique
+  name String  @db.VarChar(100)
+  icon String? @db.VarChar(45)
 
-  user_server_settings UserServerSettings[]
-  channels             Channel[]
-  server_settings      ServerSettings?
+  // Answer Overflow Settings
+  bitfield   Int       @default(0)
+  kickedTime DateTime?
+
+  // Relations
+  userServerSettings UserServerSettings[]
+  channels           Channel[]
 }
-
-model ServerSettings {
-  server_id String @id @unique
-  bitfield  Int    @default(0)
-  Server    Server @relation(fields: [server_id], references: [id])
-}
-
-// Channels
 
 model Channel {
-  id               String           @id
-  server_id        String
-  name             String           @db.VarChar(100)
-  type             Int
-  parent_id        String?
-  parent           Channel?         @relation("ParentChannel", fields: [parent_id], references: [id])
-  threads          Channel[]        @relation("ParentChannel")
-  server           Server           @relation(fields: [server_id], references: [id])
-  channel_settings ChannelSettings?
-}
+  // Discord Data
+  id         String  @id
+  serverId   String
+  name       String  @db.VarChar(100)
+  type       Int
+  parentId   String?
+  inviteCode String? @unique @db.VarChar(15)
 
-model ChannelSettings {
-  channel_id             String  @id
-  bitfield               Int     @default(0)
-  last_indexed_snowflake String?
-  invite_code            String? @unique @db.VarChar(15)
-  solution_tag_id        String?
+  // Answer Overflow Settings
+  bitfield             Int     @default(0)
+  lastIndexedSnowflake String?
+  solutionTagId        String?
 
-  channel Channel @relation(fields: [channel_id], references: [id])
+  // Relations
+  parent  Channel?  @relation("ParentChannel", fields: [parentId], references: [id])
+  threads Channel[] @relation("ParentChannel")
+  server  Server    @relation(fields: [serverId], references: [id])
 }

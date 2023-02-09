@@ -9,9 +9,10 @@ import {
 } from "discord.js";
 import React from "react";
 import { ephemeralReply } from "~discord-bot/utils/utils";
-import { getDefaultChannelSettingsWithFlags } from "@answeroverflow/db";
+import { ChannelWithFlags, getDefaultChannelWithFlags } from "@answeroverflow/db";
 import { TRPCError } from "@trpc/server";
 import { createMemberCtx } from "~discord-bot/utils/context";
+import { toAOChannel } from "~discord-bot/utils/conversions";
 
 @ApplyOptions<Command.Options>({
   name: "channel-settings",
@@ -34,11 +35,7 @@ export class ChannelSettingsCommand extends Command {
     });
   }
 
-  public override async chatInputRun(
-    interaction: ChatInputCommandInteraction,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _context: ChatInputCommand.RunContext
-  ) {
+  public override async chatInputRun(interaction: ChatInputCommandInteraction) {
     if (interaction.guild == null) {
       return;
     }
@@ -52,14 +49,14 @@ export class ChannelSettingsCommand extends Command {
     const channel = interaction.channel;
     const member = await guild.members.fetch(interaction.user.id);
 
-    const parent_id = channel.isThread() ? channel.parentId : channel.id;
-    if (!parent_id) return;
+    const parentId = channel.isThread() ? channel.parentId : channel.id;
+    if (!parentId) return;
 
     await callApiWithEphemeralErrorHandler(
       {
         async ApiCall(router) {
           try {
-            return await router.channel_settings.byId(parent_id);
+            return router.channels.byId(parentId);
           } catch (error) {
             if (error instanceof TRPCError && error.code == "NOT_FOUND") {
               return null;
@@ -70,14 +67,12 @@ export class ChannelSettingsCommand extends Command {
         },
         Ok(result) {
           if (!result) {
-            result = {
-              ...getDefaultChannelSettingsWithFlags(parent_id),
-              channel: {
-                server_id: guild.id,
-              },
-            };
+            result = getDefaultChannelWithFlags(toAOChannel(channel));
           }
-          const menu = <ChannelSettingsMenu channel={channel} settings={result} />;
+          // TODO: Maybe assert that it matches that spec instead of casting
+          const menu = (
+            <ChannelSettingsMenu channel={channel} settings={result as ChannelWithFlags} />
+          );
           ephemeralReply(container.reacord, menu, interaction);
         },
         getCtx: () => createMemberCtx(member),

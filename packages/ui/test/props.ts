@@ -1,6 +1,5 @@
 import type {
-  ChannelPublic,
-  ChannelPublicWithSettings,
+  ChannelPublicWithFlags,
   DiscordAccountPublic,
   MessageWithDiscordAccount,
   ServerPublic,
@@ -25,11 +24,11 @@ export function mockMessageWithDiscordAccount(override: Partial<MessageWithDisco
     id: randomId(),
     content: "Hello, world!",
     author: mockDiscordAccount(),
-    channel_id: "0",
-    child_thread: null,
+    channelId: "0",
+    childThread: null,
     images: [],
-    replies_to: null,
-    server_id: "0",
+    repliesTo: null,
+    serverId: "0",
     solutions: [],
     public: true,
     ...override,
@@ -47,28 +46,27 @@ export function mockServer(override: Partial<ServerPublic> = {}) {
   return data;
 }
 
-export function mockChannel(override: Partial<ChannelPublic> = {}) {
-  const data: ChannelPublic = {
+export function mockChannel(override: Partial<ChannelPublicWithFlags> = {}) {
+  const data: ChannelPublicWithFlags = {
     id: randomId(),
     name: "general",
-    server_id: "0",
-    parent_id: null,
+    serverId: "0",
+    parentId: null,
     type: 0,
+    inviteCode: null,
     ...override,
   };
   return data;
 }
 
-export function mockChannelWithSettings(override: Partial<ChannelPublicWithSettings> = {}) {
-  const data: ChannelPublicWithSettings = {
+export function mockChannelWithSettings(override: Partial<ChannelPublicWithFlags> = {}) {
+  const data: ChannelPublicWithFlags = {
     id: randomId(),
     name: "general",
-    server_id: "0",
-    parent_id: null,
+    serverId: "0",
+    parentId: null,
     type: 0,
-    settings: {
-      invite_code: null,
-    },
+    inviteCode: null,
     ...override,
   };
   return data;

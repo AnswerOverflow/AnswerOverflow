@@ -22,19 +22,15 @@ export class ConsentCommand extends Command {
   }
 
   public override messageRun() {}
-  public override async chatInputRun(
-    interaction: ChatInputCommandInteraction,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _context: ChatInputCommand.RunContext
-  ) {
+  public override async chatInputRun(interaction: ChatInputCommandInteraction) {
     await callApiWithEphemeralErrorHandler(
       {
         ApiCall(router) {
-          return router.user_server_settings.upsertWithDeps({
+          return router.userServerSettings.upsertWithDeps({
             user: toAODiscordAccount(interaction.user),
-            server_id: interaction.guildId!,
+            serverId: interaction.guildId!,
             flags: {
-              can_publicly_display_messages: true,
+              canPubliclyDisplayMessages: true,
             },
           });
         },

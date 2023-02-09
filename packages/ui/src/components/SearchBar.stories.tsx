@@ -11,9 +11,9 @@ const Template: ComponentStory<typeof SearchBar> = (args: SearchBarProps) => (
 );
 
 //👇 Each story then reuses that template
-const default_message: SearchBarProps = {
+const defaultMessage: SearchBarProps = {
   placeholder: "Search for anything",
 };
 
 export const Primary = Template.bind({});
-Primary.args = default_message;
+Primary.args = defaultMessage;

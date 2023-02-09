@@ -10,7 +10,7 @@ function disableTransitionsTemporarily() {
   }, 0);
 }
 
-function changeCodeHighlighting(dark_theme_enabled: boolean) {
+function changeCodeHighlighting(darkThemeEnabled: boolean) {
   // This is disgusting, but it works for switching the code highlighting
   let darkStyleSheet: CSSStyleSheet | undefined;
   let lightStyleSheet: CSSStyleSheet | undefined;
@@ -32,7 +32,7 @@ function changeCodeHighlighting(dark_theme_enabled: boolean) {
     }
   });
   if (darkStyleSheet && lightStyleSheet) {
-    if (dark_theme_enabled) {
+    if (darkThemeEnabled) {
       darkStyleSheet.disabled = false;
       lightStyleSheet.disabled = true;
     } else {
@@ -41,15 +41,15 @@ function changeCodeHighlighting(dark_theme_enabled: boolean) {
     }
   }
 }
-export function toggleDarkTheme(theme_override?: boolean) {
+export function toggleDarkTheme(themeOverride?: boolean) {
   disableTransitionsTemporarily();
 
   const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
   const isSystemDarkMode = darkModeMediaQuery.matches;
   let isDarkMode: boolean;
-  if (theme_override !== undefined) {
+  if (themeOverride !== undefined) {
     const root = window.document.documentElement;
-    isDarkMode = theme_override;
+    isDarkMode = themeOverride;
     if (isDarkMode) {
       root.classList.add("dark");
     } else {

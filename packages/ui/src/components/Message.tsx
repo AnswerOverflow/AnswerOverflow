@@ -7,12 +7,12 @@ import Parser from "html-react-parser";
 import type { MessageWithDiscordAccount } from "@answeroverflow/api";
 import { DiscordIcon } from "./icons/DiscordIcon";
 import Link from "next/link";
-import type { ChannelPublic } from "~api/router/channel/types";
+import type { ChannelPublicWithFlags } from "~api/router/channel/types";
 import { useIsUserInServer } from "../utils";
 import { forwardRef } from "react";
 export type MessageProps = {
   message: MessageWithDiscordAccount;
-  thread?: ChannelPublic;
+  thread?: ChannelPublicWithFlags;
   blurred?: boolean;
   not_public_title?: string;
   darkMode?: boolean;
@@ -44,16 +44,16 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
     : getSnowflakeUTCDate(message.id);
   const convertedMessageContent = toHTML(message.content);
   const parsedMessageContent = Parser(convertedMessageContent);
-  const is_user_in_server = useIsUserInServer(message.server_id);
-  if (is_user_in_server) {
+  const isUserInServer = useIsUserInServer(message.serverId);
+  if (isUserInServer) {
     blurred = false;
   }
 
   function MessageImage({ image }: { image: MessageWithDiscordAccount["images"][number] }) {
     let width = image.width;
     let height = image.height;
-    const max_width = 400;
-    const max_height = 300;
+    const maxWidth = 400;
+    const maxHeight = 300;
 
     if (!width || !height)
       return (
@@ -70,45 +70,45 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
           alt={image.description ? image.description : "Image"}
         />
       );
-    const original_width = width;
-    const original_height = height;
+    const originalWidth = width;
+    const originalHeight = height;
     if (width > height) {
-      width = max_width;
-      height = (max_width / original_width) * original_height;
+      width = maxWidth;
+      height = (maxWidth / originalWidth) * originalHeight;
     } else {
-      height = max_height;
-      width = (max_height / original_height) * original_width;
+      height = maxHeight;
+      width = (maxHeight / originalHeight) * originalWidth;
     }
 
-    const aspect_ratio = width / height;
+    const aspectRatio = width / height;
     return (
       <Image
         key={image.url}
         src={image.url}
-        width={original_width}
-        height={original_height}
+        width={originalWidth}
+        height={originalHeight}
         alt={image.description ? image.description : "Image"}
         style={{
           maxWidth: `${width}px`,
-          maxHeight: `${max_height}px`,
-          aspectRatio: `${aspect_ratio}`,
+          maxHeight: `${maxHeight}px`,
+          aspectRatio: `${aspectRatio}`,
         }}
       />
     );
   }
 
   function getMessageUrl({
-    server_id,
-    channel_id,
-    message_id,
-    thread_id,
+    serverId,
+    channelId,
+    messageId,
+    threadId,
   }: {
-    server_id: string;
-    channel_id: string;
-    message_id: string;
-    thread_id?: string;
+    serverId: string;
+    channelId: string;
+    messageId: string;
+    threadId?: string;
   }) {
-    const endpoint = `${server_id}/${channel_id}/${thread_id ? thread_id + "/" : ""}${message_id}`;
+    const endpoint = `${serverId}/${channelId}/${threadId ? threadId + "/" : ""}${messageId}`;
     return `discord://discord.com/channels/${endpoint}`;
   }
 
@@ -177,7 +177,7 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
     </div>
   );
 
-  const blur_amount = ".4rem";
+  const blurAmount = ".4rem";
 
   return (
     <div
@@ -190,11 +190,11 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
         <>
           <div
             style={{
-              filter: `blur(${blur_amount})`,
-              backdropFilter: `blur(${blur_amount})`,
-              WebkitBackdropFilter: `blur(${blur_amount})`,
-              WebkitFilter: `blur(${blur_amount})`,
-              msFilter: `blur(${blur_amount})`,
+              filter: `blur(${blurAmount})`,
+              backdropFilter: `blur(${blurAmount})`,
+              WebkitBackdropFilter: `blur(${blurAmount})`,
+              WebkitFilter: `blur(${blurAmount})`,
+              msFilter: `blur(${blurAmount})`,
             }}
           >
             <Contents />

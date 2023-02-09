@@ -7,12 +7,12 @@ import { createDiscordAccount, findMessageById, upsertMessage } from "@answerove
 
 let client: SapphireClient;
 let message: Message;
-let text_channel: TextChannel;
+let textChannel: TextChannel;
 
 beforeEach(async () => {
   client = await setupAnswerOverflowBot();
-  text_channel = mockTextChannel(client);
-  message = mockMessage({ client, channel: text_channel });
+  textChannel = mockTextChannel(client);
+  message = mockMessage({ client, channel: textChannel });
   await createDiscordAccount(toAODiscordAccount(message.author));
 });
 
@@ -20,19 +20,19 @@ describe("Message Delete Tests", () => {
   it("should deleted a cached message", async () => {
     await upsertMessage(toAOMessage(message));
     await emitEvent(client, Events.MessageDelete, message);
-    const deleted_msg = await findMessageById(message.id);
-    expect(deleted_msg).toBeNull();
+    const deletedMsg = await findMessageById(message.id);
+    expect(deletedMsg).toBeNull();
   });
   test.todo("should delete an uncached message");
 });
 
 describe("Message Update Tests", () => {
   it("should update a cached edited message", async () => {
-    const updated_message = copyClass(message, client, {
+    const updatedMessage = copyClass(message, client, {
       content: "updated",
     });
     await upsertMessage(toAOMessage(message)),
-      await emitEvent(client, Events.MessageUpdate, message, updated_message);
+      await emitEvent(client, Events.MessageUpdate, message, updatedMessage);
     const updated = await findMessageById(message.id);
     expect(updated!.content).toBe("updated");
   });
@@ -46,11 +46,11 @@ describe("Message Bulk Delete Tests", () => {
       client,
       Events.MessageBulkDelete,
       new Collection([[message.id, message]]),
-      text_channel
+      textChannel
     );
 
-    const deleted_msg = await findMessageById(message.id);
-    expect(deleted_msg).toBeNull();
+    const deletedMsg = await findMessageById(message.id);
+    expect(deletedMsg).toBeNull();
   });
   test.todo("should delete an uncached bulk messages");
 });

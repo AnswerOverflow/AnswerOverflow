@@ -47,7 +47,7 @@ export function getGuildTextChannelMockDataBase<Type extends GuildTextChannelTyp
   type: Type,
   guild: Guild
 ) {
-  const raw_data: APIGuildTextChannel<Type> = {
+  const rawData: APIGuildTextChannel<Type> = {
     id: randomSnowflake().toString(),
     type,
     position: 0,
@@ -63,30 +63,30 @@ export function getGuildTextChannelMockDataBase<Type extends GuildTextChannelTyp
     permission_overwrites: [],
     topic: "channel topic",
   };
-  return raw_data;
+  return rawData;
 }
 
 function setupMockedChannel<T extends GuildBasedChannel>(
   client: Client,
   guild: Guild | undefined,
-  create_mock_data: (guild: Guild) => T
+  createMockData: (guild: Guild) => T
 ): T {
   if (!guild) {
     guild = mockGuild(client);
   }
-  const channel = create_mock_data(guild);
+  const channel = createMockData(guild);
   if (
     channel.type === ChannelType.GuildText ||
     channel.type === ChannelType.GuildAnnouncement ||
     channel.type === ChannelType.GuildForum
   ) {
     channel.threads.fetchActive = jest.fn().mockImplementation(() => {
-      const active_threads = [...channel.threads.cache.values()].filter(
+      const activeThreads = [...channel.threads.cache.values()].filter(
         (thread) => !thread.archived || thread.archived == null
       );
       const output: FetchedThreads = {
         threads: new Collection(
-          active_threads.map((thread) => [thread.id, thread as AnyThreadChannel])
+          activeThreads.map((thread) => [thread.id, thread as AnyThreadChannel])
         ),
         hasMore: false,
       };
@@ -95,44 +95,44 @@ function setupMockedChannel<T extends GuildBasedChannel>(
     channel.threads.fetchArchived = jest
       .fn()
       .mockImplementation((options: FetchArchivedThreadOptions = {}) => {
-        let filtered_threads = [
+        let filteredThreads = [
           ...channel.threads.cache.sorted((a, b) => isSnowflakeLargerAsInt(a.id, b.id)).values(),
         ].filter((thread) => thread.archived);
         if (options.type) {
-          filtered_threads = filtered_threads.filter((thread) => {
-            const is_public_thread = thread.type === ChannelType.PublicThread;
-            const is_private_thread = thread.type === ChannelType.PrivateThread;
-            if (options.type === "public" && is_public_thread) {
+          filteredThreads = filteredThreads.filter((thread) => {
+            const isPublicThread = thread.type === ChannelType.PublicThread;
+            const isPrivateThread = thread.type === ChannelType.PrivateThread;
+            if (options.type === "public" && isPublicThread) {
               return true;
             }
-            if (options.type === "private" && is_private_thread) {
+            if (options.type === "private" && isPrivateThread) {
               return true;
             }
             return false;
           });
         }
 
-        filtered_threads = filtered_threads.filter((thread) => {
-          let before_time = options.before;
-          if (before_time == undefined) {
+        filteredThreads = filteredThreads.filter((thread) => {
+          let beforeTime = options.before;
+          if (beforeTime == undefined) {
             return true;
           }
-          if (before_time instanceof Date || typeof before_time === "number") {
-            before_time = SnowflakeUtil.generate({ timestamp: before_time }).toString();
+          if (beforeTime instanceof Date || typeof beforeTime === "number") {
+            beforeTime = SnowflakeUtil.generate({ timestamp: beforeTime }).toString();
           }
-          if (before_time instanceof ThreadChannel) {
-            before_time = before_time.id;
+          if (beforeTime instanceof ThreadChannel) {
+            beforeTime = beforeTime.id;
           }
-          return isSnowflakeLarger(thread.id, before_time);
+          return isSnowflakeLarger(thread.id, beforeTime);
         });
 
         if (options.limit) {
-          filtered_threads = filtered_threads.slice(0, options.limit);
+          filteredThreads = filteredThreads.slice(0, options.limit);
         }
 
         const output: FetchedThreads = {
           threads: new Collection(
-            filtered_threads.map((thread) => [thread.id, thread as AnyThreadChannel])
+            filteredThreads.map((thread) => [thread.id, thread as AnyThreadChannel])
           ),
           hasMore: false, // TODO: set this
         };
@@ -212,19 +212,19 @@ function setupMockedChannel<T extends GuildBasedChannel>(
           }
 
           // 1. sort by id
-          const sorted_cached_messages = sortMessagesById(
+          const sortedCachedMessages = sortMessagesById(
             Array.from(channel.messages.cache.values())
           );
           // 2. filter to only above the id
-          const filtered_messages = sorted_cached_messages.filter((message) => {
+          const filteredMessages = sortedCachedMessages.filter((message) => {
             if (!after) return true;
             return isSnowflakeLarger(message.id, after);
           });
           // 3. take up to limit
-          const messages = filtered_messages.slice(0, limit);
+          const messages = filteredMessages.slice(0, limit);
           jest.clearAllMocks();
-          const as_collection = new Collection(messages.map((message) => [message.id, message]));
-          return Promise.resolve(as_collection);
+          const asCollection = new Collection(messages.map((message) => [message.id, message]));
+          return Promise.resolve(asCollection);
         }
       );
   }
@@ -239,32 +239,32 @@ export function mockTextChannel(
   data: Partial<APITextChannel> = {}
 ): TextChannel {
   return setupMockedChannel(client, guild, (guild) => {
-    const raw_data: APITextChannel = {
+    const rawData: APITextChannel = {
       ...getGuildTextChannelMockDataBase(ChannelType.GuildText, guild),
       ...data,
     };
-    const channel = Reflect.construct(TextChannel, [guild, raw_data, client]) as TextChannel;
+    const channel = Reflect.construct(TextChannel, [guild, rawData, client]) as TextChannel;
     return channel;
   });
 }
 
 export function mockThreadFromParentMessage(input: {
   client: Client;
-  parent_message: Message;
+  parentMessage: Message;
   data?: Partial<APIThreadChannel>;
 }) {
-  const { client, parent_message, data = {} } = input;
-  if (parent_message) {
+  const { client, parentMessage, data = {} } = input;
+  if (parentMessage) {
     if (
-      parent_message &&
-      (parent_message.channel.type === ChannelType.GuildText ||
-        parent_message.channel.type === ChannelType.GuildAnnouncement)
+      parentMessage &&
+      (parentMessage.channel.type === ChannelType.GuildText ||
+        parentMessage.channel.type === ChannelType.GuildAnnouncement)
     ) {
       return mockPublicThread({
         client,
-        parent_channel: parent_message.channel,
+        parentChannel: parentMessage.channel,
         data: {
-          id: parent_message.id,
+          id: parentMessage.id,
           ...data,
         },
       });
@@ -275,17 +275,17 @@ export function mockThreadFromParentMessage(input: {
 
 export function mockPublicThread(input: {
   client: Client;
-  parent_channel?: TextChannel | ForumChannel | NewsChannel;
+  parentChannel?: TextChannel | ForumChannel | NewsChannel;
   data?: Partial<APIThreadChannel>;
 }) {
   const { client, data = {} } = input;
-  let { parent_channel } = input;
+  let { parentChannel } = input;
 
-  return setupMockedChannel(client, parent_channel?.guild, (guild) => {
-    if (!parent_channel) {
-      parent_channel = mockTextChannel(client, guild);
+  return setupMockedChannel(client, parentChannel?.guild, (guild) => {
+    if (!parentChannel) {
+      parentChannel = mockTextChannel(client, guild);
     }
-    const raw_data: APIThreadChannel = {
+    const rawData: APIThreadChannel = {
       ...getGuildTextChannelMockDataBase(ChannelType.PublicThread, guild),
       member: {
         id: randomSnowflake().toString(),
@@ -294,7 +294,7 @@ export function mockPublicThread(input: {
         flags: 0,
       },
       guild_id: guild.id,
-      parent_id: parent_channel.id,
+      parent_id: parentChannel.id,
       applied_tags: [],
       message_count: 0,
       member_count: 0,
@@ -309,12 +309,12 @@ export function mockPublicThread(input: {
 
     const thread: PublicThreadChannel = Reflect.construct(ThreadChannel, [
       guild,
-      raw_data,
+      rawData,
       client,
     ]) as PublicThreadChannel;
 
     // @ts-ignore
-    parent_channel.threads.cache.set(thread.id, thread);
+    parentChannel.threads.cache.set(thread.id, thread);
     return thread;
   });
 }
@@ -325,7 +325,7 @@ export function mockForumChannel(
   data: Partial<APIGuildForumChannel> = {}
 ) {
   return setupMockedChannel(client, guild, (guild) => {
-    const raw_data: APIGuildForumChannel = {
+    const rawData: APIGuildForumChannel = {
       ...getGuildTextChannelMockDataBase(ChannelType.GuildForum, guild),
       available_tags: [
         {
@@ -341,7 +341,7 @@ export function mockForumChannel(
       default_sort_order: null,
       ...data,
     };
-    const channel = Reflect.construct(ForumChannel, [guild, raw_data, client]);
+    const channel = Reflect.construct(ForumChannel, [guild, rawData, client]);
     return channel;
   });
 }
@@ -352,18 +352,18 @@ export function mockNewsChannel(input: {
   data?: Partial<APINewsChannel>;
 }) {
   return setupMockedChannel(input.client, input.guild, (guild) => {
-    const raw_data: APINewsChannel = {
+    const rawData: APINewsChannel = {
       ...getGuildTextChannelMockDataBase(ChannelType.GuildAnnouncement, guild),
       ...input.data,
     };
-    const channel = Reflect.construct(NewsChannel, [guild, raw_data, input.client]) as NewsChannel;
+    const channel = Reflect.construct(NewsChannel, [guild, rawData, input.client]) as NewsChannel;
     return channel;
   });
 }
 
-export function mockMessages(channel: TextBasedChannel, number_of_messages: number) {
+export function mockMessages(channel: TextBasedChannel, numberOfMessages: number) {
   const messages: Message[] = [];
-  for (let id = 1; id <= number_of_messages; id++) {
+  for (let id = 1; id <= numberOfMessages; id++) {
     messages.push(
       mockMessage({
         client: channel.client,
@@ -395,7 +395,7 @@ export function mockMessage(input: {
       });
     }
   }
-  const raw_data: RawMessageData = {
+  const rawData: RawMessageData = {
     id: randomSnowflake().toString(),
     channel_id: channel.id,
     author: {
@@ -419,7 +419,7 @@ export function mockMessage(input: {
     reactions: [],
     ...override,
   };
-  const message = Reflect.construct(Message, [client, raw_data]) as Message;
+  const message = Reflect.construct(Message, [client, rawData]) as Message;
   // TODO: Fix ts ignore?
   // @ts-ignore
   channel.messages.cache.set(message.id, message);
@@ -449,12 +449,12 @@ export function mockMessageReaction({
     me: reacter.id === message.client.user?.id,
     ...override,
   };
-  const message_reaction = Reflect.construct(MessageReaction, [
+  const messageReaction = Reflect.construct(MessageReaction, [
     message.client,
     data,
     message,
   ]) as MessageReaction;
-  return message_reaction;
+  return messageReaction;
 }
 
 export function mockReaction({
@@ -484,28 +484,28 @@ export function mockReaction({
     data,
     message,
   ]) as MessageReaction;
-  const emoji_id = data.emoji.name ?? data.emoji.id;
-  if (!emoji_id) {
+  const emojiId = data.emoji.name ?? data.emoji.id;
+  if (!emojiId) {
     throw new Error("Emoji ID and name cannot be null");
   }
-  message.reactions.cache.set(emoji_id, reaction);
+  message.reactions.cache.set(emojiId, reaction);
   return reaction;
 }
 
 export function mockMarkedAsSolvedReply({
   client,
-  question_id,
-  solution_id,
+  questionId,
+  solutionId,
   channel,
   override = {},
 }: {
   client: Client;
-  question_id: string;
-  solution_id: string;
+  questionId: string;
+  solutionId: string;
   channel?: TextBasedChannel;
   override?: Partial<RawMessageData>;
 }) {
-  const marked_as_solved_reply = mockMessage({
+  const markedAsSolvedReply = mockMessage({
     client,
     author: client.user!,
     override: {
@@ -514,12 +514,12 @@ export function mockMarkedAsSolvedReply({
           fields: [
             {
               name: "Solution Message ID",
-              value: solution_id,
+              value: solutionId,
               inline: true,
             },
             {
               name: "Question Message ID",
-              value: question_id,
+              value: questionId,
               inline: true,
             },
           ],
@@ -529,7 +529,7 @@ export function mockMarkedAsSolvedReply({
     },
     channel,
   });
-  return marked_as_solved_reply;
+  return markedAsSolvedReply;
 }
 
 export function mockInvite(
@@ -540,7 +540,7 @@ export function mockInvite(
   if (!channel) {
     channel = mockTextChannel(client);
   }
-  const invite_data: APIInvite = {
+  const inviteData: APIInvite = {
     // random 5 letter string
     code: Math.random().toString(36).substring(2, 7),
     channel: {
@@ -550,6 +550,6 @@ export function mockInvite(
     },
     ...override,
   };
-  const invite = Reflect.construct(Invite, [client, invite_data]) as Invite;
+  const invite = Reflect.construct(Invite, [client, inviteData]) as Invite;
   return invite;
 }

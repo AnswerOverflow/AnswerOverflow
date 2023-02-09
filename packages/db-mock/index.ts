@@ -22,13 +22,13 @@ export function mockMessage(
   server: Server,
   channel: Channel,
   author: DiscordAccount,
-  override: Omit<Partial<Message>, "author_id" | "channel_id" | "server_id"> = {}
+  override: Omit<Partial<Message>, "authorId" | "channelId" | "serverId"> = {}
 ) {
   return getDefaultMessage({
     id: getRandomId(),
-    author_id: author.id,
-    channel_id: channel.id,
-    server_id: server.id,
+    authorId: author.id,
+    channelId: channel.id,
+    serverId: server.id,
     ...override,
   });
 }
@@ -42,27 +42,27 @@ export function mockServer(override: Partial<Server> = {}) {
   });
 }
 
-export function mockChannel(server: Server, override?: Omit<Partial<Channel>, "server_id">) {
+export function mockChannel(server: Server, override?: Omit<Partial<Channel>, "serverId">) {
   return getDefaultChannel({
     id: getRandomId(),
     name: "test-channel",
-    server_id: server?.id ?? getRandomId(),
+    serverId: server.id ?? getRandomId(),
     type: ChannelType.GuildText,
-    parent_id: null,
+    parentId: null,
     ...override,
   });
 }
 
 export function mockThread(
   parent: Channel,
-  override?: Omit<Partial<Channel>, "parent_id" | "server_id">
+  override?: Omit<Partial<Channel>, "parentId" | "serverId">
 ) {
   return getDefaultChannel({
     id: getRandomId(),
     name: "test-thread",
-    server_id: parent.server_id,
+    serverId: parent.serverId,
     type: ChannelType.PublicThread,
-    parent_id: parent.id,
+    parentId: parent.id,
     ...override,
   });
 }

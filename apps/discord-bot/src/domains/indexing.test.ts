@@ -10,11 +10,10 @@ import {
 } from "discord.js";
 import {
   createChannel,
-  createChannelSettings,
   createDiscordAccount,
   createServer,
   createUserServerSettings,
-  findChannelSettingsById,
+  findChannelById,
   findManyChannelsById,
   findManyDiscordAccountsById,
   findManyMessages,
@@ -51,100 +50,94 @@ import { isSnowflakeLargerAsInt, randomSnowflake } from "@answeroverflow/discord
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 
 let client: Client;
-let text_channel: TextChannel;
-let forum_channel: ForumChannel;
-let news_channel: NewsChannel;
+let textChannel: TextChannel;
+let forumChannel: ForumChannel;
+let newsChannel: NewsChannel;
 beforeEach(async () => {
   client = await setupAnswerOverflowBot();
-  text_channel = mockTextChannel(client);
-  forum_channel = mockForumChannel(client);
-  news_channel = mockNewsChannel({ client });
+  textChannel = mockTextChannel(client);
+  forumChannel = mockForumChannel(client);
+  newsChannel = mockNewsChannel({ client });
 });
 
 async function validateIndexingResults(input: {
   messages: Message[];
   threads?: AnyThreadChannel[];
-  expected_threads: number;
-  expected_users: number;
-  expected_messages: number;
+  expectedThreads: number;
+  expectedUsers: number;
+  expectedMessages: number;
 }) {
-  const { messages, threads = [], expected_threads, expected_users, expected_messages } = input;
-  const user_ids = messages.map((msg) => msg.author.id);
+  const { messages, threads = [], expectedThreads, expectedUsers, expectedMessages } = input;
+  const userIds = messages.map((msg) => msg.author.id);
 
-  const fetched_users = await findManyDiscordAccountsById(user_ids);
-  expect(fetched_users.length).toBe(expected_users);
+  const fetchedUsers = await findManyDiscordAccountsById(userIds);
+  expect(fetchedUsers.length).toBe(expectedUsers);
 
-  const message_ids = messages.map((msg) => msg.id);
-  const fetched_messages = await findManyMessages(message_ids);
-  expect(fetched_messages.length).toBe(expected_messages);
+  const messageIds = messages.map((msg) => msg.id);
+  const fetchedMessages = await findManyMessages(messageIds);
+  expect(fetchedMessages.length).toBe(expectedMessages);
 
-  const thread_ids = threads.map((thread) => thread.id);
-  const fetched_threads = await findManyChannelsById(thread_ids);
-  expect(fetched_threads.length).toBe(expected_threads);
+  const threadIds = threads.map((thread) => thread.id);
+  const fetchedThreads = await findManyChannelsById(threadIds);
+  expect(fetchedThreads.length).toBe(expectedThreads);
 }
 
 async function upsertChannelSettings(
   channel: TextChannel | ForumChannel | NewsChannel,
   opts: Omit<
-    inferRouterInputs<typeof botRouter>["channel_settings"]["upsertWithDeps"],
-    "channel"
+    inferRouterInputs<typeof botRouter>["channels"]["upsertWithDeps"],
+    "id" | "server" | "name" | "type" | "parentId"
   > = {}
 ) {
   await createServer(toAOServer(channel.guild));
-  await createChannel(toAOChannel(channel));
-  const settings = await createChannelSettings({
-    channel_id: channel.id,
-    ...opts,
-  });
-
-  return settings;
+  return await createChannel({ ...toAOChannel(channel), ...opts });
 }
 
 describe("Indexing", () => {
   test.todo("Validate Message Fetch Options");
   describe("Index Root Channel", () => {
     it("should skip a channel with indexing disabled", async () => {
-      const settings = await upsertChannelSettings(text_channel);
-      expect(settings.flags.indexing_enabled).toBeFalsy();
-      const messages = mockMessages(text_channel, 100);
+      const settings = await upsertChannelSettings(textChannel);
+      expect(settings.flags.indexingEnabled).toBeFalsy();
+      const messages = mockMessages(textChannel, 100);
 
-      await indexRootChannel(text_channel);
+      await indexRootChannel(textChannel);
       await validateIndexingResults({
         messages,
-        expected_threads: 0,
-        expected_users: 0,
-        expected_messages: 0,
+        expectedThreads: 0,
+        expectedUsers: 0,
+        expectedMessages: 0,
       });
     });
-    it.only("should index a text channel", async () => {
-      const settings = await upsertChannelSettings(text_channel, {
+    it("should index a text channel", async () => {
+      const settings = await upsertChannelSettings(textChannel, {
         flags: {
-          indexing_enabled: true,
+          indexingEnabled: true,
         },
       });
-      expect(settings.flags.indexing_enabled).toBeTruthy();
-      const messages = mockMessages(text_channel, 100);
+      expect(settings.flags.indexingEnabled).toBeTruthy();
+      const messages = mockMessages(textChannel, 100);
 
-      await indexRootChannel(text_channel);
+      await indexRootChannel(textChannel);
 
       await validateIndexingResults({
         messages,
-        expected_threads: 0,
-        expected_users: 100,
-        expected_messages: 100,
+        expectedThreads: 0,
+        expectedUsers: 100,
+        expectedMessages: 100,
       });
     });
     it("should index a news channel", async () => {
-      const settings = await upsertChannelSettings(news_channel, {
+      const settings = await upsertChannelSettings(newsChannel, {
         flags: {
-          indexing_enabled: true,
+          indexingEnabled: true,
         },
       });
-      expect(settings.flags.indexing_enabled).toBeTruthy();
-      const messages = mockMessages(news_channel, 100);
+      expect(settings.flags.indexingEnabled).toBeTruthy();
+      const messages = mockMessages(newsChannel, 100);
       const thread1 = mockThreadFromParentMessage({
         client,
-        parent_message: messages[0]!,
+        parentMessage: messages[0]!,
         data: {
           type: ChannelType.AnnouncementThread,
         },
@@ -152,175 +145,175 @@ describe("Indexing", () => {
       messages.push(...mockMessages(thread1, 10));
       const thread2 = mockThreadFromParentMessage({
         client,
-        parent_message: messages[1]!,
+        parentMessage: messages[1]!,
         data: {
           type: ChannelType.AnnouncementThread,
         },
       });
       messages.push(...mockMessages(thread2, 10));
 
-      await indexRootChannel(news_channel);
+      await indexRootChannel(newsChannel);
 
       await validateIndexingResults({
         messages,
         threads: [thread1, thread2],
-        expected_threads: 2,
-        expected_users: 120,
-        expected_messages: 120,
+        expectedThreads: 2,
+        expectedUsers: 120,
+        expectedMessages: 120,
       });
     });
     it("should update last indexed snowflake after indexing", async () => {
-      const settings = await upsertChannelSettings(text_channel, {
+      const settings = await upsertChannelSettings(textChannel, {
         flags: {
-          indexing_enabled: true,
+          indexingEnabled: true,
         },
       });
-      expect(settings.flags.indexing_enabled).toBeTruthy();
-      const messages = mockMessages(text_channel, 100);
-      await indexRootChannel(text_channel);
-      const largest_id = messages.sort((a, b) => isSnowflakeLargerAsInt(a.id, b.id)).at(-1)!.id;
-      const updated_settings = await findChannelSettingsById(text_channel.id);
-      expect(updated_settings!.last_indexed_snowflake).toBe(largest_id);
+      expect(settings.flags.indexingEnabled).toBeTruthy();
+      const messages = mockMessages(textChannel, 100);
+      await indexRootChannel(textChannel);
+      const largestId = messages.sort((a, b) => isSnowflakeLargerAsInt(a.id, b.id)).at(-1)!.id;
+      const updatedSettings = await findChannelById(textChannel.id);
+      expect(updatedSettings!.lastIndexedSnowflake).toBe(largestId);
     });
     it("should start indexing from the last indexed snowflake", async () => {
-      const start_snowflake = 345312;
-      await upsertChannelSettings(text_channel, {
+      const startSnowflake = 345312;
+      await upsertChannelSettings(textChannel, {
         flags: {
-          indexing_enabled: true,
+          indexingEnabled: true,
         },
-        last_indexed_snowflake: `${start_snowflake}`,
+        lastIndexedSnowflake: `${startSnowflake}`,
       });
-      for (let i = start_snowflake - 100; i < start_snowflake; i++) {
+      for (let i = startSnowflake - 100; i < startSnowflake; i++) {
         mockMessage({
           client,
-          channel: text_channel,
+          channel: textChannel,
           override: {
             id: `${i}`,
           },
         });
       }
       const messages: Message[] = [];
-      for (let i = start_snowflake; i <= start_snowflake + 100; i++) {
+      for (let i = startSnowflake; i <= startSnowflake + 100; i++) {
         messages.push(
           mockMessage({
             client,
-            channel: text_channel,
+            channel: textChannel,
             override: {
               id: `${i}`,
             },
           })
         );
       }
-      await indexRootChannel(text_channel);
+      await indexRootChannel(textChannel);
       await validateIndexingResults({
         messages,
-        expected_threads: 0,
-        expected_users: 100,
-        expected_messages: 100,
+        expectedThreads: 0,
+        expectedUsers: 100,
+        expectedMessages: 100,
       });
     });
     it("should index a forum channel", async () => {
-      const settings = await upsertChannelSettings(forum_channel, {
+      const settings = await upsertChannelSettings(forumChannel, {
         flags: {
-          indexing_enabled: true,
+          indexingEnabled: true,
         },
       });
-      expect(settings.flags.indexing_enabled).toBeTruthy();
+      expect(settings.flags.indexingEnabled).toBeTruthy();
       const thread1 = mockPublicThread({
         client,
-        parent_channel: forum_channel,
+        parentChannel: forumChannel,
       });
       const thread2 = mockPublicThread({
         client,
-        parent_channel: forum_channel,
+        parentChannel: forumChannel,
       });
-      const thread1_messages = mockMessages(thread1, 100);
-      const thread2_messages = mockMessages(thread2, 100);
-      const messages = [...thread1_messages, ...thread2_messages];
+      const thread1Messages = mockMessages(thread1, 100);
+      const thread2Messages = mockMessages(thread2, 100);
+      const messages = [...thread1Messages, ...thread2Messages];
 
-      await indexRootChannel(forum_channel);
+      await indexRootChannel(forumChannel);
 
       await validateIndexingResults({
         messages,
         threads: [thread1, thread2],
-        expected_threads: 2,
-        expected_users: 200,
-        expected_messages: 200,
+        expectedThreads: 2,
+        expectedUsers: 200,
+        expectedMessages: 200,
       });
     });
   });
   describe("Add Solutions To Messages", () => {
-    let question_message: Message;
-    let solution_message: Message;
-    let marked_as_solved_reply: Message;
-    let question_message_as_ao_message: AOMessage;
-    let solution_message_as_ao_message: AOMessage;
-    let marked_as_solved_reply_as_ao_message: AOMessage;
+    let questionMessage: Message;
+    let solutionMessage: Message;
+    let markedAsSolvedReply: Message;
+    let questionMessageAsAoMessage: AOMessage;
+    let solutionMessageAsAoMessage: AOMessage;
+    let markedAsSolvedReplyAsAoMessage: AOMessage;
     let messages: Message[];
     beforeEach(() => {
-      question_message = mockMessage({ client });
-      solution_message = mockMessage({ client });
-      marked_as_solved_reply = mockMarkedAsSolvedReply({
+      questionMessage = mockMessage({ client });
+      solutionMessage = mockMessage({ client });
+      markedAsSolvedReply = mockMarkedAsSolvedReply({
         client,
-        question_id: question_message.id,
-        solution_id: solution_message.id,
+        questionId: questionMessage.id,
+        solutionId: solutionMessage.id,
       });
-      messages = [question_message, solution_message, marked_as_solved_reply];
-      question_message_as_ao_message = toAOMessage(question_message);
-      solution_message_as_ao_message = toAOMessage(solution_message);
-      marked_as_solved_reply_as_ao_message = toAOMessage(marked_as_solved_reply);
+      messages = [questionMessage, solutionMessage, markedAsSolvedReply];
+      questionMessageAsAoMessage = toAOMessage(questionMessage);
+      solutionMessageAsAoMessage = toAOMessage(solutionMessage);
+      markedAsSolvedReplyAsAoMessage = toAOMessage(markedAsSolvedReply);
     });
     it("should add solutions to messages with reply at the end", () => {
       addSolutionsToMessages(messages, [
-        question_message_as_ao_message,
-        solution_message_as_ao_message,
-        marked_as_solved_reply_as_ao_message,
+        questionMessageAsAoMessage,
+        solutionMessageAsAoMessage,
+        markedAsSolvedReplyAsAoMessage,
       ]);
-      expect(question_message_as_ao_message.solutions).toEqual([solution_message_as_ao_message.id]);
+      expect(questionMessageAsAoMessage.solutions).toEqual([solutionMessageAsAoMessage.id]);
     });
     it("should add solutions to messages with reply in the middle", () => {
       addSolutionsToMessages(messages, [
-        question_message_as_ao_message,
-        marked_as_solved_reply_as_ao_message,
-        solution_message_as_ao_message,
+        questionMessageAsAoMessage,
+        markedAsSolvedReplyAsAoMessage,
+        solutionMessageAsAoMessage,
       ]);
-      expect(question_message_as_ao_message.solutions).toEqual([solution_message_as_ao_message.id]);
+      expect(questionMessageAsAoMessage.solutions).toEqual([solutionMessageAsAoMessage.id]);
     });
     it("should add solutions to messages with reply at the beginning", () => {
       addSolutionsToMessages(messages, [
-        marked_as_solved_reply_as_ao_message,
-        question_message_as_ao_message,
-        solution_message_as_ao_message,
+        markedAsSolvedReplyAsAoMessage,
+        questionMessageAsAoMessage,
+        solutionMessageAsAoMessage,
       ]);
-      expect(question_message_as_ao_message.solutions).toEqual([solution_message_as_ao_message.id]);
+      expect(questionMessageAsAoMessage.solutions).toEqual([solutionMessageAsAoMessage.id]);
     });
   });
   describe("Find Solutions To Messages", () => {
     it("should find solutions from a mark as solved reply", () => {
-      const question_message = mockMessage({ client });
-      const solution_message = mockMessage({ client });
-      const marked_as_solved_reply = mockMarkedAsSolvedReply({
+      const questionMessage = mockMessage({ client });
+      const solutionMessage = mockMessage({ client });
+      const markedAsSolvedReply = mockMarkedAsSolvedReply({
         client,
-        question_id: question_message.id,
-        solution_id: solution_message.id,
+        questionId: questionMessage.id,
+        solutionId: solutionMessage.id,
       });
-      const { question_id, solution_id } = findSolutionsToMessage(marked_as_solved_reply);
-      expect(question_id).toBe(question_message.id);
-      expect(solution_id).toBe(solution_message.id);
+      const { questionId, solutionId } = findSolutionsToMessage(markedAsSolvedReply);
+      expect(questionId).toBe(questionMessage.id);
+      expect(solutionId).toBe(solutionMessage.id);
     });
     it("should not find solutions on a regular message", () => {
-      const regular_message = mockMessage({ client });
-      const { question_id, solution_id } = findSolutionsToMessage(regular_message);
-      expect(question_id).toBeNull();
-      expect(solution_id).toBeNull();
+      const regularMessage = mockMessage({ client });
+      const { questionId, solutionId } = findSolutionsToMessage(regularMessage);
+      expect(questionId).toBeNull();
+      expect(solutionId).toBeNull();
     });
     it("should not find solutions from a mark as solved reply that is not sent by the bot", () => {
-      const question_message = mockMessage({ client });
-      const solution_message = mockMessage({ client });
-      const marked_as_solved_reply = mockMarkedAsSolvedReply({
+      const questionMessage = mockMessage({ client });
+      const solutionMessage = mockMessage({ client });
+      const markedAsSolvedReply = mockMarkedAsSolvedReply({
         client,
-        question_id: question_message.id,
-        solution_id: solution_message.id,
+        questionId: questionMessage.id,
+        solutionId: solutionMessage.id,
         override: {
           author: {
             id: randomSnowflake().toString(),
@@ -330,56 +323,61 @@ describe("Indexing", () => {
           },
         },
       });
-      const { question_id, solution_id } = findSolutionsToMessage(marked_as_solved_reply);
-      expect(question_id).toBeNull();
-      expect(solution_id).toBeNull();
+      const { questionId, solutionId } = findSolutionsToMessage(markedAsSolvedReply);
+      expect(questionId).toBeNull();
+      expect(solutionId).toBeNull();
     });
   });
   describe("Filter Messages", () => {
     it("should filter system messages", async () => {
-      const system_msg = mockMessage({
+      const systemMsg = mockMessage({
         client,
-        channel: text_channel,
+        channel: textChannel,
         override: {
           type: MessageType.UserJoin,
         },
       });
-      const filtered_messages = await filterMessages([system_msg], text_channel);
-      expect(filtered_messages.length).toBe(0);
+      const filteredMessages = await filterMessages([systemMsg], textChannel);
+      expect(filteredMessages.length).toBe(0);
     });
     it("should filter messages from users with message indexing disabled", async () => {
-      const member_to_ignore = mockGuildMember({ client, guild: text_channel.guild });
-      const message_to_ignore = mockMessage({
+      const memberToIgnore = mockGuildMember({ client, guild: textChannel.guild });
+      const messageToIgnore = mockMessage({
         client,
-        channel: text_channel,
-        author: member_to_ignore.user,
+        channel: textChannel,
+        author: memberToIgnore.user,
       });
-      await createDiscordAccount(toAODiscordAccount(member_to_ignore.user));
-      const settings = await createUserServerSettings({
-        user_id: member_to_ignore.user.id,
-        server_id: member_to_ignore.guild.id,
+      await upsertChannelSettings(textChannel, {
         flags: {
-          message_indexing_disabled: true,
+          indexingEnabled: true,
         },
       });
-      expect(settings.flags.message_indexing_disabled).toBe(true);
-      const filtered_messages = await filterMessages([message_to_ignore], text_channel);
-      expect(filtered_messages.length).toBe(0);
+      await createDiscordAccount(toAODiscordAccount(memberToIgnore.user));
+      const settings = await createUserServerSettings({
+        userId: memberToIgnore.user.id,
+        serverId: memberToIgnore.guild.id,
+        flags: {
+          messageIndexingDisabled: true,
+        },
+      });
+      expect(settings.flags.messageIndexingDisabled).toBe(true);
+      const filteredMessages = await filterMessages([messageToIgnore], textChannel);
+      expect(filteredMessages.length).toBe(0);
     });
     it("should not filter normal users", async () => {
-      const msg1 = mockMessage({ client, channel: text_channel });
-      const msg2 = mockMessage({ client, channel: text_channel });
-      const filtered_messages = await filterMessages([msg1, msg2], text_channel);
-      expect(filtered_messages.length).toBe(2);
+      const msg1 = mockMessage({ client, channel: textChannel });
+      const msg2 = mockMessage({ client, channel: textChannel });
+      const filteredMessages = await filterMessages([msg1, msg2], textChannel);
+      expect(filteredMessages.length).toBe(2);
     });
   });
   describe("Fetch All Channel Messages With Threads", () => {
     describe("Text Channel", () => {
       it("should fetch all messages from a text channel with no threads", async () => {
-        const number_of_messages = 1245;
-        mockMessages(text_channel, number_of_messages);
-        const { messages } = await fetchAllChannelMessagesWithThreads(text_channel);
-        expect(messages.length).toBe(number_of_messages);
+        const numberOfMessages = 1245;
+        mockMessages(textChannel, numberOfMessages);
+        const { messages } = await fetchAllChannelMessagesWithThreads(textChannel);
+        expect(messages.length).toBe(numberOfMessages);
       });
       it("should fetch all messages from a text channel one archived thread", async () => {
         const thread = mockThreadFromParentMessage({
@@ -391,33 +389,29 @@ describe("Indexing", () => {
               archived: true,
             },
           },
-          parent_message: mockMessage({ client, channel: text_channel }),
+          parentMessage: mockMessage({ client, channel: textChannel }),
         });
-        const number_of_thread_messages = 300;
-        mockMessages(thread, number_of_thread_messages);
-        const number_of_text_channel_messages = 1245;
-        mockMessages(text_channel, number_of_text_channel_messages);
-        const { messages } = await fetchAllChannelMessagesWithThreads(text_channel);
-        expect(messages.length).toBe(
-          number_of_thread_messages + number_of_text_channel_messages + 1
-        );
+        const numberOfThreadMessages = 300;
+        mockMessages(thread, numberOfThreadMessages);
+        const numberOfTextChannelMessages = 1245;
+        mockMessages(textChannel, numberOfTextChannelMessages);
+        const { messages } = await fetchAllChannelMessagesWithThreads(textChannel);
+        expect(messages.length).toBe(numberOfThreadMessages + numberOfTextChannelMessages + 1);
       });
       it("should fetch all messages from a text channel with one active thread", async () => {
         const thread = mockThreadFromParentMessage({
           client,
-          parent_message: mockMessage({ client, channel: text_channel }),
+          parentMessage: mockMessage({ client, channel: textChannel }),
         });
-        const number_of_thread_messages = 300;
-        mockMessages(thread, number_of_thread_messages);
-        const number_of_text_channel_messages = 1245;
-        mockMessages(text_channel, number_of_text_channel_messages);
-        const { messages } = await fetchAllChannelMessagesWithThreads(text_channel);
-        expect(messages.length).toBe(
-          number_of_text_channel_messages + number_of_thread_messages + 1
-        );
+        const numberOfThreadMessages = 300;
+        mockMessages(thread, numberOfThreadMessages);
+        const numberOfTextChannelMessages = 1245;
+        mockMessages(textChannel, numberOfTextChannelMessages);
+        const { messages } = await fetchAllChannelMessagesWithThreads(textChannel);
+        expect(messages.length).toBe(numberOfTextChannelMessages + numberOfThreadMessages + 1);
       });
       it("should fetch all messages from a text channel with an active and archived thread", async () => {
-        const archived_thread = mockThreadFromParentMessage({
+        const archivedThread = mockThreadFromParentMessage({
           client,
           data: {
             thread_metadata: {
@@ -426,33 +420,33 @@ describe("Indexing", () => {
               archived: true,
             },
           },
-          parent_message: mockMessage({ client, channel: text_channel }),
+          parentMessage: mockMessage({ client, channel: textChannel }),
         });
-        const active_thread = mockThreadFromParentMessage({
+        const activeThread = mockThreadFromParentMessage({
           client,
-          parent_message: mockMessage({ client, channel: text_channel }),
+          parentMessage: mockMessage({ client, channel: textChannel }),
         });
-        const number_of_archived_thread_messages = 300;
-        mockMessages(archived_thread, number_of_archived_thread_messages);
-        const number_of_active_thread_messages = 300;
-        mockMessages(active_thread, number_of_active_thread_messages);
-        const number_of_text_channel_messages = 1245;
-        mockMessages(text_channel, number_of_text_channel_messages);
-        const { messages } = await fetchAllChannelMessagesWithThreads(text_channel);
+        const numberOfArchivedThreadMessages = 300;
+        mockMessages(archivedThread, numberOfArchivedThreadMessages);
+        const numberOfActiveThreadMessages = 300;
+        mockMessages(activeThread, numberOfActiveThreadMessages);
+        const numberOfTextChannelMessages = 1245;
+        mockMessages(textChannel, numberOfTextChannelMessages);
+        const { messages } = await fetchAllChannelMessagesWithThreads(textChannel);
         expect(messages.length).toBe(
-          number_of_archived_thread_messages +
-            number_of_active_thread_messages +
-            number_of_text_channel_messages +
+          numberOfArchivedThreadMessages +
+            numberOfActiveThreadMessages +
+            numberOfTextChannelMessages +
             2
         );
       });
     });
     describe("News Channel", () => {
       it("should fetch all messages from a news channel with no threads", async () => {
-        const number_of_messages = 1245;
-        mockMessages(news_channel, number_of_messages);
-        const { messages } = await fetchAllChannelMessagesWithThreads(news_channel);
-        expect(messages.length).toBe(number_of_messages);
+        const numberOfMessages = 1245;
+        mockMessages(newsChannel, numberOfMessages);
+        const { messages } = await fetchAllChannelMessagesWithThreads(newsChannel);
+        expect(messages.length).toBe(numberOfMessages);
       });
       it("should fetch all messages from a news channel with one archived thread", async () => {
         const thread = mockThreadFromParentMessage({
@@ -465,16 +459,14 @@ describe("Indexing", () => {
             },
             type: ChannelType.AnnouncementThread,
           },
-          parent_message: mockMessage({ client, channel: news_channel }),
+          parentMessage: mockMessage({ client, channel: newsChannel }),
         });
-        const number_of_thread_messages = 300;
-        mockMessages(thread, number_of_thread_messages);
-        const number_of_news_channel_messages = 1245;
-        mockMessages(news_channel, number_of_news_channel_messages);
-        const { messages, threads } = await fetchAllChannelMessagesWithThreads(news_channel);
-        expect(messages.length).toBe(
-          number_of_thread_messages + number_of_news_channel_messages + 1
-        );
+        const numberOfThreadMessages = 300;
+        mockMessages(thread, numberOfThreadMessages);
+        const numberOfNewsChannelMessages = 1245;
+        mockMessages(newsChannel, numberOfNewsChannelMessages);
+        const { messages, threads } = await fetchAllChannelMessagesWithThreads(newsChannel);
+        expect(messages.length).toBe(numberOfThreadMessages + numberOfNewsChannelMessages + 1);
         expect(threads.length).toBe(1);
       });
       it("should fetch all messages from a news channel with one active thread", async () => {
@@ -483,22 +475,20 @@ describe("Indexing", () => {
           data: {
             type: ChannelType.AnnouncementThread,
           },
-          parent_message: mockMessage({ client, channel: news_channel }),
+          parentMessage: mockMessage({ client, channel: newsChannel }),
         });
-        const number_of_thread_messages = 300;
-        mockMessages(thread, number_of_thread_messages);
-        const number_of_news_channel_messages = 1245;
-        mockMessages(news_channel, number_of_news_channel_messages);
-        const { messages, threads } = await fetchAllChannelMessagesWithThreads(news_channel);
-        expect(messages.length).toBe(
-          number_of_news_channel_messages + number_of_thread_messages + 1
-        );
+        const numberOfThreadMessages = 300;
+        mockMessages(thread, numberOfThreadMessages);
+        const numberOfNewsChannelMessages = 1245;
+        mockMessages(newsChannel, numberOfNewsChannelMessages);
+        const { messages, threads } = await fetchAllChannelMessagesWithThreads(newsChannel);
+        expect(messages.length).toBe(numberOfNewsChannelMessages + numberOfThreadMessages + 1);
         expect(threads.length).toBe(1);
       });
     });
     describe("Forum Channel", () => {
       it("should fetch all messages from a forum channel with no threads", async () => {
-        const { messages } = await fetchAllChannelMessagesWithThreads(forum_channel);
+        const { messages } = await fetchAllChannelMessagesWithThreads(forumChannel);
         expect(messages.length).toBe(0);
       });
       it("should fetch all messages from a forum channel with one archived thread", async () => {
@@ -511,12 +501,12 @@ describe("Indexing", () => {
               archived: true,
             },
           },
-          parent_channel: forum_channel,
+          parentChannel: forumChannel,
         });
-        const number_of_thread_messages = 300;
-        mockMessages(thread, number_of_thread_messages);
-        const { messages } = await fetchAllChannelMessagesWithThreads(forum_channel);
-        expect(messages.length).toBe(number_of_thread_messages);
+        const numberOfThreadMessages = 300;
+        mockMessages(thread, numberOfThreadMessages);
+        const { messages } = await fetchAllChannelMessagesWithThreads(forumChannel);
+        expect(messages.length).toBe(numberOfThreadMessages);
       });
       it("should fetch all messages from a forum channel with one active thread", async () => {
         const thread = mockPublicThread({
@@ -528,15 +518,15 @@ describe("Indexing", () => {
               archived: false,
             },
           },
-          parent_channel: forum_channel,
+          parentChannel: forumChannel,
         });
-        const number_of_thread_messages = 300;
-        mockMessages(thread, number_of_thread_messages);
-        const { messages } = await fetchAllChannelMessagesWithThreads(forum_channel);
-        expect(messages.length).toBe(number_of_thread_messages);
+        const numberOfThreadMessages = 300;
+        mockMessages(thread, numberOfThreadMessages);
+        const { messages } = await fetchAllChannelMessagesWithThreads(forumChannel);
+        expect(messages.length).toBe(numberOfThreadMessages);
       });
       it("should fetch all messages from a forum channel with an active and archived thread", async () => {
-        const archived_thread = mockPublicThread({
+        const archivedThread = mockPublicThread({
           client,
           data: {
             thread_metadata: {
@@ -545,30 +535,28 @@ describe("Indexing", () => {
               archived: true,
             },
           },
-          parent_channel: forum_channel,
+          parentChannel: forumChannel,
         });
-        const active_thread = mockPublicThread({
+        const activeThread = mockPublicThread({
           client,
-          parent_channel: forum_channel,
+          parentChannel: forumChannel,
         });
-        const number_of_archived_thread_messages = 300;
-        mockMessages(archived_thread, number_of_archived_thread_messages);
-        const number_of_active_thread_messages = 300;
-        mockMessages(active_thread, number_of_active_thread_messages);
-        const { messages } = await fetchAllChannelMessagesWithThreads(forum_channel);
-        expect(messages.length).toBe(
-          number_of_archived_thread_messages + number_of_active_thread_messages
-        );
+        const numberOfArchivedThreadMessages = 300;
+        mockMessages(archivedThread, numberOfArchivedThreadMessages);
+        const numberOfActiveThreadMessages = 300;
+        mockMessages(activeThread, numberOfActiveThreadMessages);
+        const { messages } = await fetchAllChannelMessagesWithThreads(forumChannel);
+        expect(messages.length).toBe(numberOfArchivedThreadMessages + numberOfActiveThreadMessages);
       });
     });
   });
   describe("Fetch All Messages", () => {
-    const number_of_messages = 1425;
+    const numberOfMessages = 1425;
     beforeEach(() => {
-      for (let id = 1; id <= number_of_messages; id++) {
+      for (let id = 1; id <= numberOfMessages; id++) {
         mockMessage({
           client,
-          channel: text_channel,
+          channel: textChannel,
           override: {
             id: `${id}`,
           },
@@ -576,25 +564,25 @@ describe("Indexing", () => {
       }
     });
     it("should fetch all messages", async () => {
-      const messages = await fetchAllMesages(text_channel);
-      expect(messages.length).toBe(number_of_messages);
+      const messages = await fetchAllMesages(textChannel);
+      expect(messages.length).toBe(numberOfMessages);
     });
     it("should fetch all messages with a limit", async () => {
       const limit = 36;
-      const messages = await fetchAllMesages(text_channel, { limit });
+      const messages = await fetchAllMesages(textChannel, { limit });
       expect(messages.length).toBe(limit);
     });
     it("should fetch all messages with a limit and a start", async () => {
       const limit = 36;
       const start = 100;
-      const messages = await fetchAllMesages(text_channel, { limit, start: `${start}` });
+      const messages = await fetchAllMesages(textChannel, { limit, start: `${start}` });
       expect(messages.length).toBe(limit);
       expect(messages[0]!.id).toBe(`${start + 1}`);
     });
     it("should return the messages sorted from oldest to newest", async () => {
-      const messages = await fetchAllMesages(text_channel);
-      expect(messages.length).toBe(number_of_messages);
-      for (let id = 0; id < number_of_messages; id++) {
+      const messages = await fetchAllMesages(textChannel);
+      expect(messages.length).toBe(numberOfMessages);
+      for (let id = 0; id < numberOfMessages; id++) {
         expect(messages[id]!.id).toBe(`${id + 1}`);
       }
     });

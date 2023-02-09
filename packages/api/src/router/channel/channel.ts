@@ -1,24 +1,22 @@
 import {
-  z_unique_array,
-  z_channel_public,
+  zUniqueArray,
+  zChannelPublic,
   findManyChannelsById,
   findChannelById,
-  z_channel_create,
+  zChannelCreate,
   createChannel,
-  z_channel_update,
+  zChannelUpdate,
   updateChannel,
   deleteChannel,
-  z_channel_create_with_deps,
+  zChannelCreateWithDeps,
   createChannelWithDeps,
-  z_channel_upsert,
-  z_channel_upsert_with_deps,
-  z_thread_upsert_with_deps,
+  zChannelUpsert,
+  zChannelUpsertWithDeps,
+  zThreadUpsertWithDeps,
   upsert,
-  z_channel_public_with_settings,
-  findChannelByIdWithSettings,
 } from "@answeroverflow/db";
 import { z } from "zod";
-import { mergeRouters, router, publicProcedure } from "~api/router/trpc";
+import { MergeRouters, router, publicProcedure } from "~api/router/trpc";
 import {
   protectedFetchWithPublicData,
   protectedFetchManyWithPublicData,
@@ -29,60 +27,50 @@ import { assertCanEditServer, assertCanEditServerBotOnly } from "~api/utils/perm
 
 export const CHANNEL_NOT_FOUND_MESSAGES = "Channel does not exist";
 
-const channel_crud_router = router({
+const channelCrudRouter = router({
   byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({
       fetch: () => findChannelById(input),
-      permissions: (data) => assertCanEditServer(ctx, data.server_id),
-      not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
-      public_data_formatter: (data) => {
-        return z_channel_public.parse(data);
+      permissions: (data) => assertCanEditServer(ctx, data.serverId),
+      notFoundMessage: CHANNEL_NOT_FOUND_MESSAGES,
+      publicDataFormatter: (data) => {
+        return zChannelPublic.parse(data);
       },
     });
   }),
-  byIdWithSettings: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    return protectedFetchWithPublicData({
-      fetch: () => findChannelByIdWithSettings(input),
-      permissions: (data) => assertCanEditServer(ctx, data.server_id),
-      not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
-      public_data_formatter: (data) => {
-        return z_channel_public_with_settings.parse(data);
-      },
-    });
-  }),
-  byIdMany: publicProcedure.input(z_unique_array).query(async ({ ctx, input }) => {
+  byIdMany: publicProcedure.input(zUniqueArray).query(async ({ ctx, input }) => {
     return protectedFetchManyWithPublicData({
       fetch: () => findManyChannelsById(input),
-      permissions: (data) => assertCanEditServer(ctx, data.server_id),
-      public_data_formatter: (data) => z_channel_public.parse(data),
+      permissions: (data) => assertCanEditServer(ctx, data.serverId),
+      publicDataFormatter: (data) => zChannelPublic.parse(data),
     });
   }),
-  create: publicProcedure.input(z_channel_create).mutation(({ ctx, input }) => {
+  create: publicProcedure.input(zChannelCreate).mutation(({ ctx, input }) => {
     return protectedMutation({
       operation: () => createChannel(input),
-      permissions: () => assertCanEditServerBotOnly(ctx, input.server_id),
+      permissions: () => assertCanEditServerBotOnly(ctx, input.serverId),
     });
   }),
-  update: publicProcedure.input(z_channel_update).mutation(async ({ ctx, input }) => {
+  update: publicProcedure.input(zChannelUpdate).mutation(async ({ ctx, input }) => {
     return protectedMutationFetchFirst({
       fetch: () => findChannelById(input.id),
-      permissions: (data) => assertCanEditServerBotOnly(ctx, data.server_id),
-      operation: () => updateChannel(input),
-      not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
+      permissions: (data) => assertCanEditServerBotOnly(ctx, data.serverId),
+      operation: (old) => updateChannel(input, old),
+      notFoundMessage: CHANNEL_NOT_FOUND_MESSAGES,
     });
   }),
   delete: publicProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
     return protectedMutationFetchFirst({
       fetch: () => findChannelById(input),
       operation: () => deleteChannel(input),
-      permissions: (data) => assertCanEditServerBotOnly(ctx, data.server_id),
-      not_found_message: CHANNEL_NOT_FOUND_MESSAGES,
+      permissions: (data) => assertCanEditServerBotOnly(ctx, data.serverId),
+      notFoundMessage: CHANNEL_NOT_FOUND_MESSAGES,
     });
   }),
 });
 
-const create_with_deps_router = router({
-  createWithDeps: publicProcedure.input(z_channel_create_with_deps).mutation(({ ctx, input }) => {
+const createWithDepsRouter = router({
+  createWithDeps: publicProcedure.input(zChannelCreateWithDeps).mutation(({ ctx, input }) => {
     return protectedMutation({
       operation: () => createChannelWithDeps(input),
       permissions: () => assertCanEditServerBotOnly(ctx, input.server.id),
@@ -90,47 +78,45 @@ const create_with_deps_router = router({
   }),
 });
 
-const upsert_router = router({
-  upsert: publicProcedure.input(z_channel_upsert).mutation(async ({ ctx, input }) => {
+const upsertRouter = router({
+  upsert: publicProcedure.input(zChannelUpsert).mutation(async ({ ctx, input }) => {
     return upsert({
-      create: () => channel_crud_router.createCaller(ctx).create(input),
-      update: () => channel_crud_router.createCaller(ctx).update(input),
+      create: () => channelCrudRouter.createCaller(ctx).create(input),
+      update: () => channelCrudRouter.createCaller(ctx).update(input),
       find: () => findChannelById(input.id),
     });
   }),
-  upsertWithDeps: publicProcedure
-    .input(z_channel_upsert_with_deps)
-    .mutation(async ({ ctx, input }) => {
-      return upsert({
-        find: () => findChannelById(input.id),
-        create: () => create_with_deps_router.createCaller(ctx).createWithDeps(input),
-        update: () => channel_crud_router.createCaller(ctx).update(input),
-      });
-    }),
+  upsertWithDeps: publicProcedure.input(zChannelUpsertWithDeps).mutation(async ({ ctx, input }) => {
+    return upsert({
+      find: () => findChannelById(input.id),
+      create: () => createWithDepsRouter.createCaller(ctx).createWithDeps(input),
+      update: () => channelCrudRouter.createCaller(ctx).update(input),
+    });
+  }),
 });
 
-const upsert_thread_router = router({
+const upsertThreadRouter = router({
   upsertThreadWithDeps: publicProcedure
-    .input(z_thread_upsert_with_deps)
+    .input(zThreadUpsertWithDeps)
     .mutation(async ({ ctx, input }) => {
       return upsert({
         find: () => findChannelById(input.parent.id),
         create: async () => {
-          await upsert_router.createCaller(ctx).upsertWithDeps(input.parent);
-          return channel_crud_router.createCaller(ctx).create({
-            parent_id: input.parent.id,
-            server_id: input.parent.server.id,
+          await upsertRouter.createCaller(ctx).upsertWithDeps(input.parent);
+          return channelCrudRouter.createCaller(ctx).create({
+            parentId: input.parent.id,
+            serverId: input.parent.server.id,
             ...input,
           });
         },
-        update: () => channel_crud_router.createCaller(ctx).update(input),
+        update: () => channelCrudRouter.createCaller(ctx).update(input),
       });
     }),
 });
 
-export const channelRouter = mergeRouters(
-  create_with_deps_router,
-  upsert_thread_router,
-  channel_crud_router,
-  upsert_router
+export const channelRouter = MergeRouters(
+  createWithDepsRouter,
+  upsertThreadRouter,
+  channelCrudRouter,
+  upsertRouter
 );

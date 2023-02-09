@@ -11,7 +11,7 @@ import {
 export const IGNORED_ACCOUNT_MESSAGE =
   "Cannot create discord account for ignored user. Enable indexing of your account first";
 
-export const ignored_discord_account_router = router({
+export const ignoredDiscordAccountRouter = router({
   upsert: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
     return protectedMutation({
       permissions: [() => assertIsUser(ctx, input)],
@@ -22,7 +22,7 @@ export const ignored_discord_account_router = router({
   byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
     return protectedFetch({
       permissions: () => assertIsUser(ctx, input),
-      not_found_message: "Ignored discord account not found",
+      notFoundMessage: "Ignored discord account not found",
       fetch: () => findIgnoredDiscordAccountById(input),
     });
   }),

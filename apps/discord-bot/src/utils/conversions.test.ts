@@ -13,16 +13,16 @@ import {
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 
-let text_channel: TextChannel;
+let textChannel: TextChannel;
 let client: Client;
 beforeEach(async () => {
   client = await setupAnswerOverflowBot();
-  text_channel = mockTextChannel(client);
+  textChannel = mockTextChannel(client);
 });
 
 describe("Extract Users Set From Messages", () => {
   it("should extract users from messages", () => {
-    const messages = mockMessages(text_channel, 10);
+    const messages = mockMessages(textChannel, 10);
     const users = extractUsersSetFromMessages(messages);
     expect(users.length).toBe(10);
   });
@@ -43,34 +43,34 @@ describe("Extract Users Set From Messages", () => {
 
 describe("Extract Threads Set From Messages", () => {
   it("should extract threads from messages", () => {
-    const msg_with_thread = mockMessage({ client });
-    const msg_without_thread = mockMessage({ client });
+    const msgWithThread = mockMessage({ client });
+    const msgWithoutThread = mockMessage({ client });
     mockThreadFromParentMessage({
       client,
-      parent_message: msg_with_thread,
+      parentMessage: msgWithThread,
     });
-    const threads = extractThreadsSetFromMessages([msg_with_thread, msg_without_thread]);
+    const threads = extractThreadsSetFromMessages([msgWithThread, msgWithoutThread]);
     expect(threads.length).toBe(1);
   });
   it("should not extract duplicate threads", () => {
-    const msg_with_thread = mockMessage({ client });
+    const msgWithThread = mockMessage({ client });
     mockThreadFromParentMessage({
       client,
-      parent_message: msg_with_thread,
+      parentMessage: msgWithThread,
     });
-    const threads = extractThreadsSetFromMessages([msg_with_thread, msg_with_thread]);
+    const threads = extractThreadsSetFromMessages([msgWithThread, msgWithThread]);
     expect(threads.length).toBe(1);
   });
 });
 describe("Messages To AO Messages Set", () => {
   it("should convert messages to AO messages", () => {
-    const messages = mockMessages(text_channel, 10);
-    const ao_messages = messagesToAOMessagesSet(messages);
-    expect(ao_messages.length).toBe(10);
+    const messages = mockMessages(textChannel, 10);
+    const aoMessages = messagesToAOMessagesSet(messages);
+    expect(aoMessages.length).toBe(10);
   });
   it("should not convert duplicate messages", () => {
     const msg1 = mockMessage({ client });
-    const ao_messages = messagesToAOMessagesSet([msg1, msg1]);
-    expect(ao_messages.length).toBe(1);
+    const aoMessages = messagesToAOMessagesSet([msg1, msg1]);
+    expect(aoMessages.length).toBe(1);
   });
 });

@@ -10,17 +10,17 @@ import {
   getDefaultServer,
   Message as AOMessage,
   Channel as AOChannel,
-  Thread as AOThread,
   Server as AOServer,
   DiscordAccount as AODiscordAccount,
+  getDefaultChannelWithFlags,
 } from "@answeroverflow/db";
 
 export function toAOMessage(message: Message): AOMessage {
   if (!message.guild) throw new Error("Message is not in a guild");
-  const converted_message: AOMessage = {
+  const convertedMessage: AOMessage = {
     id: message.id,
     content: message.cleanContent,
-    channel_id: message.channel.id,
+    channelId: message.channel.id,
     images: message.attachments.map((attachment) => {
       return {
         url: attachment.url,
@@ -29,22 +29,22 @@ export function toAOMessage(message: Message): AOMessage {
         description: attachment.description,
       };
     }),
-    replies_to: message.reference?.messageId ?? null,
-    author_id: message.author.id,
-    server_id: message.guild?.id,
+    repliesTo: message.reference?.messageId ?? null,
+    authorId: message.author.id,
+    serverId: message.guild?.id,
     solutions: [],
-    child_thread: message.thread?.id ?? null,
+    childThread: message.thread?.id ?? null,
   };
-  return converted_message;
+  return convertedMessage;
 }
 
 export function toAODiscordAccount(user: User): AODiscordAccount {
-  const converted_user: AODiscordAccount = {
+  const convertedUser: AODiscordAccount = {
     id: user.id,
     avatar: user.avatar,
     name: user.username,
   };
-  return converted_user;
+  return convertedUser;
 }
 
 export function toAOServer(guild: Guild) {
@@ -57,14 +57,14 @@ export function toAOServer(guild: Guild) {
 
 export function toAOChannel(channel: GuildChannel | GuildBasedChannel): AOChannel {
   if (!channel.guild) throw new Error("Channel is not in a guild");
-  const converted_channel: AOChannel = {
+  const convertedChannel: AOChannel = getDefaultChannelWithFlags({
     id: channel.id,
     name: channel.name,
     type: channel.type,
-    parent_id: channel.isThread() ? channel.parentId : null,
-    server_id: channel.guild.id,
-  };
-  return converted_channel;
+    parentId: channel.isThread() ? channel.parentId : null,
+    serverId: channel.guild.id,
+  });
+  return convertedChannel;
 }
 
 export function toAOChannelWithServer(channel: GuildChannel): AOChannel & { server: AOServer } {
@@ -75,16 +75,17 @@ export function toAOChannelWithServer(channel: GuildChannel): AOChannel & { serv
   };
 }
 
-export function toAOThread(thread: AnyThreadChannel): AOThread {
-  if (!thread.parent) throw new Error("Thread has no parent");
-  const converted_thread: AOThread = {
+export function toAOThread(thread: AnyThreadChannel): AOChannel {
+  if (!thread?.parent?.id) throw new Error("Thread has no parent");
+
+  const convertedThread: AOChannel = getDefaultChannelWithFlags({
     id: thread.id,
     name: thread.name,
-    parent_id: thread.parent.id,
     type: thread.type,
-    server_id: thread.guild.id,
-  };
-  return converted_thread;
+    parentId: thread.parent.id,
+    serverId: thread.guild.id,
+  });
+  return convertedThread;
 }
 
 export function extractUsersSetFromMessages(messages: Message[]) {
@@ -96,7 +97,7 @@ export function extractUsersSetFromMessages(messages: Message[]) {
 }
 
 export function extractThreadsSetFromMessages(messages: Message[]) {
-  const threads = new Map<string, AOThread>();
+  const threads = new Map<string, AOChannel>();
   for (const msg of messages) {
     if (msg.thread) {
       threads.set(msg.thread.id, toAOThread(msg.thread));
@@ -106,9 +107,9 @@ export function extractThreadsSetFromMessages(messages: Message[]) {
 }
 
 export function messagesToAOMessagesSet(messages: Message[]) {
-  const ao_messages = new Map<string, AOMessage>();
+  const aoMessages = new Map<string, AOMessage>();
   for (const msg of messages) {
-    ao_messages.set(msg.id, toAOMessage(msg));
+    aoMessages.set(msg.id, toAOMessage(msg));
   }
-  return Array.from(ao_messages.values());
+  return Array.from(aoMessages.values());
 }

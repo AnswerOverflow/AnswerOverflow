@@ -1,24 +1,24 @@
 import { extendedAdapter } from "./adapter";
 import type { z } from "zod";
-import type { z_user_schema } from "./discord-oauth";
+import type { zUserSchema } from "./discord-oauth";
 import { prisma } from "@answeroverflow/db";
 import { getRandomEmail, getRandomId } from "@answeroverflow/utils";
-let mock_discord_account: z.infer<typeof z_user_schema>;
+let mockDiscordAccount: z.infer<typeof zUserSchema>;
 beforeEach(() => {
   vitest.mock("./discord-oauth", () => ({
     getDiscordUser: vitest.fn(() => {
-      return mock_discord_account;
+      return mockDiscordAccount;
     }),
   }));
-  mock_discord_account = {
+  mockDiscordAccount = {
     id: getRandomId(),
     username: "TestUser",
     avatar: "1234567890",
     discriminator: "1234",
-    public_flags: 0,
+    publicFlags: 0,
     flags: 0,
     locale: "en-US",
-    mfa_enabled: false,
+    mfaEnabled: false,
     email: getRandomEmail(),
     verified: true,
     bot: false,
@@ -28,66 +28,66 @@ beforeEach(() => {
 describe("Discord Auth", () => {
   // This is the first time we have ever seen this user, we need to generate information for them
   it("should create a Discord user for a new account", async () => {
-    const created_user = await extendedAdapter.createUser({
-      email: mock_discord_account.email!,
+    const createdUser = await extendedAdapter.createUser({
+      email: mockDiscordAccount.email!,
       emailVerified: null,
     });
     await extendedAdapter.linkAccount({
       provider: "discord",
-      providerAccountId: mock_discord_account.id,
+      providerAccountId: mockDiscordAccount.id,
       type: "oauth",
-      userId: created_user.id,
+      userId: createdUser.id,
       access_token: "1234567890",
     });
     const user = await prisma.discordAccount.findUnique({
       where: {
-        id: mock_discord_account.id,
+        id: mockDiscordAccount.id,
       },
     });
     expect(user).toEqual({
-      id: mock_discord_account.id,
-      name: mock_discord_account.username,
-      avatar: mock_discord_account.avatar,
+      id: mockDiscordAccount.id,
+      name: mockDiscordAccount.username,
+      avatar: mockDiscordAccount.avatar,
     });
   });
   // We have first seen their account on Discord from indexing their messages, we are linking their indexed account to what was signed in with
   it("should link to a Discord user for an existing account", async () => {
     await prisma.discordAccount.create({
       data: {
-        id: mock_discord_account.id,
-        name: mock_discord_account.username,
-        avatar: mock_discord_account.avatar,
+        id: mockDiscordAccount.id,
+        name: mockDiscordAccount.username,
+        avatar: mockDiscordAccount.avatar,
       },
     });
-    const created_user = await extendedAdapter.createUser({
-      email: mock_discord_account.email!,
+    const createdUser = await extendedAdapter.createUser({
+      email: mockDiscordAccount.email!,
       emailVerified: null,
     });
     await extendedAdapter.linkAccount({
       provider: "discord",
-      providerAccountId: mock_discord_account.id,
+      providerAccountId: mockDiscordAccount.id,
       type: "oauth",
-      userId: created_user.id,
+      userId: createdUser.id,
       access_token: "1234567890",
     });
     const user = await prisma.discordAccount.findUnique({
       where: {
-        id: mock_discord_account.id,
+        id: mockDiscordAccount.id,
       },
     });
     expect(user).toEqual({
-      id: mock_discord_account.id,
-      name: mock_discord_account.username,
-      avatar: mock_discord_account.avatar,
+      id: mockDiscordAccount.id,
+      name: mockDiscordAccount.username,
+      avatar: mockDiscordAccount.avatar,
     });
     const account = await prisma.account.findUnique({
       where: {
         provider_providerAccountId: {
           provider: "discord",
-          providerAccountId: mock_discord_account.id,
+          providerAccountId: mockDiscordAccount.id,
         },
       },
     });
-    expect(account?.providerAccountId).toBe(mock_discord_account.id);
+    expect(account?.providerAccountId).toBe(mockDiscordAccount.id);
   });
 });

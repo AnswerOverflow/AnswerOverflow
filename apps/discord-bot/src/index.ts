@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { createClient, login } from "./utils/bot";
 
 const client = createClient();

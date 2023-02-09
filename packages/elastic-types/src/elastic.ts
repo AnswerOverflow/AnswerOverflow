@@ -1,4 +1,5 @@
 import { Client, ClientOptions, errors } from "@elastic/elasticsearch";
+import type { BulkOperationContainer } from "@elastic/elasticsearch/lib/api/types";
 
 declare global {
   // eslint-disable-next-line no-var, no-unused-vars
@@ -50,9 +51,9 @@ function getElasticClient(): Elastic {
 // https://discord.com/developers/docs/resources/channel#message-objects
 export type Message = {
   id: string;
-  server_id: string;
-  channel_id: string;
-  author_id: string;
+  serverId: string;
+  channelId: string;
+  authorId: string;
   content: string;
   images: {
     url: string;
@@ -69,27 +70,27 @@ export type Message = {
 };
 
 export class Elastic extends Client {
-  messages_index: string;
+  messagesIndex: string;
 
   constructor(opts: ClientOptions) {
     super(opts);
     if (process.env.NODE_ENV === "test") {
-      this.messages_index = process.env.VITE_ELASTICSEARCH_MESSAGE_INDEX;
+      this.messagesIndex = process.env.VITE_ELASTICSEARCH_MESSAGE_INDEX;
     } else {
-      this.messages_index = process.env.ELASTICSEARCH_MESSAGE_INDEX;
+      this.messagesIndex = process.env.ELASTICSEARCH_MESSAGE_INDEX;
     }
   }
 
   public destroyMessagesIndex() {
     return this.indices.delete({
-      index: this.messages_index,
+      index: this.messagesIndex,
     });
   }
 
   public async getMessage(id: string) {
     try {
       const message = await this.get<Message>({
-        index: this.messages_index,
+        index: this.messagesIndex,
         id,
       });
       if (message.found === false) return null;
@@ -106,7 +107,7 @@ export class Elastic extends Client {
   public async bulkGetMessages(ids: string[]) {
     try {
       const messages = await this.mget<Message>({
-        docs: ids.map((id) => ({ _index: this.messages_index, _id: id, _source: true })),
+        docs: ids.map((id) => ({ _index: this.messagesIndex, _id: id, _source: true })),
       });
       return messages.docs
         .filter((doc) => "found" in doc && doc.found)
@@ -124,13 +125,13 @@ export class Elastic extends Client {
     }
   }
 
-  public async bulkGetMessagesByChannelId(channel_id: string, after?: string, limit?: number) {
+  public async bulkGetMessagesByChannelId(channelId: string, after?: string, limit?: number) {
     if (process.env.NODE_ENV === "test") {
       // TODO: Ugly hack for testing since elastic doesn't update immediately
       await new Promise((resolve) => setTimeout(resolve, 1200));
     }
     const result = await this.search<Message>({
-      index: this.messages_index,
+      index: this.messagesIndex,
       query: {
         // TODO: Remove ts-expect-error
         // @ts-ignore
@@ -138,7 +139,7 @@ export class Elastic extends Client {
           must: [
             {
               term: {
-                channel_id,
+                channelId,
               },
             },
             {
@@ -165,7 +166,7 @@ export class Elastic extends Client {
       },
     };
     const result = await this.search<Message>({
-      index: this.messages_index,
+      index: this.messagesIndex,
       body,
       size: 1000,
       sort: [{ id: "desc" }],
@@ -177,7 +178,7 @@ export class Elastic extends Client {
   public async deleteMessage(id: string) {
     try {
       const message = await this.delete({
-        index: this.messages_index,
+        index: this.messagesIndex,
         id,
       });
       switch (message.result) {
@@ -197,16 +198,16 @@ export class Elastic extends Client {
     }
   }
 
-  public async deleteByChannelId(thread_id: string) {
+  public async deleteByChannelId(threadId: string) {
     if (process.env.NODE_ENV === "test") {
       // TODO: Ugly hack for testing since elastic doesn't update immediately
       await new Promise((resolve) => setTimeout(resolve, 1200));
     }
     const result = await this.deleteByQuery({
-      index: this.messages_index,
+      index: this.messagesIndex,
       query: {
         term: {
-          channel_id: thread_id,
+          channelId: threadId,
         },
       },
     });
@@ -214,8 +215,10 @@ export class Elastic extends Client {
   }
 
   public async bulkDeleteMessages(ids: string[]) {
-    const body = ids.flatMap((id) => [{ delete: { _index: this.messages_index, _id: id } }]);
-    const result = await this.bulk({ body });
+    const body: BulkOperationContainer[] = ids.flatMap((id) => [
+      { delete: { _index: this.messagesIndex, _id: id } },
+    ]);
+    const result = await this.bulk({ operations: body });
     if (result.errors) {
       console.error(result);
       return false;
@@ -225,12 +228,12 @@ export class Elastic extends Client {
 
   public async updateMessage(message: Message) {
     try {
-      const fetched_message = await this.update({
-        index: this.messages_index,
+      const fetchedMessage = await this.update({
+        index: this.messagesIndex,
         id: message.id,
         doc: message,
       });
-      switch (fetched_message.result) {
+      switch (fetchedMessage.result) {
         case "updated":
         case "noop": // Update changed no data
           return message;
@@ -251,13 +254,13 @@ export class Elastic extends Client {
   }
 
   public async upsertMessage(message: Message) {
-    const fetched_message = await this.update({
-      index: this.messages_index,
+    const fetchedMessage = await this.update({
+      index: this.messagesIndex,
       id: message.id,
       doc: message,
       upsert: message,
     });
-    switch (fetched_message.result) {
+    switch (fetchedMessage.result) {
       case "created":
       case "updated":
       case "noop": // Update changed no data
@@ -272,11 +275,12 @@ export class Elastic extends Client {
   }
 
   public async bulkUpsertMessages(messages: Message[]) {
-    const body = messages.flatMap((message) => [
-      { update: { _index: this.messages_index, _id: message.id } },
-      { doc: message, doc_as_upsert: true },
-    ]);
-    const result = await this.bulk({ body });
+    const result = await this.bulk({
+      operations: messages.flatMap((message) => [
+        { update: { _index: this.messagesIndex, _id: message.id } },
+        { doc: message, doc_as_upsert: true },
+      ]),
+    });
     if (result.errors) {
       console.error(
         result.errors,
@@ -290,7 +294,7 @@ export class Elastic extends Client {
 
   public async createMessagesIndex() {
     const exists = await this.indices.exists({
-      index: this.messages_index,
+      index: this.messagesIndex,
     });
     if (exists) {
       await this.destroyMessagesIndex();
@@ -303,13 +307,13 @@ export class Elastic extends Client {
         },
         properties: {
           id: { type: "long" },
-          server_id: { type: "long" },
-          channel_id: { type: "long" },
-          author_id: { type: "long" },
+          serverId: { type: "long" },
+          channelId: { type: "long" },
+          authorId: { type: "long" },
           hidden: { type: "boolean" },
           content: { type: "text" },
-          replies_to: { type: "long" },
-          child_thread: { type: "long" },
+          repliesTo: { type: "long" },
+          childThread: { type: "long" },
           images: {
             properties: {
               url: { type: "text" },

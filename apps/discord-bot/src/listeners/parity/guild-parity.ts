@@ -19,11 +19,10 @@ export class SyncOnReady extends Listener {
 export class SyncOnJoin extends Listener {
   public async run(guild: Guild) {
     await upsertServer(toAOServer(guild));
-    await upsertManyChannels(
-      guild.channels.cache
-        .filter((channel) => ALLOWED_CHANNEL_TYPES.has(channel.type))
-        .map((channel) => toAOChannel(channel))
-    );
+    const channelsToUpsert = guild.channels.cache
+      .filter((channel) => ALLOWED_CHANNEL_TYPES.has(channel.type))
+      .map((channel) => toAOChannel(channel));
+    await upsertManyChannels(channelsToUpsert);
   }
 }
 
@@ -37,14 +36,14 @@ export class SyncOnDelete extends Listener {
   public async run(guild: Guild) {
     await upsertServer({
       ...toAOServer(guild),
-      kicked_time: new Date(),
+      kickedTime: new Date(),
     });
   }
 }
 
 @ApplyOptions<Listener.Options>({ event: Events.GuildUpdate, name: "Guild Sync On Update" })
 export class SyncOnUpdate extends Listener {
-  public async run(_oldGuild: Guild, newGuild: Guild) {
+  public async run(_: Guild, newGuild: Guild) {
     await upsertServer(toAOServer(newGuild));
   }
 }

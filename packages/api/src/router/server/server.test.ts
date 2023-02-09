@@ -1,6 +1,6 @@
 import { mockServer } from "@answeroverflow/db-mock";
 import { createServer, Server } from "@answeroverflow/db";
-import { pickPublicServerData } from "~api/test/public_data";
+import { pickPublicServerData } from "~api/test/public-data";
 import {
   testAllVariantsThatThrowErrors,
   mockAccountWithServersCallerCtx,
@@ -15,7 +15,7 @@ describe("Server Operations", () => {
       await testAllVariantsThatThrowErrors({
         sourcesThatShouldWork: ["discord-bot"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
-        permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+        permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
         async operation({ permission, source }) {
           const server = mockServer();
           const account = await mockAccountWithServersCallerCtx(server, source, permission);
@@ -33,33 +33,39 @@ describe("Server Operations", () => {
           await createServer(server);
           const account = await mockAccountWithServersCallerCtx(server, source, permission);
           const router = serverRouter.createCaller(account.ctx);
-          await router.update({ id: server.id, name: "new name" });
+          await router.update({
+            id: server.id,
+            name: "new name",
+            flags: {
+              readTheRulesConsentEnabled: true,
+            },
+          });
         },
         sourcesThatShouldWork: ["discord-bot"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
-        permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+        permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
       });
     });
   });
 
   describe("Server Fetch", () => {
-    let server_2: Server;
+    let server2: Server;
     beforeEach(async () => {
-      server_2 = mockServer({
-        kicked_time: new Date(),
+      server2 = mockServer({
+        kickedTime: new Date(),
       });
-      await createServer(server_2);
+      await createServer(server2);
     });
     it("should succeed fetching a server with permission variants", async () => {
       await testAllDataVariants({
         async fetch({ source, permission }) {
-          const account = await mockAccountWithServersCallerCtx(server_2, source, permission);
+          const account = await mockAccountWithServersCallerCtx(server2, source, permission);
           const router = serverRouter.createCaller(account.ctx);
-          const data = await router.byId(server_2.id);
+          const data = await router.byId(server2.id);
           return {
             data,
-            private_data_format: server_2,
-            public_data_format: pickPublicServerData(server_2),
+            privateDataFormat: data,
+            publicDataFormat: pickPublicServerData(server2),
           };
         },
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
@@ -72,7 +78,7 @@ describe("Server Operations", () => {
       await testAllVariantsThatThrowErrors({
         sourcesThatShouldWork: ["discord-bot"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
-        permission_failure_message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+        permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
         async operation({ permission, source }) {
           const server = mockServer();
           const account = await mockAccountWithServersCallerCtx(server, source, permission);

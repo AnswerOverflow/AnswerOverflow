@@ -1,15 +1,15 @@
-import type { ServerPublic, ChannelPublicWithSettings } from "@answeroverflow/api";
+import type { ServerPublic, ChannelPublicWithFlags } from "@answeroverflow/api";
 import Link from "next/link";
 import { Button } from "./primitives/Button";
 import { ServerIcon } from "./ServerIcon";
 
 export type ServerInviteProps = {
   server: ServerPublic;
-  channel?: ChannelPublicWithSettings;
-  is_user_in_server: boolean;
+  channel?: ChannelPublicWithFlags;
+  isUserInServer: boolean;
 };
 
-export function ServerInvite({ server, channel, is_user_in_server }: ServerInviteProps) {
+export function ServerInvite({ server, channel, isUserInServer }: ServerInviteProps) {
   const ServerNameAndChannelName = () => (
     <div className="flex flex-col">
       <span className="text-base font-bold text-black dark:text-neutral-300">{server.name}</span>
@@ -29,14 +29,14 @@ export function ServerInvite({ server, channel, is_user_in_server }: ServerInvit
         <ServerNameAndChannelName />
       </div>
       <div>
-        {channel?.settings.invite_code && (
+        {channel?.inviteCode && (
           <Link
-            href={`https://discord.gg/${channel?.settings.invite_code}`}
-            target={"_blank"}
+            href={`https://discord.gg/${channel?.inviteCode}`}
+            target={"Blank"}
             referrerPolicy="no-referrer"
           >
-            <Button intent={"success"} visual_only>
-              {is_user_in_server ? "Joined" : "Join"}
+            <Button intent={"success"} visualOnly>
+              {isUserInServer ? "Joined" : "Join"}
             </Button>
           </Link>
         )}

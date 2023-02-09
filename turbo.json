@@ -9,11 +9,14 @@
         "dist/**",
         ".next/**"
       ],
-      "cache": true
+      "cache": false
     },
     "init": {},
     "migrate": {},
     "lint": {
+      "inputs": [
+        "./packages/config/"
+      ],
       "outputs": [],
       "cache": false
     },
@@ -29,7 +32,7 @@
     },
     "test": {
       "outputs": [],
-      "cache": true
+      "cache": false
     },
     "db:generate": {
       "inputs": [

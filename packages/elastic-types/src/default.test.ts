@@ -3,25 +3,25 @@ import { getDefaultMessage } from "./default";
 
 describe("Default Message Values", () => {
   it("should verify message default values are correct", () => {
-    const server_id = getRandomId();
-    const channel_id = getRandomId();
-    const author_id = getRandomId();
-    const message_id = getRandomId();
+    const serverId = getRandomId();
+    const channelId = getRandomId();
+    const authorId = getRandomId();
+    const messageId = getRandomId();
     const msg = getDefaultMessage({
-      id: message_id,
-      channel_id,
-      server_id,
-      author_id,
+      id: messageId,
+      channelId,
+      serverId,
+      authorId,
     });
     expect(msg).toEqual({
-      id: message_id,
-      channel_id,
-      server_id,
-      author_id,
+      id: messageId,
+      channelId,
+      serverId,
+      authorId,
       content: "",
       images: [],
-      replies_to: null,
-      child_thread: null,
+      repliesTo: null,
+      childThread: null,
       solutions: [],
     });
   });

@@ -5,16 +5,16 @@ import {
 } from "@answeroverflow/db";
 import { mockDiscordAccount } from "@answeroverflow/db-mock";
 import { testAllSources, mockAccountCallerCtx } from "~api/test/utils";
-import { ignored_discord_account_router } from "./ignored-discord-account";
+import { ignoredDiscordAccountRouter } from "./ignored-discord-account";
 
-let discord_account: DiscordAccount;
-let discord_account_2: DiscordAccount;
+let discordAccount: DiscordAccount;
+let discordAccount2: DiscordAccount;
 beforeEach(async () => {
-  discord_account = mockDiscordAccount();
-  discord_account_2 = mockDiscordAccount();
+  discordAccount = mockDiscordAccount();
+  discordAccount2 = mockDiscordAccount();
 
-  await createDiscordAccount(discord_account);
-  await upsertIgnoredDiscordAccount(discord_account_2.id);
+  await createDiscordAccount(discordAccount);
+  await upsertIgnoredDiscordAccount(discordAccount2.id);
 });
 
 describe("Ignored Discord Account Operations", () => {
@@ -23,8 +23,8 @@ describe("Ignored Discord Account Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx } = await mockAccountCallerCtx(source);
-          const router = ignored_discord_account_router.createCaller(ctx);
-          await expect(router.upsert(discord_account.id)).rejects.toThrowError();
+          const router = ignoredDiscordAccountRouter.createCaller(ctx);
+          await expect(router.upsert(discordAccount.id)).rejects.toThrowError();
         },
       });
     });
@@ -32,7 +32,7 @@ describe("Ignored Discord Account Operations", () => {
       await testAllSources({
         async operation(source) {
           const { ctx, account } = await mockAccountCallerCtx(source);
-          const router = ignored_discord_account_router.createCaller(ctx);
+          const router = ignoredDiscordAccountRouter.createCaller(ctx);
           await expect(router.upsert(account.id)).resolves.toEqual({ id: account.id });
         },
       });
@@ -46,7 +46,7 @@ describe("Ignored Discord Account Operations", () => {
           const account = mockDiscordAccount();
           const { ctx } = await mockAccountCallerCtx(source);
           await upsertIgnoredDiscordAccount(account.id);
-          const router = ignored_discord_account_router.createCaller(ctx);
+          const router = ignoredDiscordAccountRouter.createCaller(ctx);
           await expect(router.byId(account.id)).rejects.toThrowError();
         },
       });
@@ -56,7 +56,7 @@ describe("Ignored Discord Account Operations", () => {
         async operation(source) {
           const { ctx, account } = await mockAccountCallerCtx(source);
           await upsertIgnoredDiscordAccount(account.id);
-          const router = ignored_discord_account_router.createCaller(ctx);
+          const router = ignoredDiscordAccountRouter.createCaller(ctx);
           await expect(router.byId(account.id)).resolves.toEqual({ id: account.id });
         },
       });
@@ -69,7 +69,7 @@ describe("Ignored Discord Account Operations", () => {
           const account = mockDiscordAccount();
           const { ctx } = await mockAccountCallerCtx(source);
           await upsertIgnoredDiscordAccount(account.id);
-          const router = ignored_discord_account_router.createCaller(ctx);
+          const router = ignoredDiscordAccountRouter.createCaller(ctx);
           await expect(router.stopIgnoring(account.id)).rejects.toThrowError();
         },
       });
@@ -79,7 +79,7 @@ describe("Ignored Discord Account Operations", () => {
         async operation(source) {
           const { ctx, account } = await mockAccountCallerCtx(source);
           await upsertIgnoredDiscordAccount(account.id);
-          const router = ignored_discord_account_router.createCaller(ctx);
+          const router = ignoredDiscordAccountRouter.createCaller(ctx);
           await expect(router.stopIgnoring(account.id)).resolves.toEqual({ id: account.id });
         },
       });

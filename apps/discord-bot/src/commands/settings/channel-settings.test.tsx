@@ -5,8 +5,8 @@ describe("Channel Settings Slash Command", () => {
   //     "channel-settings",
   //     "1048055954618454026",
   //     guild,
-  //     text_channel,
-  //     members.guild_member_default
+  //     textChannel,
+  //     members.guildMemberDefault
   //   );
   //   command.reply = jest.fn();
   //   await emitEvent(client, Events.InteractionCreate, command);

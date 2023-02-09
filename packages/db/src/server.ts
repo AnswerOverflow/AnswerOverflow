@@ -1,44 +1,78 @@
 import type { z } from "zod";
-import { prisma } from "@answeroverflow/prisma-types";
+import { getDefaultServer, prisma, Server } from "@answeroverflow/prisma-types";
 import { upsert } from "./utils/operations";
-import { z_server } from "./zod-schemas";
-export const z_server_required = z_server.pick({
+import { addFlagsToServer, zServer, mergeServerFlags } from "./zod-schemas";
+
+export const zServerRequired = zServer.pick({
   id: true,
   name: true,
 });
 
-export const z_server_mutable = z_server
+export const zServerMutable = zServer
   .omit({
     id: true,
   })
-  .partial();
+  .deepPartial();
 
-export const z_server_create = z_server_mutable.merge(z_server_required);
+export const zServerCreate = zServerMutable.merge(zServerRequired);
 
-export const z_server_update = z_server_mutable.merge(
-  z_server_required.pick({
+export const zServerUpdate = zServerMutable.merge(
+  zServerRequired.pick({
     id: true,
   })
 );
 
-export const z_server_upsert = z_server_create;
+export const zServerUpsert = zServerCreate;
 
-export function createServer(input: z.infer<typeof z_server_create>) {
-  return prisma.server.create({ data: input });
+export function combineServerSettings<
+  F extends { bitfield: number },
+  T extends z.infer<typeof zServerMutable>
+>({ old, updated }: { old: F; updated: T }) {
+  const { flags, ...updateDataWithoutFlags } = updated;
+  return {
+    ...updateDataWithoutFlags,
+    bitfield: flags ? mergeServerFlags(old.bitfield, flags) : undefined,
+  };
 }
 
-export function updateServer(input: z.infer<typeof z_server_update>) {
-  return prisma.server.update({ where: { id: input.id }, data: input });
+export function getDefaultServerWithFlags(
+  override: Partial<z.infer<typeof zServerMutable>> &
+    Pick<z.infer<typeof zServer>, "id" | "name">
+) {
+  return addFlagsToServer(getDefaultServer(override));
 }
 
-export function findServerById(id: string) {
-  return prisma.server.findUnique({ where: { id } });
+export async function createServer(input: z.infer<typeof zServerCreate>) {
+  const created = await prisma.server.create({
+    data: combineServerSettings({
+      old: getDefaultServerWithFlags(input),
+      updated: input,
+    }),
+  });
+  return addFlagsToServer(created);
 }
 
-export function upsertServer(input: z.infer<typeof z_server_upsert>) {
+export async function updateServer(input: z.infer<typeof zServerUpdate>, existing: Server) {
+  const updated = await prisma.server.update({
+    where: { id: input.id },
+    data: combineServerSettings({
+      old: existing,
+      updated: input,
+    }),
+  });
+  return addFlagsToServer(updated);
+}
+
+export async function findServerById(id: string) {
+  const found = await prisma.server.findUnique({ where: { id } });
+  if (!found) return null;
+  return addFlagsToServer(found);
+}
+
+export function upsertServer(input: z.infer<typeof zServerUpsert>) {
   return upsert({
     find: () => findServerById(input.id),
     create: () => createServer(input),
-    update: () => updateServer(input),
+    update: (old) => updateServer(input, old),
   });
 }
