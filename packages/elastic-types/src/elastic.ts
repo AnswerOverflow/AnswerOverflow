@@ -1,4 +1,5 @@
 import { Client, ClientOptions, errors } from "@elastic/elasticsearch";
+import type { BulkOperationContainer } from "@elastic/elasticsearch/lib/api/types";
 
 declare global {
   // eslint-disable-next-line no-var, no-unused-vars
@@ -211,8 +212,10 @@ export class Elastic extends Client {
   }
 
   public async bulkDeleteMessages(ids: string[]) {
-    const body = ids.flatMap((id) => [{ delete: { Index: this.messagesIndex, Id: id } }]);
-    const result = await this.bulk({ body });
+    const body: BulkOperationContainer[] = ids.flatMap((id) => [
+      { delete: { _index: this.messagesIndex, _id: id } },
+    ]);
+    const result = await this.bulk({ operations: body });
     if (result.errors) {
       console.error(result);
       return false;
@@ -269,11 +272,12 @@ export class Elastic extends Client {
   }
 
   public async bulkUpsertMessages(messages: Message[]) {
-    const body = messages.flatMap((message) => [
-      { update: { Index: this.messagesIndex, Id: message.id } },
-      { doc: message, docAsUpsert: true },
-    ]);
-    const result = await this.bulk({ body });
+    const result = await this.bulk({
+      operations: messages.flatMap((message) => [
+        { update: { _index: this.messagesIndex, _id: message.id } },
+        { doc: message, dock_as_upsert: true },
+      ]),
+    });
     if (result.errors) {
       console.error(
         result.errors,
