@@ -2,17 +2,17 @@ import { Button, ButtonClickEvent } from "@answeroverflow/reacord";
 import React from "react";
 
 export function ToggleButton({
-  currently_enabled,
-  enable_label,
-  disable_label,
+  currentlyEnabled,
+  enableLabel,
+  disableLabel,
   onClick,
 }: {
-  currently_enabled: boolean;
-  enable_label: string;
-  disable_label: string;
+  currentlyEnabled: boolean;
+  enableLabel: string;
+  disableLabel: string;
   onClick: (event: ButtonClickEvent) => void;
 }) {
-  const label = currently_enabled ? disable_label : enable_label;
-  const style = currently_enabled ? "danger" : "success";
+  const label = currentlyEnabled ? disableLabel : enableLabel;
+  const style = currentlyEnabled ? "danger" : "success";
   return <Button label={label} style={style} onClick={onClick} />;
 }

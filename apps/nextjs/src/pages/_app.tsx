@@ -1,4 +1,4 @@
-// src/pages/_app.tsx
+// src/pages/App.tsx
 import "../styles/globals.css";
 import "highlight.js/styles/github.css";
 import "highlight.js/styles/github-dark.css";
@@ -11,6 +11,7 @@ import { NextTRPC, trpc } from "@answeroverflow/ui";
 import { Footer, Navbar } from "@answeroverflow/ui";
 import { useEffect } from "react";
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },

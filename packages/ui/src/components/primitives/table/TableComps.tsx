@@ -38,25 +38,25 @@ export const TableButtonWrapper: React.FC<PropsWithChildren> = ({ children }) =>
 };
 
 export interface TableButtonProps {
-  background_color: string;
+  backgroundColor: string;
   onClick?: () => void;
-  aria_label: string;
+  ariaLabel: string;
 }
 
 export const TableButton: React.FC<PropsWithChildren<TableButtonProps>> = ({
   children,
-  background_color,
+  backgroundColor,
   onClick,
-  aria_label,
+  ariaLabel,
 }) => {
   return (
     <button
       className={`h-7 w-7 rounded-md p-[0.15rem]`}
       style={{
-        backgroundColor: background_color,
+        backgroundColor: backgroundColor,
       }}
       onClick={() => onClick ?? undefined}
-      aria-label={aria_label}
+      aria-label={ariaLabel}
     >
       {children}
     </button>

@@ -17,12 +17,12 @@ export const ALLOWED_CHECKMARK_AS_REACTION_GUILD_IDS = new Set([
 
 @ApplyOptions<Listener.Options>({ event: Events.MessageReactionAdd })
 export class CheckmarkReactionMarkSolution extends Listener {
-  public async run(message_reaction: MessageReaction, user: User) {
-    if (message_reaction.emoji.name !== "✅" || message_reaction.me) return;
+  public async run(messageReaction: MessageReaction, user: User) {
+    if (messageReaction.emoji.name !== "✅" || messageReaction.me) return;
     try {
-      const full_message = await message_reaction.message.fetch();
-      if (!ALLOWED_CHECKMARK_AS_REACTION_GUILD_IDS.has(full_message.guildId ?? "")) return;
-      const { embed, components, thread } = await markAsSolved(full_message, user);
+      const fullMessage = await messageReaction.message.fetch();
+      if (!ALLOWED_CHECKMARK_AS_REACTION_GUILD_IDS.has(fullMessage.guildId ?? "")) return;
+      const { embed, components, thread } = await markAsSolved(fullMessage, user);
       await thread.send({ embeds: [embed], components: components ? [components] : undefined });
     } catch (error) {
       if (error instanceof MarkSolutionError) {

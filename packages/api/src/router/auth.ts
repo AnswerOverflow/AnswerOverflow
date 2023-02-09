@@ -14,10 +14,10 @@ export const authRouter = router({
     return "you can see this secret message!";
   }),
   getServers: withUserServersProcedure.query(({ ctx }) => {
-    return ctx.user_servers;
+    return ctx.userServers;
   }),
   // TODO: Cache
   getDiscordAccount: withDiscordAccountProcedure.query(({ ctx }) => {
-    return ctx.discord_account;
+    return ctx.discordAccount;
   }),
 });

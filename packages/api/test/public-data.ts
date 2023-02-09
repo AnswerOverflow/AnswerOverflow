@@ -15,14 +15,14 @@ export function pickPublicServerData(server: Server) {
 export function toMessageWithDiscordAccount(
   message: Message,
   author: DiscordAccount,
-  public_message: boolean
+  publicMessage: boolean
 ) {
-  const public_msg: MessageWithDiscordAccount = {
+  const publicMsg: MessageWithDiscordAccount = {
     ...message,
     author,
-    public: public_message,
+    public: publicMessage,
   };
-  return public_msg;
+  return publicMsg;
 }
 
 export function toPrivateMessageWithStrippedData(message: MessageWithDiscordAccount) {
@@ -30,15 +30,15 @@ export function toPrivateMessageWithStrippedData(message: MessageWithDiscordAcco
     id: "0",
     name: "Unknown User",
   });
-  const private_msg: MessageWithDiscordAccount = {
+  const privateMsg: MessageWithDiscordAccount = {
     ...getDefaultMessage({
-      author_id: author.id,
-      channel_id: message.channel_id,
-      server_id: message.server_id,
+      authorId: author.id,
+      channelId: message.channelId,
+      serverId: message.serverId,
       id: message.id,
     }),
     author,
     public: false,
   };
-  return private_msg;
+  return privateMsg;
 }

@@ -13,13 +13,13 @@ export default {
 //👇 We create a “template” of how args map to rendering
 const Template: ComponentStory<typeof Message> = (args: MessageProps) => <Message {...args} />;
 
-const lorem_ipsum =
+const loremIpsum =
   "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quidem fugit iure delectus tempore! Nam nihil animi nemo nisi eligendi veniam obcaecati accusantium, sunt maiores tenetur illum saepe incidunt beatae hic.";
 
 //👇 Each story then reuses that template
-const default_message: MessageProps = {
+const defaultMessage: MessageProps = {
   message: {
-    content: lorem_ipsum,
+    content: loremIpsum,
     id: "1063028763656458270",
     author: {
       name: "John Doe",
@@ -28,22 +28,22 @@ const default_message: MessageProps = {
     },
     public: true,
     images: [],
-    channel_id: "0",
-    server_id: "0",
+    channelId: "0",
+    serverId: "0",
     solutions: [],
-    child_thread: null,
-    replies_to: null,
+    childThread: null,
+    repliesTo: null,
   },
 };
 
 export const Primary = Template.bind({});
-Primary.args = default_message;
+Primary.args = defaultMessage;
 
 export const OverflowLetters = Template.bind({});
 OverflowLetters.args = {
   ...Primary.args,
   message: {
-    ...default_message.message,
+    ...defaultMessage.message,
     content:
       "Helloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo",
     author: mockDiscordAccount(),
@@ -54,9 +54,9 @@ export const WithImages = Template.bind({});
 WithImages.args = {
   ...Primary.args,
   message: {
-    ...default_message.message,
-    channel_id: "1031266112802914305",
-    server_id: "701008832645824553",
+    ...defaultMessage.message,
+    channelId: "1031266112802914305",
+    serverId: "701008832645824553",
     images: [
       {
         url: "https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.png",
@@ -84,7 +84,7 @@ export const WithCode = Template.bind({});
 WithCode.args = {
   ...Primary.args,
   message: {
-    ...default_message.message,
+    ...defaultMessage.message,
     content: `
     \`\`\`typescript
   const variable = 'hello';
@@ -105,7 +105,7 @@ export const WithXSS = Template.bind({});
 WithXSS.args = {
   ...Primary.args,
   message: {
-    ...default_message.message,
+    ...defaultMessage.message,
     content: "<script> alert('XSS')</script>",
   },
 };
@@ -114,7 +114,7 @@ export const WithXSSInCodeBlock = Template.bind({});
 WithXSSInCodeBlock.args = {
   ...Primary.args,
   message: {
-    ...default_message.message,
+    ...defaultMessage.message,
     content: "```<script> alert('XSS')</script>```",
   },
 };

@@ -10,24 +10,24 @@ import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
 export class ReadTheRulesConsent extends Listener {
   public async run(oldMember: GuildMember, newMember: GuildMember) {
     if (oldMember.pending && !newMember.pending) {
-      const server_settings = await findServerById(newMember.guild.id);
+      const serverSettings = await findServerById(newMember.guild.id);
 
-      if (!server_settings?.flags.read_the_rules_consent_enabled) {
+      if (!serverSettings?.flags.readTheRulesConsentEnabled) {
         return;
       }
       await callApiWithConsoleStatusHandler({
         async ApiCall(router) {
           const user = toAODiscordAccount(newMember.user);
-          return router.user_server_settings.upsertWithDeps({
+          return router.userServerSettings.upsertWithDeps({
             user,
-            server_id: oldMember.guild.id,
+            serverId: oldMember.guild.id,
             flags: {
-              can_publicly_display_messages: true,
+              canPubliclyDisplayMessages: true,
             },
           });
         },
-        error_message: `Failed to update user ${newMember.id} in server ${newMember.guild.id} to have read the rules consent.`,
-        success_message: `Updated user ${newMember.id} in server ${newMember.guild.id} to have read the rules consent.`,
+        errorMessage: `Failed to update user ${newMember.id} in server ${newMember.guild.id} to have read the rules consent.`,
+        successMessage: `Updated user ${newMember.id} in server ${newMember.guild.id} to have read the rules consent.`,
         getCtx: () => createMemberCtx(newMember),
       });
     }

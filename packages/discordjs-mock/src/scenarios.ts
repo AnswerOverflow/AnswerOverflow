@@ -9,31 +9,31 @@ export async function createGuildMemberVariants(
   guild: Guild | undefined = undefined
 ) {
   if (!guild) guild = mockGuild(client);
-  const guild_member_owner = await guild.members.fetch(guild.ownerId);
-  const guild_member_default = mockGuildMember({ client, guild });
-  const pending_guild_member_default = mockGuildMember({
+  const guildMemberOwner = await guild.members.fetch(guild.ownerId);
+  const guildMemberDefault = mockGuildMember({ client, guild });
+  const pendingGuildMemberDefault = mockGuildMember({
     client,
     guild,
     data: {
       pending: true,
     },
   });
-  const guild_member_manage_guild = mockGuildMember({
+  const guildMemberManageGuild = mockGuildMember({
     client,
     guild,
     permissions: PermissionFlagsBits.ManageGuild,
   });
-  const guild_member_admin = mockGuildMember({
+  const guildMemberAdmin = mockGuildMember({
     client,
     guild,
     permissions: PermissionFlagsBits.Administrator,
   });
 
   return {
-    guild_member_owner,
-    guild_member_default,
-    pending_guild_member_default,
-    guild_member_manage_guild,
-    guild_member_admin,
+    guildMemberOwner,
+    guildMemberDefault,
+    pendingGuildMemberDefault,
+    guildMemberManageGuild,
+    guildMemberAdmin,
   };
 }

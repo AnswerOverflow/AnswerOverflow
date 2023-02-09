@@ -35,6 +35,34 @@ module.exports = {
     ],
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": ["error"],
+    "@typescript-eslint/naming-convention": [
+      "warn",
+      {
+        selector: "variable",
+        format: ["camelCase", "UPPER_CASE"],
+        leadingUnderscore: "allow",
+        trailingUnderscore: "allow",
+      },
+      {
+        selector: "variable",
+        types: ["function"],
+        // arrow functions & react components
+        format: ["camelCase", "PascalCase"],
+      },
+      {
+        selector: "typeLike",
+        format: ["PascalCase"],
+      },
+      {
+        selector: "typeProperty",
+        format: ["camelCase"],
+      },
+      {
+        selector: "typeProperty",
+        types: ["function"],
+        format: ["camelCase", "PascalCase"],
+      },
+    ],
     //"@typescript-eslint/explicit-function-return-type": "warn"
   },
   overrides: [

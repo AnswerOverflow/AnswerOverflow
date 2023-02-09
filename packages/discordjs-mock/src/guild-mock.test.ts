@@ -24,17 +24,17 @@ describe("Guild Mock", () => {
   });
   it("should create a user and then a guild ", async () => {
     const client = await setupBot();
-    const random_user = mockUser(client);
+    const randomUser = mockUser(client);
     const guild = mockGuild(client);
     expect(guild).toBeDefined();
     expect(client.guilds.cache.get(guild.id)).toBeDefined();
     expect(guild.ownerId).toBeDefined();
     expect(client.users.cache.get(guild.ownerId)).toBeDefined();
-    expect(random_user.id).not.toBe(guild.ownerId);
+    expect(randomUser.id).not.toBe(guild.ownerId);
     expect(guild.members.cache.get(guild.ownerId)).toBeDefined();
     expect(client.users.cache.size).toBe(3);
     expect(guild.members.cache.size).toBe(2);
-    expect(guild.members.cache.get(random_user.id)).toBeUndefined();
+    expect(guild.members.cache.get(randomUser.id)).toBeUndefined();
   });
   it("should have a @everyone default role", async () => {
     const client = await setupBot();

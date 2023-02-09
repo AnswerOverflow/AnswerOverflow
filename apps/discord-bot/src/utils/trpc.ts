@@ -15,7 +15,7 @@ type TRPCall<T> = {
   ApiCall: (router: BotRouterCaller) => Promise<T>;
   Ok?: (result: T) => void | Promise<void>;
   Error?: (error: TRPCError) => void;
-  allowed_errors?: TRPCError["code"][] | TRPCError["code"];
+  allowedErrors?: TRPCError["code"][] | TRPCError["code"];
 };
 
 export async function callAPI<T>({
@@ -23,17 +23,17 @@ export async function callAPI<T>({
   ApiCall,
   Ok = () => {},
   Error = () => {},
-  allowed_errors = "NOT_FOUND",
+  allowedErrors = "NOT_FOUND",
 }: TRPCall<T>) {
   try {
-    const converted_ctx = await createBotContext(await getCtx());
-    const caller = botRouter.createCaller(converted_ctx);
+    const convertedCtx = await createBotContext(await getCtx());
+    const caller = botRouter.createCaller(convertedCtx);
     const data = await ApiCall(caller); // Pass in the caller we created to ApiCall to make the request
     await Ok(data); // If no errors, Ok gets called with the API data
     return data;
   } catch (error) {
     if (error instanceof TRPCError) {
-      if (!allowed_errors.includes(error.code)) {
+      if (!allowedErrors.includes(error.code)) {
         Error(error);
       }
     } else {
@@ -70,8 +70,8 @@ export async function callApiWithButtonErrorHandler<T>(
 export async function callApiWithConsoleStatusHandler<T>(
   call: Omit<
     TRPCall<T> & {
-      success_message?: string | undefined;
-      error_message: string;
+      successMessage?: string | undefined;
+      errorMessage: string;
     },
     "Error" | "Ok"
   >
@@ -79,11 +79,11 @@ export async function callApiWithConsoleStatusHandler<T>(
   return await callAPI({
     ...call,
     Error(error) {
-      container.logger.error(call.error_message, error.code, error.message);
+      container.logger.error(call.errorMessage, error.code, error.message);
     },
     Ok() {
-      if (call.success_message) {
-        container.logger.info(call.success_message);
+      if (call.successMessage) {
+        container.logger.info(call.successMessage);
       }
     },
   });

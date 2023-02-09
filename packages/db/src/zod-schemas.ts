@@ -21,37 +21,37 @@ export function toZObject<T extends readonly string[]>(...keys: T) {
   return z.object(toDict(() => z.boolean(), ...keys));
 }
 
-export const z_unique_array = z.array(z.string()).transform((arr) => [...new Set(arr)]);
+export const zUniqueArray = z.array(z.string()).transform((arr) => [...new Set(arr)]);
 
-export const channel_bitfield_flags = [
-  "indexing_enabled",
-  "auto_thread_enabled",
-  "mark_solution_enabled",
-  "send_mark_solution_instructions_in_new_threads",
-  "forum_guidelines_consent_enabled",
+export const channelBitfieldFlags = [
+  "indexingEnabled",
+  "autoThreadEnabled",
+  "markSolutionEnabled",
+  "sendMarkSolutionInstructionsInNewThreads",
+  "forumGuidelinesConsentEnabled",
 ] as const;
 
-export const z_channel_bitfield_flags = toZObject(...channel_bitfield_flags);
+export const zChannelBitfieldFlags = toZObject(...channelBitfieldFlags);
 
-export const z_channel = z.object({
+export const zChannel = z.object({
   id: z.string(),
   name: z.string(),
-  server_id: z.string(),
+  serverId: z.string(),
   type: z.number().refine(
     (n) => ALLOWED_CHANNEL_TYPES.has(n),
     "Channel type can only be guild forum, text, or announcement" // TODO: Make a type error if possible
   ),
-  parent_id: z.string().nullable(),
-  flags: z_channel_bitfield_flags,
-  last_indexed_snowflake: z.string().nullable(),
-  invite_code: z.string().nullable(),
-  solution_tag_id: z.string().nullable(),
+  parentId: z.string().nullable(),
+  flags: zChannelBitfieldFlags,
+  lastIndexedSnowflake: z.string().nullable(),
+  inviteCode: z.string().nullable(),
+  solutionTagId: z.string().nullable(),
 });
 
-export type ChannelWithFlags = z.infer<typeof z_channel>;
+export type ChannelWithFlags = z.infer<typeof zChannel>;
 
 export const bitfieldToChannelFlags = (bitfield: number) =>
-  bitfieldToDict(bitfield, channel_bitfield_flags);
+  bitfieldToDict(bitfield, channelBitfieldFlags);
 
 export function addFlagsToChannel<
   T extends {
@@ -64,127 +64,127 @@ export function addFlagsToChannel<
   };
 }
 
-export const z_channel_public = z_channel.pick({
+export const zChannelPublic = zChannel.pick({
   id: true,
   name: true,
-  server_id: true,
+  serverId: true,
   type: true,
-  parent_id: true,
-  invite_code: true,
+  parentId: true,
+  inviteCode: true,
 });
 
-export type ChannelPublicWithFlags = z.infer<typeof z_channel_public>;
+export type ChannelPublicWithFlags = z.infer<typeof zChannelPublic>;
 
-export const z_discord_image = z.object({
+export const zDiscordImage = z.object({
   url: z.string(),
   width: z.number().nullable(),
   height: z.number().nullable(),
   description: z.string().nullable(),
 });
 
-export const z_message = z.object({
+export const zMessage = z.object({
   id: z.string(),
   content: z.string(),
-  images: z.array(z_discord_image),
+  images: z.array(zDiscordImage),
   solutions: z.array(z.string()),
-  replies_to: z.string().nullable(),
-  child_thread: z.string().nullable(),
-  author_id: z.string(),
-  channel_id: z.string(),
-  server_id: z.string(),
+  repliesTo: z.string().nullable(),
+  childThread: z.string().nullable(),
+  authorId: z.string(),
+  channelId: z.string(),
+  serverId: z.string(),
 });
 
-export const z_message_public = z_message.pick({
+export const zMessagePublic = zMessage.pick({
   id: true,
   content: true,
   images: true,
   solutions: true,
-  replies_to: true,
-  child_thread: true,
-  author_id: true,
-  channel_id: true,
-  server_id: true,
+  repliesTo: true,
+  childThread: true,
+  authorId: true,
+  channelId: true,
+  serverId: true,
 });
 
-export const server_settings_flags = ["read_the_rules_consent_enabled"] as const;
-export const z_server_settings_flags = toZObject(...server_settings_flags);
+export const serverSettingsFlags = ["readTheRulesConsentEnabled"] as const;
+export const zServerSettingsFlags = toZObject(...serverSettingsFlags);
 
 export const bitfieldToServerFlags = (bitfield: number) =>
-  bitfieldToDict(bitfield, server_settings_flags);
+  bitfieldToDict(bitfield, serverSettingsFlags);
 
-export function addFlagsToServer<T extends Server>(server_settings: T) {
+export function addFlagsToServer<T extends Server>(serverSettings: T) {
   return {
-    ...server_settings,
-    flags: bitfieldToServerFlags(server_settings.bitfield),
+    ...serverSettings,
+    flags: bitfieldToServerFlags(serverSettings.bitfield),
   };
 }
 
-export function mergeServerFlags(old: number, new_flags: Record<string, boolean>) {
+export function mergeServerFlags(old: number, newFlags: Record<string, boolean>) {
   return mergeFlags(
     () => bitfieldToServerFlags(old),
-    new_flags,
-    (flags) => dictToBitfield(flags, server_settings_flags)
+    newFlags,
+    (flags) => dictToBitfield(flags, serverSettingsFlags)
   );
 }
 
-export const z_server = z.object({
+export const zServer = z.object({
   id: z.string(),
   name: z.string(),
   icon: z.string().nullable(),
-  kicked_time: z.date().nullable(),
-  flags: z_server_settings_flags,
+  kickedTime: z.date().nullable(),
+  flags: zServerSettingsFlags,
 });
 
-export type ServerWithFlags = z.infer<typeof z_server>;
+export type ServerWithFlags = z.infer<typeof zServer>;
 
-export const z_server_public = z_server.pick({
+export const zServerPublic = zServer.pick({
   id: true,
   name: true,
   icon: true,
 });
 
-export type ServerPublicWithFlags = z.infer<typeof z_server_public>;
+export type ServerPublicWithFlags = z.infer<typeof zServerPublic>;
 
-export const user_server_settings_flags = [
-  "can_publicly_display_messages",
-  "message_indexing_disabled",
+export const userServerSettingsFlags = [
+  "canPubliclyDisplayMessages",
+  "messageIndexingDisabled",
 ] as const;
 
 export const bitfieldToUserServerSettingsFlags = (bitfield: number) =>
-  bitfieldToDict(bitfield, user_server_settings_flags);
+  bitfieldToDict(bitfield, userServerSettingsFlags);
 
 export function addFlagsToUserServerSettings<T extends UserServerSettings>(
-  user_server_settings: T
+  userServerSettings: T
 ) {
   return {
-    ...user_server_settings,
-    flags: bitfieldToUserServerSettingsFlags(user_server_settings.bitfield),
+    ...userServerSettings,
+    flags: bitfieldToUserServerSettingsFlags(userServerSettings.bitfield),
   };
 }
 
-export function mergeUserServerSettingsFlags(old: number, new_flags: Record<string, boolean>) {
+export function mergeUserServerSettingsFlags(old: number, newFlags: Record<string, boolean>) {
   return mergeFlags(
     () => bitfieldToUserServerSettingsFlags(old),
-    new_flags,
-    (flags) => dictToBitfield(flags, user_server_settings_flags)
+    newFlags,
+    (flags) => dictToBitfield(flags, userServerSettingsFlags)
   );
 }
 
-export const z_user_server_settings_flags = toZObject(...user_server_settings_flags);
+export const zUserServerSettingsFlags = toZObject(...userServerSettingsFlags);
 
-export const z_user_server_settings = z.object({
-  user_id: z.string(),
-  server_id: z.string(),
-  flags: z_user_server_settings_flags,
+export const zUserServerSettings = z.object({
+  userId: z.string(),
+  serverId: z.string(),
+  flags: zUserServerSettingsFlags,
 });
 
-export const z_discord_account = z.object({
+export const zDiscordAccount = z.object({
   id: z.string(),
   name: z.string(),
   avatar: z.string().nullable(),
 });
 
-export const z_discord_account_public = z_discord_account.pick({
+export const zDiscordAccountPublic = zDiscordAccount.pick({
   id: true,
   name: true,
   avatar: true,

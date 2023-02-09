@@ -3,16 +3,16 @@ import type { Message } from "./elastic";
 export function getDefaultMessage(
   override: Partial<Message> & {
     id: string;
-    channel_id: string;
-    server_id: string;
-    author_id: string;
+    channelId: string;
+    serverId: string;
+    authorId: string;
   }
 ): Message {
   const data: Message = {
     content: "",
     images: [],
-    replies_to: null,
-    child_thread: null,
+    repliesTo: null,
+    childThread: null,
     solutions: [],
     ...override,
   };

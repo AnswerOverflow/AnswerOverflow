@@ -11,6 +11,6 @@ export const makeServerIconLink = (server: ServerPublic, size: number = 64) => {
 };
 
 export function ServerIcon({ server, size = "md", ...props }: ServerIconProps) {
-  const server_icon_url = makeServerIconLink(server, getAvatarSize(size));
-  return <Avatar url={server_icon_url} alt={server.name} size={size} {...props} />;
+  const serverIconUrl = makeServerIconLink(server, getAvatarSize(size));
+  return <Avatar url={serverIconUrl} alt={server.name} size={size} {...props} />;
 }

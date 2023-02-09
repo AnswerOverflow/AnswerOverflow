@@ -18,7 +18,7 @@ import {
   GuildTextBasedChannel,
 } from "discord.js";
 import type { ReactNode } from "react";
-import { RandomLoadingMessage } from "./constants";
+import { LOADING_MESSAGES } from "./constants";
 
 /**
  * Picks a random item from an array
@@ -37,9 +37,7 @@ export function pickRandom<T>(array: readonly T[]): T {
  */
 export function sendLoadingMessage(message: Message): Promise<typeof message> {
   return send(message, {
-    embeds: [
-      new EmbedBuilder().setDescription(pickRandom(RandomLoadingMessage)).setColor("#FF0000"),
-    ],
+    embeds: [new EmbedBuilder().setDescription(pickRandom(LOADING_MESSAGES)).setColor("#FF0000")],
   });
 }
 

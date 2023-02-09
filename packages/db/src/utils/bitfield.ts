@@ -13,7 +13,7 @@ export function toDict<T extends readonly string[], Result>(
 }
 
 export function toBitfield<T extends readonly string[]>(...keys: T): Record<T[number], number> {
-  return toDict((_key, index) => 1 << index, ...keys) as Record<T[number], number>;
+  return toDict((_, index) => 1 << index, ...keys) as Record<T[number], number>;
 }
 
 export function bitfieldToDict<T extends readonly string[]>(
@@ -29,21 +29,21 @@ export function dictToBitfield<
   FlagDict extends Record<T[number], boolean>
 >(dict: FlagDict, flags: T) {
   const bitfield = new BitField(toBitfield(...flags));
-  const enabled_flags: string[] = [];
+  const enabledFlags: string[] = [];
   for (const key in dict) {
     if (dict[key]) {
-      enabled_flags.push(key);
+      enabledFlags.push(key);
     }
   }
-  return bitfield.resolve(enabled_flags) as number; // TODO: Possibly a bug? Needs to be revisited if bitfields ever exceed the size of a number
+  return bitfield.resolve(enabledFlags) as number; // TODO: Possibly a bug? Needs to be revisited if bitfields ever exceed the size of a number
 }
 
 export function mergeFlags(
   getOldFlags: () => Record<string, boolean>,
-  new_flags: Record<string, boolean>,
+  newFlags: Record<string, boolean>,
   flagsToBitfield: (flags: Record<string, boolean>) => number
 ) {
-  const old_flags = getOldFlags();
-  const merged_flags = { ...old_flags, ...new_flags };
-  return flagsToBitfield(merged_flags);
+  const oldFlags = getOldFlags();
+  const mergedFlags = { ...oldFlags, ...newFlags };
+  return flagsToBitfield(mergedFlags);
 }

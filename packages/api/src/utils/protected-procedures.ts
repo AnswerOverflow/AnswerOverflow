@@ -13,20 +13,20 @@ async function iteratePermissionResults(
 ) {
   let errors: TRPCError[] = [];
   if (Array.isArray(results)) {
-    const awaited_results = await Promise.all(results);
-    errors = awaited_results.filter((result) => result != undefined) as TRPCError[];
+    const awaitedResults = await Promise.all(results);
+    errors = awaitedResults.filter((result) => result != undefined) as TRPCError[];
   } else {
-    const awaited_result = await results;
-    if (awaited_result != undefined) {
-      errors = [awaited_result];
+    const awaitedResult = await results;
+    if (awaitedResult != undefined) {
+      errors = [awaitedResult];
     }
   }
   if (errors.length > 0) {
     // Ugly
-    const error_messages = [...new Set(errors.map((error) => error.message))].join("\n");
+    const errorMessages = [...new Set(errors.map((error) => error.message))].join("\n");
     throw new TRPCError({
       code: "PRECONDITION_FAILED",
-      message: error_messages,
+      message: errorMessages,
     });
   }
 }
@@ -57,35 +57,35 @@ async function validatePermissionsWithData<T>(permissions: PermissionsChecksWith
 type ProtectedFetchInput<T> = {
   fetch: () => Promise<T | null>;
   permissions: PermissionsChecksWithData<T>;
-  not_found_message: string;
+  notFoundMessage: string;
 };
 
 export async function protectedFetch<T>({
   fetch,
   permissions,
-  not_found_message,
+  notFoundMessage,
 }: ProtectedFetchInput<T>) {
-  const data = await findOrThrowNotFound(fetch, not_found_message);
+  const data = await findOrThrowNotFound(fetch, notFoundMessage);
   await validatePermissionsWithData(permissions, data);
   return data;
 }
 
 type ValidatedPermissionsOrFormatData<F, T extends F> = {
   permissions: PermissionsChecksWithData<T>;
-  public_data_formatter: (data: T) => DeepPartial<T> & F;
+  publicDataFormatter: (data: T) => DeepPartial<T> & F;
   data: T;
 };
 
 async function validatePermissionsOrFormatData<F, T extends F>({
   permissions,
-  public_data_formatter,
+  publicDataFormatter,
   data,
 }: ValidatedPermissionsOrFormatData<F, T>): Promise<T | (DeepPartial<T> & F)> {
   try {
     await validatePermissionsWithData(permissions, data);
   } catch (error) {
-    if (error instanceof TRPCError && error.code === "PRECONDITION_FAILED" && public_data_formatter)
-      return public_data_formatter(data);
+    if (error instanceof TRPCError && error.code === "PRECONDITION_FAILED" && publicDataFormatter)
+      return publicDataFormatter(data);
     throw error;
   }
   return data;
@@ -93,10 +93,10 @@ async function validatePermissionsOrFormatData<F, T extends F>({
 
 export async function protectedFetchWithPublicData<F extends {}, T extends F>({
   fetch,
-  not_found_message,
+  notFoundMessage,
   ...validate
 }: ProtectedFetchInput<T> & Omit<ValidatedPermissionsOrFormatData<F, T>, "data">) {
-  const data = await findOrThrowNotFound(fetch, not_found_message);
+  const data = await findOrThrowNotFound(fetch, notFoundMessage);
   return validatePermissionsOrFormatData({
     ...validate,
     data,
@@ -104,7 +104,7 @@ export async function protectedFetchWithPublicData<F extends {}, T extends F>({
 }
 
 export async function protectedFetchManyWithPublicData<G extends {}, F extends G[], T extends F>({
-  public_data_formatter,
+  publicDataFormatter,
   fetch,
   permissions,
 }: {
@@ -116,7 +116,7 @@ export async function protectedFetchManyWithPublicData<G extends {}, F extends G
       validatePermissionsOrFormatData({
         data: item,
         permissions,
-        public_data_formatter,
+        publicDataFormatter,
       })
     )
   );
