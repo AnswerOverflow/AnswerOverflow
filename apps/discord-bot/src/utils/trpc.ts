@@ -10,13 +10,16 @@ import type { CommandInteraction } from "discord.js";
 import type { ComponentEvent } from "@answeroverflow/reacord";
 import { ephemeralReply } from "./utils";
 
-type TRPCall<T> = {
-  getCtx: () => Promise<BotContextCreate>;
-  ApiCall: (router: BotRouterCaller) => Promise<T>;
+type TRPCStatusHandler<T> = {
   Ok?: (result: T) => void | Promise<void>;
   Error?: (error: TRPCError) => void;
   allowedErrors?: TRPCError["code"][] | TRPCError["code"];
 };
+
+type TRPCall<T> = {
+  getCtx: () => Promise<BotContextCreate>;
+  ApiCall: (router: BotRouterCaller) => Promise<T>;
+} & TRPCStatusHandler<T>;
 
 export async function callAPI<T>({
   getCtx,
@@ -43,48 +46,39 @@ export async function callAPI<T>({
   }
 }
 
-export async function callApiWithEphemeralErrorHandler<T>(
-  call: Omit<TRPCall<T>, "Error">,
+export function makeEphemeralErrorHandler<T>(
   interaction: CommandInteraction
-) {
-  return await callAPI({
-    ...call,
+): TRPCStatusHandler<T> {
+  return {
     Error(error) {
       ephemeralReply(container.reacord, "Error: " + error.message, interaction);
     },
-  });
+  };
 }
 
-export async function callApiWithButtonErrorHandler<T>(
-  call: Omit<TRPCall<T>, "Error">,
-  interaction: ComponentEvent
-) {
-  return await callAPI({
-    ...call,
+export function makeButtonErrorHandler<T>(interaction: ComponentEvent): TRPCStatusHandler<T> {
+  return {
     Error(error) {
       interaction.ephemeralReply("Error: " + error.message);
     },
-  });
+  };
 }
 
-export async function callApiWithConsoleStatusHandler<T>(
-  call: Omit<
-    TRPCall<T> & {
-      successMessage?: string | undefined;
-      errorMessage: string;
-    },
-    "Error" | "Ok"
-  >
-) {
-  return await callAPI({
-    ...call,
+export function makeConsoleStatusHandler<T>({
+  errorMessage,
+  successMessage,
+}: {
+  errorMessage: string;
+  successMessage?: string;
+}): TRPCStatusHandler<T> {
+  return {
     Error(error) {
-      container.logger.error(call.errorMessage, error.code, error.message);
+      container.logger.error(errorMessage, error.code, error.message);
     },
     Ok() {
-      if (call.successMessage) {
-        container.logger.info(call.successMessage);
+      if (successMessage) {
+        container.logger.info(successMessage);
       }
     },
-  });
+  };
 }

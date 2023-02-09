@@ -4,7 +4,7 @@ import { Events, GuildMember } from "discord.js";
 import { findServerById } from "@answeroverflow/db";
 import { createMemberCtx } from "~discord-bot/utils/context";
 import { toAODiscordAccount } from "~discord-bot/utils/conversions";
-import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
+import { callAPI, makeConsoleStatusHandler } from "~discord-bot/utils/trpc";
 
 @ApplyOptions<Listener.Options>({ event: Events.GuildMemberUpdate })
 export class ReadTheRulesConsent extends Listener {
@@ -15,7 +15,7 @@ export class ReadTheRulesConsent extends Listener {
       if (!serverSettings?.flags.readTheRulesConsentEnabled) {
         return;
       }
-      await callApiWithConsoleStatusHandler({
+      await callAPI({
         async ApiCall(router) {
           const user = toAODiscordAccount(newMember.user);
           return router.userServerSettings.upsertWithDeps({
@@ -26,8 +26,11 @@ export class ReadTheRulesConsent extends Listener {
             },
           });
         },
-        errorMessage: `Failed to update user ${newMember.id} in server ${newMember.guild.id} to have read the rules consent.`,
-        successMessage: `Updated user ${newMember.id} in server ${newMember.guild.id} to have read the rules consent.`,
+        ...makeConsoleStatusHandler({
+          errorMessage: `Failed to update user ${newMember.id} in server ${newMember.guild.id} to have read the rules consent.`,
+          successMessage: `Updated user ${newMember.id} in server ${newMember.guild.id} to have read the rules consent.`,
+        }),
+
         getCtx: () => createMemberCtx(newMember),
       });
     }

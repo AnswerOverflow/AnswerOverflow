@@ -1,7 +1,7 @@
 import { ChannelSettingsMenu } from "~discord-bot/components/channel-settings-menu";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command, container, type ChatInputCommand } from "@sapphire/framework";
-import { callApiWithEphemeralErrorHandler } from "~discord-bot/utils/trpc";
+import { callAPI, makeEphemeralErrorHandler } from "~discord-bot/utils/trpc";
 import {
   SlashCommandBuilder,
   PermissionsBitField,
@@ -52,32 +52,30 @@ export class ChannelSettingsCommand extends Command {
     const parentId = channel.isThread() ? channel.parentId : channel.id;
     if (!parentId) return;
 
-    await callApiWithEphemeralErrorHandler(
-      {
-        async ApiCall(router) {
-          try {
-            return router.channels.byId(parentId);
-          } catch (error) {
-            if (error instanceof TRPCError && error.code == "NOT_FOUND") {
-              return null;
-            } else {
-              throw error;
-            }
+    await callAPI({
+      async ApiCall(router) {
+        try {
+          return router.channels.byId(parentId);
+        } catch (error) {
+          if (error instanceof TRPCError && error.code == "NOT_FOUND") {
+            return null;
+          } else {
+            throw error;
           }
-        },
-        Ok(result) {
-          if (!result) {
-            result = getDefaultChannelWithFlags(toAOChannel(channel));
-          }
-          // TODO: Maybe assert that it matches that spec instead of casting
-          const menu = (
-            <ChannelSettingsMenu channel={channel} settings={result as ChannelWithFlags} />
-          );
-          ephemeralReply(container.reacord, menu, interaction);
-        },
-        getCtx: () => createMemberCtx(member),
+        }
       },
-      interaction
-    );
+      Ok(result) {
+        if (!result) {
+          result = getDefaultChannelWithFlags(toAOChannel(channel));
+        }
+        // TODO: Maybe assert that it matches that spec instead of casting
+        const menu = (
+          <ChannelSettingsMenu channel={channel} settings={result as ChannelWithFlags} />
+        );
+        ephemeralReply(container.reacord, menu, interaction);
+      },
+      ...makeEphemeralErrorHandler(interaction),
+      getCtx: () => createMemberCtx(member),
+    });
   }
 }

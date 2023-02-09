@@ -3,7 +3,7 @@ import { APIButtonComponent, ButtonStyle, ChannelType, ComponentType, Message } 
 import { findChannelById } from "@answeroverflow/db";
 import { createMemberCtx } from "~discord-bot/utils/context";
 import { toAODiscordAccount } from "~discord-bot/utils/conversions";
-import { callApiWithConsoleStatusHandler } from "~discord-bot/utils/trpc";
+import { callAPI, makeConsoleStatusHandler } from "~discord-bot/utils/trpc";
 
 export const CONSENT_BUTTON_LABEL = "Publicly display my messages on Answer Overflow";
 export const CONSENT_BUTTON_ID = "consentButton";
@@ -34,16 +34,18 @@ export async function provideConsentOnForumChannelMessage(message: Message): Pro
   if (!channelSettings?.flags.forumGuidelinesConsentEnabled) {
     throw new ConsentError("Forum post guidelines consent is not enabled for this channel");
   }
-  const existingUserSettings = await callApiWithConsoleStatusHandler({
+  const existingUserSettings = await callAPI({
     ApiCall(router) {
       return router.userServerSettings.byId({
         serverId: channel.guild.id,
         userId: message.author.id,
       });
     },
-    errorMessage: `Failed to find user settings for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
-    successMessage: `Successfully found user settings for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
     getCtx: () => createMemberCtx(message.member!),
+    ...makeConsoleStatusHandler({
+      errorMessage: `Failed to find user settings for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
+      successMessage: `Successfully found user settings for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
+    }),
   });
 
   if (existingUserSettings) {
@@ -58,7 +60,7 @@ export async function provideConsentOnForumChannelMessage(message: Message): Pro
     }
   }
 
-  const data = await callApiWithConsoleStatusHandler({
+  const data = await callAPI({
     ApiCall(router) {
       return router.userServerSettings.upsertWithDeps({
         serverId: channel.guild.id,
@@ -68,8 +70,10 @@ export async function provideConsentOnForumChannelMessage(message: Message): Pro
         },
       });
     },
-    errorMessage: `Failed to provide consent for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
-    successMessage: `Successfully provided consent for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
+    ...makeConsoleStatusHandler({
+      errorMessage: `Failed to provide consent for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
+      successMessage: `Successfully provided consent for user ${message.author.id} in server ${channel.guild.id} via forum post guidelines consent`,
+    }),
     getCtx: () => createMemberCtx(message.member!),
   });
   return data?.flags.canPubliclyDisplayMessages ?? false;
