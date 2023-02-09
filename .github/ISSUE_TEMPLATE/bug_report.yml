@@ -21,6 +21,7 @@ body:
         - eslint-config
         - tailwind-config
         - tsconfig
+        - dev env
         - other
     validations:
       required: true
