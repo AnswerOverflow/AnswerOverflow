@@ -37,7 +37,7 @@ describe("Discord Auth", () => {
       providerAccountId: mockDiscordAccount.id,
       type: "oauth",
       userId: createdUser.id,
-      accessToken: "1234567890",
+      access_token: "1234567890",
     });
     const user = await prisma.discordAccount.findUnique({
       where: {
@@ -68,7 +68,7 @@ describe("Discord Auth", () => {
       providerAccountId: mockDiscordAccount.id,
       type: "oauth",
       userId: createdUser.id,
-      accessToken: "1234567890",
+      access_token: "1234567890",
     });
     const user = await prisma.discordAccount.findUnique({
       where: {
