@@ -4,10 +4,10 @@ title: "[Dev Env]: "
 labels: ["🛠️dev env"]
 body:
   - type: dropdown
-    id: area
+    id: aspect
     attributes:
-      label: area
-      description: What area of the dev env does this relate to?
+      label: aspect
+      description: What aspect of the dev env does this relate to?
       multiple: true
       options:
         - Linting
