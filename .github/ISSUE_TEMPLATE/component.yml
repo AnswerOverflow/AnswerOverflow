@@ -1,6 +1,6 @@
 name: Component
 description: File a feature request for a new component 
-title: "[Docs]: "
+title: "[Component]: "
 labels: ["⚛ component", "🎨 Design"]
 body:
   - type: textarea
@@ -11,13 +11,13 @@ body:
       placeholder: It should allow users to...
     validations:
       required: true
-- type: textarea
-    id: concepts
-    attributes:
-      label: Concepts
-      description: Upload images for the concepts of this component. Feel free to just create a basic wireframe in paint to get the concept across
-    validations:
-      required: true
+  - type: textarea
+      id: concepts
+      attributes:
+        label: Concepts
+        description: Upload images for the concepts of this component. Feel free to just create a basic wireframe in paint to get the concept across
+      validations:
+        required: true
   - type: textarea
     id: description
     attributes:
