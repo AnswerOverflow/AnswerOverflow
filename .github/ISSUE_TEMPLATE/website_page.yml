@@ -1,5 +1,5 @@
 name: Website Page
-description: Create an issue/feature request for a website page
+description: Create an feature request for a website page
 title: "[Web]: [/URL]"
 labels: ["🖥️website"]
 body:
