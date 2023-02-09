@@ -1,0 +1,69 @@
+name: Bug report
+description: Report incorrect or unexpected behavior
+labels: [bug, need repro]
+body:
+  - type: dropdown
+    id: package
+    attributes:
+      label: What is this bug report for?
+      multiple: true
+      options:
+        - discord bot
+        - website
+        - api
+        - auth
+        - database
+        - ui
+        - discordjs-mock
+        - discordjs-utils
+        - elastic-types
+        - prisma-types
+        - eslint-config
+        - tailwind-config
+        - tsconfig
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue description
+      description: Describe the issue in as much detail as possible.
+      placeholder: Steps to reproduce with below code sample:        
+    validations:
+      required: true
+  - type: textarea
+    id: codesample
+    attributes:
+      label: Code sample
+      description: Include a reproducible, minimal code sample. This will be automatically formatted into code, so no need for backticks.
+      render: typescript
+      placeholder: |
+        Your code sample should be...
+        ... Minimal - Use as little code as possible that still produces the same problem (and is understandable)
+        ... Complete - Provide all parts someone else needs to reproduce your problem
+        ... Reproducible - Test the code you're about to provide to make sure it reproduces the problem
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      description: Which OS does your application run on?
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority this issue should have
+      description: Please be realistic. If you need to elaborate on your reasoning, please use the Issue description field above.
+      options:
+        - Low (slightly annoying)
+        - Medium (should be fixed soon)
+        - High (immediate attention needed)
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Extra
+      description: Attach logs, screenshots, anything extra to help narrow down the bug.
+      placeholder: Here are my logs and a screenshot...
+    validations:
+      required: false
