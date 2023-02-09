@@ -61,9 +61,8 @@ export async function addAuthorsToMessages(messages: Message[]) {
           ...zDiscordAccountPublic.parse(authorLookup.get(m.authorId)!),
         },
         public:
-          authorServerSettingsLookup.get(
-            toAuthorServerSettingsLookupKey(m.authorId, m.serverId)
-          )?.flags.canPubliclyDisplayMessages ?? false,
+          authorServerSettingsLookup.get(toAuthorServerSettingsLookupKey(m.authorId, m.serverId))
+            ?.flags.canPubliclyDisplayMessages ?? false,
       })
     );
 }
@@ -78,9 +77,7 @@ export async function findMessageById(id: string) {
   return msgWithAuthor[0] ?? null;
 }
 
-export async function findMessagesByChannelId(
-  input: z.infer<typeof zFindMessagesByChannelId>
-) {
+export async function findMessagesByChannelId(input: z.infer<typeof zFindMessagesByChannelId>) {
   const messages = await elastic.bulkGetMessagesByChannelId(
     input.channelId,
     input.after,

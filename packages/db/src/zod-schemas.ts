@@ -87,19 +87,19 @@ export const zMessage = z.object({
   content: z.string(),
   images: z.array(zDiscordImage),
   solutions: z.array(z.string()),
-  replies_to: z
+  repliesTo: z
     .object({
-      message_content: z.string(),
+      messageContent: z.string(),
       /**
        * The author of the message that is being replied to.
        */
-      author_avatar: z.string().nullable(),
+      authorAvatar: z.string().nullable(),
     })
     .nullable(),
-  child_thread: z.string().nullable(),
-  author_id: z.string(),
-  channel_id: z.string(),
-  server_id: z.string(),
+  childThread: z.string().nullable(),
+  authorId: z.string(),
+  channelId: z.string(),
+  serverId: z.string(),
 });
 
 export const zMessagePublic = zMessage.pick({
@@ -161,9 +161,7 @@ export const userServerSettingsFlags = [
 export const bitfieldToUserServerSettingsFlags = (bitfield: number) =>
   bitfieldToDict(bitfield, userServerSettingsFlags);
 
-export function addFlagsToUserServerSettings<T extends UserServerSettings>(
-  userServerSettings: T
-) {
+export function addFlagsToUserServerSettings<T extends UserServerSettings>(userServerSettings: T) {
   return {
     ...userServerSettings,
     flags: bitfieldToUserServerSettingsFlags(userServerSettings.bitfield),

@@ -39,7 +39,7 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
   },
   ref
 ) {
-  const date_of_message = customMessageDateString
+  const dateOfMessage = customMessageDateString
     ? customMessageDateString
     : getSnowflakeUTCDate(message.id);
   const convertedMessageContent = toHTML(message.content);
@@ -114,10 +114,10 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
 
   const Contents = () => (
     <div className="flex w-full flex-col items-start justify-center">
-      {message.replies_to && (
+      {message.repliesTo && (
         <div className="relative flex w-full flex-row items-center justify-start">
           <span className="ml-[calc(40px+2rem)] before:absolute before:top-1/2 before:right-[93%] before:h-[1rem] before:w-[2rem] before:rounded-tl-[6px] before:border-t-2 before:border-l-2 before:border-black">
-            {message.replies_to.message_content}
+            {message.repliesTo.messageContent}
           </span>
         </div>
       )}
@@ -140,7 +140,7 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
                     darkMode ? "text-[hsl(216,_3.7%,_73.5%)]" : "dark:text-[hsl(216,_3.7%,_73.5%)]"
                   }`}
                 >
-                  {date_of_message}
+                  {dateOfMessage}
                 </span>
               </div>
             </div>
