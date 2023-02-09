@@ -20,6 +20,7 @@ body:
         - Continous Integration
         - Continous Deployment
         - GitHub
+        - Other
     validations:
       required: true
   - type: textarea
