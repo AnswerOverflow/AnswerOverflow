@@ -1,5 +1,5 @@
 name: Component
-description: File a feature request for a new component 
+description: Feature request for a new component 
 title: "[Component]: "
 labels: ["⚛ component", "🎨 Design"]
 body:
