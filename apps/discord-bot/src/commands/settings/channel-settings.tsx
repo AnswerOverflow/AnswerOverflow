@@ -55,7 +55,7 @@ export class ChannelSettingsCommand extends Command {
     await callAPI({
       async ApiCall(router) {
         try {
-          return router.channels.byId(parentId);
+          return await router.channels.byId(parentId);
         } catch (error) {
           if (error instanceof TRPCError && error.code == "NOT_FOUND") {
             return null;

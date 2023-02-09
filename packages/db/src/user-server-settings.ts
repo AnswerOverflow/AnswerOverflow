@@ -40,6 +40,16 @@ export const zUserServerSettingsUpdate = zUserServerSettingsMutable.merge(zUserS
 
 export type UserServerSettingsWithFlags = Awaited<ReturnType<typeof addFlagsToUserServerSettings>>;
 
+export function getDefaultUserServerSettingsWithFlags({
+  userId,
+  serverId,
+}: {
+  userId: string;
+  serverId: string;
+}) {
+  return addFlagsToUserServerSettings(getDefaultUserServerSettings({ userId, serverId }));
+}
+
 export function mergeUserServerSettings<T extends z.infer<typeof zUserServerSettingsMutable>>(
   old: UserServerSettings,
   updated: T

@@ -12,7 +12,7 @@ import { ephemeralReply } from "./utils";
 
 type TRPCStatusHandler<T> = {
   Ok?: (result: T) => void | Promise<void>;
-  Error?: (error: TRPCError) => void;
+  Error?: (error: TRPCError) => void | Promise<void>;
   allowedErrors?: TRPCError["code"][] | TRPCError["code"];
 };
 
@@ -37,7 +37,7 @@ export async function callAPI<T>({
   } catch (error) {
     if (error instanceof TRPCError) {
       if (!allowedErrors.includes(error.code)) {
-        Error(error);
+        await Error(error);
       }
     } else {
       throw error;
