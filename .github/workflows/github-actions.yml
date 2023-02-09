@@ -28,6 +28,9 @@ env:
   OWNERS: "[]"
   DISCORD_CLIENT_ID: "123"
   VITE_DISCORD_CLIENT_ID: "123"
+  
+  # Long delay to give tests best chance at succeeding
+  DEFAULT_DELAY_IN_MS: "5000"
 
 jobs:
   build:
