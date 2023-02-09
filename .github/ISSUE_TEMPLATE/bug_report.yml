@@ -60,7 +60,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: description
+    id: extra
     attributes:
       label: Extra
       description: Attach logs, screenshots, anything extra to help narrow down the bug.
