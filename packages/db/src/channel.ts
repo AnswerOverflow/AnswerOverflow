@@ -32,13 +32,13 @@ export const zChannelMutable = zChannel
 
 export const zChannelCreate = zChannelMutable.merge(zChannelRequired);
 
+export const zChannelCreateMany = zChannelCreate.omit({
+  flags: true,
+});
+
 export const zChannelUpsert = zChannelCreate;
 
-export const zChannelUpsertMany = z.array(
-  zChannelUpsert.omit({
-    flags: true,
-  })
-);
+export const zChannelUpsertMany = zChannelCreateMany;
 
 export const zThreadCreate = zChannelCreate.extend({
   parentId: z.string(),
@@ -62,11 +62,9 @@ export const zChannelUpdate = zChannelMutable.merge(
 );
 
 // We omit flags because it's too complicated to update many of them
-export const zChannelUpdateMany = zChannelUpdate
-  .omit({
-    flags: true,
-  })
-  .array();
+export const zChannelUpdateMany = zChannelUpdate.omit({
+  flags: true,
+});
 
 export const zThreadCreateWithDeps = zThreadCreate
   .omit({
@@ -128,9 +126,9 @@ export async function createChannel(data: z.infer<typeof zChannelCreate>) {
   return addFlagsToChannel(created);
 }
 
-export async function createManyChannels(data: z.infer<typeof zChannelCreate>[]) {
+export async function createManyChannels(data: z.infer<typeof zChannelCreateMany>[]) {
   await prisma.channel.createMany({
-    data: data,
+    data: data.map((c) => zChannelCreateMany.parse(c)),
   });
   return data.map((c) => getDefaultChannel({ ...c }));
 }
@@ -146,9 +144,14 @@ export async function updateChannel(data: z.infer<typeof zChannelUpdate>, old: C
   return addFlagsToChannel(updated);
 }
 
-export async function updateManyChannels(data: z.infer<typeof zChannelUpdateMany>) {
+export async function updateManyChannels(data: z.infer<typeof zChannelUpdateMany>[]) {
   const updated = await prisma.$transaction(
-    data.map((c) => prisma.channel.update({ where: { id: c.id }, data: c }))
+    data.map((c) =>
+      prisma.channel.update({
+        where: { id: c.id },
+        data: zChannelUpdateMany.parse(c),
+      })
+    )
   );
   return updated.map(addFlagsToChannel);
 }
@@ -173,7 +176,7 @@ export function upsertChannel(data: z.infer<typeof zChannelUpsert>) {
   });
 }
 
-export function upsertManyChannels(data: z.infer<typeof zChannelUpsertMany>) {
+export function upsertManyChannels(data: z.infer<typeof zChannelUpsertMany>[]) {
   return upsertMany({
     input: data,
     find: () => findManyChannelsById(data.map((c) => c.id)),
