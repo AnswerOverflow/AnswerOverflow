@@ -1,0 +1,43 @@
+name: Dev Environment
+description: File suggestion that relates to the developer environment
+title: "[Docs]: "
+labels: ["📜documentation"]
+body:
+  - type: dropdown
+    id: aspect
+    attributes:
+      label: aspect
+      description: What aspect of the docs does this relate to?
+      multiple: true
+      options:
+        - Contributing
+        - README
+        - Setup (Self-Hosting)
+        - Setup (Answer Overflow Hosted)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Suggestion?
+      description: What changes would you like to see?
+      placeholder: The documentation for mark solution is out of date...
+    validations:
+      required: true
+  - type: textarea
+    id: possible-solutions
+    attributes:
+      label: Possible Solutions
+      description: Got ideas for how to solve this?
+      placeholder: Update the screenshots to...
+    validations:
+      required: false
+  - type: textarea
+    id: extra
+    attributes:
+      label: Extra Information
+      description: Post any extra links, screenshots, or references that might be helpful here
+      placeholder: Get the new screenshots from here https://www.youtube.com/watch?v=dQw4w9WgXcQ
+    validations:
+      required: false
