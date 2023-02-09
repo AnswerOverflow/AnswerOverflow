@@ -109,7 +109,7 @@ describe("Indexing", () => {
         expectedMessages: 0,
       });
     });
-    it.only("should index a text channel", async () => {
+    it("should index a text channel", async () => {
       const settings = await upsertChannelSettings(textChannel, {
         flags: {
           indexingEnabled: true,
@@ -346,6 +346,11 @@ describe("Indexing", () => {
         client,
         channel: textChannel,
         author: memberToIgnore.user,
+      });
+      await upsertChannelSettings(textChannel, {
+        flags: {
+          indexingEnabled: true,
+        },
       });
       await createDiscordAccount(toAODiscordAccount(memberToIgnore.user));
       const settings = await createUserServerSettings({

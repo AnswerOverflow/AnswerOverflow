@@ -34,7 +34,11 @@ export const zChannelCreate = zChannelMutable.merge(zChannelRequired);
 
 export const zChannelUpsert = zChannelCreate;
 
-export const zChannelUpsertMany = z.array(zChannelUpsert);
+export const zChannelUpsertMany = z.array(
+  zChannelUpsert.omit({
+    flags: true,
+  })
+);
 
 export const zThreadCreate = zChannelCreate.extend({
   parentId: z.string(),
@@ -126,12 +130,7 @@ export async function createChannel(data: z.infer<typeof zChannelCreate>) {
 
 export async function createManyChannels(data: z.infer<typeof zChannelCreate>[]) {
   await prisma.channel.createMany({
-    data: data.map((c) =>
-      combineChannelSettingsFlagsToBitfield({
-        old: getDefaultChannel(c),
-        updated: c,
-      })
-    ),
+    data: data,
   });
   return data.map((c) => getDefaultChannel({ ...c }));
 }
@@ -147,7 +146,7 @@ export async function updateChannel(data: z.infer<typeof zChannelUpdate>, old: C
   return addFlagsToChannel(updated);
 }
 
-export async function updateManyChannels(data: z.infer<typeof zChannelUpdate>[]) {
+export async function updateManyChannels(data: z.infer<typeof zChannelUpdateMany>) {
   const updated = await prisma.$transaction(
     data.map((c) => prisma.channel.update({ where: { id: c.id }, data: c }))
   );

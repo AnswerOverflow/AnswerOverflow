@@ -85,7 +85,10 @@ export async function indexRootChannel(channel: TextChannel | NewsChannel | Foru
   addSolutionsToMessages(filteredMessages, convertedMessages);
 
   await upsertManyDiscordAccounts(convertedUsers);
-  await upsertChannel(toAOChannel(channel));
+  await upsertChannel({
+    ...toAOChannel(channel),
+    lastIndexedSnowflake: sortMessagesById(filteredMessages).pop()?.id,
+  });
   await upsertManyMessages(convertedMessages);
   await upsertManyChannels(convertedThreads);
 }
