@@ -31,7 +31,7 @@ export function mockInteracion(
   if (!member) {
     member = mockGuildMember({ client, guild });
   }
-  const raw_data: APIChatInputApplicationCommandInteraction = {
+  const rawData: APIChatInputApplicationCommandInteraction = {
     application_id: client.user?.id.toString() ?? randomSnowflake.toString(), // TODO: This probably should be an assert
     channel_id: channel.id,
     id, // TODO: Is this related to the command id?
@@ -67,7 +67,7 @@ export function mockInteracion(
   // TODO: Look into adding command to client cache
   const command = Reflect.construct(ChatInputCommandInteraction, [
     client,
-    raw_data,
+    rawData,
   ]) as ChatInputCommandInteraction;
   command.reply = jest.fn();
   return command;

@@ -25,10 +25,10 @@ const Template: StoryFn<typeof Table> = () => (
           <Td>example@example.com</Td>
           <Td>
             <TableButtonWrapper>
-              <TableButton background_color="#E6E6E6" aria_label="Settings">
+              <TableButton backgroundColor="#E6E6E6" ariaLabel="Settings">
                 <Cog6ToothIcon color="#282828" />
               </TableButton>
-              <TableButton background_color="#D61E1E" aria_label="Delete">
+              <TableButton backgroundColor="#D61E1E" ariaLabel="Delete">
                 <TrashIcon color="#E6E6E6" />
               </TableButton>
             </TableButtonWrapper>

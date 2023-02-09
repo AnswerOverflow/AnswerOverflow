@@ -17,9 +17,9 @@ export function mockGuild(client: Client, owner?: User, data: Partial<APIGuild> 
   if (!owner) {
     owner = mockUser(client);
   }
-  const guild_id = data.id ?? randomSnowflake().toString();
-  const raw_data: APIGuild = {
-    id: guild_id,
+  const guildId = data.id ?? randomSnowflake().toString();
+  const rawData: APIGuild = {
+    id: guildId,
     owner_id: owner.id,
     verification_level: 0,
     emojis: [],
@@ -51,7 +51,7 @@ export function mockGuild(client: Client, owner?: User, data: Partial<APIGuild> 
     premium_progress_bar_enabled: false,
     ...omit(data, "id"),
   };
-  const guild = Reflect.construct(Guild, [client, raw_data]) as Guild;
+  const guild = Reflect.construct(Guild, [client, rawData]) as Guild;
 
   // Create the default role
   mockRole(client, PermissionsBitField.Default, guild, { name: "everyone", id: guild.id });
@@ -90,7 +90,7 @@ export function mockRole(
   if (!guild) {
     guild = mockGuild(client);
   }
-  const role_data: RawRoleData = {
+  const roleData: RawRoleData = {
     color: 0,
     hoist: false,
     id: randomSnowflake().toString(),
@@ -101,7 +101,7 @@ export function mockRole(
     permissions: PermissionsBitField.resolve(permissions).toString(),
     ...role,
   };
-  const created_role = Reflect.construct(Role, [client, role_data, guild]) as Role;
-  guild.roles.cache.set(created_role.id, created_role);
-  return created_role;
+  const createdRole = Reflect.construct(Role, [client, roleData, guild]) as Role;
+  guild.roles.cache.set(createdRole.id, createdRole);
+  return createdRole;
 }

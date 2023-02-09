@@ -2,6 +2,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const Home: NextPage = () => {
   return (
     <>

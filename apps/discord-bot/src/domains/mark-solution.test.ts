@@ -42,24 +42,24 @@ import { createChannelWithDeps } from "@answeroverflow/db";
 
 let client: Client;
 let guild: Guild;
-let default_author: GuildMember;
-let text_channel: TextChannel;
-let forum_channel: ForumChannel;
-let text_channel_thread: AnyThreadChannel;
-let forum_channel_thread: AnyThreadChannel;
+let defaultAuthor: GuildMember;
+let textChannel: TextChannel;
+let forumChannel: ForumChannel;
+let textChannelThread: AnyThreadChannel;
+let forumChannelThread: AnyThreadChannel;
 beforeEach(async () => {
   client = await setupAnswerOverflowBot();
   guild = mockGuild(client);
-  text_channel = mockTextChannel(client, guild);
-  forum_channel = mockForumChannel(client, guild);
-  default_author = mockGuildMember({ client, guild });
-  text_channel_thread = mockPublicThread({
+  textChannel = mockTextChannel(client, guild);
+  forumChannel = mockForumChannel(client, guild);
+  defaultAuthor = mockGuildMember({ client, guild });
+  textChannelThread = mockPublicThread({
     client,
-    parent_channel: text_channel,
+    parentChannel: textChannel,
   });
-  forum_channel_thread = mockPublicThread({
+  forumChannelThread = mockPublicThread({
     client,
-    parent_channel: forum_channel,
+    parentChannel: forumChannel,
   });
 });
 
@@ -68,48 +68,48 @@ describe("Can Mark Solution", () => {
     it("should fail if the possible solution message is not in a thread", async () => {
       const message = mockMessage({
         client,
-        channel: text_channel,
-        author: default_author.user,
+        channel: textChannel,
+        author: defaultAuthor.user,
       });
-      await expect(checkIfCanMarkSolution(message, default_author.user)).rejects.toThrowError(
+      await expect(checkIfCanMarkSolution(message, defaultAuthor.user)).rejects.toThrowError(
         "Cannot mark a message as a solution if it's not in a thread"
       );
     });
     it("should fail if the possible solution message is from Answer Overflow Bot", async () => {
       const message = mockMessage({
         client,
-        channel: text_channel_thread,
+        channel: textChannelThread,
         author: client.user!,
       });
-      await expect(checkIfCanMarkSolution(message, default_author.user)).rejects.toThrowError(
+      await expect(checkIfCanMarkSolution(message, defaultAuthor.user)).rejects.toThrowError(
         "Answer Overflow Bot messages can't be marked as a solution"
       );
     });
     it("should fail if the thread parent is not found", async () => {
       const message = mockMessage({
         client,
-        channel: text_channel_thread,
+        channel: textChannelThread,
       });
-      overrideVariables(text_channel_thread, {
+      overrideVariables(textChannelThread, {
         parentId: randomSnowflake(),
       });
-      await expect(checkIfCanMarkSolution(message, default_author.user)).rejects.toThrowError(
+      await expect(checkIfCanMarkSolution(message, defaultAuthor.user)).rejects.toThrowError(
         "Could not find the parent channel of the thread"
       );
     });
     it("should fail if mark solution is not enabled in the channel", async () => {
       const message = mockMessage({
         client,
-        channel: text_channel_thread,
+        channel: textChannelThread,
       });
       await createChannelWithDeps({
-        ...toAOChannelWithServer(text_channel),
+        ...toAOChannelWithServer(textChannel),
         flags: {
-          mark_solution_enabled: false,
+          markSolutionEnabled: false,
         },
-        solution_tag_id: "solved",
+        solutionTagId: "solved",
       });
-      await expect(checkIfCanMarkSolution(message, default_author.user)).rejects.toThrowError(
+      await expect(checkIfCanMarkSolution(message, defaultAuthor.user)).rejects.toThrowError(
         "Mark solution is not enabled in this channel"
       );
     });
@@ -117,69 +117,69 @@ describe("Can Mark Solution", () => {
   describe("Check If Can Mark Solution Failures - Mark Solution Enabled", () => {
     it("should fail if the question message is not found for a text channel thread", async () => {
       await createChannelWithDeps({
-        ...toAOChannelWithServer(text_channel),
+        ...toAOChannelWithServer(textChannel),
         flags: {
-          mark_solution_enabled: true,
+          markSolutionEnabled: true,
         },
       });
       mockMessage({
         client,
-        channel: text_channel,
+        channel: textChannel,
       });
-      const solution_message = mockMessage({
+      const solutionMessage = mockMessage({
         client,
-        channel: text_channel_thread,
+        channel: textChannelThread,
       });
       await expect(
-        checkIfCanMarkSolution(solution_message, default_author.user)
+        checkIfCanMarkSolution(solutionMessage, defaultAuthor.user)
       ).rejects.toThrowError("Could not find the root message of the thread");
     });
     it("should fail if the question message is not found for a forum channel thread", async () => {
       await createChannelWithDeps({
-        ...toAOChannelWithServer(forum_channel),
+        ...toAOChannelWithServer(forumChannel),
         flags: {
-          mark_solution_enabled: true,
+          markSolutionEnabled: true,
         },
       });
       mockMessage({
         client,
-        channel: forum_channel_thread,
+        channel: forumChannelThread,
       });
-      const solution_message = mockMessage({
+      const solutionMessage = mockMessage({
         client,
-        channel: forum_channel_thread,
+        channel: forumChannelThread,
       });
       await createChannelWithDeps({
-        ...toAOChannelWithServer(text_channel),
+        ...toAOChannelWithServer(textChannel),
         flags: {
-          mark_solution_enabled: true,
+          markSolutionEnabled: true,
         },
-        solution_tag_id: "solved",
+        solutionTagId: "solved",
       });
       await expect(
-        checkIfCanMarkSolution(solution_message, default_author.user)
+        checkIfCanMarkSolution(solutionMessage, defaultAuthor.user)
       ).rejects.toThrowError("Could not find the root message of the thread");
     });
     it("should fail if the user is not the question author and does not have override permissions", async () => {
       await createChannelWithDeps({
-        ...toAOChannelWithServer(text_channel),
+        ...toAOChannelWithServer(textChannel),
         flags: {
-          mark_solution_enabled: true,
+          markSolutionEnabled: true,
         },
       });
       mockMessage({
         client,
-        channel: text_channel,
+        channel: textChannel,
         override: {
-          id: text_channel_thread.id,
+          id: textChannelThread.id,
         },
       });
-      const solution_message = mockMessage({
+      const solutionMessage = mockMessage({
         client,
-        channel: text_channel_thread,
+        channel: textChannelThread,
       });
       await expect(
-        checkIfCanMarkSolution(solution_message, default_author.user)
+        checkIfCanMarkSolution(solutionMessage, defaultAuthor.user)
       ).rejects.toThrowError(
         `You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
           ", "
@@ -189,55 +189,55 @@ describe("Can Mark Solution", () => {
   });
   describe("Check If Can Mark Solution Failures - Solved Indicator Applied Already", () => {
     it("should fail if the solution tag is already set", async () => {
-      const thread_with_solved_tag = mockPublicThread({
+      const threadWithSolvedTag = mockPublicThread({
         client,
-        parent_channel: forum_channel,
+        parentChannel: forumChannel,
         data: {
           applied_tags: ["solved"],
         },
       });
       mockMessage({
         client,
-        channel: thread_with_solved_tag,
-        author: default_author.user,
+        channel: threadWithSolvedTag,
+        author: defaultAuthor.user,
         override: {
-          id: thread_with_solved_tag.id,
+          id: threadWithSolvedTag.id,
         },
       });
-      const solution_message = mockMessage({
+      const solutionMessage = mockMessage({
         client,
-        channel: thread_with_solved_tag,
+        channel: threadWithSolvedTag,
       });
 
       await createChannelWithDeps({
-        ...toAOChannelWithServer(forum_channel),
+        ...toAOChannelWithServer(forumChannel),
         flags: {
-          mark_solution_enabled: true,
+          markSolutionEnabled: true,
         },
-        solution_tag_id: "solved",
+        solutionTagId: "solved",
       });
       await expect(
-        checkIfCanMarkSolution(solution_message, default_author.user)
+        checkIfCanMarkSolution(solutionMessage, defaultAuthor.user)
       ).rejects.toThrowError("This question is already marked as solved");
     });
     it("should fail if the solution emoji is already set", async () => {
-      const root_message = mockMessage({
+      const rootMessage = mockMessage({
         client,
-        channel: text_channel,
-        author: default_author.user,
+        channel: textChannel,
+        author: defaultAuthor.user,
         override: {
-          id: text_channel_thread.id,
+          id: textChannelThread.id,
         },
       });
 
-      const solution_message = mockMessage({
+      const solutionMessage = mockMessage({
         client,
-        channel: text_channel_thread,
+        channel: textChannelThread,
       });
 
       mockReaction({
-        message: root_message,
-        user: root_message.client.user,
+        message: rootMessage,
+        user: rootMessage.client.user,
         override: {
           emoji: {
             name: "✅",
@@ -246,85 +246,85 @@ describe("Can Mark Solution", () => {
         },
       });
       await createChannelWithDeps({
-        ...toAOChannelWithServer(text_channel),
+        ...toAOChannelWithServer(textChannel),
         flags: {
-          mark_solution_enabled: true,
+          markSolutionEnabled: true,
         },
-        solution_tag_id: "solved",
+        solutionTagId: "solved",
       });
 
       await expect(
-        checkIfCanMarkSolution(solution_message, default_author.user)
+        checkIfCanMarkSolution(solutionMessage, defaultAuthor.user)
       ).rejects.toThrowError("This question is already marked as solved");
     });
     it("should fail if the solution message is already sent", async () => {
-      const root_message = mockMessage({
+      const rootMessage = mockMessage({
         client,
-        channel: text_channel,
-        author: default_author.user,
+        channel: textChannel,
+        author: defaultAuthor.user,
         override: {
-          id: text_channel_thread.id,
+          id: textChannelThread.id,
         },
       });
-      const solution_message = mockMessage({
+      const solutionMessage = mockMessage({
         client,
-        channel: text_channel_thread,
+        channel: textChannelThread,
       });
 
       mockMarkedAsSolvedReply({
         client,
-        channel: text_channel_thread,
-        question_id: root_message.id,
-        solution_id: solution_message.id,
+        channel: textChannelThread,
+        questionId: rootMessage.id,
+        solutionId: solutionMessage.id,
       });
 
       await createChannelWithDeps({
-        ...toAOChannelWithServer(text_channel),
+        ...toAOChannelWithServer(textChannel),
         flags: {
-          mark_solution_enabled: true,
+          markSolutionEnabled: true,
         },
-        solution_tag_id: "solved",
+        solutionTagId: "solved",
       });
 
       await expect(
-        checkIfCanMarkSolution(solution_message, default_author.user)
+        checkIfCanMarkSolution(solutionMessage, defaultAuthor.user)
       ).rejects.toThrowError("This question is already marked as solved");
     });
   });
   describe("Check If Can Mark Solution Success", () => {
-    let question_message: Message;
-    let solution_message: Message;
+    let questionMessage: Message;
+    let solutionMessage: Message;
     beforeEach(async () => {
       await createChannelWithDeps({
-        ...toAOChannelWithServer(text_channel),
+        ...toAOChannelWithServer(textChannel),
         flags: {
-          mark_solution_enabled: true,
+          markSolutionEnabled: true,
         },
-        solution_tag_id: "solved",
+        solutionTagId: "solved",
       });
 
-      question_message = mockMessage({
+      questionMessage = mockMessage({
         client,
-        channel: text_channel,
+        channel: textChannel,
         override: {
-          id: text_channel_thread.id,
+          id: textChannelThread.id,
         },
-        author: default_author.user,
+        author: defaultAuthor.user,
       });
-      solution_message = mockMessage({
+      solutionMessage = mockMessage({
         client,
-        channel: text_channel_thread,
+        channel: textChannelThread,
       });
     });
     it("should pass if the user is the question author", async () => {
-      const { question, solution, server, thread, parent_channel, channel_settings } =
-        await checkIfCanMarkSolution(solution_message, default_author.user);
-      expect(question).toEqual(question_message);
-      expect(solution).toEqual(solution_message);
-      expect(server).toEqual(text_channel.guild);
-      expect(thread).toEqual(text_channel_thread);
-      expect(parent_channel).toEqual(text_channel);
-      expect(channel_settings.solution_tag_id).toEqual("solved");
+      const { question, solution, server, thread, parentChannel, channelSettings } =
+        await checkIfCanMarkSolution(solutionMessage, defaultAuthor.user);
+      expect(question).toEqual(questionMessage);
+      expect(solution).toEqual(solutionMessage);
+      expect(server).toEqual(textChannel.guild);
+      expect(thread).toEqual(textChannelThread);
+      expect(parentChannel).toEqual(textChannel);
+      expect(channelSettings.solutionTagId).toEqual("solved");
     });
     it("should pass if the user has administrator", async () => {
       await testAllPermissions({
@@ -334,24 +334,24 @@ describe("Can Mark Solution", () => {
           "ManageThreads",
           "ManageGuild",
         ],
-        async operation(permission, is_permission_allowed) {
+        async operation(permission, isPermissionAllowed) {
           const solver = mockGuildMember({
             client,
-            guild: text_channel.guild,
+            guild: textChannel.guild,
             permissions: permission,
           });
-          let did_error = false;
+          let didError = false;
           try {
             const { question, solution } = await checkIfCanMarkSolution(
-              solution_message,
+              solutionMessage,
               solver.user
             );
-            expect(question).toEqual(question_message);
-            expect(solution).toEqual(solution_message);
+            expect(question).toEqual(questionMessage);
+            expect(solution).toEqual(solutionMessage);
           } catch (error) {
-            did_error = true;
+            didError = true;
           }
-          expect(did_error).toEqual(!is_permission_allowed);
+          expect(didError).toEqual(!isPermissionAllowed);
         },
       });
     });
@@ -362,46 +362,45 @@ describe("Make Mark Solution Response", () => {
   let question: Message;
   let solution: Message;
   let settings: ChannelWithFlags;
-  let jump_to_solution_button_data: Partial<ButtonComponentData>;
-  const solution_message_without_consent_request =
-    "**Thank you for marking this question as solved!**";
-  let solution_message_with_consent_request: string;
-  let solution_embed_data: Partial<EmbedData>;
+  let jumpToSolutionButtonData: Partial<ButtonComponentData>;
+  const solutionMessageWithoutConsentRequest = "**Thank you for marking this question as solved!**";
+  let solutionMessageWithConsentRequest: string;
+  let solutionEmbedData: Partial<EmbedData>;
   beforeEach(() => {
     question = mockMessage({
       client,
-      channel: text_channel,
+      channel: textChannel,
       override: {
-        id: text_channel_thread.id,
+        id: textChannelThread.id,
       },
     });
     solution = mockMessage({
       client,
-      channel: text_channel_thread,
+      channel: textChannelThread,
     });
     settings = {
-      ...toAOChannelWithServer(text_channel),
+      ...toAOChannelWithServer(textChannel),
       flags: {
-        mark_solution_enabled: true,
-        auto_thread_enabled: true,
-        forum_guidelines_consent_enabled: true,
-        indexing_enabled: true,
-        send_mark_solution_instructions_in_new_threads: true,
+        markSolutionEnabled: true,
+        autoThreadEnabled: true,
+        forumGuidelinesConsentEnabled: true,
+        indexingEnabled: true,
+        sendMarkSolutionInstructionsInNewThreads: true,
       },
-      invite_code: null,
-      solution_tag_id: "solved",
-      last_indexed_snowflake: null,
+      inviteCode: null,
+      solutionTagId: "solved",
+      lastIndexedSnowflake: null,
     };
-    jump_to_solution_button_data = new ButtonBuilder()
+    jumpToSolutionButtonData = new ButtonBuilder()
       .setLabel("Jump To Solution")
       .setURL(solution.url)
       .setStyle(ButtonStyle.Link).data;
-    solution_message_with_consent_request = [
+    solutionMessageWithConsentRequest = [
       `**Thank you for marking this question as solved!**`,
-      makeRequestForConsentString(text_channel.guild.name),
+      makeRequestForConsentString(textChannel.guild.name),
     ].join("\n\n");
-    solution_embed_data = {
-      description: solution_message_with_consent_request,
+    solutionEmbedData = {
+      description: solutionMessageWithConsentRequest,
       color: 9228799,
       fields: [
         {
@@ -426,42 +425,42 @@ describe("Make Mark Solution Response", () => {
     const { components, embed } = makeMarkSolutionResponse({
       question,
       solution,
-      server_name: text_channel.guild.name,
+      serverName: textChannel.guild.name,
       settings: {
         ...settings,
         flags: {
           ...settings.flags,
-          indexing_enabled: true,
-          forum_guidelines_consent_enabled: false,
+          indexingEnabled: true,
+          forumGuidelinesConsentEnabled: false,
         },
       },
     });
     expect(components!.components.map((component) => component.data)).toEqual([
       CONSENT_BUTTON_DATA,
-      jump_to_solution_button_data,
+      jumpToSolutionButtonData,
     ]);
-    expect(embed.data).toEqual(solution_embed_data);
+    expect(embed.data).toEqual(solutionEmbedData);
   });
   it("should make a response with only the solution response a channel with indexing enabled and forum guidelines consent enabled", () => {
     const { components, embed } = makeMarkSolutionResponse({
       question,
       solution,
-      server_name: text_channel.guild.name,
+      serverName: textChannel.guild.name,
       settings: {
         ...settings,
         flags: {
           ...settings.flags,
-          indexing_enabled: true,
-          forum_guidelines_consent_enabled: true,
+          indexingEnabled: true,
+          forumGuidelinesConsentEnabled: true,
         },
       },
     });
     expect(components!.components.map((component) => component.data)).toEqual([
-      jump_to_solution_button_data,
+      jumpToSolutionButtonData,
     ]);
     expect(embed.data).toEqual({
-      ...solution_embed_data,
-      description: solution_message_without_consent_request,
+      ...solutionEmbedData,
+      description: solutionMessageWithoutConsentRequest,
     });
   });
 });

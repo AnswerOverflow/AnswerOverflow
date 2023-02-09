@@ -17,11 +17,11 @@ interface HeadProps {
 export const AOHead = ({
   title,
   description,
-  image = "https://answeroverflow.com/content/branding/meta_header.png",
+  image = "https://answeroverflow.com/content/branding/metaHeader.png",
   server = undefined,
-  addPrefix = false,
-  imageWidth = "1200",
-  imageHeight = "630",
+  addPrefix: addPrefix = false,
+  imageWidth: imageWidth = "1200",
+  imageHeight: imageHeight = "630",
   type = "website",
   path,
 }: HeadProps) => {
@@ -32,7 +32,7 @@ export const AOHead = ({
     if (serverIconImage) {
       image = serverIconImage;
     } else {
-      image = "https://answeroverflow.com/content/branding/logo_icon.png";
+      image = "https://answeroverflow.com/content/branding/logoIcon.png";
     }
   }
   if (addPrefix) title += " - Answer Overflow";

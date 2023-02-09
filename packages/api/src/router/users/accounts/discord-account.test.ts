@@ -10,20 +10,20 @@ import { pick } from "@answeroverflow/utils";
 import { testAllDataVariants, mockAccountCallerCtx, testAllSources } from "~api/test/utils";
 import { discordAccountRouter } from "./discord-accounts";
 
-let discord_account: DiscordAccount;
-let discord_account2: DiscordAccount;
-function pickPublicFields(discord_account: DiscordAccount) {
-  return pick(discord_account, ["id", "name", "avatar"]);
+let discordAccount: DiscordAccount;
+let discordAccount2: DiscordAccount;
+function pickPublicFields(discordAccount: DiscordAccount) {
+  return pick(discordAccount, ["id", "name", "avatar"]);
 }
 
 beforeEach(() => {
-  discord_account = mockDiscordAccount();
-  discord_account2 = mockDiscordAccount();
+  discordAccount = mockDiscordAccount();
+  discordAccount2 = mockDiscordAccount();
 });
 describe("Discord Account Operations", () => {
   describe("Discord Account By Id", () => {
     beforeEach(async () => {
-      await createDiscordAccount(discord_account);
+      await createDiscordAccount(discordAccount);
     });
 
     it("should test all varaints of finding a discord account by id", async () => {
@@ -31,11 +31,11 @@ describe("Discord Account Operations", () => {
         async fetch({ source }) {
           const { ctx } = await mockAccountCallerCtx(source);
           const router = discordAccountRouter.createCaller(ctx);
-          const data = await router.byId(discord_account.id);
+          const data = await router.byId(discordAccount.id);
           return {
             data,
-            private_data_format: discord_account,
-            public_data_format: pickPublicFields(discord_account),
+            privateDataFormat: discordAccount,
+            publicDataFormat: pickPublicFields(discordAccount),
           };
         },
       });
@@ -43,21 +43,18 @@ describe("Discord Account Operations", () => {
   });
   describe("Discord Account By Id Many", () => {
     beforeEach(async () => {
-      await createManyDiscordAccounts([discord_account, discord_account2]);
+      await createManyDiscordAccounts([discordAccount, discordAccount2]);
     });
     it("should test all varaints of finding many discord accounts by id", async () => {
       await testAllDataVariants({
         async fetch({ source }) {
           const { ctx } = await mockAccountCallerCtx(source);
           const router = discordAccountRouter.createCaller(ctx);
-          const data = await router.byIdMany([discord_account.id, discord_account2.id]);
+          const data = await router.byIdMany([discordAccount.id, discordAccount2.id]);
           return {
             data,
-            private_data_format: [discord_account, discord_account2],
-            public_data_format: [
-              pickPublicFields(discord_account),
-              pickPublicFields(discord_account2),
-            ],
+            privateDataFormat: [discordAccount, discordAccount2],
+            publicDataFormat: [pickPublicFields(discordAccount), pickPublicFields(discordAccount2)],
           };
         },
       });
@@ -69,7 +66,7 @@ describe("Discord Account Operations", () => {
         async operation(source) {
           const { ctx } = await mockAccountCallerCtx(source);
           const router = discordAccountRouter.createCaller(ctx);
-          await expect(router.create(discord_account)).rejects.toThrowError();
+          await expect(router.create(discordAccount)).rejects.toThrowError();
         },
       });
     });
@@ -78,8 +75,8 @@ describe("Discord Account Operations", () => {
         async operation(source) {
           const { ctx, account } = await mockAccountCallerCtx(source);
           const router = discordAccountRouter.createCaller(ctx);
-          const discord_account_created = await router.create(account);
-          expect(discord_account_created).toEqual(account);
+          const discordAccountCreated = await router.create(account);
+          expect(discordAccountCreated).toEqual(account);
         },
       });
     });
@@ -87,7 +84,7 @@ describe("Discord Account Operations", () => {
   });
   describe("Discord Account Update", () => {
     beforeEach(async () => {
-      await createDiscordAccount(discord_account);
+      await createDiscordAccount(discordAccount);
     });
     it("should test all varaints of updating a discord account as a user who does not own the account", async () => {
       await testAllSources({
@@ -95,7 +92,7 @@ describe("Discord Account Operations", () => {
           const { ctx } = await mockAccountCallerCtx(source);
           const router = discordAccountRouter.createCaller(ctx);
           await expect(
-            router.update({ id: discord_account.id, name: "new name" })
+            router.update({ id: discordAccount.id, name: "new name" })
           ).rejects.toThrowError();
         },
       });
@@ -106,11 +103,11 @@ describe("Discord Account Operations", () => {
           const { ctx, account } = await mockAccountCallerCtx(source);
           await createDiscordAccount(account);
           const router = discordAccountRouter.createCaller(ctx);
-          const discord_account_updated = await router.update({
+          const discordAccountUpdated = await router.update({
             id: account.id,
             name: "new name",
           });
-          expect(discord_account_updated).toEqual({
+          expect(discordAccountUpdated).toEqual({
             ...account,
             name: "new name",
           });
@@ -120,17 +117,15 @@ describe("Discord Account Operations", () => {
   });
   describe("Discord Account Delete", () => {
     beforeEach(async () => {
-      await createDiscordAccount(discord_account);
+      await createDiscordAccount(discordAccount);
     });
     it("should test all varaints of deleting a discord account that the user does not own", async () => {
       await testAllSources({
         async operation(source) {
           const { ctx } = await mockAccountCallerCtx(source);
           const router = discordAccountRouter.createCaller(ctx);
-          await expect(router.delete(discord_account.id)).rejects.toThrowError();
-          await expect(findDiscordAccountById(discord_account.id)).resolves.toEqual(
-            discord_account
-          );
+          await expect(router.delete(discordAccount.id)).rejects.toThrowError();
+          await expect(findDiscordAccountById(discordAccount.id)).resolves.toEqual(discordAccount);
         },
       });
     });
@@ -140,8 +135,8 @@ describe("Discord Account Operations", () => {
           const { ctx, account } = await mockAccountCallerCtx(source);
           await createDiscordAccount(account);
           const router = discordAccountRouter.createCaller(ctx);
-          const discord_account_deleted = await router.delete(account.id);
-          expect(discord_account_deleted).toBeTruthy();
+          const discordAccountDeleted = await router.delete(account.id);
+          expect(discordAccountDeleted).toBeTruthy();
           await expect(findDiscordAccountById(account.id)).resolves.toBeNull();
         },
       });
@@ -154,7 +149,7 @@ describe("Discord Account Operations", () => {
           async operation(source) {
             const { ctx } = await mockAccountCallerCtx(source);
             const router = discordAccountRouter.createCaller(ctx);
-            await expect(router.upsert(discord_account)).rejects.toThrowError();
+            await expect(router.upsert(discordAccount)).rejects.toThrowError();
           },
         });
       });
@@ -164,14 +159,14 @@ describe("Discord Account Operations", () => {
             const { ctx, account } = await mockAccountCallerCtx(source);
             await createDiscordAccount(account);
             const router = discordAccountRouter.createCaller(ctx);
-            const discord_account_created = await router.upsert(account);
-            expect(discord_account_created).toEqual(account);
+            const discordAccountCreated = await router.upsert(account);
+            expect(discordAccountCreated).toEqual(account);
           },
         });
       });
       describe("Discord Account Upsert Update", () => {
         beforeEach(async () => {
-          await createDiscordAccount(discord_account);
+          await createDiscordAccount(discordAccount);
         });
         it("should test all varaints of upsert updating a discord account that the user does not own", async () => {
           await testAllSources({
@@ -179,7 +174,7 @@ describe("Discord Account Operations", () => {
               const { ctx } = await mockAccountCallerCtx(source);
               const router = discordAccountRouter.createCaller(ctx);
               await expect(
-                router.upsert({ ...discord_account, name: "new name" })
+                router.upsert({ ...discordAccount, name: "new name" })
               ).rejects.toThrowError();
             },
           });
@@ -190,11 +185,11 @@ describe("Discord Account Operations", () => {
               const { ctx, account } = await mockAccountCallerCtx(source);
               await createDiscordAccount(account);
               const router = discordAccountRouter.createCaller(ctx);
-              const discord_account_updated = await router.upsert({
+              const discordAccountUpdated = await router.upsert({
                 ...account,
                 name: "new name",
               });
-              expect(discord_account_updated).toEqual({
+              expect(discordAccountUpdated).toEqual({
                 ...account,
                 name: "new name",
               });

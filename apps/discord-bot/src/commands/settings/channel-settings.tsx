@@ -35,11 +35,7 @@ export class ChannelSettingsCommand extends Command {
     });
   }
 
-  public override async chatInputRun(
-    interaction: ChatInputCommandInteraction,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _context: ChatInputCommand.RunContext
-  ) {
+  public override async chatInputRun(interaction: ChatInputCommandInteraction) {
     if (interaction.guild == null) {
       return;
     }
@@ -53,14 +49,14 @@ export class ChannelSettingsCommand extends Command {
     const channel = interaction.channel;
     const member = await guild.members.fetch(interaction.user.id);
 
-    const parent_id = channel.isThread() ? channel.parentId : channel.id;
-    if (!parent_id) return;
+    const parentId = channel.isThread() ? channel.parentId : channel.id;
+    if (!parentId) return;
 
     await callApiWithEphemeralErrorHandler(
       {
         async ApiCall(router) {
           try {
-            return router.channels.byId(parent_id);
+            return router.channels.byId(parentId);
           } catch (error) {
             if (error instanceof TRPCError && error.code == "NOT_FOUND") {
               return null;

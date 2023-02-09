@@ -29,7 +29,7 @@ export class OnMessageBulkDelete extends Listener {
 
 @ApplyOptions<Listener.Options>({ event: Events.MessageUpdate, name: "Message Update Watcher" })
 export class OnMessageUpdate extends Listener {
-  public async run(_old_message: Message, new_message: Message) {
-    await updateMessage(toAOMessage(new_message));
+  public async run(_: Message, newMessage: Message) {
+    await updateMessage(toAOMessage(newMessage));
   }
 }

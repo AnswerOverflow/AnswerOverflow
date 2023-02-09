@@ -25,7 +25,7 @@ export function isSnowflakeLargerAsInt(a: Snowflake, b: Snowflake) {
 }
 
 export function isSnowflakeLarger(a: Snowflake, b: Snowflake) {
-  const a_as_big_int = BigInt(a);
-  const b_as_big_int = BigInt(b);
-  return a_as_big_int > b_as_big_int;
+  const aAsBigInt = BigInt(a);
+  const bAsBigInt = BigInt(b);
+  return aAsBigInt > bAsBigInt;
 }

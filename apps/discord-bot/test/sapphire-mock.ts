@@ -40,24 +40,24 @@ export function mockSapphireClient(
     store.strategy.filterDtsFiles = true;
 
     // @ts-ignore
-    store.strategy.filter = jest.fn((file_path) => {
+    store.strategy.filter = jest.fn((filePath) => {
       // Retrieve the file extension.
-      const extension = extname(file_path);
+      const extension = extname(filePath);
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
       if (!store.strategy.supportedExtensions.includes(extension)) return null;
 
       // @ts-ignore
-      if (store.strategy.filterDtsFiles && file_path.endsWith(".d.ts")) return null;
+      if (store.strategy.filterDtsFiles && filePath.endsWith(".d.ts")) return null;
 
-      if (file_path.includes(".test")) return null;
+      if (filePath.includes(".test")) return null;
 
       // Retrieve the name of the file, return null if empty.
-      const name = basename(file_path, extension);
+      const name = basename(filePath, extension);
       if (name === "") return null;
 
       // Return the name and extension.
-      return { extension, path: file_path, name };
+      return { extension, path: filePath, name };
     });
   });
 

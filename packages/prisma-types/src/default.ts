@@ -17,7 +17,7 @@ export function getDefaultUser(
 export function getDefaultServer(override: Partial<Server> & { id: string; name: string }): Server {
   const data: Server = {
     icon: null,
-    kicked_time: null,
+    kickedTime: null,
     bitfield: 0,
     ...override,
   };
@@ -25,13 +25,13 @@ export function getDefaultServer(override: Partial<Server> & { id: string; name:
 }
 
 export function getDefaultChannel(
-  override: Partial<Channel> & Pick<Channel, "id" | "name" | "server_id" | "parent_id" | "type">
+  override: Partial<Channel> & Pick<Channel, "id" | "name" | "serverId" | "parentId" | "type">
 ): Channel {
   const data: Channel = {
     bitfield: 0,
-    invite_code: null,
-    last_indexed_snowflake: null,
-    solution_tag_id: null,
+    inviteCode: null,
+    lastIndexedSnowflake: null,
+    solutionTagId: null,
     ...override,
   };
   return data;
@@ -48,7 +48,7 @@ export function getDefaultDiscordAccount(
 }
 
 export function getDefaultUserServerSettings(
-  override: Partial<UserServerSettings> & { user_id: string; server_id: string }
+  override: Partial<UserServerSettings> & { userId: string; serverId: string }
 ): UserServerSettings {
   const data: UserServerSettings = {
     bitfield: 0,

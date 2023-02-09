@@ -10,56 +10,56 @@ import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
 import { createChannel, createServer, findUserServerSettingsById } from "@answeroverflow/db";
 
 let client: Client;
-let forum_channel: ForumChannel;
-let forum_channel_thread: AnyThreadChannel;
-let forum_channel_thread_message: Message;
+let forumChannel: ForumChannel;
+let forumChannelThread: AnyThreadChannel;
+let forumChannelThreadMessage: Message;
 beforeEach(async () => {
   client = await setupAnswerOverflowBot();
-  forum_channel = mockForumChannel(client);
-  forum_channel_thread = mockPublicThread({ client, parent_channel: forum_channel });
-  forum_channel_thread_message = mockMessage({
+  forumChannel = mockForumChannel(client);
+  forumChannelThread = mockPublicThread({ client, parentChannel: forumChannel });
+  forumChannelThreadMessage = mockMessage({
     client,
-    channel: forum_channel_thread,
+    channel: forumChannelThread,
   });
-  await createServer(toAOServer(forum_channel.guild));
+  await createServer(toAOServer(forumChannel.guild));
   await createChannel({
-    ...toAOChannel(forum_channel),
+    ...toAOChannel(forumChannel),
     flags: {
-      forum_guidelines_consent_enabled: true,
+      forumGuidelinesConsentEnabled: true,
     },
   });
 });
 
 describe("Forum Post Guidelines Consent Listener", () => {
   it("should provide consent in a forum channel with consent enabled", async () => {
-    await emitEvent(client, Events.MessageCreate, forum_channel_thread_message);
+    await emitEvent(client, Events.MessageCreate, forumChannelThreadMessage);
     const updated = await findUserServerSettingsById({
-      user_id: forum_channel_thread_message.author.id,
-      server_id: forum_channel.guild.id,
+      userId: forumChannelThreadMessage.author.id,
+      serverId: forumChannel.guild.id,
     });
-    expect(updated!.flags.can_publicly_display_messages).toBeTruthy();
+    expect(updated!.flags.canPubliclyDisplayMessages).toBeTruthy();
   });
   it("should provide consent in a forum channel for multiple users", async () => {
     const messages = [
       mockMessage({
         client,
-        channel: forum_channel_thread,
+        channel: forumChannelThread,
       }),
       mockMessage({
         client,
-        channel: forum_channel_thread,
+        channel: forumChannelThread,
       }),
     ];
     await Promise.all(messages.map((message) => emitEvent(client, Events.MessageCreate, message)));
     const updated = await findUserServerSettingsById({
-      user_id: messages[0]!.author.id,
-      server_id: forum_channel.guild.id,
+      userId: messages[0]!.author.id,
+      serverId: forumChannel.guild.id,
     });
-    expect(updated!.flags.can_publicly_display_messages).toBeTruthy();
+    expect(updated!.flags.canPubliclyDisplayMessages).toBeTruthy();
     const updated2 = await findUserServerSettingsById({
-      user_id: messages[1]!.author.id,
-      server_id: forum_channel.guild.id,
+      userId: messages[1]!.author.id,
+      serverId: forumChannel.guild.id,
     });
-    expect(updated2!.flags.can_publicly_display_messages).toBeTruthy();
+    expect(updated2!.flags.canPubliclyDisplayMessages).toBeTruthy();
   });
 });

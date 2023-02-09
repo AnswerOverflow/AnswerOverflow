@@ -39,11 +39,11 @@ export async function indexServers(client: Client) {
 async function indexServer(guild: Guild) {
   container.logger.info(`Indexing server ${guild.id}`);
   for (const channel of guild.channels.cache.values()) {
-    const is_indexable_channel_type =
+    const isIndexableChannelType =
       channel.type === ChannelType.GuildText ||
       channel.type === ChannelType.GuildAnnouncement ||
       channel.type === ChannelType.GuildForum;
-    if (is_indexable_channel_type) {
+    if (isIndexableChannelType) {
       await indexRootChannel(channel);
     }
   }
@@ -54,43 +54,43 @@ export async function indexRootChannel(channel: TextChannel | NewsChannel | Foru
 
   const settings = await findChannelById(channel.id);
 
-  if (!settings || !settings.flags.indexing_enabled) {
+  if (!settings || !settings.flags.indexingEnabled) {
     return;
   }
-  let start = settings.last_indexed_snowflake == null ? undefined : settings.last_indexed_snowflake;
+  let start = settings.lastIndexedSnowflake == null ? undefined : settings.lastIndexedSnowflake;
   if (process.env.NODE_ENV === "development") {
     start = undefined; // always index from the beginning in development for ease of testing
   }
   // Collect all messages
-  const { messages: messages_to_parse, threads } = await fetchAllChannelMessagesWithThreads(
-    channel,
-    {
-      start,
-      limit: process.env.MAXIMUM_CHANNEL_MESSAGES_PER_INDEX
-        ? parseInt(process.env.MAXIMUM_CHANNEL_MESSAGES_PER_INDEX)
-        : undefined,
-    }
-  );
+  const { messages: messagesToParse, threads } = await fetchAllChannelMessagesWithThreads(channel, {
+    start,
+    limit: process.env.MAXIMUM_CHANNEL_MESSAGES_PER_INDEX
+      ? parseInt(process.env.MAXIMUM_CHANNEL_MESSAGES_PER_INDEX)
+      : undefined,
+  });
 
   // Filter out messages from users with indexing disabled or from the system
-  const filtered_messages = await filterMessages(messages_to_parse, channel);
+  const filteredMessages = await filterMessages(messagesToParse, channel);
 
   // Convert to Answer Overflow data types
 
-  const converted_users = extractUsersSetFromMessages(filtered_messages);
-  const converted_threads = threads.map((x) => toAOThread(x));
-  const converted_messages = messagesToAOMessagesSet(filtered_messages);
+  const convertedUsers = extractUsersSetFromMessages(filteredMessages);
+  const convertedThreads = threads.map((x) => toAOThread(x));
+  const convertedMessages = messagesToAOMessagesSet(filteredMessages);
 
   if (channel.client.id == null) {
     throw new Error("Received a null client id when indexing");
   }
 
-  addSolutionsToMessages(filtered_messages, converted_messages);
+  addSolutionsToMessages(filteredMessages, convertedMessages);
 
-  await upsertManyDiscordAccounts(converted_users);
-  await upsertChannel(toAOChannel(channel));
-  await upsertManyMessages(converted_messages);
-  await upsertManyChannels(converted_threads);
+  await upsertManyDiscordAccounts(convertedUsers);
+  await upsertChannel({
+    ...toAOChannel(channel),
+    lastIndexedSnowflake: sortMessagesById(filteredMessages).pop()?.id,
+  });
+  await upsertManyMessages(convertedMessages);
+  await upsertManyChannels(convertedThreads);
 }
 
 type MessageFetchOptions = {
@@ -98,58 +98,58 @@ type MessageFetchOptions = {
   limit?: number | undefined;
 };
 
-export function addSolutionsToMessages(messages: Message[], converted_messages: AOMessage[]) {
+export function addSolutionsToMessages(messages: Message[], convertedMessages: AOMessage[]) {
   // Loop through filtered messages for everything from the Answer Overflow bot
   // Put the solution messages on the relevant messages
-  const message_lookup = new Map(converted_messages.map((x) => [x.id, x]));
+  const messageLookup = new Map(convertedMessages.map((x) => [x.id, x]));
   for (const msg of messages) {
-    const { question_id, solution_id } = findSolutionsToMessage(msg);
-    if (question_id && solution_id && message_lookup.has(question_id)) {
-      message_lookup.get(question_id)!.solutions.push(solution_id);
+    const { questionId, solutionId } = findSolutionsToMessage(msg);
+    if (questionId && solutionId && messageLookup.has(questionId)) {
+      messageLookup.get(questionId)!.solutions.push(solutionId);
     }
   }
 }
 
 export function findSolutionsToMessage(msg: Message) {
-  let question_id: string | null = null;
-  let solution_id: string | null = null;
+  let questionId: string | null = null;
+  let solutionId: string | null = null;
   if (msg.author.id != msg.client.user.id) {
-    return { question_id, solution_id };
+    return { questionId, solutionId };
   }
   for (const embed of msg.embeds) {
     for (const field of embed.fields) {
       if (field.name === "Question Message ID") {
-        question_id = field.value;
+        questionId = field.value;
       }
       if (field.name === "Solution Message ID") {
-        solution_id = field.value;
+        solutionId = field.value;
       }
     }
   }
-  return { question_id, solution_id };
+  return { questionId, solutionId };
 }
 
 export async function filterMessages(messages: Message[], channel: GuildBasedChannel) {
-  const seen_user_ids = [...new Set(messages.map((message) => message.author.id))];
-  const user_server_settings = await findManyUserServerSettings(
-    seen_user_ids.map((x) => ({
-      server_id: channel.guildId,
-      user_id: x,
+  const seenUserIds = [...new Set(messages.map((message) => message.author.id))];
+  const userServerSettings = await findManyUserServerSettings(
+    seenUserIds.map((x) => ({
+      serverId: channel.guildId,
+      userId: x,
     }))
   );
 
-  if (!user_server_settings) {
+  if (!userServerSettings) {
     throw new Error("Error fetching user server settings");
   }
 
-  const users_to_remove = new Set(
-    user_server_settings.filter((x) => x.flags.message_indexing_disabled).map((x) => x.user_id)
+  const usersToRemove = new Set(
+    userServerSettings.filter((x) => x.flags.messageIndexingDisabled).map((x) => x.userId)
   );
 
   return messages.filter((x) => {
-    const is_ignored_user = users_to_remove.has(x.author.id);
-    const is_system_message = x.system;
-    return !is_ignored_user && !is_system_message;
+    const isIgnoredUser = usersToRemove.has(x.author.id);
+    const isSystemMessage = x.system;
+    return !isIgnoredUser && !isSystemMessage;
   });
 }
 
@@ -163,19 +163,19 @@ export async function fetchAllChannelMessagesWithThreads(
   )}
   `);
   let threads: PublicThreadChannel[] = [];
-  const collected_messages: Message[] = [];
+  const collectedMessages: Message[] = [];
 
   /*
       Handles indexing of forum channels
       Forum channels have no messages in them, so we have to fetch the threads
   */
   if (channel.type === ChannelType.GuildForum) {
-    const archived_threads = await channel.threads.fetchArchived({
+    const archivedThreads = await channel.threads.fetchArchived({
       type: "public",
       fetchAll: true,
     });
-    const active_threads = await channel.threads.fetchActive();
-    threads = [...archived_threads.threads.values(), ...active_threads.threads.values()]
+    const activeThreads = await channel.threads.fetchActive();
+    threads = [...archivedThreads.threads.values(), ...activeThreads.threads.values()]
       .filter((x) => x.type === ChannelType.PublicThread)
       .map((x) => x as PublicThreadChannel);
   } else {
@@ -196,15 +196,15 @@ export async function fetchAllChannelMessagesWithThreads(
         threads.push(message.thread);
       }
     }
-    collected_messages.push(...messages);
+    collectedMessages.push(...messages);
   }
 
   for (const thread of threads) {
-    const thread_messages = await fetchAllMesages(thread);
-    collected_messages.push(...thread_messages);
+    const threadMessages = await fetchAllMesages(thread);
+    collectedMessages.push(...threadMessages);
   }
 
-  return { messages: collected_messages, threads };
+  return { messages: collectedMessages, threads };
 }
 
 export async function fetchAllMesages(
@@ -213,17 +213,17 @@ export async function fetchAllMesages(
 ) {
   const messages: Message[] = [];
   // Create message pointer
-  const initial_fetch = await channel.messages.fetch({ limit: 1, after: start ?? "0" }); // TODO: Check if 0 works correctly for starting at the beginning
-  let message = initial_fetch.size === 1 ? initial_fetch.first() : null;
-  messages.push(...initial_fetch.values());
+  const initialFetch = await channel.messages.fetch({ limit: 1, after: start ?? "0" }); // TODO: Check if 0 works correctly for starting at the beginning
+  let message = initialFetch.size === 1 ? initialFetch.first() : null;
+  messages.push(...initialFetch.values());
   while (message && (limit === undefined || messages.length < limit)) {
     // container.logger.debug(`Fetching from ${message.id}`);
     await channel.messages.fetch({ limit: 100, after: message.id }).then((messagePage) => {
       // container.logger.debug(`Received ${messagePage.size} messages`);
-      const sorted_messages_by_id = sortMessagesById([...messagePage.values()]);
-      messages.push(...sorted_messages_by_id.values());
+      const sortedMessagesById = sortMessagesById([...messagePage.values()]);
+      messages.push(...sortedMessagesById.values());
       // Update our message pointer to be last message in page of messages
-      message = 0 < sorted_messages_by_id.length ? sorted_messages_by_id.at(-1) : null;
+      message = 0 < sortedMessagesById.length ? sortedMessagesById.at(-1) : null;
     });
   }
   if (limit) {

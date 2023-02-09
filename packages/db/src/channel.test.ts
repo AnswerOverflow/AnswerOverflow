@@ -15,15 +15,7 @@ describe("Channel Operations", () => {
       const chnl1 = mockChannel(server);
       const chnl2 = mockChannel(server);
 
-      const created = await upsertManyChannels([
-        {
-          ...chnl1,
-          flags: {
-            forum_guidelines_consent_enabled: true,
-          },
-        },
-        chnl2,
-      ]);
+      const created = await upsertManyChannels([chnl1, chnl2]);
       expect(created).toHaveLength(2);
       const found = await findManyChannelsById([chnl1.id, chnl2.id]);
       expect(found).toHaveLength(2);

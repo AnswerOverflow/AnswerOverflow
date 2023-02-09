@@ -8,17 +8,15 @@ import type { GetStaticPropsContext, InferGetStaticPropsType } from "next";
 import { TRPCError } from "@trpc/server";
 
 export default function MessageResult(props: InferGetStaticPropsType<typeof getStaticProps>) {
-  const { server_id, message_id, are_all_messages_public } = props;
+  const { serverId, messageId, areAllMessagesPublic } = props;
 
-  const is_user_in_server = useIsUserInServer(server_id);
-  const should_fetch_private_messages = is_user_in_server && !are_all_messages_public;
-  const { data } = trpc.message_page.byId.useQuery(message_id, {
+  const isUserInServer = useIsUserInServer(serverId);
+  const shouldFetchPrivateMessages = isUserInServer && !areAllMessagesPublic;
+  const { data } = trpc.messagePage.byId.useQuery(messageId, {
     // For authenticated users that are in the server, we fetch the messages incase any of them are private
-    enabled: should_fetch_private_messages,
+    enabled: shouldFetchPrivateMessages,
     // If we're doing SSG, then we don't change the queryHash so we can access the data, othewise we set it to change with the auth state
-    queryHash: should_fetch_private_messages
-      ? `${message_id}-${is_user_in_server.toString()}`
-      : undefined,
+    queryHash: shouldFetchPrivateMessages ? `${messageId}-${isUserInServer.toString()}` : undefined,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -26,24 +24,24 @@ export default function MessageResult(props: InferGetStaticPropsType<typeof getS
   if (!data) {
     return null;
   }
-  const { messages, parent_channel, server, thread } = data;
+  const { messages, parentChannel, server, thread } = data;
 
-  const first_message = messages.at(0);
-  const channel_name = thread?.name ?? parent_channel.name;
+  const firstMessage = messages.at(0);
+  const channelName = thread?.name ?? parentChannel.name;
   const description =
-    first_message && first_message.content?.length > 0
-      ? first_message.content
-      : `Questions related to ${channel_name} in ${server.name}`;
+    firstMessage && firstMessage.content?.length > 0
+      ? firstMessage.content
+      : `Questions related to ${channelName} in ${server.name}`;
   return (
     <>
       <AOHead
         description={description}
-        path={`/m/${message_id}`}
-        title={`${channel_name} - ${server.name}`}
+        path={`/m/${messageId}`}
+        title={`${channelName} - ${server.name}`}
       />
       <MessageResultPage
         messages={messages}
-        channel={parent_channel}
+        channel={parentChannel}
         server={server}
         thread={thread ?? undefined}
       />
@@ -55,7 +53,7 @@ export function getStaticPaths() {
   return { paths: [], fallback: "blocking" };
 }
 
-export async function getStaticProps(context: GetStaticPropsContext<{ message_id: string }>) {
+export async function getStaticProps(context: GetStaticPropsContext<{ messageId: string }>) {
   const ssg = createProxySSGHelpers({
     router: appRouter,
     ctx: await createSSGContext(),
@@ -68,14 +66,14 @@ export async function getStaticProps(context: GetStaticPropsContext<{ message_id
   }
   // prefetch `post.byId`
   try {
-    const { server, messages } = await ssg.message_page.byId.fetch(context.params.message_id, {});
-    const are_all_messages_public = messages.every((message) => message.public);
+    const { server, messages } = await ssg.messagePage.byId.fetch(context.params.messageId, {});
+    const areAllMessagesPublic = messages.every((message) => message.public);
     return {
       props: {
         trpcState: ssg.dehydrate(),
-        server_id: server.id,
-        are_all_messages_public,
-        message_id: context.params.message_id,
+        serverId: server.id,
+        areAllMessagesPublic,
+        messageId: context.params.messageId,
       },
       revalidate: 60 * 10, // every 10 minutes
     };
