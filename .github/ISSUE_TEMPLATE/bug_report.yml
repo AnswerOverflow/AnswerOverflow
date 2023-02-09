@@ -47,7 +47,7 @@ body:
     id: os
     attributes:
       label: Operating system
-      description: Which OS does your application run on?
+      description: What OS are you on?
   - type: dropdown
     id: priority
     attributes:
