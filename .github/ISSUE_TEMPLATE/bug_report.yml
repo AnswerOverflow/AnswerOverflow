@@ -1,6 +1,6 @@
 name: Bug report
 description: Report incorrect or unexpected behavior
-labels: [bug, need repro]
+labels: [🐞 bug]
 body:
   - type: dropdown
     id: package
