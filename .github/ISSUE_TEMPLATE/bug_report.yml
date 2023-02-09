@@ -29,7 +29,7 @@ body:
     attributes:
       label: Issue description
       description: Describe the issue in as much detail as possible.
-      placeholder: Steps to reproduce with below code sample:        
+      placeholder: Steps to reproduce with below code sample     
     validations:
       required: true
   - type: textarea
