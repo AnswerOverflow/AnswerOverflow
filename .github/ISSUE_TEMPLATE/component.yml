@@ -1,0 +1,36 @@
+name: Component
+description: File a feature request for a new component 
+title: "[Docs]: "
+labels: ["⚛ component", "🎨 Design"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Purpose?
+      description: What purpose does this component serve?
+      placeholder: It should allow users to...
+    validations:
+      required: true
+- type: textarea
+    id: concepts
+    attributes:
+      label: Concepts
+      description: Upload images for the concepts of this component. Feel free to just create a basic wireframe in paint to get the concept across
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe how the component interacts
+      placeholder: When I click the button it should...
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Extra Information
+      description: Post any extra links, screenshots, or references that might be helpful here
+      placeholder: This component looks like a good refrence https://www.youtube.com/watch?v=dQw4w9WgXcQ
+    validations:
+      required: false
