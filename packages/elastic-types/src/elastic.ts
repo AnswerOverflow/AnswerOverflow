@@ -275,7 +275,7 @@ export class Elastic extends Client {
     const result = await this.bulk({
       operations: messages.flatMap((message) => [
         { update: { _index: this.messagesIndex, _id: message.id } },
-        { doc: message, dock_as_upsert: true },
+        { doc: message, doc_as_upsert: true },
       ]),
     });
     if (result.errors) {
