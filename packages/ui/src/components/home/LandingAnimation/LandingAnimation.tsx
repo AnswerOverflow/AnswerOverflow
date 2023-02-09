@@ -167,8 +167,11 @@ export const LandingAnimation = ({
     };
   }, []);
 
+  //  border-image-source: linear-gradient(142.68deg, #818181 0%, #393B3F 100%);
+
   return (
-    <div className="w-full rounded-lg border-2 p-2 drop-shadow-2xl">
+    // eslint-disable-next-line tailwindcss/no-custom-classname
+    <div className="bg-gradient-to-br-dark-glass w-full rounded-xl border-1 border-[#636363] py-32 px-10 drop-shadow-2xl backdrop-blur-md">
       <div
         className="flex h-10 w-full items-center justify-center rounded-t-lg border-b-1 border-black bg-[#363636]"
         ref={containerRef}
@@ -206,8 +209,10 @@ export const LandingAnimation = ({
       <div className={`absolute`} ref={cursorRef}>
         {(!shouldStartGoogleSearchAnimation || shouldStartAnswerOverflowAnimation) &&
           (distanceBetweenRects && distanceBetweenRects < 16 ? (
+            // eslint-disable-next-line tailwindcss/no-custom-classname
             <i className="bi bi-cursor-text text-white"></i>
           ) : (
+            // eslint-disable-next-line tailwindcss/no-custom-classname
             <i className="bi bi-cursor-fill text-white"></i>
           ))}
       </div>

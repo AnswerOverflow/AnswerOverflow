@@ -29,6 +29,11 @@ module.exports = {
         1: "1px",
       },
       visibility: ["group-hover"],
+      // Custom linear gradient
+      backgroundImage: () => ({
+        "gradient-to-br-dark-glass":
+          "linear-gradient(145.98deg, rgba(57, 59, 63, 0.37) -3.49%, rgba(57, 59, 63, 0.1591) 108.92%);",
+      }),
     },
   },
 

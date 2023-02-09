@@ -33,6 +33,7 @@ export const buttonStyles = cva(
 
 export interface ButtonProps extends ButtonVariantProps {
   onClick?: () => void;
+  className?: string;
 }
 
 export const Button: React.FC<React.PropsWithChildren<ButtonProps>> = ({
@@ -41,10 +42,11 @@ export const Button: React.FC<React.PropsWithChildren<ButtonProps>> = ({
   disabled,
   onClick,
   children,
+  className,
 }) => {
   return (
     <button
-      className={buttonStyles({ type, color, disabled: disabled ?? false })}
+      className={buttonStyles({ type, color, disabled: disabled ?? false, className })}
       onClick={() => onClick?.()}
       disabled={disabled ?? false}
     >
