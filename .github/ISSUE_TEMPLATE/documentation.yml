@@ -1,5 +1,5 @@
-name: Dev Environment
-description: File suggestion that relates to the documentation
+name: Documentation
+description: Suggestions that relates to the documentation
 title: "[Docs]: "
 labels: ["📜documentation"]
 body:
