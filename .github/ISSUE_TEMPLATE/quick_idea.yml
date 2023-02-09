@@ -1,5 +1,5 @@
 name: Quick Idea
-description: Jot down a quick concept to add to the backlog
+description: Jot down a quick concept to add to the backlog. Ideas that do not fit the other categories should go here
 title: "[Needs Expansion]: "
 labels: ["🔬Needs Expansion"]
 body:
