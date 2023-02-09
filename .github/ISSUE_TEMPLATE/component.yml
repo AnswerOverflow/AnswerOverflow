@@ -12,12 +12,12 @@ body:
     validations:
       required: true
   - type: textarea
-      id: concepts
-      attributes:
-        label: Concepts
-        description: Upload images for the concepts of this component. Feel free to just create a basic wireframe in paint to get the concept across
-      validations:
-        required: true
+    id: concepts
+    attributes:
+      label: Concepts
+      description: Upload images for the concepts of this component. Feel free to just create a basic wireframe in paint to get the concept across
+    validations:
+      required: true
   - type: textarea
     id: description
     attributes:
