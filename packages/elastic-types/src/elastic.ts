@@ -61,11 +61,11 @@ export type Message = {
     height: number | null;
     description: string | null;
   }[];
-  replies_to: {
-    message_content: string;
-    author_avatar: string | null;
+  repliesTo: {
+    messageContent: string;
+    authorAvatar: string | null;
   } | null;
-  child_thread: string | null;
+  childThread: string | null;
   solutions: string[];
 };
 

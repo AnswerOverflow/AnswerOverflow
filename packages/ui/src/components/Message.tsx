@@ -14,7 +14,7 @@ export type MessageProps = {
   message: MessageWithDiscordAccount;
   thread?: ChannelPublicWithFlags;
   blurred?: boolean;
-  not_public_title?: string;
+  notPublicTitle?: string;
   darkMode?: boolean;
   showLinkIcon?: boolean;
   /**
@@ -32,7 +32,7 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
     message,
     thread,
     blurred = false,
-    not_public_title = "Message Not Public",
+    notPublicTitle = "Message Not Public",
     darkMode = false,
     showLinkIcon = true,
     customMessageDateString,
@@ -148,10 +148,10 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
             {showLinkIcon && (
               <Link
                 href={getMessageUrl({
-                  server_id: message.server_id,
-                  channel_id: thread && thread.parent_id ? thread.parent_id : message.channel_id,
-                  message_id: message.id,
-                  thread_id: thread?.id,
+                  serverId: message.serverId,
+                  channelId: thread && thread.parentId ? thread.parentId : message.channelId,
+                  messageId: message.id,
+                  threadId: thread?.id,
                 })}
                 className="absolute right-0 h-6 w-6 group-hover:visible"
                 aria-label="Open in Discord"
@@ -207,7 +207,7 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
                   darkMode ? "text-white" : "dark:text-white"
                 }`}
               >
-                <div className="text-2xl ">{not_public_title}</div>
+                <div className="text-2xl ">{notPublicTitle}</div>
                 <div>Sign In & Join Server To View</div>
               </div>
             </div>
