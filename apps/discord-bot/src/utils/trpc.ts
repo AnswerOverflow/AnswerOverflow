@@ -52,7 +52,7 @@ export function makeEphemeralErrorHandler<T>(
 ): TRPCStatusHandler<T> {
   return {
     Error(message) {
-      ephemeralReply(container.reacord, "Error: " + message, interaction);
+      ephemeralReply(container.reacord, message, interaction);
     },
   };
 }

@@ -1,9 +1,9 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { ChatInputCommand, Command } from "@sapphire/framework";
-import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from "discord.js";
-import { createMemberCtx } from "~discord-bot/utils/context";
-import { toAODiscordAccount } from "~discord-bot/utils/conversions";
-import { callAPI, makeEphemeralErrorHandler } from "~discord-bot/utils/trpc";
+import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { updateUserConsent } from "~discord-bot/domains/consent";
+import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
+import { makeEphemeralErrorHandler } from "~discord-bot/utils/trpc";
 
 @ApplyOptions<Command.Options>({
   name: "consent",
@@ -21,24 +21,20 @@ export class ConsentCommand extends Command {
     );
   }
   public override async chatInputRun(interaction: ChatInputCommandInteraction) {
-    await callAPI({
-      ApiCall(router) {
-        return router.userServerSettings.upsertWithDeps({
-          user: toAODiscordAccount(interaction.user),
-          serverId: interaction.guildId!,
-          flags: {
-            canPubliclyDisplayMessages: true,
-          },
-        });
-      },
-      getCtx: () => createMemberCtx(interaction.member as GuildMember),
-      async Ok() {
-        await interaction.reply({
-          content: "Provided consent to display messsages publicly on Answer Overflow",
-          ephemeral: true,
-        });
-      },
-      ...makeEphemeralErrorHandler(interaction),
+    await guildTextChannelOnlyInteraction(interaction, async ({ member, guild }) => {
+      await updateUserConsent({
+        member,
+        guild,
+        canPubliclyDisplayMessages: true,
+        consentSource: "slash-command",
+        async onConsentStatusChange() {
+          await interaction.reply({
+            content: `Provided consent to display messsages in ${guild.name}  publicly on Answer Overflow`,
+            ephemeral: true,
+          });
+        },
+        onError: makeEphemeralErrorHandler(interaction).Error,
+      });
     });
   }
 }

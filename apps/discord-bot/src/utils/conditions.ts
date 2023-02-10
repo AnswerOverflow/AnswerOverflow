@@ -1,6 +1,6 @@
 import type { Guild, GuildMember, GuildTextBasedChannel, Interaction } from "discord.js";
 
-export async function guildOnlyInteraction<T>(
+export async function guildTextChannelOnlyInteraction<T>(
   interaction: Interaction,
   operation: ({
     guild,
