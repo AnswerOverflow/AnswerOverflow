@@ -52,6 +52,7 @@ export class ConsentError extends Error {
   }
 }
 
+// TODO: Find a better return value than `null`
 export async function provideConsentOnForumChannelMessage(message: Message) {
   const channel = message.channel;
   if (!(channel.isThread() && channel.parent?.type === ChannelType.GuildForum)) {

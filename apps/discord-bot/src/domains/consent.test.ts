@@ -6,7 +6,7 @@ import {
   mockTextChannel,
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
-import { provideConsentOnForumChannelMessage, updateUserConsent } from "./consent";
+import { provideConsentOnForumChannelMessage } from "./consent";
 import {
   toAOChannel,
   toAOChannelWithServer,
