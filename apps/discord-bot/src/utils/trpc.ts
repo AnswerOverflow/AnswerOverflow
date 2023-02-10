@@ -11,38 +11,45 @@ import type { ComponentEvent } from "@answeroverflow/reacord";
 import { ephemeralReply } from "./utils";
 
 export type TRPCStatusHandler<T> = {
-  allowedErrors?: TRPCError["code"][] | TRPCError["code"];
   Ok?: (result: T) => void | Promise<void>;
   Error?: (message: string) => void | Promise<void>;
 };
 
 export type TRPCall<T> = {
   getCtx: () => Promise<BotContextCreate>;
-  ApiCall: (router: BotRouterCaller) => Promise<T>;
+  apiCall: (router: BotRouterCaller) => Promise<T>;
 } & TRPCStatusHandler<T>;
 
-export async function callAPI<T>({
-  getCtx,
-  ApiCall,
-  Ok = () => {},
-  Error = () => {},
+export async function callWithAllowedErrors<T>({
   allowedErrors,
-}: TRPCall<T>) {
+  call,
+}: {
+  call: () => Promise<T>;
+  allowedErrors?: TRPCError["code"] | TRPCError["code"][];
+}) {
   try {
-    const convertedCtx = await createBotContext(await getCtx());
-    const caller = botRouter.createCaller(convertedCtx);
-    const data = await ApiCall(caller); // Pass in the caller we created to ApiCall to make the request
-    await Ok(data); // If no errors, Ok gets called with the API data
-    return data;
+    return await call();
   } catch (error) {
-    if (error instanceof TRPCError) {
-      if (!Array.isArray(allowedErrors)) allowedErrors = allowedErrors ? [allowedErrors] : [];
-      if (!allowedErrors.includes(error.code)) {
-        await Error(error.message);
-      }
+    if (!(error instanceof TRPCError)) throw error;
+    if (!Array.isArray(allowedErrors)) allowedErrors = allowedErrors ? [allowedErrors] : [];
+    if (!allowedErrors.includes(error.code)) {
+      return null;
     } else {
       throw error;
     }
+  }
+}
+
+export async function callAPI<T>({ getCtx, apiCall, Ok = () => {}, Error = () => {} }: TRPCall<T>) {
+  try {
+    const convertedCtx = await createBotContext(await getCtx());
+    const caller = botRouter.createCaller(convertedCtx);
+    const data = await apiCall(caller);
+    await Ok(data);
+    return data;
+  } catch (error) {
+    if (!(error instanceof TRPCError)) throw error;
+    await Error(error.message);
     return null;
   }
 }

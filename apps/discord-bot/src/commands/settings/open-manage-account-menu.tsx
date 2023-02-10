@@ -1,11 +1,10 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command, container, type ChatInputCommand } from "@sapphire/framework";
-import { callAPI, makeEphemeralErrorHandler } from "~discord-bot/utils/trpc";
+import { callAPI, callWithAllowedErrors, makeEphemeralErrorHandler } from "~discord-bot/utils/trpc";
 import { SlashCommandBuilder, type ChatInputCommandInteraction } from "discord.js";
 import React from "react";
 import { ephemeralReply } from "~discord-bot/utils/utils";
 import { getDefaultUserServerSettingsWithFlags } from "@answeroverflow/db";
-import { TRPCError } from "@trpc/server";
 import { createMemberCtx } from "~discord-bot/utils/context";
 
 import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
@@ -29,19 +28,15 @@ export class OpenManageAccountMenuCommand extends Command {
   public override async chatInputRun(interaction: ChatInputCommandInteraction) {
     await guildTextChannelOnlyInteraction(interaction, async ({ guild, member }) => {
       await callAPI({
-        async ApiCall(router) {
-          try {
-            return await router.userServerSettings.byId({
-              userId: member.id,
-              serverId: guild.id,
-            });
-          } catch (error) {
-            if (error instanceof TRPCError && error.code == "NOT_FOUND") {
-              return null;
-            } else {
-              throw error;
-            }
-          }
+        async apiCall(router) {
+          return callWithAllowedErrors({
+            call: () =>
+              router.userServerSettings.byId({
+                userId: member.id,
+                serverId: guild.id,
+              }),
+            allowedErrors: "NOT_FOUND",
+          });
         },
         Ok(result) {
           if (!result) {

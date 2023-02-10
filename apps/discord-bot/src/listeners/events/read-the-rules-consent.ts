@@ -16,7 +16,7 @@ export class ReadTheRulesConsent extends Listener {
         return;
       }
       await callAPI({
-        async ApiCall(router) {
+        async apiCall(router) {
           const user = toAODiscordAccount(newMember.user);
           return router.userServerSettings.upsertWithDeps({
             user,

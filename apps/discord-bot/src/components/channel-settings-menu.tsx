@@ -38,7 +38,7 @@ export function ChannelSettingsMenu({
 
     const member = await channel.guild.members.fetch(interaction.user.id);
     await callAPI({
-      async ApiCall(router) {
+      async apiCall(router) {
         return await router.channels.upsertWithDeps({
           ...toAOChannelWithServer(targetChannel),
           ...data,

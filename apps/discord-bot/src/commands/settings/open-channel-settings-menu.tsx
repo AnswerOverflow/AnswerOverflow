@@ -1,7 +1,7 @@
 import { ChannelSettingsMenu } from "~discord-bot/components/channel-settings-menu";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command, container, type ChatInputCommand } from "@sapphire/framework";
-import { callAPI, makeEphemeralErrorHandler } from "~discord-bot/utils/trpc";
+import { callAPI, callWithAllowedErrors, makeEphemeralErrorHandler } from "~discord-bot/utils/trpc";
 import {
   SlashCommandBuilder,
   PermissionsBitField,
@@ -10,7 +10,6 @@ import {
 import React from "react";
 import { ephemeralReply } from "~discord-bot/utils/utils";
 import { ChannelWithFlags, getDefaultChannelWithFlags } from "@answeroverflow/db";
-import { TRPCError } from "@trpc/server";
 import { createMemberCtx } from "~discord-bot/utils/context";
 import { toAOChannel } from "~discord-bot/utils/conversions";
 import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
@@ -41,16 +40,11 @@ export class ChannelSettingsCommand extends Command {
       if (!parentId) return; // TODO: Send message to user
 
       await callAPI({
-        async ApiCall(router) {
-          try {
-            return await router.channels.byId(parentId);
-          } catch (error) {
-            if (error instanceof TRPCError && error.code == "NOT_FOUND") {
-              return null;
-            } else {
-              throw error;
-            }
-          }
+        async apiCall(router) {
+          return callWithAllowedErrors({
+            call: () => router.channels.byId(parentId),
+            allowedErrors: "NOT_FOUND",
+          });
         },
         Ok(result) {
           if (!result) {

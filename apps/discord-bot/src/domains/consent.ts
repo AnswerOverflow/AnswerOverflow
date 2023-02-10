@@ -11,7 +11,12 @@ import {
 import { findChannelById, UserServerSettingsWithFlags } from "@answeroverflow/db";
 import { createMemberCtx } from "~discord-bot/utils/context";
 import { toAODiscordAccount } from "~discord-bot/utils/conversions";
-import { callAPI, makeConsoleStatusHandler, TRPCStatusHandler } from "~discord-bot/utils/trpc";
+import {
+  callAPI,
+  callWithAllowedErrors,
+  makeConsoleStatusHandler,
+  TRPCStatusHandler,
+} from "~discord-bot/utils/trpc";
 
 export const CONSENT_BUTTON_LABEL = "Publicly display my messages on Answer Overflow";
 export const CONSENT_BUTTON_ID = "consentButton";
@@ -95,17 +100,20 @@ export async function updateUserConsent({
     consentSource === "forum-post-guidelines" || consentSource === "read-the-rules";
   try {
     const existingUserSettings = await callAPI({
-      ApiCall(router) {
-        return router.userServerSettings.byId({
-          serverId: guild.id,
-          userId: member.id,
+      apiCall(router) {
+        return callWithAllowedErrors({
+          call: () =>
+            router.userServerSettings.byId({
+              serverId: guild.id,
+              userId: member.id,
+            }),
+          allowedErrors: "NOT_FOUND",
         });
       },
       getCtx: () => createMemberCtx(member),
       Error: (message) => {
         throw new ConsentError(message, "api-error");
       },
-      allowedErrors: "NOT_FOUND",
     });
 
     if (existingUserSettings) {
@@ -124,7 +132,7 @@ export async function updateUserConsent({
       }
     }
     return await callAPI({
-      ApiCall(router) {
+      apiCall(router) {
         return router.userServerSettings.upsertWithDeps({
           serverId: guild.id,
           user: toAODiscordAccount(member.user),
