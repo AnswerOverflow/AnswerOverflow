@@ -1,9 +1,11 @@
 import type {
   AnyThreadChannel,
+  Client,
   Guild,
   GuildBasedChannel,
   GuildChannel,
   Message,
+  TextChannel,
   User,
 } from "discord.js";
 import {
@@ -14,6 +16,7 @@ import {
   DiscordAccount as AODiscordAccount,
   getDefaultChannelWithFlags,
 } from "@answeroverflow/db";
+import type { ComponentEvent } from "@answeroverflow/reacord";
 
 export function toAOMessage(message: Message): AOMessage {
   if (!message.guild) throw new Error("Message is not in a guild");
@@ -112,4 +115,30 @@ export function messagesToAOMessagesSet(messages: Message[]) {
     aoMessages.set(msg.id, toAOMessage(msg));
   }
   return Array.from(aoMessages.values());
+}
+
+export type DiscordJSComponentEvent = Awaited<ReturnType<typeof componentEventToDiscordJSTypes>>;
+
+export async function componentEventToDiscordJSTypes(event: ComponentEvent, client: Client) {
+  const {
+    message: messageToConvert,
+    user: userToConvert,
+    channel: channelToConvert,
+    guild: guildToConvert,
+  } = event;
+  const [channel, guild, user] = await Promise.all([
+    client.channels.fetch(channelToConvert.id),
+    guildToConvert ? client.guilds.fetch(guildToConvert.id) : null,
+    client.users.fetch(userToConvert.id),
+  ]);
+  // this should never fail
+  const message = await (channel as TextChannel).messages.fetch(messageToConvert.id);
+  // probably shouldnt assert is null but these arent expected to be null
+  return {
+    ...event,
+    message: message,
+    user: user,
+    channel: channel!,
+    guild: guild,
+  };
 }

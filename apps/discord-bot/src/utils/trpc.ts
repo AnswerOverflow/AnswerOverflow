@@ -10,13 +10,13 @@ import type { CommandInteraction } from "discord.js";
 import type { ComponentEvent } from "@answeroverflow/reacord";
 import { ephemeralReply } from "./utils";
 
-type TRPCStatusHandler<T> = {
+export type TRPCStatusHandler<T> = {
   Ok?: (result: T) => void | Promise<void>;
-  Error?: (error: TRPCError) => void | Promise<void>;
+  Error?: (message: string) => void | Promise<void>;
   allowedErrors?: TRPCError["code"][] | TRPCError["code"];
 };
 
-type TRPCall<T> = {
+export type TRPCall<T> = {
   getCtx: () => Promise<BotContextCreate>;
   ApiCall: (router: BotRouterCaller) => Promise<T>;
 } & TRPCStatusHandler<T>;
@@ -36,8 +36,10 @@ export async function callAPI<T>({
     return data;
   } catch (error) {
     if (error instanceof TRPCError) {
+      console.log("error", error.code);
+      if (!Array.isArray(allowedErrors)) allowedErrors = [allowedErrors];
       if (!allowedErrors.includes(error.code)) {
-        await Error(error);
+        await Error(error.message);
       }
     } else {
       throw error;
@@ -50,16 +52,18 @@ export function makeEphemeralErrorHandler<T>(
   interaction: CommandInteraction
 ): TRPCStatusHandler<T> {
   return {
-    Error(error) {
-      ephemeralReply(container.reacord, "Error: " + error.message, interaction);
+    Error(message) {
+      ephemeralReply(container.reacord, "Error: " + message, interaction);
     },
   };
 }
 
-export function makeButtonErrorHandler<T>(interaction: ComponentEvent): TRPCStatusHandler<T> {
+export function makeComponentEventErrorHandler<T>(
+  interaction: ComponentEvent
+): TRPCStatusHandler<T> {
   return {
-    Error(error) {
-      interaction.ephemeralReply("Error: " + error.message);
+    Error(message) {
+      interaction.ephemeralReply("Error: " + message);
     },
   };
 }
@@ -72,8 +76,8 @@ export function makeConsoleStatusHandler<T>({
   successMessage?: string;
 }): TRPCStatusHandler<T> {
   return {
-    Error(error) {
-      container.logger.error(errorMessage, error.code, error.message);
+    Error(message) {
+      container.logger.error(errorMessage, message);
     },
     Ok() {
       if (successMessage) {

@@ -1,5 +1,5 @@
 import type { ChannelWithFlags, ChannelUpsertWithDepsInput } from "@answeroverflow/api";
-import { callAPI, makeButtonErrorHandler } from "~discord-bot/utils/trpc";
+import { callAPI, makeComponentEventErrorHandler } from "~discord-bot/utils/trpc";
 import { type GuildForumTag, ChannelType, ForumChannel, GuildTextBasedChannel } from "discord.js";
 import { ButtonClickEvent, Select, SelectChangeEvent, Option } from "@answeroverflow/reacord";
 import React from "react";
@@ -48,7 +48,7 @@ export function ChannelSettingsMenu({
         setChannelSettings(result);
       },
       getCtx: () => createMemberCtx(member),
-      ...makeButtonErrorHandler(interaction),
+      ...makeComponentEventErrorHandler(interaction),
     });
   };
 

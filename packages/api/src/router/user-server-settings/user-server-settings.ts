@@ -63,7 +63,7 @@ const userServerSettingsWithDepsRouter = router({
         if (error instanceof TRPCError) {
           if (error.code === "NOT_FOUND") {
             throw new TRPCError({
-              code: "NOT_FOUND",
+              code: "PRECONDITION_FAILED",
               message: SERVER_NOT_SETUP_MESSAGE,
             });
           }

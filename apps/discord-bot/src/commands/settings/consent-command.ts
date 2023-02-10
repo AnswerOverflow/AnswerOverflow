@@ -20,8 +20,6 @@ export class ConsentCommand extends Command {
         .setDMPermission(false)
     );
   }
-
-  public override messageRun() {}
   public override async chatInputRun(interaction: ChatInputCommandInteraction) {
     await callAPI({
       ApiCall(router) {
