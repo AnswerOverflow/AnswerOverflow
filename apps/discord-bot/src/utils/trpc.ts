@@ -32,7 +32,7 @@ export async function callWithAllowedErrors<T>({
   } catch (error) {
     if (!(error instanceof TRPCError)) throw error;
     if (!Array.isArray(allowedErrors)) allowedErrors = allowedErrors ? [allowedErrors] : [];
-    if (!allowedErrors.includes(error.code)) {
+    if (allowedErrors.includes(error.code)) {
       return null;
     } else {
       throw error;
@@ -49,7 +49,7 @@ export async function callAPI<T>({ getCtx, apiCall, Ok = () => {}, Error = () =>
     return data;
   } catch (error) {
     if (!(error instanceof TRPCError)) throw error;
-    await Error(error.message);
+    await Error(`${error.code}: ${error.message}`);
     return null;
   }
 }

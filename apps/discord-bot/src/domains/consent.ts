@@ -81,6 +81,15 @@ export async function provideConsentOnForumChannelMessage(message: Message) {
   });
 }
 
+/*
+  Bit of an ugly function but we want 1 place where we update the user's consent status
+  The steps are as follows:
+  Fetch the existing user settings
+    If the user has already given consent, throw an error
+    If the user has already denied consent, throw an error
+    If the user has already explicitly set consent, throw an error only if it is an automated consent method
+  Update the user's consent status
+*/
 export async function updateUserConsent({
   guild,
   member,
@@ -157,7 +166,7 @@ export async function updateUserConsent({
         case "api-error":
           errorMessage = isAutomatedConsent
             ? `Failed to update consent for ${member.user.id} in ${guild.id} for ${consentSource} due to an API error: ${error.message}`
-            : `There was an error updating your consent for ${guild.name}: ${error.message}`;
+            : `There was an error updating your consent for ${guild.name}: \n\n${error.message}`;
           break;
         case "consent-already-given":
           errorMessage = isAutomatedConsent
