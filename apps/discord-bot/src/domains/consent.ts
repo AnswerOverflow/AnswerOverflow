@@ -8,7 +8,7 @@ import {
   GuildMember,
   Message,
 } from "discord.js";
-import { findChannelById, UserServerSettingsWithFlags } from "@answeroverflow/db";
+import { findChannelById, findServerById, UserServerSettingsWithFlags } from "@answeroverflow/db";
 import { createMemberCtx } from "~discord-bot/utils/context";
 import { toAODiscordAccount } from "~discord-bot/utils/conversions";
 import {
@@ -81,6 +81,32 @@ export async function provideConsentOnForumChannelMessage(message: Message) {
   });
 }
 
+export async function applyReadTheRulesConsent({
+  oldMember,
+  newMember,
+}: {
+  oldMember: GuildMember;
+  newMember: GuildMember;
+}) {
+  const hasJustReadTheRules = oldMember.pending && !newMember.pending;
+  if (!hasJustReadTheRules) return;
+
+  const serverSettings = await findServerById(newMember.guild.id);
+
+  if (!serverSettings?.flags.readTheRulesConsentEnabled) {
+    return;
+  }
+  return updateUserConsent({
+    guild: newMember.guild,
+    member: newMember,
+    consentSource: "read-the-rules",
+    canPubliclyDisplayMessages: true,
+    onError: makeConsoleStatusHandler({
+      errorMessage: "Error updating consent via read-the-rules",
+    }).Error,
+  });
+}
+
 /*
   Bit of an ugly function but we want 1 place where we update the user's consent status
   The steps are as follows:
@@ -96,14 +122,14 @@ export async function updateUserConsent({
   consentSource,
   canPubliclyDisplayMessages,
   onError,
-  onConsentStatusChange,
+  onConsentStatusChange = () => {},
 }: {
   guild: Guild;
   member: GuildMember;
   consentSource: ConsentSource;
   canPubliclyDisplayMessages: boolean;
   onError: TRPCStatusHandler<UserServerSettingsWithFlags>["Error"];
-  onConsentStatusChange: (updatedSettings: UserServerSettingsWithFlags) => void | Promise<void>;
+  onConsentStatusChange?: (updatedSettings: UserServerSettingsWithFlags) => void | Promise<void>;
 }) {
   const isAutomatedConsent =
     consentSource === "forum-post-guidelines" || consentSource === "read-the-rules";
