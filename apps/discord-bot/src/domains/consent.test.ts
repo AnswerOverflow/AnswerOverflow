@@ -6,7 +6,7 @@ import {
   mockTextChannel,
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
-import { provideConsentOnForumChannelMessage } from "./consent";
+import { provideConsentOnForumChannelMessage, updateUserConsent } from "./consent";
 import {
   toAOChannel,
   toAOChannelWithServer,
@@ -49,14 +49,14 @@ beforeEach(async () => {
 describe("Consent", () => {
   describe("Forum Post Guidelines Consent", () => {
     it("should fail to provide consent in a non-forum channel", async () => {
-      await expect(provideConsentOnForumChannelMessage(textChannelThreadMessage)).rejects.toThrow(
-        "Message is not in a forum channel"
-      );
+      await expect(
+        provideConsentOnForumChannelMessage(textChannelThreadMessage)
+      ).resolves.toBeNull();
     });
     it("should fail to provide consent in a forum channel with forum post consent disabled", async () => {
-      await expect(provideConsentOnForumChannelMessage(forumChannelThreadMessage)).rejects.toThrow(
-        "Forum post guidelines consent is not enabled for this channel"
-      );
+      await expect(
+        provideConsentOnForumChannelMessage(forumChannelThreadMessage)
+      ).resolves.toBeNull();
     });
     it("should provide consent in a forum channel with consent enabled", async () => {
       await upsertChannel({
@@ -93,9 +93,9 @@ describe("Consent", () => {
         },
       });
 
-      await expect(provideConsentOnForumChannelMessage(forumChannelThreadMessage)).rejects.toThrow(
-        "Cannot automatically provide consent for user who has already provided consent"
-      );
+      await expect(
+        provideConsentOnForumChannelMessage(forumChannelThreadMessage)
+      ).resolves.toBeNull();
     });
     it("should not provide consent if the user explicitly opted out", async () => {
       await createChannelWithDeps({
@@ -112,9 +112,12 @@ describe("Consent", () => {
           canPubliclyDisplayMessages: false,
         },
       });
-      await expect(provideConsentOnForumChannelMessage(forumChannelThreadMessage)).rejects.toThrow(
-        "Cannot automatically provide consent for user who explicitly disabled consent"
-      );
+      await expect(
+        provideConsentOnForumChannelMessage(forumChannelThreadMessage)
+      ).resolves.toBeNull();
     });
+  });
+  describe("Manage Account Menu Consent", () => {
+    it("should successfully provide consent via the manage account menu", async () => {});
   });
 });

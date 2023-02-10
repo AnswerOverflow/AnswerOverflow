@@ -11,9 +11,9 @@ import type { ComponentEvent } from "@answeroverflow/reacord";
 import { ephemeralReply } from "./utils";
 
 export type TRPCStatusHandler<T> = {
+  allowedErrors?: TRPCError["code"][] | TRPCError["code"];
   Ok?: (result: T) => void | Promise<void>;
   Error?: (message: string) => void | Promise<void>;
-  allowedErrors?: TRPCError["code"][] | TRPCError["code"];
 };
 
 export type TRPCall<T> = {
@@ -26,7 +26,7 @@ export async function callAPI<T>({
   ApiCall,
   Ok = () => {},
   Error = () => {},
-  allowedErrors = "NOT_FOUND",
+  allowedErrors,
 }: TRPCall<T>) {
   try {
     const convertedCtx = await createBotContext(await getCtx());
@@ -36,8 +36,7 @@ export async function callAPI<T>({
     return data;
   } catch (error) {
     if (error instanceof TRPCError) {
-      console.log("error", error.code);
-      if (!Array.isArray(allowedErrors)) allowedErrors = [allowedErrors];
+      if (!Array.isArray(allowedErrors)) allowedErrors = allowedErrors ? [allowedErrors] : [];
       if (!allowedErrors.includes(error.code)) {
         await Error(error.message);
       }
@@ -63,7 +62,7 @@ export function makeComponentEventErrorHandler<T>(
 ): TRPCStatusHandler<T> {
   return {
     Error(message) {
-      interaction.ephemeralReply("Error: " + message);
+      interaction.ephemeralReply(message);
     },
   };
 }

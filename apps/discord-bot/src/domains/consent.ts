@@ -26,6 +26,15 @@ export function makeConsentButton() {
   return new ButtonBuilder(CONSENT_BUTTON_DATA);
 }
 
+export const CONSENT_ERROR_REASONS = [
+  "api-error",
+  "consent-already-given",
+  "consent-already-denied",
+  "consent-already-explicitly-set",
+] as const;
+
+export type ConsentErrorReason = (typeof CONSENT_ERROR_REASONS)[number];
+
 export const CONSENT_SOURCES = [
   "forum-post-guidelines",
   "read-the-rules",
@@ -37,7 +46,7 @@ export const CONSENT_SOURCES = [
 export type ConsentSource = (typeof CONSENT_SOURCES)[number];
 
 export class ConsentError extends Error {
-  constructor(message: string) {
+  constructor(message: string, public reason: ConsentErrorReason) {
     super(message);
     this.name = "ConsentError";
   }
@@ -46,11 +55,11 @@ export class ConsentError extends Error {
 export async function provideConsentOnForumChannelMessage(message: Message) {
   const channel = message.channel;
   if (!(channel.isThread() && channel.parent?.type === ChannelType.GuildForum)) {
-    throw new ConsentError("Message is not in a forum channel");
+    return null;
   }
   const channelSettings = await findChannelById(channel.parent.id);
   if (!channelSettings?.flags.forumGuidelinesConsentEnabled) {
-    throw new ConsentError("Forum post guidelines consent is not enabled for this channel");
+    return null;
   }
   return updateUserConsent({
     guild: channel.guild,
@@ -83,65 +92,86 @@ export async function updateUserConsent({
 }) {
   const isAutomatedConsent =
     consentSource === "forum-post-guidelines" || consentSource === "read-the-rules";
-  await callAPI({
-    ApiCall(router) {
-      return router.userServerSettings.byId({
-        serverId: guild.id,
-        userId: member.id,
-      });
-    },
-    getCtx: () => createMemberCtx(member),
-    Error: onError,
-    async Ok(existingUserSettings) {
-      if (existingUserSettings) {
-        if (existingUserSettings.flags.canPubliclyDisplayMessages === canPubliclyDisplayMessages) {
-          if (onError) {
-            if (isAutomatedConsent) {
-              await onError(
-                `Cannot automatically update consent for ${
-                  member.id
-                } because it has already been set to ${canPubliclyDisplayMessages.toString()} for ${
-                  guild.name
-                }`
-              );
-            } else {
-              if (canPubliclyDisplayMessages) {
-                await onError(
-                  `You have already consented to publicly display your messages for ${guild.name}`
-                );
-              } else {
-                await onError(`Your messages are already not publicly displayed in ${guild.name}`);
-              }
-            }
-          }
-          return;
-        } else {
-          if (isAutomatedConsent) {
-            if (onError) {
-              await onError(
-                "Cannot automatically update consent because it has already been manually set"
-              );
-            }
-            return;
-          }
+  try {
+    const existingUserSettings = await callAPI({
+      ApiCall(router) {
+        return router.userServerSettings.byId({
+          serverId: guild.id,
+          userId: member.id,
+        });
+      },
+      getCtx: () => createMemberCtx(member),
+      Error: (message) => {
+        throw new ConsentError(message, "api-error");
+      },
+      allowedErrors: "NOT_FOUND",
+    });
+
+    if (existingUserSettings) {
+      if (existingUserSettings.flags.canPubliclyDisplayMessages === canPubliclyDisplayMessages) {
+        throw new ConsentError(
+          "Consent is already set to this value",
+          canPubliclyDisplayMessages ? "consent-already-given" : "consent-already-denied"
+        );
+      } else {
+        if (isAutomatedConsent) {
+          throw new ConsentError(
+            "Consent cannot be changed once set",
+            "consent-already-explicitly-set"
+          );
         }
       }
-      await callAPI({
-        ApiCall(router) {
-          return router.userServerSettings.upsertWithDeps({
-            serverId: guild.id,
-            user: toAODiscordAccount(member.user),
-            flags: {
-              canPubliclyDisplayMessages,
-            },
-          });
-        },
-        getCtx: () => createMemberCtx(member),
-        Error: onError,
-        async Ok(result) {
-          await onConsentStatusChange(result);
-        },
-      });
-    },
-  });
+    }
+    return await callAPI({
+      ApiCall(router) {
+        return router.userServerSettings.upsertWithDeps({
+          serverId: guild.id,
+          user: toAODiscordAccount(member.user),
+          flags: {
+            canPubliclyDisplayMessages,
+          },
+        });
+      },
+      getCtx: () => createMemberCtx(member),
+      Error: (message) => {
+        throw new ConsentError(message, "api-error");
+      },
+      async Ok(result) {
+        await onConsentStatusChange(result);
+        // TODO: Call analytics here
+      },
+    });
+  } catch (error) {
+    if (error instanceof ConsentError) {
+      let errorMessage = error.message;
+      switch (error.reason) {
+        case "api-error":
+          errorMessage = isAutomatedConsent
+            ? `Failed to update consent for ${member.user.id} in ${guild.id} for ${consentSource} due to an API error: ${error.message}`
+            : `There was an error updating your consent for ${guild.name}: ${error.message}`;
+          break;
+        case "consent-already-given":
+          errorMessage = isAutomatedConsent
+            ? `Consent for ${member.user.id} in ${guild.id} for ${consentSource} is already given`
+            : `You have already given consent for ${guild.name}`;
+          break;
+        case "consent-already-denied":
+          errorMessage = isAutomatedConsent
+            ? `Consent for ${member.user.id} in ${guild.id} for ${consentSource} is already denied`
+            : `You have already denied consent for ${guild.name}`;
+          break;
+        case "consent-already-explicitly-set":
+          errorMessage = isAutomatedConsent
+            ? `Consent for ${member.user.id} in ${guild.id} for ${consentSource} is already set`
+            : `You have already set your consent for ${guild.name}`;
+          break;
+      }
+      if (onError) {
+        await onError(errorMessage);
+      }
+    } else {
+      throw error;
+    }
+    return null;
+  }
 }
