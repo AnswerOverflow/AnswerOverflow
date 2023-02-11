@@ -81,7 +81,7 @@ export async function provideConsentOnForumChannelMessage(message: Message) {
   });
 }
 
-export async function applyReadTheRulesConsent({
+export async function provideConsentOnReadTheRules({
   oldMember,
   newMember,
 }: {
