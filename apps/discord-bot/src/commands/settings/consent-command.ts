@@ -24,7 +24,6 @@ export class ConsentCommand extends Command {
     await guildTextChannelOnlyInteraction(interaction, async ({ member, guild }) => {
       await updateUserConsent({
         member,
-        guild,
         canPubliclyDisplayMessages: true,
         consentSource: "slash-command",
         async onConsentStatusChange() {

@@ -26,7 +26,6 @@ export function ManageAccountMenu({
           await updateUserConsent({
             canPubliclyDisplayMessages: !settings.flags.canPubliclyDisplayMessages,
             consentSource: "manage-account-menu",
-            guild,
             member,
             onConsentStatusChange(updatedSettings) {
               setSettings(updatedSettings);

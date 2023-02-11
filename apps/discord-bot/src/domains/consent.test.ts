@@ -1,123 +1,122 @@
-import type { AnyThreadChannel, Client, ForumChannel, Message, TextChannel } from "discord.js";
-import {
-  mockForumChannel,
-  mockMessage,
-  mockPublicThread,
-  mockTextChannel,
-} from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
-import { provideConsentOnForumChannelMessage } from "./consent";
-import {
-  toAOChannel,
-  toAOChannelWithServer,
-  toAODiscordAccount,
-  toAOServer,
-} from "~discord-bot/utils/conversions";
-import {
-  createChannelWithDeps,
-  createDiscordAccount,
-  createServer,
-  createUserServerSettings,
-  findUserServerSettingsById,
-  upsertChannel,
-} from "@answeroverflow/db";
+import { toAODiscordAccount, toAOServer } from "~discord-bot/utils/conversions";
+import { createDiscordAccount, createServer, createUserServerSettings } from "@answeroverflow/db";
+import type { Client, GuildMember } from "discord.js";
+import { mockGuildMember } from "@answeroverflow/discordjs-mock";
+import { ConsentSource, updateUserConsent } from "./consent";
 
 let client: Client;
-let textChannel: TextChannel;
-let textChannelThreadMessage: Message;
-let textChannelThread: AnyThreadChannel;
-
-let forumChannel: ForumChannel;
-let forumChannelThread: AnyThreadChannel;
-let forumChannelThreadMessage: Message;
+const automatedConsentSources: ConsentSource[] = ["forum-post-guidelines", "read-the-rules"];
+const manualConsentSources: ConsentSource[] = [
+  "manage-account-menu",
+  "slash-command",
+  "mark-solution-response",
+];
 beforeEach(async () => {
   client = await setupAnswerOverflowBot();
-  textChannel = mockTextChannel(client);
-  forumChannel = mockForumChannel(client, textChannel.guild);
-  await createServer(toAOServer(textChannel.guild));
-  textChannelThread = mockPublicThread({ client, parentChannel: textChannel });
-  forumChannelThread = mockPublicThread({ client, parentChannel: forumChannel });
-  textChannelThreadMessage = mockMessage({
-    client,
-    channel: textChannelThread,
-  });
-  forumChannelThreadMessage = mockMessage({
-    client,
-    channel: forumChannelThread,
-  });
 });
+
+async function testAllConsentSources({
+  consentSources,
+  canPubliclyDisplayMessages,
+  isConsentBeingGranted,
+  validate,
+}: {
+  validate: (input: {
+    member: GuildMember;
+    consentSource: ConsentSource;
+    canPubliclyDisplayMessages: boolean;
+    isConsentBeingGranted: boolean;
+    errorMessage?: string;
+  }) => void;
+  consentSources: ConsentSource[];
+  isConsentBeingGranted: boolean;
+  canPubliclyDisplayMessages: boolean;
+}) {
+  for (const consentSource of consentSources) {
+    let errorMessage = "";
+    const memberAlreadyConsenting = mockGuildMember({ client });
+    await createServer(toAOServer(memberAlreadyConsenting.guild));
+    await createDiscordAccount(toAODiscordAccount(memberAlreadyConsenting.user));
+    await createUserServerSettings({
+      serverId: memberAlreadyConsenting.guild.id,
+      userId: memberAlreadyConsenting.id,
+      flags: {
+        canPubliclyDisplayMessages,
+      },
+    });
+    await updateUserConsent({
+      member: memberAlreadyConsenting,
+      consentSource,
+      onError: (message) => {
+        errorMessage = message;
+      },
+      canPubliclyDisplayMessages: isConsentBeingGranted,
+    });
+    validate({
+      member: memberAlreadyConsenting,
+      canPubliclyDisplayMessages,
+      isConsentBeingGranted,
+      consentSource,
+      errorMessage,
+    });
+  }
+}
+
 describe("Consent", () => {
-  describe("Forum Post Guidelines Consent", () => {
-    it("should fail to provide consent in a non-forum channel", async () => {
-      await expect(
-        provideConsentOnForumChannelMessage(textChannelThreadMessage)
-      ).resolves.toBeNull();
-    });
-    it("should fail to provide consent in a forum channel with forum post consent disabled", async () => {
-      await expect(
-        provideConsentOnForumChannelMessage(forumChannelThreadMessage)
-      ).resolves.toBeNull();
-    });
-    it("should provide consent in a forum channel with consent enabled", async () => {
-      await upsertChannel({
-        ...toAOChannel(forumChannel),
-        flags: {
-          forumGuidelinesConsentEnabled: true,
-        },
-      });
-
-      await expect(
-        provideConsentOnForumChannelMessage(forumChannelThreadMessage)
-      ).resolves.toBeTruthy();
-
-      const updatedSettings = await findUserServerSettingsById({
-        serverId: forumChannel.guild.id,
-        userId: forumChannelThreadMessage.author.id,
-      });
-
-      expect(updatedSettings?.flags.canPubliclyDisplayMessages).toBeTruthy();
-    });
-    it("should not provide consent if the user already has it", async () => {
-      await createChannelWithDeps({
-        ...toAOChannelWithServer(forumChannel),
-        flags: {
-          forumGuidelinesConsentEnabled: true,
-        },
-      });
-      await createDiscordAccount(toAODiscordAccount(forumChannelThreadMessage.author));
-      await createUserServerSettings({
-        serverId: forumChannel.guild.id,
-        userId: forumChannelThreadMessage.author.id,
-        flags: {
+  /*
+    We need to validate 2 things:
+      1. Successfully updating the users consent
+      2. For each variant, the correct error is thrown
+  */
+  describe("Update User Consent", () => {
+    describe("Automated Consent Sources", () => {
+      it("should validate the correct error when the user has provided consent for all automated consents", async () => {
+        await testAllConsentSources({
+          consentSources: automatedConsentSources,
           canPubliclyDisplayMessages: true,
-        },
+          isConsentBeingGranted: true,
+          validate: ({ member, consentSource, errorMessage }) => {
+            expect(errorMessage).toBe(
+              `Consent for ${member.user.id} in ${member.guild.id} for ${consentSource} is already set`
+            );
+          },
+        });
       });
-
-      await expect(
-        provideConsentOnForumChannelMessage(forumChannelThreadMessage)
-      ).resolves.toBeNull();
-    });
-    it("should not provide consent if the user explicitly opted out", async () => {
-      await createChannelWithDeps({
-        ...toAOChannelWithServer(forumChannel),
-        flags: {
-          forumGuidelinesConsentEnabled: true,
-        },
-      });
-      await createDiscordAccount(toAODiscordAccount(forumChannelThreadMessage.author));
-      await createUserServerSettings({
-        serverId: forumChannel.guild.id,
-        userId: forumChannelThreadMessage.author.id,
-        flags: {
+      it("should validate the correct error when the user has revoked consent for all automated consents", async () => {
+        await testAllConsentSources({
+          consentSources: automatedConsentSources,
           canPubliclyDisplayMessages: false,
-        },
+          isConsentBeingGranted: true,
+          validate: ({ member, consentSource, errorMessage }) => {
+            expect(errorMessage).toBe(
+              `Consent for ${member.user.id} in ${member.guild.id} for ${consentSource} is already set`
+            );
+          },
+        });
       });
-      await expect(
-        provideConsentOnForumChannelMessage(forumChannelThreadMessage)
-      ).resolves.toBeNull();
     });
-  });
-  describe("Manage Account Menu Consent", () => {
-    it("should successfully provide consent via the manage account menu", async () => {});
+    describe("Manual Consent Sources", () => {
+      it("should validate the correct error when the user has provided consent for all manual consents", async () => {
+        await testAllConsentSources({
+          consentSources: manualConsentSources,
+          canPubliclyDisplayMessages: true,
+          isConsentBeingGranted: true,
+          validate: ({ member, errorMessage }) => {
+            expect(errorMessage).toBe(`You have already given consent for ${member.guild.name}`);
+          },
+        });
+      });
+      it("should validate the correct error when the user has revoked consent for all manual consents", async () => {
+        await testAllConsentSources({
+          consentSources: manualConsentSources,
+          canPubliclyDisplayMessages: false,
+          isConsentBeingGranted: false,
+          validate: ({ member, errorMessage }) => {
+            expect(errorMessage).toBe(`You have already denied consent for ${member.guild.name}`);
+          },
+        });
+      });
+    });
   });
 });

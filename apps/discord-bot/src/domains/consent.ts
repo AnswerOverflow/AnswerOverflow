@@ -4,7 +4,6 @@ import {
   ButtonStyle,
   ChannelType,
   ComponentType,
-  Guild,
   GuildMember,
   Message,
 } from "discord.js";
@@ -68,16 +67,12 @@ export async function provideConsentOnForumChannelMessage(message: Message) {
     return null;
   }
   return updateUserConsent({
-    guild: channel.guild,
     member: message.member!,
     consentSource: "forum-post-guidelines",
     canPubliclyDisplayMessages: true,
     onError: makeConsoleStatusHandler({
       errorMessage: "Error updating consent",
     }).Error,
-    onConsentStatusChange(updatedSettings) {
-      console.log("updatedSettings", updatedSettings);
-    },
   });
 }
 
@@ -97,7 +92,6 @@ export async function provideConsentOnReadTheRules({
     return;
   }
   return updateUserConsent({
-    guild: newMember.guild,
     member: newMember,
     consentSource: "read-the-rules",
     canPubliclyDisplayMessages: true,
@@ -117,20 +111,19 @@ export async function provideConsentOnReadTheRules({
   Update the user's consent status
 */
 export async function updateUserConsent({
-  guild,
   member,
   consentSource,
   canPubliclyDisplayMessages,
-  onError,
+  onError = () => {},
   onConsentStatusChange = () => {},
 }: {
-  guild: Guild;
   member: GuildMember;
   consentSource: ConsentSource;
   canPubliclyDisplayMessages: boolean;
-  onError: TRPCStatusHandler<UserServerSettingsWithFlags>["Error"];
+  onError?: TRPCStatusHandler<UserServerSettingsWithFlags>["Error"];
   onConsentStatusChange?: (updatedSettings: UserServerSettingsWithFlags) => void | Promise<void>;
 }) {
+  const guild = member.guild;
   const isAutomatedConsent =
     consentSource === "forum-post-guidelines" || consentSource === "read-the-rules";
   try {
@@ -152,18 +145,18 @@ export async function updateUserConsent({
     });
 
     if (existingUserSettings) {
-      if (existingUserSettings.flags.canPubliclyDisplayMessages === canPubliclyDisplayMessages) {
+      if (isAutomatedConsent) {
+        throw new ConsentError(
+          "Consent cannot be automatically changed once set",
+          "consent-already-explicitly-set"
+        );
+      } else if (
+        existingUserSettings.flags.canPubliclyDisplayMessages === canPubliclyDisplayMessages
+      ) {
         throw new ConsentError(
           "Consent is already set to this value",
           canPubliclyDisplayMessages ? "consent-already-given" : "consent-already-denied"
         );
-      } else {
-        if (isAutomatedConsent) {
-          throw new ConsentError(
-            "Consent cannot be changed once set",
-            "consent-already-explicitly-set"
-          );
-        }
       }
     }
     return await callAPI({
