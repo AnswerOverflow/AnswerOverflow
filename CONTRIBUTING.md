@@ -41,7 +41,7 @@ There are shortcut buttons in the README to jumpstart running from a remote envi
 We use storybook for developing our components and pages. It offers an isolated enviroment with a powerful toolset to empower frontend development.
 
 ### Design
-For more information on designing Answer Overflow UI's, check out our [Design Guidlines](design_guidelines.md).
+For more information on designing Answer Overflow UI's, check out our [Design Guidlines](./DESIGN_GUIDELINES.md).
 
 ### Gitpod
 
