@@ -89,32 +89,6 @@ export const Home = () => {
         </svg>
       </div>
 
-      <div className="absolute bottom-1/3 right-0 -z-10 hidden 2xl:block">
-        <svg
-          width="526"
-          height="399"
-          viewBox="0 0 526 399"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="fill-[url(#paint0_linear_70_13)]"
-        >
-          <path d="M63.4856 121.017C19.4724 25.7629 634.883 -95.4272 618.686 121.017C612.684 201.218 527.225 306.774 207.529 378.585C-192.091 468.348 118.502 240.084 63.4856 121.017Z" />
-          <defs>
-            <linearGradient
-              id="paint0_linear_70_13"
-              x1="519.046"
-              y1="-278.297"
-              x2="156.619"
-              y2="538.22"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop stop-color="#86A8FF" />
-              <stop offset="1" stop-opacity="0" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
-
       <div className="absolute bottom-0 w-full">
         <div className="mx-auto h-16 w-16 text-white/[.65]">
           {<ChevronDownIcon strokeWidth={0.5} />}
@@ -123,10 +97,10 @@ export const Home = () => {
 
       <div className="flex h-full w-full flex-row gap-72 px-4 transition-all sm:px-[4rem] 2xl:px-[6rem]">
         <div className="flex w-full flex-col items-start justify-center gap-6 xl:w-[60%]">
-          <h1 className="text-center font-header text-4xl font-bold leading-[114.5%] text-ao-black dark:text-ao-white md:text-start md:text-6xl">
+          <h1 className="text-center font-header text-4xl font-bold leading-[114.5%] text-ao-white md:text-start md:text-6xl">
             Bringing your discord channels to google
           </h1>
-          <p className="text-center font-body text-lg text-ao-black/[.85] dark:text-ao-white/[.85] md:text-start md:text-xl">
+          <p className="text-center font-body text-lg text-ao-white dark:text-ao-white/[.85] md:text-start md:text-xl">
             Answer Overflow is an open source project designed to......................
           </p>
           <Button type={"solid"} color={"white"} className="mx-auto xl:mx-0">

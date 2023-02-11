@@ -145,3 +145,19 @@ export const useTextTypingState = (text: string, shouldRun: boolean) => {
 
   return { textState, completed };
 };
+
+export const useTheme = () => {
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const themeStorage = localStorage.getItem("isDarkMode") as "true" | "false" | null;
+
+  // Listen to changes to the theme in storage
+  useEffect(() => {
+    if (themeStorage === "true") {
+      setTheme("dark");
+    } else if (themeStorage === "false") {
+      setTheme("light");
+    }
+  }, [themeStorage, theme]);
+
+  return theme;
+};

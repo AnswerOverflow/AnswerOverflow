@@ -171,7 +171,7 @@ export const LandingAnimation = ({
 
   return (
     // eslint-disable-next-line tailwindcss/no-custom-classname
-    <div className="bg-gradient-to-br-dark-glass w-full rounded-xl border-1 border-[#636363] py-32 px-10 drop-shadow-2xl backdrop-blur-md">
+    <div className="bg-gradient-to-br-light-glass w-full rounded-xl border-1 border-[#C5C5C5] py-32 px-10 drop-shadow-2xl backdrop-blur-md dark:border-[#636363] dark:bg-gradient-to-br-dark-glass">
       <div
         className="flex h-10 w-full items-center justify-center rounded-t-lg border-b-1 border-black bg-[#363636]"
         ref={containerRef}
