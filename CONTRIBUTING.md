@@ -37,6 +37,12 @@ There are shortcut buttons in the README to jumpstart running from a remote envi
   - In this case, consider creating a smaller machine and just running the package you're developing in
   - This is only for packages that don't make any calls to the databases. If you try to run the tests on the whole project without databases setup the tests will fail
 
+## UI
+We use storybook for developing our components and pages. It offers an isolated enviroment with a powerful toolset to empower frontend development.
+
+### Design
+For more information on designing Answer Overflow UI's, check out our [Design Guidlines](design_guidelines.md).
+
 ### Gitpod
 
 - You must start the databases using the command docker-compose up
