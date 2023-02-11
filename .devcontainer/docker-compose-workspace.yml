@@ -9,7 +9,7 @@ services:
         VARIANT: "16"
 
     volumes:
-      - ..:/workspace:cached
+      - ..:/AnswerOverflow:cached
 
       # Uncomment the next line to use Docker from inside the container. See https://aka.ms/vscode-remote/samples/docker-from-docker-compose for details.
       # - /var/run/docker.sock:/var/run/docker.sock
