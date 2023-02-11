@@ -12,7 +12,7 @@ import { ephemeralReply } from "./utils";
 
 export type TRPCStatusHandler<T> = {
   Ok?: (result: T) => void | Promise<void>;
-  Error?: (message: string) => void | Promise<void>;
+  Error?: (error: TRPCError, messageWithCode: string) => unknown | Promise<unknown>;
 };
 
 export type TRPCall<T> = {
@@ -49,46 +49,15 @@ export async function callAPI<T>({ getCtx, apiCall, Ok = () => {}, Error = () =>
     return data;
   } catch (error) {
     if (!(error instanceof TRPCError)) throw error;
-    await Error(`${error.code}: ${error.message}`);
+    await Error(error, `${error.code}: ${error.message}`);
     return null;
   }
 }
 
-export function makeEphemeralErrorHandler<T>(
-  interaction: CommandInteraction
-): TRPCStatusHandler<T> {
-  return {
-    Error(message) {
-      ephemeralReply(container.reacord, message, interaction);
-    },
-  };
+export function ephemeralStatusHandler(interaction: CommandInteraction, message: string) {
+  return ephemeralReply(container.reacord, message, interaction);
 }
 
-export function makeComponentEventErrorHandler<T>(
-  interaction: ComponentEvent
-): TRPCStatusHandler<T> {
-  return {
-    Error(message) {
-      interaction.ephemeralReply(message);
-    },
-  };
-}
-
-export function makeConsoleStatusHandler<T>({
-  errorMessage,
-  successMessage,
-}: {
-  errorMessage: string;
-  successMessage?: string;
-}): TRPCStatusHandler<T> {
-  return {
-    Error(message) {
-      container.logger.error(errorMessage, message);
-    },
-    Ok() {
-      if (successMessage) {
-        container.logger.info(successMessage);
-      }
-    },
-  };
+export function componentEventStatusHandler(interaction: ComponentEvent, message: string) {
+  return interaction.ephemeralReply(message);
 }

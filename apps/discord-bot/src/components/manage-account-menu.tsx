@@ -5,7 +5,7 @@ import { updateUserConsent } from "~discord-bot/domains/consent";
 import type { ComponentEvent } from "@answeroverflow/reacord";
 import { componentEventToDiscordJSTypes } from "~discord-bot/utils/conversions";
 import { container } from "@sapphire/framework";
-import { makeComponentEventErrorHandler } from "~discord-bot/utils/trpc";
+import { componentEventStatusHandler } from "~discord-bot/utils/trpc";
 export function ManageAccountMenu({
   initalSettings,
 }: {
@@ -30,7 +30,7 @@ export function ManageAccountMenu({
             onConsentStatusChange(updatedSettings) {
               setSettings(updatedSettings);
             },
-            onError: makeComponentEventErrorHandler(event).Error,
+            onError: (error) => componentEventStatusHandler(event, error.message),
           });
         }}
       />

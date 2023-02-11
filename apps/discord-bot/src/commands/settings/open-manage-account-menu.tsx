@@ -1,6 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command, container, type ChatInputCommand } from "@sapphire/framework";
-import { callAPI, callWithAllowedErrors, makeEphemeralErrorHandler } from "~discord-bot/utils/trpc";
+import { callAPI, callWithAllowedErrors, ephemeralStatusHandler } from "~discord-bot/utils/trpc";
 import { SlashCommandBuilder, type ChatInputCommandInteraction } from "discord.js";
 import React from "react";
 import { ephemeralReply } from "~discord-bot/utils/utils";
@@ -49,7 +49,7 @@ export class OpenManageAccountMenuCommand extends Command {
           const menu = <ManageAccountMenu initalSettings={result} />;
           ephemeralReply(container.reacord, menu, interaction);
         },
-        ...makeEphemeralErrorHandler(interaction),
+        Error: (error) => ephemeralStatusHandler(interaction, error.message),
         getCtx: () => createMemberCtx(member),
       });
     });

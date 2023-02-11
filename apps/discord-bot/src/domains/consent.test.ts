@@ -3,7 +3,7 @@ import { toAODiscordAccount, toAOServer } from "~discord-bot/utils/conversions";
 import { createDiscordAccount, createServer, createUserServerSettings } from "@answeroverflow/db";
 import type { Client, GuildMember } from "discord.js";
 import { mockGuildMember } from "@answeroverflow/discordjs-mock";
-import { ConsentSource, updateUserConsent } from "./consent";
+import { ConsentError, ConsentSource, updateUserConsent } from "./consent";
 
 let client: Client;
 const automatedConsentSources: ConsentSource[] = ["forum-post-guidelines", "read-the-rules"];
@@ -27,14 +27,14 @@ async function testAllConsentSources({
     consentSource: ConsentSource;
     canPubliclyDisplayMessages: boolean;
     isConsentBeingGranted: boolean;
-    errorMessage?: string;
+    error?: ConsentError;
   }) => void;
   consentSources: ConsentSource[];
   isConsentBeingGranted: boolean;
   canPubliclyDisplayMessages: boolean;
 }) {
   for (const consentSource of consentSources) {
-    let errorMessage = "";
+    let consetError: ConsentError | undefined = undefined;
     const memberAlreadyConsenting = mockGuildMember({ client });
     await createServer(toAOServer(memberAlreadyConsenting.guild));
     await createDiscordAccount(toAODiscordAccount(memberAlreadyConsenting.user));
@@ -48,8 +48,8 @@ async function testAllConsentSources({
     await updateUserConsent({
       member: memberAlreadyConsenting,
       consentSource,
-      onError: (message) => {
-        errorMessage = message;
+      onError: (error) => {
+        consetError = error;
       },
       canPubliclyDisplayMessages: isConsentBeingGranted,
     });
@@ -58,7 +58,7 @@ async function testAllConsentSources({
       canPubliclyDisplayMessages,
       isConsentBeingGranted,
       consentSource,
-      errorMessage,
+      error: consetError,
     });
   }
 }
@@ -76,8 +76,8 @@ describe("Consent", () => {
           consentSources: automatedConsentSources,
           canPubliclyDisplayMessages: true,
           isConsentBeingGranted: true,
-          validate: ({ member, consentSource, errorMessage }) => {
-            expect(errorMessage).toBe(
+          validate: ({ member, consentSource, error }) => {
+            expect(error?.message).toBe(
               `Consent for ${member.user.id} in ${member.guild.id} for ${consentSource} is already set`
             );
           },
@@ -88,8 +88,8 @@ describe("Consent", () => {
           consentSources: automatedConsentSources,
           canPubliclyDisplayMessages: false,
           isConsentBeingGranted: true,
-          validate: ({ member, consentSource, errorMessage }) => {
-            expect(errorMessage).toBe(
+          validate: ({ member, consentSource, error }) => {
+            expect(error?.message).toBe(
               `Consent for ${member.user.id} in ${member.guild.id} for ${consentSource} is already set`
             );
           },
@@ -102,8 +102,8 @@ describe("Consent", () => {
           consentSources: manualConsentSources,
           canPubliclyDisplayMessages: true,
           isConsentBeingGranted: true,
-          validate: ({ member, errorMessage }) => {
-            expect(errorMessage).toBe(`You have already given consent for ${member.guild.name}`);
+          validate: ({ member, error }) => {
+            expect(error?.message).toBe(`You have already given consent for ${member.guild.name}`);
           },
         });
       });
@@ -112,8 +112,8 @@ describe("Consent", () => {
           consentSources: manualConsentSources,
           canPubliclyDisplayMessages: false,
           isConsentBeingGranted: false,
-          validate: ({ member, errorMessage }) => {
-            expect(errorMessage).toBe(`You have already denied consent for ${member.guild.name}`);
+          validate: ({ member, error }) => {
+            expect(error?.message).toBe(`You have already denied consent for ${member.guild.name}`);
           },
         });
       });

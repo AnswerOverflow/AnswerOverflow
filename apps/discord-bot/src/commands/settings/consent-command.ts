@@ -3,7 +3,7 @@ import { ChatInputCommand, Command } from "@sapphire/framework";
 import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 import { updateUserConsent } from "~discord-bot/domains/consent";
 import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
-import { makeEphemeralErrorHandler } from "~discord-bot/utils/trpc";
+import { ephemeralStatusHandler } from "~discord-bot/utils/trpc";
 
 @ApplyOptions<Command.Options>({
   name: "consent",
@@ -32,7 +32,7 @@ export class ConsentCommand extends Command {
             ephemeral: true,
           });
         },
-        onError: makeEphemeralErrorHandler(interaction).Error,
+        onError: (error) => ephemeralStatusHandler(interaction, error.message),
       });
     });
   }

@@ -10,12 +10,7 @@ import {
 import { findChannelById, findServerById, UserServerSettingsWithFlags } from "@answeroverflow/db";
 import { createMemberCtx } from "~discord-bot/utils/context";
 import { toAODiscordAccount } from "~discord-bot/utils/conversions";
-import {
-  callAPI,
-  callWithAllowedErrors,
-  makeConsoleStatusHandler,
-  TRPCStatusHandler,
-} from "~discord-bot/utils/trpc";
+import { callAPI, callWithAllowedErrors } from "~discord-bot/utils/trpc";
 
 export const CONSENT_BUTTON_LABEL = "Publicly display my messages on Answer Overflow";
 export const CONSENT_BUTTON_ID = "consentButton";
@@ -70,9 +65,6 @@ export async function provideConsentOnForumChannelMessage(message: Message) {
     member: message.member!,
     consentSource: "forum-post-guidelines",
     canPubliclyDisplayMessages: true,
-    onError: makeConsoleStatusHandler({
-      errorMessage: "Error updating consent",
-    }).Error,
   });
 }
 
@@ -95,9 +87,6 @@ export async function provideConsentOnReadTheRules({
     member: newMember,
     consentSource: "read-the-rules",
     canPubliclyDisplayMessages: true,
-    onError: makeConsoleStatusHandler({
-      errorMessage: "Error updating consent via read-the-rules",
-    }).Error,
   });
 }
 
@@ -120,13 +109,15 @@ export async function updateUserConsent({
   member: GuildMember;
   consentSource: ConsentSource;
   canPubliclyDisplayMessages: boolean;
-  onError?: TRPCStatusHandler<UserServerSettingsWithFlags>["Error"];
+  onError?: (error: ConsentError) => unknown | Promise<unknown>;
   onConsentStatusChange?: (updatedSettings: UserServerSettingsWithFlags) => void | Promise<void>;
 }) {
   const guild = member.guild;
   const isAutomatedConsent =
     consentSource === "forum-post-guidelines" || consentSource === "read-the-rules";
+
   try {
+    // 1. Fetch the existing user settings
     const existingUserSettings = await callAPI({
       apiCall(router) {
         return callWithAllowedErrors({
@@ -139,26 +130,41 @@ export async function updateUserConsent({
         });
       },
       getCtx: () => createMemberCtx(member),
-      Error: (message) => {
-        throw new ConsentError(message, "api-error");
+      Error: (_, messageWithCode) => {
+        throw new ConsentError(
+          isAutomatedConsent
+            ? `Failed to update consent for ${member.user.id} in ${guild.id} for ${consentSource} due to an API error: ${messageWithCode}`
+            : `There was an error updating your consent for ${guild.name}: \n\n${messageWithCode}`,
+          "api-error"
+        );
       },
     });
 
+    // 2. Check if the user has already given/denied consent
     if (existingUserSettings) {
       if (isAutomatedConsent) {
         throw new ConsentError(
-          "Consent cannot be automatically changed once set",
+          `Consent for ${member.user.id} in ${guild.id} for ${consentSource} is already set`,
           "consent-already-explicitly-set"
         );
       } else if (
         existingUserSettings.flags.canPubliclyDisplayMessages === canPubliclyDisplayMessages
       ) {
-        throw new ConsentError(
-          "Consent is already set to this value",
-          canPubliclyDisplayMessages ? "consent-already-given" : "consent-already-denied"
-        );
+        if (canPubliclyDisplayMessages) {
+          throw new ConsentError(
+            `You have already given consent for ${guild.name}`,
+            "consent-already-given"
+          );
+        } else {
+          throw new ConsentError(
+            `You have already denied consent for ${guild.name}`,
+            "consent-already-denied"
+          );
+        }
       }
     }
+
+    // 3. Update the user's consent status
     return await callAPI({
       apiCall(router) {
         return router.userServerSettings.upsertWithDeps({
@@ -170,8 +176,13 @@ export async function updateUserConsent({
         });
       },
       getCtx: () => createMemberCtx(member),
-      Error: (message) => {
-        throw new ConsentError(message, "api-error");
+      Error: (_, messageWithCode) => {
+        throw new ConsentError(
+          isAutomatedConsent
+            ? `Failed to update consent for ${member.user.id} in ${guild.id} for ${consentSource} due to an API error: ${messageWithCode}`
+            : `There was an error updating your consent for ${guild.name}: \n\n${messageWithCode}`,
+          "api-error"
+        );
       },
       async Ok(result) {
         await onConsentStatusChange(result);
@@ -179,35 +190,9 @@ export async function updateUserConsent({
       },
     });
   } catch (error) {
-    if (error instanceof ConsentError) {
-      let errorMessage = error.message;
-      switch (error.reason) {
-        case "api-error":
-          errorMessage = isAutomatedConsent
-            ? `Failed to update consent for ${member.user.id} in ${guild.id} for ${consentSource} due to an API error: ${error.message}`
-            : `There was an error updating your consent for ${guild.name}: \n\n${error.message}`;
-          break;
-        case "consent-already-given":
-          errorMessage = isAutomatedConsent
-            ? `Consent for ${member.user.id} in ${guild.id} for ${consentSource} is already given`
-            : `You have already given consent for ${guild.name}`;
-          break;
-        case "consent-already-denied":
-          errorMessage = isAutomatedConsent
-            ? `Consent for ${member.user.id} in ${guild.id} for ${consentSource} is already denied`
-            : `You have already denied consent for ${guild.name}`;
-          break;
-        case "consent-already-explicitly-set":
-          errorMessage = isAutomatedConsent
-            ? `Consent for ${member.user.id} in ${guild.id} for ${consentSource} is already set`
-            : `You have already set your consent for ${guild.name}`;
-          break;
-      }
-      if (onError) {
-        await onError(errorMessage);
-      }
-    } else {
-      throw error;
+    if (!(error instanceof ConsentError)) throw error;
+    if (onError) {
+      await onError(error);
     }
     return null;
   }

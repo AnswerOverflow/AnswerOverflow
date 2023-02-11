@@ -1,7 +1,7 @@
 import { ChannelSettingsMenu } from "~discord-bot/components/channel-settings-menu";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command, container, type ChatInputCommand } from "@sapphire/framework";
-import { callAPI, callWithAllowedErrors, makeEphemeralErrorHandler } from "~discord-bot/utils/trpc";
+import { callAPI, callWithAllowedErrors, ephemeralStatusHandler } from "~discord-bot/utils/trpc";
 import {
   SlashCommandBuilder,
   PermissionsBitField,
@@ -56,7 +56,7 @@ export class ChannelSettingsCommand extends Command {
           );
           ephemeralReply(container.reacord, menu, interaction);
         },
-        ...makeEphemeralErrorHandler(interaction),
+        Error: (error) => ephemeralStatusHandler(interaction, error.message),
         getCtx: () => createMemberCtx(member),
       });
     });
