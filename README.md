@@ -68,7 +68,7 @@ Go to [Answer Overflow](https://www.answeroverflow.com/), add the bot your serve
 
 Want to contribute? First, read the <a href="https://github.com/AnswerOverflow/AnswerOverflow/blob/main/CONTRIBUTING.md">Contributing Guidelines</a> before creating PRs or issues. Need any help? Join us on <a href="https://discord.gg/Wny38ap7Tx">Discord</a>!
 
-For designing user interfaces, check out our [design guidelines](design_guidelines.md).
+For designing user interfaces, check out our [design guidelines](./DESIGN_GUIDELINES.md).
 
 <div align="left">
   <div>
