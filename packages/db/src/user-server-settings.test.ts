@@ -1,4 +1,8 @@
-import type { DiscordAccount, Server } from "@answeroverflow/prisma-types";
+import type {
+  DiscordAccount,
+  Server,
+  UserServerSettingsWithFlags,
+} from "@answeroverflow/prisma-types";
 import { mockDiscordAccount, mockServer } from "@answeroverflow/db-mock";
 import { addFlagsToUserServerSettings } from "@answeroverflow/prisma-types";
 import { createServer } from "./server";
@@ -7,7 +11,6 @@ import {
   createUserServerSettings,
   findUserServerSettingsById,
   updateUserServerSettings,
-  UserServerSettingsWithFlags,
 } from "./user-server-settings";
 
 let server: Server;
