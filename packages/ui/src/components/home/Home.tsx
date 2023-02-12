@@ -2,7 +2,7 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { MessageProps } from "../Message";
 import { Button } from "../newComps/Button";
 import { Navbar } from "../newComps/Navbar";
-import { LandingAnimation } from "./LandingAnimation/LandingAnimation";
+import { NewLandingAnimation } from "./LandingAnimation/NewLandingAnimation";
 
 export const Home = () => {
   const firstMessage: MessageProps = {
@@ -103,14 +103,23 @@ export const Home = () => {
           <p className="text-center font-body text-lg text-ao-white dark:text-ao-white/[.85] md:text-start md:text-xl">
             Answer Overflow is an open source project designed to......................
           </p>
-          <Button type={"solid"} color={"white"} className="mx-auto xl:mx-0">
+          <Button
+            type={"solid"}
+            color={"white"}
+            className="mx-auto shadow-[0px_0px_40px_rgba(255,_255,_255,_0.2)] duration-200 hover:shadow-[0px_0px_40px_rgba(255,_255,_255,_0.4)] xl:mx-0"
+          >
             <span className="text-2xl">Get Started</span>
           </Button>
         </div>
 
         {/* Discord animation */}
         <div className="hidden grow items-center justify-end xl:flex">
-          <LandingAnimation questionMessageData={firstMessage} answerMessageData={secondMessage} />
+          {/* <LandingAnimation questionMessageData={firstMessage} answerMessageData={secondMessage} /> */}
+          <NewLandingAnimation
+            discordChannelName={"How do I index discord channels into google?"}
+            questionMessage={firstMessage}
+            answerMessage={secondMessage}
+          />
         </div>
       </div>
     </div>

@@ -1,4 +1,6 @@
+import Image from "next/image";
 import { forwardRef } from "react";
+import googleLogo from "~ui/assets/googlelogo.png";
 
 export interface GooglePageProps {
   result: {
@@ -13,11 +15,14 @@ export const GooglePage = forwardRef<HTMLDivElement, GooglePageProps>(function G
   ref
 ) {
   return (
-    <div className="flex min-h-[10rem] w-[36.5rem] items-center justify-center bg-[#202124]">
+    <div className="flex min-h-[10rem] w-[38rem] flex-col items-center justify-center gap-5 rounded-md bg-[#202124] py-5">
       {/* Searchbar */}
-      {/* <div className="w-[538px] rounded-[24px] bg-[#303134] p-3 px-5 font-sans text-[#e8eaed]">
-        <span>How do I index my discord channels into google?</span>
-      </div> */}
+      <div className="flex flex-row items-center justify-center px-10">
+        <Image src={googleLogo} alt={"Google Logo"} />
+        <div className="w-full grow rounded-[24px] bg-[#303134] p-3 px-5 font-sans text-[#e8eaed]">
+          <span>How do I index my discord channels into google?</span>
+        </div>
+      </div>
 
       {/* Result */}
       <div className="flex flex-col items-start justify-center px-5 font-['arial']">
