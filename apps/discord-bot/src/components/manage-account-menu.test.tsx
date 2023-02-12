@@ -53,5 +53,33 @@ describe("Manage Account Menu", () => {
       const button = message!.findButtonByLabel("Disable publicly displaying messages", reacord);
       expect(button).toBeDefined();
     });
+    it("should disable consent", async () => {
+      const message = await reply(
+        reacord,
+        <ManageAccountMenu
+          initalSettings={{
+            ...defaultSettings,
+            flags: {
+              ...defaultSettings.flags,
+              canPubliclyDisplayMessages: true,
+            },
+          }}
+        />
+      );
+      const disableIndexingButton = message!.findButtonByLabel(
+        "Disable publicly displaying messages",
+        reacord
+      );
+      expect(disableIndexingButton).toBeDefined();
+      await disableIndexingButton!.click(textChannel, members.guildMemberOwner);
+      // Used to verify no errors were thrown
+      expect(reacord.messages).toHaveLength(1);
+      expect(message!.hasButton("Disable publicly displaying messages", reacord)).toBeFalsy();
+      const button = message!.findButtonByLabel(
+        "Publicly display messages on Answer Overflow",
+        reacord
+      );
+      expect(button).toBeDefined();
+    });
   });
 });
