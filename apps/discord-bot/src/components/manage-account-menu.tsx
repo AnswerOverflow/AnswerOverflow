@@ -31,6 +31,32 @@ const ToggleConsentButton = ({ settings, setSettings }: ManageAccountMenuItemPro
   />
 );
 
+const ToggleIndexingButton = ({ settings, setSettings }: ManageAccountMenuItemProps) => (
+  <ToggleButton
+    currentlyEnabled={!settings.flags.messageIndexingDisabled}
+    enableLabel={"Ignored account in server"}
+    disableLabel={"Enable indexing of messages"}
+    onClick={(event, messageIndexingDisabled) => {
+      void guildOnlyComponentEvent(event, async ({ member }) => {
+        if (messageIndexingDisabled) {
+          await updateUserConsent({
+            canPubliclyDisplayMessages: false,
+            consentSource: "disable-indexing-button",
+            member,
+            onConsentStatusChange(updatedSettings) {
+              setSettings(updatedSettings);
+            },
+            onError: (error) => componentEventStatusHandler(event, error.message),
+          });
+          // TODO: Delete all messages from the user
+        }
+      });
+    }}
+  />
+);
+
+// TODO: Make this take in the caller as a prop and compare that when the button is clicked?
+// Doesn't matter that much since the action only affects the button clicker
 export function ManageAccountMenu({
   initalSettings,
 }: {
@@ -40,6 +66,7 @@ export function ManageAccountMenu({
   return (
     <>
       <ToggleConsentButton setSettings={setSettings} settings={settings} />
+      <ToggleIndexingButton setSettings={setSettings} settings={settings} />
     </>
   );
 }

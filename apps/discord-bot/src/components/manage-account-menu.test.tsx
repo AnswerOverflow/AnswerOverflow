@@ -59,8 +59,6 @@ describe("Manage Account Menu", () => {
         reacord,
         <ManageAccountMenu
           initalSettings={mockUserServerSettingsWithFlags({
-            serverId: guild.id,
-            userId: members.guildMemberOwner.id,
             flags: {
               canPubliclyDisplayMessages: true,
             },

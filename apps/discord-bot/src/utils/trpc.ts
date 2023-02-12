@@ -15,7 +15,7 @@ export type TRPCStatusHandler<T> = {
   Error?: (error: TRPCError, messageWithCode: string) => unknown | Promise<unknown>;
 };
 
-export type TRPCall<T> = {
+export type TRPCCall<T> = {
   getCtx: () => Promise<BotContextCreate>;
   apiCall: (router: BotRouterCaller) => Promise<T>;
 } & TRPCStatusHandler<T>;
@@ -40,7 +40,12 @@ export async function callWithAllowedErrors<T>({
   }
 }
 
-export async function callAPI<T>({ getCtx, apiCall, Ok = () => {}, Error = () => {} }: TRPCall<T>) {
+export async function callAPI<T>({
+  getCtx,
+  apiCall,
+  Ok = () => {},
+  Error = () => {},
+}: TRPCCall<T>) {
   try {
     const convertedCtx = await createBotContext(await getCtx());
     const caller = botRouter.createCaller(convertedCtx);

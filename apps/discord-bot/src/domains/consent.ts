@@ -40,6 +40,7 @@ export const CONSENT_SOURCES = [
   "manage-account-menu",
   "slash-command",
   "mark-solution-response",
+  "disable-indexing-button",
 ] as const;
 
 export type ConsentSource = (typeof CONSENT_SOURCES)[number];
