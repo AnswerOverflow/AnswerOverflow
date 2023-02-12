@@ -7,6 +7,7 @@
   "dependencies": {
     "@answeroverflow/api": "*",
     "@answeroverflow/db": "*",
+    "@answeroverflow/db-mock": "*",
     "@answeroverflow/discordjs-utils": "*",
     "@answeroverflow/reacord": "^0.5.7",
     "@sapphire/decorators": "6.0.0",

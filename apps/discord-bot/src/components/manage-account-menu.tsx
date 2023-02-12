@@ -10,7 +10,7 @@ type ManageAccountMenuItemProps = {
   setSettings: (settings: UserServerSettingsWithFlags) => void;
 };
 
-export const ToggleConsentButton = ({ settings, setSettings }: ManageAccountMenuItemProps) => (
+const ToggleConsentButton = ({ settings, setSettings }: ManageAccountMenuItemProps) => (
   <ToggleButton
     currentlyEnabled={settings.flags.canPubliclyDisplayMessages}
     enableLabel={"Publicly display messages on Answer Overflow"}

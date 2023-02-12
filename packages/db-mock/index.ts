@@ -9,9 +9,11 @@ import {
   getDefaultUserServerSettings,
   UserServerSettings,
   UserServerSettingsWithFlags,
+  addFlagsToUserServerSettings,
 } from "@answeroverflow/prisma-types";
 import { getRandomId } from "@answeroverflow/utils";
 import { ChannelType } from "discord-api-types/v10";
+import type { PartialDeep } from "type-fest";
 export function mockDiscordAccount(override: Partial<DiscordAccount> = {}) {
   const account = getDefaultDiscordAccount({
     id: getRandomId(),
@@ -81,13 +83,16 @@ export function mockUserServerSettings(override: Partial<UserServerSettings> = {
 }
 
 export function mockUserServerSettingsWithFlags(
-  override: Omit<Partial<UserServerSettingsWithFlags>, "bitfield"> = {}
-) {
+  override: Omit<PartialDeep<UserServerSettingsWithFlags>, "bitfield"> = {}
+): UserServerSettingsWithFlags {
+  const base = addFlagsToUserServerSettings(mockUserServerSettings());
+  const { flags, ...rest } = override;
   return {
-    ...getDefaultUserServerSettings({
-      serverId: getRandomId(),
-      userId: getRandomId(),
-    }),
-    ...override,
+    ...base,
+    flags: {
+      ...base.flags,
+      ...flags,
+    },
+    ...rest,
   };
 }

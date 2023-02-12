@@ -5,6 +5,7 @@ import {
   getDefaultUserServerSettingsWithFlags,
   UserServerSettingsWithFlags,
 } from "@answeroverflow/db";
+import { mockUserServerSettingsWithFlags } from "@answeroverflow/db-mock";
 import type { ReacordTester } from "@answeroverflow/reacord";
 import type { Guild, TextChannel } from "discord.js";
 import { mockReacord, setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
@@ -57,13 +58,13 @@ describe("Manage Account Menu", () => {
       const message = await reply(
         reacord,
         <ManageAccountMenu
-          initalSettings={{
-            ...defaultSettings,
+          initalSettings={mockUserServerSettingsWithFlags({
+            serverId: guild.id,
+            userId: members.guildMemberOwner.id,
             flags: {
-              ...defaultSettings.flags,
               canPubliclyDisplayMessages: true,
             },
-          }}
+          })}
         />
       );
       const disableIndexingButton = message!.findButtonByLabel(
