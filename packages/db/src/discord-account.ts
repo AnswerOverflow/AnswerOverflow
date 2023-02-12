@@ -7,7 +7,7 @@ import {
 } from "./ignored-discord-account";
 import { DBError } from "./utils/error";
 import { upsertMany } from "./utils/operations";
-import { zDiscordAccount } from "./zod-schemas";
+import { zDiscordAccount } from "@answeroverflow/prisma-types";
 
 export const zDiscordAccountRequired = zDiscordAccount.pick({
   id: true,

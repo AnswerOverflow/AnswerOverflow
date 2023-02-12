@@ -9,7 +9,7 @@ import {
   addFlagsToUserServerSettings,
   mergeUserServerSettingsFlags,
   zUserServerSettings,
-} from "./zod-schemas";
+} from "@answeroverflow/prisma-types";
 
 export const zUserServerSettingsRequired = zUserServerSettings.pick({
   userId: true,
@@ -37,18 +37,6 @@ export const zUserServerSettingsCreateWithDeps = zUserServerSettingsCreate
   });
 
 export const zUserServerSettingsUpdate = zUserServerSettingsMutable.merge(zUserServerSettingsFind);
-
-export type UserServerSettingsWithFlags = Awaited<ReturnType<typeof addFlagsToUserServerSettings>>;
-
-export function getDefaultUserServerSettingsWithFlags({
-  userId,
-  serverId,
-}: {
-  userId: string;
-  serverId: string;
-}) {
-  return addFlagsToUserServerSettings(getDefaultUserServerSettings({ userId, serverId }));
-}
 
 export function mergeUserServerSettings<T extends z.infer<typeof zUserServerSettingsMutable>>(
   old: UserServerSettings,
@@ -109,8 +97,17 @@ export async function createUserServerSettings(data: z.infer<typeof zUserServerS
 
 export async function updateUserServerSettings(
   data: z.infer<typeof zUserServerSettingsUpdate>,
-  existing: UserServerSettings
+  existing: UserServerSettings | null
 ) {
+  if (!existing) {
+    existing = await findUserServerSettingsById({
+      userId: data.userId,
+      serverId: data.serverId,
+    });
+  }
+  if (!existing) {
+    throw new Error("UserServerSettings not found");
+  }
   const updated = await prisma.userServerSettings.update({
     where: {
       userId_serverId: {

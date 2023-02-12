@@ -6,6 +6,9 @@ import {
   type Channel,
   getDefaultServer,
   getDefaultChannel,
+  getDefaultUserServerSettings,
+  UserServerSettings,
+  UserServerSettingsWithFlags,
 } from "@answeroverflow/prisma-types";
 import { getRandomId } from "@answeroverflow/utils";
 import { ChannelType } from "discord-api-types/v10";
@@ -65,4 +68,26 @@ export function mockThread(
     parentId: parent.id,
     ...override,
   });
+}
+
+export function mockUserServerSettings(override: Partial<UserServerSettings> = {}) {
+  return {
+    ...getDefaultUserServerSettings({
+      serverId: getRandomId(),
+      userId: getRandomId(),
+    }),
+    ...override,
+  };
+}
+
+export function mockUserServerSettingsWithFlags(
+  override: Omit<Partial<UserServerSettingsWithFlags>, "bitfield"> = {}
+) {
+  return {
+    ...getDefaultUserServerSettings({
+      serverId: getRandomId(),
+      userId: getRandomId(),
+    }),
+    ...override,
+  };
 }

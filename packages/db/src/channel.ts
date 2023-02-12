@@ -7,10 +7,10 @@ import {
   bitfieldToChannelFlags,
   channelBitfieldFlags,
   zChannel,
-} from "./zod-schemas";
+} from "@answeroverflow/prisma-types";
 import { prisma, getDefaultChannel, Channel } from "@answeroverflow/prisma-types";
 import { omit } from "@answeroverflow/utils";
-import { dictToBitfield } from "./utils/bitfield";
+import { dictToBitfield } from "@answeroverflow/prisma-types/src/bitfield";
 
 export const zChannelRequired = zChannel.pick({
   id: true,
@@ -90,13 +90,6 @@ function combineChannelSettingsFlagsToBitfield<
     ...updateDataWithoutFlags,
     bitfield: flagsToBitfieldValue,
   };
-}
-
-export function getDefaultChannelWithFlags(
-  override: Partial<z.infer<typeof zChannel>> &
-    Pick<z.infer<typeof zChannel>, "id" | "serverId" | "type" | "parentId" | "name">
-) {
-  return addFlagsToChannel(getDefaultChannel(override));
 }
 
 export async function findChannelById(id: string) {

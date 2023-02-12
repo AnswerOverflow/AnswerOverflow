@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { bitfieldToDict, dictToBitfield, mergeFlags, toDict } from "./utils/bitfield";
+import { bitfieldToDict, dictToBitfield, mergeFlags, toDict } from "./bitfield";
 import { ChannelType } from "discord-api-types/v10";
 import type { Server, UserServerSettings } from "@answeroverflow/prisma-types";
 
@@ -153,9 +153,7 @@ export const userServerSettingsFlags = [
 export const bitfieldToUserServerSettingsFlags = (bitfield: number) =>
   bitfieldToDict(bitfield, userServerSettingsFlags);
 
-export function addFlagsToUserServerSettings<T extends UserServerSettings>(
-  userServerSettings: T
-) {
+export function addFlagsToUserServerSettings<T extends UserServerSettings>(userServerSettings: T) {
   return {
     ...userServerSettings,
     flags: bitfieldToUserServerSettingsFlags(userServerSettings.bitfield),

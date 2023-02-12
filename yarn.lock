@@ -2465,7 +2465,7 @@
 
 "@sapphire/bitfield@^1.0.0":
   version "1.0.0"
-  resolved "https://registry.npmjs.org/@sapphire/bitfield/-/bitfield-1.0.0.tgz"
+  resolved "https://registry.yarnpkg.com/@sapphire/bitfield/-/bitfield-1.0.0.tgz#5edb9e377fc04628d528bca562bc5d5e4e00f074"
   integrity sha512-gbcprMwXIzHtUGbplloJ0BXQE8hugYQyVCpXY24346Ked0HHMxje39A9Sz7Eu80ibtHTBLbeu4JTLV/j85JNww==
 
 "@sapphire/cron@^1.0.0":
