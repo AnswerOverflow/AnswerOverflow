@@ -81,4 +81,47 @@ describe("Manage Account Menu", () => {
       expect(button).toBeDefined();
     });
   });
+  describe("Toggle Indexing Of User Messages Button", () => {
+    it("should enable indexing of user messages", async () => {
+      const message = await reply(
+        reacord,
+        <ManageAccountMenu
+          initalSettings={mockUserServerSettingsWithFlags({
+            flags: {
+              messageIndexingDisabled: true,
+            },
+          })}
+        />
+      );
+      const enableIndexingButton = message!.findButtonByLabel(
+        "Enable indexing of messages",
+        reacord
+      );
+      expect(enableIndexingButton).toBeDefined();
+      await enableIndexingButton!.click(textChannel, members.guildMemberOwner);
+
+      expect(message!.hasButton("Enable indexing of messages", reacord)).toBeFalsy();
+      const button = message!.findButtonByLabel("Disable indexing of messages", reacord);
+      expect(button).toBeDefined();
+    });
+    it("should disable indexing of user messages", async () => {
+      const message = await reply(reacord, <ManageAccountMenu initalSettings={defaultSettings} />);
+      const disableIndexingButton = message!.findButtonByLabel(
+        "Disable indexing of messages",
+        reacord
+      );
+      expect(disableIndexingButton).toBeDefined();
+      await disableIndexingButton!.click(textChannel, members.guildMemberOwner);
+
+      expect(message!.hasButton("Disable indexing of messages", reacord)).toBeFalsy();
+      const button = message!.findButtonByLabel("Enable indexing of messages", reacord);
+      expect(button).toBeDefined();
+      const consentButton = message!.findButtonByLabel(
+        "Publicly display messages on Answer Overflow",
+        reacord
+      );
+      expect(consentButton).toBeDefined();
+      expect(consentButton?.disabled).toBeTruthy();
+    });
+  });
 });
