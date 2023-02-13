@@ -186,7 +186,7 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
 
   return (
     <div
-      className={`relative h-full w-full bg-[#FFFFFF] p-2 ${messageBoxClassName ?? ""} ${
+      className={`relative h-full w-full  p-2 ${messageBoxClassName ?? ""} ${
         darkMode ? "bg-[#36393F]" : "dark:bg-[#36393F]"
       }`}
       ref={ref}

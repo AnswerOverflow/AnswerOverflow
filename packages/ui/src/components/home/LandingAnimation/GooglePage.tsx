@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { forwardRef } from "react";
-import googleLogo from "~ui/assets/googlelogo.png";
+import googleLogo from "../../../../../../apps/nextjs/public/googlelogo.png";
 
 export interface GooglePageProps {
   result: {
