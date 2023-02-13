@@ -7,8 +7,11 @@ import {
   GuildMember,
   Message,
 } from "discord.js";
-import { findChannelById, findServerById, UserServerSettingsWithFlags } from "@answeroverflow/db";
-import { updateUserServerSettings } from "./manage-account";
+import { findChannelById, findServerById } from "@answeroverflow/db";
+import {
+  updateUserServerSettings,
+  UpdateUserServerSettingsOverrideOptions,
+} from "./manage-account";
 import { UpdateSettingsError } from "./settings";
 
 export const CONSENT_BUTTON_LABEL = "Publicly display my messages on Answer Overflow";
@@ -49,6 +52,9 @@ export async function provideConsentOnForumChannelMessage(message: Message) {
     member: message.member!,
     consentSource: "forum-post-guidelines",
     canPubliclyDisplayMessages: true,
+    onError(error) {
+      console.log(error.message);
+    },
   });
 }
 
@@ -71,6 +77,9 @@ export async function provideConsentOnReadTheRules({
     member: newMember,
     consentSource: "read-the-rules",
     canPubliclyDisplayMessages: true,
+    onError(error) {
+      console.log(error.message);
+    },
   });
 }
 
@@ -87,15 +96,15 @@ export async function updateUserConsent({
   member,
   consentSource,
   canPubliclyDisplayMessages,
-  onError = () => {},
-  onConsentStatusChange = () => {},
+  ...rest
 }: {
-  member: GuildMember;
   consentSource: ConsentSource;
   canPubliclyDisplayMessages: boolean;
-  onError?: (error: UpdateSettingsError) => unknown | Promise<unknown>;
-  onConsentStatusChange?: (updatedSettings: UserServerSettingsWithFlags) => void | Promise<void>;
-}) {
+} & UpdateUserServerSettingsOverrideOptions<{
+  flags: {
+    canPubliclyDisplayMessages: boolean;
+  };
+}>) {
   const guild = member.guild;
   const isAutomatedConsent =
     consentSource === "forum-post-guidelines" || consentSource === "read-the-rules";
@@ -134,7 +143,6 @@ export async function updateUserConsent({
         );
       }
     },
-    onError,
-    onSettingChange: onConsentStatusChange,
+    ...rest,
   });
 }

@@ -23,7 +23,7 @@ const ToggleConsentButton = ({ settings, setSettings }: ManageAccountMenuItemPro
           canPubliclyDisplayMessages: enabled,
           consentSource: "manage-account-menu",
           member,
-          onConsentStatusChange(updatedSettings) {
+          onSettingChange(updatedSettings) {
             setSettings(updatedSettings);
           },
           onError: (error) => componentEventStatusHandler(event, error.message),

@@ -101,7 +101,7 @@ export async function updateUserServerIndexingEnabled({
           consentSource: "disable-indexing-button",
           member,
           onError,
-          onConsentStatusChange: onSettingChange,
+          onSettingChange,
         });
       } else {
         await onSettingChange?.(newSettings);
