@@ -26,7 +26,7 @@ export class ConsentCommand extends Command {
         member,
         canPubliclyDisplayMessages: true,
         consentSource: "slash-command",
-        async onConsentStatusChange() {
+        async onSettingChange() {
           await interaction.reply({
             content: `Provided consent to display messsages in ${guild.name}  publicly on Answer Overflow`,
             ephemeral: true,
