@@ -1,6 +1,11 @@
 import type { UserServerSettingsWithFlags } from "@answeroverflow/prisma-types";
 import type { Client, GuildMember } from "discord.js";
-import { createDiscordAccount, createServer, createUserServerSettings } from "@answeroverflow/db";
+import {
+  createDiscordAccount,
+  createServer,
+  createUserServerSettings,
+  findUserServerSettingsById,
+} from "@answeroverflow/db";
 import { mockGuildMember } from "@answeroverflow/discordjs-mock";
 import type { PartialDeep } from "type-fest";
 import { toAODiscordAccount, toAOServer } from "~discord-bot/utils/conversions";
@@ -53,6 +58,14 @@ export async function testUpdateUserServerSettings<
         updateSettingsError = error;
       },
     });
+    if (!updateSettingsError) {
+      const found = await findUserServerSettingsById({
+        serverId: member.guild.id,
+        userId: member.id,
+      });
+      // Little bit of a sanity check
+      expect(found).toEqual(updated);
+    }
     validate({
       member,
       startingSettings,

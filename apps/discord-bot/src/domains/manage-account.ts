@@ -75,7 +75,8 @@ export async function updateUserServerIndexingEnabled({
 }> & {
   messageIndexingDisabled: boolean;
 }) {
-  return updateUserServerSettings({
+  let updateConsentResult: UserServerSettingsWithFlags | null = null;
+  const result = await updateUserServerSettings({
     member,
     source: "manage-account-menu",
     updateData: {
@@ -96,7 +97,7 @@ export async function updateUserServerIndexingEnabled({
     onError: onError,
     async onSettingChange(newSettings) {
       if (newSettings.flags.canPubliclyDisplayMessages) {
-        await updateUserConsent({
+        updateConsentResult = await updateUserConsent({
           canPubliclyDisplayMessages: false,
           consentSource: "disable-indexing-button",
           member,
@@ -108,4 +109,6 @@ export async function updateUserServerIndexingEnabled({
       }
     },
   });
+  // If we updated the consent, return that instead as it is the most up to date
+  return updateConsentResult ?? result;
 }
