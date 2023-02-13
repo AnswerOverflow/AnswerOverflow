@@ -10,6 +10,7 @@ import type { Client, GuildMember } from "discord.js";
 import { mockGuildMember } from "@answeroverflow/discordjs-mock";
 import { ConsentSource, updateUserConsent } from "./consent";
 import type { UpdateSettingsError } from "./settings";
+import type { PartialDeep } from "type-fest";
 
 let client: Client;
 const automatedConsentSources: ConsentSource[] = ["forum-post-guidelines", "read-the-rules"];
@@ -22,36 +23,36 @@ beforeEach(async () => {
   client = await setupAnswerOverflowBot();
 });
 
-async function testAllConsentSources({
+async function testAllConsentSources<
+  T extends Omit<PartialDeep<UserServerSettingsWithFlags>, "serverId" | "userId">
+>({
   consentSources,
-  canPubliclyDisplayMessages,
+  startingSettings,
   isConsentBeingGranted,
   validate,
 }: {
   validate: (input: {
     member: GuildMember;
     consentSource: ConsentSource;
-    canPubliclyDisplayMessages: boolean | null;
+    startingSettings: T | null;
     isConsentBeingGranted: boolean;
     updated: UserServerSettingsWithFlags | null;
     error?: UpdateSettingsError;
   }) => void;
   consentSources: ConsentSource[];
   isConsentBeingGranted: boolean;
-  canPubliclyDisplayMessages: boolean | null;
+  startingSettings: T | null;
 }) {
   for (const consentSource of consentSources) {
     let consetError: UpdateSettingsError | undefined = undefined;
     const memberAlreadyConsenting = mockGuildMember({ client });
     await createServer(toAOServer(memberAlreadyConsenting.guild));
     await createDiscordAccount(toAODiscordAccount(memberAlreadyConsenting.user));
-    if (canPubliclyDisplayMessages !== null) {
+    if (startingSettings !== null) {
       await createUserServerSettings({
         serverId: memberAlreadyConsenting.guild.id,
         userId: memberAlreadyConsenting.id,
-        flags: {
-          canPubliclyDisplayMessages,
-        },
+        ...startingSettings,
       });
     }
     const updated = await updateUserConsent({
@@ -64,7 +65,7 @@ async function testAllConsentSources({
     });
     validate({
       member: memberAlreadyConsenting,
-      canPubliclyDisplayMessages,
+      startingSettings,
       isConsentBeingGranted,
       consentSource,
       updated,
@@ -74,31 +75,13 @@ async function testAllConsentSources({
 }
 
 describe("Consent", () => {
-  /*
-    We need to validate 2 things:
-      1. Successfully updating the users consent
-        - Automated consent:
-          - User has never set their preferences
-        - Manual consent:
-          - User has never set their preferences
-          - User has revoked consent and is trying to give consent
-          - User has given consent and is trying to revoke consent
-      2. For each variant, the correct error is thrown
-        - Automated consent:
-          - User has already given consent
-          - User has already revoked consent
-        - Manual consent:
-          - User has already given consent and is trying to give consent again
-          - User has already revoked consent and is trying to revoke consent again
-
-  */
   describe("Update User Consent", () => {
     describe("Update Consent Successes", () => {
       describe("Automated Consent Sources Successes", () => {
         test("user has never set their preferences", async () => {
           await testAllConsentSources({
             consentSources: automatedConsentSources,
-            canPubliclyDisplayMessages: null,
+            startingSettings: null,
             isConsentBeingGranted: true,
             validate: ({ updated }) => {
               expect(updated?.flags.canPubliclyDisplayMessages).toBe(true);
@@ -110,7 +93,7 @@ describe("Consent", () => {
         test("user has never set their preferences", async () => {
           await testAllConsentSources({
             consentSources: manualConsentSources,
-            canPubliclyDisplayMessages: null,
+            startingSettings: null,
             isConsentBeingGranted: true,
             validate: ({ updated }) => {
               expect(updated?.flags.canPubliclyDisplayMessages).toBe(true);
@@ -120,7 +103,11 @@ describe("Consent", () => {
         test("user has revoked consent and is trying to give consent", async () => {
           await testAllConsentSources({
             consentSources: manualConsentSources,
-            canPubliclyDisplayMessages: false,
+            startingSettings: {
+              flags: {
+                canPubliclyDisplayMessages: false,
+              },
+            },
             isConsentBeingGranted: true,
             validate: ({ updated }) => {
               expect(updated?.flags.canPubliclyDisplayMessages).toBe(true);
@@ -130,7 +117,11 @@ describe("Consent", () => {
         test("user has given consent and is trying to revoke consent", async () => {
           await testAllConsentSources({
             consentSources: manualConsentSources,
-            canPubliclyDisplayMessages: true,
+            startingSettings: {
+              flags: {
+                canPubliclyDisplayMessages: true,
+              },
+            },
             isConsentBeingGranted: false,
             validate: ({ updated }) => {
               expect(updated?.flags.canPubliclyDisplayMessages).toBe(false);
@@ -144,7 +135,11 @@ describe("Consent", () => {
         test("user has already provided consent for all automated consents and is trying to apply again", async () => {
           await testAllConsentSources({
             consentSources: automatedConsentSources,
-            canPubliclyDisplayMessages: true,
+            startingSettings: {
+              flags: {
+                canPubliclyDisplayMessages: true,
+              },
+            },
             isConsentBeingGranted: true,
             validate: ({ member, consentSource, error }) => {
               expect(error?.message).toBe(
@@ -156,7 +151,11 @@ describe("Consent", () => {
         test("user has already revoked consent for all automated consents and is trying to revoke again", async () => {
           await testAllConsentSources({
             consentSources: automatedConsentSources,
-            canPubliclyDisplayMessages: false,
+            startingSettings: {
+              flags: {
+                canPubliclyDisplayMessages: false,
+              },
+            },
             isConsentBeingGranted: true,
             validate: ({ member, consentSource, error }) => {
               expect(error?.message).toBe(
@@ -170,7 +169,11 @@ describe("Consent", () => {
         test("user has already given consent for all manual consents and is trying to give consent again", async () => {
           await testAllConsentSources({
             consentSources: manualConsentSources,
-            canPubliclyDisplayMessages: true,
+            startingSettings: {
+              flags: {
+                canPubliclyDisplayMessages: true,
+              },
+            },
             isConsentBeingGranted: true,
             validate: ({ member, error }) => {
               expect(error?.message).toBe(
@@ -182,15 +185,21 @@ describe("Consent", () => {
         test("user has already revoked consent for all manual consents and is trying to revoke consent again", async () => {
           await testAllConsentSources({
             consentSources: manualConsentSources,
-            canPubliclyDisplayMessages: false,
-            isConsentBeingGranted: false,
+            startingSettings: {
+              flags: {
+                canPubliclyDisplayMessages: false,
+                messageIndexingDisabled: true,
+              },
+            },
+            isConsentBeingGranted: true,
             validate: ({ member, error }) => {
               expect(error?.message).toBe(
-                `You have already denied consent for ${member.guild.name}`
+                `You have disabled indexing for ${member.guild.name}, if you wish to display your messages, first enable indexing`
               );
             },
           });
         });
+        test("user has disabled inexing and is trying to give consent", async () => {});
       });
     });
   });

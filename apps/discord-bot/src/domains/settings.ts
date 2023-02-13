@@ -9,6 +9,8 @@ export const UPDATE_SETTING_ERROR_REASONS = [
   "target-value-already-equals-goal-value",
   // The user has already set this setting, and we don't want to override it i.e in automated scenarios
   "setting-already-explicitly-set",
+  // Another setting is preventing this setting from being set
+  "setting-prevented-by-other-setting",
 ] as const;
 export type UpdateSettingsErrorReason = (typeof UPDATE_SETTING_ERROR_REASONS)[number];
 

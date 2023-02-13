@@ -124,6 +124,14 @@ export async function updateUserConsent({
             : `You have already denied consent for ${guild.name}`,
           "target-value-already-equals-goal-value"
         );
+      } else if (
+        existingSettings.flags.messageIndexingDisabled &&
+        newValue.flags.canPubliclyDisplayMessages
+      ) {
+        throw new UpdateSettingsError(
+          `You have disabled indexing for ${guild.name}, if you wish to display your messages, first enable indexing`,
+          "setting-prevented-by-other-setting"
+        );
       }
     },
     onError,
