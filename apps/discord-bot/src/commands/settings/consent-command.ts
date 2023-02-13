@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { ChatInputCommand, Command } from "@sapphire/framework";
 import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
-import { updateUserConsent } from "~discord-bot/domains/consent";
+import { updateUserConsent } from "~discord-bot/domains/manage-account";
 import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
 import { ephemeralStatusHandler } from "~discord-bot/utils/trpc";
 
@@ -25,21 +25,15 @@ export class ConsentCommand extends Command {
   }
   public override async chatInputRun(interaction: ChatInputCommandInteraction) {
     const consented = interaction.options.getBoolean("consent") ?? true;
-    await guildTextChannelOnlyInteraction(interaction, async ({ member, guild }) => {
-      await updateUserConsent({
+    await guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
+      updateUserConsent({
         member,
-        canPubliclyDisplayMessages: consented,
         consentSource: "slash-command",
-        async onSettingChange() {
-          await interaction.reply({
-            content: consented
-              ? `Provided consent to display messsages in ${guild.name} publicly on Answer Overflow`
-              : `Removed consent to display messsages in ${guild.name} publicly on Answer Overflow`,
-            ephemeral: true,
-          });
+        canPubliclyDisplayMessages: consented,
+        Error(error) {
+          ephemeralStatusHandler(interaction, error.message);
         },
-        onError: (error) => ephemeralStatusHandler(interaction, error.message),
-      });
-    });
+      })
+    );
   }
 }

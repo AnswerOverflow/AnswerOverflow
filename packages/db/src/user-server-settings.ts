@@ -4,12 +4,13 @@ import {
   getDefaultUserServerSettings,
   UserServerSettings,
 } from "@answeroverflow/prisma-types";
-import { zDiscordAccountUpsert } from "./discord-account";
+import { upsertDiscordAccount, zDiscordAccountUpsert } from "./discord-account";
 import {
   addFlagsToUserServerSettings,
   mergeUserServerSettingsFlags,
   zUserServerSettings,
 } from "@answeroverflow/prisma-types";
+import { upsert } from "./utils/operations";
 
 export const zUserServerSettingsRequired = zUserServerSettings.pick({
   userId: true,
@@ -43,8 +44,9 @@ export function mergeUserServerSettings<T extends z.infer<typeof zUserServerSett
   updated: T
 ) {
   const { flags, ...updateDataWithoutFlags } = updated;
+  const sanitizedUpdateData = zUserServerSettingsUpdate.parse(updateDataWithoutFlags);
   return {
-    ...updateDataWithoutFlags,
+    ...sanitizedUpdateData,
     bitfield: flags ? mergeUserServerSettingsFlags(old.bitfield, flags) : undefined,
   };
 }
@@ -118,4 +120,35 @@ export async function updateUserServerSettings(
     data: mergeUserServerSettings(existing, data),
   });
   return addFlagsToUserServerSettings(updated);
+}
+
+export async function upsertUserServerSettingsWithDeps(
+  data: z.infer<typeof zUserServerSettingsCreateWithDeps>
+) {
+  return upsert({
+    find: () =>
+      findUserServerSettingsById({
+        userId: data.user.id,
+        serverId: data.serverId,
+      }),
+    create: async () => {
+      await upsertDiscordAccount(data.user);
+      return createUserServerSettings({
+        serverId: data.serverId,
+        userId: data.user.id,
+        flags: data.flags,
+      });
+    },
+    update: async (existing) => {
+      await upsertDiscordAccount(data.user);
+      return updateUserServerSettings(
+        {
+          serverId: data.serverId,
+          userId: data.user.id,
+          flags: data.flags,
+        },
+        existing
+      );
+    },
+  });
 }

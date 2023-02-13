@@ -10,6 +10,7 @@ export default defineConfig({
     '@answeroverflow/auth',
     '@answeroverflow/api',
     "@answeroverflow/discordjs-utils",
-    "@answeroverflow/utils"
+    "@answeroverflow/utils",
+    "@answeroverflow/domains"
   ],
 });

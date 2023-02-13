@@ -17,7 +17,7 @@ import {
 import { ANSWER_OVERFLOW_BLUE_HEX } from "~discord-bot/utils/constants";
 import { findSolutionsToMessage } from "./indexing";
 import type { ChannelWithFlags } from "@answeroverflow/api";
-import { makeConsentButton } from "./consent";
+import { makeConsentButton } from "./manage-account";
 import { findChannelById } from "@answeroverflow/db";
 
 export const QUESTION_ID_FIELD_NAME = "Question Message ID";

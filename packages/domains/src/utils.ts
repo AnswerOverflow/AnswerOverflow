@@ -1,8 +1,3 @@
-import type { GuildMember } from "discord.js";
-import type { BotRouterCaller } from "@answeroverflow/api";
-import { createMemberCtx } from "~discord-bot/utils/context";
-import { callAPI } from "~discord-bot/utils/trpc";
-
 export const UPDATE_SETTING_ERROR_REASONS = [
   "api-error",
   // No op, i.e the setting is already set to the value we want to set it to
@@ -22,18 +17,15 @@ export class UpdateSettingsError extends Error {
 }
 
 export type UpdateSettingsOptions<T, F> = {
-  member: GuildMember;
   newValue: T;
-  fetchSettings: (router: BotRouterCaller) => Promise<F | null>;
+  fetchSettings: () => Promise<F | null>;
   checkIfSettingIsAlreadySet: (input: { existingSettings: F; newValue: T }) => void | Promise<void>;
-  updateSettings: (router: BotRouterCaller, newValue: T) => Promise<F>;
+  updateSettings: (newValue: T, existing: F | null) => Promise<F>;
   onSettingChange?: (newSettings: F) => void | Promise<void>;
   onError: (error: UpdateSettingsError) => unknown | Promise<unknown>;
 };
 
-// 🤮
 export async function updateSetting<T, F>({
-  member,
   newValue,
   fetchSettings,
   checkIfSettingIsAlreadySet,
@@ -42,33 +34,18 @@ export async function updateSetting<T, F>({
   onError,
 }: UpdateSettingsOptions<T, F>) {
   try {
-    const existingSettings = await callAPI({
-      apiCall: fetchSettings,
-      getCtx: () => createMemberCtx(member),
-      Error: (_, messageWithCode) => {
-        throw new UpdateSettingsError(messageWithCode, "api-error");
-      },
-    });
+    const existingSettings = await fetchSettings();
     // Check if the setting is already set to the desired value
     if (existingSettings) {
       await checkIfSettingIsAlreadySet({ existingSettings, newValue });
     }
     // Update the setting
-    const updatedSettings = await callAPI({
-      apiCall: (router) => updateSettings(router, newValue),
-      getCtx: () => createMemberCtx(member),
-      Error: (_, messageWithCode) => {
-        throw new UpdateSettingsError(messageWithCode, "api-error");
-      },
-      async Ok(result) {
-        await onSettingChange(result);
-      },
-    });
+    const updatedSettings = await updateSettings(newValue, existingSettings);
+    await onSettingChange(updatedSettings);
     return updatedSettings;
   } catch (error) {
     if (!(error instanceof UpdateSettingsError)) throw error;
     await onError(error);
-
     return null;
   }
 }

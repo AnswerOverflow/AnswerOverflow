@@ -1,10 +1,15 @@
 import React from "react";
-import type { UserServerSettingsWithFlags } from "@answeroverflow/db";
+import {
+  getDefaultUserServerSettingsWithFlags,
+  UserServerSettingsWithFlags,
+} from "@answeroverflow/db";
 import { ToggleButton } from "./toggle-button";
-import { updateUserConsent } from "~discord-bot/domains/consent";
+import {
+  updateUserConsent,
+  updateUserServerIndexingEnabled,
+} from "~discord-bot/domains/manage-account";
 import { callAPI, componentEventStatusHandler } from "~discord-bot/utils/trpc";
 import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
-import { updateUserServerIndexingEnabled } from "~discord-bot/domains/manage-account";
 import { Button, Embed } from "@answeroverflow/reacord";
 import { Spacer } from "./spacer";
 import { ANSWER_OVERFLOW_BLUE_AS_INT } from "~discord-bot/utils/constants";
@@ -29,10 +34,10 @@ const ToggleConsentButton = ({ settings, setSettings }: ManageAccountMenuItemPro
           canPubliclyDisplayMessages: enabled,
           consentSource: "manage-account-menu",
           member,
-          onSettingChange(updatedSettings) {
+          Ok(updatedSettings) {
             setSettings(updatedSettings);
           },
-          onError: (error) => componentEventStatusHandler(event, error.message),
+          Error: (error) => componentEventStatusHandler(event, error.message),
         });
       });
     }}
@@ -51,8 +56,9 @@ const ToggleIndexingButton = ({ settings, setSettings }: ManageAccountMenuItemPr
         await updateUserServerIndexingEnabled({
           member,
           messageIndexingDisabled: !messageIndexingDisabled,
-          onError: (error) => componentEventStatusHandler(event, error.message),
-          onSettingChange(newSettings) {
+          source: "manage-account-menu",
+          Error: (error) => componentEventStatusHandler(event, error.message),
+          Ok(newSettings) {
             setSettings(newSettings);
           },
         });
@@ -87,8 +93,10 @@ export const GloballyIgnoreAccountButton = ({
 export const STOP_IGNORING_ACCOUNT_LABEL = "Stop ignoring account";
 export const StopIgnoringAccountButton = ({
   setIsGloballyIgnored,
+  setUserServerSettings,
 }: {
   setIsGloballyIgnored: (isGloballyIgnored: boolean) => void;
+  setUserServerSettings: (settings: UserServerSettingsWithFlags) => void;
 }) => (
   <Button
     label={STOP_IGNORING_ACCOUNT_LABEL}
@@ -100,7 +108,15 @@ export const StopIgnoringAccountButton = ({
           apiCall: (router) => router.ignoredDiscordAccounts.stopIgnoring(event.user.id),
           getCtx: () => createMemberCtx(member),
           Error: (error) => componentEventStatusHandler(event, error.message),
-          Ok: () => setIsGloballyIgnored(false),
+          Ok: () => {
+            setIsGloballyIgnored(false);
+            setUserServerSettings(
+              getDefaultUserServerSettingsWithFlags({
+                userId: event.user.id,
+                serverId: member.guild.id,
+              })
+            );
+          },
         })
       );
     }}
@@ -183,7 +199,10 @@ export function ManageAccountMenu({
         will not be indexed in any server and will not appear on Answer Overflow. You can undo this
         by clicking the button below
       </Embed>
-      <StopIgnoringAccountButton setIsGloballyIgnored={setIsGloballyIgnored} />
+      <StopIgnoringAccountButton
+        setIsGloballyIgnored={setIsGloballyIgnored}
+        setUserServerSettings={setSettings}
+      />
     </>
   );
 
