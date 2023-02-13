@@ -76,7 +76,7 @@ model UserServerSettings {
   serverId String
   bitfield Int    @default(0)
 
-  user   DiscordAccount @relation(fields: [userId], references: [id])
+  user   DiscordAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
   server Server         @relation(fields: [serverId], references: [id])
 
   @@id([userId, serverId])

@@ -29,7 +29,7 @@ export class OpenManageAccountMenuCommand extends Command {
     await guildTextChannelOnlyInteraction(interaction, async ({ guild, member }) => {
       await callAPI({
         async apiCall(router) {
-          return callWithAllowedErrors({
+          const userServerSettingsFetch = callWithAllowedErrors({
             call: () =>
               router.userServerSettings.byId({
                 userId: member.id,
@@ -37,16 +37,33 @@ export class OpenManageAccountMenuCommand extends Command {
               }),
             allowedErrors: "NOT_FOUND",
           });
+          const isIgnoredAccountFetch = callWithAllowedErrors({
+            call: () => router.ignoredDiscordAccounts.byId(member.id),
+            allowedErrors: "NOT_FOUND",
+          });
+          const [userServerSettings, isIgnoredAccount] = await Promise.all([
+            userServerSettingsFetch,
+            isIgnoredAccountFetch,
+          ]);
+          return {
+            userServerSettings,
+            isIgnoredAccount,
+          };
         },
-        Ok(result) {
-          if (!result) {
-            result = getDefaultUserServerSettingsWithFlags({
+        Ok({ userServerSettings, isIgnoredAccount }) {
+          if (!userServerSettings) {
+            userServerSettings = getDefaultUserServerSettingsWithFlags({
               userId: interaction.user.id,
               serverId: guild.id,
             });
           }
           // TODO: Maybe assert that it matches that spec instead of casting
-          const menu = <ManageAccountMenu initalSettings={result} />;
+          const menu = (
+            <ManageAccountMenu
+              initalSettings={userServerSettings}
+              initalIsGloballyIgnored={isIgnoredAccount !== null}
+            />
+          );
           ephemeralReply(container.reacord, menu, interaction);
         },
         Error: (error) => ephemeralStatusHandler(interaction, error.message),

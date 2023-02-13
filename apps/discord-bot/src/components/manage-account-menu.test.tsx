@@ -39,7 +39,10 @@ beforeEach(async () => {
 describe("Manage Account Menu", () => {
   describe("Toggle Consent Button", () => {
     it("should enable consent", async () => {
-      const message = await reply(reacord, <ManageAccountMenu initalSettings={defaultSettings} />);
+      const message = await reply(
+        reacord,
+        <ManageAccountMenu initalSettings={defaultSettings} initalIsGloballyIgnored={false} />
+      );
       const enableIndexingButton = message!.findButtonByLabel(
         "Publicly display messages on Answer Overflow",
         reacord
@@ -63,6 +66,7 @@ describe("Manage Account Menu", () => {
               canPubliclyDisplayMessages: true,
             },
           })}
+          initalIsGloballyIgnored={false}
         />
       );
       const disableIndexingButton = message!.findButtonByLabel(
@@ -91,6 +95,7 @@ describe("Manage Account Menu", () => {
               messageIndexingDisabled: true,
             },
           })}
+          initalIsGloballyIgnored={false}
         />
       );
       const enableIndexingButton = message!.findButtonByLabel(
@@ -105,7 +110,10 @@ describe("Manage Account Menu", () => {
       expect(button).toBeDefined();
     });
     it("should disable indexing of user messages", async () => {
-      const message = await reply(reacord, <ManageAccountMenu initalSettings={defaultSettings} />);
+      const message = await reply(
+        reacord,
+        <ManageAccountMenu initalSettings={defaultSettings} initalIsGloballyIgnored={false} />
+      );
       const disableIndexingButton = message!.findButtonByLabel(
         "Disable indexing of messages",
         reacord

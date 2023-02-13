@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { router, publicProcedure } from "~api/router/trpc";
 import { protectedFetch, protectedMutation } from "~api/utils/protected-procedures";
-import { assertIsUser } from "~api/utils/permissions";
+import { assertIsUser, assertIsIgnoredAccount } from "~api/utils/permissions";
 import {
   deleteIgnoredDiscordAccount,
   findIgnoredDiscordAccountById,
@@ -28,7 +28,7 @@ export const ignoredDiscordAccountRouter = router({
   }),
   stopIgnoring: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
     return protectedMutation({
-      permissions: () => assertIsUser(ctx, input),
+      permissions: [() => assertIsUser(ctx, input), () => assertIsIgnoredAccount(ctx, input)],
       operation: () => deleteIgnoredDiscordAccount(input),
     });
   }),

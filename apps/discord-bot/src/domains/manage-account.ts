@@ -101,7 +101,13 @@ export async function updateUserServerIndexingEnabled({
           canPubliclyDisplayMessages: false,
           consentSource: "disable-indexing-button",
           member,
-          onError,
+          onError: (err) => {
+            if (err.reason === "target-value-already-equals-goal-value") {
+              return;
+            } else {
+              onError?.(err);
+            }
+          },
           onSettingChange,
         });
       } else {

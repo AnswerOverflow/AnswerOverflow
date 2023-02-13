@@ -72,7 +72,8 @@ export async function updateManyDiscordAccounts(data: z.infer<typeof zDiscordAcc
 }
 
 export async function deleteDiscordAccount(id: string) {
-  await prisma.discordAccount.delete({ where: { id } });
+  const existingAccount = await findDiscordAccountById(id);
+  if (existingAccount) await prisma.discordAccount.delete({ where: { id } });
   await upsertIgnoredDiscordAccount(id);
   return true;
 }

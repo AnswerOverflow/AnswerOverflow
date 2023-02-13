@@ -18,7 +18,7 @@ import {
   protectedFetchWithPublicData,
   protectedMutation,
 } from "~api/utils/protected-procedures";
-import { assertIsUser } from "~api/utils/permissions";
+import { assertIsNotIgnoredAccount, assertIsUser } from "~api/utils/permissions";
 
 const accountCrudRouter = router({
   byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
@@ -38,7 +38,10 @@ const accountCrudRouter = router({
   }),
   create: publicProcedure.input(zDiscordAccountCreate).mutation(async ({ ctx, input }) => {
     return protectedMutation({
-      permissions: [() => assertIsUser(ctx, input.id)],
+      permissions: [
+        () => assertIsUser(ctx, input.id),
+        () => assertIsNotIgnoredAccount(ctx, input.id),
+      ],
       operation: () => createDiscordAccount(input),
     });
   }),
@@ -50,7 +53,7 @@ const accountCrudRouter = router({
   }),
   delete: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
     return protectedMutation({
-      permissions: () => assertIsUser(ctx, input),
+      permissions: [() => assertIsUser(ctx, input), () => assertIsNotIgnoredAccount(ctx, input)],
       operation: () => deleteDiscordAccount(input),
     });
   }),
