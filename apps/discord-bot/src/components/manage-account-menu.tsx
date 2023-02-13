@@ -40,7 +40,7 @@ const ToggleConsentButton = ({ settings, setSettings }: ManageAccountMenuItemPro
 );
 
 export const DISABLE_INDEXING_LABEL = "Ignore account in server";
-export const ENABLE_INDEXING_LABEL = "Enable indexing of messages";
+export const ENABLE_INDEXING_LABEL = "Enable indexing of messages in server";
 const ToggleIndexingButton = ({ settings, setSettings }: ManageAccountMenuItemProps) => (
   <ToggleButton
     currentlyEnabled={!settings.flags.messageIndexingDisabled}
@@ -149,6 +149,12 @@ export function ManageAccountMenu({
       title: DISABLE_INDEXING_LABEL,
       enabled: !settings.flags.messageIndexingDisabled,
     },
+    {
+      instructions:
+        "Disables indexing of your account in all servers, also will remove all the messages that Answer Overflow has stored from you in all servers",
+      title: GLOBALLY_IGNORE_ACCOUNT_LABEL,
+      enabled: !isGloballyIgnored,
+    },
   ];
 
   const RegularView = () => (
@@ -170,9 +176,16 @@ export function ManageAccountMenu({
     </>
   );
 
-  return isGloballyIgnored ? (
-    <StopIgnoringAccountButton setIsGloballyIgnored={setIsGloballyIgnored} />
-  ) : (
-    <RegularView />
+  const GloballyIgnoredView = () => (
+    <>
+      <Embed color={ANSWER_OVERFLOW_BLUE_AS_INT}>
+        **{STOP_IGNORING_ACCOUNT_LABEL}** - You have globally ignored your account, your messages
+        will not be indexed in any server and will not appear on Answer Overflow. You can undo this
+        by clicking the button below
+      </Embed>
+      <StopIgnoringAccountButton setIsGloballyIgnored={setIsGloballyIgnored} />
+    </>
   );
+
+  return isGloballyIgnored ? <GloballyIgnoredView /> : <RegularView />;
 }
