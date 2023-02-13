@@ -14,3 +14,5 @@ export type ChannelUpsertWithDepsInput = BotRouterInput["channels"]["upsertWithD
 
 export type ServerUpsertInput = BotRouterInput["servers"]["upsert"];
 export type UserUpsertInput = BotRouterInput["users"]["upsert"];
+export type UserServerSettingsUpsertWithDepsInput =
+  BotRouterInput["userServerSettings"]["upsertWithDeps"];

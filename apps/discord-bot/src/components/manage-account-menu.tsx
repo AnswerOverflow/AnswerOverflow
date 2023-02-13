@@ -4,6 +4,7 @@ import { ToggleButton } from "./toggle-button";
 import { updateUserConsent } from "~discord-bot/domains/consent";
 import { componentEventStatusHandler } from "~discord-bot/utils/trpc";
 import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
+import { updateUserServerIndexingEnabled } from "~discord-bot/domains/manage-account";
 
 type ManageAccountMenuItemProps = {
   settings: UserServerSettingsWithFlags;
@@ -14,6 +15,7 @@ const ToggleConsentButton = ({ settings, setSettings }: ManageAccountMenuItemPro
   <ToggleButton
     currentlyEnabled={settings.flags.canPubliclyDisplayMessages}
     enableLabel={"Publicly display messages on Answer Overflow"}
+    disabled={settings.flags.messageIndexingDisabled}
     disableLabel={"Disable publicly displaying messages"}
     onClick={(event, enabled) => {
       void guildOnlyComponentEvent(event, async ({ member }) => {
@@ -34,22 +36,19 @@ const ToggleConsentButton = ({ settings, setSettings }: ManageAccountMenuItemPro
 const ToggleIndexingButton = ({ settings, setSettings }: ManageAccountMenuItemProps) => (
   <ToggleButton
     currentlyEnabled={!settings.flags.messageIndexingDisabled}
-    enableLabel={"Ignored account in server"}
-    disableLabel={"Enable indexing of messages"}
+    enableLabel={"Enable indexing of messages"}
+    disableLabel={"Disable indexing of messages"}
     onClick={(event, messageIndexingDisabled) => {
       void guildOnlyComponentEvent(event, async ({ member }) => {
-        if (messageIndexingDisabled) {
-          await updateUserConsent({
-            canPubliclyDisplayMessages: false,
-            consentSource: "disable-indexing-button",
-            member,
-            onConsentStatusChange(updatedSettings) {
-              setSettings(updatedSettings);
-            },
-            onError: (error) => componentEventStatusHandler(event, error.message),
-          });
-          // TODO: Delete all messages from the user
-        }
+        await updateUserServerIndexingEnabled({
+          member,
+          messageIndexingDisabled: !messageIndexingDisabled,
+          onError: (error) => componentEventStatusHandler(event, error.message),
+          onSettingChange(newSettings) {
+            setSettings(newSettings);
+          },
+        });
+        // TODO: Delete all messages from the user
       });
     }}
   />
