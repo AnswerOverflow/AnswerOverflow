@@ -57,7 +57,6 @@ export class OpenManageAccountMenuCommand extends Command {
               serverId: guild.id,
             });
           }
-          // TODO: Maybe assert that it matches that spec instead of casting
           const menu = (
             <ManageAccountMenu
               initalSettings={userServerSettings}
