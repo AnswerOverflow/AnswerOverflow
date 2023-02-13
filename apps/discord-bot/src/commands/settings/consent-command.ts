@@ -18,17 +18,23 @@ export class ConsentCommand extends Command {
         .setName(this.name)
         .setDescription(this.description)
         .setDMPermission(false)
+        .addBooleanOption((option) =>
+          option.setName("consent").setDescription("Enable or disable consent")
+        )
     );
   }
   public override async chatInputRun(interaction: ChatInputCommandInteraction) {
+    const consented = interaction.options.getBoolean("consent") ?? true;
     await guildTextChannelOnlyInteraction(interaction, async ({ member, guild }) => {
       await updateUserConsent({
         member,
-        canPubliclyDisplayMessages: true,
+        canPubliclyDisplayMessages: consented,
         consentSource: "slash-command",
         async onSettingChange() {
           await interaction.reply({
-            content: `Provided consent to display messsages in ${guild.name}  publicly on Answer Overflow`,
+            content: consented
+              ? `Provided consent to display messsages in ${guild.name} publicly on Answer Overflow`
+              : `Removed consent to display messsages in ${guild.name} publicly on Answer Overflow`,
             ephemeral: true,
           });
         },
