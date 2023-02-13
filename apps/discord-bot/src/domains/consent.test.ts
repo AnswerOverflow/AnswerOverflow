@@ -8,7 +8,8 @@ import {
 } from "@answeroverflow/db";
 import type { Client, GuildMember } from "discord.js";
 import { mockGuildMember } from "@answeroverflow/discordjs-mock";
-import { ConsentError, ConsentSource, updateUserConsent } from "./consent";
+import { ConsentSource, updateUserConsent } from "./consent";
+import type { UpdateSettingsError } from "./settings";
 
 let client: Client;
 const automatedConsentSources: ConsentSource[] = ["forum-post-guidelines", "read-the-rules"];
@@ -33,14 +34,14 @@ async function testAllConsentSources({
     canPubliclyDisplayMessages: boolean | null;
     isConsentBeingGranted: boolean;
     updated: UserServerSettingsWithFlags | null;
-    error?: ConsentError;
+    error?: UpdateSettingsError;
   }) => void;
   consentSources: ConsentSource[];
   isConsentBeingGranted: boolean;
   canPubliclyDisplayMessages: boolean | null;
 }) {
   for (const consentSource of consentSources) {
-    let consetError: ConsentError | undefined = undefined;
+    let consetError: UpdateSettingsError | undefined = undefined;
     const memberAlreadyConsenting = mockGuildMember({ client });
     await createServer(toAOServer(memberAlreadyConsenting.guild));
     await createDiscordAccount(toAODiscordAccount(memberAlreadyConsenting.user));

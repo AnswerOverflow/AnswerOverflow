@@ -117,15 +117,13 @@ export async function updateUserConsent({
         existingSettings.flags.canPubliclyDisplayMessages ===
         newValue.flags.canPubliclyDisplayMessages
       ) {
-        if (canPubliclyDisplayMessages) {
-          // These are only user facing operations so give a more user friendly error message
-          throw new UpdateSettingsError(
-            canPubliclyDisplayMessages
-              ? `You have already given consent for ${guild.name}`
-              : `You have already denied consent for ${guild.name}`,
-            "target-value-already-equals-goal-value"
-          );
-        }
+        // These are only user facing operations so give a more user friendly error message
+        throw new UpdateSettingsError(
+          canPubliclyDisplayMessages
+            ? `You have already given consent for ${guild.name}`
+            : `You have already denied consent for ${guild.name}`,
+          "target-value-already-equals-goal-value"
+        );
       }
     },
     onError,
