@@ -33,6 +33,13 @@ export class ConsentCommand extends Command {
         Error(error) {
           ephemeralStatusHandler(interaction, error.message);
         },
+        Ok(result) {
+          // TODO: Better messages
+          ephemeralStatusHandler(
+            interaction,
+            result.flags.canPubliclyDisplayMessages ? "Consented" : "Unconsented"
+          );
+        },
       })
     );
   }

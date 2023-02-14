@@ -13,7 +13,16 @@ import { assertIsUser } from "~api/utils/permissions";
 
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { MANAGE_ACCOUNT_SOURCES, CONSENT_SOURCES } from "./types";
+import {
+  MANAGE_ACCOUNT_SOURCES,
+  CONSENT_SOURCES,
+  CONSENT_ALREADY_DENIED_MESSAGE,
+  CONSENT_EXPLICITLY_SET_MESSAGE,
+  CONSENT_ALREADY_GRANTED_MESSAGE,
+  MESSAGE_INDEXING_ALREADY_DISABLED_MESSAGE,
+  MESSAGE_INDEXING_ALREADY_ENABLED_MESSAGE,
+  CONSENT_PREVENTED_BY_DISABLED_INDEXING_MESSAGE,
+} from "./types";
 export const SERVER_NOT_SETUP_MESSAGE = "Server is not setup for Answer Overflow yet";
 
 function assertValuesAreNotEqual({
@@ -111,8 +120,8 @@ const userServerSettingsCrudRouter = router({
               () => assertIsUser(ctx, input.data.user.id),
               () =>
                 assertValuesAreNotEqual({
-                  falsyMessage: "Indexing is already enabled",
-                  truthyMessage: "Indexing is already disabled",
+                  falsyMessage: MESSAGE_INDEXING_ALREADY_DISABLED_MESSAGE,
+                  truthyMessage: MESSAGE_INDEXING_ALREADY_ENABLED_MESSAGE,
                   newValue: input.data.flags.messageIndexingDisabled,
                   oldValue: existingSettings.flags.messageIndexingDisabled,
                 }),
@@ -156,15 +165,23 @@ const userServerSettingsCrudRouter = router({
             permissions: [
               () => assertIsUser(ctx, input.data.user.id),
               () =>
+                input.data.flags.canPubliclyDisplayMessages
+                  ? assertIsNotValue({
+                      actualValue: oldSettings.flags.messageIndexingDisabled,
+                      expectedToNotBeValue: true,
+                      errorMessage: CONSENT_PREVENTED_BY_DISABLED_INDEXING_MESSAGE,
+                    })
+                  : undefined,
+              () =>
                 isAutomatedConsent
                   ? assertIsNotValue({
                       actualValue: doSettingsExistAlready,
                       expectedToNotBeValue: true,
-                      errorMessage: "Consent has already been explicitly set",
+                      errorMessage: CONSENT_EXPLICITLY_SET_MESSAGE,
                     })
                   : assertValuesAreNotEqual({
-                      falsyMessage: "Consent is already revoked",
-                      truthyMessage: "Consent is already granted",
+                      falsyMessage: CONSENT_ALREADY_DENIED_MESSAGE,
+                      truthyMessage: CONSENT_ALREADY_GRANTED_MESSAGE,
                       newValue: input.data.flags.canPubliclyDisplayMessages,
                       oldValue: oldSettings.flags.canPubliclyDisplayMessages,
                     }),
