@@ -16,7 +16,6 @@
   "dependencies": {
     "@answeroverflow/auth": "*",
     "@answeroverflow/db": "*",
-    "@answeroverflow/domains": "*",
     "@answeroverflow/discordjs-utils": "*",
     "@answeroverflow/utils": "*",
     "@sapphire/bitfield": "^1.0.0",

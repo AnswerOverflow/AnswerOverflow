@@ -10,8 +10,8 @@ import {
 import { findChannelById, findServerById, UserServerSettingsWithFlags } from "@answeroverflow/db";
 import { callAPI, TRPCStatusHandler } from "~discord-bot/utils/trpc";
 import { toAODiscordAccount } from "~discord-bot/utils/conversions";
-import type { ConsentSource, ManageAccountSource } from "@answeroverflow/domains";
 import { createMemberCtx } from "~discord-bot/utils/context";
+import type { ConsentSource, ManageAccountSource } from "@answeroverflow/api";
 
 export const CONSENT_BUTTON_LABEL = "Publicly display my messages on Answer Overflow";
 export const CONSENT_BUTTON_ID = "consentButton";
