@@ -6,7 +6,7 @@ import {
   CONSENT_SOURCES,
   MANAGE_ACCOUNT_SOURCES,
   updateUserConsent,
-  updateUserIndexingInServerDisabled,
+  updateUserServerIndexingPreference,
   zUpdateUserConsetInput,
   zUpdateUserIndexingInServerDisabledData,
 } from "@answeroverflow/domains";
@@ -36,8 +36,9 @@ const userServerSettingsCrudRouter = router({
         operation: () =>
           findOrThrowNotFound(
             () =>
-              updateUserIndexingInServerDisabled({
+              updateUserServerIndexingPreference({
                 updateData: input.data,
+                source: input.source,
                 onError(error) {
                   throw new TRPCError({
                     code: "PRECONDITION_FAILED",
@@ -63,7 +64,7 @@ const userServerSettingsCrudRouter = router({
           findOrThrowNotFound(
             () =>
               updateUserConsent({
-                consentSource: input.source,
+                source: input.source,
                 onError(error) {
                   throw new TRPCError({
                     code: "PRECONDITION_FAILED",

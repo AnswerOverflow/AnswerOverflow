@@ -20,6 +20,8 @@ import {
 } from "@answeroverflow/db";
 import type { PartialDeep } from "type-fest";
 
+// These tests could benefit from being split up
+
 export async function testUpdateUserServerSettings<S extends string>({
   sources,
   startingSettings,
@@ -82,9 +84,7 @@ export async function testUpdateUserServerSettings<S extends string>({
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const automatedConsentSources: ConsentSource[] = ["forum-post-guidelines", "read-the-rules"];
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const manualConsentSources: ConsentSource[] = [
   "manage-account-menu",
   "slash-command",

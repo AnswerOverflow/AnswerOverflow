@@ -38,7 +38,7 @@ export class OpenManageAccountMenuCommand extends Command {
             allowedErrors: "NOT_FOUND",
           });
           const isIgnoredAccountFetch = callWithAllowedErrors({
-            call: () => router.ignoredDiscordAccounts.byId(member.id),
+            call: () => router.discordAccounts.checkIfIgnored(member.id),
             allowedErrors: "NOT_FOUND",
           });
           const [userServerSettings, isIgnoredAccount] = await Promise.all([
