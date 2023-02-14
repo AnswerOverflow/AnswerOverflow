@@ -74,41 +74,37 @@ export const zUpdateUserIndexingInServerDisabledData = zUserServerSettingsCreate
     }),
   });
 
-export async function updateUserIndexingInServerDisabled({
+export async function updateUserServerIndexingPreference({
   updateData,
   onError,
   onSettingChange,
+  source,
 }: UpdateUserServerSettingsOverrideOptions & {
   updateData: z.infer<typeof zUpdateUserIndexingInServerDisabledData>;
+  source: ManageAccountSource;
 }) {
   let updateConsentResult: UserServerSettingsWithFlags | null = null;
   const result = await updateUserServerSettingsWithChecks({
-    source: "manage-account-menu",
+    source,
     updateData: updateData,
+    onError,
     checkIfSettingIsAlreadySet({ existingSettings }) {
       if (
         existingSettings.flags.messageIndexingDisabled === updateData.flags.messageIndexingDisabled
       ) {
         throw new UpdateSettingsError(
-          `Message indexing is already ${
+          `You have already ${
             updateData.flags.messageIndexingDisabled ? "disabled" : "enabled"
-          }"`,
+          } message indexing in this server`,
           "target-value-already-equals-goal-value"
         );
       }
     },
-    onError: onError,
     async onSettingChange(newSettings) {
       if (newSettings.flags.canPubliclyDisplayMessages) {
         updateConsentResult = await updateUserConsent({
-          consentSource: "disable-indexing-button",
-          onError: (err) => {
-            if (err.reason === "target-value-already-equals-goal-value") {
-              return;
-            } else {
-              onError?.(err);
-            }
-          },
+          source: source,
+          onError,
           onSettingChange,
           updateData: {
             serverId: updateData.serverId,
@@ -150,18 +146,17 @@ export const zUpdateUserConsetInput = zUserServerSettingsCreateWithDeps
   });
 
 export async function updateUserConsent({
-  consentSource,
+  source,
   updateData,
   ...rest
 }: {
-  consentSource: ConsentSource;
+  source: ConsentSource;
 } & UpdateUserServerSettingsOverrideOptions & {
     updateData: z.infer<typeof zUpdateUserConsetInput>;
   }) {
-  const isAutomatedConsent =
-    consentSource === "forum-post-guidelines" || consentSource === "read-the-rules";
+  const isAutomatedConsent = source === "forum-post-guidelines" || source === "read-the-rules";
   return await updateUserServerSettingsWithChecks({
-    source: consentSource,
+    source: source,
     updateData,
     checkIfSettingIsAlreadySet({ existingSettings }) {
       if (isAutomatedConsent) {
@@ -185,7 +180,7 @@ export async function updateUserConsent({
         updateData.flags.canPubliclyDisplayMessages
       ) {
         throw new UpdateSettingsError(
-          "Cannot grant consent as message indexing is disabled",
+          "You have disabled message indexing in this server. You cannot give consent to display your messages in this server until you enable message indexing",
           "setting-prevented-by-other-setting"
         );
       }

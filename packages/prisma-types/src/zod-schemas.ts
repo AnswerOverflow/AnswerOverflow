@@ -174,6 +174,10 @@ export const zUserServerSettingsFlags = toZObject(...userServerSettingsFlags);
 export const zUserServerSettings = z.object({
   userId: z.string(),
   serverId: z.string(),
+  bitfield: z.number(),
+});
+
+export const zUserServerSettingsWithFlags = zUserServerSettings.extend({
   flags: zUserServerSettingsFlags,
 });
 

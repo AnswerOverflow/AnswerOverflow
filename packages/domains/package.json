@@ -14,13 +14,14 @@
     "test:watch": "yarn run with-env vitest"
   },
   "dependencies": {
+    "@answeroverflow/db": "*",
+    "@answeroverflow/db-mock": "*",
     "@answeroverflow/elastic-types": "*",
     "@answeroverflow/prisma-types": "*",
-    "@answeroverflow/db-mock": "*",
-    "@answeroverflow/db": "*",
     "@answeroverflow/utils": "*",
     "@sapphire/bitfield": "^1.0.0",
     "discord-api-types": "^0.37.30",
+    "type-fest": "^3.5.7",
     "zod": "^3.20.2"
   },
   "devDependencies": {
