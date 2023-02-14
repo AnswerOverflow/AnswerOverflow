@@ -32,10 +32,6 @@
       "path": "packages/auth"
     },
     {
-      "name": "domains",
-      "path": "packages/domains"
-    },
-    {
       "name": "db",
       "path": "packages/db",
     },
