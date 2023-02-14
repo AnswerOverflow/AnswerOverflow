@@ -49,7 +49,6 @@ describe("Channel Operations", () => {
       const chnl = mockChannel(server, {
         inviteCode: getRandomId(5),
       });
-      console.log(chnl.inviteCode);
       await createChannel(chnl);
       const found = await findChannelByInviteCode(chnl.inviteCode!);
       expect(found).toStrictEqual(addFlagsToChannel(chnl));
@@ -102,23 +101,28 @@ describe("Channel Operations", () => {
   });
   describe("Update Channel", () => {
     it("should update channel without passing in the old settings", async () => {
-      const chnl = mockChannelWithFlags(server);
+      const chnl = mockChannelWithFlags(server, {
+        inviteCode: getRandomId(5),
+      });
       await createChannel(chnl);
       const updated = await updateChannel(
         {
           ...chnl,
           name: "new name",
+          inviteCode: null,
         },
         null
       );
       expect(updated).toStrictEqual({
         ...chnl,
         name: "new name",
+        inviteCode: null,
       });
       const found = await findChannelById(chnl.id);
       expect(found).toStrictEqual({
         ...chnl,
         name: "new name",
+        inviteCode: null,
       });
     });
     it("should update channel with passing in the old settings", async () => {

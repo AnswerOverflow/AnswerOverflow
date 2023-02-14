@@ -11,7 +11,7 @@ import {
 import { prisma, getDefaultChannel, Channel } from "@answeroverflow/prisma-types";
 import { dictToBitfield } from "@answeroverflow/prisma-types/src/bitfield";
 import { deleteManyMessagesByChannelId } from "./message";
-
+import { omit } from "@answeroverflow/utils";
 export const zChannelRequired = zChannel.pick({
   id: true,
   name: true,
@@ -86,9 +86,8 @@ function combineChannelSettingsFlagsToBitfield<
   const flagsToBitfieldValue = dictToBitfield(newFlags, channelBitfieldFlags);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { flags, ...updateDataWithoutFlags } = updated;
-  const sanitzedUpdateData = zChannelCreate.parse(updateDataWithoutFlags);
   return {
-    ...sanitzedUpdateData,
+    ...updateDataWithoutFlags,
     bitfield: flagsToBitfieldValue,
   };
 }
@@ -164,7 +163,7 @@ export async function createChannelWithDeps(data: z.infer<typeof zChannelCreateW
   await upsertServer(data.server);
   return createChannel({
     serverId: data.server.id,
-    ...data,
+    ...omit(data, "server"),
   });
 }
 

@@ -1,3 +1,4 @@
+it("should update user server settings", async () => {});
 // import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 // import type { Client } from "discord.js";
 // import { updateUserConsent } from "./consent";

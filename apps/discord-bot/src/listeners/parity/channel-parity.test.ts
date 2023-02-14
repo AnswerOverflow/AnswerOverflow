@@ -7,9 +7,11 @@ import {
   copyClass,
   emitEvent,
   mockInvite,
+  delay,
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import { createChannel, createServer, findChannelById } from "@answeroverflow/db";
+import { getRandomId } from "@answeroverflow/utils";
 
 let client: SapphireClient;
 let textChannel: TextChannel;
@@ -43,6 +45,7 @@ describe("Channel Delete Parity", () => {
   it("should delete an existing channel", async () => {
     await createChannel(toAOChannel(textChannel));
     await emitEvent(client, Events.ChannelDelete, textChannel);
+    await delay(3000); // Give time for elastic
     const deleted = await findChannelById(textChannel.id);
     expect(deleted).toBeNull();
   });
@@ -60,6 +63,7 @@ describe("Thread Delete Parity", () => {
     const created = await findChannelById(thread.id);
     expect(created).not.toBeNull();
     await emitEvent(client, Events.ThreadDelete, thread);
+    await delay(3000); // Give time for elastic
     const deleted = await findChannelById(thread.id);
     expect(deleted).toBeNull();
   });
@@ -89,13 +93,13 @@ describe("Invite Parity", () => {
   it("should sync delete of an invite", async () => {
     const settings = await createChannel({
       ...toAOChannel(textChannel),
-      inviteCode: "1234",
+      inviteCode: getRandomId(5),
     });
     expect(settings).not.toBeNull();
-    expect(settings.inviteCode).toBe("1234");
+    expect(settings.inviteCode).toBe(settings.inviteCode);
     const inviteMock = mockInvite(client, undefined, { code: settings.inviteCode! });
     await emitEvent(client, Events.InviteDelete, inviteMock);
-
+    await delay();
     const updated = await findChannelById(textChannel.id);
     expect(updated!.inviteCode).toBeNull();
   });

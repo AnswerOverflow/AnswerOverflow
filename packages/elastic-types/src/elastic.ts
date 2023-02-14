@@ -125,7 +125,7 @@ export class Elastic extends Client {
   public async bulkGetMessagesByChannelId(channelId: string, after?: string, limit?: number) {
     if (process.env.NODE_ENV === "test") {
       // TODO: Ugly hack for testing since elastic doesn't update immediately
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
     const result = await this.search<Message>({
       index: this.messagesIndex,
@@ -198,28 +198,13 @@ export class Elastic extends Client {
   public async deleteByChannelId(threadId: string) {
     if (process.env.NODE_ENV === "test") {
       // TODO: Ugly hack for testing since elastic doesn't update immediately
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
     const result = await this.deleteByQuery({
       index: this.messagesIndex,
       query: {
         term: {
           channelId: threadId,
-        },
-      },
-    });
-    return result.deleted;
-  }
-
-  public async deleteByParentId(parentId: string) {
-    if (process.env.NODE_ENV === "test") {
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-    }
-    const result = await this.deleteByQuery({
-      index: this.messagesIndex,
-      query: {
-        term: {
-          parentId,
         },
       },
     });
