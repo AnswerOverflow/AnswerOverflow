@@ -10,6 +10,7 @@ import {
 } from "@answeroverflow/prisma-types";
 import { prisma, getDefaultChannel, Channel } from "@answeroverflow/prisma-types";
 import { dictToBitfield } from "@answeroverflow/prisma-types/src/bitfield";
+import { deleteManyMessagesByChannelId } from "./message";
 
 export const zChannelRequired = zChannel.pick({
   id: true,
@@ -151,7 +152,11 @@ export async function updateManyChannels(data: z.infer<typeof zChannelUpdateMany
   return updated.map(addFlagsToChannel);
 }
 
-export function deleteChannel(id: string) {
+export async function deleteChannel(id: string) {
+  await deleteManyMessagesByChannelId(id);
+  // TODO: Ugly & how does this handle large amounts of threads?
+  const threads = await prisma.channel.findMany({ where: { parentId: id }, select: { id: true } });
+  await Promise.all(threads.map((t) => deleteChannel(t.id)));
   return prisma.channel.delete({ where: { id } });
 }
 

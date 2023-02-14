@@ -125,3 +125,7 @@ export async function deleteMessage(id: string) {
 export async function deleteManyMessages(ids: string[]) {
   return elastic.bulkDeleteMessages(ids);
 }
+
+export async function deleteManyMessagesByChannelId(channelId: string) {
+  return elastic.deleteByChannelId(channelId);
+}

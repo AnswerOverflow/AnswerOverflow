@@ -1,4 +1,11 @@
-import { mockChannel, mockChannelWithFlags, mockServer } from "@answeroverflow/db-mock";
+import {
+  mockChannel,
+  mockChannelWithFlags,
+  mockDiscordAccount,
+  mockMessage,
+  mockServer,
+  mockThread,
+} from "@answeroverflow/db-mock";
 import { addFlagsToChannel, Server } from "@answeroverflow/prisma-types";
 import { getRandomId } from "@answeroverflow/utils";
 import {
@@ -14,6 +21,8 @@ import {
   upsertChannel,
   upsertManyChannels,
 } from "./channel";
+import { createDiscordAccount } from "./discord-account";
+import { findMessageById, upsertMessage } from "./message";
 import { createServer } from "./server";
 
 let server: Server;
@@ -178,8 +187,39 @@ describe("Channel Operations", () => {
       const found = await findChannelById(chnl.id);
       expect(found).toBeNull();
     });
-    test.todo("delete channel threads");
-    test.todo("delete channel messages");
+    it("should delete a channel and all of its threads", async () => {
+      const chnl = mockChannel(server);
+      const thread = mockThread(chnl);
+      await createChannel(chnl);
+      await createChannel(thread);
+      await deleteChannel(chnl.id);
+      const found = await findChannelById(thread.id);
+      expect(found).toBeNull();
+    });
+    it("should delete all of a channels messages", async () => {
+      const chnl = mockChannel(server);
+      const author = mockDiscordAccount();
+      const msg = mockMessage(server, chnl, author);
+      await createDiscordAccount(author);
+      await createChannel(chnl);
+      await upsertMessage(msg);
+      await deleteChannel(chnl.id);
+      const found = await findMessageById(msg.id);
+      expect(found).toBeNull();
+    });
+    it("should delete all of a channels threads messages on parent channel delete", async () => {
+      const chnl = mockChannel(server);
+      const thread = mockThread(chnl);
+      const author = mockDiscordAccount();
+      const msg = mockMessage(server, thread, author);
+      await createDiscordAccount(author);
+      await createChannel(chnl);
+      await createChannel(thread);
+      await upsertMessage(msg);
+      await deleteChannel(chnl.id);
+      const found = await findMessageById(msg.id);
+      expect(found).toBeNull();
+    });
   });
   describe("Create channel with deps", () => {
     it("should create a channel and a server together", async () => {
