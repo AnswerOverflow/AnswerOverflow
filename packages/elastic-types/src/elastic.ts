@@ -123,10 +123,6 @@ export class Elastic extends Client {
   }
 
   public async bulkGetMessagesByChannelId(channelId: string, after?: string, limit?: number) {
-    if (process.env.NODE_ENV === "test") {
-      // TODO: Ugly hack for testing since elastic doesn't update immediately
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
     const result = await this.search<Message>({
       index: this.messagesIndex,
       query: {
@@ -177,6 +173,7 @@ export class Elastic extends Client {
       const message = await this.delete({
         index: this.messagesIndex,
         id,
+        refresh: process.env.NODE_ENV === "test",
       });
       switch (message.result) {
         case "deleted":
@@ -196,12 +193,9 @@ export class Elastic extends Client {
   }
 
   public async deleteByChannelId(threadId: string) {
-    if (process.env.NODE_ENV === "test") {
-      // TODO: Ugly hack for testing since elastic doesn't update immediately
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
     const result = await this.deleteByQuery({
       index: this.messagesIndex,
+      refresh: process.env.NODE_ENV === "test",
       query: {
         term: {
           channelId: threadId,
@@ -215,7 +209,7 @@ export class Elastic extends Client {
     const body: BulkOperationContainer[] = ids.flatMap((id) => [
       { delete: { _index: this.messagesIndex, _id: id } },
     ]);
-    const result = await this.bulk({ operations: body });
+    const result = await this.bulk({ operations: body, refresh: process.env.NODE_ENV === "test" });
     if (result.errors) {
       console.error(result);
       return false;
@@ -228,6 +222,7 @@ export class Elastic extends Client {
       const fetchedMessage = await this.update({
         index: this.messagesIndex,
         id: message.id,
+        refresh: process.env.NODE_ENV === "test",
         doc: message,
       });
       switch (fetchedMessage.result) {
@@ -255,6 +250,7 @@ export class Elastic extends Client {
       index: this.messagesIndex,
       id: message.id,
       doc: message,
+      refresh: process.env.NODE_ENV === "test",
       upsert: message,
     });
     switch (fetchedMessage.result) {
@@ -277,6 +273,7 @@ export class Elastic extends Client {
         { update: { _index: this.messagesIndex, _id: message.id } },
         { doc: message, doc_as_upsert: true },
       ]),
+      refresh: process.env.NODE_ENV === "test",
     });
     if (result.errors) {
       console.error(

@@ -7,7 +7,6 @@ import {
   copyClass,
   emitEvent,
   mockInvite,
-  delay,
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import { createChannel, createServer, findChannelById } from "@answeroverflow/db";
@@ -45,7 +44,6 @@ describe("Channel Delete Parity", () => {
   it("should delete an existing channel", async () => {
     await createChannel(toAOChannel(textChannel));
     await emitEvent(client, Events.ChannelDelete, textChannel);
-    await delay(3000); // Give time for elastic
     const deleted = await findChannelById(textChannel.id);
     expect(deleted).toBeNull();
   });
@@ -63,7 +61,6 @@ describe("Thread Delete Parity", () => {
     const created = await findChannelById(thread.id);
     expect(created).not.toBeNull();
     await emitEvent(client, Events.ThreadDelete, thread);
-    await delay(3000); // Give time for elastic
     const deleted = await findChannelById(thread.id);
     expect(deleted).toBeNull();
   });
@@ -99,7 +96,6 @@ describe("Invite Parity", () => {
     expect(settings.inviteCode).toBe(settings.inviteCode);
     const inviteMock = mockInvite(client, undefined, { code: settings.inviteCode! });
     await emitEvent(client, Events.InviteDelete, inviteMock);
-    await delay();
     const updated = await findChannelById(textChannel.id);
     expect(updated!.inviteCode).toBeNull();
   });
