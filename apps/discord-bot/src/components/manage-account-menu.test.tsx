@@ -15,7 +15,13 @@ import {
   mockGuild,
   mockTextChannel,
 } from "@answeroverflow/discordjs-mock";
-import { ManageAccountMenu } from "./manage-account-menu";
+import {
+  DISABLE_INDEXING_LABEL,
+  ENABLE_INDEXING_LABEL,
+  GRANT_CONSENT_LABEL,
+  ManageAccountMenu,
+  REVOKE_CONSENT_LABEL,
+} from "./manage-account-menu";
 import { toAOServer } from "~discord-bot/utils/conversions";
 
 let reacord: ReacordTester;
@@ -43,18 +49,13 @@ describe("Manage Account Menu", () => {
         reacord,
         <ManageAccountMenu initalSettings={defaultSettings} initalIsGloballyIgnored={false} />
       );
-      const enableIndexingButton = message!.findButtonByLabel(
-        "Publicly display messages on Answer Overflow",
-        reacord
-      );
+      const enableIndexingButton = message!.findButtonByLabel(GRANT_CONSENT_LABEL, reacord);
       expect(enableIndexingButton).toBeDefined();
       await enableIndexingButton!.click(textChannel, members.guildMemberOwner);
       // Used to verify no errors were thrown
       expect(reacord.messages).toHaveLength(1);
-      expect(
-        message!.hasButton("Publicly display messages on Answer Overflow", reacord)
-      ).toBeFalsy();
-      const button = message!.findButtonByLabel("Disable publicly displaying messages", reacord);
+      expect(message!.hasButton(GRANT_CONSENT_LABEL, reacord)).toBeFalsy();
+      const button = message!.findButtonByLabel(REVOKE_CONSENT_LABEL, reacord);
       expect(button).toBeDefined();
     });
     it("should disable consent", async () => {
@@ -69,19 +70,13 @@ describe("Manage Account Menu", () => {
           initalIsGloballyIgnored={false}
         />
       );
-      const disableIndexingButton = message!.findButtonByLabel(
-        "Disable publicly displaying messages",
-        reacord
-      );
+      const disableIndexingButton = message!.findButtonByLabel(REVOKE_CONSENT_LABEL, reacord);
       expect(disableIndexingButton).toBeDefined();
       await disableIndexingButton!.click(textChannel, members.guildMemberOwner);
       // Used to verify no errors were thrown
       expect(reacord.messages).toHaveLength(1);
-      expect(message!.hasButton("Disable publicly displaying messages", reacord)).toBeFalsy();
-      const button = message!.findButtonByLabel(
-        "Publicly display messages on Answer Overflow",
-        reacord
-      );
+      expect(message!.hasButton(REVOKE_CONSENT_LABEL, reacord)).toBeFalsy();
+      const button = message!.findButtonByLabel(GRANT_CONSENT_LABEL, reacord);
       expect(button).toBeDefined();
     });
   });
@@ -98,15 +93,12 @@ describe("Manage Account Menu", () => {
           initalIsGloballyIgnored={false}
         />
       );
-      const enableIndexingButton = message!.findButtonByLabel(
-        "Enable indexing of messages",
-        reacord
-      );
+      const enableIndexingButton = message!.findButtonByLabel(ENABLE_INDEXING_LABEL, reacord);
       expect(enableIndexingButton).toBeDefined();
       await enableIndexingButton!.click(textChannel, members.guildMemberOwner);
 
-      expect(message!.hasButton("Enable indexing of messages", reacord)).toBeFalsy();
-      const button = message!.findButtonByLabel("Disable indexing of messages", reacord);
+      expect(message!.hasButton(ENABLE_INDEXING_LABEL, reacord)).toBeFalsy();
+      const button = message!.findButtonByLabel(DISABLE_INDEXING_LABEL, reacord);
       expect(button).toBeDefined();
     });
     it("should disable indexing of user messages", async () => {
@@ -114,20 +106,14 @@ describe("Manage Account Menu", () => {
         reacord,
         <ManageAccountMenu initalSettings={defaultSettings} initalIsGloballyIgnored={false} />
       );
-      const disableIndexingButton = message!.findButtonByLabel(
-        "Disable indexing of messages",
-        reacord
-      );
+      const disableIndexingButton = message!.findButtonByLabel(DISABLE_INDEXING_LABEL, reacord);
       expect(disableIndexingButton).toBeDefined();
       await disableIndexingButton!.click(textChannel, members.guildMemberOwner);
 
-      expect(message!.hasButton("Disable indexing of messages", reacord)).toBeFalsy();
-      const button = message!.findButtonByLabel("Enable indexing of messages", reacord);
+      expect(message!.hasButton(DISABLE_INDEXING_LABEL, reacord)).toBeFalsy();
+      const button = message!.findButtonByLabel(ENABLE_INDEXING_LABEL, reacord);
       expect(button).toBeDefined();
-      const consentButton = message!.findButtonByLabel(
-        "Publicly display messages on Answer Overflow",
-        reacord
-      );
+      const consentButton = message!.findButtonByLabel(GRANT_CONSENT_LABEL, reacord);
       expect(consentButton).toBeDefined();
       expect(consentButton?.disabled).toBeTruthy();
     });

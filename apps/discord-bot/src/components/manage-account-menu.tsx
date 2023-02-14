@@ -179,10 +179,10 @@ export function ManageAccountMenu({
         {instructions.map(
           ({ title, instructions, enabled }) =>
             enabled && (
-              <>
+              <React.Fragment key={title}>
                 **{title}** - {instructions}
-                <Spacer count={2} key={title} />
-              </>
+                <Spacer count={2} />
+              </React.Fragment>
             )
         )}
       </Embed>
