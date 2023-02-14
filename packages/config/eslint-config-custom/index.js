@@ -23,7 +23,7 @@ module.exports = {
     "no-restricted-imports": [
       "error",
       {
-        patterns: ["../..*"],
+        patterns: ["../..*", "packages/*"],
       },
     ],
     "prefer-arrow-callback": [

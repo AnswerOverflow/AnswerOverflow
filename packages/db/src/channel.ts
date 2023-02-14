@@ -9,7 +9,6 @@ import {
   zChannel,
 } from "@answeroverflow/prisma-types";
 import { prisma, getDefaultChannel, Channel } from "@answeroverflow/prisma-types";
-import { omit } from "@answeroverflow/utils";
 import { dictToBitfield } from "@answeroverflow/prisma-types/src/bitfield";
 
 export const zChannelRequired = zChannel.pick({
@@ -86,8 +85,9 @@ function combineChannelSettingsFlagsToBitfield<
   const flagsToBitfieldValue = dictToBitfield(newFlags, channelBitfieldFlags);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { flags, ...updateDataWithoutFlags } = updated;
+  const sanitzedUpdateData = zChannelCreate.parse(updateDataWithoutFlags);
   return {
-    ...updateDataWithoutFlags,
+    ...sanitzedUpdateData,
     bitfield: flagsToBitfieldValue,
   };
 }
@@ -126,7 +126,9 @@ export async function createManyChannels(data: z.infer<typeof zChannelCreateMany
   return data.map((c) => getDefaultChannel({ ...c }));
 }
 
-export async function updateChannel(data: z.infer<typeof zChannelUpdate>, old: Channel) {
+export async function updateChannel(data: z.infer<typeof zChannelUpdate>, old: Channel | null) {
+  if (!old) old = await findChannelById(data.id);
+  if (!old) throw new Error("Channel not found");
   const updated = await prisma.channel.update({
     where: { id: data.id },
     data: combineChannelSettingsFlagsToBitfield({
@@ -157,7 +159,7 @@ export async function createChannelWithDeps(data: z.infer<typeof zChannelCreateW
   await upsertServer(data.server);
   return createChannel({
     serverId: data.server.id,
-    ...omit(data, "server"),
+    ...data,
   });
 }
 

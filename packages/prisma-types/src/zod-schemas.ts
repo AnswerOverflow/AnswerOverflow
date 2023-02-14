@@ -37,6 +37,7 @@ export const zChannel = z.object({
   id: z.string(),
   name: z.string(),
   serverId: z.string(),
+  bitfield: z.number(),
   type: z.number().refine(
     (n) => ALLOWED_CHANNEL_TYPES.has(n),
     "Channel type can only be guild forum, text, or announcement" // TODO: Make a type error if possible

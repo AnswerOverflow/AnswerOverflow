@@ -44,7 +44,7 @@ export function mergeUserServerSettings<T extends z.infer<typeof zUserServerSett
   updated: T
 ) {
   const { flags, ...updateDataWithoutFlags } = updated;
-  const sanitizedUpdateData = zUserServerSettingsUpdate.parse(updateDataWithoutFlags);
+  const sanitizedUpdateData = zUserServerSettingsCreate.parse(updateDataWithoutFlags);
   return {
     ...sanitizedUpdateData,
     bitfield: flags ? mergeUserServerSettingsFlags(old.bitfield, flags) : undefined,

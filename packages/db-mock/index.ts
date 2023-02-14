@@ -10,6 +10,11 @@ import {
   UserServerSettings,
   UserServerSettingsWithFlags,
   addFlagsToUserServerSettings,
+  ChannelWithFlags,
+  addFlagsToChannel,
+  dictToBitfield,
+  channelBitfieldFlags,
+  userServerSettingsFlags,
 } from "@answeroverflow/prisma-types";
 import { getRandomId } from "@answeroverflow/utils";
 import { ChannelType } from "discord-api-types/v10";
@@ -58,6 +63,24 @@ export function mockChannel(server: Server, override?: Omit<Partial<Channel>, "s
   });
 }
 
+export function mockChannelWithFlags(
+  server: Server,
+  override: Omit<PartialDeep<ChannelWithFlags>, "serverId" | "bitfield"> = {}
+): ChannelWithFlags {
+  const base = addFlagsToChannel(mockChannel(server));
+  const { flags, ...rest } = override;
+  const data = {
+    ...base,
+    flags: {
+      ...base.flags,
+      ...flags,
+    },
+    ...rest,
+  };
+  data.bitfield = dictToBitfield(data.flags, channelBitfieldFlags);
+  return data;
+}
+
 export function mockThread(
   parent: Channel,
   override?: Omit<Partial<Channel>, "parentId" | "serverId">
@@ -87,7 +110,7 @@ export function mockUserServerSettingsWithFlags(
 ): UserServerSettingsWithFlags {
   const base = addFlagsToUserServerSettings(mockUserServerSettings());
   const { flags, ...rest } = override;
-  return {
+  const data = {
     ...base,
     flags: {
       ...base.flags,
@@ -95,4 +118,6 @@ export function mockUserServerSettingsWithFlags(
     },
     ...rest,
   };
+  data.bitfield = dictToBitfield(data.flags, userServerSettingsFlags);
+  return data;
 }

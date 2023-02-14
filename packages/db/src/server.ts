@@ -29,8 +29,9 @@ export function combineServerSettings<
   T extends z.infer<typeof zServerMutable>
 >({ old, updated }: { old: F; updated: T }) {
   const { flags, ...updateDataWithoutFlags } = updated;
+  const sanitizedUpdateData = zServerCreate.parse(updateDataWithoutFlags);
   return {
-    ...updateDataWithoutFlags,
+    ...sanitizedUpdateData,
     bitfield: flags ? mergeServerFlags(old.bitfield, flags) : undefined,
   };
 }
