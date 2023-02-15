@@ -8,6 +8,7 @@ import {
 } from "@answeroverflow/db";
 import { userServerSettingsRouter } from "./user-server-settings";
 import { mockDiscordAccount, mockServer } from "@answeroverflow/db-mock";
+import { NOT_AUTHORIZED_MESSAGE } from "~api/utils/permissions";
 
 let server: Server;
 let discordAccount: DiscordAccount;
@@ -61,6 +62,50 @@ describe("User Server Settings Operations", () => {
           expect(userServerSettings).toBeDefined();
           expect(userServerSettings?.serverId).toEqual(server.id);
           expect(userServerSettings?.userId).toEqual(discordAccount.id);
+        },
+      });
+    });
+  });
+  describe("Set Indexing Disabled", () => {
+    it("should fail all variants setting indexing disabled as a different user", async () => {
+      await testAllSources({
+        async operation(source) {
+          const { ctx } = await mockAccountWithServersCallerCtx(server, source);
+          const router = userServerSettingsRouter.createCaller(ctx);
+          await expect(
+            router.setIndexingDisabled({
+              data: {
+                serverId: server.id,
+                user: discordAccount,
+                flags: {
+                  messageIndexingDisabled: true,
+                },
+              },
+              source: "manage-account-menu",
+            })
+          ).rejects.toThrowError(NOT_AUTHORIZED_MESSAGE);
+        },
+      });
+    });
+    it("should succeed all variants setting indexing disabled as that user", async () => {
+      await testAllSources({
+        async operation(source) {
+          const { ctx, account } = await mockAccountWithServersCallerCtx(server, source, undefined);
+          const router = userServerSettingsRouter.createCaller(ctx);
+          const userServerSettings = await router.setIndexingDisabled({
+            data: {
+              serverId: server.id,
+              user: account,
+              flags: {
+                messageIndexingDisabled: true,
+              },
+            },
+            source: "manage-account-menu",
+          });
+          expect(userServerSettings).toBeDefined();
+          expect(userServerSettings?.serverId).toEqual(server.id);
+          expect(userServerSettings?.userId).toEqual(account.id);
+          expect(userServerSettings?.flags.messageIndexingDisabled).toEqual(true);
         },
       });
     });

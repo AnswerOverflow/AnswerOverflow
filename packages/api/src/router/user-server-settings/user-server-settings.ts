@@ -23,23 +23,24 @@ import {
   MESSAGE_INDEXING_ALREADY_ENABLED_MESSAGE,
   CONSENT_PREVENTED_BY_DISABLED_INDEXING_MESSAGE,
 } from "./types";
+import type { Context } from "../context";
 export const SERVER_NOT_SETUP_MESSAGE = "Server is not setup for Answer Overflow yet";
 
-function assertValuesAreNotEqual({
+function assertBoolsAreNotEqual({
   oldValue,
   newValue,
-  truthyMessage,
-  falsyMessage,
+  messageIfBothTrue,
+  messageIfBothFalse,
 }: {
   oldValue: boolean;
   newValue: boolean;
-  truthyMessage: string;
-  falsyMessage: string;
+  messageIfBothTrue: string;
+  messageIfBothFalse: string;
 }) {
   if (oldValue === newValue) {
     return new TRPCError({
       code: "PRECONDITION_FAILED",
-      message: oldValue ? truthyMessage : falsyMessage,
+      message: oldValue ? messageIfBothTrue : messageIfBothFalse,
     });
   }
   return;
@@ -63,9 +64,10 @@ function assertIsNotValue({
   return;
 }
 
-async function findOrGiveDefaultUserServerSettings({
+async function mutateUserServerSettings({
   operation,
   find,
+  ctx,
 }: {
   operation: (input: {
     oldSettings: UserServerSettingsWithFlags;
@@ -75,16 +77,22 @@ async function findOrGiveDefaultUserServerSettings({
     userId: string;
     serverId: string;
   };
+  ctx: Context;
 }) {
-  let oldSettings = await findUserServerSettingsById(find);
-  let doSettingsExistAlready = true;
-  if (!oldSettings) {
-    oldSettings = getDefaultUserServerSettingsWithFlags(find);
-    doSettingsExistAlready = false;
-  } else {
-    doSettingsExistAlready = true;
-  }
-  return operation({ oldSettings, doSettingsExistAlready });
+  return protectedMutation({
+    permissions: () => assertIsUser(ctx, find.userId),
+    operation: async () => {
+      let oldSettings = await findUserServerSettingsById(find);
+      let doSettingsExistAlready = true;
+      if (!oldSettings) {
+        oldSettings = getDefaultUserServerSettingsWithFlags(find);
+        doSettingsExistAlready = false;
+      } else {
+        doSettingsExistAlready = true;
+      }
+      return operation({ oldSettings, doSettingsExistAlready });
+    },
+  });
 }
 
 const userServerSettingsCrudRouter = router({
@@ -112,20 +120,18 @@ const userServerSettingsCrudRouter = router({
       })
     )
     .mutation(({ input, ctx }) => {
-      return findOrGiveDefaultUserServerSettings({
+      return mutateUserServerSettings({
+        ctx,
         find: { userId: input.data.user.id, serverId: input.data.serverId },
         operation: ({ oldSettings: existingSettings }) =>
           protectedMutation({
-            permissions: [
-              () => assertIsUser(ctx, input.data.user.id),
-              () =>
-                assertValuesAreNotEqual({
-                  falsyMessage: MESSAGE_INDEXING_ALREADY_DISABLED_MESSAGE,
-                  truthyMessage: MESSAGE_INDEXING_ALREADY_ENABLED_MESSAGE,
-                  newValue: input.data.flags.messageIndexingDisabled,
-                  oldValue: existingSettings.flags.messageIndexingDisabled,
-                }),
-            ],
+            permissions: () =>
+              assertBoolsAreNotEqual({
+                messageIfBothFalse: MESSAGE_INDEXING_ALREADY_ENABLED_MESSAGE,
+                messageIfBothTrue: MESSAGE_INDEXING_ALREADY_DISABLED_MESSAGE,
+                newValue: input.data.flags.messageIndexingDisabled,
+                oldValue: existingSettings.flags.messageIndexingDisabled,
+              }),
             operation: () =>
               upsertUserServerSettingsWithDeps({
                 ...input.data,
@@ -158,12 +164,12 @@ const userServerSettingsCrudRouter = router({
     .mutation(async ({ input, ctx }) => {
       const isAutomatedConsent =
         input.source === "forum-post-guidelines" || input.source === "read-the-rules";
-      return findOrGiveDefaultUserServerSettings({
+      return mutateUserServerSettings({
+        ctx,
         find: { userId: input.data.user.id, serverId: input.data.serverId },
         operation: ({ oldSettings, doSettingsExistAlready }) =>
           protectedMutation({
             permissions: [
-              () => assertIsUser(ctx, input.data.user.id),
               () =>
                 input.data.flags.canPubliclyDisplayMessages
                   ? assertIsNotValue({
@@ -179,9 +185,9 @@ const userServerSettingsCrudRouter = router({
                       expectedToNotBeValue: true,
                       errorMessage: CONSENT_EXPLICITLY_SET_MESSAGE,
                     })
-                  : assertValuesAreNotEqual({
-                      falsyMessage: CONSENT_ALREADY_DENIED_MESSAGE,
-                      truthyMessage: CONSENT_ALREADY_GRANTED_MESSAGE,
+                  : assertBoolsAreNotEqual({
+                      messageIfBothFalse: CONSENT_ALREADY_DENIED_MESSAGE,
+                      messageIfBothTrue: CONSENT_ALREADY_GRANTED_MESSAGE,
                       newValue: input.data.flags.canPubliclyDisplayMessages,
                       oldValue: oldSettings.flags.canPubliclyDisplayMessages,
                     }),

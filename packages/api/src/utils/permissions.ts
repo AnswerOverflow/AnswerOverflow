@@ -106,12 +106,14 @@ export async function assertIsIgnoredAccount(ctx: Context, targetUserId: string)
   return;
 }
 
+export const NOT_AUTHORIZED_MESSAGE = "You are not authorized to do this";
+
 export function assertIsUser(ctx: Context, targetUserId: string) {
   if (isSuperUser(ctx)) return;
   if (ctx.discordAccount?.id !== targetUserId) {
     return new TRPCError({
       code: "UNAUTHORIZED",
-      message: "You are not authorized to do this",
+      message: NOT_AUTHORIZED_MESSAGE,
     });
   }
   return;
