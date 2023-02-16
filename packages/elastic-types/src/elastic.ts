@@ -205,6 +205,19 @@ export class Elastic extends Client {
     return result.deleted;
   }
 
+  public async deleteByUserId(userId: string) {
+    const result = await this.deleteByQuery({
+      index: this.messagesIndex,
+      refresh: process.env.NODE_ENV === "test",
+      query: {
+        term: {
+          authorId: userId,
+        },
+      },
+    });
+    return result.deleted;
+  }
+
   public async bulkDeleteMessages(ids: string[]) {
     const body: BulkOperationContainer[] = ids.flatMap((id) => [
       { delete: { _index: this.messagesIndex, _id: id } },

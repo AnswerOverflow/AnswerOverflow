@@ -90,6 +90,20 @@ describe("ElasticSearch", () => {
       expect(fetchedDeletedMessage).toBeNull();
     });
   });
+  describe("Delete by user id", () => {
+    it("should delete a message by user id", async () => {
+      const userMessage = {
+        ...msg1,
+        authorId: getRandomId(),
+      };
+      await elastic.upsertMessage(userMessage);
+      const deletedMessage = await elastic.deleteByUserId(userMessage.authorId);
+      expect(deletedMessage).toBe(1);
+      // wait 1 second
+      const fetchedDeletedMessage = await elastic.getMessage(userMessage.id);
+      expect(fetchedDeletedMessage).toBeNull();
+    });
+  });
   describe("Message Fetch", () => {
     it("should search for a message", async () => {
       await elastic.upsertMessage(msg1);

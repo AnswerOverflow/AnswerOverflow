@@ -129,3 +129,7 @@ export async function deleteManyMessages(ids: string[]) {
 export async function deleteManyMessagesByChannelId(channelId: string) {
   return elastic.deleteByChannelId(channelId);
 }
+
+export async function deleteManyMessagesByUserId(userId: string) {
+  return elastic.deleteByUserId(userId);
+}
