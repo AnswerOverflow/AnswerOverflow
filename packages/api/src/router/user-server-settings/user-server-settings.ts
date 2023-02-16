@@ -132,16 +132,7 @@ const userServerSettingsCrudRouter = router({
                 newValue: input.data.flags.messageIndexingDisabled,
                 oldValue: existingSettings.flags.messageIndexingDisabled,
               }),
-            operation: () =>
-              upsertUserServerSettingsWithDeps({
-                ...input.data,
-                flags: {
-                  ...input.data.flags,
-                  canPubliclyDisplayMessages: input.data.flags.messageIndexingDisabled
-                    ? false
-                    : existingSettings.flags.canPubliclyDisplayMessages,
-                },
-              }),
+            operation: () => upsertUserServerSettingsWithDeps(input.data),
           }),
       });
     }),

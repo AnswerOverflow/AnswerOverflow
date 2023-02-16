@@ -78,5 +78,35 @@ describe("User Server Settings", () => {
       });
       expect(found!.flags.canPubliclyDisplayMessages).toBe(true);
     });
+    it("should disable consent when setting message indexing to false", async () => {
+      await updateUserServerSettings(
+        {
+          serverId: server.id,
+          userId: account.id,
+          flags: {
+            canPubliclyDisplayMessages: true,
+          },
+        },
+        existing
+      );
+      const updated = await updateUserServerSettings(
+        {
+          serverId: server.id,
+          userId: account.id,
+          flags: {
+            messageIndexingDisabled: true,
+          },
+        },
+        null
+      );
+      expect(updated.flags.canPubliclyDisplayMessages).toBe(false);
+      expect(updated.flags.messageIndexingDisabled).toBe(true);
+      const found = await findUserServerSettingsById({
+        serverId: server.id,
+        userId: account.id,
+      });
+      expect(found!.flags.canPubliclyDisplayMessages).toBe(false);
+      expect(found!.flags.messageIndexingDisabled).toBe(true);
+    });
   });
 });

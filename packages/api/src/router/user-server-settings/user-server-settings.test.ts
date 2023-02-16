@@ -109,5 +109,37 @@ describe("User Server Settings Operations", () => {
         },
       });
     });
+    it("should succeed all variants of setting indexing disabled on a user that has consented to publicly display their messages", async () => {
+      await testAllSources({
+        async operation(source) {
+          const { ctx, account } = await mockAccountWithServersCallerCtx(server, source, undefined);
+          const router = userServerSettingsRouter.createCaller(ctx);
+          await createDiscordAccount(account);
+          await createUserServerSettings({
+            serverId: server.id,
+            userId: account.id,
+            flags: {
+              canPubliclyDisplayMessages: true,
+            },
+          });
+
+          const userServerSettings = await router.setIndexingDisabled({
+            data: {
+              serverId: server.id,
+              user: account,
+              flags: {
+                messageIndexingDisabled: true,
+              },
+            },
+            source: "manage-account-menu",
+          });
+          expect(userServerSettings).toBeDefined();
+          expect(userServerSettings?.serverId).toEqual(server.id);
+          expect(userServerSettings?.userId).toEqual(account.id);
+          expect(userServerSettings?.flags.messageIndexingDisabled).toEqual(true);
+          expect(userServerSettings?.flags.canPubliclyDisplayMessages).toEqual(true);
+        },
+      });
+    });
   });
 });

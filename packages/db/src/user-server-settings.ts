@@ -47,9 +47,14 @@ export function mergeUserServerSettings<T extends z.infer<typeof zUserServerSett
   updated: T
 ) {
   const { flags, ...updateDataWithoutFlags } = updated;
+  // Disable flags that depend on other flags
+  if (flags?.messageIndexingDisabled) {
+    flags.canPubliclyDisplayMessages = false;
+  }
+  const bitfield = flags ? mergeUserServerSettingsFlags(old.bitfield, flags) : undefined;
   return zUserServerSettings.parse({
     ...updateDataWithoutFlags,
-    bitfield: flags ? mergeUserServerSettingsFlags(old.bitfield, flags) : undefined,
+    bitfield,
   });
 }
 
