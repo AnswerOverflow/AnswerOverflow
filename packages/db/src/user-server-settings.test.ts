@@ -3,7 +3,7 @@ import type {
   Server,
   UserServerSettingsWithFlags,
 } from "@answeroverflow/prisma-types";
-import { mockDiscordAccount, mockServer } from "@answeroverflow/db-mock";
+import { mockChannel, mockDiscordAccount, mockMessage, mockServer } from "@answeroverflow/db-mock";
 import { addFlagsToUserServerSettings } from "@answeroverflow/prisma-types";
 import { createServer } from "./server";
 import { createDiscordAccount } from "./discord-account";
@@ -12,6 +12,8 @@ import {
   findUserServerSettingsById,
   updateUserServerSettings,
 } from "./user-server-settings";
+import { findMessageById, upsertMessage } from "./message";
+import { createChannel } from "./channel";
 
 let server: Server;
 let account: DiscordAccount;
@@ -107,6 +109,33 @@ describe("User Server Settings", () => {
       });
       expect(found!.flags.canPubliclyDisplayMessages).toBe(false);
       expect(found!.flags.messageIndexingDisabled).toBe(true);
+    });
+    it("should delete user server messages when setting indexing enabled to false", async () => {
+      const chnl = mockChannel(server);
+      await createChannel(chnl);
+      const msg = await upsertMessage(mockMessage(server, chnl, account));
+      const createdMsg = await findMessageById(msg.id);
+      expect(createdMsg).not.toBe(null);
+      const updated = await updateUserServerSettings(
+        {
+          serverId: server.id,
+          userId: account.id,
+          flags: {
+            messageIndexingDisabled: true,
+          },
+        },
+        null
+      );
+      expect(updated.flags.canPubliclyDisplayMessages).toBe(false);
+      expect(updated.flags.messageIndexingDisabled).toBe(true);
+      const found = await findUserServerSettingsById({
+        serverId: server.id,
+        userId: account.id,
+      });
+      expect(found!.flags.canPubliclyDisplayMessages).toBe(false);
+      expect(found!.flags.messageIndexingDisabled).toBe(true);
+      const deletedMsg = await findMessageById(msg.id);
+      expect(deletedMsg).toBe(null);
     });
   });
 });

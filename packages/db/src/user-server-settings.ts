@@ -4,6 +4,7 @@ import {
   getDefaultUserServerSettings,
   UserServerSettings,
   zUserServerSettings,
+  getDefaultUserServerSettingsWithFlags,
 } from "@answeroverflow/prisma-types";
 import { upsertDiscordAccount, zDiscordAccountUpsert } from "./discord-account";
 import {
@@ -42,14 +43,26 @@ export type UserServerSettingsCreateWithDeps = z.infer<typeof zUserServerSetting
 
 export const zUserServerSettingsUpdate = zUserServerSettingsMutable.merge(zUserServerSettingsFind);
 
-export function mergeUserServerSettings<T extends z.infer<typeof zUserServerSettingsMutable>>(
+export async function mergeUserServerSettings<T extends z.infer<typeof zUserServerSettingsMutable>>(
   old: UserServerSettings,
   updated: T
 ) {
   const { flags, ...updateDataWithoutFlags } = updated;
+  const oldFlags = old.bitfield
+    ? addFlagsToUserServerSettings(old).flags
+    : getDefaultUserServerSettingsWithFlags({
+        userId: old.userId,
+        serverId: old.serverId,
+      }).flags;
   // Disable flags that depend on other flags
   if (flags?.messageIndexingDisabled) {
     flags.canPubliclyDisplayMessages = false;
+  }
+  if (flags?.messageIndexingDisabled && !oldFlags?.messageIndexingDisabled) {
+    await elastic?.deleteByUserIdInServer({
+      userId: old.userId,
+      serverId: old.serverId,
+    });
   }
   const bitfield = flags ? mergeUserServerSettingsFlags(old.bitfield, flags) : undefined;
   return zUserServerSettings.parse({
@@ -93,13 +106,14 @@ export async function findManyUserServerSettings(where: UserServerSettingsFindBy
 }
 
 export async function createUserServerSettings(data: z.infer<typeof zUserServerSettingsCreate>) {
+  const updateData = await mergeUserServerSettings(
+    getDefaultUserServerSettings({
+      ...data,
+    }),
+    data
+  );
   const created = await prisma.userServerSettings.create({
-    data: mergeUserServerSettings(
-      getDefaultUserServerSettings({
-        ...data,
-      }),
-      data
-    ),
+    data: updateData,
   });
   return addFlagsToUserServerSettings(created);
 }
@@ -117,6 +131,7 @@ export async function updateUserServerSettings(
   if (!existing) {
     throw new Error("UserServerSettings not found");
   }
+  const updateData = await mergeUserServerSettings(existing, data);
   const updated = await prisma.userServerSettings.update({
     where: {
       userId_serverId: {
@@ -124,7 +139,7 @@ export async function updateUserServerSettings(
         serverId: data.serverId,
       },
     },
-    data: mergeUserServerSettings(existing, data),
+    data: updateData,
   });
   return addFlagsToUserServerSettings(updated);
 }

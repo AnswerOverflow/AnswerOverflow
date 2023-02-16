@@ -97,7 +97,29 @@ describe("ElasticSearch", () => {
         authorId: getRandomId(),
       };
       await elastic.upsertMessage(userMessage);
+      const created = await elastic.getMessage(userMessage.id);
+      expect(created).toBeDefined();
       const deletedMessage = await elastic.deleteByUserId(userMessage.authorId);
+      expect(deletedMessage).toBe(1);
+      // wait 1 second
+      const fetchedDeletedMessage = await elastic.getMessage(userMessage.id);
+      expect(fetchedDeletedMessage).toBeNull();
+    });
+  });
+  describe("Delete by user id in a server", () => {
+    it("should delete a message by user id in a server", async () => {
+      const userMessage = {
+        ...msg1,
+        authorId: getRandomId(),
+        serverId: getRandomId(),
+      };
+      await elastic.upsertMessage(userMessage);
+      const created = await elastic.getMessage(userMessage.id);
+      expect(created).toBeDefined();
+      const deletedMessage = await elastic.deleteByUserIdInServer({
+        userId: userMessage.authorId,
+        serverId: userMessage.serverId,
+      });
       expect(deletedMessage).toBe(1);
       // wait 1 second
       const fetchedDeletedMessage = await elastic.getMessage(userMessage.id);
@@ -113,7 +135,6 @@ describe("ElasticSearch", () => {
       expect(fetchedMessage).toEqual(msg1);
     });
   });
-
   describe("Message Fetch Bulk", () => {
     it("should bulk fetch messages", async () => {
       await elastic.upsertMessage(msg1);
