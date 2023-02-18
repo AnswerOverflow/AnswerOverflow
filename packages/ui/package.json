@@ -30,7 +30,6 @@
     "highlight.js": "^11.7.0",
     "html-react-parser": "^3.0.8",
     "next": "13.0.2",
-    "react-archer": "^4.2.2",
     "react-use-measure": "^2.1.1",
     "react-wrap-balancer": "^0.4.0",
     "react-xarrows": "^2.0.2",

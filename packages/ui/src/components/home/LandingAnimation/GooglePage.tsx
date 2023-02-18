@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { forwardRef } from "react";
-import googleLogo from "../../../../../../apps/nextjs/public/googlelogo.png";
 
 export interface GooglePageProps {
   result: {
@@ -15,11 +14,13 @@ export const GooglePage = forwardRef<HTMLDivElement, GooglePageProps>(function G
   ref
 ) {
   return (
-    <div className="flex min-h-[10rem] w-[38rem] flex-col items-center justify-center gap-5 rounded-md bg-[#202124] py-5">
+    <div className="flex min-h-[10rem] w-full flex-col items-center justify-center gap-5 rounded-md bg-[#202124] py-5">
       {/* Searchbar */}
-      <div className="flex flex-row items-center justify-center px-10">
-        <Image src={googleLogo} alt={"Google Logo"} />
-        <div className="w-full grow rounded-[24px] bg-[#303134] p-3 px-5 font-sans text-[#e8eaed]">
+      <div className="flex w-full flex-col items-center justify-center gap-5 px-5 2xl:flex-row">
+        <div className="relative hidden h-14 w-28 2xl:block">
+          <Image src={"./googlelogo.png"} alt={"Google Logo"} fill className="object-contain" />
+        </div>
+        <div className="w-full grow rounded-[24px] bg-[#303134] py-3 px-5 font-sans text-[#e8eaed]">
           <span>How do I index my discord channels into google?</span>
         </div>
       </div>

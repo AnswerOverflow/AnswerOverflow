@@ -1,0 +1,10 @@
+.arrow > div > svg > path {
+    stroke-dasharray: 10;
+    animation: dash 10s linear infinite;
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: -500;
+    }
+}
