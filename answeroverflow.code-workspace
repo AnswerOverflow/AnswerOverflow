@@ -61,6 +61,7 @@
     },
   ],
   "settings": {
+    "editor.tabSize": 2,
     "tailwindCSS.experimental.classRegex": [
       [
         "cva\\(([^)]*)\\)",
@@ -146,5 +147,5 @@
       "ms-vscode-remote.vscode-remote-extensionpack",
       "orta.vscode-twoslash-queries"
     ]
-  }
+  },
 }
