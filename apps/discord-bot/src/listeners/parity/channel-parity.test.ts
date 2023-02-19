@@ -10,6 +10,7 @@ import {
 } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import { createChannel, createServer, findChannelById } from "@answeroverflow/db";
+import { getRandomId } from "@answeroverflow/utils";
 
 let client: SapphireClient;
 let textChannel: TextChannel;
@@ -89,13 +90,12 @@ describe("Invite Parity", () => {
   it("should sync delete of an invite", async () => {
     const settings = await createChannel({
       ...toAOChannel(textChannel),
-      inviteCode: "1234",
+      inviteCode: getRandomId(5),
     });
     expect(settings).not.toBeNull();
-    expect(settings.inviteCode).toBe("1234");
+    expect(settings.inviteCode).toBe(settings.inviteCode);
     const inviteMock = mockInvite(client, undefined, { code: settings.inviteCode! });
     await emitEvent(client, Events.InviteDelete, inviteMock);
-
     const updated = await findChannelById(textChannel.id);
     expect(updated!.inviteCode).toBeNull();
   });

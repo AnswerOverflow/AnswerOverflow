@@ -10,81 +10,59 @@ import type { CommandInteraction } from "discord.js";
 import type { ComponentEvent } from "@answeroverflow/reacord";
 import { ephemeralReply } from "./utils";
 
-type TRPCall<T> = {
-  getCtx: () => Promise<BotContextCreate>;
-  ApiCall: (router: BotRouterCaller) => Promise<T>;
+export type TRPCStatusHandler<T> = {
   Ok?: (result: T) => void | Promise<void>;
-  Error?: (error: TRPCError) => void;
-  allowedErrors?: TRPCError["code"][] | TRPCError["code"];
+  Error?: (error: TRPCError, messageWithCode: string) => unknown | Promise<unknown>;
 };
 
-export async function callAPI<T>({
-  getCtx,
-  ApiCall,
-  Ok = () => {},
-  Error = () => {},
-  allowedErrors = "NOT_FOUND",
-}: TRPCall<T>) {
+export type TRPCCall<T> = {
+  getCtx: () => Promise<BotContextCreate>;
+  apiCall: (router: BotRouterCaller) => Promise<T>;
+} & TRPCStatusHandler<T>;
+
+export async function callWithAllowedErrors<T>({
+  allowedErrors,
+  call,
+}: {
+  call: () => Promise<T>;
+  allowedErrors?: TRPCError["code"] | TRPCError["code"][];
+}) {
   try {
-    const convertedCtx = await createBotContext(await getCtx());
-    const caller = botRouter.createCaller(convertedCtx);
-    const data = await ApiCall(caller); // Pass in the caller we created to ApiCall to make the request
-    await Ok(data); // If no errors, Ok gets called with the API data
-    return data;
+    return await call();
   } catch (error) {
-    if (error instanceof TRPCError) {
-      if (!allowedErrors.includes(error.code)) {
-        Error(error);
-      }
+    if (!(error instanceof TRPCError)) throw error;
+    if (!Array.isArray(allowedErrors)) allowedErrors = allowedErrors ? [allowedErrors] : [];
+    if (allowedErrors.includes(error.code)) {
+      return null;
     } else {
       throw error;
     }
+  }
+}
+
+export async function callAPI<T>({
+  getCtx,
+  apiCall,
+  Ok = () => {},
+  Error = () => {},
+}: TRPCCall<T>) {
+  try {
+    const convertedCtx = await createBotContext(await getCtx());
+    const caller = botRouter.createCaller(convertedCtx);
+    const data = await apiCall(caller);
+    await Ok(data);
+    return data;
+  } catch (error) {
+    if (!(error instanceof TRPCError)) throw error;
+    await Error(error, `${error.code}: ${error.message}`);
     return null;
   }
 }
 
-export async function callApiWithEphemeralErrorHandler<T>(
-  call: Omit<TRPCall<T>, "Error">,
-  interaction: CommandInteraction
-) {
-  return await callAPI({
-    ...call,
-    Error(error) {
-      ephemeralReply(container.reacord, "Error: " + error.message, interaction);
-    },
-  });
+export function ephemeralStatusHandler(interaction: CommandInteraction, message: string) {
+  return ephemeralReply(container.reacord, message, interaction);
 }
 
-export async function callApiWithButtonErrorHandler<T>(
-  call: Omit<TRPCall<T>, "Error">,
-  interaction: ComponentEvent
-) {
-  return await callAPI({
-    ...call,
-    Error(error) {
-      interaction.ephemeralReply("Error: " + error.message);
-    },
-  });
-}
-
-export async function callApiWithConsoleStatusHandler<T>(
-  call: Omit<
-    TRPCall<T> & {
-      successMessage?: string | undefined;
-      errorMessage: string;
-    },
-    "Error" | "Ok"
-  >
-) {
-  return await callAPI({
-    ...call,
-    Error(error) {
-      container.logger.error(call.errorMessage, error.code, error.message);
-    },
-    Ok() {
-      if (call.successMessage) {
-        container.logger.info(call.successMessage);
-      }
-    },
-  });
+export function componentEventStatusHandler(interaction: ComponentEvent, message: string) {
+  return interaction.ephemeralReply(message);
 }

@@ -2465,7 +2465,7 @@
 
 "@sapphire/bitfield@^1.0.0":
   version "1.0.0"
-  resolved "https://registry.npmjs.org/@sapphire/bitfield/-/bitfield-1.0.0.tgz"
+  resolved "https://registry.yarnpkg.com/@sapphire/bitfield/-/bitfield-1.0.0.tgz#5edb9e377fc04628d528bca562bc5d5e4e00f074"
   integrity sha512-gbcprMwXIzHtUGbplloJ0BXQE8hugYQyVCpXY24346Ked0HHMxje39A9Sz7Eu80ibtHTBLbeu4JTLV/j85JNww==
 
 "@sapphire/cron@^1.0.0":
@@ -15655,6 +15655,11 @@ type-fest@^3.0.0:
   version "3.5.2"
   resolved "https://registry.npmjs.org/type-fest/-/type-fest-3.5.2.tgz"
   integrity sha512-Ph7S4EhXzWy0sbljEuZo0tTNoLl+K2tPauGrQpcwUWrOVneLePTuhVzcuzVJJ6RU5DsNwQZka+8YtkXXU4z9cA==
+
+type-fest@^3.5.7:
+  version "3.5.7"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-3.5.7.tgz#1ee9efc9a172f4002c40b896689928a7bba537f2"
+  integrity sha512-6J4bYzb4sdkcLBty4XW7F18VPI66M4boXNE+CY40532oq2OJe6AVMB5NmjOp6skt/jw5mRjz/hLRpuglz0U+FA==
 
 type-is@~1.6.18:
   version "1.6.18"

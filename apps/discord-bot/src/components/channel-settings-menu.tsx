@@ -1,5 +1,5 @@
 import type { ChannelWithFlags, ChannelUpsertWithDepsInput } from "@answeroverflow/api";
-import { callApiWithButtonErrorHandler } from "~discord-bot/utils/trpc";
+import { callAPI, componentEventStatusHandler } from "~discord-bot/utils/trpc";
 import { type GuildForumTag, ChannelType, ForumChannel, GuildTextBasedChannel } from "discord.js";
 import { ButtonClickEvent, Select, SelectChangeEvent, Option } from "@answeroverflow/reacord";
 import React from "react";
@@ -37,21 +37,19 @@ export function ChannelSettingsMenu({
     }
 
     const member = await channel.guild.members.fetch(interaction.user.id);
-    await callApiWithButtonErrorHandler(
-      {
-        async ApiCall(router) {
-          return await router.channels.upsertWithDeps({
-            ...toAOChannelWithServer(targetChannel),
-            ...data,
-          });
-        },
-        Ok(result) {
-          setChannelSettings(result);
-        },
-        getCtx: () => createMemberCtx(member),
+    await callAPI({
+      async apiCall(router) {
+        return await router.channels.upsertWithDeps({
+          ...toAOChannelWithServer(targetChannel),
+          ...data,
+        });
       },
-      interaction
-    );
+      Ok(result) {
+        setChannelSettings(result);
+      },
+      getCtx: () => createMemberCtx(member),
+      Error: (error) => componentEventStatusHandler(interaction, error.message),
+    });
   };
 
   const ToggleIndexingButton = () => (

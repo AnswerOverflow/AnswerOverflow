@@ -1,25 +1,100 @@
 import {
-  createUserServerSettings,
   findUserServerSettingsById,
-  updateUserServerSettings,
-  upsert,
-  zUserServerSettingsCreate,
+  getDefaultUserServerSettingsWithFlags,
+  upsertUserServerSettingsWithDeps,
+  UserServerSettingsWithFlags,
   zUserServerSettingsCreateWithDeps,
   zUserServerSettingsFind,
-  zUserServerSettingsUpdate,
+  zUserServerSettingsFlags,
 } from "@answeroverflow/db";
 import { withDiscordAccountProcedure, MergeRouters, router } from "../trpc";
-import { discordAccountRouter } from "../users/accounts/discord-accounts";
-import { serverRouter } from "../server/server";
-import { TRPCError } from "@trpc/server";
-import {
-  protectedFetch,
-  protectedMutation,
-  protectedMutationFetchFirst,
-} from "~api/utils/protected-procedures";
+import { protectedFetch, protectedMutation } from "~api/utils/protected-procedures";
 import { assertIsUser } from "~api/utils/permissions";
 
+import { z } from "zod";
+import { TRPCError } from "@trpc/server";
+import {
+  MANAGE_ACCOUNT_SOURCES,
+  CONSENT_SOURCES,
+  CONSENT_ALREADY_DENIED_MESSAGE,
+  CONSENT_EXPLICITLY_SET_MESSAGE,
+  CONSENT_ALREADY_GRANTED_MESSAGE,
+  MESSAGE_INDEXING_ALREADY_DISABLED_MESSAGE,
+  MESSAGE_INDEXING_ALREADY_ENABLED_MESSAGE,
+  CONSENT_PREVENTED_BY_DISABLED_INDEXING_MESSAGE,
+  AUTOMATED_CONSENT_SOURCES,
+} from "./types";
+import type { Context } from "../context";
 export const SERVER_NOT_SETUP_MESSAGE = "Server is not setup for Answer Overflow yet";
+
+function assertBoolsAreNotEqual({
+  oldValue,
+  newValue,
+  messageIfBothTrue,
+  messageIfBothFalse,
+}: {
+  oldValue: boolean;
+  newValue: boolean;
+  messageIfBothTrue: string;
+  messageIfBothFalse: string;
+}) {
+  if (oldValue === newValue) {
+    return new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: oldValue ? messageIfBothTrue : messageIfBothFalse,
+    });
+  }
+  return;
+}
+
+function assertIsNotValue({
+  actualValue,
+  expectedToNotBeValue,
+  errorMessage,
+}: {
+  actualValue: boolean;
+  expectedToNotBeValue: boolean;
+  errorMessage: string;
+}) {
+  if (actualValue === expectedToNotBeValue) {
+    return new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: errorMessage,
+    });
+  }
+  return;
+}
+
+async function mutateUserServerSettings({
+  operation,
+  find,
+  ctx,
+}: {
+  operation: (input: {
+    oldSettings: UserServerSettingsWithFlags;
+    doSettingsExistAlready: boolean;
+  }) => Promise<UserServerSettingsWithFlags>;
+  find: {
+    userId: string;
+    serverId: string;
+  };
+  ctx: Context;
+}) {
+  return protectedMutation({
+    permissions: () => assertIsUser(ctx, find.userId),
+    operation: async () => {
+      let oldSettings = await findUserServerSettingsById(find);
+      let doSettingsExistAlready = true;
+      if (!oldSettings) {
+        oldSettings = getDefaultUserServerSettingsWithFlags(find);
+        doSettingsExistAlready = false;
+      } else {
+        doSettingsExistAlready = true;
+      }
+      return operation({ oldSettings, doSettingsExistAlready });
+    },
+  });
+}
 
 const userServerSettingsCrudRouter = router({
   byId: withDiscordAccountProcedure.input(zUserServerSettingsFind).query(async ({ input, ctx }) => {
@@ -29,89 +104,89 @@ const userServerSettingsCrudRouter = router({
       notFoundMessage: "User server settings not found",
     });
   }),
-  create: withDiscordAccountProcedure
-    .input(zUserServerSettingsCreate)
-    .mutation(async ({ input, ctx }) => {
-      return protectedMutation({
-        permissions: () => assertIsUser(ctx, input.userId),
-        operation: () => createUserServerSettings(input),
+  setIndexingDisabled: withDiscordAccountProcedure
+    .input(
+      z.object({
+        source: z.enum(MANAGE_ACCOUNT_SOURCES),
+        data: zUserServerSettingsCreateWithDeps
+          .pick({
+            serverId: true,
+            user: true,
+          })
+          .extend({
+            flags: zUserServerSettingsFlags.pick({
+              messageIndexingDisabled: true,
+            }),
+          }),
+      })
+    )
+    .mutation(({ input, ctx }) => {
+      return mutateUserServerSettings({
+        ctx,
+        find: { userId: input.data.user.id, serverId: input.data.serverId },
+        operation: ({ oldSettings: existingSettings }) =>
+          protectedMutation({
+            permissions: () =>
+              assertBoolsAreNotEqual({
+                messageIfBothFalse: MESSAGE_INDEXING_ALREADY_ENABLED_MESSAGE,
+                messageIfBothTrue: MESSAGE_INDEXING_ALREADY_DISABLED_MESSAGE,
+                newValue: input.data.flags.messageIndexingDisabled,
+                oldValue: existingSettings.flags.messageIndexingDisabled,
+              }),
+            operation: () => upsertUserServerSettingsWithDeps(input.data),
+          }),
       });
     }),
-  update: withDiscordAccountProcedure
-    .input(zUserServerSettingsUpdate)
-    .mutation(async ({ input, ctx }) => {
-      return protectedMutationFetchFirst({
-        permissions: () => assertIsUser(ctx, input.userId),
-        notFoundMessage: "User server settings not found",
-        fetch: () =>
-          findUserServerSettingsById({
-            userId: input.userId,
-            serverId: input.serverId,
+  setConsentGranted: withDiscordAccountProcedure
+    .input(
+      z.object({
+        source: z.enum(CONSENT_SOURCES),
+        data: zUserServerSettingsCreateWithDeps
+          .pick({
+            serverId: true,
+            user: true,
+          })
+          .extend({
+            flags: zUserServerSettingsFlags.pick({
+              canPubliclyDisplayMessages: true,
+            }),
           }),
-        operation: (old) => updateUserServerSettings(input, old),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const isAutomatedConsent = AUTOMATED_CONSENT_SOURCES.includes(input.source);
+      return mutateUserServerSettings({
+        ctx,
+        find: { userId: input.data.user.id, serverId: input.data.serverId },
+        operation: ({ oldSettings, doSettingsExistAlready }) =>
+          protectedMutation({
+            permissions: [
+              () =>
+                input.data.flags.canPubliclyDisplayMessages
+                  ? assertIsNotValue({
+                      actualValue: oldSettings.flags.messageIndexingDisabled,
+                      expectedToNotBeValue: true,
+                      errorMessage: CONSENT_PREVENTED_BY_DISABLED_INDEXING_MESSAGE,
+                    })
+                  : undefined,
+              () =>
+                isAutomatedConsent
+                  ? assertIsNotValue({
+                      actualValue: doSettingsExistAlready,
+                      expectedToNotBeValue: true,
+                      errorMessage: CONSENT_EXPLICITLY_SET_MESSAGE,
+                    })
+                  : assertBoolsAreNotEqual({
+                      messageIfBothFalse: CONSENT_ALREADY_DENIED_MESSAGE,
+                      messageIfBothTrue: CONSENT_ALREADY_GRANTED_MESSAGE,
+                      newValue: input.data.flags.canPubliclyDisplayMessages,
+                      oldValue: oldSettings.flags.canPubliclyDisplayMessages,
+                    }),
+            ],
+            operation: () => upsertUserServerSettingsWithDeps(input.data),
+          }),
       });
     }),
 });
 
-const userServerSettingsWithDepsRouter = router({
-  createWithDeps: withDiscordAccountProcedure
-    .input(zUserServerSettingsCreateWithDeps)
-    .mutation(async ({ input, ctx }) => {
-      try {
-        await serverRouter.createCaller(ctx).byId(input.serverId);
-      } catch (error) {
-        if (error instanceof TRPCError) {
-          if (error.code === "NOT_FOUND") {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: SERVER_NOT_SETUP_MESSAGE,
-            });
-          }
-        }
-      }
-
-      await discordAccountRouter.createCaller(ctx).upsert(input.user);
-      return userServerSettingsCrudRouter.createCaller(ctx).create({
-        ...input,
-        userId: input.user.id,
-      });
-    }),
-});
-
-const userServerSettingsUpsert = router({
-  upsert: withDiscordAccountProcedure
-    .input(zUserServerSettingsCreate)
-    .mutation(async ({ input, ctx }) => {
-      return upsert({
-        find: () =>
-          findUserServerSettingsById({
-            userId: input.userId,
-            serverId: input.serverId,
-          }),
-        create: () => userServerSettingsCrudRouter.createCaller(ctx).create(input),
-        update: () => userServerSettingsCrudRouter.createCaller(ctx).update(input),
-      });
-    }),
-  upsertWithDeps: withDiscordAccountProcedure
-    .input(zUserServerSettingsCreateWithDeps)
-    .mutation(async ({ input, ctx }) => {
-      return upsert({
-        find: () =>
-          findUserServerSettingsById({
-            userId: input.user.id,
-            serverId: input.serverId,
-          }),
-        create: () => userServerSettingsWithDepsRouter.createCaller(ctx).createWithDeps(input),
-        update: () =>
-          userServerSettingsCrudRouter
-            .createCaller(ctx)
-            .update({ ...input, userId: input.user.id }),
-      });
-    }),
-});
-
-export const userServerSettingsRouter = MergeRouters(
-  userServerSettingsCrudRouter,
-  userServerSettingsWithDepsRouter,
-  userServerSettingsUpsert
-);
+export const userServerSettingsRouter = MergeRouters(userServerSettingsCrudRouter);

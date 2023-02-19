@@ -2,68 +2,69 @@ import {
   zUniqueArray,
   zDiscordAccountPublic,
   findDiscordAccountById,
-  zDiscordAccountCreate,
-  zDiscordAccountUpdate,
-  zDiscordAccountUpsert,
   findManyDiscordAccountsById,
-  createDiscordAccount,
-  updateDiscordAccount,
   deleteDiscordAccount,
-  upsert,
+  deleteIgnoredDiscordAccount,
+  findIgnoredDiscordAccountById,
 } from "@answeroverflow/db";
 import { z } from "zod";
-import { MergeRouters, router, publicProcedure } from "~api/router/trpc";
+import { MergeRouters, router, withDiscordAccountProcedure } from "~api/router/trpc";
 import {
+  protectedFetch,
   protectedFetchManyWithPublicData,
   protectedFetchWithPublicData,
   protectedMutation,
 } from "~api/utils/protected-procedures";
-import { assertIsUser } from "~api/utils/permissions";
+import {
+  assertIsIgnoredAccount,
+  assertIsNotIgnoredAccount,
+  assertIsUser,
+} from "~api/utils/permissions";
+import { TRPCError } from "@trpc/server";
+
+export const COULD_NOT_FIND_ACCOUNT_ERROR_MESSAGE = "Could not find discord account";
 
 const accountCrudRouter = router({
-  byId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
+  byId: withDiscordAccountProcedure.input(z.string()).query(({ ctx, input }) => {
     return protectedFetchWithPublicData({
       fetch: () => findDiscordAccountById(input),
       permissions: (data) => assertIsUser(ctx, data.id),
-      notFoundMessage: "Could not find discord account",
+      notFoundMessage: COULD_NOT_FIND_ACCOUNT_ERROR_MESSAGE,
       publicDataFormatter: (data) => zDiscordAccountPublic.parse(data),
     });
   }),
-  byIdMany: publicProcedure.input(zUniqueArray).query(({ ctx, input }) => {
+  byIdMany: withDiscordAccountProcedure.input(zUniqueArray).query(({ ctx, input }) => {
     return protectedFetchManyWithPublicData({
       fetch: () => findManyDiscordAccountsById(input),
       permissions: (data) => assertIsUser(ctx, data.id),
       publicDataFormatter: (data) => zDiscordAccountPublic.parse(data),
     });
   }),
-  create: publicProcedure.input(zDiscordAccountCreate).mutation(async ({ ctx, input }) => {
+  delete: withDiscordAccountProcedure.input(z.string()).mutation(({ ctx, input }) => {
     return protectedMutation({
-      permissions: [() => assertIsUser(ctx, input.id)],
-      operation: () => createDiscordAccount(input),
-    });
-  }),
-  update: publicProcedure.input(zDiscordAccountUpdate).mutation(({ ctx, input }) => {
-    return protectedMutation({
-      permissions: () => assertIsUser(ctx, input.id),
-      operation: () => updateDiscordAccount(input),
-    });
-  }),
-  delete: publicProcedure.input(z.string()).mutation(({ ctx, input }) => {
-    return protectedMutation({
-      permissions: () => assertIsUser(ctx, input),
+      permissions: [() => assertIsUser(ctx, input), () => assertIsNotIgnoredAccount(ctx, input)],
       operation: () => deleteDiscordAccount(input),
     });
   }),
-});
-
-const accountUpsertRouter = router({
-  upsert: publicProcedure.input(zDiscordAccountUpsert).mutation(({ ctx, input }) => {
-    return upsert({
-      find: () => findDiscordAccountById(input.id),
-      create: () => accountCrudRouter.createCaller(ctx).create(input),
-      update: () => accountCrudRouter.createCaller(ctx).update(input),
+  undelete: withDiscordAccountProcedure.input(z.string()).mutation(({ ctx, input }) => {
+    return protectedMutation({
+      permissions: [() => assertIsUser(ctx, input), () => assertIsIgnoredAccount(ctx, input)],
+      operation: () => deleteIgnoredDiscordAccount(input),
     });
+  }),
+  checkIfIgnored: withDiscordAccountProcedure.input(z.string()).query(async ({ ctx, input }) => {
+    try {
+      await protectedFetch({
+        permissions: () => assertIsUser(ctx, input),
+        fetch: () => findIgnoredDiscordAccountById(input),
+        notFoundMessage: "Could not find discord account",
+      });
+      return true;
+    } catch (error) {
+      if (!(error instanceof TRPCError && error.code === "NOT_FOUND")) throw error;
+      return false;
+    }
   }),
 });
 
-export const discordAccountRouter = MergeRouters(accountCrudRouter, accountUpsertRouter);
+export const discordAccountRouter = MergeRouters(accountCrudRouter);

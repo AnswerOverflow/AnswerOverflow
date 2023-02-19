@@ -7,11 +7,11 @@ import {
   bitfieldToChannelFlags,
   channelBitfieldFlags,
   zChannel,
-} from "./zod-schemas";
+} from "@answeroverflow/prisma-types";
 import { prisma, getDefaultChannel, Channel } from "@answeroverflow/prisma-types";
+import { dictToBitfield } from "@answeroverflow/prisma-types/src/bitfield";
+import { deleteManyMessagesByChannelId } from "./message";
 import { omit } from "@answeroverflow/utils";
-import { dictToBitfield } from "./utils/bitfield";
-
 export const zChannelRequired = zChannel.pick({
   id: true,
   name: true,
@@ -92,13 +92,6 @@ function combineChannelSettingsFlagsToBitfield<
   };
 }
 
-export function getDefaultChannelWithFlags(
-  override: Partial<z.infer<typeof zChannel>> &
-    Pick<z.infer<typeof zChannel>, "id" | "serverId" | "type" | "parentId" | "name">
-) {
-  return addFlagsToChannel(getDefaultChannel(override));
-}
-
 export async function findChannelById(id: string) {
   const data = await prisma.channel.findUnique({ where: { id } });
   if (!data) return null;
@@ -133,7 +126,9 @@ export async function createManyChannels(data: z.infer<typeof zChannelCreateMany
   return data.map((c) => getDefaultChannel({ ...c }));
 }
 
-export async function updateChannel(data: z.infer<typeof zChannelUpdate>, old: Channel) {
+export async function updateChannel(data: z.infer<typeof zChannelUpdate>, old: Channel | null) {
+  if (!old) old = await findChannelById(data.id);
+  if (!old) throw new Error("Channel not found");
   const updated = await prisma.channel.update({
     where: { id: data.id },
     data: combineChannelSettingsFlagsToBitfield({
@@ -156,7 +151,11 @@ export async function updateManyChannels(data: z.infer<typeof zChannelUpdateMany
   return updated.map(addFlagsToChannel);
 }
 
-export function deleteChannel(id: string) {
+export async function deleteChannel(id: string) {
+  await deleteManyMessagesByChannelId(id);
+  // TODO: Ugly & how does this handle large amounts of threads?
+  const threads = await prisma.channel.findMany({ where: { parentId: id }, select: { id: true } });
+  await Promise.all(threads.map((t) => deleteChannel(t.id)));
   return prisma.channel.delete({ where: { id } });
 }
 

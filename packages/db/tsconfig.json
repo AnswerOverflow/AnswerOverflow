@@ -10,7 +10,9 @@
     "index.ts",
     "src",
     "vitest.config.ts",
-    "scripts"
+    "scripts",
+    "../prisma-types/src/zod-schemas.ts",
+    "../prisma-types/src/bitfield.ts"
   ],
   "ts-node": {
     // these options are overrides used only by ts-node

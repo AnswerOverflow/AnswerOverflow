@@ -1,6 +1,7 @@
 export * from "@prisma/client";
 export { prisma } from "./src/prisma";
-
+export * from "./src/bitfield";
+export * from "./src/zod-schemas";
 export * from "./src/default";
 
 declare global {
