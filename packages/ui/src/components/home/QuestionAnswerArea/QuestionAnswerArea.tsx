@@ -2,7 +2,7 @@ import { useRef } from "react";
 import Xarrow from "react-xarrows";
 import { Message, MessageProps } from "~ui/components/Message";
 import { useTheme } from "~ui/utils/hooks";
-import { GooglePage } from "./GooglePage";
+import { GooglePage } from "./GooglePage/GooglePage";
 import "./DashAnimation.css";
 
 export interface NewLandingAnimationProps {
@@ -11,7 +11,7 @@ export interface NewLandingAnimationProps {
   discordChannelName: string;
 }
 
-export const NewLandingAnimation = ({
+export const QuestionAnswerArea = ({
   discordChannelName,
   questionMessage,
   answerMessage,
@@ -70,22 +70,6 @@ export const NewLandingAnimation = ({
           _cpx2Offset={-60}
         />
       </div>
-
-      {/* <Xarrow
-        start={discordPageRef}
-        end={googlePageRef}
-        color="white"
-        strokeWidth={3}
-        startAnchor={"right"}
-        endAnchor={{
-          position: "auto",
-          offset: { x: 152, y: 0 },
-        }}
-        dashness={true}
-        curveness={2}
-        _cpx1Offset={60}
-        _cpx2Offset={60}
-      /> */}
     </>
   );
 };

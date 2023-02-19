@@ -1,6 +1,6 @@
 import type { Meta, StoryFn } from "@storybook/react";
 
-import { GooglePage, GooglePageProps } from "./GooglePage";
+import { GooglePage, GooglePageProps } from "./GooglePage/GooglePage";
 export default {
   component: GooglePage,
 } as Meta;

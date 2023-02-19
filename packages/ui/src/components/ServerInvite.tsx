@@ -1,6 +1,6 @@
 import type { ServerPublic, ChannelPublicWithFlags } from "@answeroverflow/api";
 import Link from "next/link";
-import { Button } from "./primitives/Button";
+import { Button } from "./deprecated/Button";
 import { ServerIcon } from "./ServerIcon";
 
 export type ServerInviteProps = {

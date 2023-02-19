@@ -1,15 +1,10 @@
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
-import { useEffect } from "react";
 import { useTheme } from "~ui/utils/index";
 import { AnswerOverflowLogo } from "../AnswerOverflowLogo";
 import { Button } from "./Button";
 
 export const Navbar = () => {
   const theme = useTheme();
-
-  useEffect(() => {
-    console.log(theme);
-  }, [theme]);
 
   return (
     <nav className="absolute top-0 left-0 z-50 flex h-32 w-full items-center">
@@ -29,11 +24,6 @@ export const Navbar = () => {
             <MagnifyingGlassIcon width={"1.5rem"} height={"1.5rem"} />
           </button>
         </li>
-        {/* <li className="mx-8 flex items-center justify-center">
-          <a href="/" className="text-2xl font-normal text-ao-black hover:text-neutral-800">
-            Sign In
-          </a>
-        </li> */}
         <li className="ml-6 hidden items-center justify-center md:flex">
           <Button type={"ghost"} color={theme === "light" ? "black" : "white"}>
             <span className="text-xl">Add to server</span>

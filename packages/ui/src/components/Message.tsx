@@ -15,7 +15,7 @@ export type MessageProps = {
   thread?: ChannelPublicWithFlags;
   blurred?: boolean;
   notPublicTitle?: string;
-  darkMode?: boolean;
+  forceDarkMode?: boolean;
   showLinkIcon?: boolean;
   /**
    * @example "Today at 13:51"
@@ -37,7 +37,7 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
     thread,
     blurred = false,
     notPublicTitle = "Message Not Public",
-    darkMode = false,
+    forceDarkMode = false,
     showLinkIcon = true,
     customMessageDateString,
     messageBoxClassName,
@@ -137,12 +137,16 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
                 <DiscordAvatar user={message.author} />
               </div>
               <div className="flex flex-col sm:flex-row">
-                <span className={`mr-1 text-black ${darkMode ? "text-white" : "dark:text-white"}`}>
+                <span
+                  className={`mr-1 text-black ${forceDarkMode ? "text-white" : "dark:text-white"}`}
+                >
                   {message.author.name}
                 </span>
                 <span
                   className={`ml-[0.25rem] flex items-center justify-center text-[0.75rem] text-[hsl(213,_9.6%,_40.8%)] ${
-                    darkMode ? "text-[hsl(216,_3.7%,_73.5%)]" : "dark:text-[hsl(216,_3.7%,_73.5%)]"
+                    forceDarkMode
+                      ? "text-[hsl(216,_3.7%,_73.5%)]"
+                      : "dark:text-[hsl(216,_3.7%,_73.5%)]"
                   }`}
                 >
                   {dateOfMessage}
@@ -167,7 +171,7 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
           </div>
           <div
             className={`mt-2 max-w-[80vw] text-black ${
-              darkMode ? "text-neutral-50" : "dark:text-neutral-50"
+              forceDarkMode ? "text-neutral-50" : "dark:text-neutral-50"
             } sm:mt-0 sm:max-w-[70vw] md:max-w-full`}
           >
             {parsedMessageContent}
@@ -187,7 +191,7 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
   return (
     <div
       className={`relative h-full w-full  p-2 ${messageBoxClassName ?? ""} ${
-        darkMode ? "bg-[#36393F]" : "dark:bg-[#36393F]"
+        forceDarkMode ? "bg-[#36393F]" : "dark:bg-[#36393F]"
       }`}
       ref={ref}
     >
@@ -209,7 +213,7 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
             <div className="absolute inset-0 flex items-center justify-center ">
               <div
                 className={`flex flex-col items-center justify-center text-center text-black ${
-                  darkMode ? "text-white" : "dark:text-white"
+                  forceDarkMode ? "text-white" : "dark:text-white"
                 }`}
               >
                 <div className="text-2xl ">{notPublicTitle}</div>

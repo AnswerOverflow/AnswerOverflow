@@ -13,7 +13,7 @@ export type ButtonStylesType = {
   };
 };
 
-export const ButtonStyles: ButtonStylesType = {
+export const buttonStyles: ButtonStylesType = {
   white: {
     solid: {
       default: "bg-white text-black",
@@ -37,15 +37,15 @@ export const ButtonStyles: ButtonStylesType = {
   },
 };
 
-type compoundVariants = {
+type CompoundVariants = {
   type: Styles;
   color: Colors;
   className: ClassValue;
   disabled: boolean;
 };
 
-export const convertToCva = (styles: ButtonStylesType): compoundVariants[] => {
-  const cvaStyles: compoundVariants[] = [];
+export const convertToCva = (styles: ButtonStylesType): CompoundVariants[] => {
+  const cvaStyles: CompoundVariants[] = [];
 
   for (const [key, value] of Object.entries(styles) as Entries<typeof styles>) {
     for (const [key2, value2] of Object.entries(value) as Entries<typeof value>) {
