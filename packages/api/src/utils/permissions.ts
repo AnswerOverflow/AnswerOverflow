@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { PermissionsBitField } from "discord.js";
+import { findIgnoredDiscordAccountById } from "@answeroverflow/db";
 import type { Source, Context } from "~api/router/context";
 
 export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
@@ -71,12 +72,48 @@ export function assertIsUserInServer(ctx: Context, targetServerId: string) {
   return;
 }
 
+export async function assertIsNotIgnoredAccount(ctx: Context, targetUserId: string) {
+  if (ctx.discordAccount?.id !== targetUserId) {
+    return new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You are not authorized to do this",
+    });
+  }
+  const ignoredAccount = await findIgnoredDiscordAccountById(targetUserId);
+  if (ignoredAccount) {
+    return new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: "Your account is currently being ignored",
+    });
+  }
+  return;
+}
+
+export async function assertIsIgnoredAccount(ctx: Context, targetUserId: string) {
+  if (ctx.discordAccount?.id !== targetUserId) {
+    return new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You are not authorized to do this",
+    });
+  }
+  const ignoredAccount = await findIgnoredDiscordAccountById(targetUserId);
+  if (!ignoredAccount) {
+    return new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: "Your account is not currently being ignored",
+    });
+  }
+  return;
+}
+
+export const NOT_AUTHORIZED_MESSAGE = "You are not authorized to do this";
+
 export function assertIsUser(ctx: Context, targetUserId: string) {
   if (isSuperUser(ctx)) return;
   if (ctx.discordAccount?.id !== targetUserId) {
     return new TRPCError({
       code: "UNAUTHORIZED",
-      message: "You are not authorized to do this",
+      message: NOT_AUTHORIZED_MESSAGE,
     });
   }
   return;

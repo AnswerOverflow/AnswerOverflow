@@ -14,10 +14,10 @@ import {
   TextChannel,
   User,
 } from "discord.js";
-import { ANSWER_OVERFLOW_BLUE } from "~discord-bot/utils/constants";
+import { ANSWER_OVERFLOW_BLUE_HEX } from "~discord-bot/utils/constants";
 import { findSolutionsToMessage } from "./indexing";
 import type { ChannelWithFlags } from "@answeroverflow/api";
-import { makeConsentButton } from "./consent";
+import { makeConsentButton } from "./manage-account";
 import { findChannelById } from "@answeroverflow/db";
 
 export const QUESTION_ID_FIELD_NAME = "Question Message ID";
@@ -179,7 +179,7 @@ export function makeMarkSolutionResponse({
         value: "https://answeroverflow.com",
       }
     )
-    .setColor(ANSWER_OVERFLOW_BLUE);
+    .setColor(ANSWER_OVERFLOW_BLUE_HEX);
 
   if (settings.flags.indexingEnabled && !settings.flags.forumGuidelinesConsentEnabled) {
     embed.setDescription(
