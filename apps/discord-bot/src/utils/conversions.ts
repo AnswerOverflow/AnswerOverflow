@@ -29,7 +29,12 @@ export function toAOMessage(message: Message): AOMessage {
         description: attachment.description,
       };
     }),
-    repliesTo: message.reference?.messageId ?? null,
+    repliesTo:
+      {
+        messageContent: message.reference?.messageId ?? "",
+        // TODO: Add author avatar of replying to message
+        authorAvatar: null,
+      } ?? null,
     authorId: message.author.id,
     serverId: message.guild?.id,
     solutions: [],
