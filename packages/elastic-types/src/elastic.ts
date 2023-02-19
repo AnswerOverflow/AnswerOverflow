@@ -1,10 +1,30 @@
 import { Client, ClientOptions, errors } from "@elastic/elasticsearch";
 import type { BulkOperationContainer } from "@elastic/elasticsearch/lib/api/types";
+import { z } from "zod";
 
 declare global {
   // eslint-disable-next-line no-var, no-unused-vars
   var elastic: Elastic | undefined;
 }
+
+export const zDiscordImage = z.object({
+  url: z.string(),
+  width: z.number().nullable(),
+  height: z.number().nullable(),
+  description: z.string().nullable(),
+});
+
+export const zMessage = z.object({
+  id: z.string(),
+  content: z.string(),
+  images: z.array(zDiscordImage),
+  solutions: z.array(z.string()),
+  repliesTo: z.string().nullable(),
+  childThread: z.string().nullable(),
+  authorId: z.string(),
+  channelId: z.string(),
+  serverId: z.string(),
+});
 
 function getElasticClient(): Elastic {
   if (process.env.NODE_ENV === "test") {

@@ -1,11 +1,7 @@
 import { z } from "zod";
 import { prisma } from "@answeroverflow/prisma-types";
-import {
-  zMessage,
-  addFlagsToUserServerSettings,
-  zDiscordAccountPublic,
-} from "@answeroverflow/prisma-types";
-import { Message, elastic } from "@answeroverflow/elastic-types";
+import { addFlagsToUserServerSettings, zDiscordAccountPublic } from "@answeroverflow/prisma-types";
+import { Message, elastic, zMessage } from "@answeroverflow/elastic-types";
 import { DBError } from "./utils/error";
 import {
   findIgnoredDiscordAccountById,
