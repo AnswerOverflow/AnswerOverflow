@@ -306,6 +306,7 @@ export class Elastic extends Client {
   }
 
   public async bulkUpsertMessages(messages: Message[]) {
+    if (messages.length === 0) return true;
     const result = await this.bulk({
       operations: messages.flatMap((message) => [
         { update: { _index: this.messagesIndex, _id: message.id } },
