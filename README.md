@@ -1,14 +1,12 @@
 
 <p align='center'>
 <a href='https://answeroverflow.com/' target="_blank" rel="noopener">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/AnswerOverflowLogoLight.png" />
-    <img alt="Answer Overflow Logo" src="./assets/AnswerOverflowLogoDark.png" />
-  </picture>
+    <img src="https://www.answeroverflow.com/content/branding/AnswerOverflowLOGO.png">
 </a>
 </p>
 
 <div align="center">
+  <h1>Answer Overflow</h1>
   <h3>Google Index Your Discord Help Channels<br /></h3>
   <a href="https://github.com/AnswerOverflow/AnswerOverflow/blob/main/LICENSE">
     <img alt="AGPL License" src="https://img.shields.io/github/license/AnswerOverflow/AnswerOverflow" />
@@ -57,14 +55,6 @@ Answer Overflow lets you index your Discord help channels into Google so that yo
 - 📈&nbsp; Powerful analytics - Learn what questions are asked the most, who is most helpful, and other community insights
 - ✅&nbsp; Improved Help Channels - Mark questions as solved, organize content, and keep discussions on track
 - 🐻&nbsp; Easy - Simple menus to control settings
-
-### Roadmap
-
-- 🤖&nbsp; AI question improvement suggestions trained on your community
-- 🤖&nbsp; AI answers trained off of your community
-- 🗺️&nbsp; Server browser and discoverability
-- ✈️&nbsp; Self Hosting Support
-- 📥&nbsp; Automatically redirecting people to correct help channels
 
 ## Quickstart
 

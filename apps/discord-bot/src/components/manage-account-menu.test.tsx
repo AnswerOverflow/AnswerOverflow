@@ -147,25 +147,28 @@ describe("Manage Account Menu", () => {
       const button = message!.findButtonByLabel(STOP_IGNORING_ACCOUNT_LABEL, reacord);
       expect(button).toBeDefined();
     });
-  });
-  it("should disable globally ignored", async () => {
-    await deleteDiscordAccount(toAODiscordAccount(members.guildMemberOwner.user).id);
-    const message = await reply(
-      reacord,
-      <ManageAccountMenu
-        initalSettings={getDefaultUserServerSettingsWithFlags({
-          serverId: guild.id,
-          userId: members.guildMemberOwner.id,
-        })}
-        initalIsGloballyIgnored={true}
-      />
-    );
-    const disableIndexingButton = message!.findButtonByLabel(STOP_IGNORING_ACCOUNT_LABEL, reacord);
-    expect(disableIndexingButton).toBeDefined();
-    await disableIndexingButton!.click(textChannel, members.guildMemberOwner);
+    it("should disable globally ignored", async () => {
+      await deleteDiscordAccount(toAODiscordAccount(members.guildMemberOwner.user).id);
+      const message = await reply(
+        reacord,
+        <ManageAccountMenu
+          initalSettings={getDefaultUserServerSettingsWithFlags({
+            serverId: guild.id,
+            userId: members.guildMemberOwner.id,
+          })}
+          initalIsGloballyIgnored={true}
+        />
+      );
+      const disableIndexingButton = message!.findButtonByLabel(
+        STOP_IGNORING_ACCOUNT_LABEL,
+        reacord
+      );
+      expect(disableIndexingButton).toBeDefined();
+      await disableIndexingButton!.click(textChannel, members.guildMemberOwner);
 
-    expect(message!.hasButton(STOP_IGNORING_ACCOUNT_LABEL, reacord)).toBeFalsy();
-    const button = message!.findButtonByLabel(GLOBALLY_IGNORE_ACCOUNT_LABEL, reacord);
-    expect(button).toBeDefined();
+      expect(message!.hasButton(STOP_IGNORING_ACCOUNT_LABEL, reacord)).toBeFalsy();
+      const button = message!.findButtonByLabel(GLOBALLY_IGNORE_ACCOUNT_LABEL, reacord);
+      expect(button).toBeDefined();
+    });
   });
 });
