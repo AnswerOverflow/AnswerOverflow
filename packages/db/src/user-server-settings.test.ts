@@ -8,6 +8,7 @@ import { addFlagsToUserServerSettings } from "@answeroverflow/prisma-types";
 import { createServer } from "./server";
 import { createDiscordAccount } from "./discord-account";
 import {
+  CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE,
   createUserServerSettings,
   findUserServerSettingsById,
   updateUserServerSettings,
@@ -136,6 +137,32 @@ describe("User Server Settings", () => {
       expect(found!.flags.messageIndexingDisabled).toBe(true);
       const deletedMsg = await findMessageById(msg.id);
       expect(deletedMsg).toBe(null);
+    });
+    it("should throw an error when trying to grant consent when indexing is disabled", async () => {
+      await updateUserServerSettings(
+        {
+          serverId: server.id,
+          userId: account.id,
+          flags: {
+            messageIndexingDisabled: true,
+          },
+        },
+        null
+      );
+      await expect(
+        updateUserServerSettings(
+          {
+            serverId: server.id,
+            userId: account.id,
+            flags: {
+              canPubliclyDisplayMessages: true,
+            },
+          },
+          null
+        )
+      ).rejects.toThrowError(
+        CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE
+      );
     });
   });
 });

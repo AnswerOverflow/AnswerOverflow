@@ -161,7 +161,7 @@ export function addFlagsToUserServerSettings<T extends UserServerSettings>(userS
   };
 }
 
-export function mergeUserServerSettingsFlags(old: number, newFlags: Record<string, boolean>) {
+export function userServerSettingsFlagsToBitfield(old: number, newFlags: Record<string, boolean>) {
   return mergeFlags(
     () => bitfieldToUserServerSettingsFlags(old),
     newFlags,

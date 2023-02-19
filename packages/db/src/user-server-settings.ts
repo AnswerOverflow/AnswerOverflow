@@ -5,14 +5,18 @@ import {
   UserServerSettings,
   zUserServerSettings,
   getDefaultUserServerSettingsWithFlags,
+  dictToBitfield,
+  UserServerSettingsWithFlags,
+  userServerSettingsFlags,
 } from "@answeroverflow/prisma-types";
 import { upsertDiscordAccount, zDiscordAccountUpsert } from "./discord-account";
 import {
   addFlagsToUserServerSettings,
-  mergeUserServerSettingsFlags,
   zUserServerSettingsWithFlags,
 } from "@answeroverflow/prisma-types";
 import { upsert } from "./utils/operations";
+import { DBError } from "./utils/error";
+import { omit } from "@answeroverflow/utils";
 
 export const zUserServerSettingsRequired = zUserServerSettingsWithFlags.pick({
   userId: true,
@@ -43,30 +47,57 @@ export type UserServerSettingsCreateWithDeps = z.infer<typeof zUserServerSetting
 
 export const zUserServerSettingsUpdate = zUserServerSettingsMutable.merge(zUserServerSettingsFind);
 
-export async function mergeUserServerSettings<T extends z.infer<typeof zUserServerSettingsMutable>>(
-  old: UserServerSettings,
-  updated: T
-) {
-  const { flags, ...updateDataWithoutFlags } = updated;
+export const CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE =
+  "You cannot grant consent to publicly display messages with message indexing disabled. Enable messaging indexing first";
+
+// Applies all side effects of updating user server settings
+// Does not update the user server settings in the database, only handles side effects
+export async function applyUserServerSettingsChangesSideEffects<
+  T extends z.infer<typeof zUserServerSettingsMutable>
+>(old: UserServerSettings, updated: T) {
   const oldFlags = old.bitfield
     ? addFlagsToUserServerSettings(old).flags
     : getDefaultUserServerSettingsWithFlags({
         userId: old.userId,
         serverId: old.serverId,
       }).flags;
-  // Disable flags that depend on other flags
-  if (flags?.messageIndexingDisabled) {
-    flags.canPubliclyDisplayMessages = false;
+
+  // Flags to update is what is being passed in from the update data
+  const flagsToUpdate = updated?.flags ? updated.flags : {};
+
+  // Pending settings is the merged old and settings that need to be updated
+  const pendingSettings: UserServerSettingsWithFlags = {
+    ...old,
+    ...updated,
+    flags: {
+      ...oldFlags,
+      ...flagsToUpdate,
+    },
+  };
+
+  // The user is trying to grant consent to publicly display messages with message indexing disabled
+  if (flagsToUpdate?.canPubliclyDisplayMessages && pendingSettings.flags?.messageIndexingDisabled) {
+    throw new DBError(
+      CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE,
+      "INVALID_CONFIGURATION"
+    );
   }
-  if (flags?.messageIndexingDisabled && !oldFlags?.messageIndexingDisabled) {
+
+  // User has disabled message indexing, so we need to remove the consent to publicly display messages
+  if (flagsToUpdate.messageIndexingDisabled && pendingSettings.flags?.canPubliclyDisplayMessages) {
+    pendingSettings.flags.canPubliclyDisplayMessages = false;
+  }
+
+  // If we have now disabled message indexing, delete all messages from the user in the server
+  if (pendingSettings?.flags.messageIndexingDisabled && !oldFlags.messageIndexingDisabled) {
     await elastic?.deleteByUserIdInServer({
       userId: old.userId,
       serverId: old.serverId,
     });
   }
-  const bitfield = flags ? mergeUserServerSettingsFlags(old.bitfield, flags) : undefined;
+  const bitfield = dictToBitfield(pendingSettings.flags, userServerSettingsFlags);
   return zUserServerSettings.parse({
-    ...updateDataWithoutFlags,
+    ...omit(pendingSettings, "flags"),
     bitfield,
   });
 }
@@ -106,7 +137,7 @@ export async function findManyUserServerSettings(where: UserServerSettingsFindBy
 }
 
 export async function createUserServerSettings(data: z.infer<typeof zUserServerSettingsCreate>) {
-  const updateData = await mergeUserServerSettings(
+  const updateData = await applyUserServerSettingsChangesSideEffects(
     getDefaultUserServerSettings({
       ...data,
     }),
@@ -131,7 +162,7 @@ export async function updateUserServerSettings(
   if (!existing) {
     throw new Error("UserServerSettings not found");
   }
-  const updateData = await mergeUserServerSettings(existing, data);
+  const updateData = await applyUserServerSettingsChangesSideEffects(existing, data);
   const updated = await prisma.userServerSettings.update({
     where: {
       userId_serverId: {
