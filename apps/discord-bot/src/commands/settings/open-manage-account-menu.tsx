@@ -37,10 +37,7 @@ export class OpenManageAccountMenuCommand extends Command {
               }),
             allowedErrors: "NOT_FOUND",
           });
-          const isIgnoredAccountFetch = callWithAllowedErrors({
-            call: () => router.discordAccounts.checkIfIgnored(member.id),
-            allowedErrors: "NOT_FOUND",
-          });
+          const isIgnoredAccountFetch = router.discordAccounts.checkIfIgnored(member.id);
           const [userServerSettings, isIgnoredAccount] = await Promise.all([
             userServerSettingsFetch,
             isIgnoredAccountFetch,
@@ -60,7 +57,7 @@ export class OpenManageAccountMenuCommand extends Command {
           const menu = (
             <ManageAccountMenu
               initalSettings={userServerSettings}
-              initalIsGloballyIgnored={isIgnoredAccount !== null}
+              initalIsGloballyIgnored={isIgnoredAccount}
             />
           );
           ephemeralReply(container.reacord, menu, interaction);
