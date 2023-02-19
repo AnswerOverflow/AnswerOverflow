@@ -6,7 +6,7 @@ import {
 import { mockDiscordAccount } from "@answeroverflow/db-mock";
 import { pick } from "@answeroverflow/utils";
 
-import { testAllDataVariants, mockAccountCallerCtx } from "~api/test/utils";
+import { testAllPublicAndPrivateDataVariants, mockAccountCallerCtx } from "~api/test/utils";
 import { discordAccountRouter } from "./discord-accounts";
 
 let discordAccount: DiscordAccount;
@@ -26,7 +26,7 @@ describe("Discord Account Operations", () => {
     });
 
     it("should test all varaints of finding a discord account by id", async () => {
-      await testAllDataVariants({
+      await testAllPublicAndPrivateDataVariants({
         async fetch({ source }) {
           const { ctx } = await mockAccountCallerCtx(source);
           const router = discordAccountRouter.createCaller(ctx);
@@ -45,7 +45,7 @@ describe("Discord Account Operations", () => {
       await createManyDiscordAccounts([discordAccount, discordAccount2]);
     });
     it("should test all varaints of finding many discord accounts by id", async () => {
-      await testAllDataVariants({
+      await testAllPublicAndPrivateDataVariants({
         async fetch({ source }) {
           const { ctx } = await mockAccountCallerCtx(source);
           const router = discordAccountRouter.createCaller(ctx);

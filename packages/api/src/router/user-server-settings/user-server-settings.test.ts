@@ -9,6 +9,7 @@ import {
 import { userServerSettingsRouter } from "./user-server-settings";
 import { mockDiscordAccount, mockServer } from "@answeroverflow/db-mock";
 import { NOT_AUTHORIZED_MESSAGE } from "~api/utils/permissions";
+import type { ManageAccountSource } from "./types";
 
 let server: Server;
 let discordAccount: DiscordAccount;
@@ -22,6 +23,26 @@ beforeEach(async () => {
   await createDiscordAccount(discordAccount);
   await createDiscordAccount(discordAccount2);
 });
+
+export async function testAllToggleIndexingScenarios(
+  operation: ({
+    manageAccountSource,
+    router,
+    account,
+  }: {
+    manageAccountSource: ManageAccountSource;
+    account: DiscordAccount;
+    router: ReturnType<typeof userServerSettingsRouter.createCaller>;
+  }) => Promise<void>
+) {
+  const { ctx, account } = await mockAccountWithServersCallerCtx(server, "discord-bot", undefined);
+  const router = userServerSettingsRouter.createCaller(ctx);
+  await operation({
+    manageAccountSource: "manage-account-menu",
+    account,
+    router,
+  });
+}
 
 describe("User Server Settings Operations", () => {
   describe("User Server Settings By Id", () => {
@@ -68,77 +89,64 @@ describe("User Server Settings Operations", () => {
   });
   describe("Set Indexing Disabled", () => {
     it("should fail all variants setting indexing disabled as a different user", async () => {
-      await testAllSources({
-        async operation(source) {
-          const { ctx } = await mockAccountWithServersCallerCtx(server, source);
-          const router = userServerSettingsRouter.createCaller(ctx);
-          await expect(
-            router.setIndexingDisabled({
-              data: {
-                serverId: server.id,
-                user: discordAccount,
-                flags: {
-                  messageIndexingDisabled: true,
-                },
+      await testAllToggleIndexingScenarios(async ({ router }) => {
+        await expect(
+          router.setIndexingDisabled({
+            data: {
+              serverId: server.id,
+              user: mockDiscordAccount(), // use a different user than the caller
+              flags: {
+                messageIndexingDisabled: true,
               },
-              source: "manage-account-menu",
-            })
-          ).rejects.toThrowError(NOT_AUTHORIZED_MESSAGE);
-        },
+            },
+            source: "manage-account-menu",
+          })
+        ).rejects.toThrowError(NOT_AUTHORIZED_MESSAGE);
       });
     });
     it("should succeed all variants setting indexing disabled as that user", async () => {
-      await testAllSources({
-        async operation(source) {
-          const { ctx, account } = await mockAccountWithServersCallerCtx(server, source, undefined);
-          const router = userServerSettingsRouter.createCaller(ctx);
-          const userServerSettings = await router.setIndexingDisabled({
-            data: {
-              serverId: server.id,
-              user: account,
-              flags: {
-                messageIndexingDisabled: true,
-              },
+      await testAllToggleIndexingScenarios(async ({ router, account }) => {
+        const userServerSettings = await router.setIndexingDisabled({
+          data: {
+            serverId: server.id,
+            user: account,
+            flags: {
+              messageIndexingDisabled: true,
             },
-            source: "manage-account-menu",
-          });
-          expect(userServerSettings).toBeDefined();
-          expect(userServerSettings?.serverId).toEqual(server.id);
-          expect(userServerSettings?.userId).toEqual(account.id);
-          expect(userServerSettings?.flags.messageIndexingDisabled).toEqual(true);
-        },
+          },
+          source: "manage-account-menu",
+        });
+        expect(userServerSettings).toBeDefined();
+        expect(userServerSettings?.serverId).toEqual(server.id);
+        expect(userServerSettings?.userId).toEqual(account.id);
+        expect(userServerSettings?.flags.messageIndexingDisabled).toEqual(true);
       });
     });
     it("should succeed all variants of setting indexing disabled on a user that has consented to publicly display their messages", async () => {
-      await testAllSources({
-        async operation(source) {
-          const { ctx, account } = await mockAccountWithServersCallerCtx(server, source, undefined);
-          const router = userServerSettingsRouter.createCaller(ctx);
-          await createDiscordAccount(account);
-          await createUserServerSettings({
+      await testAllToggleIndexingScenarios(async ({ router, account }) => {
+        await createDiscordAccount(account);
+        await createUserServerSettings({
+          serverId: server.id,
+          userId: account.id,
+          flags: {
+            canPubliclyDisplayMessages: true,
+          },
+        });
+        const userServerSettings = await router.setIndexingDisabled({
+          data: {
             serverId: server.id,
-            userId: account.id,
+            user: account,
             flags: {
-              canPubliclyDisplayMessages: true,
+              messageIndexingDisabled: true,
             },
-          });
-
-          const userServerSettings = await router.setIndexingDisabled({
-            data: {
-              serverId: server.id,
-              user: account,
-              flags: {
-                messageIndexingDisabled: true,
-              },
-            },
-            source: "manage-account-menu",
-          });
-          expect(userServerSettings).toBeDefined();
-          expect(userServerSettings?.serverId).toEqual(server.id);
-          expect(userServerSettings?.userId).toEqual(account.id);
-          expect(userServerSettings?.flags.messageIndexingDisabled).toEqual(true);
-          expect(userServerSettings?.flags.canPubliclyDisplayMessages).toEqual(true);
-        },
+          },
+          source: "manage-account-menu",
+        });
+        expect(userServerSettings).toBeDefined();
+        expect(userServerSettings?.serverId).toEqual(server.id);
+        expect(userServerSettings?.userId).toEqual(account.id);
+        expect(userServerSettings?.flags.messageIndexingDisabled).toEqual(true);
+        expect(userServerSettings?.flags.canPubliclyDisplayMessages).toEqual(false);
       });
     });
   });
