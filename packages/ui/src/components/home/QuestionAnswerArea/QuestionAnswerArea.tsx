@@ -31,12 +31,12 @@ export const QuestionAnswerArea = ({
           </div>
 
           <div ref={discordPageRef}>
-            <Message {...questionMessage} showLinkIcon={false} darkMode={true} />
+            <Message {...questionMessage} showLinkIcon={false} forceDarkMode={true} />
             <Message
               {...answerMessage}
               messageBoxClassName="rounded-b-md"
               showLinkIcon={false}
-              darkMode={true}
+              forceDarkMode={true}
             />
           </div>
         </div>
