@@ -25,7 +25,7 @@ export type MessageProps = {
   /**
    * Any additional classes to add to the message box
    */
-  messageBoxClassName?: string;
+  additionalMessageBoxClassNames?: string;
 };
 
 const { toHTML } = discordMarkdown;
@@ -40,7 +40,7 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
     forceDarkMode = false,
     showLinkIcon = true,
     customMessageDateString,
-    messageBoxClassName,
+    additionalMessageBoxClassNames,
   },
   ref
 ) {
@@ -190,7 +190,7 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
 
   return (
     <div
-      className={`relative h-full w-full  p-2 ${messageBoxClassName ?? ""} ${
+      className={`relative h-full w-full  p-2 ${additionalMessageBoxClassNames ?? ""} ${
         forceDarkMode ? "bg-[#36393F]" : "dark:bg-[#36393F]"
       }`}
       ref={ref}

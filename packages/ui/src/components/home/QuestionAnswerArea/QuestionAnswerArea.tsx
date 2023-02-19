@@ -34,7 +34,7 @@ export const QuestionAnswerArea = ({
             <Message {...questionMessage} showLinkIcon={false} forceDarkMode={true} />
             <Message
               {...answerMessage}
-              messageBoxClassName="rounded-b-md"
+              additionalMessageBoxClassNames="rounded-b-md"
               showLinkIcon={false}
               forceDarkMode={true}
             />

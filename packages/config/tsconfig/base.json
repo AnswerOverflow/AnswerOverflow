@@ -58,9 +58,6 @@
       "~ui/pages/*": [
         "./packages/ui/src/pages/*"
       ],
-      "~ui/assets/*": [
-        "./packages/ui/src/assets/*"
-      ],
       "~discord-bot/utils/*": [
         "./apps/discord-bot/src/utils/*"
       ],

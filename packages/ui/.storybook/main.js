@@ -24,7 +24,7 @@ module.exports = {
     };
     return config;
   },
-  staticDirs: ['../../../apps/nextjs/public', '../src/assets'],
+  staticDirs: ['../../../apps/nextjs/public'],
   typescript: {
     check: false,
     checkOptions: {},
