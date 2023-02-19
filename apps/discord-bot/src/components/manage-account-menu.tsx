@@ -105,7 +105,7 @@ export const StopIgnoringAccountButton = ({
     onClick={async (event) => {
       await guildOnlyComponentEvent(event, async ({ member }) =>
         callAPI({
-          apiCall: (router) => router.discordAccounts.unDelete(event.user.id),
+          apiCall: (router) => router.discordAccounts.undelete(event.user.id),
           getCtx: () => createMemberCtx(member),
           Error: (error) => componentEventStatusHandler(event, error.message),
           Ok: () => {

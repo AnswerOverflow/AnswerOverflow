@@ -4,6 +4,7 @@ import {
   createDiscordAccount,
   createServer,
   createUserServerSettings,
+  deleteDiscordAccount,
   getDefaultUserServerSettingsWithFlags,
   UserServerSettingsWithFlags,
 } from "@answeroverflow/db";
@@ -20,9 +21,11 @@ import {
 import {
   DISABLE_INDEXING_LABEL,
   ENABLE_INDEXING_LABEL,
+  GLOBALLY_IGNORE_ACCOUNT_LABEL,
   GRANT_CONSENT_LABEL,
   ManageAccountMenu,
   REVOKE_CONSENT_LABEL,
+  STOP_IGNORING_ACCOUNT_LABEL,
 } from "./manage-account-menu";
 import { toAODiscordAccount, toAOServer } from "~discord-bot/utils/conversions";
 
@@ -126,5 +129,43 @@ describe("Manage Account Menu", () => {
       expect(consentButton).toBeDefined();
       expect(consentButton?.disabled).toBeTruthy();
     });
+  });
+  describe("Toggle Globally Ignored Button", () => {
+    it("should enable globally ignored", async () => {
+      const message = await reply(
+        reacord,
+        <ManageAccountMenu initalSettings={defaultSettings} initalIsGloballyIgnored={false} />
+      );
+      const enableIndexingButton = message!.findButtonByLabel(
+        GLOBALLY_IGNORE_ACCOUNT_LABEL,
+        reacord
+      );
+      expect(enableIndexingButton).toBeDefined();
+      await enableIndexingButton!.click(textChannel, members.guildMemberOwner);
+
+      expect(message!.hasButton(GLOBALLY_IGNORE_ACCOUNT_LABEL, reacord)).toBeFalsy();
+      const button = message!.findButtonByLabel(STOP_IGNORING_ACCOUNT_LABEL, reacord);
+      expect(button).toBeDefined();
+    });
+  });
+  it("should disable globally ignored", async () => {
+    await deleteDiscordAccount(toAODiscordAccount(members.guildMemberOwner.user).id);
+    const message = await reply(
+      reacord,
+      <ManageAccountMenu
+        initalSettings={getDefaultUserServerSettingsWithFlags({
+          serverId: guild.id,
+          userId: members.guildMemberOwner.id,
+        })}
+        initalIsGloballyIgnored={true}
+      />
+    );
+    const disableIndexingButton = message!.findButtonByLabel(STOP_IGNORING_ACCOUNT_LABEL, reacord);
+    expect(disableIndexingButton).toBeDefined();
+    await disableIndexingButton!.click(textChannel, members.guildMemberOwner);
+
+    expect(message!.hasButton(STOP_IGNORING_ACCOUNT_LABEL, reacord)).toBeFalsy();
+    const button = message!.findButtonByLabel(GLOBALLY_IGNORE_ACCOUNT_LABEL, reacord);
+    expect(button).toBeDefined();
   });
 });
