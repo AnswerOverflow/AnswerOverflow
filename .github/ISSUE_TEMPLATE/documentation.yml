@@ -1,7 +1,7 @@
 name: Documentation
 description: Suggestions that relates to the documentation
 title: "[Docs]: "
-labels: ["📜documentation"]
+labels: ["📖 documentation"]
 body:
   - type: dropdown
     id: aspect
