@@ -22,6 +22,7 @@ import {
   MESSAGE_INDEXING_ALREADY_DISABLED_MESSAGE,
   MESSAGE_INDEXING_ALREADY_ENABLED_MESSAGE,
   CONSENT_PREVENTED_BY_DISABLED_INDEXING_MESSAGE,
+  AUTOMATED_CONSENT_SOURCES,
 } from "./types";
 import type { Context } from "../context";
 export const SERVER_NOT_SETUP_MESSAGE = "Server is not setup for Answer Overflow yet";
@@ -153,8 +154,7 @@ const userServerSettingsCrudRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const isAutomatedConsent =
-        input.source === "forum-post-guidelines" || input.source === "read-the-rules";
+      const isAutomatedConsent = AUTOMATED_CONSENT_SOURCES.includes(input.source);
       return mutateUserServerSettings({
         ctx,
         find: { userId: input.data.user.id, serverId: input.data.serverId },

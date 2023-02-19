@@ -7,10 +7,20 @@ export const CONSENT_SOURCES = [
   "manage-account-menu",
   "slash-command",
   "mark-solution-response",
-  "disable-indexing-button",
 ] as const;
-
 export type ConsentSource = (typeof CONSENT_SOURCES)[number];
+
+export const MANUAL_CONSENT_SOURCES: ConsentSource[] = [
+  "manage-account-menu",
+  "slash-command",
+  "mark-solution-response",
+];
+export type ManualConsentSource = (typeof MANUAL_CONSENT_SOURCES)[number];
+export const AUTOMATED_CONSENT_SOURCES: ConsentSource[] = [
+  "forum-post-guidelines",
+  "read-the-rules",
+];
+export type AutomatedConsentSource = (typeof AUTOMATED_CONSENT_SOURCES)[number];
 
 export const CONSENT_ALREADY_GRANTED_MESSAGE = "You have already granted consent for this server";
 export const CONSENT_ALREADY_DENIED_MESSAGE = "You have already denied consent for this server";

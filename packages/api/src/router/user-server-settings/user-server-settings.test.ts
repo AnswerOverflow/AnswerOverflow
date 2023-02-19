@@ -5,11 +5,22 @@ import {
   createServer,
   createDiscordAccount,
   createUserServerSettings,
+  findUserServerSettingsById,
 } from "@answeroverflow/db";
 import { userServerSettingsRouter } from "./user-server-settings";
 import { mockDiscordAccount, mockServer } from "@answeroverflow/db-mock";
 import { NOT_AUTHORIZED_MESSAGE } from "~api/utils/permissions";
-import { ManageAccountSource, MESSAGE_INDEXING_ALREADY_DISABLED_MESSAGE, MESSAGE_INDEXING_ALREADY_ENABLED_MESSAGE } from "./types";
+import {
+  AUTOMATED_CONSENT_SOURCES,
+  ConsentSource,
+  CONSENT_ALREADY_DENIED_MESSAGE,
+  CONSENT_ALREADY_GRANTED_MESSAGE,
+  CONSENT_EXPLICITLY_SET_MESSAGE,
+  ManageAccountSource,
+  MANUAL_CONSENT_SOURCES,
+  MESSAGE_INDEXING_ALREADY_DISABLED_MESSAGE,
+  MESSAGE_INDEXING_ALREADY_ENABLED_MESSAGE,
+} from "./types";
 
 let server: Server;
 let discordAccount: DiscordAccount;
@@ -42,6 +53,62 @@ export async function testAllToggleIndexingScenarios(
     account,
     router,
   });
+}
+
+export async function testAllBotAutomatedGrantConsentScenarios(
+  operation: ({
+    consentSource,
+    router,
+    account,
+  }: {
+    consentSource: ConsentSource;
+    account: DiscordAccount;
+    router: ReturnType<typeof userServerSettingsRouter.createCaller>;
+  }) => Promise<void>
+) {
+  await Promise.all(
+    [...AUTOMATED_CONSENT_SOURCES].map(async (consentSource) => {
+      const { ctx, account } = await mockAccountWithServersCallerCtx(
+        server,
+        "discord-bot",
+        undefined
+      );
+      const router = userServerSettingsRouter.createCaller(ctx);
+      await operation({
+        consentSource,
+        account,
+        router,
+      });
+    })
+  );
+}
+
+export async function testAllBotManualGrantConsentScenarios(
+  operation: ({
+    consentSource,
+    router,
+    account,
+  }: {
+    consentSource: ConsentSource;
+    account: DiscordAccount;
+    router: ReturnType<typeof userServerSettingsRouter.createCaller>;
+  }) => Promise<void>
+) {
+  await Promise.all(
+    [...MANUAL_CONSENT_SOURCES].map(async (consentSource) => {
+      const { ctx, account } = await mockAccountWithServersCallerCtx(
+        server,
+        "discord-bot",
+        undefined
+      );
+      const router = userServerSettingsRouter.createCaller(ctx);
+      await operation({
+        consentSource,
+        account,
+        router,
+      });
+    })
+  );
 }
 
 describe("User Server Settings Operations", () => {
@@ -199,6 +266,174 @@ describe("User Server Settings Operations", () => {
           expect(userServerSettings?.flags.messageIndexingDisabled).toEqual(true);
           expect(userServerSettings?.flags.canPubliclyDisplayMessages).toEqual(false);
         });
+      });
+    });
+  });
+  describe("Set Consent Granted", () => {
+    describe("Successes", () => {
+      it("should succeed all variants setting consent granted as that user", async () => {
+        await testAllBotManualGrantConsentScenarios(async ({ router, account, consentSource }) => {
+          await router.setConsentGranted({
+            data: {
+              serverId: server.id,
+              user: account,
+              flags: {
+                canPubliclyDisplayMessages: true,
+              },
+            },
+            source: consentSource,
+          });
+          const foundUserServerSettings = await findUserServerSettingsById({
+            serverId: server.id,
+            userId: account.id,
+          });
+          expect(foundUserServerSettings?.flags.canPubliclyDisplayMessages).toEqual(true);
+        });
+      });
+      it("should succeed all manual variants setting consent revoked for a user who has granted consent", async () => {
+        await testAllBotManualGrantConsentScenarios(async ({ router, account, consentSource }) => {
+          await createDiscordAccount(account);
+          await createUserServerSettings({
+            serverId: server.id,
+            userId: account.id,
+            flags: {
+              canPubliclyDisplayMessages: true,
+            },
+          });
+          await router.setConsentGranted({
+            data: {
+              serverId: server.id,
+              user: account,
+              flags: {
+                canPubliclyDisplayMessages: false,
+              },
+            },
+            source: consentSource,
+          });
+          const foundUserServerSettings = await findUserServerSettingsById({
+            serverId: server.id,
+            userId: account.id,
+          });
+          expect(foundUserServerSettings?.flags.canPubliclyDisplayMessages).toEqual(false);
+        });
+      });
+    });
+    describe("Failures", () => {
+      it("should fail all variants setting consent granted as a different user", async () => {
+        await testAllBotManualGrantConsentScenarios(async ({ router, consentSource }) => {
+          await expect(
+            router.setConsentGranted({
+              data: {
+                serverId: server.id,
+                user: mockDiscordAccount(), // use a different user than the caller
+                flags: {
+                  canPubliclyDisplayMessages: true,
+                },
+              },
+              source: consentSource,
+            })
+          ).rejects.toThrowError(NOT_AUTHORIZED_MESSAGE);
+        });
+      });
+      it("should fail all variants setting manually consent granted when it is already granted", async () => {
+        await testAllBotManualGrantConsentScenarios(async ({ router, account, consentSource }) => {
+          await createDiscordAccount(account);
+          await createUserServerSettings({
+            serverId: server.id,
+            userId: account.id,
+            flags: {
+              canPubliclyDisplayMessages: true,
+            },
+          });
+          await expect(
+            router.setConsentGranted({
+              data: {
+                serverId: server.id,
+                user: account,
+                flags: {
+                  canPubliclyDisplayMessages: true,
+                },
+              },
+              source: consentSource,
+            })
+          ).rejects.toThrowError(CONSENT_ALREADY_GRANTED_MESSAGE);
+        });
+      });
+      it("should fail all variants setting manually consent revoked when it is already revoked", async () => {
+        await testAllBotManualGrantConsentScenarios(async ({ router, account, consentSource }) => {
+          await createDiscordAccount(account);
+          await createUserServerSettings({
+            serverId: server.id,
+            userId: account.id,
+            flags: {
+              canPubliclyDisplayMessages: false,
+            },
+          });
+          await expect(
+            router.setConsentGranted({
+              data: {
+                serverId: server.id,
+                user: account,
+                flags: {
+                  canPubliclyDisplayMessages: false,
+                },
+              },
+              source: consentSource,
+            })
+          ).rejects.toThrowError(CONSENT_ALREADY_DENIED_MESSAGE);
+        });
+      });
+      it("should fail all variants setting automated consent granted when it is already granted", async () => {
+        await testAllBotAutomatedGrantConsentScenarios(
+          async ({ router, account, consentSource }) => {
+            await createDiscordAccount(account);
+            await createUserServerSettings({
+              serverId: server.id,
+              userId: account.id,
+              flags: {
+                canPubliclyDisplayMessages: true,
+              },
+            });
+            await expect(
+              router.setConsentGranted({
+                data: {
+                  serverId: server.id,
+                  user: account,
+                  flags: {
+                    canPubliclyDisplayMessages: true,
+                  },
+                },
+                source: consentSource,
+              })
+            ).rejects.toThrowError(CONSENT_EXPLICITLY_SET_MESSAGE);
+          }
+        );
+      });
+      it("should fail all variants setting automated consent revoked when it is already revoked", async () => {
+        await testAllBotAutomatedGrantConsentScenarios(
+          async ({ router, account, consentSource }) => {
+            await createDiscordAccount(account);
+            await createUserServerSettings({
+              serverId: server.id,
+              userId: account.id,
+              flags: {
+                canPubliclyDisplayMessages: false,
+              },
+            });
+            await expect(
+              router.setConsentGranted({
+                data: {
+                  serverId: server.id,
+                  user: account,
+                  flags: {
+                    canPubliclyDisplayMessages: false,
+                  },
+                },
+                source: consentSource,
+              })
+            ).rejects.toThrowError(CONSENT_EXPLICITLY_SET_MESSAGE);
+          }
+        );
       });
     });
   });
