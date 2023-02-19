@@ -1,13 +1,15 @@
 import {
   createDiscordAccount,
   createManyDiscordAccounts,
+  deleteDiscordAccount,
   DiscordAccount,
 } from "@answeroverflow/db";
 import { mockDiscordAccount } from "@answeroverflow/db-mock";
 import { pick } from "@answeroverflow/utils";
 
 import { testAllPublicAndPrivateDataVariants, mockAccountCallerCtx } from "~api/test/utils";
-import { discordAccountRouter } from "./discord-accounts";
+import { NOT_AUTHORIZED_MESSAGE } from "~api/utils/permissions";
+import { COULD_NOT_FIND_ACCOUNT_ERROR_MESSAGE, discordAccountRouter } from "./discord-accounts";
 
 let discordAccount: DiscordAccount;
 let discordAccount2: DiscordAccount;
@@ -57,6 +59,41 @@ describe("Discord Account Operations", () => {
           };
         },
       });
+    });
+  });
+  describe("Delete", () => {
+    it("should succeed deleting a discord account that the user owns", async () => {
+      await createDiscordAccount(discordAccount);
+      const { ctx } = await mockAccountCallerCtx("discord-bot", discordAccount);
+      const router = discordAccountRouter.createCaller(ctx);
+      await router.delete(discordAccount.id);
+      await expect(router.byId(discordAccount.id)).rejects.toThrow(
+        COULD_NOT_FIND_ACCOUNT_ERROR_MESSAGE
+      );
+    });
+    it("should fail deleting a discord account that the user does not own", async () => {
+      await createDiscordAccount(discordAccount);
+      const { ctx } = await mockAccountCallerCtx("discord-bot", discordAccount2);
+      const router = discordAccountRouter.createCaller(ctx);
+      await expect(router.delete(discordAccount.id)).rejects.toThrow(NOT_AUTHORIZED_MESSAGE);
+    });
+  });
+  describe("Undelete", () => {
+    it("should succeed undeleting a discord account that the user owns", async () => {
+      await createDiscordAccount(discordAccount);
+      const { ctx } = await mockAccountCallerCtx("discord-bot", discordAccount);
+      const router = discordAccountRouter.createCaller(ctx);
+      await router.delete(discordAccount.id);
+      await router.undelete(discordAccount.id);
+      const data = await router.checkIfIgnored(discordAccount.id);
+      expect(data).toBeFalsy();
+    });
+    it("should fail undeleting a discord account that the user does not own", async () => {
+      await createDiscordAccount(discordAccount);
+      await deleteDiscordAccount(discordAccount.id);
+      const { ctx } = await mockAccountCallerCtx("discord-bot", discordAccount2);
+      const router = discordAccountRouter.createCaller(ctx);
+      await expect(router.undelete(discordAccount.id)).rejects.toThrow(NOT_AUTHORIZED_MESSAGE);
     });
   });
 });

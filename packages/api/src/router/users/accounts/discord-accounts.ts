@@ -20,13 +20,16 @@ import {
   assertIsNotIgnoredAccount,
   assertIsUser,
 } from "~api/utils/permissions";
+import { TRPCError } from "@trpc/server";
+
+export const COULD_NOT_FIND_ACCOUNT_ERROR_MESSAGE = "Could not find discord account";
 
 const accountCrudRouter = router({
   byId: withDiscordAccountProcedure.input(z.string()).query(({ ctx, input }) => {
     return protectedFetchWithPublicData({
       fetch: () => findDiscordAccountById(input),
       permissions: (data) => assertIsUser(ctx, data.id),
-      notFoundMessage: "Could not find discord account",
+      notFoundMessage: COULD_NOT_FIND_ACCOUNT_ERROR_MESSAGE,
       publicDataFormatter: (data) => zDiscordAccountPublic.parse(data),
     });
   }),
@@ -43,18 +46,24 @@ const accountCrudRouter = router({
       operation: () => deleteDiscordAccount(input),
     });
   }),
-  unDelete: withDiscordAccountProcedure.input(z.string()).mutation(({ ctx, input }) => {
+  undelete: withDiscordAccountProcedure.input(z.string()).mutation(({ ctx, input }) => {
     return protectedMutation({
       permissions: [() => assertIsUser(ctx, input), () => assertIsIgnoredAccount(ctx, input)],
       operation: () => deleteIgnoredDiscordAccount(input),
     });
   }),
-  checkIfIgnored: withDiscordAccountProcedure.input(z.string()).query(({ ctx, input }) => {
-    return protectedFetch({
-      permissions: () => assertIsUser(ctx, input),
-      fetch: () => findIgnoredDiscordAccountById(input),
-      notFoundMessage: "Could not find discord account",
-    });
+  checkIfIgnored: withDiscordAccountProcedure.input(z.string()).query(async ({ ctx, input }) => {
+    try {
+      await protectedFetch({
+        permissions: () => assertIsUser(ctx, input),
+        fetch: () => findIgnoredDiscordAccountById(input),
+        notFoundMessage: "Could not find discord account",
+      });
+      return true;
+    } catch (error) {
+      if (!(error instanceof TRPCError && error.code === "NOT_FOUND")) throw error;
+      return false;
+    }
   }),
 });
 
