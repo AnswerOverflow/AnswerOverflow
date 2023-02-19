@@ -15,7 +15,11 @@ import {
   protectedFetchWithPublicData,
   protectedMutation,
 } from "~api/utils/protected-procedures";
-import { assertIsNotIgnoredAccount, assertIsUser } from "~api/utils/permissions";
+import {
+  assertIsIgnoredAccount,
+  assertIsNotIgnoredAccount,
+  assertIsUser,
+} from "~api/utils/permissions";
 
 const accountCrudRouter = router({
   byId: withDiscordAccountProcedure.input(z.string()).query(({ ctx, input }) => {
@@ -41,7 +45,7 @@ const accountCrudRouter = router({
   }),
   unDelete: withDiscordAccountProcedure.input(z.string()).mutation(({ ctx, input }) => {
     return protectedMutation({
-      permissions: [() => assertIsUser(ctx, input), () => assertIsNotIgnoredAccount(ctx, input)],
+      permissions: [() => assertIsUser(ctx, input), () => assertIsIgnoredAccount(ctx, input)],
       operation: () => deleteIgnoredDiscordAccount(input),
     });
   }),

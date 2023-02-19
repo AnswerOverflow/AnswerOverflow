@@ -1,7 +1,9 @@
 import { reply } from "~discord-bot/test/reacord-utils";
 import React from "react";
 import {
+  createDiscordAccount,
   createServer,
+  createUserServerSettings,
   getDefaultUserServerSettingsWithFlags,
   UserServerSettingsWithFlags,
 } from "@answeroverflow/db";
@@ -22,7 +24,7 @@ import {
   ManageAccountMenu,
   REVOKE_CONSENT_LABEL,
 } from "./manage-account-menu";
-import { toAOServer } from "~discord-bot/utils/conversions";
+import { toAODiscordAccount, toAOServer } from "~discord-bot/utils/conversions";
 
 let reacord: ReacordTester;
 let textChannel: TextChannel;
@@ -59,16 +61,20 @@ describe("Manage Account Menu", () => {
       expect(button).toBeDefined();
     });
     it("should disable consent", async () => {
+      await createDiscordAccount(toAODiscordAccount(members.guildMemberOwner.user));
+      const initialSettings = await createUserServerSettings(
+        mockUserServerSettingsWithFlags({
+          serverId: guild.id,
+          userId: members.guildMemberOwner.id,
+          flags: {
+            canPubliclyDisplayMessages: true,
+          },
+        })
+      );
+
       const message = await reply(
         reacord,
-        <ManageAccountMenu
-          initalSettings={mockUserServerSettingsWithFlags({
-            flags: {
-              canPubliclyDisplayMessages: true,
-            },
-          })}
-          initalIsGloballyIgnored={false}
-        />
+        <ManageAccountMenu initalSettings={initialSettings} initalIsGloballyIgnored={false} />
       );
       const disableIndexingButton = message!.findButtonByLabel(REVOKE_CONSENT_LABEL, reacord);
       expect(disableIndexingButton).toBeDefined();
@@ -82,16 +88,19 @@ describe("Manage Account Menu", () => {
   });
   describe("Toggle Indexing Of User Messages Button", () => {
     it("should enable indexing of user messages", async () => {
+      await createDiscordAccount(toAODiscordAccount(members.guildMemberOwner.user));
+      const initialSettings = await createUserServerSettings(
+        mockUserServerSettingsWithFlags({
+          serverId: guild.id,
+          userId: members.guildMemberOwner.id,
+          flags: {
+            messageIndexingDisabled: true,
+          },
+        })
+      );
       const message = await reply(
         reacord,
-        <ManageAccountMenu
-          initalSettings={mockUserServerSettingsWithFlags({
-            flags: {
-              messageIndexingDisabled: true,
-            },
-          })}
-          initalIsGloballyIgnored={false}
-        />
+        <ManageAccountMenu initalSettings={initialSettings} initalIsGloballyIgnored={false} />
       );
       const enableIndexingButton = message!.findButtonByLabel(ENABLE_INDEXING_LABEL, reacord);
       expect(enableIndexingButton).toBeDefined();
