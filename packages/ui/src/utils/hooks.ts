@@ -56,14 +56,14 @@ export const useElementPosition = (element: RefObject<HTMLDivElement>) => {
   return elementBox;
 };
 
-export interface distanceOptions {
+export interface DistanceOptions {
   returnXY?: boolean;
 }
 
 export const useGetDistanceBetweenRects = (
   rect1: DOMRect | null,
   rect2: DOMRect | null,
-  options?: distanceOptions
+  options?: DistanceOptions
 ) => {
   const [distance, setDistance] = useState<
     | number
@@ -115,35 +115,6 @@ export const useGetRectForElement = (element: RefObject<HTMLDivElement>) => {
   }, [element]);
 
   return rect;
-};
-
-export const useTextTypingState = (text: string, shouldRun: boolean) => {
-  const [textState, setTextState] = useState<string>("Search");
-  const [completed, setCompleted] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!shouldRun) return;
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i == 0) return i++;
-      setTextState(text.slice(0, i));
-      i++;
-      if (i > text.length) {
-        clearInterval(interval);
-
-        // Wait a random number of seconds between 0.5 and 1.5 seconds
-        setTimeout(() => {
-          setCompleted(true);
-        }, Math.random() * 1000 + 500);
-      }
-    }, 75);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [text, shouldRun]);
-
-  return { textState, completed };
 };
 
 export const useTheme = () => {
