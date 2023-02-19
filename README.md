@@ -2,14 +2,13 @@
 <p align='center'>
 <a href='https://answeroverflow.com/' target="_blank" rel="noopener">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/AnswerOverflowLogoDark.png" />
-    <img alt="Answer Overflow Logo" src="./assets/AnswerOverflowLogoLight.png" />
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/AnswerOverflowLogoLight.png" />
+    <img alt="Answer Overflow Logo" src="./assets/AnswerOverflowLogoDark.png" />
   </picture>
 </a>
 </p>
 
 <div align="center">
-  <h1>Answer Overflow</h1>
   <h3>Google Index Your Discord Help Channels<br /></h3>
   <a href="https://github.com/AnswerOverflow/AnswerOverflow/blob/main/LICENSE">
     <img alt="AGPL License" src="https://img.shields.io/github/license/AnswerOverflow/AnswerOverflow" />
