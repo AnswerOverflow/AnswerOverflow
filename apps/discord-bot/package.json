@@ -65,5 +65,8 @@
     "test": "yarn run with-env jest --coverage",
     "test:watch": "yarn run with-env jest --watch",
     "install-local-reacord": "cp -r ~/repos/reacord/packages/reacord/dist/ /workspace/node_modules/@answeroverflow/reacord/"
+  },
+  "resolutions": {
+    "discord-api-types": "0.37.20"
   }
 }
