@@ -49,6 +49,9 @@ When designing, keep in mind that the user should be able to use the interface w
 - Responsiveness to different screen sizes
 - Good use of whitespace and neutrals
 
+## Icons
+We recommend using [hero icons](https://heroicons.com/) primarily for icons, and [boostrap icons](https://icons.getbootstrap.com/) if you cannot find a suitable icon within hero icons.
+
 ---
 
 ### Recommendations
