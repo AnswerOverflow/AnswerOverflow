@@ -28,5 +28,8 @@
   },
   "peerDependencies": {
     "discord.js": "^14.7.1"
+  },
+  "resolutions": {
+    "discord-api-types": "0.37.20"
   }
 }
