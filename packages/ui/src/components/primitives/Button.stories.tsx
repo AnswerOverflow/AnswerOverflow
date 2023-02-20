@@ -4,31 +4,31 @@ import { Button, ButtonProps } from "./Button";
 export default {
   component: Button,
   argTypes: {
-    intent: {
-      options: ["primary", "secondary", "danger", "success"],
+    color: {
+      control: {
+        type: "radio",
+      },
+      options: ["red", "blue", "green", "black", "white"],
+    },
+    type: {
       control: { type: "radio" },
+      options: ["solid", "ghost"],
+    },
+    disabled: {
+      control: { type: "boolean" },
+      defaultValue: false,
     },
   },
 } as Meta<typeof Button>;
 
-//👇 We create a “template” of how args map to rendering
-const Template: StoryFn<typeof Button> = (args: ButtonProps) => <Button {...args} />;
+const Template: StoryFn<typeof Button> = (props: ButtonProps) => (
+  <Button color={props.color} disabled={props.disabled} onClick={props.onClick} type={props.type}>
+    Primary
+  </Button>
+);
 
-//👇 Each story then reuses that template
-export const Primary = Template.bind({});
-Primary.args = {
-  intent: "primary",
-  children: "Primary",
-};
-
-export const Secondary = Template.bind({});
-Secondary.args = {
-  intent: "secondary",
-  children: "Secondary",
-};
-
-export const Danger = Template.bind({});
-Danger.args = {
-  intent: "danger",
-  children: "Danger",
+export const ButtonPrimary = Template.bind({});
+ButtonPrimary.args = {
+  type: "ghost",
+  color: "white",
 };

@@ -8,21 +8,27 @@ import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
   Guild relevated events are tracked here, this may make sense to split into multiple files as the complexity grows.
 */
 
+async function syncServer(guild: Guild) {
+  await upsertServer(toAOServer(guild));
+  const channelsToUpsert = guild.channels.cache
+    .filter((channel) => ALLOWED_CHANNEL_TYPES.has(channel.type))
+    .map((channel) => toAOChannel(channel));
+  await upsertManyChannels(channelsToUpsert);
+}
+
 @ApplyOptions<Listener.Options>({ once: true, event: "ready" })
 export class SyncOnReady extends Listener {
   public async run() {
     // 1. Sync all of the servers to have the most up to date data
+    const guilds = this.container.client.guilds.cache;
+    await Promise.all(guilds.map((guild) => syncServer(guild)));
     // 2. For any servers that are in the database and not in the guilds the bot is in, mark them as kicked
   }
 }
 @ApplyOptions<Listener.Options>({ event: Events.GuildCreate, name: "Guild Sync On Join" })
 export class SyncOnJoin extends Listener {
   public async run(guild: Guild) {
-    await upsertServer(toAOServer(guild));
-    const channelsToUpsert = guild.channels.cache
-      .filter((channel) => ALLOWED_CHANNEL_TYPES.has(channel.type))
-      .map((channel) => toAOChannel(channel));
-    await upsertManyChannels(channelsToUpsert);
+    await syncServer(guild);
   }
 }
 

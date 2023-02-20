@@ -1,15 +1,16 @@
 /* eslint-disable tailwindcss/migration-from-tailwind-2 */
 import Link from "next/link";
-import { AnswerOverflowLogo } from "./AnswerOverflowLogo";
-import { ThemeSwitcher } from "./ThemeSwitcher";
+import { AnswerOverflowLogo } from "../AnswerOverflowLogo";
+import { ThemeSwitcher } from "../ThemeSwitcher";
 import { useRouter } from "next/router";
 import { signIn, signOut } from "next-auth/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/solid";
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { trpc } from "../utils";
-import { Avatar } from "./primitives/Avatar";
-import { Button } from "./primitives/Button";
+// eslint-disable-next-line no-restricted-imports
+import { trpc } from "../../utils/trpc";
+import { Avatar } from "../primitives/Avatar";
+import { Button } from "./Button";
 import type { User } from "@answeroverflow/api";
 import { classNames } from "~ui/utils/styling";
 

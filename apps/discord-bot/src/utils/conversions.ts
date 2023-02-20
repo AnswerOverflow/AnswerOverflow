@@ -1,9 +1,12 @@
 import type {
   AnyThreadChannel,
+  Client,
   Guild,
   GuildBasedChannel,
   GuildChannel,
   Message,
+  MessageReference,
+  TextChannel,
   User,
 } from "discord.js";
 import {
@@ -14,9 +17,21 @@ import {
   DiscordAccount as AODiscordAccount,
   getDefaultChannelWithFlags,
 } from "@answeroverflow/db";
+import type { ComponentEvent } from "@answeroverflow/reacord";
+
+export function toAOMessageReference(reference: MessageReference): AOMessage["messageReference"] {
+  if (!reference.messageId) return null;
+  if (!reference.guildId) return null;
+  return {
+    channelId: reference.channelId,
+    messageId: reference.messageId,
+    serverId: reference.guildId,
+  };
+}
 
 export function toAOMessage(message: Message): AOMessage {
   if (!message.guild) throw new Error("Message is not in a guild");
+
   const convertedMessage: AOMessage = {
     id: message.id,
     content: message.cleanContent,
@@ -29,10 +44,10 @@ export function toAOMessage(message: Message): AOMessage {
         description: attachment.description,
       };
     }),
-    repliesTo: message.reference?.messageId ?? null,
+    messageReference: message.reference ? toAOMessageReference(message.reference) : null,
     authorId: message.author.id,
     serverId: message.guild?.id,
-    solutions: [],
+    solutionIds: [],
     childThread: message.thread?.id ?? null,
   };
   return convertedMessage;
@@ -112,4 +127,30 @@ export function messagesToAOMessagesSet(messages: Message[]) {
     aoMessages.set(msg.id, toAOMessage(msg));
   }
   return Array.from(aoMessages.values());
+}
+
+export type DiscordJSComponentEvent = Awaited<ReturnType<typeof componentEventToDiscordJSTypes>>;
+
+export async function componentEventToDiscordJSTypes(event: ComponentEvent, client: Client) {
+  const {
+    message: messageToConvert,
+    user: userToConvert,
+    channel: channelToConvert,
+    guild: guildToConvert,
+  } = event;
+  const [channel, guild, user] = await Promise.all([
+    client.channels.fetch(channelToConvert.id),
+    guildToConvert ? client.guilds.fetch(guildToConvert.id) : null,
+    client.users.fetch(userToConvert.id),
+  ]);
+  // this should never fail
+  const message = await (channel as TextChannel).messages.fetch(messageToConvert.id);
+  // probably shouldnt assert is null but these arent expected to be null
+  return {
+    ...event,
+    message: message,
+    user: user,
+    channel: channel!,
+    guild: guild,
+  };
 }

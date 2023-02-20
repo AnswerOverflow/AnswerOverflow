@@ -1,4 +1,4 @@
-import type { Server } from "@answeroverflow/prisma-types";
+import { addFlagsToServer, Server } from "@answeroverflow/prisma-types";
 import { mockServer } from "@answeroverflow/db-mock";
 import { createServer, findServerById, updateServer } from "./server";
 
@@ -41,6 +41,39 @@ describe("Server", () => {
       expect(updated.flags.readTheRulesConsentEnabled).toBe(true);
       const found = await findServerById(server.id);
       expect(found!.flags.readTheRulesConsentEnabled).toBe(true);
+    });
+  });
+  describe("Find Server By Id", () => {
+    let existing: Server;
+    beforeEach(async () => {
+      existing = await createServer(server);
+    });
+    it("should find server by id", async () => {
+      const found = await findServerById(server.id);
+      expect(found).toStrictEqual(existing);
+    });
+    it("should return null if server not found", async () => {
+      const found = await findServerById("not-found");
+      expect(found).toBeNull();
+    });
+  });
+  describe("Upsert Server", () => {
+    it("should upsert create a server", async () => {
+      const created = await createServer(server);
+      expect(created).toEqual(addFlagsToServer(server));
+    });
+    it("should upsert update a server", async () => {
+      const created = await createServer(server);
+      const updated = await updateServer(
+        {
+          ...server,
+          flags: {
+            readTheRulesConsentEnabled: true,
+          },
+        },
+        created
+      );
+      expect(updated.flags.readTheRulesConsentEnabled).toBe(true);
     });
   });
 });

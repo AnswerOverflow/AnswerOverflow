@@ -64,9 +64,10 @@ export async function getStaticProps(context: GetStaticPropsContext<{ messageId:
       notFound: true,
     };
   }
+
   // prefetch `post.byId`
   try {
-    const { server, messages } = await ssg.messagePage.byId.fetch(context.params.messageId, {});
+    const { server, messages } = await ssg.messagePage.byId.fetch(context.params.messageId);
     const areAllMessagesPublic = messages.every((message) => message.public);
     return {
       props: {

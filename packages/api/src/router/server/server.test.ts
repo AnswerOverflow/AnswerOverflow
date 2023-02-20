@@ -2,9 +2,9 @@ import { mockServer } from "@answeroverflow/db-mock";
 import { createServer, Server } from "@answeroverflow/db";
 import { pickPublicServerData } from "~api/test/public-data";
 import {
-  testAllVariantsThatThrowErrors,
+  testAllSourceAndPermissionVariantsThatThrowErrors,
   mockAccountWithServersCallerCtx,
-  testAllDataVariants,
+  testAllPublicAndPrivateDataVariants,
 } from "~api/test/utils";
 import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
 import { serverRouter } from "./server";
@@ -12,7 +12,7 @@ import { serverRouter } from "./server";
 describe("Server Operations", () => {
   describe("Server Create", () => {
     it("should test all permission and caller variants to ensure only calls from the Discord bot with Manage Guild & Administrator can succeed", async () => {
-      await testAllVariantsThatThrowErrors({
+      await testAllSourceAndPermissionVariantsThatThrowErrors({
         sourcesThatShouldWork: ["discord-bot"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
         permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
@@ -27,7 +27,7 @@ describe("Server Operations", () => {
   });
   describe("Server Update", () => {
     it("should test all permission and caller variants to ensure only calls from the Discord bot with Manage Guild & Administrator can succeed", async () => {
-      return await testAllVariantsThatThrowErrors({
+      return await testAllSourceAndPermissionVariantsThatThrowErrors({
         async operation({ source, permission }) {
           const server = mockServer();
           await createServer(server);
@@ -57,7 +57,7 @@ describe("Server Operations", () => {
       await createServer(server2);
     });
     it("should succeed fetching a server with permission variants", async () => {
-      await testAllDataVariants({
+      await testAllPublicAndPrivateDataVariants({
         async fetch({ source, permission }) {
           const account = await mockAccountWithServersCallerCtx(server2, source, permission);
           const router = serverRouter.createCaller(account.ctx);
@@ -75,7 +75,7 @@ describe("Server Operations", () => {
 
   describe("Server Upsert", () => {
     it("should test all server create upsert variants", async () => {
-      await testAllVariantsThatThrowErrors({
+      await testAllSourceAndPermissionVariantsThatThrowErrors({
         sourcesThatShouldWork: ["discord-bot"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
         permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,

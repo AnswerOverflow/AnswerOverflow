@@ -1,6 +1,9 @@
-import type { DiscordAccount } from "..";
-import { upsertManyDiscordAccounts } from "./discord-account";
-import { mockDiscordAccount } from "@answeroverflow/db-mock";
+import type { DiscordAccount } from "@answeroverflow/prisma-types";
+import { findMessageById, upsertMessage } from "./message";
+import { deleteDiscordAccount, upsertManyDiscordAccounts } from "./discord-account";
+import { mockChannel, mockDiscordAccount, mockMessage, mockServer } from "@answeroverflow/db-mock";
+import { createServer } from "./server";
+import { createChannel } from "./channel";
 let account1: DiscordAccount;
 let account2: DiscordAccount;
 let account3: DiscordAccount;
@@ -17,5 +20,18 @@ describe("Discord Account Operations", () => {
     });
     it("should update many discord accounts", async () => {});
     it("should create and update many discord accounts", async () => {});
+    it("should delete messages of a discord user on delete", async () => {
+      const account = mockDiscordAccount();
+      await upsertManyDiscordAccounts([account]);
+      const srv = mockServer();
+      const chnl = mockChannel(srv);
+      const msg = mockMessage(srv, chnl, account);
+      await createServer(srv);
+      await createChannel(chnl);
+      await upsertMessage(msg);
+      await deleteDiscordAccount(account.id);
+      const fetchedMsg = await findMessageById(msg.id);
+      expect(fetchedMsg).toBeNull();
+    });
   });
 });

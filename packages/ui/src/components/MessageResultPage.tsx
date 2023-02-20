@@ -25,7 +25,7 @@ export function MessageResultPage({
   thread,
   query,
 }: MessageResultPageProps) {
-  const solutionMessageId = messages.at(0)?.solutions?.at(0);
+  const solutionMessageId = messages.at(0)?.solutionIds?.at(0);
   const MessageStack = ({ messages }: { messages: MessageWithDiscordAccount[] }) => {
     let consecutivePrivateMessages = 0;
     const isUserInServer = useIsUserInServer(server.id);

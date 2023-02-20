@@ -3,7 +3,8 @@ import { cva, VariantProps } from "cva";
 const discordIconStyles = cva("", {
   variants: {
     color: {
-      blurple: "dark:text-blue-400 text-[#5865F2] hover:text-[#7289DA] dark:hover:text-blue-500",
+      blurple:
+        "dark:text-blue-400 text-[#5865F2] hover:text-[#7289DA] dark:hover:text-blue-300 transition-all",
       inherit: "text-inherit",
     },
     defaultVariants: {

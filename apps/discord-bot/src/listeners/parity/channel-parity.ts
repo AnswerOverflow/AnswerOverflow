@@ -59,6 +59,7 @@ export class InviteSyncOnDelete extends Listener {
   public async run(invite: Invite) {
     const settings = await findChannelByInviteCode(invite.code);
     if (!settings) return;
+
     await updateChannel({ id: settings.id, inviteCode: null }, settings);
   }
 }

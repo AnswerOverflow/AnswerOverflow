@@ -13,3 +13,4 @@ export * from "./src/router/users/accounts/types";
 export * from "./src/router/server/types";
 export * from "./src/router/channel/types";
 export * from "./src/router/users/user/types";
+export * from "./src/router/user-server-settings/types";

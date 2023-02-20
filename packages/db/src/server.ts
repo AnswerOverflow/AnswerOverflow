@@ -1,7 +1,7 @@
 import type { z } from "zod";
-import { getDefaultServer, prisma, Server } from "@answeroverflow/prisma-types";
+import { getDefaultServerWithFlags, prisma, Server } from "@answeroverflow/prisma-types";
 import { upsert } from "./utils/operations";
-import { addFlagsToServer, zServer, mergeServerFlags } from "./zod-schemas";
+import { addFlagsToServer, zServer, mergeServerFlags } from "@answeroverflow/prisma-types";
 
 export const zServerRequired = zServer.pick({
   id: true,
@@ -33,13 +33,6 @@ export function combineServerSettings<
     ...updateDataWithoutFlags,
     bitfield: flags ? mergeServerFlags(old.bitfield, flags) : undefined,
   };
-}
-
-export function getDefaultServerWithFlags(
-  override: Partial<z.infer<typeof zServerMutable>> &
-    Pick<z.infer<typeof zServer>, "id" | "name">
-) {
-  return addFlagsToServer(getDefaultServer(override));
 }
 
 export async function createServer(input: z.infer<typeof zServerCreate>) {
