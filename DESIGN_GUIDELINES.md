@@ -17,7 +17,7 @@ Answer overflow uses several predefined colors to ensure consistency. These colo
 - Accents (use sparingly)
   - Soon.
 - Others
-  - ![#00FF85](https://via.placeholder.com/15/00FF85/000000?text=+) `#00FF85` - looks nice against the answer overflow black for indicating success to a user.
+  - ![#00FF85](https://via.placeholder.com/15/00FF85/000000?text=+) `#00FF85` - looks nice against the answer overflow black (with an opacity of 47% on lines) for indicating success to a user.
 
 ## Logos
 
