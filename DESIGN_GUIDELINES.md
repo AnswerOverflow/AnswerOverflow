@@ -1,4 +1,5 @@
 # Answer Overflow Design Guidelines
+These guidelines briefly showcase how to design nice interfaces for Answer Overflow.
 
 > **Note**
 > We are currently undertaking a complete revamp of the answer overflow design. Colors, logos, guidelines, and other items are likely to be added, removed, and changed.
