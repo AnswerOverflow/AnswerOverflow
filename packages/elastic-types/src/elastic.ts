@@ -393,7 +393,7 @@ export class Elastic extends Client {
     return true;
   }
 
-  public async searchForMessages({ query, serverId, limit }: MessageSearchOptions) {
+  public async searchMessages({ query, serverId, limit }: MessageSearchOptions) {
     const q: QueryDslQueryContainer = {
       // TODO: No ts ignore in future
       // @ts-ignore
@@ -427,7 +427,12 @@ export class Elastic extends Client {
       sort: [{ id: "asc" }],
     });
 
-    return result.hits.hits.filter((hit) => hit._source).map((hit) => hit._source!);
+    return result.hits.hits
+      .filter((hit) => hit._source)
+      .map((hit) => ({
+        ...hit,
+        _source: hit._source!,
+      }));
   }
 
   public async createMessagesIndex() {

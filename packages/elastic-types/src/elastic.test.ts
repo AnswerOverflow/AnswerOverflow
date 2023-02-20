@@ -168,7 +168,7 @@ describe("ElasticSearch", () => {
         ...msg1,
         content,
       });
-      const searchResults = await elastic.searchForMessages({
+      const searchResults = await elastic.searchMessages({
         query: content,
       });
       expect(searchResults).toBeDefined();
@@ -187,7 +187,7 @@ describe("ElasticSearch", () => {
         serverId: serverId2,
         content,
       });
-      const searchResults = await elastic.searchForMessages({
+      const searchResults = await elastic.searchMessages({
         query: content,
         serverId: serverId2,
       });
@@ -196,7 +196,7 @@ describe("ElasticSearch", () => {
       expect(searchResults.find((msg) => msg.content === content)).toBeDefined();
     });
     it("should return an empty array if no messages are found", async () => {
-      const searchResults = await elastic.searchForMessages({
+      const searchResults = await elastic.searchMessages({
         query: getRandomId(),
       });
       expect(searchResults).toBeDefined();
@@ -212,7 +212,7 @@ describe("ElasticSearch", () => {
         ...msg2,
         content,
       });
-      const searchResults = await elastic.searchForMessages({
+      const searchResults = await elastic.searchMessages({
         query: content,
         limit: 1,
       });

@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { prisma } from "@answeroverflow/prisma-types";
+import { Channel, prisma, Server } from "@answeroverflow/prisma-types";
 import { addFlagsToUserServerSettings, zDiscordAccountPublic } from "@answeroverflow/prisma-types";
-import { Message, elastic, zMessage } from "@answeroverflow/elastic-types";
+import { Message, elastic, zMessage, MessageSearchOptions } from "@answeroverflow/elastic-types";
 import { DBError } from "./utils/error";
 import {
   findIgnoredDiscordAccountById,
@@ -50,28 +50,32 @@ export async function addRepliesToMessages(messages: Message[]) {
   }));
 }
 
-export async function addAuthorsToMessages(
-  messages: Awaited<ReturnType<typeof addRepliesToMessages>>
-) {
-  const authorIds = messages.map((m) => m.authorId);
-  const replyAuthorIds = messages.flatMap((m) => m.referencedMessage?.authorId ?? []);
-  const allAuthorIds = [...new Set([...authorIds, ...replyAuthorIds])];
+export type MessageWithReply = Awaited<ReturnType<typeof addRepliesToMessages>>[number];
 
-  const authorServerIds = messages.map((m) => m.serverId);
-  const replyServerIds = messages.flatMap((m) => m.referencedMessage?.serverId ?? []);
-  const allServerIds = [...new Set([...authorServerIds, ...replyServerIds])];
+export function isMessageWithReply(
+  message: Message | MessageWithReply
+): message is MessageWithReply {
+  return "referencedMessage" in message;
+}
 
+async function idk({
+  authorIds,
+  authorServerIds,
+}: {
+  authorIds: string[];
+  authorServerIds: string[];
+}) {
   const authors = await prisma.discordAccount.findMany({
     where: {
       id: {
-        in: allAuthorIds,
+        in: authorIds,
       },
     },
     include: {
       userServerSettings: {
         where: {
           serverId: {
-            in: allServerIds,
+            in: authorServerIds,
           },
         },
       },
@@ -88,7 +92,6 @@ export async function addAuthorsToMessages(
       ])
     )
   );
-
   const authorLookup = new Map(authors.map((a) => [a.id, a]));
 
   const addAuthorToMessage = (m: Message): MessageWithDiscordAccount => ({
@@ -98,15 +101,36 @@ export async function addAuthorsToMessages(
       authorServerSettingsLookup.get(toAuthorServerSettingsLookupKey(m.authorId, m.serverId))?.flags
         .canPubliclyDisplayMessages ?? false,
   });
+  return { authorLookup, addAuthorToMessage };
+}
 
+export async function addAuthorsToMessages<T extends Message>(messages: T[]) {
+  if (messages.length === 0) {
+    return [];
+  }
+  const authorIds = messages.map((m) => m.authorId);
+  const authorServerIds = messages.map((m) => m.serverId);
+  const { authorLookup, addAuthorToMessage } = await idk({ authorIds, authorServerIds });
+  return messages.filter((m) => authorLookup.has(m.authorId)).map(addAuthorToMessage);
+}
+
+export async function addAuthorsToMessagesWithReplies<T extends MessageWithReply>(messages: T[]) {
+  if (messages.length === 0) {
+    return [];
+  }
+  const authorIds = messages
+    .map((m) => (m.referencedMessage ? [m.authorId, m.referencedMessage.authorId] : [m.authorId]))
+    .flat();
+  const authorServerIds = messages
+    .map((m) => (m.referencedMessage ? [m.serverId, m.referencedMessage.serverId] : [m.serverId]))
+    .flat();
+  const { authorLookup, addAuthorToMessage } = await idk({ authorIds, authorServerIds });
   return messages
     .filter((m) => authorLookup.has(m.authorId))
-    .map(
-      (m): MessageWithAccountAndRepliesTo => ({
-        ...addAuthorToMessage(m),
-        referencedMessage: m.referencedMessage ? addAuthorToMessage(m.referencedMessage) : null,
-      })
-    );
+    .map((m) => ({
+      ...addAuthorToMessage(m),
+      referencedMessage: m.referencedMessage ? addAuthorToMessage(m.referencedMessage) : null,
+    }));
 }
 
 export const CANNOT_UPSERT_MESSAGE_FOR_IGNORED_ACCOUNT_MESSAGE =
@@ -119,9 +143,8 @@ export async function findMessageById(id: string) {
   if (!msg) {
     return null;
   }
-  // TODO: Maybe make it so that addAuthorsToMessages can take a single message
   const msgWithReplies = await addRepliesToMessages([msg]);
-  const msgWithAuthorAndReplies = await addAuthorsToMessages(msgWithReplies);
+  const msgWithAuthorAndReplies = await addAuthorsToMessagesWithReplies(msgWithReplies);
   return msgWithAuthorAndReplies[0] ?? null;
 }
 
@@ -135,13 +158,13 @@ export async function findMessagesByChannelId(input: z.infer<typeof zFindMessage
     return [];
   }
   const withReplies = await addRepliesToMessages(messages);
-  return addAuthorsToMessages(withReplies);
+  return addAuthorsToMessagesWithReplies(withReplies);
 }
 
 export async function findManyMessages(ids: string[]) {
   const allMessages = await elastic.bulkGetMessages(ids);
   const withReplies = await addRepliesToMessages(allMessages);
-  return addAuthorsToMessages(withReplies);
+  return addAuthorsToMessagesWithReplies(withReplies);
 }
 
 export async function updateMessage(data: z.infer<typeof zMessage>) {
@@ -209,23 +232,17 @@ export async function deleteManyMessagesByUserId(userId: string) {
   return elastic.deleteByUserId(userId);
 }
 
-export async function searchForMessages({
-  serverId,
-  userId,
-  query,
-  after,
-  limit,
-}: MessageSearchOptions) {
-  const searchResults = await elastic.searchMessages({
-    serverId,
-    userId,
-    query,
-    after,
-    limit,
-  });
-  const messages = await addAuthorsToMessages(searchResults.results);
-  return {
-    ...searchResults,
-    results: messages,
-  };
+export type SearchResult = {
+  question: MessageWithDiscordAccount;
+  answer: MessageWithDiscordAccount;
+  score: number;
+  channel: Channel;
+  server: Server;
+  thread?: Channel;
+};
+
+export async function searchMessages(options: MessageSearchOptions): Promise<SearchResult[]> {
+  const searchResults = await elastic.searchMessages(options);
+  const messages = searchResults.map((r) => r._source);
+  const withDiscordAccounts = await addAuthorsToMessages(messages);
 }
