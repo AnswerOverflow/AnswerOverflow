@@ -269,7 +269,7 @@ describe("Indexing", () => {
         solutionMessageAsAoMessage,
         markedAsSolvedReplyAsAoMessage,
       ]);
-      expect(questionMessageAsAoMessage.solutions).toEqual([solutionMessageAsAoMessage.id]);
+      expect(questionMessageAsAoMessage.solutionIds).toEqual([solutionMessageAsAoMessage.id]);
     });
     it("should add solutions to messages with reply in the middle", () => {
       addSolutionsToMessages(messages, [
@@ -277,7 +277,7 @@ describe("Indexing", () => {
         markedAsSolvedReplyAsAoMessage,
         solutionMessageAsAoMessage,
       ]);
-      expect(questionMessageAsAoMessage.solutions).toEqual([solutionMessageAsAoMessage.id]);
+      expect(questionMessageAsAoMessage.solutionIds).toEqual([solutionMessageAsAoMessage.id]);
     });
     it("should add solutions to messages with reply at the beginning", () => {
       addSolutionsToMessages(messages, [
@@ -285,7 +285,7 @@ describe("Indexing", () => {
         questionMessageAsAoMessage,
         solutionMessageAsAoMessage,
       ]);
-      expect(questionMessageAsAoMessage.solutions).toEqual([solutionMessageAsAoMessage.id]);
+      expect(questionMessageAsAoMessage.solutionIds).toEqual([solutionMessageAsAoMessage.id]);
     });
   });
   describe("Find Solutions To Messages", () => {

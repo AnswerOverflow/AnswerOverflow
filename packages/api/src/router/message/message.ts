@@ -6,23 +6,40 @@ import { assertIsUserInServer } from "~api/utils/permissions";
 import {
   getDefaultDiscordAccount,
   getDefaultMessage,
-  zMessageWithDiscordAccount,
   findMessagesByChannelId,
   zFindMessagesByChannelId,
   findManyMessages,
   findMessageById,
+  MessageWithAccountAndRepliesTo,
+  MessageWithDiscordAccount,
+  isMessageWithAccountAndRepliesTo,
 } from "@answeroverflow/db";
 import type { DiscordServer } from "@answeroverflow/auth";
 
+// Kind of ugly having it take in two different types, but it's the easiest way to do it
 export function stripPrivateMessageData(
-  message: z.infer<typeof zMessageWithDiscordAccount>,
+  message: MessageWithAccountAndRepliesTo | MessageWithDiscordAccount,
   userServers: DiscordServer[] | null = null
-) {
-  if (message.public) {
+): MessageWithAccountAndRepliesTo | MessageWithDiscordAccount {
+  const isReply = !isMessageWithAccountAndRepliesTo(message);
+  // If it is only a reply and is public, then just return
+  if (isReply && message.public) {
     return message;
   }
+  // If it is not a reply, is public, and has no referenced message, then just return
+  // If it is not a reply, is public, and the referenced message is public, then just return
+  if (!isReply && message.public) {
+    return {
+      ...message,
+      referencedMessage: message.referencedMessage
+        ? stripPrivateMessageData(message.referencedMessage)
+        : null,
+    };
+  }
+
   if (userServers) {
     const userServer = userServers.find((s) => s.id === message.serverId);
+    // If the user is in the server, then just return
     if (userServer) {
       return message;
     }
@@ -38,15 +55,31 @@ export function stripPrivateMessageData(
     id: message.id,
     childThread: null,
   });
+
+  // If it is a reply, then we know that is it private so we can just return
+  // If there is no referenced message, then we can just return
+  if (isReply) {
+    return {
+      ...defaultMessage,
+      author: defaultAuthor,
+      public: false,
+    };
+  }
+
+  const reply = message.referencedMessage
+    ? stripPrivateMessageData(message.referencedMessage, userServers)
+    : null;
+
   return {
     ...defaultMessage,
     author: defaultAuthor,
     public: false,
+    referencedMessage: reply,
   };
 }
 
 export function stripPrivateMessagesData(
-  messages: z.infer<typeof zMessageWithDiscordAccount>[],
+  messages: MessageWithAccountAndRepliesTo[],
   userServers: DiscordServer[] | null = null
 ) {
   return messages.map((m) => stripPrivateMessageData(m, userServers));

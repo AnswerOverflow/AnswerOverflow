@@ -19,7 +19,8 @@
   "dependencies": {
     "@answeroverflow/utils": "*",
     "@prisma/client": "^4.8.1",
-    "@sapphire/bitfield": "^1.0.0"
+    "@sapphire/bitfield": "^1.0.0",
+    "zod": "^3.20.6"
   },
   "devDependencies": {
     "@answeroverflow/tsconfig": "*",

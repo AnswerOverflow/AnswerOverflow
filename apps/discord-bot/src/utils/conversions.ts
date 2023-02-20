@@ -5,6 +5,7 @@ import type {
   GuildBasedChannel,
   GuildChannel,
   Message,
+  MessageReference,
   TextChannel,
   User,
 } from "discord.js";
@@ -18,8 +19,19 @@ import {
 } from "@answeroverflow/db";
 import type { ComponentEvent } from "@answeroverflow/reacord";
 
+export function toAOMessageReference(reference: MessageReference): AOMessage["messageReference"] {
+  if (!reference.messageId) return null;
+  if (!reference.guildId) return null;
+  return {
+    channelId: reference.channelId,
+    messageId: reference.messageId,
+    serverId: reference.guildId,
+  };
+}
+
 export function toAOMessage(message: Message): AOMessage {
   if (!message.guild) throw new Error("Message is not in a guild");
+
   const convertedMessage: AOMessage = {
     id: message.id,
     content: message.cleanContent,
@@ -32,10 +44,10 @@ export function toAOMessage(message: Message): AOMessage {
         description: attachment.description,
       };
     }),
-    repliesTo: message.reference?.messageId ?? null,
+    messageReference: message.reference ? toAOMessageReference(message.reference) : null,
     authorId: message.author.id,
     serverId: message.guild?.id,
-    solutions: [],
+    solutionIds: [],
     childThread: message.thread?.id ?? null,
   };
   return convertedMessage;

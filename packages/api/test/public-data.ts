@@ -2,7 +2,9 @@ import {
   DiscordAccount,
   getDefaultDiscordAccount,
   getDefaultMessage,
+  isMessageWithAccountAndRepliesTo,
   Message,
+  MessageWithAccountAndRepliesTo,
   MessageWithDiscordAccount,
   Server,
 } from "@answeroverflow/db";
@@ -12,20 +14,45 @@ export function pickPublicServerData(server: Server) {
   return pick(server, ["id", "name", "icon"]);
 }
 
-export function toMessageWithDiscordAccount(
-  message: Message,
-  author: DiscordAccount,
-  publicMessage: boolean
-) {
-  const publicMsg: MessageWithDiscordAccount = {
+type ToMessageWithDiscordAccount = {
+  message: Message;
+  author: DiscordAccount;
+  publicMessage: boolean;
+};
+
+export function toMessageWithDiscordAccount({
+  message,
+  author,
+  publicMessage,
+}: ToMessageWithDiscordAccount) {
+  const msg: MessageWithDiscordAccount = {
     ...message,
     author,
     public: publicMessage,
   };
+  return msg;
+}
+
+export function toMessageWithAccountAndRepliesTo({
+  message,
+  referenced = undefined,
+  author,
+  publicMessage,
+}: ToMessageWithDiscordAccount & {
+  referenced?: MessageWithDiscordAccount;
+}) {
+  const publicMsg: MessageWithAccountAndRepliesTo = {
+    ...toMessageWithDiscordAccount({ message, author, publicMessage }),
+    referencedMessage: referenced ?? null,
+  };
   return publicMsg;
 }
 
-export function toPrivateMessageWithStrippedData(message: MessageWithDiscordAccount) {
+export function toPrivateMessageWithStrippedData(
+  message: MessageWithDiscordAccount | MessageWithAccountAndRepliesTo
+): MessageWithDiscordAccount | MessageWithAccountAndRepliesTo {
+  const isReply = !isMessageWithAccountAndRepliesTo(message);
+
   const author = getDefaultDiscordAccount({
     id: "0",
     name: "Unknown User",
@@ -40,5 +67,13 @@ export function toPrivateMessageWithStrippedData(message: MessageWithDiscordAcco
     author,
     public: false,
   };
-  return privateMsg;
+  if (isReply) {
+    return privateMsg;
+  }
+  return {
+    ...privateMsg,
+    referencedMessage: message.referencedMessage
+      ? toPrivateMessageWithStrippedData(message.referencedMessage)
+      : null,
+  };
 }

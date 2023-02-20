@@ -105,7 +105,7 @@ export function addSolutionsToMessages(messages: Message[], convertedMessages: A
   for (const msg of messages) {
     const { questionId, solutionId } = findSolutionsToMessage(msg);
     if (questionId && solutionId && messageLookup.has(questionId)) {
-      messageLookup.get(questionId)!.solutions.push(solutionId);
+      messageLookup.get(questionId)!.solutionIds.push(solutionId);
     }
   }
 }
