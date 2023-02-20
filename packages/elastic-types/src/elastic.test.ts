@@ -13,7 +13,7 @@ beforeEach(() => {
     images: [],
     messageReference: null,
     serverId: getRandomId(),
-    solutions: [],
+    solutionIds: [],
     authorId: getRandomId(),
     childThread: getRandomId(),
   };

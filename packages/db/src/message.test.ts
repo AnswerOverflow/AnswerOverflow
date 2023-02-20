@@ -39,6 +39,23 @@ describe("Message Operations", () => {
       expect(found).not.toBeNull();
       expect(found?.id).toBe(message.id);
     });
+    it("should return a message with its referenced message", async () => {
+      const referencedMessage = mockMessage(server, channel, author);
+      await upsertMessage(referencedMessage);
+      const msg = mockMessage(server, channel, author, {
+        messageReference: {
+          messageId: referencedMessage.id,
+          channelId: referencedMessage.channelId,
+          serverId: referencedMessage.serverId,
+        },
+      });
+      await upsertMessage(msg);
+      const found = await findMessageById(msg.id);
+      expect(found).not.toBeNull();
+      expect(found?.id).toBe(msg.id);
+      expect(found?.referencedMessage?.id).toBe(referencedMessage.id);
+      expect(found?.referencedMessage?.author).toBe(author);
+    });
     it("should return null if message not found", async () => {
       const found = await findMessageById("1");
       expect(found).toBeNull();

@@ -10,4 +10,5 @@ export default createVitestConfig({
       "~api/utils": path.resolve(__dirname, "./src/utils/"),
     },
   },
+  envDir: "../../",
 });
