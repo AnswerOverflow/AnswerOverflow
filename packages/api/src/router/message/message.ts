@@ -6,21 +6,22 @@ import { assertIsUserInServer } from "~api/utils/permissions";
 import {
   getDefaultDiscordAccount,
   getDefaultMessage,
-  zMessageWithDiscordAccount,
   findMessagesByChannelId,
   zFindMessagesByChannelId,
   findManyMessages,
   findMessageById,
+  MessageWithAccountAndRepliesTo,
 } from "@answeroverflow/db";
 import type { DiscordServer } from "@answeroverflow/auth";
 
 export function stripPrivateMessageData(
-  message: z.infer<typeof zMessageWithDiscordAccount>,
+  message: MessageWithAccountAndRepliesTo,
   userServers: DiscordServer[] | null = null
-) {
-  if (message.public) {
+): MessageWithAccountAndRepliesTo {
+  if (message.public && message.repliesTo?.public) {
     return message;
   }
+
   if (userServers) {
     const userServer = userServers.find((s) => s.id === message.serverId);
     if (userServer) {
@@ -38,15 +39,28 @@ export function stripPrivateMessageData(
     id: message.id,
     childThread: null,
   });
+
+  if (!message.repliesTo) {
+    return {
+      ...defaultMessage,
+      author: defaultAuthor,
+      public: false,
+      repliesTo: null,
+    };
+  }
+
+  const reply = stripPrivateMessageData(message.repliesTo, userServers);
+
   return {
     ...defaultMessage,
     author: defaultAuthor,
     public: false,
+    repliesTo: reply,
   };
 }
 
 export function stripPrivateMessagesData(
-  messages: z.infer<typeof zMessageWithDiscordAccount>[],
+  messages: MessageWithAccountAndRepliesTo[],
   userServers: DiscordServer[] | null = null
 ) {
   return messages.map((m) => stripPrivateMessageData(m, userServers));

@@ -11,7 +11,7 @@ beforeEach(() => {
     channelId: getRandomId(),
     content: "hello",
     images: [],
-    repliesTo: "1",
+    messageReference: null,
     serverId: getRandomId(),
     solutions: [],
     authorId: getRandomId(),

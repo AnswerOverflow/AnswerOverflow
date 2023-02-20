@@ -11,9 +11,9 @@ export function getDefaultMessage(
   const data: Message = {
     content: "",
     images: [],
-    repliesTo: null,
+    messageReference: null,
     childThread: null,
-    solutions: [],
+    solutionIds: [],
     ...override,
   };
   return data;

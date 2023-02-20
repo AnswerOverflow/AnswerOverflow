@@ -1,5 +1,5 @@
 import { Client, ClientOptions, errors } from "@elastic/elasticsearch";
-import type { BulkOperationContainer } from "@elastic/elasticsearch/lib/api/types";
+import type { BulkOperationContainer, MappingProperty } from "@elastic/elasticsearch/lib/api/types";
 import { z } from "zod";
 
 declare global {
@@ -14,17 +14,67 @@ export const zDiscordImage = z.object({
   description: z.string().nullable(),
 });
 
+export const zMessageReference = z.object({
+  messageId: z.string(),
+  channelId: z.string(),
+  serverId: z.string(),
+});
+
 export const zMessage = z.object({
   id: z.string(),
   content: z.string(),
   images: z.array(zDiscordImage),
-  solutions: z.array(z.string()),
-  repliesTo: z.string().nullable(),
+  solutionIds: z.array(z.string()),
+  messageReference: zMessageReference.nullable(),
   childThread: z.string().nullable(),
   authorId: z.string(),
   channelId: z.string(),
   serverId: z.string(),
 });
+
+type MessageImageMappingProperty = {
+  [K in keyof typeof zDiscordImage.shape]: MappingProperty;
+};
+
+type MessageReferenceMappingProperty = {
+  [K in keyof typeof zMessageReference.shape]: MappingProperty;
+};
+
+type ElasticMessageIndexProperties = {
+  [K in keyof Message]: MappingProperty;
+};
+
+const idProperty: MappingProperty = { type: "long" };
+
+const imageProperties: MessageImageMappingProperty = {
+  url: { type: "text" },
+  width: { type: "integer" },
+  height: { type: "integer" },
+  description: { type: "text" },
+};
+
+const messageReferenceProperties: MessageReferenceMappingProperty = {
+  messageId: idProperty,
+  channelId: idProperty,
+  serverId: idProperty,
+};
+
+const properties: ElasticMessageIndexProperties = {
+  id: idProperty,
+  serverId: idProperty,
+  channelId: idProperty,
+  authorId: idProperty,
+  content: { type: "text" },
+  images: {
+    properties: imageProperties,
+  },
+  // https://www.elastic.co/guide/en/elasticsearch/reference/current/array.html
+  solutionIds: idProperty,
+  messageReference: {
+    properties: messageReferenceProperties,
+  },
+  childThread: idProperty,
+};
 
 function getElasticClient(): Elastic {
   if (process.env.NODE_ENV === "test") {
@@ -69,22 +119,7 @@ function getElasticClient(): Elastic {
 }
 
 // https://discord.com/developers/docs/resources/channel#message-objects
-export type Message = {
-  id: string;
-  serverId: string;
-  channelId: string;
-  authorId: string;
-  content: string;
-  images: {
-    url: string;
-    width: number | null;
-    height: number | null;
-    description: string | null;
-  }[];
-  repliesTo: string | null;
-  childThread: string | null;
-  solutions: string[];
-};
+export type Message = z.infer<typeof zMessage>;
 
 export class Elastic extends Client {
   messagesIndex: string;
@@ -123,6 +158,7 @@ export class Elastic extends Client {
 
   public async bulkGetMessages(ids: string[]) {
     try {
+      if (ids.length === 0) return Promise.resolve([]);
       const messages = await this.mget<Message>({
         docs: ids.map((id) => ({ _index: this.messagesIndex, _id: id, _source: true })),
       });
@@ -264,6 +300,7 @@ export class Elastic extends Client {
   }
 
   public async bulkDeleteMessages(ids: string[]) {
+    if (ids.length === 0) return Promise.resolve(true);
     const body: BulkOperationContainer[] = ids.flatMap((id) => [
       { delete: { _index: this.messagesIndex, _id: id } },
     ]);
@@ -358,24 +395,7 @@ export class Elastic extends Client {
         _source: {
           excludes: ["tags"],
         },
-        properties: {
-          id: { type: "long" },
-          serverId: { type: "long" },
-          channelId: { type: "long" },
-          authorId: { type: "long" },
-          hidden: { type: "boolean" },
-          content: { type: "text" },
-          repliesTo: { type: "long" },
-          childThread: { type: "long" },
-          images: {
-            properties: {
-              url: { type: "text" },
-              width: { type: "integer" },
-              height: { type: "integer" },
-              description: { type: "text" },
-            },
-          },
-        },
+        properties,
       },
     });
   }
