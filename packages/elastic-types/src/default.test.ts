@@ -1,5 +1,6 @@
 import { getRandomId } from "@answeroverflow/utils";
 import { getDefaultMessage } from "./default";
+import type { Message } from "./elastic";
 
 describe("Default Message Values", () => {
   it("should verify message default values are correct", () => {
@@ -20,9 +21,9 @@ describe("Default Message Values", () => {
       authorId,
       content: "",
       images: [],
-      repliesTo: null,
+      messageReference: null,
       childThread: null,
-      solutions: [],
-    });
+      solutionIds: [],
+    } satisfies Message);
   });
 });

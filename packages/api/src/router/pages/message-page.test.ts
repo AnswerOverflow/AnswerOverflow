@@ -12,7 +12,7 @@ import { mockUnauthedCtx } from "~api/test/utils";
 import { messagePageRouter } from "./message-page";
 import {
   pickPublicServerData,
-  toMessageWithDiscordAccount,
+  toMessageWithAccountAndRepliesTo,
   toPrivateMessageWithStrippedData,
 } from "~api/test/public-data";
 import {
@@ -63,8 +63,20 @@ describe("Message Results", () => {
       const messages = await unauthedMessagePageRouter.byId(message.id);
       expect(messages).toMatchObject({
         messages: [
-          toPrivateMessageWithStrippedData(toMessageWithDiscordAccount(message, author, false)),
-          toPrivateMessageWithStrippedData(toMessageWithDiscordAccount(message2, author, false)),
+          toPrivateMessageWithStrippedData(
+            toMessageWithAccountAndRepliesTo({
+              message,
+              author,
+              publicMessage: false,
+            })
+          ),
+          toPrivateMessageWithStrippedData(
+            toMessageWithAccountAndRepliesTo({
+              message: message2,
+              author,
+              publicMessage: false,
+            })
+          ),
         ],
         parentChannel: pickPublicChannelData(channel),
         server: pickPublicServerData(server),
@@ -100,7 +112,13 @@ describe("Message Results", () => {
       const messages = await unauthedMessagePageRouter.byId(threadMessages[0]!.id);
       expect(messages).toMatchObject({
         messages: threadMessages.map((m) =>
-          toPrivateMessageWithStrippedData(toMessageWithDiscordAccount(m, author, false))
+          toPrivateMessageWithStrippedData(
+            toMessageWithAccountAndRepliesTo({
+              message: m,
+              author,
+              publicMessage: false,
+            })
+          )
         ),
         parentChannel: pickPublicChannelData(channel),
         server: pickPublicServerData(server),
@@ -113,7 +131,13 @@ describe("Message Results", () => {
       );
       expect(messages).toMatchObject({
         messages: threadMessages.map((m) =>
-          toPrivateMessageWithStrippedData(toMessageWithDiscordAccount(m, author, false))
+          toPrivateMessageWithStrippedData(
+            toMessageWithAccountAndRepliesTo({
+              message: m,
+              author,
+              publicMessage: false,
+            })
+          )
         ),
         parentChannel: pickPublicChannelData(channel),
         server: pickPublicServerData(server),

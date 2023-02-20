@@ -36,8 +36,81 @@ describe("Message Operations", () => {
     it("should return a message", async () => {
       await upsertMessage(message);
       const found = await findMessageById(message.id);
-      expect(found).not.toBeNull();
       expect(found?.id).toBe(message.id);
+    });
+    it("should return with a public author", async () => {
+      await upsertMessage(message);
+      await createUserServerSettings({
+        userId: author.id,
+        serverId: server.id,
+        flags: {
+          canPubliclyDisplayMessages: true,
+        },
+      });
+      const found = await findMessageById(message.id);
+      expect(found?.public).toBeTruthy();
+    });
+    it("should return with a private author", async () => {
+      await upsertMessage(message);
+      await createUserServerSettings({
+        userId: author.id,
+        serverId: server.id,
+        flags: {
+          canPubliclyDisplayMessages: false,
+        },
+      });
+      const found = await findMessageById(message.id);
+      expect(found?.public).toBeFalsy();
+    });
+    it("should return a message with its referenced message that is private", async () => {
+      const author2 = mockDiscordAccount();
+      await createDiscordAccount(author2);
+      await createUserServerSettings({
+        userId: author2.id,
+        serverId: server.id,
+        flags: {
+          canPubliclyDisplayMessages: false,
+        },
+      });
+      const referencedMessage = mockMessage(server, channel, author2);
+      await upsertMessage(referencedMessage);
+      const msg = mockMessage(server, channel, author, {
+        messageReference: {
+          messageId: referencedMessage.id,
+          channelId: referencedMessage.channelId,
+          serverId: referencedMessage.serverId,
+        },
+      });
+      await upsertMessage(msg);
+      const found = await findMessageById(msg.id);
+      expect(found?.referencedMessage?.id).toBe(referencedMessage.id);
+      expect(found?.referencedMessage?.author.id).toBe(author2.id);
+      expect(found?.referencedMessage?.public).toBeFalsy();
+    });
+    it("should return a message with its referenced message that is public", async () => {
+      const author2 = mockDiscordAccount();
+      await createDiscordAccount(author2);
+      await createUserServerSettings({
+        userId: author2.id,
+        serverId: server.id,
+        flags: {
+          canPubliclyDisplayMessages: true,
+        },
+      });
+      const referencedMessage = mockMessage(server, channel, author2);
+      await upsertMessage(referencedMessage);
+      const msg = mockMessage(server, channel, author, {
+        messageReference: {
+          messageId: referencedMessage.id,
+          channelId: referencedMessage.channelId,
+          serverId: referencedMessage.serverId,
+        },
+      });
+      await upsertMessage(msg);
+      const found = await findMessageById(msg.id);
+      expect(found?.referencedMessage?.id).toBe(referencedMessage.id);
+      expect(found?.referencedMessage?.author.id).toBe(author2.id);
+      expect(found?.referencedMessage?.public).toBeTruthy();
     });
     it("should return null if message not found", async () => {
       const found = await findMessageById("1");

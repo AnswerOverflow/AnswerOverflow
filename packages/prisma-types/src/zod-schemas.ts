@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { bitfieldToDict, dictToBitfield, mergeFlags, toDict } from "./bitfield";
 import { ChannelType } from "discord-api-types/v10";
-import type { Server, UserServerSettings } from "@answeroverflow/prisma-types";
+import type { Server, UserServerSettings } from "@prisma/client";
 
 // TODO: Split up this file, it's become a bit bloated to prevent circular dependencies
 
@@ -75,37 +75,6 @@ export const zChannelPublic = zChannel.pick({
 });
 
 export type ChannelPublicWithFlags = z.infer<typeof zChannelPublic>;
-
-export const zDiscordImage = z.object({
-  url: z.string(),
-  width: z.number().nullable(),
-  height: z.number().nullable(),
-  description: z.string().nullable(),
-});
-
-export const zMessage = z.object({
-  id: z.string(),
-  content: z.string(),
-  images: z.array(zDiscordImage),
-  solutions: z.array(z.string()),
-  repliesTo: z.string().nullable(),
-  childThread: z.string().nullable(),
-  authorId: z.string(),
-  channelId: z.string(),
-  serverId: z.string(),
-});
-
-export const zMessagePublic = zMessage.pick({
-  id: true,
-  content: true,
-  images: true,
-  solutions: true,
-  repliesTo: true,
-  childThread: true,
-  authorId: true,
-  channelId: true,
-  serverId: true,
-});
 
 export const serverSettingsFlags = ["readTheRulesConsentEnabled"] as const;
 export const zServerSettingsFlags = toZObject(...serverSettingsFlags);
