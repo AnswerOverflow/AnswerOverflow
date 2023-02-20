@@ -76,7 +76,6 @@
       // "coverage/": true,
     },
     "vitest.enable": true,
-    "vitest.commandLine": "",
     "vitest.disabledWorkspaceFolders": [
       "root",
       "discord-bot"
