@@ -35,7 +35,7 @@
     "tslib": "^2.5.0",
     "turbo": "latest",
     "vite": "^4.1.1",
-    "vitest": "^0.27.3"
+    "vitest": "^0.28.5"
   },
   "engines": {
     "node": ">=16.18.0"
