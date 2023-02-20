@@ -152,7 +152,7 @@ export type AllVaraintsTest = {
   ) => Promise<void> | void;
 };
 
-export async function testAllVariants({
+export async function testAllSourceAndPermissionVariants({
   sourcesThatShouldWork = [...sourceTypes],
   permissionsThatShouldWork = Object.keys(PermissionFlagsBits) as PermissionResolvable[],
   operation,
@@ -169,7 +169,7 @@ export async function testAllVariants({
   });
 }
 
-export async function testAllDataVariants<F, T extends F>({
+export async function testAllPublicAndPrivateDataVariants<F, T extends F>({
   permissionsThatShouldWork,
   sourcesThatShouldWork,
   fetch,
@@ -185,7 +185,7 @@ export async function testAllDataVariants<F, T extends F>({
     privateDataFormat: T;
   }>;
 }) {
-  await testAllVariants({
+  await testAllSourceAndPermissionVariants({
     async operation(source, permission, shouldSourceSucceed, shouldPermissionSucceed) {
       try {
         const { data, publicDataFormat, privateDataFormat } = await fetch({
@@ -241,7 +241,17 @@ export async function testAllDataVariants<F, T extends F>({
   });
 }
 
-export async function testAllVariantsThatThrowErrors({
+export async function testAllVaraints<T>({
+  arr,
+  operation,
+}: {
+  arr: T[];
+  operation: (item: T) => Promise<void> | void;
+}) {
+  await Promise.all(arr.map((item) => operation(item)));
+}
+
+export async function testAllSourceAndPermissionVariantsThatThrowErrors({
   sourcesThatShouldWork = [...sourceTypes],
   permissionsThatShouldWork = Object.keys(PermissionFlagsBits) as PermissionResolvable[],
   operation,
@@ -255,7 +265,7 @@ export async function testAllVariantsThatThrowErrors({
     shouldPermissionSucceed: boolean;
   }) => Promise<void> | void;
 }) {
-  await testAllVariants({
+  await testAllSourceAndPermissionVariants({
     permissionsThatShouldWork,
     sourcesThatShouldWork,
     async operation(source, permission, shouldSourceSucceed, shouldPermissionSucceed) {

@@ -4,7 +4,7 @@ import type { DeepPartial } from "@answeroverflow/utils";
 
 type PermissionCheckResult = Promise<TRPCError | void> | (TRPCError | void);
 
-type PermissionsChecks =
+export type PermissionsChecks =
   | Array<() => PermissionCheckResult | PermissionCheckResult[]>
   | (() => PermissionCheckResult | PermissionCheckResult[]);
 

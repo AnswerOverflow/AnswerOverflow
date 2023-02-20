@@ -3,7 +3,7 @@ export * from "./DiscordAvatar";
 export * from "./Footer";
 export * from "./Message";
 export * from "./MessageResultPage";
-export * from "./Navbar";
+export * from "./deprecated/Navbar";
 export * from "./SearchBar";
 export * from "./SearchBarDriver";
 export * from "./ServerInvite";

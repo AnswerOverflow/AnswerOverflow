@@ -6,8 +6,8 @@ import {
   findManyIgnoredDiscordAccountsById,
 } from "./ignored-discord-account";
 import { DBError } from "./utils/error";
-import { upsertMany } from "./utils/operations";
-import { zDiscordAccount } from "./zod-schemas";
+import { upsert, upsertMany } from "./utils/operations";
+import { zDiscordAccount } from "@answeroverflow/prisma-types";
 
 export const zDiscordAccountRequired = zDiscordAccount.pick({
   id: true,
@@ -72,9 +72,18 @@ export async function updateManyDiscordAccounts(data: z.infer<typeof zDiscordAcc
 }
 
 export async function deleteDiscordAccount(id: string) {
-  await prisma.discordAccount.delete({ where: { id } });
+  const existingAccount = await findDiscordAccountById(id);
+  if (existingAccount) await prisma.discordAccount.delete({ where: { id } });
   await upsertIgnoredDiscordAccount(id);
   return true;
+}
+
+export async function upsertDiscordAccount(data: z.infer<typeof zDiscordAccountUpsert>) {
+  return upsert({
+    find: () => findDiscordAccountById(data.id),
+    create: () => createDiscordAccount(data),
+    update: () => updateDiscordAccount(data),
+  });
 }
 
 export async function upsertManyDiscordAccounts(data: z.infer<typeof zDiscordAccountUpsert>[]) {

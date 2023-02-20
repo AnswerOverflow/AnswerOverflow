@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "@answeroverflow/utils": "*",
-    "@elastic/elasticsearch": "^8.6.0"
+    "@elastic/elasticsearch": "^8.6.0",
+    "zod": "^3.20.6"
   },
   "devDependencies": {
     "@answeroverflow/tsconfig": "*",

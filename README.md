@@ -1,12 +1,14 @@
 
 <p align='center'>
 <a href='https://answeroverflow.com/' target="_blank" rel="noopener">
-    <img src="https://www.answeroverflow.com/content/branding/AnswerOverflowLOGO.png">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/AnswerOverflowLogoLight.png" />
+    <img alt="Answer Overflow Logo" src="./assets/AnswerOverflowLogoDark.png" />
+  </picture>
 </a>
 </p>
 
 <div align="center">
-  <h1>Answer Overflow</h1>
   <h3>Google Index Your Discord Help Channels<br /></h3>
   <a href="https://github.com/AnswerOverflow/AnswerOverflow/blob/main/LICENSE">
     <img alt="AGPL License" src="https://img.shields.io/github/license/AnswerOverflow/AnswerOverflow" />
@@ -56,6 +58,14 @@ Answer Overflow lets you index your Discord help channels into Google so that yo
 - ✅&nbsp; Improved Help Channels - Mark questions as solved, organize content, and keep discussions on track
 - 🐻&nbsp; Easy - Simple menus to control settings
 
+### Roadmap
+
+- 🤖&nbsp; AI question improvement suggestions trained on your community
+- 🤖&nbsp; AI answers trained off of your community
+- 🗺️&nbsp; Server browser and discoverability
+- ✈️&nbsp; Self Hosting Support
+- 📥&nbsp; Automatically redirecting people to correct help channels
+
 ## Quickstart
 
 Go to [Answer Overflow](https://www.answeroverflow.com/), add the bot your server, and use /channel-settings to get started
@@ -67,6 +77,8 @@ Go to [Answer Overflow](https://www.answeroverflow.com/), add the bot your serve
 ## Contributing
 
 Want to contribute? First, read the <a href="https://github.com/AnswerOverflow/AnswerOverflow/blob/main/CONTRIBUTING.md">Contributing Guidelines</a> before creating PRs or issues. Need any help? Join us on <a href="https://discord.gg/Wny38ap7Tx">Discord</a>!
+
+For designing user interfaces, check out our [design guidelines](./DESIGN_GUIDELINES.md).
 
 <div align="left">
   <div>

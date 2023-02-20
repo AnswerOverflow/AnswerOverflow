@@ -1,5 +1,5 @@
 import type { Channel, DiscordAccount, Server, User, UserServerSettings } from "@prisma/client";
-
+import { addFlagsToChannel, addFlagsToServer, addFlagsToUserServerSettings } from "./zod-schemas";
 export function getDefaultUser(
   override: Partial<User> & {
     id: string;
@@ -24,6 +24,10 @@ export function getDefaultServer(override: Partial<Server> & { id: string; name:
   return data;
 }
 
+export function getDefaultServerWithFlags(override: Partial<Server> & Pick<Server, "id" | "name">) {
+  return addFlagsToServer(getDefaultServer(override));
+}
+
 export function getDefaultChannel(
   override: Partial<Channel> & Pick<Channel, "id" | "name" | "serverId" | "parentId" | "type">
 ): Channel {
@@ -35,6 +39,12 @@ export function getDefaultChannel(
     ...override,
   };
   return data;
+}
+
+export function getDefaultChannelWithFlags(
+  override: Partial<Channel> & Pick<Channel, "id" | "serverId" | "type" | "parentId" | "name">
+) {
+  return addFlagsToChannel(getDefaultChannel(override));
 }
 
 export function getDefaultDiscordAccount(
@@ -55,4 +65,16 @@ export function getDefaultUserServerSettings(
     ...override,
   };
   return data;
+}
+
+export type UserServerSettingsWithFlags = Awaited<ReturnType<typeof addFlagsToUserServerSettings>>;
+
+export function getDefaultUserServerSettingsWithFlags({
+  userId,
+  serverId,
+}: {
+  userId: string;
+  serverId: string;
+}) {
+  return addFlagsToUserServerSettings(getDefaultUserServerSettings({ userId, serverId }));
 }
