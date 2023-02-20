@@ -22,15 +22,24 @@ export function stripPrivateMessageData(
   userServers: DiscordServer[] | null = null
 ): MessageWithAccountAndRepliesTo | MessageWithDiscordAccount {
   const isReply = !isMessageWithAccountAndRepliesTo(message);
+  // If it is only a reply and is public, then just return
   if (isReply && message.public) {
     return message;
   }
-  if (!isReply && message.public && !message.referencedMessage) {
-    return message;
+  // If it is not a reply, is public, and has no referenced message, then just return
+  // If it is not a reply, is public, and the referenced message is public, then just return
+  if (!isReply && message.public) {
+    return {
+      ...message,
+      referencedMessage: message.referencedMessage
+        ? stripPrivateMessageData(message.referencedMessage)
+        : null,
+    };
   }
 
   if (userServers) {
     const userServer = userServers.find((s) => s.id === message.serverId);
+    // If the user is in the server, then just return
     if (userServer) {
       return message;
     }
@@ -47,16 +56,19 @@ export function stripPrivateMessageData(
     childThread: null,
   });
 
-  if (isReply || !message.referencedMessage) {
+  // If it is a reply, then we know that is it private so we can just return
+  // If there is no referenced message, then we can just return
+  if (isReply) {
     return {
       ...defaultMessage,
       author: defaultAuthor,
       public: false,
-      referencedMessage: null,
     };
   }
 
-  const reply = stripPrivateMessageData(message.referencedMessage, userServers);
+  const reply = message.referencedMessage
+    ? stripPrivateMessageData(message.referencedMessage, userServers)
+    : null;
 
   return {
     ...defaultMessage,
