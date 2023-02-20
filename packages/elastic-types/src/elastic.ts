@@ -1,5 +1,9 @@
 import { Client, ClientOptions, errors } from "@elastic/elasticsearch";
-import type { BulkOperationContainer, MappingProperty } from "@elastic/elasticsearch/lib/api/types";
+import type {
+  BulkOperationContainer,
+  MappingProperty,
+  QueryDslQueryContainer,
+} from "@elastic/elasticsearch/lib/api/types";
 import { z } from "zod";
 
 declare global {
@@ -31,6 +35,13 @@ export const zMessage = z.object({
   channelId: z.string(),
   serverId: z.string(),
 });
+
+export type MessageSearchOptions = {
+  query: string;
+  serverId?: string;
+  after?: string;
+  limit?: number;
+};
 
 type MessageImageMappingProperty = {
   [K in keyof typeof zDiscordImage.shape]: MappingProperty;
@@ -380,6 +391,43 @@ export class Elastic extends Client {
       return false;
     }
     return true;
+  }
+
+  public async searchForMessages({ query, serverId, limit }: MessageSearchOptions) {
+    const q: QueryDslQueryContainer = {
+      // TODO: No ts ignore in future
+      // @ts-ignore
+      bool: {
+        must: [
+          {
+            multi_match: {
+              query,
+              fields: ["content"],
+              fuzziness: "AUTO",
+            },
+          },
+        ],
+      },
+    };
+    if (!Array.isArray(q.bool?.must))
+      throw new Error(
+        "This error should never occur. The query is always expected to be an array for the must property"
+      );
+    if (q.bool?.must && serverId) {
+      q.bool.must.push({
+        match: {
+          serverId,
+        },
+      });
+    }
+    const result = await this.search<Message>({
+      index: this.messagesIndex,
+      query: q,
+      size: limit ?? 100,
+      sort: [{ id: "asc" }],
+    });
+
+    return result.hits.hits.filter((hit) => hit._source).map((hit) => hit._source!);
   }
 
   public async createMessagesIndex() {

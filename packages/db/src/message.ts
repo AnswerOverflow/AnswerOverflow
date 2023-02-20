@@ -208,3 +208,24 @@ export async function deleteManyMessagesByChannelId(channelId: string) {
 export async function deleteManyMessagesByUserId(userId: string) {
   return elastic.deleteByUserId(userId);
 }
+
+export async function searchForMessages({
+  serverId,
+  userId,
+  query,
+  after,
+  limit,
+}: MessageSearchOptions) {
+  const searchResults = await elastic.searchMessages({
+    serverId,
+    userId,
+    query,
+    after,
+    limit,
+  });
+  const messages = await addAuthorsToMessages(searchResults.results);
+  return {
+    ...searchResults,
+    results: messages,
+  };
+}
