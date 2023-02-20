@@ -1,17 +1,23 @@
 # Answer Overflow Design Guidelines
 
+> **Note**
+> We are currently undertaking a complete revamp of the answer overflow design. Colors, logos, guidelines, and other items are likely to be added, removed, and changed.
+
 ## Fonts
 
 We use [Montserrat](https://fonts.google.com/specimen/Montserrat) for headings, and [Source Sans Pro](https://fonts.google.com/specimen/Source+Sans+Pro) for body text.
 
 ## Colors
 
-Answer overflow uses a color palette of 5 colors. These colors are used throughout the site, and should be used in designs as well.
+Answer overflow uses several predefined colors to ensure consistency. These colors are used throughout the site, and should be used in designs as well.
 
 - Neutrals
-  - ![#BLACKHEX](https://via.placeholder.com/15/F5F5F5/000000?text=+) `#BLACKHEX` - `<prefix>-ao-black` in tailwind classnames
+  - ![#070A0D](https://via.placeholder.com/15/070A0D/000000?text=+) `#070A0D` - `<prefix>-ao-black` in tailwind classnames
+  - ![#FAFCFF](https://via.placeholder.com/15/FAFCFF/000000?text=+) `#FAFCFF` - `<prefix>-ao-white` in tailwind classnames
 - Accents (use sparingly)
-  - ![#ACCENTHEX](https://via.placeholder.com/15/F5F5F5/000000?text=+) `#ACCENTHEX`
+  - Soon.
+- Others
+  - ![#00FF85](https://via.placeholder.com/15/00FF85/000000?text=+) `#00FF85` - looks nice against the answer overflow black for indicating success to a user.
 
 ## Logos
 
@@ -30,7 +36,7 @@ All designs must be accessible to everyone. This includes:
 
 We have a few set component styles that we use throughout the site. (Buttons, inputs, etc.)
 
-You can view these styles in the [Answer Overflow Base Figma file](figmaurl).
+You can view these styles in the [Answer Overflow Base Figma file](https://www.figma.com/file/GARsgsibWxOOzZ5MZ5XvWv/AnswerOverflow?node-id=0%3A1&t=BvruVK5YvFzx3bd4-1).
 
 ## Ease of use
 
