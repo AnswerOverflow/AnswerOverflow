@@ -1,7 +1,7 @@
 import { ChannelSettingsMenu } from "~discord-bot/components/channel-settings-menu";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command, container, type ChatInputCommand } from "@sapphire/framework";
-import { callApiWithEphemeralErrorHandler } from "~discord-bot/utils/trpc";
+import { callAPI, callWithAllowedErrors, ephemeralStatusHandler } from "~discord-bot/utils/trpc";
 import {
   SlashCommandBuilder,
   PermissionsBitField,
@@ -10,9 +10,9 @@ import {
 import React from "react";
 import { ephemeralReply } from "~discord-bot/utils/utils";
 import { ChannelWithFlags, getDefaultChannelWithFlags } from "@answeroverflow/db";
-import { TRPCError } from "@trpc/server";
 import { createMemberCtx } from "~discord-bot/utils/context";
 import { toAOChannel } from "~discord-bot/utils/conversions";
+import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
 
 @ApplyOptions<Command.Options>({
   name: "channel-settings",
@@ -21,49 +21,30 @@ import { toAOChannel } from "~discord-bot/utils/conversions";
   requiredUserPermissions: ["ManageGuild"],
 })
 export class ChannelSettingsCommand extends Command {
-  public getSlashCommandBuilder(): SlashCommandBuilder {
-    return new SlashCommandBuilder()
-      .setName(this.name)
-      .setDescription(this.description)
-      .setDMPermission(false)
-      .setDefaultMemberPermissions(PermissionsBitField.resolve("ManageGuild"));
-  }
-
   public override registerApplicationCommands(registry: ChatInputCommand.Registry) {
-    registry.registerChatInputCommand(this.getSlashCommandBuilder(), {
-      idHints: ["1048055954618454026"],
-    });
+    registry.registerChatInputCommand(
+      new SlashCommandBuilder()
+        .setName(this.name)
+        .setDescription(this.description)
+        .setDMPermission(false)
+        .setDefaultMemberPermissions(PermissionsBitField.resolve("ManageGuild")),
+      {
+        idHints: ["1048055954618454026"],
+      }
+    );
   }
 
   public override async chatInputRun(interaction: ChatInputCommandInteraction) {
-    if (interaction.guild == null) {
-      return;
-    }
-    if (!interaction.channel || interaction.channel.isDMBased()) {
-      return;
-    }
-    if (interaction.channel.isVoiceBased()) {
-      return;
-    }
-    const guild = interaction.guild;
-    const channel = interaction.channel;
-    const member = await guild.members.fetch(interaction.user.id);
+    await guildTextChannelOnlyInteraction(interaction, async ({ channel, member }) => {
+      const parentId = channel.isThread() ? channel.parentId : channel.id;
+      if (!parentId) return; // TODO: Send message to user
 
-    const parentId = channel.isThread() ? channel.parentId : channel.id;
-    if (!parentId) return;
-
-    await callApiWithEphemeralErrorHandler(
-      {
-        async ApiCall(router) {
-          try {
-            return router.channels.byId(parentId);
-          } catch (error) {
-            if (error instanceof TRPCError && error.code == "NOT_FOUND") {
-              return null;
-            } else {
-              throw error;
-            }
-          }
+      await callAPI({
+        async apiCall(router) {
+          return callWithAllowedErrors({
+            call: () => router.channels.byId(parentId),
+            allowedErrors: "NOT_FOUND",
+          });
         },
         Ok(result) {
           if (!result) {
@@ -75,9 +56,9 @@ export class ChannelSettingsCommand extends Command {
           );
           ephemeralReply(container.reacord, menu, interaction);
         },
+        Error: (error) => ephemeralStatusHandler(interaction, error.message),
         getCtx: () => createMemberCtx(member),
-      },
-      interaction
-    );
+      });
+    });
   }
 }

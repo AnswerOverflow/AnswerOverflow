@@ -5,7 +5,11 @@ import {
   createInvalidSourceError,
   MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
 } from "~api/utils/permissions";
-import { testAllPermissions, testAllSources, testAllVariantsThatThrowErrors } from "./utils";
+import {
+  testAllPermissions,
+  testAllSources,
+  testAllSourceAndPermissionVariantsThatThrowErrors,
+} from "./utils";
 
 describe("Test All Permissions", () => {
   it("should validate permissions are succeeding correctly", async () => {
@@ -66,7 +70,7 @@ describe("Test All Variants", () => {
     const successfulVariants: { source: string; permission: PermissionResolvable }[] = [];
     const sourcesThatShouldWork: Source[] = ["discord-bot"];
     const permissionsThatShouldWork: PermissionResolvable[] = ["AddReactions"];
-    await testAllVariantsThatThrowErrors({
+    await testAllSourceAndPermissionVariantsThatThrowErrors({
       sourcesThatShouldWork: sourcesThatShouldWork,
       permissionsThatShouldWork: permissionsThatShouldWork,
       operation: ({ source, permission }) => {

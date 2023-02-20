@@ -1,9 +1,9 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { ChatInputCommand, Command } from "@sapphire/framework";
-import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from "discord.js";
-import { createMemberCtx } from "~discord-bot/utils/context";
-import { toAODiscordAccount } from "~discord-bot/utils/conversions";
-import { callApiWithEphemeralErrorHandler } from "~discord-bot/utils/trpc";
+import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { updateUserConsent } from "~discord-bot/domains/manage-account";
+import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
+import { ephemeralStatusHandler } from "~discord-bot/utils/trpc";
 
 @ApplyOptions<Command.Options>({
   name: "consent",
@@ -18,31 +18,29 @@ export class ConsentCommand extends Command {
         .setName(this.name)
         .setDescription(this.description)
         .setDMPermission(false)
+        .addBooleanOption((option) =>
+          option.setName("consent").setDescription("Enable or disable consent")
+        )
     );
   }
-
-  public override messageRun() {}
   public override async chatInputRun(interaction: ChatInputCommandInteraction) {
-    await callApiWithEphemeralErrorHandler(
-      {
-        ApiCall(router) {
-          return router.userServerSettings.upsertWithDeps({
-            user: toAODiscordAccount(interaction.user),
-            serverId: interaction.guildId!,
-            flags: {
-              canPubliclyDisplayMessages: true,
-            },
-          });
+    const consented = interaction.options.getBoolean("consent") ?? true;
+    await guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
+      updateUserConsent({
+        member,
+        consentSource: "slash-command",
+        canPubliclyDisplayMessages: consented,
+        Error(error) {
+          ephemeralStatusHandler(interaction, error.message);
         },
-        getCtx: () => createMemberCtx(interaction.member as GuildMember),
-        async Ok() {
-          await interaction.reply({
-            content: "Provided consent to display messsages publicly on Answer Overflow",
-            ephemeral: true,
-          });
+        Ok(result) {
+          // TODO: Better messages
+          ephemeralStatusHandler(
+            interaction,
+            result.flags.canPubliclyDisplayMessages ? "Consented" : "Unconsented"
+          );
         },
-      },
-      interaction
+      })
     );
   }
 }

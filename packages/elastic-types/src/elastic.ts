@@ -1,10 +1,80 @@
 import { Client, ClientOptions, errors } from "@elastic/elasticsearch";
-import type { BulkOperationContainer } from "@elastic/elasticsearch/lib/api/types";
+import type { BulkOperationContainer, MappingProperty } from "@elastic/elasticsearch/lib/api/types";
+import { z } from "zod";
 
 declare global {
   // eslint-disable-next-line no-var, no-unused-vars
   var elastic: Elastic | undefined;
 }
+
+export const zDiscordImage = z.object({
+  url: z.string(),
+  width: z.number().nullable(),
+  height: z.number().nullable(),
+  description: z.string().nullable(),
+});
+
+export const zMessageReference = z.object({
+  messageId: z.string(),
+  channelId: z.string(),
+  serverId: z.string(),
+});
+
+export const zMessage = z.object({
+  id: z.string(),
+  content: z.string(),
+  images: z.array(zDiscordImage),
+  solutionIds: z.array(z.string()),
+  messageReference: zMessageReference.nullable(),
+  childThread: z.string().nullable(),
+  authorId: z.string(),
+  channelId: z.string(),
+  serverId: z.string(),
+});
+
+type MessageImageMappingProperty = {
+  [K in keyof typeof zDiscordImage.shape]: MappingProperty;
+};
+
+type MessageReferenceMappingProperty = {
+  [K in keyof typeof zMessageReference.shape]: MappingProperty;
+};
+
+type ElasticMessageIndexProperties = {
+  [K in keyof Message]: MappingProperty;
+};
+
+const idProperty: MappingProperty = { type: "long" };
+
+const imageProperties: MessageImageMappingProperty = {
+  url: { type: "text" },
+  width: { type: "integer" },
+  height: { type: "integer" },
+  description: { type: "text" },
+};
+
+const messageReferenceProperties: MessageReferenceMappingProperty = {
+  messageId: idProperty,
+  channelId: idProperty,
+  serverId: idProperty,
+};
+
+const properties: ElasticMessageIndexProperties = {
+  id: idProperty,
+  serverId: idProperty,
+  channelId: idProperty,
+  authorId: idProperty,
+  content: { type: "text" },
+  images: {
+    properties: imageProperties,
+  },
+  // https://www.elastic.co/guide/en/elasticsearch/reference/current/array.html
+  solutionIds: idProperty,
+  messageReference: {
+    properties: messageReferenceProperties,
+  },
+  childThread: idProperty,
+};
 
 function getElasticClient(): Elastic {
   if (process.env.NODE_ENV === "test") {
@@ -49,25 +119,7 @@ function getElasticClient(): Elastic {
 }
 
 // https://discord.com/developers/docs/resources/channel#message-objects
-export type Message = {
-  id: string;
-  serverId: string;
-  channelId: string;
-  authorId: string;
-  content: string;
-  images: {
-    url: string;
-    width: number | null;
-    height: number | null;
-    description: string | null;
-  }[];
-  repliesTo: {
-    messageContent: string;
-    authorAvatar: string | null;
-  } | null;
-  childThread: string | null;
-  solutions: string[];
-};
+export type Message = z.infer<typeof zMessage>;
 
 export class Elastic extends Client {
   messagesIndex: string;
@@ -106,6 +158,7 @@ export class Elastic extends Client {
 
   public async bulkGetMessages(ids: string[]) {
     try {
+      if (ids.length === 0) return Promise.resolve([]);
       const messages = await this.mget<Message>({
         docs: ids.map((id) => ({ _index: this.messagesIndex, _id: id, _source: true })),
       });
@@ -126,10 +179,6 @@ export class Elastic extends Client {
   }
 
   public async bulkGetMessagesByChannelId(channelId: string, after?: string, limit?: number) {
-    if (process.env.NODE_ENV === "test") {
-      // TODO: Ugly hack for testing since elastic doesn't update immediately
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-    }
     const result = await this.search<Message>({
       index: this.messagesIndex,
       query: {
@@ -180,6 +229,7 @@ export class Elastic extends Client {
       const message = await this.delete({
         index: this.messagesIndex,
         id,
+        refresh: process.env.NODE_ENV === "test",
       });
       switch (message.result) {
         case "deleted":
@@ -199,12 +249,9 @@ export class Elastic extends Client {
   }
 
   public async deleteByChannelId(threadId: string) {
-    if (process.env.NODE_ENV === "test") {
-      // TODO: Ugly hack for testing since elastic doesn't update immediately
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-    }
     const result = await this.deleteByQuery({
       index: this.messagesIndex,
+      refresh: process.env.NODE_ENV === "test",
       query: {
         term: {
           channelId: threadId,
@@ -214,11 +261,50 @@ export class Elastic extends Client {
     return result.deleted;
   }
 
+  public async deleteByUserId(userId: string) {
+    const result = await this.deleteByQuery({
+      index: this.messagesIndex,
+      refresh: process.env.NODE_ENV === "test",
+      query: {
+        term: {
+          authorId: userId,
+        },
+      },
+    });
+    return result.deleted;
+  }
+
+  public async deleteByUserIdInServer({ userId, serverId }: { userId: string; serverId: string }) {
+    const result = await this.deleteByQuery({
+      index: this.messagesIndex,
+      refresh: process.env.NODE_ENV === "test",
+      query: {
+        // @ts-ignore
+        bool: {
+          must: [
+            {
+              term: {
+                authorId: userId,
+              },
+            },
+            {
+              term: {
+                serverId,
+              },
+            },
+          ],
+        },
+      },
+    });
+    return result.deleted;
+  }
+
   public async bulkDeleteMessages(ids: string[]) {
+    if (ids.length === 0) return Promise.resolve(true);
     const body: BulkOperationContainer[] = ids.flatMap((id) => [
       { delete: { _index: this.messagesIndex, _id: id } },
     ]);
-    const result = await this.bulk({ operations: body });
+    const result = await this.bulk({ operations: body, refresh: process.env.NODE_ENV === "test" });
     if (result.errors) {
       console.error(result);
       return false;
@@ -231,6 +317,7 @@ export class Elastic extends Client {
       const fetchedMessage = await this.update({
         index: this.messagesIndex,
         id: message.id,
+        refresh: process.env.NODE_ENV === "test",
         doc: message,
       });
       switch (fetchedMessage.result) {
@@ -258,6 +345,7 @@ export class Elastic extends Client {
       index: this.messagesIndex,
       id: message.id,
       doc: message,
+      refresh: process.env.NODE_ENV === "test",
       upsert: message,
     });
     switch (fetchedMessage.result) {
@@ -275,11 +363,13 @@ export class Elastic extends Client {
   }
 
   public async bulkUpsertMessages(messages: Message[]) {
+    if (messages.length === 0) return true;
     const result = await this.bulk({
       operations: messages.flatMap((message) => [
         { update: { _index: this.messagesIndex, _id: message.id } },
         { doc: message, doc_as_upsert: true },
       ]),
+      refresh: process.env.NODE_ENV === "test",
     });
     if (result.errors) {
       console.error(
@@ -305,24 +395,7 @@ export class Elastic extends Client {
         _source: {
           excludes: ["tags"],
         },
-        properties: {
-          id: { type: "long" },
-          serverId: { type: "long" },
-          channelId: { type: "long" },
-          authorId: { type: "long" },
-          hidden: { type: "boolean" },
-          content: { type: "text" },
-          repliesTo: { type: "long" },
-          childThread: { type: "long" },
-          images: {
-            properties: {
-              url: { type: "text" },
-              width: { type: "integer" },
-              height: { type: "integer" },
-              description: { type: "text" },
-            },
-          },
-        },
+        properties,
       },
     });
   }

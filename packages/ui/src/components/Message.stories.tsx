@@ -30,9 +30,9 @@ const defaultMessage: MessageProps = {
     images: [],
     channelId: "0",
     serverId: "0",
-    solutions: [],
+    solutionIds: [],
     childThread: null,
-    repliesTo: null,
+    messageReference: null,
   },
 };
 

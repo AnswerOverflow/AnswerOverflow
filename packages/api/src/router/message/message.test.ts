@@ -12,6 +12,7 @@ import {
 import { mockAccountCallerCtx, mockAccountWithServersCallerCtx } from "~api/test/utils";
 import { messageRouter, stripPrivateMessageData } from "./message";
 import {
+  toMessageWithAccountAndRepliesTo,
   toMessageWithDiscordAccount,
   toPrivateMessageWithStrippedData,
 } from "~api/test/public-data";
@@ -72,8 +73,16 @@ describe("Message Operations", () => {
         channelId: channel.id,
       });
       expect(messages).toEqual([
-        toMessageWithDiscordAccount(publicMessage, publicAuthor, true),
-        toMessageWithDiscordAccount(privateMessage, privateAuthor, false),
+        toMessageWithAccountAndRepliesTo({
+          message: publicMessage,
+          author: publicAuthor,
+          publicMessage: true,
+        }),
+        toMessageWithAccountAndRepliesTo({
+          message: privateMessage,
+          author: privateAuthor,
+          publicMessage: false,
+        }),
       ]);
     });
     it("should get all messages with only public data if users do not share a server", async () => {
@@ -84,9 +93,17 @@ describe("Message Operations", () => {
       });
 
       expect(messages).toEqual([
-        toMessageWithDiscordAccount(publicMessage, publicAuthor, true),
+        toMessageWithAccountAndRepliesTo({
+          message: publicMessage,
+          author: publicAuthor,
+          publicMessage: true,
+        }),
         toPrivateMessageWithStrippedData(
-          toMessageWithDiscordAccount(privateMessage, privateAuthor, false)
+          toMessageWithAccountAndRepliesTo({
+            message: privateMessage,
+            author: privateAuthor,
+            publicMessage: false,
+          })
         ),
       ]);
     });
@@ -95,26 +112,100 @@ describe("Message Operations", () => {
 
 describe("Message Utilities", () => {
   describe("Strip Private Message Data", () => {
-    it("should preserve information on a public message", () => {
+    it("should preserve information on a public message with no reply", () => {
       const author = mockDiscordAccount();
-      const messageWithAccount = toMessageWithDiscordAccount(
-        mockMessage(server, channel, author),
+      const messageWithAccount = toMessageWithAccountAndRepliesTo({
+        message: mockMessage(server, channel, author),
         author,
-        true
-      );
+        publicMessage: true,
+      });
       const stripped = stripPrivateMessageData(messageWithAccount);
       expect(stripped).toEqual(messageWithAccount);
     });
-    it("should strip information on a private message", () => {
+    it("should preserve information on a public message with a public reply", () => {
       const author = mockDiscordAccount();
-
-      const messageWithAccount = toMessageWithDiscordAccount(
-        mockMessage(server, channel, author),
+      const messageWithAccount = toMessageWithAccountAndRepliesTo({
+        message: mockMessage(server, channel, author),
         author,
-        false
-      );
+        publicMessage: true,
+        referenced: toMessageWithDiscordAccount({
+          message: mockMessage(server, channel, author),
+          author,
+          publicMessage: true,
+        }),
+      });
+      const stripped = stripPrivateMessageData(messageWithAccount);
+      expect(stripped).toEqual(messageWithAccount);
+    });
+    it("strip information for a public message with a private reply", () => {
+      const author = mockDiscordAccount();
+      const ref = toMessageWithDiscordAccount({
+        message: mockMessage(server, channel, author),
+        author,
+        publicMessage: false,
+      });
+      const messageWithAccount = toMessageWithAccountAndRepliesTo({
+        message: mockMessage(server, channel, author),
+        author,
+        publicMessage: true,
+        referenced: ref,
+      });
+      const stripped = stripPrivateMessageData(messageWithAccount);
+      const expected = {
+        ...messageWithAccount,
+        referencedMessage: toPrivateMessageWithStrippedData(ref),
+      };
+      expect(stripped).toEqual(expected);
+    });
+    it("strip information for a private message with a public reply", () => {
+      const author = mockDiscordAccount();
+      const ref = toMessageWithDiscordAccount({
+        message: mockMessage(server, channel, author),
+        author,
+        publicMessage: true,
+      });
+      const messageWithAccount = toMessageWithAccountAndRepliesTo({
+        message: mockMessage(server, channel, author),
+        author,
+        publicMessage: false,
+        referenced: ref,
+      });
+      const stripped = stripPrivateMessageData(messageWithAccount);
+      const expected = {
+        ...stripPrivateMessageData(messageWithAccount),
+        referencedMessage: ref,
+      };
+      expect(stripped).toEqual(expected);
+    });
+    it("should strip information on a private message with no reply", () => {
+      const author = mockDiscordAccount();
+      const messageWithAccount = toMessageWithAccountAndRepliesTo({
+        message: mockMessage(server, channel, author),
+        author,
+        publicMessage: false,
+      });
       const stripped = stripPrivateMessageData(messageWithAccount);
       expect(stripped).toEqual(toPrivateMessageWithStrippedData(messageWithAccount));
+    });
+    it("strip information for a private message with a private reply", () => {
+      const author = mockDiscordAccount();
+      const ref = toMessageWithDiscordAccount({
+        message: mockMessage(server, channel, author),
+        author,
+        publicMessage: false,
+      });
+      const messageWithAccount = toMessageWithAccountAndRepliesTo({
+        message: mockMessage(server, channel, author),
+        author,
+        publicMessage: false,
+        referenced: ref,
+      });
+      const stripped = stripPrivateMessageData(messageWithAccount);
+      const expected = {
+        ...stripPrivateMessageData(messageWithAccount),
+        referencedMessage: toPrivateMessageWithStrippedData(ref),
+      };
+      expect(stripped).toEqual(expected);
     });
   });
 });

@@ -11,6 +11,5 @@
     "postcss.config.cjs",
     "tailwind.config.cjs",
     "next-env.d.ts",
-    "../../packages/ui/src/utils/trpc.ts"
   ],
 }

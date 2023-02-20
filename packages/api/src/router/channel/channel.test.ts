@@ -6,9 +6,9 @@ import {
   Server,
 } from "@answeroverflow/db";
 import {
-  testAllVariantsThatThrowErrors,
+  testAllSourceAndPermissionVariantsThatThrowErrors,
   mockAccountWithServersCallerCtx,
-  testAllDataVariants,
+  testAllPublicAndPrivateDataVariants,
 } from "~api/test/utils";
 import { channelRouter } from "./channel";
 import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
@@ -38,7 +38,7 @@ describe("Channel Operations", () => {
       await createChannel(channel);
     });
     it("tests all variants for fetching a single channel", async () => {
-      await testAllDataVariants({
+      await testAllPublicAndPrivateDataVariants({
         sourcesThatShouldWork: ["discord-bot", "web-client"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
         async fetch({ permission, source }) {
@@ -59,7 +59,7 @@ describe("Channel Operations", () => {
       await createManyChannels([channel, channel2]);
     });
     it("tests all variants for fetching many channels", async () => {
-      await testAllDataVariants({
+      await testAllPublicAndPrivateDataVariants({
         sourcesThatShouldWork: ["discord-bot", "web-client"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
         async fetch({ permission, source }) {
@@ -77,7 +77,7 @@ describe("Channel Operations", () => {
   });
   describe("Channel Create", () => {
     it("tests all variants for creating a single channel", async () => {
-      await testAllVariantsThatThrowErrors({
+      await testAllSourceAndPermissionVariantsThatThrowErrors({
         sourcesThatShouldWork: ["discord-bot"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
         permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
@@ -96,7 +96,7 @@ describe("Channel Operations", () => {
       await createChannel(channel);
     });
     it("tests all varaints for updating a channel", async () => {
-      await testAllVariantsThatThrowErrors({
+      await testAllSourceAndPermissionVariantsThatThrowErrors({
         sourcesThatShouldWork: ["discord-bot"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
         permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
@@ -114,7 +114,7 @@ describe("Channel Operations", () => {
 
   describe("Channel Delete", () => {
     it("tests all varaints for deleting a channel", async () => {
-      await testAllVariantsThatThrowErrors({
+      await testAllSourceAndPermissionVariantsThatThrowErrors({
         sourcesThatShouldWork: ["discord-bot"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
         permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
@@ -131,7 +131,7 @@ describe("Channel Operations", () => {
   describe("Channel Upsert", () => {
     describe("Upsert Create", () => {
       it("tests all varaints for upsert creating a channel", async () => {
-        await testAllVariantsThatThrowErrors({
+        await testAllSourceAndPermissionVariantsThatThrowErrors({
           sourcesThatShouldWork: ["discord-bot"],
           permissionsThatShouldWork: ["ManageGuild", "Administrator"],
           permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
@@ -149,7 +149,7 @@ describe("Channel Operations", () => {
         await createChannel(channel);
       });
       it("tests all varaints for upsert updating a channel", async () => {
-        await testAllVariantsThatThrowErrors({
+        await testAllSourceAndPermissionVariantsThatThrowErrors({
           sourcesThatShouldWork: ["discord-bot"],
           permissionsThatShouldWork: ["ManageGuild", "Administrator"],
           permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,

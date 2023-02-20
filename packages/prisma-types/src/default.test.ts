@@ -1,4 +1,4 @@
-import { prisma } from "..";
+import { prisma } from "./prisma";
 import { getDefaultChannel, getDefaultUserServerSettings } from "./default";
 import { getRandomId } from "@answeroverflow/utils";
 

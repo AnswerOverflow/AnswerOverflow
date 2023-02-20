@@ -16,7 +16,7 @@ const defaultMessage: MessageResultPageProps = {
   messages: [
     mockMessageWithDiscordAccount({
       id: "1",
-      solutions: ["4"],
+      solutionIds: ["4"],
       public: false,
       content: " THis is the first private message",
     }),

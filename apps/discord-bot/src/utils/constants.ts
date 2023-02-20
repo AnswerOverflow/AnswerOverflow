@@ -11,4 +11,5 @@ export const LOADING_MESSAGES = [
   "Loading...",
 ];
 
-export const ANSWER_OVERFLOW_BLUE = "#8CD1FF";
+export const ANSWER_OVERFLOW_BLUE_HEX = "#8CD1FF";
+export const ANSWER_OVERFLOW_BLUE_AS_INT = parseInt(ANSWER_OVERFLOW_BLUE_HEX.replace("#", "0x"));
