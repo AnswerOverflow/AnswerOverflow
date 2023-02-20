@@ -119,13 +119,6 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
 
   const Contents = () => (
     <div className="flex w-full flex-col items-start justify-center">
-      {message.repliesTo && (
-        <div className="relative flex w-full flex-row items-center justify-start">
-          <span className="ml-[calc(40px+2rem)] before:absolute before:top-1/2 before:right-[93%] before:h-[1rem] before:w-[2rem] before:rounded-tl-[6px] before:border-t-2 before:border-l-2 before:border-black">
-            {message.repliesTo.messageContent}
-          </span>
-        </div>
-      )}
       <div className="group relative flex w-full break-words rounded-xl p-1 ">
         <div className="mr-4 hidden shrink-0 sm:block">
           <DiscordAvatar user={message.author} />
