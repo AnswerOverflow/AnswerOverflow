@@ -12,7 +12,7 @@ import {
 import { mockAccountCallerCtx, mockAccountWithServersCallerCtx } from "~api/test/utils";
 import { messageRouter, stripPrivateMessageData } from "./message";
 import {
-  toMessageWithDiscordAccount,
+  toMessageWithAccountAndRepliesTo,
   toPrivateMessageWithStrippedData,
 } from "~api/test/public-data";
 import { mockDiscordAccount, mockChannel, mockMessage, mockServer } from "@answeroverflow/db-mock";
@@ -72,8 +72,16 @@ describe("Message Operations", () => {
         channelId: channel.id,
       });
       expect(messages).toEqual([
-        toMessageWithDiscordAccount(publicMessage, publicAuthor, true),
-        toMessageWithDiscordAccount(privateMessage, privateAuthor, false),
+        toMessageWithAccountAndRepliesTo({
+          message: publicMessage,
+          author: publicAuthor,
+          publicMessage: true,
+        }),
+        toMessageWithAccountAndRepliesTo({
+          message: privateMessage,
+          author: privateAuthor,
+          publicMessage: false,
+        }),
       ]);
     });
     it("should get all messages with only public data if users do not share a server", async () => {
@@ -84,9 +92,17 @@ describe("Message Operations", () => {
       });
 
       expect(messages).toEqual([
-        toMessageWithDiscordAccount(publicMessage, publicAuthor, true),
+        toMessageWithAccountAndRepliesTo({
+          message: publicMessage,
+          author: publicAuthor,
+          publicMessage: true,
+        }),
         toPrivateMessageWithStrippedData(
-          toMessageWithDiscordAccount(privateMessage, privateAuthor, false)
+          toMessageWithAccountAndRepliesTo({
+            message: privateMessage,
+            author: privateAuthor,
+            publicMessage: false,
+          })
         ),
       ]);
     });
@@ -97,22 +113,22 @@ describe("Message Utilities", () => {
   describe("Strip Private Message Data", () => {
     it("should preserve information on a public message", () => {
       const author = mockDiscordAccount();
-      const messageWithAccount = toMessageWithDiscordAccount(
-        mockMessage(server, channel, author),
+      const messageWithAccount = toMessageWithAccountAndRepliesTo({
+        message: mockMessage(server, channel, author),
         author,
-        true
-      );
+        publicMessage: true,
+      });
       const stripped = stripPrivateMessageData(messageWithAccount);
       expect(stripped).toEqual(messageWithAccount);
     });
     it("should strip information on a private message", () => {
       const author = mockDiscordAccount();
 
-      const messageWithAccount = toMessageWithDiscordAccount(
-        mockMessage(server, channel, author),
+      const messageWithAccount = toMessageWithAccountAndRepliesTo({
+        message: mockMessage(server, channel, author),
         author,
-        false
-      );
+        publicMessage: false,
+      });
       const stripped = stripPrivateMessageData(messageWithAccount);
       expect(stripped).toEqual(toPrivateMessageWithStrippedData(messageWithAccount));
     });

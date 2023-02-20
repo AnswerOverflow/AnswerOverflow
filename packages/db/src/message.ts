@@ -20,6 +20,12 @@ export type MessageWithAccountAndRepliesTo = z.infer<typeof zMessageWithDiscordA
   referencedMessage: MessageWithDiscordAccount | null;
 };
 
+export function isMessageWithAccountAndRepliesTo(
+  message: MessageWithDiscordAccount | MessageWithAccountAndRepliesTo
+): message is MessageWithAccountAndRepliesTo {
+  return "referencedMessage" in message;
+}
+
 export const zMessageWithAccountAndRepliesTo: z.ZodType<MessageWithAccountAndRepliesTo> =
   zMessageWithDiscordAccount.extend({
     referencedMessage: z.lazy(() => zMessageWithDiscordAccount.nullable()),

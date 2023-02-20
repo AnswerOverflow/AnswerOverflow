@@ -11,14 +11,21 @@ import {
   findManyMessages,
   findMessageById,
   MessageWithAccountAndRepliesTo,
+  MessageWithDiscordAccount,
+  isMessageWithAccountAndRepliesTo,
 } from "@answeroverflow/db";
 import type { DiscordServer } from "@answeroverflow/auth";
 
+// Kind of ugly having it take in two different types, but it's the easiest way to do it
 export function stripPrivateMessageData(
-  message: MessageWithAccountAndRepliesTo,
+  message: MessageWithAccountAndRepliesTo | MessageWithDiscordAccount,
   userServers: DiscordServer[] | null = null
-): MessageWithAccountAndRepliesTo {
-  if (message.public && message.repliesTo?.public) {
+): MessageWithAccountAndRepliesTo | MessageWithDiscordAccount {
+  const isReply = !isMessageWithAccountAndRepliesTo(message);
+  if (isReply && message.public) {
+    return message;
+  }
+  if (!isReply && message.public && !message.referencedMessage) {
     return message;
   }
 
@@ -40,22 +47,22 @@ export function stripPrivateMessageData(
     childThread: null,
   });
 
-  if (!message.repliesTo) {
+  if (isReply || !message.referencedMessage) {
     return {
       ...defaultMessage,
       author: defaultAuthor,
       public: false,
-      repliesTo: null,
+      referencedMessage: null,
     };
   }
 
-  const reply = stripPrivateMessageData(message.repliesTo, userServers);
+  const reply = stripPrivateMessageData(message.referencedMessage, userServers);
 
   return {
     ...defaultMessage,
     author: defaultAuthor,
     public: false,
-    repliesTo: reply,
+    referencedMessage: reply,
   };
 }
 
