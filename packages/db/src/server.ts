@@ -62,6 +62,11 @@ export async function findServerById(id: string) {
   return addFlagsToServer(found);
 }
 
+export async function findManyServersById(ids: string[]) {
+  const found = await prisma.server.findMany({ where: { id: { in: ids } } });
+  return found.map(addFlagsToServer);
+}
+
 export function upsertServer(input: z.infer<typeof zServerUpsert>) {
   return upsert({
     find: () => findServerById(input.id),

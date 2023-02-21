@@ -8,6 +8,8 @@ import {
   findManyIgnoredDiscordAccountsById,
 } from "./ignored-discord-account";
 import { findManyUserServerSettings, findUserServerSettingsById } from "./user-server-settings";
+import { findManyChannelsById } from "./channel";
+import { findManyServersById } from "./server";
 export type MessageWithDiscordAccount = z.infer<typeof zMessageWithDiscordAccount>;
 export const zMessageWithDiscordAccount = zMessage
   .extend({
@@ -244,5 +246,34 @@ export type SearchResult = {
 export async function searchMessages(options: MessageSearchOptions): Promise<SearchResult[]> {
   const searchResults = await elastic.searchMessages(options);
   const messages = searchResults.map((r) => r._source);
-  const withDiscordAccounts = await addAuthorsToMessages(messages);
+  // Fetch all channels, servers, threads, and solutions
+  const channelIds = messages.map((m) => m.channelId);
+  const serverIds = messages.map((m) => m.serverId);
+  const childThreads = messages.filter((m) => m.childThread).map((m) => m.childThread!);
+  const solutionIds = messages.map((m) => m.solutionIds).flat();
+  const [channels, servers, solutions] = await Promise.all([
+    findManyChannelsById([...channelIds, ...childThreads]),
+    findManyServersById(serverIds),
+    findManyMessages(solutionIds),
+  ]);
+  const channelLookup = new Map(channels.map((c) => [c.id, c]));
+  const serverLookup = new Map(servers.map((s) => [s.id, s]));
+  const solutionLookup = new Map(solutions.map((s) => [s.id, s]));
+  const resultsWithData = searchResults.map((r) => {
+    const message = r._source;
+    const channel = channelLookup.get(message.channelId);
+    const server = serverLookup.get(message.serverId);
+    const thread = channelLookup.get(message.childThread);
+    const solution = solutionLookup.get(message.solutionIds[0]);
+    return {
+      ...r,
+      _source: {
+        ...message,
+        channel,
+        server,
+        thread,
+        solution,
+      },
+    };
+  });
 }

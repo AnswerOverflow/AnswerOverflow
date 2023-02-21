@@ -172,7 +172,7 @@ describe("Message Utilities", () => {
       });
       const stripped = stripPrivateMessageData(messageWithAccount);
       const expected = {
-        ...stripPrivateMessageData(messageWithAccount),
+        ...messageWithAccount,
         referencedMessage: ref,
       };
       expect(stripped).toEqual(expected);
