@@ -2,8 +2,8 @@
 <p align='center'>
 <a href='https://answeroverflow.com/' target="_blank" rel="noopener">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/AnswerOverflowLogoLight.png" />
-    <img alt="Answer Overflow Logo" src="./assets/AnswerOverflowLogoDark.png" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.answeroverflow.com/AnswerOverflowLogoLight.png" />
+    <img alt="Answer Overflow Logo" src="https://www.answeroverflow.com/AnswerOverflowLogoDark.png" />
   </picture>
 </a>
 </p>
