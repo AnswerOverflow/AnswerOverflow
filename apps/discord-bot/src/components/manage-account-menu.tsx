@@ -20,7 +20,7 @@ type ManageAccountMenuItemProps = {
   setSettings: (settings: UserServerSettingsWithFlags) => void;
 };
 export const REVOKE_CONSENT_LABEL = "Disable publicly showing messages";
-export const GRANT_CONSENT_LABEL = "Publicly display messages on Answer Overflow";
+export const GRANT_CONSENT_LABEL = "Publicly display messages";
 
 const ToggleConsentButton = ({ settings, setSettings }: ManageAccountMenuItemProps) => (
   <ToggleButton
