@@ -1,7 +1,19 @@
 import { TRPCError } from "@trpc/server";
 import { PermissionsBitField } from "discord.js";
-import { findIgnoredDiscordAccountById } from "@answeroverflow/db";
+import {
+  ChannelWithFlags,
+  findIgnoredDiscordAccountById,
+  getDefaultDiscordAccount,
+  getDefaultMessage,
+  isMessageWithAccountAndRepliesTo,
+  MessageWithAccountAndRepliesTo,
+  MessageWithDiscordAccount,
+  ServerWithFlags,
+  zChannelPublic,
+  zServerPublic,
+} from "@answeroverflow/db";
 import type { Source, Context } from "~api/router/context";
+import type { DiscordServer } from "@answeroverflow/auth";
 
 export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
   "You are missing the required permissions to do this";
@@ -153,4 +165,74 @@ export function isCtxSourceDiscordBot(ctx: Context) {
 
 export function assertCanEditServerBotOnly(ctx: Context, serverId: string) {
   return [assertCanEditServer(ctx, serverId), isCtxSourceDiscordBot(ctx)];
+}
+
+// Kind of ugly having it take in two different types, but it's the easiest way to do it
+export function stripPrivateMessageData(
+  message: MessageWithAccountAndRepliesTo | MessageWithDiscordAccount,
+  userServers: DiscordServer[] | null = null
+): MessageWithAccountAndRepliesTo | MessageWithDiscordAccount {
+  const isReply = !isMessageWithAccountAndRepliesTo(message);
+  // If it is only a reply and is public, then just return
+  if (isReply && message.public) {
+    return message;
+  }
+  // If it is not a reply, is public, and has no referenced message, then just return
+  // If it is not a reply, is public, and the referenced message is public, then just return
+  if (!isReply && message.public) {
+    return {
+      ...message,
+      referencedMessage: message.referencedMessage
+        ? stripPrivateMessageData(message.referencedMessage)
+        : null,
+    };
+  }
+
+  if (userServers) {
+    const userServer = userServers.find((s) => s.id === message.serverId);
+    // If the user is in the server, then just return
+    if (userServer) {
+      return message;
+    }
+  }
+  const defaultAuthor = getDefaultDiscordAccount({
+    id: "0",
+    name: "Unknown User",
+  });
+  const defaultMessage = getDefaultMessage({
+    channelId: message.channelId,
+    serverId: message.serverId,
+    authorId: defaultAuthor.id,
+    id: message.id,
+    childThread: null,
+  });
+
+  // If it is a reply, then we know that is it private so we can just return
+  // If there is no referenced message, then we can just return
+  if (isReply) {
+    return {
+      ...defaultMessage,
+      author: defaultAuthor,
+      public: false,
+    };
+  }
+
+  const reply = message.referencedMessage
+    ? stripPrivateMessageData(message.referencedMessage, userServers)
+    : null;
+
+  return {
+    ...defaultMessage,
+    author: defaultAuthor,
+    public: false,
+    referencedMessage: reply,
+  };
+}
+
+export function stripPrivateChannelData(channel: ChannelWithFlags) {
+  return zChannelPublic.parse(channel);
+}
+
+export function stripPrivateServerData(server: ServerWithFlags) {
+  return zServerPublic.parse(server);
 }

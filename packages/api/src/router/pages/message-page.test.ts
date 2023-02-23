@@ -46,7 +46,7 @@ beforeEach(async () => {
 describe("Message Results", () => {
   it("should 404 if the root message doesnt exists", async () => {
     await expect(unauthedMessagePageRouter.byId(getRandomId())).rejects.toThrow(
-      "Message not found"
+      "Root message not found"
     );
   });
   describe("Text Channel Message Pages", () => {

@@ -1,5 +1,9 @@
 import type { z } from "zod";
-import { getDefaultDiscordAccount, prisma } from "@answeroverflow/prisma-types";
+import {
+  addFlagsToUserServerSettings,
+  getDefaultDiscordAccount,
+  prisma,
+} from "@answeroverflow/prisma-types";
 import {
   upsertIgnoredDiscordAccount,
   findIgnoredDiscordAccountById,
@@ -8,6 +12,7 @@ import {
 import { DBError } from "./utils/error";
 import { upsert, upsertMany } from "./utils/operations";
 import { zDiscordAccount } from "@answeroverflow/prisma-types";
+import { deleteManyMessagesByUserId } from "./message";
 
 export const zDiscordAccountRequired = zDiscordAccount.pick({
   id: true,
@@ -74,7 +79,8 @@ export async function updateManyDiscordAccounts(data: z.infer<typeof zDiscordAcc
 export async function deleteDiscordAccount(id: string) {
   const existingAccount = await findDiscordAccountById(id);
   if (existingAccount) await prisma.discordAccount.delete({ where: { id } });
-  await upsertIgnoredDiscordAccount(id);
+  await Promise.all([upsertIgnoredDiscordAccount(id), deleteManyMessagesByUserId(id)]);
+
   return true;
 }
 
@@ -95,4 +101,64 @@ export async function upsertManyDiscordAccounts(data: z.infer<typeof zDiscordAcc
     getInputId: (i) => i.id,
     input: data,
   });
+}
+
+export async function findDiscordAccountWithUserServerSettings({
+  authorId,
+  authorServerId,
+}: {
+  authorId: string;
+  authorServerId: string[];
+}) {
+  const data = await prisma.discordAccount.findUnique({
+    where: {
+      id: authorId,
+    },
+    include: {
+      userServerSettings: {
+        where: {
+          serverId: {
+            in: authorServerId,
+          },
+        },
+      },
+    },
+  });
+  if (!data) return null;
+  const userServerSettingsWithFlags = data.userServerSettings.map((i) =>
+    addFlagsToUserServerSettings(i)
+  );
+  return {
+    ...data,
+    userServerSettings: userServerSettingsWithFlags,
+  };
+}
+
+export async function findManyDiscordAccountsWithUserServerSettings({
+  authorIds,
+  authorServerIds,
+}: {
+  authorIds: string[];
+  authorServerIds: string[];
+}) {
+  const data = await prisma.discordAccount.findMany({
+    where: {
+      id: {
+        in: authorIds,
+      },
+    },
+    include: {
+      userServerSettings: {
+        where: {
+          serverId: {
+            in: authorServerIds,
+          },
+        },
+      },
+    },
+  });
+  return data.map((i) => ({
+    ...i,
+    userServerSettings: i.userServerSettings.map((j) => addFlagsToUserServerSettings(j)),
+  }));
 }
