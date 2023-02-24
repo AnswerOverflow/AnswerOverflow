@@ -1,7 +1,7 @@
 const path = require('path'); // 👈 import path
 
 module.exports = {
-  "stories": ["../src/**/*.stories.mdx", "../src/**/*.stories.@(js|jsx|ts|tsx)"],
+  "stories": ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|ts|tsx)"],
   "addons": ["@storybook/addon-links", "@storybook/addon-essentials", "@storybook/addon-interactions", "@storybook/addon-a11y", {
     name: "@storybook/addon-postcss",
     options: {
@@ -11,8 +11,9 @@ module.exports = {
     }
   }],
   framework: {
-    name: '@storybook/nextjs', // Add this
-    options: {},
+    name: "@storybook/nextjs",
+    // Add this
+    options: {}
   },
   webpackFinal: async (config, {
     configType
@@ -37,8 +38,8 @@ module.exports = {
   docs: {
     autodocs: false
   },
-  env: (config) => ({
+  env: config => ({
     ...config,
-    THEME: process.env.THEME ?? "both",
-  }),
+    THEME: process.env.THEME ?? "both"
+  })
 };
