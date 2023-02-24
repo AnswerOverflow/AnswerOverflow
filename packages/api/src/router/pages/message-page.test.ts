@@ -95,7 +95,7 @@ describe("Message Results", () => {
       threadMessages = [
         mockMessage(server, thread, author, {
           id: startId,
-          parentChannelId: thread.parentId,
+          childThread: thread.id,
         }),
         mockMessage(server, thread, author, {
           id: nextId,

@@ -346,8 +346,8 @@ describe("Message Operations", () => {
       await upsertMessage(solution);
       const withRef = await addReferenceToMessage(created);
       const withAuthor = await addAuthorToMessage(withRef!);
-      expect(withAuthor!.solutionMessages![0]!.author).not.toBeNull();
-      expect(withAuthor!.solutionMessages![0]!.author?.id).toBe(author.id);
+      expect(withAuthor!.solutionMessages[0]!.author).not.toBeNull();
+      expect(withAuthor!.solutionMessages[0]!.author?.id).toBe(author.id);
     });
     it("should have a null solution message if the author is not found", async () => {
       const solution = mockMessage(server, channel, mockDiscordAccount());

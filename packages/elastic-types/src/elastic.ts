@@ -37,6 +37,23 @@ export const zMessage = z.object({
   serverId: z.string(),
 });
 
+export function getThreadIdOfMessage(message: Message): string | null {
+  if (message.childThread) {
+    return message.childThread;
+  }
+  if (message.parentChannelId) {
+    return message.channelId;
+  }
+  return null;
+}
+
+export function getParentChannelOfMessage(message: Message): string | null {
+  if (message.parentChannelId) {
+    return message.parentChannelId;
+  }
+  return message.channelId;
+}
+
 export type MessageSearchOptions = {
   query: string;
   serverId?: string;

@@ -23,7 +23,7 @@ export const zMessageWithDiscordAccount = zMessage
 
 export type MessageFull = z.infer<typeof zMessageWithDiscordAccount> & {
   referencedMessage: MessageWithDiscordAccount | null;
-  solutionMessages: MessageWithDiscordAccount[] | null;
+  solutionMessages: MessageWithDiscordAccount[];
 };
 
 export function isMessageFull(

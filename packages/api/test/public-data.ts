@@ -78,5 +78,6 @@ export function toPrivateMessageWithStrippedData(
     referencedMessage: message.referencedMessage
       ? toPrivateMessageWithStrippedData(message.referencedMessage)
       : null,
+    solutionMessages: message.solutionMessages.map((m) => toPrivateMessageWithStrippedData(m)),
   };
 }
