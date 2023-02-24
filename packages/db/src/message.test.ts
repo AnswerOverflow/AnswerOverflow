@@ -11,6 +11,7 @@ import {
   deleteMessage,
   findMessageById,
   findMessagesByChannelId,
+  searchMessages,
   updateMessage,
   upsertManyMessages,
   upsertMessage,
@@ -19,6 +20,7 @@ import { createServer } from "./server";
 import { createChannel } from "./channel";
 import { createDiscordAccount, deleteDiscordAccount } from "./discord-account";
 import { createUserServerSettings, Message } from "..";
+import { getRandomId } from "@answeroverflow/utils";
 
 describe("Message Operations", () => {
   let server: Server;
@@ -357,6 +359,23 @@ describe("Message Operations", () => {
       const withRef = await addReferenceToMessage(created);
       const withAuthor = await addAuthorToMessage(withRef!);
       expect(withAuthor?.solutionMessages).toHaveLength(0);
+    });
+  });
+  describe("Search", () => {
+    it("should search for a message in a normal channel", async () => {
+      const msg = mockMessage(server, channel, author, {
+        content: getRandomId(),
+      });
+      await upsertMessage(msg);
+      const found = await searchMessages({
+        query: msg.content,
+      });
+      const firstResult = found[0];
+      expect(found).toHaveLength(1);
+      expect(firstResult?.message.id).toBe(msg.id);
+      expect(firstResult?.channel.id).toBe(channel.id);
+      expect(firstResult?.server.id).toBe(server.id);
+      expect(firstResult?.score).toBeGreaterThan(0);
     });
   });
 });

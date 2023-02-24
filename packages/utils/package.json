@@ -12,7 +12,9 @@
     "test": "yarn run vitest run  --coverage",
     "test:watch": "yarn run vitest"
   },
-  "dependencies": {},
+  "dependencies": {
+    "lorem-ipsum": "^2.0.8"
+  },
   "devDependencies": {
     "@answeroverflow/tsconfig": "*",
     "@vitest/coverage-c8": "^0.25.8",

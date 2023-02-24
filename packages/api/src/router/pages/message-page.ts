@@ -1,11 +1,14 @@
 import { z } from "zod";
 import { router, publicProcedure } from "~api/router/trpc";
 import {
+  addAuthorsToMessages,
+  addReferencesToMessages,
   ChannelWithFlags,
   findChannelById,
   findMessageById,
   findMessagesByChannelId,
   findServerById,
+  Message,
   MessageWithDiscordAccount,
 } from "@answeroverflow/db";
 import { findOrThrowNotFound } from "~api/utils/operations";
@@ -41,7 +44,7 @@ export const messagePageRouter = router({
 
     let thread: ChannelWithFlags | undefined = undefined;
     let parentChannel: ChannelWithFlags = threadOrParentChannel;
-    let messages: MessageWithDiscordAccount[];
+    let messages: Message[];
 
     if (threadOrParentChannel.parentId) {
       thread = threadOrParentChannel;
@@ -64,9 +67,12 @@ export const messagePageRouter = router({
     }
 
     // We've collected all of the data, now we need to strip out the private info
-
+    const messagesWithRefs = await addReferencesToMessages(messages);
+    const messagesWithDiscordAccounts = await addAuthorsToMessages(messagesWithRefs);
     return {
-      messages: messages.map((message) => stripPrivateMessageData(message, ctx.userServers)),
+      messages: messagesWithDiscordAccounts.map((message) =>
+        stripPrivateMessageData(message, ctx.userServers)
+      ),
       parentChannel: stripPrivateChannelData(parentChannel),
       server: stripPrivateServerData(server),
       thread: thread ? stripPrivateChannelData(thread) : undefined,

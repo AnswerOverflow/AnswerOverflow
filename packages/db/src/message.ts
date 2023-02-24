@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { Channel, Server } from "@answeroverflow/prisma-types";
 import { zDiscordAccountPublic } from "@answeroverflow/prisma-types";
-import { Message, elastic, zMessage } from "@answeroverflow/elastic-types";
+import { Message, elastic, zMessage, MessageSearchOptions } from "@answeroverflow/elastic-types";
 import { DBError } from "./utils/error";
 import {
   findIgnoredDiscordAccountById,
@@ -10,6 +10,9 @@ import {
 import { findManyUserServerSettings, findUserServerSettingsById } from "./user-server-settings";
 import { findManyDiscordAccountsWithUserServerSettings } from "./discord-account";
 import { omit } from "@answeroverflow/utils";
+import { findManyChannelsById } from "./channel";
+import { findManyServersById } from "./server";
+
 export type MessageWithDiscordAccount = z.infer<typeof zMessageWithDiscordAccount>;
 export const zMessageWithDiscordAccount = zMessage
   .extend({
@@ -222,10 +225,44 @@ export async function deleteManyMessagesByUserId(userId: string) {
 }
 
 export type SearchResult = {
-  question: MessageWithDiscordAccount;
-  answer: MessageWithDiscordAccount;
+  message: MessageWithAccountAndRepliesTo;
   score: number;
   channel: Channel;
   server: Server;
   thread?: Channel;
 };
+
+export async function searchMessages(opts: MessageSearchOptions) {
+  const results = await elastic.searchMessages(opts);
+  const resultsLookup = new Map(results.map((r) => [r._id, r]));
+  const messages = results.map((r) => r._source);
+  const channelIds = [
+    ...messages.map((m) => m.channelId),
+    ...messages.map((m) => m.parentChannelId).filter(Boolean),
+  ];
+  const serverIds = messages.map((m) => m.serverId);
+  const [channels, servers, messagesWithRefs] = await Promise.all([
+    findManyChannelsById(channelIds),
+    findManyServersById(serverIds),
+    addReferencesToMessages(messages),
+  ]);
+  const messagesWithAuthors = await addAuthorsToMessages(messagesWithRefs);
+  const channelLookup = new Map(channels.map((c) => [c.id, c]));
+  const serverLookup = new Map(servers.map((s) => [s.id, s]));
+  return messagesWithAuthors
+    .map((m): SearchResult | null => {
+      const channel = channelLookup.get(m.parentChannelId ?? m.channelId);
+      const server = serverLookup.get(m.serverId);
+      const thread = m.parentChannelId ? channelLookup.get(m.channelId) : undefined;
+      if (!channel || !server) return null;
+      return {
+        message: m,
+        channel: channel,
+        score: resultsLookup.get(m.id)!._score ?? 0,
+        server: server,
+        thread: thread,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score);
+}

@@ -32,7 +32,8 @@ export const zMessage = z.object({
   messageReference: zMessageReference.nullable(),
   childThread: z.string().nullable(),
   authorId: z.string(),
-  channelId: z.string(),
+  channelId: z.string(), // If the message is is in a thread, this is the thread's channel id
+  parentChannelId: z.string().nullable(), // If the message is in a thread, this is the channel id of the parent channel for the thread
   serverId: z.string(),
 });
 
@@ -75,6 +76,7 @@ const properties: ElasticMessageIndexProperties = {
   serverId: idProperty,
   channelId: idProperty,
   authorId: idProperty,
+  parentChannelId: idProperty,
   content: { type: "text" },
   images: {
     properties: imageProperties,
@@ -423,6 +425,13 @@ export class Elastic extends Client {
     const result = await this.search<Message>({
       index: this.messagesIndex,
       query: q,
+      track_scores: true,
+      // TODO: Enable highlighting
+      // highlight: {
+      //   fields: {
+      //     content: {},
+      //   },
+      // },
       size: limit ?? 100,
       sort: [{ id: "asc" }],
     });
