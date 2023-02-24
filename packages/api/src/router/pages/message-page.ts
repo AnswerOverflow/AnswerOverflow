@@ -22,10 +22,9 @@ export const messagePageRouter = router({
   /*
     Message page by ID
     Variants:
-      - Text channel message that has a thread
-      - Text channel message that has no thread
-      - Root message of a thread with no parent message
-      - Message in thread with a parent message
+      - Text channel thread message that has a parent message
+      - Text channel thread message that has no parent message
+      - Text channel thread message starting from anywhere in the thread
       - Forum post from root message of post
       - Forum post from any other message in the post
   */
@@ -33,7 +32,7 @@ export const messagePageRouter = router({
     // This is the message we're starting from
     const targetMessage = await findOrThrowNotFound(
       () => findMessageById(input),
-      "Root message not found"
+      "Target message not found"
     );
 
     // Declare as const to make Typescript not yell at us when used in arrow functions

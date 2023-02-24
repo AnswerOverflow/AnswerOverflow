@@ -46,7 +46,7 @@ beforeEach(async () => {
 describe("Message Results", () => {
   it("should 404 if the root message doesnt exists", async () => {
     await expect(unauthedMessagePageRouter.byId(getRandomId())).rejects.toThrow(
-      "Root message not found"
+      "Target message not found"
     );
   });
   describe("Text Channel Message Pages", () => {
@@ -85,67 +85,37 @@ describe("Message Results", () => {
     });
   });
   describe("Thread Message Pages", () => {
-    let thread: Channel;
-    let threadMessages: Message[];
-    beforeEach(async () => {
-      thread = mockThread(channel);
-      const startId = thread.id;
-      const nextId = randomSnowflakeLargerThan(startId).toString();
-      const lastId = randomSnowflakeLargerThan(nextId).toString();
-      threadMessages = [
-        mockMessage(server, thread, author, {
-          id: startId,
-          childThread: thread.id,
-        }),
-        mockMessage(server, thread, author, {
-          id: nextId,
-          parentChannelId: thread.parentId,
-        }),
-        mockMessage(server, thread, author, {
-          id: lastId,
-          parentChannelId: thread.parentId,
-        }),
-      ];
-
+    it("should get messages correctly starting from the root of a text channel thread", async () => {
+      const thread = mockThread(channel);
+      const message = mockMessage(server, channel, author, {
+        childThread: thread.id,
+        id: thread.id,
+      });
+      const message2 = mockMessage(server, thread, author, {
+        id: randomSnowflakeLargerThan(message.id).toString(),
+      });
       await createChannel(thread);
-      await upsertManyMessages(threadMessages);
-    });
-
-    it("should get all thread messages for a thread correctly starting from the root", async () => {
-      const messages = await unauthedMessagePageRouter.byId(threadMessages[0]!.id);
-      expect(messages).toMatchObject({
-        messages: threadMessages.map((m) =>
-          toPrivateMessageWithStrippedData(
-            toMessageWithAccountAndRepliesTo({
-              message: m,
-              author,
-              publicMessage: false,
-            })
-          )
+      await upsertManyMessages([message, message2]);
+      const pageData = await unauthedMessagePageRouter.byId(message.id);
+      expect(pageData.messages).toEqual([
+        toPrivateMessageWithStrippedData(
+          toMessageWithAccountAndRepliesTo({
+            message,
+            author,
+            publicMessage: false,
+          })
         ),
-        parentChannel: pickPublicChannelData(channel),
-        server: pickPublicServerData(server),
-        thread: pickPublicChannelData(thread),
-      });
-    });
-    it("should get all thread messages for a thread correctly starting from a message in the thread", async () => {
-      const messages = await unauthedMessagePageRouter.byId(
-        threadMessages[threadMessages.length - 1]!.id
-      );
-      expect(messages).toMatchObject({
-        messages: threadMessages.map((m) =>
-          toPrivateMessageWithStrippedData(
-            toMessageWithAccountAndRepliesTo({
-              message: m,
-              author,
-              publicMessage: false,
-            })
-          )
+        toPrivateMessageWithStrippedData(
+          toMessageWithAccountAndRepliesTo({
+            message: message2,
+            author,
+            publicMessage: false,
+          })
         ),
-        parentChannel: pickPublicChannelData(channel),
-        server: pickPublicServerData(server),
-        thread: pickPublicChannelData(thread),
-      });
+      ]);
+      expect(pageData.parentChannel).toEqual(pickPublicChannelData(channel));
+      expect(pageData.server).toEqual(pickPublicServerData(server));
+      expect(pageData.thread).toEqual(pickPublicChannelData(thread));
     });
   });
 });

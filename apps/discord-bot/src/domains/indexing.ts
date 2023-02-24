@@ -184,7 +184,7 @@ export async function fetchAllChannelMessagesWithThreads(
       Text channels and news channels have messages in them, so we have to fetch the messages
       We also add any threads we find to the threads array
       Threads can be found from normal messages or system create messages
-      TODO: Handle threads without any parent messages in the channel
+      TODO: Handle threads without any parent messages in the channel, unsure if possible
       */
     const messages = await fetchAllMesages(channel, options);
     for (const message of messages) {

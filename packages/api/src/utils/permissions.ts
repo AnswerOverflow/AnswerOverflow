@@ -177,16 +177,6 @@ export function stripPrivateMessageData(
   if (isPartialMessage && message.public) {
     return message;
   }
-  // If it is not a reply, is public, and has no referenced message, then just return
-  // If it is not a reply, is public, and the referenced message is public, then just return
-  if (!isPartialMessage && message.public) {
-    return {
-      ...message,
-      referencedMessage: message.referencedMessage
-        ? stripPrivateMessageData(message.referencedMessage)
-        : null,
-    };
-  }
 
   if (userServers) {
     const userServer = userServers.find((s) => s.id === message.serverId);
@@ -221,11 +211,15 @@ export function stripPrivateMessageData(
     ? stripPrivateMessageData(message.referencedMessage, userServers)
     : null;
 
+  const solutions = message.solutionMessages.map((solution) =>
+    stripPrivateMessageData(solution, userServers)
+  );
   return {
     ...defaultMessage,
     author: defaultAuthor,
     public: false,
     referencedMessage: reply,
+    solutionMessages: solutions,
   };
 }
 
