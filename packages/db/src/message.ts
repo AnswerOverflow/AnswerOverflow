@@ -1,15 +1,15 @@
 import { z } from "zod";
-import { Channel, prisma, Server } from "@answeroverflow/prisma-types";
-import { addFlagsToUserServerSettings, zDiscordAccountPublic } from "@answeroverflow/prisma-types";
-import { Message, elastic, zMessage, MessageSearchOptions } from "@answeroverflow/elastic-types";
+import type { Channel, Server } from "@answeroverflow/prisma-types";
+import { zDiscordAccountPublic } from "@answeroverflow/prisma-types";
+import { Message, elastic, zMessage } from "@answeroverflow/elastic-types";
 import { DBError } from "./utils/error";
 import {
   findIgnoredDiscordAccountById,
   findManyIgnoredDiscordAccountsById,
 } from "./ignored-discord-account";
 import { findManyUserServerSettings, findUserServerSettingsById } from "./user-server-settings";
-import { findManyChannelsById } from "./channel";
-import { findManyServersById } from "./server";
+import { findManyDiscordAccountsWithUserServerSettings } from "./discord-account";
+import { omit } from "@answeroverflow/utils";
 export type MessageWithDiscordAccount = z.infer<typeof zMessageWithDiscordAccount>;
 export const zMessageWithDiscordAccount = zMessage
   .extend({
@@ -20,17 +20,19 @@ export const zMessageWithDiscordAccount = zMessage
 
 export type MessageWithAccountAndRepliesTo = z.infer<typeof zMessageWithDiscordAccount> & {
   referencedMessage: MessageWithDiscordAccount | null;
+  solutionMessages: MessageWithDiscordAccount[] | null;
 };
 
 export function isMessageWithAccountAndRepliesTo(
   message: MessageWithDiscordAccount | MessageWithAccountAndRepliesTo
 ): message is MessageWithAccountAndRepliesTo {
-  return "referencedMessage" in message;
+  return "referencedMessage" in message && "solutionMessages" in message;
 }
 
 export const zMessageWithAccountAndRepliesTo: z.ZodType<MessageWithAccountAndRepliesTo> =
   zMessageWithDiscordAccount.extend({
     referencedMessage: z.lazy(() => zMessageWithDiscordAccount.nullable()),
+    solutionMessages: z.lazy(() => z.array(zMessageWithDiscordAccount)),
   });
 
 export const zFindMessagesByChannelId = z.object({
@@ -39,100 +41,102 @@ export const zFindMessagesByChannelId = z.object({
   limit: z.number().optional(),
 });
 
-export async function addRepliesToMessages(messages: Message[]) {
-  const replies = await elastic.bulkGetMessages(
-    messages.flatMap((m) => m.messageReference?.messageId ?? [])
-  );
-  const repliesLookup = new Map(replies.map((r) => [r.id, r]));
+export async function addReferenceToMessage(message: Message) {
+  return (await addReferencesToMessages([message]))[0];
+}
+
+export async function addReferencesToMessages(messages: Message[]) {
+  const replyIds = messages
+    .filter((m) => m.messageReference?.messageId)
+    .map((m) => m.messageReference?.messageId!);
+  const solutionIds = messages
+    .filter((m) => m.solutionIds.length > 0)
+    .flatMap((m) => m.solutionIds);
+  const refrencedMessages = await findManyMessages([...replyIds, ...solutionIds]);
+  const messageLookup = new Map(refrencedMessages.map((r) => [r.id, r]));
   return messages.map((m) => ({
     ...m,
     referencedMessage: m.messageReference?.messageId
-      ? repliesLookup.get(m.messageReference?.messageId)
+      ? messageLookup.get(m.messageReference?.messageId)
       : null,
+    solutionMessages: m.solutionIds.map((id) => messageLookup.get(id)).filter(Boolean) as Message[],
   }));
 }
 
-export type MessageWithReply = Awaited<ReturnType<typeof addRepliesToMessages>>[number];
-
-export function isMessageWithReply(
-  message: Message | MessageWithReply
-): message is MessageWithReply {
-  return "referencedMessage" in message;
+export async function addAuthorToMessage(
+  message: Awaited<ReturnType<typeof addReferencesToMessages>>[number]
+) {
+  return (await addAuthorsToMessages([message]))[0] ?? null;
 }
 
-async function idk({
-  authorIds,
-  authorServerIds,
-}: {
-  authorIds: string[];
-  authorServerIds: string[];
-}) {
-  const authors = await prisma.discordAccount.findMany({
-    where: {
-      id: {
-        in: authorIds,
-      },
-    },
-    include: {
-      userServerSettings: {
-        where: {
-          serverId: {
-            in: authorServerIds,
-          },
-        },
-      },
-    },
+export async function addAuthorsToMessages(
+  messages: Awaited<ReturnType<typeof addReferencesToMessages>>
+): Promise<MessageWithAccountAndRepliesTo[]> {
+  if (messages.length === 0) {
+    return [];
+  }
+  const authorIds = new Set(messages.map((m) => m.authorId));
+  const authorServers = new Set(messages.map((m) => m.serverId));
+  const solutionAuthorIds = new Set(
+    messages.flatMap((m) => m.solutionMessages.map((s) => s.authorId))
+  );
+  const solutionServerIds = new Set(
+    messages.flatMap((m) => m.solutionMessages.map((s) => s.serverId))
+  );
+  const referencedAuthorIds = new Set(
+    messages.flatMap((m) => (m.referencedMessage ? [m.referencedMessage.authorId] : []))
+  );
+  const referencedServerIds = new Set(
+    messages.flatMap((m) => (m.referencedMessage ? [m.referencedMessage.serverId] : []))
+  );
+  const allAuthorIds = new Set([...authorIds, ...solutionAuthorIds, ...referencedAuthorIds]);
+  const allServerIds = new Set([...authorServers, ...solutionServerIds, ...referencedServerIds]);
+  const authors = await findManyDiscordAccountsWithUserServerSettings({
+    authorIds: Array.from(allAuthorIds),
+    authorServerIds: Array.from(allServerIds),
   });
-  const toAuthorServerSettingsLookupKey = (discordId: string, serverId: string) =>
-    `${discordId}-${serverId}`;
-
   const authorServerSettingsLookup = new Map(
-    authors.flatMap((a) =>
-      a.userServerSettings.map((uss) => [
-        toAuthorServerSettingsLookupKey(uss.userId, uss.serverId),
-        addFlagsToUserServerSettings(uss),
-      ])
-    )
+    authors.flatMap((a) => a.userServerSettings.map((uss) => [`${a.id}-${uss.serverId}`, uss]))
   );
   const authorLookup = new Map(authors.map((a) => [a.id, a]));
 
-  const addAuthorToMessage = (m: Message): MessageWithDiscordAccount => ({
-    ...m,
-    author: zDiscordAccountPublic.parse(authorLookup.get(m.authorId)!),
-    public:
-      authorServerSettingsLookup.get(toAuthorServerSettingsLookupKey(m.authorId, m.serverId))?.flags
-        .canPubliclyDisplayMessages ?? false,
-  });
-  return { authorLookup, addAuthorToMessage };
-}
+  const makeMessageWithAuthor = (message: Message) => {
+    const author = authorLookup.get(message.authorId);
+    const authorServerSettings = authorServerSettingsLookup.get(
+      `${message.authorId}-${message.serverId}`
+    );
+    if (!author) {
+      return null;
+    }
+    return {
+      ...omit(message, "authorId"),
+      author,
+      public: authorServerSettings ? authorServerSettings.flags.canPubliclyDisplayMessages : false,
+    };
+  };
 
-export async function addAuthorsToMessages<T extends Message>(messages: T[]) {
-  if (messages.length === 0) {
-    return [];
+  const fullMessages: MessageWithAccountAndRepliesTo[] = [];
+  for (const message of messages) {
+    const author = authorLookup.get(message.authorId);
+    if (!author) {
+      continue;
+    }
+    const msgWithAuthor = makeMessageWithAuthor(message);
+    if (!msgWithAuthor) {
+      continue;
+    }
+    const fullMessage: MessageWithAccountAndRepliesTo = {
+      ...makeMessageWithAuthor(message)!,
+      referencedMessage: message.referencedMessage
+        ? makeMessageWithAuthor(message.referencedMessage)
+        : null,
+      solutionMessages: message.solutionMessages
+        .map((m) => makeMessageWithAuthor(m))
+        .filter(Boolean),
+    };
+    fullMessages.push(fullMessage);
   }
-  const authorIds = messages.map((m) => m.authorId);
-  const authorServerIds = messages.map((m) => m.serverId);
-  const { authorLookup, addAuthorToMessage } = await idk({ authorIds, authorServerIds });
-  return messages.filter((m) => authorLookup.has(m.authorId)).map(addAuthorToMessage);
-}
-
-export async function addAuthorsToMessagesWithReplies<T extends MessageWithReply>(messages: T[]) {
-  if (messages.length === 0) {
-    return [];
-  }
-  const authorIds = messages
-    .map((m) => (m.referencedMessage ? [m.authorId, m.referencedMessage.authorId] : [m.authorId]))
-    .flat();
-  const authorServerIds = messages
-    .map((m) => (m.referencedMessage ? [m.serverId, m.referencedMessage.serverId] : [m.serverId]))
-    .flat();
-  const { authorLookup, addAuthorToMessage } = await idk({ authorIds, authorServerIds });
-  return messages
-    .filter((m) => authorLookup.has(m.authorId))
-    .map((m) => ({
-      ...addAuthorToMessage(m),
-      referencedMessage: m.referencedMessage ? addAuthorToMessage(m.referencedMessage) : null,
-    }));
+  return fullMessages;
 }
 
 export const CANNOT_UPSERT_MESSAGE_FOR_IGNORED_ACCOUNT_MESSAGE =
@@ -141,32 +145,15 @@ export const CANNOT_UPSERT_MESSAGE_FOR_USER_WITH_MESSAGE_INDEXING_DISABLED_MESSA
   "Message author has disabled message indexing, cannot upsert message";
 
 export async function findMessageById(id: string) {
-  const msg = await elastic.getMessage(id);
-  if (!msg) {
-    return null;
-  }
-  const msgWithReplies = await addRepliesToMessages([msg]);
-  const msgWithAuthorAndReplies = await addAuthorsToMessagesWithReplies(msgWithReplies);
-  return msgWithAuthorAndReplies[0] ?? null;
+  return elastic.getMessage(id);
 }
 
 export async function findMessagesByChannelId(input: z.infer<typeof zFindMessagesByChannelId>) {
-  const messages = await elastic.bulkGetMessagesByChannelId(
-    input.channelId,
-    input.after,
-    input.limit
-  );
-  if (messages.length === 0) {
-    return [];
-  }
-  const withReplies = await addRepliesToMessages(messages);
-  return addAuthorsToMessagesWithReplies(withReplies);
+  return elastic.bulkGetMessagesByChannelId(input.channelId, input.after, input.limit);
 }
 
 export async function findManyMessages(ids: string[]) {
-  const allMessages = await elastic.bulkGetMessages(ids);
-  const withReplies = await addRepliesToMessages(allMessages);
-  return addAuthorsToMessagesWithReplies(withReplies);
+  return elastic.bulkGetMessages(ids);
 }
 
 export async function updateMessage(data: z.infer<typeof zMessage>) {
@@ -242,38 +229,3 @@ export type SearchResult = {
   server: Server;
   thread?: Channel;
 };
-
-export async function searchMessages(options: MessageSearchOptions): Promise<SearchResult[]> {
-  const searchResults = await elastic.searchMessages(options);
-  const messages = searchResults.map((r) => r._source);
-  // Fetch all channels, servers, threads, and solutions
-  const channelIds = messages.map((m) => m.channelId);
-  const serverIds = messages.map((m) => m.serverId);
-  const childThreads = messages.filter((m) => m.childThread).map((m) => m.childThread!);
-  const solutionIds = messages.map((m) => m.solutionIds).flat();
-  const [channels, servers, solutions] = await Promise.all([
-    findManyChannelsById([...channelIds, ...childThreads]),
-    findManyServersById(serverIds),
-    findManyMessages(solutionIds),
-  ]);
-  const channelLookup = new Map(channels.map((c) => [c.id, c]));
-  const serverLookup = new Map(servers.map((s) => [s.id, s]));
-  const solutionLookup = new Map(solutions.map((s) => [s.id, s]));
-  const resultsWithData = searchResults.map((r) => {
-    const message = r._source;
-    const channel = channelLookup.get(message.channelId);
-    const server = serverLookup.get(message.serverId);
-    const thread = channelLookup.get(message.childThread);
-    const solution = solutionLookup.get(message.solutionIds[0]);
-    return {
-      ...r,
-      _source: {
-        ...message,
-        channel,
-        server,
-        thread,
-        solution,
-      },
-    };
-  });
-}

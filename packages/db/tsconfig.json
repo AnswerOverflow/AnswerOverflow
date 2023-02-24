@@ -11,8 +11,7 @@
     "src",
     "vitest.config.ts",
     "scripts",
-    "../prisma-types/src/zod-schemas.ts",
-    "../prisma-types/src/bitfield.ts"
+    "../../reset.d.ts"
   ],
   "ts-node": {
     // these options are overrides used only by ts-node
