@@ -21,18 +21,18 @@ export const zMessageWithDiscordAccount = zMessage
   })
   .omit({ authorId: true });
 
-export type MessageWithAccountAndRepliesTo = z.infer<typeof zMessageWithDiscordAccount> & {
+export type MessageFull = z.infer<typeof zMessageWithDiscordAccount> & {
   referencedMessage: MessageWithDiscordAccount | null;
   solutionMessages: MessageWithDiscordAccount[] | null;
 };
 
-export function isMessageWithAccountAndRepliesTo(
-  message: MessageWithDiscordAccount | MessageWithAccountAndRepliesTo
-): message is MessageWithAccountAndRepliesTo {
+export function isMessageFull(
+  message: MessageWithDiscordAccount | MessageFull
+): message is MessageFull {
   return "referencedMessage" in message && "solutionMessages" in message;
 }
 
-export const zMessageWithAccountAndRepliesTo: z.ZodType<MessageWithAccountAndRepliesTo> =
+export const zMessageWithAccountAndRepliesTo: z.ZodType<MessageFull> =
   zMessageWithDiscordAccount.extend({
     referencedMessage: z.lazy(() => zMessageWithDiscordAccount.nullable()),
     solutionMessages: z.lazy(() => z.array(zMessageWithDiscordAccount)),
@@ -62,7 +62,7 @@ export async function addReferencesToMessages(messages: Message[]) {
     referencedMessage: m.messageReference?.messageId
       ? messageLookup.get(m.messageReference?.messageId)
       : null,
-    solutionMessages: m.solutionIds.map((id) => messageLookup.get(id)).filter(Boolean) as Message[],
+    solutionMessages: m.solutionIds.map((id) => messageLookup.get(id)).filter(Boolean),
   }));
 }
 
@@ -74,7 +74,7 @@ export async function addAuthorToMessage(
 
 export async function addAuthorsToMessages(
   messages: Awaited<ReturnType<typeof addReferencesToMessages>>
-): Promise<MessageWithAccountAndRepliesTo[]> {
+): Promise<MessageFull[]> {
   if (messages.length === 0) {
     return [];
   }
@@ -118,7 +118,7 @@ export async function addAuthorsToMessages(
     };
   };
 
-  const fullMessages: MessageWithAccountAndRepliesTo[] = [];
+  const fullMessages: MessageFull[] = [];
   for (const message of messages) {
     const author = authorLookup.get(message.authorId);
     if (!author) {
@@ -128,7 +128,7 @@ export async function addAuthorsToMessages(
     if (!msgWithAuthor) {
       continue;
     }
-    const fullMessage: MessageWithAccountAndRepliesTo = {
+    const fullMessage: MessageFull = {
       ...makeMessageWithAuthor(message)!,
       referencedMessage: message.referencedMessage
         ? makeMessageWithAuthor(message.referencedMessage)
@@ -225,7 +225,7 @@ export async function deleteManyMessagesByUserId(userId: string) {
 }
 
 export type SearchResult = {
-  message: MessageWithAccountAndRepliesTo;
+  message: MessageFull;
   score: number;
   channel: Channel;
   server: Server;

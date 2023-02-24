@@ -8,6 +8,7 @@ let msg2: Message;
 beforeEach(() => {
   msg1 = {
     id: getRandomId(),
+    parentChannelId: null,
     channelId: getRandomId(),
     content: "hello",
     images: [],
@@ -173,7 +174,7 @@ describe("ElasticSearch", () => {
       });
       expect(searchResults).toBeDefined();
       expect(searchResults).toHaveLength(1);
-      expect(searchResults.find((msg) => msg.content === content)).toBeDefined();
+      expect(searchResults.find((msg) => msg._source.content === content)).toBeDefined();
     });
     it("should search for messages by server id", async () => {
       const content = getRandomId();
@@ -193,7 +194,7 @@ describe("ElasticSearch", () => {
       });
       expect(searchResults).toBeDefined();
       expect(searchResults).toHaveLength(1);
-      expect(searchResults.find((msg) => msg.content === content)).toBeDefined();
+      expect(searchResults.find((msg) => msg._source.content === content)).toBeDefined();
     });
     it("should return an empty array if no messages are found", async () => {
       const searchResults = await elastic.searchMessages({

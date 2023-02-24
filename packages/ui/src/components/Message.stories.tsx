@@ -1,6 +1,7 @@
 import type { ComponentStory, Meta } from "@storybook/react";
 import { MessageProps, Message } from "./Message";
 import { mockDiscordAccount } from "~ui/test/props";
+import type { MessageWithDiscordAccount } from "@answeroverflow/db";
 export default {
   component: Message,
   parameters: {
@@ -26,6 +27,7 @@ const defaultMessage: MessageProps = {
       id: "0",
       avatar: null,
     },
+    parentChannelId: null,
     public: true,
     images: [],
     channelId: "0",
@@ -33,7 +35,7 @@ const defaultMessage: MessageProps = {
     solutionIds: [],
     childThread: null,
     messageReference: null,
-  },
+  } satisfies MessageWithDiscordAccount,
 };
 
 export const Primary = Template.bind({});

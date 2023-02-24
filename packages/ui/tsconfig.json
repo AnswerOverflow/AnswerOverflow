@@ -3,7 +3,9 @@
     "target": "es2017",
     "baseUrl": "../../",
     "preserveSymlinks": true,
-    "types": ["jest"]
+    "types": [
+      "jest"
+    ]
   },
   "extends": "@answeroverflow/tsconfig/nextjs.json",
   "include": [
@@ -14,5 +16,6 @@
     "**/*.tsx",
     "**/*.cjs",
     "**/*.mjs",
+    "../../reset.d.ts"
   ],
 }

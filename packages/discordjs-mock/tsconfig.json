@@ -15,6 +15,7 @@
   "include": [
     "src",
     "jest.config.ts",
-    "index.ts"
+    "index.ts",
+    "../../reset.d.ts"
   ],
 }

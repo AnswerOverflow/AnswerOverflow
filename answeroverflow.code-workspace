@@ -75,6 +75,7 @@
       // "dist/": true,
       // "coverage/": true,
     },
+    // "typescript.tsserver.experimental.enableProjectDiagnostics": true,
     "vitest.enable": true,
     "vitest.disabledWorkspaceFolders": [
       "root",

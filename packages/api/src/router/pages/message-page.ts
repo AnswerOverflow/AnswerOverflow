@@ -1,15 +1,12 @@
 import { z } from "zod";
-import { router, publicProcedure } from "~api/router/trpc";
+import { router, withUserServersProcedure } from "~api/router/trpc";
 import {
   addAuthorsToMessages,
   addReferencesToMessages,
-  ChannelWithFlags,
   findChannelById,
   findMessageById,
   findMessagesByChannelId,
   findServerById,
-  Message,
-  MessageWithDiscordAccount,
 } from "@answeroverflow/db";
 import { findOrThrowNotFound } from "~api/utils/operations";
 import {
@@ -17,66 +14,85 @@ import {
   stripPrivateMessageData,
   stripPrivateServerData,
 } from "~api/utils/permissions";
+import { ChannelType } from "discord.js";
 
 export const messagePageRouter = router({
-  byId: publicProcedure.input(z.string()).query(async ({ input, ctx }) => {
-    // fetch the root message
-    const rootMessage = await findOrThrowNotFound(
+  byId: withUserServersProcedure.input(z.string()).query(async ({ input, ctx }) => {
+    // This is the message we're starting from
+    const targetMessage = await findOrThrowNotFound(
       () => findMessageById(input),
       "Root message not found"
     );
 
+    // Declare as const to make Typescript not yell at us when used in arrow functions
+    const childThreadId = targetMessage.childThread;
+    const parentChannelId = targetMessage.parentChannelId;
+    const isThreadWithRootMessageInParentChannel = childThreadId !== null;
+    const isMessageInThread = parentChannelId !== null;
     // TODO: These should maybe be a different error code
-    // fetch the channel and the server the message is in
-    const parentChannelOrThreadFetch = await findOrThrowNotFound(
-      () => findChannelById(rootMessage.channelId),
-      "Channel for message not found"
-    );
-    const serverFetch = await findOrThrowNotFound(
-      () => findServerById(parentChannelOrThreadFetch.serverId),
+
+    const threadFetch = isThreadWithRootMessageInParentChannel
+      ? findOrThrowNotFound(() => findChannelById(childThreadId), "Thread for message not found")
+      : isMessageInThread
+      ? findOrThrowNotFound(
+          () => findChannelById(parentChannelId),
+          "Parent channel for message not found"
+        )
+      : undefined;
+
+    const serverFetch = findOrThrowNotFound(
+      () => findServerById(targetMessage.serverId),
       "Server for message not found"
     );
+    const parentChannelFetch = parentChannelId
+      ? findOrThrowNotFound(
+          () => findChannelById(parentChannelId),
+          "Parent channel for message not found"
+        )
+      : findOrThrowNotFound(
+          () => findChannelById(targetMessage.channelId),
+          "Channel for message not found"
+        );
 
-    const [threadOrParentChannel, server] = await Promise.all([
-      parentChannelOrThreadFetch,
+    const messageFetch = isThreadWithRootMessageInParentChannel
+      ? findMessagesByChannelId({
+          channelId: childThreadId,
+        })
+      : isMessageInThread
+      ? findMessagesByChannelId({
+          channelId: targetMessage.channelId,
+        })
+      : findMessagesByChannelId({
+          channelId: targetMessage.channelId,
+          after: targetMessage.id,
+          limit: 20,
+        });
+
+    const [thread, server, channel, messages, rootMessage] = await Promise.all([
+      threadFetch,
       serverFetch,
+      parentChannelFetch,
+      messageFetch,
+      isMessageInThread ? findMessageById(targetMessage.id) : undefined,
     ]);
 
-    let thread: ChannelWithFlags | undefined = undefined;
-    let parentChannel: ChannelWithFlags = threadOrParentChannel;
-    let messages: Message[];
-
-    if (threadOrParentChannel.parentId) {
-      thread = threadOrParentChannel;
-      const parentId = threadOrParentChannel.parentId;
-      const parentChannelFetch = findOrThrowNotFound(
-        () => findChannelById(parentId),
-        "Parent channel for thread not found"
-      );
-
-      const messageFetch = findMessagesByChannelId({
-        channelId: thread.id,
-      });
-      [parentChannel, messages] = await Promise.all([parentChannelFetch, messageFetch]);
-    } else {
-      messages = await findMessagesByChannelId({
-        channelId: parentChannel.id,
-        after: rootMessage.id,
-        limit: 20,
-      });
-    }
-
     // We've collected all of the data, now we need to strip out the private info
-    const messagesWithRefs = await addReferencesToMessages(messages);
+    const messagesWithRefs = await addReferencesToMessages(
+      isThreadWithRootMessageInParentChannel
+        ? [targetMessage, ...messages]
+        : isMessageInThread && rootMessage && channel.type !== ChannelType.GuildForum
+        ? [rootMessage, ...messages]
+        : messages
+    );
     const messagesWithDiscordAccounts = await addAuthorsToMessages(messagesWithRefs);
     return {
       messages: messagesWithDiscordAccounts.map((message) =>
         stripPrivateMessageData(message, ctx.userServers)
       ),
-      parentChannel: stripPrivateChannelData(parentChannel),
+      parentChannel: stripPrivateChannelData(channel),
       server: stripPrivateServerData(server),
       thread: thread ? stripPrivateChannelData(thread) : undefined,
     };
   }),
-  search: publicProcedure.input(z.string()).query(async ({ input, ctx }) => {}),
+  search: withUserServersProcedure.input(z.string()).query(async () => {}),
 });

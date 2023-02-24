@@ -28,7 +28,8 @@
     "test:watch": "turbo run test:watch",
     "cloc": "npx cloc $(git ls-files)",
     "cloc:no-tests": "npx cloc $(git ls-files | grep -v .test.ts.*$)",
-    "cloc:only-tests": "npx cloc $(git ls-files | grep .test.ts.*$)"
+    "cloc:only-tests": "npx cloc $(git ls-files | grep .test.ts.*$)",
+    "pr-check": "yarn lint && yarn build && yarn test"
   },
   "devDependencies": {
     "@answeroverflow/eslint-config-custom": "*",

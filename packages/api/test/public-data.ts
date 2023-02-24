@@ -2,9 +2,9 @@ import {
   DiscordAccount,
   getDefaultDiscordAccount,
   getDefaultMessage,
-  isMessageWithAccountAndRepliesTo,
+  isMessageFull,
   Message,
-  MessageWithAccountAndRepliesTo,
+  MessageFull,
   MessageWithDiscordAccount,
   Server,
 } from "@answeroverflow/db";
@@ -38,20 +38,23 @@ export function toMessageWithAccountAndRepliesTo({
   referenced = undefined,
   author,
   publicMessage,
+  solutions = [],
 }: ToMessageWithDiscordAccount & {
   referenced?: MessageWithDiscordAccount;
+  solutions?: MessageWithDiscordAccount[];
 }) {
-  const publicMsg: MessageWithAccountAndRepliesTo = {
+  const publicMsg: MessageFull = {
     ...toMessageWithDiscordAccount({ message, author, publicMessage }),
+    solutionMessages: solutions,
     referencedMessage: referenced ?? null,
   };
   return publicMsg;
 }
 
 export function toPrivateMessageWithStrippedData(
-  message: MessageWithDiscordAccount | MessageWithAccountAndRepliesTo
-): MessageWithDiscordAccount | MessageWithAccountAndRepliesTo {
-  const isReply = !isMessageWithAccountAndRepliesTo(message);
+  message: MessageWithDiscordAccount | MessageFull
+): MessageWithDiscordAccount | MessageFull {
+  const isReply = !isMessageFull(message);
 
   const author = getDefaultDiscordAccount({
     id: "0",

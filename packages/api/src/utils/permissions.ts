@@ -5,8 +5,8 @@ import {
   findIgnoredDiscordAccountById,
   getDefaultDiscordAccount,
   getDefaultMessage,
-  isMessageWithAccountAndRepliesTo,
-  MessageWithAccountAndRepliesTo,
+  isMessageFull,
+  MessageFull,
   MessageWithDiscordAccount,
   ServerWithFlags,
   zChannelPublic,
@@ -169,17 +169,17 @@ export function assertCanEditServerBotOnly(ctx: Context, serverId: string) {
 
 // Kind of ugly having it take in two different types, but it's the easiest way to do it
 export function stripPrivateMessageData(
-  message: MessageWithAccountAndRepliesTo | MessageWithDiscordAccount,
+  message: MessageFull | MessageWithDiscordAccount,
   userServers: DiscordServer[] | null = null
-): MessageWithAccountAndRepliesTo | MessageWithDiscordAccount {
-  const isReply = !isMessageWithAccountAndRepliesTo(message);
+): MessageFull | MessageWithDiscordAccount {
+  const isPartialMessage = !isMessageFull(message);
   // If it is only a reply and is public, then just return
-  if (isReply && message.public) {
+  if (isPartialMessage && message.public) {
     return message;
   }
   // If it is not a reply, is public, and has no referenced message, then just return
   // If it is not a reply, is public, and the referenced message is public, then just return
-  if (!isReply && message.public) {
+  if (!isPartialMessage && message.public) {
     return {
       ...message,
       referencedMessage: message.referencedMessage
@@ -209,7 +209,7 @@ export function stripPrivateMessageData(
 
   // If it is a reply, then we know that is it private so we can just return
   // If there is no referenced message, then we can just return
-  if (isReply) {
+  if (isPartialMessage) {
     return {
       ...defaultMessage,
       author: defaultAuthor,

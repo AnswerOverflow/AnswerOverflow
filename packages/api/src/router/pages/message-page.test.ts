@@ -95,12 +95,15 @@ describe("Message Results", () => {
       threadMessages = [
         mockMessage(server, thread, author, {
           id: startId,
+          parentChannelId: thread.parentId,
         }),
         mockMessage(server, thread, author, {
           id: nextId,
+          parentChannelId: thread.parentId,
         }),
         mockMessage(server, thread, author, {
           id: lastId,
+          parentChannelId: thread.parentId,
         }),
       ];
 
