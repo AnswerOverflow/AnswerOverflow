@@ -1,20 +1,20 @@
-import type { Meta, StoryFn } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
-import { GooglePage, GooglePageProps } from "./GooglePage/GooglePage";
-export default {
+import { GooglePage } from "./GooglePage/GooglePage";
+const meta = {
   component: GooglePage,
-} as Meta;
+} as Meta<typeof GooglePage>;
 
-//👇 We create a “template” of how args map to rendering
-const Template: StoryFn<typeof GooglePage> = (props: GooglePageProps) => <GooglePage {...props} />;
+export default meta;
 
-//👇 Each story then reuses that template
+type Story = StoryObj<typeof meta>;
 
-export const Primary = Template.bind({});
-Primary.args = {
-  result: {
-    url: "https://www.answeroverflow.com > ...",
-    title: "How do I index my discord channels into google?",
-    description: `How do I index my discord channels into google? How do I index my discord channels into google? How do I index my discord channels into google?`,
+export const Primary: Story = {
+  args: {
+    result: {
+      url: "https://www.answeroverflow.com > ...",
+      title: "How do I index my discord channels into google?",
+      description: `How do I index my discord channels into google? How do I index my discord channels into google? How do I index my discord channels into google?`,
+    },
   },
 };

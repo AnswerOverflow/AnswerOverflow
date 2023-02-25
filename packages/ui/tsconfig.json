@@ -3,12 +3,15 @@
     "target": "es2017",
     "baseUrl": "../../",
     "preserveSymlinks": true,
-    "types": ["jest"]
+    "types": [
+      "jest"
+    ]
   },
   "extends": "@answeroverflow/tsconfig/nextjs.json",
   "include": [
     "next-env.d.ts",
     "**/*.ts",
+    ".storybook/*",
     "test",
     "src",
     "**/*.tsx",
