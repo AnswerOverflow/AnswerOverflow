@@ -1,16 +1,11 @@
-import type { Meta, StoryFn, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { mockDiscordAccount } from "~ui/test/props";
-import { DiscordAvatar, DiscordAvatarProps } from "./DiscordAvatar";
+import { DiscordAvatar } from "./DiscordAvatar";
 const meta = {
   component: DiscordAvatar,
-} satisfies Meta<typeof DiscordAvatar>;
+} as Meta<typeof DiscordAvatar>;
 
 export default meta;
-
-//👇 We create a “template” of how args map to rendering
-const Template: StoryFn<typeof DiscordAvatar> = (args: DiscordAvatarProps) => (
-  <DiscordAvatar {...args} />
-);
 
 type Story = StoryObj<typeof meta>;
 
@@ -22,11 +17,12 @@ export const Primary: Story = {
   },
 };
 
-export const WithImage = Template.bind({});
-WithImage.args = {
-  size: "md",
-  user: mockDiscordAccount({
-    avatar: "7716e305f7de26045526d9da6eef2dab",
-    id: "523949187663134754",
-  }),
+export const WithImage: Story = {
+  args: {
+    size: "md",
+    user: mockDiscordAccount({
+      avatar: "7716e305f7de26045526d9da6eef2dab",
+      id: "523949187663134754",
+    }),
+  },
 };
