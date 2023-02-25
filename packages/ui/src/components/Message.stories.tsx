@@ -1,4 +1,4 @@
-import type { ComponentStory, Meta } from "@storybook/react";
+import type { StoryFn, Meta } from "@storybook/react";
 import { MessageProps, Message } from "./Message";
 import { mockDiscordAccount } from "~ui/test/props";
 export default {
@@ -11,7 +11,7 @@ export default {
 } as Meta;
 
 //👇 We create a “template” of how args map to rendering
-const Template: ComponentStory<typeof Message> = (args: MessageProps) => <Message {...args} />;
+const Template: StoryFn<typeof Message> = (args: MessageProps) => <Message {...args} />;
 
 const loremIpsum =
   "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quidem fugit iure delectus tempore! Nam nihil animi nemo nisi eligendi veniam obcaecati accusantium, sunt maiores tenetur illum saepe incidunt beatae hic.";

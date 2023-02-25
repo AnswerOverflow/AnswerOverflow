@@ -1,4 +1,4 @@
-import type { ComponentStory, Meta } from "@storybook/react";
+import type { StoryFn, Meta } from "@storybook/react";
 
 import { SearchBar, SearchBarProps } from "./SearchBar";
 export default {
@@ -6,9 +6,7 @@ export default {
 } as Meta;
 
 //👇 We create a “template” of how args map to rendering
-const Template: ComponentStory<typeof SearchBar> = (args: SearchBarProps) => (
-  <SearchBar {...args} />
-);
+const Template: StoryFn<typeof SearchBar> = (args: SearchBarProps) => <SearchBar {...args} />;
 
 //👇 Each story then reuses that template
 const defaultMessage: SearchBarProps = {
