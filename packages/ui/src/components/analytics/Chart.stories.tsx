@@ -1,8 +1,8 @@
 import React from "react";
-import type { Meta, StoryFn } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Chart, ChartProps } from "./Chart";
-export default {
+const meta = {
   component: Chart,
   // For the moment, we need to disable a11y checks for the charts - failing a11y checks
   // We need to investigate this further in the future
@@ -30,21 +30,12 @@ export default {
       defaultValue: true,
     },
   },
-} as Meta;
+} as Meta<typeof Chart>;
 
-const Template: StoryFn<typeof Chart> = (props: ChartProps) => (
-  <div className="h-40">
-    <Chart {...props} />
-  </div>
-);
+export default meta;
 
-export const LineChart = Template.bind({});
+type Story = StoryObj<typeof meta>;
 
-LineChart.parameters = {
-  a11y: {
-    disable: true,
-  },
-};
 const lineProps: ChartProps = {
   type: "line",
   showGrid: false,
@@ -103,14 +94,22 @@ const lineProps: ChartProps = {
   ],
 };
 
-LineChart.args = lineProps;
-
-export const BarChart = Template.bind({});
-BarChart.parameters = {
-  a11y: {
-    disable: true,
+export const LineChart: Story = {
+  render: (props: ChartProps) => (
+    <div className="h-40">
+      <Chart {...props} />
+    </div>
+  ),
+  parameters: {
+    a11y: {
+      disable: true,
+    },
   },
+  // todo: fix this
+  // @ts-ignore
+  args: lineProps,
 };
+
 const barProps: ChartProps = {
   type: "bar",
   showGrid: false,
@@ -161,4 +160,19 @@ const barProps: ChartProps = {
   ],
 };
 
-BarChart.args = barProps;
+export const BarChart: Story = {
+  render: (props: ChartProps) => (
+    <div className="h-40">
+      <Chart {...props} />
+    </div>
+  ),
+
+  parameters: {
+    a11y: {
+      disable: true,
+    },
+  },
+  // todo: fix this
+  // @ts-ignore
+  args: barProps,
+};

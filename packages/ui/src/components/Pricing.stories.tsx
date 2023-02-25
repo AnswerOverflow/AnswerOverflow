@@ -1,13 +1,13 @@
-import type { ComponentStory, Meta } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Pricing } from "./Pricing";
-export default {
+const meta = {
   component: Pricing,
 } as Meta;
 
-//👇 We create a “template” of how args map to rendering
-const Template: ComponentStory<typeof Pricing> = () => <Pricing />;
+export default meta;
 
-//👇 Each story then reuses that template
-
-export const Primary = Template.bind({});
+type Story = StoryObj<typeof meta>;
+export const Primary: Story = {
+  args: {},
+};

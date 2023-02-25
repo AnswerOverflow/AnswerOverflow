@@ -1,6 +1,6 @@
-import type { Meta, StoryFn } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { StatsCard, StatsCardProps } from "./StatsCard";
-export default {
+const meta = {
   component: StatsCard,
   argTypes: {
     changeType: {
@@ -8,13 +8,11 @@ export default {
       options: ["increase", "decrease"],
     },
   },
-} as Meta;
+} as Meta<typeof StatsCard>;
 
-//👇 We create a “template” of how args map to rendering
-const Template: StoryFn<typeof StatsCard> = (args: StatsCardProps) => <StatsCard {...args} />;
+export default meta;
 
-//👇 Each story then reuses that template
-export const Primary = Template.bind({});
+type Story = StoryObj<typeof meta>;
 
 const primaryArgs: StatsCardProps = {
   title: "Questions asked",
@@ -24,5 +22,6 @@ const primaryArgs: StatsCardProps = {
   changeCount: "12",
   changeDuration: "15 days",
 };
-
-Primary.args = primaryArgs;
+export const Primary: Story = {
+  args: primaryArgs,
+};

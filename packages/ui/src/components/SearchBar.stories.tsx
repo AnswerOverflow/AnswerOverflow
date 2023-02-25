@@ -1,19 +1,19 @@
-import type { ComponentStory, Meta } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { SearchBar, SearchBarProps } from "./SearchBar";
-export default {
+const meta = {
   component: SearchBar,
-} as Meta;
+} as Meta<typeof SearchBar>;
 
-//👇 We create a “template” of how args map to rendering
-const Template: ComponentStory<typeof SearchBar> = (args: SearchBarProps) => (
-  <SearchBar {...args} />
-);
+export default meta;
+
+type Story = StoryObj<typeof meta>;
 
 //👇 Each story then reuses that template
 const defaultMessage: SearchBarProps = {
   placeholder: "Search for anything",
 };
 
-export const Primary = Template.bind({});
-Primary.args = defaultMessage;
+export const Primary: Story = {
+  args: defaultMessage,
+};
