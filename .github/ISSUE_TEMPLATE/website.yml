@@ -1,6 +1,6 @@
 name: Website Page
 description: Create an feature request for a website page
-title: "[Web] [/URL]:"
+title: "[Web]:"
 labels: ["🖥️website"]
 body:
   - type: dropdown
