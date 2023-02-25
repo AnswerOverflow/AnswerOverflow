@@ -1,7 +1,7 @@
-import type { Meta, StoryFn } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { Button, ButtonProps } from "./Button";
 
-export default {
+const meta = {
   component: Button,
   argTypes: {
     color: {
@@ -21,14 +21,15 @@ export default {
   },
 } as Meta<typeof Button>;
 
-const Template: StoryFn<typeof Button> = (props: ButtonProps) => (
-  <Button color={props.color} disabled={props.disabled} onClick={props.onClick} type={props.type}>
-    Primary
-  </Button>
-);
+export default meta;
 
-export const ButtonPrimary = Template.bind({});
-ButtonPrimary.args = {
-  type: "ghost",
-  color: "white",
+type Story = StoryObj<typeof meta>;
+
+export const ButtonPrimary: Story = {
+  render: (props: ButtonProps) => <Button {...props}>Primary</Button>,
+
+  args: {
+    type: "ghost",
+    color: "white",
+  },
 };

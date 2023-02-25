@@ -1,14 +1,13 @@
-import type { StoryFn, Meta } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Navbar } from "./Navbar";
-export default {
+const meta = {
   title: "Deprecated/Navbar",
   component: Navbar,
-} as Meta;
+} as Meta<typeof Navbar>;
 
-//👇 We create a “template” of how args map to rendering
-const Template: StoryFn<typeof Navbar> = () => <Navbar />;
+export default meta;
 
-//👇 Each story then reuses that template
+type Story = StoryObj<typeof meta>;
 
-export const Primary = Template.bind({});
+export const Primary: Story = {};
