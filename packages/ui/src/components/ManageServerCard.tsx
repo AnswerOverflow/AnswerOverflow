@@ -47,7 +47,7 @@ export function ManageServerCard({ server, role }: ManageServerCardProps) {
       <div className="col-span-1 col-start-2 row-span-1 row-start-3 flex">
         <div className="ml-auto">
           <Link href={`https://discord.gg/`} target={"Blank"} referrerPolicy="no-referrer">
-            <Button intent={"primary"} visualOnly>
+            <Button type="solid" color="black">
               Manage
             </Button>
           </Link>
