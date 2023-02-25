@@ -9,6 +9,7 @@ import {
   findServerById,
   getParentChannelOfMessage,
   getThreadIdOfMessage,
+  searchMessages,
 } from "@answeroverflow/db";
 import { findOrThrowNotFound } from "~api/utils/operations";
 import {
@@ -18,7 +19,7 @@ import {
 } from "~api/utils/permissions";
 import { TRPCError } from "@trpc/server";
 
-export const messagePageRouter = router({
+export const messagesRouter = router({
   /*
     Message page by ID
     Variants:
@@ -29,7 +30,7 @@ export const messagePageRouter = router({
       - Forum post from root message of post
       - Forum post from any other message in the post
   */
-  byId: withUserServersProcedure.input(z.string()).query(async ({ input, ctx }) => {
+  threadFromMessageId: withUserServersProcedure.input(z.string()).query(async ({ input, ctx }) => {
     // This is the message we're starting from
     const targetMessage = await findOrThrowNotFound(
       () => findMessageById(input),
@@ -95,5 +96,28 @@ export const messagePageRouter = router({
       thread: thread ? stripPrivateChannelData(thread) : undefined,
     };
   }),
-  search: withUserServersProcedure.input(z.string()).query(async () => {}),
+  search: withUserServersProcedure
+    .input(
+      z.object({
+        query: z.string(),
+        serverId: z.string().optional(),
+        channelId: z.string().optional(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const searchResults = await searchMessages({
+        query: input.query,
+        serverId: input.serverId,
+      });
+      const strippedSearchResults = searchResults.map(
+        ({ message, channel, server, thread, score }) => ({
+          message: stripPrivateMessageData(message, ctx.userServers),
+          channel: stripPrivateChannelData(channel),
+          server: stripPrivateServerData(server),
+          thread: thread ? stripPrivateChannelData(thread) : undefined,
+          score,
+        })
+      );
+      return strippedSearchResults;
+    }),
 });

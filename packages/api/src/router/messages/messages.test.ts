@@ -9,7 +9,7 @@ import {
   upsertManyMessages,
 } from "@answeroverflow/db";
 import { mockUnauthedCtx } from "~api/test/utils";
-import { messagePageRouter } from "./message-page";
+import { messagesRouter } from "./messages";
 import {
   pickPublicServerData,
   toMessageWithAccountAndRepliesTo,
@@ -30,7 +30,7 @@ import { ChannelType } from "discord-api-types/v10";
 let server: Server;
 let channel: Channel;
 let author: DiscordAccount;
-let unauthedMessagePageRouter: ReturnType<(typeof messagePageRouter)["createCaller"]>;
+let unauthedMessagePageRouter: ReturnType<(typeof messagesRouter)["createCaller"]>;
 
 beforeEach(async () => {
   server = mockServer();
@@ -41,12 +41,12 @@ beforeEach(async () => {
   await createChannel(channel);
   await createDiscordAccount(author);
   const unauthedCtx = await mockUnauthedCtx("web-client");
-  unauthedMessagePageRouter = messagePageRouter.createCaller(unauthedCtx);
+  unauthedMessagePageRouter = messagesRouter.createCaller(unauthedCtx);
 });
 
 describe("Message Results", () => {
   it("should 404 if the root message doesnt exists", async () => {
-    await expect(unauthedMessagePageRouter.byId(getRandomId())).rejects.toThrow(
+    await expect(unauthedMessagePageRouter.threadFromMessageId(getRandomId())).rejects.toThrow(
       "Target message not found"
     );
   });
@@ -61,7 +61,7 @@ describe("Message Results", () => {
       await upsertManyMessages([message, message2]);
     });
     it("should get messages for a text channel correctly", async () => {
-      const messages = await unauthedMessagePageRouter.byId(message.id);
+      const messages = await unauthedMessagePageRouter.threadFromMessageId(message.id);
       expect(messages).toMatchObject({
         messages: [
           toPrivateMessageWithStrippedData(
@@ -97,7 +97,7 @@ describe("Message Results", () => {
       });
       await createChannel(thread);
       await upsertManyMessages([message, message2]);
-      const pageData = await unauthedMessagePageRouter.byId(message.id);
+      const pageData = await unauthedMessagePageRouter.threadFromMessageId(message.id);
       expect(pageData.messages).toEqual([
         toPrivateMessageWithStrippedData(
           toMessageWithAccountAndRepliesTo({
@@ -130,7 +130,7 @@ describe("Message Results", () => {
       });
       await createChannel(thread);
       await upsertManyMessages([message, message2]);
-      const pageData = await unauthedMessagePageRouter.byId(message2.id);
+      const pageData = await unauthedMessagePageRouter.threadFromMessageId(message2.id);
       expect(pageData.messages).toEqual([
         toPrivateMessageWithStrippedData(
           toMessageWithAccountAndRepliesTo({
@@ -157,7 +157,7 @@ describe("Message Results", () => {
         id: randomSnowflakeLargerThan(message.id).toString(),
       });
       await upsertManyMessages([message, message2]);
-      const pageData = await unauthedMessagePageRouter.byId(message.id);
+      const pageData = await unauthedMessagePageRouter.threadFromMessageId(message.id);
       expect(pageData.messages).toEqual([
         toPrivateMessageWithStrippedData(
           toMessageWithAccountAndRepliesTo({
@@ -194,7 +194,7 @@ describe("Message Results", () => {
         parentChannelId: forumChannel.id,
       });
       await upsertManyMessages([message, message2]);
-      const pageData = await unauthedMessagePageRouter.byId(message.id);
+      const pageData = await unauthedMessagePageRouter.threadFromMessageId(message.id);
       expect(pageData.messages).toEqual([
         toPrivateMessageWithStrippedData(
           toMessageWithAccountAndRepliesTo({
@@ -231,7 +231,7 @@ describe("Message Results", () => {
         parentChannelId: forumChannel.id,
       });
       await upsertManyMessages([message, message2]);
-      const pageData = await unauthedMessagePageRouter.byId(message2.id);
+      const pageData = await unauthedMessagePageRouter.threadFromMessageId(message2.id);
       expect(pageData.messages).toEqual([
         toPrivateMessageWithStrippedData(
           toMessageWithAccountAndRepliesTo({
@@ -253,4 +253,12 @@ describe("Message Results", () => {
       expect(pageData.thread).toEqual(pickPublicChannelData(forumThread));
     });
   });
+});
+
+describe("Search Results", () => {
+  it("should fetch a public search result correctly", async () => {});
+  it("should not return a private search result if the user is not logged in", async () => {});
+  it("should return a private search result if the user is logged in", async () => {});
+  it("should fetch a result in a server correctly", async () => {});
+  it("should fetch a result in a channel correctly", async () => {});
 });

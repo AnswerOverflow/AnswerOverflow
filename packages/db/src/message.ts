@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Channel, Server } from "@answeroverflow/prisma-types";
+import type { ChannelWithFlags, ServerWithFlags } from "@answeroverflow/prisma-types";
 import { zDiscordAccountPublic } from "@answeroverflow/prisma-types";
 import { Message, elastic, zMessage, MessageSearchOptions } from "@answeroverflow/elastic-types";
 import { DBError } from "./utils/error";
@@ -227,9 +227,9 @@ export async function deleteManyMessagesByUserId(userId: string) {
 export type SearchResult = {
   message: MessageFull;
   score: number;
-  channel: Channel;
-  server: Server;
-  thread?: Channel;
+  channel: ChannelWithFlags;
+  server: ServerWithFlags;
+  thread?: ChannelWithFlags;
 };
 
 export async function searchMessages(opts: MessageSearchOptions) {
