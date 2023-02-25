@@ -5,13 +5,11 @@ export default {
   component: SearchBar,
 } as Meta;
 
-//👇 We create a “template” of how args map to rendering
-const Template: StoryFn<typeof SearchBar> = (args: SearchBarProps) => <SearchBar {...args} />;
-
 //👇 Each story then reuses that template
 const defaultMessage: SearchBarProps = {
   placeholder: "Search for anything",
 };
 
-export const Primary = Template.bind({});
-Primary.args = defaultMessage;
+export const Primary = {
+  args: defaultMessage,
+};

@@ -21,14 +21,15 @@ export default {
   },
 } as Meta<typeof Button>;
 
-const Template: StoryFn<typeof Button> = (props: ButtonProps) => (
-  <Button color={props.color} disabled={props.disabled} onClick={props.onClick} type={props.type}>
-    Primary
-  </Button>
-);
+export const ButtonPrimary = {
+  render: (props: ButtonProps) => (
+    <Button color={props.color} disabled={props.disabled} onClick={props.onClick} type={props.type}>
+      Primary
+    </Button>
+  ),
 
-export const ButtonPrimary = Template.bind({});
-ButtonPrimary.args = {
-  type: "ghost",
-  color: "white",
+  args: {
+    type: "ghost",
+    color: "white",
+  },
 };

@@ -5,11 +5,6 @@ export default {
   component: ServerInvite,
 } as Meta;
 
-//👇 We create a “template” of how args map to rendering
-const Template: StoryFn<typeof ServerInvite> = (args: ServerInviteProps) => (
-  <ServerInvite {...args} />
-);
-
 //👇 Each story then reuses that template
 const defaultMessage: ServerInviteProps = {
   server: {
@@ -28,5 +23,6 @@ const defaultMessage: ServerInviteProps = {
   isUserInServer: false,
 };
 
-export const Primary = Template.bind({});
-Primary.args = defaultMessage;
+export const Primary = {
+  args: defaultMessage,
+};

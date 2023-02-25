@@ -22,7 +22,6 @@ export default {
   },
 } as Meta<typeof Home>;
 
-//👇 We create a “template” of how args map to rendering
-const Template: StoryFn<typeof Home> = () => <Home />;
-
-export const Homepage = Template.bind({});
+export const Homepage = {
+  render: () => <Home />,
+};

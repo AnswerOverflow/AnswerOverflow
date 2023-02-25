@@ -32,19 +32,22 @@ export default {
   },
 } as Meta;
 
-const Template: StoryFn<typeof Chart> = (props: ChartProps) => (
-  <div className="h-40">
-    <Chart {...props} />
-  </div>
-);
+export const LineChart = {
+  render: (props: ChartProps) => (
+    <div className="h-40">
+      <Chart {...props} />
+    </div>
+  ),
 
-export const LineChart = Template.bind({});
-
-LineChart.parameters = {
-  a11y: {
-    disable: true,
+  parameters: {
+    a11y: {
+      disable: true,
+    },
   },
+
+  args: lineProps,
 };
+
 const lineProps: ChartProps = {
   type: "line",
   showGrid: false,
@@ -103,14 +106,22 @@ const lineProps: ChartProps = {
   ],
 };
 
-LineChart.args = lineProps;
+export const BarChart = {
+  render: (props: ChartProps) => (
+    <div className="h-40">
+      <Chart {...props} />
+    </div>
+  ),
 
-export const BarChart = Template.bind({});
-BarChart.parameters = {
-  a11y: {
-    disable: true,
+  parameters: {
+    a11y: {
+      disable: true,
+    },
   },
+
+  args: barProps,
 };
+
 const barProps: ChartProps = {
   type: "bar",
   showGrid: false,
@@ -160,5 +171,3 @@ const barProps: ChartProps = {
     },
   ],
 };
-
-BarChart.args = barProps;

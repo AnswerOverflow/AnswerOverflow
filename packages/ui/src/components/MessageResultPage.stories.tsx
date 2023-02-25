@@ -5,11 +5,6 @@ export default {
   component: MessageResultPage,
 } as Meta;
 
-//👇 We create a “template” of how args map to rendering
-const Template: StoryFn<typeof MessageResultPage> = (args: MessageResultPageProps) => {
-  return <MessageResultPage {...args} />;
-};
-
 //👇 Each story then reuses that template
 
 const defaultMessage: MessageResultPageProps = {
@@ -44,5 +39,10 @@ const defaultMessage: MessageResultPageProps = {
   server: { ...mockServer(), id: "83730679338106880" },
 };
 
-export const Primary = Template.bind({});
-Primary.args = defaultMessage;
+export const Primary = {
+  render: (args: MessageResultPageProps) => {
+    return <MessageResultPage {...args} />;
+  },
+
+  args: defaultMessage,
+};

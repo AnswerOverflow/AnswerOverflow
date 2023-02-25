@@ -10,11 +10,9 @@ export default {
   },
 } as Meta;
 
-//👇 We create a “template” of how args map to rendering
-const Template: StoryFn<typeof StatsCard> = (args: StatsCardProps) => <StatsCard {...args} />;
-
-//👇 Each story then reuses that template
-export const Primary = Template.bind({});
+export const Primary = {
+  args: primaryArgs,
+};
 
 const primaryArgs: StatsCardProps = {
   title: "Questions asked",
@@ -24,5 +22,3 @@ const primaryArgs: StatsCardProps = {
   changeCount: "12",
   changeDuration: "15 days",
 };
-
-Primary.args = primaryArgs;

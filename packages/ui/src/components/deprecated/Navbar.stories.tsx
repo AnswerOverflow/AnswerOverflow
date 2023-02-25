@@ -6,9 +6,6 @@ export default {
   component: Navbar,
 } as Meta;
 
-//👇 We create a “template” of how args map to rendering
-const Template: StoryFn<typeof Navbar> = () => <Navbar />;
-
-//👇 Each story then reuses that template
-
-export const Primary = Template.bind({});
+export const Primary = {
+  render: () => <Navbar />,
+};
