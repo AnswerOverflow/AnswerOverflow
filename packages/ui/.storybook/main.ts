@@ -1,13 +1,13 @@
-const path = require('path'); // 👈 import path
-
-module.exports = {
+import path from 'path' // 👈 import path
+import type { StorybookConfig } from '@storybook/nextjs'; // or whatever framework you're using
+const config: StorybookConfig = {
   "stories": ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|ts|tsx)"],
   "addons": ["@storybook/addon-links", "@storybook/addon-essentials", "@storybook/addon-interactions", "@storybook/addon-a11y", {
     name: "@storybook/addon-postcss",
     options: {
       postcssLoaderOptions: {
         implementation: require("postcss")
-      }
+                  }
     }
   }],
   framework: {
@@ -15,11 +15,9 @@ module.exports = {
     // Add this
     options: {}
   },
-  webpackFinal: async (config, {
-    configType
-  }) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
+  webpackFinal: async (config) => {
+    config.resolve!.alias = {
+      ...config.resolve!.alias,
       '~ui/test': path.resolve(__dirname, "../test/"),
       '~ui': path.resolve(__dirname, "../src/")
     };
@@ -38,8 +36,5 @@ module.exports = {
   docs: {
     autodocs: false
   },
-  env: config => ({
-    ...config,
-    THEME: process.env.THEME ?? "both"
-  })
 };
+export default config;
