@@ -22,6 +22,7 @@ export const messagePageRouter = router({
   /*
     Message page by ID
     Variants:
+      - Root Message Not Found
       - Text channel thread message that has a parent message
       - Text channel thread message that has no parent message
       - Text channel thread message starting from anywhere in the thread
@@ -85,7 +86,6 @@ export const messagePageRouter = router({
       threadId && rootMessage ? [...new Set([rootMessage, ...messages])] : messages
     );
     const messagesWithDiscordAccounts = await addAuthorsToMessages(messagesWithRefs);
-    console.log(thread?.parentId);
     return {
       messages: messagesWithDiscordAccounts.map((message) =>
         stripPrivateMessageData(message, ctx.userServers)

@@ -66,6 +66,7 @@ export function toPrivateMessageWithStrippedData(
       channelId: message.channelId,
       serverId: message.serverId,
       id: message.id,
+      parentChannelId: message.parentChannelId,
     }),
     author,
     public: false,

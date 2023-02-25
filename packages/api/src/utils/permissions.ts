@@ -193,6 +193,7 @@ export function stripPrivateMessageData(
     channelId: message.channelId,
     serverId: message.serverId,
     authorId: defaultAuthor.id,
+    parentChannelId: message.parentChannelId,
     id: message.id,
     childThread: null,
   });
