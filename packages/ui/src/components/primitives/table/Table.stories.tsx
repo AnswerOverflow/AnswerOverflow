@@ -1,13 +1,17 @@
-import type { Meta, StoryFn } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { Table } from "./Table";
 import { Tbody, Td, Th, Thead, Tr, TableButtonWrapper, TableButton } from "./TableComps";
-export default {
+const meta = {
   component: Table,
-} as Meta;
+} as Meta<typeof Table>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
 
 import { TrashIcon, Cog6ToothIcon } from "@heroicons/react/24/solid";
 
-export const Primary = {
+export const Primary: Story = {
   render: () => (
     <div className="2xl:w-[85rem]">
       <Table>

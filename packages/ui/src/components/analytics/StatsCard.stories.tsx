@@ -1,6 +1,6 @@
-import type { Meta, StoryFn } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { StatsCard, StatsCardProps } from "./StatsCard";
-export default {
+const meta = {
   component: StatsCard,
   argTypes: {
     changeType: {
@@ -8,11 +8,11 @@ export default {
       options: ["increase", "decrease"],
     },
   },
-} as Meta;
+} as Meta<typeof StatsCard>;
 
-export const Primary = {
-  args: primaryArgs,
-};
+export default meta;
+
+type Story = StoryObj<typeof meta>;
 
 const primaryArgs: StatsCardProps = {
   title: "Questions asked",
@@ -21,4 +21,7 @@ const primaryArgs: StatsCardProps = {
   changeType: "decrease",
   changeCount: "12",
   changeDuration: "15 days",
+};
+export const Primary: Story = {
+  args: primaryArgs,
 };

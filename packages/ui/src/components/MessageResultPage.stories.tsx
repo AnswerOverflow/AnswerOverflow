@@ -1,10 +1,13 @@
-import type { StoryFn, Meta } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { mockChannelWithSettings, mockMessageWithDiscordAccount, mockServer } from "~ui/test/props";
 import { MessageResultPage, MessageResultPageProps } from "./MessageResultPage";
-export default {
+const meta = {
   component: MessageResultPage,
-} as Meta;
+} as Meta<typeof MessageResultPage>;
 
+export default meta;
+
+type Story = StoryObj<typeof meta>;
 //👇 Each story then reuses that template
 
 const defaultMessage: MessageResultPageProps = {
@@ -39,10 +42,6 @@ const defaultMessage: MessageResultPageProps = {
   server: { ...mockServer(), id: "83730679338106880" },
 };
 
-export const Primary = {
-  render: (args: MessageResultPageProps) => {
-    return <MessageResultPage {...args} />;
-  },
-
+export const Primary: Story = {
   args: defaultMessage,
 };

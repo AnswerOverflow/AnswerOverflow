@@ -1,7 +1,7 @@
-import type { Meta, StoryFn } from "@storybook/react";
-import { Button, ButtonProps } from "./Button";
+import type { Meta, StoryObj } from "@storybook/react";
+import { Button } from "./Button";
 
-export default {
+const meta = {
   title: "Deprecated/Button",
   component: Button,
   argTypes: {
@@ -12,21 +12,24 @@ export default {
   },
 } as Meta<typeof Button>;
 
-export const PrimaryDep = {
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+export const PrimaryDep: Story = {
   args: {
     intent: "primary",
     children: "Primary",
   },
 };
 
-export const SecondaryDep = {
+export const SecondaryDep: Story = {
   args: {
     intent: "secondary",
     children: "Secondary",
   },
 };
 
-export const DangerDep = {
+export const DangerDep: Story = {
   args: {
     intent: "danger",
     children: "Danger",

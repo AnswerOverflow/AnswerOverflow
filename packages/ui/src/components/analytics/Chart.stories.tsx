@@ -1,8 +1,8 @@
 import React from "react";
-import type { Meta, StoryFn } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { Chart, ChartProps } from "./Chart";
-export default {
+const meta = {
   component: Chart,
   // For the moment, we need to disable a11y checks for the charts - failing a11y checks
   // We need to investigate this further in the future
@@ -30,23 +30,11 @@ export default {
       defaultValue: true,
     },
   },
-} as Meta;
+} as Meta<typeof Chart>;
 
-export const LineChart = {
-  render: (props: ChartProps) => (
-    <div className="h-40">
-      <Chart {...props} />
-    </div>
-  ),
+export default meta;
 
-  parameters: {
-    a11y: {
-      disable: true,
-    },
-  },
-
-  args: lineProps,
-};
+type Story = StoryObj<typeof meta>;
 
 const lineProps: ChartProps = {
   type: "line",
@@ -106,20 +94,20 @@ const lineProps: ChartProps = {
   ],
 };
 
-export const BarChart = {
+export const LineChart: Story = {
   render: (props: ChartProps) => (
     <div className="h-40">
       <Chart {...props} />
     </div>
   ),
-
   parameters: {
     a11y: {
       disable: true,
     },
   },
-
-  args: barProps,
+  // todo: fix this
+  // @ts-ignore
+  args: lineProps,
 };
 
 const barProps: ChartProps = {
@@ -170,4 +158,21 @@ const barProps: ChartProps = {
       pv: 4300,
     },
   ],
+};
+
+export const BarChart: Story = {
+  render: (props: ChartProps) => (
+    <div className="h-40">
+      <Chart {...props} />
+    </div>
+  ),
+
+  parameters: {
+    a11y: {
+      disable: true,
+    },
+  },
+  // todo: fix this
+  // @ts-ignore
+  args: barProps,
 };

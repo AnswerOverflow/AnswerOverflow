@@ -1,17 +1,20 @@
-import type { Meta, StoryFn } from "@storybook/react";
-import { ServerIcon, ServerIconProps } from "./ServerIcon";
+import type { Meta, StoryObj } from "@storybook/react";
+import { ServerIcon } from "./ServerIcon";
 import { mockServer } from "~ui/test/props";
-export default {
+const meta = {
   component: ServerIcon,
-} as Meta;
+} as Meta<typeof ServerIcon>;
 
-export const Primary = {
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+export const Primary: Story = {
   args: {
     server: mockServer(),
   },
 };
 
-export const WithImage = {
+export const WithImage: Story = {
   args: {
     server: mockServer({
       name: "AnswerOverflow",
@@ -21,7 +24,7 @@ export const WithImage = {
   },
 };
 
-export const Tertiary = {
+export const Tertiary: Story = {
   args: {
     ...Primary.args,
   },

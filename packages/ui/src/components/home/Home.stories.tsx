@@ -1,7 +1,7 @@
-import type { Meta, StoryFn } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { Home } from "./Home";
 
-export default {
+const meta = {
   component: Home,
   parameters: {
     layout: "fullscreen",
@@ -22,6 +22,6 @@ export default {
   },
 } as Meta<typeof Home>;
 
-export const Homepage = {
-  render: () => <Home />,
-};
+export default meta;
+type Story = StoryObj<typeof meta>;
+export const Homepage: Story = {};

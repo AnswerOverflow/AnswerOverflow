@@ -1,9 +1,13 @@
-import type { Meta, StoryFn } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
 import { ServerInvite, ServerInviteProps } from "./ServerInvite";
-export default {
+const meta = {
   component: ServerInvite,
-} as Meta;
+} as Meta<typeof ServerInvite>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
 
 //👇 Each story then reuses that template
 const defaultMessage: ServerInviteProps = {
@@ -23,6 +27,6 @@ const defaultMessage: ServerInviteProps = {
   isUserInServer: false,
 };
 
-export const Primary = {
+export const Primary: Story = {
   args: defaultMessage,
 };

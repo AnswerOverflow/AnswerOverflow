@@ -1,11 +1,15 @@
-import type { Meta, StoryFn } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
-import { GooglePage, GooglePageProps } from "./GooglePage/GooglePage";
-export default {
+import { GooglePage } from "./GooglePage/GooglePage";
+const meta = {
   component: GooglePage,
-} as Meta;
+} as Meta<typeof GooglePage>;
 
-export const Primary = {
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Primary: Story = {
   args: {
     result: {
       url: "https://www.answeroverflow.com > ...",

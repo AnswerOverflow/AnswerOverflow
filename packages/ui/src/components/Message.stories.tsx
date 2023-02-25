@@ -1,14 +1,18 @@
-import type { StoryFn, Meta } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { MessageProps, Message } from "./Message";
 import { mockDiscordAccount } from "~ui/test/props";
-export default {
+const meta = {
   component: Message,
   parameters: {
     a11y: {
       disable: true,
     },
   },
-} as Meta;
+} as Meta<typeof Message>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
 
 const loremIpsum =
   "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quidem fugit iure delectus tempore! Nam nihil animi nemo nisi eligendi veniam obcaecati accusantium, sunt maiores tenetur illum saepe incidunt beatae hic.";
@@ -33,11 +37,11 @@ const defaultMessage: MessageProps = {
   },
 };
 
-export const Primary = {
+export const Primary: Story = {
   args: defaultMessage,
 };
 
-export const OverflowLetters = {
+export const OverflowLetters: Story = {
   args: {
     ...Primary.args,
     message: {
@@ -49,7 +53,7 @@ export const OverflowLetters = {
   },
 };
 
-export const WithImages = {
+export const WithImages: Story = {
   args: {
     ...Primary.args,
     message: {
@@ -80,7 +84,7 @@ export const WithImages = {
   },
 };
 
-export const WithCode = {
+export const WithCode: Story = {
   args: {
     ...Primary.args,
     message: {
@@ -102,7 +106,7 @@ export const WithCode = {
   },
 };
 
-export const WithXSS = {
+export const WithXSS: Story = {
   args: {
     ...Primary.args,
     message: {
@@ -112,7 +116,7 @@ export const WithXSS = {
   },
 };
 
-export const WithXSSInCodeBlock = {
+export const WithXSSInCodeBlock: Story = {
   args: {
     ...Primary.args,
     message: {
