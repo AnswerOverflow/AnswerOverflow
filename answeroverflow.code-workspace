@@ -40,6 +40,10 @@
       "path": "packages/db-mock"
     },
     {
+      "name": "redis",
+      "path": "packages/redis"
+    },
+    {
       "name": "prisma-types",
       "path": "packages/prisma-types"
     },
@@ -133,6 +137,7 @@
       "auth",
       "config",
       "utils",
+      "redis",
       "db-mock",
       "prisma-types",
       "elastic-types",
@@ -146,7 +151,7 @@
       "Turborepo",
       "unauthed",
       "upsert",
-      "upserting"
+      "upserting",
       "devcontainer",
       "devcontainers",
       "Turborepo"

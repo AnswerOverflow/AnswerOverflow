@@ -26,3 +26,13 @@ services:
     ports:
       - 9200:9200
       - 9300:9300
+
+  cache-redis:
+    container_name: ao-cache-redis
+    image: redis:alpine3.17
+    restart: always
+    command: redis-server --save 20 1 --loglevel warning --requirepass redis
+    expose:
+      - 6379
+    ports:
+      - 6379:6379
