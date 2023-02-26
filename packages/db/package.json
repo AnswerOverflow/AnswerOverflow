@@ -19,6 +19,7 @@
     "@answeroverflow/db-mock": "*",
     "@answeroverflow/elastic-types": "*",
     "@answeroverflow/prisma-types": "*",
+    "@answeroverflow/cache": "*",
     "@answeroverflow/utils": "*",
     "@sapphire/bitfield": "^1.0.0",
     "discord-api-types": "^0.37.30",

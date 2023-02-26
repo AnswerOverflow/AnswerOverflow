@@ -40,8 +40,8 @@
       "path": "packages/db-mock"
     },
     {
-      "name": "redis",
-      "path": "packages/redis"
+      "name": "cache",
+      "path": "packages/cache"
     },
     {
       "name": "prisma-types",
@@ -145,16 +145,16 @@
     "jest.autoRun": "off",
     "cSpell.words": [
       "Bitfield",
+      "devcontainer",
+      "devcontainers",
       "Rhys",
       "superjson",
       "trpc",
+      "tsup",
       "Turborepo",
       "unauthed",
       "upsert",
-      "upserting",
-      "devcontainer",
-      "devcontainers",
-      "Turborepo"
+      "upserting"
     ],
   },
   "extensions": {

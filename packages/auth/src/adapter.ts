@@ -1,6 +1,6 @@
 import { prisma } from "@answeroverflow/db";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { getDiscordUser } from "./discord-oauth";
+import { getDiscordUser } from "@answeroverflow/cache";
 import type { Adapter, AdapterAccount } from "next-auth/adapters";
 
 export const extendedAdapter: Adapter = {
