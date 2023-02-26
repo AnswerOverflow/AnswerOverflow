@@ -17,5 +17,6 @@
     "test",
     "jest.config.ts",
     "tsup.config.ts",
+    "../../reset.d.ts"
   ],
 }

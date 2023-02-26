@@ -1,5 +1,9 @@
 import { Client, ClientOptions, errors } from "@elastic/elasticsearch";
-import type { BulkOperationContainer, MappingProperty } from "@elastic/elasticsearch/lib/api/types";
+import type {
+  BulkOperationContainer,
+  MappingProperty,
+  QueryDslQueryContainer,
+} from "@elastic/elasticsearch/lib/api/types";
 import { z } from "zod";
 
 declare global {
@@ -28,9 +32,35 @@ export const zMessage = z.object({
   messageReference: zMessageReference.nullable(),
   childThread: z.string().nullable(),
   authorId: z.string(),
-  channelId: z.string(),
+  channelId: z.string(), // If the message is is in a thread, this is the thread's channel id
+  parentChannelId: z.string().nullable(), // If the message is in a thread, this is the channel id of the parent channel for the thread
   serverId: z.string(),
 });
+
+export function getThreadIdOfMessage(message: Message): string | null {
+  if (message.childThread) {
+    return message.childThread;
+  }
+  if (message.parentChannelId) {
+    return message.channelId;
+  }
+  return null;
+}
+
+export function getParentChannelOfMessage(message: Message): string | null {
+  if (message.parentChannelId) {
+    return message.parentChannelId;
+  }
+  return message.channelId;
+}
+
+export type MessageSearchOptions = {
+  query: string;
+  channelId?: string;
+  serverId?: string;
+  after?: string;
+  limit?: number;
+};
 
 type MessageImageMappingProperty = {
   [K in keyof typeof zDiscordImage.shape]: MappingProperty;
@@ -64,6 +94,7 @@ const properties: ElasticMessageIndexProperties = {
   serverId: idProperty,
   channelId: idProperty,
   authorId: idProperty,
+  parentChannelId: idProperty,
   content: { type: "text" },
   images: {
     properties: imageProperties,
@@ -380,6 +411,64 @@ export class Elastic extends Client {
       return false;
     }
     return true;
+  }
+
+  public async searchMessages({ query, serverId, limit, channelId }: MessageSearchOptions) {
+    const q: QueryDslQueryContainer = {
+      // TODO: No ts ignore in future
+      // @ts-ignore
+      bool: {
+        must: [
+          {
+            multi_match: {
+              query,
+              fields: ["content"],
+              fuzziness: "AUTO",
+            },
+          },
+        ],
+      },
+    };
+    if (!Array.isArray(q.bool?.must))
+      throw new Error(
+        "This error should never occur. The query is always expected to be an array for the must property"
+      );
+    if (q.bool?.must) {
+      if (serverId) {
+        q.bool.must.push({
+          match: {
+            serverId,
+          },
+        });
+      }
+      if (channelId) {
+        q.bool.must.push({
+          match: {
+            channelId,
+          },
+        });
+      }
+    }
+    const result = await this.search<Message>({
+      index: this.messagesIndex,
+      query: q,
+      track_scores: true,
+      // TODO: Enable highlighting
+      // highlight: {
+      //   fields: {
+      //     content: {},
+      //   },
+      // },
+      size: limit ?? 100,
+      sort: [{ id: "asc" }],
+    });
+
+    return result.hits.hits
+      .filter((hit) => hit._source)
+      .map((hit) => ({
+        ...hit,
+        _source: hit._source!,
+      }));
   }
 
   public async createMessagesIndex() {

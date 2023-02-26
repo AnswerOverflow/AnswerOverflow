@@ -1,7 +1,19 @@
 import { TRPCError } from "@trpc/server";
 import { PermissionsBitField } from "discord.js";
-import { findIgnoredDiscordAccountById } from "@answeroverflow/db";
+import {
+  ChannelWithFlags,
+  findIgnoredDiscordAccountById,
+  getDefaultDiscordAccount,
+  getDefaultMessage,
+  isMessageFull,
+  MessageFull,
+  MessageWithDiscordAccount,
+  ServerWithFlags,
+  zChannelPublic,
+  zServerPublic,
+} from "@answeroverflow/db";
 import type { Source, Context } from "~api/router/context";
+import type { DiscordServer } from "@answeroverflow/auth";
 
 export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
   "You are missing the required permissions to do this";
@@ -118,9 +130,9 @@ export function assertIsUser(ctx: Context, targetUserId: string) {
   }
   return;
 }
-export const INVALID_ROUTE_FOR_BOT_ERROR = "This route is unavaliable to be called from the bot";
+export const INVALID_ROUTE_FOR_BOT_ERROR = "This route is unavailable to be called from the bot";
 export const INVALID_ROUTER_FOR_WEB_CLIENT_ERROR =
-  "This route is unavaliable to be called from the web client";
+  "This route is unavailable to be called from the web client";
 
 export function createInvalidSourceError(caller: Source) {
   let message = "";
@@ -153,4 +165,78 @@ export function isCtxSourceDiscordBot(ctx: Context) {
 
 export function assertCanEditServerBotOnly(ctx: Context, serverId: string) {
   return [assertCanEditServer(ctx, serverId), isCtxSourceDiscordBot(ctx)];
+}
+
+export const canUserViewPrivateMessage = (
+  userServers: DiscordServer[] | null,
+  message: MessageFull | MessageWithDiscordAccount
+) => userServers?.find((s) => s.id === message.serverId);
+
+// Kind of ugly having it take in two different types, but it's the easiest way to do it
+export function stripPrivateMessageData(
+  message: MessageFull | MessageWithDiscordAccount,
+  userServers: DiscordServer[] | null = null
+): MessageFull | MessageWithDiscordAccount {
+  const isPartialMessage = !isMessageFull(message);
+  // If it is only a reply and is public, then just return
+  if (isPartialMessage && message.public) {
+    return message;
+  }
+
+  if (canUserViewPrivateMessage(userServers, message)) {
+    return message;
+  }
+
+  const defaultAuthor = getDefaultDiscordAccount({
+    id: "0",
+    name: "Unknown User",
+  });
+  const defaultMessage = getDefaultMessage({
+    channelId: message.channelId,
+    serverId: message.serverId,
+    authorId: defaultAuthor.id,
+    parentChannelId: message.parentChannelId,
+    id: message.id,
+    childThread: null,
+  });
+
+  // If it is a reply, then we know that is it private so we can just return
+  // If there is no referenced message, then we can just return
+  if (isPartialMessage) {
+    return {
+      ...defaultMessage,
+      author: defaultAuthor,
+      public: false,
+    };
+  }
+
+  const reply = message.referencedMessage
+    ? stripPrivateMessageData(message.referencedMessage, userServers)
+    : null;
+
+  const solutions = message.solutionMessages.map((solution) =>
+    stripPrivateMessageData(solution, userServers)
+  );
+  if (message.public) {
+    return {
+      ...message,
+      referencedMessage: reply,
+      solutionMessages: solutions,
+    };
+  }
+  return {
+    ...defaultMessage,
+    author: defaultAuthor,
+    public: false,
+    referencedMessage: reply,
+    solutionMessages: solutions,
+  };
+}
+
+export function stripPrivateChannelData(channel: ChannelWithFlags) {
+  return zChannelPublic.parse(channel);
+}
+
+export function stripPrivateServerData(server: ServerWithFlags) {
+  return zServerPublic.parse(server);
 }

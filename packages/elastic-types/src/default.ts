@@ -13,6 +13,7 @@ export function getDefaultMessage(
     images: [],
     messageReference: null,
     childThread: null,
+    parentChannelId: null,
     solutionIds: [],
     ...override,
   };

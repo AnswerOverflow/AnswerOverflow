@@ -16,7 +16,7 @@ import {
   channelBitfieldFlags,
   userServerSettingsFlags,
 } from "@answeroverflow/prisma-types";
-import { getRandomId } from "@answeroverflow/utils";
+import { getRandomId, getRandomSentence } from "@answeroverflow/utils";
 import { ChannelType } from "discord-api-types/v10";
 import type { PartialDeep } from "type-fest";
 export function mockDiscordAccount(override: Partial<DiscordAccount> = {}) {
@@ -39,6 +39,7 @@ export function mockMessage(
     authorId: author.id,
     channelId: channel.id,
     serverId: server.id,
+    content: getRandomSentence(),
     ...override,
   });
 }

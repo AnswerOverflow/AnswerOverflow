@@ -1,6 +1,8 @@
 import type { Channel, DiscordAccount, Server } from "@answeroverflow/prisma-types";
 import { mockChannel, mockDiscordAccount, mockMessage, mockServer } from "@answeroverflow/db-mock";
 import {
+  addAuthorToMessage,
+  addReferenceToMessage,
   CANNOT_UPSERT_MESSAGE_FOR_IGNORED_ACCOUNT_MESSAGE,
   CANNOT_UPSERT_MESSAGE_FOR_USER_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE,
   deleteManyMessages,
@@ -9,6 +11,7 @@ import {
   deleteMessage,
   findMessageById,
   findMessagesByChannelId,
+  searchMessages,
   updateMessage,
   upsertManyMessages,
   upsertMessage,
@@ -17,6 +20,7 @@ import { createServer } from "./server";
 import { createChannel } from "./channel";
 import { createDiscordAccount, deleteDiscordAccount } from "./discord-account";
 import { createUserServerSettings, Message } from "..";
+import { getRandomId } from "@answeroverflow/utils";
 
 describe("Message Operations", () => {
   let server: Server;
@@ -37,80 +41,6 @@ describe("Message Operations", () => {
       await upsertMessage(message);
       const found = await findMessageById(message.id);
       expect(found?.id).toBe(message.id);
-    });
-    it("should return with a public author", async () => {
-      await upsertMessage(message);
-      await createUserServerSettings({
-        userId: author.id,
-        serverId: server.id,
-        flags: {
-          canPubliclyDisplayMessages: true,
-        },
-      });
-      const found = await findMessageById(message.id);
-      expect(found?.public).toBeTruthy();
-    });
-    it("should return with a private author", async () => {
-      await upsertMessage(message);
-      await createUserServerSettings({
-        userId: author.id,
-        serverId: server.id,
-        flags: {
-          canPubliclyDisplayMessages: false,
-        },
-      });
-      const found = await findMessageById(message.id);
-      expect(found?.public).toBeFalsy();
-    });
-    it("should return a message with its referenced message that is private", async () => {
-      const author2 = mockDiscordAccount();
-      await createDiscordAccount(author2);
-      await createUserServerSettings({
-        userId: author2.id,
-        serverId: server.id,
-        flags: {
-          canPubliclyDisplayMessages: false,
-        },
-      });
-      const referencedMessage = mockMessage(server, channel, author2);
-      await upsertMessage(referencedMessage);
-      const msg = mockMessage(server, channel, author, {
-        messageReference: {
-          messageId: referencedMessage.id,
-          channelId: referencedMessage.channelId,
-          serverId: referencedMessage.serverId,
-        },
-      });
-      await upsertMessage(msg);
-      const found = await findMessageById(msg.id);
-      expect(found?.referencedMessage?.id).toBe(referencedMessage.id);
-      expect(found?.referencedMessage?.author.id).toBe(author2.id);
-      expect(found?.referencedMessage?.public).toBeFalsy();
-    });
-    it("should return a message with its referenced message that is public", async () => {
-      const author2 = mockDiscordAccount();
-      await createDiscordAccount(author2);
-      await createUserServerSettings({
-        userId: author2.id,
-        serverId: server.id,
-        flags: {
-          canPubliclyDisplayMessages: true,
-        },
-      });
-      const referencedMessage = mockMessage(server, channel, author2);
-      await upsertMessage(referencedMessage);
-      const msg = mockMessage(server, channel, author, {
-        messageReference: {
-          messageId: referencedMessage.id,
-          channelId: referencedMessage.channelId,
-          serverId: referencedMessage.serverId,
-        },
-      });
-      await upsertMessage(msg);
-      const found = await findMessageById(msg.id);
-      expect(found?.referencedMessage?.id).toBe(referencedMessage.id);
-      expect(found?.referencedMessage?.author.id).toBe(author2.id);
-      expect(found?.referencedMessage?.public).toBeTruthy();
     });
     it("should return null if message not found", async () => {
       const found = await findMessageById("1");
@@ -312,6 +242,140 @@ describe("Message Operations", () => {
         channelId: channel.id,
       });
       expect(foundDeleted).toHaveLength(0);
+    });
+  });
+  describe("Add Reference To Message", () => {
+    it("should return null if the referenced message isnt found", async () => {
+      const msg = mockMessage(server, channel, author);
+      const created = await upsertMessage(msg);
+      const withRef = await addReferenceToMessage(created);
+      expect(withRef?.referencedMessage).toBeNull();
+    });
+    it("should add the reference to the message", async () => {
+      const ref = mockMessage(server, channel, author);
+      const msg = mockMessage(server, channel, author, {
+        messageReference: {
+          messageId: ref.id,
+          channelId: ref.channelId,
+          serverId: ref.serverId,
+        },
+      });
+      await upsertMessage(ref);
+      const created = await upsertMessage(msg);
+      const withRef = await addReferenceToMessage(created);
+      expect(withRef).not.toBeNull();
+      expect(withRef?.referencedMessage).not.toBeNull();
+      expect(withRef?.referencedMessage?.id).toBe(ref.id);
+    });
+    it("should add the solution to the message", async () => {
+      const solution = mockMessage(server, channel, author);
+      const msg = mockMessage(server, channel, author, {
+        solutionIds: [solution.id],
+      });
+      const created = await upsertMessage(msg);
+      await upsertMessage(solution);
+      const withRef = await addReferenceToMessage(created);
+      expect(withRef).not.toBeNull();
+      expect(withRef?.solutionMessages).toHaveLength(1);
+      expect(withRef?.solutionMessages[0]!.id).toBe(solution.id);
+    });
+    it("should have a empty solution if the solution message is not found", async () => {
+      const msg = mockMessage(server, channel, author, {
+        solutionIds: ["123"],
+      });
+      const created = await upsertMessage(msg);
+      const withRef = await addReferenceToMessage(created);
+      expect(withRef).not.toBeNull();
+      expect(withRef?.solutionMessages).toHaveLength(0);
+    });
+  });
+  describe("Add Authors To Message", () => {
+    it("should return null if the author isnt found", async () => {
+      const msg = mockMessage(server, channel, author);
+      const created = await upsertMessage(msg);
+      const withRef = await addReferenceToMessage(created);
+      await deleteDiscordAccount(author.id);
+      const withAuthor = await addAuthorToMessage(withRef!);
+      expect(withAuthor).toBeNull();
+    });
+    it("should add the author to the message", async () => {
+      const msg = mockMessage(server, channel, author);
+      const created = await upsertMessage(msg);
+      const withRef = await addReferenceToMessage(created);
+      const withAuthor = await addAuthorToMessage(withRef!);
+      expect(withAuthor?.author).not.toBeNull();
+      expect(withAuthor?.author?.id).toBe(author.id);
+    });
+    it("should add the author to the referenced message", async () => {
+      const reply = mockMessage(server, channel, author);
+      const msg = mockMessage(server, channel, author, {
+        messageReference: {
+          messageId: reply.id,
+          channelId: reply.channelId,
+          serverId: reply.serverId,
+        },
+      });
+      await upsertMessage(reply);
+      const created = await upsertMessage(msg);
+      const withRef = await addReferenceToMessage(created);
+      const withAuthor = await addAuthorToMessage(withRef!);
+      expect(withAuthor?.referencedMessage?.author).not.toBeNull();
+      expect(withAuthor?.referencedMessage?.author?.id).toBe(author.id);
+    });
+    it("should have a null referenced message if the author is not found", async () => {
+      const reply = mockMessage(server, channel, mockDiscordAccount());
+      const msg = mockMessage(server, channel, author, {
+        messageReference: {
+          messageId: reply.id,
+          channelId: reply.channelId,
+          serverId: reply.serverId,
+        },
+      });
+      await upsertMessage(reply);
+      const created = await upsertMessage(msg);
+      const withRef = await addReferenceToMessage(created);
+      const withAuthor = await addAuthorToMessage(withRef!);
+      expect(withAuthor?.referencedMessage).toBeNull();
+    });
+    it("should add the author to the solution message", async () => {
+      const solution = mockMessage(server, channel, author);
+      const msg = mockMessage(server, channel, author, {
+        solutionIds: [solution.id],
+      });
+      const created = await upsertMessage(msg);
+      await upsertMessage(solution);
+      const withRef = await addReferenceToMessage(created);
+      const withAuthor = await addAuthorToMessage(withRef!);
+      expect(withAuthor!.solutionMessages[0]!.author).not.toBeNull();
+      expect(withAuthor!.solutionMessages[0]!.author?.id).toBe(author.id);
+    });
+    it("should have a null solution message if the author is not found", async () => {
+      const solution = mockMessage(server, channel, mockDiscordAccount());
+      const msg = mockMessage(server, channel, author, {
+        solutionIds: [solution.id],
+      });
+      const created = await upsertMessage(msg);
+      await upsertMessage(solution);
+      const withRef = await addReferenceToMessage(created);
+      const withAuthor = await addAuthorToMessage(withRef!);
+      expect(withAuthor?.solutionMessages).toHaveLength(0);
+    });
+  });
+  describe("Search", () => {
+    it("should search for a message in a normal channel", async () => {
+      const msg = mockMessage(server, channel, author, {
+        content: getRandomId(),
+      });
+      await upsertMessage(msg);
+      const found = await searchMessages({
+        query: msg.content,
+      });
+      const firstResult = found[0];
+      expect(found).toHaveLength(1);
+      expect(firstResult?.message.id).toBe(msg.id);
+      expect(firstResult?.channel.id).toBe(channel.id);
+      expect(firstResult?.server.id).toBe(server.id);
+      expect(firstResult?.score).toBeGreaterThan(0);
     });
   });
 });

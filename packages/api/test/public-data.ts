@@ -2,13 +2,13 @@ import {
   DiscordAccount,
   getDefaultDiscordAccount,
   getDefaultMessage,
-  isMessageWithAccountAndRepliesTo,
+  isMessageFull,
   Message,
-  MessageWithAccountAndRepliesTo,
+  MessageFull,
   MessageWithDiscordAccount,
   Server,
 } from "@answeroverflow/db";
-import { pick } from "@answeroverflow/utils";
+import { omit, pick } from "@answeroverflow/utils";
 
 export function pickPublicServerData(server: Server) {
   return pick(server, ["id", "name", "icon"]);
@@ -26,7 +26,7 @@ export function toMessageWithDiscordAccount({
   publicMessage,
 }: ToMessageWithDiscordAccount) {
   const msg: MessageWithDiscordAccount = {
-    ...message,
+    ...omit(message, "authorId"),
     author,
     public: publicMessage,
   };
@@ -38,20 +38,23 @@ export function toMessageWithAccountAndRepliesTo({
   referenced = undefined,
   author,
   publicMessage,
+  solutions = [],
 }: ToMessageWithDiscordAccount & {
   referenced?: MessageWithDiscordAccount;
+  solutions?: MessageWithDiscordAccount[];
 }) {
-  const publicMsg: MessageWithAccountAndRepliesTo = {
+  const publicMsg: MessageFull = {
     ...toMessageWithDiscordAccount({ message, author, publicMessage }),
+    solutionMessages: solutions,
     referencedMessage: referenced ?? null,
   };
   return publicMsg;
 }
 
 export function toPrivateMessageWithStrippedData(
-  message: MessageWithDiscordAccount | MessageWithAccountAndRepliesTo
-): MessageWithDiscordAccount | MessageWithAccountAndRepliesTo {
-  const isReply = !isMessageWithAccountAndRepliesTo(message);
+  message: MessageWithDiscordAccount | MessageFull
+): MessageWithDiscordAccount | MessageFull {
+  const isReply = !isMessageFull(message);
 
   const author = getDefaultDiscordAccount({
     id: "0",
@@ -63,6 +66,7 @@ export function toPrivateMessageWithStrippedData(
       channelId: message.channelId,
       serverId: message.serverId,
       id: message.id,
+      parentChannelId: message.parentChannelId,
     }),
     author,
     public: false,
@@ -75,5 +79,6 @@ export function toPrivateMessageWithStrippedData(
     referencedMessage: message.referencedMessage
       ? toPrivateMessageWithStrippedData(message.referencedMessage)
       : null,
+    solutionMessages: message.solutionMessages.map((m) => toPrivateMessageWithStrippedData(m)),
   };
 }

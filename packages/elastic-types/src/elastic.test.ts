@@ -8,6 +8,7 @@ let msg2: Message;
 beforeEach(() => {
   msg1 = {
     id: getRandomId(),
+    parentChannelId: null,
     channelId: getRandomId(),
     content: "hello",
     images: [],
@@ -159,6 +160,87 @@ describe("ElasticSearch", () => {
       const fetchedMessages = await elastic.bulkGetMessagesByChannelId(msg1.channelId);
       expect(fetchedMessages).toBeDefined();
       expect(fetchedMessages).toHaveLength(2);
+    });
+  });
+  describe("Search", () => {
+    it("should search for messages by content", async () => {
+      const content = getRandomId();
+      await elastic.upsertMessage({
+        ...msg1,
+        content,
+      });
+      const searchResults = await elastic.searchMessages({
+        query: content,
+      });
+      expect(searchResults).toBeDefined();
+      expect(searchResults).toHaveLength(1);
+      expect(searchResults.find((msg) => msg._source.content === content)).toBeDefined();
+    });
+    it("should search for messages by server id", async () => {
+      const content = getRandomId();
+      await elastic.upsertMessage({
+        ...msg1,
+        content,
+      });
+      const serverId2 = getRandomId();
+      await elastic.upsertMessage({
+        ...msg2,
+        serverId: serverId2,
+        content,
+      });
+      const searchResults = await elastic.searchMessages({
+        query: content,
+        serverId: serverId2,
+      });
+      expect(searchResults).toBeDefined();
+      expect(searchResults).toHaveLength(1);
+      expect(searchResults.find((msg) => msg._source.content === content)).toBeDefined();
+    });
+    it("should return an empty array if no messages are found", async () => {
+      const searchResults = await elastic.searchMessages({
+        query: getRandomId(),
+      });
+      expect(searchResults).toBeDefined();
+      expect(searchResults).toHaveLength(0);
+    });
+    it("should return a limited number of messages", async () => {
+      const content = getRandomId();
+      await elastic.upsertMessage({
+        ...msg1,
+        content,
+      });
+      await elastic.upsertMessage({
+        ...msg2,
+        content,
+      });
+      const searchResults = await elastic.searchMessages({
+        query: content,
+        limit: 1,
+      });
+      expect(searchResults).toBeDefined();
+      expect(searchResults).toHaveLength(1);
+    });
+    it("should search for a message by channel id", async () => {
+      const content = getRandomId();
+      const targetChannelId = getRandomId();
+      await elastic.upsertMessage({
+        ...msg1,
+        channelId: targetChannelId,
+        content,
+      });
+      await elastic.upsertMessage({
+        ...msg1,
+        id: getRandomId(),
+        channelId: getRandomId(),
+        content,
+      });
+      const searchResults = await elastic.searchMessages({
+        query: content,
+        channelId: targetChannelId,
+      });
+      expect(searchResults).toBeDefined();
+      expect(searchResults).toHaveLength(1);
+      expect(searchResults.find((msg) => msg._source.content === content)).toBeDefined();
     });
   });
 });

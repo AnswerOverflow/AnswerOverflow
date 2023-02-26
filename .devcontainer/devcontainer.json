@@ -18,7 +18,8 @@
         "EditorConfig.EditorConfig",
         "bradlc.vscode-tailwindcss",
         "DavidAnson.vscode-markdownlint",
-        "Orta.vscode-jest"
+        "Orta.vscode-jest",
+        "streetsidesoftware.code-spell-checker"
       ]
     }
   },

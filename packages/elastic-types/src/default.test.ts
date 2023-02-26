@@ -20,6 +20,7 @@ describe("Default Message Values", () => {
       serverId,
       authorId,
       content: "",
+      parentChannelId: null,
       images: [],
       messageReference: null,
       childThread: null,
