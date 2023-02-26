@@ -8,7 +8,6 @@ import type { AppType } from "next/app";
 import hljs from "highlight.js";
 
 import { NextTRPC, trpc } from "@answeroverflow/ui";
-import { Footer, Navbar } from "@answeroverflow/ui";
 import { useEffect } from "react";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention

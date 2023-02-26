@@ -16,7 +16,6 @@ class MyDocument extends Document {
 
   override render() {
     return (
-      // eslint-disable-next-line tailwindcss/no-custom-classname
       <Html className="dark">
         <Head>
           {/* TODO: Swap for Next font */}
@@ -25,10 +24,8 @@ class MyDocument extends Document {
             rel="stylesheet"
           />
         </Head>
-        <body className="dark:bg-neutral-800">
-          <Main />
-          <NextScript />
-        </body>
+        <Main />
+        <NextScript />
       </Html>
     );
   }
