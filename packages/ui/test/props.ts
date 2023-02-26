@@ -27,6 +27,7 @@ export function mockMessageWithDiscordAccount(override: Partial<MessageWithDisco
     channelId: "0",
     childThread: null,
     images: [],
+    parentChannelId: null,
     messageReference: null,
     serverId: "0",
     solutionIds: [],

@@ -36,6 +36,7 @@ export function toAOMessage(message: Message): AOMessage {
     id: message.id,
     content: message.cleanContent,
     channelId: message.channel.id,
+    parentChannelId: message.channel.isThread() ? message.channel.parentId : null,
     images: message.attachments.map((attachment) => {
       return {
         url: attachment.url,

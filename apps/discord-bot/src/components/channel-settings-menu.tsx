@@ -41,6 +41,7 @@ export function ChannelSettingsMenu({
       async apiCall(router) {
         return await router.channels.upsertWithDeps({
           ...toAOChannelWithServer(targetChannel),
+          ...channelSettings,
           ...data,
         });
       },

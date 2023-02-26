@@ -8,7 +8,6 @@ export {
 export type { Context, BotContextCreate } from "~api/router/context";
 
 export * from "./src/utils/types";
-export * from "./src/router/message/types";
 export * from "./src/router/users/accounts/types";
 export * from "./src/router/server/types";
 export * from "./src/router/channel/types";

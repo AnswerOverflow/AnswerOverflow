@@ -12,5 +12,6 @@
     "transformer.ts",
     "vitest.config.ts",
     "test",
+    "../../reset.d.ts"
   ]
 }
