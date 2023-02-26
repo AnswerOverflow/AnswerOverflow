@@ -1,6 +1,6 @@
 import { z } from "zod";
 import axios from "axios";
-import { redis } from "./client";
+import { getRedisClient } from "./client";
 
 export function discordApiFetch(url: "/users/@me/guilds" | "/users/@me", token: string) {
   return axios.get("https://discordapp.com/api" + url, {
@@ -34,7 +34,7 @@ export async function updateUserServersCache(
   accessToken: string,
   servers: DiscordAPIServerSchema[]
 ) {
-  const client = await redis;
+  const client = await getRedisClient();
   await client.setEx(
     getDiscordServersRedisKey(accessToken),
     hoursToSeconds(DISCORD_SERVERS_CACHE_TTL_IN_HOURS),
@@ -43,7 +43,7 @@ export async function updateUserServersCache(
 }
 
 export async function getUserServers(accessToken: string) {
-  const client = await redis;
+  const client = await getRedisClient();
   const cachedServers = await client.get(getDiscordServersRedisKey(accessToken));
   if (cachedServers) {
     return zDiscordApiServerArraySchema.parse(JSON.parse(cachedServers));
@@ -113,7 +113,7 @@ export function getDiscordUserRedisKey(accessToken: string) {
 }
 
 export async function updateCachedDiscordUser(accessToken: string, user: DiscordAPIUserSchema) {
-  const client = await redis;
+  const client = await getRedisClient();
   await client.setEx(
     getDiscordUserRedisKey(accessToken),
     hoursToSeconds(DISCORD_USER_CACHE_TTL_IN_HOURS),
@@ -123,7 +123,7 @@ export async function updateCachedDiscordUser(accessToken: string, user: Discord
 }
 
 export async function getDiscordUser(accessToken: string) {
-  const client = await redis;
+  const client = await getRedisClient();
   const cachedUser = await client.get(getDiscordUserRedisKey(accessToken));
   if (cachedUser) {
     return zUserSchema.parse(JSON.parse(cachedUser));

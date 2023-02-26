@@ -1,30 +1,45 @@
 import { createClient } from "redis";
 type RedisClientType = ReturnType<typeof createClient>;
 
-declare global {
-  // eslint-disable-next-line no-var, no-unused-vars
-  var redis: RedisClientType | Promise<RedisClientType> | undefined;
-}
-
-async function initializeClient(): Promise<RedisClientType> {
-  const client = createClient({
+let redisClient: RedisClientType;
+export async function getRedisClient() {
+  if (redisClient) {
+    return redisClient;
+  }
+  const cacheInstance = createClient({
     url: process.env.REDIS_URL,
   });
+  cacheInstance.on("connect", () => {
+    console.log("CacheStore - Connection status: connected");
+  });
 
-  client.on("error", (err) => console.log("Redis Client Error", err));
+  cacheInstance.on("end", () => {
+    console.log("CacheStore - Connection status: disconnected");
+  });
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  process.on("exit", () => client.quit());
-  await client.connect();
-  return client;
-}
+  cacheInstance.on("reconnecting", () => {
+    console.log("CacheStore - Connection status: reconnecting");
+  });
 
-export const redis = global.redis || initializeClient();
+  cacheInstance.on("error", (err) => {
+    console.log("CacheStore - Connection status: error ", err);
+  });
+  process.on(
+    "exit",
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    async () =>
+      await cacheInstance
+        .disconnect()
+        .catch((err) =>
+          console.log(
+            `CacheStore - Error while disconnecting from redis: ${
+              err instanceof Error ? err.message : "Unknown error"
+            }`
+          )
+        )
+  );
 
-if (process.env.NODE_ENV !== "production") {
-  global.redis = redis;
-}
-
-if (process.env.NODE_ENV !== "production") {
-  global.redis = redis;
+  await cacheInstance.connect();
+  redisClient = cacheInstance;
+  return cacheInstance;
 }

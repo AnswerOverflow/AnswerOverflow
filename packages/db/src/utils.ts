@@ -1,13 +1,13 @@
 import { prisma } from "@answeroverflow/prisma-types";
 import { elastic } from "@answeroverflow/elastic-types";
-import { redis } from "@answeroverflow/cache";
+import { getRedisClient } from "@answeroverflow/cache";
 export async function clearDatabase() {
   if (process.env.NODE_ENV !== "test") {
     throw new Error("clearDatabase can only be used in test environment");
   }
   console.log("Wiping database...");
 
-  const client = await redis;
+  const client = await getRedisClient();
   await prisma.userServerSettings.deleteMany({});
   await prisma.channel.deleteMany({});
   await prisma.server.deleteMany({});
