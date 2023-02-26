@@ -1,7 +1,11 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
-import { Events, GuildMember } from "discord.js";
-import { addServerToUserServerCache, removeServerFromUserCache } from "@answeroverflow/cache";
+import { Events, GuildMember, User } from "discord.js";
+import {
+  addServerToUserServerCache,
+  removeServerFromUserCache,
+  updateCachedDiscordUser,
+} from "@answeroverflow/cache";
 import { findDiscordOauthById } from "@answeroverflow/db";
 import { toDiscordAPIServer } from "~discord-bot/utils/conversions";
 
@@ -32,6 +36,24 @@ export class SyncOnRemove extends Listener {
     await removeServerFromUserCache({
       accessToken: account.access_token,
       serverId: guild.id,
+    });
+  }
+}
+
+@ApplyOptions<Listener.Options>({
+  event: Events.UserUpdate,
+  name: "UpdateUserServerCacheOnUpdate",
+})
+export class SyncOnUpdate extends Listener {
+  public async run(_: User, newUser: User) {
+    const account = await findDiscordOauthById(newUser.id);
+    if (!account || !account.access_token) return;
+    await updateCachedDiscordUser(account.access_token, {
+      ...account,
+      // We only need to update the avatar, username, and discriminator
+      avatar: newUser.avatar,
+      username: newUser.username,
+      discriminator: newUser.discriminator,
     });
   }
 }

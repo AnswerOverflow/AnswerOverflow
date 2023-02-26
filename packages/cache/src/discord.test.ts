@@ -3,6 +3,7 @@ import {
   getDiscordUser,
   getUserServers,
   removeServerFromUserCache,
+  updateCachedDiscordUser,
   zDiscordApiServerArraySchema,
   zUserSchema,
 } from "./discord";
@@ -90,6 +91,25 @@ describe("Discord API", () => {
 
       const cachedUser = await getDiscordUser(accessToken);
       expect(cachedUser).toEqual(zUserSchema.parse(mockDiscordApiUserResponse));
+      expect(axios.get).toHaveBeenCalledTimes(1);
+    });
+    it("should update a cached user", async () => {
+      mockAxiosGet(mockDiscordApiUserResponse);
+
+      const notCachedUser = await getDiscordUser(accessToken);
+      expect(notCachedUser).toEqual(zUserSchema.parse(mockDiscordApiUserResponse));
+
+      const cachedUser = await getDiscordUser(accessToken);
+      expect(cachedUser).toEqual(zUserSchema.parse(mockDiscordApiUserResponse));
+      expect(axios.get).toHaveBeenCalledTimes(1);
+
+      const updatedUser = {
+        ...mockDiscordApiUserResponse,
+        username: "Updated Username",
+      };
+      await updateCachedDiscordUser(accessToken, updatedUser);
+      const updatedCachedUser = await getDiscordUser(accessToken);
+      expect(updatedCachedUser).toEqual(zUserSchema.parse(updatedUser));
       expect(axios.get).toHaveBeenCalledTimes(1);
     });
   });

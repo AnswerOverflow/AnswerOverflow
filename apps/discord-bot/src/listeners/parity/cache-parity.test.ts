@@ -1,5 +1,5 @@
 import { Client, Events, Guild, GuildMember } from "discord.js";
-import { emitEvent, mockGuild, mockGuildMember } from "@answeroverflow/discordjs-mock";
+import { copyClass, emitEvent, mockGuild, mockGuildMember } from "@answeroverflow/discordjs-mock";
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import {
   createDiscordAccount,
@@ -8,7 +8,12 @@ import {
   _NOT_PROD_createOauthAccountEntry,
 } from "@answeroverflow/db";
 import { toAODiscordAccount, toDiscordAPIServer } from "~discord-bot/utils/conversions";
-import { getUserServers, updateUserServersCache } from "@answeroverflow/cache";
+import {
+  getDiscordUser,
+  getUserServers,
+  updateCachedDiscordUser,
+  updateUserServersCache,
+} from "@answeroverflow/cache";
 // import { updateUserServersCache } from "@answeroverflow/cache";
 let client: Client;
 let guild: Guild;
@@ -57,6 +62,29 @@ describe("Account Parity", () => {
 
       const userServers2 = await getUserServers(oauth.access_token!);
       expect(userServers2).toHaveLength(0);
+    });
+  });
+  describe("User update", () => {
+    it("should update the cache when a user updates their username", async () => {
+      const oauth = await _NOT_PROD_createOauthAccountEntry({
+        discordUserId: member.user.id,
+        userId: user.id,
+      });
+      await updateCachedDiscordUser(oauth.access_token!, {
+        avatar: member.user.avatar,
+        discriminator: member.user.discriminator,
+        id: member.user.id,
+        username: member.user.username,
+      });
+      const cachedUser = await getDiscordUser(oauth.access_token!);
+      expect(cachedUser.username).toEqual(member.user.username);
+      const newUser = copyClass(member.user, member.client, {
+        username: "New User",
+      });
+
+      await emitEvent(client, Events.UserUpdate, member.user, newUser);
+      const cachedUser2 = await getDiscordUser(oauth.access_token!);
+      expect(cachedUser2.username).toEqual(newUser.username);
     });
   });
 });

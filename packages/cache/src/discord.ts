@@ -112,6 +112,16 @@ export function getDiscordUserRedisKey(accessToken: string) {
   return `discordUser:${accessToken}`;
 }
 
+export async function updateCachedDiscordUser(accessToken: string, user: DiscordAPIUserSchema) {
+  const client = await redis;
+  await client.setEx(
+    getDiscordUserRedisKey(accessToken),
+    hoursToSeconds(DISCORD_USER_CACHE_TTL_IN_HOURS),
+    JSON.stringify(user)
+  );
+  return user;
+}
+
 export async function getDiscordUser(accessToken: string) {
   const client = await redis;
   const cachedUser = await client.get(getDiscordUserRedisKey(accessToken));
@@ -120,10 +130,6 @@ export async function getDiscordUser(accessToken: string) {
   }
   const data = await discordApiFetch("/users/@me", accessToken);
   const parsed = zUserSchema.parse(data.data);
-  await client.setEx(
-    getDiscordUserRedisKey(accessToken),
-    hoursToSeconds(DISCORD_USER_CACHE_TTL_IN_HOURS),
-    JSON.stringify(parsed)
-  );
+  await updateCachedDiscordUser(accessToken, parsed);
   return parsed;
 }
