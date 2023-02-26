@@ -147,6 +147,9 @@
       "unauthed",
       "upsert",
       "upserting"
+      "devcontainer",
+      "devcontainers",
+      "Turborepo"
     ],
   },
   "extensions": {

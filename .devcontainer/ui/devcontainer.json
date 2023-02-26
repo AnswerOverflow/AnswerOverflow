@@ -1,9 +1,9 @@
-// ! If you make changes to this devcontainer make sure to update all other devcontainers as well
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/typescript-node
 {
   "name": "AnswerOverflow Dev",
   "dockerComposeFile": [
-    "docker-compose-workspace.yml",
-    "../docker-compose.yml"
+    "../docker-compose-workspace.yml"
   ],
   "service": "workspace",
   "workspaceFolder": "/AnswerOverflow",
@@ -18,8 +18,7 @@
         "EditorConfig.EditorConfig",
         "bradlc.vscode-tailwindcss",
         "DavidAnson.vscode-markdownlint",
-        "Orta.vscode-jest",
-        "streetsidesoftware.code-spell-checker"
+        "Orta.vscode-jest"
       ]
     }
   },
