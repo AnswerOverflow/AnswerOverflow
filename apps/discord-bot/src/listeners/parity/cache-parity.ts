@@ -6,7 +6,7 @@ import {
   removeServerFromUserCache,
   updateCachedDiscordUser,
 } from "@answeroverflow/cache";
-import { findDiscordOauthById } from "@answeroverflow/db";
+import { findDiscordOauthByProviderAccountId } from "@answeroverflow/db";
 import { toDiscordAPIServer } from "~discord-bot/utils/conversions";
 
 @ApplyOptions<Listener.Options>({
@@ -15,7 +15,7 @@ import { toDiscordAPIServer } from "~discord-bot/utils/conversions";
 })
 export class SyncOnAdd extends Listener {
   public async run(member: GuildMember) {
-    const account = await findDiscordOauthById(member.user.id);
+    const account = await findDiscordOauthByProviderAccountId(member.user.id);
     if (!account || !account.access_token) return;
     await addServerToUserServerCache({
       accessToken: account.access_token,
@@ -30,7 +30,7 @@ export class SyncOnAdd extends Listener {
 })
 export class SyncOnRemove extends Listener {
   public async run(member: GuildMember) {
-    const account = await findDiscordOauthById(member.user.id);
+    const account = await findDiscordOauthByProviderAccountId(member.user.id);
     if (!account || !account.access_token) return;
     const guild = member.guild;
     await removeServerFromUserCache({
@@ -46,7 +46,7 @@ export class SyncOnRemove extends Listener {
 })
 export class SyncOnUpdate extends Listener {
   public async run(_: User, newUser: User) {
-    const account = await findDiscordOauthById(newUser.id);
+    const account = await findDiscordOauthByProviderAccountId(newUser.id);
     if (!account || !account.access_token) return;
     await updateCachedDiscordUser(account.access_token, {
       ...account,

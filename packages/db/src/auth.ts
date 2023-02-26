@@ -1,7 +1,7 @@
 import { prisma } from "@answeroverflow/prisma-types";
 import { getRandomId } from "@answeroverflow/utils";
 
-export function findDiscordOauthById(discordId: string) {
+export function findDiscordOauthByProviderAccountId(discordId: string) {
   return prisma.account.findUnique({
     where: {
       provider_providerAccountId: {
@@ -10,6 +10,22 @@ export function findDiscordOauthById(discordId: string) {
       },
     },
   });
+}
+
+export async function findDiscordOauthByUserId(userId: string) {
+  const account = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      accounts: {
+        where: {
+          provider: "discord",
+        },
+      },
+    },
+  });
+  return account?.accounts[0] ?? null;
 }
 
 // todo: move to its own package
