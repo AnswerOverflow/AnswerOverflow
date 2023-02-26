@@ -130,9 +130,9 @@ export function assertIsUser(ctx: Context, targetUserId: string) {
   }
   return;
 }
-export const INVALID_ROUTE_FOR_BOT_ERROR = "This route is unavaliable to be called from the bot";
+export const INVALID_ROUTE_FOR_BOT_ERROR = "This route is unavailable to be called from the bot";
 export const INVALID_ROUTER_FOR_WEB_CLIENT_ERROR =
-  "This route is unavaliable to be called from the web client";
+  "This route is unavailable to be called from the web client";
 
 export function createInvalidSourceError(caller: Source) {
   let message = "";

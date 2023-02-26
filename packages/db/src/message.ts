@@ -55,8 +55,8 @@ export async function addReferencesToMessages(messages: Message[]) {
   const solutionIds = messages
     .filter((m) => m.solutionIds.length > 0)
     .flatMap((m) => m.solutionIds);
-  const refrencedMessages = await findManyMessages([...replyIds, ...solutionIds]);
-  const messageLookup = new Map(refrencedMessages.map((r) => [r.id, r]));
+  const referencedMessages = await findManyMessages([...replyIds, ...solutionIds]);
+  const messageLookup = new Map(referencedMessages.map((r) => [r.id, r]));
   return messages.map((m) => ({
     ...m,
     referencedMessage: m.messageReference?.messageId

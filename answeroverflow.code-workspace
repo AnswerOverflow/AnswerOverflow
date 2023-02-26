@@ -138,6 +138,8 @@
     ],
     "jest.autoRun": "off",
     "cSpell.words": [
+      "Bitfield",
+      "Rhys",
       "superjson",
       "trpc",
       "Turborepo",
