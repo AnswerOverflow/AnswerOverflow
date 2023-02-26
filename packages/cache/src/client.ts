@@ -24,22 +24,23 @@ export async function getRedisClient() {
   cacheInstance.on("error", (err) => {
     console.log("CacheStore - Connection status: error ", err);
   });
-  process.on(
-    "exit",
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    async () =>
-      await cacheInstance
-        .disconnect()
-        .catch((err) =>
-          console.log(
-            `CacheStore - Error while disconnecting from redis: ${
-              err instanceof Error ? err.message : "Unknown error"
-            }`
-          )
-        )
-  );
+  process.on("exit", () => cleanupRedis);
 
   await cacheInstance.connect();
   redisClient = cacheInstance;
   return cacheInstance;
+}
+
+export async function cleanupRedis() {
+  if (redisClient) {
+    await redisClient
+      .disconnect()
+      .catch((err) =>
+        console.log(
+          `CacheStore - Error while disconnecting from redis: ${
+            err instanceof Error ? err.message : "Unknown error"
+          }`
+        )
+      );
+  }
 }

@@ -8,6 +8,7 @@
   },
   "include": [
     "src",
+    "test",
     "index.ts",
     "vitest.config.ts",
     "../../reset.d.ts"
