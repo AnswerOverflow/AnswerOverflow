@@ -12,6 +12,9 @@ async function initializeClient(): Promise<RedisClientType> {
   });
 
   client.on("error", (err) => console.log("Redis Client Error", err));
+
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  process.on("exit", () => client.quit());
   await client.connect();
   return client;
 }
