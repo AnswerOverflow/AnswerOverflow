@@ -2,7 +2,7 @@ import { z } from "zod";
 import axios from "axios";
 import { redis } from "./client";
 
-function discordApiFetch(url: "/users/@me/guilds" | "/users/@me", token: string) {
+export function discordApiFetch(url: "/users/@me/guilds" | "/users/@me", token: string) {
   return axios.get("https://discordapp.com/api" + url, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -22,7 +22,7 @@ export const zDiscordApiServerSchema = z.object({
   permissions: z.number(),
   features: z.array(z.string()),
 });
-const zDiscordApiServerArraySchema = z.array(zDiscordApiServerSchema);
+export const zDiscordApiServerArraySchema = z.array(zDiscordApiServerSchema);
 export type DiscordAPIServerSchema = z.infer<typeof zDiscordApiServerSchema>;
 
 // TODO: Log cache hits and misses
@@ -34,10 +34,9 @@ export async function getUserServers(accessToken: string) {
   const client = await redis;
   const cachedServers = await client.get(getDiscordServersRedisKey(accessToken));
   if (cachedServers) {
-    return zDiscordApiServerArraySchema.parse(cachedServers);
+    return zDiscordApiServerArraySchema.parse(JSON.parse(cachedServers));
   }
   const data = await discordApiFetch("/users/@me/guilds", accessToken);
-  console.log(data.data);
   const servers = zDiscordApiServerArraySchema.parse(data.data);
   await client.setEx(
     getDiscordServersRedisKey(accessToken),
@@ -70,6 +69,8 @@ export const zUserSchema = z.object({
   publicFlags: z.number().optional(),
 });
 
+export type DiscordAPIUserSchema = z.infer<typeof zUserSchema>;
+
 const DISCORD_USER_CACHE_TTL_IN_HOURS = 24;
 
 export function getDiscordUserRedisKey(accessToken: string) {
@@ -80,7 +81,7 @@ export async function getDiscordUser(accessToken: string) {
   const client = await redis;
   const cachedUser = await client.get(getDiscordUserRedisKey(accessToken));
   if (cachedUser) {
-    return zUserSchema.parse(cachedUser);
+    return zUserSchema.parse(JSON.parse(cachedUser));
   }
   const data = await discordApiFetch("/users/@me", accessToken);
   const parsed = zUserSchema.parse(data.data);

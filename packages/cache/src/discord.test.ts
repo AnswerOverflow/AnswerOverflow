@@ -1,3 +1,13 @@
+import {
+  getDiscordUser,
+  getUserServers,
+  zDiscordApiServerArraySchema,
+  zUserSchema,
+} from "./discord";
+
+import axios from "axios";
+import { getRandomId } from "@answeroverflow/utils";
+
 const mockDiscordApiUserResponse = {
   id: "523949187663134754",
   username: "Rhys",
@@ -51,19 +61,49 @@ const mockDiscordApiServersResponse = [
     features: ["APPLICATION_COMMAND_PERMISSIONS_V2"],
     permissions_new: "4398046511103",
   },
-  {
-    id: "545388030467375121",
-    name: "UE4 Winter Jam",
-    icon: "c36a41c71195d0d19106a15e1b096b47",
-    owner: true,
-    permissions: 2147483647,
-    features: ["APPLICATION_COMMAND_PERMISSIONS_V2"],
-    permissions_new: "4398046511103",
-  },
 ];
 
+function mockAxiosGet<T>(data: T) {
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
+  return axios.get.mockResolvedValue({
+    data,
+  });
+}
+
+let accessToken: string;
+beforeEach(() => {
+  vi.resetAllMocks();
+  vi.mock("axios");
+  accessToken = getRandomId();
+});
+
 describe("Discord API", () => {
+  describe("Discord User", () => {
+    it("should miss the cache and fetch discord user from the api, then write them to the cache", async () => {
+      mockAxiosGet(mockDiscordApiUserResponse);
+
+      const notCachedUser = await getDiscordUser(accessToken);
+      expect(notCachedUser).toEqual(zUserSchema.parse(mockDiscordApiUserResponse));
+
+      const cachedUser = await getDiscordUser(accessToken);
+      expect(cachedUser).toEqual(zUserSchema.parse(mockDiscordApiUserResponse));
+      expect(axios.get).toHaveBeenCalledTimes(1);
+    });
+  });
   describe("Discord Servers", () => {
-    it("should miss the cache and fetch discord servers from the api, then write them to the cache", async () => {});
+    it("should miss the cache and fetch discord servers from the api, then write them to the cache", async () => {
+      mockAxiosGet(mockDiscordApiServersResponse);
+      const notCachedServers = await getUserServers(accessToken);
+      expect(notCachedServers).toEqual(
+        zDiscordApiServerArraySchema.parse(mockDiscordApiServersResponse)
+      );
+
+      const cachedServers = await getUserServers(accessToken);
+      expect(cachedServers).toEqual(
+        zDiscordApiServerArraySchema.parse(mockDiscordApiServersResponse)
+      );
+      expect(axios.get).toHaveBeenCalledTimes(1);
+    });
   });
 });
