@@ -56,6 +56,7 @@ export function getParentChannelOfMessage(message: Message): string | null {
 
 export type MessageSearchOptions = {
   query: string;
+  channelId?: string;
   serverId?: string;
   after?: string;
   limit?: number;
@@ -412,7 +413,7 @@ export class Elastic extends Client {
     return true;
   }
 
-  public async searchMessages({ query, serverId, limit }: MessageSearchOptions) {
+  public async searchMessages({ query, serverId, limit, channelId }: MessageSearchOptions) {
     const q: QueryDslQueryContainer = {
       // TODO: No ts ignore in future
       // @ts-ignore
@@ -432,12 +433,21 @@ export class Elastic extends Client {
       throw new Error(
         "This error should never occur. The query is always expected to be an array for the must property"
       );
-    if (q.bool?.must && serverId) {
-      q.bool.must.push({
-        match: {
-          serverId,
-        },
-      });
+    if (q.bool?.must) {
+      if (serverId) {
+        q.bool.must.push({
+          match: {
+            serverId,
+          },
+        });
+      }
+      if (channelId) {
+        q.bool.must.push({
+          match: {
+            channelId,
+          },
+        });
+      }
     }
     const result = await this.search<Message>({
       index: this.messagesIndex,

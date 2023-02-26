@@ -220,5 +220,27 @@ describe("ElasticSearch", () => {
       expect(searchResults).toBeDefined();
       expect(searchResults).toHaveLength(1);
     });
+    it("should search for a message by channel id", async () => {
+      const content = getRandomId();
+      const targetChannelId = getRandomId();
+      await elastic.upsertMessage({
+        ...msg1,
+        channelId: targetChannelId,
+        content,
+      });
+      await elastic.upsertMessage({
+        ...msg1,
+        id: getRandomId(),
+        channelId: getRandomId(),
+        content,
+      });
+      const searchResults = await elastic.searchMessages({
+        query: content,
+        channelId: targetChannelId,
+      });
+      expect(searchResults).toBeDefined();
+      expect(searchResults).toHaveLength(1);
+      expect(searchResults.find((msg) => msg._source.content === content)).toBeDefined();
+    });
   });
 });
