@@ -40,6 +40,10 @@
       "path": "packages/db-mock"
     },
     {
+      "name": "cache",
+      "path": "packages/cache"
+    },
+    {
       "name": "prisma-types",
       "path": "packages/prisma-types"
     },
@@ -133,6 +137,7 @@
       "auth",
       "config",
       "utils",
+      "redis",
       "db-mock",
       "prisma-types",
       "elastic-types",
@@ -140,16 +145,17 @@
     "jest.autoRun": "off",
     "cSpell.words": [
       "Bitfield",
+      "devcontainer",
+      "devcontainers",
+      "reacord",
       "Rhys",
       "superjson",
       "trpc",
+      "tsup",
       "Turborepo",
       "unauthed",
       "upsert",
       "upserting"
-      "devcontainer",
-      "devcontainers",
-      "Turborepo"
     ],
   },
   "extensions": {

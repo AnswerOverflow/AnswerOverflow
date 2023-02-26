@@ -11,4 +11,7 @@ export default createVitestConfig({
     },
   },
   envDir: "../../",
+  test: {
+    globalSetup: "./test/setup.ts",
+  },
 });

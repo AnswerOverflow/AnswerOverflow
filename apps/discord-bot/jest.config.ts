@@ -23,6 +23,7 @@ const jestConfig: JestConfigWithTsJest = {
   transform: {
     "^.+\\.(t|j)sx?$": "@swc/jest",
   },
+  setupFilesAfterEnv: ["<rootDir>/test/setup.ts"],
 };
 
 export default jestConfig;

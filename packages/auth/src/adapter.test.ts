@@ -1,11 +1,11 @@
 import { extendedAdapter } from "./adapter";
 import type { z } from "zod";
-import type { zUserSchema } from "./discord-oauth";
+import type { zUserSchema } from "@answeroverflow/cache";
 import { prisma } from "@answeroverflow/db";
 import { getRandomEmail, getRandomId } from "@answeroverflow/utils";
 let mockDiscordAccount: z.infer<typeof zUserSchema>;
 beforeEach(() => {
-  vitest.mock("./discord-oauth", () => ({
+  vitest.mock("@answeroverflow/cache", () => ({
     getDiscordUser: vitest.fn(() => {
       return mockDiscordAccount;
     }),
