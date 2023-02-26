@@ -1,27 +1,28 @@
-import type { Meta, StoryFn } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { mockDiscordAccount } from "~ui/test/props";
-import { DiscordAvatar, DiscordAvatarProps } from "./DiscordAvatar";
-export default {
+import { DiscordAvatar } from "./DiscordAvatar";
+const meta = {
   component: DiscordAvatar,
-} as Meta;
+} as Meta<typeof DiscordAvatar>;
 
-//👇 We create a “template” of how args map to rendering
-const Template: StoryFn<typeof DiscordAvatar> = (args: DiscordAvatarProps) => (
-  <DiscordAvatar {...args} />
-);
+export default meta;
+
+type Story = StoryObj<typeof meta>;
 
 //👇 Each story then reuses that template
-export const Primary = Template.bind({});
-Primary.args = {
-  size: "md",
-  user: mockDiscordAccount(),
+export const Primary: Story = {
+  args: {
+    size: "md",
+    user: mockDiscordAccount(),
+  },
 };
 
-export const WithImage = Template.bind({});
-WithImage.args = {
-  size: "md",
-  user: mockDiscordAccount({
-    avatar: "7716e305f7de26045526d9da6eef2dab",
-    id: "523949187663134754",
-  }),
+export const WithImage: Story = {
+  args: {
+    size: "md",
+    user: mockDiscordAccount({
+      avatar: "7716e305f7de26045526d9da6eef2dab",
+      id: "523949187663134754",
+    }),
+  },
 };

@@ -11,6 +11,7 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
+    ".storybook/*",
     "test",
     "src",
     "**/*.tsx",

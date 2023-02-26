@@ -1,48 +1,56 @@
 import { cva, VariantProps } from "cva";
+import type { Merge, SetNonNullable } from "type-fest";
+import { buttonStyles as buttonStylesData, convertToCva } from "./button-styles";
+
+export type ButtonVariantProps = Merge<
+  SetNonNullable<Required<VariantProps<typeof buttonStyles>>>,
+  Pick<VariantProps<typeof buttonStyles>, "disabled">
+>;
 
 export const buttonStyles = cva(
-  "inline-flex items-center justify-center rounded-md border border-transparent  px-6 py-3 text-base font-medium text-white shadow-sm  focus:outline-none focus:ring-2 focus:ring-offset-2",
+  "rounded-md px-8 py-2 font-body font-bold transition-all duration-100",
   {
+    // We don't need to declare any of these, as all the types are required, we only need to do compound variants
     variants: {
-      intent: {
-        primary: "bg-blue-700 text-white border-transparent hover:bg-blue-800 ",
-        secondary: "bg-white text-gray-800 border-gray-400 hover:bg-gray-100",
-        danger: "bg-red-600 text-white border-transparent hover:bg-red-700",
-        success: "bg-green-700 text-white border-transparent hover:bg-green-800",
+      type: {
+        solid: "",
+        ghost: "",
       },
-      size: {
-        small: ["text-sm", "py-1", "px-2"],
-        medium: ["text-base", "py-2", "px-4"],
+      color: {
+        red: "",
+        blue: "",
+        green: "",
+        black: "",
+        white: "",
+      },
+      disabled: {
+        true: "",
       },
     },
-    defaultVariants: {
-      size: "medium",
-      intent: "primary",
-    },
+    compoundVariants: [...convertToCva(buttonStylesData)],
   }
 );
 
-export interface ButtonProps extends VariantProps<typeof buttonStyles> {
-  children: React.ReactNode;
-  visualOnly?: boolean;
+export interface ButtonProps extends ButtonVariantProps {
   onClick?: () => void;
+  className?: string;
 }
 
-export function Button({
-  intent,
-  size,
+export const Button: React.FC<React.PropsWithChildren<ButtonProps>> = ({
+  type,
+  color,
+  disabled,
+  onClick,
   children,
-  visualOnly,
-  ...props
-}: ButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  className,
+}) => {
   return (
     <button
-      type="button"
-      className={buttonStyles({ intent, size })}
-      tabIndex={visualOnly ? -1 : undefined}
-      {...props}
+      className={buttonStyles({ type, color, disabled: disabled ?? false, className })}
+      onClick={() => onClick?.()}
+      disabled={disabled ?? false}
     >
       {children}
     </button>
   );
-}
+};

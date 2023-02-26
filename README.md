@@ -2,8 +2,8 @@
 <p align='center'>
 <a href='https://answeroverflow.com/' target="_blank" rel="noopener">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/AnswerOverflowLogoLight.png" />
-    <img alt="Answer Overflow Logo" src="./assets/AnswerOverflowLogoDark.png" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.answeroverflow.com/AnswerOverflowLogoLight.png" />
+    <img alt="Answer Overflow Logo" src="https://www.answeroverflow.com/AnswerOverflowLogoDark.png" />
   </picture>
 </a>
 </p>
@@ -77,6 +77,8 @@ Go to [Answer Overflow](https://www.answeroverflow.com/), add the bot your serve
 ## Contributing
 
 Want to contribute? First, read the <a href="https://github.com/AnswerOverflow/AnswerOverflow/blob/main/CONTRIBUTING.md">Contributing Guidelines</a> before creating PRs or issues. Need any help? Join us on <a href="https://discord.gg/Wny38ap7Tx">Discord</a>!
+
+For designing user interfaces, check out our [design guidelines](./DESIGN_GUIDELINES.md).
 
 <div align="left">
   <div>

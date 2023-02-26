@@ -61,7 +61,7 @@ export function toggleDarkTheme(themeOverride?: boolean) {
   changeCodeHighlighting(isDarkMode);
 
   if (isDarkMode === isSystemDarkMode) {
-    delete window.localStorage.isDarkMode;
+    window.localStorage.isDarkMode = isDarkMode;
   } else {
     window.localStorage.isDarkMode = isDarkMode;
   }
