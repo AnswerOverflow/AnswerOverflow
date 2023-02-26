@@ -9,8 +9,6 @@ declare global {
     interface ProcessEnv {
       /* Prisma */
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      VITE_DATABASE_URL: string;
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       DATABASE_URL: string;
 
       // common
