@@ -30,6 +30,18 @@ const DISCORD_SERVERS_CACHE_TTL_IN_HOURS = 24;
 export function getDiscordServersRedisKey(accessToken: string) {
   return `userServers:${accessToken}`;
 }
+export async function updateUserServersCache(
+  accessToken: string,
+  servers: DiscordAPIServerSchema[]
+) {
+  const client = await redis;
+  await client.setEx(
+    getDiscordServersRedisKey(accessToken),
+    hoursToSeconds(DISCORD_SERVERS_CACHE_TTL_IN_HOURS),
+    JSON.stringify(servers)
+  );
+}
+
 export async function getUserServers(accessToken: string) {
   const client = await redis;
   const cachedServers = await client.get(getDiscordServersRedisKey(accessToken));
@@ -38,12 +50,35 @@ export async function getUserServers(accessToken: string) {
   }
   const data = await discordApiFetch("/users/@me/guilds", accessToken);
   const servers = zDiscordApiServerArraySchema.parse(data.data);
-  await client.setEx(
-    getDiscordServersRedisKey(accessToken),
-    hoursToSeconds(DISCORD_SERVERS_CACHE_TTL_IN_HOURS),
-    JSON.stringify(servers)
-  );
+  await updateUserServersCache(accessToken, servers);
   return servers;
+}
+
+export async function removeServerFromUserCache({
+  accessToken,
+  serverId,
+}: {
+  accessToken: string;
+  serverId: string;
+}) {
+  const cachedServers = await getUserServers(accessToken);
+  if (cachedServers) {
+    const filteredServers = cachedServers.filter((server) => server.id !== serverId);
+    await updateUserServersCache(accessToken, filteredServers);
+  }
+}
+
+export async function addServerToUserCache({
+  accessToken,
+  server,
+}: {
+  accessToken: string;
+  server: DiscordAPIServerSchema;
+}) {
+  const cachedServers = await getUserServers(accessToken);
+  if (cachedServers) {
+    await updateUserServersCache(accessToken, [...cachedServers, server]);
+  }
 }
 
 /*

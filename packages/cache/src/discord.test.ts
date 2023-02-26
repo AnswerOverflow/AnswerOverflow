@@ -1,6 +1,8 @@
 import {
+  addServerToUserCache,
   getDiscordUser,
   getUserServers,
+  removeServerFromUserCache,
   zDiscordApiServerArraySchema,
   zUserSchema,
 } from "./discord";
@@ -104,6 +106,55 @@ describe("Discord API", () => {
         zDiscordApiServerArraySchema.parse(mockDiscordApiServersResponse)
       );
       expect(axios.get).toHaveBeenCalledTimes(1);
+    });
+    it("should manually remove a server from the users cache", async () => {
+      mockAxiosGet(mockDiscordApiServersResponse);
+      const notCachedServers = await getUserServers(accessToken);
+      expect(notCachedServers).toEqual(
+        zDiscordApiServerArraySchema.parse(mockDiscordApiServersResponse)
+      );
+
+      const cachedServers = await getUserServers(accessToken);
+      expect(cachedServers).toHaveLength(2);
+      expect(cachedServers).toEqual(
+        zDiscordApiServerArraySchema.parse(mockDiscordApiServersResponse)
+      );
+      const idToRemove = cachedServers[0]!.id;
+      await removeServerFromUserCache({
+        accessToken,
+        serverId: idToRemove,
+      });
+      const cachedServersAfterRemoval = await getUserServers(accessToken);
+      expect(cachedServersAfterRemoval).toHaveLength(1);
+      expect(cachedServersAfterRemoval.find((s) => s.id === idToRemove)).toBeUndefined();
+    });
+    it("should manually add a server to the users cache", async () => {
+      mockAxiosGet(mockDiscordApiServersResponse);
+      const notCachedServers = await getUserServers(accessToken);
+      expect(notCachedServers).toEqual(
+        zDiscordApiServerArraySchema.parse(mockDiscordApiServersResponse)
+      );
+
+      const cachedServers = await getUserServers(accessToken);
+      expect(cachedServers).toHaveLength(2);
+      expect(cachedServers).toEqual(
+        zDiscordApiServerArraySchema.parse(mockDiscordApiServersResponse)
+      );
+      const idToAdd = getRandomId();
+      await addServerToUserCache({
+        accessToken,
+        server: {
+          id: idToAdd,
+          name: "Test Server",
+          icon: null,
+          owner: false,
+          permissions: 0,
+          features: [],
+        },
+      });
+      const cachedServersAfterRemoval = await getUserServers(accessToken);
+      expect(cachedServersAfterRemoval).toHaveLength(3);
+      expect(cachedServersAfterRemoval.find((s) => s.id === idToAdd)).toBeDefined();
     });
   });
 });
