@@ -4,7 +4,7 @@
  * This is especially useful for Docker builds.
  */
 
-import nextra from "nextra"
+import nextra from "nextra";
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -24,12 +24,10 @@ const config = {
   eslint: {
     ignoreDuringBuilds: !!process.env.CI,
   },
-
 };
 const withNextra = nextra({
-  theme: 'nextra-theme-docs',
-  themeConfig: './theme.config.tsx',
-})
-
+  theme: "nextra-theme-docs",
+  themeConfig: "./theme.config.tsx",
+});
 
 export default withNextra(config);

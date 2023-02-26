@@ -1,6 +1,6 @@
 import React from "react";
 import type { DocsThemeConfig } from "nextra-theme-docs";
-import { AnswerOverflowLogo } from "@answeroverflow/ui";
+import { AnswerOverflowLogo, Footer } from "@answeroverflow/ui";
 const config: DocsThemeConfig = {
   logo: <AnswerOverflowLogo />,
   project: {
@@ -9,9 +9,14 @@ const config: DocsThemeConfig = {
   chat: {
     link: "https://discord.answeroverflow.com",
   },
-  docsRepositoryBase: "https://github.com/shuding/nextra-docs-template",
+  feedback: {
+    // TODO: Add properties that Nextra passes and add to url
+    useLink: () =>
+      `https://github.com/AnswerOverflow/AnswerOverflow/issues/new?assignees=&labels=%F0%9F%93%96+documentation&template=documentation.yml&title=%5BDocs%5D%3A+`,
+  },
+  docsRepositoryBase: "https://github.com/AnswerOverflow/AnswerOverflow/tree/main/apps/docs",
   footer: {
-    text: "Nextra Docs Template",
+    component: <Footer />,
   },
 };
 

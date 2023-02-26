@@ -1,3 +1,7 @@
 {
-  "index": "My Homepage"
+  "index": "My Homepage",
+  "quick-start": "Quick Start",
+  "channel-settings": "Channel Settings",
+  "server-settings": "Server Settings",
+  "user-settings": "User Settings"
 }
