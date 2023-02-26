@@ -1,5 +1,5 @@
-import { Session, getServerSession, DiscordServer } from "@answeroverflow/auth";
-import type { getDiscordUser } from "@answeroverflow/auth";
+import { Session, getServerSession } from "@answeroverflow/auth";
+import type { DiscordAPIServerSchema, getDiscordUser } from "@answeroverflow/cache";
 import { prisma, elastic } from "@answeroverflow/db";
 import type { inferAsyncReturnType } from "@trpc/server";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
@@ -16,7 +16,7 @@ type CreateContextOptions = {
   // If the web client, then we need to fetch the user servers
   source: Source;
   // Used for ensuring that the user has the right access to the data they are trying to fetch
-  userServers?: DiscordServer[] | null;
+  userServers?: DiscordAPIServerSchema[] | null;
   discordAccount?: Awaited<ReturnType<typeof getDiscordUser>> | null;
 };
 

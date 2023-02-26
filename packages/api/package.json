@@ -18,6 +18,7 @@
     "@answeroverflow/db": "*",
     "@answeroverflow/discordjs-utils": "*",
     "@answeroverflow/utils": "*",
+    "@answeroverflow/cache": "*",
     "@sapphire/bitfield": "^1.0.0",
     "@trpc/client": "^10.4.3",
     "@trpc/server": "^10.4.3",

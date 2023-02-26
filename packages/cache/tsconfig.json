@@ -7,13 +7,13 @@
     "baseUrl": "../../"
   },
   "include": [
+    "index.ts",
     "src",
     "test",
-    "index.ts",
-    "vitest.config.ts",
-    "../../reset.d.ts"
+    "vitest.config.ts"
   ],
   "exclude": [
-    "node_modules"
-  ]
+    "node_modules",
+    "../../node_modules/*"
+  ],
 }

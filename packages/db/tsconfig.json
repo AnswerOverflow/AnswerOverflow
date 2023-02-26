@@ -9,6 +9,7 @@
   "include": [
     "index.ts",
     "src",
+    "test",
     "vitest.config.ts",
     "scripts",
     "../../reset.d.ts"

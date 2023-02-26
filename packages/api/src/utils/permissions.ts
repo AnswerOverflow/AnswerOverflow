@@ -13,7 +13,7 @@ import {
   zServerPublic,
 } from "@answeroverflow/db";
 import type { Source, Context } from "~api/router/context";
-import type { DiscordServer } from "@answeroverflow/auth";
+import type { DiscordAPIServerSchema } from "@answeroverflow/cache";
 
 export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
   "You are missing the required permissions to do this";
@@ -168,14 +168,14 @@ export function assertCanEditServerBotOnly(ctx: Context, serverId: string) {
 }
 
 export const canUserViewPrivateMessage = (
-  userServers: DiscordServer[] | null,
+  userServers: DiscordAPIServerSchema[] | null,
   message: MessageFull | MessageWithDiscordAccount
 ) => userServers?.find((s) => s.id === message.serverId);
 
 // Kind of ugly having it take in two different types, but it's the easiest way to do it
 export function stripPrivateMessageData(
   message: MessageFull | MessageWithDiscordAccount,
-  userServers: DiscordServer[] | null = null
+  userServers: DiscordAPIServerSchema[] | null = null
 ): MessageFull | MessageWithDiscordAccount {
   const isPartialMessage = !isMessageFull(message);
   // If it is only a reply and is public, then just return

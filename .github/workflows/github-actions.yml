@@ -11,24 +11,17 @@ on:
 env:
   # None of these are real secrets although this should probably be updated
   DATABASE_URL: mysql://root:mysql@localhost:33306/api_dev
-  VITE_DATABASE_URL: mysql://root:mysql@localhost:33306/api_dev
 
   ELASTICSEARCH_URL: http://localhost:9200
-  VITE_ELASTICSEARCH_URL: http://localhost:9200
-
   ELASTICSEARCH_USERNAME: elastic
-  VITE_ELASTICSEARCH_USERNAME: elastic
-
   ELASTICSEARCH_PASSWORD: changeme
-  VITE_ELASTICSEARCH_PASSWORD: changeme
-
   ELASTICSEARCH_MESSAGE_INDEX: messages
-  VITE_ELASTICSEARCH_MESSAGE_INDEX: messages
+
+  REDIS_URL: redis://:redis@localhost:6379
 
   OWNERS: "[]"
   DISCORD_CLIENT_ID: "123"
-  VITE_DISCORD_CLIENT_ID: "123"
-  
+
   # Long delay to give tests best chance at succeeding
   DEFAULT_DELAY_IN_MS: "5000"
 

@@ -108,15 +108,7 @@ const properties: ElasticMessageIndexProperties = {
 };
 
 function getElasticClient(): Elastic {
-  if (process.env.NODE_ENV === "test") {
-    return new Elastic({
-      node: process.env.VITE_ELASTICSEARCH_URL,
-      auth: {
-        password: process.env.VITE_ELASTICSEARCH_PASSWORD,
-        username: process.env.VITE_ELASTICSEARCH_USERNAME,
-      },
-    });
-  } else if (process.env.NODE_ENV === "development") {
+  if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
     return new Elastic({
       node: process.env.ELASTICSEARCH_URL,
       auth: {
@@ -157,11 +149,7 @@ export class Elastic extends Client {
 
   constructor(opts: ClientOptions) {
     super(opts);
-    if (process.env.NODE_ENV === "test") {
-      this.messagesIndex = process.env.VITE_ELASTICSEARCH_MESSAGE_INDEX;
-    } else {
-      this.messagesIndex = process.env.ELASTICSEARCH_MESSAGE_INDEX;
-    }
+    this.messagesIndex = process.env.ELASTICSEARCH_MESSAGE_INDEX;
   }
 
   public destroyMessagesIndex() {

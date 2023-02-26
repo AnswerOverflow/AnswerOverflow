@@ -1,29 +1,13 @@
-import type { PrismaClient } from "@answeroverflow/db";
+import { findDiscordOauthByUserId } from "@answeroverflow/db";
 import { TRPCError } from "@trpc/server";
 
-export async function getDiscordAccount(prisma: PrismaClient, userId: string) {
-  const user = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-    include: {
-      accounts: {
-        where: {
-          provider: "discord",
-        },
-      },
-    },
-  });
-  if (!user) {
+export async function getDiscordOauthThrowIfNotFound(userId: string) {
+  const account = await findDiscordOauthByUserId(userId);
+  if (!account?.access_token) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
+      message: "You are not authorized with Discord",
     });
   }
-  const discordAccount = user.accounts[0];
-  if (!discordAccount || !discordAccount.access_token) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-    });
-  }
-  return discordAccount;
+  return account;
 }
