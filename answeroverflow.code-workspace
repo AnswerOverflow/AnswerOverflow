@@ -138,6 +138,8 @@
     ],
     "jest.autoRun": "off",
     "cSpell.words": [
+      "devcontainer",
+      "devcontainers",
       "Turborepo"
     ],
   },
