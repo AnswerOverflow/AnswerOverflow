@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "with-env": "dotenv -e ../../.env --",
-    "dev": "yarn with-env next dev",
+    "dev": "yarn with-env next dev -p 5234",
     "build": "yarn with-env next build",
     "clean": "rm -rf .next .turbo node_modules",
-    "start": "yarn run with-env next start",
+    "start": "yarn run with-env next start -p 5234",
     "lint": "next lint && tsc --noEmit",
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit"

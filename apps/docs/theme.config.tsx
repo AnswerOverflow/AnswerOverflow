@@ -1,19 +1,18 @@
-import React from 'react'
-import type { DocsThemeConfig } from 'nextra-theme-docs'
-
-
+import React from "react";
+import type { DocsThemeConfig } from "nextra-theme-docs";
+import { AnswerOverflowLogo } from "@answeroverflow/ui";
 const config: DocsThemeConfig = {
-  logo: <span>My Project</span>,
+  logo: <AnswerOverflowLogo />,
   project: {
-    link: 'https://github.com/shuding/nextra-docs-template',
+    link: "https://contribute.answeroverflow.com",
   },
   chat: {
-    link: 'https://discord.com',
+    link: "https://discord.answeroverflow.com",
   },
-  docsRepositoryBase: 'https://github.com/shuding/nextra-docs-template',
+  docsRepositoryBase: "https://github.com/shuding/nextra-docs-template",
   footer: {
-    text: 'Nextra Docs Template',
+    text: "Nextra Docs Template",
   },
-}
+};
 
-export default config
+export default config;
