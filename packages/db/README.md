@@ -1,14 +1,16 @@
-# File for writing down misc notes relating to the database
+# DB
 
-## Commands
-Misc commands that are used while working with prisma
-* Generate a migration
-    
-    ```npx prisma migrate dev --name name```
+## Package Philosophy
 
-* Update the types after a migration
+This is where the database packages meet up. The output of the functions for this package can be composed of data from multiple database sources in order to give the best developer experience when working.
 
-    ```npx prisma generate```
+Along with this, this package handles validation before performing writes to the database.
 
-* Browse data
-    ```npx prisma studio```
+i.e Before upserting a message for a user in `upsertMessage()`, it will fetch the user server settings to validate that they have message indexing enabled before doing the database write.
+
+This is to put these fundamental permission checks as close to the database as possible in order to prevent them from being missed.
+
+### Core dependencies
+
+- `@answeroverflow/elastic-types`
+- `@answeroverflow/prisma-types`

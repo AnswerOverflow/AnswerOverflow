@@ -15,7 +15,7 @@ export default function MessageResult(props: InferGetStaticPropsType<typeof getS
   const { data } = trpc.messagePage.threadFromMessageId.useQuery(messageId, {
     // For authenticated users that are in the server, we fetch the messages incase any of them are private
     enabled: shouldFetchPrivateMessages,
-    // If we're doing SSG, then we don't change the queryHash so we can access the data, othewise we set it to change with the auth state
+    // If we're doing SSG, then we don't change the queryHash so we can access the data, otherwise we set it to change with the auth state
     queryHash: shouldFetchPrivateMessages ? `${messageId}-${isUserInServer.toString()}` : undefined,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,

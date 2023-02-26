@@ -35,7 +35,7 @@ const defaultMessage: MessageProps = {
     solutionIds: [],
     childThread: null,
     messageReference: null,
-  } satisfies MessageWithDiscordAccount,
+  } as MessageWithDiscordAccount,
 };
 
 export const Primary = Template.bind({});
