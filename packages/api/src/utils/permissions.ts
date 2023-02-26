@@ -167,6 +167,11 @@ export function assertCanEditServerBotOnly(ctx: Context, serverId: string) {
   return [assertCanEditServer(ctx, serverId), isCtxSourceDiscordBot(ctx)];
 }
 
+export const canUserViewPrivateMessage = (
+  userServers: DiscordServer[] | null,
+  message: MessageFull | MessageWithDiscordAccount
+) => userServers?.find((s) => s.id === message.serverId);
+
 // Kind of ugly having it take in two different types, but it's the easiest way to do it
 export function stripPrivateMessageData(
   message: MessageFull | MessageWithDiscordAccount,
@@ -178,13 +183,10 @@ export function stripPrivateMessageData(
     return message;
   }
 
-  if (userServers) {
-    const userServer = userServers.find((s) => s.id === message.serverId);
-    // If the user is in the server, then just return
-    if (userServer) {
-      return message;
-    }
+  if (canUserViewPrivateMessage(userServers, message)) {
+    return message;
   }
+
   const defaultAuthor = getDefaultDiscordAccount({
     id: "0",
     name: "Unknown User",

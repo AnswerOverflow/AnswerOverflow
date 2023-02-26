@@ -9,7 +9,7 @@ import {
   upsertManyMessages,
   createUserServerSettings,
 } from "@answeroverflow/db";
-import { mockUnauthedCtx } from "~api/test/utils";
+import { mockAccountWithServersCallerCtx, mockUnauthedCtx } from "~api/test/utils";
 import { messagesRouter } from "./messages";
 import {
   pickPublicServerData,
@@ -32,7 +32,7 @@ let server: Server;
 let channel: Channel;
 let author: DiscordAccount;
 let unauthedMessagePageRouter: ReturnType<(typeof messagesRouter)["createCaller"]>;
-
+let sameServerMessagePageRouter: ReturnType<(typeof messagesRouter)["createCaller"]>;
 beforeEach(async () => {
   server = mockServer();
   channel = mockChannel(server);
@@ -43,6 +43,13 @@ beforeEach(async () => {
   await createDiscordAccount(author);
   const unauthedCtx = await mockUnauthedCtx("web-client");
   unauthedMessagePageRouter = messagesRouter.createCaller(unauthedCtx);
+  const sameServerCtx = await mockAccountWithServersCallerCtx(
+    server,
+    "web-client",
+    "AddReactions",
+    author
+  );
+  sameServerMessagePageRouter = messagesRouter.createCaller(sameServerCtx.ctx);
 });
 
 describe("Message Results", () => {
@@ -282,8 +289,114 @@ describe("Search Results", () => {
       })
     );
   });
-  it("should not return a private search result if the user is not logged in", async () => {});
-  it("should return a private search result if the user is logged in", async () => {});
-  it("should fetch a result in a server correctly", async () => {});
-  it("should fetch a result in a channel correctly", async () => {});
+  it("should not return a private search result if the user is not logged in", async () => {
+    const message = mockMessage(server, channel, author, {
+      content: getRandomId(),
+    });
+    await upsertManyMessages([message]);
+    const searchResults = await unauthedMessagePageRouter.search({
+      query: message.content,
+    });
+    expect(searchResults).toEqual([]);
+  });
+  it("should return a private search result if the user is logged in", async () => {
+    const message = mockMessage(server, channel, author, {
+      content: getRandomId(),
+    });
+    await upsertManyMessages([message]);
+    const searchResults = await sameServerMessagePageRouter.search({
+      query: message.content,
+    });
+    const firstResult = searchResults[0]!;
+    expect(firstResult).toBeDefined();
+    expect(firstResult.message).toEqual(
+      toMessageWithAccountAndRepliesTo({
+        message,
+        author,
+        publicMessage: false,
+      })
+    );
+  });
+  it("should fetch a result in a server correctly", async () => {
+    const message = mockMessage(server, channel, author, {
+      content: getRandomId(),
+    });
+    const otherServer = mockServer();
+    const otherChannel = mockChannel(otherServer);
+    await createServer(otherServer);
+    await createChannel(otherChannel);
+    const otherMessage = mockMessage(otherServer, otherChannel, author, {
+      content: message.content,
+    });
+    await upsertManyMessages([message, otherMessage]);
+    await createUserServerSettings({
+      userId: author.id,
+      serverId: server.id,
+      flags: {
+        canPubliclyDisplayMessages: true,
+      },
+    });
+    await createUserServerSettings({
+      userId: author.id,
+      serverId: otherServer.id,
+      flags: {
+        canPubliclyDisplayMessages: true,
+      },
+    });
+    const searchResults = await unauthedMessagePageRouter.search({
+      query: message.content,
+      serverId: server.id,
+    });
+    expect(searchResults).toHaveLength(1);
+    const firstResult = searchResults[0]!;
+    expect(firstResult).toBeDefined();
+    expect(firstResult.message).toEqual(
+      toMessageWithAccountAndRepliesTo({
+        message,
+        author,
+        publicMessage: true,
+      })
+    );
+  });
+  it("should fetch a result in a channel correctly", async () => {
+    const message = mockMessage(server, channel, author, {
+      content: getRandomId(),
+    });
+    const otherServer = mockServer();
+    const otherChannel = mockChannel(otherServer);
+    await createServer(otherServer);
+    await createChannel(otherChannel);
+    const otherMessage = mockMessage(otherServer, otherChannel, author, {
+      content: message.content,
+    });
+    await upsertManyMessages([message, otherMessage]);
+    await createUserServerSettings({
+      userId: author.id,
+      serverId: server.id,
+      flags: {
+        canPubliclyDisplayMessages: true,
+      },
+    });
+    await createUserServerSettings({
+      userId: author.id,
+      serverId: otherServer.id,
+      flags: {
+        canPubliclyDisplayMessages: true,
+      },
+    });
+    const searchResults = await unauthedMessagePageRouter.search({
+      query: message.content,
+      channelId: channel.id,
+    });
+    expect(searchResults).toHaveLength(1);
+    const firstResult = searchResults[0]!;
+    expect(firstResult).toBeDefined();
+    expect(firstResult.message).toEqual(
+      toMessageWithAccountAndRepliesTo({
+        message,
+        author,
+        publicMessage: true,
+      })
+    );
+  });
 });

@@ -13,6 +13,7 @@ import {
 } from "@answeroverflow/db";
 import { findOrThrowNotFound } from "~api/utils/operations";
 import {
+  canUserViewPrivateMessage,
   stripPrivateChannelData,
   stripPrivateMessageData,
   stripPrivateServerData,
@@ -105,10 +106,7 @@ export const messagesRouter = router({
       })
     )
     .query(async ({ input, ctx }) => {
-      const searchResults = await searchMessages({
-        query: input.query,
-        serverId: input.serverId,
-      });
+      const searchResults = await searchMessages(input);
       const strippedSearchResults = searchResults.map(
         ({ message, channel, server, thread, score }) => ({
           message: stripPrivateMessageData(message, ctx.userServers),
@@ -118,6 +116,9 @@ export const messagesRouter = router({
           score,
         })
       );
-      return strippedSearchResults;
+      return strippedSearchResults.filter(
+        (result) =>
+          canUserViewPrivateMessage(ctx.userServers, result.message) || result.message.public
+      );
     }),
 });
