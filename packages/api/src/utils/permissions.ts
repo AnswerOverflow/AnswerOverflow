@@ -215,6 +215,13 @@ export function stripPrivateMessageData(
   const solutions = message.solutionMessages.map((solution) =>
     stripPrivateMessageData(solution, userServers)
   );
+  if (message.public) {
+    return {
+      ...message,
+      referencedMessage: reply,
+      solutionMessages: solutions,
+    };
+  }
   return {
     ...defaultMessage,
     author: defaultAuthor,

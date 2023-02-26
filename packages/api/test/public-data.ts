@@ -8,7 +8,7 @@ import {
   MessageWithDiscordAccount,
   Server,
 } from "@answeroverflow/db";
-import { pick } from "@answeroverflow/utils";
+import { omit, pick } from "@answeroverflow/utils";
 
 export function pickPublicServerData(server: Server) {
   return pick(server, ["id", "name", "icon"]);
@@ -26,7 +26,7 @@ export function toMessageWithDiscordAccount({
   publicMessage,
 }: ToMessageWithDiscordAccount) {
   const msg: MessageWithDiscordAccount = {
-    ...message,
+    ...omit(message, "authorId"),
     author,
     public: publicMessage,
   };

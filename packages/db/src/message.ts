@@ -113,7 +113,7 @@ export async function addAuthorsToMessages(
     }
     return {
       ...omit(message, "authorId"),
-      author,
+      author: zDiscordAccountPublic.parse(author),
       public: authorServerSettings ? authorServerSettings.flags.canPubliclyDisplayMessages : false,
     };
   };

@@ -7,6 +7,7 @@ import {
   createChannel,
   createDiscordAccount,
   upsertManyMessages,
+  createUserServerSettings,
 } from "@answeroverflow/db";
 import { mockUnauthedCtx } from "~api/test/utils";
 import { messagesRouter } from "./messages";
@@ -45,7 +46,7 @@ beforeEach(async () => {
 });
 
 describe("Message Results", () => {
-  it("should 404 if the root message doesnt exists", async () => {
+  it("should 404 if the root message doesn't exists", async () => {
     await expect(unauthedMessagePageRouter.threadFromMessageId(getRandomId())).rejects.toThrow(
       "Target message not found"
     );
@@ -256,7 +257,31 @@ describe("Message Results", () => {
 });
 
 describe("Search Results", () => {
-  it("should fetch a public search result correctly", async () => {});
+  it("should fetch a public search result correctly", async () => {
+    await createUserServerSettings({
+      userId: author.id,
+      serverId: server.id,
+      flags: {
+        canPubliclyDisplayMessages: true,
+      },
+    });
+    const message = mockMessage(server, channel, author, {
+      content: getRandomId(),
+    });
+    await upsertManyMessages([message]);
+    const searchResults = await unauthedMessagePageRouter.search({
+      query: message.content,
+    });
+    const firstResult = searchResults[0]!;
+    expect(firstResult).toBeDefined();
+    expect(firstResult.message).toEqual(
+      toMessageWithAccountAndRepliesTo({
+        message,
+        author,
+        publicMessage: true,
+      })
+    );
+  });
   it("should not return a private search result if the user is not logged in", async () => {});
   it("should return a private search result if the user is logged in", async () => {});
   it("should fetch a result in a server correctly", async () => {});

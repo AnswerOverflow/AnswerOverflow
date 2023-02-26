@@ -2,7 +2,7 @@
 
 ## Package Philosophy
 
-This is where the database packages meet up. The output of the functions for this package can be composed of data from multiple database sources in order to give the best developer experience when working.
+This is where the database clients meet up. The output of the functions for this package can be composed of data from multiple database sources in order to give the best developer experience when working.
 
 Along with this, this package handles validation before performing writes to the database.
 
