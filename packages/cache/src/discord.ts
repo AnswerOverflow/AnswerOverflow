@@ -68,7 +68,7 @@ export async function removeServerFromUserCache({
   }
 }
 
-export async function addServerToUserCache({
+export async function addServerToUserServerCache({
   accessToken,
   server,
 }: {

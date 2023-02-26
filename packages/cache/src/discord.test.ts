@@ -1,5 +1,5 @@
 import {
-  addServerToUserCache,
+  addServerToUserServerCache,
   getDiscordUser,
   getUserServers,
   removeServerFromUserCache,
@@ -141,7 +141,7 @@ describe("Discord API", () => {
         zDiscordApiServerArraySchema.parse(mockDiscordApiServersResponse)
       );
       const idToAdd = getRandomId();
-      await addServerToUserCache({
+      await addServerToUserServerCache({
         accessToken,
         server: {
           id: idToAdd,
