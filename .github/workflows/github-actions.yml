@@ -17,7 +17,7 @@ env:
   ELASTICSEARCH_PASSWORD: changeme
   ELASTICSEARCH_MESSAGE_INDEX: messages
 
-  REDIS_URL: redis://:redis@ao-cache-redis:6379
+  REDIS_URL: redis://:redis@localhost:6379
 
   OWNERS: "[]"
   DISCORD_CLIENT_ID: "123"
