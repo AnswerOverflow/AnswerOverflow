@@ -39,4 +39,5 @@ export async function toggleButtonTest({
 
   const postClickButton = message.findButtonByLabel(postClickLabel, reacord);
   expect(postClickButton).toBeDefined();
+  return postClickButton!;
 }
