@@ -23,8 +23,8 @@
     "clean": "rm -rf dist node_modules turbo coverage",
     "test": "yarn jest --coverage",
     "test:watch": "yarn jest --watch",
-    "lint": "eslint src && tsc --noEmit",
-    "lint:fix": "eslint src --fix"
+    "lint": "eslint . && tsc --noEmit",
+    "lint:fix": "eslint . --fix"
   },
   "peerDependencies": {
     "discord.js": "^14.7.1"

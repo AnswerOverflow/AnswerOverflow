@@ -8,8 +8,8 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules coverage",
     "with-env": "dotenv -e ../../.env --",
-    "lint": "eslint \"*.ts*\" && tsc --noEmit",
-    "lint:fix": "eslint \"*.ts*\" --fix"
+    "lint": "eslint . \"*.ts*\" && tsc --noEmit",
+    "lint:fix": "eslint . \"*.ts*\" --fix"
   },
   "dependencies": {
     "@answeroverflow/elastic-types": "*",

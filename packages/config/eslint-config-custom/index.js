@@ -26,7 +26,8 @@ module.exports = {
         patterns: ["../..*", "packages/*"],
       },
     ],
-    "no-only-tests/no-only-tests": "error",
+    // eslint-disable-next-line no-undef
+    "no-only-tests/no-only-tests": process.env.CI ? "error" : "warn",
     "prefer-arrow-callback": [
       "error",
       {
