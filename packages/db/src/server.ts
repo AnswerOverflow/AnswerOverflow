@@ -45,7 +45,11 @@ export async function createServer(input: z.infer<typeof zServerCreate>) {
   return addFlagsToServer(created);
 }
 
-export async function updateServer(input: z.infer<typeof zServerUpdate>, existing: Server) {
+export async function updateServer(input: z.infer<typeof zServerUpdate>, existing: Server | null) {
+  if (!existing) {
+    existing = await findServerById(input.id);
+    if (!existing) throw new Error(`Server with id ${input.id} not found`);
+  }
   const updated = await prisma.server.update({
     where: { id: input.id },
     data: combineServerSettings({
