@@ -23,7 +23,7 @@
   "devDependencies": {
     "@answeroverflow/tsconfig": "*",
     "@vitest/coverage-c8": "^0.25.8",
-    "dotenv-cli": "^6.0.0",
+    "dotenv-cli": "^7.0.0",
     "vitest": "^0.25.8"
   }
 }
