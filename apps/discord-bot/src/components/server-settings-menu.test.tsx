@@ -2,7 +2,7 @@ import { findLinkByURL, reply, toggleButtonTest } from "~discord-bot/test/reacor
 import React from "react";
 import { createServer, findServerById, ServerWithFlags, updateServer } from "@answeroverflow/db";
 import type { ReacordTester } from "@answeroverflow/reacord";
-import type { Guild, GuildMember, TextChannel } from "discord.js";
+import type { Guild, TextChannel } from "discord.js";
 import { mockReacord, setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import {
   createGuildMemberVariants,

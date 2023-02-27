@@ -43,7 +43,7 @@ export class OpenServerSettingsMenu extends Command {
           if (!server) {
             server = getDefaultServerWithFlags(toAOServer(guild));
           }
-          const menu = <ServerSettingsMenu initialSettings={server as ServerAll} />;
+          const menu = <ServerSettingsMenu server={server as ServerAll} />;
           ephemeralReply(container.reacord, menu, interaction);
         },
       });
