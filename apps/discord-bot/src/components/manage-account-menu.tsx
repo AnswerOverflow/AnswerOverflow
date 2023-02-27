@@ -16,17 +16,17 @@ import { createMemberCtx } from "~discord-bot/utils/context";
 import { EmbedMenuInstruction, MenuInstruction } from "./instructions";
 
 type ManageAccountMenuItemProps = {
-  settings: UserServerSettingsWithFlags;
-  setSettings: (settings: UserServerSettingsWithFlags) => void;
+  state: ManageAccountMenuState;
+  setSettings: (settings: ManageAccountMenuState) => void;
 };
 export const REVOKE_CONSENT_LABEL = "Disable publicly showing messages";
 export const GRANT_CONSENT_LABEL = "Publicly display messages on Answer Overflow";
 
-const ToggleConsentButton = ({ settings, setSettings }: ManageAccountMenuItemProps) => (
+const ToggleConsentButton = ({ state, setSettings }: ManageAccountMenuItemProps) => (
   <ToggleButton
-    currentlyEnabled={settings.flags.canPubliclyDisplayMessages}
+    currentlyEnabled={state.settings.flags.canPubliclyDisplayMessages}
     enableLabel={GRANT_CONSENT_LABEL}
-    disabled={settings.flags.messageIndexingDisabled}
+    disabled={state.settings.flags.messageIndexingDisabled}
     disableLabel={REVOKE_CONSENT_LABEL}
     onClick={(event, enabled) => {
       void guildOnlyComponentEvent(event, async ({ member }) => {
@@ -35,7 +35,10 @@ const ToggleConsentButton = ({ settings, setSettings }: ManageAccountMenuItemPro
           consentSource: "manage-account-menu",
           member,
           Ok(updatedSettings) {
-            setSettings(updatedSettings);
+            setSettings({
+              settings: updatedSettings,
+              isGloballyIgnored: state.isGloballyIgnored,
+            });
           },
           Error: (error) => componentEventStatusHandler(event, error.message),
         });
@@ -46,9 +49,9 @@ const ToggleConsentButton = ({ settings, setSettings }: ManageAccountMenuItemPro
 
 export const DISABLE_INDEXING_LABEL = "Ignore account in server";
 export const ENABLE_INDEXING_LABEL = "Enable indexing of messages in server";
-const ToggleIndexingButton = ({ settings, setSettings }: ManageAccountMenuItemProps) => (
+const ToggleIndexingButton = ({ state, setSettings }: ManageAccountMenuItemProps) => (
   <ToggleButton
-    currentlyEnabled={!settings.flags.messageIndexingDisabled}
+    currentlyEnabled={!state.settings.flags.messageIndexingDisabled}
     enableLabel={ENABLE_INDEXING_LABEL}
     disableLabel={DISABLE_INDEXING_LABEL}
     onClick={(event, messageIndexingDisabled) => {
@@ -59,7 +62,10 @@ const ToggleIndexingButton = ({ settings, setSettings }: ManageAccountMenuItemPr
           source: "manage-account-menu",
           Error: (error) => componentEventStatusHandler(event, error.message),
           Ok(newSettings) {
-            setSettings(newSettings);
+            setSettings({
+              settings: newSettings,
+              isGloballyIgnored: state.isGloballyIgnored,
+            });
           },
         });
       });
@@ -69,9 +75,9 @@ const ToggleIndexingButton = ({ settings, setSettings }: ManageAccountMenuItemPr
 
 export const GLOBALLY_IGNORE_ACCOUNT_LABEL = "Globally ignore account";
 export const GloballyIgnoreAccountButton = ({
-  setIsGloballyIgnored,
+  setState,
 }: {
-  setIsGloballyIgnored: (isGloballyIgnored: boolean) => void;
+  setState: (newState: ManageAccountMenuState) => void;
 }) => (
   <Button
     label={GLOBALLY_IGNORE_ACCOUNT_LABEL}
@@ -83,7 +89,14 @@ export const GloballyIgnoreAccountButton = ({
           apiCall: (router) => router.discordAccounts.delete(event.user.id),
           getCtx: () => createMemberCtx(member),
           Error: (error) => componentEventStatusHandler(event, error.message),
-          Ok: () => setIsGloballyIgnored(true),
+          Ok: () =>
+            setState({
+              settings: getDefaultUserServerSettingsWithFlags({
+                userId: event.user.id,
+                serverId: member.guild.id,
+              }),
+              isGloballyIgnored: true,
+            }),
         })
       );
     }}
@@ -92,11 +105,9 @@ export const GloballyIgnoreAccountButton = ({
 
 export const STOP_IGNORING_ACCOUNT_LABEL = "Stop ignoring account";
 export const StopIgnoringAccountButton = ({
-  setIsGloballyIgnored,
-  setUserServerSettings,
+  setState,
 }: {
-  setIsGloballyIgnored: (isGloballyIgnored: boolean) => void;
-  setUserServerSettings: (settings: UserServerSettingsWithFlags) => void;
+  setState: (settings: ManageAccountMenuState) => void;
 }) => (
   <Button
     label={STOP_IGNORING_ACCOUNT_LABEL}
@@ -109,19 +120,24 @@ export const StopIgnoringAccountButton = ({
           getCtx: () => createMemberCtx(member),
           Error: (error) => componentEventStatusHandler(event, error.message),
           Ok: () => {
-            setIsGloballyIgnored(false);
-            setUserServerSettings(
-              getDefaultUserServerSettingsWithFlags({
+            setState({
+              settings: getDefaultUserServerSettingsWithFlags({
                 userId: event.user.id,
                 serverId: member.guild.id,
-              })
-            );
+              }),
+              isGloballyIgnored: false,
+            });
           },
         })
       );
     }}
   />
 );
+
+type ManageAccountMenuState = {
+  settings: UserServerSettingsWithFlags;
+  isGloballyIgnored: boolean;
+};
 
 // TODO: Make this take in the caller as a prop and compare that when the button is clicked?
 // Doesn't matter that much since the action only affects the button clicker
@@ -132,8 +148,12 @@ export function ManageAccountMenu({
   initialSettings: UserServerSettingsWithFlags;
   initialIsGloballyIgnored: boolean;
 }) {
-  const [settings, setSettings] = React.useState(initialSettings);
-  const [isGloballyIgnored, setIsGloballyIgnored] = React.useState(initialIsGloballyIgnored);
+  const [state, setState] = React.useState({
+    settings: initialSettings,
+    isGloballyIgnored: initialIsGloballyIgnored,
+  });
+  const settings = state.settings;
+
   const instructions: MenuInstruction[] = [
     {
       instructions:
@@ -163,7 +183,7 @@ export function ManageAccountMenu({
       instructions:
         "Disables indexing of your account in all servers, also will remove all the messages that Answer Overflow has stored from you in all servers",
       title: GLOBALLY_IGNORE_ACCOUNT_LABEL,
-      enabled: !isGloballyIgnored,
+      enabled: !state.isGloballyIgnored,
     },
   ];
 
@@ -172,9 +192,9 @@ export function ManageAccountMenu({
       <Embed color={ANSWER_OVERFLOW_BLUE_AS_INT}>
         <EmbedMenuInstruction instructions={instructions} />
       </Embed>
-      <ToggleConsentButton setSettings={setSettings} settings={settings} />
-      <ToggleIndexingButton setSettings={setSettings} settings={settings} />
-      <GloballyIgnoreAccountButton setIsGloballyIgnored={setIsGloballyIgnored} />
+      <ToggleConsentButton setSettings={setState} state={state} />
+      <ToggleIndexingButton setSettings={setState} state={state} />
+      <GloballyIgnoreAccountButton setState={setState} />
     </>
   );
 
@@ -192,12 +212,9 @@ export function ManageAccountMenu({
           ]}
         />
       </Embed>
-      <StopIgnoringAccountButton
-        setIsGloballyIgnored={setIsGloballyIgnored}
-        setUserServerSettings={setSettings}
-      />
+      <StopIgnoringAccountButton setSta={setState} />
     </>
   );
 
-  return isGloballyIgnored ? <GloballyIgnoredView /> : <RegularView />;
+  return state.isGloballyIgnored ? <GloballyIgnoredView /> : <RegularView />;
 }
