@@ -1,8 +1,57 @@
-import { zServerPublic, findServerById } from "@answeroverflow/db";
+import {
+  zServerPublic,
+  findServerById,
+  ServerWithFlags,
+  getDefaultServerWithFlags,
+  zServerUpsert,
+  upsertServer,
+} from "@answeroverflow/db";
 import { z } from "zod";
+import type { Context } from "~api/router/context";
 import { router, withUserServersProcedure } from "~api/router/trpc";
-import { assertCanEditServer } from "~api/utils/permissions";
-import { protectedFetchWithPublicData } from "~api/utils/protected-procedures";
+import {
+  assertBoolsAreNotEqual,
+  assertCanEditServer,
+  assertCanEditServerBotOnly,
+} from "~api/utils/permissions";
+import { protectedFetchWithPublicData, protectedMutation } from "~api/utils/protected-procedures";
+
+export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
+  "Read the rules consent already enabled";
+export const READ_THE_RULES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE =
+  "Read the rules consent already disabled";
+
+async function mutateServer({
+  operation,
+  server,
+  ctx,
+}: {
+  operation: (input: {
+    oldSettings: ServerWithFlags;
+    doSettingsExistAlready: boolean;
+  }) => Promise<ServerWithFlags>;
+  server: z.infer<typeof zServerUpsert>;
+  ctx: Context;
+}) {
+  return protectedMutation({
+    permissions: () => assertCanEditServerBotOnly(ctx, server.id),
+    operation: async () => {
+      let oldSettings = await findServerById(server.id);
+      let doSettingsExistAlready = true;
+      if (!oldSettings) {
+        oldSettings = getDefaultServerWithFlags({
+          id: server.id,
+          name: server.name,
+          icon: server.icon,
+        });
+        doSettingsExistAlready = false;
+      } else {
+        doSettingsExistAlready = true;
+      }
+      return operation({ oldSettings, doSettingsExistAlready });
+    },
+  });
+}
 
 export const serverRouter = router({
   byId: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
@@ -13,4 +62,37 @@ export const serverRouter = router({
       publicDataFormatter: (server) => zServerPublic.parse(server),
     });
   }),
+  setReadTheRulesConsentEnabled: withUserServersProcedure
+    .input(
+      z.object({
+        server: zServerUpsert.omit({
+          flags: true,
+        }),
+        enabled: z.boolean(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return mutateServer({
+        ctx,
+        server: input.server,
+        operation: async ({ oldSettings }) => {
+          return protectedMutation({
+            permissions: () =>
+              assertBoolsAreNotEqual({
+                oldValue: oldSettings.flags.readTheRulesConsentEnabled,
+                newValue: input.enabled,
+                messageIfBothFalse: READ_THE_RULES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE,
+                messageIfBothTrue: READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE,
+              }),
+            operation: () =>
+              upsertServer({
+                ...input.server,
+                flags: {
+                  readTheRulesConsentEnabled: input.enabled,
+                },
+              }),
+          });
+        },
+      });
+    }),
 });

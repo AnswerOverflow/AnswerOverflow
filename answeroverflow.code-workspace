@@ -149,6 +149,7 @@
     "jest.autoRun": "off",
     "cSpell.words": [
       "Bitfield",
+      "Bools",
       "devcontainer",
       "devcontainers",
       "Nextra",

@@ -15,6 +15,9 @@ import {
   dictToBitfield,
   channelBitfieldFlags,
   userServerSettingsFlags,
+  addFlagsToServer,
+  serverSettingsFlags,
+  ServerWithFlags,
 } from "@answeroverflow/prisma-types";
 import { getRandomId, getRandomSentence } from "@answeroverflow/utils";
 import { ChannelType } from "discord-api-types/v10";
@@ -51,6 +54,21 @@ export function mockServer(override: Partial<Server> = {}) {
     icon: "ASDASDASDASDsd",
     ...override,
   });
+}
+
+export function mockServerWithFlags(override: Omit<PartialDeep<ServerWithFlags>, "bitfield"> = {}) {
+  const base = addFlagsToServer(mockServer(override));
+  const { flags, ...rest } = override;
+  const data = {
+    ...base,
+    flags: {
+      ...base.flags,
+      ...flags,
+    },
+    ...rest,
+  };
+  data.bitfield = dictToBitfield(data.flags, serverSettingsFlags);
+  return data;
 }
 
 export function mockChannel(server: Server, override?: Omit<Partial<Channel>, "serverId">) {
