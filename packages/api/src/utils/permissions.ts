@@ -20,6 +20,44 @@ export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
 
 type PermissionCheckResult = TRPCError | undefined;
 
+export function assertBoolsAreNotEqual({
+  oldValue,
+  newValue,
+  messageIfBothTrue,
+  messageIfBothFalse,
+}: {
+  oldValue: boolean;
+  newValue: boolean;
+  messageIfBothTrue: string;
+  messageIfBothFalse: string;
+}) {
+  if (oldValue === newValue) {
+    return new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: oldValue ? messageIfBothTrue : messageIfBothFalse,
+    });
+  }
+  return;
+}
+
+export function assertIsNotValue({
+  actualValue,
+  expectedToNotBeValue,
+  errorMessage,
+}: {
+  actualValue: boolean;
+  expectedToNotBeValue: boolean;
+  errorMessage: string;
+}) {
+  if (actualValue === expectedToNotBeValue) {
+    return new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: errorMessage,
+    });
+  }
+  return;
+}
+
 export function isSuperUser(ctx: Context) {
   if (ctx.discordAccount?.id === "523949187663134754") return true; // This is the ID of Rhys - TODO: Swap to an env var
   return false;
