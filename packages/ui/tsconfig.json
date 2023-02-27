@@ -10,13 +10,12 @@
   "extends": "@answeroverflow/tsconfig/nextjs.json",
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
     ".storybook/*",
     "test",
     "src",
-    "**/*.tsx",
-    "**/*.cjs",
-    "**/*.mjs",
+    "next.config.mjs",
+    "postcss.config.cjs",
+    "tailwind.config.cjs",
     "../../reset.d.ts"
   ],
 }

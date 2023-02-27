@@ -9,10 +9,9 @@ import {
 } from "@answeroverflow/db";
 import { withDiscordAccountProcedure, MergeRouters, router } from "../trpc";
 import { protectedFetch, protectedMutation } from "~api/utils/protected-procedures";
-import { assertIsUser } from "~api/utils/permissions";
+import { assertBoolsAreNotEqual, assertIsNotValue, assertIsUser } from "~api/utils/permissions";
 
 import { z } from "zod";
-import { TRPCError } from "@trpc/server";
 import {
   MANAGE_ACCOUNT_SOURCES,
   CONSENT_SOURCES,
@@ -26,44 +25,6 @@ import {
 } from "./types";
 import type { Context } from "../context";
 export const SERVER_NOT_SETUP_MESSAGE = "Server is not setup for Answer Overflow yet";
-
-function assertBoolsAreNotEqual({
-  oldValue,
-  newValue,
-  messageIfBothTrue,
-  messageIfBothFalse,
-}: {
-  oldValue: boolean;
-  newValue: boolean;
-  messageIfBothTrue: string;
-  messageIfBothFalse: string;
-}) {
-  if (oldValue === newValue) {
-    return new TRPCError({
-      code: "PRECONDITION_FAILED",
-      message: oldValue ? messageIfBothTrue : messageIfBothFalse,
-    });
-  }
-  return;
-}
-
-function assertIsNotValue({
-  actualValue,
-  expectedToNotBeValue,
-  errorMessage,
-}: {
-  actualValue: boolean;
-  expectedToNotBeValue: boolean;
-  errorMessage: string;
-}) {
-  if (actualValue === expectedToNotBeValue) {
-    return new TRPCError({
-      code: "PRECONDITION_FAILED",
-      message: errorMessage,
-    });
-  }
-  return;
-}
 
 async function mutateUserServerSettings({
   operation,

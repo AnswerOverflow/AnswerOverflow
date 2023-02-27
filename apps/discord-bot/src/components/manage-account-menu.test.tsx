@@ -1,4 +1,4 @@
-import { reply } from "~discord-bot/test/reacord-utils";
+import { reply, toggleButtonTest } from "~discord-bot/test/reacord-utils";
 import React from "react";
 import {
   createDiscordAccount,
@@ -52,16 +52,16 @@ describe("Manage Account Menu", () => {
     it("should enable consent", async () => {
       const message = await reply(
         reacord,
-        <ManageAccountMenu initalSettings={defaultSettings} initalIsGloballyIgnored={false} />
+        <ManageAccountMenu initialSettings={defaultSettings} initialIsGloballyIgnored={false} />
       );
-      const enableIndexingButton = message!.findButtonByLabel(GRANT_CONSENT_LABEL, reacord);
-      expect(enableIndexingButton).toBeDefined();
-      await enableIndexingButton!.click(textChannel, members.guildMemberOwner);
-      // Used to verify no errors were thrown
-      expect(reacord.messages).toHaveLength(1);
-      expect(message!.hasButton(GRANT_CONSENT_LABEL, reacord)).toBeFalsy();
-      const button = message!.findButtonByLabel(REVOKE_CONSENT_LABEL, reacord);
-      expect(button).toBeDefined();
+      await toggleButtonTest({
+        clicker: members.guildMemberOwner,
+        preClickLabel: GRANT_CONSENT_LABEL,
+        postClickLabel: REVOKE_CONSENT_LABEL,
+        message: message!,
+        reacord,
+        channel: textChannel,
+      });
     });
     it("should disable consent", async () => {
       await createDiscordAccount(toAODiscordAccount(members.guildMemberOwner.user));
@@ -77,16 +77,16 @@ describe("Manage Account Menu", () => {
 
       const message = await reply(
         reacord,
-        <ManageAccountMenu initalSettings={initialSettings} initalIsGloballyIgnored={false} />
+        <ManageAccountMenu initialSettings={initialSettings} initialIsGloballyIgnored={false} />
       );
-      const disableIndexingButton = message!.findButtonByLabel(REVOKE_CONSENT_LABEL, reacord);
-      expect(disableIndexingButton).toBeDefined();
-      await disableIndexingButton!.click(textChannel, members.guildMemberOwner);
-      // Used to verify no errors were thrown
-      expect(reacord.messages).toHaveLength(1);
-      expect(message!.hasButton(REVOKE_CONSENT_LABEL, reacord)).toBeFalsy();
-      const button = message!.findButtonByLabel(GRANT_CONSENT_LABEL, reacord);
-      expect(button).toBeDefined();
+      await toggleButtonTest({
+        clicker: members.guildMemberOwner,
+        preClickLabel: REVOKE_CONSENT_LABEL,
+        postClickLabel: GRANT_CONSENT_LABEL,
+        message: message!,
+        reacord,
+        channel: textChannel,
+      });
     });
   });
   describe("Toggle Indexing Of User Messages Button", () => {
@@ -103,30 +103,33 @@ describe("Manage Account Menu", () => {
       );
       const message = await reply(
         reacord,
-        <ManageAccountMenu initalSettings={initialSettings} initalIsGloballyIgnored={false} />
+        <ManageAccountMenu initialSettings={initialSettings} initialIsGloballyIgnored={false} />
       );
-      const enableIndexingButton = message!.findButtonByLabel(ENABLE_INDEXING_LABEL, reacord);
-      expect(enableIndexingButton).toBeDefined();
-      await enableIndexingButton!.click(textChannel, members.guildMemberOwner);
-
-      expect(message!.hasButton(ENABLE_INDEXING_LABEL, reacord)).toBeFalsy();
-      const button = message!.findButtonByLabel(DISABLE_INDEXING_LABEL, reacord);
-      expect(button).toBeDefined();
+      await toggleButtonTest({
+        clicker: members.guildMemberOwner,
+        preClickLabel: ENABLE_INDEXING_LABEL,
+        postClickLabel: DISABLE_INDEXING_LABEL,
+        message: message!,
+        reacord,
+        channel: textChannel,
+      });
+      const consentButton = message!.findButtonByLabel(GRANT_CONSENT_LABEL, reacord);
+      expect(consentButton?.disabled).toBeFalsy();
     });
     it("should disable indexing of user messages", async () => {
       const message = await reply(
         reacord,
-        <ManageAccountMenu initalSettings={defaultSettings} initalIsGloballyIgnored={false} />
+        <ManageAccountMenu initialSettings={defaultSettings} initialIsGloballyIgnored={false} />
       );
-      const disableIndexingButton = message!.findButtonByLabel(DISABLE_INDEXING_LABEL, reacord);
-      expect(disableIndexingButton).toBeDefined();
-      await disableIndexingButton!.click(textChannel, members.guildMemberOwner);
-
-      expect(message!.hasButton(DISABLE_INDEXING_LABEL, reacord)).toBeFalsy();
-      const button = message!.findButtonByLabel(ENABLE_INDEXING_LABEL, reacord);
-      expect(button).toBeDefined();
+      await toggleButtonTest({
+        clicker: members.guildMemberOwner,
+        preClickLabel: DISABLE_INDEXING_LABEL,
+        postClickLabel: ENABLE_INDEXING_LABEL,
+        message: message!,
+        reacord,
+        channel: textChannel,
+      });
       const consentButton = message!.findButtonByLabel(GRANT_CONSENT_LABEL, reacord);
-      expect(consentButton).toBeDefined();
       expect(consentButton?.disabled).toBeTruthy();
     });
   });
@@ -134,41 +137,39 @@ describe("Manage Account Menu", () => {
     it("should enable globally ignored", async () => {
       const message = await reply(
         reacord,
-        <ManageAccountMenu initalSettings={defaultSettings} initalIsGloballyIgnored={false} />
+        <ManageAccountMenu initialSettings={defaultSettings} initialIsGloballyIgnored={false} />
       );
-      const enableIndexingButton = message!.findButtonByLabel(
-        GLOBALLY_IGNORE_ACCOUNT_LABEL,
-        reacord
-      );
-      expect(enableIndexingButton).toBeDefined();
-      await enableIndexingButton!.click(textChannel, members.guildMemberOwner);
-
-      expect(message!.hasButton(GLOBALLY_IGNORE_ACCOUNT_LABEL, reacord)).toBeFalsy();
-      const button = message!.findButtonByLabel(STOP_IGNORING_ACCOUNT_LABEL, reacord);
-      expect(button).toBeDefined();
+      await toggleButtonTest({
+        clicker: members.guildMemberOwner,
+        preClickLabel: GLOBALLY_IGNORE_ACCOUNT_LABEL,
+        postClickLabel: STOP_IGNORING_ACCOUNT_LABEL,
+        message: message!,
+        reacord,
+        channel: textChannel,
+      });
     });
     it("should disable globally ignored", async () => {
       await deleteDiscordAccount(toAODiscordAccount(members.guildMemberOwner.user).id);
+
       const message = await reply(
         reacord,
         <ManageAccountMenu
-          initalSettings={getDefaultUserServerSettingsWithFlags({
+          initialSettings={getDefaultUserServerSettingsWithFlags({
             serverId: guild.id,
             userId: members.guildMemberOwner.id,
           })}
-          initalIsGloballyIgnored={true}
+          initialIsGloballyIgnored={true}
         />
       );
-      const disableIndexingButton = message!.findButtonByLabel(
-        STOP_IGNORING_ACCOUNT_LABEL,
-        reacord
-      );
-      expect(disableIndexingButton).toBeDefined();
-      await disableIndexingButton!.click(textChannel, members.guildMemberOwner);
 
-      expect(message!.hasButton(STOP_IGNORING_ACCOUNT_LABEL, reacord)).toBeFalsy();
-      const button = message!.findButtonByLabel(GLOBALLY_IGNORE_ACCOUNT_LABEL, reacord);
-      expect(button).toBeDefined();
+      await toggleButtonTest({
+        clicker: members.guildMemberOwner,
+        preClickLabel: STOP_IGNORING_ACCOUNT_LABEL,
+        postClickLabel: GLOBALLY_IGNORE_ACCOUNT_LABEL,
+        message: message!,
+        reacord,
+        channel: textChannel,
+      });
     });
   });
 });

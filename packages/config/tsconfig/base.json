@@ -91,10 +91,7 @@
     }
   },
   "exclude": [
-    "dist"
-  ],
-  "include": [
-    "src",
+    "dist",
     "node_modules"
   ]
 }
