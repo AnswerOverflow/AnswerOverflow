@@ -3246,9 +3246,9 @@
     "@storybook/preview-api" "7.0.0-beta.54"
 
 "@storybook/jest@^0.0.11--canary.22.2783ae7.0":
-  version "0.0.11--canary.22.2783ae7.0"
-  resolved "https://registry.yarnpkg.com/@storybook/jest/-/jest-0.0.11--canary.22.2783ae7.0.tgz#72c323d641bd22dd8f74118776362c533a111fae"
-  integrity sha512-bMGMI7Ykp6H+mJKD0tXJ0rh3UvC1RTIoq8amPEZYpZVqocfHeggDfDUPQ0cA8hYF199+08YA5k5Q0bokkfmz1w==
+  version "0.0.11-next.0"
+  resolved "https://registry.yarnpkg.com/@storybook/jest/-/jest-0.0.11-next.0.tgz#d5fadfb0c285c7c38c3c2372751921e8e7af7851"
+  integrity sha512-jtCu2rmDNhG+VxB/sR+AADhb6c/UNdqAmHYV3B50tc+HlnrlELE3UEsRFCztlq4zFaz1y3JK91lwQn9ja6yPsQ==
   dependencies:
     "@storybook/expect" storybook-jest
     "@storybook/instrumenter" next
@@ -6334,10 +6334,15 @@ dir-glob@^3.0.1:
   dependencies:
     path-type "^4.0.0"
 
-discord-api-types@0.37.20, discord-api-types@^0.37.20, discord-api-types@^0.37.23, discord-api-types@^0.37.25, discord-api-types@^0.37.30, discord-api-types@^0.37.31:
+discord-api-types@^0.37.20:
   version "0.37.20"
   resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.37.20.tgz#f23894e3e6b894abb5431ff6c4aa52471360377c"
   integrity sha512-uAO+55E11rMkYR36/paE1vKN8c2bZa1mgrIaiQIBgIZRKZTDIGOZB+8I5eMRPFJcGxrg16riUu+0aTu2JQEPew==
+
+discord-api-types@^0.37.23, discord-api-types@^0.37.25, discord-api-types@^0.37.30, discord-api-types@^0.37.31:
+  version "0.37.35"
+  resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.37.35.tgz#d0dad0bce7ce5bffc633030f17464e45148d9f28"
+  integrity sha512-iyKZ/82k7FX3lcmHiAvvWu5TmyfVo78RtghBV/YsehK6CID83k5SI03DKKopBcln+TiEIYw5MGgq7SJXSpNzMg==
 
 discord-markdown@^2.5.1:
   version "2.5.1"
@@ -6983,6 +6988,11 @@ eslint-plugin-jsx-a11y@^6.5.1:
     object.entries "^1.1.6"
     object.fromentries "^2.0.6"
     semver "^6.3.0"
+
+eslint-plugin-no-only-tests@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-no-only-tests/-/eslint-plugin-no-only-tests-3.1.0.tgz#f38e4935c6c6c4842bf158b64aaa20c366fe171b"
+  integrity sha512-Lf4YW/bL6Un1R6A76pRZyE1dl1vr31G/ev8UzIc/geCgFWyrKil8hVjYqWVKGB/UIGmb6Slzs9T0wNezdSVegw==
 
 eslint-plugin-prettier@^4.2.1:
   version "4.2.1"

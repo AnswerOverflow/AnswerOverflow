@@ -39,7 +39,9 @@ async function setupSolvedMessageScenario(guildId?: string) {
     client,
     channel: textChannelThread,
   });
-  await upsertServer(toAOServer(guild));
+  await upsertServer({
+    create: toAOServer(guild),
+  });
   await createChannel({
     ...toAOChannel(textChannel),
     flags: {
@@ -70,7 +72,6 @@ describe("Checkmark Reaction Mark Solution", () => {
         },
       },
     });
-    jest.spyOn(textChannelThread, "send");
     await emitEvent(client, Events.MessageReactionAdd, messageReaction, defaultAuthor.user);
     expect(textChannelThread.send).not.toHaveBeenCalled();
   });
@@ -89,7 +90,6 @@ describe("Checkmark Reaction Mark Solution", () => {
         me: true,
       },
     });
-    jest.spyOn(textChannelThread, "send");
     await emitEvent(client, Events.MessageReactionAdd, messageReaction, client.user!);
     expect(textChannelThread.send).not.toHaveBeenCalled();
   });
@@ -106,7 +106,6 @@ describe("Checkmark Reaction Mark Solution", () => {
         },
       },
     });
-    jest.spyOn(textChannelThread, "send");
     await emitEvent(client, Events.MessageReactionAdd, messageReaction, defaultAuthor.user);
     expect(textChannelThread.send).not.toHaveBeenCalled();
   });
@@ -124,7 +123,6 @@ describe("Checkmark Reaction Mark Solution", () => {
         },
       },
     });
-    jest.spyOn(textChannelThread, "send");
     await emitEvent(client, Events.MessageReactionAdd, messageReaction, defaultAuthor.user);
     expect(textChannelThread.send).toHaveBeenCalled();
   });

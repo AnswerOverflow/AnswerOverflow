@@ -73,7 +73,7 @@ const createWithDepsRouter = router({
   createWithDeps: publicProcedure.input(zChannelCreateWithDeps).mutation(({ ctx, input }) => {
     return protectedMutation({
       operation: () => createChannelWithDeps(input),
-      permissions: () => assertCanEditServerBotOnly(ctx, input.server.id),
+      permissions: () => assertCanEditServerBotOnly(ctx, input.server.create.id),
     });
   }),
 });
@@ -105,7 +105,7 @@ const upsertThreadRouter = router({
           await upsertRouter.createCaller(ctx).upsertWithDeps(input.parent);
           return channelCrudRouter.createCaller(ctx).create({
             parentId: input.parent.id,
-            serverId: input.parent.server.id,
+            serverId: input.parent.server.create.id,
             ...input,
           });
         },

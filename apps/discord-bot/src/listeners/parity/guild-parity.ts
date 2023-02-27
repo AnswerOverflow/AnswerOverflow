@@ -5,11 +5,25 @@ import { ALLOWED_CHANNEL_TYPES, upsertServer, upsertManyChannels } from "@answer
 import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
 
 /*
-  Guild relevated events are tracked here, this may make sense to split into multiple files as the complexity grows.
+  Guild related events are tracked here, this may make sense to split into multiple files as the complexity grows.
 */
 
+// Sync server properties that aren't set by the user
+async function autoUpdateServerInfo(guild: Guild) {
+  const convertedServer = toAOServer(guild);
+  await upsertServer({
+    create: convertedServer,
+    update: {
+      icon: convertedServer.icon,
+      name: convertedServer.name,
+      kickedTime: null,
+    },
+  });
+}
+
 async function syncServer(guild: Guild) {
-  await upsertServer(toAOServer(guild));
+  // If the server doesn't exist we want to initialize it with the default values
+  await autoUpdateServerInfo(guild);
   const channelsToUpsert = guild.channels.cache
     .filter((channel) => ALLOWED_CHANNEL_TYPES.has(channel.type))
     .map((channel) => toAOChannel(channel));
@@ -41,8 +55,11 @@ export class SyncOnJoin extends Listener {
 export class SyncOnDelete extends Listener {
   public async run(guild: Guild) {
     await upsertServer({
-      ...toAOServer(guild),
-      kickedTime: new Date(),
+      create: {
+        ...toAOServer(guild),
+        kickedTime: new Date(),
+      },
+      update: { kickedTime: new Date() },
     });
   }
 }
@@ -50,6 +67,6 @@ export class SyncOnDelete extends Listener {
 @ApplyOptions<Listener.Options>({ event: Events.GuildUpdate, name: "Guild Sync On Update" })
 export class SyncOnUpdate extends Listener {
   public async run(_: Guild, newGuild: Guild) {
-    await upsertServer(toAOServer(newGuild));
+    await autoUpdateServerInfo(newGuild);
   }
 }

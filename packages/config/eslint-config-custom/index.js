@@ -7,7 +7,7 @@ module.exports = {
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
   ],
-  plugins: ["prettier", "@typescript-eslint", "import"],
+  plugins: ["prettier", "@typescript-eslint", "import", "no-only-tests"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     project: ["./tsconfig.json"],
@@ -26,6 +26,7 @@ module.exports = {
         patterns: ["../..*", "packages/*"],
       },
     ],
+    "no-only-tests/no-only-tests": "error",
     "prefer-arrow-callback": [
       "error",
       {

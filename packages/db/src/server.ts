@@ -1,5 +1,11 @@
-import type { z } from "zod";
-import { getDefaultServerWithFlags, prisma, Server } from "@answeroverflow/prisma-types";
+import { z } from "zod";
+import {
+  getDefaultServerWithFlags,
+  prisma,
+  Server,
+  zServerPrismaCreate,
+  zServerPrismaUpdate,
+} from "@answeroverflow/prisma-types";
 import { upsert } from "./utils/operations";
 import { addFlagsToServer, zServer, mergeServerFlags } from "@answeroverflow/prisma-types";
 
@@ -22,7 +28,10 @@ export const zServerUpdate = zServerMutable.merge(
   })
 );
 
-export const zServerUpsert = zServerCreate;
+export const zServerUpsert = z.object({
+  create: zServerCreate,
+  update: zServerMutable.optional(),
+});
 
 export function combineServerSettings<
   F extends { bitfield: number },
@@ -37,25 +46,35 @@ export function combineServerSettings<
 
 export async function createServer(input: z.infer<typeof zServerCreate>) {
   const created = await prisma.server.create({
-    data: combineServerSettings({
-      old: getDefaultServerWithFlags(input),
-      updated: input,
-    }),
+    data: zServerPrismaCreate.parse(
+      combineServerSettings({
+        old: getDefaultServerWithFlags(input),
+        updated: input,
+      })
+    ),
   });
   return addFlagsToServer(created);
 }
 
-export async function updateServer(input: z.infer<typeof zServerUpdate>, existing: Server | null) {
+export async function updateServer({
+  update,
+  existing,
+}: {
+  update: z.infer<typeof zServerUpdate>;
+  existing: Server | null;
+}) {
   if (!existing) {
-    existing = await findServerById(input.id);
-    if (!existing) throw new Error(`Server with id ${input.id} not found`);
+    existing = await findServerById(update.id);
+    if (!existing) throw new Error(`Server with id ${update.id} not found`);
   }
   const updated = await prisma.server.update({
-    where: { id: input.id },
-    data: combineServerSettings({
-      old: existing,
-      updated: input,
-    }),
+    where: { id: update.id },
+    data: zServerPrismaUpdate.parse(
+      combineServerSettings({
+        old: existing,
+        updated: update,
+      })
+    ),
   });
   return addFlagsToServer(updated);
 }
@@ -73,8 +92,11 @@ export async function findManyServersById(ids: string[]) {
 
 export function upsertServer(input: z.infer<typeof zServerUpsert>) {
   return upsert({
-    find: () => findServerById(input.id),
-    create: () => createServer(input),
-    update: (old) => updateServer(input, old),
+    find: () => findServerById(input.create.id),
+    create: () => createServer(input.create),
+    update: (old) => {
+      if (!input.update) return old;
+      return updateServer({ update: { ...input.update, id: old.id }, existing: old });
+    },
   });
 }
