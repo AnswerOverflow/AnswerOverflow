@@ -13,12 +13,50 @@ import {
   zServerPublic,
 } from "@answeroverflow/db";
 import type { Source, Context } from "~api/router/context";
-import type { DiscordServer } from "@answeroverflow/auth";
+import type { DiscordAPIServerSchema } from "@answeroverflow/cache";
 
 export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
   "You are missing the required permissions to do this";
 
 type PermissionCheckResult = TRPCError | undefined;
+
+export function assertBoolsAreNotEqual({
+  oldValue,
+  newValue,
+  messageIfBothTrue,
+  messageIfBothFalse,
+}: {
+  oldValue: boolean;
+  newValue: boolean;
+  messageIfBothTrue: string;
+  messageIfBothFalse: string;
+}) {
+  if (oldValue === newValue) {
+    return new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: oldValue ? messageIfBothTrue : messageIfBothFalse,
+    });
+  }
+  return;
+}
+
+export function assertIsNotValue({
+  actualValue,
+  expectedToNotBeValue,
+  errorMessage,
+}: {
+  actualValue: boolean;
+  expectedToNotBeValue: boolean;
+  errorMessage: string;
+}) {
+  if (actualValue === expectedToNotBeValue) {
+    return new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: errorMessage,
+    });
+  }
+  return;
+}
 
 export function isSuperUser(ctx: Context) {
   if (ctx.discordAccount?.id === "523949187663134754") return true; // This is the ID of Rhys - TODO: Swap to an env var
@@ -168,14 +206,14 @@ export function assertCanEditServerBotOnly(ctx: Context, serverId: string) {
 }
 
 export const canUserViewPrivateMessage = (
-  userServers: DiscordServer[] | null,
+  userServers: DiscordAPIServerSchema[] | null,
   message: MessageFull | MessageWithDiscordAccount
 ) => userServers?.find((s) => s.id === message.serverId);
 
 // Kind of ugly having it take in two different types, but it's the easiest way to do it
 export function stripPrivateMessageData(
   message: MessageFull | MessageWithDiscordAccount,
-  userServers: DiscordServer[] | null = null
+  userServers: DiscordAPIServerSchema[] | null = null
 ): MessageFull | MessageWithDiscordAccount {
   const isPartialMessage = !isMessageFull(message);
   // If it is only a reply and is public, then just return

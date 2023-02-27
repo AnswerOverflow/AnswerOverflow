@@ -6,7 +6,7 @@ export type ToggleButtonProps = {
   enableLabel: string;
   disableLabel: string;
   disabled?: boolean;
-  onClick: (event: ButtonClickEvent, enabled: boolean) => void;
+  onClick?: (event: ButtonClickEvent, enabled: boolean) => void;
 };
 
 export function ToggleButton({
@@ -23,7 +23,7 @@ export function ToggleButton({
       label={label}
       disabled={disabled}
       style={disabled ? "secondary" : style}
-      onClick={(event) => onClick(event, !currentlyEnabled)}
+      onClick={(event) => (onClick ? onClick(event, !currentlyEnabled) : null)}
     />
   );
 }

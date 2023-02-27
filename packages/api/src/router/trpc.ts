@@ -1,8 +1,8 @@
 import { initTRPC } from "@trpc/server";
 import type { Context } from "./context";
 import superjson from "superjson";
-import { getDiscordAccount } from "../utils/discord-operations";
-import { getDiscordUser, getUserServers } from "@answeroverflow/auth";
+import { getDiscordOauthThrowIfNotFound } from "../utils/discord-operations";
+import { getDiscordUser, getUserServers } from "@answeroverflow/cache";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
@@ -15,7 +15,7 @@ async function getDiscordOauth(ctx: Context) {
   if (!ctx.session) {
     return null;
   }
-  const discordOauth = await getDiscordAccount(ctx.prisma, ctx.session.user.id);
+  const discordOauth = await getDiscordOauthThrowIfNotFound(ctx.session.user.id);
   return discordOauth;
 }
 

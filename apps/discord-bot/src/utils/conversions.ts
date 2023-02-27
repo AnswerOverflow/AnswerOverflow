@@ -4,6 +4,7 @@ import type {
   Guild,
   GuildBasedChannel,
   GuildChannel,
+  GuildMember,
   Message,
   MessageReference,
   TextChannel,
@@ -18,6 +19,7 @@ import {
   getDefaultChannelWithFlags,
 } from "@answeroverflow/db";
 import type { ComponentEvent } from "@answeroverflow/reacord";
+import type { DiscordAPIServerSchema } from "@answeroverflow/cache";
 
 export function toAOMessageReference(reference: MessageReference): AOMessage["messageReference"] {
   if (!reference.messageId) return null;
@@ -26,6 +28,18 @@ export function toAOMessageReference(reference: MessageReference): AOMessage["me
     channelId: reference.channelId,
     messageId: reference.messageId,
     serverId: reference.guildId,
+  };
+}
+
+export function toDiscordAPIServer(member: GuildMember): DiscordAPIServerSchema {
+  const guild = member.guild;
+  return {
+    id: guild.id,
+    name: guild.name,
+    icon: guild.icon,
+    features: guild.features,
+    owner: guild.ownerId === member.user.id,
+    permissions: Number(member.permissions.bitfield),
   };
 }
 

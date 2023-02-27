@@ -7,6 +7,10 @@
       "path": "apps/nextjs"
     },
     {
+      "name": "docs",
+      "path": "apps/docs"
+    },
+    {
       "name": "ui",
       "path": "packages/ui"
     },
@@ -40,6 +44,10 @@
       "path": "packages/db-mock"
     },
     {
+      "name": "cache",
+      "path": "packages/cache"
+    },
+    {
       "name": "prisma-types",
       "path": "packages/prisma-types"
     },
@@ -69,12 +77,13 @@
       ]
     ],
     // "tailwindCSS.experimental.configFile": "./packages/config/tailwind/index.js",
+    // Disable these to view "useless" files
     "files.exclude": {
-      // "apps/": true, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
-      // "packages/": true, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
-      // "node_modules/": true,
-      // "dist/": true,
-      // "coverage/": true,
+      "**/node_modules": true,
+      "**/coverage/": true,
+      "**/.next": true,
+      "**/.turbo": true,
+      "**/dist": true,
     },
     // "typescript.tsserver.experimental.enableProjectDiagnostics": true,
     "vitest.enable": true,
@@ -133,30 +142,54 @@
       "auth",
       "config",
       "utils",
+      "redis",
       "db-mock",
       "prisma-types",
       "elastic-types",
     ],
     "jest.autoRun": "off",
     "cSpell.words": [
+      "Anson",
       "Bitfield",
-      "Rhys",
-      "superjson",
-      "trpc",
-      "Turborepo",
-      "unauthed",
-      "upsert",
-      "upserting"
+      "Bools",
+      "Codespaces",
+      "dbaeumer",
       "devcontainer",
       "devcontainers",
-      "Turborepo"
+      "extensionpack",
+      "nextjs",
+      "Nextra",
+      "orta",
+      "reacord",
+      "Rhys",
+      "superjson",
+      "tailwindcss",
+      "trpc",
+      "Turborepo",
+      "twoslash",
+      "unauthed",
+      "undelete",
+      "upsert",
+      "upserting"
     ],
   },
   "extensions": {
     "recommendations": [
       "vscode-icons-team.vscode-icons",
       "ms-vscode-remote.vscode-remote-extensionpack",
-      "orta.vscode-twoslash-queries"
+      "orta.vscode-twoslash-queries",
+      "dbaeumer.vscode-eslint",
+      "GitHub.copilot",
+      "eamodio.gitlens",
+      "Prisma.prisma",
+      "aaron-bond.better-comments",
+      "ZixuanChen.vitest-explorer",
+      "EditorConfig.EditorConfig",
+      "bradlc.vscode-tailwindcss",
+      "DavidAnson.vscode-markdownlint",
+      "Orta.vscode-jest",
+      "unifiedjs.vscode-mdx",
+      "usernamehw.errorlens"
     ]
   },
 }

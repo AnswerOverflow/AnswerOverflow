@@ -19,6 +19,7 @@
     "@answeroverflow/db-mock": "*",
     "@answeroverflow/elastic-types": "*",
     "@answeroverflow/prisma-types": "*",
+    "@answeroverflow/cache": "*",
     "@answeroverflow/utils": "*",
     "@sapphire/bitfield": "^1.0.0",
     "discord-api-types": "^0.37.30",
@@ -28,7 +29,7 @@
     "@answeroverflow/tsconfig": "*",
     "@vitest/coverage-c8": "^0.25.8",
     "cross-env": "^7.0.3",
-    "dotenv-cli": "^6.0.0",
+    "dotenv-cli": "^7.0.0",
     "vitest": "^0.25.8"
   }
 }

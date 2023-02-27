@@ -2,6 +2,7 @@ export * from "./src/server";
 export * from "./src/channel";
 export * from "./src/discord-account";
 export * from "./src/ignored-discord-account";
+export * from "./src/auth";
 export * from "./src/user-server-settings";
 export * from "./src/message";
 export * from "./src/utils";
