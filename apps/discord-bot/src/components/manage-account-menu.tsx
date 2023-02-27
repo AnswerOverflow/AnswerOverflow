@@ -11,9 +11,9 @@ import {
 import { callAPI, componentEventStatusHandler } from "~discord-bot/utils/trpc";
 import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
 import { Button, Embed } from "@answeroverflow/reacord";
-import { Spacer } from "./spacer";
 import { ANSWER_OVERFLOW_BLUE_AS_INT } from "~discord-bot/utils/constants";
 import { createMemberCtx } from "~discord-bot/utils/context";
+import { EmbedMenuInstruction, MenuInstruction } from "./instructions";
 
 type ManageAccountMenuItemProps = {
   settings: UserServerSettingsWithFlags;
@@ -123,12 +123,6 @@ export const StopIgnoringAccountButton = ({
   />
 );
 
-type MenuInstruction = {
-  title: string;
-  instructions: string;
-  enabled: boolean;
-};
-
 // TODO: Make this take in the caller as a prop and compare that when the button is clicked?
 // Doesn't matter that much since the action only affects the button clicker
 export function ManageAccountMenu({
@@ -176,15 +170,7 @@ export function ManageAccountMenu({
   const RegularView = () => (
     <>
       <Embed color={ANSWER_OVERFLOW_BLUE_AS_INT}>
-        {instructions.map(
-          ({ title, instructions, enabled }) =>
-            enabled && (
-              <React.Fragment key={title}>
-                **{title}** - {instructions}
-                <Spacer count={2} />
-              </React.Fragment>
-            )
-        )}
+        <EmbedMenuInstruction instructions={instructions} />
       </Embed>
       <ToggleConsentButton setSettings={setSettings} settings={settings} />
       <ToggleIndexingButton setSettings={setSettings} settings={settings} />
@@ -195,9 +181,16 @@ export function ManageAccountMenu({
   const GloballyIgnoredView = () => (
     <>
       <Embed color={ANSWER_OVERFLOW_BLUE_AS_INT}>
-        **{STOP_IGNORING_ACCOUNT_LABEL}** - You have globally ignored your account, your messages
-        will not be indexed in any server and will not appear on Answer Overflow. You can undo this
-        by clicking the button below
+        <EmbedMenuInstruction
+          instructions={[
+            {
+              title: STOP_IGNORING_ACCOUNT_LABEL,
+              enabled: true,
+              instructions:
+                "You have globally ignored your account, your messages will not be indexed in any server and will not appear on Answer Overflow. You can undo this by clicking the button below",
+            },
+          ]}
+        />
       </Embed>
       <StopIgnoringAccountButton
         setIsGloballyIgnored={setIsGloballyIgnored}
