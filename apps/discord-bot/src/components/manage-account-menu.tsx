@@ -212,7 +212,7 @@ export function ManageAccountMenu({
           ]}
         />
       </Embed>
-      <StopIgnoringAccountButton setSta={setState} />
+      <StopIgnoringAccountButton setState={setState} />
     </>
   );
 

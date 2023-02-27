@@ -176,7 +176,19 @@
     "recommendations": [
       "vscode-icons-team.vscode-icons",
       "ms-vscode-remote.vscode-remote-extensionpack",
-      "orta.vscode-twoslash-queries"
+      "orta.vscode-twoslash-queries",
+      "dbaeumer.vscode-eslint",
+      "GitHub.copilot",
+      "eamodio.gitlens",
+      "Prisma.prisma",
+      "aaron-bond.better-comments",
+      "ZixuanChen.vitest-explorer",
+      "EditorConfig.EditorConfig",
+      "bradlc.vscode-tailwindcss",
+      "DavidAnson.vscode-markdownlint",
+      "Orta.vscode-jest",
+      "unifiedjs.vscode-mdx",
+      "usernamehw.errorlens"
     ]
   },
 }
