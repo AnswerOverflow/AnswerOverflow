@@ -13,6 +13,9 @@ import { toAODiscordAccount } from "~discord-bot/utils/conversions";
 import { createMemberCtx } from "~discord-bot/utils/context";
 import type { ConsentSource, ManageAccountSource } from "@answeroverflow/api";
 
+export const READ_THE_RULES_CONSENT_PROMPT =
+  "This server uses Answer Overflow to index content on the web. By posting in indexed channels, you agree to have your messages publicly displayed on Answer Overflow to help others find answers.";
+
 export const CONSENT_BUTTON_LABEL = "Publicly display my messages on Answer Overflow";
 export const CONSENT_BUTTON_ID = "consentButton";
 export const CONSENT_BUTTON_DATA = {
