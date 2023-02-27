@@ -422,6 +422,7 @@ export function mockMessage(input: {
   // @ts-ignore
   channel.messages.cache.set(message.id, message);
   message.react = jest.fn(); // TODO: implement
+  message.startThread = jest.fn(); // TODO: implement
   return message;
 }
 
