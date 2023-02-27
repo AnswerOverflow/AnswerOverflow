@@ -62,7 +62,7 @@ describe("Server", () => {
       const created = await createServer(server);
       expect(created).toEqual(addFlagsToServer(server));
     });
-    it.only("should upsert update a server", async () => {
+    it("should upsert update a server", async () => {
       const created = await createServer(server);
       const updated = await updateServer({
         update: {

@@ -27,7 +27,9 @@ module.exports = {
       },
     ],
     // eslint-disable-next-line no-undef
-    "no-only-tests/no-only-tests": process.env.CI ? "error" : "warn",
+    "no-only-tests/no-only-tests": [
+      process.env.CI ? "error" : "warn", // CI should never allow .only,
+    ],
     "prefer-arrow-callback": [
       "error",
       {
