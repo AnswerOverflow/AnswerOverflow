@@ -3252,10 +3252,10 @@
     "@storybook/global" "^5.0.0"
     "@storybook/preview-api" "7.0.0-beta.54"
 
-"@storybook/jest@^0.0.11-next.0":
-  version "0.0.11-next.0"
-  resolved "https://registry.yarnpkg.com/@storybook/jest/-/jest-0.0.11-next.0.tgz#d5fadfb0c285c7c38c3c2372751921e8e7af7851"
-  integrity sha512-jtCu2rmDNhG+VxB/sR+AADhb6c/UNdqAmHYV3B50tc+HlnrlELE3UEsRFCztlq4zFaz1y3JK91lwQn9ja6yPsQ==
+"@storybook/jest@^0.0.11--canary.22.2783ae7.0":
+  version "0.0.11--canary.22.2783ae7.0"
+  resolved "https://registry.yarnpkg.com/@storybook/jest/-/jest-0.0.11--canary.22.2783ae7.0.tgz#72c323d641bd22dd8f74118776362c533a111fae"
+  integrity sha512-bMGMI7Ykp6H+mJKD0tXJ0rh3UvC1RTIoq8amPEZYpZVqocfHeggDfDUPQ0cA8hYF199+08YA5k5Q0bokkfmz1w==
   dependencies:
     "@storybook/expect" storybook-jest
     "@storybook/instrumenter" next
