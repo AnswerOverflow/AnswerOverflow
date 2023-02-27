@@ -1,12 +1,6 @@
-import { reply } from "~discord-bot/test/reacord-utils";
+import { findLinkByURL, reply, toggleButtonTest } from "~discord-bot/test/reacord-utils";
 import React from "react";
-import {
-  createDiscordAccount,
-  createServer,
-  ServerWithFlags,
-  updateServer,
-} from "@answeroverflow/db";
-import { mockServerWithFlags, mockUserServerSettingsWithFlags } from "@answeroverflow/db-mock";
+import { createServer, findServerById, ServerWithFlags, updateServer } from "@answeroverflow/db";
 import type { ReacordTester } from "@answeroverflow/reacord";
 import type { Guild, GuildMember, TextChannel } from "discord.js";
 import { mockReacord, setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
@@ -16,7 +10,7 @@ import {
   mockGuild,
   mockTextChannel,
 } from "@answeroverflow/discordjs-mock";
-import { toAODiscordAccount, toAOServer } from "~discord-bot/utils/conversions";
+import { toAOServer } from "~discord-bot/utils/conversions";
 import {
   DISABLE_READ_THE_RULES_CONSENT_LABEL,
   ENABLE_READ_THE_RULES_CONSENT_LABEL,
@@ -37,28 +31,6 @@ beforeEach(async () => {
   server = await createServer(toAOServer(guild));
 });
 
-async function toggleButtonTest({
-  clicker,
-  preClickLabel,
-  postClickLabel,
-  message,
-}: {
-  preClickLabel: string;
-  postClickLabel: string;
-  message: ReacordTester["messages"][number];
-  clicker: GuildMember;
-}) {
-  const preClickButton = message.findButtonByLabel(preClickLabel, reacord);
-  expect(preClickButton).toBeDefined();
-  await preClickButton!.click(textChannel, clicker);
-
-  // Used to verify no errors were thrown
-  expect(reacord.messages).toHaveLength(1);
-
-  const postClickButton = message.findButtonByLabel(postClickLabel, reacord);
-  expect(postClickButton).toBeDefined();
-}
-
 describe("Server Settings Menu", () => {
   describe("Toggle Read The Rules Consent Button", () => {
     it("should enable read the rules consent", async () => {
@@ -68,7 +40,11 @@ describe("Server Settings Menu", () => {
         preClickLabel: ENABLE_READ_THE_RULES_CONSENT_LABEL,
         postClickLabel: DISABLE_READ_THE_RULES_CONSENT_LABEL,
         message: message!,
+        reacord,
+        channel: textChannel,
       });
+      const updated = await findServerById(server.id);
+      expect(updated!.flags.readTheRulesConsentEnabled).toBeTruthy();
     });
     it("should disable read the rules consent", async () => {
       const updated = await updateServer(
@@ -86,7 +62,17 @@ describe("Server Settings Menu", () => {
         preClickLabel: DISABLE_READ_THE_RULES_CONSENT_LABEL,
         postClickLabel: ENABLE_READ_THE_RULES_CONSENT_LABEL,
         message: message!,
+        reacord,
+        channel: textChannel,
       });
+      const updated2 = await findServerById(server.id);
+      expect(updated2!.flags.readTheRulesConsentEnabled).toBeFalsy();
+    });
+  });
+  describe("View On Answer Overflow Link", () => {
+    it("should have a link to the server's page on Answer Overflow", async () => {
+      const message = await reply(reacord, <ServerSettingsMenu server={server} />);
+      expect(findLinkByURL(message!, `https://answeroverflow.com/c/${server.id}`)).toBeTruthy();
     });
   });
 });
