@@ -20,7 +20,6 @@
         "DavidAnson.vscode-markdownlint",
         "Orta.vscode-jest",
         "streetsidesoftware.code-spell-checker",
-        "WakaTime.vscode-wakatime",
         "unifiedjs.vscode-mdx"
       ]
     }
