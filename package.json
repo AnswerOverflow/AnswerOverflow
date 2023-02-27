@@ -3,9 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "workspaces": {
+    "comment": "TODO: Replace with apps/** when turborepo fixes nameless packages",
     "packages": [
-      "apps/*",
-      "packages/*"
+      "apps/nextjs",
+      "apps/discord-bot",
+      "apps/docs",
+      "packages/**"
     ]
   },
   "scripts": {
