@@ -65,6 +65,7 @@ Answer Overflow lets you index your Discord help channels into Google so that yo
 - 🗺️&nbsp; Server browser and discoverability
 - ✈️&nbsp; Self Hosting Support
 - 📥&nbsp; Automatically redirecting people to correct help channels
+- 💖&nbsp; Link the GitHub sponsors page of a person who solves the question
 
 ## Quickstart
 
