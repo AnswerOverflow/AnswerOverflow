@@ -39,6 +39,7 @@ export function ServerSettingsMenu({ server: initialServer }: { server: ServerWi
   const [server, setServer] = React.useState(initialServer);
   return (
     <>
+      <Embed></Embed>
       <ToggleReadTheRulesConsentButton setServer={setServer} server={server} />
       <Link url={`https://answeroverflow.com/c/${server.id}`} label="View On Answer Overflow" />
     </>

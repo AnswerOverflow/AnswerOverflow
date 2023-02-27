@@ -10,10 +10,10 @@ import {
 } from "~discord-bot/domains/manage-account";
 import { callAPI, componentEventStatusHandler } from "~discord-bot/utils/trpc";
 import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
-import { Button, Embed } from "@answeroverflow/reacord";
-import { ANSWER_OVERFLOW_BLUE_AS_INT } from "~discord-bot/utils/constants";
+import { Button } from "@answeroverflow/reacord";
 import { createMemberCtx } from "~discord-bot/utils/context";
 import { EmbedMenuInstruction, MenuInstruction } from "./instructions";
+import { InstructionsContainer } from "./instructions-container";
 
 type ManageAccountMenuItemProps = {
   state: ManageAccountMenuState;
@@ -189,9 +189,9 @@ export function ManageAccountMenu({
 
   const RegularView = () => (
     <>
-      <Embed color={ANSWER_OVERFLOW_BLUE_AS_INT}>
+      <InstructionsContainer>
         <EmbedMenuInstruction instructions={instructions} />
-      </Embed>
+      </InstructionsContainer>
       <ToggleConsentButton setSettings={setState} state={state} />
       <ToggleIndexingButton setSettings={setState} state={state} />
       <GloballyIgnoreAccountButton setState={setState} />
@@ -200,7 +200,7 @@ export function ManageAccountMenu({
 
   const GloballyIgnoredView = () => (
     <>
-      <Embed color={ANSWER_OVERFLOW_BLUE_AS_INT}>
+      <InstructionsContainer>
         <EmbedMenuInstruction
           instructions={[
             {
@@ -211,7 +211,7 @@ export function ManageAccountMenu({
             },
           ]}
         />
-      </Embed>
+      </InstructionsContainer>
       <StopIgnoringAccountButton setState={setState} />
     </>
   );
