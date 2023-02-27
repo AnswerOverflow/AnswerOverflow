@@ -132,14 +132,14 @@ type MenuInstruction = {
 // TODO: Make this take in the caller as a prop and compare that when the button is clicked?
 // Doesn't matter that much since the action only affects the button clicker
 export function ManageAccountMenu({
-  initalSettings,
-  initalIsGloballyIgnored,
+  initialSettings,
+  initialIsGloballyIgnored,
 }: {
-  initalSettings: UserServerSettingsWithFlags;
-  initalIsGloballyIgnored: boolean;
+  initialSettings: UserServerSettingsWithFlags;
+  initialIsGloballyIgnored: boolean;
 }) {
-  const [settings, setSettings] = React.useState(initalSettings);
-  const [isGloballyIgnored, setIsGloballyIgnored] = React.useState(initalIsGloballyIgnored);
+  const [settings, setSettings] = React.useState(initialSettings);
+  const [isGloballyIgnored, setIsGloballyIgnored] = React.useState(initialIsGloballyIgnored);
   const instructions: MenuInstruction[] = [
     {
       instructions:

@@ -56,8 +56,8 @@ export class OpenManageAccountMenuCommand extends Command {
           }
           const menu = (
             <ManageAccountMenu
-              initalSettings={userServerSettings}
-              initalIsGloballyIgnored={isIgnoredAccount}
+              initialSettings={userServerSettings}
+              initialIsGloballyIgnored={isIgnoredAccount}
             />
           );
           ephemeralReply(container.reacord, menu, interaction);
