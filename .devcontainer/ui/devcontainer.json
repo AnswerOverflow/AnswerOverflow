@@ -19,7 +19,8 @@
         "bradlc.vscode-tailwindcss",
         "DavidAnson.vscode-markdownlint",
         "Orta.vscode-jest",
-        "WakaTime.vscode-wakatime"
+        "WakaTime.vscode-wakatime",
+        "unifiedjs.vscode-mdx"
       ]
     }
   },

@@ -7,6 +7,10 @@
       "path": "apps/nextjs"
     },
     {
+      "name": "docs",
+      "path": "apps/docs"
+    },
+    {
       "name": "ui",
       "path": "packages/ui"
     },
@@ -147,11 +151,10 @@
       "Bitfield",
       "devcontainer",
       "devcontainers",
-      "reacord",
+      "Nextra",
       "Rhys",
       "superjson",
       "trpc",
-      "tsup",
       "Turborepo",
       "unauthed",
       "upsert",
