@@ -28,7 +28,7 @@ And an [Elastic Search](https://www.elastic.co/guide/en/elasticsearch/reference/
 
 ## Remote Environment (Codespaces / Gitpod)
 
-There are shortcut buttons in the README to jumpstart running from a remote environment. When running from these remote environments, consider the following:
+There are shortcut buttons in the README to jump start running from a remote environment. When running from these remote environments, consider the following:
 
 - They require at least 8 GB of ram to run the databases
 - If you have a slow remote machine, then the tests may fail when you run them locally if you run them all at the same time from the root directory.
@@ -38,10 +38,12 @@ There are shortcut buttons in the README to jumpstart running from a remote envi
   - This is only for packages that don't make any calls to the databases. If you try to run the tests on the whole project without databases setup the tests will fail
 
 ## UI
-We use storybook for developing our components and pages. It offers an isolated enviroment with a powerful toolset to empower frontend development.
+
+We use storybook for developing our components and pages. It offers an isolated environment with a powerful tool set to empower frontend development.
 
 ### Design
-For more information on designing Answer Overflow UI's, check out our [Design Guidlines](./DESIGN_GUIDELINES.md).
+
+For more information on designing Answer Overflow UI's, check out our [Design Guidelines](./DESIGN_GUIDELINES.md).
 
 ### Gitpod
 
@@ -55,6 +57,8 @@ For more information on designing Answer Overflow UI's, check out our [Design Gu
 ## VSCode users
 
 There is a workspace file called answeroverflow.code-workspace, VSCode lets you open this folder as that workspace and it is recommended that you do your development work inside of this workspace as it will configure all of the settings for you
+
+! The workspace is set to hide all "useless" files (i.e node_modules) if you for some reason need to access them, comment out the line hiding them in the workspace file !
 
 ### Get it running
 

@@ -77,12 +77,13 @@
       ]
     ],
     // "tailwindCSS.experimental.configFile": "./packages/config/tailwind/index.js",
+    // Disable these to view "useless" files
     "files.exclude": {
-      // "apps/": true, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
-      // "packages/": true, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
-      // "node_modules/": true,
-      // "dist/": true,
-      // "coverage/": true,
+      "**/node_modules": true,
+      "**/coverage/": true,
+      "**/.next": true,
+      "**/.turbo": true,
+      "**/dist": true,
     },
     // "typescript.tsserver.experimental.enableProjectDiagnostics": true,
     "vitest.enable": true,
@@ -148,16 +149,24 @@
     ],
     "jest.autoRun": "off",
     "cSpell.words": [
+      "Anson",
       "Bitfield",
       "Bools",
+      "Codespaces",
+      "dbaeumer",
       "devcontainer",
       "devcontainers",
+      "extensionpack",
+      "nextjs",
       "Nextra",
+      "orta",
       "reacord",
       "Rhys",
       "superjson",
+      "tailwindcss",
       "trpc",
       "Turborepo",
+      "twoslash",
       "unauthed",
       "upsert",
       "upserting"
