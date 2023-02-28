@@ -24,7 +24,7 @@ import type { Context } from "../context";
 
 export const CHANNEL_NOT_FOUND_MESSAGES = "Channel does not exist";
 
-const zChannelWithServerCreate = zChannelCreate
+export const zChannelWithServerCreate = zChannelCreate
   .omit({
     serverId: true,
   })
@@ -95,6 +95,9 @@ export const FORUM_GUIDELINES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
 export const FORUM_GUIDELINES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE =
   "Forum post guidelines consent already disabled";
 
+export const MARK_SOLUTION_ALREADY_ENABLED_ERROR_MESSAGE = "Mark solution already enabled";
+export const MARK_SOLUTION_ALREADY_DISABLED_ERROR_MESSAGE = "Mark solution already disabled";
+
 export const channelRouter = router({
   byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return protectedFetchWithPublicData({
@@ -146,6 +149,28 @@ export const channelRouter = router({
         updateData: {
           flags: {
             forumGuidelinesConsentEnabled: input.enabled,
+          },
+        },
+      });
+    }),
+  setMarkSolutionEnabled: withUserServersProcedure
+    .input(zChannelFlagChange)
+    .mutation(async ({ ctx, input }) => {
+      return mutateChannel({
+        canUpdate:
+          ({ oldSettings }) =>
+          () =>
+            assertBoolsAreNotEqual({
+              messageIfBothFalse: MARK_SOLUTION_ALREADY_DISABLED_ERROR_MESSAGE,
+              messageIfBothTrue: MARK_SOLUTION_ALREADY_ENABLED_ERROR_MESSAGE,
+              newValue: input.enabled,
+              oldValue: oldSettings.flags.markSolutionEnabled,
+            }),
+        channel: input.channel,
+        ctx,
+        updateData: {
+          flags: {
+            markSolutionEnabled: input.enabled,
           },
         },
       });
