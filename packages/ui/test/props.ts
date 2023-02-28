@@ -42,6 +42,7 @@ export function mockServer(override: Partial<ServerPublic> = {}) {
     id: randomId(),
     name: "Test Server",
     icon: null,
+    description: null,
     ...override,
   };
   return data;

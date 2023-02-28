@@ -13,7 +13,7 @@ module.exports = {
     project: ["./tsconfig.json"],
     sourceType: "module",
   },
-  ignorePatterns: [".eslintrc.js"],
+  ignorePatterns: [".eslintrc.js", "dist/", "node_modules/"],
   rules: {
     "@next/next/no-html-link-for-pages": "off",
     "react/jsx-key": "off",
@@ -26,8 +26,8 @@ module.exports = {
         patterns: ["../..*", "packages/*"],
       },
     ],
-    // eslint-disable-next-line no-undef
     "no-only-tests/no-only-tests": [
+      // eslint-disable-next-line no-undef
       process.env.CI ? "error" : "warn", // CI should never allow .only,
     ],
     "prefer-arrow-callback": [
