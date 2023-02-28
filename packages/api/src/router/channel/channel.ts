@@ -138,7 +138,7 @@ export const channelRouter = router({
             assertBoolsAreNotEqual({
               messageIfBothFalse: FORUM_GUIDELINES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE,
               messageIfBothTrue: FORUM_GUIDELINES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE,
-              newValue: input.forumGuidelinesConsentEnabled,
+              newValue: input.enabled,
               oldValue: oldSettings.flags.forumGuidelinesConsentEnabled,
             }),
         channel: input.channel,
