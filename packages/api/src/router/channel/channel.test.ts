@@ -3,6 +3,7 @@ import {
   createChannel,
   createChannelWithDeps,
   createServer,
+  findChannelById,
   Server,
 } from "@answeroverflow/db";
 import {
@@ -12,6 +13,8 @@ import {
 } from "~api/test/utils";
 import {
   channelRouter,
+  FORUM_GUIDELINES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE,
+  FORUM_GUIDELINES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE,
   INDEXING_ALREADY_DISABLED_ERROR_MESSAGE,
   INDEXING_ALREADY_ENABLED_ERROR_MESSAGE,
 } from "./channel";
@@ -64,6 +67,8 @@ describe("Channel Operations", () => {
             },
             enabled: true,
           });
+          const updated = await findChannelById(chnl.id);
+          expect(updated!.flags.indexingEnabled).toBeTruthy();
         },
         sourcesThatShouldWork: ["discord-bot"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
@@ -90,6 +95,8 @@ describe("Channel Operations", () => {
             },
             enabled: false,
           });
+          const updated = await findChannelById(chnl.id);
+          expect(updated!.flags.indexingEnabled).toBeFalsy();
         },
         sourcesThatShouldWork: ["discord-bot"],
         permissionsThatShouldWork: ["ManageGuild", "Administrator"],
@@ -138,6 +145,101 @@ describe("Channel Operations", () => {
           enabled: false,
         })
       ).rejects.toThrowError(INDEXING_ALREADY_DISABLED_ERROR_MESSAGE);
+    });
+  });
+  describe("set forum post guidelines enabled", () => {
+    it("should have all variants of setting forum post guidelines enabled succeed", async () => {
+      await testAllSourceAndPermissionVariantsThatThrowErrors({
+        async operation({ source, permission }) {
+          const server = mockServer();
+          const chnl = mockChannel(server);
+          const account = await mockAccountWithServersCallerCtx(server, source, permission);
+          const router = channelRouter.createCaller(account.ctx);
+          await router.setForumGuidelinesConsentEnabled({
+            channel: {
+              server,
+              ...chnl,
+            },
+            enabled: true,
+          });
+          const updated = await findChannelById(chnl.id);
+          expect(updated!.flags.forumGuidelinesConsentEnabled).toBeTruthy();
+        },
+        sourcesThatShouldWork: ["discord-bot"],
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+      });
+    });
+    it("should have all variants of setting forum post guidelines disabled succeed", async () => {
+      await testAllSourceAndPermissionVariantsThatThrowErrors({
+        async operation({ source, permission }) {
+          const server = mockServer();
+          const chnl = mockChannel(server);
+          const account = await mockAccountWithServersCallerCtx(server, source, permission);
+          const router = channelRouter.createCaller(account.ctx);
+          await createServer(server);
+          await createChannel({
+            ...chnl,
+            flags: {
+              forumGuidelinesConsentEnabled: true,
+            },
+          });
+          await router.setForumGuidelinesConsentEnabled({
+            channel: {
+              server,
+              ...chnl,
+            },
+            enabled: false,
+          });
+          const updated = await findChannelById(chnl.id);
+          expect(updated!.flags.forumGuidelinesConsentEnabled).toBeFalsy();
+        },
+        sourcesThatShouldWork: ["discord-bot"],
+        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
+      });
+      it("should throw the correct error when setting forum post guidelines enabled on a channel with forum post guidelines already enabled", async () => {
+        const server = mockServer();
+        const chnl = mockChannel(server);
+        const account = await mockAccountWithServersCallerCtx(server, "discord-bot", "ManageGuild");
+        const router = channelRouter.createCaller(account.ctx);
+        await createServer(server);
+        await createChannel({
+          ...chnl,
+          flags: {
+            forumGuidelinesConsentEnabled: true,
+          },
+        });
+        await expect(
+          router.setForumGuidelinesConsentEnabled({
+            channel: {
+              server,
+              ...chnl,
+            },
+            enabled: true,
+          })
+        ).rejects.toThrowError(FORUM_GUIDELINES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE);
+      });
+      it("should throw the correct error when setting forum post guidelines disabled on a channel with forum post guidelines already disabled", async () => {
+        const server = mockServer();
+        const chnl = mockChannel(server);
+        const account = await mockAccountWithServersCallerCtx(server, "discord-bot", "ManageGuild");
+        const router = channelRouter.createCaller(account.ctx);
+        await createServer(server);
+        await createChannel({
+          ...chnl,
+          flags: {
+            forumGuidelinesConsentEnabled: false,
+          },
+        });
+        await expect(
+          router.setForumGuidelinesConsentEnabled({
+            channel: {
+              server,
+              ...chnl,
+            },
+            enabled: false,
+          })
+        ).rejects.toThrowError(FORUM_GUIDELINES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE);
+      });
     });
   });
 });

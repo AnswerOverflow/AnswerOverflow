@@ -90,6 +90,10 @@ const zChannelFlagChange = z.object({
 
 export const INDEXING_ALREADY_ENABLED_ERROR_MESSAGE = "Indexing already enabled";
 export const INDEXING_ALREADY_DISABLED_ERROR_MESSAGE = "Indexing already disabled";
+export const FORUM_GUIDELINES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
+  "Forum post guidelines consent already enabled";
+export const FORUM_GUIDELINES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE =
+  "Forum post guidelines consent already disabled";
 
 export const channelRouter = router({
   byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
@@ -120,6 +124,28 @@ export const channelRouter = router({
         updateData: {
           flags: {
             indexingEnabled: input.enabled,
+          },
+        },
+      });
+    }),
+  setForumGuidelinesConsentEnabled: withUserServersProcedure
+    .input(zChannelFlagChange)
+    .mutation(async ({ ctx, input }) => {
+      return mutateChannel({
+        canUpdate:
+          ({ oldSettings }) =>
+          () =>
+            assertBoolsAreNotEqual({
+              messageIfBothFalse: FORUM_GUIDELINES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE,
+              messageIfBothTrue: FORUM_GUIDELINES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE,
+              newValue: input.forumGuidelinesConsentEnabled,
+              oldValue: oldSettings.flags.forumGuidelinesConsentEnabled,
+            }),
+        channel: input.channel,
+        ctx,
+        updateData: {
+          flags: {
+            forumGuidelinesConsentEnabled: input.enabled,
           },
         },
       });
