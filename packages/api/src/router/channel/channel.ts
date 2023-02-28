@@ -234,4 +234,26 @@ export const channelRouter = router({
         },
       });
     }),
+  setAutoThreadEnabled: withUserServersProcedure
+    .input(zChannelFlagChange)
+    .mutation(async ({ ctx, input }) => {
+      return mutateChannel({
+        canUpdate:
+          ({ oldSettings }) =>
+          () =>
+            assertBoolsAreNotEqual({
+              messageIfBothFalse: AUTO_THREAD_ALREADY_DISABLED_ERROR_MESSAGE,
+              messageIfBothTrue: AUTO_THREAD_ALREADY_ENABLED_ERROR_MESSAGE,
+              newValue: input.enabled,
+              oldValue: oldSettings.flags.autoThreadEnabled,
+            }),
+        channel: input.channel,
+        ctx,
+        updateData: {
+          flags: {
+            autoThreadEnabled: input.enabled,
+          },
+        },
+      });
+    }),
 });

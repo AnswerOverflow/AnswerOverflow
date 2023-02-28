@@ -12,6 +12,8 @@ import {
   testAllSourceAndPermissionVariantsThatThrowErrors,
 } from "~api/test/utils";
 import {
+  AUTO_THREAD_ALREADY_DISABLED_ERROR_MESSAGE,
+  AUTO_THREAD_ALREADY_ENABLED_ERROR_MESSAGE,
   channelRouter,
   FORUM_GUIDELINES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE,
   FORUM_GUIDELINES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE,
@@ -454,6 +456,73 @@ describe("Channel Operations", () => {
           tagId: null,
         })
       ).rejects.toThrowError(SOLVED_LABEL_ALREADY_UNSELECTED_ERROR_MESSAGE);
+    });
+  });
+  describe("set auto thread enabled", () => {
+    it("should have all variants of setting auto thread enabled succeed", async () => {
+      await validateChannelSettingsChange({
+        act(channel, router) {
+          return router.setAutoThreadEnabled({
+            channel,
+            enabled: true,
+          });
+        },
+        assert: (updated) => expect(updated.flags.autoThreadEnabled).toBeTruthy(),
+      });
+    });
+    it("should have all variants of setting auto thread disabled succeed", async () => {
+      await validateChannelSettingsChange({
+        async setup({ server, channel }) {
+          await createServer(server);
+          await createChannel({
+            ...channel,
+            flags: {
+              autoThreadEnabled: true,
+            },
+          });
+        },
+        act(channel, router) {
+          return router.setAutoThreadEnabled({
+            channel,
+            enabled: false,
+          });
+        },
+        assert: (updated) => expect(updated.flags.autoThreadEnabled).toBeFalsy(),
+      });
+    });
+    it("should throw the correct error when setting auto thread enabled on a channel with auto thread already enabled", async () => {
+      await createChannel({
+        ...channel,
+        flags: {
+          autoThreadEnabled: true,
+        },
+      });
+      await expect(
+        router.setAutoThreadEnabled({
+          channel: {
+            server,
+            ...channel,
+          },
+          enabled: true,
+        })
+      ).rejects.toThrowError(AUTO_THREAD_ALREADY_ENABLED_ERROR_MESSAGE);
+    });
+    it("should throw the correct error when setting auto thread disabled on a channel with auto thread already disabled", async () => {
+      await createChannel({
+        ...channel,
+        flags: {
+          autoThreadEnabled: false,
+        },
+      });
+      await expect(
+        router.setAutoThreadEnabled({
+          channel: {
+            server,
+            ...channel,
+          },
+          enabled: false,
+        })
+      ).rejects.toThrowError(AUTO_THREAD_ALREADY_DISABLED_ERROR_MESSAGE);
     });
   });
 });
