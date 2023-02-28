@@ -7,8 +7,8 @@
   "scripts": {
     "with-env": "dotenv -e ../../.env --",
     "clean": "rm -rf .turbo node_modules coverage",
-    "lint": "eslint src && tsc --noEmit",
-    "lint:fix": "eslint src --fix",
+    "lint": "eslint . && tsc --noEmit",
+    "lint:fix": "eslint . --fix",
     "test": "yarn run with-env vitest run --coverage",
     "test:watch": "yarn run with-env vitest",
     "type-check": "tsc --noEmit"
