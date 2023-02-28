@@ -84,9 +84,14 @@ describe("Message Mock", () => {
     expect(thread).toBeDefined();
     expect(thread.parentId).toBe(message.channel.id);
     expect(thread.parent).toBeDefined();
+    expect(thread.name).toBe("test thread");
     expect(thread.parent!.id).toBe(message.channel.id);
     expect(message.thread).toBeDefined();
     expect(message.thread!.id).toBe(thread.id);
+    const fromCache = textChannel.threads.cache.get(thread.id);
+    expect(fromCache).toBeDefined();
+    expect(fromCache!.id).toBe(thread.id);
+    expect(fromCache!.name).toBe(thread.name);
   });
 });
 
