@@ -38,7 +38,10 @@ export const zChannelCreateMany = zChannelCreate.omit({
   flags: true,
 });
 
-export const zChannelUpsert = zChannelCreate;
+export const zChannelUpsert = z.object({
+  create: zChannelCreate,
+  update: zChannelMutable.optional(),
+});
 
 export const zChannelUpsertMany = zChannelCreateMany;
 
@@ -179,13 +182,16 @@ export async function createChannelWithDeps(data: z.infer<typeof zChannelCreateW
 
 export function upsertChannel(data: z.infer<typeof zChannelUpsert>) {
   return upsert({
-    create: () => createChannel(data),
+    create: () => createChannel(data.create),
     update: (old) =>
       updateChannel({
-        update: data,
+        update: {
+          id: data.create.id,
+          ...data.update,
+        },
         old,
       }),
-    find: () => findChannelById(data.id),
+    find: () => findChannelById(data.create.id),
   });
 }
 

@@ -236,7 +236,9 @@ describe("Channel Operations", () => {
   describe("Channel Upsert", () => {
     it("should upsert create a channel", async () => {
       const chnl = mockChannelWithFlags(server);
-      const created = await upsertChannel(chnl);
+      const created = await upsertChannel({
+        create: chnl,
+      });
       expect(created).toStrictEqual(chnl);
       const found = await findChannelById(chnl.id);
       expect(found).toStrictEqual(chnl);
@@ -245,8 +247,10 @@ describe("Channel Operations", () => {
       const chnl = mockChannelWithFlags(server);
       await createChannel(chnl);
       const updated = await upsertChannel({
-        ...chnl,
-        name: "new name",
+        create: chnl,
+        update: {
+          name: "new name",
+        },
       });
       expect(updated).toStrictEqual({
         ...chnl,

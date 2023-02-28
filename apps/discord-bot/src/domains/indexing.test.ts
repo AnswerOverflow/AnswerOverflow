@@ -18,6 +18,7 @@ import {
   findManyDiscordAccountsById,
   findManyMessages,
   Message as AOMessage,
+  upsertChannel,
 } from "@answeroverflow/db";
 import {
   toAOChannel,
@@ -33,8 +34,6 @@ import {
   findSolutionsToMessage,
   indexRootChannel,
 } from "./indexing";
-import type { inferRouterInputs } from "@trpc/server";
-import type { botRouter } from "@answeroverflow/api";
 import {
   mockTextChannel,
   mockForumChannel,
@@ -84,10 +83,7 @@ async function validateIndexingResults(input: {
 
 async function upsertChannelSettings(
   channel: TextChannel | ForumChannel | NewsChannel,
-  opts: Omit<
-    inferRouterInputs<typeof botRouter>["channels"]["upsertWithDeps"],
-    "id" | "server" | "name" | "type" | "parentId"
-  > = {}
+  opts: Parameters<typeof upsertChannel>[0]["update"] = {}
 ) {
   await createServer(toAOServer(channel.guild));
   return await createChannel({ ...toAOChannel(channel), ...opts });

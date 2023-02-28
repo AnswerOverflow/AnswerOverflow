@@ -1,29 +1,19 @@
+import { Channel, createChannel, createServer, Server } from "@answeroverflow/db";
 import {
-  Channel,
-  createChannel,
-  createManyChannels,
-  createServer,
-  Server,
-} from "@answeroverflow/db";
-import {
-  testAllSourceAndPermissionVariantsThatThrowErrors,
   mockAccountWithServersCallerCtx,
   testAllPublicAndPrivateDataVariants,
 } from "~api/test/utils";
 import { channelRouter } from "./channel";
-import { MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE } from "~api/utils/permissions";
 import { mockChannel, mockServer } from "@answeroverflow/db-mock";
 import { pick } from "@answeroverflow/utils";
 import type { ChannelFindByIdOutput } from "~api/utils/types";
 
 let server: Server;
 let channel: Channel;
-let channel2: Channel;
 
 beforeEach(async () => {
   server = mockServer();
   channel = mockChannel(server);
-  channel2 = mockChannel(server);
   await createServer(server);
 });
 
@@ -51,117 +41,6 @@ describe("Channel Operations", () => {
             publicDataFormat: pickPublicChannelData(data),
           };
         },
-      });
-    });
-  });
-  describe("Channel Fetch Many", () => {
-    beforeEach(async () => {
-      await createManyChannels([channel, channel2]);
-    });
-    it("tests all variants for fetching many channels", async () => {
-      await testAllPublicAndPrivateDataVariants({
-        sourcesThatShouldWork: ["discord-bot", "web-client"],
-        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
-        async fetch({ permission, source }) {
-          const account = await mockAccountWithServersCallerCtx(server, source, permission);
-          const router = channelRouter.createCaller(account.ctx);
-          const data = await router.byIdMany([channel.id, channel2.id]);
-          return {
-            data,
-            privateDataFormat: data,
-            publicDataFormat: data.map(pickPublicChannelData),
-          };
-        },
-      });
-    });
-  });
-  describe("Channel Create", () => {
-    it("tests all variants for creating a single channel", async () => {
-      await testAllSourceAndPermissionVariantsThatThrowErrors({
-        sourcesThatShouldWork: ["discord-bot"],
-        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
-        permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
-        async operation({ permission, source }) {
-          const chnl = mockChannel(server);
-          const account = await mockAccountWithServersCallerCtx(server, source, permission);
-          const router = channelRouter.createCaller(account.ctx);
-          await router.create(chnl);
-        },
-      });
-    });
-  });
-
-  describe("Channel Update", () => {
-    beforeEach(async () => {
-      await createChannel(channel);
-    });
-    it("tests all varaints for updating a channel", async () => {
-      await testAllSourceAndPermissionVariantsThatThrowErrors({
-        sourcesThatShouldWork: ["discord-bot"],
-        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
-        permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
-        async operation({ permission, source }) {
-          const account = await mockAccountWithServersCallerCtx(server, source, permission);
-          const router = channelRouter.createCaller(account.ctx);
-          await router.update({
-            id: channel.id,
-            name: "new name",
-          });
-        },
-      });
-    });
-  });
-
-  describe("Channel Delete", () => {
-    it("tests all varaints for deleting a channel", async () => {
-      await testAllSourceAndPermissionVariantsThatThrowErrors({
-        sourcesThatShouldWork: ["discord-bot"],
-        permissionsThatShouldWork: ["ManageGuild", "Administrator"],
-        permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
-        async operation({ permission, source }) {
-          const chnl = mockChannel(server);
-          await createChannel(chnl);
-          const account = await mockAccountWithServersCallerCtx(server, source, permission);
-          const router = channelRouter.createCaller(account.ctx);
-          await router.delete(chnl.id);
-        },
-      });
-    });
-  });
-  describe("Channel Upsert", () => {
-    describe("Upsert Create", () => {
-      it("tests all varaints for upsert creating a channel", async () => {
-        await testAllSourceAndPermissionVariantsThatThrowErrors({
-          sourcesThatShouldWork: ["discord-bot"],
-          permissionsThatShouldWork: ["ManageGuild", "Administrator"],
-          permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
-          async operation({ permission, source }) {
-            const chnl = mockChannel(server);
-            const account = await mockAccountWithServersCallerCtx(server, source, permission);
-            const router = channelRouter.createCaller(account.ctx);
-            await router.upsert(chnl);
-          },
-        });
-      });
-    });
-    describe("Upsert Update", () => {
-      beforeEach(async () => {
-        await createChannel(channel);
-      });
-      it("tests all varaints for upsert updating a channel", async () => {
-        await testAllSourceAndPermissionVariantsThatThrowErrors({
-          sourcesThatShouldWork: ["discord-bot"],
-          permissionsThatShouldWork: ["ManageGuild", "Administrator"],
-          permissionFailureMessage: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
-          async operation({ permission, source }) {
-            const account = await mockAccountWithServersCallerCtx(server, source, permission);
-            const router = channelRouter.createCaller(account.ctx);
-            await router.upsert({
-              ...channel,
-              name: "new name",
-            });
-          },
-        });
       });
     });
   });

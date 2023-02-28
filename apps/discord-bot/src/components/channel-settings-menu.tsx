@@ -1,4 +1,4 @@
-import type { ChannelWithFlags, ChannelUpsertWithDepsInput } from "@answeroverflow/api";
+import type { ChannelWithFlags } from "@answeroverflow/api";
 import { callAPI, componentEventStatusHandler } from "~discord-bot/utils/trpc";
 import { type GuildForumTag, ChannelType, ForumChannel, GuildTextBasedChannel } from "discord.js";
 import { ButtonClickEvent, Select, SelectChangeEvent, Option } from "@answeroverflow/reacord";
@@ -7,6 +7,7 @@ import { ToggleButton } from "./toggle-button";
 import { getRootChannel } from "~discord-bot/utils/utils";
 import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
 import { createMemberCtx } from "~discord-bot/utils/context";
+import { upsertChannel, upsertServer } from "@answeroverflow/db";
 
 const getTagNameWithEmoji = (tag: GuildForumTag) =>
   tag.emoji?.name ? tag.emoji.name + " " + tag.name : tag.name;
@@ -29,7 +30,7 @@ export function ChannelSettingsMenu({
 
   const updateChannelSettings = async (
     interaction: ButtonClickEvent,
-    data: Omit<ChannelUpsertWithDepsInput, "id" | "server" | "type" | "name" | "parentId">
+    data: Parameters<typeof upsertChannel>[0]["update"]
   ) => {
     if (channel.isDMBased()) {
       interaction.ephemeralReply("Does not work in DMs");
@@ -38,14 +39,17 @@ export function ChannelSettingsMenu({
 
     const member = await channel.guild.members.fetch(interaction.user.id);
     await callAPI({
-      async apiCall(router) {
-        return await router.channels.upsertWithDeps({
-          server: {
-            create: toAOServer(channel.guild),
+      async apiCall() {
+        // TODO: DO NOT MERGE THIS
+        await upsertServer({
+          create: toAOServer(channel.guild),
+        });
+        return upsertChannel({
+          create: {
+            ...toAOChannel(targetChannel),
+            ...data,
           },
-          ...toAOChannel(targetChannel),
-          ...channelSettings,
-          ...data,
+          update: data,
         });
       },
       Ok(result) {
