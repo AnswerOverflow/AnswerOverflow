@@ -13,7 +13,16 @@ module.exports = {
     project: ["./tsconfig.json"],
     sourceType: "module",
   },
-  ignorePatterns: [".eslintrc.js", "dist/", "node_modules/"],
+  ignorePatterns: [
+    ".eslintrc.js",
+    "dist/",
+    "node_modules/",
+    "storybook-static*/",
+    ".next/",
+    "out/",
+    "build",
+    "coverage/",
+  ],
   rules: {
     "@next/next/no-html-link-for-pages": "off",
     "react/jsx-key": "off",
