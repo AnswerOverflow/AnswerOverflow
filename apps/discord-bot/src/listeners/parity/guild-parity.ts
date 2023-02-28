@@ -16,6 +16,7 @@ async function autoUpdateServerInfo(guild: Guild) {
     update: {
       icon: convertedServer.icon,
       name: convertedServer.name,
+      description: convertedServer.description,
       kickedTime: null,
     },
   });

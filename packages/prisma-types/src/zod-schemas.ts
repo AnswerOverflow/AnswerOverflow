@@ -138,6 +138,7 @@ export const zServerPublic = zServer.pick({
   id: true,
   name: true,
   icon: true,
+  description: true,
 });
 
 export type ServerPublicWithFlags = z.infer<typeof zServerPublic>;
