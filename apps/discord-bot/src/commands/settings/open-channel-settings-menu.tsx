@@ -36,13 +36,13 @@ export class ChannelSettingsCommand extends Command {
 
   public override async chatInputRun(interaction: ChatInputCommandInteraction) {
     await guildTextChannelOnlyInteraction(interaction, async ({ channel, member }) => {
-      const parentId = channel.isThread() ? channel.parentId : channel.id;
-      if (!parentId) return; // TODO: Send message to user
+      const targetChannelIdToChangeSettingsFor = channel.isThread() ? channel.parentId : channel.id;
+      if (!targetChannelIdToChangeSettingsFor) return; // TODO: Send message to user
 
       await callAPI({
         async apiCall(router) {
           return callWithAllowedErrors({
-            call: () => router.channels.byId(parentId),
+            call: () => router.channels.byId(targetChannelIdToChangeSettingsFor),
             allowedErrors: "NOT_FOUND",
           });
         },
@@ -52,7 +52,10 @@ export class ChannelSettingsCommand extends Command {
           }
           // TODO: Maybe assert that it matches that spec instead of casting
           const menu = (
-            <ChannelSettingsMenu channel={channel} settings={result as ChannelWithFlags} />
+            <ChannelSettingsMenu
+              channelMenuIsIn={channel}
+              channelWithFlags={result as ChannelWithFlags}
+            />
           );
           ephemeralReply(container.reacord, menu, interaction);
         },

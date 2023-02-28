@@ -108,6 +108,8 @@ export function ephemeralReply(
   }
   throw new Error(`Invalid reacord instance`);
 }
+
+export type RootChannelType = NonNullable<ReturnType<typeof getRootChannel>>;
 export function getRootChannel(channel: GuildTextBasedChannel) {
   if (channel.isVoiceBased()) return undefined;
   if (!channel.isTextBased()) return undefined;
