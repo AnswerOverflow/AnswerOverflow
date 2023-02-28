@@ -82,3 +82,8 @@ export function toPrivateMessageWithStrippedData(
     solutionMessages: message.solutionMessages.map((m) => toPrivateMessageWithStrippedData(m)),
   };
 }
+
+export function pickPublicChannelData(channel: ChannelFindByIdOutput) {
+  const picked = pick(channel, ["id", "name", "parentId", "serverId", "type", "inviteCode"]);
+  return picked;
+}
