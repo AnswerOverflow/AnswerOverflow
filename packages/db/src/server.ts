@@ -45,13 +45,14 @@ export function combineServerSettings<
 }
 
 export async function createServer(input: z.infer<typeof zServerCreate>) {
+  // Explicitly type this to avoid passing into .parse missing information
+  const combinedCreateData: z.infer<typeof zServerPrismaCreate> = combineServerSettings({
+    old: getDefaultServerWithFlags(input),
+    updated: input,
+  });
   const created = await prisma.server.create({
-    data: zServerPrismaCreate.parse(
-      combineServerSettings({
-        old: getDefaultServerWithFlags(input),
-        updated: input,
-      })
-    ),
+    // Strip out any extra data that isn't in the model
+    data: zServerPrismaCreate.parse(combinedCreateData),
   });
   return addFlagsToServer(created);
 }
@@ -67,14 +68,15 @@ export async function updateServer({
     existing = await findServerById(update.id);
     if (!existing) throw new Error(`Server with id ${update.id} not found`);
   }
+  // Explicitly type this to avoid passing into .parse missing information
+  const combinedUpdateData: z.infer<typeof zServerPrismaUpdate> = combineServerSettings({
+    old: existing,
+    updated: update,
+  });
   const updated = await prisma.server.update({
     where: { id: update.id },
-    data: zServerPrismaUpdate.parse(
-      combineServerSettings({
-        old: existing,
-        updated: update,
-      })
-    ),
+    // Strip out any extra data that isn't in the model
+    data: zServerPrismaUpdate.parse(combinedUpdateData),
   });
   return addFlagsToServer(updated);
 }

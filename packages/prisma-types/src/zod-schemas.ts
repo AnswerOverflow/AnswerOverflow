@@ -97,6 +97,7 @@ export function mergeServerFlags(old: number, newFlags: Record<string, boolean>)
   );
 }
 
+// ! Prisma breaks if you call it with extra data that isn't in the model, this is used to strip that data out
 type ServerZodFormat = {
   [K in keyof Server]: z.ZodTypeAny;
 };
@@ -110,6 +111,7 @@ export const zServerPrisma = z.object({
   bitfield: z.number(),
 } satisfies ServerZodFormat);
 
+// For creating a server, we make sure to include the required fields
 export const zServerPrismaCreate = zServerPrisma.partial().merge(
   zServerPrisma.pick({
     name: true,
@@ -117,6 +119,7 @@ export const zServerPrismaCreate = zServerPrisma.partial().merge(
   })
 );
 
+// For updating a server, only the ID is required
 export const zServerPrismaUpdate = zServerPrisma.partial().merge(
   zServerPrisma.pick({
     id: true,
