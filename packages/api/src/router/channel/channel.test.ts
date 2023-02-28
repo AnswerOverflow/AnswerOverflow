@@ -21,6 +21,8 @@ import {
   MARK_SOLUTION_ALREADY_ENABLED_ERROR_MESSAGE,
   SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS_ALREADY_DISABLED_ERROR_MESSAGE,
   SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS_ALREADY_ENABLED_ERROR_MESSAGE,
+  SOLVED_LABEL_ALREADY_SELECTED_ERROR_MESSAGE,
+  SOLVED_LABEL_ALREADY_UNSELECTED_ERROR_MESSAGE,
   zChannelWithServerCreate,
 } from "./channel";
 import { mockChannel, mockServer } from "@answeroverflow/db-mock";
@@ -38,7 +40,7 @@ beforeEach(async () => {
   router = channelRouter.createCaller(account.ctx);
 });
 
-async function validateFlagChange({
+async function validateChannelSettingsChange({
   assert,
   act,
   setup = () => {},
@@ -111,7 +113,7 @@ describe("Channel Operations", () => {
   });
   describe("Set Indexing Enabled", () => {
     it("should have all variants of setting indexing enabled succeed", async () => {
-      await validateFlagChange({
+      await validateChannelSettingsChange({
         act(channel, router) {
           return router.setIndexingEnabled({
             channel,
@@ -122,7 +124,7 @@ describe("Channel Operations", () => {
       });
     });
     it("should have all variants of setting indexing disabled succeed", async () => {
-      await validateFlagChange({
+      await validateChannelSettingsChange({
         async setup({ server, channel }) {
           await createServer(server);
           await createChannel({
@@ -188,7 +190,7 @@ describe("Channel Operations", () => {
   });
   describe("set forum post guidelines enabled", () => {
     it("should have all variants of setting forum post guidelines enabled succeed", async () => {
-      await validateFlagChange({
+      await validateChannelSettingsChange({
         act(channel, router) {
           return router.setForumGuidelinesConsentEnabled({
             channel,
@@ -199,7 +201,7 @@ describe("Channel Operations", () => {
       });
     });
     it("should have all variants of setting forum post guidelines disabled succeed", async () => {
-      await validateFlagChange({
+      await validateChannelSettingsChange({
         async setup({ server, channel }) {
           await createServer(server);
           await createChannel({
@@ -255,7 +257,7 @@ describe("Channel Operations", () => {
   });
   describe("set mark solution enabled", () => {
     it("should have all variants of setting mark solution enabled succeed", async () => {
-      await validateFlagChange({
+      await validateChannelSettingsChange({
         act(channel, router) {
           return router.setMarkSolutionEnabled({
             channel,
@@ -266,7 +268,7 @@ describe("Channel Operations", () => {
       });
     });
     it("should have all variants of setting mark solution disabled succeed", async () => {
-      await validateFlagChange({
+      await validateChannelSettingsChange({
         async setup({ server, channel }) {
           await createServer(server);
           await createChannel({
@@ -322,7 +324,7 @@ describe("Channel Operations", () => {
   });
   describe("set send mark solution instructions in new threads", () => {
     it("should have all variants of setting send mark solution instructions in new threads enabled succeed", async () => {
-      await validateFlagChange({
+      await validateChannelSettingsChange({
         act(channel, router) {
           return router.setSendMarkSolutionInstructionsInNewThreadsEnabled({
             channel,
@@ -334,7 +336,7 @@ describe("Channel Operations", () => {
       });
     });
     it("should have all variants of setting send mark solution instructions in new threads disabled succeed", async () => {
-      await validateFlagChange({
+      await validateChannelSettingsChange({
         async setup({ server, channel }) {
           await createServer(server);
           await createChannel({
@@ -391,6 +393,67 @@ describe("Channel Operations", () => {
       ).rejects.toThrowError(
         SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS_ALREADY_DISABLED_ERROR_MESSAGE
       );
+    });
+  });
+  describe("set solution tag id", () => {
+    it("should have all variants of setting solution tag id succeed", async () => {
+      await validateChannelSettingsChange({
+        act(channel, router) {
+          return router.setSolutionTagId({
+            channel,
+            tagId: "tagId",
+          });
+        },
+        assert: (updated) => expect(updated.solutionTagId).toBe("tagId"),
+      });
+    });
+    it("should have all variants of clearing the solution tag id succeed", async () => {
+      await validateChannelSettingsChange({
+        async setup({ server, channel }) {
+          await createServer(server);
+          await createChannel({
+            ...channel,
+            solutionTagId: "tagId",
+          });
+        },
+        act(channel, router) {
+          return router.setSolutionTagId({
+            channel,
+            tagId: null,
+          });
+        },
+        assert: (updated) => expect(updated.solutionTagId).toBeNull(),
+      });
+    });
+    it("should throw the correct error when setting solution tag id on a channel with solution tag id already set", async () => {
+      await createChannel({
+        ...channel,
+        solutionTagId: "tagId",
+      });
+      await expect(
+        router.setSolutionTagId({
+          channel: {
+            server,
+            ...channel,
+          },
+          tagId: "tagId",
+        })
+      ).rejects.toThrowError(SOLVED_LABEL_ALREADY_SELECTED_ERROR_MESSAGE);
+    });
+    it("should throw the correct error when clearing the solution tag id on a channel with no solution tag id set", async () => {
+      await createChannel({
+        ...channel,
+        solutionTagId: null,
+      });
+      await expect(
+        router.setSolutionTagId({
+          channel: {
+            server,
+            ...channel,
+          },
+          tagId: null,
+        })
+      ).rejects.toThrowError(SOLVED_LABEL_ALREADY_UNSELECTED_ERROR_MESSAGE);
     });
   });
 });

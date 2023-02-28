@@ -14,6 +14,7 @@ import {
   assertBoolsAreNotEqual,
   assertCanEditServer,
   assertCanEditServerBotOnly,
+  assertIsNotValue,
 } from "~api/utils/permissions";
 import {
   PermissionsChecks,
@@ -204,6 +205,32 @@ export const channelRouter = router({
           flags: {
             sendMarkSolutionInstructionsInNewThreads: input.enabled,
           },
+        },
+      });
+    }),
+  setSolutionTagId: withUserServersProcedure
+    .input(
+      z.object({
+        channel: zChannelWithServerCreate,
+        tagId: z.string().nullable(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return mutateChannel({
+        canUpdate:
+          ({ oldSettings }) =>
+          () =>
+            assertIsNotValue({
+              expectedToNotBeValue: oldSettings.solutionTagId,
+              actualValue: input.tagId,
+              errorMessage: oldSettings.solutionTagId
+                ? SOLVED_LABEL_ALREADY_SELECTED_ERROR_MESSAGE
+                : SOLVED_LABEL_ALREADY_UNSELECTED_ERROR_MESSAGE,
+            }),
+        channel: input.channel,
+        ctx,
+        updateData: {
+          solutionTagId: input.tagId,
         },
       });
     }),
