@@ -55,7 +55,11 @@ const channelCrudRouter = router({
     return protectedMutationFetchFirst({
       fetch: () => findChannelById(input.id),
       permissions: (data) => assertCanEditServerBotOnly(ctx, data.serverId),
-      operation: (old) => updateChannel(input, old),
+      operation: (old) =>
+        updateChannel({
+          update: input,
+          old,
+        }),
       notFoundMessage: CHANNEL_NOT_FOUND_MESSAGES,
     });
   }),

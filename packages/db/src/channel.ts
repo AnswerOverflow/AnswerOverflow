@@ -7,6 +7,8 @@ import {
   bitfieldToChannelFlags,
   channelBitfieldFlags,
   zChannel,
+  zChannelPrismaCreate,
+  zChannelPrismaUpdate,
 } from "@answeroverflow/prisma-types";
 import { prisma, getDefaultChannel, Channel } from "@answeroverflow/prisma-types";
 import { dictToBitfield } from "@answeroverflow/prisma-types/src/bitfield";
@@ -110,11 +112,12 @@ export async function findManyChannelsById(ids: string[]) {
 }
 
 export async function createChannel(data: z.infer<typeof zChannelCreate>) {
+  const combinedData: z.infer<typeof zChannelPrismaCreate> = combineChannelSettingsFlagsToBitfield({
+    old: getDefaultChannel(data),
+    updated: data,
+  });
   const created = await prisma.channel.create({
-    data: combineChannelSettingsFlagsToBitfield({
-      old: getDefaultChannel(data),
-      updated: data,
-    }),
+    data: zChannelPrismaCreate.parse(combinedData),
   });
   return addFlagsToChannel(created);
 }
@@ -126,15 +129,22 @@ export async function createManyChannels(data: z.infer<typeof zChannelCreateMany
   return data.map((c) => getDefaultChannel({ ...c }));
 }
 
-export async function updateChannel(data: z.infer<typeof zChannelUpdate>, old: Channel | null) {
-  if (!old) old = await findChannelById(data.id);
+export async function updateChannel({
+  update,
+  old,
+}: {
+  update: z.infer<typeof zChannelUpdate>;
+  old: Channel | null;
+}) {
+  if (!old) old = await findChannelById(update.id);
   if (!old) throw new Error("Channel not found");
+  const combinedData: z.infer<typeof zChannelPrismaUpdate> = combineChannelSettingsFlagsToBitfield({
+    old,
+    updated: update,
+  });
   const updated = await prisma.channel.update({
-    where: { id: data.id },
-    data: combineChannelSettingsFlagsToBitfield({
-      old,
-      updated: data,
-    }),
+    where: { id: update.id },
+    data: zChannelPrismaUpdate.parse(combinedData),
   });
   return addFlagsToChannel(updated);
 }
@@ -170,7 +180,11 @@ export async function createChannelWithDeps(data: z.infer<typeof zChannelCreateW
 export function upsertChannel(data: z.infer<typeof zChannelUpsert>) {
   return upsert({
     create: () => createChannel(data),
-    update: (old) => updateChannel(data, old),
+    update: (old) =>
+      updateChannel({
+        update: data,
+        old,
+      }),
     find: () => findChannelById(data.id),
   });
 }

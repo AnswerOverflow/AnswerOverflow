@@ -104,14 +104,14 @@ describe("Channel Operations", () => {
         inviteCode: getRandomId(5),
       });
       await createChannel(chnl);
-      const updated = await updateChannel(
-        {
-          ...chnl,
+      const updated = await updateChannel({
+        old: null,
+        update: {
+          id: chnl.id,
           name: "new name",
           inviteCode: null,
         },
-        null
-      );
+      });
       expect(updated).toStrictEqual({
         ...chnl,
         name: "new name",
@@ -139,16 +139,16 @@ describe("Channel Operations", () => {
         },
       });
       await createChannel(chnl);
-      const updated = await updateChannel(
-        {
-          ...chnl,
+      const updated = await updateChannel({
+        old: chnl,
+        update: {
+          id: chnl.id,
           name: "new name",
           flags: {
             sendMarkSolutionInstructionsInNewThreads: true,
           },
         },
-        chnl
-      );
+      });
       expect(updated).toStrictEqual(target);
       const found = await findChannelById(chnl.id);
       expect(found).toStrictEqual(target);
