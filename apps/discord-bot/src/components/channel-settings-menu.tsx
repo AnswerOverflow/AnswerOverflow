@@ -5,7 +5,7 @@ import { ButtonClickEvent, Select, SelectChangeEvent, Option } from "@answerover
 import React from "react";
 import { ToggleButton } from "./toggle-button";
 import { getRootChannel } from "~discord-bot/utils/utils";
-import { toAOChannelWithServer } from "~discord-bot/utils/conversions";
+import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
 import { createMemberCtx } from "~discord-bot/utils/context";
 
 const getTagNameWithEmoji = (tag: GuildForumTag) =>
@@ -40,7 +40,10 @@ export function ChannelSettingsMenu({
     await callAPI({
       async apiCall(router) {
         return await router.channels.upsertWithDeps({
-          ...toAOChannelWithServer(targetChannel),
+          server: {
+            create: toAOServer(channel.guild),
+          },
+          ...toAOChannel(targetChannel),
           ...channelSettings,
           ...data,
         });

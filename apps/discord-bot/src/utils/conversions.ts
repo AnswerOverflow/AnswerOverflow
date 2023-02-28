@@ -82,6 +82,7 @@ export function toAOServer(guild: Guild) {
     id: guild.id,
     name: guild.name,
     icon: guild.icon,
+    description: guild.description,
   });
 }
 

@@ -162,7 +162,7 @@ export async function deleteChannel(id: string) {
 export async function createChannelWithDeps(data: z.infer<typeof zChannelCreateWithDeps>) {
   await upsertServer(data.server);
   return createChannel({
-    serverId: data.server.id,
+    serverId: data.server.create.id,
     ...omit(data, "server"),
   });
 }

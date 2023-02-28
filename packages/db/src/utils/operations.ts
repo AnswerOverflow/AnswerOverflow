@@ -3,7 +3,7 @@ import { type DBErrorCode, DBError } from "./error";
 interface UpsertOptions<T> {
   find: () => Promise<T | null>;
   create: () => Promise<T>;
-  update: (old: T) => Promise<T>;
+  update: (old: T) => Promise<T> | T;
 }
 
 export async function upsert<T>({ find, create, update }: UpsertOptions<T>) {

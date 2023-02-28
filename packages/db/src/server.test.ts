@@ -29,15 +29,15 @@ describe("Server", () => {
       existing = await createServer(server);
     });
     it("should update server with consent enabled enable", async () => {
-      const updated = await updateServer(
-        {
+      const updated = await updateServer({
+        update: {
           ...server,
           flags: {
             readTheRulesConsentEnabled: true,
           },
         },
-        existing
-      );
+        existing,
+      });
       expect(updated.flags.readTheRulesConsentEnabled).toBe(true);
       const found = await findServerById(server.id);
       expect(found!.flags.readTheRulesConsentEnabled).toBe(true);
@@ -64,15 +64,15 @@ describe("Server", () => {
     });
     it("should upsert update a server", async () => {
       const created = await createServer(server);
-      const updated = await updateServer(
-        {
+      const updated = await updateServer({
+        update: {
           ...server,
           flags: {
             readTheRulesConsentEnabled: true,
           },
         },
-        created
-      );
+        existing: created,
+      });
       expect(updated.flags.readTheRulesConsentEnabled).toBe(true);
     });
   });

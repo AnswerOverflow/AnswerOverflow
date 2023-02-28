@@ -19,6 +19,7 @@ export function getDefaultServer(override: Partial<Server> & { id: string; name:
     icon: null,
     kickedTime: null,
     bitfield: 0,
+    description: null,
     ...override,
   };
   return data;

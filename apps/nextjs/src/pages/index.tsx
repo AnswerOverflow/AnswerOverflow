@@ -7,7 +7,14 @@ import { ServerInviteDriver } from "@answeroverflow/ui";
 const ServerCard: React.FC<{
   server: Exclude<inferProcedureOutput<AppRouter["auth"]["getServers"]>, null | undefined>[0];
 }> = ({ server }) => {
-  return <ServerInviteDriver server={server} />;
+  return (
+    <ServerInviteDriver
+      server={{
+        ...server,
+        description: null,
+      }}
+    />
+  );
 };
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
