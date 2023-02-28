@@ -88,6 +88,9 @@ function combineChannelSettingsFlagsToBitfield<
 >({ old, updated }: { old: T; updated: F }) {
   const oldFlags = bitfieldToChannelFlags(old.bitfield);
   const newFlags = { ...oldFlags, ...updated.flags };
+  // TODO: Validate mark solution is enabled if send mark solution instructions is enabled
+  // TODO: Throw error if enabling read the rules consent for a non forum channel
+  // TODO: Throw error if enabling auto thread for a non valid threadable channel
   const flagsToBitfieldValue = dictToBitfield(newFlags, channelBitfieldFlags);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { flags, ...updateDataWithoutFlags } = updated;
