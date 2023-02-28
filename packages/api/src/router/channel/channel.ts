@@ -97,6 +97,14 @@ export const FORUM_GUIDELINES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE =
 
 export const MARK_SOLUTION_ALREADY_ENABLED_ERROR_MESSAGE = "Mark solution already enabled";
 export const MARK_SOLUTION_ALREADY_DISABLED_ERROR_MESSAGE = "Mark solution already disabled";
+export const SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS_ALREADY_ENABLED_ERROR_MESSAGE =
+  "Send mark solution in new threads already enabled";
+export const SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS_ALREADY_DISABLED_ERROR_MESSAGE =
+  "Send mark solution in new threads already disabled";
+export const SOLVED_LABEL_ALREADY_SELECTED_ERROR_MESSAGE = "Solved label already selected";
+export const SOLVED_LABEL_ALREADY_UNSELECTED_ERROR_MESSAGE = "Solved label already unselected";
+export const AUTO_THREAD_ALREADY_ENABLED_ERROR_MESSAGE = "Auto thread already enabled";
+export const AUTO_THREAD_ALREADY_DISABLED_ERROR_MESSAGE = "Auto thread already disabled";
 
 export const channelRouter = router({
   byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
@@ -171,6 +179,30 @@ export const channelRouter = router({
         updateData: {
           flags: {
             markSolutionEnabled: input.enabled,
+          },
+        },
+      });
+    }),
+  setSendMarkSolutionInstructionsInNewThreadsEnabled: withUserServersProcedure
+    .input(zChannelFlagChange)
+    .mutation(async ({ ctx, input }) => {
+      return mutateChannel({
+        canUpdate:
+          ({ oldSettings }) =>
+          () =>
+            assertBoolsAreNotEqual({
+              messageIfBothFalse:
+                SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS_ALREADY_DISABLED_ERROR_MESSAGE,
+              messageIfBothTrue:
+                SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS_ALREADY_ENABLED_ERROR_MESSAGE,
+              newValue: input.enabled,
+              oldValue: oldSettings.flags.sendMarkSolutionInstructionsInNewThreads,
+            }),
+        channel: input.channel,
+        ctx,
+        updateData: {
+          flags: {
+            sendMarkSolutionInstructionsInNewThreads: input.enabled,
           },
         },
       });

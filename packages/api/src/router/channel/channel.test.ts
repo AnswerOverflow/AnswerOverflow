@@ -3,7 +3,6 @@ import {
   ChannelWithFlags,
   createChannel,
   createServer,
-  DiscordAccount,
   findChannelById,
   Server,
 } from "@answeroverflow/db";
@@ -20,6 +19,8 @@ import {
   INDEXING_ALREADY_ENABLED_ERROR_MESSAGE,
   MARK_SOLUTION_ALREADY_DISABLED_ERROR_MESSAGE,
   MARK_SOLUTION_ALREADY_ENABLED_ERROR_MESSAGE,
+  SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS_ALREADY_DISABLED_ERROR_MESSAGE,
+  SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS_ALREADY_ENABLED_ERROR_MESSAGE,
   zChannelWithServerCreate,
 } from "./channel";
 import { mockChannel, mockServer } from "@answeroverflow/db-mock";
@@ -317,6 +318,79 @@ describe("Channel Operations", () => {
           enabled: false,
         })
       ).rejects.toThrowError(MARK_SOLUTION_ALREADY_DISABLED_ERROR_MESSAGE);
+    });
+  });
+  describe("set send mark solution instructions in new threads", () => {
+    it("should have all variants of setting send mark solution instructions in new threads enabled succeed", async () => {
+      await validateFlagChange({
+        act(channel, router) {
+          return router.setSendMarkSolutionInstructionsInNewThreadsEnabled({
+            channel,
+            enabled: true,
+          });
+        },
+        assert: (updated) =>
+          expect(updated.flags.sendMarkSolutionInstructionsInNewThreads).toBeTruthy(),
+      });
+    });
+    it("should have all variants of setting send mark solution instructions in new threads disabled succeed", async () => {
+      await validateFlagChange({
+        async setup({ server, channel }) {
+          await createServer(server);
+          await createChannel({
+            ...channel,
+            flags: {
+              sendMarkSolutionInstructionsInNewThreads: true,
+            },
+          });
+        },
+        act(channel, router) {
+          return router.setSendMarkSolutionInstructionsInNewThreadsEnabled({
+            channel,
+            enabled: false,
+          });
+        },
+        assert: (updated) =>
+          expect(updated.flags.sendMarkSolutionInstructionsInNewThreads).toBeFalsy(),
+      });
+    });
+    it("should throw the correct error when setting send mark solution instructions in new threads enabled on a channel with send mark solution instructions in new threads already enabled", async () => {
+      await createChannel({
+        ...channel,
+        flags: {
+          sendMarkSolutionInstructionsInNewThreads: true,
+        },
+      });
+      await expect(
+        router.setSendMarkSolutionInstructionsInNewThreadsEnabled({
+          channel: {
+            server,
+            ...channel,
+          },
+          enabled: true,
+        })
+      ).rejects.toThrowError(
+        SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS_ALREADY_ENABLED_ERROR_MESSAGE
+      );
+    });
+    it("should throw the correct error when setting send mark solution instructions in new threads disabled on a channel with send mark solution instructions in new threads already disabled", async () => {
+      await createChannel({
+        ...channel,
+        flags: {
+          sendMarkSolutionInstructionsInNewThreads: false,
+        },
+      });
+      await expect(
+        router.setSendMarkSolutionInstructionsInNewThreadsEnabled({
+          channel: {
+            server,
+            ...channel,
+          },
+          enabled: false,
+        })
+      ).rejects.toThrowError(
+        SEND_MARK_SOLUTION_INSTRUCTIONS_IN_NEW_THREADS_ALREADY_DISABLED_ERROR_MESSAGE
+      );
     });
   });
 });
