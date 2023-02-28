@@ -3,8 +3,8 @@ import {
   findServerById,
   ServerWithFlags,
   getDefaultServerWithFlags,
-  zServerUpsert,
   upsertServer,
+  zServerCreate,
 } from "@answeroverflow/db";
 import { z } from "zod";
 import type { Context } from "~api/router/context";
@@ -30,7 +30,7 @@ async function mutateServer({
     oldSettings: ServerWithFlags;
     doSettingsExistAlready: boolean;
   }) => Promise<ServerWithFlags>;
-  server: z.infer<typeof zServerUpsert>;
+  server: z.infer<typeof zServerCreate>;
   ctx: Context;
 }) {
   return protectedMutation({
@@ -65,7 +65,7 @@ export const serverRouter = router({
   setReadTheRulesConsentEnabled: withUserServersProcedure
     .input(
       z.object({
-        server: zServerUpsert.omit({
+        server: zServerCreate.omit({
           flags: true,
         }),
         enabled: z.boolean(),
@@ -86,9 +86,16 @@ export const serverRouter = router({
               }),
             operation: () =>
               upsertServer({
-                ...input.server,
-                flags: {
-                  readTheRulesConsentEnabled: input.enabled,
+                create: {
+                  ...input.server,
+                  flags: {
+                    readTheRulesConsentEnabled: input.enabled,
+                  },
+                },
+                update: {
+                  flags: {
+                    readTheRulesConsentEnabled: input.enabled,
+                  },
                 },
               }),
           });

@@ -70,6 +70,7 @@
   ],
   "settings": {
     "editor.tabSize": 2,
+    "mdx.experimentalLanguageServer": true,
     "tailwindCSS.experimental.classRegex": [
       [
         "cva\\(([^)]*)\\)",

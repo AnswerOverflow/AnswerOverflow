@@ -47,15 +47,15 @@ describe("Server Settings Menu", () => {
       expect(updated!.flags.readTheRulesConsentEnabled).toBeTruthy();
     });
     it("should disable read the rules consent", async () => {
-      const updated = await updateServer(
-        {
+      const updated = await updateServer({
+        existing: null,
+        update: {
           id: server.id,
           flags: {
             readTheRulesConsentEnabled: true,
           },
         },
-        null
-      );
+      });
       const message = await reply(reacord, <ServerSettingsMenu server={updated} />);
       await toggleButtonTest({
         clicker: members.guildMemberOwner,

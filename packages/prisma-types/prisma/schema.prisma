@@ -88,9 +88,10 @@ model IgnoredDiscordAccount {
 
 model Server {
   // Discord Data
-  id   String  @id @unique
-  name String  @db.VarChar(100)
-  icon String? @db.VarChar(45)
+  id          String  @id @unique
+  name        String  @db.VarChar(100)
+  icon        String? @db.VarChar(45)
+  description String?
 
   // Answer Overflow Settings
   bitfield   Int       @default(0)

@@ -10,7 +10,6 @@ import { addFlagsToChannel, Server } from "@answeroverflow/prisma-types";
 import { getRandomId } from "@answeroverflow/utils";
 import {
   createChannel,
-  createChannelWithDeps,
   createManyChannels,
   deleteChannel,
   findChannelById,
@@ -229,10 +228,8 @@ describe("Channel Operations", () => {
     it("should create a channel and a server together", async () => {
       const srv = mockServer();
       const chnl = mockChannelWithFlags(srv);
-      const created = await createChannelWithDeps({
-        server: srv,
-        ...chnl,
-      });
+      await createServer(srv);
+      const created = await createChannel(chnl);
       expect(created).toStrictEqual(chnl);
     });
   });
