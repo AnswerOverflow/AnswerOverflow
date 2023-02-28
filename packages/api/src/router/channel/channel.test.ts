@@ -30,6 +30,7 @@ import {
 import { mockChannel, mockServer } from "@answeroverflow/db-mock";
 import { pickPublicChannelData } from "~api/test/public-data";
 import type { z } from "zod";
+import { getRandomId } from "@answeroverflow/utils";
 
 let server: Server;
 let channel: Channel;
@@ -42,7 +43,7 @@ beforeEach(async () => {
   router = channelRouter.createCaller(account.ctx);
 });
 
-async function validateChannelSettingsChange({
+async function validateChannelSettingsChange<T>({
   assert,
   act,
   setup = () => {},
@@ -58,11 +59,11 @@ async function validateChannelSettingsChange({
     account: Awaited<ReturnType<typeof mockAccountWithServersCallerCtx>>;
     router: ReturnType<typeof channelRouter.createCaller>;
   }) => Promise<unknown> | unknown;
-  assert: (channel: ChannelWithFlags) => void;
+  assert: (channel: ChannelWithFlags, updateData: T) => void;
   act: (
     channel: z.infer<typeof zChannelWithServerCreate>,
     router: ReturnType<typeof channelRouter.createCaller>
-  ) => Promise<unknown>;
+  ) => Promise<T>;
 }) {
   await testAllSourceAndPermissionVariantsThatThrowErrors({
     async operation({ source, permission }) {
@@ -76,15 +77,15 @@ async function validateChannelSettingsChange({
         account,
         router,
       });
-      await act(
+      const updated = await act(
         {
           server,
           ...chnl,
         },
         router
       );
-      const updated = await findChannelById(chnl.id);
-      assert(updated!);
+      const found = await findChannelById(chnl.id);
+      assert(found!, updated);
     },
     sourcesThatShouldWork: ["discord-bot"],
     permissionsThatShouldWork: ["ManageGuild", "Administrator"],
@@ -120,17 +121,23 @@ describe("Channel Operations", () => {
           return router.setIndexingEnabled({
             channel,
             enabled: true,
+            inviteCode: getRandomId(),
           });
         },
-        assert: (updated) => expect(updated.flags.indexingEnabled).toBeTruthy(),
+        assert: (updated, updateData) => {
+          expect(updated.flags.indexingEnabled).toBeTruthy();
+          expect(updated.inviteCode).not.toBeNull();
+          expect(updated.inviteCode).toBe(updateData.inviteCode);
+        },
       });
     });
-    it("should have all variants of setting indexing disabled succeed", async () => {
+    it.only("should have all variants of setting indexing disabled succeed", async () => {
       await validateChannelSettingsChange({
         async setup({ server, channel }) {
           await createServer(server);
           await createChannel({
             ...channel,
+            inviteCode: getRandomId(),
             flags: {
               indexingEnabled: true,
             },
@@ -142,7 +149,10 @@ describe("Channel Operations", () => {
             enabled: false,
           });
         },
-        assert: (updated) => expect(updated.flags.indexingEnabled).toBeFalsy(),
+        assert: (updated) => {
+          expect(updated.flags.indexingEnabled).toBeFalsy();
+          expect(updated.inviteCode).toBeNull();
+        },
       });
     });
     it("should throw the correct error when setting indexing enabled on a channel with indexing already enabled", async () => {

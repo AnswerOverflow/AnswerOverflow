@@ -6,6 +6,7 @@ import {
   ALLOWED_THREAD_TYPES,
   bitfieldToChannelFlags,
   channelBitfieldFlags,
+  ChannelWithFlags,
   zChannel,
   zChannelPrismaCreate,
   zChannelPrismaUpdate,
@@ -14,6 +15,13 @@ import { prisma, getDefaultChannel, Channel } from "@answeroverflow/prisma-types
 import { dictToBitfield } from "@answeroverflow/prisma-types/src/bitfield";
 import { deleteManyMessagesByChannelId } from "./message";
 import { omit } from "@answeroverflow/utils";
+import { DBError } from "./utils/error";
+import { ChannelType } from "discord-api-types/v10";
+export const CHANNELS_THAT_CAN_HAVE_AUTOTHREAD = new Set([
+  ChannelType.GuildNews,
+  ChannelType.GuildText,
+]);
+
 export const zChannelRequired = zChannel.pick({
   id: true,
   name: true,
@@ -82,15 +90,64 @@ export const zThreadCreateWithDeps = zThreadCreate
 
 export const zThreadUpsertWithDeps = zThreadCreateWithDeps;
 
-function combineChannelSettingsFlagsToBitfield<
-  T extends { bitfield: number },
-  F extends z.infer<typeof zChannelMutable>
->({ old, updated }: { old: T; updated: F }) {
+function applyChannelSettingsChangesSideEffects<F extends z.infer<typeof zChannelMutable>>({
+  old,
+  updated,
+}: {
+  old: Channel;
+  updated: F;
+}) {
   const oldFlags = bitfieldToChannelFlags(old.bitfield);
+  const flagsToUpdate = updated.flags ?? {};
+
+  const pendingSettings: ChannelWithFlags = {
+    ...old,
+    ...updated,
+    flags: {
+      ...oldFlags,
+      ...flagsToUpdate,
+    },
+  };
+
+  // User is trying to enable sending mark solution instructions in new threads without enabling mark solution
+  if (
+    flagsToUpdate.sendMarkSolutionInstructionsInNewThreads &&
+    !pendingSettings.flags.markSolutionEnabled
+  ) {
+    throw new DBError(
+      "Cannot enable sendMarkSolutionInstructionsInNewThreads without enabling markSolutionEnabled",
+      "INVALID_CONFIGURATION"
+    );
+  }
+
+  // Throw error if enabling forum post guidelines consent for a non forum channel
+  if (
+    pendingSettings.type !== ChannelType.GuildForum &&
+    pendingSettings.flags.forumGuidelinesConsentEnabled
+  ) {
+    throw new DBError(
+      "Cannot enable readTheRulesConsentEnabled for a non forum channel",
+      "INVALID_CONFIGURATION"
+    );
+  }
+  // Throw error if enabling auto thread for a non valid threadable channel
+  if (
+    !CHANNELS_THAT_CAN_HAVE_AUTOTHREAD.has(pendingSettings.type) &&
+    pendingSettings.flags.autoThreadEnabled
+  ) {
+    throw new DBError(
+      "Cannot enable autoThreadEnabled for a non threadable channel",
+      "INVALID_CONFIGURATION"
+    );
+  }
+
+  if (!pendingSettings.flags.indexingEnabled) {
+    // TODO: Emit a cron job here to run in X minutes / hours to clean up the channel, delay incase the user accidentally disabled indexing
+    pendingSettings.lastIndexedSnowflake = null;
+    pendingSettings.inviteCode = null;
+  }
+
   const newFlags = { ...oldFlags, ...updated.flags };
-  // TODO: Validate mark solution is enabled if send mark solution instructions is enabled
-  // TODO: Throw error if enabling read the rules consent for a non forum channel
-  // TODO: Throw error if enabling auto thread for a non valid threadable channel
   const flagsToBitfieldValue = dictToBitfield(newFlags, channelBitfieldFlags);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { flags, ...updateDataWithoutFlags } = updated;
@@ -118,10 +175,12 @@ export async function findManyChannelsById(ids: string[]) {
 }
 
 export async function createChannel(data: z.infer<typeof zChannelCreate>) {
-  const combinedData: z.infer<typeof zChannelPrismaCreate> = combineChannelSettingsFlagsToBitfield({
-    old: getDefaultChannel(data),
-    updated: data,
-  });
+  const combinedData: z.infer<typeof zChannelPrismaCreate> = applyChannelSettingsChangesSideEffects(
+    {
+      old: getDefaultChannel(data),
+      updated: data,
+    }
+  );
   const created = await prisma.channel.create({
     data: zChannelPrismaCreate.parse(combinedData),
   });
@@ -144,10 +203,12 @@ export async function updateChannel({
 }) {
   if (!old) old = await findChannelById(update.id);
   if (!old) throw new Error("Channel not found");
-  const combinedData: z.infer<typeof zChannelPrismaUpdate> = combineChannelSettingsFlagsToBitfield({
-    old,
-    updated: update,
-  });
+  const combinedData: z.infer<typeof zChannelPrismaUpdate> = applyChannelSettingsChangesSideEffects(
+    {
+      old,
+      updated: update,
+    }
+  );
   const updated = await prisma.channel.update({
     where: { id: update.id },
     data: zChannelPrismaUpdate.parse(combinedData),

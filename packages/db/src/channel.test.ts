@@ -153,6 +153,40 @@ describe("Channel Operations", () => {
       const found = await findChannelById(chnl.id);
       expect(found).toStrictEqual(target);
     });
+    it("should clear the invite of a channel when setting indexing to disabled", async () => {
+      const chnl = mockChannelWithFlags(server, {
+        inviteCode: getRandomId(5),
+        flags: {
+          indexingEnabled: true,
+        },
+      });
+      await createChannel(chnl);
+      const updated = await upsertChannel({
+        create: {
+          ...chnl,
+        },
+        update: {
+          flags: {
+            indexingEnabled: false,
+          },
+        },
+      });
+      expect(updated).toStrictEqual({
+        ...chnl,
+        inviteCode: null,
+        flags: {
+          indexingEnabled: false,
+        },
+      });
+      const found = await findChannelById(chnl.id);
+      expect(found).toStrictEqual({
+        ...chnl,
+        inviteCode: null,
+        flags: {
+          indexingEnabled: false,
+        },
+      });
+    });
   });
   describe("Update Many Channels", () => {
     it("should update many channels", async () => {

@@ -119,7 +119,11 @@ export const channelRouter = router({
     });
   }),
   setIndexingEnabled: withUserServersProcedure
-    .input(zChannelFlagChange)
+    .input(
+      zChannelFlagChange.extend({
+        inviteCode: z.string().optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       return mutateChannel({
         canUpdate:
@@ -137,6 +141,7 @@ export const channelRouter = router({
           flags: {
             indexingEnabled: input.enabled,
           },
+          inviteCode: input.inviteCode,
         },
       });
     }),
