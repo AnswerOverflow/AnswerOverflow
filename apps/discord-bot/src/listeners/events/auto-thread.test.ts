@@ -38,11 +38,12 @@ const succeedCreatingAThread = async () => {
 
   await emitEvent(client, Events.MessageCreate, message);
 
-  expect(message.startThread).toHaveBeenCalled();
+  expect(message.thread).toBeDefined();
 };
 
 describe("Auto thread", () => {
   it("should not create a thread on a channel thread channel", async () => {
+    // Make sure that the success case works, then we can test other cases
     await succeedCreatingAThread();
 
     const channel = mockPublicThread({ client });
@@ -58,9 +59,10 @@ describe("Auto thread", () => {
 
     await emitEvent(client, Events.MessageCreate, message);
 
-    expect(message.startThread).not.toHaveBeenCalled();
+    expect(message.hasThread).toEqual(false);
   });
   it("should not create a thread if the author is a bot", async () => {
+    // Make sure that the success case works, then we can test other cases
     await succeedCreatingAThread();
     const author = mockGuildMember({
       client,
@@ -83,10 +85,10 @@ describe("Auto thread", () => {
 
     await emitEvent(client, Events.MessageCreate, message);
 
-    // assert
-    expect(message.startThread).not.toHaveBeenCalled();
+    expect(message.hasThread).toEqual(false);
   });
   it("should not create if the author is the system", async () => {
+    // Make sure that the success case works, then we can test other cases
     await succeedCreatingAThread();
 
     const author = mockGuildMember({
@@ -110,10 +112,10 @@ describe("Auto thread", () => {
 
     await emitEvent(client, Events.MessageCreate, message);
 
-    // assert
-    expect(message.startThread).not.toHaveBeenCalled();
+    expect(message.hasThread).toEqual(false);
   });
   it("should not create a thread if it does not have auto thread enabled", async () => {
+    // Make sure that the success case works, then we can test other cases
     await succeedCreatingAThread();
 
     const channel = mockTextChannel(client);
@@ -136,14 +138,16 @@ describe("Auto thread", () => {
 
     await emitEvent(client, Events.MessageCreate, message);
 
-    expect(message.startThread).not.toHaveBeenCalled();
+    expect(message.hasThread).toEqual(false);
   });
 
   it("should create a thread", async () => {
+    // Make sure that the success case works
     await succeedCreatingAThread();
   });
 
   it("should use the nickname instead of the username for the thread title", async () => {
+    // Make sure that the success case works, then we can test other cases
     await succeedCreatingAThread();
     const channel = mockTextChannel(client);
 
@@ -176,12 +180,10 @@ describe("Auto thread", () => {
 
     await emitEvent(client, Events.MessageCreate, message);
 
-    expect(message.startThread).toHaveBeenCalledWith({
-      name: `serverNickname - test`,
-      reason: "Answer Overflow auto thread",
-    });
+    expect(message.thread?.name).toEqual(`serverNickname - test`);
   });
   it("should trim the text to no longer than 50 characters", async () => {
+    // Make sure that the success case works, then we can test other cases
     await succeedCreatingAThread();
 
     const channel = mockTextChannel(client);
@@ -213,13 +215,11 @@ describe("Auto thread", () => {
 
     await emitEvent(client, Events.MessageCreate, message);
 
-    expect(message.startThread).toHaveBeenCalledWith({
-      // 30 = 50 - all other characters
-      name: `serverUsername - ${"a".repeat(30)}...`,
-      reason: "Answer Overflow auto thread",
-    });
+    // 30 = 50 - all other characters
+    expect(message.thread?.name).toEqual(`serverUsername - ${"a".repeat(30)}...`);
   });
   it("should remove all markdown syntax from title", async () => {
+    // Make sure that the success case works, then we can test other cases
     await succeedCreatingAThread();
 
     const channel = mockTextChannel(client);
@@ -251,10 +251,6 @@ describe("Auto thread", () => {
 
     await emitEvent(client, Events.MessageCreate, message);
 
-    expect(message.startThread).toHaveBeenCalledWith({
-      // 30 = 50 - all other characters
-      name: `serverUsername - thread title`,
-      reason: "Answer Overflow auto thread",
-    });
+    expect(message.thread?.name).toEqual(`serverUsername - thread title`);
   });
 });
