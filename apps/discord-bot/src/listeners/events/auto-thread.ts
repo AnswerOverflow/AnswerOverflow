@@ -2,6 +2,7 @@ import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import { ChannelType, Events, Message } from "discord.js";
 import { findChannelById } from "@answeroverflow/db";
+import { removeDiscordMarkdown } from "~discord-bot/utils/utils";
 
 @ApplyOptions<Listener.Options>({ event: Events.MessageCreate })
 export class OnMessage extends Listener {
@@ -23,7 +24,7 @@ export class OnMessage extends Listener {
       message.cleanContent
     }`;
     // Remove all markdown characters
-    textTitle = textTitle.replace(/(\*|_|~|`)/g, "");
+    textTitle = removeDiscordMarkdown(textTitle);
     if (textTitle.length > 47) {
       textTitle = textTitle.slice(0, 47) + "...";
     }
