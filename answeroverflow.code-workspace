@@ -139,7 +139,6 @@
       "ui",
       "web",
       "db",
-      "api",
       "auth",
       "config",
       "utils",
@@ -147,6 +146,8 @@
       "db-mock",
       "prisma-types",
       "elastic-types",
+      "cache",
+      "docs"
     ],
     "jest.autoRun": "off",
     "cSpell.words": [

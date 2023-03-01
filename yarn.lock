@@ -6504,7 +6504,7 @@ dotenv-cli@^7.0.0:
     dotenv-expand "^10.0.0"
     minimist "^1.2.6"
 
-dotenv-cra@^3.0.2:
+dotenv-cra@^3.0.2, dotenv-cra@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/dotenv-cra/-/dotenv-cra-3.0.3.tgz#edcc1bd810a55b55f7deac2f350ea6cace46b2ea"
   integrity sha512-p/EaxmpLem27Oy/z776GdYnWcHuwWJAzq1XJZvjhqqPPKAoFSn8/PuLradZIiGbX8P2Z5GY7PtswvLH1BYJibQ==

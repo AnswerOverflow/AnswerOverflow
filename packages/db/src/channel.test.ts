@@ -78,7 +78,6 @@ describe("Channel Operations", () => {
       const chnl = mockChannelWithFlags(server, {
         flags: {
           autoThreadEnabled: true,
-          forumGuidelinesConsentEnabled: true,
           indexingEnabled: true,
         },
       });
@@ -135,6 +134,7 @@ describe("Channel Operations", () => {
         name: "new name",
         flags: {
           indexingEnabled: true,
+          markSolutionEnabled: true,
           sendMarkSolutionInstructionsInNewThreads: true,
         },
       });
@@ -145,6 +145,7 @@ describe("Channel Operations", () => {
           id: chnl.id,
           name: "new name",
           flags: {
+            markSolutionEnabled: true,
             sendMarkSolutionInstructionsInNewThreads: true,
           },
         },
@@ -161,11 +162,10 @@ describe("Channel Operations", () => {
         },
       });
       await createChannel(chnl);
-      const updated = await upsertChannel({
-        create: {
-          ...chnl,
-        },
+      const updated = await updateChannel({
+        old: chnl,
         update: {
+          id: chnl.id,
           flags: {
             indexingEnabled: false,
           },

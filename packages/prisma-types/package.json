@@ -20,6 +20,7 @@
     "@answeroverflow/utils": "*",
     "@prisma/client": "^4.8.1",
     "@sapphire/bitfield": "^1.0.0",
+    "dotenv-cra": "^3.0.3",
     "zod": "^3.20.6"
   },
   "devDependencies": {
