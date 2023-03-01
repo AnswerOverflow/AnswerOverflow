@@ -18,7 +18,7 @@ import { omit } from "@answeroverflow/utils";
 import { DBError } from "./utils/error";
 import { ChannelType } from "discord-api-types/v10";
 export const CHANNELS_THAT_CAN_HAVE_AUTOTHREAD = new Set([
-  ChannelType.GuildNews,
+  ChannelType.GuildAnnouncement,
   ChannelType.GuildText,
 ]);
 
@@ -147,13 +147,10 @@ function applyChannelSettingsChangesSideEffects<F extends z.infer<typeof zChanne
     pendingSettings.inviteCode = null;
   }
 
-  const newFlags = { ...oldFlags, ...updated.flags };
-  const flagsToBitfieldValue = dictToBitfield(newFlags, channelBitfieldFlags);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { flags, ...updateDataWithoutFlags } = updated;
+  const bitfield = dictToBitfield(pendingSettings.flags, channelBitfieldFlags);
   return {
-    ...updateDataWithoutFlags,
-    bitfield: flagsToBitfieldValue,
+    ...pendingSettings,
+    bitfield,
   };
 }
 
