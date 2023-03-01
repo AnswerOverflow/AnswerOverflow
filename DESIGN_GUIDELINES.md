@@ -1,4 +1,5 @@
 # Answer Overflow Design Guidelines
+
 These guidelines briefly showcase how to design nice interfaces for Answer Overflow.
 
 > **Note**
@@ -13,12 +14,18 @@ We use [Montserrat](https://fonts.google.com/specimen/Montserrat) for headings a
 Answer overflow uses several predefined colors to ensure consistency. These colors are used throughout the site and should be used in designs as well.
 
 - Neutrals
-  - ![#070A0D](https://via.placeholder.com/15/070A0D/000000?text=+) `#070A0D` - `<prefix>-ao-black` in tailwind classnames
-  - ![#FAFCFF](https://via.placeholder.com/15/FAFCFF/000000?text=+) `#FAFCFF` - `<prefix>-ao-white` in tailwind classnames
+  - ![#F5F8FF](https://via.placeholder.com/15/F5F8FF/000000?text=+) `#141619` - Answer Overflow Zircon - `<style>-ao-white` in tailwind
+  - ![#141619](https://via.placeholder.com/15/141619/000000?text=+) `#141619` - Answer Overflow Charcoal - `<style>-ao-black` in tailwind
 - Accents (use sparingly)
-  - Soon.
+  - ![#396FF8](https://via.placeholder.com/15/396FF8/000000?text=+) `#396FF8` - Answer Overflow Ultramarine Blue - `<style>-ao-blue` in tailwind
 - Others
-  - ![#00FF85](https://via.placeholder.com/15/00FF85/000000?text=+) `#00FF85` - looks nice against the answer overflow black (with an opacity of 47% on lines) for indicating success to a user.
+  - ![#4BB543](https://via.placeholder.com/15/4BB543/000000?text=+) `#4BB543` - Answer Overflow Success Green - `<style>-ao-green` in tailwind
+  - ![#DECB33](https://via.placeholder.com/15/DECB33/000000?text=+) `#DECB33` - Answer Overflow Caution - `<style>-ao-yellow` in tailwind
+  - ![#DE3D33](https://via.placeholder.com/15/DE3D33/000000?text=+) `#DE3D33` - Answer Overflow Danger Red - `<style>-ao-red` in tailwind
+
+### Color Systems
+
+We recommend using the [HSB](https://www.learnui.design/blog/the-hsb-color-system-practicioners-primer.html) color system for colors. This is because it is easier to find a color that is similar to another color, as well as many other advantages!
 
 ## Logos
 
@@ -30,7 +37,7 @@ The following logos are available for use in your designs.
 
 All designs must be accessible to everyone. This includes:
 
-- Contrast ratios complying with at least WCAG 2.0 AA
+- Contrast ratios complying with at least [WCAG 2.0 AA](https://www.w3.org/WAI/WCAG21/quickref/#contrast-minimum)
 - Suitable scale and spacing around text and elements
 
 ## Styles
@@ -50,6 +57,7 @@ When designing, keep in mind that the user should be able to use the interface w
 - Good use of whitespace and neutrals
 
 ## Icons
+
 We recommend using [hero icons](https://heroicons.com/) primarily for icons, and [boostrap icons](https://icons.getbootstrap.com/) if you cannot find a suitable icon within hero icons.
 
 ---
