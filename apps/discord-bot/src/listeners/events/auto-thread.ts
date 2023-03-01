@@ -18,8 +18,12 @@ export class OnMessage extends Listener {
     // Channel is text based, and message has been sent by a human
 
     const channel = await findChannelById(message.channelId);
-    if (!channel?.flags.sendMarkSolutionInstructionsInNewThreads) return;
-    let textTitle = `${message.member?.nickname ?? message.author.username} - ${message.content}`;
+    if (!channel?.flags.autoThreadEnabled) return;
+    let textTitle = `${message.member?.nickname ?? message.author.username} - ${
+      message.cleanContent
+    }`;
+    // Remove all markdown characters
+    textTitle = textTitle.replace(/(\*|_|~|`)/g, "");
     if (textTitle.length > 47) {
       textTitle = textTitle.slice(0, 47) + "...";
     }

@@ -19,12 +19,12 @@ beforeEach(async () => {
   textChannel = mockTextChannel(client);
 });
 
-const mockMessageCorrect = async () => {
+const succeedCreatingAThread = async () => {
   // Channel with flag enabled
   await createServer(toAOServer(textChannel.guild));
   await createChannel({
     ...toAOChannel(textChannel),
-    flags: { sendMarkSolutionInstructionsInNewThreads: true },
+    flags: { autoThreadEnabled: true },
   });
   const author = mockGuildMember({ client });
   const message = mockMessage({
@@ -43,7 +43,7 @@ const mockMessageCorrect = async () => {
 
 describe("Auto thread", () => {
   it("should not create a thread on a channel thread channel", async () => {
-    await mockMessageCorrect();
+    await succeedCreatingAThread();
 
     const channel = mockPublicThread({ client });
     const author = mockGuildMember({ client });
@@ -61,7 +61,7 @@ describe("Auto thread", () => {
     expect(message.startThread).not.toHaveBeenCalled();
   });
   it("should not create a thread if the author is a bot", async () => {
-    await mockMessageCorrect();
+    await succeedCreatingAThread();
     const author = mockGuildMember({
       client,
       data: {
@@ -87,7 +87,7 @@ describe("Auto thread", () => {
     expect(message.startThread).not.toHaveBeenCalled();
   });
   it("should not create if the author is the system", async () => {
-    await mockMessageCorrect();
+    await succeedCreatingAThread();
 
     const author = mockGuildMember({
       client,
@@ -114,14 +114,14 @@ describe("Auto thread", () => {
     expect(message.startThread).not.toHaveBeenCalled();
   });
   it("should not create a thread if it does not have auto thread enabled", async () => {
-    await mockMessageCorrect();
+    await succeedCreatingAThread();
 
     const channel = mockTextChannel(client);
 
     await createServer(toAOServer(channel.guild));
     await createChannel({
       ...toAOChannel(channel),
-      flags: { sendMarkSolutionInstructionsInNewThreads: false },
+      flags: { autoThreadEnabled: false },
     });
     const author = mockGuildMember({ client });
 
@@ -140,6 +140,121 @@ describe("Auto thread", () => {
   });
 
   it("should create a thread", async () => {
-    await mockMessageCorrect();
+    await succeedCreatingAThread();
+  });
+
+  it("should use the nickname instead of the username for the thread title", async () => {
+    await succeedCreatingAThread();
+    const channel = mockTextChannel(client);
+
+    await createServer(toAOServer(channel.guild));
+    await createChannel({
+      ...toAOChannel(channel),
+      flags: { autoThreadEnabled: true },
+    });
+
+    const author = mockGuildMember({
+      client,
+      guild: channel.guild,
+
+      data: {
+        user: {
+          username: "serverUsername",
+          id: randomSnowflake().toString(),
+        },
+        nick: "serverNickname",
+      },
+    });
+    const message = mockMessage({
+      client,
+      channel: channel,
+      author: author.user,
+      override: {
+        content: "test",
+      },
+    });
+
+    await emitEvent(client, Events.MessageCreate, message);
+
+    expect(message.startThread).toHaveBeenCalledWith({
+      name: `serverNickname - test`,
+      reason: "Answer Overflow auto thread",
+    });
+  });
+  it("should trim the text to no longer than 50 characters", async () => {
+    await succeedCreatingAThread();
+
+    const channel = mockTextChannel(client);
+
+    await createServer(toAOServer(channel.guild));
+    await createChannel({
+      ...toAOChannel(channel),
+      flags: { autoThreadEnabled: true },
+    });
+
+    const author = mockGuildMember({
+      client,
+
+      data: {
+        user: {
+          username: "serverUsername",
+          id: randomSnowflake().toString(),
+        },
+      },
+    });
+    const message = mockMessage({
+      client,
+      channel: channel,
+      author: author.user,
+      override: {
+        content: "a".repeat(50),
+      },
+    });
+
+    await emitEvent(client, Events.MessageCreate, message);
+
+    expect(message.startThread).toHaveBeenCalledWith({
+      // 30 = 50 - all other characters
+      name: `serverUsername - ${"a".repeat(30)}...`,
+      reason: "Answer Overflow auto thread",
+    });
+  });
+  it("should remove all markdown syntax from title", async () => {
+    await succeedCreatingAThread();
+
+    const channel = mockTextChannel(client);
+
+    await createServer(toAOServer(channel.guild));
+    await createChannel({
+      ...toAOChannel(channel),
+      flags: { autoThreadEnabled: true },
+    });
+
+    const author = mockGuildMember({
+      client,
+
+      data: {
+        user: {
+          username: "serverUsername",
+          id: randomSnowflake().toString(),
+        },
+      },
+    });
+    const message = mockMessage({
+      client,
+      channel: channel,
+      author: author.user,
+      override: {
+        content: "**thread title**",
+      },
+    });
+
+    await emitEvent(client, Events.MessageCreate, message);
+
+    expect(message.startThread).toHaveBeenCalledWith({
+      // 30 = 50 - all other characters
+      name: `serverUsername - thread title`,
+      reason: "Answer Overflow auto thread",
+    });
   });
 });
