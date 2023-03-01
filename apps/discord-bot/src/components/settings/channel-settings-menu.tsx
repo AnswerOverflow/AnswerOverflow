@@ -3,8 +3,8 @@ import type { ChannelWithFlags } from "@answeroverflow/api";
 import { type GuildForumTag, ChannelType, ForumChannel, GuildTextBasedChannel } from "discord.js";
 import type { ButtonClickEvent, Select, SelectChangeEvent, Option } from "@answeroverflow/reacord";
 import React from "react";
-import { ToggleButton } from "./toggle-button";
-import { getRootChannel, RootChannelType } from "~discord-bot/utils/utils";
+import { ToggleButton } from "../primitives";
+import { getRootChannel, RootChannel } from "~discord-bot/utils/utils";
 
 const getTagNameWithEmoji = (tag: GuildForumTag) =>
   tag.emoji?.name ? tag.emoji.name + " " + tag.name : tag.name;
@@ -14,7 +14,7 @@ const CLEAR_TAG_VALUE = "clear";
 type ChannelSettingsMenuItemProps = {
   channelInDB: ChannelWithFlags;
   setChannel: (channel: ChannelWithFlags) => void;
-  targetChannel: RootChannelType;
+  targetChannel: RootChannel;
 };
 
 const ToggleIndexingButton = ({

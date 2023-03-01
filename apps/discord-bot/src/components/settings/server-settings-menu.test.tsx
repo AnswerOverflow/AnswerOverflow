@@ -15,7 +15,7 @@ import {
   DISABLE_READ_THE_RULES_CONSENT_LABEL,
   ENABLE_READ_THE_RULES_CONSENT_LABEL,
   ServerSettingsMenu,
-} from "~discord-bot/components/server-settings-menu";
+} from "~discord-bot/components/settings/server-settings-menu";
 
 let reacord: ReacordTester;
 let textChannel: TextChannel;

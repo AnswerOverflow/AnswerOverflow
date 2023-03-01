@@ -8,7 +8,7 @@ import { getDefaultUserServerSettingsWithFlags } from "@answeroverflow/db";
 import { createMemberCtx } from "~discord-bot/utils/context";
 
 import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
-import { ManageAccountMenu } from "~discord-bot/components/manage-account-menu";
+import { ManageAccountMenu } from "~discord-bot/components/settings";
 
 @ApplyOptions<Command.Options>({
   name: "manage-account",

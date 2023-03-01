@@ -1,4 +1,4 @@
-import { ChannelSettingsMenu } from "~discord-bot/components/channel-settings-menu";
+import { ChannelSettingsMenu } from "~discord-bot/components/settings";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command, container, type ChatInputCommand } from "@sapphire/framework";
 import { callAPI, callWithAllowedErrors, ephemeralStatusHandler } from "~discord-bot/utils/trpc";
