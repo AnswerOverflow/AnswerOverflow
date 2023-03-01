@@ -17,6 +17,7 @@ We recommend the use of dev containers to make your onboarding as easy as possib
 Follow this [Getting Started Guide](https://code.visualstudio.com/docs/devcontainers/containers) on how to setup dev containers for your system
 
 - If you encounter issues with installing packages, change the remote user from "node" to "root" in devcontainer.json
+- If you are on Linux you may need to install docker compose separately, check out [Docker's page on how to do so](https://docs.docker.com/compose/install/linux/).
 
 ## Local Environment
 
