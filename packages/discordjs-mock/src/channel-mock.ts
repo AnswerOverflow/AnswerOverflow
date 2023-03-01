@@ -31,6 +31,7 @@ import {
   FetchMessagesOptions,
   DiscordAPIError,
   FetchMessageOptions,
+  StartThreadOptions,
 } from "discord.js";
 import type { RawMessageData, RawMessageReactionData } from "discord.js/typings/rawDataTypes";
 import {
@@ -422,6 +423,13 @@ export function mockMessage(input: {
   // @ts-ignore
   channel.messages.cache.set(message.id, message);
   message.react = jest.fn(); // TODO: implement
+  message.startThread = jest.fn().mockImplementation((options: StartThreadOptions) =>
+    mockThreadFromParentMessage({
+      client,
+      parentMessage: message,
+      data: options,
+    })
+  );
   return message;
 }
 
