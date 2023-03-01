@@ -1,10 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { ChannelWithFlags } from "@answeroverflow/api";
-import { type GuildForumTag, ChannelType, ForumChannel, GuildTextBasedChannel } from "discord.js";
-import type { ButtonClickEvent, Select, SelectChangeEvent, Option } from "@answeroverflow/reacord";
+import {
+  type GuildForumTag,
+  ChannelType,
+  ForumChannel,
+  GuildTextBasedChannel,
+  Interaction,
+} from "discord.js";
+import {
+  ButtonClickEvent,
+  Select,
+  SelectChangeEvent,
+  Option,
+  Button,
+} from "@answeroverflow/reacord";
 import React from "react";
 import { ToggleButton } from "../primitives";
 import { getRootChannel, RootChannel } from "~discord-bot/utils/utils";
+import { useMenuHistory } from "../hooks";
 
 const getTagNameWithEmoji = (tag: GuildForumTag) =>
   tag.emoji?.name ? tag.emoji.name + " " + tag.name : tag.name;
@@ -16,6 +29,9 @@ type ChannelSettingsMenuItemProps = {
   setChannel: (channel: ChannelWithFlags) => void;
   targetChannel: RootChannel;
 };
+
+export const ENABLE_INDEXING_LABEL = "Enable indexing";
+export const DISABLE_INDEXING_LABEL = "Disable indexing";
 
 const ToggleIndexingButton = ({
   channelInDB,
@@ -106,13 +122,39 @@ const ToggleIndexingButton = ({
 //     ))}
 //   </Select>
 // );
+const Router = ({
+  interactionId,
+  initial,
+}: {
+  interactionId: string;
+  initial: React.ReactNode;
+}) => {
+  const { getHistory, popHistory, addHistory } = useMenuHistory(interactionId);
+  const history = getHistory();
+  if (history.length == 0) {
+    addHistory(initial);
+    return;
+  }
+  const current = history.at(-1);
+  if (history.length <= 1) {
+    return current;
+  }
+  return (
+    <>
+      <Button label="Back" onClick={() => popHistory()} />
+      {current}
+    </>
+  );
+};
 
 export function ChannelSettingsMenu({
   channelMenuIsIn,
   channelWithFlags,
+  interactionId,
 }: {
   channelMenuIsIn: GuildTextBasedChannel;
   channelWithFlags: ChannelWithFlags;
+  interactionId: string;
 }) {
   const [channel, setChannel] = React.useState<ChannelWithFlags>(channelWithFlags);
   const isForumChannel =
@@ -122,21 +164,45 @@ export function ChannelSettingsMenu({
     throw new Error("Could not find root channel");
   }
 
+  const IndexingSettingsMenu = () => (
+    <>
+      <Router
+        interactionId={interactionId}
+        initial={
+          <>
+            <ToggleIndexingButton
+              channelInDB={channel}
+              setChannel={setChannel}
+              targetChannel={targetChannel}
+            />
+            <MainMenu />
+          </>
+        }
+      />
+    </>
+  );
+
+  // Router takes in the base of what it renders
+  // It then has a set active function
+  // When calling set active, it pushes the old rendering to a stack
+  // When calling set active, it renders the new rendering
+  // When calling pop, it pops the old rendering off the stack and renders it
+
+  const { addHistory } = useMenuHistory(interactionId);
+  const MainMenu = () => (
+    <>
+      <Button
+        label="Indexing Settings"
+        onClick={() => {
+          addHistory(<MainMenu />);
+        }}
+      />
+    </>
+  );
+
   return (
     <>
-      <ToggleIndexingButton
-        channelInDB={channel}
-        setChannel={setChannel}
-        targetChannel={targetChannel}
-      />
-      {/* <ToggleMarkSolutionButton />
-      <ToggleSendMarkSolutionInstructionsButton />
-      {isForumChannel && (
-        <>
-          <SelectMarkAsSolvedTag forumChannel={channel.parent} />
-          <ToggleForumPostGuidelinesConsentButton />
-        </>
-      )} */}
+      <Router interactionId={interactionId} initial={<MainMenu />} />
     </>
   );
 }

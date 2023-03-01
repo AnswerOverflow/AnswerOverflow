@@ -1,5 +1,5 @@
 import { ChannelSettingsMenu } from "~discord-bot/components/settings";
-import { reply } from "~discord-bot/test/reacord-utils";
+import { reply, toggleButtonTest } from "~discord-bot/test/reacord-utils";
 import React from "react";
 import { getDefaultChannelWithFlags } from "@answeroverflow/db";
 import type { ReacordTester } from "@answeroverflow/reacord";
@@ -35,8 +35,26 @@ beforeEach(async () => {
   });
 });
 
-describe("ChannelSettingsMenu", () => {
-  it("should render correctly in a text channel", async () => { });
-  it("should render correctly in a forum thread", async () => { });
-  test.todo("should render correctly in a text channel thread");
+// describe("ChannelSettingsMenu", () => {
+//   it("should render correctly in a text channel", async () => { });
+//   it("should render correctly in a forum thread", async () => { });
+//   test.todo("should render correctly in a text channel thread");
+// });
+
+describe("Channel Settings Menu", () => {
+  describe("Indexing Settings Menu", () => {
+    describe("Toggle Indexing Button", () => {
+      it("should enable indexing", async () => {
+        const message = await reply(reacord, <ChannelSettingsMenu channel={textChannel} />);
+        await toggleButtonTest({
+          channel: textChannel,
+          clicker: members.guildMemberOwner,
+          message!,
+          postClickLabel
+
+        })
+      });
+      it("should disable indexing", async () => { });
+    });
+  });
 });
