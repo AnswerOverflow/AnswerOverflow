@@ -3,7 +3,6 @@ import {
   getDefaultUserServerSettingsWithFlags,
   UserServerSettingsWithFlags,
 } from "@answeroverflow/db";
-import { ToggleButton } from "./toggle-button";
 import {
   updateUserConsent,
   updateUserServerIndexingEnabled,
@@ -12,8 +11,12 @@ import { callAPI, componentEventStatusHandler } from "~discord-bot/utils/trpc";
 import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
 import { Button } from "@answeroverflow/reacord";
 import { createMemberCtx } from "~discord-bot/utils/context";
-import { EmbedMenuInstruction, MenuInstruction } from "./instructions";
-import { InstructionsContainer } from "./instructions-container";
+import {
+  ToggleButton,
+  type MenuInstruction,
+  InstructionsContainer,
+  EmbedMenuInstruction,
+} from "~discord-bot/components/primitives";
 
 type ManageAccountMenuItemProps = {
   state: ManageAccountMenuState;

@@ -1,4 +1,4 @@
-import { ChannelSettingsMenu } from "~discord-bot/components/channel-settings-menu";
+import { ChannelSettingsMenu } from "~discord-bot/components/settings";
 import { reply } from "~discord-bot/test/reacord-utils";
 import React from "react";
 import { getDefaultChannelWithFlags } from "@answeroverflow/db";
