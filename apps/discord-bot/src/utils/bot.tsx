@@ -5,11 +5,12 @@ import { ClientOptions, Partials } from "discord.js";
 import "~discord-bot/utils/setup";
 import { Router } from "~discord-bot/components/primitives";
 import React from "react";
+import LRUCache from "lru-cache";
 
 declare module "@sapphire/pieces" {
   interface Container {
     reacord: ReacordDiscordJs | ReacordTester;
-    messageHistory: Map<
+    messageHistory: LRUCache<
       string,
       {
         history: React.ReactNode[];
@@ -78,14 +79,19 @@ export const login = async (client: SapphireClient) => {
     client.logger.info("Logging in");
     await client.login(process.env.DISCORD_TOKEN);
     client.logger.info("logged in");
-    const messageHistory = new Map<
+    const messageHistory = new LRUCache<
       string,
       {
         history: React.ReactNode[];
         pushHistory: (message: React.ReactNode) => void;
         popHistory: () => void;
       }
-    >();
+    >({
+      max: 100,
+      // 10 minute ttl
+      ttl: 1000 * 60 * 10,
+    });
+
     container.messageHistory = messageHistory;
     container.reacord = new ReacordDiscordJs(client, {}, ({ children, renderer }) => {
       if (renderer instanceof InteractionReplyRenderer) {
