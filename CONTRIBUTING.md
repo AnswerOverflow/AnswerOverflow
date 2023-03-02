@@ -44,6 +44,8 @@ We recommend using [encrypted secrets](https://docs.github.com/en/codespaces/man
 
 Please note, if you do not copy all the .env.example variables into your codespace secrets, you must still make a .env file from your .env.example file - otherwise you will have missing env variables!
 
+Alternatively, if you are using gitpod, you should use [gitpod enviroment variables](https://www.gitpod.io/guides/automate-env-files-with-gitpod-environment-variables).
+
 ## UI
 
 We use storybook for developing our components and pages. It offers an isolated environment with a powerful tool set to empower frontend development.
