@@ -146,7 +146,7 @@ function applyChannelSettingsChangesSideEffects<F extends z.infer<typeof zChanne
     pendingSettings.lastIndexedSnowflake = null;
     pendingSettings.inviteCode = null;
   }
-
+  // TODO: Maybe throw error if indexing enabled and inviteCode is null?
   const bitfield = dictToBitfield(pendingSettings.flags, channelBitfieldFlags);
   return {
     ...pendingSettings,

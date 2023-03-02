@@ -1,6 +1,25 @@
 import { Button } from "@answeroverflow/reacord";
-import React from "react";
-import { setMessageHistory } from "../hooks";
+import { container } from "@sapphire/framework";
+import React, { useEffect } from "react";
+export function setMessageHistory({
+  key,
+  ...data
+}: {
+  key: string;
+  history: React.ReactNode[];
+  pushHistory: (message: React.ReactNode) => void;
+  popHistory: () => void;
+}) {
+  container.messageHistory.set(key, data);
+}
+
+export function getMessageHistory(key: string) {
+  const history = container.messageHistory.get(key);
+  if (!history) {
+    throw new Error("No history found for key: " + key);
+  }
+  return history;
+}
 
 export const Router: React.FC<{
   interactionId: string;
@@ -12,12 +31,19 @@ export const Router: React.FC<{
   };
   const popHistory = () => setHistory(history.slice(0, -1));
 
+  // TODO: Swap for use context when Reacord supports it
   setMessageHistory({
     history,
     key: interactionId,
     popHistory,
     pushHistory,
   });
+
+  useEffect(() => {
+    return () => {
+      container.messageHistory.delete(interactionId);
+    };
+  }, []);
 
   const current = history.at(-1);
   if (history.length === 0) {

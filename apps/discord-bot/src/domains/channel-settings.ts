@@ -9,20 +9,29 @@ export async function updateChannelIndexingEnabled({
   member,
   channel,
   enabled,
-  inviteCode,
   ...statusHandlers
 }: {
   member: GuildMember;
   enabled: boolean;
-  inviteCode: string;
   channel: RootChannel;
 } & TRPCStatusHandler<ChannelWithFlags>) {
+  let newInviteCode: string | null = null;
+  if (enabled) {
+    const channelInvite = await channel.createInvite({
+      maxAge: 0,
+      maxUses: 0,
+      reason: "Channel indexing enabled invite",
+      unique: false,
+      temporary: false,
+    });
+    newInviteCode = channelInvite.code;
+  }
   return callAPI({
     apiCall: (router) =>
       router.channels.setIndexingEnabled({
         channel: toAOChannelWithServer(channel),
         enabled,
-        inviteCode,
+        inviteCode: newInviteCode ?? undefined,
       }),
     getCtx: () => createMemberCtx(member),
     ...statusHandlers,
