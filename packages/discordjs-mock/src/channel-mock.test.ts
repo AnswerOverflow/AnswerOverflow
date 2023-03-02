@@ -77,6 +77,22 @@ describe("Message Mock", () => {
     expect(message.guild).toBeDefined();
     expect(message.guild!.members.cache.get(message.author.id)).toBeDefined();
   });
+  it("should start a thread from a message", async () => {
+    const textChannel = mockTextChannel(client);
+    const message = mockMessage({ client, channel: textChannel });
+    const thread = await message.startThread({ name: "test thread" });
+    expect(thread).toBeDefined();
+    expect(thread.parentId).toBe(message.channel.id);
+    expect(thread.parent).toBeDefined();
+    expect(thread.name).toBe("test thread");
+    expect(thread.parent!.id).toBe(message.channel.id);
+    expect(message.thread).toBeDefined();
+    expect(message.thread!.id).toBe(thread.id);
+    const fromCache = textChannel.threads.cache.get(thread.id);
+    expect(fromCache).toBeDefined();
+    expect(fromCache!.id).toBe(thread.id);
+    expect(fromCache!.name).toBe(thread.name);
+  });
 });
 
 describe("Thread Mock", () => {

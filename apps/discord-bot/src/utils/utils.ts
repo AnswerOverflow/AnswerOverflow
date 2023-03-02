@@ -121,3 +121,12 @@ export function getRootChannel(channel: GuildTextBasedChannel) {
   }
   return channel;
 }
+
+/**
+ * Util to remove all discord markdown characters from a string
+ * @param text Input string to process
+ * @returns string with all discord markdown characters removed
+ */
+export function removeDiscordMarkdown(text: string) {
+  return text.replace(/(\*|_|~|`)/g, "");
+}

@@ -59,6 +59,7 @@ export function createClient(override: Partial<ClientOptions> = {}) {
       "GuildMessageReactions",
       "DirectMessages",
       "DirectMessageReactions",
+      "MessageContent",
     ],
     partials: [Partials.Channel, Partials.Message, Partials.GuildMember, Partials.Reaction],
     loadMessageCommandListeners: true,
