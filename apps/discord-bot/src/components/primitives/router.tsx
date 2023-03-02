@@ -25,6 +25,7 @@ export const Router: React.FC<{
   }
   return (
     <>
+      {`Levels deep: ${history.length}`}
       <Button label="Back" onClick={() => popHistory()} />
       {current}
     </>
