@@ -10,7 +10,7 @@
     "@answeroverflow/db": "*",
     "@answeroverflow/db-mock": "*",
     "@answeroverflow/discordjs-utils": "*",
-    "@answeroverflow/reacord": "^0.5.8",
+    "@answeroverflow/reacord": "^0.5.10",
     "@sapphire/decorators": "6.0.0",
     "@sapphire/discord-utilities": "3.0.0",
     "@sapphire/fetch": "^2.4.1",

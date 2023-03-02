@@ -36,7 +36,8 @@ export const zChannelBitfieldFlags = toZObject(...channelBitfieldFlags);
 type ChannelZodFormat = {
   [K in keyof Channel]: z.ZodTypeAny;
 };
-
+// Another option is https://github.com/jbranchaud/til/blob/master/zod/incorporate-existing-type-into-zod-schema.md
+// However that approach doesn't allow us to extend / merge it with other zod schemas
 export const zChannelPrisma = z.object({
   id: z.string(),
   name: z.string(),
