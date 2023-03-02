@@ -16,7 +16,7 @@ type ChannelSettingsMenuItemProps = {
 
 export const ENABLE_INDEXING_LABEL = "Enable indexing";
 export const DISABLE_INDEXING_LABEL = "Disable indexing";
-
+// Store a cache to handle unmounting of the component
 const channelCache = new LRUCache<string, ChannelWithFlags>({
   max: 500,
   ttl: 1000 * 60 * 5,
