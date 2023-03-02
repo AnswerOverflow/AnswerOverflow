@@ -49,12 +49,11 @@ describe("Channel Settings Menu", () => {
         await toggleButtonTest({
           channel: textChannel,
           clicker: members.guildMemberOwner,
-          message!,
-          postClickLabel
-
-        })
+          message,
+          postClickLabel,
+        });
       });
-      it("should disable indexing", async () => { });
+      it("should disable indexing", async () => {});
     });
   });
 });
