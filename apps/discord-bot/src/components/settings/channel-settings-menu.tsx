@@ -2,15 +2,22 @@ import type { ChannelWithFlags } from "@answeroverflow/api";
 import { ChannelType, GuildTextBasedChannel } from "discord.js";
 import { ButtonClickEvent, Button } from "@answeroverflow/reacord";
 import React from "react";
-import { getMessageHistory, ToggleButton } from "../primitives";
+import {
+  EmbedMenuInstruction,
+  getMessageHistory,
+  InstructionsContainer,
+  ToggleButton,
+} from "../primitives";
 import { getRootChannel, RootChannel } from "~discord-bot/utils/utils";
 import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
 import {
+  FORUM_GUIDELINES_CONSENT_PROMPT,
   updateChannelForumGuidelinesConsentEnabled,
   updateChannelIndexingEnabled,
 } from "~discord-bot/domains/channel-settings";
 import { componentEventStatusHandler } from "~discord-bot/utils/trpc";
 import LRUCache from "lru-cache";
+import { ENABLE_INDEXING_LABEL } from "./manage-account-menu";
 type ChannelSettingsMenuItemProps = {
   channelInDB: ChannelWithFlags;
   setChannel: (channel: ChannelWithFlags) => void;
@@ -104,6 +111,33 @@ export function IndexingSettingsMenu({
   const isButtonInForumChannel = targetChannel.type === ChannelType.GuildForum;
   return (
     <>
+      <InstructionsContainer>
+        <EmbedMenuInstruction
+          instructions={[
+            {
+              title: ENABLE_INDEXING_LABEL,
+              enabled: !channel.flags.indexingEnabled,
+              instructions: "This channel will be indexed and searchable.",
+            },
+            {
+              title: DISABLE_CHANNEL_INDEXING_LABEL,
+              enabled: channel.flags.indexingEnabled,
+              instructions: "This channel will not be indexed and searchable.",
+            },
+            {
+              title: ENABLE_FORUM_GUIDELINES_CONSENT_LABEL,
+              enabled: !channel.flags.forumGuidelinesConsentEnabled && isButtonInForumChannel,
+              instructions: `Users posting new threads in this channel will be marked as consenting. You must have the following in your post guidelines for this to work:\n\n\`${FORUM_GUIDELINES_CONSENT_PROMPT}\``,
+            },
+            {
+              title: DISABLE_FORUM_GUIDELINES_CONSENT_LABEL,
+              enabled: channel.flags.forumGuidelinesConsentEnabled && isButtonInForumChannel,
+              instructions:
+                "Users posting new threads in this channel will not be marked as consenting.",
+            },
+          ]}
+        />
+      </InstructionsContainer>
       <ToggleIndexingButton
         channelInDB={channel}
         setChannel={setChannel}

@@ -95,6 +95,7 @@
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
     },
+    "editor.wordWrap": "on",
     "eslint.validate": [
       "javascript",
       "javascriptreact",

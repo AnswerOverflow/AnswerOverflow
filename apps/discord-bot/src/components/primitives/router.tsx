@@ -1,6 +1,7 @@
-import { Button } from "@answeroverflow/reacord";
+import { ActionRow, Button } from "@answeroverflow/reacord";
 import { container } from "@sapphire/framework";
 import React, { useEffect } from "react";
+import { OpenSupportMenuButton, SupportMenu } from "./support";
 export function setMessageHistory({
   key,
   ...data
@@ -47,13 +48,31 @@ export const Router: React.FC<{
 
   const current = history.at(-1);
   if (history.length === 0) {
-    return <>{children}</>;
+    pushHistory(children);
   }
+
+  // TODO: This is disgusting
+  const isSupportMenu =
+    current instanceof Object &&
+    "type" in current &&
+    current.type.toString().includes(SupportMenu.toString());
+
   return (
     <>
-      {`Levels deep: ${history.length}`}
-      <Button label="Back" onClick={() => popHistory()} />
+      {history.length > 1 && (
+        <Button
+          label="Back"
+          onClick={() => {
+            popHistory();
+          }}
+        />
+      )}
       {current}
+      {!isSupportMenu && (
+        <ActionRow>
+          <OpenSupportMenuButton interactionId={interactionId} />
+        </ActionRow>
+      )}
     </>
   );
 };
