@@ -26,7 +26,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
-  render: (props: MessageResultProps) => <MessageResult {...props} />,
+  render: (props: MessageResultProps) => (
+    <div className="h-full w-2/3 px-2">
+      <MessageResult {...props} />
+    </div>
+  ),
 
   args: {
     authorAvatar: undefined,
@@ -35,5 +39,19 @@ export const Primary: Story = {
     title: "How do I write a print statement in python?",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+    views: 21,
+    comments: 5,
+    server: {
+      serverName: "Reactiflux",
+      channelName: "#help-support",
+      serverIcon: undefined,
+    },
+    response: {
+      responseAuthorAvatar: undefined,
+      responseContent:
+        "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est",
+      responseAuthorName: "user#9876",
+      readMoreLink: "",
+    },
   },
 };
