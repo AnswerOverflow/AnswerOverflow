@@ -26,6 +26,7 @@ import {
   mockTextChannel,
 } from "@answeroverflow/discordjs-mock";
 import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
+import { FORUM_GUIDELINES_CONSENT_PROMPT } from "~discord-bot/domains/channel-settings";
 
 let reacord: ReacordTester;
 let textChannel: TextChannel;
@@ -41,7 +42,9 @@ beforeEach(async () => {
   guild = mockGuild(client);
   members = await createGuildMemberVariants(client, guild);
   textChannel = mockTextChannel(client, guild);
-  forumChannel = mockForumChannel(client, guild);
+  forumChannel = mockForumChannel(client, guild, {
+    topic: FORUM_GUIDELINES_CONSENT_PROMPT,
+  });
   forumThread = mockPublicThread({
     client,
     parentChannel: forumChannel,

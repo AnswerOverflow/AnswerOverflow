@@ -53,7 +53,7 @@ const ToggleIndexingButton = ({
           channel: targetChannel,
           enabled,
           member,
-          Error: (error) => componentEventStatusHandler(event, error.message),
+          Error: (message) => componentEventStatusHandler(event, message),
           Ok: (updatedChannel) => {
             updateChannelState(setChannel, updatedChannel);
           },
@@ -81,7 +81,7 @@ const ToggleForumGuidelinesConsentButton = ({
           channel: targetChannel,
           enabled,
           member,
-          Error: (error) => componentEventStatusHandler(event, error.message),
+          Error: (message) => componentEventStatusHandler(event, message),
           Ok: (updatedChannel) => {
             updateChannelState(setChannel, updatedChannel);
           },
