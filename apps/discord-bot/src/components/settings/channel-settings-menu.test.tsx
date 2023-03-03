@@ -139,7 +139,7 @@ describe("Channel Settings Menu", () => {
           />
         );
         await toggleButtonTest({
-          channel: textChannel,
+          channel: forumThread,
           clicker: members.guildMemberOwner,
           message: message!,
           reacord,
@@ -164,7 +164,7 @@ describe("Channel Settings Menu", () => {
           <IndexingSettingsMenu initialChannelData={updated} targetChannel={forumChannel} />
         );
         await toggleButtonTest({
-          channel: textChannel,
+          channel: forumThread,
           clicker: members.guildMemberOwner,
           message: message!,
           reacord,
@@ -419,18 +419,21 @@ describe("Channel Settings Menu", () => {
         expect(button).not.toBeUndefined();
       });
       it("should enable", async () => {
-        const updated = await updateChannel({
-          old: null,
-          update: {
-            id: textChannelWithFlags.id,
-          },
-        });
         const message = await reply(
           reacord,
-          <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
+          <HelpChannelUtilitiesMenu
+            initialChannelData={textChannelWithFlags}
+            targetChannel={textChannel}
+          />
         );
-        const button = message?.findButtonByLabel(ENABLE_AUTO_THREAD_LABEL, reacord);
-        await button?.click(forumThread, members.guildMemberOwner);
+        await toggleButtonTest({
+          message: message!,
+          channel: textChannel,
+          clicker: members.guildMemberOwner,
+          postClickLabel: DISABLE_AUTO_THREAD_LABEL,
+          preClickLabel: ENABLE_AUTO_THREAD_LABEL,
+          reacord,
+        });
         const found = await findChannelById(textChannelWithFlags.id);
         expect(found!.flags.autoThreadEnabled).toBeTruthy();
       });
@@ -448,8 +451,14 @@ describe("Channel Settings Menu", () => {
           reacord,
           <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
         );
-        const button = message?.findButtonByLabel(DISABLE_AUTO_THREAD_LABEL, reacord);
-        await button?.click(forumThread, members.guildMemberOwner);
+        await toggleButtonTest({
+          message: message!,
+          channel: textChannel,
+          clicker: members.guildMemberOwner,
+          postClickLabel: ENABLE_AUTO_THREAD_LABEL,
+          preClickLabel: DISABLE_AUTO_THREAD_LABEL,
+          reacord,
+        });
         const found = await findChannelById(textChannelWithFlags.id);
         expect(found!.flags.autoThreadEnabled).toBeFalsy();
       });
@@ -469,7 +478,7 @@ describe("Channel Settings Menu", () => {
       );
       const button = message?.findButtonByLabel(OPEN_INDEXING_SETTINGS_MENU_LABEL, reacord);
       expect(button).toBeDefined();
-      await button?.click(forumThread, members.guildMemberOwner);
+      await button?.click(textChannel, members.guildMemberOwner);
       const enableIndexingButton = message?.findButtonByLabel(
         ENABLE_CHANNEL_INDEXING_LABEL,
         reacord
@@ -489,7 +498,7 @@ describe("Channel Settings Menu", () => {
       );
       const button = message?.findButtonByLabel(OPEN_HELP_CHANNEL_UTILITIES_LABEL, reacord);
       expect(button).toBeDefined();
-      await button?.click(forumThread, members.guildMemberOwner);
+      await button?.click(textChannel, members.guildMemberOwner);
       const enableAutoThreadButton = message?.findButtonByLabel(ENABLE_AUTO_THREAD_LABEL, reacord);
       expect(enableAutoThreadButton).toBeDefined();
     });
