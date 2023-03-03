@@ -25,16 +25,16 @@ env:
   # Long delay to give tests best chance at succeeding
   DEFAULT_DELAY_IN_MS: "5000"
 
+  # Actual secrets now, no peeking
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
 jobs:
   build:
       name: Build and Test
       timeout-minutes: 30
       runs-on: ubuntu-latest
 
-    # To use Remote Caching, uncomment the next lines and follow the steps below.
-    # env:
-    #  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-    #  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
       steps:
       - name: Checkout (GitHub)

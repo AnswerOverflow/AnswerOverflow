@@ -1,7 +1,19 @@
 {
   "$schema": "https://turborepo.org/schema.json",
   "pipeline": {
+    "init": {},
+    "migrate": {},
     "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ],
+      "cache": true
+    },
+    "build:no-cache": {
       "dependsOn": [
         "^build"
       ],
@@ -11,27 +23,41 @@
       ],
       "cache": false
     },
-    "init": {},
-    "migrate": {},
     "lint": {
       "inputs": [
         "./packages/config/"
       ],
       "outputs": [],
-      "cache": false
+      "cache": true
+    },
+    "lint:no-cache": {
+      "inputs": [
+        "./packages/config/"
+      ],
+      "outputs": [],
+      "cache": false,
+      "dependsOn": [
+        "^lint"
+      ]
     },
     "lint:fix": {
       "outputs": [],
       "cache": false
     },
+    "test": {
+      "outputs": [],
+      "cache": true
+    },
+    "test:no-cache": {
+      "cache": false,
+      "dependsOn": [
+        "^test"
+      ]
+    },
     "dev": {
       "cache": false
     },
     "clean": {
-      "cache": false
-    },
-    "test": {
-      "outputs": [],
       "cache": false
     },
     "db:generate": {
