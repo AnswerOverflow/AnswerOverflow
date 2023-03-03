@@ -11,7 +11,6 @@ import {
 
 type ChannelSettingsUpdateAPICall = {
   member: GuildMember;
-  enabled: boolean;
   channel: RootChannel;
   Error: (message: string) => unknown | Promise<unknown>;
 } & Omit<TRPCStatusHandler<ChannelWithFlags>, "Error">;
@@ -22,7 +21,7 @@ export async function updateChannelIndexingEnabled({
   enabled,
   Error,
   ...statusHandlers
-}: ChannelSettingsUpdateAPICall) {
+}: ChannelSettingsUpdateAPICall & { enabled: boolean }) {
   let newInviteCode: string | null = null;
   if (enabled) {
     const channelInvite = await channel.createInvite({
@@ -58,7 +57,7 @@ export async function updateChannelForumGuidelinesConsentEnabled({
   enabled,
   Error,
   ...statusHandlers
-}: ChannelSettingsUpdateAPICall) {
+}: ChannelSettingsUpdateAPICall & { enabled: boolean }) {
   if (channel.type === ChannelType.GuildForum && enabled) {
     if (!channel.topic || !doesTextHaveConsentPrompt(channel.topic))
       return Error(FORUM_GUIDELINES_CONSENT_MISSING_ERROR_MESSAGE);
@@ -68,6 +67,63 @@ export async function updateChannelForumGuidelinesConsentEnabled({
       router.channels.setForumGuidelinesConsentEnabled({
         channel: toAOChannelWithServer(channel),
         enabled,
+      }),
+    getCtx: () => createMemberCtx(member),
+    Error: (error) => Error(error.message),
+    ...statusHandlers,
+  });
+}
+
+export function updateMarkAsSolutionEnabled({
+  member,
+  channel,
+  enabled,
+  Error,
+  ...statusHandlers
+}: ChannelSettingsUpdateAPICall & { enabled: boolean }) {
+  return callAPI({
+    apiCall: (router) =>
+      router.channels.setMarkSolutionEnabled({
+        channel: toAOChannelWithServer(channel),
+        enabled,
+      }),
+    getCtx: () => createMemberCtx(member),
+    Error: (error) => Error(error.message),
+    ...statusHandlers,
+  });
+}
+
+export function updateSendMarkAsSolutionInstructionsEnabled({
+  member,
+  channel,
+  enabled,
+  Error,
+  ...statusHandlers
+}: ChannelSettingsUpdateAPICall & { enabled: boolean }) {
+  return callAPI({
+    apiCall: (router) =>
+      router.channels.setSendMarkSolutionInstructionsInNewThreadsEnabled({
+        channel: toAOChannelWithServer(channel),
+        enabled,
+      }),
+    getCtx: () => createMemberCtx(member),
+    Error: (error) => Error(error.message),
+    ...statusHandlers,
+  });
+}
+
+export function setSolutionTagId({
+  member,
+  channel,
+  tagId,
+  Error,
+  ...statusHandlers
+}: ChannelSettingsUpdateAPICall & { tagId: string | null }) {
+  return callAPI({
+    apiCall: (router) =>
+      router.channels.setSolutionTagId({
+        channel: toAOChannelWithServer(channel),
+        tagId,
       }),
     getCtx: () => createMemberCtx(member),
     Error: (error) => Error(error.message),

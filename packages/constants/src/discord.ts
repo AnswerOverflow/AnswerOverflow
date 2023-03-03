@@ -34,3 +34,11 @@ export const QUESTION_ID_FIELD_NAME = "Question Message ID";
 export const SOLUTION_ID_FIELD_NAME = "Solution Message ID";
 export const ANSWER_OVERFLOW_BLUE_HEX = "#8CD1FF";
 export const ANSWER_OVERFLOW_BLUE_AS_INT = parseInt(ANSWER_OVERFLOW_BLUE_HEX.replace("#", "0x"));
+export const DISABLE_MARK_AS_SOLUTION_LABEL = "Disable mark as solution";
+export const ENABLE_MARK_AS_SOLUTION_LABEL = "Enable mark as solution";
+export const ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL =
+  "Enable send mark as solution in new thread";
+export const DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL =
+  "Disable send mark as solution in new thread";
+export const ENABLE_AUTO_THREAD = "Enable auto thread";
+export const DISABLE_AUTO_THREAD = "Disable auto thread";

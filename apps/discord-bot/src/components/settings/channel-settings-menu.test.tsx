@@ -6,6 +6,10 @@ import {
   DISABLE_CHANNEL_INDEXING_LABEL,
   ENABLE_FORUM_GUIDELINES_CONSENT_LABEL,
   DISABLE_FORUM_GUIDELINES_CONSENT_LABEL,
+  ENABLE_MARK_AS_SOLUTION_LABEL,
+  DISABLE_MARK_AS_SOLUTION_LABEL,
+  DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
+  ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
 } from "@answeroverflow/constants";
 import { createServer, createChannel, findChannelById, updateChannel } from "@answeroverflow/db";
 import {
@@ -17,7 +21,10 @@ import {
   mockPublicThread,
 } from "@answeroverflow/discordjs-mock";
 import type { ChannelWithFlags } from "@answeroverflow/prisma-types";
-import { IndexingSettingsMenu } from "~discord-bot/components/settings/channel-settings-menu";
+import {
+  HelpChannelUtilitiesMenu,
+  IndexingSettingsMenu,
+} from "~discord-bot/components/settings/channel-settings-menu";
 import { reply, toggleButtonTest } from "~discord-bot/test/reacord-utils";
 import { setupAnswerOverflowBot, mockReacord } from "~discord-bot/test/sapphire-mock";
 import { toAOServer, toAOChannel } from "~discord-bot/utils/conversions";
@@ -62,10 +69,7 @@ describe("Channel Settings Menu", () => {
       it("should enable indexing", async () => {
         const message = await reply(
           reacord,
-          <IndexingSettingsMenu
-            channelWithFlags={textChannelWithFlags}
-            targetChannel={textChannel}
-          />
+          <IndexingSettingsMenu channelInDB={textChannelWithFlags} targetChannel={textChannel} />
         );
         await toggleButtonTest({
           channel: textChannel,
@@ -90,7 +94,7 @@ describe("Channel Settings Menu", () => {
         });
         const message = await reply(
           reacord,
-          <IndexingSettingsMenu channelWithFlags={updated} targetChannel={textChannel} />
+          <IndexingSettingsMenu channelInDB={updated} targetChannel={textChannel} />
         );
         await toggleButtonTest({
           channel: textChannel,
@@ -108,10 +112,7 @@ describe("Channel Settings Menu", () => {
       it("should not render in a text channel", async () => {
         const message = await reply(
           reacord,
-          <IndexingSettingsMenu
-            channelWithFlags={textChannelWithFlags}
-            targetChannel={textChannel}
-          />
+          <IndexingSettingsMenu channelInDB={textChannelWithFlags} targetChannel={textChannel} />
         );
         expect(
           message?.findButtonByLabel(ENABLE_FORUM_GUIDELINES_CONSENT_LABEL, reacord)
@@ -123,10 +124,7 @@ describe("Channel Settings Menu", () => {
       it("should enable in a forum channel", async () => {
         const message = await reply(
           reacord,
-          <IndexingSettingsMenu
-            channelWithFlags={forumChannelWithFlags}
-            targetChannel={forumChannel}
-          />
+          <IndexingSettingsMenu channelInDB={forumChannelWithFlags} targetChannel={forumChannel} />
         );
         await toggleButtonTest({
           channel: textChannel,
@@ -151,7 +149,7 @@ describe("Channel Settings Menu", () => {
         });
         const message = await reply(
           reacord,
-          <IndexingSettingsMenu channelWithFlags={updated} targetChannel={forumChannel} />
+          <IndexingSettingsMenu channelInDB={updated} targetChannel={forumChannel} />
         );
         await toggleButtonTest({
           channel: textChannel,
@@ -163,6 +161,120 @@ describe("Channel Settings Menu", () => {
         });
         const found = await findChannelById(forumChannelWithFlags.id);
         expect(found!.flags.forumGuidelinesConsentEnabled).toBeFalsy();
+      });
+    });
+  });
+  describe("Help Channel Utilities Menu", () => {
+    describe("Toggle Mark Solution", () => {
+      it("should enable", async () => {
+        const message = await reply(
+          reacord,
+          <HelpChannelUtilitiesMenu
+            channelInDB={textChannelWithFlags}
+            targetChannel={textChannel}
+          />
+        );
+        await toggleButtonTest({
+          channel: textChannel,
+          clicker: members.guildMemberOwner,
+          message: message!,
+          reacord,
+          preClickLabel: ENABLE_MARK_AS_SOLUTION_LABEL,
+          postClickLabel: DISABLE_MARK_AS_SOLUTION_LABEL,
+        });
+        const found = await findChannelById(textChannelWithFlags.id);
+        expect(found!.flags.markSolutionEnabled).toBeTruthy();
+      });
+      it("should disable", async () => {
+        const updated = await updateChannel({
+          old: null,
+          update: {
+            id: textChannelWithFlags.id,
+            flags: {
+              markSolutionEnabled: true,
+            },
+          },
+        });
+        const message = await reply(
+          reacord,
+          <HelpChannelUtilitiesMenu channelInDB={updated} targetChannel={textChannel} />
+        );
+        await toggleButtonTest({
+          channel: textChannel,
+          clicker: members.guildMemberOwner,
+          message: message!,
+          reacord,
+          preClickLabel: DISABLE_MARK_AS_SOLUTION_LABEL,
+          postClickLabel: ENABLE_MARK_AS_SOLUTION_LABEL,
+        });
+        const found = await findChannelById(textChannelWithFlags.id);
+        expect(found!.flags.markSolutionEnabled).toBeFalsy();
+      });
+    });
+    describe("Toggle Send Mark Solution Instructions", () => {
+      it("should enable", async () => {
+        const updated = await updateChannel({
+          old: null,
+          update: {
+            id: textChannelWithFlags.id,
+            flags: {
+              markSolutionEnabled: true,
+            },
+          },
+        });
+        const message = await reply(
+          reacord,
+          <HelpChannelUtilitiesMenu channelInDB={updated} targetChannel={textChannel} />
+        );
+        await toggleButtonTest({
+          channel: textChannel,
+          clicker: members.guildMemberOwner,
+          message: message!,
+          reacord,
+          preClickLabel: ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
+          postClickLabel: DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
+        });
+        const found = await findChannelById(textChannelWithFlags.id);
+        expect(found!.flags.sendMarkSolutionInstructionsInNewThreads).toBeTruthy();
+      });
+      it("should disable", async () => {
+        const updated = await updateChannel({
+          old: null,
+          update: {
+            id: textChannelWithFlags.id,
+            flags: {
+              markSolutionEnabled: true,
+              sendMarkSolutionInstructionsInNewThreads: true,
+            },
+          },
+        });
+        const message = await reply(
+          reacord,
+          <HelpChannelUtilitiesMenu channelInDB={updated} targetChannel={textChannel} />
+        );
+        await toggleButtonTest({
+          channel: textChannel,
+          clicker: members.guildMemberOwner,
+          message: message!,
+          reacord,
+          preClickLabel: DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
+          postClickLabel: ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
+        });
+        const found = await findChannelById(textChannelWithFlags.id);
+        expect(found!.flags.sendMarkSolutionInstructionsInNewThreads).toBeFalsy();
+      });
+      it.only("should be disabled if mark solution is disabled", async () => {
+        const message = await reply(
+          reacord,
+          <HelpChannelUtilitiesMenu
+            channelInDB={textChannelWithFlags}
+            targetChannel={textChannel}
+          />
+        );
+        expect(
+          message?.findButtonByLabel(ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL, reacord)
+            ?.disabled
+        ).toBeTruthy();
       });
     });
   });
