@@ -184,6 +184,13 @@ export function IndexingSettingsMenu({
           targetChannel={targetChannel}
         />
       )}
+      <Button
+        label="Send consent prompt"
+        style="primary"
+        onClick={() => {
+          console.log("sending consent prompt");
+        }}
+      />
     </>
   );
 }
@@ -382,7 +389,7 @@ export function ChannelSettingsMenu({
   return (
     <>
       <Button
-        label="Indexing Settings"
+        label="Indexing settings"
         style="primary"
         onClick={() => {
           const { pushHistory } = getMessageHistory(interactionId);
@@ -392,7 +399,7 @@ export function ChannelSettingsMenu({
         }}
       />
       <Button
-        label="Help Channel Utilities"
+        label="Help channel utilities"
         style="primary"
         onClick={() => {
           const { pushHistory } = getMessageHistory(interactionId);
