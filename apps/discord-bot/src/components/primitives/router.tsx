@@ -60,19 +60,17 @@ export const Router: React.FC<{
   return (
     <>
       {current}
-      {!isSupportMenu && (
-        <ActionRow>
-          {history.length > 1 && (
-            <Button
-              label="Back"
-              onClick={() => {
-                popHistory();
-              }}
-            />
-          )}
-          <OpenSupportMenuButton interactionId={interactionId} />
-        </ActionRow>
-      )}
+      <ActionRow>
+        {history.length > 1 && (
+          <Button
+            label="Back"
+            onClick={() => {
+              popHistory();
+            }}
+          />
+        )}
+        {!isSupportMenu && <OpenSupportMenuButton interactionId={interactionId} />}
+      </ActionRow>
     </>
   );
 };
