@@ -11,6 +11,8 @@ import {
   DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
   ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
   SET_SOLVED_TAG_ID_PLACEHOLDER,
+  ENABLE_AUTO_THREAD_LABEL,
+  DISABLE_AUTO_THREAD_LABEL,
 } from "@answeroverflow/constants";
 import { createServer, createChannel, findChannelById, updateChannel } from "@answeroverflow/db";
 import {
@@ -395,6 +397,67 @@ describe("Channel Settings Menu", () => {
         const found = await findChannelById(forumChannelWithFlags.id);
         expect(found!.solutionTagId).toBe(null);
         expect(updatedSelect?.values?.at(0)).toBe("");
+      });
+    });
+    describe("toggle auto thread", () => {
+      it("should not render in a forum channel", async () => {
+        const message = await reply(
+          reacord,
+          <HelpChannelUtilitiesMenu
+            initialChannelData={forumChannelWithFlags}
+            targetChannel={forumChannel}
+          />
+        );
+        const button = message?.findButtonByLabel(ENABLE_AUTO_THREAD_LABEL, reacord);
+        expect(button).toBeUndefined();
+      });
+      it("should render correctly in a non-forum channel", async () => {
+        const message = await reply(
+          reacord,
+          <HelpChannelUtilitiesMenu
+            initialChannelData={textChannelWithFlags}
+            targetChannel={textChannel}
+          />
+        );
+        const button = message?.findButtonByLabel(ENABLE_AUTO_THREAD_LABEL, reacord);
+        expect(button).not.toBeUndefined();
+      });
+      it("should enable", async () => {
+        const updated = await updateChannel({
+          old: null,
+          update: {
+            id: textChannelWithFlags.id,
+          },
+        });
+        const message = await reply(
+          reacord,
+          <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
+        );
+        const button = message?.findButtonByLabel(ENABLE_AUTO_THREAD_LABEL, reacord);
+        await button?.click(forumThread, members.guildMemberOwner);
+        await delay();
+        const found = await findChannelById(textChannelWithFlags.id);
+        expect(found!.flags.autoThreadEnabled).toBeTruthy();
+      });
+      it("should disable", async () => {
+        const updated = await updateChannel({
+          old: null,
+          update: {
+            id: textChannelWithFlags.id,
+            flags: {
+              autoThreadEnabled: true,
+            },
+          },
+        });
+        const message = await reply(
+          reacord,
+          <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
+        );
+        const button = message?.findButtonByLabel(DISABLE_AUTO_THREAD_LABEL, reacord);
+        await button?.click(forumThread, members.guildMemberOwner);
+        await delay();
+        const found = await findChannelById(textChannelWithFlags.id);
+        expect(found!.flags.autoThreadEnabled).toBeFalsy();
       });
     });
   });
