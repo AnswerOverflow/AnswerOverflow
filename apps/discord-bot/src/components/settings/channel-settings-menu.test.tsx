@@ -13,6 +13,7 @@ import {
   SET_SOLVED_TAG_ID_PLACEHOLDER,
   ENABLE_AUTO_THREAD_LABEL,
   DISABLE_AUTO_THREAD_LABEL,
+  OPEN_INDEXING_SETTINGS_MENU_LABEL,
 } from "@answeroverflow/constants";
 import { createServer, createChannel, findChannelById, updateChannel } from "@answeroverflow/db";
 import {
@@ -22,7 +23,6 @@ import {
   mockTextChannel,
   mockForumChannel,
   mockPublicThread,
-  delay,
 } from "@answeroverflow/discordjs-mock";
 import type { ChannelWithFlags } from "@answeroverflow/prisma-types";
 import {
@@ -62,12 +62,6 @@ beforeEach(async () => {
   forumChannelWithFlags = await createChannel(toAOChannel(forumChannel));
   console.log(forumThread.name);
 });
-
-// describe("ChannelSettingsMenu", () => {
-//   it("should render correctly in a text channel", async () => { });
-//   it("should render correctly in a forum thread", async () => { });
-//   test.todo("should render correctly in a text channel thread");
-// });
 
 describe("Channel Settings Menu", () => {
   describe("Indexing Settings Menu", () => {
@@ -364,7 +358,6 @@ describe("Channel Settings Menu", () => {
           members.guildMemberOwner,
           forumChannel.availableTags[0]!.id
         );
-        await delay();
         const updatedSelect = message?.findSelectByPlaceholder(
           SET_SOLVED_TAG_ID_PLACEHOLDER,
           reacord
@@ -435,7 +428,6 @@ describe("Channel Settings Menu", () => {
         );
         const button = message?.findButtonByLabel(ENABLE_AUTO_THREAD_LABEL, reacord);
         await button?.click(forumThread, members.guildMemberOwner);
-        await delay();
         const found = await findChannelById(textChannelWithFlags.id);
         expect(found!.flags.autoThreadEnabled).toBeTruthy();
       });
@@ -455,10 +447,40 @@ describe("Channel Settings Menu", () => {
         );
         const button = message?.findButtonByLabel(DISABLE_AUTO_THREAD_LABEL, reacord);
         await button?.click(forumThread, members.guildMemberOwner);
-        await delay();
         const found = await findChannelById(textChannelWithFlags.id);
         expect(found!.flags.autoThreadEnabled).toBeFalsy();
       });
+    });
+  });
+  describe("Channel Settings Menu", () => {
+    it("should open the indexing settings correctly", async () => {
+      const message = await reply(
+        reacord,
+        <HelpChannelUtilitiesMenu
+          initialChannelData={textChannelWithFlags}
+          targetChannel={textChannel}
+        />
+      );
+      const button = message?.findButtonByLabel(OPEN_INDEXING_SETTINGS_MENU_LABEL, reacord);
+      await button?.click(forumThread, members.guildMemberOwner);
+      const enableIndexingButton = message?.findButtonByLabel(
+        ENABLE_CHANNEL_INDEXING_LABEL,
+        reacord
+      );
+      expect(enableIndexingButton).toBeDefined();
+    });
+    it("should open the help channel utilities menu correctly", async () => {
+      const message = await reply(
+        reacord,
+        <HelpChannelUtilitiesMenu
+          initialChannelData={textChannelWithFlags}
+          targetChannel={textChannel}
+        />
+      );
+      const button = message?.findButtonByLabel(OPEN_INDEXING_SETTINGS_MENU_LABEL, reacord);
+      await button?.click(forumThread, members.guildMemberOwner);
+      const enableAutoThreadButton = message?.findButtonByLabel(ENABLE_AUTO_THREAD_LABEL, reacord);
+      expect(enableAutoThreadButton).toBeDefined();
     });
   });
 });

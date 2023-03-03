@@ -47,3 +47,11 @@ export const ALLOWED_AUTO_THREAD_CHANNEL_TYPES = new Set([
   ChannelType.GuildText,
   ChannelType.GuildAnnouncement,
 ] as const);
+export const ENABLE_REDIRECTION_TO_HELP_CHANNEL_LABEL = "Enable redirection to help channel";
+export const ENABLE_AI_QUESTION_ANSWERING_LABEL = "Enable AI question answering";
+export const ENABLE_AI_QUESTION_IMPROVEMENT_SUGGESTIONS_LABEL =
+  "Enable AI question improvement suggestions";
+export const OPEN_INDEXING_SETTINGS_MENU_LABEL = "Indexing settings";
+export const OPEN_HELP_CHANNEL_UTILITIES_LABEL = "Help channel utilities";
+export const OPEN_EXPERIMENTAL_SETTINGS_LABEL = "Experimental settings";
+export const EXPERIMENTAL_SETTINGS_WAITLIST_URL = "https://forms.gle/8Q5Z7Z7Z7Z7Z7Z7Z7";

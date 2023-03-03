@@ -181,7 +181,8 @@
       "unauthed",
       "undelete",
       "upsert",
-      "upserting"
+      "upserting",
+      "WAITLIST"
     ],
   },
   "extensions": {

@@ -4,6 +4,8 @@ import {
   Select,
   SelectChangeEvent,
   Option,
+  Link,
+  ActionRow,
 } from "@answeroverflow/reacord";
 import {
   ChannelType,
@@ -29,6 +31,12 @@ import {
   DISABLE_AUTO_THREAD_LABEL,
   ENABLE_AUTO_THREAD_LABEL,
   ALLOWED_AUTO_THREAD_CHANNEL_TYPES,
+  OPEN_HELP_CHANNEL_UTILITIES_LABEL,
+  OPEN_EXPERIMENTAL_SETTINGS_LABEL,
+  EXPERIMENTAL_SETTINGS_WAITLIST_URL,
+  ENABLE_AI_QUESTION_IMPROVEMENT_SUGGESTIONS_LABEL,
+  ENABLE_REDIRECTION_TO_HELP_CHANNEL_LABEL,
+  ENABLE_AI_QUESTION_ANSWERING_LABEL,
 } from "@answeroverflow/constants";
 import type { ChannelWithFlags } from "@answeroverflow/prisma-types";
 import React from "react";
@@ -37,6 +45,7 @@ import {
   InstructionsContainer,
   EmbedMenuInstruction,
   getMessageHistory,
+  Spacer,
 } from "~discord-bot/components/primitives";
 import {
   updateChannelIndexingEnabled,
@@ -370,6 +379,69 @@ export function HelpChannelUtilitiesMenu({
   );
 }
 
+function ExperimentalSettingsMenu() {
+  return (
+    <>
+      <InstructionsContainer>
+        **These features are experimental and may not work as expected.**
+        <Spacer count={2} />
+        **Some features may not be implemented yet, join the waitlist to be notified when they
+        are.**
+        <Spacer count={2} />
+        <EmbedMenuInstruction
+          instructions={[
+            {
+              title: ENABLE_REDIRECTION_TO_HELP_CHANNEL_LABEL,
+              enabled: true,
+              instructions:
+                "Users will be redirected to use help channels when they ask a question in the wrong channel, i.e a general chat.",
+            },
+            {
+              title: ENABLE_AI_QUESTION_ANSWERING_LABEL,
+              enabled: true,
+              instructions:
+                "Users will receive a ChatGPT style AI answer to their question trained off your community's data.",
+            },
+            {
+              title: ENABLE_AI_QUESTION_IMPROVEMENT_SUGGESTIONS_LABEL,
+              enabled: true,
+              instructions:
+                "Users will receive instructions on how to improve their question to get a better answer.",
+            },
+          ]}
+        />
+      </InstructionsContainer>
+      <Button
+        label={ENABLE_REDIRECTION_TO_HELP_CHANNEL_LABEL}
+        disabled={true}
+        style="secondary"
+        onClick={() => {
+          console.error("Enable redirection to help channel not implemented yet");
+        }}
+      />
+      <Button
+        label={ENABLE_AI_QUESTION_ANSWERING_LABEL}
+        disabled={true}
+        style="secondary"
+        onClick={() => {
+          console.error("Enable AI Question Answering not implemented yet");
+        }}
+      />
+      <Button
+        label={ENABLE_AI_QUESTION_IMPROVEMENT_SUGGESTIONS_LABEL}
+        disabled={true}
+        style="secondary"
+        onClick={() => {
+          console.error("Enable AI Question Improvement Suggestions not implemented yet");
+        }}
+      />
+      <ActionRow>
+        <Link url={EXPERIMENTAL_SETTINGS_WAITLIST_URL} label="Join the waitlist" />
+      </ActionRow>
+    </>
+  );
+}
+
 export function ChannelSettingsMenu({
   channelMenuIsIn,
   channelWithFlags,
@@ -388,8 +460,24 @@ export function ChannelSettingsMenu({
   }
   return (
     <>
+      <InstructionsContainer>
+        <EmbedMenuInstruction
+          instructions={[
+            {
+              title: OPEN_HELP_CHANNEL_UTILITIES_LABEL,
+              enabled: true,
+              instructions: "Configure channel indexing and user consent settings.",
+            },
+            {
+              title: OPEN_HELP_CHANNEL_UTILITIES_LABEL,
+              enabled: true,
+              instructions: "Configure utilities to improve asking questions.",
+            },
+          ]}
+        />
+      </InstructionsContainer>
       <Button
-        label="Indexing settings"
+        label={OPEN_HELP_CHANNEL_UTILITIES_LABEL}
         style="primary"
         onClick={() => {
           const { pushHistory } = getMessageHistory(interactionId);
@@ -399,13 +487,21 @@ export function ChannelSettingsMenu({
         }}
       />
       <Button
-        label="Help channel utilities"
+        label={OPEN_HELP_CHANNEL_UTILITIES_LABEL}
         style="primary"
         onClick={() => {
           const { pushHistory } = getMessageHistory(interactionId);
           pushHistory(
             <HelpChannelUtilitiesMenu initialChannelData={channel} targetChannel={targetChannel} />
           );
+        }}
+      />
+      <Button
+        label={OPEN_EXPERIMENTAL_SETTINGS_LABEL}
+        style="primary"
+        onClick={() => {
+          const { pushHistory } = getMessageHistory(interactionId);
+          pushHistory(<ExperimentalSettingsMenu />);
         }}
       />
     </>
