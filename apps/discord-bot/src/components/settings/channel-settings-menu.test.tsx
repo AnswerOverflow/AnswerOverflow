@@ -20,6 +20,7 @@ import {
   mockTextChannel,
   mockForumChannel,
   mockPublicThread,
+  delay,
 } from "@answeroverflow/discordjs-mock";
 import type { ChannelWithFlags } from "@answeroverflow/prisma-types";
 import {
@@ -72,7 +73,10 @@ describe("Channel Settings Menu", () => {
       it("should enable indexing", async () => {
         const message = await reply(
           reacord,
-          <IndexingSettingsMenu channelInDB={textChannelWithFlags} targetChannel={textChannel} />
+          <IndexingSettingsMenu
+            initialChannelData={textChannelWithFlags}
+            targetChannel={textChannel}
+          />
         );
         await toggleButtonTest({
           channel: textChannel,
@@ -97,7 +101,7 @@ describe("Channel Settings Menu", () => {
         });
         const message = await reply(
           reacord,
-          <IndexingSettingsMenu channelInDB={updated} targetChannel={textChannel} />
+          <IndexingSettingsMenu initialChannelData={updated} targetChannel={textChannel} />
         );
         await toggleButtonTest({
           channel: textChannel,
@@ -115,7 +119,10 @@ describe("Channel Settings Menu", () => {
       it("should not render in a text channel", async () => {
         const message = await reply(
           reacord,
-          <IndexingSettingsMenu channelInDB={textChannelWithFlags} targetChannel={textChannel} />
+          <IndexingSettingsMenu
+            initialChannelData={textChannelWithFlags}
+            targetChannel={textChannel}
+          />
         );
         expect(
           message?.findButtonByLabel(ENABLE_FORUM_GUIDELINES_CONSENT_LABEL, reacord)
@@ -127,7 +134,10 @@ describe("Channel Settings Menu", () => {
       it("should enable in a forum channel", async () => {
         const message = await reply(
           reacord,
-          <IndexingSettingsMenu channelInDB={forumChannelWithFlags} targetChannel={forumChannel} />
+          <IndexingSettingsMenu
+            initialChannelData={forumChannelWithFlags}
+            targetChannel={forumChannel}
+          />
         );
         await toggleButtonTest({
           channel: textChannel,
@@ -152,7 +162,7 @@ describe("Channel Settings Menu", () => {
         });
         const message = await reply(
           reacord,
-          <IndexingSettingsMenu channelInDB={updated} targetChannel={forumChannel} />
+          <IndexingSettingsMenu initialChannelData={updated} targetChannel={forumChannel} />
         );
         await toggleButtonTest({
           channel: textChannel,
@@ -173,7 +183,7 @@ describe("Channel Settings Menu", () => {
         const message = await reply(
           reacord,
           <HelpChannelUtilitiesMenu
-            channelInDB={textChannelWithFlags}
+            initialChannelData={textChannelWithFlags}
             targetChannel={textChannel}
           />
         );
@@ -200,7 +210,7 @@ describe("Channel Settings Menu", () => {
         });
         const message = await reply(
           reacord,
-          <HelpChannelUtilitiesMenu channelInDB={updated} targetChannel={textChannel} />
+          <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
         );
         await toggleButtonTest({
           channel: textChannel,
@@ -227,7 +237,7 @@ describe("Channel Settings Menu", () => {
         });
         const message = await reply(
           reacord,
-          <HelpChannelUtilitiesMenu channelInDB={updated} targetChannel={textChannel} />
+          <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
         );
         await toggleButtonTest({
           channel: textChannel,
@@ -253,7 +263,7 @@ describe("Channel Settings Menu", () => {
         });
         const message = await reply(
           reacord,
-          <HelpChannelUtilitiesMenu channelInDB={updated} targetChannel={textChannel} />
+          <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
         );
         await toggleButtonTest({
           channel: textChannel,
@@ -270,7 +280,7 @@ describe("Channel Settings Menu", () => {
         const message = await reply(
           reacord,
           <HelpChannelUtilitiesMenu
-            channelInDB={textChannelWithFlags}
+            initialChannelData={textChannelWithFlags}
             targetChannel={textChannel}
           />
         );
@@ -280,12 +290,12 @@ describe("Channel Settings Menu", () => {
         ).toBeTruthy();
       });
     });
-    describe.only("set solved tag id", () => {
+    describe("set solved tag id", () => {
       it("should render correctly in a forum channel", async () => {
         const message = await reply(
           reacord,
           <HelpChannelUtilitiesMenu
-            channelInDB={forumChannelWithFlags}
+            initialChannelData={forumChannelWithFlags}
             targetChannel={forumChannel}
           />
         );
@@ -296,7 +306,7 @@ describe("Channel Settings Menu", () => {
         const message = await reply(
           reacord,
           <HelpChannelUtilitiesMenu
-            channelInDB={textChannelWithFlags}
+            initialChannelData={textChannelWithFlags}
             targetChannel={textChannel}
           />
         );
@@ -307,7 +317,7 @@ describe("Channel Settings Menu", () => {
         const message = await reply(
           reacord,
           <HelpChannelUtilitiesMenu
-            channelInDB={forumChannelWithFlags}
+            initialChannelData={forumChannelWithFlags}
             targetChannel={forumChannel}
           />
         );
@@ -323,7 +333,7 @@ describe("Channel Settings Menu", () => {
         const message = await reply(
           reacord,
           <HelpChannelUtilitiesMenu
-            channelInDB={mockChannelWithFlags(toAOServer(guild), toAOChannel(taglessForum))}
+            initialChannelData={mockChannelWithFlags(toAOServer(guild), toAOChannel(taglessForum))}
             targetChannel={taglessForum}
           />
         );
@@ -344,7 +354,7 @@ describe("Channel Settings Menu", () => {
         });
         const message = await reply(
           reacord,
-          <HelpChannelUtilitiesMenu channelInDB={updated} targetChannel={forumChannel} />
+          <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={forumChannel} />
         );
         const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER, reacord);
         await select?.select(
@@ -352,13 +362,14 @@ describe("Channel Settings Menu", () => {
           members.guildMemberOwner,
           forumChannel.availableTags[0]!.id
         );
+        await delay();
         const updatedSelect = message?.findSelectByPlaceholder(
           SET_SOLVED_TAG_ID_PLACEHOLDER,
           reacord
         );
-        expect(updatedSelect?.values?.at(0)).toBe(forumChannel.availableTags[0]!.id);
         const found = await findChannelById(forumChannelWithFlags.id);
         expect(found!.solutionTagId).toBe(forumChannel.availableTags[0]!.id);
+        expect(updatedSelect?.values?.at(0)).toBe(forumChannel.availableTags[0]!.id);
       });
       it("should clear the tag id", async () => {
         const updated = await updateChannel({
@@ -373,7 +384,7 @@ describe("Channel Settings Menu", () => {
         });
         const message = await reply(
           reacord,
-          <HelpChannelUtilitiesMenu channelInDB={updated} targetChannel={forumChannel} />
+          <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={forumChannel} />
         );
         const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER, reacord);
         await select?.select(forumThread, members.guildMemberOwner, CLEAR_TAG_VALUE);
@@ -381,9 +392,9 @@ describe("Channel Settings Menu", () => {
           SET_SOLVED_TAG_ID_PLACEHOLDER,
           reacord
         );
-        expect(updatedSelect?.values?.at(0)).toBe("");
         const found = await findChannelById(forumChannelWithFlags.id);
         expect(found!.solutionTagId).toBe(null);
+        expect(updatedSelect?.values?.at(0)).toBe("");
       });
     });
   });

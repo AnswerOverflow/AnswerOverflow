@@ -130,3 +130,22 @@ export function setSolutionTagId({
     ...statusHandlers,
   });
 }
+
+export function updateAutoThreadEnabled({
+  member,
+  channel,
+  enabled,
+  Error,
+  ...statusHandlers
+}: ChannelSettingsUpdateAPICall & { enabled: boolean }) {
+  return callAPI({
+    apiCall: (router) =>
+      router.channels.setAutoThreadEnabled({
+        channel: toAOChannelWithServer(channel),
+        enabled,
+      }),
+    getCtx: () => createMemberCtx(member),
+    Error: (error) => Error(error.message),
+    ...statusHandlers,
+  });
+}

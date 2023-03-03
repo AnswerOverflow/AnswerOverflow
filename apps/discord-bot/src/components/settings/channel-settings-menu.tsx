@@ -5,7 +5,14 @@ import {
   SelectChangeEvent,
   Option,
 } from "@answeroverflow/reacord";
-import { ChannelType, ForumChannel, GuildForumTag, type GuildTextBasedChannel } from "discord.js";
+import {
+  ChannelType,
+  ForumChannel,
+  GuildForumTag,
+  NewsChannel,
+  TextChannel,
+  type GuildTextBasedChannel,
+} from "discord.js";
 import LRUCache from "lru-cache";
 import {
   DISABLE_CHANNEL_INDEXING_LABEL,
@@ -19,6 +26,9 @@ import {
   DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
   ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
   SET_SOLVED_TAG_ID_PLACEHOLDER,
+  DISABLE_AUTO_THREAD_LABEL,
+  ENABLE_AUTO_THREAD_LABEL,
+  ALLOWED_AUTO_THREAD_CHANNEL_TYPES,
 } from "@answeroverflow/constants";
 import type { ChannelWithFlags } from "@answeroverflow/prisma-types";
 import React from "react";
@@ -34,6 +44,7 @@ import {
   updateMarkAsSolutionEnabled,
   updateSendMarkAsSolutionInstructionsEnabled,
   setSolutionTagId,
+  updateAutoThreadEnabled,
 } from "~discord-bot/domains/channel-settings";
 import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
 import { componentEventStatusHandler } from "~discord-bot/utils/trpc";
@@ -46,7 +57,7 @@ type ChannelSettingsMenuItemProps<T extends RootChannel = RootChannel> = {
 };
 
 type ChannelSettingsSubMenuProps = {
-  channelInDB: ChannelWithFlags;
+  initialChannelData: ChannelWithFlags;
   targetChannel: RootChannel;
 };
 
@@ -124,9 +135,12 @@ function ToggleForumGuidelinesConsentButton({
   );
 }
 
-export function IndexingSettingsMenu({ targetChannel, channelInDB }: ChannelSettingsSubMenuProps) {
+export function IndexingSettingsMenu({
+  targetChannel,
+  initialChannelData,
+}: ChannelSettingsSubMenuProps) {
   const [channel, setChannel] = React.useState<ChannelWithFlags>(
-    channelCache.get(targetChannel.id) ?? channelInDB
+    channelCache.get(targetChannel.id) ?? initialChannelData
   );
   const isButtonInForumChannel = targetChannel.type === ChannelType.GuildForum;
   return (
@@ -275,13 +289,42 @@ function SelectMarkAsSolvedTag({
   );
 }
 
-export function HelpChannelUtilitiesMenu({
+function ToggleAutoThreadButton({
   channelInDB,
+  setChannel,
+  targetChannel,
+}: ChannelSettingsMenuItemProps<TextChannel | NewsChannel>) {
+  return (
+    <ToggleButton
+      currentlyEnabled={channelInDB.flags.autoThreadEnabled}
+      disableLabel={DISABLE_AUTO_THREAD_LABEL}
+      enableLabel={ENABLE_AUTO_THREAD_LABEL}
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      onClick={async (event: ButtonClickEvent, enabled) =>
+        guildOnlyComponentEvent(event, async ({ member }) => {
+          await updateAutoThreadEnabled({
+            channel: targetChannel,
+            enabled,
+            member,
+            Error: (message) => componentEventStatusHandler(event, message),
+            Ok: (updatedChannel) => {
+              updateChannelState(setChannel, updatedChannel);
+            },
+          });
+        })
+      }
+    />
+  );
+}
+
+export function HelpChannelUtilitiesMenu({
+  initialChannelData,
   targetChannel,
 }: ChannelSettingsSubMenuProps) {
   const [channel, setChannel] = React.useState<ChannelWithFlags>(
-    channelCache.get(targetChannel.id) ?? channelInDB
+    channelCache.get(targetChannel.id) ?? initialChannelData
   );
+  const props = { channelInDB: channel, setChannel, targetChannel };
   return (
     <>
       <InstructionsContainer>
@@ -300,16 +343,15 @@ export function HelpChannelUtilitiesMenu({
           ]}
         />
       </InstructionsContainer>
-      <ToggleMarkAsSolutionButton
-        channelInDB={channel}
-        setChannel={setChannel}
-        targetChannel={targetChannel}
-      />
-      <ToggleSendMarkAsSolutionInstructionsButton
-        channelInDB={channel}
-        setChannel={setChannel}
-        targetChannel={targetChannel}
-      />
+      <ToggleMarkAsSolutionButton {...props} />
+      <ToggleSendMarkAsSolutionInstructionsButton {...props} />
+      {ALLOWED_AUTO_THREAD_CHANNEL_TYPES.has(targetChannel.type) && (
+        <ToggleAutoThreadButton
+          channelInDB={channel}
+          setChannel={setChannel}
+          targetChannel={targetChannel as TextChannel | NewsChannel}
+        />
+      )}
       {targetChannel.type === ChannelType.GuildForum && (
         <SelectMarkAsSolvedTag
           channelInDB={channel}
@@ -344,7 +386,9 @@ export function ChannelSettingsMenu({
         style="primary"
         onClick={() => {
           const { pushHistory } = getMessageHistory(interactionId);
-          pushHistory(<IndexingSettingsMenu channelInDB={channel} targetChannel={targetChannel} />);
+          pushHistory(
+            <IndexingSettingsMenu initialChannelData={channel} targetChannel={targetChannel} />
+          );
         }}
       />
       <Button
@@ -353,7 +397,7 @@ export function ChannelSettingsMenu({
         onClick={() => {
           const { pushHistory } = getMessageHistory(interactionId);
           pushHistory(
-            <HelpChannelUtilitiesMenu channelInDB={channel} targetChannel={targetChannel} />
+            <HelpChannelUtilitiesMenu initialChannelData={channel} targetChannel={targetChannel} />
           );
         }}
       />

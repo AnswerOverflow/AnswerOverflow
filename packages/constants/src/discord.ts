@@ -1,4 +1,4 @@
-import type { PermissionFlagsBits } from "discord-api-types/v10";
+import { ChannelType, PermissionFlagsBits } from "discord-api-types/v10";
 
 // keys of PermissionFlagsBits as a string
 export type DiscordPermissions = keyof typeof PermissionFlagsBits;
@@ -40,6 +40,10 @@ export const ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL =
   "Enable send mark as solution in new thread";
 export const DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL =
   "Disable send mark as solution in new thread";
-export const ENABLE_AUTO_THREAD = "Enable auto thread";
-export const DISABLE_AUTO_THREAD = "Disable auto thread";
+export const ENABLE_AUTO_THREAD_LABEL = "Enable auto thread";
+export const DISABLE_AUTO_THREAD_LABEL = "Disable auto thread";
 export const SET_SOLVED_TAG_ID_PLACEHOLDER = "Select a tag to use on mark as solved";
+export const ALLOWED_AUTO_THREAD_CHANNEL_TYPES = new Set([
+  ChannelType.GuildText,
+  ChannelType.GuildAnnouncement,
+] as const);
