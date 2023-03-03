@@ -29,8 +29,9 @@ import {
 } from "./channel";
 import { mockChannel, mockServer } from "@answeroverflow/db-mock";
 import { pickPublicChannelData } from "~api/test/public-data";
-import type { z } from "zod";
+import type { typecast, z } from "zod";
 import { getRandomId } from "@answeroverflow/utils";
+import { ChannelType } from "discord.js";
 
 let server: Server;
 let channel: Channel;
@@ -47,6 +48,7 @@ async function validateChannelSettingsChange<T>({
   assert,
   act,
   setup = () => {},
+  override = {},
 }: {
   setup?: ({
     server,
@@ -64,11 +66,12 @@ async function validateChannelSettingsChange<T>({
     channel: z.infer<typeof zChannelWithServerCreate>,
     router: ReturnType<typeof channelRouter.createCaller>
   ) => Promise<T>;
+  override?: Parameters<typeof mockChannel>[1];
 }) {
   await testAllSourceAndPermissionVariantsThatThrowErrors({
     async operation({ source, permission }) {
       const server = mockServer();
-      const chnl = mockChannel(server);
+      const chnl = mockChannel(server, override);
       const account = await mockAccountWithServersCallerCtx(server, source, permission);
       const router = channelRouter.createCaller(account.ctx);
       await setup({
@@ -131,7 +134,7 @@ describe("Channel Operations", () => {
         },
       });
     });
-    it.only("should have all variants of setting indexing disabled succeed", async () => {
+    it("should have all variants of setting indexing disabled succeed", async () => {
       await validateChannelSettingsChange({
         async setup({ server, channel }) {
           await createServer(server);
@@ -209,6 +212,9 @@ describe("Channel Operations", () => {
             enabled: true,
           });
         },
+        override: {
+          type: ChannelType.GuildForum,
+        },
         assert: (updated) => expect(updated.flags.forumGuidelinesConsentEnabled).toBeTruthy(),
       });
     });
@@ -222,6 +228,9 @@ describe("Channel Operations", () => {
               forumGuidelinesConsentEnabled: true,
             },
           });
+        },
+        override: {
+          type: ChannelType.GuildForum,
         },
         act(channel, router) {
           return router.setForumGuidelinesConsentEnabled({
@@ -337,6 +346,15 @@ describe("Channel Operations", () => {
   describe("set send mark solution instructions in new threads", () => {
     it("should have all variants of setting send mark solution instructions in new threads enabled succeed", async () => {
       await validateChannelSettingsChange({
+        async setup({ server, channel }) {
+          await createServer(server);
+          await createChannel({
+            ...channel,
+            flags: {
+              markSolutionEnabled: true,
+            },
+          });
+        },
         act(channel, router) {
           return router.setSendMarkSolutionInstructionsInNewThreadsEnabled({
             channel,
@@ -354,6 +372,7 @@ describe("Channel Operations", () => {
           await createChannel({
             ...channel,
             flags: {
+              markSolutionEnabled: true,
               sendMarkSolutionInstructionsInNewThreads: true,
             },
           });
@@ -372,6 +391,7 @@ describe("Channel Operations", () => {
       await createChannel({
         ...channel,
         flags: {
+          markSolutionEnabled: true,
           sendMarkSolutionInstructionsInNewThreads: true,
         },
       });
