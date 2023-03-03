@@ -34,7 +34,7 @@ export function WithTailwindTheme(
   toggleDarkTheme(tailwindTheme === "dark");
   const Dark = () => (
     // eslint-disable-next-line tailwindcss/no-custom-classname
-    <Flex className="dark bg-neutral-800">
+    <Flex className="dark bg-ao-black">
       <Story />
     </Flex>
   );
@@ -44,7 +44,7 @@ export function WithTailwindTheme(
   }
 
   const Light = () => (
-    <Flex className="bg-white">
+    <Flex className="bg-ao-white">
       <Story />
     </Flex>
   );
