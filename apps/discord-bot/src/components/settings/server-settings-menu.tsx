@@ -36,6 +36,8 @@ const ToggleReadTheRulesConsentButton = ({
   />
 );
 
+export const VIEW_ON_ANSWEROVERFLOW_LABEL = "View on Answer Overflow";
+
 export function ServerSettingsMenu({ server: initialServer }: { server: ServerWithFlags }) {
   const [server, setServer] = React.useState(initialServer);
   return (
@@ -54,12 +56,20 @@ export function ServerSettingsMenu({ server: initialServer }: { server: ServerWi
               title: ENABLE_READ_THE_RULES_CONSENT_LABEL,
               instructions: `New members who agree to the membership screening will be marked as consenting. You must have the following test in your membership screening before enabling: \n\n\`${READ_THE_RULES_CONSENT_PROMPT}\``,
             },
+            {
+              enabled: true,
+              title: VIEW_ON_ANSWEROVERFLOW_LABEL,
+              instructions: "View your community on answeroverflow.com",
+            },
           ]}
         />
       </InstructionsContainer>
       <ToggleReadTheRulesConsentButton setServer={setServer} server={server} />
       <ActionRow>
-        <Link url={`https://answeroverflow.com/c/${server.id}`} label="View On Answer Overflow" />
+        <Link
+          url={`https://answeroverflow.com/c/${server.id}`}
+          label={VIEW_ON_ANSWEROVERFLOW_LABEL}
+        />
       </ActionRow>
     </>
   );
