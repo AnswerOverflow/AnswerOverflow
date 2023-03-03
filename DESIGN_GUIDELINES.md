@@ -14,7 +14,7 @@ We use [Montserrat](https://fonts.google.com/specimen/Montserrat) for headings a
 Answer overflow uses several predefined colors to ensure consistency. These colors are used throughout the site and should be used in designs as well.
 
 - Neutrals
-  - ![#F5F8FF](https://via.placeholder.com/15/F5F8FF/000000?text=+) `#141619` - Answer Overflow Zircon - `<style>-ao-white` in tailwind
+  - ![#F5F8FF](https://via.placeholder.com/15/F5F8FF/000000?text=+) `#F5F8FF` - Answer Overflow Zircon - `<style>-ao-white` in tailwind
   - ![#141619](https://via.placeholder.com/15/141619/000000?text=+) `#141619` - Answer Overflow Charcoal - `<style>-ao-black` in tailwind
 - Accents (use sparingly)
   - ![#396FF8](https://via.placeholder.com/15/396FF8/000000?text=+) `#396FF8` - Answer Overflow Ultramarine Blue - `<style>-ao-blue` in tailwind
