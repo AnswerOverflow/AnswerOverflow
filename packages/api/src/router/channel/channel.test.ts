@@ -29,7 +29,7 @@ import {
 } from "./channel";
 import { mockChannel, mockServer } from "@answeroverflow/db-mock";
 import { pickPublicChannelData } from "~api/test/public-data";
-import type { typecast, z } from "zod";
+import type { z } from "zod";
 import { getRandomId } from "@answeroverflow/utils";
 import { ChannelType } from "discord.js";
 
