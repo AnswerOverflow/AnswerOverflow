@@ -14,6 +14,7 @@ import {
   ENABLE_AUTO_THREAD_LABEL,
   DISABLE_AUTO_THREAD_LABEL,
   OPEN_INDEXING_SETTINGS_MENU_LABEL,
+  OPEN_HELP_CHANNEL_UTILITIES_LABEL,
 } from "@answeroverflow/constants";
 import { createServer, createChannel, findChannelById, updateChannel } from "@answeroverflow/db";
 import {
@@ -26,6 +27,7 @@ import {
 } from "@answeroverflow/discordjs-mock";
 import type { ChannelWithFlags } from "@answeroverflow/prisma-types";
 import {
+  ChannelSettingsMenu,
   CLEAR_TAG_VALUE,
   HelpChannelUtilitiesMenu,
   IndexingSettingsMenu,
@@ -35,6 +37,7 @@ import { setupAnswerOverflowBot, mockReacord } from "~discord-bot/test/sapphire-
 import { toAOServer, toAOChannel } from "~discord-bot/utils/conversions";
 import React from "react";
 import { mockChannelWithFlags } from "@answeroverflow/db-mock";
+import { Router } from "~discord-bot/components/primitives";
 let client: Client;
 let reacord: ReacordTester;
 let textChannel: TextChannel;
@@ -456,12 +459,16 @@ describe("Channel Settings Menu", () => {
     it("should open the indexing settings correctly", async () => {
       const message = await reply(
         reacord,
-        <HelpChannelUtilitiesMenu
-          initialChannelData={textChannelWithFlags}
-          targetChannel={textChannel}
-        />
+        <Router interactionId="0">
+          <ChannelSettingsMenu
+            channelMenuIsIn={textChannel}
+            channelWithFlags={textChannelWithFlags}
+            interactionId={"0"}
+          />
+        </Router>
       );
       const button = message?.findButtonByLabel(OPEN_INDEXING_SETTINGS_MENU_LABEL, reacord);
+      expect(button).toBeDefined();
       await button?.click(forumThread, members.guildMemberOwner);
       const enableIndexingButton = message?.findButtonByLabel(
         ENABLE_CHANNEL_INDEXING_LABEL,
@@ -472,12 +479,16 @@ describe("Channel Settings Menu", () => {
     it("should open the help channel utilities menu correctly", async () => {
       const message = await reply(
         reacord,
-        <HelpChannelUtilitiesMenu
-          initialChannelData={textChannelWithFlags}
-          targetChannel={textChannel}
-        />
+        <Router interactionId="0">
+          <ChannelSettingsMenu
+            channelMenuIsIn={textChannel}
+            channelWithFlags={textChannelWithFlags}
+            interactionId={"0"}
+          />
+        </Router>
       );
-      const button = message?.findButtonByLabel(OPEN_INDEXING_SETTINGS_MENU_LABEL, reacord);
+      const button = message?.findButtonByLabel(OPEN_HELP_CHANNEL_UTILITIES_LABEL, reacord);
+      expect(button).toBeDefined();
       await button?.click(forumThread, members.guildMemberOwner);
       const enableAutoThreadButton = message?.findButtonByLabel(ENABLE_AUTO_THREAD_LABEL, reacord);
       expect(enableAutoThreadButton).toBeDefined();
