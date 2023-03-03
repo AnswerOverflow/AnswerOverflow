@@ -18,6 +18,7 @@ import {
   ENABLE_MARK_AS_SOLUTION_LABEL,
   DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
   ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
+  SET_SOLVED_TAG_ID_PLACEHOLDER,
 } from "@answeroverflow/constants";
 import type { ChannelWithFlags } from "@answeroverflow/prisma-types";
 import React from "react";
@@ -234,7 +235,7 @@ function ToggleSendMarkAsSolutionInstructionsButton({
   );
 }
 
-const CLEAR_TAG_VALUE = "clear";
+export const CLEAR_TAG_VALUE = "clear";
 const getTagNameWithEmoji = (tag: GuildForumTag) =>
   tag.emoji?.name ? `${tag.emoji.name} ${tag.name}` : tag.name;
 
@@ -245,8 +246,9 @@ function SelectMarkAsSolvedTag({
 }: ChannelSettingsMenuItemProps<ForumChannel>) {
   return (
     <Select
-      placeholder="Select a tag to use on mark as solved"
+      placeholder={SET_SOLVED_TAG_ID_PLACEHOLDER}
       value={channelInDB.solutionTagId ?? ""}
+      disabled={!channelInDB.flags.markSolutionEnabled}
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       onChangeValue={async (value: string, event: SelectChangeEvent) =>
         guildOnlyComponentEvent(event, async ({ member }) =>
@@ -308,6 +310,13 @@ export function HelpChannelUtilitiesMenu({
         setChannel={setChannel}
         targetChannel={targetChannel}
       />
+      {targetChannel.type === ChannelType.GuildForum && (
+        <SelectMarkAsSolvedTag
+          channelInDB={channel}
+          setChannel={setChannel}
+          targetChannel={targetChannel}
+        />
+      )}
     </>
   );
 }

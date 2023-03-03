@@ -57,20 +57,23 @@ export const Router: React.FC<{
     "type" in current &&
     current.type.toString().includes(SupportMenu.toString());
 
+  const shouldShowActionRow = history.length > 1 || !isSupportMenu;
   return (
     <>
       {current}
-      <ActionRow>
-        {history.length > 1 && (
-          <Button
-            label="Back"
-            onClick={() => {
-              popHistory();
-            }}
-          />
-        )}
-        {!isSupportMenu && <OpenSupportMenuButton interactionId={interactionId} />}
-      </ActionRow>
+      {shouldShowActionRow && (
+        <ActionRow>
+          {history.length > 1 && (
+            <Button
+              label="Back"
+              onClick={() => {
+                popHistory();
+              }}
+            />
+          )}
+          {!isSupportMenu && <OpenSupportMenuButton interactionId={interactionId} />}
+        </ActionRow>
+      )}
     </>
   );
 };

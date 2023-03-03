@@ -42,3 +42,4 @@ export const DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL =
   "Disable send mark as solution in new thread";
 export const ENABLE_AUTO_THREAD = "Enable auto thread";
 export const DISABLE_AUTO_THREAD = "Disable auto thread";
+export const SET_SOLVED_TAG_ID_PLACEHOLDER = "Select a tag to use on mark as solved";
