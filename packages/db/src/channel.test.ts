@@ -179,6 +179,28 @@ describe("Channel Operations", () => {
       const found = await findChannelById(chnl.id);
       expect(found!.inviteCode).toBeNull();
     });
+    it("should update a channel with a thread", async () => {
+      const chnl = mockChannelWithFlags(server, {
+        flags: {
+          autoThreadEnabled: true,
+        },
+      });
+      const thread = mockThread(chnl);
+      await createChannel(chnl);
+      await createChannel(thread);
+      const updated = await updateChannel({
+        old: chnl,
+        update: {
+          id: chnl.id,
+          flags: {
+            autoThreadEnabled: false,
+          },
+        },
+      });
+      expect(updated.flags.autoThreadEnabled).toBeFalsy();
+      const found = await findChannelById(chnl.id);
+      expect(found!.flags.autoThreadEnabled).toBeFalsy();
+    });
   });
   describe("Update Many Channels", () => {
     it("should update many channels", async () => {

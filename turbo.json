@@ -51,6 +51,12 @@
         "prisma/schema.prisma"
       ],
       "cache": false
+    },
+    "db:push:staging": {
+      "inputs": [
+        "prisma/schema.prisma"
+      ],
+      "cache": false
     }
   },
   "globalDependencies": [

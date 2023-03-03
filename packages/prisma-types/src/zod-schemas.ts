@@ -10,10 +10,14 @@ export const ALLOWED_THREAD_TYPES = new Set([
   ChannelType.AnnouncementThread,
 ]);
 
-export const ALLOWED_CHANNEL_TYPES = new Set([
+export const ALLOWED_ROOT_CHANNEL_TYPES = new Set([
   ChannelType.GuildForum,
   ChannelType.GuildText,
   ChannelType.GuildAnnouncement,
+]);
+
+export const ALLOWED_CHANNEL_TYPES = new Set([
+  ...ALLOWED_ROOT_CHANNEL_TYPES,
   ...ALLOWED_THREAD_TYPES,
 ]);
 
@@ -62,11 +66,11 @@ export const zChannelPrismaCreate = zChannelPrisma.partial().merge(
   })
 );
 
-export const zChannelPrismaUpdate = zChannelPrisma.partial().merge(
-  zChannelPrisma.pick({
-    id: true,
-  })
-);
+export const zChannelPrismaUpdate = zChannelPrisma.partial().omit({
+  serverId: true,
+  id: true,
+  parentId: true,
+});
 
 export const zChannel = zChannelPrisma.required().extend({
   flags: zChannelBitfieldFlags,

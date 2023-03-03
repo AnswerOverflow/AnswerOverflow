@@ -23,6 +23,7 @@
     "db:generate": "turbo db:generate",
     "db:wipe": "turbo db:wipe",
     "db:push": "turbo db:push db:generate",
+    "db:push:staging": "turbo db:push:staging db:generate",
     "clean": "turbo run clean && rm -rf node_modules",
     "dev:discord-bot": "turbo run dev --filter=discord-bot... --parallel --no-cache",
     "build:discord-bot": "turbo run build --filter=discord-bot... --parallel --no-cache",
