@@ -4,6 +4,10 @@ import { callAPI, TRPCStatusHandler } from "~discord-bot/utils/trpc";
 import { toAOChannelWithServer } from "~discord-bot/utils/conversions";
 import { createMemberCtx } from "~discord-bot/utils/context";
 import { removeDiscordMarkdown, RootChannel } from "~discord-bot/utils/utils";
+import {
+  FORUM_GUIDELINES_CONSENT_PROMPT,
+  FORUM_GUIDELINES_CONSENT_MISSING_ERROR_MESSAGE,
+} from "@answeroverflow/constants";
 
 type ChannelSettingsUpdateAPICall = {
   member: GuildMember;
@@ -43,14 +47,10 @@ export async function updateChannelIndexingEnabled({
   });
 }
 
-export const FORUM_GUIDELINES_CONSENT_PROMPT =
-  "This server uses Answer Overflow to index content on the web. By posting in this channel your messages will be indexed on the web to help others find answers.";
 export function doesTextHaveConsentPrompt(text: string) {
   const strippedGuidelines = removeDiscordMarkdown(text).replace(/[^A-Za-z0-9]/g, "");
   return strippedGuidelines.includes(FORUM_GUIDELINES_CONSENT_PROMPT.replace(/[^A-Za-z0-9]/g, ""));
 }
-
-export const FORUM_GUIDELINES_CONSENT_MISSING_ERROR_MESSAGE = `You must add the consent prompt to the channel forum guidelines to enable this setting: \n\n\`${FORUM_GUIDELINES_CONSENT_PROMPT}\`\n\nIs this not detecting properly? Please join the Discord for support!`;
 
 export async function updateChannelForumGuidelinesConsentEnabled({
   member,

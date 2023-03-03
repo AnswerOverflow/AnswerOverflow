@@ -16,9 +16,6 @@ import {
   checkIfCanMarkSolution,
   makeMarkSolutionResponse,
   makeRequestForConsentString,
-  PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED,
-  QUESTION_ID_FIELD_NAME,
-  SOLUTION_ID_FIELD_NAME,
 } from "./mark-solution";
 import { toAOChannel, toAOChannelWithServer, toAOServer } from "~discord-bot/utils/conversions";
 
@@ -39,6 +36,11 @@ import {
 import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import { randomSnowflake } from "@answeroverflow/discordjs-utils";
 import { createChannel, createServer } from "@answeroverflow/db";
+import {
+  PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED,
+  QUESTION_ID_FIELD_NAME,
+  SOLUTION_ID_FIELD_NAME,
+} from "@answeroverflow/constants";
 
 let client: Client;
 let guild: Guild;

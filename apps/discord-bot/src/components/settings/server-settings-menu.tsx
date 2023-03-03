@@ -4,11 +4,13 @@ import React from "react";
 import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
 import { updateReadTheRulesConsentEnabled } from "~discord-bot/domains/server-settings";
 import { componentEventStatusHandler } from "~discord-bot/utils/trpc";
-import { READ_THE_RULES_CONSENT_PROMPT } from "~discord-bot/domains/manage-account";
 import { EmbedMenuInstruction, InstructionsContainer, ToggleButton } from "../primitives";
-
-export const ENABLE_READ_THE_RULES_CONSENT_LABEL = "Enable read the rules consent";
-export const DISABLE_READ_THE_RULES_CONSENT_LABEL = "Disable read the rules consent";
+import {
+  DISABLE_READ_THE_RULES_CONSENT_LABEL,
+  ENABLE_READ_THE_RULES_CONSENT_LABEL,
+  READ_THE_RULES_CONSENT_PROMPT,
+  VIEW_ON_ANSWEROVERFLOW_LABEL,
+} from "@answeroverflow/constants";
 
 const ToggleReadTheRulesConsentButton = ({
   server,
@@ -35,8 +37,6 @@ const ToggleReadTheRulesConsentButton = ({
     }}
   />
 );
-
-export const VIEW_ON_ANSWEROVERFLOW_LABEL = "View on Answer Overflow";
 
 export function ServerSettingsMenu({ server: initialServer }: { server: ServerWithFlags }) {
   const [server, setServer] = React.useState(initialServer);

@@ -28,6 +28,10 @@
       "path": "packages/discordjs-utils",
     },
     {
+      "name": "constants",
+      "path": "packages/constants"
+    },
+    {
       "name": "api",
       "path": "packages/api"
     },
@@ -110,9 +114,8 @@
       "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     },
     "javascript.suggest.autoImports": true,
-    "typescript.suggest.autoImports": true,
     "javascript.updateImportsOnFileMove.enabled": "always",
-    "typescript.updateImportsOnFileMove.enabled": "always",
+    "typescript.preferences.importModuleSpecifier": "non-relative",
     "editor.bracketPairColorization.enabled": true,
     "editor.guides.bracketPairs": "active",
     "[json]": {
@@ -145,12 +148,13 @@
       "utils",
       "redis",
       "db-mock",
+      "constants",
       "prisma-types",
       "elastic-types",
       "cache",
       "docs"
     ],
-    "jest.autoRun": "off",
+    "jest.autoRevealOutput": "off",
     "cSpell.words": [
       "Anson",
       "AUTOTHREAD",

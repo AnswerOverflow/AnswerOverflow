@@ -11,12 +11,11 @@ import {
   mockTextChannel,
 } from "@answeroverflow/discordjs-mock";
 import { toAOServer } from "~discord-bot/utils/conversions";
+import { ServerSettingsMenu } from "~discord-bot/components/settings/server-settings-menu";
 import {
-  DISABLE_READ_THE_RULES_CONSENT_LABEL,
   ENABLE_READ_THE_RULES_CONSENT_LABEL,
-  ServerSettingsMenu,
-} from "~discord-bot/components/settings/server-settings-menu";
-
+  DISABLE_READ_THE_RULES_CONSENT_LABEL,
+} from "@answeroverflow/constants";
 let reacord: ReacordTester;
 let textChannel: TextChannel;
 let guild: Guild;

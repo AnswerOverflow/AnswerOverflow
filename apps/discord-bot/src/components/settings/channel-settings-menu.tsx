@@ -1,23 +1,30 @@
-import type { ChannelWithFlags } from "@answeroverflow/api";
-import { ChannelType, GuildTextBasedChannel } from "discord.js";
-import { ButtonClickEvent, Button } from "@answeroverflow/reacord";
+import { type ButtonClickEvent, Button } from "@answeroverflow/reacord";
+import { ChannelType, type GuildTextBasedChannel } from "discord.js";
+import LRUCache from "lru-cache";
+import {
+  DISABLE_CHANNEL_INDEXING_LABEL,
+  ENABLE_CHANNEL_INDEXING_LABEL,
+  DISABLE_FORUM_GUIDELINES_CONSENT_LABEL,
+  ENABLE_FORUM_GUIDELINES_CONSENT_LABEL,
+  ENABLE_INDEXING_LABEL,
+  FORUM_GUIDELINES_CONSENT_PROMPT,
+} from "@answeroverflow/constants";
+import type { ChannelWithFlags } from "@answeroverflow/prisma-types";
 import React from "react";
 import {
+  ToggleButton,
+  InstructionsContainer,
   EmbedMenuInstruction,
   getMessageHistory,
-  InstructionsContainer,
-  ToggleButton,
-} from "../primitives";
-import { getRootChannel, RootChannel } from "~discord-bot/utils/utils";
-import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
+} from "~discord-bot/components/primitives";
 import {
-  FORUM_GUIDELINES_CONSENT_PROMPT,
-  updateChannelForumGuidelinesConsentEnabled,
   updateChannelIndexingEnabled,
+  updateChannelForumGuidelinesConsentEnabled,
 } from "~discord-bot/domains/channel-settings";
+import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
 import { componentEventStatusHandler } from "~discord-bot/utils/trpc";
-import LRUCache from "lru-cache";
-import { ENABLE_INDEXING_LABEL } from "./manage-account-menu";
+import { type RootChannel, getRootChannel } from "~discord-bot/utils/utils";
+
 type ChannelSettingsMenuItemProps = {
   channelInDB: ChannelWithFlags;
   setChannel: (channel: ChannelWithFlags) => void;
@@ -42,8 +49,6 @@ const updateChannelState = (
   Indexing Menu
 */
 
-export const ENABLE_CHANNEL_INDEXING_LABEL = "Enable indexing";
-export const DISABLE_CHANNEL_INDEXING_LABEL = "Disable indexing";
 const ToggleIndexingButton = ({
   channelInDB,
   setChannel,
@@ -70,8 +75,6 @@ const ToggleIndexingButton = ({
   />
 );
 
-export const ENABLE_FORUM_GUIDELINES_CONSENT_LABEL = "Enable forum guidelines consent";
-export const DISABLE_FORUM_GUIDELINES_CONSENT_LABEL = "Disable forum guidelines consent";
 const ToggleForumGuidelinesConsentButton = ({
   channelInDB,
   setChannel,

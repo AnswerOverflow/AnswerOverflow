@@ -9,6 +9,7 @@
     "@answeroverflow/cache": "*",
     "@answeroverflow/db": "*",
     "@answeroverflow/db-mock": "*",
+    "@answeroverflow/constants": "*",
     "@answeroverflow/discordjs-utils": "*",
     "@answeroverflow/reacord": "^0.5.11",
     "@sapphire/decorators": "6.0.0",

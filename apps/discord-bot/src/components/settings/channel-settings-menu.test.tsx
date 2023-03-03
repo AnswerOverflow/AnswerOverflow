@@ -1,32 +1,27 @@
-import {
-  DISABLE_CHANNEL_INDEXING_LABEL,
-  DISABLE_FORUM_GUIDELINES_CONSENT_LABEL,
-  ENABLE_CHANNEL_INDEXING_LABEL,
-  ENABLE_FORUM_GUIDELINES_CONSENT_LABEL,
-  IndexingSettingsMenu,
-} from "~discord-bot/components/settings";
-import { reply, toggleButtonTest } from "~discord-bot/test/reacord-utils";
-import React from "react";
-import {
-  ChannelWithFlags,
-  createChannel,
-  createServer,
-  findChannelById,
-  updateChannel,
-} from "@answeroverflow/db";
 import type { ReacordTester } from "@answeroverflow/reacord";
-import type { ForumChannel, Guild, PublicThreadChannel, TextChannel } from "discord.js";
-import { mockReacord, setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
+import type { TextChannel, PublicThreadChannel, ForumChannel, Guild } from "discord.js";
 import {
-  createGuildMemberVariants,
-  GuildMemberVariants,
-  mockForumChannel,
+  FORUM_GUIDELINES_CONSENT_PROMPT,
+  ENABLE_CHANNEL_INDEXING_LABEL,
+  DISABLE_CHANNEL_INDEXING_LABEL,
+  ENABLE_FORUM_GUIDELINES_CONSENT_LABEL,
+  DISABLE_FORUM_GUIDELINES_CONSENT_LABEL,
+} from "@answeroverflow/constants";
+import { createServer, createChannel, findChannelById, updateChannel } from "@answeroverflow/db";
+import {
+  type GuildMemberVariants,
   mockGuild,
-  mockPublicThread,
+  createGuildMemberVariants,
   mockTextChannel,
+  mockForumChannel,
+  mockPublicThread,
 } from "@answeroverflow/discordjs-mock";
-import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
-import { FORUM_GUIDELINES_CONSENT_PROMPT } from "~discord-bot/domains/channel-settings";
+import type { ChannelWithFlags } from "@answeroverflow/prisma-types";
+import { IndexingSettingsMenu } from "~discord-bot/components/settings/channel-settings-menu";
+import { reply, toggleButtonTest } from "~discord-bot/test/reacord-utils";
+import { setupAnswerOverflowBot, mockReacord } from "~discord-bot/test/sapphire-mock";
+import { toAOServer, toAOChannel } from "~discord-bot/utils/conversions";
+import React from "react";
 
 let reacord: ReacordTester;
 let textChannel: TextChannel;

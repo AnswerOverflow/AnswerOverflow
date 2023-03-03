@@ -11,6 +11,7 @@ export default defineConfig({
     '@answeroverflow/api',
     "@answeroverflow/discordjs-utils",
     "@answeroverflow/utils",
+    "@answeroverflow/constants",
     "@answeroverflow/cache",
   ],
 });
