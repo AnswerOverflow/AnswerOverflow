@@ -13,6 +13,7 @@ import { toAODiscordAccount } from "~discord-bot/utils/conversions";
 import { createMemberCtx } from "~discord-bot/utils/context";
 import type { ConsentSource, ManageAccountSource } from "@answeroverflow/api";
 import { CONSENT_BUTTON_LABEL } from "@answeroverflow/constants";
+import { isHumanMessage } from "~discord-bot/utils/utils";
 
 export const CONSENT_BUTTON_ID = "consentButton";
 export const CONSENT_BUTTON_DATA = {
@@ -30,6 +31,9 @@ export function makeConsentButton() {
 export async function provideConsentOnForumChannelMessage(message: Message) {
   const channel = message.channel;
   if (!(channel.isThread() && channel.parent?.type === ChannelType.GuildForum)) {
+    return null;
+  }
+  if (!isHumanMessage(message)) {
     return null;
   }
   const channelSettings = await findChannelById(channel.parent.id);

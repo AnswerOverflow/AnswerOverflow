@@ -130,3 +130,9 @@ export function getRootChannel(channel: GuildTextBasedChannel) {
 export function removeDiscordMarkdown(text: string) {
   return text.replace(/(\*|_|~|`)/g, "");
 }
+
+export function isHumanMessage(message: Message) {
+  if (message.author.bot) return false;
+  if (message.author.system) return false;
+  return true;
+}

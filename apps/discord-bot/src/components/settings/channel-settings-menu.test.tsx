@@ -47,6 +47,7 @@ beforeEach(async () => {
   await createServer(toAOServer(guild));
   textChannelWithFlags = await createChannel(toAOChannel(textChannel));
   forumChannelWithFlags = await createChannel(toAOChannel(forumChannel));
+  console.log(forumThread.name);
 });
 
 // describe("ChannelSettingsMenu", () => {

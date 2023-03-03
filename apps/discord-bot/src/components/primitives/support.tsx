@@ -36,7 +36,7 @@ export const OpenSupportMenuButton: React.FC<{
         event.ephemeralReply(<SupportMenu />);
       }
     }}
-    style="primary"
+    style="secondary"
     label="Support"
   />
 );

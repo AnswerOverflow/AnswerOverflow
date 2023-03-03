@@ -177,6 +177,7 @@ export function ChannelSettingsMenu({
     <>
       <Button
         label="Indexing Settings"
+        style="primary"
         onClick={() => {
           const { pushHistory } = getMessageHistory(interactionId);
           pushHistory(
