@@ -37,6 +37,8 @@ import {
   ENABLE_AI_QUESTION_IMPROVEMENT_SUGGESTIONS_LABEL,
   ENABLE_REDIRECTION_TO_HELP_CHANNEL_LABEL,
   ENABLE_AI_QUESTION_ANSWERING_LABEL,
+  OPEN_INDEXING_SETTINGS_MENU_LABEL,
+  SEND_CONSENT_PROMPT_LABEL,
 } from "@answeroverflow/constants";
 import type { ChannelWithFlags } from "@answeroverflow/prisma-types";
 import React from "react";
@@ -160,23 +162,29 @@ export function IndexingSettingsMenu({
             {
               title: ENABLE_INDEXING_LABEL,
               enabled: !channel.flags.indexingEnabled,
-              instructions: "This channel will be indexed and searchable.",
+              instructions: "Enable indexing of this channel into web search results",
             },
             {
               title: DISABLE_CHANNEL_INDEXING_LABEL,
               enabled: channel.flags.indexingEnabled,
-              instructions: "This channel will not be indexed and searchable.",
+              instructions:
+                "Disable indexing of this channel into web search results, existing indexing content will be cleaned up within 7 days",
             },
             {
               title: ENABLE_FORUM_GUIDELINES_CONSENT_LABEL,
               enabled: !channel.flags.forumGuidelinesConsentEnabled && isButtonInForumChannel,
-              instructions: `Users posting new threads in this channel will be marked as consenting. You must have the following in your post guidelines for this to work:\n\n\`${FORUM_GUIDELINES_CONSENT_PROMPT}\``,
+              instructions: `Users posting new threads in this channel will be marked as consenting to have their messages publicly displayed. You must have the following in your post guidelines for this to work:\n\n\`${FORUM_GUIDELINES_CONSENT_PROMPT}\``,
             },
             {
               title: DISABLE_FORUM_GUIDELINES_CONSENT_LABEL,
               enabled: channel.flags.forumGuidelinesConsentEnabled && isButtonInForumChannel,
               instructions:
-                "Users posting new threads in this channel will not be marked as consenting.",
+                "Users posting new threads in this channel will no longer be marked as consenting to have their messages publicly displayed",
+            },
+            {
+              title: SEND_CONSENT_PROMPT_LABEL,
+              enabled: true,
+              instructions: "Sends a message with a consent prompt and button",
             },
           ]}
         />
@@ -194,7 +202,7 @@ export function IndexingSettingsMenu({
         />
       )}
       <Button
-        label="Send consent prompt"
+        label={SEND_CONSENT_PROMPT_LABEL}
         style="primary"
         onClick={() => {
           console.log("sending consent prompt");
@@ -333,6 +341,9 @@ function ToggleAutoThreadButton({
   );
 }
 
+const getThreadOrPostText = (channel: TextChannel | NewsChannel | ForumChannel) =>
+  channel.type === ChannelType.GuildForum ? "thread" : "post";
+
 export function HelpChannelUtilitiesMenu({
   initialChannelData,
   targetChannel,
@@ -341,6 +352,7 @@ export function HelpChannelUtilitiesMenu({
     channelCache.get(targetChannel.id) ?? initialChannelData
   );
   const props = { channelInDB: channel, setChannel, targetChannel };
+  const isButtonInForumChannel = targetChannel.type === ChannelType.GuildForum;
   return (
     <>
       <InstructionsContainer>
@@ -349,12 +361,45 @@ export function HelpChannelUtilitiesMenu({
             {
               title: ENABLE_MARK_AS_SOLUTION_LABEL,
               enabled: !channel.flags.markSolutionEnabled,
-              instructions: "Users will be able to mark their own messages as solutions.",
+              instructions:
+                "Questions in this channel will be able to be marked as solved. On Answer Overflow result page, those solutions will be highlighted",
             },
             {
               title: DISABLE_MARK_AS_SOLUTION_LABEL,
               enabled: channel.flags.markSolutionEnabled,
-              instructions: "Users will not be able to mark their own messages as solutions.",
+              instructions: "Questions in this channel will not be able to be marked as solved",
+            },
+            {
+              title: ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
+              enabled:
+                !channel.flags.sendMarkSolutionInstructionsInNewThreads && !isButtonInForumChannel,
+              instructions: `When a new ${getThreadOrPostText(
+                targetChannel
+              )} is created, a message will be sent to the thread with instructions on how to mark a solution`,
+            },
+            {
+              title: DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
+              enabled:
+                channel.flags.sendMarkSolutionInstructionsInNewThreads && !isButtonInForumChannel,
+              instructions: `Mark solution instructions will no longer be sent in new ${getThreadOrPostText(
+                targetChannel
+              )}s`,
+            },
+            {
+              title: ENABLE_AUTO_THREAD_LABEL,
+              enabled: !channel.flags.autoThreadEnabled && !isButtonInForumChannel,
+              instructions: "A new thread will be created for every message in this channel",
+            },
+            {
+              title: DISABLE_AUTO_THREAD_LABEL,
+              enabled: channel.flags.autoThreadEnabled && !isButtonInForumChannel,
+              instructions:
+                "New threads will no longer be created for every message in this channel",
+            },
+            {
+              title: SET_SOLVED_TAG_ID_PLACEHOLDER,
+              enabled: isButtonInForumChannel,
+              instructions: `When a question is marked as solved, this tag will added to the post`,
             },
           ]}
         />
@@ -368,7 +413,7 @@ export function HelpChannelUtilitiesMenu({
           targetChannel={targetChannel as TextChannel | NewsChannel}
         />
       )}
-      {targetChannel.type === ChannelType.GuildForum && (
+      {isButtonInForumChannel && (
         <SelectMarkAsSolvedTag
           channelInDB={channel}
           setChannel={setChannel}
@@ -464,20 +509,25 @@ export function ChannelSettingsMenu({
         <EmbedMenuInstruction
           instructions={[
             {
-              title: OPEN_HELP_CHANNEL_UTILITIES_LABEL,
+              title: OPEN_INDEXING_SETTINGS_MENU_LABEL,
               enabled: true,
-              instructions: "Configure channel indexing and user consent settings.",
+              instructions: "Configure channel indexing and user consent settings",
             },
             {
               title: OPEN_HELP_CHANNEL_UTILITIES_LABEL,
               enabled: true,
-              instructions: "Configure utilities to improve asking questions.",
+              instructions: "Configure utilities to improve asking questions",
+            },
+            {
+              title: OPEN_EXPERIMENTAL_SETTINGS_LABEL,
+              enabled: true,
+              instructions: "Configure experimental features",
             },
           ]}
         />
       </InstructionsContainer>
       <Button
-        label={OPEN_HELP_CHANNEL_UTILITIES_LABEL}
+        label={OPEN_INDEXING_SETTINGS_MENU_LABEL}
         style="primary"
         onClick={() => {
           const { pushHistory } = getMessageHistory(interactionId);

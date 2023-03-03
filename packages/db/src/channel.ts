@@ -146,6 +146,11 @@ function applyChannelSettingsChangesSideEffects<F extends z.infer<typeof zChanne
     pendingSettings.lastIndexedSnowflake = null;
     pendingSettings.inviteCode = null;
   }
+
+  if (!pendingSettings.flags.markSolutionEnabled) {
+    pendingSettings.flags.sendMarkSolutionInstructionsInNewThreads = false;
+  }
+
   // TODO: Maybe throw error if indexing enabled and inviteCode is null?
   const bitfield = dictToBitfield(pendingSettings.flags, channelBitfieldFlags);
   return {

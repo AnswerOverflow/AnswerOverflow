@@ -55,3 +55,4 @@ export const OPEN_INDEXING_SETTINGS_MENU_LABEL = "Indexing settings";
 export const OPEN_HELP_CHANNEL_UTILITIES_LABEL = "Help channel utilities";
 export const OPEN_EXPERIMENTAL_SETTINGS_LABEL = "Experimental settings";
 export const EXPERIMENTAL_SETTINGS_WAITLIST_URL = "https://forms.gle/UaKs8CcYsnRWwmpY8";
+export const SEND_CONSENT_PROMPT_LABEL = "Send consent prompt";
