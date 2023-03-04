@@ -12,6 +12,7 @@
     ]
   },
   "scripts": {
+    "postinstall": "yarn db:generate",
     "init": "turbo run init",
     "build": "turbo run build",
     "build:no-cache": "turbo run build:no-cache",
