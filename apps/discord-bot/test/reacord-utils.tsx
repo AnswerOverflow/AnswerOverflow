@@ -2,7 +2,7 @@ import type { ReacordTester } from "@answeroverflow/reacord";
 import { delay } from "@answeroverflow/discordjs-mock";
 import type { ReactNode } from "react";
 import { ephemeralReply } from "~discord-bot/utils/utils";
-import type { GuildMember, TextChannel } from "discord.js";
+import type { Channel, GuildMember } from "discord.js";
 
 export async function reply(reacord: ReacordTester, content: ReactNode) {
   ephemeralReply(reacord, content);
@@ -28,7 +28,7 @@ export async function toggleButtonTest({
   message: ReacordTester["messages"][number];
   clicker: GuildMember;
   reacord: ReacordTester;
-  channel: TextChannel;
+  channel: Channel;
 }) {
   const preClickButton = message.findButtonByLabel(preClickLabel, reacord);
   expect(preClickButton).toBeDefined();

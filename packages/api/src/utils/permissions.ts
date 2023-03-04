@@ -40,13 +40,13 @@ export function assertBoolsAreNotEqual({
   return;
 }
 
-export function assertIsNotValue({
+export function assertIsNotValue<T>({
   actualValue,
   expectedToNotBeValue,
   errorMessage,
 }: {
-  actualValue: boolean;
-  expectedToNotBeValue: boolean;
+  actualValue: T;
+  expectedToNotBeValue: T;
   errorMessage: string;
 }) {
   if (actualValue === expectedToNotBeValue) {

@@ -15,10 +15,10 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@answeroverflow/reacord@^0.5.7":
-  version "0.5.7"
-  resolved "https://registry.yarnpkg.com/@answeroverflow/reacord/-/reacord-0.5.7.tgz#91e91f3757994eed5aba52aa21dcf38b719e3a64"
-  integrity sha512-wtvXfr8YAYFUTvLd2RawmHkGAkkQ+3vEAyoOVYU9GugbihCbY3xYPZkyAsAAVtrNvD3Zd9FV2Uz+4RvNeFrzfw==
+"@answeroverflow/reacord@^0.5.11":
+  version "0.5.11"
+  resolved "https://registry.yarnpkg.com/@answeroverflow/reacord/-/reacord-0.5.11.tgz#6248886012383fc666a0fa9dbfc456623424a979"
+  integrity sha512-TNtgDS4jSuULT3wIkz59ONBiOAv0NEXZQGkwi178e78RDtdviiNdIvEaHjY8f2EwjdvIB0H1TGar3hJYZmLk6g==
   dependencies:
     "@types/node" "*"
     "@types/react" "*"
@@ -6504,7 +6504,7 @@ dotenv-cli@^7.0.0:
     dotenv-expand "^10.0.0"
     minimist "^1.2.6"
 
-dotenv-cra@^3.0.2:
+dotenv-cra@^3.0.2, dotenv-cra@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/dotenv-cra/-/dotenv-cra-3.0.3.tgz#edcc1bd810a55b55f7deac2f350ea6cace46b2ea"
   integrity sha512-p/EaxmpLem27Oy/z776GdYnWcHuwWJAzq1XJZvjhqqPPKAoFSn8/PuLradZIiGbX8P2Z5GY7PtswvLH1BYJibQ==
@@ -10206,6 +10206,11 @@ lru-cache@^6.0.0:
   integrity sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==
   dependencies:
     yallist "^4.0.0"
+
+lru-cache@^7.18.1:
+  version "7.18.1"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.18.1.tgz#4716408dec51d5d0104732647f584d1f6738b109"
+  integrity sha512-8/HcIENyQnfUTCDizRu9rrDyG6XG/21M4X7/YEGZeD76ZJilFPAUVb/2zysFf7VVO1LEjCDFyHp8pMMvozIrvg==
 
 lz-string@^1.4.4:
   version "1.4.4"

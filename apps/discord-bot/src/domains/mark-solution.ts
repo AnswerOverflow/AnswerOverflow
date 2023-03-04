@@ -10,24 +10,19 @@ import {
   Message,
   MessageActionRowComponentBuilder,
   NewsChannel,
-  PermissionResolvable,
   TextChannel,
   User,
 } from "discord.js";
-import { ANSWER_OVERFLOW_BLUE_HEX } from "~discord-bot/utils/constants";
 import { findSolutionsToMessage } from "./indexing";
 import type { ChannelWithFlags } from "@answeroverflow/api";
 import { makeConsentButton } from "./manage-account";
 import { findChannelById } from "@answeroverflow/db";
-
-export const QUESTION_ID_FIELD_NAME = "Question Message ID";
-export const SOLUTION_ID_FIELD_NAME = "Solution Message ID";
-export const PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED: PermissionResolvable[] = [
-  "Administrator",
-  "ManageChannels",
-  "ManageThreads",
-  "ManageGuild",
-];
+import {
+  ANSWER_OVERFLOW_BLUE_HEX,
+  PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED,
+  QUESTION_ID_FIELD_NAME,
+  SOLUTION_ID_FIELD_NAME,
+} from "@answeroverflow/constants";
 
 export class MarkSolutionError extends Error {}
 

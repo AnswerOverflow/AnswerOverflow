@@ -8,7 +8,7 @@ import { getDefaultServerWithFlags } from "@answeroverflow/db";
 import { createMemberCtx } from "~discord-bot/utils/context";
 
 import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
-import { ServerSettingsMenu } from "~discord-bot/components/server-settings-menu";
+import { ServerSettingsMenu } from "~discord-bot/components/settings";
 import { toAOServer } from "~discord-bot/utils/conversions";
 import type { ServerAll } from "@answeroverflow/api";
 
