@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
 import { Events, Guild } from "discord.js";
-import { ALLOWED_CHANNEL_TYPES, upsertServer, upsertManyChannels } from "@answeroverflow/db";
+import { ALLOWED_ROOT_CHANNEL_TYPES, upsertServer, upsertManyChannels } from "@answeroverflow/db";
 import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
 
 /*
@@ -26,7 +26,7 @@ async function syncServer(guild: Guild) {
   // If the server doesn't exist we want to initialize it with the default values
   await autoUpdateServerInfo(guild);
   const channelsToUpsert = guild.channels.cache
-    .filter((channel) => ALLOWED_CHANNEL_TYPES.has(channel.type))
+    .filter((channel) => ALLOWED_ROOT_CHANNEL_TYPES.has(channel.type))
     .map((channel) => toAOChannel(channel));
   await upsertManyChannels(channelsToUpsert);
 }

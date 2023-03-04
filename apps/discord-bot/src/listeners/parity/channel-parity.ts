@@ -23,7 +23,10 @@ export class SyncOnUpdate extends Listener {
     const chnl = await findChannelById(newChannel.id);
     if (!chnl) return;
 
-    await updateChannel({ id: newChannel.id, name: newChannel.name }, chnl);
+    await updateChannel({
+      old: chnl,
+      update: { id: newChannel.id, name: newChannel.name },
+    });
   }
 }
 
@@ -50,7 +53,10 @@ export class ThreadSyncOnUpdate extends Listener {
   public async run(_: ThreadChannel, newThread: ThreadChannel) {
     const chnl = await findChannelById(newThread.id);
     if (!chnl) return;
-    await updateChannel({ id: newThread.id, name: newThread.name }, chnl);
+    await updateChannel({
+      old: chnl,
+      update: { id: newThread.id, name: newThread.name },
+    });
   }
 }
 
@@ -60,6 +66,9 @@ export class InviteSyncOnDelete extends Listener {
     const settings = await findChannelByInviteCode(invite.code);
     if (!settings) return;
 
-    await updateChannel({ id: settings.id, inviteCode: null }, settings);
+    await updateChannel({
+      old: settings,
+      update: { id: settings.id, inviteCode: null },
+    });
   }
 }

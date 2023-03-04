@@ -18,6 +18,7 @@ import {
   findManyDiscordAccountsById,
   findManyMessages,
   Message as AOMessage,
+  upsertChannel,
 } from "@answeroverflow/db";
 import {
   toAOChannel,
@@ -28,13 +29,11 @@ import {
 import {
   addSolutionsToMessages,
   fetchAllChannelMessagesWithThreads,
-  fetchAllMesages,
+  fetchAllMessages,
   filterMessages,
   findSolutionsToMessage,
   indexRootChannel,
 } from "./indexing";
-import type { inferRouterInputs } from "@trpc/server";
-import type { botRouter } from "@answeroverflow/api";
 import {
   mockTextChannel,
   mockForumChannel,
@@ -84,10 +83,7 @@ async function validateIndexingResults(input: {
 
 async function upsertChannelSettings(
   channel: TextChannel | ForumChannel | NewsChannel,
-  opts: Omit<
-    inferRouterInputs<typeof botRouter>["channels"]["upsertWithDeps"],
-    "id" | "server" | "name" | "type" | "parentId"
-  > = {}
+  opts: Parameters<typeof upsertChannel>[0]["update"] = {}
 ) {
   await createServer(toAOServer(channel.guild));
   return await createChannel({ ...toAOChannel(channel), ...opts });
@@ -564,23 +560,23 @@ describe("Indexing", () => {
       }
     });
     it("should fetch all messages", async () => {
-      const messages = await fetchAllMesages(textChannel);
+      const messages = await fetchAllMessages(textChannel);
       expect(messages.length).toBe(numberOfMessages);
     });
     it("should fetch all messages with a limit", async () => {
       const limit = 36;
-      const messages = await fetchAllMesages(textChannel, { limit });
+      const messages = await fetchAllMessages(textChannel, { limit });
       expect(messages.length).toBe(limit);
     });
     it("should fetch all messages with a limit and a start", async () => {
       const limit = 36;
       const start = 100;
-      const messages = await fetchAllMesages(textChannel, { limit, start: `${start}` });
+      const messages = await fetchAllMessages(textChannel, { limit, start: `${start}` });
       expect(messages.length).toBe(limit);
       expect(messages[0]!.id).toBe(`${start + 1}`);
     });
     it("should return the messages sorted from oldest to newest", async () => {
-      const messages = await fetchAllMesages(textChannel);
+      const messages = await fetchAllMessages(textChannel);
       expect(messages.length).toBe(numberOfMessages);
       for (let id = 0; id < numberOfMessages; id++) {
         expect(messages[id]!.id).toBe(`${id + 1}`);
