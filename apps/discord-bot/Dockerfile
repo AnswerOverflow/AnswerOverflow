@@ -41,6 +41,9 @@ RUN yarn turbo run build --filter=discord-bot...
 FROM node:alpine AS runner
 WORKDIR /app
 
+ENV NODE_ENV="production"
+ENV NODE_OPTIONS="--enable-source-maps --max_old_space_size=4096"
+
 # Don't run production as root
 RUN addgroup --system --gid 1001 sapphire
 RUN adduser --system --uid 1001 sapphire
