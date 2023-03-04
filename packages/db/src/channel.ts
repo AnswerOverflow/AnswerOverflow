@@ -6,12 +6,22 @@ import {
   ALLOWED_THREAD_TYPES,
   bitfieldToChannelFlags,
   channelBitfieldFlags,
+  ChannelWithFlags,
   zChannel,
+  zChannelPrismaCreate,
+  zChannelPrismaUpdate,
 } from "@answeroverflow/prisma-types";
 import { prisma, getDefaultChannel, Channel } from "@answeroverflow/prisma-types";
 import { dictToBitfield } from "@answeroverflow/prisma-types/src/bitfield";
 import { deleteManyMessagesByChannelId } from "./message";
 import { omit } from "@answeroverflow/utils";
+import { DBError } from "./utils/error";
+import { ChannelType } from "discord-api-types/v10";
+export const CHANNELS_THAT_CAN_HAVE_AUTOTHREAD = new Set([
+  ChannelType.GuildAnnouncement,
+  ChannelType.GuildText,
+]);
+
 export const zChannelRequired = zChannel.pick({
   id: true,
   name: true,
@@ -36,7 +46,10 @@ export const zChannelCreateMany = zChannelCreate.omit({
   flags: true,
 });
 
-export const zChannelUpsert = zChannelCreate;
+export const zChannelUpsert = z.object({
+  create: zChannelCreate,
+  update: zChannelMutable.optional(),
+});
 
 export const zChannelUpsertMany = zChannelCreateMany;
 
@@ -77,18 +90,72 @@ export const zThreadCreateWithDeps = zThreadCreate
 
 export const zThreadUpsertWithDeps = zThreadCreateWithDeps;
 
-function combineChannelSettingsFlagsToBitfield<
-  T extends { bitfield: number },
-  F extends z.infer<typeof zChannelMutable>
->({ old, updated }: { old: T; updated: F }) {
+function applyChannelSettingsChangesSideEffects<F extends z.infer<typeof zChannelMutable>>({
+  old,
+  updated,
+}: {
+  old: Channel;
+  updated: F;
+}) {
   const oldFlags = bitfieldToChannelFlags(old.bitfield);
-  const newFlags = { ...oldFlags, ...updated.flags };
-  const flagsToBitfieldValue = dictToBitfield(newFlags, channelBitfieldFlags);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { flags, ...updateDataWithoutFlags } = updated;
+  const flagsToUpdate = updated.flags ?? {};
+
+  const pendingSettings: ChannelWithFlags = {
+    ...old,
+    ...updated,
+    flags: {
+      ...oldFlags,
+      ...flagsToUpdate,
+    },
+  };
+
+  // User is trying to enable sending mark solution instructions in new threads without enabling mark solution
+  if (
+    flagsToUpdate.sendMarkSolutionInstructionsInNewThreads &&
+    !pendingSettings.flags.markSolutionEnabled
+  ) {
+    throw new DBError(
+      "Cannot enable sendMarkSolutionInstructionsInNewThreads without enabling markSolutionEnabled",
+      "INVALID_CONFIGURATION"
+    );
+  }
+
+  // Throw error if enabling forum post guidelines consent for a non forum channel
+  if (
+    pendingSettings.type !== ChannelType.GuildForum &&
+    pendingSettings.flags.forumGuidelinesConsentEnabled
+  ) {
+    throw new DBError(
+      "Cannot enable readTheRulesConsentEnabled for a non forum channel",
+      "INVALID_CONFIGURATION"
+    );
+  }
+  // Throw error if enabling auto thread for a non valid threadable channel
+  if (
+    !CHANNELS_THAT_CAN_HAVE_AUTOTHREAD.has(pendingSettings.type) &&
+    pendingSettings.flags.autoThreadEnabled
+  ) {
+    throw new DBError(
+      "Cannot enable autoThreadEnabled for a non threadable channel",
+      "INVALID_CONFIGURATION"
+    );
+  }
+
+  if (!pendingSettings.flags.indexingEnabled) {
+    // TODO: Emit a cron job here to run in X minutes / hours to clean up the channel, delay incase the user accidentally disabled indexing
+    pendingSettings.lastIndexedSnowflake = null;
+    pendingSettings.inviteCode = null;
+  }
+
+  if (!pendingSettings.flags.markSolutionEnabled) {
+    pendingSettings.flags.sendMarkSolutionInstructionsInNewThreads = false;
+  }
+
+  // TODO: Maybe throw error if indexing enabled and inviteCode is null?
+  const bitfield = dictToBitfield(pendingSettings.flags, channelBitfieldFlags);
   return {
-    ...updateDataWithoutFlags,
-    bitfield: flagsToBitfieldValue,
+    ...pendingSettings,
+    bitfield,
   };
 }
 
@@ -110,11 +177,14 @@ export async function findManyChannelsById(ids: string[]) {
 }
 
 export async function createChannel(data: z.infer<typeof zChannelCreate>) {
-  const created = await prisma.channel.create({
-    data: combineChannelSettingsFlagsToBitfield({
+  const combinedData: z.infer<typeof zChannelPrismaCreate> = applyChannelSettingsChangesSideEffects(
+    {
       old: getDefaultChannel(data),
       updated: data,
-    }),
+    }
+  );
+  const created = await prisma.channel.create({
+    data: zChannelPrismaCreate.parse(combinedData),
   });
   return addFlagsToChannel(created);
 }
@@ -126,15 +196,24 @@ export async function createManyChannels(data: z.infer<typeof zChannelCreateMany
   return data.map((c) => getDefaultChannel({ ...c }));
 }
 
-export async function updateChannel(data: z.infer<typeof zChannelUpdate>, old: Channel | null) {
-  if (!old) old = await findChannelById(data.id);
+export async function updateChannel({
+  update,
+  old,
+}: {
+  update: z.infer<typeof zChannelUpdate>;
+  old: Channel | null;
+}) {
+  if (!old) old = await findChannelById(update.id);
   if (!old) throw new Error("Channel not found");
-  const updated = await prisma.channel.update({
-    where: { id: data.id },
-    data: combineChannelSettingsFlagsToBitfield({
+  const combinedData: z.infer<typeof zChannelPrismaUpdate> = applyChannelSettingsChangesSideEffects(
+    {
       old,
-      updated: data,
-    }),
+      updated: update,
+    }
+  );
+  const updated = await prisma.channel.update({
+    where: { id: update.id },
+    data: zChannelPrismaUpdate.parse(combinedData),
   });
   return addFlagsToChannel(updated);
 }
@@ -169,9 +248,16 @@ export async function createChannelWithDeps(data: z.infer<typeof zChannelCreateW
 
 export function upsertChannel(data: z.infer<typeof zChannelUpsert>) {
   return upsert({
-    create: () => createChannel(data),
-    update: (old) => updateChannel(data, old),
-    find: () => findChannelById(data.id),
+    create: () => createChannel(data.create),
+    update: (old) =>
+      updateChannel({
+        update: {
+          id: data.create.id,
+          ...data.update,
+        },
+        old,
+      }),
+    find: () => findChannelById(data.create.id),
   });
 }
 

@@ -7,4 +7,3 @@ export type BotRouterInput = inferRouterInputs<BotRouter>;
 export type BotRouterOutput = inferRouterOutputs<BotRouter>;
 
 export type ChannelFindByIdOutput = BotRouterOutput["channels"]["byId"];
-export type ChannelUpsertWithDepsInput = BotRouterInput["channels"]["upsertWithDeps"];

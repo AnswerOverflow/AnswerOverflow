@@ -84,10 +84,16 @@ export async function indexRootChannel(channel: TextChannel | NewsChannel | Foru
 
   addSolutionsToMessages(filteredMessages, convertedMessages);
 
+  const largestSnowflake = sortMessagesById(filteredMessages).pop()?.id;
   await upsertManyDiscordAccounts(convertedUsers);
   await upsertChannel({
-    ...toAOChannel(channel),
-    lastIndexedSnowflake: sortMessagesById(filteredMessages).pop()?.id,
+    create: {
+      ...toAOChannel(channel),
+      lastIndexedSnowflake: largestSnowflake,
+    },
+    update: {
+      lastIndexedSnowflake: largestSnowflake,
+    },
   });
   await upsertManyMessages(convertedMessages);
   await upsertManyChannels(convertedThreads);
@@ -186,7 +192,7 @@ export async function fetchAllChannelMessagesWithThreads(
       Threads can be found from normal messages or system create messages
       TODO: Handle threads without any parent messages in the channel, unsure if possible
       */
-    const messages = await fetchAllMesages(channel, options);
+    const messages = await fetchAllMessages(channel, options);
     for (const message of messages) {
       if (
         message.thread &&
@@ -200,14 +206,14 @@ export async function fetchAllChannelMessagesWithThreads(
   }
 
   for (const thread of threads) {
-    const threadMessages = await fetchAllMesages(thread);
+    const threadMessages = await fetchAllMessages(thread);
     collectedMessages.push(...threadMessages);
   }
 
   return { messages: collectedMessages, threads };
 }
 
-export async function fetchAllMesages(
+export async function fetchAllMessages(
   channel: TextBasedChannel,
   { start, limit }: MessageFetchOptions = {}
 ) {

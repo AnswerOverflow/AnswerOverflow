@@ -8,10 +8,12 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules coverage",
     "with-env": "dotenv -e ../../.env --",
+    "with-env-staging": "dotenv -e ../../.env.staging --",
     "lint": "eslint . && tsc --noEmit",
     "lint:fix": "eslint . --fix",
     "db:generate": "yarn with-env prisma generate",
     "db:push": "yarn with-env prisma db push --skip-generate",
+    "db:push:staging": "yarn with-env-staging prisma db push --skip-generate",
     "dev": "yarn with-env prisma studio --port 5556 --browser none",
     "test": "yarn run with-env vitest run  --coverage",
     "test:watch": "yarn run with-env vitest"
@@ -20,6 +22,7 @@
     "@answeroverflow/utils": "*",
     "@prisma/client": "^4.8.1",
     "@sapphire/bitfield": "^1.0.0",
+    "dotenv-cra": "^3.0.3",
     "zod": "^3.20.6"
   },
   "devDependencies": {

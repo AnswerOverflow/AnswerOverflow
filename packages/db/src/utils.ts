@@ -9,6 +9,13 @@ export async function clearDatabase() {
 
   const client = await getRedisClient();
   await prisma.userServerSettings.deleteMany({});
+  await prisma.channel.deleteMany({
+    where: {
+      parentId: {
+        not: null,
+      },
+    },
+  });
   await prisma.channel.deleteMany({});
   await prisma.server.deleteMany({});
   await prisma.account.deleteMany({});

@@ -1,12 +1,23 @@
 import { container, LogLevel, SapphireClient } from "@sapphire/framework";
-import { ReacordDiscordJs, ReacordTester } from "@answeroverflow/reacord";
+import { InteractionReplyRenderer, ReacordDiscordJs, ReacordTester } from "@answeroverflow/reacord";
 import { ClientOptions, Partials } from "discord.js";
 
 import "~discord-bot/utils/setup";
+import { Router } from "~discord-bot/components/primitives";
+import React from "react";
+import LRUCache from "lru-cache";
 
 declare module "@sapphire/pieces" {
   interface Container {
     reacord: ReacordDiscordJs | ReacordTester;
+    messageHistory: LRUCache<
+      string,
+      {
+        history: React.ReactNode[];
+        pushHistory: (message: React.ReactNode) => void;
+        popHistory: () => void;
+      }
+    >;
   }
 }
 
@@ -69,7 +80,27 @@ export const login = async (client: SapphireClient) => {
     client.logger.info("Logging in");
     await client.login(process.env.DISCORD_TOKEN);
     client.logger.info("logged in");
-    container.reacord = new ReacordDiscordJs(client);
+    const messageHistory = new LRUCache<
+      string,
+      {
+        history: React.ReactNode[];
+        pushHistory: (message: React.ReactNode) => void;
+        popHistory: () => void;
+      }
+    >({
+      max: 100,
+      // 10 minute ttl
+      ttl: 1000 * 60 * 10,
+    });
+
+    container.messageHistory = messageHistory;
+    container.reacord = new ReacordDiscordJs(client, {}, ({ children, renderer }) => {
+      if (renderer instanceof InteractionReplyRenderer) {
+        return <Router interactionId={renderer.interaction.id}>{children}</Router>;
+      } else {
+        return children;
+      }
+    });
   } catch (error) {
     client.logger.fatal(error);
     client.destroy();

@@ -15,14 +15,15 @@
   },
   "dependencies": {
     "@answeroverflow/auth": "*",
+    "@answeroverflow/cache": "*",
     "@answeroverflow/db": "*",
     "@answeroverflow/discordjs-utils": "*",
     "@answeroverflow/utils": "*",
-    "@answeroverflow/cache": "*",
     "@sapphire/bitfield": "^1.0.0",
     "@trpc/client": "^10.4.3",
     "@trpc/server": "^10.4.3",
     "discord.js": "^14.7.1",
+    "dotenv-cra": "^3.0.3",
     "superjson": "^1.9.1",
     "zod": "^3.20.6"
   },

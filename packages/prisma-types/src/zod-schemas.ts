@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { bitfieldToDict, dictToBitfield, mergeFlags, toDict } from "./bitfield";
 import { ChannelType } from "discord-api-types/v10";
-import type { Server, UserServerSettings } from "@prisma/client";
+import type { Channel, Server, UserServerSettings } from "@prisma/client";
 
 // TODO: Split up this file, it's become a bit bloated to prevent circular dependencies
 
@@ -10,10 +10,14 @@ export const ALLOWED_THREAD_TYPES = new Set([
   ChannelType.AnnouncementThread,
 ]);
 
-export const ALLOWED_CHANNEL_TYPES = new Set([
+export const ALLOWED_ROOT_CHANNEL_TYPES = new Set([
   ChannelType.GuildForum,
   ChannelType.GuildText,
   ChannelType.GuildAnnouncement,
+]);
+
+export const ALLOWED_CHANNEL_TYPES = new Set([
+  ...ALLOWED_ROOT_CHANNEL_TYPES,
   ...ALLOWED_THREAD_TYPES,
 ]);
 
@@ -33,7 +37,12 @@ export const channelBitfieldFlags = [
 
 export const zChannelBitfieldFlags = toZObject(...channelBitfieldFlags);
 
-export const zChannel = z.object({
+type ChannelZodFormat = {
+  [K in keyof Channel]: z.ZodTypeAny;
+};
+// Another option is https://github.com/jbranchaud/til/blob/master/zod/incorporate-existing-type-into-zod-schema.md
+// However that approach doesn't allow us to extend / merge it with other zod schemas
+export const zChannelPrisma = z.object({
   id: z.string(),
   name: z.string(),
   serverId: z.string(),
@@ -43,10 +52,28 @@ export const zChannel = z.object({
     "Channel type can only be guild forum, text, or announcement" // TODO: Make a type error if possible
   ),
   parentId: z.string().nullable(),
-  flags: zChannelBitfieldFlags,
-  lastIndexedSnowflake: z.string().nullable(),
   inviteCode: z.string().nullable(),
   solutionTagId: z.string().nullable(),
+  lastIndexedSnowflake: z.string().nullable(),
+} satisfies ChannelZodFormat);
+
+export const zChannelPrismaCreate = zChannelPrisma.partial().merge(
+  zChannelPrisma.pick({
+    id: true,
+    name: true,
+    serverId: true,
+    type: true,
+  })
+);
+
+export const zChannelPrismaUpdate = zChannelPrisma.partial().omit({
+  serverId: true,
+  id: true,
+  parentId: true,
+});
+
+export const zChannel = zChannelPrisma.required().extend({
+  flags: zChannelBitfieldFlags,
 });
 
 export type ChannelWithFlags = z.infer<typeof zChannel>;

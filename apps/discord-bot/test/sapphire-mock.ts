@@ -4,7 +4,7 @@ import { assert } from "console";
 import { ClientOptions, Options } from "discord.js";
 import { applyClientMocks } from "@answeroverflow/discordjs-mock/src/client-mock";
 import { basename, extname } from "path";
-import { createClient } from "~discord-bot/utils/bot";
+import { createClient, login } from "~discord-bot/utils/bot";
 
 export function mockSapphireClient(
   override: Partial<ClientOptions> = {
@@ -74,6 +74,6 @@ export function mockReacord() {
 
 export async function setupAnswerOverflowBot() {
   const client = mockSapphireClient();
-  await client.login();
+  await login(client);
   return client;
 }
