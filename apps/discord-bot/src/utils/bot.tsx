@@ -77,9 +77,12 @@ export const login = async (client: SapphireClient) => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
   require("dotenv").config();
   try {
-    client.logger.info("Logging in");
+    client.logger.info("LOGGING IN");
+    client.logger.info(`NODE_ENV: ${process.env.NODE_ENV}`);
+    client.logger.info(`DISCORD_ID: ${process.env.DISCORD_CLIENT_ID ?? "UNKNOWN"}`);
     await client.login(process.env.DISCORD_TOKEN);
-    client.logger.info("logged in");
+    client.logger.info("LOGGED IN");
+    client.logger.info(`LOGGED IN AS: ${client.user?.username ?? "UNKNOWN"}`);
     const messageHistory = new LRUCache<
       string,
       {
