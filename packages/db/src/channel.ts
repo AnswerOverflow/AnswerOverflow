@@ -223,7 +223,7 @@ export async function updateManyChannels(data: z.infer<typeof zChannelUpdateMany
     data.map((c) =>
       prisma.channel.update({
         where: { id: c.id },
-        data: zChannelUpdateMany.parse(c),
+        data: zChannelPrismaUpdate.parse(c),
       })
     )
   );
