@@ -13,5 +13,6 @@ export default defineConfig({
     "@answeroverflow/utils",
     "@answeroverflow/constants",
     "@answeroverflow/cache",
+    "@answeroverflow/discordjs-mock"
   ],
 });

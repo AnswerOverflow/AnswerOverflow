@@ -11,6 +11,7 @@ import {
   READ_THE_RULES_CONSENT_PROMPT,
   VIEW_ON_ANSWEROVERFLOW_LABEL,
 } from "@answeroverflow/constants";
+import { delay } from "@answeroverflow/discordjs-mock";
 
 const ToggleReadTheRulesConsentButton = ({
   server,
@@ -23,7 +24,9 @@ const ToggleReadTheRulesConsentButton = ({
     currentlyEnabled={server.flags.readTheRulesConsentEnabled}
     enableLabel={ENABLE_READ_THE_RULES_CONSENT_LABEL}
     disableLabel={DISABLE_READ_THE_RULES_CONSENT_LABEL}
-    onClick={(event, enabled) => {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    onClick={async (event, enabled) => {
+      await delay(10000);
       void guildOnlyComponentEvent(event, async ({ member }) =>
         updateReadTheRulesConsentEnabled({
           enabled,
