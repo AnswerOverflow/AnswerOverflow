@@ -21,11 +21,12 @@ WORKDIR /app
 COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/yarn.lock ./yarn.lock
+COPY turbo.json turbo.json
+
 RUN yarn install
 
 # Build the project and its dependencies
 COPY --from=builder /app/out/full/ .
-COPY turbo.json turbo.json
 
 # Uncomment and use build args to enable remote caching
 ARG TURBO_TEAM
@@ -33,7 +34,7 @@ ENV TURBO_TEAM=$TURBO_TEAM
 
 ARG TURBO_TOKEN
 ENV TURBO_TOKEN=$TURBO_TOKEN
-
+RUN (cd packages/prisma-types/ && npx prisma generate)
 RUN yarn turbo run build --filter=discord-bot...
 
 FROM node:alpine AS runner
