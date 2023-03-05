@@ -60,6 +60,7 @@ import {
 import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
 import { componentEventStatusHandler } from "~discord-bot/utils/trpc";
 import { type RootChannel, getRootChannel } from "~discord-bot/utils/utils";
+import { delay } from "@answeroverflow/discordjs-mock";
 
 type ChannelSettingsMenuItemProps<T extends RootChannel = RootChannel> = {
   channelInDB: ChannelWithFlags;
@@ -103,6 +104,7 @@ function ToggleIndexingButton({
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       onClick={async (event: ButtonClickEvent, enabled) =>
         guildOnlyComponentEvent(event, async ({ member }) => {
+          await delay(8000);
           await updateChannelIndexingEnabled({
             channel: targetChannel,
             enabled,
@@ -131,6 +133,7 @@ function ToggleForumGuidelinesConsentButton({
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       onClick={async (event: ButtonClickEvent, enabled) =>
         guildOnlyComponentEvent(event, async ({ member }) => {
+          await delay(6000);
           await updateChannelForumGuidelinesConsentEnabled({
             channel: targetChannel,
             enabled,

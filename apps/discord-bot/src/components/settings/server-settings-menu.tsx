@@ -12,6 +12,7 @@ import {
   VIEW_ON_ANSWEROVERFLOW_LABEL,
 } from "@answeroverflow/constants";
 import { delay } from "@answeroverflow/discordjs-mock";
+import { randomUUID } from "crypto";
 
 const ToggleReadTheRulesConsentButton = ({
   server,
@@ -26,7 +27,7 @@ const ToggleReadTheRulesConsentButton = ({
     disableLabel={DISABLE_READ_THE_RULES_CONSENT_LABEL}
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     onClick={async (event, enabled) => {
-      await delay(10000);
+      await delay(6000);
       void guildOnlyComponentEvent(event, async ({ member }) =>
         updateReadTheRulesConsentEnabled({
           enabled,
@@ -45,6 +46,7 @@ export function ServerSettingsMenu({ server: initialServer }: { server: ServerWi
   const [server, setServer] = React.useState(initialServer);
   return (
     <>
+      SERVER SETTINGS ID: {randomUUID()}
       <InstructionsContainer>
         <EmbedMenuInstruction
           instructions={[

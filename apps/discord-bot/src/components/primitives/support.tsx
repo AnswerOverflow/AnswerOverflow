@@ -1,4 +1,5 @@
 import { Button, Link } from "@answeroverflow/reacord";
+import { delay } from "@answeroverflow/discordjs-mock";
 import React from "react";
 import { getMessageHistory } from "./router";
 
@@ -27,7 +28,9 @@ export const OpenSupportMenuButton: React.FC<{
   interactionId: string;
 }> = ({ interactionId }) => (
   <Button
-    onClick={(event) => {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    onClick={async (event) => {
+      await delay(4000);
       const replaceMenu = false;
       if (replaceMenu) {
         const { pushHistory } = getMessageHistory(interactionId);

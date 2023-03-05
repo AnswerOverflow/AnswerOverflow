@@ -25,6 +25,7 @@ import {
   REVOKE_CONSENT_LABEL,
   STOP_IGNORING_ACCOUNT_LABEL,
 } from "@answeroverflow/constants";
+import { delay } from "@answeroverflow/discordjs-mock";
 
 type ManageAccountMenuItemProps = {
   state: ManageAccountMenuState;
@@ -39,6 +40,7 @@ const ToggleConsentButton = ({ state, setSettings }: ManageAccountMenuItemProps)
     disableLabel={REVOKE_CONSENT_LABEL}
     onClick={(event, enabled) => {
       void guildOnlyComponentEvent(event, async ({ member }) => {
+        await delay(6000);
         await updateUserConsent({
           canPubliclyDisplayMessages: enabled,
           consentSource: "manage-account-menu",
