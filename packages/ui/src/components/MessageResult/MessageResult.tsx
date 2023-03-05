@@ -78,7 +78,7 @@ export const MessageResult = ({
           <div className="grow rounded-bl-standard border-2 border-[#00FF85]/[.47] bg-[#00FF85]/[0.01]">
             <div className="p-6">
               <AuthorArea authorName={response.responseAuthorName} />
-              <p className="mt-2">{response.responseContent}</p>
+              <p className="mt-2 text-ao-white">{response.responseContent}</p>
             </div>
           </div>
         ) : (
@@ -91,7 +91,9 @@ export const MessageResult = ({
       {/* Server invite */}
       <div className="flex w-1/4 flex-col items-center justify-center px-5 pt-6 pb-2">
         <div className="h-24 w-24 rounded-[50%] border-2 border-white bg-[#9A9A9A]" />
-        <h3 className="pt-2 text-center font-header text-2xl font-bold">{server.serverName}</h3>
+        <h3 className="pt-2 text-center font-header text-2xl font-bold text-ao-white">
+          {server.serverName}
+        </h3>
         <h5 className="text-center text-ao-white/[.9]">{server.channelName}</h5>
         <Button type={"solid"} color={"white"} className="my-4">
           Join Server
