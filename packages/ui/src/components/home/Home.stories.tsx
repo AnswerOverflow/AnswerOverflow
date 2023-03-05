@@ -3,6 +3,7 @@ import { Home } from "./Home";
 
 const meta = {
   component: Home,
+  title: "pages/Home",
   parameters: {
     layout: "fullscreen",
     a11y: {
