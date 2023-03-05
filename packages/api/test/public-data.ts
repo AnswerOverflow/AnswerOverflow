@@ -9,6 +9,7 @@ import {
   Server,
 } from "@answeroverflow/db";
 import { omit, pick } from "@answeroverflow/utils";
+import type { ChannelFindByIdOutput } from "~api/utils/types";
 
 export function pickPublicServerData(server: Server) {
   return pick(server, ["id", "name", "icon", "description"]);
@@ -81,4 +82,9 @@ export function toPrivateMessageWithStrippedData(
       : null,
     solutionMessages: message.solutionMessages.map((m) => toPrivateMessageWithStrippedData(m)),
   };
+}
+
+export function pickPublicChannelData(channel: ChannelFindByIdOutput) {
+  const picked = pick(channel, ["id", "name", "parentId", "serverId", "type", "inviteCode"]);
+  return picked;
 }

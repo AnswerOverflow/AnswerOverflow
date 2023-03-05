@@ -12,7 +12,6 @@ declare global {
 
       // Prod Only
       ELASTICSEARCH_CLOUD_ID: string;
-      ELASTICSEARCH_API_KEY: string;
 
       // common
       readonly NODE_ENV: "development" | "production" | "test";

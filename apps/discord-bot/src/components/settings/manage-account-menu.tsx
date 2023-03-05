@@ -3,7 +3,6 @@ import {
   getDefaultUserServerSettingsWithFlags,
   UserServerSettingsWithFlags,
 } from "@answeroverflow/db";
-import { ToggleButton } from "./toggle-button";
 import {
   updateUserConsent,
   updateUserServerIndexingEnabled,
@@ -12,15 +11,25 @@ import { callAPI, componentEventStatusHandler } from "~discord-bot/utils/trpc";
 import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
 import { Button } from "@answeroverflow/reacord";
 import { createMemberCtx } from "~discord-bot/utils/context";
-import { EmbedMenuInstruction, MenuInstruction } from "./instructions";
-import { InstructionsContainer } from "./instructions-container";
+import {
+  ToggleButton,
+  type MenuInstruction,
+  InstructionsContainer,
+  EmbedMenuInstruction,
+} from "~discord-bot/components/primitives";
+import {
+  DISABLE_INDEXING_LABEL,
+  ENABLE_INDEXING_LABEL,
+  GLOBALLY_IGNORE_ACCOUNT_LABEL,
+  GRANT_CONSENT_LABEL,
+  REVOKE_CONSENT_LABEL,
+  STOP_IGNORING_ACCOUNT_LABEL,
+} from "@answeroverflow/constants";
 
 type ManageAccountMenuItemProps = {
   state: ManageAccountMenuState;
   setSettings: (settings: ManageAccountMenuState) => void;
 };
-export const REVOKE_CONSENT_LABEL = "Disable publicly showing messages";
-export const GRANT_CONSENT_LABEL = "Publicly display messages on Answer Overflow";
 
 const ToggleConsentButton = ({ state, setSettings }: ManageAccountMenuItemProps) => (
   <ToggleButton
@@ -47,8 +56,6 @@ const ToggleConsentButton = ({ state, setSettings }: ManageAccountMenuItemProps)
   />
 );
 
-export const DISABLE_INDEXING_LABEL = "Ignore account in server";
-export const ENABLE_INDEXING_LABEL = "Enable indexing of messages in server";
 const ToggleIndexingButton = ({ state, setSettings }: ManageAccountMenuItemProps) => (
   <ToggleButton
     currentlyEnabled={!state.settings.flags.messageIndexingDisabled}
@@ -73,7 +80,6 @@ const ToggleIndexingButton = ({ state, setSettings }: ManageAccountMenuItemProps
   />
 );
 
-export const GLOBALLY_IGNORE_ACCOUNT_LABEL = "Globally ignore account";
 export const GloballyIgnoreAccountButton = ({
   setState,
 }: {
@@ -103,7 +109,6 @@ export const GloballyIgnoreAccountButton = ({
   />
 );
 
-export const STOP_IGNORING_ACCOUNT_LABEL = "Stop ignoring account";
 export const StopIgnoringAccountButton = ({
   setState,
 }: {

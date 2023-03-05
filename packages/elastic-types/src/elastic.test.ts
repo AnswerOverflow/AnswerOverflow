@@ -243,4 +243,25 @@ describe("ElasticSearch", () => {
       expect(searchResults.find((msg) => msg._source.content === content)).toBeDefined();
     });
   });
+  describe("Message Update", () => {
+    it("should update a message", async () => {
+      await elastic.upsertMessage(msg1);
+      const updatedMessage = {
+        ...msg1,
+        content: getRandomId(),
+      };
+      await elastic.updateMessage(updatedMessage);
+      const fetchedMessage = await elastic.getMessage(msg1.id);
+      expect(fetchedMessage).toBeDefined();
+      expect(fetchedMessage).toEqual(updatedMessage);
+    });
+    it("should return null if the message does not exist", async () => {
+      const updatedMessage = {
+        ...msg1,
+        content: getRandomId(),
+      };
+      const result = await elastic.updateMessage(updatedMessage);
+      expect(result).toBeNull();
+    });
+  });
 });

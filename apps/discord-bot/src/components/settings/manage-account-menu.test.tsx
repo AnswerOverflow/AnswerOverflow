@@ -18,17 +18,16 @@ import {
   mockGuild,
   mockTextChannel,
 } from "@answeroverflow/discordjs-mock";
+import { ManageAccountMenu } from "./manage-account-menu";
+import { toAODiscordAccount, toAOServer } from "~discord-bot/utils/conversions";
 import {
   DISABLE_INDEXING_LABEL,
   ENABLE_INDEXING_LABEL,
   GLOBALLY_IGNORE_ACCOUNT_LABEL,
   GRANT_CONSENT_LABEL,
-  ManageAccountMenu,
   REVOKE_CONSENT_LABEL,
   STOP_IGNORING_ACCOUNT_LABEL,
-} from "./manage-account-menu";
-import { toAODiscordAccount, toAOServer } from "~discord-bot/utils/conversions";
-
+} from "@answeroverflow/constants";
 let reacord: ReacordTester;
 let textChannel: TextChannel;
 let guild: Guild;

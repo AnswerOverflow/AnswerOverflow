@@ -12,6 +12,7 @@ import {
 import { mockAccountWithServersCallerCtx, mockUnauthedCtx } from "~api/test/utils";
 import { messagesRouter } from "./messages";
 import {
+  pickPublicChannelData,
   pickPublicServerData,
   toMessageWithAccountAndRepliesTo,
   toPrivateMessageWithStrippedData,
@@ -25,7 +26,6 @@ import {
 } from "@answeroverflow/db-mock";
 import { getRandomId } from "@answeroverflow/utils";
 import { randomSnowflakeLargerThan } from "@answeroverflow/discordjs-utils";
-import { pickPublicChannelData } from "../channel/channel.test";
 import { ChannelType } from "discord-api-types/v10";
 
 let server: Server;
