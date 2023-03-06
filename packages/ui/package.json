@@ -55,7 +55,7 @@
     "@storybook/nextjs": "^7.0.0-beta.54",
     "@storybook/preview-web": "^7.0.0-beta.54",
     "@storybook/react": "^7.0.0-beta.54",
-    "@storybook/test-runner": "^0.10.0-next.8",
+    "@storybook/test-runner": "^0.10.0--canary.210.8666bd0.0",
     "@storybook/testing-library": "^0.0.14-next.1",
     "@storybook/testing-react": "^2.0.0-next.0",
     "@storybook/types": "7.0.0-beta.54",
