@@ -10,7 +10,7 @@
     "@answeroverflow/constants": "*",
     "@answeroverflow/db": "*",
     "@answeroverflow/db-mock": "*",
-    "@answeroverflow/discordjs-react": "^0.0.8",
+    "@answeroverflow/discordjs-react": "^0.0.9",
     "@answeroverflow/discordjs-utils": "*",
     "@sapphire/decorators": "6.0.0",
     "@sapphire/discord-utilities": "3.0.0",
