@@ -12,7 +12,7 @@ import {
 import { delay } from "@answeroverflow/discordjs-mock";
 import { randomUUID } from "crypto";
 import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
-import { ephemeralStatusHandler } from "~discord-bot/utils/utils";
+import { ephemeralReply } from "~discord-bot/utils/utils";
 
 const ToggleReadTheRulesConsentButton = ({
   server,
@@ -32,7 +32,7 @@ const ToggleReadTheRulesConsentButton = ({
         updateReadTheRulesConsentEnabled({
           enabled,
           member,
-          Error: (error) => ephemeralStatusHandler(interaction, error.message),
+          Error: (error) => ephemeralReply(error.message, interaction),
           Ok(result) {
             setServer(result);
           },

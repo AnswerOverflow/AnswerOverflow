@@ -2,7 +2,7 @@
   "name": "@answeroverflow/discord-bot",
   "version": "1.0.0",
   "main": "dist/index.js",
-  "author": "@sapphire",
+  "author": "@answeroverflow",
   "license": "UNLICENSE",
   "dependencies": {
     "@answeroverflow/api": "*",
@@ -10,7 +10,7 @@
     "@answeroverflow/constants": "*",
     "@answeroverflow/db": "*",
     "@answeroverflow/db-mock": "*",
-    "@answeroverflow/discordjs-react": "^0.0.9",
+    "@answeroverflow/discordjs-react": "^0.0.15",
     "@answeroverflow/discordjs-utils": "*",
     "@sapphire/decorators": "6.0.0",
     "@sapphire/discord-utilities": "3.0.0",
@@ -67,7 +67,7 @@
     "start": "yarn run with-env node dist/index.js",
     "test": "yarn run with-env jest --coverage",
     "test:watch": "yarn run with-env jest --watch",
-    "install-local-reacord": "cp -r ~/repos/reacord/packages/reacord/dist/ /AnswerOverflow/node_modules/@answeroverflow/reacord/"
+    "install-local-discordjs-react": "cp -r ~/repos/discordjs-react/packages/discordjs-react/dist/ /AnswerOverflow/node_modules/@answeroverflow/discordjs-react/"
   },
   "resolutions": {
     "discord-api-types": "0.37.20"

@@ -11,9 +11,56 @@ beforeEach(async () => {
 });
 
 describe("Interaction Mock", () => {
-  it("should create a mocked interaction", async () => {
-    const interaction = mockChatInputCommandInteraction(client, "test", "1");
-    await emitEvent(client, Events.InteractionCreate, interaction);
+  describe("Chat input command interaction", () => {
+    it("should reply", async () => {
+      const interaction = mockChatInputCommandInteraction(client, "test", "test");
+      const response = await interaction.reply({
+        content: "hello",
+        fetchReply: true,
+      });
+      expect(response.content).toBe("hello");
+    });
+    it("should defer", async () => {
+      const interaction = mockChatInputCommandInteraction(client, "test", "test");
+      await interaction.reply({
+        content: "hello",
+        fetchReply: true,
+      });
+      const defer = await interaction.deferReply({
+        fetchReply: true,
+      });
+      expect(defer.id).toBe(interaction.id.toString());
+    });
+    it("should edit deferred reply", async () => {
+      const interaction = mockChatInputCommandInteraction(client, "test", "test");
+      await interaction.reply({
+        content: "hello",
+        fetchReply: true,
+      });
+      await interaction.deferReply({
+        fetchReply: true,
+      });
+      const updated = await interaction.editReply("world");
+      expect(updated.content).toBe("world");
+    });
+    it("should edit reply", async () => {
+      const interaction = mockChatInputCommandInteraction(client, "test", "test");
+      await interaction.reply({
+        content: "hello",
+        fetchReply: true,
+      });
+      const updated = await interaction.editReply("world");
+      expect(updated.content).toBe("world");
+    });
+    it("should fetch the reply", async () => {
+      const interaction = mockChatInputCommandInteraction(client, "test", "test");
+      await interaction.reply({
+        content: "hello",
+        fetchReply: true,
+      });
+      const reply = await interaction.fetchReply();
+      expect(reply.content).toBe("hello");
+    });
   });
   describe("Button Interaction", () => {
     let message: Message;

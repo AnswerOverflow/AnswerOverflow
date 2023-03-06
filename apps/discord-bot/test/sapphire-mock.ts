@@ -1,8 +1,6 @@
-import { ReacordTester } from "@answeroverflow/discordjs-react";
-import { container } from "@sapphire/framework";
 import { assert } from "console";
 import { ClientOptions, Options } from "discord.js";
-import { applyClientMocks } from "@answeroverflow/discordjs-mock/src/client-mock";
+import { applyClientMocks } from "@answeroverflow/discordjs-mock";
 import { basename, extname } from "path";
 import { createClient, login } from "~discord-bot/utils/bot";
 
@@ -65,11 +63,6 @@ export function mockSapphireClient(
   assert(client.user !== null, "Client user is null");
   client.id = client.user!.id;
   return client;
-}
-
-export function mockReacord() {
-  container.discordJSReact = new ReacordTester();
-  return container.discordJSReact;
 }
 
 export async function setupAnswerOverflowBot() {

@@ -4,7 +4,7 @@ import { ClientOptions, Partials } from "discord.js";
 import "~discord-bot/utils/setup";
 import type React from "react";
 import LRUCache from "lru-cache";
-import { DiscordJSReact } from "@answeroverflow/discordjs-react";
+import { DiscordJSReact, TestDiscordJSReact } from "@answeroverflow/discordjs-react";
 
 function getLogLevel() {
   switch (process.env.NODE_ENV) {
@@ -81,7 +81,7 @@ export const login = async (client: SapphireClient) => {
       ttl: 1000 * 60 * 10,
     });
 
-    container.messageHistory = messageHistory;
+    // container.messageHistory = messageHistory;
 
     // ({ children, renderer }) => {
     //   if (renderer instanceof InteractionReplyRenderer) {
@@ -90,7 +90,8 @@ export const login = async (client: SapphireClient) => {
     //     return children;
     //   }
     // }
-    container.discordJSReact = new DiscordJSReact(client, {});
+    container.discordJSReact =
+      process.env.NODE_ENV === "test" ? new TestDiscordJSReact(client) : new DiscordJSReact(client);
   } catch (error) {
     client.logger.fatal(error);
     client.destroy();

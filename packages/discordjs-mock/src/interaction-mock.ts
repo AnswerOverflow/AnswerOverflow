@@ -17,6 +17,8 @@ import {
   MessagePayload,
   Message,
   User,
+  APIBaseInteraction,
+  Channel,
 } from "discord.js";
 import { randomSnowflake } from "@answeroverflow/discordjs-utils";
 import { mockTextChannel } from "./channel-mock";
@@ -28,6 +30,160 @@ import type {
   RawMessageComponentInteractionData,
 } from "discord.js/typings/rawDataTypes";
 import { messageToAPIData } from "./to-api-data";
+
+function setupMockedInteractionAPIData<Type extends InteractionType>({
+  channel,
+  caller,
+  message = undefined,
+  type,
+  applicationId = undefined,
+  override = {},
+}: {
+  applicationId?: string;
+  channel: Channel;
+  message?: Message;
+  caller: User;
+  type: Type;
+  override?: Partial<APIBaseInteraction<Type, {}>>;
+}): Omit<Required<APIBaseInteraction<Type, {}>>, "guild_id" | "message" | "member"> &
+  Pick<APIBaseInteraction<Type, {}>, "guild_id" | "message"> {
+  return {
+    application_id: applicationId ?? randomSnowflake().toString(),
+    channel_id: channel.id,
+    id: randomSnowflake().toString(),
+    token: randomSnowflake().toString(), // TODO: Use a real token
+    version: 1,
+    app_permissions: PermissionsBitField.Default.toString(),
+    locale: "en-US",
+    guild_id: channel.isDMBased() ? undefined : channel.guild.id,
+    user: {
+      id: caller.id,
+      avatar: caller.avatar,
+      discriminator: caller.discriminator,
+      username: caller.username,
+    },
+    data: {},
+    guild_locale: "en-US",
+    message: message ? messageToAPIData(message) : undefined,
+    type,
+    ...override,
+  };
+}
+
+function applyInteractionResponseHandlers(interaction: Interaction) {
+  const client = interaction.client;
+  if ("update" in interaction) {
+    // @ts-ignore
+    interaction.update = async (
+      options:
+        | (InteractionUpdateOptions & { fetchReply: true })
+        | (string | MessagePayload | InteractionUpdateOptions)
+    ) => {
+      interaction.deferred = false;
+      await interaction.message.edit(options);
+      if (options instanceof Object && "fetchReply" in options) {
+        return interaction.message;
+      }
+      return mockInteractionResponse({
+        interaction: interaction,
+        id: interaction.id,
+      });
+    };
+  }
+  if ("deferUpdate" in interaction) {
+    // @ts-ignore
+    interaction.deferUpdate = (options) => {
+      interaction.deferred = true;
+      if (options?.fetchReply) {
+        return Promise.resolve(interaction.message);
+      }
+      return Promise.resolve(
+        mockInteractionResponse({
+          id: interaction.id,
+          interaction,
+        })
+      );
+    };
+  }
+
+  if ("deferReply" in interaction) {
+    // @ts-ignore
+    interaction.deferReply = (options) => {
+      interaction.deferred = true;
+      const msg = mockMessage({
+        client,
+        channel: interaction.channel ?? undefined, // TODO: probably error here?
+        author: interaction.client.user,
+        override: {
+          id: interaction.id.toString(),
+        },
+      });
+      if (options?.fetchReply) {
+        return Promise.resolve(msg);
+      }
+      return Promise.resolve(
+        mockInteractionResponse({
+          id: interaction.id,
+          interaction,
+        })
+      );
+    };
+  }
+
+  if ("reply" in interaction) {
+    // @ts-ignore
+    interaction.reply = (opts) => {
+      const msg = mockMessage({
+        client,
+        channel: interaction.channel ?? undefined, // TODO: probably error here?
+        author: interaction.client.user,
+        override: {
+          id: interaction.id.toString(),
+        },
+      });
+      interaction.deferred = false;
+      interaction.replied = true;
+      applyMessagePayload(opts, msg);
+      if (opts instanceof Object && "fetchReply" in opts) {
+        return msg;
+      }
+
+      return Promise.resolve(
+        mockInteractionResponse({
+          interaction: interaction,
+          id: interaction.id,
+        })
+      );
+    };
+  }
+
+  if ("fetchReply" in interaction) {
+    interaction.fetchReply = () => {
+      if (interaction.isChatInputCommand() || interaction.isContextMenuCommand()) {
+        const msg = interaction.channel?.messages.cache.get(interaction.id);
+        if (!msg) throw new Error("Message not found");
+        return Promise.resolve(msg);
+      } else {
+        if (!interaction.message) throw new Error("No message to edit");
+        return Promise.resolve(interaction.message);
+      }
+    };
+  }
+
+  if ("editReply" in interaction) {
+    interaction.editReply = async (opts) => {
+      interaction.deferred = false;
+      interaction.replied = true;
+      if (interaction.isChatInputCommand() || interaction.isContextMenuCommand()) {
+        const message = await interaction.fetchReply();
+        return message.edit(opts);
+      } else {
+        if (!interaction.message) throw new Error("No message to edit");
+        return interaction.message?.edit(opts);
+      }
+    };
+  }
+}
 
 export function mockChatInputCommandInteraction(
   client: Client,
@@ -47,31 +203,12 @@ export function mockChatInputCommandInteraction(
     member = mockGuildMember({ client, guild });
   }
   const rawData: APIChatInputApplicationCommandInteraction = {
-    application_id: client.user?.id.toString() ?? randomSnowflake.toString(), // TODO: This probably should be an assert
-    channel_id: channel.id,
-    id, // TODO: Is this related to the command id?
-    type: InteractionType.ApplicationCommand,
-    token: "123456789",
-    version: 1,
-    app_permissions: PermissionsBitField.Default.toString(),
-    locale: "en-US",
-    guild_id: guild.id,
-    member: {
-      user: {
-        id: member.id,
-        username: member.user.username,
-        discriminator: member.user.discriminator,
-        avatar: member.user.avatar,
-      },
-      roles: member.roles.cache.map((role) => role.id),
-      premium_since: null,
-      permissions: member.permissions.bitfield.toString(),
-      pending: false,
-      nick: member.nickname,
-      mute: false,
-      joined_at: member.joinedAt?.toISOString() ?? new Date().toISOString(),
-      deaf: false,
-    },
+    ...setupMockedInteractionAPIData({
+      caller: member.user,
+      channel,
+      type: InteractionType.ApplicationCommand,
+      applicationId: id,
+    }),
     data: {
       id,
       name,
@@ -84,7 +221,7 @@ export function mockChatInputCommandInteraction(
     client,
     rawData,
   ]) as ChatInputCommandInteraction;
-  command.reply = jest.fn();
+  applyInteractionResponseHandlers(command);
   return command;
 }
 
@@ -110,84 +247,25 @@ export function mockButtonInteraction({
   >;
 }) {
   const client = message.client;
-  const id = randomSnowflake.toString();
-  const customId = override.custom_id ?? randomSnowflake.toString();
+  const customId = override.custom_id ?? randomSnowflake().toString();
   const rawData = {
     component_type: ComponentType.Button,
-    application_id: client.user?.id.toString() ?? randomSnowflake.toString(), // TODO: This probably should be an assert
-    channel_id: message.channel.id,
-    id,
-    token: randomSnowflake.toString(), // TODO: Use a real token
-    version: 1,
-    app_permissions: PermissionsBitField.Default.toString(),
-    locale: "en-US",
-    guild_id: message.guild?.id,
-    user: {
-      id: caller.id,
-      avatar: caller.avatar,
-      discriminator: caller.discriminator,
-      username: caller.username,
-    },
+    custom_id: customId,
+    message: messageToAPIData(message),
+    ...override,
+    ...setupMockedInteractionAPIData({
+      caller,
+      channel: message.channel,
+      type: InteractionType.MessageComponent,
+      message,
+      override,
+    }),
     data: {
       component_type: ComponentType.Button,
       custom_id: customId,
     },
-    custom_id: customId,
-    message: messageToAPIData(message),
-    type: InteractionType.MessageComponent,
-    ...override,
   } satisfies RawMessageButtonInteractionData & RawMessageComponentInteractionData;
   const interaction = Reflect.construct(ButtonInteraction, [client, rawData]) as ButtonInteraction;
-
-  // @ts-ignore
-  interaction.update = async (
-    options:
-      | (InteractionUpdateOptions & { fetchReply: true })
-      | (string | MessagePayload | InteractionUpdateOptions)
-  ) => {
-    interaction.deferred = false;
-    await interaction.message.edit(options);
-    if (options instanceof Object && "fetchReply" in options) {
-      return interaction.message;
-    }
-    return mockInteractionResponse({
-      interaction: interaction,
-      id: interaction.id,
-    });
-  };
-  // @ts-ignore
-  interaction.deferUpdate = (options) => {
-    interaction.deferred = true;
-    if (options?.fetchReply) {
-      return Promise.resolve(interaction.message);
-    }
-    return Promise.resolve(
-      mockInteractionResponse({
-        id: interaction.id,
-        interaction,
-      })
-    );
-  };
-  // @ts-ignore
-  interaction.reply = (opts) => {
-    const msg = mockMessage({ client, channel: message.channel, author: client.user });
-    interaction.deferred = false;
-    interaction.replied = true;
-    applyMessagePayload(opts, msg);
-    if (opts instanceof Object && "fetchReply" in opts) {
-      return Promise.resolve(msg);
-    }
-
-    return mockInteractionResponse({
-      interaction: interaction,
-      id: interaction.id,
-    });
-  };
-
-  interaction.editReply = (opts) => {
-    interaction.deferred = false;
-    interaction.replied = true;
-    return interaction.message.edit(opts);
-  };
+  applyInteractionResponseHandlers(interaction);
   return interaction;
 }
