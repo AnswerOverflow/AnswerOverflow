@@ -1,5 +1,4 @@
-import { Client, Events, GuildMember, Message } from "discord.js";
-import { delay, emitEvent } from "./helpers";
+import type { Client, GuildMember, Message } from "discord.js";
 import { mockButtonInteraction, mockChatInputCommandInteraction } from "./interaction-mock";
 import { setupBot } from "./client-mock";
 import { mockMessage } from "./message-mock";
@@ -13,7 +12,11 @@ beforeEach(async () => {
 describe("Interaction Mock", () => {
   describe("Chat input command interaction", () => {
     it("should reply", async () => {
-      const interaction = mockChatInputCommandInteraction(client, "test", "test");
+      const interaction = mockChatInputCommandInteraction({
+        client,
+        id: "test",
+        name: "test",
+      });
       const response = await interaction.reply({
         content: "hello",
         fetchReply: true,
@@ -21,7 +24,11 @@ describe("Interaction Mock", () => {
       expect(response.content).toBe("hello");
     });
     it("should defer", async () => {
-      const interaction = mockChatInputCommandInteraction(client, "test", "test");
+      const interaction = mockChatInputCommandInteraction({
+        client,
+        id: "test",
+        name: "test",
+      });
       await interaction.reply({
         content: "hello",
         fetchReply: true,
@@ -32,7 +39,11 @@ describe("Interaction Mock", () => {
       expect(defer.id).toBe(interaction.id.toString());
     });
     it("should edit deferred reply", async () => {
-      const interaction = mockChatInputCommandInteraction(client, "test", "test");
+      const interaction = mockChatInputCommandInteraction({
+        client,
+        id: "test",
+        name: "test",
+      });
       await interaction.reply({
         content: "hello",
         fetchReply: true,
@@ -44,7 +55,11 @@ describe("Interaction Mock", () => {
       expect(updated.content).toBe("world");
     });
     it("should edit reply", async () => {
-      const interaction = mockChatInputCommandInteraction(client, "test", "test");
+      const interaction = mockChatInputCommandInteraction({
+        client,
+        id: "test",
+        name: "test",
+      });
       await interaction.reply({
         content: "hello",
         fetchReply: true,
@@ -53,7 +68,11 @@ describe("Interaction Mock", () => {
       expect(updated.content).toBe("world");
     });
     it("should fetch the reply", async () => {
-      const interaction = mockChatInputCommandInteraction(client, "test", "test");
+      const interaction = mockChatInputCommandInteraction({
+        client,
+        id: "test",
+        name: "test",
+      });
       await interaction.reply({
         content: "hello",
         fetchReply: true,
@@ -77,7 +96,6 @@ describe("Interaction Mock", () => {
       });
     });
     it("should create a mocked button interaction", async () => {
-      const client = await setupBot();
       const expectedId = "test";
       const interaction = mockButtonInteraction({
         caller: caller.user,
@@ -86,16 +104,9 @@ describe("Interaction Mock", () => {
           custom_id: expectedId,
         },
       });
-      client.on(Events.InteractionCreate, async (interaction) => {
-        if (interaction.isButton()) {
-          await interaction.update({
-            content: "test",
-          });
-        }
-      });
-      await emitEvent(client, Events.InteractionCreate, interaction);
-      await delay();
+      await interaction.update("test");
       expect(interaction.message.content).toBe("test");
+      expect(interaction.replied).toBe(true);
     });
     it("should deffer the button interaction", async () => {
       const expectedId = "test";
@@ -117,6 +128,7 @@ describe("Interaction Mock", () => {
       await interaction.reply("hello");
       await interaction.editReply("world");
       expect(interaction.message.content).toBe("world");
+      expect(interaction.replied).toBe(true);
     });
     it("should reply to a button interaction", async () => {
       const interaction = mockButtonInteraction({
@@ -129,6 +141,7 @@ describe("Interaction Mock", () => {
       });
 
       expect(reply.content).toBe("hello");
+      expect(interaction.replied).toBe(true);
     });
     it("should clear defer of a button interaction on reply", async () => {
       const interaction = mockButtonInteraction({
@@ -138,6 +151,7 @@ describe("Interaction Mock", () => {
       await interaction.deferUpdate();
       await interaction.reply("hello");
       expect(interaction.deferred).toBe(false);
+      expect(interaction.replied).toBe(true);
     });
     it("should set replied on reply to an interaction", async () => {
       const interaction = mockButtonInteraction({

@@ -1,13 +1,25 @@
 import { mockChatInputCommandInteraction } from "@answeroverflow/discordjs-mock";
 import type { ReactNode } from "react";
-import type { Client, User } from "discord.js";
+import type { User } from "discord.js";
 import { container } from "@sapphire/framework";
 import { randomSnowflake } from "@answeroverflow/discordjs-utils";
 import type { TestDiscordJSReactMessage } from "@answeroverflow/discordjs-react";
 
-export async function reply(client: Client, content: ReactNode) {
-  const interaction = mockChatInputCommandInteraction(client, "open", randomSnowflake().toString());
-  const renderer = container.discordJSReact.ephemeralReply(interaction, content);
+export async function reply(
+  context: Required<
+    Pick<Parameters<typeof mockChatInputCommandInteraction>[0], "channel" | "member">
+  > & {
+    content: ReactNode;
+  }
+) {
+  const interaction = mockChatInputCommandInteraction({
+    client: context.member.client,
+    channel: context.channel,
+    member: context.member,
+    id: randomSnowflake().toString(),
+    name: "test",
+  });
+  const renderer = container.discordJSReact.ephemeralReply(interaction, context.content);
 
   // wait for message to not be undefined
   const msg = await new Promise<TestDiscordJSReactMessage>((resolve) => {

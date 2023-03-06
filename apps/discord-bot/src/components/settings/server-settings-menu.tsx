@@ -9,7 +9,6 @@ import {
   READ_THE_RULES_CONSENT_PROMPT,
   VIEW_ON_ANSWEROVERFLOW_LABEL,
 } from "@answeroverflow/constants";
-import { delay } from "@answeroverflow/discordjs-mock";
 import { randomUUID } from "crypto";
 import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
 import { ephemeralReply } from "~discord-bot/utils/utils";
@@ -25,10 +24,8 @@ const ToggleReadTheRulesConsentButton = ({
     currentlyEnabled={server.flags.readTheRulesConsentEnabled}
     enableLabel={ENABLE_READ_THE_RULES_CONSENT_LABEL}
     disableLabel={DISABLE_READ_THE_RULES_CONSENT_LABEL}
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    onClick={async (interaction, enabled) => {
-      await delay(6000);
-      void guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
+    onClick={async (interaction, enabled) =>
+      guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
         updateReadTheRulesConsentEnabled({
           enabled,
           member,
@@ -37,8 +34,8 @@ const ToggleReadTheRulesConsentButton = ({
             setServer(result);
           },
         })
-      );
-    }}
+      )
+    }
   />
 );
 

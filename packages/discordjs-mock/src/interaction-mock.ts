@@ -4,7 +4,6 @@ import {
   APIChatInputApplicationCommandInteraction,
   ApplicationCommandType,
   GuildBasedChannel,
-  Guild,
   GuildMember,
   PermissionsBitField,
   Client,
@@ -23,7 +22,6 @@ import {
 import { randomSnowflake } from "@answeroverflow/discordjs-utils";
 import { mockTextChannel } from "./channel-mock";
 import { applyMessagePayload, mockMessage } from "./message-mock";
-import { mockGuild } from "./guild-mock";
 import { mockGuildMember } from "./user-mock";
 import type {
   RawMessageButtonInteractionData,
@@ -80,9 +78,10 @@ function applyInteractionResponseHandlers(interaction: Interaction) {
         | (string | MessagePayload | InteractionUpdateOptions)
     ) => {
       interaction.deferred = false;
+      interaction.replied = true;
       await interaction.message.edit(options);
       if (options instanceof Object && "fetchReply" in options) {
-        return interaction.message;
+        return Promise.resolve(interaction.message);
       }
       return mockInteractionResponse({
         interaction: interaction,
@@ -145,7 +144,7 @@ function applyInteractionResponseHandlers(interaction: Interaction) {
       interaction.replied = true;
       applyMessagePayload(opts, msg);
       if (opts instanceof Object && "fetchReply" in opts) {
-        return msg;
+        return Promise.resolve(msg);
       }
 
       return Promise.resolve(
@@ -185,22 +184,24 @@ function applyInteractionResponseHandlers(interaction: Interaction) {
   }
 }
 
-export function mockChatInputCommandInteraction(
-  client: Client,
-  name: string,
-  id: string,
-  guild?: Guild,
-  channel?: GuildBasedChannel,
-  member?: GuildMember
-): ChatInputCommandInteraction {
-  if (!guild) {
-    guild = mockGuild(client);
-  }
+export function mockChatInputCommandInteraction({
+  client,
+  name,
+  id,
+  channel,
+  member,
+}: {
+  client: Client;
+  name: string;
+  id: string;
+  channel?: GuildBasedChannel;
+  member?: GuildMember;
+}): ChatInputCommandInteraction {
   if (!channel) {
-    channel = mockTextChannel(client, guild);
+    channel = mockTextChannel(client);
   }
   if (!member) {
-    member = mockGuildMember({ client, guild });
+    member = mockGuildMember({ client, guild: channel.guild });
   }
   const rawData: APIChatInputApplicationCommandInteraction = {
     ...setupMockedInteractionAPIData({
@@ -213,7 +214,7 @@ export function mockChatInputCommandInteraction(
       id,
       name,
       type: ApplicationCommandType.ChatInput,
-      guild_id: guild.id,
+      guild_id: channel.guild.id,
     },
   };
   // TODO: Look into adding command to client cache

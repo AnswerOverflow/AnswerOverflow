@@ -32,7 +32,11 @@ beforeEach(async () => {
 describe("Server Settings Menu", () => {
   describe("Toggle Read The Rules Consent Button", () => {
     it("should enable read the rules consent", async () => {
-      const message = await reply(client, <ServerSettingsMenu server={server} />);
+      const message = await reply({
+        content: <ServerSettingsMenu server={server} />,
+        channel: textChannel,
+        member: members.guildMemberOwner,
+      });
       await toggleButtonTest({
         clicker: members.guildMemberOwner.user,
         preClickLabel: ENABLE_READ_THE_RULES_CONSENT_LABEL,
@@ -42,28 +46,30 @@ describe("Server Settings Menu", () => {
       const updated = await findServerById(server.id);
       expect(updated!.flags.readTheRulesConsentEnabled).toBeTruthy();
     });
-    // it("should disable read the rules consent", async () => {
-    //   const updated = await updateServer({
-    //     existing: null,
-    //     update: {
-    //       id: server.id,
-    //       flags: {
-    //         readTheRulesConsentEnabled: true,
-    //       },
-    //     },
-    //   });
-    //   const message = await reply(reacord, <ServerSettingsMenu server={updated} />);
-    //   await toggleButtonTest({
-    //     clicker: members.guildMemberOwner,
-    //     preClickLabel: DISABLE_READ_THE_RULES_CONSENT_LABEL,
-    //     postClickLabel: ENABLE_READ_THE_RULES_CONSENT_LABEL,
-    //     message: message,
-    //     reacord,
-    //     channel: textChannel,
-    //   });
-    //   const updated2 = await findServerById(server.id);
-    //   expect(updated2!.flags.readTheRulesConsentEnabled).toBeFalsy();
-    // });
+    it("should disable read the rules consent", async () => {
+      const updated = await updateServer({
+        existing: null,
+        update: {
+          id: server.id,
+          flags: {
+            readTheRulesConsentEnabled: true,
+          },
+        },
+      });
+      const message = await reply({
+        content: <ServerSettingsMenu server={updated} />,
+        channel: textChannel,
+        member: members.guildMemberOwner,
+      });
+      await toggleButtonTest({
+        clicker: members.guildMemberOwner.user,
+        preClickLabel: DISABLE_READ_THE_RULES_CONSENT_LABEL,
+        postClickLabel: ENABLE_READ_THE_RULES_CONSENT_LABEL,
+        message: message,
+      });
+      const updated2 = await findServerById(server.id);
+      expect(updated2!.flags.readTheRulesConsentEnabled).toBeFalsy();
+    });
   });
   // describe("View On Answer Overflow Link", () => {
   //   it("should have a link to the server's page on Answer Overflow", async () => {
