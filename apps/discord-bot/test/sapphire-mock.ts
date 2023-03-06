@@ -1,4 +1,4 @@
-import { ReacordTester } from "@answeroverflow/reacord";
+import { ReacordTester } from "@answeroverflow/discordjs-react";
 import { container } from "@sapphire/framework";
 import { assert } from "console";
 import { ClientOptions, Options } from "discord.js";
@@ -68,8 +68,8 @@ export function mockSapphireClient(
 }
 
 export function mockReacord() {
-  container.reacord = new ReacordTester();
-  return container.reacord;
+  container.discordJSReact = new ReacordTester();
+  return container.discordJSReact;
 }
 
 export async function setupAnswerOverflowBot() {

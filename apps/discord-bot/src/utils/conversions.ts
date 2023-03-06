@@ -18,7 +18,7 @@ import {
   DiscordAccount as AODiscordAccount,
   getDefaultChannelWithFlags,
 } from "@answeroverflow/db";
-import type { ComponentEvent } from "@answeroverflow/reacord";
+import type { ComponentEvent } from "@answeroverflow/discordjs-react";
 import type { DiscordAPIServerSchema } from "@answeroverflow/cache";
 
 export function toAOMessageReference(reference: MessageReference): AOMessage["messageReference"] {

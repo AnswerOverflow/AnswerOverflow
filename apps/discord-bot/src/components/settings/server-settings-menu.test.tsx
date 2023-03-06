@@ -1,7 +1,7 @@
 import { findLinkByURL, reply, toggleButtonTest } from "~discord-bot/test/reacord-utils";
 import React from "react";
 import { createServer, findServerById, ServerWithFlags, updateServer } from "@answeroverflow/db";
-import type { ReacordTester } from "@answeroverflow/reacord";
+import type { ReacordTester } from "@answeroverflow/discordjs-react";
 import type { Guild, TextChannel } from "discord.js";
 import { mockReacord, setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import {
@@ -38,7 +38,7 @@ describe("Server Settings Menu", () => {
         clicker: members.guildMemberOwner,
         preClickLabel: ENABLE_READ_THE_RULES_CONSENT_LABEL,
         postClickLabel: DISABLE_READ_THE_RULES_CONSENT_LABEL,
-        message: message!,
+        message: message,
         reacord,
         channel: textChannel,
       });
@@ -60,7 +60,7 @@ describe("Server Settings Menu", () => {
         clicker: members.guildMemberOwner,
         preClickLabel: DISABLE_READ_THE_RULES_CONSENT_LABEL,
         postClickLabel: ENABLE_READ_THE_RULES_CONSENT_LABEL,
-        message: message!,
+        message: message,
         reacord,
         channel: textChannel,
       });
@@ -71,7 +71,7 @@ describe("Server Settings Menu", () => {
   describe("View On Answer Overflow Link", () => {
     it("should have a link to the server's page on Answer Overflow", async () => {
       const message = await reply(reacord, <ServerSettingsMenu server={server} />);
-      expect(findLinkByURL(message!, `https://answeroverflow.com/c/${server.id}`)).toBeTruthy();
+      expect(findLinkByURL(message, `https://answeroverflow.com/c/${server.id}`)).toBeTruthy();
     });
   });
 });

@@ -15,16 +15,17 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@answeroverflow/reacord@^0.5.11":
-  version "0.5.11"
-  resolved "https://registry.yarnpkg.com/@answeroverflow/reacord/-/reacord-0.5.11.tgz#6248886012383fc666a0fa9dbfc456623424a979"
-  integrity sha512-TNtgDS4jSuULT3wIkz59ONBiOAv0NEXZQGkwi178e78RDtdviiNdIvEaHjY8f2EwjdvIB0H1TGar3hJYZmLk6g==
+"@answeroverflow/discordjs-react@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@answeroverflow/discordjs-react/-/discordjs-react-0.0.8.tgz#c6c894c8164a6a5f3784830019b88e24a8915180"
+  integrity sha512-fpdMjMmBNH5Jg5F/zmyLE8puReCw67DsP/iwb2FsfAEhpMX3fjgDIM2zCLHqzXb/O3/aKTBz3chzqD+lUYBsxw==
   dependencies:
     "@types/node" "*"
-    "@types/react" "*"
+    "@types/react" "^17.0.37"
     "@types/react-reconciler" "^0.28.0"
     react-reconciler "^0.29.0"
-    rxjs "^7.5.6"
+    rxjs "^7.8.0"
+    type-fest "3.5.7"
 
 "@aw-web-design/x-default-browser@1.4.88":
   version "1.4.88"
@@ -4159,6 +4160,15 @@
   version "18.0.28"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.28.tgz#accaeb8b86f4908057ad629a26635fe641480065"
   integrity sha512-RD0ivG1kEztNBdoAK7lekI9M+azSnitIn85h4iOiaLjaTrMjzslhaqCGaI4IyCJ1RljWiLCEu4jyrLLgqxBTew==
+  dependencies:
+    "@types/prop-types" "*"
+    "@types/scheduler" "*"
+    csstype "^3.0.2"
+
+"@types/react@^17.0.37":
+  version "17.0.53"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.53.tgz#10d4d5999b8af3d6bc6a9369d7eb953da82442ab"
+  integrity sha512-1yIpQR2zdYu1Z/dc1OxC+MA6GR240u3gcnP4l6mvj/PJiVaqHsQPmWttsvHsfnhfPbU2FuGmo0wSITPygjBmsw==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -13048,7 +13058,7 @@ rxjs@^6.6.3:
   dependencies:
     tslib "^1.9.0"
 
-rxjs@^7.5.6, rxjs@^7.8.0:
+rxjs@^7.8.0:
   version "7.8.0"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.0.tgz#90a938862a82888ff4c7359811a595e14e1e09a4"
   integrity sha512-F2+gxDshqmIub1KdvZkaEfGDwLNpPvk9Fs6LD/MyQxNgMds/WH9OdDDXOmxUZpME+iSK3rQCctkL0DYyytUqMg==
@@ -14305,6 +14315,11 @@ type-detect@4.0.8, type-detect@^4.0.0, type-detect@^4.0.5:
   version "4.0.8"
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
+
+type-fest@3.5.7:
+  version "3.5.7"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-3.5.7.tgz#1ee9efc9a172f4002c40b896689928a7bba537f2"
+  integrity sha512-6J4bYzb4sdkcLBty4XW7F18VPI66M4boXNE+CY40532oq2OJe6AVMB5NmjOp6skt/jw5mRjz/hLRpuglz0U+FA==
 
 type-fest@^0.16.0:
   version "0.16.0"

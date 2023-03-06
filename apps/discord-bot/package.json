@@ -7,11 +7,11 @@
   "dependencies": {
     "@answeroverflow/api": "*",
     "@answeroverflow/cache": "*",
+    "@answeroverflow/constants": "*",
     "@answeroverflow/db": "*",
     "@answeroverflow/db-mock": "*",
-    "@answeroverflow/constants": "*",
+    "@answeroverflow/discordjs-react": "^0.0.8",
     "@answeroverflow/discordjs-utils": "*",
-    "@answeroverflow/reacord": "^0.5.11",
     "@sapphire/decorators": "6.0.0",
     "@sapphire/discord-utilities": "3.0.0",
     "@sapphire/fetch": "^2.4.1",

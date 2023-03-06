@@ -1,4 +1,4 @@
-import type { ReacordTester } from "@answeroverflow/reacord";
+import type { ReacordTester } from "@answeroverflow/discordjs-react";
 import { delay } from "@answeroverflow/discordjs-mock";
 import type { ReactNode } from "react";
 import { ephemeralReply } from "~discord-bot/utils/utils";
@@ -32,12 +32,12 @@ export async function toggleButtonTest({
 }) {
   const preClickButton = message.findButtonByLabel(preClickLabel, reacord);
   expect(preClickButton).toBeDefined();
-  await preClickButton!.click(channel, clicker);
+  await preClickButton.click(channel, clicker);
 
   // Used to verify no errors were thrown
   expect(reacord.messages).toHaveLength(1);
 
   const postClickButton = message.findButtonByLabel(postClickLabel, reacord);
   expect(postClickButton).toBeDefined();
-  return postClickButton!;
+  return postClickButton;
 }

@@ -1,4 +1,4 @@
-import { ActionRow, Button } from "@answeroverflow/reacord";
+import { ActionRow, Button } from "@answeroverflow/discordjs-react";
 import { container } from "@sapphire/framework";
 import React, { useEffect } from "react";
 import { OpenSupportMenuButton, SupportMenu } from "./support";

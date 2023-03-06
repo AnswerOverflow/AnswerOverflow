@@ -1,9 +1,7 @@
-import { ActionRow, Link } from "@answeroverflow/reacord";
+import { ActionRow, Link } from "@answeroverflow/discordjs-react";
 import type { ServerWithFlags } from "@answeroverflow/prisma-types";
 import React from "react";
-import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
 import { updateReadTheRulesConsentEnabled } from "~discord-bot/domains/server-settings";
-import { componentEventStatusHandler } from "~discord-bot/utils/trpc";
 import { EmbedMenuInstruction, InstructionsContainer, ToggleButton } from "../primitives";
 import {
   DISABLE_READ_THE_RULES_CONSENT_LABEL,
@@ -13,6 +11,8 @@ import {
 } from "@answeroverflow/constants";
 import { delay } from "@answeroverflow/discordjs-mock";
 import { randomUUID } from "crypto";
+import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
+import { ephemeralStatusHandler } from "~discord-bot/utils/utils";
 
 const ToggleReadTheRulesConsentButton = ({
   server,
@@ -26,13 +26,13 @@ const ToggleReadTheRulesConsentButton = ({
     enableLabel={ENABLE_READ_THE_RULES_CONSENT_LABEL}
     disableLabel={DISABLE_READ_THE_RULES_CONSENT_LABEL}
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    onClick={async (event, enabled) => {
+    onClick={async (interaction, enabled) => {
       await delay(6000);
-      void guildOnlyComponentEvent(event, async ({ member }) =>
+      void guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
         updateReadTheRulesConsentEnabled({
           enabled,
           member,
-          Error: (error) => componentEventStatusHandler(event, error.message),
+          Error: (error) => ephemeralStatusHandler(interaction, error.message),
           Ok(result) {
             setServer(result);
           },

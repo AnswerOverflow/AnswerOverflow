@@ -1,4 +1,4 @@
-import type { ReacordTester } from "@answeroverflow/reacord";
+import type { ReacordTester } from "@answeroverflow/discordjs-react";
 import type { TextChannel, PublicThreadChannel, ForumChannel, Guild, Client } from "discord.js";
 import {
   FORUM_GUIDELINES_CONSENT_PROMPT,
@@ -79,7 +79,7 @@ describe("Channel Settings Menu", () => {
         await toggleButtonTest({
           channel: textChannel,
           clicker: members.guildMemberOwner,
-          message: message!,
+          message: message,
           reacord,
           preClickLabel: ENABLE_CHANNEL_INDEXING_LABEL,
           postClickLabel: DISABLE_CHANNEL_INDEXING_LABEL,
@@ -104,7 +104,7 @@ describe("Channel Settings Menu", () => {
         await toggleButtonTest({
           channel: textChannel,
           clicker: members.guildMemberOwner,
-          message: message!,
+          message: message,
           reacord,
           preClickLabel: DISABLE_CHANNEL_INDEXING_LABEL,
           postClickLabel: ENABLE_CHANNEL_INDEXING_LABEL,
@@ -140,7 +140,7 @@ describe("Channel Settings Menu", () => {
         await toggleButtonTest({
           channel: forumThread,
           clicker: members.guildMemberOwner,
-          message: message!,
+          message: message,
           reacord,
           preClickLabel: ENABLE_FORUM_GUIDELINES_CONSENT_LABEL,
           postClickLabel: DISABLE_FORUM_GUIDELINES_CONSENT_LABEL,
@@ -165,7 +165,7 @@ describe("Channel Settings Menu", () => {
         await toggleButtonTest({
           channel: forumThread,
           clicker: members.guildMemberOwner,
-          message: message!,
+          message: message,
           reacord,
           preClickLabel: DISABLE_FORUM_GUIDELINES_CONSENT_LABEL,
           postClickLabel: ENABLE_FORUM_GUIDELINES_CONSENT_LABEL,
@@ -188,7 +188,7 @@ describe("Channel Settings Menu", () => {
         await toggleButtonTest({
           channel: textChannel,
           clicker: members.guildMemberOwner,
-          message: message!,
+          message: message,
           reacord,
           preClickLabel: ENABLE_MARK_AS_SOLUTION_LABEL,
           postClickLabel: DISABLE_MARK_AS_SOLUTION_LABEL,
@@ -213,7 +213,7 @@ describe("Channel Settings Menu", () => {
         await toggleButtonTest({
           channel: textChannel,
           clicker: members.guildMemberOwner,
-          message: message!,
+          message: message,
           reacord,
           preClickLabel: DISABLE_MARK_AS_SOLUTION_LABEL,
           postClickLabel: ENABLE_MARK_AS_SOLUTION_LABEL,
@@ -240,7 +240,7 @@ describe("Channel Settings Menu", () => {
         await toggleButtonTest({
           channel: textChannel,
           clicker: members.guildMemberOwner,
-          message: message!,
+          message: message,
           reacord,
           preClickLabel: ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
           postClickLabel: DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
@@ -266,7 +266,7 @@ describe("Channel Settings Menu", () => {
         await toggleButtonTest({
           channel: textChannel,
           clicker: members.guildMemberOwner,
-          message: message!,
+          message: message,
           reacord,
           preClickLabel: DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
           postClickLabel: ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
@@ -426,7 +426,7 @@ describe("Channel Settings Menu", () => {
           />
         );
         await toggleButtonTest({
-          message: message!,
+          message: message,
           channel: textChannel,
           clicker: members.guildMemberOwner,
           postClickLabel: DISABLE_AUTO_THREAD_LABEL,
@@ -451,7 +451,7 @@ describe("Channel Settings Menu", () => {
           <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
         );
         await toggleButtonTest({
-          message: message!,
+          message: message,
           channel: textChannel,
           clicker: members.guildMemberOwner,
           postClickLabel: ENABLE_AUTO_THREAD_LABEL,

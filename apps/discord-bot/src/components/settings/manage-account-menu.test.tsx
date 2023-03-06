@@ -9,7 +9,7 @@ import {
   UserServerSettingsWithFlags,
 } from "@answeroverflow/db";
 import { mockUserServerSettingsWithFlags } from "@answeroverflow/db-mock";
-import type { ReacordTester } from "@answeroverflow/reacord";
+import type { ReacordTester } from "@answeroverflow/discordjs-react";
 import type { Guild, TextChannel } from "discord.js";
 import { mockReacord, setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import {
@@ -57,7 +57,7 @@ describe("Manage Account Menu", () => {
         clicker: members.guildMemberOwner,
         preClickLabel: GRANT_CONSENT_LABEL,
         postClickLabel: REVOKE_CONSENT_LABEL,
-        message: message!,
+        message: message,
         reacord,
         channel: textChannel,
       });
@@ -82,7 +82,7 @@ describe("Manage Account Menu", () => {
         clicker: members.guildMemberOwner,
         preClickLabel: REVOKE_CONSENT_LABEL,
         postClickLabel: GRANT_CONSENT_LABEL,
-        message: message!,
+        message: message,
         reacord,
         channel: textChannel,
       });
@@ -108,11 +108,11 @@ describe("Manage Account Menu", () => {
         clicker: members.guildMemberOwner,
         preClickLabel: ENABLE_INDEXING_LABEL,
         postClickLabel: DISABLE_INDEXING_LABEL,
-        message: message!,
+        message: message,
         reacord,
         channel: textChannel,
       });
-      const consentButton = message!.findButtonByLabel(GRANT_CONSENT_LABEL, reacord);
+      const consentButton = message.findButtonByLabel(GRANT_CONSENT_LABEL, reacord);
       expect(consentButton?.disabled).toBeFalsy();
     });
     it("should disable indexing of user messages", async () => {
@@ -124,11 +124,11 @@ describe("Manage Account Menu", () => {
         clicker: members.guildMemberOwner,
         preClickLabel: DISABLE_INDEXING_LABEL,
         postClickLabel: ENABLE_INDEXING_LABEL,
-        message: message!,
+        message: message,
         reacord,
         channel: textChannel,
       });
-      const consentButton = message!.findButtonByLabel(GRANT_CONSENT_LABEL, reacord);
+      const consentButton = message.findButtonByLabel(GRANT_CONSENT_LABEL, reacord);
       expect(consentButton?.disabled).toBeTruthy();
     });
   });
@@ -142,7 +142,7 @@ describe("Manage Account Menu", () => {
         clicker: members.guildMemberOwner,
         preClickLabel: GLOBALLY_IGNORE_ACCOUNT_LABEL,
         postClickLabel: STOP_IGNORING_ACCOUNT_LABEL,
-        message: message!,
+        message: message,
         reacord,
         channel: textChannel,
       });
@@ -165,7 +165,7 @@ describe("Manage Account Menu", () => {
         clicker: members.guildMemberOwner,
         preClickLabel: STOP_IGNORING_ACCOUNT_LABEL,
         postClickLabel: GLOBALLY_IGNORE_ACCOUNT_LABEL,
-        message: message!,
+        message: message,
         reacord,
         channel: textChannel,
       });

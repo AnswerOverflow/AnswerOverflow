@@ -1,25 +1,10 @@
 import { container, LogLevel, SapphireClient } from "@sapphire/framework";
-import { InteractionReplyRenderer, ReacordDiscordJs, ReacordTester } from "@answeroverflow/reacord";
 import { ClientOptions, Partials } from "discord.js";
 
 import "~discord-bot/utils/setup";
-import { Router } from "~discord-bot/components/primitives";
-import React from "react";
+import type React from "react";
 import LRUCache from "lru-cache";
-
-declare module "@sapphire/pieces" {
-  interface Container {
-    reacord: ReacordDiscordJs | ReacordTester;
-    messageHistory: LRUCache<
-      string,
-      {
-        history: React.ReactNode[];
-        pushHistory: (message: React.ReactNode) => void;
-        popHistory: () => void;
-      }
-    >;
-  }
-}
+import { DiscordJSReact } from "@answeroverflow/discordjs-react";
 
 function getLogLevel() {
   switch (process.env.NODE_ENV) {
@@ -97,13 +82,15 @@ export const login = async (client: SapphireClient) => {
     });
 
     container.messageHistory = messageHistory;
-    container.reacord = new ReacordDiscordJs(client, {}, ({ children, renderer }) => {
-      if (renderer instanceof InteractionReplyRenderer) {
-        return <Router interactionId={renderer.interaction.id}>{children}</Router>;
-      } else {
-        return children;
-      }
-    });
+
+    // ({ children, renderer }) => {
+    //   if (renderer instanceof InteractionReplyRenderer) {
+    //     return <Router interactionId={renderer.interaction.id}>{children}</Router>;
+    //   } else {
+    //     return children;
+    //   }
+    // }
+    container.discordJSReact = new DiscordJSReact(client, {});
   } catch (error) {
     client.logger.fatal(error);
     client.destroy();
