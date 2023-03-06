@@ -1,10 +1,29 @@
 {
   "name": "@answeroverflow/discordjs-mock",
-  "version": "1.0.0",
-  "main": "./index.ts",
-  "types": "./index.ts",
-  "author": "@sapphire",
-  "license": "UNLICENSE",
+  "version": "0.0.1",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "author": "@answeroverflow",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./package.json": {
+      "import": "./package.json",
+      "require": "./package.json"
+    }
+  },
   "dependencies": {
     "@answeroverflow/discordjs-utils": "*",
     "@answeroverflow/utils": "*"
@@ -16,10 +35,13 @@
     "@types/node": "^18.14.2",
     "jest": "^29.4.1",
     "ts-jest": "^29.0.5",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "tsup": "^6.6.3"
   },
   "scripts": {
-    "build": "tsc",
+    "prepublish": "yarn build",
+    "build": "tsup index.ts --target node16 --format cjs,esm --dts --sourcemap",
+    "build-watch": "yarn build -- --watch",
     "clean": "rm -rf dist node_modules turbo coverage",
     "test": "yarn jest --coverage",
     "test:watch": "yarn jest --watch",
