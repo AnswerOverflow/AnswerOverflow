@@ -144,7 +144,7 @@ function setupMockedChannel<T extends GuildBasedChannel>(
     };
   }
   if (channel.isTextBased()) {
-    // TODO: Add the sent message to the cache
+    // @ts-ignore
     channel.send = (options: string | MessagePayload | MessageCreateOptions) => {
       const isMessagePayload = options instanceof MessagePayload;
       const opts = isMessagePayload ? options.options : options;

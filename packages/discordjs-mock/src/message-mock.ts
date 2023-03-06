@@ -20,6 +20,7 @@ import {
   JSONEncodable,
   MessageActionRowComponentBuilder,
   MessageActionRowComponentData,
+  InteractionReplyOptions,
 } from "discord.js";
 import type { RawMessageData } from "discord.js/typings/rawDataTypes";
 import { randomSnowflake } from "@answeroverflow/discordjs-utils";
@@ -40,7 +41,7 @@ export function mockActionRow(
 }
 
 export function applyMessagePayload(
-  payload: string | MessageEditOptions | MessagePayload,
+  payload: string | MessageEditOptions | MessagePayload | InteractionReplyOptions,
   message: Message
 ) {
   if (typeof payload === "string") {
@@ -55,6 +56,7 @@ export function applyMessagePayload(
     message.components =
       payload.components?.map((comp) => mockActionRow(comp)) ?? message.components;
   }
+
   return message;
 }
 
