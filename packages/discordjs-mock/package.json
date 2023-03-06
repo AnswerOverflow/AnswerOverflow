@@ -1,6 +1,6 @@
 {
   "name": "@answeroverflow/discordjs-mock",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",
@@ -24,11 +24,9 @@
       "require": "./package.json"
     }
   },
-  "dependencies": {
-    "@answeroverflow/discordjs-utils": "*",
-    "@answeroverflow/utils": "*"
-  },
   "devDependencies": {
+    "@answeroverflow/discordjs-utils": "*",
+    "@answeroverflow/utils": "*",
     "@swc/core": "^1.3.32",
     "@swc/jest": "^0.2.24",
     "@types/jest": "^29.4.0",
