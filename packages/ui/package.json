@@ -52,7 +52,7 @@
     "@storybook/addons": "^7.0.0-beta.54",
     "@storybook/client-api": "^7.0.0-beta.54",
     "@storybook/jest": "^0.0.11--canary.22.2783ae7.0",
-    "@storybook/nextjs": "^7.0.0-beta.54",
+    "@storybook/nextjs": "^7.0.0-beta.61",
     "@storybook/preview-web": "^7.0.0-beta.54",
     "@storybook/react": "^7.0.0-beta.54",
     "@storybook/test-runner": "^0.10.0-next.8",
