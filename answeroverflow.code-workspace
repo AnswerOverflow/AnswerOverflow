@@ -115,7 +115,7 @@
     },
     "javascript.suggest.autoImports": true,
     "javascript.updateImportsOnFileMove.enabled": "always",
-    "typescript.preferences.importModuleSpecifier": "non-relative",
+    // "typescript.preferences.importModuleSpecifier": "non-relative",
     "editor.bracketPairColorization.enabled": true,
     "editor.guides.bracketPairs": "active",
     "[json]": {

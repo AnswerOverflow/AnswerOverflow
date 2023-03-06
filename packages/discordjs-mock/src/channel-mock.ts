@@ -30,6 +30,8 @@ import {
   FetchMessagesOptions,
   DiscordAPIError,
   FetchMessageOptions,
+  MessageCreateOptions,
+  MessagePayload,
 } from "discord.js";
 import type { RawMessageData, RawMessageReactionData } from "discord.js/typings/rawDataTypes";
 import {
@@ -39,7 +41,7 @@ import {
   sortMessagesById,
 } from "@answeroverflow/discordjs-utils";
 import { mockGuild } from "./guild-mock";
-import { mockMessage } from "./message";
+import { mockMessage } from "./message-mock";
 
 export function getGuildTextChannelMockDataBase<Type extends GuildTextChannelType>(
   type: Type,
@@ -78,7 +80,7 @@ function setupMockedChannel<T extends GuildBasedChannel>(
     channel.type === ChannelType.GuildAnnouncement ||
     channel.type === ChannelType.GuildForum
   ) {
-    channel.threads.fetchActive = jest.fn().mockImplementation(() => {
+    channel.threads.fetchActive = () => {
       const activeThreads = [...channel.threads.cache.values()].filter(
         (thread) => !thread.archived || thread.archived == null
       );
@@ -89,7 +91,7 @@ function setupMockedChannel<T extends GuildBasedChannel>(
         hasMore: false,
       };
       return Promise.resolve(output);
-    });
+    };
     channel.threads.fetchArchived = jest
       .fn()
       .mockImplementation((options: FetchArchivedThreadOptions = {}) => {
@@ -136,14 +138,26 @@ function setupMockedChannel<T extends GuildBasedChannel>(
         };
         return Promise.resolve(output);
       });
-    channel.createInvite = jest.fn().mockImplementation(() => {
+    channel.createInvite = () => {
       const invite = mockInvite(client, channel);
       return Promise.resolve(invite);
-    });
+    };
   }
   if (channel.isTextBased()) {
     // TODO: Add the sent message to the cache
-    channel.send = jest.fn();
+    channel.send = (options: string | MessagePayload | MessageCreateOptions) => {
+      const isMessagePayload = options instanceof MessagePayload;
+      const opts = isMessagePayload ? options.options : options;
+      const message = mockMessage({
+        client,
+        channel,
+        author: client.user!,
+        override: {
+          content: typeof opts === "string" ? opts : opts.content ?? "",
+        },
+      });
+      return Promise.resolve(message);
+    };
 
     channel.messages.fetch = jest
       .fn()

@@ -1,5 +1,5 @@
 import { Events } from "discord.js";
-import { emitEvent } from "./helpers";
+import { delay, emitEvent } from "./helpers";
 import { mockButtonInteraction, mockChatInputCommandInteraction } from "./interaction-mock";
 import { setupBot } from "./client-mock";
 
@@ -27,6 +27,7 @@ describe("Interaction Mock", () => {
         }
       });
       await emitEvent(client, Events.InteractionCreate, interaction);
+      await delay();
       expect(interaction.message.content).toBe("test");
     });
   });

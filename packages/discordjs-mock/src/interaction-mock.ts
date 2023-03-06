@@ -31,7 +31,7 @@ import {
 } from "discord.js";
 import { randomSnowflake } from "@answeroverflow/discordjs-utils";
 import { mockTextChannel } from "./channel-mock";
-import { mockMessage } from "./message";
+import { mockMessage } from "./message-mock";
 import { mockGuild } from "./guild-mock";
 import { mockGuildMember } from "./user-mock";
 import type {
@@ -284,6 +284,8 @@ export function mockButtonInteraction({
     ...override,
   } satisfies RawMessageButtonInteractionData & RawMessageComponentInteractionData;
   const interaction = Reflect.construct(ButtonInteraction, [client, rawData]) as ButtonInteraction;
+
+  // @ts-ignore
   interaction.update = async (
     options:
       | (InteractionUpdateOptions & { fetchReply: true })

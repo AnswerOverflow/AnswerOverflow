@@ -5,7 +5,7 @@ import {
   mockPublicThread,
   mockThreadFromParentMessage,
 } from "./channel-mock";
-import { mockMessage } from "./message";
+import { mockMessage } from "./message-mock";
 import { setupBot } from "./client-mock";
 import { mockGuild } from "./guild-mock";
 let client: Client;

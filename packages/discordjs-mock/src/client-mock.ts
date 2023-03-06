@@ -25,7 +25,7 @@ export function mockClient(
 
 /* Seperate this out into its own function to be reused with custom clients */
 export function applyClientMocks(client: Client) {
-  Client.prototype.login = jest.fn();
+  Client.prototype.login = async () => Promise.resolve("");
 
   mockClientUser(client);
 }
