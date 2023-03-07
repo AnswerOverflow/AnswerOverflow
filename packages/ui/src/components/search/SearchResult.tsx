@@ -1,7 +1,7 @@
 import type { APISearchResult, ChannelPublicWithFlags, ServerPublic } from "@answeroverflow/api";
 import { DiscordAvatar } from "~ui/components/DiscordAvatar";
 import {
-  MessageRenderer,
+  Message,
   MessageAuthorArea,
   MessageContents,
   MessageTitle,
@@ -37,6 +37,7 @@ const ServerInvite = ({
   );
 };
 
+// TODO: Use data from the API
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SearchResultMetaData = ({ result }: MessageResultProps) => {
   return (
@@ -98,7 +99,7 @@ export const SearchResult = ({ result }: MessageResultProps) => {
         </div>
 
         {/* Answer */}
-        {solution && <MessageRenderer message={solution} />}
+        {solution && <Message message={solution} />}
       </div>
       <div className="flex w-1/4 flex-col items-center justify-center px-5 pt-6 pb-2">
         {/* Server Invite */}
