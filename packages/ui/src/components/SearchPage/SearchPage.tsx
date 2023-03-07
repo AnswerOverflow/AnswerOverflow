@@ -1,8 +1,14 @@
+import type { APISearchResult } from "@answeroverflow/api";
 import { useState } from "react";
-import { Input } from "../primitives/Input";
+import { MessageResult } from "~ui/components/MessageResult/MessageResult";
+import { Input } from "~ui/components/primitives/Input";
 import { Navbar } from "../primitives/Navbar";
 
-export const SearchPage = () => {
+interface SearchResultProps {
+  results?: APISearchResult;
+}
+
+export const SearchPage = ({ results }: SearchResultProps) => {
   const [searchInput, setSearchInput] = useState<string>("");
 
   return (
@@ -15,6 +21,28 @@ export const SearchPage = () => {
         <Input onChange={setSearchInput} type="buttonInput" fill placeholder="Search">
           Search
         </Input>
+
+        {/* Search */}
+        {results &&
+          results.map((result) => {
+            return (
+              <MessageResult
+                authorAvatar={result.message.author.avatar}
+                authorName={result.message.author.name}
+                questionPostedTimestamp={"TODO"}
+                title={"TODO"}
+                description={result.message.content}
+                views={result.score}
+                comments={0}
+                server={{
+                  serverIcon: result.server.icon,
+                  serverName: result.server.name,
+                  channelName: result.channel.name,
+                }}
+                response={false}
+              />
+            );
+          })}
       </div>
     </div>
   );

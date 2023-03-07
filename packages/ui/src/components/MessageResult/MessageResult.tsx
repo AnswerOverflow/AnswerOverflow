@@ -2,7 +2,7 @@ import { Button } from "../primitives/Button";
 
 /* eslint-disable tailwindcss/no-custom-classname */
 export interface MessageResultProps {
-  authorAvatar: string;
+  authorAvatar: string | null;
   /**
    * @example "user#1234"
    */
@@ -14,7 +14,7 @@ export interface MessageResultProps {
   comments: number;
 
   server: {
-    serverIcon: string | undefined;
+    serverIcon: string | null;
     serverName: string;
     channelName: string;
   };
