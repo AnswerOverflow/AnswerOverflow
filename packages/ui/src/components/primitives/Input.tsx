@@ -26,7 +26,7 @@ const InputText = ({ placeholder, fill, onChange }: InputProps) => {
       type="text"
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
-      className={`rounded-standard border-1 border-[#525A66] bg-[#D8DAE0] py-3 font-body font-normal text-ao-black focus:border-transparent focus:outline-transparent focus:ring-2 focus:ring-ao-blue dark:bg-[#181B1F] dark:text-ao-white ${
+      className={`rounded-standard border-1 border-[#889AB2] bg-[#F5F6FA] py-3 font-body font-normal text-ao-black focus:border-transparent focus:outline-transparent focus:ring-2 focus:ring-ao-blue dark:border-[#525A66] dark:bg-[#181B1F] dark:text-ao-white ${
         fill ? "w-full" : ""
       }`}
     />
@@ -35,7 +35,7 @@ const InputText = ({ placeholder, fill, onChange }: InputProps) => {
 
 const InputButton = ({ children }: { children: React.ReactNode }) => {
   return (
-    <button className="absolute right-5 top-1/2 -translate-y-1/2 rounded-standard px-4 py-1 font-body font-semibold dark:bg-[#272C33] dark:text-ao-white">
+    <button className="absolute right-5 top-1/2 -translate-y-1/2 rounded-standard border-1 border-[#889AB2] px-4 py-1 font-body font-semibold hover:bg-[#f1f3f7] dark:border-0 dark:bg-[#272C33] dark:text-ao-white dark:hover:bg-[#2f343b]">
       {children}
     </button>
   );
