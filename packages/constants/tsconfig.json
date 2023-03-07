@@ -1,0 +1,12 @@
+{
+  "extends": "@answeroverflow/tsconfig/base.json",
+  "include": [
+    "index.ts",
+    "src",
+    "../../reset.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "../../node_modules/*"
+  ],
+}

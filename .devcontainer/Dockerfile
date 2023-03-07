@@ -15,3 +15,4 @@ ENV CHOKIDAR_USEPOLLING=true
 # RUN su node -c "npm install -g <your-package-list -here>"
 RUN su node -c "npm install @sapphire/cli -g"
 RUN su node -c "npm install -g eslint"
+RUN su node -c "npm i -g @railway/cli"

@@ -48,9 +48,14 @@ describe("Channel Operations", () => {
       const chnl = mockChannel(server, {
         inviteCode: getRandomId(5),
       });
-      await createChannel(chnl);
+      await createChannel({
+        ...chnl,
+        flags: {
+          indexingEnabled: true,
+        },
+      });
       const found = await findChannelByInviteCode(chnl.inviteCode!);
-      expect(found).toStrictEqual(addFlagsToChannel(chnl));
+      expect(found!.id).toBe(chnl.id);
     });
     it("should return null if channel not found", async () => {
       const found = await findChannelByInviteCode(getRandomId(5));
@@ -78,7 +83,6 @@ describe("Channel Operations", () => {
       const chnl = mockChannelWithFlags(server, {
         flags: {
           autoThreadEnabled: true,
-          forumGuidelinesConsentEnabled: true,
           indexingEnabled: true,
         },
       });
@@ -104,14 +108,14 @@ describe("Channel Operations", () => {
         inviteCode: getRandomId(5),
       });
       await createChannel(chnl);
-      const updated = await updateChannel(
-        {
-          ...chnl,
+      const updated = await updateChannel({
+        old: null,
+        update: {
+          id: chnl.id,
           name: "new name",
           inviteCode: null,
         },
-        null
-      );
+      });
       expect(updated).toStrictEqual({
         ...chnl,
         name: "new name",
@@ -135,23 +139,67 @@ describe("Channel Operations", () => {
         name: "new name",
         flags: {
           indexingEnabled: true,
+          markSolutionEnabled: true,
           sendMarkSolutionInstructionsInNewThreads: true,
         },
       });
       await createChannel(chnl);
-      const updated = await updateChannel(
-        {
-          ...chnl,
+      const updated = await updateChannel({
+        old: chnl,
+        update: {
+          id: chnl.id,
           name: "new name",
           flags: {
+            markSolutionEnabled: true,
             sendMarkSolutionInstructionsInNewThreads: true,
           },
         },
-        chnl
-      );
+      });
       expect(updated).toStrictEqual(target);
       const found = await findChannelById(chnl.id);
       expect(found).toStrictEqual(target);
+    });
+    it("should clear the invite of a channel when setting indexing to disabled", async () => {
+      const chnl = mockChannelWithFlags(server, {
+        inviteCode: getRandomId(5),
+        flags: {
+          indexingEnabled: true,
+        },
+      });
+      await createChannel(chnl);
+      await updateChannel({
+        old: chnl,
+        update: {
+          id: chnl.id,
+          flags: {
+            indexingEnabled: false,
+          },
+        },
+      });
+      const found = await findChannelById(chnl.id);
+      expect(found!.inviteCode).toBeNull();
+    });
+    it("should update a channel with a thread", async () => {
+      const chnl = mockChannelWithFlags(server, {
+        flags: {
+          autoThreadEnabled: true,
+        },
+      });
+      const thread = mockThread(chnl);
+      await createChannel(chnl);
+      await createChannel(thread);
+      const updated = await updateChannel({
+        old: chnl,
+        update: {
+          id: chnl.id,
+          flags: {
+            autoThreadEnabled: false,
+          },
+        },
+      });
+      expect(updated.flags.autoThreadEnabled).toBeFalsy();
+      const found = await findChannelById(chnl.id);
+      expect(found!.flags.autoThreadEnabled).toBeFalsy();
     });
   });
   describe("Update Many Channels", () => {
@@ -236,7 +284,9 @@ describe("Channel Operations", () => {
   describe("Channel Upsert", () => {
     it("should upsert create a channel", async () => {
       const chnl = mockChannelWithFlags(server);
-      const created = await upsertChannel(chnl);
+      const created = await upsertChannel({
+        create: chnl,
+      });
       expect(created).toStrictEqual(chnl);
       const found = await findChannelById(chnl.id);
       expect(found).toStrictEqual(chnl);
@@ -245,8 +295,10 @@ describe("Channel Operations", () => {
       const chnl = mockChannelWithFlags(server);
       await createChannel(chnl);
       const updated = await upsertChannel({
-        ...chnl,
-        name: "new name",
+        create: chnl,
+        update: {
+          name: "new name",
+        },
       });
       expect(updated).toStrictEqual({
         ...chnl,

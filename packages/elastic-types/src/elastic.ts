@@ -118,7 +118,7 @@ function getElasticClient(): Elastic {
     });
   } else if (process.env.NODE_ENV === "production") {
     // Allow for building locally
-    if (!process.env.ELASTICSEARCH_CLOUD_ID || !process.env.ELASTICSEARCH_API_KEY) {
+    if (!process.env.ELASTICSEARCH_CLOUD_ID) {
       return new Elastic({
         node: process.env.ELASTICSEARCH_URL,
         auth: {
@@ -132,7 +132,8 @@ function getElasticClient(): Elastic {
           id: process.env.ELASTICSEARCH_CLOUD_ID,
         },
         auth: {
-          apiKey: process.env.ELASTICSEARCH_API_KEY,
+          password: process.env.ELASTICSEARCH_PASSWORD,
+          username: process.env.ELASTICSEARCH_USERNAME,
         },
       });
     }
@@ -464,10 +465,14 @@ export class Elastic extends Client {
       index: this.messagesIndex,
     });
     if (exists) {
-      await this.destroyMessagesIndex();
+      if (process.env.NODE_ENV === "production") {
+        throw new Error("Messages index already exists. Cannot overwrite");
+      } else {
+        await this.destroyMessagesIndex();
+      }
     }
     return this.indices.create({
-      index: "messages",
+      index: this.messagesIndex,
       mappings: {
         _source: {
           excludes: ["tags"],

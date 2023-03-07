@@ -1,16 +1,16 @@
-import { Link } from "@answeroverflow/reacord";
+import { ActionRow, Link } from "@answeroverflow/reacord";
 import type { ServerWithFlags } from "@answeroverflow/prisma-types";
 import React from "react";
-import { ToggleButton } from "~discord-bot/components/toggle-button";
 import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
 import { updateReadTheRulesConsentEnabled } from "~discord-bot/domains/server-settings";
 import { componentEventStatusHandler } from "~discord-bot/utils/trpc";
-import { InstructionsContainer } from "./instructions-container";
-import { EmbedMenuInstruction } from "./instructions";
-import { READ_THE_RULES_CONSENT_PROMPT } from "~discord-bot/domains/manage-account";
-
-export const ENABLE_READ_THE_RULES_CONSENT_LABEL = "Enable read the rules consent";
-export const DISABLE_READ_THE_RULES_CONSENT_LABEL = "Disable read the rules consent";
+import { EmbedMenuInstruction, InstructionsContainer, ToggleButton } from "../primitives";
+import {
+  DISABLE_READ_THE_RULES_CONSENT_LABEL,
+  ENABLE_READ_THE_RULES_CONSENT_LABEL,
+  READ_THE_RULES_CONSENT_PROMPT,
+  VIEW_ON_ANSWEROVERFLOW_LABEL,
+} from "@answeroverflow/constants";
 
 const ToggleReadTheRulesConsentButton = ({
   server,
@@ -54,13 +54,23 @@ export function ServerSettingsMenu({ server: initialServer }: { server: ServerWi
             {
               enabled: !server.flags.readTheRulesConsentEnabled,
               title: ENABLE_READ_THE_RULES_CONSENT_LABEL,
-              instructions: `New members who agree to the membership screening will be marked as consenting. \n\n**Before enabling, add the following text in your membership screening**: \n${READ_THE_RULES_CONSENT_PROMPT}`,
+              instructions: `New members who agree to the membership screening will be marked as consenting. You must have the following test in your membership screening before enabling: \n\n\`${READ_THE_RULES_CONSENT_PROMPT}\``,
+            },
+            {
+              enabled: true,
+              title: VIEW_ON_ANSWEROVERFLOW_LABEL,
+              instructions: "View your community on answeroverflow.com",
             },
           ]}
         />
       </InstructionsContainer>
       <ToggleReadTheRulesConsentButton setServer={setServer} server={server} />
-      <Link url={`https://answeroverflow.com/c/${server.id}`} label="View On Answer Overflow" />
+      <ActionRow>
+        <Link
+          url={`https://answeroverflow.com/c/${server.id}`}
+          label={VIEW_ON_ANSWEROVERFLOW_LABEL}
+        />
+      </ActionRow>
     </>
   );
 }

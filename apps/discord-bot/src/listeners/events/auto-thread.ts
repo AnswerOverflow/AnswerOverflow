@@ -1,20 +1,17 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener } from "@sapphire/framework";
-import { ChannelType, Events, Message } from "discord.js";
+import { Events, Message } from "discord.js";
 import { findChannelById } from "@answeroverflow/db";
-import { removeDiscordMarkdown } from "~discord-bot/utils/utils";
+import { isHumanMessage, removeDiscordMarkdown } from "~discord-bot/utils/utils";
+import { ALLOWED_AUTO_THREAD_CHANNEL_TYPES } from "@answeroverflow/constants";
 
 @ApplyOptions<Listener.Options>({ event: Events.MessageCreate })
 export class OnMessage extends Listener {
   public async run(message: Message) {
     const channelType = message.channel.type;
-    const allowedThreadChannelTypes = new Set([
-      ChannelType.GuildText,
-      ChannelType.GuildAnnouncement,
-    ]);
-    if (!allowedThreadChannelTypes.has(channelType)) return;
-    if (message.author.bot) return;
-    if (message.author.system) return;
+
+    if (!ALLOWED_AUTO_THREAD_CHANNEL_TYPES.has(channelType)) return;
+    if (!isHumanMessage(message)) return;
 
     // Channel is text based, and message has been sent by a human
 

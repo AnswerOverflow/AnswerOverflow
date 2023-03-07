@@ -13,6 +13,7 @@
     "test:watch": "yarn run vitest"
   },
   "dependencies": {
+    "dotenv-cra": "^3.0.3",
     "lorem-ipsum": "^2.0.8"
   },
   "devDependencies": {
