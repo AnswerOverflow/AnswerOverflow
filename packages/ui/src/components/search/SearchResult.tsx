@@ -1,40 +1,16 @@
-import type {
-  APISearchResult,
-  ChannelPublicWithFlags,
-  APIMessageWithDiscordAccount,
-  ServerPublic,
-} from "@answeroverflow/api";
+import type { APISearchResult, ChannelPublicWithFlags, ServerPublic } from "@answeroverflow/api";
+import { DiscordAvatar } from "~ui/components/DiscordAvatar";
+import {
+  MessageRenderer,
+  MessageAuthorArea,
+  MessageContents,
+  MessageTitle,
+} from "~ui/components/primitives/Message";
 import { Button } from "../primitives/Button";
 
-/* eslint-disable tailwindcss/no-custom-classname */
 export interface MessageResultProps {
   result: APISearchResult[number];
 }
-
-interface AuthorAreaProps {
-  authorName: string;
-}
-
-const AuthorArea = ({ authorName }: AuthorAreaProps) => {
-  return (
-    <div className="flex flex-row gap-2">
-      {/* Image */}
-      <div className="h-8 w-8 rounded-[50%] border-1 border-white bg-[#D9D9D9]/[.06]"></div>
-      <span className="h-full font-body text-lg text-white/[.47]">{authorName}</span>
-    </div>
-  );
-};
-
-const Message = ({ message }: { message: APIMessageWithDiscordAccount }) => {
-  return (
-    <div className="grow rounded-bl-standard border-2 border-[#00FF85]/[.47] bg-[#00FF85]/[0.01]">
-      <div className="p-6">
-        <AuthorArea authorName={message.author.name} />
-        <p className="mt-2 text-ao-white">{message.content}</p>
-      </div>
-    </div>
-  );
-};
 
 const ServerInvite = ({
   server,
@@ -105,7 +81,7 @@ const SearchResultMetaData = ({ result }: MessageResultProps) => {
   );
 };
 
-export const MessageResult = ({ result }: MessageResultProps) => {
+export const SearchResult = ({ result }: MessageResultProps) => {
   const solution = result.message.solutionMessages?.[0];
   return (
     <div className="flex h-full w-full flex-row rounded-standard border-2 border-[#696969]/[.42] bg-[#181B1F]">
@@ -114,19 +90,15 @@ export const MessageResult = ({ result }: MessageResultProps) => {
         <div className="border-r-2 border-white/[.13] p-6">
           {/* Timestamp area */}
           <div className="flex flex-row">
-            <AuthorArea authorName={result.message.author.name} />
+            <DiscordAvatar user={result.message.author} size={"sm"} />
+            <MessageAuthorArea message={result.message} />
           </div>
-
-          <div className="pt-4">
-            <h4 className="font-body text-4xl font-semibold text-ao-white">
-              {result?.thread?.name ?? result.channel.name}
-            </h4>
-            <p className="pt-2 font-body font-light text-ao-white">{result.message.content}</p>
-          </div>
+          <MessageTitle channel={result.channel} thread={result.thread} />
+          <MessageContents message={result.message} />
         </div>
 
         {/* Answer */}
-        {solution && <Message message={solution} />}
+        {solution && <MessageRenderer message={solution} />}
       </div>
       <div className="flex w-1/4 flex-col items-center justify-center px-5 pt-6 pb-2">
         {/* Server Invite */}

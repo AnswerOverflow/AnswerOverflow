@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { mockChannelWithSettings, mockMessageWithDiscordAccount, mockServer } from "~ui/test/props";
-import { MessageResult, MessageResultProps } from "./SearchResult";
+import { SearchResult } from "./SearchResult";
 
 const meta = {
-  component: MessageResult,
+  component: SearchResult,
   argTypes: {
     color: {
       control: {
@@ -20,19 +20,13 @@ const meta = {
       defaultValue: false,
     },
   },
-} as Meta<typeof MessageResult>;
+} as Meta<typeof SearchResult>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
-  render: (props: MessageResultProps) => (
-    <div className="h-full w-2/3 px-2">
-      <MessageResult {...props} />
-    </div>
-  ),
-
   args: {
     result: {
       message: {

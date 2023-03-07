@@ -1,7 +1,8 @@
 import type { APISearchResult } from "@answeroverflow/api";
 import { useState } from "react";
-import { MessageResult } from "~ui/components/MessageResult/SearchResult";
+
 import { Input } from "~ui/components/primitives/Input";
+import { SearchResult } from "~ui/components/search/SearchResult";
 import { Navbar } from "../primitives/Navbar";
 
 interface SearchResultProps {
@@ -25,23 +26,7 @@ export const SearchPage = ({ results }: SearchResultProps) => {
         {/* Search */}
         {results &&
           results.map((result) => {
-            return (
-              <MessageResult
-                authorAvatar={result.message.author.avatar}
-                authorName={result.message.author.name}
-                questionPostedTimestamp={"TODO"}
-                title={"TODO"}
-                description={result.message.content}
-                views={result.score}
-                comments={0}
-                server={{
-                  serverIcon: result.server.icon,
-                  serverName: result.server.name,
-                  channelName: result.channel.name,
-                }}
-                response={false}
-              />
-            );
+            return <SearchResult result={result} />;
           })}
       </div>
     </div>

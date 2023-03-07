@@ -31,7 +31,7 @@ export type MessageProps = {
 const { toHTML } = discordMarkdown;
 
 // TODO: Align text to be same level with the avatar
-export const Message = forwardRef<HTMLDivElement, MessageProps>(function MessageComp(
+export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(function MessageComp(
   {
     message,
     thread,
@@ -137,8 +137,8 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
                 </span>
                 <span
                   className={`ml-[0.25rem] flex items-center justify-center text-[0.75rem] text-[hsl(213,_9.6%,_40.8%)] ${forceDarkMode
-                    ? "text-[hsl(216,_3.7%,_73.5%)]"
-                    : "dark:text-[hsl(216,_3.7%,_73.5%)]"
+                      ? "text-[hsl(216,_3.7%,_73.5%)]"
+                      : "dark:text-[hsl(216,_3.7%,_73.5%)]"
                     }`}
                 >
                   {dateOfMessage}

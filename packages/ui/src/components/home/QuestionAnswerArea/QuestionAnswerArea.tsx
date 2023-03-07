@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import Xarrow from "react-xarrows";
-import { Message, MessageProps } from "~ui/components/home/DemoMessage";
+import { DemoMessage, MessageProps } from "~ui/components/home/DemoMessage";
 import { useTheme } from "~ui/utils/hooks";
 import { GooglePage } from "./GooglePage/GooglePage";
 import "./DashAnimation.css";
@@ -31,8 +31,8 @@ export const QuestionAnswerArea = ({
           </div>
 
           <div ref={discordPageRef}>
-            <Message {...questionMessage} showLinkIcon={false} forceDarkMode={true} />
-            <Message
+            <DemoMessage {...questionMessage} showLinkIcon={false} forceDarkMode={true} />
+            <DemoMessage
               {...answerMessage}
               additionalMessageBoxClassNames="rounded-b-md"
               showLinkIcon={false}
