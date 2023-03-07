@@ -38,13 +38,17 @@ There are shortcut buttons in the README to jump start running from a remote env
   - In this case, consider creating a smaller machine and just running the package you're developing in
   - This is only for packages that don't make any calls to the databases. If you try to run the tests on the whole project without databases setup the tests will fail
 
-### Codespace secrets
+### CDE Env's
+
+#### Github Codespaces Secrets
 
 We recommend using [encrypted secrets](https://docs.github.com/en/codespaces/managing-your-codespaces/managing-encrypted-secrets-for-your-codespaces) while using [github codespaces](https://github.com/features/codespaces). This makes moving between different codespaces much quicker, removing the need to regenerate secrets for your .env file.
 
 Please note, if you do not copy all the .env.example variables into your codespace secrets, you must still make a .env file from your .env.example file - otherwise you will have missing env variables!
 
-Alternatively, if you are using gitpod, you should use [gitpod enviroment variables](https://www.gitpod.io/guides/automate-env-files-with-gitpod-environment-variables).
+#### Gitpod Secrets
+
+If you are using gitpod, you should use [gitpod enviroment variables](https://www.gitpod.io/guides/automate-env-files-with-gitpod-environment-variables).
 
 ## UI
 
