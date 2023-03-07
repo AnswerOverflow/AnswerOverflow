@@ -5,7 +5,7 @@ import { Input } from "~ui/components/primitives/Input";
 import { Navbar } from "../primitives/Navbar";
 
 interface SearchResultProps {
-  results?: APISearchResult[number];
+  results?: APISearchResult[number][];
 }
 
 export const SearchPage = ({ results }: SearchResultProps) => {
