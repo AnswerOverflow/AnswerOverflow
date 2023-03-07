@@ -1,6 +1,6 @@
 import type { APISearchResult } from "@answeroverflow/api";
 import { useState } from "react";
-import { MessageResult } from "~ui/components/MessageResult/MessageResult";
+import { MessageResult } from "~ui/components/MessageResult/SearchResult";
 import { Input } from "~ui/components/primitives/Input";
 import { Navbar } from "../primitives/Navbar";
 

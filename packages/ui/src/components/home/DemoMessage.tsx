@@ -1,17 +1,17 @@
-import { DiscordAvatar } from "./DiscordAvatar";
+import { DiscordAvatar } from "../DiscordAvatar";
 import { getSnowflakeUTCDate } from "~ui/utils/snowflake";
 import Image from "next/image";
 import discordMarkdown from "discord-markdown";
 import Parser from "html-react-parser";
 
-import type { MessageWithDiscordAccount } from "@answeroverflow/api";
-import { DiscordIcon } from "./icons/DiscordIcon";
+import type { APIMessageWithDiscordAccount } from "@answeroverflow/api";
+import { DiscordIcon } from "../icons/DiscordIcon";
 import Link from "next/link";
 import type { ChannelPublicWithFlags } from "~api/router/channel/types";
-import { useIsUserInServer } from "../utils";
+import { useIsUserInServer } from "~ui/utils/hooks";
 import { forwardRef } from "react";
 export type MessageProps = {
-  message: MessageWithDiscordAccount;
+  message: APIMessageWithDiscordAccount;
   thread?: ChannelPublicWithFlags;
   blurred?: boolean;
   notPublicTitle?: string;
@@ -54,7 +54,7 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
     blurred = false;
   }
 
-  function MessageImage({ image }: { image: MessageWithDiscordAccount["images"][number] }) {
+  function MessageImage({ image }: { image: APIMessageWithDiscordAccount["images"][number] }) {
     let width = image.width;
     let height = image.height;
     const maxWidth = 400;
@@ -136,11 +136,10 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
                   {message.author.name}
                 </span>
                 <span
-                  className={`ml-[0.25rem] flex items-center justify-center text-[0.75rem] text-[hsl(213,_9.6%,_40.8%)] ${
-                    forceDarkMode
-                      ? "text-[hsl(216,_3.7%,_73.5%)]"
-                      : "dark:text-[hsl(216,_3.7%,_73.5%)]"
-                  }`}
+                  className={`ml-[0.25rem] flex items-center justify-center text-[0.75rem] text-[hsl(213,_9.6%,_40.8%)] ${forceDarkMode
+                    ? "text-[hsl(216,_3.7%,_73.5%)]"
+                    : "dark:text-[hsl(216,_3.7%,_73.5%)]"
+                    }`}
                 >
                   {dateOfMessage}
                 </span>
@@ -163,9 +162,8 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
             )}
           </div>
           <div
-            className={`mt-2 max-w-[80vw] text-black ${
-              forceDarkMode ? "text-neutral-50" : "dark:text-neutral-50"
-            } sm:mt-0 sm:max-w-[70vw] md:max-w-full`}
+            className={`mt-2 max-w-[80vw] text-black ${forceDarkMode ? "text-neutral-50" : "dark:text-neutral-50"
+              } sm:mt-0 sm:max-w-[70vw] md:max-w-full`}
           >
             {parsedMessageContent}
           </div>
@@ -183,9 +181,8 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
 
   return (
     <div
-      className={`relative h-full w-full  p-2 ${additionalMessageBoxClassNames ?? ""} ${
-        forceDarkMode ? "bg-[#36393F]" : "dark:bg-[#36393F]"
-      }`}
+      className={`relative h-full w-full  p-2 ${additionalMessageBoxClassNames ?? ""} ${forceDarkMode ? "bg-[#36393F]" : "dark:bg-[#36393F]"
+        }`}
       ref={ref}
     >
       {blurred ? (
@@ -205,9 +202,8 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(function Message
             <div className="absolute inset-0 " />
             <div className="absolute inset-0 flex items-center justify-center ">
               <div
-                className={`flex flex-col items-center justify-center text-center text-black ${
-                  forceDarkMode ? "text-white" : "dark:text-white"
-                }`}
+                className={`flex flex-col items-center justify-center text-center text-black ${forceDarkMode ? "text-white" : "dark:text-white"
+                  }`}
               >
                 <div className="text-2xl ">{notPublicTitle}</div>
                 <div>Sign In & Join Server To View</div>

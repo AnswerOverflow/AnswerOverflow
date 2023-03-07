@@ -1,15 +1,15 @@
 import type {
   ChannelPublicWithFlags,
-  MessageWithDiscordAccount,
+  APIMessageWithDiscordAccount,
   ServerPublic,
 } from "@answeroverflow/api";
 import { useIsUserInServer } from "../utils";
-import { Message } from "./Message";
+import { Message } from "./home/DemoMessage"; // TODO: Swap for real message
 import { SearchBar } from "./SearchBar";
 import { ServerInviteDriver } from "./ServerInviteDriver";
 
 export type MessageResultPageProps = {
-  messages: MessageWithDiscordAccount[];
+  messages: APIMessageWithDiscordAccount[];
   server: ServerPublic;
   channel: ChannelPublicWithFlags;
   thread?: ChannelPublicWithFlags;
@@ -26,7 +26,7 @@ export function MessageResultPage({
   query,
 }: MessageResultPageProps) {
   const solutionMessageId = messages.at(0)?.solutionIds?.at(0);
-  const MessageStack = ({ messages }: { messages: MessageWithDiscordAccount[] }) => {
+  const MessageStack = ({ messages }: { messages: APIMessageWithDiscordAccount[] }) => {
     let consecutivePrivateMessages = 0;
     const isUserInServer = useIsUserInServer(server.id);
     return (

@@ -5,7 +5,6 @@ import {
   findIgnoredDiscordAccountById,
   getDefaultDiscordAccount,
   getDefaultMessage,
-  isMessageFull,
   MessageFull,
   MessageWithDiscordAccount,
   ServerWithFlags,
@@ -210,21 +209,13 @@ export const canUserViewPrivateMessage = (
   message: MessageFull | MessageWithDiscordAccount
 ) => userServers?.find((s) => s.id === message.serverId);
 
-// Kind of ugly having it take in two different types, but it's the easiest way to do it
-export function stripPrivateMessageData(
-  message: MessageFull | MessageWithDiscordAccount,
-  userServers: DiscordAPIServerSchema[] | null = null
-): MessageFull | MessageWithDiscordAccount {
-  const isPartialMessage = !isMessageFull(message);
-  // If it is only a reply and is public, then just return
-  if (isPartialMessage && message.public) {
-    return message;
-  }
-
+export function stripPrivatePartialMessageData(
+  message: MessageWithDiscordAccount,
+  userServers: DiscordAPIServerSchema[] | null
+) {
   if (canUserViewPrivateMessage(userServers, message)) {
     return message;
   }
-
   const defaultAuthor = getDefaultDiscordAccount({
     id: "0",
     name: "Unknown User",
@@ -238,24 +229,39 @@ export function stripPrivateMessageData(
     childThread: null,
   });
 
-  // If it is a reply, then we know that is it private so we can just return
-  // If there is no referenced message, then we can just return
-  if (isPartialMessage) {
-    return {
-      ...defaultMessage,
-      author: defaultAuthor,
-      public: false,
-    };
-  }
+  return {
+    ...defaultMessage,
+    author: defaultAuthor,
+    public: false,
+  };
+}
+
+// Kind of ugly having it take in two different types, but it's the easiest way to do it
+export function stripPrivateFullMessageData(
+  message: MessageFull,
+  userServers: DiscordAPIServerSchema[] | null
+): MessageFull {
+  const defaultAuthor = getDefaultDiscordAccount({
+    id: "0",
+    name: "Unknown User",
+  });
+  const defaultMessage = getDefaultMessage({
+    channelId: message.channelId,
+    serverId: message.serverId,
+    authorId: defaultAuthor.id,
+    parentChannelId: message.parentChannelId,
+    id: message.id,
+    childThread: null,
+  });
 
   const reply = message.referencedMessage
-    ? stripPrivateMessageData(message.referencedMessage, userServers)
+    ? stripPrivatePartialMessageData(message.referencedMessage, userServers)
     : null;
 
   const solutions = message.solutionMessages.map((solution) =>
-    stripPrivateMessageData(solution, userServers)
+    stripPrivatePartialMessageData(solution, userServers)
   );
-  if (message.public) {
+  if (message.public || canUserViewPrivateMessage(userServers, message)) {
     return {
       ...message,
       referencedMessage: reply,

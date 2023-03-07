@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { MessageProps, Message } from "./Message";
+import { MessageProps, Message } from "./DemoMessage";
 import { mockDiscordAccount } from "~ui/test/props";
 
-import type { MessageWithDiscordAccount } from "@answeroverflow/db";
+import type { APIMessageWithDiscordAccount } from "@answeroverflow/api";
 
 const meta = {
   component: Message,
@@ -38,7 +38,7 @@ const defaultMessage: MessageProps = {
     solutionIds: [],
     childThread: null,
     messageReference: null,
-  } as MessageWithDiscordAccount,
+  } as APIMessageWithDiscordAccount,
 };
 
 export const Primary: Story = {

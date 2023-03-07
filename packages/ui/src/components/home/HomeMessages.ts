@@ -1,4 +1,4 @@
-import type { MessageProps } from "../Message";
+import type { MessageProps } from "../home/DemoMessage";
 
 export interface HomeMessages {
   questionMessage: MessageProps;

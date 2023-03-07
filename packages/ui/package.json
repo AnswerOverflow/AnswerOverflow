@@ -40,6 +40,7 @@
   "devDependencies": {
     "@answeroverflow/tailwind-config": "*",
     "@answeroverflow/tsconfig": "*",
+    "@answeroverflow/utils": "*",
     "@babel/core": "^7.20.5",
     "@storybook/addon-a11y": "^7.0.0-beta.60",
     "@storybook/addon-actions": "^7.0.0-beta.60",

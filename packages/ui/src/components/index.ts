@@ -1,7 +1,6 @@
 export * from "./AnswerOverflowLogo";
 export * from "./DiscordAvatar";
 export * from "./Footer";
-export * from "./Message";
 export * from "./MessageResultPage";
 export * from "./deprecated/Navbar";
 export * from "./SearchBar";
