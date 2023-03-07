@@ -24,7 +24,7 @@
     "@trpc/react-query": "^10.4.3",
     "@trpc/server": "^10.4.3",
     "next": "^13.0.6",
-    "next-auth": "^4.17.0",
+    "next-auth": "^4.20.1",
     "nextra": "^2.2.16",
     "nextra-theme-docs": "^2.2.16",
     "react": "18.2.0",

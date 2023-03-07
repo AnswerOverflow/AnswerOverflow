@@ -6,11 +6,12 @@
   "license": "UNLICENSE",
   "dependencies": {
     "@answeroverflow/api": "*",
+    "@answeroverflow/cache": "*",
     "@answeroverflow/db": "*",
     "@answeroverflow/db-mock": "*",
+    "@answeroverflow/constants": "*",
     "@answeroverflow/discordjs-utils": "*",
-    "@answeroverflow/cache": "*",
-    "@answeroverflow/reacord": "^0.5.7",
+    "@answeroverflow/reacord": "^0.5.11",
     "@sapphire/decorators": "6.0.0",
     "@sapphire/discord-utilities": "3.0.0",
     "@sapphire/fetch": "^2.4.1",
@@ -28,6 +29,7 @@
     "discord-api-types": "^0.37.20",
     "discord.js": "14.7.1",
     "dotenv-cra": "^3.0.2",
+    "lru-cache": "^7.18.1",
     "react": "^18.2.0",
     "reflect-metadata": "^0.1.13",
     "tsx": "^3.12.1"
@@ -65,7 +67,7 @@
     "start": "yarn run with-env node dist/index.js",
     "test": "yarn run with-env jest --coverage",
     "test:watch": "yarn run with-env jest --watch",
-    "install-local-reacord": "cp -r ~/repos/reacord/packages/reacord/dist/ /workspace/node_modules/@answeroverflow/reacord/"
+    "install-local-reacord": "cp -r ~/repos/reacord/packages/reacord/dist/ /AnswerOverflow/node_modules/@answeroverflow/reacord/"
   },
   "resolutions": {
     "discord-api-types": "0.37.20"

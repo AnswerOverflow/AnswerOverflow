@@ -108,6 +108,8 @@ export function ephemeralReply(
   }
   throw new Error(`Invalid reacord instance`);
 }
+
+export type RootChannel = NonNullable<ReturnType<typeof getRootChannel>>;
 export function getRootChannel(channel: GuildTextBasedChannel) {
   if (channel.isVoiceBased()) return undefined;
   if (!channel.isTextBased()) return undefined;
@@ -127,4 +129,10 @@ export function getRootChannel(channel: GuildTextBasedChannel) {
  */
 export function removeDiscordMarkdown(text: string) {
   return text.replace(/(\*|_|~|`)/g, "");
+}
+
+export function isHumanMessage(message: Message) {
+  if (message.author.bot) return false;
+  if (message.author.system) return false;
+  return true;
 }

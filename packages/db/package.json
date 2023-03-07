@@ -16,13 +16,14 @@
     "test:watch": "yarn run with-env vitest"
   },
   "dependencies": {
+    "@answeroverflow/cache": "*",
     "@answeroverflow/db-mock": "*",
     "@answeroverflow/elastic-types": "*",
     "@answeroverflow/prisma-types": "*",
-    "@answeroverflow/cache": "*",
     "@answeroverflow/utils": "*",
     "@sapphire/bitfield": "^1.0.0",
     "discord-api-types": "^0.37.30",
+    "dotenv-cra": "^3.0.3",
     "zod": "^3.20.6"
   },
   "devDependencies": {
