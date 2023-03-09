@@ -20,18 +20,14 @@
   resolved "https://registry.yarnpkg.com/@answeroverflow/discordjs-mock/-/discordjs-mock-0.0.9.tgz#3632e1670d6d73e7908ae2b87527570dc70f6f0a"
   integrity sha512-Mnt5/H03M15ufldYusHoSY3kCEvMwPXhNuz/eNAfWuY3wBQumxKFuHaOJrKB3XnfKsIMtKcl12QiwCSAa1cB6Q==
 
-"@answeroverflow/discordjs-react@^0.0.23":
-  version "0.0.23"
-  resolved "https://registry.yarnpkg.com/@answeroverflow/discordjs-react/-/discordjs-react-0.0.23.tgz#3049d7544105697d9c5d76deb78fb83e8377e770"
-  integrity sha512-K5tYL/iVQorYtcZbrEDdRmHYNPKDGNCFor+KItTahXgdKlRdDWUlFev/pxM3qgh64fXPOfAiBBqxgzg7b6i1TQ==
+"@answeroverflow/discordjs-react@^0.0.24":
+  version "0.0.24"
+  resolved "https://registry.yarnpkg.com/@answeroverflow/discordjs-react/-/discordjs-react-0.0.24.tgz#98cbaf2c59b3c4a8fcc339ab5682594e4fd2abcb"
+  integrity sha512-UgzxBN2bN059L1ZyVhtlPPkM1Fq5FeA3HjjsPxmS2zUQj1T49nf8PyGNfAVgTlojFTJGNagDaVTOSf5KW0ixYg==
   dependencies:
     "@answeroverflow/discordjs-mock" "0.0.9"
-    "@types/node" "*"
-    "@types/react" "^18.0.28"
-    "@types/react-reconciler" "^0.28.0"
     react-reconciler "^0.29.0"
     rxjs "^7.8.0"
-    type-fest "3.5.7"
 
 "@aw-web-design/x-default-browser@1.4.88":
   version "1.4.88"
@@ -4155,26 +4151,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-reconciler@^0.28.0":
-  version "0.28.2"
-  resolved "https://registry.yarnpkg.com/@types/react-reconciler/-/react-reconciler-0.28.2.tgz#f16b0e8cc4748af70ca975eaaace0d79582c71fa"
-  integrity sha512-8tu6lHzEgYPlfDf/J6GOQdIc+gs+S2yAqlby3zTsB3SP2svlqTYe5fwZNtZyfactP74ShooP2vvi1BOp9ZemWw==
-  dependencies:
-    "@types/react" "*"
-
 "@types/react@*", "@types/react@>=16", "@types/react@>=16.0.0", "@types/react@^18.0.14", "@types/react@^18.0.26", "@types/react@^18.0.28":
   version "18.0.28"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.28.tgz#accaeb8b86f4908057ad629a26635fe641480065"
   integrity sha512-RD0ivG1kEztNBdoAK7lekI9M+azSnitIn85h4iOiaLjaTrMjzslhaqCGaI4IyCJ1RljWiLCEu4jyrLLgqxBTew==
-  dependencies:
-    "@types/prop-types" "*"
-    "@types/scheduler" "*"
-    csstype "^3.0.2"
-
-"@types/react@^17.0.37":
-  version "17.0.53"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.53.tgz#10d4d5999b8af3d6bc6a9369d7eb953da82442ab"
-  integrity sha512-1yIpQR2zdYu1Z/dc1OxC+MA6GR240u3gcnP4l6mvj/PJiVaqHsQPmWttsvHsfnhfPbU2FuGmo0wSITPygjBmsw==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -14321,11 +14301,6 @@ type-detect@4.0.8, type-detect@^4.0.0, type-detect@^4.0.5:
   version "4.0.8"
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
-
-type-fest@3.5.7:
-  version "3.5.7"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-3.5.7.tgz#1ee9efc9a172f4002c40b896689928a7bba537f2"
-  integrity sha512-6J4bYzb4sdkcLBty4XW7F18VPI66M4boXNE+CY40532oq2OJe6AVMB5NmjOp6skt/jw5mRjz/hLRpuglz0U+FA==
 
 type-fest@^0.16.0:
   version "0.16.0"
