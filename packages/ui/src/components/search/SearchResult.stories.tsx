@@ -1,25 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { mockChannelWithSettings, mockMessageWithDiscordAccount, mockServer } from "~ui/test/props";
-import { SearchResult } from "./SearchResult";
+import { MessageResultProps, SearchResult } from "./SearchResult";
 
 const meta = {
   component: SearchResult,
-  argTypes: {
-    color: {
-      control: {
-        type: "radio",
-      },
-      options: ["red", "blue", "green", "black", "white"],
-    },
-    type: {
-      control: { type: "radio" },
-      options: ["solid", "ghost"],
-    },
-    disabled: {
-      control: { type: "boolean" },
-      defaultValue: false,
-    },
-  },
+  argTypes: {},
 } as Meta<typeof SearchResult>;
 
 export default meta;
@@ -40,4 +25,9 @@ export const Primary: Story = {
       server: mockServer(),
     },
   },
+  render: (props: MessageResultProps) => (
+    <div className="xl:w-2/3">
+      <SearchResult {...props} />
+    </div>
+  ),
 };
