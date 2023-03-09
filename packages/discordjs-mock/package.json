@@ -1,8 +1,10 @@
 {
   "name": "@answeroverflow/discordjs-mock",
   "version": "0.0.10",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "index.ts",
+  "types": "index.ts",
+  "dist-main": "./dist/index.js",
+  "dist-types": "./dist/index.d.ts",
   "type": "module",
   "author": "@answeroverflow",
   "license": "MIT",
@@ -13,7 +15,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "exports": {
+  "dist-exports": {
     ".": {
       "import": "./dist/index.js",
       "require": "./dist/index.cjs",
@@ -37,7 +39,8 @@
     "tsup": "^6.6.3"
   },
   "scripts": {
-    "prepublish": "yarn build",
+    "prepublishOnly": "npx name-updater prepublish && yarn build",
+    "postpublish": "npx name-updater postpublish",
     "build": "tsup index.ts --target node16 --format cjs,esm --dts --sourcemap",
     "build-watch": "yarn build -- --watch",
     "clean": "rm -rf dist node_modules turbo coverage",
