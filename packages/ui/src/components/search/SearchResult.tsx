@@ -20,14 +20,14 @@ const ServerInvite = ({
   channel?: ChannelPublicWithFlags;
 }) => {
   return (
-    <div className="flex w-1/4 flex-col items-center justify-center px-5 pt-6 pb-2">
+    <div className="flex flex-col items-center justify-center px-5 pt-6 pb-2">
       <div className="h-24 w-24 rounded-[50%] border-2 border-white bg-[#9A9A9A]" />
       <h3 className="pt-2 text-center font-header text-2xl font-bold text-ao-white">
         {server.name}
       </h3>
       {channel && (
         <>
-          <h5 className="text-center text-ao-white/[.9]">{channel.name}</h5>
+          <h5 className="text-center text-ao-white/[.9]">#{channel.name}</h5>
           <Button type={"solid"} color={"white"} className="my-4">
             Join Server
           </Button>
@@ -87,10 +87,10 @@ export const SearchResult = ({ result }: MessageResultProps) => {
   return (
     <div className="flex h-full w-full flex-row rounded-standard border-2 border-[#696969]/[.42] bg-[#181B1F]">
       {/* Body */}
-      <div className="flex flex-col">
-        <div className="border-r-2 border-white/[.13] p-6">
+      <div className="flex grow flex-col">
+        <div className="grow border-r-2 border-white/[.13] p-6">
           {/* Timestamp area */}
-          <div className="flex flex-row">
+          <div className="flex flex-row gap-2">
             <DiscordAvatar user={result.message.author} size={"sm"} />
             <MessageAuthorArea message={result.message} />
           </div>
@@ -99,7 +99,11 @@ export const SearchResult = ({ result }: MessageResultProps) => {
         </div>
 
         {/* Answer */}
-        {solution && <Message message={solution} />}
+        {solution && (
+          <div className="border-r-2 border-white/[.13]">
+            <Message message={solution} />
+          </div>
+        )}
       </div>
       <div className="flex w-1/4 flex-col items-center justify-center px-5 pt-6 pb-2">
         {/* Server Invite */}
