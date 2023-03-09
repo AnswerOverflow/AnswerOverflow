@@ -1,4 +1,3 @@
-import type { ReacordTester } from "@answeroverflow/discordjs-react";
 import type { TextChannel, PublicThreadChannel, ForumChannel, Guild, Client } from "discord.js";
 import {
   FORUM_GUIDELINES_CONSENT_PROMPT,
@@ -32,14 +31,13 @@ import {
   HelpChannelUtilitiesMenu,
   IndexingSettingsMenu,
 } from "~discord-bot/components/settings/channel-settings-menu";
-import { reply, toggleButtonTest } from "~discord-bot/test/reacord-utils";
-import { setupAnswerOverflowBot, mockReacord } from "~discord-bot/test/sapphire-mock";
+import { mockReply, toggleButtonTest } from "~discord-bot/test/discordjs-react-utils";
+import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
 import { toAOServer, toAOChannel } from "~discord-bot/utils/conversions";
 import React from "react";
 import { mockChannelWithFlags } from "@answeroverflow/db-mock";
-import { Router } from "~discord-bot/components/primitives";
+
 let client: Client;
-let reacord: ReacordTester;
 let textChannel: TextChannel;
 let forumThread: PublicThreadChannel;
 let textChannelWithFlags: ChannelWithFlags;
@@ -49,7 +47,6 @@ let guild: Guild;
 let members: GuildMemberVariants;
 beforeEach(async () => {
   client = await setupAnswerOverflowBot();
-  reacord = mockReacord();
   guild = mockGuild(client);
   members = await createGuildMemberVariants(client, guild);
   textChannel = mockTextChannel(client, guild);
@@ -69,18 +66,19 @@ describe("Channel Settings Menu", () => {
   describe("Indexing Settings Menu", () => {
     describe("Toggle Indexing Button", () => {
       it("should enable indexing", async () => {
-        const message = await reply(
-          reacord,
-          <IndexingSettingsMenu
-            initialChannelData={textChannelWithFlags}
-            targetChannel={textChannel}
-          />
-        );
-        await toggleButtonTest({
+        const message = await mockReply({
           channel: textChannel,
-          clicker: members.guildMemberOwner,
+          content: (
+            <ChannelSettingsMenu
+              channelMenuIsIn={textChannel}
+              channelWithFlags={textChannelWithFlags}
+            />
+          ),
+          member: members.guildMemberOwner,
+        });
+        await toggleButtonTest({
+          clicker: members.guildMemberOwner.user,
           message: message,
-          reacord,
           preClickLabel: ENABLE_CHANNEL_INDEXING_LABEL,
           postClickLabel: DISABLE_CHANNEL_INDEXING_LABEL,
         });
@@ -97,15 +95,16 @@ describe("Channel Settings Menu", () => {
             },
           },
         });
-        const message = await reply(
-          reacord,
-          <IndexingSettingsMenu initialChannelData={updated} targetChannel={textChannel} />
-        );
-        await toggleButtonTest({
+
+        const message = await mockReply({
           channel: textChannel,
-          clicker: members.guildMemberOwner,
+          content: <ChannelSettingsMenu channelMenuIsIn={textChannel} channelWithFlags={updated} />,
+          member: members.guildMemberOwner,
+        });
+
+        await toggleButtonTest({
+          clicker: members.guildMemberOwner.user,
           message: message,
-          reacord,
           preClickLabel: DISABLE_CHANNEL_INDEXING_LABEL,
           postClickLabel: ENABLE_CHANNEL_INDEXING_LABEL,
         });
@@ -115,33 +114,34 @@ describe("Channel Settings Menu", () => {
     });
     describe("Forum Guidelines Consent Button", () => {
       it("should not render in a text channel", async () => {
-        const message = await reply(
-          reacord,
-          <IndexingSettingsMenu
-            initialChannelData={textChannelWithFlags}
-            targetChannel={textChannel}
-          />
-        );
-        expect(
-          message?.findButtonByLabel(ENABLE_FORUM_GUIDELINES_CONSENT_LABEL, reacord)
-        ).toBeUndefined();
-        expect(
-          message?.findButtonByLabel(DISABLE_FORUM_GUIDELINES_CONSENT_LABEL, reacord)
-        ).toBeUndefined();
+        const message = await mockReply({
+          content: (
+            <IndexingSettingsMenu
+              initialChannelData={textChannelWithFlags}
+              targetChannel={textChannel}
+            />
+          ),
+          channel: textChannel,
+          member: members.guildMemberOwner,
+        });
+        expect(message?.findButtonByLabel(ENABLE_FORUM_GUIDELINES_CONSENT_LABEL)).toBeUndefined();
+        expect(message?.findButtonByLabel(DISABLE_FORUM_GUIDELINES_CONSENT_LABEL)).toBeUndefined();
       });
       it("should enable in a forum channel", async () => {
-        const message = await reply(
-          reacord,
-          <IndexingSettingsMenu
-            initialChannelData={forumChannelWithFlags}
-            targetChannel={forumChannel}
-          />
-        );
-        await toggleButtonTest({
+        const message = await mockReply({
+          content: (
+            <IndexingSettingsMenu
+              initialChannelData={forumChannelWithFlags}
+              targetChannel={forumChannel}
+            />
+          ),
           channel: forumThread,
-          clicker: members.guildMemberOwner,
+          member: members.guildMemberOwner,
+        });
+        await toggleButtonTest({
+          clicker: members.guildMemberOwner.user,
           message: message,
-          reacord,
+
           preClickLabel: ENABLE_FORUM_GUIDELINES_CONSENT_LABEL,
           postClickLabel: DISABLE_FORUM_GUIDELINES_CONSENT_LABEL,
         });
@@ -158,15 +158,16 @@ describe("Channel Settings Menu", () => {
             },
           },
         });
-        const message = await reply(
-          reacord,
-          <IndexingSettingsMenu initialChannelData={updated} targetChannel={forumChannel} />
-        );
-        await toggleButtonTest({
+        const message = await mockReply({
+          content: (
+            <IndexingSettingsMenu initialChannelData={updated} targetChannel={forumChannel} />
+          ),
           channel: forumThread,
-          clicker: members.guildMemberOwner,
+          member: members.guildMemberOwner,
+        });
+        await toggleButtonTest({
+          clicker: members.guildMemberOwner.user,
           message: message,
-          reacord,
           preClickLabel: DISABLE_FORUM_GUIDELINES_CONSENT_LABEL,
           postClickLabel: ENABLE_FORUM_GUIDELINES_CONSENT_LABEL,
         });
@@ -178,18 +179,19 @@ describe("Channel Settings Menu", () => {
   describe("Help Channel Utilities Menu", () => {
     describe("Toggle Mark Solution", () => {
       it("should enable", async () => {
-        const message = await reply(
-          reacord,
-          <HelpChannelUtilitiesMenu
-            initialChannelData={textChannelWithFlags}
-            targetChannel={textChannel}
-          />
-        );
-        await toggleButtonTest({
+        const message = await mockReply({
+          content: (
+            <HelpChannelUtilitiesMenu
+              initialChannelData={textChannelWithFlags}
+              targetChannel={textChannel}
+            />
+          ),
           channel: textChannel,
-          clicker: members.guildMemberOwner,
+          member: members.guildMemberOwner,
+        });
+        await toggleButtonTest({
+          clicker: members.guildMemberOwner.user,
           message: message,
-          reacord,
           preClickLabel: ENABLE_MARK_AS_SOLUTION_LABEL,
           postClickLabel: DISABLE_MARK_AS_SOLUTION_LABEL,
         });
@@ -206,15 +208,17 @@ describe("Channel Settings Menu", () => {
             },
           },
         });
-        const message = await reply(
-          reacord,
-          <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
-        );
-        await toggleButtonTest({
+        const message = await mockReply({
+          content: (
+            <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
+          ),
           channel: textChannel,
-          clicker: members.guildMemberOwner,
+          member: members.guildMemberOwner,
+        });
+        await toggleButtonTest({
+          clicker: members.guildMemberOwner.user,
           message: message,
-          reacord,
+
           preClickLabel: DISABLE_MARK_AS_SOLUTION_LABEL,
           postClickLabel: ENABLE_MARK_AS_SOLUTION_LABEL,
         });
@@ -233,15 +237,17 @@ describe("Channel Settings Menu", () => {
             },
           },
         });
-        const message = await reply(
-          reacord,
-          <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
-        );
-        await toggleButtonTest({
+        const message = await mockReply({
+          content: (
+            <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
+          ),
           channel: textChannel,
-          clicker: members.guildMemberOwner,
+          member: members.guildMemberOwner,
+        });
+        await toggleButtonTest({
+          clicker: members.guildMemberOwner.user,
           message: message,
-          reacord,
+
           preClickLabel: ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
           postClickLabel: DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
         });
@@ -259,15 +265,17 @@ describe("Channel Settings Menu", () => {
             },
           },
         });
-        const message = await reply(
-          reacord,
-          <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
-        );
-        await toggleButtonTest({
+        const message = await mockReply({
           channel: textChannel,
-          clicker: members.guildMemberOwner,
+          member: members.guildMemberOwner,
+          content: (
+            <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
+          ),
+        });
+        await toggleButtonTest({
+          clicker: members.guildMemberOwner.user,
           message: message,
-          reacord,
+
           preClickLabel: DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
           postClickLabel: ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
         });
@@ -275,52 +283,63 @@ describe("Channel Settings Menu", () => {
         expect(found!.flags.sendMarkSolutionInstructionsInNewThreads).toBeFalsy();
       });
       it("should be disabled if mark solution is disabled", async () => {
-        const message = await reply(
-          reacord,
-          <HelpChannelUtilitiesMenu
-            initialChannelData={textChannelWithFlags}
-            targetChannel={textChannel}
-          />
-        );
+        const message = await mockReply({
+          content: (
+            <HelpChannelUtilitiesMenu
+              initialChannelData={textChannelWithFlags}
+              targetChannel={textChannel}
+            />
+          ),
+          channel: textChannel,
+          member: members.guildMemberOwner,
+        });
         expect(
-          message?.findButtonByLabel(ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL, reacord)
-            ?.disabled
+          message?.findButtonByLabel(ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL)?.disabled
         ).toBeTruthy();
       });
     });
     describe("set solved tag id", () => {
       it("should render correctly in a forum channel", async () => {
-        const message = await reply(
-          reacord,
-          <HelpChannelUtilitiesMenu
-            initialChannelData={forumChannelWithFlags}
-            targetChannel={forumChannel}
-          />
-        );
-        const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER, reacord);
+        const message = await mockReply({
+          content: (
+            <HelpChannelUtilitiesMenu
+              initialChannelData={forumChannelWithFlags}
+              targetChannel={forumChannel}
+            />
+          ),
+          channel: forumChannel,
+          member: members.guildMemberOwner,
+        });
+        const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER);
         expect(select).not.toBeUndefined();
       });
       it("should not render in a non-forum channel", async () => {
-        const message = await reply(
-          reacord,
-          <HelpChannelUtilitiesMenu
-            initialChannelData={textChannelWithFlags}
-            targetChannel={textChannel}
-          />
-        );
-        const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER, reacord);
+        const message = await mockReply({
+          content: (
+            <HelpChannelUtilitiesMenu
+              initialChannelData={textChannelWithFlags}
+              targetChannel={textChannel}
+            />
+          ),
+          channel: textChannel,
+          member: members.guildMemberOwner,
+        });
+        const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER);
         expect(select).toBeUndefined();
       });
       it("should have a clear option", async () => {
-        const message = await reply(
-          reacord,
-          <HelpChannelUtilitiesMenu
-            initialChannelData={forumChannelWithFlags}
-            targetChannel={forumChannel}
-          />
-        );
-        const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER, reacord);
-        expect(select?.options.filter((option) => option.value === CLEAR_TAG_VALUE))?.toHaveLength(
+        const message = await mockReply({
+          content: (
+            <HelpChannelUtilitiesMenu
+              initialChannelData={forumChannelWithFlags}
+              targetChannel={forumChannel}
+            />
+          ),
+          channel: forumChannel,
+          member: members.guildMemberOwner,
+        });
+        const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER);
+        expect(select?.options?.filter((option) => option.value === CLEAR_TAG_VALUE))?.toHaveLength(
           1
         );
       });
@@ -328,15 +347,21 @@ describe("Channel Settings Menu", () => {
         const taglessForum = mockForumChannel(client, guild, {
           available_tags: [],
         });
-        const message = await reply(
-          reacord,
-          <HelpChannelUtilitiesMenu
-            initialChannelData={mockChannelWithFlags(toAOServer(guild), toAOChannel(taglessForum))}
-            targetChannel={taglessForum}
-          />
-        );
-        const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER, reacord);
-        expect(select?.options.filter((option) => option.label === "No Tags Found"))?.toHaveLength(
+        const message = await mockReply({
+          channel: taglessForum,
+          content: (
+            <HelpChannelUtilitiesMenu
+              initialChannelData={mockChannelWithFlags(
+                toAOServer(guild),
+                toAOChannel(taglessForum)
+              )}
+              targetChannel={taglessForum}
+            />
+          ),
+          member: members.guildMemberOwner,
+        });
+        const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER);
+        expect(select?.options?.filter((option) => option.label === "No Tags Found"))?.toHaveLength(
           1
         );
       });
@@ -350,23 +375,26 @@ describe("Channel Settings Menu", () => {
             },
           },
         });
-        const message = await reply(
-          reacord,
-          <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={forumChannel} />
-        );
-        const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER, reacord);
-        await select?.select(
-          forumThread,
-          members.guildMemberOwner,
-          forumChannel.availableTags[0]!.id
-        );
-        const updatedSelect = message?.findSelectByPlaceholder(
-          SET_SOLVED_TAG_ID_PLACEHOLDER,
-          reacord
-        );
+        const message = await mockReply({
+          channel: forumChannel,
+          member: members.guildMemberOwner,
+          content: (
+            <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={forumChannel} />
+          ),
+        });
+        const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER);
+        await select?.select({
+          clicker: members.guildMemberOwner.user,
+          values: forumChannel.availableTags[0]!.id,
+        });
+        const updatedSelect = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER);
         const found = await findChannelById(forumChannelWithFlags.id);
         expect(found!.solutionTagId).toBe(forumChannel.availableTags[0]!.id);
-        expect(updatedSelect?.values?.at(0)).toBe(forumChannel.availableTags[0]!.id);
+        const selectedOption = updatedSelect?.options?.filter(
+          (option) => option.value === CLEAR_TAG_VALUE
+        );
+        expect(selectedOption).toHaveLength(1);
+        expect(selectedOption![0]!.default).toBeTruthy();
       });
       it("should clear the tag id", async () => {
         const updated = await updateChannel({
@@ -379,59 +407,73 @@ describe("Channel Settings Menu", () => {
             },
           },
         });
-        const message = await reply(
-          reacord,
-          <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={forumChannel} />
-        );
-        const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER, reacord);
-        await select?.select(forumThread, members.guildMemberOwner, CLEAR_TAG_VALUE);
-        const updatedSelect = message?.findSelectByPlaceholder(
-          SET_SOLVED_TAG_ID_PLACEHOLDER,
-          reacord
-        );
+        const message = await mockReply({
+          channel: forumChannel,
+          content: (
+            <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={forumChannel} />
+          ),
+          member: members.guildMemberOwner,
+        });
+        const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER);
+        await select?.select({
+          clicker: members.guildMemberOwner.user,
+          values: CLEAR_TAG_VALUE,
+        });
+        const updatedSelect = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER);
         const found = await findChannelById(forumChannelWithFlags.id);
         expect(found!.solutionTagId).toBe(null);
-        expect(updatedSelect?.values?.at(0)).toBe("");
+        const selectedOption = updatedSelect?.options?.filter(
+          (option) => option.value === CLEAR_TAG_VALUE
+        );
+        expect(selectedOption).toHaveLength(1);
+        expect(selectedOption![0]!.default).toBeTruthy();
       });
     });
     describe("toggle auto thread", () => {
       it("should not render in a forum channel", async () => {
-        const message = await reply(
-          reacord,
-          <HelpChannelUtilitiesMenu
-            initialChannelData={forumChannelWithFlags}
-            targetChannel={forumChannel}
-          />
-        );
-        const button = message?.findButtonByLabel(ENABLE_AUTO_THREAD_LABEL, reacord);
+        const message = await mockReply({
+          channel: forumChannel,
+          content: (
+            <HelpChannelUtilitiesMenu
+              initialChannelData={forumChannelWithFlags}
+              targetChannel={forumChannel}
+            />
+          ),
+          member: members.guildMemberOwner,
+        });
+        const button = message?.findButtonByLabel(ENABLE_AUTO_THREAD_LABEL);
         expect(button).toBeUndefined();
       });
       it("should render correctly in a non-forum channel", async () => {
-        const message = await reply(
-          reacord,
-          <HelpChannelUtilitiesMenu
-            initialChannelData={textChannelWithFlags}
-            targetChannel={textChannel}
-          />
-        );
-        const button = message?.findButtonByLabel(ENABLE_AUTO_THREAD_LABEL, reacord);
+        const message = await mockReply({
+          channel: textChannel,
+          content: (
+            <HelpChannelUtilitiesMenu
+              initialChannelData={textChannelWithFlags}
+              targetChannel={textChannel}
+            />
+          ),
+          member: members.guildMemberOwner,
+        });
+        const button = message?.findButtonByLabel(ENABLE_AUTO_THREAD_LABEL);
         expect(button).not.toBeUndefined();
       });
       it("should enable", async () => {
-        const message = await reply(
-          reacord,
-          <HelpChannelUtilitiesMenu
-            initialChannelData={textChannelWithFlags}
-            targetChannel={textChannel}
-          />
-        );
+        const message = await mockReply({
+          channel: textChannel,
+          content: (
+            <HelpChannelUtilitiesMenu
+              initialChannelData={textChannelWithFlags}
+              targetChannel={textChannel}
+            />
+          ),
+          member: members.guildMemberOwner,
+        });
         await toggleButtonTest({
           message: message,
-          channel: textChannel,
-          clicker: members.guildMemberOwner,
+          clicker: members.guildMemberOwner.user,
           postClickLabel: DISABLE_AUTO_THREAD_LABEL,
           preClickLabel: ENABLE_AUTO_THREAD_LABEL,
-          reacord,
         });
         const found = await findChannelById(textChannelWithFlags.id);
         expect(found!.flags.autoThreadEnabled).toBeTruthy();
@@ -446,17 +488,18 @@ describe("Channel Settings Menu", () => {
             },
           },
         });
-        const message = await reply(
-          reacord,
-          <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
-        );
+        const message = await mockReply({
+          channel: textChannel,
+          content: (
+            <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={textChannel} />
+          ),
+          member: members.guildMemberOwner,
+        });
         await toggleButtonTest({
           message: message,
-          channel: textChannel,
-          clicker: members.guildMemberOwner,
+          clicker: members.guildMemberOwner.user,
           postClickLabel: ENABLE_AUTO_THREAD_LABEL,
           preClickLabel: DISABLE_AUTO_THREAD_LABEL,
-          reacord,
         });
         const found = await findChannelById(textChannelWithFlags.id);
         expect(found!.flags.autoThreadEnabled).toBeFalsy();
@@ -465,40 +508,41 @@ describe("Channel Settings Menu", () => {
   });
   describe("Channel Settings Menu", () => {
     it("should open the indexing settings correctly", async () => {
-      const message = await reply(
-        reacord,
-        <Router interactionId="0">
+      const message = await mockReply({
+        channel: textChannel,
+        content: (
           <ChannelSettingsMenu
             channelMenuIsIn={textChannel}
             channelWithFlags={textChannelWithFlags}
-            interactionId={"0"}
           />
-        </Router>
-      );
-      const button = message?.findButtonByLabel(OPEN_INDEXING_SETTINGS_MENU_LABEL, reacord);
+        ),
+        member: members.guildMemberOwner,
+      });
+      const button = message?.findButtonByLabel(OPEN_INDEXING_SETTINGS_MENU_LABEL);
       expect(button).toBeDefined();
-      await button?.click(textChannel, members.guildMemberOwner);
-      const enableIndexingButton = message?.findButtonByLabel(
-        ENABLE_CHANNEL_INDEXING_LABEL,
-        reacord
-      );
+      await button?.click({
+        clicker: members.guildMemberOwner.user,
+      });
+      const enableIndexingButton = message?.findButtonByLabel(ENABLE_CHANNEL_INDEXING_LABEL);
       expect(enableIndexingButton).toBeDefined();
     });
     it("should open the help channel utilities menu correctly", async () => {
-      const message = await reply(
-        reacord,
-        <Router interactionId="0">
+      const message = await mockReply({
+        channel: textChannel,
+        content: (
           <ChannelSettingsMenu
             channelMenuIsIn={textChannel}
             channelWithFlags={textChannelWithFlags}
-            interactionId={"0"}
           />
-        </Router>
-      );
-      const button = message?.findButtonByLabel(OPEN_HELP_CHANNEL_UTILITIES_LABEL, reacord);
+        ),
+        member: members.guildMemberOwner,
+      });
+      const button = message?.findButtonByLabel(OPEN_HELP_CHANNEL_UTILITIES_LABEL);
       expect(button).toBeDefined();
-      await button?.click(textChannel, members.guildMemberOwner);
-      const enableAutoThreadButton = message?.findButtonByLabel(ENABLE_AUTO_THREAD_LABEL, reacord);
+      await button?.click({
+        clicker: members.guildMemberOwner.user,
+      });
+      const enableAutoThreadButton = message?.findButtonByLabel(ENABLE_AUTO_THREAD_LABEL);
       expect(enableAutoThreadButton).toBeDefined();
     });
   });

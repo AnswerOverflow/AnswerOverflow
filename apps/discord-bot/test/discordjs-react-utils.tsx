@@ -5,7 +5,7 @@ import { container } from "@sapphire/framework";
 import { randomSnowflake } from "@answeroverflow/discordjs-utils";
 import type { TestDiscordJSReactMessage } from "@answeroverflow/discordjs-react";
 
-export async function reply(
+export async function mockReply(
   context: Required<
     Pick<Parameters<typeof mockChatInputCommandInteraction>[0], "channel" | "member">
   > & {

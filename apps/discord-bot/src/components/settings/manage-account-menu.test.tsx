@@ -1,4 +1,4 @@
-import { reply, toggleButtonTest } from "~discord-bot/test/reacord-utils";
+import { mockReply, toggleButtonTest } from "~discord-bot/test/discordjs-react-utils";
 import React from "react";
 import {
   createDiscordAccount,
@@ -48,7 +48,7 @@ beforeEach(async () => {
 describe("Manage Account Menu", () => {
   describe("Toggle Consent Button", () => {
     it("should enable consent", async () => {
-      const message = await reply({
+      const message = await mockReply({
         channel: textChannel,
         content: (
           <ManageAccountMenu initialSettings={defaultSettings} initialIsGloballyIgnored={false} />
@@ -79,7 +79,7 @@ describe("Manage Account Menu", () => {
         })
       );
 
-      const message = await reply({
+      const message = await mockReply({
         channel: textChannel,
         content: (
           <ManageAccountMenu initialSettings={initialSettings} initialIsGloballyIgnored={false} />
@@ -111,7 +111,7 @@ describe("Manage Account Menu", () => {
           },
         })
       );
-      const message = await reply({
+      const message = await mockReply({
         channel: textChannel,
         content: (
           <ManageAccountMenu initialSettings={initialSettings} initialIsGloballyIgnored={false} />
@@ -133,7 +133,7 @@ describe("Manage Account Menu", () => {
       expect(updated?.flags.messageIndexingDisabled).toBeFalsy();
     });
     it("should disable indexing of user messages", async () => {
-      const message = await reply({
+      const message = await mockReply({
         channel: textChannel,
         content: (
           <ManageAccountMenu initialSettings={defaultSettings} initialIsGloballyIgnored={false} />
@@ -157,7 +157,7 @@ describe("Manage Account Menu", () => {
   });
   describe("Toggle Globally Ignored Button", () => {
     it("should enable globally ignored", async () => {
-      const message = await reply({
+      const message = await mockReply({
         channel: textChannel,
         content: (
           <ManageAccountMenu initialSettings={defaultSettings} initialIsGloballyIgnored={false} />
@@ -177,7 +177,7 @@ describe("Manage Account Menu", () => {
     it("should disable globally ignored", async () => {
       await deleteDiscordAccount(toAODiscordAccount(members.guildMemberOwner.user).id);
 
-      const message = await reply({
+      const message = await mockReply({
         channel: textChannel,
         content: (
           <ManageAccountMenu initialSettings={defaultSettings} initialIsGloballyIgnored={true} />

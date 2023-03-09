@@ -1,4 +1,4 @@
-import { reply, toggleButtonTest } from "~discord-bot/test/reacord-utils";
+import { mockReply, toggleButtonTest } from "~discord-bot/test/discordjs-react-utils";
 import React from "react";
 import { createServer, findServerById, ServerWithFlags, updateServer } from "@answeroverflow/db";
 import type { Client, Guild, TextChannel } from "discord.js";
@@ -32,7 +32,7 @@ beforeEach(async () => {
 describe("Server Settings Menu", () => {
   describe("Toggle Read The Rules Consent Button", () => {
     it("should enable read the rules consent", async () => {
-      const message = await reply({
+      const message = await mockReply({
         content: <ServerSettingsMenu server={server} />,
         channel: textChannel,
         member: members.guildMemberOwner,
@@ -56,7 +56,7 @@ describe("Server Settings Menu", () => {
           },
         },
       });
-      const message = await reply({
+      const message = await mockReply({
         content: <ServerSettingsMenu server={updated} />,
         channel: textChannel,
         member: members.guildMemberOwner,

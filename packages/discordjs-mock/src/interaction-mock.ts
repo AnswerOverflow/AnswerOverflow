@@ -18,6 +18,8 @@ import {
   User,
   APIBaseInteraction,
   Channel,
+  StringSelectMenuInteraction,
+  APIMessageStringSelectInteractionData,
 } from "discord.js";
 import { randomSnowflake } from "@answeroverflow/discordjs-utils";
 import { mockTextChannel } from "./channel-mock";
@@ -267,6 +269,46 @@ export function mockButtonInteraction({
     },
   } satisfies RawMessageButtonInteractionData & RawMessageComponentInteractionData;
   const interaction = Reflect.construct(ButtonInteraction, [client, rawData]) as ButtonInteraction;
+  applyInteractionResponseHandlers(interaction);
+  return interaction;
+}
+
+export function mockStringSelectInteraction({
+  override = {},
+  caller,
+  message,
+  data,
+}: {
+  caller: User;
+  message: Message;
+  data: Omit<APIMessageStringSelectInteractionData, "component_type" | "values"> & {
+    values: string[] | string;
+  };
+  override?: Partial<Omit<RawMessageComponentInteractionData, "data">>;
+}) {
+  const client = message.client;
+  const rawData = {
+    message: messageToAPIData(message),
+    ...override,
+    ...setupMockedInteractionAPIData({
+      caller,
+      channel: message.channel,
+      type: InteractionType.MessageComponent,
+      message,
+      override,
+    }),
+    data: {
+      component_type: ComponentType.StringSelect,
+      custom_id: data.custom_id,
+      values: Array.isArray(data.values) ? data.values : [data.values],
+    },
+  } satisfies RawMessageComponentInteractionData & {
+    data: APIMessageStringSelectInteractionData;
+  };
+  const interaction = Reflect.construct(StringSelectMenuInteraction, [
+    client,
+    rawData,
+  ]) as StringSelectMenuInteraction;
   applyInteractionResponseHandlers(interaction);
   return interaction;
 }

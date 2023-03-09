@@ -1,5 +1,4 @@
 import { Button, Link } from "@answeroverflow/discordjs-react";
-import { delay } from "@answeroverflow/discordjs-mock";
 import React from "react";
 import { useHistory } from "./router";
 import { ephemeralReply } from "~discord-bot/utils/utils";

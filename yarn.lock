@@ -15,17 +15,12 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@answeroverflow/discordjs-mock@0.0.9":
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/@answeroverflow/discordjs-mock/-/discordjs-mock-0.0.9.tgz#3632e1670d6d73e7908ae2b87527570dc70f6f0a"
-  integrity sha512-Mnt5/H03M15ufldYusHoSY3kCEvMwPXhNuz/eNAfWuY3wBQumxKFuHaOJrKB3XnfKsIMtKcl12QiwCSAa1cB6Q==
-
-"@answeroverflow/discordjs-react@^0.0.24":
-  version "0.0.24"
-  resolved "https://registry.yarnpkg.com/@answeroverflow/discordjs-react/-/discordjs-react-0.0.24.tgz#98cbaf2c59b3c4a8fcc339ab5682594e4fd2abcb"
-  integrity sha512-UgzxBN2bN059L1ZyVhtlPPkM1Fq5FeA3HjjsPxmS2zUQj1T49nf8PyGNfAVgTlojFTJGNagDaVTOSf5KW0ixYg==
+"@answeroverflow/discordjs-react@^0.0.30":
+  version "0.0.30"
+  resolved "https://registry.yarnpkg.com/@answeroverflow/discordjs-react/-/discordjs-react-0.0.30.tgz#a7bfbe281a9973d611d5ec19cd63cf9036de7236"
+  integrity sha512-ExLjBr3UBa1V/PLh2NIV/EwuVru1QK+hlfd4oxVcIbI3ERwB5nEom4Zypy9MuxfOr8lDvKIkpHIStYLCECC5fQ==
   dependencies:
-    "@answeroverflow/discordjs-mock" "0.0.9"
+    "@answeroverflow/discordjs-mock" "0.0.12"
     react-reconciler "^0.29.0"
     rxjs "^7.8.0"
 

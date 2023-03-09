@@ -1,5 +1,9 @@
 import type { Client, GuildMember, Message } from "discord.js";
-import { mockButtonInteraction, mockChatInputCommandInteraction } from "./interaction-mock";
+import {
+  mockButtonInteraction,
+  mockChatInputCommandInteraction,
+  mockStringSelectInteraction,
+} from "./interaction-mock";
 import { setupBot } from "./client-mock";
 import { mockMessage } from "./message-mock";
 import { mockGuildMember } from "./user-mock";
@@ -160,6 +164,100 @@ describe("Interaction Mock", () => {
       });
       await interaction.reply("hello");
       expect(interaction.replied).toBe(true);
+    });
+  });
+  describe("String Select Interacation", () => {
+    let message: Message;
+    let caller: GuildMember;
+    beforeEach(() => {
+      caller = mockGuildMember({
+        client,
+      });
+      mockTextChannel(client, caller.guild);
+      message = mockMessage({
+        client,
+      });
+    });
+    it("should create a mocked string select interaction", async () => {
+      const interaction = mockStringSelectInteraction({
+        caller: caller.user,
+        message,
+        data: {
+          custom_id: "test",
+          values: "test",
+        },
+      });
+      await interaction.update("test");
+      expect(interaction.message.content).toBe("test");
+      expect(interaction.replied).toBe(true);
+    });
+    it("should defer the string select interaction", async () => {
+      const interaction = mockStringSelectInteraction({
+        caller: caller.user,
+        message,
+        data: {
+          custom_id: "test",
+          values: "test",
+        },
+      });
+      await interaction.deferUpdate();
+      expect(interaction.deferred).toBe(true);
+    });
+    it("should edit a string select interaction reply", async () => {
+      const interaction = mockStringSelectInteraction({
+        caller: caller.user,
+        message,
+        data: {
+          custom_id: "test",
+          values: "test",
+        },
+      });
+      await interaction.reply("hello");
+      await interaction.editReply("world");
+      expect(interaction.message.content).toBe("world");
+      expect(interaction.replied).toBe(true);
+    });
+    it("should reply to a string select interaction", async () => {
+      const interaction = mockStringSelectInteraction({
+        caller: caller.user,
+        message,
+        data: {
+          custom_id: "test",
+          values: "test",
+        },
+      });
+      const reply = await interaction.reply({
+        fetchReply: true,
+        content: "hello",
+      });
+
+      expect(reply.content).toBe("hello");
+      expect(interaction.replied).toBe(true);
+    });
+    it("should clear defer of a string select interaction on reply", async () => {
+      const interaction = mockStringSelectInteraction({
+        caller: caller.user,
+        message,
+        data: {
+          custom_id: "test",
+          values: "test",
+        },
+      });
+      await interaction.deferUpdate();
+      await interaction.reply("hello");
+      expect(interaction.deferred).toBe(false);
+      expect(interaction.replied).toBe(true);
+    });
+    it("should select multiple values", () => {
+      const interaction = mockStringSelectInteraction({
+        caller: caller.user,
+        message,
+        data: {
+          custom_id: "test",
+          values: ["test", "test2"],
+        },
+      });
+      expect(interaction.values).toEqual(["test", "test2"]);
     });
   });
 });

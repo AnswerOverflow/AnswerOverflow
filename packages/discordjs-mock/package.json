@@ -15,7 +15,17 @@
   "publishConfig": {
     "access": "public"
   },
-  "exports": "{\n  \".\": {\n    \"import\": \"./dist/index.js\",\n    \"require\": \"./dist/index.cjs\",\n    \"types\": \"./dist/index.d.ts\"\n  },\n  \"./package.json\": {\n    \"import\": \"./package.json\",\n    \"require\": \"./package.json\"\n  }\n}",
+  "dist-exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./package.json": {
+      "import": "./package.json",
+      "require": "./package.json"
+    }
+  },
   "devDependencies": {
     "@answeroverflow/discordjs-utils": "*",
     "@answeroverflow/utils": "*",
