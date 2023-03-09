@@ -1,6 +1,6 @@
 {
   "name": "@answeroverflow/discordjs-mock",
-  "version": "0.0.10",
+  "version": "0.0.12",
   "main": "index.ts",
   "types": "index.ts",
   "dist-main": "./dist/index.js",
@@ -15,17 +15,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "dist-exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
-    },
-    "./package.json": {
-      "import": "./package.json",
-      "require": "./package.json"
-    }
-  },
+  "exports": "{\n  \".\": {\n    \"import\": \"./dist/index.js\",\n    \"require\": \"./dist/index.cjs\",\n    \"types\": \"./dist/index.d.ts\"\n  },\n  \"./package.json\": {\n    \"import\": \"./package.json\",\n    \"require\": \"./package.json\"\n  }\n}",
   "devDependencies": {
     "@answeroverflow/discordjs-utils": "*",
     "@answeroverflow/utils": "*",
@@ -39,8 +29,8 @@
     "tsup": "^6.6.3"
   },
   "scripts": {
-    "prepublishOnly": "npx name-updater prepublish && yarn build",
-    "postpublish": "npx name-updater postpublish",
+    "prepublishOnly": "npx main-updater@latest prepublish && yarn build",
+    "postpublish": "npx main-updater@latest postpublish",
     "build": "tsup index.ts --target node16 --format cjs,esm --dts --sourcemap",
     "build-watch": "yarn build -- --watch",
     "clean": "rm -rf dist node_modules turbo coverage",
