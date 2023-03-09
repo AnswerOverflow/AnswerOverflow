@@ -38,8 +38,8 @@ import {
   ToggleButton,
   InstructionsContainer,
   EmbedMenuInstruction,
-  getMessageHistory,
   Spacer,
+  useHistory,
 } from "~discord-bot/components/primitives";
 import {
   updateChannelIndexingEnabled,
@@ -485,11 +485,9 @@ function ExperimentalSettingsMenu() {
 export function ChannelSettingsMenu({
   channelMenuIsIn,
   channelWithFlags,
-  interactionId,
 }: {
   channelMenuIsIn: GuildTextBasedChannel;
   channelWithFlags: ChannelWithFlags;
-  interactionId: string;
 }) {
   const [channel] = React.useState<ChannelWithFlags>(
     channelCache.get(channelMenuIsIn.id) ?? channelWithFlags
@@ -498,6 +496,7 @@ export function ChannelSettingsMenu({
   if (!targetChannel) {
     throw new Error("Could not find root channel");
   }
+  const { pushHistory } = useHistory();
   return (
     <>
       <InstructionsContainer>
@@ -525,7 +524,6 @@ export function ChannelSettingsMenu({
         label={OPEN_INDEXING_SETTINGS_MENU_LABEL}
         style="Primary"
         onClick={() => {
-          const { pushHistory } = getMessageHistory(interactionId);
           pushHistory(
             <IndexingSettingsMenu initialChannelData={channel} targetChannel={targetChannel} />
           );
@@ -535,7 +533,6 @@ export function ChannelSettingsMenu({
         label={OPEN_HELP_CHANNEL_UTILITIES_LABEL}
         style="Primary"
         onClick={() => {
-          const { pushHistory } = getMessageHistory(interactionId);
           pushHistory(
             <HelpChannelUtilitiesMenu initialChannelData={channel} targetChannel={targetChannel} />
           );
@@ -545,7 +542,6 @@ export function ChannelSettingsMenu({
         label={OPEN_EXPERIMENTAL_SETTINGS_LABEL}
         style="Primary"
         onClick={() => {
-          const { pushHistory } = getMessageHistory(interactionId);
           pushHistory(<ExperimentalSettingsMenu />);
         }}
       />

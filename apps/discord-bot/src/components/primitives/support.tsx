@@ -1,7 +1,7 @@
 import { Button, Link } from "@answeroverflow/discordjs-react";
 import { delay } from "@answeroverflow/discordjs-mock";
 import React from "react";
-import { getMessageHistory } from "./router";
+import { useHistory } from "./router";
 import { ephemeralReply } from "~discord-bot/utils/utils";
 
 export const SupportMenu: React.FC = () => (
@@ -25,22 +25,21 @@ export const SupportMenu: React.FC = () => (
   </>
 );
 
-export const OpenSupportMenuButton: React.FC<{
-  interactionId: string;
-}> = ({ interactionId }) => (
-  <Button
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    onClick={async (interaction) => {
-      await delay(4000);
-      const replaceMenu = false;
-      if (replaceMenu) {
-        const { pushHistory } = getMessageHistory(interactionId);
-        pushHistory(<SupportMenu />);
-      } else {
-        ephemeralReply(<SupportMenu />, interaction);
-      }
-    }}
-    style="Secondary"
-    label="Support"
-  />
-);
+export const OpenSupportMenuButton: React.FC = () => {
+  const { pushHistory } = useHistory();
+  return (
+    <Button
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      onClick={(interaction) => {
+        const replaceMenu = false;
+        if (replaceMenu) {
+          pushHistory(<SupportMenu />);
+        } else {
+          ephemeralReply(<SupportMenu />, interaction);
+        }
+      }}
+      style="Secondary"
+      label="Support"
+    />
+  );
+};

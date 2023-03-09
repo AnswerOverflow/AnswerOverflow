@@ -20,14 +20,14 @@
   resolved "https://registry.yarnpkg.com/@answeroverflow/discordjs-mock/-/discordjs-mock-0.0.9.tgz#3632e1670d6d73e7908ae2b87527570dc70f6f0a"
   integrity sha512-Mnt5/H03M15ufldYusHoSY3kCEvMwPXhNuz/eNAfWuY3wBQumxKFuHaOJrKB3XnfKsIMtKcl12QiwCSAa1cB6Q==
 
-"@answeroverflow/discordjs-react@^0.0.16":
-  version "0.0.16"
-  resolved "https://registry.yarnpkg.com/@answeroverflow/discordjs-react/-/discordjs-react-0.0.16.tgz#fad4e953d7bd6cfbef784326c008d9b513590b88"
-  integrity sha512-uyd6wsWHEWD/n90td4a8RW73zProb2xExma40OdOSNqghF7/4YCR88SQveXQFpvZpC4PpZff4CGLitYgWNcpiQ==
+"@answeroverflow/discordjs-react@^0.0.23":
+  version "0.0.23"
+  resolved "https://registry.yarnpkg.com/@answeroverflow/discordjs-react/-/discordjs-react-0.0.23.tgz#3049d7544105697d9c5d76deb78fb83e8377e770"
+  integrity sha512-K5tYL/iVQorYtcZbrEDdRmHYNPKDGNCFor+KItTahXgdKlRdDWUlFev/pxM3qgh64fXPOfAiBBqxgzg7b6i1TQ==
   dependencies:
     "@answeroverflow/discordjs-mock" "0.0.9"
     "@types/node" "*"
-    "@types/react" "^17.0.37"
+    "@types/react" "^18.0.28"
     "@types/react-reconciler" "^0.28.0"
     react-reconciler "^0.29.0"
     rxjs "^7.8.0"
@@ -4162,7 +4162,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@>=16", "@types/react@>=16.0.0", "@types/react@^18.0.14", "@types/react@^18.0.26":
+"@types/react@*", "@types/react@>=16", "@types/react@>=16.0.0", "@types/react@^18.0.14", "@types/react@^18.0.26", "@types/react@^18.0.28":
   version "18.0.28"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.28.tgz#accaeb8b86f4908057ad629a26635fe641480065"
   integrity sha512-RD0ivG1kEztNBdoAK7lekI9M+azSnitIn85h4iOiaLjaTrMjzslhaqCGaI4IyCJ1RljWiLCEu4jyrLLgqxBTew==

@@ -13,8 +13,7 @@ declare module "@sapphire/pieces" {
       string,
       {
         history: React.ReactNode[];
-        pushHistory: (message: React.ReactNode) => void;
-        popHistory: () => void;
+        setHistory: (node: React.ReactNode[]) => void;
       }
     >;
   }

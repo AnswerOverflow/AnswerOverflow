@@ -2,10 +2,10 @@ import { container, LogLevel, SapphireClient } from "@sapphire/framework";
 import { ClientOptions, Partials } from "discord.js";
 
 import "~discord-bot/utils/setup";
-import type React from "react";
-import LRUCache from "lru-cache";
 import { DiscordJSReact, TestDiscordJSReact } from "@answeroverflow/discordjs-react";
-
+import { Router } from "~discord-bot/components/primitives";
+import React from "react";
+import LRUCache from "lru-cache";
 function getLogLevel() {
   switch (process.env.NODE_ENV) {
     case "development":
@@ -68,30 +68,25 @@ export const login = async (client: SapphireClient) => {
     await client.login(process.env.DISCORD_TOKEN);
     client.logger.info("LOGGED IN");
     client.logger.info(`LOGGED IN AS: ${client.user?.username ?? "UNKNOWN"}`);
-    const messageHistory = new LRUCache<
+    const config: DiscordJSReact["config"] = {
+      // @ts-ignore
+      wrapper: ({ children }) => <Router>{children}</Router>,
+    };
+    container.discordJSReact =
+      process.env.NODE_ENV === "test"
+        ? new TestDiscordJSReact(client, config)
+        : new DiscordJSReact(client, config);
+    container.messageHistory = new LRUCache<
       string,
       {
         history: React.ReactNode[];
-        pushHistory: (message: React.ReactNode) => void;
-        popHistory: () => void;
+        setHistory: (node: React.ReactNode[]) => void;
       }
     >({
       max: 100,
       // 10 minute ttl
       ttl: 1000 * 60 * 10,
     });
-
-    // container.messageHistory = messageHistory;
-
-    // ({ children, renderer }) => {
-    //   if (renderer instanceof InteractionReplyRenderer) {
-    //     return <Router interactionId={renderer.interaction.id}>{children}</Router>;
-    //   } else {
-    //     return children;
-    //   }
-    // }
-    container.discordJSReact =
-      process.env.NODE_ENV === "test" ? new TestDiscordJSReact(client) : new DiscordJSReact(client);
   } catch (error) {
     client.logger.fatal(error);
     client.destroy();

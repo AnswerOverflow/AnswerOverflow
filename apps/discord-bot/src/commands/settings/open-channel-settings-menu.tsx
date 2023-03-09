@@ -55,7 +55,6 @@ export class ChannelSettingsCommand extends Command {
             <ChannelSettingsMenu
               channelMenuIsIn={channel}
               channelWithFlags={result as ChannelWithFlags}
-              interactionId={interaction.id}
             />
           );
           ephemeralReply(menu, interaction);
