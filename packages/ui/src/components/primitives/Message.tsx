@@ -8,10 +8,11 @@ import { useIsUserInServer } from "~ui/utils/hooks";
 
 export const MessageAuthorArea = ({ message }: { message: APIMessageWithDiscordAccount }) => {
   return (
-    <div className="flex min-w-0 gap-2">
-      <div className="flex flex-col sm:flex-row">
-        <span className={`mr-1`}>{message.author.name}</span>
-        <span className={``}>{getSnowflakeUTCDate(message.id)}</span>
+    <div className="flex w-full min-w-0 gap-2">
+      {/* TODO: sort out responsive styling */}
+      <div className="flex w-full flex-col items-center font-body text-lg text-[#FFFFFF]/[.47] sm:flex-row">
+        <span className="mr-1">{message.author.name}</span>
+        <span className="ml-auto">{getSnowflakeUTCDate(message.id)}</span>
       </div>
     </div>
   );
@@ -22,7 +23,7 @@ const { toHTML } = discordMarkdown;
 export const MessageContents = ({ message }: { message: APIMessageWithDiscordAccount }) => {
   const convertedMessageContent = toHTML(message.content);
   const parsedMessageContent = Parser(convertedMessageContent);
-  return <div className={""}>{parsedMessageContent}</div>;
+  return <div className={"pt-2 text-ao-white"}>{parsedMessageContent}</div>;
 };
 
 export const MessageTitle = ({
@@ -101,7 +102,7 @@ export const MessageImages = ({ message }: { message: APIMessageWithDiscordAccou
 export const MessageRenderer = ({ message }: { message: APIMessageWithDiscordAccount }) => {
   return (
     <div className="grow rounded-bl-standard bg-[#00FF85]/[0.01]">
-      <div className="p-6">
+      <div className="select-none p-6">
         <div className="flex items-center gap-2">
           <DiscordAvatar user={message.author} />
           <MessageAuthorArea message={message} />
@@ -130,12 +131,18 @@ export const MessageBlurrer = ({
 }) => {
   const isUserInServer = useIsUserInServer(message.serverId);
 
-  return <ContentBlurrer blurred={!isUserInServer}>{children}</ContentBlurrer>;
+  // We must hide backdrop blur to prevent the border around the message from being blurred as well - causes weird color change
+  return (
+    <ContentBlurrer blurred={!isUserInServer} hideBackdropBlur>
+      {children}
+    </ContentBlurrer>
+  );
 };
 
 export const ContentBlurrer = ({
   blurred,
   children,
+  hideBackdropBlur,
   notPublicTitle = "Message Not Public",
   notPublicInstructions = "Sign In & Join Server To View",
 }: {
@@ -143,6 +150,7 @@ export const ContentBlurrer = ({
   notPublicTitle?: string;
   children: React.ReactNode;
   notPublicInstructions?: string;
+  hideBackdropBlur?: boolean;
 }) => {
   const blurAmount = ".4rem";
 
@@ -155,8 +163,8 @@ export const ContentBlurrer = ({
       <div
         style={{
           filter: `blur(${blurAmount})`,
-          backdropFilter: `blur(${blurAmount})`,
-          WebkitBackdropFilter: `blur(${blurAmount})`,
+          backdropFilter: `${hideBackdropBlur ? "" : `blur(${blurAmount})`}`,
+          WebkitBackdropFilter: `${hideBackdropBlur ? "" : `blur(${blurAmount})`}`,
           WebkitFilter: `blur(${blurAmount})`,
           msFilter: `blur(${blurAmount})`,
         }}
@@ -167,8 +175,10 @@ export const ContentBlurrer = ({
       <div>
         <div className="absolute inset-0 " />
         <div className="absolute inset-0 flex items-center justify-center ">
-          <div className={`flex flex-col items-center justify-center text-center text-black`}>
-            <div className="text-2xl ">{notPublicTitle}</div>
+          <div
+            className={`flex flex-col items-center justify-center rounded-standard bg-ao-black/75 p-5 text-center text-ao-white backdrop-blur-sm`}
+          >
+            <div className="text-2xl">{notPublicTitle}</div>
             <div>{notPublicInstructions}</div>
           </div>
         </div>
