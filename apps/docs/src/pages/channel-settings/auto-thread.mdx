@@ -1,0 +1,33 @@
+import {OPEN_INDEXING_SETTINGS_MENU_LABEL, ENABLE_AUTO_THREAD_LABEL, DISABLE_AUTO_THREAD_LABEL, DISCORD_LINK} from "@answeroverflow/constants"
+import {TryLiveDemo} from "../../components/links"
+
+# Auto Thread
+
+## Demo
+
+<TryLiveDemo/>
+
+{/* TODO: Add a video here */}
+
+
+
+## How to enable
+
+Use `/channel-settings` in the channel you want to enable auto thread in. Click the **{OPEN_INDEXING_SETTINGS_MENU_LABEL}** menu and then click **{ENABLE_AUTO_THREAD_LABEL}**.
+
+{/* TODO: Screenshot */}
+
+## How it works:
+
+- When a user posts a message, the bot will automatically create a thread for that message
+- The thread name will be in the format of `[Nickname]-[Message Content...]` to a length of 50 characters for the title
+
+## Recommendations:
+
+To get the most out of this feature, we recommend:
+- Set [slow mode](https://support.discord.com/hc/en-us/articles/360016150952-Slowmode-Slllooowwwiiinng-down-your-channel) to at least 1 minute to prevent users from spamming threads
+
+
+## Disabling
+
+Use `/channel-settings` in the channel you want to disable auto thread in. Click the **{OPEN_INDEXING_SETTINGS_MENU_LABEL}** menu and then click **{DISABLE_AUTO_THREAD_LABEL}**.
