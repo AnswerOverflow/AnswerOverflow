@@ -1,4 +1,5 @@
 export * from "./src/channel-mock";
+export * from "./src/message-mock";
 export * from "./src/client-mock";
 export * from "./src/guild-mock";
 export * from "./src/interaction-mock";

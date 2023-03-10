@@ -15,16 +15,14 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@answeroverflow/reacord@^0.5.11":
-  version "0.5.11"
-  resolved "https://registry.yarnpkg.com/@answeroverflow/reacord/-/reacord-0.5.11.tgz#6248886012383fc666a0fa9dbfc456623424a979"
-  integrity sha512-TNtgDS4jSuULT3wIkz59ONBiOAv0NEXZQGkwi178e78RDtdviiNdIvEaHjY8f2EwjdvIB0H1TGar3hJYZmLk6g==
+"@answeroverflow/discordjs-react@^0.0.35":
+  version "0.0.35"
+  resolved "https://registry.yarnpkg.com/@answeroverflow/discordjs-react/-/discordjs-react-0.0.35.tgz#bfbdcfc560410afa0083ae14b26f8eac7016c0ec"
+  integrity sha512-e2RkD5NGguD4IAbBVLFyjh1xrTwcaecuh7POm2hnasSGAlDXPSkWZcm4cmdLGD/kLT4bubST6salOT0qTMlR2A==
   dependencies:
-    "@types/node" "*"
-    "@types/react" "*"
-    "@types/react-reconciler" "^0.28.0"
+    "@answeroverflow/discordjs-mock" "0.0.12"
     react-reconciler "^0.29.0"
-    rxjs "^7.5.6"
+    rxjs "^7.8.0"
 
 "@aw-web-design/x-default-browser@1.4.88":
   version "1.4.88"
@@ -4497,14 +4495,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-reconciler@^0.28.0":
-  version "0.28.2"
-  resolved "https://registry.yarnpkg.com/@types/react-reconciler/-/react-reconciler-0.28.2.tgz#f16b0e8cc4748af70ca975eaaace0d79582c71fa"
-  integrity sha512-8tu6lHzEgYPlfDf/J6GOQdIc+gs+S2yAqlby3zTsB3SP2svlqTYe5fwZNtZyfactP74ShooP2vvi1BOp9ZemWw==
-  dependencies:
-    "@types/react" "*"
-
-"@types/react@*", "@types/react@>=16", "@types/react@>=16.0.0", "@types/react@^18.0.14", "@types/react@^18.0.26":
+"@types/react@*", "@types/react@>=16", "@types/react@>=16.0.0", "@types/react@^18.0.14", "@types/react@^18.0.26", "@types/react@^18.0.28":
   version "18.0.28"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.28.tgz#accaeb8b86f4908057ad629a26635fe641480065"
   integrity sha512-RD0ivG1kEztNBdoAK7lekI9M+azSnitIn85h4iOiaLjaTrMjzslhaqCGaI4IyCJ1RljWiLCEu4jyrLLgqxBTew==
@@ -13417,7 +13408,7 @@ rxjs@^6.6.3:
   dependencies:
     tslib "^1.9.0"
 
-rxjs@^7.5.6, rxjs@^7.8.0:
+rxjs@^7.8.0:
   version "7.8.0"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.0.tgz#90a938862a82888ff4c7359811a595e14e1e09a4"
   integrity sha512-F2+gxDshqmIub1KdvZkaEfGDwLNpPvk9Fs6LD/MyQxNgMds/WH9OdDDXOmxUZpME+iSK3rQCctkL0DYyytUqMg==
@@ -14576,7 +14567,7 @@ tslib@^1.8.1, tslib@^1.9.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
-tsup@^6.3.0:
+tsup@^6.3.0, tsup@^6.6.3:
   version "6.6.3"
   resolved "https://registry.yarnpkg.com/tsup/-/tsup-6.6.3.tgz#f6f975a8656cfd9b8e115f33b1aa0f0fd4df78e2"
   integrity sha512-OLx/jFllYlVeZQ7sCHBuRVEQBBa1tFbouoc/gbYakyipjVQdWy/iQOvmExUA/ewap9iQ7tbJf9pW0PgcEFfJcQ==

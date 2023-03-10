@@ -2,16 +2,16 @@
   "name": "@answeroverflow/discord-bot",
   "version": "1.0.0",
   "main": "dist/index.js",
-  "author": "@sapphire",
+  "author": "@answeroverflow",
   "license": "UNLICENSE",
   "dependencies": {
     "@answeroverflow/api": "*",
     "@answeroverflow/cache": "*",
+    "@answeroverflow/constants": "*",
     "@answeroverflow/db": "*",
     "@answeroverflow/db-mock": "*",
-    "@answeroverflow/constants": "*",
+    "@answeroverflow/discordjs-react": "^0.0.35",
     "@answeroverflow/discordjs-utils": "*",
-    "@answeroverflow/reacord": "^0.5.11",
     "@sapphire/decorators": "6.0.0",
     "@sapphire/discord-utilities": "3.0.0",
     "@sapphire/fetch": "^2.4.1",
@@ -43,6 +43,7 @@
     "@swc/jest": "^0.2.24",
     "@types/jest": "^29.2.5",
     "@types/node": "^18.14.2",
+    "@types/react": "^18.0.28",
     "@types/ws": "^8.5.3",
     "dotenv-cli": "^7.0.0",
     "eslint-plugin-jest": "^27.2.1",
@@ -67,7 +68,7 @@
     "start": "yarn run with-env node dist/index.js",
     "test": "yarn run with-env jest --coverage",
     "test:watch": "yarn run with-env jest --watch",
-    "install-local-reacord": "cp -r ~/repos/reacord/packages/reacord/dist/ /AnswerOverflow/node_modules/@answeroverflow/reacord/"
+    "install-local-discordjs-react": "cp -r ~/repos/discordjs-react/packages/discordjs-react/dist/ /AnswerOverflow/node_modules/@answeroverflow/discordjs-react/"
   },
   "resolutions": {
     "discord-api-types": "0.37.20"

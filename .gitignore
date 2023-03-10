@@ -4,7 +4,7 @@
 node_modules
 .pnp
 .pnp.js
-
+.tsbuildinfo
 # testing
 coverage
 
@@ -12,7 +12,7 @@ coverage
 .next/
 out/
 build
-
+tsbuildinfo
 # misc
 .DS_Store
 *.pem

@@ -12,7 +12,6 @@ import {
   ThreadChannel,
   Message,
   User,
-  MessageType,
   Invite,
   APIInvite,
   GuildChannel,
@@ -31,7 +30,8 @@ import {
   FetchMessagesOptions,
   DiscordAPIError,
   FetchMessageOptions,
-  StartThreadOptions,
+  MessageCreateOptions,
+  MessagePayload,
 } from "discord.js";
 import type { RawMessageData, RawMessageReactionData } from "discord.js/typings/rawDataTypes";
 import {
@@ -41,7 +41,7 @@ import {
   sortMessagesById,
 } from "@answeroverflow/discordjs-utils";
 import { mockGuild } from "./guild-mock";
-import { mockGuildMember, mockUser } from "./user-mock";
+import { mockMessage } from "./message-mock";
 
 export function getGuildTextChannelMockDataBase<Type extends GuildTextChannelType>(
   type: Type,
@@ -80,7 +80,7 @@ function setupMockedChannel<T extends GuildBasedChannel>(
     channel.type === ChannelType.GuildAnnouncement ||
     channel.type === ChannelType.GuildForum
   ) {
-    channel.threads.fetchActive = jest.fn().mockImplementation(() => {
+    channel.threads.fetchActive = () => {
       const activeThreads = [...channel.threads.cache.values()].filter(
         (thread) => !thread.archived || thread.archived == null
       );
@@ -91,7 +91,7 @@ function setupMockedChannel<T extends GuildBasedChannel>(
         hasMore: false,
       };
       return Promise.resolve(output);
-    });
+    };
     channel.threads.fetchArchived = jest
       .fn()
       .mockImplementation((options: FetchArchivedThreadOptions = {}) => {
@@ -138,14 +138,26 @@ function setupMockedChannel<T extends GuildBasedChannel>(
         };
         return Promise.resolve(output);
       });
-    channel.createInvite = jest.fn().mockImplementation(() => {
+    channel.createInvite = () => {
       const invite = mockInvite(client, channel);
       return Promise.resolve(invite);
-    });
+    };
   }
   if (channel.isTextBased()) {
-    // TODO: Add the sent message to the cache
-    channel.send = jest.fn();
+    // @ts-ignore
+    channel.send = (options: string | MessagePayload | MessageCreateOptions) => {
+      const isMessagePayload = options instanceof MessagePayload;
+      const opts = isMessagePayload ? options.options : options;
+      const message = mockMessage({
+        client,
+        channel,
+        author: client.user!,
+        override: {
+          content: typeof opts === "string" ? opts : opts.content ?? "",
+        },
+      });
+      return Promise.resolve(message);
+    };
 
     channel.messages.fetch = jest
       .fn()
@@ -371,66 +383,6 @@ export function mockMessages(channel: TextBasedChannel, numberOfMessages: number
     );
   }
   return messages;
-}
-
-export function mockMessage(input: {
-  client: Client;
-  author?: User;
-  channel?: TextBasedChannel;
-  override?: Partial<RawMessageData>;
-}) {
-  const { client, override = {} } = input;
-  let { author, channel } = input;
-  if (!channel) {
-    channel = mockTextChannel(client);
-  }
-  if (!author) {
-    author = mockUser(client);
-    if (!channel.isDMBased()) {
-      mockGuildMember({
-        client,
-        user: author,
-        guild: channel.guild,
-      });
-    }
-  }
-  const rawData: RawMessageData = {
-    id: randomSnowflake().toString(),
-    channel_id: channel.id,
-    author: {
-      // TODO: Use a helper function to get properties
-      id: author.id,
-      username: author.username,
-      discriminator: author.discriminator,
-      avatar: author.avatar,
-    },
-    content: "",
-    timestamp: "",
-    edited_timestamp: null,
-    tts: false,
-    mention_everyone: false,
-    mentions: [],
-    mention_roles: [],
-    attachments: [],
-    embeds: [],
-    pinned: false,
-    type: MessageType.Default,
-    reactions: [],
-    ...override,
-  };
-  const message = Reflect.construct(Message, [client, rawData]) as Message;
-  // TODO: Fix ts ignore?
-  // @ts-ignore
-  channel.messages.cache.set(message.id, message);
-  message.react = jest.fn(); // TODO: implement
-  message.startThread = jest.fn().mockImplementation((options: StartThreadOptions) =>
-    mockThreadFromParentMessage({
-      client,
-      parentMessage: message,
-      data: options,
-    })
-  );
-  return message;
 }
 
 export function mockMessageReaction({

@@ -1,5 +1,5 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import { Command, container, type ChatInputCommand } from "@sapphire/framework";
+import { Command, type ChatInputCommand } from "@sapphire/framework";
 import { callAPI, callWithAllowedErrors, ephemeralStatusHandler } from "~discord-bot/utils/trpc";
 import { SlashCommandBuilder, type ChatInputCommandInteraction } from "discord.js";
 import React from "react";
@@ -60,7 +60,7 @@ export class OpenManageAccountMenuCommand extends Command {
               initialIsGloballyIgnored={isIgnoredAccount}
             />
           );
-          ephemeralReply(container.reacord, menu, interaction);
+          ephemeralReply(menu, interaction);
         },
         Error: (error) => ephemeralStatusHandler(interaction, error.message),
         getCtx: () => createMemberCtx(member),

@@ -1,12 +1,4 @@
-import {
-  type ButtonClickEvent,
-  Button,
-  Select,
-  SelectChangeEvent,
-  Option,
-  Link,
-  ActionRow,
-} from "@answeroverflow/reacord";
+import { Button, Select, Option, Link, ActionRow } from "@answeroverflow/discordjs-react";
 import {
   ChannelType,
   ForumChannel,
@@ -46,8 +38,8 @@ import {
   ToggleButton,
   InstructionsContainer,
   EmbedMenuInstruction,
-  getMessageHistory,
   Spacer,
+  useHistory,
 } from "~discord-bot/components/primitives";
 import {
   updateChannelIndexingEnabled,
@@ -57,8 +49,8 @@ import {
   setSolutionTagId,
   updateAutoThreadEnabled,
 } from "~discord-bot/domains/channel-settings";
-import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
-import { componentEventStatusHandler } from "~discord-bot/utils/trpc";
+import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
+import { ephemeralStatusHandler } from "~discord-bot/utils/trpc";
 import { type RootChannel, getRootChannel } from "~discord-bot/utils/utils";
 
 type ChannelSettingsMenuItemProps<T extends RootChannel = RootChannel> = {
@@ -101,13 +93,13 @@ function ToggleIndexingButton({
       disableLabel={DISABLE_CHANNEL_INDEXING_LABEL}
       enableLabel={ENABLE_CHANNEL_INDEXING_LABEL}
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      onClick={async (event: ButtonClickEvent, enabled) =>
-        guildOnlyComponentEvent(event, async ({ member }) => {
+      onClick={async (interaction, enabled) =>
+        guildTextChannelOnlyInteraction(interaction, async ({ member }) => {
           await updateChannelIndexingEnabled({
             channel: targetChannel,
             enabled,
             member,
-            Error: (message) => componentEventStatusHandler(event, message),
+            Error: (message) => ephemeralStatusHandler(interaction, message),
             Ok: (updatedChannel) => {
               updateChannelState(setChannel, updatedChannel);
             },
@@ -129,13 +121,13 @@ function ToggleForumGuidelinesConsentButton({
       disableLabel={DISABLE_FORUM_GUIDELINES_CONSENT_LABEL}
       enableLabel={ENABLE_FORUM_GUIDELINES_CONSENT_LABEL}
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      onClick={async (event: ButtonClickEvent, enabled) =>
-        guildOnlyComponentEvent(event, async ({ member }) => {
+      onClick={async (interaction, enabled) =>
+        guildTextChannelOnlyInteraction(interaction, async ({ member }) => {
           await updateChannelForumGuidelinesConsentEnabled({
             channel: targetChannel,
             enabled,
             member,
-            Error: (message) => componentEventStatusHandler(event, message),
+            Error: (message) => ephemeralStatusHandler(interaction, message),
             Ok: (updatedChannel) => {
               updateChannelState(setChannel, updatedChannel);
             },
@@ -203,7 +195,7 @@ export function IndexingSettingsMenu({
       )}
       <Button
         label={SEND_CONSENT_PROMPT_LABEL}
-        style="primary"
+        style="Primary"
         onClick={() => {
           console.log("sending consent prompt");
         }}
@@ -227,13 +219,13 @@ function ToggleMarkAsSolutionButton({
       disableLabel={DISABLE_MARK_AS_SOLUTION_LABEL}
       enableLabel={ENABLE_MARK_AS_SOLUTION_LABEL}
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      onClick={async (event: ButtonClickEvent, enabled) =>
-        guildOnlyComponentEvent(event, async ({ member }) => {
+      onClick={async (interaction, enabled) =>
+        guildTextChannelOnlyInteraction(interaction, async ({ member }) => {
           await updateMarkAsSolutionEnabled({
             channel: targetChannel,
             enabled,
             member,
-            Error: (message) => componentEventStatusHandler(event, message),
+            Error: (message) => ephemeralStatusHandler(interaction, message),
             Ok: (updatedChannel) => {
               updateChannelState(setChannel, updatedChannel);
             },
@@ -256,13 +248,13 @@ function ToggleSendMarkAsSolutionInstructionsButton({
       enableLabel={ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL}
       disabled={!channelInDB.flags.markSolutionEnabled}
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      onClick={async (event: ButtonClickEvent, enabled) =>
-        guildOnlyComponentEvent(event, async ({ member }) => {
+      onClick={async (interaction, enabled) =>
+        guildTextChannelOnlyInteraction(interaction, async ({ member }) => {
           await updateSendMarkAsSolutionInstructionsEnabled({
             channel: targetChannel,
             enabled,
             member,
-            Error: (message) => componentEventStatusHandler(event, message),
+            Error: (message) => ephemeralStatusHandler(interaction, message),
             Ok: (updatedChannel) => {
               updateChannelState(setChannel, updatedChannel);
             },
@@ -287,20 +279,19 @@ function SelectMarkAsSolvedTag({
       placeholder={SET_SOLVED_TAG_ID_PLACEHOLDER}
       value={channelInDB.solutionTagId ?? ""}
       disabled={!channelInDB.flags.markSolutionEnabled}
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      onChangeValue={async (value: string, event: SelectChangeEvent) =>
-        guildOnlyComponentEvent(event, async ({ member }) =>
+      onChangeValue={async (value, interaction) => {
+        await guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
           setSolutionTagId({
             channel: targetChannel,
             tagId: value === CLEAR_TAG_VALUE ? null : value,
             member,
-            Error: (message) => componentEventStatusHandler(event, message),
+            Error: (message) => ephemeralStatusHandler(interaction, message),
             Ok: (updatedChannel) => {
               updateChannelState(setChannel, updatedChannel);
             },
           })
-        )
-      }
+        );
+      }}
     >
       <Option
         label={targetChannel.availableTags.length > 0 ? "(Clear)" : "No Tags Found"}
@@ -324,13 +315,13 @@ function ToggleAutoThreadButton({
       disableLabel={DISABLE_AUTO_THREAD_LABEL}
       enableLabel={ENABLE_AUTO_THREAD_LABEL}
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      onClick={async (event: ButtonClickEvent, enabled) =>
-        guildOnlyComponentEvent(event, async ({ member }) => {
+      onClick={async (interaction, enabled) =>
+        guildTextChannelOnlyInteraction(interaction, async ({ member }) => {
           await updateAutoThreadEnabled({
             channel: targetChannel,
             enabled,
             member,
-            Error: (message) => componentEventStatusHandler(event, message),
+            Error: (message) => ephemeralStatusHandler(interaction, message),
             Ok: (updatedChannel) => {
               updateChannelState(setChannel, updatedChannel);
             },
@@ -459,7 +450,7 @@ function ExperimentalSettingsMenu() {
       <Button
         label={ENABLE_REDIRECTION_TO_HELP_CHANNEL_LABEL}
         disabled={true}
-        style="secondary"
+        style="Secondary"
         onClick={() => {
           console.error("Enable redirection to help channel not implemented yet");
         }}
@@ -467,7 +458,7 @@ function ExperimentalSettingsMenu() {
       <Button
         label={ENABLE_AI_QUESTION_ANSWERING_LABEL}
         disabled={true}
-        style="secondary"
+        style="Secondary"
         onClick={() => {
           console.error("Enable AI Question Answering not implemented yet");
         }}
@@ -475,7 +466,7 @@ function ExperimentalSettingsMenu() {
       <Button
         label={ENABLE_AI_QUESTION_IMPROVEMENT_SUGGESTIONS_LABEL}
         disabled={true}
-        style="secondary"
+        style="Secondary"
         onClick={() => {
           console.error("Enable AI Question Improvement Suggestions not implemented yet");
         }}
@@ -490,11 +481,9 @@ function ExperimentalSettingsMenu() {
 export function ChannelSettingsMenu({
   channelMenuIsIn,
   channelWithFlags,
-  interactionId,
 }: {
   channelMenuIsIn: GuildTextBasedChannel;
   channelWithFlags: ChannelWithFlags;
-  interactionId: string;
 }) {
   const [channel] = React.useState<ChannelWithFlags>(
     channelCache.get(channelMenuIsIn.id) ?? channelWithFlags
@@ -503,6 +492,7 @@ export function ChannelSettingsMenu({
   if (!targetChannel) {
     throw new Error("Could not find root channel");
   }
+  const { pushHistory } = useHistory();
   return (
     <>
       <InstructionsContainer>
@@ -528,9 +518,8 @@ export function ChannelSettingsMenu({
       </InstructionsContainer>
       <Button
         label={OPEN_INDEXING_SETTINGS_MENU_LABEL}
-        style="primary"
+        style="Primary"
         onClick={() => {
-          const { pushHistory } = getMessageHistory(interactionId);
           pushHistory(
             <IndexingSettingsMenu initialChannelData={channel} targetChannel={targetChannel} />
           );
@@ -538,9 +527,8 @@ export function ChannelSettingsMenu({
       />
       <Button
         label={OPEN_HELP_CHANNEL_UTILITIES_LABEL}
-        style="primary"
+        style="Primary"
         onClick={() => {
-          const { pushHistory } = getMessageHistory(interactionId);
           pushHistory(
             <HelpChannelUtilitiesMenu initialChannelData={channel} targetChannel={targetChannel} />
           );
@@ -548,9 +536,8 @@ export function ChannelSettingsMenu({
       />
       <Button
         label={OPEN_EXPERIMENTAL_SETTINGS_LABEL}
-        style="primary"
+        style="Primary"
         onClick={() => {
-          const { pushHistory } = getMessageHistory(interactionId);
           pushHistory(<ExperimentalSettingsMenu />);
         }}
       />

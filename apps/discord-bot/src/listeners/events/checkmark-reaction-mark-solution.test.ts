@@ -72,8 +72,10 @@ describe("Checkmark Reaction Mark Solution", () => {
         },
       },
     });
+    const preEventTextChannelMessagesLength = textChannelThread.messages.cache.size;
     await emitEvent(client, Events.MessageReactionAdd, messageReaction, defaultAuthor.user);
-    expect(textChannelThread.send).not.toHaveBeenCalled();
+    const postEventTextChannelMessagesLength = textChannelThread.messages.cache.size;
+    expect(postEventTextChannelMessagesLength).toBe(preEventTextChannelMessagesLength);
   });
   it("should not mark a message as a solution if the reaction is from the bot", async () => {
     const { defaultAuthor, solutionMessage, textChannelThread } = await setupSolvedMessageScenario(
@@ -90,8 +92,10 @@ describe("Checkmark Reaction Mark Solution", () => {
         me: true,
       },
     });
+    const preEventTextChannelMessagesLength = textChannelThread.messages.cache.size;
     await emitEvent(client, Events.MessageReactionAdd, messageReaction, client.user!);
-    expect(textChannelThread.send).not.toHaveBeenCalled();
+    const postEventTextChannelMessagesLength = textChannelThread.messages.cache.size;
+    expect(postEventTextChannelMessagesLength).toBe(preEventTextChannelMessagesLength);
   });
   it("should not mark a message as a solution if the guild is not allowed", async () => {
     const { defaultAuthor, solutionMessage, textChannelThread } =
@@ -106,8 +110,10 @@ describe("Checkmark Reaction Mark Solution", () => {
         },
       },
     });
+    const preEventTextChannelMessagesLength = textChannelThread.messages.cache.size;
     await emitEvent(client, Events.MessageReactionAdd, messageReaction, defaultAuthor.user);
-    expect(textChannelThread.send).not.toHaveBeenCalled();
+    const postEventTextChannelMessagesLength = textChannelThread.messages.cache.size;
+    expect(postEventTextChannelMessagesLength).toBe(preEventTextChannelMessagesLength);
   });
   it("should mark a message as a solution if the emoji is a checkmark, the reaction is not from the bot, and the guild is allowed", async () => {
     const { defaultAuthor, solutionMessage, textChannelThread } = await setupSolvedMessageScenario(
@@ -123,6 +129,7 @@ describe("Checkmark Reaction Mark Solution", () => {
         },
       },
     });
+    jest.spyOn(textChannelThread, "send");
     await emitEvent(client, Events.MessageReactionAdd, messageReaction, defaultAuthor.user);
     expect(textChannelThread.send).toHaveBeenCalled();
   });

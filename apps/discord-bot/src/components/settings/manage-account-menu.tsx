@@ -7,9 +7,8 @@ import {
   updateUserConsent,
   updateUserServerIndexingEnabled,
 } from "~discord-bot/domains/manage-account";
-import { callAPI, componentEventStatusHandler } from "~discord-bot/utils/trpc";
-import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
-import { Button } from "@answeroverflow/reacord";
+import { callAPI, ephemeralStatusHandler } from "~discord-bot/utils/trpc";
+import { Button } from "@answeroverflow/discordjs-react";
 import { createMemberCtx } from "~discord-bot/utils/context";
 import {
   ToggleButton,
@@ -25,6 +24,7 @@ import {
   REVOKE_CONSENT_LABEL,
   STOP_IGNORING_ACCOUNT_LABEL,
 } from "@answeroverflow/constants";
+import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
 
 type ManageAccountMenuItemProps = {
   state: ManageAccountMenuState;
@@ -37,8 +37,8 @@ const ToggleConsentButton = ({ state, setSettings }: ManageAccountMenuItemProps)
     enableLabel={GRANT_CONSENT_LABEL}
     disabled={state.settings.flags.messageIndexingDisabled}
     disableLabel={REVOKE_CONSENT_LABEL}
-    onClick={(event, enabled) => {
-      void guildOnlyComponentEvent(event, async ({ member }) => {
+    onClick={(interaction, enabled) =>
+      guildTextChannelOnlyInteraction(interaction, async ({ member }) => {
         await updateUserConsent({
           canPubliclyDisplayMessages: enabled,
           consentSource: "manage-account-menu",
@@ -49,10 +49,10 @@ const ToggleConsentButton = ({ state, setSettings }: ManageAccountMenuItemProps)
               isGloballyIgnored: state.isGloballyIgnored,
             });
           },
-          Error: (error) => componentEventStatusHandler(event, error.message),
+          Error: (error) => ephemeralStatusHandler(interaction, error.message),
         });
-      });
-    }}
+      })
+    }
   />
 );
 
@@ -61,22 +61,24 @@ const ToggleIndexingButton = ({ state, setSettings }: ManageAccountMenuItemProps
     currentlyEnabled={!state.settings.flags.messageIndexingDisabled}
     enableLabel={ENABLE_INDEXING_LABEL}
     disableLabel={DISABLE_INDEXING_LABEL}
-    onClick={(event, messageIndexingDisabled) => {
-      void guildOnlyComponentEvent(event, async ({ member }) => {
-        await updateUserServerIndexingEnabled({
-          member,
-          messageIndexingDisabled: !messageIndexingDisabled,
-          source: "manage-account-menu",
-          Error: (error) => componentEventStatusHandler(event, error.message),
-          Ok(newSettings) {
-            setSettings({
-              settings: newSettings,
-              isGloballyIgnored: state.isGloballyIgnored,
-            });
-          },
-        });
-      });
-    }}
+    onClick={(interaction, messageIndexingDisabled) =>
+      guildTextChannelOnlyInteraction(
+        interaction,
+        async ({ member }) =>
+          await updateUserServerIndexingEnabled({
+            member,
+            messageIndexingDisabled: !messageIndexingDisabled,
+            source: "manage-account-menu",
+            Error: (error) => ephemeralStatusHandler(interaction, error.message),
+            Ok(newSettings) {
+              setSettings({
+                settings: newSettings,
+                isGloballyIgnored: state.isGloballyIgnored,
+              });
+            },
+          })
+      )
+    }
   />
 );
 
@@ -87,18 +89,18 @@ export const GloballyIgnoreAccountButton = ({
 }) => (
   <Button
     label={GLOBALLY_IGNORE_ACCOUNT_LABEL}
-    style="danger"
+    style="Danger"
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    onClick={async (event) => {
-      await guildOnlyComponentEvent(event, async ({ member }) =>
+    onClick={async (interaction) => {
+      await guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
         callAPI({
-          apiCall: (router) => router.discordAccounts.delete(event.user.id),
+          apiCall: (router) => router.discordAccounts.delete(interaction.user.id),
           getCtx: () => createMemberCtx(member),
-          Error: (error) => componentEventStatusHandler(event, error.message),
+          Error: (error) => ephemeralStatusHandler(interaction, error.message),
           Ok: () =>
             setState({
               settings: getDefaultUserServerSettingsWithFlags({
-                userId: event.user.id,
+                userId: interaction.user.id,
                 serverId: member.guild.id,
               }),
               isGloballyIgnored: true,
@@ -116,18 +118,18 @@ export const StopIgnoringAccountButton = ({
 }) => (
   <Button
     label={STOP_IGNORING_ACCOUNT_LABEL}
-    style="success"
+    style="Success"
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    onClick={async (event) => {
-      await guildOnlyComponentEvent(event, async ({ member }) =>
+    onClick={async (interaction) => {
+      await guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
         callAPI({
-          apiCall: (router) => router.discordAccounts.undelete(event.user.id),
+          apiCall: (router) => router.discordAccounts.undelete(interaction.user.id),
           getCtx: () => createMemberCtx(member),
-          Error: (error) => componentEventStatusHandler(event, error.message),
+          Error: (error) => ephemeralStatusHandler(interaction, error.message),
           Ok: () => {
             setState({
               settings: getDefaultUserServerSettingsWithFlags({
-                userId: event.user.id,
+                userId: interaction.user.id,
                 serverId: member.guild.id,
               }),
               isGloballyIgnored: false,
