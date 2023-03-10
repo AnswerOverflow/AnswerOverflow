@@ -15,10 +15,10 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@answeroverflow/discordjs-react@^0.0.30":
-  version "0.0.30"
-  resolved "https://registry.yarnpkg.com/@answeroverflow/discordjs-react/-/discordjs-react-0.0.30.tgz#a7bfbe281a9973d611d5ec19cd63cf9036de7236"
-  integrity sha512-ExLjBr3UBa1V/PLh2NIV/EwuVru1QK+hlfd4oxVcIbI3ERwB5nEom4Zypy9MuxfOr8lDvKIkpHIStYLCECC5fQ==
+"@answeroverflow/discordjs-react@^0.0.35":
+  version "0.0.35"
+  resolved "https://registry.yarnpkg.com/@answeroverflow/discordjs-react/-/discordjs-react-0.0.35.tgz#bfbdcfc560410afa0083ae14b26f8eac7016c0ec"
+  integrity sha512-e2RkD5NGguD4IAbBVLFyjh1xrTwcaecuh7POm2hnasSGAlDXPSkWZcm4cmdLGD/kLT4bubST6salOT0qTMlR2A==
   dependencies:
     "@answeroverflow/discordjs-mock" "0.0.12"
     react-reconciler "^0.29.0"

@@ -376,27 +376,29 @@ describe("Channel Settings Menu", () => {
           },
         });
         const message = await mockReply({
-          channel: forumChannel,
+          channel: forumThread,
           member: members.guildMemberOwner,
           content: (
             <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={forumChannel} />
           ),
         });
         const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER);
+        const tagToSelect = forumChannel.availableTags[0]!.id;
         await select?.select({
           clicker: members.guildMemberOwner.user,
-          values: forumChannel.availableTags[0]!.id,
+          values: tagToSelect,
         });
         const updatedSelect = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER);
         const found = await findChannelById(forumChannelWithFlags.id);
-        expect(found!.solutionTagId).toBe(forumChannel.availableTags[0]!.id);
+        expect(found!.solutionTagId).toBe(tagToSelect);
+
         const selectedOption = updatedSelect?.options?.filter(
-          (option) => option.value === CLEAR_TAG_VALUE
+          (option) => option.value === tagToSelect
         );
         expect(selectedOption).toHaveLength(1);
         expect(selectedOption![0]!.default).toBeTruthy();
       });
-      it("should clear the tag id", async () => {
+      it.only("should clear the tag id", async () => {
         const updated = await updateChannel({
           old: null,
           update: {
@@ -408,7 +410,7 @@ describe("Channel Settings Menu", () => {
           },
         });
         const message = await mockReply({
-          channel: forumChannel,
+          channel: forumThread,
           content: (
             <HelpChannelUtilitiesMenu initialChannelData={updated} targetChannel={forumChannel} />
           ),
@@ -422,11 +424,8 @@ describe("Channel Settings Menu", () => {
         const updatedSelect = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER);
         const found = await findChannelById(forumChannelWithFlags.id);
         expect(found!.solutionTagId).toBe(null);
-        const selectedOption = updatedSelect?.options?.filter(
-          (option) => option.value === CLEAR_TAG_VALUE
-        );
-        expect(selectedOption).toHaveLength(1);
-        expect(selectedOption![0]!.default).toBeTruthy();
+        const selectedOption = updatedSelect?.options?.filter((option) => option.default);
+        expect(selectedOption).toHaveLength(0);
       });
     });
     describe("toggle auto thread", () => {

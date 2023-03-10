@@ -282,9 +282,8 @@ function SelectMarkAsSolvedTag({
       placeholder={SET_SOLVED_TAG_ID_PLACEHOLDER}
       value={channelInDB.solutionTagId ?? ""}
       disabled={!channelInDB.flags.markSolutionEnabled}
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      onChangeValue={async (value, interaction) =>
-        guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
+      onChangeValue={async (value, interaction) => {
+        await guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
           setSolutionTagId({
             channel: targetChannel,
             tagId: value === CLEAR_TAG_VALUE ? null : value,
@@ -294,8 +293,8 @@ function SelectMarkAsSolvedTag({
               updateChannelState(setChannel, updatedChannel);
             },
           })
-        )
-      }
+        );
+      }}
     >
       <Option
         label={targetChannel.availableTags.length > 0 ? "(Clear)" : "No Tags Found"}
