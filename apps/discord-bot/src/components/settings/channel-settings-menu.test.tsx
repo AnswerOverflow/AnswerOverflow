@@ -398,7 +398,7 @@ describe("Channel Settings Menu", () => {
         expect(selectedOption).toHaveLength(1);
         expect(selectedOption![0]!.default).toBeTruthy();
       });
-      it.only("should clear the tag id", async () => {
+      it("should clear the tag id", async () => {
         const updated = await updateChannel({
           old: null,
           update: {
