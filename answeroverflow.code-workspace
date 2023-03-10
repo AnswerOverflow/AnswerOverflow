@@ -186,6 +186,7 @@
       "undelete",
       "upsert",
       "upserting",
+      "upvote",
       "WAITLIST"
     ],
     "cSpell.enableFiletypes": [
