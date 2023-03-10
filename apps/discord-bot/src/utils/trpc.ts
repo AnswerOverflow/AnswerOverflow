@@ -6,9 +6,7 @@ import {
 } from "@answeroverflow/api";
 import { container } from "@sapphire/framework";
 import { TRPCError } from "@trpc/server";
-import type { CommandInteraction } from "discord.js";
-import type { ComponentEvent } from "@answeroverflow/reacord";
-import { ephemeralReply } from "./utils";
+import type { RendererableInteractions } from "@answeroverflow/discordjs-react";
 
 export type TRPCStatusHandler<T> = {
   Ok?: (result: T) => void | Promise<void>;
@@ -59,10 +57,6 @@ export async function callAPI<T>({
   }
 }
 
-export function ephemeralStatusHandler(interaction: CommandInteraction, message: string) {
-  return ephemeralReply(container.reacord, message, interaction);
-}
-
-export function componentEventStatusHandler(interaction: ComponentEvent, message: string) {
-  return interaction.ephemeralReply(message);
+export function ephemeralStatusHandler(interaction: RendererableInteractions, message: string) {
+  return container.discordJSReact.ephemeralReply(interaction, message);
 }

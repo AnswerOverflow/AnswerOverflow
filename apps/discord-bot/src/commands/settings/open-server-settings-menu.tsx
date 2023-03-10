@@ -1,5 +1,5 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import { Command, container, type ChatInputCommand } from "@sapphire/framework";
+import { Command, type ChatInputCommand } from "@sapphire/framework";
 import { callAPI, callWithAllowedErrors, ephemeralStatusHandler } from "~discord-bot/utils/trpc";
 import { SlashCommandBuilder, type ChatInputCommandInteraction } from "discord.js";
 import React from "react";
@@ -44,7 +44,7 @@ export class OpenServerSettingsMenu extends Command {
             server = getDefaultServerWithFlags(toAOServer(guild));
           }
           const menu = <ServerSettingsMenu server={server as ServerAll} />;
-          ephemeralReply(container.reacord, menu, interaction);
+          ephemeralReply(menu, interaction);
         },
       });
     });

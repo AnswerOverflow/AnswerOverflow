@@ -1,9 +1,7 @@
-import { ActionRow, Link } from "@answeroverflow/reacord";
+import { ActionRow, Link } from "@answeroverflow/discordjs-react";
 import type { ServerWithFlags } from "@answeroverflow/prisma-types";
 import React from "react";
-import { guildOnlyComponentEvent } from "~discord-bot/utils/conditions";
 import { updateReadTheRulesConsentEnabled } from "~discord-bot/domains/server-settings";
-import { componentEventStatusHandler } from "~discord-bot/utils/trpc";
 import { EmbedMenuInstruction, InstructionsContainer, ToggleButton } from "../primitives";
 import {
   DISABLE_READ_THE_RULES_CONSENT_LABEL,
@@ -11,6 +9,9 @@ import {
   READ_THE_RULES_CONSENT_PROMPT,
   VIEW_ON_ANSWEROVERFLOW_LABEL,
 } from "@answeroverflow/constants";
+import { randomUUID } from "crypto";
+import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
+import { ephemeralReply } from "~discord-bot/utils/utils";
 
 const ToggleReadTheRulesConsentButton = ({
   server,
@@ -23,18 +24,18 @@ const ToggleReadTheRulesConsentButton = ({
     currentlyEnabled={server.flags.readTheRulesConsentEnabled}
     enableLabel={ENABLE_READ_THE_RULES_CONSENT_LABEL}
     disableLabel={DISABLE_READ_THE_RULES_CONSENT_LABEL}
-    onClick={(event, enabled) => {
-      void guildOnlyComponentEvent(event, async ({ member }) =>
+    onClick={async (interaction, enabled) =>
+      guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
         updateReadTheRulesConsentEnabled({
           enabled,
           member,
-          Error: (error) => componentEventStatusHandler(event, error.message),
+          Error: (error) => ephemeralReply(error.message, interaction),
           Ok(result) {
             setServer(result);
           },
         })
-      );
-    }}
+      )
+    }
   />
 );
 
@@ -42,6 +43,7 @@ export function ServerSettingsMenu({ server: initialServer }: { server: ServerWi
   const [server, setServer] = React.useState(initialServer);
   return (
     <>
+      SERVER SETTINGS ID: {randomUUID()}
       <InstructionsContainer>
         <EmbedMenuInstruction
           instructions={[

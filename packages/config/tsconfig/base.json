@@ -19,6 +19,7 @@
     "importHelpers": true,
     "importsNotUsedAsValues": "error",
     "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
     "lib": [
       "esnext"
     ],

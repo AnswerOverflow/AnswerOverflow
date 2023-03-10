@@ -2,10 +2,10 @@ import { ChannelType, Client } from "discord.js";
 import {
   mockTextChannel,
   mockForumChannel,
-  mockMessage,
   mockPublicThread,
   mockThreadFromParentMessage,
 } from "./channel-mock";
+import { mockMessage } from "./message-mock";
 import { setupBot } from "./client-mock";
 import { mockGuild } from "./guild-mock";
 let client: Client;

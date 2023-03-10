@@ -1,8 +1,23 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+import type { DiscordJSReact } from "@answeroverflow/discordjs-react";
+import type LRUCache from "lru-cache";
 import { createClient, login } from "./utils/bot";
 
 const client = createClient();
 void login(client);
+
+declare module "@sapphire/pieces" {
+  interface Container {
+    discordJSReact: DiscordJSReact;
+    messageHistory: LRUCache<
+      string,
+      {
+        history: React.ReactNode[];
+        setHistory: (node: React.ReactNode[]) => void;
+      }
+    >;
+  }
+}
 
 declare global {
   namespace NodeJS {

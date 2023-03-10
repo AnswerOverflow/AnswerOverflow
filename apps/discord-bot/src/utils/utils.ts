@@ -1,4 +1,4 @@
-import { ReacordTester, ReacordDiscordJs } from "@answeroverflow/reacord";
+import type { RendererableInteractions } from "@answeroverflow/discordjs-react";
 import type {
   ChatInputCommandSuccessPayload,
   Command,
@@ -9,14 +9,7 @@ import { container } from "@sapphire/framework";
 import { send } from "@sapphire/plugin-editable-commands";
 import { cyan } from "colorette";
 import type { APIUser } from "discord-api-types/v9";
-import {
-  Guild,
-  Message,
-  EmbedBuilder,
-  User,
-  CommandInteraction,
-  GuildTextBasedChannel,
-} from "discord.js";
+import { Guild, Message, EmbedBuilder, User, GuildTextBasedChannel } from "discord.js";
 import type { ReactNode } from "react";
 import { LOADING_MESSAGES } from "./constants";
 
@@ -94,19 +87,8 @@ function getGuildInfo(guild: Guild | null) {
   return `${guild.name}[${cyan(guild.id)}]`;
 }
 
-export function ephemeralReply(
-  reacord: ReacordTester | ReacordDiscordJs,
-  content: ReactNode,
-  interaction?: CommandInteraction
-) {
-  if (reacord instanceof ReacordTester) {
-    reacord.ephemeralReply(content);
-    return;
-  } else if (interaction && reacord instanceof ReacordDiscordJs) {
-    reacord.ephemeralReply(interaction, content);
-    return;
-  }
-  throw new Error(`Invalid reacord instance`);
+export function ephemeralReply(content: ReactNode, interaction: RendererableInteractions) {
+  return container.discordJSReact.ephemeralReply(interaction, content);
 }
 
 export type RootChannel = NonNullable<ReturnType<typeof getRootChannel>>;
