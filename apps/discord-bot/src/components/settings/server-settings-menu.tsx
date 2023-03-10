@@ -43,7 +43,6 @@ export function ServerSettingsMenu({ server: initialServer }: { server: ServerWi
   const [server, setServer] = React.useState(initialServer);
   return (
     <>
-      SERVER SETTINGS ID: {randomUUID()}
       <InstructionsContainer>
         <EmbedMenuInstruction
           instructions={[
