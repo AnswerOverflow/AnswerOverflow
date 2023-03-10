@@ -9,7 +9,6 @@ import {
   READ_THE_RULES_CONSENT_PROMPT,
   VIEW_ON_ANSWEROVERFLOW_LABEL,
 } from "@answeroverflow/constants";
-import { randomUUID } from "crypto";
 import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
 import { ephemeralReply } from "~discord-bot/utils/utils";
 

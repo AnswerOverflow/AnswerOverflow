@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { DISCORD_LINK, GITHUB_LINK, TWITTER_LINK } from "@answeroverflow/constants";
+// TODO: Storybook breaks when importing from the root of @answeroverflow/constants - figure out why
+import { DISCORD_LINK, GITHUB_LINK, TWITTER_LINK } from "@answeroverflow/constants/src/links";
 import { DiscordIcon } from "./icons/DiscordIcon";
 
 const navigation = {
