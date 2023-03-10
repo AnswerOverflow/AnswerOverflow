@@ -187,6 +187,9 @@
       "upserting",
       "WAITLIST"
     ],
+    "cSpell.enableFiletypes": [
+      "mdx"
+    ],
   },
   "extensions": {
     "recommendations": [
