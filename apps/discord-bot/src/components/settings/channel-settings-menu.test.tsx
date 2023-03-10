@@ -69,9 +69,9 @@ describe("Channel Settings Menu", () => {
         const message = await mockReply({
           channel: textChannel,
           content: (
-            <ChannelSettingsMenu
-              channelMenuIsIn={textChannel}
-              channelWithFlags={textChannelWithFlags}
+            <IndexingSettingsMenu
+              targetChannel={textChannel}
+              initialChannelData={textChannelWithFlags}
             />
           ),
           member: members.guildMemberOwner,
@@ -98,7 +98,9 @@ describe("Channel Settings Menu", () => {
 
         const message = await mockReply({
           channel: textChannel,
-          content: <ChannelSettingsMenu channelMenuIsIn={textChannel} channelWithFlags={updated} />,
+          content: (
+            <IndexingSettingsMenu targetChannel={textChannel} initialChannelData={updated} />
+          ),
           member: members.guildMemberOwner,
         });
 
@@ -307,7 +309,7 @@ describe("Channel Settings Menu", () => {
               targetChannel={forumChannel}
             />
           ),
-          channel: forumChannel,
+          channel: forumThread,
           member: members.guildMemberOwner,
         });
         const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER);
@@ -335,7 +337,7 @@ describe("Channel Settings Menu", () => {
               targetChannel={forumChannel}
             />
           ),
-          channel: forumChannel,
+          channel: forumThread,
           member: members.guildMemberOwner,
         });
         const select = message?.findSelectByPlaceholder(SET_SOLVED_TAG_ID_PLACEHOLDER);
@@ -347,8 +349,12 @@ describe("Channel Settings Menu", () => {
         const taglessForum = mockForumChannel(client, guild, {
           available_tags: [],
         });
+        const taglessForumThread = mockPublicThread({
+          client,
+          parentChannel: taglessForum,
+        });
         const message = await mockReply({
-          channel: taglessForum,
+          channel: taglessForumThread,
           content: (
             <HelpChannelUtilitiesMenu
               initialChannelData={mockChannelWithFlags(
@@ -431,7 +437,7 @@ describe("Channel Settings Menu", () => {
     describe("toggle auto thread", () => {
       it("should not render in a forum channel", async () => {
         const message = await mockReply({
-          channel: forumChannel,
+          channel: forumThread,
           content: (
             <HelpChannelUtilitiesMenu
               initialChannelData={forumChannelWithFlags}

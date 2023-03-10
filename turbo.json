@@ -45,6 +45,9 @@
       "cache": false
     },
     "test": {
+      "dependsOn": [
+        "build"
+      ],
       "outputs": [],
       "cache": true
     },

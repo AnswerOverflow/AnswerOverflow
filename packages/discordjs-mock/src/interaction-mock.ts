@@ -3,7 +3,6 @@ import {
   InteractionType,
   APIChatInputApplicationCommandInteraction,
   ApplicationCommandType,
-  GuildBasedChannel,
   GuildMember,
   PermissionsBitField,
   Client,
@@ -20,6 +19,7 @@ import {
   Channel,
   StringSelectMenuInteraction,
   APIMessageStringSelectInteractionData,
+  GuildTextBasedChannel,
 } from "discord.js";
 import { randomSnowflake } from "@answeroverflow/discordjs-utils";
 import { mockTextChannel } from "./channel-mock";
@@ -196,7 +196,7 @@ export function mockChatInputCommandInteraction({
   client: Client;
   name: string;
   id: string;
-  channel?: GuildBasedChannel;
+  channel?: GuildTextBasedChannel;
   member?: GuildMember;
 }): ChatInputCommandInteraction {
   if (!channel) {

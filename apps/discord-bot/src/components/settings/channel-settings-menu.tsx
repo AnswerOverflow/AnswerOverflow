@@ -52,7 +52,6 @@ import {
 import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
 import { ephemeralStatusHandler } from "~discord-bot/utils/trpc";
 import { type RootChannel, getRootChannel } from "~discord-bot/utils/utils";
-import { delay } from "@answeroverflow/discordjs-mock";
 
 type ChannelSettingsMenuItemProps<T extends RootChannel = RootChannel> = {
   channelInDB: ChannelWithFlags;
@@ -96,7 +95,6 @@ function ToggleIndexingButton({
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       onClick={async (interaction, enabled) =>
         guildTextChannelOnlyInteraction(interaction, async ({ member }) => {
-          await delay(8000);
           await updateChannelIndexingEnabled({
             channel: targetChannel,
             enabled,
@@ -125,7 +123,6 @@ function ToggleForumGuidelinesConsentButton({
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       onClick={async (interaction, enabled) =>
         guildTextChannelOnlyInteraction(interaction, async ({ member }) => {
-          await delay(6000);
           await updateChannelForumGuidelinesConsentEnabled({
             channel: targetChannel,
             enabled,
