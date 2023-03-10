@@ -20,14 +20,14 @@ const ServerInvite = ({
   channel?: ChannelPublicWithFlags;
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center px-5 pt-6 pb-2">
+    <div className="flex flex-col items-center justify-center pt-6 pb-2 xl:px-5">
       <div className="h-24 w-24 rounded-[50%] border-2 border-white bg-[#9A9A9A]" />
       <h3 className="pt-2 text-center font-header text-2xl font-bold text-ao-white">
         {server.name}
       </h3>
       {channel && (
         <>
-          <h5 className="text-center text-ao-white/[.9]">#{channel.name}</h5>
+          <h5 className="text-center text-xl font-light text-ao-white/[.9]">#{channel.name}</h5>
           <Button type={"solid"} color={"white"} className="my-4">
             Join Server
           </Button>
@@ -88,24 +88,26 @@ export const SearchResult = ({ result }: MessageResultProps) => {
     <div className="flex h-full w-full flex-row rounded-standard border-2 border-[#696969]/[.42] bg-[#181B1F]">
       {/* Body */}
       <div className="flex grow flex-col">
-        <div className="grow border-r-2 border-white/[.13] p-6">
+        <div className="grow border-white/[.13] pb-6 lg:border-r-2 lg:py-6">
           {/* Timestamp area */}
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-row gap-2 border-b-1 border-white/[.13] px-6 py-4 lg:border-0 lg:py-0">
             <DiscordAvatar user={result.message.author} size={"sm"} />
             <MessageAuthorArea message={result.message} />
           </div>
-          <MessageTitle channel={result.channel} thread={result.thread} />
-          <MessageContents message={result.message} />
+          <div className="px-6">
+            <MessageTitle channel={result.channel} thread={result.thread} />
+            <MessageContents message={result.message} />
+          </div>
         </div>
 
         {/* Answer */}
         {solution && (
-          <div className="border-r-2 border-white/[.13]">
+          <div className="border-white/[.13] lg:border-r-2">
             <Message message={solution} />
           </div>
         )}
       </div>
-      <div className="flex w-1/4 flex-col items-center justify-center px-5 pt-6 pb-2">
+      <div className="hidden w-1/4 flex-col items-center justify-center px-5 pt-6 pb-2 lg:flex">
         {/* Server Invite */}
         <ServerInvite server={result.server} channel={result.channel} />
         <SearchResultMetaData result={result} />

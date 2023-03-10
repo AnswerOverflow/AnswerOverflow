@@ -17,13 +17,7 @@ module.exports = {
   },
   plugins: ["tailwindcss"],
   rules: {
-    "tailwindcss/no-custom-classname": [
-      "warn", // TODO: Renable this eventually, whitelist is not working
-      {
-        config: "./tailwind.config.cjs",
-        whitelist: ["scrollbar-hide", "dark"],
-      },
-    ],
+    "tailwindcss/no-custom-classname": "off",
     // Disable tailwindcss rearrange class
     "tailwindcss/classnames-order": "off",
   },

@@ -10,7 +10,7 @@ export const MessageAuthorArea = ({ message }: { message: APIMessageWithDiscordA
   return (
     <div className="flex w-full min-w-0 gap-2">
       {/* TODO: sort out responsive styling */}
-      <div className="flex w-full flex-col items-center font-body text-lg text-[#FFFFFF]/[.47] sm:flex-row">
+      <div className="flex w-full flex-row items-center font-body text-lg text-[#FFFFFF]/[.47]">
         <span className="mr-1">{message.author.name}</span>
         <span className="ml-auto">{getSnowflakeUTCDate(message.id)}</span>
       </div>

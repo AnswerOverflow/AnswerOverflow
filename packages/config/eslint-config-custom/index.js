@@ -3,9 +3,9 @@
 module.exports = {
   extends: [
     "turbo",
-    "prettier",
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "prettier",
   ],
   plugins: ["prettier", "@typescript-eslint", "import", "no-only-tests"],
   parser: "@typescript-eslint/parser",
