@@ -15,8 +15,8 @@
   "dependencies": {
     "@answeroverflow/api": "*",
     "@answeroverflow/auth": "*",
-    "@answeroverflow/db": "*",
     "@answeroverflow/constants": "*",
+    "@answeroverflow/db": "*",
     "@answeroverflow/tailwind-config": "*",
     "@answeroverflow/ui": "*",
     "@tanstack/react-query": "^4.19.0",
@@ -30,6 +30,7 @@
     "nextra-theme-docs": "^2.2.16",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-player": "^2.12.0",
     "superjson": "^1.9.1",
     "zod": "^3.20.6"
   },
