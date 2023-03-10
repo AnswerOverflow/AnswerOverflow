@@ -1,20 +1,25 @@
 import React from "react";
 import type { DocsThemeConfig } from "nextra-theme-docs";
 import { AnswerOverflowLogo, Footer } from "@answeroverflow/ui";
+import {
+  CREATE_NEW_DOCS_ISSUE_LINK,
+  DISCORD_LINK,
+  DOCS_LINK_BASE,
+  GITHUB_LINK,
+} from "@answeroverflow/constants";
 const config: DocsThemeConfig = {
   logo: <AnswerOverflowLogo />,
   project: {
-    link: "https://contribute.answeroverflow.com",
+    link: GITHUB_LINK,
   },
   chat: {
-    link: "https://discord.answeroverflow.com",
+    link: DISCORD_LINK,
   },
   feedback: {
     // TODO: Add properties that Nextra passes and add to url
-    useLink: () =>
-      `https://github.com/AnswerOverflow/AnswerOverflow/issues/new?assignees=&labels=%F0%9F%93%96+documentation&template=documentation.yml&title=%5BDocs%5D%3A+`,
+    useLink: () => CREATE_NEW_DOCS_ISSUE_LINK,
   },
-  docsRepositoryBase: "https://github.com/AnswerOverflow/AnswerOverflow/tree/main/apps/docs",
+  docsRepositoryBase: DOCS_LINK_BASE,
   footer: {
     component: <Footer />,
   },

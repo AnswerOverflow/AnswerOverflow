@@ -16,6 +16,7 @@ const config = {
     "@answeroverflow/db",
     "@answeroverflow/tailwind-config",
     "@answeroverflow/ui",
+    "@answeroverflow/constants",
   ],
   images: {
     domains: ["cdn.discordapp.com"],

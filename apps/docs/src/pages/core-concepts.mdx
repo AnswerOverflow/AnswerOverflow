@@ -1,0 +1,25 @@
+# Answer Overflow Core Concepts
+
+Answer Overflow is a Discord bot meant to **improve and index your Discord help channels into Google.** There's a few terms you should know before using Answer Overflow to understand how it works.
+
+### Indexing
+
+Indexing occurs roughly ever 24 hours, although this may fluxuate depending on the number of servers Answer Overflow is in. This is to not overload the Discord API and to allow for questions to be solved before they are indexed. **Indexing starts at the beginning of the channel and works its way to the most recent messages. It may take a few days for a channel to be fully indexed, however, once it is fully indexed it will be updated every 24 hours.**
+
+
+### Display message consent
+
+In order to comply with the Discord terms of service and respect user privacy, Answer Overflow requires users to provide consent to  publicly display their messages. Due to this, a user can be in the following states:
+
+- #### User has not consented
+
+This is the default state for a user. Their messages will only be shown to visitors of [answeroverflow.com](https://answeroverflow.com) if they are in the same server as the user.
+
+- #### User has consented
+
+The user has provided consent via one of many methods to publicly display their message. Their messages in indexed channels will be shown to all visitors of [answeroverflow.com](https://answeroverflow.com).
+
+- #### User has indexing disabled
+
+All stored messages of this user will be deleted from Answer Overflow's database. Along with this any future messages will not be indexed.
+

@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@answeroverflow/api": "*",
+    "@answeroverflow/constants": "*",
     "@headlessui/react": "^1.7.13",
     "@heroicons/react": "^2.0.13",
     "@next/font": "^13.1.2",

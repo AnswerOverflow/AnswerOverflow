@@ -16,6 +16,7 @@
     "@answeroverflow/api": "*",
     "@answeroverflow/auth": "*",
     "@answeroverflow/db": "*",
+    "@answeroverflow/constants": "*",
     "@answeroverflow/tailwind-config": "*",
     "@answeroverflow/ui": "*",
     "@tanstack/react-query": "^4.19.0",
