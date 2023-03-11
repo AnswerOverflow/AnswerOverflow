@@ -5,7 +5,7 @@ export const ytVideoStyle: CSSProperties = {
   height: "100%",
   maxWidth: "100%",
   maxHeight: "100%",
-  marginTop: "20px",
   margin: "0 auto",
+  marginTop: "20px",
   display: "block",
 };

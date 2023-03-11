@@ -7,12 +7,12 @@ export const AnswerOverflowServerInviteLink = () => (
     className="nx-text-primary-600 nx-underline nx-decoration-from-font [text-underline-position:from-font]"
     href={DISCORD_LINK}
   >
-    Answer Overflow Discord
+    Answer Overflow Discord server
   </Link>
 );
 
 export const TryLiveDemo = () => (
   <Callout type="info">
-    Join the <AnswerOverflowServerInviteLink /> server to try this with 0 setup.
+    Join the <AnswerOverflowServerInviteLink /> to try this in a live channel with no setup.
   </Callout>
 );
