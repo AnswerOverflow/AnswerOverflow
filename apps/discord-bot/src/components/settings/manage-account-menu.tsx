@@ -22,6 +22,7 @@ import {
   GRANT_CONSENT_LABEL,
   REVOKE_CONSENT_LABEL,
   STOP_IGNORING_ACCOUNT_LABEL,
+  STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL,
 } from "@answeroverflow/constants";
 import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
 
@@ -58,7 +59,7 @@ const ToggleConsentButton = ({ state, setSettings }: ManageAccountMenuItemProps)
 const ToggleIndexingButton = ({ state, setSettings }: ManageAccountMenuItemProps) => (
   <ToggleButton
     currentlyEnabled={!state.settings.flags.messageIndexingDisabled}
-    enableLabel={STOP_IGNORING_ACCOUNT_LABEL}
+    enableLabel={STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL}
     disableLabel={IGNORE_ACCOUNT_IN_SERVER_LABEL}
     onClick={(interaction, messageIndexingDisabled) =>
       guildTextChannelOnlyInteraction(
@@ -176,7 +177,7 @@ export function ManageAccountMenu({
     {
       instructions:
         "Enables your messages to be indexed in this server, they will appear on AnswerOverflow behind a sign in if you have not consented to publicly display them",
-      title: STOP_IGNORING_ACCOUNT_LABEL,
+      title: STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL,
       enabled: settings.flags.messageIndexingDisabled,
     },
     {

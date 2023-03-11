@@ -120,7 +120,7 @@ describe("Manage Account Menu", () => {
       });
       await toggleButtonTest({
         clicker: members.guildMemberOwner.user,
-        preClickLabel: STOP_IGNORING_ACCOUNT_LABEL,
+        preClickLabel: STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL,
         postClickLabel: IGNORE_ACCOUNT_IN_SERVER_LABEL,
         message: message,
       });
