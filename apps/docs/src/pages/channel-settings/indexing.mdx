@@ -1,14 +1,24 @@
 # Indexing
 
+## What it does
+
+Indexes the content of your channel into search engines like Google. This allows for people to find your server from doing a simple Google search for their question.
+
+Indexing occurs roughly ever 24 hours, although this may fluctuate depending on the number of servers Answer Overflow is in. This is to not overload the Discord API and to allow for questions to be solved before they are indexed.
+
+import { Callout } from 'nextra-theme-docs'
+
+<Callout emoji="📝">
+  Indexing starts at the beginning of the channel and works its way to the most recent messages. It may take a few days for a channel to be fully indexed, however, once it is fully indexed it will be updated every 24 hours.
+</Callout>
+
 ## What it looks like
 
 {/* TODO: Screenshot of a google search result with Answer Overflow in the results */}
 ![Screenshots containing pages from answeroverflow.com](https://thecatapi.com/api/images/get?format=src)
 {/* TODO: Link to an example page */}
 
-## What it does
 
-Indexes the content of your channel into Google. For more information about how this process works, view the [core concepts](/core-concepts) page.
 
 ## Enabling
 
@@ -21,8 +31,6 @@ Use `/channel-settings` in the channel you want to enable indexing in. Click the
 
 Use `/channel-settings` in the channel you want to disable indexing in. Click the **{OPEN_INDEXING_SETTINGS_MENU_LABEL}** menu and then click **{DISABLE_INDEXING_LABEL}**
 
-import {Callout} from "nextra-theme-docs"
-
 <Callout type="warning">
   Indexed content will persist on Answer Overflow for up to 7 days after disabling indexing. This is to prevent people from accidentally wiping out their indexed content.
 
@@ -30,3 +38,16 @@ import {Callout} from "nextra-theme-docs"
 
   If you need content urgently removed, please contact us.
 </Callout>
+
+
+
+## Indexing FAQ
+
+##### I see my server questions on Answer Overflow, but cannot find them on Google.
+
+Answer Overflow has no control over what content Google indexes. Your content is submitted via a sitemap to Google and it's up to Google to evaluate it as relevant and high quality for indexing.
+
+To have the best chance of your questions being indexed, try the following:
+- Sign up for [Answer Overflow Pro](https://answeroverflow.com/pricing) to index content on your on domain to not compete with other Discord servers that are hosting their content on [answeroverflow.com](https://answeroverflow.com).
+- Make sure your help channels are following the [recommended format](/recommended-setup).
+- Enable [read the rules consent](/server-settings/read-the-rules-consent) and [forum guidelines consent](/channel-settings/forum-guidelines-consent) to get the most indexable content.

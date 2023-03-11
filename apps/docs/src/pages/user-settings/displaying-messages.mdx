@@ -1,5 +1,34 @@
 # Display message consent
 
-## Why
+import {CONSENT_BUTTON_LABEL, REVOKE_CONSENT_LABEL} from "@answeroverflow/constants"
+
+## What it is
+
+In order to comply with the Discord terms of service and respect user privacy, Answer Overflow requires users to provide consent to publicly display their messages. Due to this, a user can be in the following states:
+
+- ### User has not consented (default)
+
+**This is the default state for a user**. Their messages will only be shown to visitors of [answeroverflow.com](https://answeroverflow.com) if they are in the same server as the user.
+
+- ### User has consented
+
+The user has provided consent via one of many methods to publicly display their message. Their messages in indexed channels will be shown to all visitors of [answeroverflow.com](https://answeroverflow.com).
+
+
+## Publicly display messages on Answer Overflow
+
+Use the `/manage-account` slash command and click on the button that says **{CONSENT_BUTTON_LABEL}** to publicly display your messages on Answer Overflow. This helps people find answers to questions that you have asked/solved in the past.
+
+Consent can also be provided via:
+- [Forum guidelines](/channel-settings/forum-guidelines-consent)
+- [Membership screening](/server-settings/read-the-rules-consent)
+
+{/* TODO: Show what a message looks like */}
+
+## Disable
+
+Use the `/manage-account` slash command and click on the button that says **{REVOKE_CONSENT_LABEL}** to disable publicly displaying your messages on Answer Overflow. Your messages will now only be shown to visitors of [answeroverflow.com](https://answeroverflow.com) if they are in the same server as you.
+
+{/* TODO: Show what a blurred message looks like */}
 
 
