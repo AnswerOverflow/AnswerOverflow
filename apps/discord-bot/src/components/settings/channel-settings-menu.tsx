@@ -11,6 +11,7 @@ import LRUCache from "lru-cache";
 import {
   DISABLE_CHANNEL_INDEXING_LABEL,
   ENABLE_CHANNEL_INDEXING_LABEL,
+  CLEAR_TAG_LABEL,
   DISABLE_FORUM_GUIDELINES_CONSENT_LABEL,
   ENABLE_FORUM_GUIDELINES_CONSENT_LABEL,
   ENABLE_INDEXING_LABEL,
@@ -294,7 +295,7 @@ function SelectMarkAsSolvedTag({
       }}
     >
       <Option
-        label={targetChannel.availableTags.length > 0 ? "(Clear)" : "No Tags Found"}
+        label={targetChannel.availableTags.length > 0 ? CLEAR_TAG_LABEL : "No Tags Found"}
         value={CLEAR_TAG_VALUE}
       />
       {targetChannel.availableTags.map((tag) => (
