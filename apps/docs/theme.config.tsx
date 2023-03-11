@@ -6,7 +6,9 @@ import {
   DISCORD_LINK,
   DOCS_LINK_BASE,
   GITHUB_LINK,
+  ANSWER_OVERFLOW_BLUE_HEX,
 } from "@answeroverflow/constants";
+import { useRouter } from "next/router";
 
 // https://nextra.site/docs/docs-theme/theme-configuration
 const config: DocsThemeConfig = {
@@ -22,8 +24,11 @@ const config: DocsThemeConfig = {
     useLink: () => CREATE_NEW_DOCS_ISSUE_LINK,
   },
   useNextSeoProps() {
+    const { asPath } = useRouter();
     return {
-      titleTemplate: "%s - AnswerOverflow",
+      titleTemplate: asPath === "/" ? "%s" : "%s - Answer Overflow",
+      themeColor: ANSWER_OVERFLOW_BLUE_HEX,
+      description: "Improve & index your Discord help channels into Google with Answer Overflow",
     };
   },
   docsRepositoryBase: DOCS_LINK_BASE,
