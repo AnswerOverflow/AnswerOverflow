@@ -111,7 +111,6 @@
       "!@typescript-eslint/naming-convention",
       "*"
     ],
-    "eslint.debug": true,
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
     "eslint.format.enable": true,
     "eslint.alwaysShowStatus": true,
