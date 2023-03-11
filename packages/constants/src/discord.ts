@@ -9,8 +9,8 @@ export const ENABLE_FORUM_GUIDELINES_CONSENT_LABEL = "Enable forum guidelines co
 export const DISABLE_FORUM_GUIDELINES_CONSENT_LABEL = "Disable forum guidelines consent";
 export const REVOKE_CONSENT_LABEL = "Disable publicly showing messages";
 export const GRANT_CONSENT_LABEL = "Publicly display messages on Answer Overflow";
-export const DISABLE_INDEXING_LABEL = "Ignore account in server";
-export const ENABLE_INDEXING_LABEL = "Enable indexing of messages in server";
+export const IGNORE_ACCOUNT_IN_SERVER_LABEL = "Ignore account in server";
+export const STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL = "Stop ignoring account in server";
 export const GLOBALLY_IGNORE_ACCOUNT_LABEL = "Globally ignore account";
 export const STOP_IGNORING_ACCOUNT_LABEL = "Stop ignoring account";
 

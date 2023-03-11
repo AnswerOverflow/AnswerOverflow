@@ -1,0 +1,28 @@
+# Read the rules consent
+
+## Example
+{/* TODO: Screenshot from the membership screening with the rule in it */}
+![Membership screening with read the rules consent](https://thecatapi.com/api/images/get?format=src)
+
+## Enabling
+
+import {READ_THE_RULES_CONSENT_PROMPT, ENABLE_READ_THE_RULES_CONSENT_LABEL, DISABLE_READ_THE_RULES_CONSENT_LABEL} from "@answeroverflow/constants"
+
+
+
+import {Callout} from "nextra-theme-docs"
+
+Use the `/server-settings` slash command in any channel of your server and then click on the **{ENABLE_READ_THE_RULES_CONSENT_LABEL}** button.
+
+<Callout  >
+You must have the following in your [membership screening](https://support.discord.com/hc/en-us/articles/1500000466882-Rules-Screening-FAQ) for this to work.
+  <br/>
+  {READ_THE_RULES_CONSENT_PROMPT}
+</Callout>
+
+
+## Disabling
+
+Use the `/server-settings` slash command in any channel of your server and then click on the **{DISABLE_READ_THE_RULES_CONSENT_LABEL}** button.
+
+You can remove the consent prompt from your membership screening as it will no longer be applied to new members.
