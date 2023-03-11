@@ -7,6 +7,8 @@ import {
   DOCS_LINK_BASE,
   GITHUB_LINK,
 } from "@answeroverflow/constants";
+
+// https://nextra.site/docs/docs-theme/theme-configuration
 const config: DocsThemeConfig = {
   logo: <AnswerOverflowLogo />,
   project: {
@@ -18,6 +20,11 @@ const config: DocsThemeConfig = {
   feedback: {
     // TODO: Add properties that Nextra passes and add to url
     useLink: () => CREATE_NEW_DOCS_ISSUE_LINK,
+  },
+  useNextSeoProps() {
+    return {
+      titleTemplate: "%s - AnswerOverflow",
+    };
   },
   docsRepositoryBase: DOCS_LINK_BASE,
   footer: {
