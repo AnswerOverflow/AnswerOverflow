@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { MessageRenderer } from "./Message";
+import { Message } from "./Message";
 import { mockDiscordAccount, mockMessageWithDiscordAccount } from "~ui/test/props";
 
 const meta = {
-  component: MessageRenderer,
+  component: Message,
   parameters: {
     a11y: {
       disable: true,
     },
   },
-} as Meta<typeof MessageRenderer>;
+} as Meta<typeof Message>;
 
 export default meta;
 

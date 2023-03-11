@@ -1,9 +1,9 @@
 import type { APISearchResult, ChannelPublicWithFlags, ServerPublic } from "@answeroverflow/api";
-import { DiscordAvatar } from "~ui/components/DiscordAvatar";
 import {
   Message,
-  MessageAuthorArea,
   MessageContents,
+  MessageImages,
+  MessageRenderer,
   MessageTitle,
 } from "~ui/components/primitives/Message";
 import { Button } from "../primitives/Button";
@@ -84,34 +84,46 @@ const SearchResultMetaData = ({ result }: MessageResultProps) => {
 
 export const SearchResult = ({ result }: MessageResultProps) => {
   const solution = result.message.solutionMessages?.[0];
+
+  const SearchResultMainContent = () => (
+    <div>
+      {/* Body */}
+      <Message
+        message={result.message}
+        messageRenderer={
+          <MessageRenderer
+            content={
+              <>
+                <MessageTitle channel={result.channel} thread={result.thread} />
+                <MessageContents />
+                <MessageImages />
+              </>
+            }
+          />
+        }
+      />
+
+      {/* Answer */}
+      {solution && (
+        <div className="border-white/[.13] lg:border-r-2">
+          <Message message={solution} />
+        </div>
+      )}
+    </div>
+  );
+
+  const SearchResultSidebar = () => (
+    <div className="hidden w-1/4 flex-col items-center justify-center px-5 pt-6 pb-2 lg:flex">
+      {/* Server Invite */}
+      <ServerInvite server={result.server} channel={result.channel} />
+      <SearchResultMetaData result={result} />
+    </div>
+  );
+
   return (
     <div className="flex h-full w-full flex-row rounded-standard border-2 border-[#696969]/[.42] bg-[#181B1F]">
-      {/* Body */}
-      <div className="flex grow flex-col">
-        <div className="grow border-white/[.13] pb-6 lg:border-r-2 lg:py-6">
-          {/* Timestamp area */}
-          <div className="flex flex-row gap-2 border-b-1 border-white/[.13] px-6 py-4 lg:border-0 lg:py-0">
-            <DiscordAvatar user={result.message.author} size={"sm"} />
-            <MessageAuthorArea message={result.message} />
-          </div>
-          <div className="px-6">
-            <MessageTitle channel={result.channel} thread={result.thread} />
-            <MessageContents message={result.message} />
-          </div>
-        </div>
-
-        {/* Answer */}
-        {solution && (
-          <div className="border-white/[.13] lg:border-r-2">
-            <Message message={solution} />
-          </div>
-        )}
-      </div>
-      <div className="hidden w-1/4 flex-col items-center justify-center px-5 pt-6 pb-2 lg:flex">
-        {/* Server Invite */}
-        <ServerInvite server={result.server} channel={result.channel} />
-        <SearchResultMetaData result={result} />
-      </div>
+      <SearchResultMainContent />
+      <SearchResultSidebar />
     </div>
   );
 };
