@@ -1,8 +1,10 @@
+/** @type {import("prettier").Config} */
+// eslint-disable-next-line no-undef
 module.exports = {
   endOfLine: "lf",
   quoteProps: "as-needed",
   semi: true,
-  singleQuote: true,
+  singleQuote: false,
   tabWidth: 4,
   printWidth: 100,
   trailingComma: "none",
@@ -22,6 +24,4 @@ module.exports = {
       },
     },
   ],
-  plugins: ["prettier-plugin-tailwindcss"],
-  tailwindConfig: "../tailwind/index.js",
 };

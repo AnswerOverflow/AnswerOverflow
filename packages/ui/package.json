@@ -5,6 +5,8 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
+    "format": "prettier --config ./prettierrc.js --write .",
+    "format:check": "prettier --config ./prettierrc.js --check .",
     "lint": "next lint && tsc --noEmit",
     "lint:fix": "next lint --fix",
     "dev": "cross-env THEME=\"both\" storybook dev -p 6006 --quiet --no-open",
@@ -40,6 +42,7 @@
   "devDependencies": {
     "@answeroverflow/tailwind-config": "*",
     "@answeroverflow/tsconfig": "*",
+    "@answeroverflow/prettier-config": "*",
     "@babel/core": "^7.20.5",
     "@storybook/addon-a11y": "^7.0.0-beta.54",
     "@storybook/addon-actions": "^7.0.0-beta.54",
