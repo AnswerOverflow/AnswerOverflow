@@ -14,7 +14,7 @@
 		"test:ui:dark": "cross-env THEME=\"dark\" storybook build --quiet -o storybook-static-dark && npx concurrently -k -s first -n \"SB,DARK\" -c \"magenta,blue\" \"npx http-server storybook-static-dark --port 6006 --silent\" \"yarn test:ui:dark:no-serve\"",
 		"test:ui:light:no-serve": "npx wait-on tcp:6007 && test-storybook --maxWorkers=2 --url=http://localhost:6007",
 		"test:ui:light": "cross-env THEME=\"light\" storybook build --quiet -o storybook-static-light && npx concurrently -k -s first -n \"SB,LIGHT\" -c \"magenta,blue\" \"npx http-server storybook-static-light --port 6007 --silent\" \"yarn test:ui:light:no-serve\"",
-		"test": "npx concurrently -k -s all -n \"D\",\"L\" \"yarn test:ui:dark\"  \"yarn test:ui:light\"",
+		"test": "yarn test:ui:dark && yarn test:ui:light",
 		"build": "storybook build --quiet",
 		"storybook": "yarn dev",
 		"build-storybook": "storybook build public",
