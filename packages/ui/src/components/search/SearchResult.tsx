@@ -1,8 +1,4 @@
-import type {
-	APISearchResult,
-	ChannelPublicWithFlags,
-	ServerPublic,
-} from '@answeroverflow/api';
+import type { APISearchResult } from '@answeroverflow/api';
 import {
 	Message,
 	MessageContents,
