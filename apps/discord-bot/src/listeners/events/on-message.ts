@@ -1,7 +1,7 @@
-import { ApplyOptions } from "@sapphire/decorators";
-import { Listener } from "@sapphire/framework";
+import { ApplyOptions } from '@sapphire/decorators';
+import { Listener } from '@sapphire/framework';
 
-@ApplyOptions<Listener.Options>({ once: true, event: "messageCreate" })
+@ApplyOptions<Listener.Options>({ once: true, event: 'messageCreate' })
 export class OnMessage extends Listener {
-  public async run() {}
+	public async run() {}
 }

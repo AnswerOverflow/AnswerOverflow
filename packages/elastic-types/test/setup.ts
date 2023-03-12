@@ -1,5 +1,5 @@
-import { config } from "dotenv-cra";
+import { config } from 'dotenv-cra';
 
 config({
-  path: "../../.env",
+	path: '../../.env',
 });

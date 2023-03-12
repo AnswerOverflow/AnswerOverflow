@@ -1,17 +1,23 @@
-import type { RendererableInteractions } from "@answeroverflow/discordjs-react";
+import type { RendererableInteractions } from '@answeroverflow/discordjs-react';
 import type {
-  ChatInputCommandSuccessPayload,
-  Command,
-  ContextMenuCommandSuccessPayload,
-  MessageCommandSuccessPayload,
-} from "@sapphire/framework";
-import { container } from "@sapphire/framework";
-import { send } from "@sapphire/plugin-editable-commands";
-import { cyan } from "colorette";
-import type { APIUser } from "discord-api-types/v9";
-import { Guild, Message, EmbedBuilder, User, GuildTextBasedChannel } from "discord.js";
-import type { ReactNode } from "react";
-import { LOADING_MESSAGES } from "./constants";
+	ChatInputCommandSuccessPayload,
+	Command,
+	ContextMenuCommandSuccessPayload,
+	MessageCommandSuccessPayload,
+} from '@sapphire/framework';
+import { container } from '@sapphire/framework';
+import { send } from '@sapphire/plugin-editable-commands';
+import { cyan } from 'colorette';
+import type { APIUser } from 'discord-api-types/v9';
+import {
+	Guild,
+	Message,
+	EmbedBuilder,
+	User,
+	GuildTextBasedChannel,
+} from 'discord.js';
+import type { ReactNode } from 'react';
+import { LOADING_MESSAGES } from './constants';
 
 /**
  * Picks a random item from an array
@@ -20,8 +26,8 @@ import { LOADING_MESSAGES } from "./constants";
  * const randomEntry = pickRandom([1, 2, 3, 4]) // 1
  */
 export function pickRandom<T>(array: readonly T[]): T {
-  const { length } = array;
-  return array[Math.floor(Math.random() * length)]!;
+	const { length } = array;
+	return array[Math.floor(Math.random() * length)]!;
 }
 
 /**
@@ -29,79 +35,90 @@ export function pickRandom<T>(array: readonly T[]): T {
  * @param message The message data for which to send the loading message
  */
 export function sendLoadingMessage(message: Message): Promise<typeof message> {
-  return send(message, {
-    embeds: [new EmbedBuilder().setDescription(pickRandom(LOADING_MESSAGES)).setColor("#FF0000")],
-  });
+	return send(message, {
+		embeds: [
+			new EmbedBuilder()
+				.setDescription(pickRandom(LOADING_MESSAGES))
+				.setColor('#FF0000'),
+		],
+	});
 }
 
 export function logSuccessCommand(
-  payload:
-    | ContextMenuCommandSuccessPayload
-    | ChatInputCommandSuccessPayload
-    | MessageCommandSuccessPayload
+	payload:
+		| ContextMenuCommandSuccessPayload
+		| ChatInputCommandSuccessPayload
+		| MessageCommandSuccessPayload,
 ): void {
-  let successLoggerData: ReturnType<typeof getSuccessLoggerData>;
+	let successLoggerData: ReturnType<typeof getSuccessLoggerData>;
 
-  if ("interaction" in payload) {
-    successLoggerData = getSuccessLoggerData(
-      payload.interaction.guild,
-      payload.interaction.user,
-      payload.command
-    );
-  } else {
-    successLoggerData = getSuccessLoggerData(
-      payload.message.guild,
-      payload.message.author,
-      payload.command
-    );
-  }
+	if ('interaction' in payload) {
+		successLoggerData = getSuccessLoggerData(
+			payload.interaction.guild,
+			payload.interaction.user,
+			payload.command,
+		);
+	} else {
+		successLoggerData = getSuccessLoggerData(
+			payload.message.guild,
+			payload.message.author,
+			payload.command,
+		);
+	}
 
-  container.logger.debug(
-    `${successLoggerData.shard} - ${successLoggerData.commandName} ${successLoggerData.author} ${successLoggerData.sentAt}`
-  );
+	container.logger.debug(
+		`${successLoggerData.shard} - ${successLoggerData.commandName} ${successLoggerData.author} ${successLoggerData.sentAt}`,
+	);
 }
 
-export function getSuccessLoggerData(guild: Guild | null, user: User, command: Command) {
-  const shard = getShardInfo(guild?.shardId ?? 0);
-  const commandName = getCommandInfo(command);
-  const author = getAuthorInfo(user);
-  const sentAt = getGuildInfo(guild);
+export function getSuccessLoggerData(
+	guild: Guild | null,
+	user: User,
+	command: Command,
+) {
+	const shard = getShardInfo(guild?.shardId ?? 0);
+	const commandName = getCommandInfo(command);
+	const author = getAuthorInfo(user);
+	const sentAt = getGuildInfo(guild);
 
-  return { shard, commandName, author, sentAt };
+	return { shard, commandName, author, sentAt };
 }
 
 function getShardInfo(id: number) {
-  return `[${cyan(id.toString())}]`;
+	return `[${cyan(id.toString())}]`;
 }
 
 function getCommandInfo(command: Command) {
-  return cyan(command.name);
+	return cyan(command.name);
 }
 
 function getAuthorInfo(author: User | APIUser) {
-  return `${author.username}[${cyan(author.id)}]`;
+	return `${author.username}[${cyan(author.id)}]`;
 }
 
 function getGuildInfo(guild: Guild | null) {
-  if (guild === null) return "Direct Messages";
-  return `${guild.name}[${cyan(guild.id)}]`;
+	if (guild === null) return 'Direct Messages';
+	return `${guild.name}[${cyan(guild.id)}]`;
 }
 
-export function ephemeralReply(content: ReactNode, interaction: RendererableInteractions) {
-  return container.discordJSReact.ephemeralReply(interaction, content);
+export function ephemeralReply(
+	content: ReactNode,
+	interaction: RendererableInteractions,
+) {
+	return container.discordJSReact.ephemeralReply(interaction, content);
 }
 
 export type RootChannel = NonNullable<ReturnType<typeof getRootChannel>>;
 export function getRootChannel(channel: GuildTextBasedChannel) {
-  if (channel.isVoiceBased()) return undefined;
-  if (!channel.isTextBased()) return undefined;
-  if (channel.isThread()) {
-    if (!channel.parent) {
-      return undefined;
-    }
-    return channel.parent;
-  }
-  return channel;
+	if (channel.isVoiceBased()) return undefined;
+	if (!channel.isTextBased()) return undefined;
+	if (channel.isThread()) {
+		if (!channel.parent) {
+			return undefined;
+		}
+		return channel.parent;
+	}
+	return channel;
 }
 
 /**
@@ -110,11 +127,11 @@ export function getRootChannel(channel: GuildTextBasedChannel) {
  * @returns string with all discord markdown characters removed
  */
 export function removeDiscordMarkdown(text: string) {
-  return text.replace(/(\*|_|~|`)/g, "");
+	return text.replace(/(\*|_|~|`)/g, '');
 }
 
 export function isHumanMessage(message: Message) {
-  if (message.author.bot) return false;
-  if (message.author.system) return false;
-  return true;
+	if (message.author.bot) return false;
+	if (message.author.system) return false;
+	return true;
 }
