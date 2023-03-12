@@ -6,8 +6,8 @@
 	"license": "MIT",
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules coverage",
-		"format": "prettier --config ./prettierrc.js --write .",
-		"format:check": "prettier --config ./prettierrc.js --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
 		"lint": "eslint . --ext .ts && tsc --noEmit",
 		"lint:fix": "eslint . --ext .ts --fix",
 		"with-env": "dotenv -e ../../.env --",

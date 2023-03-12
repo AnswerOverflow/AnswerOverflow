@@ -1,5 +1,5 @@
 {
 	"extends": "@answeroverflow/tsconfig/base.json",
-	"include": ["index.ts", "src", "../../reset.d.ts", "prettierrc.js"],
+	"include": ["index.ts", "src", "../../reset.d.ts", "prettierrc.cjs"],
 	"exclude": ["node_modules", "../../node_modules/*"]
 }

@@ -8,8 +8,8 @@
 		"build": "yarn with-env next build",
 		"clean": "rm -rf .next .turbo node_modules",
 		"start": "yarn run with-env next start -p 5234",
-		"format": "prettier --config ./prettierrc.js --write .",
-		"format:check": "prettier --config ./prettierrc.js --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
 		"lint": "next lint && tsc --noEmit",
 		"lint:fix": "next lint --fix",
 		"type-check": "tsc --noEmit"

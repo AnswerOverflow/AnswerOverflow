@@ -10,7 +10,7 @@
 		"test",
 		"scripts",
 		"vitest.config.ts",
-		"prettierrc.js"
+		"prettierrc.cjs"
 	],
 	"ts-node": {
 		// these options are overrides used only by ts-node
