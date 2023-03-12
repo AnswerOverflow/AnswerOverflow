@@ -2,11 +2,11 @@ import type {
 	ChannelPublicWithFlags,
 	MessageWithDiscordAccount,
 	ServerPublic
-} from '@answeroverflow/api';
-import { useIsUserInServer } from '../utils';
-import { Message } from './Message';
-import { SearchBar } from './SearchBar';
-import { ServerInviteDriver } from './ServerInviteDriver';
+} from "@answeroverflow/api";
+import { useIsUserInServer } from "../utils";
+import { Message } from "./Message";
+import { SearchBar } from "./SearchBar";
+import { ServerInviteDriver } from "./ServerInviteDriver";
 
 export type MessageResultPageProps = {
 	messages: MessageWithDiscordAccount[];

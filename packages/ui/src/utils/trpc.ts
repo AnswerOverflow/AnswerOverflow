@@ -7,30 +7,30 @@ import { transformer } from "@answeroverflow/api/transformer";
 import { createTRPCReact } from "@trpc/react-query";
 
 const getBaseUrl = () => {
-  if (typeof window !== "undefined") return ""; // browser should use relative url
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
-  return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
+	if (typeof window !== "undefined") return ""; // browser should use relative url
+	if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+	return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
 
 const nextTRPC = () =>
-  createTRPCNext<AppRouter>({
-    config() {
-      return {
-        transformer,
-        links: [
-          loggerLink({
-            enabled: (opts) =>
-              process.env.NODE_ENV === "development" ||
-              (opts.direction === "down" && opts.result instanceof Error),
-          }),
-          httpBatchLink({
-            url: `${getBaseUrl()}/api/trpc`,
-          }),
-        ],
-      };
-    },
-    ssr: false,
-  });
+	createTRPCNext<AppRouter>({
+		config() {
+			return {
+				transformer,
+				links: [
+					loggerLink({
+						enabled: (opts) =>
+							process.env.NODE_ENV === "development" ||
+							(opts.direction === "down" && opts.result instanceof Error)
+					}),
+					httpBatchLink({
+						url: `${getBaseUrl()}/api/trpc`
+					})
+				]
+			};
+		},
+		ssr: false
+	});
 
 const storybookTRPC = () => createTRPCReact<AppRouter>();
 export type StorybookTRPC = ReturnType<typeof storybookTRPC>;
