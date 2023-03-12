@@ -17,7 +17,7 @@
     {
       //
       "name": "discord-bot",
-      "path": "apps/discord-bot",
+      "path": "apps/discord-bot"
     },
     {
       "name": "discordjs-mock",
@@ -25,7 +25,7 @@
     },
     {
       "name": "discordjs-utils",
-      "path": "packages/discordjs-utils",
+      "path": "packages/discordjs-utils"
     },
     {
       "name": "constants",
@@ -41,7 +41,7 @@
     },
     {
       "name": "db",
-      "path": "packages/db",
+      "path": "packages/db"
     },
     {
       "name": "db-mock",
@@ -70,7 +70,7 @@
     {
       "name": "root",
       "path": "./"
-    },
+    }
   ],
   "settings": {
     /*
@@ -130,7 +130,7 @@
       "**/node_modules": true,
       "**/coverage/": true,
       "**/.next": true,
-      "**/.turbo": true,
+      "**/.turbo": true
       // "**/dist": true,
     },
     "search.useParentIgnoreFiles": true,
@@ -194,7 +194,7 @@
       "upsert",
       "upserting",
       "WAITLIST"
-    ],
+    ]
   },
   "extensions": {
     "recommendations": [
@@ -212,7 +212,9 @@
       "DavidAnson.vscode-markdownlint",
       "Orta.vscode-jest",
       "unifiedjs.vscode-mdx",
-      "usernamehw.errorlens"
+      "usernamehw.errorlens",
+      "esbenp.prettier-vscode",
+      "streetsidesoftware.code-spell-checker",
     ]
-  },
+  }
 }
