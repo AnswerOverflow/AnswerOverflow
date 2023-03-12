@@ -1,28 +1,12 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/typescript-node
 {
-  "name": "AnswerOverflow Dev",
+  "name": "UI Dev Only",
   "dockerComposeFile": [
     "../docker-compose-workspace.yml"
   ],
   "service": "workspace",
   "workspaceFolder": "/AnswerOverflow",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "dbaeumer.vscode-eslint",
-        "GitHub.copilot",
-        "eamodio.gitlens",
-        "Prisma.prisma",
-        "ZixuanChen.vitest-explorer",
-        "EditorConfig.EditorConfig",
-        "bradlc.vscode-tailwindcss",
-        "DavidAnson.vscode-markdownlint",
-        "Orta.vscode-jest",
-        "unifiedjs.vscode-mdx"
-      ]
-    }
-  },
   "postCreateCommand": "yarn install && npx playwright install && npx playwright install-deps",
   "remoteUser": "node",
   "mounts": [

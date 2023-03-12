@@ -1,79 +1,94 @@
-import { ActionRow, Button } from "@answeroverflow/reacord";
-import { container } from "@sapphire/framework";
-import React, { useEffect } from "react";
-import { OpenSupportMenuButton, SupportMenu } from "./support";
-export function setMessageHistory({
-  key,
-  ...data
-}: {
-  key: string;
-  history: React.ReactNode[];
-  pushHistory: (message: React.ReactNode) => void;
-  popHistory: () => void;
-}) {
-  container.messageHistory.set(key, data);
+import {
+	ActionRow,
+	Button,
+	useInstance,
+} from '@answeroverflow/discordjs-react';
+import { container } from '@sapphire/framework';
+import React, { useEffect } from 'react';
+import { OpenSupportMenuButton, SupportMenu } from './support';
+
+function popHistory(key: string) {
+	const data = container.messageHistory.get(key);
+	if (!data) {
+		return;
+	}
+	const { history, setHistory } = data;
+	const newHistory = [...history];
+	newHistory.pop();
+	container.messageHistory.set(key, {
+		history: newHistory,
+		setHistory,
+	});
+	setHistory(newHistory);
 }
 
-export function getMessageHistory(key: string) {
-  const history = container.messageHistory.get(key);
-  if (!history) {
-    throw new Error("No history found for key: " + key);
-  }
-  return history;
+function pushHistory(key: string, node: React.ReactNode) {
+	const data = container.messageHistory.get(key);
+	if (!data) {
+		return;
+	}
+	const { history, setHistory } = data;
+	const newHistory = [...history, node];
+	container.messageHistory.set(key, {
+		history: newHistory,
+		setHistory,
+	});
+	setHistory(newHistory);
+}
+
+export function useHistory() {
+	const instance = useInstance();
+	return {
+		pushHistory: (node: React.ReactNode) =>
+			pushHistory(instance.rendererId, node),
+		popHistory: () => popHistory(instance.rendererId),
+	};
 }
 
 export const Router: React.FC<{
-  interactionId: string;
-  children: React.ReactNode;
-}> = ({ interactionId, children }: { interactionId: string; children: React.ReactNode }) => {
-  const [history, setHistory] = React.useState<React.ReactNode[]>([]);
-  const pushHistory = (node: React.ReactNode) => {
-    setHistory([...history, node]);
-  };
-  const popHistory = () => setHistory(history.slice(0, -1));
+	children: React.ReactNode;
+}> = ({ children }) => {
+	const [history, setHistory] = React.useState<React.ReactNode[]>([]);
+	const instance = useInstance();
 
-  // TODO: Swap for use context when Reacord supports it
-  setMessageHistory({
-    history,
-    key: interactionId,
-    popHistory,
-    pushHistory,
-  });
+	useEffect(() => {
+		return () => {
+			container.messageHistory.delete(instance.rendererId);
+		};
+	}, []);
 
-  useEffect(() => {
-    return () => {
-      container.messageHistory.delete(interactionId);
-    };
-  }, []);
+	container.messageHistory.set(instance.rendererId, {
+		history,
+		setHistory,
+	});
 
-  const current = history.at(-1);
-  if (history.length === 0) {
-    pushHistory(children);
-  }
+	const current = history[history.length - 1];
+	if (!current) {
+		pushHistory(instance.rendererId, children);
+	}
+	// TODO: This is disgusting
+	const isSupportMenu =
+		current instanceof Object &&
+		'type' in current &&
+		current.type.toString().includes(SupportMenu.toString());
 
-  // TODO: This is disgusting
-  const isSupportMenu =
-    current instanceof Object &&
-    "type" in current &&
-    current.type.toString().includes(SupportMenu.toString());
-
-  const shouldShowActionRow = history.length > 1 || !isSupportMenu;
-  return (
-    <>
-      {current}
-      {shouldShowActionRow && (
-        <ActionRow>
-          {history.length > 1 && (
-            <Button
-              label="Back"
-              onClick={() => {
-                popHistory();
-              }}
-            />
-          )}
-          {!isSupportMenu && <OpenSupportMenuButton interactionId={interactionId} />}
-        </ActionRow>
-      )}
-    </>
-  );
+	const shouldShowActionRow = history.length > 1 || !isSupportMenu;
+	return (
+		<>
+			{current}
+			{shouldShowActionRow && (
+				<ActionRow>
+					{history.length > 1 && (
+						<Button
+							label="Back"
+							onClick={() => {
+								popHistory(instance.rendererId);
+							}}
+						/>
+					)}
+					{!isSupportMenu && <OpenSupportMenuButton />}
+				</ActionRow>
+			)}
+		</>
+	);
 };

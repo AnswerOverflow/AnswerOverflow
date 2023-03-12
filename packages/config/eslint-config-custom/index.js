@@ -7,7 +7,7 @@ module.exports = {
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "prettier",
   ],
-  plugins: ["prettier", "@typescript-eslint", "import", "no-only-tests"],
+  plugins: ["@typescript-eslint", "import", "no-only-tests"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     project: ["./tsconfig.json"],
@@ -26,7 +26,6 @@ module.exports = {
   rules: {
     "@next/next/no-html-link-for-pages": "off",
     "react/jsx-key": "off",
-    "prettier/prettier": ["error"],
     "@typescript-eslint/no-floating-promises": "error",
     "@typescript-eslint/prefer-as-const": "error",
     "no-restricted-imports": [

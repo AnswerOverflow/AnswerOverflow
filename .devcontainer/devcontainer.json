@@ -1,29 +1,12 @@
 // ! If you make changes to this devcontainer make sure to update all other devcontainers as well
 {
-  "name": "AnswerOverflow Dev",
+  "name": "Full Environment (MySQL, Elastic, Redis)",
   "dockerComposeFile": [
     "docker-compose-workspace.yml",
     "../docker-compose.yml"
   ],
   "service": "workspace",
   "workspaceFolder": "/AnswerOverflow",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "dbaeumer.vscode-eslint",
-        "GitHub.copilot",
-        "eamodio.gitlens",
-        "Prisma.prisma",
-        "ZixuanChen.vitest-explorer",
-        "EditorConfig.EditorConfig",
-        "bradlc.vscode-tailwindcss",
-        "DavidAnson.vscode-markdownlint",
-        "Orta.vscode-jest",
-        "streetsidesoftware.code-spell-checker",
-        "unifiedjs.vscode-mdx"
-      ]
-    }
-  },
   "postCreateCommand": "yarn install && npx playwright install && npx playwright install-deps",
   "remoteUser": "node",
   "mounts": [

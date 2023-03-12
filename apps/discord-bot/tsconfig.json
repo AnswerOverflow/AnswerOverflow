@@ -1,22 +1,19 @@
 {
-  "extends": "@answeroverflow/tsconfig/base.json",
-  "compilerOptions": {
-    "jsx": "react",
-    "types": [
-      "jest",
-      "node",
-      "@types/jest"
-    ],
-    "baseUrl": "../../",
-  },
-  "ts-node": {
-    "transpileOnly": true
-  },
-  "include": [
-    "src",
-    "test",
-    "jest.config.ts",
-    "tsup.config.ts",
-    "../../reset.d.ts"
-  ],
+	"extends": "@answeroverflow/tsconfig/base.json",
+	"compilerOptions": {
+		"jsx": "react",
+		"types": ["jest", "node", "@types/jest"],
+		"baseUrl": "../../",
+		"noEmitOnError": false
+	},
+	"ts-node": {
+		"transpileOnly": true
+	},
+	"include": [
+		"src",
+		"test",
+		"jest.config.ts",
+		"tsup.config.ts",
+		"../../reset.d.ts"
+	]
 }
