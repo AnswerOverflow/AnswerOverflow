@@ -1,62 +1,62 @@
 import {
-  BotContextCreate,
-  botRouter,
-  BotRouterCaller,
-  createBotContext,
+	BotContextCreate,
+	botRouter,
+	BotRouterCaller,
+	createBotContext
 } from "@answeroverflow/api";
 import { container } from "@sapphire/framework";
 import { TRPCError } from "@trpc/server";
 import type { RendererableInteractions } from "@answeroverflow/discordjs-react";
 
 export type TRPCStatusHandler<T> = {
-  Ok?: (result: T) => void | Promise<void>;
-  Error?: (error: TRPCError, messageWithCode: string) => unknown | Promise<unknown>;
+	Ok?: (result: T) => void | Promise<void>;
+	Error?: (error: TRPCError, messageWithCode: string) => unknown | Promise<unknown>;
 };
 
 export type TRPCCall<T> = {
-  getCtx: () => Promise<BotContextCreate>;
-  apiCall: (router: BotRouterCaller) => Promise<T>;
+	getCtx: () => Promise<BotContextCreate>;
+	apiCall: (router: BotRouterCaller) => Promise<T>;
 } & TRPCStatusHandler<T>;
 
 export async function callWithAllowedErrors<T>({
-  allowedErrors,
-  call,
+	allowedErrors,
+	call
 }: {
-  call: () => Promise<T>;
-  allowedErrors?: TRPCError["code"] | TRPCError["code"][];
+	call: () => Promise<T>;
+	allowedErrors?: TRPCError["code"] | TRPCError["code"][];
 }) {
-  try {
-    return await call();
-  } catch (error) {
-    if (!(error instanceof TRPCError)) throw error;
-    if (!Array.isArray(allowedErrors)) allowedErrors = allowedErrors ? [allowedErrors] : [];
-    if (allowedErrors.includes(error.code)) {
-      return null;
-    } else {
-      throw error;
-    }
-  }
+	try {
+		return await call();
+	} catch (error) {
+		if (!(error instanceof TRPCError)) throw error;
+		if (!Array.isArray(allowedErrors)) allowedErrors = allowedErrors ? [allowedErrors] : [];
+		if (allowedErrors.includes(error.code)) {
+			return null;
+		} else {
+			throw error;
+		}
+	}
 }
 
 export async function callAPI<T>({
-  getCtx,
-  apiCall,
-  Ok = () => {},
-  Error = () => {},
+	getCtx,
+	apiCall,
+	Ok = () => {},
+	Error = () => {}
 }: TRPCCall<T>) {
-  try {
-    const convertedCtx = await createBotContext(await getCtx());
-    const caller = botRouter.createCaller(convertedCtx);
-    const data = await apiCall(caller);
-    await Ok(data);
-    return data;
-  } catch (error) {
-    if (!(error instanceof TRPCError)) throw error;
-    await Error(error, `${error.code}: ${error.message}`);
-    return null;
-  }
+	try {
+		const convertedCtx = await createBotContext(await getCtx());
+		const caller = botRouter.createCaller(convertedCtx);
+		const data = await apiCall(caller);
+		await Ok(data);
+		return data;
+	} catch (error) {
+		if (!(error instanceof TRPCError)) throw error;
+		await Error(error, `${error.code}: ${error.message}`);
+		return null;
+	}
 }
 
 export function ephemeralStatusHandler(interaction: RendererableInteractions, message: string) {
-  return container.discordJSReact.ephemeralReply(interaction, message);
+	return container.discordJSReact.ephemeralReply(interaction, message);
 }

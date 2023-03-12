@@ -8,26 +8,26 @@ import nextra from "nextra";
 
 /** @type {import("next").NextConfig} */
 const config = {
-  reactStrictMode: true,
-  swcMinify: true,
-  transpilePackages: [
-    "@answeroverflow/api",
-    "@answeroverflow/auth",
-    "@answeroverflow/db",
-    "@answeroverflow/tailwind-config",
-    "@answeroverflow/ui",
-  ],
-  images: {
-    domains: ["cdn.discordapp.com"],
-  },
-  // We already do linting on GH actions
-  eslint: {
-    ignoreDuringBuilds: !!process.env.CI,
-  },
+	reactStrictMode: true,
+	swcMinify: true,
+	transpilePackages: [
+		"@answeroverflow/api",
+		"@answeroverflow/auth",
+		"@answeroverflow/db",
+		"@answeroverflow/tailwind-config",
+		"@answeroverflow/ui"
+	],
+	images: {
+		domains: ["cdn.discordapp.com"]
+	},
+	// We already do linting on GH actions
+	eslint: {
+		ignoreDuringBuilds: !!process.env.CI
+	}
 };
 const withNextra = nextra({
-  theme: "nextra-theme-docs",
-  themeConfig: "./theme.config.tsx",
+	theme: "nextra-theme-docs",
+	themeConfig: "./theme.config.tsx"
 });
 
 export default withNextra(config);

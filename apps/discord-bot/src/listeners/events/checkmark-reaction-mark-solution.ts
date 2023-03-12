@@ -11,25 +11,28 @@ import { markAsSolved, MarkSolutionError } from "~discord-bot/domains/mark-solut
 const DISCORD_BOT_TESTING_SERVER_ID = "1037547185492996207";
 const REACTIFLUX_ID = "102860784329052160";
 export const ALLOWED_CHECKMARK_AS_REACTION_GUILD_IDS = new Set([
-  DISCORD_BOT_TESTING_SERVER_ID,
-  REACTIFLUX_ID,
+	DISCORD_BOT_TESTING_SERVER_ID,
+	REACTIFLUX_ID
 ]);
 
 @ApplyOptions<Listener.Options>({ event: Events.MessageReactionAdd })
 export class CheckmarkReactionMarkSolution extends Listener {
-  public async run(messageReaction: MessageReaction, user: User) {
-    if (messageReaction.emoji.name !== "✅" || messageReaction.me) return;
-    try {
-      const fullMessage = await messageReaction.message.fetch();
-      if (!ALLOWED_CHECKMARK_AS_REACTION_GUILD_IDS.has(fullMessage.guildId ?? "")) return;
-      const { embed, components, thread } = await markAsSolved(fullMessage, user);
-      await thread.send({ embeds: [embed], components: components ? [components] : undefined });
-    } catch (error) {
-      if (error instanceof MarkSolutionError) {
-        this.container.logger.info(`Checkmark MarkSolutionError: ${error.message}`);
-      } else {
-        throw error;
-      }
-    }
-  }
+	public async run(messageReaction: MessageReaction, user: User) {
+		if (messageReaction.emoji.name !== "✅" || messageReaction.me) return;
+		try {
+			const fullMessage = await messageReaction.message.fetch();
+			if (!ALLOWED_CHECKMARK_AS_REACTION_GUILD_IDS.has(fullMessage.guildId ?? "")) return;
+			const { embed, components, thread } = await markAsSolved(fullMessage, user);
+			await thread.send({
+				embeds: [embed],
+				components: components ? [components] : undefined
+			});
+		} catch (error) {
+			if (error instanceof MarkSolutionError) {
+				this.container.logger.info(`Checkmark MarkSolutionError: ${error.message}`);
+			} else {
+				throw error;
+			}
+		}
+	}
 }

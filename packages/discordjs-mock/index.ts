@@ -8,11 +8,11 @@ export * from "./src/helpers";
 export * from "./src/scenarios";
 
 declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      /* Discord Bot */
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      DEFAULT_DELAY_IN_MS: string | undefined;
-    }
-  }
+	namespace NodeJS {
+		interface ProcessEnv {
+			/* Discord Bot */
+			// eslint-disable-next-line @typescript-eslint/naming-convention
+			DEFAULT_DELAY_IN_MS: string | undefined;
+		}
+	}
 }

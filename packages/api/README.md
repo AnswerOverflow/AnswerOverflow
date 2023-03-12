@@ -12,6 +12,6 @@ i.e A user trying to set their consent status to true when it is already set to 
 
 ### Core dependencies
 
-- tRPC
-- Zod
-- `@answeroverflow/db`
+-   tRPC
+-   Zod
+-   `@answeroverflow/db`

@@ -2,9 +2,9 @@ import { cleanupRedis } from "@answeroverflow/cache";
 import { config } from "dotenv-cra";
 
 config({
-  path: "../../.env",
+	path: "../../.env"
 });
 
 export async function teardown() {
-  await cleanupRedis();
+	await cleanupRedis();
 }

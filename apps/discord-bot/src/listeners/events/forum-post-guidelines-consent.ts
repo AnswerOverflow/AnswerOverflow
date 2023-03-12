@@ -5,7 +5,7 @@ import { provideConsentOnForumChannelMessage } from "~discord-bot/domains/manage
 
 @ApplyOptions<Listener.Options>({ event: "messageCreate" })
 export class ForumPostGuideliensConsent extends Listener {
-  public async run(message: Message) {
-    await provideConsentOnForumChannelMessage(message);
-  }
+	public async run(message: Message) {
+		await provideConsentOnForumChannelMessage(message);
+	}
 }

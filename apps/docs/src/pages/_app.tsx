@@ -12,19 +12,19 @@ import { useEffect } from "react";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MyApp: AppType<{ session: Session | null }> = ({
-  Component,
-  pageProps: { session, ...pageProps },
+	Component,
+	pageProps: { session, ...pageProps }
 }) => {
-  useEffect(() => {
-    hljs.configure({
-      ignoreUnescapedHTML: true, // TODO: Revisit this, discord-markdown escapes the HTML so it should be safe
-    });
-    hljs.highlightAll();
-  }, []);
-  return (
-    <SessionProvider session={session}>
-      <Component {...pageProps} />
-    </SessionProvider>
-  );
+	useEffect(() => {
+		hljs.configure({
+			ignoreUnescapedHTML: true // TODO: Revisit this, discord-markdown escapes the HTML so it should be safe
+		});
+		hljs.highlightAll();
+	}, []);
+	return (
+		<SessionProvider session={session}>
+			<Component {...pageProps} />
+		</SessionProvider>
+	);
 };
 export default (trpc as NextTRPC).withTRPC(MyApp);

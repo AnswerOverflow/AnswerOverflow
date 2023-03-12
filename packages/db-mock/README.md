@@ -1,14 +1,16 @@
 # File for writing down misc notes relating to the database
 
 ## Commands
+
 Misc commands that are used while working with prisma
-* Generate a migration
-    
-    ```npx prisma migrate dev --name name```
 
-* Update the types after a migration
+-   Generate a migration
 
-    ```npx prisma generate```
+    `npx prisma migrate dev --name name`
 
-* Browse data
-    ```npx prisma studio```
+-   Update the types after a migration
+
+    `npx prisma generate`
+
+-   Browse data
+    `npx prisma studio`

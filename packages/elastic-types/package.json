@@ -1,31 +1,33 @@
 {
-  "name": "@answeroverflow/elastic-types",
-  "version": "0.1.0",
-  "main": "./index.ts",
-  "types": "./index.ts",
-  "license": "MIT",
-  "private": true,
-  "scripts": {
-    "clean": "rm -rf .turbo node_modules coverage",
-    "with-env": "dotenv -e ../../.env --",
-    "with-staging-env": "dotenv -e ../../.env.staging --",
-    "lint": "eslint . && tsc --noEmit",
-    "lint:fix": "eslint . --fix",
-    "test": "yarn run with-env vitest run  --coverage",
-    "test:watch": "yarn run with-env vitest",
-    "create-message-index": "cross-env NODE_ENV=development yarn with-env npx ts-node --esm ./scripts/create-message-index.ts",
-    "create-message-index-staging": "cross-env NODE_ENV=production yarn with-staging-env npx ts-node --esm ./scripts/create-message-index.ts"
-  },
-  "dependencies": {
-    "@answeroverflow/utils": "*",
-    "@elastic/elasticsearch": "^8.6.0",
-    "dotenv-cra": "^3.0.3",
-    "zod": "^3.20.6"
-  },
-  "devDependencies": {
-    "@answeroverflow/tsconfig": "*",
-    "@vitest/coverage-c8": "^0.25.8",
-    "dotenv-cli": "^7.0.0",
-    "vitest": "^0.25.8"
-  }
+	"name": "@answeroverflow/elastic-types",
+	"version": "0.1.0",
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"license": "MIT",
+	"private": true,
+	"scripts": {
+		"clean": "rm -rf .turbo node_modules coverage",
+		"with-env": "dotenv -e ../../.env --",
+		"with-staging-env": "dotenv -e ../../.env.staging --",
+		"format": "prettier --config ./prettierrc.js --write .",
+		"format:check": "prettier --config ./prettierrc.js --check .",
+		"lint": "eslint . && tsc --noEmit",
+		"lint:fix": "eslint . --fix",
+		"test": "yarn run with-env vitest run  --coverage",
+		"test:watch": "yarn run with-env vitest",
+		"create-message-index": "cross-env NODE_ENV=development yarn with-env npx ts-node --esm ./scripts/create-message-index.ts",
+		"create-message-index-staging": "cross-env NODE_ENV=production yarn with-staging-env npx ts-node --esm ./scripts/create-message-index.ts"
+	},
+	"dependencies": {
+		"@answeroverflow/utils": "*",
+		"@elastic/elasticsearch": "^8.6.0",
+		"dotenv-cra": "^3.0.3",
+		"zod": "^3.20.6"
+	},
+	"devDependencies": {
+		"@answeroverflow/tsconfig": "*",
+		"@vitest/coverage-c8": "^0.25.8",
+		"dotenv-cli": "^7.0.0",
+		"vitest": "^0.25.8"
+	}
 }

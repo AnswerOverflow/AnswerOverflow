@@ -1,24 +1,26 @@
 {
-  "name": "@answeroverflow/utils",
-  "version": "0.1.0",
-  "main": "./index.ts",
-  "types": "./index.ts",
-  "license": "MIT",
-  "private": true,
-  "scripts": {
-    "clean": "rm -rf .turbo node_modules coverage",
-    "lint": "eslint . && tsc --noEmit",
-    "lint:fix": "eslint . --fix",
-    "test": "yarn run vitest run  --coverage",
-    "test:watch": "yarn run vitest"
-  },
-  "dependencies": {
-    "dotenv-cra": "^3.0.3",
-    "lorem-ipsum": "^2.0.8"
-  },
-  "devDependencies": {
-    "@answeroverflow/tsconfig": "*",
-    "@vitest/coverage-c8": "^0.25.8",
-    "vitest": "^0.25.8"
-  }
+	"name": "@answeroverflow/utils",
+	"version": "0.1.0",
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"license": "MIT",
+	"private": true,
+	"scripts": {
+		"clean": "rm -rf .turbo node_modules coverage",
+		"format": "prettier --config ./prettierrc.js --write .",
+		"format:check": "prettier --config ./prettierrc.js --check .",
+		"lint": "eslint . && tsc --noEmit",
+		"lint:fix": "eslint . --fix",
+		"test": "yarn run vitest run  --coverage",
+		"test:watch": "yarn run vitest"
+	},
+	"dependencies": {
+		"dotenv-cra": "^3.0.3",
+		"lorem-ipsum": "^2.0.8"
+	},
+	"devDependencies": {
+		"@answeroverflow/tsconfig": "*",
+		"@vitest/coverage-c8": "^0.25.8",
+		"vitest": "^0.25.8"
+	}
 }

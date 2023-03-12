@@ -8,26 +8,26 @@ import { userRouter } from "./users/user/user";
 import { messagesRouter } from "./messages/messages";
 
 export const botRouter = router({
-  // Discord:
-  servers: serverRouter,
-  channels: channelRouter,
-  discordAccounts: discordAccountRouter,
-  userServerSettings: userServerSettingsRouter,
+	// Discord:
+	servers: serverRouter,
+	channels: channelRouter,
+	discordAccounts: discordAccountRouter,
+	userServerSettings: userServerSettingsRouter,
 
-  // Other:
-  users: userRouter,
+	// Other:
+	users: userRouter
 });
 
 export const appRouter = router({
-  servers: serverRouter,
-  channels: channelRouter,
-  discordAccounts: discordAccountRouter,
-  userServerSettings: userServerSettingsRouter,
-  messagePage: messagesRouter,
+	servers: serverRouter,
+	channels: channelRouter,
+	discordAccounts: discordAccountRouter,
+	userServerSettings: userServerSettingsRouter,
+	messagePage: messagesRouter,
 
-  // Other:
-  users: userRouter,
-  auth: authRouter,
+	// Other:
+	users: userRouter,
+	auth: authRouter
 });
 
 // export type definition of API
