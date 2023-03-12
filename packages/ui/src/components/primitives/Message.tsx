@@ -27,7 +27,7 @@ export const MessageAuthorArea = () => {
       <div className="flex w-full flex-row items-center gap-2 font-body text-lg text-[#FFFFFF]/[.47]">
         <DiscordAvatar user={message.author} size="sm" />
         <span className="mr-1">{message.author.name}</span>
-        <span>{getSnowflakeUTCDate(message.id)}</span>
+        <span className="ml-auto">{getSnowflakeUTCDate(message.id)}</span>
       </div>
     </div>
   );
@@ -120,15 +120,21 @@ type MessageRendererProps = {
   content?: React.ReactNode;
   authorArea?: React.ReactNode;
   images?: React.ReactNode;
+  showBorders?: boolean;
 };
 
 export function MessageRenderer({
   content = <MessageContents />,
   authorArea = <MessageAuthorArea />,
   images = <MessageImages />,
+  showBorders,
 }: MessageRendererProps) {
   return (
-    <div className="grow rounded-bl-standard bg-[#00FF85]/[0.01]">
+    <div
+      className={`grow rounded-t-standard lg:rounded-tr-none ${
+        showBorders ? "border-x-2 border-t-2" : ""
+      } border-white/[.13]`}
+    >
       <div className="select-none p-6">
         <div className="flex items-center gap-2">{authorArea}</div>
         {content}
