@@ -1,10 +1,10 @@
-import { Client, ClientOptions, errors } from "@elastic/elasticsearch";
+import { Client, ClientOptions, errors } from '@elastic/elasticsearch';
 import type {
 	BulkOperationContainer,
 	MappingProperty,
-	QueryDslQueryContainer
-} from "@elastic/elasticsearch/lib/api/types";
-import { z } from "zod";
+	QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
+import { z } from 'zod';
 
 declare global {
 	// eslint-disable-next-line no-var, no-unused-vars
@@ -15,13 +15,13 @@ export const zDiscordImage = z.object({
 	url: z.string(),
 	width: z.number().nullable(),
 	height: z.number().nullable(),
-	description: z.string().nullable()
+	description: z.string().nullable(),
 });
 
 export const zMessageReference = z.object({
 	messageId: z.string(),
 	channelId: z.string(),
-	serverId: z.string()
+	serverId: z.string(),
 });
 
 export const zMessage = z.object({
@@ -34,7 +34,7 @@ export const zMessage = z.object({
 	authorId: z.string(),
 	channelId: z.string(), // If the message is is in a thread, this is the thread's channel id
 	parentChannelId: z.string().nullable(), // If the message is in a thread, this is the channel id of the parent channel for the thread
-	serverId: z.string()
+	serverId: z.string(),
 });
 
 export function getThreadIdOfMessage(message: Message): string | null {
@@ -74,19 +74,19 @@ type ElasticMessageIndexProperties = {
 	[K in keyof Message]: MappingProperty;
 };
 
-const idProperty: MappingProperty = { type: "long" };
+const idProperty: MappingProperty = { type: 'long' };
 
 const imageProperties: MessageImageMappingProperty = {
-	url: { type: "text" },
-	width: { type: "integer" },
-	height: { type: "integer" },
-	description: { type: "text" }
+	url: { type: 'text' },
+	width: { type: 'integer' },
+	height: { type: 'integer' },
+	description: { type: 'text' },
 };
 
 const messageReferenceProperties: MessageReferenceMappingProperty = {
 	messageId: idProperty,
 	channelId: idProperty,
-	serverId: idProperty
+	serverId: idProperty,
 };
 
 const properties: ElasticMessageIndexProperties = {
@@ -95,50 +95,53 @@ const properties: ElasticMessageIndexProperties = {
 	channelId: idProperty,
 	authorId: idProperty,
 	parentChannelId: idProperty,
-	content: { type: "text" },
+	content: { type: 'text' },
 	images: {
-		properties: imageProperties
+		properties: imageProperties,
 	},
 	// https://www.elastic.co/guide/en/elasticsearch/reference/current/array.html
 	solutionIds: idProperty,
 	messageReference: {
-		properties: messageReferenceProperties
+		properties: messageReferenceProperties,
 	},
-	childThread: idProperty
+	childThread: idProperty,
 };
 
 function getElasticClient(): Elastic {
-	if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
+	if (
+		process.env.NODE_ENV === 'development' ||
+		process.env.NODE_ENV === 'test'
+	) {
 		return new Elastic({
 			node: process.env.ELASTICSEARCH_URL,
 			auth: {
 				password: process.env.ELASTICSEARCH_PASSWORD,
-				username: process.env.ELASTICSEARCH_USERNAME
-			}
+				username: process.env.ELASTICSEARCH_USERNAME,
+			},
 		});
-	} else if (process.env.NODE_ENV === "production") {
+	} else if (process.env.NODE_ENV === 'production') {
 		// Allow for building locally
 		if (!process.env.ELASTICSEARCH_CLOUD_ID) {
 			return new Elastic({
 				node: process.env.ELASTICSEARCH_URL,
 				auth: {
 					password: process.env.ELASTICSEARCH_PASSWORD,
-					username: process.env.ELASTICSEARCH_USERNAME
-				}
+					username: process.env.ELASTICSEARCH_USERNAME,
+				},
 			});
 		} else {
 			return new Elastic({
 				cloud: {
-					id: process.env.ELASTICSEARCH_CLOUD_ID
+					id: process.env.ELASTICSEARCH_CLOUD_ID,
 				},
 				auth: {
 					password: process.env.ELASTICSEARCH_PASSWORD,
-					username: process.env.ELASTICSEARCH_USERNAME
-				}
+					username: process.env.ELASTICSEARCH_USERNAME,
+				},
 			});
 		}
 	} else {
-		throw new Error("Invalid environment to connect to elastic");
+		throw new Error('Invalid environment to connect to elastic');
 	}
 }
 
@@ -155,7 +158,7 @@ export class Elastic extends Client {
 
 	public destroyMessagesIndex() {
 		return this.indices.delete({
-			index: this.messagesIndex
+			index: this.messagesIndex,
 		});
 	}
 
@@ -163,7 +166,7 @@ export class Elastic extends Client {
 		try {
 			const message = await this.get<Message>({
 				index: this.messagesIndex,
-				id
+				id,
 			});
 			if (message.found === false) return null;
 			return message._source ?? null;
@@ -180,14 +183,18 @@ export class Elastic extends Client {
 		try {
 			if (ids.length === 0) return Promise.resolve([]);
 			const messages = await this.mget<Message>({
-				docs: ids.map((id) => ({ _index: this.messagesIndex, _id: id, _source: true }))
+				docs: ids.map((id) => ({
+					_index: this.messagesIndex,
+					_id: id,
+					_source: true,
+				})),
 			});
 			return messages.docs
-				.filter((doc) => "found" in doc && doc.found)
+				.filter((doc) => 'found' in doc && doc.found)
 				.map((doc) => {
-					if (!("error" in doc) && doc._source) {
+					if (!('error' in doc) && doc._source) {
 						return doc._source;
-					} else throw new Error("Unknown error in bulk get messages");
+					} else throw new Error('Unknown error in bulk get messages');
 				});
 		} catch (error) {
 			if (error instanceof errors.ResponseError && error.statusCode === 404) {
@@ -198,7 +205,11 @@ export class Elastic extends Client {
 		}
 	}
 
-	public async bulkGetMessagesByChannelId(channelId: string, after?: string, limit?: number) {
+	public async bulkGetMessagesByChannelId(
+		channelId: string,
+		after?: string,
+		limit?: number,
+	) {
 		const result = await this.search<Message>({
 			index: this.messagesIndex,
 			query: {
@@ -208,40 +219,44 @@ export class Elastic extends Client {
 					must: [
 						{
 							term: {
-								channelId
-							}
+								channelId,
+							},
 						},
 						{
 							range: {
 								id: {
-									gte: after ?? "0"
-								}
-							}
-						}
-					]
-				}
+									gte: after ?? '0',
+								},
+							},
+						},
+					],
+				},
 			},
 			size: limit ?? 100,
-			sort: [{ id: "asc" }]
+			sort: [{ id: 'asc' }],
 		});
 
-		return result.hits.hits.filter((hit) => hit._source).map((hit) => hit._source!);
+		return result.hits.hits
+			.filter((hit) => hit._source)
+			.map((hit) => hit._source!);
 	}
 
 	public async getAllMessages() {
 		const body = {
 			query: {
-				match_all: {}
-			}
+				match_all: {},
+			},
 		};
 		const result = await this.search<Message>({
 			index: this.messagesIndex,
 			body,
 			size: 1000,
-			sort: [{ id: "desc" }]
+			sort: [{ id: 'desc' }],
 		});
 
-		return result.hits.hits.filter((hit) => hit._source).map((hit) => hit._source!);
+		return result.hits.hits
+			.filter((hit) => hit._source)
+			.map((hit) => hit._source!);
 	}
 
 	public async deleteMessage(id: string) {
@@ -249,15 +264,15 @@ export class Elastic extends Client {
 			const message = await this.delete({
 				index: this.messagesIndex,
 				id,
-				refresh: process.env.NODE_ENV === "test"
+				refresh: process.env.NODE_ENV === 'test',
 			});
 			switch (message.result) {
-				case "deleted":
+				case 'deleted':
 					return true;
-				case "not_found":
+				case 'not_found':
 					return false;
 				default:
-					throw new Error("Unknown message delete error");
+					throw new Error('Unknown message delete error');
 			}
 		} catch (error) {
 			if (error instanceof errors.ResponseError && error.statusCode === 404) {
@@ -271,12 +286,12 @@ export class Elastic extends Client {
 	public async deleteByChannelId(threadId: string) {
 		const result = await this.deleteByQuery({
 			index: this.messagesIndex,
-			refresh: process.env.NODE_ENV === "test",
+			refresh: process.env.NODE_ENV === 'test',
 			query: {
 				term: {
-					channelId: threadId
-				}
-			}
+					channelId: threadId,
+				},
+			},
 		});
 		return result.deleted;
 	}
@@ -284,43 +299,43 @@ export class Elastic extends Client {
 	public async deleteByUserId(userId: string) {
 		const result = await this.deleteByQuery({
 			index: this.messagesIndex,
-			refresh: process.env.NODE_ENV === "test",
+			refresh: process.env.NODE_ENV === 'test',
 			query: {
 				term: {
-					authorId: userId
-				}
-			}
+					authorId: userId,
+				},
+			},
 		});
 		return result.deleted;
 	}
 
 	public async deleteByUserIdInServer({
 		userId,
-		serverId
+		serverId,
 	}: {
 		userId: string;
 		serverId: string;
 	}) {
 		const result = await this.deleteByQuery({
 			index: this.messagesIndex,
-			refresh: process.env.NODE_ENV === "test",
+			refresh: process.env.NODE_ENV === 'test',
 			query: {
 				// @ts-ignore
 				bool: {
 					must: [
 						{
 							term: {
-								authorId: userId
-							}
+								authorId: userId,
+							},
 						},
 						{
 							term: {
-								serverId
-							}
-						}
-					]
-				}
-			}
+								serverId,
+							},
+						},
+					],
+				},
+			},
 		});
 		return result.deleted;
 	}
@@ -328,11 +343,11 @@ export class Elastic extends Client {
 	public async bulkDeleteMessages(ids: string[]) {
 		if (ids.length === 0) return Promise.resolve(true);
 		const body: BulkOperationContainer[] = ids.flatMap((id) => [
-			{ delete: { _index: this.messagesIndex, _id: id } }
+			{ delete: { _index: this.messagesIndex, _id: id } },
 		]);
 		const result = await this.bulk({
 			operations: body,
-			refresh: process.env.NODE_ENV === "test"
+			refresh: process.env.NODE_ENV === 'test',
 		});
 		if (result.errors) {
 			console.error(result);
@@ -346,19 +361,19 @@ export class Elastic extends Client {
 			const fetchedMessage = await this.update({
 				index: this.messagesIndex,
 				id: message.id,
-				refresh: process.env.NODE_ENV === "test",
-				doc: message
+				refresh: process.env.NODE_ENV === 'test',
+				doc: message,
 			});
 			switch (fetchedMessage.result) {
-				case "updated":
-				case "noop": // Update changed no data
+				case 'updated':
+				case 'noop': // Update changed no data
 					return message;
-				case "not_found":
-					throw new Error("Message not found when it should have been updated");
-				case "deleted":
-					throw new Error("Message deleted when it should have been updated");
+				case 'not_found':
+					throw new Error('Message not found when it should have been updated');
+				case 'deleted':
+					throw new Error('Message deleted when it should have been updated');
 				default:
-					throw new Error("Unknown message update error");
+					throw new Error('Unknown message update error');
 			}
 		} catch (error) {
 			if (error instanceof errors.ResponseError && error.statusCode === 404) {
@@ -374,20 +389,20 @@ export class Elastic extends Client {
 			index: this.messagesIndex,
 			id: message.id,
 			doc: message,
-			refresh: process.env.NODE_ENV === "test",
-			upsert: message
+			refresh: process.env.NODE_ENV === 'test',
+			upsert: message,
 		});
 		switch (fetchedMessage.result) {
-			case "created":
-			case "updated":
-			case "noop": // Update changed no data
+			case 'created':
+			case 'updated':
+			case 'noop': // Update changed no data
 				return message;
-			case "not_found":
-				throw new Error("Message not found when it should have been indexed");
-			case "deleted":
-				throw new Error("Message deleted when it should have been indexed");
+			case 'not_found':
+				throw new Error('Message not found when it should have been indexed');
+			case 'deleted':
+				throw new Error('Message deleted when it should have been indexed');
 			default:
-				throw new Error("Unknown message index error error");
+				throw new Error('Unknown message index error error');
 		}
 	}
 
@@ -396,22 +411,27 @@ export class Elastic extends Client {
 		const result = await this.bulk({
 			operations: messages.flatMap((message) => [
 				{ update: { _index: this.messagesIndex, _id: message.id } },
-				{ doc: message, doc_as_upsert: true }
+				{ doc: message, doc_as_upsert: true },
 			]),
-			refresh: process.env.NODE_ENV === "test"
+			refresh: process.env.NODE_ENV === 'test',
 		});
 		if (result.errors) {
 			console.error(
 				result.errors,
 				`Wrote ${result.took} successfully out of ${messages.length} messages`,
-				result.items.map((item) => item.update?.error)
+				result.items.map((item) => item.update?.error),
 			);
 			return false;
 		}
 		return true;
 	}
 
-	public async searchMessages({ query, serverId, limit, channelId }: MessageSearchOptions) {
+	public async searchMessages({
+		query,
+		serverId,
+		limit,
+		channelId,
+	}: MessageSearchOptions) {
 		const q: QueryDslQueryContainer = {
 			// TODO: No ts ignore in future
 			// @ts-ignore
@@ -420,30 +440,30 @@ export class Elastic extends Client {
 					{
 						multi_match: {
 							query,
-							fields: ["content"],
-							fuzziness: "AUTO"
-						}
-					}
-				]
-			}
+							fields: ['content'],
+							fuzziness: 'AUTO',
+						},
+					},
+				],
+			},
 		};
 		if (!Array.isArray(q.bool?.must))
 			throw new Error(
-				"This error should never occur. The query is always expected to be an array for the must property"
+				'This error should never occur. The query is always expected to be an array for the must property',
 			);
 		if (q.bool?.must) {
 			if (serverId) {
 				q.bool.must.push({
 					match: {
-						serverId
-					}
+						serverId,
+					},
 				});
 			}
 			if (channelId) {
 				q.bool.must.push({
 					match: {
-						channelId
-					}
+						channelId,
+					},
 				});
 			}
 		}
@@ -458,24 +478,24 @@ export class Elastic extends Client {
 			//   },
 			// },
 			size: limit ?? 100,
-			sort: [{ id: "asc" }]
+			sort: [{ id: 'asc' }],
 		});
 
 		return result.hits.hits
 			.filter((hit) => hit._source)
 			.map((hit) => ({
 				...hit,
-				_source: hit._source!
+				_source: hit._source!,
 			}));
 	}
 
 	public async createMessagesIndex() {
 		const exists = await this.indices.exists({
-			index: this.messagesIndex
+			index: this.messagesIndex,
 		});
 		if (exists) {
-			if (process.env.NODE_ENV === "production") {
-				throw new Error("Messages index already exists. Cannot overwrite");
+			if (process.env.NODE_ENV === 'production') {
+				throw new Error('Messages index already exists. Cannot overwrite');
 			} else {
 				await this.destroyMessagesIndex();
 			}
@@ -484,16 +504,16 @@ export class Elastic extends Client {
 			index: this.messagesIndex,
 			mappings: {
 				_source: {
-					excludes: ["tags"]
+					excludes: ['tags'],
 				},
-				properties
-			}
+				properties,
+			},
 		});
 	}
 }
 
 export const elastic = global.elastic || getElasticClient();
 
-if (process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== 'production') {
 	global.elastic = elastic;
 }

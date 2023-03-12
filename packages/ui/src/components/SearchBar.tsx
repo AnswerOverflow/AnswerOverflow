@@ -1,4 +1,4 @@
-import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 export type SearchBarProps = {
 	placeholder?: string;
@@ -7,9 +7,9 @@ export type SearchBarProps = {
 };
 
 export function SearchBar({
-	placeholder = "Search for anything",
+	placeholder = 'Search for anything',
 	className,
-	defaultValue
+	defaultValue,
 }: SearchBarProps) {
 	return (
 		<div className={className}>

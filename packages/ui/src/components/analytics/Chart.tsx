@@ -9,27 +9,27 @@ import {
 	ResponsiveContainer,
 	Tooltip,
 	XAxis,
-	YAxis
-} from "recharts";
+	YAxis,
+} from 'recharts';
 
 export interface LineChartLine {
 	lineColor: string;
-	lineType: LineProps["type"];
+	lineType: LineProps['type'];
 	dataKey: string;
 }
 
 export interface LineChartData extends DefaultChartProps {
-	type: "line";
+	type: 'line';
 	// TODO: Find type for lines
 	lines: {
 		lineColor: string;
-		lineType: LineProps["type"];
+		lineType: LineProps['type'];
 		dataKey: string;
 	}[];
 }
 
 export interface BarChartData extends DefaultChartProps {
-	type: "bar";
+	type: 'bar';
 	// TODO: Find type for lines
 	bars: {
 		barColor: string;
@@ -65,12 +65,13 @@ export interface DefaultChartProps {
 export type ChartProps = LineChartData | BarChartData;
 
 export const Chart = (props: ChartProps) => {
-	const { showGrid, showTooltip, showLegend, xAxisKey, yAxisKey, data, type } = props;
+	const { showGrid, showTooltip, showLegend, xAxisKey, yAxisKey, data, type } =
+		props;
 	return (
-		<ResponsiveContainer width={"100%"}>
+		<ResponsiveContainer width={'100%'}>
 			{(() => {
 				switch (type) {
-					case "line":
+					case 'line':
 						return (
 							<LineChart data={data}>
 								{props.lines.map((line, index) => (
@@ -90,7 +91,7 @@ export const Chart = (props: ChartProps) => {
 								{showLegend == false ? null : <Legend />}
 							</LineChart>
 						);
-					case "bar":
+					case 'bar':
 						return (
 							<BarChart data={data}>
 								{props.bars.map((line, index) => (

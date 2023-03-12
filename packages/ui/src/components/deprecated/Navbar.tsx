@@ -1,24 +1,24 @@
 /* eslint-disable tailwindcss/migration-from-tailwind-2 */
-import Link from "next/link";
-import { AnswerOverflowLogo } from "../AnswerOverflowLogo";
-import { ThemeSwitcher } from "../ThemeSwitcher";
-import { useRouter } from "next/router";
-import { signIn, signOut } from "next-auth/react";
-import { EllipsisVerticalIcon } from "@heroicons/react/24/solid";
-import { Menu, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import Link from 'next/link';
+import { AnswerOverflowLogo } from '../AnswerOverflowLogo';
+import { ThemeSwitcher } from '../ThemeSwitcher';
+import { useRouter } from 'next/router';
+import { signIn, signOut } from 'next-auth/react';
+import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
+import { Menu, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
 // eslint-disable-next-line no-restricted-imports
-import { trpc } from "../../utils/trpc";
-import { Avatar } from "../primitives/Avatar";
-import { Button } from "./Button";
-import type { User } from "@answeroverflow/api";
-import { classNames } from "~ui/utils/styling";
+import { trpc } from '../../utils/trpc';
+import { Avatar } from '../primitives/Avatar';
+import { Button } from './Button';
+import type { User } from '@answeroverflow/api';
+import { classNames } from '~ui/utils/styling';
 
 const SignedInDropdownMenu = ({ signedInUser }: { signedInUser: User }) => (
 	<Menu as="div" className="relative inline-block text-left">
 		<Menu.Button>
 			<div className="flex shrink-0 flex-row items-center rounded-md p-2 transition hover:bg-zinc-900/5 dark:hover:bg-white/5">
-				<Avatar alt={signedInUser.name} size={"sm"} url={signedInUser.image} />
+				<Avatar alt={signedInUser.name} size={'sm'} url={signedInUser.image} />
 				<EllipsisVerticalIcon className="h-7 w-7 dark:text-white hover:dark:text-neutral-400" />
 			</div>
 		</Menu.Button>
@@ -39,9 +39,9 @@ const SignedInDropdownMenu = ({ signedInUser }: { signedInUser: User }) => (
 								href="/settings/servers"
 								className={classNames(
 									active
-										? "bg-gray-100 text-gray-900 dark:bg-neutral-700 dark:text-neutral-100"
-										: "text-gray-700 dark:text-neutral-300",
-									"block px-4 py-2 text-sm"
+										? 'bg-gray-100 text-gray-900 dark:bg-neutral-700 dark:text-neutral-100'
+										: 'text-gray-700 dark:text-neutral-300',
+									'block px-4 py-2 text-sm',
 								)}
 							>
 								My Servers
@@ -54,9 +54,9 @@ const SignedInDropdownMenu = ({ signedInUser }: { signedInUser: User }) => (
 								<Button
 									className={classNames(
 										active
-											? "bg-gray-100 text-gray-900 dark:bg-neutral-700 dark:text-neutral-100"
-											: "text-gray-700 dark:text-neutral-300",
-										"block w-full px-4 py-2 text-left text-sm"
+											? 'bg-gray-100 text-gray-900 dark:bg-neutral-700 dark:text-neutral-100'
+											: 'text-gray-700 dark:text-neutral-300',
+										'block w-full px-4 py-2 text-left text-sm',
 									)}
 									// eslint-disable-next-line @typescript-eslint/no-misused-promises
 									onClick={() => signOut()}
@@ -82,7 +82,9 @@ export function Navbar() {
 			<div className="flex h-16 items-center justify-between">
 				<Link
 					href="/"
-					className={router.pathname === "/" && !process.env.STORYBOOK ? "invisible" : ""}
+					className={
+						router.pathname === '/' && !process.env.STORYBOOK ? 'invisible' : ''
+					}
 					aria-label="Home"
 				>
 					<AnswerOverflowLogo />
@@ -93,7 +95,7 @@ export function Navbar() {
 						<SignedInDropdownMenu signedInUser={user} />
 					) : (
 						// eslint-disable-next-line @typescript-eslint/no-misused-promises
-						<Button visualOnly onClick={() => signIn("discord")}>
+						<Button visualOnly onClick={() => signIn('discord')}>
 							Login
 						</Button>
 					)}

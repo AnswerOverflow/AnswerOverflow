@@ -6,13 +6,13 @@ import {
 	Message,
 	MessageFull,
 	MessageWithDiscordAccount,
-	Server
-} from "@answeroverflow/db";
-import { omit, pick } from "@answeroverflow/utils";
-import type { ChannelFindByIdOutput } from "~api/utils/types";
+	Server,
+} from '@answeroverflow/db';
+import { omit, pick } from '@answeroverflow/utils';
+import type { ChannelFindByIdOutput } from '~api/utils/types';
 
 export function pickPublicServerData(server: Server) {
-	return pick(server, ["id", "name", "icon", "description"]);
+	return pick(server, ['id', 'name', 'icon', 'description']);
 }
 
 type ToMessageWithDiscordAccount = {
@@ -24,12 +24,12 @@ type ToMessageWithDiscordAccount = {
 export function toMessageWithDiscordAccount({
 	message,
 	author,
-	publicMessage
+	publicMessage,
 }: ToMessageWithDiscordAccount) {
 	const msg: MessageWithDiscordAccount = {
-		...omit(message, "authorId"),
+		...omit(message, 'authorId'),
 		author,
-		public: publicMessage
+		public: publicMessage,
 	};
 	return msg;
 }
@@ -39,7 +39,7 @@ export function toMessageWithAccountAndRepliesTo({
 	referenced = undefined,
 	author,
 	publicMessage,
-	solutions = []
+	solutions = [],
 }: ToMessageWithDiscordAccount & {
 	referenced?: MessageWithDiscordAccount;
 	solutions?: MessageWithDiscordAccount[];
@@ -47,19 +47,19 @@ export function toMessageWithAccountAndRepliesTo({
 	const publicMsg: MessageFull = {
 		...toMessageWithDiscordAccount({ message, author, publicMessage }),
 		solutionMessages: solutions,
-		referencedMessage: referenced ?? null
+		referencedMessage: referenced ?? null,
 	};
 	return publicMsg;
 }
 
 export function toPrivateMessageWithStrippedData(
-	message: MessageWithDiscordAccount | MessageFull
+	message: MessageWithDiscordAccount | MessageFull,
 ): MessageWithDiscordAccount | MessageFull {
 	const isReply = !isMessageFull(message);
 
 	const author = getDefaultDiscordAccount({
-		id: "0",
-		name: "Unknown User"
+		id: '0',
+		name: 'Unknown User',
 	});
 	const privateMsg: MessageWithDiscordAccount = {
 		...getDefaultMessage({
@@ -67,10 +67,10 @@ export function toPrivateMessageWithStrippedData(
 			channelId: message.channelId,
 			serverId: message.serverId,
 			id: message.id,
-			parentChannelId: message.parentChannelId
+			parentChannelId: message.parentChannelId,
 		}),
 		author,
-		public: false
+		public: false,
 	};
 	if (isReply) {
 		return privateMsg;
@@ -80,11 +80,20 @@ export function toPrivateMessageWithStrippedData(
 		referencedMessage: message.referencedMessage
 			? toPrivateMessageWithStrippedData(message.referencedMessage)
 			: null,
-		solutionMessages: message.solutionMessages.map((m) => toPrivateMessageWithStrippedData(m))
+		solutionMessages: message.solutionMessages.map((m) =>
+			toPrivateMessageWithStrippedData(m),
+		),
 	};
 }
 
 export function pickPublicChannelData(channel: ChannelFindByIdOutput) {
-	const picked = pick(channel, ["id", "name", "parentId", "serverId", "type", "inviteCode"]);
+	const picked = pick(channel, [
+		'id',
+		'name',
+		'parentId',
+		'serverId',
+		'type',
+		'inviteCode',
+	]);
 	return picked;
 }

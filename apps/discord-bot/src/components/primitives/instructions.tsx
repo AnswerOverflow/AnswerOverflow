@@ -1,5 +1,5 @@
-import React from "react";
-import { Spacer } from "./spacer";
+import React from 'react';
+import { Spacer } from './spacer';
 
 export type MenuInstruction = {
 	title: string;
@@ -7,7 +7,11 @@ export type MenuInstruction = {
 	enabled: boolean;
 };
 
-export const EmbedMenuInstruction = ({ instructions }: { instructions: MenuInstruction[] }) => (
+export const EmbedMenuInstruction = ({
+	instructions,
+}: {
+	instructions: MenuInstruction[];
+}) => (
 	<React.Fragment>
 		{instructions.map(
 			({ title, instructions, enabled }) =>
@@ -16,7 +20,7 @@ export const EmbedMenuInstruction = ({ instructions }: { instructions: MenuInstr
 						**{title}** - {instructions}
 						<Spacer count={2} />
 					</React.Fragment>
-				)
+				),
 		)}
 	</React.Fragment>
 );

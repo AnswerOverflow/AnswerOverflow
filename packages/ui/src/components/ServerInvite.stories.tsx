@@ -1,9 +1,9 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { mockServer } from "~ui/test/props";
+import type { Meta, StoryObj } from '@storybook/react';
+import { mockServer } from '~ui/test/props';
 
-import { ServerInvite, ServerInviteProps } from "./ServerInvite";
+import { ServerInvite, ServerInviteProps } from './ServerInvite';
 const meta = {
-	component: ServerInvite
+	component: ServerInvite,
 } as Meta<typeof ServerInvite>;
 
 export default meta;
@@ -15,16 +15,16 @@ const server = mockServer();
 const defaultMessage: ServerInviteProps = {
 	server: server,
 	channel: {
-		id: "0",
-		name: "general",
+		id: '0',
+		name: 'general',
 		serverId: server.id,
 		parentId: null,
 		type: 0,
-		inviteCode: "123456"
+		inviteCode: '123456',
 	},
-	isUserInServer: false
+	isUserInServer: false,
 };
 
 export const Primary: Story = {
-	args: defaultMessage
+	args: defaultMessage,
 };

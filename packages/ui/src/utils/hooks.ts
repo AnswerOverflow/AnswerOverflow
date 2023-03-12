@@ -1,5 +1,5 @@
-import { RefObject, useEffect, useState } from "react";
-import { trpc } from "./trpc";
+import { RefObject, useEffect, useState } from 'react';
+import { trpc } from './trpc';
 
 export const useIsUserInServer = (serverId: string) => {
 	const { data: servers } = trpc.auth.getServers.useQuery();
@@ -12,14 +12,14 @@ export const useElementPosition = (element: RefObject<HTMLDivElement>) => {
 		const config: MutationObserverInit = {
 			childList: false,
 			attributes: true,
-			subtree: false
+			subtree: false,
 		};
 
 		const callback: MutationCallback = (mutationList) => {
 			for (const mutation of mutationList) {
-				if (mutation.type === "attributes") {
+				if (mutation.type === 'attributes') {
 					// Check if is a div
-					if (mutation.target.nodeName === "DIV") {
+					if (mutation.target.nodeName === 'DIV') {
 						// Change type to div
 						const div = mutation.target as HTMLDivElement;
 						setElementBox(div.getBoundingClientRect());
@@ -44,12 +44,12 @@ export const useElementPosition = (element: RefObject<HTMLDivElement>) => {
 			setElementBox(element?.current?.getBoundingClientRect() ?? null);
 		};
 
-		window.addEventListener("resize", recalculateRect);
-		window.addEventListener("scroll", recalculateRect);
+		window.addEventListener('resize', recalculateRect);
+		window.addEventListener('scroll', recalculateRect);
 
 		return () => {
-			window.removeEventListener("resize", recalculateRect);
-			window.removeEventListener("scroll", recalculateRect);
+			window.removeEventListener('resize', recalculateRect);
+			window.removeEventListener('scroll', recalculateRect);
 		};
 	}, [element]);
 
@@ -63,7 +63,7 @@ export interface DistanceOptions {
 export const useGetDistanceBetweenRects = (
 	rect1: DOMRect | null,
 	rect2: DOMRect | null,
-	options?: DistanceOptions
+	options?: DistanceOptions,
 ) => {
 	const [distance, setDistance] = useState<
 		| number
@@ -83,7 +83,7 @@ export const useGetDistanceBetweenRects = (
 		// });
 		// } else {
 		const distanceBetweenRects = Math.sqrt(
-			Math.pow(rect1.x - rect2.x, 2) + Math.pow(rect1.y - rect2.y, 2)
+			Math.pow(rect1.x - rect2.x, 2) + Math.pow(rect1.y - rect2.y, 2),
 		);
 		setDistance(distanceBetweenRects);
 		// }
@@ -105,12 +105,12 @@ export const useGetRectForElement = (element: RefObject<HTMLDivElement>) => {
 			setRect(element?.current?.getBoundingClientRect() ?? null);
 		};
 
-		window.addEventListener("resize", recalculateRect);
-		window.addEventListener("scroll", recalculateRect);
+		window.addEventListener('resize', recalculateRect);
+		window.addEventListener('scroll', recalculateRect);
 
 		return () => {
-			window.removeEventListener("resize", recalculateRect);
-			window.removeEventListener("scroll", recalculateRect);
+			window.removeEventListener('resize', recalculateRect);
+			window.removeEventListener('scroll', recalculateRect);
 		};
 	}, [element]);
 
@@ -118,15 +118,18 @@ export const useGetRectForElement = (element: RefObject<HTMLDivElement>) => {
 };
 
 export const useTheme = () => {
-	const [theme, setTheme] = useState<"light" | "dark">("dark");
-	const themeStorage = localStorage.getItem("isDarkMode") as "true" | "false" | null;
+	const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+	const themeStorage = localStorage.getItem('isDarkMode') as
+		| 'true'
+		| 'false'
+		| null;
 
 	// Listen to changes to the theme in storage
 	useEffect(() => {
-		if (themeStorage === "true") {
-			setTheme("dark");
-		} else if (themeStorage === "false") {
-			setTheme("light");
+		if (themeStorage === 'true') {
+			setTheme('dark');
+		} else if (themeStorage === 'false') {
+			setTheme('light');
 		}
 	}, [themeStorage, theme]);
 

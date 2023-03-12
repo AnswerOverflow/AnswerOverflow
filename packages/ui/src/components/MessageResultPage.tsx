@@ -1,12 +1,12 @@
 import type {
 	ChannelPublicWithFlags,
 	MessageWithDiscordAccount,
-	ServerPublic
-} from "@answeroverflow/api";
-import { useIsUserInServer } from "../utils";
-import { Message } from "./Message";
-import { SearchBar } from "./SearchBar";
-import { ServerInviteDriver } from "./ServerInviteDriver";
+	ServerPublic,
+} from '@answeroverflow/api';
+import { useIsUserInServer } from '../utils';
+import { Message } from './Message';
+import { SearchBar } from './SearchBar';
+import { ServerInviteDriver } from './ServerInviteDriver';
 
 export type MessageResultPageProps = {
 	messages: MessageWithDiscordAccount[];
@@ -23,10 +23,14 @@ export function MessageResultPage({
 	server,
 	channel,
 	thread,
-	query
+	query,
 }: MessageResultPageProps) {
 	const solutionMessageId = messages.at(0)?.solutionIds?.at(0);
-	const MessageStack = ({ messages }: { messages: MessageWithDiscordAccount[] }) => {
+	const MessageStack = ({
+		messages,
+	}: {
+		messages: MessageWithDiscordAccount[];
+	}) => {
 		let consecutivePrivateMessages = 0;
 		const isUserInServer = useIsUserInServer(server.id);
 		return (
@@ -42,7 +46,7 @@ export function MessageResultPage({
 						consecutivePrivateMessages = 0;
 					}
 					const Msg = ({
-						consecutivePrivateMessages
+						consecutivePrivateMessages,
 					}: {
 						consecutivePrivateMessages: number;
 					}) => {
@@ -78,7 +82,11 @@ export function MessageResultPage({
 							);
 						}
 						return (
-							<Message message={message} thread={thread} blurred={!message.public} />
+							<Message
+								message={message}
+								thread={thread}
+								blurred={!message.public}
+							/>
 						);
 					};
 					return (

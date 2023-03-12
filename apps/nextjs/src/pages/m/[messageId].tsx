@@ -1,13 +1,19 @@
-import { appRouter } from "@answeroverflow/api";
-import { createSSGContext } from "@answeroverflow/api/src/router/context";
-import { MessageResultPage, AOHead, useIsUserInServer } from "@answeroverflow/ui";
-import { createProxySSGHelpers } from "@trpc/react-query/ssg";
-import superjson from "superjson";
-import { trpc } from "@answeroverflow/ui";
-import type { GetStaticPropsContext, InferGetStaticPropsType } from "next";
-import { TRPCError } from "@trpc/server";
+import { appRouter } from '@answeroverflow/api';
+import { createSSGContext } from '@answeroverflow/api/src/router/context';
+import {
+	MessageResultPage,
+	AOHead,
+	useIsUserInServer,
+} from '@answeroverflow/ui';
+import { createProxySSGHelpers } from '@trpc/react-query/ssg';
+import superjson from 'superjson';
+import { trpc } from '@answeroverflow/ui';
+import type { GetStaticPropsContext, InferGetStaticPropsType } from 'next';
+import { TRPCError } from '@trpc/server';
 
-export default function MessageResult(props: InferGetStaticPropsType<typeof getStaticProps>) {
+export default function MessageResult(
+	props: InferGetStaticPropsType<typeof getStaticProps>,
+) {
 	const { serverId, messageId, areAllMessagesPublic } = props;
 
 	const isUserInServer = useIsUserInServer(serverId);
@@ -21,7 +27,7 @@ export default function MessageResult(props: InferGetStaticPropsType<typeof getS
 			: undefined,
 		refetchOnReconnect: false,
 		refetchOnWindowFocus: false,
-		refetchOnMount: false
+		refetchOnMount: false,
 	});
 	if (!data) {
 		return null;
@@ -52,40 +58,41 @@ export default function MessageResult(props: InferGetStaticPropsType<typeof getS
 }
 
 export function getStaticPaths() {
-	return { paths: [], fallback: "blocking" };
+	return { paths: [], fallback: 'blocking' };
 }
 
-export async function getStaticProps(context: GetStaticPropsContext<{ messageId: string }>) {
+export async function getStaticProps(
+	context: GetStaticPropsContext<{ messageId: string }>,
+) {
 	const ssg = createProxySSGHelpers({
 		router: appRouter,
 		ctx: await createSSGContext(),
-		transformer: superjson // optional - adds superjson serialization
+		transformer: superjson, // optional - adds superjson serialization
 	});
 	if (!context.params) {
 		return {
-			notFound: true
+			notFound: true,
 		};
 	}
 
 	// prefetch `post.byId`
 	try {
-		const { server, messages } = await ssg.messagePage.threadFromMessageId.fetch(
-			context.params.messageId
-		);
+		const { server, messages } =
+			await ssg.messagePage.threadFromMessageId.fetch(context.params.messageId);
 		const areAllMessagesPublic = messages.every((message) => message.public);
 		return {
 			props: {
 				trpcState: ssg.dehydrate(),
 				serverId: server.id,
 				areAllMessagesPublic,
-				messageId: context.params.messageId
+				messageId: context.params.messageId,
 			},
-			revalidate: 60 * 10 // every 10 minutes
+			revalidate: 60 * 10, // every 10 minutes
 		};
 	} catch (error) {
-		if (error instanceof TRPCError && error.code === "NOT_FOUND") {
+		if (error instanceof TRPCError && error.code === 'NOT_FOUND') {
 			return {
-				notFound: true
+				notFound: true,
 			};
 		} else {
 			throw error;

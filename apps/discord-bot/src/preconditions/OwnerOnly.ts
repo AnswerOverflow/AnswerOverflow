@@ -1,16 +1,16 @@
-import { AllFlowsPrecondition } from "@sapphire/framework";
+import { AllFlowsPrecondition } from '@sapphire/framework';
 import type {
 	CommandInteraction,
 	ContextMenuCommandInteraction,
 	Message,
-	Snowflake
-} from "discord.js";
-import { envParseArray } from "~discord-bot/utils/env-parser";
+	Snowflake,
+} from 'discord.js';
+import { envParseArray } from '~discord-bot/utils/env-parser';
 
-const OWNERS = envParseArray("OWNERS");
+const OWNERS = envParseArray('OWNERS');
 
 export class UserPrecondition extends AllFlowsPrecondition {
-	#message = "This command can only be used by the owner.";
+	#message = 'This command can only be used by the owner.';
 
 	public override chatInputRun(interaction: CommandInteraction) {
 		return this.doOwnerCheck(interaction.user.id);
@@ -25,11 +25,13 @@ export class UserPrecondition extends AllFlowsPrecondition {
 	}
 
 	private doOwnerCheck(userId: Snowflake) {
-		return OWNERS.includes(userId) ? this.ok() : this.error({ message: this.#message });
+		return OWNERS.includes(userId)
+			? this.ok()
+			: this.error({ message: this.#message });
 	}
 }
 
-declare module "@sapphire/framework" {
+declare module '@sapphire/framework' {
 	interface Preconditions {
 		ownerOnly: never;
 	}

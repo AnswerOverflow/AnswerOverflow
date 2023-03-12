@@ -1,4 +1,4 @@
-import { Snowflake, SnowflakeUtil } from "discord.js";
+import { Snowflake, SnowflakeUtil } from 'discord.js';
 
 export function getRandomTime(start?: Date, end?: Date) {
 	if (!start) {
@@ -7,7 +7,9 @@ export function getRandomTime(start?: Date, end?: Date) {
 	if (!end) {
 		end = new Date();
 	}
-	return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+	return new Date(
+		start.getTime() + Math.random() * (end.getTime() - start.getTime()),
+	);
 }
 
 export function randomSnowflake(start?: Date, end?: Date) {
@@ -16,7 +18,7 @@ export function randomSnowflake(start?: Date, end?: Date) {
 
 export function randomSnowflakeLargerThan(start: Snowflake) {
 	return SnowflakeUtil.generate({
-		timestamp: new Date(SnowflakeUtil.timestampFrom(start) + 1000)
+		timestamp: new Date(SnowflakeUtil.timestampFrom(start) + 1000),
 	});
 }
 

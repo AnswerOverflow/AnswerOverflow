@@ -20,12 +20,16 @@ import {
 	JSONEncodable,
 	MessageActionRowComponentBuilder,
 	MessageActionRowComponentData,
-	InteractionReplyOptions
-} from "discord.js";
-import type { RawMessageData } from "discord.js/typings/rawDataTypes";
-import { randomSnowflake } from "@answeroverflow/discordjs-utils";
-import { mockGuildMember, mockUser } from "./user-mock";
-import { mockReaction, mockTextChannel, mockThreadFromParentMessage } from "./channel-mock";
+	InteractionReplyOptions,
+} from 'discord.js';
+import type { RawMessageData } from 'discord.js/typings/rawDataTypes';
+import { randomSnowflake } from '@answeroverflow/discordjs-utils';
+import { mockGuildMember, mockUser } from './user-mock';
+import {
+	mockReaction,
+	mockTextChannel,
+	mockThreadFromParentMessage,
+} from './channel-mock';
 
 export function mockEmbed(data: JSONEncodable<APIEmbed> | APIEmbed): Embed {
 	return Reflect.construct(Embed, [data]) as Embed;
@@ -34,27 +38,36 @@ export function mockEmbed(data: JSONEncodable<APIEmbed> | APIEmbed): Embed {
 export function mockActionRow(
 	data:
 		| JSONEncodable<APIActionRowComponent<APIMessageActionRowComponent>>
-		| ActionRowData<MessageActionRowComponentData | MessageActionRowComponentBuilder>
-		| APIActionRowComponent<APIMessageActionRowComponent>
+		| ActionRowData<
+				MessageActionRowComponentData | MessageActionRowComponentBuilder
+		  >
+		| APIActionRowComponent<APIMessageActionRowComponent>,
 ): ActionRow<MessageActionRowComponent> {
-	return Reflect.construct(ActionRow, [data]) as ActionRow<MessageActionRowComponent>;
+	return Reflect.construct(ActionRow, [
+		data,
+	]) as ActionRow<MessageActionRowComponent>;
 }
 
 export function applyMessagePayload(
-	payload: string | MessageEditOptions | MessagePayload | InteractionReplyOptions,
-	message: Message
+	payload:
+		| string
+		| MessageEditOptions
+		| MessagePayload
+		| InteractionReplyOptions,
+	message: Message,
 ) {
-	if (typeof payload === "string") {
+	if (typeof payload === 'string') {
 		message.content = payload;
 	}
 	if (payload instanceof MessagePayload) {
-		throw new Error("Not implemented");
+		throw new Error('Not implemented');
 	}
-	if (typeof payload !== "string") {
+	if (typeof payload !== 'string') {
 		message.embeds = payload.embeds?.map(mockEmbed) ?? message.embeds;
 		message.content = payload.content ?? message.content;
 		message.components =
-			payload.components?.map((comp) => mockActionRow(comp)) ?? message.components;
+			payload.components?.map((comp) => mockActionRow(comp)) ??
+			message.components;
 	}
 
 	return message;
@@ -77,7 +90,7 @@ export function mockMessage(input: {
 			mockGuildMember({
 				client,
 				user: author,
-				guild: channel.guild
+				guild: channel.guild,
 			});
 		}
 	}
@@ -89,10 +102,10 @@ export function mockMessage(input: {
 			id: author.id,
 			username: author.username,
 			discriminator: author.discriminator,
-			avatar: author.avatar
+			avatar: author.avatar,
 		},
-		content: "",
-		timestamp: "",
+		content: '',
+		timestamp: '',
 		edited_timestamp: null,
 		tts: false,
 		mention_everyone: false,
@@ -103,19 +116,19 @@ export function mockMessage(input: {
 		pinned: false,
 		type: MessageType.Default,
 		reactions: [],
-		...override
+		...override,
 	};
 	const message = Reflect.construct(Message, [client, rawData]) as Message;
 	// TODO: Fix ts ignore?
 	// @ts-ignore
 	channel.messages.cache.set(message.id, message);
 	message.react = async (emoji: EmojiIdentifierResolvable) => {
-		const isCustomEmoji = typeof emoji === "string" && emoji.startsWith("<:");
+		const isCustomEmoji = typeof emoji === 'string' && emoji.startsWith('<:');
 		if (emoji instanceof GuildEmoji) {
-			throw new Error("Not implement");
+			throw new Error('Not implement');
 		}
 		if (emoji instanceof ReactionEmoji) {
-			throw new Error("Not implement");
+			throw new Error('Not implement');
 		}
 		return Promise.resolve(
 			mockReaction({
@@ -124,10 +137,10 @@ export function mockMessage(input: {
 				override: {
 					emoji: {
 						id: isCustomEmoji ? emoji : null,
-						name: isCustomEmoji ? null : emoji
-					}
-				}
-			})
+						name: isCustomEmoji ? null : emoji,
+					},
+				},
+			}),
 		);
 	};
 	message.startThread = async (options: StartThreadOptions) =>
@@ -135,8 +148,8 @@ export function mockMessage(input: {
 			mockThreadFromParentMessage({
 				client,
 				parentMessage: message,
-				data: options
-			})
+				data: options,
+			}),
 		);
 
 	message.edit = (payload) => {

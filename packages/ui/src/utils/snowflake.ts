@@ -22,7 +22,9 @@ export function getDate(snowflake: Snowflake) {
 
 export function getSnowflakeUTCDate(snowflake: Snowflake) {
 	const date = getDate(snowflake);
-	return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear()}`;
+	return `${
+		date.getUTCMonth() + 1
+	}/${date.getUTCDate()}/${date.getUTCFullYear()}`;
 }
 
 export function getWorkerId(snowflake: Snowflake) {
@@ -42,6 +44,6 @@ export function parse(snowflake: Snowflake) {
 		timestamp: getTimestamp(snowflake),
 		workerId: getWorkerId(snowflake),
 		processId: getProcessId(snowflake),
-		increment: getIncrement(snowflake)
+		increment: getIncrement(snowflake),
 	};
 }

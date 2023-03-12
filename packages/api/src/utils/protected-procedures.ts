@@ -1,6 +1,6 @@
-import { findOrThrowNotFound } from "./operations";
-import { TRPCError } from "@trpc/server";
-import type { DeepPartial } from "@answeroverflow/utils";
+import { findOrThrowNotFound } from './operations';
+import { TRPCError } from '@trpc/server';
+import type { DeepPartial } from '@answeroverflow/utils';
 
 type PermissionCheckResult = Promise<TRPCError | void> | (TRPCError | void);
 
@@ -9,12 +9,14 @@ export type PermissionsChecks =
 	| (() => PermissionCheckResult | PermissionCheckResult[]);
 
 async function iteratePermissionResults(
-	results: Array<PermissionCheckResult> | PermissionCheckResult
+	results: Array<PermissionCheckResult> | PermissionCheckResult,
 ) {
 	let errors: TRPCError[] = [];
 	if (Array.isArray(results)) {
 		const awaitedResults = await Promise.all(results);
-		errors = awaitedResults.filter((result) => result != undefined) as TRPCError[];
+		errors = awaitedResults.filter(
+			(result) => result != undefined,
+		) as TRPCError[];
 	} else {
 		const awaitedResult = await results;
 		if (awaitedResult != undefined) {
@@ -23,17 +25,21 @@ async function iteratePermissionResults(
 	}
 	if (errors.length > 0) {
 		// Ugly
-		const errorMessages = [...new Set(errors.map((error) => error.message))].join("\n");
+		const errorMessages = [
+			...new Set(errors.map((error) => error.message)),
+		].join('\n');
 		throw new TRPCError({
-			code: "PRECONDITION_FAILED",
-			message: errorMessages
+			code: 'PRECONDITION_FAILED',
+			message: errorMessages,
 		});
 	}
 }
 
 async function validatePermissions(permissions: PermissionsChecks) {
 	if (Array.isArray(permissions)) {
-		await iteratePermissionResults(permissions.map((permission) => permission()).flat());
+		await iteratePermissionResults(
+			permissions.map((permission) => permission()).flat(),
+		);
 	} else {
 		await iteratePermissionResults(permissions());
 	}
@@ -43,7 +49,10 @@ type PermissionsChecksWithData<T> =
 	| Array<(data: T) => PermissionCheckResult | PermissionCheckResult[]>
 	| ((data: T) => PermissionCheckResult | PermissionCheckResult[]);
 
-async function validatePermissionsWithData<T>(permissions: PermissionsChecksWithData<T>, data: T) {
+async function validatePermissionsWithData<T>(
+	permissions: PermissionsChecksWithData<T>,
+	data: T,
+) {
 	if (Array.isArray(permissions)) {
 		const permissionResults = permissions.map((permission) => permission(data));
 		// flatten
@@ -63,7 +72,7 @@ type ProtectedFetchInput<T> = {
 export async function protectedFetch<T>({
 	fetch,
 	permissions,
-	notFoundMessage
+	notFoundMessage,
 }: ProtectedFetchInput<T>) {
 	const data = await findOrThrowNotFound(fetch, notFoundMessage);
 	await validatePermissionsWithData(permissions, data);
@@ -79,14 +88,14 @@ type ValidatedPermissionsOrFormatData<F, T extends F> = {
 async function validatePermissionsOrFormatData<F, T extends F>({
 	permissions,
 	publicDataFormatter,
-	data
+	data,
 }: ValidatedPermissionsOrFormatData<F, T>): Promise<T | (DeepPartial<T> & F)> {
 	try {
 		await validatePermissionsWithData(permissions, data);
 	} catch (error) {
 		if (
 			error instanceof TRPCError &&
-			error.code === "PRECONDITION_FAILED" &&
+			error.code === 'PRECONDITION_FAILED' &&
 			publicDataFormatter
 		)
 			return publicDataFormatter(data);
@@ -99,30 +108,35 @@ export async function protectedFetchWithPublicData<F extends {}, T extends F>({
 	fetch,
 	notFoundMessage,
 	...validate
-}: ProtectedFetchInput<T> & Omit<ValidatedPermissionsOrFormatData<F, T>, "data">) {
+}: ProtectedFetchInput<T> &
+	Omit<ValidatedPermissionsOrFormatData<F, T>, 'data'>) {
 	const data = await findOrThrowNotFound(fetch, notFoundMessage);
 	return validatePermissionsOrFormatData({
 		...validate,
-		data
+		data,
 	});
 }
 
-export async function protectedFetchManyWithPublicData<G extends {}, F extends G[], T extends F>({
+export async function protectedFetchManyWithPublicData<
+	G extends {},
+	F extends G[],
+	T extends F,
+>({
 	publicDataFormatter,
 	fetch,
-	permissions
+	permissions,
 }: {
 	fetch: () => Promise<T>;
-} & Omit<ValidatedPermissionsOrFormatData<G, T[number]>, "data">) {
+} & Omit<ValidatedPermissionsOrFormatData<G, T[number]>, 'data'>) {
 	const data = await fetch();
 	const result = Promise.all(
 		data.map(async (item) =>
 			validatePermissionsOrFormatData({
 				data: item,
 				permissions,
-				publicDataFormatter
-			})
-		)
+				publicDataFormatter,
+			}),
+		),
 	);
 	return result;
 }
@@ -132,7 +146,10 @@ type ProtectedMutationInput<T> = {
 	permissions: PermissionsChecks;
 };
 
-export async function protectedMutation<T>({ operation, permissions }: ProtectedMutationInput<T>) {
+export async function protectedMutation<T>({
+	operation,
+	permissions,
+}: ProtectedMutationInput<T>) {
 	await validatePermissions(permissions);
 	return operation();
 }

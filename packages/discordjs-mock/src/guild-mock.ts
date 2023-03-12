@@ -5,14 +5,18 @@ import {
 	User,
 	PermissionResolvable,
 	Role,
-	Client
-} from "discord.js";
-import type { RawRoleData } from "discord.js/typings/rawDataTypes";
-import { randomSnowflake } from "@answeroverflow/discordjs-utils";
-import { mockGuildMember, mockUser } from "./user-mock";
-import { omit } from "@answeroverflow/utils";
+	Client,
+} from 'discord.js';
+import type { RawRoleData } from 'discord.js/typings/rawDataTypes';
+import { randomSnowflake } from '@answeroverflow/discordjs-utils';
+import { mockGuildMember, mockUser } from './user-mock';
+import { omit } from '@answeroverflow/utils';
 
-export function mockGuild(client: Client, owner?: User, data: Partial<APIGuild> = {}) {
+export function mockGuild(
+	client: Client,
+	owner?: User,
+	data: Partial<APIGuild> = {},
+) {
 	// Create the guild
 	if (!owner) {
 		owner = mockUser(client);
@@ -23,18 +27,18 @@ export function mockGuild(client: Client, owner?: User, data: Partial<APIGuild> 
 		owner_id: owner.id,
 		verification_level: 0,
 		emojis: [],
-		icon: "guild icon url",
+		icon: 'guild icon url',
 		mfa_level: 0,
 		hub_type: 0,
 		features: [],
 		roles: [],
-		name: "guild name",
-		description: "guild description",
+		name: 'guild name',
+		description: 'guild description',
 		default_message_notifications: 0,
-		banner: "guild banner url",
-		splash: "guild splash url",
-		discovery_splash: "guild discovery splash url",
-		region: "",
+		banner: 'guild banner url',
+		splash: 'guild splash url',
+		discovery_splash: 'guild discovery splash url',
+		region: '',
 		afk_channel_id: null,
 		afk_timeout: 60,
 		explicit_content_filter: 0,
@@ -44,17 +48,20 @@ export function mockGuild(client: Client, owner?: User, data: Partial<APIGuild> 
 		rules_channel_id: null,
 		vanity_url_code: null,
 		premium_tier: 0,
-		preferred_locale: "",
+		preferred_locale: '',
 		public_updates_channel_id: null,
 		nsfw_level: 0,
 		stickers: [],
 		premium_progress_bar_enabled: false,
-		...omit(data, "id")
+		...omit(data, 'id'),
 	};
 	const guild = Reflect.construct(Guild, [client, rawData]) as Guild;
 
 	// Create the default role
-	mockRole(client, PermissionsBitField.Default, guild, { name: "everyone", id: guild.id });
+	mockRole(client, PermissionsBitField.Default, guild, {
+		name: 'everyone',
+		id: guild.id,
+	});
 
 	// Update client cache
 	client.guilds.cache.set(guild.id, guild);
@@ -69,14 +76,14 @@ export function mockGuild(client: Client, owner?: User, data: Partial<APIGuild> 
 			| string
 			| {
 					user: string;
-			  }
+			  },
 	) => {
-		if (typeof id === "object") {
+		if (typeof id === 'object') {
 			id = id.user;
 		}
 		const member = guild.members.cache.get(id);
 		if (member) return Promise.resolve(member);
-		return Promise.reject(new Error("Member not found"));
+		return Promise.reject(new Error('Member not found'));
 	};
 
 	return guild;
@@ -86,7 +93,7 @@ export function mockRole(
 	client: Client,
 	permissions: PermissionResolvable,
 	guild?: Guild,
-	role: Partial<RawRoleData> = {}
+	role: Partial<RawRoleData> = {},
 ) {
 	if (!guild) {
 		guild = mockGuild(client);
@@ -97,12 +104,16 @@ export function mockRole(
 		id: randomSnowflake().toString(),
 		managed: false,
 		mentionable: false,
-		name: "test",
+		name: 'test',
 		position: 0,
 		permissions: PermissionsBitField.resolve(permissions).toString(),
-		...role
+		...role,
 	};
-	const createdRole = Reflect.construct(Role, [client, roleData, guild]) as Role;
+	const createdRole = Reflect.construct(Role, [
+		client,
+		roleData,
+		guild,
+	]) as Role;
 	guild.roles.cache.set(createdRole.id, createdRole);
 	return createdRole;
 }

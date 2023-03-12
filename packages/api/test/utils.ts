@@ -1,30 +1,37 @@
-import type { DiscordAccount, Server } from "@answeroverflow/db";
-import { TRPCError } from "@trpc/server";
-import { PermissionFlagsBits, PermissionResolvable, PermissionsBitField } from "discord.js";
-import { Source, sourceTypes, createContextInner } from "~api/router/context";
+import type { DiscordAccount, Server } from '@answeroverflow/db';
+import { TRPCError } from '@trpc/server';
+import {
+	PermissionFlagsBits,
+	PermissionResolvable,
+	PermissionsBitField,
+} from 'discord.js';
+import { Source, sourceTypes, createContextInner } from '~api/router/context';
 import {
 	INVALID_ROUTE_FOR_BOT_ERROR,
 	INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,
-	MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE
-} from "~api/utils/permissions";
-import { mockDiscordAccount } from "@answeroverflow/db-mock";
+	MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+} from '~api/utils/permissions';
+import { mockDiscordAccount } from '@answeroverflow/db-mock';
 export async function mockAccountWithServersCallerCtx(
 	server: Server,
 	caller: Source,
 	permissions: PermissionResolvable = PermissionsBitField.Default,
-	override: Partial<DiscordAccount> = {}
+	override: Partial<DiscordAccount> = {},
 ) {
 	const account = mockDiscordAccount(override);
 	const ctx = await createCtxWithServers({
 		user: account,
 		permissions: permissions,
 		server: server,
-		caller: caller
+		caller: caller,
 	});
 	return { account, ctx };
 }
 
-export async function mockAccountCallerCtx(caller: Source, override: Partial<DiscordAccount> = {}) {
+export async function mockAccountCallerCtx(
+	caller: Source,
+	override: Partial<DiscordAccount> = {},
+) {
 	const account = mockDiscordAccount(override);
 
 	const ctx = await createContextInner({
@@ -34,9 +41,9 @@ export async function mockAccountCallerCtx(caller: Source, override: Partial<Dis
 			id: account.id,
 			avatar: null,
 			username: account.name,
-			discriminator: "0000"
+			discriminator: '0000',
 		},
-		userServers: undefined
+		userServers: undefined,
 	});
 	return { account, ctx };
 }
@@ -46,7 +53,7 @@ export async function mockUnauthedCtx(caller: Source) {
 		session: null,
 		source: caller,
 		discordAccount: null,
-		userServers: undefined
+		userServers: undefined,
 	});
 	return ctx;
 }
@@ -69,7 +76,7 @@ export function createCtxWithServers(input: CtxOverride) {
 			id: input.user.id,
 			avatar: null,
 			username: input.user.name,
-			discriminator: "0000"
+			discriminator: '0000',
 		},
 		userServers: [
 			{
@@ -78,16 +85,16 @@ export function createCtxWithServers(input: CtxOverride) {
 				name: input.server.name,
 				owner: false,
 				icon: null,
-				permissions: Number(PermissionsBitField.resolve(input.permissions))
-			}
-		]
+				permissions: Number(PermissionsBitField.resolve(input.permissions)),
+			},
+		],
 	});
 }
 
 export async function handleOperationCall<T>({
 	operation,
 	Success,
-	Err
+	Err,
 }: {
 	operation: () => Promise<T>;
 	Success: (result: T) => void;
@@ -108,18 +115,18 @@ export type PermissionVariantsTest = {
 	permissionsThatShouldWork: PermissionResolvable[];
 	operation: (
 		permission: PermissionResolvable,
-		isPermissionAllowed: boolean
+		isPermissionAllowed: boolean,
 	) => Promise<void> | void;
 };
 
 export async function testAllPermissions({
 	permissionsThatShouldWork,
-	operation
+	operation,
 }: PermissionVariantsTest) {
 	// Possibly swap to Promise.All - going in parallel break things sometimes
 	for await (const permission of Object.keys(PermissionFlagsBits)) {
 		const permissionIsAllowed = permissionsThatShouldWork.includes(
-			permission as PermissionResolvable
+			permission as PermissionResolvable,
 		);
 		await operation(permission as PermissionResolvable, permissionIsAllowed);
 	}
@@ -127,12 +134,15 @@ export async function testAllPermissions({
 
 export type SourceVariantsTest = {
 	sourcesThatShouldWork?: Source[];
-	operation: (source: Source, shouldSourceSucceed: boolean) => Promise<void> | void;
+	operation: (
+		source: Source,
+		shouldSourceSucceed: boolean,
+	) => Promise<void> | void;
 };
 
 export async function testAllSources({
 	sourcesThatShouldWork = [...sourceTypes],
-	operation
+	operation,
 }: SourceVariantsTest) {
 	// Possibly swap to Promise.All - going in parallel break things sometimes
 	for await (const source of sourceTypes) {
@@ -148,14 +158,16 @@ export type AllVaraintsTest = {
 		source: Source,
 		permission: PermissionResolvable,
 		shouldSourceSucceed: boolean,
-		shouldPermissionSucceed: boolean
+		shouldPermissionSucceed: boolean,
 	) => Promise<void> | void;
 };
 
 export async function testAllSourceAndPermissionVariants({
 	sourcesThatShouldWork = [...sourceTypes],
-	permissionsThatShouldWork = Object.keys(PermissionFlagsBits) as PermissionResolvable[],
-	operation
+	permissionsThatShouldWork = Object.keys(
+		PermissionFlagsBits,
+	) as PermissionResolvable[],
+	operation,
 }: AllVaraintsTest) {
 	await testAllSources({
 		sourcesThatShouldWork,
@@ -167,18 +179,18 @@ export async function testAllSourceAndPermissionVariants({
 						source,
 						permission,
 						shouldSourceSucceed,
-						shouldPermissionSucceed
+						shouldPermissionSucceed,
 					);
-				}
-			})
+				},
+			}),
 	});
 }
 
 export async function testAllPublicAndPrivateDataVariants<F, T extends F>({
 	permissionsThatShouldWork,
 	sourcesThatShouldWork,
-	fetch
-}: Omit<AllVaraintsTest, "operation"> & {
+	fetch,
+}: Omit<AllVaraintsTest, 'operation'> & {
 	fetch: (input: {
 		source: Source;
 		permission: PermissionResolvable;
@@ -191,13 +203,18 @@ export async function testAllPublicAndPrivateDataVariants<F, T extends F>({
 	}>;
 }) {
 	await testAllSourceAndPermissionVariants({
-		async operation(source, permission, shouldSourceSucceed, shouldPermissionSucceed) {
+		async operation(
+			source,
+			permission,
+			shouldSourceSucceed,
+			shouldPermissionSucceed,
+		) {
 			try {
 				const { data, publicDataFormat, privateDataFormat } = await fetch({
 					source,
 					permission,
 					shouldSourceSucceed,
-					shouldPermissionSucceed
+					shouldPermissionSucceed,
 				});
 				// TODO: Ugly
 				if (shouldSourceSucceed && shouldPermissionSucceed) {
@@ -207,13 +224,15 @@ export async function testAllPublicAndPrivateDataVariants<F, T extends F>({
 								data,
 								`Failure from ${source} with ${
 									permission as string
-								} data did not match`
+								} data did not match`,
 							).toContainEqual(item);
 						});
 					} else {
 						expect(
 							data,
-							`Failure from ${source} with ${permission as string} data did not match`
+							`Failure from ${source} with ${
+								permission as string
+							} data did not match`,
 						).toStrictEqual(privateDataFormat);
 					}
 				} else {
@@ -223,13 +242,15 @@ export async function testAllPublicAndPrivateDataVariants<F, T extends F>({
 								data,
 								`Failure from ${source} with ${
 									permission as string
-								} data did not match`
+								} data did not match`,
 							).toContainEqual(item);
 						});
 					} else {
 						expect(
 							data,
-							`Failure from ${source} with ${permission as string} data did not match`
+							`Failure from ${source} with ${
+								permission as string
+							} data did not match`,
 						).toStrictEqual(publicDataFormat);
 					}
 				}
@@ -238,7 +259,7 @@ export async function testAllPublicAndPrivateDataVariants<F, T extends F>({
 					throw new Error(
 						`Error from ${source} with ${permission as string} \n \n \n ${
 							error.name
-						} \n ${error.code} \n ${error.message} \n  ${error.stack ?? ""}`
+						} \n ${error.code} \n ${error.message} \n  ${error.stack ?? ''}`,
 					);
 				} else {
 					throw error;
@@ -246,13 +267,13 @@ export async function testAllPublicAndPrivateDataVariants<F, T extends F>({
 			}
 		},
 		permissionsThatShouldWork,
-		sourcesThatShouldWork
+		sourcesThatShouldWork,
 	});
 }
 
 export async function testAllVaraints<T>({
 	arr,
-	operation
+	operation,
 }: {
 	arr: T[];
 	operation: (item: T) => Promise<void> | void;
@@ -262,10 +283,12 @@ export async function testAllVaraints<T>({
 
 export async function testAllSourceAndPermissionVariantsThatThrowErrors({
 	sourcesThatShouldWork = [...sourceTypes],
-	permissionsThatShouldWork = Object.keys(PermissionFlagsBits) as PermissionResolvable[],
+	permissionsThatShouldWork = Object.keys(
+		PermissionFlagsBits,
+	) as PermissionResolvable[],
 	operation,
-	permissionFailureMessage = MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE
-}: Omit<AllVaraintsTest, "operation"> & {
+	permissionFailureMessage = MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+}: Omit<AllVaraintsTest, 'operation'> & {
 	permissionFailureMessage?: string;
 	operation: (input: {
 		source: Source;
@@ -277,20 +300,25 @@ export async function testAllSourceAndPermissionVariantsThatThrowErrors({
 	await testAllSourceAndPermissionVariants({
 		permissionsThatShouldWork,
 		sourcesThatShouldWork,
-		async operation(source, permission, shouldSourceSucceed, shouldPermissionSucceed) {
+		async operation(
+			source,
+			permission,
+			shouldSourceSucceed,
+			shouldPermissionSucceed,
+		) {
 			try {
 				await operation({
 					source,
 					permission,
 					shouldSourceSucceed,
-					shouldPermissionSucceed
+					shouldPermissionSucceed,
 				});
 				expect(shouldPermissionSucceed).toBeTruthy();
 				expect(shouldSourceSucceed).toBeTruthy();
 			} catch (error) {
 				const errorLookup: Record<Source, string> = {
-					"discord-bot": INVALID_ROUTE_FOR_BOT_ERROR,
-					"web-client": INVALID_ROUTER_FOR_WEB_CLIENT_ERROR
+					'discord-bot': INVALID_ROUTE_FOR_BOT_ERROR,
+					'web-client': INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,
 				};
 				if (error instanceof TRPCError) {
 					if (shouldSourceSucceed && shouldPermissionSucceed) {
@@ -298,37 +326,37 @@ export async function testAllSourceAndPermissionVariantsThatThrowErrors({
 					}
 					const makeExpectErrorMessage = (
 						expectedMessage: string,
-						actualMessage: string
+						actualMessage: string,
 					) =>
 						`Failure from ${source} with permissions ${permission.toString()}.\nExpected message:\n-----\n${expectedMessage}\n-----\n\n\nActual Message:\n\n-----\n${actualMessage}\n-----\n\n`;
 
 					if (!shouldPermissionSucceed && shouldSourceSucceed) {
 						expect(
 							error.message,
-							makeExpectErrorMessage(permissionFailureMessage, error.message)
+							makeExpectErrorMessage(permissionFailureMessage, error.message),
 						).toBe(permissionFailureMessage);
 					}
 					if (!shouldSourceSucceed && shouldPermissionSucceed) {
 						expect(
 							error.message,
-							makeExpectErrorMessage(errorLookup[source], error.message)
+							makeExpectErrorMessage(errorLookup[source], error.message),
 						).toBe(errorLookup[source]);
 					}
 					if (!shouldSourceSucceed && !shouldPermissionSucceed) {
 						const expectedErrorMessage = `${errorLookup[source]}\n${permissionFailureMessage}`;
-						const sortedActualErrorMessage = [...error.message].sort().join("");
+						const sortedActualErrorMessage = [...error.message].sort().join('');
 						const sortedExpectedErrorMessage = [...expectedErrorMessage]
 							.sort()
-							.join("");
+							.join('');
 						expect(
 							sortedActualErrorMessage,
-							makeExpectErrorMessage(expectedErrorMessage, error.message)
+							makeExpectErrorMessage(expectedErrorMessage, error.message),
 						).toBe(sortedExpectedErrorMessage);
 					}
 				} else {
 					throw error;
 				}
 			}
-		}
+		},
 	});
 }

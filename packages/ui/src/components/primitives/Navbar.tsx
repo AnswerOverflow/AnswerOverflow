@@ -1,7 +1,7 @@
-import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
-import { useTheme } from "~ui/utils/index";
-import { AnswerOverflowLogo } from "../AnswerOverflowLogo";
-import { Button } from "./Button";
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { useTheme } from '~ui/utils/index';
+import { AnswerOverflowLogo } from '../AnswerOverflowLogo';
+import { Button } from './Button';
 
 export const Navbar = () => {
 	const theme = useTheme();
@@ -21,11 +21,11 @@ export const Navbar = () => {
 				</li>
 				<li className="mx-6 ml-auto hidden md:block">
 					<button className="h-full w-full" aria-label="Search">
-						<MagnifyingGlassIcon width={"1.5rem"} height={"1.5rem"} />
+						<MagnifyingGlassIcon width={'1.5rem'} height={'1.5rem'} />
 					</button>
 				</li>
 				<li className="ml-6 hidden items-center justify-center md:flex">
-					<Button type={"ghost"} color={theme === "light" ? "black" : "white"}>
+					<Button type={'ghost'} color={theme === 'light' ? 'black' : 'white'}>
 						<span className="text-xl">Add to server</span>
 					</Button>
 				</li>

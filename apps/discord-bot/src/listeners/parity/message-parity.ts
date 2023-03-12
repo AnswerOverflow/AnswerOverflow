@@ -1,15 +1,18 @@
-import { ApplyOptions } from "@sapphire/decorators";
-import { Listener } from "@sapphire/framework";
-import { Message, Events, Collection, Snowflake } from "discord.js";
+import { ApplyOptions } from '@sapphire/decorators';
+import { Listener } from '@sapphire/framework';
+import { Message, Events, Collection, Snowflake } from 'discord.js';
 import {
 	deleteManyMessages,
 	deleteMessage,
 	findMessageById,
-	updateMessage
-} from "@answeroverflow/db";
-import { toAOMessage } from "~discord-bot/utils/conversions";
+	updateMessage,
+} from '@answeroverflow/db';
+import { toAOMessage } from '~discord-bot/utils/conversions';
 
-@ApplyOptions<Listener.Options>({ event: Events.MessageDelete, name: "Message Delete Watcher" })
+@ApplyOptions<Listener.Options>({
+	event: Events.MessageDelete,
+	name: 'Message Delete Watcher',
+})
 export class OnMessageDelete extends Listener {
 	public async run(message: Message) {
 		const msg = await findMessageById(message.id);
@@ -19,7 +22,7 @@ export class OnMessageDelete extends Listener {
 
 @ApplyOptions<Listener.Options>({
 	event: Events.MessageBulkDelete,
-	name: "Message Delete Bulk Watcher"
+	name: 'Message Delete Bulk Watcher',
 })
 export class OnMessageBulkDelete extends Listener {
 	public async run(messages: Collection<Snowflake, Message>) {
@@ -27,7 +30,10 @@ export class OnMessageBulkDelete extends Listener {
 	}
 }
 
-@ApplyOptions<Listener.Options>({ event: Events.MessageUpdate, name: "Message Update Watcher" })
+@ApplyOptions<Listener.Options>({
+	event: Events.MessageUpdate,
+	name: 'Message Update Watcher',
+})
 export class OnMessageUpdate extends Listener {
 	public async run(_: Message, newMessage: Message) {
 		await updateMessage(toAOMessage(newMessage));

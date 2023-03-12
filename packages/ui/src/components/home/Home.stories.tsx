@@ -1,25 +1,25 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Home } from "./Home";
+import type { Meta, StoryObj } from '@storybook/react';
+import { Home } from './Home';
 
 const meta = {
 	component: Home,
 	parameters: {
-		layout: "fullscreen",
+		layout: 'fullscreen',
 		a11y: {
 			config: {
 				rules: [
 					{
-						id: "heading-order",
-						enabled: false
+						id: 'heading-order',
+						enabled: false,
 					},
 					{
-						id: "duplicate-id",
-						enabled: false
-					}
-				]
-			}
-		}
-	}
+						id: 'duplicate-id',
+						enabled: false,
+					},
+				],
+			},
+		},
+	},
 } as Meta<typeof Home>;
 
 export default meta;

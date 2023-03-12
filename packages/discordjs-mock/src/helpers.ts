@@ -1,4 +1,9 @@
-import { Client, ClientEvents, PermissionFlagsBits, PermissionResolvable } from "discord.js";
+import {
+	Client,
+	ClientEvents,
+	PermissionFlagsBits,
+	PermissionResolvable,
+} from 'discord.js';
 
 // Bit of a hack of a helper function to give async tasks that aren't tracked time to run. A better approach would be to listen to dispatched events
 export async function delay(timeInMs?: number) {
@@ -26,12 +31,12 @@ export function overrideVariables<T extends {}>(obj: T, overrides: {}) {
 export function copyClass<T extends { client: Client }>(
 	obj: T,
 	client: Client,
-	overrides: {} = {}
+	overrides: {} = {},
 ) {
 	const created = Object.assign(
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		Object.create(Object.getPrototypeOf(obj)),
-		obj
+		obj,
 	) as T;
 	overrideVariables(created, { client, ...overrides });
 	return created;
@@ -41,18 +46,18 @@ export type PermissionVariantsTest = {
 	permissionsThatShouldWork: PermissionResolvable[];
 	operation: (
 		permission: PermissionResolvable,
-		isPermissionAllowed: boolean
+		isPermissionAllowed: boolean,
 	) => Promise<void> | void;
 };
 
 export async function testAllPermissions({
 	permissionsThatShouldWork,
-	operation
+	operation,
 }: PermissionVariantsTest) {
 	// Possibly swap to Promise.All - going in parallel break things sometimes
 	for await (const permission of Object.keys(PermissionFlagsBits)) {
 		const permissionIsAllowed = permissionsThatShouldWork.includes(
-			permission as PermissionResolvable
+			permission as PermissionResolvable,
 		);
 		await operation(permission as PermissionResolvable, permissionIsAllowed);
 	}

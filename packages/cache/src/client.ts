@@ -1,4 +1,4 @@
-import { createClient } from "redis";
+import { createClient } from 'redis';
 type RedisClientType = ReturnType<typeof createClient>;
 
 let redisClient: RedisClientType;
@@ -7,24 +7,24 @@ export async function getRedisClient() {
 		return redisClient;
 	}
 	const cacheInstance = createClient({
-		url: process.env.REDIS_URL
+		url: process.env.REDIS_URL,
 	});
-	cacheInstance.on("connect", () => {
-		console.log("CacheStore - Connection status: connected");
-	});
-
-	cacheInstance.on("end", () => {
-		console.log("CacheStore - Connection status: disconnected");
+	cacheInstance.on('connect', () => {
+		console.log('CacheStore - Connection status: connected');
 	});
 
-	cacheInstance.on("reconnecting", () => {
-		console.log("CacheStore - Connection status: reconnecting");
+	cacheInstance.on('end', () => {
+		console.log('CacheStore - Connection status: disconnected');
 	});
 
-	cacheInstance.on("error", (err) => {
-		console.log("CacheStore - Connection status: error ", err);
+	cacheInstance.on('reconnecting', () => {
+		console.log('CacheStore - Connection status: reconnecting');
 	});
-	process.on("exit", () => cleanupRedis);
+
+	cacheInstance.on('error', (err) => {
+		console.log('CacheStore - Connection status: error ', err);
+	});
+	process.on('exit', () => cleanupRedis);
 
 	await cacheInstance.connect();
 	redisClient = cacheInstance;
@@ -38,9 +38,9 @@ export async function cleanupRedis() {
 			.catch((err) =>
 				console.log(
 					`CacheStore - Error while disconnecting from redis: ${
-						err instanceof Error ? err.message : "Unknown error"
-					}`
-				)
+						err instanceof Error ? err.message : 'Unknown error'
+					}`,
+				),
 			);
 	}
 }

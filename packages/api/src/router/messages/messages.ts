@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { router, withUserServersProcedure } from "~api/router/trpc";
+import { z } from 'zod';
+import { router, withUserServersProcedure } from '~api/router/trpc';
 import {
 	addAuthorsToMessages,
 	addReferencesToMessages,
@@ -9,16 +9,16 @@ import {
 	findServerById,
 	getParentChannelOfMessage,
 	getThreadIdOfMessage,
-	searchMessages
-} from "@answeroverflow/db";
-import { findOrThrowNotFound } from "~api/utils/operations";
+	searchMessages,
+} from '@answeroverflow/db';
+import { findOrThrowNotFound } from '~api/utils/operations';
 import {
 	canUserViewPrivateMessage,
 	stripPrivateChannelData,
 	stripPrivateMessageData,
-	stripPrivateServerData
-} from "~api/utils/permissions";
-import { TRPCError } from "@trpc/server";
+	stripPrivateServerData,
+} from '~api/utils/permissions';
+import { TRPCError } from '@trpc/server';
 
 export const messagesRouter = router({
 	/*
@@ -37,7 +37,7 @@ export const messagesRouter = router({
 			// This is the message we're starting from
 			const targetMessage = await findOrThrowNotFound(
 				() => findMessageById(input),
-				"Target message not found"
+				'Target message not found',
 			);
 
 			// Declare as const to make Typescript not yell at us when used in arrow functions
@@ -47,59 +47,67 @@ export const messagesRouter = router({
 
 			if (!parentId) {
 				throw new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Message has no parent channel"
+					code: 'INTERNAL_SERVER_ERROR',
+					message: 'Message has no parent channel',
 				});
 			}
 
 			const threadFetch = threadId
-				? findOrThrowNotFound(() => findChannelById(threadId), "Thread not found")
+				? findOrThrowNotFound(
+						() => findChannelById(threadId),
+						'Thread not found',
+				  )
 				: undefined;
 
 			const serverFetch = findOrThrowNotFound(
 				() => findServerById(targetMessage.serverId),
-				"Server for message not found"
+				'Server for message not found',
 			);
 			const parentChannelFetch = threadId
 				? findOrThrowNotFound(
 						() => findChannelById(parentId),
-						"Parent channel for message not found"
+						'Parent channel for message not found',
 				  )
 				: findOrThrowNotFound(
 						() => findChannelById(targetMessage.channelId),
-						"Channel for message not found"
+						'Channel for message not found',
 				  );
 
 			const messageFetch = threadId
 				? findMessagesByChannelId({
-						channelId: threadId
+						channelId: threadId,
 				  })
 				: findMessagesByChannelId({
 						channelId: parentId,
 						after: targetMessage.id,
-						limit: 20
+						limit: 20,
 				  });
 
-			const [thread, server, channel, messages, rootMessage] = await Promise.all([
-				threadFetch,
-				serverFetch,
-				parentChannelFetch,
-				messageFetch,
-				threadId ? findMessageById(threadId) : undefined
-			]);
+			const [thread, server, channel, messages, rootMessage] =
+				await Promise.all([
+					threadFetch,
+					serverFetch,
+					parentChannelFetch,
+					messageFetch,
+					threadId ? findMessageById(threadId) : undefined,
+				]);
 
 			// We've collected all of the data, now we need to strip out the private info
 			const messagesWithRefs = await addReferencesToMessages(
-				threadId && rootMessage ? [...new Set([rootMessage, ...messages])] : messages
+				threadId && rootMessage
+					? [...new Set([rootMessage, ...messages])]
+					: messages,
 			);
-			const messagesWithDiscordAccounts = await addAuthorsToMessages(messagesWithRefs);
+			const messagesWithDiscordAccounts = await addAuthorsToMessages(
+				messagesWithRefs,
+			);
 			return {
 				messages: messagesWithDiscordAccounts.map((message) =>
-					stripPrivateMessageData(message, ctx.userServers)
+					stripPrivateMessageData(message, ctx.userServers),
 				),
 				parentChannel: stripPrivateChannelData(channel),
 				server: stripPrivateServerData(server),
-				thread: thread ? stripPrivateChannelData(thread) : undefined
+				thread: thread ? stripPrivateChannelData(thread) : undefined,
 			};
 		}),
 	search: withUserServersProcedure
@@ -107,8 +115,8 @@ export const messagesRouter = router({
 			z.object({
 				query: z.string(),
 				serverId: z.string().optional(),
-				channelId: z.string().optional()
-			})
+				channelId: z.string().optional(),
+			}),
 		)
 		.query(async ({ input, ctx }) => {
 			const searchResults = await searchMessages(input);
@@ -118,13 +126,13 @@ export const messagesRouter = router({
 					channel: stripPrivateChannelData(channel),
 					server: stripPrivateServerData(server),
 					thread: thread ? stripPrivateChannelData(thread) : undefined,
-					score
-				})
+					score,
+				}),
 			);
 			return strippedSearchResults.filter(
 				(result) =>
 					canUserViewPrivateMessage(ctx.userServers, result.message) ||
-					result.message.public
+					result.message.public,
 			);
-		})
+		}),
 });

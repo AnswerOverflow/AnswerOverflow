@@ -1,6 +1,10 @@
-import { ChatInputCommandSuccessPayload, Listener, LogLevel } from "@sapphire/framework";
-import type { Logger } from "@sapphire/plugin-logger";
-import { logSuccessCommand } from "~discord-bot/utils/utils";
+import {
+	ChatInputCommandSuccessPayload,
+	Listener,
+	LogLevel,
+} from '@sapphire/framework';
+import type { Logger } from '@sapphire/plugin-logger';
+import { logSuccessCommand } from '~discord-bot/utils/utils';
 export class UserListener extends Listener {
 	public run(payload: ChatInputCommandSuccessPayload) {
 		logSuccessCommand(payload);

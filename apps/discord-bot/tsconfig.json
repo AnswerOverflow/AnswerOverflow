@@ -9,5 +9,11 @@
 	"ts-node": {
 		"transpileOnly": true
 	},
-	"include": ["src", "test", "jest.config.ts", "tsup.config.ts", "../../reset.d.ts"]
+	"include": [
+		"src",
+		"test",
+		"jest.config.ts",
+		"tsup.config.ts",
+		"../../reset.d.ts"
+	]
 }

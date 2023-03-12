@@ -1,12 +1,14 @@
-import { Client, Guild, PermissionFlagsBits } from "discord.js";
-import { mockGuild } from "./guild-mock";
-import { mockGuildMember } from "./user-mock";
+import { Client, Guild, PermissionFlagsBits } from 'discord.js';
+import { mockGuild } from './guild-mock';
+import { mockGuildMember } from './user-mock';
 
-export type GuildMemberVariants = Awaited<ReturnType<typeof createGuildMemberVariants>>;
+export type GuildMemberVariants = Awaited<
+	ReturnType<typeof createGuildMemberVariants>
+>;
 
 export async function createGuildMemberVariants(
 	client: Client,
-	guild: Guild | undefined = undefined
+	guild: Guild | undefined = undefined,
 ) {
 	if (!guild) guild = mockGuild(client);
 	const guildMemberOwner = await guild.members.fetch(guild.ownerId);
@@ -15,18 +17,18 @@ export async function createGuildMemberVariants(
 		client,
 		guild,
 		data: {
-			pending: true
-		}
+			pending: true,
+		},
 	});
 	const guildMemberManageGuild = mockGuildMember({
 		client,
 		guild,
-		permissions: PermissionFlagsBits.ManageGuild
+		permissions: PermissionFlagsBits.ManageGuild,
 	});
 	const guildMemberAdmin = mockGuildMember({
 		client,
 		guild,
-		permissions: PermissionFlagsBits.Administrator
+		permissions: PermissionFlagsBits.Administrator,
 	});
 
 	return {
@@ -34,6 +36,6 @@ export async function createGuildMemberVariants(
 		guildMemberDefault,
 		pendingGuildMemberDefault,
 		guildMemberManageGuild,
-		guildMemberAdmin
+		guildMemberAdmin,
 	};
 }

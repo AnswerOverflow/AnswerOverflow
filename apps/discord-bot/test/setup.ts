@@ -1,4 +1,4 @@
-import { cleanupRedis } from "@answeroverflow/cache";
+import { cleanupRedis } from '@answeroverflow/cache';
 
 afterAll(async () => {
 	await cleanupRedis();

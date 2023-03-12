@@ -4,11 +4,13 @@ import Document, {
 	Main,
 	NextScript,
 	DocumentContext,
-	DocumentInitialProps
-} from "next/document";
+	DocumentInitialProps,
+} from 'next/document';
 
 class MyDocument extends Document {
-	static override async getInitialProps(ctx: DocumentContext): Promise<DocumentInitialProps> {
+	static override async getInitialProps(
+		ctx: DocumentContext,
+	): Promise<DocumentInitialProps> {
 		const initialProps = await Document.getInitialProps(ctx);
 
 		return initialProps;

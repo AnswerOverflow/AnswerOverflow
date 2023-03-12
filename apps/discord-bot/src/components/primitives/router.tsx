@@ -1,7 +1,11 @@
-import { ActionRow, Button, useInstance } from "@answeroverflow/discordjs-react";
-import { container } from "@sapphire/framework";
-import React, { useEffect } from "react";
-import { OpenSupportMenuButton, SupportMenu } from "./support";
+import {
+	ActionRow,
+	Button,
+	useInstance,
+} from '@answeroverflow/discordjs-react';
+import { container } from '@sapphire/framework';
+import React, { useEffect } from 'react';
+import { OpenSupportMenuButton, SupportMenu } from './support';
 
 function popHistory(key: string) {
 	const data = container.messageHistory.get(key);
@@ -13,7 +17,7 @@ function popHistory(key: string) {
 	newHistory.pop();
 	container.messageHistory.set(key, {
 		history: newHistory,
-		setHistory
+		setHistory,
 	});
 	setHistory(newHistory);
 }
@@ -27,7 +31,7 @@ function pushHistory(key: string, node: React.ReactNode) {
 	const newHistory = [...history, node];
 	container.messageHistory.set(key, {
 		history: newHistory,
-		setHistory
+		setHistory,
 	});
 	setHistory(newHistory);
 }
@@ -35,8 +39,9 @@ function pushHistory(key: string, node: React.ReactNode) {
 export function useHistory() {
 	const instance = useInstance();
 	return {
-		pushHistory: (node: React.ReactNode) => pushHistory(instance.rendererId, node),
-		popHistory: () => popHistory(instance.rendererId)
+		pushHistory: (node: React.ReactNode) =>
+			pushHistory(instance.rendererId, node),
+		popHistory: () => popHistory(instance.rendererId),
 	};
 }
 
@@ -54,7 +59,7 @@ export const Router: React.FC<{
 
 	container.messageHistory.set(instance.rendererId, {
 		history,
-		setHistory
+		setHistory,
 	});
 
 	const current = history[history.length - 1];
@@ -64,7 +69,7 @@ export const Router: React.FC<{
 	// TODO: This is disgusting
 	const isSupportMenu =
 		current instanceof Object &&
-		"type" in current &&
+		'type' in current &&
 		current.type.toString().includes(SupportMenu.toString());
 
 	const shouldShowActionRow = history.length > 1 || !isSupportMenu;

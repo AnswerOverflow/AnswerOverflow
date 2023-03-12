@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-export * from "./src/elastic";
-export * from "./src/default";
+export * from './src/elastic';
+export * from './src/default';
 declare global {
 	namespace NodeJS {
 		interface ProcessEnv {
@@ -14,7 +14,7 @@ declare global {
 			ELASTICSEARCH_CLOUD_ID: string;
 
 			// common
-			readonly NODE_ENV: "development" | "production" | "test";
+			readonly NODE_ENV: 'development' | 'production' | 'test';
 		}
 	}
 }

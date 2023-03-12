@@ -1,17 +1,23 @@
-import type { RendererableInteractions } from "@answeroverflow/discordjs-react";
+import type { RendererableInteractions } from '@answeroverflow/discordjs-react';
 import type {
 	ChatInputCommandSuccessPayload,
 	Command,
 	ContextMenuCommandSuccessPayload,
-	MessageCommandSuccessPayload
-} from "@sapphire/framework";
-import { container } from "@sapphire/framework";
-import { send } from "@sapphire/plugin-editable-commands";
-import { cyan } from "colorette";
-import type { APIUser } from "discord-api-types/v9";
-import { Guild, Message, EmbedBuilder, User, GuildTextBasedChannel } from "discord.js";
-import type { ReactNode } from "react";
-import { LOADING_MESSAGES } from "./constants";
+	MessageCommandSuccessPayload,
+} from '@sapphire/framework';
+import { container } from '@sapphire/framework';
+import { send } from '@sapphire/plugin-editable-commands';
+import { cyan } from 'colorette';
+import type { APIUser } from 'discord-api-types/v9';
+import {
+	Guild,
+	Message,
+	EmbedBuilder,
+	User,
+	GuildTextBasedChannel,
+} from 'discord.js';
+import type { ReactNode } from 'react';
+import { LOADING_MESSAGES } from './constants';
 
 /**
  * Picks a random item from an array
@@ -31,8 +37,10 @@ export function pickRandom<T>(array: readonly T[]): T {
 export function sendLoadingMessage(message: Message): Promise<typeof message> {
 	return send(message, {
 		embeds: [
-			new EmbedBuilder().setDescription(pickRandom(LOADING_MESSAGES)).setColor("#FF0000")
-		]
+			new EmbedBuilder()
+				.setDescription(pickRandom(LOADING_MESSAGES))
+				.setColor('#FF0000'),
+		],
 	});
 }
 
@@ -40,30 +48,34 @@ export function logSuccessCommand(
 	payload:
 		| ContextMenuCommandSuccessPayload
 		| ChatInputCommandSuccessPayload
-		| MessageCommandSuccessPayload
+		| MessageCommandSuccessPayload,
 ): void {
 	let successLoggerData: ReturnType<typeof getSuccessLoggerData>;
 
-	if ("interaction" in payload) {
+	if ('interaction' in payload) {
 		successLoggerData = getSuccessLoggerData(
 			payload.interaction.guild,
 			payload.interaction.user,
-			payload.command
+			payload.command,
 		);
 	} else {
 		successLoggerData = getSuccessLoggerData(
 			payload.message.guild,
 			payload.message.author,
-			payload.command
+			payload.command,
 		);
 	}
 
 	container.logger.debug(
-		`${successLoggerData.shard} - ${successLoggerData.commandName} ${successLoggerData.author} ${successLoggerData.sentAt}`
+		`${successLoggerData.shard} - ${successLoggerData.commandName} ${successLoggerData.author} ${successLoggerData.sentAt}`,
 	);
 }
 
-export function getSuccessLoggerData(guild: Guild | null, user: User, command: Command) {
+export function getSuccessLoggerData(
+	guild: Guild | null,
+	user: User,
+	command: Command,
+) {
 	const shard = getShardInfo(guild?.shardId ?? 0);
 	const commandName = getCommandInfo(command);
 	const author = getAuthorInfo(user);
@@ -85,11 +97,14 @@ function getAuthorInfo(author: User | APIUser) {
 }
 
 function getGuildInfo(guild: Guild | null) {
-	if (guild === null) return "Direct Messages";
+	if (guild === null) return 'Direct Messages';
 	return `${guild.name}[${cyan(guild.id)}]`;
 }
 
-export function ephemeralReply(content: ReactNode, interaction: RendererableInteractions) {
+export function ephemeralReply(
+	content: ReactNode,
+	interaction: RendererableInteractions,
+) {
 	return container.discordJSReact.ephemeralReply(interaction, content);
 }
 
@@ -112,7 +127,7 @@ export function getRootChannel(channel: GuildTextBasedChannel) {
  * @returns string with all discord markdown characters removed
  */
 export function removeDiscordMarkdown(text: string) {
-	return text.replace(/(\*|_|~|`)/g, "");
+	return text.replace(/(\*|_|~|`)/g, '');
 }
 
 export function isHumanMessage(message: Message) {

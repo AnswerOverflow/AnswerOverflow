@@ -11,8 +11,8 @@ import {
 	APITextChannel,
 	APIDMChannel,
 	APIThreadChannel,
-	APIChannelMention
-} from "discord.js";
+	APIChannelMention,
+} from 'discord.js';
 
 export function userToAPIUser(user: User): APIUser {
 	return {
@@ -24,7 +24,7 @@ export function userToAPIUser(user: User): APIUser {
 		banner: user.banner,
 		bot: user.bot,
 		flags: user.flags?.bitfield,
-		system: user.system
+		system: user.system,
 	};
 }
 
@@ -34,7 +34,7 @@ export function tagToAPIGuildForumTag(tag: GuildForumTag): APIGuildForumTag {
 		emoji_name: tag.emoji?.name ?? null,
 		id: tag.id,
 		moderated: tag.moderated,
-		name: tag.name
+		name: tag.name,
 	};
 }
 
@@ -46,7 +46,9 @@ export function channelToAPIChannel(channel: Channel): APIChannel {
 			flags: channel.flags?.bitfield,
 			last_message_id: channel.lastMessageId,
 			name: channel.recipient?.username,
-			recipients: [channel.client.user, channel.recipient].map((user) => userToAPIUser(user!)) // TODO: Is the bot a recipient?
+			recipients: [channel.client.user, channel.recipient].map((user) =>
+				userToAPIUser(user!),
+			), // TODO: Is the bot a recipient?
 		};
 		return data;
 	}
@@ -73,12 +75,12 @@ export function channelToAPIChannel(channel: Channel): APIChannel {
 					new Date().toISOString(),
 				invitable: channel.invitable ?? false,
 				auto_archive_duration: channel.autoArchiveDuration ?? 0,
-				archived: channel.archived ?? false
+				archived: channel.archived ?? false,
 			},
 			owner_id: channel.ownerId ?? undefined,
 			total_message_sent: channel.totalMessageSent ?? 0,
 			rate_limit_per_user: channel.rateLimitPerUser ?? 0,
-			member: undefined // TODO: Define
+			member: undefined, // TODO: Define
 		};
 		return data;
 	}
@@ -97,22 +99,24 @@ export function channelToAPIChannel(channel: Channel): APIChannel {
 			parent_id: channel.parentId,
 			permission_overwrites: undefined,
 			rate_limit_per_user: channel.rateLimitPerUser,
-			topic: channel.topic
+			topic: channel.topic,
 		};
 		return data;
 	}
-	throw new Error("Channel type not supported");
+	throw new Error('Channel type not supported');
 }
 
-export function channelToAPIChannelMention(channel: Channel): APIChannelMention {
+export function channelToAPIChannelMention(
+	channel: Channel,
+): APIChannelMention {
 	if (channel.isDMBased()) {
-		throw new Error("Cannot mention a DM channel");
+		throw new Error('Cannot mention a DM channel');
 	}
 	return {
 		id: channel.id,
 		guild_id: channel.guild.id,
 		name: channel.name,
-		type: channel.type
+		type: channel.type,
 	};
 }
 
@@ -135,6 +139,6 @@ export function messageToAPIData(message: Message): APIMessage {
 		type: message.type,
 		mention_channels: message.mentions.channels.map(channelToAPIChannelMention),
 		nonce: message.nonce ?? undefined,
-		position: message.position ?? undefined
+		position: message.position ?? undefined,
 	};
 }

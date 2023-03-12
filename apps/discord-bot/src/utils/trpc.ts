@@ -2,15 +2,18 @@ import {
 	BotContextCreate,
 	botRouter,
 	BotRouterCaller,
-	createBotContext
-} from "@answeroverflow/api";
-import { container } from "@sapphire/framework";
-import { TRPCError } from "@trpc/server";
-import type { RendererableInteractions } from "@answeroverflow/discordjs-react";
+	createBotContext,
+} from '@answeroverflow/api';
+import { container } from '@sapphire/framework';
+import { TRPCError } from '@trpc/server';
+import type { RendererableInteractions } from '@answeroverflow/discordjs-react';
 
 export type TRPCStatusHandler<T> = {
 	Ok?: (result: T) => void | Promise<void>;
-	Error?: (error: TRPCError, messageWithCode: string) => unknown | Promise<unknown>;
+	Error?: (
+		error: TRPCError,
+		messageWithCode: string,
+	) => unknown | Promise<unknown>;
 };
 
 export type TRPCCall<T> = {
@@ -20,16 +23,17 @@ export type TRPCCall<T> = {
 
 export async function callWithAllowedErrors<T>({
 	allowedErrors,
-	call
+	call,
 }: {
 	call: () => Promise<T>;
-	allowedErrors?: TRPCError["code"] | TRPCError["code"][];
+	allowedErrors?: TRPCError['code'] | TRPCError['code'][];
 }) {
 	try {
 		return await call();
 	} catch (error) {
 		if (!(error instanceof TRPCError)) throw error;
-		if (!Array.isArray(allowedErrors)) allowedErrors = allowedErrors ? [allowedErrors] : [];
+		if (!Array.isArray(allowedErrors))
+			allowedErrors = allowedErrors ? [allowedErrors] : [];
 		if (allowedErrors.includes(error.code)) {
 			return null;
 		} else {
@@ -42,7 +46,7 @@ export async function callAPI<T>({
 	getCtx,
 	apiCall,
 	Ok = () => {},
-	Error = () => {}
+	Error = () => {},
 }: TRPCCall<T>) {
 	try {
 		const convertedCtx = await createBotContext(await getCtx());
@@ -57,6 +61,9 @@ export async function callAPI<T>({
 	}
 }
 
-export function ephemeralStatusHandler(interaction: RendererableInteractions, message: string) {
+export function ephemeralStatusHandler(
+	interaction: RendererableInteractions,
+	message: string,
+) {
 	return container.discordJSReact.ephemeralReply(interaction, message);
 }

@@ -1,6 +1,6 @@
-import type { NextAuthOptions } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
-import { extendedAdapter } from "./adapter";
+import type { NextAuthOptions } from 'next-auth';
+import DiscordProvider from 'next-auth/providers/discord';
+import { extendedAdapter } from './adapter';
 
 export const authOptions: NextAuthOptions = {
 	// Configure one or more authentication providers
@@ -9,8 +9,9 @@ export const authOptions: NextAuthOptions = {
 		DiscordProvider({
 			clientId: process.env.DISCORD_CLIENT_ID,
 			clientSecret: process.env.DISCORD_CLIENT_SECRET,
-			authorization: "https://discord.com/api/oauth2/authorize?scope=identify+email+guilds"
-		})
+			authorization:
+				'https://discord.com/api/oauth2/authorize?scope=identify+email+guilds',
+		}),
 		// ...add more providers here
 	],
 	callbacks: {
@@ -19,6 +20,6 @@ export const authOptions: NextAuthOptions = {
 				session.user.id = user.id;
 			}
 			return session;
-		}
-	}
+		},
+	},
 };

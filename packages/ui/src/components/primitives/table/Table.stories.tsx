@@ -1,15 +1,23 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Table } from "./Table";
-import { Tbody, Td, Th, Thead, Tr, TableButtonWrapper, TableButton } from "./TableComps";
+import type { Meta, StoryObj } from '@storybook/react';
+import { Table } from './Table';
+import {
+	Tbody,
+	Td,
+	Th,
+	Thead,
+	Tr,
+	TableButtonWrapper,
+	TableButton,
+} from './TableComps';
 const meta = {
-	component: Table
+	component: Table,
 } as Meta<typeof Table>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-import { TrashIcon, Cog6ToothIcon } from "@heroicons/react/24/solid";
+import { TrashIcon, Cog6ToothIcon } from '@heroicons/react/24/solid';
 
 export const Primary: Story = {
 	render: () => (
@@ -49,5 +57,5 @@ export const Primary: Story = {
 				</Tbody>
 			</Table>
 		</div>
-	)
+	),
 };

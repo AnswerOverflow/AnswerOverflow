@@ -1,9 +1,12 @@
-import { ApplyOptions } from "@sapphire/decorators";
-import { Listener } from "@sapphire/framework";
-import { Events, Message } from "discord.js";
-import { findChannelById } from "@answeroverflow/db";
-import { isHumanMessage, removeDiscordMarkdown } from "~discord-bot/utils/utils";
-import { ALLOWED_AUTO_THREAD_CHANNEL_TYPES } from "@answeroverflow/constants";
+import { ApplyOptions } from '@sapphire/decorators';
+import { Listener } from '@sapphire/framework';
+import { Events, Message } from 'discord.js';
+import { findChannelById } from '@answeroverflow/db';
+import {
+	isHumanMessage,
+	removeDiscordMarkdown,
+} from '~discord-bot/utils/utils';
+import { ALLOWED_AUTO_THREAD_CHANNEL_TYPES } from '@answeroverflow/constants';
 
 @ApplyOptions<Listener.Options>({ event: Events.MessageCreate })
 export class OnMessage extends Listener {
@@ -23,8 +26,11 @@ export class OnMessage extends Listener {
 		// Remove all markdown characters
 		textTitle = removeDiscordMarkdown(textTitle);
 		if (textTitle.length > 47) {
-			textTitle = textTitle.slice(0, 47) + "...";
+			textTitle = textTitle.slice(0, 47) + '...';
 		}
-		await message.startThread({ name: textTitle, reason: "Answer Overflow auto thread" });
+		await message.startThread({
+			name: textTitle,
+			reason: 'Answer Overflow auto thread',
+		});
 	} // Checking if auto thread is enabled on guild
 }

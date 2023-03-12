@@ -1,13 +1,16 @@
-import { Button } from "@answeroverflow/discordjs-react";
-import type { ButtonInteraction } from "discord.js";
-import React from "react";
+import { Button } from '@answeroverflow/discordjs-react';
+import type { ButtonInteraction } from 'discord.js';
+import React from 'react';
 
 export type ToggleButtonProps = {
 	currentlyEnabled: boolean;
 	enableLabel: string;
 	disableLabel: string;
 	disabled?: boolean;
-	onClick?: (event: ButtonInteraction, enabled: boolean) => unknown | Promise<unknown>;
+	onClick?: (
+		event: ButtonInteraction,
+		enabled: boolean,
+	) => unknown | Promise<unknown>;
 };
 
 export function ToggleButton({
@@ -15,16 +18,18 @@ export function ToggleButton({
 	enableLabel,
 	disableLabel,
 	onClick,
-	disabled = false
+	disabled = false,
 }: ToggleButtonProps) {
 	const label = currentlyEnabled ? disableLabel : enableLabel;
-	const style = currentlyEnabled ? "Danger" : "Success";
+	const style = currentlyEnabled ? 'Danger' : 'Success';
 	return (
 		<Button
 			label={label}
 			disabled={disabled}
-			style={disabled ? "Secondary" : style}
-			onClick={(interaction) => (onClick ? onClick(interaction, !currentlyEnabled) : null)}
+			style={disabled ? 'Secondary' : style}
+			onClick={(interaction) =>
+				onClick ? onClick(interaction, !currentlyEnabled) : null
+			}
 		/>
 	);
 }

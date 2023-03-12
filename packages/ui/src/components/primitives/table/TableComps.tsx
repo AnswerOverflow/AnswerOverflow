@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren } from 'react';
 
 /**
  * Note: Use th directly inside of thead
@@ -16,7 +16,9 @@ export const Tbody: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 export const Th: React.FC<PropsWithChildren> = ({ children }) => {
-	return <th className="p-1 text-neutral-900 dark:text-neutral-300">{children}</th>;
+	return (
+		<th className="p-1 text-neutral-900 dark:text-neutral-300">{children}</th>
+	);
 };
 
 export const Tr: React.FC<PropsWithChildren> = ({ children }) => {
@@ -29,11 +31,15 @@ export const Tr: React.FC<PropsWithChildren> = ({ children }) => {
 
 export const Td: React.FC<PropsWithChildren> = ({ children }) => {
 	return (
-		<td className="py-2 text-center font-normal text-black dark:text-[#E6E6E6]">{children}</td>
+		<td className="py-2 text-center font-normal text-black dark:text-[#E6E6E6]">
+			{children}
+		</td>
 	);
 };
 
-export const TableButtonWrapper: React.FC<PropsWithChildren> = ({ children }) => {
+export const TableButtonWrapper: React.FC<PropsWithChildren> = ({
+	children,
+}) => {
 	return <div className="flex justify-center gap-2">{children}</div>;
 };
 
@@ -47,13 +53,13 @@ export const TableButton: React.FC<PropsWithChildren<TableButtonProps>> = ({
 	children,
 	backgroundColor,
 	onClick,
-	ariaLabel
+	ariaLabel,
 }) => {
 	return (
 		<button
 			className={`h-7 w-7 rounded-md p-[0.15rem]`}
 			style={{
-				backgroundColor: backgroundColor
+				backgroundColor: backgroundColor,
 			}}
 			onClick={() => onClick ?? undefined}
 			aria-label={ariaLabel}

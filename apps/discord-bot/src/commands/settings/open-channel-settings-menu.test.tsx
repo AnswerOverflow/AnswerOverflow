@@ -1,4 +1,4 @@
-describe("Channel Settings Slash Command", () => {
+describe('Channel Settings Slash Command', () => {
 	// it("uses /channel-settings without manage guild permissions", async () => {
 	//   const command = mockInteracion(
 	//     client,
@@ -14,11 +14,11 @@ describe("Channel Settings Slash Command", () => {
 	// });
 	// it("uses /channel-settings as an admin", async () => { });
 	// it("uses /channel-settings with manage guild permissions", async () => { });
-	test.todo("Verify default member permissions");
-	test.todo("Verify bot permissions");
-	test.todo("Verify channel type");
-	test.todo("Verify running in guild");
-	test.todo("Verify error handling for missing permissions");
-	test.todo("Verify error handling for backend");
-	test.todo("Verify reacord reply is called with right args");
+	test.todo('Verify default member permissions');
+	test.todo('Verify bot permissions');
+	test.todo('Verify channel type');
+	test.todo('Verify running in guild');
+	test.todo('Verify error handling for missing permissions');
+	test.todo('Verify error handling for backend');
+	test.todo('Verify reacord reply is called with right args');
 });

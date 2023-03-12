@@ -4,27 +4,30 @@ import {
 	ServerWithFlags,
 	getDefaultServerWithFlags,
 	upsertServer,
-	zServerCreate
-} from "@answeroverflow/db";
-import { z } from "zod";
-import type { Context } from "~api/router/context";
-import { router, withUserServersProcedure } from "~api/router/trpc";
+	zServerCreate,
+} from '@answeroverflow/db';
+import { z } from 'zod';
+import type { Context } from '~api/router/context';
+import { router, withUserServersProcedure } from '~api/router/trpc';
 import {
 	assertBoolsAreNotEqual,
 	assertCanEditServer,
-	assertCanEditServerBotOnly
-} from "~api/utils/permissions";
-import { protectedFetchWithPublicData, protectedMutation } from "~api/utils/protected-procedures";
+	assertCanEditServerBotOnly,
+} from '~api/utils/permissions';
+import {
+	protectedFetchWithPublicData,
+	protectedMutation,
+} from '~api/utils/protected-procedures';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
-	"Read the rules consent already enabled";
+	'Read the rules consent already enabled';
 export const READ_THE_RULES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE =
-	"Read the rules consent already disabled";
+	'Read the rules consent already disabled';
 
 async function mutateServer({
 	operation,
 	server,
-	ctx
+	ctx,
 }: {
 	operation: (input: {
 		oldSettings: ServerWithFlags;
@@ -42,34 +45,36 @@ async function mutateServer({
 				oldSettings = getDefaultServerWithFlags({
 					id: server.id,
 					name: server.name,
-					icon: server.icon
+					icon: server.icon,
 				});
 				doSettingsExistAlready = false;
 			} else {
 				doSettingsExistAlready = true;
 			}
 			return operation({ oldSettings, doSettingsExistAlready });
-		}
+		},
 	});
 }
 
 export const serverRouter = router({
-	byId: withUserServersProcedure.input(z.string()).query(async ({ ctx, input }) => {
-		return protectedFetchWithPublicData({
-			fetch: () => findServerById(input),
-			permissions: () => assertCanEditServer(ctx, input),
-			notFoundMessage: "Server not found",
-			publicDataFormatter: (server) => zServerPublic.parse(server)
-		});
-	}),
+	byId: withUserServersProcedure
+		.input(z.string())
+		.query(async ({ ctx, input }) => {
+			return protectedFetchWithPublicData({
+				fetch: () => findServerById(input),
+				permissions: () => assertCanEditServer(ctx, input),
+				notFoundMessage: 'Server not found',
+				publicDataFormatter: (server) => zServerPublic.parse(server),
+			});
+		}),
 	setReadTheRulesConsentEnabled: withUserServersProcedure
 		.input(
 			z.object({
 				server: zServerCreate.omit({
-					flags: true
+					flags: true,
 				}),
-				enabled: z.boolean()
-			})
+				enabled: z.boolean(),
+			}),
 		)
 		.mutation(async ({ ctx, input }) => {
 			return mutateServer({
@@ -84,24 +89,24 @@ export const serverRouter = router({
 								messageIfBothFalse:
 									READ_THE_RULES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE,
 								messageIfBothTrue:
-									READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE
+									READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE,
 							}),
 						operation: () =>
 							upsertServer({
 								create: {
 									...input.server,
 									flags: {
-										readTheRulesConsentEnabled: input.enabled
-									}
+										readTheRulesConsentEnabled: input.enabled,
+									},
 								},
 								update: {
 									flags: {
-										readTheRulesConsentEnabled: input.enabled
-									}
-								}
-							})
+										readTheRulesConsentEnabled: input.enabled,
+									},
+								},
+							}),
 					});
-				}
+				},
 			});
-		})
+		}),
 });

@@ -19,17 +19,17 @@ import {
 	Channel,
 	StringSelectMenuInteraction,
 	APIMessageStringSelectInteractionData,
-	GuildTextBasedChannel
-} from "discord.js";
-import { randomSnowflake } from "@answeroverflow/discordjs-utils";
-import { mockTextChannel } from "./channel-mock";
-import { applyMessagePayload, mockMessage } from "./message-mock";
-import { mockGuildMember } from "./user-mock";
+	GuildTextBasedChannel,
+} from 'discord.js';
+import { randomSnowflake } from '@answeroverflow/discordjs-utils';
+import { mockTextChannel } from './channel-mock';
+import { applyMessagePayload, mockMessage } from './message-mock';
+import { mockGuildMember } from './user-mock';
 import type {
 	RawMessageButtonInteractionData,
-	RawMessageComponentInteractionData
-} from "discord.js/typings/rawDataTypes";
-import { messageToAPIData } from "./to-api-data";
+	RawMessageComponentInteractionData,
+} from 'discord.js/typings/rawDataTypes';
+import { messageToAPIData } from './to-api-data';
 
 function setupMockedInteractionAPIData<Type extends InteractionType>({
 	channel,
@@ -37,7 +37,7 @@ function setupMockedInteractionAPIData<Type extends InteractionType>({
 	message = undefined,
 	type,
 	applicationId = undefined,
-	override = {}
+	override = {},
 }: {
 	applicationId?: string;
 	channel: Channel;
@@ -45,8 +45,11 @@ function setupMockedInteractionAPIData<Type extends InteractionType>({
 	caller: User;
 	type: Type;
 	override?: Partial<APIBaseInteraction<Type, {}>>;
-}): Omit<Required<APIBaseInteraction<Type, {}>>, "guild_id" | "message" | "member"> &
-	Pick<APIBaseInteraction<Type, {}>, "guild_id" | "message"> {
+}): Omit<
+	Required<APIBaseInteraction<Type, {}>>,
+	'guild_id' | 'message' | 'member'
+> &
+	Pick<APIBaseInteraction<Type, {}>, 'guild_id' | 'message'> {
 	return {
 		application_id: applicationId ?? randomSnowflake().toString(),
 		channel_id: channel.id,
@@ -54,44 +57,44 @@ function setupMockedInteractionAPIData<Type extends InteractionType>({
 		token: randomSnowflake().toString(), // TODO: Use a real token
 		version: 1,
 		app_permissions: PermissionsBitField.Default.toString(),
-		locale: "en-US",
+		locale: 'en-US',
 		guild_id: channel.isDMBased() ? undefined : channel.guild.id,
 		user: {
 			id: caller.id,
 			avatar: caller.avatar,
 			discriminator: caller.discriminator,
-			username: caller.username
+			username: caller.username,
 		},
 		data: {},
-		guild_locale: "en-US",
+		guild_locale: 'en-US',
 		message: message ? messageToAPIData(message) : undefined,
 		type,
-		...override
+		...override,
 	};
 }
 
 function applyInteractionResponseHandlers(interaction: Interaction) {
 	const client = interaction.client;
-	if ("update" in interaction) {
+	if ('update' in interaction) {
 		// @ts-ignore
 		interaction.update = async (
 			options:
 				| (InteractionUpdateOptions & { fetchReply: true })
-				| (string | MessagePayload | InteractionUpdateOptions)
+				| (string | MessagePayload | InteractionUpdateOptions),
 		) => {
 			interaction.deferred = false;
 			interaction.replied = true;
 			await interaction.message.edit(options);
-			if (options instanceof Object && "fetchReply" in options) {
+			if (options instanceof Object && 'fetchReply' in options) {
 				return Promise.resolve(interaction.message);
 			}
 			return mockInteractionResponse({
 				interaction: interaction,
-				id: interaction.id
+				id: interaction.id,
 			});
 		};
 	}
-	if ("deferUpdate" in interaction) {
+	if ('deferUpdate' in interaction) {
 		// @ts-ignore
 		interaction.deferUpdate = (options) => {
 			interaction.deferred = true;
@@ -101,13 +104,13 @@ function applyInteractionResponseHandlers(interaction: Interaction) {
 			return Promise.resolve(
 				mockInteractionResponse({
 					id: interaction.id,
-					interaction
-				})
+					interaction,
+				}),
 			);
 		};
 	}
 
-	if ("deferReply" in interaction) {
+	if ('deferReply' in interaction) {
 		// @ts-ignore
 		interaction.deferReply = (options) => {
 			interaction.deferred = true;
@@ -116,8 +119,8 @@ function applyInteractionResponseHandlers(interaction: Interaction) {
 				channel: interaction.channel ?? undefined, // TODO: probably error here?
 				author: interaction.client.user,
 				override: {
-					id: interaction.id.toString()
-				}
+					id: interaction.id.toString(),
+				},
 			});
 			if (options?.fetchReply) {
 				return Promise.resolve(msg);
@@ -125,13 +128,13 @@ function applyInteractionResponseHandlers(interaction: Interaction) {
 			return Promise.resolve(
 				mockInteractionResponse({
 					id: interaction.id,
-					interaction
-				})
+					interaction,
+				}),
 			);
 		};
 	}
 
-	if ("reply" in interaction) {
+	if ('reply' in interaction) {
 		// @ts-ignore
 		interaction.reply = (opts) => {
 			const msg = mockMessage({
@@ -139,47 +142,53 @@ function applyInteractionResponseHandlers(interaction: Interaction) {
 				channel: interaction.channel ?? undefined, // TODO: probably error here?
 				author: interaction.client.user,
 				override: {
-					id: interaction.id.toString()
-				}
+					id: interaction.id.toString(),
+				},
 			});
 			interaction.deferred = false;
 			interaction.replied = true;
 			applyMessagePayload(opts, msg);
-			if (opts instanceof Object && "fetchReply" in opts) {
+			if (opts instanceof Object && 'fetchReply' in opts) {
 				return Promise.resolve(msg);
 			}
 
 			return Promise.resolve(
 				mockInteractionResponse({
 					interaction: interaction,
-					id: interaction.id
-				})
+					id: interaction.id,
+				}),
 			);
 		};
 	}
 
-	if ("fetchReply" in interaction) {
+	if ('fetchReply' in interaction) {
 		interaction.fetchReply = () => {
-			if (interaction.isChatInputCommand() || interaction.isContextMenuCommand()) {
+			if (
+				interaction.isChatInputCommand() ||
+				interaction.isContextMenuCommand()
+			) {
 				const msg = interaction.channel?.messages.cache.get(interaction.id);
-				if (!msg) throw new Error("Message not found");
+				if (!msg) throw new Error('Message not found');
 				return Promise.resolve(msg);
 			} else {
-				if (!interaction.message) throw new Error("No message to edit");
+				if (!interaction.message) throw new Error('No message to edit');
 				return Promise.resolve(interaction.message);
 			}
 		};
 	}
 
-	if ("editReply" in interaction) {
+	if ('editReply' in interaction) {
 		interaction.editReply = async (opts) => {
 			interaction.deferred = false;
 			interaction.replied = true;
-			if (interaction.isChatInputCommand() || interaction.isContextMenuCommand()) {
+			if (
+				interaction.isChatInputCommand() ||
+				interaction.isContextMenuCommand()
+			) {
 				const message = await interaction.fetchReply();
 				return message.edit(opts);
 			} else {
-				if (!interaction.message) throw new Error("No message to edit");
+				if (!interaction.message) throw new Error('No message to edit');
 				return interaction.message?.edit(opts);
 			}
 		};
@@ -191,7 +200,7 @@ export function mockChatInputCommandInteraction({
 	name,
 	id,
 	channel,
-	member
+	member,
 }: {
 	client: Client;
 	name: string;
@@ -210,19 +219,19 @@ export function mockChatInputCommandInteraction({
 			caller: member.user,
 			channel,
 			type: InteractionType.ApplicationCommand,
-			applicationId: id
+			applicationId: id,
 		}),
 		data: {
 			id,
 			name,
 			type: ApplicationCommandType.ChatInput,
-			guild_id: channel.guild.id
-		}
+			guild_id: channel.guild.id,
+		},
 	};
 	// TODO: Look into adding command to client cache
 	const command = Reflect.construct(ChatInputCommandInteraction, [
 		client,
-		rawData
+		rawData,
 	]) as ChatInputCommandInteraction;
 	applyInteractionResponseHandlers(command);
 	return command;
@@ -230,23 +239,29 @@ export function mockChatInputCommandInteraction({
 
 export function mockInteractionResponse({
 	interaction,
-	id
+	id,
 }: {
 	interaction: Interaction;
 	id: Snowflake;
 }): InteractionResponse {
-	return Reflect.construct(InteractionResponse, [interaction, id]) as InteractionResponse;
+	return Reflect.construct(InteractionResponse, [
+		interaction,
+		id,
+	]) as InteractionResponse;
 }
 
 export function mockButtonInteraction({
 	override = {},
 	caller,
-	message
+	message,
 }: {
 	caller: User;
 	message: Message;
 	override?: Partial<
-		Omit<RawMessageButtonInteractionData & RawMessageComponentInteractionData, "component_type">
+		Omit<
+			RawMessageButtonInteractionData & RawMessageComponentInteractionData,
+			'component_type'
+		>
 	>;
 }) {
 	const client = message.client;
@@ -261,16 +276,17 @@ export function mockButtonInteraction({
 			channel: message.channel,
 			type: InteractionType.MessageComponent,
 			message,
-			override
+			override,
 		}),
 		data: {
 			component_type: ComponentType.Button,
-			custom_id: customId
-		}
-	} satisfies RawMessageButtonInteractionData & RawMessageComponentInteractionData;
+			custom_id: customId,
+		},
+	} satisfies RawMessageButtonInteractionData &
+		RawMessageComponentInteractionData;
 	const interaction = Reflect.construct(ButtonInteraction, [
 		client,
-		rawData
+		rawData,
 	]) as ButtonInteraction;
 	applyInteractionResponseHandlers(interaction);
 	return interaction;
@@ -280,14 +296,17 @@ export function mockStringSelectInteraction({
 	override = {},
 	caller,
 	message,
-	data
+	data,
 }: {
 	caller: User;
 	message: Message;
-	data: Omit<APIMessageStringSelectInteractionData, "component_type" | "values"> & {
+	data: Omit<
+		APIMessageStringSelectInteractionData,
+		'component_type' | 'values'
+	> & {
 		values: string[] | string;
 	};
-	override?: Partial<Omit<RawMessageComponentInteractionData, "data">>;
+	override?: Partial<Omit<RawMessageComponentInteractionData, 'data'>>;
 }) {
 	const client = message.client;
 	const rawData = {
@@ -298,19 +317,19 @@ export function mockStringSelectInteraction({
 			channel: message.channel,
 			type: InteractionType.MessageComponent,
 			message,
-			override
+			override,
 		}),
 		data: {
 			component_type: ComponentType.StringSelect,
 			custom_id: data.custom_id,
-			values: Array.isArray(data.values) ? data.values : [data.values]
-		}
+			values: Array.isArray(data.values) ? data.values : [data.values],
+		},
 	} satisfies RawMessageComponentInteractionData & {
 		data: APIMessageStringSelectInteractionData;
 	};
 	const interaction = Reflect.construct(StringSelectMenuInteraction, [
 		client,
-		rawData
+		rawData,
 	]) as StringSelectMenuInteraction;
 	applyInteractionResponseHandlers(interaction);
 	return interaction;

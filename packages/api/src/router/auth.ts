@@ -2,8 +2,8 @@ import {
 	withDiscordAccountProcedure,
 	withUserServersProcedure,
 	publicProcedure,
-	router
-} from "./trpc";
+	router,
+} from './trpc';
 
 export const authRouter = router({
 	getSession: publicProcedure.query(({ ctx }) => {
@@ -11,7 +11,7 @@ export const authRouter = router({
 	}),
 	getSecretMessage: withDiscordAccountProcedure.query(() => {
 		// testing type validation of overridden next-auth Session in @answeroverflow/auth package
-		return "you can see this secret message!";
+		return 'you can see this secret message!';
 	}),
 	getServers: withUserServersProcedure.query(({ ctx }) => {
 		return ctx.userServers;
@@ -19,5 +19,5 @@ export const authRouter = router({
 	// TODO: Cache
 	getDiscordAccount: withDiscordAccountProcedure.query(({ ctx }) => {
 		return ctx.discordAccount;
-	})
+	}),
 });

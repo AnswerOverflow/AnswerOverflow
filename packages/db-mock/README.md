@@ -4,13 +4,13 @@
 
 Misc commands that are used while working with prisma
 
--   Generate a migration
+- Generate a migration
 
-    `npx prisma migrate dev --name name`
+  `npx prisma migrate dev --name name`
 
--   Update the types after a migration
+- Update the types after a migration
 
-    `npx prisma generate`
+  `npx prisma generate`
 
--   Browse data
-    `npx prisma studio`
+- Browse data
+  `npx prisma studio`

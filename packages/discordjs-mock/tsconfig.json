@@ -8,5 +8,11 @@
 	"ts-node": {
 		"transpileOnly": true
 	},
-	"include": ["src", "jest.config.ts", "index.ts", "../../reset.d.ts", "prettierrc.cjs"]
+	"include": [
+		"src",
+		"jest.config.ts",
+		"index.ts",
+		"../../reset.d.ts",
+		"prettierrc.cjs"
+	]
 }

@@ -1,9 +1,9 @@
 // eslint-disable-next-line no-restricted-imports
-import { createVitestConfig } from "../../scripts/vitest.config";
+import { createVitestConfig } from '../../scripts/vitest.config';
 
 export default createVitestConfig({
-	envDir: "../../",
+	envDir: '../../',
 	test: {
-		globalSetup: "./test/setup.ts"
-	}
+		globalSetup: './test/setup.ts',
+	},
 });

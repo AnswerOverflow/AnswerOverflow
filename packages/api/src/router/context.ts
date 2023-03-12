@@ -1,14 +1,17 @@
-import { Session, getServerSession } from "@answeroverflow/auth";
-import type { DiscordAPIServerSchema, getDiscordUser } from "@answeroverflow/cache";
-import { prisma, elastic } from "@answeroverflow/db";
-import type { inferAsyncReturnType } from "@trpc/server";
-import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
+import { Session, getServerSession } from '@answeroverflow/auth';
+import type {
+	DiscordAPIServerSchema,
+	getDiscordUser,
+} from '@answeroverflow/cache';
+import { prisma, elastic } from '@answeroverflow/db';
+import type { inferAsyncReturnType } from '@trpc/server';
+import type { CreateNextContextOptions } from '@trpc/server/adapters/next';
 
 /**
  * Replace this with an object if you want to pass things to createContextInner
  */
 
-export const sourceTypes = ["web-client", "discord-bot"] as const;
+export const sourceTypes = ['web-client', 'discord-bot'] as const;
 export type Source = (typeof sourceTypes)[number];
 
 type CreateContextOptions = {
@@ -33,18 +36,18 @@ export const createContextInner = async (opts: CreateContextOptions) => {
 		caller: opts.source,
 		discordAccount: opts.discordAccount,
 		prisma,
-		elastic
+		elastic,
 	};
 };
 
 export const createSSGContext = async () => {
-	return await createContextInner({ source: "web-client", session: null });
+	return await createContextInner({ source: 'web-client', session: null });
 };
 
-export type BotContextCreate = Omit<CreateContextOptions, "source">;
+export type BotContextCreate = Omit<CreateContextOptions, 'source'>;
 
 export const createBotContext = async (opts: BotContextCreate) => {
-	return await createContextInner({ ...opts, source: "discord-bot" });
+	return await createContextInner({ ...opts, source: 'discord-bot' });
 };
 
 /**
@@ -57,7 +60,7 @@ export const createContext = async (opts: CreateNextContextOptions) => {
 	return await createContextInner({
 		session,
 		userServers: null,
-		source: "web-client"
+		source: 'web-client',
 	});
 };
 

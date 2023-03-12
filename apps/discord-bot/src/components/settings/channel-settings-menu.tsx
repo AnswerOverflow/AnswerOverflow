@@ -1,13 +1,19 @@
-import { Button, Select, Option, Link, ActionRow } from "@answeroverflow/discordjs-react";
+import {
+	Button,
+	Select,
+	Option,
+	Link,
+	ActionRow,
+} from '@answeroverflow/discordjs-react';
 import {
 	ChannelType,
 	ForumChannel,
 	GuildForumTag,
 	NewsChannel,
 	TextChannel,
-	type GuildTextBasedChannel
-} from "discord.js";
-import LRUCache from "lru-cache";
+	type GuildTextBasedChannel,
+} from 'discord.js';
+import LRUCache from 'lru-cache';
 import {
 	DISABLE_CHANNEL_INDEXING_LABEL,
 	ENABLE_CHANNEL_INDEXING_LABEL,
@@ -30,28 +36,28 @@ import {
 	ENABLE_REDIRECTION_TO_HELP_CHANNEL_LABEL,
 	ENABLE_AI_QUESTION_ANSWERING_LABEL,
 	OPEN_INDEXING_SETTINGS_MENU_LABEL,
-	SEND_CONSENT_PROMPT_LABEL
-} from "@answeroverflow/constants";
-import type { ChannelWithFlags } from "@answeroverflow/prisma-types";
-import React from "react";
+	SEND_CONSENT_PROMPT_LABEL,
+} from '@answeroverflow/constants';
+import type { ChannelWithFlags } from '@answeroverflow/prisma-types';
+import React from 'react';
 import {
 	ToggleButton,
 	InstructionsContainer,
 	EmbedMenuInstruction,
 	Spacer,
-	useHistory
-} from "~discord-bot/components/primitives";
+	useHistory,
+} from '~discord-bot/components/primitives';
 import {
 	updateChannelIndexingEnabled,
 	updateChannelForumGuidelinesConsentEnabled,
 	updateMarkAsSolutionEnabled,
 	updateSendMarkAsSolutionInstructionsEnabled,
 	setSolutionTagId,
-	updateAutoThreadEnabled
-} from "~discord-bot/domains/channel-settings";
-import { guildTextChannelOnlyInteraction } from "~discord-bot/utils/conditions";
-import { ephemeralStatusHandler } from "~discord-bot/utils/trpc";
-import { type RootChannel, getRootChannel } from "~discord-bot/utils/utils";
+	updateAutoThreadEnabled,
+} from '~discord-bot/domains/channel-settings';
+import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
+import { ephemeralStatusHandler } from '~discord-bot/utils/trpc';
+import { type RootChannel, getRootChannel } from '~discord-bot/utils/utils';
 
 type ChannelSettingsMenuItemProps<T extends RootChannel = RootChannel> = {
 	channelInDB: ChannelWithFlags;
@@ -67,12 +73,12 @@ type ChannelSettingsSubMenuProps = {
 // Store a cache to handle unmounting of the component
 const channelCache = new LRUCache<string, ChannelWithFlags>({
 	max: 500,
-	ttl: 1000 * 60 * 5
+	ttl: 1000 * 60 * 5,
 });
 
 const updateChannelState = (
 	setChannelState: (channel: ChannelWithFlags) => void,
-	channel: ChannelWithFlags
+	channel: ChannelWithFlags,
 ) => {
 	channelCache.set(channel.id, channel);
 	setChannelState(channel);
@@ -85,7 +91,7 @@ const updateChannelState = (
 function ToggleIndexingButton({
 	channelInDB,
 	setChannel,
-	targetChannel
+	targetChannel,
 }: ChannelSettingsMenuItemProps) {
 	return (
 		<ToggleButton
@@ -102,7 +108,7 @@ function ToggleIndexingButton({
 						Error: (message) => ephemeralStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
-						}
+						},
 					});
 				})
 			}
@@ -113,7 +119,7 @@ function ToggleIndexingButton({
 function ToggleForumGuidelinesConsentButton({
 	channelInDB,
 	setChannel,
-	targetChannel
+	targetChannel,
 }: ChannelSettingsMenuItemProps) {
 	return (
 		<ToggleButton
@@ -130,7 +136,7 @@ function ToggleForumGuidelinesConsentButton({
 						Error: (message) => ephemeralStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
-						}
+						},
 					});
 				})
 			}
@@ -140,10 +146,10 @@ function ToggleForumGuidelinesConsentButton({
 
 export function IndexingSettingsMenu({
 	targetChannel,
-	initialChannelData
+	initialChannelData,
 }: ChannelSettingsSubMenuProps) {
 	const [channel, setChannel] = React.useState<ChannelWithFlags>(
-		channelCache.get(targetChannel.id) ?? initialChannelData
+		channelCache.get(targetChannel.id) ?? initialChannelData,
 	);
 	const isButtonInForumChannel = targetChannel.type === ChannelType.GuildForum;
 	return (
@@ -154,20 +160,21 @@ export function IndexingSettingsMenu({
 						{
 							title: ENABLE_INDEXING_LABEL,
 							enabled: !channel.flags.indexingEnabled,
-							instructions: "Enable indexing of this channel into web search results"
+							instructions:
+								'Enable indexing of this channel into web search results',
 						},
 						{
 							title: DISABLE_CHANNEL_INDEXING_LABEL,
 							enabled: channel.flags.indexingEnabled,
 							instructions:
-								"Disable indexing of this channel into web search results, existing indexing content will be cleaned up within 7 days"
+								'Disable indexing of this channel into web search results, existing indexing content will be cleaned up within 7 days',
 						},
 						{
 							title: ENABLE_FORUM_GUIDELINES_CONSENT_LABEL,
 							enabled:
 								!channel.flags.forumGuidelinesConsentEnabled &&
 								isButtonInForumChannel,
-							instructions: `Users posting new threads in this channel will be marked as consenting to have their messages publicly displayed. You must have the following in your post guidelines for this to work:\n\n\`${FORUM_GUIDELINES_CONSENT_PROMPT}\``
+							instructions: `Users posting new threads in this channel will be marked as consenting to have their messages publicly displayed. You must have the following in your post guidelines for this to work:\n\n\`${FORUM_GUIDELINES_CONSENT_PROMPT}\``,
 						},
 						{
 							title: DISABLE_FORUM_GUIDELINES_CONSENT_LABEL,
@@ -175,13 +182,13 @@ export function IndexingSettingsMenu({
 								channel.flags.forumGuidelinesConsentEnabled &&
 								isButtonInForumChannel,
 							instructions:
-								"Users posting new threads in this channel will no longer be marked as consenting to have their messages publicly displayed"
+								'Users posting new threads in this channel will no longer be marked as consenting to have their messages publicly displayed',
 						},
 						{
 							title: SEND_CONSENT_PROMPT_LABEL,
 							enabled: true,
-							instructions: "Sends a message with a consent prompt and button"
-						}
+							instructions: 'Sends a message with a consent prompt and button',
+						},
 					]}
 				/>
 			</InstructionsContainer>
@@ -201,7 +208,7 @@ export function IndexingSettingsMenu({
 				label={SEND_CONSENT_PROMPT_LABEL}
 				style="Primary"
 				onClick={() => {
-					console.log("sending consent prompt");
+					console.log('sending consent prompt');
 				}}
 			/>
 		</>
@@ -215,7 +222,7 @@ export function IndexingSettingsMenu({
 function ToggleMarkAsSolutionButton({
 	channelInDB,
 	setChannel,
-	targetChannel
+	targetChannel,
 }: ChannelSettingsMenuItemProps) {
 	return (
 		<ToggleButton
@@ -232,7 +239,7 @@ function ToggleMarkAsSolutionButton({
 						Error: (message) => ephemeralStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
-						}
+						},
 					});
 				})
 			}
@@ -243,11 +250,13 @@ function ToggleMarkAsSolutionButton({
 function ToggleSendMarkAsSolutionInstructionsButton({
 	channelInDB,
 	setChannel,
-	targetChannel
+	targetChannel,
 }: ChannelSettingsMenuItemProps) {
 	return (
 		<ToggleButton
-			currentlyEnabled={channelInDB.flags.sendMarkSolutionInstructionsInNewThreads}
+			currentlyEnabled={
+				channelInDB.flags.sendMarkSolutionInstructionsInNewThreads
+			}
 			disableLabel={DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL}
 			enableLabel={ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL}
 			disabled={!channelInDB.flags.markSolutionEnabled}
@@ -261,7 +270,7 @@ function ToggleSendMarkAsSolutionInstructionsButton({
 						Error: (message) => ephemeralStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
-						}
+						},
 					});
 				})
 			}
@@ -269,19 +278,19 @@ function ToggleSendMarkAsSolutionInstructionsButton({
 	);
 }
 
-export const CLEAR_TAG_VALUE = "clear";
+export const CLEAR_TAG_VALUE = 'clear';
 const getTagNameWithEmoji = (tag: GuildForumTag) =>
 	tag.emoji?.name ? `${tag.emoji.name} ${tag.name}` : tag.name;
 
 function SelectMarkAsSolvedTag({
 	channelInDB,
 	setChannel,
-	targetChannel
+	targetChannel,
 }: ChannelSettingsMenuItemProps<ForumChannel>) {
 	return (
 		<Select
 			placeholder={SET_SOLVED_TAG_ID_PLACEHOLDER}
-			value={channelInDB.solutionTagId ?? ""}
+			value={channelInDB.solutionTagId ?? ''}
 			disabled={!channelInDB.flags.markSolutionEnabled}
 			onChangeValue={async (value, interaction) => {
 				await guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
@@ -292,13 +301,15 @@ function SelectMarkAsSolvedTag({
 						Error: (message) => ephemeralStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
-						}
-					})
+						},
+					}),
 				);
 			}}
 		>
 			<Option
-				label={targetChannel.availableTags.length > 0 ? "(Clear)" : "No Tags Found"}
+				label={
+					targetChannel.availableTags.length > 0 ? '(Clear)' : 'No Tags Found'
+				}
 				value={CLEAR_TAG_VALUE}
 			/>
 			{targetChannel.availableTags.map((tag) => (
@@ -311,7 +322,7 @@ function SelectMarkAsSolvedTag({
 function ToggleAutoThreadButton({
 	channelInDB,
 	setChannel,
-	targetChannel
+	targetChannel,
 }: ChannelSettingsMenuItemProps<TextChannel | NewsChannel>) {
 	return (
 		<ToggleButton
@@ -328,7 +339,7 @@ function ToggleAutoThreadButton({
 						Error: (message) => ephemeralStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
-						}
+						},
 					});
 				})
 			}
@@ -336,15 +347,16 @@ function ToggleAutoThreadButton({
 	);
 }
 
-const getThreadOrPostText = (channel: TextChannel | NewsChannel | ForumChannel) =>
-	channel.type === ChannelType.GuildForum ? "thread" : "post";
+const getThreadOrPostText = (
+	channel: TextChannel | NewsChannel | ForumChannel,
+) => (channel.type === ChannelType.GuildForum ? 'thread' : 'post');
 
 export function HelpChannelUtilitiesMenu({
 	initialChannelData,
-	targetChannel
+	targetChannel,
 }: ChannelSettingsSubMenuProps) {
 	const [channel, setChannel] = React.useState<ChannelWithFlags>(
-		channelCache.get(targetChannel.id) ?? initialChannelData
+		channelCache.get(targetChannel.id) ?? initialChannelData,
 	);
 	const props = { channelInDB: channel, setChannel, targetChannel };
 	const isButtonInForumChannel = targetChannel.type === ChannelType.GuildForum;
@@ -357,13 +369,13 @@ export function HelpChannelUtilitiesMenu({
 							title: ENABLE_MARK_AS_SOLUTION_LABEL,
 							enabled: !channel.flags.markSolutionEnabled,
 							instructions:
-								"Questions in this channel will be able to be marked as solved. On Answer Overflow result page, those solutions will be highlighted"
+								'Questions in this channel will be able to be marked as solved. On Answer Overflow result page, those solutions will be highlighted',
 						},
 						{
 							title: DISABLE_MARK_AS_SOLUTION_LABEL,
 							enabled: channel.flags.markSolutionEnabled,
 							instructions:
-								"Questions in this channel will not be able to be marked as solved"
+								'Questions in this channel will not be able to be marked as solved',
 						},
 						{
 							title: ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
@@ -371,8 +383,8 @@ export function HelpChannelUtilitiesMenu({
 								!channel.flags.sendMarkSolutionInstructionsInNewThreads &&
 								!isButtonInForumChannel,
 							instructions: `When a new ${getThreadOrPostText(
-								targetChannel
-							)} is created, a message will be sent to the thread with instructions on how to mark a solution`
+								targetChannel,
+							)} is created, a message will be sent to the thread with instructions on how to mark a solution`,
 						},
 						{
 							title: DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
@@ -380,26 +392,28 @@ export function HelpChannelUtilitiesMenu({
 								channel.flags.sendMarkSolutionInstructionsInNewThreads &&
 								!isButtonInForumChannel,
 							instructions: `Mark solution instructions will no longer be sent in new ${getThreadOrPostText(
-								targetChannel
-							)}s`
+								targetChannel,
+							)}s`,
 						},
 						{
 							title: ENABLE_AUTO_THREAD_LABEL,
-							enabled: !channel.flags.autoThreadEnabled && !isButtonInForumChannel,
+							enabled:
+								!channel.flags.autoThreadEnabled && !isButtonInForumChannel,
 							instructions:
-								"A new thread will be created for every message in this channel"
+								'A new thread will be created for every message in this channel',
 						},
 						{
 							title: DISABLE_AUTO_THREAD_LABEL,
-							enabled: channel.flags.autoThreadEnabled && !isButtonInForumChannel,
+							enabled:
+								channel.flags.autoThreadEnabled && !isButtonInForumChannel,
 							instructions:
-								"New threads will no longer be created for every message in this channel"
+								'New threads will no longer be created for every message in this channel',
 						},
 						{
 							title: SET_SOLVED_TAG_ID_PLACEHOLDER,
 							enabled: isButtonInForumChannel,
-							instructions: `When a question is marked as solved, this tag will added to the post`
-						}
+							instructions: `When a question is marked as solved, this tag will added to the post`,
+						},
 					]}
 				/>
 			</InstructionsContainer>
@@ -429,8 +443,8 @@ function ExperimentalSettingsMenu() {
 			<InstructionsContainer>
 				**These features are experimental and may not work as expected.**
 				<Spacer count={2} />
-				**Some features may not be implemented yet, join the waitlist to be notified when
-				they are.**
+				**Some features may not be implemented yet, join the waitlist to be
+				notified when they are.**
 				<Spacer count={2} />
 				<EmbedMenuInstruction
 					instructions={[
@@ -438,20 +452,20 @@ function ExperimentalSettingsMenu() {
 							title: ENABLE_REDIRECTION_TO_HELP_CHANNEL_LABEL,
 							enabled: true,
 							instructions:
-								"Users will be redirected to use help channels when they ask a question in the wrong channel, i.e a general chat."
+								'Users will be redirected to use help channels when they ask a question in the wrong channel, i.e a general chat.',
 						},
 						{
 							title: ENABLE_AI_QUESTION_ANSWERING_LABEL,
 							enabled: true,
 							instructions:
-								"Users will receive a ChatGPT style AI answer to their question trained off your community's data."
+								"Users will receive a ChatGPT style AI answer to their question trained off your community's data.",
 						},
 						{
 							title: ENABLE_AI_QUESTION_IMPROVEMENT_SUGGESTIONS_LABEL,
 							enabled: true,
 							instructions:
-								"Users will receive instructions on how to improve their question to get a better answer."
-						}
+								'Users will receive instructions on how to improve their question to get a better answer.',
+						},
 					]}
 				/>
 			</InstructionsContainer>
@@ -460,7 +474,9 @@ function ExperimentalSettingsMenu() {
 				disabled={true}
 				style="Secondary"
 				onClick={() => {
-					console.error("Enable redirection to help channel not implemented yet");
+					console.error(
+						'Enable redirection to help channel not implemented yet',
+					);
 				}}
 			/>
 			<Button
@@ -468,7 +484,7 @@ function ExperimentalSettingsMenu() {
 				disabled={true}
 				style="Secondary"
 				onClick={() => {
-					console.error("Enable AI Question Answering not implemented yet");
+					console.error('Enable AI Question Answering not implemented yet');
 				}}
 			/>
 			<Button
@@ -476,11 +492,16 @@ function ExperimentalSettingsMenu() {
 				disabled={true}
 				style="Secondary"
 				onClick={() => {
-					console.error("Enable AI Question Improvement Suggestions not implemented yet");
+					console.error(
+						'Enable AI Question Improvement Suggestions not implemented yet',
+					);
 				}}
 			/>
 			<ActionRow>
-				<Link url={EXPERIMENTAL_SETTINGS_WAITLIST_URL} label="Join the waitlist" />
+				<Link
+					url={EXPERIMENTAL_SETTINGS_WAITLIST_URL}
+					label="Join the waitlist"
+				/>
 			</ActionRow>
 		</>
 	);
@@ -488,17 +509,17 @@ function ExperimentalSettingsMenu() {
 
 export function ChannelSettingsMenu({
 	channelMenuIsIn,
-	channelWithFlags
+	channelWithFlags,
 }: {
 	channelMenuIsIn: GuildTextBasedChannel;
 	channelWithFlags: ChannelWithFlags;
 }) {
 	const [channel] = React.useState<ChannelWithFlags>(
-		channelCache.get(channelMenuIsIn.id) ?? channelWithFlags
+		channelCache.get(channelMenuIsIn.id) ?? channelWithFlags,
 	);
 	const targetChannel = getRootChannel(channelMenuIsIn);
 	if (!targetChannel) {
-		throw new Error("Could not find root channel");
+		throw new Error('Could not find root channel');
 	}
 	const { pushHistory } = useHistory();
 	return (
@@ -509,18 +530,19 @@ export function ChannelSettingsMenu({
 						{
 							title: OPEN_INDEXING_SETTINGS_MENU_LABEL,
 							enabled: true,
-							instructions: "Configure channel indexing and user consent settings"
+							instructions:
+								'Configure channel indexing and user consent settings',
 						},
 						{
 							title: OPEN_HELP_CHANNEL_UTILITIES_LABEL,
 							enabled: true,
-							instructions: "Configure utilities to improve asking questions"
+							instructions: 'Configure utilities to improve asking questions',
 						},
 						{
 							title: OPEN_EXPERIMENTAL_SETTINGS_LABEL,
 							enabled: true,
-							instructions: "Configure experimental features"
-						}
+							instructions: 'Configure experimental features',
+						},
 					]}
 				/>
 			</InstructionsContainer>
@@ -532,7 +554,7 @@ export function ChannelSettingsMenu({
 						<IndexingSettingsMenu
 							initialChannelData={channel}
 							targetChannel={targetChannel}
-						/>
+						/>,
 					);
 				}}
 			/>
@@ -544,7 +566,7 @@ export function ChannelSettingsMenu({
 						<HelpChannelUtilitiesMenu
 							initialChannelData={channel}
 							targetChannel={targetChannel}
-						/>
+						/>,
 					);
 				}}
 			/>

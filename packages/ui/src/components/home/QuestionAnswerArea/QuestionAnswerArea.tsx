@@ -1,9 +1,9 @@
-import { useRef } from "react";
-import Xarrow from "react-xarrows";
-import { Message, MessageProps } from "~ui/components/Message";
-import { useTheme } from "~ui/utils/hooks";
-import { GooglePage } from "./GooglePage/GooglePage";
-import "./DashAnimation.css";
+import { useRef } from 'react';
+import Xarrow from 'react-xarrows';
+import { Message, MessageProps } from '~ui/components/Message';
+import { useTheme } from '~ui/utils/hooks';
+import { GooglePage } from './GooglePage/GooglePage';
+import './DashAnimation.css';
 
 export interface NewLandingAnimationProps {
 	questionMessage: MessageProps;
@@ -14,7 +14,7 @@ export interface NewLandingAnimationProps {
 export const QuestionAnswerArea = ({
 	discordChannelName,
 	questionMessage,
-	answerMessage
+	answerMessage,
 }: NewLandingAnimationProps) => {
 	const googlePageRef = useRef(null);
 	const discordPageRef = useRef(null);
@@ -31,7 +31,11 @@ export const QuestionAnswerArea = ({
 					</div>
 
 					<div ref={discordPageRef}>
-						<Message {...questionMessage} showLinkIcon={false} forceDarkMode={true} />
+						<Message
+							{...questionMessage}
+							showLinkIcon={false}
+							forceDarkMode={true}
+						/>
 						<Message
 							{...answerMessage}
 							additionalMessageBoxClassNames="rounded-b-md"
@@ -44,11 +48,11 @@ export const QuestionAnswerArea = ({
 				{/* Google */}
 				<GooglePage
 					result={{
-						url: "https://www.answeroverflow.com > ...",
-						title: "How do I index my discord channels into google?",
+						url: 'https://www.answeroverflow.com > ...',
+						title: 'How do I index my discord channels into google?',
 						// TODO: Add description, will require arrow offsets to be changed
 						description:
-							"How do I index my discord channels into google? How do I index my discord channels into google? How do I index my discord channels into google?"
+							'How do I index my discord channels into google? How do I index my discord channels into google? How do I index my discord channels into google?',
 					}}
 					ref={googlePageRef}
 				/>
@@ -57,12 +61,12 @@ export const QuestionAnswerArea = ({
 				<Xarrow
 					start={discordPageRef}
 					end={googlePageRef}
-					color={theme === "dark" ? "white" : "black"}
+					color={theme === 'dark' ? 'white' : 'black'}
 					strokeWidth={3}
-					startAnchor={"left"}
+					startAnchor={'left'}
 					endAnchor={{
-						position: "auto",
-						offset: { x: -18, y: 0 }
+						position: 'auto',
+						offset: { x: -18, y: 0 },
 					}}
 					dashness={true}
 					curveness={2}

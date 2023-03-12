@@ -1,4 +1,4 @@
-import { toggleDarkTheme } from "~ui/utils/theme";
+import { toggleDarkTheme } from '~ui/utils/theme';
 
 function SunIcon<T extends {}>(props: T) {
 	return (

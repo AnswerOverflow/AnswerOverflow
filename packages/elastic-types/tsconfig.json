@@ -4,7 +4,14 @@
 		"types": ["vitest/globals"],
 		"baseUrl": "../../"
 	},
-	"include": ["index.ts", "src", "test", "scripts", "vitest.config.ts", "prettierrc.js"],
+	"include": [
+		"index.ts",
+		"src",
+		"test",
+		"scripts",
+		"vitest.config.ts",
+		"prettierrc.js"
+	],
 	"ts-node": {
 		// these options are overrides used only by ts-node
 		// same as the --compilerOptions flag and the TS_NODE_COMPILER_OPTIONS environment variable

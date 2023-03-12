@@ -1,8 +1,8 @@
-import type { ServerPublic } from "@answeroverflow/api";
-import Link from "next/link";
-import { Button } from "./primitives/Button";
-import { ServerIcon } from "./ServerIcon";
-import Image from "next/image";
+import type { ServerPublic } from '@answeroverflow/api';
+import Link from 'next/link';
+import { Button } from './primitives/Button';
+import { ServerIcon } from './ServerIcon';
+import Image from 'next/image';
 
 export type ManageServerCardProps = {
 	server: ServerPublic;
@@ -15,7 +15,9 @@ export function ManageServerCard({ server, role }: ManageServerCardProps) {
 			<span className="text-base font-bold text-black dark:text-neutral-300">
 				{server.name}
 			</span>
-			<span className="text-sm text-gray-600 dark:text-neutral-400">{role}</span>
+			<span className="text-sm text-gray-600 dark:text-neutral-400">
+				{role}
+			</span>
 		</div>
 	);
 
@@ -32,7 +34,7 @@ export function ManageServerCard({ server, role }: ManageServerCardProps) {
 				)}
 				<div className="relative z-10 h-full w-full rounded-lg bg-black/5 shadow-md backdrop-blur-md " />
 				<div className="absolute inset-0 z-20 flex items-center justify-center">
-					<ServerIcon server={server} size={"lg"} />
+					<ServerIcon server={server} size={'lg'} />
 				</div>
 			</div>
 		);
@@ -50,7 +52,7 @@ export function ManageServerCard({ server, role }: ManageServerCardProps) {
 				<div className="ml-auto">
 					<Link
 						href={`https://discord.gg/`}
-						target={"Blank"}
+						target={'Blank'}
 						referrerPolicy="no-referrer"
 					>
 						<Button type="solid" color="black">

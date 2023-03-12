@@ -1,47 +1,48 @@
-import path from "path"; // 👈 import path
-import type { StorybookConfig } from "@storybook/nextjs"; // or whatever framework you're using
-import postcss from "postcss";
+import path from 'path'; // 👈 import path
+import type { StorybookConfig } from '@storybook/nextjs'; // or whatever framework you're using
+import postcss from 'postcss';
 const config: StorybookConfig = {
-	stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|ts|tsx)"],
+	stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],
 	addons: [
-		"@storybook/addon-links",
-		"@storybook/addon-essentials",
-		"@storybook/addon-interactions",
-		"@storybook/addon-a11y",
+		'@storybook/addon-links',
+		'@storybook/addon-essentials',
+		'@storybook/addon-interactions',
+		'@storybook/addon-a11y',
 		{
-			name: "@storybook/addon-postcss",
+			name: '@storybook/addon-postcss',
 			options: {
 				postcssLoaderOptions: {
-					implementation: postcss
-				}
-			}
-		}
+					implementation: postcss,
+				},
+			},
+		},
 	],
 	framework: {
-		name: "@storybook/nextjs",
+		name: '@storybook/nextjs',
 		// Add this
-		options: {}
+		options: {},
 	},
 	webpackFinal: (config) => {
 		config.resolve!.alias = {
 			...config.resolve!.alias,
-			"~ui/test": path.resolve(__dirname, "../test/"),
-			"~ui": path.resolve(__dirname, "../src/")
+			'~ui/test': path.resolve(__dirname, '../test/'),
+			'~ui': path.resolve(__dirname, '../src/'),
 		};
 		return config;
 	},
-	staticDirs: ["../../../apps/nextjs/public"],
+	staticDirs: ['../../../apps/nextjs/public'],
 	typescript: {
 		check: false,
 		checkOptions: {},
 		reactDocgen: false,
 		reactDocgenTypescriptOptions: {
 			shouldExtractLiteralValuesFromEnum: true,
-			propFilter: (prop) => (prop.parent ? !/node_modules/.test(prop.parent.fileName) : true)
-		}
+			propFilter: (prop) =>
+				prop.parent ? !/node_modules/.test(prop.parent.fileName) : true,
+		},
 	},
 	docs: {
-		autodocs: false
-	}
+		autodocs: false,
+	},
 };
 export default config;

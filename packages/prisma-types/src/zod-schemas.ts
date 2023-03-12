@@ -1,38 +1,40 @@
-import { z } from "zod";
-import { bitfieldToDict, dictToBitfield, mergeFlags, toDict } from "./bitfield";
-import { ChannelType } from "discord-api-types/v10";
-import type { Channel, Server, UserServerSettings } from "@prisma/client";
+import { z } from 'zod';
+import { bitfieldToDict, dictToBitfield, mergeFlags, toDict } from './bitfield';
+import { ChannelType } from 'discord-api-types/v10';
+import type { Channel, Server, UserServerSettings } from '@prisma/client';
 
 // TODO: Split up this file, it's become a bit bloated to prevent circular dependencies
 
 export const ALLOWED_THREAD_TYPES = new Set([
 	ChannelType.PublicThread,
-	ChannelType.AnnouncementThread
+	ChannelType.AnnouncementThread,
 ]);
 
 export const ALLOWED_ROOT_CHANNEL_TYPES = new Set([
 	ChannelType.GuildForum,
 	ChannelType.GuildText,
-	ChannelType.GuildAnnouncement
+	ChannelType.GuildAnnouncement,
 ]);
 
 export const ALLOWED_CHANNEL_TYPES = new Set([
 	...ALLOWED_ROOT_CHANNEL_TYPES,
-	...ALLOWED_THREAD_TYPES
+	...ALLOWED_THREAD_TYPES,
 ]);
 
 export function toZObject<T extends readonly string[]>(...keys: T) {
 	return z.object(toDict(() => z.boolean(), ...keys));
 }
 
-export const zUniqueArray = z.array(z.string()).transform((arr) => [...new Set(arr)]);
+export const zUniqueArray = z
+	.array(z.string())
+	.transform((arr) => [...new Set(arr)]);
 
 export const channelBitfieldFlags = [
-	"indexingEnabled",
-	"autoThreadEnabled",
-	"markSolutionEnabled",
-	"sendMarkSolutionInstructionsInNewThreads",
-	"forumGuidelinesConsentEnabled"
+	'indexingEnabled',
+	'autoThreadEnabled',
+	'markSolutionEnabled',
+	'sendMarkSolutionInstructionsInNewThreads',
+	'forumGuidelinesConsentEnabled',
 ] as const;
 
 export const zChannelBitfieldFlags = toZObject(...channelBitfieldFlags);
@@ -49,12 +51,12 @@ export const zChannelPrisma = z.object({
 	bitfield: z.number(),
 	type: z.number().refine(
 		(n) => ALLOWED_CHANNEL_TYPES.has(n),
-		"Channel type can only be guild forum, text, or announcement" // TODO: Make a type error if possible
+		'Channel type can only be guild forum, text, or announcement', // TODO: Make a type error if possible
 	),
 	parentId: z.string().nullable(),
 	inviteCode: z.string().nullable(),
 	solutionTagId: z.string().nullable(),
-	lastIndexedSnowflake: z.string().nullable()
+	lastIndexedSnowflake: z.string().nullable(),
 } satisfies ChannelZodFormat);
 
 export const zChannelPrismaCreate = zChannelPrisma.partial().merge(
@@ -62,18 +64,18 @@ export const zChannelPrismaCreate = zChannelPrisma.partial().merge(
 		id: true,
 		name: true,
 		serverId: true,
-		type: true
-	})
+		type: true,
+	}),
 );
 
 export const zChannelPrismaUpdate = zChannelPrisma.partial().omit({
 	serverId: true,
 	id: true,
-	parentId: true
+	parentId: true,
 });
 
 export const zChannel = zChannelPrisma.required().extend({
-	flags: zChannelBitfieldFlags
+	flags: zChannelBitfieldFlags,
 });
 
 export type ChannelWithFlags = z.infer<typeof zChannel>;
@@ -84,11 +86,11 @@ export const bitfieldToChannelFlags = (bitfield: number) =>
 export function addFlagsToChannel<
 	T extends {
 		bitfield: number;
-	}
+	},
 >(channel: T) {
 	return {
 		...channel,
-		flags: bitfieldToChannelFlags(channel.bitfield)
+		flags: bitfieldToChannelFlags(channel.bitfield),
 	};
 }
 
@@ -98,12 +100,12 @@ export const zChannelPublic = zChannel.pick({
 	serverId: true,
 	type: true,
 	parentId: true,
-	inviteCode: true
+	inviteCode: true,
 });
 
 export type ChannelPublicWithFlags = z.infer<typeof zChannelPublic>;
 
-export const serverSettingsFlags = ["readTheRulesConsentEnabled"] as const;
+export const serverSettingsFlags = ['readTheRulesConsentEnabled'] as const;
 export const zServerSettingsFlags = toZObject(...serverSettingsFlags);
 
 export const bitfieldToServerFlags = (bitfield: number) =>
@@ -112,15 +114,18 @@ export const bitfieldToServerFlags = (bitfield: number) =>
 export function addFlagsToServer<T extends Server>(serverSettings: T) {
 	return {
 		...serverSettings,
-		flags: bitfieldToServerFlags(serverSettings.bitfield)
+		flags: bitfieldToServerFlags(serverSettings.bitfield),
 	};
 }
 
-export function mergeServerFlags(old: number, newFlags: Record<string, boolean>) {
+export function mergeServerFlags(
+	old: number,
+	newFlags: Record<string, boolean>,
+) {
 	return mergeFlags(
 		() => bitfieldToServerFlags(old),
 		newFlags,
-		(flags) => dictToBitfield(flags, serverSettingsFlags)
+		(flags) => dictToBitfield(flags, serverSettingsFlags),
 	);
 }
 
@@ -135,31 +140,31 @@ export const zServerPrisma = z.object({
 	icon: z.string().nullable(),
 	kickedTime: z.date().nullable(),
 	description: z.string().nullable(),
-	bitfield: z.number()
+	bitfield: z.number(),
 } satisfies ServerZodFormat);
 
 // For creating a server, we make sure to include the required fields
 export const zServerPrismaCreate = zServerPrisma.partial().merge(
 	zServerPrisma.pick({
 		name: true,
-		id: true
-	})
+		id: true,
+	}),
 );
 
 // For updating a server, only the ID is required
 export const zServerPrismaUpdate = zServerPrisma.partial().merge(
 	zServerPrisma.pick({
-		id: true
-	})
+		id: true,
+	}),
 );
 
 export const zServer = zServerPrisma
 	.required()
 	.omit({
-		bitfield: true
+		bitfield: true,
 	})
 	.extend({
-		flags: zServerSettingsFlags
+		flags: zServerSettingsFlags,
 	});
 
 export type ServerWithFlags = z.infer<typeof zServer>;
@@ -168,31 +173,36 @@ export const zServerPublic = zServer.pick({
 	id: true,
 	name: true,
 	icon: true,
-	description: true
+	description: true,
 });
 
 export type ServerPublicWithFlags = z.infer<typeof zServerPublic>;
 
 export const userServerSettingsFlags = [
-	"canPubliclyDisplayMessages",
-	"messageIndexingDisabled"
+	'canPubliclyDisplayMessages',
+	'messageIndexingDisabled',
 ] as const;
 
 export const bitfieldToUserServerSettingsFlags = (bitfield: number) =>
 	bitfieldToDict(bitfield, userServerSettingsFlags);
 
-export function addFlagsToUserServerSettings<T extends UserServerSettings>(userServerSettings: T) {
+export function addFlagsToUserServerSettings<T extends UserServerSettings>(
+	userServerSettings: T,
+) {
 	return {
 		...userServerSettings,
-		flags: bitfieldToUserServerSettingsFlags(userServerSettings.bitfield)
+		flags: bitfieldToUserServerSettingsFlags(userServerSettings.bitfield),
 	};
 }
 
-export function userServerSettingsFlagsToBitfield(old: number, newFlags: Record<string, boolean>) {
+export function userServerSettingsFlagsToBitfield(
+	old: number,
+	newFlags: Record<string, boolean>,
+) {
 	return mergeFlags(
 		() => bitfieldToUserServerSettingsFlags(old),
 		newFlags,
-		(flags) => dictToBitfield(flags, userServerSettingsFlags)
+		(flags) => dictToBitfield(flags, userServerSettingsFlags),
 	);
 }
 
@@ -201,21 +211,21 @@ export const zUserServerSettingsFlags = toZObject(...userServerSettingsFlags);
 export const zUserServerSettings = z.object({
 	userId: z.string(),
 	serverId: z.string(),
-	bitfield: z.number().optional()
+	bitfield: z.number().optional(),
 });
 
 export const zUserServerSettingsWithFlags = zUserServerSettings.extend({
-	flags: zUserServerSettingsFlags
+	flags: zUserServerSettingsFlags,
 });
 
 export const zDiscordAccount = z.object({
 	id: z.string(),
 	name: z.string(),
-	avatar: z.string().nullable()
+	avatar: z.string().nullable(),
 });
 
 export const zDiscordAccountPublic = zDiscordAccount.pick({
 	id: true,
 	name: true,
-	avatar: true
+	avatar: true,
 });

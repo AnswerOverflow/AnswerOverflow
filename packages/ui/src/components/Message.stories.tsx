@@ -1,16 +1,16 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { MessageProps, Message } from "./Message";
-import { mockDiscordAccount } from "~ui/test/props";
+import type { Meta, StoryObj } from '@storybook/react';
+import { MessageProps, Message } from './Message';
+import { mockDiscordAccount } from '~ui/test/props';
 
-import type { MessageWithDiscordAccount } from "@answeroverflow/db";
+import type { MessageWithDiscordAccount } from '@answeroverflow/db';
 
 const meta = {
 	component: Message,
 	parameters: {
 		a11y: {
-			disable: true
-		}
-	}
+			disable: true,
+		},
+	},
 } as Meta<typeof Message>;
 
 export default meta;
@@ -18,31 +18,31 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const loremIpsum =
-	"Lorem ipsum dolor sit amet consectetur adipisicing elit. Quidem fugit iure delectus tempore! Nam nihil animi nemo nisi eligendi veniam obcaecati accusantium, sunt maiores tenetur illum saepe incidunt beatae hic.";
+	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quidem fugit iure delectus tempore! Nam nihil animi nemo nisi eligendi veniam obcaecati accusantium, sunt maiores tenetur illum saepe incidunt beatae hic.';
 
 //👇 Each story then reuses that template
 const defaultMessage: MessageProps = {
 	message: {
 		content: loremIpsum,
-		id: "1063028763656458270",
+		id: '1063028763656458270',
 		author: {
-			name: "John Doe",
-			id: "0",
-			avatar: null
+			name: 'John Doe',
+			id: '0',
+			avatar: null,
 		},
 		parentChannelId: null,
 		public: true,
 		images: [],
-		channelId: "0",
-		serverId: "0",
+		channelId: '0',
+		serverId: '0',
 		solutionIds: [],
 		childThread: null,
-		messageReference: null
-	} as MessageWithDiscordAccount
+		messageReference: null,
+	} as MessageWithDiscordAccount,
 };
 
 export const Primary: Story = {
-	args: defaultMessage
+	args: defaultMessage,
 };
 
 export const OverflowLetters: Story = {
@@ -51,10 +51,10 @@ export const OverflowLetters: Story = {
 		message: {
 			...defaultMessage.message,
 			content:
-				"Helloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo",
-			author: mockDiscordAccount()
-		}
-	}
+				'Helloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo',
+			author: mockDiscordAccount(),
+		},
+	},
 };
 
 export const WithImages: Story = {
@@ -62,30 +62,30 @@ export const WithImages: Story = {
 		...Primary.args,
 		message: {
 			...defaultMessage.message,
-			channelId: "1031266112802914305",
-			serverId: "701008832645824553",
+			channelId: '1031266112802914305',
+			serverId: '701008832645824553',
 			images: [
 				{
-					url: "https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.png",
+					url: 'https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.png',
 					width: 897,
 					height: 672,
-					description: null
+					description: null,
 				},
 				{
-					url: "https://cdn.discordapp.com/attachments/1037547270733832242/1063121784578261033/image.png",
+					url: 'https://cdn.discordapp.com/attachments/1037547270733832242/1063121784578261033/image.png',
 					width: 1440,
 					height: 2560,
-					description: null
+					description: null,
 				},
 				{
-					url: "https://cdn.discordapp.com/attachments/1037547270733832242/1063121784578261033/image.png",
+					url: 'https://cdn.discordapp.com/attachments/1037547270733832242/1063121784578261033/image.png',
 					width: null,
 					height: null,
-					description: null
-				}
-			]
-		}
-	}
+					description: null,
+				},
+			],
+		},
+	},
 };
 
 export const WithCode: Story = {
@@ -105,9 +105,9 @@ export const WithCode: Story = {
       };
     }
       \`\`\`
-    `
-		}
-	}
+    `,
+		},
+	},
 };
 
 export const WithXSS: Story = {
@@ -115,9 +115,9 @@ export const WithXSS: Story = {
 		...Primary.args,
 		message: {
 			...defaultMessage.message,
-			content: "<script> alert('XSS')</script>"
-		}
-	}
+			content: "<script> alert('XSS')</script>",
+		},
+	},
 };
 
 export const WithXSSInCodeBlock: Story = {
@@ -125,7 +125,7 @@ export const WithXSSInCodeBlock: Story = {
 		...Primary.args,
 		message: {
 			...defaultMessage.message,
-			content: "```<script> alert('XSS')</script>```"
-		}
-	}
+			content: "```<script> alert('XSS')</script>```",
+		},
+	},
 };

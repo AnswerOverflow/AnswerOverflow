@@ -1,11 +1,11 @@
-import { router } from "./trpc";
-import { authRouter } from "./auth";
-import { channelRouter } from "~api/router/channel/channel";
-import { serverRouter } from "~api/router/server/server";
-import { discordAccountRouter } from "./users/accounts/discord-accounts";
-import { userServerSettingsRouter } from "./user-server-settings/user-server-settings";
-import { userRouter } from "./users/user/user";
-import { messagesRouter } from "./messages/messages";
+import { router } from './trpc';
+import { authRouter } from './auth';
+import { channelRouter } from '~api/router/channel/channel';
+import { serverRouter } from '~api/router/server/server';
+import { discordAccountRouter } from './users/accounts/discord-accounts';
+import { userServerSettingsRouter } from './user-server-settings/user-server-settings';
+import { userRouter } from './users/user/user';
+import { messagesRouter } from './messages/messages';
 
 export const botRouter = router({
 	// Discord:
@@ -15,7 +15,7 @@ export const botRouter = router({
 	userServerSettings: userServerSettingsRouter,
 
 	// Other:
-	users: userRouter
+	users: userRouter,
 });
 
 export const appRouter = router({
@@ -27,7 +27,7 @@ export const appRouter = router({
 
 	// Other:
 	users: userRouter,
-	auth: authRouter
+	auth: authRouter,
 });
 
 // export type definition of API

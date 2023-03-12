@@ -1,10 +1,10 @@
-import { createBotContext, botRouter } from "@answeroverflow/api";
-import type { GuildMember } from "discord.js";
+import { createBotContext, botRouter } from '@answeroverflow/api';
+import type { GuildMember } from 'discord.js';
 
 export async function createUnauthenticatedCtx() {
 	const ctx = await createBotContext({
 		session: null,
-		userServers: undefined
+		userServers: undefined,
 	});
 	return botRouter.createCaller(ctx);
 }
@@ -17,7 +17,7 @@ export async function createMemberCtx(member: GuildMember) {
 			avatar: member.displayAvatarURL(),
 			discriminator: member.user.discriminator,
 			username: member.user.username,
-			id: member.id
+			id: member.id,
 		},
 		// The only server that we care about is the one we are currently interacting with, so only having 1 server makes sense here
 		userServers: [
@@ -28,9 +28,9 @@ export async function createMemberCtx(member: GuildMember) {
 				// Permissions are the member permissions that tRPC validates match the required flags
 				permissions: member.permissions.bitfield as unknown as number, // TODO: Handle bigint better
 				icon: guild.iconURL(),
-				owner: guild.ownerId === member.id
-			}
-		]
+				owner: guild.ownerId === member.id,
+			},
+		],
 	});
 	return ctx;
 }

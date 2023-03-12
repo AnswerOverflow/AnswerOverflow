@@ -1,5 +1,5 @@
-import { ApplyOptions } from "@sapphire/decorators";
-import { Listener } from "@sapphire/framework";
+import { ApplyOptions } from '@sapphire/decorators';
+import { Listener } from '@sapphire/framework';
 import {
 	Channel,
 	ChannelType,
@@ -7,30 +7,39 @@ import {
 	Events,
 	GuildChannel,
 	Invite,
-	ThreadChannel
-} from "discord.js";
+	ThreadChannel,
+} from 'discord.js';
 import {
 	deleteChannel,
 	findChannelById,
 	findChannelByInviteCode,
-	updateChannel
-} from "@answeroverflow/db";
+	updateChannel,
+} from '@answeroverflow/db';
 
-@ApplyOptions<Listener.Options>({ event: Events.ChannelUpdate, name: "Channel Sync On Update" })
+@ApplyOptions<Listener.Options>({
+	event: Events.ChannelUpdate,
+	name: 'Channel Sync On Update',
+})
 export class SyncOnUpdate extends Listener {
-	public async run(_: DMChannel | GuildChannel, newChannel: DMChannel | GuildChannel) {
+	public async run(
+		_: DMChannel | GuildChannel,
+		newChannel: DMChannel | GuildChannel,
+	) {
 		if (newChannel.type === ChannelType.DM) return;
 		const chnl = await findChannelById(newChannel.id);
 		if (!chnl) return;
 
 		await updateChannel({
 			old: chnl,
-			update: { id: newChannel.id, name: newChannel.name }
+			update: { id: newChannel.id, name: newChannel.name },
 		});
 	}
 }
 
-@ApplyOptions<Listener.Options>({ event: Events.ChannelDelete, name: "Channel Sync On Delete" })
+@ApplyOptions<Listener.Options>({
+	event: Events.ChannelDelete,
+	name: 'Channel Sync On Delete',
+})
 export class ChannelSyncOnDelete extends Listener {
 	public async run(channel: Channel) {
 		const chnl = await findChannelById(channel.id);
@@ -39,7 +48,10 @@ export class ChannelSyncOnDelete extends Listener {
 	}
 }
 
-@ApplyOptions<Listener.Options>({ event: Events.ThreadDelete, name: "Thread Sync On Delete" })
+@ApplyOptions<Listener.Options>({
+	event: Events.ThreadDelete,
+	name: 'Thread Sync On Delete',
+})
 export class ThreadSyncOnDelete extends Listener {
 	public async run(thread: ThreadChannel) {
 		const chnl = await findChannelById(thread.id);
@@ -48,19 +60,25 @@ export class ThreadSyncOnDelete extends Listener {
 	}
 }
 
-@ApplyOptions<Listener.Options>({ event: Events.ThreadUpdate, name: "Thread Sync On Update" })
+@ApplyOptions<Listener.Options>({
+	event: Events.ThreadUpdate,
+	name: 'Thread Sync On Update',
+})
 export class ThreadSyncOnUpdate extends Listener {
 	public async run(_: ThreadChannel, newThread: ThreadChannel) {
 		const chnl = await findChannelById(newThread.id);
 		if (!chnl) return;
 		await updateChannel({
 			old: chnl,
-			update: { id: newThread.id, name: newThread.name }
+			update: { id: newThread.id, name: newThread.name },
 		});
 	}
 }
 
-@ApplyOptions<Listener.Options>({ event: Events.InviteDelete, name: "Invite Sync On Delete" })
+@ApplyOptions<Listener.Options>({
+	event: Events.InviteDelete,
+	name: 'Invite Sync On Delete',
+})
 export class InviteSyncOnDelete extends Listener {
 	public async run(invite: Invite) {
 		const settings = await findChannelByInviteCode(invite.code);
@@ -68,7 +86,7 @@ export class InviteSyncOnDelete extends Listener {
 
 		await updateChannel({
 			old: settings,
-			update: { id: settings.id, inviteCode: null }
+			update: { id: settings.id, inviteCode: null },
 		});
 	}
 }

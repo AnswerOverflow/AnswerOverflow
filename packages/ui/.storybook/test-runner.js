@@ -3,8 +3,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable no-undef */
 // 🤮
-const { getStoryContext } = require("@storybook/test-runner");
-const { injectAxe, checkA11y, configureAxe } = require("axe-playwright");
+const { getStoryContext } = require('@storybook/test-runner');
+const { injectAxe, checkA11y, configureAxe } = require('axe-playwright');
 
 module.exports = {
 	setup() {
@@ -25,17 +25,17 @@ module.exports = {
 
 		// Apply story-level a11y rules
 		await configureAxe(page, {
-			rules: storyContext.parameters?.a11y?.config?.rules
+			rules: storyContext.parameters?.a11y?.config?.rules,
 		});
 
 		// from Storybook 7.0 onwards, the selector should be #storybook-root
-		await checkA11y(page, "#storybook-root", {
+		await checkA11y(page, '#storybook-root', {
 			detailedReport: true,
 			detailedReportOptions: {
-				html: true
+				html: true,
 			},
 			// pass axe options defined in @storybook/addon-a11y
-			axeOptions: storyContext.parameters?.a11y?.options
+			axeOptions: storyContext.parameters?.a11y?.options,
 		});
-	}
+	},
 };

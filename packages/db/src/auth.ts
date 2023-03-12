@@ -1,29 +1,29 @@
-import { prisma } from "@answeroverflow/prisma-types";
-import { getRandomId } from "@answeroverflow/utils";
+import { prisma } from '@answeroverflow/prisma-types';
+import { getRandomId } from '@answeroverflow/utils';
 
 export function findDiscordOauthByProviderAccountId(discordId: string) {
 	return prisma.account.findUnique({
 		where: {
 			provider_providerAccountId: {
-				provider: "discord",
-				providerAccountId: discordId
-			}
-		}
+				provider: 'discord',
+				providerAccountId: discordId,
+			},
+		},
 	});
 }
 
 export async function findDiscordOauthByUserId(userId: string) {
 	const account = await prisma.user.findUnique({
 		where: {
-			id: userId
+			id: userId,
 		},
 		select: {
 			accounts: {
 				where: {
-					provider: "discord"
-				}
-			}
-		}
+					provider: 'discord',
+				},
+			},
+		},
 	});
 	return account?.accounts[0] ?? null;
 }
@@ -32,18 +32,18 @@ export async function findDiscordOauthByUserId(userId: string) {
 //! MAINLY TEST ONLY
 export function _NOT_PROD_createOauthAccountEntry({
 	discordUserId,
-	userId
+	userId,
 }: {
 	discordUserId: string;
 	userId: string;
 }) {
 	return prisma.account.create({
 		data: {
-			provider: "discord",
-			type: "oauth",
+			provider: 'discord',
+			type: 'oauth',
 			providerAccountId: discordUserId,
 			userId: userId,
-			access_token: getRandomId()
-		}
+			access_token: getRandomId(),
+		},
 	});
 }

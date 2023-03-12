@@ -1,19 +1,19 @@
-import { ChannelType, GuildMember } from "discord.js";
-import type { ChannelWithFlags } from "@answeroverflow/db";
-import { callAPI, TRPCStatusHandler } from "~discord-bot/utils/trpc";
-import { toAOChannelWithServer } from "~discord-bot/utils/conversions";
-import { createMemberCtx } from "~discord-bot/utils/context";
-import { removeDiscordMarkdown, RootChannel } from "~discord-bot/utils/utils";
+import { ChannelType, GuildMember } from 'discord.js';
+import type { ChannelWithFlags } from '@answeroverflow/db';
+import { callAPI, TRPCStatusHandler } from '~discord-bot/utils/trpc';
+import { toAOChannelWithServer } from '~discord-bot/utils/conversions';
+import { createMemberCtx } from '~discord-bot/utils/context';
+import { removeDiscordMarkdown, RootChannel } from '~discord-bot/utils/utils';
 import {
 	FORUM_GUIDELINES_CONSENT_PROMPT,
-	FORUM_GUIDELINES_CONSENT_MISSING_ERROR_MESSAGE
-} from "@answeroverflow/constants";
+	FORUM_GUIDELINES_CONSENT_MISSING_ERROR_MESSAGE,
+} from '@answeroverflow/constants';
 
 type ChannelSettingsUpdateAPICall = {
 	member: GuildMember;
 	channel: RootChannel;
 	Error: (message: string) => unknown | Promise<unknown>;
-} & Omit<TRPCStatusHandler<ChannelWithFlags>, "Error">;
+} & Omit<TRPCStatusHandler<ChannelWithFlags>, 'Error'>;
 
 export async function updateChannelIndexingEnabled({
 	member,
@@ -27,9 +27,9 @@ export async function updateChannelIndexingEnabled({
 		const channelInvite = await channel.createInvite({
 			maxAge: 0,
 			maxUses: 0,
-			reason: "Channel indexing enabled invite",
+			reason: 'Channel indexing enabled invite',
 			unique: false,
-			temporary: false
+			temporary: false,
 		});
 		newInviteCode = channelInvite.code;
 	}
@@ -38,18 +38,21 @@ export async function updateChannelIndexingEnabled({
 			router.channels.setIndexingEnabled({
 				channel: toAOChannelWithServer(channel),
 				enabled,
-				inviteCode: newInviteCode ?? undefined
+				inviteCode: newInviteCode ?? undefined,
 			}),
 		getCtx: () => createMemberCtx(member),
 		Error: (error) => Error(error.message),
-		...statusHandlers
+		...statusHandlers,
 	});
 }
 
 export function doesTextHaveConsentPrompt(text: string) {
-	const strippedGuidelines = removeDiscordMarkdown(text).replace(/[^A-Za-z0-9]/g, "");
+	const strippedGuidelines = removeDiscordMarkdown(text).replace(
+		/[^A-Za-z0-9]/g,
+		'',
+	);
 	return strippedGuidelines.includes(
-		FORUM_GUIDELINES_CONSENT_PROMPT.replace(/[^A-Za-z0-9]/g, "")
+		FORUM_GUIDELINES_CONSENT_PROMPT.replace(/[^A-Za-z0-9]/g, ''),
 	);
 }
 
@@ -68,11 +71,11 @@ export async function updateChannelForumGuidelinesConsentEnabled({
 		apiCall: (router) =>
 			router.channels.setForumGuidelinesConsentEnabled({
 				channel: toAOChannelWithServer(channel),
-				enabled
+				enabled,
 			}),
 		getCtx: () => createMemberCtx(member),
 		Error: (error) => Error(error.message),
-		...statusHandlers
+		...statusHandlers,
 	});
 }
 
@@ -87,11 +90,11 @@ export function updateMarkAsSolutionEnabled({
 		apiCall: (router) =>
 			router.channels.setMarkSolutionEnabled({
 				channel: toAOChannelWithServer(channel),
-				enabled
+				enabled,
 			}),
 		getCtx: () => createMemberCtx(member),
 		Error: (error) => Error(error.message),
-		...statusHandlers
+		...statusHandlers,
 	});
 }
 
@@ -106,11 +109,11 @@ export function updateSendMarkAsSolutionInstructionsEnabled({
 		apiCall: (router) =>
 			router.channels.setSendMarkSolutionInstructionsInNewThreadsEnabled({
 				channel: toAOChannelWithServer(channel),
-				enabled
+				enabled,
 			}),
 		getCtx: () => createMemberCtx(member),
 		Error: (error) => Error(error.message),
-		...statusHandlers
+		...statusHandlers,
 	});
 }
 
@@ -125,11 +128,11 @@ export function setSolutionTagId({
 		apiCall: (router) =>
 			router.channels.setSolutionTagId({
 				channel: toAOChannelWithServer(channel),
-				tagId
+				tagId,
 			}),
 		getCtx: () => createMemberCtx(member),
 		Error: (error) => Error(error.message),
-		...statusHandlers
+		...statusHandlers,
 	});
 }
 
@@ -144,10 +147,10 @@ export function updateAutoThreadEnabled({
 		apiCall: (router) =>
 			router.channels.setAutoThreadEnabled({
 				channel: toAOChannelWithServer(channel),
-				enabled
+				enabled,
 			}),
 		getCtx: () => createMemberCtx(member),
 		Error: (error) => Error(error.message),
-		...statusHandlers
+		...statusHandlers,
 	});
 }

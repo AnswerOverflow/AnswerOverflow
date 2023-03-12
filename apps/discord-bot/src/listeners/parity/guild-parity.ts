@@ -1,8 +1,12 @@
-import { ApplyOptions } from "@sapphire/decorators";
-import { Listener } from "@sapphire/framework";
-import { Events, Guild } from "discord.js";
-import { ALLOWED_ROOT_CHANNEL_TYPES, upsertServer, upsertManyChannels } from "@answeroverflow/db";
-import { toAOChannel, toAOServer } from "~discord-bot/utils/conversions";
+import { ApplyOptions } from '@sapphire/decorators';
+import { Listener } from '@sapphire/framework';
+import { Events, Guild } from 'discord.js';
+import {
+	ALLOWED_ROOT_CHANNEL_TYPES,
+	upsertServer,
+	upsertManyChannels,
+} from '@answeroverflow/db';
+import { toAOChannel, toAOServer } from '~discord-bot/utils/conversions';
 
 /*
   Guild related events are tracked here, this may make sense to split into multiple files as the complexity grows.
@@ -17,8 +21,8 @@ async function autoUpdateServerInfo(guild: Guild) {
 			icon: convertedServer.icon,
 			name: convertedServer.name,
 			description: convertedServer.description,
-			kickedTime: null
-		}
+			kickedTime: null,
+		},
 	});
 }
 
@@ -31,7 +35,7 @@ async function syncServer(guild: Guild) {
 	await upsertManyChannels(channelsToUpsert);
 }
 
-@ApplyOptions<Listener.Options>({ once: true, event: "ready" })
+@ApplyOptions<Listener.Options>({ once: true, event: 'ready' })
 export class SyncOnReady extends Listener {
 	public async run() {
 		// 1. Sync all of the servers to have the most up to date data
@@ -40,7 +44,10 @@ export class SyncOnReady extends Listener {
 		// 2. For any servers that are in the database and not in the guilds the bot is in, mark them as kicked
 	}
 }
-@ApplyOptions<Listener.Options>({ event: Events.GuildCreate, name: "Guild Sync On Join" })
+@ApplyOptions<Listener.Options>({
+	event: Events.GuildCreate,
+	name: 'Guild Sync On Join',
+})
 export class SyncOnJoin extends Listener {
 	public async run(guild: Guild) {
 		await syncServer(guild);
@@ -52,20 +59,26 @@ export class SyncOnJoin extends Listener {
  * This is incase someone is just temporarily kicking the bot, and we don't want to lose all of the data.
  * A background job will periodically clean up servers that have been kicked for a long time.
  */
-@ApplyOptions<Listener.Options>({ event: Events.GuildDelete, name: "Guild Sync On Delete" })
+@ApplyOptions<Listener.Options>({
+	event: Events.GuildDelete,
+	name: 'Guild Sync On Delete',
+})
 export class SyncOnDelete extends Listener {
 	public async run(guild: Guild) {
 		await upsertServer({
 			create: {
 				...toAOServer(guild),
-				kickedTime: new Date()
+				kickedTime: new Date(),
 			},
-			update: { kickedTime: new Date() }
+			update: { kickedTime: new Date() },
 		});
 	}
 }
 
-@ApplyOptions<Listener.Options>({ event: Events.GuildUpdate, name: "Guild Sync On Update" })
+@ApplyOptions<Listener.Options>({
+	event: Events.GuildUpdate,
+	name: 'Guild Sync On Update',
+})
 export class SyncOnUpdate extends Listener {
 	public async run(_: Guild, newGuild: Guild) {
 		await autoUpdateServerInfo(newGuild);

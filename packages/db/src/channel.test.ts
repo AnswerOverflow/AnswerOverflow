@@ -4,10 +4,10 @@ import {
 	mockDiscordAccount,
 	mockMessage,
 	mockServer,
-	mockThread
-} from "@answeroverflow/db-mock";
-import { addFlagsToChannel, Server } from "@answeroverflow/prisma-types";
-import { getRandomId } from "@answeroverflow/utils";
+	mockThread,
+} from '@answeroverflow/db-mock';
+import { addFlagsToChannel, Server } from '@answeroverflow/prisma-types';
+import { getRandomId } from '@answeroverflow/utils';
 import {
 	createChannel,
 	createManyChannels,
@@ -18,11 +18,11 @@ import {
 	updateChannel,
 	updateManyChannels,
 	upsertChannel,
-	upsertManyChannels
-} from "./channel";
-import { createDiscordAccount } from "./discord-account";
-import { findMessageById, upsertMessage } from "./message";
-import { createServer } from "./server";
+	upsertManyChannels,
+} from './channel';
+import { createDiscordAccount } from './discord-account';
+import { findMessageById, upsertMessage } from './message';
+import { createServer } from './server';
 
 let server: Server;
 beforeEach(async () => {
@@ -30,40 +30,40 @@ beforeEach(async () => {
 	await createServer(server);
 });
 
-describe("Channel Operations", () => {
-	describe("Find channel by id", () => {
-		it("should find channel by id", async () => {
+describe('Channel Operations', () => {
+	describe('Find channel by id', () => {
+		it('should find channel by id', async () => {
 			const chnl = mockChannel(server);
 			await createChannel(chnl);
 			const found = await findChannelById(chnl.id);
 			expect(found).toStrictEqual(addFlagsToChannel(chnl));
 		});
-		it("should return null if channel not found", async () => {
+		it('should return null if channel not found', async () => {
 			const found = await findChannelById(getRandomId());
 			expect(found).toBeNull();
 		});
 	});
-	describe("Find channel by invite code", () => {
-		it("should find channel by invite code", async () => {
+	describe('Find channel by invite code', () => {
+		it('should find channel by invite code', async () => {
 			const chnl = mockChannel(server, {
-				inviteCode: getRandomId(5)
+				inviteCode: getRandomId(5),
 			});
 			await createChannel({
 				...chnl,
 				flags: {
-					indexingEnabled: true
-				}
+					indexingEnabled: true,
+				},
 			});
 			const found = await findChannelByInviteCode(chnl.inviteCode!);
 			expect(found!.id).toBe(chnl.id);
 		});
-		it("should return null if channel not found", async () => {
+		it('should return null if channel not found', async () => {
 			const found = await findChannelByInviteCode(getRandomId(5));
 			expect(found).toBeNull();
 		});
 	});
-	describe("Find many channels by id", () => {
-		it("should find many channels by id", async () => {
+	describe('Find many channels by id', () => {
+		it('should find many channels by id', async () => {
 			const chnl1 = mockChannel(server);
 			const chnl2 = mockChannel(server);
 			await createChannel(chnl1);
@@ -73,18 +73,18 @@ describe("Channel Operations", () => {
 			expect(found).toContainEqual(addFlagsToChannel(chnl1));
 			expect(found).toContainEqual(addFlagsToChannel(chnl2));
 		});
-		it("should return empty array if no channels found", async () => {
+		it('should return empty array if no channels found', async () => {
 			const found = await findManyChannelsById([getRandomId(), getRandomId()]);
 			expect(found).toHaveLength(0);
 		});
 	});
-	describe("Channel Create", () => {
-		it("should create channel", async () => {
+	describe('Channel Create', () => {
+		it('should create channel', async () => {
 			const chnl = mockChannelWithFlags(server, {
 				flags: {
 					autoThreadEnabled: true,
-					indexingEnabled: true
-				}
+					indexingEnabled: true,
+				},
 			});
 			const created = await createChannel(chnl);
 			expect(created).toStrictEqual(chnl);
@@ -92,8 +92,8 @@ describe("Channel Operations", () => {
 			expect(found).toStrictEqual(chnl);
 		});
 	});
-	describe("Create Many Channels", () => {
-		it("should create many channels", async () => {
+	describe('Create Many Channels', () => {
+		it('should create many channels', async () => {
 			const chnl1 = mockChannel(server);
 			const chnl2 = mockChannel(server);
 			const created = await createManyChannels([chnl1, chnl2]);
@@ -102,69 +102,69 @@ describe("Channel Operations", () => {
 			expect(found).toHaveLength(2);
 		});
 	});
-	describe("Update Channel", () => {
-		it("should update channel without passing in the old settings", async () => {
+	describe('Update Channel', () => {
+		it('should update channel without passing in the old settings', async () => {
 			const chnl = mockChannelWithFlags(server, {
-				inviteCode: getRandomId(5)
+				inviteCode: getRandomId(5),
 			});
 			await createChannel(chnl);
 			const updated = await updateChannel({
 				old: null,
 				update: {
 					id: chnl.id,
-					name: "new name",
-					inviteCode: null
-				}
+					name: 'new name',
+					inviteCode: null,
+				},
 			});
 			expect(updated).toStrictEqual({
 				...chnl,
-				name: "new name",
-				inviteCode: null
+				name: 'new name',
+				inviteCode: null,
 			});
 			const found = await findChannelById(chnl.id);
 			expect(found).toStrictEqual({
 				...chnl,
-				name: "new name",
-				inviteCode: null
+				name: 'new name',
+				inviteCode: null,
 			});
 		});
-		it("should update channel with passing in the old settings", async () => {
+		it('should update channel with passing in the old settings', async () => {
 			const chnl = mockChannelWithFlags(server, {
 				flags: {
-					indexingEnabled: true
-				}
+					indexingEnabled: true,
+				},
 			});
 			const target = mockChannelWithFlags(server, {
 				...chnl,
-				name: "new name",
+				name: 'new name',
 				flags: {
 					indexingEnabled: true,
 					markSolutionEnabled: true,
-					sendMarkSolutionInstructionsInNewThreads: true
-				}
+					sendMarkSolutionInstructionsInNewThreads: true,
+				},
 			});
 			await createChannel(chnl);
 			const updated = await updateChannel({
 				old: chnl,
 				update: {
 					id: chnl.id,
-					name: "new name",
+					name: 'new name',
 					flags: {
 						markSolutionEnabled: true,
-						sendMarkSolutionInstructionsInNewThreads: true
-					}
-				}
+						sendMarkSolutionInstructionsInNewThreads: true,
+					},
+				},
 			});
 			expect(updated).toStrictEqual(target);
 			const found = await findChannelById(chnl.id);
 			expect(found).toStrictEqual(target);
 		});
-		it("should clear the invite of a channel when setting indexing to disabled", async () => {
+		it('should clear the invite of a channel when setting indexing to disabled', async () => {
 			const chnl = mockChannelWithFlags(server, {
 				inviteCode: getRandomId(5),
 				flags: {
-					indexingEnabled: true
-				}
+					indexingEnabled: true,
+				},
 			});
 			await createChannel(chnl);
 			await updateChannel({
@@ -172,18 +172,18 @@ describe("Channel Operations", () => {
 				update: {
 					id: chnl.id,
 					flags: {
-						indexingEnabled: false
-					}
-				}
+						indexingEnabled: false,
+					},
+				},
 			});
 			const found = await findChannelById(chnl.id);
 			expect(found!.inviteCode).toBeNull();
 		});
-		it("should update a channel with a thread", async () => {
+		it('should update a channel with a thread', async () => {
 			const chnl = mockChannelWithFlags(server, {
 				flags: {
-					autoThreadEnabled: true
-				}
+					autoThreadEnabled: true,
+				},
 			});
 			const thread = mockThread(chnl);
 			await createChannel(chnl);
@@ -193,17 +193,17 @@ describe("Channel Operations", () => {
 				update: {
 					id: chnl.id,
 					flags: {
-						autoThreadEnabled: false
-					}
-				}
+						autoThreadEnabled: false,
+					},
+				},
 			});
 			expect(updated.flags.autoThreadEnabled).toBeFalsy();
 			const found = await findChannelById(chnl.id);
 			expect(found!.flags.autoThreadEnabled).toBeFalsy();
 		});
 	});
-	describe("Update Many Channels", () => {
-		it("should update many channels", async () => {
+	describe('Update Many Channels', () => {
+		it('should update many channels', async () => {
 			const chnl1 = mockChannelWithFlags(server);
 			const chnl2 = mockChannelWithFlags(server);
 			await createChannel(chnl1);
@@ -211,34 +211,34 @@ describe("Channel Operations", () => {
 			await updateManyChannels([
 				{
 					...chnl1,
-					name: "new name"
+					name: 'new name',
 				},
 				{
 					...chnl2,
-					name: "new name"
-				}
+					name: 'new name',
+				},
 			]);
 			const found = await findManyChannelsById([chnl1.id, chnl2.id]);
 			expect(found).toHaveLength(2);
 			expect(found).toContainEqual({
 				...chnl1,
-				name: "new name"
+				name: 'new name',
 			});
 			expect(found).toContainEqual({
 				...chnl2,
-				name: "new name"
+				name: 'new name',
 			});
 		});
 	});
-	describe("Delete Channel", () => {
-		it("should delete channel", async () => {
+	describe('Delete Channel', () => {
+		it('should delete channel', async () => {
 			const chnl = mockChannel(server);
 			await createChannel(chnl);
 			await deleteChannel(chnl.id);
 			const found = await findChannelById(chnl.id);
 			expect(found).toBeNull();
 		});
-		it("should delete a channel and all of its threads", async () => {
+		it('should delete a channel and all of its threads', async () => {
 			const chnl = mockChannel(server);
 			const thread = mockThread(chnl);
 			await createChannel(chnl);
@@ -247,7 +247,7 @@ describe("Channel Operations", () => {
 			const found = await findChannelById(thread.id);
 			expect(found).toBeNull();
 		});
-		it("should delete all of a channels messages", async () => {
+		it('should delete all of a channels messages', async () => {
 			const chnl = mockChannel(server);
 			const author = mockDiscordAccount();
 			const msg = mockMessage(server, chnl, author);
@@ -258,7 +258,7 @@ describe("Channel Operations", () => {
 			const found = await findMessageById(msg.id);
 			expect(found).toBeNull();
 		});
-		it("should delete all of a channels threads messages on parent channel delete", async () => {
+		it('should delete all of a channels threads messages on parent channel delete', async () => {
 			const chnl = mockChannel(server);
 			const thread = mockThread(chnl);
 			const author = mockDiscordAccount();
@@ -272,8 +272,8 @@ describe("Channel Operations", () => {
 			expect(found).toBeNull();
 		});
 	});
-	describe("Create channel with deps", () => {
-		it("should create a channel and a server together", async () => {
+	describe('Create channel with deps', () => {
+		it('should create a channel and a server together', async () => {
 			const srv = mockServer();
 			const chnl = mockChannelWithFlags(srv);
 			await createServer(srv);
@@ -281,39 +281,39 @@ describe("Channel Operations", () => {
 			expect(created).toStrictEqual(chnl);
 		});
 	});
-	describe("Channel Upsert", () => {
-		it("should upsert create a channel", async () => {
+	describe('Channel Upsert', () => {
+		it('should upsert create a channel', async () => {
 			const chnl = mockChannelWithFlags(server);
 			const created = await upsertChannel({
-				create: chnl
+				create: chnl,
 			});
 			expect(created).toStrictEqual(chnl);
 			const found = await findChannelById(chnl.id);
 			expect(found).toStrictEqual(chnl);
 		});
-		it("should upsert update a channel", async () => {
+		it('should upsert update a channel', async () => {
 			const chnl = mockChannelWithFlags(server);
 			await createChannel(chnl);
 			const updated = await upsertChannel({
 				create: chnl,
 				update: {
-					name: "new name"
-				}
+					name: 'new name',
+				},
 			});
 			expect(updated).toStrictEqual({
 				...chnl,
-				name: "new name"
+				name: 'new name',
 			});
 			const found = await findChannelById(chnl.id);
 			expect(found).toStrictEqual({
 				...chnl,
-				name: "new name"
+				name: 'new name',
 			});
 		});
 	});
 
-	describe("Channel Upsert Many", () => {
-		it("should create many channels", async () => {
+	describe('Channel Upsert Many', () => {
+		it('should create many channels', async () => {
 			const chnl1 = mockChannel(server);
 			const chnl2 = mockChannel(server);
 
@@ -322,7 +322,7 @@ describe("Channel Operations", () => {
 			const found = await findManyChannelsById([chnl1.id, chnl2.id]);
 			expect(found).toHaveLength(2);
 		});
-		it("should update many channels", async () => {
+		it('should update many channels', async () => {
 			const chnl1 = mockChannel(server);
 			const chnl2 = mockChannel(server);
 			await createChannel(chnl1);
@@ -330,36 +330,36 @@ describe("Channel Operations", () => {
 			await upsertManyChannels([
 				{
 					...chnl1,
-					name: "new name"
+					name: 'new name',
 				},
 				{
 					...chnl2,
-					name: "new name"
-				}
+					name: 'new name',
+				},
 			]);
 			const found = await findManyChannelsById([chnl1.id, chnl2.id]);
 			expect(found).toHaveLength(2);
-			expect(found?.[0]!.name).toBe("new name");
-			expect(found?.[1]!.name).toBe("new name");
+			expect(found?.[0]!.name).toBe('new name');
+			expect(found?.[1]!.name).toBe('new name');
 		});
-		it("should create and update many channels", async () => {
+		it('should create and update many channels', async () => {
 			const chnl1 = mockChannel(server);
 			const chnl2 = mockChannel(server);
 			await createChannel(chnl1);
 			await upsertManyChannels([
 				{
 					...chnl1,
-					name: "new name"
+					name: 'new name',
 				},
-				chnl2
+				chnl2,
 			]);
 			const found = await findManyChannelsById([chnl1.id, chnl2.id]);
 			expect(found).toHaveLength(2);
 			expect(found).toContainEqual(
 				addFlagsToChannel({
 					...chnl1,
-					name: "new name"
-				})
+					name: 'new name',
+				}),
 			);
 			expect(found).toContainEqual(addFlagsToChannel(chnl2));
 		});

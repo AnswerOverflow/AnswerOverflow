@@ -1,5 +1,5 @@
-import { Client, Events } from "discord.js";
-import { toAOServer } from "~discord-bot/utils/conversions";
+import { Client, Events } from 'discord.js';
+import { toAOServer } from '~discord-bot/utils/conversions';
 import {
 	type GuildMemberVariants,
 	createGuildMemberVariants,
@@ -7,10 +7,10 @@ import {
 	emitEvent,
 	mockGuild,
 	mockGuildMember,
-	delay
-} from "@answeroverflow/discordjs-mock";
-import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
-import { createServer, findUserServerSettingsById } from "@answeroverflow/db";
+	delay,
+} from '@answeroverflow/discordjs-mock';
+import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
+import { createServer, findUserServerSettingsById } from '@answeroverflow/db';
 
 let client: Client;
 let members: GuildMemberVariants;
@@ -19,14 +19,14 @@ beforeEach(async () => {
 	members = await createGuildMemberVariants(client);
 });
 
-describe("Read the rules consent", () => {
-	it("should mark a pending user as consenting in a server with read the rules consent enabled", async () => {
+describe('Read the rules consent', () => {
+	it('should mark a pending user as consenting in a server with read the rules consent enabled', async () => {
 		// setup
 		await createServer({
 			...toAOServer(members.pendingGuildMemberDefault.guild),
 			flags: {
-				readTheRulesConsentEnabled: true
-			}
+				readTheRulesConsentEnabled: true,
+			},
 		});
 
 		// act
@@ -36,26 +36,26 @@ describe("Read the rules consent", () => {
 			client,
 			Events.GuildMemberUpdate,
 			members.pendingGuildMemberDefault,
-			fullMember
+			fullMember,
 		);
 		await delay();
 
 		// assert
 		const updatedSettings = await findUserServerSettingsById({
 			userId: fullMember.id,
-			serverId: fullMember.guild.id
+			serverId: fullMember.guild.id,
 		});
 
 		expect(updatedSettings!.flags.canPubliclyDisplayMessages).toBe(true);
 	});
-	it("should not mark a pending user as consenting in a server with read the rules consent disabled", async () => {
+	it('should not mark a pending user as consenting in a server with read the rules consent disabled', async () => {
 		// setup
 
 		await createServer({
 			...toAOServer(members.pendingGuildMemberDefault.guild),
 			flags: {
-				readTheRulesConsentEnabled: false
-			}
+				readTheRulesConsentEnabled: false,
+			},
 		});
 
 		// act
@@ -65,39 +65,44 @@ describe("Read the rules consent", () => {
 			client,
 			Events.GuildMemberUpdate,
 			members.pendingGuildMemberDefault,
-			fullMember
+			fullMember,
 		);
 
 		// assert
 		const updatedSettings = await findUserServerSettingsById({
 			userId: fullMember.id,
-			serverId: fullMember.guild.id
+			serverId: fullMember.guild.id,
 		});
 		expect(updatedSettings).toBe(null);
 	});
-	it("should mark multiple users as consenting in a server with read the rules consent enabled", async () => {
+	it('should mark multiple users as consenting in a server with read the rules consent enabled', async () => {
 		const server = mockGuild(client);
 		const members = [
 			mockGuildMember({ client, guild: server, data: { pending: true } }),
-			mockGuildMember({ client, guild: server, data: { pending: true } })
+			mockGuildMember({ client, guild: server, data: { pending: true } }),
 		];
 		await createServer({
 			...toAOServer(server),
 			flags: {
-				readTheRulesConsentEnabled: true
-			}
+				readTheRulesConsentEnabled: true,
+			},
 		});
 
 		for await (const pendingMember of members) {
 			// act
 			const fullMember = copyClass(pendingMember, client);
 			fullMember.pending = false;
-			await emitEvent(client, Events.GuildMemberUpdate, pendingMember, fullMember);
+			await emitEvent(
+				client,
+				Events.GuildMemberUpdate,
+				pendingMember,
+				fullMember,
+			);
 
 			// assert
 			const updatedSettings = await findUserServerSettingsById({
 				userId: fullMember.id,
-				serverId: server.id
+				serverId: server.id,
 			});
 			await delay(1000);
 			expect(updatedSettings!.flags.canPubliclyDisplayMessages).toBe(true);

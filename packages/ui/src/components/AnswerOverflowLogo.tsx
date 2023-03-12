@@ -1,5 +1,5 @@
 /* eslint-disable tailwindcss/no-custom-classname */
-import * as React from "react";
+import * as React from 'react';
 
 // {font-family:Poppins-SemiBold,Sofia Pro;font-weight:600}
 
@@ -13,42 +13,42 @@ export function AnswerOverflowLogo() {
 			className={`w-40 fill-black stroke-black dark:fill-white dark:stroke-white md:w-56`}
 		>
 			<defs>
-				<style>{".cls-3{letter-spacing:-.02em}"}</style>
+				<style>{'.cls-3{letter-spacing:-.02em}'}</style>
 			</defs>
 			<g id="TEXT">
 				<text
 					transform="translate(41.82 122.17)"
 					style={{
-						fontFamily: "Poppins-Regular,Poppins",
-						fontSize: "98.04px"
+						fontFamily: 'Poppins-Regular,Poppins',
+						fontSize: '98.04px',
 					}}
 				>
 					<tspan x={0} y={0}>
-						{"Answer"}
+						{'Answer'}
 					</tspan>
 				</text>
 				<text
 					transform="translate(407.69 124.15)"
 					style={{
-						fontFamily: "Poppins-Medium,Poppins",
-						fontSize: "100.71px",
-						fontWeight: "bold"
+						fontFamily: 'Poppins-Medium,Poppins',
+						fontSize: '100.71px',
+						fontWeight: 'bold',
 					}}
 				>
 					<tspan className="cls-3" x={0} y={0}>
-						{"Ove"}
+						{'Ove'}
 					</tspan>
 					<tspan
 						x={193.06}
 						y={0}
 						style={{
-							letterSpacing: ".01em"
+							letterSpacing: '.01em',
 						}}
 					>
-						{"rf"}
+						{'rf'}
 					</tspan>
 					<tspan className="cls-3" x={267.18} y={0}>
-						{"low"}
+						{'low'}
 					</tspan>
 				</text>
 			</g>
@@ -57,7 +57,7 @@ export function AnswerOverflowLogo() {
 				style={{
 					strokeMiterlimit: 10,
 					strokeWidth: 13,
-					fill: "none"
+					fill: 'none',
 				}}
 				id="Layer_4"
 			/>

@@ -1,26 +1,30 @@
-import { ButtonBuilder } from "@discordjs/builders";
+import { ButtonBuilder } from '@discordjs/builders';
 import {
 	APIButtonComponent,
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
 	GuildMember,
-	Message
-} from "discord.js";
-import { findChannelById, findServerById, UserServerSettingsWithFlags } from "@answeroverflow/db";
-import { callAPI, TRPCStatusHandler } from "~discord-bot/utils/trpc";
-import { toAODiscordAccount } from "~discord-bot/utils/conversions";
-import { createMemberCtx } from "~discord-bot/utils/context";
-import type { ConsentSource, ManageAccountSource } from "@answeroverflow/api";
-import { CONSENT_BUTTON_LABEL } from "@answeroverflow/constants";
-import { isHumanMessage } from "~discord-bot/utils/utils";
+	Message,
+} from 'discord.js';
+import {
+	findChannelById,
+	findServerById,
+	UserServerSettingsWithFlags,
+} from '@answeroverflow/db';
+import { callAPI, TRPCStatusHandler } from '~discord-bot/utils/trpc';
+import { toAODiscordAccount } from '~discord-bot/utils/conversions';
+import { createMemberCtx } from '~discord-bot/utils/context';
+import type { ConsentSource, ManageAccountSource } from '@answeroverflow/api';
+import { CONSENT_BUTTON_LABEL } from '@answeroverflow/constants';
+import { isHumanMessage } from '~discord-bot/utils/utils';
 
-export const CONSENT_BUTTON_ID = "consentButton";
+export const CONSENT_BUTTON_ID = 'consentButton';
 export const CONSENT_BUTTON_DATA = {
 	label: CONSENT_BUTTON_LABEL,
 	style: ButtonStyle.Success,
 	custom_id: CONSENT_BUTTON_ID,
-	type: ComponentType.Button
+	type: ComponentType.Button,
 } as APIButtonComponent;
 
 export function makeConsentButton() {
@@ -30,7 +34,9 @@ export function makeConsentButton() {
 // TODO: Find a better return value than `null`
 export async function provideConsentOnForumChannelMessage(message: Message) {
 	const channel = message.channel;
-	if (!(channel.isThread() && channel.parent?.type === ChannelType.GuildForum)) {
+	if (
+		!(channel.isThread() && channel.parent?.type === ChannelType.GuildForum)
+	) {
 		return null;
 	}
 	if (!isHumanMessage(message)) {
@@ -42,17 +48,17 @@ export async function provideConsentOnForumChannelMessage(message: Message) {
 	}
 	return updateUserConsent({
 		member: message.member!,
-		consentSource: "forum-post-guidelines",
+		consentSource: 'forum-post-guidelines',
 		canPubliclyDisplayMessages: true,
 		Error(error) {
 			console.log(error.message);
-		}
+		},
 	});
 }
 
 export async function provideConsentOnReadTheRules({
 	oldMember,
-	newMember
+	newMember,
 }: {
 	oldMember: GuildMember;
 	newMember: GuildMember;
@@ -67,11 +73,11 @@ export async function provideConsentOnReadTheRules({
 	}
 	return updateUserConsent({
 		member: newMember,
-		consentSource: "read-the-rules",
+		consentSource: 'read-the-rules',
 		canPubliclyDisplayMessages: true,
 		Error(error) {
 			console.log(error.message);
-		}
+		},
 	});
 }
 
@@ -93,12 +99,12 @@ export async function updateUserConsent({
 					user: toAODiscordAccount(member.user),
 					serverId: member.guild.id,
 					flags: {
-						canPubliclyDisplayMessages
-					}
-				}
+						canPubliclyDisplayMessages,
+					},
+				},
 			}),
 		getCtx: () => createMemberCtx(member),
-		...statusHandlers
+		...statusHandlers,
 	});
 }
 
@@ -119,12 +125,12 @@ export async function updateUserServerIndexingEnabled({
 					user: toAODiscordAccount(member.user),
 					serverId: member.guild.id,
 					flags: {
-						messageIndexingDisabled
-					}
+						messageIndexingDisabled,
+					},
 				},
-				source
+				source,
 			}),
 		getCtx: () => createMemberCtx(member),
-		...statusHandlers
+		...statusHandlers,
 	});
 }

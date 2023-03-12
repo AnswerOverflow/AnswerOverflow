@@ -1,14 +1,14 @@
-import { assert } from "console";
-import { ClientOptions, Options } from "discord.js";
-import { applyClientMocks } from "@answeroverflow/discordjs-mock";
-import { basename, extname } from "path";
-import { createClient, login } from "~discord-bot/utils/bot";
+import { assert } from 'console';
+import { ClientOptions, Options } from 'discord.js';
+import { applyClientMocks } from '@answeroverflow/discordjs-mock';
+import { basename, extname } from 'path';
+import { createClient, login } from '~discord-bot/utils/bot';
 
 export function mockSapphireClient(
 	override: Partial<ClientOptions> = {
 		// Cache everything is used to simulate API responses, removes the limit
-		makeCache: Options.cacheEverything()
-	}
+		makeCache: Options.cacheEverything(),
+	},
 ) {
 	// TODO: This is so ugly please fix this
 	const client = createClient(override);
@@ -18,7 +18,7 @@ export function mockSapphireClient(
 		store.registerPath = (path) => {
 			// @ts-ignore
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-			if (!path.includes("/dist")) {
+			if (!path.includes('/dist')) {
 				store.paths.add(path.toString());
 			}
 		};
@@ -30,7 +30,7 @@ export function mockSapphireClient(
 		// Add the typescript extensions to be able to be parsed
 		// @ts-ignore
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-		store.strategy.supportedExtensions.push(".ts", ".cts", ".mts", ".tsx");
+		store.strategy.supportedExtensions.push('.ts', '.cts', '.mts', '.tsx');
 
 		// Filter out type files
 		// @ts-ignore
@@ -46,13 +46,14 @@ export function mockSapphireClient(
 			if (!store.strategy.supportedExtensions.includes(extension)) return null;
 
 			// @ts-ignore
-			if (store.strategy.filterDtsFiles && filePath.endsWith(".d.ts")) return null;
+			if (store.strategy.filterDtsFiles && filePath.endsWith('.d.ts'))
+				return null;
 
-			if (filePath.includes(".test")) return null;
+			if (filePath.includes('.test')) return null;
 
 			// Retrieve the name of the file, return null if empty.
 			const name = basename(filePath, extension);
-			if (name === "") return null;
+			if (name === '') return null;
 
 			// Return the name and extension.
 			return { extension, path: filePath, name };
@@ -60,7 +61,7 @@ export function mockSapphireClient(
 	});
 
 	applyClientMocks(client);
-	assert(client.user !== null, "Client user is null");
+	assert(client.user !== null, 'Client user is null');
 	client.id = client.user!.id;
 	return client;
 }

@@ -1,19 +1,27 @@
-import { Client, Events, Guild, GuildMember } from "discord.js";
-import { copyClass, emitEvent, mockGuild, mockGuildMember } from "@answeroverflow/discordjs-mock";
-import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
+import { Client, Events, Guild, GuildMember } from 'discord.js';
+import {
+	copyClass,
+	emitEvent,
+	mockGuild,
+	mockGuildMember,
+} from '@answeroverflow/discordjs-mock';
+import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
 import {
 	createDiscordAccount,
 	prisma,
 	User,
-	_NOT_PROD_createOauthAccountEntry
-} from "@answeroverflow/db";
-import { toAODiscordAccount, toDiscordAPIServer } from "~discord-bot/utils/conversions";
+	_NOT_PROD_createOauthAccountEntry,
+} from '@answeroverflow/db';
+import {
+	toAODiscordAccount,
+	toDiscordAPIServer,
+} from '~discord-bot/utils/conversions';
 import {
 	getDiscordUser,
 	getUserServers,
 	updateCachedDiscordUser,
-	updateUserServersCache
-} from "@answeroverflow/cache";
+	updateUserServersCache,
+} from '@answeroverflow/cache';
 // import { updateUserServersCache } from "@answeroverflow/cache";
 let client: Client;
 let guild: Guild;
@@ -24,19 +32,21 @@ beforeEach(async () => {
 	guild = mockGuild(client);
 	member = mockGuildMember({ client, guild });
 	user = await prisma.user.create({
-		data: {}
+		data: {},
 	});
 	await createDiscordAccount(toAODiscordAccount(member.user));
 });
 
-describe("Account Parity", () => {
-	describe("Guild member add", () => {
-		it("should update the cache when a user joins a server", async () => {
+describe('Account Parity', () => {
+	describe('Guild member add', () => {
+		it('should update the cache when a user joins a server', async () => {
 			const oauth = await _NOT_PROD_createOauthAccountEntry({
 				discordUserId: member.user.id,
-				userId: user.id
+				userId: user.id,
 			});
-			await updateUserServersCache(oauth.access_token!, [toDiscordAPIServer(member)]);
+			await updateUserServersCache(oauth.access_token!, [
+				toDiscordAPIServer(member),
+			]);
 			const userServers = await getUserServers(oauth.access_token!);
 			expect(userServers).toEqual([toDiscordAPIServer(member)]);
 			const member2 = mockGuildMember({ client, user: member.user });
@@ -48,13 +58,15 @@ describe("Account Parity", () => {
 			expect(userServers2).toContainEqual(toDiscordAPIServer(member));
 		});
 	});
-	describe("Guild member remove", () => {
-		it("should update the cache when a user leaves a server", async () => {
+	describe('Guild member remove', () => {
+		it('should update the cache when a user leaves a server', async () => {
 			const oauth = await _NOT_PROD_createOauthAccountEntry({
 				discordUserId: member.user.id,
-				userId: user.id
+				userId: user.id,
 			});
-			await updateUserServersCache(oauth.access_token!, [toDiscordAPIServer(member)]);
+			await updateUserServersCache(oauth.access_token!, [
+				toDiscordAPIServer(member),
+			]);
 			const userServers = await getUserServers(oauth.access_token!);
 			expect(userServers).toEqual([toDiscordAPIServer(member)]);
 
@@ -64,22 +76,22 @@ describe("Account Parity", () => {
 			expect(userServers2).toHaveLength(0);
 		});
 	});
-	describe("User update", () => {
-		it("should update the cache when a user updates their username", async () => {
+	describe('User update', () => {
+		it('should update the cache when a user updates their username', async () => {
 			const oauth = await _NOT_PROD_createOauthAccountEntry({
 				discordUserId: member.user.id,
-				userId: user.id
+				userId: user.id,
 			});
 			await updateCachedDiscordUser(oauth.access_token!, {
 				avatar: member.user.avatar,
 				discriminator: member.user.discriminator,
 				id: member.user.id,
-				username: member.user.username
+				username: member.user.username,
 			});
 			const cachedUser = await getDiscordUser(oauth.access_token!);
 			expect(cachedUser.username).toEqual(member.user.username);
 			const newUser = copyClass(member.user, member.client, {
-				username: "New User"
+				username: 'New User',
 			});
 
 			await emitEvent(client, Events.UserUpdate, member.user, newUser);

@@ -1,7 +1,7 @@
-import { Button, Link } from "@answeroverflow/discordjs-react";
-import React from "react";
-import { useHistory } from "./router";
-import { ephemeralReply } from "~discord-bot/utils/utils";
+import { Button, Link } from '@answeroverflow/discordjs-react';
+import React from 'react';
+import { useHistory } from './router';
+import { ephemeralReply } from '~discord-bot/utils/utils';
 
 export const SupportMenu: React.FC = () => (
 	<>

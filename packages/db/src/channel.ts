@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { upsertServer, zServerUpsert } from "./server";
-import { upsert, upsertMany } from "./utils/operations";
+import { z } from 'zod';
+import { upsertServer, zServerUpsert } from './server';
+import { upsert, upsertMany } from './utils/operations';
 import {
 	addFlagsToChannel,
 	ALLOWED_THREAD_TYPES,
@@ -9,17 +9,21 @@ import {
 	ChannelWithFlags,
 	zChannel,
 	zChannelPrismaCreate,
-	zChannelPrismaUpdate
-} from "@answeroverflow/prisma-types";
-import { prisma, getDefaultChannel, Channel } from "@answeroverflow/prisma-types";
-import { dictToBitfield } from "@answeroverflow/prisma-types/src/bitfield";
-import { deleteManyMessagesByChannelId } from "./message";
-import { omit } from "@answeroverflow/utils";
-import { DBError } from "./utils/error";
-import { ChannelType } from "discord-api-types/v10";
+	zChannelPrismaUpdate,
+} from '@answeroverflow/prisma-types';
+import {
+	prisma,
+	getDefaultChannel,
+	Channel,
+} from '@answeroverflow/prisma-types';
+import { dictToBitfield } from '@answeroverflow/prisma-types/src/bitfield';
+import { deleteManyMessagesByChannelId } from './message';
+import { omit } from '@answeroverflow/utils';
+import { DBError } from './utils/error';
+import { ChannelType } from 'discord-api-types/v10';
 export const CHANNELS_THAT_CAN_HAVE_AUTOTHREAD = new Set([
 	ChannelType.GuildAnnouncement,
-	ChannelType.GuildText
+	ChannelType.GuildText,
 ]);
 
 export const zChannelRequired = zChannel.pick({
@@ -27,7 +31,7 @@ export const zChannelRequired = zChannel.pick({
 	name: true,
 	serverId: true,
 	type: true,
-	parentId: true
+	parentId: true,
 });
 
 export const zChannelMutable = zChannel
@@ -36,67 +40,68 @@ export const zChannelMutable = zChannel
 		flags: true,
 		inviteCode: true,
 		solutionTagId: true,
-		lastIndexedSnowflake: true
+		lastIndexedSnowflake: true,
 	})
 	.deepPartial();
 
 export const zChannelCreate = zChannelMutable.merge(zChannelRequired);
 
 export const zChannelCreateMany = zChannelCreate.omit({
-	flags: true
+	flags: true,
 });
 
 export const zChannelUpsert = z.object({
 	create: zChannelCreate,
-	update: zChannelMutable.optional()
+	update: zChannelMutable.optional(),
 });
 
 export const zChannelUpsertMany = zChannelCreateMany;
 
 export const zThreadCreate = zChannelCreate.extend({
 	parentId: z.string(),
-	type: z.number().refine((n) => ALLOWED_THREAD_TYPES.has(n), "Can only create public threads") // TODO: Make a type error if possible
+	type: z
+		.number()
+		.refine(
+			(n) => ALLOWED_THREAD_TYPES.has(n),
+			'Can only create public threads',
+		), // TODO: Make a type error if possible
 });
 
 export const zChannelCreateWithDeps = zChannelCreate
 	.omit({
-		serverId: true // Taken from server
+		serverId: true, // Taken from server
 	})
 	.extend({
-		server: zServerUpsert
+		server: zServerUpsert,
 	});
 
 export const zChannelUpsertWithDeps = zChannelCreateWithDeps;
 
 export const zChannelUpdate = zChannelMutable.merge(
 	zChannelRequired.pick({
-		id: true
-	})
+		id: true,
+	}),
 );
 
 // We omit flags because it's too complicated to update many of them
 export const zChannelUpdateMany = zChannelUpdate.omit({
-	flags: true
+	flags: true,
 });
 
 export const zThreadCreateWithDeps = zThreadCreate
 	.omit({
 		parentId: true, // Taken from parent
-		serverId: true // Taken from parent
+		serverId: true, // Taken from parent
 	})
 	.extend({
-		parent: zChannelUpsertWithDeps
+		parent: zChannelUpsertWithDeps,
 	});
 
 export const zThreadUpsertWithDeps = zThreadCreateWithDeps;
 
-function applyChannelSettingsChangesSideEffects<F extends z.infer<typeof zChannelMutable>>({
-	old,
-	updated
-}: {
-	old: Channel;
-	updated: F;
-}) {
+function applyChannelSettingsChangesSideEffects<
+	F extends z.infer<typeof zChannelMutable>,
+>({ old, updated }: { old: Channel; updated: F }) {
 	const oldFlags = bitfieldToChannelFlags(old.bitfield);
 	const flagsToUpdate = updated.flags ?? {};
 
@@ -105,8 +110,8 @@ function applyChannelSettingsChangesSideEffects<F extends z.infer<typeof zChanne
 		...updated,
 		flags: {
 			...oldFlags,
-			...flagsToUpdate
-		}
+			...flagsToUpdate,
+		},
 	};
 
 	// User is trying to enable sending mark solution instructions in new threads without enabling mark solution
@@ -115,8 +120,8 @@ function applyChannelSettingsChangesSideEffects<F extends z.infer<typeof zChanne
 		!pendingSettings.flags.markSolutionEnabled
 	) {
 		throw new DBError(
-			"Cannot enable sendMarkSolutionInstructionsInNewThreads without enabling markSolutionEnabled",
-			"INVALID_CONFIGURATION"
+			'Cannot enable sendMarkSolutionInstructionsInNewThreads without enabling markSolutionEnabled',
+			'INVALID_CONFIGURATION',
 		);
 	}
 
@@ -126,8 +131,8 @@ function applyChannelSettingsChangesSideEffects<F extends z.infer<typeof zChanne
 		pendingSettings.flags.forumGuidelinesConsentEnabled
 	) {
 		throw new DBError(
-			"Cannot enable readTheRulesConsentEnabled for a non forum channel",
-			"INVALID_CONFIGURATION"
+			'Cannot enable readTheRulesConsentEnabled for a non forum channel',
+			'INVALID_CONFIGURATION',
 		);
 	}
 	// Throw error if enabling auto thread for a non valid threadable channel
@@ -136,8 +141,8 @@ function applyChannelSettingsChangesSideEffects<F extends z.infer<typeof zChanne
 		pendingSettings.flags.autoThreadEnabled
 	) {
 		throw new DBError(
-			"Cannot enable autoThreadEnabled for a non threadable channel",
-			"INVALID_CONFIGURATION"
+			'Cannot enable autoThreadEnabled for a non threadable channel',
+			'INVALID_CONFIGURATION',
 		);
 	}
 
@@ -155,7 +160,7 @@ function applyChannelSettingsChangesSideEffects<F extends z.infer<typeof zChanne
 	const bitfield = dictToBitfield(pendingSettings.flags, channelBitfieldFlags);
 	return {
 		...pendingSettings,
-		bitfield
+		bitfield,
 	};
 }
 
@@ -180,50 +185,54 @@ export async function createChannel(data: z.infer<typeof zChannelCreate>) {
 	const combinedData: z.infer<typeof zChannelPrismaCreate> =
 		applyChannelSettingsChangesSideEffects({
 			old: getDefaultChannel(data),
-			updated: data
+			updated: data,
 		});
 	const created = await prisma.channel.create({
-		data: zChannelPrismaCreate.parse(combinedData)
+		data: zChannelPrismaCreate.parse(combinedData),
 	});
 	return addFlagsToChannel(created);
 }
 
-export async function createManyChannels(data: z.infer<typeof zChannelCreateMany>[]) {
+export async function createManyChannels(
+	data: z.infer<typeof zChannelCreateMany>[],
+) {
 	await prisma.channel.createMany({
-		data: data.map((c) => zChannelCreateMany.parse(c))
+		data: data.map((c) => zChannelCreateMany.parse(c)),
 	});
 	return data.map((c) => getDefaultChannel({ ...c }));
 }
 
 export async function updateChannel({
 	update,
-	old
+	old,
 }: {
 	update: z.infer<typeof zChannelUpdate>;
 	old: Channel | null;
 }) {
 	if (!old) old = await findChannelById(update.id);
-	if (!old) throw new Error("Channel not found");
+	if (!old) throw new Error('Channel not found');
 	const combinedData: z.infer<typeof zChannelPrismaUpdate> =
 		applyChannelSettingsChangesSideEffects({
 			old,
-			updated: update
+			updated: update,
 		});
 	const updated = await prisma.channel.update({
 		where: { id: update.id },
-		data: zChannelPrismaUpdate.parse(combinedData)
+		data: zChannelPrismaUpdate.parse(combinedData),
 	});
 	return addFlagsToChannel(updated);
 }
 
-export async function updateManyChannels(data: z.infer<typeof zChannelUpdateMany>[]) {
+export async function updateManyChannels(
+	data: z.infer<typeof zChannelUpdateMany>[],
+) {
 	const updated = await prisma.$transaction(
 		data.map((c) =>
 			prisma.channel.update({
 				where: { id: c.id },
-				data: zChannelPrismaUpdate.parse(c)
-			})
-		)
+				data: zChannelPrismaUpdate.parse(c),
+			}),
+		),
 	);
 	return updated.map(addFlagsToChannel);
 }
@@ -233,17 +242,19 @@ export async function deleteChannel(id: string) {
 	// TODO: Ugly & how does this handle large amounts of threads?
 	const threads = await prisma.channel.findMany({
 		where: { parentId: id },
-		select: { id: true }
+		select: { id: true },
 	});
 	await Promise.all(threads.map((t) => deleteChannel(t.id)));
 	return prisma.channel.delete({ where: { id } });
 }
 
-export async function createChannelWithDeps(data: z.infer<typeof zChannelCreateWithDeps>) {
+export async function createChannelWithDeps(
+	data: z.infer<typeof zChannelCreateWithDeps>,
+) {
 	await upsertServer(data.server);
 	return createChannel({
 		serverId: data.server.create.id,
-		...omit(data, "server")
+		...omit(data, 'server'),
 	});
 }
 
@@ -254,11 +265,11 @@ export function upsertChannel(data: z.infer<typeof zChannelUpsert>) {
 			updateChannel({
 				update: {
 					id: data.create.id,
-					...data.update
+					...data.update,
 				},
-				old
+				old,
 			}),
-		find: () => findChannelById(data.create.id)
+		find: () => findChannelById(data.create.id),
 	});
 }
 
@@ -273,6 +284,6 @@ export function upsertManyChannels(data: z.infer<typeof zChannelUpsertMany>[]) {
 			return input.id;
 		},
 		create: (create) => createManyChannels(create),
-		update: (update) => updateManyChannels(update)
+		update: (update) => updateManyChannels(update),
 	});
 }

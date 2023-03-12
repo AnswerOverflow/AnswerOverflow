@@ -1,8 +1,8 @@
-export * from "@prisma/client";
-export { prisma } from "./src/prisma";
-export * from "./src/bitfield";
-export * from "./src/zod-schemas";
-export * from "./src/default";
+export * from '@prisma/client';
+export { prisma } from './src/prisma';
+export * from './src/bitfield';
+export * from './src/zod-schemas';
+export * from './src/default';
 
 declare global {
 	namespace NodeJS {
@@ -13,7 +13,7 @@ declare global {
 
 			// common
 			// eslint-disable-next-line @typescript-eslint/naming-convention
-			readonly NODE_ENV: "development" | "production" | "test";
+			readonly NODE_ENV: 'development' | 'production' | 'test';
 		}
 	}
 }

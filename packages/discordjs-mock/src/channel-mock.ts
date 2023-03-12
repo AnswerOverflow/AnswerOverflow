@@ -31,22 +31,24 @@ import {
 	DiscordAPIError,
 	FetchMessageOptions,
 	MessageCreateOptions,
-	MessagePayload
-} from "discord.js";
-import type { RawMessageData, RawMessageReactionData } from "discord.js/typings/rawDataTypes";
+	MessagePayload,
+} from 'discord.js';
+import type {
+	RawMessageData,
+	RawMessageReactionData,
+} from 'discord.js/typings/rawDataTypes';
 import {
 	isSnowflakeLarger,
 	isSnowflakeLargerAsInt,
 	randomSnowflake,
-	sortMessagesById
-} from "@answeroverflow/discordjs-utils";
-import { mockGuild } from "./guild-mock";
-import { mockMessage } from "./message-mock";
+	sortMessagesById,
+} from '@answeroverflow/discordjs-utils';
+import { mockGuild } from './guild-mock';
+import { mockMessage } from './message-mock';
 
-export function getGuildTextChannelMockDataBase<Type extends GuildTextChannelType>(
-	type: Type,
-	guild: Guild
-) {
+export function getGuildTextChannelMockDataBase<
+	Type extends GuildTextChannelType,
+>(type: Type, guild: Guild) {
 	const rawData: APIGuildTextChannel<Type> = {
 		id: randomSnowflake().toString(),
 		type,
@@ -57,11 +59,11 @@ export function getGuildTextChannelMockDataBase<Type extends GuildTextChannelTyp
 		guild_id: guild?.id,
 		last_message_id: null,
 		last_pin_timestamp: null,
-		name: "channel name",
+		name: 'channel name',
 		nsfw: false,
 		parent_id: null,
 		permission_overwrites: [],
-		topic: "channel topic"
+		topic: 'channel topic',
 	};
 	return rawData;
 }
@@ -69,7 +71,7 @@ export function getGuildTextChannelMockDataBase<Type extends GuildTextChannelTyp
 function setupMockedChannel<T extends GuildBasedChannel>(
 	client: Client,
 	guild: Guild | undefined,
-	createMockData: (guild: Guild) => T
+	createMockData: (guild: Guild) => T,
 ): T {
 	if (!guild) {
 		guild = mockGuild(client);
@@ -82,13 +84,16 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 	) {
 		channel.threads.fetchActive = () => {
 			const activeThreads = [...channel.threads.cache.values()].filter(
-				(thread) => !thread.archived || thread.archived == null
+				(thread) => !thread.archived || thread.archived == null,
 			);
 			const output: FetchedThreads = {
 				threads: new Collection(
-					activeThreads.map((thread) => [thread.id, thread as AnyThreadChannel])
+					activeThreads.map((thread) => [
+						thread.id,
+						thread as AnyThreadChannel,
+					]),
 				),
-				hasMore: false
+				hasMore: false,
 			};
 			return Promise.resolve(output);
 		};
@@ -98,16 +103,16 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 				let filteredThreads = [
 					...channel.threads.cache
 						.sorted((a, b) => isSnowflakeLargerAsInt(a.id, b.id))
-						.values()
+						.values(),
 				].filter((thread) => thread.archived);
 				if (options.type) {
 					filteredThreads = filteredThreads.filter((thread) => {
 						const isPublicThread = thread.type === ChannelType.PublicThread;
 						const isPrivateThread = thread.type === ChannelType.PrivateThread;
-						if (options.type === "public" && isPublicThread) {
+						if (options.type === 'public' && isPublicThread) {
 							return true;
 						}
-						if (options.type === "private" && isPrivateThread) {
+						if (options.type === 'private' && isPrivateThread) {
 							return true;
 						}
 						return false;
@@ -119,8 +124,10 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 					if (beforeTime == undefined) {
 						return true;
 					}
-					if (beforeTime instanceof Date || typeof beforeTime === "number") {
-						beforeTime = SnowflakeUtil.generate({ timestamp: beforeTime }).toString();
+					if (beforeTime instanceof Date || typeof beforeTime === 'number') {
+						beforeTime = SnowflakeUtil.generate({
+							timestamp: beforeTime,
+						}).toString();
 					}
 					if (beforeTime instanceof ThreadChannel) {
 						beforeTime = beforeTime.id;
@@ -134,9 +141,12 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 
 				const output: FetchedThreads = {
 					threads: new Collection(
-						filteredThreads.map((thread) => [thread.id, thread as AnyThreadChannel])
+						filteredThreads.map((thread) => [
+							thread.id,
+							thread as AnyThreadChannel,
+						]),
 					),
-					hasMore: false // TODO: set this
+					hasMore: false, // TODO: set this
 				};
 				return Promise.resolve(output);
 			});
@@ -147,7 +157,9 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 	}
 	if (channel.isTextBased()) {
 		// @ts-ignore
-		channel.send = (options: string | MessagePayload | MessageCreateOptions) => {
+		channel.send = (
+			options: string | MessagePayload | MessageCreateOptions,
+		) => {
 			const isMessagePayload = options instanceof MessagePayload;
 			const opts = isMessagePayload ? options.options : options;
 			const message = mockMessage({
@@ -155,8 +167,8 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 				channel,
 				author: client.user!,
 				override: {
-					content: typeof opts === "string" ? opts : opts.content ?? ""
-				}
+					content: typeof opts === 'string' ? opts : opts.content ?? '',
+				},
 			});
 			return Promise.resolve(message);
 		};
@@ -164,59 +176,64 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 		channel.messages.fetch = jest
 			.fn()
 			.mockImplementation(
-				(q: MessageResolvable | FetchMessagesOptions | FetchMessageOptions = {}) => {
+				(
+					q:
+						| MessageResolvable
+						| FetchMessagesOptions
+						| FetchMessageOptions = {},
+				) => {
 					if (q instanceof Message) {
 						return Promise.resolve(q);
 					}
-					if (typeof q === "string") {
+					if (typeof q === 'string') {
 						const message = channel.messages.cache.get(q);
 						if (!message) {
 							return Promise.reject(
 								new DiscordAPIError(
 									{
 										code: 10008,
-										message: "NOT FOUND"
+										message: 'NOT FOUND',
 									},
 									10008,
 									404,
-									"GET",
-									"/channels/123/messages/123",
+									'GET',
+									'/channels/123/messages/123',
 									{
-										files: []
-									}
-								)
+										files: [],
+									},
+								),
 							);
 						}
 						return Promise.resolve(message);
 					}
-					if ("message" in q) {
+					if ('message' in q) {
 						const resolvable = q.message;
 						// DRY? Never heard of it
 						if (resolvable instanceof Message) {
 							return Promise.resolve(q);
 						}
-						if (typeof resolvable === "string") {
+						if (typeof resolvable === 'string') {
 							const message = channel.messages.cache.get(resolvable);
 							if (!message) {
 								return Promise.reject(
 									new DiscordAPIError(
 										{
 											code: 10008,
-											message: "NOT FOUND"
+											message: 'NOT FOUND',
 										},
 										10008,
 										404,
-										"GET",
-										"/channels/123/messages/123",
+										'GET',
+										'/channels/123/messages/123',
 										{
-											files: []
-										}
-									)
+											files: [],
+										},
+									),
 								);
 							}
 							return Promise.resolve(message);
 						}
-						throw new Error("Invalid message");
+						throw new Error('Invalid message');
 					}
 					const { after } = q;
 					let { limit } = q;
@@ -227,7 +244,7 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 
 					// 1. sort by id
 					const sortedCachedMessages = sortMessagesById(
-						Array.from(channel.messages.cache.values())
+						Array.from(channel.messages.cache.values()),
 					);
 					// 2. filter to only above the id
 					const filteredMessages = sortedCachedMessages.filter((message) => {
@@ -238,10 +255,10 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 					const messages = filteredMessages.slice(0, limit);
 					jest.clearAllMocks();
 					const asCollection = new Collection(
-						messages.map((message) => [message.id, message])
+						messages.map((message) => [message.id, message]),
 					);
 					return Promise.resolve(asCollection);
-				}
+				},
 			);
 	}
 	client.channels.cache.set(channel.id, channel);
@@ -252,14 +269,18 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 export function mockTextChannel(
 	client: Client,
 	guild?: Guild,
-	data: Partial<APITextChannel> = {}
+	data: Partial<APITextChannel> = {},
 ): TextChannel {
 	return setupMockedChannel(client, guild, (guild) => {
 		const rawData: APITextChannel = {
 			...getGuildTextChannelMockDataBase(ChannelType.GuildText, guild),
-			...data
+			...data,
 		};
-		const channel = Reflect.construct(TextChannel, [guild, rawData, client]) as TextChannel;
+		const channel = Reflect.construct(TextChannel, [
+			guild,
+			rawData,
+			client,
+		]) as TextChannel;
 		return channel;
 	});
 }
@@ -281,12 +302,12 @@ export function mockThreadFromParentMessage(input: {
 				parentChannel: parentMessage.channel,
 				data: {
 					id: parentMessage.id,
-					...data
-				}
+					...data,
+				},
 			});
 		}
 	}
-	throw new Error("Invalid parent message");
+	throw new Error('Invalid parent message');
 }
 
 export function mockPublicThread(input: {
@@ -307,7 +328,7 @@ export function mockPublicThread(input: {
 				id: randomSnowflake().toString(),
 				user_id: randomSnowflake().toString(),
 				join_timestamp: new Date().toISOString(),
-				flags: 0
+				flags: 0,
 			},
 			guild_id: guild.id,
 			parent_id: parentChannel.id,
@@ -318,15 +339,15 @@ export function mockPublicThread(input: {
 				archived: false,
 				auto_archive_duration: 60,
 				archive_timestamp: new Date().toISOString(),
-				locked: false
+				locked: false,
 			},
-			...data
+			...data,
 		};
 
 		const thread: PublicThreadChannel = Reflect.construct(ThreadChannel, [
 			guild,
 			rawData,
-			client
+			client,
 		]) as PublicThreadChannel;
 
 		// @ts-ignore
@@ -338,7 +359,7 @@ export function mockPublicThread(input: {
 export function mockForumChannel(
 	client: Client,
 	guild?: Guild,
-	data: Partial<APIGuildForumChannel> = {}
+	data: Partial<APIGuildForumChannel> = {},
 ) {
 	return setupMockedChannel(client, guild, (guild) => {
 		const rawData: APIGuildForumChannel = {
@@ -346,15 +367,15 @@ export function mockForumChannel(
 			available_tags: [
 				{
 					id: randomSnowflake().toString(),
-					name: "test tag",
+					name: 'test tag',
 					emoji_id: null,
 					emoji_name: null,
-					moderated: false
-				}
+					moderated: false,
+				},
 			],
 			default_reaction_emoji: null,
 			default_sort_order: null,
-			...data
+			...data,
 		};
 		const channel = Reflect.construct(ForumChannel, [guild, rawData, client]);
 		return channel;
@@ -369,25 +390,28 @@ export function mockNewsChannel(input: {
 	return setupMockedChannel(input.client, input.guild, (guild) => {
 		const rawData: APINewsChannel = {
 			...getGuildTextChannelMockDataBase(ChannelType.GuildAnnouncement, guild),
-			...input.data
+			...input.data,
 		};
 		const channel = Reflect.construct(NewsChannel, [
 			guild,
 			rawData,
-			input.client
+			input.client,
 		]) as NewsChannel;
 		return channel;
 	});
 }
 
-export function mockMessages(channel: TextBasedChannel, numberOfMessages: number) {
+export function mockMessages(
+	channel: TextBasedChannel,
+	numberOfMessages: number,
+) {
 	const messages: Message[] = [];
 	for (let id = 1; id <= numberOfMessages; id++) {
 		messages.push(
 			mockMessage({
 				client: channel.client,
-				channel: channel
-			})
+				channel: channel,
+			}),
 		);
 	}
 	return messages;
@@ -396,7 +420,7 @@ export function mockMessages(channel: TextBasedChannel, numberOfMessages: number
 export function mockMessageReaction({
 	message,
 	reacter,
-	override
+	override,
 }: {
 	message: Message;
 	reacter: User;
@@ -407,18 +431,18 @@ export function mockMessageReaction({
 		count: 1,
 		emoji: {
 			id: randomSnowflake().toString(),
-			name: "👍"
+			name: '👍',
 		},
 		user_id: reacter.id,
 		message_id: message.id,
 		guild_id: message.guild?.id,
 		me: reacter.id === message.client.user?.id,
-		...override
+		...override,
 	};
 	const messageReaction = Reflect.construct(MessageReaction, [
 		message.client,
 		data,
-		message
+		message,
 	]) as MessageReaction;
 	return messageReaction;
 }
@@ -426,7 +450,7 @@ export function mockMessageReaction({
 export function mockReaction({
 	message,
 	user,
-	override
+	override,
 }: {
 	message: Message;
 	user: User;
@@ -440,19 +464,19 @@ export function mockReaction({
 		count: 1,
 		emoji: {
 			id: randomSnowflake().toString(),
-			name: "👍"
+			name: '👍',
 		},
 		me: user.id === message.client.user?.id,
-		...override
+		...override,
 	};
 	const reaction = Reflect.construct(MessageReaction, [
 		message.client,
 		data,
-		message
+		message,
 	]) as MessageReaction;
 	const emojiId = data.emoji.name ?? data.emoji.id;
 	if (!emojiId) {
-		throw new Error("Emoji ID and name cannot be null");
+		throw new Error('Emoji ID and name cannot be null');
 	}
 	message.reactions.cache.set(emojiId, reaction);
 	return reaction;
@@ -463,7 +487,7 @@ export function mockMarkedAsSolvedReply({
 	questionId,
 	solutionId,
 	channel,
-	override = {}
+	override = {},
 }: {
 	client: Client;
 	questionId: string;
@@ -479,21 +503,21 @@ export function mockMarkedAsSolvedReply({
 				{
 					fields: [
 						{
-							name: "Solution Message ID",
+							name: 'Solution Message ID',
 							value: solutionId,
-							inline: true
+							inline: true,
 						},
 						{
-							name: "Question Message ID",
+							name: 'Question Message ID',
 							value: questionId,
-							inline: true
-						}
-					]
-				}
+							inline: true,
+						},
+					],
+				},
 			],
-			...override
+			...override,
 		},
-		channel
+		channel,
 	});
 	return markedAsSolvedReply;
 }
@@ -501,7 +525,7 @@ export function mockMarkedAsSolvedReply({
 export function mockInvite(
 	client: Client,
 	channel: GuildChannel | undefined,
-	override: Partial<APIInvite> = {}
+	override: Partial<APIInvite> = {},
 ) {
 	if (!channel) {
 		channel = mockTextChannel(client);
@@ -512,9 +536,9 @@ export function mockInvite(
 		channel: {
 			id: channel.id,
 			name: channel.name,
-			type: channel.type
+			type: channel.type,
 		},
-		...override
+		...override,
 	};
 	const invite = Reflect.construct(Invite, [client, inviteData]) as Invite;
 	return invite;

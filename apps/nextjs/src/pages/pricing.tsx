@@ -1,5 +1,5 @@
-import Head from "next/head";
-import { Pricing } from "@answeroverflow/ui";
+import Head from 'next/head';
+import { Pricing } from '@answeroverflow/ui';
 export default function PricingPage() {
 	return (
 		<>

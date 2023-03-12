@@ -1,17 +1,20 @@
-import type { NextPage } from "next";
-import Head from "next/head";
-import { AnswerOverflowLogo, trpc } from "@answeroverflow/ui";
-import type { inferProcedureOutput } from "@trpc/server";
-import type { AppRouter } from "@answeroverflow/api";
-import { ServerInviteDriver } from "@answeroverflow/ui";
+import type { NextPage } from 'next';
+import Head from 'next/head';
+import { AnswerOverflowLogo, trpc } from '@answeroverflow/ui';
+import type { inferProcedureOutput } from '@trpc/server';
+import type { AppRouter } from '@answeroverflow/api';
+import { ServerInviteDriver } from '@answeroverflow/ui';
 const ServerCard: React.FC<{
-	server: Exclude<inferProcedureOutput<AppRouter["auth"]["getServers"]>, null | undefined>[0];
+	server: Exclude<
+		inferProcedureOutput<AppRouter['auth']['getServers']>,
+		null | undefined
+	>[0];
 }> = ({ server }) => {
 	return (
 		<ServerInviteDriver
 			server={{
 				...server,
-				description: null
+				description: null,
 			}}
 		/>
 	);

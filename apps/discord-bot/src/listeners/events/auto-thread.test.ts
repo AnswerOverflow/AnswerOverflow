@@ -1,15 +1,15 @@
-import { Client, Events, TextChannel } from "discord.js";
+import { Client, Events, TextChannel } from 'discord.js';
 import {
 	mockTextChannel,
 	mockMessage,
 	mockGuildMember,
-	emitEvent
-} from "@answeroverflow/discordjs-mock";
-import { setupAnswerOverflowBot } from "~discord-bot/test/sapphire-mock";
-import { randomSnowflake } from "@answeroverflow/discordjs-utils";
-import { mockPublicThread } from "@answeroverflow/discordjs-mock";
-import { createChannel, createServer } from "@answeroverflow/db";
-import { toAOServer, toAOChannel } from "~discord-bot/utils/conversions";
+	emitEvent,
+} from '@answeroverflow/discordjs-mock';
+import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
+import { randomSnowflake } from '@answeroverflow/discordjs-utils';
+import { mockPublicThread } from '@answeroverflow/discordjs-mock';
+import { createChannel, createServer } from '@answeroverflow/db';
+import { toAOServer, toAOChannel } from '~discord-bot/utils/conversions';
 
 let client: Client;
 let textChannel: TextChannel;
@@ -24,7 +24,7 @@ const succeedCreatingAThread = async () => {
 	await createServer(toAOServer(textChannel.guild));
 	await createChannel({
 		...toAOChannel(textChannel),
-		flags: { autoThreadEnabled: true }
+		flags: { autoThreadEnabled: true },
 	});
 	const author = mockGuildMember({ client });
 	const message = mockMessage({
@@ -32,8 +32,8 @@ const succeedCreatingAThread = async () => {
 		channel: textChannel,
 		author: author.user,
 		override: {
-			content: "Message"
-		}
+			content: 'Message',
+		},
 	});
 
 	await emitEvent(client, Events.MessageCreate, message);
@@ -41,8 +41,8 @@ const succeedCreatingAThread = async () => {
 	expect(message.thread).toBeDefined();
 };
 
-describe("Auto thread", () => {
-	it("should not create a thread on a channel thread channel", async () => {
+describe('Auto thread', () => {
+	it('should not create a thread on a channel thread channel', async () => {
 		// Make sure that the success case works, then we can test other cases
 		await succeedCreatingAThread();
 
@@ -52,16 +52,16 @@ describe("Auto thread", () => {
 			client,
 			channel: channel,
 			override: {
-				content: "Hey"
+				content: 'Hey',
 			},
-			author: author.user
+			author: author.user,
 		});
 
 		await emitEvent(client, Events.MessageCreate, message);
 
 		expect(message.hasThread).toEqual(false);
 	});
-	it("should not create a thread if the author is a bot", async () => {
+	it('should not create a thread if the author is a bot', async () => {
 		// Make sure that the success case works, then we can test other cases
 		await succeedCreatingAThread();
 		const author = mockGuildMember({
@@ -69,25 +69,25 @@ describe("Auto thread", () => {
 			data: {
 				user: {
 					bot: true,
-					id: randomSnowflake().toString()
-				}
-			}
+					id: randomSnowflake().toString(),
+				},
+			},
 		});
 
 		const message = mockMessage({
 			client,
 			channel: textChannel,
 			override: {
-				content: "Hey"
+				content: 'Hey',
 			},
-			author: author.user
+			author: author.user,
 		});
 
 		await emitEvent(client, Events.MessageCreate, message);
 
 		expect(message.hasThread).toEqual(false);
 	});
-	it("should not create if the author is the system", async () => {
+	it('should not create if the author is the system', async () => {
 		// Make sure that the success case works, then we can test other cases
 		await succeedCreatingAThread();
 
@@ -96,25 +96,25 @@ describe("Auto thread", () => {
 			data: {
 				user: {
 					system: true,
-					id: randomSnowflake().toString()
-				}
-			}
+					id: randomSnowflake().toString(),
+				},
+			},
 		});
 
 		const message = mockMessage({
 			client,
 			channel: textChannel,
 			override: {
-				content: "Hey"
+				content: 'Hey',
 			},
-			author: author.user
+			author: author.user,
 		});
 
 		await emitEvent(client, Events.MessageCreate, message);
 
 		expect(message.hasThread).toEqual(false);
 	});
-	it("should not create a thread if it does not have auto thread enabled", async () => {
+	it('should not create a thread if it does not have auto thread enabled', async () => {
 		// Make sure that the success case works, then we can test other cases
 		await succeedCreatingAThread();
 
@@ -123,7 +123,7 @@ describe("Auto thread", () => {
 		await createServer(toAOServer(channel.guild));
 		await createChannel({
 			...toAOChannel(channel),
-			flags: { autoThreadEnabled: false }
+			flags: { autoThreadEnabled: false },
 		});
 		const author = mockGuildMember({ client });
 
@@ -131,9 +131,9 @@ describe("Auto thread", () => {
 			client,
 			channel: channel,
 			override: {
-				content: "Hey"
+				content: 'Hey',
 			},
-			author: author.user
+			author: author.user,
 		});
 
 		await emitEvent(client, Events.MessageCreate, message);
@@ -141,12 +141,12 @@ describe("Auto thread", () => {
 		expect(message.hasThread).toEqual(false);
 	});
 
-	it("should create a thread", async () => {
+	it('should create a thread', async () => {
 		// Make sure that the success case works
 		await succeedCreatingAThread();
 	});
 
-	it("should use the nickname instead of the username for the thread title", async () => {
+	it('should use the nickname instead of the username for the thread title', async () => {
 		// Make sure that the success case works, then we can test other cases
 		await succeedCreatingAThread();
 		const channel = mockTextChannel(client);
@@ -154,7 +154,7 @@ describe("Auto thread", () => {
 		await createServer(toAOServer(channel.guild));
 		await createChannel({
 			...toAOChannel(channel),
-			flags: { autoThreadEnabled: true }
+			flags: { autoThreadEnabled: true },
 		});
 
 		const author = mockGuildMember({
@@ -163,26 +163,26 @@ describe("Auto thread", () => {
 
 			data: {
 				user: {
-					username: "serverUsername",
-					id: randomSnowflake().toString()
+					username: 'serverUsername',
+					id: randomSnowflake().toString(),
 				},
-				nick: "serverNickname"
-			}
+				nick: 'serverNickname',
+			},
 		});
 		const message = mockMessage({
 			client,
 			channel: channel,
 			author: author.user,
 			override: {
-				content: "test"
-			}
+				content: 'test',
+			},
 		});
 
 		await emitEvent(client, Events.MessageCreate, message);
 
 		expect(message.thread?.name).toEqual(`serverNickname - test`);
 	});
-	it("should trim the text to no longer than 50 characters", async () => {
+	it('should trim the text to no longer than 50 characters', async () => {
 		// Make sure that the success case works, then we can test other cases
 		await succeedCreatingAThread();
 
@@ -191,7 +191,7 @@ describe("Auto thread", () => {
 		await createServer(toAOServer(channel.guild));
 		await createChannel({
 			...toAOChannel(channel),
-			flags: { autoThreadEnabled: true }
+			flags: { autoThreadEnabled: true },
 		});
 
 		const author = mockGuildMember({
@@ -199,26 +199,28 @@ describe("Auto thread", () => {
 
 			data: {
 				user: {
-					username: "serverUsername",
-					id: randomSnowflake().toString()
-				}
-			}
+					username: 'serverUsername',
+					id: randomSnowflake().toString(),
+				},
+			},
 		});
 		const message = mockMessage({
 			client,
 			channel: channel,
 			author: author.user,
 			override: {
-				content: "a".repeat(50)
-			}
+				content: 'a'.repeat(50),
+			},
 		});
 
 		await emitEvent(client, Events.MessageCreate, message);
 
 		// 30 = 50 - all other characters
-		expect(message.thread?.name).toEqual(`serverUsername - ${"a".repeat(30)}...`);
+		expect(message.thread?.name).toEqual(
+			`serverUsername - ${'a'.repeat(30)}...`,
+		);
 	});
-	it("should remove all markdown syntax from title", async () => {
+	it('should remove all markdown syntax from title', async () => {
 		// Make sure that the success case works, then we can test other cases
 		await succeedCreatingAThread();
 
@@ -227,7 +229,7 @@ describe("Auto thread", () => {
 		await createServer(toAOServer(channel.guild));
 		await createChannel({
 			...toAOChannel(channel),
-			flags: { autoThreadEnabled: true }
+			flags: { autoThreadEnabled: true },
 		});
 
 		const author = mockGuildMember({
@@ -235,18 +237,18 @@ describe("Auto thread", () => {
 
 			data: {
 				user: {
-					username: "serverUsername",
-					id: randomSnowflake().toString()
-				}
-			}
+					username: 'serverUsername',
+					id: randomSnowflake().toString(),
+				},
+			},
 		});
 		const message = mockMessage({
 			client,
 			channel: channel,
 			author: author.user,
 			override: {
-				content: "**thread title**"
-			}
+				content: '**thread title**',
+			},
 		});
 
 		await emitEvent(client, Events.MessageCreate, message);

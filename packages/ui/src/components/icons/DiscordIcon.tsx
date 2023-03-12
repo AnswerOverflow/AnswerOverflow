@@ -1,26 +1,28 @@
-import { cva, VariantProps } from "cva";
+import { cva, VariantProps } from 'cva';
 
-const discordIconStyles = cva("", {
+const discordIconStyles = cva('', {
 	variants: {
 		color: {
 			blurple:
-				"dark:text-blue-400 text-[#5865F2] hover:text-[#7289DA] dark:hover:text-blue-300 transition-all",
-			inherit: "text-inherit"
+				'dark:text-blue-400 text-[#5865F2] hover:text-[#7289DA] dark:hover:text-blue-300 transition-all',
+			inherit: 'text-inherit',
 		},
 		defaultVariants: {
-			color: "inherit"
-		}
-	}
+			color: 'inherit',
+		},
+	},
 });
 
 export function DiscordIcon(
-	props: React.SVGProps<SVGSVGElement> & VariantProps<typeof discordIconStyles>
+	props: React.SVGProps<SVGSVGElement> & VariantProps<typeof discordIconStyles>,
 ) {
 	return (
 		<svg
 			fill="currentColor"
 			viewBox="0 0 127.14 96.36"
-			className={`${discordIconStyles({ color: props.color })} ${props.className ?? ""}`}
+			className={`${discordIconStyles({ color: props.color })} ${
+				props.className ?? ''
+			}`}
 		>
 			<path
 				fillRule="evenodd"

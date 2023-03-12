@@ -1,34 +1,37 @@
-import { cva, VariantProps } from "cva";
-import type { Merge, SetNonNullable } from "type-fest";
-import { buttonStyles as buttonStylesData, convertToCva } from "./button-styles";
+import { cva, VariantProps } from 'cva';
+import type { Merge, SetNonNullable } from 'type-fest';
+import {
+	buttonStyles as buttonStylesData,
+	convertToCva,
+} from './button-styles';
 
 export type ButtonVariantProps = Merge<
 	SetNonNullable<Required<VariantProps<typeof buttonStyles>>>,
-	Pick<VariantProps<typeof buttonStyles>, "disabled">
+	Pick<VariantProps<typeof buttonStyles>, 'disabled'>
 >;
 
 export const buttonStyles = cva(
-	"rounded-md px-8 py-2 font-body font-bold transition-all duration-100",
+	'rounded-md px-8 py-2 font-body font-bold transition-all duration-100',
 	{
 		// We don't need to declare any of these, as all the types are required, we only need to do compound variants
 		variants: {
 			type: {
-				solid: "",
-				ghost: ""
+				solid: '',
+				ghost: '',
 			},
 			color: {
-				red: "",
-				blue: "",
-				green: "",
-				black: "",
-				white: ""
+				red: '',
+				blue: '',
+				green: '',
+				black: '',
+				white: '',
 			},
 			disabled: {
-				true: ""
-			}
+				true: '',
+			},
 		},
-		compoundVariants: [...convertToCva(buttonStylesData)]
-	}
+		compoundVariants: [...convertToCva(buttonStylesData)],
+	},
 );
 
 export interface ButtonProps extends ButtonVariantProps {
@@ -42,11 +45,16 @@ export const Button: React.FC<React.PropsWithChildren<ButtonProps>> = ({
 	disabled,
 	onClick,
 	children,
-	className
+	className,
 }) => {
 	return (
 		<button
-			className={buttonStyles({ type, color, disabled: disabled ?? false, className })}
+			className={buttonStyles({
+				type,
+				color,
+				disabled: disabled ?? false,
+				className,
+			})}
 			onClick={() => onClick?.()}
 			disabled={disabled ?? false}
 		>

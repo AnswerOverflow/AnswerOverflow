@@ -1,16 +1,21 @@
-import type { Guild, GuildMember, GuildTextBasedChannel, Interaction } from "discord.js";
+import type {
+	Guild,
+	GuildMember,
+	GuildTextBasedChannel,
+	Interaction,
+} from 'discord.js';
 
 export async function guildTextChannelOnlyInteraction<T, I extends Interaction>(
 	interaction: I,
 	operation: ({
 		guild,
 		channel,
-		member
+		member,
 	}: {
 		guild: Guild;
 		channel: GuildTextBasedChannel;
 		member: GuildMember;
-	}) => Promise<T>
+	}) => Promise<T>,
 ) {
 	if (interaction.guild == null) {
 		return;
@@ -27,6 +32,6 @@ export async function guildTextChannelOnlyInteraction<T, I extends Interaction>(
 	await operation({
 		guild,
 		channel,
-		member
+		member,
 	});
 }

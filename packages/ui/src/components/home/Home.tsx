@@ -1,9 +1,9 @@
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { Navbar } from "../primitives/Navbar";
-import { BlobHome } from "./BlobHome";
-import { HomeLeadText } from "./HomeLeadText";
-import { QuestionAnswerArea } from "./QuestionAnswerArea/QuestionAnswerArea";
-import { messageData } from "./HomeMessages";
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import { Navbar } from '../primitives/Navbar';
+import { BlobHome } from './BlobHome';
+import { HomeLeadText } from './HomeLeadText';
+import { QuestionAnswerArea } from './QuestionAnswerArea/QuestionAnswerArea';
+import { messageData } from './HomeMessages';
 
 export const Home = () => {
 	return (
@@ -23,7 +23,7 @@ export const Home = () => {
 
 				<div className="hidden items-center justify-end xl:flex xl:w-2/3 2xl:grow">
 					<QuestionAnswerArea
-						discordChannelName={"How do I index discord channels into google?"}
+						discordChannelName={'How do I index discord channels into google?'}
 						questionMessage={messageData.questionMessage}
 						answerMessage={messageData.answerMessage}
 					/>
