@@ -1,21 +1,20 @@
 {
-  "compilerOptions": {
-    "target": "es2017",
-    "baseUrl": "../../",
-    "preserveSymlinks": true,
-    "types": [
-      "jest"
-    ]
-  },
-  "extends": "@answeroverflow/tsconfig/nextjs.json",
-  "include": [
-    "next-env.d.ts",
-    ".storybook/*",
-    "test",
-    "src",
-    "next.config.mjs",
-    "postcss.config.cjs",
-    "tailwind.config.cjs",
-    "../../reset.d.ts"
-  ],
+	"compilerOptions": {
+		"target": "es2017",
+		"baseUrl": "../../",
+		"preserveSymlinks": true,
+		"types": ["jest"]
+	},
+	"extends": "@answeroverflow/tsconfig/nextjs.json",
+	"include": [
+		"next-env.d.ts",
+		".storybook/*",
+		"test",
+		"src",
+		"next.config.mjs",
+		"postcss.config.cjs",
+		"tailwind.config.cjs",
+		"prettierrc.cjs",
+		"../../reset.d.ts"
+	]
 }

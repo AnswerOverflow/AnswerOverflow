@@ -23,6 +23,17 @@
       ],
       "cache": false
     },
+    "format": {
+      "inputs": [
+        "./packages/config/"
+      ],
+      "outputs": [],
+      "cache": false
+    },
+    "format:check": {
+      "outputs": [],
+      "cache": false
+    },
     "lint": {
       "inputs": [
         "./packages/config/"

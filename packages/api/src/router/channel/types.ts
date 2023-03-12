@@ -1,1 +1,4 @@
-export type { ChannelPublicWithFlags, ChannelWithFlags } from "@answeroverflow/db";
+export type {
+	ChannelPublicWithFlags,
+	ChannelWithFlags,
+} from '@answeroverflow/db';
