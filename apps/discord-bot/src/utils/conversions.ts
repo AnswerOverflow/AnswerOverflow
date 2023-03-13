@@ -44,6 +44,7 @@ export function toDiscordAPIServer(
 	};
 }
 
+// top 10 ugliest functions in this codebase
 export function toAOMessage(message: Message): AOMessage {
 	if (!message.guild) throw new Error('Message is not in a guild');
 
@@ -78,7 +79,64 @@ export function toAOMessage(message: Message): AOMessage {
 			reactorIds: reaction.users.cache.map((user) => user.id),
 		})),
 		components: [],
-		embeds: [],
+		embeds: message.embeds.map((embed) => ({
+			title: embed.title ?? undefined,
+			description: embed.description ?? undefined,
+			url: embed.url ?? undefined,
+			color: embed.color ?? undefined,
+			type: undefined,
+			timestamp: embed.timestamp ?? undefined,
+			footer: embed.footer
+				? {
+						text: embed.footer.text,
+						iconUrl: embed.footer.iconURL ?? undefined,
+						proxyIconUrl: embed.footer.proxyIconURL ?? undefined,
+				  }
+				: undefined,
+			image: embed.image
+				? {
+						url: embed.image.url,
+						proxyUrl: embed.image.proxyURL ?? undefined,
+						height: embed.image.height ?? undefined,
+						width: embed.image.width ?? undefined,
+				  }
+				: undefined,
+			video: embed.video
+				? {
+						height: embed.video.height ?? undefined,
+						width: embed.video.width ?? undefined,
+						url: embed.video.url,
+						proxyUrl: embed.video.proxyURL ?? undefined,
+				  }
+				: undefined,
+			provider: embed.provider
+				? {
+						name: embed.provider.name ?? undefined,
+						url: embed.provider.url ?? undefined,
+				  }
+				: undefined,
+			thumbnail: embed.thumbnail
+				? {
+						url: embed.thumbnail.url,
+						proxyUrl: embed.thumbnail.proxyURL ?? undefined,
+						height: embed.thumbnail.height ?? undefined,
+						width: embed.thumbnail.width ?? undefined,
+				  }
+				: undefined,
+			author: embed.author
+				? {
+						name: embed.author.name ?? undefined,
+						url: embed.author.url ?? undefined,
+						iconUrl: embed.author.iconURL ?? undefined,
+						proxyIconUrl: embed.author.proxyIconURL ?? undefined,
+				  }
+				: undefined,
+			fields: embed.fields.map((field) => ({
+				name: field.name,
+				value: field.value,
+				inline: field.inline ?? false,
+			})),
+		})),
 		interactionId: message.interaction?.id ?? null,
 		mentionChannels: message.mentions.channels.map((channel) => channel.id),
 		mentionEveryone: message.mentions.everyone,
