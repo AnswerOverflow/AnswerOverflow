@@ -1,6 +1,5 @@
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { Navbar } from '../primitives/Navbar';
-// import { BlobHome } from "./BlobHome";
 import { HomeLeadText } from './HomeLeadText';
 import { QuestionAnswerArea } from './QuestionAnswerArea/QuestionAnswerArea';
 import { messageData } from './HomeMessages';
@@ -9,7 +8,6 @@ export const Home = () => {
 	return (
 		<div className="absolute -z-50 h-screen bg-ao-white bg-gradient-to-t from-[#10151c] to-[#354364] xl:from-transparent xl:to-transparent xl:dark:bg-ao-black/[0.79]">
 			<Navbar />
-			{/* <BlobHome /> */}
 
 			{/* Chevron going down */}
 			<div className="absolute bottom-0 w-full">

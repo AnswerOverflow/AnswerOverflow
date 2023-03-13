@@ -7,9 +7,9 @@ interface BaseInputProps {
 }
 
 // Add children if type is buttonInput
-interface ButtonInputProps extends BaseInputProps {
+interface ButtonInputProps extends React.PropsWithChildren<BaseInputProps> {
 	type: 'buttonInput';
-	children: React.ReactNode;
+	buttonAria: string;
 }
 
 // Add type if type is not buttonInput
@@ -17,7 +17,7 @@ interface NormalInputProps extends BaseInputProps {
 	type?: 'text';
 }
 
-// Distriminated union
+// Discriminated union
 type InputProps = ButtonInputProps | NormalInputProps;
 
 const InputText = ({ placeholder, fill, onChange }: InputProps) => {
@@ -33,25 +33,37 @@ const InputText = ({ placeholder, fill, onChange }: InputProps) => {
 	);
 };
 
-const InputButton = ({ children }: { children: React.ReactNode }) => {
+const InputButton = ({
+	children,
+	buttonAria,
+}: Omit<ButtonInputProps, 'type'>) => {
 	return (
-		<button className="absolute right-5 top-1/2 -translate-y-1/2 rounded-standard border-1 border-[#889AB2] px-4 py-1 font-body font-semibold hover:bg-[#f1f3f7] dark:border-0 dark:bg-[#272C33] dark:text-ao-white dark:hover:bg-[#2f343b]">
+		<button
+			className="absolute right-5 top-1/2 -translate-y-1/2 rounded-standard border-1 border-[#889AB2] px-4 py-1 font-body font-semibold hover:bg-[#f1f3f7] dark:border-0 dark:bg-[#272C33] dark:text-ao-white dark:hover:bg-[#2f343b]"
+			aria-label={buttonAria}
+		>
 			{children}
 		</button>
 	);
 };
 
-export const Input = ({ placeholder, fill, onChange, type }: InputProps) => {
+// It is not suitable to destructure here, due to the discriminated types
+export const Input = (props: InputProps) => {
 	return (
 		<>
-			{type === 'buttonInput' ? (
-				<div className={`relative inline-block ${fill ? 'w-full' : ''}`}>
+			{props.type === 'buttonInput' ? (
+				<div className={`relative inline-block ${props.fill ? 'w-full' : ''}`}>
 					<InputText
-						onChange={onChange}
-						placeholder={placeholder}
-						fill={fill}
+						onChange={props.onChange}
+						placeholder={props.placeholder}
+						fill={props.fill}
 					/>
-					<InputButton>
+					<InputButton
+						buttonAria={props.buttonAria}
+						onChange={function (text: string): void {
+							throw new Error('Function not implemented.' + text);
+						}}
+					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							fill="none"
@@ -69,7 +81,11 @@ export const Input = ({ placeholder, fill, onChange, type }: InputProps) => {
 					</InputButton>
 				</div>
 			) : (
-				<InputText onChange={onChange} placeholder={placeholder} fill={fill} />
+				<InputText
+					onChange={props.onChange}
+					placeholder={props.placeholder}
+					fill={props.fill}
+				/>
 			)}
 		</>
 	);

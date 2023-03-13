@@ -1,15 +1,16 @@
+import type { APISearchResult } from '@answeroverflow/api';
 import type { Meta, StoryObj } from '@storybook/react';
 import {
 	mockChannelWithSettings,
 	mockMessageWithDiscordAccount,
 	mockServer,
 } from '~ui/test/props';
-import { MessageResultProps, SearchResult } from './SearchResult';
+import { SearchResultWrapper } from './SearchResult';
 
 const meta = {
-	component: SearchResult,
+	component: SearchResultWrapper,
 	argTypes: {},
-} as Meta<typeof SearchResult>;
+} as Meta<typeof SearchResultWrapper>;
 
 export default meta;
 
@@ -29,9 +30,9 @@ export const Primary: Story = {
 			server: mockServer(),
 		},
 	},
-	render: (props: MessageResultProps) => (
+	render: ({ result }: { result: APISearchResult[number] }) => (
 		<div className="xl:w-2/3">
-			<SearchResult {...props} />
+			<SearchResultWrapper result={result} />
 		</div>
 	),
 };
