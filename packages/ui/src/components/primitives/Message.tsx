@@ -31,7 +31,7 @@ export const MessageAuthorArea = () => {
 	return (
 		<div className="flex w-full min-w-0 gap-2">
 			{/* TODO: sort out responsive styling */}
-			<div className="flex w-full flex-row items-center gap-2 font-body text-lg text-[#FFFFFF]/[.47]">
+			<div className="flex w-full flex-row items-center gap-2 font-body text-lg text-black/[.7] dark:text-white/[.47]">
 				<DiscordAvatar user={message.author} size="sm" />
 				<span className="mr-1">{message.author.name}</span>
 				<span className="ml-auto">{getSnowflakeUTCDate(message.id)}</span>
@@ -46,7 +46,7 @@ export const MessageContents = () => {
 	const convertedMessageContent = toHTML(message.content);
 	const parsedMessageContent = Parser(convertedMessageContent);
 	return (
-		<div className="pt-2 text-ao-white [word-wrap:_break-word]">
+		<div className="pt-2 text-ao-black [word-wrap:_break-word] dark:text-ao-white">
 			{parsedMessageContent}
 		</div>
 	);
@@ -61,7 +61,7 @@ export const MessageTitle = ({
 }) => {
 	return (
 		<div className="pt-4">
-			<h4 className="font-body text-4xl font-semibold text-ao-white">
+			<h4 className="font-body text-4xl font-semibold text-ao-black dark:text-ao-white">
 				{thread?.name ?? channel.name}
 			</h4>
 		</div>
@@ -146,9 +146,9 @@ export function MessageRenderer({
 }: MessageRendererProps) {
 	return (
 		<div
-			className={`rounded-t-standard grow lg:rounded-tr-none ${
+			className={`grow rounded-t-standard lg:rounded-tr-none ${
 				showBorders ? 'border-x-2 border-t-2' : ''
-			} border-white/[.13]`}
+			} border-black/[.13] dark:border-white/[.13]`}
 		>
 			<div className="p-6">
 				<div className="flex items-center gap-2">{authorArea}</div>
@@ -227,7 +227,7 @@ export const ContentBlurrer = ({
 				<div className="absolute inset-0 " />
 				<div className="absolute inset-0 flex items-center justify-center ">
 					<div
-						className={`rounded-standard flex flex-col items-center justify-center bg-ao-black/75 p-5 text-center text-ao-white backdrop-blur-sm`}
+						className={`flex flex-col items-center justify-center rounded-standard bg-ao-black/75 p-5 text-center text-ao-black backdrop-blur-sm dark:text-ao-white`}
 					>
 						<div className="text-2xl">{notPublicTitle}</div>
 						<div>{notPublicInstructions}</div>

@@ -8,6 +8,7 @@ import {
 } from '~ui/components/primitives/Message';
 import { Button } from '../primitives/Button';
 import { createContext, useContext } from 'react';
+import { useTheme } from '~ui/utils/hooks';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const SearchResultContext = createContext<{
@@ -26,7 +27,7 @@ export function useSearchResultContext() {
 
 const ServerInviteTitle = ({ name }: { name: string }) => {
 	return (
-		<h3 className="pt-2 text-center font-header text-2xl font-bold text-ao-white">
+		<h3 className="pt-2 text-center font-header text-2xl font-bold text-ao-black dark:text-ao-white">
 			{name}
 		</h3>
 	);
@@ -34,7 +35,7 @@ const ServerInviteTitle = ({ name }: { name: string }) => {
 
 const ServerInviteChannelName = ({ channelName }: { channelName: string }) => {
 	return (
-		<h5 className="text-center text-xl font-light text-ao-white/[.9]">
+		<h5 className="text-center text-xl font-light text-ao-black/[.9] dark:text-ao-white/[.9]">
 			#{channelName}
 		</h5>
 	);
@@ -42,15 +43,24 @@ const ServerInviteChannelName = ({ channelName }: { channelName: string }) => {
 
 const ServerInviteIcon = () => {
 	return (
-		<div className="h-24 w-24 rounded-[50%] border-2 border-white bg-[#9A9A9A]" />
+		<div className="h-24 w-24 rounded-[50%] border-2 border-white bg-[#F6F9FF] dark:bg-[#9A9A9A]" />
 	);
 };
 
 const ServerInviteJoinButton = () => {
+	const theme = useTheme();
 	return (
-		<Button type={'solid'} color={'white'} className="my-4">
-			Join Server
-		</Button>
+		<>
+			{theme === 'dark' ? (
+				<Button type={'solid'} color={'white'} className="my-4">
+					Join Server
+				</Button>
+			) : (
+				<Button type={'solid'} color={'black'} className="my-4">
+					Join Server
+				</Button>
+			)}
+		</>
 	);
 };
 
@@ -62,7 +72,7 @@ const ThreadIcon = () => {
 			viewBox="0 0 24 24"
 			strokeWidth={1.5}
 			stroke="currentColor"
-			className="h-6 w-6 text-white/[.55]"
+			className="h-6 w-6 text-ao-black/[.55] dark:text-ao-white/[.55]"
 		>
 			<path
 				strokeLinecap="round"
@@ -81,7 +91,7 @@ const ViewsIcon = () => {
 			viewBox="0 0 24 24"
 			strokeWidth={1.5}
 			stroke="currentColor"
-			className="h-6 w-6 text-white/[.55]"
+			className="h-6 w-6 text-ao-black/[.55] dark:text-ao-white/[.55]"
 		>
 			<path
 				strokeLinecap="round"
@@ -103,15 +113,20 @@ const SearchResultMetaData = () => {
 	return (
 		<div className="mt-2 flex flex-row items-center justify-center">
 			{/* Thread count */}
-			<span className="flex items-center justify-center px-1 text-white/[.55]">
+			<span className="flex items-center justify-center px-1 text-ao-black/[.55] dark:text-ao-white/[.55]">
 				{0}
 			</span>
 			<ThreadIcon />
 
-			<div className="ml-2 h-2 w-2 rounded-[50%] bg-white/[.55]" aria-hidden />
+			<div
+				className="ml-2 h-2 w-2 rounded-[50%] bg-ao-black/[.55] dark:bg-ao-white/[.55]"
+				aria-hidden
+			/>
 
 			{/* Views */}
-			<span className="px-1 text-white/[.55]">{0}</span>
+			<span className="px-1 text-ao-black/[.55] dark:text-ao-white/[.55]">
+				{0}
+			</span>
 			<ViewsIcon />
 		</div>
 	);
@@ -142,7 +157,7 @@ export const SearchResult = () => {
 
 			{/* Answer */}
 			{solution && (
-				<div className="rounded-b-standard border-2 border-ao-green bg-[#4BB543]/[0.02] lg:rounded-br-none">
+				<div className="rounded-b-standard border-2 border-ao-green  bg-ao-green/10 dark:bg-ao-green/[0.02] lg:rounded-br-none">
 					<Message message={solution} />
 				</div>
 			)}
@@ -151,7 +166,7 @@ export const SearchResult = () => {
 
 	const SearchResultSidebar = () => {
 		return (
-			<div className="hidden w-1/4 flex-col items-center justify-center rounded-tr-standard rounded-br-standard border-y-2 border-r-2 border-white/[.13] px-5 pt-6 pb-2 lg:flex">
+			<div className="hidden w-1/4 flex-col items-center justify-center rounded-tr-standard rounded-br-standard border-y-2 border-r-2 border-black/[.13] px-5 pt-6 pb-2 dark:border-white/[.13] lg:flex">
 				{/* Server Invite */}
 				<div className="flex flex-col items-center justify-center pt-6 pb-2 xl:px-5">
 					<ServerInviteIcon />
@@ -169,7 +184,7 @@ export const SearchResult = () => {
 	};
 
 	return (
-		<div className="flex h-full w-full flex-col rounded-standard bg-[#181B1F] lg:flex-row">
+		<div className="flex h-full w-full flex-col rounded-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:flex-row">
 			<SearchResultMainContent />
 			<SearchResultSidebar />
 		</div>
