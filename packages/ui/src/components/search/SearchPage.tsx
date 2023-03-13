@@ -10,6 +10,7 @@ interface SearchResultProps {
 }
 
 export const SearchPage = ({ results }: SearchResultProps) => {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [searchInput, setSearchInput] = useState<string>('');
 
 	return (
