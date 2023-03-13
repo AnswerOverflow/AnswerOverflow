@@ -9,7 +9,7 @@ import { TRPCError } from '@trpc/server';
 import type { RendererableInteractions } from '@answeroverflow/discordjs-react';
 
 export type TRPCStatusHandler<T> = {
-	Ok?: (result: T) => void | Promise<void>;
+	Ok?: (result: T) => unknown | Promise<unknown>;
 	Error?: (
 		error: TRPCError,
 		messageWithCode: string,
@@ -56,14 +56,22 @@ export async function callAPI<T>({
 		return data;
 	} catch (error) {
 		if (!(error instanceof TRPCError)) throw error;
-		await Error(error, `${error.code}: ${error.message}`);
+		await Error(error, error.message);
 		return null;
 	}
 }
 
-export function ephemeralStatusHandler(
+export function discordJSReactEphemeralStatusHandler(
 	interaction: RendererableInteractions,
 	message: string,
 ) {
 	return container.discordJSReact.ephemeralReply(interaction, message);
+}
+
+export function onceTimeStatusHandler(
+	interaction: RendererableInteractions,
+	message: string,
+) {
+	if (interaction.deferred) return interaction.editReply({ content: message });
+	else return interaction.reply({ content: message, ephemeral: true });
 }
