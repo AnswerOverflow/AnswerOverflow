@@ -24,7 +24,7 @@ import {
 } from '~discord-bot/utils/conversions';
 
 import type { ChannelWithFlags } from '@answeroverflow/api';
-import { CONSENT_BUTTON_DATA } from './manage-account';
+import { makeConsentButtonData } from './manage-account';
 import {
 	mockGuild,
 	mockTextChannel,
@@ -448,7 +448,7 @@ describe('Make Mark Solution Response', () => {
 			},
 		});
 		expect(components!.components.map((component) => component.data)).toEqual([
-			CONSENT_BUTTON_DATA,
+			makeConsentButtonData('mark-solution-response'),
 			jumpToSolutionButtonData,
 		]);
 		expect(embed.data).toEqual(solutionEmbedData);

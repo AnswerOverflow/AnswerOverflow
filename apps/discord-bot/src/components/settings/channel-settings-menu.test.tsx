@@ -20,6 +20,7 @@ import {
 	DISABLE_AUTO_THREAD_LABEL,
 	OPEN_INDEXING_SETTINGS_MENU_LABEL,
 	OPEN_HELP_CHANNEL_UTILITIES_LABEL,
+	SEND_CONSENT_PROMPT_LABEL,
 } from '@answeroverflow/constants';
 import {
 	createServer,
@@ -50,6 +51,7 @@ import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
 import { toAOServer, toAOChannel } from '~discord-bot/utils/conversions';
 import React from 'react';
 import { mockChannelWithFlags } from '@answeroverflow/db-mock';
+import { makeRequestForConsentString } from '~discord-bot/domains/mark-solution';
 
 let client: Client;
 let textChannel: TextChannel;
@@ -78,6 +80,33 @@ beforeEach(async () => {
 
 describe('Channel Settings Menu', () => {
 	describe('Indexing Settings Menu', () => {
+		describe('Send consent prompt', () => {
+			it('should sent the consent prompt on click', async () => {
+				const message = await mockReply({
+					content: (
+						<IndexingSettingsMenu
+							initialChannelData={forumChannelWithFlags}
+							targetChannel={forumChannel}
+						/>
+					),
+					channel: forumThread,
+					member: members.guildMemberOwner,
+				});
+				await message.findButtonByLabel(SEND_CONSENT_PROMPT_LABEL)?.click({
+					clicker: members.guildMemberOwner.user,
+				});
+				const consentMessage = forumThread.messages.cache.find(
+					(message) => message.embeds.length > 0,
+				);
+				expect(consentMessage).toBeDefined();
+				const instructionEmbed = consentMessage?.embeds.find((embed) =>
+					embed.description?.includes(
+						makeRequestForConsentString(forumThread.guild.name),
+					),
+				);
+				expect(instructionEmbed).toBeDefined();
+			});
+		});
 		describe('Toggle Indexing Button', () => {
 			it('should enable indexing', async () => {
 				const message = await mockReply({

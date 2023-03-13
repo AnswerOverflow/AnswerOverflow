@@ -205,7 +205,7 @@ export function makeMarkSolutionResponse({
 				makeRequestForConsentString(serverName),
 			].join('\n\n'),
 		);
-		components.addComponents(makeConsentButton());
+		components.addComponents(makeConsentButton('mark-solution-response'));
 	} else {
 		embed.setDescription('**Thank you for marking this question as solved!**');
 	}

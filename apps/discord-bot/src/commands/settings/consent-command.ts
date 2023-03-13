@@ -3,7 +3,7 @@ import { ChatInputCommand, Command } from '@sapphire/framework';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { updateUserConsent } from '~discord-bot/domains/manage-account';
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
-import { ephemeralStatusHandler } from '~discord-bot/utils/trpc';
+import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
 
 @ApplyOptions<Command.Options>({
 	name: 'consent',
@@ -32,12 +32,12 @@ export class ConsentCommand extends Command {
 				member,
 				consentSource: 'slash-command',
 				canPubliclyDisplayMessages: consented,
-				Error(error) {
-					ephemeralStatusHandler(interaction, error.message);
+				async Error(error) {
+					await onceTimeStatusHandler(interaction, error.message);
 				},
-				Ok(result) {
+				async Ok(result) {
 					// TODO: Better messages
-					ephemeralStatusHandler(
+					await onceTimeStatusHandler(
 						interaction,
 						result.flags.canPubliclyDisplayMessages
 							? 'Consented'
