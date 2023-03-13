@@ -142,11 +142,11 @@ export function MessageRenderer({
 }: MessageRendererProps) {
 	return (
 		<div
-			className={`grow rounded-t-standard lg:rounded-tr-none ${
+			className={`rounded-t-standard grow lg:rounded-tr-none ${
 				showBorders ? 'border-x-2 border-t-2' : ''
 			} border-white/[.13]`}
 		>
-			<div className="select-none p-6">
+			<div className="p-6">
 				<div className="flex items-center gap-2">{authorArea}</div>
 				{content}
 				{images}
@@ -214,6 +214,7 @@ export const ContentBlurrer = ({
 					WebkitFilter: `blur(${blurAmount})`,
 					msFilter: `blur(${blurAmount})`,
 				}}
+				className="select-none"
 				tabIndex={-1}
 			>
 				{children}
@@ -222,7 +223,7 @@ export const ContentBlurrer = ({
 				<div className="absolute inset-0 " />
 				<div className="absolute inset-0 flex items-center justify-center ">
 					<div
-						className={`flex flex-col items-center justify-center rounded-standard bg-ao-black/75 p-5 text-center text-ao-white backdrop-blur-sm`}
+						className={`rounded-standard flex flex-col items-center justify-center bg-ao-black/75 p-5 text-center text-ao-white backdrop-blur-sm`}
 					>
 						<div className="text-2xl">{notPublicTitle}</div>
 						<div>{notPublicInstructions}</div>
