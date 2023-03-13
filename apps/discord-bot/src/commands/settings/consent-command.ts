@@ -32,12 +32,12 @@ export class ConsentCommand extends Command {
 				member,
 				consentSource: 'slash-command',
 				canPubliclyDisplayMessages: consented,
-				Error(error) {
-					onceTimeStatusHandler(interaction, error.message);
+				async Error(error) {
+					await onceTimeStatusHandler(interaction, error.message);
 				},
-				Ok(result) {
+				async Ok(result) {
 					// TODO: Better messages
-					onceTimeStatusHandler(
+					await onceTimeStatusHandler(
 						interaction,
 						result.flags.canPubliclyDisplayMessages
 							? 'Consented'
