@@ -19,6 +19,11 @@ const config: DocsThemeConfig = {
 	footer: {
 		component: <Footer />,
 	},
+	useNextSeoProps: () => {
+		return {
+			noindex: process.env.STAGING !== '1',
+		};
+	},
 };
 
 export default config;
