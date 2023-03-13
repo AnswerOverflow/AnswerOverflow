@@ -104,7 +104,14 @@ export async function indexRootChannel(
 		},
 	});
 	await upsertManyMessages(convertedMessages);
-	await upsertManyChannels(convertedThreads);
+	await upsertManyChannels(
+		convertedThreads.map((x) => ({
+			create: x,
+			update: {
+				name: x.name,
+			},
+		})),
+	);
 }
 
 type MessageFetchOptions = {
@@ -181,8 +188,7 @@ export async function fetchAllChannelMessagesWithThreads(
 	channel: ForumChannel | NewsChannel | TextChannel,
 	options: MessageFetchOptions = {},
 ) {
-	container.logger.info(`
-    Fetching all messages for channel ${channel.id} ${
+	container.logger.info(`Fetching all messages for channel ${channel.id} ${
 		channel.name
 	} with options ${JSON.stringify(options)}
   `);
