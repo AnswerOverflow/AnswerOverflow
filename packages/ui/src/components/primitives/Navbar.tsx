@@ -1,39 +1,15 @@
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import { useEffect, useRef, useState } from 'react';
 import { useTheme } from '~ui/utils/index';
 import { AnswerOverflowLogo } from '../AnswerOverflowLogo';
 import { Button } from './Button';
 
 export const Navbar = () => {
-	const [navbarStyles, setNavbarStyles] = useState<string>('');
 	const theme = useTheme();
-	const navbarRef = useRef<HTMLDivElement>(null);
-
-	// // When the user scrolls down make the navbar sticky
-	// useEffect(() => {
-	//   const handleScroll = () => {
-	//     if (navbarRef.current) {
-	//       console.log(window.scrollY)
-	//       if (window.scrollY > 0) {
-	//         setNavbarStyles("absolute top-0 bg-white dark:bg-black shadow-md");
-	//       } else {
-	//         setNavbarStyles("");
-	//       }
-	//     }
-	//   };
-
-	//   window.addEventListener("scroll", handleScroll);
-
-	//   return () => {
-	//     window.removeEventListener("scroll", handleScroll);
-	//   };
-	// }, []);
 
 	return (
 		<>
 			<nav
-				className={`${navbarStyles} z-50 flex min-h-[4rem] w-full items-center`}
-				ref={navbarRef}
+				className="z-50 flex min-h-[4rem] w-full items-center"
 			>
 				<div className="flex w-full items-center justify-center lg:hidden">
 					<a href="/" aria-label="AnswerOverflow Logo">
