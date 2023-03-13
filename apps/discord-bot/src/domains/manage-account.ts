@@ -65,7 +65,7 @@ export function makeConsentButtonData(source: ConsentSource) {
 	return {
 		label: CONSENT_BUTTON_LABEL,
 		style: ButtonStyle.Success,
-		custom_id: `${CONSENT_ACTION_PREFIX}-${source}`,
+		custom_id: `${CONSENT_ACTION_PREFIX}:${source}`,
 		type: ComponentType.Button,
 	} as APIButtonComponent;
 }
