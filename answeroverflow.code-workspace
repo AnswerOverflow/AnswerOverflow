@@ -95,6 +95,9 @@
     "prettier.configPath": "prettierrc.cjs",
     "javascript.suggest.autoImports": true,
     "javascript.updateImportsOnFileMove.enabled": "always",
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
     "[json]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
@@ -194,7 +197,7 @@
       "upsert",
       "upserting",
       "WAITLIST"
-    ]
+    ],
   },
   "extensions": {
     "recommendations": [

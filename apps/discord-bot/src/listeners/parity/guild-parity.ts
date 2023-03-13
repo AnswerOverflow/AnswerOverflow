@@ -29,10 +29,17 @@ async function autoUpdateServerInfo(guild: Guild) {
 async function syncServer(guild: Guild) {
 	// If the server doesn't exist we want to initialize it with the default values
 	await autoUpdateServerInfo(guild);
-	const channelsToUpsert = guild.channels.cache
-		.filter((channel) => ALLOWED_ROOT_CHANNEL_TYPES.has(channel.type))
-		.map((channel) => toAOChannel(channel));
-	await upsertManyChannels(channelsToUpsert);
+	const channelsToUpsert = guild.channels.cache.filter((channel) =>
+		ALLOWED_ROOT_CHANNEL_TYPES.has(channel.type),
+	);
+	await upsertManyChannels(
+		channelsToUpsert.map((channel) => ({
+			create: toAOChannel(channel),
+			update: {
+				name: channel.name,
+			},
+		})),
+	);
 }
 
 @ApplyOptions<Listener.Options>({ once: true, event: 'ready' })

@@ -23,7 +23,7 @@ import {
 } from 'discord.js';
 import { randomSnowflake } from '@answeroverflow/discordjs-utils';
 import { mockTextChannel } from './channel-mock';
-import { applyMessagePayload, mockMessage } from './message-mock';
+import { mockMessage } from './message-mock';
 import { mockGuildMember } from './user-mock';
 import type {
 	RawMessageButtonInteractionData,
@@ -144,10 +144,11 @@ function applyInteractionResponseHandlers(interaction: Interaction) {
 				override: {
 					id: interaction.id.toString(),
 				},
+				opts,
 			});
 			interaction.deferred = false;
 			interaction.replied = true;
-			applyMessagePayload(opts, msg);
+
 			if (opts instanceof Object && 'fetchReply' in opts) {
 				return Promise.resolve(msg);
 			}
