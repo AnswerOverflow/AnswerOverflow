@@ -35,9 +35,9 @@ const ServerInviteTitle = ({ name }: { name: string }) => {
 
 const ServerInviteChannelName = ({ channelName }: { channelName: string }) => {
 	return (
-		<h5 className="text-center text-xl font-light text-ao-black/[.9] dark:text-ao-white/[.9]">
+		<h4 className="text-center text-xl font-light text-ao-black/[.9] dark:text-ao-white/[.9]">
 			#{channelName}
-		</h5>
+		</h4>
 	);
 };
 
