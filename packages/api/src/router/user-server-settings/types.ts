@@ -3,6 +3,7 @@ export type ManageAccountSource = (typeof MANAGE_ACCOUNT_SOURCES)[number];
 
 export const CONSENT_SOURCES = [
 	'forum-post-guidelines',
+	'manually-posted-prompt',
 	'read-the-rules',
 	'manage-account-menu',
 	'slash-command',
@@ -12,6 +13,7 @@ export type ConsentSource = (typeof CONSENT_SOURCES)[number];
 
 export const MANUAL_CONSENT_SOURCES: ConsentSource[] = [
 	'manage-account-menu',
+	'manually-posted-prompt',
 	'slash-command',
 	'mark-solution-response',
 ];
