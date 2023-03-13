@@ -4,9 +4,9 @@ import {
 	PieceContext,
 } from '@sapphire/framework';
 import type { ButtonInteraction } from 'discord.js';
-import { CONSENT_SOURCES } from '@answeroverflow/api';
 import {
-	CONSENT_ACTION_PREFIX,
+	ConsentButtonInteractionParseError,
+	parseConsentButtonInteraction,
 	updateUserConsent,
 } from '~discord-bot/domains/manage-account';
 import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
@@ -20,16 +20,18 @@ export class ButtonHandler extends InteractionHandler {
 	}
 
 	public override async parse(interaction: ButtonInteraction) {
-		const splitInteractionId = interaction.customId.split('-');
-		const action = splitInteractionId[0];
-		const source = splitInteractionId.slice(1).join('-');
-		if (action !== CONSENT_ACTION_PREFIX) return this.none();
-		if (!source) return this.none();
-		if (!CONSENT_SOURCES.includes(source)) return this.none();
-		await interaction.deferReply({
-			ephemeral: true,
-		});
-		return this.some({ source });
+		try {
+			const source = parseConsentButtonInteraction(interaction.customId);
+			await interaction.deferReply({
+				ephemeral: true,
+			});
+			return this.some({ source });
+		} catch (error) {
+			if (error instanceof ConsentButtonInteractionParseError) {
+				return this.none();
+			}
+			throw error;
+		}
 	}
 
 	public async run(

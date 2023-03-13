@@ -15,11 +15,42 @@ import {
 import { callAPI, TRPCStatusHandler } from '~discord-bot/utils/trpc';
 import { toAODiscordAccount } from '~discord-bot/utils/conversions';
 import { createMemberCtx } from '~discord-bot/utils/context';
-import type { ConsentSource, ManageAccountSource } from '@answeroverflow/api';
+import {
+	ConsentSource,
+	CONSENT_SOURCES,
+	ManageAccountSource,
+} from '@answeroverflow/api';
 import { CONSENT_BUTTON_LABEL } from '@answeroverflow/constants';
 import { isHumanMessage } from '~discord-bot/utils/utils';
 
 export const CONSENT_ACTION_PREFIX = 'consent';
+
+const consentButtonInteractionParseErrors = [
+	'no-consent-prefix',
+	'no-consent-source',
+	'invalid-consent-source',
+] as const;
+export class ConsentButtonInteractionParseError extends Error {
+	constructor(reason: (typeof consentButtonInteractionParseErrors)[number]) {
+		super(reason);
+	}
+}
+
+export function parseConsentButtonInteraction(customId: string) {
+	const splitInteractionId = customId.split(':');
+	const action = splitInteractionId[0];
+	const source = splitInteractionId[1];
+	if (action !== CONSENT_ACTION_PREFIX) {
+		throw new ConsentButtonInteractionParseError('no-consent-prefix');
+	}
+	if (!source) {
+		throw new ConsentButtonInteractionParseError('no-consent-source');
+	}
+	if (!CONSENT_SOURCES.includes(source as ConsentSource)) {
+		throw new ConsentButtonInteractionParseError('invalid-consent-source');
+	}
+	return source as ConsentSource;
+}
 
 export function makeConsentButtonData(source: ConsentSource) {
 	return {
