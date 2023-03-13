@@ -8,9 +8,7 @@ export const Navbar = () => {
 
 	return (
 		<>
-			<nav
-				className="z-50 flex min-h-[4rem] w-full items-center"
-			>
+			<nav className="z-50 flex min-h-[4rem] w-full items-center">
 				<div className="flex w-full items-center justify-center lg:hidden">
 					<a href="/" aria-label="AnswerOverflow Logo">
 						<AnswerOverflowLogo />
