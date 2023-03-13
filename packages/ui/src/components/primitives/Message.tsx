@@ -45,7 +45,11 @@ export const MessageContents = () => {
 	const { toHTML } = discordMarkdown;
 	const convertedMessageContent = toHTML(message.content);
 	const parsedMessageContent = Parser(convertedMessageContent);
-	return <div className={'pt-2 text-ao-white'}>{parsedMessageContent}</div>;
+	return (
+		<div className="pt-2 text-ao-white [word-wrap:_break-word]">
+			{parsedMessageContent}
+		</div>
+	);
 };
 
 export const MessageTitle = ({
