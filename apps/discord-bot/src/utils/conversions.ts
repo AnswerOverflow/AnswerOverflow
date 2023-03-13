@@ -54,14 +54,40 @@ export function toAOMessage(message: Message): AOMessage {
 		parentChannelId: message.channel.isThread()
 			? message.channel.parentId
 			: null,
-		images: message.attachments.map((attachment) => {
+		attachments: message.attachments.map((attachment) => {
 			return {
+				id: attachment.id,
 				url: attachment.url,
-				width: attachment.width,
+				proxyUrl: attachment.proxyURL,
+				filename: attachment.name ?? '',
+				size: attachment.size,
 				height: attachment.height,
-				description: attachment.description,
+				width: attachment.width,
+				contentType: attachment.contentType ?? undefined,
+				description: attachment.description ?? '',
+				ephemeral: attachment.ephemeral ?? false,
 			};
 		}),
+		applicationId: message.applicationId,
+		flags: message.flags.bitfield,
+		nonce: message.nonce ? message.nonce.toString() : null,
+		tts: message.tts,
+		reactions: message.reactions.cache.map((reaction) => ({
+			emojiId: reaction.emoji.id,
+			emojiName: reaction.emoji.name,
+			reactorIds: reaction.users.cache.map((user) => user.id),
+		})),
+		components: [],
+		embeds: [],
+		interactionId: message.interaction?.id ?? null,
+		mentionChannels: message.mentions.channels.map((channel) => channel.id),
+		mentionEveryone: message.mentions.everyone,
+		mentionRoles: message.mentions.roles.map((role) => role.id),
+		mentions: message.mentions.users.map((user) => user.id),
+		pinned: message.pinned,
+		stickerIds: message.stickers.map((sticker) => sticker.id),
+		type: message.type,
+		webhookId: message.webhookId,
 		messageReference: message.reference
 			? toAOMessageReference(message.reference)
 			: null,

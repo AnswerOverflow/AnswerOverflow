@@ -177,7 +177,8 @@ const messageComponentProperties: CustomMappingProperty<
 };
 
 const zMessageReaction = z.object({
-	emojiId: z.string(),
+	emojiName: z.string().nullable(),
+	emojiId: z.string().nullable(),
 	reactorIds: z.array(z.string()),
 });
 
@@ -186,6 +187,7 @@ const messageReactionProperties: CustomMappingProperty<
 > = {
 	reactorIds: idProperty,
 	emojiId: idProperty,
+	emojiName: { type: 'text' },
 };
 
 export const zMessage = z.object({
