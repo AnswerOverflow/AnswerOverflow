@@ -7,9 +7,21 @@ import {
 	MessageTitle,
 } from '~ui/components/primitives/Message';
 import { Button } from '../primitives/Button';
+import { createContext, useContext } from 'react';
 
-export interface MessageResultProps {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const SearchResultContext = createContext<{
 	result: APISearchResult[number];
+} | null>(null);
+
+export function useSearchResultContext() {
+	const context = useContext(SearchResultContext);
+	if (!context) {
+		throw new Error(
+			'This component must be rendered as a child of Search component',
+		);
+	}
+	return context;
 }
 
 const ServerInviteTitle = ({ name }: { name: string }) => {
@@ -87,7 +99,7 @@ const ViewsIcon = () => {
 
 // TODO: Use data from the API
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const SearchResultMetaData = ({ result }: MessageResultProps) => {
+const SearchResultMetaData = () => {
 	return (
 		<div className="mt-2 flex flex-row items-center justify-center">
 			{/* Thread count */}
@@ -105,7 +117,8 @@ const SearchResultMetaData = ({ result }: MessageResultProps) => {
 	);
 };
 
-export const SearchResult = ({ result }: MessageResultProps) => {
+export const SearchResult = () => {
+	const { result } = useSearchResultContext();
 	const solution = result.message.solutionMessages?.[0];
 
 	const SearchResultMainContent = () => (
@@ -150,7 +163,7 @@ export const SearchResult = ({ result }: MessageResultProps) => {
 						</>
 					)}
 				</div>
-				<SearchResultMetaData result={result} />
+				<SearchResultMetaData />
 			</div>
 		);
 	};
@@ -160,5 +173,17 @@ export const SearchResult = ({ result }: MessageResultProps) => {
 			<SearchResultMainContent />
 			<SearchResultSidebar />
 		</div>
+	);
+};
+
+export const SearchResultWrapper = ({
+	result,
+}: {
+	result: APISearchResult[number];
+}) => {
+	return (
+		<SearchResultContext.Provider value={{ result }}>
+			<SearchResult />
+		</SearchResultContext.Provider>
 	);
 };
