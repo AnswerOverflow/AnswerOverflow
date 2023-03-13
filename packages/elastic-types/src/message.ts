@@ -176,6 +176,18 @@ const messageComponentProperties: CustomMappingProperty<
 	},
 };
 
+const zMessageReaction = z.object({
+	emojiId: z.string(),
+	reactorIds: z.array(z.string()),
+});
+
+const messageReactionProperties: CustomMappingProperty<
+	z.infer<typeof zMessageReaction>
+> = {
+	reactorIds: idProperty,
+	emojiId: idProperty,
+};
+
 export const zMessage = z.object({
 	id: z.string(),
 	channelId: z.string(), // If the message is is in a thread, this is the thread's channel id
@@ -192,6 +204,7 @@ export const zMessage = z.object({
 	content: z.string(),
 	attachments: z.array(zDiscordAttachment),
 	components: z.array(zDiscordMessageComponent),
+	reactions: z.array(zMessageReaction),
 	embeds: z.array(zDiscordEmbed),
 	messageReference: zMessageReference.nullable(),
 
@@ -245,7 +258,9 @@ export const elasticMessageIndexProperties: ElasticMessageIndexProperties = {
 	components: {
 		properties: messageComponentProperties,
 	},
-	// https://www.elastic.co/guide/en/elasticsearch/reference/current/array.html
+	reactions: {
+		properties: messageReactionProperties,
+	},
 	messageReference: {
 		properties: messageReferenceProperties,
 	},
