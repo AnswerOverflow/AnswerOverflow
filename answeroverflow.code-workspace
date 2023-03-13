@@ -17,7 +17,7 @@
     {
       //
       "name": "discord-bot",
-      "path": "apps/discord-bot",
+      "path": "apps/discord-bot"
     },
     {
       "name": "discordjs-mock",
@@ -25,7 +25,7 @@
     },
     {
       "name": "discordjs-utils",
-      "path": "packages/discordjs-utils",
+      "path": "packages/discordjs-utils"
     },
     {
       "name": "constants",
@@ -41,7 +41,7 @@
     },
     {
       "name": "db",
-      "path": "packages/db",
+      "path": "packages/db"
     },
     {
       "name": "db-mock",
@@ -70,36 +70,15 @@
     {
       "name": "root",
       "path": "./"
-    },
+    }
   ],
   "settings": {
-    "editor.tabSize": 2,
+    /*
+    LINTING & FORMATTING
+    */
     "mdx.experimentalLanguageServer": true,
-    "tailwindCSS.experimental.classRegex": [
-      [
-        "cva\\(([^)]*)\\)",
-        "[\"'`]([^\"'`]*).*?[\"'`]"
-      ]
-    ],
-    // "tailwindCSS.experimental.configFile": "./packages/config/tailwind/index.js",
-    // Disable these to view "useless" files
-    "files.exclude": {
-      // "**/node_modules": true,
-      "**/coverage/": true,
-      "**/.next": true,
-      "**/.turbo": true,
-      // "**/dist": true,
-    },
-    // "typescript.tsserver.experimental.enableProjectDiagnostics": true,
-    "vitest.enable": true,
-    "vitest.disabledWorkspaceFolders": [
-      "root",
-      "discord-bot"
-    ],
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
-    },
-    "editor.wordWrap": "on",
+    "editor.formatOnSave": true,
+    "eslint.format.enable": false,
     "eslint.validate": [
       "javascript",
       "javascriptreact",
@@ -107,25 +86,23 @@
       "typescriptreact",
       "typescript"
     ],
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
-    "eslint.format.enable": true,
-    "eslint.alwaysShowStatus": true,
-    "[typescript]": {
-      "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "editor.codeActionsOnSave": {
+      // TODO: Reenable when eslint performance is better
+      "source.fixAll.eslint": false
     },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "prettier.requireConfig": true,
+    "prettier.configPath": "prettierrc.cjs",
     "javascript.suggest.autoImports": true,
     "javascript.updateImportsOnFileMove.enabled": "always",
-    // "typescript.preferences.importModuleSpecifier": "non-relative",
-    "editor.bracketPairColorization.enabled": true,
-    "editor.guides.bracketPairs": "active",
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
     "[json]": {
-      "editor.defaultFormatter": "vscode.json-language-features"
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[prisma]": {
       "editor.defaultFormatter": "Prisma.prisma"
-    },
-    "editor.quickSuggestions": {
-      "strings": true
     },
     "tailwindCSS.includeLanguages": {
       "plaintext": "html"
@@ -133,10 +110,36 @@
     "files.associations": {
       "*.css": "tailwindcss"
     },
-    "search.useParentIgnoreFiles": true,
     "[markdown]": {
-      "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+      "editor.defaultFormatter": "unifiedjs.vscode-mdx"
     },
+    "tailwindCSS.experimental.classRegex": [
+      [
+        "cva\\(([^)]*)\\)",
+        "[\"'`]([^\"'`]*).*?[\"'`]"
+      ]
+    ],
+    /*
+      EDITOR STYLE
+    */
+    "editor.wordWrap": "on",
+    "editor.tabSize": 2,
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": "active",
+    "editor.quickSuggestions": {
+      "strings": true
+    },
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/coverage/": true,
+      "**/.next": true,
+      "**/.turbo": true
+      // "**/dist": true,
+    },
+    "search.useParentIgnoreFiles": true,
+    /*
+      TESTING
+    */
     "jest.disabledWorkspaceFolders": [
       "root",
       "api",
@@ -155,13 +158,20 @@
       "docs"
     ],
     "jest.autoRevealOutput": "off",
+    "vitest.enable": true,
+    "vitest.disabledWorkspaceFolders": [
+      "root",
+      "discord-bot"
+    ],
+    /*
+      MISC
+    */
     "cSpell.words": [
       "Anson",
       "AUTOTHREAD",
       "Bitfield",
       "Bools",
       "chnl",
-      "classname",
       "Codespaces",
       "dbaeumer",
       "devcontainer",
@@ -186,11 +196,7 @@
       "undelete",
       "upsert",
       "upserting",
-      "upvote",
       "WAITLIST"
-    ],
-    "cSpell.enableFiletypes": [
-      "mdx"
     ],
   },
   "extensions": {
@@ -209,7 +215,9 @@
       "DavidAnson.vscode-markdownlint",
       "Orta.vscode-jest",
       "unifiedjs.vscode-mdx",
-      "usernamehw.errorlens"
+      "usernamehw.errorlens",
+      "esbenp.prettier-vscode",
+      "streetsidesoftware.code-spell-checker",
     ]
-  },
+  }
 }

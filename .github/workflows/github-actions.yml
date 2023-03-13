@@ -56,6 +56,9 @@ jobs:
       - name: Setup Database
         run: yarn db:push
 
+      - name: Format
+        run: yarn format:check
+
       - name: Lint
         run: yarn lint
 
