@@ -1,135 +1,99 @@
 {
-  "$schema": "https://turborepo.org/schema.json",
-  "pipeline": {
-    "init": {},
-    "migrate": {},
-    "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**",
-        ".next/**"
-      ],
-      "cache": true
-    },
-    "build:no-cache": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**",
-        ".next/**"
-      ],
-      "cache": false
-    },
-    "format": {
-      "inputs": [
-        "./packages/config/"
-      ],
-      "outputs": [],
-      "cache": false
-    },
-    "format:check": {
-      "outputs": [],
-      "cache": false
-    },
-    "lint": {
-      "inputs": [
-        "./packages/config/"
-      ],
-      "outputs": [],
-      "cache": true
-    },
-    "lint:no-cache": {
-      "inputs": [
-        "./packages/config/"
-      ],
-      "outputs": [],
-      "cache": false,
-      "dependsOn": [
-        "^lint"
-      ]
-    },
-    "lint:fix": {
-      "outputs": [],
-      "cache": false
-    },
-    "test": {
-      "dependsOn": [
-        "build"
-      ],
-      "outputs": [],
-      "cache": true
-    },
-    "test:no-cache": {
-      "cache": false,
-      "dependsOn": [
-        "^test"
-      ]
-    },
-    "dev": {
-      "dependsOn": [
-        "build"
-      ],
-      "cache": false
-    },
-    "clean": {
-      "cache": false
-    },
-    "db:generate": {
-      "inputs": [
-        "prisma/schema.prisma"
-      ],
-      "cache": false
-    },
-    "db:wipe": {
-      "inputs": [
-        "prisma/schema.prisma"
-      ],
-      "cache": false
-    },
-    "db:push": {
-      "inputs": [
-        "prisma/schema.prisma"
-      ],
-      "cache": false
-    },
-    "db:push:staging": {
-      "inputs": [
-        "prisma/schema.prisma"
-      ],
-      "cache": false
-    }
-  },
-  "globalDependencies": [
-    ".env.local"
-  ],
-  "globalEnv": [
-    "NODE_ENV",
-    "DISCORD_TOKEN",
-    "OWNERS",
-    "VERCEL_URL",
-    "PORT",
-    "DEFAULT_DELAY_IN_MS",
-    "DATABASE_URL",
-    "ELASTICSEARCH_URL",
-    "ELASTICSEARCH_PASSWORD",
-    "ELASTICSEARCH_USERNAME",
-    "ELASTICSEARCH_MESSAGE_INDEX",
-    "REDIS_URL",
-    "ELASTICSEARCH_CLOUD_ID",
-    "DISCORD_CLIENT_ID",
-    "DISCORD_CLIENT_SECRET",
-    "SKIP_ENV_VALIDATION",
-    "CI",
-    "INDEXING_INTERVAL_IN_HOURS",
-    "BOT_DEV_LOG_LEVEL",
-    "BOT_TEST_LOG_LEVEL",
-    "BOT_PROD_LOG_LEVEL",
-    "MAXIMUM_CHANNEL_MESSAGES_PER_INDEX",
-    "STORYBOOK",
-    "VITEST_DISCORD_CLIENT_ID",
-    "THEME"
-  ]
+	"$schema": "https://turborepo.org/schema.json",
+	"pipeline": {
+		"init": {},
+		"migrate": {},
+		"build": {
+			"dependsOn": ["^build"],
+			"outputs": ["dist/**", ".next/**"],
+			"cache": true
+		},
+		"build:no-cache": {
+			"dependsOn": ["^build"],
+			"outputs": ["dist/**", ".next/**"],
+			"cache": false
+		},
+		"format": {
+			"inputs": ["./packages/config/"],
+			"outputs": [],
+			"cache": false
+		},
+		"format:check": {
+			"outputs": [],
+			"cache": false
+		},
+		"lint": {
+			"inputs": ["./packages/config/"],
+			"outputs": [],
+			"cache": true
+		},
+		"lint:no-cache": {
+			"inputs": ["./packages/config/"],
+			"outputs": [],
+			"cache": false,
+			"dependsOn": ["^lint"]
+		},
+		"lint:fix": {
+			"outputs": [],
+			"cache": false
+		},
+		"test": {
+			"outputs": [],
+			"cache": true
+		},
+		"test:no-cache": {
+			"cache": false,
+			"dependsOn": ["^test"]
+		},
+		"dev": {
+			"cache": false
+		},
+		"clean": {
+			"cache": false
+		},
+		"db:generate": {
+			"inputs": ["prisma/schema.prisma"],
+			"cache": false
+		},
+		"db:wipe": {
+			"inputs": ["prisma/schema.prisma"],
+			"cache": false
+		},
+		"db:push": {
+			"inputs": ["prisma/schema.prisma"],
+			"cache": false
+		},
+		"db:push:staging": {
+			"inputs": ["prisma/schema.prisma"],
+			"cache": false
+		}
+	},
+	"globalDependencies": [".env.local"],
+	"globalEnv": [
+		"NODE_ENV",
+		"DISCORD_TOKEN",
+		"OWNERS",
+		"VERCEL_URL",
+		"PORT",
+		"DEFAULT_DELAY_IN_MS",
+		"DATABASE_URL",
+		"ELASTICSEARCH_URL",
+		"ELASTICSEARCH_PASSWORD",
+		"ELASTICSEARCH_USERNAME",
+		"ELASTICSEARCH_MESSAGE_INDEX",
+		"REDIS_URL",
+		"ELASTICSEARCH_CLOUD_ID",
+		"DISCORD_CLIENT_ID",
+		"DISCORD_CLIENT_SECRET",
+		"SKIP_ENV_VALIDATION",
+		"CI",
+		"INDEXING_INTERVAL_IN_HOURS",
+		"BOT_DEV_LOG_LEVEL",
+		"BOT_TEST_LOG_LEVEL",
+		"BOT_PROD_LOG_LEVEL",
+		"MAXIMUM_CHANNEL_MESSAGES_PER_INDEX",
+		"STORYBOOK",
+		"VITEST_DISCORD_CLIENT_ID",
+		"THEME"
+	]
 }

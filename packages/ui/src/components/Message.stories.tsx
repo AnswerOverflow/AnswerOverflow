@@ -1,9 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { MessageProps, Message } from './Message';
-import { mockDiscordAccount } from '~ui/test/props';
-
-import type { MessageWithDiscordAccount } from '@answeroverflow/db';
-
+import { mockMessageWithDiscordAccount } from '~ui/test/props';
 const meta = {
 	component: Message,
 	parameters: {
@@ -22,23 +19,9 @@ const loremIpsum =
 
 //👇 Each story then reuses that template
 const defaultMessage: MessageProps = {
-	message: {
+	message: mockMessageWithDiscordAccount({
 		content: loremIpsum,
-		id: '1063028763656458270',
-		author: {
-			name: 'John Doe',
-			id: '0',
-			avatar: null,
-		},
-		parentChannelId: null,
-		public: true,
-		images: [],
-		channelId: '0',
-		serverId: '0',
-		solutionIds: [],
-		childThread: null,
-		messageReference: null,
-	} as MessageWithDiscordAccount,
+	}),
 };
 
 export const Primary: Story = {
@@ -48,12 +31,10 @@ export const Primary: Story = {
 export const OverflowLetters: Story = {
 	args: {
 		...Primary.args,
-		message: {
-			...defaultMessage.message,
+		message: mockMessageWithDiscordAccount({
 			content:
 				'Helloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo',
-			author: mockDiscordAccount(),
-		},
+		}),
 	},
 };
 
