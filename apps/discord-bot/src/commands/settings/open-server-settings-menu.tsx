@@ -3,7 +3,7 @@ import { Command, type ChatInputCommand } from '@sapphire/framework';
 import {
 	callAPI,
 	callWithAllowedErrors,
-	ephemeralStatusHandler,
+	onceTimeStatusHandler,
 } from '~discord-bot/utils/trpc';
 import {
 	SlashCommandBuilder,
@@ -49,7 +49,7 @@ export class OpenServerSettingsMenu extends Command {
 						return server;
 					},
 					getCtx: () => createMemberCtx(member),
-					Error: (error) => ephemeralStatusHandler(interaction, error.message),
+					Error: (error) => onceTimeStatusHandler(interaction, error.message),
 					Ok(server) {
 						if (!server) {
 							server = getDefaultServerWithFlags(toAOServer(guild));

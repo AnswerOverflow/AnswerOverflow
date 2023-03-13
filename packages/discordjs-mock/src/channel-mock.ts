@@ -166,9 +166,7 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 				client,
 				channel,
 				author: client.user!,
-				override: {
-					content: typeof opts === 'string' ? opts : opts.content ?? '',
-				},
+				opts,
 			});
 			return Promise.resolve(message);
 		};
@@ -253,13 +251,19 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 					});
 					// 3. take up to limit
 					const messages = filteredMessages.slice(0, limit);
-					jest.clearAllMocks();
 					const asCollection = new Collection(
 						messages.map((message) => [message.id, message]),
 					);
 					return Promise.resolve(asCollection);
 				},
 			);
+	}
+	if (channel.isThread()) {
+		channel.fetchStarterMessage = () => {
+			return Promise.resolve(
+				channel.parent?.messages.cache.get(channel.id) ?? null,
+			);
+		};
 	}
 	client.channels.cache.set(channel.id, channel);
 	guild.channels.cache.set(channel.id, channel);

@@ -55,7 +55,27 @@ export const zChannelUpsert = z.object({
 	update: zChannelMutable.optional(),
 });
 
-export const zChannelUpsertMany = zChannelCreateMany;
+export const zChannelUpdate = zChannelMutable.merge(
+	zChannelRequired.pick({
+		id: true,
+	}),
+);
+
+// We omit flags because it's too complicated to update many of them
+export const zChannelUpdateMany = zChannelUpdate.omit({
+	flags: true,
+});
+
+export const zChannelUpsertMany = z.array(
+	z.object({
+		create: zChannelCreateMany,
+		update: zChannelUpdateMany
+			.omit({
+				id: true,
+			})
+			.optional(),
+	}),
+);
 
 export const zThreadCreate = zChannelCreate.extend({
 	parentId: z.string(),
@@ -76,17 +96,6 @@ export const zChannelCreateWithDeps = zChannelCreate
 	});
 
 export const zChannelUpsertWithDeps = zChannelCreateWithDeps;
-
-export const zChannelUpdate = zChannelMutable.merge(
-	zChannelRequired.pick({
-		id: true,
-	}),
-);
-
-// We omit flags because it's too complicated to update many of them
-export const zChannelUpdateMany = zChannelUpdate.omit({
-	flags: true,
-});
 
 export const zThreadCreateWithDeps = zThreadCreate
 	.omit({
@@ -273,17 +282,23 @@ export function upsertChannel(data: z.infer<typeof zChannelUpsert>) {
 	});
 }
 
-export function upsertManyChannels(data: z.infer<typeof zChannelUpsertMany>[]) {
+export function upsertManyChannels(data: z.infer<typeof zChannelUpsertMany>) {
 	return upsertMany({
 		input: data,
-		find: () => findManyChannelsById(data.map((c) => c.id)),
+		find: () => findManyChannelsById(data.map((c) => c.create.id)),
 		getInputId(input) {
-			return input.id;
+			return input.create.id;
 		},
 		getFetchedDataId(input) {
 			return input.id;
 		},
-		create: (create) => createManyChannels(create),
-		update: (update) => updateManyChannels(update),
+		create: (toCreate) => createManyChannels(toCreate.map((c) => c.create)),
+		update: (toUpdate) =>
+			updateManyChannels(
+				toUpdate.map((c) => ({
+					id: c.create.id,
+					...c.update,
+				})),
+			),
 	});
 }

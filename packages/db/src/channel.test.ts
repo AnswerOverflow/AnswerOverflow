@@ -317,7 +317,14 @@ describe('Channel Operations', () => {
 			const chnl1 = mockChannel(server);
 			const chnl2 = mockChannel(server);
 
-			const created = await upsertManyChannels([chnl1, chnl2]);
+			const created = await upsertManyChannels([
+				{
+					create: chnl1,
+				},
+				{
+					create: chnl2,
+				},
+			]);
 			expect(created).toHaveLength(2);
 			const found = await findManyChannelsById([chnl1.id, chnl2.id]);
 			expect(found).toHaveLength(2);
@@ -329,12 +336,16 @@ describe('Channel Operations', () => {
 			await createChannel(chnl2);
 			await upsertManyChannels([
 				{
-					...chnl1,
-					name: 'new name',
+					create: chnl1,
+					update: {
+						name: 'new name',
+					},
 				},
 				{
-					...chnl2,
-					name: 'new name',
+					create: chnl2,
+					update: {
+						name: 'new name',
+					},
 				},
 			]);
 			const found = await findManyChannelsById([chnl1.id, chnl2.id]);
@@ -348,10 +359,14 @@ describe('Channel Operations', () => {
 			await createChannel(chnl1);
 			await upsertManyChannels([
 				{
-					...chnl1,
-					name: 'new name',
+					create: chnl1,
+					update: {
+						name: 'new name',
+					},
 				},
-				chnl2,
+				{
+					create: chnl2,
+				},
 			]);
 			const found = await findManyChannelsById([chnl1.id, chnl2.id]);
 			expect(found).toHaveLength(2);

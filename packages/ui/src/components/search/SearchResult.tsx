@@ -117,7 +117,7 @@ export const SearchResult = ({ result }: MessageResultProps) => {
 
 			{/* Answer */}
 			{solution && (
-				<div className="rounded-bl-standard border-2 border-ao-green bg-[#4BB543]/[0.02]">
+				<div className="rounded-b-standard border-2 border-ao-green bg-[#4BB543]/[0.02] lg:rounded-br-none">
 					<Message message={solution} />
 				</div>
 			)}
@@ -143,27 +143,27 @@ export const SearchResult = ({ result }: MessageResultProps) => {
 		);
 	};
 
-	const SearchResultMobileBar = () => {
-		return (
-			<div className="flex w-full flex-col items-center justify-center rounded-tr-standard rounded-br-standard border-y-2 border-r-2 border-white/[.13] px-5 pt-6 pb-2 lg:hidden">
-				{/* Server Invite */}
-				<div className="flex flex-col items-center justify-center pt-6 pb-2 xl:px-5">
-					<ServerInviteTitle name={result.server.name} />
-					{result.channel && (
-						<>
-							<ServerInviteChannelName channelName={result.channel.name} />
-						</>
-					)}
-				</div>
-			</div>
-		);
-	};
+	// const SearchResultMobileBar = () => {
+	// 	return (
+	// 		<div className="flex w-full flex-col items-center justify-center rounded-tr-standard rounded-br-standard border-y-2 border-r-2 border-white/[.13] px-5 pt-6 pb-2 lg:hidden">
+	// 			{/* Server Invite */}
+	// 			<div className="flex flex-col items-center justify-center pt-6 pb-2 xl:px-5">
+	// 				<ServerInviteTitle name={result.server.name} />
+	// 				{result.channel && (
+	// 					<>
+	// 						<ServerInviteChannelName channelName={result.channel.name} />
+	// 					</>
+	// 				)}
+	// 			</div>
+	// 		</div>
+	// 	);
+	// };
 
 	return (
 		<div className="flex h-full w-full flex-col rounded-standard bg-[#181B1F] lg:flex-row">
 			<SearchResultMainContent />
 			<SearchResultSidebar />
-			<SearchResultMobileBar />
+			{/* <SearchResultMobileBar /> */}
 		</div>
 	);
 };

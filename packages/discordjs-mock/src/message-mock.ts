@@ -21,6 +21,7 @@ import {
 	MessageActionRowComponentBuilder,
 	MessageActionRowComponentData,
 	InteractionReplyOptions,
+	EmbedBuilder,
 } from 'discord.js';
 import type { RawMessageData } from 'discord.js/typings/rawDataTypes';
 import { randomSnowflake } from '@answeroverflow/discordjs-utils';
@@ -31,8 +32,12 @@ import {
 	mockThreadFromParentMessage,
 } from './channel-mock';
 
-export function mockEmbed(data: JSONEncodable<APIEmbed> | APIEmbed): Embed {
-	return Reflect.construct(Embed, [data]) as Embed;
+export function mockEmbed(
+	data: JSONEncodable<APIEmbed> | APIEmbed | EmbedBuilder,
+): Embed {
+	return Reflect.construct(Embed, [
+		data instanceof EmbedBuilder ? data.data : data,
+	]) as Embed;
 }
 
 export function mockActionRow(
@@ -47,15 +52,12 @@ export function mockActionRow(
 		data,
 	]) as ActionRow<MessageActionRowComponent>;
 }
-
-export function applyMessagePayload(
-	payload:
-		| string
-		| MessageEditOptions
-		| MessagePayload
-		| InteractionReplyOptions,
-	message: Message,
-) {
+export type MessageOpts =
+	| string
+	| MessageEditOptions
+	| MessagePayload
+	| InteractionReplyOptions;
+export function applyMessagePayload(payload: MessageOpts, message: Message) {
 	if (typeof payload === 'string') {
 		message.content = payload;
 	}
@@ -78,8 +80,9 @@ export function mockMessage(input: {
 	author?: User;
 	channel?: TextBasedChannel;
 	override?: Partial<RawMessageData>;
+	opts?: MessageOpts;
 }) {
-	const { client, override = {} } = input;
+	const { client, opts, override = {} } = input;
 	let { author, channel } = input;
 	if (!channel) {
 		channel = mockTextChannel(client);
@@ -160,5 +163,7 @@ export function mockMessage(input: {
 		channel?.messages.cache.delete(message.id);
 		return Promise.resolve(message);
 	};
+
+	if (opts) applyMessagePayload(opts, message);
 	return message;
 }
