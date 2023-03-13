@@ -68,7 +68,7 @@ export function toAOMessage(message: Message): AOMessage {
 		authorId: message.author.id,
 		serverId: message.guild?.id,
 		solutionIds: [],
-		childThread: message.thread?.id ?? null,
+		childThreadId: message.thread?.id ?? null,
 	};
 	return convertedMessage;
 }

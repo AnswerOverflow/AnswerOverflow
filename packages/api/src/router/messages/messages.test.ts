@@ -106,7 +106,7 @@ describe('Message Results', () => {
 		it('should get messages correctly starting from the root of a text channel thread', async () => {
 			const thread = mockThread(channel);
 			const message = mockMessage(server, channel, author, {
-				childThread: thread.id,
+				childThreadId: thread.id,
 				id: thread.id,
 			});
 			const message2 = mockMessage(server, thread, author, {
@@ -140,7 +140,7 @@ describe('Message Results', () => {
 		it('should get messages correctly starting a non root message in a text channel thread', async () => {
 			const thread = mockThread(channel);
 			const message = mockMessage(server, channel, author, {
-				childThread: thread.id,
+				childThreadId: thread.id,
 				id: thread.id,
 			});
 			const message2 = mockMessage(server, thread, author, {

@@ -3,7 +3,7 @@ import { MessageProps, Message } from './Message';
 import { mockDiscordAccount } from '~ui/test/props';
 
 import type { MessageWithDiscordAccount } from '@answeroverflow/db';
-
+import { getDefaultMessage } from '@answeroverflow/elastic-types';
 const meta = {
 	component: Message,
 	parameters: {
@@ -23,21 +23,19 @@ const loremIpsum =
 //👇 Each story then reuses that template
 const defaultMessage: MessageProps = {
 	message: {
+		...getDefaultMessage({
+			authorId: '0',
+			channelId: '0',
+			serverId: '0',
+			id: '0',
+		}),
+		public: true,
 		content: loremIpsum,
-		id: '1063028763656458270',
 		author: {
 			name: 'John Doe',
 			id: '0',
 			avatar: null,
 		},
-		parentChannelId: null,
-		public: true,
-		images: [],
-		channelId: '0',
-		serverId: '0',
-		solutionIds: [],
-		childThread: null,
-		messageReference: null,
 	} as MessageWithDiscordAccount,
 };
 

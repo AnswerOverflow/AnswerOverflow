@@ -4,7 +4,7 @@ import type {
 	MessageWithDiscordAccount,
 	ServerPublic,
 } from '@answeroverflow/api';
-
+import { getDefaultMessage } from '@answeroverflow/elastic-types';
 export function randomId() {
 	return Math.floor(Math.random() * 10000000).toString();
 }
@@ -25,16 +25,14 @@ export function mockMessageWithDiscordAccount(
 	override: Partial<MessageWithDiscordAccount> = {},
 ) {
 	const data: MessageWithDiscordAccount = {
-		id: randomId(),
+		...getDefaultMessage({
+			id: randomId(),
+			channelId: '0',
+			serverId: '0',
+			authorId: '0',
+		}),
 		content: 'Hello, world!',
 		author: mockDiscordAccount(),
-		channelId: '0',
-		childThread: null,
-		images: [],
-		parentChannelId: null,
-		messageReference: null,
-		serverId: '0',
-		solutionIds: [],
 		public: true,
 		...override,
 	};
