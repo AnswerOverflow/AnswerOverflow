@@ -144,6 +144,7 @@ function applyInteractionResponseHandlers(interaction: Interaction) {
 				override: {
 					id: interaction.id.toString(),
 				},
+				opts,
 			});
 			interaction.deferred = false;
 			interaction.replied = true;
