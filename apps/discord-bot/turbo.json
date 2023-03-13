@@ -1,0 +1,15 @@
+{
+	"$schema": "https://turborepo.org/schema.json",
+	"extends": ["//"],
+	"pipeline": {
+		"test": {
+			"dependsOn": ["^build"],
+			"outputs": [],
+			"cache": true
+		},
+		"dev": {
+			"dependsOn": ["^build"],
+			"cache": false
+		}
+	}
+}

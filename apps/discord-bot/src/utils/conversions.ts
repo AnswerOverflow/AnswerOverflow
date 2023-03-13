@@ -1,5 +1,7 @@
-import type {
+import {
 	AnyThreadChannel,
+	ButtonStyle,
+	ComponentType,
 	Guild,
 	GuildBasedChannel,
 	GuildChannel,
@@ -44,6 +46,94 @@ export function toDiscordAPIServer(
 	};
 }
 
+function toAOComponent(
+	component: Message['components'][number]['components'][number],
+): AOMessage['components'][number]['components'][number] {
+	if (component.type === ComponentType.Button) {
+		if (component.style === ButtonStyle.Link) {
+			return {
+				type: component.type,
+				label: component.label ?? undefined,
+				url: component.url ?? '',
+				disabled: component.disabled ?? false,
+				style: component.style,
+				emoji: component.emoji ?? undefined,
+			};
+		} else {
+			return {
+				type: component.type,
+				label: component.label ?? undefined,
+				customId: component.customId ?? '',
+				disabled: component.disabled ?? false,
+				style: component.style,
+				emoji: component.emoji ?? undefined,
+			};
+		}
+	}
+	if (component.type === ComponentType.StringSelect) {
+		return {
+			type: component.type,
+			customId: component.customId ?? '',
+			disabled: component.disabled ?? false,
+			options: component.options ?? [],
+			placeholder: component.placeholder ?? undefined,
+			minValues: component.minValues ?? 1,
+			maxValues: component.maxValues ?? 1,
+		};
+	}
+	if (component.type === ComponentType.RoleSelect) {
+		return {
+			type: component.type,
+			customId: component.customId ?? '',
+			disabled: component.disabled ?? false,
+			placeholder: component.placeholder ?? undefined,
+			minValues: component.minValues ?? 1,
+			maxValues: component.maxValues ?? 1,
+		};
+	}
+	if (component.type === ComponentType.UserSelect) {
+		return {
+			type: component.type,
+			customId: component.customId ?? '',
+			disabled: component.disabled ?? false,
+			placeholder: component.placeholder ?? undefined,
+			minValues: component.minValues ?? 1,
+			maxValues: component.maxValues ?? 1,
+		};
+	}
+	if (component.type === ComponentType.ChannelSelect) {
+		return {
+			type: component.type,
+			customId: component.customId ?? '',
+			disabled: component.disabled ?? false,
+			placeholder: component.placeholder ?? undefined,
+			minValues: component.minValues ?? 1,
+			maxValues: component.maxValues ?? 1,
+		};
+	}
+	if (component.type === ComponentType.MentionableSelect) {
+		return {
+			type: component.type,
+			customId: component.customId ?? '',
+			disabled: component.disabled ?? false,
+			placeholder: component.placeholder ?? undefined,
+			minValues: component.minValues ?? 1,
+			maxValues: component.maxValues ?? 1,
+		};
+	}
+	throw new Error('Unknown component type');
+}
+
+// ActionRow<MessageActionRowComponent>[]
+function toAOActionRow(
+	components: Message['components'],
+): AOMessage['components'] {
+	return components.map((row) => ({
+		type: row.type,
+		components: row.components.map(toAOComponent),
+	}));
+}
+
 // top 10 ugliest functions in this codebase
 export function toAOMessage(message: Message): AOMessage {
 	if (!message.guild) throw new Error('Message is not in a guild');
@@ -78,7 +168,7 @@ export function toAOMessage(message: Message): AOMessage {
 			emojiName: reaction.emoji.name,
 			reactorIds: reaction.users.cache.map((user) => user.id),
 		})),
-		components: [],
+		components: toAOActionRow(message.components),
 		embeds: message.embeds.map((embed) => ({
 			title: embed.title ?? undefined,
 			description: embed.description ?? undefined,

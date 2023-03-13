@@ -1,9 +1,10 @@
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { z } from 'zod';
 import type {
+	APIActionRowComponent,
 	APIAttachment,
 	APIEmbed,
-	APIMessageComponent,
+	APIMessageActionRowComponent,
 	APIMessageReference,
 	APISelectMenuOption,
 } from 'discord-api-types/v10';
@@ -140,7 +141,7 @@ const messageReferenceProperties: MessageReferenceMappingProperty = {
 };
 
 export const zDiscordMessageComponent: z.ZodType<
-	CamelCasedPropertiesDeep<APIMessageComponent>
+	CamelCasedPropertiesDeep<APIActionRowComponent<APIMessageActionRowComponent>>
 > = z.any();
 const selectOptionsProperties: CustomMappingProperty<APISelectMenuOption> = {
 	label: { type: 'text' },
@@ -151,7 +152,7 @@ const selectOptionsProperties: CustomMappingProperty<APISelectMenuOption> = {
 };
 
 const baseMessageComponentProperties: CustomMappingProperty<
-	z.infer<typeof zDiscordMessageComponent>
+	CamelCasedPropertiesDeep<APIMessageActionRowComponent>
 > = {
 	type: { type: 'integer' },
 	url: { type: 'text' },
