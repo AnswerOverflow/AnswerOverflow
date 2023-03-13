@@ -6,7 +6,7 @@ import { sendMarkSolutionInstructionsInThread } from '~discord-bot/domains/send-
 
 @ApplyOptions<Listener.Options>({ event: Events.ThreadCreate })
 export class SendMarkSolutionInstructionsOnThreadCreate extends Listener {
-  public async run(thread: ThreadChannel, newlyCreated: boolean) {
-    await sendMarkSolutionInstructionsInThread(thread, newlyCreated)
-  }
+	public async run(thread: ThreadChannel, newlyCreated: boolean) {
+		await sendMarkSolutionInstructionsInThread(thread, newlyCreated);
+	}
 }
