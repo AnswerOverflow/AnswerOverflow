@@ -238,7 +238,7 @@ export function stripPrivatePartialMessageData(
 		authorId: defaultAuthor.id,
 		parentChannelId: message.parentChannelId,
 		id: message.id,
-		childThread: null,
+		childThreadId: null,
 	});
 
 	return {

@@ -1,27 +1,24 @@
 import { getRandomId } from '@answeroverflow/utils';
-import { elastic, Message } from '../index';
+import { elastic, getDefaultMessage } from '../index';
+import type { Message } from './message';
 
 let msg1: Message;
 
 let msg2: Message;
 
 beforeEach(() => {
-	msg1 = {
+	msg1 = getDefaultMessage({
 		id: getRandomId(),
-		parentChannelId: null,
 		channelId: getRandomId(),
-		content: 'hello',
-		images: [],
-		messageReference: null,
-		serverId: getRandomId(),
-		solutionIds: [],
 		authorId: getRandomId(),
-		childThread: getRandomId(),
-	};
-	msg2 = {
-		...msg1,
+		serverId: getRandomId(),
+	});
+	msg2 = getDefaultMessage({
 		id: getRandomId(),
-	};
+		channelId: getRandomId(),
+		authorId: getRandomId(),
+		serverId: getRandomId(),
+	});
 });
 
 describe('ElasticSearch', () => {
@@ -166,7 +163,10 @@ describe('ElasticSearch', () => {
 	describe('Messages Fetch By Channel Id', () => {
 		it('should fetch messages by channel id', async () => {
 			await elastic.upsertMessage(msg1);
-			await elastic.upsertMessage(msg2);
+			await elastic.upsertMessage({
+				...msg2,
+				channelId: msg1.channelId,
+			});
 
 			const fetchedMessages = await elastic.bulkGetMessagesByChannelId(
 				msg1.channelId,
