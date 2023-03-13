@@ -2364,15 +2364,15 @@
   dependencies:
     discord-api-types "^0.37.25"
 
-"@sapphire/discord.js-utilities@6.0.0":
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/@sapphire/discord.js-utilities/-/discord.js-utilities-6.0.0.tgz#0b55eabfe43ec0f3d28b1f3a49238af37bc9993c"
-  integrity sha512-WqYeLeUATpIZysTEeYbHxYxrR4A/lQidTJX0vTgbTORAEUo0Zn5H7zDeoJz1zZtaS1wTL1qrnnY5rNYvH1D9Bg==
+"@sapphire/discord.js-utilities@6.0.3":
+  version "6.0.3"
+  resolved "https://registry.yarnpkg.com/@sapphire/discord.js-utilities/-/discord.js-utilities-6.0.3.tgz#2e7e1559f983dcf3cf1cdd299b2c8c004724e455"
+  integrity sha512-ADeKBHNCqY1MZfDuDaS3B5apk8QaZChbw08RNL+DSY/6QvWUiL85eLUk9fWurtkvceBb+qPF7UQTExDAm4lYdA==
   dependencies:
     "@sapphire/discord-utilities" "^3.0.0"
     "@sapphire/duration" "^1.0.0"
     "@sapphire/utilities" "^3.11.0"
-    tslib "^2.4.1"
+    tslib "^2.5.0"
 
 "@sapphire/duration@^1.0.0":
   version "1.0.0"
@@ -2399,14 +2399,14 @@
   dependencies:
     cross-fetch "^3.1.5"
 
-"@sapphire/framework@4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@sapphire/framework/-/framework-4.0.0.tgz#c87fa17eab9e3a47b6e572b043140133bd11ac9b"
-  integrity sha512-HaQLJbIrEjtd+rZmIxDaG0QD8BXYmuKWTZuu0okbYmaNypCNYvVhT3v0sOrv9lxDGX3sYKFO9qPzN+M9aVXgpA==
+"@sapphire/framework@4.2.1":
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/@sapphire/framework/-/framework-4.2.1.tgz#47e1b9cc14835fcbd03763c82864a52611a6bcc4"
+  integrity sha512-YmOfMXk8n0xufblDW7nE+pmPUUT1/qBlNEgevC9LA5WjlFdCY3Vef1YYGEJLdWbUTyV3EmnTzhdukPlWEx9jLg==
   dependencies:
     "@discordjs/builders" "^1.4.0"
     "@sapphire/discord-utilities" "^3.0.0"
-    "@sapphire/discord.js-utilities" "6.0.0"
+    "@sapphire/discord.js-utilities" "6.0.3"
     "@sapphire/lexure" "^1.1.2"
     "@sapphire/pieces" "^3.6.0"
     "@sapphire/ratelimits" "^2.4.5"
