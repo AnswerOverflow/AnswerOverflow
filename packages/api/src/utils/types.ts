@@ -8,7 +8,7 @@ export type BotRouterOutput = inferRouterOutputs<BotRouter>;
 export type AppRouterOutput = inferRouterOutputs<AppRouter>;
 export type ChannelFindByIdOutput = BotRouterOutput['channels']['byId'];
 export type APISearchResult = AppRouterOutput['messagePage']['search'];
-export {
+export type {
 	MessageWithDiscordAccount as APIMessageWithDiscordAccount,
 	MessageFull as APIMessageFull,
 } from '@answeroverflow/db';
