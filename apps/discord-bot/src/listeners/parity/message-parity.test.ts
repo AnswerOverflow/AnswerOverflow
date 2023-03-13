@@ -16,6 +16,7 @@ import {
 	findMessageById,
 	upsertMessage,
 } from '@answeroverflow/db';
+import { getRandomId } from '@answeroverflow/utils';
 
 let client: SapphireClient;
 let message: Message;
@@ -43,10 +44,14 @@ describe('Message Update Tests', () => {
 		const updatedMessage = copyClass(message, client, {
 			content: 'updated',
 		});
-		await upsertMessage(toAOMessage(message)),
-			await emitEvent(client, Events.MessageUpdate, message, updatedMessage);
+		const created = await upsertMessage({
+			...toAOMessage(message),
+			solutionIds: [getRandomId()],
+		});
+		await emitEvent(client, Events.MessageUpdate, message, updatedMessage);
 		const updated = await findMessageById(message.id);
 		expect(updated!.content).toBe('updated');
+		expect(updated!.solutionIds).toEqual(created.solutionIds);
 	});
 	test.todo('should update an uncached edited message');
 });
