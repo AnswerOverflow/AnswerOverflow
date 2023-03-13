@@ -19,16 +19,19 @@ import type { ConsentSource, ManageAccountSource } from '@answeroverflow/api';
 import { CONSENT_BUTTON_LABEL } from '@answeroverflow/constants';
 import { isHumanMessage } from '~discord-bot/utils/utils';
 
-export const CONSENT_BUTTON_ID = 'consentButton';
-export const CONSENT_BUTTON_DATA = {
-	label: CONSENT_BUTTON_LABEL,
-	style: ButtonStyle.Success,
-	custom_id: CONSENT_BUTTON_ID,
-	type: ComponentType.Button,
-} as APIButtonComponent;
+export const CONSENT_ACTION_PREFIX = 'consent';
 
-export function makeConsentButton() {
-	return new ButtonBuilder(CONSENT_BUTTON_DATA);
+export function makeConsentButtonData(source: ConsentSource) {
+	return {
+		label: CONSENT_BUTTON_LABEL,
+		style: ButtonStyle.Success,
+		custom_id: `${CONSENT_ACTION_PREFIX}-${source}`,
+		type: ComponentType.Button,
+	} as APIButtonComponent;
+}
+
+export function makeConsentButton(source: ConsentSource) {
+	return new ButtonBuilder(makeConsentButtonData(source));
 }
 
 // TODO: Find a better return value than `null`

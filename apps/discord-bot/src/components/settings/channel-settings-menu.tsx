@@ -56,7 +56,7 @@ import {
 	updateAutoThreadEnabled,
 } from '~discord-bot/domains/channel-settings';
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
-import { ephemeralStatusHandler } from '~discord-bot/utils/trpc';
+import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
 import { type RootChannel, getRootChannel } from '~discord-bot/utils/utils';
 
 type ChannelSettingsMenuItemProps<T extends RootChannel = RootChannel> = {
@@ -105,7 +105,7 @@ function ToggleIndexingButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => ephemeralStatusHandler(interaction, message),
+						Error: (message) => onceTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -133,7 +133,7 @@ function ToggleForumGuidelinesConsentButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => ephemeralStatusHandler(interaction, message),
+						Error: (message) => onceTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -236,7 +236,7 @@ function ToggleMarkAsSolutionButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => ephemeralStatusHandler(interaction, message),
+						Error: (message) => onceTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -267,7 +267,7 @@ function ToggleSendMarkAsSolutionInstructionsButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => ephemeralStatusHandler(interaction, message),
+						Error: (message) => onceTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -298,7 +298,7 @@ function SelectMarkAsSolvedTag({
 						channel: targetChannel,
 						tagId: value === CLEAR_TAG_VALUE ? null : value,
 						member,
-						Error: (message) => ephemeralStatusHandler(interaction, message),
+						Error: (message) => onceTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -336,7 +336,7 @@ function ToggleAutoThreadButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => ephemeralStatusHandler(interaction, message),
+						Error: (message) => onceTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
