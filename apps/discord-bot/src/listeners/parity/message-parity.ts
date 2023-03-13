@@ -36,6 +36,11 @@ export class OnMessageBulkDelete extends Listener {
 })
 export class OnMessageUpdate extends Listener {
 	public async run(_: Message, newMessage: Message) {
-		await updateMessage(toAOMessage(newMessage));
+		const existing = await findMessageById(newMessage.id);
+		if (!existing) return;
+		await updateMessage({
+			...toAOMessage(newMessage),
+			solutionIds: existing.solutionIds,
+		});
 	}
 }

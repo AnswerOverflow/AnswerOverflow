@@ -247,7 +247,7 @@ export function stripPrivateMessageData(
 		authorId: defaultAuthor.id,
 		parentChannelId: message.parentChannelId,
 		id: message.id,
-		childThread: null,
+		childThreadId: null,
 	});
 
 	// If it is a reply, then we know that is it private so we can just return
