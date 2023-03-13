@@ -21,6 +21,7 @@
 	"dependencies": {
 		"@answeroverflow/utils": "*",
 		"@elastic/elasticsearch": "^8.6.0",
+		"discord-api-types": "^0.37.35",
 		"dotenv-cra": "^3.0.3",
 		"zod": "^3.20.6"
 	},
