@@ -36,11 +36,20 @@ export class ConsentButtonInteractionParseError extends Error {
 	}
 }
 
-export function parseConsentButtonInteraction(customId: string) {
+export function parseConsentButtonInteraction(customId: string): ConsentSource {
 	const splitInteractionId = customId.split(':');
 	const action = splitInteractionId[0];
 	const source = splitInteractionId[1];
 	if (action !== CONSENT_ACTION_PREFIX) {
+		// Legacy consent button ids
+		switch (action) {
+			case 'consent_button':
+				return 'manually-posted-prompt';
+			case 'consent_button_mark_solution':
+				return 'mark-solution-response';
+			case 'manage_account_consent_button':
+				return 'manage-account-menu';
+		}
 		throw new ConsentButtonInteractionParseError('no-consent-prefix');
 	}
 	if (!source) {

@@ -27,5 +27,23 @@ describe('Manage Account Domain', () => {
 				'invalid-consent-source',
 			);
 		});
+		it('should parse legacy consent_button id', () => {
+			const customId = 'consent_button';
+			expect(parseConsentButtonInteraction(customId)).toEqual(
+				'manually-posted-prompt',
+			);
+		});
+		it('should parse legacy consent_button_mark_solution id', () => {
+			const customId = 'consent_button_mark_solution';
+			expect(parseConsentButtonInteraction(customId)).toEqual(
+				'mark-solution-response',
+			);
+		});
+		it('should parse legacy manage_account_consent_button id', () => {
+			const customId = 'manage_account_consent_button';
+			expect(parseConsentButtonInteraction(customId)).toEqual(
+				'manage-account-menu',
+			);
+		});
 	});
 });

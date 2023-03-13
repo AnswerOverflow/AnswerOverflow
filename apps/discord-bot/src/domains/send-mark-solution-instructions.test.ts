@@ -67,9 +67,6 @@ describe('Send mark solution instructions', () => {
 			(message) => message.embeds.length > 0,
 		);
 		expect(sentMessage).toBeDefined();
-		for (const embed of sentMessage?.embeds ?? []) {
-			console.log(embed.description);
-		}
 		const instructionEmbed = sentMessage?.embeds.find((embed) =>
 			embed.description?.includes('help others find answers, you can mark'),
 		);
