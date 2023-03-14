@@ -5,7 +5,10 @@ import { ephemeralReply } from '~discord-bot/utils/utils';
 
 export const SupportMenu: React.FC = () => (
 	<>
-		<Link label="Docs" url="https://docs.answeroverflow.com" emoji="📃" />
+		{/*
+      Disable docs until they are ready
+    <Link label="Docs" url="https://docs.answeroverflow.com" emoji="📃" />
+    */}
 		<Link
 			label="Bugs, features & suggestions"
 			url="https://github.com/answeroverflow/answeroverflow"
