@@ -1,9 +1,10 @@
 import type {
 	ChannelPublicWithFlags,
 	DiscordAccountPublic,
-	MessageWithDiscordAccount,
+	APIMessageWithDiscordAccount,
 	ServerPublic,
 } from '@answeroverflow/api';
+import { getRandomSentence } from '@answeroverflow/utils';
 
 export function randomId() {
 	return Math.floor(Math.random() * 10000000).toString();
@@ -22,19 +23,35 @@ export function mockDiscordAccount(
 }
 
 export function mockMessageWithDiscordAccount(
-	override: Partial<MessageWithDiscordAccount> = {},
-) {
-	const data: MessageWithDiscordAccount = {
-		id: randomId(),
-		content: 'Hello, world!',
-		author: mockDiscordAccount(),
+	override: Partial<APIMessageWithDiscordAccount> = {},
+): APIMessageWithDiscordAccount {
+	const data: APIMessageWithDiscordAccount = {
 		channelId: '0',
-		childThread: null,
-		images: [],
-		parentChannelId: null,
-		messageReference: null,
+		id: randomId(),
 		serverId: '0',
+		attachments: [],
+		applicationId: null,
+		messageReference: null,
+		childThreadId: null,
+		parentChannelId: null,
 		solutionIds: [],
+		mentions: [],
+		mentionRoles: [],
+		mentionChannels: [],
+		mentionEveryone: false,
+		nonce: null,
+		pinned: false,
+		type: 0,
+		flags: 0,
+		components: [],
+		embeds: [],
+		reactions: [],
+		stickerIds: [],
+		webhookId: null,
+		tts: false,
+		interactionId: null,
+		content: getRandomSentence(),
+		author: mockDiscordAccount(),
 		public: true,
 		...override,
 	};

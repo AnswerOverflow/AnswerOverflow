@@ -1,17 +1,17 @@
-import { DiscordAvatar } from './DiscordAvatar';
+import { DiscordAvatar } from '../DiscordAvatar';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import Image from 'next/image';
 import discordMarkdown from 'discord-markdown';
 import Parser from 'html-react-parser';
 
-import type { MessageWithDiscordAccount } from '@answeroverflow/api';
-import { DiscordIcon } from './icons/DiscordIcon';
+import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
+import { DiscordIcon } from '../icons/DiscordIcon';
 import Link from 'next/link';
 import type { ChannelPublicWithFlags } from '~api/router/channel/types';
-import { useIsUserInServer } from '../utils';
+import { useIsUserInServer } from '~ui/utils/hooks';
 import { forwardRef } from 'react';
 export type MessageProps = {
-	message: MessageWithDiscordAccount;
+	message: APIMessageWithDiscordAccount;
 	thread?: ChannelPublicWithFlags;
 	blurred?: boolean;
 	notPublicTitle?: string;
@@ -31,7 +31,7 @@ export type MessageProps = {
 const { toHTML } = discordMarkdown;
 
 // TODO: Align text to be same level with the avatar
-export const Message = forwardRef<HTMLDivElement, MessageProps>(
+export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 	function MessageComp(
 		{
 			message,
@@ -55,13 +55,14 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
 			blurred = false;
 		}
 
-		function MessageImage({
-			image,
+		function MessageAttachment({
+			attachment,
 		}: {
-			image: MessageWithDiscordAccount['images'][number];
+			attachment: APIMessageWithDiscordAccount['attachments'][number];
 		}) {
-			let width = image.width;
-			let height = image.height;
+			if (!attachment.contentType?.startsWith('image/')) return null;
+			let width = attachment.width;
+			let height = attachment.height;
 			const maxWidth = 400;
 			const maxHeight = 300;
 
@@ -71,13 +72,13 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
 					// eslint-disable-next-line @next/next/no-img-element
 					<img
 						className="max-w-full md:max-w-sm"
-						src={image.url}
+						src={attachment.url}
 						style={{
 							width: 'fit-content',
 							height: 'auto',
 							objectFit: 'cover',
 						}}
-						alt={image.description ? image.description : 'Image'}
+						alt={attachment.description ? attachment.description : 'Image'}
 					/>
 				);
 			const originalWidth = width;
@@ -93,11 +94,11 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
 			const aspectRatio = width / height;
 			return (
 				<Image
-					key={image.url}
-					src={image.url}
+					key={attachment.url}
+					src={attachment.url}
 					width={originalWidth}
 					height={originalHeight}
-					alt={image.description ? image.description : 'Image'}
+					alt={attachment.description ? attachment.description : 'Image'}
 					style={{
 						maxWidth: `${width}px`,
 						maxHeight: `${maxHeight}px`,
@@ -182,8 +183,11 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
 							{parsedMessageContent}
 						</div>
 						<div className="grid gap-2">
-							{message.images.map((image) => (
-								<MessageImage key={image.url} image={image} />
+							{message.attachments.map((attachment) => (
+								<MessageAttachment
+									key={attachment.id}
+									attachment={attachment}
+								/>
 							))}
 						</div>
 					</div>

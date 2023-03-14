@@ -1,5 +1,5 @@
 import { container, LogLevel, SapphireClient } from '@sapphire/framework';
-import { ClientOptions, Partials } from 'discord.js';
+import { ClientOptions, Partials, ActivityType } from 'discord.js';
 
 import '~discord-bot/utils/setup';
 import {
@@ -76,6 +76,7 @@ export const login = async (client: SapphireClient) => {
 			`DISCORD_ID: ${process.env.DISCORD_CLIENT_ID ?? 'UNKNOWN'}`,
 		);
 		await client.login(process.env.DISCORD_TOKEN);
+
 		client.logger.info('LOGGED IN');
 		client.logger.info(`LOGGED IN AS: ${client.user?.username ?? 'UNKNOWN'}`);
 		const config: DiscordJSReact['config'] = {
@@ -96,6 +97,10 @@ export const login = async (client: SapphireClient) => {
 			max: 100,
 			// 10 minute ttl
 			ttl: 1000 * 60 * 10,
+		});
+		client.user?.setActivity({
+			type: ActivityType.Playing,
+			name: 'with becoming open source ⚠️ may be unstable this week ⚠️',
 		});
 	} catch (error) {
 		client.logger.fatal(error);
