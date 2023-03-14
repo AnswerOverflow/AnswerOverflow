@@ -8,7 +8,7 @@ import type { AppType } from 'next/app';
 import hljs from 'highlight.js';
 
 import { NextTRPC, trpc } from '@answeroverflow/ui';
-import { Footer, Navbar } from '@answeroverflow/ui';
+import { Footer } from '@answeroverflow/ui';
 import { useEffect } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -24,11 +24,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
 	}, []);
 	return (
 		<SessionProvider session={session}>
-			<Navbar />
 			<div className="mx-auto w-full max-w-screen-xl overflow-y-scroll scrollbar-hide overflow-x-hidden sm:px-4">
 				<Component {...pageProps} />
 			</div>
-
 			<Footer />
 		</SessionProvider>
 	);

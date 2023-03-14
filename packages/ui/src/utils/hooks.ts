@@ -1,6 +1,6 @@
 import { RefObject, useEffect, useState } from 'react';
 import { trpc } from './trpc';
-
+import { isServer } from './checks';
 export const useIsUserInServer = (serverId: string) => {
 	const { data: servers } = trpc.auth.getServers.useQuery();
 	return servers?.some((s) => s.id === serverId) ?? false;
@@ -119,10 +119,9 @@ export const useGetRectForElement = (element: RefObject<HTMLDivElement>) => {
 
 export const useTheme = () => {
 	const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-	const themeStorage = localStorage.getItem('isDarkMode') as
-		| 'true'
-		| 'false'
-		| null;
+	const themeStorage = isServer()
+		? null
+		: (localStorage.getItem('isDarkMode') as 'true' | 'false' | null);
 
 	// Listen to changes to the theme in storage
 	useEffect(() => {

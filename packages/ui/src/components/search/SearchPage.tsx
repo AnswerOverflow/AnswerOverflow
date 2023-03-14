@@ -12,7 +12,6 @@ interface SearchResultProps {
 export const SearchPage = ({ results }: SearchResultProps) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [searchInput, setSearchInput] = useState<string>('');
-
 	return (
 		<div className="min-h-screen w-full bg-ao-white dark:bg-ao-black">
 			<Navbar />
@@ -20,15 +19,21 @@ export const SearchPage = ({ results }: SearchResultProps) => {
 				<h1 className="py-4 font-header text-3xl text-ao-black dark:text-ao-white xl:text-5xl">
 					Search
 				</h1>
-				<Input
-					onChange={setSearchInput}
-					buttonAria="Search button"
-					type="buttonInput"
-					fill
-					placeholder="Search"
+				<form
+					onSubmit={(e) => {
+						e.preventDefault();
+					}}
 				>
-					Search
-				</Input>
+					<Input
+						onChange={setSearchInput}
+						buttonAria="Search button"
+						type="buttonInput"
+						fill
+						placeholder="Search"
+					>
+						Search
+					</Input>
+				</form>
 
 				{/* Search */}
 				{results &&

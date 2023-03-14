@@ -4,6 +4,7 @@ export * from './Footer';
 export * from './MessageResultPage';
 export * from './deprecated/Navbar';
 export * from './SearchBar';
+export * from './search/SearchPage';
 export * from './SearchBarDriver';
 export * from './ServerInvite';
 export * from './ServerInviteDriver';
