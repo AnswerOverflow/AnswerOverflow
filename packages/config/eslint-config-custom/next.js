@@ -4,10 +4,10 @@
 // eslint-disable-next-line no-undef
 module.exports = {
   extends: [
-    "next",
     "./index.js",
     "plugin:storybook/recommended",
     "plugin:tailwindcss/recommended",
+    "next",
     "prettier",
   ],
   env: {

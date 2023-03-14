@@ -1,13 +1,12 @@
 import { AOHead, SearchPage, trpc } from '@answeroverflow/ui';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Search() {
 	// get the query from the url in the q param
 	const router = useRouter();
-	const [query, setQuery] = useState<string>(
-		typeof router.query.q === 'string' ? router.query.q : '',
-	);
+	const routerQuery = typeof router.query.q === 'string' ? router.query.q : '';
+	const [query, setQuery] = useState<string>(routerQuery);
 	const results = trpc.messages.search.useQuery(
 		{
 			query,
@@ -19,6 +18,12 @@ export default function Search() {
 			refetchOnWindowFocus: false,
 		},
 	);
+
+	useEffect(() => {
+		// if the query in the url changes, set the query in the state
+		setQuery(routerQuery);
+	}, [routerQuery]);
+
 	return (
 		<>
 			<AOHead
@@ -26,9 +31,8 @@ export default function Search() {
 				path="/search"
 				title="Search"
 			/>
-
 			<SearchPage
-				results={results.data}
+				results={results.data ?? []}
 				isLoading={results.isLoading && query.length > 0}
 				onSearch={async (query: string) => {
 					// set the query in the url
@@ -36,7 +40,7 @@ export default function Search() {
 						shallow: true,
 					});
 					// set the query in the state
-					setQuery(query);
+					// setQuery(query);
 				}}
 			/>
 		</>
