@@ -6,7 +6,7 @@ import { SessionProvider } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import type { AppType } from 'next/app';
 import hljs from 'highlight.js';
-import { NextTRPC, BodyWrapper, trpc } from '@answeroverflow/ui';
+import { NextTRPC, PageWrapper, trpc } from '@answeroverflow/ui';
 import { useEffect } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -22,9 +22,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
 	}, []);
 	return (
 		<SessionProvider session={session}>
-			<BodyWrapper>
+			<PageWrapper>
 				<Component {...pageProps} />
-			</BodyWrapper>
+			</PageWrapper>
 		</SessionProvider>
 	);
 };
