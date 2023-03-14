@@ -106,3 +106,13 @@ export const WithXSSInCodeBlock: Story = {
 		},
 	},
 };
+
+export const Blurred: Story = {
+	args: {
+		...Primary.args,
+		message: {
+			...mockMessageWithDiscordAccount(),
+			public: false,
+		},
+	},
+};
