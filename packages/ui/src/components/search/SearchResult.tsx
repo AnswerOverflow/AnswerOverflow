@@ -2,7 +2,7 @@ import type { APISearchResult } from '@answeroverflow/api';
 import {
 	Message,
 	MessageContents,
-	MessageImages,
+	MessageAttachments,
 	MessageRenderer,
 	MessageTitle,
 } from '~ui/components/primitives/Message';
@@ -148,7 +148,7 @@ export const SearchResult = () => {
 							<>
 								<MessageTitle channel={result.channel} thread={result.thread} />
 								<MessageContents />
-								<MessageImages />
+								<MessageAttachments />
 							</>
 						}
 					/>

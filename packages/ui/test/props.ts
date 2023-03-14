@@ -24,8 +24,8 @@ export function mockDiscordAccount(
 
 export function mockMessageWithDiscordAccount(
 	override: Partial<APIMessageWithDiscordAccount> = {},
-) {
-	const data: MessageWithDiscordAccount = {
+): APIMessageWithDiscordAccount {
+	const data: APIMessageWithDiscordAccount = {
 		channelId: '0',
 		id: randomId(),
 		serverId: '0',
@@ -50,7 +50,7 @@ export function mockMessageWithDiscordAccount(
 		webhookId: null,
 		tts: false,
 		interactionId: null,
-		content: 'Hello, world!',
+		content: getRandomSentence(),
 		author: mockDiscordAccount(),
 		public: true,
 		...override,

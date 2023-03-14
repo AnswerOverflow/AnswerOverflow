@@ -68,15 +68,15 @@ export const MessageTitle = ({
 	);
 };
 
-export const MessageImages = () => {
+export const MessageAttachments = () => {
 	const { message } = useMessageContext();
 	function MessageImage({
-		image,
+		attachment,
 	}: {
-		image: APIMessageWithDiscordAccount['images'][number];
+		attachment: APIMessageWithDiscordAccount['attachments'][number];
 	}) {
-		let width = image.width;
-		let height = image.height;
+		let width = attachment.width;
+		let height = attachment.height;
 		const maxWidth = 400;
 		const maxHeight = 300;
 
@@ -86,13 +86,13 @@ export const MessageImages = () => {
 				// eslint-disable-next-line @next/next/no-img-element
 				<img
 					className="max-w-full md:max-w-sm"
-					src={image.url}
+					src={attachment.url}
 					style={{
 						width: 'fit-content',
 						height: 'auto',
 						objectFit: 'cover',
 					}}
-					alt={image.description ? image.description : 'Image'}
+					alt={attachment.description ? attachment.description : 'Image'}
 				/>
 			);
 		const originalWidth = width;
@@ -108,11 +108,11 @@ export const MessageImages = () => {
 		const aspectRatio = width / height;
 		return (
 			<Image
-				key={image.url}
-				src={image.url}
+				key={attachment.url}
+				src={attachment.url}
 				width={originalWidth}
 				height={originalHeight}
-				alt={image.description ? image.description : 'Image'}
+				alt={attachment.description ? attachment.description : 'Image'}
 				style={{
 					maxWidth: `${width}px`,
 					maxHeight: `${maxHeight}px`,
@@ -123,8 +123,8 @@ export const MessageImages = () => {
 	}
 	return (
 		<div className="grid gap-2">
-			{message.images.map((image) => (
-				<MessageImage key={image.url} image={image} />
+			{message.attachments.map((attachment) => (
+				<MessageImage key={attachment.id} attachment={attachment} />
 			))}
 		</div>
 	);
@@ -141,7 +141,7 @@ type MessageRendererProps = {
 export function MessageRenderer({
 	content = <MessageContents />,
 	authorArea = <MessageAuthorArea />,
-	images = <MessageImages />,
+	images = <MessageAttachments />,
 	showBorders,
 }: MessageRendererProps) {
 	return (

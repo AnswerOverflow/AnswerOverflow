@@ -263,7 +263,7 @@ export function stripPrivateFullMessageData(
 		authorId: defaultAuthor.id,
 		parentChannelId: message.parentChannelId,
 		id: message.id,
-		childThread: null,
+		childThreadId: null,
 	});
 
 	const reply = message.referencedMessage

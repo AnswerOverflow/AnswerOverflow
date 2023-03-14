@@ -55,13 +55,14 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 			blurred = false;
 		}
 
-		function MessageImage({
-			image,
+		function MessageAttachment({
+			attachment,
 		}: {
-			image: APIMessageWithDiscordAccount['images'][number];
+			attachment: APIMessageWithDiscordAccount['attachments'][number];
 		}) {
-			let width = image.width;
-			let height = image.height;
+			if (!attachment.contentType?.startsWith('image/')) return null;
+			let width = attachment.width;
+			let height = attachment.height;
 			const maxWidth = 400;
 			const maxHeight = 300;
 
@@ -71,13 +72,13 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 					// eslint-disable-next-line @next/next/no-img-element
 					<img
 						className="max-w-full md:max-w-sm"
-						src={image.url}
+						src={attachment.url}
 						style={{
 							width: 'fit-content',
 							height: 'auto',
 							objectFit: 'cover',
 						}}
-						alt={image.description ? image.description : 'Image'}
+						alt={attachment.description ? attachment.description : 'Image'}
 					/>
 				);
 			const originalWidth = width;
@@ -93,11 +94,11 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 			const aspectRatio = width / height;
 			return (
 				<Image
-					key={image.url}
-					src={image.url}
+					key={attachment.url}
+					src={attachment.url}
 					width={originalWidth}
 					height={originalHeight}
-					alt={image.description ? image.description : 'Image'}
+					alt={attachment.description ? attachment.description : 'Image'}
 					style={{
 						maxWidth: `${width}px`,
 						maxHeight: `${maxHeight}px`,
@@ -182,8 +183,11 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 							{parsedMessageContent}
 						</div>
 						<div className="grid gap-2">
-							{message.images.map((image) => (
-								<MessageImage key={image.url} image={image} />
+							{message.attachments.map((attachment) => (
+								<MessageAttachment
+									key={attachment.id}
+									attachment={attachment}
+								/>
 							))}
 						</div>
 					</div>
