@@ -35,7 +35,7 @@ export function MessageResultPage({
 					<ServerInviteDriver server={server} channel={channel} />
 				</div>
 			</div>
-			<div className="rounded-md bg-neutral-100 p-3 dark:bg-[#2c2d2d] sm:mt-3">
+			<div className="rounded-md sm:mt-3">
 				<h1 className="rounded-sm border-b-2 border-solid border-neutral-400 pb-2 text-3xl dark:border-neutral-600 dark:text-white">
 					{thread ? thread.name : channel.name}
 				</h1>
