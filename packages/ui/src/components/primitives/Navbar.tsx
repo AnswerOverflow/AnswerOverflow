@@ -80,24 +80,21 @@ export type NavbarProps = {
 	user?: User;
 	path?: string;
 };
+
+// TODO: Needs mobile styling
 export const NavbarRenderer = ({ path, user }: NavbarProps) => {
 	const theme = useTheme();
 
 	return (
 		<>
 			<nav className="z-50 flex min-h-[4rem] w-full items-center">
-				<div className="flex w-full items-center justify-center lg:hidden">
-					<Link
-						href="/"
-						className={path === '/' ? 'invisible' : ''}
-						aria-label="Home"
-					>
-						<AnswerOverflowLogo />
-					</Link>
-				</div>
 				<ol className="mx-[4rem] hidden w-full flex-row py-8 transition-all lg:flex 2xl:mx-[6rem]">
 					<li>
-						<Link href="/" aria-label="AnswerOverflow Logo">
+						<Link
+							href="/"
+							className={path === '/' ? 'invisible' : ''}
+							aria-label="Home"
+						>
 							<AnswerOverflowLogo />
 						</Link>
 					</li>
@@ -141,5 +138,6 @@ export const Navbar = () => {
 	const router = useRouter();
 	const userQuery = trpc.auth.getSession.useQuery();
 	const user = userQuery.data?.user;
+	console.log(router.pathname);
 	return <NavbarRenderer user={user} path={router.pathname} />;
 };

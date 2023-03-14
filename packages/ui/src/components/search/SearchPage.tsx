@@ -3,7 +3,6 @@ import { useState } from 'react';
 
 import { Input } from '~ui/components/primitives/Input';
 import { SearchResult } from '~ui/components/search/SearchResult';
-import { Navbar } from '../primitives/Navbar';
 
 interface SearchResultProps {
 	results: APISearchResult[number][];
@@ -38,30 +37,27 @@ export const SearchPage = ({
 	);
 
 	return (
-		<div className="min-h-screen w-full bg-ao-white dark:bg-ao-black">
-			<Navbar />
-			<div className="w-full px-[4rem] 2xl:px-[6rem]">
-				<h1 className="py-4 font-header text-3xl text-ao-black dark:text-ao-white xl:text-5xl">
-					Search
-				</h1>
-				<form
-					onSubmit={(e) => {
-						e.preventDefault();
-						onSearch(searchInput);
-					}}
+		<div className="w-full px-[4rem] 2xl:px-[6rem]">
+			<h1 className="py-4 font-header text-3xl text-ao-black dark:text-ao-white xl:text-5xl">
+				Search
+			</h1>
+			<form
+				onSubmit={(e) => {
+					e.preventDefault();
+					onSearch(searchInput);
+				}}
+			>
+				<Input
+					onChange={setSearchInput}
+					buttonAria="Search button"
+					type="buttonInput"
+					fill
+					placeholder="Search"
 				>
-					<Input
-						onChange={setSearchInput}
-						buttonAria="Search button"
-						type="buttonInput"
-						fill
-						placeholder="Search"
-					>
-						Search
-					</Input>
-				</form>
-				{resultsSection}
-			</div>
+					Search
+				</Input>
+			</form>
+			{resultsSection}
 		</div>
 	);
 };
