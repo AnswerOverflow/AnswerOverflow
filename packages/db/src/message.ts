@@ -292,6 +292,17 @@ export async function searchMessages(opts: MessageSearchOptions) {
 	const messagesWithAuthors = await addAuthorsToMessages(messagesWithRefs);
 	const channelLookup = new Map(channels.map((c) => [c.id, c]));
 	const serverLookup = new Map(servers.map((s) => [s.id, s]));
+
+	const threadIds = messagesWithAuthors
+		.filter((m) => m.parentChannelId)
+		.map((m) => m.channelId);
+	const threadMessageCounts = await Promise.all(
+		threadIds.map((id) => elastic.getChannelMessagesCount(id)),
+	);
+	const threadMessageCountLookup = new Map(
+		threadIds.map((id, i) => [id, threadMessageCounts[i]]),
+	);
+
 	return messagesWithAuthors
 		.map((m): SearchResult | null => {
 			const channel = channelLookup.get(m.parentChannelId ?? m.channelId);
@@ -305,7 +316,13 @@ export async function searchMessages(opts: MessageSearchOptions) {
 				channel: channel,
 				score: resultsLookup.get(m.id)!._score ?? 0,
 				server: server,
-				thread: thread,
+				thread: thread
+					? {
+							...thread,
+							messageCount:
+								threadMessageCountLookup.get(thread.id) ?? undefined,
+					  }
+					: undefined,
 			};
 		})
 		.filter(Boolean)

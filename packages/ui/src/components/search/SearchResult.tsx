@@ -67,27 +67,32 @@ const ViewsIcon = () => {
 	);
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const Views = () => (
+	<>
+		<div
+			className="ml-2 h-2 w-2 rounded-[50%] bg-ao-black/[.55] dark:bg-ao-white/[.55]"
+			aria-hidden
+		/>
+
+		{/* Views */}
+		<span className="px-1 text-ao-black/[.55] dark:text-ao-white/[.55]">
+			{0}
+		</span>
+		<ViewsIcon />
+	</>
+);
 // TODO: Use data from the API
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SearchResultMetaData = () => {
+	const { result } = useSearchResultContext();
 	return (
 		<div className="mt-2 flex flex-row items-center justify-center">
 			{/* Thread count */}
 			<span className="flex items-center justify-center px-1 text-ao-black/[.55] dark:text-ao-white/[.55]">
-				{0}
+				{result.thread?.messageCount ?? 20}
 			</span>
 			<ThreadIcon />
-
-			<div
-				className="ml-2 h-2 w-2 rounded-[50%] bg-ao-black/[.55] dark:bg-ao-white/[.55]"
-				aria-hidden
-			/>
-
-			{/* Views */}
-			<span className="px-1 text-ao-black/[.55] dark:text-ao-white/[.55]">
-				{0}
-			</span>
-			<ViewsIcon />
 		</div>
 	);
 };
