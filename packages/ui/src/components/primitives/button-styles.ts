@@ -20,7 +20,8 @@ export const buttonStyles: ButtonStylesType = {
 			disabled: 'bg-gray-300 text-gray-500 border-2 border-black',
 		},
 		ghost: {
-			default: 'bg-transparent text-white border-1 border-white',
+			default:
+				'bg-transparent dark:text-white text-black border-1 dark:border-white border-black',
 			disabled: 'bg-gray-300 text-gray-500 border-1 border-white',
 		},
 	},

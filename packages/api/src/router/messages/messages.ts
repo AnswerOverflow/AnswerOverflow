@@ -15,7 +15,7 @@ import { findOrThrowNotFound } from '~api/utils/operations';
 import {
 	canUserViewPrivateMessage,
 	stripPrivateChannelData,
-	stripPrivateMessageData,
+	stripPrivateFullMessageData,
 	stripPrivateServerData,
 } from '~api/utils/permissions';
 import { TRPCError } from '@trpc/server';
@@ -103,7 +103,7 @@ export const messagesRouter = router({
 			);
 			return {
 				messages: messagesWithDiscordAccounts.map((message) =>
-					stripPrivateMessageData(message, ctx.userServers),
+					stripPrivateFullMessageData(message, ctx.userServers),
 				),
 				parentChannel: stripPrivateChannelData(channel),
 				server: stripPrivateServerData(server),
@@ -122,7 +122,7 @@ export const messagesRouter = router({
 			const searchResults = await searchMessages(input);
 			const strippedSearchResults = searchResults.map(
 				({ message, channel, server, thread, score }) => ({
-					message: stripPrivateMessageData(message, ctx.userServers),
+					message: stripPrivateFullMessageData(message, ctx.userServers),
 					channel: stripPrivateChannelData(channel),
 					server: stripPrivateServerData(server),
 					thread: thread ? stripPrivateChannelData(thread) : undefined,

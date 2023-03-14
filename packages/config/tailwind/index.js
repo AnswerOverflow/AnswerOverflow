@@ -40,6 +40,9 @@ module.exports = {
         "gradient-to-br-light-glass":
           "linear-gradient(145.98deg, rgba(183, 190, 206, 0.37) -3.49%, rgba(183, 190, 206, 0.1591) 108.92%);",
       }),
+      borderRadius: {
+        standard: "5px",
+      },
     },
   },
 
