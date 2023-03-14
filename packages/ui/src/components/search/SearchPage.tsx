@@ -30,9 +30,11 @@ export const SearchPage = ({
 			</p>
 		</div>
 	) : (
-		results.map((result) => {
-			return <SearchResult result={result} />;
-		})
+		results.map((result) => (
+			<div className="my-2">
+				<SearchResult result={result} />
+			</div>
+		))
 	);
 
 	return (
