@@ -30,7 +30,7 @@ export const SearchPage = ({
 		</div>
 	) : (
 		results.map((result) => (
-			<div className="my-2">
+			<div className="my-2" key={result.message.id}>
 				<SearchResult result={result} />
 			</div>
 		))

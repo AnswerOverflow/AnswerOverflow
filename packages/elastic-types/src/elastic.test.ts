@@ -183,6 +183,7 @@ describe('ElasticSearch', () => {
 				content,
 			});
 			const searchResults = await elastic.searchMessages({
+				limit: 20,
 				query: content,
 			});
 			expect(searchResults).toBeDefined();
@@ -204,6 +205,7 @@ describe('ElasticSearch', () => {
 				content,
 			});
 			const searchResults = await elastic.searchMessages({
+				limit: 20,
 				query: content,
 				serverId: serverId2,
 			});
@@ -215,6 +217,7 @@ describe('ElasticSearch', () => {
 		});
 		it('should return an empty array if no messages are found', async () => {
 			const searchResults = await elastic.searchMessages({
+				limit: 20,
 				query: getRandomId(),
 			});
 			expect(searchResults).toBeDefined();
@@ -252,6 +255,7 @@ describe('ElasticSearch', () => {
 				content,
 			});
 			const searchResults = await elastic.searchMessages({
+				limit: 20,
 				query: content,
 				channelId: targetChannelId,
 			});
@@ -281,6 +285,21 @@ describe('ElasticSearch', () => {
 			};
 			const result = await elastic.updateMessage(updatedMessage);
 			expect(result).toBeNull();
+		});
+	});
+	describe('Get channel message count', () => {
+		it('should return the number of messages in a channel', async () => {
+			await elastic.upsertMessage(msg1);
+			await elastic.upsertMessage({
+				...msg2,
+				channelId: msg1.channelId,
+			});
+			const count = await elastic.getChannelMessagesCount(msg1.channelId);
+			expect(count).toBe(2);
+		});
+		it('should return 0 if there are no messages in a channel', async () => {
+			const count = await elastic.getChannelMessagesCount(msg1.channelId);
+			expect(count).toBe(0);
 		});
 	});
 });

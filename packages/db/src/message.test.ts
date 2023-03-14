@@ -382,6 +382,7 @@ describe('Message Operations', () => {
 			await upsertMessage(msg);
 			const found = await searchMessages({
 				query: msg.content,
+				limit: 20,
 			});
 			const firstResult = found[0];
 			expect(found).toHaveLength(1);
@@ -390,5 +391,6 @@ describe('Message Operations', () => {
 			expect(firstResult?.server.id).toBe(server.id);
 			expect(firstResult?.score).toBeGreaterThan(0);
 		});
+		it('should add the number of messages in the channel to the result', async () => {});
 	});
 });

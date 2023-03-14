@@ -40,7 +40,7 @@ export function MessageResultPage({
 					{thread ? thread.name : channel.name}
 				</h1>
 				{messages.map((m) => (
-					<Message message={m} />
+					<Message message={m} key={m.id} />
 				))}
 			</div>
 		</div>

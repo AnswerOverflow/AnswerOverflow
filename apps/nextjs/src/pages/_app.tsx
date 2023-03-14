@@ -8,6 +8,7 @@ import type { AppType } from 'next/app';
 import hljs from 'highlight.js';
 import { NextTRPC, PageWrapper, trpc } from '@answeroverflow/ui';
 import { useEffect } from 'react';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -25,6 +26,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 			<PageWrapper>
 				<Component {...pageProps} />
 			</PageWrapper>
+			<ReactQueryDevtools initialIsOpen={false} />
 		</SessionProvider>
 	);
 };
