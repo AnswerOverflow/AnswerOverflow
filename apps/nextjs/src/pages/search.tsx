@@ -11,6 +11,7 @@ export default function Search() {
 	const results = trpc.messagePage.search.useQuery({
 		query,
 	});
+	console.log(results);
 	return (
 		<>
 			<AOHead
@@ -21,9 +22,12 @@ export default function Search() {
 
 			<SearchPage
 				results={results.data}
+				isLoading={results.isLoading}
 				onSearch={async (query: string) => {
 					// set the query in the url
-					await router.push(`/search?q=${query}`, undefined, { shallow: true });
+					await router.push(`/search?q=${query}`, undefined, {
+						shallow: true,
+					});
 					// set the query in the state
 					setQuery(query);
 				}}

@@ -7,10 +7,15 @@ import { Navbar } from '../primitives/Navbar';
 
 interface SearchResultProps {
 	results?: APISearchResult[number][];
+	isLoading?: boolean;
 	onSearch: (query: string) => Promise<unknown> | unknown;
 }
 
-export const SearchPage = ({ results, onSearch }: SearchResultProps) => {
+export const SearchPage = ({
+	results,
+	onSearch,
+	isLoading,
+}: SearchResultProps) => {
 	const [searchInput, setSearchInput] = useState<string>('');
 	return (
 		<div className="min-h-screen w-full bg-ao-white dark:bg-ao-black">
@@ -37,10 +42,18 @@ export const SearchPage = ({ results, onSearch }: SearchResultProps) => {
 				</form>
 
 				{/* Search */}
-				{results &&
-					results.map((result) => {
-						return <SearchResult result={result} />;
-					})}
+				{isLoading ? (
+					<div className="flex h-[50vh] items-center justify-center">
+						<div className="h-64 w-64 animate-spin rounded-full border-b-4 border-ao-blue" />
+					</div>
+				) : (
+					<>
+						{results &&
+							results.map((result) => {
+								return <SearchResult result={result} />;
+							})}
+					</>
+				)}
 			</div>
 		</div>
 	);
