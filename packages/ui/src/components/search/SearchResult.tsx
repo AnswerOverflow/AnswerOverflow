@@ -132,7 +132,7 @@ const SearchResultMetaData = () => {
 	);
 };
 
-export const SearchResult = () => {
+export const SearchResultRenderer = () => {
 	const { result } = useSearchResultContext();
 	const solution = result.message.solutionMessages?.[0];
 
@@ -191,14 +191,14 @@ export const SearchResult = () => {
 	);
 };
 
-export const SearchResultWrapper = ({
+export const SearchResult = ({
 	result,
 }: {
 	result: APISearchResult[number];
 }) => {
 	return (
 		<SearchResultContext.Provider value={{ result }}>
-			<SearchResult />
+			<SearchResultRenderer />
 		</SearchResultContext.Provider>
 	);
 };

@@ -2,15 +2,15 @@ import type { APISearchResult } from '@answeroverflow/api';
 import { useState } from 'react';
 
 import { Input } from '~ui/components/primitives/Input';
-import { SearchResultWrapper } from '~ui/components/search/SearchResult';
+import { SearchResult } from '~ui/components/search/SearchResult';
 import { Navbar } from '../primitives/Navbar';
 
 interface SearchResultProps {
 	results?: APISearchResult[number][];
+	onSearch: (query: string) => Promise<unknown> | unknown;
 }
 
-export const SearchPage = ({ results }: SearchResultProps) => {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const SearchPage = ({ results, onSearch }: SearchResultProps) => {
 	const [searchInput, setSearchInput] = useState<string>('');
 	return (
 		<div className="min-h-screen w-full bg-ao-white dark:bg-ao-black">
@@ -22,6 +22,7 @@ export const SearchPage = ({ results }: SearchResultProps) => {
 				<form
 					onSubmit={(e) => {
 						e.preventDefault();
+						onSearch(searchInput);
 					}}
 				>
 					<Input
@@ -38,7 +39,7 @@ export const SearchPage = ({ results }: SearchResultProps) => {
 				{/* Search */}
 				{results &&
 					results.map((result) => {
-						return <SearchResultWrapper result={result} />;
+						return <SearchResult result={result} />;
 					})}
 			</div>
 		</div>

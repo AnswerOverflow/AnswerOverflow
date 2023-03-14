@@ -5,12 +5,12 @@ import {
 	mockMessageWithDiscordAccount,
 	mockServer,
 } from '~ui/test/props';
-import { SearchResultWrapper } from './SearchResult';
+import { SearchResult } from './SearchResult';
 
 const meta = {
-	component: SearchResultWrapper,
+	component: SearchResult,
 	argTypes: {},
-} as Meta<typeof SearchResultWrapper>;
+} as Meta<typeof SearchResult>;
 
 export default meta;
 
@@ -32,7 +32,7 @@ export const Primary: Story = {
 	},
 	render: ({ result }: { result: APISearchResult[number] }) => (
 		<div className="xl:w-2/3">
-			<SearchResultWrapper result={result} />
+			<SearchResult result={result} />
 		</div>
 	),
 };
