@@ -6,9 +6,8 @@ import {
 	MessageRenderer,
 	MessageTitle,
 } from '~ui/components/primitives/Message';
-import { Button } from '../primitives/Button';
 import { createContext, useContext } from 'react';
-import { useTheme } from '~ui/utils/hooks';
+import { ServerInvite } from './ServerInviteNew';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const SearchResultContext = createContext<{
@@ -24,45 +23,6 @@ export function useSearchResultContext() {
 	}
 	return context;
 }
-
-const ServerInviteTitle = ({ name }: { name: string }) => {
-	return (
-		<h3 className="pt-2 text-center font-header text-2xl font-bold text-ao-black dark:text-ao-white">
-			{name}
-		</h3>
-	);
-};
-
-const ServerInviteChannelName = ({ channelName }: { channelName: string }) => {
-	return (
-		<h4 className="text-center text-xl font-light text-ao-black/[.9] dark:text-ao-white/[.9]">
-			#{channelName}
-		</h4>
-	);
-};
-
-const ServerInviteIcon = () => {
-	return (
-		<div className="h-24 w-24 rounded-[50%] border-2 border-white bg-[#F6F9FF] dark:bg-[#9A9A9A]" />
-	);
-};
-
-const ServerInviteJoinButton = () => {
-	const theme = useTheme();
-	return (
-		<>
-			{theme === 'dark' ? (
-				<Button type={'solid'} color={'white'} className="my-4">
-					Join Server
-				</Button>
-			) : (
-				<Button type={'solid'} color={'black'} className="my-4">
-					Join Server
-				</Button>
-			)}
-		</>
-	);
-};
 
 const ThreadIcon = () => {
 	return (
@@ -132,13 +92,32 @@ const SearchResultMetaData = () => {
 	);
 };
 
-export const SearchResultRenderer = () => {
+const SearchResultSidebar = () => {
+	const { result } = useSearchResultContext();
+	return (
+		<div className="hidden w-1/4 flex-col items-center justify-center rounded-tr-standard rounded-br-standard border-y-2 border-r-2 border-black/[.13] px-5 pt-6 pb-2 dark:border-white/[.13] lg:flex">
+			<ServerInvite server={result.server} channel={result.channel} />
+			<SearchResultMetaData />
+		</div>
+	);
+};
+
+const SearchResultAnswer = () => {
 	const { result } = useSearchResultContext();
 	const solution = result.message.solutionMessages?.[0];
+	return solution ? (
+		<div className="rounded-b-standard border-2 border-ao-green  bg-ao-green/10 dark:bg-ao-green/[0.02] lg:rounded-br-none">
+			<Message message={solution} />
+		</div>
+	) : (
+		<></>
+	);
+};
 
-	const SearchResultMainContent = () => (
+const SearchResultMainContent = () => {
+	const { result } = useSearchResultContext();
+	return (
 		<div className="flex grow flex-col">
-			{/* Body */}
 			<Message
 				message={result.message}
 				messageRenderer={
@@ -154,39 +133,7 @@ export const SearchResultRenderer = () => {
 					/>
 				}
 			/>
-
-			{/* Answer */}
-			{solution && (
-				<div className="rounded-b-standard border-2 border-ao-green  bg-ao-green/10 dark:bg-ao-green/[0.02] lg:rounded-br-none">
-					<Message message={solution} />
-				</div>
-			)}
-		</div>
-	);
-
-	const SearchResultSidebar = () => {
-		return (
-			<div className="hidden w-1/4 flex-col items-center justify-center rounded-tr-standard rounded-br-standard border-y-2 border-r-2 border-black/[.13] px-5 pt-6 pb-2 dark:border-white/[.13] lg:flex">
-				{/* Server Invite */}
-				<div className="flex flex-col items-center justify-center pt-6 pb-2 xl:px-5">
-					<ServerInviteIcon />
-					<ServerInviteTitle name={result.server.name} />
-					{result.channel && (
-						<>
-							<ServerInviteChannelName channelName={result.channel.name} />
-							<ServerInviteJoinButton />
-						</>
-					)}
-				</div>
-				<SearchResultMetaData />
-			</div>
-		);
-	};
-
-	return (
-		<div className="flex h-full w-full flex-col rounded-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:flex-row">
-			<SearchResultMainContent />
-			<SearchResultSidebar />
+			<SearchResultAnswer />
 		</div>
 	);
 };
@@ -198,7 +145,10 @@ export const SearchResult = ({
 }) => {
 	return (
 		<SearchResultContext.Provider value={{ result }}>
-			<SearchResultRenderer />
+			<div className="flex h-full w-full flex-col rounded-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:flex-row">
+				<SearchResultMainContent />
+				<SearchResultSidebar />
+			</div>
 		</SearchResultContext.Provider>
 	);
 };

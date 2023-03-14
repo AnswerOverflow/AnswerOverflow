@@ -38,15 +38,7 @@ export function ServerInvite({
 			</div>
 			<div>
 				{channel?.inviteCode && (
-					<Link
-						href={`https://discord.gg/${channel?.inviteCode}`}
-						target={'Blank'}
-						referrerPolicy="no-referrer"
-					>
-						<Button intent={'success'} visualOnly>
-							{isUserInServer ? 'Joined' : 'Join'}
-						</Button>
-					</Link>
+
 				)}
 			</div>
 		</div>
