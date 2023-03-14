@@ -1,17 +1,17 @@
-import { DiscordAvatar } from './DiscordAvatar';
+import { DiscordAvatar } from '../DiscordAvatar';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import Image from 'next/image';
 import discordMarkdown from 'discord-markdown';
 import Parser from 'html-react-parser';
 
-import type { MessageWithDiscordAccount } from '@answeroverflow/api';
-import { DiscordIcon } from './icons/DiscordIcon';
+import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
+import { DiscordIcon } from '../icons/DiscordIcon';
 import Link from 'next/link';
 import type { ChannelPublicWithFlags } from '~api/router/channel/types';
-import { useIsUserInServer } from '../utils';
+import { useIsUserInServer } from '~ui/utils/hooks';
 import { forwardRef } from 'react';
 export type MessageProps = {
-	message: MessageWithDiscordAccount;
+	message: APIMessageWithDiscordAccount;
 	thread?: ChannelPublicWithFlags;
 	blurred?: boolean;
 	notPublicTitle?: string;
@@ -31,7 +31,7 @@ export type MessageProps = {
 const { toHTML } = discordMarkdown;
 
 // TODO: Align text to be same level with the avatar
-export const Message = forwardRef<HTMLDivElement, MessageProps>(
+export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 	function MessageComp(
 		{
 			message,
@@ -58,11 +58,9 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
 		function MessageAttachment({
 			attachment,
 		}: {
-			attachment: MessageWithDiscordAccount['attachments'][number];
+			attachment: APIMessageWithDiscordAccount['attachments'][number];
 		}) {
-			if (!attachment?.contentType?.startsWith('image/')) {
-				return null;
-			}
+			if (!attachment.contentType?.startsWith('image/')) return null;
 			let width = attachment.width;
 			let height = attachment.height;
 			const maxWidth = 400;

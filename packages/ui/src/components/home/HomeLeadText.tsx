@@ -2,7 +2,7 @@ import { Button } from '../primitives/Button';
 
 export const HomeLeadText = () => {
 	return (
-		<div className="flex w-full flex-col items-start justify-center gap-6 xl:w-[60%]">
+		<div className="flex w-full flex-col items-start justify-center gap-6 pb-20 xl:w-[60%]">
 			<h1 className="text-center font-header text-4xl font-bold leading-[114.5%] text-ao-white md:text-start md:text-6xl">
 				Bringing your discord channels to google
 			</h1>
