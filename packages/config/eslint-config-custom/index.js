@@ -22,7 +22,6 @@ module.exports = {
     "out/",
     "build",
     "coverage/",
-    "*.html"
   ],
   rules: {
     "@next/next/no-html-link-for-pages": "off",
