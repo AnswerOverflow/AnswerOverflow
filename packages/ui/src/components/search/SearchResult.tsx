@@ -7,7 +7,7 @@ import {
 	MessageTitle,
 } from '~ui/components/primitives/Message';
 import { createContext, useContext } from 'react';
-import { ServerInvite } from './ServerInviteNew';
+import { ServerInvite } from '../ServerInvite';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const SearchResultContext = createContext<{

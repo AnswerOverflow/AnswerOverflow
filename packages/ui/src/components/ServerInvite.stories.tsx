@@ -1,30 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { mockServer } from '~ui/test/props';
+import { mockChannelWithSettings, mockServer } from '~ui/test/props';
 
-import { ServerInvite, ServerInviteProps } from './ServerInvite';
+import { ServerInviteRenderer } from './ServerInvite';
 const meta = {
-	component: ServerInvite,
-} as Meta<typeof ServerInvite>;
+	component: ServerInviteRenderer,
+} as Meta<typeof ServerInviteRenderer>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-//👇 Each story then reuses that template
-const server = mockServer();
-const defaultMessage: ServerInviteProps = {
-	server: server,
-	channel: {
-		id: '0',
-		name: 'general',
-		serverId: server.id,
-		parentId: null,
-		type: 0,
-		inviteCode: '123456',
+export const InServer: Story = {
+	args: {
+		server: mockServer(),
+		channel: mockChannelWithSettings(),
+		isUserInServer: true,
 	},
-	isUserInServer: false,
-};
-
-export const Primary: Story = {
-	args: defaultMessage,
 };
