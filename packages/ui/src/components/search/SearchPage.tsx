@@ -6,8 +6,8 @@ import { SearchResult } from '~ui/components/search/SearchResult';
 import { Navbar } from '../primitives/Navbar';
 
 interface SearchResultProps {
-	results?: APISearchResult[number][];
-	isLoading?: boolean;
+	results: APISearchResult[number][];
+	isLoading: boolean;
 	onSearch: (query: string) => Promise<unknown> | unknown;
 }
 
@@ -21,7 +21,7 @@ export const SearchPage = ({
 	const noResults = !results || results.length === 0;
 	const resultsSection = isLoading ? (
 		<div className="flex h-[50vh] items-center justify-center">
-			<div className="h-64 w-64 animate-spin rounded-full border-b-4 border-ao-blue" />
+			<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-ao-blue" />
 		</div>
 	) : noResults ? (
 		<div className="flex h-[50vh] items-center justify-center">
