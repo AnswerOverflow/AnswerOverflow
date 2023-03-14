@@ -5,7 +5,7 @@ import type {
 } from '@answeroverflow/api';
 import { Message } from './primitives/Message';
 import { SearchBar } from './SearchBar';
-import { ServerInviteDriver } from './ServerInviteDriver';
+import { ServerInvite } from './ServerInvite';
 
 export type MessageResultPageProps = {
 	messages: APIMessageWithDiscordAccount[];
@@ -32,7 +32,7 @@ export function MessageResultPage({
 			<div className=" flex flex-col items-center justify-between gap-2 sm:flex-row">
 				<SearchBar className="w-full" defaultValue={query} />
 				<div className="shrink-0 ">
-					<ServerInviteDriver server={server} channel={channel} />
+					<ServerInvite server={server} channel={channel} />
 				</div>
 			</div>
 			<div className="rounded-md sm:mt-3">

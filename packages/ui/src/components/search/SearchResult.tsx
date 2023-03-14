@@ -105,12 +105,11 @@ const SearchResultSidebar = () => {
 const SearchResultAnswer = () => {
 	const { result } = useSearchResultContext();
 	const solution = result.message.solutionMessages?.[0];
-	return solution ? (
+	if (!solution) return <></>;
+	return (
 		<div className="rounded-b-standard border-2 border-ao-green  bg-ao-green/10 dark:bg-ao-green/[0.02] lg:rounded-br-none">
 			<Message message={solution} />
 		</div>
-	) : (
-		<></>
 	);
 };
 

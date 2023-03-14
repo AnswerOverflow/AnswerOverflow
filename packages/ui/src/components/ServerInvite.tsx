@@ -8,6 +8,7 @@ import React from 'react';
 import { ChannelType } from '~ui/utils/discord';
 import { ServerIcon } from './ServerIcon';
 import Link from 'next/link';
+import { useIsUserInServer } from '../utils';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const ServerInviteContext = createContext<{
 	server: ServerPublic;
@@ -28,7 +29,7 @@ function useServerInviteContext() {
 const ServerInviteTitle = () => {
 	const { server } = useServerInviteContext();
 	return (
-		<h3 className="pt-2 text-center font-header text-2xl font-bold text-ao-black dark:text-ao-white">
+		<h3 className="pt-2 text-center font-header text-lg font-bold text-ao-black dark:text-ao-white">
 			{server.name}
 		</h3>
 	);
@@ -55,7 +56,7 @@ const ServerInviteChannelName = () => {
 	return (
 		<div className="flex flex-row items-center justify-center align-middle">
 			{getChannelTypeIcon(channel.type)}
-			<h4 className="text-center font-header text-xl font-bold text-ao-black dark:text-ao-white">
+			<h4 className="text-center font-header text-base font-bold text-ao-black dark:text-ao-white">
 				{channel.name}
 			</h4>
 		</div>
@@ -92,9 +93,13 @@ export const ServerInviteRenderer = (props: {
 		<ServerInviteContext.Provider value={props}>
 			<div className="flex h-full w-full flex-col items-center justify-center">
 				<div className="flex h-full w-full flex-col items-center justify-center">
-					<ServerInviteIcon />
-					<ServerInviteTitle />
-					<ServerInviteChannelName />
+					<div className="flex flex-row items-center justify-center align-middle">
+						<ServerInviteIcon />
+						<ServerInviteTitle />
+					</div>
+					<div>
+						<ServerInviteChannelName />
+					</div>
 					<ServerInviteJoinButton />
 				</div>
 			</div>
@@ -106,5 +111,6 @@ export const ServerInvite = (props: {
 	server: ServerPublic;
 	channel?: ChannelPublicWithFlags;
 }) => {
-	return <ServerInviteRenderer {...props} isUserInServer={false} />;
+	const isUserInServer = useIsUserInServer(props.server.id);
+	return <ServerInviteRenderer {...props} isUserInServer={isUserInServer} />;
 };
