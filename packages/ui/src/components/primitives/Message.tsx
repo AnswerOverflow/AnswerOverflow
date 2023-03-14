@@ -146,7 +146,7 @@ export function MessageRenderer({
 }: MessageRendererProps) {
 	return (
 		<div
-			className={`rounded-t-standard grow lg:rounded-tr-none ${
+			className={`grow rounded-t-standard lg:rounded-tr-none ${
 				showBorders ? 'border-x-2 border-t-2' : ''
 			} border-black/[.13] dark:border-white/[.13]`}
 		>
@@ -227,7 +227,7 @@ export const ContentBlurrer = ({
 				<div className="absolute inset-0 " />
 				<div className="absolute inset-0 flex items-center justify-center ">
 					<div
-						className={`rounded-standard flex flex-col items-center justify-center bg-ao-white/25 p-5 text-center text-ao-black backdrop-blur-sm dark:bg-ao-black/75 dark:text-ao-white`}
+						className={`flex flex-col items-center justify-center rounded-standard bg-ao-white/25 p-5 text-center text-ao-black backdrop-blur-sm dark:bg-ao-black/75 dark:text-ao-white`}
 					>
 						<div className="text-2xl">{notPublicTitle}</div>
 						<div>{notPublicInstructions}</div>
