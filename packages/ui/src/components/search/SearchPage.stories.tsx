@@ -4,12 +4,18 @@ import {
 	mockMessageWithDiscordAccount,
 	mockServer,
 } from '~ui/test/props';
+import { PageWrapper } from '../PageWrapper';
 import { SearchPage } from './SearchPage';
 
 const meta = {
 	component: SearchPage,
 	title: 'pages/SearchPage',
 	argTypes: {},
+	render: (args) => (
+		<PageWrapper>
+			<SearchPage {...args} />
+		</PageWrapper>
+	),
 	parameters: {
 		layout: 'fullscreen',
 		a11y: {

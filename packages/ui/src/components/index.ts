@@ -4,6 +4,7 @@ export * from './Footer';
 export * from './MessageResultPage';
 export * from './primitives/Navbar';
 export * from './PageWrapper';
+export * from './home/Home';
 export * from './SearchBar';
 export * from './search/SearchPage';
 export * from './SearchBarDriver';
