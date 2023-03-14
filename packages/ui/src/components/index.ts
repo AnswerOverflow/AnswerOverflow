@@ -2,7 +2,7 @@ export * from './AnswerOverflowLogo';
 export * from './DiscordAvatar';
 export * from './Footer';
 export * from './MessageResultPage';
-export * from './deprecated/Navbar';
+export * from './primitives/Navbar';
 export * from './SearchBar';
 export * from './search/SearchPage';
 export * from './SearchBarDriver';
