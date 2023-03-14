@@ -17,6 +17,24 @@ export const SearchPage = ({
 	isLoading,
 }: SearchResultProps) => {
 	const [searchInput, setSearchInput] = useState<string>('');
+
+	const noResults = !results || results.length === 0;
+	const resultsSection = isLoading ? (
+		<div className="flex h-[50vh] items-center justify-center">
+			<div className="h-64 w-64 animate-spin rounded-full border-b-4 border-ao-blue" />
+		</div>
+	) : noResults ? (
+		<div className="flex h-[50vh] items-center justify-center">
+			<p className="font-header text-xl text-ao-black dark:text-ao-white">
+				No results found
+			</p>
+		</div>
+	) : (
+		results.map((result) => {
+			return <SearchResult result={result} />;
+		})
+	);
+
 	return (
 		<div className="min-h-screen w-full bg-ao-white dark:bg-ao-black">
 			<Navbar />
@@ -40,20 +58,7 @@ export const SearchPage = ({
 						Search
 					</Input>
 				</form>
-
-				{/* Search */}
-				{isLoading ? (
-					<div className="flex h-[50vh] items-center justify-center">
-						<div className="h-64 w-64 animate-spin rounded-full border-b-4 border-ao-blue" />
-					</div>
-				) : (
-					<>
-						{results &&
-							results.map((result) => {
-								return <SearchResult result={result} />;
-							})}
-					</>
-				)}
+				{resultsSection}
 			</div>
 		</div>
 	);

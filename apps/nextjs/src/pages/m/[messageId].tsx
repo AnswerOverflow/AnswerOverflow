@@ -18,7 +18,7 @@ export default function MessageResult(
 
 	const isUserInServer = useIsUserInServer(serverId);
 	const shouldFetchPrivateMessages = isUserInServer && !areAllMessagesPublic;
-	const { data } = trpc.messagePage.threadFromMessageId.useQuery(messageId, {
+	const { data } = trpc.messages.threadFromMessageId.useQuery(messageId, {
 		// For authenticated users that are in the server, we fetch the messages incase any of them are private
 		enabled: shouldFetchPrivateMessages,
 		// If we're doing SSG, then we don't change the queryHash so we can access the data, otherwise we set it to change with the auth state
@@ -77,8 +77,9 @@ export async function getStaticProps(
 
 	// prefetch `post.byId`
 	try {
-		const { server, messages } =
-			await ssg.messagePage.threadFromMessageId.fetch(context.params.messageId);
+		const { server, messages } = await ssg.messages.threadFromMessageId.fetch(
+			context.params.messageId,
+		);
 		const areAllMessagesPublic = messages.every((message) => message.public);
 		return {
 			props: {

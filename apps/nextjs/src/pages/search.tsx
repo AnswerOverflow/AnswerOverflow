@@ -8,10 +8,17 @@ export default function Search() {
 	const [query, setQuery] = useState<string>(
 		typeof router.query.q === 'string' ? router.query.q : '',
 	);
-	const results = trpc.messagePage.search.useQuery({
-		query,
-	});
-	console.log(results);
+	const results = trpc.messages.search.useQuery(
+		{
+			query,
+		},
+		{
+			enabled: query.length > 0,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			refetchOnWindowFocus: false,
+		},
+	);
 	return (
 		<>
 			<AOHead
@@ -22,7 +29,7 @@ export default function Search() {
 
 			<SearchPage
 				results={results.data}
-				isLoading={results.isLoading}
+				isLoading={results.isLoading && query.length > 0}
 				onSearch={async (query: string) => {
 					// set the query in the url
 					await router.push(`/search?q=${query}`, undefined, {

@@ -129,10 +129,12 @@ export const messagesRouter = router({
 					score,
 				}),
 			);
-			return strippedSearchResults.filter(
-				(result) =>
-					canUserViewPrivateMessage(ctx.userServers, result.message) ||
-					result.message.public,
-			);
+			return strippedSearchResults
+				.filter(
+					(result) =>
+						canUserViewPrivateMessage(ctx.userServers, result.message) ||
+						result.message.public,
+				)
+				.splice(0, 20);
 		}),
 });
