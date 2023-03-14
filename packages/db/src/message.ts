@@ -23,7 +23,7 @@ import { findManyDiscordAccountsWithUserServerSettings } from './discord-account
 import { omit } from '@answeroverflow/utils';
 import { findManyChannelsById } from './channel';
 import { findManyServersById } from './server';
-
+import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 export type MessageWithDiscordAccount = z.infer<
 	typeof zMessageWithDiscordAccount
 >;
@@ -313,7 +313,10 @@ export async function searchMessages(opts: MessageSearchOptions) {
 			if (!channel || !server) return null;
 			return {
 				message: m,
-				channel: channel,
+				channel: {
+					...channel,
+					messageCount: NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
+				},
 				score: resultsLookup.get(m.id)!._score ?? 0,
 				server: server,
 				thread: thread

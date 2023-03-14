@@ -8,6 +8,7 @@ import {
 	mockDiscordAccount,
 	mockMessage,
 	mockServer,
+	mockThread,
 } from '@answeroverflow/db-mock';
 import {
 	addAuthorToMessage,
@@ -382,7 +383,6 @@ describe('Message Operations', () => {
 			await upsertMessage(msg);
 			const found = await searchMessages({
 				query: msg.content,
-				limit: 20,
 			});
 			const firstResult = found[0];
 			expect(found).toHaveLength(1);
@@ -391,6 +391,30 @@ describe('Message Operations', () => {
 			expect(firstResult?.server.id).toBe(server.id);
 			expect(firstResult?.score).toBeGreaterThan(0);
 		});
-		it('should add the number of messages in the channel to the result', async () => {});
+		it('should add the number of messages in a thread to the result', async () => {
+			const thread = await createChannel(mockThread(channel));
+
+			const msg = mockMessage(server, thread, author, {
+				content: getRandomId(),
+				parentChannelId: thread.parentId,
+			});
+			await upsertMessage(msg);
+			const found = await searchMessages({
+				query: msg.content,
+			});
+			const firstResult = found[0];
+			expect(firstResult?.thread?.messageCount).toBe(1);
+		});
+		it('should add the max number of fetched channel messages to the result', async () => {
+			const msg = mockMessage(server, channel, author, {
+				content: getRandomId(),
+			});
+			await upsertMessage(msg);
+			const found = await searchMessages({
+				query: msg.content,
+			});
+			const firstResult = found[0];
+			expect(firstResult?.channel.messageCount).toBe(20);
+		});
 	});
 });
