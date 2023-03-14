@@ -21,7 +21,7 @@ export const Navbar = () => {
 							<AnswerOverflowLogo />
 						</a>
 					</li>
-					<li className="ml-6 ml-auto hidden items-center justify-center md:flex">
+					<li className="ml-auto hidden items-center justify-center md:flex">
 						<ThemeSwitcher />
 					</li>
 					<li className="mx-6  hidden md:block">
