@@ -26,6 +26,11 @@ export class OpenManageAccountMenuCommand extends Command {
 	public override registerApplicationCommands(
 		registry: ChatInputCommand.Registry,
 	) {
+		const ids = getCommandIds({
+			local: '1073363501659201646',
+			staging: '1081235691649904741',
+			production: '1013627262068859000',
+		});
 		registry.registerChatInputCommand(
 			new SlashCommandBuilder()
 				.setName(this.name)

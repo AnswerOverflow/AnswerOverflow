@@ -16,11 +16,21 @@ export class MarkSolution extends Command {
 	public override registerApplicationCommands(
 		registry: ChatInputCommand.Registry,
 	) {
-		registry.registerContextMenuCommand({
-			name: '✅ Mark Solution',
-			type: ApplicationCommandType.Message,
-			dmPermission: false,
+		const ids = getCommandIds({
+			local: '1073363502732955739',
+			staging: '1081235688038613072',
+			production: '999153895114821692',
 		});
+		registry.registerContextMenuCommand(
+			{
+				name: '✅ Mark Solution',
+				type: ApplicationCommandType.Message,
+				dmPermission: false,
+			},
+			{
+				idHints: ids,
+			},
+		);
 	}
 	public override async contextMenuRun(
 		interaction: ContextMenuCommandInteraction,

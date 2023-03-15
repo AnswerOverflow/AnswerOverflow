@@ -15,6 +15,12 @@ export class ConsentCommand extends Command {
 	public override registerApplicationCommands(
 		registry: ChatInputCommand.Registry,
 	) {
+		const ids = getCommandIds({
+			local: '1073363500585468084',
+			staging: '982084090251595786',
+			production: '980880200566964264',
+		});
+
 		registry.registerChatInputCommand(
 			new SlashCommandBuilder()
 				.setName(this.name)

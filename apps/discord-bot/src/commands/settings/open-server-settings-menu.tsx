@@ -28,6 +28,10 @@ export class OpenServerSettingsMenu extends Command {
 	public override registerApplicationCommands(
 		registry: ChatInputCommand.Registry,
 	) {
+		const ids = getCommandIds({
+			local: '1079583356053897276',
+			staging: '1081235686956482650',
+		});
 		registry.registerChatInputCommand(
 			new SlashCommandBuilder()
 				.setName(this.name)

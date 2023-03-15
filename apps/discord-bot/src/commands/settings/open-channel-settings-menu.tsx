@@ -31,6 +31,10 @@ export class ChannelSettingsCommand extends Command {
 	public override registerApplicationCommands(
 		registry: ChatInputCommand.Registry,
 	) {
+		const ids = getCommandIds({
+			local: '1073363499532701806',
+			staging: '1081235690089623672',
+		});
 		registry.registerChatInputCommand(
 			new SlashCommandBuilder()
 				.setName(this.name)
