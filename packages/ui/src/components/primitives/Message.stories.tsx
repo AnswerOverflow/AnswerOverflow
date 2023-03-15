@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { MessageProps, Message } from './Message';
-import { mockDiscordAccount } from '~ui/test/props';
-
-import type { MessageWithDiscordAccount } from '@answeroverflow/db';
+import { Message } from './Message';
+import {
+	mockDiscordAccount,
+	mockMessageWithDiscordAccount,
+} from '~ui/test/props';
 
 const meta = {
 	component: Message,
@@ -17,39 +18,15 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-const loremIpsum =
-	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quidem fugit iure delectus tempore! Nam nihil animi nemo nisi eligendi veniam obcaecati accusantium, sunt maiores tenetur illum saepe incidunt beatae hic.';
-
-//👇 Each story then reuses that template
-const defaultMessage: MessageProps = {
-	message: {
-		content: loremIpsum,
-		id: '1063028763656458270',
-		author: {
-			name: 'John Doe',
-			id: '0',
-			avatar: null,
-		},
-		parentChannelId: null,
-		public: true,
-		images: [],
-		channelId: '0',
-		serverId: '0',
-		solutionIds: [],
-		childThread: null,
-		messageReference: null,
-	} as MessageWithDiscordAccount,
-};
-
 export const Primary: Story = {
-	args: defaultMessage,
+	args: { message: mockMessageWithDiscordAccount() },
 };
 
 export const OverflowLetters: Story = {
 	args: {
 		...Primary.args,
 		message: {
-			...defaultMessage.message,
+			...mockMessageWithDiscordAccount(),
 			content:
 				'Helloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo',
 			author: mockDiscordAccount(),
@@ -61,7 +38,7 @@ export const WithImages: Story = {
 	args: {
 		...Primary.args,
 		message: {
-			...defaultMessage.message,
+			...mockMessageWithDiscordAccount(),
 			channelId: '1031266112802914305',
 			serverId: '701008832645824553',
 			images: [
@@ -92,7 +69,7 @@ export const WithCode: Story = {
 	args: {
 		...Primary.args,
 		message: {
-			...defaultMessage.message,
+			...mockMessageWithDiscordAccount(),
 			content: `
       \`\`\`typescript
     const variable = 'hello';
@@ -114,7 +91,7 @@ export const WithXSS: Story = {
 	args: {
 		...Primary.args,
 		message: {
-			...defaultMessage.message,
+			...mockMessageWithDiscordAccount(),
 			content: "<script> alert('XSS')</script>",
 		},
 	},
@@ -124,8 +101,18 @@ export const WithXSSInCodeBlock: Story = {
 	args: {
 		...Primary.args,
 		message: {
-			...defaultMessage.message,
+			...mockMessageWithDiscordAccount(),
 			content: "```<script> alert('XSS')</script>```",
+		},
+	},
+};
+
+export const Blurred: Story = {
+	args: {
+		...Primary.args,
+		message: {
+			...mockMessageWithDiscordAccount(),
+			public: false,
 		},
 	},
 };

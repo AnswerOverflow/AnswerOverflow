@@ -40,8 +40,8 @@ export class ConsentCommand extends Command {
 					await onceTimeStatusHandler(
 						interaction,
 						result.flags.canPubliclyDisplayMessages
-							? 'Consented'
-							: 'Unconsented',
+							? `You have consented to publicly display your messages from indexed channels in ${member.guild.name} on Answer Overflow.`
+							: `You have revoked your consent to publicly display your messages from indexed channels in ${member.guild.name} on Answer Overflow.`,
 					);
 				},
 			}),
