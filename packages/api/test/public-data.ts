@@ -1,4 +1,5 @@
 import {
+	ChannelWithFlags,
 	DiscordAccount,
 	getDefaultDiscordAccount,
 	getDefaultMessage,
@@ -86,7 +87,7 @@ export function toPrivateMessageWithStrippedData(
 	};
 }
 
-export function pickPublicChannelData(channel: ChannelFindByIdOutput) {
+export function pickPublicChannelData(channel: ChannelWithFlags) {
 	const picked = pick(channel, [
 		'id',
 		'name',
@@ -94,6 +95,7 @@ export function pickPublicChannelData(channel: ChannelFindByIdOutput) {
 		'serverId',
 		'type',
 		'inviteCode',
+		'messageCount',
 	]);
 	return picked;
 }

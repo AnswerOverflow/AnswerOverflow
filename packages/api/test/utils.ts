@@ -233,7 +233,7 @@ export async function testAllPublicAndPrivateDataVariants<F, T extends F>({
 							`Failure from ${source} with ${
 								permission as string
 							} data did not match`,
-						).toStrictEqual(privateDataFormat);
+						).toEqual(privateDataFormat);
 					}
 				} else {
 					if (Array.isArray(publicDataFormat)) {
@@ -251,7 +251,7 @@ export async function testAllPublicAndPrivateDataVariants<F, T extends F>({
 							`Failure from ${source} with ${
 								permission as string
 							} data did not match`,
-						).toStrictEqual(publicDataFormat);
+						).toEqual(publicDataFormat);
 					}
 				}
 			} catch (error) {

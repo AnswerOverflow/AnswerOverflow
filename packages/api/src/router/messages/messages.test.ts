@@ -26,10 +26,12 @@ import {
 	mockDiscordAccount,
 	mockMessage,
 	mockThread,
+	mockChannelWithFlags,
 } from '@answeroverflow/db-mock';
 import { getRandomId } from '@answeroverflow/utils';
 import { randomSnowflakeLargerThan } from '@answeroverflow/discordjs-utils';
 import { ChannelType } from 'discord-api-types/v10';
+import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 
 let server: Server;
 let channel: Channel;
@@ -79,27 +81,29 @@ describe('Message Results', () => {
 			const messages = await unauthedMessagePageRouter.threadFromMessageId(
 				message.id,
 			);
-			expect(messages).toMatchObject({
-				messages: [
-					toPrivateMessageWithStrippedData(
-						toMessageWithAccountAndRepliesTo({
-							message,
-							author,
-							publicMessage: false,
-						}),
-					),
-					toPrivateMessageWithStrippedData(
-						toMessageWithAccountAndRepliesTo({
-							message: message2,
-							author,
-							publicMessage: false,
-						}),
-					),
-				],
-				parentChannel: pickPublicChannelData(channel),
-				server: pickPublicServerData(server),
-				thread: undefined,
-			});
+
+			expect(messages.messages).toEqual([
+				toPrivateMessageWithStrippedData(
+					toMessageWithAccountAndRepliesTo({
+						message,
+						author,
+						publicMessage: false,
+					}),
+				),
+				toPrivateMessageWithStrippedData(
+					toMessageWithAccountAndRepliesTo({
+						message: message2,
+						author,
+						publicMessage: false,
+					}),
+				),
+			]);
+
+			expect(messages.parentChannel).toEqual(
+				pickPublicChannelData(mockChannelWithFlags(server, channel)),
+			);
+			expect(messages.server).toEqual(pickPublicServerData(server));
+			expect(messages.thread).toEqual(undefined);
 		});
 	});
 	describe('Thread Message Pages', () => {
@@ -117,6 +121,7 @@ describe('Message Results', () => {
 			const pageData = await unauthedMessagePageRouter.threadFromMessageId(
 				message.id,
 			);
+
 			expect(pageData.messages).toEqual([
 				toPrivateMessageWithStrippedData(
 					toMessageWithAccountAndRepliesTo({
@@ -133,9 +138,13 @@ describe('Message Results', () => {
 					}),
 				),
 			]);
-			expect(pageData.parentChannel).toEqual(pickPublicChannelData(channel));
+			expect(pageData.parentChannel).toEqual(
+				pickPublicChannelData(mockChannelWithFlags(server, channel)),
+			);
 			expect(pageData.server).toEqual(pickPublicServerData(server));
-			expect(pageData.thread).toEqual(pickPublicChannelData(thread));
+			expect(pageData.thread).toEqual(
+				pickPublicChannelData(mockChannelWithFlags(server, thread)),
+			);
 		});
 		it('should get messages correctly starting a non root message in a text channel thread', async () => {
 			const thread = mockThread(channel);
@@ -339,6 +348,12 @@ describe('Search Results', () => {
 				publicMessage: false,
 			}),
 		);
+		expect(firstResult.server).toEqual(pickPublicServerData(server));
+		expect(firstResult.channel).toEqual({
+			...pickPublicChannelData(channel),
+			messageCount: NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
+		});
+		expect(firstResult.thread).toEqual(undefined);
 	});
 	it('should fetch a result in a server correctly', async () => {
 		const message = mockMessage(server, channel, author, {
