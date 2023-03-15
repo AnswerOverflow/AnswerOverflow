@@ -19,6 +19,31 @@ import {
 import type { ReactNode } from 'react';
 import { LOADING_MESSAGES } from './constants';
 
+export function getCommandIds(ids: {
+	local?: string | string[];
+	production?: string | string[];
+	staging?: string | string[];
+}): string[] {
+	const { local, production, staging } = ids;
+
+	switch (process.env.NEXT_PUBLIC_DEPLOYMENT_ENV) {
+		case 'production':
+			if (!production) return [];
+			return Array.isArray(production) ? production : [production];
+		case 'staging':
+			if (!staging) return [];
+			return Array.isArray(staging) ? staging : [staging];
+		case 'local':
+			if (!local) return [];
+			return Array.isArray(local) ? local : [local];
+	}
+	container.logger.warn(
+		'No command id found for environment',
+		process.env.NEXT_PUBLIC_DEPLOYMENT_ENV,
+	);
+	return [];
+}
+
 /**
  * Picks a random item from an array
  * @param array The array to pick a random item from

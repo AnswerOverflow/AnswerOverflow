@@ -37,7 +37,7 @@ export async function indexServers(client: Client) {
 }
 
 async function indexServer(guild: Guild) {
-	container.logger.info(`Indexing server ${guild.id}`);
+	container.logger.info(`Indexing server ${guild.name} ${guild.id}`);
 	for (const channel of guild.channels.cache.values()) {
 		const isIndexableChannelType =
 			channel.type === ChannelType.GuildText ||
@@ -47,15 +47,12 @@ async function indexServer(guild: Guild) {
 			await indexRootChannel(channel);
 		}
 	}
+	container.logger.info(`Finished indexing server ${guild.name} ${guild.id}`);
 }
 
 export async function indexRootChannel(
 	channel: TextChannel | NewsChannel | ForumChannel,
 ) {
-	container.logger.info(
-		`Attempting to indexing channel ${channel.id} | ${channel.name}`,
-	);
-
 	const settings = await findChannelById(channel.id);
 
 	if (!settings || !settings.flags.indexingEnabled) {

@@ -73,6 +73,9 @@ export const login = async (client: SapphireClient) => {
 		client.logger.info('LOGGING IN');
 		client.logger.info(`NODE_ENV: ${process.env.NODE_ENV}`);
 		client.logger.info(
+			`DEPLOYMENT ENV: ${process.env.NEXT_PUBLIC_DEPLOYMENT_ENV!}`,
+		);
+		client.logger.info(
 			`DISCORD_ID: ${process.env.DISCORD_CLIENT_ID ?? 'UNKNOWN'}`,
 		);
 		if (process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === undefined) {
