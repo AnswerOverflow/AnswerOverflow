@@ -36,6 +36,8 @@ export function getCommandIds(ids: {
 		case 'local':
 			if (!local) return [];
 			return Array.isArray(local) ? local : [local];
+		case 'ci':
+			return [];
 	}
 	container.logger.warn(
 		'No command id found for environment',

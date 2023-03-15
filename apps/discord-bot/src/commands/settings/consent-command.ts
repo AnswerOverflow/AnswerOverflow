@@ -4,6 +4,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { updateUserConsent } from '~discord-bot/domains/manage-account';
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
 import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
+import { getCommandIds } from '~discord-bot/utils/utils';
 
 @ApplyOptions<Command.Options>({
 	name: 'consent',
