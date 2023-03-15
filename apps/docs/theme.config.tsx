@@ -19,6 +19,11 @@ const config: DocsThemeConfig = {
 	footer: {
 		component: <Footer />,
 	},
+	useNextSeoProps: () => {
+		return {
+			noindex: process.env.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'production',
+		};
+	},
 };
 
 export default config;
