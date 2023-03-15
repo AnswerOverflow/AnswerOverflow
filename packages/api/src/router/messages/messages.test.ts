@@ -1,5 +1,4 @@
 import {
-	Channel,
 	DiscordAccount,
 	Message,
 	Server,
@@ -8,6 +7,7 @@ import {
 	createDiscordAccount,
 	upsertManyMessages,
 	createUserServerSettings,
+	ChannelWithFlags,
 } from '@answeroverflow/db';
 import {
 	mockAccountWithServersCallerCtx,
@@ -34,7 +34,7 @@ import { ChannelType } from 'discord-api-types/v10';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 
 let server: Server;
-let channel: Channel;
+let channel: ChannelWithFlags;
 let author: DiscordAccount;
 let unauthedMessagePageRouter: ReturnType<
 	(typeof messagesRouter)['createCaller']
@@ -44,11 +44,11 @@ let sameServerMessagePageRouter: ReturnType<
 >;
 beforeEach(async () => {
 	server = mockServer();
-	channel = mockChannel(server);
+
 	author = mockDiscordAccount();
 
 	await createServer(server);
-	await createChannel(channel);
+	channel = await createChannel(mockChannel(server));
 	await createDiscordAccount(author);
 	const unauthedCtx = await mockUnauthedCtx('web-client');
 	unauthedMessagePageRouter = messagesRouter.createCaller(unauthedCtx);
@@ -147,7 +147,7 @@ describe('Message Results', () => {
 			);
 		});
 		it('should get messages correctly starting a non root message in a text channel thread', async () => {
-			const thread = mockThread(channel);
+			const thread = await createChannel(mockThread(channel));
 			const message = mockMessage(server, channel, author, {
 				childThreadId: thread.id,
 				id: thread.id,
@@ -156,7 +156,6 @@ describe('Message Results', () => {
 				id: randomSnowflakeLargerThan(message.id).toString(),
 				parentChannelId: channel.id,
 			});
-			await createChannel(thread);
 			await upsertManyMessages([message, message2]);
 			const pageData = await unauthedMessagePageRouter.threadFromMessageId(
 				message2.id,
@@ -211,12 +210,12 @@ describe('Message Results', () => {
 			expect(pageData.thread).toEqual(undefined);
 		});
 		it('should get follow up messages of a forum post correctly starting from the root of the post', async () => {
-			const forumChannel = mockChannel(server, {
-				type: ChannelType.GuildForum,
-			});
-			const forumThread = mockThread(forumChannel);
-			await createChannel(forumChannel);
-			await createChannel(forumThread);
+			const forumChannel = await createChannel(
+				mockChannel(server, {
+					type: ChannelType.GuildForum,
+				}),
+			);
+			const forumThread = await createChannel(mockThread(forumChannel));
 			const message = mockMessage(server, forumThread, author, {
 				id: forumChannel.id,
 				parentChannelId: forumChannel.id,
@@ -252,12 +251,12 @@ describe('Message Results', () => {
 			expect(pageData.thread).toEqual(pickPublicChannelData(forumThread));
 		});
 		it('should get follow up messages of a forum post correctly starting from a non root message', async () => {
-			const forumChannel = mockChannel(server, {
-				type: ChannelType.GuildForum,
-			});
-			const forumThread = mockThread(forumChannel);
-			await createChannel(forumChannel);
-			await createChannel(forumThread);
+			const forumChannel = await createChannel(
+				mockChannel(server, {
+					type: ChannelType.GuildForum,
+				}),
+			);
+			const forumThread = await createChannel(mockThread(forumChannel));
 			const message = mockMessage(server, forumThread, author, {
 				id: forumChannel.id,
 				parentChannelId: forumChannel.id,
