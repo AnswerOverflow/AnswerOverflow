@@ -95,7 +95,7 @@ export const messagesRouter = router({
 
 			// We've collected all of the data, now we need to strip out the private info
 			const messagesWithRefs = await addReferencesToMessages(
-				threadId && rootMessage && rootMessage.parentChannelId !== undefined
+				threadId && rootMessage && channel.type !== ChannelType.GuildForum
 					? [rootMessage, ...messages]
 					: messages,
 			);
