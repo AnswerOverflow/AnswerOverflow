@@ -435,6 +435,20 @@ export class Elastic extends Client {
 			},
 		});
 	}
+
+	public async getChannelMessagesCount(channelId: string) {
+		const result = await this.count({
+			index: this.messagesIndex,
+			body: {
+				query: {
+					match: {
+						channelId,
+					},
+				},
+			},
+		});
+		return result.count;
+	}
 }
 
 export const elastic = global.elastic || getElasticClient();

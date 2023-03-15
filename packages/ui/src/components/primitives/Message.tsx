@@ -130,47 +130,38 @@ export const MessageAttachments = () => {
 	);
 };
 
-type MessageRendererProps = {
+type MessageProps = {
+	message: APIMessageWithDiscordAccount;
 	avatar?: React.ReactNode;
 	content?: React.ReactNode;
 	authorArea?: React.ReactNode;
 	images?: React.ReactNode;
 	showBorders?: boolean;
+	Blurrer?: React.FC<{ children: React.ReactNode }>;
 };
-
-export function MessageRenderer({
-	content = <MessageContents />,
-	authorArea = <MessageAuthorArea />,
-	images = <MessageAttachments />,
-	showBorders,
-}: MessageRendererProps) {
-	return (
-		<div
-			className={`grow rounded-t-standard lg:rounded-tr-none ${
-				showBorders ? 'border-x-2 border-t-2' : ''
-			} border-black/[.13] dark:border-white/[.13]`}
-		>
-			<div className="p-6">
-				<div className="flex items-center gap-2">{authorArea}</div>
-				{content}
-				{images}
-			</div>
-		</div>
-	);
-}
-
 export const Message = ({
 	message,
 	Blurrer = MessageBlurrer,
-	messageRenderer = <MessageRenderer />,
-}: {
-	message: APIMessageWithDiscordAccount;
-	Blurrer?: React.FC<{ children: React.ReactNode }>;
-	messageRenderer?: React.ReactNode;
-}) => {
+	showBorders,
+	content = <MessageContents />,
+	authorArea = <MessageAuthorArea />,
+	images = <MessageAttachments />,
+}: MessageProps) => {
 	return (
 		<MessageContext.Provider value={{ message }}>
-			<Blurrer>{messageRenderer}</Blurrer>
+			<Blurrer>
+				<div
+					className={`grow rounded-t-standard lg:rounded-tr-none ${
+						showBorders ? 'border-x-2 border-t-2' : ''
+					} border-black/[.13] dark:border-white/[.13]`}
+				>
+					<div className="p-6">
+						<div className="flex items-center gap-2">{authorArea}</div>
+						{content}
+						{images}
+					</div>
+				</div>
+			</Blurrer>
 		</MessageContext.Provider>
 	);
 };

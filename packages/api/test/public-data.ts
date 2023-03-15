@@ -1,4 +1,5 @@
 import {
+	ChannelWithFlags,
 	DiscordAccount,
 	getDefaultDiscordAccount,
 	getDefaultMessage,
@@ -9,7 +10,6 @@ import {
 	Server,
 } from '@answeroverflow/db';
 import { omit, pick } from '@answeroverflow/utils';
-import type { ChannelFindByIdOutput } from '~api/utils/types';
 
 export function pickPublicServerData(server: Server) {
 	return pick(server, ['id', 'name', 'icon', 'description']);
@@ -86,7 +86,7 @@ export function toPrivateMessageWithStrippedData(
 	};
 }
 
-export function pickPublicChannelData(channel: ChannelFindByIdOutput) {
+export function pickPublicChannelData(channel: ChannelWithFlags) {
 	const picked = pick(channel, [
 		'id',
 		'name',
@@ -94,6 +94,7 @@ export function pickPublicChannelData(channel: ChannelFindByIdOutput) {
 		'serverId',
 		'type',
 		'inviteCode',
+		'messageCount',
 	]);
 	return picked;
 }
