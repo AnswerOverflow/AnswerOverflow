@@ -14,3 +14,12 @@ export const NotSignedIn: Story = {
 		path: '/',
 	},
 };
+
+export const SignedIn: Story = {
+	args: {
+		path: '/',
+		user: {
+			id: '123',
+		},
+	},
+};
