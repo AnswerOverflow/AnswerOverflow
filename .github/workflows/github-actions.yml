@@ -18,7 +18,7 @@ env:
   ELASTICSEARCH_MESSAGE_INDEX: messages
 
   REDIS_URL: redis://:redis@localhost:6379
-
+  NEXT_PUBLIC_DEPLOYMENT_ENV: "ci"
   OWNERS: "[]"
   DISCORD_CLIENT_ID: "123"
 
