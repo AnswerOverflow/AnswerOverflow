@@ -23,6 +23,6 @@ declare global {
 
 if (process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === undefined) {
 	throw new Error(
-		'NEXT_PUBLIC_DEPLOYMENT_ENV is not defined, you must explicitly set it to "development", "local" or "production"',
+		'NEXT_PUBLIC_DEPLOYMENT_ENV is not defined, you must explicitly set it to "local", "staging" or "production"',
 	);
 }
