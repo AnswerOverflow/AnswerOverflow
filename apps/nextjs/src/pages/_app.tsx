@@ -6,10 +6,9 @@ import { SessionProvider } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import type { AppType } from 'next/app';
 import hljs from 'highlight.js';
-
-import { NextTRPC, trpc } from '@answeroverflow/ui';
-import { Footer, Navbar } from '@answeroverflow/ui';
+import { NextTRPC, PageWrapper, trpc } from '@answeroverflow/ui';
 import { useEffect } from 'react';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -24,12 +23,10 @@ const MyApp: AppType<{ session: Session | null }> = ({
 	}, []);
 	return (
 		<SessionProvider session={session}>
-			<Navbar />
-			<div className="mx-auto w-full max-w-screen-xl overflow-y-scroll scrollbar-hide overflow-x-hidden sm:px-4">
+			<PageWrapper>
 				<Component {...pageProps} />
-			</div>
-
-			<Footer />
+			</PageWrapper>
+			<ReactQueryDevtools initialIsOpen={false} />
 		</SessionProvider>
 	);
 };

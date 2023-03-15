@@ -5,18 +5,18 @@ import {
 	mockMessageWithDiscordAccount,
 	mockServer,
 } from '~ui/test/props';
-import { SearchResultWrapper } from './SearchResult';
+import { SearchResult } from './SearchResult';
 
 const meta = {
-	component: SearchResultWrapper,
+	component: SearchResult,
 	argTypes: {},
-} as Meta<typeof SearchResultWrapper>;
+} as Meta<typeof SearchResult>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Primary: Story = {
+export const PublicSolution: Story = {
 	args: {
 		result: {
 			message: {
@@ -32,7 +32,54 @@ export const Primary: Story = {
 	},
 	render: ({ result }: { result: APISearchResult[number] }) => (
 		<div className="xl:w-2/3">
-			<SearchResultWrapper result={result} />
+			<SearchResult result={result} />
+		</div>
+	),
+};
+
+export const PrivateSolution: Story = {
+	args: {
+		result: {
+			message: {
+				...mockMessageWithDiscordAccount(),
+				solutionMessages: [
+					{
+						...mockMessageWithDiscordAccount(),
+						public: false,
+					},
+				],
+				referencedMessage: mockMessageWithDiscordAccount(),
+			},
+			thread: mockChannelWithSettings(),
+			score: 0.5,
+			channel: mockChannelWithSettings(),
+			server: mockServer(),
+		},
+	},
+	render: ({ result }: { result: APISearchResult[number] }) => (
+		<div className="xl:w-2/3">
+			<SearchResult result={result} />
+		</div>
+	),
+};
+
+export const NoSolution: Story = {
+	args: {
+		result: {
+			message: {
+				...mockMessageWithDiscordAccount(),
+				solutionMessages: [],
+				referencedMessage: mockMessageWithDiscordAccount(),
+			},
+			thread: mockChannelWithSettings(),
+			score: 0.5,
+			channel: mockChannelWithSettings(),
+			server: mockServer(),
+		},
+	},
+	render: ({ result }: { result: APISearchResult[number] }) => (
+		<div className="xl:w-2/3">
+			<SearchResult result={result} />
 		</div>
 	),
 };
