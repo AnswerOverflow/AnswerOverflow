@@ -20,6 +20,7 @@ import {
 } from '~api/utils/permissions';
 import { TRPCError } from '@trpc/server';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
+import { ChannelType } from 'discord.js';
 export const messagesRouter = router({
 	/*
     Message page by ID
@@ -94,8 +95,8 @@ export const messagesRouter = router({
 
 			// We've collected all of the data, now we need to strip out the private info
 			const messagesWithRefs = await addReferencesToMessages(
-				threadId && rootMessage
-					? [...new Set([rootMessage, ...messages])]
+				threadId && rootMessage && rootMessage.parentChannelId !== undefined
+					? [rootMessage, ...messages]
 					: messages,
 			);
 			const messagesWithDiscordAccounts = await addAuthorsToMessages(
