@@ -1,54 +1,116 @@
-import type { ServerPublic, ChannelPublicWithFlags } from '@answeroverflow/api';
-import Link from 'next/link';
-import { Button } from './deprecated/Button';
+import type { ChannelPublicWithFlags, ServerPublic } from '@answeroverflow/api';
+import { createContext } from 'react';
+import {
+	ChatBubbleLeftRightIcon,
+	HashtagIcon,
+} from '@heroicons/react/24/outline';
+import React from 'react';
+import { ChannelType } from '~ui/utils/discord';
 import { ServerIcon } from './ServerIcon';
-
-export type ServerInviteProps = {
+import Link from 'next/link';
+import { useIsUserInServer } from '../utils';
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const ServerInviteContext = createContext<{
 	server: ServerPublic;
 	channel?: ChannelPublicWithFlags;
 	isUserInServer: boolean;
+} | null>(null);
+
+function useServerInviteContext() {
+	const context = React.useContext(ServerInviteContext);
+	if (!context) {
+		throw new Error(
+			'useServerInviteContext must be used within a ServerInviteContext',
+		);
+	}
+	return context;
+}
+
+const ServerInviteTitle = () => {
+	const { server } = useServerInviteContext();
+	return (
+		<h3 className="pt-2 text-center font-header text-lg font-bold text-ao-black dark:text-ao-white">
+			{server.name}
+		</h3>
+	);
 };
 
-export function ServerInvite({
-	server,
-	channel,
-	isUserInServer,
-}: ServerInviteProps) {
-	const ServerNameAndChannelName = () => (
-		<div className="flex flex-col">
-			<span className="text-base font-bold text-black dark:text-neutral-300">
-				{server.name}
-			</span>
-			{channel && (
-				<span className="text-sm text-gray-600 dark:text-neutral-400">
-					#{channel.name}
-				</span>
-			)}
-		</div>
-	);
+const ServerInviteChannelName = () => {
+	const { channel } = useServerInviteContext();
+
+	const getChannelTypeIcon = (channelType: ChannelType) => {
+		switch (channelType) {
+			case ChannelType.GuildForum:
+				return (
+					<ChatBubbleLeftRightIcon className="h-4 w-4 text-ao-black dark:text-ao-white" />
+				);
+			default:
+				return (
+					<HashtagIcon className="h-4 w-4 text-ao-black dark:text-ao-white" />
+				);
+		}
+	};
+
+	if (!channel) return <></>;
 
 	return (
-		<div className="flex max-w-md  items-center justify-between gap-3 rounded-lg bg-neutral-100 p-3 text-black dark:bg-stone-900 dark:text-neutral-300 sm:flex-row">
-			<div className="flex">
-				<div className="mr-4 shrink-0">
-					<ServerIcon server={server} />
-				</div>
-
-				<ServerNameAndChannelName />
-			</div>
-			<div>
-				{channel?.inviteCode && (
-					<Link
-						href={`https://discord.gg/${channel?.inviteCode}`}
-						target={'Blank'}
-						referrerPolicy="no-referrer"
-					>
-						<Button intent={'success'} visualOnly>
-							{isUserInServer ? 'Joined' : 'Join'}
-						</Button>
-					</Link>
-				)}
-			</div>
+		<div className="flex flex-row items-center justify-center align-middle">
+			{getChannelTypeIcon(channel.type)}
+			<h4 className="text-center font-header text-base font-bold text-ao-black dark:text-ao-white">
+				{channel.name}
+			</h4>
 		</div>
 	);
-}
+};
+
+// TODO: Make this a link button
+const ServerInviteJoinButton = () => {
+	const { channel, isUserInServer } = useServerInviteContext();
+	if (!channel?.inviteCode) return <></>;
+	return (
+		<Link
+			href={`https://discord.gg/${channel?.inviteCode}`}
+			target={'Blank'}
+			referrerPolicy="no-referrer"
+			className="text-center font-header text-xl font-bold "
+		>
+			{isUserInServer ? <>Joined</> : <>Join</>}
+		</Link>
+	);
+};
+
+export const ServerInviteIcon = () => {
+	const { server } = useServerInviteContext();
+	return <ServerIcon server={server} size="md" />;
+};
+
+export const ServerInviteRenderer = (props: {
+	server: ServerPublic;
+	channel?: ChannelPublicWithFlags;
+	isUserInServer: boolean;
+}) => {
+	return (
+		<ServerInviteContext.Provider value={props}>
+			<div className="flex h-full w-full flex-col items-center justify-center">
+				<div className="flex h-full w-full flex-col items-center justify-center">
+					<div className="flex flex-row items-center justify-center align-middle">
+						<ServerInviteIcon />
+						<ServerInviteTitle />
+					</div>
+					<div>
+						<ServerInviteChannelName />
+					</div>
+					<ServerInviteJoinButton />
+				</div>
+			</div>
+		</ServerInviteContext.Provider>
+	);
+};
+
+export const ServerInvite = (props: {
+	server: ServerPublic;
+	channel?: ChannelPublicWithFlags;
+}) => {
+	const isUserInServer = useIsUserInServer(props.server.id);
+	return <ServerInviteRenderer {...props} isUserInServer={isUserInServer} />;
+};
