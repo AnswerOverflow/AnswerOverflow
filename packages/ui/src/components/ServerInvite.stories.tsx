@@ -17,3 +17,11 @@ export const InServer: Story = {
 		isUserInServer: true,
 	},
 };
+
+export const NotInServer: Story = {
+	args: {
+		server: mockServer(),
+		channel: mockChannelWithSettings(),
+		isUserInServer: false,
+	},
+};

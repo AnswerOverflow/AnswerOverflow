@@ -3,7 +3,6 @@ import {
 	Message,
 	MessageContents,
 	MessageAttachments,
-	MessageRenderer,
 	MessageTitle,
 } from '~ui/components/primitives/Message';
 import { createContext, useContext } from 'react';
@@ -76,7 +75,7 @@ const Views = () => (
 		/>
 
 		{/* Views */}
-		<span className="px-1 text-ao-black/[.55] dark:text-ao-white/[.55]">
+		<span className="px-1 text-ao-black/[.75] dark:text-ao-white/[.55]">
 			{0}
 		</span>
 		<ViewsIcon />
@@ -89,7 +88,7 @@ const SearchResultMetaData = () => {
 	return (
 		<div className="mt-2 flex flex-row items-center justify-center">
 			{/* Thread count */}
-			<span className="flex items-center justify-center px-1 text-ao-black/[.55] dark:text-ao-white/[.55]">
+			<span className="flex items-center justify-center px-1 text-ao-black/[.75] dark:text-ao-white/[.55]">
 				{result.thread?.messageCount ?? 20}
 			</span>
 			<ThreadIcon />
