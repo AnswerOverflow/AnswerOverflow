@@ -213,8 +213,18 @@ export async function fetchAllChannelMessagesWithThreads(
 			...activeThreads.threads.values(),
 		]
 			.filter((x) => x.type === ChannelType.PublicThread)
-			.filter((x) => isSnowflakeLarger(x.id, options.start ?? '0'))
+			.filter((x) =>
+				x.lastMessageId
+					? isSnowflakeLarger(x.lastMessageId, options.start ?? '0')
+					: false,
+			)
 			.map((x) => x as PublicThreadChannel);
+		const threadsWithoutLastMessageId = threads.filter((x) => !x.lastMessageId);
+		if (threadsWithoutLastMessageId.length > 0) {
+			container.logger.warn(
+				`Found ${threadsWithoutLastMessageId.length} threads without a last message id`,
+			);
+		}
 	} else {
 		/*
       Handles indexing of text channels and news channels
