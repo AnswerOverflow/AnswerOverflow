@@ -37,7 +37,7 @@ export async function indexServers(client: Client) {
 }
 
 async function indexServer(guild: Guild) {
-	container.logger.info(`Indexing server ${guild.name} ${guild.id}`);
+	container.logger.info(`Indexing server ${guild.id}`);
 	for (const channel of guild.channels.cache.values()) {
 		const isIndexableChannelType =
 			channel.type === ChannelType.GuildText ||
@@ -47,12 +47,15 @@ async function indexServer(guild: Guild) {
 			await indexRootChannel(channel);
 		}
 	}
-	container.logger.info(`Finished indexing server ${guild.name} ${guild.id}`);
 }
 
 export async function indexRootChannel(
 	channel: TextChannel | NewsChannel | ForumChannel,
 ) {
+	container.logger.info(
+		`Attempting to indexing channel ${channel.id} | ${channel.name}`,
+	);
+
 	const settings = await findChannelById(channel.id);
 
 	if (!settings || !settings.flags.indexingEnabled) {
@@ -239,8 +242,9 @@ export async function fetchAllChannelMessagesWithThreads(
 
 export async function fetchAllMessages(
 	channel: TextBasedChannel,
-	{ start, limit }: MessageFetchOptions = {},
+	opts: MessageFetchOptions = {},
 ) {
+	const { start, limit = 20000 } = opts;
 	const messages: Message[] = [];
 	// Create message pointer
 	const initialFetch = await channel.messages.fetch({
@@ -262,8 +266,5 @@ export async function fetchAllMessages(
 					0 < sortedMessagesById.length ? sortedMessagesById.at(-1) : null;
 			});
 	}
-	if (limit) {
-		return messages.slice(0, limit);
-	}
-	return messages;
+	return messages.slice(0, limit);
 }
