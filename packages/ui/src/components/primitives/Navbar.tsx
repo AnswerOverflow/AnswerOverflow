@@ -60,11 +60,7 @@ const SignedInDropdownMenu = ({
 								// eslint-disable-next-line @typescript-eslint/no-unused-vars
 								active,
 							}) => (
-								<Button
-									type={'ghost'}
-									color={theme === 'light' ? 'black' : 'white'}
-									onClick={() => signOut()}
-								>
+								<Button variant="outline" onClick={() => signOut()}>
 									Sign out
 								</Button>
 							)}
@@ -101,29 +97,20 @@ export const NavbarRenderer = ({ path, user }: NavbarProps) => {
 					<li className="ml-auto hidden items-center justify-center md:flex">
 						<ThemeSwitcher />
 					</li>
-					<li className="mx-6  hidden md:block">
-						<button className="h-full w-full" aria-label="Search">
-							<MagnifyingGlassIcon width={'1.5rem'} height={'1.5rem'} />
-						</button>
+					<li className="mx-6 hidden md:flex">
+						<Button aria-label="Search" variant="ghost" className="my-auto">
+							<MagnifyingGlassIcon height={'1.5rem'} />
+						</Button>
 					</li>
 					<li className="ml-6 hidden items-center justify-center md:flex">
-						<Button
-							type={'ghost'}
-							color={theme === 'light' ? 'black' : 'white'}
-						>
-							<span className="text-xl">Add to server</span>
-						</Button>
+						<Button variant="outline">Add to server</Button>
 					</li>
 					<li className="ml-6 hidden items-center justify-center md:flex">
 						{user ? (
 							<SignedInDropdownMenu signedInUser={user} theme={theme} />
 						) : (
 							// eslint-disable-next-line @typescript-eslint/no-misused-promises
-							<Button
-								type={'ghost'}
-								color={theme === 'light' ? 'black' : 'white'}
-								onClick={() => signIn('discord')}
-							>
+							<Button variant="outline" onClick={() => signIn('discord')}>
 								Login
 							</Button>
 						)}
