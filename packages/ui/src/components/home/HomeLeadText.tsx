@@ -12,8 +12,7 @@ export const HomeLeadText = () => {
 				the info they need, fast.
 			</p>
 			<Button
-				type={'solid'}
-				color={'white'}
+				variant={'default'}
 				className="mx-auto shadow-[0px_0px_40px_rgba(255,_255,_255,_0.2)] duration-200 hover:shadow-[0px_0px_40px_rgba(255,_255,_255,_0.4)] xl:mx-0"
 			>
 				<span className="text-2xl">Get Started</span>
