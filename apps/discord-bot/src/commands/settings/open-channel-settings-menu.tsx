@@ -34,6 +34,7 @@ export class ChannelSettingsCommand extends Command {
 		const ids = getCommandIds({
 			local: '1073363499532701806',
 			staging: '1081235690089623672',
+			production: '1015112483570188348',
 		});
 		registry.registerChatInputCommand(
 			new SlashCommandBuilder()
