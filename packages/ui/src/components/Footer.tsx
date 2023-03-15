@@ -7,6 +7,7 @@ const navigation = {
 		{ name: 'Terms', href: '/terms' },
 		{ name: 'Privacy', href: '/privacy' },
 		{ name: 'Pricing', href: '/pricing' },
+		{ name: 'Docs', href: 'https://docs.answeroverflow.com' },
 	],
 	social: [
 		{
