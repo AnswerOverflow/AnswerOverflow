@@ -21,7 +21,7 @@ const config: DocsThemeConfig = {
 	},
 	useNextSeoProps: () => {
 		return {
-			noindex: process.env.STAGING !== '1',
+			noindex: process.env.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'production',
 		};
 	},
 };

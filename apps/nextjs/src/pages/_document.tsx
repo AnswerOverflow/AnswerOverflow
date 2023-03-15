@@ -1,21 +1,6 @@
-import Document, {
-	Html,
-	Head,
-	Main,
-	NextScript,
-	DocumentContext,
-	DocumentInitialProps,
-} from 'next/document';
+import Document, { Html, Head, Main, NextScript } from 'next/document';
 
 class MyDocument extends Document {
-	static override async getInitialProps(
-		ctx: DocumentContext,
-	): Promise<DocumentInitialProps> {
-		const initialProps = await Document.getInitialProps(ctx);
-
-		return initialProps;
-	}
-
 	override render() {
 		return (
 			// eslint-disable-next-line tailwindcss/no-custom-classname

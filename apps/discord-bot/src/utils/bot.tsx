@@ -75,6 +75,12 @@ export const login = async (client: SapphireClient) => {
 		client.logger.info(
 			`DISCORD_ID: ${process.env.DISCORD_CLIENT_ID ?? 'UNKNOWN'}`,
 		);
+		if (process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === undefined) {
+			throw new Error(
+				'NEXT_PUBLIC_DEPLOYMENT_ENV is not defined, you must explicitly set it to "development", "local" or "production"',
+			);
+		}
+
 		await client.login(process.env.DISCORD_TOKEN);
 		client.logger.info('LOGGED IN');
 		client.logger.info(`LOGGED IN AS: ${client.user?.username ?? 'UNKNOWN'}`);
