@@ -39,6 +39,12 @@ export const AOHead = ({
 	return (
 		<Head>
 			<title>{title}</title>
+			{process.env.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'production' && (
+				<>
+					<meta name="robots" content="noindex" />
+					<noindex />
+				</>
+			)}
 			<link
 				rel="canonical"
 				// Prevent incorrectly doing a double slash
