@@ -15,7 +15,7 @@ declare global {
 		interface ProcessEnv {
 			// eslint-disable-next-line @typescript-eslint/naming-convention
 			readonly NEXT_PUBLIC_DEPLOYMENT_ENV:
-				| ('local' | 'staging' | 'production')
+				| ('local' | 'staging' | 'production' | 'ci')
 				| undefined;
 		}
 	}
@@ -23,6 +23,6 @@ declare global {
 
 if (process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === undefined) {
 	throw new Error(
-		'NEXT_PUBLIC_DEPLOYMENT_ENV is not defined, you must explicitly set it to "local", "staging" or "production"',
+		'NEXT_PUBLIC_DEPLOYMENT_ENV is not defined, you must explicitly set it to "local", "staging", "ci" or "production"',
 	);
 }
