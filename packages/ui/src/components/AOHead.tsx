@@ -40,10 +40,7 @@ export const AOHead = ({
 		<Head>
 			<title>{title}</title>
 			{process.env.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'production' && (
-				<>
-					<meta name="robots" content="noindex" />
-					<noindex />
-				</>
+				<meta name="robots" content="noindex" />
 			)}
 			<link
 				rel="canonical"
