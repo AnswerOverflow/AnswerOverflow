@@ -1,4 +1,5 @@
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import { useRouter } from 'next/router';
 
 export type SearchBarProps = {
 	placeholder?: string;
@@ -34,4 +35,11 @@ export function SearchBar({
 			</div>
 		</div>
 	);
+}
+
+export function SearchBarDriver(props: SearchBarProps) {
+	const router = useRouter();
+	const { search: searchQuery } = router.query;
+	const search = searchQuery ? searchQuery.toString() : '';
+	return <SearchBar {...props} defaultValue={props.defaultValue ?? search} />;
 }
