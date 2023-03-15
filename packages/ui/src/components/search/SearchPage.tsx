@@ -37,7 +37,7 @@ export const SearchPage = ({
 	);
 
 	return (
-		<div className="w-full px-[4rem] 2xl:px-[6rem]">
+		<div className="w-full">
 			<h1 className="py-4 font-header text-3xl text-ao-black dark:text-ao-white xl:text-5xl">
 				Search
 			</h1>
@@ -46,6 +46,7 @@ export const SearchPage = ({
 					e.preventDefault();
 					onSearch(searchInput);
 				}}
+				className="mb-8"
 			>
 				<Input
 					onChange={setSearchInput}
