@@ -19,7 +19,7 @@ import {
 	stripPrivateServerData,
 } from '~api/utils/permissions';
 import { TRPCError } from '@trpc/server';
-
+import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 export const messagesRouter = router({
 	/*
     Message page by ID
@@ -80,7 +80,7 @@ export const messagesRouter = router({
 				: findMessagesByChannelId({
 						channelId: parentId,
 						after: targetMessage.id,
-						limit: 20,
+						limit: NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
 				  });
 
 			const [thread, server, channel, messages, rootMessage] =
@@ -129,10 +129,12 @@ export const messagesRouter = router({
 					score,
 				}),
 			);
-			return strippedSearchResults.filter(
-				(result) =>
-					canUserViewPrivateMessage(ctx.userServers, result.message) ||
-					result.message.public,
-			);
+			return strippedSearchResults
+				.filter(
+					(result) =>
+						canUserViewPrivateMessage(ctx.userServers, result.message) ||
+						result.message.public,
+				)
+				.splice(0, 20);
 		}),
 });

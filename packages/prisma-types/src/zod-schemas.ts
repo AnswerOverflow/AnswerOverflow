@@ -76,6 +76,7 @@ export const zChannelPrismaUpdate = zChannelPrisma.partial().omit({
 
 export const zChannel = zChannelPrisma.required().extend({
 	flags: zChannelBitfieldFlags,
+	messageCount: z.number().optional(),
 });
 
 export type ChannelWithFlags = z.infer<typeof zChannel>;
@@ -101,6 +102,7 @@ export const zChannelPublic = zChannel.pick({
 	type: true,
 	parentId: true,
 	inviteCode: true,
+	messageCount: true,
 });
 
 export type ChannelPublicWithFlags = z.infer<typeof zChannelPublic>;

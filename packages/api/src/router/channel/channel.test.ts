@@ -27,7 +27,11 @@ import {
 	SOLVED_LABEL_ALREADY_UNSELECTED_ERROR_MESSAGE,
 	zChannelWithServerCreate,
 } from './channel';
-import { mockChannel, mockServer } from '@answeroverflow/db-mock';
+import {
+	mockChannel,
+	mockChannelWithFlags,
+	mockServer,
+} from '@answeroverflow/db-mock';
 import { pickPublicChannelData } from '~api/test/public-data';
 import type { z } from 'zod';
 import { getRandomId } from '@answeroverflow/utils';
@@ -123,7 +127,9 @@ describe('Channel Operations', () => {
 					return {
 						data,
 						privateDataFormat: data,
-						publicDataFormat: pickPublicChannelData(data),
+						publicDataFormat: pickPublicChannelData(
+							mockChannelWithFlags(server, channel),
+						),
 					};
 				},
 			});

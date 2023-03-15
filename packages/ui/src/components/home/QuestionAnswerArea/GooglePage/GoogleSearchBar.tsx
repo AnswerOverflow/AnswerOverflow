@@ -5,7 +5,7 @@ export const GoogleSearchBar = () => {
 		<div className="flex w-full flex-col items-center justify-center gap-5 px-5 2xl:flex-row">
 			<div className="relative hidden h-14 w-28 2xl:block">
 				<Image
-					src={'./googlelogo.png'}
+					src={'/googlelogo.png'}
 					alt={'Google Logo'}
 					fill
 					className="object-contain"

@@ -35,7 +35,7 @@ export const buttonStyles = cva(
 );
 
 export interface ButtonProps extends ButtonVariantProps {
-	onClick?: () => void;
+	onClick?: () => unknown | Promise<unknown>;
 	className?: string;
 }
 

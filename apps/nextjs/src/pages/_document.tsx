@@ -3,7 +3,6 @@ import Document, { Html, Head, Main, NextScript } from 'next/document';
 class MyDocument extends Document {
 	override render() {
 		return (
-			// eslint-disable-next-line tailwindcss/no-custom-classname
 			<Html className="dark">
 				<Head>
 					{/* TODO: Swap for Next font */}
@@ -12,7 +11,7 @@ class MyDocument extends Document {
 						rel="stylesheet"
 					/>
 				</Head>
-				<body className="dark:bg-neutral-800">
+				<body className="bg-ao-white dark:bg-ao-black">
 					<Main />
 					<NextScript />
 				</body>
