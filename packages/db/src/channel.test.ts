@@ -385,7 +385,7 @@ describe('Channel Operations', () => {
 	});
 });
 
-describe.only('Channel Flags', () => {
+describe('Channel Flags', () => {
 	it('should resolve enable indexing on correctly', () => {
 		expect(bitfieldToChannelFlags(1 << 0).indexingEnabled).toBeTruthy();
 	});
