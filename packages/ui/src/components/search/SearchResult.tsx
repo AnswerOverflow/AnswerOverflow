@@ -124,17 +124,12 @@ const SearchResultMainContent = () => {
 		<div className="flex grow flex-col">
 			<Message
 				message={result.message}
-				messageRenderer={
-					<MessageRenderer
-						showBorders
-						content={
-							<>
-								<MessageTitle channel={result.channel} thread={result.thread} />
-								<MessageContents />
-								<MessageAttachments />
-							</>
-						}
-					/>
+				content={
+					<>
+						<MessageTitle channel={result.channel} thread={result.thread} />
+						<MessageContents />
+						<MessageAttachments />
+					</>
 				}
 			/>
 			<SearchResultAnswer />
