@@ -29,6 +29,9 @@ export class ConsentCommand extends Command {
 				.addBooleanOption((option) =>
 					option.setName('consent').setDescription('Enable or disable consent'),
 				),
+			{
+				idHints: ids,
+			},
 		);
 	}
 	public override async chatInputRun(interaction: ChatInputCommandInteraction) {

@@ -8,6 +8,7 @@ import {
 	markAsSolved,
 	MarkSolutionError,
 } from '~discord-bot/domains/mark-solution';
+import { getCommandIds } from '~discord-bot/utils/utils';
 
 @ApplyOptions<Command.Options>({
 	runIn: ['GUILD_ANY'],

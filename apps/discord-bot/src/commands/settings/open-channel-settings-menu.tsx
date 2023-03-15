@@ -12,7 +12,7 @@ import {
 	type ChatInputCommandInteraction,
 } from 'discord.js';
 import React from 'react';
-import { ephemeralReply } from '~discord-bot/utils/utils';
+import { ephemeralReply, getCommandIds } from '~discord-bot/utils/utils';
 import {
 	ChannelWithFlags,
 	getDefaultChannelWithFlags,
@@ -44,7 +44,7 @@ export class ChannelSettingsCommand extends Command {
 					PermissionsBitField.resolve('ManageGuild'),
 				),
 			{
-				idHints: ['1048055954618454026'],
+				idHints: ids,
 			},
 		);
 	}

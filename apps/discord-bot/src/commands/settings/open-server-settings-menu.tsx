@@ -10,7 +10,7 @@ import {
 	type ChatInputCommandInteraction,
 } from 'discord.js';
 import React from 'react';
-import { ephemeralReply } from '~discord-bot/utils/utils';
+import { ephemeralReply, getCommandIds } from '~discord-bot/utils/utils';
 import { getDefaultServerWithFlags } from '@answeroverflow/db';
 import { createMemberCtx } from '~discord-bot/utils/context';
 
@@ -37,6 +37,9 @@ export class OpenServerSettingsMenu extends Command {
 				.setName(this.name)
 				.setDescription(this.description)
 				.setDMPermission(false),
+			{
+				idHints: ids,
+			},
 		);
 	}
 
