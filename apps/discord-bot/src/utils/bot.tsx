@@ -77,7 +77,7 @@ export const login = async (client: SapphireClient) => {
 		);
 		if (process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === undefined) {
 			throw new Error(
-				'NEXT_PUBLIC_DEPLOYMENT_ENV is not defined, you must explicitly set it to "local", "staging" or "production"',
+				'NEXT_PUBLIC_DEPLOYMENT_ENV is not defined, you must explicitly set it to "local", "staging", "ci" or "production"',
 			);
 		}
 
