@@ -2,7 +2,7 @@ import type { User } from '@answeroverflow/api';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { trpc, useTheme } from '~ui/utils/index';
+import { trpc } from '~ui/utils/index';
 import { AnswerOverflowLogo } from '../AnswerOverflowLogo';
 import { ThemeSwitcher } from '../ThemeSwitcher';
 import { Button } from './Button';
@@ -13,13 +13,7 @@ import { Fragment } from 'react';
 import { Avatar } from '../primitives/Avatar';
 import { classNames } from '~ui/utils/styling';
 
-const SignedInDropdownMenu = ({
-	signedInUser,
-	theme,
-}: {
-	signedInUser: User;
-	theme: 'light' | 'dark';
-}) => (
+const SignedInDropdownMenu = ({ signedInUser }: { signedInUser: User }) => (
 	<Menu as="div" className="relative inline-block text-left">
 		<Menu.Button>
 			<div className="flex shrink-0 flex-row items-center rounded-md p-2 transition hover:bg-zinc-900/5 dark:hover:bg-white/5">
@@ -61,9 +55,9 @@ const SignedInDropdownMenu = ({
 								active,
 							}) => (
 								<Button
-									type={'ghost'}
-									color={theme === 'light' ? 'black' : 'white'}
-									onClick={() => signOut()}
+									onClick={() => async () => {
+										await signOut();
+									}}
 								>
 									Sign out
 								</Button>
@@ -83,8 +77,6 @@ export type NavbarProps = {
 
 // TODO: Needs mobile styling
 export const NavbarRenderer = ({ path, user }: NavbarProps) => {
-	const theme = useTheme();
-
 	return (
 		<>
 			<nav className="z-50 flex min-h-[4rem] w-full items-center">
@@ -107,25 +99,16 @@ export const NavbarRenderer = ({ path, user }: NavbarProps) => {
 						</button>
 					</li>
 					<li className="ml-6 hidden items-center justify-center md:flex">
-						<Button
-							type={'ghost'}
-							color={theme === 'light' ? 'black' : 'white'}
-						>
+						<Button>
 							<span className="text-xl">Add to server</span>
 						</Button>
 					</li>
 					<li className="ml-6 hidden items-center justify-center md:flex">
 						{user ? (
-							<SignedInDropdownMenu signedInUser={user} theme={theme} />
+							<SignedInDropdownMenu signedInUser={user} />
 						) : (
 							// eslint-disable-next-line @typescript-eslint/no-misused-promises
-							<Button
-								type={'ghost'}
-								color={theme === 'light' ? 'black' : 'white'}
-								onClick={() => signIn('discord')}
-							>
-								Login
-							</Button>
+							<Button onClick={() => signIn('discord')}>Login</Button>
 						)}
 					</li>
 				</ol>
