@@ -27,7 +27,10 @@ import {
 	toAOThread,
 } from '~discord-bot/utils/conversions';
 import { container } from '@sapphire/framework';
-import { sortMessagesById } from '@answeroverflow/discordjs-utils';
+import {
+	isSnowflakeLarger,
+	sortMessagesById,
+} from '@answeroverflow/discordjs-utils';
 
 export async function indexServers(client: Client) {
 	container.logger.info(`Indexing ${client.guilds.cache.size} servers`);
@@ -210,6 +213,7 @@ export async function fetchAllChannelMessagesWithThreads(
 			...activeThreads.threads.values(),
 		]
 			.filter((x) => x.type === ChannelType.PublicThread)
+			.filter((x) => isSnowflakeLarger(x.id, options.start ?? '0'))
 			.map((x) => x as PublicThreadChannel);
 	} else {
 		/*
