@@ -7,7 +7,6 @@ const navigation = {
 		{ name: 'Terms', href: '/terms' },
 		{ name: 'Privacy', href: '/privacy' },
 		{ name: 'Pricing', href: '/pricing' },
-		{ name: 'Frequently Asked Questions', href: '/faq' },
 	],
 	social: [
 		{
