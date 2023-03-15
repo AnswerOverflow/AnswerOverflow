@@ -12,8 +12,8 @@ export const PageWrapper = ({
 		<Navbar />
 		<main
 			className={`${
-				disableDefaultBackground ? '' : 'bg-ao-white dark:bg-ao-black '
-			} px-[4rem] 2xl:px-[6rem]`}
+				disableDefaultBackground ? '' : 'bg-ao-white dark:bg-ao-black'
+			} px-4 sm:px-[4rem] 2xl:px-[6rem]`}
 		>
 			{children}
 		</main>
