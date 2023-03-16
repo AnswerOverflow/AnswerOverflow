@@ -301,7 +301,9 @@ export async function fetchAllMessages(
 	let message = initialFetch.size === 1 ? initialFetch.first() : null;
 	messages.push(...initialFetch.values());
 	while (message && (limit === undefined || messages.length < limit)) {
-		// container.logger.debug(`Fetching from ${message.id}`);
+		container.logger.debug(
+			`Collected ${messages.length}/${limit} messages. After message ${message.id} in channel ${channel.id}`,
+		);
 		await channel.messages
 			.fetch({ limit: 100, after: message.id })
 			.then((messagePage) => {

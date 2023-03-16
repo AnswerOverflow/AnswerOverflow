@@ -3,14 +3,13 @@ import {
 	ChatInputCommandErrorPayload,
 	CommandDoesNotHaveChatInputCommandHandlerPayload,
 	CommandDoesNotHaveContextMenuCommandHandlerPayload,
-	container,
 	Events,
 	UnknownChatInputCommandPayload,
 	UnknownContextMenuCommandPayload,
 } from '@sapphire/framework';
 import { Listener } from '@sapphire/framework';
 import type { ContextMenuCommandInteraction, Interaction } from 'discord.js';
-import * as Sentry from '@sentry/node';
+import { sentryLogger } from '~discord-bot/utils/sentry';
 import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
 
 function makeErrorMessage(msg: string) {
@@ -24,17 +23,13 @@ async function handleError<T extends {}>(opts: {
 	sentryPayload: T;
 }) {
 	const { interaction, userFacingMessage, sentryMessage, sentryPayload } = opts;
+	sentryLogger(sentryMessage, sentryPayload);
 	if (interaction.isChatInputCommand() || interaction.isMessageComponent()) {
 		await onceTimeStatusHandler(
 			interaction,
 			makeErrorMessage(userFacingMessage),
 		);
 	}
-	container.logger.error(sentryMessage, sentryPayload);
-	Sentry.withScope((scope) => {
-		scope.setExtras(sentryPayload);
-		Sentry.captureMessage(sentryMessage);
-	});
 }
 
 @ApplyOptions<Listener.Options>({
