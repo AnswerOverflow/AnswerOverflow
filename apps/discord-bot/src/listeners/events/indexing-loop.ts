@@ -3,10 +3,13 @@ import { Listener } from '@sapphire/framework';
 import { Client, Events } from 'discord.js';
 import { container } from '@sapphire/framework';
 import { indexServers } from '~discord-bot/domains/indexing';
+import { delay } from '@answeroverflow/discordjs-mock';
 
 @ApplyOptions<Listener.Options>({ once: true, event: Events.ClientReady })
 export class Indexing extends Listener {
 	public async run(client: Client) {
+		// Wait for everything to be ready
+		await delay(60 * 1000);
 		const intervalInHours = process.env.INDEXING_INTERVAL_IN_HOURS
 			? parseFloat(process.env.INDEXING_INTERVAL_IN_HOURS)
 			: 24;

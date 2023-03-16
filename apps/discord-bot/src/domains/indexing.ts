@@ -32,6 +32,7 @@ import {
 	isSnowflakeLarger,
 	sortMessagesById,
 } from '@answeroverflow/discordjs-utils';
+import * as Sentry from '@sentry/node';
 
 export async function indexServers(client: Client) {
 	const indexingStartTime = Date.now();
@@ -40,7 +41,10 @@ export async function indexServers(client: Client) {
 		try {
 			await indexServer(guild);
 		} catch (error) {
-			container.logger.error(`Error indexing server ${guild.id}`, error);
+			Sentry.withScope((scope) => {
+				scope.setExtra('guild', guild);
+				Sentry.captureException(error);
+			});
 		}
 	}
 	const indexingEndTime = Date.now();
