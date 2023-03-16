@@ -216,7 +216,7 @@ export async function fetchAllChannelMessagesWithThreads(
 			.filter((x) =>
 				x.lastMessageId
 					? isSnowflakeLarger(x.lastMessageId, options.start ?? '0')
-					: false,
+					: true,
 			)
 			.map((x) => x as PublicThreadChannel);
 		const threadsWithoutLastMessageId = threads.filter((x) => !x.lastMessageId);
