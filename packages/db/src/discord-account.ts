@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 import {
 	addFlagsToUserServerSettings,
+	DiscordAccount,
 	getDefaultDiscordAccount,
 	prisma,
 	zDiscordAccountPrismaCreate,
@@ -71,11 +72,12 @@ export async function createManyDiscordAccounts(
 	const allowedToCreateAccounts = data.filter(
 		(x) => !ignoredIdsLookup.has(x.id),
 	);
-	await prisma.discordAccount.createMany({
-		data: allowedToCreateAccounts.map((i) =>
-			zDiscordAccountPrismaCreate.parse(i),
-		),
-	});
+	for (let i = 0; i < allowedToCreateAccounts.length; i += 1000) {
+		const chunk = allowedToCreateAccounts.slice(i, i + 1000);
+		await prisma.discordAccount.createMany({
+			data: chunk.map((i) => zDiscordAccountPrismaCreate.parse(i)),
+		});
+	}
 	return allowedToCreateAccounts.map((i) => getDefaultDiscordAccount(i));
 }
 
@@ -90,14 +92,20 @@ export async function updateDiscordAccount(
 export async function updateManyDiscordAccounts(
 	data: z.infer<typeof zDiscordAccountUpdate>[],
 ) {
-	return prisma.$transaction(
-		data.map((i) =>
-			prisma.discordAccount.update({
-				where: { id: i.id },
-				data: zDiscordAccountPrismaUpdate.parse(i),
-			}),
-		),
-	);
+	const accounts: DiscordAccount[] = [];
+	for (let i = 0; i < data.length; i += 1000) {
+		const chunk = data.slice(i, i + 1000);
+		const updated = await prisma.$transaction(
+			chunk.map((i) =>
+				prisma.discordAccount.update({
+					where: { id: i.id },
+					data: zDiscordAccountPrismaUpdate.parse(i),
+				}),
+			),
+		);
+		accounts.push(...updated);
+	}
+	return accounts;
 }
 
 export async function deleteDiscordAccount(id: string) {
