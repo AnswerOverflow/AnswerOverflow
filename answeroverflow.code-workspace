@@ -7,13 +7,29 @@
       "path": "apps/nextjs"
     },
     {
+      "name": "docs",
+      "path": "apps/docs"
+    },
+    {
       "name": "ui",
       "path": "packages/ui"
     },
     {
       //
       "name": "discord-bot",
-      "path": "apps/discord-bot",
+      "path": "apps/discord-bot"
+    },
+    {
+      "name": "discordjs-mock",
+      "path": "packages/discordjs-mock"
+    },
+    {
+      "name": "discordjs-utils",
+      "path": "packages/discordjs-utils"
+    },
+    {
+      "name": "constants",
+      "path": "packages/constants"
     },
     {
       "name": "api",
@@ -25,7 +41,27 @@
     },
     {
       "name": "db",
-      "path": "packages/db",
+      "path": "packages/db"
+    },
+    {
+      "name": "db-mock",
+      "path": "packages/db-mock"
+    },
+    {
+      "name": "cache",
+      "path": "packages/cache"
+    },
+    {
+      "name": "prisma-types",
+      "path": "packages/prisma-types"
+    },
+    {
+      "name": "elastic-types",
+      "path": "packages/elastic-types"
+    },
+    {
+      "name": "utils",
+      "path": "packages/utils"
     },
     {
       "name": "config",
@@ -34,21 +70,15 @@
     {
       "name": "root",
       "path": "./"
-    },
+    }
   ],
   "settings": {
-    "files.exclude": {
-      "apps/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
-      "packages/": false, // disable to make the root view cleaner, left on to allow for edits w/out leaving workspace
-    },
-    "vitest.enable": true,
-    "vitest.disabledWorkspaceFolders": [
-      "root",
-      "discord-bot"
-    ],
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
-    },
+    /*
+    LINTING & FORMATTING
+    */
+    "mdx.experimentalLanguageServer": true,
+    "editor.formatOnSave": true,
+    "eslint.format.enable": false,
     "eslint.validate": [
       "javascript",
       "javascriptreact",
@@ -56,26 +86,23 @@
       "typescriptreact",
       "typescript"
     ],
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
-    "eslint.format.enable": true,
-    "eslint.alwaysShowStatus": true,
-    "[typescript]": {
-      "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "editor.codeActionsOnSave": {
+      // TODO: Reenable when eslint performance is better
+      "source.fixAll.eslint": false
     },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "prettier.requireConfig": true,
+    "prettier.configPath": "prettierrc.cjs",
     "javascript.suggest.autoImports": true,
-    "typescript.suggest.autoImports": true,
     "javascript.updateImportsOnFileMove.enabled": "always",
-    "typescript.updateImportsOnFileMove.enabled": "always",
-    "editor.bracketPairColorization.enabled": true,
-    "editor.guides.bracketPairs": "active",
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
     "[json]": {
-      "editor.defaultFormatter": "vscode.json-language-features"
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[prisma]": {
       "editor.defaultFormatter": "Prisma.prisma"
-    },
-    "editor.quickSuggestions": {
-      "strings": true
     },
     "tailwindCSS.includeLanguages": {
       "plaintext": "html"
@@ -83,26 +110,115 @@
     "files.associations": {
       "*.css": "tailwindcss"
     },
-    "search.useIgnoreFiles": true,
     "[markdown]": {
-      "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+      "editor.defaultFormatter": "unifiedjs.vscode-mdx"
     },
+    "tailwindCSS.experimental.classRegex": [
+      [
+        "cva\\(([^)]*)\\)",
+        "[\"'`]([^\"'`]*).*?[\"'`]"
+      ]
+    ],
+    /*
+      EDITOR STYLE
+    */
+    "editor.wordWrap": "on",
+    "editor.tabSize": 2,
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": "active",
+    "editor.quickSuggestions": {
+      "strings": true
+    },
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/coverage/": true,
+      "**/.next": true,
+      "**/.turbo": true
+      // "**/dist": true,
+    },
+    "search.useParentIgnoreFiles": true,
+    /*
+      TESTING
+    */
     "jest.disabledWorkspaceFolders": [
       "root",
       "api",
       "ui",
       "web",
       "db",
-      "api",
       "auth",
-      "config"
+      "config",
+      "utils",
+      "redis",
+      "db-mock",
+      "constants",
+      "prisma-types",
+      "elastic-types",
+      "cache",
+      "docs"
     ],
-    "jest.autoRun": "off",
+    "jest.autoRevealOutput": "off",
+    "vitest.enable": true,
+    "vitest.disabledWorkspaceFolders": [
+      "root",
+      "discord-bot"
+    ],
+    /*
+      MISC
+    */
+    "cSpell.words": [
+      "Anson",
+      "AUTOTHREAD",
+      "Bitfield",
+      "Blurrer",
+      "Bools",
+      "chnl",
+      "Codespaces",
+      "dbaeumer",
+      "devcontainer",
+      "devcontainers",
+      "extensionpack",
+      "nextjs",
+      "Nextra",
+      "orta",
+      "postpublish",
+      "reacord",
+      "Rendererable",
+      "Rhys",
+      "superjson",
+      "tagless",
+      "tailwindcss",
+      "threadable",
+      "trpc",
+      "tsup",
+      "Turborepo",
+      "twoslash",
+      "unauthed",
+      "undelete",
+      "upsert",
+      "upserting",
+      "WAITLIST"
+    ],
   },
   "extensions": {
     "recommendations": [
       "vscode-icons-team.vscode-icons",
       "ms-vscode-remote.vscode-remote-extensionpack",
+      "orta.vscode-twoslash-queries",
+      "dbaeumer.vscode-eslint",
+      "GitHub.copilot",
+      "eamodio.gitlens",
+      "Prisma.prisma",
+      "aaron-bond.better-comments",
+      "ZixuanChen.vitest-explorer",
+      "EditorConfig.EditorConfig",
+      "bradlc.vscode-tailwindcss",
+      "DavidAnson.vscode-markdownlint",
+      "Orta.vscode-jest",
+      "unifiedjs.vscode-mdx",
+      "usernamehw.errorlens",
+      "esbenp.prettier-vscode",
+      "streetsidesoftware.code-spell-checker",
     ]
   }
 }

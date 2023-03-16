@@ -1,90 +1,112 @@
-import type { Server } from "@answeroverflow/db";
-import { inferRouterInputs, TRPCError } from "@trpc/server";
-import { z } from "zod";
-import { mergeRouters, authedProcedureWithUserServers, router } from "~api/router/trpc";
-import { upsert } from "~api/utils/operations";
 import {
-  protectedServerManagerFetch,
-  protectedServerManagerMutation,
-} from "~api/utils/protected-procedures/server-manager-procedures";
+	zServerPublic,
+	findServerById,
+	ServerWithFlags,
+	getDefaultServerWithFlags,
+	upsertServer,
+	zServerCreate,
+} from '@answeroverflow/db';
+import { z } from 'zod';
+import type { Context } from '~api/router/context';
+import { router, withUserServersProcedure } from '~api/router/trpc';
+import {
+	assertBoolsAreNotEqual,
+	assertCanEditServer,
+	assertCanEditServerBotOnly,
+} from '~api/utils/permissions';
+import {
+	protectedFetchWithPublicData,
+	protectedMutation,
+} from '~api/utils/protected-procedures';
 
-export const z_server = z.object({
-  id: z.string(),
-  name: z.string(),
-  kicked_time: z.date().nullable(),
-});
+export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
+	'Read the rules consent already enabled';
+export const READ_THE_RULES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE =
+	'Read the rules consent already disabled';
 
-export const z_server_create = z.object({
-  name: z.string(),
-  id: z.string(),
-  kicked_time: z.date().nullable().optional(),
-});
-
-export const z_server_mutable = z_server_create.omit({ id: true }).partial();
-
-export const z_server_update = z.object({ id: z.string(), data: z_server_mutable });
-
-export const z_server_upsert = z.object({
-  create: z_server_create,
-  update: z_server_update,
-});
-
-const serverCreateUpdateRouter = router({
-  create: authedProcedureWithUserServers.input(z_server_create).mutation(({ ctx, input }) => {
-    return protectedServerManagerMutation({
-      ctx,
-      server_id: input.id,
-      operation: () => ctx.prisma.server.create({ data: input }),
-    });
-  }),
-  update: authedProcedureWithUserServers.input(z_server_update).mutation(({ ctx, input }) => {
-    return protectedServerManagerMutation({
-      ctx,
-      server_id: input.id,
-      operation: () => ctx.prisma.server.update({ where: { id: input.id }, data: input.data }),
-    });
-  }),
-});
-
-const serverFetchRouter = router({
-  byId: authedProcedureWithUserServers.input(z.string()).query(async ({ ctx, input }) => {
-    return protectedServerManagerFetch({
-      async fetch() {
-        const server = await ctx.prisma.server.findUnique({ where: { id: input } });
-        if (!server) throw new TRPCError({ code: "NOT_FOUND", message: "Server not found" });
-        return server;
-      },
-      getServerId(data) {
-        return data.id;
-      },
-      ctx,
-      not_found_message: "Server not found",
-    });
-  }),
-});
-
-const serverUpsertRouter = router({
-  upsert: authedProcedureWithUserServers.input(z_server_upsert).mutation(async ({ ctx, input }) => {
-    return upsert(
-      () => serverFetchRouter.createCaller(ctx).byId(input.create.id),
-      () => serverCreateUpdateRouter.createCaller(ctx).create(input.create),
-      () => serverCreateUpdateRouter.createCaller(ctx).update(input.update)
-    );
-  }),
-});
-
-export const serverRouter = mergeRouters(
-  serverFetchRouter,
-  serverUpsertRouter,
-  serverCreateUpdateRouter
-);
-
-export function makeServerUpsert(
-  server: Server,
-  update: z.infer<typeof z_server_mutable> | undefined = undefined
-): inferRouterInputs<typeof serverUpsertRouter>["upsert"] {
-  return {
-    create: server,
-    update: { id: server.id, data: update ?? server },
-  };
+async function mutateServer({
+	operation,
+	server,
+	ctx,
+}: {
+	operation: (input: {
+		oldSettings: ServerWithFlags;
+		doSettingsExistAlready: boolean;
+	}) => Promise<ServerWithFlags>;
+	server: z.infer<typeof zServerCreate>;
+	ctx: Context;
+}) {
+	return protectedMutation({
+		permissions: () => assertCanEditServerBotOnly(ctx, server.id),
+		operation: async () => {
+			let oldSettings = await findServerById(server.id);
+			let doSettingsExistAlready = true;
+			if (!oldSettings) {
+				oldSettings = getDefaultServerWithFlags({
+					id: server.id,
+					name: server.name,
+					icon: server.icon,
+				});
+				doSettingsExistAlready = false;
+			} else {
+				doSettingsExistAlready = true;
+			}
+			return operation({ oldSettings, doSettingsExistAlready });
+		},
+	});
 }
+
+export const serverRouter = router({
+	byId: withUserServersProcedure
+		.input(z.string())
+		.query(async ({ ctx, input }) => {
+			return protectedFetchWithPublicData({
+				fetch: () => findServerById(input),
+				permissions: () => assertCanEditServer(ctx, input),
+				notFoundMessage: 'Server not found',
+				publicDataFormatter: (server) => zServerPublic.parse(server),
+			});
+		}),
+	setReadTheRulesConsentEnabled: withUserServersProcedure
+		.input(
+			z.object({
+				server: zServerCreate.omit({
+					flags: true,
+				}),
+				enabled: z.boolean(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			return mutateServer({
+				ctx,
+				server: input.server,
+				operation: async ({ oldSettings }) => {
+					return protectedMutation({
+						permissions: () =>
+							assertBoolsAreNotEqual({
+								oldValue: oldSettings.flags.readTheRulesConsentEnabled,
+								newValue: input.enabled,
+								messageIfBothFalse:
+									READ_THE_RULES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE,
+								messageIfBothTrue:
+									READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE,
+							}),
+						operation: () =>
+							upsertServer({
+								create: {
+									...input.server,
+									flags: {
+										readTheRulesConsentEnabled: input.enabled,
+									},
+								},
+								update: {
+									flags: {
+										readTheRulesConsentEnabled: input.enabled,
+									},
+								},
+							}),
+					});
+				},
+			});
+		}),
+});

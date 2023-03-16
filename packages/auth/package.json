@@ -1,35 +1,40 @@
 {
-  "name": "@answeroverflow/auth",
-  "version": "0.1.0",
-  "main": "./index.ts",
-  "types": "./index.ts",
-  "type": "module",
-  "license": "MIT",
-  "scripts": {
-    "clean": "rm -rf .turbo node_modules",
-    "lint": "eslint . --ext .ts && tsc --noEmit",
-    "lint:fix": "eslint . --ext .ts --fix",
-    "with-env": "dotenv -e ../../.env --",
-    "test:auth": "yarn with-env vitest run --no-threads ",
-    "test:watch": "yarn with-env vitest --no-threads --coverage",
-    "type-check": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@answeroverflow/db": "*",
-    "@answeroverflow/tsconfig": "*",
-    "@next-auth/prisma-adapter": "^1.0.5",
-    "@prisma/client": "^4.7.1",
-    "next": "^13.0.6",
-    "next-auth": "^4.17.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
-  },
-  "devDependencies": {
-    "@types/cookie": "^0.5.1",
-    "@vitest/coverage-c8": "^0.26.2",
-    "dotenv-cli": "^6.0.0",
-    "eslint": "^8.29.0",
-    "typescript": "^4.9.4",
-    "vitest": "^0.26.2"
-  }
+	"name": "@answeroverflow/auth",
+	"version": "0.1.0",
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"license": "MIT",
+	"scripts": {
+		"clean": "rm -rf .turbo node_modules coverage",
+		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
+		"lint": "eslint . --ext .ts && tsc --noEmit",
+		"lint:fix": "eslint . --ext .ts --fix",
+		"with-env": "dotenv -e ../../.env --",
+		"test": "yarn run with-env vitest run --coverage",
+		"test:watch": "yarn run with-env vitest",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@answeroverflow/cache": "*",
+		"@answeroverflow/db": "*",
+		"@answeroverflow/tsconfig": "*",
+		"@answeroverflow/utils": "*",
+		"@next-auth/prisma-adapter": "^1.0.5",
+		"@prisma/client": "^4.7.1",
+		"dotenv-cra": "^3.0.3",
+		"next": "^13.0.6",
+		"next-auth": "^4.20.1",
+		"react": "18.2.0",
+		"react-dom": "18.2.0",
+		"zod": "^3.20.6"
+	},
+	"devDependencies": {
+		"@types/cookie": "^0.5.1",
+		"@vitest/coverage-c8": "^0.28.5",
+		"dotenv-cli": "^7.0.0",
+		"eslint": "^8.29.0",
+		"typescript": "^4.9.4",
+		"vitest": "^0.26.2"
+	}
 }
