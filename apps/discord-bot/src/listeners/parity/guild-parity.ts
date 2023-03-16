@@ -53,7 +53,7 @@ function makeGuildEmbed(guild: Guild, joined: boolean) {
 		)
 		.setThumbnail(guild.iconURL())
 		.setTimestamp()
-		.setColor('Green')
+		.setColor(joined ? 'Green' : 'Red')
 		.setImage(guild.bannerURL() ?? guild.splashURL())
 		.setFields([
 			{
@@ -69,6 +69,11 @@ function makeGuildEmbed(guild: Guild, joined: boolean) {
 			{
 				name: 'Age',
 				value: guild.createdAt.toDateString(),
+				inline: false,
+			},
+			{
+				name: 'Id',
+				value: guild.id,
 				inline: false,
 			},
 		]);
