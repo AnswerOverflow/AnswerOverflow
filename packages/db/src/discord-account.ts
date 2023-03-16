@@ -3,6 +3,8 @@ import {
 	addFlagsToUserServerSettings,
 	getDefaultDiscordAccount,
 	prisma,
+	zDiscordAccountPrismaCreate,
+	zDiscordAccountPrismaUpdate,
 } from '@answeroverflow/prisma-types';
 import {
 	upsertIgnoredDiscordAccount,
@@ -55,7 +57,7 @@ export async function createDiscordAccount(
 	if (deletedAccount)
 		throw new DBError('Account is ignored', 'IGNORED_ACCOUNT');
 	return prisma.discordAccount.create({
-		data,
+		data: zDiscordAccountPrismaCreate.parse(data),
 	});
 }
 
@@ -69,7 +71,11 @@ export async function createManyDiscordAccounts(
 	const allowedToCreateAccounts = data.filter(
 		(x) => !ignoredIdsLookup.has(x.id),
 	);
-	await prisma.discordAccount.createMany({ data: allowedToCreateAccounts });
+	await prisma.discordAccount.createMany({
+		data: allowedToCreateAccounts.map((i) =>
+			zDiscordAccountPrismaCreate.parse(i),
+		),
+	});
 	return allowedToCreateAccounts.map((i) => getDefaultDiscordAccount(i));
 }
 
@@ -78,7 +84,7 @@ export async function updateDiscordAccount(
 ) {
 	return prisma.discordAccount.update({
 		where: { id: data.id },
-		data,
+		data: zDiscordAccountPrismaUpdate.parse(data),
 	});
 }
 export async function updateManyDiscordAccounts(
@@ -88,7 +94,7 @@ export async function updateManyDiscordAccounts(
 		data.map((i) =>
 			prisma.discordAccount.update({
 				where: { id: i.id },
-				data: i,
+				data: zDiscordAccountPrismaUpdate.parse(i),
 			}),
 		),
 	);
