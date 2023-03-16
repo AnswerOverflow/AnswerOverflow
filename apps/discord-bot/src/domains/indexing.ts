@@ -103,7 +103,10 @@ export async function indexRootChannel(
 	addSolutionsToMessages(filteredMessages, convertedMessages);
 
 	const largestSnowflake = sortMessagesById(filteredMessages).pop()?.id;
+	container.logger.info('Indexing complete, writing data');
+	container.logger.info(`Upserting ${convertedUsers.length} discord accounts `);
 	await upsertManyDiscordAccounts(convertedUsers);
+	container.logger.info(`Upserting channel: ${channel.id}`);
 	await upsertChannel({
 		create: {
 			...toAOChannel(channel),
@@ -113,7 +116,9 @@ export async function indexRootChannel(
 			lastIndexedSnowflake: largestSnowflake,
 		},
 	});
+	container.logger.info(`Upserting ${convertedMessages.length} messages`);
 	await upsertManyMessages(convertedMessages);
+	container.logger.info(`Upserting ${convertedThreads.length} threads`);
 	await upsertManyChannels(
 		convertedThreads.map((x) => ({
 			create: x,
@@ -121,6 +126,9 @@ export async function indexRootChannel(
 				name: x.name,
 			},
 		})),
+	);
+	container.logger.info(
+		`Finished writing data, indexing complete for channel ${channel.id}`,
 	);
 }
 
