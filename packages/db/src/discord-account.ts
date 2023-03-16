@@ -72,12 +72,17 @@ export async function createManyDiscordAccounts(
 	const allowedToCreateAccounts = data.filter(
 		(x) => !ignoredIdsLookup.has(x.id),
 	);
-	for (let i = 0; i < allowedToCreateAccounts.length; i += 1000) {
-		const chunk = allowedToCreateAccounts.slice(i, i + 1000);
-		await prisma.discordAccount.createMany({
-			data: chunk.map((i) => zDiscordAccountPrismaCreate.parse(i)),
-		});
+
+	const createOps: Promise<unknown>[] = [];
+	for (let i = 0; i < allowedToCreateAccounts.length; i += 50) {
+		const chunk = allowedToCreateAccounts.slice(i, i + 50);
+		createOps.push(
+			prisma.discordAccount.createMany({
+				data: chunk.map((i) => zDiscordAccountPrismaCreate.parse(i)),
+			}),
+		);
 	}
+	await Promise.all(createOps);
 	return allowedToCreateAccounts.map((i) => getDefaultDiscordAccount(i));
 }
 
@@ -92,20 +97,28 @@ export async function updateDiscordAccount(
 export async function updateManyDiscordAccounts(
 	data: z.infer<typeof zDiscordAccountUpdate>[],
 ) {
-	const accounts: DiscordAccount[] = [];
-	for (let i = 0; i < data.length; i += 1000) {
-		const chunk = data.slice(i, i + 1000);
-		const updated = await prisma.$transaction(
-			chunk.map((i) =>
-				prisma.discordAccount.update({
-					where: { id: i.id },
-					data: zDiscordAccountPrismaUpdate.parse(i),
-				}),
+	const uniqueAccountsToCreate = new Map<
+		string,
+		z.infer<typeof zDiscordAccountUpdate>
+	>(data.map((i) => [i.id, i]));
+	const accountSet = Array.from(uniqueAccountsToCreate.values());
+
+	const operations: Promise<DiscordAccount[]>[] = [];
+	for (let i = 0; i < accountSet.length; i += 50) {
+		const chunk = accountSet.slice(i, i + 50);
+		operations.push(
+			prisma.$transaction(
+				chunk.map((account) =>
+					prisma.discordAccount.update({
+						where: { id: account.id },
+						data: zDiscordAccountPrismaUpdate.parse(account),
+					}),
+				),
 			),
 		);
-		accounts.push(...updated);
 	}
-	return accounts;
+	const results = await Promise.all(operations);
+	return results.flat();
 }
 
 export async function deleteDiscordAccount(id: string) {
