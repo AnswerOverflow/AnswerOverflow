@@ -22,17 +22,14 @@ function getLogLevel() {
 		case 'production':
 			return process.env.BOT_PROD_LOG_LEVEL
 				? parseInt(process.env.BOT_PROD_LOG_LEVEL)
-				: LogLevel.Info;
+				: LogLevel.Debug;
 		default:
-			return LogLevel.Info;
+			return LogLevel.Debug;
 	}
 }
 
 export function createClient(override: Partial<ClientOptions> = {}) {
 	return new SapphireClient({
-		defaultPrefix: '!',
-		regexPrefix: /^(hey +)?bot[,! ]/i,
-		caseInsensitiveCommands: true,
 		logger: {
 			level: getLogLevel(),
 		},
@@ -55,7 +52,6 @@ export function createClient(override: Partial<ClientOptions> = {}) {
 			Partials.GuildMember,
 			Partials.Reaction,
 		],
-		loadMessageCommandListeners: true,
 		hmr: {
 			enabled: process.env.NODE_ENV === 'development',
 		},
@@ -109,7 +105,7 @@ export const login = async (client: SapphireClient) => {
 		});
 		client.user?.setActivity({
 			type: ActivityType.Playing,
-			name: 'with becoming open source ⚠️ may be unstable this week ⚠️',
+			name: 'becoming open source ⚠️ maintenance week ⚠️',
 		});
 	} catch (error) {
 		client.logger.fatal(error);
