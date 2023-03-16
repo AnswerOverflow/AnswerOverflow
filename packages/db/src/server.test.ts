@@ -1,4 +1,8 @@
-import { addFlagsToServer, Server } from '@answeroverflow/prisma-types';
+import {
+	addFlagsToServer,
+	bitfieldToServerFlags,
+	Server,
+} from '@answeroverflow/prisma-types';
 import { mockServer } from '@answeroverflow/db-mock';
 import { createServer, findServerById, updateServer } from './server';
 
@@ -75,5 +79,16 @@ describe('Server', () => {
 			});
 			expect(updated.flags.readTheRulesConsentEnabled).toBe(true);
 		});
+	});
+});
+
+describe('Server flags', () => {
+	it('should enable read the rules consent correctly', () => {
+		expect(
+			bitfieldToServerFlags(1 << 0).readTheRulesConsentEnabled,
+		).toBeTruthy();
+	});
+	it('should disable read the rules consent correctly', () => {
+		expect(bitfieldToServerFlags(0).readTheRulesConsentEnabled).toBeFalsy();
 	});
 });

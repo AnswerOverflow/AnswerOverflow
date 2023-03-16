@@ -23,7 +23,7 @@ export const appRouter = router({
 	channels: channelRouter,
 	discordAccounts: discordAccountRouter,
 	userServerSettings: userServerSettingsRouter,
-	messagePage: messagesRouter,
+	messages: messagesRouter,
 
 	// Other:
 	users: userRouter,

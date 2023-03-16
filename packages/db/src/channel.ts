@@ -19,8 +19,10 @@ import {
 import { dictToBitfield } from '@answeroverflow/prisma-types/src/bitfield';
 import { deleteManyMessagesByChannelId } from './message';
 import { omit } from '@answeroverflow/utils';
+import { elastic } from '@answeroverflow/elastic-types';
 import { DBError } from './utils/error';
 import { ChannelType } from 'discord-api-types/v10';
+import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 export const CHANNELS_THAT_CAN_HAVE_AUTOTHREAD = new Set([
 	ChannelType.GuildAnnouncement,
 	ChannelType.GuildText,
@@ -173,21 +175,61 @@ function applyChannelSettingsChangesSideEffects<
 	};
 }
 
-export async function findChannelById(id: string) {
+export async function findChannelById(
+	id: string,
+): Promise<ChannelWithFlags | null> {
 	const data = await prisma.channel.findUnique({ where: { id } });
 	if (!data) return null;
 	return addFlagsToChannel(data);
 }
 
-export async function findChannelByInviteCode(inviteCode: string) {
+export async function findChannelByInviteCode(
+	inviteCode: string,
+): Promise<ChannelWithFlags | null> {
 	const data = await prisma.channel.findUnique({ where: { inviteCode } });
 	if (!data) return null;
 	return addFlagsToChannel(data);
 }
 
-export async function findManyChannelsById(ids: string[]) {
+export async function findManyChannelsById(
+	ids: string[],
+	opts: {
+		includeMessageCount?: boolean;
+	} = {},
+): Promise<ChannelWithFlags[]> {
 	const data = await prisma.channel.findMany({ where: { id: { in: ids } } });
-	return data.map(addFlagsToChannel);
+	const withFlags = data.map(addFlagsToChannel);
+	let threadMessageCountLookup: Map<string, number | undefined> | undefined =
+		undefined;
+	const isThreadType = (t: ChannelType) =>
+		t === ChannelType.PublicThread ||
+		t === ChannelType.PrivateThread ||
+		t === ChannelType.AnnouncementThread;
+	if (opts.includeMessageCount) {
+		const threadIds = withFlags
+			.filter((c) => isThreadType(c.type))
+			.map((c) => c.id);
+		const threadMessageCounts = await Promise.all(
+			threadIds.map((id) => elastic.getChannelMessagesCount(id)),
+		);
+		threadMessageCountLookup = new Map(
+			threadIds.map((id, i) => [id, threadMessageCounts[i] ?? undefined]),
+		);
+	}
+	return withFlags.map((c) => {
+		let messageCount: number | undefined = undefined;
+		if (opts.includeMessageCount) {
+			if (isThreadType(c.type)) {
+				messageCount = threadMessageCountLookup?.get(c.id);
+			} else {
+				messageCount = NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD;
+			}
+		}
+		return {
+			...c,
+			messageCount,
+		};
+	});
 }
 
 export async function createChannel(data: z.infer<typeof zChannelCreate>) {
@@ -205,9 +247,16 @@ export async function createChannel(data: z.infer<typeof zChannelCreate>) {
 export async function createManyChannels(
 	data: z.infer<typeof zChannelCreateMany>[],
 ) {
-	await prisma.channel.createMany({
-		data: data.map((c) => zChannelCreateMany.parse(c)),
-	});
+	const operations: Promise<unknown>[] = [];
+	for (let i = 0; i < data.length; i += 50) {
+		const chunk = data.slice(i, i + 50);
+		operations.push(
+			prisma.channel.createMany({
+				data: chunk.map((c) => zChannelCreateMany.parse(c)),
+			}),
+		);
+	}
+	await Promise.all(operations);
 	return data.map((c) => getDefaultChannel({ ...c }));
 }
 
@@ -235,15 +284,22 @@ export async function updateChannel({
 export async function updateManyChannels(
 	data: z.infer<typeof zChannelUpdateMany>[],
 ) {
-	const updated = await prisma.$transaction(
-		data.map((c) =>
-			prisma.channel.update({
-				where: { id: c.id },
-				data: zChannelPrismaUpdate.parse(c),
-			}),
-		),
-	);
-	return updated.map(addFlagsToChannel);
+	const operations: Promise<Channel[]>[] = [];
+	for (let i = 0; i < data.length; i += 50) {
+		const chunk = data.slice(i, i + 50);
+		operations.push(
+			prisma.$transaction(
+				chunk.map((c) =>
+					prisma.channel.update({
+						where: { id: c.id },
+						data: zChannelPrismaUpdate.parse(c),
+					}),
+				),
+			),
+		);
+	}
+	const results = await Promise.all(operations);
+	return results.flat().map(addFlagsToChannel);
 }
 
 export async function deleteChannel(id: string) {

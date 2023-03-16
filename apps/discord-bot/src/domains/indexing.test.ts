@@ -399,6 +399,9 @@ describe('Indexing', () => {
 				mockMessages(textChannel, numberOfMessages);
 				const { messages } = await fetchAllChannelMessagesWithThreads(
 					textChannel,
+					{
+						limit: 20000,
+					},
 				);
 				expect(messages.length).toBe(numberOfMessages);
 			});
@@ -420,6 +423,9 @@ describe('Indexing', () => {
 				mockMessages(textChannel, numberOfTextChannelMessages);
 				const { messages } = await fetchAllChannelMessagesWithThreads(
 					textChannel,
+					{
+						limit: 20000,
+					},
 				);
 				expect(messages.length).toBe(
 					numberOfThreadMessages + numberOfTextChannelMessages + 1,
@@ -436,6 +442,9 @@ describe('Indexing', () => {
 				mockMessages(textChannel, numberOfTextChannelMessages);
 				const { messages } = await fetchAllChannelMessagesWithThreads(
 					textChannel,
+					{
+						limit: 20000,
+					},
 				);
 				expect(messages.length).toBe(
 					numberOfTextChannelMessages + numberOfThreadMessages + 1,
@@ -465,6 +474,9 @@ describe('Indexing', () => {
 				mockMessages(textChannel, numberOfTextChannelMessages);
 				const { messages } = await fetchAllChannelMessagesWithThreads(
 					textChannel,
+					{
+						limit: 20000,
+					},
 				);
 				expect(messages.length).toBe(
 					numberOfArchivedThreadMessages +
@@ -480,6 +492,9 @@ describe('Indexing', () => {
 				mockMessages(newsChannel, numberOfMessages);
 				const { messages } = await fetchAllChannelMessagesWithThreads(
 					newsChannel,
+					{
+						limit: 20000,
+					},
 				);
 				expect(messages.length).toBe(numberOfMessages);
 			});
@@ -502,6 +517,9 @@ describe('Indexing', () => {
 				mockMessages(newsChannel, numberOfNewsChannelMessages);
 				const { messages, threads } = await fetchAllChannelMessagesWithThreads(
 					newsChannel,
+					{
+						limit: 20000,
+					},
 				);
 				expect(messages.length).toBe(
 					numberOfThreadMessages + numberOfNewsChannelMessages + 1,
@@ -522,6 +540,9 @@ describe('Indexing', () => {
 				mockMessages(newsChannel, numberOfNewsChannelMessages);
 				const { messages, threads } = await fetchAllChannelMessagesWithThreads(
 					newsChannel,
+					{
+						limit: 20000,
+					},
 				);
 				expect(messages.length).toBe(
 					numberOfNewsChannelMessages + numberOfThreadMessages + 1,
@@ -533,6 +554,9 @@ describe('Indexing', () => {
 			it('should fetch all messages from a forum channel with no threads', async () => {
 				const { messages } = await fetchAllChannelMessagesWithThreads(
 					forumChannel,
+					{
+						limit: 20000,
+					},
 				);
 				expect(messages.length).toBe(0);
 			});
@@ -552,6 +576,9 @@ describe('Indexing', () => {
 				mockMessages(thread, numberOfThreadMessages);
 				const { messages } = await fetchAllChannelMessagesWithThreads(
 					forumChannel,
+					{
+						limit: 20000,
+					},
 				);
 				expect(messages.length).toBe(numberOfThreadMessages);
 			});
@@ -617,7 +644,9 @@ describe('Indexing', () => {
 			}
 		});
 		it('should fetch all messages', async () => {
-			const messages = await fetchAllMessages(textChannel);
+			const messages = await fetchAllMessages(textChannel, {
+				limit: 20000,
+			});
 			expect(messages.length).toBe(numberOfMessages);
 		});
 		it('should fetch all messages with a limit', async () => {
@@ -636,7 +665,9 @@ describe('Indexing', () => {
 			expect(messages[0]!.id).toBe(`${start + 1}`);
 		});
 		it('should return the messages sorted from oldest to newest', async () => {
-			const messages = await fetchAllMessages(textChannel);
+			const messages = await fetchAllMessages(textChannel, {
+				limit: 20000,
+			});
 			expect(messages.length).toBe(numberOfMessages);
 			for (let id = 0; id < numberOfMessages; id++) {
 				expect(messages[id]!.id).toBe(`${id + 1}`);

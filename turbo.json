@@ -23,7 +23,7 @@
 			"cache": false
 		},
 		"lint": {
-			"inputs": ["./packages/config/"],
+			"inputs": ["./packages/config/eslint-config-custom"],
 			"outputs": [],
 			"cache": true
 		},
@@ -38,7 +38,7 @@
 			"cache": false
 		},
 		"test": {
-			"outputs": [],
+			"outputs": ["coverage/**"],
 			"cache": true
 		},
 		"test:no-cache": {
@@ -94,6 +94,8 @@
 		"MAXIMUM_CHANNEL_MESSAGES_PER_INDEX",
 		"STORYBOOK",
 		"VITEST_DISCORD_CLIENT_ID",
-		"THEME"
+		"THEME",
+		"NEXT_PUBLIC_DEPLOYMENT_ENV",
+		"SENTRY_DSN"
 	]
 }

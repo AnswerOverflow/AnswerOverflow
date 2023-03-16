@@ -10,6 +10,7 @@ import {
 import {
 	ChannelType,
 	Client,
+	DiscordAPIError,
 	ForumChannel,
 	Guild,
 	GuildBasedChannel,
@@ -27,18 +28,29 @@ import {
 	toAOThread,
 } from '~discord-bot/utils/conversions';
 import { container } from '@sapphire/framework';
-import { sortMessagesById } from '@answeroverflow/discordjs-utils';
+import {
+	isSnowflakeLarger,
+	sortMessagesById,
+} from '@answeroverflow/discordjs-utils';
 
 export async function indexServers(client: Client) {
+	const indexingStartTime = Date.now();
 	container.logger.info(`Indexing ${client.guilds.cache.size} servers`);
-	for (const guild of client.guilds.cache.values()) {
-		await indexServer(guild);
+	for await (const guild of client.guilds.cache.values()) {
+		try {
+			await indexServer(guild);
+		} catch (error) {
+			container.logger.error(`Error indexing server ${guild.id}`, error);
+		}
 	}
+	const indexingEndTime = Date.now();
+	const indexingDuration = indexingEndTime - indexingStartTime;
+	container.logger.info(`Indexing complete, took ${indexingDuration}ms`);
 }
 
 async function indexServer(guild: Guild) {
 	container.logger.info(`Indexing server ${guild.id}`);
-	for (const channel of guild.channels.cache.values()) {
+	for await (const channel of guild.channels.cache.values()) {
 		const isIndexableChannelType =
 			channel.type === ChannelType.GuildText ||
 			channel.type === ChannelType.GuildAnnouncement ||
@@ -58,7 +70,10 @@ export async function indexRootChannel(
 
 	const settings = await findChannelById(channel.id);
 
-	if (!settings || !settings.flags.indexingEnabled) {
+	const botCanViewChannel = channel
+		.permissionsFor(channel.client.user)
+		?.has(['ViewChannel', 'ReadMessageHistory']);
+	if (!settings || !settings.flags.indexingEnabled || !botCanViewChannel) {
 		return;
 	}
 	let start =
@@ -93,7 +108,10 @@ export async function indexRootChannel(
 	addSolutionsToMessages(filteredMessages, convertedMessages);
 
 	const largestSnowflake = sortMessagesById(filteredMessages).pop()?.id;
+	container.logger.info('Indexing complete, writing data');
+	container.logger.info(`Upserting ${convertedUsers.length} discord accounts `);
 	await upsertManyDiscordAccounts(convertedUsers);
+	container.logger.info(`Upserting channel: ${channel.id}`);
 	await upsertChannel({
 		create: {
 			...toAOChannel(channel),
@@ -103,7 +121,9 @@ export async function indexRootChannel(
 			lastIndexedSnowflake: largestSnowflake,
 		},
 	});
+	container.logger.info(`Upserting ${convertedMessages.length} messages`);
 	await upsertManyMessages(convertedMessages);
+	container.logger.info(`Upserting ${convertedThreads.length} threads`);
 	await upsertManyChannels(
 		convertedThreads.map((x) => ({
 			create: x,
@@ -111,6 +131,9 @@ export async function indexRootChannel(
 				name: x.name,
 			},
 		})),
+	);
+	container.logger.info(
+		`Finished writing data, indexing complete for channel ${channel.id}`,
 	);
 }
 
@@ -205,12 +228,35 @@ export async function fetchAllChannelMessagesWithThreads(
 			fetchAll: true,
 		});
 		const activeThreads = await channel.threads.fetchActive();
+		container.logger.info(
+			`Found ${archivedThreads.threads.size} archived threads and ${
+				activeThreads.threads.size
+			} active threads, a total of ${
+				archivedThreads.threads.size + activeThreads.threads.size
+			} threads`,
+		);
 		threads = [
 			...archivedThreads.threads.values(),
 			...activeThreads.threads.values(),
 		]
 			.filter((x) => x.type === ChannelType.PublicThread)
+			.filter((x) =>
+				x.lastMessageId
+					? isSnowflakeLarger(x.lastMessageId, options.start ?? '0')
+					: true,
+			)
 			.map((x) => x as PublicThreadChannel);
+		container.logger.info(
+			`Pruned threads to index from ${
+				activeThreads.threads.size + archivedThreads.threads.size
+			} to ${threads.length} threads`,
+		);
+		const threadsWithoutLastMessageId = threads.filter((x) => !x.lastMessageId);
+		if (threadsWithoutLastMessageId.length > 0) {
+			container.logger.warn(
+				`Found ${threadsWithoutLastMessageId.length} threads without a last message id`,
+			);
+		}
 	} else {
 		/*
       Handles indexing of text channels and news channels
@@ -221,6 +267,7 @@ export async function fetchAllChannelMessagesWithThreads(
       */
 		const messages = await fetchAllMessages(channel, options);
 		for (const message of messages) {
+			collectedMessages.push(message);
 			if (
 				message.thread &&
 				(message.thread.type === ChannelType.PublicThread ||
@@ -229,12 +276,16 @@ export async function fetchAllChannelMessagesWithThreads(
 				threads.push(message.thread);
 			}
 		}
-		collectedMessages.push(...messages);
 	}
-
-	for (const thread of threads) {
-		const threadMessages = await fetchAllMessages(thread);
-		collectedMessages.push(...threadMessages);
+	container.logger.info(`Found ${threads.length} threads to index`);
+	for await (const thread of threads) {
+		try {
+			const threadMessages = await fetchAllMessages(thread);
+			collectedMessages.push(...threadMessages);
+		} catch (error) {
+			if (error instanceof DiscordAPIError && error.status == 404) continue;
+			throw error;
+		}
 	}
 
 	return { messages: collectedMessages, threads };
@@ -242,8 +293,12 @@ export async function fetchAllChannelMessagesWithThreads(
 
 export async function fetchAllMessages(
 	channel: TextBasedChannel,
-	{ start, limit }: MessageFetchOptions = {},
+	opts: MessageFetchOptions = {},
 ) {
+	const {
+		start,
+		limit = channel.type === ChannelType.GuildText ? 1000 : 20000,
+	} = opts;
 	const messages: Message[] = [];
 	// Create message pointer
 	const initialFetch = await channel.messages.fetch({
@@ -252,21 +307,24 @@ export async function fetchAllMessages(
 	}); // TODO: Check if 0 works correctly for starting at the beginning
 	let message = initialFetch.size === 1 ? initialFetch.first() : null;
 	messages.push(...initialFetch.values());
-	while (message && (limit === undefined || messages.length < limit)) {
-		// container.logger.debug(`Fetching from ${message.id}`);
-		await channel.messages
-			.fetch({ limit: 100, after: message.id })
-			.then((messagePage) => {
-				// container.logger.debug(`Received ${messagePage.size} messages`);
-				const sortedMessagesById = sortMessagesById([...messagePage.values()]);
-				messages.push(...sortedMessagesById.values());
-				// Update our message pointer to be last message in page of messages
-				message =
-					0 < sortedMessagesById.length ? sortedMessagesById.at(-1) : null;
-			});
-	}
-	if (limit) {
-		return messages.slice(0, limit);
-	}
-	return messages;
+
+	const asyncMessageFetch = async (after: string) => {
+		container.logger.debug(
+			`Collected ${messages.length}/${limit} messages. After message ${after} in channel ${channel.id}`,
+		);
+		await channel.messages.fetch({ limit: 100, after }).then((messagePage) => {
+			// container.logger.debug(`Received ${messagePage.size} messages`);
+			const sortedMessagesById = sortMessagesById([...messagePage.values()]);
+			messages.push(...sortedMessagesById.values());
+			// Update our message pointer to be last message in page of messages
+			message =
+				0 < sortedMessagesById.length ? sortedMessagesById.at(-1) : null;
+		});
+		if (message && (limit === undefined || messages.length < limit)) {
+			await asyncMessageFetch(message.id);
+		}
+	};
+
+	await asyncMessageFetch(message?.id ?? '0');
+	return messages.slice(0, limit);
 }

@@ -4,6 +4,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { updateUserConsent } from '~discord-bot/domains/manage-account';
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
 import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
+import { getCommandIds } from '~discord-bot/utils/utils';
 
 @ApplyOptions<Command.Options>({
 	name: 'consent',
@@ -15,6 +16,12 @@ export class ConsentCommand extends Command {
 	public override registerApplicationCommands(
 		registry: ChatInputCommand.Registry,
 	) {
+		const ids = getCommandIds({
+			local: '1073363500585468084',
+			staging: '982084090251595786',
+			production: '980880200566964264',
+		});
+
 		registry.registerChatInputCommand(
 			new SlashCommandBuilder()
 				.setName(this.name)
@@ -23,6 +30,9 @@ export class ConsentCommand extends Command {
 				.addBooleanOption((option) =>
 					option.setName('consent').setDescription('Enable or disable consent'),
 				),
+			{
+				idHints: ids,
+			},
 		);
 	}
 	public override async chatInputRun(interaction: ChatInputCommandInteraction) {
