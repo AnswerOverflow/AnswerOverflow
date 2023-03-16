@@ -291,7 +291,10 @@ export async function fetchAllMessages(
 	channel: TextBasedChannel,
 	opts: MessageFetchOptions = {},
 ) {
-	const { start, limit = 20000 } = opts;
+	const {
+		start,
+		limit = channel.type === ChannelType.GuildText ? 1000 : 20000,
+	} = opts;
 	const messages: Message[] = [];
 	// Create message pointer
 	const initialFetch = await channel.messages.fetch({
@@ -300,20 +303,24 @@ export async function fetchAllMessages(
 	}); // TODO: Check if 0 works correctly for starting at the beginning
 	let message = initialFetch.size === 1 ? initialFetch.first() : null;
 	messages.push(...initialFetch.values());
-	while (message && (limit === undefined || messages.length < limit)) {
+
+	const asyncMessageFetch = async (after: string) => {
 		container.logger.debug(
-			`Collected ${messages.length}/${limit} messages. After message ${message.id} in channel ${channel.id}`,
+			`Collected ${messages.length}/${limit} messages. After message ${after} in channel ${channel.id}`,
 		);
-		await channel.messages
-			.fetch({ limit: 100, after: message.id })
-			.then((messagePage) => {
-				// container.logger.debug(`Received ${messagePage.size} messages`);
-				const sortedMessagesById = sortMessagesById([...messagePage.values()]);
-				messages.push(...sortedMessagesById.values());
-				// Update our message pointer to be last message in page of messages
-				message =
-					0 < sortedMessagesById.length ? sortedMessagesById.at(-1) : null;
-			});
-	}
+		await channel.messages.fetch({ limit: 100, after }).then((messagePage) => {
+			// container.logger.debug(`Received ${messagePage.size} messages`);
+			const sortedMessagesById = sortMessagesById([...messagePage.values()]);
+			messages.push(...sortedMessagesById.values());
+			// Update our message pointer to be last message in page of messages
+			message =
+				0 < sortedMessagesById.length ? sortedMessagesById.at(-1) : null;
+		});
+		if (message && (limit === undefined || messages.length < limit)) {
+			await asyncMessageFetch(message.id);
+		}
+	};
+
+	await asyncMessageFetch(message?.id ?? '0');
 	return messages.slice(0, limit);
 }

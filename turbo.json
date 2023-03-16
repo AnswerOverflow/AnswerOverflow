@@ -23,7 +23,7 @@
 			"cache": false
 		},
 		"lint": {
-			"inputs": ["./packages/config/"],
+			"inputs": ["./packages/config/eslint-config-custom"],
 			"outputs": [],
 			"cache": true
 		},
