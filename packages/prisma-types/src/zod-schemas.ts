@@ -31,9 +31,9 @@ export const zUniqueArray = z
 
 export const channelBitfieldFlags = [
 	'indexingEnabled',
-	'autoThreadEnabled',
 	'markSolutionEnabled',
 	'sendMarkSolutionInstructionsInNewThreads',
+	'autoThreadEnabled',
 	'forumGuidelinesConsentEnabled',
 ] as const;
 

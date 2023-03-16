@@ -22,17 +22,14 @@ function getLogLevel() {
 		case 'production':
 			return process.env.BOT_PROD_LOG_LEVEL
 				? parseInt(process.env.BOT_PROD_LOG_LEVEL)
-				: LogLevel.Info;
+				: LogLevel.Debug;
 		default:
-			return LogLevel.Info;
+			return LogLevel.Debug;
 	}
 }
 
 export function createClient(override: Partial<ClientOptions> = {}) {
 	return new SapphireClient({
-		defaultPrefix: '!',
-		regexPrefix: /^(hey +)?bot[,! ]/i,
-		caseInsensitiveCommands: true,
 		logger: {
 			level: getLogLevel(),
 		},
@@ -55,7 +52,6 @@ export function createClient(override: Partial<ClientOptions> = {}) {
 			Partials.GuildMember,
 			Partials.Reaction,
 		],
-		loadMessageCommandListeners: true,
 		hmr: {
 			enabled: process.env.NODE_ENV === 'development',
 		},
@@ -72,6 +68,9 @@ export const login = async (client: SapphireClient) => {
 	try {
 		client.logger.info('LOGGING IN');
 		client.logger.info(`NODE_ENV: ${process.env.NODE_ENV}`);
+		client.logger.info(
+			`DEPLOYMENT ENV: ${process.env.NEXT_PUBLIC_DEPLOYMENT_ENV!}`,
+		);
 		client.logger.info(
 			`DISCORD_ID: ${process.env.DISCORD_CLIENT_ID ?? 'UNKNOWN'}`,
 		);
@@ -106,7 +105,7 @@ export const login = async (client: SapphireClient) => {
 		});
 		client.user?.setActivity({
 			type: ActivityType.Playing,
-			name: 'with becoming open source ⚠️ may be unstable this week ⚠️',
+			name: 'becoming open source ⚠️ maintenance week ⚠️',
 		});
 	} catch (error) {
 		client.logger.fatal(error);
