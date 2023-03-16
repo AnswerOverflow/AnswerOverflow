@@ -1,35 +1,47 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Button, ButtonProps } from './Button';
 
+import { Button } from './Button';
 const meta = {
 	component: Button,
-	argTypes: {
-		color: {
-			control: {
-				type: 'radio',
-			},
-			options: ['red', 'blue', 'green', 'black', 'white'],
-		},
-		type: {
-			control: { type: 'radio' },
-			options: ['solid', 'ghost'],
-		},
-		disabled: {
-			control: { type: 'boolean' },
-			defaultValue: false,
-		},
-	},
+	render: (args) => <Button {...args}>Text</Button>,
 } as Meta<typeof Button>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const ButtonPrimary: Story = {
-	render: (props: ButtonProps) => <Button {...props}>Primary</Button>,
-
+export const Primary: Story = {
 	args: {
-		type: 'ghost',
-		color: 'white',
+		variant: 'default',
+	},
+};
+
+export const Destructive: Story = {
+	args: {
+		variant: 'destructive',
+	},
+};
+
+export const Outline: Story = {
+	args: {
+		variant: 'outline',
+	},
+};
+
+export const Subtle: Story = {
+	args: {
+		variant: 'subtle',
+	},
+};
+
+export const Ghost: Story = {
+	args: {
+		variant: 'ghost',
+	},
+};
+
+export const Link: Story = {
+	args: {
+		variant: 'link',
 	},
 };
