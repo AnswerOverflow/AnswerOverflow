@@ -34,6 +34,7 @@ import {
 } from '@answeroverflow/discordjs-utils';
 
 export async function indexServers(client: Client) {
+	const indexingStartTime = Date.now();
 	container.logger.info(`Indexing ${client.guilds.cache.size} servers`);
 	for await (const guild of client.guilds.cache.values()) {
 		try {
@@ -42,6 +43,9 @@ export async function indexServers(client: Client) {
 			container.logger.error(`Error indexing server ${guild.id}`, error);
 		}
 	}
+	const indexingEndTime = Date.now();
+	const indexingDuration = indexingEndTime - indexingStartTime;
+	container.logger.info(`Indexing complete, took ${indexingDuration}ms`);
 }
 
 async function indexServer(guild: Guild) {
@@ -263,6 +267,7 @@ export async function fetchAllChannelMessagesWithThreads(
       */
 		const messages = await fetchAllMessages(channel, options);
 		for (const message of messages) {
+			collectedMessages.push(message);
 			if (
 				message.thread &&
 				(message.thread.type === ChannelType.PublicThread ||
@@ -271,9 +276,8 @@ export async function fetchAllChannelMessagesWithThreads(
 				threads.push(message.thread);
 			}
 		}
-		collectedMessages.push(...messages);
 	}
-
+	container.logger.info(`Found ${threads.length} threads to index`);
 	for await (const thread of threads) {
 		try {
 			const threadMessages = await fetchAllMessages(thread);
