@@ -9,7 +9,7 @@ import { Button } from './Button';
 import { signIn, signOut } from 'next-auth/react';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
+import { Fragment, useState, useEffect, useRef } from 'react';
 import { Avatar } from '../primitives/Avatar';
 import { classNames } from '~ui/utils/styling';
 
@@ -80,10 +80,41 @@ export type NavbarProps = {
 
 // TODO: Needs mobile styling
 export const NavbarRenderer = ({ path, user }: NavbarProps) => {
+	const [sticky, setSticky] = useState(false);
+	const navbarRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const handleScroll = () => {
+			if (window.pageYOffset > 100) {
+				setSticky(true);
+			} else {
+				setSticky(false);
+			}
+		};
+
+		window.addEventListener('scroll', handleScroll);
+
+		return () => {
+			window.removeEventListener('scroll', handleScroll);
+		};
+	}, []);
+
 	return (
 		<>
-			<nav className="z-50 flex min-h-[4rem] w-full items-center">
-				<ol className="mx-[4rem] hidden w-full flex-row py-8 transition-all lg:flex 2xl:mx-[6rem]">
+			{sticky && <div className="pt-[15.5rem]"></div>}
+			<nav
+				className={`${
+					sticky
+						? 'fixed top-0 left-0 backdrop-blur-md dark:bg-ao-black/75'
+						: 'relative min-h-[4rem]'
+				} z-50 flex w-full items-center`}
+				ref={navbarRef}
+			>
+				<ol
+					className={`mx-[4rem] hidden w-full flex-row ${
+						sticky ? 'py-2' : 'py-8'
+					} transition-all lg:flex 2xl:mx-[6rem]`}
+				>
 					<li>
 						<Link
 							href="/"
