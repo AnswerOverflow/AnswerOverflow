@@ -13,7 +13,10 @@ type Story = StoryObj<typeof meta>;
 export const InServer: Story = {
 	args: {
 		server: mockServer(),
-		channel: mockChannelWithSettings(),
+		channel: mockChannelWithSettings({
+			// AO's Discord server
+			inviteCode: 'sxDN2rEdwD',
+		}),
 		isUserInServer: true,
 	},
 };
@@ -21,7 +24,10 @@ export const InServer: Story = {
 export const NotInServer: Story = {
 	args: {
 		server: mockServer(),
-		channel: mockChannelWithSettings(),
+		channel: mockChannelWithSettings({
+			// AO's Discord server
+			inviteCode: 'sxDN2rEdwD',
+		}),
 		isUserInServer: false,
 	},
 };

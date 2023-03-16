@@ -26,7 +26,10 @@ export const PublicSolution: Story = {
 			},
 			thread: mockChannelWithSettings(),
 			score: 0.5,
-			channel: mockChannelWithSettings(),
+			channel: mockChannelWithSettings({
+				// AO's Discord server
+				inviteCode: 'sxDN2rEdwD',
+			}),
 			server: mockServer(),
 		},
 	},
@@ -52,7 +55,10 @@ export const PrivateSolution: Story = {
 			},
 			thread: mockChannelWithSettings(),
 			score: 0.5,
-			channel: mockChannelWithSettings(),
+			channel: mockChannelWithSettings({
+				// AO's Discord server
+				inviteCode: 'sxDN2rEdwD',
+			}),
 			server: mockServer(),
 		},
 	},
@@ -73,7 +79,10 @@ export const NoSolution: Story = {
 			},
 			thread: mockChannelWithSettings(),
 			score: 0.5,
-			channel: mockChannelWithSettings(),
+			channel: mockChannelWithSettings({
+				// AO's Discord server
+				inviteCode: 'sxDN2rEdwD',
+			}),
 			server: mockServer(),
 		},
 	},

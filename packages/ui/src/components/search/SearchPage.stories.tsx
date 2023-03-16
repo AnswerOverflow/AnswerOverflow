@@ -49,7 +49,10 @@ export const Results: Story = {
 				},
 				thread: mockChannelWithSettings(),
 				score: 0.5,
-				channel: mockChannelWithSettings(),
+				channel: mockChannelWithSettings({
+					// AO's Discord server
+					inviteCode: 'sxDN2rEdwD',
+				}),
 				server: mockServer(),
 			},
 		],
