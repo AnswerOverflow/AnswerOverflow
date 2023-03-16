@@ -5,6 +5,20 @@
  */
 // @ts-ignore
 !process.env.SKIP_ENV_VALIDATION && (await import('./src/env/server.mjs'));
+const nextJSMDX = await import('@next/mdx');
+
+const withMDX = nextJSMDX.default({
+  extension: /\.mdx?$/,
+  options: {
+    // If you use remark-gfm, you'll need to use next.config.mjs
+    // as the package is ESM only
+    // https://github.com/remarkjs/remark-gfm#install
+    remarkPlugins: [],
+    rehypePlugins: [],
+    // If you use `MDXProvider`, uncomment the following line.
+    // providerImportSource: "@mdx-js/react",
+  },
+})
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -26,4 +40,4 @@ const config = {
 	},
 };
 
-export default config;
+export default withMDX(config);
