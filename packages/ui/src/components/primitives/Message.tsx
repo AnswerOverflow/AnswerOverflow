@@ -46,7 +46,7 @@ export const MessageContents = () => {
 	const convertedMessageContent = toHTML(message.content);
 	const parsedMessageContent = Parser(convertedMessageContent);
 	return (
-		<div className="pt-2 text-ao-black [word-wrap:_break-word] dark:text-ao-white">
+		<div className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white">
 			{parsedMessageContent}
 		</div>
 	);
