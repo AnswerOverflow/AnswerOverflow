@@ -2,12 +2,14 @@ import { ApplyOptions } from '@sapphire/decorators';
 import {
 	ChatInputCommandErrorPayload,
 	CommandDoesNotHaveChatInputCommandHandlerPayload,
+	CommandDoesNotHaveContextMenuCommandHandlerPayload,
 	container,
 	Events,
 	UnknownChatInputCommandPayload,
+	UnknownContextMenuCommandPayload,
 } from '@sapphire/framework';
 import { Listener } from '@sapphire/framework';
-import type { Interaction } from 'discord.js';
+import type { ContextMenuCommandInteraction, Interaction } from 'discord.js';
 import * as Sentry from '@sentry/node';
 import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
 
@@ -16,7 +18,7 @@ function makeErrorMessage(msg: string) {
 }
 
 async function handleError<T extends {}>(opts: {
-	interaction: Interaction;
+	interaction: Interaction | ContextMenuCommandInteraction;
 	userFacingMessage: string;
 	sentryMessage: string;
 	sentryPayload: T;
@@ -53,6 +55,27 @@ export class CommandDoesNotHaveChatInputCommandHandlerListener extends Listener<
 }
 
 @ApplyOptions<Listener.Options>({
+	event: Events.CommandDoesNotHaveContextMenuCommandHandler,
+	name: 'CommandDoesNotHaveContextMenuCommandHandlerListener',
+})
+export class CommandDoesNotHaveContextMenuCommandHandlerListener extends Listener<
+	typeof Events.CommandDoesNotHaveContextMenuCommandHandler
+> {
+	public async run(
+		payload: CommandDoesNotHaveContextMenuCommandHandlerPayload,
+	) {
+		await handleError({
+			interaction: payload.interaction,
+			userFacingMessage: 'This command has no context menu command response',
+			sentryMessage: 'Command does not have context menu command handler',
+			sentryPayload: payload,
+		});
+	}
+}
+
+// TODO: Handle message command errors?
+
+@ApplyOptions<Listener.Options>({
 	event: Events.ChatInputCommandError,
 	name: 'ChatInputCommandErrorListener',
 })
@@ -70,6 +93,23 @@ export class ChatInputCommandErrorListener extends Listener<
 }
 
 @ApplyOptions<Listener.Options>({
+	event: Events.ContextMenuCommandError,
+	name: 'ContextMenuCommandErrorListener',
+})
+export class ContextMenuCommandErrorListener extends Listener<
+	typeof Events.ContextMenuCommandError
+> {
+	public async run(payload: ChatInputCommandErrorPayload) {
+		await handleError({
+			interaction: payload.interaction,
+			userFacingMessage: 'We encountered an error while running your command',
+			sentryMessage: 'Context menu command error',
+			sentryPayload: payload,
+		});
+	}
+}
+
+@ApplyOptions<Listener.Options>({
 	event: Events.UnknownChatInputCommand,
 	name: 'UnknownChatInputCommandEvent',
 })
@@ -80,6 +120,24 @@ export class UnknownChatInputCommandEvent extends Listener<
 		await handleError({
 			interaction: payload.interaction,
 			sentryMessage: 'Unknown chat input command',
+			sentryPayload: payload,
+			userFacingMessage:
+				'We could not find the command you were trying to run. It may be a new command that is still being rolled out, or a recently removed command',
+		});
+	}
+}
+
+@ApplyOptions<Listener.Options>({
+	event: Events.UnknownContextMenuCommand,
+	name: 'UnknownContextMenuCommandEvent',
+})
+export class UnknownContextMenuCommandEvent extends Listener<
+	typeof Events.UnknownContextMenuCommand
+> {
+	public async run(payload: UnknownContextMenuCommandPayload) {
+		await handleError({
+			interaction: payload.interaction,
+			sentryMessage: 'Unknown context menu command',
 			sentryPayload: payload,
 			userFacingMessage:
 				'We could not find the command you were trying to run. It may be a new command that is still being rolled out, or a recently removed command',
