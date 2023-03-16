@@ -247,12 +247,16 @@ export async function createChannel(data: z.infer<typeof zChannelCreate>) {
 export async function createManyChannels(
 	data: z.infer<typeof zChannelCreateMany>[],
 ) {
-	for (let i = 0; i < data.length; i += 1000) {
-		const chunk = data.slice(i, i + 1000);
-		await prisma.channel.createMany({
-			data: chunk.map((c) => zChannelCreateMany.parse(c)),
-		});
+	const operations: Promise<unknown>[] = [];
+	for (let i = 0; i < data.length; i += 50) {
+		const chunk = data.slice(i, i + 50);
+		operations.push(
+			prisma.channel.createMany({
+				data: chunk.map((c) => zChannelCreateMany.parse(c)),
+			}),
+		);
 	}
+	await Promise.all(operations);
 	return data.map((c) => getDefaultChannel({ ...c }));
 }
 
@@ -280,20 +284,22 @@ export async function updateChannel({
 export async function updateManyChannels(
 	data: z.infer<typeof zChannelUpdateMany>[],
 ) {
-	const updatedAll: ChannelWithFlags[] = [];
-	for (let i = 0; i < data.length; i += 1000) {
-		const chunk = data.slice(i, i + 1000);
-		const updated = await prisma.$transaction(
-			chunk.map((c) =>
-				prisma.channel.update({
-					where: { id: c.id },
-					data: zChannelPrismaUpdate.parse(c),
-				}),
+	const operations: Promise<Channel[]>[] = [];
+	for (let i = 0; i < data.length; i += 50) {
+		const chunk = data.slice(i, i + 50);
+		operations.push(
+			prisma.$transaction(
+				chunk.map((c) =>
+					prisma.channel.update({
+						where: { id: c.id },
+						data: zChannelPrismaUpdate.parse(c),
+					}),
+				),
 			),
 		);
-		updatedAll.push(...updated.map((c) => addFlagsToChannel(c)));
 	}
-	return updatedAll;
+	const results = await Promise.all(operations);
+	return results.flat().map(addFlagsToChannel);
 }
 
 export async function deleteChannel(id: string) {

@@ -10,6 +10,7 @@ import {
 import {
 	ChannelType,
 	Client,
+	DiscordAPIError,
 	ForumChannel,
 	Guild,
 	GuildBasedChannel,
@@ -34,7 +35,7 @@ import {
 
 export async function indexServers(client: Client) {
 	container.logger.info(`Indexing ${client.guilds.cache.size} servers`);
-	for (const guild of client.guilds.cache.values()) {
+	for await (const guild of client.guilds.cache.values()) {
 		try {
 			await indexServer(guild);
 		} catch (error) {
@@ -45,7 +46,7 @@ export async function indexServers(client: Client) {
 
 async function indexServer(guild: Guild) {
 	container.logger.info(`Indexing server ${guild.id}`);
-	for (const channel of guild.channels.cache.values()) {
+	for await (const channel of guild.channels.cache.values()) {
 		const isIndexableChannelType =
 			channel.type === ChannelType.GuildText ||
 			channel.type === ChannelType.GuildAnnouncement ||
@@ -273,9 +274,14 @@ export async function fetchAllChannelMessagesWithThreads(
 		collectedMessages.push(...messages);
 	}
 
-	for (const thread of threads) {
-		const threadMessages = await fetchAllMessages(thread);
-		collectedMessages.push(...threadMessages);
+	for await (const thread of threads) {
+		try {
+			const threadMessages = await fetchAllMessages(thread);
+			collectedMessages.push(...threadMessages);
+		} catch (error) {
+			if (error instanceof DiscordAPIError && error.status == 404) continue;
+			throw error;
+		}
 	}
 
 	return { messages: collectedMessages, threads };
