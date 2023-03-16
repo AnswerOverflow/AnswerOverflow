@@ -9,7 +9,7 @@ import { delay } from '@answeroverflow/discordjs-mock';
 export class Indexing extends Listener {
 	public async run(client: Client) {
 		// Wait for everything to be ready
-		await delay(60 * 1000);
+		if (process.env.NODE_ENV === 'production') await delay(60 * 1000);
 		const intervalInHours = process.env.INDEXING_INTERVAL_IN_HOURS
 			? parseFloat(process.env.INDEXING_INTERVAL_IN_HOURS)
 			: 24;
