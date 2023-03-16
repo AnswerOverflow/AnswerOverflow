@@ -1959,7 +1959,15 @@
   resolved "https://registry.yarnpkg.com/@juggle/resize-observer/-/resize-observer-3.4.0.tgz#08d6c5e20cf7e4cc02fd181c4b0c225cd31dbb60"
   integrity sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==
 
-"@mdx-js/mdx@^2.2.1":
+"@mdx-js/loader@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@mdx-js/loader/-/loader-2.3.0.tgz#56a6b07eb0027b6407e953a97c52bd8619601161"
+  integrity sha512-IqsscXh7Q3Rzb+f5DXYk0HU71PK+WuFsEhf+mSV3fOhpLcEpgsHvTQ2h0T6TlZ5gHOaBeFjkXwB52by7ypMyNg==
+  dependencies:
+    "@mdx-js/mdx" "^2.0.0"
+    source-map "^0.7.0"
+
+"@mdx-js/mdx@^2.0.0", "@mdx-js/mdx@^2.2.1":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@mdx-js/mdx/-/mdx-2.3.0.tgz#d65d8c3c28f3f46bb0e7cb3bf7613b39980671a9"
   integrity sha512-jLuwRlz8DQfQNiUCJR50Y09CGPq3fLtmtUQfVrj79E0JWu3dvsVcxVIcfhR5h0iXu+/z++zDrYeiJqifRynJkA==
@@ -1982,7 +1990,7 @@
     unist-util-visit "^4.0.0"
     vfile "^5.0.0"
 
-"@mdx-js/react@^2.1.5", "@mdx-js/react@^2.2.1":
+"@mdx-js/react@^2.1.5", "@mdx-js/react@^2.2.1", "@mdx-js/react@^2.3.0":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@mdx-js/react/-/react-2.3.0.tgz#4208bd6d70f0d0831def28ef28c26149b03180b3"
   integrity sha512-zQH//gdOmuu7nt2oJR29vFhDv88oGPmVw6BggmrHeMI+xgEkp1B2dX9/bMBSYtK0dyLX/aOmesKS09g222K1/g==
@@ -2088,6 +2096,13 @@
   version "13.2.1"
   resolved "https://registry.yarnpkg.com/@next/font/-/font-13.2.1.tgz#3723342727193116b904c798a1c054db02e07c22"
   integrity sha512-4sergLt7xp9+mZuKME/xM4tLlHGTcmL7naCq0qCTcAlof6NnttshYgiLOdhSiy0NcI+/yM3BjvdEk++O96UzTg==
+
+"@next/mdx@^13.2.4":
+  version "13.2.4"
+  resolved "https://registry.yarnpkg.com/@next/mdx/-/mdx-13.2.4.tgz#055dd5928a488ad9cc6ced03aff5807ad48f0ac4"
+  integrity sha512-inl7u+OEa4Ok3uL052oa8EDw1bUkMGLVKzFfVBIgG19s29gxQvcWYzxa5t438J31ljApjh6Y5k4AD6yLaCAlQw==
+  dependencies:
+    source-map "^0.7.0"
 
 "@next/swc-android-arm-eabi@13.0.2":
   version "13.0.2"
@@ -6730,10 +6745,15 @@ dir-glob@^3.0.1:
   dependencies:
     path-type "^4.0.0"
 
-discord-api-types@0.37.20, discord-api-types@^0.37.20, discord-api-types@^0.37.23, discord-api-types@^0.37.25, discord-api-types@^0.37.30, discord-api-types@^0.37.31, discord-api-types@^0.37.35:
+discord-api-types@^0.37.20:
   version "0.37.20"
   resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.37.20.tgz#f23894e3e6b894abb5431ff6c4aa52471360377c"
   integrity sha512-uAO+55E11rMkYR36/paE1vKN8c2bZa1mgrIaiQIBgIZRKZTDIGOZB+8I5eMRPFJcGxrg16riUu+0aTu2JQEPew==
+
+discord-api-types@^0.37.23, discord-api-types@^0.37.25, discord-api-types@^0.37.30, discord-api-types@^0.37.31, discord-api-types@^0.37.35:
+  version "0.37.36"
+  resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.37.36.tgz#650a8f66dce2c5e54a8c2275db74a0bb7936430d"
+  integrity sha512-Nlxmp10UpVr/utgZ9uODQvG2Or+5w7LFrvFMswyeKC9l/+UaqGT6H0OVgEFhu9GEO4U6K7NNO5W8Carv7irnCA==
 
 discord-markdown@^2.5.1:
   version "2.5.1"
