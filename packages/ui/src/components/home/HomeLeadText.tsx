@@ -13,9 +13,9 @@ export const HomeLeadText = () => {
 			</p>
 			<Button
 				variant={'default'}
-				className="mx-auto shadow-[0px_0px_40px_rgba(255,_255,_255,_0.2)] duration-200 hover:shadow-[0px_0px_40px_rgba(255,_255,_255,_0.4)] xl:mx-0"
+				className="mx-auto text-xl shadow-[0px_0px_40px_rgba(255,_255,_255,_0.2)] duration-200 hover:shadow-[0px_0px_40px_rgba(255,_255,_255,_0.4)] xl:mx-0"
 			>
-				<span className="text-2xl">Get Started</span>
+				Get Started
 			</Button>
 		</div>
 	);
