@@ -6,6 +6,7 @@
 // @ts-ignore
 !process.env.SKIP_ENV_VALIDATION && (await import('./src/env/server.mjs'));
 const nextJSMDX = await import('@next/mdx');
+import remarkGfm from 'remark-gfm'
 
 const withMDX = nextJSMDX.default({
   extension: /\.mdx?$/,
@@ -13,10 +14,12 @@ const withMDX = nextJSMDX.default({
     // If you use remark-gfm, you'll need to use next.config.mjs
     // as the package is ESM only
     // https://github.com/remarkjs/remark-gfm#install
-    remarkPlugins: [],
+    remarkPlugins: [
+      remarkGfm,
+    ],
     rehypePlugins: [],
     // If you use `MDXProvider`, uncomment the following line.
-    // providerImportSource: "@mdx-js/react",
+    providerImportSource: "@mdx-js/react",
   },
 })
 
@@ -24,6 +27,7 @@ const withMDX = nextJSMDX.default({
 const config = {
 	reactStrictMode: true,
 	swcMinify: true,
+  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
 	transpilePackages: [
 		'@answeroverflow/api',
 		'@answeroverflow/auth',
