@@ -31,8 +31,8 @@ model Account {
   scope             String?
   id_token          String? // @db.Text
   session_state     String?
-  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  discordAccount    DiscordAccount? @relation(fields: [providerAccountId], references: [id], onDelete: Cascade)
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  discordAccount    DiscordAccount? @relation(fields: [providerAccountId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
@@ -51,7 +51,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([userId])
 }
@@ -80,8 +80,8 @@ model UserServerSettings {
   serverId String
   bitfield Int    @default(0)
 
-  user   DiscordAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  server Server         @relation(fields: [serverId], references: [id])
+  user   DiscordAccount @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  server Server         @relation(fields: [serverId], references: [id], onUpdate: NoAction)
 
   @@id([userId, serverId])
   @@index([userId])
@@ -125,7 +125,7 @@ model Channel {
   // Relations
   parent  Channel?  @relation("ParentChannel", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   threads Channel[] @relation("ParentChannel")
-  server  Server    @relation(fields: [serverId], references: [id])
+  server  Server    @relation(fields: [serverId], references: [id], onUpdate: NoAction)
 
   @@index([serverId])
   @@index([parentId])

@@ -35,7 +35,11 @@ import {
 export async function indexServers(client: Client) {
 	container.logger.info(`Indexing ${client.guilds.cache.size} servers`);
 	for (const guild of client.guilds.cache.values()) {
-		await indexServer(guild);
+		try {
+			await indexServer(guild);
+		} catch (error) {
+			container.logger.error(`Error indexing server ${guild.id}`, error);
+		}
 	}
 }
 
@@ -61,7 +65,10 @@ export async function indexRootChannel(
 
 	const settings = await findChannelById(channel.id);
 
-	if (!settings || !settings.flags.indexingEnabled) {
+	const botCanViewChannel = channel
+		.permissionsFor(channel.client.user)
+		?.has(['ViewChannel', 'ReadMessageHistory']);
+	if (!settings || !settings.flags.indexingEnabled || !botCanViewChannel) {
 		return;
 	}
 	let start =
