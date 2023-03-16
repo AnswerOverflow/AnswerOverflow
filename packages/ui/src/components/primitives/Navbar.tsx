@@ -3,6 +3,7 @@ import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { trpc } from '~ui/utils/index';
+import { trpc } from '~ui/utils/index';
 import { AnswerOverflowLogo } from '../AnswerOverflowLogo';
 import { ThemeSwitcher } from '../ThemeSwitcher';
 import { Button } from './Button';
@@ -13,6 +14,7 @@ import { Fragment } from 'react';
 import { Avatar } from '../primitives/Avatar';
 import { classNames } from '~ui/utils/styling';
 
+const SignedInDropdownMenu = ({ signedInUser }: { signedInUser: User }) => (
 const SignedInDropdownMenu = ({ signedInUser }: { signedInUser: User }) => (
 	<Menu as="div" className="relative inline-block text-left">
 		<Menu.Button>
@@ -106,6 +108,7 @@ export const NavbarRenderer = ({ path, user }: NavbarProps) => {
 					</li>
 					<li className="ml-6 hidden items-center justify-center md:flex">
 						{user ? (
+							<SignedInDropdownMenu signedInUser={user} />
 							<SignedInDropdownMenu signedInUser={user} />
 						) : (
 							// eslint-disable-next-line @typescript-eslint/no-misused-promises

@@ -1,8 +1,11 @@
 import type { z } from 'zod';
 import {
 	addFlagsToUserServerSettings,
+	DiscordAccount,
 	getDefaultDiscordAccount,
 	prisma,
+	zDiscordAccountPrismaCreate,
+	zDiscordAccountPrismaUpdate,
 } from '@answeroverflow/prisma-types';
 import {
 	upsertIgnoredDiscordAccount,
@@ -55,7 +58,7 @@ export async function createDiscordAccount(
 	if (deletedAccount)
 		throw new DBError('Account is ignored', 'IGNORED_ACCOUNT');
 	return prisma.discordAccount.create({
-		data,
+		data: zDiscordAccountPrismaCreate.parse(data),
 	});
 }
 
@@ -69,7 +72,17 @@ export async function createManyDiscordAccounts(
 	const allowedToCreateAccounts = data.filter(
 		(x) => !ignoredIdsLookup.has(x.id),
 	);
-	await prisma.discordAccount.createMany({ data: allowedToCreateAccounts });
+
+	const createOps: Promise<unknown>[] = [];
+	for (let i = 0; i < allowedToCreateAccounts.length; i += 50) {
+		const chunk = allowedToCreateAccounts.slice(i, i + 50);
+		createOps.push(
+			prisma.discordAccount.createMany({
+				data: chunk.map((i) => zDiscordAccountPrismaCreate.parse(i)),
+			}),
+		);
+	}
+	await Promise.all(createOps);
 	return allowedToCreateAccounts.map((i) => getDefaultDiscordAccount(i));
 }
 
@@ -78,20 +91,34 @@ export async function updateDiscordAccount(
 ) {
 	return prisma.discordAccount.update({
 		where: { id: data.id },
-		data,
+		data: zDiscordAccountPrismaUpdate.parse(data),
 	});
 }
 export async function updateManyDiscordAccounts(
 	data: z.infer<typeof zDiscordAccountUpdate>[],
 ) {
-	return prisma.$transaction(
-		data.map((i) =>
-			prisma.discordAccount.update({
-				where: { id: i.id },
-				data: i,
-			}),
-		),
-	);
+	const uniqueAccountsToCreate = new Map<
+		string,
+		z.infer<typeof zDiscordAccountUpdate>
+	>(data.map((i) => [i.id, i]));
+	const accountSet = Array.from(uniqueAccountsToCreate.values());
+
+	const operations: Promise<DiscordAccount[]>[] = [];
+	for (let i = 0; i < accountSet.length; i += 50) {
+		const chunk = accountSet.slice(i, i + 50);
+		operations.push(
+			prisma.$transaction(
+				chunk.map((account) =>
+					prisma.discordAccount.update({
+						where: { id: account.id },
+						data: zDiscordAccountPrismaUpdate.parse(account),
+					}),
+				),
+			),
+		);
+	}
+	const results = await Promise.all(operations);
+	return results.flat();
 }
 
 export async function deleteDiscordAccount(id: string) {

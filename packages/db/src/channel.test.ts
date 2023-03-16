@@ -6,7 +6,11 @@ import {
 	mockServer,
 	mockThread,
 } from '@answeroverflow/db-mock';
-import { addFlagsToChannel, Server } from '@answeroverflow/prisma-types';
+import {
+	addFlagsToChannel,
+	bitfieldToChannelFlags,
+	Server,
+} from '@answeroverflow/prisma-types';
 import { getRandomId } from '@answeroverflow/utils';
 import {
 	createChannel,
@@ -378,5 +382,44 @@ describe('Channel Operations', () => {
 			);
 			expect(found).toContainEqual(addFlagsToChannel(chnl2));
 		});
+	});
+});
+
+describe('Channel Flags', () => {
+	it('should resolve enable indexing on correctly', () => {
+		expect(bitfieldToChannelFlags(1 << 0).indexingEnabled).toBeTruthy();
+	});
+	it('should resolve disable indexing on correctly', () => {
+		expect(bitfieldToChannelFlags(0).indexingEnabled).toBeFalsy();
+	});
+	it('should resolve enable mark solution correctly', () => {
+		expect(bitfieldToChannelFlags(1 << 1).markSolutionEnabled).toBeTruthy();
+	});
+	it('should resolve disable mark solution correctly', () => {
+		expect(bitfieldToChannelFlags(0).markSolutionEnabled).toBeFalsy();
+	});
+	it('should resolve enable send mark solution instructions correctly', () => {
+		expect(
+			bitfieldToChannelFlags(1 << 2).sendMarkSolutionInstructionsInNewThreads,
+		).toBeTruthy();
+	});
+	it('should resolve disable send mark solution instructions correctly', () => {
+		expect(
+			bitfieldToChannelFlags(0).sendMarkSolutionInstructionsInNewThreads,
+		).toBeFalsy();
+	});
+	it('should resolve auto thread enabled correctly', () => {
+		expect(bitfieldToChannelFlags(1 << 3).autoThreadEnabled).toBeTruthy();
+	});
+	it('should resolve auto thread disabled correctly', () => {
+		expect(bitfieldToChannelFlags(0).autoThreadEnabled).toBeFalsy();
+	});
+	it('should resolve forum guidelines consent enabled correctly', () => {
+		expect(
+			bitfieldToChannelFlags(1 << 4).forumGuidelinesConsentEnabled,
+		).toBeTruthy();
+	});
+	it('should resolve forum guidelines consent disabled correctly', () => {
+		expect(bitfieldToChannelFlags(0).forumGuidelinesConsentEnabled).toBeFalsy();
 	});
 });

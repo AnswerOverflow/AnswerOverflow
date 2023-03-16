@@ -55,9 +55,7 @@ export function ManageServerCard({ server, role }: ManageServerCardProps) {
 						target={'Blank'}
 						referrerPolicy="no-referrer"
 					>
-						<Button type="solid" color="black">
-							Manage
-						</Button>
+						<Button variant="default">Manage</Button>
 					</Link>
 				</div>
 			</div>

@@ -8,6 +8,7 @@ import {
 	dictToBitfield,
 	UserServerSettingsWithFlags,
 	userServerSettingsFlags,
+	zUserServerSettingsPrismaCreate,
 } from '@answeroverflow/prisma-types';
 import { upsertDiscordAccount, zDiscordAccountUpsert } from './discord-account';
 import {
@@ -166,7 +167,7 @@ export async function createUserServerSettings(
 		data,
 	);
 	const created = await prisma.userServerSettings.create({
-		data: updateData,
+		data: zUserServerSettingsPrismaCreate.parse(updateData),
 	});
 	return addFlagsToUserServerSettings(created);
 }
@@ -195,7 +196,7 @@ export async function updateUserServerSettings(
 				serverId: data.serverId,
 			},
 		},
-		data: updateData,
+		data: zUserServerSettingsPrismaCreate.parse(updateData),
 	});
 	return addFlagsToUserServerSettings(updated);
 }
