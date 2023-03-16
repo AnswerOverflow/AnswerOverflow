@@ -208,6 +208,13 @@ export async function fetchAllChannelMessagesWithThreads(
 			fetchAll: true,
 		});
 		const activeThreads = await channel.threads.fetchActive();
+		container.logger.info(
+			`Found ${archivedThreads.threads.size} archived threads and ${
+				activeThreads.threads.size
+			} active threads, a total of ${
+				archivedThreads.threads.size + activeThreads.threads.size
+			} threads`,
+		);
 		threads = [
 			...archivedThreads.threads.values(),
 			...activeThreads.threads.values(),
@@ -219,6 +226,11 @@ export async function fetchAllChannelMessagesWithThreads(
 					: true,
 			)
 			.map((x) => x as PublicThreadChannel);
+		container.logger.info(
+			`Pruned threads to index from ${
+				activeThreads.threads.size + archivedThreads.threads.size
+			} to ${threads.length} threads`,
+		);
 		const threadsWithoutLastMessageId = threads.filter((x) => !x.lastMessageId);
 		if (threadsWithoutLastMessageId.length > 0) {
 			container.logger.warn(
