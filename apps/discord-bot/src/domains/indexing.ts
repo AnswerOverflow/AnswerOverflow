@@ -27,7 +27,10 @@ import {
 	toAOThread,
 } from '~discord-bot/utils/conversions';
 import { container } from '@sapphire/framework';
-import { sortMessagesById } from '@answeroverflow/discordjs-utils';
+import {
+	isSnowflakeLarger,
+	sortMessagesById,
+} from '@answeroverflow/discordjs-utils';
 
 export async function indexServers(client: Client) {
 	container.logger.info(`Indexing ${client.guilds.cache.size} servers`);
@@ -205,12 +208,35 @@ export async function fetchAllChannelMessagesWithThreads(
 			fetchAll: true,
 		});
 		const activeThreads = await channel.threads.fetchActive();
+		container.logger.info(
+			`Found ${archivedThreads.threads.size} archived threads and ${
+				activeThreads.threads.size
+			} active threads, a total of ${
+				archivedThreads.threads.size + activeThreads.threads.size
+			} threads`,
+		);
 		threads = [
 			...archivedThreads.threads.values(),
 			...activeThreads.threads.values(),
 		]
 			.filter((x) => x.type === ChannelType.PublicThread)
+			.filter((x) =>
+				x.lastMessageId
+					? isSnowflakeLarger(x.lastMessageId, options.start ?? '0')
+					: true,
+			)
 			.map((x) => x as PublicThreadChannel);
+		container.logger.info(
+			`Pruned threads to index from ${
+				activeThreads.threads.size + archivedThreads.threads.size
+			} to ${threads.length} threads`,
+		);
+		const threadsWithoutLastMessageId = threads.filter((x) => !x.lastMessageId);
+		if (threadsWithoutLastMessageId.length > 0) {
+			container.logger.warn(
+				`Found ${threadsWithoutLastMessageId.length} threads without a last message id`,
+			);
+		}
 	} else {
 		/*
       Handles indexing of text channels and news channels
@@ -242,8 +268,9 @@ export async function fetchAllChannelMessagesWithThreads(
 
 export async function fetchAllMessages(
 	channel: TextBasedChannel,
-	{ start, limit }: MessageFetchOptions = {},
+	opts: MessageFetchOptions = {},
 ) {
+	const { start, limit = 20000 } = opts;
 	const messages: Message[] = [];
 	// Create message pointer
 	const initialFetch = await channel.messages.fetch({
@@ -265,8 +292,5 @@ export async function fetchAllMessages(
 					0 < sortedMessagesById.length ? sortedMessagesById.at(-1) : null;
 			});
 	}
-	if (limit) {
-		return messages.slice(0, limit);
-	}
-	return messages;
+	return messages.slice(0, limit);
 }

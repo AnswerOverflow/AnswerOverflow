@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
-import { Events, Guild } from 'discord.js';
+import { ChannelType, EmbedBuilder, Events, Guild } from 'discord.js';
 import {
 	ALLOWED_ROOT_CHANNEL_TYPES,
 	upsertServer,
@@ -42,6 +42,43 @@ async function syncServer(guild: Guild) {
 	);
 }
 
+function makeGuildEmbed(guild: Guild, joined: boolean) {
+	const numberOfForumChannels = guild.channels.cache
+		.filter((c) => c.type === ChannelType.GuildForum)
+		.size.toString();
+	return new EmbedBuilder()
+		.setTitle(joined ? 'Joined Server' : 'Left Server')
+		.setDescription(
+			joined ? `Joined server ${guild.name}` : `Left server ${guild.name}`,
+		)
+		.setThumbnail(guild.iconURL())
+		.setTimestamp()
+		.setColor(joined ? 'Green' : 'Red')
+		.setImage(guild.bannerURL() ?? guild.splashURL())
+		.setFields([
+			{
+				name: 'Members',
+				value: guild.memberCount.toString(),
+				inline: true,
+			},
+			{
+				name: 'Forum Channels',
+				value: numberOfForumChannels,
+				inline: true,
+			},
+			{
+				name: 'Age',
+				value: guild.createdAt.toDateString(),
+				inline: false,
+			},
+			{
+				name: 'Id',
+				value: guild.id,
+				inline: false,
+			},
+		]);
+}
+
 @ApplyOptions<Listener.Options>({ once: true, event: 'ready' })
 export class SyncOnReady extends Listener {
 	public async run() {
@@ -58,6 +95,14 @@ export class SyncOnReady extends Listener {
 export class SyncOnJoin extends Listener {
 	public async run(guild: Guild) {
 		await syncServer(guild);
+		if (process.env.NODE_ENV !== 'test') {
+			const rhysUser = await this.container.client.users.fetch(
+				'523949187663134754',
+			);
+			await rhysUser.send({
+				embeds: [makeGuildEmbed(guild, true)],
+			});
+		}
 	}
 }
 
@@ -79,6 +124,14 @@ export class SyncOnDelete extends Listener {
 			},
 			update: { kickedTime: new Date() },
 		});
+		if (process.env.NODE_ENV !== 'test') {
+			const rhysUser = await this.container.client.users.fetch(
+				'523949187663134754',
+			);
+			await rhysUser.send({
+				embeds: [makeGuildEmbed(guild, false)],
+			});
+		}
 	}
 }
 

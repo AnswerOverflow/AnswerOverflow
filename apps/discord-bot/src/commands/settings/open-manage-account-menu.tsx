@@ -10,7 +10,7 @@ import {
 	type ChatInputCommandInteraction,
 } from 'discord.js';
 import React from 'react';
-import { ephemeralReply } from '~discord-bot/utils/utils';
+import { ephemeralReply, getCommandIds } from '~discord-bot/utils/utils';
 import { getDefaultUserServerSettingsWithFlags } from '@answeroverflow/db';
 import { createMemberCtx } from '~discord-bot/utils/context';
 
@@ -26,11 +26,19 @@ export class OpenManageAccountMenuCommand extends Command {
 	public override registerApplicationCommands(
 		registry: ChatInputCommand.Registry,
 	) {
+		const ids = getCommandIds({
+			local: '1073363501659201646',
+			staging: '1081235691649904741',
+			production: '1013627262068859000',
+		});
 		registry.registerChatInputCommand(
 			new SlashCommandBuilder()
 				.setName(this.name)
 				.setDescription(this.description)
 				.setDMPermission(false),
+			{
+				idHints: ids,
+			},
 		);
 	}
 

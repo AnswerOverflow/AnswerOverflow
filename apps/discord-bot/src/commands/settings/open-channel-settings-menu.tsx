@@ -12,7 +12,7 @@ import {
 	type ChatInputCommandInteraction,
 } from 'discord.js';
 import React from 'react';
-import { ephemeralReply } from '~discord-bot/utils/utils';
+import { ephemeralReply, getCommandIds } from '~discord-bot/utils/utils';
 import {
 	ChannelWithFlags,
 	getDefaultChannelWithFlags,
@@ -31,6 +31,11 @@ export class ChannelSettingsCommand extends Command {
 	public override registerApplicationCommands(
 		registry: ChatInputCommand.Registry,
 	) {
+		const ids = getCommandIds({
+			local: '1073363499532701806',
+			staging: '1081235690089623672',
+			production: '1015112483570188348',
+		});
 		registry.registerChatInputCommand(
 			new SlashCommandBuilder()
 				.setName(this.name)
@@ -40,7 +45,7 @@ export class ChannelSettingsCommand extends Command {
 					PermissionsBitField.resolve('ManageGuild'),
 				),
 			{
-				idHints: ['1048055954618454026'],
+				idHints: ids,
 			},
 		);
 	}
