@@ -333,13 +333,16 @@ export async function fetchAllChannelMessagesWithThreads(
 		try {
 			indexedThreads++;
 			container.logger.info(
-				` (${indexedThreads}/${threadsToParse.length}) Fetching messages for thread ${thread.id} `,
-				`Name:  ${thread.name}`,
-				`Parent channel ${thread.parentId ?? 'no parent id'} ${
+				`(${indexedThreads}/${
+					threadsToParse.length
+				}) Fetching messages for thread ${thread.id}
+Name:  ${thread.name}
+Parent channel ${thread.parentId ?? 'no parent id'} ${
 					thread.parent ? thread.parent.name : 'no parent'
-				}`,
-				`Server ${thread.guildId}
-         ${thread.guild.name}`,
+				}
+Server ${thread.guildId} ${thread.guild.name}
+==========
+        `,
 			);
 			const threadMessages = await fetchAllMessages(thread);
 			collectedMessages.push(...threadMessages);
