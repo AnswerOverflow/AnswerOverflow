@@ -8,6 +8,7 @@ import {
 	findChannelById,
 } from '@answeroverflow/db';
 import {
+	AnyThreadChannel,
 	ChannelType,
 	Client,
 	DiscordAPIError,
@@ -53,7 +54,7 @@ export async function indexServers(client: Client) {
 }
 
 async function indexServer(guild: Guild) {
-	container.logger.info(`Indexing server ${guild.id}`);
+	container.logger.info(`Indexing server ${guild.id} | ${guild.name}`);
 	for await (const channel of guild.channels.cache.values()) {
 		const isIndexableChannelType =
 			channel.type === ChannelType.GuildText ||
@@ -68,10 +69,6 @@ async function indexServer(guild: Guild) {
 export async function indexRootChannel(
 	channel: TextChannel | NewsChannel | ForumChannel,
 ) {
-	container.logger.info(
-		`Attempting to indexing channel ${channel.id} | ${channel.name}`,
-	);
-
 	const settings = await findChannelById(channel.id);
 
 	const botCanViewChannel = channel
@@ -80,6 +77,9 @@ export async function indexRootChannel(
 	if (!settings || !settings.flags.indexingEnabled || !botCanViewChannel) {
 		return;
 	}
+
+	container.logger.info(`Indexing channel ${channel.id} | ${channel.name}`);
+
 	let start =
 		settings.lastIndexedSnowflake == null
 			? undefined
@@ -215,10 +215,11 @@ export async function fetchAllChannelMessagesWithThreads(
 	channel: ForumChannel | NewsChannel | TextChannel,
 	options: MessageFetchOptions = {},
 ) {
-	container.logger.info(`Fetching all messages for channel ${channel.id} ${
-		channel.name
-	} with options ${JSON.stringify(options)}
-  `);
+	container.logger.info(
+		`Fetching all messages for channel ${channel.id} ${
+			channel.name
+		} with options ${JSON.stringify(options)}`,
+	);
 	let threads: PublicThreadChannel[] = [];
 	const collectedMessages: Message[] = [];
 
@@ -226,23 +227,44 @@ export async function fetchAllChannelMessagesWithThreads(
       Handles indexing of forum channels
       Forum channels have no messages in them, so we have to fetch the threads
   */
+
 	if (channel.type === ChannelType.GuildForum) {
-		const archivedThreads = await channel.threads.fetchArchived({
-			type: 'public',
-			fetchAll: true,
-		});
+		const archivedThreads: AnyThreadChannel[] = [];
+		container.logger.info(
+			`Fetching archived threads for channel ${channel.id} ${channel.name}`,
+		);
+		const fetchAllArchivedThreads = async (before?: number | string) => {
+			const fetched = await channel.threads.fetchArchived({
+				type: 'public',
+				fetchAll: true,
+				before,
+			});
+			const hasMoreString =
+				fetched.hasMore !== undefined ? fetched.hasMore.toString() : 'unknown';
+			container.logger.info(
+				`Fetched ${fetched.threads.size} archived threads for channel ${
+					channel.id
+				} ${channel.name} in server
+            ${channel.guild.name}
+        \nbefore: ${before ?? 'none'} has more: ${hasMoreString}`,
+			);
+			const last = fetched.threads.last();
+			if (!fetched.hasMore || !last || fetched.threads.size == 0) return;
+			archivedThreads.push(...fetched.threads.values());
+			await fetchAllArchivedThreads(last.archiveTimestamp ?? last.id);
+		};
+
+		await fetchAllArchivedThreads();
+
 		const activeThreads = await channel.threads.fetchActive();
 		container.logger.info(
-			`Found ${archivedThreads.threads.size} archived threads and ${
+			`Found ${archivedThreads.length} archived threads and ${
 				activeThreads.threads.size
 			} active threads, a total of ${
-				archivedThreads.threads.size + activeThreads.threads.size
+				archivedThreads.length + activeThreads.threads.size
 			} threads`,
 		);
-		threads = [
-			...archivedThreads.threads.values(),
-			...activeThreads.threads.values(),
-		]
+		threads = [...archivedThreads, ...activeThreads.threads.values()]
 			.filter((x) => x.type === ChannelType.PublicThread)
 			.filter((x) =>
 				x.lastMessageId
@@ -252,7 +274,7 @@ export async function fetchAllChannelMessagesWithThreads(
 			.map((x) => x as PublicThreadChannel);
 		container.logger.info(
 			`Pruned threads to index from ${
-				activeThreads.threads.size + archivedThreads.threads.size
+				activeThreads.threads.size + archivedThreads.length
 			} to ${threads.length} threads`,
 		);
 		const threadsWithoutLastMessageId = threads.filter((x) => !x.lastMessageId);
