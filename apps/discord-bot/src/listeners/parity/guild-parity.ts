@@ -7,6 +7,7 @@ import {
 	upsertManyChannels,
 } from '@answeroverflow/db';
 import { toAOChannel, toAOServer } from '~discord-bot/utils/conversions';
+import { delay } from '@answeroverflow/discordjs-mock';
 
 /*
   Guild related events are tracked here, this may make sense to split into multiple files as the complexity grows.
@@ -79,9 +80,10 @@ function makeGuildEmbed(guild: Guild, joined: boolean) {
 		]);
 }
 
-@ApplyOptions<Listener.Options>({ once: true, event: 'ready' })
+@ApplyOptions<Listener.Options>({ once: true, event: Events.ClientReady })
 export class SyncOnReady extends Listener {
 	public async run() {
+		if (process.env.NODE_ENV === 'production') await delay(20 * 1000); // give time for dbs to start up
 		// 1. Sync all of the servers to have the most up to date data
 		const guilds = this.container.client.guilds.cache;
 		await Promise.all(guilds.map((guild) => syncServer(guild)));
