@@ -1,22 +1,36 @@
 import { Navbar } from './primitives/Navbar';
 import { Footer } from './Footer';
+import { useRouter } from 'next/router';
 
-export const PageWrapper = ({
-	children,
-	disableDefaultBackground,
-}: {
-	children: React.ReactNode;
-	disableDefaultBackground?: boolean;
-}) => (
-	<div className="mx-auto w-full overflow-y-scroll bg-ao-white scrollbar-hide overflow-x-hidden dark:bg-ao-black sm:px-4">
-		<Navbar />
-		<main
-			className={`${
-				disableDefaultBackground ? '' : 'bg-ao-white dark:bg-ao-black'
-			} px-4 sm:px-[4rem] 2xl:px-[6rem]`}
-		>
-			{children}
-		</main>
-		<Footer />
-	</div>
-);
+export interface PageWrapperProps extends React.PropsWithChildren {
+	/**
+	 * @example ['/', ["/foo"]]
+	 */
+	disabledRoutes?: string[];
+}
+
+export const PageWrapper = ({ children, disabledRoutes }: PageWrapperProps) => {
+	const router = useRouter();
+	// Check if running in storybook
+	if (process.env.STORYBOOK) {
+		return <PageWrapperRenderer>{children}</PageWrapperRenderer>;
+	} else {
+		if (disabledRoutes?.includes(router.pathname)) {
+			return <>{children}</>;
+		} else {
+			return <PageWrapperRenderer>{children}</PageWrapperRenderer>;
+		}
+	}
+};
+
+export const PageWrapperRenderer = ({ children }: PageWrapperProps) => {
+	return (
+		<div className="mx-auto w-full overflow-y-scroll bg-ao-white scrollbar-hide overflow-x-hidden dark:bg-ao-black sm:px-4">
+			<Navbar />
+			<main className="bg-ao-white px-4 dark:bg-ao-black sm:px-[4rem] 2xl:px-[6rem]">
+				{children}
+			</main>
+			<Footer />
+		</div>
+	);
+};
