@@ -1,5 +1,6 @@
 import type { APISearchResult } from '@answeroverflow/api';
 import { useState } from 'react';
+import { Heading } from '../primitives/Heading';
 
 import { Input } from '~ui/components/primitives/Input';
 import { SearchResult } from '~ui/components/search/SearchResult';
@@ -38,9 +39,9 @@ export const SearchPage = ({
 
 	return (
 		<div className="w-full">
-			<h1 className="py-4 font-header text-3xl text-ao-black dark:text-ao-white xl:text-5xl">
+			<Heading.H1 classNameOverride="py-4 text-3xl xl:text-5xl">
 				Search
-			</h1>
+			</Heading.H1>
 			<form
 				onSubmit={(e) => {
 					e.preventDefault();

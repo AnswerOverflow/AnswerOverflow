@@ -8,6 +8,7 @@ import {
 import { createContext, useContext } from 'react';
 import { ServerInvite } from '../ServerInvite';
 import Link from 'next/link';
+import { Paragraph } from '../primitives/Paragraph';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const SearchResultContext = createContext<{
@@ -110,7 +111,7 @@ const SearchResultSidebar = () => {
 const NoSolution = ({ messageId }: { messageId: string }) => {
 	return (
 		<div className="w-full rounded-bl-standard border-2 border-black/[.13] bg-white/[.01] dark:border-white/[.13]">
-			<p className="p-6 font-body text-ao-black dark:text-white/[.66]">
+			<Paragraph classNameOverride="p-6 font-body text-ao-black dark:text-white/[.66]">
 				No replies marked as solution...{' '}
 				<Link
 					href={`/m/${messageId}`}
@@ -118,7 +119,7 @@ const NoSolution = ({ messageId }: { messageId: string }) => {
 				>
 					View thread
 				</Link>
-			</p>
+			</Paragraph>
 		</div>
 	);
 };
