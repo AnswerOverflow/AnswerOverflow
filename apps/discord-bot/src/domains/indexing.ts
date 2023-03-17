@@ -253,7 +253,6 @@ export async function fetchAllChannelMessagesWithThreads(
 				!fetched.hasMore ||
 				!last ||
 				fetched.threads.size == 0 ||
-				archivedThreads.length > maxNumberOfThreadsToParse ||
 				!isSnowflakeLarger(last.id, options.start ?? '0') // If the last thread is smaller than the start, we've seen those threads already
 			)
 				return;
