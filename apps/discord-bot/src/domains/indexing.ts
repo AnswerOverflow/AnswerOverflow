@@ -248,19 +248,20 @@ export async function fetchAllChannelMessagesWithThreads(
 			});
 
 			const last = fetched.threads.last();
+			archivedThreads.push(...fetched.threads.values());
 			if (
 				!fetched.hasMore ||
 				!last ||
 				fetched.threads.size == 0 ||
-				archivedThreads.length > maxNumberOfThreadsToParse
+				archivedThreads.length > maxNumberOfThreadsToParse ||
+				!isSnowflakeLarger(last.id, options.start ?? '0') // If the last thread is smaller than the start, we've seen those threads already
 			)
 				return;
-			archivedThreads.push(...fetched.threads.values());
 			await fetchAllArchivedThreads(last.archiveTimestamp ?? last.id);
 		};
 
 		// Fetching all archived threads is very expensive, so only do it on the very first indexing pass
-		if (options.start || process.env.NODE_ENV === 'test') {
+		if (process.env.NODE_ENV === 'test') {
 			const data = await channel.threads.fetchArchived({
 				type: 'public',
 				fetchAll: true,
@@ -333,11 +334,13 @@ export async function fetchAllChannelMessagesWithThreads(
 		try {
 			indexedThreads++;
 			container.logger.info(
-				`Fetching messages for thread ${thread.id} ${thread.name} in channel ${
-					thread.parentId ?? 'no parent id'
-				} ${thread.parent ? thread.parent.name : 'no parent'} in server ${
-					thread.guildId
-				} ${thread.guild.name} (${indexedThreads}/${threadsToParse.length})`,
+				` (${indexedThreads}/${threadsToParse.length}) Fetching messages for thread ${thread.id} `,
+				`Name:  ${thread.name}`,
+				`Parent channel ${thread.parentId ?? 'no parent id'} ${
+					thread.parent ? thread.parent.name : 'no parent'
+				}`,
+				`Server ${thread.guildId}
+         ${thread.guild.name}`,
 			);
 			const threadMessages = await fetchAllMessages(thread);
 			collectedMessages.push(...threadMessages);
