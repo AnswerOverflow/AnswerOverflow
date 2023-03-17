@@ -285,7 +285,8 @@ export async function fetchAllChannelMessagesWithThreads(
 				archivedThreads.length + activeThreads.threads.size
 			} threads`,
 		);
-		threads = [...archivedThreads, ...activeThreads.threads.values()]
+		threads = [...archivedThreads.reverse(), ...activeThreads.threads.values()]
+			.reverse()
 			.filter((x) => x.type === ChannelType.PublicThread)
 			.filter((x) =>
 				x.lastMessageId
