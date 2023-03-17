@@ -286,7 +286,6 @@ export async function fetchAllChannelMessagesWithThreads(
 			} threads`,
 		);
 		threads = [...archivedThreads.reverse(), ...activeThreads.threads.values()]
-			.reverse()
 			.filter((x) => x.type === ChannelType.PublicThread)
 			.filter((x) =>
 				x.lastMessageId
