@@ -8,6 +8,9 @@ import { delay } from '@answeroverflow/discordjs-mock';
 @ApplyOptions<Listener.Options>({ once: true, event: Events.ClientReady })
 export class Indexing extends Listener {
 	public async run(client: Client) {
+		if (process.env.INDEXING_DISABLED) {
+			return;
+		}
 		// Wait for everything to be ready
 		if (process.env.NODE_ENV === 'production') await delay(60 * 1000);
 		const intervalInHours = process.env.INDEXING_INTERVAL_IN_HOURS
