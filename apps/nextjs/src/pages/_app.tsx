@@ -56,7 +56,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 	}, []);
 	return (
 		<SessionProvider session={session}>
-			<PageWrapper>
+			<PageWrapper disabledRoutes={['/']}>
 				<MDXProvider components={components}>
 					<Component {...pageProps} />
 				</MDXProvider>
