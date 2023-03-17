@@ -6,7 +6,7 @@ import { Navbar } from '../primitives/Navbar';
 
 export const Home = () => {
 	const DownChevron = () => (
-		<div className="absolute">
+		<div className="absolute bottom-0 left-1/2">
 			<div className="mx-auto h-16 w-16 text-black/[.65] dark:text-white/[.65]">
 				{<ChevronDownIcon strokeWidth={0.5} />}
 			</div>
@@ -16,7 +16,7 @@ export const Home = () => {
 		<div className="bg-[linear-gradient(180.49deg,_#1A1818_-12.07%,_#0E0D0D_-12.07%,_#040405_-12.06%,_#101214_103.52%)] sm:px-4">
 			<Navbar />
 
-			<div className="relative z-50 min-h-[calc(100vh-10rem)] py-10 px-4 sm:px-[4rem] 2xl:px-[6rem]">
+			<div className="relative z-20 min-h-[calc(100vh-10rem)] px-4 pt-10 pb-20 sm:px-[4rem] 2xl:px-[6rem]">
 				<DownChevron />
 				<div className="flex h-full w-full flex-row transition-all lg:gap-32 2xl:gap-72">
 					<HomeLeadText />
