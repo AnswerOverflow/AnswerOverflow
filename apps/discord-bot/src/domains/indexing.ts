@@ -11,7 +11,6 @@ import {
 	AnyThreadChannel,
 	ChannelType,
 	Client,
-	Collection,
 	DiscordAPIError,
 	ForumChannel,
 	Guild,
@@ -216,10 +215,6 @@ export async function fetchAllChannelMessagesWithThreads(
 	channel: ForumChannel | NewsChannel | TextChannel,
 	options: MessageFetchOptions = {},
 ) {
-	const maxNumberOfThreadsToParse = process.env
-		.MAX_NUMBER_OF_THREADS_TO_PARSE_AT_A_TIME
-		? parseInt(process.env.MAX_NUMBER_OF_THREADS_TO_PARSE_AT_A_TIME)
-		: 1000;
 	container.logger.info(
 		`Fetching all messages for channel ${channel.id} ${
 			channel.name
@@ -249,13 +244,7 @@ export async function fetchAllChannelMessagesWithThreads(
 
 			const last = fetched.threads.last();
 			archivedThreads.push(...fetched.threads.values());
-			if (
-				!fetched.hasMore ||
-				!last ||
-				fetched.threads.size == 0 ||
-				!isSnowflakeLarger(last.id, options.start ?? '0') // If the last thread is smaller than the start, we've seen those threads already
-			)
-				return;
+			if (!fetched.hasMore || !last || fetched.threads.size == 0) return;
 			await fetchAllArchivedThreads(last.archiveTimestamp ?? last.id);
 		};
 
@@ -274,10 +263,7 @@ export async function fetchAllChannelMessagesWithThreads(
 			`Fetched ${archivedThreads.length} archived threads for channel ${channel.id} ${channel.name} in server ${channel.guildId} ${channel.guild.name}`,
 		);
 
-		const activeThreads =
-			archivedThreads.length < maxNumberOfThreadsToParse
-				? await channel.threads.fetchActive()
-				: { threads: new Collection<Snowflake, AnyThreadChannel>() };
+		const activeThreads = await channel.threads.fetchActive();
 		container.logger.info(
 			`Found ${archivedThreads.length} archived threads and ${
 				activeThreads.threads.size
@@ -285,6 +271,8 @@ export async function fetchAllChannelMessagesWithThreads(
 				archivedThreads.length + activeThreads.threads.size
 			} threads`,
 		);
+
+		// archived threads are sorted by archive timestamp from newest to oldest  so we reverse them
 		threads = [...archivedThreads.reverse(), ...activeThreads.threads.values()]
 			.filter((x) => x.type === ChannelType.PublicThread)
 			.filter((x) =>
@@ -324,18 +312,15 @@ export async function fetchAllChannelMessagesWithThreads(
 			}
 		}
 	}
-	const threadsToParse = threads.slice(0, maxNumberOfThreadsToParse);
-	container.logger.info(
-		`Found ${threads.length} threads to index. Parsing ${threadsToParse.length} threads`,
-	);
+	container.logger.info(`Found ${threads.length} threads to index.`);
 	let indexedThreads = 0;
-	for await (const thread of threadsToParse) {
+	for await (const thread of threads) {
 		try {
 			indexedThreads++;
 			container.logger.info(
-				`(${indexedThreads}/${
-					threadsToParse.length
-				}) Fetching messages for thread ${thread.id}
+				`(${indexedThreads}/${threads.length}) Fetching messages for thread ${
+					thread.id
+				}
 Name:  ${thread.name}
 Parent channel ${thread.parentId ?? 'no parent id'} ${
 					thread.parent ? thread.parent.name : 'no parent'
@@ -364,27 +349,21 @@ export async function fetchAllMessages(
 		limit = channel.type === ChannelType.GuildText ? 1000 : 20000,
 	} = opts;
 	const messages: Message[] = [];
-	// Create message pointer
-	const initialFetch = await channel.messages.fetch({
-		limit: 1,
-		after: start ?? '0',
-	}); // TODO: Check if 0 works correctly for starting at the beginning
-	let message = initialFetch.size === 1 ? initialFetch.first() : null;
-	messages.push(...initialFetch.values());
 
+	let message: Message | undefined = undefined;
 	const asyncMessageFetch = async (after: string) => {
 		await channel.messages.fetch({ limit: 100, after }).then((messagePage) => {
 			const sortedMessagesById = sortMessagesById([...messagePage.values()]);
 			messages.push(...sortedMessagesById.values());
 			// Update our message pointer to be last message in page of messages
 			message =
-				0 < sortedMessagesById.length ? sortedMessagesById.at(-1) : null;
+				0 < sortedMessagesById.length ? sortedMessagesById.at(-1) : undefined;
 		});
 		if (message && (limit === undefined || messages.length < limit)) {
 			await asyncMessageFetch(message.id);
 		}
 	};
 
-	await asyncMessageFetch(message?.id ?? '0');
+	await asyncMessageFetch(start ?? '0');
 	return messages.slice(0, limit);
 }
