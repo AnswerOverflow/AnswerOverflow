@@ -218,6 +218,8 @@ export async function fetchAllChannelMessagesWithThreads(
 	container.logger.info(
 		`Fetching all messages for channel ${channel.id} ${
 			channel.name
+		} in server ${channel.guildId} ${
+			channel.guild.name
 		} with options ${JSON.stringify(options)}`,
 	);
 	let threads: PublicThreadChannel[] = [];
@@ -231,7 +233,7 @@ export async function fetchAllChannelMessagesWithThreads(
 	if (channel.type === ChannelType.GuildForum) {
 		const archivedThreads: AnyThreadChannel[] = [];
 		container.logger.info(
-			`Fetching archived threads for channel ${channel.id} ${channel.name}`,
+			`Fetching archived threads for channel ${channel.id} ${channel.name} in server ${channel.guildId} ${channel.guild.name}`,
 		);
 		const fetchAllArchivedThreads = async (before?: number | string) => {
 			const fetched = await channel.threads.fetchArchived({
@@ -239,22 +241,30 @@ export async function fetchAllChannelMessagesWithThreads(
 				fetchAll: true,
 				before,
 			});
-			const hasMoreString =
-				fetched.hasMore !== undefined ? fetched.hasMore.toString() : 'unknown';
-			container.logger.info(
-				`Fetched ${fetched.threads.size} archived threads for channel ${
-					channel.id
-				} ${channel.name} in server
-            ${channel.guild.name}
-        \nbefore: ${before ?? 'none'} has more: ${hasMoreString}`,
-			);
+
 			const last = fetched.threads.last();
 			if (!fetched.hasMore || !last || fetched.threads.size == 0) return;
 			archivedThreads.push(...fetched.threads.values());
 			await fetchAllArchivedThreads(last.archiveTimestamp ?? last.id);
 		};
 
-		await fetchAllArchivedThreads();
+		// Fetching all archived threads is very expensive, so only do it on the very first indexing pass
+		if (options.start || process.env.NODE_ENV === 'test') {
+			const data = await channel.threads.fetchArchived(
+				{
+					type: 'public',
+					fetchAll: true,
+				},
+				false,
+			);
+			archivedThreads.push(...data.threads.values());
+		} else {
+			await fetchAllArchivedThreads();
+		}
+
+		container.logger.info(
+			`Fetched ${archivedThreads.length} archived threads for channel ${channel.id} ${channel.name} in server ${channel.guildId} ${channel.guild.name}`,
+		);
 
 		const activeThreads = await channel.threads.fetchActive();
 		container.logger.info(
@@ -304,8 +314,17 @@ export async function fetchAllChannelMessagesWithThreads(
 		}
 	}
 	container.logger.info(`Found ${threads.length} threads to index`);
+	let indexedThreads = 0;
 	for await (const thread of threads) {
 		try {
+			indexedThreads++;
+			container.logger.info(
+				`Fetching messages for thread ${thread.id} ${thread.name} in channel ${
+					thread.parentId ?? 'no parent id'
+				} ${thread.parent ? thread.parent.name : 'no parent'} in server ${
+					thread.guildId
+				} ${thread.guild.name} (${indexedThreads}/${threads.length})`,
+			);
 			const threadMessages = await fetchAllMessages(thread);
 			collectedMessages.push(...threadMessages);
 		} catch (error) {
@@ -335,11 +354,7 @@ export async function fetchAllMessages(
 	messages.push(...initialFetch.values());
 
 	const asyncMessageFetch = async (after: string) => {
-		container.logger.debug(
-			`Collected ${messages.length}/${limit} messages. After message ${after} in channel ${channel.id}`,
-		);
 		await channel.messages.fetch({ limit: 100, after }).then((messagePage) => {
-			// container.logger.debug(`Received ${messagePage.size} messages`);
 			const sortedMessagesById = sortMessagesById([...messagePage.values()]);
 			messages.push(...sortedMessagesById.values());
 			// Update our message pointer to be last message in page of messages
