@@ -12,7 +12,7 @@ export class Indexing extends Listener {
 			return;
 		}
 		// Wait for everything to be ready
-		if (process.env.NODE_ENV === 'production') await delay(60 * 1000);
+		if (process.env.NODE_ENV === 'production') await delay(120 * 1000);
 		const intervalInHours = process.env.INDEXING_INTERVAL_IN_HOURS
 			? parseFloat(process.env.INDEXING_INTERVAL_IN_HOURS)
 			: 24;
