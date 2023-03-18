@@ -10,9 +10,20 @@ export const makeServerIconLink = (server: ServerPublic, size: number = 64) => {
 	return `https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png?size=${size}`;
 };
 
-export function ServerIcon({ server, size = 'md', ...props }: ServerIconProps) {
+export function ServerIcon({
+	server,
+	size = 'md',
+	className,
+	...props
+}: ServerIconProps) {
 	const serverIconUrl = makeServerIconLink(server, getAvatarSize(size));
 	return (
-		<Avatar url={serverIconUrl} alt={server.name} size={size} {...props} />
+		<Avatar
+			url={serverIconUrl}
+			alt={server.name}
+			size={size}
+			className={className}
+			{...props}
+		/>
 	);
 }

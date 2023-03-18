@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { twMerge } from 'tailwind-merge';
 
 export type AvatarSize = 'sm' | 'md' | 'lg';
 
@@ -6,6 +7,7 @@ export type AvatarProps = {
 	size?: AvatarSize;
 	url?: string | null;
 	alt?: string | null;
+	className?: string;
 };
 
 export function getAvatarSize(size: AvatarSize) {
@@ -23,11 +25,15 @@ export function Avatar({
 	url,
 	alt = 'Profile Avatar',
 	size = 'md',
+	className,
 }: AvatarProps) {
 	if (!alt) alt = 'Profile Avatar';
 	return (
 		<span
-			className={`inline-flex items-center justify-center rounded-full bg-neutral-50 dark:bg-neutral-700`}
+			className={`${twMerge(
+				'inline-flex aspect-square items-center justify-center rounded-full bg-neutral-50 dark:bg-neutral-700',
+				className ?? '',
+			)}`}
 		>
 			{url ? (
 				<Image
