@@ -1,28 +1,38 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import type { Listener, SapphireClient } from "@sapphire/framework";
-import { Activity, ActivityType, Events, User } from "discord.js";
-import { container } from "@sapphire/framework";
+import { Listener, SapphireClient } from "@sapphire/framework";
+import { ActivityType, Events } from "discord.js";
 
-let minutes_between_switches = .25
+const minutesBetweenSwitches = 0.25;
 
-let messages: [string, ActivityType.Playing | ActivityType.Streaming | ActivityType.Listening | ActivityType.Watching | ActivityType.Competing][] = [
-    [' X communities!', ActivityType.Watching],
-    [' over X questions!', ActivityType.Listening],
-    [' with something I need ideas', ActivityType.Playing],
-    [' hell idk', ActivityType.Streaming]
-]
+//add messages in the form ['<message body>', ActivityType.<your type>]
+const messages: [
+  string,
+  (
+    | ActivityType.Playing
+    | ActivityType.Streaming
+    | ActivityType.Listening
+    | ActivityType.Watching
+    | ActivityType.Competing
+  )
+][] = [
+  [" X communities!", ActivityType.Watching],
+  [" over X questions!", ActivityType.Listening],
+  [" with something I need ideas", ActivityType.Playing],
+  [" hell idk", ActivityType.Streaming],
+];
 
-function newStatus(){
-    let time = new Date().getSeconds();
-    let index = Math.round(time/(60*minutes_between_switches))
-    let message = messages[index]
-    if((message != undefined)){
-        let x = message[1]
-        container.client.user?.setActivity(message[0], {type: message[1]})
-    }    
+function newStatus(client: SapphireClient) {
+  const time = new Date().getSeconds();
+  const index = Math.round(time / (60 * minutesBetweenSwitches));
+  const message = messages[index];
+  if (message != undefined) {
+    client.user?.setActivity(message[0], { type: message[1] });
+  }
 }
 
-container.client.once(Events.ClientReady, c=>{
-    let timing = (60*minutes_between_switches)*1000
-    setInterval(newStatus, (60*minutes_between_switches)*1000)
-})
+@ApplyOptions<Listener.Options>({ event: Events.ClientReady })
+export class StartStatusLoop extends Listener<typeof Events.ClientReady> {
+  public run(client: SapphireClient) {
+    setInterval(newStatus, 60 * minutesBetweenSwitches * 1000, client);
+  }
+}
