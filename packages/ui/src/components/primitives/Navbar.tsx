@@ -76,10 +76,18 @@ const SignedInDropdownMenu = ({ signedInUser }: { signedInUser: User }) => (
 export type NavbarProps = {
 	user?: User;
 	path?: string;
+	/**
+	 * Adds additional padding to the navbar, when PageWrapper is not being used
+	 */
+	additionalPadding?: boolean;
 };
 
 // TODO: Needs mobile styling
-export const NavbarRenderer = ({ path, user }: NavbarProps) => {
+export const NavbarRenderer = ({
+	path,
+	user,
+	additionalPadding,
+}: NavbarProps) => {
 	const [sticky, setSticky] = useState(false);
 	const navbarRef = useRef<HTMLDivElement>(null);
 
@@ -100,7 +108,7 @@ export const NavbarRenderer = ({ path, user }: NavbarProps) => {
 	}, []);
 
 	return (
-		<>
+		<div className={`${additionalPadding ? 'sm:px-4' : ''}`}>
 			{sticky && <div className="pt-[15.5rem]"></div>}
 			<nav
 				className={`${
@@ -147,14 +155,24 @@ export const NavbarRenderer = ({ path, user }: NavbarProps) => {
 					</li>
 				</ol>
 			</nav>
-		</>
+		</div>
 	);
 };
 
-export const Navbar = () => {
+export const Navbar = ({
+	additionalPadding,
+}: {
+	additionalPadding?: boolean;
+}) => {
 	const router = useRouter();
 	const userQuery = trpc.auth.getSession.useQuery();
 	const user = userQuery.data?.user;
 	console.log(router.pathname);
-	return <NavbarRenderer user={user} path={router.pathname} />;
+	return (
+		<NavbarRenderer
+			user={user}
+			path={router.pathname}
+			additionalPadding={additionalPadding}
+		/>
+	);
 };

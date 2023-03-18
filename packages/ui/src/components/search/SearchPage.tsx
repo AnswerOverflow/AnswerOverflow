@@ -39,9 +39,7 @@ export const SearchPage = ({
 
 	return (
 		<div className="w-full">
-			<Heading.H1 classNameOverride="py-4 text-3xl xl:text-5xl">
-				Search
-			</Heading.H1>
+			<Heading.H1 className="py-4 text-3xl xl:text-5xl">Search</Heading.H1>
 			<form
 				onSubmit={(e) => {
 					e.preventDefault();
