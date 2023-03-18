@@ -61,7 +61,7 @@ export const zChannelPrisma = z.object({
 	parentId: z.string().nullable(),
 	inviteCode: z.string().nullable(),
 	solutionTagId: z.string().nullable(),
-	lastIndexedSnowflake: z.string().nullable(),
+	archivedTimestamp: z.number().nullable(),
 } satisfies ChannelZodFormat);
 
 export const zChannelPrismaCreate = zChannelPrisma.partial().merge(

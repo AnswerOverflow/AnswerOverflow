@@ -80,10 +80,7 @@ export async function indexRootChannel(
 
 	container.logger.info(`Indexing channel ${channel.id} | ${channel.name}`);
 
-	let start =
-		settings.lastIndexedSnowflake == null
-			? undefined
-			: settings.lastIndexedSnowflake;
+	let start: string | undefined = '0' // TODO: Fetch from elastic
 	if (process.env.NODE_ENV === 'development') {
 		start = undefined; // always index from the beginning in development for ease of testing
 	}
@@ -111,7 +108,6 @@ export async function indexRootChannel(
 
 	addSolutionsToMessages(filteredMessages, convertedMessages);
 
-	const largestSnowflake = sortMessagesById(filteredMessages).pop()?.id;
 	container.logger.info('Indexing complete, writing data');
 	container.logger.info(`Upserting ${convertedUsers.length} discord accounts `);
 	await upsertManyDiscordAccounts(convertedUsers);
@@ -119,10 +115,9 @@ export async function indexRootChannel(
 	await upsertChannel({
 		create: {
 			...toAOChannel(channel),
-			lastIndexedSnowflake: largestSnowflake,
 		},
 		update: {
-			lastIndexedSnowflake: largestSnowflake,
+			archivedTimestamp: toAOChannel(channel).archivedTimestamp,
 		},
 	});
 	container.logger.info(`Upserting ${convertedMessages.length} messages`);

@@ -42,7 +42,7 @@ export const zChannelMutable = zChannel
 		flags: true,
 		inviteCode: true,
 		solutionTagId: true,
-		lastIndexedSnowflake: true,
+		archivedTimestamp: true,
 	})
 	.deepPartial();
 
@@ -159,7 +159,6 @@ function applyChannelSettingsChangesSideEffects<
 
 	if (!pendingSettings.flags.indexingEnabled) {
 		// TODO: Emit a cron job here to run in X minutes / hours to clean up the channel, delay incase the user accidentally disabled indexing
-		pendingSettings.lastIndexedSnowflake = null;
 		pendingSettings.inviteCode = null;
 	}
 

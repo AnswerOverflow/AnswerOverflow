@@ -13,7 +13,6 @@ import {
 	createDiscordAccount,
 	createServer,
 	createUserServerSettings,
-	findChannelById,
 	findManyChannelsById,
 	findManyDiscordAccountsById,
 	findManyMessages,
@@ -45,10 +44,7 @@ import {
 	mockMarkedAsSolvedReply,
 	mockGuildMember,
 } from '@answeroverflow/discordjs-mock';
-import {
-	isSnowflakeLargerAsInt,
-	randomSnowflake,
-} from '@answeroverflow/discordjs-utils';
+import { randomSnowflake } from '@answeroverflow/discordjs-utils';
 import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
 
 let client: Client;
@@ -165,58 +161,6 @@ describe('Indexing', () => {
 				expectedThreads: 2,
 				expectedUsers: 120,
 				expectedMessages: 120,
-			});
-		});
-		it('should update last indexed snowflake after indexing', async () => {
-			const settings = await upsertChannelSettings(textChannel, {
-				flags: {
-					indexingEnabled: true,
-				},
-			});
-			expect(settings.flags.indexingEnabled).toBeTruthy();
-			const messages = mockMessages(textChannel, 100);
-			await indexRootChannel(textChannel);
-			const largestId = messages
-				.sort((a, b) => isSnowflakeLargerAsInt(a.id, b.id))
-				.at(-1)!.id;
-			const updatedSettings = await findChannelById(textChannel.id);
-			expect(updatedSettings!.lastIndexedSnowflake).toBe(largestId);
-		});
-		it('should start indexing from the last indexed snowflake', async () => {
-			const startSnowflake = 345312;
-			await upsertChannelSettings(textChannel, {
-				flags: {
-					indexingEnabled: true,
-				},
-				lastIndexedSnowflake: `${startSnowflake}`,
-			});
-			for (let i = startSnowflake - 100; i < startSnowflake; i++) {
-				mockMessage({
-					client,
-					channel: textChannel,
-					override: {
-						id: `${i}`,
-					},
-				});
-			}
-			const messages: Message[] = [];
-			for (let i = startSnowflake; i <= startSnowflake + 100; i++) {
-				messages.push(
-					mockMessage({
-						client,
-						channel: textChannel,
-						override: {
-							id: `${i}`,
-						},
-					}),
-				);
-			}
-			await indexRootChannel(textChannel);
-			await validateIndexingResults({
-				messages,
-				expectedThreads: 0,
-				expectedUsers: 100,
-				expectedMessages: 100,
 			});
 		});
 		it('should index a forum channel', async () => {

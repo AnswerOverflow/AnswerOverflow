@@ -110,17 +110,17 @@ model Server {
 
 model Channel {
   // Discord Data
-  id         String  @id
-  serverId   String
-  name       String  @db.VarChar(100)
-  type       Int
-  parentId   String?
-  inviteCode String? @unique @db.VarChar(15)
+  id                String  @id
+  serverId          String
+  name              String  @db.VarChar(100)
+  type              Int
+  parentId          String?
+  inviteCode        String? @unique @db.VarChar(15)
+  archivedTimestamp Int?
 
   // Answer Overflow Settings
-  bitfield             Int     @default(0)
-  lastIndexedSnowflake String?
-  solutionTagId        String?
+  bitfield      Int     @default(0)
+  solutionTagId String?
 
   // Relations
   parent  Channel?  @relation("ParentChannel", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
