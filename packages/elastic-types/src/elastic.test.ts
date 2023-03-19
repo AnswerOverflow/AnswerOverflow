@@ -1,4 +1,4 @@
-import { getRandomId } from '@answeroverflow/utils';
+import { getRandomId, getRandomIdGreaterThan } from '@answeroverflow/utils';
 import { elastic, getDefaultMessage } from '../index';
 import type { Message } from './message';
 
@@ -300,6 +300,35 @@ describe('ElasticSearch', () => {
 		it('should return 0 if there are no messages in a channel', async () => {
 			const count = await elastic.getChannelMessagesCount(msg1.channelId);
 			expect(count).toBe(0);
+		});
+	});
+	describe('find latest message in channel', () => {
+		it('should return the latest message in a channel', async () => {
+			await elastic.upsertMessage(msg1);
+			const lastMsg = {
+				...msg1,
+				id: getRandomIdGreaterThan(parseInt(msg1.id)),
+			};
+			await elastic.upsertMessage(lastMsg);
+			const latestMessage = await elastic.findLatestMessageInChannel(
+				msg1.channelId,
+			);
+			expect(latestMessage).toBeDefined();
+			expect(latestMessage).toEqual(lastMsg);
+		});
+		it('should return the first message if there is only one message in a channel', async () => {
+			await elastic.upsertMessage(msg1);
+			const latestMessage = await elastic.findLatestMessageInChannel(
+				msg1.channelId,
+			);
+			expect(latestMessage).toBeDefined();
+			expect(latestMessage).toEqual(msg1);
+		});
+		it('should return null if there are no messages in a channel', async () => {
+			const latestMessage = await elastic.findLatestMessageInChannel(
+				msg1.channelId,
+			);
+			expect(latestMessage).toBeNull();
 		});
 	});
 });

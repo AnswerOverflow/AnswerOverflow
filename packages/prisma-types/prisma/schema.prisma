@@ -78,7 +78,7 @@ model VerificationToken {
 model UserServerSettings {
   userId   String
   serverId String
-  bitfield Int    @default(0)
+  bitfield Int    @default(0) @db.UnsignedInt
 
   user   DiscordAccount @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   server Server         @relation(fields: [serverId], references: [id], onUpdate: NoAction)
@@ -100,7 +100,7 @@ model Server {
   description String?
 
   // Answer Overflow Settings
-  bitfield   Int       @default(0)
+  bitfield   Int       @default(0) @db.UnsignedInt
   kickedTime DateTime?
 
   // Relations
@@ -116,10 +116,10 @@ model Channel {
   type              Int
   parentId          String?
   inviteCode        String? @unique @db.VarChar(15)
-  archivedTimestamp Int?
+  archivedTimestamp BigInt?
 
   // Answer Overflow Settings
-  bitfield      Int     @default(0)
+  bitfield      Int     @default(0) @db.UnsignedInt
   solutionTagId String?
 
   // Relations

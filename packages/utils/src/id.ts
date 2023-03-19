@@ -9,6 +9,11 @@ export function getRandomId(length: number = 15): string {
 	return Math.floor(Math.random() * max).toString();
 }
 
+export function getRandomIdGreaterThan(min: number): string {
+	const max = Math.pow(10, min.toString().length);
+	return Math.floor(Math.random() * (max - min) + min).toString();
+}
+
 export function getRandomEmail(): string {
 	return `${getRandomId()}@answeroverflow.com`;
 }

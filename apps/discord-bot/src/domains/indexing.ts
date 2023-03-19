@@ -80,7 +80,7 @@ export async function indexRootChannel(
 
 	container.logger.info(`Indexing channel ${channel.id} | ${channel.name}`);
 
-	let start: string | undefined = '0' // TODO: Fetch from elastic
+	let start: string | undefined = '0'; // TODO: Fetch from elastic
 	if (process.env.NODE_ENV === 'development') {
 		start = undefined; // always index from the beginning in development for ease of testing
 	}
@@ -331,8 +331,6 @@ Server ${thread.guildId} ${thread.guild.name}
 			throw error;
 		}
 	}
-
-	return { messages: collectedMessages, threads };
 }
 
 export async function fetchAllMessages(

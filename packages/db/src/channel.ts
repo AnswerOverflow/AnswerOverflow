@@ -231,6 +231,27 @@ export async function findManyChannelsById(
 	});
 }
 
+export async function findYoungestArchivedTimestampByChannelId(
+	parentId: string,
+) {
+	const data = await prisma.channel.aggregate({
+		where: {
+			parentId,
+			archivedTimestamp: {
+				not: null,
+			},
+		},
+		_max: {
+			archivedTimestamp: true,
+		},
+		orderBy: {
+			archivedTimestamp: 'desc',
+		},
+		take: 1,
+	});
+	return data._max?.archivedTimestamp ?? null;
+}
+
 export async function createChannel(data: z.infer<typeof zChannelCreate>) {
 	const combinedData: z.infer<typeof zChannelPrismaCreate> =
 		applyChannelSettingsChangesSideEffects({
