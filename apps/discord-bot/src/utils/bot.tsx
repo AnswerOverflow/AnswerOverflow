@@ -1,5 +1,5 @@
 import { container, LogLevel, SapphireClient } from '@sapphire/framework';
-import { ClientOptions, Partials, ActivityType } from 'discord.js';
+import { ClientOptions, Partials, ActivityType, Options } from 'discord.js';
 
 import '~discord-bot/utils/setup';
 import {
@@ -52,6 +52,8 @@ export function createClient(override: Partial<ClientOptions> = {}) {
 			Partials.GuildMember,
 			Partials.Reaction,
 		],
+		// TODO: Evaluate if this is needed, we were encountering errors with the channels of messages not being cached in large indexing operations
+		makeCache: Options.cacheEverything(),
 		hmr: {
 			enabled: process.env.NODE_ENV === 'development',
 		},

@@ -41,6 +41,7 @@ async function syncServer(guild: Guild) {
 			},
 		})),
 	);
+	return guild;
 }
 
 function makeGuildEmbed(guild: Guild, joined: boolean) {
@@ -83,10 +84,13 @@ function makeGuildEmbed(guild: Guild, joined: boolean) {
 @ApplyOptions<Listener.Options>({ once: true, event: Events.ClientReady })
 export class SyncOnReady extends Listener {
 	public async run() {
-		if (process.env.NODE_ENV === 'production') await delay(20 * 1000); // give time for dbs to start up
+		if (process.env.NODE_ENV === 'production') await delay(30 * 1000); // give time for dbs to start up
 		// 1. Sync all of the servers to have the most up to date data
 		const guilds = this.container.client.guilds.cache;
-		await Promise.all(guilds.map((guild) => syncServer(guild)));
+		const syncs = guilds.map((guild) => syncServer(guild));
+		for await (const sync of syncs) {
+			this.container.logger.info(`Synced server ${sync.name}`);
+		}
 		// 2. For any servers that are in the database and not in the guilds the bot is in, mark them as kicked
 	}
 }

@@ -19,6 +19,7 @@ import {
 	findChannelById,
 	findChannelByInviteCode,
 	findManyChannelsById,
+	findLatestArchivedTimestampByChannelId,
 	updateChannel,
 	updateManyChannels,
 	upsertChannel,
@@ -80,6 +81,25 @@ describe('Channel Operations', () => {
 		it('should return empty array if no channels found', async () => {
 			const found = await findManyChannelsById([getRandomId(), getRandomId()]);
 			expect(found).toHaveLength(0);
+		});
+	});
+	describe('Find youngest archived thread', () => {
+		it('should find youngest archived thread', async () => {
+			const chnl = mockChannel(server);
+			const thread1 = mockThread({
+				...chnl,
+				archivedTimestamp: BigInt(new Date().getTime()),
+			});
+			const thread2 = mockThread({
+				...chnl,
+				archivedTimestamp: BigInt(new Date().getTime() + 1000),
+			});
+
+			await createChannel(chnl);
+			await createChannel(thread1);
+			await createChannel(thread2);
+			const found = await findLatestArchivedTimestampByChannelId(chnl.id);
+			expect(found).toEqual(thread2.archivedTimestamp);
 		});
 	});
 	describe('Channel Create', () => {
