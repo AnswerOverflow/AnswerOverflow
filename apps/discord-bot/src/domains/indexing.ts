@@ -76,8 +76,10 @@ export async function indexRootChannel(
 
 	container.logger.debug(`Indexing channel ${channel.id} | ${channel.name}`);
 	if (channel.type === ChannelType.GuildForum) {
-		const maxNumberOfThreadsToCollect =
-			process.env.MAX_NUMBER_OF_THREADS_TO_COLLECT ?? 1000;
+		const maxNumberOfThreadsToCollect = process.env
+			.MAX_NUMBER_OF_THREADS_TO_COLLECT
+			? parseInt(process.env.MAX_NUMBER_OF_THREADS_TO_COLLECT)
+			: 1000;
 		let threadCutoffTimestamp = await findLatestArchivedTimestampByChannelId(
 			channel.id,
 		);
@@ -105,7 +107,6 @@ export async function indexRootChannel(
 				!fetched.hasMore ||
 				!last ||
 				fetched.threads.size == 0 ||
-				archivedThreads.length >= maxNumberOfThreadsToCollect ||
 				isLastThreadOlderThanCutoff
 			)
 				return;
@@ -140,7 +141,9 @@ export async function indexRootChannel(
 		const threadsToIndex = [
 			...archivedThreads.reverse(),
 			...activeThreads.threads.values(),
-		].filter((x) => x.type === ChannelType.PublicThread);
+		]
+			.filter((x) => x.type === ChannelType.PublicThread)
+			.slice(0, maxNumberOfThreadsToCollect);
 		container.logger.debug(
 			`Pruned threads to index from ${
 				activeThreads.threads.size + archivedThreads.length
@@ -175,6 +178,11 @@ export async function indexTextBasedChannel(channel: GuildTextBasedChannel) {
 	if (process.env.NODE_ENV === 'development') {
 		start = undefined; // always index from the beginning in development for ease of testing
 	}
+	container.logger.debug(
+		`Indexing channel ${channel.id} | ${channel.name} from message id ${
+			start ?? 'beginning'
+		}`,
+	);
 	let messages: Message[] = [];
 	if (
 		channel.type === ChannelType.PublicThread ||
@@ -220,6 +228,11 @@ async function storeIndexData(
 	messages: Message[],
 	channel: GuildTextBasedChannel,
 ) {
+	if (messages.length === 0) {
+		container.logger.debug(
+			`No messages to index for channel ${channel.id} | ${channel.name}`,
+		);
+	}
 	// Filter out messages from users with indexing disabled or from the system
 	const filteredMessages = await filterMessages(messages, channel);
 
