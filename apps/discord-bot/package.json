@@ -70,7 +70,7 @@
 		"build-deps": "(cd ../../packages/discordjs-mock && yarn build)",
 		"dev": "yarn build-deps && yarn run with-env rm -rf dist && yarn run build && run-p watch start",
 		"start": "yarn run with-env node dist/index.js",
-		"test": "yarn run with-env jest --coverage",
+		"test": "yarn build-deps && yarn run with-env jest --coverage",
 		"test:watch": "yarn run with-env jest --watch",
 		"install-local-discordjs-react": "cp -r ~/repos/discordjs-react/packages/discordjs-react/dist/ /AnswerOverflow/node_modules/@answeroverflow/discordjs-react/"
 	},
