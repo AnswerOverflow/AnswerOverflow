@@ -275,6 +275,10 @@ export function toAOChannel(
 		type: channel.type,
 		parentId: channel.isThread() ? channel.parentId : null,
 		serverId: channel.guild.id,
+		archivedTimestamp:
+			channel.isThread() && channel.archiveTimestamp
+				? BigInt(channel.archiveTimestamp)
+				: null,
 	});
 	return convertedChannel;
 }

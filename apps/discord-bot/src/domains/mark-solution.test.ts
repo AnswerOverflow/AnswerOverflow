@@ -401,7 +401,7 @@ describe('Make Mark Solution Response', () => {
 			},
 			inviteCode: null,
 			solutionTagId: 'solved',
-			lastIndexedSnowflake: null,
+			archivedTimestamp: null,
 		};
 		jumpToSolutionButtonData = new ButtonBuilder()
 			.setLabel('Jump To Solution')
