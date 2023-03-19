@@ -50,7 +50,7 @@ export async function indexServers(client: Client) {
 }
 
 async function indexServer(guild: Guild) {
-	container.logger.info(`Indexing server ${guild.id} | ${guild.name}`);
+	container.logger.debug(`Indexing server ${guild.id} | ${guild.name}`);
 	for await (const channel of guild.channels.cache.values()) {
 		const isIndexableChannelType =
 			channel.type === ChannelType.GuildText ||
@@ -74,8 +74,10 @@ export async function indexRootChannel(
 		return;
 	}
 
-	container.logger.info(`Indexing channel ${channel.id} | ${channel.name}`);
+	container.logger.debug(`Indexing channel ${channel.id} | ${channel.name}`);
 	if (channel.type === ChannelType.GuildForum) {
+		const maxNumberOfThreadsToCollect =
+			process.env.MAX_NUMBER_OF_THREADS_TO_COLLECT ?? 1000;
 		let threadCutoffTimestamp = await findLatestArchivedTimestampByChannelId(
 			channel.id,
 		);
@@ -83,14 +85,13 @@ export async function indexRootChannel(
 			threadCutoffTimestamp = null;
 		}
 		const archivedThreads: AnyThreadChannel[] = [];
-		container.logger.info(
+		container.logger.debug(
 			`Fetching archived threads for channel ${channel.id} ${channel.name} in server ${channel.guildId} ${channel.guild.name}`,
 		);
 		const fetchAllArchivedThreads = async (before?: number | string) => {
 			const fetched = await channel.threads.fetchArchived({
 				type: 'public',
 				fetchAll: true,
-				limit: 10,
 				before,
 			});
 
@@ -105,6 +106,7 @@ export async function indexRootChannel(
 				!fetched.hasMore ||
 				!last ||
 				fetched.threads.size == 0 ||
+				archivedThreads.length >= maxNumberOfThreadsToCollect ||
 				isLastThreadOlderThanCutoff
 			)
 				return;
@@ -122,12 +124,12 @@ export async function indexRootChannel(
 			await fetchAllArchivedThreads();
 		}
 
-		container.logger.info(
+		container.logger.debug(
 			`Fetched ${archivedThreads.length} archived threads for channel ${channel.id} ${channel.name} in server ${channel.guildId} ${channel.guild.name}`,
 		);
 
 		const activeThreads = await channel.threads.fetchActive();
-		container.logger.info(
+		container.logger.debug(
 			`Found ${archivedThreads.length} archived threads and ${
 				activeThreads.threads.size
 			} active threads, a total of ${
@@ -140,20 +142,19 @@ export async function indexRootChannel(
 			...archivedThreads.reverse(),
 			...activeThreads.threads.values(),
 		].filter((x) => x.type === ChannelType.PublicThread);
-		container.logger.info(
+		container.logger.debug(
 			`Pruned threads to index from ${
 				activeThreads.threads.size + archivedThreads.length
 			} to ${threadsToIndex.length} threads`,
 		);
 
-		let threadsIndexed = 1;
+		let threadsIndexed = 0;
 		for await (const thread of threadsToIndex) {
-			container.logger.info(
-				`(${threadsIndexed++}/${threadsToIndex.length}) Indexing thread ${
-					channel.id
-				} | ${channel.name} in server ${channel.guildId} | ${
-					channel.guild.name
-				}`,
+			container.logger.debug(
+				`(${++threadsIndexed}/${threadsToIndex.length}) Indexing:
+Thread: ${thread.id} | ${thread.name}
+Channel: ${channel.id} | ${channel.name}
+Server: ${channel.guildId} | ${channel.guild.name}`,
 			);
 			await indexTextBasedChannel(thread);
 		}
@@ -173,7 +174,7 @@ export async function indexTextBasedChannel(channel: GuildTextBasedChannel) {
 	const lastIndexedMessage = await findLatestMessageInChannel(channel.id);
 	let start = lastIndexedMessage?.id; // TODO: Fetch from elastic
 	if (process.env.NODE_ENV === 'development') {
-		// start = undefined; // always index from the beginning in development for ease of testing
+		start = undefined; // always index from the beginning in development for ease of testing
 	}
 	let messages: Message[] = [];
 	if (
@@ -201,18 +202,17 @@ export async function indexTextBasedChannel(channel: GuildTextBasedChannel) {
 
 		let threadsIndexed = 0;
 		for await (const thread of threadsToIndex) {
-			container.logger.info(
-				`(${threadsIndexed++}/${threadsToIndex.length}) Indexing thread ${
-					channel.id
-				} | ${channel.name} in server ${channel.guildId} | ${
-					channel.guild.name
-				}`,
+			container.logger.debug(
+				`(${threadsIndexed++}/${threadsToIndex.length}) Indexing:
+Thread: ${thread.id} | ${thread.name}
+Channel: ${channel.id} | ${channel.name}
+Server: ${channel.guildId} | ${channel.guild.name}`,
 			);
 			await indexTextBasedChannel(thread);
 		}
 	}
 	await storeIndexData(messages, channel);
-	container.logger.info(
+	container.logger.debug(
 		`Finished writing data, indexing complete for channel ${channel.id} | ${channel.name}`,
 	);
 }
@@ -233,9 +233,11 @@ async function storeIndexData(
 	}
 
 	addSolutionsToMessages(filteredMessages, convertedMessages);
-	container.logger.info(`Upserting ${convertedUsers.length} discord accounts `);
+	container.logger.debug(
+		`Upserting ${convertedUsers.length} discord accounts `,
+	);
 	await upsertManyDiscordAccounts(convertedUsers);
-	container.logger.info(`Upserting channel: ${channel.id}`);
+	container.logger.debug(`Upserting channel: ${channel.id}`);
 	await upsertChannel({
 		create: {
 			...toAOChannel(channel),
@@ -244,7 +246,7 @@ async function storeIndexData(
 			archivedTimestamp: toAOChannel(channel).archivedTimestamp,
 		},
 	});
-	container.logger.info(`Upserting ${convertedMessages.length} messages`);
+	container.logger.debug(`Upserting ${convertedMessages.length} messages`);
 	await upsertManyMessages(convertedMessages);
 }
 
@@ -323,7 +325,7 @@ export async function fetchAllMessages(
 ) {
 	const {
 		start,
-		limit = channel.type === ChannelType.GuildText ? 1000 : 20000,
+		limit = channel.type === ChannelType.GuildText ? 10000 : 20000,
 	} = opts;
 	const messages: Message[] = [];
 

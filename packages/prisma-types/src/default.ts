@@ -50,7 +50,7 @@ export function getDefaultChannel(
 	const data: Channel = {
 		bitfield: 0,
 		inviteCode: null,
-    archivedTimestamp: null,
+		archivedTimestamp: null,
 		solutionTagId: null,
 		...override,
 	};
