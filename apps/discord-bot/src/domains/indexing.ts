@@ -91,7 +91,6 @@ export async function indexRootChannel(
 		const fetchAllArchivedThreads = async (before?: number | string) => {
 			const fetched = await channel.threads.fetchArchived({
 				type: 'public',
-				fetchAll: true,
 				before,
 			});
 
