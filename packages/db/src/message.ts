@@ -262,6 +262,10 @@ export async function deleteManyMessagesByChannelId(channelId: string) {
 	return elastic.deleteByChannelId(channelId);
 }
 
+export async function findLatestMessageInChannel(channelId: string) {
+	return elastic.findLatestMessageInChannel(channelId);
+}
+
 export async function deleteManyMessagesByUserId(userId: string) {
 	return elastic.deleteByUserId(userId);
 }

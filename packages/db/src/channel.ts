@@ -231,9 +231,7 @@ export async function findManyChannelsById(
 	});
 }
 
-export async function findYoungestArchivedTimestampByChannelId(
-	parentId: string,
-) {
+export async function findLatestArchivedTimestampByChannelId(parentId: string) {
 	const data = await prisma.channel.aggregate({
 		where: {
 			parentId,

@@ -19,7 +19,7 @@ import {
 	findChannelById,
 	findChannelByInviteCode,
 	findManyChannelsById,
-	findYoungestArchivedTimestampByChannelId,
+	findLatestArchivedTimestampByChannelId,
 	updateChannel,
 	updateManyChannels,
 	upsertChannel,
@@ -98,7 +98,7 @@ describe('Channel Operations', () => {
 			await createChannel(chnl);
 			await createChannel(thread1);
 			await createChannel(thread2);
-			const found = await findYoungestArchivedTimestampByChannelId(chnl.id);
+			const found = await findLatestArchivedTimestampByChannelId(chnl.id);
 			expect(found).toEqual(thread2.archivedTimestamp);
 		});
 	});
