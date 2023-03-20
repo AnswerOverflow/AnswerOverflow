@@ -69,14 +69,14 @@ describe('Extract Threads Set From Messages', () => {
 	});
 });
 describe('Messages To AO Messages Set', () => {
-	it('should convert messages to AO messages', () => {
+	it('should convert messages to AO messages', async () => {
 		const messages = mockMessages(textChannel, 10);
-		const aoMessages = messagesToAOMessagesSet(messages);
+		const aoMessages = await messagesToAOMessagesSet(messages);
 		expect(aoMessages.length).toBe(10);
 	});
-	it('should not convert duplicate messages', () => {
+	it('should not convert duplicate messages', async () => {
 		const msg1 = mockMessage({ client });
-		const aoMessages = messagesToAOMessagesSet([msg1, msg1]);
+		const aoMessages = await messagesToAOMessagesSet([msg1, msg1]);
 		expect(aoMessages.length).toBe(1);
 	});
 });

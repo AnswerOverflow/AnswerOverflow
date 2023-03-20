@@ -1,6 +1,7 @@
 import { RefObject, useEffect, useState } from 'react';
 import { trpc } from './trpc';
-
+import { isServer } from './checks';
+import { useRouter } from 'next/router';
 export const useIsUserInServer = (serverId: string) => {
 	const { data: servers } = trpc.auth.getServers.useQuery();
 	return servers?.some((s) => s.id === serverId) ?? false;
@@ -119,10 +120,9 @@ export const useGetRectForElement = (element: RefObject<HTMLDivElement>) => {
 
 export const useTheme = () => {
 	const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-	const themeStorage = localStorage.getItem('isDarkMode') as
-		| 'true'
-		| 'false'
-		| null;
+	const themeStorage = isServer()
+		? null
+		: (localStorage.getItem('isDarkMode') as 'true' | 'false' | null);
 
 	// Listen to changes to the theme in storage
 	useEffect(() => {
@@ -134,4 +134,17 @@ export const useTheme = () => {
 	}, [themeStorage, theme]);
 
 	return theme;
+};
+
+export const useRouterQuery = () => {
+	const router = useRouter();
+	const routerQuery = typeof router.query.q === 'string' ? router.query.q : '';
+	return routerQuery;
+};
+
+export const useRouterServerId = () => {
+	const router = useRouter();
+	const routerServerId =
+		typeof router.query.s === 'string' ? router.query.s : '';
+	return routerServerId;
 };

@@ -1,45 +1,18 @@
 import { Client, ClientOptions, errors } from '@elastic/elasticsearch';
 import type {
 	BulkOperationContainer,
-	MappingProperty,
 	QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import { z } from 'zod';
+import { elasticMessageIndexProperties, Message } from './message';
 
 declare global {
 	// eslint-disable-next-line no-var, no-unused-vars
 	var elastic: Elastic | undefined;
 }
 
-export const zDiscordImage = z.object({
-	url: z.string(),
-	width: z.number().nullable(),
-	height: z.number().nullable(),
-	description: z.string().nullable(),
-});
-
-export const zMessageReference = z.object({
-	messageId: z.string(),
-	channelId: z.string(),
-	serverId: z.string(),
-});
-
-export const zMessage = z.object({
-	id: z.string(),
-	content: z.string(),
-	images: z.array(zDiscordImage),
-	solutionIds: z.array(z.string()),
-	messageReference: zMessageReference.nullable(),
-	childThread: z.string().nullable(),
-	authorId: z.string(),
-	channelId: z.string(), // If the message is is in a thread, this is the thread's channel id
-	parentChannelId: z.string().nullable(), // If the message is in a thread, this is the channel id of the parent channel for the thread
-	serverId: z.string(),
-});
-
 export function getThreadIdOfMessage(message: Message): string | null {
-	if (message.childThread) {
-		return message.childThread;
+	if (message.childThreadId) {
+		return message.childThreadId;
 	}
 	if (message.parentChannelId) {
 		return message.channelId;
@@ -60,51 +33,6 @@ export type MessageSearchOptions = {
 	serverId?: string;
 	after?: string;
 	limit?: number;
-};
-
-type MessageImageMappingProperty = {
-	[K in keyof typeof zDiscordImage.shape]: MappingProperty;
-};
-
-type MessageReferenceMappingProperty = {
-	[K in keyof typeof zMessageReference.shape]: MappingProperty;
-};
-
-type ElasticMessageIndexProperties = {
-	[K in keyof Message]: MappingProperty;
-};
-
-const idProperty: MappingProperty = { type: 'long' };
-
-const imageProperties: MessageImageMappingProperty = {
-	url: { type: 'text' },
-	width: { type: 'integer' },
-	height: { type: 'integer' },
-	description: { type: 'text' },
-};
-
-const messageReferenceProperties: MessageReferenceMappingProperty = {
-	messageId: idProperty,
-	channelId: idProperty,
-	serverId: idProperty,
-};
-
-const properties: ElasticMessageIndexProperties = {
-	id: idProperty,
-	serverId: idProperty,
-	channelId: idProperty,
-	authorId: idProperty,
-	parentChannelId: idProperty,
-	content: { type: 'text' },
-	images: {
-		properties: imageProperties,
-	},
-	// https://www.elastic.co/guide/en/elasticsearch/reference/current/array.html
-	solutionIds: idProperty,
-	messageReference: {
-		properties: messageReferenceProperties,
-	},
-	childThread: idProperty,
 };
 
 function getElasticClient(): Elastic {
@@ -144,9 +72,6 @@ function getElasticClient(): Elastic {
 		throw new Error('Invalid environment to connect to elastic');
 	}
 }
-
-// https://discord.com/developers/docs/resources/channel#message-objects
-export type Message = z.infer<typeof zMessage>;
 
 export class Elastic extends Client {
 	messagesIndex: string;
@@ -506,9 +431,37 @@ export class Elastic extends Client {
 				_source: {
 					excludes: ['tags'],
 				},
-				properties,
+				properties: elasticMessageIndexProperties,
 			},
 		});
+	}
+
+	public async findLatestMessageInChannel(channelId: string) {
+		const result = await this.search<Message>({
+			index: this.messagesIndex,
+			query: {
+				match: {
+					channelId,
+				},
+			},
+			size: 1,
+			sort: [{ id: 'desc' }],
+		});
+		return result.hits.hits[0]?._source ?? null;
+	}
+
+	public async getChannelMessagesCount(channelId: string) {
+		const result = await this.count({
+			index: this.messagesIndex,
+			body: {
+				query: {
+					match: {
+						channelId,
+					},
+				},
+			},
+		});
+		return result.count;
 	}
 }
 

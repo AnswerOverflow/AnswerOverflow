@@ -24,7 +24,7 @@
 		"@sapphire/bitfield": "^1.0.0",
 		"@trpc/client": "^10.4.3",
 		"@trpc/server": "^10.4.3",
-		"discord.js": "^14.7.1",
+		"discord.js": "^14.8.0",
 		"dotenv-cra": "^3.0.3",
 		"superjson": "^1.9.1",
 		"zod": "^3.20.6"
@@ -32,7 +32,7 @@
 	"devDependencies": {
 		"@answeroverflow/db-mock": "*",
 		"@answeroverflow/tsconfig": "*",
-		"@vitest/coverage-c8": "^0.25.1",
+		"@vitest/coverage-c8": "^0.28.5",
 		"dotenv-cli": "^7.0.0",
 		"eslint": "^8.28.0",
 		"tslib": "^2.4.1",

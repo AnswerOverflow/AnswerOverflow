@@ -3,7 +3,8 @@ import { ChatInputCommand, Command } from '@sapphire/framework';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { updateUserConsent } from '~discord-bot/domains/manage-account';
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
-import { ephemeralStatusHandler } from '~discord-bot/utils/trpc';
+import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
+import { getCommandIds } from '~discord-bot/utils/utils';
 
 @ApplyOptions<Command.Options>({
 	name: 'consent',
@@ -15,14 +16,27 @@ export class ConsentCommand extends Command {
 	public override registerApplicationCommands(
 		registry: ChatInputCommand.Registry,
 	) {
+		const ids = getCommandIds({
+			local: '1073363500585468084',
+			staging: '982084090251595786',
+			production: '980880200566964264',
+		});
+
 		registry.registerChatInputCommand(
 			new SlashCommandBuilder()
 				.setName(this.name)
 				.setDescription(this.description)
 				.setDMPermission(false)
 				.addBooleanOption((option) =>
-					option.setName('consent').setDescription('Enable or disable consent'),
+					option
+						.setName('consent')
+						.setDescription(
+							'Enable or disable publicly displaying your messages on Answer Overflow',
+						),
 				),
+			{
+				idHints: ids,
+			},
 		);
 	}
 	public override async chatInputRun(interaction: ChatInputCommandInteraction) {
@@ -32,16 +46,16 @@ export class ConsentCommand extends Command {
 				member,
 				consentSource: 'slash-command',
 				canPubliclyDisplayMessages: consented,
-				Error(error) {
-					ephemeralStatusHandler(interaction, error.message);
+				async Error(error) {
+					await onceTimeStatusHandler(interaction, error.message);
 				},
-				Ok(result) {
+				async Ok(result) {
 					// TODO: Better messages
-					ephemeralStatusHandler(
+					await onceTimeStatusHandler(
 						interaction,
 						result.flags.canPubliclyDisplayMessages
-							? 'Consented'
-							: 'Unconsented',
+							? `You have consented to publicly display your messages from indexed channels in ${member.guild.name} on Answer Overflow.`
+							: `You have revoked your consent to publicly display your messages from indexed channels in ${member.guild.name} on Answer Overflow.`,
 					);
 				},
 			}),

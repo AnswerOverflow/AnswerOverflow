@@ -15,20 +15,63 @@ import {
 import { callAPI, TRPCStatusHandler } from '~discord-bot/utils/trpc';
 import { toAODiscordAccount } from '~discord-bot/utils/conversions';
 import { createMemberCtx } from '~discord-bot/utils/context';
-import type { ConsentSource, ManageAccountSource } from '@answeroverflow/api';
+import {
+	ConsentSource,
+	CONSENT_SOURCES,
+	ManageAccountSource,
+} from '@answeroverflow/api';
 import { CONSENT_BUTTON_LABEL } from '@answeroverflow/constants';
 import { isHumanMessage } from '~discord-bot/utils/utils';
 
-export const CONSENT_BUTTON_ID = 'consentButton';
-export const CONSENT_BUTTON_DATA = {
-	label: CONSENT_BUTTON_LABEL,
-	style: ButtonStyle.Success,
-	custom_id: CONSENT_BUTTON_ID,
-	type: ComponentType.Button,
-} as APIButtonComponent;
+export const CONSENT_ACTION_PREFIX = 'consent';
 
-export function makeConsentButton() {
-	return new ButtonBuilder(CONSENT_BUTTON_DATA);
+const consentButtonInteractionParseErrors = [
+	'no-consent-prefix',
+	'no-consent-source',
+	'invalid-consent-source',
+] as const;
+export class ConsentButtonInteractionParseError extends Error {
+	constructor(reason: (typeof consentButtonInteractionParseErrors)[number]) {
+		super(reason);
+	}
+}
+
+export function parseConsentButtonInteraction(customId: string): ConsentSource {
+	const splitInteractionId = customId.split(':');
+	const action = splitInteractionId[0];
+	const source = splitInteractionId[1];
+	if (action !== CONSENT_ACTION_PREFIX) {
+		// Legacy consent button ids
+		switch (action) {
+			case 'consent_button':
+				return 'manually-posted-prompt';
+			case 'consent_button_mark_solution':
+				return 'mark-solution-response';
+			case 'manage_account_consent_button':
+				return 'manage-account-menu';
+		}
+		throw new ConsentButtonInteractionParseError('no-consent-prefix');
+	}
+	if (!source) {
+		throw new ConsentButtonInteractionParseError('no-consent-source');
+	}
+	if (!CONSENT_SOURCES.includes(source as ConsentSource)) {
+		throw new ConsentButtonInteractionParseError('invalid-consent-source');
+	}
+	return source as ConsentSource;
+}
+
+export function makeConsentButtonData(source: ConsentSource) {
+	return {
+		label: CONSENT_BUTTON_LABEL,
+		style: ButtonStyle.Success,
+		custom_id: `${CONSENT_ACTION_PREFIX}:${source}`,
+		type: ComponentType.Button,
+	} as APIButtonComponent;
+}
+
+export function makeConsentButton(source: ConsentSource) {
+	return new ButtonBuilder(makeConsentButtonData(source));
 }
 
 // TODO: Find a better return value than `null`

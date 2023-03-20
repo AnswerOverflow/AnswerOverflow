@@ -23,7 +23,6 @@ import { findManyDiscordAccountsWithUserServerSettings } from './discord-account
 import { omit } from '@answeroverflow/utils';
 import { findManyChannelsById } from './channel';
 import { findManyServersById } from './server';
-
 export type MessageWithDiscordAccount = z.infer<
 	typeof zMessageWithDiscordAccount
 >;
@@ -263,6 +262,10 @@ export async function deleteManyMessagesByChannelId(channelId: string) {
 	return elastic.deleteByChannelId(channelId);
 }
 
+export async function findLatestMessageInChannel(channelId: string) {
+	return elastic.findLatestMessageInChannel(channelId);
+}
+
 export async function deleteManyMessagesByUserId(userId: string) {
 	return elastic.deleteByUserId(userId);
 }
@@ -285,13 +288,16 @@ export async function searchMessages(opts: MessageSearchOptions) {
 	];
 	const serverIds = messages.map((m) => m.serverId);
 	const [channels, servers, messagesWithRefs] = await Promise.all([
-		findManyChannelsById(channelIds),
+		findManyChannelsById(channelIds, {
+			includeMessageCount: true,
+		}),
 		findManyServersById(serverIds),
 		addReferencesToMessages(messages),
 	]);
 	const messagesWithAuthors = await addAuthorsToMessages(messagesWithRefs);
 	const channelLookup = new Map(channels.map((c) => [c.id, c]));
 	const serverLookup = new Map(servers.map((s) => [s.id, s]));
+
 	return messagesWithAuthors
 		.map((m): SearchResult | null => {
 			const channel = channelLookup.get(m.parentChannelId ?? m.channelId);
@@ -302,10 +308,10 @@ export async function searchMessages(opts: MessageSearchOptions) {
 			if (!channel || !server) return null;
 			return {
 				message: m,
-				channel: channel,
+				channel,
 				score: resultsLookup.get(m.id)!._score ?? 0,
 				server: server,
-				thread: thread,
+				thread,
 			};
 		})
 		.filter(Boolean)

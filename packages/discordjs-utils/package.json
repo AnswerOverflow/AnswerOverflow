@@ -5,7 +5,9 @@
 	"types": "./index.ts",
 	"author": "@answeroverflow",
 	"license": "UNLICENSE",
-	"dependencies": {},
+	"dependencies": {
+		"discord.js": "^14.8.0"
+	},
 	"devDependencies": {
 		"@swc/core": "^1.3.32",
 		"@swc/jest": "^0.2.24",

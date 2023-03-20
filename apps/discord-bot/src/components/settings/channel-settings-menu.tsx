@@ -6,9 +6,12 @@ import {
 	ActionRow,
 } from '@answeroverflow/discordjs-react';
 import {
+	ActionRowBuilder,
 	ChannelType,
+	EmbedBuilder,
 	ForumChannel,
 	GuildForumTag,
+	MessageActionRowComponentBuilder,
 	NewsChannel,
 	TextChannel,
 	type GuildTextBasedChannel,
@@ -38,6 +41,7 @@ import {
 	ENABLE_AI_QUESTION_ANSWERING_LABEL,
 	OPEN_INDEXING_SETTINGS_MENU_LABEL,
 	SEND_CONSENT_PROMPT_LABEL,
+	WEBSITE_URL,
 } from '@answeroverflow/constants';
 import type { ChannelWithFlags } from '@answeroverflow/prisma-types';
 import React from 'react';
@@ -57,8 +61,10 @@ import {
 	updateAutoThreadEnabled,
 } from '~discord-bot/domains/channel-settings';
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
-import { ephemeralStatusHandler } from '~discord-bot/utils/trpc';
+import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
 import { type RootChannel, getRootChannel } from '~discord-bot/utils/utils';
+import { makeRequestForConsentString } from '~discord-bot/domains/mark-solution';
+import { makeConsentButton } from '~discord-bot/domains/manage-account';
 
 type ChannelSettingsMenuItemProps<T extends RootChannel = RootChannel> = {
 	channelInDB: ChannelWithFlags;
@@ -106,7 +112,7 @@ function ToggleIndexingButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => ephemeralStatusHandler(interaction, message),
+						Error: (message) => onceTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -134,7 +140,7 @@ function ToggleForumGuidelinesConsentButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => ephemeralStatusHandler(interaction, message),
+						Error: (message) => onceTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -208,9 +214,28 @@ export function IndexingSettingsMenu({
 			<Button
 				label={SEND_CONSENT_PROMPT_LABEL}
 				style="Primary"
-				onClick={() => {
-					console.log('sending consent prompt');
-				}}
+				onClick={(intr) =>
+					guildTextChannelOnlyInteraction(intr, async ({ guild, channel }) => {
+						const consentEmbed = new EmbedBuilder();
+						consentEmbed.setDescription(
+							makeRequestForConsentString(guild.name),
+						);
+						consentEmbed.addFields({
+							name: 'Learn more',
+							value: WEBSITE_URL,
+						});
+						const components =
+							new ActionRowBuilder<MessageActionRowComponentBuilder>();
+						components.addComponents(
+							makeConsentButton('manually-posted-prompt'),
+						);
+						await channel.send({
+							embeds: [consentEmbed],
+							components: [components],
+						});
+						await onceTimeStatusHandler(intr, 'Consent prompt sent!');
+					})
+				}
 			/>
 		</>
 	);
@@ -237,7 +262,7 @@ function ToggleMarkAsSolutionButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => ephemeralStatusHandler(interaction, message),
+						Error: (message) => onceTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -268,7 +293,7 @@ function ToggleSendMarkAsSolutionInstructionsButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => ephemeralStatusHandler(interaction, message),
+						Error: (message) => onceTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -299,7 +324,7 @@ function SelectMarkAsSolvedTag({
 						channel: targetChannel,
 						tagId: value === CLEAR_TAG_VALUE ? null : value,
 						member,
-						Error: (message) => ephemeralStatusHandler(interaction, message),
+						Error: (message) => onceTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -339,7 +364,7 @@ function ToggleAutoThreadButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => ephemeralStatusHandler(interaction, message),
+						Error: (message) => onceTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},

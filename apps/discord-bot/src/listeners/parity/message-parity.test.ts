@@ -16,6 +16,7 @@ import {
 	findMessageById,
 	upsertMessage,
 } from '@answeroverflow/db';
+import { getRandomId } from '@answeroverflow/utils';
 
 let client: SapphireClient;
 let message: Message;
@@ -30,7 +31,7 @@ beforeEach(async () => {
 
 describe('Message Delete Tests', () => {
 	it('should deleted a cached message', async () => {
-		await upsertMessage(toAOMessage(message));
+		await upsertMessage(await toAOMessage(message));
 		await emitEvent(client, Events.MessageDelete, message);
 		const deletedMsg = await findMessageById(message.id);
 		expect(deletedMsg).toBeNull();
@@ -43,17 +44,21 @@ describe('Message Update Tests', () => {
 		const updatedMessage = copyClass(message, client, {
 			content: 'updated',
 		});
-		await upsertMessage(toAOMessage(message)),
-			await emitEvent(client, Events.MessageUpdate, message, updatedMessage);
+		const created = await upsertMessage({
+			...(await toAOMessage(message)),
+			solutionIds: [getRandomId()],
+		});
+		await emitEvent(client, Events.MessageUpdate, message, updatedMessage);
 		const updated = await findMessageById(message.id);
 		expect(updated!.content).toBe('updated');
+		expect(updated!.solutionIds).toEqual(created.solutionIds);
 	});
 	test.todo('should update an uncached edited message');
 });
 
 describe('Message Bulk Delete Tests', () => {
 	it('should deleted cached bulk messages', async () => {
-		await upsertMessage(toAOMessage(message));
+		await upsertMessage(await toAOMessage(message));
 		await emitEvent(
 			client,
 			Events.MessageBulkDelete,

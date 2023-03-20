@@ -1,4 +1,5 @@
-import type {
+import {
+	bitfieldToUserServerSettingsFlags,
 	DiscordAccount,
 	Server,
 	UserServerSettingsWithFlags,
@@ -169,5 +170,28 @@ describe('User Server Settings', () => {
 				CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE,
 			);
 		});
+	});
+});
+
+describe('User Server Settings Flags', () => {
+	it('should resolve publicly displaying messages enabled correctly', () => {
+		expect(
+			bitfieldToUserServerSettingsFlags(1 << 0).canPubliclyDisplayMessages,
+		).toBeTruthy();
+	});
+	it('should resolve publicly displaying messages disabled correctly', () => {
+		expect(
+			bitfieldToUserServerSettingsFlags(0).canPubliclyDisplayMessages,
+		).toBeFalsy();
+	});
+	it('should resolve message indexing disabled correctly', () => {
+		expect(
+			bitfieldToUserServerSettingsFlags(1 << 1).messageIndexingDisabled,
+		).toBeTruthy();
+	});
+	it('should resolve message indexing enabled correctly', () => {
+		expect(
+			bitfieldToUserServerSettingsFlags(0).messageIndexingDisabled,
+		).toBeFalsy();
 	});
 });

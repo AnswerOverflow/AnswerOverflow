@@ -1,5 +1,5 @@
 import { container, LogLevel, SapphireClient } from '@sapphire/framework';
-import { ClientOptions, Partials } from 'discord.js';
+import { ClientOptions, Partials, ActivityType, Options } from 'discord.js';
 
 import '~discord-bot/utils/setup';
 import {
@@ -22,17 +22,14 @@ function getLogLevel() {
 		case 'production':
 			return process.env.BOT_PROD_LOG_LEVEL
 				? parseInt(process.env.BOT_PROD_LOG_LEVEL)
-				: LogLevel.Info;
+				: LogLevel.Debug;
 		default:
-			return LogLevel.Info;
+			return LogLevel.Debug;
 	}
 }
 
 export function createClient(override: Partial<ClientOptions> = {}) {
 	return new SapphireClient({
-		defaultPrefix: '!',
-		regexPrefix: /^(hey +)?bot[,! ]/i,
-		caseInsensitiveCommands: true,
 		logger: {
 			level: getLogLevel(),
 		},
@@ -55,7 +52,8 @@ export function createClient(override: Partial<ClientOptions> = {}) {
 			Partials.GuildMember,
 			Partials.Reaction,
 		],
-		loadMessageCommandListeners: true,
+		// TODO: Evaluate if this is needed, we were encountering errors with the channels of messages not being cached in large indexing operations
+		makeCache: Options.cacheEverything(),
 		hmr: {
 			enabled: process.env.NODE_ENV === 'development',
 		},
@@ -73,9 +71,19 @@ export const login = async (client: SapphireClient) => {
 		client.logger.info('LOGGING IN');
 		client.logger.info(`NODE_ENV: ${process.env.NODE_ENV}`);
 		client.logger.info(
+			`DEPLOYMENT ENV: ${process.env.NEXT_PUBLIC_DEPLOYMENT_ENV!}`,
+		);
+		client.logger.info(
 			`DISCORD_ID: ${process.env.DISCORD_CLIENT_ID ?? 'UNKNOWN'}`,
 		);
+		if (process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === undefined) {
+			throw new Error(
+				'NEXT_PUBLIC_DEPLOYMENT_ENV is not defined, you must explicitly set it to "local", "staging", "ci" or "production"',
+			);
+		}
+
 		await client.login(process.env.DISCORD_TOKEN);
+
 		client.logger.info('LOGGED IN');
 		client.logger.info(`LOGGED IN AS: ${client.user?.username ?? 'UNKNOWN'}`);
 		const config: DiscordJSReact['config'] = {
@@ -96,6 +104,10 @@ export const login = async (client: SapphireClient) => {
 			max: 100,
 			// 10 minute ttl
 			ttl: 1000 * 60 * 10,
+		});
+		client.user?.setActivity({
+			type: ActivityType.Playing,
+			name: 'becoming open source ⚠️ maintenance week ⚠️',
 		});
 	} catch (error) {
 		client.logger.fatal(error);

@@ -1,27 +1,24 @@
-import { getRandomId } from '@answeroverflow/utils';
-import { elastic, Message } from '../index';
+import { getRandomId, getRandomIdGreaterThan } from '@answeroverflow/utils';
+import { elastic, getDefaultMessage } from '../index';
+import type { Message } from './message';
 
 let msg1: Message;
 
 let msg2: Message;
 
 beforeEach(() => {
-	msg1 = {
+	msg1 = getDefaultMessage({
 		id: getRandomId(),
-		parentChannelId: null,
 		channelId: getRandomId(),
-		content: 'hello',
-		images: [],
-		messageReference: null,
-		serverId: getRandomId(),
-		solutionIds: [],
 		authorId: getRandomId(),
-		childThread: getRandomId(),
-	};
-	msg2 = {
-		...msg1,
+		serverId: getRandomId(),
+	});
+	msg2 = getDefaultMessage({
 		id: getRandomId(),
-	};
+		channelId: getRandomId(),
+		authorId: getRandomId(),
+		serverId: getRandomId(),
+	});
 });
 
 describe('ElasticSearch', () => {
@@ -166,7 +163,10 @@ describe('ElasticSearch', () => {
 	describe('Messages Fetch By Channel Id', () => {
 		it('should fetch messages by channel id', async () => {
 			await elastic.upsertMessage(msg1);
-			await elastic.upsertMessage(msg2);
+			await elastic.upsertMessage({
+				...msg2,
+				channelId: msg1.channelId,
+			});
 
 			const fetchedMessages = await elastic.bulkGetMessagesByChannelId(
 				msg1.channelId,
@@ -183,6 +183,7 @@ describe('ElasticSearch', () => {
 				content,
 			});
 			const searchResults = await elastic.searchMessages({
+				limit: 20,
 				query: content,
 			});
 			expect(searchResults).toBeDefined();
@@ -204,6 +205,7 @@ describe('ElasticSearch', () => {
 				content,
 			});
 			const searchResults = await elastic.searchMessages({
+				limit: 20,
 				query: content,
 				serverId: serverId2,
 			});
@@ -215,6 +217,7 @@ describe('ElasticSearch', () => {
 		});
 		it('should return an empty array if no messages are found', async () => {
 			const searchResults = await elastic.searchMessages({
+				limit: 20,
 				query: getRandomId(),
 			});
 			expect(searchResults).toBeDefined();
@@ -252,6 +255,7 @@ describe('ElasticSearch', () => {
 				content,
 			});
 			const searchResults = await elastic.searchMessages({
+				limit: 20,
 				query: content,
 				channelId: targetChannelId,
 			});
@@ -281,6 +285,50 @@ describe('ElasticSearch', () => {
 			};
 			const result = await elastic.updateMessage(updatedMessage);
 			expect(result).toBeNull();
+		});
+	});
+	describe('Get channel message count', () => {
+		it('should return the number of messages in a channel', async () => {
+			await elastic.upsertMessage(msg1);
+			await elastic.upsertMessage({
+				...msg2,
+				channelId: msg1.channelId,
+			});
+			const count = await elastic.getChannelMessagesCount(msg1.channelId);
+			expect(count).toBe(2);
+		});
+		it('should return 0 if there are no messages in a channel', async () => {
+			const count = await elastic.getChannelMessagesCount(msg1.channelId);
+			expect(count).toBe(0);
+		});
+	});
+	describe('find latest message in channel', () => {
+		it('should return the latest message in a channel', async () => {
+			await elastic.upsertMessage(msg1);
+			const lastMsg = {
+				...msg1,
+				id: getRandomIdGreaterThan(parseInt(msg1.id)),
+			};
+			await elastic.upsertMessage(lastMsg);
+			const latestMessage = await elastic.findLatestMessageInChannel(
+				msg1.channelId,
+			);
+			expect(latestMessage).toBeDefined();
+			expect(latestMessage).toEqual(lastMsg);
+		});
+		it('should return the first message if there is only one message in a channel', async () => {
+			await elastic.upsertMessage(msg1);
+			const latestMessage = await elastic.findLatestMessageInChannel(
+				msg1.channelId,
+			);
+			expect(latestMessage).toBeDefined();
+			expect(latestMessage).toEqual(msg1);
+		});
+		it('should return null if there are no messages in a channel', async () => {
+			const latestMessage = await elastic.findLatestMessageInChannel(
+				msg1.channelId,
+			);
+			expect(latestMessage).toBeNull();
 		});
 	});
 });

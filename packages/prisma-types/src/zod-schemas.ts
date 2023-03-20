@@ -1,7 +1,12 @@
 import { z } from 'zod';
 import { bitfieldToDict, dictToBitfield, mergeFlags, toDict } from './bitfield';
 import { ChannelType } from 'discord-api-types/v10';
-import type { Channel, Server, UserServerSettings } from '@prisma/client';
+import type {
+	Channel,
+	DiscordAccount,
+	Server,
+	UserServerSettings,
+} from '@prisma/client';
 
 // TODO: Split up this file, it's become a bit bloated to prevent circular dependencies
 
@@ -31,9 +36,9 @@ export const zUniqueArray = z
 
 export const channelBitfieldFlags = [
 	'indexingEnabled',
-	'autoThreadEnabled',
 	'markSolutionEnabled',
 	'sendMarkSolutionInstructionsInNewThreads',
+	'autoThreadEnabled',
 	'forumGuidelinesConsentEnabled',
 ] as const;
 
@@ -56,7 +61,19 @@ export const zChannelPrisma = z.object({
 	parentId: z.string().nullable(),
 	inviteCode: z.string().nullable(),
 	solutionTagId: z.string().nullable(),
-	lastIndexedSnowflake: z.string().nullable(),
+	archivedTimestamp: z.preprocess((n) => {
+		if (n === null) {
+			return null;
+		}
+		if (
+			typeof n === 'number' ||
+			typeof n === 'bigint' ||
+			typeof n === 'string'
+		) {
+			return BigInt(n);
+		}
+		return n;
+	}, z.bigint().nullable()),
 } satisfies ChannelZodFormat);
 
 export const zChannelPrismaCreate = zChannelPrisma.partial().merge(
@@ -76,6 +93,7 @@ export const zChannelPrismaUpdate = zChannelPrisma.partial().omit({
 
 export const zChannel = zChannelPrisma.required().extend({
 	flags: zChannelBitfieldFlags,
+	messageCount: z.number().optional(),
 });
 
 export type ChannelWithFlags = z.infer<typeof zChannel>;
@@ -101,6 +119,7 @@ export const zChannelPublic = zChannel.pick({
 	type: true,
 	parentId: true,
 	inviteCode: true,
+	messageCount: true,
 });
 
 export type ChannelPublicWithFlags = z.infer<typeof zChannelPublic>;
@@ -152,11 +171,9 @@ export const zServerPrismaCreate = zServerPrisma.partial().merge(
 );
 
 // For updating a server, only the ID is required
-export const zServerPrismaUpdate = zServerPrisma.partial().merge(
-	zServerPrisma.pick({
-		id: true,
-	}),
-);
+export const zServerPrismaUpdate = zServerPrisma.partial().omit({
+	id: true,
+});
 
 export const zServer = zServerPrisma
 	.required()
@@ -206,23 +223,68 @@ export function userServerSettingsFlagsToBitfield(
 	);
 }
 
-export const zUserServerSettingsFlags = toZObject(...userServerSettingsFlags);
-
-export const zUserServerSettings = z.object({
-	userId: z.string(),
+// ! Prisma breaks if you call it with extra data that isn't in the model, this is used to strip that data out
+type UserServerSettingsZodFormat = {
+	[K in keyof UserServerSettings]: z.ZodTypeAny;
+};
+// A 1:1 copy of the Prisma model
+export const zUserServerSettingsPrisma = z.object({
 	serverId: z.string(),
-	bitfield: z.number().optional(),
-});
+	userId: z.string(),
+	bitfield: z.number(),
+} satisfies UserServerSettingsZodFormat);
+
+// For creating a server, we make sure to include the required fields
+export const zUserServerSettingsPrismaCreate = zUserServerSettingsPrisma
+	.partial()
+	.merge(
+		zUserServerSettingsPrisma.pick({
+			serverId: true,
+			userId: true,
+		}),
+	);
+
+// For updating a server, only the ID is required
+export const zUserServerSettingsPrismaUpdate = zUserServerSettingsPrisma
+	.partial()
+	.omit({
+		serverId: true,
+		userId: true,
+	});
+
+export const zUserServerSettings = zUserServerSettingsPrisma;
+export const zUserServerSettingsFlags = toZObject(...userServerSettingsFlags);
 
 export const zUserServerSettingsWithFlags = zUserServerSettings.extend({
 	flags: zUserServerSettingsFlags,
 });
 
-export const zDiscordAccount = z.object({
+type DiscordAccountZodFormat = {
+	[K in keyof DiscordAccount]: z.ZodTypeAny;
+};
+
+export const zDiscordAccountPrisma = z.object({
 	id: z.string(),
 	name: z.string(),
 	avatar: z.string().nullable(),
-});
+} satisfies DiscordAccountZodFormat);
+
+export const zDiscordAccountPrismaCreate = zDiscordAccountPrisma
+	.partial()
+	.merge(
+		zDiscordAccountPrisma.pick({
+			id: true,
+			name: true,
+		}),
+	);
+
+export const zDiscordAccountPrismaUpdate = zDiscordAccountPrisma
+	.partial()
+	.omit({
+		id: true,
+	});
+
+export const zDiscordAccount = zDiscordAccountPrisma;
 
 export const zDiscordAccountPublic = zDiscordAccount.pick({
 	id: true,

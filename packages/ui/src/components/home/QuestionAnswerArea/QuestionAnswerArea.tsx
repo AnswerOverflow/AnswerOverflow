@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import Xarrow from 'react-xarrows';
-import { Message, MessageProps } from '~ui/components/Message';
+import { DemoMessage, MessageProps } from '~ui/components/home/DemoMessage';
 import { useTheme } from '~ui/utils/hooks';
 import { GooglePage } from './GooglePage/GooglePage';
 import './DashAnimation.css';
@@ -22,7 +22,7 @@ export const QuestionAnswerArea = ({
 
 	return (
 		<>
-			<div className="flex flex-col gap-10 rounded-lg border-1 border-[#C5C5C5] bg-gradient-to-br-light-glass py-20 pl-16 pr-8 shadow-[0px_0px_98px_-19px_#D4EDFF0F] backdrop-blur-md dark:border-[#343434] dark:bg-gradient-to-br-dark-glass xl:py-10 2xl:py-12">
+			<div className="flex flex-col gap-10 rounded-lg border-1 border-[#C5C5C5] bg-gradient-to-br-light-glass py-20 pl-16 pr-8 shadow-[0px_0px_222px_41px_rgba(57,_111,_248,_0.39)] backdrop-blur-md dark:border-[#343434] dark:bg-gradient-to-br-dark-glass xl:py-10 2xl:py-12">
 				{/* Discord */}
 				<div className="rounded-md bg-[#36393F]" ref={discordPageRef}>
 					{/* Channel name */}
@@ -31,12 +31,12 @@ export const QuestionAnswerArea = ({
 					</div>
 
 					<div ref={discordPageRef}>
-						<Message
+						<DemoMessage
 							{...questionMessage}
 							showLinkIcon={false}
 							forceDarkMode={true}
 						/>
-						<Message
+						<DemoMessage
 							{...answerMessage}
 							additionalMessageBoxClassNames="rounded-b-md"
 							showLinkIcon={false}

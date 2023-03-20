@@ -2,7 +2,7 @@ import { Button } from '../primitives/Button';
 
 export const HomeLeadText = () => {
 	return (
-		<div className="flex w-full flex-col items-start justify-center gap-6 xl:w-[60%]">
+		<div className="flex w-full flex-col items-start justify-center gap-6 pb-20 xl:w-[60%]">
 			<h1 className="text-center font-header text-4xl font-bold leading-[114.5%] text-ao-white md:text-start md:text-6xl">
 				Bringing your discord channels to google
 			</h1>
@@ -12,11 +12,10 @@ export const HomeLeadText = () => {
 				the info they need, fast.
 			</p>
 			<Button
-				type={'solid'}
-				color={'white'}
-				className="mx-auto shadow-[0px_0px_40px_rgba(255,_255,_255,_0.2)] duration-200 hover:shadow-[0px_0px_40px_rgba(255,_255,_255,_0.4)] xl:mx-0"
+				variant={'default'}
+				className="mx-auto text-xl shadow-[0px_0px_40px_rgba(255,_255,_255,_0.2)] duration-200 hover:shadow-[0px_0px_40px_rgba(255,_255,_255,_0.4)] xl:mx-0"
 			>
-				<span className="text-2xl">Get Started</span>
+				Get Started
 			</Button>
 		</div>
 	);

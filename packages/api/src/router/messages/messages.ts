@@ -15,11 +15,12 @@ import { findOrThrowNotFound } from '~api/utils/operations';
 import {
 	canUserViewPrivateMessage,
 	stripPrivateChannelData,
-	stripPrivateMessageData,
+	stripPrivateFullMessageData,
 	stripPrivateServerData,
 } from '~api/utils/permissions';
 import { TRPCError } from '@trpc/server';
-
+import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
+import { ChannelType } from 'discord.js';
 export const messagesRouter = router({
 	/*
     Message page by ID
@@ -80,7 +81,7 @@ export const messagesRouter = router({
 				: findMessagesByChannelId({
 						channelId: parentId,
 						after: targetMessage.id,
-						limit: 20,
+						limit: NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
 				  });
 
 			const [thread, server, channel, messages, rootMessage] =
@@ -94,8 +95,8 @@ export const messagesRouter = router({
 
 			// We've collected all of the data, now we need to strip out the private info
 			const messagesWithRefs = await addReferencesToMessages(
-				threadId && rootMessage
-					? [...new Set([rootMessage, ...messages])]
+				threadId && rootMessage && channel.type !== ChannelType.GuildForum
+					? [rootMessage, ...messages]
 					: messages,
 			);
 			const messagesWithDiscordAccounts = await addAuthorsToMessages(
@@ -103,7 +104,7 @@ export const messagesRouter = router({
 			);
 			return {
 				messages: messagesWithDiscordAccounts.map((message) =>
-					stripPrivateMessageData(message, ctx.userServers),
+					stripPrivateFullMessageData(message, ctx.userServers),
 				),
 				parentChannel: stripPrivateChannelData(channel),
 				server: stripPrivateServerData(server),
@@ -122,17 +123,19 @@ export const messagesRouter = router({
 			const searchResults = await searchMessages(input);
 			const strippedSearchResults = searchResults.map(
 				({ message, channel, server, thread, score }) => ({
-					message: stripPrivateMessageData(message, ctx.userServers),
+					message: stripPrivateFullMessageData(message, ctx.userServers),
 					channel: stripPrivateChannelData(channel),
 					server: stripPrivateServerData(server),
 					thread: thread ? stripPrivateChannelData(thread) : undefined,
 					score,
 				}),
 			);
-			return strippedSearchResults.filter(
-				(result) =>
-					canUserViewPrivateMessage(ctx.userServers, result.message) ||
-					result.message.public,
-			);
+			return strippedSearchResults
+				.filter(
+					(result) =>
+						canUserViewPrivateMessage(ctx.userServers, result.message) ||
+						result.message.public,
+				)
+				.splice(0, 20);
 		}),
 });

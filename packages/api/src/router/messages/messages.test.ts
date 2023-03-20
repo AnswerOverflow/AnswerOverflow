@@ -1,5 +1,4 @@
 import {
-	Channel,
 	DiscordAccount,
 	Message,
 	Server,
@@ -8,6 +7,7 @@ import {
 	createDiscordAccount,
 	upsertManyMessages,
 	createUserServerSettings,
+	ChannelWithFlags,
 } from '@answeroverflow/db';
 import {
 	mockAccountWithServersCallerCtx,
@@ -26,13 +26,15 @@ import {
 	mockDiscordAccount,
 	mockMessage,
 	mockThread,
+	mockChannelWithFlags,
 } from '@answeroverflow/db-mock';
 import { getRandomId } from '@answeroverflow/utils';
 import { randomSnowflakeLargerThan } from '@answeroverflow/discordjs-utils';
 import { ChannelType } from 'discord-api-types/v10';
+import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 
 let server: Server;
-let channel: Channel;
+let channel: ChannelWithFlags;
 let author: DiscordAccount;
 let unauthedMessagePageRouter: ReturnType<
 	(typeof messagesRouter)['createCaller']
@@ -42,11 +44,11 @@ let sameServerMessagePageRouter: ReturnType<
 >;
 beforeEach(async () => {
 	server = mockServer();
-	channel = mockChannel(server);
+
 	author = mockDiscordAccount();
 
 	await createServer(server);
-	await createChannel(channel);
+	channel = await createChannel(mockChannel(server));
 	await createDiscordAccount(author);
 	const unauthedCtx = await mockUnauthedCtx('web-client');
 	unauthedMessagePageRouter = messagesRouter.createCaller(unauthedCtx);
@@ -79,34 +81,36 @@ describe('Message Results', () => {
 			const messages = await unauthedMessagePageRouter.threadFromMessageId(
 				message.id,
 			);
-			expect(messages).toMatchObject({
-				messages: [
-					toPrivateMessageWithStrippedData(
-						toMessageWithAccountAndRepliesTo({
-							message,
-							author,
-							publicMessage: false,
-						}),
-					),
-					toPrivateMessageWithStrippedData(
-						toMessageWithAccountAndRepliesTo({
-							message: message2,
-							author,
-							publicMessage: false,
-						}),
-					),
-				],
-				parentChannel: pickPublicChannelData(channel),
-				server: pickPublicServerData(server),
-				thread: undefined,
-			});
+
+			expect(messages.messages).toEqual([
+				toPrivateMessageWithStrippedData(
+					toMessageWithAccountAndRepliesTo({
+						message,
+						author,
+						publicMessage: false,
+					}),
+				),
+				toPrivateMessageWithStrippedData(
+					toMessageWithAccountAndRepliesTo({
+						message: message2,
+						author,
+						publicMessage: false,
+					}),
+				),
+			]);
+
+			expect(messages.parentChannel).toEqual(
+				pickPublicChannelData(mockChannelWithFlags(server, channel)),
+			);
+			expect(messages.server).toEqual(pickPublicServerData(server));
+			expect(messages.thread).toEqual(undefined);
 		});
 	});
 	describe('Thread Message Pages', () => {
 		it('should get messages correctly starting from the root of a text channel thread', async () => {
 			const thread = mockThread(channel);
 			const message = mockMessage(server, channel, author, {
-				childThread: thread.id,
+				childThreadId: thread.id,
 				id: thread.id,
 			});
 			const message2 = mockMessage(server, thread, author, {
@@ -117,6 +121,7 @@ describe('Message Results', () => {
 			const pageData = await unauthedMessagePageRouter.threadFromMessageId(
 				message.id,
 			);
+
 			expect(pageData.messages).toEqual([
 				toPrivateMessageWithStrippedData(
 					toMessageWithAccountAndRepliesTo({
@@ -133,21 +138,24 @@ describe('Message Results', () => {
 					}),
 				),
 			]);
-			expect(pageData.parentChannel).toEqual(pickPublicChannelData(channel));
+			expect(pageData.parentChannel).toEqual(
+				pickPublicChannelData(mockChannelWithFlags(server, channel)),
+			);
 			expect(pageData.server).toEqual(pickPublicServerData(server));
-			expect(pageData.thread).toEqual(pickPublicChannelData(thread));
+			expect(pageData.thread).toEqual(
+				pickPublicChannelData(mockChannelWithFlags(server, thread)),
+			);
 		});
 		it('should get messages correctly starting a non root message in a text channel thread', async () => {
-			const thread = mockThread(channel);
+			const thread = await createChannel(mockThread(channel));
 			const message = mockMessage(server, channel, author, {
-				childThread: thread.id,
+				childThreadId: thread.id,
 				id: thread.id,
 			});
 			const message2 = mockMessage(server, thread, author, {
 				id: randomSnowflakeLargerThan(message.id).toString(),
 				parentChannelId: channel.id,
 			});
-			await createChannel(thread);
 			await upsertManyMessages([message, message2]);
 			const pageData = await unauthedMessagePageRouter.threadFromMessageId(
 				message2.id,
@@ -202,12 +210,12 @@ describe('Message Results', () => {
 			expect(pageData.thread).toEqual(undefined);
 		});
 		it('should get follow up messages of a forum post correctly starting from the root of the post', async () => {
-			const forumChannel = mockChannel(server, {
-				type: ChannelType.GuildForum,
-			});
-			const forumThread = mockThread(forumChannel);
-			await createChannel(forumChannel);
-			await createChannel(forumThread);
+			const forumChannel = await createChannel(
+				mockChannel(server, {
+					type: ChannelType.GuildForum,
+				}),
+			);
+			const forumThread = await createChannel(mockThread(forumChannel));
 			const message = mockMessage(server, forumThread, author, {
 				id: forumChannel.id,
 				parentChannelId: forumChannel.id,
@@ -243,12 +251,12 @@ describe('Message Results', () => {
 			expect(pageData.thread).toEqual(pickPublicChannelData(forumThread));
 		});
 		it('should get follow up messages of a forum post correctly starting from a non root message', async () => {
-			const forumChannel = mockChannel(server, {
-				type: ChannelType.GuildForum,
-			});
-			const forumThread = mockThread(forumChannel);
-			await createChannel(forumChannel);
-			await createChannel(forumThread);
+			const forumChannel = await createChannel(
+				mockChannel(server, {
+					type: ChannelType.GuildForum,
+				}),
+			);
+			const forumThread = await createChannel(mockThread(forumChannel));
 			const message = mockMessage(server, forumThread, author, {
 				id: forumChannel.id,
 				parentChannelId: forumChannel.id,
@@ -339,6 +347,12 @@ describe('Search Results', () => {
 				publicMessage: false,
 			}),
 		);
+		expect(firstResult.server).toEqual(pickPublicServerData(server));
+		expect(firstResult.channel).toEqual({
+			...pickPublicChannelData(channel),
+			messageCount: NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
+		});
+		expect(firstResult.thread).toEqual(undefined);
 	});
 	it('should fetch a result in a server correctly', async () => {
 		const message = mockMessage(server, channel, author, {

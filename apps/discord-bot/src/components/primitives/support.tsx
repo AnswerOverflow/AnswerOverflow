@@ -6,7 +6,10 @@ import { DISCORD_LINK, GITHUB_LINK } from '@answeroverflow/constants';
 
 export const SupportMenu: React.FC = () => (
 	<>
-		<Link label="Docs" url="https://docs.answeroverflow.com" emoji="📃" />
+		{/*
+      Disable docs until they are ready
+    <Link label="Docs" url="https://docs.answeroverflow.com" emoji="📃" />
+    */}
 		<Link
 			label="Bugs, features & suggestions"
 			url={GITHUB_LINK}
