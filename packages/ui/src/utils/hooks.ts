@@ -134,3 +134,9 @@ export const useTheme = () => {
 
 	return theme;
 };
+
+export const useRouterQuery = () => {
+	const router = useRouter();
+	const routerQuery = typeof router.query.q === 'string' ? router.query.q : '';
+	return routerQuery;
+};

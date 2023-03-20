@@ -2,20 +2,15 @@ import type { APISearchResult } from '@answeroverflow/api';
 import { useState } from 'react';
 import { Heading } from '../primitives/Heading';
 
-import { Input } from '~ui/components/primitives/Input';
+import { SearchInput } from '~ui/components/primitives/Input';
 import { SearchResult } from '~ui/components/search/SearchResult';
 import { useRouter } from 'next/router';
+import { useRouterQuery } from '~ui/utils/hooks';
 
 interface SearchResultProps {
 	results: APISearchResult[number][];
 	isLoading: boolean;
 }
-
-export const useRouterQuery = () => {
-	const router = useRouter();
-	const routerQuery = typeof router.query.q === 'string' ? router.query.q : '';
-	return routerQuery;
-};
 
 export const MessagesSearchBar = (props: { placeholder?: string }) => {
 	const router = useRouter();
@@ -30,18 +25,17 @@ export const MessagesSearchBar = (props: { placeholder?: string }) => {
 					shallow: true,
 				});
 			}}
-			className="mb-8"
+			className="mb-8 w-full"
 		>
-			<Input
+			<SearchInput
 				onChange={setSearchInput}
 				buttonAria="Search button"
 				type="buttonInput"
 				fill
-				className="w-full"
 				placeholder={props.placeholder ?? 'Search'}
 			>
 				Search
-			</Input>
+			</SearchInput>
 		</form>
 	);
 };
