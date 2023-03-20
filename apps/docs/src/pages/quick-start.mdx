@@ -1,5 +1,9 @@
-import {OPEN_INDEXING_SETTINGS_MENU_LABEL, ENABLE_CHANNEL_INDEXING_LABEL} from "@answeroverflow/constants"
-import { Callout } from 'nextra-theme-docs'
+import {
+	OPEN_INDEXING_SETTINGS_MENU_LABEL,
+	ENABLE_CHANNEL_INDEXING_LABEL,
+} from '@answeroverflow/constants';
+import { Callout } from 'nextra-theme-docs';
+import { LinkButton } from '@answeroverflow/ui';
 
 # Answer Overflow Quick Start
 
@@ -8,10 +12,19 @@ This will walk you through the steps to enable indexing of a channel in your ser
 ### 1. Add the bot to your server
 
 {/* TODO: Add inviting bot screenshot */}
-- You can add it from [BOT_INVITE_LINK]
-- It requires all the permissions it requests, if you disable them it may not work properly.
 
-### 2. Use /channel-settings in a channel your want to enable indexing in
+<div className="flex flex-row justify-center">
+	<LinkButton href="https://discord.com/oauth2/authorize?client_id=958907348389339146&permissions=328565083201&scope=bot+applications.commands">
+		Add To Server
+	</LinkButton>
+</div>
+
+<Callout>
+	Answer Overflow requires all the permissions it requests, if you disable them
+	it may not work properly.
+</Callout>
+
+### 2. Use /channel-settings in a channel you want to enable indexing in
 
 The channel settings menu looks like this:
 {/* TODO: Add channel settings menu screenshot */}
@@ -25,7 +38,9 @@ Click on the **{ENABLE_CHANNEL_INDEXING_LABEL}** button to enable indexing in th
 **You're setup and ready to go! The content of this channel will now be indexed into web search engines like Google.**
 
 <Callout type="error" emoji="❗">
-  Users have to be marked as consenting to publicly display their messages in order for their messages to be shown publicly. You can read more about this in the [displaying messages](/user-settings/displaying-messages) section.
+	Users have to be marked as consenting to publicly display their messages in
+	order for their messages to be shown publicly. You can read more about this in
+	the [displaying messages](/user-settings/displaying-messages) section.
 </Callout>
 
 ### 3. Next steps
@@ -33,6 +48,7 @@ Click on the **{ENABLE_CHANNEL_INDEXING_LABEL}** button to enable indexing in th
 While your channel is now indexed, there's more you can do to boost the amount of content that will be indexed.
 
 Make sure to:
+
 - [Review the overview](/) to understand all the terminology and concepts of Answer Overflow
 - [Follow the recommended setup guide](/recommended-setup) to make sure your help channels and server are setup properly
 - [Enable forum guidelines consent](/channel-settings/forum-guidelines-consent) to have all users making new forum posts being marked as consenting to publicly display their messages
