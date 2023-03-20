@@ -12,7 +12,7 @@ We use developer containers to ensure a consistent environment across all platfo
 
 We recommend the use of dev containers to make your onboarding as easy as possible, below are instructions for setup on both, pick one to follow (dev containers is recommended)
 
-## Dev containers 
+## Dev containers
 
 Follow this [Getting Started Guide](https://code.visualstudio.com/docs/devcontainers/containers) on how to setup dev containers for your system
 
@@ -53,6 +53,10 @@ If you are using gitpod, you should use [gitpod enviroment variables](https://ww
 ## UI
 
 We use storybook for developing our components and pages. It offers an isolated environment with a powerful tool set to empower frontend development.
+
+Notes:
+
+- Creating a page? Make sure to use the `PageWrapper` as the parent element, this makes sure we keep styling the same across all our pages.
 
 ### Design
 

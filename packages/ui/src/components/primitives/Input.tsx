@@ -67,7 +67,7 @@ const InputButton = ({
 };
 
 // It is not suitable to destructure here, due to the discriminated types
-export const Input = (props: InputProps) => {
+export const SearchInput = (props: InputProps) => {
 	return (
 		<>
 			{props.type === 'buttonInput' ? (

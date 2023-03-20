@@ -4,41 +4,22 @@ import {
 	mockMessageWithDiscordAccount,
 	mockServer,
 } from '~ui/test/props';
-import { PageWrapper } from '../PageWrapper';
-import { SearchPage } from './SearchPage';
 
+import { CommunityPage } from './CommunityPage';
 const meta = {
-	component: SearchPage,
-	title: 'pages/SearchPage',
-	argTypes: {},
-	render: (args) => (
-		<PageWrapper>
-			<SearchPage {...args} />
-		</PageWrapper>
-	),
+	title: 'pages/CommunityPage',
+	component: CommunityPage,
+	render: (props) => <CommunityPage {...props} />,
 	parameters: {
 		layout: 'fullscreen',
-		a11y: {
-			config: {
-				rules: [
-					{
-						id: 'heading-order',
-						enabled: false,
-					},
-					{
-						id: 'duplicate-id',
-						enabled: false,
-					},
-				],
-			},
-		},
 	},
-} as Meta<typeof SearchPage>;
+} as Meta<typeof CommunityPage>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
-export const NoResults: Story = {};
-export const Results: Story = {
+
+export const CommunityPageStory: Story = {
 	args: {
 		results: [
 			{
@@ -56,11 +37,7 @@ export const Results: Story = {
 				server: mockServer(),
 			},
 		],
+		server: mockServer(),
 		isLoading: false,
-	},
-};
-export const Loading: Story = {
-	args: {
-		isLoading: true,
 	},
 };

@@ -135,13 +135,16 @@ function toAOActionRow(
 }
 
 // top 10 ugliest functions in this codebase
-export function toAOMessage(message: Message): AOMessage {
-	if (!message.guild) throw new Error('Message is not in a guild');
+export async function toAOMessage(message: Message): Promise<AOMessage> {
+	if (message.partial) {
+		message = await message.fetch();
+	}
+	if (!message.guildId) throw new Error('Message is not in a guild');
 
 	const convertedMessage: AOMessage = {
 		id: message.id,
 		content: message.cleanContent,
-		channelId: message.channel.id,
+		channelId: message.channelId,
 		parentChannelId: message.channel.isThread()
 			? message.channel.parentId
 			: null,
@@ -240,7 +243,7 @@ export function toAOMessage(message: Message): AOMessage {
 			? toAOMessageReference(message.reference)
 			: null,
 		authorId: message.author.id,
-		serverId: message.guild?.id,
+		serverId: message.guildId,
 		solutionIds: [],
 		childThreadId: message.thread?.id ?? null,
 	};
@@ -275,6 +278,10 @@ export function toAOChannel(
 		type: channel.type,
 		parentId: channel.isThread() ? channel.parentId : null,
 		serverId: channel.guild.id,
+		archivedTimestamp:
+			channel.isThread() && channel.archiveTimestamp
+				? BigInt(channel.archiveTimestamp)
+				: null,
 	});
 	return convertedChannel;
 }
@@ -320,10 +327,11 @@ export function extractThreadsSetFromMessages(messages: Message[]) {
 	return Array.from(threads.values());
 }
 
-export function messagesToAOMessagesSet(messages: Message[]) {
+export async function messagesToAOMessagesSet(messages: Message[]) {
 	const aoMessages = new Map<string, AOMessage>();
-	for (const msg of messages) {
-		aoMessages.set(msg.id, toAOMessage(msg));
+	for await (const msg of messages) {
+		const converted = await toAOMessage(msg);
+		aoMessages.set(msg.id, converted);
 	}
 	return Array.from(aoMessages.values());
 }

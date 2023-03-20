@@ -7,8 +7,8 @@ import {
 import React from 'react';
 import { ChannelType } from '~ui/utils/discord';
 import { ServerIcon } from './ServerIcon';
-import Link from 'next/link';
 import { useIsUserInServer } from '../utils';
+import { LinkButton } from './primitives/LinkButton';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const ServerInviteContext = createContext<{
 	server: ServerPublic;
@@ -29,7 +29,7 @@ function useServerInviteContext() {
 const ServerInviteTitle = () => {
 	const { server } = useServerInviteContext();
 	return (
-		<h3 className="pt-2 text-center font-header text-lg font-bold text-ao-black dark:text-ao-white">
+		<h3 className="text-center font-header text-lg font-bold leading-5 text-ao-black dark:text-ao-white">
 			{server.name}
 		</h3>
 	);
@@ -54,9 +54,9 @@ const ServerInviteChannelName = () => {
 	if (!channel) return <></>;
 
 	return (
-		<div className="flex flex-row items-center justify-center align-middle">
+		<div className="flex flex-row items-center justify-center">
 			{getChannelTypeIcon(channel.type)}
-			<h4 className="text-center font-header text-base font-bold text-ao-black dark:text-ao-white">
+			<h4 className="text-center font-body text-base font-bold leading-5 text-ao-black dark:text-ao-white">
 				{channel.name}
 			</h4>
 		</div>
@@ -66,16 +66,17 @@ const ServerInviteChannelName = () => {
 // TODO: Make this a link button
 const ServerInviteJoinButton = () => {
 	const { channel, isUserInServer } = useServerInviteContext();
+	console.log('foo');
 	if (!channel?.inviteCode) return <></>;
 	return (
-		<Link
+		<LinkButton
 			href={`https://discord.gg/${channel?.inviteCode}`}
-			target={'Blank'}
+			variant="default"
 			referrerPolicy="no-referrer"
-			className="text-center font-header text-xl font-bold "
+			className="text-center font-header font-bold "
 		>
-			{isUserInServer ? <>Joined</> : <>Join</>}
-		</Link>
+			{isUserInServer ? <>Joined</> : <>Join Server</>}
+		</LinkButton>
 	);
 };
 
@@ -91,14 +92,14 @@ export const ServerInviteRenderer = (props: {
 }) => {
 	return (
 		<ServerInviteContext.Provider value={props}>
-			<div className="flex h-full w-full flex-col items-center justify-center">
-				<div className="flex h-full w-full flex-col items-center justify-center">
-					<div className="flex flex-row items-center justify-center align-middle">
+			<div className="flex h-full w-full flex-col items-center justify-center gap-1">
+				<div className="flex flex-col">
+					<div className="flex flex-row items-center justify-center pb-5 align-middle">
 						<ServerInviteIcon />
-						<ServerInviteTitle />
-					</div>
-					<div>
-						<ServerInviteChannelName />
+						<div className="flex flex-col items-center justify-center pl-2">
+							<ServerInviteTitle />
+							<ServerInviteChannelName />
+						</div>
 					</div>
 					<ServerInviteJoinButton />
 				</div>

@@ -13,7 +13,6 @@ import {
 	createDiscordAccount,
 	createServer,
 	createUserServerSettings,
-	findChannelById,
 	findManyChannelsById,
 	findManyDiscordAccountsById,
 	findManyMessages,
@@ -28,7 +27,6 @@ import {
 } from '~discord-bot/utils/conversions';
 import {
 	addSolutionsToMessages,
-	fetchAllChannelMessagesWithThreads,
 	fetchAllMessages,
 	filterMessages,
 	findSolutionsToMessage,
@@ -45,10 +43,7 @@ import {
 	mockMarkedAsSolvedReply,
 	mockGuildMember,
 } from '@answeroverflow/discordjs-mock';
-import {
-	isSnowflakeLargerAsInt,
-	randomSnowflake,
-} from '@answeroverflow/discordjs-utils';
+import { randomSnowflake } from '@answeroverflow/discordjs-utils';
 import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
 
 let client: Client;
@@ -167,58 +162,6 @@ describe('Indexing', () => {
 				expectedMessages: 120,
 			});
 		});
-		it('should update last indexed snowflake after indexing', async () => {
-			const settings = await upsertChannelSettings(textChannel, {
-				flags: {
-					indexingEnabled: true,
-				},
-			});
-			expect(settings.flags.indexingEnabled).toBeTruthy();
-			const messages = mockMessages(textChannel, 100);
-			await indexRootChannel(textChannel);
-			const largestId = messages
-				.sort((a, b) => isSnowflakeLargerAsInt(a.id, b.id))
-				.at(-1)!.id;
-			const updatedSettings = await findChannelById(textChannel.id);
-			expect(updatedSettings!.lastIndexedSnowflake).toBe(largestId);
-		});
-		it('should start indexing from the last indexed snowflake', async () => {
-			const startSnowflake = 345312;
-			await upsertChannelSettings(textChannel, {
-				flags: {
-					indexingEnabled: true,
-				},
-				lastIndexedSnowflake: `${startSnowflake}`,
-			});
-			for (let i = startSnowflake - 100; i < startSnowflake; i++) {
-				mockMessage({
-					client,
-					channel: textChannel,
-					override: {
-						id: `${i}`,
-					},
-				});
-			}
-			const messages: Message[] = [];
-			for (let i = startSnowflake; i <= startSnowflake + 100; i++) {
-				messages.push(
-					mockMessage({
-						client,
-						channel: textChannel,
-						override: {
-							id: `${i}`,
-						},
-					}),
-				);
-			}
-			await indexRootChannel(textChannel);
-			await validateIndexingResults({
-				messages,
-				expectedThreads: 0,
-				expectedUsers: 100,
-				expectedMessages: 100,
-			});
-		});
 		it('should index a forum channel', async () => {
 			const settings = await upsertChannelSettings(forumChannel, {
 				flags: {
@@ -257,7 +200,7 @@ describe('Indexing', () => {
 		let solutionMessageAsAoMessage: AOMessage;
 		let markedAsSolvedReplyAsAoMessage: AOMessage;
 		let messages: Message[];
-		beforeEach(() => {
+		beforeEach(async () => {
 			questionMessage = mockMessage({ client });
 			solutionMessage = mockMessage({ client });
 			markedAsSolvedReply = mockMarkedAsSolvedReply({
@@ -266,9 +209,9 @@ describe('Indexing', () => {
 				solutionId: solutionMessage.id,
 			});
 			messages = [questionMessage, solutionMessage, markedAsSolvedReply];
-			questionMessageAsAoMessage = toAOMessage(questionMessage);
-			solutionMessageAsAoMessage = toAOMessage(solutionMessage);
-			markedAsSolvedReplyAsAoMessage = toAOMessage(markedAsSolvedReply);
+			questionMessageAsAoMessage = await toAOMessage(questionMessage);
+			solutionMessageAsAoMessage = await toAOMessage(solutionMessage);
+			markedAsSolvedReplyAsAoMessage = await toAOMessage(markedAsSolvedReply);
 		});
 		it('should add solutions to messages with reply at the end', () => {
 			addSolutionsToMessages(messages, [
@@ -390,244 +333,6 @@ describe('Indexing', () => {
 			const msg2 = mockMessage({ client, channel: textChannel });
 			const filteredMessages = await filterMessages([msg1, msg2], textChannel);
 			expect(filteredMessages.length).toBe(2);
-		});
-	});
-	describe('Fetch All Channel Messages With Threads', () => {
-		describe('Text Channel', () => {
-			it('should fetch all messages from a text channel with no threads', async () => {
-				const numberOfMessages = 1245;
-				mockMessages(textChannel, numberOfMessages);
-				const { messages } = await fetchAllChannelMessagesWithThreads(
-					textChannel,
-					{
-						limit: 20000,
-					},
-				);
-				expect(messages.length).toBe(numberOfMessages);
-			});
-			it('should fetch all messages from a text channel one archived thread', async () => {
-				const thread = mockThreadFromParentMessage({
-					client,
-					data: {
-						thread_metadata: {
-							auto_archive_duration: 60,
-							archive_timestamp: new Date().toISOString(),
-							archived: true,
-						},
-					},
-					parentMessage: mockMessage({ client, channel: textChannel }),
-				});
-				const numberOfThreadMessages = 300;
-				mockMessages(thread, numberOfThreadMessages);
-				const numberOfTextChannelMessages = 1245;
-				mockMessages(textChannel, numberOfTextChannelMessages);
-				const { messages } = await fetchAllChannelMessagesWithThreads(
-					textChannel,
-					{
-						limit: 20000,
-					},
-				);
-				expect(messages.length).toBe(
-					numberOfThreadMessages + numberOfTextChannelMessages + 1,
-				);
-			});
-			it('should fetch all messages from a text channel with one active thread', async () => {
-				const thread = mockThreadFromParentMessage({
-					client,
-					parentMessage: mockMessage({ client, channel: textChannel }),
-				});
-				const numberOfThreadMessages = 300;
-				mockMessages(thread, numberOfThreadMessages);
-				const numberOfTextChannelMessages = 1245;
-				mockMessages(textChannel, numberOfTextChannelMessages);
-				const { messages } = await fetchAllChannelMessagesWithThreads(
-					textChannel,
-					{
-						limit: 20000,
-					},
-				);
-				expect(messages.length).toBe(
-					numberOfTextChannelMessages + numberOfThreadMessages + 1,
-				);
-			});
-			it('should fetch all messages from a text channel with an active and archived thread', async () => {
-				const archivedThread = mockThreadFromParentMessage({
-					client,
-					data: {
-						thread_metadata: {
-							auto_archive_duration: 60,
-							archive_timestamp: new Date().toISOString(),
-							archived: true,
-						},
-					},
-					parentMessage: mockMessage({ client, channel: textChannel }),
-				});
-				const activeThread = mockThreadFromParentMessage({
-					client,
-					parentMessage: mockMessage({ client, channel: textChannel }),
-				});
-				const numberOfArchivedThreadMessages = 300;
-				mockMessages(archivedThread, numberOfArchivedThreadMessages);
-				const numberOfActiveThreadMessages = 300;
-				mockMessages(activeThread, numberOfActiveThreadMessages);
-				const numberOfTextChannelMessages = 1245;
-				mockMessages(textChannel, numberOfTextChannelMessages);
-				const { messages } = await fetchAllChannelMessagesWithThreads(
-					textChannel,
-					{
-						limit: 20000,
-					},
-				);
-				expect(messages.length).toBe(
-					numberOfArchivedThreadMessages +
-						numberOfActiveThreadMessages +
-						numberOfTextChannelMessages +
-						2,
-				);
-			});
-		});
-		describe('News Channel', () => {
-			it('should fetch all messages from a news channel with no threads', async () => {
-				const numberOfMessages = 1245;
-				mockMessages(newsChannel, numberOfMessages);
-				const { messages } = await fetchAllChannelMessagesWithThreads(
-					newsChannel,
-					{
-						limit: 20000,
-					},
-				);
-				expect(messages.length).toBe(numberOfMessages);
-			});
-			it('should fetch all messages from a news channel with one archived thread', async () => {
-				const thread = mockThreadFromParentMessage({
-					client,
-					data: {
-						thread_metadata: {
-							auto_archive_duration: 60,
-							archive_timestamp: new Date().toISOString(),
-							archived: true,
-						},
-						type: ChannelType.AnnouncementThread,
-					},
-					parentMessage: mockMessage({ client, channel: newsChannel }),
-				});
-				const numberOfThreadMessages = 300;
-				mockMessages(thread, numberOfThreadMessages);
-				const numberOfNewsChannelMessages = 1245;
-				mockMessages(newsChannel, numberOfNewsChannelMessages);
-				const { messages, threads } = await fetchAllChannelMessagesWithThreads(
-					newsChannel,
-					{
-						limit: 20000,
-					},
-				);
-				expect(messages.length).toBe(
-					numberOfThreadMessages + numberOfNewsChannelMessages + 1,
-				);
-				expect(threads.length).toBe(1);
-			});
-			it('should fetch all messages from a news channel with one active thread', async () => {
-				const thread = mockThreadFromParentMessage({
-					client,
-					data: {
-						type: ChannelType.AnnouncementThread,
-					},
-					parentMessage: mockMessage({ client, channel: newsChannel }),
-				});
-				const numberOfThreadMessages = 300;
-				mockMessages(thread, numberOfThreadMessages);
-				const numberOfNewsChannelMessages = 1245;
-				mockMessages(newsChannel, numberOfNewsChannelMessages);
-				const { messages, threads } = await fetchAllChannelMessagesWithThreads(
-					newsChannel,
-					{
-						limit: 20000,
-					},
-				);
-				expect(messages.length).toBe(
-					numberOfNewsChannelMessages + numberOfThreadMessages + 1,
-				);
-				expect(threads.length).toBe(1);
-			});
-		});
-		describe('Forum Channel', () => {
-			it('should fetch all messages from a forum channel with no threads', async () => {
-				const { messages } = await fetchAllChannelMessagesWithThreads(
-					forumChannel,
-					{
-						limit: 20000,
-					},
-				);
-				expect(messages.length).toBe(0);
-			});
-			it('should fetch all messages from a forum channel with one archived thread', async () => {
-				const thread = mockPublicThread({
-					client,
-					data: {
-						thread_metadata: {
-							auto_archive_duration: 60,
-							archive_timestamp: new Date().toISOString(),
-							archived: true,
-						},
-					},
-					parentChannel: forumChannel,
-				});
-				const numberOfThreadMessages = 300;
-				mockMessages(thread, numberOfThreadMessages);
-				const { messages } = await fetchAllChannelMessagesWithThreads(
-					forumChannel,
-					{
-						limit: 20000,
-					},
-				);
-				expect(messages.length).toBe(numberOfThreadMessages);
-			});
-			it('should fetch all messages from a forum channel with one active thread', async () => {
-				const thread = mockPublicThread({
-					client,
-					data: {
-						thread_metadata: {
-							auto_archive_duration: 60,
-							archive_timestamp: new Date().toISOString(),
-							archived: false,
-						},
-					},
-					parentChannel: forumChannel,
-				});
-				const numberOfThreadMessages = 300;
-				mockMessages(thread, numberOfThreadMessages);
-				const { messages } = await fetchAllChannelMessagesWithThreads(
-					forumChannel,
-				);
-				expect(messages.length).toBe(numberOfThreadMessages);
-			});
-			it('should fetch all messages from a forum channel with an active and archived thread', async () => {
-				const archivedThread = mockPublicThread({
-					client,
-					data: {
-						thread_metadata: {
-							auto_archive_duration: 60,
-							archive_timestamp: new Date().toISOString(),
-							archived: true,
-						},
-					},
-					parentChannel: forumChannel,
-				});
-				const activeThread = mockPublicThread({
-					client,
-					parentChannel: forumChannel,
-				});
-				const numberOfArchivedThreadMessages = 300;
-				mockMessages(archivedThread, numberOfArchivedThreadMessages);
-				const numberOfActiveThreadMessages = 300;
-				mockMessages(activeThread, numberOfActiveThreadMessages);
-				const { messages } = await fetchAllChannelMessagesWithThreads(
-					forumChannel,
-				);
-				expect(messages.length).toBe(
-					numberOfArchivedThreadMessages + numberOfActiveThreadMessages,
-				);
-			});
 		});
 	});
 	describe('Fetch All Messages', () => {

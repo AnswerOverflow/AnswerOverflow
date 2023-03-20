@@ -9,15 +9,25 @@ import { Button } from './Button';
 import { signIn, signOut } from 'next-auth/react';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
-import { Avatar } from '../primitives/Avatar';
+import { Fragment, useState, useEffect, useRef } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '../primitives/Avatar';
 import { classNames } from '~ui/utils/styling';
 
 const SignedInDropdownMenu = ({ signedInUser }: { signedInUser: User }) => (
 	<Menu as="div" className="relative inline-block text-left">
 		<Menu.Button>
 			<div className="flex shrink-0 flex-row items-center rounded-md p-2 transition hover:bg-zinc-900/5 dark:hover:bg-white/5">
-				<Avatar alt={signedInUser.name} size={'sm'} url={signedInUser.image} />
+				<Avatar>
+					<AvatarImage
+						alt={signedInUser.name ?? 'Signed In User'}
+						src={signedInUser.image ?? undefined}
+					/>
+					<AvatarFallback>
+						{(signedInUser?.name ?? 'Signed In User')
+							.split(' ')
+							.map((word) => word.at(0)?.toUpperCase())}
+					</AvatarFallback>
+				</Avatar>
 				<EllipsisVerticalIcon className="h-7 w-7 dark:text-white hover:dark:text-neutral-400" />
 			</div>
 		</Menu.Button>
@@ -55,8 +65,11 @@ const SignedInDropdownMenu = ({ signedInUser }: { signedInUser: User }) => (
 								active,
 							}) => (
 								<Button
-									onClick={() => async () => {
-										await signOut();
+									variant="outline"
+									onClick={() => {
+										async () => {
+											await signOut();
+										};
 									}}
 								>
 									Sign out
@@ -73,14 +86,53 @@ const SignedInDropdownMenu = ({ signedInUser }: { signedInUser: User }) => (
 export type NavbarProps = {
 	user?: User;
 	path?: string;
+	/**
+	 * Adds additional padding to the navbar, when PageWrapper is not being used
+	 */
+	additionalPadding?: boolean;
 };
 
 // TODO: Needs mobile styling
-export const NavbarRenderer = ({ path, user }: NavbarProps) => {
+export const NavbarRenderer = ({
+	path,
+	user,
+	additionalPadding,
+}: NavbarProps) => {
+	const [sticky, setSticky] = useState(false);
+	const navbarRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const handleScroll = () => {
+			if (window.pageYOffset > 100) {
+				setSticky(true);
+			} else {
+				setSticky(false);
+			}
+		};
+
+		window.addEventListener('scroll', handleScroll);
+
+		return () => {
+			window.removeEventListener('scroll', handleScroll);
+		};
+	}, []);
+
 	return (
-		<>
-			<nav className="z-50 flex min-h-[4rem] w-full items-center">
-				<ol className="mx-[4rem] hidden w-full flex-row py-8 transition-all lg:flex 2xl:mx-[6rem]">
+		<div className={`${additionalPadding ? 'sm:px-4' : ''}`}>
+			{sticky && <div className="pt-[15.5rem]"></div>}
+			<nav
+				className={`${
+					sticky
+						? 'fixed top-0 left-0 backdrop-blur-md dark:bg-ao-black/75'
+						: 'relative min-h-[4rem]'
+				} z-50 flex w-full items-center`}
+				ref={navbarRef}
+			>
+				<ol
+					className={`mx-[4rem] hidden w-full flex-row ${
+						sticky ? 'py-2' : 'py-8'
+					} transition-all lg:flex 2xl:mx-[6rem]`}
+				>
 					<li>
 						<Link
 							href="/"
@@ -93,34 +145,44 @@ export const NavbarRenderer = ({ path, user }: NavbarProps) => {
 					<li className="ml-auto hidden items-center justify-center md:flex">
 						<ThemeSwitcher />
 					</li>
-					<li className="mx-6  hidden md:block">
-						<button className="h-full w-full" aria-label="Search">
-							<MagnifyingGlassIcon width={'1.5rem'} height={'1.5rem'} />
-						</button>
-					</li>
-					<li className="ml-6 hidden items-center justify-center md:flex">
-						<Button>
-							<span className="text-xl">Add to server</span>
+					<li className="mx-6 hidden md:flex">
+						<Button aria-label="Search" variant="ghost" className="my-auto">
+							<MagnifyingGlassIcon height={'1.5rem'} />
 						</Button>
 					</li>
-					<li className="ml-6 hidden items-center justify-center md:flex">
+					<li className="ml-6 hidden items-center justify-center  md:flex">
+						<Button variant="outline">Add to server</Button>
+					</li>
+					<li className="ml-6 hidden items-center justify-center  md:flex">
 						{user ? (
 							<SignedInDropdownMenu signedInUser={user} />
 						) : (
 							// eslint-disable-next-line @typescript-eslint/no-misused-promises
-							<Button onClick={() => signIn('discord')}>Login</Button>
+							<Button variant="outline" onClick={() => signIn('discord')}>
+								Login
+							</Button>
 						)}
 					</li>
 				</ol>
 			</nav>
-		</>
+		</div>
 	);
 };
 
-export const Navbar = () => {
+export const Navbar = ({
+	additionalPadding,
+}: {
+	additionalPadding?: boolean;
+}) => {
 	const router = useRouter();
 	const userQuery = trpc.auth.getSession.useQuery();
 	const user = userQuery.data?.user;
 	console.log(router.pathname);
-	return <NavbarRenderer user={user} path={router.pathname} />;
+	return (
+		<NavbarRenderer
+			user={user}
+			path={router.pathname}
+			additionalPadding={additionalPadding}
+		/>
+	);
 };

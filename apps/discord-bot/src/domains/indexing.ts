@@ -1,24 +1,23 @@
 import {
 	upsertManyDiscordAccounts,
 	Message as AOMessage,
-	upsertManyChannels,
 	upsertManyMessages,
 	upsertChannel,
 	findManyUserServerSettings,
 	findChannelById,
+	findLatestArchivedTimestampByChannelId,
+	findLatestMessageInChannel,
 } from '@answeroverflow/db';
 import {
 	AnyThreadChannel,
 	ChannelType,
 	Client,
-	Collection,
-	DiscordAPIError,
 	ForumChannel,
 	Guild,
 	GuildBasedChannel,
+	GuildTextBasedChannel,
 	Message,
 	NewsChannel,
-	PublicThreadChannel,
 	Snowflake,
 	TextBasedChannel,
 	TextChannel,
@@ -27,13 +26,9 @@ import {
 	extractUsersSetFromMessages,
 	messagesToAOMessagesSet,
 	toAOChannel,
-	toAOThread,
 } from '~discord-bot/utils/conversions';
 import { container } from '@sapphire/framework';
-import {
-	isSnowflakeLarger,
-	sortMessagesById,
-} from '@answeroverflow/discordjs-utils';
+import { sortMessagesById } from '@answeroverflow/discordjs-utils';
 import * as Sentry from '@sentry/node';
 
 export async function indexServers(client: Client) {
@@ -51,11 +46,23 @@ export async function indexServers(client: Client) {
 	}
 	const indexingEndTime = Date.now();
 	const indexingDuration = indexingEndTime - indexingStartTime;
-	container.logger.info(`Indexing complete, took ${indexingDuration}ms`);
+	// log the time in hours, minutes
+	const asHours = Math.floor(indexingDuration / 1000 / 60 / 60);
+	const asMinutes = Math.floor(indexingDuration / 1000 / 60) % 60;
+
+	const asSeconds = Math.floor(indexingDuration / 1000) % 60;
+
+	container.logger.info(
+		`Indexing complete, took ${asHours} hour${
+			asHours === 1 ? '' : 's'
+		} ${asMinutes} min${asMinutes === 1 ? '' : 's'} ${asSeconds} sec${
+			asSeconds === 1 ? '' : 's'
+		}`,
+	);
 }
 
 async function indexServer(guild: Guild) {
-	container.logger.info(`Indexing server ${guild.id} | ${guild.name}`);
+	container.logger.debug(`Indexing server ${guild.id} | ${guild.name}`);
 	for await (const channel of guild.channels.cache.values()) {
 		const isIndexableChannelType =
 			channel.type === ChannelType.GuildText ||
@@ -79,67 +86,189 @@ export async function indexRootChannel(
 		return;
 	}
 
-	container.logger.info(`Indexing channel ${channel.id} | ${channel.name}`);
+	container.logger.debug(`Indexing channel ${channel.id} | ${channel.name}`);
+	if (channel.type === ChannelType.GuildForum) {
+		const maxNumberOfThreadsToCollect = process.env
+			.MAX_NUMBER_OF_THREADS_TO_COLLECT
+			? parseInt(process.env.MAX_NUMBER_OF_THREADS_TO_COLLECT)
+			: 1000;
+		let threadCutoffTimestamp = await findLatestArchivedTimestampByChannelId(
+			channel.id,
+		);
+		if (process.env.NODE_ENV === 'test') {
+			threadCutoffTimestamp = null;
+		}
+		const archivedThreads: AnyThreadChannel[] = [];
+		container.logger.debug(
+			`Fetching archived threads for channel ${channel.id} ${channel.name} in server ${channel.guildId} ${channel.guild.name}`,
+		);
+		const fetchAllArchivedThreads = async (before?: number | string) => {
+			const fetched = await channel.threads.fetchArchived({
+				type: 'public',
+				before,
+			});
 
-	let start =
-		settings.lastIndexedSnowflake == null
-			? undefined
-			: settings.lastIndexedSnowflake;
-	if (process.env.NODE_ENV === 'development') {
-		start = undefined; // always index from the beginning in development for ease of testing
+			const last = fetched.threads.last();
+			const isLastThreadOlderThanCutoff =
+				last?.archiveTimestamp &&
+				threadCutoffTimestamp &&
+				last.archiveTimestamp < threadCutoffTimestamp;
+			archivedThreads.push(...fetched.threads.values());
+
+			if (
+				!fetched.hasMore ||
+				!last ||
+				fetched.threads.size == 0 ||
+				isLastThreadOlderThanCutoff
+			)
+				return;
+			await fetchAllArchivedThreads(last.archiveTimestamp ?? last.id);
+		};
+
+		// Fetching all archived threads is very expensive, so only do it on the very first indexing pass
+		if (process.env.NODE_ENV === 'test') {
+			const data = await channel.threads.fetchArchived({
+				type: 'public',
+				fetchAll: true,
+			});
+			archivedThreads.push(...data.threads.values());
+		} else {
+			await fetchAllArchivedThreads();
+		}
+
+		container.logger.debug(
+			`Fetched ${archivedThreads.length} archived threads for channel ${channel.id} ${channel.name} in server ${channel.guildId} ${channel.guild.name}`,
+		);
+
+		const activeThreads = await channel.threads.fetchActive();
+		container.logger.debug(
+			`Found ${archivedThreads.length} archived threads and ${
+				activeThreads.threads.size
+			} active threads, a total of ${
+				archivedThreads.length + activeThreads.threads.size
+			} threads`,
+		);
+
+		// archived threads are sorted by archive timestamp from newest to oldest  so we reverse them
+		const threadsToIndex = [
+			...archivedThreads.reverse(),
+			...activeThreads.threads.values(),
+		]
+			.filter((x) => x.type === ChannelType.PublicThread)
+			.slice(0, maxNumberOfThreadsToCollect);
+		container.logger.debug(
+			`Pruned threads to index from ${
+				activeThreads.threads.size + archivedThreads.length
+			} to ${threadsToIndex.length} threads`,
+		);
+
+		let threadsIndexed = 0;
+		for await (const thread of threadsToIndex) {
+			container.logger.debug(
+				`(${++threadsIndexed}/${threadsToIndex.length}) Indexing:
+Thread: ${thread.id} | ${thread.name}
+Channel: ${channel.id} | ${channel.name}
+Server: ${channel.guildId} | ${channel.guild.name}`,
+			);
+			await indexTextBasedChannel(thread);
+		}
+	} else {
+		/*
+      Handles indexing of text channels and news channels
+      Text channels and news channels have messages in them, so we have to fetch the messages
+      We also add any threads we find to the threads array
+      Threads can be found from normal messages or system create messages
+      TODO: Handle threads without any parent messages in the channel, unsure if possible
+      */
+		await indexTextBasedChannel(channel);
 	}
-	// Collect all messages
-	const { messages: messagesToParse, threads } =
-		await fetchAllChannelMessagesWithThreads(channel, {
-			start,
-			limit: process.env.MAXIMUM_CHANNEL_MESSAGES_PER_INDEX
-				? parseInt(process.env.MAXIMUM_CHANNEL_MESSAGES_PER_INDEX)
-				: undefined,
-		});
+}
 
+export async function indexTextBasedChannel(channel: GuildTextBasedChannel) {
+	const lastIndexedMessage = await findLatestMessageInChannel(channel.id);
+	const start = lastIndexedMessage?.id;
+	container.logger.debug(
+		`Indexing channel ${channel.id} | ${channel.name} from message id ${
+			start ?? 'beginning'
+		}`,
+	);
+	let messages: Message[] = [];
+	if (
+		channel.type === ChannelType.PublicThread ||
+		channel.type === ChannelType.AnnouncementThread
+	) {
+		messages = await fetchAllMessages(channel, {
+			start,
+		});
+	} else {
+		messages = await fetchAllMessages(channel, {
+			start,
+		});
+		const threadsToIndex: AnyThreadChannel[] = [];
+		for (const message of messages) {
+			const thread = message.thread;
+			if (
+				thread &&
+				(thread.type === ChannelType.PublicThread ||
+					thread.type === ChannelType.AnnouncementThread)
+			) {
+				threadsToIndex.push(thread);
+			}
+		}
+
+		let threadsIndexed = 0;
+		for await (const thread of threadsToIndex) {
+			container.logger.debug(
+				`(${threadsIndexed++}/${threadsToIndex.length}) Indexing:
+Thread: ${thread.id} | ${thread.name}
+Channel: ${channel.id} | ${channel.name}
+Server: ${channel.guildId} | ${channel.guild.name}`,
+			);
+			await indexTextBasedChannel(thread);
+		}
+	}
+	await storeIndexData(messages, channel);
+	container.logger.debug(
+		`Finished writing data, indexing complete for channel ${channel.id} | ${channel.name}`,
+	);
+}
+
+async function storeIndexData(
+	messages: Message[],
+	channel: GuildTextBasedChannel,
+) {
+	if (messages.length === 0) {
+		container.logger.debug(
+			`No messages to index for channel ${channel.id} | ${channel.name}`,
+		);
+	}
 	// Filter out messages from users with indexing disabled or from the system
-	const filteredMessages = await filterMessages(messagesToParse, channel);
+	const filteredMessages = await filterMessages(messages, channel);
 
 	// Convert to Answer Overflow data types
-
 	const convertedUsers = extractUsersSetFromMessages(filteredMessages);
-	const convertedThreads = threads.map((x) => toAOThread(x));
-	const convertedMessages = messagesToAOMessagesSet(filteredMessages);
+	const convertedMessages = await messagesToAOMessagesSet(filteredMessages);
 
 	if (channel.client.id == null) {
 		throw new Error('Received a null client id when indexing');
 	}
 
 	addSolutionsToMessages(filteredMessages, convertedMessages);
-
-	const largestSnowflake = sortMessagesById(filteredMessages).pop()?.id;
-	container.logger.info('Indexing complete, writing data');
-	container.logger.info(`Upserting ${convertedUsers.length} discord accounts `);
+	container.logger.debug(
+		`Upserting ${convertedUsers.length} discord accounts `,
+	);
 	await upsertManyDiscordAccounts(convertedUsers);
-	container.logger.info(`Upserting channel: ${channel.id}`);
+	container.logger.debug(`Upserting channel: ${channel.id}`);
 	await upsertChannel({
 		create: {
 			...toAOChannel(channel),
-			lastIndexedSnowflake: largestSnowflake,
 		},
 		update: {
-			lastIndexedSnowflake: largestSnowflake,
+			archivedTimestamp: toAOChannel(channel).archivedTimestamp,
 		},
 	});
-	container.logger.info(`Upserting ${convertedMessages.length} messages`);
+	container.logger.debug(`Upserting ${convertedMessages.length} messages`);
 	await upsertManyMessages(convertedMessages);
-	container.logger.info(`Upserting ${convertedThreads.length} threads`);
-	await upsertManyChannels(
-		convertedThreads.map((x) => ({
-			create: x,
-			update: {
-				name: x.name,
-			},
-		})),
-	);
-	container.logger.info(
-		`Finished writing data, indexing complete for channel ${channel.id}`,
-	);
 }
 
 type MessageFetchOptions = {
@@ -211,180 +340,42 @@ export async function filterMessages(
 		return !isIgnoredUser && !isSystemMessage;
 	});
 }
-
-export async function fetchAllChannelMessagesWithThreads(
-	channel: ForumChannel | NewsChannel | TextChannel,
-	options: MessageFetchOptions = {},
-) {
-	const maxNumberOfThreadsToParse = process.env
-		.MAX_NUMBER_OF_THREADS_TO_PARSE_AT_A_TIME
-		? parseInt(process.env.MAX_NUMBER_OF_THREADS_TO_PARSE_AT_A_TIME)
-		: 1000;
-	container.logger.info(
-		`Fetching all messages for channel ${channel.id} ${
-			channel.name
-		} in server ${channel.guildId} ${
-			channel.guild.name
-		} with options ${JSON.stringify(options)}`,
-	);
-	let threads: PublicThreadChannel[] = [];
-	const collectedMessages: Message[] = [];
-
-	/*
-      Handles indexing of forum channels
-      Forum channels have no messages in them, so we have to fetch the threads
-  */
-
-	if (channel.type === ChannelType.GuildForum) {
-		const archivedThreads: AnyThreadChannel[] = [];
-		container.logger.info(
-			`Fetching archived threads for channel ${channel.id} ${channel.name} in server ${channel.guildId} ${channel.guild.name}`,
-		);
-		const fetchAllArchivedThreads = async (before?: number | string) => {
-			const fetched = await channel.threads.fetchArchived({
-				type: 'public',
-				fetchAll: true,
-				before,
-			});
-
-			const last = fetched.threads.last();
-			archivedThreads.push(...fetched.threads.values());
-			if (
-				!fetched.hasMore ||
-				!last ||
-				fetched.threads.size == 0 ||
-				!isSnowflakeLarger(last.id, options.start ?? '0') // If the last thread is smaller than the start, we've seen those threads already
-			)
-				return;
-			await fetchAllArchivedThreads(last.archiveTimestamp ?? last.id);
-		};
-
-		// Fetching all archived threads is very expensive, so only do it on the very first indexing pass
-		if (process.env.NODE_ENV === 'test') {
-			const data = await channel.threads.fetchArchived({
-				type: 'public',
-				fetchAll: true,
-			});
-			archivedThreads.push(...data.threads.values());
-		} else {
-			await fetchAllArchivedThreads();
-		}
-
-		container.logger.info(
-			`Fetched ${archivedThreads.length} archived threads for channel ${channel.id} ${channel.name} in server ${channel.guildId} ${channel.guild.name}`,
-		);
-
-		const activeThreads =
-			archivedThreads.length < maxNumberOfThreadsToParse
-				? await channel.threads.fetchActive()
-				: { threads: new Collection<Snowflake, AnyThreadChannel>() };
-		container.logger.info(
-			`Found ${archivedThreads.length} archived threads and ${
-				activeThreads.threads.size
-			} active threads, a total of ${
-				archivedThreads.length + activeThreads.threads.size
-			} threads`,
-		);
-		threads = [...archivedThreads.reverse(), ...activeThreads.threads.values()]
-			.filter((x) => x.type === ChannelType.PublicThread)
-			.filter((x) =>
-				x.lastMessageId
-					? isSnowflakeLarger(x.lastMessageId, options.start ?? '0')
-					: true,
-			)
-			.map((x) => x as PublicThreadChannel);
-		container.logger.info(
-			`Pruned threads to index from ${
-				activeThreads.threads.size + archivedThreads.length
-			} to ${threads.length} threads`,
-		);
-		const threadsWithoutLastMessageId = threads.filter((x) => !x.lastMessageId);
-		if (threadsWithoutLastMessageId.length > 0) {
-			container.logger.warn(
-				`Found ${threadsWithoutLastMessageId.length} threads without a last message id`,
-			);
-		}
-	} else {
-		/*
-      Handles indexing of text channels and news channels
-      Text channels and news channels have messages in them, so we have to fetch the messages
-      We also add any threads we find to the threads array
-      Threads can be found from normal messages or system create messages
-      TODO: Handle threads without any parent messages in the channel, unsure if possible
-      */
-		const messages = await fetchAllMessages(channel, options);
-		for (const message of messages) {
-			collectedMessages.push(message);
-			if (
-				message.thread &&
-				(message.thread.type === ChannelType.PublicThread ||
-					message.thread.type === ChannelType.AnnouncementThread)
-			) {
-				threads.push(message.thread);
-			}
-		}
-	}
-	const threadsToParse = threads.slice(0, maxNumberOfThreadsToParse);
-	container.logger.info(
-		`Found ${threads.length} threads to index. Parsing ${threadsToParse.length} threads`,
-	);
-	let indexedThreads = 0;
-	for await (const thread of threadsToParse) {
-		try {
-			indexedThreads++;
-			container.logger.info(
-				`(${indexedThreads}/${
-					threadsToParse.length
-				}) Fetching messages for thread ${thread.id}
-Name:  ${thread.name}
-Parent channel ${thread.parentId ?? 'no parent id'} ${
-					thread.parent ? thread.parent.name : 'no parent'
-				}
-Server ${thread.guildId} ${thread.guild.name}
-==========
-        `,
-			);
-			const threadMessages = await fetchAllMessages(thread);
-			collectedMessages.push(...threadMessages);
-		} catch (error) {
-			if (error instanceof DiscordAPIError && error.status == 404) continue;
-			throw error;
-		}
-	}
-
-	return { messages: collectedMessages, threads };
-}
-
 export async function fetchAllMessages(
 	channel: TextBasedChannel,
 	opts: MessageFetchOptions = {},
 ) {
 	const {
 		start,
-		limit = channel.type === ChannelType.GuildText ? 1000 : 20000,
+		limit = channel.type === ChannelType.GuildText ? 10000 : 20000,
 	} = opts;
 	const messages: Message[] = [];
-	// Create message pointer
-	const initialFetch = await channel.messages.fetch({
-		limit: 1,
-		after: start ?? '0',
-	}); // TODO: Check if 0 works correctly for starting at the beginning
-	let message = initialFetch.size === 1 ? initialFetch.first() : null;
-	messages.push(...initialFetch.values());
-
+	if (channel.lastMessageId && start == channel.lastMessageId) {
+		return [];
+	}
+	let message: Message | undefined = undefined;
+	let approximateThreadMessageCount = 0;
 	const asyncMessageFetch = async (after: string) => {
 		await channel.messages.fetch({ limit: 100, after }).then((messagePage) => {
 			const sortedMessagesById = sortMessagesById([...messagePage.values()]);
 			messages.push(...sortedMessagesById.values());
 			// Update our message pointer to be last message in page of messages
 			message =
-				0 < sortedMessagesById.length ? sortedMessagesById.at(-1) : null;
+				0 < sortedMessagesById.length ? sortedMessagesById.at(-1) : undefined;
+			messages.forEach((msg) => {
+				if (msg.thread) {
+					approximateThreadMessageCount += msg.thread.messageCount ?? 0;
+				}
+			});
 		});
-		if (message && (limit === undefined || messages.length < limit)) {
+		if (
+			message &&
+			(limit === undefined ||
+				messages.length + approximateThreadMessageCount < limit)
+		) {
 			await asyncMessageFetch(message.id);
 		}
 	};
 
-	await asyncMessageFetch(message?.id ?? '0');
+	await asyncMessageFetch(start ?? '0');
 	return messages.slice(0, limit);
 }
