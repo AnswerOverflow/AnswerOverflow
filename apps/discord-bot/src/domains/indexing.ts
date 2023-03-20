@@ -46,7 +46,14 @@ export async function indexServers(client: Client) {
 	}
 	const indexingEndTime = Date.now();
 	const indexingDuration = indexingEndTime - indexingStartTime;
-	container.logger.info(`Indexing complete, took ${indexingDuration}ms`);
+	// log the time in hours, minutes
+	container.logger.info(
+		`Indexing complete, took ${Math.floor(
+			indexingDuration / 1000 / 60 / 60,
+		)}hours ${Math.floor((indexingDuration / 1000 / 60) % 60)} min ${Math.floor(
+			(indexingDuration / 1000) % 60,
+		)} sec`,
+	);
 }
 
 async function indexServer(guild: Guild) {
