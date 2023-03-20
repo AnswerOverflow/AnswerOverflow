@@ -7,6 +7,8 @@ import {
 } from '~ui/components/primitives/Message';
 import { createContext, useContext } from 'react';
 import { ServerInvite } from '../ServerInvite';
+import Link from 'next/link';
+import { Paragraph } from '../primitives/Paragraph';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const SearchResultContext = createContext<{
@@ -99,9 +101,25 @@ const SearchResultMetaData = () => {
 const SearchResultSidebar = () => {
 	const { result } = useSearchResultContext();
 	return (
-		<div className="hidden w-1/4 flex-col items-center justify-center rounded-tr-standard rounded-br-standard border-y-2 border-r-2 border-black/[.13] px-5 pt-6 pb-2 dark:border-white/[.13] lg:flex">
+		<div className="hidden w-1/4 flex-col items-center justify-center rounded-tr-standard rounded-br-standard border-y-2 border-r-2 border-black/[.13] px-5 pt-6 pb-2 dark:border-white/[.13] lg:flex 2xl:w-1/6">
 			<ServerInvite server={result.server} channel={result.channel} />
 			<SearchResultMetaData />
+		</div>
+	);
+};
+
+const NoSolution = ({ messageId }: { messageId: string }) => {
+	return (
+		<div className="w-full rounded-bl-standard border-2 border-black/[.13] bg-white/[.01] dark:border-white/[.13]">
+			<Paragraph className="p-6 font-body text-ao-black dark:text-white/[.66]">
+				No replies marked as solution...{' '}
+				<Link
+					href={`/m/${messageId}`}
+					className="font-bold text-ao-black underline dark:text-ao-white"
+				>
+					View thread
+				</Link>
+			</Paragraph>
 		</div>
 	);
 };
@@ -109,7 +127,7 @@ const SearchResultSidebar = () => {
 const SearchResultAnswer = () => {
 	const { result } = useSearchResultContext();
 	const solution = result.message.solutionMessages?.[0];
-	if (!solution) return <></>;
+	if (!solution) return <NoSolution messageId={result.message.id} />;
 	return (
 		<div className="rounded-b-standard border-2 border-ao-green  bg-ao-green/10 dark:bg-ao-green/[0.02] lg:rounded-br-none">
 			<Message message={solution} />
@@ -123,6 +141,7 @@ const SearchResultMainContent = () => {
 		<div className="flex grow flex-col">
 			<Message
 				message={result.message}
+				showBorders
 				content={
 					<>
 						<MessageTitle channel={result.channel} thread={result.thread} />

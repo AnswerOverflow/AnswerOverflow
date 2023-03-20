@@ -31,7 +31,7 @@ beforeEach(async () => {
 
 describe('Message Delete Tests', () => {
 	it('should deleted a cached message', async () => {
-		await upsertMessage(toAOMessage(message));
+		await upsertMessage(await toAOMessage(message));
 		await emitEvent(client, Events.MessageDelete, message);
 		const deletedMsg = await findMessageById(message.id);
 		expect(deletedMsg).toBeNull();
@@ -45,7 +45,7 @@ describe('Message Update Tests', () => {
 			content: 'updated',
 		});
 		const created = await upsertMessage({
-			...toAOMessage(message),
+			...(await toAOMessage(message)),
 			solutionIds: [getRandomId()],
 		});
 		await emitEvent(client, Events.MessageUpdate, message, updatedMessage);
@@ -58,7 +58,7 @@ describe('Message Update Tests', () => {
 
 describe('Message Bulk Delete Tests', () => {
 	it('should deleted cached bulk messages', async () => {
-		await upsertMessage(toAOMessage(message));
+		await upsertMessage(await toAOMessage(message));
 		await emitEvent(
 			client,
 			Events.MessageBulkDelete,

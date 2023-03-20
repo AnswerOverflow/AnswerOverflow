@@ -36,7 +36,7 @@ module.exports = {
       // Custom linear gradient
       backgroundImage: () => ({
         "gradient-to-br-dark-glass":
-          "linear-gradient(145.98deg, rgba(31, 32, 34, 0.37) -3.49%, rgba(31, 32, 34, 0.37) -3.48%, rgba(31, 32, 34, 0.1591) 108.92%);",
+          "linear-gradient(145.98deg, rgba(14, 18, 26, 0.75) -3.49%, rgba(17, 20, 28, 0.75) 108.92%);",
         "gradient-to-br-light-glass":
           "linear-gradient(145.98deg, rgba(183, 190, 206, 0.37) -3.49%, rgba(183, 190, 206, 0.1591) 108.92%);",
       }),

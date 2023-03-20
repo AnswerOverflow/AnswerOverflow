@@ -7,8 +7,41 @@ import type { Session } from 'next-auth';
 import type { AppType } from 'next/app';
 import hljs from 'highlight.js';
 import { NextTRPC, PageWrapper, trpc } from '@answeroverflow/ui';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
+import { Heading } from '@answeroverflow/ui/src/components/primitives/Heading';
+import { Paragraph } from '@answeroverflow/ui/src/components/primitives/Paragraph';
+import { MDXProvider } from '@mdx-js/react';
+import Link from 'next/link';
+import type { Components } from '@mdx-js/react/lib';
+
+const components: Components = {
+	h1: Heading.H1,
+	h2: Heading.H2,
+	h3: Heading.H3,
+	h4: Heading.H4,
+	h5: Heading.H5,
+	h6: Heading.H6,
+	p: Paragraph,
+	ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
+		<ul {...props} className="list-disc pl-10" />
+	),
+	a: (
+		props: React.DetailedHTMLProps<
+			React.AnchorHTMLAttributes<HTMLAnchorElement>,
+			HTMLAnchorElement
+		>,
+	) => (
+		<Link
+			href={props.href ?? ''}
+			className="font-bold underline decoration-2 underline-offset-2 transition-colors hover:decoration-ao-blue"
+			target="_blank"
+		>
+			{props.children}
+		</Link>
+	),
+};
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -23,8 +56,10 @@ const MyApp: AppType<{ session: Session | null }> = ({
 	}, []);
 	return (
 		<SessionProvider session={session}>
-			<PageWrapper>
-				<Component {...pageProps} />
+			<PageWrapper disabledRoutes={['/']}>
+				<MDXProvider components={components}>
+					<Component {...pageProps} />
+				</MDXProvider>
 			</PageWrapper>
 			<ReactQueryDevtools initialIsOpen={false} />
 		</SessionProvider>

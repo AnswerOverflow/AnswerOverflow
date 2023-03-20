@@ -1,15 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { PageWrapper } from '../PageWrapper';
 import { Home } from './Home';
 
 const meta = {
 	component: Home,
 	title: 'pages/Home',
-	render: () => (
-		<PageWrapper>
-			<Home />
-		</PageWrapper>
-	),
+	render: () => <Home />,
 	parameters: {
 		layout: 'fullscreen',
 		a11y: {
