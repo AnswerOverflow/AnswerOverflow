@@ -1,36 +1,63 @@
 # Answer Overflow Overview
 
-Answer Overflow is a Discord bot meant to **improve and index your Discord help channels into Google.** This is a brief overview of what Answer Overflow can do for your community and how it works.
-
 ## What does Answer Overflow do?
 
 ### Answer Overflow has two goals:
 
 #### 1. Index the content of your community
 
-
-
 Assuming that a question has been solved in your server and no where else on the internet, let's take a look at a user flow before and after Answer Overflow
 
-{/* TODO: I'd love to make this section into some sort of visual image instead */}
+<table>
+	<tr>
+		<th>With Answer Overflow</th>
+		<th>Without Answer Overflow</th>
+	</tr>
+	<tr>
+		<td>1. Google search for the question</td>
+		<td>1. Google search for the question</td>
+	</tr>
+	<tr>
+		<td>
+			2. Find the question that was asked in your server on a Google indexed
+			Answer Overflow page
+		</td>
+		<td>2. No relevant results found</td>
+	</tr>
+	<tr>
+		<td>3. Read the answer to my question</td>
+		<td>3. Try to find a place to ask my question</td>
+	</tr>
+	<tr>
+		<td>4. Join the server to continue the discussion</td>
+		<td>
+			4. (Maybe) Find your Discord server and join it (if the invite link is
+			still valid)
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			5. Search in the server I just joined for the question using the small
+			Discord search sidebar
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>6. (Maybe) Find the question I'm looking for</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			7. If I don't find the question or don't search for it, I ask my question
+			in the server, resulting in a duplicate question
+		</td>
+	</tr>
+</table>
 
-Without Answer Overflow:
-1. Google search for the question
-2. No relevant results found
-3. Try to find a place to ask my question
-4. (Maybe) Find your Discord server and join it (if the invite link is still valid)
-5. Search in the server I just joined for the question using the small Discord search sidebar
-6. (Maybe) Find the question I'm looking for
-7. If I don't find the question or don't search for it, I ask my question in the server, resulting in a duplicate question
-
-With Answer Overflow:
-1. Google search for the question
-2. Find the question that was asked in your server on a Google indexed Answer Overflow page
-3. Read the answer to my question
-4. (Optional) If I have a follow-up question or it didn't quite fit my situation, I can ask my question in the server and I now know that the server exists
-
-
-**Your community is amazing and Answer Overflow is a way to share it with even more people, allowing all of the work that people have put into providing support to be even more valuable.**
+**Your community is amazing and Answer Overflow is a way to share it with even more
+people, allowing all of the work that people have put into providing support to be
+even more valuable.**
 
 To learn more about indexing, check out the [indexing](/channel-settings/indexing) section.
 
@@ -39,6 +66,7 @@ To learn more about indexing, check out the [indexing](/channel-settings/indexin
 There's more than can be done than just indexing your content. Another goal of Answer Overflow is to reduce burnout of community members and give communities more tools to improve their support channels.
 
 This is done in the following ways:
+
 - Being able to mark questions as solved
 - Community analytics to:
   - **Understand what questions are asked the most to improve documentation**
@@ -55,6 +83,7 @@ For more on the awesome utilities you can enable for your help channels, check o
 ## Who is Answer Overflow for?
 
 Answer Overflow is for publicly communities with a focus on support, such as:
+
 - Open source projects
 - Game servers
 - Game mod servers
@@ -62,10 +91,10 @@ Answer Overflow is for publicly communities with a focus on support, such as:
 - Homework help communities
 - Any other community that wants to improve their support channels
 
-import {GITHUB_LINK} from "@answeroverflow/constants"
-import {NextraStyledLink} from "../components/links"
+import { GITHUB_LINK } from '@answeroverflow/constants';
+import { NextraStyledLink } from '../components/links';
 
-## What about privacy and the Discord TOS?
+## Privacy and the Discord ToS
 
 This section is super important and the tools that Answer Overflow has built out are done in a way to ensure providing the best support to your community while also being compliant with the Discord TOS and respecting your community members' privacy.
 
