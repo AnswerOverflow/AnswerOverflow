@@ -6,13 +6,17 @@ import { SearchInput } from '~ui/components/primitives/Input';
 import { SearchResult } from '~ui/components/search/SearchResult';
 import { useRouter } from 'next/router';
 import { useRouterQuery } from '~ui/utils/hooks';
+import { twMerge } from 'tailwind-merge';
 
 interface SearchResultProps {
 	results: APISearchResult[number][];
 	isLoading: boolean;
 }
 
-export const MessagesSearchBar = (props: { placeholder?: string }) => {
+export const MessagesSearchBar = (props: {
+	placeholder?: string;
+	className?: string;
+}) => {
 	const router = useRouter();
 	const query = useRouterQuery();
 	const [searchInput, setSearchInput] = useState<string>(query);
@@ -25,7 +29,7 @@ export const MessagesSearchBar = (props: { placeholder?: string }) => {
 					shallow: true,
 				});
 			}}
-			className="mb-8 w-full"
+			className={twMerge('mb-8 w-full', props.className)}
 		>
 			<SearchInput
 				onChange={setSearchInput}

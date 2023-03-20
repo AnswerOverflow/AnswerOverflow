@@ -6,6 +6,7 @@ import {
 } from '~ui/test/props';
 import { MessageResultPage, MessageResultPageProps } from './MessageResultPage';
 const meta = {
+	title: 'pages/MessageResultPage',
 	component: MessageResultPage,
 } as Meta<typeof MessageResultPage>;
 

@@ -27,10 +27,10 @@ export function MessageResultPage({
 	const solutionMessageId = messages.at(0)?.solutionIds?.at(0);
 
 	return (
-		<div className="sm:mx-3 ">
-			<div className=" flex flex-col items-center justify-between gap-2 sm:flex-row">
-				<MessagesSearchBar />
-				<div className="shrink-0 ">
+		<div className="sm:mx-3">
+			<div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
+				<MessagesSearchBar className="mb-0" />
+				<div className="ml-20 shrink-0">
 					<ServerInvite server={server} channel={channel} />
 				</div>
 			</div>
