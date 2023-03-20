@@ -1,14 +1,17 @@
-import Image from 'next/image';
-import { twMerge } from 'tailwind-merge';
+import * as React from 'react';
+import * as AvatarPrimitive from '@radix-ui/react-avatar';
+import { cn } from '~ui/utils/styling';
 
-export type AvatarSize = 'sm' | 'md' | 'lg';
+export type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
 
-export type AvatarProps = {
+export type ExtraAvatarProps = {
 	size?: AvatarSize;
-	url?: string | null;
-	alt?: string | null;
-	className?: string;
 };
+
+export type AvatarProps = React.ComponentPropsWithoutRef<
+	typeof AvatarPrimitive.Root
+> &
+	ExtraAvatarProps;
 
 export function getAvatarSize(size: AvatarSize) {
 	switch (size) {
@@ -18,46 +21,67 @@ export function getAvatarSize(size: AvatarSize) {
 			return 48;
 		case 'lg':
 			return 64;
+		case 'xl':
+			return 128;
 	}
 }
 
-export function Avatar({
-	url,
-	alt = 'Profile Avatar',
-	size = 'md',
-	className,
-}: AvatarProps) {
-	if (!alt) alt = 'Profile Avatar';
-	return (
-		<span
-			className={`${twMerge(
-				'inline-flex aspect-square items-center justify-center rounded-full bg-neutral-50 dark:bg-neutral-700',
-				className ?? '',
-			)}`}
-		>
-			{url ? (
-				<Image
-					src={url}
-					alt={alt}
-					width={getAvatarSize(size)}
-					height={getAvatarSize(size)}
-					className="inline-block rounded-full"
-				/>
-			) : (
-				<span
-					className="inline-flex items-center justify-center rounded-full text-xl text-black dark:text-white"
-					style={{
-						width: getAvatarSize(size),
-						height: getAvatarSize(size),
-					}}
-				>
-					{alt
-						.split(' ')
-						.filter((word) => word.length > 0)
-						.map((word) => word[0]?.toUpperCase())
-						.join('')}
-				</span>
-			)}
-		</span>
-	);
+export function getAvatarSizeAsClass(size: AvatarSize) {
+	switch (size) {
+		case 'sm':
+			return 'w-10 h-10 text-sm';
+		case 'md':
+			return 'w-12 h-12 text-base';
+		case 'lg':
+			return 'w-16 h-16 text-lg';
+		case 'xl':
+			return 'w-32 h-32 text-2xl';
+	}
 }
+
+const Avatar = React.forwardRef<
+	React.ElementRef<typeof AvatarPrimitive.Root>,
+	AvatarProps
+>(({ className, size, ...props }, ref) => (
+	<AvatarPrimitive.Root
+		ref={ref}
+		className={cn(
+			'relative flex h-full shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-50 text-center text-ao-black dark:bg-neutral-700 dark:text-ao-white',
+			className,
+			getAvatarSizeAsClass(size ?? 'md'),
+		)}
+		{...props}
+	/>
+));
+Avatar.displayName = AvatarPrimitive.Root.displayName;
+
+const AvatarImage = React.forwardRef<
+	React.ElementRef<typeof AvatarPrimitive.Image>,
+	React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
+>(({ className, ...props }, ref) => (
+	<AvatarPrimitive.Image
+		ref={ref}
+		className={cn('aspect-square h-full w-full ', className)}
+		{...props}
+	/>
+));
+AvatarImage.displayName = AvatarPrimitive.Image.displayName;
+
+const AvatarFallback = React.forwardRef<
+	React.ElementRef<typeof AvatarPrimitive.Fallback>,
+	React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback> &
+		ExtraAvatarProps
+>(({ className, ...props }, ref) => (
+	<AvatarPrimitive.Fallback
+		ref={ref}
+		className={cn(
+			'relative flex h-full shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-50 text-center dark:bg-neutral-700',
+			className,
+			getAvatarSizeAsClass(props.size ?? 'md'),
+		)}
+		{...props}
+	/>
+));
+AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
+
+export { Avatar, AvatarImage, AvatarFallback };

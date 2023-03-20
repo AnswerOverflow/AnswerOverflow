@@ -29,7 +29,7 @@ export const CommunityPage = ({
 			<main className="bg-ao-white dark:bg-ao-black">
 				<div className="flex flex-col">
 					<div className="my-auto flex flex-row bg-gradient-to-r from-[#7196CD] to-[#113360] px-4 py-8 sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
-						<ServerIcon server={server} size="md" className="hidden sm:flex" />
+						<ServerIcon server={server} size="xl" className="hidden sm:flex" />
 						<div className="ml-16 flex flex-col">
 							<Heading.H1 className="pt-0">Reactiflux</Heading.H1>
 							<Heading.H2 className="text-xl font-normal">

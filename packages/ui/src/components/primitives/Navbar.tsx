@@ -10,14 +10,24 @@ import { signIn, signOut } from 'next-auth/react';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment, useState, useEffect, useRef } from 'react';
-import { Avatar } from '../primitives/Avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '../primitives/Avatar';
 import { classNames } from '~ui/utils/styling';
 
 const SignedInDropdownMenu = ({ signedInUser }: { signedInUser: User }) => (
 	<Menu as="div" className="relative inline-block text-left">
 		<Menu.Button>
 			<div className="flex shrink-0 flex-row items-center rounded-md p-2 transition hover:bg-zinc-900/5 dark:hover:bg-white/5">
-				<Avatar alt={signedInUser.name} size={'sm'} url={signedInUser.image} />
+				<Avatar>
+					<AvatarImage
+						alt={signedInUser.name ?? 'Signed In User'}
+						src={signedInUser.image ?? undefined}
+					/>
+					<AvatarFallback>
+						{(signedInUser?.name ?? 'Signed In User')
+							.split(' ')
+							.map((word) => word.at(0)?.toUpperCase())}
+					</AvatarFallback>
+				</Avatar>
 				<EllipsisVerticalIcon className="h-7 w-7 dark:text-white hover:dark:text-neutral-400" />
 			</div>
 		</Menu.Button>
