@@ -12,7 +12,13 @@ import { useRouter } from 'next/router';
 
 // https://nextra.site/docs/docs-theme/theme-configuration
 const config: DocsThemeConfig = {
-	logo: <AnswerOverflowLogo />,
+	logo: (
+		<AnswerOverflowLogo
+			style={{
+				width: '168px',
+			}}
+		/>
+	),
 	project: {
 		link: GITHUB_LINK,
 	},
