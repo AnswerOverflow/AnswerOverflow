@@ -17,12 +17,12 @@ import {
 	EmbedMenuInstruction,
 } from '~discord-bot/components/primitives';
 import {
-	DISABLE_INDEXING_LABEL,
-	ENABLE_INDEXING_LABEL,
+	IGNORE_ACCOUNT_IN_SERVER_LABEL,
 	GLOBALLY_IGNORE_ACCOUNT_LABEL,
 	GRANT_CONSENT_LABEL,
 	REVOKE_CONSENT_LABEL,
 	STOP_IGNORING_ACCOUNT_LABEL,
+	STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL,
 } from '@answeroverflow/constants';
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
 
@@ -65,8 +65,8 @@ const ToggleIndexingButton = ({
 }: ManageAccountMenuItemProps) => (
 	<ToggleButton
 		currentlyEnabled={!state.settings.flags.messageIndexingDisabled}
-		enableLabel={ENABLE_INDEXING_LABEL}
-		disableLabel={DISABLE_INDEXING_LABEL}
+		enableLabel={STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL}
+		disableLabel={IGNORE_ACCOUNT_IN_SERVER_LABEL}
 		onClick={(interaction, messageIndexingDisabled) =>
 			guildTextChannelOnlyInteraction(
 				interaction,
@@ -185,13 +185,13 @@ export function ManageAccountMenu({
 		{
 			instructions:
 				'Enables your messages to be indexed in this server, they will appear on AnswerOverflow behind a sign in if you have not consented to publicly display them',
-			title: ENABLE_INDEXING_LABEL,
+			title: STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL,
 			enabled: settings.flags.messageIndexingDisabled,
 		},
 		{
 			instructions:
 				'Disables indexing of your account in this server, also will remove all the messages that Answer Overflow has stored from you in this server',
-			title: DISABLE_INDEXING_LABEL,
+			title: IGNORE_ACCOUNT_IN_SERVER_LABEL,
 			enabled: !settings.flags.messageIndexingDisabled,
 		},
 		{

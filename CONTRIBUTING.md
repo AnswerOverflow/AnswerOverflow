@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in contributing to Answer Overflow! If you need any help, please reach out in our [Discord](https://discord.gg/Wny38ap7Tx)!
+Thank you for your interest in contributing to Answer Overflow! If you need any help, please reach out in our [Discord](https://discord.answeroverflow.com/)!
 
 ## If I have a change I want to make, do I create a PR or an issue first?
 
