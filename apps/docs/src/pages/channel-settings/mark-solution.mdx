@@ -2,40 +2,52 @@
 
 ## Demo
 
+import ReactPlayer from 'react-player/youtube';
+import { ytVideoStyle } from '../../utils/styling';
+import { TryLiveDemo } from '../../components/links';
 
+<ReactPlayer
+	url="https://youtu.be/QggUf4YCTaA"
+	controls
+	muted
+	loop
+	style={ytVideoStyle}
+/>
 
-import ReactPlayer from 'react-player/youtube'
-import {ytVideoStyle} from "../../utils/styling"
-import {TryLiveDemo} from "../../components/links"
+<TryLiveDemo />
 
-{/* TODO: Video of someone marking a question as solved */}
-<ReactPlayer url='https://youtu.be/3pGDHWke6Wg' controls muted loop style={ytVideoStyle}/>
-
-<TryLiveDemo/>
-
-import {OPEN_HELP_CHANNEL_UTILITIES_LABEL, ENABLE_MARK_AS_SOLUTION_LABEL, DISABLE_MARK_AS_SOLUTION_LABEL, PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED} from "@answeroverflow/constants"
+import {
+	OPEN_HELP_CHANNEL_UTILITIES_LABEL,
+	ENABLE_MARK_AS_SOLUTION_LABEL,
+	DISABLE_MARK_AS_SOLUTION_LABEL,
+	PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED,
+} from '@answeroverflow/constants';
 
 ## What it does
 
 Allows users to mark their forum post or thread as solved. The following people are able to mark a post as solved:
+
 - The original poster
-{
+  {
   PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.map((permission) => (
-    <li>Anyone with the {permission} permission</li>
-  ))
-}
+  <li>Anyone with the {permission} permission</li>
+  )) }
 
 When a post is marked as solved:
+
 - A solved indicator is added to the post, either a specific tag if selected or a ✅ emoji
 - The Answer Overflow bot sends a message to the thread with a message containing a jump to the solution link
 
-{/* TODO: IMAGE OF THE MARK AS SOLVED RESPONSE */}
-![Automatic message sent by the Answer Overflow bot with a button to jump to the solution](https://thecatapi.com/api/images/get?format=src)
+![Automatic message sent by the Answer Overflow bot with a button to jump to the solution](/mark-solution-response-w-forum-post-guidelines.png)
+
+## Why you might want it
+
+- Allows supporters to find questions that have not been answered yet
+- Solution message on Answer Overflow gets highlighted to make it easier to find
 
 ## Enabling
 
 Use `/channel-settings` in the channel you want to enable mark solution in. Click the **{OPEN_HELP_CHANNEL_UTILITIES_LABEL}** menu and then click **{ENABLE_MARK_AS_SOLUTION_LABEL}**
-
 
 ## Disabling
 

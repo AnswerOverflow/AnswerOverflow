@@ -2,28 +2,39 @@
 
 ## Demo
 
-import ReactPlayer from 'react-player/youtube'
-import {ytVideoStyle} from "../../utils/styling"
-import {TryLiveDemo} from "../../components/links"
+import ReactPlayer from 'react-player/youtube';
+import { ytVideoStyle } from '../../utils/styling';
+import { TryLiveDemo } from '../../components/links';
 
-{/* TODO: Video of someone making a new thread */}
-<ReactPlayer url='https://youtu.be/3pGDHWke6Wg' controls muted loop style={ytVideoStyle}/>
+<ReactPlayer
+	url="https://youtu.be/CY8mWM1LcT0"
+	controls
+	muted
+	loop
+	style={ytVideoStyle}
+/>
 
-<TryLiveDemo/>
+<TryLiveDemo />
 
-import {OPEN_HELP_CHANNEL_UTILITIES_LABEL, ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL, DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL} from "@answeroverflow/constants"
+import {
+	OPEN_HELP_CHANNEL_UTILITIES_LABEL,
+	ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
+	DISABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL,
+} from '@answeroverflow/constants';
 
 ## What it does
 
-Sends a message automatically to **all new threads / posts** in a channel instructing users how to mark their question as solved. For users who are new to the server, this is helpful to let them know how to mark their question as solved. For users who are experienced, this is helpful to remind them to mark their question as solved.
-{/* TODO: IMAGE OF THE MARK AS SOLVED INSTRUCTION MESSAGE */}
+Sends a message automatically to **all new threads / posts** in a channel instructing users how to mark their question as solved.
 
-![Discord message sent by the Answer Overflow bot containing an image telling users to open the context menu on a message and use the mark solution command](https://thecatapi.com/api/images/get?format=src)
+![Discord message sent by the Answer Overflow bot containing an image telling users to open the context menu on a message and use the mark solution command](/mark-solution-instructions.png)
+
+## Why you might want it
+
+For users who are new to the server, this is helpful to let them know how to mark their question as solved. For users who are experienced, this is helpful to remind them to mark their question as solved.
 
 ## Enabling
 
 Use `/channel-settings` in the channel you want to enable sending mark solution instructions in. Click the **{OPEN_HELP_CHANNEL_UTILITIES_LABEL}** menu and then click **{ENABLE_SEND_MARK_AS_SOLUTION_INSTRUCTIONS_LABEL}**
-
 
 ## Disabling
 

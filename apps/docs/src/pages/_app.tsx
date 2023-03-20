@@ -17,7 +17,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
 	useEffect(() => {
 		hljs.configure({
-			ignoreUnescapedHTML: true, // TODO: Revisit this, discord-markdown escapes the HTML so it should be safe
+			ignoreUnescapedHTML: true,
 		});
 		hljs.highlightAll();
 	}, []);
