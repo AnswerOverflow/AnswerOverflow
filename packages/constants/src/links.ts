@@ -12,3 +12,9 @@ SOCIAL
 
 export const TWITTER_LINK = 'https://twitter.com/AnswerOverflow';
 export const DISCORD_LINK = 'https://discord.answeroverflow.com';
+
+/*
+  OTHER
+*/
+
+export const WEBSITE_URL = 'https://answeroverflow.com';
