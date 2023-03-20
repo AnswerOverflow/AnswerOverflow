@@ -43,6 +43,7 @@ export const CommunityPage = ({
 					<div className="px-4 2xl:px-[6rem]">
 						<MessagesSearchBar
 							placeholder={`Search the ${server.name} community`}
+							serverId={server.id}
 						/>
 
 						<Heading.H3>Community questions</Heading.H3>
