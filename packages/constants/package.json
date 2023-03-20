@@ -20,6 +20,6 @@
 	},
 	"devDependencies": {
 		"@answeroverflow/tsconfig": "*",
-		"dotenv-cli": "^7.0.0"
+		"dotenv-cli": "^7.1.0"
 	}
 }
