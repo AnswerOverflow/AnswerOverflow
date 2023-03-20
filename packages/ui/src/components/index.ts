@@ -1,4 +1,5 @@
 export * from './AnswerOverflowLogo';
+export * from './primitives';
 export * from './DiscordAvatar';
 export * from './Footer';
 export * from './MessageResultPage';

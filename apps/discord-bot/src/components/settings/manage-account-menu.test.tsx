@@ -25,8 +25,8 @@ import {
 import { ManageAccountMenu } from './manage-account-menu';
 import { toAODiscordAccount, toAOServer } from '~discord-bot/utils/conversions';
 import {
-	DISABLE_INDEXING_LABEL,
-	ENABLE_INDEXING_LABEL,
+	IGNORE_ACCOUNT_IN_SERVER_LABEL,
+	STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL,
 	GLOBALLY_IGNORE_ACCOUNT_LABEL,
 	GRANT_CONSENT_LABEL,
 	REVOKE_CONSENT_LABEL,
@@ -136,8 +136,8 @@ describe('Manage Account Menu', () => {
 			});
 			await toggleButtonTest({
 				clicker: members.guildMemberOwner.user,
-				preClickLabel: ENABLE_INDEXING_LABEL,
-				postClickLabel: DISABLE_INDEXING_LABEL,
+				preClickLabel: STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL,
+				postClickLabel: IGNORE_ACCOUNT_IN_SERVER_LABEL,
 				message: message,
 			});
 			const consentButton = message.findButtonByLabel(GRANT_CONSENT_LABEL);
@@ -161,8 +161,8 @@ describe('Manage Account Menu', () => {
 			});
 			await toggleButtonTest({
 				clicker: members.guildMemberOwner.user,
-				preClickLabel: DISABLE_INDEXING_LABEL,
-				postClickLabel: ENABLE_INDEXING_LABEL,
+				preClickLabel: IGNORE_ACCOUNT_IN_SERVER_LABEL,
+				postClickLabel: STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL,
 				message: message,
 			});
 			const consentButton = message.findButtonByLabel(GRANT_CONSENT_LABEL);

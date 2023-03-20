@@ -79,6 +79,7 @@ const userServerSettingsCrudRouter = router({
 		.input(
 			z.object({
 				source: z.enum(MANAGE_ACCOUNT_SOURCES),
+				// @ts-ignore
 				data: zUserServerSettingsCreateWithDeps
 					.pick({
 						serverId: true,
@@ -112,6 +113,7 @@ const userServerSettingsCrudRouter = router({
 		.input(
 			z.object({
 				source: z.enum(CONSENT_SOURCES),
+				// @ts-ignore
 				data: zUserServerSettingsCreateWithDeps
 					.pick({
 						serverId: true,
