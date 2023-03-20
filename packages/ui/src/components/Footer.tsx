@@ -4,7 +4,7 @@ import { DiscordIcon } from './icons/DiscordIcon';
 const navigation = {
 	main: [
 		{ name: 'About', href: '/about' },
-		{ name: 'Terms', href: '/terms' },
+		{ name: 'Terms', href: '/tos' },
 		{ name: 'Privacy', href: '/privacy' },
 		{ name: 'Pricing', href: '/pricing' },
 		{ name: 'Docs', href: 'https://docs.answeroverflow.com' },
