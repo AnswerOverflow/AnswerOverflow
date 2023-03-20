@@ -1,6 +1,7 @@
 import { RefObject, useEffect, useState } from 'react';
 import { trpc } from './trpc';
 import { isServer } from './checks';
+import { useRouter } from 'next/router';
 export const useIsUserInServer = (serverId: string) => {
 	const { data: servers } = trpc.auth.getServers.useQuery();
 	return servers?.some((s) => s.id === serverId) ?? false;
@@ -133,4 +134,10 @@ export const useTheme = () => {
 	}, [themeStorage, theme]);
 
 	return theme;
+};
+
+export const useRouterQuery = () => {
+	const router = useRouter();
+	const routerQuery = typeof router.query.q === 'string' ? router.query.q : '';
+	return routerQuery;
 };

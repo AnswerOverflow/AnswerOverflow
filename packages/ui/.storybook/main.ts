@@ -44,7 +44,6 @@ const config: StorybookConfig = {
 	docs: {
 		autodocs: false,
 	},
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 	// @ts-ignore
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 	env: (config) => ({

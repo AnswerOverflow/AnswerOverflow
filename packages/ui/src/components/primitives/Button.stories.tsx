@@ -39,9 +39,3 @@ export const Ghost: Story = {
 		variant: 'ghost',
 	},
 };
-
-export const Link: Story = {
-	args: {
-		variant: 'link',
-	},
-};

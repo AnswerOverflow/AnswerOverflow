@@ -38,8 +38,9 @@ export class OnMessageUpdate extends Listener {
 	public async run(_: Message, newMessage: Message) {
 		const existing = await findMessageById(newMessage.id);
 		if (!existing) return;
+		const converted = await toAOMessage(newMessage);
 		await updateMessage({
-			...toAOMessage(newMessage),
+			...converted,
 			solutionIds: existing.solutionIds,
 		});
 	}
