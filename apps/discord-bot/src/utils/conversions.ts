@@ -136,12 +136,12 @@ function toAOActionRow(
 
 // top 10 ugliest functions in this codebase
 export function toAOMessage(message: Message): AOMessage {
-	if (!message.guild) throw new Error('Message is not in a guild');
+	if (!message.guildId) throw new Error('Message is not in a guild');
 
 	const convertedMessage: AOMessage = {
 		id: message.id,
 		content: message.cleanContent,
-		channelId: message.channel.id,
+		channelId: message.channelId,
 		parentChannelId: message.channel.isThread()
 			? message.channel.parentId
 			: null,
@@ -240,7 +240,7 @@ export function toAOMessage(message: Message): AOMessage {
 			? toAOMessageReference(message.reference)
 			: null,
 		authorId: message.author.id,
-		serverId: message.guild?.id,
+		serverId: message.guildId,
 		solutionIds: [],
 		childThreadId: message.thread?.id ?? null,
 	};
