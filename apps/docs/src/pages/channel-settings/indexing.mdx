@@ -2,30 +2,31 @@
 
 ## What it does
 
-Indexes the content of your channel into search engines like Google. This allows for people to find your server from doing a simple Google search for their question.
+Indexes the content of your channel into search engines like Google.
 
 Indexing occurs roughly ever 24 hours, although this may fluctuate depending on the number of servers Answer Overflow is in. This is to not overload the Discord API and to allow for questions to be solved before they are indexed.
 
-import { Callout } from 'nextra-theme-docs'
+import { Callout } from 'nextra-theme-docs';
 
 <Callout emoji="📝">
-  Indexing starts at the beginning of the channel and works its way to the most recent messages. It may take a few days for a channel to be fully indexed, however, once it is fully indexed it will be updated every 24 hours.
+	Indexing starts at the beginning of the channel and works its way to the most
+	recent messages. It may take a few days for a channel to be fully indexed,
+	however, once it is fully indexed it will be updated every 24 hours.
 </Callout>
 
-## What it looks like
+## Why you want it
 
-{/* TODO: Screenshot of a google search result with Answer Overflow in the results */}
-![Screenshots containing pages from answeroverflow.com](https://thecatapi.com/api/images/get?format=src)
-{/* TODO: Link to an example page */}
-
-
+Indexing the content of your Discord server into web search engines like Google will allow people to find your content when they search for it. Otherwise they have to know your Discord server exists, and then try to find the answer to their question in your server. This is a lot of friction for people attempting to find answers to their questions about your product.
 
 ## Enabling
 
-import {OPEN_INDEXING_SETTINGS_MENU_LABEL, ENABLE_CHANNEL_INDEXING_LABEL, DISABLE_CHANNEL_INDEXING_LABEL} from "@answeroverflow/constants"
+import {
+	OPEN_INDEXING_SETTINGS_MENU_LABEL,
+	ENABLE_CHANNEL_INDEXING_LABEL,
+	DISABLE_CHANNEL_INDEXING_LABEL,
+} from '@answeroverflow/constants';
 
 Use `/channel-settings` in the channel you want to enable indexing in. Click the **{OPEN_INDEXING_SETTINGS_MENU_LABEL}** menu and then click **{ENABLE_CHANNEL_INDEXING_LABEL}**
-
 
 ## Disabling
 
@@ -34,12 +35,11 @@ Use `/channel-settings` in the channel you want to disable indexing in. Click th
 <Callout type="warning">
   Indexed content will persist on Answer Overflow for up to 7 days after disabling indexing. This is to prevent people from accidentally wiping out their indexed content.
 
-  It will also persist in Google for an unknown amount of time after disabling indexing. This is because Google has its own indexing process that is not controlled by Answer Overflow.
+It will also persist in Google for an unknown amount of time after disabling indexing. This is because Google has its own indexing process that is not controlled by Answer Overflow.
 
-  If you need content urgently removed, please contact us.
+If you need content urgently removed, please contact us.
+
 </Callout>
-
-
 
 ## Indexing FAQ
 
@@ -48,6 +48,7 @@ Use `/channel-settings` in the channel you want to disable indexing in. Click th
 Answer Overflow has no control over what content Google indexes. Your content is submitted via a sitemap to Google and it's up to Google to evaluate it as relevant and high quality for indexing.
 
 To have the best chance of your questions being indexed, try the following:
-- Sign up for [Answer Overflow Pro](https://answeroverflow.com/pricing) to index content on your on domain to not compete with other Discord servers that are hosting their content on [answeroverflow.com](https://answeroverflow.com).
+
 - Make sure your help channels are following the [recommended format](/recommended-setup).
 - Enable [read the rules consent](/server-settings/read-the-rules-consent) and [forum guidelines consent](/channel-settings/forum-guidelines-consent) to get the most indexable content.
+- Sign up for [Answer Overflow Pro](https://answeroverflow.com/pricing) to index content on your on domain to not compete with other Discord servers that are hosting their content on [answeroverflow.com](https://answeroverflow.com).
