@@ -6,7 +6,6 @@ import { DISCORD_LINK, DOCS_URL, GITHUB_LINK } from '@answeroverflow/constants';
 
 export const SupportMenu: React.FC = () => (
 	<>
-		Disable docs until they are ready
 		<Link label="Docs" url={DOCS_URL} emoji="📃" />
 		<Link
 			label="Bugs, features & suggestions"
