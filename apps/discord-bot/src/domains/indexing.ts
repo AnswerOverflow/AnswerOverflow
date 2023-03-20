@@ -242,7 +242,7 @@ async function storeIndexData(
 
 	// Convert to Answer Overflow data types
 	const convertedUsers = extractUsersSetFromMessages(filteredMessages);
-	const convertedMessages = messagesToAOMessagesSet(filteredMessages);
+	const convertedMessages = await messagesToAOMessagesSet(filteredMessages);
 
 	if (channel.client.id == null) {
 		throw new Error('Received a null client id when indexing');

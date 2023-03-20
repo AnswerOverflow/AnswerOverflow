@@ -200,7 +200,7 @@ describe('Indexing', () => {
 		let solutionMessageAsAoMessage: AOMessage;
 		let markedAsSolvedReplyAsAoMessage: AOMessage;
 		let messages: Message[];
-		beforeEach(() => {
+		beforeEach(async () => {
 			questionMessage = mockMessage({ client });
 			solutionMessage = mockMessage({ client });
 			markedAsSolvedReply = mockMarkedAsSolvedReply({
@@ -209,9 +209,9 @@ describe('Indexing', () => {
 				solutionId: solutionMessage.id,
 			});
 			messages = [questionMessage, solutionMessage, markedAsSolvedReply];
-			questionMessageAsAoMessage = toAOMessage(questionMessage);
-			solutionMessageAsAoMessage = toAOMessage(solutionMessage);
-			markedAsSolvedReplyAsAoMessage = toAOMessage(markedAsSolvedReply);
+			questionMessageAsAoMessage = await toAOMessage(questionMessage);
+			solutionMessageAsAoMessage = await toAOMessage(solutionMessage);
+			markedAsSolvedReplyAsAoMessage = await toAOMessage(markedAsSolvedReply);
 		});
 		it('should add solutions to messages with reply at the end', () => {
 			addSolutionsToMessages(messages, [

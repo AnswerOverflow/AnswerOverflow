@@ -135,7 +135,10 @@ function toAOActionRow(
 }
 
 // top 10 ugliest functions in this codebase
-export function toAOMessage(message: Message): AOMessage {
+export async function toAOMessage(message: Message): Promise<AOMessage> {
+	if (message.partial) {
+		message = await message.fetch();
+	}
 	if (!message.guildId) throw new Error('Message is not in a guild');
 
 	const convertedMessage: AOMessage = {
@@ -324,10 +327,11 @@ export function extractThreadsSetFromMessages(messages: Message[]) {
 	return Array.from(threads.values());
 }
 
-export function messagesToAOMessagesSet(messages: Message[]) {
+export async function messagesToAOMessagesSet(messages: Message[]) {
 	const aoMessages = new Map<string, AOMessage>();
-	for (const msg of messages) {
-		aoMessages.set(msg.id, toAOMessage(msg));
+	for await (const msg of messages) {
+		const converted = await toAOMessage(msg);
+		aoMessages.set(msg.id, converted);
 	}
 	return Array.from(aoMessages.values());
 }

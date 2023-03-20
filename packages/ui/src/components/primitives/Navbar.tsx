@@ -150,10 +150,10 @@ export const NavbarRenderer = ({
 							<MagnifyingGlassIcon height={'1.5rem'} />
 						</Button>
 					</li>
-					<li className="ml-6 hidden items-center justify-center md:flex">
+					<li className="ml-6 hidden items-center justify-center  md:flex">
 						<Button variant="outline">Add to server</Button>
 					</li>
-					<li className="ml-6 hidden items-center justify-center md:flex">
+					<li className="ml-6 hidden items-center justify-center  md:flex">
 						{user ? (
 							<SignedInDropdownMenu signedInUser={user} />
 						) : (

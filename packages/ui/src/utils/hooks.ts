@@ -1,6 +1,7 @@
 import { RefObject, useEffect, useState } from 'react';
 import { trpc } from './trpc';
 import { isServer } from './checks';
+import { useRouter } from 'next/router';
 export const useIsUserInServer = (serverId: string) => {
 	const { data: servers } = trpc.auth.getServers.useQuery();
 	return servers?.some((s) => s.id === serverId) ?? false;
