@@ -47,12 +47,17 @@ export async function indexServers(client: Client) {
 	const indexingEndTime = Date.now();
 	const indexingDuration = indexingEndTime - indexingStartTime;
 	// log the time in hours, minutes
+	const asHours = Math.floor(indexingDuration / 1000 / 60 / 60);
+	const asMinutes = Math.floor(indexingDuration / 1000 / 60) % 60;
+
+	const asSeconds = Math.floor(indexingDuration / 1000) % 60;
+
 	container.logger.info(
-		`Indexing complete, took ${Math.floor(
-			indexingDuration / 1000 / 60 / 60,
-		)}hours ${Math.floor((indexingDuration / 1000 / 60) % 60)} min ${Math.floor(
-			(indexingDuration / 1000) % 60,
-		)} sec`,
+		`Indexing complete, took ${asHours} hour${
+			asHours === 1 ? '' : 's'
+		} ${asMinutes} min${asMinutes === 1 ? '' : 's'} ${asSeconds} sec${
+			asSeconds === 1 ? '' : 's'
+		}`,
 	);
 }
 
