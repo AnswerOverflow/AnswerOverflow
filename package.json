@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@answeroverflow/eslint-config-custom": "*",
-    "@total-typescript/ts-reset": "^0.3.7",
+    "@total-typescript/ts-reset": "^0.4.2",
     "tslib": "^2.5.0",
     "turbo": "latest",
     "vite": "^4.1.1",
