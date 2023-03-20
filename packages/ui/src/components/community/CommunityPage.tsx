@@ -1,10 +1,10 @@
 import type { APISearchResult, ServerPublic } from '@answeroverflow/api';
-import { useState } from 'react';
+
 import { Footer } from '../Footer';
 import { Button } from '../primitives/Button';
 import { Heading } from '../primitives/Heading';
-import { Input } from '../primitives/Input';
 import { Navbar } from '../primitives/Navbar';
+import { MessagesSearchBar } from '../search/SearchPage';
 import { SearchResult } from '../search/SearchResult';
 import { ServerIcon } from '../ServerIcon';
 
@@ -17,12 +17,8 @@ interface CommunityPageResultsProps {
 
 export const CommunityPage = ({
 	results,
-	isLoading,
-	onSearch,
 	server,
 }: CommunityPageResultsProps) => {
-	const [textSearchInput, setTextSearchInput] = useState<string>('');
-
 	return (
 		<div className="mx-auto w-full overflow-y-scroll bg-ao-white scrollbar-hide overflow-x-hidden dark:bg-ao-black">
 			<Navbar additionalPadding />
@@ -45,15 +41,9 @@ export const CommunityPage = ({
 
 				<div className="py-8 sm:px-4">
 					<div className="px-4 2xl:px-[6rem]">
-						<Input
-							onChange={setTextSearchInput}
-							buttonAria="Search button"
-							type="buttonInput"
-							fill
-							placeholder="Search"
-						>
-							Search
-						</Input>
+						<MessagesSearchBar
+							placeholder={`Search the ${server.name} community`}
+						/>
 
 						<div className="mt-4">
 							{results.map((result) => (

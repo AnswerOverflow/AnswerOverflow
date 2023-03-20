@@ -4,20 +4,48 @@ import { Heading } from '../primitives/Heading';
 
 import { Input } from '~ui/components/primitives/Input';
 import { SearchResult } from '~ui/components/search/SearchResult';
+import { useRouter } from 'next/router';
 
 interface SearchResultProps {
 	results: APISearchResult[number][];
 	isLoading: boolean;
-	onSearch: (query: string) => Promise<unknown> | unknown;
 }
 
-export const SearchPage = ({
-	results,
-	onSearch,
-	isLoading,
-}: SearchResultProps) => {
-	const [searchInput, setSearchInput] = useState<string>('');
+export const useRouterQuery = () => {
+	const router = useRouter();
+	const routerQuery = typeof router.query.q === 'string' ? router.query.q : '';
+	return routerQuery;
+};
 
+export const MessagesSearchBar = (props: { placeholder?: string }) => {
+	const router = useRouter();
+	const query = useRouterQuery();
+	const [searchInput, setSearchInput] = useState<string>(query);
+	return (
+		<form
+			// eslint-disable-next-line @typescript-eslint/no-misused-promises
+			onSubmit={async (e) => {
+				e.preventDefault();
+				await router.push(`/search?q=${searchInput}`, undefined, {
+					shallow: true,
+				});
+			}}
+			className="mb-8"
+		>
+			<Input
+				onChange={setSearchInput}
+				buttonAria="Search button"
+				type="buttonInput"
+				fill
+				className="w-full"
+				placeholder={props.placeholder ?? 'Search'}
+			>
+				Search
+			</Input>
+		</form>
+	);
+};
+export const SearchPage = ({ results, isLoading }: SearchResultProps) => {
 	const noResults = !results || results.length === 0;
 	const resultsSection = isLoading ? (
 		<div className="flex h-[50vh] items-center justify-center">
@@ -40,23 +68,7 @@ export const SearchPage = ({
 	return (
 		<div className="w-full">
 			<Heading.H1 className="py-4 text-3xl xl:text-5xl">Search</Heading.H1>
-			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					onSearch(searchInput);
-				}}
-				className="mb-8"
-			>
-				<Input
-					onChange={setSearchInput}
-					buttonAria="Search button"
-					type="buttonInput"
-					fill
-					placeholder="Search"
-				>
-					Search
-				</Input>
-			</form>
+			<MessagesSearchBar />
 			{resultsSection}
 		</div>
 	);

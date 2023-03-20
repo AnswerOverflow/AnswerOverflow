@@ -4,7 +4,7 @@ import type {
 	ServerPublic,
 } from '@answeroverflow/api';
 import { Message } from './primitives/Message';
-import { SearchBar } from './SearchBar';
+import { MessagesSearchBar } from './search/SearchPage';
 import { ServerInvite } from './ServerInvite';
 
 export type MessageResultPageProps = {
@@ -22,7 +22,6 @@ export function MessageResultPage({
 	server,
 	channel,
 	thread,
-	query,
 }: MessageResultPageProps) {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const solutionMessageId = messages.at(0)?.solutionIds?.at(0);
@@ -30,7 +29,7 @@ export function MessageResultPage({
 	return (
 		<div className="sm:mx-3 ">
 			<div className=" flex flex-col items-center justify-between gap-2 sm:flex-row">
-				<SearchBar className="w-full" defaultValue={query} />
+				<MessagesSearchBar />
 				<div className="shrink-0 ">
 					<ServerInvite server={server} channel={channel} />
 				</div>
