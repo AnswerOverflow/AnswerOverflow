@@ -1,25 +1,30 @@
-# Send Mark Solution Instructions
+# Solved Tag
 
 ## Example
 
-import {TryLiveDemo} from "../../components/links"
+import { TryLiveDemo } from '../../components/links';
 
-{/* TODO: Screenshot of a forum post with a solved tag */}
+![Message with a solved tag that has a green checkmark](/sample-solved-tag-post.png)
 
-<TryLiveDemo/>
+<TryLiveDemo />
 
-import {OPEN_HELP_CHANNEL_UTILITIES_LABEL, SET_SOLVED_TAG_ID_PLACEHOLDER, CLEAR_TAG_LABEL} from "@answeroverflow/constants"
+import {
+	OPEN_HELP_CHANNEL_UTILITIES_LABEL,
+	SET_SOLVED_TAG_ID_PLACEHOLDER,
+	CLEAR_TAG_LABEL,
+} from '@answeroverflow/constants';
 
 ## What it does
 
-Sends a message automatically to **all new threads / posts** in a channel instructing users how to mark their question as solved. For users who are new to the server, this is helpful to let them know how to mark their question as solved. For users who are experienced, this is helpful to remind them to mark their question as solved.
+Applies a specified tag to a post when a user marks their question as solved.
 
-You need to create a solved tag in the discord channel settings first before doing this, read more about this in the [recommended setup](/recommended-setup) section.
+## Why you want it
+
+This helps to organize content so when someone is going to answer a question, they can easily find questions that have not been answered yet.
 
 ## Enabling
 
 Use `/channel-settings` in the channel you want to enable auto thread in. Click the **{OPEN_HELP_CHANNEL_UTILITIES_LABEL}** menu and then click on **{SET_SOLVED_TAG_ID_PLACEHOLDER}** and select the tag you want to use when a question is marked as solved.
-
 
 ## Disabling
 
