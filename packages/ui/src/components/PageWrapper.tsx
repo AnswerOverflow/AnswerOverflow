@@ -25,8 +25,8 @@ export const PageWrapper = ({ children, disabledRoutes }: PageWrapperProps) => {
 
 export const PageWrapperRenderer = ({ children }: PageWrapperProps) => {
 	return (
-		<div className="mx-auto w-full overflow-y-scroll bg-ao-white scrollbar-hide overflow-x-hidden dark:bg-ao-black sm:px-4">
-			<div className="w-full max-w-screen-2xl">
+		<div className="mx-auto flex w-full flex-col items-center overflow-y-scroll bg-ao-white scrollbar-hide overflow-x-hidden dark:bg-ao-black sm:px-4">
+			<div className="w-full max-w-screen-2xl justify-center">
 				<Navbar />
 				<main className="bg-ao-white px-4 dark:bg-ao-black sm:px-[4rem] 2xl:px-[6rem]">
 					{children}

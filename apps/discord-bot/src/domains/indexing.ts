@@ -181,10 +181,7 @@ Server: ${channel.guildId} | ${channel.guild.name}`,
 
 export async function indexTextBasedChannel(channel: GuildTextBasedChannel) {
 	const lastIndexedMessage = await findLatestMessageInChannel(channel.id);
-	let start = lastIndexedMessage?.id; // TODO: Fetch from elastic
-	if (process.env.NODE_ENV === 'development') {
-		start = undefined; // always index from the beginning in development for ease of testing
-	}
+	const start = lastIndexedMessage?.id;
 	container.logger.debug(
 		`Indexing channel ${channel.id} | ${channel.name} from message id ${
 			start ?? 'beginning'
