@@ -111,7 +111,7 @@ const SearchResultSidebar = () => {
 const NoSolution = ({ messageId }: { messageId: string }) => {
 	return (
 		<div className="w-full rounded-bl-standard border-2 border-black/[.13] bg-white/[.01] dark:border-white/[.13]">
-			<Paragraph classNameOverride="p-6 font-body text-ao-black dark:text-white/[.66]">
+			<Paragraph className="p-6 font-body text-ao-black dark:text-white/[.66]">
 				No replies marked as solution...{' '}
 				<Link
 					href={`/m/${messageId}`}

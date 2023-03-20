@@ -97,10 +97,10 @@ const H6 = (props: HeadingProps) => {
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const Heading = {
-	H1: H1,
-	H2: H2,
-	H3: H3,
-	H4: H4,
-	H5: H5,
-	H6: H6,
+	H1,
+	H2,
+	H3,
+	H4,
+	H5,
+	H6,
 };
