@@ -1,11 +1,19 @@
-import { AOHead, SearchPage, trpc, useRouterQuery } from '@answeroverflow/ui';
+import {
+	AOHead,
+	SearchPage,
+	trpc,
+	useRouterQuery,
+	useRouterServerId,
+} from '@answeroverflow/ui';
 
 export default function Search() {
 	// get the query from the url in the q param
 	const routerQuery = useRouterQuery();
+	const serverIdToFilterTo = useRouterServerId();
 	const results = trpc.messages.search.useQuery(
 		{
 			query: routerQuery,
+			serverId: serverIdToFilterTo,
 		},
 		{
 			enabled: routerQuery.length > 0,

@@ -12,7 +12,10 @@ interface SearchResultProps {
 	isLoading: boolean;
 }
 
-export const MessagesSearchBar = (props: { placeholder?: string }) => {
+export const MessagesSearchBar = (props: {
+	placeholder?: string;
+	serverId?: string;
+}) => {
 	const router = useRouter();
 	const query = useRouterQuery();
 	const [searchInput, setSearchInput] = useState<string>(query);
@@ -21,7 +24,12 @@ export const MessagesSearchBar = (props: { placeholder?: string }) => {
 			// eslint-disable-next-line @typescript-eslint/no-misused-promises
 			onSubmit={async (e) => {
 				e.preventDefault();
-				await router.push(`/search?q=${searchInput}`, undefined, {
+				const params = new URLSearchParams();
+				params.set('q', searchInput);
+				if (props.serverId) {
+					params.set('s', props.serverId);
+				}
+				await router.push(`/search?${params.toString()}`, undefined, {
 					shallow: true,
 				});
 			}}

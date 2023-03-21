@@ -22,6 +22,7 @@ import {
 	MessageActionRowComponentData,
 	InteractionReplyOptions,
 	EmbedBuilder,
+	MessageCreateOptions,
 } from 'discord.js';
 import type { RawMessageData } from 'discord.js/typings/rawDataTypes';
 import { randomSnowflake } from '@answeroverflow/discordjs-utils';
@@ -56,7 +57,8 @@ export type MessageOpts =
 	| string
 	| MessageEditOptions
 	| MessagePayload
-	| InteractionReplyOptions;
+	| InteractionReplyOptions
+	| MessageCreateOptions;
 export function applyMessagePayload(payload: MessageOpts, message: Message) {
 	if (typeof payload === 'string') {
 		message.content = payload;

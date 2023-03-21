@@ -99,7 +99,6 @@ export function WithAuth(
 			],
 			transformer,
 		});
-		console.log('authState', authState);
 		setTRPCClient(trpcClient);
 	}, [authState, setTRPCClient, queryClient]);
 	return (

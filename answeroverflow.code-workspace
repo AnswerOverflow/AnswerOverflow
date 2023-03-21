@@ -3,8 +3,8 @@
   "folders": [
     {
       //
-      "name": "web",
-      "path": "apps/nextjs"
+      "name": "main-site",
+      "path": "apps/main-site"
     },
     {
       "name": "docs",
@@ -144,7 +144,7 @@
       "root",
       "api",
       "ui",
-      "web",
+      "main-site",
       "db",
       "auth",
       "config",
@@ -198,7 +198,11 @@
       "undelete",
       "upsert",
       "upserting",
+      "upvote",
       "WAITLIST"
+    ],
+    "cSpell.enableFiletypes": [
+      "mdx"
     ],
   },
   "extensions": {

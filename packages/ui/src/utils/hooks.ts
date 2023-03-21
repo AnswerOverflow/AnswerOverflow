@@ -30,7 +30,6 @@ export const useElementPosition = (element: RefObject<HTMLDivElement>) => {
 		};
 		const observer = new MutationObserver(callback);
 
-		console.log(typeof element);
 		observer.observe(element?.current!, config);
 
 		return () => {
@@ -140,4 +139,11 @@ export const useRouterQuery = () => {
 	const router = useRouter();
 	const routerQuery = typeof router.query.q === 'string' ? router.query.q : '';
 	return routerQuery;
+};
+
+export const useRouterServerId = () => {
+	const router = useRouter();
+	const routerServerId =
+		typeof router.query.s === 'string' ? router.query.s : '';
+	return routerServerId;
 };

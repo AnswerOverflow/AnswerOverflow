@@ -10,7 +10,7 @@
     - "apps/discord-bot/src/utils/components/**"
 
 "🎆event":
-    - "apps/discord-bot/src/listeners/**" 
+    - "apps/discord-bot/src/listeners/**"
     - "apps/discord-bot/src/utils/listeners/**"
 
 "⚡ api":
@@ -26,8 +26,8 @@
   - "packages/db/**"
 
 "📄 page":
-  - "apps/nextjs/src/pages"
+  - "apps/main-site/src/pages"
 
 "🖥️website":
   - "packages/ui/**"
-  - "apps/nextjs/**"
+  - "apps/main-site/**"
