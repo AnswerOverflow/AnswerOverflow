@@ -1,0 +1,18 @@
+# Ignore account in server
+
+import {GLOBALLY_IGNORE_ACCOUNT_LABEL, STOP_IGNORING_ACCOUNT_LABEL} from "@answeroverflow/constants"
+
+Use the `/manage-account` slash command and click on the **{GLOBALLY_IGNORE_ACCOUNT_LABEL}** button to disable indexing of their account in the server.
+
+import {Callout} from "nextra-theme-docs"
+
+<Callout type='error' emoji='❗'>
+  This is a destructive action, equivalent to deleting your account. It will:
+  - Remove all stored messages of your account
+  - Not index future messages of your account
+  - Not track analytics events of your account
+</Callout>
+
+## Restoring account
+
+If you want to restore your account, use the `/manage-account` slash command and click on the **{STOP_IGNORING_ACCOUNT_LABEL}** to restore functionality.

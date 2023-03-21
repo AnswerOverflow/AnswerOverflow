@@ -1,16 +1,16 @@
 /* eslint-disable tailwindcss/no-custom-classname */
 import * as React from 'react';
+import { classNames } from '~ui/utils/styling';
 
-// {font-family:Poppins-SemiBold,Sofia Pro;font-weight:600}
-
-// Regular - 400
-// Medium  - 500
-export function AnswerOverflowLogo() {
+export function AnswerOverflowLogo({
+	className,
+	...props
+}: React.PropsWithChildren<React.HTMLAttributes<HTMLDivElement>>) {
 	const Svg = () => (
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			viewBox="0 0 889.87 240.34"
-			className={`w-40 fill-black stroke-black dark:fill-white dark:stroke-white md:w-56`}
+			className={`w-full fill-black stroke-black dark:fill-white dark:stroke-white`}
 		>
 			<defs>
 				<style>{'.cls-3{letter-spacing:-.02em}'}</style>
@@ -64,7 +64,10 @@ export function AnswerOverflowLogo() {
 		</svg>
 	);
 	return (
-		<div className={`max-h-sm w-auto`}>
+		<div
+			className={classNames(`max-h-sm w-40  md:w-56`, className ?? '')}
+			{...props}
+		>
 			<Svg />
 		</div>
 	);
