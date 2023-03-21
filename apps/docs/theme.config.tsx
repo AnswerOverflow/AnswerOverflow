@@ -25,6 +25,7 @@ const config: DocsThemeConfig = {
 	chat: {
 		link: DISCORD_LINK,
 	},
+	darkMode: true,
 	feedback: {
 		// TODO: Add properties that Nextra passes and add to url
 		useLink: () => CREATE_NEW_DOCS_ISSUE_LINK,

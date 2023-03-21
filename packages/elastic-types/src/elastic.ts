@@ -4,7 +4,6 @@ import type {
 	QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { elasticMessageIndexProperties, Message } from './message';
-
 declare global {
 	// eslint-disable-next-line no-var, no-unused-vars
 	var elastic: Elastic | undefined;

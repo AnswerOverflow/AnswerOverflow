@@ -190,6 +190,22 @@ export async function findChannelByInviteCode(
 	return addFlagsToChannel(data);
 }
 
+export async function findAllThreadsByParentId(
+	parentId: string,
+): Promise<ChannelWithFlags[]> {
+	const data = await prisma.channel.findMany({
+		where: { parentId },
+	});
+	return data.map(addFlagsToChannel);
+}
+
+export async function findAllChannelsByServerId(
+	serverId: string,
+): Promise<ChannelWithFlags[]> {
+	const data = await prisma.channel.findMany({ where: { serverId } });
+	return data.map(addFlagsToChannel);
+}
+
 export async function findManyChannelsById(
 	ids: string[],
 	opts: {

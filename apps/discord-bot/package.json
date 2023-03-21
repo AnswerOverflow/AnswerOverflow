@@ -73,8 +73,5 @@
 		"test": "yarn build-deps && yarn run with-env jest --coverage",
 		"test:watch": "yarn run with-env jest --watch",
 		"install-local-discordjs-react": "cp -r ~/repos/discordjs-react/packages/discordjs-react/dist/ /AnswerOverflow/node_modules/@answeroverflow/discordjs-react/"
-	},
-	"resolutions": {
-		"discord-api-types": "0.37.20"
 	}
 }

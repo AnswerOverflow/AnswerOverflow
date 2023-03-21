@@ -32,6 +32,7 @@ import {
 	FetchMessageOptions,
 	MessageCreateOptions,
 	MessagePayload,
+	ForumLayoutType,
 } from 'discord.js';
 import type {
 	RawMessageData,
@@ -377,6 +378,7 @@ export function mockForumChannel(
 					moderated: false,
 				},
 			],
+			default_forum_layout: ForumLayoutType.ListView,
 			default_reaction_emoji: null,
 			default_sort_order: null,
 			...data,
