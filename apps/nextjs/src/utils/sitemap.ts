@@ -17,11 +17,14 @@ export type SitemapEntry = {
 export class Sitemap {
 	constructor(private baseUrl: string, private sitemap: SitemapEntry[] = []) {}
 
-	add(entry: SitemapEntry) {
-		this.sitemap.push(entry);
+	add(...entries: SitemapEntry[]) {
+		this.sitemap.push(...entries);
 	}
 
 	toXml() {
+		if (this.sitemap.length > 50000)
+			throw new Error('Sitemap cannot have more than 50,000 entries');
+
 		const clamp = (num: number, min: number, max: number) =>
 			Math.min(Math.max(num, min), max);
 		const urls = this.sitemap.map(

@@ -22,7 +22,7 @@ export async function getServerSideProps({
 		})),
 	);
 	sitemap.add({
-		loc: `/c/${communityId}`,
+		loc: `/c/${communityId}`, // Community page
 		changefreq: 'weekly',
 		priority: 1,
 	});

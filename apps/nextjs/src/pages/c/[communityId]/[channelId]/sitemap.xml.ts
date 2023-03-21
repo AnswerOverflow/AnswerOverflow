@@ -1,5 +1,5 @@
 import type { GetServerSidePropsContext } from 'next';
-import { findAllThreadsByParentId } from '@answeroverflow/db';
+import { findAllChannelQuestions } from '@answeroverflow/db';
 // eslint-disable-next-line no-restricted-imports
 import { Sitemap } from '../../../../utils/sitemap';
 
@@ -8,13 +8,15 @@ export async function getServerSideProps({
 	params,
 }: GetServerSidePropsContext) {
 	const channelId = params?.channelId as string;
-	const channels = await findAllThreadsByParentId(channelId);
-
+	const { threads: questions } = await findAllChannelQuestions({
+		channelId,
+		includePrivateMessages: false, // TODO: Serve private threads to search engine crawlers only
+	});
 	const sitemap = new Sitemap(
 		'https://www.answeroverflow.com',
-		channels.map((thread) => ({
-			loc: `/m/${thread.id}`,
-			changefreq: 'monthly',
+		questions.map((question) => ({
+			loc: `/m/${question.id}`,
+			changefreq: question.archivedTimestamp ? 'monthly' : 'daily',
 			priority: 0.7,
 		})),
 	);

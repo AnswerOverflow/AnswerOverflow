@@ -190,11 +190,13 @@ export async function findChannelByInviteCode(
 	return addFlagsToChannel(data);
 }
 
-export async function findAllThreadsByParentId(
-	parentId: string,
-): Promise<ChannelWithFlags[]> {
+export async function findAllThreadsByParentId(input: {
+	parentId: string;
+	limit?: number;
+}): Promise<ChannelWithFlags[]> {
 	const data = await prisma.channel.findMany({
-		where: { parentId },
+		where: { parentId: input.parentId },
+		take: input.limit,
 	});
 	return data.map(addFlagsToChannel);
 }

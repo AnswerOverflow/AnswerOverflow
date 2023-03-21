@@ -21,7 +21,7 @@ import {
 } from './user-server-settings';
 import { findManyDiscordAccountsWithUserServerSettings } from './discord-account';
 import { omit } from '@answeroverflow/utils';
-import { findManyChannelsById } from './channel';
+import { findAllThreadsByParentId, findManyChannelsById } from './channel';
 import { findManyServersById } from './server';
 export type MessageWithDiscordAccount = z.infer<
 	typeof zMessageWithDiscordAccount
@@ -196,6 +196,44 @@ export async function findMessagesByChannelId(
 
 export async function findManyMessages(ids: string[]) {
 	return elastic.bulkGetMessages(ids);
+}
+
+export async function findManyMessagesWithAuthors(
+	ids: string[],
+): Promise<MessageFull[]> {
+	const messages = await findManyMessages(ids);
+	// TODO: Make work without adding references
+	const withRefs = await addReferencesToMessages(messages);
+	return addAuthorsToMessages(withRefs);
+}
+
+export async function findAllChannelQuestions(input: {
+	channelId: string;
+	limit?: number;
+	includePrivateMessages?: boolean;
+}) {
+	const threads = await findAllThreadsByParentId({
+		parentId: input.channelId,
+		limit: input.limit,
+	});
+
+	const messages = await findManyMessagesWithAuthors(
+		threads.map((thread) => thread.id),
+	);
+
+	const messagesLookup = new Map(
+		messages.map((message) => [message.id, message]),
+	);
+	const filteredThreads = threads.filter((thread) => {
+		const message = messagesLookup.get(thread.id);
+		if (!message) return false;
+		return input.includePrivateMessages ? true : message.public;
+	});
+
+	return {
+		messages,
+		threads: filteredThreads,
+	};
 }
 
 export async function updateMessage(data: z.infer<typeof zMessage>) {
