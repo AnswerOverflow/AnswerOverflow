@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import Xarrow from 'react-xarrows';
 import { DemoMessage, MessageProps } from '~ui/components/home/DemoMessage';
-import { useTheme } from '~ui/utils/hooks';
+import { useThemeContext } from '~ui/utils/theme';
 import { GooglePage } from './GooglePage/GooglePage';
 import './DashAnimation.css';
 
@@ -18,7 +18,7 @@ export const QuestionAnswerArea = ({
 }: NewLandingAnimationProps) => {
 	const googlePageRef = useRef(null);
 	const discordPageRef = useRef(null);
-	const theme = useTheme();
+	const { theme } = useThemeContext();
 
 	return (
 		<>

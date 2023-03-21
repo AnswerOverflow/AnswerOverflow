@@ -6,7 +6,7 @@ import { transformer } from '@answeroverflow/api/transformer';
 import React, { useEffect, useState } from 'react';
 import { trpc, StorybookTRPC } from './trpc';
 import hljs from 'highlight.js';
-import { toggleDarkTheme } from './theme';
+import { ThemeProvider } from './theme';
 
 const storybookTrpc = trpc as StorybookTRPC;
 type Globals = {
@@ -32,11 +32,11 @@ export function WithTailwindTheme(
 	}
 
 	const { tailwindTheme } = context.globals as Globals;
-	toggleDarkTheme(tailwindTheme === 'dark');
 	const Dark = () => (
-		// eslint-disable-next-line tailwindcss/no-custom-classname
 		<Flex className="dark bg-ao-black">
-			<Story />
+			<ThemeProvider defaultTheme="dark">
+				<Story />
+			</ThemeProvider>
 		</Flex>
 	);
 
@@ -46,7 +46,9 @@ export function WithTailwindTheme(
 
 	const Light = () => (
 		<Flex className="bg-ao-white">
-			<Story />
+			<ThemeProvider defaultTheme="light">
+				<Story />
+			</ThemeProvider>
 		</Flex>
 	);
 
