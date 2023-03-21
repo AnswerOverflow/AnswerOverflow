@@ -6800,7 +6800,8 @@ dot-case@^3.0.4:
     no-case "^3.0.4"
     tslib "^2.0.3"
 
-dotenv-cli@^7.0.0:
+
+dotenv-cli@^7.1.0:
   version "7.1.0"
   resolved "https://registry.yarnpkg.com/dotenv-cli/-/dotenv-cli-7.1.0.tgz#9ff360f7d1de72389027d4d9e9deccb0ef151c5e"
   integrity sha512-motytjZFQB3ZtGTIN4c0vnFgv4kuNZ2WxVnGY6PVFiygCzkm3IFBBguDUzezd9HgNA0OYYd6vNCWlozs0Q1Zxg==
