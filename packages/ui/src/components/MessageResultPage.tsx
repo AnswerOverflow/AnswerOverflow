@@ -49,7 +49,7 @@ export function MessageResultPage({
 
 		if (message.id === solutionMessageId) {
 			return (
-				<div className="text-green-500 dark:text-green-400" key={message.id}>
+				<div className="text-green-700 dark:text-green-400" key={message.id}>
 					Solution
 					<div
 						className="rounded-lg border-2 border-green-500  dark:border-green-400 "
