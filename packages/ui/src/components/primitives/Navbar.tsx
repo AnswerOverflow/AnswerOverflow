@@ -177,7 +177,6 @@ export const Navbar = ({
 	const router = useRouter();
 	const userQuery = trpc.auth.getSession.useQuery();
 	const user = userQuery.data?.user;
-	console.log(router.pathname);
 	return (
 		<NavbarRenderer
 			user={user}

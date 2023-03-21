@@ -30,7 +30,6 @@ export const useElementPosition = (element: RefObject<HTMLDivElement>) => {
 		};
 		const observer = new MutationObserver(callback);
 
-		console.log(typeof element);
 		observer.observe(element?.current!, config);
 
 		return () => {
