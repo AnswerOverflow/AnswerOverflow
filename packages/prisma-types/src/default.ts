@@ -32,6 +32,7 @@ export function getDefaultServer(
 		kickedTime: null,
 		bitfield: 0,
 		description: null,
+		vanityUrl: null,
 		...override,
 	};
 	return data;
