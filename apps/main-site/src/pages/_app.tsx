@@ -6,7 +6,7 @@ import { SessionProvider } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import type { AppType } from 'next/app';
 import hljs from 'highlight.js';
-import { NextTRPC, PageWrapper, trpc } from '@answeroverflow/ui';
+import { NextTRPC, PageWrapper, trpc, ThemeProvider } from '@answeroverflow/ui';
 import React, { useEffect } from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
@@ -55,14 +55,16 @@ const MyApp: AppType<{ session: Session | null }> = ({
 		hljs.highlightAll();
 	}, []);
 	return (
-		<SessionProvider session={session}>
-			<PageWrapper disabledRoutes={['/']}>
-				<MDXProvider components={components}>
-					<Component {...pageProps} />
-				</MDXProvider>
-			</PageWrapper>
-			<ReactQueryDevtools initialIsOpen={false} />
-		</SessionProvider>
+		<ThemeProvider>
+			<SessionProvider session={session}>
+				<PageWrapper disabledRoutes={['/']}>
+					<MDXProvider components={components}>
+						<Component {...pageProps} />
+					</MDXProvider>
+				</PageWrapper>
+				<ReactQueryDevtools initialIsOpen={false} />
+			</SessionProvider>
+		</ThemeProvider>
 	);
 };
 export default (trpc as NextTRPC).withTRPC(MyApp);

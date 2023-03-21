@@ -1,4 +1,4 @@
-import { toggleDarkTheme } from '~ui/utils/theme';
+import { useThemeContext } from '~ui/utils/theme';
 
 function SunIcon<T extends {}>(props: T) {
 	return (
@@ -21,12 +21,13 @@ function MoonIcon<T extends {}>(props: T) {
 }
 
 export function ThemeSwitcher() {
+	const { toggleTheme } = useThemeContext();
 	return (
 		<button
 			type="button"
 			className="flex h-9 w-9 items-center justify-center rounded-md transition hover:bg-zinc-900/5 dark:hover:bg-white/5"
 			aria-label="Toggle dark mode"
-			onClick={() => toggleDarkTheme()}
+			onClick={() => toggleTheme()}
 		>
 			<SunIcon className="h-8 w-8 stroke-zinc-900 dark:hidden" />
 			<MoonIcon className="hidden h-8 w-8 stroke-white dark:block" />
