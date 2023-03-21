@@ -44,7 +44,7 @@ export default function MessageResult(
 		<>
 			<AOHead
 				description={description}
-				path={`/m/${messageId}`}
+				path={`/m/${firstMessage?.id ?? messageId}`}
 				title={`${channelName} - ${server.name}`}
 			/>
 			<MessageResultPage
