@@ -30,7 +30,7 @@ const config: StorybookConfig = {
 		};
 		return config;
 	},
-	staticDirs: ['../../../apps/nextjs/public'],
+	staticDirs: ['../../../apps/main-site/public'],
 	typescript: {
 		check: false,
 		checkOptions: {},
