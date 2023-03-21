@@ -123,7 +123,9 @@ export const NavbarRenderer = ({
 			<nav
 				className={`${
 					sticky
-						? 'fixed top-0 left-0 backdrop-blur-md dark:bg-ao-black/75'
+						? `fixed top-0 left-0 backdrop-blur-md dark:bg-ao-black/75 ${
+								additionalPadding ? 'sm:px-4' : ''
+						  }`
 						: 'relative min-h-[4rem]'
 				} z-50 flex w-full items-center`}
 				ref={navbarRef}
