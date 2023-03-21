@@ -5,7 +5,7 @@ import {
 	getDefaultServerWithFlags,
 	upsertServer,
 	zServerCreate,
-	findServerByAlias,
+	findServerByAliasOrId,
 } from '@answeroverflow/db';
 import { z } from 'zod';
 import type { Context } from '~api/router/context';
@@ -62,7 +62,7 @@ export const serverRouter = router({
 		.input(z.string())
 		.query(async ({ ctx, input }) => {
 			return protectedFetchWithPublicData({
-				fetch: () => findServerByAlias(input),
+				fetch: () => findServerByAliasOrId(input),
 				permissions: () => assertCanEditServer(ctx, input),
 				notFoundMessage: 'Server not found',
 				publicDataFormatter: (server) => zServerPublic.parse(server),
