@@ -12,6 +12,38 @@ export async function getServerSideProps({ res }: GetServerSidePropsContext) {
 			priority: 1,
 		})),
 	);
+	sitemap.add(
+		{
+			loc: '/',
+			changefreq: 'weekly',
+			priority: 1,
+		},
+		{
+			loc: '/pricing',
+			changefreq: 'weekly',
+			priority: 1,
+		},
+		{
+			loc: '/tos',
+			changefreq: 'monthly',
+			priority: 0.5,
+		},
+		{
+			loc: '/privacy',
+			changefreq: 'monthly',
+			priority: 0.5,
+		},
+		{
+			loc: '/cookies',
+			changefreq: 'monthly',
+			priority: 0.5,
+		},
+		{
+			loc: '/eula',
+			changefreq: 'monthly',
+			priority: 0.5,
+		},
+	);
 	sitemap.applyToRes(res);
 	res.end();
 
