@@ -102,6 +102,7 @@ model Server {
   // Answer Overflow Settings
   bitfield   Int       @default(0) @db.UnsignedInt
   kickedTime DateTime?
+  vanityUrl  String?   @unique
 
   // Relations
   userServerSettings UserServerSettings[]

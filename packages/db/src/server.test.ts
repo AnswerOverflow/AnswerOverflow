@@ -4,7 +4,13 @@ import {
 	Server,
 } from '@answeroverflow/prisma-types';
 import { mockServer } from '@answeroverflow/db-mock';
-import { createServer, findServerById, updateServer } from './server';
+import {
+	createServer,
+	findServerByAlias,
+	findServerById,
+	updateServer,
+} from './server';
+import { getRandomId } from '@answeroverflow/utils';
 
 let server: Server;
 
@@ -25,6 +31,11 @@ describe('Server', () => {
 			expect(created.flags.readTheRulesConsentEnabled).toBe(true);
 			const found = await findServerById(server.id);
 			expect(found!.flags.readTheRulesConsentEnabled).toBe(true);
+		});
+		it("should fail if creating a server with an alais the same as an existing server's id", async () => {
+			const existing = await createServer(server);
+			const newServer = mockServer({ vanityUrl: existing.id });
+			await expect(createServer(newServer)).rejects.toThrow();
 		});
 	});
 	describe('Update Server', () => {
@@ -58,6 +69,18 @@ describe('Server', () => {
 		});
 		it('should return null if server not found', async () => {
 			const found = await findServerById('not-found');
+			expect(found).toBeNull();
+		});
+	});
+	describe('Find by alias', () => {
+		it('should find server by alias', async () => {
+			const serverWithAlias = mockServer({ vanityUrl: getRandomId() });
+			await createServer(serverWithAlias);
+			const found = await findServerByAlias(serverWithAlias.vanityUrl!);
+			expect(found).toStrictEqual(addFlagsToServer(serverWithAlias));
+		});
+		it('should return null if server not found', async () => {
+			const found = await findServerByAlias('not-found');
 			expect(found).toBeNull();
 		});
 	});

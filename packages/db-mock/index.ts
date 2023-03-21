@@ -52,6 +52,7 @@ export function mockServer(override: Partial<Server> = {}) {
 		id: getRandomId(),
 		name: 'test-server',
 		icon: 'ASDASDASDASDsd',
+		vanityUrl: null,
 		...override,
 	});
 }
