@@ -1,4 +1,5 @@
 export * from './AnswerOverflowLogo';
+export * from './primitives';
 export * from './DiscordAvatar';
 export * from './Footer';
 export * from './MessageResultPage';
@@ -7,6 +8,7 @@ export * from './PageWrapper';
 export * from './home/Home';
 export * from './SearchBar';
 export * from './search/SearchPage';
+export * from './community/CommunityPage';
 export * from './ServerInvite';
 export * from './Pricing';
 export * from './AOHead';

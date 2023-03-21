@@ -160,6 +160,7 @@ export const zServerPrisma = z.object({
 	kickedTime: z.date().nullable(),
 	description: z.string().nullable(),
 	bitfield: z.number(),
+	vanityUrl: z.string().nullable(),
 } satisfies ServerZodFormat);
 
 // For creating a server, we make sure to include the required fields
