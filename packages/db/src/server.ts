@@ -37,11 +37,21 @@ export const zServerUpsert = z.object({
 	update: zServerMutable.optional(),
 });
 
-export function combineServerSettings<
+export async function applyServerSettingsSideEffects<
 	F extends { bitfield: number },
 	T extends z.infer<typeof zServerMutable>,
 >({ old, updated }: { old: F; updated: T }) {
 	const { flags, ...updateDataWithoutFlags } = updated;
+	if (updateDataWithoutFlags.vanityUrl) {
+		const doesAliasExistAlready = await findServerByAliasOrId(
+			updateDataWithoutFlags.vanityUrl,
+		);
+		if (doesAliasExistAlready) {
+			throw new Error(
+				`Server with alias ${updateDataWithoutFlags.vanityUrl} already exists`,
+			);
+		}
+	}
 	return {
 		...updateDataWithoutFlags,
 		bitfield: flags ? mergeServerFlags(old.bitfield, flags) : undefined,
@@ -50,11 +60,10 @@ export function combineServerSettings<
 
 export async function createServer(input: z.infer<typeof zServerCreate>) {
 	// Explicitly type this to avoid passing into .parse missing information
-	const combinedCreateData: z.infer<typeof zServerPrismaCreate> =
-		combineServerSettings({
-			old: getDefaultServerWithFlags(input),
-			updated: input,
-		});
+	const combinedCreateData = await applyServerSettingsSideEffects({
+		old: getDefaultServerWithFlags(input),
+		updated: input,
+	});
 	const created = await prisma.server.create({
 		// Strip out any extra data that isn't in the model
 		data: zServerPrismaCreate.parse(combinedCreateData),
@@ -74,11 +83,10 @@ export async function updateServer({
 		if (!existing) throw new Error(`Server with id ${update.id} not found`);
 	}
 	// Explicitly type this to avoid passing into .parse missing information
-	const combinedUpdateData: z.infer<typeof zServerPrismaUpdate> =
-		combineServerSettings({
-			old: existing,
-			updated: update,
-		});
+	const combinedUpdateData = await applyServerSettingsSideEffects({
+		old: existing,
+		updated: update,
+	});
 	const updated = await prisma.server.update({
 		where: { id: update.id },
 		// Strip out any extra data that isn't in the model
@@ -88,7 +96,38 @@ export async function updateServer({
 }
 
 export async function findServerById(id: string) {
-	const found = await prisma.server.findUnique({ where: { id } });
+	const found = await prisma.server.findUnique({
+		where: {
+			id,
+		},
+	});
+	if (!found) return null;
+	return addFlagsToServer(found);
+}
+
+export async function findServerByAlias(alias: string) {
+	const found = await prisma.server.findUnique({
+		where: {
+			vanityUrl: alias,
+		},
+	});
+	if (!found) return null;
+	return addFlagsToServer(found);
+}
+
+export async function findServerByAliasOrId(aliasOrId: string) {
+	const found = await prisma.server.findFirst({
+		where: {
+			OR: [
+				{
+					vanityUrl: aliasOrId,
+				},
+				{
+					id: aliasOrId,
+				},
+			],
+		},
+	});
 	if (!found) return null;
 	return addFlagsToServer(found);
 }
