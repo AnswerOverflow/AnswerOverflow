@@ -22,12 +22,13 @@
 		"@elastic/elasticsearch": "^8.6.0",
 		"discord-api-types": "^0.37.35",
 		"dotenv-cra": "^3.0.3",
+		"elastic-builder": "^2.18.1",
 		"zod": "^3.20.6"
 	},
 	"devDependencies": {
 		"@answeroverflow/tsconfig": "*",
 		"@vitest/coverage-c8": "^0.28.5",
-		"dotenv-cli": "^7.0.0",
+		"dotenv-cli": "^7.1.0",
 		"vitest": "^0.25.8"
 	}
 }

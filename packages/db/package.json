@@ -32,7 +32,7 @@
 		"@answeroverflow/tsconfig": "*",
 		"@vitest/coverage-c8": "^0.28.5",
 		"cross-env": "^7.0.3",
-		"dotenv-cli": "^7.0.0",
+		"dotenv-cli": "^7.1.0",
 		"vitest": "^0.25.8"
 	}
 }

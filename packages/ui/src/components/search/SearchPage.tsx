@@ -16,6 +16,7 @@ interface SearchResultProps {
 export const MessagesSearchBar = (props: {
 	placeholder?: string;
 	className?: string;
+	serverId?: string;
 }) => {
 	const router = useRouter();
 	const query = useRouterQuery();
@@ -25,7 +26,12 @@ export const MessagesSearchBar = (props: {
 			// eslint-disable-next-line @typescript-eslint/no-misused-promises
 			onSubmit={async (e) => {
 				e.preventDefault();
-				await router.push(`/search?q=${searchInput}`, undefined, {
+				const params = new URLSearchParams();
+				params.set('q', searchInput);
+				if (props.serverId) {
+					params.set('s', props.serverId);
+				}
+				await router.push(`/search?${params.toString()}`, undefined, {
 					shallow: true,
 				});
 			}}

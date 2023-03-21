@@ -28,7 +28,11 @@ export class ConsentCommand extends Command {
 				.setDescription(this.description)
 				.setDMPermission(false)
 				.addBooleanOption((option) =>
-					option.setName('consent').setDescription('Enable or disable consent'),
+					option
+						.setName('consent')
+						.setDescription(
+							'Enable or disable publicly displaying your messages on Answer Overflow',
+						),
 				),
 			{
 				idHints: ids,

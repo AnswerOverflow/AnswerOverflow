@@ -12,8 +12,9 @@ export const DISABLE_FORUM_GUIDELINES_CONSENT_LABEL =
 export const REVOKE_CONSENT_LABEL = 'Disable publicly showing messages';
 export const GRANT_CONSENT_LABEL =
 	'Publicly display messages on Answer Overflow';
-export const DISABLE_INDEXING_LABEL = 'Ignore account in server';
-export const ENABLE_INDEXING_LABEL = 'Enable indexing of messages in server';
+export const IGNORE_ACCOUNT_IN_SERVER_LABEL = 'Ignore account in server';
+export const STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL =
+	'Stop ignoring account in server';
 export const GLOBALLY_IGNORE_ACCOUNT_LABEL = 'Globally ignore account';
 export const STOP_IGNORING_ACCOUNT_LABEL = 'Stop ignoring account';
 
@@ -68,3 +69,4 @@ export const OPEN_EXPERIMENTAL_SETTINGS_LABEL = 'Experimental settings';
 export const EXPERIMENTAL_SETTINGS_WAITLIST_URL =
 	'https://forms.gle/UaKs8CcYsnRWwmpY8';
 export const SEND_CONSENT_PROMPT_LABEL = 'Send consent prompt';
+export const CLEAR_TAG_LABEL = '(Clear)';

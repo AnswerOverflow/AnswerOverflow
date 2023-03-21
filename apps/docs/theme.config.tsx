@@ -1,28 +1,48 @@
 import React from 'react';
 import type { DocsThemeConfig } from 'nextra-theme-docs';
 import { AnswerOverflowLogo, Footer } from '@answeroverflow/ui';
+import {
+	CREATE_NEW_DOCS_ISSUE_LINK,
+	DISCORD_LINK,
+	DOCS_LINK_BASE,
+	GITHUB_LINK,
+	ANSWER_OVERFLOW_BLUE_HEX,
+} from '@answeroverflow/constants';
+import { useRouter } from 'next/router';
+
+// https://nextra.site/docs/docs-theme/theme-configuration
 const config: DocsThemeConfig = {
-	logo: <AnswerOverflowLogo />,
+	logo: (
+		<AnswerOverflowLogo
+			style={{
+				width: '168px',
+			}}
+		/>
+	),
 	project: {
-		link: 'https://contribute.answeroverflow.com',
+		link: GITHUB_LINK,
 	},
 	chat: {
-		link: 'https://discord.answeroverflow.com',
+		link: DISCORD_LINK,
 	},
+	darkMode: true,
 	feedback: {
 		// TODO: Add properties that Nextra passes and add to url
-		useLink: () =>
-			`https://github.com/AnswerOverflow/AnswerOverflow/issues/new?assignees=&labels=%F0%9F%93%96+documentation&template=documentation.yml&title=%5BDocs%5D%3A+`,
+		useLink: () => CREATE_NEW_DOCS_ISSUE_LINK,
 	},
-	docsRepositoryBase:
-		'https://github.com/AnswerOverflow/AnswerOverflow/tree/main/apps/docs',
-	footer: {
-		component: <Footer />,
-	},
-	useNextSeoProps: () => {
+	useNextSeoProps() {
+		const { asPath } = useRouter();
 		return {
+			titleTemplate: asPath === '/' ? '%s' : '%s - Answer Overflow Docs',
+			themeColor: ANSWER_OVERFLOW_BLUE_HEX,
+			description:
+				'Improve & index your Discord help channels into Google with Answer Overflow',
 			noindex: process.env.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'production',
 		};
+	},
+	docsRepositoryBase: DOCS_LINK_BASE,
+	footer: {
+		component: <Footer />,
 	},
 };
 
