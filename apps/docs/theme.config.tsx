@@ -33,7 +33,7 @@ const config: DocsThemeConfig = {
 	useNextSeoProps() {
 		const { asPath } = useRouter();
 		return {
-			titleTemplate: asPath === '/' ? '%s' : '%s - Answer Overflow',
+			titleTemplate: asPath === '/' ? '%s' : '%s - Answer Overflow Docs',
 			themeColor: ANSWER_OVERFLOW_BLUE_HEX,
 			description:
 				'Improve & index your Discord help channels into Google with Answer Overflow',

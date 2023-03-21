@@ -17,7 +17,7 @@ interface HeadProps {
 export const AOHead = ({
 	title,
 	description,
-	image = 'https://answeroverflow.com/content/branding/metaHeader.png',
+	image = 'https://answeroverflow.com/content/branding/meta-header.png',
 	server = undefined,
 	addPrefix: addPrefix = false,
 	imageWidth: imageWidth = '1200',
