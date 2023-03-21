@@ -45,7 +45,7 @@ export function channelToAPIChannel(channel: Channel): APIChannel {
 			type: channel.type,
 			flags: channel.flags?.bitfield,
 			last_message_id: channel.lastMessageId,
-			name: channel.recipient?.username,
+			name: null,
 			recipients: [channel.client.user, channel.recipient].map((user) =>
 				userToAPIUser(user!),
 			), // TODO: Is the bot a recipient?
