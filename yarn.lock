@@ -4039,10 +4039,10 @@
   resolved "https://registry.yarnpkg.com/@tokenizer/token/-/token-0.3.0.tgz#fe98a93fe789247e998c75e74e9c7c63217aa276"
   integrity sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==
 
-"@total-typescript/ts-reset@^0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@total-typescript/ts-reset/-/ts-reset-0.3.7.tgz#66d0d9d3a9d8055b876640b7d0231809e01351b7"
-  integrity sha512-yXt2BRRVCJVvzWaxac5n0nCXzIrQEBE/MeYlNQ8/Iq7UeelNmm/AdnUAu18ilSS893mbEQ4u6whPt/HvOPc4rw==
+"@total-typescript/ts-reset@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@total-typescript/ts-reset/-/ts-reset-0.4.2.tgz#c564c173ba09973968e1046c93965b7a257878a4"
+  integrity sha512-vqd7ZUDSrXFVT1n8b2kc3LnklncDQFPvR58yUS1kEP23/nHPAO9l1lMjUfnPrXYYk4Hj54rrLKMW5ipwk7k09A==
 
 "@trpc/client@^10.4.3":
   version "10.16.0"
