@@ -66,7 +66,6 @@ const ServerInviteChannelName = () => {
 // TODO: Make this a link button
 const ServerInviteJoinButton = () => {
 	const { channel, isUserInServer } = useServerInviteContext();
-	console.log('foo');
 	if (!channel?.inviteCode) return <></>;
 	return (
 		<LinkButton

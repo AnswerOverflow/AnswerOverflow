@@ -71,6 +71,11 @@ export async function createServer(input: z.infer<typeof zServerCreate>) {
 	return addFlagsToServer(created);
 }
 
+export async function findAllServers() {
+	const found = await prisma.server.findMany();
+	return found.map(addFlagsToServer);
+}
+
 export async function updateServer({
 	update,
 	existing,

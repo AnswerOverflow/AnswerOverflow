@@ -22,6 +22,7 @@
 		"@elastic/elasticsearch": "^8.6.0",
 		"discord-api-types": "^0.37.35",
 		"dotenv-cra": "^3.0.3",
+		"elastic-builder": "^2.18.1",
 		"zod": "^3.20.6"
 	},
 	"devDependencies": {
