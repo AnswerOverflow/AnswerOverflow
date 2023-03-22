@@ -49,6 +49,7 @@ const UserAvatar = ({ user }: { user: User }) => (
 						variant="ghost"
 						className="w-full"
 						size="sm"
+						// eslint-disable-next-line @typescript-eslint/no-misused-promises
 						onClick={async () => {
 							await signOut();
 						}}
