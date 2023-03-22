@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-restricted-imports
 import '../../../apps/main-site/src/styles/globals.css';
-import 'highlight.js/styles/github-dark.css';
-import 'highlight.js/styles/github.css';
+// eslint-disable-next-line no-restricted-imports
+import '../../../apps/main-site/src/styles/code.scss';
 import type { Decorator, Preview } from '@storybook/react';
 import {
 	WithAuth,

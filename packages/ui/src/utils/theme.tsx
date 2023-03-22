@@ -1,42 +1,10 @@
 import React, { useCallback } from 'react';
 
-type CSSRule = {
-	style: {
-		color: string;
-	};
-};
 function disableTransitionsTemporarily() {
 	document.documentElement.classList.add('[&_*]:!transition-none');
 	window.setTimeout(() => {
 		document.documentElement.classList.remove('[&_*]:!transition-none');
 	}, 0);
-}
-
-function changeCodeHighlighting(theme: 'light' | 'dark') {
-	// This is disgusting, but it works for switching the code highlighting
-	let darkStyleSheet: CSSStyleSheet | undefined;
-	let lightStyleSheet: CSSStyleSheet | undefined;
-	[...document.styleSheets].forEach((styleSheet) => {
-		try {
-			const rule = [...styleSheet.cssRules].find((rule) =>
-				rule.cssText.includes('hljs-keyword'),
-			) as CSSRule | undefined;
-
-			if (rule) {
-				if (rule.style.color === 'rgb(255, 123, 114)') {
-					darkStyleSheet = styleSheet;
-				} else if (rule.style.color === 'rgb(215, 58, 73)') {
-					lightStyleSheet = styleSheet;
-				}
-			}
-		} catch (error) {
-			// let error pass
-		}
-	});
-	if (darkStyleSheet && lightStyleSheet) {
-		darkStyleSheet.disabled = theme === 'light';
-		lightStyleSheet.disabled = theme === 'dark';
-	}
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -73,7 +41,7 @@ export const ThemeProvider = (props: {
 				newTheme = props.defaultTheme; // Bit of a hack to make previews work
 			}
 			root.classList.toggle('dark', newTheme === 'dark');
-			changeCodeHighlighting(newTheme);
+			root.dataset.theme = newTheme;
 			window.localStorage.theme = newTheme;
 			setTheme(newTheme);
 		},
