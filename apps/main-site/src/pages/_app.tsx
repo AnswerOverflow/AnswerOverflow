@@ -1,7 +1,6 @@
 // src/pages/App.tsx
 import '../styles/globals.css';
-import 'highlight.js/styles/github.css';
-import 'highlight.js/styles/github-dark.css';
+import '../styles/code.scss';
 import { SessionProvider } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import type { AppType } from 'next/app';
