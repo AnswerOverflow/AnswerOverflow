@@ -99,7 +99,7 @@ const SetupSection = () => {
 
 export const AboutArea = () => {
 	return (
-		<div className="flex flex-col items-center px-4 pt-10 pb-20 sm:px-[4rem] 2xl:px-[6rem]">
+		<div className="flex max-w-screen-2xl flex-col items-center px-4 pt-10 pb-20 sm:px-[4rem] 2xl:px-[6rem]">
 			<SetupSection />
 			<SearchEngineSection />
 			<FeaturesSection />

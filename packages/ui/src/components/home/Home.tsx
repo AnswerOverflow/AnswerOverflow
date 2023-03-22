@@ -12,7 +12,7 @@ export const Home = () => {
 					<HeroArea />
 				</div>
 			</div>
-			<div className="bg-gradient-to-b from-[#0F1113] to-ao-black sm:px-4">
+			<div className="flex justify-center bg-gradient-to-b from-[#0F1113] to-ao-black sm:px-4">
 				<AboutArea />
 			</div>
 			<Footer />
