@@ -22,10 +22,12 @@
 	},
 	"dependencies": {
 		"@answeroverflow/api": "*",
-		"@headlessui/react": "^1.7.13",
 		"@heroicons/react": "^2.0.13",
 		"@next/font": "^13.1.2",
 		"@radix-ui/react-avatar": "^1.0.2",
+		"@radix-ui/react-label": "^2.0.1",
+		"@radix-ui/react-navigation-menu": "^1.1.2",
+		"@radix-ui/react-popover": "^1.0.5",
 		"bootstrap-icons": "^1.10.3",
 		"clsx": "^1.2.1",
 		"cva": "npm:class-variance-authority",

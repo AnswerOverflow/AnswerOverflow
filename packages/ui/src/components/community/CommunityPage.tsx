@@ -21,7 +21,7 @@ export const CommunityPage = ({
 }: CommunityPageResultsProps) => {
 	return (
 		<div className="mx-auto w-full overflow-y-scroll bg-ao-white scrollbar-hide overflow-x-hidden dark:bg-ao-black">
-			<Navbar additionalPadding />
+			<Navbar />
 			<main className="bg-ao-white dark:bg-ao-black">
 				<div className="flex flex-col">
 					<div className="my-auto flex flex-row bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">

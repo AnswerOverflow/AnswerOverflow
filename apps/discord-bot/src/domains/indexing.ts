@@ -344,10 +344,7 @@ export async function fetchAllMessages(
 	channel: TextBasedChannel,
 	opts: MessageFetchOptions = {},
 ) {
-	const {
-		start,
-		limit = channel.type === ChannelType.GuildText ? 10000 : 20000,
-	} = opts;
+	const { start, limit = 20000 } = opts;
 	const messages: Message[] = [];
 	if (channel.lastMessageId && start == channel.lastMessageId) {
 		return [];

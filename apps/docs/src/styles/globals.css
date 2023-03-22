@@ -9,7 +9,7 @@
 @tailwind utilities;
 
 .hljs {
-	@apply w-full rounded-lg bg-neutral-50 dark:bg-stone-900  !important;
+	@apply w-full rounded-lg bg-neutral-50  dark:bg-stone-900 !important;
 }
 
 html {
