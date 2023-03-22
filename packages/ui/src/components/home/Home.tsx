@@ -1,6 +1,6 @@
 import { Footer } from '../Footer';
 import { Navbar } from '../primitives/Navbar';
-import { AboutArea } from './About/AboutArea';
+import { AboutArea } from './AboutArea';
 import { HeroArea } from './HeroArea';
 
 export const Home = () => {
