@@ -4,7 +4,7 @@ import { Paragraph } from '~ui/components/primitives/Paragraph';
 
 const HomeFeature = () => {
 	return (
-		<div className="flex items-center justify-center rounded-standard border-2 border-white/[.13] bg-[#191B1F] px-20 py-10">
+		<div className="flex items-center justify-center rounded-standard border-2 border-white/[.13] bg-[#fafafa] px-20 py-10 drop-shadow-xl   dark:bg-[#191B1F]">
 			<Paragraph className="text-2xl">Feature</Paragraph>
 		</div>
 	);
@@ -32,7 +32,10 @@ const FeaturesSection = () => {
 
 const EndSection = () => {
 	return (
-		<section className="mt-16 flex w-full flex-col items-center justify-center bg-[#191B1F] py-5">
+		<section
+			className="mt-16 flex w-full flex-col items-center justify-center border-2 border-white/[.13]
+bg-[#ffffffd2] py-5 drop-shadow-2xl dark:bg-[#191B1F] dark:drop-shadow"
+		>
 			<Heading.H2>Why not give it a try?</Heading.H2>
 			<Paragraph>
 				Join the rapidly increasing list of communities using Answer Overflow to
@@ -49,7 +52,7 @@ const RoadmapSection = () => {
 			<Heading.H2 className="text-center">
 				And we are just getting started
 			</Heading.H2>
-			<div className="mt-4 flex w-full items-center justify-center rounded-standard border-2 border-white/[.13] bg-[#191B1F]">
+			<div className="mt-4 flex w-full items-center justify-center rounded-standard border-2 border-white/[.13] bg-[#fafafa] drop-shadow-2xl dark:bg-[#191B1F] ">
 				<Paragraph className="py-72 text-2xl">Roadmap</Paragraph>
 			</div>
 		</section>
@@ -58,7 +61,7 @@ const RoadmapSection = () => {
 
 const SearchEngineSection = () => {
 	return (
-		<div className="mt-20 w-full bg-[#191B1F] p-5">
+		<div className="mt-20 w-full bg-[#ffffffd2]  p-5 drop-shadow-2xl dark:bg-[#191B1F]">
 			<Heading.H2 className="text-4xl">Unleash the power of Google</Heading.H2>
 			<Paragraph>
 				Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem dolore
@@ -80,12 +83,12 @@ const SetupSection = () => {
 			<Heading.H1>5 Minute Setup</Heading.H1>
 			<Heading.H2 className="text-lg">Tagline here</Heading.H2>
 			<div className="mt-4 grid grid-cols-3 grid-rows-1 gap-20">
-				<div className="flex shrink flex-col items-center justify-center rounded-standard border-2 border-white/[.13] p-20">
+				<div className="flex shrink flex-col items-center justify-center rounded-standard border-2 border-black/[.95] p-20 dark:border-white/[.13]">
 					<Heading.H3 className="pb-10">You click add</Heading.H3>
 					<Button>Add to server</Button>
 				</div>
 
-				<div className="flex grow flex-col items-center justify-center rounded-standard border-2 border-white/[.13] p-20">
+				<div className="flex shrink flex-col items-center justify-center rounded-standard border-2 border-black/[.95] p-20 dark:border-white/[.13]">
 					<Heading.H3 className="pb-10">One command setup</Heading.H3>
 				</div>
 
