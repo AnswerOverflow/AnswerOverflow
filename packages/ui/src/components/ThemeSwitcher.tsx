@@ -1,4 +1,4 @@
-import { toggleDarkTheme } from '~ui/utils/theme';
+import { useThemeContext } from '~ui/utils/theme';
 
 function SunIcon<T extends {}>(props: T) {
 	return (
@@ -20,16 +20,34 @@ function MoonIcon<T extends {}>(props: T) {
 	);
 }
 
-export function ThemeSwitcher() {
+export function ThemeIcon() {
 	return (
-		<button
-			type="button"
-			className="flex h-9 w-9 items-center justify-center rounded-md transition hover:bg-zinc-900/5 dark:hover:bg-white/5"
-			aria-label="Toggle dark mode"
-			onClick={() => toggleDarkTheme()}
-		>
+		<>
 			<SunIcon className="h-8 w-8 stroke-zinc-900 dark:hidden" />
 			<MoonIcon className="hidden h-8 w-8 stroke-white dark:block" />
-		</button>
+		</>
 	);
+}
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export function ThemeSwitcher({
+	Switcher,
+}: {
+	Switcher?: React.FC<{
+		toggleTheme: () => void;
+	}>;
+}) {
+	const { toggleTheme } = useThemeContext();
+	if (!Switcher)
+		return (
+			<button
+				type="button"
+				className="flex h-9 w-9 items-center justify-center rounded-md transition hover:bg-zinc-900/5 dark:hover:bg-white/5"
+				aria-label="Toggle dark mode"
+				onClick={() => toggleTheme()}
+			>
+				<ThemeIcon />
+			</button>
+		);
+	return <Switcher toggleTheme={() => toggleTheme()} />;
 }

@@ -3,7 +3,7 @@ export * from './primitives';
 export * from './DiscordAvatar';
 export * from './Footer';
 export * from './MessageResultPage';
-export * from './primitives/Navbar';
+export * from './primitives/NavigationMenu';
 export * from './PageWrapper';
 export * from './home/Home';
 export * from './SearchBar';

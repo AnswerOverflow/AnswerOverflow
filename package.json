@@ -4,7 +4,12 @@
 	"private": true,
 	"workspaces": {
 		"comment": "TODO: Replace with apps/** when turborepo fixes nameless packages",
-		"packages": ["apps/nextjs", "apps/discord-bot", "apps/docs", "packages/**"]
+		"packages": [
+			"apps/main-site",
+			"apps/discord-bot",
+			"apps/docs",
+			"packages/**"
+		]
 	},
 	"scripts": {
 		"postinstall": "yarn db:generate",

@@ -178,6 +178,28 @@ export function MessageBlurrer({ children }: { children: React.ReactNode }) {
 	);
 }
 
+export function MultiMessageBlurrer(props: {
+	children: React.ReactNode;
+	count: number;
+}) {
+	const { count, children } = props;
+	const { message } = useMessageContext();
+	const isUserInServer = useIsUserInServer(message.serverId);
+	const isBlurred = !isUserInServer && !message.public;
+	// We must hide backdrop blur to prevent the border around the message from being blurred as well - causes weird color change
+	return (
+		<ContentBlurrer
+			blurred={isBlurred}
+			hideBackdropBlur
+			notPublicTitle={
+				count === 1 ? 'Message Not Public' : `${count} Messages Not Public`
+			}
+		>
+			{children}
+		</ContentBlurrer>
+	);
+}
+
 export const ContentBlurrer = ({
 	blurred,
 	children,
