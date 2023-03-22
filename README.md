@@ -26,6 +26,9 @@
    <a href="https://codecov.io/gh/AnswerOverflow/AnswerOverflow">
     <img alt="codecov" src="https://codecov.io/gh/AnswerOverflow/AnswerOverflow/branch/main/graph/badge.svg?token=8J0AQ77SOG">
   </a>
+  
+  [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app?referralCode=Q3ROGt)
+
 
   <br />
   <br />
