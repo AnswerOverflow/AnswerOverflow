@@ -9,11 +9,14 @@ const HomeFeature = (props: {
 	featureDescription?: string;
 }) => {
 	return (
-		<div className="flex flex-col items-center justify-center rounded-standard border-2 border-white/[.13] bg-[#fafafa] px-20 py-10 text-center drop-shadow-xl dark:bg-[#191B1F]">
+		<div className="flex flex-col items-center justify-center rounded-standard border-2 border-white/[.13] bg-[#fafafa] px-2 py-4 text-center drop-shadow-xl dark:bg-[#191B1F] md:px-20 md:py-10">
 			<Paragraph className="text-2xl">{props.featureName}</Paragraph>
 
-			<Paragraph className="text-xl">
+			<Paragraph className="hidden text-xl md:block">
 				<Balancer>{props.featureDescription}</Balancer>
+			</Paragraph>
+			<Paragraph className="text-xl md:hidden">
+				{props.featureDescription}
 			</Paragraph>
 		</div>
 	);
@@ -22,12 +25,14 @@ const HomeFeature = (props: {
 const FeaturesSection = () => {
 	return (
 		<div className="mt-5 w-full">
-			<Heading.H2 className="text-right">Level up your community</Heading.H2>
-			<Heading.H2 className="pt-0 text-right text-lg">
-				Make your support better than ever
+			<Heading.H2 className="text-center md:text-right">
+				Level up your community
+			</Heading.H2>
+			<Heading.H2 className="pt-0 text-center text-lg md:text-right">
+				<Balancer>By making your support better than ever</Balancer>
 			</Heading.H2>
 
-			<div className="mt-2 grid grid-cols-2 grid-rows-2 gap-10">
+			<div className="mt-2 grid grid-cols-1 grid-rows-1 gap-10 md:grid-cols-2 md:grid-rows-2">
 				<HomeFeature
 					featureName="🔎 Index Content Into Google"
 					featureDescription="Organically gain more users by ranking at the top of Google search results"
@@ -103,9 +108,11 @@ const SearchEngineSection = () => {
 const SetupSection = () => {
 	return (
 		<div className="flex flex-col items-center justify-center">
-			<Heading.H1>5 Minute Setup</Heading.H1>
+			<Heading.H1 className="text-center md:text-left">
+				5 Minute Setup
+			</Heading.H1>
 			<Heading.H2 className="text-lg">Tagline here</Heading.H2>
-			<div className="mt-4 grid grid-cols-3 grid-rows-1 gap-20">
+			<div className="mt-4 grid grid-cols-1 grid-rows-3 gap-20 md:grid-cols-3 md:grid-rows-1">
 				<div className="flex shrink flex-col items-center justify-center rounded-standard border-2 border-black/[.95] p-20 dark:border-white/[.13]">
 					<Heading.H3 className="pb-10">You click add</Heading.H3>
 					<Button>Add to server</Button>
@@ -126,10 +133,10 @@ const SetupSection = () => {
 export const AboutArea = () => {
 	return (
 		<div className="flex max-w-screen-2xl flex-col items-center px-4 pt-10 pb-20 sm:px-[4rem] 2xl:px-[6rem]">
-			<SetupSection />
-			<SearchEngineSection />
+			{/* <SearchEngineSection /> */}
 			<FeaturesSection />
 			<RoadmapSection />
+			<SetupSection />
 			<EndSection />
 		</div>
 	);
