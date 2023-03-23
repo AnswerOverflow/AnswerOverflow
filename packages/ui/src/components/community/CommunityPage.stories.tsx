@@ -4,6 +4,7 @@ import {
 	mockMessageFull,
 	mockServer,
 } from '~ui/test/props';
+import { ChannelType } from '~ui/utils/discord';
 
 import { CommunityPage } from './CommunityPage';
 const meta = {
@@ -25,7 +26,9 @@ function makeMockedChannelQuestions(amount: number) {
 	}
 	return Array.from({ length: amount }).map(() => ({
 		message: mockMessageFull(),
-		thread: mockChannelWithSettings(),
+		thread: mockChannelWithSettings({
+			type: ChannelType.PublicThread,
+		}),
 	}));
 }
 

@@ -6,6 +6,7 @@ import type {
 	APIMessageFull,
 } from '@answeroverflow/api';
 import { getRandomName, getRandomSentence } from '@answeroverflow/utils';
+import { ChannelType } from '~ui/utils/discord';
 
 export function randomId() {
 	return Math.floor(Math.random() * 10000000).toString();
@@ -83,7 +84,10 @@ export function mockServer(override: Partial<ServerPublic> = {}) {
 export function mockChannel(override: Partial<ChannelPublicWithFlags> = {}) {
 	const data: ChannelPublicWithFlags = {
 		id: randomId(),
-		name: getRandomName(),
+		name:
+			override.type === ChannelType.PublicThread
+				? getRandomSentence()
+				: getRandomName(),
 		serverId: '0',
 		parentId: null,
 		type: 0,
@@ -98,7 +102,7 @@ export function mockChannelWithSettings(
 	override: Partial<ChannelPublicWithFlags> = {},
 ) {
 	const data: ChannelPublicWithFlags = {
-		...mockChannel(),
+		...mockChannel(override),
 		inviteCode: 'sxDN2rEdwD',
 		...override,
 	};

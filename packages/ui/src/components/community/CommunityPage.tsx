@@ -92,6 +92,43 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 		);
 	};
 
+	const MessagesSection = () => {
+		if (!selectedChannel) {
+			return (
+				<Heading.H4 className="text-center">No channel selected.</Heading.H4>
+			);
+		}
+		if (!questions || questions.length === 0) {
+			return (
+				<div className="flex flex-col items-center justify-center">
+					<Heading.H4 className="text-center">
+						No questions found for this channel.
+					</Heading.H4>
+				</div>
+			);
+		}
+		const qs = questions.map((question) => (
+			<div className="drop-shadow-sm " key={question.message.id}>
+				<LinkMessage message={question.message} thread={question.thread} />
+			</div>
+		));
+		return <div className="flex w-full flex-1 flex-col gap-2">{qs}</div>;
+	};
+
+	const CommunityQuestionsSection = () => (
+		<>
+			<Heading.H3 className="py-0">Community questions</Heading.H3>
+			<div className="flex shrink-0 flex-row ">
+				<ChannelSidebar
+					channels={channels.map((c) => c.channel)}
+					selectedChannelId={selectedChannelId}
+					setSelectedChannelId={setSelectedChannelId}
+				/>
+				<MessagesSection />
+			</div>
+		</>
+	);
+
 	return (
 		<div className="mx-auto w-full overflow-y-scroll bg-ao-white scrollbar-hide overflow-x-hidden dark:bg-ao-black">
 			<Navbar />
@@ -103,42 +140,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 							placeholder={`Search the ${server.name} community`}
 							serverId={server.id}
 						/>
-
-						<Heading.H3 className="py-0">Community questions</Heading.H3>
-						<div className="flex shrink-0 flex-row ">
-							<ChannelSidebar
-								channels={channels.map((c) => c.channel)}
-								selectedChannelId={selectedChannelId}
-								setSelectedChannelId={setSelectedChannelId}
-							/>
-							<div className="flex w-full flex-1 flex-col gap-2">
-								{selectedChannel ? (
-									questions ? (
-										questions.map((question) => (
-											<div
-												className="drop-shadow-sm "
-												key={question.message.id}
-											>
-												<LinkMessage
-													message={question.message}
-													thread={question.thread}
-												/>
-											</div>
-										))
-									) : (
-										<div className="flex flex-col items-center justify-center">
-											<Heading.H4 className="text-center">
-												No questions found for this channel.
-											</Heading.H4>
-										</div>
-									)
-								) : (
-									<Heading.H4 className="text-center">
-										No channel selected.
-									</Heading.H4>
-								)}
-							</div>
-						</div>
+						<CommunityQuestionsSection />
 					</div>
 				</div>
 			</main>
