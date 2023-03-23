@@ -9,10 +9,11 @@ import type { z } from 'zod';
 import { findAllChannelQuestions, MessageFull } from './message';
 
 // TODO: Do not merge w/out tests
-export async function findServerWithCommunityPageData(id: string) {
-	const found = await prisma.server.findUnique({
+export async function findServerWithCommunityPageData(idOrVanityUrl: string) {
+	// TODO: Micro optimization, if the idOrVanityUrl is a number, we can skip the vanityUrl check
+	const found = await prisma.server.findFirst({
 		where: {
-			id,
+			OR: [{ id: idOrVanityUrl }, { vanityUrl: idOrVanityUrl }],
 		},
 		include: {
 			channels: true,
@@ -38,7 +39,7 @@ export async function findServerWithCommunityPageData(id: string) {
 	const questionLookup = new Map<
 		string,
 		{
-			message: MessageFull;
+			message: MessageFull | null;
 			thread: z.infer<typeof zChannelPublic>;
 		}[]
 	>();
@@ -49,13 +50,13 @@ export async function findServerWithCommunityPageData(id: string) {
 		if (!questions) {
 			questionLookup.set(channel, [
 				{
-					message: channelQuestions.message,
+					message: channelQuestions.message ?? null,
 					thread: channelQuestions.thread,
 				},
 			]);
 		} else {
 			questions.push({
-				message: channelQuestions.message,
+				message: channelQuestions.message ?? null,
 				thread: channelQuestions.thread,
 			});
 		}
@@ -63,8 +64,7 @@ export async function findServerWithCommunityPageData(id: string) {
 
 	const channelsWithQuestions = channels
 		.map((c) => {
-			const questions = questionLookup.get(c.id);
-			if (!questions) return null;
+			const questions = questionLookup.get(c.id) ?? [];
 			return {
 				channel: c,
 				questions: questions

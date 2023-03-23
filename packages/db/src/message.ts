@@ -233,7 +233,6 @@ export async function findAllChannelQuestions(input: {
 	const questions = filteredThreads
 		.map((thread) => {
 			const message = messagesLookup.get(thread.id);
-			if (!message) return null;
 			return {
 				thread: thread,
 				message: message,
