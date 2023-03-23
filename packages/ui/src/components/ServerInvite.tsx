@@ -9,6 +9,8 @@ import { ChannelType } from '~ui/utils/discord';
 import { ServerIcon } from './ServerIcon';
 import { useIsUserInServer } from '../utils';
 import { LinkButton } from './primitives/LinkButton';
+import { cn } from '~ui/utils/styling';
+import Link from 'next/link';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const ServerInviteContext = createContext<{
 	server: ServerPublic;
@@ -26,18 +28,22 @@ function useServerInviteContext() {
 	return context;
 }
 
-const ServerInviteTitle = () => {
+export const ServerInviteTitle = () => {
 	const { server } = useServerInviteContext();
 	return (
-		<h3 className="text-center font-header text-lg font-bold leading-5 text-ao-black dark:text-ao-white">
-			{server.name}
-		</h3>
+		<Link href={`/c/${server.id}`}>
+			<h3 className="text-center font-header text-lg font-bold leading-5 text-ao-black  hover:text-ao-black/[.5] dark:text-ao-white dark:hover:text-ao-white/80">
+				{server.name}
+			</h3>
+		</Link>
 	);
 };
 
-const ServerInviteChannelName = () => {
-	const { channel } = useServerInviteContext();
-
+export const ChannelName = ({
+	channel,
+}: {
+	channel: ChannelPublicWithFlags;
+}) => {
 	const getChannelTypeIcon = (channelType: ChannelType) => {
 		switch (channelType) {
 			case ChannelType.GuildForum:
@@ -51,10 +57,8 @@ const ServerInviteChannelName = () => {
 		}
 	};
 
-	if (!channel) return <></>;
-
 	return (
-		<div className="flex flex-row items-center justify-center">
+		<div className="flex w-full flex-row items-center justify-start">
 			{getChannelTypeIcon(channel.type)}
 			<h4 className="text-center font-body text-base font-bold leading-5 text-ao-black dark:text-ao-white">
 				{channel.name}
@@ -63,8 +67,7 @@ const ServerInviteChannelName = () => {
 	);
 };
 
-// TODO: Make this a link button
-const ServerInviteJoinButton = () => {
+export const ServerInviteJoinButton = (props: { className?: string }) => {
 	const { channel, isUserInServer } = useServerInviteContext();
 	if (!channel?.inviteCode) return <></>;
 	return (
@@ -72,7 +75,7 @@ const ServerInviteJoinButton = () => {
 			href={`https://discord.gg/${channel?.inviteCode}`}
 			variant="default"
 			referrerPolicy="no-referrer"
-			className="text-center font-header font-bold "
+			className={cn('text-center font-header font-bold', props.className)}
 		>
 			{isUserInServer ? <>Joined</> : <>Join Server</>}
 		</LinkButton>
@@ -84,33 +87,44 @@ export const ServerInviteIcon = () => {
 	return <ServerIcon server={server} size="md" />;
 };
 
-export const ServerInviteRenderer = (props: {
+type ServerInviteProps = {
 	server: ServerPublic;
 	channel?: ChannelPublicWithFlags;
 	isUserInServer: boolean;
-}) => {
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	Icon?: React.ReactNode;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	Body?: React.ReactNode;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	JoinButton?: React.ReactNode;
+};
+
+export const ServerInviteRenderer = (props: ServerInviteProps) => {
 	return (
 		<ServerInviteContext.Provider value={props}>
 			<div className="flex h-full w-full flex-col items-center justify-center gap-1">
 				<div className="flex flex-col">
 					<div className="flex flex-row items-center justify-center pb-5 align-middle">
-						<ServerInviteIcon />
+						{props.Icon || <ServerInviteIcon />}
 						<div className="flex flex-col items-center justify-center pl-2">
-							<ServerInviteTitle />
-							<ServerInviteChannelName />
+							{props.Body || (
+								<>
+									<ServerInviteTitle />
+									{props.channel && <ChannelName channel={props.channel} />}
+								</>
+							)}
 						</div>
 					</div>
-					<ServerInviteJoinButton />
+					{props.JoinButton || <ServerInviteJoinButton />}
 				</div>
 			</div>
 		</ServerInviteContext.Provider>
 	);
 };
 
-export const ServerInvite = (props: {
-	server: ServerPublic;
-	channel?: ChannelPublicWithFlags;
-}) => {
+export const ServerInvite = (
+	props: Omit<ServerInviteProps, 'isUserInServer'>,
+) => {
 	const isUserInServer = useIsUserInServer(props.server.id);
 	return <ServerInviteRenderer {...props} isUserInServer={isUserInServer} />;
 };

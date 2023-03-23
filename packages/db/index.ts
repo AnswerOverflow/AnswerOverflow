@@ -1,4 +1,5 @@
 export * from './src/server';
+export * from './src/pages';
 export * from './src/channel';
 export * from './src/discord-account';
 export * from './src/ignored-discord-account';

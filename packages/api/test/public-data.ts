@@ -93,6 +93,7 @@ export function pickPublicChannelData(channel: ChannelWithFlags) {
 		'parentId',
 		'serverId',
 		'type',
+		'archivedTimestamp',
 		'inviteCode',
 		'messageCount',
 	]);

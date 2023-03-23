@@ -25,7 +25,9 @@
 		"@heroicons/react": "^2.0.13",
 		"@next/font": "^13.1.2",
 		"@radix-ui/react-avatar": "^1.0.2",
+		"@radix-ui/react-dropdown-menu": "^2.0.4",
 		"@radix-ui/react-label": "^2.0.1",
+		"@radix-ui/react-menubar": "^1.0.2",
 		"@radix-ui/react-navigation-menu": "^1.1.2",
 		"@radix-ui/react-popover": "^1.0.5",
 		"bootstrap-icons": "^1.10.3",
@@ -46,6 +48,7 @@
 		"zod": "^3.20.6"
 	},
 	"devDependencies": {
+		"@answeroverflow/db": "*",
 		"@answeroverflow/prettier-config": "*",
 		"@answeroverflow/tailwind-config": "*",
 		"@answeroverflow/tsconfig": "*",

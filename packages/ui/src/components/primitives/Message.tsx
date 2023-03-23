@@ -1,8 +1,5 @@
 // This component file is based off - https://www.youtube.com/watch?v=vPRdY87_SH0
-import type {
-	APIMessageWithDiscordAccount,
-	ChannelPublicWithFlags,
-} from '@answeroverflow/api';
+import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
 import discordMarkdown from 'discord-markdown';
 import Parser from 'html-react-parser';
 import Image from 'next/image';
@@ -48,22 +45,6 @@ export const MessageContents = () => {
 	return (
 		<div className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white">
 			{parsedMessageContent}
-		</div>
-	);
-};
-
-export const MessageTitle = ({
-	thread,
-	channel,
-}: {
-	thread?: ChannelPublicWithFlags;
-	channel: ChannelPublicWithFlags;
-}) => {
-	return (
-		<div className="pt-4">
-			<h4 className="font-body text-4xl font-semibold text-ao-black dark:text-ao-white">
-				{thread?.name ?? channel.name}
-			</h4>
 		</div>
 	);
 };
@@ -151,8 +132,8 @@ export const Message = ({
 		<MessageContext.Provider value={{ message }}>
 			<Blurrer>
 				<div
-					className={`grow rounded-t-standard lg:rounded-tr-none ${
-						showBorders ? 'border-x-2 border-t-2' : ''
+					className={`grow rounded-t-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:rounded-tr-none ${
+						showBorders ? 'border-2' : ''
 					} border-black/[.13] dark:border-white/[.13]`}
 				>
 					<div className="p-6">
