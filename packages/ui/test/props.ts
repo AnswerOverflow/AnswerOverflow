@@ -3,6 +3,7 @@ import type {
 	DiscordAccountPublic,
 	APIMessageWithDiscordAccount,
 	ServerPublic,
+	APIMessageFull,
 } from '@answeroverflow/api';
 import { getRandomSentence } from '@answeroverflow/utils';
 
@@ -17,6 +18,16 @@ export function mockDiscordAccount(
 		id: randomId(),
 		name: 'John Doe',
 		avatar: null,
+		...override,
+	};
+	return data;
+}
+
+export function mockMessageFull(override: Partial<APIMessageFull> = {}) {
+	const data: APIMessageFull = {
+		...mockMessageWithDiscordAccount(),
+		referencedMessage: null,
+		solutionMessages: [],
 		...override,
 	};
 	return data;

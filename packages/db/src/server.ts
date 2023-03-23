@@ -12,7 +12,6 @@ import {
 	zServer,
 	mergeServerFlags,
 } from '@answeroverflow/prisma-types';
-
 export const zServerRequired = zServer.pick({
 	id: true,
 	name: true,

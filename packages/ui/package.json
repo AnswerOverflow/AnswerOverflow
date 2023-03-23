@@ -49,6 +49,7 @@
 		"@answeroverflow/prettier-config": "*",
 		"@answeroverflow/tailwind-config": "*",
 		"@answeroverflow/tsconfig": "*",
+		"@answeroverflow/db": "*",
 		"@babel/core": "^7.20.5",
 		"@storybook/addon-a11y": "^7.0.0-beta.54",
 		"@storybook/addon-actions": "^7.0.0-beta.54",

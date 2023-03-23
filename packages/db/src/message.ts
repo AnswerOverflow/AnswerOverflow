@@ -230,10 +230,18 @@ export async function findAllChannelQuestions(input: {
 		return input.includePrivateMessages ? true : message.public;
 	});
 
-	return {
-		messages,
-		threads: filteredThreads,
-	};
+	const questions = filteredThreads
+		.map((thread) => {
+			const message = messagesLookup.get(thread.id);
+			if (!message) return null;
+			return {
+				thread: thread,
+				message: message,
+			};
+		})
+		.filter(Boolean);
+
+	return questions;
 }
 
 export async function updateMessage(data: z.infer<typeof zMessage>) {

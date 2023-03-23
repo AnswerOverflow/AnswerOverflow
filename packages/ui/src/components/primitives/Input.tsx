@@ -1,24 +1,26 @@
-import type React from 'react';
+import * as React from 'react';
+import { cn } from '~ui/utils/styling';
+import { Button } from './Button';
+export interface InputProps
+	extends React.InputHTMLAttributes<HTMLInputElement> {}
 
-interface BaseInputProps {
-	placeholder?: string;
-	fill?: boolean;
-	onChange: (text: string) => void;
-}
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+	({ className, ...props }, ref) => {
+		return (
+			<input
+				className={cn(
+					'flex h-10 w-full rounded-md border border-slate-300 bg-transparent py-2 px-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-50 dark:focus:ring-slate-400 dark:focus:ring-offset-slate-900',
+					className,
+				)}
+				ref={ref}
+				{...props}
+			/>
+		);
+	},
+);
+Input.displayName = 'Input';
 
-// Add children if type is buttonInput
-interface ButtonInputProps extends React.PropsWithChildren<BaseInputProps> {
-	type: 'buttonInput';
-	buttonAria: string;
-}
-
-// Add type if type is not buttonInput
-interface NormalInputProps extends BaseInputProps {
-	type?: 'text';
-}
-
-// Discriminated union
-type InputProps = ButtonInputProps | NormalInputProps;
+export { Input };
 
 const SearchIcon = () => {
 	return (
@@ -39,60 +41,14 @@ const SearchIcon = () => {
 	);
 };
 
-const InputText = ({ placeholder, fill, onChange }: InputProps) => {
+export function SearchInput(props: InputProps) {
+	const { className, ...inputProps } = props;
 	return (
-		<input
-			type="text"
-			placeholder={placeholder}
-			onChange={(e) => onChange(e.target.value)}
-			className={`rounded-standard border-1 border-[#889AB2] bg-[#F5F6FA] py-3 font-body font-normal text-ao-black focus:border-transparent focus:outline-transparent focus:ring-2 focus:ring-ao-blue dark:border-[#525A66] dark:bg-[#181B1F] dark:text-ao-white ${
-				fill ? 'w-full' : ''
-			}`}
-		/>
+		<div className={cn('flex w-full items-center space-x-2', className)}>
+			<Input className="bg-inherit" {...inputProps} />
+			<Button aria-label="Search" className="bg-inherit">
+				<SearchIcon />
+			</Button>
+		</div>
 	);
-};
-
-const InputButton = ({
-	children,
-	buttonAria,
-}: Omit<ButtonInputProps, 'type'>) => {
-	return (
-		<button
-			className="absolute right-5 top-1/2 -translate-y-1/2 rounded-standard border-1 border-[#889AB2] px-4 py-1 font-body font-semibold hover:bg-[#f1f3f7] dark:border-0 dark:bg-[#272C33] dark:text-ao-white dark:hover:bg-[#2f343b]"
-			aria-label={buttonAria}
-		>
-			{children}
-		</button>
-	);
-};
-
-// It is not suitable to destructure here, due to the discriminated types
-export const SearchInput = (props: InputProps) => {
-	return (
-		<>
-			{props.type === 'buttonInput' ? (
-				<div className={`relative inline-block ${props.fill ? 'w-full' : ''}`}>
-					<InputText
-						onChange={props.onChange}
-						placeholder={props.placeholder}
-						fill={props.fill}
-					/>
-					<InputButton
-						buttonAria={props.buttonAria}
-						onChange={function (text: string): void {
-							throw new Error('Function not implemented.' + text);
-						}}
-					>
-						<SearchIcon />
-					</InputButton>
-				</div>
-			) : (
-				<InputText
-					onChange={props.onChange}
-					placeholder={props.placeholder}
-					fill={props.fill}
-				/>
-			)}
-		</>
-	);
-};
+}

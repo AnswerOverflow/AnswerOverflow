@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import {
 	mockChannelWithSettings,
-	mockMessageWithDiscordAccount,
+	mockMessageFull,
 	mockServer,
 } from '~ui/test/props';
 
@@ -21,23 +21,17 @@ type Story = StoryObj<typeof meta>;
 
 export const CommunityPageStory: Story = {
 	args: {
-		results: [
+		channels: [
 			{
-				message: {
-					...mockMessageWithDiscordAccount(),
-					solutionMessages: [],
-					referencedMessage: mockMessageWithDiscordAccount(),
-				},
-				thread: mockChannelWithSettings(),
-				score: 0.5,
-				channel: mockChannelWithSettings({
-					// AO's Discord server
-					inviteCode: 'sxDN2rEdwD',
-				}),
-				server: mockServer(),
+				channel: mockChannelWithSettings(),
+				questions: [
+					{
+						message: mockMessageFull(),
+						thread: mockChannelWithSettings(),
+					},
+				],
 			},
 		],
 		server: mockServer(),
-		isLoading: false,
 	},
 };
