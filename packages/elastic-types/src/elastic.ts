@@ -402,7 +402,7 @@ export class Elastic extends Client {
 			//   },
 			// },
 			size: limit ?? 100,
-			sort: [{ id: 'asc' }],
+			sort: '_score',
 		});
 
 		return result.hits.hits
