@@ -1,8 +1,5 @@
 // This component file is based off - https://www.youtube.com/watch?v=vPRdY87_SH0
-import type {
-	APIMessageWithDiscordAccount,
-	ChannelPublicWithFlags,
-} from '@answeroverflow/api';
+import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
 import discordMarkdown from 'discord-markdown';
 import Parser from 'html-react-parser';
 import Image from 'next/image';
@@ -10,7 +7,6 @@ import { createContext, useContext } from 'react';
 import { DiscordAvatar } from '~ui/components/DiscordAvatar';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
-import { Heading } from './Heading';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MessageContext = createContext<{

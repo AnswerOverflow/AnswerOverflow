@@ -5,6 +5,12 @@ import type {
 import { useState } from 'react';
 import { Footer } from '../Footer';
 import { Button } from '../primitives/Button';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '../primitives/Dropdown';
 import { Heading } from '../primitives/Heading';
 import { Navbar } from '../primitives/Navbar';
 import { MessagesSearchBar } from '../search/SearchPage';
@@ -16,16 +22,20 @@ import {
 	ServerInviteJoinButton,
 } from '../ServerInvite';
 
-function ChannelSidebar(props: {
+type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];
-	selectedChannelId: string | null;
+	selectedChannel: ChannelPublicWithFlags;
 	setSelectedChannelId: (id: string) => void;
-}) {
+};
+
+function ChannelSidebar(props: ChannelSelectProps) {
 	const ChannelSelect = ({ channel }: { channel: ChannelPublicWithFlags }) => {
-		const selected = props.selectedChannelId === channel.id;
+		const selected = props.selectedChannel.id === channel.id;
 		return (
 			<Button
-				className={selected ? '' : 'bg-inherit dark:bg-inherit'}
+				className={
+					selected ? 'text-left' : 'bg-inherit text-left dark:bg-inherit'
+				}
 				variant={'ghost'}
 				onClick={() => props.setSelectedChannelId(channel.id)}
 				selected={selected}
@@ -37,14 +47,36 @@ function ChannelSidebar(props: {
 
 	const channels = props.channels;
 	return (
-		<div className="mr-4">
-			<Heading.H4>Channels</Heading.H4>
+		<div className="mr-4 ">
+			<Heading.H4 className="my-0 py-0">Channels</Heading.H4>
 			<div className="flex flex-col gap-2">
 				{channels.map((channel) => (
 					<ChannelSelect channel={channel} key={channel.id} />
 				))}
 			</div>
 		</div>
+	);
+}
+
+function ChannelDropdown(props: ChannelSelectProps) {
+	return (
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button variant="outline" className="w-vw80">
+					<ChannelName channel={props.selectedChannel} />
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent className="max-h-vh30 w-vw80">
+				{props.channels.map((channel) => (
+					<DropdownMenuItem
+						key={channel.id}
+						onClick={() => props.setSelectedChannelId(channel.id)}
+					>
+						<ChannelName channel={channel} />
+					</DropdownMenuItem>
+				))}
+			</DropdownMenuContent>
+		</DropdownMenu>
 	);
 }
 
@@ -75,9 +107,22 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 						}
 						Body={
 							<>
-								<div className="ml-16 flex flex-col">
+								<div className="hidden md:ml-16 md:flex md:flex-col">
 									<Heading.H1 className="pt-0">{server.name}</Heading.H1>
 									<Heading.H2 className="text-xl font-normal">
+										{server.description ??
+											`${server.name} community. Join the community to ask questions about ${server.name} and get answers from other members.`}
+									</Heading.H2>
+									<ServerInviteJoinButton className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0" />
+								</div>
+								<div className="flex w-full flex-col items-center text-center md:hidden">
+									<div className="flex flex-row items-center justify-center gap-2">
+										<ServerIcon server={server} size="lg" />
+										<Heading.H1 className="pt-0 text-3xl">
+											{server.name}
+										</Heading.H1>
+									</div>
+									<Heading.H2 className="text-base font-normal">
 										{server.description ??
 											`${server.name} community. Join the community to ask questions about ${server.name} and get answers from other members.`}
 									</Heading.H2>
@@ -117,13 +162,34 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 
 	const CommunityQuestionsSection = () => (
 		<>
-			<Heading.H3 className="py-0">Community questions</Heading.H3>
-			<div className="flex shrink-0 flex-row ">
-				<ChannelSidebar
-					channels={channels.map((c) => c.channel)}
-					selectedChannelId={selectedChannelId}
-					setSelectedChannelId={setSelectedChannelId}
-				/>
+			<Heading.H3 className="text-center md:text-left">
+				Community questions
+			</Heading.H3>
+
+			<MessagesSearchBar
+				placeholder={`Search the ${server.name} community`}
+				serverId={server.id}
+				className="py-6"
+			/>
+			<div className="flex w-full justify-center py-2 md:hidden">
+				{selectedChannel && (
+					<ChannelDropdown
+						channels={channels.map((c) => c.channel)}
+						selectedChannel={selectedChannel.channel}
+						setSelectedChannelId={setSelectedChannelId}
+					/>
+				)}
+			</div>
+			<div className="flex shrink-0 flex-row pt-4">
+				<div className="hidden md:block">
+					{selectedChannel && (
+						<ChannelSidebar
+							channels={channels.map((c) => c.channel)}
+							selectedChannel={selectedChannel.channel}
+							setSelectedChannelId={setSelectedChannelId}
+						/>
+					)}
+				</div>
 				<MessagesSection />
 			</div>
 		</>
@@ -136,10 +202,6 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 				<HeroArea />
 				<div className="py-8 sm:px-4">
 					<div className="px-4 2xl:px-[6rem]">
-						<MessagesSearchBar
-							placeholder={`Search the ${server.name} community`}
-							serverId={server.id}
-						/>
 						<CommunityQuestionsSection />
 					</div>
 				</div>

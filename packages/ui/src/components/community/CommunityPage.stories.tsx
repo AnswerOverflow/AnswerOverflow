@@ -32,14 +32,16 @@ function makeMockedChannelQuestions(amount: number) {
 	}));
 }
 
+function makeMockedChannels(amount: number) {
+	return Array.from({ length: amount }).map(() => ({
+		channel: mockChannelWithSettings(),
+		questions: makeMockedChannelQuestions(100),
+	}));
+}
+
 export const CommunityPageStory: Story = {
 	args: {
-		channels: [
-			{
-				channel: mockChannelWithSettings(),
-				questions: makeMockedChannelQuestions(100),
-			},
-		],
+		channels: makeMockedChannels(100),
 		server: mockServer(),
 	},
 };
