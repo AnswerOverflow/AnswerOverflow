@@ -1,32 +1,32 @@
 import { CheckIcon } from '@heroicons/react/24/outline';
-
+import { GetStarted } from './Callouts';
+import { LinkButton } from './primitives';
+import { Heading } from './primitives/Heading';
+import { WAITLIST_URL } from '@answeroverflow/constants/src/links';
 const pricing = {
 	tiers: [
 		{
 			title: 'Free',
-			description: 'The essentials to provide your best work for clients.',
+			description: 'Great for smaller communities ',
 			features: ['Hosting on answeroverflow.com', 'Basic analytics'],
-			cta: 'Setup Now',
+			cta: <GetStarted variant={'subtle'} className="w-full" />,
 			mostPopular: false,
 		},
 		{
 			title: 'Enterprise',
-			description: 'A plan that scales with your rapidly growing business.',
+			description: 'Tools to scale your community support',
 			features: [
-				'Host on your own domain',
+				'Host on your own domain*',
 				'Advanced analytics',
 				'Premium Support',
-				'Automated updates',
+				'AI Question Answers',
 			],
-			cta: 'Join The Waitlist',
+			cta: (
+				<LinkButton href={WAITLIST_URL} className="w-full">
+					Join Waitlist
+				</LinkButton>
+			),
 			mostPopular: true,
-		},
-		{
-			title: 'Self Host',
-			description: 'Host your own instance of Answer Overflow.',
-			features: ['Own your data'],
-			cta: 'Self Host Instructions',
-			mostPopular: false,
 		},
 	],
 };
@@ -37,31 +37,33 @@ function classNames(...classes: string[]) {
 
 export function Pricing() {
 	return (
-		<div className="mx-auto max-w-7xl bg-white py-24 px-6 lg:px-8">
-			<h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl sm:leading-none lg:text-6xl">
-				Pricing plans for teams of all sizes
-			</h2>
-			<p className="mt-6 max-w-2xl text-xl text-gray-500">
-				Choose an affordable plan that &apos s packed with the best features for
-				engaging your audience, creating customer loyalty, and driving sales.
+		<div className="mx-auto max-w-7xl  py-24 px-6 lg:px-8">
+			<Heading.H2 className="text-3xl font-bold tracking-tight sm:text-5xl sm:leading-none lg:text-6xl">
+				Make the most of your community
+			</Heading.H2>
+			<p className="mt-6 max-w-2xl text-xl text-neutral-600 dark:text-neutral-200">
+				Plan for communities of all sizes. Whether {"you're"} just getting
+				started or managing thousands of members, we{"'"}ve got you covered.
 			</p>
 
 			{/* Tiers */}
-			<div className="mt-24 space-y-12 lg:grid lg:grid-cols-3 lg:gap-x-8 lg:space-y-0">
+			<div className="mt-24 space-y-12 lg:grid lg:grid-cols-2 lg:gap-x-8 lg:space-y-0">
 				{pricing.tiers.map((tier) => (
 					<div
 						key={tier.title}
 						className={classNames(
-							'relative flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm',
-							tier.mostPopular ? 'border-yellow-200 drop-shadow-2xl' : '',
+							'relative flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-ao-black',
+							tier.mostPopular ? 'shadow-xl shadow-ao-yellow/[.5]' : '',
 						)}
 					>
 						<div className="flex-1">
-							<h3 className="text-xl font-semibold text-gray-900">
+							<Heading.H3 className="text-xl font-semibold">
 								{tier.title}
-							</h3>
+							</Heading.H3>
 
-							<p className="mt-6 text-gray-500">{tier.description}</p>
+							<p className="mt-6 text-neutral-600 dark:text-neutral-300">
+								{tier.description}
+							</p>
 
 							{/* Feature list */}
 							<ul role="list" className="mt-6 space-y-6">
@@ -71,25 +73,26 @@ export function Pricing() {
 											className="h-6 w-6 shrink-0 text-indigo-500"
 											aria-hidden="true"
 										/>
-										<span className="ml-3 text-gray-500">{feature}</span>
+										<span className="ml-3 text-gray-600 dark:text-gray-300">
+											{feature}
+										</span>
 									</li>
 								))}
 							</ul>
 						</div>
-
-						<a
-							href="#"
-							className={classNames(
-								tier.mostPopular
-									? 'bg-indigo-600 text-white hover:bg-indigo-700'
-									: 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100',
-								'mt-8 block w-full rounded-md border border-transparent py-3 px-6 text-center font-medium',
-							)}
-						>
-							{tier.cta}
-						</a>
+						<div className="w-full py-4">{tier.cta}</div>
 					</div>
 				))}
+			</div>
+			<div
+				className="
+        pt-10
+        text-center
+        text-neutral-600 dark:text-neutral-400"
+			>
+				*You can start hosting content on answeroverflow.com today and upgrade
+				at any time, all of the existing content will be redirected to your own
+				domain.
 			</div>
 		</div>
 	);
