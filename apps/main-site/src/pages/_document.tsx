@@ -18,7 +18,7 @@ class MyDocument extends Document {
 
 	override render() {
 		return (
-			<Html className="dark">
+			<Html className="dark" data-theme="dark">
 				<Head>
 					{/* TODO: Swap for Next font */}
 					<link
