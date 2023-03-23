@@ -176,7 +176,7 @@ const FeaturedCommunitiesSection = (props: { className?: string }) => {
 				<Balancer>Used by some of the largest support servers</Balancer>
 			</Heading.H2>
 			<div className="flex max-w-vw90 items-center pt-20 sm:max-w-vw70 2xl:max-w-screen-xl">
-				<Marquee gradient={false}>
+				<Marquee gradient={false} speed={30}>
 					{featuredCommunities.map((community) => (
 						<div key={community.id} className="mx-10 my-0">
 							<FeaturedCommunity {...community} />

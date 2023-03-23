@@ -21,3 +21,4 @@ export const WEBSITE_URL = 'https://answeroverflow.com';
 export const DOCS_URL = 'https://docs.answeroverflow.com';
 export const GETTING_STARTED_URL =
 	'https://docs.answeroverflow.com/quick-start';
+export const WAITLIST_URL = 'https://forms.gle/UaKs8CcYsnRWwmpY8';
