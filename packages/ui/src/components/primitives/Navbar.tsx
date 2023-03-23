@@ -1,6 +1,6 @@
 import type { User } from '@answeroverflow/api';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/router';
 import { trpc } from '~ui/utils/trpc';
 import { AnswerOverflowLogo } from '../AnswerOverflowLogo';
@@ -63,20 +63,21 @@ const UserAvatar = ({ user }: { user: User }) => (
 );
 
 export function NavbarRenderer(props: { user: User | null; path: string }) {
-	const [sticky, setSticky] = useState(false);
-	useEffect(() => {
-		const handleScroll = () => {
-			if (window.pageYOffset > 80) {
-				setSticky(true);
-			} else {
-				setSticky(false);
-			}
-		};
-		window.addEventListener('scroll', handleScroll);
-		return () => {
-			window.removeEventListener('scroll', handleScroll);
-		};
-	}, []);
+	const sticky = false;
+	// const [sticky, setSticky] = useState(false);
+	// useEffect(() => {
+	// 	const handleScroll = () => {
+	// 		if (window.pageYOffset > 80) {
+	// 			setSticky(true);
+	// 		} else {
+	// 			setSticky(false);
+	// 		}
+	// 	};
+	// 	window.addEventListener('scroll', handleScroll);
+	// 	return () => {
+	// 		window.removeEventListener('scroll', handleScroll);
+	// 	};
+	// }, []);
 
 	const UserSection = () =>
 		props.user ? <UserAvatar user={props.user} /> : <SignInButton />;
@@ -155,7 +156,7 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 			className={
 				sticky
 					? 'fixed top-0 left-0 w-full backdrop-blur-md dark:bg-ao-black/75'
-					: 'relative min-h-[4rem]'
+					: 'relative min-h-[4rem] py-2 sm:px-4'
 			}
 		>
 			<NavigationMenuList>
