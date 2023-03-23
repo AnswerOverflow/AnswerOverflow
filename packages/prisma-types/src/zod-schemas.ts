@@ -119,6 +119,7 @@ export const zChannelPublic = zChannel.pick({
 	type: true,
 	parentId: true,
 	inviteCode: true,
+	archivedTimestamp: true,
 	messageCount: true,
 });
 

@@ -3,8 +3,10 @@ import type {
 	DiscordAccountPublic,
 	APIMessageWithDiscordAccount,
 	ServerPublic,
+	APIMessageFull,
 } from '@answeroverflow/api';
-import { getRandomSentence } from '@answeroverflow/utils';
+import { getRandomName, getRandomSentence } from '@answeroverflow/utils';
+import { ChannelType } from '~ui/utils/discord';
 
 export function randomId() {
 	return Math.floor(Math.random() * 10000000).toString();
@@ -17,6 +19,16 @@ export function mockDiscordAccount(
 		id: randomId(),
 		name: 'John Doe',
 		avatar: null,
+		...override,
+	};
+	return data;
+}
+
+export function mockMessageFull(override: Partial<APIMessageFull> = {}) {
+	const data: APIMessageFull = {
+		...mockMessageWithDiscordAccount(),
+		referencedMessage: null,
+		solutionMessages: [],
 		...override,
 	};
 	return data;
@@ -72,10 +84,14 @@ export function mockServer(override: Partial<ServerPublic> = {}) {
 export function mockChannel(override: Partial<ChannelPublicWithFlags> = {}) {
 	const data: ChannelPublicWithFlags = {
 		id: randomId(),
-		name: 'general',
+		name:
+			override.type === ChannelType.PublicThread
+				? getRandomSentence()
+				: getRandomName(),
 		serverId: '0',
 		parentId: null,
 		type: 0,
+		archivedTimestamp: null,
 		inviteCode: null,
 		...override,
 	};
@@ -86,12 +102,8 @@ export function mockChannelWithSettings(
 	override: Partial<ChannelPublicWithFlags> = {},
 ) {
 	const data: ChannelPublicWithFlags = {
-		id: randomId(),
-		name: 'general',
-		serverId: '0',
-		parentId: null,
-		type: 0,
-		inviteCode: randomId(),
+		...mockChannel(override),
+		inviteCode: 'sxDN2rEdwD',
 		...override,
 	};
 	return data;

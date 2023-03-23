@@ -9,7 +9,10 @@ export interface PageWrapperProps extends React.PropsWithChildren {
 	disabledRoutes?: string[];
 }
 
-export const PageWrapper = ({ children, disabledRoutes }: PageWrapperProps) => {
+export const PageWrapper = ({
+	children,
+	disabledRoutes = [],
+}: PageWrapperProps) => {
 	const router = useRouter();
 	// Check if running in storybook
 	if (process.env.STORYBOOK) {

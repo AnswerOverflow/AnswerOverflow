@@ -8,15 +8,15 @@ export async function getServerSideProps({
 	params,
 }: GetServerSidePropsContext) {
 	const channelId = params?.channelId as string;
-	const { threads: questions } = await findAllChannelQuestions({
+	const questions = await findAllChannelQuestions({
 		channelId,
 		includePrivateMessages: false, // TODO: Serve private threads to search engine crawlers only
 	});
 	const sitemap = new Sitemap(
 		'https://www.answeroverflow.com',
 		questions.map((question) => ({
-			loc: `/m/${question.id}`,
-			changefreq: question.archivedTimestamp ? 'monthly' : 'daily',
+			loc: `/m/${question.thread.id}`,
+			changefreq: question.thread.archivedTimestamp ? 'monthly' : 'daily',
 			priority: 0.7,
 		})),
 	);

@@ -21,6 +21,7 @@ export const MessagesSearchBar = (props: {
 	const router = useRouter();
 	const query = useRouterQuery();
 	const [searchInput, setSearchInput] = useState<string>(query);
+	console.log('searchInput: ', searchInput, query);
 	return (
 		<form
 			// eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -35,17 +36,14 @@ export const MessagesSearchBar = (props: {
 					shallow: true,
 				});
 			}}
-			className={twMerge('mb-8 w-full', props.className)}
+			className={twMerge('w-full', props.className)}
 		>
 			<SearchInput
-				onChange={setSearchInput}
-				buttonAria="Search button"
-				type="buttonInput"
-				fill
+				defaultValue={query || ''}
+				className="w-full"
+				onChange={(e) => setSearchInput(e.target.value)}
 				placeholder={props.placeholder ?? 'Search'}
-			>
-				Search
-			</SearchInput>
+			/>
 		</form>
 	);
 };

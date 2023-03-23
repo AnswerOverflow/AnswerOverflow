@@ -2,7 +2,6 @@
 	"compilerOptions": {
 		"target": "es2017",
 		"baseUrl": "../../",
-		"preserveSymlinks": true,
 		"types": ["jest"]
 	},
 	"extends": "@answeroverflow/tsconfig/nextjs.json",
@@ -12,8 +11,8 @@
 		"test",
 		"src",
 		"next.config.mjs",
+		"../../reset.d.ts",
 		"postcss.config.cjs",
-		"tailwind.config.cjs",
-		"../../reset.d.ts"
+		"tailwind.config.cjs"
 	]
 }
