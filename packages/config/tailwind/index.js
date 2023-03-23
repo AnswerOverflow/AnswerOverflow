@@ -54,7 +54,7 @@ module.exports = {
 				vw80: '80vw',
 				vw90: '90vw',
 				vw100: '100vw',
-				'screen-3-xl': '2000px',
+				'screen-3xl': '2000px',
 			},
 		},
 	},
