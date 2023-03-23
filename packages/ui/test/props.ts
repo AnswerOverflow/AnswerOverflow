@@ -102,7 +102,8 @@ export function mockChannelWithSettings(
 		serverId: '0',
 		parentId: null,
 		type: 0,
-		inviteCode: randomId(),
+		archivedTimestamp: null,
+		inviteCode: 'sxDN2rEdwD',
 		...override,
 	};
 	return data;

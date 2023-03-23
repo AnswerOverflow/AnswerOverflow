@@ -10,7 +10,11 @@ import { Heading } from '../primitives/Heading';
 import { Navbar } from '../primitives/Navbar';
 import { MessagesSearchBar } from '../search/SearchPage';
 import { ServerIcon } from '../ServerIcon';
-import { ChannelName } from '../ServerInvite';
+import {
+	ChannelName,
+	ServerInvite,
+	ServerInviteJoinButton,
+} from '../ServerInvite';
 
 function ChannelSidebar(props: {
 	channels: ChannelPublicWithFlags[];
@@ -61,17 +65,30 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 			<main className="bg-ao-white dark:bg-ao-black">
 				<div className="flex flex-col">
 					<div className="my-auto flex flex-row bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
-						<ServerIcon server={server} size="xl" className="hidden sm:flex" />
-						<div className="ml-16 flex flex-col">
-							<Heading.H1 className="pt-0">{server.name}</Heading.H1>
-							<Heading.H2 className="text-xl font-normal">
-								{server.description ??
-									`${server.name} community. Join the community to ask questions about ${server.name} and get answers from other members.`}
-							</Heading.H2>
-							<Button className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0">
-								Join Server
-							</Button>
-						</div>
+						<ServerInvite
+							server={server}
+							channel={selectedChannel?.channel}
+							Icon={
+								<ServerIcon
+									server={server}
+									size="xl"
+									className="hidden sm:flex"
+								/>
+							}
+							Body={
+								<>
+									<div className="ml-16 flex flex-col">
+										<Heading.H1 className="pt-0">{server.name}</Heading.H1>
+										<Heading.H2 className="text-xl font-normal">
+											{server.description ??
+												`${server.name} community. Join the community to ask questions about ${server.name} and get answers from other members.`}
+										</Heading.H2>
+										<ServerInviteJoinButton className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0" />
+									</div>
+								</>
+							}
+							JoinButton={<></>}
+						/>
 					</div>
 				</div>
 

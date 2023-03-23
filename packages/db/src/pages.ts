@@ -39,24 +39,26 @@ export async function findServerWithCommunityPageData(idOrVanityUrl: string) {
 	const questionLookup = new Map<
 		string,
 		{
-			message: MessageFull | null;
+			message: MessageFull;
 			thread: z.infer<typeof zChannelPublic>;
 		}[]
 	>();
 
 	for (const channelQuestions of allChannelQuestions.flat()) {
-		const channel = channelQuestions.thread.parentId!;
+		if (!channelQuestions.thread.parentId) continue;
+		if (!channelQuestions.message) continue;
+		const channel = channelQuestions.thread.parentId;
 		const questions = questionLookup.get(channel);
 		if (!questions) {
 			questionLookup.set(channel, [
 				{
-					message: channelQuestions.message ?? null,
+					message: channelQuestions.message,
 					thread: channelQuestions.thread,
 				},
 			]);
 		} else {
 			questions.push({
-				message: channelQuestions.message ?? null,
+				message: channelQuestions.message,
 				thread: channelQuestions.thread,
 			});
 		}

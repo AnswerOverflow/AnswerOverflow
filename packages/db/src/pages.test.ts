@@ -77,7 +77,7 @@ describe('Page Operations', () => {
 			const { channels } = result!;
 			expect(channels).toHaveLength(1);
 			const firstChannel = channels[0]!;
-			expect(firstChannel!.id).not.toEqual(disabledChannel.id);
+			expect(firstChannel.channel.id).not.toEqual(disabledChannel.id);
 		});
 		it('should not return private server data', async () => {
 			const privateServer = mockServer();
