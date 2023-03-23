@@ -5,7 +5,7 @@ import type {
 	ServerPublic,
 	APIMessageFull,
 } from '@answeroverflow/api';
-import { getRandomSentence } from '@answeroverflow/utils';
+import { getRandomName, getRandomSentence } from '@answeroverflow/utils';
 
 export function randomId() {
 	return Math.floor(Math.random() * 10000000).toString();
@@ -83,10 +83,11 @@ export function mockServer(override: Partial<ServerPublic> = {}) {
 export function mockChannel(override: Partial<ChannelPublicWithFlags> = {}) {
 	const data: ChannelPublicWithFlags = {
 		id: randomId(),
-		name: 'general',
+		name: getRandomName(),
 		serverId: '0',
 		parentId: null,
 		type: 0,
+		archivedTimestamp: null,
 		inviteCode: null,
 		...override,
 	};
@@ -97,12 +98,7 @@ export function mockChannelWithSettings(
 	override: Partial<ChannelPublicWithFlags> = {},
 ) {
 	const data: ChannelPublicWithFlags = {
-		id: randomId(),
-		name: 'general',
-		serverId: '0',
-		parentId: null,
-		type: 0,
-		archivedTimestamp: null,
+		...mockChannel(),
 		inviteCode: 'sxDN2rEdwD',
 		...override,
 	};

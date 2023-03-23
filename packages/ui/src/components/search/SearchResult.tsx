@@ -1,10 +1,14 @@
-import type { APISearchResult } from '@answeroverflow/api';
+import type {
+	APISearchResult,
+	APIMessageWithDiscordAccount,
+	ChannelPublicWithFlags,
+} from '@answeroverflow/api';
 import {
 	Message,
 	MessageContents,
 	MessageAttachments,
-	MessageTitle,
 } from '~ui/components/primitives/Message';
+import { Heading } from '../primitives/Heading';
 import { createContext, useContext } from 'react';
 import { ServerInvite } from '../ServerInvite';
 import Link from 'next/link';
@@ -110,7 +114,7 @@ const SearchResultSidebar = () => {
 
 const NoSolution = ({ messageId }: { messageId: string }) => {
 	return (
-		<div className="w-full rounded-bl-standard border-2 border-black/[.13] bg-white/[.01] dark:border-white/[.13]">
+		<div className=" w-full rounded-bl-standard border-2 border-t-0 border-black/[.13] bg-white/[.01] dark:border-white/[.13]">
 			<Paragraph className="p-6 font-body text-ao-black dark:text-white/[.66]">
 				No replies marked as solution...{' '}
 				<Link
@@ -129,27 +133,44 @@ const SearchResultAnswer = () => {
 	const solution = result.message.solutionMessages?.[0];
 	if (!solution) return <NoSolution messageId={result.message.id} />;
 	return (
-		<div className="rounded-b-standard border-2 border-ao-green  bg-ao-green/10 dark:bg-ao-green/[0.02] lg:rounded-br-none">
+		<div className="rounded-b-standard border-2 border-t-0 border-ao-green  bg-ao-green/10 dark:bg-ao-green/[0.02] lg:rounded-br-none">
 			<Message message={solution} />
 		</div>
 	);
 };
 
+export const LinkMessage = ({
+	message,
+	thread,
+}: {
+	message: APIMessageWithDiscordAccount;
+	thread?: ChannelPublicWithFlags;
+}) => {
+	return (
+		<Message
+			message={message}
+			showBorders
+			content={
+				<>
+					<Link href={`/m/${message.id}`}>
+						<div className="pt-2">
+							<Heading.H4 className="text-lg text-blue-700 decoration-2 hover:text-blue-600 hover:underline dark:text-blue-400 hover:dark:text-blue-500">
+								{thread?.name ?? content.slice(0, 20).trim() + '...'}
+							</Heading.H4>
+						</div>
+					</Link>
+					<MessageContents />
+					<MessageAttachments />
+				</>
+			}
+		/>
+	);
+};
 const SearchResultMainContent = () => {
 	const { result } = useSearchResultContext();
 	return (
 		<div className="flex grow flex-col">
-			<Message
-				message={result.message}
-				showBorders
-				content={
-					<>
-						<MessageTitle channel={result.channel} thread={result.thread} />
-						<MessageContents />
-						<MessageAttachments />
-					</>
-				}
-			/>
+			<LinkMessage message={result.message} thread={result.thread} />
 			<SearchResultAnswer />
 		</div>
 	);

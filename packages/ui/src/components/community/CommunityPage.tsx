@@ -4,11 +4,11 @@ import type {
 } from '@answeroverflow/db';
 import { useState } from 'react';
 import { Footer } from '../Footer';
-import { Message } from '../primitives';
 import { Button } from '../primitives/Button';
 import { Heading } from '../primitives/Heading';
 import { Navbar } from '../primitives/Navbar';
 import { MessagesSearchBar } from '../search/SearchPage';
+import { LinkMessage } from '../search/SearchResult';
 import { ServerIcon } from '../ServerIcon';
 import {
 	ChannelName,
@@ -107,21 +107,30 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 								setSelectedChannelId={setSelectedChannelId}
 							/>
 							<div className="flex w-full flex-1 flex-col gap-2">
-								{questions ? (
-									questions.map((question) => (
-										<div className="drop-shadow-sm " key={question.message.id}>
-											<Message message={question.message} />
+								{selectedChannel ? (
+									questions ? (
+										questions.map((question) => (
+											<div
+												className="drop-shadow-sm "
+												key={question.message.id}
+											>
+												<LinkMessage
+													message={question.message}
+													thread={question.thread}
+												/>
+											</div>
+										))
+									) : (
+										<div className="flex flex-col items-center justify-center">
+											<Heading.H4 className="text-center">
+												No questions found for this channel.
+											</Heading.H4>
 										</div>
-									))
+									)
 								) : (
-									<div className="flex flex-col items-center justify-center">
-										<Heading.H4 className="text-center">
-											No questions found for this channel.
-										</Heading.H4>
-										<Button className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0">
-											Ask a question
-										</Button>
-									</div>
+									<Heading.H4 className="text-center">
+										No channel selected.
+									</Heading.H4>
 								)}
 							</div>
 						</div>

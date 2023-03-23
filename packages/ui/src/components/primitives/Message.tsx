@@ -10,6 +10,7 @@ import { createContext, useContext } from 'react';
 import { DiscordAvatar } from '~ui/components/DiscordAvatar';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
+import { Heading } from './Heading';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MessageContext = createContext<{
@@ -48,22 +49,6 @@ export const MessageContents = () => {
 	return (
 		<div className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white">
 			{parsedMessageContent}
-		</div>
-	);
-};
-
-export const MessageTitle = ({
-	thread,
-	channel,
-}: {
-	thread?: ChannelPublicWithFlags;
-	channel: ChannelPublicWithFlags;
-}) => {
-	return (
-		<div className="pt-4">
-			<h4 className="font-body text-4xl font-semibold text-ao-black dark:text-ao-white">
-				{thread?.name ?? channel.name}
-			</h4>
 		</div>
 	);
 };
@@ -152,7 +137,7 @@ export const Message = ({
 			<Blurrer>
 				<div
 					className={`grow rounded-t-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:rounded-tr-none ${
-						showBorders ? 'border-x-2 border-t-2' : ''
+						showBorders ? 'border-2' : ''
 					} border-black/[.13] dark:border-white/[.13]`}
 				>
 					<div className="p-6">
