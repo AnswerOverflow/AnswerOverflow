@@ -7,8 +7,8 @@ import {
 import { MessageResultPage, MessageResultPageProps } from './MessageResultPage';
 import { PageWrapper } from './PageWrapper';
 const meta = {
-	component: MessageResultPage,
 	title: 'pages/MessageResultPage',
+	component: MessageResultPage,
 	parameters: {
 		layout: 'fullscreen',
 		a11y: {

@@ -1,9 +1,9 @@
-import { Button, LinkButton } from './primitives';
+import { Button, LinkButton, LinkButtonProps } from './primitives';
 import { signIn } from 'next-auth/react';
 import { GETTING_STARTED_URL } from '@answeroverflow/constants/src/links';
-export function GetStarted() {
+export function GetStarted(props: Omit<LinkButtonProps, 'href'>) {
 	return (
-		<LinkButton href={GETTING_STARTED_URL} variant="outline">
+		<LinkButton href={GETTING_STARTED_URL} variant="outline" {...props}>
 			Get started
 		</LinkButton>
 	);
