@@ -9,7 +9,6 @@ import { PageWrapper } from './PageWrapper';
 const meta = {
 	title: 'pages/MessageResultPage',
 	component: MessageResultPage,
-	title: 'pages/MessageResultPage',
 	parameters: {
 		layout: 'fullscreen',
 		a11y: {
