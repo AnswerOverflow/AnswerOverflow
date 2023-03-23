@@ -5,13 +5,27 @@ import {
 	findServerWithCommunityPageData,
 } from '@answeroverflow/db';
 import superjson from 'superjson';
-import { CommunityPage } from '~ui/components/index';
+import { AOHead, CommunityPage } from '~ui/components/index';
 
 export default function MessageResult(
 	props: InferGetStaticPropsType<typeof getStaticProps>,
 ) {
 	const data = superjson.parse<CommunityPageData>(props.data);
-	return <CommunityPage {...data} />;
+	return (
+		<>
+			<AOHead
+				title={`${data.server.name} Community Page`}
+				description={
+					data.server.description ??
+					`The community page for ${data.server.name} on Answer Overflow.`
+				}
+				path={`/c/${data.server.id}`}
+				server={data.server}
+			/>
+
+			<CommunityPage {...data} />
+		</>
+	);
 }
 
 // TODO: Do all at build time?

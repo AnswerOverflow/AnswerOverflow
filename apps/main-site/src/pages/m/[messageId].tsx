@@ -46,6 +46,7 @@ export default function MessageResult(
 				description={description}
 				path={`/m/${firstMessage?.id ?? messageId}`}
 				title={`${channelName} - ${server.name}`}
+				server={server}
 			/>
 			<MessageResultPage
 				messages={messages}
