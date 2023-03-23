@@ -6,6 +6,7 @@ import { SearchInput } from '~ui/components/primitives/Input';
 import { SearchResult } from '~ui/components/search/SearchResult';
 import { useRouter } from 'next/router';
 import { useRouterQuery } from '~ui/utils/hooks';
+import { twMerge } from 'tailwind-merge';
 
 interface SearchResultProps {
 	results: APISearchResult[number][];
@@ -14,6 +15,7 @@ interface SearchResultProps {
 
 export const MessagesSearchBar = (props: {
 	placeholder?: string;
+	className?: string;
 	serverId?: string;
 }) => {
 	const router = useRouter();
@@ -33,7 +35,7 @@ export const MessagesSearchBar = (props: {
 					shallow: true,
 				});
 			}}
-			className="mb-8 w-full"
+			className={twMerge('mb-8 w-full', props.className)}
 		>
 			<SearchInput
 				onChange={setSearchInput}

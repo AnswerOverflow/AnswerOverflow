@@ -52,7 +52,7 @@ export const QuestionAnswerArea = ({
 						title: 'How do I index my discord channels into google?',
 						// TODO: Add description, will require arrow offsets to be changed
 						description:
-							'How do I index my discord channels into google? How do I index my discord channels into google? How do I index my discord channels into google?',
+							'Hey @Jolt, you can use Answer Overflow to do that! Learn more at answeroverflow.com!',
 					}}
 					ref={googlePageRef}
 				/>
