@@ -36,7 +36,7 @@ export const MessagesSearchBar = (props: {
 					shallow: true,
 				});
 			}}
-			className={twMerge('mb-8 w-full', props.className)}
+			className={twMerge('w-full', props.className)}
 		>
 			<SearchInput
 				defaultValue={query || ''}

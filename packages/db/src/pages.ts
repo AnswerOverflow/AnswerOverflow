@@ -69,18 +69,11 @@ export async function findServerWithCommunityPageData(id: string) {
 				channel: c,
 				questions: questions
 					.sort((a, b) => {
-						if (a.thread.archivedTimestamp && b.thread.archivedTimestamp) {
-							return a.thread.archivedTimestamp > b.thread.archivedTimestamp
-								? 1
-								: -1;
-						}
-						if (!a.thread.archivedTimestamp && !b.thread.archivedTimestamp) {
-							return 0;
-						}
-						if (a.thread.archivedTimestamp) {
-							return 1;
-						}
-						return -1;
+						const aDate = BigInt(a.thread.id);
+						const bDate = BigInt(b.thread.id);
+						if (aDate > bDate) return -1;
+						if (aDate < bDate) return 1;
+						return 0;
 					})
 					.slice(0, 20),
 			};

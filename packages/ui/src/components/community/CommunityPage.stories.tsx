@@ -19,17 +19,22 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+function makeMockedChannelQuestions(amount: number) {
+	if (amount > 20) {
+		amount = 20;
+	}
+	return Array.from({ length: amount }).map(() => ({
+		message: mockMessageFull(),
+		thread: mockChannelWithSettings(),
+	}));
+}
+
 export const CommunityPageStory: Story = {
 	args: {
 		channels: [
 			{
 				channel: mockChannelWithSettings(),
-				questions: [
-					{
-						message: mockMessageFull(),
-						thread: mockChannelWithSettings(),
-					},
-				],
+				questions: makeMockedChannelQuestions(100),
 			},
 		],
 		server: mockServer(),

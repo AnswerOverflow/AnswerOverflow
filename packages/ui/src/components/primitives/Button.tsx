@@ -17,30 +17,44 @@ const buttonVariants = cva(
 				subtle:
 					'bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-100',
 				ghost:
-					'bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-100 dark:hover:text-slate-100 data-[state=open]:bg-transparent dark:data-[state=open]:bg-transparent',
+					'bg-transparent hover:bg-slate-200 dark:hover:bg-slate-800 dark:text-slate-00 dark:hover:text-slate-100 data-[state=open]:bg-transparent dark:data-[state=open]:bg-transparent',
 			},
 			size: {
 				default: 'h-10 py-2 px-4',
 				sm: 'h-9 px-2 rounded-md',
 				lg: 'h-11 px-8 rounded-md',
 			},
+			selected: {
+				true: '',
+				false: '',
+			},
 		},
+		compoundVariants: [
+			{
+				variant: 'ghost',
+				selected: true,
+				className: 'bg-slate-200 dark:bg-slate-800',
+			},
+		],
 		defaultVariants: {
 			variant: 'default',
 			size: 'default',
+			selected: false,
 		},
 	},
 );
 
 export interface ButtonProps
 	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-		VariantProps<typeof buttonVariants> {}
+		VariantProps<typeof buttonVariants> {
+	selected?: boolean;
+}
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-	({ className, variant, size, ...props }, ref) => {
+	({ className, variant, selected, size, ...props }, ref) => {
 		return (
 			<button
-				className={cn(buttonVariants({ variant, size, className }))}
+				className={cn(buttonVariants({ variant, size, selected, className }))}
 				ref={ref}
 				{...props}
 			/>

@@ -35,9 +35,11 @@ const ServerInviteTitle = () => {
 	);
 };
 
-const ServerInviteChannelName = () => {
-	const { channel } = useServerInviteContext();
-
+export const ChannelName = ({
+	channel,
+}: {
+	channel: ChannelPublicWithFlags;
+}) => {
 	const getChannelTypeIcon = (channelType: ChannelType) => {
 		switch (channelType) {
 			case ChannelType.GuildForum:
@@ -50,8 +52,6 @@ const ServerInviteChannelName = () => {
 				);
 		}
 	};
-
-	if (!channel) return <></>;
 
 	return (
 		<div className="flex flex-row items-center justify-center">
@@ -97,7 +97,7 @@ export const ServerInviteRenderer = (props: {
 						<ServerInviteIcon />
 						<div className="flex flex-col items-center justify-center pl-2">
 							<ServerInviteTitle />
-							<ServerInviteChannelName />
+							{props.channel && <ChannelName channel={props.channel} />}
 						</div>
 					</div>
 					<ServerInviteJoinButton />
