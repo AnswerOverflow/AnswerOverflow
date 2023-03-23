@@ -14,6 +14,7 @@ const DownChevron = (props: { scrollIntoView: () => unknown }) => (
 				onClick={props.scrollIntoView}
 			>
 				<ChevronDownIcon className="h-16 w-16 rounded-full text-ao-black/[.6] hover:text-ao-black  dark:text-ao-white/[.6] dark:hover:text-ao-white" />
+				<span className="sr-only">Scroll down</span>
 			</Button>
 		</div>
 	</div>

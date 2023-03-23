@@ -146,6 +146,7 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 			style={{
 				width: '80%',
 			}}
+			tabIndex={-1}
 		>
 			<div className="flex flex-col items-center ">
 				<Image
@@ -156,8 +157,10 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 					className="rounded-full"
 				/>
 
-				<Paragraph className="py-0 text-center text-lg">{props.name}</Paragraph>
-				<Paragraph className="py-0 text-center">
+				<Paragraph className="py-2 text-center text-lg dark:text-white">
+					{props.name}
+				</Paragraph>
+				<Paragraph className="py-0 text-center dark:text-white">
 					{props.approximateMemberCount} members
 				</Paragraph>
 			</div>
