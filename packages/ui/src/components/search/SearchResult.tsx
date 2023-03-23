@@ -133,7 +133,7 @@ const SearchResultAnswer = () => {
 	const solution = result.message.solutionMessages?.[0];
 	if (!solution) return <NoSolution messageId={result.message.id} />;
 	return (
-		<div className="rounded-b-standard border-2 border-t-0 border-ao-green  bg-ao-green/10 dark:bg-ao-green/[0.02] lg:rounded-br-none">
+		<div className="rounded-b-standard border-2  border-ao-green  bg-ao-green/10 dark:bg-ao-green/[0.02] lg:rounded-br-none">
 			<Message message={solution} />
 		</div>
 	);
@@ -155,7 +155,7 @@ export const LinkMessage = ({
 					<Link href={`/m/${message.id}`}>
 						<div className="pt-2">
 							<Heading.H4 className="text-lg text-blue-700 decoration-2 hover:text-blue-600 hover:underline dark:text-blue-400 hover:dark:text-blue-500">
-								{thread?.name ?? content.slice(0, 20).trim() + '...'}
+								{thread?.name ?? message.content.slice(0, 20).trim() + '...'}
 							</Heading.H4>
 						</div>
 					</Link>
