@@ -24,15 +24,18 @@ const FeaturesSection = (props: { className?: string }) => {
 	return (
 		<div className={cn('w-full', props.className)}>
 			<Heading.H2 className="text-center md:text-right">
-				Level up your community
+				Tools tailored to your community
 			</Heading.H2>
 			<Heading.H2 className="pt-0 text-center text-lg md:text-right">
-				<Balancer>By making your support better than ever</Balancer>
+				<Balancer>
+					Your community is unique, {"it's"} time you had a bot that matches
+					that
+				</Balancer>
 			</Heading.H2>
 
 			<div className="mt-2 grid grid-cols-1 grid-rows-1 gap-10 md:grid-cols-2 md:grid-rows-2">
 				<HomeFeature
-					featureName="🔎 Index Content Into Google"
+					featureName="🔎 Index Content into Google"
 					featureDescription="Organically gain more users by ranking at the top of Google search results"
 				/>
 				<HomeFeature
@@ -65,10 +68,14 @@ const EndSection = (props: { className?: string }) => {
 				props.className,
 			)}
 		>
-			<Heading.H2>Setup in your server for free</Heading.H2>
-			<Paragraph>
-				Join over 50+ communities using Answer Overflow to transform their
-				support
+			<Heading.H2 className="text-center md:w-full">
+				<Balancer>Setup in your server for free</Balancer>
+			</Heading.H2>
+			<Paragraph className="text-center md:w-full">
+				<Balancer className="md:w-full">
+					Join over 50+ communities using Answer Overflow to make the most of
+					their support
+				</Balancer>
 			</Paragraph>
 			<GetStarted variant={'default'} />
 		</section>
@@ -158,10 +165,13 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 	);
 };
 
+// TODO: The marquee is really hacky here to get sizing right on all devices
 const FeaturedCommunitiesSection = (props: { className?: string }) => {
 	return (
 		<div className={cn('text-center overflow-x-hidden', props.className)}>
-			<Heading.H2>Used by some of the largest support servers</Heading.H2>
+			<Heading.H2>
+				<Balancer>Used by some of the largest support servers</Balancer>
+			</Heading.H2>
 			<div className="flex max-w-vw90 items-center pt-20 sm:max-w-vw70 2xl:max-w-screen-xl">
 				<Marquee gradient={false}>
 					{featuredCommunities.map((community) => (

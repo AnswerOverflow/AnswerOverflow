@@ -1,6 +1,6 @@
 import { QuestionAnswerArea } from './QuestionAnswerArea/QuestionAnswerArea';
 import { messageData } from './HomeMessages';
-import { Button } from '../primitives/Button';
+import { GetStarted } from '../Callouts';
 
 const HomeLeadText = () => {
 	return (
@@ -13,12 +13,10 @@ const HomeLeadText = () => {
 				channels to your favourite search engine, enabling users to easily find
 				the info they need, fast.
 			</p>
-			<Button
+			<GetStarted
 				variant={'default'}
 				className="mx-auto text-xl shadow-[0px_0px_40px_rgba(255,_255,_255,_0.2)] duration-200 hover:shadow-[0px_0px_40px_rgba(255,_255,_255,_0.4)] xl:mx-0"
-			>
-				Get Started
-			</Button>
+			/>
 		</div>
 	);
 };
