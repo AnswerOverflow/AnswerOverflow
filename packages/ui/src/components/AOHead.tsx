@@ -4,7 +4,7 @@ import { makeServerIconLink } from './ServerIcon';
 
 interface HeadProps {
 	title: string;
-	description: string;
+	description?: string;
 	image?: string;
 	addPrefix?: boolean;
 	imageWidth?: string;
@@ -16,8 +16,8 @@ interface HeadProps {
 
 export const AOHead = ({
 	title,
-	description,
-	image = 'https://answeroverflow.com/answer-overflow-banner.png',
+	description = 'Build the best Discord support server with Answer Overflow. Index your content into Google, answer questions with AI, and gain insights into your community.',
+	image = 'https://www.answeroverflow.com/answer-overflow-banner.png',
 	server = undefined,
 	addPrefix: addPrefix = false,
 	imageWidth: imageWidth = '1200',

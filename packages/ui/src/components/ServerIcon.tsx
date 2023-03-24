@@ -12,13 +12,17 @@ export const makeServerIconLink = (server: ServerPublic, size: number = 64) => {
 };
 
 export function ServerIcon(props: ServerIconProps) {
-	const serverIconUrl = makeServerIconLink(
-		props.server,
-		getAvatarSize(props.size ?? 'md'),
-	);
+	const size = getAvatarSize(props.size ?? 'md');
+	const serverIconUrl = makeServerIconLink(props.server, size);
 	return (
 		<Avatar {...props}>
-			<AvatarImage src={serverIconUrl} alt={props.server.name} {...props} />
+			<AvatarImage
+				src={serverIconUrl}
+				width={size}
+				height={size}
+				alt={props.server.name}
+				{...props}
+			/>
 			<AvatarFallback {...props}>
 				{props.server.name.split(' ').map((word) => word.at(0)?.toUpperCase())}
 			</AvatarFallback>

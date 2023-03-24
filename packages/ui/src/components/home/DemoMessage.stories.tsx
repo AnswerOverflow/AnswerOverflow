@@ -22,6 +22,8 @@ const loremIpsum =
 
 //👇 Each story then reuses that template
 const defaultMessage: MessageProps = {
+	alt: 'John Doe',
+	src: 'https://cdn.discordapp.com/avatars/0/0.png',
 	message: {
 		content: loremIpsum,
 		id: '1063028763656458270',

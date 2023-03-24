@@ -4,12 +4,7 @@ import { AOHead, Home } from '@answeroverflow/ui';
 const HomePage: NextPage = () => {
 	return (
 		<>
-			<AOHead
-				description=""
-				path="/"
-				title="Answer Overflow"
-				addPrefix={false}
-			/>
+			<AOHead path="/" title="Answer Overflow" addPrefix={false} />
 			<Home />
 		</>
 	);

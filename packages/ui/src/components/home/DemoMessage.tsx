@@ -1,4 +1,4 @@
-import { DiscordAvatar } from '../DiscordAvatar';
+import { Avatar, AvatarImage, AvatarFallback } from '../primitives/Avatar';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import Image from 'next/image';
 import discordMarkdown from 'discord-markdown';
@@ -26,6 +26,8 @@ export type MessageProps = {
 	 * Any additional classes to add to the message box
 	 */
 	additionalMessageBoxClassNames?: string;
+	alt: string;
+	src: string;
 };
 
 const { toHTML } = discordMarkdown;
@@ -42,6 +44,8 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 			showLinkIcon = true,
 			customMessageDateString,
 			additionalMessageBoxClassNames,
+			alt,
+			src,
 		},
 		ref,
 	) {
@@ -125,17 +129,29 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 			return `discord://discord.com/channels/${endpoint}`;
 		}
 
-		const Contents = () => (
+		const Contents = (props: { alt: string; src: string }) => (
 			<div className="flex w-full flex-col items-start justify-center">
 				<div className="group relative flex w-full break-words rounded-xl p-1 ">
 					<div className="mr-4 hidden shrink-0 sm:block">
-						<DiscordAvatar user={message.author} />
+						<Avatar>
+							<AvatarImage alt={props.alt} src={props.src} />
+							<AvatarFallback>
+								{props.alt.split(' ').map((word) => word.at(0)?.toUpperCase())}
+							</AvatarFallback>
+						</Avatar>
 					</div>
 					<div className="w-full">
 						<div className="flex w-full min-w-0  justify-between">
 							<div className="flex min-w-0 gap-2">
 								<div className="shrink-0 sm:hidden">
-									<DiscordAvatar user={message.author} />
+									<Avatar>
+										<AvatarImage alt={props.alt} src={props.src} />
+										<AvatarFallback>
+											{props.alt
+												.split(' ')
+												.map((word) => word.at(0)?.toUpperCase())}
+										</AvatarFallback>
+									</Avatar>
 								</div>
 								<div className="flex flex-col sm:flex-row">
 									<span
@@ -215,7 +231,7 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 								msFilter: `blur(${blurAmount})`,
 							}}
 						>
-							<Contents />
+							<Contents alt={alt} src={src} />
 						</div>
 						<div>
 							<div className="absolute inset-0 " />
@@ -232,7 +248,7 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 						</div>
 					</>
 				) : (
-					<Contents />
+					<Contents alt={alt} src={src} />
 				)}
 			</div>
 		);

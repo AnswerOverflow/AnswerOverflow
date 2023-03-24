@@ -84,10 +84,12 @@ export function mockServer(override: Partial<ServerPublic> = {}) {
 export function mockChannel(override: Partial<ChannelPublicWithFlags> = {}) {
 	const data: ChannelPublicWithFlags = {
 		id: randomId(),
-		name:
-			override.type === ChannelType.PublicThread
-				? getRandomSentence()
-				: getRandomName(),
+		name: (override.type === ChannelType.PublicThread
+			? getRandomSentence()
+			: getRandomName()
+		)
+			.split(' ')
+			.join('-'),
 		serverId: '0',
 		parentId: null,
 		type: 0,

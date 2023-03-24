@@ -42,6 +42,8 @@ export const messageData: HomeMessages = {
 			interactionId: null,
 		},
 		customMessageDateString: 'Today at 15:31',
+		alt: 'Jolt',
+		src: '/jolt_icon.png',
 	},
 
 	answerMessage: {
@@ -79,6 +81,8 @@ export const messageData: HomeMessages = {
 			tts: false,
 			interactionId: null,
 		},
+		alt: 'Rhys',
+		src: '/rhys_icon.png',
 		customMessageDateString: 'Today at 15:45',
 	},
 };

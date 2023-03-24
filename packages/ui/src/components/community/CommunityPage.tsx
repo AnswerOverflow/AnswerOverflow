@@ -49,7 +49,7 @@ function ChannelSidebar(props: ChannelSelectProps) {
 	return (
 		<div className="mr-4 ">
 			<Heading.H4 className="my-0 py-0">Channels</Heading.H4>
-			<div className="flex flex-col gap-2">
+			<div className="flex shrink-0 flex-col gap-2">
 				{channels.map((channel) => (
 					<ChannelSelect channel={channel} key={channel.id} />
 				))}
@@ -117,7 +117,11 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 								</div>
 								<div className="flex w-full flex-col items-center text-center md:hidden">
 									<div className="flex flex-row items-center justify-center gap-2">
-										<ServerIcon server={server} size="lg" />
+										<ServerIcon
+											server={server}
+											size="lg"
+											className="flex sm:hidden"
+										/>
 										<Heading.H1 className="pt-0 text-3xl">
 											{server.name}
 										</Heading.H1>
@@ -180,7 +184,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 					/>
 				)}
 			</div>
-			<div className="flex shrink-0 flex-row pt-4">
+			<div className="flex flex-row pt-4">
 				<div className="hidden md:block">
 					{selectedChannel && (
 						<ChannelSidebar
