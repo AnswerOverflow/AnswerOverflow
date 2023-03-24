@@ -21,7 +21,6 @@ export const MessagesSearchBar = (props: {
 	const router = useRouter();
 	const query = useRouterQuery();
 	const [searchInput, setSearchInput] = useState<string>(query);
-	console.log('searchInput: ', searchInput, query);
 	return (
 		<form
 			// eslint-disable-next-line @typescript-eslint/no-misused-promises
