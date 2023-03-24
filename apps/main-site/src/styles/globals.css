@@ -32,3 +32,10 @@ body {
 .dark {
 	color-scheme: dark;
 }
+
+/* Speculative fix for lacking of loading of images on mobile in a marquee */
+@supports (font: -apple-system-body) and (-webkit-appearance: none) {
+	img[loading='lazy'] {
+		clip-path: inset(0.6px);
+	}
+}
