@@ -12,7 +12,7 @@ import {
 	NavigationMenuItem,
 	NavigationMenuList,
 } from './NavigationMenu';
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { Popover, PopoverTrigger, PopoverContent } from './Popover';
 import { ThemeIcon } from '../ThemeSwitcher';
 import { Button } from './Button';
@@ -99,8 +99,8 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 	const Mobile = () => (
 		<Popover>
 			<PopoverTrigger asChild>
-				<Button variant="outline" className="w-10 rounded-full p-0">
-					<ChevronDownIcon className="h-4 w-4" />
+				<Button variant="outline" className="w-10 rounded-full border-0 p-0">
+					<Bars3Icon className="h-6 w-6" />
 					<span className="sr-only">Open popover</span>
 				</Button>
 			</PopoverTrigger>
@@ -113,7 +113,6 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 							// eslint-disable-next-line @typescript-eslint/no-misused-promises
 							onClick={async () => {
 								if (props.user) {
-									console.log('signing out');
 									await signOut();
 								} else {
 									await signIn('discord');
