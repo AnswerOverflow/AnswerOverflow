@@ -344,7 +344,12 @@ export async function fetchAllMessages(
 	channel: TextBasedChannel,
 	opts: MessageFetchOptions = {},
 ) {
-	const { start, limit = 20000 } = opts;
+	const {
+		start,
+		limit = process.env.MAX_NUMBER_OF_MESSAGES_TO_COLLECT
+			? parseInt(process.env.MAX_NUMBER_OF_MESSAGES_TO_COLLECT)
+			: 20000,
+	} = opts;
 	const messages: Message[] = [];
 	if (channel.lastMessageId && start == channel.lastMessageId) {
 		return [];
