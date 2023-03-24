@@ -33,7 +33,7 @@ export function getRandomSentence() {
 }
 export function getRandomName() {
 	return loremIpsum({
-		count: 1, // Number of "words", "sentences", or "paragraphs"
+		count: 4, // Number of "words", "sentences", or "paragraphs"
 		format: 'plain', // "plain" or "html"
 		paragraphLowerBound: 1, // Min. number of sentences per paragraph.
 		paragraphUpperBound: 1, // Max. number of sentences per paragarph.

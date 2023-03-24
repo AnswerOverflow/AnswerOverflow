@@ -58,7 +58,7 @@ export const ChannelName = ({
 	};
 
 	return (
-		<div className="flex w-full flex-row items-center justify-start">
+		<div className="flex w-full flex-row items-center justify-start ">
 			{getChannelTypeIcon(channel.type)}
 			<h4 className="text-center font-body text-base font-bold leading-5 text-ao-black dark:text-ao-white">
 				{channel.name}

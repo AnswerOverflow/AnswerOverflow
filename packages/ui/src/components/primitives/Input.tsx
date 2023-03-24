@@ -45,7 +45,7 @@ export function SearchInput(props: InputProps) {
 	const { className, ...inputProps } = props;
 	return (
 		<div className={cn('flex w-full items-center space-x-2', className)}>
-			<Input className="bg-inherit" {...inputProps} />
+			<Input className="bg-inherit" {...inputProps} type="search" />
 			<Button
 				aria-label="Search"
 				variant={'ghost'}

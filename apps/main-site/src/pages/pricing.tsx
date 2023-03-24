@@ -1,13 +1,13 @@
-import Head from 'next/head';
-import { Pricing } from '@answeroverflow/ui';
+import { Pricing, AOHead } from '@answeroverflow/ui';
 export default function PricingPage() {
 	return (
 		<>
-			<Head>
-				<title>Pricing</title>
-				<meta name="description" content="Answer Overflow Pricing" />
-				<link rel="icon" href="/favicon.ico" />
-			</Head>
+			<AOHead
+				path="/pricing"
+				title="Pricing"
+				addPrefix
+				description="Explore premium features of Answer Overflow to get the most out of your support community"
+			/>
 			<Pricing />
 		</>
 	);

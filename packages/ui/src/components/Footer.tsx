@@ -9,11 +9,11 @@ import { DiscordIcon } from './icons/DiscordIcon';
 
 const navigation = {
 	main: [
-		{ name: 'Terms', href: 'https://answeroverflow.com/tos' },
-		{ name: 'Privacy', href: 'https://answeroverflow.com/privacy' },
-		{ name: 'Pricing', href: 'https://answeroverflow.com/pricing' },
-		{ name: 'Cookies', href: 'https://answeroverflow.com/cookies' },
-		{ name: 'EULA', href: 'https://answeroverflow.com/eula' },
+		{ name: 'Terms', href: 'https://www.answeroverflow.com/tos' },
+		{ name: 'Privacy', href: 'https://www.answeroverflow.com/privacy' },
+		{ name: 'Pricing', href: 'https://www.answeroverflow.com/pricing' },
+		{ name: 'Cookies', href: 'https://www.answeroverflow.com/cookies' },
+		{ name: 'EULA', href: 'https://www.answeroverflow.com/eula' },
 		{ name: 'Docs', href: 'https://docs.answeroverflow.com' },
 	],
 	social: [
