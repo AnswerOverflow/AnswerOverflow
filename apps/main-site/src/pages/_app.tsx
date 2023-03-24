@@ -9,8 +9,7 @@ import { NextTRPC, PageWrapper, trpc, ThemeProvider } from '@answeroverflow/ui';
 import React, { useEffect } from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
-import { Heading } from '@answeroverflow/ui/src/components/primitives/Heading';
-import { Paragraph } from '@answeroverflow/ui/src/components/primitives/Paragraph';
+import { Heading, Paragraph } from '@answeroverflow/ui';
 import { MDXProvider } from '@mdx-js/react';
 import Link from 'next/link';
 import type { Components } from '@mdx-js/react/lib';

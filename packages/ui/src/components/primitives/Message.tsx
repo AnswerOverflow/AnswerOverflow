@@ -4,7 +4,7 @@ import discordMarkdown from 'discord-markdown';
 import Parser from 'html-react-parser';
 import Image from 'next/image';
 import { createContext, useContext } from 'react';
-import { DiscordAvatar } from '~ui/components/DiscordAvatar';
+import { DiscordAvatar } from './DiscordAvatar';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 
