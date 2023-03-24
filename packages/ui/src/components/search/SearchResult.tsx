@@ -105,10 +105,10 @@ const SearchResultMetaData = () => {
 const SearchResultSidebar = () => {
 	const { result } = useSearchResultContext();
 	return (
-		<div className="hidden w-1/4 flex-col items-center justify-center rounded-tr-standard rounded-br-standard border-y-2 border-r-2 border-black/[.13] px-5 pt-6 pb-2 dark:border-white/[.13] lg:flex 2xl:w-1/6">
+		<>
 			<ServerInvite server={result.server} channel={result.channel} />
 			<SearchResultMetaData />
-		</div>
+		</>
 	);
 };
 
@@ -183,9 +183,11 @@ export const SearchResult = ({
 }) => {
 	return (
 		<SearchResultContext.Provider value={{ result }}>
-			<div className="flex h-full w-full flex-col rounded-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:flex-row">
+			<div className="flex h-full w-full flex-col-reverse rounded-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:flex-row">
 				<SearchResultMainContent />
-				<SearchResultSidebar />
+				<div className="border-bottom-0 lg:border-bottom-2 w-full flex-col items-center justify-center rounded-tr-standard rounded-br-standard border-y-2  border-r-2 border-black/[.13] px-5 pt-6 pb-2 dark:border-white/[.13] lg:flex lg:w-1/4 2xl:w-1/6">
+					<SearchResultSidebar />
+				</div>
 			</div>
 		</SearchResultContext.Provider>
 	);
