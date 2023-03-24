@@ -10,11 +10,13 @@
 
 .hljs {
 	@apply w-full rounded-lg bg-neutral-50  dark:bg-stone-900 !important;
+	/* Fixes overflowing code blocks */
 	white-space: break-spaces;
+	line-break: anywhere;
 }
 
-.d-emoji{
-  @apply w-6 h-6 inline-block;
+.d-emoji {
+	@apply inline-block h-6 w-6;
 }
 
 html {
