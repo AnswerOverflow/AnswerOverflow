@@ -31,6 +31,7 @@ export class OpenServerSettingsMenu extends Command {
 		const ids = getCommandIds({
 			local: '1079583356053897276',
 			staging: '1081235686956482650',
+			production: '1085766757647646750',
 		});
 		registry.registerChatInputCommand(
 			new SlashCommandBuilder()
