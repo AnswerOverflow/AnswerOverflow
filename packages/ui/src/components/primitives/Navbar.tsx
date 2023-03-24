@@ -7,6 +7,7 @@ import { AnswerOverflowLogo } from '../AnswerOverflowLogo';
 import { GetStarted, SignInButton } from '../Callouts';
 import { ThemeSwitcher } from '../ThemeSwitcher';
 import { Avatar, AvatarFallback, AvatarImage } from './Avatar';
+import { GitHubIcon } from '../Icons';
 import {
 	NavigationMenu,
 	NavigationMenuItem,
@@ -17,7 +18,10 @@ import { Popover, PopoverTrigger, PopoverContent } from './Popover';
 import { ThemeIcon } from '../ThemeSwitcher';
 import { Button } from './Button';
 import { LinkButton } from './LinkButton';
-import { GETTING_STARTED_URL } from '@answeroverflow/constants/src/links';
+import {
+	GETTING_STARTED_URL,
+	GITHUB_LINK,
+} from '@answeroverflow/constants/src/links';
 import { signIn, signOut } from 'next-auth/react';
 // TODO: Clean up this navbar area, bit of a mess
 
@@ -86,6 +90,11 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 		<>
 			<NavigationMenuItem>
 				<ThemeSwitcher />
+			</NavigationMenuItem>
+			<NavigationMenuItem>
+				<Link href={GITHUB_LINK} target="_blank">
+					<GitHubIcon className="h-8 w-8 hover:text-neutral-300" />
+				</Link>
 			</NavigationMenuItem>
 			<NavigationMenuItem>
 				<GetStarted />
@@ -171,6 +180,11 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 					<Desktop />
 				</NavigationMenuList>
 				<NavigationMenuList>
+					<NavigationMenuItem className="md:hidden">
+						<Link href={GITHUB_LINK} target="_blank">
+							<GitHubIcon className="h-8 w-8 hover:text-neutral-300" />
+						</Link>
+					</NavigationMenuItem>
 					<NavigationMenuItem className="md:hidden">
 						<Mobile />
 					</NavigationMenuItem>
