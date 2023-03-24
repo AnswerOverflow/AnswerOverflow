@@ -62,7 +62,7 @@ const EndSection = (props: { className?: string }) => {
 	return (
 		<section
 			className={cn(
-				'flex w-full flex-col items-center justify-center border-2 border-white/[.13] bg-[#ffffffd2] drop-shadow-2xl dark:bg-[#191B1F] ',
+				'flex w-full flex-col items-center justify-center border-2 border-white/[.13] bg-[#ffffffd2] drop-shadow-2xl dark:bg-[#191B1F] dark:drop-shadow',
 				props.className,
 			)}
 		>
