@@ -31,7 +31,7 @@ export async function findServerWithCommunityPageData(idOrVanityUrl: string) {
 			findAllChannelQuestions({
 				channelId: c.id,
 				includePrivateMessages: false,
-				limit: 100,
+				limit: 10000,
 			}),
 		),
 	);
