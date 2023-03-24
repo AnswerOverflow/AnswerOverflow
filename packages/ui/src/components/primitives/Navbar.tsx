@@ -3,21 +3,23 @@ import Link from 'next/link';
 import React from 'react';
 import { useRouter } from 'next/router';
 import { trpc } from '~ui/utils/trpc';
-import { AnswerOverflowLogo } from '../AnswerOverflowLogo';
-import { GetStarted, SignInButton } from '../Callouts';
-import { ThemeSwitcher } from '../ThemeSwitcher';
-import { Avatar, AvatarFallback, AvatarImage } from './Avatar';
-import { GitHubIcon } from '../Icons';
+import { GetStarted, SignInButton } from './Callouts';
+import { ThemeSwitcher } from './ThemeSwitcher';
+import { Avatar, AvatarFallback, AvatarImage } from './base/Avatar';
+import { GitHubIcon } from './base/Icons';
 import {
 	NavigationMenu,
 	NavigationMenuItem,
 	NavigationMenuList,
-} from './NavigationMenu';
+	AnswerOverflowLogo,
+	LinkButton,
+	Popover,
+	PopoverTrigger,
+	PopoverContent,
+	Button,
+} from './base';
 import { Bars3Icon, ChevronDownIcon } from '@heroicons/react/24/outline';
-import { Popover, PopoverTrigger, PopoverContent } from './Popover';
-import { ThemeIcon } from '../ThemeSwitcher';
-import { Button } from './Button';
-import { LinkButton } from './LinkButton';
+import { ThemeIcon } from './ThemeSwitcher';
 import {
 	GETTING_STARTED_URL,
 	GITHUB_LINK,
@@ -93,7 +95,8 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 			</NavigationMenuItem>
 			<NavigationMenuItem>
 				<Link href={GITHUB_LINK} target="_blank">
-					<GitHubIcon className="h-8 w-8 hover:text-neutral-300" />
+					<GitHubIcon className="h-8 w-8 text-ao-black hover:text-neutral-300 dark:text-ao-white" />
+					<span className="sr-only">GitHub</span>
 				</Link>
 			</NavigationMenuItem>
 			<NavigationMenuItem>
@@ -183,6 +186,7 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 					<NavigationMenuItem className="md:hidden">
 						<Link href={GITHUB_LINK} target="_blank">
 							<GitHubIcon className="h-8 w-8 hover:text-neutral-300" />
+							<span className="sr-only">GitHub</span>
 						</Link>
 					</NavigationMenuItem>
 					<NavigationMenuItem className="md:hidden">
