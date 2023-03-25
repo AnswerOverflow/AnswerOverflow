@@ -107,7 +107,7 @@ export const login = async (client: SapphireClient) => {
 		});
 		client.user?.setActivity({
 			type: ActivityType.Playing,
-			name: 'becoming open source ⚠️ maintenance week ⚠️',
+			name: 'Open source! github.com/AnswerOverflow',
 		});
 	} catch (error) {
 		client.logger.fatal(error);
