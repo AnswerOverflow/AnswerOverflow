@@ -26,8 +26,7 @@ const FeaturesSection = (props: { className?: string }) => {
 			</Heading.H2>
 			<Heading.H2 className="pt-0 text-center text-lg md:text-right">
 				<Balancer>
-					Your community is unique, {"it's"} time you had a bot that matches
-					that
+					Your community is unique, {"it's"} time you had a bot that matches it
 				</Balancer>
 			</Heading.H2>
 
