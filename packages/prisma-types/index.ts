@@ -3,6 +3,7 @@ export { prisma } from './src/prisma';
 export * from './src/bitfield';
 export * from './src/zod-schemas';
 export * from './src/default';
+export * from './src/server-schema';
 
 declare global {
 	namespace NodeJS {

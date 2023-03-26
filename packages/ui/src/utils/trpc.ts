@@ -37,7 +37,7 @@ export type StorybookTRPC = ReturnType<typeof storybookTRPC>;
 export type NextTRPC = ReturnType<typeof nextTRPC>;
 
 // eslint-disable-next-line no-constant-condition
-export const trpc = nextTRPC();
+export const trpc = process.env.STORYBOOK ? storybookTRPC() : nextTRPC();
 
 /**
  * Inference helpers for input types
@@ -50,5 +50,3 @@ export type RouterInputs = inferRouterInputs<AppRouter>;
  * @example type HelloOutput = RouterOutputs['example']['hello']
  **/
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
-
-//process.env.STORYBOOK ? storybookTRPC() :

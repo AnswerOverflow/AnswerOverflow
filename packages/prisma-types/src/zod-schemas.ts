@@ -149,54 +149,6 @@ export function mergeServerFlags(
 	);
 }
 
-// ! Prisma breaks if you call it with extra data that isn't in the model, this is used to strip that data out
-type ServerZodFormat = {
-	[K in keyof Server]: z.ZodTypeAny;
-};
-// A 1:1 copy of the Prisma model
-export const zServerPrisma = z.object({
-	id: z.string(),
-	name: z.string(),
-	icon: z.string().nullable(),
-	kickedTime: z.date().nullable(),
-	description: z.string().nullable(),
-	bitfield: z.number(),
-	vanityUrl: z.string().nullable(),
-} satisfies ServerZodFormat);
-
-// For creating a server, we make sure to include the required fields
-export const zServerPrismaCreate = zServerPrisma.partial().merge(
-	zServerPrisma.pick({
-		name: true,
-		id: true,
-	}),
-);
-
-// For updating a server, only the ID is required
-export const zServerPrismaUpdate = zServerPrisma.partial().omit({
-	id: true,
-});
-
-export const zServer = zServerPrisma
-	.required()
-	.omit({
-		bitfield: true,
-	})
-	.extend({
-		flags: zServerSettingsFlags,
-	});
-
-export type ServerWithFlags = z.infer<typeof zServer>;
-
-export const zServerPublic = zServer.pick({
-	id: true,
-	name: true,
-	icon: true,
-	description: true,
-});
-
-export type ServerPublicWithFlags = z.infer<typeof zServerPublic>;
-
 export const userServerSettingsFlags = [
 	'canPubliclyDisplayMessages',
 	'messageIndexingDisabled',

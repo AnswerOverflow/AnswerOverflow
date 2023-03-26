@@ -1,10 +1,14 @@
-import { z } from 'zod';
+import type { z } from 'zod';
 import {
 	getDefaultServerWithFlags,
 	prisma,
 	Server,
+	zServerCreate,
+	zServerMutable,
 	zServerPrismaCreate,
 	zServerPrismaUpdate,
+	zServerUpdate,
+	zServerUpsert,
 } from '@answeroverflow/prisma-types';
 import { upsert } from './utils/operations';
 import {
@@ -15,25 +19,6 @@ import {
 export const zServerRequired = zServer.pick({
 	id: true,
 	name: true,
-});
-
-export const zServerMutable = zServer
-	.omit({
-		id: true,
-	})
-	.deepPartial();
-
-export const zServerCreate = zServerMutable.merge(zServerRequired);
-
-export const zServerUpdate = zServerMutable.merge(
-	zServerRequired.pick({
-		id: true,
-	}),
-);
-
-export const zServerUpsert = z.object({
-	create: zServerCreate,
-	update: zServerMutable.optional(),
 });
 
 export async function applyServerSettingsSideEffects<

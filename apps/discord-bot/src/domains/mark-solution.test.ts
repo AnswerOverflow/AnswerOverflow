@@ -43,7 +43,7 @@ import { createChannel, createServer } from '@answeroverflow/db';
 import {
 	PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED,
 	QUESTION_ID_FIELD_NAME,
-	SOLUTION_ID_FIELD_NAME,
+	SOLUTION_EMBED_ID_FIELD_NAME,
 } from '@answeroverflow/constants';
 
 let client: Client;
@@ -421,7 +421,7 @@ describe('Make Mark Solution Response', () => {
 					inline: true,
 				},
 				{
-					name: SOLUTION_ID_FIELD_NAME,
+					name: SOLUTION_EMBED_ID_FIELD_NAME,
 					value: solution.id,
 					inline: true,
 				},
