@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 
 export const useIsUserInServer = (serverId: string) => {
 	const { data: servers } = trpc.auth.getServers.useQuery();
+	if (!servers) return 'loading';
 	return servers?.some((s) => s.id === serverId) ?? false;
 };
 

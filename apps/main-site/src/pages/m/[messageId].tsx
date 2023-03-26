@@ -10,13 +10,25 @@ import superjson from 'superjson';
 import { trpc } from '@answeroverflow/ui';
 import type { GetStaticPropsContext, InferGetStaticPropsType } from 'next';
 import { TRPCError } from '@trpc/server';
-
+import { useTrackEvent } from '@answeroverflow/hooks';
 export default function MessageResult(
 	props: InferGetStaticPropsType<typeof getStaticProps>,
 ) {
 	const { serverId, messageId, areAllMessagesPublic } = props;
-
 	const isUserInServer = useIsUserInServer(serverId);
+	useTrackEvent(
+		'MessagePageView',
+		{
+			messageId,
+			isUserInServer: isUserInServer === 'loading' ? false : isUserInServer,
+		},
+		{
+			runOnce: true,
+			enabled: isUserInServer !== 'loading',
+		},
+	);
+
+	console.log(isUserInServer);
 	const shouldFetchPrivateMessages = isUserInServer && !areAllMessagesPublic;
 	const { data } = trpc.messages.threadFromMessageId.useQuery(messageId, {
 		// For authenticated users that are in the server, we fetch the messages incase any of them are private

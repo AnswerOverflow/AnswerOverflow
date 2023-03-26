@@ -19,6 +19,7 @@
 		"@answeroverflow/auth": "*",
 		"@answeroverflow/cache": "*",
 		"@answeroverflow/db": "*",
+		"@answeroverflow/analytics": "*",
 		"@answeroverflow/discordjs-utils": "*",
 		"@answeroverflow/utils": "*",
 		"@sapphire/bitfield": "^1.0.0",

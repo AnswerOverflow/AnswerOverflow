@@ -18,6 +18,8 @@
 		"@answeroverflow/api": "*",
 		"@answeroverflow/auth": "*",
 		"@answeroverflow/db": "*",
+		"@answeroverflow/hooks": "*",
+		"@answeroverflow/analytics": "*",
 		"@answeroverflow/tailwind-config": "*",
 		"@answeroverflow/ui": "*",
 		"@mdx-js/loader": "^2.3.0",

@@ -77,7 +77,11 @@ export const ServerInviteJoinButton = (props: { className?: string }) => {
 			referrerPolicy="no-referrer"
 			className={cn('text-center font-header font-bold', props.className)}
 		>
-			{isUserInServer ? <>Joined</> : <>Join Server</>}
+			{isUserInServer !== 'loading' && isUserInServer ? (
+				<>Joined</>
+			) : (
+				<>Join Server</>
+			)}
 		</LinkButton>
 	);
 };
@@ -90,7 +94,7 @@ export const ServerInviteIcon = () => {
 type ServerInviteProps = {
 	server: ServerPublic;
 	channel?: ChannelPublicWithFlags;
-	isUserInServer: boolean;
+	isUserInServer: boolean | 'loading';
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	Icon?: React.ReactNode;
 	// eslint-disable-next-line @typescript-eslint/naming-convention

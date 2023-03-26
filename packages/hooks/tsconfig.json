@@ -1,0 +1,14 @@
+{
+  "extends": "@answeroverflow/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": "../../",
+  },
+  "include": [
+    "src",
+    "next.config.mjs",
+    "../../reset.d.ts",
+    "postcss.config.cjs",
+    "tailwind.config.cjs",
+    "index.ts"
+  ]
+}
