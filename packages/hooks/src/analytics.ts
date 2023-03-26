@@ -3,7 +3,13 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import posthog from 'posthog-js';
 import React, { useEffect, useRef } from 'react';
-
+import {
+	ChannelProps,
+	MessageProps,
+	NUMBER_OF_MESSAGES_FIELD_NAME,
+	ServerProps,
+	ThreadProps,
+} from '@answeroverflow/constants/src/analytics';
 // TODO: This type should be inferred from the auth package
 declare module 'next-auth' {
 	interface Session extends DefaultSession {
@@ -13,10 +19,12 @@ declare module 'next-auth' {
 	}
 }
 
-type MessagePageViewProps = {
-	messageId: string;
-	isUserInServer: boolean;
-};
+type MessagePageViewProps = MessageProps &
+	ServerProps &
+	ChannelProps &
+	Partial<ThreadProps> & {
+		[NUMBER_OF_MESSAGES_FIELD_NAME]: number;
+	};
 
 interface EventMap {
 	MessagePageView: MessagePageViewProps;
