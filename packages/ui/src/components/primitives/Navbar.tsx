@@ -100,7 +100,7 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 				</Link>
 			</NavigationMenuItem>
 			<NavigationMenuItem>
-				<GetStarted />
+				<GetStarted location="Navbar" />
 			</NavigationMenuItem>
 			<NavigationMenuItem>
 				<UserSection />

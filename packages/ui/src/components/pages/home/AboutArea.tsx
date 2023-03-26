@@ -75,7 +75,7 @@ const EndSection = (props: { className?: string }) => {
 					their support
 				</Balancer>
 			</Paragraph>
-			<GetStarted variant={'default'} />
+			<GetStarted variant={'default'} location="About Area" />
 		</section>
 	);
 };

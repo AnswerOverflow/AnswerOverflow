@@ -26,8 +26,18 @@ type MessagePageViewProps = MessageProps &
 		[NUMBER_OF_MESSAGES_FIELD_NAME]: number;
 	};
 
+export type GettingStartedClickProps = {
+	'Button Location': 'Hero' | 'About Area' | 'Pricing' | 'Navbar';
+};
+
+export type AddToServerClickProps = {
+	'Button Location': 'Quick Start';
+};
+
 interface EventMap {
-	MessagePageView: MessagePageViewProps;
+	'Message Page View': MessagePageViewProps;
+	'Getting Started Click': GettingStartedClickProps;
+	'Add To Server Click': AddToServerClickProps;
 }
 
 export function trackEvent<K extends keyof EventMap>(

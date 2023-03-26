@@ -1,6 +1,6 @@
 import type { DefaultSession } from 'next-auth';
 import { PostHog } from 'posthog-node';
-
+import type { ServerProps } from '@answeroverflow/constants';
 const apiKey = process.env.POSTHOG_API_KEY;
 const shouldCollectAnalytics =
 	apiKey !== undefined && process.env.NODE_ENV !== 'test';
@@ -19,17 +19,14 @@ declare module 'next-auth' {
 	}
 }
 
-type MessagePageViewProps = {
-	messageId: string;
-	tet: boolean;
-};
-
 type BaseProps = {
 	'Answer Overflow Account Id': string;
 };
 
+type ServerJoinProps = ServerProps;
+
 interface EventMap {
-	MessagePageView: MessagePageViewProps;
+	'Server Join': ServerJoinProps;
 }
 
 export function trackEvent<K extends keyof EventMap>(

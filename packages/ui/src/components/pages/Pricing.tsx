@@ -7,7 +7,9 @@ const pricing = {
 			title: 'Free',
 			description: 'Great for smaller communities ',
 			features: ['Hosting on answeroverflow.com', 'Basic analytics'],
-			cta: <GetStarted variant={'subtle'} className="w-full" />,
+			cta: (
+				<GetStarted variant={'subtle'} className="w-full" location="Pricing" />
+			),
 			mostPopular: false,
 		},
 		{

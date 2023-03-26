@@ -24,6 +24,7 @@
 		"initVersion": "6.11.0"
 	},
 	"dependencies": {
-		"posthog-node": "^2.6.0"
+		"posthog-node": "^2.6.0",
+		"@answeroverflow/constants": "*"
 	}
 }
