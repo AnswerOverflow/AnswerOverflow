@@ -11,7 +11,7 @@ const HomeFeature = (props: {
 	featureDescription?: React.ReactNode;
 }) => {
 	return (
-		<div className="flex flex-col items-center justify-center rounded-standard border-2 border-white/[.13] bg-[#fafafa] px-2 py-4 text-center dark:bg-[#191B1F] md:px-20 md:py-10 ">
+		<div className="flex flex-col items-center justify-center rounded-standard border-2 border-gray-300 bg-[#fafafa] px-2 py-4 text-center dark:border-white/[.13] dark:bg-[#191B1F] md:px-20 md:py-10 ">
 			<Paragraph className="text-xl md:text-2xl">{props.featureName}</Paragraph>
 			<Paragraph className="text-lg">{props.featureDescription}</Paragraph>
 		</div>
@@ -151,6 +151,7 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 					src={props.iconUrl}
 					width={64}
 					height={64}
+					unoptimized
 					alt={`${props.name} community icon`}
 					className="rounded-full"
 				/>

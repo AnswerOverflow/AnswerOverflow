@@ -39,7 +39,7 @@ export function MessageResultPage({
 			: `Questions related to ${channelName} in ${server.name}`;
 
 	useTrackEvent(
-		'MessagePageView',
+		'Message Page View',
 		{
 			'Channel Id': channel.id,
 			'Channel Name': channel.name,
@@ -104,7 +104,11 @@ export function MessageResultPage({
 			<div className=" flex flex-col items-center justify-between gap-2 sm:flex-row">
 				<MessagesSearchBar />
 				<div className="shrink-0 pl-8">
-					<ServerInvite server={server} channel={channel} />
+					<ServerInvite
+						server={server}
+						channel={channel}
+						location="Message Result Page"
+					/>
 				</div>
 			</div>
 			<div className="rounded-md sm:mt-3">

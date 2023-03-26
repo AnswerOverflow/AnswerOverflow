@@ -11,9 +11,12 @@ import { useIsUserInServer } from '~ui/utils/hooks';
 import { LinkButton } from './base';
 import { cn } from '~ui/utils/styling';
 import Link from 'next/link';
+import { trackEvent } from '@answeroverflow/hooks';
+import type { ServerInviteClickProps } from '@answeroverflow/constants/src/analytics';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const ServerInviteContext = createContext<{
 	server: ServerPublic;
+	location: ServerInviteClickProps['Button Location'];
 	channel?: ChannelPublicWithFlags;
 	isUserInServer: boolean | 'loading';
 } | null>(null);
@@ -68,14 +71,26 @@ export const ChannelName = ({
 };
 
 export const ServerInviteJoinButton = (props: { className?: string }) => {
-	const { channel, isUserInServer } = useServerInviteContext();
-	if (!channel?.inviteCode) return <></>;
+	const { channel, location, server, isUserInServer } =
+		useServerInviteContext();
+	const inviteCode = channel?.inviteCode;
+	if (!inviteCode) return <></>;
 	return (
 		<LinkButton
-			href={`https://discord.gg/${channel?.inviteCode}`}
+			href={`https://discord.gg/${inviteCode}`}
 			variant="default"
 			referrerPolicy="no-referrer"
 			className={cn('text-center font-header font-bold', props.className)}
+			onMouseUp={() => {
+				trackEvent('Server Invite Click', {
+					'Channel Id': channel.id,
+					'Channel Name': channel.name,
+					'Server Id': channel.serverId,
+					'Server Name': server.name,
+					'Invite Code': inviteCode,
+					'Button Location': location,
+				});
+			}}
 		>
 			{isUserInServer !== 'loading' && isUserInServer ? (
 				<>Joined</>
@@ -95,6 +110,7 @@ type ServerInviteProps = {
 	server: ServerPublic;
 	channel?: ChannelPublicWithFlags;
 	isUserInServer: boolean | 'loading';
+	location: ServerInviteClickProps['Button Location'];
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	Icon?: React.ReactNode;
 	// eslint-disable-next-line @typescript-eslint/naming-convention

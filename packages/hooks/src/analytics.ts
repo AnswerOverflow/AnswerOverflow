@@ -9,6 +9,7 @@ import {
 	JOIN_WAITLIST_EVENT_NAME,
 	MessageProps,
 	NUMBER_OF_MESSAGES_FIELD_NAME,
+	ServerInviteEvent,
 	ServerProps,
 	ThreadProps,
 } from '@answeroverflow/constants/src/analytics';
@@ -36,12 +37,12 @@ export type AddToServerClickProps = {
 	'Button Location': 'Quick Start';
 };
 
-interface EventMap {
+type EventMap = {
 	'Message Page View': MessagePageViewProps;
 	'Getting Started Click': GettingStartedClickProps;
 	'Add To Server Click': AddToServerClickProps;
 	[JOIN_WAITLIST_EVENT_NAME]: JoinWaitlistClickProps;
-}
+} & ServerInviteEvent;
 
 export function trackEvent<K extends keyof EventMap>(
 	eventName: K,

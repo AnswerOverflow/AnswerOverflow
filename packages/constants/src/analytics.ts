@@ -38,3 +38,17 @@ export const JOIN_WAITLIST_EVENT_NAME = 'Join Waitlist Click';
 export type JoinWaitlistClickProps = {
 	'Button Location': 'Pricing Page' | 'Experimental Settings Menu';
 };
+
+export type ServerInviteClickProps = {
+	'Button Location':
+		| 'Search Results'
+		| 'Community Page'
+		| 'Message Result Page';
+	'Invite Code': string;
+} & ServerProps &
+	ChannelProps &
+	Partial<ThreadProps>;
+
+export type ServerInviteEvent = {
+	'Server Invite Click': ServerInviteClickProps;
+};

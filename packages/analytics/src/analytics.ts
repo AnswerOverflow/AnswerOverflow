@@ -29,7 +29,7 @@ interface EventMap {
 	'Server Join': ServerJoinProps;
 }
 
-export function trackEvent<K extends keyof EventMap>(
+export function trackServerSideEvent<K extends keyof EventMap>(
 	eventName: K,
 	props: EventMap[K] & BaseProps,
 ): void {
