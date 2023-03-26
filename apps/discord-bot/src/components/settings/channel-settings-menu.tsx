@@ -526,6 +526,7 @@ function ExperimentalSettingsMenu() {
 				}}
 			/>
 			<ActionRow>
+				{/* TODO: Swap with a button that responds ephemerally w/ the link for analytics */}
 				<Link url={WAITLIST_URL} label="Join the waitlist" />
 			</ActionRow>
 		</>

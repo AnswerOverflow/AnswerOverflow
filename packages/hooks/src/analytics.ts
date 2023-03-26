@@ -5,6 +5,8 @@ import posthog from 'posthog-js';
 import React, { useEffect, useRef } from 'react';
 import {
 	ChannelProps,
+	JoinWaitlistClickProps,
+	JOIN_WAITLIST_EVENT_NAME,
 	MessageProps,
 	NUMBER_OF_MESSAGES_FIELD_NAME,
 	ServerProps,
@@ -38,6 +40,7 @@ interface EventMap {
 	'Message Page View': MessagePageViewProps;
 	'Getting Started Click': GettingStartedClickProps;
 	'Add To Server Click': AddToServerClickProps;
+	[JOIN_WAITLIST_EVENT_NAME]: JoinWaitlistClickProps;
 }
 
 export function trackEvent<K extends keyof EventMap>(

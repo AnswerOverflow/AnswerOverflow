@@ -33,3 +33,8 @@ export type ThreadProps = {
 	[THREAD_ID_FIELD_NAME]: Snowflake;
 	[THREAD_NAME_FIELD_NAME]: string;
 };
+
+export const JOIN_WAITLIST_EVENT_NAME = 'Join Waitlist Click';
+export type JoinWaitlistClickProps = {
+	'Button Location': 'Pricing Page' | 'Experimental Settings Menu';
+};
