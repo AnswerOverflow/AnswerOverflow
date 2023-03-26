@@ -107,7 +107,7 @@ export function mockChannelWithFlags(
 }
 
 export function mockThread(
-	parent: Channel,
+	parent: Channel | ChannelWithFlags,
 	override?: Omit<Partial<Channel>, 'parentId' | 'serverId'>,
 ) {
 	return getDefaultChannel({

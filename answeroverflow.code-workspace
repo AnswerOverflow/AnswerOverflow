@@ -127,8 +127,6 @@
         "[\"'`]([^\"'`]*).*?[\"'`]"
       ]
     ],
-    "typescript.disableAutomaticTypeAcquisition": true,
-    "typescript.tsserver.maxTsServerMemory": 20000,
     "typescript.autoClosingTags": true,
     /*
       EDITOR STYLE

@@ -1,15 +1,21 @@
-import { z } from 'zod';
-import { upsertServer, zServerUpsert } from './server';
+import type { z } from 'zod';
+import { upsertServer } from './server';
 import { upsert, upsertMany } from './utils/operations';
 import {
 	addFlagsToChannel,
-	ALLOWED_THREAD_TYPES,
-	bitfieldToChannelFlags,
 	channelBitfieldFlags,
 	ChannelWithFlags,
-	zChannel,
+	getDefaultChannelWithFlags,
+	zChannelCreate,
+	zChannelCreateMany,
+	zChannelCreateWithDeps,
+	zChannelMutable,
 	zChannelPrismaCreate,
 	zChannelPrismaUpdate,
+	zChannelUpdate,
+	zChannelUpdateMany,
+	zChannelUpsert,
+	zChannelUpsertMany,
 } from '@answeroverflow/prisma-types';
 import {
 	prisma,
@@ -28,92 +34,10 @@ export const CHANNELS_THAT_CAN_HAVE_AUTOTHREAD = new Set([
 	ChannelType.GuildText,
 ]);
 
-export const zChannelRequired = zChannel.pick({
-	id: true,
-	name: true,
-	serverId: true,
-	type: true,
-	parentId: true,
-});
-
-export const zChannelMutable = zChannel
-	.pick({
-		name: true,
-		flags: true,
-		inviteCode: true,
-		solutionTagId: true,
-		archivedTimestamp: true,
-	})
-	.deepPartial();
-
-export const zChannelCreate = zChannelMutable.merge(zChannelRequired);
-
-export const zChannelCreateMany = zChannelCreate.omit({
-	flags: true,
-});
-
-export const zChannelUpsert = z.object({
-	create: zChannelCreate,
-	update: zChannelMutable.optional(),
-});
-
-export const zChannelUpdate = zChannelMutable.merge(
-	zChannelRequired.pick({
-		id: true,
-	}),
-);
-
-// We omit flags because it's too complicated to update many of them
-export const zChannelUpdateMany = zChannelUpdate.omit({
-	flags: true,
-});
-
-export const zChannelUpsertMany = z.array(
-	z.object({
-		create: zChannelCreateMany,
-		update: zChannelUpdateMany
-			.omit({
-				id: true,
-			})
-			.optional(),
-	}),
-);
-
-export const zThreadCreate = zChannelCreate.extend({
-	parentId: z.string(),
-	type: z
-		.number()
-		.refine(
-			(n) => ALLOWED_THREAD_TYPES.has(n),
-			'Can only create public threads',
-		), // TODO: Make a type error if possible
-});
-
-export const zChannelCreateWithDeps = zChannelCreate
-	.omit({
-		serverId: true, // Taken from server
-	})
-	.extend({
-		server: zServerUpsert,
-	});
-
-export const zChannelUpsertWithDeps = zChannelCreateWithDeps;
-
-export const zThreadCreateWithDeps = zThreadCreate
-	.omit({
-		parentId: true, // Taken from parent
-		serverId: true, // Taken from parent
-	})
-	.extend({
-		parent: zChannelUpsertWithDeps,
-	});
-
-export const zThreadUpsertWithDeps = zThreadCreateWithDeps;
-
 function applyChannelSettingsChangesSideEffects<
 	F extends z.infer<typeof zChannelMutable>,
->({ old, updated }: { old: Channel; updated: F }) {
-	const oldFlags = bitfieldToChannelFlags(old.bitfield);
+>({ old, updated }: { old: ChannelWithFlags; updated: F }) {
+	const oldFlags = old.flags;
 	const flagsToUpdate = updated.flags ?? {};
 
 	const pendingSettings: ChannelWithFlags = {
@@ -271,7 +195,7 @@ export async function findLatestArchivedTimestampByChannelId(parentId: string) {
 export async function createChannel(data: z.infer<typeof zChannelCreate>) {
 	const combinedData: z.infer<typeof zChannelPrismaCreate> =
 		applyChannelSettingsChangesSideEffects({
-			old: getDefaultChannel(data),
+			old: getDefaultChannelWithFlags(data),
 			updated: data,
 		});
 	const created = await prisma.channel.create({
@@ -301,7 +225,7 @@ export async function updateChannel({
 	old,
 }: {
 	update: z.infer<typeof zChannelUpdate>;
-	old: Channel | null;
+	old: ChannelWithFlags | null;
 }) {
 	if (!old) old = await findChannelById(update.id);
 	if (!old) throw new Error('Channel not found');
@@ -387,10 +311,12 @@ export function upsertManyChannels(data: z.infer<typeof zChannelUpsertMany>) {
 		create: (toCreate) => createManyChannels(toCreate.map((c) => c.create)),
 		update: (toUpdate) =>
 			updateManyChannels(
-				toUpdate.map((c) => ({
-					id: c.create.id,
-					...c.update,
-				})),
+				toUpdate
+					.filter((c) => c.update)
+					.map((c) => ({
+						id: c.create.id,
+						...c.update!,
+					})),
 			),
 	});
 }

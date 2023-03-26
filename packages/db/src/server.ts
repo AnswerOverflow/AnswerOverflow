@@ -13,13 +13,8 @@ import {
 import { upsert } from './utils/operations';
 import {
 	addFlagsToServer,
-	zServer,
 	mergeServerFlags,
 } from '@answeroverflow/prisma-types';
-export const zServerRequired = zServer.pick({
-	id: true,
-	name: true,
-});
 
 export async function applyServerSettingsSideEffects<
 	F extends { bitfield: number },

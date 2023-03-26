@@ -1,7 +1,32 @@
 import type { Server } from '@prisma/client';
 import { omit, pick } from '@answeroverflow/utils';
 import { z } from 'zod';
-import { zServerSettingsFlags } from './zod-schemas';
+import { toZObject } from './zod-utils';
+import { bitfieldToDict, dictToBitfield, mergeFlags } from './bitfield';
+
+export const serverSettingsFlags = ['readTheRulesConsentEnabled'] as const;
+export const zServerSettingsFlags = toZObject(...serverSettingsFlags);
+
+export const bitfieldToServerFlags = (bitfield: number) =>
+	bitfieldToDict(bitfield, serverSettingsFlags);
+
+export function addFlagsToServer<T extends Server>(serverSettings: T) {
+	return {
+		...serverSettings,
+		flags: bitfieldToServerFlags(serverSettings.bitfield),
+	};
+}
+
+export function mergeServerFlags(
+	old: number,
+	newFlags: Record<string, boolean>,
+) {
+	return mergeFlags(
+		() => bitfieldToServerFlags(old),
+		newFlags,
+		(flags) => dictToBitfield(flags, serverSettingsFlags),
+	);
+}
 
 // ! Prisma breaks if you call it with extra data that isn't in the model, this is used to strip that data out
 type ServerZodFormat = {
@@ -9,7 +34,7 @@ type ServerZodFormat = {
 };
 
 // A 1:1 copy of the Prisma model
-const serverPropertiesToZodTypes = {
+const internalServerProperties = {
 	id: z.string(),
 	name: z.string(),
 	icon: z.string().nullable(),
@@ -19,52 +44,65 @@ const serverPropertiesToZodTypes = {
 	vanityUrl: z.string().nullable(),
 } as const satisfies ServerZodFormat;
 
-// Used for parsing the input before sending to prisma
-export const zServerPrisma = z.object(serverPropertiesToZodTypes);
+const internalServerPropertiesMutable = z
+	.object(omit(internalServerProperties, 'id'))
+	.partial().shape;
 
-export const zServerPrismaCreate = zServerPrisma;
+const internalServerPropertiesRequired = pick(internalServerProperties, [
+	'id',
+	'name',
+]);
 
-export const zServerPrismaUpdate = z.object(
-	omit(serverPropertiesToZodTypes, 'id'),
-);
-
-export const zServer = z.object({
-	...omit(serverPropertiesToZodTypes, 'bitfield'),
-	flags: zServerSettingsFlags,
+export const zServerPrismaCreate = z.object({
+	...internalServerPropertiesMutable,
+	...internalServerPropertiesRequired,
 });
 
+export const zServerPrismaUpdate = z.object({
+	...internalServerPropertiesMutable,
+});
+
+const externalServerProperties = {
+	...omit(internalServerProperties, 'bitfield'),
+	flags: zServerSettingsFlags,
+} as const;
+
+const externalServerPropertiesMutable = z
+	.object(omit(externalServerProperties, 'id'))
+	.deepPartial().shape;
+
+const externalServerPropertiesRequired = pick(externalServerProperties, [
+	'id',
+	'name',
+]);
+
+export const zServer = z.object({
+	...externalServerPropertiesMutable,
+	...externalServerPropertiesRequired,
+});
 export type ServerWithFlags = z.infer<typeof zServer>;
 
 export const zServerPublic = z.object({
-	...pick(serverPropertiesToZodTypes, ['id', 'name', 'icon', 'description']),
+	...pick(externalServerProperties, ['id', 'name', 'icon', 'description']),
 });
 
-export const serverMutablePropertiesToZodTypes = z
-	.object(omit(serverPropertiesToZodTypes, 'id', 'bitfield'))
-	.partial();
+export const zServerMutable = z.object(externalServerPropertiesMutable);
 
-export const zServerMutable = z
-	.object({
-		...omit(serverPropertiesToZodTypes, 'id', 'bitfield'),
-		flags: zServerSettingsFlags,
-	})
-	.deepPartial(); // TODO: partial this w/out zod?
-
-export const zServerRequired = pick(serverPropertiesToZodTypes, ['id', 'name']);
+export const zServerRequired = z.object(externalServerPropertiesRequired);
 
 export const zServerCreate = z.object({
-	...zServerMutable.shape,
-	...zServerRequired,
+	...externalServerPropertiesMutable,
+	...externalServerPropertiesRequired,
 });
 
 export const zServerUpdate = z.object({
-	...zServerMutable.shape,
-	id: zServerRequired.id,
+	...externalServerPropertiesMutable,
+	id: externalServerPropertiesRequired.id,
 });
 
 export const zServerUpsert = z.object({
 	create: zServerCreate,
-	update: z.object(zServerMutable.shape),
+	update: zServerMutable,
 });
 
 export type ServerPublicWithFlags = z.infer<typeof zServerPublic>;

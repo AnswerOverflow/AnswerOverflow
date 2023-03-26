@@ -44,7 +44,12 @@ export function MessageResultPage({
 			'Channel Id': channel.id,
 			'Channel Name': channel.name,
 			'Message Id': firstMessage.id,
-			""
+			'Message Author Id': firstMessage.author.id,
+			'Number of Messages': messages.length,
+			'Server Id': server.id,
+			'Server Name': server.name,
+			'Thread Id': thread?.id,
+			'Thread Name': thread?.name,
 		},
 		{
 			runOnce: true,
