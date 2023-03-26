@@ -48,10 +48,11 @@ const internalServerPropertiesMutable = z
 	.object(omit(internalServerProperties, 'id'))
 	.partial().shape;
 
-const internalServerPropertiesRequired = pick(internalServerProperties, [
+const internalServerPropertiesRequired = pick(
+	internalServerProperties,
 	'id',
 	'name',
-]);
+);
 
 export const zServerPrismaCreate = z.object({
 	...internalServerPropertiesMutable,
@@ -69,22 +70,27 @@ const externalServerProperties = {
 
 const externalServerPropertiesMutable = z
 	.object(omit(externalServerProperties, 'id'))
-	.deepPartial().shape;
+	.partial().shape;
 
-const externalServerPropertiesRequired = pick(externalServerProperties, [
+const externalServerPropertiesRequired = pick(
+	externalServerProperties,
 	'id',
 	'name',
-]);
+);
 
-export const zServer = z.object({
-	...externalServerPropertiesMutable,
-	...externalServerPropertiesRequired,
-});
+export const zServer = z.object(externalServerProperties);
 export type ServerWithFlags = z.infer<typeof zServer>;
 
-export const zServerPublic = z.object({
-	...pick(externalServerProperties, ['id', 'name', 'icon', 'description']),
-});
+export const zServerPublic = z.object(
+	pick(
+		externalServerProperties,
+		'id',
+		'name',
+		'icon',
+		'vanityUrl',
+		'description',
+	),
+);
 
 export const zServerMutable = z.object(externalServerPropertiesMutable);
 
@@ -102,7 +108,7 @@ export const zServerUpdate = z.object({
 
 export const zServerUpsert = z.object({
 	create: zServerCreate,
-	update: zServerMutable,
+	update: zServerMutable.optional(),
 });
 
 export type ServerPublicWithFlags = z.infer<typeof zServerPublic>;

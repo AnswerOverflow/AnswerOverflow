@@ -52,7 +52,8 @@ const internalUserServerSettingsPropertiesMutable = z
 
 const internalUserServerSettingsPropertiesRequired = pick(
 	internalUserServerSettingsProperties,
-	['serverId', 'userId'],
+	'serverId',
+	'userId',
 );
 
 export const zUserServerSettingsPrismaCreate = z.object({
@@ -76,7 +77,8 @@ const externalUserServerSettingsProperties = {
 
 const externalUserServerSettingsPropertiesRequired = pick(
 	externalUserServerSettingsProperties,
-	['serverId', 'userId'],
+	'serverId',
+	'userId',
 );
 
 const externalUserServerSettingsPropertiesMutable = z
@@ -97,7 +99,7 @@ export const zUserServerSettingsMutable = z
 	.deepPartial();
 
 export const zUserServerSettingsFind = z.object(
-	pick(externalUserServerSettingsPropertiesRequired, ['serverId', 'userId']),
+	pick(externalUserServerSettingsPropertiesRequired, 'serverId', 'userId'),
 );
 
 export const zUserServerSettingsCreate = zUserServerSettingsMutable.merge(

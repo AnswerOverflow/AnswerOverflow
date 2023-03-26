@@ -12,7 +12,7 @@ import {
 import { omit, pick } from '@answeroverflow/utils';
 
 export function pickPublicServerData(server: Server) {
-	return pick(server, ['id', 'name', 'icon', 'description']);
+	return pick(server, 'id', 'name', 'icon', 'description');
 }
 
 type ToMessageWithDiscordAccount = {
@@ -87,7 +87,8 @@ export function toPrivateMessageWithStrippedData(
 }
 
 export function pickPublicChannelData(channel: ChannelWithFlags) {
-	const picked = pick(channel, [
+	const picked = pick(
+		channel,
 		'id',
 		'name',
 		'parentId',
@@ -96,6 +97,6 @@ export function pickPublicChannelData(channel: ChannelWithFlags) {
 		'archivedTimestamp',
 		'inviteCode',
 		'messageCount',
-	]);
+	);
 	return picked;
 }

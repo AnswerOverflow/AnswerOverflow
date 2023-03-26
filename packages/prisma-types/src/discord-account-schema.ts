@@ -18,7 +18,8 @@ const internalDiscordAccountPropertiesMutable = z
 
 const internalDiscordAccountPropertiesRequired = pick(
 	internalDiscordAccountProperties,
-	['id', 'name'],
+	'id',
+	'name',
 );
 
 export const zDiscordAccountPrismaCreate = z.object({
@@ -33,7 +34,7 @@ export const zDiscordAccountPrismaUpdate = z.object(
 export const zDiscordAccount = z.object(internalDiscordAccountProperties);
 
 export const zDiscordAccountPublic = z.object(
-	pick(internalDiscordAccountProperties, ['id', 'name', 'avatar']),
+	pick(internalDiscordAccountProperties, 'id', 'name', 'avatar'),
 );
 
 export const zDiscordAccountRequired = z.object(

@@ -54,7 +54,7 @@ describe('Protected Fetch', () => {
 			permissions: () => new TRPCError({ code: 'UNAUTHORIZED' }),
 			publicDataFormatter: (data) => zPublicSampleData.parse(data),
 		});
-		const publicData = pick(sampleData, ['id', 'name']);
+		const publicData = pick(sampleData, 'id', 'name');
 		expect(data).toEqual([publicData]);
 	});
 });

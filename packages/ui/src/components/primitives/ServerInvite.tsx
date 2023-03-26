@@ -15,7 +15,7 @@ import Link from 'next/link';
 const ServerInviteContext = createContext<{
 	server: ServerPublic;
 	channel?: ChannelPublicWithFlags;
-	isUserInServer: boolean;
+	isUserInServer: boolean | 'loading';
 } | null>(null);
 
 function useServerInviteContext() {

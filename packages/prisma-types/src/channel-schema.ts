@@ -63,13 +63,14 @@ const internalChannelProperties = {
 	}, z.bigint().nullable()),
 } as const satisfies ChannelZodFormat;
 
-const internalRequiredChannelProperties = pick(internalChannelProperties, [
+const internalRequiredChannelProperties = pick(
+	internalChannelProperties,
 	'id',
 	'name',
 	'serverId',
 	'type',
 	'parentId',
-]);
+);
 
 const internalMutableChannelProperties = z
 	.object(omit(internalChannelProperties, 'id', 'parentId', 'type', 'serverId'))
@@ -101,13 +102,14 @@ const externalChannelPropertiesMutable = z.object(
 	),
 ).shape;
 
-const externalRequiredChannelProperties = pick(externalChannelProperties, [
+const externalRequiredChannelProperties = pick(
+	externalChannelProperties,
 	'id',
 	'name',
 	'serverId',
 	'type',
 	'parentId',
-]);
+);
 
 export const zChannel = z.object({
 	...externalChannelPropertiesMutable,

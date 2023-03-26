@@ -33,7 +33,7 @@ export function mockDiscordAccount(override: Partial<DiscordAccount> = {}) {
 
 export function mockMessage(
 	server: Server,
-	channel: Channel,
+	channel: Channel | ChannelWithFlags,
 	author: DiscordAccount,
 	override: Omit<Partial<Message>, 'authorId' | 'channelId' | 'serverId'> = {},
 ) {
