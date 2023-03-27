@@ -16,6 +16,7 @@ export default async function handler(
 	res: NextApiResponse,
 ) {
 	// Only enable CORS in development for accessing through Storybook
+  console.log('hello')
 	if (process.env.NODE_ENV !== 'production') {
 		// Modify `req` and `res` objects here
 		// In this case, we are enabling CORS
