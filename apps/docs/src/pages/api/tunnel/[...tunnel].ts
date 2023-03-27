@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-// import * as request from 'request';
-import fetch from 'node-fetch';
+import getRawBody from 'raw-body';
 
 export default async function handler(
 	req: NextApiRequest,
@@ -22,19 +21,32 @@ export default async function handler(
 
 	const posthogEndpoint = `https://app.posthog.com/${
 		tunnel as string
-	}?${query}`;
-	// // const headersThatBreak = new Set(['transfer-encoding', 'content-encoding']);
-	const body = JSON.parse(JSON.stringify(req.body));
+	}?${query}`;	
+
+	const headersToFilter = new Set([
+		'host',
+		'cookie'])
+	const filteredHeaders = Object.entries(req.headers)
+		.filter(([key]) => !headersToFilter.has(key))
+
+	const rawBody = await getRawBody(req)
 	const proxyRes = await fetch(posthogEndpoint, {
 		method: req.method,
-		// @ts-ignore TODO: Revisit
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-		body: body instanceof Object ? body.data : (body as string),
+		body: rawBody,
 		redirect: 'follow',
+		// @ts-ignore TODO: Revisit
+		headers: filteredHeaders
 	});
+	
 	res.status(proxyRes.status);
 	proxyRes.headers.forEach((value, key) => {
 		res.setHeader(key, value);
-	});
+	});  
 	res.end(await proxyRes.text());
 }
+
+export const config = {
+	api: {
+	  bodyParser: false,
+	},
+  }
