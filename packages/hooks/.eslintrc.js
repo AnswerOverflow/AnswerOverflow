@@ -11,7 +11,7 @@ module.exports = {
 					'warn',
 					{
 						selector: 'typeProperty',
-						format: ['PascalCase, camelCase'],
+						format: ['PascalCase', 'camelCase'],
 					},
 				],
 			},

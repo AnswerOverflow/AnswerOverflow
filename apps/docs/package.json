@@ -15,9 +15,9 @@
 	"dependencies": {
 		"@answeroverflow/api": "*",
 		"@answeroverflow/auth": "*",
-		"@answeroverflow/hooks": "*",
 		"@answeroverflow/constants": "*",
 		"@answeroverflow/db": "*",
+		"@answeroverflow/hooks": "*",
 		"@answeroverflow/tailwind-config": "*",
 		"@answeroverflow/ui": "*",
 		"@tanstack/react-query": "^4.19.0",
@@ -29,6 +29,7 @@
 		"next-auth": "^4.20.1",
 		"nextra": "^2.2.16",
 		"nextra-theme-docs": "^2.2.16",
+		"node-fetch": "^3.3.1",
 		"react": "18.2.0",
 		"react-dom": "18.2.0",
 		"react-player": "^2.12.0",

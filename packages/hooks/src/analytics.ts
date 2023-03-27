@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import type { DefaultSession } from 'next-auth';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
@@ -38,9 +39,7 @@ export type AddToServerClickProps = {
 	'Button Location': 'Quick Start';
 };
 
-export type CommunityPageViewProps = {
-
-} & ServerProps
+export type CommunityPageViewProps = {} & ServerProps;
 
 type EventMap = {
 	'Message Page View': MessagePageViewProps;
@@ -58,7 +57,7 @@ export function trackEvent<K extends keyof EventMap>(
 	const isServer = typeof window === 'undefined';
 	posthog.capture(eventName, {
 		...props,
-		"Is Server": isServer,
+		'Is Server': isServer,
 	});
 }
 
@@ -91,7 +90,7 @@ export const useAnalytics = () => {
 	useEffect(() => {
 		if (!analyticsLoaded) {
 			posthog.init(process.env.NEXT_PUBLIC_POSTHOG_TOKEN as string, {
-				// api_host: '/api/tunnel',
+				api_host: '/api/tunnel',
 				disable_session_recording: process.env.NODE_ENV === 'development',
 				loaded: () => {
 					setAnalyticsLoaded(true);

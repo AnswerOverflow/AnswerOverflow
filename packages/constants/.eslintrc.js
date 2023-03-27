@@ -6,7 +6,7 @@ module.exports = {
 		{
 			files: ['*.ts', '*.tsx'],
 			rules: {
-				'@typescript-eslint/naming-convention': ['off'],
+				'@typescript-eslint/naming-convention': 'off',
 			},
 		},
 	],
