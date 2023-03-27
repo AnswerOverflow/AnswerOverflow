@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import getRawBody from 'raw-body';
+import nodeFetch from 'node-fetch';
 
 export default async function handler(
 	req: NextApiRequest,
@@ -29,7 +30,7 @@ export default async function handler(
 	);
 
 	const rawBody = await getRawBody(req);
-	const proxyRes = await fetch(posthogEndpoint, {
+	const proxyRes = await nodeFetch(posthogEndpoint, {
 		method: req.method,
 		body: rawBody,
 		redirect: 'follow',
