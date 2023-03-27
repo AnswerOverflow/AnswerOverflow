@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import getRawBody from 'raw-body';
-import nodeFetch from 'node-fetch';
+import nodeFetch, { RequestInit } from 'node-fetch';
 
 export default async function handler(
 	req: NextApiRequest,
@@ -30,13 +30,17 @@ export default async function handler(
 	);
 
 	const rawBody = await getRawBody(req);
-	const proxyRes = await nodeFetch(posthogEndpoint, {
+	const requestInit: RequestInit = {
 		method: req.method,
-		body: rawBody,
 		redirect: 'follow',
 		// @ts-ignore TODO: Revisit
 		headers: filteredHeaders,
-	});
+	};
+	if (req.method !== 'GET') {
+		requestInit.body = rawBody;
+	}
+
+	const proxyRes = await nodeFetch(posthogEndpoint, requestInit);
 
 	res.status(proxyRes.status);
 	proxyRes.headers.forEach((value, key) => {
