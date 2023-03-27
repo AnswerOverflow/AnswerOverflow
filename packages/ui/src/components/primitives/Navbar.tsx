@@ -95,7 +95,7 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 			</NavigationMenuItem>
 			<NavigationMenuItem>
 				<Link href={GITHUB_LINK} target="_blank">
-					<GitHubIcon className="h-8 w-8 text-ao-black hover:text-neutral-300 dark:text-ao-white" />
+					<GitHubIcon className="h-8 w-8 text-ao-black hover:fill-neutral-300 dark:text-ao-white" />
 					<span className="sr-only">GitHub</span>
 				</Link>
 			</NavigationMenuItem>
