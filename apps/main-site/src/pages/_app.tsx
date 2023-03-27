@@ -58,7 +58,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 		useAnalytics();
 		return <>{children}</>;
 	};
-
+  console.log("hello world");
 	return (
 		<ThemeProvider>
 			<SessionProvider session={session}>
