@@ -56,7 +56,7 @@ export const createBotContext = async (opts: BotContextCreate) => {
  **/
 export const createContext = async (opts: CreateNextContextOptions) => {
 	const session = await getServerSession(opts);
-
+  console.log(session);
 	return await createContextInner({
 		session,
 		userServers: null,
