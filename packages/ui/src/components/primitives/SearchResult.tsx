@@ -141,14 +141,20 @@ const SearchResultAnswer = () => {
 export const LinkMessage = ({
 	message,
 	thread,
+	className,
 }: {
 	message: APIMessageWithDiscordAccount;
 	thread?: ChannelPublicWithFlags;
+	/**
+	 * className passed directly to the message component
+	 */
+	className?: string;
 }) => {
 	return (
 		<Message
 			message={message}
 			showBorders
+			className={className}
 			content={
 				<>
 					<Link href={`/m/${message.id}`}>
