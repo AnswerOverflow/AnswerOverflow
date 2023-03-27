@@ -62,6 +62,7 @@ export type CommunityPageLinkClickProps = {
 } & ServerProps &
 	Partial<ChannelProps> &
 	Partial<ThreadProps>;
-export type CommunityPageLinkEvent = {
+
+	export type CommunityPageLinkEvent = {
 	'Community Page Link Click': CommunityPageLinkClickProps;
 };

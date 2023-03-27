@@ -38,11 +38,16 @@ export type AddToServerClickProps = {
 	'Button Location': 'Quick Start';
 };
 
+export type CommunityPageViewProps = {
+
+} & ServerProps
+
 type EventMap = {
 	'Message Page View': MessagePageViewProps;
 	'Getting Started Click': GettingStartedClickProps;
 	'Add To Server Click': AddToServerClickProps;
 	[JOIN_WAITLIST_EVENT_NAME]: JoinWaitlistClickProps;
+	'Community Page View': CommunityPageViewProps;
 } & ServerInviteEvent &
 	CommunityPageLinkEvent;
 
@@ -53,7 +58,7 @@ export function trackEvent<K extends keyof EventMap>(
 	const isServer = typeof window === 'undefined';
 	posthog.capture(eventName, {
 		...props,
-		isServer,
+		"Is Server": isServer,
 	});
 }
 
@@ -68,7 +73,8 @@ export function useTrackEvent<K extends keyof EventMap>(
 	const hasSentAnalyticsEvent = useRef(false);
 	useEffect(() => {
 		const options = opts || {};
-		if (!options.enabled) return;
+		const enabled = opts?.enabled ?? true;
+		if (!enabled) return;
 		if (!hasSentAnalyticsEvent.current) {
 			trackEvent(eventName, props);
 			if (options.runOnce) {
