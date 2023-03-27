@@ -132,7 +132,7 @@ export const Message = ({
 		<MessageContext.Provider value={{ message }}>
 			<Blurrer>
 				<div
-					className={`grow rounded-t-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:rounded-tr-none ${
+					className={`grow bg-[#E9ECF2] dark:bg-[#181B1F] lg:rounded-t-standard lg:rounded-tr-none ${
 						showBorders ? 'border-2' : ''
 					} border-black/[.13] dark:border-white/[.13]`}
 				>
