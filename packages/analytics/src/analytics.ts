@@ -1,13 +1,13 @@
 import type { DefaultSession } from 'next-auth';
 import { PostHog } from 'posthog-node';
 import type { ServerProps } from '@answeroverflow/constants';
-const apiKey = process.env.POSTHOG_API_KEY;
+const apiKey = process.env.NEXT_PUBLIC_POSTHOG_TOKEN;
 const shouldCollectAnalytics =
 	apiKey !== undefined && process.env.NODE_ENV !== 'test';
 
 const client = new PostHog(
 	apiKey || '',
-	{ host: 'https://app.posthog.com', enable: shouldCollectAnalytics }, // You can omit this line if using PostHog Cloud
+	{ enable: shouldCollectAnalytics }, // You can omit this line if using PostHog Cloud
 );
 
 // TODO: This type should be inferred from the auth package

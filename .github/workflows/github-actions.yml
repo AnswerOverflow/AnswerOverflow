@@ -16,7 +16,7 @@ env:
   ELASTICSEARCH_USERNAME: elastic
   ELASTICSEARCH_PASSWORD: changeme
   ELASTICSEARCH_MESSAGE_INDEX: messages
-  POSTHOG_API_KEY: "123" # Fake API key to make CI not fail
+  NEXT_PUBLIC_POSTHOG_TOKEN: "123" # Fake API key to make CI not fail
   REDIS_URL: redis://:redis@localhost:6379
   NEXT_PUBLIC_DEPLOYMENT_ENV: "ci"
   OWNERS: "[]"
