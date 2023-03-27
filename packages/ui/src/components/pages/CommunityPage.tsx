@@ -85,10 +85,10 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 		channels.at(0)?.channel.id ?? null,
 	);
 
-	useTrackEvent("Community Page View", {
-		"Server Id": server.id,
-		"Server Name": server.name
-	})
+	useTrackEvent('Community Page View', {
+		'Server Id': server.id,
+		'Server Name': server.name,
+	});
 
 	const selectedChannel = channels.find(
 		(c) => c.channel.id === selectedChannelId,
@@ -172,7 +172,6 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 
 	const CommunityQuestionsSection = () => (
 		<>
-		
 			<Heading.H3 className="text-center md:text-left">
 				Community questions
 			</Heading.H3>
@@ -210,15 +209,15 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 		<div className="mx-auto w-full overflow-y-scroll bg-ao-white scrollbar-hide overflow-x-hidden dark:bg-ao-black">
 			<Navbar />
 			<main className="bg-ao-white dark:bg-ao-black">
-			<AOHead
-				title={`${server.name} Community Page`}
-				description={
-					server.description ??
-					`The community page for ${server.name} on Answer Overflow.`
-				}
-				path={`/c/${server.id}`}
-				server={server}
-			/>
+				<AOHead
+					title={`${server.name} Community Page`}
+					description={
+						server.description ??
+						`The community page for ${server.name} on Answer Overflow.`
+					}
+					path={`/c/${server.id}`}
+					server={server}
+				/>
 
 				<HeroArea />
 				<div className="py-8 sm:px-4">
