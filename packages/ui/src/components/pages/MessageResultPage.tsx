@@ -101,9 +101,9 @@ export function MessageResultPage({
 				title={`${channelName} - ${server.name}`}
 				server={server}
 			/>
-			<div className=" flex flex-col items-center justify-between gap-2 sm:flex-row">
+			<div className="my-8 flex flex-col items-center justify-between gap-2 sm:flex-row sm:py-0">
 				<MessagesSearchBar />
-				<div className="shrink-0 pl-8">
+				<div className="shrink-0 sm:pl-8">
 					<ServerInvite
 						server={server}
 						channel={channel}
@@ -111,8 +111,8 @@ export function MessageResultPage({
 					/>
 				</div>
 			</div>
-			<div className="rounded-md sm:mt-3">
-				<h1 className="rounded-sm border-b-2 border-solid border-neutral-400 pb-2 text-3xl dark:border-neutral-600 dark:text-white">
+			<div className="rounded-md">
+				<h1 className="mb-4 rounded-sm border-b-2 border-solid border-neutral-400 pb-2 text-3xl dark:border-neutral-600 dark:text-white">
 					{thread ? thread.name : channel.name}
 				</h1>
 				<div className="flex flex-col gap-2">{messageStack}</div>
