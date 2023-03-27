@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Marquee from 'react-fast-marquee';
 import Link from 'next/link';
 import { cn } from '~ui/utils/styling';
+import { trackEvent } from '@answeroverflow/hooks';
 
 // TODO: Link to docs for feature?
 const HomeFeature = (props: {
@@ -11,7 +12,7 @@ const HomeFeature = (props: {
 	featureDescription?: React.ReactNode;
 }) => {
 	return (
-		<div className="flex flex-col items-center justify-center rounded-standard border-2 border-white/[.13] bg-[#fafafa] px-2 py-4 text-center dark:bg-[#191B1F] md:px-20 md:py-10 ">
+		<div className="flex flex-col items-center justify-center rounded-standard border-2 border-gray-300 bg-[#fafafa] px-2 py-4 text-center dark:border-white/[.13] dark:bg-[#191B1F] md:px-20 md:py-10 ">
 			<Paragraph className="text-xl md:text-2xl">{props.featureName}</Paragraph>
 			<Paragraph className="text-lg">{props.featureDescription}</Paragraph>
 		</div>
@@ -26,8 +27,7 @@ const FeaturesSection = (props: { className?: string }) => {
 			</Heading.H2>
 			<Heading.H2 className="pt-0 text-center text-lg md:text-right">
 				<Balancer>
-					Your community is unique, {"it's"} time you had a bot that matches
-					that
+					Your community is unique, {"it's"} time you had a bot that matches it
 				</Balancer>
 			</Heading.H2>
 
@@ -75,7 +75,7 @@ const EndSection = (props: { className?: string }) => {
 					their support
 				</Balancer>
 			</Paragraph>
-			<GetStarted variant={'default'} />
+			<GetStarted variant={'default'} location="About Area" />
 		</section>
 	);
 };
@@ -144,6 +144,13 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 			style={{
 				width: '80%',
 			}}
+			onMouseUp={() => {
+				trackEvent('Community Page Link Click', {
+					'Link Location': 'About Marquee',
+					'Server Id': props.id,
+					'Server Name': props.name,
+				});
+			}}
 			tabIndex={-1}
 		>
 			<div className="flex flex-col items-center ">
@@ -151,6 +158,7 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 					src={props.iconUrl}
 					width={64}
 					height={64}
+					unoptimized
 					alt={`${props.name} community icon`}
 					className="rounded-full"
 				/>

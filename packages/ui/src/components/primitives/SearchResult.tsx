@@ -101,7 +101,11 @@ const SearchResultSidebar = () => {
 	const { result } = useSearchResultContext();
 	return (
 		<>
-			<ServerInvite server={result.server} channel={result.channel} />
+			<ServerInvite
+				server={result.server}
+				channel={result.channel}
+				location="Search Results"
+			/>
 			<SearchResultMetaData />
 		</>
 	);

@@ -1,21 +1,15 @@
 import { appRouter } from '@answeroverflow/api';
 import { createSSGContext } from '@answeroverflow/api/src/router/context';
-import {
-	MessageResultPage,
-	AOHead,
-	useIsUserInServer,
-} from '@answeroverflow/ui';
+import { MessageResultPage, useIsUserInServer } from '@answeroverflow/ui';
 import { createProxySSGHelpers } from '@trpc/react-query/ssg';
 import superjson from 'superjson';
 import { trpc } from '@answeroverflow/ui';
 import type { GetStaticPropsContext, InferGetStaticPropsType } from 'next';
 import { TRPCError } from '@trpc/server';
-
 export default function MessageResult(
 	props: InferGetStaticPropsType<typeof getStaticProps>,
 ) {
 	const { serverId, messageId, areAllMessagesPublic } = props;
-
 	const isUserInServer = useIsUserInServer(serverId);
 	const shouldFetchPrivateMessages = isUserInServer && !areAllMessagesPublic;
 	const { data } = trpc.messages.threadFromMessageId.useQuery(messageId, {
@@ -33,28 +27,14 @@ export default function MessageResult(
 		return null;
 	}
 	const { messages, parentChannel, server, thread } = data;
-
-	const firstMessage = messages.at(0);
-	const channelName = thread?.name ?? parentChannel.name;
-	const description =
-		firstMessage && firstMessage.content?.length > 0
-			? firstMessage.content
-			: `Questions related to ${channelName} in ${server.name}`;
 	return (
-		<>
-			<AOHead
-				description={description}
-				path={`/m/${firstMessage?.id ?? messageId}`}
-				title={`${channelName} - ${server.name}`}
-				server={server}
-			/>
-			<MessageResultPage
-				messages={messages}
-				channel={parentChannel}
-				server={server}
-				thread={thread ?? undefined}
-			/>
-		</>
+		<MessageResultPage
+			messages={messages}
+			channel={parentChannel}
+			server={server}
+			requestedId={messageId}
+			thread={thread ?? undefined}
+		/>
 	);
 }
 

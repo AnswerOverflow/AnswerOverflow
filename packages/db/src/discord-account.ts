@@ -4,8 +4,11 @@ import {
 	DiscordAccount,
 	getDefaultDiscordAccount,
 	prisma,
+	zDiscordAccountCreate,
 	zDiscordAccountPrismaCreate,
 	zDiscordAccountPrismaUpdate,
+	zDiscordAccountUpdate,
+	zDiscordAccountUpsert,
 } from '@answeroverflow/prisma-types';
 import {
 	upsertIgnoredDiscordAccount,
@@ -14,30 +17,7 @@ import {
 } from './ignored-discord-account';
 import { DBError } from './utils/error';
 import { upsert, upsertMany } from './utils/operations';
-import { zDiscordAccount } from '@answeroverflow/prisma-types';
 import { deleteManyMessagesByUserId } from './message';
-
-export const zDiscordAccountRequired = zDiscordAccount.pick({
-	id: true,
-	name: true,
-});
-
-export const zDiscordAccountMutable = zDiscordAccount
-	.extend({})
-	.omit({ id: true })
-	.partial();
-
-export const zDiscordAccountCreate = zDiscordAccountMutable.merge(
-	zDiscordAccountRequired,
-);
-
-export const zDiscordAccountUpdate = zDiscordAccountMutable.merge(
-	zDiscordAccountRequired.pick({
-		id: true,
-	}),
-);
-
-export const zDiscordAccountUpsert = zDiscordAccountCreate;
 
 export function findDiscordAccountById(id: string) {
 	return prisma.discordAccount.findUnique({

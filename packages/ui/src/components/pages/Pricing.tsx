@@ -1,13 +1,16 @@
 import { CheckIcon } from '@heroicons/react/24/outline';
 import { GetStarted, Heading, LinkButton } from '../primitives';
 import { WAITLIST_URL } from '@answeroverflow/constants/src/links';
+import { trackEvent } from '@answeroverflow/hooks';
 const pricing = {
 	tiers: [
 		{
 			title: 'Free',
 			description: 'Great for smaller communities ',
 			features: ['Hosting on answeroverflow.com', 'Basic analytics'],
-			cta: <GetStarted variant={'subtle'} className="w-full" />,
+			cta: (
+				<GetStarted variant={'subtle'} className="w-full" location="Pricing" />
+			),
 			mostPopular: false,
 		},
 		{
@@ -20,7 +23,15 @@ const pricing = {
 				'AI Question Answers',
 			],
 			cta: (
-				<LinkButton href={WAITLIST_URL} className="w-full">
+				<LinkButton
+					href={WAITLIST_URL}
+					className="w-full"
+					onMouseUp={() => {
+						trackEvent('Join Waitlist Click', {
+							'Button Location': 'Pricing Page',
+						});
+					}}
+				>
 					Join Waitlist
 				</LinkButton>
 			),
@@ -40,7 +51,7 @@ export function Pricing() {
 				Make the most of your community
 			</Heading.H2>
 			<p className="mt-6 max-w-2xl text-xl text-neutral-600 dark:text-neutral-200">
-				Plan for communities of all sizes. Whether {"you're"} just getting
+				Plans for communities of all sizes. Whether {"you're"} just getting
 				started or managing thousands of members, we{"'"}ve got you covered.
 			</p>
 

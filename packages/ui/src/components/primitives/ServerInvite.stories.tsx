@@ -17,6 +17,7 @@ export const InServer: Story = {
 			// AO's Discord server
 			inviteCode: 'sxDN2rEdwD',
 		}),
+		location: 'Search Results',
 		isUserInServer: true,
 	},
 };

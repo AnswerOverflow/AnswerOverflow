@@ -33,6 +33,7 @@ const nextTRPC = () =>
 	});
 
 const storybookTRPC = () => createTRPCReact<AppRouter>();
+
 export type StorybookTRPC = ReturnType<typeof storybookTRPC>;
 export type NextTRPC = ReturnType<typeof nextTRPC>;
 

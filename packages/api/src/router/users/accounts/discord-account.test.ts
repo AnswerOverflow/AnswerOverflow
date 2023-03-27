@@ -20,7 +20,7 @@ import {
 let discordAccount: DiscordAccount;
 let discordAccount2: DiscordAccount;
 function pickPublicFields(discordAccount: DiscordAccount) {
-	return pick(discordAccount, ['id', 'name', 'avatar']);
+	return pick(discordAccount, 'id', 'name', 'avatar');
 }
 
 beforeEach(() => {

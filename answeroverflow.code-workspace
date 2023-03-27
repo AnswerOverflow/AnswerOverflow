@@ -11,10 +11,6 @@
       "path": "apps/docs"
     },
     {
-      "name": "ui",
-      "path": "packages/ui"
-    },
-    {
       //
       "name": "discord-bot",
       "path": "apps/discord-bot"
@@ -28,6 +24,14 @@
       "path": "packages/discordjs-utils"
     },
     {
+      "name": "ui",
+      "path": "packages/ui"
+    },
+    {
+      "name": "hooks",
+      "path": "packages/hooks"
+    },
+    {
       "name": "constants",
       "path": "packages/constants"
     },
@@ -38,6 +42,10 @@
     {
       "name": "auth",
       "path": "packages/auth"
+    },
+    {
+      "analytics": "analytics",
+      "path": "packages/analytics"
     },
     {
       "name": "db",
@@ -119,6 +127,7 @@
         "[\"'`]([^\"'`]*).*?[\"'`]"
       ]
     ],
+    "typescript.autoClosingTags": true,
     /*
       EDITOR STYLE
     */
@@ -150,6 +159,8 @@
       "config",
       "utils",
       "redis",
+      "hooks",
+      "analytics",
       "db-mock",
       "constants",
       "prisma-types",
@@ -182,6 +193,8 @@
       "nextjs",
       "Nextra",
       "orta",
+      "pageview",
+      "posthog",
       "postpublish",
       "reacord",
       "Rendererable",
@@ -197,6 +210,7 @@
       "twoslash",
       "unauthed",
       "undelete",
+      "unoptimized",
       "upsert",
       "upserting",
       "upvote",

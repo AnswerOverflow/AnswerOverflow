@@ -64,8 +64,8 @@ const defaultMessage: MessageResultPageProps = {
 			content: 'This is the second public message',
 		}),
 	],
+	requestedId: '1',
 	channel: mockChannelWithSettings(),
-	query: '',
 	server: { ...mockServer(), id: '83730679338106880' },
 };
 

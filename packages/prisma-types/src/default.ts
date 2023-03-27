@@ -5,11 +5,9 @@ import type {
 	User,
 	UserServerSettings,
 } from '@prisma/client';
-import {
-	addFlagsToChannel,
-	addFlagsToServer,
-	addFlagsToUserServerSettings,
-} from './zod-schemas';
+import { addFlagsToChannel } from './channel-schema';
+import { addFlagsToServer } from './server-schema';
+import { addFlagsToUserServerSettings } from './user-server-settings-schema';
 export function getDefaultUser(
 	override: Partial<User> & {
 		id: string;

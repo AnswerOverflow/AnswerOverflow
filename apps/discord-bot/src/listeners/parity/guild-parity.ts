@@ -8,6 +8,7 @@ import {
 } from '@answeroverflow/db';
 import { toAOChannel, toAOServer } from '~discord-bot/utils/conversions';
 import { delay } from '@answeroverflow/discordjs-mock';
+import { trackServerSideEvent } from '@answeroverflow/analytics';
 
 /*
   Guild related events are tracked here, this may make sense to split into multiple files as the complexity grows.
@@ -101,6 +102,11 @@ export class SyncOnReady extends Listener {
 export class SyncOnJoin extends Listener {
 	public async run(guild: Guild) {
 		await syncServer(guild);
+		trackServerSideEvent('Server Join', {
+			'Server Id': guild.id,
+			'Server Name': guild.name,
+			'Answer Overflow Account Id': guild.ownerId, // <---TODO: Not a great id to track with but best we've got
+		});
 		if (process.env.NODE_ENV !== 'test') {
 			const rhysUser = await this.container.client.users.fetch(
 				'523949187663134754',
