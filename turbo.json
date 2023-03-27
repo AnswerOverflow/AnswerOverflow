@@ -39,7 +39,7 @@
 		},
 		"test": {
 			"outputs": ["coverage/**"],
-			"cache": false
+			"cache": true
 		},
 		"test:no-cache": {
 			"cache": false,
