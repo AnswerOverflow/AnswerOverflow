@@ -18,6 +18,8 @@ export const clientSchema = z.object({
 	// NEXT_PUBLIC_BAR: z.string(),
 });
 
+// This is a comment to trigger a redeploy
+
 /**
  * You can't destruct `process.env` as a regular object, so you have to do
  * it manually here. This is because Next.js evaluates this at build time,
