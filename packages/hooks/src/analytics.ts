@@ -5,6 +5,7 @@ import posthog from 'posthog-js';
 import React, { useEffect, useRef } from 'react';
 import {
 	ChannelProps,
+	CommunityPageLinkEvent,
 	JoinWaitlistClickProps,
 	JOIN_WAITLIST_EVENT_NAME,
 	MessageProps,
@@ -42,7 +43,8 @@ type EventMap = {
 	'Getting Started Click': GettingStartedClickProps;
 	'Add To Server Click': AddToServerClickProps;
 	[JOIN_WAITLIST_EVENT_NAME]: JoinWaitlistClickProps;
-} & ServerInviteEvent;
+} & ServerInviteEvent &
+	CommunityPageLinkEvent;
 
 export function trackEvent<K extends keyof EventMap>(
 	eventName: K,

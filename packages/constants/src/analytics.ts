@@ -52,3 +52,16 @@ export type ServerInviteClickProps = {
 export type ServerInviteEvent = {
 	'Server Invite Click': ServerInviteClickProps;
 };
+
+export type CommunityPageLinkClickProps = {
+	'Link Location':
+		| 'Community Page'
+		| 'Search Results'
+		| 'About Marquee'
+		| 'Message Result Page';
+} & ServerProps &
+	Partial<ChannelProps> &
+	Partial<ThreadProps>;
+export type CommunityPageLinkEvent = {
+	'Community Page Link Click': CommunityPageLinkClickProps;
+};

@@ -4,14 +4,9 @@ module.exports = {
 	extends: ['@answeroverflow/eslint-config-custom'],
 	overrides: [
 		{
+			files: ['*.ts', '*.tsx'],
 			rules: {
-				'@typescript-eslint/naming-convention': [
-					'warn',
-					{
-						selector: 'typeProperty',
-						format: ['PascalCase'],
-					},
-				],
+				'@typescript-eslint/naming-convention': ['off'],
 			},
 		},
 	],

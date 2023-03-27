@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Marquee from 'react-fast-marquee';
 import Link from 'next/link';
 import { cn } from '~ui/utils/styling';
+import { trackEvent } from '@answeroverflow/hooks';
 
 // TODO: Link to docs for feature?
 const HomeFeature = (props: {
@@ -142,6 +143,13 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 			href={`c/${props.id}`}
 			style={{
 				width: '80%',
+			}}
+			onMouseUp={() => {
+				trackEvent('Community Page Link Click', {
+					'Link Location': 'About Marquee',
+					'Server Id': props.id,
+					'Server Name': props.name,
+				});
 			}}
 			tabIndex={-1}
 		>

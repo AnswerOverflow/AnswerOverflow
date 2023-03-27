@@ -32,9 +32,20 @@ function useServerInviteContext() {
 }
 
 export const ServerInviteTitle = () => {
-	const { server } = useServerInviteContext();
+	const { server, location, channel } = useServerInviteContext();
 	return (
-		<Link href={`/c/${server.id}`}>
+		<Link
+			href={`/c/${server.id}`}
+			onMouseUp={() => {
+				trackEvent('Community Page Link Click', {
+					'Link Location': location,
+					'Server Id': server.id,
+					'Server Name': server.name,
+					'Channel Id': channel?.id,
+					'Channel Name': channel?.name,
+				});
+			}}
+		>
 			<h3 className="text-center font-header text-lg font-bold leading-5 text-ao-black  hover:text-ao-black/[.5] dark:text-ao-white dark:hover:text-ao-white/80">
 				{server.name}
 			</h3>
