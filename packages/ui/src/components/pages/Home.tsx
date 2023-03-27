@@ -32,7 +32,7 @@ export const Home = () => {
 			<div className="max-w-screen-3xl">
 				<div className="relative ">
 					<Navbar />
-					<div className="sm:px-4">
+					<div className="">
 						<HeroArea />
 					</div>
 				</div>

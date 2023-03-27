@@ -224,7 +224,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 				/>
 
 				<HeroArea />
-				<div className="py-8 sm:px-4">
+				<div className="py-8">
 					<div className="px-4 2xl:px-[6rem]">
 						<CommunityQuestionsSection />
 					</div>
