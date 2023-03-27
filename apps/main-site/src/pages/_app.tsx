@@ -8,9 +8,9 @@ import hljs from 'highlight.js';
 import { NextTRPC, PageWrapper, trpc, ThemeProvider } from '@answeroverflow/ui';
 import React, { useEffect } from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-
 import { Heading, Paragraph } from '@answeroverflow/ui';
 import { MDXProvider } from '@mdx-js/react';
+import { useAnalytics } from '@answeroverflow/hooks';
 import Link from 'next/link';
 import type { Components } from '@mdx-js/react/lib';
 
@@ -52,15 +52,24 @@ const MyApp: AppType<{ session: Session | null }> = ({
 		});
 		hljs.highlightAll();
 	}, []);
+
+	// TODO: wow this is ugly but use analytics needs session provider data
+	const WithAnalytics = ({ children }: { children: React.ReactNode }) => {
+		useAnalytics();
+		return <>{children}</>;
+	};
+
 	return (
 		<ThemeProvider>
 			<SessionProvider session={session}>
-				<PageWrapper disabledRoutes={['/', '/c/[communityId]']}>
-					<MDXProvider components={components}>
-						<Component {...pageProps} />
-					</MDXProvider>
-				</PageWrapper>
-				<ReactQueryDevtools initialIsOpen={false} />
+				<WithAnalytics>
+					<PageWrapper disabledRoutes={['/', '/c/[communityId]']}>
+						<MDXProvider components={components}>
+							<Component {...pageProps} />
+						</MDXProvider>
+					</PageWrapper>
+					<ReactQueryDevtools initialIsOpen={false} />
+				</WithAnalytics>
 			</SessionProvider>
 		</ThemeProvider>
 	);

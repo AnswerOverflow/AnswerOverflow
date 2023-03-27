@@ -19,6 +19,7 @@
 		"@answeroverflow/cache": "*",
 		"@answeroverflow/db": "*",
 		"@answeroverflow/tsconfig": "*",
+		"@answeroverflow/analytics": "*",
 		"@answeroverflow/utils": "*",
 		"@next-auth/prisma-adapter": "^1.0.5",
 		"@prisma/client": "^4.7.1",

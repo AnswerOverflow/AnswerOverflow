@@ -76,6 +76,7 @@ export function mockServer(override: Partial<ServerPublic> = {}) {
 		name: 'Test Server',
 		icon: null,
 		description: null,
+		vanityUrl: null,
 		...override,
 	};
 	return data;

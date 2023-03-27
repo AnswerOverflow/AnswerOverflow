@@ -58,7 +58,7 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 		const convertedMessageContent = toHTML(message.content);
 		const parsedMessageContent = Parser(convertedMessageContent);
 		const isUserInServer = useIsUserInServer(message.serverId);
-		if (isUserInServer) {
+		if (isUserInServer !== 'loading' && isUserInServer) {
 			blurred = false;
 		}
 

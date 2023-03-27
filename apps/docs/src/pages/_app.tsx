@@ -9,6 +9,7 @@ import hljs from 'highlight.js';
 
 import { NextTRPC, trpc } from '@answeroverflow/ui';
 import { useEffect } from 'react';
+import { useAnalytics } from '@answeroverflow/hooks';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -21,9 +22,17 @@ const MyApp: AppType<{ session: Session | null }> = ({
 		});
 		hljs.highlightAll();
 	}, []);
+
+	const WithAnalytics = ({ children }: { children: React.ReactNode }) => {
+		useAnalytics();
+		return <>{children}</>;
+	};
+
 	return (
 		<SessionProvider session={session}>
-			<Component {...pageProps} />
+			<WithAnalytics>
+				<Component {...pageProps} />
+			</WithAnalytics>
 		</SessionProvider>
 	);
 };

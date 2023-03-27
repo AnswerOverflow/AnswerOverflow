@@ -150,7 +150,8 @@ export const Message = ({
 export function MessageBlurrer({ children }: { children: React.ReactNode }) {
 	const { message } = useMessageContext();
 	const isUserInServer = useIsUserInServer(message.serverId);
-	const isBlurred = !isUserInServer && !message.public;
+	const isBlurred =
+		isUserInServer !== 'loading' && isUserInServer && !message.public;
 	// We must hide backdrop blur to prevent the border around the message from being blurred as well - causes weird color change
 	return (
 		<ContentBlurrer blurred={isBlurred} hideBackdropBlur>

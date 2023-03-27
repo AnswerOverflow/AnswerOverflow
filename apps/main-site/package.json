@@ -15,9 +15,11 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@answeroverflow/analytics": "*",
 		"@answeroverflow/api": "*",
 		"@answeroverflow/auth": "*",
 		"@answeroverflow/db": "*",
+		"@answeroverflow/hooks": "*",
 		"@answeroverflow/tailwind-config": "*",
 		"@answeroverflow/ui": "*",
 		"@mdx-js/loader": "^2.3.0",
@@ -32,6 +34,7 @@
 		"@trpc/server": "^10.4.3",
 		"next": "^13.0.6",
 		"next-auth": "^4.20.1",
+		"node-fetch": "^3.3.1",
 		"react": "18.2.0",
 		"react-dom": "18.2.0",
 		"react-fast-marquee": "^1.3.5",

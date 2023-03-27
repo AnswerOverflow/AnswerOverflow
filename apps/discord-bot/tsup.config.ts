@@ -15,6 +15,7 @@ export default defineConfig({
 		'@answeroverflow/db',
 		'@answeroverflow/auth',
 		'@answeroverflow/api',
+		'@answeroverflow/analytics',
 		'@answeroverflow/discordjs-utils',
 		'@answeroverflow/utils',
 		'@answeroverflow/constants',

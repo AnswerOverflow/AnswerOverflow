@@ -2,6 +2,7 @@ import type {
 	ChannelPublicWithFlags,
 	CommunityPageData,
 } from '@answeroverflow/db';
+import { useTrackEvent } from '@answeroverflow/hooks';
 import { useState } from 'react';
 import {
 	Footer,
@@ -17,6 +18,7 @@ import {
 	ServerInviteJoinButton,
 	ServerIcon,
 	DropdownMenuTrigger,
+	AOHead,
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
 
@@ -83,6 +85,11 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 		channels.at(0)?.channel.id ?? null,
 	);
 
+	useTrackEvent('Community Page View', {
+		'Server Id': server.id,
+		'Server Name': server.name,
+	});
+
 	const selectedChannel = channels.find(
 		(c) => c.channel.id === selectedChannelId,
 	);
@@ -95,6 +102,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 				<div className="my-auto flex flex-row bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
 					<ServerInvite
 						server={server}
+						location="Community Page"
 						channel={selectedChannel?.channel}
 						Icon={
 							<ServerIcon
@@ -201,6 +209,16 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 		<div className="mx-auto w-full overflow-y-scroll bg-ao-white scrollbar-hide overflow-x-hidden dark:bg-ao-black">
 			<Navbar />
 			<main className="bg-ao-white dark:bg-ao-black">
+				<AOHead
+					title={`${server.name} Community Page`}
+					description={
+						server.description ??
+						`The community page for ${server.name} on Answer Overflow.`
+					}
+					path={`/c/${server.id}`}
+					server={server}
+				/>
+
 				<HeroArea />
 				<div className="py-8 sm:px-4">
 					<div className="px-4 2xl:px-[6rem]">

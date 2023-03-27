@@ -9,10 +9,11 @@
 		"next-env.d.ts",
 		".storybook/*",
 		"test",
-		"src",
 		"next.config.mjs",
 		"../../reset.d.ts",
 		"postcss.config.cjs",
-		"tailwind.config.cjs"
-	]
+		"tailwind.config.cjs",
+		"src"
+	],
+	"exclude": ["node_modules", "../../node_modules"]
 }

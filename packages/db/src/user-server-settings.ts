@@ -1,56 +1,21 @@
 import type { z } from 'zod';
 import {
 	prisma,
-	getDefaultUserServerSettings,
-	UserServerSettings,
-	zUserServerSettings,
 	getDefaultUserServerSettingsWithFlags,
 	dictToBitfield,
 	UserServerSettingsWithFlags,
 	userServerSettingsFlags,
 	zUserServerSettingsPrismaCreate,
+	zUserServerSettingsCreate,
+	zUserServerSettingsCreateWithDeps,
+	zUserServerSettingsMutable,
+	zUserServerSettingsUpdate,
+	zUserServerSettingsPrismaUpdate,
 } from '@answeroverflow/prisma-types';
-import { upsertDiscordAccount, zDiscordAccountUpsert } from './discord-account';
-import {
-	addFlagsToUserServerSettings,
-	zUserServerSettingsWithFlags,
-} from '@answeroverflow/prisma-types';
+import { upsertDiscordAccount } from './discord-account';
+import { addFlagsToUserServerSettings } from '@answeroverflow/prisma-types';
 import { upsert } from './utils/operations';
 import { DBError } from './utils/error';
-import { omit } from '@answeroverflow/utils';
-
-export const zUserServerSettingsRequired = zUserServerSettingsWithFlags.pick({
-	userId: true,
-	serverId: true,
-});
-
-export const zUserServerSettingsMutable = zUserServerSettingsWithFlags
-	.omit({
-		userId: true,
-		serverId: true,
-	})
-	.deepPartial();
-
-export const zUserServerSettingsFind = zUserServerSettingsRequired;
-
-export const zUserServerSettingsCreate = zUserServerSettingsMutable.merge(
-	zUserServerSettingsRequired,
-);
-export const zUserServerSettingsCreateWithDeps = zUserServerSettingsCreate
-	.omit({
-		userId: true, // we infer this from the user
-	})
-	.extend({
-		user: zDiscordAccountUpsert,
-	});
-
-export type UserServerSettingsCreateWithDeps = z.infer<
-	typeof zUserServerSettingsCreateWithDeps
->;
-
-export const zUserServerSettingsUpdate = zUserServerSettingsMutable.merge(
-	zUserServerSettingsFind,
-);
 
 export const CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE =
 	'You cannot grant consent to publicly display messages with message indexing disabled. Enable messaging indexing first';
@@ -59,8 +24,8 @@ export const CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDE
 // Does not update the user server settings in the database, only handles side effects
 export async function applyUserServerSettingsChangesSideEffects<
 	T extends z.infer<typeof zUserServerSettingsMutable>,
->(old: UserServerSettings, updated: T) {
-	const oldFlags = old.bitfield
+>(old: UserServerSettingsWithFlags, updated: T) {
+	const oldFlags = old.flags
 		? addFlagsToUserServerSettings(old).flags
 		: getDefaultUserServerSettingsWithFlags({
 				userId: old.userId,
@@ -113,10 +78,10 @@ export async function applyUserServerSettingsChangesSideEffects<
 		pendingSettings.flags,
 		userServerSettingsFlags,
 	);
-	return zUserServerSettings.parse({
-		...omit(pendingSettings, 'flags'),
+	return {
+		...pendingSettings,
 		bitfield,
-	});
+	};
 }
 
 interface UserServerSettingsFindById {
@@ -161,7 +126,7 @@ export async function createUserServerSettings(
 	data: z.infer<typeof zUserServerSettingsCreate>,
 ) {
 	const updateData = await applyUserServerSettingsChangesSideEffects(
-		getDefaultUserServerSettings({
+		getDefaultUserServerSettingsWithFlags({
 			...data,
 		}),
 		data,
@@ -174,7 +139,7 @@ export async function createUserServerSettings(
 
 export async function updateUserServerSettings(
 	data: z.infer<typeof zUserServerSettingsUpdate>,
-	existing: UserServerSettings | null,
+	existing: UserServerSettingsWithFlags | null,
 ) {
 	if (!existing) {
 		existing = await findUserServerSettingsById({
@@ -196,7 +161,7 @@ export async function updateUserServerSettings(
 				serverId: data.serverId,
 			},
 		},
-		data: zUserServerSettingsPrismaCreate.parse(updateData),
+		data: zUserServerSettingsPrismaUpdate.parse(updateData),
 	});
 	return addFlagsToUserServerSettings(updated);
 }

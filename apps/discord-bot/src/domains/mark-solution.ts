@@ -21,7 +21,7 @@ import {
 	ANSWER_OVERFLOW_BLUE_HEX,
 	PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED,
 	QUESTION_ID_FIELD_NAME,
-	SOLUTION_ID_FIELD_NAME,
+	SOLUTION_EMBED_ID_FIELD_NAME,
 } from '@answeroverflow/constants';
 
 export class MarkSolutionError extends Error {}
@@ -184,7 +184,7 @@ export function makeMarkSolutionResponse({
 				inline: true,
 			},
 			{
-				name: SOLUTION_ID_FIELD_NAME,
+				name: SOLUTION_EMBED_ID_FIELD_NAME,
 				value: solution.id,
 				inline: true,
 			},

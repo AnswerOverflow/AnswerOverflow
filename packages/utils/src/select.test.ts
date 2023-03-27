@@ -7,7 +7,7 @@ describe('Pick', () => {
 			b: 2,
 			c: 3,
 		};
-		const picked = pick(toPick, ['a', 'c']);
+		const picked = pick(toPick, 'a', 'c');
 		expect(picked).toEqual({
 			a: 1,
 			c: 3,
