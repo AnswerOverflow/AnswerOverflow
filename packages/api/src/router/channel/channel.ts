@@ -88,6 +88,8 @@ async function mutateChannel({
 	});
 }
 
+console.log(process.env.DATABASE_URL)
+
 const zChannelFlagChange = z.object({
 	channel: zChannelWithServerCreate,
 	enabled: z.boolean(),
