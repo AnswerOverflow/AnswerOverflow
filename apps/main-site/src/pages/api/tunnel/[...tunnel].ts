@@ -20,9 +20,8 @@ export default async function handler(
 		})
 		.join('&');
 
-	const posthogEndpoint = `https://app.posthog.com/${
-		tunnel as string
-	}?${query}`;
+	const targetUrl = tunnel instanceof Array ? tunnel.join('/') : tunnel;
+	const posthogEndpoint = `https://app.posthog.com/${targetUrl ?? ''}?${query}`;
 
 	const headersToFilter = new Set(['host', 'cookie']);
 	const filteredHeaders = Object.entries(req.headers).filter(
@@ -39,13 +38,10 @@ export default async function handler(
 	if (req.method !== 'GET') {
 		requestInit.body = rawBody;
 	}
-
 	const proxyRes = await nodeFetch(posthogEndpoint, requestInit);
 
 	res.status(proxyRes.status);
-	proxyRes.headers.forEach((value, key) => {
-		res.setHeader(key, value);
-	});
+
 	res.end(await proxyRes.text());
 }
 
