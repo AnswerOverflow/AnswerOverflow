@@ -62,7 +62,7 @@ function ChannelDropdown(props: ChannelSelectProps) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="outline" className="w-vw80">
+				<Button variant="outline" className="w-full">
 					<ChannelName channel={props.selectedChannel} />
 				</Button>
 			</DropdownMenuTrigger>
@@ -164,7 +164,11 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 		}
 		const qs = questions.map((question) => (
 			<div className="drop-shadow-sm " key={question.message.id}>
-				<LinkMessage message={question.message} thread={question.thread} />
+				<LinkMessage
+					message={question.message}
+					thread={question.thread}
+					className="rounded-standard"
+				/>
 			</div>
 		));
 		return <div className="flex w-full flex-1 flex-col gap-2">{qs}</div>;
