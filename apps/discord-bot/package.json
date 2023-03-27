@@ -20,7 +20,7 @@
 		"@sapphire/plugin-editable-commands": "3.0.0",
 		"@sapphire/plugin-hmr": "^2.0.0",
 		"@sapphire/plugin-logger": "^3.0.1",
-		"@sapphire/plugin-subcommands": "^3.2.2",
+		"@sapphire/plugin-subcommands": "^4.0.0",
 		"@sapphire/time-utilities": "^1.7.8",
 		"@sapphire/type": "^2.2.4",
 		"@sapphire/utilities": "^3.10.1",

@@ -2776,10 +2776,10 @@
     colorette "^2.0.19"
     tslib "^2.4.0"
 
-"@sapphire/plugin-subcommands@^3.2.2":
-  version "3.2.4"
-  resolved "https://registry.yarnpkg.com/@sapphire/plugin-subcommands/-/plugin-subcommands-3.2.4.tgz#7cadd315b6e37b90bb31d2535dab5277ddd1e8fa"
-  integrity sha512-vZQ/bV5AjScBMwgaHxnXVyev8ONjyRjNWq29ARJLNRTLMJ2wlnu60+tu+1ejCzRagxncesswjFr7wMWE2C9svw==
+"@sapphire/plugin-subcommands@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@sapphire/plugin-subcommands/-/plugin-subcommands-4.0.0.tgz#f091925cbbcb8776595fac7f662a19bd2b0092e1"
+  integrity sha512-jugJskJuFN8Cq7NeQ2XnaJkQuyPOj9JfZDSAVVSdiddKAGcXVMhGaB0YoDJ29MvFqSSNj3zPXAl4esvzIt/FiA==
   dependencies:
     "@sapphire/utilities" "^3.11.0"
     tslib "^2.4.1"
