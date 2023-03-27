@@ -63,7 +63,7 @@ Answer Overflow lets you index your Discord help channels into Google so that yo
 
 ### Roadmap
 
-- 🤖&nbsp; AI question improvement suggestions trained on your community
+-  🤖&nbsp; AI question improvement suggestions trained on your community
 - 🤖&nbsp; AI answers trained off of your community
 - 🗺️&nbsp; Server browser and discoverability
 - ✈️&nbsp; Self Hosting Support
