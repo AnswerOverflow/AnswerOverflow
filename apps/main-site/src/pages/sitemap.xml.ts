@@ -8,7 +8,7 @@ export async function getServerSideProps({ res }: GetServerSidePropsContext) {
 		'https://www.answeroverflow.com',
 		servers.map((server) => ({
 			loc: `/c/${server.id}/sitemap.xml`,
-			changefreq: 'weekly',
+			changefreq: 'daily',
 			priority: 1,
 		})),
 	);
