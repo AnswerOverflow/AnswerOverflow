@@ -11,7 +11,6 @@ const navigation = {
 	main: [
 		{ name: 'Terms', href: 'https://www.answeroverflow.com/tos' },
 		{ name: 'Privacy', href: 'https://www.answeroverflow.com/privacy' },
-		{ name: 'Pricing', href: 'https://www.answeroverflow.com/pricing' },
 		{ name: 'Cookies', href: 'https://www.answeroverflow.com/cookies' },
 		{ name: 'EULA', href: 'https://www.answeroverflow.com/eula' },
 		{ name: 'Docs', href: 'https://docs.answeroverflow.com' },

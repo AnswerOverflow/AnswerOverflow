@@ -16,7 +16,6 @@ export const authRouter = router({
 	getServers: withUserServersProcedure.query(({ ctx }) => {
 		return ctx.userServers;
 	}),
-	// TODO: Cache
 	getDiscordAccount: withDiscordAccountProcedure.query(({ ctx }) => {
 		return ctx.discordAccount;
 	}),
