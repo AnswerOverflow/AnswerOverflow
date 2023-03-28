@@ -63,7 +63,7 @@ export const PricingArea = (props: { className?: string }) => {
 	return (
 		<div className={cn('w-full', props.className)} id="roadmap">
 			<Heading.H2 className="text-center ">
-				{"We're"} just getting started
+				{"And we're"} just getting started
 			</Heading.H2>
 			<div className="flex w-full items-center justify-center py-2">
 				<Heading.H3 className="pt-0 text-center  text-lg lg:w-1/2">
