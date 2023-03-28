@@ -13,6 +13,7 @@ import { MDXProvider } from '@mdx-js/react';
 import { useAnalytics } from '@answeroverflow/hooks';
 import Link from 'next/link';
 import type { Components } from '@mdx-js/react/lib';
+import 'core-js/actual/array/at';
 
 const components: Components = {
 	h1: Heading.H1,
