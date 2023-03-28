@@ -37,7 +37,7 @@
 		"dotenv-cli": "^7.1.0",
 		"eslint": "^8.28.0",
 		"tslib": "^2.4.1",
-		"typescript": "^4.9.4",
+		"typescript": "^5.0.2",
 		"vitest": "^0.25.1"
 	}
 }
