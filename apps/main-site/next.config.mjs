@@ -23,7 +23,7 @@ const withMDX = nextJSMDX.default({
 
 /** @type {import("next").NextConfig} */
 const config = {
-	reactStrictMode: true,
+	reactStrictMode: false,
 	swcMinify: true,
 	pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
 	transpilePackages: [
@@ -39,6 +39,13 @@ const config = {
 	// We already do linting on GH actions
 	eslint: {
 		ignoreDuringBuilds: !!process.env.CI,
+	},
+	webpack: (config) => {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+		config.optimization.minimize = false;
+
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+		return config;
 	},
 };
 
