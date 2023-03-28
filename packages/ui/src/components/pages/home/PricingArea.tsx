@@ -61,7 +61,7 @@ const pricing = {
 
 export const PricingArea = (props: { className?: string }) => {
 	return (
-		<div className={cn('w-full', props.className)}>
+		<div className={cn('w-full', props.className)} id="roadmap">
 			<Heading.H2 className="text-center ">
 				{"We're"} just getting started
 			</Heading.H2>
@@ -72,13 +72,13 @@ export const PricingArea = (props: { className?: string }) => {
 				</Heading.H3>
 			</div>
 			<div className="flex w-full items-center justify-center pb-8 pt-4">
-				<GetStarted location="Pricing" variant={'default'}>
+				<GetStarted location="Pricing" variant={'outline'}>
 					Add to server
 				</GetStarted>
 			</div>
 
 			{/* Tiers */}
-			<div className="flex w-full justify-center" id="roadmap">
+			<div className="flex w-full justify-center">
 				{pricing.tiers.map((tier) => (
 					<div
 						key={tier.title}
