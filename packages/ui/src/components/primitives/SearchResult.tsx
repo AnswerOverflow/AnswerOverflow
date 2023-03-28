@@ -113,7 +113,7 @@ const SearchResultSidebar = () => {
 
 const NoSolution = ({ messageId }: { messageId: string }) => {
 	return (
-		<div className=" w-full rounded-bl-standard border-2 border-t-0 border-black/[.13] bg-white/[.01] dark:border-white/[.13]">
+		<div className="w-full rounded-b-standard border-2 border-t-0 border-black/[.13] bg-white/[.01] dark:border-white/[.13] lg:rounded-br-none">
 			<Paragraph className="p-6 font-body text-ao-black dark:text-white/[.66]">
 				No replies marked as solution...{' '}
 				<Link
@@ -141,14 +141,20 @@ const SearchResultAnswer = () => {
 export const LinkMessage = ({
 	message,
 	thread,
+	className,
 }: {
 	message: APIMessageWithDiscordAccount;
 	thread?: ChannelPublicWithFlags;
+	/**
+	 * className passed directly to the message component
+	 */
+	className?: string;
 }) => {
 	return (
 		<Message
 			message={message}
 			showBorders
+			className={className}
 			content={
 				<>
 					<Link href={`/m/${message.id}`}>
@@ -184,7 +190,7 @@ export const SearchResult = ({
 		<SearchResultContext.Provider value={{ result }}>
 			<div className="flex h-full w-full flex-col-reverse rounded-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:flex-row">
 				<SearchResultMainContent />
-				<div className="w-full flex-col items-center justify-center rounded-tr-standard rounded-br-standard border-y-2 border-b-0 border-r-2  border-black/[.13] px-5 pt-6 pb-2 dark:border-white/[.13] lg:flex lg:w-1/4 lg:border-b-2 2xl:w-1/6">
+				<div className="w-full flex-col items-center justify-center rounded-t-standard border-x-2 border-t-2 border-black/[.13] px-5 pt-6 pb-2 dark:border-white/[.13] lg:flex lg:w-1/4 lg:rounded-tl-none lg:rounded-br-standard lg:border-y-2 lg:border-l-0 lg:border-r-2 2xl:w-1/6">
 					<SearchResultSidebar />
 				</div>
 			</div>

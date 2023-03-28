@@ -44,12 +44,14 @@ const SearchIcon = () => {
 export function SearchInput(props: InputProps) {
 	const { className, ...inputProps } = props;
 	return (
-		<div className={cn('flex w-full items-center space-x-2', className)}>
-			<Input className="bg-inherit" {...inputProps} type="search" />
+		<div
+			className={cn('relative flex w-full items-center space-x-2', className)}
+		>
+			<Input className="bg-inherit pr-16" {...inputProps} type="search" />
 			<Button
 				aria-label="Search"
-				variant={'ghost'}
-				className="bg-inherit text-ao-black dark:bg-inherit dark:text-ao-white"
+				variant="ghost"
+				className="absolute right-0 z-10 bg-inherit text-ao-black dark:bg-inherit dark:text-ao-white"
 			>
 				<SearchIcon />
 			</Button>

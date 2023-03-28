@@ -7,6 +7,7 @@ import { createContext, useContext } from 'react';
 import { DiscordAvatar } from './DiscordAvatar';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
+import { cn } from '~ui/utils/styling';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MessageContext = createContext<{
@@ -119,6 +120,7 @@ type MessageProps = {
 	images?: React.ReactNode;
 	showBorders?: boolean;
 	Blurrer?: React.FC<{ children: React.ReactNode }>;
+	className?: string;
 };
 export const Message = ({
 	message,
@@ -127,14 +129,18 @@ export const Message = ({
 	content = <MessageContents />,
 	authorArea = <MessageAuthorArea />,
 	images = <MessageAttachments />,
+	className,
 }: MessageProps) => {
 	return (
 		<MessageContext.Provider value={{ message }}>
 			<Blurrer>
 				<div
-					className={`grow rounded-t-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:rounded-tr-none ${
-						showBorders ? 'border-2' : ''
-					} border-black/[.13] dark:border-white/[.13]`}
+					className={cn(
+						`grow bg-[#E9ECF2] dark:bg-[#181B1F] lg:rounded-tl-standard ${
+							showBorders ? 'border-2' : ''
+						} border-black/[.13] dark:border-white/[.13]`,
+						className,
+					)}
 				>
 					<div className="p-6">
 						<div className="flex items-center gap-2">{authorArea}</div>
