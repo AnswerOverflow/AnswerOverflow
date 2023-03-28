@@ -1,7 +1,7 @@
 /* eslint-disable tailwindcss/no-custom-classname */
 import { cva, VariantProps } from 'cva';
 
-export const GitHubIcon = (props: any) => (
+export const GitHubIcon = (props: React.SVGProps<SVGSVGElement>) => (
 	<svg fill="currentColor" viewBox="0 0 24 24" {...props}>
 		<path
 			fillRule="evenodd"

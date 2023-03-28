@@ -6,7 +6,7 @@ export const GoogleResult = forwardRef<
 	GooglePageProps['result']
 >(function GoogleResultComp({ url, title, description }, ref) {
 	return (
-		<div className="flex flex-col items-start justify-center px-5 font-['arial']">
+		<div className="mr-auto flex flex-col items-start justify-center px-5 font-['arial']">
 			<div className="group">
 				<div className="flex w-full flex-row items-center justify-start">
 					<span className="text-[14px] text-[#bdc1c6]">{url}</span>
