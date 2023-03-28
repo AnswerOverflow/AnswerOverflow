@@ -1,4 +1,5 @@
 // src/pages/App.tsx
+import 'core-js/actual/array/at';
 import '../styles/globals.css';
 import '../styles/code.scss';
 import { SessionProvider } from 'next-auth/react';
@@ -13,7 +14,6 @@ import { MDXProvider } from '@mdx-js/react';
 import { useAnalytics } from '@answeroverflow/hooks';
 import Link from 'next/link';
 import type { Components } from '@mdx-js/react/lib';
-import 'core-js/actual/array/at';
 
 const components: Components = {
 	h1: Heading.H1,
