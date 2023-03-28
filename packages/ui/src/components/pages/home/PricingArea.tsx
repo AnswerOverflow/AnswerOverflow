@@ -22,10 +22,10 @@ const pricing = {
 			title: 'Enterprise',
 			description: 'Tools to scale your community support',
 			features: [
+				'AI Question Answers',
 				'Host on your own domain*',
 				'Advanced analytics',
 				'Premium Support',
-				'AI Question Answers',
 			],
 			cta: (
 				<LinkButton

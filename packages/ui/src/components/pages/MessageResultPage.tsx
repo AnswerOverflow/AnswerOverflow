@@ -69,6 +69,13 @@ export function MessageResultPage({
 		} else {
 			consecutivePrivateMessages = 0;
 		}
+		// TODO: Remove when embeds are supported
+		if (
+			message.public &&
+			message.content.length === 0 &&
+			message.attachments.length === 0
+		)
+			return null;
 		const Msg = ({ count }: { count: number }) => (
 			<Message
 				key={message.id}
