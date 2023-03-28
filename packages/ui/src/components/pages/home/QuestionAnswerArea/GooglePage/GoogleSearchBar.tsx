@@ -12,7 +12,9 @@ export const GoogleSearchBar = () => {
 				/>
 			</div>
 			<div className="w-full grow rounded-[24px] bg-[#303134] py-3 px-5 font-sans text-[#e8eaed]">
-				<span>How do I index my discord channels into google?</span>
+				<span className="whitespace-nowrap">
+					How do I index my discord channels into google?
+				</span>
 			</div>
 		</div>
 	);

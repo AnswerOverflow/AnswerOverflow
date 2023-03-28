@@ -17,7 +17,7 @@ interface HeadProps {
 export const AOHead = ({
 	title,
 	description = 'Build the best Discord support server with Answer Overflow. Index your content into Google, answer questions with AI, and gain insights into your community.',
-	image = 'https://www.answeroverflow.com/answer-overflow-banner.png',
+	image = 'https://www.answeroverflow.com/answer-overflow-banner-v3.png',
 	server = undefined,
 	addPrefix: addPrefix = false,
 	imageWidth: imageWidth = '1200',

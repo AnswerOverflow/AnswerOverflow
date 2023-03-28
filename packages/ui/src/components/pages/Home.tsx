@@ -7,13 +7,13 @@ import { Button } from '../primitives';
 import { useRef } from 'react';
 const DownChevron = (props: { scrollIntoView: () => unknown }) => (
 	<div className="absolute bottom-10 left-1/2 -translate-x-1/2">
-		<div className="mx-auto h-16 w-16 rounded-full text-black/[.65] hover:shadow-[0px_0px_40px_rgba(255,_255,_255,_0.4)] dark:text-white/[.65] ">
+		<div className="mx-auto h-16 w-16 rounded-full text-black/[.65] dark:text-white/[.65]">
 			<Button
 				variant="ghost"
-				className="h-16 w-16 rounded-lg focus:ring-0 focus:ring-offset-0 dark:hover:bg-inherit"
+				className="rounded-lg focus:ring-0 focus:ring-offset-0 dark:hover:bg-inherit"
 				onClick={props.scrollIntoView}
 			>
-				<ChevronDownIcon className="h-16 w-16 rounded-full text-ao-black/[.6] hover:text-ao-black  dark:text-ao-white/[.6] dark:hover:text-ao-white" />
+				<ChevronDownIcon className="h-8 w-8 rounded-full text-ao-black/[.6] hover:text-ao-black  dark:text-ao-white/[.6] dark:hover:text-ao-white" />
 				<span className="sr-only">Scroll down</span>
 			</Button>
 		</div>
@@ -32,7 +32,7 @@ export const Home = () => {
 			<div className="max-w-screen-3xl">
 				<div className="relative ">
 					<Navbar />
-					<div className="sm:px-4">
+					<div className="">
 						<HeroArea />
 					</div>
 				</div>

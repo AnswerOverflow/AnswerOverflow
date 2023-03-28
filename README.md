@@ -16,6 +16,7 @@
   <a href="https://discord.gg/Wny38ap7Tx">
     <img alt="Discord" src="https://img.shields.io/discord/952724385238761475?color=7389D8&label&logo=discord&logoColor=ffffff" />
   </a>
+  
   <br />
   <a href="https://twitter.com/RhysSullivan">
     <img alt="Twitter" src="https://img.shields.io/twitter/url.svg?label=%40RhysSullivan&style=social&url=https%3A%2F%2Ftwitter.com%2RhysSullivan" />
@@ -27,6 +28,8 @@
     <img alt="codecov" src="https://codecov.io/gh/AnswerOverflow/AnswerOverflow/branch/main/graph/badge.svg?token=8J0AQ77SOG">
   </a>
   
+  
+  <a href="https://www.producthunt.com/posts/answer-overflow?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-answer&#0045;overflow" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=386188&theme=light" alt="Answer&#0032;Overflow - Indexing&#0032;Discord&#0032;channels&#0032;into&#0032;Google | Product Hunt" style="width: 180px; height: 39px;" width="180" height="39" /></a>
   [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app?referralCode=Q3ROGt)
 
 
