@@ -19,6 +19,7 @@ const config: DocsThemeConfig = {
 			}}
 		/>
 	),
+	logoLink: 'https://www.answeroverflow.com',
 	project: {
 		link: GITHUB_LINK,
 	},
