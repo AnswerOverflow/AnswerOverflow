@@ -106,6 +106,7 @@ export async function findUserServerSettingsById(
 export async function findManyUserServerSettings(
 	where: UserServerSettingsFindById[],
 ) {
+	// TODO: Maybe just make it only selecting for 1 server at a time
 	const data = await prisma.userServerSettings.findMany({
 		where: {
 			AND: {
