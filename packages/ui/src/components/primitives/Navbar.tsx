@@ -95,7 +95,7 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 			</NavigationMenuItem>
 			<NavigationMenuItem>
 				<Link href={GITHUB_LINK} target="_blank">
-					<GitHubIcon className="h-8 w-8 text-ao-black hover:text-neutral-300 dark:text-ao-white" />
+					<GitHubIcon className="h-8 w-8 text-ao-black hover:fill-neutral-300 dark:text-ao-white" />
 					<span className="sr-only">GitHub</span>
 				</Link>
 			</NavigationMenuItem>
@@ -167,7 +167,7 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 			className={
 				sticky
 					? 'fixed top-0 left-0 w-full backdrop-blur-md dark:bg-ao-black/75'
-					: 'relative min-h-[4rem] py-2 sm:px-4'
+					: 'relative min-h-[4rem] py-2 sm:px-[4rem] 2xl:px-[6rem]'
 			}
 		>
 			<NavigationMenuList>

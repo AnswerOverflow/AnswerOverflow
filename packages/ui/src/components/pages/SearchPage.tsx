@@ -36,7 +36,7 @@ export const MessagesSearchBar = (props: {
 		>
 			<SearchInput
 				defaultValue={query || ''}
-				className="w-full"
+				className="mb-4 w-full"
 				onChange={(e) => setSearchInput(e.target.value)}
 				placeholder={props.placeholder ?? 'Search'}
 			/>
@@ -57,7 +57,7 @@ export const SearchPage = ({ results, isLoading }: SearchResultProps) => {
 		</div>
 	) : (
 		results.map((result) => (
-			<div className="my-2" key={result.message.id}>
+			<div className="mb-8" key={result.message.id}>
 				<SearchResult result={result} />
 			</div>
 		))

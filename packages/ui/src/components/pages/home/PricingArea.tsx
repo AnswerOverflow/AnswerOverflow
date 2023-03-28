@@ -1,7 +1,12 @@
 import { CheckIcon } from '@heroicons/react/24/outline';
-import { GetStarted, Heading, LinkButton } from '../primitives';
 import { WAITLIST_URL } from '@answeroverflow/constants/src/links';
+import {
+	GetStarted,
+	LinkButton,
+	Heading,
+} from '@answeroverflow/ui/src/components/primitives';
 import { trackEvent } from '@answeroverflow/hooks';
+import { cn } from '~ui/utils/styling';
 const pricing = {
 	tiers: [
 		{
@@ -17,10 +22,10 @@ const pricing = {
 			title: 'Enterprise',
 			description: 'Tools to scale your community support',
 			features: [
+				'AI Question Answers',
 				'Host on your own domain*',
 				'Advanced analytics',
 				'Premium Support',
-				'AI Question Answers',
 			],
 			cta: (
 				<LinkButton
@@ -40,46 +45,42 @@ const pricing = {
 	],
 };
 
-function classNames(...classes: string[]) {
-	return classes.filter(Boolean).join(' ');
-}
-
-export function Pricing() {
+export const PricingArea = (props: { className?: string }) => {
 	return (
-		<div className="mx-auto max-w-7xl  py-24 px-6 lg:px-8">
-			<Heading.H2 className="text-3xl font-bold tracking-tight sm:text-5xl sm:leading-none lg:text-6xl">
+		<div className={cn('w-full', props.className)}>
+			<Heading.H2 className="text-center md:text-left">
 				Make the most of your community
 			</Heading.H2>
-			<p className="mt-6 max-w-2xl text-xl text-neutral-600 dark:text-neutral-200">
+			<Heading.H3 className="pt-0 text-center text-lg md:w-3/4 md:text-left lg:w-1/2">
 				Plans for communities of all sizes. Whether {"you're"} just getting
 				started or managing thousands of members, we{"'"}ve got you covered.
-			</p>
+			</Heading.H3>
 
 			{/* Tiers */}
-			<div className="mt-24 space-y-12 lg:grid lg:grid-cols-2 lg:gap-x-8 lg:space-y-0">
+			<div className="mt-8 space-y-12 lg:grid lg:grid-cols-2 lg:gap-x-8 lg:space-y-0">
 				{pricing.tiers.map((tier) => (
 					<div
 						key={tier.title}
-						className={classNames(
+						className={cn(
 							'relative flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-ao-black',
-							tier.mostPopular ? 'shadow-xl shadow-ao-yellow/[.5]' : '',
+							tier.mostPopular
+								? 'shadow-xl shadow-ao-blue/[.5] lg:shadow-2xl'
+								: '',
 						)}
 					>
 						<div className="flex-1">
-							<Heading.H3 className="text-xl font-semibold">
-								{tier.title}
-							</Heading.H3>
+							<Heading.H3 className="font-semibold">{tier.title}</Heading.H3>
 
-							<p className="mt-6 text-neutral-600 dark:text-neutral-300">
+							<p className="text-neutral-600 dark:text-neutral-300">
 								{tier.description}
 							</p>
 
 							{/* Feature list */}
-							<ul role="list" className="mt-6 space-y-6">
+							<ul role="list" className="my-6 space-y-4">
 								{tier.features.map((feature) => (
 									<li key={feature} className="flex">
 										<CheckIcon
-											className="h-6 w-6 shrink-0 text-indigo-500"
+											className="h-6 w-6 shrink-0 text-ao-blue"
 											aria-hidden="true"
 										/>
 										<span className="ml-3 text-gray-600 dark:text-gray-300">
@@ -89,7 +90,7 @@ export function Pricing() {
 								))}
 							</ul>
 						</div>
-						<div className="w-full py-4">{tier.cta}</div>
+						{tier.cta}
 					</div>
 				))}
 			</div>
@@ -105,4 +106,4 @@ export function Pricing() {
 			</div>
 		</div>
 	);
-}
+};

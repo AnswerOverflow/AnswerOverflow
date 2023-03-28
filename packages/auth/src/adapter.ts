@@ -37,4 +37,18 @@ export const extendedAdapter: Adapter = {
 			account,
 		) as unknown as AdapterAccount;
 	},
+	async getUserByAccount(providerAccountId) {
+		const user = await PrismaAdapter(prisma).getUserByAccount(
+			providerAccountId,
+		);
+		if (!user) {
+			return null;
+		}
+		linkAnalyticsAccount({
+			answerOverflowAccountId: user.id,
+			otherId: providerAccountId.providerAccountId,
+		});
+		await finishAnalyticsCollection(); // TODO: Find a better place for this
+		return user;
+	},
 };

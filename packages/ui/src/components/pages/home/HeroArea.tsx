@@ -25,9 +25,9 @@ const HomeLeadText = () => {
 export const HeroArea = () => {
 	return (
 		<div className="z-20 min-h-[calc(100vh-10rem)] px-4 pt-10 pb-20 sm:px-[4rem] 2xl:px-[6rem]">
-			<div className="flex h-full w-full flex-row transition-all lg:gap-32 2xl:gap-72">
+			<div className="flex h-full w-full flex-col transition-all lg:gap-32 xl:flex-row 2xl:gap-72">
 				<HomeLeadText />
-				<div className="hidden items-center justify-center xl:flex 2xl:grow">
+				<div className="hidden items-center justify-center sm:flex 2xl:grow">
 					<QuestionAnswerArea
 						discordChannelName={'How do I index discord channels into google?'}
 						questionMessage={messageData.questionMessage}
