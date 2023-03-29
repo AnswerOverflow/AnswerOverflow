@@ -1,5 +1,5 @@
 // src/pages/App.tsx
-import "core-js/actual";
+import 'core-js/actual';
 import '../styles/globals.css';
 import '../styles/code.scss';
 import { SessionProvider } from 'next-auth/react';
