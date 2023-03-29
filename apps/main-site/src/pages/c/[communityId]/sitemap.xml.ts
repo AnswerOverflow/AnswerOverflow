@@ -15,17 +15,14 @@ export async function getServerSideProps({
 
 	const sitemap = new Sitemap(
 		'https://www.answeroverflow.com',
+		'sitemap',
 		channelsWithIndexingEnabled.map((channel) => ({
 			loc: `/c/${communityId}/${channel.id}/sitemap.xml`,
 			changefreq: 'daily',
 			priority: 0.9,
 		})),
 	);
-	sitemap.add({
-		loc: `/c/${communityId}`, // Community page
-		changefreq: 'weekly',
-		priority: 1,
-	});
+
 	sitemap.applyToRes(res);
 	res.end();
 
