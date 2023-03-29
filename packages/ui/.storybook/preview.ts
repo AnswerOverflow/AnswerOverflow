@@ -1,3 +1,4 @@
+import 'core-js/actual';
 // eslint-disable-next-line no-restricted-imports
 import '../../../apps/main-site/src/styles/globals.css';
 // eslint-disable-next-line no-restricted-imports
