@@ -23,7 +23,7 @@ export function GetStarted(
 			}}
 			{...props}
 		>
-			Get started
+			{props.children || 'Get Started'}
 		</LinkButton>
 	);
 }
