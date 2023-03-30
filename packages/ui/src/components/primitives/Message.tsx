@@ -153,14 +153,18 @@ export const Message = ({
 	);
 };
 
+export function useCanViewMessage(message: APIMessageWithDiscordAccount) {
+	const isUserInServer = useIsUserInServer(message.serverId);
+	if (isUserInServer === 'loading' && !message.public) return false;
+	return message.public || isUserInServer;
+}
+
 export function MessageBlurrer({ children }: { children: React.ReactNode }) {
 	const { message } = useMessageContext();
-	const isUserInServer = useIsUserInServer(message.serverId);
-	const isBlurred =
-		isUserInServer !== 'loading' && isUserInServer && !message.public;
+	const canViewMessage = useCanViewMessage(message);
 	// We must hide backdrop blur to prevent the border around the message from being blurred as well - causes weird color change
 	return (
-		<ContentBlurrer blurred={isBlurred} hideBackdropBlur>
+		<ContentBlurrer blurred={!canViewMessage} hideBackdropBlur>
 			{children}
 		</ContentBlurrer>
 	);
@@ -172,12 +176,11 @@ export function MultiMessageBlurrer(props: {
 }) {
 	const { count, children } = props;
 	const { message } = useMessageContext();
-	const isUserInServer = useIsUserInServer(message.serverId);
-	const isBlurred = !isUserInServer && !message.public;
+	const canViewMessage = useCanViewMessage(message);
 	// We must hide backdrop blur to prevent the border around the message from being blurred as well - causes weird color change
 	return (
 		<ContentBlurrer
-			blurred={isBlurred}
+			blurred={!canViewMessage}
 			hideBackdropBlur
 			notPublicTitle={
 				count === 1 ? 'Message Not Public' : `${count} Messages Not Public`
