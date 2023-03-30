@@ -9,7 +9,11 @@ import type { z } from 'zod';
 import { findAllChannelQuestions, MessageFull } from './message';
 
 // TODO: Do not merge w/out tests
-export async function findServerWithCommunityPageData(idOrVanityUrl: string) {
+export async function findServerWithCommunityPageData(opts: {
+	idOrVanityUrl: string;
+	limit?: number;
+}) {
+	const { idOrVanityUrl, limit } = opts;
 	// TODO: Micro optimization, if the idOrVanityUrl is a number, we can skip the vanityUrl check
 	const found = await prisma.server.findFirst({
 		where: {
@@ -77,7 +81,7 @@ export async function findServerWithCommunityPageData(idOrVanityUrl: string) {
 						if (aDate < bDate) return 1;
 						return 0;
 					})
-					.slice(0, 20),
+					.slice(0, limit),
 			};
 		})
 		.filter(Boolean);

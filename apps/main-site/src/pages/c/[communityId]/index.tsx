@@ -33,7 +33,10 @@ export async function getStaticProps(
 	}
 
 	const serverId = context.params.communityId;
-	const communityPageData = await findServerWithCommunityPageData(serverId);
+	const communityPageData = await findServerWithCommunityPageData({
+		idOrVanityUrl: serverId,
+		limit: 20,
+	});
 
 	if (!communityPageData) {
 		return {
