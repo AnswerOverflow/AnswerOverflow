@@ -12,6 +12,8 @@ import {
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
 import { useTrackEvent } from '@answeroverflow/hooks';
+import { MessageModal } from '../primitives/MessageModal';
+import { useState } from 'react';
 export type MessageResultPageProps = {
 	messages: APIMessageWithDiscordAccount[];
 	server: ServerPublic;
@@ -29,6 +31,10 @@ export function MessageResultPage({
 	thread,
 }: MessageResultPageProps) {
 	const isUserInServer = useIsUserInServer(server.id);
+	const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+	const [attatchmentSelected, setAttachmentSelected] = useState<
+		APIMessageWithDiscordAccount['attachments'][number] | undefined | null
+	>(null);
 
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
@@ -80,7 +86,10 @@ export function MessageResultPage({
 			<Message
 				key={message.id}
 				message={message}
+				fullRounded
 				Blurrer={(props) => <MultiMessageBlurrer {...props} count={count} />}
+				setAttachment={setAttachmentSelected}
+				setOpen={setIsMessageModalOpen}
 			/>
 		);
 
@@ -108,6 +117,11 @@ export function MessageResultPage({
 				title={`${channelName} - ${server.name}`}
 				server={server}
 			/>
+			<MessageModal
+				isOpen={isMessageModalOpen}
+				setIsOpen={setIsMessageModalOpen}
+				attachment={attatchmentSelected}
+			/>
 			<div className="my-8 flex flex-col items-center justify-between gap-2 sm:flex-row sm:py-0">
 				<MessagesSearchBar />
 				<div className="shrink-0 sm:pl-8">
@@ -120,9 +134,10 @@ export function MessageResultPage({
 			</div>
 			<div className="rounded-md">
 				<h1 className="mb-4 rounded-sm border-b-2 border-solid border-neutral-400 pb-2 text-3xl dark:border-neutral-600 dark:text-white">
-					{thread ? thread.name : channel.name}
+					{/* TODO: Add proper icon for a thread/channel */}
+					{thread ? `#${thread.name}` : `#${channel.name}`}
 				</h1>
-				<div className="flex flex-col gap-2">{messageStack}</div>
+				<div className="flex flex-col gap-4">{messageStack}</div>
 			</div>
 		</div>
 	);

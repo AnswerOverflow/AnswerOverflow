@@ -50,7 +50,15 @@ export const MessageContents = () => {
 	);
 };
 
-export const MessageAttachments = () => {
+export const MessageAttachments = ({
+	setOpen,
+	setAttachment,
+}: {
+	setOpen?: (open: boolean) => void;
+	setAttachment?: (
+		attachment: APIMessageWithDiscordAccount['attachments'][number],
+	) => void;
+}) => {
 	const { message } = useMessageContext();
 	function MessageImage({
 		attachment,
@@ -67,7 +75,7 @@ export const MessageAttachments = () => {
 				// TODO: Bit of a hack for now since next images don't work well with no w/h specified
 				// eslint-disable-next-line @next/next/no-img-element
 				<img
-					className="max-w-full md:max-w-sm"
+					className="max-w-full cursor-zoom-in py-4 md:max-w-sm"
 					src={attachment.url}
 					style={{
 						width: 'fit-content',
@@ -75,6 +83,10 @@ export const MessageAttachments = () => {
 						objectFit: 'cover',
 					}}
 					alt={attachment.description ? attachment.description : 'Image'}
+					onClick={() => {
+						setOpen?.(true);
+						setAttachment?.(attachment);
+					}}
 				/>
 			);
 		const originalWidth = width;
@@ -94,6 +106,11 @@ export const MessageAttachments = () => {
 				src={attachment.url}
 				width={originalWidth}
 				height={originalHeight}
+				className="cursor-zoom-in py-4"
+				onClick={() => {
+					setOpen?.(true);
+					setAttachment?.(attachment);
+				}}
 				alt={attachment.description ? attachment.description : 'Image'}
 				style={{
 					maxWidth: `${width}px`,
@@ -121,24 +138,37 @@ type MessageProps = {
 	showBorders?: boolean;
 	Blurrer?: React.FC<{ children: React.ReactNode }>;
 	className?: string;
+	fullRounded?: boolean;
+	setOpen?: (open: boolean) => void;
+	setAttachment?: (
+		attachment: APIMessageWithDiscordAccount['attachments'][number],
+	) => void;
 };
+
 export const Message = ({
 	message,
+	setOpen,
+	setAttachment,
 	Blurrer = MessageBlurrer,
 	showBorders,
 	content = <MessageContents />,
 	authorArea = <MessageAuthorArea />,
-	images = <MessageAttachments />,
+	images = (
+		<MessageAttachments setOpen={setOpen} setAttachment={setAttachment} />
+	),
 	className,
+	fullRounded,
 }: MessageProps) => {
 	return (
 		<MessageContext.Provider value={{ message }}>
 			<Blurrer>
 				<div
 					className={cn(
-						`grow bg-[#E9ECF2] dark:bg-[#181B1F] lg:rounded-tl-standard ${
+						`grow bg-[#E9ECF2] dark:bg-[#181B1F] ${
 							showBorders ? 'border-2' : ''
-						} border-black/[.13] dark:border-white/[.13]`,
+						} border-black/[.13] dark:border-white/[.13] ${
+							fullRounded ? 'rounded-standard' : 'lg:rounded-tl-standard'
+						}`,
 						className,
 					)}
 				>
