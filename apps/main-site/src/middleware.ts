@@ -4,12 +4,10 @@ import type { NextRequest } from 'next/server';
 
 // This function can be marked `async` if using `await` inside
 export function middleware(request: NextRequest) {
-	const target = request.nextUrl.pathname.split('/oemf7z50uh7w/')[1];
 	const rewrite = NextResponse.rewrite(
 		new URL(
-			`https://oemf7z50uh7w.ddns.dataunlocker.com/${target ?? ''}${
-				request.nextUrl.search
-			}`,
+			`${request.nextUrl.pathname}${request.nextUrl.search}`,
+			`https://oemf7z50uh7w.ddns.dataunlocker.com/`,
 		),
 	);
 	rewrite.headers.set('host', 'www.answeroverflow.com');
