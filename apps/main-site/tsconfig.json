@@ -10,7 +10,6 @@
     "next-env.d.ts",
     "postcss.config.cjs",
     "tailwind.config.cjs",
-    "src/_middleware.ts",
     "next-env.d.ts",
     "../../reset.d.ts",
     "prettierrc.cjs"

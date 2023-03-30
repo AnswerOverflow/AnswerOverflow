@@ -8,14 +8,6 @@ const HomeLeadText = () => {
 			<h1 className="text-center font-header text-4xl font-bold leading-[114.5%] text-ao-black dark:text-ao-white md:text-start md:text-6xl">
 				Bringing your Discord channels to Google
 			</h1>
-			<button
-				type="button"
-				onClick={() => {
-					throw new Error('Sentry Frontend Error');
-				}}
-			>
-				Throw error
-			</button>
 			<p className="text-center font-body text-lg text-ao-black/[.95] dark:text-ao-white/[.85] md:text-start md:text-xl">
 				Answer Overflow is an open source project designed to bring discord
 				channels to your favorite search engine, enabling users to easily find
