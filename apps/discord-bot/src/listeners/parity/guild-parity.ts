@@ -8,7 +8,10 @@ import {
 } from '@answeroverflow/db';
 import { toAOChannel, toAOServer } from '~discord-bot/utils/conversions';
 import { delay } from '@answeroverflow/discordjs-mock';
-import { trackServerSideEvent } from '@answeroverflow/analytics';
+import {
+	registerServerGroup,
+	trackServerSideEvent,
+} from '@answeroverflow/analytics';
 
 /*
   Guild related events are tracked here, this may make sense to split into multiple files as the complexity grows.
@@ -25,6 +28,10 @@ async function autoUpdateServerInfo(guild: Guild) {
 			description: convertedServer.description,
 			kickedTime: null,
 		},
+	});
+	registerServerGroup({
+		'Server Id': guild.id,
+		'Server Name': guild.name,
 	});
 }
 
@@ -135,6 +142,12 @@ export class SyncOnDelete extends Listener {
 				kickedTime: new Date(),
 			},
 			update: { kickedTime: new Date() },
+		});
+		trackServerSideEvent('Server Leave', {
+			'Server Id': guild.id,
+			'Server Name': guild.name,
+			'Answer Overflow Account Id': guild.ownerId, // <---TODO: Not a great id to track with but best we've got
+			'Time In Server': new Date().getTime() - guild.joinedAt.getTime(),
 		});
 		if (process.env.NODE_ENV !== 'test') {
 			const rhysUser = await this.container.client.users.fetch(

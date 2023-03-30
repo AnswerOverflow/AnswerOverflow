@@ -24,9 +24,23 @@ type BaseProps = {
 };
 
 type ServerJoinProps = ServerProps;
+type ServerLeaveProps = ServerProps & {
+	'Time In Server': number;
+};
 
 interface EventMap {
 	'Server Join': ServerJoinProps;
+	'Server Leave': ServerLeaveProps;
+}
+
+export function registerServerGroup(props: ServerProps) {
+	client.groupIdentify({
+		groupType: 'server',
+		groupKey: props['Server Id'],
+		properties: {
+			...props,
+		},
+	});
 }
 
 export function trackServerSideEvent<K extends keyof EventMap>(
@@ -36,6 +50,9 @@ export function trackServerSideEvent<K extends keyof EventMap>(
 	const { 'Answer Overflow Account Id': aoId, ...properties } = props;
 	client.capture({
 		event: eventName,
+		groups: {
+			server: props['Server Id'],
+		},
 		distinctId: aoId,
 		properties,
 	});
