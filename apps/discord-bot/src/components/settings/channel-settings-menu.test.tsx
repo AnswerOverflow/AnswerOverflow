@@ -612,7 +612,7 @@ describe('Channel Settings Menu', () => {
 				channel: textChannel,
 				content: (
 					<ChannelSettingsMenu
-						channelMenuIsIn={textChannel}
+						targetChannel={textChannel}
 						channelWithFlags={textChannelWithFlags}
 					/>
 				),
@@ -635,7 +635,7 @@ describe('Channel Settings Menu', () => {
 				channel: textChannel,
 				content: (
 					<ChannelSettingsMenu
-						channelMenuIsIn={textChannel}
+						targetChannel={textChannel}
 						channelWithFlags={textChannelWithFlags}
 					/>
 				),

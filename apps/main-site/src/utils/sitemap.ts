@@ -15,42 +15,60 @@ export type SitemapEntry = {
 };
 
 export class Sitemap {
-	constructor(private baseUrl: string, private sitemap: SitemapEntry[] = []) {}
+	constructor(
+		private baseUrl: string,
+		private type: 'url' | 'sitemap',
+		private entries: SitemapEntry[] = [],
+	) {}
 
 	add(...entries: SitemapEntry[]) {
-		this.sitemap.push(...entries);
+		this.entries.push(...entries);
 	}
 
 	toXml() {
-		if (this.sitemap.length > 50000)
+		if (this.entries.length > 50000)
 			throw new Error('Sitemap cannot have more than 50,000 entries');
 
 		const clamp = (num: number, min: number, max: number) =>
 			Math.min(Math.max(num, min), max);
-		const urls = this.sitemap.map(
+		const urls = this.entries.map(
 			(entry) => `
-    <url>
+    ${this.type === 'sitemap' ? '<sitemap>' : '<url>'}
       <loc>${
 				entry.loc.startsWith('http') ? entry.loc : this.baseUrl + entry.loc
 			}</loc>
       ${entry.lastmod ? `<lastmod>${entry.lastmod}</lastmod>` : ''}
-      ${entry.changefreq ? `<changefreq>${entry.changefreq}</changefreq>` : ''}
       ${
-				entry.priority
+				entry.changefreq && this.type === 'url'
+					? `<changefreq>${entry.changefreq}</changefreq>`
+					: ''
+			}
+      ${
+				entry.priority && this.type === 'url'
 					? `<priority>${clamp(entry.priority, 0, 1)}</priority>`
 					: ''
 			}
-    </url>
+    ${this.type === 'sitemap' ? '</sitemap>' : '</url>'}
   `,
 		);
 
-		return (
-			`<?xml version="1.0" encoding="UTF-8"?>
-      <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
-			urls.join('') +
-			`
-      </urlset>`
-		);
+		if (this.type === 'url') {
+			return (
+				`<?xml version="1.0" encoding="UTF-8"?>
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
+				urls.join('') +
+				`
+        </urlset>`
+			);
+		} else {
+			return (
+				`<?xml version="1.0" encoding="UTF-8"?>
+        <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
+				urls.join('') +
+				`
+        </sitemapindex>`
+			);
+		}
 	}
 
 	applyToRes(res: ServerResponse<IncomingMessage>) {

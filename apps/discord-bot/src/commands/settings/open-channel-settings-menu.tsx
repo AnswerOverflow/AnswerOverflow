@@ -10,9 +10,16 @@ import {
 	SlashCommandBuilder,
 	PermissionsBitField,
 	type ChatInputCommandInteraction,
+	ChannelType,
+	GuildTextBasedChannel,
 } from 'discord.js';
 import React from 'react';
-import { ephemeralReply, getCommandIds } from '~discord-bot/utils/utils';
+import {
+	ephemeralReply,
+	getCommandIds,
+	getRootChannel,
+	RootChannel,
+} from '~discord-bot/utils/utils';
 import {
 	ChannelWithFlags,
 	getDefaultChannelWithFlags,
@@ -20,6 +27,12 @@ import {
 import { createMemberCtx } from '~discord-bot/utils/context';
 import { toAOChannel } from '~discord-bot/utils/conversions';
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
+
+const allowedTypes = [
+	ChannelType.GuildForum,
+	ChannelType.GuildText,
+	ChannelType.GuildAnnouncement,
+] as const;
 
 @ApplyOptions<Command.Options>({
 	name: 'channel-settings',
@@ -41,8 +54,19 @@ export class ChannelSettingsCommand extends Command {
 				.setName(this.name)
 				.setDescription(this.description)
 				.setDMPermission(false)
-				.setDefaultMemberPermissions(
-					PermissionsBitField.resolve('ManageGuild'),
+				.setDefaultMemberPermissions(PermissionsBitField.resolve('ManageGuild'))
+				.addChannelOption((option) =>
+					option
+						.setRequired(false)
+						.setDescription(
+							'Channel to change the settings of. Default is the current channel (or parent channel if in a thread)',
+						)
+						.setName('channel-to-configure')
+						.addChannelTypes(
+							ChannelType.GuildForum,
+							ChannelType.GuildText,
+							ChannelType.GuildAnnouncement,
+						),
 				),
 			{
 				idHints: ids,
@@ -53,29 +77,48 @@ export class ChannelSettingsCommand extends Command {
 	public override async chatInputRun(interaction: ChatInputCommandInteraction) {
 		await guildTextChannelOnlyInteraction(
 			interaction,
-			async ({ channel, member }) => {
-				const targetChannelIdToChangeSettingsFor = channel.isThread()
-					? channel.parentId
-					: channel.id;
-				if (!targetChannelIdToChangeSettingsFor) return; // TODO: Send message to user
+			async ({ channel: interactionChannel, member }) => {
+				const channelArg = interaction.options.getChannel(
+					'channel-to-configure',
+				);
+
+				const targetChannelToConfigure = channelArg
+					? this.container.client.channels.cache.get(channelArg.id)
+					: getRootChannel(interactionChannel);
+
+				if (!targetChannelToConfigure) {
+					await onceTimeStatusHandler(
+						interaction,
+						'Could not find channel to configure',
+					);
+					return;
+				}
+				if (!allowedTypes.includes(targetChannelToConfigure.type)) {
+					await onceTimeStatusHandler(
+						interaction,
+						'Channel to configure is not a valid type',
+					);
+					return;
+				}
 
 				await callAPI({
 					async apiCall(router) {
 						return callWithAllowedErrors({
-							call: () =>
-								router.channels.byId(targetChannelIdToChangeSettingsFor),
+							call: () => router.channels.byId(targetChannelToConfigure.id),
 							allowedErrors: 'NOT_FOUND',
 						});
 					},
 					Ok(result) {
 						if (!result) {
-							result = getDefaultChannelWithFlags(toAOChannel(channel));
+							result = getDefaultChannelWithFlags(
+								toAOChannel(targetChannelToConfigure as GuildTextBasedChannel),
+							);
 						}
 						// TODO: Maybe assert that it matches that spec instead of casting
 						const menu = (
 							<ChannelSettingsMenu
-								channelMenuIsIn={channel}
 								channelWithFlags={result as ChannelWithFlags}
+								targetChannel={targetChannelToConfigure as RootChannel}
 							/>
 						);
 						ephemeralReply(menu, interaction);

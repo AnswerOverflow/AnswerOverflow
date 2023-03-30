@@ -14,7 +14,6 @@ import {
 	MessageActionRowComponentBuilder,
 	NewsChannel,
 	TextChannel,
-	type GuildTextBasedChannel,
 } from 'discord.js';
 import LRUCache from 'lru-cache';
 import {
@@ -62,7 +61,7 @@ import {
 } from '~discord-bot/domains/channel-settings';
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
 import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
-import { type RootChannel, getRootChannel } from '~discord-bot/utils/utils';
+import type { RootChannel } from '~discord-bot/utils/utils';
 import { makeRequestForConsentString } from '~discord-bot/domains/mark-solution';
 import { makeConsentButton } from '~discord-bot/domains/manage-account';
 
@@ -162,6 +161,8 @@ export function IndexingSettingsMenu({
 	return (
 		<>
 			<InstructionsContainer>
+				**Settings for {targetChannel.name}**
+				<Spacer count={2} />
 				<EmbedMenuInstruction
 					instructions={[
 						{
@@ -391,6 +392,8 @@ export function HelpChannelUtilitiesMenu({
 	return (
 		<>
 			<InstructionsContainer>
+				**Settings for {targetChannel.name}**
+				<Spacer count={2} />
 				<EmbedMenuInstruction
 					instructions={[
 						{
@@ -534,23 +537,21 @@ function ExperimentalSettingsMenu() {
 }
 
 export function ChannelSettingsMenu({
-	channelMenuIsIn,
 	channelWithFlags,
+	targetChannel,
 }: {
-	channelMenuIsIn: GuildTextBasedChannel;
 	channelWithFlags: ChannelWithFlags;
+	targetChannel: RootChannel;
 }) {
 	const [channel] = React.useState<ChannelWithFlags>(
-		channelCache.get(channelMenuIsIn.id) ?? channelWithFlags,
+		channelCache.get(targetChannel.id) ?? channelWithFlags,
 	);
-	const targetChannel = getRootChannel(channelMenuIsIn);
-	if (!targetChannel) {
-		throw new Error('Could not find root channel');
-	}
 	const { pushHistory } = useHistory();
 	return (
 		<>
 			<InstructionsContainer>
+				**Settings for {targetChannel.name}**
+				<Spacer count={2} />
 				<EmbedMenuInstruction
 					instructions={[
 						{

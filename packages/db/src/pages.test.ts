@@ -41,7 +41,9 @@ describe('Page Operations', () => {
 			const threadMsg = mockMessage(server, thread, author, { id: thread.id });
 			await createChannel(thread);
 			await upsertMessage(threadMsg);
-			const result = await findServerWithCommunityPageData(server.id);
+			const result = await findServerWithCommunityPageData({
+				idOrVanityUrl: server.id,
+			});
 			expect(result).not.toBeNull();
 			const { channels } = result!;
 			expect(channels).toHaveLength(1);
@@ -57,7 +59,9 @@ describe('Page Operations', () => {
 					sendMarkSolutionInstructionsInNewThreads: true,
 				},
 			});
-			const result = await findServerWithCommunityPageData(server.id);
+			const result = await findServerWithCommunityPageData({
+				idOrVanityUrl: server.id,
+			});
 			expect(result).not.toBeNull();
 			const { channels } = result!;
 			expect(channels).toHaveLength(1);
@@ -72,7 +76,9 @@ describe('Page Operations', () => {
 					indexingEnabled: false,
 				},
 			});
-			const result = await findServerWithCommunityPageData(server.id);
+			const result = await findServerWithCommunityPageData({
+				idOrVanityUrl: server.id,
+			});
 			expect(result).not.toBeNull();
 			const { channels } = result!;
 			expect(channels).toHaveLength(1);
@@ -87,25 +93,31 @@ describe('Page Operations', () => {
 					readTheRulesConsentEnabled: true,
 				},
 			});
-			const result = await findServerWithCommunityPageData(privateServer.id);
+			const result = await findServerWithCommunityPageData({
+				idOrVanityUrl: privateServer.id,
+			});
 			expect(result).not.toBeNull();
 			expect(result!.server).not.toEqual(privateShouldNotEqual);
 		});
 		it('should return null on not found', async () => {
-			const result = await findServerWithCommunityPageData('not-found');
+			const result = await findServerWithCommunityPageData({
+				idOrVanityUrl: 'not-found',
+			});
 			expect(result).toBeNull();
 		});
 		it('should work for a vanity url', async () => {
 			const serverWithVanity = mockServer({ vanityUrl: getRandomId() });
 			await createServer(serverWithVanity);
-			const result = await findServerWithCommunityPageData(
-				serverWithVanity.vanityUrl!,
-			);
+			const result = await findServerWithCommunityPageData({
+				idOrVanityUrl: serverWithVanity.vanityUrl!,
+			});
 			expect(result).not.toBeNull();
 			expect(result!.server.id).toEqual(serverWithVanity.id);
 		});
 		it('should work for an id', async () => {
-			const result = await findServerWithCommunityPageData(server.id);
+			const result = await findServerWithCommunityPageData({
+				idOrVanityUrl: server.id,
+			});
 			expect(result).not.toBeNull();
 			expect(result!.server.id).toEqual(server.id);
 		});
