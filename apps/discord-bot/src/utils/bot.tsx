@@ -9,6 +9,22 @@ import {
 import { Router } from '~discord-bot/components/primitives';
 import React from 'react';
 import LRUCache from 'lru-cache';
+import type { AOEventSubject } from './events';
+
+declare module '@sapphire/pieces' {
+	interface Container {
+		discordJSReact: DiscordJSReact;
+		messageHistory: LRUCache<
+			string,
+			{
+				history: React.ReactNode[];
+				setHistory: (node: React.ReactNode[]) => void;
+			}
+		>;
+		events: AOEventSubject;
+	}
+}
+
 function getLogLevel() {
 	switch (process.env.NODE_ENV) {
 		case 'development':
