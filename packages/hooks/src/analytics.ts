@@ -90,7 +90,7 @@ export const useAnalytics = () => {
 	useEffect(() => {
 		if (!analyticsLoaded) {
 			posthog.init(process.env.NEXT_PUBLIC_POSTHOG_TOKEN as string, {
-				api_host: '/api/tunnel',
+				// api_host: '/api/tunnel',
 				disable_session_recording: process.env.NODE_ENV === 'development',
 				loaded: () => {
 					setAnalyticsLoaded(true);
