@@ -40,6 +40,7 @@
 		"highlight.js": "^11.7.0",
 		"html-react-parser": "^3.0.8",
 		"next": "13.0.2",
+		"react-use": "^17.4.0",
 		"react-use-measure": "^2.1.1",
 		"react-wrap-balancer": "^0.4.0",
 		"react-xarrows": "^2.0.2",
@@ -48,7 +49,6 @@
 		"tailwind-merge": "^1.10.0",
 		"tailwindcss-animate": "^1.0.5",
 		"typescript": "^4.9.4",
-		"usehooks-ts": "^2.9.1",
 		"zod": "^3.20.6"
 	},
 	"devDependencies": {
