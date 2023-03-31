@@ -10,8 +10,7 @@ Sentry.init({
 	// Set tracesSampleRate to 1.0 to capture 100%
 	// of transactions for performance monitoring.
 	// We recommend adjusting this value in production
-	// TODO: Adjust for prod
-	tracesSampleRate: 1.0,
+	tracesSampleRate: 0.1,
 });
 
 import type { DiscordJSReact } from '@answeroverflow/discordjs-react';
