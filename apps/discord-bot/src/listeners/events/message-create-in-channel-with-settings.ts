@@ -10,11 +10,9 @@ export class OnMessageInChannelWithSettings extends Listener {
 		if (!channel) return;
 		this.container.events.next({
 			action: 'messageCreate',
-			value: {
-				eventData: [message],
-				extra: {
-					channelSettings: channel,
-				},
+			data: {
+				raw: [message],
+				channelSettings: channel,
 			},
 		});
 	}

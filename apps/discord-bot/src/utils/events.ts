@@ -3,9 +3,8 @@ import type { ClientEvents } from 'discord.js';
 import type { Subject } from 'rxjs';
 
 type AOEvent<E extends keyof ClientEvents, D extends {} = {}> = {
-	eventData: ClientEvents[E];
-	extra: D;
-};
+	raw: ClientEvents[E];
+} & D;
 
 export type AOEvents = {
 	messageCreate: AOEvent<
@@ -17,7 +16,7 @@ export type AOEvents = {
 
 // ☭
 type AOUnion = {
-	[K in keyof AOEvents]: { action: K; value: AOEvents[K] };
+	[K in keyof AOEvents]: { action: K; data: AOEvents[K] };
 }[keyof AOEvents];
 
 export type AOEventSubject = Subject<AOUnion>;

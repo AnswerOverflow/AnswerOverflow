@@ -8,7 +8,7 @@ import {
 	Message,
 } from 'discord.js';
 import {
-	findChannelById,
+	ChannelWithFlags,
 	findServerById,
 	UserServerSettingsWithFlags,
 } from '@answeroverflow/db';
@@ -75,7 +75,13 @@ export function makeConsentButton(source: ConsentSource) {
 }
 
 // TODO: Find a better return value than `null`
-export async function provideConsentOnForumChannelMessage(message: Message) {
+export async function provideConsentOnForumChannelMessage(
+	message: Message,
+	channelSettings: ChannelWithFlags,
+) {
+	if (!channelSettings?.flags.forumGuidelinesConsentEnabled) {
+		return null;
+	}
 	const channel = message.channel;
 	if (
 		!(channel.isThread() && channel.parent?.type === ChannelType.GuildForum)
@@ -85,10 +91,7 @@ export async function provideConsentOnForumChannelMessage(message: Message) {
 	if (!isHumanMessage(message)) {
 		return null;
 	}
-	const channelSettings = await findChannelById(channel.parent.id);
-	if (!channelSettings?.flags.forumGuidelinesConsentEnabled) {
-		return null;
-	}
+
 	return updateUserConsent({
 		member: message.member!,
 		consentSource: 'forum-post-guidelines',

@@ -37,10 +37,7 @@ export class OnMessage extends Listener {
 	public run() {
 		this.container.events.subscribe((event) => {
 			if (event.action !== 'messageCreate') return;
-			void autoThread(
-				event.value.extra.channelSettings,
-				event.value.eventData[0],
-			);
+			void autoThread(event.data.channelSettings, event.data.raw[0]);
 		});
 	}
 }
