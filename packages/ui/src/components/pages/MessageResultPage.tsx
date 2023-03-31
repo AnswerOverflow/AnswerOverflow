@@ -62,7 +62,6 @@ export function MessageResultPage({
 	const messageStack = messages.map((message, index) => {
 		const nextMessage = messages.at(index + 1);
 		if (!message.public && (isUserInServer === 'loading' || !isUserInServer)) {
-			console.log('private message');
 			consecutivePrivateMessages++;
 			if (nextMessage && !nextMessage.public) {
 				return;
