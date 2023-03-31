@@ -3,11 +3,12 @@ import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
 import discordMarkdown from 'discord-markdown';
 import Parser from 'html-react-parser';
 import Image from 'next/image';
-import { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { DiscordAvatar } from './DiscordAvatar';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import { cn } from '~ui/utils/styling';
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MessageContext = createContext<{
@@ -50,15 +51,56 @@ export const MessageContents = () => {
 	);
 };
 
-export const MessageAttachments = ({
-	setOpen,
-	setAttachment,
-}: {
-	setOpen?: (open: boolean) => void;
-	setAttachment?: (
-		attachment: APIMessageWithDiscordAccount['attachments'][number],
-	) => void;
-}) => {
+const CloseIcon = () => {
+	return (
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			fill="none"
+			viewBox="0 0 24 24"
+			strokeWidth={1.5}
+			stroke="currentColor"
+			className="h-6 w-6"
+		>
+			<path
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				d="M6 18L18 6M6 6l12 12"
+			/>
+		</svg>
+	);
+};
+
+export const MessageModalWrapper = ({
+	children,
+	attachment,
+}: React.PropsWithChildren<{
+	attachment: APIMessageWithDiscordAccount['attachments'][number];
+}>) => {
+	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+	return (
+		<AlertDialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+			<AlertDialog.Trigger asChild>{children}</AlertDialog.Trigger>
+			<AlertDialog.Portal>
+				<AlertDialog.Overlay className="fixed inset-0 z-50 flex h-full w-full items-center justify-center bg-black/75" />
+				<AlertDialog.Content className="fixed top-0 left-0 z-[75] flex h-full w-full flex-col items-center justify-center p-4">
+					<div className="absolute top-0 right-0 z-[100] p-2">
+						<AlertDialog.Cancel className="flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors duration-200 focus:outline-none focus:ring focus:ring-gray-300 hover:bg-gray-200 dark:bg-black dark:hover:bg-gray-800">
+							<CloseIcon />
+						</AlertDialog.Cancel>
+					</div>
+					<img
+						className="max-h-vh80 w-full max-w-2xl object-contain lg:h-full xl:p-10"
+						src={attachment?.url}
+						alt={attachment?.description ?? 'Image'}
+					/>
+				</AlertDialog.Content>
+			</AlertDialog.Portal>
+		</AlertDialog.Root>
+	);
+};
+
+export const MessageAttachments = () => {
 	const { message } = useMessageContext();
 	function MessageImage({
 		attachment,
@@ -74,20 +116,18 @@ export const MessageAttachments = ({
 			return (
 				// TODO: Bit of a hack for now since next images don't work well with no w/h specified
 				// eslint-disable-next-line @next/next/no-img-element
-				<img
-					className="max-w-full cursor-zoom-in py-4 md:max-w-sm"
-					src={attachment.url}
-					style={{
-						width: 'fit-content',
-						height: 'auto',
-						objectFit: 'cover',
-					}}
-					alt={attachment.description ? attachment.description : 'Image'}
-					onClick={() => {
-						setOpen?.(true);
-						setAttachment?.(attachment);
-					}}
-				/>
+				<MessageModalWrapper attachment={attachment}>
+					<img
+						className="max-w-full cursor-zoom-in py-4 md:max-w-sm"
+						src={attachment.url}
+						style={{
+							width: 'fit-content',
+							height: 'auto',
+							objectFit: 'cover',
+						}}
+						alt={attachment.description ? attachment.description : 'Image'}
+					/>
+				</MessageModalWrapper>
 			);
 		const originalWidth = width;
 		const originalHeight = height;
@@ -101,23 +141,21 @@ export const MessageAttachments = ({
 
 		const aspectRatio = width / height;
 		return (
-			<Image
-				key={attachment.url}
-				src={attachment.url}
-				width={originalWidth}
-				height={originalHeight}
-				className="cursor-zoom-in py-4"
-				onClick={() => {
-					setOpen?.(true);
-					setAttachment?.(attachment);
-				}}
-				alt={attachment.description ? attachment.description : 'Image'}
-				style={{
-					maxWidth: `${width}px`,
-					maxHeight: `${maxHeight}px`,
-					aspectRatio: `${aspectRatio}`,
-				}}
-			/>
+			<MessageModalWrapper attachment={attachment}>
+				<Image
+					key={attachment.url}
+					src={attachment.url}
+					width={originalWidth}
+					height={originalHeight}
+					className="cursor-zoom-in py-4"
+					alt={attachment.description ? attachment.description : 'Image'}
+					style={{
+						maxWidth: `${width}px`,
+						maxHeight: `${maxHeight}px`,
+						aspectRatio: `${aspectRatio}`,
+					}}
+				/>
+			</MessageModalWrapper>
 		);
 	}
 	return (
@@ -139,23 +177,15 @@ type MessageProps = {
 	Blurrer?: React.FC<{ children: React.ReactNode }>;
 	className?: string;
 	fullRounded?: boolean;
-	setOpen?: (open: boolean) => void;
-	setAttachment?: (
-		attachment: APIMessageWithDiscordAccount['attachments'][number],
-	) => void;
 };
 
 export const Message = ({
 	message,
-	setOpen,
-	setAttachment,
 	Blurrer = MessageBlurrer,
 	showBorders,
 	content = <MessageContents />,
 	authorArea = <MessageAuthorArea />,
-	images = (
-		<MessageAttachments setOpen={setOpen} setAttachment={setAttachment} />
-	),
+	images = <MessageAttachments />,
 	className,
 	fullRounded,
 }: MessageProps) => {
