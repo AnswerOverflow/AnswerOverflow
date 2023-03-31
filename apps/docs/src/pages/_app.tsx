@@ -17,9 +17,6 @@ const MyApp: AppType<{ session: Session | null }> = ({
 	pageProps: { session, ...pageProps },
 }) => {
 	useEffect(() => {
-		hljs.configure({
-			ignoreUnescapedHTML: true,
-		});
 		hljs.highlightAll();
 	}, []);
 
