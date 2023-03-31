@@ -10,7 +10,7 @@ type AOEvent<E extends keyof ClientEvents, D extends {} = {}> = {
 export type AOEvents = {
 	messageCreate: AOEvent<
 		'messageCreate',
-		{ channelSettings?: ChannelWithFlags }
+		{ channelSettings: ChannelWithFlags }
 	>;
 	clientReady: AOEvent<'clientReady'>;
 };

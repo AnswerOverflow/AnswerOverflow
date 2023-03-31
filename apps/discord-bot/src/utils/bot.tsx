@@ -10,6 +10,7 @@ import { Router } from '~discord-bot/components/primitives';
 import React from 'react';
 import LRUCache from 'lru-cache';
 import type { AOEventSubject } from './events';
+import { Subject } from 'rxjs';
 
 declare module '@sapphire/pieces' {
 	interface Container {
@@ -121,6 +122,7 @@ export const login = async (client: SapphireClient) => {
 			// 10 minute ttl
 			ttl: 1000 * 60 * 10,
 		});
+		container.events = new Subject();
 		client.user?.setActivity({
 			type: ActivityType.Playing,
 			name: 'Open source! github.com/AnswerOverflow',

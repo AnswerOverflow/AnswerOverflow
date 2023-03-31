@@ -1,16 +1,14 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
-import { Events } from 'discord.js';
+import { Events, Message } from 'discord.js';
 import {
 	isHumanMessage,
 	removeDiscordMarkdown,
 } from '~discord-bot/utils/utils';
 import { ALLOWED_AUTO_THREAD_CHANNEL_TYPES } from '@answeroverflow/constants';
-import type { AOEvents } from '~discord-bot/utils/events';
+import type { ChannelWithFlags } from '@answeroverflow/db';
 
-async function autoThread(data: AOEvents['messageCreate']) {
-	const message = data.eventData[0];
-	const channelSettings = data.extra.channelSettings;
+async function autoThread(channelSettings: ChannelWithFlags, message: Message) {
 	if (!channelSettings?.flags.autoThreadEnabled) return;
 
 	const channelType = message.channel.type;
@@ -39,7 +37,10 @@ export class OnMessage extends Listener {
 	public run() {
 		this.container.events.subscribe((event) => {
 			if (event.action !== 'messageCreate') return;
-			void autoThread(event.value);
+			void autoThread(
+				event.value.extra.channelSettings,
+				event.value.eventData[0],
+			);
 		});
 	}
 }
