@@ -11,6 +11,8 @@ export type AOEvents = {
 		'messageCreate',
 		{ channelSettings: ChannelWithFlags }
 	>;
+	threadCreate: AOEvent<'threadCreate', { channelSettings: ChannelWithFlags }>;
+	questionAsked: AOEvent<'threadCreate', { channelSettings: ChannelWithFlags }>;
 	clientReady: AOEvent<'clientReady'>;
 };
 

@@ -1,5 +1,5 @@
 import { EmbedBuilder, ThreadChannel } from 'discord.js';
-import { findChannelById } from '@answeroverflow/db';
+import type { ChannelWithFlags } from '@answeroverflow/db';
 
 const sendMarkSolutionInstructionsErrorReasons = [
 	'Thread was not newly created',
@@ -20,24 +20,17 @@ export class SendMarkSolutionInstructionsError extends Error {
 export async function sendMarkSolutionInstructionsInThread(
 	thread: ThreadChannel,
 	newlyCreated: boolean,
+	channelSettings: ChannelWithFlags,
 ) {
-	if (!newlyCreated) {
-		throw new SendMarkSolutionInstructionsError('Thread was not newly created');
-	}
-	if (!thread.parentId) {
-		throw new SendMarkSolutionInstructionsError(
-			'Thread does not have a parent channel',
-		);
-	}
-	const channel = await findChannelById(thread.parentId);
-	if (!channel) {
-		throw new SendMarkSolutionInstructionsError('Channel not found');
-	}
-	if (!channel.flags.sendMarkSolutionInstructionsInNewThreads) {
+	if (!channelSettings.flags.sendMarkSolutionInstructionsInNewThreads) {
 		throw new SendMarkSolutionInstructionsError(
 			'Channel does not have sendMarkSolutionInstructionsInNewThreads flag set',
 		);
 	}
+	if (!newlyCreated) {
+		throw new SendMarkSolutionInstructionsError('Thread was not newly created');
+	}
+
 	const markSolutionInstructionsEmbed = new EmbedBuilder()
 		.setDescription(
 			`To help others find answers, you can mark your question as solved via \`Right click solution message -> Apps -> ✅ Mark Solution\``,

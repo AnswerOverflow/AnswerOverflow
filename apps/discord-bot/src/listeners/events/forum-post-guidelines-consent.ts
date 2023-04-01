@@ -4,7 +4,7 @@ import { Events } from 'discord.js';
 import { provideConsentOnForumChannelMessage } from '~discord-bot/domains/manage-account';
 
 @ApplyOptions<Listener.Options>({ event: Events.ClientReady })
-export class ForumPostGuideliensConsent extends Listener {
+export class ForumPostGuidelinesConsent extends Listener {
 	public run() {
 		this.container.events.subscribe((event) => {
 			if (event.action !== 'messageCreate') return;
