@@ -2,6 +2,7 @@ import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
 import { Events, Message, AnyThreadChannel } from 'discord.js';
 import { findChannelById } from '@answeroverflow/db';
+import { getRootChannel } from '~discord-bot/utils/utils';
 
 @ApplyOptions<Listener.Options>({
 	event: Events.MessageCreate,
@@ -9,7 +10,12 @@ import { findChannelById } from '@answeroverflow/db';
 })
 export class OnMessageInChannelWithSettings extends Listener<Events.MessageCreate> {
 	public async run(message: Message) {
-		const channel = await findChannelById(message.channelId);
+		// Couple shortcuts to avoid spamming our database
+		if (message.channel.isDMBased()) return;
+		if (message.channel.isVoiceBased()) return;
+		const rootChannel = getRootChannel(message.channel);
+		if (!rootChannel) return;
+		const channel = await findChannelById(rootChannel.id);
 		if (!channel) return;
 		this.container.events.next({
 			action: 'messageCreate',
