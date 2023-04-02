@@ -33,8 +33,9 @@ export class OnMessageInChannelWithSettings extends Listener<Events.MessageCreat
 })
 export class OnThreadCreateInChannelWithSettings extends Listener<Events.ThreadCreate> {
 	public async run(thread: AnyThreadChannel, newlyCreated: boolean) {
-		if (thread.parentId === null) return;
-		const channel = await findChannelById(thread.parentId);
+		const rootChannel = getRootChannel(thread);
+		if (!rootChannel) return;
+		const channel = await findChannelById(rootChannel.id);
 		if (!channel) return;
 		this.container.events.next({
 			action: 'threadCreate',

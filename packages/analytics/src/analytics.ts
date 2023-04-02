@@ -1,6 +1,10 @@
 import type { DefaultSession } from 'next-auth';
 import { PostHog } from 'posthog-node';
-import type { ServerProps } from '@answeroverflow/constants';
+import type {
+	ChannelProps,
+	ServerProps,
+	ThreadProps,
+} from '@answeroverflow/constants';
 const apiKey = process.env.NEXT_PUBLIC_POSTHOG_TOKEN;
 const shouldCollectAnalytics =
 	apiKey !== undefined && process.env.NODE_ENV !== 'test';
@@ -27,10 +31,12 @@ type ServerJoinProps = ServerProps;
 type ServerLeaveProps = ServerProps & {
 	'Time In Server': number;
 };
+type QuestionAskedProps = ServerProps & ChannelProps & ThreadProps;
 
 interface EventMap {
 	'Server Join': ServerJoinProps;
 	'Server Leave': ServerLeaveProps;
+	'Question Asked': QuestionAskedProps;
 }
 
 export function registerServerGroup(props: ServerProps) {
@@ -48,14 +54,17 @@ export function trackServerSideEvent<K extends keyof EventMap>(
 	props: EventMap[K] & BaseProps,
 ): void {
 	const { 'Answer Overflow Account Id': aoId, ...properties } = props;
-	client.capture({
+	const captureData: Parameters<typeof client.capture>[0] = {
 		event: eventName,
-		groups: {
-			server: props['Server Id'],
-		},
 		distinctId: aoId,
 		properties,
-	});
+	};
+	if ('Server Id' in props) {
+		captureData.groups = {
+			server: props['Server Id'],
+		};
+	}
+	client.capture(captureData);
 }
 
 export function identifyDiscordAccount(

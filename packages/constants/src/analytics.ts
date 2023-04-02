@@ -1,37 +1,43 @@
 export const NUMBER_OF_MESSAGES_FIELD_NAME = 'Number of Messages';
 export type Snowflake = string;
 
-export const MESSAGE_ID_FIELD_NAME = 'Message Id';
-export const MESSAGE_AUTHOR_ID_FIELD_NAME = 'Message Author Id';
-export const SOLUTION_ID_FIELD_NAME = 'Solution Id';
-export const SOLUTION_AUTHOR_ID_FIELD_NAME = 'Solution Author Id';
-
 export type MessageProps = {
-	[MESSAGE_ID_FIELD_NAME]: Snowflake;
-	[MESSAGE_AUTHOR_ID_FIELD_NAME]: Snowflake;
-	[SOLUTION_ID_FIELD_NAME]?: Snowflake;
-	[SOLUTION_AUTHOR_ID_FIELD_NAME]?: Snowflake;
+	'Message Id': Snowflake;
+	'Message Author Id': Snowflake;
+	'Solution Id'?: Snowflake;
+	'Solution Author Id'?: Snowflake;
 };
-
-export const SERVER_ID_FIELD_NAME = 'Server Id';
-export const SERVER_NAME_FIELD_NAME = 'Server Name';
 export type ServerProps = {
-	[SERVER_ID_FIELD_NAME]: Snowflake;
-	[SERVER_NAME_FIELD_NAME]: string;
+	'Server Id': Snowflake;
+	'Server Name': string;
 };
 
-export const CHANNEL_ID_FIELD_NAME = 'Channel Id';
-export const CHANNEL_NAME_FIELD_NAME = 'Channel Name';
+export type ServerWithSettingsProps = ServerProps & {
+	'Server Flags': Record<string, boolean>;
+	'Time In Server': number;
+};
+
 export type ChannelProps = {
-	[CHANNEL_ID_FIELD_NAME]: Snowflake;
-	[CHANNEL_NAME_FIELD_NAME]: string;
+	'Channel Id': Snowflake;
+	'Channel Name': string;
+	'Channel Type': number;
 };
 
-export const THREAD_ID_FIELD_NAME = 'Thread Id';
-export const THREAD_NAME_FIELD_NAME = 'Thread Name';
+export type ChannelPropsWithSettings = ChannelProps & {
+	'Channel Flags': Record<string, boolean>;
+	'Channel Solution Tag Id'?: Snowflake;
+	'Channel Invite Code'?: string;
+	'Channel Server Id': Snowflake;
+};
+
 export type ThreadProps = {
-	[THREAD_ID_FIELD_NAME]: Snowflake;
-	[THREAD_NAME_FIELD_NAME]: string;
+	'Thread Id': Snowflake;
+	'Thread Name': string;
+	'Thread Type': number;
+	'Thread Archived At'?: number;
+	'Thread Parent Id'?: Snowflake;
+	'Thread Parent Name'?: string;
+	'Thread Parent Type'?: number;
 };
 
 export const JOIN_WAITLIST_EVENT_NAME = 'Join Waitlist Click';

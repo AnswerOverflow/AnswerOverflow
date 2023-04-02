@@ -6,7 +6,11 @@ import {
 	upsertServer,
 	upsertManyChannels,
 } from '@answeroverflow/db';
-import { toAOChannel, toAOServer } from '~discord-bot/utils/conversions';
+import {
+	toAOAnalyticsServer,
+	toAOChannel,
+	toAOServer,
+} from '~discord-bot/utils/conversions';
 import { delay } from '@answeroverflow/discordjs-mock';
 import {
 	registerServerGroup,
@@ -20,7 +24,7 @@ import {
 // Sync server properties that aren't set by the user
 async function autoUpdateServerInfo(guild: Guild) {
 	const convertedServer = toAOServer(guild);
-	await upsertServer({
+	const upserted = await upsertServer({
 		create: convertedServer,
 		update: {
 			icon: convertedServer.icon,
@@ -29,15 +33,18 @@ async function autoUpdateServerInfo(guild: Guild) {
 			kickedTime: null,
 		},
 	});
-	registerServerGroup({
-		'Server Id': guild.id,
-		'Server Name': guild.name,
-	});
+	registerServerGroup(
+		toAOAnalyticsServer({
+			guild,
+			guildInDb: upserted,
+		}),
+	);
+	return upserted;
 }
 
 async function syncServer(guild: Guild) {
 	// If the server doesn't exist we want to initialize it with the default values
-	await autoUpdateServerInfo(guild);
+	const updated = await autoUpdateServerInfo(guild);
 	const channelsToUpsert = guild.channels.cache.filter((channel) =>
 		ALLOWED_ROOT_CHANNEL_TYPES.has(channel.type),
 	);
@@ -49,7 +56,7 @@ async function syncServer(guild: Guild) {
 			},
 		})),
 	);
-	return guild;
+	return updated;
 }
 
 function makeGuildEmbed(guild: Guild, joined: boolean) {
@@ -108,10 +115,12 @@ export class SyncOnReady extends Listener {
 })
 export class SyncOnJoin extends Listener {
 	public async run(guild: Guild) {
-		await syncServer(guild);
+		const synced = await syncServer(guild);
 		trackServerSideEvent('Server Join', {
-			'Server Id': guild.id,
-			'Server Name': guild.name,
+			...toAOAnalyticsServer({
+				guild,
+				guildInDb: synced,
+			}),
 			'Answer Overflow Account Id': guild.ownerId, // <---TODO: Not a great id to track with but best we've got
 		});
 		if (process.env.NODE_ENV !== 'test') {
@@ -136,7 +145,7 @@ export class SyncOnJoin extends Listener {
 })
 export class SyncOnDelete extends Listener {
 	public async run(guild: Guild) {
-		await upsertServer({
+		const upserted = await upsertServer({
 			create: {
 				...toAOServer(guild),
 				kickedTime: new Date(),
@@ -144,10 +153,11 @@ export class SyncOnDelete extends Listener {
 			update: { kickedTime: new Date() },
 		});
 		trackServerSideEvent('Server Leave', {
-			'Server Id': guild.id,
-			'Server Name': guild.name,
 			'Answer Overflow Account Id': guild.ownerId, // <---TODO: Not a great id to track with but best we've got
-			'Time In Server': new Date().getTime() - guild.joinedAt.getTime(),
+			...toAOAnalyticsServer({
+				guild,
+				guildInDb: upserted,
+			}),
 		});
 		if (process.env.NODE_ENV !== 'test') {
 			const rhysUser = await this.container.client.users.fetch(
