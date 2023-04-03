@@ -47,12 +47,18 @@ describe('Account Parity', () => {
 			await updateUserServersCache(oauth.access_token!, [
 				toDiscordAPIServer(member),
 			]);
-			const userServers = await getUserServers(oauth.access_token!);
+			const userServers = await getUserServers({
+				accessToken: oauth.access_token!,
+				onInvalidToken: () => {},
+			});
 			expect(userServers).toEqual([toDiscordAPIServer(member)]);
 			const member2 = mockGuildMember({ client, user: member.user });
 			await emitEvent(client, Events.GuildMemberAdd, member2);
 
-			const userServers2 = await getUserServers(oauth.access_token!);
+			const userServers2 = await getUserServers({
+				accessToken: oauth.access_token!,
+				onInvalidToken: () => {},
+			});
 			expect(userServers2).toHaveLength(2);
 			expect(userServers2).toContainEqual(toDiscordAPIServer(member2));
 			expect(userServers2).toContainEqual(toDiscordAPIServer(member));
@@ -67,12 +73,18 @@ describe('Account Parity', () => {
 			await updateUserServersCache(oauth.access_token!, [
 				toDiscordAPIServer(member),
 			]);
-			const userServers = await getUserServers(oauth.access_token!);
+			const userServers = await getUserServers({
+				accessToken: oauth.access_token!,
+				onInvalidToken: () => {},
+			});
 			expect(userServers).toEqual([toDiscordAPIServer(member)]);
 
 			await emitEvent(client, Events.GuildMemberRemove, member);
 
-			const userServers2 = await getUserServers(oauth.access_token!);
+			const userServers2 = await getUserServers({
+				accessToken: oauth.access_token!,
+				onInvalidToken: () => {},
+			});
 			expect(userServers2).toHaveLength(0);
 		});
 	});
@@ -88,14 +100,20 @@ describe('Account Parity', () => {
 				id: member.user.id,
 				username: member.user.username,
 			});
-			const cachedUser = await getDiscordUser(oauth.access_token!);
+			const cachedUser = await getDiscordUser({
+				accessToken: oauth.access_token!,
+				onInvalidToken: () => {},
+			});
 			expect(cachedUser.username).toEqual(member.user.username);
 			const newUser = copyClass(member.user, member.client, {
 				username: 'New User',
 			});
 
 			await emitEvent(client, Events.UserUpdate, member.user, newUser);
-			const cachedUser2 = await getDiscordUser(oauth.access_token!);
+			const cachedUser2 = await getDiscordUser({
+				accessToken: oauth.access_token!,
+				onInvalidToken: () => {},
+			});
 			expect(cachedUser2.username).toEqual(newUser.username);
 		});
 	});

@@ -34,6 +34,7 @@
 		"react": "18.2.0",
 		"react-dom": "18.2.0",
 		"react-player": "^2.12.0",
+		"sharp": "^0.32.0",
 		"superjson": "^1.9.1",
 		"zod": "^3.20.6"
 	},

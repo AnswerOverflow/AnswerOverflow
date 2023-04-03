@@ -2,15 +2,26 @@ import { z } from 'zod';
 import axios from 'axios';
 import { getRedisClient } from './client';
 
-export function discordApiFetch(
+type DiscordApiCallOpts = {
+	accessToken: string;
+	onInvalidToken: () => void | Promise<void>;
+};
+export async function discordApiFetch(
 	url: '/users/@me/guilds' | '/users/@me',
-	token: string,
+	callOpts: DiscordApiCallOpts,
 ) {
-	return axios.get('https://discordapp.com/api' + url, {
+	const data = await axios.get('https://discordapp.com/api' + url, {
 		headers: {
-			Authorization: `Bearer ${token}`,
+			Authorization: `Bearer ${callOpts.accessToken}`,
+		},
+		validateStatus(status) {
+			return status < 300 || status === 401;
 		},
 	});
+	if (data.status === 401) {
+		await callOpts.onInvalidToken();
+	}
+	return data;
 }
 const hoursToSeconds = (hours: number) => hours * 60 * 60;
 
@@ -45,46 +56,41 @@ export async function updateUserServersCache(
 	);
 }
 
-export async function getUserServers(accessToken: string) {
+export async function getUserServers(opts: DiscordApiCallOpts) {
 	const client = await getRedisClient();
 	const cachedServers = await client.get(
-		getDiscordServersRedisKey(accessToken),
+		getDiscordServersRedisKey(opts.accessToken),
 	);
 	if (cachedServers) {
 		return zDiscordApiServerArraySchema.parse(JSON.parse(cachedServers));
 	}
-	const data = await discordApiFetch('/users/@me/guilds', accessToken);
+	const data = await discordApiFetch('/users/@me/guilds', opts);
 	const servers = zDiscordApiServerArraySchema.parse(data.data);
-	await updateUserServersCache(accessToken, servers);
+	await updateUserServersCache(opts.accessToken, servers);
 	return servers;
 }
 
-export async function removeServerFromUserCache({
-	accessToken,
-	serverId,
-}: {
-	accessToken: string;
-	serverId: string;
-}) {
-	const cachedServers = await getUserServers(accessToken);
+export async function removeServerFromUserCache(
+	opts: DiscordApiCallOpts & { serverId: string },
+) {
+	const cachedServers = await getUserServers(opts);
 	if (cachedServers) {
 		const filteredServers = cachedServers.filter(
-			(server) => server.id !== serverId,
+			(server) => server.id !== opts.serverId,
 		);
-		await updateUserServersCache(accessToken, filteredServers);
+		await updateUserServersCache(opts.accessToken, filteredServers);
 	}
 }
 
-export async function addServerToUserServerCache({
-	accessToken,
-	server,
-}: {
-	accessToken: string;
-	server: DiscordAPIServerSchema;
-}) {
-	const cachedServers = await getUserServers(accessToken);
+export async function addServerToUserServerCache(
+	opts: DiscordApiCallOpts & { server: DiscordAPIServerSchema },
+) {
+	const cachedServers = await getUserServers(opts);
 	if (cachedServers) {
-		await updateUserServersCache(accessToken, [...cachedServers, server]);
+		await updateUserServersCache(opts.accessToken, [
+			...cachedServers,
+			opts.server,
+		]);
 	}
 }
 
@@ -132,14 +138,14 @@ export async function updateCachedDiscordUser(
 	return user;
 }
 
-export async function getDiscordUser(accessToken: string) {
+export async function getDiscordUser(opts: DiscordApiCallOpts) {
 	const client = await getRedisClient();
-	const cachedUser = await client.get(getDiscordUserRedisKey(accessToken));
+	const cachedUser = await client.get(getDiscordUserRedisKey(opts.accessToken));
 	if (cachedUser) {
 		return zUserSchema.parse(JSON.parse(cachedUser));
 	}
-	const data = await discordApiFetch('/users/@me', accessToken);
+	const data = await discordApiFetch('/users/@me', opts);
 	const parsed = zUserSchema.parse(data.data);
-	await updateCachedDiscordUser(accessToken, parsed);
+	await updateCachedDiscordUser(opts.accessToken, parsed);
 	return parsed;
 }

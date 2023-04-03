@@ -1,14 +1,24 @@
-import { prisma } from '@answeroverflow/prisma-types';
+import { Account, prisma } from '@answeroverflow/prisma-types';
 import { getRandomId } from '@answeroverflow/utils';
 
-export function findDiscordOauthByProviderAccountId(discordId: string) {
+export function findAccountByProviderAccountId(input: {
+	provider: string;
+	providerAccountId: string;
+}) {
 	return prisma.account.findUnique({
 		where: {
 			provider_providerAccountId: {
-				provider: 'discord',
-				providerAccountId: discordId,
+				provider: input.provider,
+				providerAccountId: input.providerAccountId,
 			},
 		},
+	});
+}
+
+export function findDiscordOauthByProviderAccountId(discordId: string) {
+	return findAccountByProviderAccountId({
+		provider: 'discord',
+		providerAccountId: discordId,
 	});
 }
 
@@ -26,6 +36,56 @@ export async function findDiscordOauthByUserId(userId: string) {
 		},
 	});
 	return account?.accounts[0] ?? null;
+}
+
+export async function clearProviderAuthToken(
+	input: Pick<Account, 'provider' | 'providerAccountId'>,
+) {
+	await prisma.account.update({
+		where: {
+			provider_providerAccountId: {
+				provider: input.provider,
+				providerAccountId: input.providerAccountId,
+			},
+		},
+		data: {
+			access_token: null,
+			refresh_token: null,
+			scope: null,
+			expires_at: null,
+			token_type: null,
+		},
+	});
+}
+
+export async function updateProviderAuthToken(
+	input: Pick<Account, 'provider' | 'providerAccountId'> & {
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		access_token?: string;
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		refresh_token?: string;
+		scope?: string;
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		expires_at?: number;
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		token_type?: string;
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		session_state?: string;
+		type?: string;
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		id_token?: string;
+	},
+) {
+	const { provider, providerAccountId, ...update } = input;
+	await prisma.account.update({
+		where: {
+			provider_providerAccountId: {
+				provider: provider,
+				providerAccountId: providerAccountId,
+			},
+		},
+		data: update,
+	});
 }
 
 // todo: move to its own package
