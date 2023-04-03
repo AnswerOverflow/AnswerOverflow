@@ -4,14 +4,8 @@
 		"init": {},
 		"migrate": {},
 		"build": {
-			"dependsOn": ["^build"],
 			"outputs": ["dist/**", ".next/**"],
 			"cache": true
-		},
-		"build:no-cache": {
-			"dependsOn": ["^build"],
-			"outputs": ["dist/**", ".next/**"],
-			"cache": false
 		},
 		"format": {
 			"inputs": ["./packages/config/"],
@@ -27,12 +21,6 @@
 			"outputs": [],
 			"cache": true
 		},
-		"lint:no-cache": {
-			"inputs": ["./packages/config/"],
-			"outputs": [],
-			"cache": false,
-			"dependsOn": ["^lint"]
-		},
 		"lint:fix": {
 			"outputs": [],
 			"cache": false
@@ -40,10 +28,6 @@
 		"test": {
 			"outputs": ["coverage/**"],
 			"cache": true
-		},
-		"test:no-cache": {
-			"cache": false,
-			"dependsOn": ["^test"]
 		},
 		"dev": {
 			"cache": false
