@@ -2754,16 +2754,16 @@
     "@sapphire/utilities" "^3.11.0"
     tslib "^2.5.0"
 
-"@sapphire/plugin-api@5.0.1":
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/@sapphire/plugin-api/-/plugin-api-5.0.1.tgz#20e209a5a43407768801b8041040c9e48dee6636"
-  integrity sha512-rcIo7hKqiIkiJVCuDHJI/25f1QQnARTvsg5mwsdSQnwd8CgwDgysCgANYI1ikxhE1kPJCYofRl9frQlqEWv2Vw==
+"@sapphire/plugin-api@5.0.2":
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/@sapphire/plugin-api/-/plugin-api-5.0.2.tgz#f866b1ec986a08de513fa0ef096c31258435e249"
+  integrity sha512-kCWoyqq0Ynn2D+t+rTM7/b9jANYjBe/cX0a4yVEr7gKRTGU8f9ve5nYRhCk5aq1OxRgfAYLTcEMau0iHin58Fw==
   dependencies:
     "@types/psl" "^1.1.0"
     "@types/ws" "^8.5.4"
     psl "^1.9.0"
     tslib "^2.5.0"
-    undici "^5.20.0"
+    undici "^5.21.0"
 
 "@sapphire/plugin-editable-commands@3.0.0":
   version "3.0.0"
@@ -15228,7 +15228,7 @@ unbox-primitive@^1.0.2:
     has-symbols "^1.0.3"
     which-boxed-primitive "^1.0.2"
 
-undici@^5.20.0, undici@^5.5.1:
+undici@^5.20.0, undici@^5.21.0, undici@^5.5.1:
   version "5.21.0"
   resolved "https://registry.yarnpkg.com/undici/-/undici-5.21.0.tgz#b00dfc381f202565ab7f52023222ab862bb2494f"
   integrity sha512-HOjK8l6a57b2ZGXOcUsI5NLfoTrfmbOl90ixJDl0AEFG4wgHNDQxtZy15/ZQp7HhjkpaGlp/eneMgtsu1dIlUA==
