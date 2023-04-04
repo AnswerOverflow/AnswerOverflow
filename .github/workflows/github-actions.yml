@@ -11,26 +11,23 @@ on:
 env:
   # None of these are real secrets although this should probably be updated
   DATABASE_URL: mysql://root:mysql@localhost:33306/api_dev
-  VITE_DATABASE_URL: mysql://root:mysql@localhost:33306/api_dev
 
   ELASTICSEARCH_URL: http://localhost:9200
-  VITE_ELASTICSEARCH_URL: http://localhost:9200
-
   ELASTICSEARCH_USERNAME: elastic
-  VITE_ELASTICSEARCH_USERNAME: elastic
-
   ELASTICSEARCH_PASSWORD: changeme
-  VITE_ELASTICSEARCH_PASSWORD: changeme
-
   ELASTICSEARCH_MESSAGE_INDEX: messages
-  VITE_ELASTICSEARCH_MESSAGE_INDEX: messages
-
+  NEXT_PUBLIC_POSTHOG_TOKEN: "123" # Fake API key to make CI not fail
+  REDIS_URL: redis://:redis@localhost:6379
+  NEXT_PUBLIC_DEPLOYMENT_ENV: "ci"
   OWNERS: "[]"
   DISCORD_CLIENT_ID: "123"
-  VITE_DISCORD_CLIENT_ID: "123"
-  
+
   # Long delay to give tests best chance at succeeding
   DEFAULT_DELAY_IN_MS: "5000"
+
+  # Actual secrets now, no peeking
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
 jobs:
   build:
@@ -38,10 +35,6 @@ jobs:
       timeout-minutes: 30
       runs-on: ubuntu-latest
 
-    # To use Remote Caching, uncomment the next lines and follow the steps below.
-    # env:
-    #  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-    #  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
       steps:
       - name: Checkout (GitHub)
@@ -62,6 +55,9 @@ jobs:
 
       - name: Setup Database
         run: yarn db:push
+
+      - name: Format
+        run: yarn format:check
 
       - name: Lint
         run: yarn lint

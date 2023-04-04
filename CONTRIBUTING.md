@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in contributing to Answer Overflow! If you need any help, please reach out in our [Discord](https://discord.gg/Wny38ap7Tx)!
+Thank you for your interest in contributing to Answer Overflow! If you need any help, please reach out in our [Discord](https://discord.answeroverflow.com/)!
 
 ## If I have a change I want to make, do I create a PR or an issue first?
 
@@ -17,6 +17,7 @@ We recommend the use of dev containers to make your onboarding as easy as possib
 Follow this [Getting Started Guide](https://code.visualstudio.com/docs/devcontainers/containers) on how to setup dev containers for your system
 
 - If you encounter issues with installing packages, change the remote user from "node" to "root" in devcontainer.json
+- If you are on Linux you may need to install docker compose separately, check out [Docker's page on how to do so](https://docs.docker.com/compose/install/linux/).
 
 ## Local Environment
 
@@ -28,7 +29,7 @@ And an [Elastic Search](https://www.elastic.co/guide/en/elasticsearch/reference/
 
 ## Remote Environment (Codespaces / Gitpod)
 
-There are shortcut buttons in the README to jumpstart running from a remote environment. When running from these remote environments, consider the following:
+There are shortcut buttons in the README to jump start running from a remote environment. When running from these remote environments, consider the following:
 
 - They require at least 8 GB of ram to run the databases
 - If you have a slow remote machine, then the tests may fail when you run them locally if you run them all at the same time from the root directory.
@@ -37,11 +38,29 @@ There are shortcut buttons in the README to jumpstart running from a remote envi
   - In this case, consider creating a smaller machine and just running the package you're developing in
   - This is only for packages that don't make any calls to the databases. If you try to run the tests on the whole project without databases setup the tests will fail
 
+### Cloud Development Enviroment Env's
+
+#### Github Codespaces Secrets
+
+We recommend using [encrypted secrets](https://docs.github.com/en/codespaces/managing-your-codespaces/managing-encrypted-secrets-for-your-codespaces) while using [github codespaces](https://github.com/features/codespaces). This makes moving between different codespaces much quicker, removing the need to regenerate secrets for your .env file.
+
+Please note, if you do not copy all the .env.example variables into your codespace secrets, you must still make a .env file from your .env.example file - otherwise you will have missing env variables!
+
+#### Gitpod Secrets
+
+If you are using gitpod, you should use [gitpod enviroment variables](https://www.gitpod.io/guides/automate-env-files-with-gitpod-environment-variables).
+
 ## UI
-We use storybook for developing our components and pages. It offers an isolated enviroment with a powerful toolset to empower frontend development.
+
+We use storybook for developing our components and pages. It offers an isolated environment with a powerful tool set to empower frontend development.
+
+Notes:
+
+- Creating a page? Make sure to use the `PageWrapper` as the parent element, this makes sure we keep styling the same across all our pages.
 
 ### Design
-For more information on designing Answer Overflow UI's, check out our [Design Guidlines](./DESIGN_GUIDELINES.md).
+
+For more information on designing Answer Overflow UI's, check out our [Design Guidelines](./DESIGN_GUIDELINES.md).
 
 ### Gitpod
 
@@ -55,6 +74,8 @@ For more information on designing Answer Overflow UI's, check out our [Design Gu
 ## VSCode users
 
 There is a workspace file called answeroverflow.code-workspace, VSCode lets you open this folder as that workspace and it is recommended that you do your development work inside of this workspace as it will configure all of the settings for you
+
+! The workspace is set to hide all "useless" files (i.e node_modules) if you for some reason need to access them, comment out the line hiding them in the workspace file !
 
 ### Get it running
 

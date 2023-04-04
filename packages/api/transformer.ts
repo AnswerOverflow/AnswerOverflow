@@ -1,2 +1,2 @@
-import superjson from "superjson";
+import superjson from 'superjson';
 export const transformer = superjson;

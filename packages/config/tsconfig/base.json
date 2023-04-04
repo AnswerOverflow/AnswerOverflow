@@ -19,6 +19,7 @@
     "importHelpers": true,
     "importsNotUsedAsValues": "error",
     "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
     "lib": [
       "esnext"
     ],
@@ -30,7 +31,7 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "noUnusedLocals": false,
-    "noUnusedParameters": true,
+    "noUnusedParameters": false,
     "preserveConstEnums": true,
     "pretty": true,
     "removeComments": false,
@@ -91,10 +92,7 @@
     }
   },
   "exclude": [
-    "dist"
-  ],
-  "include": [
-    "src",
+    "dist",
     "node_modules"
   ]
 }

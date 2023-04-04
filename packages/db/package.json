@@ -1,34 +1,38 @@
 {
-  "name": "@answeroverflow/db",
-  "version": "0.1.0",
-  "main": "./index.ts",
-  "types": "./index.ts",
-  "license": "MIT",
-  "private": true,
-  "scripts": {
-    "clean": "rm -rf .turbo node_modules coverage",
-    "with-env": "dotenv -e ../../.env --",
-    "lint": "eslint \"*.ts*\" && tsc --noEmit",
-    "lint:fix": "eslint \"*.ts*\" --fix",
-    "db:wipe": "cross-env NODE_ENV=test yarn with-env npx ts-node --esm ./scripts/wipe.ts",
-    "dev": "yarn with-env prisma studio --port 5556 --browser none",
-    "test": "yarn run with-env vitest run --coverage",
-    "test:watch": "yarn run with-env vitest"
-  },
-  "dependencies": {
-    "@answeroverflow/db-mock": "*",
-    "@answeroverflow/elastic-types": "*",
-    "@answeroverflow/prisma-types": "*",
-    "@answeroverflow/utils": "*",
-    "@sapphire/bitfield": "^1.0.0",
-    "discord-api-types": "^0.37.30",
-    "zod": "^3.20.6"
-  },
-  "devDependencies": {
-    "@answeroverflow/tsconfig": "*",
-    "@vitest/coverage-c8": "^0.25.8",
-    "cross-env": "^7.0.3",
-    "dotenv-cli": "^6.0.0",
-    "vitest": "^0.25.8"
-  }
+	"name": "@answeroverflow/db",
+	"version": "0.1.0",
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"license": "MIT",
+	"private": true,
+	"scripts": {
+		"clean": "rm -rf .turbo node_modules coverage",
+		"with-env": "dotenv -e ../../.env --",
+		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
+		"lint": "eslint . && tsc --noEmit",
+		"lint:fix": "eslint . --fix",
+		"db:wipe": "cross-env NODE_ENV=test yarn with-env npx ts-node --esm ./scripts/wipe.ts",
+		"dev": "yarn with-env prisma studio --port 5556 --browser none",
+		"test": "yarn run with-env vitest run --coverage",
+		"test:watch": "yarn run with-env vitest"
+	},
+	"dependencies": {
+		"@answeroverflow/cache": "*",
+		"@answeroverflow/db-mock": "*",
+		"@answeroverflow/elastic-types": "*",
+		"@answeroverflow/prisma-types": "*",
+		"@answeroverflow/utils": "*",
+		"@sapphire/bitfield": "^1.0.0",
+		"discord-api-types": "^0.37.30",
+		"dotenv-cra": "^3.0.3",
+		"zod": "^3.20.6"
+	},
+	"devDependencies": {
+		"@answeroverflow/tsconfig": "*",
+		"@vitest/coverage-c8": "^0.28.5",
+		"cross-env": "^7.0.3",
+		"dotenv-cli": "^7.1.0",
+		"vitest": "^0.25.8"
+	}
 }

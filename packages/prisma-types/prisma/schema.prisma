@@ -9,8 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 // NextAuth.js Models
@@ -30,10 +31,11 @@ model Account {
   scope             String?
   id_token          String? // @db.Text
   session_state     String?
-  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  discordAccount    DiscordAccount? @relation(fields: [providerAccountId], references: [id], onDelete: Cascade)
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  discordAccount    DiscordAccount? @relation(fields: [providerAccountId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model DiscordAccount {
@@ -49,7 +51,9 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId])
 }
 
 model User {
@@ -74,12 +78,14 @@ model VerificationToken {
 model UserServerSettings {
   userId   String
   serverId String
-  bitfield Int    @default(0)
+  bitfield Int    @default(0) @db.UnsignedInt
 
-  user   DiscordAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  server Server         @relation(fields: [serverId], references: [id])
+  user   DiscordAccount @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  server Server         @relation(fields: [serverId], references: [id], onUpdate: NoAction)
 
   @@id([userId, serverId])
+  @@index([userId])
+  @@index([serverId])
 }
 
 model IgnoredDiscordAccount {
@@ -88,13 +94,15 @@ model IgnoredDiscordAccount {
 
 model Server {
   // Discord Data
-  id   String  @id @unique
-  name String  @db.VarChar(100)
-  icon String? @db.VarChar(45)
+  id          String  @id @unique
+  name        String  @db.VarChar(100)
+  icon        String? @db.VarChar(45)
+  description String?
 
   // Answer Overflow Settings
-  bitfield   Int       @default(0)
+  bitfield   Int       @default(0) @db.UnsignedInt
   kickedTime DateTime?
+  vanityUrl  String?   @unique
 
   // Relations
   userServerSettings UserServerSettings[]
@@ -103,20 +111,23 @@ model Server {
 
 model Channel {
   // Discord Data
-  id         String  @id
-  serverId   String
-  name       String  @db.VarChar(100)
-  type       Int
-  parentId   String?
-  inviteCode String? @unique @db.VarChar(15)
+  id                String  @id
+  serverId          String
+  name              String  @db.VarChar(100)
+  type              Int
+  parentId          String?
+  inviteCode        String? @unique @db.VarChar(15)
+  archivedTimestamp BigInt?
 
   // Answer Overflow Settings
-  bitfield             Int     @default(0)
-  lastIndexedSnowflake String?
-  solutionTagId        String?
+  bitfield      Int     @default(0) @db.UnsignedInt
+  solutionTagId String?
 
   // Relations
-  parent  Channel?  @relation("ParentChannel", fields: [parentId], references: [id])
+  parent  Channel?  @relation("ParentChannel", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   threads Channel[] @relation("ParentChannel")
-  server  Server    @relation(fields: [serverId], references: [id])
+  server  Server    @relation(fields: [serverId], references: [id], onUpdate: NoAction)
+
+  @@index([serverId])
+  @@index([parentId])
 }
