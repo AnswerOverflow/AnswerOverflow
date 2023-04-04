@@ -9,8 +9,8 @@ type StatusUpdate = {
 function getStatuses(client: SapphireClient) {
   const statuses: StatusUpdate[] = [
       { 
+        type: ActivityType.Watching,
         getStatus: () => `${client.guilds.cache.size} communities.`, 
-        type: ActivityType.Watching, 
       },
       {
           type: ActivityType.Listening,
@@ -20,8 +20,20 @@ function getStatuses(client: SapphireClient) {
           },
       },
       {
-          type: ActivityType.Watching,
-          getStatus: 'hello',
+          type: ActivityType.Playing,
+          getStatus: 'Open Source! github.com/AnswerOverflow',
+      },
+      {
+        type: ActivityType.Playing,
+        getStatus: 'Placeholder4',
+      },
+      {
+        type: ActivityType.Playing,
+        getStatus: 'Placeholder5',
+      },
+      {
+        type: ActivityType.Playing,
+        getStatus: 'Placeholder6',
       },
   ];
   return statuses;
@@ -30,14 +42,14 @@ function getStatuses(client: SapphireClient) {
 @ApplyOptions<Listener.Options>({ event: Events.ClientReady })
 export class SendMarkSolutionInstructionsOnThreadCreate extends Listener {
   public async run() {
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       setInterval(async () => {
           const statuses = getStatuses(this.container.client);
-          //const status = statuses[Math.floor(Math.random() * statuses.length)]!;
-          var index = Math.floor((new Date().getSeconds())/60 * statuses.length);
+          var index = Math.floor(((new Date().getHours())%6)/6 * statuses.length);
+          console.log(new Date().getHours());
+          console.log(index);
           const status = statuses[index]!;
     const statusText = typeof status.getStatus === 'string' ? status.getStatus : await status.getStatus();
           this.container.client.user?.setActivity(statusText, {
               type: status.type,
           });
-      }, 1000 * 15)}};
+      }, 10000 * 60)}};
