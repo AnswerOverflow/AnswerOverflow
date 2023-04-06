@@ -16,7 +16,7 @@
 		"@sapphire/discord-utilities": "3.0.0",
 		"@sapphire/fetch": "^2.4.1",
 		"@sapphire/framework": "^4.2.2",
-		"@sapphire/plugin-api": "5.0.1",
+		"@sapphire/plugin-api": "5.0.2",
 		"@sapphire/plugin-editable-commands": "3.0.0",
 		"@sapphire/plugin-hmr": "^2.0.0",
 		"@sapphire/plugin-logger": "^3.0.1",
@@ -31,7 +31,7 @@
 		"discord-api-types": "^0.37.20",
 		"discord.js": "^14.8.0",
 		"dotenv-cra": "^3.0.2",
-		"lru-cache": "^7.18.1",
+		"lru-cache": "^8.0.4",
 		"react": "^18.2.0",
 		"reflect-metadata": "^0.1.13",
 		"tsx": "^3.12.1"
