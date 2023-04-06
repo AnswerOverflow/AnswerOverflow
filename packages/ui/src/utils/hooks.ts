@@ -1,9 +1,13 @@
 import { RefObject, useEffect, useState } from 'react';
 import { trpc } from './trpc';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 
 export const useIsUserInServer = (serverId: string) => {
-	const { data: servers } = trpc.auth.getServers.useQuery();
+	const session = useSession();
+	const { data: servers } = trpc.auth.getServers.useQuery(undefined, {
+		enabled: session.status === 'authenticated',
+	});
 	if (!servers) return 'loading';
 	return servers?.some((s) => s.id === serverId) ?? false;
 };
