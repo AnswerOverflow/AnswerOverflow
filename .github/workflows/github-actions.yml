@@ -6,7 +6,9 @@ on:
     - main
   pull_request:
 
-
+concurrency:
+    group: deploy-preview-${{ github.head_ref }}
+    cancel-in-progress: true
 
 env:
   # None of these are real secrets although this should probably be updated
