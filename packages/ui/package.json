@@ -63,7 +63,7 @@
 		"@storybook/addon-mdx-gfm": "^7.0.0-beta.54",
 		"@storybook/addon-postcss": "^2.0.0",
 		"@storybook/addon-toolbars": "7.0.0-beta.54",
-		"@storybook/addons": "^7.0.0-beta.61",
+		"@storybook/addons": "^7.0.0",
 		"@storybook/client-api": "^7.0.0-beta.54",
 		"@storybook/jest": "^0.0.11--canary.22.2783ae7.0",
 		"@storybook/nextjs": "^7.0.0-beta.62",
