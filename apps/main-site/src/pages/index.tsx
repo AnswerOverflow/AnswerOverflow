@@ -4,7 +4,11 @@ import { AOHead, Home } from '@answeroverflow/ui';
 const HomePage: NextPage = () => {
 	return (
 		<>
-			<AOHead path="/" title="Answer Overflow" addPrefix={false} />
+			<AOHead
+				path="/"
+				title="Answer Overflow - Index Your Discord Server Channels Into Google"
+				addPrefix={false}
+			/>
 			<Home />
 		</>
 	);
