@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@answeroverflow/tsconfig": "*",
-    "typescript": "^4.9.5"
+    "typescript": "^5.0.4"
   },
   "publishConfig": {
     "access": "public"
