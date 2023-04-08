@@ -10,7 +10,7 @@ import {
 import { Listener } from '@sapphire/framework';
 import type { ContextMenuCommandInteraction, Interaction } from 'discord.js';
 import { sentryLogger } from '~discord-bot/utils/sentry';
-import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
+import { oneTimeStatusHandler } from '~discord-bot/utils/trpc';
 
 function makeErrorMessage(msg: string) {
 	return `Sorry! ${msg}. We've been notified of the problem and are looking into it. \n\nYou can try dismissing this and rerunning the command in the meantime.`;
@@ -25,7 +25,7 @@ async function handleError<T extends {}>(opts: {
 	const { interaction, userFacingMessage, sentryMessage, sentryPayload } = opts;
 	sentryLogger(sentryMessage, sentryPayload);
 	if (interaction.isChatInputCommand() || interaction.isMessageComponent()) {
-		await onceTimeStatusHandler(
+		await oneTimeStatusHandler(
 			interaction,
 			makeErrorMessage(userFacingMessage),
 		);

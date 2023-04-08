@@ -4,7 +4,7 @@ import { Command, type ChatInputCommand } from '@sapphire/framework';
 import {
 	callAPI,
 	callWithAllowedErrors,
-	onceTimeStatusHandler,
+	oneTimeStatusHandler,
 } from '~discord-bot/utils/trpc';
 import {
 	SlashCommandBuilder,
@@ -88,14 +88,14 @@ export class ChannelSettingsCommand extends Command {
 					: getRootChannel(interactionChannel);
 
 				if (!targetChannelToConfigure) {
-					await onceTimeStatusHandler(
+					await oneTimeStatusHandler(
 						interaction,
 						'Could not find channel to configure',
 					);
 					return;
 				}
 				if (!allowedTypes.includes(targetChannelToConfigure.type)) {
-					await onceTimeStatusHandler(
+					await oneTimeStatusHandler(
 						interaction,
 						'Channel to configure is not a valid type',
 					);
@@ -129,7 +129,7 @@ export class ChannelSettingsCommand extends Command {
 						);
 						ephemeralReply(menu, interaction);
 					},
-					Error: (error) => onceTimeStatusHandler(interaction, error.message),
+					Error: (error) => oneTimeStatusHandler(interaction, error.message),
 					getCtx: () => createMemberCtx(member),
 				});
 			},
