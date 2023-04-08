@@ -1,5 +1,11 @@
-import { EmbedBuilder, ThreadChannel } from 'discord.js';
+import {
+	ActionRowBuilder,
+	EmbedBuilder,
+	MessageActionRowComponentBuilder,
+	ThreadChannel,
+} from 'discord.js';
 import { findChannelById } from '@answeroverflow/db';
+import { makeDismissButton } from './dismiss-button';
 
 const sendMarkSolutionInstructionsErrorReasons = [
 	'Thread was not newly created',
@@ -47,5 +53,10 @@ export async function sendMarkSolutionInstructionsInThread(
 		);
 	await thread.send({
 		embeds: [markSolutionInstructionsEmbed],
+		components: [
+			new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+				makeDismissButton(thread.ownerId ?? ''),
+			),
+		],
 	});
 }

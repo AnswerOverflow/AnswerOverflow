@@ -3,7 +3,7 @@ import { Command, type ChatInputCommand } from '@sapphire/framework';
 import {
 	callAPI,
 	callWithAllowedErrors,
-	onceTimeStatusHandler,
+	oneTimeStatusHandler,
 } from '~discord-bot/utils/trpc';
 import {
 	SlashCommandBuilder,
@@ -83,7 +83,7 @@ export class OpenManageAccountMenuCommand extends Command {
 						);
 						ephemeralReply(menu, interaction);
 					},
-					Error: (error) => onceTimeStatusHandler(interaction, error.message),
+					Error: (error) => oneTimeStatusHandler(interaction, error.message),
 					getCtx: () => createMemberCtx(member),
 				});
 			},
