@@ -59,9 +59,9 @@ export const DISMISS_OVERRIDE_PERMISSIONS: PermissionResolvable[] = [
 	'ManageGuild',
 ];
 
-export const MISSING_PERMISSIONS_TO_DISMISS_ERROR_MESSAGE = `You are missing permissions to dismiss this message.\n\nOnly the person this message is replying to or someone with the following permissions can dismiss this message: ${DISMISS_OVERRIDE_PERMISSIONS.join(
-	'\n',
-)}`;
+export const MISSING_PERMISSIONS_TO_DISMISS_ERROR_MESSAGE = `You are missing permissions to dismiss this message.\n\nOnly the person this message is replying to or someone with the following permissions can dismiss this message: \`${DISMISS_OVERRIDE_PERMISSIONS.join(
+	', ',
+)}\``;
 
 export async function dismissMessage(input: {
 	messageToDismiss: Message;
