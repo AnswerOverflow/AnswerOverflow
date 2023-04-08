@@ -9,7 +9,7 @@ import {
 	parseConsentButtonInteraction,
 	updateUserConsent,
 } from '~discord-bot/domains/manage-account';
-import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
+import { oneTimeStatusHandler } from '~discord-bot/utils/trpc';
 
 export class ButtonHandler extends InteractionHandler {
 	public constructor(ctx: PieceContext, options: InteractionHandler.Options) {
@@ -44,9 +44,9 @@ export class ButtonHandler extends InteractionHandler {
 			canPubliclyDisplayMessages: true,
 			consentSource: data.source,
 			member,
-			Error: (_, msg) => onceTimeStatusHandler(interaction, msg),
+			Error: (_, msg) => oneTimeStatusHandler(interaction, msg),
 			Ok: () =>
-				onceTimeStatusHandler(
+				oneTimeStatusHandler(
 					interaction,
 					'You have provided consent to display your messages publicly.',
 				),
