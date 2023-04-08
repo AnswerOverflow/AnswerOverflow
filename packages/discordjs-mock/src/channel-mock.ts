@@ -33,6 +33,7 @@ import {
 	MessageCreateOptions,
 	MessagePayload,
 	ForumLayoutType,
+	ThreadMemberFlags,
 } from 'discord.js';
 import type {
 	RawMessageData,
@@ -56,7 +57,6 @@ export function getGuildTextChannelMockDataBase<
 		position: 0,
 		default_auto_archive_duration: 60,
 		rate_limit_per_user: 0,
-		flags: 0,
 		guild_id: guild?.id,
 		last_message_id: null,
 		last_pin_timestamp: null,
@@ -261,9 +261,13 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 	}
 	if (channel.isThread()) {
 		channel.fetchStarterMessage = () => {
-			return Promise.resolve(
-				channel.parent?.messages.cache.get(channel.id) ?? null,
-			);
+			if (channel.parent?.type === ChannelType.GuildForum) {
+				return Promise.resolve(channel.messages.cache.get(channel.id) ?? null);
+			} else {
+				return Promise.resolve(
+					channel.parent?.messages.cache.get(channel.id) ?? null,
+				);
+			}
 		};
 	}
 	client.channels.cache.set(channel.id, channel);
@@ -333,7 +337,7 @@ export function mockPublicThread(input: {
 				id: randomSnowflake().toString(),
 				user_id: randomSnowflake().toString(),
 				join_timestamp: new Date().toISOString(),
-				flags: 0,
+				flags: ThreadMemberFlags.AllMessages,
 			},
 			guild_id: guild.id,
 			parent_id: parentChannel.id,
