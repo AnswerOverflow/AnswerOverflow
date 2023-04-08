@@ -9,11 +9,11 @@
 @tailwind utilities;
 
 .hljs {
-	@apply w-full rounded-lg bg-neutral-50 dark:bg-stone-900 my-4 text-sm !important;
+	@apply my-4 w-full rounded-lg bg-neutral-50 text-sm dark:bg-stone-900 !important;
 	/* Fixes overflowing code blocks */
 	white-space: break-spaces;
 	line-break: anywhere;
-  font-family: 'Courier New', Courier, monospace;
+	font-family: 'Courier New', Courier, monospace;
 }
 
 .d-emoji {
