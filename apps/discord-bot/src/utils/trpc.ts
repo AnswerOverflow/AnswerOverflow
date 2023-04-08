@@ -68,7 +68,7 @@ export function discordJSReactEphemeralStatusHandler(
 	return container.discordJSReact.ephemeralReply(interaction, message);
 }
 
-export function onceTimeStatusHandler(
+export function oneTimeStatusHandler(
 	interaction: RendererableInteractions,
 	message: string,
 ) {

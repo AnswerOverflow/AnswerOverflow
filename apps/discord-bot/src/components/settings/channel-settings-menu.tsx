@@ -61,7 +61,7 @@ import {
 	updateAutoThreadEnabled,
 } from '~discord-bot/domains/channel-settings';
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
-import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
+import { oneTimeStatusHandler } from '~discord-bot/utils/trpc';
 import type { RootChannel } from '~discord-bot/utils/utils';
 import { makeRequestForConsentString } from '~discord-bot/domains/mark-solution';
 import { makeConsentButton } from '~discord-bot/domains/manage-account';
@@ -113,7 +113,7 @@ function ToggleIndexingButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => onceTimeStatusHandler(interaction, message),
+						Error: (message) => oneTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -141,7 +141,7 @@ function ToggleForumGuidelinesConsentButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => onceTimeStatusHandler(interaction, message),
+						Error: (message) => oneTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -239,7 +239,7 @@ export function IndexingSettingsMenu({
 							embeds: [consentEmbed],
 							components: [components],
 						});
-						await onceTimeStatusHandler(intr, 'Consent prompt sent!');
+						await oneTimeStatusHandler(intr, 'Consent prompt sent!');
 					})
 				}
 			/>
@@ -275,7 +275,7 @@ function ToggleMarkAsSolutionButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => onceTimeStatusHandler(interaction, message),
+						Error: (message) => oneTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -306,7 +306,7 @@ function ToggleSendMarkAsSolutionInstructionsButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => onceTimeStatusHandler(interaction, message),
+						Error: (message) => oneTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -337,7 +337,7 @@ function SelectMarkAsSolvedTag({
 						channel: targetChannel,
 						tagId: value === CLEAR_TAG_VALUE ? null : value,
 						member,
-						Error: (message) => onceTimeStatusHandler(interaction, message),
+						Error: (message) => oneTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -377,7 +377,7 @@ function ToggleAutoThreadButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => onceTimeStatusHandler(interaction, message),
+						Error: (message) => oneTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
