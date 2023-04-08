@@ -2,7 +2,7 @@
 import type { ESBuildOptions } from 'vite';
 import { defineConfig, type UserConfig } from 'vitest/config';
 
-export const createVitestConfig = (options: UserConfig = {}) => {
+export const createVitestConfig = (options: UserConfig = {}) =>
 	defineConfig({
 		...options,
 		test: {
@@ -28,5 +28,3 @@ export const createVitestConfig = (options: UserConfig = {}) => {
 				(options?.esbuild as ESBuildOptions | undefined)?.target ?? 'es2020',
 		},
 	});
-};
-return;
