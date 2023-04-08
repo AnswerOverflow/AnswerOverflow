@@ -9,7 +9,7 @@
 @tailwind utilities;
 
 .hljs {
-	@apply my-4 w-full rounded-lg bg-neutral-50 text-sm dark:bg-stone-900 !important;
+	@apply my-4 w-full rounded-lg bg-white text-sm dark:bg-stone-900 !important;
 	/* Fixes overflowing code blocks */
 	white-space: break-spaces;
 	line-break: anywhere;

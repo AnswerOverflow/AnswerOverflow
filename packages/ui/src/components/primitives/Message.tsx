@@ -55,6 +55,7 @@ export const MessageAuthorArea = () => {
 						className="h-8 w-8 bg-transparent p-1 hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent"
 					>
 						<DiscordIcon color="primary" />
+						<span className="sr-only">View on Discord</span>
 					</LinkButton>
 				</div>
 				<span>{getSnowflakeUTCDate(message.id)}</span>
