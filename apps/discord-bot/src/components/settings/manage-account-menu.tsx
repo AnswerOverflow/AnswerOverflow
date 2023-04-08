@@ -7,7 +7,7 @@ import {
 	updateUserConsent,
 	updateUserServerIndexingEnabled,
 } from '~discord-bot/domains/manage-account';
-import { callAPI, onceTimeStatusHandler } from '~discord-bot/utils/trpc';
+import { callAPI, oneTimeStatusHandler } from '~discord-bot/utils/trpc';
 import { Button } from '@answeroverflow/discordjs-react';
 import { createMemberCtx } from '~discord-bot/utils/context';
 import {
@@ -52,7 +52,7 @@ const ToggleConsentButton = ({
 							isGloballyIgnored: state.isGloballyIgnored,
 						});
 					},
-					Error: (error) => onceTimeStatusHandler(interaction, error.message),
+					Error: (error) => oneTimeStatusHandler(interaction, error.message),
 				});
 			})
 		}
@@ -75,7 +75,7 @@ const ToggleIndexingButton = ({
 						member,
 						messageIndexingDisabled: !messageIndexingDisabled,
 						source: 'manage-account-menu',
-						Error: (error) => onceTimeStatusHandler(interaction, error.message),
+						Error: (error) => oneTimeStatusHandler(interaction, error.message),
 						Ok(newSettings) {
 							setSettings({
 								settings: newSettings,
@@ -103,7 +103,7 @@ export const GloballyIgnoreAccountButton = ({
 					apiCall: (router) =>
 						router.discordAccounts.delete(interaction.user.id),
 					getCtx: () => createMemberCtx(member),
-					Error: (error) => onceTimeStatusHandler(interaction, error.message),
+					Error: (error) => oneTimeStatusHandler(interaction, error.message),
 					Ok: () =>
 						setState({
 							settings: getDefaultUserServerSettingsWithFlags({
@@ -133,7 +133,7 @@ export const StopIgnoringAccountButton = ({
 					apiCall: (router) =>
 						router.discordAccounts.undelete(interaction.user.id),
 					getCtx: () => createMemberCtx(member),
-					Error: (error) => onceTimeStatusHandler(interaction, error.message),
+					Error: (error) => oneTimeStatusHandler(interaction, error.message),
 					Ok: () => {
 						setState({
 							settings: getDefaultUserServerSettingsWithFlags({
