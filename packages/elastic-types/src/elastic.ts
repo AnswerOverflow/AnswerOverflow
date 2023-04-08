@@ -449,6 +449,21 @@ export class Elastic extends Client {
 		return result.hits.hits[0]?._source ?? null;
 	}
 
+	public async findLatestMessageInChannelAndThreads(channelId: string) {
+		const result = await this.search<Message>({
+			index: this.messagesIndex,
+			query: {
+				multi_match: {
+					query: channelId,
+					fields: ['channelId', 'parentChannelId'],
+				},
+			},
+			size: 1,
+			sort: [{ id: 'desc' }],
+		});
+		return result.hits.hits[0]?._source ?? null;
+	}
+
 	public async getChannelMessagesCount(channelId: string) {
 		const result = await this.count({
 			index: this.messagesIndex,

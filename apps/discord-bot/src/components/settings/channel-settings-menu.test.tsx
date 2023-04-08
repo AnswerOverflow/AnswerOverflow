@@ -86,6 +86,7 @@ describe('Channel Settings Menu', () => {
 					content: (
 						<IndexingSettingsMenu
 							initialChannelData={forumChannelWithFlags}
+							lastIndexedMessage={null}
 							targetChannel={forumChannel}
 						/>
 					),
@@ -114,6 +115,7 @@ describe('Channel Settings Menu', () => {
 					content: (
 						<IndexingSettingsMenu
 							targetChannel={textChannel}
+							lastIndexedMessage={null}
 							initialChannelData={textChannelWithFlags}
 						/>
 					),
@@ -144,6 +146,7 @@ describe('Channel Settings Menu', () => {
 					content: (
 						<IndexingSettingsMenu
 							targetChannel={textChannel}
+							lastIndexedMessage={null}
 							initialChannelData={updated}
 						/>
 					),
@@ -165,6 +168,7 @@ describe('Channel Settings Menu', () => {
 				const message = await mockReply({
 					content: (
 						<IndexingSettingsMenu
+							lastIndexedMessage={null}
 							initialChannelData={textChannelWithFlags}
 							targetChannel={textChannel}
 						/>
@@ -183,6 +187,7 @@ describe('Channel Settings Menu', () => {
 				const message = await mockReply({
 					content: (
 						<IndexingSettingsMenu
+							lastIndexedMessage={null}
 							initialChannelData={forumChannelWithFlags}
 							targetChannel={forumChannel}
 						/>
@@ -213,6 +218,7 @@ describe('Channel Settings Menu', () => {
 				const message = await mockReply({
 					content: (
 						<IndexingSettingsMenu
+							lastIndexedMessage={null}
 							initialChannelData={updated}
 							targetChannel={forumChannel}
 						/>
@@ -612,6 +618,7 @@ describe('Channel Settings Menu', () => {
 				channel: textChannel,
 				content: (
 					<ChannelSettingsMenu
+						lastIndexedMessage={null}
 						targetChannel={textChannel}
 						channelWithFlags={textChannelWithFlags}
 					/>
@@ -635,6 +642,7 @@ describe('Channel Settings Menu', () => {
 				channel: textChannel,
 				content: (
 					<ChannelSettingsMenu
+						lastIndexedMessage={null}
 						targetChannel={textChannel}
 						channelWithFlags={textChannelWithFlags}
 					/>
