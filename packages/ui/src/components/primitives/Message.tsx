@@ -11,6 +11,7 @@ import { cn } from '~ui/utils/styling';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { LinkButton, DiscordIcon, CloseIcon } from './base';
 import { trackEvent } from '@answeroverflow/hooks';
+import { getDiscordURLForMessage } from '~ui/utils/discord';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MessageContext = createContext<{
@@ -38,11 +39,7 @@ export const MessageAuthorArea = () => {
 				<span className="mr-1">{message.author.name}</span>
 				<div className="mr-4 ml-auto flex flex-row gap-2">
 					<LinkButton
-						href={`https://discord.com/${message.serverId}/${
-							message.channelId
-						}${message.childThreadId ? `/${message.childThreadId}` : ''}/${
-							message.id
-						}`}
+						href={getDiscordURLForMessage(message)}
 						onMouseUp={() => {
 							trackEvent('View On Discord Click', {
 								'Channel Id': message.parentChannelId
@@ -116,10 +113,8 @@ export const MessageAttachments = () => {
 	}: {
 		attachment: APIMessageWithDiscordAccount['attachments'][number];
 	}) {
-		let width = attachment.width;
-		let height = attachment.height;
-		const maxWidth = 400;
-		const maxHeight = 300;
+		const width = attachment.width;
+		const height = attachment.height;
 
 		if (!width || !height)
 			return (
@@ -139,31 +134,16 @@ export const MessageAttachments = () => {
 					/>
 				</MessageModalWrapper>
 			);
-		const originalWidth = width;
-		const originalHeight = height;
-		if (width > height) {
-			width = maxWidth;
-			height = (maxWidth / originalWidth) * originalHeight;
-		} else {
-			height = maxHeight;
-			width = (maxHeight / originalHeight) * originalWidth;
-		}
 
-		const aspectRatio = width / height;
 		return (
 			<MessageModalWrapper attachment={attachment}>
 				<Image
 					key={attachment.url}
 					src={attachment.url}
-					width={originalWidth}
-					height={originalHeight}
-					className="cursor-zoom-in py-4"
+					width={width}
+					height={height}
+					className="cursor-zoom-in py-4 md:max-w-md"
 					alt={attachment.description ? attachment.description : 'Image'}
-					style={{
-						maxWidth: `${width}px`,
-						maxHeight: `${maxHeight}px`,
-						aspectRatio: `${aspectRatio}`,
-					}}
 				/>
 			</MessageModalWrapper>
 		);
