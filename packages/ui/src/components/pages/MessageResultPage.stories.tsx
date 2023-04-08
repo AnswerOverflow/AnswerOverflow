@@ -84,19 +84,34 @@ export const AllPublic: Story = {
 			}),
 			mockMessageWithDiscordAccount({
 				id: '2',
-				content: 'This is the first public message',
+				content: `This is the second public message with a code block \`\`\`ts
+const foo = "bar"\`\`\``,
 			}),
 			mockMessageWithDiscordAccount({
 				id: '3',
-				content: 'This is the second public message',
+				content: 'This is the third public message with an attached image',
+				attachments: [
+					{
+						id: '1',
+						filename: 'mark_solution_instructions.png',
+						size: 700,
+						proxyUrl:
+							'https://media.discordapp.net/attachments/1020132770862874704/1025906507549790208/mark_solution_instructions.png',
+						url: 'https://media.discordapp.net/attachments/1020132770862874704/1025906507549790208/mark_solution_instructions.png',
+					},
+				],
 			}),
 			mockMessageWithDiscordAccount({
 				id: '4',
-				content: 'This is the third public message',
+				content: 'This is the forth public message',
 			}),
 			mockMessageWithDiscordAccount({
 				id: '5',
-				content: 'This is the second public message',
+				content: 'This is the fifth public message',
+			}),
+			mockMessageWithDiscordAccount({
+				id: '6',
+				content: 'This is the sixth public message',
 			}),
 		],
 	},

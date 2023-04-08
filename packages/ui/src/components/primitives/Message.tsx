@@ -3,11 +3,15 @@ import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
 import discordMarkdown from 'discord-markdown';
 import Parser from 'html-react-parser';
 import Image from 'next/image';
-import { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { DiscordAvatar } from './DiscordAvatar';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import { cn } from '~ui/utils/styling';
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import { LinkButton, DiscordIcon, CloseIcon } from './base';
+import { trackEvent } from '@answeroverflow/hooks';
+import { getDiscordURLForMessage } from '~ui/utils/discord';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MessageContext = createContext<{
@@ -26,13 +30,35 @@ export function useMessageContext() {
 
 export const MessageAuthorArea = () => {
 	const { message } = useMessageContext();
+
 	return (
 		<div className="flex w-full min-w-0 gap-2">
 			{/* TODO: sort out responsive styling */}
 			<div className="flex w-full flex-row items-center gap-2 font-body text-lg text-black/[.7] dark:text-white/[.47]">
 				<DiscordAvatar user={message.author} size="sm" />
 				<span className="mr-1">{message.author.name}</span>
-				<span className="ml-auto">{getSnowflakeUTCDate(message.id)}</span>
+				<div className="mr-4 ml-auto flex flex-row gap-2">
+					<LinkButton
+						href={getDiscordURLForMessage(message)}
+						onMouseUp={() => {
+							trackEvent('View On Discord Click', {
+								'Channel Id': message.parentChannelId
+									? message.parentChannelId
+									: message.channelId,
+								'Thread Id': message.childThreadId ?? undefined,
+								'Server Id': message.serverId,
+								'Message Author Id': message.author.id,
+								'Message Id': message.id,
+								'Solution Id': message.solutionIds?.[0] ?? undefined,
+							});
+						}}
+						className="h-8 w-8 bg-transparent p-1 hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent"
+					>
+						<DiscordIcon color="primary" />
+						<span className="sr-only">View on Discord</span>
+					</LinkButton>
+				</div>
+				<span>{getSnowflakeUTCDate(message.id)}</span>
 			</div>
 		</div>
 	);
@@ -50,6 +76,37 @@ export const MessageContents = () => {
 	);
 };
 
+const MessageModalWrapper = ({
+	children,
+	attachment,
+}: React.PropsWithChildren<{
+	attachment: APIMessageWithDiscordAccount['attachments'][number];
+}>) => {
+	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+	return (
+		<AlertDialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+			<AlertDialog.Trigger asChild>{children}</AlertDialog.Trigger>
+			<AlertDialog.Portal>
+				<AlertDialog.Overlay className="fixed inset-0 z-50 flex h-full w-full items-center justify-center bg-black/75" />
+				<AlertDialog.Content className="fixed top-0 left-0 z-[75] flex h-full w-full flex-col items-center justify-center p-4">
+					<div className="absolute top-0 right-0 z-[100] p-2">
+						<AlertDialog.Cancel className="flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors duration-200 focus:outline-none focus:ring focus:ring-gray-300 hover:bg-gray-200 dark:bg-black dark:hover:bg-gray-800">
+							<CloseIcon />
+						</AlertDialog.Cancel>
+					</div>
+					{/* eslint-disable-next-line @next/next/no-img-element */}
+					<img
+						className="max-h-vh80 w-full max-w-2xl object-contain lg:h-full xl:p-10"
+						src={attachment?.url}
+						alt={attachment?.description ?? 'Image'}
+					/>
+				</AlertDialog.Content>
+			</AlertDialog.Portal>
+		</AlertDialog.Root>
+	);
+};
+
 export const MessageAttachments = () => {
 	const { message } = useMessageContext();
 	function MessageImage({
@@ -57,50 +114,39 @@ export const MessageAttachments = () => {
 	}: {
 		attachment: APIMessageWithDiscordAccount['attachments'][number];
 	}) {
-		let width = attachment.width;
-		let height = attachment.height;
-		const maxWidth = 400;
-		const maxHeight = 300;
+		const width = attachment.width;
+		const height = attachment.height;
 
 		if (!width || !height)
 			return (
 				// TODO: Bit of a hack for now since next images don't work well with no w/h specified
 				// eslint-disable-next-line @next/next/no-img-element
-				<img
-					className="max-w-full md:max-w-sm"
+				<MessageModalWrapper attachment={attachment}>
+					{/*  eslint-disable-next-line @next/next/no-img-element */}
+					<img
+						className="max-w-full cursor-zoom-in py-4 md:max-w-sm"
+						src={attachment.url}
+						style={{
+							width: 'fit-content',
+							height: 'auto',
+							objectFit: 'cover',
+						}}
+						alt={attachment.description ? attachment.description : 'Image'}
+					/>
+				</MessageModalWrapper>
+			);
+
+		return (
+			<MessageModalWrapper attachment={attachment}>
+				<Image
+					key={attachment.url}
 					src={attachment.url}
-					style={{
-						width: 'fit-content',
-						height: 'auto',
-						objectFit: 'cover',
-					}}
+					width={width}
+					height={height}
+					className="cursor-zoom-in py-4 md:max-w-md"
 					alt={attachment.description ? attachment.description : 'Image'}
 				/>
-			);
-		const originalWidth = width;
-		const originalHeight = height;
-		if (width > height) {
-			width = maxWidth;
-			height = (maxWidth / originalWidth) * originalHeight;
-		} else {
-			height = maxHeight;
-			width = (maxHeight / originalHeight) * originalWidth;
-		}
-
-		const aspectRatio = width / height;
-		return (
-			<Image
-				key={attachment.url}
-				src={attachment.url}
-				width={originalWidth}
-				height={originalHeight}
-				alt={attachment.description ? attachment.description : 'Image'}
-				style={{
-					maxWidth: `${width}px`,
-					maxHeight: `${maxHeight}px`,
-					aspectRatio: `${aspectRatio}`,
-				}}
-			/>
+			</MessageModalWrapper>
 		);
 	}
 	return (
@@ -121,7 +167,9 @@ type MessageProps = {
 	showBorders?: boolean;
 	Blurrer?: React.FC<{ children: React.ReactNode }>;
 	className?: string;
+	fullRounded?: boolean;
 };
+
 export const Message = ({
 	message,
 	Blurrer = MessageBlurrer,
@@ -130,15 +178,18 @@ export const Message = ({
 	authorArea = <MessageAuthorArea />,
 	images = <MessageAttachments />,
 	className,
+	fullRounded,
 }: MessageProps) => {
 	return (
 		<MessageContext.Provider value={{ message }}>
 			<Blurrer>
 				<div
 					className={cn(
-						`grow bg-[#E9ECF2] dark:bg-[#181B1F] lg:rounded-tl-standard ${
+						`grow bg-[#E9ECF2] dark:bg-[#181B1F] ${
 							showBorders ? 'border-2' : ''
-						} border-black/[.13] dark:border-white/[.13]`,
+						} border-black/[.13] dark:border-white/[.13] ${
+							fullRounded ? 'rounded-standard' : 'lg:rounded-tl-standard'
+						}`,
 						className,
 					)}
 				>
