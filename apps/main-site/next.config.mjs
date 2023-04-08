@@ -60,4 +60,4 @@ const sentryWebpackPluginOptions = {
 
 import { withSentryConfig } from '@sentry/nextjs';
 
-export default withMDX(withSentryConfig(config, sentryWebpackPluginOptions));
+export default withSentryConfig(withMDX(config), sentryWebpackPluginOptions);
