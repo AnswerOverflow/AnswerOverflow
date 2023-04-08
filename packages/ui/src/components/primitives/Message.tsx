@@ -10,7 +10,7 @@ import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import { cn } from '~ui/utils/styling';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { LinkButton, DiscordIcon, CloseIcon } from './base';
-import { useCopyToClipboard } from 'react-use';
+import { trackEvent } from '@answeroverflow/hooks';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MessageContext = createContext<{
@@ -28,7 +28,6 @@ export function useMessageContext() {
 }
 
 export const MessageAuthorArea = () => {
-	const [copyStatus, copyToClipboard] = useCopyToClipboard();
 	const { message } = useMessageContext();
 
 	return (
@@ -44,9 +43,21 @@ export const MessageAuthorArea = () => {
 						}${message.childThreadId ? `/${message.childThreadId}` : ''}/${
 							message.id
 						}`}
-						className="h-8 w-8 p-1"
+						onMouseUp={() => {
+							trackEvent('View On Discord Click', {
+								'Channel Id': message.parentChannelId
+									? message.parentChannelId
+									: message.channelId,
+								'Thread Id': message.childThreadId ?? undefined,
+								'Server Id': message.serverId,
+								'Message Author Id': message.author.id,
+								'Message Id': message.id,
+								'Solution Id': message.solutionIds?.[0] ?? undefined,
+							});
+						}}
+						className="h-8 w-8 bg-transparent p-1 hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent"
 					>
-						<DiscordIcon />
+						<DiscordIcon color="primary" />
 					</LinkButton>
 				</div>
 				<span>{getSnowflakeUTCDate(message.id)}</span>
@@ -86,6 +97,7 @@ const MessageModalWrapper = ({
 							<CloseIcon />
 						</AlertDialog.Cancel>
 					</div>
+					{/* eslint-disable-next-line @next/next/no-img-element */}
 					<img
 						className="max-h-vh80 w-full max-w-2xl object-contain lg:h-full xl:p-10"
 						src={attachment?.url}
@@ -114,6 +126,7 @@ export const MessageAttachments = () => {
 				// TODO: Bit of a hack for now since next images don't work well with no w/h specified
 				// eslint-disable-next-line @next/next/no-img-element
 				<MessageModalWrapper attachment={attachment}>
+					{/*  eslint-disable-next-line @next/next/no-img-element */}
 					<img
 						className="max-w-full cursor-zoom-in py-4 md:max-w-sm"
 						src={attachment.url}
