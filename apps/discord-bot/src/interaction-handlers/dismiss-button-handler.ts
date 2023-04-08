@@ -44,6 +44,7 @@ export class ButtonHandler extends InteractionHandler {
 					dismisser: member,
 					messageToDismiss: interaction.message,
 				});
+				await oneTimeStatusHandler(interaction, 'Dismissed message!');
 			} catch (error) {
 				if (error instanceof DismissErrorError) {
 					await oneTimeStatusHandler(interaction, error.message);

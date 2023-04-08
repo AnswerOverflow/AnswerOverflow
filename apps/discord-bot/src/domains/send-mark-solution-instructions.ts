@@ -51,11 +51,12 @@ export async function sendMarkSolutionInstructionsInThread(
 		.setImage(
 			'https://cdn.discordapp.com/attachments/1020132770862874704/1025906507549790208/mark_solution_instructions.png',
 		);
+	const firstMessage = await thread.fetchStarterMessage();
 	await thread.send({
 		embeds: [markSolutionInstructionsEmbed],
 		components: [
 			new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
-				makeDismissButton(thread.ownerId ?? ''),
+				makeDismissButton(firstMessage?.author.id ?? ''),
 			),
 		],
 	});
