@@ -22,6 +22,7 @@ import {
 } from '~discord-bot/utils/utils';
 import {
 	ChannelWithFlags,
+	findLatestMessageInChannelAndThreads,
 	getDefaultChannelWithFlags,
 } from '@answeroverflow/db';
 import { createMemberCtx } from '~discord-bot/utils/context';
@@ -103,22 +104,27 @@ export class ChannelSettingsCommand extends Command {
 
 				await callAPI({
 					async apiCall(router) {
-						return callWithAllowedErrors({
-							call: () => router.channels.byId(targetChannelToConfigure.id),
-							allowedErrors: 'NOT_FOUND',
-						});
+						const [channelSettings, lastIndexedMessage] = await Promise.all([
+							callWithAllowedErrors({
+								call: () => router.channels.byId(targetChannelToConfigure.id),
+								allowedErrors: 'NOT_FOUND',
+							}),
+							findLatestMessageInChannelAndThreads(targetChannelToConfigure.id),
+						]);
+						return { channelSettings, lastIndexedMessage };
 					},
-					Ok(result) {
-						if (!result) {
-							result = getDefaultChannelWithFlags(
+					Ok({ channelSettings, lastIndexedMessage }) {
+						if (!channelSettings) {
+							channelSettings = getDefaultChannelWithFlags(
 								toAOChannel(targetChannelToConfigure as GuildTextBasedChannel),
 							);
 						}
 						// TODO: Maybe assert that it matches that spec instead of casting
 						const menu = (
 							<ChannelSettingsMenu
-								channelWithFlags={result as ChannelWithFlags}
+								channelWithFlags={channelSettings as ChannelWithFlags}
 								targetChannel={targetChannelToConfigure as RootChannel}
+								lastIndexedMessage={lastIndexedMessage}
 							/>
 						);
 						ephemeralReply(menu, interaction);

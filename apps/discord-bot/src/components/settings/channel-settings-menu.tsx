@@ -41,6 +41,7 @@ import {
 	OPEN_INDEXING_SETTINGS_MENU_LABEL,
 	SEND_CONSENT_PROMPT_LABEL,
 	WEBSITE_URL,
+	DISCORD_EMOJI_ID,
 } from '@answeroverflow/constants';
 import type { ChannelWithFlags } from '@answeroverflow/prisma-types';
 import React from 'react';
@@ -64,6 +65,7 @@ import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
 import type { RootChannel } from '~discord-bot/utils/utils';
 import { makeRequestForConsentString } from '~discord-bot/domains/mark-solution';
 import { makeConsentButton } from '~discord-bot/domains/manage-account';
+import { Message, getDiscordURLForMessage } from '@answeroverflow/db';
 
 type ChannelSettingsMenuItemProps<T extends RootChannel = RootChannel> = {
 	channelInDB: ChannelWithFlags;
@@ -153,7 +155,10 @@ function ToggleForumGuidelinesConsentButton({
 export function IndexingSettingsMenu({
 	targetChannel,
 	initialChannelData,
-}: ChannelSettingsSubMenuProps) {
+	lastIndexedMessage,
+}: ChannelSettingsSubMenuProps & {
+	lastIndexedMessage: Message | null;
+}) {
 	const [channel, setChannel] = React.useState<ChannelWithFlags>(
 		channelCache.get(targetChannel.id) ?? initialChannelData,
 	);
@@ -238,6 +243,13 @@ export function IndexingSettingsMenu({
 					})
 				}
 			/>
+			{lastIndexedMessage && (
+				<Link
+					url={getDiscordURLForMessage(lastIndexedMessage)}
+					label="Last Indexed Message"
+					emoji={DISCORD_EMOJI_ID}
+				/>
+			)}
 		</>
 	);
 }
@@ -539,9 +551,11 @@ function ExperimentalSettingsMenu() {
 export function ChannelSettingsMenu({
 	channelWithFlags,
 	targetChannel,
+	lastIndexedMessage,
 }: {
 	channelWithFlags: ChannelWithFlags;
 	targetChannel: RootChannel;
+	lastIndexedMessage: Message | null;
 }) {
 	const [channel] = React.useState<ChannelWithFlags>(
 		channelCache.get(targetChannel.id) ?? channelWithFlags,
@@ -581,6 +595,7 @@ export function ChannelSettingsMenu({
 						<IndexingSettingsMenu
 							initialChannelData={channel}
 							targetChannel={targetChannel}
+							lastIndexedMessage={lastIndexedMessage}
 						/>,
 					);
 				}}
