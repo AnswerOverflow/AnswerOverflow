@@ -10,6 +10,7 @@ import {
 	MultiMessageBlurrer,
 	ServerInvite,
 	ChannelIcon,
+	useCanViewMessage,
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
 import { useTrackEvent } from '@answeroverflow/hooks';
@@ -30,9 +31,9 @@ export function MessageResultPage({
 	thread,
 }: MessageResultPageProps) {
 	const isUserInServer = useIsUserInServer(server.id);
-
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
+	const canViewServerMessages = useCanViewMessage(firstMessage);
 	const channelName = thread?.name ?? channel.name;
 	const description =
 		firstMessage && firstMessage.content?.length > 0
@@ -62,7 +63,7 @@ export function MessageResultPage({
 	let consecutivePrivateMessages = 0;
 	const messageStack = messages.map((message, index) => {
 		const nextMessage = messages.at(index + 1);
-		if (!message.public && (isUserInServer === 'loading' || !isUserInServer)) {
+		if (!message.public && !canViewServerMessages) {
 			consecutivePrivateMessages++;
 			if (nextMessage && !nextMessage.public) {
 				return;
@@ -72,7 +73,7 @@ export function MessageResultPage({
 		}
 		// TODO: Remove when embeds are supported
 		if (
-			message.public &&
+			(message.public || canViewServerMessages) &&
 			message.content.length === 0 &&
 			message.attachments.length === 0
 		)
