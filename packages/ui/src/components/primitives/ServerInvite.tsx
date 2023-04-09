@@ -18,7 +18,7 @@ const ServerInviteContext = createContext<{
 	server: ServerPublic;
 	location: ServerInviteClickProps['Button Location'];
 	channel?: ChannelPublicWithFlags;
-	isUserInServer: boolean | 'loading';
+	isUserInServer: ReturnType<typeof useIsUserInServer>;
 } | null>(null);
 
 function useServerInviteContext() {
@@ -114,11 +114,7 @@ export const ServerInviteJoinButton = (props: { className?: string }) => {
 				});
 			}}
 		>
-			{isUserInServer !== 'loading' && isUserInServer ? (
-				<>Joined</>
-			) : (
-				<>Join Server</>
-			)}
+			{isUserInServer === 'in_server' ? <>Joined</> : <>Join Server</>}
 		</LinkButton>
 	);
 };
@@ -131,7 +127,7 @@ export const ServerInviteIcon = () => {
 type ServerInviteProps = {
 	server: ServerPublic;
 	channel?: ChannelPublicWithFlags;
-	isUserInServer: boolean | 'loading';
+	isUserInServer: ReturnType<typeof useIsUserInServer>;
 	location: ServerInviteClickProps['Button Location'];
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	Icon?: React.ReactNode;

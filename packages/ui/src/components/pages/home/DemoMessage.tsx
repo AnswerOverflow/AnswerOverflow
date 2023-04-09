@@ -56,7 +56,7 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 			: getSnowflakeUTCDate(message.id);
 		const convertedMessageContent = toHTML(message.content);
 		const isUserInServer = useIsUserInServer(message.serverId);
-		if (isUserInServer !== 'loading' && isUserInServer) {
+		if (isUserInServer === 'in_server') {
 			blurred = false;
 		}
 
