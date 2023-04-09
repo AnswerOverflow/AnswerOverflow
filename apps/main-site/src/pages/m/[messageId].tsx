@@ -12,7 +12,7 @@ export default function MessageResult(
 	const { serverId, messageId, areAllMessagesPublic } = props;
 	const isUserInServer = useIsUserInServer(serverId);
 	const shouldFetchPrivateMessages =
-		isUserInServer !== 'loading' && !areAllMessagesPublic;
+		isUserInServer !== 'loading' && !areAllMessagesPublic && isUserInServer;
 	const { data } = trpc.messages.threadFromMessageId.useQuery(messageId, {
 		// For authenticated users that are in the server, we fetch the messages incase any of them are private
 		enabled: shouldFetchPrivateMessages,
