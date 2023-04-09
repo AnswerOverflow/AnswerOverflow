@@ -1,7 +1,6 @@
 // This component file is based off - https://www.youtube.com/watch?v=vPRdY87_SH0
 import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
 import discordMarkdown from 'discord-markdown';
-import Parser from 'html-react-parser';
 import Image from 'next/image';
 import React, { createContext, useContext, useState } from 'react';
 import { DiscordAvatar } from './DiscordAvatar';
@@ -68,11 +67,14 @@ export const MessageContents = () => {
 	const { message } = useMessageContext();
 	const { toHTML } = discordMarkdown;
 	const convertedMessageContent = toHTML(message.content);
-	const parsedMessageContent = Parser(convertedMessageContent);
 	return (
-		<div className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white">
-			{parsedMessageContent}
-		</div>
+		<div
+			className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white"
+			// The HTML from discord-markdown is escaped
+			dangerouslySetInnerHTML={{
+				__html: convertedMessageContent,
+			}}
+		/>
 	);
 };
 
