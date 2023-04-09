@@ -82,9 +82,6 @@ export async function provideConsentOnForumChannelMessage(message: Message) {
 	) {
 		return null;
 	}
-	if (!isHumanMessage(message)) {
-		return null;
-	}
 	const channelSettings = await findChannelById(channel.parent.id);
 	if (!channelSettings?.flags.forumGuidelinesConsentEnabled) {
 		return null;
