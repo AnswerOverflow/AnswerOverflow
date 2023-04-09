@@ -21,7 +21,6 @@ import {
 	RootChannel,
 } from '~discord-bot/utils/utils';
 import {
-	ChannelWithFlags,
 	findLatestMessageInChannelAndThreads,
 	getDefaultChannelWithFlags,
 } from '@answeroverflow/db';
@@ -122,7 +121,7 @@ export class ChannelSettingsCommand extends Command {
 						// TODO: Maybe assert that it matches that spec instead of casting
 						const menu = (
 							<ChannelSettingsMenu
-								channelWithFlags={channelSettings as ChannelWithFlags}
+								channelWithFlags={channelSettings}
 								targetChannel={targetChannelToConfigure as RootChannel}
 								lastIndexedMessage={lastIndexedMessage}
 							/>
