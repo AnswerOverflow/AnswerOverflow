@@ -18,6 +18,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
 	// TODO: We should look if this causes console errors
 	useEffect(() => {
+		hljs.configure({
+			ignoreUnescapedHTML: true,
+		});
 		hljs.highlightAll();
 	}, []);
 
