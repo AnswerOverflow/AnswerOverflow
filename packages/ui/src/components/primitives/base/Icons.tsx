@@ -18,7 +18,7 @@ const discordIconStyles = cva('', {
 				'dark:text-blue-400 text-[#5865F2] hover:text-[#7289DA] dark:hover:text-blue-300',
 			inherit: 'text-inherit',
 			primary:
-				'dark:text-neutral-200 dark:hover:text-neutral-400 text-neutral-800 hover:text-neutral-700',
+				'dark:text-neutral-200 dark:hover:text-neutral-400 text-neutral-800 hover:text-neutral-700 transition-all',
 		},
 		defaultVariants: {
 			color: 'inherit',
