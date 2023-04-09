@@ -21,7 +21,6 @@ import {
 	ManageAccountSource,
 } from '@answeroverflow/api';
 import { CONSENT_BUTTON_LABEL } from '@answeroverflow/constants';
-import { isHumanMessage } from '~discord-bot/utils/utils';
 
 export const CONSENT_ACTION_PREFIX = 'consent';
 
