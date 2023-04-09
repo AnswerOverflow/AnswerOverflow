@@ -23,6 +23,7 @@ import type { ServerAll } from '@answeroverflow/api';
 	name: 'server-settings',
 	description: "Manage your server's Answer Overflow settings",
 	runIn: ['GUILD_ANY'],
+	requiredUserPermissions: ['ManageGuild'],
 })
 export class OpenServerSettingsMenu extends Command {
 	public override registerApplicationCommands(
