@@ -116,6 +116,9 @@ export function WithAuth(
 
 export function WithHighlightJS(Story: PartialStoryFn<ReactRenderer, Args>) {
 	useEffect(() => {
+		hljs.configure({
+			ignoreUnescapedHTML: true,
+		});
 		hljs.highlightAll();
 	}, []);
 	return <Story />;
