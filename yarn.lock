@@ -4524,10 +4524,10 @@
   resolved "https://registry.npmjs.org/@trpc/client/-/client-10.18.0.tgz"
   integrity sha512-2d+6r2C/xygTjDWX9jT66defgHzbQP0Z8vrvyT3XtPjqU6JNlRNuS2ZtB8xDPdOQUUVnndzZ43BMr+Zu49K0OQ==
 
-"@trpc/next@^10.15.0", "@trpc/next@^10.4.3":
-  version "10.18.0"
-  resolved "https://registry.npmjs.org/@trpc/next/-/next-10.18.0.tgz"
-  integrity sha512-GftAMy3K9AEATmsVTdc5zhCTLzSYpZ9bene7+sTlCF7QX/AMxIsd0ZUFrRnF6yg3jnxN+SvdNcF9IXeETXtGUw==
+"@trpc/next@^10.19.1":
+  version "10.19.1"
+  resolved "https://registry.yarnpkg.com/@trpc/next/-/next-10.19.1.tgz#76fb37075750a95ab242536721b2df01018dec75"
+  integrity sha512-xe1Ygp4oGtn+zUJu+pCKhbfZ7aveyVAMyYrka81v0BwZTKAAGzp6YuO4t6JtW+3x+ZSJ7sHphJP2bwThJQo9kQ==
   dependencies:
     react-ssr-prepass "^1.5.0"
 
