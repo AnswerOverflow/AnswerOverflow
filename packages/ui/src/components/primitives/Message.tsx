@@ -51,9 +51,9 @@ export const MessageAuthorArea = () => {
 								'Solution Id': message.solutionIds?.[0] ?? undefined,
 							});
 						}}
-						className="h-8 w-8 bg-transparent p-1 hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent"
+						className="h-8 w-8"
 					>
-						<DiscordIcon />
+						<DiscordIcon className="h-8 w-8" />
 						<span className="sr-only">View on Discord</span>
 					</LinkButton>
 				</div>
