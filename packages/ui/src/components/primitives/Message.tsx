@@ -53,7 +53,7 @@ export const MessageAuthorArea = () => {
 						}}
 						className="h-8 w-8 bg-transparent p-1 hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent"
 					>
-						<DiscordIcon color="blurple" />
+						<DiscordIcon />
 						<span className="sr-only">View on Discord</span>
 					</LinkButton>
 				</div>
