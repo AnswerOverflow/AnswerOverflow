@@ -18,7 +18,7 @@ export const InServer: Story = {
 			inviteCode: 'sxDN2rEdwD',
 		}),
 		location: 'Search Results',
-		isUserInServer: true,
+		isUserInServer: 'in_server',
 	},
 };
 
@@ -29,6 +29,6 @@ export const NotInServer: Story = {
 			// AO's Discord server
 			inviteCode: 'sxDN2rEdwD',
 		}),
-		isUserInServer: false,
+		isUserInServer: 'not_in_server',
 	},
 };

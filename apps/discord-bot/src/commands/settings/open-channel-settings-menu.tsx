@@ -4,7 +4,7 @@ import { Command, type ChatInputCommand } from '@sapphire/framework';
 import {
 	callAPI,
 	callWithAllowedErrors,
-	onceTimeStatusHandler,
+	oneTimeStatusHandler,
 } from '~discord-bot/utils/trpc';
 import {
 	SlashCommandBuilder,
@@ -21,7 +21,7 @@ import {
 	RootChannel,
 } from '~discord-bot/utils/utils';
 import {
-	ChannelWithFlags,
+	findLatestMessageInChannelAndThreads,
 	getDefaultChannelWithFlags,
 } from '@answeroverflow/db';
 import { createMemberCtx } from '~discord-bot/utils/context';
@@ -87,14 +87,14 @@ export class ChannelSettingsCommand extends Command {
 					: getRootChannel(interactionChannel);
 
 				if (!targetChannelToConfigure) {
-					await onceTimeStatusHandler(
+					await oneTimeStatusHandler(
 						interaction,
 						'Could not find channel to configure',
 					);
 					return;
 				}
 				if (!allowedTypes.includes(targetChannelToConfigure.type)) {
-					await onceTimeStatusHandler(
+					await oneTimeStatusHandler(
 						interaction,
 						'Channel to configure is not a valid type',
 					);
@@ -103,27 +103,32 @@ export class ChannelSettingsCommand extends Command {
 
 				await callAPI({
 					async apiCall(router) {
-						return callWithAllowedErrors({
-							call: () => router.channels.byId(targetChannelToConfigure.id),
-							allowedErrors: 'NOT_FOUND',
-						});
+						const [channelSettings, lastIndexedMessage] = await Promise.all([
+							callWithAllowedErrors({
+								call: () => router.channels.byId(targetChannelToConfigure.id),
+								allowedErrors: 'NOT_FOUND',
+							}),
+							findLatestMessageInChannelAndThreads(targetChannelToConfigure.id),
+						]);
+						return { channelSettings, lastIndexedMessage };
 					},
-					Ok(result) {
-						if (!result) {
-							result = getDefaultChannelWithFlags(
+					Ok({ channelSettings, lastIndexedMessage }) {
+						if (!channelSettings) {
+							channelSettings = getDefaultChannelWithFlags(
 								toAOChannel(targetChannelToConfigure as GuildTextBasedChannel),
 							);
 						}
 						// TODO: Maybe assert that it matches that spec instead of casting
 						const menu = (
 							<ChannelSettingsMenu
-								channelWithFlags={result as ChannelWithFlags}
+								channelWithFlags={channelSettings}
 								targetChannel={targetChannelToConfigure as RootChannel}
+								lastIndexedMessage={lastIndexedMessage}
 							/>
 						);
 						ephemeralReply(menu, interaction);
 					},
-					Error: (error) => onceTimeStatusHandler(interaction, error.message),
+					Error: (error) => oneTimeStatusHandler(interaction, error.message),
 					getCtx: () => createMemberCtx(member),
 				});
 			},

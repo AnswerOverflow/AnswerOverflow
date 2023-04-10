@@ -2,7 +2,12 @@ import { Button, Link } from '@answeroverflow/discordjs-react';
 import React from 'react';
 import { useHistory } from './router';
 import { ephemeralReply } from '~discord-bot/utils/utils';
-import { DISCORD_LINK, DOCS_URL, GITHUB_LINK } from '@answeroverflow/constants';
+import {
+	DISCORD_EMOJI_ID,
+	DISCORD_LINK,
+	DOCS_URL,
+	GITHUB_LINK,
+} from '@answeroverflow/constants';
 
 export const SupportMenu: React.FC = () => (
 	<>
@@ -12,11 +17,7 @@ export const SupportMenu: React.FC = () => (
 			url={GITHUB_LINK}
 			emoji="<:github:860914920102166578>"
 		/>
-		<Link
-			label="Support server"
-			url={DISCORD_LINK}
-			emoji="<:discord:860914920215412756>"
-		/>
+		<Link label="Support server" url={DISCORD_LINK} emoji={DISCORD_EMOJI_ID} />
 		<Link
 			label="Schedule a call"
 			url="https://cal.com/answeroverflow"

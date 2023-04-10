@@ -1,7 +1,6 @@
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import Image from 'next/image';
 import discordMarkdown from 'discord-markdown';
-import Parser from 'html-react-parser';
 import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
 import {
 	DiscordIcon,
@@ -56,9 +55,8 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 			? customMessageDateString
 			: getSnowflakeUTCDate(message.id);
 		const convertedMessageContent = toHTML(message.content);
-		const parsedMessageContent = Parser(convertedMessageContent);
 		const isUserInServer = useIsUserInServer(message.serverId);
-		if (isUserInServer !== 'loading' && isUserInServer) {
+		if (isUserInServer === 'in_server') {
 			blurred = false;
 		}
 
@@ -198,9 +196,8 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 							className={`mt-2 max-w-[80vw] text-black ${
 								forceDarkMode ? 'text-neutral-50' : 'dark:text-neutral-50'
 							} sm:mt-0 sm:max-w-[70vw] md:max-w-full`}
-						>
-							{parsedMessageContent}
-						</div>
+							dangerouslySetInnerHTML={{ __html: convertedMessageContent }}
+						/>
 						<div className="grid gap-2">
 							{message.attachments.map((attachment) => (
 								<MessageAttachment

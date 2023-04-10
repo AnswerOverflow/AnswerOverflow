@@ -9,15 +9,20 @@ import {
 } from '@answeroverflow/db';
 import { z } from 'zod';
 import type { Context } from '~api/router/context';
-import { router, withUserServersProcedure } from '~api/router/trpc';
+import {
+	publicProcedure,
+	router,
+	withUserServersProcedure,
+} from '~api/router/trpc';
+import { findOrThrowNotFound } from '~api/utils/operations';
 import {
 	assertBoolsAreNotEqual,
 	assertCanEditServer,
 	assertCanEditServerBotOnly,
 } from '~api/utils/permissions';
 import {
-	protectedFetchWithPublicData,
 	protectedMutation,
+	protectedFetch,
 } from '~api/utils/protected-procedures';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
@@ -58,16 +63,20 @@ async function mutateServer({
 }
 
 export const serverRouter = router({
-	byId: withUserServersProcedure
-		.input(z.string())
-		.query(async ({ ctx, input }) => {
-			return protectedFetchWithPublicData({
-				fetch: () => findServerByAliasOrId(input),
-				permissions: () => assertCanEditServer(ctx, input),
-				notFoundMessage: 'Server not found',
-				publicDataFormatter: (server) => zServerPublic.parse(server),
-			});
-		}),
+	byId: withUserServersProcedure.input(z.string()).query(({ ctx, input }) => {
+		return protectedFetch({
+			fetch: () => findServerByAliasOrId(input),
+			permissions: () => assertCanEditServer(ctx, input),
+			notFoundMessage: 'Server not found',
+		});
+	}),
+	byIdPublic: publicProcedure.input(z.string()).query(async ({ input }) => {
+		const data = await findOrThrowNotFound(
+			() => findServerByAliasOrId(input),
+			'Server not found',
+		);
+		return zServerPublic.parse(data);
+	}),
 	setReadTheRulesConsentEnabled: withUserServersProcedure
 		.input(
 			z.object({

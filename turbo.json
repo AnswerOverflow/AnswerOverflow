@@ -5,10 +5,16 @@
 		"migrate": {},
 		"build": {
 			"outputs": ["dist/**", ".next/**"],
-			"cache": true
+			"cache": true,
+			"inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts"]
 		},
 		"format": {
-			"inputs": ["./packages/config/"],
+			"inputs": [
+				"./packages/config/prettier/**/*",
+				"src/**/*.tsx",
+				"src/**/*.ts",
+				"test/**/*.ts"
+			],
 			"outputs": [],
 			"cache": false
 		},
@@ -17,7 +23,12 @@
 			"cache": false
 		},
 		"lint": {
-			"inputs": ["./packages/config/eslint-config-custom"],
+			"inputs": [
+				"./packages/config/eslint-config-custom/**/*",
+				"src/**/*.tsx",
+				"src/**/*.ts",
+				"test/**/*.ts"
+			],
 			"outputs": [],
 			"cache": true
 		},
@@ -27,7 +38,8 @@
 		},
 		"test": {
 			"outputs": ["coverage/**"],
-			"cache": true
+			"cache": true,
+			"inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts"]
 		},
 		"dev": {
 			"cache": false

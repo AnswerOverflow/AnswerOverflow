@@ -1,4 +1,5 @@
 import {
+	addFlagsToChannel,
 	Channel,
 	ChannelWithFlags,
 	createChannel,
@@ -8,7 +9,6 @@ import {
 } from '@answeroverflow/db';
 import {
 	mockAccountWithServersCallerCtx,
-	testAllPublicAndPrivateDataVariants,
 	testAllSourceAndPermissionVariantsThatThrowErrors,
 } from '~api/test/utils';
 import {
@@ -27,11 +27,7 @@ import {
 	SOLVED_LABEL_ALREADY_UNSELECTED_ERROR_MESSAGE,
 	zChannelWithServerCreate,
 } from './channel';
-import {
-	mockChannel,
-	mockChannelWithFlags,
-	mockServer,
-} from '@answeroverflow/db-mock';
+import { mockChannel, mockServer } from '@answeroverflow/db-mock';
 import { pickPublicChannelData } from '~api/test/public-data';
 import type { z } from 'zod';
 import { getRandomId } from '@answeroverflow/utils';
@@ -112,26 +108,58 @@ describe('Channel Operations', () => {
 		beforeEach(async () => {
 			await createChannel(channel);
 		});
-		it('tests all variants for fetching a single channel', async () => {
-			await testAllPublicAndPrivateDataVariants({
-				sourcesThatShouldWork: ['discord-bot', 'web-client'],
-				permissionsThatShouldWork: ['ManageGuild', 'Administrator'],
-				async fetch({ permission, source }) {
-					const account = await mockAccountWithServersCallerCtx(
-						server,
-						source,
-						permission,
-					);
-					const router = channelRouter.createCaller(account.ctx);
-					const data = await router.byId(channel.id);
-					return {
-						data,
-						privateDataFormat: data,
-						publicDataFormat: pickPublicChannelData(
-							mockChannelWithFlags(server, channel),
-						),
-					};
-				},
+		describe('By Id', () => {
+			it('should succeed with permission variants', async () => {
+				await testAllSourceAndPermissionVariantsThatThrowErrors({
+					async operation({ source, permission }) {
+						const account = await mockAccountWithServersCallerCtx(
+							server,
+							source,
+							permission,
+						);
+						const router = channelRouter.createCaller(account.ctx);
+						const fetchedChannel = await router.byId(channel.id);
+						expect(fetchedChannel).toEqual(addFlagsToChannel(channel));
+					},
+					sourcesThatShouldWork: ['discord-bot', 'web-client'],
+					permissionsThatShouldWork: ['ManageGuild', 'Administrator'],
+				});
+			});
+			it("should fail if the channel doesn't exist", async () => {
+				const account = await mockAccountWithServersCallerCtx(
+					server,
+					'discord-bot',
+					'ManageGuild',
+				);
+				const router = channelRouter.createCaller(account.ctx);
+				await expect(router.byId('non-existent-channel')).rejects.toThrow(
+					'Channel does not exist',
+				);
+			});
+		});
+		describe('By Id Public', () => {
+			it('should only get public channel data', async () => {
+				const account = await mockAccountWithServersCallerCtx(
+					server,
+					'discord-bot',
+					'ManageGuild',
+				);
+				const router = channelRouter.createCaller(account.ctx);
+				const fetchedChannel = await router.byIdPublic(channel.id);
+				expect(fetchedChannel).toEqual(
+					pickPublicChannelData(addFlagsToChannel(channel)),
+				);
+			});
+			it("should fail if the channel doesn't exist", async () => {
+				const account = await mockAccountWithServersCallerCtx(
+					server,
+					'discord-bot',
+					'ManageGuild',
+				);
+				const router = channelRouter.createCaller(account.ctx);
+				await expect(router.byIdPublic('non-existent-channel')).rejects.toThrow(
+					'Channel does not exist',
+				);
 			});
 		});
 	});
