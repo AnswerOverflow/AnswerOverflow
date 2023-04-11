@@ -78,6 +78,7 @@ export class Elastic extends Client {
 	constructor(opts: ClientOptions) {
 		super(opts);
 		this.messagesIndex = process.env.ELASTICSEARCH_MESSAGE_INDEX;
+
 	}
 
 	public destroyMessagesIndex() {
@@ -462,6 +463,14 @@ export class Elastic extends Client {
 		});
 		return result.count;
 	}
+
+  public async getNumberOfIndexedMessages() {
+		const result = await this.count({
+			index: this.messagesIndex,
+		});
+		return result.count;
+	}
+
 }
 
 export const elastic = global.elastic || getElasticClient();

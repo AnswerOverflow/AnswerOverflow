@@ -302,6 +302,22 @@ describe('ElasticSearch', () => {
 			expect(count).toBe(0);
 		});
 	});
+	//new shit
+	describe('Get total message count', () => {
+		it('should return the total number of messages indexed', async () => {
+			await elastic.upsertMessage(msg1);
+			await elastic.upsertMessage({
+				...msg2,
+			});
+			const count = await elastic.getNumberOfIndexedMessages();
+			expect(count).toBe(2);
+		});
+		it('should return 0 if there are no messages in a channel', async () => {
+			const count = await elastic.getChannelMessagesCount(msg1.channelId);
+			expect(count).toBe(0);
+		});
+	});
+
 	describe('find latest message in channel', () => {
 		it('should return the latest message in a channel', async () => {
 			await elastic.upsertMessage(msg1);
