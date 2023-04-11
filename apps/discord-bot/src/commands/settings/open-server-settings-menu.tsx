@@ -3,11 +3,12 @@ import { Command, type ChatInputCommand } from '@sapphire/framework';
 import {
 	callAPI,
 	callWithAllowedErrors,
-	onceTimeStatusHandler,
+	oneTimeStatusHandler,
 } from '~discord-bot/utils/trpc';
 import {
 	SlashCommandBuilder,
 	type ChatInputCommandInteraction,
+	PermissionsBitField,
 } from 'discord.js';
 import React from 'react';
 import { ephemeralReply, getCommandIds } from '~discord-bot/utils/utils';
@@ -17,12 +18,12 @@ import { createMemberCtx } from '~discord-bot/utils/context';
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
 import { ServerSettingsMenu } from '~discord-bot/components/settings';
 import { toAOServer } from '~discord-bot/utils/conversions';
-import type { ServerAll } from '@answeroverflow/api';
 
 @ApplyOptions<Command.Options>({
 	name: 'server-settings',
 	description: "Manage your server's Answer Overflow settings",
 	runIn: ['GUILD_ANY'],
+	requiredUserPermissions: ['ManageGuild'],
 })
 export class OpenServerSettingsMenu extends Command {
 	public override registerApplicationCommands(
@@ -37,7 +38,10 @@ export class OpenServerSettingsMenu extends Command {
 			new SlashCommandBuilder()
 				.setName(this.name)
 				.setDescription(this.description)
-				.setDMPermission(false),
+				.setDMPermission(false)
+				.setDefaultMemberPermissions(
+					PermissionsBitField.resolve('ManageGuild'),
+				),
 			{
 				idHints: ids,
 			},
@@ -57,12 +61,12 @@ export class OpenServerSettingsMenu extends Command {
 						return server;
 					},
 					getCtx: () => createMemberCtx(member),
-					Error: (error) => onceTimeStatusHandler(interaction, error.message),
+					Error: (error) => oneTimeStatusHandler(interaction, error.message),
 					Ok(server) {
 						if (!server) {
 							server = getDefaultServerWithFlags(toAOServer(guild));
 						}
-						const menu = <ServerSettingsMenu server={server as ServerAll} />;
+						const menu = <ServerSettingsMenu server={server} />;
 						ephemeralReply(menu, interaction);
 					},
 				});

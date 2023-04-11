@@ -9,7 +9,10 @@ export const useIsUserInServer = (serverId: string) => {
 		enabled: session.status === 'authenticated',
 	});
 	if (!servers) return 'loading';
-	return servers?.some((s) => s.id === serverId) ?? false;
+	// Return string types to avoid accidental boolean casting
+	return servers?.some((s) => s.id === serverId)
+		? 'in_server'
+		: 'not_in_server';
 };
 
 export const useElementPosition = (element: RefObject<HTMLDivElement>) => {

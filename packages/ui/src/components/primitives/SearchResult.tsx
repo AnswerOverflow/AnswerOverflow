@@ -157,12 +157,10 @@ export const LinkMessage = ({
 			className={className}
 			content={
 				<>
-					<Link href={`/m/${message.id}`}>
-						<div className="pt-2">
-							<Heading.H4 className="text-lg text-blue-700 decoration-2 hover:text-blue-600 hover:underline dark:text-blue-400 hover:dark:text-blue-500">
-								{thread?.name ?? message.content.slice(0, 20).trim() + '...'}
-							</Heading.H4>
-						</div>
+					<Link href={`/m/${message.id}`} className="block w-fit ">
+						<Heading.H4 className="pt-4 text-lg text-blue-700 decoration-2 hover:text-blue-600 hover:underline dark:text-blue-400 hover:dark:text-blue-500">
+							{thread?.name ?? message.content.slice(0, 20).trim() + '...'}
+						</Heading.H4>
 					</Link>
 					<MessageContents />
 					<MessageAttachments />

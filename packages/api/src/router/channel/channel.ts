@@ -22,10 +22,11 @@ import {
 } from '~api/utils/permissions';
 import {
 	PermissionsChecks,
-	protectedFetchWithPublicData,
+	protectedFetch,
 	protectedMutation,
 } from '~api/utils/protected-procedures';
 import type { Context } from '../context';
+import { findOrThrowNotFound } from '~api/utils/operations';
 
 export const CHANNEL_NOT_FOUND_MESSAGES = 'Channel does not exist';
 
@@ -121,14 +122,18 @@ export const AUTO_THREAD_ALREADY_DISABLED_ERROR_MESSAGE =
 
 export const channelRouter = router({
 	byId: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
-		return protectedFetchWithPublicData({
+		return protectedFetch({
 			fetch: () => findChannelById(input),
 			permissions: (data) => assertCanEditServer(ctx, data.serverId),
 			notFoundMessage: CHANNEL_NOT_FOUND_MESSAGES,
-			publicDataFormatter: (data) => {
-				return zChannelPublic.parse(data);
-			},
 		});
+	}),
+	byIdPublic: publicProcedure.input(z.string()).query(async ({ input }) => {
+		const channel = await findOrThrowNotFound(
+			() => findChannelById(input),
+			CHANNEL_NOT_FOUND_MESSAGES,
+		);
+		return zChannelPublic.parse(channel);
 	}),
 	setIndexingEnabled: withUserServersProcedure
 		.input(
