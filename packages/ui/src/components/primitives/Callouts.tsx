@@ -2,30 +2,24 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { Button, ButtonProps, LinkButton } from '.';
 import { signIn } from 'next-auth/react';
 import { trackEvent, GettingStartedClickProps } from '@answeroverflow/hooks';
-import { GetStartedModal } from '../pages/home/GetStartedModal/GetStartedModal';
 export function GetStarted(
 	props: Omit<ButtonProps, 'href'> & {
 		location: GettingStartedClickProps['Button Location'];
 	},
 ) {
 	return (
-		<Dialog.Root>
-			<Dialog.Trigger asChild>
-				<Button
-					variant="outline"
-					onClick={() => {
-						// Use mouse up to capture middle click and right click
-						trackEvent('Getting Started Click', {
-							'Button Location': props.location,
-						});
-					}}
-					{...props}
-				>
-					{props.children || 'Get Started'}
-				</Button>
-			</Dialog.Trigger>
-			<GetStartedModal />
-		</Dialog.Root>
+		<Button
+			variant="outline"
+			onClick={() => {
+				// Use mouse up to capture middle click and right click
+				trackEvent('Getting Started Click', {
+					'Button Location': props.location,
+				});
+			}}
+			{...props}
+		>
+			{props.children || 'Get Started'}
+		</Button>
 	);
 }
 

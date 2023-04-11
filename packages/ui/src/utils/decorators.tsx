@@ -33,7 +33,7 @@ export function WithTailwindTheme(
 
 	const { tailwindTheme } = context.globals as Globals;
 	const Dark = () => (
-		<Flex className="dark bg-ao-black">
+		<Flex className="dark min-h-screen bg-ao-black">
 			<ThemeProvider defaultTheme="dark">
 				<Story />
 			</ThemeProvider>
