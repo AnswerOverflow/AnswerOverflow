@@ -5,10 +5,14 @@ import {
 	Navbar,
 	Paragraph,
 } from '~ui/components/primitives';
-import { GetStartedModalPageHandler } from './getStartedModal/GetStartedSection';
-import { getStartedModalPages } from './getStartedModal/GetStartedSectionPages';
+import { GetStartedModalPageHandler } from './getStartedPage/GetStartedSection';
+import { getStartedModalPages } from './getStartedPage/GetStartedSectionPages';
 
-export const GetStartedPage = () => {
+export interface GetStartedPageProps {
+	initialPageIndex: string;
+}
+
+export const GetStartedPage = ({ initialPageIndex }: GetStartedPageProps) => {
 	return (
 		<div className="mx-auto flex min-h-screen w-full flex-col overflow-y-scroll bg-ao-white scrollbar-hide overflow-x-hidden dark:bg-ao-black">
 			<Navbar />
@@ -20,9 +24,12 @@ export const GetStartedPage = () => {
 				/>
 
 				<div className="relative w-full">
-					<div className="absolute left-0 mr-32 h-[75rem] w-16 bg-black"></div>
-					<div className="mx-auto mx-auto max-w-6xl gap-16 rounded-standard border-1 p-16 drop-shadow-2xl dark:border-ao-white/25 dark:bg-ao-white/[.01]">
-						<GetStartedModalPageHandler pages={getStartedModalPages} />
+					<div className="absolute left-0 ml-32 h-full w-8 bg-black"></div>
+					<div className="mx-auto max-w-6xl gap-16 rounded-standard border-1 p-16 drop-shadow-2xl dark:border-ao-white/25 dark:bg-ao-white/[.01]">
+						<GetStartedModalPageHandler
+							pages={getStartedModalPages}
+							initialPageIndex={initialPageIndex}
+						/>
 					</div>
 				</div>
 			</main>

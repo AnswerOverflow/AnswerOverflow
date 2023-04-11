@@ -1,0 +1,14 @@
+.page-slide-in {
+	animation: slideIn 0.4s ease-in-out;
+}
+
+@keyframes slideIn {
+	0% {
+		transform: translateY(5%);
+		opacity: 0.75;
+	}
+	100% {
+		transform: translateY(0%);
+		opacity: 1;
+	}
+}
