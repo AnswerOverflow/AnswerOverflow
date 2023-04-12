@@ -1,15 +1,12 @@
+import { AOHead, Footer, Navbar } from '~ui/components/primitives';
+import { GetStartedPageHandler } from './getStartedPage/GetStartedSection';
 import {
-	AOHead,
-	Footer,
-	Heading,
-	Navbar,
-	Paragraph,
-} from '~ui/components/primitives';
-import { GetStartedModalPageHandler } from './getStartedPage/GetStartedSection';
-import { getStartedModalPages } from './getStartedPage/GetStartedSectionPages';
+	AllPageIndex,
+	getStartedPages,
+} from './getStartedPage/GetStartedSectionPages';
 
 export interface GetStartedPageProps {
-	initialPageIndex: string;
+	initialPageIndex: AllPageIndex;
 }
 
 export const GetStartedPage = ({ initialPageIndex }: GetStartedPageProps) => {
@@ -25,9 +22,9 @@ export const GetStartedPage = ({ initialPageIndex }: GetStartedPageProps) => {
 
 				<div className="relative w-full">
 					<div className="absolute left-0 ml-32 h-full w-8 bg-black"></div>
-					<div className="mx-auto max-w-6xl gap-16 rounded-standard border-1 p-16 drop-shadow-2xl dark:border-ao-white/25 dark:bg-ao-white/[.01]">
-						<GetStartedModalPageHandler
-							pages={getStartedModalPages}
+					<div className="mx-auto max-w-6xl gap-16 rounded-standard border-1 bg-ao-black/[0.01] p-16 drop-shadow-2xl dark:border-ao-white/25 dark:bg-ao-white/[.01]">
+						<GetStartedPageHandler
+							pages={getStartedPages}
 							initialPageIndex={initialPageIndex}
 						/>
 					</div>

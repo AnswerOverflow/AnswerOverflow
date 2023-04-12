@@ -92,6 +92,9 @@ module.exports = {
 				vh90: '90vh',
 				vh100: '100vh',
 			},
+      opacity: {
+        "1": "0.01",
+      }
 		},
 	},
 

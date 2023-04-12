@@ -1,20 +1,23 @@
 import { useState } from 'react';
+import type { AllPageIndex } from './GetStartedSectionPages';
 
-export interface GetStartedModalPageProps {
-	setPage: (pageIndex: 'introPage' | 'pickPlanPage') => void;
+export interface GetStartedPageProps {
+	setPage: (pageIndex: AllPageIndex) => void;
 }
 
-export interface GetStartedModalPage {
-	pageIndex: string;
-	component: React.FC<GetStartedModalPageProps>;
+export interface GetStartedPage {
+	pageIndex: AllPageIndex;
+	component: React.FC<GetStartedPageProps>;
 }
 
-export const GetStartedModalPageHandler = ({
+export interface GetStartedPageHandlerProps {
+	pages: readonly GetStartedPage[];
+	initialPageIndex?: AllPageIndex;
+}
+
+export const GetStartedPageHandler: React.FC<GetStartedPageHandlerProps> = ({
 	pages,
 	initialPageIndex,
-}: {
-	pages: GetStartedModalPage[];
-	initialPageIndex?: string;
 }) => {
 	const [currentPage, setCurrentPage] = useState(
 		initialPageIndex ?? 'introPage',
