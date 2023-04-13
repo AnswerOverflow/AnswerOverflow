@@ -6,12 +6,9 @@ import {
 	ActionRow,
 } from '@answeroverflow/discordjs-react';
 import {
-	ActionRowBuilder,
 	ChannelType,
-	EmbedBuilder,
 	ForumChannel,
 	GuildForumTag,
-	MessageActionRowComponentBuilder,
 	NewsChannel,
 	TextChannel,
 } from 'discord.js';
@@ -40,7 +37,7 @@ import {
 	ENABLE_AI_QUESTION_ANSWERING_LABEL,
 	OPEN_INDEXING_SETTINGS_MENU_LABEL,
 	SEND_CONSENT_PROMPT_LABEL,
-	WEBSITE_URL,
+	DISCORD_EMOJI_ID,
 } from '@answeroverflow/constants';
 import type { ChannelWithFlags } from '@answeroverflow/prisma-types';
 import React from 'react';
@@ -60,10 +57,10 @@ import {
 	updateAutoThreadEnabled,
 } from '~discord-bot/domains/channel-settings';
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
-import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
+import { oneTimeStatusHandler } from '~discord-bot/utils/trpc';
 import type { RootChannel } from '~discord-bot/utils/utils';
-import { makeRequestForConsentString } from '~discord-bot/domains/mark-solution';
-import { makeConsentButton } from '~discord-bot/domains/manage-account';
+import { sendConsentPrompt } from '~discord-bot/domains/manage-account';
+import { Message, getDiscordURLForMessage } from '@answeroverflow/db';
 
 type ChannelSettingsMenuItemProps<T extends RootChannel = RootChannel> = {
 	channelInDB: ChannelWithFlags;
@@ -111,7 +108,7 @@ function ToggleIndexingButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => onceTimeStatusHandler(interaction, message),
+						Error: (message) => oneTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -139,7 +136,7 @@ function ToggleForumGuidelinesConsentButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => onceTimeStatusHandler(interaction, message),
+						Error: (message) => oneTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -153,7 +150,10 @@ function ToggleForumGuidelinesConsentButton({
 export function IndexingSettingsMenu({
 	targetChannel,
 	initialChannelData,
-}: ChannelSettingsSubMenuProps) {
+	lastIndexedMessage,
+}: ChannelSettingsSubMenuProps & {
+	lastIndexedMessage: Message | null;
+}) {
 	const [channel, setChannel] = React.useState<ChannelWithFlags>(
 		channelCache.get(targetChannel.id) ?? initialChannelData,
 	);
@@ -216,28 +216,21 @@ export function IndexingSettingsMenu({
 				label={SEND_CONSENT_PROMPT_LABEL}
 				style="Primary"
 				onClick={(intr) =>
-					guildTextChannelOnlyInteraction(intr, async ({ guild, channel }) => {
-						const consentEmbed = new EmbedBuilder();
-						consentEmbed.setDescription(
-							makeRequestForConsentString(guild.name),
-						);
-						consentEmbed.addFields({
-							name: 'Learn more',
-							value: WEBSITE_URL,
-						});
-						const components =
-							new ActionRowBuilder<MessageActionRowComponentBuilder>();
-						components.addComponents(
-							makeConsentButton('manually-posted-prompt'),
-						);
-						await channel.send({
-							embeds: [consentEmbed],
-							components: [components],
-						});
-						await onceTimeStatusHandler(intr, 'Consent prompt sent!');
-					})
+					guildTextChannelOnlyInteraction(intr, async ({ channel }) =>
+						sendConsentPrompt({
+							channel,
+							interaction: intr,
+						}),
+					)
 				}
 			/>
+			{lastIndexedMessage && (
+				<Link
+					url={getDiscordURLForMessage(lastIndexedMessage)}
+					label="Last Indexed Message"
+					emoji={DISCORD_EMOJI_ID}
+				/>
+			)}
 		</>
 	);
 }
@@ -263,7 +256,7 @@ function ToggleMarkAsSolutionButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => onceTimeStatusHandler(interaction, message),
+						Error: (message) => oneTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -294,7 +287,7 @@ function ToggleSendMarkAsSolutionInstructionsButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => onceTimeStatusHandler(interaction, message),
+						Error: (message) => oneTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -325,7 +318,7 @@ function SelectMarkAsSolvedTag({
 						channel: targetChannel,
 						tagId: value === CLEAR_TAG_VALUE ? null : value,
 						member,
-						Error: (message) => onceTimeStatusHandler(interaction, message),
+						Error: (message) => oneTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -365,7 +358,7 @@ function ToggleAutoThreadButton({
 						channel: targetChannel,
 						enabled,
 						member,
-						Error: (message) => onceTimeStatusHandler(interaction, message),
+						Error: (message) => oneTimeStatusHandler(interaction, message),
 						Ok: (updatedChannel) => {
 							updateChannelState(setChannel, updatedChannel);
 						},
@@ -539,9 +532,11 @@ function ExperimentalSettingsMenu() {
 export function ChannelSettingsMenu({
 	channelWithFlags,
 	targetChannel,
+	lastIndexedMessage,
 }: {
 	channelWithFlags: ChannelWithFlags;
 	targetChannel: RootChannel;
+	lastIndexedMessage: Message | null;
 }) {
 	const [channel] = React.useState<ChannelWithFlags>(
 		channelCache.get(targetChannel.id) ?? channelWithFlags,
@@ -581,6 +576,7 @@ export function ChannelSettingsMenu({
 						<IndexingSettingsMenu
 							initialChannelData={channel}
 							targetChannel={targetChannel}
+							lastIndexedMessage={lastIndexedMessage}
 						/>,
 					);
 				}}

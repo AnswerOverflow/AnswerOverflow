@@ -6,7 +6,10 @@ import {
 	removeServerFromUserCache,
 	updateCachedDiscordUser,
 } from '@answeroverflow/cache';
-import { findDiscordOauthByProviderAccountId } from '@answeroverflow/db';
+import {
+	clearProviderAuthToken,
+	findDiscordOauthByProviderAccountId,
+} from '@answeroverflow/db';
 import { toDiscordAPIServer } from '~discord-bot/utils/conversions';
 
 @ApplyOptions<Listener.Options>({
@@ -18,6 +21,11 @@ export class SyncOnAdd extends Listener {
 		const account = await findDiscordOauthByProviderAccountId(member.user.id);
 		if (!account || !account.access_token) return;
 		await addServerToUserServerCache({
+			onInvalidToken: () =>
+				clearProviderAuthToken({
+					provider: account.provider,
+					providerAccountId: account.providerAccountId,
+				}),
 			accessToken: account.access_token,
 			server: toDiscordAPIServer(member),
 		});
@@ -34,6 +42,11 @@ export class SyncOnRemove extends Listener {
 		if (!account || !account.access_token) return;
 		const guild = member.guild;
 		await removeServerFromUserCache({
+			onInvalidToken: () =>
+				clearProviderAuthToken({
+					provider: account.provider,
+					providerAccountId: account.providerAccountId,
+				}),
 			accessToken: account.access_token,
 			serverId: guild.id,
 		});

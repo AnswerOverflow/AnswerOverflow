@@ -9,6 +9,7 @@ import {
 	Message,
 	MultiMessageBlurrer,
 	ServerInvite,
+	ChannelIcon,
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
 import { useTrackEvent } from '@answeroverflow/hooks';
@@ -29,7 +30,6 @@ export function MessageResultPage({
 	thread,
 }: MessageResultPageProps) {
 	const isUserInServer = useIsUserInServer(server.id);
-
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
 	const channelName = thread?.name ?? channel.name;
@@ -53,7 +53,7 @@ export function MessageResultPage({
 		},
 		{
 			runOnce: true,
-			enabled: isUserInServer !== 'loading',
+			enabled: isUserInServer === 'in_server',
 		},
 	);
 	const solutionMessageId = messages.at(0)?.solutionIds?.at(0);
@@ -61,7 +61,7 @@ export function MessageResultPage({
 	let consecutivePrivateMessages = 0;
 	const messageStack = messages.map((message, index) => {
 		const nextMessage = messages.at(index + 1);
-		if (!message.public && !isUserInServer) {
+		if (!message.public && isUserInServer !== 'in_server') {
 			consecutivePrivateMessages++;
 			if (nextMessage && !nextMessage.public) {
 				return;
@@ -71,15 +71,17 @@ export function MessageResultPage({
 		}
 		// TODO: Remove when embeds are supported
 		if (
-			message.public &&
+			(message.public || isUserInServer === 'in_server') &&
 			message.content.length === 0 &&
 			message.attachments.length === 0
 		)
 			return null;
+
 		const Msg = ({ count }: { count: number }) => (
 			<Message
 				key={message.id}
 				message={message}
+				fullRounded
 				Blurrer={(props) => <MultiMessageBlurrer {...props} count={count} />}
 			/>
 		);
@@ -108,6 +110,7 @@ export function MessageResultPage({
 				title={`${channelName} - ${server.name}`}
 				server={server}
 			/>
+
 			<div className="my-8 flex flex-col items-center justify-between gap-2 sm:flex-row sm:py-0">
 				<MessagesSearchBar />
 				<div className="shrink-0 sm:pl-8">
@@ -119,10 +122,13 @@ export function MessageResultPage({
 				</div>
 			</div>
 			<div className="rounded-md">
-				<h1 className="mb-4 rounded-sm border-b-2 border-solid border-neutral-400 pb-2 text-3xl dark:border-neutral-600 dark:text-white">
-					{thread ? thread.name : channel.name}
-				</h1>
-				<div className="flex flex-col gap-2">{messageStack}</div>
+				<div className="mb-4 flex flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400 pb-2 text-center leading-5 dark:border-neutral-600  dark:text-white">
+					<ChannelIcon channelType={channel.type} className="h-6 w-6" />
+					<h1 className="text-3xl">
+						{thread ? `${thread.name}` : `${channel.name}`}
+					</h1>
+				</div>
+				<div className="flex flex-col gap-4">{messageStack}</div>
 			</div>
 		</div>
 	);

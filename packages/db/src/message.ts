@@ -311,8 +311,20 @@ export async function findLatestMessageInChannel(channelId: string) {
 	return elastic.findLatestMessageInChannel(channelId);
 }
 
+export function findLatestMessageInChannelAndThreads(channelId: string) {
+	return elastic.findLatestMessageInChannelAndThreads(channelId);
+}
+
 export async function deleteManyMessagesByUserId(userId: string) {
 	return elastic.deleteByUserId(userId);
+}
+
+// TODO: Would this fit better in a utils package? this package is mainly for data fetching
+export function getDiscordURLForMessage(message: Message) {
+	const serverId = message.serverId;
+	const channelId = message.channelId;
+	const messageId = message.id;
+	return `https://discord.com/channels/${serverId}/${channelId}/${messageId}`;
 }
 
 export type SearchResult = {

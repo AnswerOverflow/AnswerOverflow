@@ -1,18 +1,26 @@
 import { ButtonBuilder } from '@discordjs/builders';
 import {
 	APIButtonComponent,
+	ActionRowBuilder,
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
+	EmbedBuilder,
 	GuildMember,
+	GuildTextBasedChannel,
 	Message,
+	MessageActionRowComponentBuilder,
 } from 'discord.js';
 import {
 	ChannelWithFlags,
 	findServerById,
 	UserServerSettingsWithFlags,
 } from '@answeroverflow/db';
-import { callAPI, TRPCStatusHandler } from '~discord-bot/utils/trpc';
+import {
+	callAPI,
+	oneTimeStatusHandler,
+	TRPCStatusHandler,
+} from '~discord-bot/utils/trpc';
 import { toAODiscordAccount } from '~discord-bot/utils/conversions';
 import { createMemberCtx } from '~discord-bot/utils/context';
 import {
@@ -20,8 +28,9 @@ import {
 	CONSENT_SOURCES,
 	ManageAccountSource,
 } from '@answeroverflow/api';
-import { CONSENT_BUTTON_LABEL } from '@answeroverflow/constants';
-import { isHumanMessage } from '~discord-bot/utils/utils';
+import { CONSENT_BUTTON_LABEL, WEBSITE_URL } from '@answeroverflow/constants';
+import { makeRequestForConsentString } from './mark-solution';
+import type { RendererableInteractions } from '@answeroverflow/discordjs-react';
 
 export const CONSENT_ACTION_PREFIX = 'consent';
 
@@ -91,7 +100,6 @@ export async function provideConsentOnForumChannelMessage(
 	if (!isHumanMessage(message)) {
 		return null;
 	}
-
 	return updateUserConsent({
 		member: message.member!,
 		consentSource: 'forum-post-guidelines',
@@ -179,4 +187,31 @@ export async function updateUserServerIndexingEnabled({
 		getCtx: () => createMemberCtx(member),
 		...statusHandlers,
 	});
+}
+
+export async function sendConsentPrompt(input: {
+	channel: GuildTextBasedChannel;
+	interaction: RendererableInteractions;
+}) {
+	const { channel, interaction } = input;
+	if (!interaction.memberPermissions?.has('ManageGuild')) {
+		await oneTimeStatusHandler(
+			interaction,
+			'You are missing permissions to send a consent prompt. You need the `Manage Server` permission.',
+		);
+		return;
+	}
+	const consentEmbed = new EmbedBuilder();
+	consentEmbed.setDescription(makeRequestForConsentString(channel.guild.name));
+	consentEmbed.addFields({
+		name: 'Learn more',
+		value: WEBSITE_URL,
+	});
+	const components = new ActionRowBuilder<MessageActionRowComponentBuilder>();
+	components.addComponents(makeConsentButton('manually-posted-prompt'));
+	await channel.send({
+		embeds: [consentEmbed],
+		components: [components],
+	});
+	await oneTimeStatusHandler(interaction, 'Consent prompt sent!');
 }

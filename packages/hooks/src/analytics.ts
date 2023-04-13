@@ -15,6 +15,7 @@ import {
 	ServerProps,
 	ThreadProps,
 } from '@answeroverflow/constants/src/analytics';
+
 // TODO: This type should be inferred from the auth package
 declare module 'next-auth' {
 	interface Session extends DefaultSession {
@@ -41,8 +42,14 @@ export type AddToServerClickProps = {
 
 export type CommunityPageViewProps = {} & ServerProps;
 
+export type ViewOnDiscordClickProps = Pick<ServerProps, 'Server Id'> &
+	Pick<ChannelProps, 'Channel Id'> &
+	Partial<Pick<ThreadProps, 'Thread Id'>> &
+	MessageProps;
+
 type EventMap = {
 	'Message Page View': MessagePageViewProps;
+	'View On Discord Click': ViewOnDiscordClickProps;
 	'Getting Started Click': GettingStartedClickProps;
 	'Add To Server Click': AddToServerClickProps;
 	[JOIN_WAITLIST_EVENT_NAME]: JoinWaitlistClickProps;

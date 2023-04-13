@@ -1,5 +1,12 @@
 import { EmbedBuilder, ThreadChannel } from 'discord.js';
 import type { ChannelWithFlags } from '@answeroverflow/db';
+import {
+	ActionRowBuilder,
+	EmbedBuilder,
+	MessageActionRowComponentBuilder,
+	ThreadChannel,
+} from 'discord.js';
+import { makeDismissButton } from './dismiss-button';
 
 const sendMarkSolutionInstructionsErrorReasons = [
 	'Thread was not newly created',
@@ -38,7 +45,13 @@ export async function sendMarkSolutionInstructionsInThread(
 		.setImage(
 			'https://cdn.discordapp.com/attachments/1020132770862874704/1025906507549790208/mark_solution_instructions.png',
 		);
+	const firstMessage = await thread.fetchStarterMessage();
 	await thread.send({
 		embeds: [markSolutionInstructionsEmbed],
+		components: [
+			new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+				makeDismissButton(firstMessage?.author.id ?? ''),
+			),
+		],
 	});
 }

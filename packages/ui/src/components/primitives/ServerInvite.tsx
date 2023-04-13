@@ -18,7 +18,7 @@ const ServerInviteContext = createContext<{
 	server: ServerPublic;
 	location: ServerInviteClickProps['Button Location'];
 	channel?: ChannelPublicWithFlags;
-	isUserInServer: boolean | 'loading';
+	isUserInServer: ReturnType<typeof useIsUserInServer>;
 } | null>(null);
 
 function useServerInviteContext() {
@@ -53,27 +53,38 @@ export const ServerInviteTitle = () => {
 	);
 };
 
+export const ChannelIcon = ({
+	channelType,
+	className,
+}: {
+	channelType: ChannelType;
+	className?: string;
+}) => {
+	switch (channelType) {
+		case ChannelType.GuildForum:
+			return (
+				<ChatBubbleLeftRightIcon
+					className={cn('h-4 w-4 text-ao-black dark:text-ao-white', className)}
+				/>
+			);
+		default:
+			return (
+				<HashtagIcon
+					className={cn('h-4 w-4 text-ao-black dark:text-ao-white', className)}
+				/>
+			);
+	}
+};
+
+// TODO: Make this more styleable
 export const ChannelName = ({
 	channel,
 }: {
 	channel: ChannelPublicWithFlags;
 }) => {
-	const getChannelTypeIcon = (channelType: ChannelType) => {
-		switch (channelType) {
-			case ChannelType.GuildForum:
-				return (
-					<ChatBubbleLeftRightIcon className="h-4 w-4 text-ao-black dark:text-ao-white" />
-				);
-			default:
-				return (
-					<HashtagIcon className="h-4 w-4 text-ao-black dark:text-ao-white" />
-				);
-		}
-	};
-
 	return (
 		<div className="flex w-full flex-row items-center justify-start ">
-			{getChannelTypeIcon(channel.type)}
+			<ChannelIcon channelType={channel.type} />
 			<h4 className="overflow-hidden text-ellipsis text-center font-body text-base font-bold leading-5 text-ao-black dark:text-ao-white">
 				{channel.name}
 			</h4>
@@ -103,11 +114,7 @@ export const ServerInviteJoinButton = (props: { className?: string }) => {
 				});
 			}}
 		>
-			{isUserInServer !== 'loading' && isUserInServer ? (
-				<>Joined</>
-			) : (
-				<>Join Server</>
-			)}
+			{isUserInServer === 'in_server' ? <>Joined</> : <>Join Server</>}
 		</LinkButton>
 	);
 };
@@ -120,7 +127,7 @@ export const ServerInviteIcon = () => {
 type ServerInviteProps = {
 	server: ServerPublic;
 	channel?: ChannelPublicWithFlags;
-	isUserInServer: boolean | 'loading';
+	isUserInServer: ReturnType<typeof useIsUserInServer>;
 	location: ServerInviteClickProps['Button Location'];
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	Icon?: React.ReactNode;

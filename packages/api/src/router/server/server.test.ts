@@ -1,9 +1,8 @@
 import { mockServer, mockServerWithFlags } from '@answeroverflow/db-mock';
-import { createServer, Server } from '@answeroverflow/db';
+import { addFlagsToServer, createServer, Server } from '@answeroverflow/db';
 import { pickPublicServerData } from '~api/test/public-data';
 import {
 	mockAccountWithServersCallerCtx,
-	testAllPublicAndPrivateDataVariants,
 	testAllSourceAndPermissionVariantsThatThrowErrors,
 } from '~api/test/utils';
 import { serverRouter } from './server';
@@ -17,23 +16,56 @@ describe('Server Operations', () => {
 			});
 			await createServer(server);
 		});
-		it('should succeed fetching a server with permission variants', async () => {
-			await testAllPublicAndPrivateDataVariants({
-				async fetch({ source, permission }) {
-					const account = await mockAccountWithServersCallerCtx(
-						server,
-						source,
-						permission,
-					);
-					const router = serverRouter.createCaller(account.ctx);
-					const data = await router.byId(server.id);
-					return {
-						data,
-						privateDataFormat: data,
-						publicDataFormat: pickPublicServerData(server),
-					};
-				},
-				permissionsThatShouldWork: ['ManageGuild', 'Administrator'],
+		describe('By Id Public', () => {
+			it('should only get public server data', async () => {
+				const account = await mockAccountWithServersCallerCtx(
+					server,
+					'discord-bot',
+					'ManageGuild',
+				);
+				const router = serverRouter.createCaller(account.ctx);
+				const fetchedServer = await router.byIdPublic(server.id);
+				expect(fetchedServer).toEqual(pickPublicServerData(server));
+			});
+			it("should fail if the server doesn't exist", async () => {
+				const account = await mockAccountWithServersCallerCtx(
+					server,
+					'discord-bot',
+					'ManageGuild',
+				);
+				const router = serverRouter.createCaller(account.ctx);
+				await expect(router.byIdPublic('non-existent-server')).rejects.toThrow(
+					'Server not found',
+				);
+			});
+		});
+		describe('By Id', () => {
+			it('should succeed with permission variants', async () => {
+				await testAllSourceAndPermissionVariantsThatThrowErrors({
+					async operation({ source, permission }) {
+						const account = await mockAccountWithServersCallerCtx(
+							server,
+							source,
+							permission,
+						);
+						const router = serverRouter.createCaller(account.ctx);
+						const fetchedServer = await router.byId(server.id);
+						expect(fetchedServer).toEqual(addFlagsToServer(server));
+					},
+					sourcesThatShouldWork: ['discord-bot', 'web-client'],
+					permissionsThatShouldWork: ['ManageGuild', 'Administrator'],
+				});
+			});
+			it("should fail if the server doesn't exist", async () => {
+				const account = await mockAccountWithServersCallerCtx(
+					server,
+					'discord-bot',
+					'ManageGuild',
+				);
+				const router = serverRouter.createCaller(account.ctx);
+				await expect(router.byId('non-existent-server')).rejects.toThrow(
+					'Server not found',
+				);
 			});
 		});
 	});

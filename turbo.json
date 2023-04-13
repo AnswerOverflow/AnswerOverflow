@@ -4,17 +4,17 @@
 		"init": {},
 		"migrate": {},
 		"build": {
-			"dependsOn": ["^build"],
 			"outputs": ["dist/**", ".next/**"],
-			"cache": true
-		},
-		"build:no-cache": {
-			"dependsOn": ["^build"],
-			"outputs": ["dist/**", ".next/**"],
-			"cache": false
+			"cache": true,
+			"inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts"]
 		},
 		"format": {
-			"inputs": ["./packages/config/"],
+			"inputs": [
+				"./packages/config/prettier/**/*",
+				"src/**/*.tsx",
+				"src/**/*.ts",
+				"test/**/*.ts"
+			],
 			"outputs": [],
 			"cache": false
 		},
@@ -23,15 +23,14 @@
 			"cache": false
 		},
 		"lint": {
-			"inputs": ["./packages/config/eslint-config-custom"],
+			"inputs": [
+				"./packages/config/eslint-config-custom/**/*",
+				"src/**/*.tsx",
+				"src/**/*.ts",
+				"test/**/*.ts"
+			],
 			"outputs": [],
 			"cache": true
-		},
-		"lint:no-cache": {
-			"inputs": ["./packages/config/"],
-			"outputs": [],
-			"cache": false,
-			"dependsOn": ["^lint"]
 		},
 		"lint:fix": {
 			"outputs": [],
@@ -39,11 +38,8 @@
 		},
 		"test": {
 			"outputs": ["coverage/**"],
-			"cache": true
-		},
-		"test:no-cache": {
-			"cache": false,
-			"dependsOn": ["^test"]
+			"cache": true,
+			"inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts"]
 		},
 		"dev": {
 			"cache": false

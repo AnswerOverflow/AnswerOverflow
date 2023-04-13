@@ -11,13 +11,14 @@ export default function MessageResult(
 ) {
 	const { serverId, messageId, areAllMessagesPublic } = props;
 	const isUserInServer = useIsUserInServer(serverId);
-	const shouldFetchPrivateMessages = isUserInServer && !areAllMessagesPublic;
+	const shouldFetchPrivateMessages =
+		!areAllMessagesPublic && isUserInServer === 'in_server';
 	const { data } = trpc.messages.threadFromMessageId.useQuery(messageId, {
 		// For authenticated users that are in the server, we fetch the messages incase any of them are private
 		enabled: shouldFetchPrivateMessages,
 		// If we're doing SSG, then we don't change the queryHash so we can access the data, otherwise we set it to change with the auth state
 		queryHash: shouldFetchPrivateMessages
-			? `${messageId}-${isUserInServer.toString()}`
+			? `${messageId}-${isUserInServer}`
 			: undefined,
 		refetchOnReconnect: false,
 		refetchOnWindowFocus: false,

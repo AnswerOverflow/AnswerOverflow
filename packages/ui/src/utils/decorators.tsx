@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { trpc, StorybookTRPC } from './trpc';
 import hljs from 'highlight.js';
 import { ThemeProvider } from './theme';
-
+import { SessionProvider } from 'next-auth/react';
 const storybookTrpc = trpc as StorybookTRPC;
 type Globals = {
 	tailwindTheme: 'dark' | 'light' | 'both';
@@ -105,13 +105,20 @@ export function WithAuth(
 	}, [authState, setTRPCClient, queryClient]);
 	return (
 		<storybookTrpc.Provider client={trpcClient} queryClient={queryClient}>
-			<QueryClientProvider client={queryClient}>{Story()}</QueryClientProvider>
+			<SessionProvider session={null}>
+				<QueryClientProvider client={queryClient}>
+					{Story()}
+				</QueryClientProvider>
+			</SessionProvider>
 		</storybookTrpc.Provider>
 	);
 }
 
 export function WithHighlightJS(Story: PartialStoryFn<ReactRenderer, Args>) {
 	useEffect(() => {
+		hljs.configure({
+			ignoreUnescapedHTML: true,
+		});
 		hljs.highlightAll();
 	}, []);
 	return <Story />;

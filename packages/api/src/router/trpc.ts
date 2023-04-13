@@ -3,6 +3,7 @@ import type { Context } from './context';
 import superjson from 'superjson';
 import { getDiscordOauthThrowIfNotFound } from '../utils/discord-operations';
 import { getDiscordUser, getUserServers } from '@answeroverflow/cache';
+import { clearProviderAuthToken } from '@answeroverflow/db';
 
 const t = initTRPC.context<Context>().create({
 	transformer: superjson,
@@ -25,7 +26,14 @@ const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
 	if (ctx.caller === 'web-client' && ctx.session) {
 		const discordOauth = await getDiscordOauth(ctx);
 		if (discordOauth && discordOauth.access_token) {
-			const discordAccount = await getDiscordUser(discordOauth.access_token);
+			const discordAccount = await getDiscordUser({
+				accessToken: discordOauth.access_token,
+				onInvalidToken: () =>
+					clearProviderAuthToken({
+						provider: discordOauth.provider,
+						providerAccountId: discordOauth.providerAccountId,
+					}),
+			});
 			ctx.discordAccount = discordAccount;
 		}
 	}
@@ -39,7 +47,10 @@ const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
 export const getUserServersFromCtx = async (ctx: Context) => {
 	const discordOauth = await getDiscordOauth(ctx);
 	if (discordOauth && discordOauth.access_token) {
-		const userServers = await getUserServers(discordOauth.access_token);
+		const userServers = await getUserServers({
+			accessToken: discordOauth.access_token,
+			onInvalidToken: () => clearProviderAuthToken(discordOauth),
+		});
 		ctx.userServers = userServers;
 		return userServers;
 	}
