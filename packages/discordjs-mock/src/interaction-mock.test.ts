@@ -173,9 +173,10 @@ describe('Interaction Mock', () => {
 			caller = mockGuildMember({
 				client,
 			});
-			mockTextChannel(client, caller.guild);
+			const channel = mockTextChannel(client, caller.guild);
 			message = mockMessage({
 				client,
+				channel,
 			});
 		});
 		it('should create a mocked string select interaction', async () => {
