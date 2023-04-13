@@ -33,6 +33,9 @@ const config = {
 		'@answeroverflow/tailwind-config',
 		'@answeroverflow/ui',
 	],
+	experimental: {
+		outputFileTracingIgnores: ['**swc/core**'],
+	},
 	images: {
 		domains: ['cdn.discordapp.com'],
 	},
