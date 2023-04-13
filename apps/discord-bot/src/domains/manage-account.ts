@@ -31,6 +31,7 @@ import {
 import { CONSENT_BUTTON_LABEL, WEBSITE_URL } from '@answeroverflow/constants';
 import { makeRequestForConsentString } from './mark-solution';
 import type { RendererableInteractions } from '@answeroverflow/discordjs-react';
+import { isHumanMessage } from '~discord-bot/utils/utils';
 
 export const CONSENT_ACTION_PREFIX = 'consent';
 
