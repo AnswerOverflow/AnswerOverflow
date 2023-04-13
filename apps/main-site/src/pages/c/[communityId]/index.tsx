@@ -5,7 +5,7 @@ import {
 	findServerWithCommunityPageData,
 } from '@answeroverflow/db';
 import superjson from 'superjson';
-import { CommunityPage } from '~ui/components/index';
+import { CommunityPage } from '@answeroverflow/ui';
 
 export default function MessageResult(
 	props: InferGetStaticPropsType<typeof getStaticProps>,
