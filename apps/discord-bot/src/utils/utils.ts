@@ -15,6 +15,7 @@ import {
 	EmbedBuilder,
 	User,
 	GuildTextBasedChannel,
+	Client,
 } from 'discord.js';
 import type { ReactNode } from 'react';
 import { LOADING_MESSAGES } from './constants';
@@ -161,4 +162,26 @@ export function isHumanMessage(message: Message) {
 	if (message.author.bot) return false;
 	if (message.author.system) return false;
 	return true;
+}
+
+export function printCommunities(client: Client) {
+	const communities = client.guilds.cache.values();
+	const communitiesByMemberCount = Array.from(communities).sort(
+		(a, b) => b.memberCount - a.memberCount,
+	);
+	const totalMemberCount = communitiesByMemberCount.reduce(
+		(acc, community) => acc + community.memberCount,
+		0,
+	);
+	console.log(`Total member count: ${totalMemberCount}`);
+	communitiesByMemberCount.forEach((community) => {
+		console.log({
+			name: community.name,
+			id: community.id,
+			memberCount: community.memberCount,
+			icon: community.iconURL({
+				forceStatic: true,
+			}),
+		});
+	});
 }

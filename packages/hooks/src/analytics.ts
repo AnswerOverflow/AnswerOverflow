@@ -15,7 +15,6 @@ import {
 	ServerProps,
 	ThreadProps,
 } from '@answeroverflow/constants/src/analytics';
-
 // TODO: This type should be inferred from the auth package
 declare module 'next-auth' {
 	interface Session extends DefaultSession {
@@ -25,7 +24,11 @@ declare module 'next-auth' {
 	}
 }
 
-type MessagePageViewProps = MessageProps &
+type MessageFullProps = MessageProps & {
+	'Solution Author Id': string;
+};
+
+export type MessagePageViewProps = MessageFullProps &
 	ServerProps &
 	ChannelProps &
 	Partial<ThreadProps> & {

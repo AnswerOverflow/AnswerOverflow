@@ -1,6 +1,6 @@
-import { EmbedBuilder, ThreadChannel } from 'discord.js';
 import type { ChannelWithFlags } from '@answeroverflow/db';
 import {
+	ThreadChannel,
 	ActionRowBuilder,
 	EmbedBuilder,
 	MessageActionRowComponentBuilder,

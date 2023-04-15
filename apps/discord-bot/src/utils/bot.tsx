@@ -1,4 +1,9 @@
-import { container, LogLevel, SapphireClient } from '@sapphire/framework';
+import {
+	container,
+	Events,
+	LogLevel,
+	SapphireClient,
+} from '@sapphire/framework';
 import { ClientOptions, Partials, ActivityType } from 'discord.js';
 
 import '~discord-bot/utils/setup';
@@ -11,6 +16,7 @@ import React from 'react';
 import LRUCache from 'lru-cache';
 import type { AOEventSubject } from './events';
 import { Subject } from 'rxjs';
+import { printCommunities } from './utils';
 
 declare module '@sapphire/pieces' {
 	interface Container {
@@ -98,7 +104,11 @@ export const login = async (client: SapphireClient) => {
 		}
 
 		await client.login(process.env.DISCORD_TOKEN);
-
+		client.addListener(Events.ClientReady, () => {
+			if (process.env.PRINT_COMMUNITIES) {
+				printCommunities(client); // TODO: Make a listener
+			}
+		});
 		client.logger.info('LOGGED IN');
 		client.logger.info(`LOGGED IN AS: ${client.user?.username ?? 'UNKNOWN'}`);
 		const config: DiscordJSReact['config'] = {

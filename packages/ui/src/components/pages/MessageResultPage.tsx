@@ -13,6 +13,11 @@ import {
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
 import { useTrackEvent } from '@answeroverflow/hooks';
+import {
+	channelToAnalyticsData,
+	messageToAnalyticsData,
+	serverToAnalyticsData,
+} from '@answeroverflow/constants/src/analytics';
 export type MessageResultPageProps = {
 	messages: APIMessageWithDiscordAccount[];
 	server: ServerPublic;
@@ -41,19 +46,18 @@ export function MessageResultPage({
 	useTrackEvent(
 		'Message Page View',
 		{
-			'Channel Id': channel.id,
-			'Channel Name': channel.name,
+			...channelToAnalyticsData(channel),
+			...serverToAnalyticsData(server),
+			...messageToAnalyticsData(firstMessage),
 			'Message Id': firstMessage.id,
 			'Message Author Id': firstMessage.author.id,
 			'Number of Messages': messages.length,
-			'Server Id': server.id,
-			'Server Name': server.name,
 			'Thread Id': thread?.id,
 			'Thread Name': thread?.name,
 		},
 		{
 			runOnce: true,
-			enabled: isUserInServer === 'in_server',
+			enabled: isUserInServer !== 'loading',
 		},
 	);
 	const solutionMessageId = messages.at(0)?.solutionIds?.at(0);

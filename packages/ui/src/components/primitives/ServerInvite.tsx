@@ -107,6 +107,7 @@ export const ServerInviteJoinButton = (props: { className?: string }) => {
 				trackEvent('Server Invite Click', {
 					'Channel Id': channel.id,
 					'Channel Name': channel.name,
+					'Channel Type': channel.type,
 					'Server Id': channel.serverId,
 					'Server Name': server.name,
 					'Invite Code': inviteCode,
