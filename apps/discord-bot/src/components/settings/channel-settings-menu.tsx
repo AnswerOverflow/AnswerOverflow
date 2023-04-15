@@ -19,7 +19,6 @@ import {
 	CLEAR_TAG_LABEL,
 	DISABLE_FORUM_GUIDELINES_CONSENT_LABEL,
 	ENABLE_FORUM_GUIDELINES_CONSENT_LABEL,
-	STOP_IGNORING_ACCOUNT_LABEL,
 	FORUM_GUIDELINES_CONSENT_PROMPT,
 	DISABLE_MARK_AS_SOLUTION_LABEL,
 	ENABLE_MARK_AS_SOLUTION_LABEL,
@@ -166,7 +165,7 @@ export function IndexingSettingsMenu({
 				<EmbedMenuInstruction
 					instructions={[
 						{
-							title: STOP_IGNORING_ACCOUNT_LABEL,
+							title: ENABLE_CHANNEL_INDEXING_LABEL,
 							enabled: !channel.flags.indexingEnabled,
 							instructions:
 								'Enable indexing of this channel into web search results',
