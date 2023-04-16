@@ -38,16 +38,17 @@ export function serverToAnalyticsData(
 	};
 }
 
-export type ServerWithSettingsProps = ServerProps & {
-	'Server Flags': Record<string, boolean>;
+export type ServerPropsWithSettings = ServerProps & {
+	'Read the Rules Consent Enabled': boolean;
 };
 
-export function serverToServerWithSettingsAnalyticsProps(
-	server: Pick<ServerWithFlags, 'id' | 'name' | 'flags'>,
-): ServerWithSettingsProps {
+export function serverWithSettingsToAnalyticsData(
+	server: ServerWithFlags,
+): ServerPropsWithSettings {
 	return {
-		...serverToAnalyticsData(server),
-		'Server Flags': server.flags,
+		'Server Id': server.id,
+		'Server Name': server.name,
+		'Read the Rules Consent Enabled': server.flags.readTheRulesConsentEnabled,
 	};
 }
 
@@ -102,11 +103,27 @@ export type ThreadProps = {
 	'Thread Id': Snowflake;
 	'Thread Name': string;
 	'Thread Type': number;
-	'Thread Archived At'?: number;
+	'Thread Archived Timestamp'?: bigint;
 	'Thread Parent Id'?: Snowflake;
 	'Thread Parent Name'?: string;
 	'Thread Parent Type'?: number;
+	'Number of Messages'?: number;
 };
+
+export function threadToAnalyticsData(
+	thread: Pick<
+		Channel,
+		'id' | 'name' | 'type' | 'archivedTimestamp' | 'parentId'
+	>,
+): ThreadProps {
+	return {
+		'Thread Id': thread.id,
+		'Thread Name': thread.name,
+		'Thread Type': thread.type,
+		'Thread Archived Timestamp': thread.archivedTimestamp ?? undefined,
+		'Thread Parent Id': thread.parentId ?? undefined,
+	};
+}
 
 export const JOIN_WAITLIST_EVENT_NAME = 'Join Waitlist Click';
 export type JoinWaitlistClickProps = {

@@ -25,7 +25,7 @@ declare module 'next-auth' {
 }
 
 type MessageFullProps = MessageProps & {
-	'Solution Author Id': string;
+	'Solution Author Id'?: string;
 };
 
 export type MessagePageViewProps = MessageFullProps &

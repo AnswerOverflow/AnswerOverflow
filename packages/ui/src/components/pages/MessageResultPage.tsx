@@ -17,6 +17,7 @@ import {
 	channelToAnalyticsData,
 	messageToAnalyticsData,
 	serverToAnalyticsData,
+	threadToAnalyticsData,
 } from '@answeroverflow/constants/src/analytics';
 export type MessageResultPageProps = {
 	messages: APIMessageWithDiscordAccount[];
@@ -43,17 +44,16 @@ export function MessageResultPage({
 			? firstMessage.content
 			: `Questions related to ${channelName} in ${server.name}`;
 
+	// TODO: Ugly
 	useTrackEvent(
 		'Message Page View',
 		{
 			...channelToAnalyticsData(channel),
 			...serverToAnalyticsData(server),
-			...messageToAnalyticsData(firstMessage),
-			'Message Id': firstMessage.id,
-			'Message Author Id': firstMessage.author.id,
-			'Number of Messages': messages.length,
-			'Thread Id': thread?.id,
-			'Thread Name': thread?.name,
+			...(thread && {
+				...threadToAnalyticsData(thread),
+				'Number of Messages': messages.length,
+			}),
 		},
 		{
 			runOnce: true,

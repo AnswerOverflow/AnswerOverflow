@@ -20,8 +20,8 @@
 	},
 	"devDependencies": {
 		"@answeroverflow/tsconfig": "*",
-    "@answeroverflow/prisma-types": "*",
-    "@answeroverflow/elastic-types": "*",
+		"@answeroverflow/prisma-types": "*",
+		"@answeroverflow/elastic-types": "*",
 		"dotenv-cli": "^7.1.0"
 	}
 }
