@@ -25,7 +25,7 @@ export class DismissButtonInteractionParseError extends Error {
 export function makeDismissButton(dismisserId: string) {
 	return new ButtonBuilder({
 		label: DISMISS_BUTTON_LABEL,
-		style: ButtonStyle.Danger,
+		style: ButtonStyle.Secondary,
 		custom_id: `${DISMISS_ACTION_PREFIX}:${dismisserId}`,
 		type: ComponentType.Button,
 	});
