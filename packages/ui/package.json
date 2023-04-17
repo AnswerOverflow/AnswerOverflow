@@ -73,7 +73,7 @@
 		"@storybook/test-runner": "^0.10.0--canary.210.8666bd0.0",
 		"@storybook/testing-library": "^0.0.14--canary.30.5f44d14.0",
 		"@storybook/testing-react": "^2.0.0-next.0",
-		"@storybook/types": "7.0.0-beta.54",
+		"@storybook/types": "7.0.5",
 		"@types/node": "^18.14.2",
 		"@types/react": "^18.0.14",
 		"@types/react-dom": "^18.0.5",
