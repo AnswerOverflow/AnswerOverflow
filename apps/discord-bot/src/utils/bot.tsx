@@ -1,5 +1,5 @@
 import { container, LogLevel, SapphireClient } from '@sapphire/framework';
-import { ClientOptions, Partials, ActivityType } from 'discord.js';
+import { ClientOptions, Partials } from 'discord.js';
 
 import '~discord-bot/utils/setup';
 import {
@@ -102,10 +102,6 @@ export const login = async (client: SapphireClient) => {
 			max: 100,
 			// 10 minute ttl
 			ttl: 1000 * 60 * 10,
-		});
-		client.user?.setActivity({
-			type: ActivityType.Playing,
-			name: 'Open source! github.com/AnswerOverflow',
 		});
 	} catch (error) {
 		client.logger.fatal(error);
