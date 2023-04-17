@@ -1,7 +1,6 @@
 import {
 	AnyThreadChannel,
 	ButtonStyle,
-	ChannelType,
 	ComponentType,
 	Guild,
 	GuildBasedChannel,
@@ -18,15 +17,8 @@ import {
 	Server as AOServer,
 	DiscordAccount as AODiscordAccount,
 	getDefaultChannelWithFlags,
-	ChannelWithFlags,
-	ServerWithFlags,
 } from '@answeroverflow/db';
 import type { DiscordAPIServerSchema } from '@answeroverflow/cache';
-import type {
-	ChannelPropsWithSettings,
-	ServerWithSettingsProps,
-	ThreadProps,
-} from '@answeroverflow/constants';
 
 export function toAOMessageReference(
 	reference: MessageReference,
@@ -342,45 +334,4 @@ export async function messagesToAOMessagesSet(messages: Message[]) {
 		aoMessages.set(msg.id, converted);
 	}
 	return Array.from(aoMessages.values());
-}
-
-export function toAOAnalyticsServer(args: {
-	guildInDb: ServerWithFlags;
-	guild: Guild;
-}): ServerWithSettingsProps {
-	return {
-		'Server Id': args.guild.id,
-		'Server Name': args.guild.name,
-		'Server Flags': args.guildInDb.flags,
-		'Time In Server': new Date().getTime() - args.guild.joinedAt.getTime(),
-	};
-}
-
-export function toAOAnalyticsChannel(
-	channel: ChannelWithFlags,
-): ChannelPropsWithSettings {
-	return {
-		'Channel Flags': channel.flags,
-		'Channel Id': channel.id,
-		'Channel Name': channel.name,
-		'Channel Type': channel.type,
-		'Channel Solution Tag Id': channel.solutionTagId ?? undefined,
-		'Channel Invite Code': channel.inviteCode ?? undefined,
-		'Channel Server Id': channel.serverId,
-	};
-}
-
-export function toAOAnalyticsThread(thread: AnyThreadChannel): ThreadProps {
-	return {
-		'Thread Id': thread.id,
-		'Thread Name': thread.name,
-		'Thread Parent Id': thread.parentId ?? undefined,
-		'Thread Parent Name': thread.parent?.name,
-		'Thread Parent Type': thread.parent?.type,
-		'Thread Type': thread.type,
-		'Thread Archived At':
-			thread.type === ChannelType.PrivateThread
-				? undefined
-				: thread.archiveTimestamp ?? undefined,
-	};
 }

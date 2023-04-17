@@ -6,16 +6,13 @@ import {
 	upsertServer,
 	upsertManyChannels,
 } from '@answeroverflow/db';
-import {
-	toAOAnalyticsServer,
-	toAOChannel,
-	toAOServer,
-} from '~discord-bot/utils/conversions';
+import { toAOChannel, toAOServer } from '~discord-bot/utils/conversions';
 import { delay } from '@answeroverflow/discordjs-mock';
+import { registerServerGroup } from '@answeroverflow/analytics';
 import {
-	registerServerGroup,
-	trackServerSideEvent,
-} from '@answeroverflow/analytics';
+	serverWithDiscordInfoToAnalyticsData,
+	trackDiscordEvent,
+} from '~discord-bot/utils/analytics';
 
 /*
   Guild related events are tracked here, this may make sense to split into multiple files as the complexity grows.
@@ -34,9 +31,9 @@ async function autoUpdateServerInfo(guild: Guild) {
 		},
 	});
 	registerServerGroup(
-		toAOAnalyticsServer({
+		serverWithDiscordInfoToAnalyticsData({
 			guild,
-			guildInDb: upserted,
+			serverWithSettings: upserted,
 		}),
 	);
 	return upserted;
@@ -116,10 +113,10 @@ export class SyncOnReady extends Listener {
 export class SyncOnJoin extends Listener {
 	public async run(guild: Guild) {
 		const synced = await syncServer(guild);
-		trackServerSideEvent('Server Join', {
-			...toAOAnalyticsServer({
+		trackDiscordEvent('Server Join', {
+			...serverWithDiscordInfoToAnalyticsData({
 				guild,
-				guildInDb: synced,
+				serverWithSettings: synced,
 			}),
 			'Answer Overflow Account Id': guild.ownerId, // <---TODO: Not a great id to track with but best we've got
 		});
@@ -152,11 +149,11 @@ export class SyncOnDelete extends Listener {
 			},
 			update: { kickedTime: new Date() },
 		});
-		trackServerSideEvent('Server Leave', {
+		trackDiscordEvent('Server Leave', {
 			'Answer Overflow Account Id': guild.ownerId, // <---TODO: Not a great id to track with but best we've got
-			...toAOAnalyticsServer({
+			...serverWithDiscordInfoToAnalyticsData({
 				guild,
-				guildInDb: upserted,
+				serverWithSettings: upserted,
 			}),
 		});
 		if (process.env.NODE_ENV !== 'test') {

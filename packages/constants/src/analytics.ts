@@ -119,7 +119,7 @@ export type ThreadProps = {
 	'Thread Id': Snowflake;
 	'Thread Name': string;
 	'Thread Type': number;
-	'Thread Archived Timestamp'?: bigint;
+	'Thread Archived Timestamp'?: bigint | number;
 	'Thread Parent Id'?: Snowflake;
 	'Thread Parent Name'?: string;
 	'Thread Parent Type'?: number;

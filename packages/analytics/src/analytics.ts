@@ -1,10 +1,6 @@
 import type { DefaultSession } from 'next-auth';
 import { PostHog } from 'posthog-node';
-import type {
-	ChannelProps,
-	ServerProps,
-	ThreadProps,
-} from '@answeroverflow/constants';
+import type { ServerProps } from '@answeroverflow/constants';
 const apiKey = process.env.NEXT_PUBLIC_POSTHOG_TOKEN;
 const shouldCollectAnalytics =
 	apiKey !== undefined && process.env.NODE_ENV !== 'test';
@@ -23,21 +19,11 @@ declare module 'next-auth' {
 	}
 }
 
-type BaseProps = {
+export type BaseProps = {
 	'Answer Overflow Account Id': string;
 };
 
-type ServerJoinProps = ServerProps;
-type ServerLeaveProps = ServerProps & {
-	'Time In Server': number;
-};
-type QuestionAskedProps = ServerProps & ChannelProps & ThreadProps;
-
-interface EventMap {
-	'Server Join': ServerJoinProps;
-	'Server Leave': ServerLeaveProps;
-	'Question Asked': QuestionAskedProps;
-}
+interface EventMap {}
 
 export function registerServerGroup(props: ServerProps) {
 	client.groupIdentify({
@@ -49,19 +35,23 @@ export function registerServerGroup(props: ServerProps) {
 	});
 }
 
-export function trackServerSideEvent<K extends keyof EventMap>(
-	eventName: K,
-	props: EventMap[K] & BaseProps,
+export function trackServerSideEvent<K extends BaseProps>(
+	eventName: string,
+	props: K,
 ): void {
-	const { 'Answer Overflow Account Id': aoId, ...properties } = props;
+	const { 'Answer Overflow Account Id': aoId } = props;
 	const captureData: Parameters<typeof client.capture>[0] = {
 		event: eventName,
 		distinctId: aoId,
-		properties,
+		properties: props,
 	};
-	if ('Server Id' in props) {
+	const serverId = 'Server Id' in props ? props['Server Id'] : undefined;
+	if (
+		(serverId !== undefined && typeof serverId === 'string') ||
+		typeof serverId === 'number'
+	) {
 		captureData.groups = {
-			server: props['Server Id'],
+			server: serverId,
 		};
 	}
 	client.capture(captureData);

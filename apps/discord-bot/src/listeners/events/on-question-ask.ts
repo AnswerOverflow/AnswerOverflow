@@ -1,13 +1,13 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
 import { Events } from 'discord.js';
-import { trackServerSideEvent } from '@answeroverflow/analytics';
-import {
-	toAOAnalyticsChannel,
-	toAOAnalyticsServer,
-	toAOAnalyticsThread,
-} from '~discord-bot/utils/conversions';
 import { findServerById, getDefaultServerWithFlags } from '@answeroverflow/db';
+import {
+	channelWithDiscordInfoToAnalyticsData,
+	serverWithDiscordInfoToAnalyticsData,
+	threadWithDiscordInfoToAnalyticsData,
+	trackDiscordEvent,
+} from '~discord-bot/utils/analytics';
 
 @ApplyOptions<Listener.Options>({ event: Events.ClientReady })
 export class QuestionAskedListener extends Listener<Events.ClientReady> {
@@ -27,15 +27,20 @@ export class QuestionAskedListener extends Listener<Events.ClientReady> {
 					data: event.data,
 				});
 				void findServerById(channelSettings.serverId).then((serverSettings) => {
-					trackServerSideEvent('Question Asked', {
+					trackDiscordEvent('Question Asked', {
 						'Answer Overflow Account Id': thread.ownerId!,
-						...toAOAnalyticsServer({
+						...serverWithDiscordInfoToAnalyticsData({
 							guild: thread.guild,
-							guildInDb:
+							serverWithSettings:
 								serverSettings || getDefaultServerWithFlags(thread.guild),
 						}),
-						...toAOAnalyticsChannel(channelSettings),
-						...toAOAnalyticsThread(thread),
+						...channelWithDiscordInfoToAnalyticsData({
+							answerOverflowChannel: channelSettings,
+							discordChannel: thread.parent!, // If we have channel settings, this channel must exist
+						}),
+						...threadWithDiscordInfoToAnalyticsData({
+							thread,
+						}),
 					});
 				});
 			}
