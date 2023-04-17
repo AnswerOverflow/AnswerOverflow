@@ -46,7 +46,7 @@ describe('Dismiss Button', () => {
 			const data = result.data as APIButtonComponentWithCustomId;
 			expect(data.custom_id).toEqual('dismiss:123456789');
 			expect(data.label).toEqual('Dismiss');
-			expect(data.style).toEqual(ButtonStyle.Danger);
+			expect(data.style).toEqual(ButtonStyle.Secondary);
 		});
 	});
 	describe('Dismiss Message', () => {
