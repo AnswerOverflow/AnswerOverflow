@@ -4,6 +4,7 @@ import { Events } from 'discord.js';
 import { findServerById, getDefaultServerWithFlags } from '@answeroverflow/db';
 import {
 	channelWithDiscordInfoToAnalyticsData,
+	memberToAnalyticsUser,
 	serverWithDiscordInfoToAnalyticsData,
 	threadWithDiscordInfoToAnalyticsData,
 	trackDiscordEvent,
@@ -12,27 +13,37 @@ import {
 @ApplyOptions<Listener.Options>({ event: Events.ClientReady })
 export class QuestionAskedListener extends Listener<Events.ClientReady> {
 	public run() {
-		this.container.events.subscribe((event) => {
+		// eslint-disable-next-line @typescript-eslint/no-misused-promises
+		this.container.events.subscribe(async (event) => {
 			if (event.action !== 'threadCreate') {
 				return;
 			}
 			const { channelSettings } = event.data;
 			const thread = event.data.raw[0];
+			const firstMessage = await thread.fetchStarterMessage();
+			if (!firstMessage) return; // TODO: Handle this case?
+			const questionAsker =
+				thread.guild.members.cache.get(firstMessage.author.id) ||
+				(await thread.guild.members.fetch(firstMessage.author.id));
 			if (
 				channelSettings.flags.indexingEnabled ||
 				channelSettings.flags.markSolutionEnabled
 			) {
 				this.container.events.next({
 					action: 'questionAsked',
-					data: event.data,
+					data: {
+						...event.data,
+						questionAsker,
+					},
 				});
-				void findServerById(channelSettings.serverId).then((serverSettings) => {
-					trackDiscordEvent('Question Asked', {
+				trackDiscordEvent('Asked Question', async () => {
+					const server = await findServerById(channelSettings.serverId);
+					return {
 						'Answer Overflow Account Id': thread.ownerId!,
 						...serverWithDiscordInfoToAnalyticsData({
 							guild: thread.guild,
 							serverWithSettings:
-								serverSettings || getDefaultServerWithFlags(thread.guild),
+								server || getDefaultServerWithFlags(thread.guild),
 						}),
 						...channelWithDiscordInfoToAnalyticsData({
 							answerOverflowChannel: channelSettings,
@@ -41,7 +52,8 @@ export class QuestionAskedListener extends Listener<Events.ClientReady> {
 						...threadWithDiscordInfoToAnalyticsData({
 							thread,
 						}),
-					});
+						...memberToAnalyticsUser('Question Asker', questionAsker),
+					};
 				});
 			}
 		});

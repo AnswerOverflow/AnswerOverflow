@@ -16,13 +16,21 @@ import {
 import { findSolutionsToMessage } from './indexing';
 import type { ChannelWithFlags } from '@answeroverflow/api';
 import { makeConsentButton } from './manage-account';
-import { findChannelById } from '@answeroverflow/db';
+import { findChannelById, findServerById } from '@answeroverflow/db';
 import {
 	ANSWER_OVERFLOW_BLUE_HEX,
 	PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED,
 	QUESTION_ID_FIELD_NAME,
 	SOLUTION_EMBED_ID_FIELD_NAME,
 } from '@answeroverflow/constants';
+import {
+	QuestionSolvedProps,
+	channelWithDiscordInfoToAnalyticsData,
+	memberToAnalyticsUser,
+	serverWithDiscordInfoToAnalyticsData,
+	threadWithDiscordInfoToAnalyticsData,
+	trackDiscordEvent,
+} from '~discord-bot/utils/analytics';
 
 export class MarkSolutionError extends Error {}
 
@@ -239,6 +247,37 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 		solution,
 		serverName: server.name,
 		settings: channelSettings,
+	});
+
+	trackDiscordEvent('Solved Question', async () => {
+		const serverSettings = await findServerById(server.id);
+		const [asker, solver, commandUser] = await Promise.all([
+			thread.guild.members.fetch(question.author.id),
+			thread.guild.members.fetch(solution.author.id),
+			thread.guild.members.fetch(user.id),
+		]);
+		const data: QuestionSolvedProps = {
+			...serverWithDiscordInfoToAnalyticsData({
+				guild: thread.guild,
+				serverWithSettings: serverSettings!,
+			}),
+			...channelWithDiscordInfoToAnalyticsData({
+				answerOverflowChannel: channelSettings,
+				discordChannel: parentChannel,
+			}),
+			...threadWithDiscordInfoToAnalyticsData({
+				thread,
+			}),
+			...memberToAnalyticsUser('Mark As Solver', commandUser),
+			...memberToAnalyticsUser('Question Asker', asker),
+			...memberToAnalyticsUser('Question Solver', solver),
+			'Time To Solve In Ms':
+				solution.createdTimestamp - question.createdTimestamp,
+		};
+		return {
+			...data,
+			'Answer Overflow Account Id': solver.id,
+		};
 	});
 	return {
 		embed,
