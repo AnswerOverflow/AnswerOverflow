@@ -162,3 +162,7 @@ export function isHumanMessage(message: Message) {
 	if (message.author.system) return false;
 	return true;
 }
+
+export function hoursToMs(hours: number) {
+	return hours * 60 * 60 * 1000;
+}

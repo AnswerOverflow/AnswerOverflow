@@ -1,9 +1,13 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener, SapphireClient } from '@sapphire/framework';
 import { ActivityOptions, ActivityType, Events } from 'discord.js';
-import { elastic } from '@answeroverflow/elastic-types';
+import { getTotalNumberOfMessages } from '@answeroverflow/db';
+import { hoursToMs } from '~discord-bot/utils/utils';
 
-const timeBetweenSwitchesInMilliseconds = 1000 * 60 * 60;
+const timeBetweenStatusChangesInHours = process.env
+	.STATUS_UPDATE_INTERVAL_IN_HOURS
+	? parseFloat(process.env.STATUS_UPDATE_INTERVAL_IN_HOURS)
+	: 1;
 
 type StatusUpdate = {
 	getStatus: (() => Promise<string> | string) | string;
@@ -13,37 +17,32 @@ function getStatuses(client: SapphireClient) {
 	const statuses: StatusUpdate[] = [
 		{
 			type: ActivityType.Watching,
-			getStatus: () => `${client.guilds.cache.size} communities.`,
+			getStatus: () => `${client.guilds.cache.size} communities!`,
 		},
 		{
 			type: ActivityType.Listening,
 			async getStatus() {
-				const numMessages = await elastic.getNumberOfIndexedMessages();
-				return ` to ${numMessages} messages`;
+				const numMessages = await getTotalNumberOfMessages();
+				return `${numMessages.toLocaleString()} messages`;
 			},
 		},
-    {
-			type: ActivityType.Playing,
-			getStatus: 'Open Source! github.com/AnswerOverflow',
+		{
+			type: ActivityType.Watching,
+			getStatus: 'Open source! github.com/AnswerOverflow',
 		},
 		{
 			type: ActivityType.Listening,
 			getStatus: () => {
-				let approximateTotalMemberCount = 0;
-				for (const guild of client.guilds.cache.values()) {
-					approximateTotalMemberCount += guild.approximateMemberCount ?? 0;
-				}
-
-				return `${approximateTotalMemberCount} users asking questions.`;
+				const totalMemberCount = client.guilds.cache.reduce(
+					(total, guild) => total + guild.memberCount,
+					0,
+				);
+				return `${totalMemberCount} users asking questions!`;
 			},
 		},
 		{
-			type: ActivityType.Playing,
-			getStatus: 'Placeholder5',
-		},
-		{
-			type: ActivityType.Playing,
-			getStatus: 'Placeholder6',
+			type: ActivityType.Watching,
+			getStatus: () => `help channels index into Google`,
 		},
 	];
 	return statuses;
@@ -52,13 +51,18 @@ function getStatuses(client: SapphireClient) {
 @ApplyOptions<Listener.Options>({ event: Events.ClientReady })
 export class LoopStatus extends Listener {
 	public run() {
+		let statusIndex = 0;
 		// eslint-disable-next-line @typescript-eslint/no-misused-promises
 		setInterval(async () => {
 			const statuses = getStatuses(this.container.client);
-			const index = Math.floor(
-				((new Date().getHours() % 6) / 6) * statuses.length,
-			);
-			const status = statuses[index]!;
+			const status = statuses[statusIndex++];
+			if (!status) {
+				this.container.logger.error('No status found for index ', statusIndex);
+				return;
+			}
+			if (statusIndex >= statuses.length) {
+				statusIndex = 0; // instead of using modulo, we just reset the index to avoid overflow
+			}
 			const statusText =
 				typeof status.getStatus === 'string'
 					? status.getStatus
@@ -67,6 +71,6 @@ export class LoopStatus extends Listener {
 				type: status.type,
 			});
 			this.container.logger.debug('Setting status to ' + statusText);
-		}, timeBetweenSwitchesInMilliseconds);
+		}, hoursToMs(timeBetweenStatusChangesInHours));
 	}
 }
