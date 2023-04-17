@@ -12,10 +12,12 @@ import {
 	ChannelIcon,
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
-import { useTrackEvent } from '@answeroverflow/hooks';
+import {
+	messageWithDiscordAccountToAnalyticsData,
+	useTrackEvent,
+} from '@answeroverflow/hooks';
 import {
 	channelToAnalyticsData,
-	messageToAnalyticsData,
 	serverToAnalyticsData,
 	threadToAnalyticsData,
 } from '@answeroverflow/constants/src/analytics';
@@ -54,6 +56,7 @@ export function MessageResultPage({
 				...threadToAnalyticsData(thread),
 				'Number of Messages': messages.length,
 			}),
+			...messageWithDiscordAccountToAnalyticsData(firstMessage),
 		},
 		{
 			runOnce: true,

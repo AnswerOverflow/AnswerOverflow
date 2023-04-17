@@ -11,16 +11,30 @@ export type Snowflake = string;
 export type MessageProps = {
 	'Message Id': Snowflake;
 	'Message Author Id': Snowflake;
-	'Solution Id'?: Snowflake[];
-};
+	'Solution Id'?: Snowflake;
+} & Pick<ServerProps, 'Server Id'> &
+	Pick<ChannelProps, 'Channel Id'> &
+	Partial<Pick<ThreadProps, 'Thread Id'>>;
 
 export function messageToAnalyticsData(
-	message: Pick<Message, 'id' | 'authorId' | 'solutionIds'>,
+	message: Pick<
+		Message,
+		| 'id'
+		| 'authorId'
+		| 'solutionIds'
+		| 'channelId'
+		| 'serverId'
+		| 'parentChannelId'
+	>,
 ): MessageProps {
 	return {
 		'Message Id': message.id,
 		'Message Author Id': message.authorId,
-		'Solution Id': message.solutionIds,
+		'Channel Id': message.parentChannelId ?? message.channelId,
+		'Thread Id': message.parentChannelId ? message.channelId : undefined,
+		'Server Id': message.serverId,
+		'Solution Id':
+			message.solutionIds.length > 0 ? message.solutionIds[0] : undefined,
 	};
 }
 
@@ -57,16 +71,18 @@ export type ChannelProps = {
 	'Channel Name': string;
 	'Channel Type': number;
 	'Channel Server Id': Snowflake;
+	'Invite Code'?: string;
 };
 
 export function channelToAnalyticsData(
-	channel: Pick<Channel, 'id' | 'name' | 'type' | 'serverId'>,
+	channel: Pick<Channel, 'id' | 'name' | 'type' | 'serverId' | 'inviteCode'>,
 ): ChannelProps {
 	return {
 		'Channel Id': channel.id,
 		'Channel Name': channel.name,
 		'Channel Type': channel.type,
 		'Channel Server Id': channel.serverId,
+		'Invite Code': channel.inviteCode ?? undefined,
 	};
 }
 
@@ -135,7 +151,6 @@ export type ServerInviteClickProps = {
 		| 'Search Results'
 		| 'Community Page'
 		| 'Message Result Page';
-	'Invite Code': string;
 } & ServerProps &
 	ChannelProps &
 	Partial<ThreadProps>;

@@ -12,7 +12,11 @@ import { LinkButton } from './base';
 import { cn } from '~ui/utils/styling';
 import Link from 'next/link';
 import { trackEvent } from '@answeroverflow/hooks';
-import type { ServerInviteClickProps } from '@answeroverflow/constants/src/analytics';
+import {
+	ServerInviteClickProps,
+	channelToAnalyticsData,
+	serverToAnalyticsData,
+} from '@answeroverflow/constants/src/analytics';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const ServerInviteContext = createContext<{
 	server: ServerPublic;
@@ -39,10 +43,8 @@ export const ServerInviteTitle = () => {
 			onMouseUp={() => {
 				trackEvent('Community Page Link Click', {
 					'Link Location': location,
-					'Server Id': server.id,
-					'Server Name': server.name,
-					'Channel Id': channel?.id,
-					'Channel Name': channel?.name,
+					...serverToAnalyticsData(server),
+					...(channel && channelToAnalyticsData(channel)),
 				});
 			}}
 		>
@@ -105,12 +107,8 @@ export const ServerInviteJoinButton = (props: { className?: string }) => {
 			className={cn('text-center font-header font-bold', props.className)}
 			onMouseUp={() => {
 				trackEvent('Server Invite Click', {
-					'Channel Id': channel.id,
-					'Channel Name': channel.name,
-					'Channel Type': channel.type,
-					'Server Id': channel.serverId,
-					'Server Name': server.name,
-					'Invite Code': inviteCode,
+					...channelToAnalyticsData(channel),
+					...serverToAnalyticsData(server),
 					'Button Location': location,
 				});
 			}}

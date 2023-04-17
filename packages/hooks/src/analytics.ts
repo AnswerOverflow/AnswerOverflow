@@ -10,11 +10,14 @@ import {
 	JoinWaitlistClickProps,
 	JOIN_WAITLIST_EVENT_NAME,
 	MessageProps,
-	NUMBER_OF_MESSAGES_FIELD_NAME,
 	ServerInviteEvent,
 	ServerProps,
 	ThreadProps,
 } from '@answeroverflow/constants/src/analytics';
+import type {
+	APIMessageFull,
+	APIMessageWithDiscordAccount,
+} from '@answeroverflow/api';
 // TODO: This type should be inferred from the auth package
 declare module 'next-auth' {
 	interface Session extends DefaultSession {
@@ -31,9 +34,7 @@ type MessageFullProps = MessageProps & {
 export type MessagePageViewProps = MessageFullProps &
 	ServerProps &
 	ChannelProps &
-	Partial<ThreadProps> & {
-		[NUMBER_OF_MESSAGES_FIELD_NAME]: number;
-	};
+	Partial<ThreadProps>;
 
 export type GettingStartedClickProps = {
 	'Button Location': 'Hero' | 'About Area' | 'Pricing' | 'Navbar';
@@ -43,7 +44,7 @@ export type AddToServerClickProps = {
 	'Button Location': 'Quick Start';
 };
 
-export type CommunityPageViewProps = {} & ServerProps;
+export type CommunityPageViewProps = ServerProps;
 
 export type ViewOnDiscordClickProps = Pick<ServerProps, 'Server Id'> &
 	Pick<ChannelProps, 'Channel Id'> &
@@ -122,3 +123,18 @@ export const useAnalytics = () => {
 		};
 	}, [session, status, analyticsLoaded, setAnalyticsLoaded, router]);
 };
+
+export function messageWithDiscordAccountToAnalyticsData(
+	message: APIMessageFull | APIMessageWithDiscordAccount,
+): MessageProps {
+	return {
+		'Channel Id': message.parentChannelId
+			? message.parentChannelId
+			: message.channelId,
+		'Thread Id': message.childThreadId ?? undefined,
+		'Server Id': message.serverId,
+		'Message Author Id': message.author.id,
+		'Message Id': message.id,
+		'Solution Id': message.solutionIds?.[0] ?? undefined,
+	};
+}

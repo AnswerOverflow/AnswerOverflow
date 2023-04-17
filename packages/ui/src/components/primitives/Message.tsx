@@ -9,7 +9,10 @@ import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import { cn } from '~ui/utils/styling';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { LinkButton, DiscordIcon, CloseIcon } from './base';
-import { trackEvent } from '@answeroverflow/hooks';
+import {
+	trackEvent,
+	messageWithDiscordAccountToAnalyticsData,
+} from '@answeroverflow/hooks';
 import { getDiscordURLForMessage } from '~ui/utils/discord';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -40,16 +43,10 @@ export const MessageAuthorArea = () => {
 					<LinkButton
 						href={getDiscordURLForMessage(message)}
 						onMouseUp={() => {
-							trackEvent('View On Discord Click', {
-								'Channel Id': message.parentChannelId
-									? message.parentChannelId
-									: message.channelId,
-								'Thread Id': message.childThreadId ?? undefined,
-								'Server Id': message.serverId,
-								'Message Author Id': message.author.id,
-								'Message Id': message.id,
-								'Solution Id': message.solutionIds?.[0] ?? undefined,
-							});
+							trackEvent(
+								'View On Discord Click',
+								messageWithDiscordAccountToAnalyticsData(message),
+							);
 						}}
 						className="h-8 w-8 bg-transparent p-1 hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent"
 					>
