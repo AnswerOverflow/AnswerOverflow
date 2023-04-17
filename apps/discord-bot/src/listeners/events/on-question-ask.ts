@@ -5,6 +5,7 @@ import { findServerById, getDefaultServerWithFlags } from '@answeroverflow/db';
 import {
 	channelWithDiscordInfoToAnalyticsData,
 	memberToAnalyticsUser,
+	messageToAnalyticsMessage,
 	serverWithDiscordInfoToAnalyticsData,
 	threadWithDiscordInfoToAnalyticsData,
 	trackDiscordEvent,
@@ -39,7 +40,7 @@ export class QuestionAskedListener extends Listener<Events.ClientReady> {
 				trackDiscordEvent('Asked Question', async () => {
 					const server = await findServerById(channelSettings.serverId);
 					return {
-						'Answer Overflow Account Id': thread.ownerId!,
+						'Answer Overflow Account Id': questionAsker.id,
 						...serverWithDiscordInfoToAnalyticsData({
 							guild: thread.guild,
 							serverWithSettings:
@@ -53,6 +54,7 @@ export class QuestionAskedListener extends Listener<Events.ClientReady> {
 							thread,
 						}),
 						...memberToAnalyticsUser('Question Asker', questionAsker),
+						...messageToAnalyticsMessage('Question', firstMessage),
 					};
 				});
 			}

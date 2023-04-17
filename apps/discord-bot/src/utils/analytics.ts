@@ -6,13 +6,19 @@ import {
 	channelWithSettingsToAnalyticsData,
 	serverWithSettingsToAnalyticsData,
 } from '@answeroverflow/constants';
-import type { AnyThreadChannel, Channel, Guild, GuildMember } from 'discord.js';
+import type {
+	AnyThreadChannel,
+	Channel,
+	Guild,
+	GuildMember,
+	Message,
+} from 'discord.js';
 import type { ChannelWithFlags, ServerWithFlags } from '@answeroverflow/db';
 import { BaseProps, trackServerSideEvent } from '@answeroverflow/analytics';
 import { sentryLogger } from './sentry';
 
 export type ServerPropsWithDiscordData = ServerPropsWithSettings & {
-	'Bot Time In Server': number;
+	'Bot Time In Server In Ms': number;
 };
 
 export type ChannelPropsWithDiscordData = ChannelPropsWithSettings;
@@ -23,7 +29,8 @@ export function serverWithDiscordInfoToAnalyticsData(args: {
 }): ServerPropsWithDiscordData {
 	return {
 		...serverWithSettingsToAnalyticsData(args.serverWithSettings),
-		'Bot Time In Server': new Date().getTime() - args.guild.joinedAt.getTime(),
+		'Bot Time In Server In Ms':
+			new Date().getTime() - args.guild.joinedAt.getTime(),
 	};
 }
 
@@ -68,6 +75,20 @@ type UserProps<T extends UserType> = {
 		: number | undefined;
 };
 
+export const messageTypes = ['Question', 'Solution'] as const;
+
+export type MessageType = (typeof messageTypes)[number];
+
+type MessageProps<T extends MessageType> = {
+	[K in
+		| `${T} Id`
+		| `${T} Created At`
+		| `${T} Content Length`
+		| `${T} Server Id`
+		| `${T} Channel Id`
+		| `${T} Thread Id`]: K extends `${T} Id` ? string : number | undefined;
+};
+
 type ServerJoinProps = ServerPropsWithDiscordData;
 type ServerLeaveProps = ServerPropsWithDiscordData;
 type UserJoinedServerProps = ServerPropsWithDiscordData & UserProps<'User'>;
@@ -76,13 +97,16 @@ type UserLeftServerProps = ServerPropsWithDiscordData & UserProps<'User'>;
 type QuestionAskedProps = ServerPropsWithDiscordData &
 	ChannelPropsWithDiscordData &
 	ThreadProps &
-	UserProps<'Question Asker'>;
+	UserProps<'Question Asker'> &
+	MessageProps<'Question'>;
 
 export type QuestionSolvedProps = QuestionAskedProps &
 	UserProps<'Question Solver'> &
 	UserProps<'Mark As Solver'> & {
 		'Time To Solve In Ms': number;
-	};
+	} & MessageProps<'Solution'>;
+
+type MarkSolutionUsedProps = UserProps<'User'> & {};
 
 type EventMap = {
 	'Server Join': ServerJoinProps;
@@ -91,6 +115,7 @@ type EventMap = {
 	'User Left Server': UserLeftServerProps;
 	'Asked Question': QuestionAskedProps;
 	'Solved Question': QuestionSolvedProps;
+	'Mark Solution Used': MarkSolutionUsedProps;
 };
 
 export function memberToAnalyticsUser<T extends UserType>(
@@ -104,6 +129,24 @@ export function memberToAnalyticsUser<T extends UserType>(
 			user.joinedAt?.getTime() &&
 			new Date().getTime() - user.joinedAt.getTime(),
 	} as UserProps<T>;
+}
+
+export function messageToAnalyticsMessage<T extends MessageType>(
+	messageType: T,
+	message: Message,
+): MessageProps<T> {
+	return {
+		[`${messageType} Id`]: message.id,
+		[`${messageType} Created At`]: message.createdTimestamp,
+		[`${messageType} Content Length`]: message.content.length,
+		[`${messageType} Server Id`]: message.guild?.id,
+		[`${messageType} Channel Id`]: message.channel.isThread()
+			? message.channel.parentId
+			: message.channel.id,
+		[`${messageType} Thread Id`]: message.channel.isThread()
+			? message.channel.id
+			: undefined,
+	} as MessageProps<T>;
 }
 
 export function trackDiscordEvent<K extends keyof EventMap>(

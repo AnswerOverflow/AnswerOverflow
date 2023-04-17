@@ -71,7 +71,7 @@ export type ChannelProps = {
 	'Channel Name': string;
 	'Channel Type': number;
 	'Channel Server Id': Snowflake;
-	'Invite Code'?: string;
+	'Channel Invite Code'?: string;
 };
 
 export function channelToAnalyticsData(
@@ -82,13 +82,12 @@ export function channelToAnalyticsData(
 		'Channel Name': channel.name,
 		'Channel Type': channel.type,
 		'Channel Server Id': channel.serverId,
-		'Invite Code': channel.inviteCode ?? undefined,
+		'Channel Invite Code': channel.inviteCode ?? undefined,
 	};
 }
 
 export type ChannelPropsWithSettings = ChannelProps & {
 	'Channel Solution Tag Id'?: Snowflake;
-	'Channel Invite Code'?: string;
 	'Indexing Enabled': boolean;
 	'Mark Solution Enabled': boolean;
 	'Send Mark Solution Instructions In New Threads Enabled': boolean;

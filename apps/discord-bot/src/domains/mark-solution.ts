@@ -27,12 +27,29 @@ import {
 	QuestionSolvedProps,
 	channelWithDiscordInfoToAnalyticsData,
 	memberToAnalyticsUser,
+	messageToAnalyticsMessage,
 	serverWithDiscordInfoToAnalyticsData,
 	threadWithDiscordInfoToAnalyticsData,
 	trackDiscordEvent,
 } from '~discord-bot/utils/analytics';
-
-export class MarkSolutionError extends Error {}
+const markSolutionErrorReasons = [
+	'Cannot mark a message as a solution if it is not in a guild',
+	"Cannot mark a message as a solution if it's not in a thread",
+	"Answer Overflow Bot messages can't be marked as a solution",
+	'Could not find the parent channel of the thread',
+	'Mark solution is not enabled in this channel',
+	'Could not find the root message of the thread',
+	`You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
+		', ',
+	)} can mark a question as solved.`,
+	'This question is already marked as solved',
+] as const;
+type MarkSolutionErrorReason = (typeof markSolutionErrorReasons)[number];
+export class MarkSolutionError extends Error {
+	constructor(public reason: MarkSolutionErrorReason) {
+		super(reason);
+	}
+}
 
 export async function checkIfCanMarkSolution(
 	possibleSolution: Message,
@@ -41,7 +58,7 @@ export async function checkIfCanMarkSolution(
 	const guild = possibleSolution.guild;
 	if (!guild)
 		throw new MarkSolutionError(
-			"Cannot mark a message as a solution if it's not in a guild",
+			'Cannot mark a message as a solution if it is not in a guild',
 		);
 	const thread = possibleSolution.channel;
 
@@ -271,6 +288,8 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 			...memberToAnalyticsUser('Mark As Solver', commandUser),
 			...memberToAnalyticsUser('Question Asker', asker),
 			...memberToAnalyticsUser('Question Solver', solver),
+			...messageToAnalyticsMessage('Question', question),
+			...messageToAnalyticsMessage('Solution', solution),
 			'Time To Solve In Ms':
 				solution.createdTimestamp - question.createdTimestamp,
 		};
