@@ -58,7 +58,7 @@
 		"@babel/core": "^7.20.5",
 		"@storybook/addon-a11y": "^7.0.0-beta.54",
 		"@storybook/addon-actions": "^7.0.0-beta.54",
-		"@storybook/addon-essentials": "^7.0.0-beta.54",
+		"@storybook/addon-essentials": "^7.0.5",
 		"@storybook/addon-interactions": "^7.0.0-beta.54",
 		"@storybook/addon-links": "^7.0.0-beta.54",
 		"@storybook/addon-mdx-gfm": "^7.0.0-beta.54",
