@@ -3519,6 +3519,11 @@
   resolved "https://registry.npmjs.org/@storybook/channels/-/channels-7.0.0-rc.8.tgz"
   integrity sha512-2tI/ECbQcXjncYGLVdrttNT8adIp6kV/bnQGJWmF5hBXZ7Izwyq1WRPTgPT++RihmOOTHvkRx4GCKfwluOrNpA==
 
+"@storybook/channels@7.0.5":
+  version "7.0.5"
+  resolved "https://registry.yarnpkg.com/@storybook/channels/-/channels-7.0.5.tgz#b7dbc11e658a5e6a694bd7df2a0514c3b27ba318"
+  integrity sha512-WiSPXgOK63jAlDDmbTs1sVXoYe3r/4VjpfwhEcxSPU544YQVARF1ePtiGjlp8HVFhZh1Q7afbVGJ9w96++u98A==
+
 "@storybook/cli@7.0.0-rc.8":
   version "7.0.0-rc.8"
   resolved "https://registry.npmjs.org/@storybook/cli/-/cli-7.0.0-rc.8.tgz"
@@ -4292,6 +4297,16 @@
   integrity sha512-Jz3MLLKs+Jy8dZVd+HVHuKAbxa7xcF/MLfUNldu0HxtJr3b7ybUlvjWjT5h2I60V5TYkWGf9wcKmegI6TGiJXQ==
   dependencies:
     "@storybook/channels" "7.0.0-rc.8"
+    "@types/babel__core" "^7.0.0"
+    "@types/express" "^4.7.0"
+    file-system-cache "^2.0.0"
+
+"@storybook/types@7.0.5":
+  version "7.0.5"
+  resolved "https://registry.yarnpkg.com/@storybook/types/-/types-7.0.5.tgz#d8a3a5aa2dc33f7b81df2833e09d3eaa2f6c9c3c"
+  integrity sha512-By+tF3B30QiCnzEJ+Z73M2usSCqBWEmX4OGT1KbiEzWekkrsfCfpZwfzeMw1WwdQGlB1gLKTzB8wZ1zZB8oPtQ==
+  dependencies:
+    "@storybook/channels" "7.0.5"
     "@types/babel__core" "^7.0.0"
     "@types/express" "^4.7.0"
     file-system-cache "^2.0.0"
