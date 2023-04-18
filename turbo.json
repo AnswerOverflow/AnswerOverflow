@@ -38,7 +38,7 @@
 		},
 		"test": {
 			"outputs": ["coverage/**"],
-			"cache": false,
+			"cache": true,
 			"inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts"]
 		},
 		"dev": {
