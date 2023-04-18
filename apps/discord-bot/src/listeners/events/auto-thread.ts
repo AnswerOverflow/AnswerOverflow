@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
-import { Events, Message } from 'discord.js';
+import { Events, Message, MessageType } from 'discord.js';
 import {
 	isHumanMessage,
 	removeDiscordMarkdown,
@@ -15,7 +15,8 @@ async function autoThread(channelSettings: ChannelWithFlags, message: Message) {
 
 	if (!ALLOWED_AUTO_THREAD_CHANNEL_TYPES.has(channelType)) return;
 	if (!isHumanMessage(message)) return;
-
+	if (message.type !== MessageType.Default) return;
+	if (message.thread) return;
 	// Channel is text based, and message has been sent by a human
 
 	let textTitle = `${message.member?.nickname ?? message.author.username} - ${
