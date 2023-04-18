@@ -3,6 +3,7 @@ import type {
 	CommunityPageData,
 } from '@answeroverflow/db';
 import { useTrackEvent } from '@answeroverflow/hooks';
+import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
 import { useState } from 'react';
 import {
 	Footer,
@@ -85,10 +86,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 		channels.at(0)?.channel.id ?? null,
 	);
 
-	useTrackEvent('Community Page View', {
-		'Server Id': server.id,
-		'Server Name': server.name,
-	});
+	useTrackEvent('Community Page View', serverToAnalyticsData(server));
 
 	const selectedChannel = channels.find(
 		(c) => c.channel.id === selectedChannelId,

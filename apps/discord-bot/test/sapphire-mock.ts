@@ -1,6 +1,6 @@
 import { assert } from 'console';
-import { ClientOptions, Options } from 'discord.js';
-import { applyClientMocks } from '@answeroverflow/discordjs-mock';
+import { ClientOptions, Options, Events, Client } from 'discord.js';
+import { applyClientMocks, emitEvent } from '@answeroverflow/discordjs-mock';
 import { basename, extname } from 'path';
 import { createClient, login } from '~discord-bot/utils/bot';
 
@@ -66,8 +66,9 @@ export function mockSapphireClient(
 	return client;
 }
 
-export async function setupAnswerOverflowBot() {
+export async function setupAnswerOverflowBot(autoLogin = true) {
 	const client = mockSapphireClient();
 	await login(client);
+	if (autoLogin) await emitEvent(client, Events.ClientReady, client as Client);
 	return client;
 }
