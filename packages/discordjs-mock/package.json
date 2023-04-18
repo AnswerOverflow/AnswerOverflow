@@ -6,9 +6,7 @@
 	"type": "module",
 	"author": "@answeroverflow",
 	"license": "MIT",
-	"files": [
-		"dist"
-	],
+	"files": ["dist"],
 	"private": false,
 	"publishConfig": {
 		"access": "public"
