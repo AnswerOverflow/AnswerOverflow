@@ -117,7 +117,12 @@ yarn build
 
 Head to the [Discord Developer Portal](https://discord.com/developers/applications), and create a new application (call it something like "AO Dev Test"), and optionally a testing server in Discord.
 
-In the portal, click "Bot" and add a bot. You'll need to enable Server Members Intent, and Message Content Intent like so:
+In the portal, click "Bot" and add a bot.
+
+Enable the following intents:
+
+- `Server Members`
+- `Message Content`
 
 <div align="center">
   <figure>
@@ -157,7 +162,9 @@ When you're done, it should look like this:
 
 You can then generate a link from `OAuth2->URL Generator` using the `bot` and `applications.commands`, with the same permissions.
 
-To make this quicker for you, you can use: `https://discord.com/oauth2/authorize?client_id=YOUR_ID&permissions=328565083201&scope=bot+applications.commands`, which has the correct permissions integer set. Just fill in your client ID, and you'll be ready to go!
+Replace your ID in this link: `https://discord.com/oauth2/authorize?client_id=YOUR_ID&permissions=328565083201&scope=bot+applications.commands`
+
+Or use the [Discord Permissions Calculator](https://discordapi.com/permissions.html).
 
 Add your bot to the server with the link and begin testing from your development machine.
 
