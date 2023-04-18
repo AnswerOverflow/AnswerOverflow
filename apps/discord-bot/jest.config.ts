@@ -8,6 +8,7 @@ const jestConfig: JestConfigWithTsJest = {
 	preset: 'ts-jest',
 	resetMocks: true,
 	testTimeout: 60000,
+	openHandlesTimeout: 0, // We don't care about open handles
 	testEnvironment: 'node',
 	testMatch: ['**/*.test.ts(x)?'],
 	moduleNameMapper: {
