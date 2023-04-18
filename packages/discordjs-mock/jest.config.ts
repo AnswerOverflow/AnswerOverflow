@@ -5,6 +5,8 @@ const jestConfig: JestConfigWithTsJest = {
 	preset: 'ts-jest',
 	resetMocks: true,
 	detectOpenHandles: false,
+	forceExit: true,
+
 	testTimeout: 60000,
 	testEnvironment: 'node',
 	testMatch: ['**/*.test.ts(x)?'],
