@@ -12,7 +12,7 @@ const client = new PostHog(apiKey || '', {
 			? 'http://localhost:8000' // use a dummy host for tests
 			: 'https://app.posthog.com',
 	requestTimeout: process.env.NODE_ENV === 'test' ? 1 : undefined,
-	maxCacheSize: process.env.NODE_ENV === 'test' ? 1 : 1000,
+	maxCacheSize: process.env.NODE_ENV === 'test' ? 1 : undefined,
 });
 
 // TODO: This type should be inferred from the auth package
