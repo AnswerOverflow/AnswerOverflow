@@ -19,26 +19,42 @@ declare module 'next-auth' {
 	}
 }
 
-type BaseProps = {
+export type BaseProps = {
 	'Answer Overflow Account Id': string;
 };
 
-type ServerJoinProps = ServerProps;
+interface EventMap {}
 
-interface EventMap {
-	'Server Join': ServerJoinProps;
+export function registerServerGroup(props: ServerProps) {
+	client.groupIdentify({
+		groupType: 'server',
+		groupKey: props['Server Id'],
+		properties: {
+			...props,
+		},
+	});
 }
 
-export function trackServerSideEvent<K extends keyof EventMap>(
-	eventName: K,
-	props: EventMap[K] & BaseProps,
+export function trackServerSideEvent<K extends BaseProps>(
+	eventName: string,
+	props: K,
 ): void {
-	const { 'Answer Overflow Account Id': aoId, ...properties } = props;
-	client.capture({
+	const { 'Answer Overflow Account Id': aoId } = props;
+	const captureData: Parameters<typeof client.capture>[0] = {
 		event: eventName,
 		distinctId: aoId,
-		properties,
-	});
+		properties: props,
+	};
+	const serverId = 'Server Id' in props ? props['Server Id'] : undefined;
+	if (
+		(serverId !== undefined && typeof serverId === 'string') ||
+		typeof serverId === 'number'
+	) {
+		captureData.groups = {
+			server: serverId,
+		};
+	}
+	client.capture(captureData);
 }
 
 export function identifyDiscordAccount(

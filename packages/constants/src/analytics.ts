@@ -1,38 +1,144 @@
+import type {
+	Channel,
+	ChannelWithFlags,
+	Server,
+	ServerWithFlags,
+} from '@answeroverflow/prisma-types';
+import type { Message } from '@answeroverflow/elastic-types';
 export const NUMBER_OF_MESSAGES_FIELD_NAME = 'Number of Messages';
 export type Snowflake = string;
 
-export const MESSAGE_ID_FIELD_NAME = 'Message Id';
-export const MESSAGE_AUTHOR_ID_FIELD_NAME = 'Message Author Id';
-export const SOLUTION_ID_FIELD_NAME = 'Solution Id';
-export const SOLUTION_AUTHOR_ID_FIELD_NAME = 'Solution Author Id';
-
 export type MessageProps = {
-	[MESSAGE_ID_FIELD_NAME]: Snowflake;
-	[MESSAGE_AUTHOR_ID_FIELD_NAME]: Snowflake;
-	[SOLUTION_ID_FIELD_NAME]?: Snowflake;
-	[SOLUTION_AUTHOR_ID_FIELD_NAME]?: Snowflake;
-};
+	'Message Id': Snowflake;
+	'Message Author Id': Snowflake;
+	'Solution Id'?: Snowflake;
+} & Pick<ServerProps, 'Server Id'> &
+	Pick<ChannelProps, 'Channel Id'> &
+	Partial<Pick<ThreadProps, 'Thread Id'>>;
 
-export const SERVER_ID_FIELD_NAME = 'Server Id';
-export const SERVER_NAME_FIELD_NAME = 'Server Name';
+export function messageToAnalyticsData(
+	message: Pick<
+		Message,
+		| 'id'
+		| 'authorId'
+		| 'solutionIds'
+		| 'channelId'
+		| 'serverId'
+		| 'parentChannelId'
+	>,
+): MessageProps {
+	return {
+		'Message Id': message.id,
+		'Message Author Id': message.authorId,
+		'Channel Id': message.parentChannelId ?? message.channelId,
+		'Thread Id': message.parentChannelId ? message.channelId : undefined,
+		'Server Id': message.serverId,
+		'Solution Id':
+			message.solutionIds.length > 0 ? message.solutionIds[0] : undefined,
+	};
+}
+
 export type ServerProps = {
-	[SERVER_ID_FIELD_NAME]: Snowflake;
-	[SERVER_NAME_FIELD_NAME]: string;
+	'Server Id': Snowflake;
+	'Server Name': string;
 };
 
-export const CHANNEL_ID_FIELD_NAME = 'Channel Id';
-export const CHANNEL_NAME_FIELD_NAME = 'Channel Name';
+export function serverToAnalyticsData(
+	server: Pick<Server, 'id' | 'name'>,
+): ServerProps {
+	return {
+		'Server Id': server.id,
+		'Server Name': server.name,
+	};
+}
+
+export type ServerPropsWithSettings = ServerProps & {
+	'Read the Rules Consent Enabled': boolean;
+};
+
+export function serverWithSettingsToAnalyticsData(
+	server: ServerWithFlags,
+): ServerPropsWithSettings {
+	return {
+		'Server Id': server.id,
+		'Server Name': server.name,
+		'Read the Rules Consent Enabled': server.flags.readTheRulesConsentEnabled,
+	};
+}
+
 export type ChannelProps = {
-	[CHANNEL_ID_FIELD_NAME]: Snowflake;
-	[CHANNEL_NAME_FIELD_NAME]: string;
+	'Channel Id': Snowflake;
+	'Channel Name': string;
+	'Channel Type': number;
+	'Channel Server Id': Snowflake;
+	'Channel Invite Code'?: string;
 };
 
-export const THREAD_ID_FIELD_NAME = 'Thread Id';
-export const THREAD_NAME_FIELD_NAME = 'Thread Name';
-export type ThreadProps = {
-	[THREAD_ID_FIELD_NAME]: Snowflake;
-	[THREAD_NAME_FIELD_NAME]: string;
+export function channelToAnalyticsData(
+	channel: Pick<Channel, 'id' | 'name' | 'type' | 'serverId' | 'inviteCode'>,
+): ChannelProps {
+	return {
+		'Channel Id': channel.id,
+		'Channel Name': channel.name,
+		'Channel Type': channel.type,
+		'Channel Server Id': channel.serverId,
+		'Channel Invite Code': channel.inviteCode ?? undefined,
+	};
+}
+
+export type ChannelPropsWithSettings = ChannelProps & {
+	'Channel Solution Tag Id'?: Snowflake;
+	'Indexing Enabled': boolean;
+	'Mark Solution Enabled': boolean;
+	'Send Mark Solution Instructions In New Threads Enabled': boolean;
+	'Auto Thread Enabled': boolean;
+	'Forum Guidelines Consent Enabled': boolean;
 };
+
+export function channelWithSettingsToAnalyticsData(
+	channel: ChannelWithFlags,
+): ChannelPropsWithSettings {
+	return {
+		...channelToAnalyticsData(channel),
+		'Channel Solution Tag Id': channel.solutionTagId ?? undefined,
+		'Channel Invite Code': channel.inviteCode ?? undefined,
+		'Channel Server Id': channel.serverId,
+
+		'Indexing Enabled': channel.flags.indexingEnabled,
+		'Mark Solution Enabled': channel.flags.markSolutionEnabled,
+		'Send Mark Solution Instructions In New Threads Enabled':
+			channel.flags.sendMarkSolutionInstructionsInNewThreads,
+		'Auto Thread Enabled': channel.flags.autoThreadEnabled,
+		'Forum Guidelines Consent Enabled':
+			channel.flags.forumGuidelinesConsentEnabled,
+	};
+}
+
+export type ThreadProps = {
+	'Thread Id': Snowflake;
+	'Thread Name': string;
+	'Thread Type': number;
+	'Thread Archived Timestamp'?: bigint | number;
+	'Thread Parent Id'?: Snowflake;
+	'Thread Parent Name'?: string;
+	'Thread Parent Type'?: number;
+	'Number of Messages'?: number;
+};
+
+export function threadToAnalyticsData(
+	thread: Pick<
+		Channel,
+		'id' | 'name' | 'type' | 'archivedTimestamp' | 'parentId'
+	>,
+): ThreadProps {
+	return {
+		'Thread Id': thread.id,
+		'Thread Name': thread.name,
+		'Thread Type': thread.type,
+		'Thread Archived Timestamp': thread.archivedTimestamp ?? undefined,
+		'Thread Parent Id': thread.parentId ?? undefined,
+	};
+}
 
 export const JOIN_WAITLIST_EVENT_NAME = 'Join Waitlist Click';
 export type JoinWaitlistClickProps = {
@@ -44,7 +150,6 @@ export type ServerInviteClickProps = {
 		| 'Search Results'
 		| 'Community Page'
 		| 'Message Result Page';
-	'Invite Code': string;
 } & ServerProps &
 	ChannelProps &
 	Partial<ThreadProps>;

@@ -8,6 +8,10 @@ import {
 	markAsSolved,
 	MarkSolutionError,
 } from '~discord-bot/domains/mark-solution';
+import {
+	memberToAnalyticsUser,
+	trackDiscordEvent,
+} from '~discord-bot/utils/analytics';
 import { getCommandIds } from '~discord-bot/utils/utils';
 
 @ApplyOptions<Command.Options>({
@@ -42,6 +46,8 @@ export class MarkSolution extends Command {
 		);
 		if (!targetMessage) return;
 		if (!interaction.member) return;
+		const member = interaction.guild?.members.cache.get(interaction.user.id);
+		let errorStatus = undefined;
 		try {
 			const { embed, components } = await markAsSolved(
 				targetMessage,
@@ -53,12 +59,15 @@ export class MarkSolution extends Command {
 				ephemeral: false,
 			});
 		} catch (error) {
-			if (error instanceof MarkSolutionError)
+			if (error instanceof MarkSolutionError) {
 				await interaction.reply({ content: error.message, ephemeral: true });
-			else throw error;
+				errorStatus = error.reason;
+			} else throw error;
 		}
-		// Send the mark solution response
-		// Add solved indicator to the question message
-		// Track analytics
+		trackDiscordEvent('Mark Solution Application Command Used', {
+			Status: errorStatus ?? 'Success',
+			...memberToAnalyticsUser('User', member!),
+			'Answer Overflow Account Id': interaction.user.id,
+		});
 	}
 }
