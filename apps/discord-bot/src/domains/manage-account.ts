@@ -32,6 +32,10 @@ import { CONSENT_BUTTON_LABEL, WEBSITE_URL } from '@answeroverflow/constants';
 import { makeRequestForConsentString } from './mark-solution';
 import type { RendererableInteractions } from '@answeroverflow/discordjs-react';
 import { isHumanMessage } from '~discord-bot/utils/utils';
+import {
+	memberToAnalyticsUser,
+	trackDiscordEvent,
+} from '~discord-bot/utils/analytics';
 
 export const CONSENT_ACTION_PREFIX = 'consent';
 
@@ -159,7 +163,17 @@ export async function updateUserConsent({
 				},
 			}),
 		getCtx: () => createMemberCtx(member),
-		...statusHandlers,
+		Error(error, messageWithCode) {
+			statusHandlers.Error?.(error, messageWithCode);
+		},
+		Ok(result) {
+			statusHandlers.Ok?.(result);
+			trackDiscordEvent('User Grant Consent', {
+				...memberToAnalyticsUser('User', member),
+				'Answer Overflow Account Id': member.id,
+				'Consent Source': consentSource,
+			});
+		},
 	});
 }
 

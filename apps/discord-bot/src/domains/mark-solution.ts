@@ -33,21 +33,24 @@ import {
 	trackDiscordEvent,
 } from '~discord-bot/utils/analytics';
 const markSolutionErrorReasons = [
-	'Cannot mark a message as a solution if it is not in a guild',
-	"Cannot mark a message as a solution if it's not in a thread",
-	"Answer Overflow Bot messages can't be marked as a solution",
-	'Could not find the parent channel of the thread',
-	'Mark solution is not enabled in this channel',
-	'Could not find the root message of the thread',
-	`You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
-		', ',
-	)} can mark a question as solved.`,
-	'This question is already marked as solved',
+	'NOT_IN_GUILD',
+	'NOT_IN_THREAD',
+	'ANSWER_OVERFLOW_BOT_MESSAGE',
+	'COULD_NOT_FIND_PARENT_CHANNEL',
+	'MARK_SOLUTION_NOT_ENABLED',
+	'COULD_NOT_FIND_ROOT_MESSAGE',
+	'NO_PERMISSION',
+	'ALREADY_SOLVED_VIA_EMBED',
+	'ALREADY_SOLVED_VIA_TAG',
+	'ALREADY_SOLVED_VIA_EMOJI',
 ] as const;
-type MarkSolutionErrorReason = (typeof markSolutionErrorReasons)[number];
+export type MarkSolutionErrorReason = (typeof markSolutionErrorReasons)[number];
 export class MarkSolutionError extends Error {
-	constructor(public reason: MarkSolutionErrorReason) {
-		super(reason);
+	constructor(
+		public reason: MarkSolutionErrorReason,
+		public override message: string,
+	) {
+		super(message);
 	}
 }
 
@@ -58,12 +61,14 @@ export async function checkIfCanMarkSolution(
 	const guild = possibleSolution.guild;
 	if (!guild)
 		throw new MarkSolutionError(
+			'NOT_IN_GUILD',
 			'Cannot mark a message as a solution if it is not in a guild',
 		);
 	const thread = possibleSolution.channel;
 
 	if (!thread.isThread()) {
 		throw new MarkSolutionError(
+			'NOT_IN_THREAD',
 			"Cannot mark a message as a solution if it's not in a thread",
 		);
 	}
@@ -71,19 +76,24 @@ export async function checkIfCanMarkSolution(
 
 	if (possibleSolution.author.id === possibleSolution.client.id) {
 		throw new MarkSolutionError(
+			'ANSWER_OVERFLOW_BOT_MESSAGE',
 			"Answer Overflow Bot messages can't be marked as a solution",
 		);
 	}
 
 	if (!threadParent)
 		throw new MarkSolutionError(
+			'COULD_NOT_FIND_PARENT_CHANNEL',
 			'Could not find the parent channel of the thread',
 		);
 
 	const channelSettings = await findChannelById(threadParent.id);
 
 	if (!channelSettings || !channelSettings.flags.markSolutionEnabled) {
-		throw new MarkSolutionError('Mark solution is not enabled in this channel');
+		throw new MarkSolutionError(
+			'MARK_SOLUTION_NOT_ENABLED',
+			'Mark solution is not enabled in this channel',
+		);
 	}
 
 	// Find the question message
@@ -101,6 +111,7 @@ export async function checkIfCanMarkSolution(
 	} catch (error) {
 		if (error instanceof DiscordAPIError && error.status === 404) {
 			throw new MarkSolutionError(
+				'COULD_NOT_FIND_ROOT_MESSAGE',
 				'Could not find the root message of the thread',
 			);
 		} else {
@@ -117,6 +128,7 @@ export async function checkIfCanMarkSolution(
 			);
 		if (!doesUserHaveOverridePermissions) {
 			throw new MarkSolutionError(
+				'NO_PERMISSION',
 				`You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
 					', ',
 				)} can mark a question as solved.`,
@@ -147,13 +159,19 @@ export function assertMessageIsUnsolved(
 ) {
 	// 1. Check if the thread has a solved tag
 	if (solutionTagId && thread.appliedTags.includes(solutionTagId)) {
-		throw new MarkSolutionError('This question is already marked as solved');
+		throw new MarkSolutionError(
+			'ALREADY_SOLVED_VIA_TAG',
+			'This question is already marked as solved',
+		);
 	}
 
 	// 2. Check if the thread has a solved emoji ✅ applied by the Answer Overflow Bot
 	const checkmarkEmojis = questionMessage.reactions.cache.get('✅');
 	if (checkmarkEmojis?.users.cache.has(questionMessage.client.user?.id)) {
-		throw new MarkSolutionError('This question is already marked as solved');
+		throw new MarkSolutionError(
+			'ALREADY_SOLVED_VIA_EMOJI',
+			'This question is already marked as solved',
+		);
 	}
 
 	// 3. Look at the message history to see if it contains the solution message from the Answer Overflow Bot
@@ -164,7 +182,10 @@ export function assertMessageIsUnsolved(
 	});
 
 	if (isSolutionInCache) {
-		throw new MarkSolutionError('This question is already marked as solved');
+		throw new MarkSolutionError(
+			'ALREADY_SOLVED_VIA_EMBED',
+			'This question is already marked as solved',
+		);
 	}
 }
 

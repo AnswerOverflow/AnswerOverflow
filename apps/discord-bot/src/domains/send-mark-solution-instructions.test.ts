@@ -1,9 +1,16 @@
-import type { Client, PublicThreadChannel } from 'discord.js';
+import type {
+	Client,
+	GuildMember,
+	Message,
+	PublicThreadChannel,
+} from 'discord.js';
 import { createChannel, createServer } from '@answeroverflow/db';
 import {
 	mockForumChannel,
+	mockGuildMember,
 	mockPublicThread,
 	mockTextChannel,
+	mockMessage,
 } from '@answeroverflow/discordjs-mock';
 import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
 import { toAOChannel, toAOServer } from '~discord-bot/utils/conversions';
@@ -12,6 +19,8 @@ import { mockChannelWithFlags } from '@answeroverflow/db-mock';
 
 let client: Client;
 let textChannelThread: PublicThreadChannel;
+let questionAsker: GuildMember;
+let threadQuestion: Message;
 beforeEach(async () => {
 	client = await setupAnswerOverflowBot();
 	const textChannel = mockTextChannel(client);
@@ -19,6 +28,15 @@ beforeEach(async () => {
 	textChannelThread = mockPublicThread({
 		client,
 		parentChannel: textChannel,
+	});
+	questionAsker = mockGuildMember({
+		guild: textChannel.guild,
+		client,
+	});
+	threadQuestion = mockMessage({
+		client,
+		author: questionAsker.user,
+		channel: textChannelThread,
 	});
 	await createServer(toAOServer(textChannel.guild));
 	await createServer(toAOServer(forumChannel.guild));
@@ -37,6 +55,8 @@ describe('Send mark solution instructions', () => {
 						sendMarkSolutionInstructionsInNewThreads: true,
 					},
 				}),
+				questionAsker,
+				threadQuestion,
 			),
 		).rejects.toThrowError('Thread was not newly created');
 	});
@@ -49,7 +69,13 @@ describe('Send mark solution instructions', () => {
 			},
 		});
 		await expect(
-			sendMarkSolutionInstructionsInThread(textChannelThread, true, cs),
+			sendMarkSolutionInstructionsInThread(
+				textChannelThread,
+				true,
+				cs,
+				questionAsker,
+				threadQuestion,
+			),
 		).rejects.toThrowError(
 			'Channel does not have sendMarkSolutionInstructionsInNewThreads flag set',
 		);
@@ -62,7 +88,13 @@ describe('Send mark solution instructions', () => {
 				sendMarkSolutionInstructionsInNewThreads: true,
 			},
 		});
-		await sendMarkSolutionInstructionsInThread(textChannelThread, true, cs);
+		await sendMarkSolutionInstructionsInThread(
+			textChannelThread,
+			true,
+			cs,
+			questionAsker,
+			threadQuestion,
+		);
 		const sentMessage = textChannelThread.messages.cache.find(
 			(message) => message.embeds.length > 0,
 		);

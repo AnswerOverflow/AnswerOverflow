@@ -1,5 +1,5 @@
 import type { ChannelWithFlags } from '@answeroverflow/db';
-import type { ClientEvents, GuildMember } from 'discord.js';
+import type { ClientEvents, GuildMember, Message } from 'discord.js';
 import type { Subject } from 'rxjs';
 
 type AOEvent<E extends keyof ClientEvents, D extends {} = {}> = {
@@ -14,7 +14,11 @@ export type AOEvents = {
 	threadCreate: AOEvent<'threadCreate', { channelSettings: ChannelWithFlags }>;
 	questionAsked: AOEvent<
 		'threadCreate',
-		{ channelSettings: ChannelWithFlags; questionAsker: GuildMember }
+		{
+			channelSettings: ChannelWithFlags;
+			questionAsker: GuildMember;
+			question: Message;
+		}
 	>;
 	clientReady: AOEvent<'clientReady'>;
 };

@@ -173,9 +173,11 @@ export function printCommunities(client: Client) {
 		(acc, community) => acc + community.memberCount,
 		0,
 	);
-	console.log(`Total member count: ${totalMemberCount}`);
+	container.logger.info(
+		`Total member count of all communities: ${totalMemberCount}`,
+	);
 	communitiesByMemberCount.forEach((community) => {
-		console.log({
+		container.logger.info({
 			name: community.name,
 			id: community.id,
 			memberCount: community.memberCount,

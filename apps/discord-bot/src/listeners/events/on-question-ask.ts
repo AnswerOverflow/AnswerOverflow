@@ -35,6 +35,7 @@ export class QuestionAskedListener extends Listener<Events.ClientReady> {
 					data: {
 						...event.data,
 						questionAsker,
+						question: firstMessage,
 					},
 				});
 				trackDiscordEvent('Asked Question', async () => {

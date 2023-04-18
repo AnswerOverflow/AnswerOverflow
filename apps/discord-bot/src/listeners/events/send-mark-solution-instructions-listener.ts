@@ -17,6 +17,8 @@ export class SendMarkSolutionInstructionsOnThreadCreate extends Listener<Events.
 				event.data.raw[0],
 				event.data.raw[1],
 				event.data.channelSettings,
+				event.data.questionAsker,
+				event.data.question,
 			).catch((error) => {
 				if (error instanceof SendMarkSolutionInstructionsError) return;
 				throw error;

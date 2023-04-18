@@ -7,15 +7,17 @@ import {
 	serverWithSettingsToAnalyticsData,
 } from '@answeroverflow/constants';
 import type {
-	AnyThreadChannel,
 	Channel,
 	Guild,
 	GuildMember,
 	Message,
+	ThreadChannel,
 } from 'discord.js';
 import type { ChannelWithFlags, ServerWithFlags } from '@answeroverflow/db';
 import { BaseProps, trackServerSideEvent } from '@answeroverflow/analytics';
 import { sentryLogger } from './sentry';
+import type { MarkSolutionErrorReason } from '~discord-bot/domains/mark-solution';
+import type { ConsentSource } from '@answeroverflow/api';
 
 export type ServerPropsWithDiscordData = ServerPropsWithSettings & {
 	'Bot Time In Server In Ms': number;
@@ -44,7 +46,7 @@ export function channelWithDiscordInfoToAnalyticsData(args: {
 }
 
 export function threadWithDiscordInfoToAnalyticsData(args: {
-	thread: AnyThreadChannel;
+	thread: ThreadChannel;
 }): ThreadProps {
 	return {
 		'Thread Id': args.thread.id,
@@ -75,7 +77,7 @@ type UserProps<T extends UserType> = {
 		: number | undefined;
 };
 
-export const messageTypes = ['Question', 'Solution'] as const;
+export const messageTypes = ['Message', 'Question', 'Solution'] as const;
 
 export type MessageType = (typeof messageTypes)[number];
 
@@ -106,7 +108,9 @@ export type QuestionSolvedProps = QuestionAskedProps &
 		'Time To Solve In Ms': number;
 	} & MessageProps<'Solution'>;
 
-type MarkSolutionUsedProps = UserProps<'User'> & {};
+type MarkSolutionUsedProps = UserProps<'User'> & {
+	Status: MarkSolutionErrorReason | 'Success';
+};
 
 type EventMap = {
 	'Server Join': ServerJoinProps;
@@ -115,7 +119,15 @@ type EventMap = {
 	'User Left Server': UserLeftServerProps;
 	'Asked Question': QuestionAskedProps;
 	'Solved Question': QuestionSolvedProps;
-	'Mark Solution Used': MarkSolutionUsedProps;
+	'Mark Solution Instructions Sent': QuestionAskedProps; // TODO: Track if the user has ever had the instructions sent to them before
+	'Mark Solution Application Command Used': MarkSolutionUsedProps;
+	'Dismiss Button Clicked': UserProps<'User'> &
+		MessageProps<'Message'> & {
+			'Dismissed Message Type': 'Mark Solution Instructions';
+		};
+	'User Grant Consent': UserProps<'User'> & {
+		'Consent Source': ConsentSource;
+	};
 };
 
 export function memberToAnalyticsUser<T extends UserType>(
