@@ -4951,9 +4951,9 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
-"@types/jest@*", "@types/jest@>=26.0.0", "@types/jest@^29.2.5", "@types/jest@^29.4.0":
+"@types/jest@*", "@types/jest@>=26.0.0", "@types/jest@^29.5.0":
   version "29.5.0"
-  resolved "https://registry.npmjs.org/@types/jest/-/jest-29.5.0.tgz"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-29.5.0.tgz#337b90bbcfe42158f39c2fb5619ad044bbb518ac"
   integrity sha512-3Emr5VOl/aoBwnWcH/EFQvlSAmjV+XtV9GGu5mwdYew5vhQh0IUZx/60x0TzHDu09Bi7HMx10t/namdJw5QIcg==
   dependencies:
     expect "^29.0.0"
