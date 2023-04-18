@@ -12,7 +12,7 @@ import {
 	MessageActionRowComponentBuilder,
 } from 'discord.js';
 import {
-	findChannelById,
+	ChannelWithFlags,
 	findServerById,
 	UserServerSettingsWithFlags,
 } from '@answeroverflow/db';
@@ -31,6 +31,11 @@ import {
 import { CONSENT_BUTTON_LABEL, WEBSITE_URL } from '@answeroverflow/constants';
 import { makeRequestForConsentString } from './mark-solution';
 import type { RendererableInteractions } from '@answeroverflow/discordjs-react';
+import { isHumanMessage } from '~discord-bot/utils/utils';
+import {
+	memberToAnalyticsUser,
+	trackDiscordEvent,
+} from '~discord-bot/utils/analytics';
 
 export const CONSENT_ACTION_PREFIX = 'consent';
 
@@ -84,15 +89,20 @@ export function makeConsentButton(source: ConsentSource) {
 }
 
 // TODO: Find a better return value than `null`
-export async function provideConsentOnForumChannelMessage(message: Message) {
+export async function provideConsentOnForumChannelMessage(
+	message: Message,
+	channelSettings: ChannelWithFlags,
+) {
+	if (!channelSettings?.flags.forumGuidelinesConsentEnabled) {
+		return null;
+	}
 	const channel = message.channel;
 	if (
 		!(channel.isThread() && channel.parent?.type === ChannelType.GuildForum)
 	) {
 		return null;
 	}
-	const channelSettings = await findChannelById(channel.parent.id);
-	if (!channelSettings?.flags.forumGuidelinesConsentEnabled) {
+	if (!isHumanMessage(message)) {
 		return null;
 	}
 	return updateUserConsent({
@@ -153,7 +163,17 @@ export async function updateUserConsent({
 				},
 			}),
 		getCtx: () => createMemberCtx(member),
-		...statusHandlers,
+		Error(error, messageWithCode) {
+			statusHandlers.Error?.(error, messageWithCode);
+		},
+		Ok(result) {
+			statusHandlers.Ok?.(result);
+			trackDiscordEvent('User Grant Consent', {
+				...memberToAnalyticsUser('User', member),
+				'Answer Overflow Account Id': member.id,
+				'Consent Source': consentSource,
+			});
+		},
 	});
 }
 

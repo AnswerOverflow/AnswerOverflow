@@ -9,8 +9,14 @@ import {
 import {
 	clearProviderAuthToken,
 	findDiscordOauthByProviderAccountId,
+	findServerById,
 } from '@answeroverflow/db';
 import { toDiscordAPIServer } from '~discord-bot/utils/conversions';
+import {
+	memberToAnalyticsUser,
+	serverWithDiscordInfoToAnalyticsData,
+	trackDiscordEvent,
+} from '~discord-bot/utils/analytics';
 
 @ApplyOptions<Listener.Options>({
 	event: Events.GuildMemberAdd,
@@ -28,6 +34,16 @@ export class SyncOnAdd extends Listener {
 				}),
 			accessToken: account.access_token,
 			server: toDiscordAPIServer(member),
+		});
+		const server = await findServerById(member.guild.id);
+		if (!server) return;
+		trackDiscordEvent('User Joined Server', {
+			...serverWithDiscordInfoToAnalyticsData({
+				guild: member.guild,
+				serverWithSettings: server,
+			}),
+			...memberToAnalyticsUser('User', member),
+			'Answer Overflow Account Id': member.id,
 		});
 	}
 }
@@ -49,6 +65,16 @@ export class SyncOnRemove extends Listener {
 				}),
 			accessToken: account.access_token,
 			serverId: guild.id,
+		});
+		const server = await findServerById(guild.id);
+		if (!server) return;
+		trackDiscordEvent('User Left Server', {
+			...serverWithDiscordInfoToAnalyticsData({
+				guild,
+				serverWithSettings: server,
+			}),
+			...memberToAnalyticsUser('User', member),
+			'Answer Overflow Account Id': member.id,
 		});
 	}
 }
