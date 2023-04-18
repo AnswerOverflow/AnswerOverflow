@@ -1,5 +1,10 @@
-import { container, LogLevel, SapphireClient } from '@sapphire/framework';
-import { ClientOptions, Partials } from 'discord.js';
+import {
+	container,
+	Events,
+	LogLevel,
+	SapphireClient,
+} from '@sapphire/framework';
+import { ClientOptions, Partials, ActivityType } from 'discord.js';
 
 import '~discord-bot/utils/setup';
 import {
@@ -9,6 +14,24 @@ import {
 import { Router } from '~discord-bot/components/primitives';
 import React from 'react';
 import LRUCache from 'lru-cache';
+import type { AOEventSubject } from './events';
+import { Subject } from 'rxjs';
+import { printCommunities } from './utils';
+
+declare module '@sapphire/pieces' {
+	interface Container {
+		discordJSReact: DiscordJSReact;
+		messageHistory: LRUCache<
+			string,
+			{
+				history: React.ReactNode[];
+				setHistory: (node: React.ReactNode[]) => void;
+			}
+		>;
+		events: AOEventSubject;
+	}
+}
+
 function getLogLevel() {
 	switch (process.env.NODE_ENV) {
 		case 'development':
@@ -81,7 +104,11 @@ export const login = async (client: SapphireClient) => {
 		}
 
 		await client.login(process.env.DISCORD_TOKEN);
-
+		client.addListener(Events.ClientReady, () => {
+			if (process.env.PRINT_COMMUNITIES) {
+				printCommunities(client); // TODO: Make a listener
+			}
+		});
 		client.logger.info('LOGGED IN');
 		client.logger.info(`LOGGED IN AS: ${client.user?.username ?? 'UNKNOWN'}`);
 		const config: DiscordJSReact['config'] = {

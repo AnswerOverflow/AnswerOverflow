@@ -23,6 +23,7 @@ import { findManyDiscordAccountsWithUserServerSettings } from './discord-account
 import { omit } from '@answeroverflow/utils';
 import { findAllThreadsByParentId, findManyChannelsById } from './channel';
 import { findManyServersById } from './server';
+import type { MessageProps } from '@answeroverflow/constants';
 export type MessageWithDiscordAccount = z.infer<
 	typeof zMessageWithDiscordAccount
 >;
@@ -37,6 +38,21 @@ export type MessageFull = z.infer<typeof zMessageWithDiscordAccount> & {
 	referencedMessage: MessageWithDiscordAccount | null;
 	solutionMessages: MessageWithDiscordAccount[];
 };
+
+export function messageWithDiscordAccountToAnalyticsData(
+	message: MessageFull | MessageWithDiscordAccount,
+): MessageProps {
+	return {
+		'Channel Id': message.parentChannelId
+			? message.parentChannelId
+			: message.channelId,
+		'Thread Id': message.childThreadId ?? undefined,
+		'Server Id': message.serverId,
+		'Message Author Id': message.author.id,
+		'Message Id': message.id,
+		'Solution Id': message.solutionIds?.[0] ?? undefined,
+	};
+}
 
 export function isMessageFull(
 	message: MessageWithDiscordAccount | MessageFull,
