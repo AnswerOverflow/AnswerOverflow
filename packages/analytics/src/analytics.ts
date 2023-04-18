@@ -5,16 +5,10 @@ const apiKey = process.env.NEXT_PUBLIC_POSTHOG_TOKEN;
 const shouldCollectAnalytics =
 	apiKey !== undefined && process.env.NODE_ENV !== 'test';
 
-const client = new PostHog(apiKey || '', {
-	enable: shouldCollectAnalytics,
-	host:
-		process.env.NODE_ENV === 'test'
-			? 'http://localhost:8000' // use a dummy host for tests
-			: 'https://app.posthog.com',
-	requestTimeout: process.env.NODE_ENV === 'test' ? 1 : undefined,
-	maxCacheSize: process.env.NODE_ENV === 'test' ? 1 : undefined,
-});
-
+const client = shouldCollectAnalytics ? new PostHog(apiKey) : undefined;
+if (!client) {
+	console.warn('Analytics collection is disabled');
+}
 // TODO: This type should be inferred from the auth package
 declare module 'next-auth' {
 	interface Session extends DefaultSession {
@@ -29,7 +23,7 @@ export type BaseProps = {
 };
 
 export function registerServerGroup(props: ServerProps) {
-	if (!shouldCollectAnalytics) return;
+	if (!client) return;
 	client.groupIdentify({
 		groupType: 'server',
 		groupKey: props['Server Id'],
@@ -43,8 +37,9 @@ export function trackServerSideEvent<K extends BaseProps>(
 	eventName: string,
 	props: K,
 ): void {
+	if (!client) return;
 	const { 'Answer Overflow Account Id': aoId } = props;
-	const captureData: Parameters<typeof client.capture>[0] = {
+	const captureData: Parameters<PostHog['capture']>[0] = {
 		event: eventName,
 		distinctId: aoId,
 		properties: props,
@@ -69,7 +64,7 @@ export function identifyDiscordAccount(
 		email: string;
 	},
 ) {
-	if (!shouldCollectAnalytics) return;
+	if (!client) return;
 	client.identify({
 		distinctId: answerOverflowAccountId,
 		properties: {
@@ -84,7 +79,7 @@ export function linkAnalyticsAccount(input: {
 	answerOverflowAccountId: string;
 	otherId: string;
 }) {
-	if (!shouldCollectAnalytics) return;
+	if (!client) return;
 	client.alias({
 		distinctId: input.answerOverflowAccountId,
 		alias: input.otherId,
@@ -92,6 +87,6 @@ export function linkAnalyticsAccount(input: {
 }
 
 export async function finishAnalyticsCollection() {
-	if (!shouldCollectAnalytics) return;
+	if (!client) return;
 	await client.shutdownAsync();
 }
