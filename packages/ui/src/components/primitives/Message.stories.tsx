@@ -41,24 +41,36 @@ export const WithImages: Story = {
 			...mockMessageWithDiscordAccount(),
 			channelId: '1031266112802914305',
 			serverId: '701008832645824553',
-			images: [
+			attachments: [
 				{
 					url: 'https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.png',
 					width: 897,
 					height: 672,
-					description: null,
+					filename: 'image.png',
+					size: 123456,
+					id: '123456789',
+					proxyUrl:
+						'https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.png',
 				},
 				{
 					url: 'https://cdn.discordapp.com/attachments/1037547270733832242/1063121784578261033/image.png',
 					width: 1440,
 					height: 2560,
-					description: null,
+					size: 123456,
+					id: '123456789',
+					filename: 'image.png',
+					proxyUrl:
+						'https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.png',
 				},
 				{
 					url: 'https://cdn.discordapp.com/attachments/1037547270733832242/1063121784578261033/image.png',
 					width: null,
 					height: null,
-					description: null,
+					size: 123456,
+					filename: 'image.png',
+					id: '123456789',
+					proxyUrl:
+						'https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.png',
 				},
 			],
 		},

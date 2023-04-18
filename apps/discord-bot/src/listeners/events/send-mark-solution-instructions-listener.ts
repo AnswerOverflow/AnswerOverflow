@@ -1,20 +1,28 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
-import type { ThreadChannel } from 'discord.js';
 import { Events } from 'discord.js';
 import {
 	SendMarkSolutionInstructionsError,
 	sendMarkSolutionInstructionsInThread,
 } from '~discord-bot/domains/send-mark-solution-instructions';
 
-@ApplyOptions<Listener.Options>({ event: Events.ThreadCreate })
-export class SendMarkSolutionInstructionsOnThreadCreate extends Listener {
-	public async run(thread: ThreadChannel, newlyCreated: boolean) {
-		try {
-			await sendMarkSolutionInstructionsInThread(thread, newlyCreated);
-		} catch (error) {
-			if (error instanceof SendMarkSolutionInstructionsError) return;
-			throw error;
-		}
+@ApplyOptions<Listener.Options>({ event: Events.ClientReady })
+export class SendMarkSolutionInstructionsOnThreadCreate extends Listener<Events.ClientReady> {
+	public run() {
+		this.container.events.subscribe((event) => {
+			if (event.action !== 'questionAsked') {
+				return;
+			}
+			void sendMarkSolutionInstructionsInThread(
+				event.data.raw[0],
+				event.data.raw[1],
+				event.data.channelSettings,
+				event.data.questionAsker,
+				event.data.question,
+			).catch((error) => {
+				if (error instanceof SendMarkSolutionInstructionsError) return;
+				throw error;
+			});
+		});
 	}
 }

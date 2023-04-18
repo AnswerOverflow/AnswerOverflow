@@ -5,10 +5,16 @@
 		"migrate": {},
 		"build": {
 			"outputs": ["dist/**", ".next/**"],
-			"cache": true
+			"cache": true,
+			"inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts"]
 		},
 		"format": {
-			"inputs": ["./packages/config/"],
+			"inputs": [
+				"./packages/config/prettier/**/*",
+				"src/**/*.tsx",
+				"src/**/*.ts",
+				"test/**/*.ts"
+			],
 			"outputs": [],
 			"cache": false
 		},
@@ -17,7 +23,12 @@
 			"cache": false
 		},
 		"lint": {
-			"inputs": ["./packages/config/eslint-config-custom"],
+			"inputs": [
+				"./packages/config/eslint-config-custom/**/*",
+				"src/**/*.tsx",
+				"src/**/*.ts",
+				"test/**/*.ts"
+			],
 			"outputs": [],
 			"cache": true
 		},
@@ -27,7 +38,8 @@
 		},
 		"test": {
 			"outputs": ["coverage/**"],
-			"cache": true
+			"cache": true,
+			"inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts"]
 		},
 		"dev": {
 			"cache": false
@@ -58,6 +70,7 @@
 		"DISCORD_TOKEN",
 		"OWNERS",
 		"VERCEL_URL",
+		"SITE_URL",
 		"PORT",
 		"DEFAULT_DELAY_IN_MS",
 		"DATABASE_URL",
@@ -84,6 +97,7 @@
 		"INDEXING_DISABLED",
 		"MAX_NUMBER_OF_THREADS_TO_COLLECT",
 		"NEXT_PUBLIC_POSTHOG_TOKEN",
+		"PRINT_COMMUNITIES",
 		"MAX_NUMBER_OF_MESSAGES_TO_COLLECT"
 	]
 }

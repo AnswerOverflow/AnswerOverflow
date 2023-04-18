@@ -3,7 +3,7 @@ import { ChatInputCommand, Command } from '@sapphire/framework';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { updateUserConsent } from '~discord-bot/domains/manage-account';
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
-import { onceTimeStatusHandler } from '~discord-bot/utils/trpc';
+import { oneTimeStatusHandler } from '~discord-bot/utils/trpc';
 import { getCommandIds } from '~discord-bot/utils/utils';
 
 @ApplyOptions<Command.Options>({
@@ -47,11 +47,11 @@ export class ConsentCommand extends Command {
 				consentSource: 'slash-command',
 				canPubliclyDisplayMessages: consented,
 				async Error(error) {
-					await onceTimeStatusHandler(interaction, error.message);
+					await oneTimeStatusHandler(interaction, error.message);
 				},
 				async Ok(result) {
 					// TODO: Better messages
-					await onceTimeStatusHandler(
+					await oneTimeStatusHandler(
 						interaction,
 						result.flags.canPubliclyDisplayMessages
 							? `You have consented to publicly display your messages from indexed channels in ${member.guild.name} on Answer Overflow.`

@@ -9,9 +9,18 @@ import {
 	Message,
 	MultiMessageBlurrer,
 	ServerInvite,
+	ChannelIcon,
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
-import { useTrackEvent } from '@answeroverflow/hooks';
+import {
+	messageWithDiscordAccountToAnalyticsData,
+	useTrackEvent,
+} from '@answeroverflow/hooks';
+import {
+	channelToAnalyticsData,
+	serverToAnalyticsData,
+	threadToAnalyticsData,
+} from '@answeroverflow/constants/src/analytics';
 export type MessageResultPageProps = {
 	messages: APIMessageWithDiscordAccount[];
 	server: ServerPublic;
@@ -29,7 +38,6 @@ export function MessageResultPage({
 	thread,
 }: MessageResultPageProps) {
 	const isUserInServer = useIsUserInServer(server.id);
-
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
 	const channelName = thread?.name ?? channel.name;
@@ -38,18 +46,17 @@ export function MessageResultPage({
 			? firstMessage.content
 			: `Questions related to ${channelName} in ${server.name}`;
 
+	// TODO: Ugly
 	useTrackEvent(
 		'Message Page View',
 		{
-			'Channel Id': channel.id,
-			'Channel Name': channel.name,
-			'Message Id': firstMessage.id,
-			'Message Author Id': firstMessage.author.id,
-			'Number of Messages': messages.length,
-			'Server Id': server.id,
-			'Server Name': server.name,
-			'Thread Id': thread?.id,
-			'Thread Name': thread?.name,
+			...channelToAnalyticsData(channel),
+			...serverToAnalyticsData(server),
+			...(thread && {
+				...threadToAnalyticsData(thread),
+				'Number of Messages': messages.length,
+			}),
+			...messageWithDiscordAccountToAnalyticsData(firstMessage),
 		},
 		{
 			runOnce: true,
@@ -61,7 +68,7 @@ export function MessageResultPage({
 	let consecutivePrivateMessages = 0;
 	const messageStack = messages.map((message, index) => {
 		const nextMessage = messages.at(index + 1);
-		if (!message.public && (isUserInServer === 'loading' || !isUserInServer)) {
+		if (!message.public && isUserInServer !== 'in_server') {
 			consecutivePrivateMessages++;
 			if (nextMessage && !nextMessage.public) {
 				return;
@@ -71,7 +78,7 @@ export function MessageResultPage({
 		}
 		// TODO: Remove when embeds are supported
 		if (
-			message.public &&
+			(message.public || isUserInServer === 'in_server') &&
 			message.content.length === 0 &&
 			message.attachments.length === 0
 		)
@@ -81,6 +88,7 @@ export function MessageResultPage({
 			<Message
 				key={message.id}
 				message={message}
+				fullRounded
 				Blurrer={(props) => <MultiMessageBlurrer {...props} count={count} />}
 			/>
 		);
@@ -109,6 +117,7 @@ export function MessageResultPage({
 				title={`${channelName} - ${server.name}`}
 				server={server}
 			/>
+
 			<div className="my-8 flex flex-col items-center justify-between gap-2 sm:flex-row sm:py-0">
 				<MessagesSearchBar />
 				<div className="shrink-0 sm:pl-8">
@@ -120,10 +129,13 @@ export function MessageResultPage({
 				</div>
 			</div>
 			<div className="rounded-md">
-				<h1 className="mb-4 rounded-sm border-b-2 border-solid border-neutral-400 pb-2 text-3xl dark:border-neutral-600 dark:text-white">
-					{thread ? thread.name : channel.name}
-				</h1>
-				<div className="flex flex-col gap-2">{messageStack}</div>
+				<div className="mb-4 flex flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400 pb-2 text-center leading-5 dark:border-neutral-600  dark:text-white">
+					<ChannelIcon channelType={channel.type} className="h-6 w-6" />
+					<h1 className="text-3xl">
+						{thread ? `${thread.name}` : `${channel.name}`}
+					</h1>
+				</div>
+				<div className="flex flex-col gap-4">{messageStack}</div>
 			</div>
 		</div>
 	);

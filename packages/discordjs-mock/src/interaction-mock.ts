@@ -49,14 +49,25 @@ function setupMockedInteractionAPIData<Type extends InteractionType>({
 	Required<APIBaseInteraction<Type, {}>>,
 	'guild_id' | 'message' | 'member'
 > &
-	Pick<APIBaseInteraction<Type, {}>, 'guild_id' | 'message'> {
+	Pick<APIBaseInteraction<Type, {}>, 'guild_id' | 'message' | 'member'> {
+	const guild = channel.isDMBased() ? undefined : channel.guild;
+	let appPermissions = null;
+	let memberPermissions = null;
+	if (guild) {
+		appPermissions = guild.members.cache
+			.get(channel.client.user.id)!
+			.permissions.bitfield.toString();
+		memberPermissions = guild.members.cache
+			.get(caller.id)!
+			.permissions.bitfield.toString();
+	}
 	return {
 		application_id: applicationId ?? randomSnowflake().toString(),
 		channel_id: channel.id,
 		id: randomSnowflake().toString(),
 		token: randomSnowflake().toString(), // TODO: Use a real token
 		version: 1,
-		app_permissions: PermissionsBitField.Default.toString(),
+		app_permissions: appPermissions ?? PermissionsBitField.Default.toString(),
 		locale: 'en-US',
 		guild_id: channel.isDMBased() ? undefined : channel.guild.id,
 		user: {
@@ -65,6 +76,27 @@ function setupMockedInteractionAPIData<Type extends InteractionType>({
 			discriminator: caller.discriminator,
 			username: caller.username,
 		},
+		member: guild
+			? {
+					deaf: false,
+					flags: 0,
+					joined_at: guild.members.cache
+						.get(caller.id)!
+						.joinedAt!.toISOString(),
+					mute: false,
+					permissions: memberPermissions!,
+					roles: guild.members.cache
+						.get(caller.id)!
+						.roles.cache.map((r) => r.id),
+					user: {
+						id: caller.id,
+						avatar: caller.avatar,
+						discriminator: caller.discriminator,
+						username: caller.username,
+					},
+					avatar: caller.avatar,
+			  }
+			: undefined,
 		data: {},
 		guild_locale: 'en-US',
 		message: message ? messageToAPIData(message) : undefined,

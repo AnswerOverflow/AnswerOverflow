@@ -2,6 +2,11 @@
   Redeclare discord types to not have to import discord-api-types as we only need a few types
 */
 
+import type {
+	APIMessageFull,
+	APIMessageWithDiscordAccount,
+} from '@answeroverflow/api';
+
 export enum ChannelType {
 	/**
 	 * A text channel within a guild
@@ -85,4 +90,13 @@ export enum ChannelType {
 	 * @deprecated This is the old name for {@apilink ChannelType#PrivateThread}
 	 */
 	GuildPrivateThread = 12,
+}
+
+export function getDiscordURLForMessage(
+	message: APIMessageWithDiscordAccount | APIMessageFull,
+) {
+	const serverId = message.serverId;
+	const channelId = message.channelId;
+	const messageId = message.id;
+	return `https://discord.com/channels/${serverId}/${channelId}/${messageId}`;
 }

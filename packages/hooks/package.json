@@ -12,7 +12,7 @@
 	},
 	"dependencies": {
 		"@answeroverflow/api": "*",
-		"next": "^13.2.4",
+		"next": "^13.3.0",
 		"next-auth": "^4.20.1",
 		"posthog-js": "^1.51.5",
 		"react": "^18.2.0",
