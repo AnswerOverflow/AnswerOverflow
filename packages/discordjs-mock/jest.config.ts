@@ -4,7 +4,7 @@ require('dotenv').config();
 const jestConfig: JestConfigWithTsJest = {
 	preset: 'ts-jest',
 	resetMocks: true,
-	openHandlesTimeout: 0, // We don't care about open handles
+	detectOpenHandles: false,
 	testTimeout: 60000,
 	testEnvironment: 'node',
 	testMatch: ['**/*.test.ts(x)?'],
