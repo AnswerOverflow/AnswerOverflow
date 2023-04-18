@@ -6,7 +6,7 @@ const shouldCollectAnalytics =
 	apiKey !== undefined && process.env.NODE_ENV !== 'test';
 
 const client = shouldCollectAnalytics ? new PostHog(apiKey) : undefined;
-if (!client) {
+if (!client && process.env.NODE_ENV !== 'test') {
 	console.warn('Analytics collection is disabled');
 }
 // TODO: This type should be inferred from the auth package
