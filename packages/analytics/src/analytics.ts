@@ -5,10 +5,13 @@ const apiKey = process.env.NEXT_PUBLIC_POSTHOG_TOKEN;
 const shouldCollectAnalytics =
 	apiKey !== undefined && process.env.NODE_ENV !== 'test';
 
-const client = new PostHog(
-	apiKey || '',
-	{ enable: shouldCollectAnalytics }, // You can omit this line if using PostHog Cloud
-);
+const client = new PostHog(apiKey || '', {
+	enable: shouldCollectAnalytics,
+	host:
+		process.env.NODE_ENV === 'test'
+			? 'http://localhost:8000' // use a dummy host for tests
+			: 'https://app.posthog.com',
+});
 
 // TODO: This type should be inferred from the auth package
 declare module 'next-auth' {
@@ -23,9 +26,8 @@ export type BaseProps = {
 	'Answer Overflow Account Id': string;
 };
 
-interface EventMap {}
-
 export function registerServerGroup(props: ServerProps) {
+	if (!shouldCollectAnalytics) return;
 	client.groupIdentify({
 		groupType: 'server',
 		groupKey: props['Server Id'],
@@ -65,6 +67,7 @@ export function identifyDiscordAccount(
 		email: string;
 	},
 ) {
+	if (!shouldCollectAnalytics) return;
 	client.identify({
 		distinctId: answerOverflowAccountId,
 		properties: {
@@ -79,6 +82,7 @@ export function linkAnalyticsAccount(input: {
 	answerOverflowAccountId: string;
 	otherId: string;
 }) {
+	if (!shouldCollectAnalytics) return;
 	client.alias({
 		distinctId: input.answerOverflowAccountId,
 		alias: input.otherId,
@@ -86,5 +90,6 @@ export function linkAnalyticsAccount(input: {
 }
 
 export async function finishAnalyticsCollection() {
+	if (!shouldCollectAnalytics) return;
 	await client.shutdownAsync();
 }
