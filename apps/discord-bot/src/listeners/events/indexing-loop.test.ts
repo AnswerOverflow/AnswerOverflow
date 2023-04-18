@@ -24,7 +24,7 @@ describe('Indexing Loop', () => {
 		jest.useFakeTimers({
 			doNotFake: ['setTimeout'],
 		});
-		const client = await setupAnswerOverflowBot();
+		const client = await setupAnswerOverflowBot(false);
 		await emitEvent(client, Events.ClientReady, client as Client);
 		jest.advanceTimersByTime(86400000); // advance time by 24 hours in ms
 		await delay(2000); // doesn't run correctly without this

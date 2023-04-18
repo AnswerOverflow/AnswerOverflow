@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { cn } from '~ui/utils/styling';
 import { trackEvent } from '@answeroverflow/hooks';
 import { PricingArea } from './PricingArea';
+import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
 
 // TODO: Link to docs for feature?
 const HomeFeature = (props: {
@@ -127,8 +128,7 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 			onMouseUp={() => {
 				trackEvent('Community Page Link Click', {
 					'Link Location': 'About Marquee',
-					'Server Id': props.id,
-					'Server Name': props.name,
+					...serverToAnalyticsData(props),
 				});
 			}}
 			tabIndex={-1}
