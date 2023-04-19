@@ -2,7 +2,7 @@
 import './GetStartedPageAnimations.css';
 import { Button, Heading, Paragraph } from '~ui/components/primitives';
 import type { GetStartedPageProps } from './GetStartedSection';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 export const IntroPage: React.FC<GetStartedPageProps> = ({ setPage }) => {
 	return (
@@ -101,7 +101,7 @@ const configPages: {
 
 interface GetStartedPagesProps {
 	readonly pageIndex: string;
-	readonly component: React.FC<GetStartedPageProps>;
+	readonly component: React.FC<GetStartedPageProps> | undefined;
 }
 
 export const getStartedPages: Readonly<GetStartedPagesProps[]> = [
