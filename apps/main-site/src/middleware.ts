@@ -31,10 +31,6 @@ const mainSiteBase =
     c. /
       - If the hostname is the main site, keep the path the same
       - If the hostname is the tenant site, rewrite to the tenant site community page
-
-
-
-
 */
 
 type PathHandler = {
@@ -46,27 +42,29 @@ type PathHandler = {
 	isMainSiteHostname: boolean;
 };
 
+function rewriteToMainSite(input: PathHandler) {
+	const { req } = input;
+	return NextResponse.rewrite(
+		new URL(`${req.nextUrl.pathname}${req.nextUrl.search}`, mainSiteBase),
+	);
+}
+
 function dataUnlockerRouteHandler(input: PathHandler) {
-	const { path, req } = input;
-	if (path.startsWith('/oemf7z50uh7w/')) {
-		const rewrite = NextResponse.rewrite(
-			new URL(
-				`${req.nextUrl.pathname}${req.nextUrl.search}`,
-				`https://oemf7z50uh7w.ddns.dataunlocker.com/`,
-			),
-		);
-		rewrite.headers.set('host', mainSiteHostName);
-		rewrite.headers.set('x-forwarded-for', req.ip!);
-		return rewrite;
-	}
-	return undefined;
+	const { req } = input;
+	const rewrite = NextResponse.rewrite(
+		new URL(
+			`${req.nextUrl.pathname}${req.nextUrl.search}`,
+			`https://oemf7z50uh7w.ddns.dataunlocker.com/`,
+		),
+	);
+	rewrite.headers.set('host', mainSiteHostName);
+	rewrite.headers.set('x-forwarded-for', req.ip!);
+	return rewrite;
 }
 
 function messageRouteHandler(input: PathHandler) {
-	const { path, req, params, isMainSiteHostname } = input;
-	// Redirect tenant messages on the main site to the tenant site
-	const isMessageRoute = path.startsWith('/m/');
-	if (isMessageRoute && isMainSiteHostname) {
+	const { req, params, isMainSiteHostname } = input;
+	if (isMainSiteHostname) {
 		// TODO: Get the server id from the database
 		return NextResponse.redirect(
 			new URL(`${req.nextUrl.pathname}${params}`, `http://localhost:3001/`),
@@ -74,43 +72,38 @@ function messageRouteHandler(input: PathHandler) {
 				status: 308,
 			},
 		);
+	} else {
+		return rewriteToMainSite(input);
 	}
-	return undefined;
 }
 
 function communityPageRouteHandler(input: PathHandler) {
-	const { path, req, params, isMainSiteHostname } = input;
-	// Redirect tenant communities on the main site to the tenant site
-	const isCommunityRoute = path.startsWith('/c/');
-	if (isCommunityRoute) {
-		if (isMainSiteHostname) {
-			// TODO: Get the server id from the database
-			return NextResponse.redirect(
-				new URL(`${req.nextUrl.pathname}${params}`, `http://localhost:3001/`),
-				{
-					status: 308,
-				},
-			);
-		} else {
-			// Redirect back to homepage, tenant sites only have one community
-			return NextResponse.redirect(new URL(`/`, mainSiteBase), {
+	const { req, params, isMainSiteHostname } = input;
+	if (isMainSiteHostname) {
+		// TODO: Get the server id from the database
+		return NextResponse.redirect(
+			new URL(`${req.nextUrl.pathname}${params}`, `http://localhost:3001/`),
+			{
 				status: 308,
-			});
-		}
+			},
+		);
+	} else {
+		// Redirect back to homepage, tenant sites only have one community
+		return NextResponse.redirect(new URL(`/`, mainSiteBase), {
+			status: 308,
+		});
 	}
-	return undefined;
 }
 
 function homePageRouteHandler(input: PathHandler) {
-	const { path, isMainSiteHostname } = input;
-	// Rewrite tenant homepages to be community pages
-	const isHomepage = path === '/';
-	if (isHomepage && !isMainSiteHostname) {
+	const { isMainSiteHostname } = input;
+	if (!isMainSiteHostname) {
 		return NextResponse.rewrite(
 			new URL(`/c/1037547185492996207`, mainSiteBase),
 		);
+	} else {
+		return NextResponse.next();
 	}
-	return undefined;
 }
 
 export function middleware(req: NextRequest) {
@@ -127,33 +120,24 @@ export function middleware(req: NextRequest) {
 		params,
 		isMainSiteHostname,
 	};
-	const dataUnlockerHandler = dataUnlockerRouteHandler(input);
-	if (dataUnlockerHandler) {
-		return dataUnlockerHandler;
+	if (path.startsWith('/oemf7z50uh7w/')) {
+		return dataUnlockerRouteHandler(input);
+	} else if (path.startsWith('/m/')) {
+		return messageRouteHandler(input);
+	} else if (path.startsWith('/c/')) {
+		return communityPageRouteHandler(input);
+	} else if (path === '/') {
+		return homePageRouteHandler(input);
+	} else if (!isMainSiteHostname) {
+		return rewriteToMainSite(input);
+	} else {
+		return NextResponse.next();
 	}
-
-	const messageHandler = messageRouteHandler(input);
-	if (messageHandler) {
-		return messageHandler;
-	}
-
-	const communityPageHandler = communityPageRouteHandler(input);
-	if (communityPageHandler) {
-		return communityPageHandler;
-	}
-
-	const homePageHandler = homePageRouteHandler(input);
-	if (homePageHandler) {
-		return homePageHandler;
-	}
-
-	// Everything else gets rewritten to the main site
-	url.hostname = mainSiteHostName;
-	return NextResponse.rewrite(url);
 }
 // See "Matching Paths" below to learn more
 export const config = {
 	matcher: [
+		// Data Unlocker
 		'/oemf7z50uh7w/:path*',
 		/*
 		 * Match all paths except for:
