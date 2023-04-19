@@ -2,7 +2,7 @@
 import './GetStartedPageAnimations.css';
 import { Button, Heading, Paragraph } from '~ui/components/primitives';
 import type { GetStartedPageProps } from './GetStartedSection';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 export const IntroPage: React.FC<GetStartedPageProps> = ({ setPage }) => {
 	return (
@@ -85,13 +85,23 @@ const configPages: {
 	readonly [key: string]: FC<GetStartedPageProps>;
 } = {
 	ChannelSettings: () => {
-		return <div>foo</div>;
+		return (
+			<div className="page-slide-in">
+				<Heading.H1 className="pb-16 text-center text-4xl">
+					Let{"'"}s set up your channel settings!
+				</Heading.H1>
+
+				{/* Checkbox showing  */}
+
+				<Heading.H2>Enable indexing on your favorite channels</Heading.H2>
+			</div>
+		);
 	},
 };
 
 interface GetStartedPagesProps {
 	readonly pageIndex: string;
-	readonly component: React.FC<GetStartedPageProps>;
+	readonly component: React.FC<GetStartedPageProps> | undefined;
 }
 
 export const getStartedPages: Readonly<GetStartedPagesProps[]> = [
