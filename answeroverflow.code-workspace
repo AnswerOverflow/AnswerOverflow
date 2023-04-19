@@ -76,6 +76,10 @@
       "path": "packages/config"
     },
     {
+      "name": "proxy",
+      "path": "apps/proxy"
+    },
+    {
       "name": "root",
       "path": "./"
     }
@@ -166,7 +170,8 @@
       "prisma-types",
       "elastic-types",
       "cache",
-      "docs"
+      "docs",
+      "proxy"
     ],
     "jest.autoRevealOutput": "off",
     "vitest.enable": true,
@@ -211,6 +216,7 @@
       "twoslash",
       "unauthed",
       "undelete",
+      "Unlocker",
       "unoptimized",
       "upsert",
       "upserted",
