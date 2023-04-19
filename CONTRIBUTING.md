@@ -113,6 +113,61 @@ yarn lint:fix
 yarn build
 ```
 
+## Setting up your Developer Bot
+
+Head to the [Discord Developer Portal](https://discord.com/developers/applications), and create a new application (call it something like "AO Dev Test"), and optionally a testing server in Discord.
+
+In the portal, click "Bot" and add a bot.
+
+Enable the following intents:
+
+- `Server Members`
+- `Message Content`
+
+<div align="center">
+  <figure>
+    <img src="./assets/bot-intents.png" alt="Bot Intents Settings"/>
+  </figure>
+</div>
+
+You'll also want to copy your token, and save it someplace safe (like GitHub Secrets).
+
+Next, in `OAuth2->General`, you'll want to grab your Client ID and Client Secret for safekeeping as well.
+
+Add a redirect, and point it to `http://localhost:3000/api/auth/callback/discord` (if you're hosting on a VPS with Remote Environment, use your VPS IP in place of localhost)
+
+Change the authorization method to "In-app Authorization", checking the `bot` and `applications.commands` scopes.
+
+You'll want to enable the following bot permissions:
+
+- `Manage Server`
+- `Create Instant Invite`
+- `Read Messages/View Channels`
+- `Send Messages`
+- `Create Public Threads`
+- `Send Messages in Threads`
+- `Manage Threads`
+- `Embed Links`
+- `Read Message History`
+- `Add Reactions`
+- `Use Slash Commands`
+
+When you're done, it should look like this:
+
+<div align="center">
+  <figure>
+    <img src="./assets/OAuth2-Settings.png" alt="OAuth2 Settings"/>
+  </figure>
+</div>
+
+You can then generate a link from `OAuth2->URL Generator` using the `bot` and `applications.commands`, with the same permissions.
+
+Replace your ID in this link: `https://discord.com/oauth2/authorize?client_id=YOUR_ID&permissions=328565083201&scope=bot+applications.commands`
+
+Or use the [Discord Permissions Calculator](https://discordapi.com/permissions.html).
+
+Add your bot to the server with the link and begin testing from your development machine.
+
 ## Project overview
 
 This project is a monorepo using Turborepo. In order to keep documentation up to date and accurate, please view the [README](./README.md) of the package that you are developing on.

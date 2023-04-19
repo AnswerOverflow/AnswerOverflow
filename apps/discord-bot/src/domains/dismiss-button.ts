@@ -6,6 +6,11 @@ import {
 	ComponentType,
 	PermissionResolvable,
 } from 'discord.js';
+import {
+	memberToAnalyticsUser,
+	messageToAnalyticsMessage,
+	trackDiscordEvent,
+} from '~discord-bot/utils/analytics';
 
 export const DISMISS_BUTTON_LABEL = 'Dismiss';
 export const DISMISS_ACTION_PREFIX = 'dismiss';
@@ -25,7 +30,7 @@ export class DismissButtonInteractionParseError extends Error {
 export function makeDismissButton(dismisserId: string) {
 	return new ButtonBuilder({
 		label: DISMISS_BUTTON_LABEL,
-		style: ButtonStyle.Danger,
+		style: ButtonStyle.Secondary,
 		custom_id: `${DISMISS_ACTION_PREFIX}:${dismisserId}`,
 		type: ComponentType.Button,
 	});
@@ -81,4 +86,10 @@ export async function dismissMessage(input: {
 		}
 	}
 	await messageToDismiss.delete();
+	trackDiscordEvent('Dismiss Button Clicked', {
+		...memberToAnalyticsUser('User', dismisser),
+		...messageToAnalyticsMessage('Message', messageToDismiss),
+		'Answer Overflow Account Id': dismisser.id,
+		'Dismissed Message Type': 'Mark Solution Instructions',
+	});
 }

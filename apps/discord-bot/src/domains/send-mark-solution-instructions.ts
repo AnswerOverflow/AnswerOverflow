@@ -1,10 +1,20 @@
+import { ChannelWithFlags, findServerById } from '@answeroverflow/db';
 import {
 	ActionRowBuilder,
 	EmbedBuilder,
+	GuildMember,
+	Message,
 	MessageActionRowComponentBuilder,
 	ThreadChannel,
 } from 'discord.js';
-import { findChannelById } from '@answeroverflow/db';
+import {
+	channelWithDiscordInfoToAnalyticsData,
+	memberToAnalyticsUser,
+	messageToAnalyticsMessage,
+	serverWithDiscordInfoToAnalyticsData,
+	threadWithDiscordInfoToAnalyticsData,
+	trackDiscordEvent,
+} from '~discord-bot/utils/analytics';
 import { makeDismissButton } from './dismiss-button';
 
 const sendMarkSolutionInstructionsErrorReasons = [
@@ -26,24 +36,19 @@ export class SendMarkSolutionInstructionsError extends Error {
 export async function sendMarkSolutionInstructionsInThread(
 	thread: ThreadChannel,
 	newlyCreated: boolean,
+	channelSettings: ChannelWithFlags,
+	threadOwner: GuildMember,
+	question: Message,
 ) {
-	if (!newlyCreated) {
-		throw new SendMarkSolutionInstructionsError('Thread was not newly created');
-	}
-	if (!thread.parentId) {
-		throw new SendMarkSolutionInstructionsError(
-			'Thread does not have a parent channel',
-		);
-	}
-	const channel = await findChannelById(thread.parentId);
-	if (!channel) {
-		throw new SendMarkSolutionInstructionsError('Channel not found');
-	}
-	if (!channel.flags.sendMarkSolutionInstructionsInNewThreads) {
+	if (!channelSettings.flags.sendMarkSolutionInstructionsInNewThreads) {
 		throw new SendMarkSolutionInstructionsError(
 			'Channel does not have sendMarkSolutionInstructionsInNewThreads flag set',
 		);
 	}
+	if (!newlyCreated) {
+		throw new SendMarkSolutionInstructionsError('Thread was not newly created');
+	}
+
 	const markSolutionInstructionsEmbed = new EmbedBuilder()
 		.setDescription(
 			`To help others find answers, you can mark your question as solved via \`Right click solution message -> Apps -> ✅ Mark Solution\``,
@@ -51,13 +56,29 @@ export async function sendMarkSolutionInstructionsInThread(
 		.setImage(
 			'https://cdn.discordapp.com/attachments/1020132770862874704/1025906507549790208/mark_solution_instructions.png',
 		);
-	const firstMessage = await thread.fetchStarterMessage();
 	await thread.send({
 		embeds: [markSolutionInstructionsEmbed],
 		components: [
 			new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
-				makeDismissButton(firstMessage?.author.id ?? ''),
+				makeDismissButton(threadOwner.id),
 			),
 		],
+	});
+	trackDiscordEvent('Mark Solution Instructions Sent', async () => {
+		const server = await findServerById(thread.guildId);
+		return {
+			...memberToAnalyticsUser('Question Asker', threadOwner),
+			...messageToAnalyticsMessage('Question', question),
+			'Answer Overflow Account Id': threadOwner.id,
+			...threadWithDiscordInfoToAnalyticsData({ thread }),
+			...channelWithDiscordInfoToAnalyticsData({
+				answerOverflowChannel: channelSettings,
+				discordChannel: thread.parent!, // If we have channel settings, this channel must exist
+			}),
+			...serverWithDiscordInfoToAnalyticsData({
+				guild: thread.guild,
+				serverWithSettings: server!,
+			}),
+		};
 	});
 }

@@ -2,6 +2,7 @@ import { Client, Events, PublicThreadChannel } from 'discord.js';
 import { createChannel, createServer } from '@answeroverflow/db';
 import {
 	mockForumChannel,
+	mockMessage,
 	mockPublicThread,
 	mockTextChannel,
 } from '@answeroverflow/discordjs-mock';
@@ -20,9 +21,23 @@ beforeEach(async () => {
 		client,
 		parentChannel: textChannel,
 	});
+	mockMessage({
+		client,
+		channel: textChannel,
+		override: {
+			id: textChannelThread.id,
+		},
+	});
 	forumChannelThread = mockPublicThread({
 		client,
 		parentChannel: forumChannel,
+	});
+	mockMessage({
+		client,
+		channel: forumChannelThread,
+		override: {
+			id: forumChannelThread.id,
+		},
 	});
 	await createServer(toAOServer(textChannel.guild));
 	await createServer(toAOServer(forumChannel.guild));

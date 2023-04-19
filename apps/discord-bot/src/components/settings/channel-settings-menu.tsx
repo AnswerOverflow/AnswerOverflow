@@ -6,12 +6,9 @@ import {
 	ActionRow,
 } from '@answeroverflow/discordjs-react';
 import {
-	ActionRowBuilder,
 	ChannelType,
-	EmbedBuilder,
 	ForumChannel,
 	GuildForumTag,
-	MessageActionRowComponentBuilder,
 	NewsChannel,
 	TextChannel,
 } from 'discord.js';
@@ -22,7 +19,6 @@ import {
 	CLEAR_TAG_LABEL,
 	DISABLE_FORUM_GUIDELINES_CONSENT_LABEL,
 	ENABLE_FORUM_GUIDELINES_CONSENT_LABEL,
-	STOP_IGNORING_ACCOUNT_LABEL,
 	FORUM_GUIDELINES_CONSENT_PROMPT,
 	DISABLE_MARK_AS_SOLUTION_LABEL,
 	ENABLE_MARK_AS_SOLUTION_LABEL,
@@ -40,7 +36,6 @@ import {
 	ENABLE_AI_QUESTION_ANSWERING_LABEL,
 	OPEN_INDEXING_SETTINGS_MENU_LABEL,
 	SEND_CONSENT_PROMPT_LABEL,
-	WEBSITE_URL,
 	DISCORD_EMOJI_ID,
 } from '@answeroverflow/constants';
 import type { ChannelWithFlags } from '@answeroverflow/prisma-types';
@@ -63,8 +58,7 @@ import {
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
 import { oneTimeStatusHandler } from '~discord-bot/utils/trpc';
 import type { RootChannel } from '~discord-bot/utils/utils';
-import { makeRequestForConsentString } from '~discord-bot/domains/mark-solution';
-import { makeConsentButton } from '~discord-bot/domains/manage-account';
+import { sendConsentPrompt } from '~discord-bot/domains/manage-account';
 import { Message, getDiscordURLForMessage } from '@answeroverflow/db';
 
 type ChannelSettingsMenuItemProps<T extends RootChannel = RootChannel> = {
@@ -171,7 +165,7 @@ export function IndexingSettingsMenu({
 				<EmbedMenuInstruction
 					instructions={[
 						{
-							title: STOP_IGNORING_ACCOUNT_LABEL,
+							title: ENABLE_CHANNEL_INDEXING_LABEL,
 							enabled: !channel.flags.indexingEnabled,
 							instructions:
 								'Enable indexing of this channel into web search results',
@@ -221,26 +215,12 @@ export function IndexingSettingsMenu({
 				label={SEND_CONSENT_PROMPT_LABEL}
 				style="Primary"
 				onClick={(intr) =>
-					guildTextChannelOnlyInteraction(intr, async ({ guild, channel }) => {
-						const consentEmbed = new EmbedBuilder();
-						consentEmbed.setDescription(
-							makeRequestForConsentString(guild.name),
-						);
-						consentEmbed.addFields({
-							name: 'Learn more',
-							value: WEBSITE_URL,
-						});
-						const components =
-							new ActionRowBuilder<MessageActionRowComponentBuilder>();
-						components.addComponents(
-							makeConsentButton('manually-posted-prompt'),
-						);
-						await channel.send({
-							embeds: [consentEmbed],
-							components: [components],
-						});
-						await oneTimeStatusHandler(intr, 'Consent prompt sent!');
-					})
+					guildTextChannelOnlyInteraction(intr, async ({ channel }) =>
+						sendConsentPrompt({
+							channel,
+							interaction: intr,
+						}),
+					)
 				}
 			/>
 			{lastIndexedMessage && (
