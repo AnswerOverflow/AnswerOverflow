@@ -5,11 +5,10 @@ const apiKey = process.env.NEXT_PUBLIC_POSTHOG_TOKEN;
 const shouldCollectAnalytics =
 	apiKey !== undefined && process.env.NODE_ENV !== 'test';
 
-const client = new PostHog(
-	apiKey || '',
-	{ enable: shouldCollectAnalytics }, // You can omit this line if using PostHog Cloud
-);
-
+const client = shouldCollectAnalytics ? new PostHog(apiKey) : undefined;
+if (!client && process.env.NODE_ENV !== 'test') {
+	console.warn('Analytics collection is disabled');
+}
 // TODO: This type should be inferred from the auth package
 declare module 'next-auth' {
 	interface Session extends DefaultSession {
@@ -19,26 +18,42 @@ declare module 'next-auth' {
 	}
 }
 
-type BaseProps = {
+export type BaseProps = {
 	'Answer Overflow Account Id': string;
 };
 
-type ServerJoinProps = ServerProps;
-
-interface EventMap {
-	'Server Join': ServerJoinProps;
+export function registerServerGroup(props: ServerProps) {
+	if (!client) return;
+	client.groupIdentify({
+		groupType: 'server',
+		groupKey: props['Server Id'],
+		properties: {
+			...props,
+		},
+	});
 }
 
-export function trackServerSideEvent<K extends keyof EventMap>(
-	eventName: K,
-	props: EventMap[K] & BaseProps,
+export function trackServerSideEvent<K extends BaseProps>(
+	eventName: string,
+	props: K,
 ): void {
-	const { 'Answer Overflow Account Id': aoId, ...properties } = props;
-	client.capture({
+	if (!client) return;
+	const { 'Answer Overflow Account Id': aoId } = props;
+	const captureData: Parameters<PostHog['capture']>[0] = {
 		event: eventName,
 		distinctId: aoId,
-		properties,
-	});
+		properties: props,
+	};
+	const serverId = 'Server Id' in props ? props['Server Id'] : undefined;
+	if (
+		(serverId !== undefined && typeof serverId === 'string') ||
+		typeof serverId === 'number'
+	) {
+		captureData.groups = {
+			server: serverId,
+		};
+	}
+	client.capture(captureData);
 }
 
 export function identifyDiscordAccount(
@@ -49,6 +64,7 @@ export function identifyDiscordAccount(
 		email: string;
 	},
 ) {
+	if (!client) return;
 	client.identify({
 		distinctId: answerOverflowAccountId,
 		properties: {
@@ -63,6 +79,7 @@ export function linkAnalyticsAccount(input: {
 	answerOverflowAccountId: string;
 	otherId: string;
 }) {
+	if (!client) return;
 	client.alias({
 		distinctId: input.answerOverflowAccountId,
 		alias: input.otherId,
@@ -70,5 +87,6 @@ export function linkAnalyticsAccount(input: {
 }
 
 export async function finishAnalyticsCollection() {
+	if (!client) return;
 	await client.shutdownAsync();
 }

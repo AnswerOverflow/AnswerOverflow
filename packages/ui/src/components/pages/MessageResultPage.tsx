@@ -12,7 +12,15 @@ import {
 	ChannelIcon,
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
-import { useTrackEvent } from '@answeroverflow/hooks';
+import {
+	messageWithDiscordAccountToAnalyticsData,
+	useTrackEvent,
+} from '@answeroverflow/hooks';
+import {
+	channelToAnalyticsData,
+	serverToAnalyticsData,
+	threadToAnalyticsData,
+} from '@answeroverflow/constants/src/analytics';
 export type MessageResultPageProps = {
 	messages: APIMessageWithDiscordAccount[];
 	server: ServerPublic;
@@ -38,22 +46,21 @@ export function MessageResultPage({
 			? firstMessage.content
 			: `Questions related to ${channelName} in ${server.name}`;
 
+	// TODO: Ugly
 	useTrackEvent(
 		'Message Page View',
 		{
-			'Channel Id': channel.id,
-			'Channel Name': channel.name,
-			'Message Id': firstMessage.id,
-			'Message Author Id': firstMessage.author.id,
-			'Number of Messages': messages.length,
-			'Server Id': server.id,
-			'Server Name': server.name,
-			'Thread Id': thread?.id,
-			'Thread Name': thread?.name,
+			...channelToAnalyticsData(channel),
+			...serverToAnalyticsData(server),
+			...(thread && {
+				...threadToAnalyticsData(thread),
+				'Number of Messages': messages.length,
+			}),
+			...messageWithDiscordAccountToAnalyticsData(firstMessage),
 		},
 		{
 			runOnce: true,
-			enabled: isUserInServer === 'in_server',
+			enabled: isUserInServer !== 'loading',
 		},
 	);
 	const solutionMessageId = messages.at(0)?.solutionIds?.at(0);
@@ -61,7 +68,7 @@ export function MessageResultPage({
 	let consecutivePrivateMessages = 0;
 	const messageStack = messages.map((message, index) => {
 		const nextMessage = messages.at(index + 1);
-		if (!message.public && isUserInServer !== 'not_in_server') {
+		if (!message.public && isUserInServer !== 'in_server') {
 			consecutivePrivateMessages++;
 			if (nextMessage && !nextMessage.public) {
 				return;
