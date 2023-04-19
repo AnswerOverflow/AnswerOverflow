@@ -118,7 +118,7 @@ export type ThreadProps = {
 	'Thread Id': Snowflake;
 	'Thread Name': string;
 	'Thread Type': number;
-	'Thread Archived Timestamp'?: bigint | number;
+	'Thread Archived Timestamp'?: string;
 	'Thread Parent Id'?: Snowflake;
 	'Thread Parent Name'?: string;
 	'Thread Parent Type'?: number;
@@ -135,7 +135,7 @@ export function threadToAnalyticsData(
 		'Thread Id': thread.id,
 		'Thread Name': thread.name,
 		'Thread Type': thread.type,
-		'Thread Archived Timestamp': thread.archivedTimestamp ?? undefined,
+		'Thread Archived Timestamp': thread.archivedTimestamp?.toString(),
 		'Thread Parent Id': thread.parentId ?? undefined,
 	};
 }
