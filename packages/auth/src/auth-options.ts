@@ -13,6 +13,9 @@ import {
 	updateProviderAuthToken,
 } from '@answeroverflow/db';
 
+// TODO: What should this be?
+const VERCEL_DEPLOYMENT = !!process.env.VERCEL_URL;
+
 export const authOptions: NextAuthOptions = {
 	// Configure one or more authentication providers
 	adapter: extendedAdapter,
@@ -25,6 +28,19 @@ export const authOptions: NextAuthOptions = {
 		}),
 		// ...add more providers here
 	],
+	cookies: {
+		sessionToken: {
+			name: `${VERCEL_DEPLOYMENT ? '__Secure-' : ''}next-auth.session-token`,
+			options: {
+				httpOnly: true,
+				sameSite: 'lax',
+				path: '/',
+				// When working on localhost, the cookie domain must be omitted entirely (https://stackoverflow.com/a/1188145)
+				domain: VERCEL_DEPLOYMENT ? '.answeroverflow.com' : undefined,
+				secure: VERCEL_DEPLOYMENT,
+			},
+		},
+	},
 	callbacks: {
 		session({ session, user }) {
 			if (session.user) {
