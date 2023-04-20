@@ -67,7 +67,7 @@ function messageRouteHandler(input: PathHandler) {
 	if (isMainSiteHostname) {
 		// TODO: Get the server id from the database
 		return NextResponse.redirect(
-			new URL(`${req.nextUrl.pathname}${params}`, `http://localhost:3001/`),
+			new URL(`${req.nextUrl.pathname}${params}`, `http://tenant:3001/`),
 			{
 				status: 308,
 			},
@@ -78,15 +78,13 @@ function messageRouteHandler(input: PathHandler) {
 }
 
 function communityPageRouteHandler(input: PathHandler) {
-	const { req, params, isMainSiteHostname } = input;
+	const { params, isMainSiteHostname } = input;
 	if (isMainSiteHostname) {
 		// TODO: Get the server id from the database
-		return NextResponse.redirect(
-			new URL(`${req.nextUrl.pathname}${params}`, `http://localhost:3001/`),
-			{
-				status: 308,
-			},
-		);
+		console.log('Redirecting to tenant site');
+		return NextResponse.redirect(new URL(`${params}`, `http://tenant:3001/`), {
+			status: 308,
+		});
 	} else {
 		// Redirect back to homepage, tenant sites only have one community
 		return NextResponse.redirect(new URL(`/`, mainSiteBase), {
@@ -97,6 +95,7 @@ function communityPageRouteHandler(input: PathHandler) {
 
 function homePageRouteHandler(input: PathHandler) {
 	const { isMainSiteHostname } = input;
+	console.log(isMainSiteHostname);
 	if (!isMainSiteHostname) {
 		return NextResponse.rewrite(
 			new URL(`/c/1037547185492996207`, mainSiteBase),
@@ -108,7 +107,7 @@ function homePageRouteHandler(input: PathHandler) {
 
 export function middleware(req: NextRequest) {
 	const url = req.nextUrl;
-	const hostname = req.headers.get('host') || mainSiteHostName; // fallback to www.answeroverflow.com
+	const hostname = req.headers.get('host') || mainSiteHostName;
 	const path = url.pathname;
 	const params = req.nextUrl.search;
 	const isMainSiteHostname = hostname === mainSiteHostName;

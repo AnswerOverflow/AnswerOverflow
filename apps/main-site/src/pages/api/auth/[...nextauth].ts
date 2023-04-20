@@ -27,6 +27,5 @@ export default async function handler(
 	const auth = NextAuth(authOptions);
 
 	const authRes = await auth(req, res);
-	console.log('authRes', authRes);
 	return authRes;
 }
