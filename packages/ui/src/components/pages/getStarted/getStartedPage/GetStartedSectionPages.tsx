@@ -4,17 +4,21 @@ import { Button, Heading, Paragraph } from '~ui/components/primitives';
 import type { GetStartedPageProps } from './GetStartedSection';
 import type { FC } from 'react';
 
-export const IntroPage: React.FC<GetStartedPageProps> = ({ setPage }) => {
+export const IntroPage: React.FC<GetStartedPageProps> = ({
+	setPage,
+	setProgress,
+}) => {
 	return (
 		<div className="flex flex-col gap-8">
 			<Heading.H1 className="pb-8 text-center text-4xl">
 				What are you looking for?
 			</Heading.H1>
-			<div className="grid grid-cols-2 gap-16 pb-16">
+			<div className="grid grid-rows-2 gap-8 lg:grid-cols-2 lg:gap-16">
 				<Button variant={'outline'}>I{"'"}m just looking around</Button>
 				<Button
 					onClick={() => {
 						setPage('pickPlanPage');
+						setProgress(20);
 					}}
 				>
 					I{"'"}m ready to add to my server
@@ -24,13 +28,16 @@ export const IntroPage: React.FC<GetStartedPageProps> = ({ setPage }) => {
 	);
 };
 
-const PickPlanPage: React.FC<GetStartedPageProps> = ({ setPage }) => {
+const PickPlanPage: React.FC<GetStartedPageProps> = ({
+	setPage,
+	setProgress,
+}) => {
 	return (
 		<div className="page-slide-in">
 			<Heading.H1 className="pb-16 text-center text-4xl">
 				Pick a plan
 			</Heading.H1>
-			<div className="grid grid-cols-2 gap-16 pb-16">
+			<div className="grid grid-cols-2 gap-16">
 				<div className="flex flex-col gap-8 rounded-standard border-1 border-white/25 bg-ao-white/1 p-5">
 					<Heading.H2 className="text-center text-2xl">Free</Heading.H2>
 					<Paragraph className="text-center text-lg">
@@ -43,7 +50,10 @@ const PickPlanPage: React.FC<GetStartedPageProps> = ({ setPage }) => {
 					<Button
 						variant="outline"
 						className="mt-auto"
-						onClick={() => setPage('addToServerPage')}
+						onClick={() => {
+							setPage('addToServerPage');
+							setProgress(60);
+						}}
 					>
 						Get started for free
 					</Button>
@@ -67,7 +77,10 @@ const PickPlanPage: React.FC<GetStartedPageProps> = ({ setPage }) => {
 	);
 };
 
-const AddToServerPage: React.FC<GetStartedPageProps> = ({ setPage }) => {
+const AddToServerPage: React.FC<GetStartedPageProps> = ({
+	setPage,
+	setProgress,
+}) => {
 	return (
 		<div className="page-slide-in">
 			<Heading.H1 className="pb-16 text-center text-4xl">
@@ -75,8 +88,32 @@ const AddToServerPage: React.FC<GetStartedPageProps> = ({ setPage }) => {
 			</Heading.H1>
 			<div className="flex w-full items-center justify-center">
 				{/* TODO: We should use discord blurple and a discord icon */}
-				<Button variant="destructive">Add to server</Button>
+				<Button
+					variant="destructive"
+					onClick={() => {
+						setPage('addBotToServerOauth');
+						setProgress(80);
+					}}
+				>
+					Add to server
+				</Button>
 			</div>
+		</div>
+	);
+};
+
+const AddToServerOauthPage: React.FC<GetStartedPageProps> = ({ setPage }) => {
+	return (
+		<div className="page-slide-in flex flex-col items-center justify-center">
+			<Heading.H1 className="pb-16 text-center text-4xl">
+				Adding via oauth
+			</Heading.H1>
+			<Button
+				variant="destructive"
+				onClick={() => setPage('channelSettingsPage')}
+			>
+				Continue
+			</Button>
 		</div>
 	);
 };
@@ -84,7 +121,7 @@ const AddToServerPage: React.FC<GetStartedPageProps> = ({ setPage }) => {
 const configPages: {
 	readonly [key: string]: FC<GetStartedPageProps>;
 } = {
-	ChannelSettings: () => {
+	ChannelSettings: ({ setPage, setProgress }) => {
 		return (
 			<div className="page-slide-in">
 				<Heading.H1 className="pb-16 text-center text-4xl">
@@ -94,17 +131,57 @@ const configPages: {
 				{/* Checkbox showing  */}
 
 				<Heading.H2>Enable indexing on your favorite channels</Heading.H2>
+				<Button
+					variant="destructive"
+					onClick={() => {
+						setPage('serverSettingsPage');
+						setProgress(90);
+					}}
+				>
+					Continue
+				</Button>
+			</div>
+		);
+	},
+	ServerSettings: ({ setPage, setProgress }) => {
+		return (
+			<div className="page-slide-in">
+				<Heading.H1 className="pb-16 text-center text-4xl">
+					Okay, now let{"'"}s set up your server settings!
+				</Heading.H1>
+
+				{/* Checkbox showing  */}
+
+				<Heading.H2 className="text-lg">Run ```/channel-settings```</Heading.H2>
+				<Button
+					variant="destructive"
+					onClick={() => {
+						setPage('completePage');
+						setProgress(100);
+					}}
+				>
+					Continue
+				</Button>
 			</div>
 		);
 	},
 };
 
-interface GetStartedPagesProps {
-	readonly pageIndex: string;
-	readonly component: React.FC<GetStartedPageProps> | undefined;
-}
+const CompletePage: React.FC<GetStartedPageProps> = ({ setPage }) => {
+	return (
+		<div className="page-slide-in flex flex-col items-center justify-center">
+			<Heading.H1 className="pb-16 text-center text-4xl">All done!</Heading.H1>
+			<Button
+				variant="destructive"
+				onClick={() => setPage('channelSettingsPage')}
+			>
+				Head to docs
+			</Button>
+		</div>
+	);
+};
 
-export const getStartedPages: Readonly<GetStartedPagesProps[]> = [
+export const getStartedPages = [
 	{
 		pageIndex: 'introPage',
 		component: IntroPage,
@@ -118,8 +195,20 @@ export const getStartedPages: Readonly<GetStartedPagesProps[]> = [
 		component: AddToServerPage,
 	},
 	{
+		pageIndex: 'addBotToServerOauth',
+		component: AddToServerOauthPage,
+	},
+	{
 		pageIndex: 'channelSettingsPage',
 		component: configPages.ChannelSettings,
+	},
+	{
+		pageIndex: 'serverSettingsPage',
+		component: configPages.ServerSettings,
+	},
+	{
+		pageIndex: 'completePage',
+		component: CompletePage,
 	},
 ] as const;
 
