@@ -50,3 +50,39 @@ export const AddToServerPage: Story = {
 		initialPageIndex: AllPageIndex;
 	},
 };
+
+export const AddToServerOauthPage: Story = {
+	name: 'Add to server oauth page',
+	args: {
+		initialPageIndex: 'addBotToServerOauth',
+	} satisfies {
+		initialPageIndex: AllPageIndex;
+	},
+};
+
+export const ChannelSettingsPage: Story = {
+	name: 'Channel settings page',
+	args: {
+		initialPageIndex: 'channelSettingsPage',
+	} satisfies {
+		initialPageIndex: AllPageIndex;
+	},
+};
+
+export const ServerSettingsPage: Story = {
+	name: 'Server settings page',
+	args: {
+		initialPageIndex: 'serverSettingsPage',
+	} satisfies {
+		initialPageIndex: AllPageIndex;
+	},
+};
+
+export const CompletePage: Story = {
+	name: 'Complete page',
+	args: {
+		initialPageIndex: 'completePage',
+	} satisfies {
+		initialPageIndex: AllPageIndex;
+	},
+};
