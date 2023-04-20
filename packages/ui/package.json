@@ -34,6 +34,7 @@
 		"@radix-ui/react-menubar": "^1.0.2",
 		"@radix-ui/react-navigation-menu": "^1.1.2",
 		"@radix-ui/react-popover": "^1.0.5",
+		"@radix-ui/react-progress": "^1.0.2",
 		"@radix-ui/react-separator": "^1.0.2",
 		"bootstrap-icons": "^1.10.4",
 		"clsx": "^1.2.1",
