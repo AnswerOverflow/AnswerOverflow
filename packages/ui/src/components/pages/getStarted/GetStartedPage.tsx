@@ -52,7 +52,7 @@ export const GetStartedPage = ({ initialPageIndex }: GetStartedPageProps) => {
 
 				<div className="relative mx-auto flex flex-col lg:flex-row">
 					<GetStartedPageProgress progress={progress} />
-					<div className="min-h-[45vh] min-w-[50vw] max-w-6xl gap-16 rounded-standard border-1 bg-ao-black/[0.01] p-16 drop-shadow-2xl dark:border-ao-white/25 dark:bg-ao-white/[.01] lg:min-h-[75vh]">
+					<div className="min-h-[45vh] min-w-[50vw] max-w-6xl gap-16 rounded-standard border-1 bg-ao-black/[0.01] p-16 dark:border-ao-white/25 dark:bg-ao-white/[.01] lg:min-h-[75vh]">
 						<GetStartedPageHandler
 							pages={getStartedPages}
 							setProgress={setProgress}
