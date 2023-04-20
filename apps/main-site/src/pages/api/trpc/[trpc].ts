@@ -15,11 +15,12 @@ export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse,
 ) {
+	// TODO: Only run this if not on the main domain
 	// Only enable CORS in development for accessing through Storybook
 	if (process.env.NODE_ENV !== 'production') {
 		// Modify `req` and `res` objects here
 		// In this case, we are enabling CORS
-		res.setHeader('Access-Control-Allow-Origin', 'http://localhost:6006');
+		res.setHeader('Access-Control-Allow-Origin', 'http://tenant:3001');
 		res.setHeader('Access-Control-Request-Method', '*');
 		res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
 		res.setHeader('Access-Control-Allow-Headers', 'content-type');
