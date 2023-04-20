@@ -4,7 +4,7 @@ import type {
 } from '@answeroverflow/db';
 import { useTrackEvent } from '@answeroverflow/hooks';
 import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
 	Footer,
 	Button,
@@ -85,7 +85,23 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 	const [selectedChannelId, setSelectedChannelId] = useState<null | string>(
 		channels.at(0)?.channel.id ?? null,
 	);
-
+	useEffect(() => {
+		// if not on client return
+		if (typeof window === 'undefined') return;
+		const signIn = async () => {
+			console.log('fetching session');
+			try {
+				const res = await fetch('http://localhost:3000/api/auth/session', {
+					credentials: 'include',
+				});
+				const data = await res.json();
+				console.log('fetch res', data, res.status);
+			} catch (error) {
+				console.log('error', error);
+			}
+		};
+		void signIn();
+	}, []);
 	useTrackEvent('Community Page View', serverToAnalyticsData(server));
 
 	const selectedChannel = channels.find(
