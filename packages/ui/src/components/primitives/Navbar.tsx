@@ -24,7 +24,7 @@ import {
 	GETTING_STARTED_URL,
 	GITHUB_LINK,
 } from '@answeroverflow/constants/src/links';
-import { signIn, signOut } from 'next-auth/react';
+import { signIn, signOut } from '@answeroverflow/next-auth/react';
 // TODO: Clean up this navbar area, bit of a mess
 
 const UserAvatar = ({ user }: { user: User }) => (

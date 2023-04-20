@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { trpc, StorybookTRPC } from './trpc';
 import hljs from 'highlight.js';
 import { ThemeProvider } from './theme';
-import { SessionProvider } from 'next-auth/react';
+import { SessionProvider } from '@answeroverflow/next-auth/react';
 const storybookTrpc = trpc as StorybookTRPC;
 type Globals = {
 	tailwindTheme: 'dark' | 'light' | 'both';

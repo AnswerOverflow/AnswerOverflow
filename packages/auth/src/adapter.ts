@@ -5,7 +5,10 @@ import {
 } from '@answeroverflow/db';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { getDiscordUser } from '@answeroverflow/cache';
-import type { Adapter, AdapterAccount } from 'next-auth/adapters';
+import type {
+	Adapter,
+	AdapterAccount,
+} from '@answeroverflow/next-auth/adapters';
 
 export const extendedAdapter: Adapter = {
 	...PrismaAdapter(prisma),

@@ -2,8 +2,8 @@
 import '../styles/globals.css';
 import 'highlight.js/styles/github.css';
 import 'highlight.js/styles/github-dark.css';
-import { SessionProvider } from 'next-auth/react';
-import type { Session } from 'next-auth';
+import { SessionProvider } from '@answeroverflow/next-auth/react';
+import type { Session } from '@answeroverflow/next-auth';
 import type { AppType } from 'next/app';
 import hljs from 'highlight.js';
 

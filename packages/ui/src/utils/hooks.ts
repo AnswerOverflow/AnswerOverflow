@@ -1,6 +1,6 @@
 import { RefObject, useEffect, useState } from 'react';
 import { trpc } from './trpc';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@answeroverflow/next-auth/react';
 import { useRouter } from 'next/router';
 
 export const useIsUserInServer = (serverId: string) => {

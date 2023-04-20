@@ -24,6 +24,21 @@
     react-reconciler "^0.29.0"
     rxjs "^7.8.0"
 
+"@answeroverflow/next-auth@4.22.1":
+  version "4.22.1"
+  resolved "https://registry.yarnpkg.com/@answeroverflow/next-auth/-/next-auth-4.22.1.tgz#911087d912a8cee0d38caa9e7054be261e5c85d3"
+  integrity sha512-GlWLXmq/DVekwrXA/uJ+W76ellsjlteZ0FRPI/DtaGirtvP/Bmw55iNo3PDKQpv7r3St1qqE2edLR7bL4hwm4Q==
+  dependencies:
+    "@babel/runtime" "^7.20.13"
+    "@panva/hkdf" "^1.0.2"
+    cookie "^0.5.0"
+    jose "^4.11.4"
+    oauth "^0.9.15"
+    openid-client "^5.4.0"
+    preact "^10.6.3"
+    preact-render-to-string "^5.1.19"
+    uuid "^8.3.2"
+
 "@aw-web-design/x-default-browser@1.4.88":
   version "1.4.88"
   resolved "https://registry.npmjs.org/@aw-web-design/x-default-browser/-/x-default-browser-1.4.88.tgz"
@@ -12144,21 +12159,6 @@ neo-async@^2.5.0, neo-async@^2.6.0, neo-async@^2.6.1, neo-async@^2.6.2:
   resolved "https://registry.npmjs.org/neo-async/-/neo-async-2.6.2.tgz"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
 
-next-auth@^4.20.1:
-  version "4.20.1"
-  resolved "https://registry.npmjs.org/next-auth/-/next-auth-4.20.1.tgz"
-  integrity sha512-ZcTUN4qzzZ/zJYgOW0hMXccpheWtAol8QOMdMts+LYRcsPGsqf2hEityyaKyECQVw1cWInb9dF3wYwI5GZdEmQ==
-  dependencies:
-    "@babel/runtime" "^7.20.13"
-    "@panva/hkdf" "^1.0.2"
-    cookie "^0.5.0"
-    jose "^4.11.4"
-    oauth "^0.9.15"
-    openid-client "^5.4.0"
-    preact "^10.6.3"
-    preact-render-to-string "^5.1.19"
-    uuid "^8.3.2"
-
 next-mdx-remote@^4.2.1:
   version "4.4.1"
   resolved "https://registry.npmjs.org/next-mdx-remote/-/next-mdx-remote-4.4.1.tgz"
@@ -15482,29 +15482,9 @@ tslib@^1.8.1, tslib@^1.9.0, tslib@^1.9.3:
   resolved "https://registry.npmjs.org/tslib/-/tslib-1.14.1.tgz"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
-tsup@^6.3.0, tsup@^6.6.3:
+tsup@^6.3.0, tsup@^6.6.3, tsup@^6.7.0:
   version "6.7.0"
   resolved "https://registry.npmjs.org/tsup/-/tsup-6.7.0.tgz"
-  integrity sha512-L3o8hGkaHnu5TdJns+mCqFsDBo83bJ44rlK7e6VdanIvpea4ArPcU3swWGsLVbXak1PqQx/V+SSmFPujBK+zEQ==
-  dependencies:
-    bundle-require "^4.0.0"
-    cac "^6.7.12"
-    chokidar "^3.5.1"
-    debug "^4.3.1"
-    esbuild "^0.17.6"
-    execa "^5.0.0"
-    globby "^11.0.3"
-    joycon "^3.0.1"
-    postcss-load-config "^3.0.1"
-    resolve-from "^5.0.0"
-    rollup "^3.2.5"
-    source-map "0.8.0-beta.0"
-    sucrase "^3.20.3"
-    tree-kill "^1.2.2"
-
-tsup@^6.7.0:
-  version "6.7.0"
-  resolved "https://registry.yarnpkg.com/tsup/-/tsup-6.7.0.tgz#416f350f32a07b6ae86792ad7e52b0cafc566d64"
   integrity sha512-L3o8hGkaHnu5TdJns+mCqFsDBo83bJ44rlK7e6VdanIvpea4ArPcU3swWGsLVbXak1PqQx/V+SSmFPujBK+zEQ==
   dependencies:
     bundle-require "^4.0.0"

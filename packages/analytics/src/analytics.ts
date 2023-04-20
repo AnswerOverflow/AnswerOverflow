@@ -1,4 +1,4 @@
-import type { DefaultSession } from 'next-auth';
+import type { DefaultSession } from '@answeroverflow/next-auth';
 import { PostHog } from 'posthog-node';
 import type { ServerProps } from '@answeroverflow/constants';
 const apiKey = process.env.NEXT_PUBLIC_POSTHOG_TOKEN;
@@ -10,7 +10,7 @@ if (!client && process.env.NODE_ENV !== 'test') {
 	console.warn('Analytics collection is disabled');
 }
 // TODO: This type should be inferred from the auth package
-declare module 'next-auth' {
+declare module '@answeroverflow/next-auth' {
 	interface Session extends DefaultSession {
 		user: {
 			id: string;

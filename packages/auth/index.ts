@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 export { authOptions as authOptions } from './src/auth-options';
 export { getServerSession as getServerSession } from './src/get-session';
-export type { Session } from 'next-auth';
-import type { DefaultSession } from 'next-auth';
+export type { Session } from '@answeroverflow/next-auth';
+import type { DefaultSession } from '@answeroverflow/next-auth';
 
 declare global {
 	namespace NodeJS {
@@ -14,7 +14,7 @@ declare global {
 	}
 }
 
-declare module 'next-auth' {
+declare module '@answeroverflow/next-auth' {
 	interface Session extends DefaultSession {
 		user: {
 			id: string;

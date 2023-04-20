@@ -1,4 +1,4 @@
-import NextAuth from 'next-auth';
+import NextAuth from '@answeroverflow/next-auth';
 
 import { authOptions } from '@answeroverflow/auth';
 

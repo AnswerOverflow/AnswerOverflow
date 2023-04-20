@@ -1,5 +1,5 @@
-import type { NextAuthOptions } from 'next-auth';
-import DiscordProvider from 'next-auth/providers/discord';
+import type { NextAuthOptions } from '@answeroverflow/next-auth';
+import DiscordProvider from '@answeroverflow/next-auth/providers/discord';
 import {
 	linkAnalyticsAccount,
 	finishAnalyticsCollection,

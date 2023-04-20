@@ -2,8 +2,8 @@
 import 'core-js/actual';
 import '../styles/globals.css';
 import '../styles/code.scss';
-import { SessionProvider } from 'next-auth/react';
-import type { Session } from 'next-auth';
+import { SessionProvider } from '@answeroverflow/next-auth/react';
+import type { Session } from '@answeroverflow/next-auth';
 import type { AppType } from 'next/app';
 import hljs from 'highlight.js';
 import { NextTRPC, PageWrapper, trpc, ThemeProvider } from '@answeroverflow/ui';
@@ -62,7 +62,10 @@ const MyApp: AppType<{ session: Session | null }> = ({
 
 	return (
 		<ThemeProvider>
-			<SessionProvider session={session}>
+			<SessionProvider
+				session={session}
+				basePath="http://localhost:3000/api/auth"
+			>
 				<WithAnalytics>
 					<PageWrapper disabledRoutes={['/', '/c/[communityId]']}>
 						<MDXProvider components={components}>

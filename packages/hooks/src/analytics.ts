@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import type { DefaultSession } from 'next-auth';
-import { useSession } from 'next-auth/react';
+import type { DefaultSession } from '@answeroverflow/next-auth';
+import { useSession } from '@answeroverflow/next-auth/react';
 import { useRouter } from 'next/router';
 import posthog from 'posthog-js';
 import React, { useEffect, useRef } from 'react';
@@ -19,7 +19,7 @@ import type {
 	APIMessageWithDiscordAccount,
 } from '@answeroverflow/api';
 // TODO: This type should be inferred from the auth package
-declare module 'next-auth' {
+declare module '@answeroverflow/next-auth' {
 	interface Session extends DefaultSession {
 		user: {
 			id: string;
