@@ -409,7 +409,7 @@ describe('Make Mark Solution Response', () => {
 			.setStyle(ButtonStyle.Link).data;
 		solutionMessageWithConsentRequest = [
 			`**Thank you for marking this question as solved!**`,
-			makeRequestForConsentString(textChannel.guild.name),
+			`Want to help others find the answer to this question? Use the button below to display your messages in ${guild.name} on the web!`,
 		].join('\n\n');
 		solutionEmbedData = {
 			description: solutionMessageWithConsentRequest,
