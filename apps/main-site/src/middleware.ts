@@ -36,7 +36,7 @@ const mainSiteBase =
 type PathHandler = {
 	url: NextURL;
 	req: NextRequest;
-	hostname: string;
+	origin: string;
 	path: string;
 	params: string;
 	isMainSiteHostname: boolean;
@@ -81,7 +81,6 @@ function communityPageRouteHandler(input: PathHandler) {
 	const { params, isMainSiteHostname } = input;
 	if (isMainSiteHostname) {
 		// TODO: Get the server id from the database
-		console.log('Redirecting to tenant site');
 		return NextResponse.redirect(new URL(`${params}`, `http://tenant:3001/`), {
 			status: 308,
 		});
@@ -93,9 +92,36 @@ function communityPageRouteHandler(input: PathHandler) {
 	}
 }
 
+function apiRouteHandler(input: PathHandler) {
+	const { req, isMainSiteHostname } = input;
+	if (isMainSiteHostname) {
+		// 🙌 we're on the main site, just keep the request moving
+		return NextResponse.next();
+	}
+	const headers = new Headers();
+	headers.set('Access-Control-Allow-Origin', 'http://tenant:3001');
+	headers.set('Access-Control-Request-Method', '*');
+	headers.set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+	headers.set('Access-Control-Allow-Headers', 'content-type');
+	headers.set('Referrer-Policy', 'no-referrer');
+	headers.set('Access-Control-Allow-Credentials', 'true');
+	// if (req.method === 'OPTIONS') {
+	//   res.writeHead(200);
+	//   return res.end();
+	// }
+	// TODO: What is this, why does this fix this? Why do we have it?
+	if (req.method === 'OPTIONS') {
+		return new Response(null, {
+			headers,
+		});
+	}
+	return NextResponse.next({
+		headers,
+	});
+}
+
 function homePageRouteHandler(input: PathHandler) {
 	const { isMainSiteHostname } = input;
-	console.log(isMainSiteHostname);
 	if (!isMainSiteHostname) {
 		return NextResponse.rewrite(
 			new URL(`/c/1037547185492996207`, mainSiteBase),
@@ -107,14 +133,22 @@ function homePageRouteHandler(input: PathHandler) {
 
 export function middleware(req: NextRequest) {
 	const url = req.nextUrl;
-	const hostname = req.headers.get('host') || mainSiteHostName;
+	// gross, ugly, disgusting
+	const origin = req.headers.get('Referer') || req.headers.get('Host'); // TODO: Is this the right header?
+
+	console.log(origin);
+	if (!origin) {
+		console.log('No origin');
+		throw new Error('No hostname'); // TODO: Handle this better
+	}
+
 	const path = url.pathname;
 	const params = req.nextUrl.search;
-	const isMainSiteHostname = hostname === mainSiteHostName;
+	const isMainSiteHostname = origin.includes(mainSiteHostName); // TODO: Prevent this from being abused
 	const input: PathHandler = {
 		url,
 		req,
-		hostname,
+		origin,
 		path,
 		params,
 		isMainSiteHostname,
@@ -127,6 +161,8 @@ export function middleware(req: NextRequest) {
 		return communityPageRouteHandler(input);
 	} else if (path === '/') {
 		return homePageRouteHandler(input);
+	} else if (path.startsWith('/api/')) {
+		return apiRouteHandler(input);
 	} else if (!isMainSiteHostname) {
 		return rewriteToMainSite(input);
 	} else {
@@ -145,6 +181,6 @@ export const config = {
 		 * 3. /examples (inside /public)
 		 * 4. all root files inside /public (e.g. /favicon.ico)
 		 */
-		'/((?!api/|_next/|_static/|[\\w-]+\\.\\w+).*)',
+		'/((?!_next/|_static/|[\\w-]+\\.\\w+).*)',
 	],
 };
