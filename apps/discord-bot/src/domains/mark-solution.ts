@@ -286,6 +286,7 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 		serverName: server.name,
 		settings: channelSettings,
 	});
+	await solution.react('✅');
 
 	trackDiscordEvent('Solved Question', async () => {
 		const serverSettings = await findServerById(server.id);
