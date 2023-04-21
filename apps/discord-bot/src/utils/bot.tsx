@@ -4,7 +4,7 @@ import {
 	LogLevel,
 	SapphireClient,
 } from '@sapphire/framework';
-import { ClientOptions, Partials, ActivityType } from 'discord.js';
+import { ClientOptions, Partials } from 'discord.js';
 
 import '~discord-bot/utils/setup';
 import {
@@ -89,6 +89,7 @@ export const login = async (client: SapphireClient) => {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
 	require('dotenv').config();
 	try {
+		container.events = new Subject();
 		client.logger.info('LOGGING IN');
 		client.logger.info(`NODE_ENV: ${process.env.NODE_ENV}`);
 		client.logger.info(

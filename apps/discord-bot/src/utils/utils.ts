@@ -164,9 +164,9 @@ export function isHumanMessage(message: Message) {
 	return true;
 }
 
-
 export function hoursToMs(hours: number) {
 	return hours * 60 * 60 * 1000;
+}
 
 export function printCommunities(client: Client) {
 	const communities = client.guilds.cache.values();
