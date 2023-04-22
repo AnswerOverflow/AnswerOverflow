@@ -39,10 +39,10 @@ type PathHandler = {
 	origin: string;
 	path: string;
 	params: string;
-	isMainSiteHostname: boolean;
+	isRequestFromMainSite: boolean;
 };
 
-function rewriteToMainSite(input: PathHandler) {
+export function rewriteToMainSite(input: PathHandler) {
 	const { req } = input;
 	return NextResponse.rewrite(
 		new URL(`${req.nextUrl.pathname}${req.nextUrl.search}`, mainSiteBase),
@@ -63,8 +63,8 @@ function dataUnlockerRouteHandler(input: PathHandler) {
 }
 
 function messageRouteHandler(input: PathHandler) {
-	const { req, params, isMainSiteHostname } = input;
-	if (isMainSiteHostname) {
+	const { req, params, isRequestFromMainSite } = input;
+	if (isRequestFromMainSite) {
 		// TODO: Get the server id from the database
 		return NextResponse.redirect(
 			new URL(`${req.nextUrl.pathname}${params}`, `http://tenant:3001/`),
@@ -78,8 +78,8 @@ function messageRouteHandler(input: PathHandler) {
 }
 
 function communityPageRouteHandler(input: PathHandler) {
-	const { params, isMainSiteHostname } = input;
-	if (isMainSiteHostname) {
+	const { params, isRequestFromMainSite } = input;
+	if (isRequestFromMainSite) {
 		// TODO: Get the server id from the database
 		return NextResponse.redirect(new URL(`${params}`, `http://tenant:3001/`), {
 			status: 308,
@@ -93,8 +93,8 @@ function communityPageRouteHandler(input: PathHandler) {
 }
 
 function apiRouteHandler(input: PathHandler) {
-	const { req, isMainSiteHostname } = input;
-	if (isMainSiteHostname) {
+	const { req, isRequestFromMainSite } = input;
+	if (isRequestFromMainSite) {
 		// 🙌 we're on the main site, just keep the request moving
 		return NextResponse.next();
 	}
@@ -121,8 +121,8 @@ function apiRouteHandler(input: PathHandler) {
 }
 
 function homePageRouteHandler(input: PathHandler) {
-	const { isMainSiteHostname } = input;
-	if (!isMainSiteHostname) {
+	const { isRequestFromMainSite } = input;
+	if (!isRequestFromMainSite) {
 		return NextResponse.rewrite(
 			new URL(`/c/1037547185492996207`, mainSiteBase),
 		);
@@ -131,28 +131,33 @@ function homePageRouteHandler(input: PathHandler) {
 	}
 }
 
-export function middleware(req: NextRequest) {
+export function toPathHandlerData(req: NextRequest) {
 	const url = req.nextUrl;
 	// gross, ugly, disgusting
 	const origin = req.headers.get('Referer') || req.headers.get('Host'); // TODO: Is this the right header?
-
+	const path = url.pathname;
+	const params = req.nextUrl.search;
 	console.log(origin);
 	if (!origin) {
 		console.log('No origin');
 		throw new Error('No hostname'); // TODO: Handle this better
 	}
-
-	const path = url.pathname;
-	const params = req.nextUrl.search;
-	const isMainSiteHostname = origin.includes(mainSiteHostName); // TODO: Prevent this from being abused
+	const isRequestFromMainSite = origin.includes(mainSiteHostName); // TODO: Prevent this from being abused
 	const input: PathHandler = {
 		url,
 		req,
 		origin,
 		path,
 		params,
-		isMainSiteHostname,
+		isRequestFromMainSite,
 	};
+	return input;
+}
+
+export function middleware(req: NextRequest) {
+	const input = toPathHandlerData(req);
+	const { path, isRequestFromMainSite } = input;
+
 	if (path.startsWith('/oemf7z50uh7w/')) {
 		return dataUnlockerRouteHandler(input);
 	} else if (path.startsWith('/m/')) {
@@ -163,7 +168,7 @@ export function middleware(req: NextRequest) {
 		return homePageRouteHandler(input);
 	} else if (path.startsWith('/api/')) {
 		return apiRouteHandler(input);
-	} else if (!isMainSiteHostname) {
+	} else if (!isRequestFromMainSite) {
 		return rewriteToMainSite(input);
 	} else {
 		return NextResponse.next();
