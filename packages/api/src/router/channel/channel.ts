@@ -89,30 +89,82 @@ async function mutateChannel({
 	});
 }
 
+const channelSettingsNames = ["Indexing", "Mark Solution" , "Auto Thread" , "Forum Guidelines Consent" , "Send Mark Solution Instruction In New Threads"] as const;
+
 const zChannelFlagChange = z.object({
 	channel: zChannelWithServerCreate,
 	enabled: z.boolean(),
-	settingDesired: z.string()
+	settingDesired: z.enum(channelSettingsNames),
+	inviteCode: z.string().optional(),
 });
+
+type ChannelSettingsUpdateAction = typeof channelSettingsNames[number];
+
 
 /*
 to get done at a later point:
 Make Generic Base Function
-Make error message function *DONE*
-Make flag enablement/disablement function	
+Get Flag Function
+Set Flag Function
 */
+
+
 
 function createErrorMessage(type: string, bool: boolean): string// error message fucntion
 {
 	let errorMessage: string = type + "already ";
 	
 	if (bool == false)
-
 		errorMessage = errorMessage + "disabled";
 	else
 		errorMessage = errorMessage + "enabled";
 
 	return errorMessage;
+}
+
+function getFlagStatus(settings: ChannelWithFlags, settingDesired: ChannelSettingsUpdateAction): boolean
+{
+	if (settingDesired === "Auto Thread")
+		return settings.flags.autoThreadEnabled;
+		else if (settingDesired === "Forum Guidelines Consent")
+		return settings.flags.forumGuidelinesConsentEnabled;
+		else if (settingDesired === "Indexing")
+		return settings.flags.indexingEnabled;
+		else if (settingDesired === "Mark Solution")
+		return settings.flags.markSolutionEnabled
+		else if (settingDesired === "Send Mark Solution Instruction In New Threads")
+		return settings.flags.sendMarkSolutionInstructionsInNewThreads;
+		else
+		{
+			//uh oh
+			return false;
+		}
+}
+
+function setFlagStatus(settingDesired: ChannelSettingsUpdateAction, funcInput: z.infer<typeof zChannelFlagChange>): boolean | undefined
+{
+	if (settingDesired === "Auto Thread")
+	return funcInput.enabled;
+		else if (settingDesired === "Forum Guidelines Consent")
+		return funcInput.enabled;
+		else if (settingDesired === "Indexing")
+		return funcInput.enabled;
+		else if (settingDesired === "Mark Solution")
+		return funcInput.enabled;
+		else if (settingDesired === "Send Mark Solution Instruction In New Threads")
+		return funcInput.enabled;
+		else
+		{
+			return undefined;
+		}
+}
+
+function updateInviteCode(settingDesired: ChannelSettingsUpdateAction, funcInput: z.infer<typeof zChannelFlagChange>): string | undefined
+{
+	if (settingDesired === "Indexing")
+		return funcInput.inviteCode;
+		else
+		return undefined;
 }
 
 export const INDEXING_ALREADY_ENABLED_ERROR_MESSAGE =
@@ -302,7 +354,9 @@ export const channelRouter = router({
 			});
 		}),
 		setSettingOfName: withUserServersProcedure
-		.input(zChannelFlagChange)
+		.input(zChannelFlagChange.extend({
+			inviteCode: z.string().optional(),
+		}))
 		.mutation(async ({ ctx, input }) => {
 			return mutateChannel({
 				canUpdate:
@@ -312,15 +366,23 @@ export const channelRouter = router({
 							messageIfBothFalse: createErrorMessage(input.settingDesired, false),
 							messageIfBothTrue: createErrorMessage(input.settingDesired, true),
 							newValue: input.enabled,
-							oldValue: oldSettings.flags.autoThreadEnabled,
+							oldValue: getFlagStatus(oldSettings, input.settingDesired),
 						}),
 				channel: input.channel,
 				ctx,
 				updateData: {
 					flags: {
-						autoThreadEnabled: input.enabled,
+						indexingEnabled: setFlagStatus(input.settingDesired, input),
+						autoThreadEnabled: setFlagStatus(input.settingDesired, input),
+						markSolutionEnabled: setFlagStatus(input.settingDesired, input),
+						forumGuidelinesConsentEnabled: setFlagStatus(input.settingDesired, input),
+						sendMarkSolutionInstructionsInNewThreads : setFlagStatus(input.settingDesired, input)
 					},
+					inviteCode: updateInviteCode(input.settingDesired, input),
 				},
 			});
 		}),
 });
+
+
+//return undefined if not the one to change
