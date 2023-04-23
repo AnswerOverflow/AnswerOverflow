@@ -15,7 +15,6 @@ import {
 import {
 	checkIfCanMarkSolution,
 	makeMarkSolutionResponse,
-	makeRequestForConsentString,
 } from './mark-solution';
 import {
 	toAOChannel,
