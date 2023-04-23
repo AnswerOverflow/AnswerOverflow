@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
+import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 import { cn } from '~ui/utils/styling';
 import {
 	CheckIcon,
@@ -9,7 +10,13 @@ import {
 	CircleStackIcon,
 } from '@heroicons/react/24/outline';
 
-const DropdownMenu = DropdownMenuPrimitive.Root;
+const DropdownMenu = (props: DropdownMenuProps) => {
+	return (
+		<DropdownMenuPrimitive.Root modal={false} {...props}>
+			{props.children}
+		</DropdownMenuPrimitive.Root>
+	);
+};
 
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 

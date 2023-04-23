@@ -477,6 +477,13 @@ export class Elastic extends Client {
 		});
 		return result.count;
 	}
+
+	public async getNumberOfIndexedMessages() {
+		const result = await this.count({
+			index: this.messagesIndex,
+		});
+		return result.count;
+	}
 }
 
 export const elastic = global.elastic || getElasticClient();

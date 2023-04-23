@@ -248,7 +248,7 @@ export function makeMarkSolutionResponse({
 		embed.setDescription(
 			[
 				`**Thank you for marking this question as solved!**`,
-				makeRequestForConsentString(serverName),
+				`Want to help others find the answer to this question? Use the button below to display your messages in ${serverName} on the web!`,
 			].join('\n\n'),
 		);
 		components.addComponents(makeConsentButton('mark-solution-response'));
@@ -286,6 +286,7 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 		serverName: server.name,
 		settings: channelSettings,
 	});
+	await solution.react('✅');
 
 	trackDiscordEvent('Solved Question', async () => {
 		const serverSettings = await findServerById(server.id);
