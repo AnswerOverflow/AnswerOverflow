@@ -17,7 +17,8 @@ function getStatuses(client: SapphireClient) {
 	const statuses: StatusUpdate[] = [
 		{
 			type: ActivityType.Watching,
-			getStatus: () => `${client.guilds.cache.size} communities!`,
+			getStatus: () =>
+				`${client.guilds.cache.size.toLocaleString()} communities!`,
 		},
 		{
 			type: ActivityType.Listening,
@@ -37,7 +38,7 @@ function getStatuses(client: SapphireClient) {
 					(total, guild) => total + guild.memberCount,
 					0,
 				);
-				return `${totalMemberCount} users asking questions!`;
+				return `${totalMemberCount.toLocaleString()} users asking questions!`;
 			},
 		},
 		{

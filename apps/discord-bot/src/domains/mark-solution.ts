@@ -196,7 +196,12 @@ export async function addSolvedIndicatorToThread(
 	solvedTagId: string | null,
 ) {
 	// Apply the solved tag if it exists and it is a forum channel, otherwise add a checkmark reaction as a fallback
-	if (parentChannel.type == ChannelType.GuildForum && solvedTagId) {
+	if (
+		parentChannel.type == ChannelType.GuildForum &&
+		solvedTagId &&
+		// The maximum number of tags is 5, use the fallback if we have reached the limit
+		thread.appliedTags.length < 5
+	) {
 		await thread.setAppliedTags([...thread.appliedTags, solvedTagId]);
 	} else {
 		await questionMessage.react('✅');
