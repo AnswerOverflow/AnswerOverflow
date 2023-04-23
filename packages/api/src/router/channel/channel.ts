@@ -92,7 +92,28 @@ async function mutateChannel({
 const zChannelFlagChange = z.object({
 	channel: zChannelWithServerCreate,
 	enabled: z.boolean(),
+	settingDesired: z.string()
 });
+
+/*
+to get done at a later point:
+Make Generic Base Function
+Make error message function *DONE*
+Make flag enablement/disablement function	
+*/
+
+function createErrorMessage(type: string, bool: boolean): string// error message fucntion
+{
+	let errorMessage: string = type + "already ";
+	
+	if (bool == false)
+
+		errorMessage = errorMessage + "disabled";
+	else
+		errorMessage = errorMessage + "enabled";
+
+	return errorMessage;
+}
 
 export const INDEXING_ALREADY_ENABLED_ERROR_MESSAGE =
 	'Indexing already enabled';
@@ -102,7 +123,6 @@ export const FORUM_GUIDELINES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
 	'Forum post guidelines consent already enabled';
 export const FORUM_GUIDELINES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE =
 	'Forum post guidelines consent already disabled';
-
 export const MARK_SOLUTION_ALREADY_ENABLED_ERROR_MESSAGE =
 	'Mark solution already enabled';
 export const MARK_SOLUTION_ALREADY_DISABLED_ERROR_MESSAGE =
@@ -269,6 +289,28 @@ export const channelRouter = router({
 						assertBoolsAreNotEqual({
 							messageIfBothFalse: AUTO_THREAD_ALREADY_DISABLED_ERROR_MESSAGE,
 							messageIfBothTrue: AUTO_THREAD_ALREADY_ENABLED_ERROR_MESSAGE,
+							newValue: input.enabled,
+							oldValue: oldSettings.flags.autoThreadEnabled,
+						}),
+				channel: input.channel,
+				ctx,
+				updateData: {
+					flags: {
+						autoThreadEnabled: input.enabled,
+					},
+				},
+			});
+		}),
+		setSettingOfName: withUserServersProcedure
+		.input(zChannelFlagChange)
+		.mutation(async ({ ctx, input }) => {
+			return mutateChannel({
+				canUpdate:
+					({ oldSettings }) =>
+					() =>
+						assertBoolsAreNotEqual({
+							messageIfBothFalse: createErrorMessage(input.settingDesired, false),
+							messageIfBothTrue: createErrorMessage(input.settingDesired, true),
 							newValue: input.enabled,
 							oldValue: oldSettings.flags.autoThreadEnabled,
 						}),
