@@ -84,7 +84,7 @@ const AddToServerPage: React.FC<GetStartedPageProps> = ({
 	return (
 		<div className="page-slide-in">
 			<Heading.H1 className="pb-16 text-center text-4xl">
-				Great! Let{"'"}s add Answer Overflow to your server!
+				We have liftoff!
 			</Heading.H1>
 			<div className="flex w-full items-center justify-center">
 				{/* TODO: We should use discord blurple and a discord icon */}
@@ -106,7 +106,7 @@ const AddToServerOauthPage: React.FC<GetStartedPageProps> = ({ setPage }) => {
 	return (
 		<div className="page-slide-in flex flex-col items-center justify-center">
 			<Heading.H1 className="pb-16 text-center text-4xl">
-				Adding via oauth
+				Launch Complete
 			</Heading.H1>
 			<Button
 				variant="destructive"
