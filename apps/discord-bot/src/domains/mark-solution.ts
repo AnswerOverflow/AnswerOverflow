@@ -196,7 +196,12 @@ export async function addSolvedIndicatorToThread(
 	solvedTagId: string | null,
 ) {
 	// Apply the solved tag if it exists and it is a forum channel, otherwise add a checkmark reaction as a fallback
-	if (parentChannel.type == ChannelType.GuildForum && solvedTagId) {
+	if (
+		parentChannel.type == ChannelType.GuildForum &&
+		solvedTagId &&
+		// The maximum number of tags is 5, use the fallback if we have reached the limit
+		thread.appliedTags.length < 5
+	) {
 		await thread.setAppliedTags([...thread.appliedTags, solvedTagId]);
 	} else {
 		await questionMessage.react('✅');
@@ -248,7 +253,7 @@ export function makeMarkSolutionResponse({
 		embed.setDescription(
 			[
 				`**Thank you for marking this question as solved!**`,
-				makeRequestForConsentString(serverName),
+				`Want to help others find the answer to this question? Use the button below to display your messages in ${serverName} on the web!`,
 			].join('\n\n'),
 		);
 		components.addComponents(makeConsentButton('mark-solution-response'));
@@ -286,6 +291,7 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 		serverName: server.name,
 		settings: channelSettings,
 	});
+	await solution.react('✅');
 
 	trackDiscordEvent('Solved Question', async () => {
 		const serverSettings = await findServerById(server.id);
