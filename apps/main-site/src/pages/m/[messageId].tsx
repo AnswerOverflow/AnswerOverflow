@@ -1,7 +1,7 @@
 import { appRouter } from '@answeroverflow/api';
 import { createSSGContext } from '@answeroverflow/api/src/router/context';
 import { MessageResultPage, useIsUserInServer } from '@answeroverflow/ui';
-import { createProxySSGHelpers } from '@trpc/react-query/ssg';
+import { createServerSideHelpers } from '@trpc/react-query/server';
 import superjson from 'superjson';
 import { trpc } from '@answeroverflow/ui';
 import type { GetStaticPropsContext, InferGetStaticPropsType } from 'next';
@@ -46,7 +46,7 @@ export function getStaticPaths() {
 export async function getStaticProps(
 	context: GetStaticPropsContext<{ messageId: string }>,
 ) {
-	const ssg = createProxySSGHelpers({
+	const ssg = createServerSideHelpers({
 		router: appRouter,
 		ctx: await createSSGContext(),
 		transformer: superjson, // optional - adds superjson serialization
