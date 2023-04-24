@@ -3,7 +3,7 @@
  */
 export const BlobHome = () => {
 	return (
-		<div className="absolute top-0 left-0 -z-10 hidden xl:block">
+		<div className="absolute left-0 top-0 -z-10 hidden xl:block">
 			<svg
 				width="1056"
 				height="817"

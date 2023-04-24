@@ -176,7 +176,7 @@ const FeaturedCommunitiesSection = (props: { className?: string }) => {
 
 export const AboutArea = () => {
 	return (
-		<div className="flex flex-col items-center px-4 pt-10 pb-20 sm:px-[4rem] 2xl:px-[6rem]">
+		<div className="flex flex-col items-center px-4 pb-20 pt-10 sm:px-[4rem] 2xl:px-[6rem]">
 			<FeaturesSection />
 			<FeaturedCommunitiesSection className="py-20" />
 			<PricingArea className="py-20" />

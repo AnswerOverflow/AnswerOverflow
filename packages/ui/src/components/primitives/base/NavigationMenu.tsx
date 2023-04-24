@@ -67,7 +67,7 @@ const NavigationMenuContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<NavigationMenuPrimitive.Content
 		ref={ref}
-		className={cn('absolute top-0 right-0', className)}
+		className={cn('absolute right-0 top-0', className)}
 		{...props}
 	/>
 ));
