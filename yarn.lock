@@ -11945,7 +11945,7 @@ next@^13.3.0:
     "@next/swc-win32-ia32-msvc" "13.3.1"
     "@next/swc-win32-x64-msvc" "13.3.1"
 
-nextra-theme-docs@^2.2.16:
+nextra-theme-docs@^2.4.1:
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/nextra-theme-docs/-/nextra-theme-docs-2.4.1.tgz#1a90a6ba08813dde344a4a8cef38c83c07973a30"
   integrity sha512-KJ0SwM6KCbv0OBByD14j9fiZw0Yzx3fNIovUt6g4cwGx0CsSY80b1PSohtNtOmIOB2Rvr/pSF56+IeJxnX3iXg==
@@ -11963,7 +11963,7 @@ nextra-theme-docs@^2.2.16:
     scroll-into-view-if-needed "^3.0.0"
     zod "^3.20.2"
 
-nextra@^2.2.16:
+nextra@^2.4.1:
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/nextra/-/nextra-2.4.1.tgz#d356b169c0a067c0e9357e7c72ede2eabd7bd706"
   integrity sha512-QDHBHdtbBMGVAdbkzOV76Z9disoI+BkOCTJjHGVobG1ukhuHHipJLiaxfIouJL1KqFKAX/L6RQBTSJgY4b7HKg==
@@ -13266,7 +13266,7 @@ react-fast-compare@^3.0.1:
   resolved "https://registry.yarnpkg.com/react-fast-compare/-/react-fast-compare-3.2.1.tgz#53933d9e14f364281d6cba24bfed7a4afb808b5f"
   integrity sha512-xTYf9zFim2pEif/Fw16dBiXpe0hoy5PxcD8+OwBnTtNLfIm3g6WxhKNurY+6OmdH1u6Ta/W/Vl6vjbYP1MFnDg==
 
-react-fast-marquee@^1.3.5:
+react-fast-marquee@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/react-fast-marquee/-/react-fast-marquee-1.4.0.tgz#8ecb8c0581862029245ec13641c27234d23a8fe8"
   integrity sha512-aSjfFV6TaQkUsGBE9d1j3LhudPXKDoywLU1Ky2xke4IchHHqAtmXMAPqjnCPdSsvlOZSMuPAbIHN+EciqPCZWQ==

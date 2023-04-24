@@ -17,7 +17,7 @@ import type { AOEventSubject } from './events';
 import { Subject } from 'rxjs';
 import { printCommunities } from './utils';
 import { Partials } from 'discord.js';
-import type { ClientOptions } from 'ws';
+import type { ClientOptions } from 'discord.js';
 
 declare module '@sapphire/pieces' {
 	interface Container {

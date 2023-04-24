@@ -83,25 +83,36 @@ export const WithImages: Story = {
 			...defaultMessage.message,
 			channelId: '1031266112802914305',
 			serverId: '701008832645824553',
-			images: [
+			attachments: [
 				{
 					url: 'https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.png',
 					width: 897,
 					height: 672,
-					description: null,
+					filename: 'image.png',
+					id: '1063028763656458270',
+					proxyUrl:
+						'https://media.discordapp.net/attachments/1037547270733832242/1063119696334966794/image.png',
+					size: 0,
 				},
 				{
 					url: 'https://cdn.discordapp.com/attachments/1037547270733832242/1063121784578261033/image.png',
 					width: 1440,
 					height: 2560,
-					description: null,
+					filename: 'image.png',
+					id: '1063028763656458270',
+					proxyUrl:
+						'https://media.discordapp.net/attachments/1037547270733832242/1063121784578261033/image.png',
+					size: 0,
 				},
 				{
 					url: 'https://cdn.discordapp.com/attachments/1037547270733832242/1063121784578261033/image.png',
 					width: null,
 					height: null,
-
-					description: null,
+					id: '1063028763656458270',
+					proxyUrl:
+						'https://media.discordapp.net/attachments/1037547270733832242/1063121784578261033/image.png',
+					filename: 'image.png',
+					size: 0,
 				},
 			],
 		},

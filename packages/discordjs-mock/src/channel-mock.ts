@@ -34,6 +34,7 @@ import {
 	MessagePayload,
 	ForumLayoutType,
 	ThreadMemberFlags,
+	type FetchedThreadsMore,
 } from 'discord.js';
 import type {
 	RawMessageData,
@@ -94,7 +95,12 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 						thread as AnyThreadChannel,
 					]),
 				),
-				hasMore: false,
+				members: new Collection(
+					activeThreads.flatMap((thread) => {
+						const members = [...thread.members.cache.values()];
+						return members.map((member) => [member.id, member]);
+					}),
+				),
 			};
 			return Promise.resolve(output);
 		};
@@ -140,12 +146,18 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 					filteredThreads = filteredThreads.slice(0, options.limit);
 				}
 
-				const output: FetchedThreads = {
+				const output: FetchedThreadsMore = {
 					threads: new Collection(
 						filteredThreads.map((thread) => [
 							thread.id,
 							thread as AnyThreadChannel,
 						]),
+					),
+					members: new Collection(
+						filteredThreads.flatMap((thread) => {
+							const members = [...thread.members.cache.values()];
+							return members.map((member) => [member.id, member]);
+						}),
 					),
 					hasMore: false, // TODO: set this
 				};
