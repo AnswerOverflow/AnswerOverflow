@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { VariantProps, cva } from 'cva';
+import { type VariantProps, cva } from 'cva';
 
 import { cn } from '~ui/utils/styling';
 

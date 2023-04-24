@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { MessageProps, DemoMessage } from './DemoMessage';
+import { type MessageProps, DemoMessage } from './DemoMessage';
 import { mockDiscordAccount } from '~ui/test/props';
 
 import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
@@ -100,6 +100,7 @@ export const WithImages: Story = {
 					url: 'https://cdn.discordapp.com/attachments/1037547270733832242/1063121784578261033/image.png',
 					width: null,
 					height: null,
+
 					description: null,
 				},
 			],

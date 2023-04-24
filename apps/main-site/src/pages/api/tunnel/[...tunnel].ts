@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import getRawBody from 'raw-body';
-import nodeFetch, { RequestInit } from 'node-fetch';
+import nodeFetch, { type RequestInit } from 'node-fetch';
 
 export default async function handler(
 	req: NextApiRequest,
