@@ -1,6 +1,9 @@
 import type { Meta, StoryFn } from '@storybook/react';
 import { mockServer } from '~ui/test/props';
-import { ManageServerCard, ManageServerCardProps } from './ManageServerCard';
+import {
+	ManageServerCard,
+	type ManageServerCardProps,
+} from './ManageServerCard';
 export default {
 	component: ManageServerCard,
 } as Meta;

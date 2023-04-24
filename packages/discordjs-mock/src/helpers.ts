@@ -1,8 +1,8 @@
 import {
 	Client,
-	ClientEvents,
+	type ClientEvents,
 	PermissionFlagsBits,
-	PermissionResolvable,
+	type PermissionResolvable,
 } from 'discord.js';
 
 // Bit of a hack of a helper function to give async tasks that aren't tracked time to run. A better approach would be to listen to dispatched events

@@ -11,14 +11,14 @@ import {
 	findIgnoredDiscordAccountById,
 	findUserServerSettingsById,
 	getDefaultUserServerSettingsWithFlags,
-	UserServerSettingsWithFlags,
+	type UserServerSettingsWithFlags,
 } from '@answeroverflow/db';
 import { mockUserServerSettingsWithFlags } from '@answeroverflow/db-mock';
 import type { Guild, TextChannel } from 'discord.js';
 import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
 import {
 	createGuildMemberVariants,
-	GuildMemberVariants,
+	type GuildMemberVariants,
 	mockGuild,
 	mockTextChannel,
 } from '@answeroverflow/discordjs-mock';

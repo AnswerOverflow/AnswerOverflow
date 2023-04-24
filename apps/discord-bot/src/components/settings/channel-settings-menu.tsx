@@ -8,7 +8,7 @@ import {
 import {
 	ChannelType,
 	ForumChannel,
-	GuildForumTag,
+	type GuildForumTag,
 	NewsChannel,
 	TextChannel,
 } from 'discord.js';
@@ -59,7 +59,7 @@ import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
 import { oneTimeStatusHandler } from '~discord-bot/utils/trpc';
 import type { RootChannel } from '~discord-bot/utils/utils';
 import { sendConsentPrompt } from '~discord-bot/domains/manage-account';
-import { Message, getDiscordURLForMessage } from '@answeroverflow/db';
+import { type Message, getDiscordURLForMessage } from '@answeroverflow/db';
 
 type ChannelSettingsMenuItemProps<T extends RootChannel = RootChannel> = {
 	channelInDB: ChannelWithFlags;

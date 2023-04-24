@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
-import { Message, Events, Collection, Snowflake } from 'discord.js';
+import { Message, Events, Collection, type Snowflake } from 'discord.js';
 import {
 	deleteManyMessages,
 	deleteMessage,

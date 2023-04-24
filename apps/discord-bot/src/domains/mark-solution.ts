@@ -1,6 +1,6 @@
 import {
 	ActionRowBuilder,
-	AnyThreadChannel,
+	type AnyThreadChannel,
 	ButtonBuilder,
 	ButtonStyle,
 	ChannelType,
@@ -8,7 +8,7 @@ import {
 	EmbedBuilder,
 	ForumChannel,
 	Message,
-	MessageActionRowComponentBuilder,
+	type MessageActionRowComponentBuilder,
 	NewsChannel,
 	TextChannel,
 	User,
@@ -24,7 +24,7 @@ import {
 	SOLUTION_EMBED_ID_FIELD_NAME,
 } from '@answeroverflow/constants';
 import {
-	QuestionSolvedProps,
+	type QuestionSolvedProps,
 	channelWithDiscordInfoToAnalyticsData,
 	memberToAnalyticsUser,
 	messageToAnalyticsMessage,

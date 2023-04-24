@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { StatsCard, StatsCardProps } from './StatsCard';
+import { StatsCard, type StatsCardProps } from './StatsCard';
 const meta = {
 	component: StatsCard,
 	argTypes: {

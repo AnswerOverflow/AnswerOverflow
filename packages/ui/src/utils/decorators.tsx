@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
 import { transformer } from '@answeroverflow/api/transformer';
 import React, { useEffect, useState } from 'react';
-import { trpc, StorybookTRPC } from './trpc';
+import { trpc, type StorybookTRPC } from './trpc';
 import hljs from 'highlight.js';
 import { ThemeProvider } from './theme';
 import { SessionProvider } from 'next-auth/react';

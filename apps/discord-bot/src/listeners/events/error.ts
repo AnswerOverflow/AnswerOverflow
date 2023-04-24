@@ -1,5 +1,9 @@
 import { ApplyOptions } from '@sapphire/decorators';
-import { Events, Listener, ListenerErrorPayload } from '@sapphire/framework';
+import {
+	Events,
+	Listener,
+	type ListenerErrorPayload,
+} from '@sapphire/framework';
 import { sentryLogger } from '~discord-bot/utils/sentry';
 
 @ApplyOptions<Listener.Options>({

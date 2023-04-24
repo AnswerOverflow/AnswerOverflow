@@ -4,7 +4,6 @@ import {
 	LogLevel,
 	SapphireClient,
 } from '@sapphire/framework';
-import { ClientOptions, Partials } from 'discord.js';
 
 import '~discord-bot/utils/setup';
 import {
@@ -17,6 +16,8 @@ import LRUCache from 'lru-cache';
 import type { AOEventSubject } from './events';
 import { Subject } from 'rxjs';
 import { printCommunities } from './utils';
+import { Partials } from 'discord.js';
+import type { ClientOptions } from 'discord.js';
 
 declare module '@sapphire/pieces' {
 	interface Container {
