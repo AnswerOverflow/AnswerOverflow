@@ -90,7 +90,7 @@ const MessageModalWrapper = ({
 				<AlertDialog.Overlay className="fixed inset-0 z-50 flex h-full w-full items-center justify-center bg-black/75" />
 				<AlertDialog.Content className="fixed left-0 top-0 z-[75] flex h-full w-full flex-col items-center justify-center p-4">
 					<div className="absolute right-0 top-0 z-[100] p-2">
-						<AlertDialog.Cancel className="flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors duration-200 focus:outline-none focus:ring focus:ring-gray-300 hover:bg-gray-200 dark:bg-black dark:hover:bg-gray-800">
+						<AlertDialog.Cancel className="flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors duration-200 hover:bg-gray-200 focus:outline-none focus:ring focus:ring-gray-300 dark:bg-black dark:hover:bg-gray-800">
 							<CloseIcon />
 						</AlertDialog.Cancel>
 					</div>
