@@ -1,7 +1,6 @@
 import { Heading, Paragraph } from '~ui/components/primitives';
 import Balancer from 'react-wrap-balancer';
 import Image from 'next/image';
-import Marquee from 'react-fast-marquee';
 import Link from 'next/link';
 import { cn } from '~ui/utils/styling';
 import { trackEvent } from '@answeroverflow/hooks';
@@ -69,18 +68,6 @@ type FeaturedCommunityProps = {
 
 const featuredCommunities: FeaturedCommunityProps[] = [
 	{
-		name: 'Mudlet',
-		id: '283581582550237184',
-		iconUrl: '/featured-communities/mudlet_logo.png',
-		approximateMemberCount: '5,000+',
-	},
-	{
-		name: 'Apache TinkerPop',
-		id: '838910279550238720',
-		iconUrl: '/featured-communities/apache_tinkerpop_logo.png',
-		approximateMemberCount: '1,000+',
-	},
-	{
 		name: 'Reactiflux',
 		id: '102860784329052160',
 		iconUrl: '/featured-communities/reactiflux_logo.png',
@@ -91,6 +78,42 @@ const featuredCommunities: FeaturedCommunityProps[] = [
 		id: '143867839282020352',
 		iconUrl: '/featured-communities/csharp_logo.png',
 		approximateMemberCount: '45,000+',
+	},
+	{
+		name: 'Robolab.io',
+		id: '462274708499595264',
+		iconUrl: '/featured-communities/robolabio_logo.png',
+		approximateMemberCount: '45,000+',
+	},
+	{
+		name: 'MechaKeys',
+		id: '462274708499595264',
+		approximateMemberCount: '45,000+',
+		iconUrl: '/featured-communities/mecha_keys_logo.png',
+	},
+	{
+		name: 'GEON',
+		id: '743801649377574924',
+		approximateMemberCount: '25,000+',
+		iconUrl: '/featured-communities/geon_logo.png',
+	},
+	{
+		name: 'Two Hours One Life',
+		id: '423293333864054833',
+		approximateMemberCount: '25,000+',
+		iconUrl: '/featured-communities/two_hours_one_life_logo.png',
+	},
+	{
+		name: "Theo's Typesafe Cult",
+		id: '966627436387266600',
+		approximateMemberCount: '15,000+',
+		iconUrl: '/featured-communities/theos_typesafe_cult_logo.png',
+	},
+	{
+		name: 'Vue Storefront',
+		id: '770285988244750366',
+		approximateMemberCount: '4,000+',
+		iconUrl: '/featured-communities/vue_storefront_logo.png',
 	},
 	{
 		name: 'Sapphire',
@@ -111,10 +134,16 @@ const featuredCommunities: FeaturedCommunityProps[] = [
 		approximateMemberCount: '1,000+',
 	},
 	{
-		name: 'Robolab.io',
-		id: '462274708499595264',
-		iconUrl: '/featured-communities/robolabio_logo.png',
-		approximateMemberCount: '45,000+',
+		name: 'Mudlet',
+		id: '283581582550237184',
+		iconUrl: '/featured-communities/mudlet_logo.png',
+		approximateMemberCount: '5,000+',
+	},
+	{
+		name: 'Apache TinkerPop',
+		id: '838910279550238720',
+		iconUrl: '/featured-communities/apache_tinkerpop_logo.png',
+		approximateMemberCount: '1,000+',
 	},
 ];
 
@@ -131,13 +160,17 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 					...serverToAnalyticsData(props),
 				});
 			}}
-			tabIndex={-1}
 		>
-			<div className="flex flex-col items-center ">
+			<div
+				className="flex
+      flex-col items-center transition-all duration-200
+      hover:z-10 hover:scale-110 hover:shadow-lg
+      "
+			>
 				<Image
 					src={props.iconUrl}
-					width={64}
-					height={64}
+					width={92}
+					height={92}
 					unoptimized
 					alt={`${props.name} community icon`}
 					className="rounded-full"
@@ -145,9 +178,6 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 
 				<Paragraph className="py-2 text-center text-lg dark:text-white">
 					{props.name}
-				</Paragraph>
-				<Paragraph className="py-0 text-center dark:text-white">
-					{props.approximateMemberCount} members
 				</Paragraph>
 			</div>
 		</Link>
@@ -161,14 +191,12 @@ const FeaturedCommunitiesSection = (props: { className?: string }) => {
 			<Heading.H2>
 				<Balancer>Used by some of the largest support servers</Balancer>
 			</Heading.H2>
-			<div className="flex max-w-vw90 items-center pt-20 sm:max-w-vw70 2xl:max-w-screen-xl">
-				<Marquee gradient={false} speed={30}>
-					{featuredCommunities.map((community) => (
-						<div key={community.id} className="mx-10 my-0">
-							<FeaturedCommunity {...community} />
-						</div>
-					))}
-				</Marquee>
+			<div className="grid grid-cols-2 gap-8 py-8 sm:grid-cols-4">
+				{featuredCommunities.map((community) => (
+					<div key={community.id} className="my-0">
+						<FeaturedCommunity {...community} />
+					</div>
+				))}
 			</div>
 		</div>
 	);
@@ -176,9 +204,9 @@ const FeaturedCommunitiesSection = (props: { className?: string }) => {
 
 export const AboutArea = () => {
 	return (
-		<div className="flex flex-col items-center px-4 pt-10 pb-20 sm:px-[4rem] 2xl:px-[6rem]">
+		<div className="flex flex-col items-center px-4 pb-20 pt-10 sm:px-[4rem] 2xl:px-[6rem]">
 			<FeaturesSection />
-			<FeaturedCommunitiesSection className="py-20" />
+			<FeaturedCommunitiesSection className="pt-20" />
 			<PricingArea className="py-20" />
 		</div>
 	);

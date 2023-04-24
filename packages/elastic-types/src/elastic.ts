@@ -1,9 +1,9 @@
-import { Client, ClientOptions, errors } from '@elastic/elasticsearch';
+import { Client, type ClientOptions, errors } from '@elastic/elasticsearch';
 import type {
 	BulkOperationContainer,
 	QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import { elasticMessageIndexProperties, Message } from './message';
+import { elasticMessageIndexProperties, type Message } from './message';
 declare global {
 	// eslint-disable-next-line no-var, no-unused-vars
 	var elastic: Elastic | undefined;

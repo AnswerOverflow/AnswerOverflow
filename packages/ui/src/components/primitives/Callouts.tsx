@@ -1,7 +1,10 @@
-import { Button, LinkButton, LinkButtonProps } from '.';
+import { Button, LinkButton, type LinkButtonProps } from '.';
 import { signIn } from 'next-auth/react';
 import { GETTING_STARTED_URL } from '@answeroverflow/constants/src/links';
-import { trackEvent, GettingStartedClickProps } from '@answeroverflow/hooks';
+import {
+	trackEvent,
+	type GettingStartedClickProps,
+} from '@answeroverflow/hooks';
 export function GetStarted(
 	props: Omit<LinkButtonProps, 'href'> & {
 		location: GettingStartedClickProps['Button Location'];

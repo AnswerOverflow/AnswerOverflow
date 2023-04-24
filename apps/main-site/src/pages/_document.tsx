@@ -3,8 +3,8 @@ import Document, {
 	Head,
 	Main,
 	NextScript,
-	DocumentContext,
-	DocumentInitialProps,
+	type DocumentContext,
+	type DocumentInitialProps,
 } from 'next/document';
 import React from 'react';
 import { DATA_UNBLOCKER } from '../utils/data-unblocker';

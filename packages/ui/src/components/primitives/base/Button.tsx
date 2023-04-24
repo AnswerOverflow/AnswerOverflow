@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { VariantProps, cva } from 'cva';
+import { type VariantProps, cva } from 'cva';
 
 import { cn } from '~ui/utils/styling';
 
@@ -17,7 +17,7 @@ const buttonVariants = cva(
 				subtle:
 					'bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-100',
 				ghost:
-					'bg-transparent hover:bg-slate-200 dark:hover:bg-slate-800 dark:text-slate-00 dark:hover:text-slate-100 data-[state=open]:bg-transparent dark:data-[state=open]:bg-transparent',
+					'bg-transparent hover:bg-slate-200 dark:hover:bg-slate-800 dark:text-slate-100 dark:hover:text-slate-100 data-[state=open]:bg-transparent dark:data-[state=open]:bg-transparent',
 			},
 			size: {
 				default: 'h-10 py-2 px-4',

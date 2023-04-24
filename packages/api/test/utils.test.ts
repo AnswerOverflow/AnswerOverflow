@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server';
-import { PermissionFlagsBits, PermissionResolvable } from 'discord.js';
-import { Source, sourceTypes } from '~api/router/context';
+import { PermissionFlagsBits, type PermissionResolvable } from 'discord.js';
+import { type Source, sourceTypes } from '~api/router/context';
 import {
 	createInvalidSourceError,
 	MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,

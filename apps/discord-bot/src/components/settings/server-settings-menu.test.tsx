@@ -6,14 +6,14 @@ import React from 'react';
 import {
 	createServer,
 	findServerById,
-	ServerWithFlags,
+	type ServerWithFlags,
 	updateServer,
 } from '@answeroverflow/db';
 import type { Client, Guild, TextChannel } from 'discord.js';
 import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
 import {
 	createGuildMemberVariants,
-	GuildMemberVariants,
+	type GuildMemberVariants,
 	mockGuild,
 	mockTextChannel,
 } from '@answeroverflow/discordjs-mock';

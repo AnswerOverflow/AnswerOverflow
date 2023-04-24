@@ -5,14 +5,14 @@ import { useRouter } from 'next/router';
 import posthog from 'posthog-js';
 import React, { useEffect, useRef } from 'react';
 import {
-	ChannelProps,
-	CommunityPageLinkEvent,
-	JoinWaitlistClickProps,
+	type ChannelProps,
+	type CommunityPageLinkEvent,
+	type JoinWaitlistClickProps,
 	JOIN_WAITLIST_EVENT_NAME,
-	MessageProps,
-	ServerInviteEvent,
-	ServerProps,
-	ThreadProps,
+	type MessageProps,
+	type ServerInviteEvent,
+	type ServerProps,
+	type ThreadProps,
 } from '@answeroverflow/constants/src/analytics';
 import type {
 	APIMessageFull,

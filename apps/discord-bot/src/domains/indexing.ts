@@ -1,6 +1,6 @@
 import {
 	upsertManyDiscordAccounts,
-	Message as AOMessage,
+	type Message as AOMessage,
 	upsertManyMessages,
 	upsertChannel,
 	findManyUserServerSettings,
@@ -9,17 +9,17 @@ import {
 	findLatestMessageInChannel,
 } from '@answeroverflow/db';
 import {
-	AnyThreadChannel,
+	type AnyThreadChannel,
 	ChannelType,
 	Client,
 	ForumChannel,
 	Guild,
-	GuildBasedChannel,
-	GuildTextBasedChannel,
+	type GuildBasedChannel,
+	type GuildTextBasedChannel,
 	Message,
 	NewsChannel,
-	Snowflake,
-	TextBasedChannel,
+	type Snowflake,
+	type TextBasedChannel,
 	TextChannel,
 } from 'discord.js';
 import {

@@ -6,7 +6,7 @@ import {
 } from '@answeroverflow/prisma-types';
 import { addFlagsToServer } from '@answeroverflow/prisma-types';
 import type { z } from 'zod';
-import { findAllChannelQuestions, MessageFull } from './message';
+import { findAllChannelQuestions, type MessageFull } from './message';
 
 // TODO: Do not merge w/out tests
 export async function findServerWithCommunityPageData(opts: {

@@ -1,10 +1,10 @@
-import { ChannelWithFlags, findServerById } from '@answeroverflow/db';
+import { type ChannelWithFlags, findServerById } from '@answeroverflow/db';
 import {
 	ActionRowBuilder,
 	EmbedBuilder,
 	GuildMember,
 	Message,
-	MessageActionRowComponentBuilder,
+	type MessageActionRowComponentBuilder,
 	ThreadChannel,
 } from 'discord.js';
 import {

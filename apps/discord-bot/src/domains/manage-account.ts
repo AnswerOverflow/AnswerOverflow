@@ -1,32 +1,32 @@
 import { ButtonBuilder } from '@discordjs/builders';
 import {
-	APIButtonComponent,
+	type APIButtonComponent,
 	ActionRowBuilder,
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
 	EmbedBuilder,
 	GuildMember,
-	GuildTextBasedChannel,
+	type GuildTextBasedChannel,
 	Message,
-	MessageActionRowComponentBuilder,
+	type MessageActionRowComponentBuilder,
 } from 'discord.js';
 import {
-	ChannelWithFlags,
+	type ChannelWithFlags,
 	findServerById,
-	UserServerSettingsWithFlags,
+	type UserServerSettingsWithFlags,
 } from '@answeroverflow/db';
 import {
 	callAPI,
 	oneTimeStatusHandler,
-	TRPCStatusHandler,
+	type TRPCStatusHandler,
 } from '~discord-bot/utils/trpc';
 import { toAODiscordAccount } from '~discord-bot/utils/conversions';
 import { createMemberCtx } from '~discord-bot/utils/context';
 import {
-	ConsentSource,
+	type ConsentSource,
 	CONSENT_SOURCES,
-	ManageAccountSource,
+	type ManageAccountSource,
 } from '@answeroverflow/api';
 import { CONSENT_BUTTON_LABEL, WEBSITE_URL } from '@answeroverflow/constants';
 import { makeRequestForConsentString } from './mark-solution';

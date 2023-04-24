@@ -7,7 +7,7 @@ import type { Session } from 'next-auth';
 import type { AppType } from 'next/app';
 import hljs from 'highlight.js';
 
-import { NextTRPC, trpc } from '@answeroverflow/ui';
+import { type NextTRPC, trpc } from '@answeroverflow/ui';
 import { useEffect } from 'react';
 import { useAnalytics } from '@answeroverflow/hooks';
 

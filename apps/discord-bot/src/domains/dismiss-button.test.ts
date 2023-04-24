@@ -1,5 +1,5 @@
 import {
-	APIButtonComponentWithCustomId,
+	type APIButtonComponentWithCustomId,
 	ButtonStyle,
 	Client,
 	Guild,

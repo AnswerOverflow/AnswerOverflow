@@ -1,11 +1,11 @@
 import {
 	addFlagsToChannel,
-	Channel,
-	ChannelWithFlags,
+	type Channel,
+	type ChannelWithFlags,
 	createChannel,
 	createServer,
 	findChannelById,
-	Server,
+	type Server,
 } from '@answeroverflow/db';
 import {
 	mockAccountWithServersCallerCtx,
