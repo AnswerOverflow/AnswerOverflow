@@ -4,7 +4,6 @@ import {
 	LogLevel,
 	SapphireClient,
 } from '@sapphire/framework';
-import { type ClientOptions, Partials, ActivityType } from 'discord.js';
 
 import '~discord-bot/utils/setup';
 import {
@@ -17,6 +16,8 @@ import LRUCache from 'lru-cache';
 import type { AOEventSubject } from './events';
 import { Subject } from 'rxjs';
 import { printCommunities } from './utils';
+import { Partials } from 'discord.js';
+import type { ClientOptions } from 'ws';
 
 declare module '@sapphire/pieces' {
 	interface Container {
@@ -89,6 +90,7 @@ export const login = async (client: SapphireClient) => {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
 	require('dotenv').config();
 	try {
+		container.events = new Subject();
 		client.logger.info('LOGGING IN');
 		client.logger.info(`NODE_ENV: ${process.env.NODE_ENV}`);
 		client.logger.info(
@@ -129,11 +131,6 @@ export const login = async (client: SapphireClient) => {
 			max: 100,
 			// 10 minute ttl
 			ttl: 1000 * 60 * 10,
-		});
-		container.events = new Subject();
-		client.user?.setActivity({
-			type: ActivityType.Playing,
-			name: 'Open source! github.com/AnswerOverflow',
 		});
 	} catch (error) {
 		client.logger.fatal(error);

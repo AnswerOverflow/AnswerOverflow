@@ -104,7 +104,7 @@ describe('Send mark solution instructions', () => {
 		);
 		expect(instructionEmbed).toBeDefined();
 		expect(instructionEmbed?.image?.url).toBe(
-			'https://cdn.discordapp.com/attachments/1020132770862874704/1025906507549790208/mark_solution_instructions.png',
+			'https://cdn.discordapp.com/attachments/1037547185492996210/1098915406627999764/mark_solution_instructions.png',
 		);
 	});
 });

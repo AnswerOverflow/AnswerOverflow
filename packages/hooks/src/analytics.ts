@@ -99,14 +99,22 @@ export const useAnalytics = () => {
 	const { data: session, status } = useSession();
 	const router = useRouter();
 	useEffect(() => {
+		if (status === 'loading') {
+			return;
+		}
 		if (!analyticsLoaded) {
 			posthog.init(process.env.NEXT_PUBLIC_POSTHOG_TOKEN as string, {
 				disable_session_recording: process.env.NODE_ENV === 'development',
+				persistence: 'memory',
+				bootstrap: {
+					distinctID: session?.user?.id,
+				},
 				loaded: () => {
 					setAnalyticsLoaded(true);
 				},
 			});
 		} else {
+			// TODO: Still needed?
 			if (
 				status === 'authenticated' &&
 				session.user &&
