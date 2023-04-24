@@ -12,7 +12,7 @@
 		"@answeroverflow/db-mock": "*",
 		"@answeroverflow/discordjs-react": "^0.0.35",
 		"@answeroverflow/discordjs-utils": "*",
-		"@sapphire/decorators": "6.0.0",
+		"@sapphire/decorators": "6.0.1",
 		"@sapphire/discord-utilities": "3.0.0",
 		"@sapphire/fetch": "^2.4.1",
 		"@sapphire/framework": "^4.2.2",
