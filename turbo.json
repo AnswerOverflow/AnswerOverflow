@@ -5,7 +5,7 @@
 		"migrate": {},
 		"build": {
 			"outputs": ["dist/**", ".next/**"],
-			"cache": true,
+			"cache": false,
 			"inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts"]
 		},
 		"format": {
@@ -30,7 +30,7 @@
 				"test/**/*.ts"
 			],
 			"outputs": [],
-			"cache": true
+			"cache": false
 		},
 		"lint:fix": {
 			"outputs": [],
@@ -38,7 +38,7 @@
 		},
 		"test": {
 			"outputs": ["coverage/**"],
-			"cache": true,
+			"cache": false,
 			"inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts"]
 		},
 		"dev": {

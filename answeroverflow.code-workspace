@@ -221,6 +221,7 @@
     "cSpell.enableFiletypes": [
       "mdx"
     ],
+    "typescript.tsdk": "root/node_modules/typescript/lib",
   },
   "extensions": {
     "recommendations": [
