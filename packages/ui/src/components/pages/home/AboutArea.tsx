@@ -181,7 +181,7 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 // TODO: The marquee is really hacky here to get sizing right on all devices
 const FeaturedCommunitiesSection = (props: { className?: string }) => {
 	return (
-		<div className={cn('text-center overflow-x-hidden', props.className)}>
+		<div className={cn('overflow-x-hidden text-center', props.className)}>
 			<Heading.H2>
 				<Balancer>Used by some of the largest support servers</Balancer>
 			</Heading.H2>
