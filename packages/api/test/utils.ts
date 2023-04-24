@@ -2,10 +2,14 @@ import type { DiscordAccount, Server } from '@answeroverflow/db';
 import { TRPCError } from '@trpc/server';
 import {
 	PermissionFlagsBits,
-	PermissionResolvable,
+	type PermissionResolvable,
 	PermissionsBitField,
 } from 'discord.js';
-import { Source, sourceTypes, createContextInner } from '~api/router/context';
+import {
+	type Source,
+	sourceTypes,
+	createContextInner,
+} from '~api/router/context';
 import {
 	INVALID_ROUTE_FOR_BOT_ERROR,
 	INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,

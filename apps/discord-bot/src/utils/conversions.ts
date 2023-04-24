@@ -1,21 +1,21 @@
 import {
-	AnyThreadChannel,
+	type AnyThreadChannel,
 	ButtonStyle,
 	ComponentType,
 	Guild,
-	GuildBasedChannel,
+	type GuildBasedChannel,
 	GuildChannel,
 	GuildMember,
 	Message,
-	MessageReference,
+	type MessageReference,
 	User,
 } from 'discord.js';
 import {
 	getDefaultServer,
-	Message as AOMessage,
-	Channel as AOChannel,
-	Server as AOServer,
-	DiscordAccount as AODiscordAccount,
+	type Message as AOMessage,
+	type Channel as AOChannel,
+	type Server as AOServer,
+	type DiscordAccount as AODiscordAccount,
 	getDefaultChannelWithFlags,
 } from '@answeroverflow/db';
 import type { DiscordAPIServerSchema } from '@answeroverflow/cache';

@@ -3,7 +3,7 @@ import {
 	prisma,
 	getDefaultUserServerSettingsWithFlags,
 	dictToBitfield,
-	UserServerSettingsWithFlags,
+	type UserServerSettingsWithFlags,
 	userServerSettingsFlags,
 	zUserServerSettingsPrismaCreate,
 	zUserServerSettingsCreate,

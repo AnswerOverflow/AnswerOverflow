@@ -1,5 +1,5 @@
 import {
-	AnyThreadChannel,
+	type AnyThreadChannel,
 	ChannelType,
 	Client,
 	ForumChannel,
@@ -16,7 +16,7 @@ import {
 	findManyChannelsById,
 	findManyDiscordAccountsById,
 	findManyMessages,
-	Message as AOMessage,
+	type Message as AOMessage,
 	upsertChannel,
 } from '@answeroverflow/db';
 import {

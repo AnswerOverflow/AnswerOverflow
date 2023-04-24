@@ -1,13 +1,13 @@
 import {
-	ChannelWithFlags,
-	DiscordAccount,
+	type ChannelWithFlags,
+	type DiscordAccount,
 	getDefaultDiscordAccount,
 	getDefaultMessage,
 	isMessageFull,
-	Message,
-	MessageFull,
-	MessageWithDiscordAccount,
-	Server,
+	type Message,
+	type MessageFull,
+	type MessageWithDiscordAccount,
+	type Server,
 } from '@answeroverflow/db';
 import { omit, pick } from '@answeroverflow/utils';
 

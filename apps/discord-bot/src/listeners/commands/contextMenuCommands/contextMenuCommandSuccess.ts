@@ -1,5 +1,5 @@
 import {
-	ContextMenuCommandSuccessPayload,
+	type ContextMenuCommandSuccessPayload,
 	Listener,
 	LogLevel,
 } from '@sapphire/framework';

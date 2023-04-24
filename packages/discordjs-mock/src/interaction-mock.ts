@@ -1,7 +1,7 @@
 import {
 	ChatInputCommandInteraction,
 	InteractionType,
-	APIChatInputApplicationCommandInteraction,
+	type APIChatInputApplicationCommandInteraction,
 	ApplicationCommandType,
 	GuildMember,
 	PermissionsBitField,
@@ -9,17 +9,18 @@ import {
 	ButtonInteraction,
 	ComponentType,
 	InteractionResponse,
-	Interaction,
-	Snowflake,
-	InteractionUpdateOptions,
+	type Interaction,
+	type Snowflake,
+	type InteractionUpdateOptions,
 	MessagePayload,
 	Message,
 	User,
-	APIBaseInteraction,
-	Channel,
+	type APIBaseInteraction,
+	type Channel,
 	StringSelectMenuInteraction,
-	APIMessageStringSelectInteractionData,
-	GuildTextBasedChannel,
+	type APIMessageStringSelectInteractionData,
+	type GuildTextBasedChannel,
+	GuildMemberFlags,
 } from 'discord.js';
 import { randomSnowflake } from '@answeroverflow/discordjs-utils';
 import { mockTextChannel } from './channel-mock';
@@ -79,7 +80,7 @@ function setupMockedInteractionAPIData<Type extends InteractionType>({
 		member: guild
 			? {
 					deaf: false,
-					flags: 0,
+					flags: GuildMemberFlags.CompletedOnboarding,
 					joined_at: guild.members.cache
 						.get(caller.id)!
 						.joinedAt!.toISOString(),

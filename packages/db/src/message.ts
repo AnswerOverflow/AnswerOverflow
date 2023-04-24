@@ -5,10 +5,10 @@ import type {
 } from '@answeroverflow/prisma-types';
 import { zDiscordAccountPublic } from '@answeroverflow/prisma-types';
 import {
-	Message,
+	type Message,
 	elastic,
 	zMessage,
-	MessageSearchOptions,
+	type MessageSearchOptions,
 } from '@answeroverflow/elastic-types';
 import { DBError } from './utils/error';
 import {

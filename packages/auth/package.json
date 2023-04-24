@@ -35,7 +35,6 @@
 		"@vitest/coverage-c8": "^0.28.5",
 		"dotenv-cli": "^7.1.0",
 		"eslint": "^8.29.0",
-		"typescript": "^5.0.4",
 		"vitest": "^0.29.8"
 	}
 }

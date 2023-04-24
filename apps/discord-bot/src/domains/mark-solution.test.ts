@@ -4,12 +4,12 @@ import {
 	ForumChannel,
 	Guild,
 	GuildMember,
-	AnyThreadChannel,
+	type AnyThreadChannel,
 	Message,
 	ButtonBuilder,
-	ButtonComponentData,
+	type ButtonComponentData,
 	ButtonStyle,
-	EmbedData,
+	type EmbedData,
 } from 'discord.js';
 
 import {

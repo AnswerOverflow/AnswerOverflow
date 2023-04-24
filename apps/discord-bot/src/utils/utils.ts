@@ -14,7 +14,7 @@ import {
 	Message,
 	EmbedBuilder,
 	User,
-	GuildTextBasedChannel,
+	type GuildTextBasedChannel,
 	Client,
 } from 'discord.js';
 import type { ReactNode } from 'react';

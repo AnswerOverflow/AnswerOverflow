@@ -4,7 +4,7 @@ import { upsert, upsertMany } from './utils/operations';
 import {
 	addFlagsToChannel,
 	channelBitfieldFlags,
-	ChannelWithFlags,
+	type ChannelWithFlags,
 	getDefaultChannelWithFlags,
 	zChannelCreate,
 	zChannelCreateMany,
@@ -20,7 +20,7 @@ import {
 import {
 	prisma,
 	getDefaultChannel,
-	Channel,
+	type Channel,
 } from '@answeroverflow/prisma-types';
 import { dictToBitfield } from '@answeroverflow/prisma-types/src/bitfield';
 import { deleteManyMessagesByChannelId } from './message';

@@ -4,7 +4,7 @@ import {
 	LogLevel,
 	SapphireClient,
 } from '@sapphire/framework';
-import { ClientOptions, Partials, ActivityType } from 'discord.js';
+import { type ClientOptions, Partials, ActivityType } from 'discord.js';
 
 import '~discord-bot/utils/setup';
 import {
