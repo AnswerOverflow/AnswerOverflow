@@ -20,7 +20,7 @@
 		},
 		"format:check": {
 			"outputs": [],
-			"cache": false
+			"cache": true
 		},
 		"lint": {
 			"inputs": [
