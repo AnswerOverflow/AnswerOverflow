@@ -92,12 +92,6 @@ const featuredCommunities: FeaturedCommunityProps[] = [
 		iconUrl: '/featured-communities/mecha_keys_logo.png',
 	},
 	{
-		name: 'GEON',
-		id: '743801649377574924',
-		approximateMemberCount: '25,000+',
-		iconUrl: '/featured-communities/geon_logo.png',
-	},
-	{
 		name: 'Two Hours One Life',
 		id: '423293333864054833',
 		approximateMemberCount: '25,000+',
