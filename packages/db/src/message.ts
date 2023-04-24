@@ -390,3 +390,7 @@ export async function searchMessages(opts: MessageSearchOptions) {
 		.filter(Boolean)
 		.sort((a, b) => b.score - a.score);
 }
+
+export async function getTotalNumberOfMessages() {
+	return elastic.getNumberOfIndexedMessages();
+}
