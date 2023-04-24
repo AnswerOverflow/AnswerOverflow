@@ -1,5 +1,5 @@
 import { assert } from 'console';
-import { ClientOptions, Options, Events, Client } from 'discord.js';
+import { type ClientOptions, Options, Events, Client } from 'discord.js';
 import { applyClientMocks, emitEvent } from '@answeroverflow/discordjs-mock';
 import { basename, extname } from 'path';
 import { createClient, login } from '~discord-bot/utils/bot';

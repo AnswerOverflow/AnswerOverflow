@@ -1,8 +1,8 @@
 import {
 	bitfieldToUserServerSettingsFlags,
-	DiscordAccount,
-	Server,
-	UserServerSettingsWithFlags,
+	type DiscordAccount,
+	type Server,
+	type UserServerSettingsWithFlags,
 } from '@answeroverflow/prisma-types';
 import {
 	mockChannel,

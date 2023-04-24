@@ -4,7 +4,7 @@ import {
 	ButtonBuilder,
 	ButtonStyle,
 	ComponentType,
-	PermissionResolvable,
+	type PermissionResolvable,
 } from 'discord.js';
 import {
 	memberToAnalyticsUser,

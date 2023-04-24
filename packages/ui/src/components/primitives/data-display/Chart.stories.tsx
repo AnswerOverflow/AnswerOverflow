@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { Chart, ChartProps } from './Chart';
+import { Chart, type ChartProps } from './Chart';
 const meta = {
 	component: Chart,
 	// For the moment, we need to disable a11y checks for the charts - failing a11y checks

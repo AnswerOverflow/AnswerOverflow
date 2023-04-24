@@ -1,7 +1,7 @@
 import {
 	zChannelPublic,
 	findChannelById,
-	ChannelWithFlags,
+	type ChannelWithFlags,
 	zChannelCreate,
 	getDefaultChannelWithFlags,
 	upsertChannel,
@@ -21,7 +21,7 @@ import {
 	assertIsNotValue,
 } from '~api/utils/permissions';
 import {
-	PermissionsChecks,
+	type PermissionsChecks,
 	protectedFetch,
 	protectedMutation,
 } from '~api/utils/protected-procedures';

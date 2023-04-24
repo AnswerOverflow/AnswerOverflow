@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useState } from 'react';
+import { type RefObject, useEffect, useState } from 'react';
 import { trpc } from './trpc';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';

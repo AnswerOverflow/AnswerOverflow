@@ -5,7 +5,7 @@ import {
 	Legend,
 	Line,
 	LineChart,
-	LineProps,
+	type LineProps,
 	ResponsiveContainer,
 	Tooltip,
 	XAxis,

@@ -1,7 +1,7 @@
 import {
-	BotContextCreate,
+	type BotContextCreate,
 	botRouter,
-	BotRouterCaller,
+	type BotRouterCaller,
 	createBotContext,
 } from '@answeroverflow/api';
 import { container } from '@sapphire/framework';

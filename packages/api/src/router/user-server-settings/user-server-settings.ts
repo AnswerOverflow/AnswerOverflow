@@ -2,7 +2,7 @@ import {
 	findUserServerSettingsById,
 	getDefaultUserServerSettingsWithFlags,
 	upsertUserServerSettingsWithDeps,
-	UserServerSettingsWithFlags,
+	type UserServerSettingsWithFlags,
 	zUserServerSettingsCreateWithDeps,
 	zUserServerSettingsFind,
 	zUserServerSettingsFlags,

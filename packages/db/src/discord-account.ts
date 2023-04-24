@@ -1,7 +1,7 @@
 import type { z } from 'zod';
 import {
 	addFlagsToUserServerSettings,
-	DiscordAccount,
+	type DiscordAccount,
 	getDefaultDiscordAccount,
 	prisma,
 	zDiscordAccountCreate,

@@ -3,7 +3,7 @@ import {
 	ClientUser,
 	Guild,
 	GuildMember,
-	PermissionResolvable,
+	type PermissionResolvable,
 	PermissionsBitField,
 	User,
 } from 'discord.js';

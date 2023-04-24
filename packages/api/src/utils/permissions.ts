@@ -1,13 +1,13 @@
 import { TRPCError } from '@trpc/server';
 import { PermissionsBitField } from 'discord.js';
 import {
-	ChannelWithFlags,
+	type ChannelWithFlags,
 	findIgnoredDiscordAccountById,
 	getDefaultDiscordAccount,
 	getDefaultMessage,
-	MessageFull,
-	MessageWithDiscordAccount,
-	ServerWithFlags,
+	type MessageFull,
+	type MessageWithDiscordAccount,
+	type ServerWithFlags,
 	zChannelPublic,
 	zServerPublic,
 } from '@answeroverflow/db';

@@ -1,5 +1,5 @@
 import {
-	ChatInputCommandSuccessPayload,
+	type ChatInputCommandSuccessPayload,
 	Listener,
 	LogLevel,
 } from '@sapphire/framework';

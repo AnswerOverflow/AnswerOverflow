@@ -1,7 +1,7 @@
 import {
 	Client,
 	ForumChannel,
-	AnyThreadChannel,
+	type AnyThreadChannel,
 	Message,
 	Events,
 } from 'discord.js';
