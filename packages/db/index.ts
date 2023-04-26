@@ -18,6 +18,9 @@ declare global {
 			readonly NEXT_PUBLIC_DEPLOYMENT_ENV:
 				| ('local' | 'staging' | 'production' | 'ci')
 				| undefined;
+			readonly NEXT_PUBLIC_VERCEL_ENV:
+				| ('development' | 'preview' | 'production')
+				| undefined;
 		}
 	}
 }
