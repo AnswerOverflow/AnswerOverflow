@@ -13,7 +13,7 @@ import { cn } from '~ui/utils/styling';
 import Link from 'next/link';
 import { trackEvent } from '@answeroverflow/hooks';
 import {
-	ServerInviteClickProps,
+	type ServerInviteClickProps,
 	channelToAnalyticsData,
 	serverToAnalyticsData,
 } from '@answeroverflow/constants/src/analytics';

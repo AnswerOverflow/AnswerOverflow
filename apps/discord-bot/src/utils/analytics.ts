@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import {
-	ChannelPropsWithSettings,
-	ServerPropsWithSettings,
-	ThreadProps,
+	type ChannelPropsWithSettings,
+	type ServerPropsWithSettings,
+	type ThreadProps,
 	channelWithSettingsToAnalyticsData,
 	serverWithSettingsToAnalyticsData,
 } from '@answeroverflow/constants';
@@ -14,7 +14,10 @@ import type {
 	ThreadChannel,
 } from 'discord.js';
 import type { ChannelWithFlags, ServerWithFlags } from '@answeroverflow/db';
-import { BaseProps, trackServerSideEvent } from '@answeroverflow/analytics';
+import {
+	type BaseProps,
+	trackServerSideEvent,
+} from '@answeroverflow/analytics';
 import { sentryLogger } from './sentry';
 import type { MarkSolutionErrorReason } from '~discord-bot/domains/mark-solution';
 import type { ConsentSource } from '@answeroverflow/api';

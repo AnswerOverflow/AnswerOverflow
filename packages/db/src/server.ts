@@ -2,7 +2,7 @@ import type { z } from 'zod';
 import {
 	getDefaultServerWithFlags,
 	prisma,
-	Server,
+	type Server,
 	zServerCreate,
 	zServerMutable,
 	zServerPrismaCreate,

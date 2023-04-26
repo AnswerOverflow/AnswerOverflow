@@ -1,39 +1,40 @@
 import {
 	type Guild,
 	TextChannel,
-	APITextChannel,
+	type APITextChannel,
 	ChannelType,
-	APIGuildForumChannel,
-	GuildTextChannelType,
-	APIGuildTextChannel,
-	GuildBasedChannel,
+	type APIGuildForumChannel,
+	type GuildTextChannelType,
+	type APIGuildTextChannel,
+	type GuildBasedChannel,
 	ForumChannel,
-	APIThreadChannel,
+	type APIThreadChannel,
 	ThreadChannel,
 	Message,
 	User,
 	Invite,
-	APIInvite,
+	type APIInvite,
 	GuildChannel,
 	Collection,
-	TextBasedChannel,
+	type TextBasedChannel,
 	Client,
-	PublicThreadChannel,
-	FetchArchivedThreadOptions,
+	type PublicThreadChannel,
+	type FetchArchivedThreadOptions,
 	SnowflakeUtil,
-	FetchedThreads,
-	AnyThreadChannel,
-	APINewsChannel,
+	type FetchedThreads,
+	type AnyThreadChannel,
+	type APINewsChannel,
 	NewsChannel,
 	MessageReaction,
-	MessageResolvable,
-	FetchMessagesOptions,
+	type MessageResolvable,
+	type FetchMessagesOptions,
 	DiscordAPIError,
-	FetchMessageOptions,
-	MessageCreateOptions,
+	type FetchMessageOptions,
+	type MessageCreateOptions,
 	MessagePayload,
 	ForumLayoutType,
 	ThreadMemberFlags,
+	type FetchedThreadsMore,
 } from 'discord.js';
 import type {
 	RawMessageData,
@@ -94,7 +95,12 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 						thread as AnyThreadChannel,
 					]),
 				),
-				hasMore: false,
+				members: new Collection(
+					activeThreads.flatMap((thread) => {
+						const members = [...thread.members.cache.values()];
+						return members.map((member) => [member.id, member]);
+					}),
+				),
 			};
 			return Promise.resolve(output);
 		};
@@ -140,12 +146,18 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 					filteredThreads = filteredThreads.slice(0, options.limit);
 				}
 
-				const output: FetchedThreads = {
+				const output: FetchedThreadsMore = {
 					threads: new Collection(
 						filteredThreads.map((thread) => [
 							thread.id,
 							thread as AnyThreadChannel,
 						]),
+					),
+					members: new Collection(
+						filteredThreads.flatMap((thread) => {
+							const members = [...thread.members.cache.values()];
+							return members.map((member) => [member.id, member]);
+						}),
 					),
 					hasMore: false, // TODO: set this
 				};

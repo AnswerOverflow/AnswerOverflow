@@ -4,7 +4,10 @@ import {
 	mockMessageWithDiscordAccount,
 	mockServer,
 } from '~ui/test/props';
-import { MessageResultPage, MessageResultPageProps } from './MessageResultPage';
+import {
+	MessageResultPage,
+	type MessageResultPageProps,
+} from './MessageResultPage';
 import { PageWrapper } from './PageWrapper';
 const meta = {
 	component: MessageResultPage,

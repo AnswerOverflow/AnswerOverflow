@@ -1,7 +1,10 @@
-import * as Dialog from '@radix-ui/react-dialog';
-import { Button, ButtonProps, LinkButton } from '.';
+import { Button, LinkButton, type LinkButtonProps } from '.';
 import { signIn } from 'next-auth/react';
-import { trackEvent, GettingStartedClickProps } from '@answeroverflow/hooks';
+import { GETTING_STARTED_URL } from '@answeroverflow/constants/src/links';
+import {
+	trackEvent,
+	type GettingStartedClickProps,
+} from '@answeroverflow/hooks';
 export function GetStarted(
 	props: Omit<ButtonProps, 'href'> & {
 		location: GettingStartedClickProps['Button Location'];

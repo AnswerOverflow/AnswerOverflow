@@ -1,5 +1,5 @@
 import { ApplyOptions } from '@sapphire/decorators';
-import { ChatInputCommand, Command } from '@sapphire/framework';
+import { type ChatInputCommand, Command } from '@sapphire/framework';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { updateUserConsent } from '~discord-bot/domains/manage-account';
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';

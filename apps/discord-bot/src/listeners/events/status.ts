@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener, SapphireClient } from '@sapphire/framework';
-import { ActivityOptions, ActivityType, Events } from 'discord.js';
+import { type ActivityOptions, ActivityType, Events } from 'discord.js';
 import { getTotalNumberOfMessages } from '@answeroverflow/db';
 import { hoursToMs } from '~discord-bot/utils/utils';
 

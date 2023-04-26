@@ -3,8 +3,8 @@ import {
 	testAllSources,
 } from '~api/test/utils';
 import {
-	Server,
-	DiscordAccount,
+	type Server,
+	type DiscordAccount,
 	createServer,
 	createDiscordAccount,
 	createUserServerSettings,
@@ -15,11 +15,11 @@ import { mockDiscordAccount, mockServer } from '@answeroverflow/db-mock';
 import { NOT_AUTHORIZED_MESSAGE } from '~api/utils/permissions';
 import {
 	AUTOMATED_CONSENT_SOURCES,
-	ConsentSource,
+	type ConsentSource,
 	CONSENT_ALREADY_DENIED_MESSAGE,
 	CONSENT_ALREADY_GRANTED_MESSAGE,
 	CONSENT_EXPLICITLY_SET_MESSAGE,
-	ManageAccountSource,
+	type ManageAccountSource,
 	MANUAL_CONSENT_SOURCES,
 	MESSAGE_INDEXING_ALREADY_DISABLED_MESSAGE,
 	MESSAGE_INDEXING_ALREADY_ENABLED_MESSAGE,
