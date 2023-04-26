@@ -18,6 +18,7 @@ const buttonVariants = cva(
 					'bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-100',
 				ghost:
 					'bg-transparent hover:bg-slate-200 dark:hover:bg-slate-800 dark:text-slate-100 dark:hover:text-slate-100 data-[state=open]:bg-transparent dark:data-[state=open]:bg-transparent',
+				blue: 'bg-ao-blue/80 text-ao-white hover:bg-ao-blue dark:bg-ao-blue/25 dark:hover:bg-ao-blue/50 dark:text-ao-white',
 			},
 			size: {
 				default: 'h-10 py-2 px-4',
