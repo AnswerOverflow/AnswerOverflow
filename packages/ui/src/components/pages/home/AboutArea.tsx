@@ -104,6 +104,12 @@ const featuredCommunities: FeaturedCommunityProps[] = [
 		iconUrl: '/featured-communities/theos_typesafe_cult_logo.png',
 	},
 	{
+		name: 'tRPC',
+		id: '867764511159091230',
+		iconUrl: '/featured-communities/trpc_logo.png',
+		approximateMemberCount: '15,000+',
+	},
+	{
 		name: 'Vue Storefront',
 		id: '770285988244750366',
 		approximateMemberCount: '4,000+',
@@ -126,12 +132,6 @@ const featuredCommunities: FeaturedCommunityProps[] = [
 		id: '811936425858695198',
 		iconUrl: '/featured-communities/twill_logo.png',
 		approximateMemberCount: '1,000+',
-	},
-	{
-		name: 'Mudlet',
-		id: '283581582550237184',
-		iconUrl: '/featured-communities/mudlet_logo.png',
-		approximateMemberCount: '5,000+',
 	},
 	{
 		name: 'Apache TinkerPop',
@@ -181,9 +181,9 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 // TODO: The marquee is really hacky here to get sizing right on all devices
 const FeaturedCommunitiesSection = (props: { className?: string }) => {
 	return (
-		<div className={cn('overflow-x-hidden text-center', props.className)}>
+		<div className={cn('text-center overflow-x-hidden', props.className)}>
 			<Heading.H2>
-				<Balancer>Used by some of the largest support servers</Balancer>
+				<Balancer>Serving 450,000+ users across 80 servers</Balancer>
 			</Heading.H2>
 			<div className="grid grid-cols-2 gap-8 py-8 sm:grid-cols-4">
 				{featuredCommunities.map((community) => (
