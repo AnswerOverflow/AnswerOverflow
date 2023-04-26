@@ -80,12 +80,6 @@ const featuredCommunities: FeaturedCommunityProps[] = [
 		approximateMemberCount: '45,000+',
 	},
 	{
-		name: 'Robolab.io',
-		id: '462274708499595264',
-		iconUrl: '/featured-communities/robolabio_logo.png',
-		approximateMemberCount: '45,000+',
-	},
-	{
 		name: 'MechaKeys',
 		id: '462274708499595264',
 		approximateMemberCount: '45,000+',
@@ -138,6 +132,12 @@ const featuredCommunities: FeaturedCommunityProps[] = [
 		id: '838910279550238720',
 		iconUrl: '/featured-communities/apache_tinkerpop_logo.png',
 		approximateMemberCount: '1,000+',
+	},
+	{
+		name: 'Mudlet',
+		id: '283581582550237184',
+		iconUrl: '/featured-communities/mudlet_logo.png',
+		approximateMemberCount: '5,000+',
 	},
 ];
 
