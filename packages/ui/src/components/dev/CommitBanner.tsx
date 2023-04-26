@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Heading, LinkButton } from '../primitives';
+import { Heading } from '../primitives';
 
 export const CommitBanner = () => {
 	if (
