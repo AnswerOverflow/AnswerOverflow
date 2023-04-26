@@ -51,15 +51,6 @@ export const AddToServerPage: Story = {
 	},
 };
 
-export const AddToServerOauthPage: Story = {
-	name: 'Add to server oauth page',
-	args: {
-		initialPageIndex: 'addBotToServerOauth',
-	} satisfies {
-		initialPageIndex: AllPageIndex;
-	},
-};
-
 export const ChannelSettingsPage: Story = {
 	name: 'Channel settings page',
 	args: {
