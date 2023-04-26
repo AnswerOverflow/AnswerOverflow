@@ -1,8 +1,9 @@
+import Link from 'next/link';
 import { Heading, LinkButton } from '../primitives';
 
 export const CommitBanner = () => {
 	if (
-		process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview' &&
+		process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'staging' &&
 		process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA
 	)
 		return (
@@ -15,15 +16,19 @@ export const CommitBanner = () => {
 
 export const CommitBannerRenderer = ({ commitSha }: { commitSha: string }) => {
 	return (
-		<div className="flex w-full flex-row justify-between bg-black px-4 md:px-10">
+		<div className="flex w-full flex-row justify-between bg-white px-4 dark:bg-black md:px-10">
 			<Heading.H2 className="font-body text-sm md:text-lg">
-				<span className="text-white">Commit: </span>
-				<span className="text-ao-white/75">{commitSha}</span>
+				<span className="align-middle text-black dark:text-white">
+					Commit:{' '}
+				</span>
+				<span className="align-middle text-ao-black/75 dark:text-ao-white/75">
+					{commitSha}
+				</span>
 			</Heading.H2>
 			<Heading.H3 className="hidden font-body text-lg md:block">
-				<LinkButton href="https://vercel.com" variant="subtle">
+				<Link href="https://vercel.com">
 					Currently running on Vercel Preview
-				</LinkButton>
+				</Link>
 			</Heading.H3>
 		</div>
 	);
