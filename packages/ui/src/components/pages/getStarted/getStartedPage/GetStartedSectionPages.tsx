@@ -1,6 +1,11 @@
 /* eslint-disable tailwindcss/no-custom-classname */
 import './GetStartedPageAnimations.css';
-import { Button, Heading, Paragraph } from '~ui/components/primitives';
+import {
+	Button,
+	Heading,
+	LinkButton,
+	Paragraph,
+} from '~ui/components/primitives';
 import type { GetStartedPageProps } from './GetStartedSection';
 import type { FC } from 'react';
 
@@ -13,7 +18,7 @@ export const IntroPage: React.FC<GetStartedPageProps> = ({
 			<Heading.H1 className="pb-8 text-center text-4xl">
 				What are you looking for?
 			</Heading.H1>
-			<div className="grid grid-rows-2 gap-8 lg:grid-cols-2 lg:gap-16">
+			<div className="grid grid-rows-2 gap-y-8 lg:grid-cols-2 lg:grid-rows-1 lg:gap-x-16 lg:gap-y-0">
 				<Button variant={'outline'}>I{"'"}m just looking around</Button>
 				<Button
 					onClick={() => {
@@ -26,6 +31,11 @@ export const IntroPage: React.FC<GetStartedPageProps> = ({
 			</div>
 		</div>
 	);
+};
+
+const InfoPage: React.FC<GetStartedPageProps> = ({ setPage, setProgress }) => {
+	// Component explaining answer overflow
+	return <div></div>;
 };
 
 const PickPlanPage: React.FC<GetStartedPageProps> = ({
@@ -68,7 +78,7 @@ const PickPlanPage: React.FC<GetStartedPageProps> = ({
 						totam architecto veniam. Non provident soluta cum reprehenderit
 						atque!
 					</Paragraph>
-					<Button variant="destructive" className="mt-auto">
+					<Button variant="blue" className="mt-auto">
 						Get started with Pro
 					</Button>
 				</div>
@@ -83,37 +93,22 @@ const AddToServerPage: React.FC<GetStartedPageProps> = ({
 }) => {
 	return (
 		<div className="page-slide-in">
-			<Heading.H1 className="pb-16 text-center text-4xl">
-				We have liftoff!
-			</Heading.H1>
+			<Heading.H1 className="text-center text-4xl">We have liftoff!</Heading.H1>
+			<Heading.H2 className="pb-16 text-2xl dark:text-ao-white/90">
+				Add Answer Overflow to your server
+			</Heading.H2>
 			<div className="flex w-full items-center justify-center">
 				{/* TODO: We should use discord blurple and a discord icon */}
 				<Button
-					variant="destructive"
+					variant="blue"
 					onClick={() => {
-						setPage('addBotToServerOauth');
+						setPage('channelSettingsPage');
 						setProgress(80);
 					}}
 				>
 					Add to server
 				</Button>
 			</div>
-		</div>
-	);
-};
-
-const AddToServerOauthPage: React.FC<GetStartedPageProps> = ({ setPage }) => {
-	return (
-		<div className="page-slide-in flex flex-col items-center justify-center">
-			<Heading.H1 className="pb-16 text-center text-4xl">
-				Launch Complete
-			</Heading.H1>
-			<Button
-				variant="destructive"
-				onClick={() => setPage('channelSettingsPage')}
-			>
-				Continue
-			</Button>
 		</div>
 	);
 };
@@ -132,7 +127,7 @@ const configPages: {
 
 				<Heading.H2>Enable indexing on your favorite channels</Heading.H2>
 				<Button
-					variant="destructive"
+					variant="blue"
 					onClick={() => {
 						setPage('serverSettingsPage');
 						setProgress(90);
@@ -145,16 +140,17 @@ const configPages: {
 	},
 	ServerSettings: ({ setPage, setProgress }) => {
 		return (
-			<div className="page-slide-in">
-				<Heading.H1 className="pb-16 text-center text-4xl">
+			<div className="page-slide-in flex flex-col items-center justify-center">
+				<Heading.H1 className="text-center text-4xl">
 					Okay, now let{"'"}s set up your server settings!
 				</Heading.H1>
 
-				{/* Checkbox showing  */}
-
-				<Heading.H2 className="text-lg">Run ```/channel-settings```</Heading.H2>
+				{/* TODO: add command component when available */}
+				<Heading.H2 className="pb-16 text-lg">
+					Run ```/channel-settings```
+				</Heading.H2>
 				<Button
-					variant="destructive"
+					variant="blue"
 					onClick={() => {
 						setPage('completePage');
 						setProgress(100);
@@ -167,16 +163,13 @@ const configPages: {
 	},
 };
 
-const CompletePage: React.FC<GetStartedPageProps> = ({ setPage }) => {
+const CompletePage: React.FC<GetStartedPageProps> = () => {
 	return (
 		<div className="page-slide-in flex flex-col items-center justify-center">
 			<Heading.H1 className="pb-16 text-center text-4xl">All done!</Heading.H1>
-			<Button
-				variant="destructive"
-				onClick={() => setPage('channelSettingsPage')}
-			>
+			<LinkButton variant="blue" href="">
 				Head to docs
-			</Button>
+			</LinkButton>
 		</div>
 	);
 };
@@ -193,10 +186,6 @@ export const getStartedPages = [
 	{
 		pageIndex: 'addToServerPage',
 		component: AddToServerPage,
-	},
-	{
-		pageIndex: 'addBotToServerOauth',
-		component: AddToServerOauthPage,
 	},
 	{
 		pageIndex: 'channelSettingsPage',
