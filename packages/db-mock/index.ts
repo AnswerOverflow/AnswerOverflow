@@ -1,4 +1,4 @@
-import { Message, getDefaultMessage } from '@answeroverflow/elastic-types';
+import { type Message, getDefaultMessage } from '@answeroverflow/elastic-types';
 import {
 	type DiscordAccount,
 	getDefaultDiscordAccount,
@@ -7,17 +7,17 @@ import {
 	getDefaultServer,
 	getDefaultChannel,
 	getDefaultUserServerSettings,
-	UserServerSettings,
-	UserServerSettingsWithFlags,
+	type UserServerSettings,
+	type UserServerSettingsWithFlags,
 	addFlagsToUserServerSettings,
-	ChannelWithFlags,
+	type ChannelWithFlags,
 	addFlagsToChannel,
 	dictToBitfield,
 	channelBitfieldFlags,
 	userServerSettingsFlags,
 	addFlagsToServer,
 	serverSettingsFlags,
-	ServerWithFlags,
+	type ServerWithFlags,
 } from '@answeroverflow/prisma-types';
 import { getRandomId, getRandomSentence } from '@answeroverflow/utils';
 import { ChannelType } from 'discord-api-types/v10';

@@ -11,14 +11,14 @@ import {
 	PermissionsBitField,
 	type ChatInputCommandInteraction,
 	ChannelType,
-	GuildTextBasedChannel,
+	type GuildTextBasedChannel,
 } from 'discord.js';
 import React from 'react';
 import {
 	ephemeralReply,
 	getCommandIds,
 	getRootChannel,
-	RootChannel,
+	type RootChannel,
 } from '~discord-bot/utils/utils';
 import {
 	findLatestMessageInChannelAndThreads,

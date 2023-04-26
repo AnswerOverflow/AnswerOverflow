@@ -1,6 +1,6 @@
 import type { ServerPublic } from '@answeroverflow/api';
 import { AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
-import { Avatar, AvatarProps, getAvatarSize } from './base';
+import { Avatar, type AvatarProps, getAvatarSize } from './base';
 
 export interface ServerIconProps extends Omit<AvatarProps, 'url' | 'alt'> {
 	server: ServerPublic;

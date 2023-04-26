@@ -9,7 +9,7 @@ import {
 import {
 	addFlagsToChannel,
 	bitfieldToChannelFlags,
-	Server,
+	type Server,
 } from '@answeroverflow/prisma-types';
 import { getRandomId } from '@answeroverflow/utils';
 import {

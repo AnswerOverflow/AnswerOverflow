@@ -8,8 +8,6 @@ module.exports = {
 		require('@tailwindcss/forms'),
 		// eslint-disable-next-line no-undef
 		require('tailwind-scrollbar-hide'),
-		// eslint-disable-next-line no-undef
-		require('tailwind-scrollbar'),
 	],
 	theme: {
 		extend: {

@@ -1,13 +1,13 @@
 import {
-	DiscordAccount,
-	Message,
-	Server,
+	type DiscordAccount,
+	type Message,
+	type Server,
 	createServer,
 	createChannel,
 	createDiscordAccount,
 	upsertManyMessages,
 	createUserServerSettings,
-	ChannelWithFlags,
+	type ChannelWithFlags,
 } from '@answeroverflow/db';
 import {
 	mockAccountWithServersCallerCtx,

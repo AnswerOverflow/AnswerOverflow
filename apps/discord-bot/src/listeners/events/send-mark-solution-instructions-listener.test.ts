@@ -1,4 +1,4 @@
-import { Client, Events, PublicThreadChannel } from 'discord.js';
+import { Client, Events, type PublicThreadChannel } from 'discord.js';
 import { createChannel, createServer } from '@answeroverflow/db';
 import {
 	mockForumChannel,

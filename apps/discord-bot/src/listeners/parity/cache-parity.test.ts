@@ -9,7 +9,7 @@ import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
 import {
 	createDiscordAccount,
 	prisma,
-	User,
+	type User,
 	_NOT_PROD_createOauthAccountEntry,
 } from '@answeroverflow/db';
 import {

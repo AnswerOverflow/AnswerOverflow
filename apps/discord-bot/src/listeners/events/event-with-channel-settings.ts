@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
-import { Events, Message, AnyThreadChannel } from 'discord.js';
+import { Events, Message, type AnyThreadChannel } from 'discord.js';
 import { findChannelById } from '@answeroverflow/db';
 import { getRootChannel } from '~discord-bot/utils/utils';
 

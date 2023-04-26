@@ -1,4 +1,4 @@
-import { Snowflake, SnowflakeUtil } from 'discord.js';
+import { type Snowflake, SnowflakeUtil } from 'discord.js';
 
 export function getRandomTime(start?: Date, end?: Date) {
 	if (!start) {

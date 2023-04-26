@@ -1,9 +1,12 @@
 import { ChannelType, GuildMember } from 'discord.js';
 import type { ChannelWithFlags } from '@answeroverflow/db';
-import { callAPI, TRPCStatusHandler } from '~discord-bot/utils/trpc';
+import { callAPI, type TRPCStatusHandler } from '~discord-bot/utils/trpc';
 import { toAOChannelWithServer } from '~discord-bot/utils/conversions';
 import { createMemberCtx } from '~discord-bot/utils/context';
-import { removeDiscordMarkdown, RootChannel } from '~discord-bot/utils/utils';
+import {
+	removeDiscordMarkdown,
+	type RootChannel,
+} from '~discord-bot/utils/utils';
 import {
 	FORUM_GUIDELINES_CONSENT_PROMPT,
 	FORUM_GUIDELINES_CONSENT_MISSING_ERROR_MESSAGE,

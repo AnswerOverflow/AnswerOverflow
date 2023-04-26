@@ -3,7 +3,7 @@ import {
 	Avatar,
 	AvatarFallback,
 	AvatarImage,
-	AvatarProps,
+	type AvatarProps,
 	getAvatarSize,
 } from './base';
 
