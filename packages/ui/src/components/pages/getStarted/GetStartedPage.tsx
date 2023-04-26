@@ -2,7 +2,7 @@ import * as Progress from '@radix-ui/react-progress';
 import { AOHead, Footer, Navbar } from '~ui/components/primitives';
 import { GetStartedPageHandler } from './getStartedPage/GetStartedSection';
 import {
-	AllPageIndex,
+	type AllPageIndex,
 	getStartedPages,
 } from './getStartedPage/GetStartedSectionPages';
 import { useState } from 'react';
@@ -41,7 +41,7 @@ export const GetStartedPage = ({ initialPageIndex }: GetStartedPageProps) => {
 	const [progress, setProgress] = useState<number>(0);
 
 	return (
-		<div className="mx-auto flex min-h-screen w-full flex-col overflow-y-scroll bg-ao-white scrollbar-hide overflow-x-hidden dark:bg-ao-black">
+		<div className="mx-auto flex min-h-screen w-full flex-col overflow-x-hidden overflow-y-scroll bg-ao-white scrollbar-hide dark:bg-ao-black">
 			<Navbar />
 			<main className="flex grow flex-row items-center justify-center bg-ao-white px-4 dark:bg-ao-black 2xl:px-[6rem]">
 				<AOHead

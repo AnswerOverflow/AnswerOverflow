@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 import { GetStartedPage } from './GetStartedPage';
 import {
-	AllPageIndex,
+	type AllPageIndex,
 	getStartedPages,
 } from './getStartedPage/GetStartedSectionPages';
 const meta = {

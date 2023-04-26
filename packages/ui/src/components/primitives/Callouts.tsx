@@ -1,6 +1,5 @@
-import { Button, LinkButton, type LinkButtonProps } from '.';
+import { Button, LinkButton, type ButtonProps } from '.';
 import { signIn } from 'next-auth/react';
-import { GETTING_STARTED_URL } from '@answeroverflow/constants/src/links';
 import {
 	trackEvent,
 	type GettingStartedClickProps,
