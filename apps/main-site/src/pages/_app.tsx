@@ -19,6 +19,7 @@ import { MDXProvider } from '@mdx-js/react';
 import { useAnalytics } from '@answeroverflow/hooks';
 import Link from 'next/link';
 import type { Components } from '@mdx-js/react/lib';
+import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner';
 
 const components: Components = {
 	h1: Heading.H1,
@@ -70,6 +71,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 			<SessionProvider session={session}>
 				<WithAnalytics>
 					<PageWrapper disabledRoutes={['/', '/c/[communityId]']}>
+						<CommitBanner />
 						<MDXProvider components={components}>
 							<Component {...pageProps} />
 						</MDXProvider>

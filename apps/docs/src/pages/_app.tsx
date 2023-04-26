@@ -10,6 +10,7 @@ import hljs from 'highlight.js';
 import { type NextTRPC, trpc } from '@answeroverflow/ui';
 import { useEffect } from 'react';
 import { useAnalytics } from '@answeroverflow/hooks';
+import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -32,6 +33,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 	return (
 		<SessionProvider session={session}>
 			<WithAnalytics>
+				<CommitBanner />
 				<Component {...pageProps} />
 			</WithAnalytics>
 		</SessionProvider>
