@@ -80,12 +80,6 @@ const featuredCommunities: FeaturedCommunityProps[] = [
 		approximateMemberCount: '45,000+',
 	},
 	{
-		name: 'Robolab.io',
-		id: '462274708499595264',
-		iconUrl: '/featured-communities/robolabio_logo.png',
-		approximateMemberCount: '45,000+',
-	},
-	{
 		name: 'MechaKeys',
 		id: '462274708499595264',
 		approximateMemberCount: '45,000+',
@@ -102,6 +96,12 @@ const featuredCommunities: FeaturedCommunityProps[] = [
 		id: '966627436387266600',
 		approximateMemberCount: '15,000+',
 		iconUrl: '/featured-communities/theos_typesafe_cult_logo.png',
+	},
+	{
+		name: 'tRPC',
+		id: '867764511159091230',
+		iconUrl: '/featured-communities/trpc_logo.png',
+		approximateMemberCount: '15,000+',
 	},
 	{
 		name: 'Vue Storefront',
@@ -128,16 +128,16 @@ const featuredCommunities: FeaturedCommunityProps[] = [
 		approximateMemberCount: '1,000+',
 	},
 	{
-		name: 'Mudlet',
-		id: '283581582550237184',
-		iconUrl: '/featured-communities/mudlet_logo.png',
-		approximateMemberCount: '5,000+',
-	},
-	{
 		name: 'Apache TinkerPop',
 		id: '838910279550238720',
 		iconUrl: '/featured-communities/apache_tinkerpop_logo.png',
 		approximateMemberCount: '1,000+',
+	},
+	{
+		name: 'Mudlet',
+		id: '283581582550237184',
+		iconUrl: '/featured-communities/mudlet_logo.png',
+		approximateMemberCount: '5,000+',
 	},
 ];
 
@@ -183,7 +183,7 @@ const FeaturedCommunitiesSection = (props: { className?: string }) => {
 	return (
 		<div className={cn('overflow-x-hidden text-center', props.className)}>
 			<Heading.H2>
-				<Balancer>Used by some of the largest support servers</Balancer>
+				<Balancer>Serving 450,000+ users across 80 servers</Balancer>
 			</Heading.H2>
 			<div className="grid grid-cols-2 gap-8 py-8 sm:grid-cols-4">
 				{featuredCommunities.map((community) => (
