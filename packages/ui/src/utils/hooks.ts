@@ -5,6 +5,9 @@ import { useRouter } from 'next/router';
 
 export const useIsUserInServer = (serverId: string) => {
 	const session = useSession();
+	if (session.status === 'unauthenticated') {
+		return 'not_in_server';
+	}
 	const { data: servers } = trpc.auth.getServers.useQuery(undefined, {
 		enabled: session.status === 'authenticated',
 	});
