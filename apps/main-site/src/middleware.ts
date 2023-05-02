@@ -13,6 +13,8 @@ const mainSiteBase =
 		? `https://${mainSiteHostName}`
 		: `http://${mainSiteHostName}`;
 
+const redirectCode = process.env.NODE_ENV === 'production' ? 308 : 302;
+
 /*
 
   Middleware Notes:
@@ -69,7 +71,7 @@ function messageRouteHandler(input: PathHandler) {
 		return NextResponse.redirect(
 			new URL(`${req.nextUrl.pathname}${params}`, `http://tenant:3001/`),
 			{
-				status: 308,
+				status: redirectCode,
 			},
 		);
 	} else {
@@ -82,12 +84,12 @@ function communityPageRouteHandler(input: PathHandler) {
 	if (isRequestFromMainSite) {
 		// TODO: Get the server id from the database
 		return NextResponse.redirect(new URL(`${params}`, `http://tenant:3001/`), {
-			status: 308,
+			status: redirectCode,
 		});
 	} else {
 		// Redirect back to homepage, tenant sites only have one community
 		return NextResponse.redirect(new URL(`/`, mainSiteBase), {
-			status: 308,
+			status: redirectCode,
 		});
 	}
 }
@@ -137,9 +139,8 @@ export function toPathHandlerData(req: NextRequest) {
 	const origin = req.headers.get('Referer') || req.headers.get('Host'); // TODO: Is this the right header?
 	const path = url.pathname;
 	const params = req.nextUrl.search;
-	console.log(origin);
+
 	if (!origin) {
-		console.log('No origin');
 		throw new Error('No hostname'); // TODO: Handle this better
 	}
 	const isRequestFromMainSite = origin.includes(mainSiteHostName); // TODO: Prevent this from being abused
@@ -157,12 +158,25 @@ export function toPathHandlerData(req: NextRequest) {
 export function middleware(req: NextRequest) {
 	const input = toPathHandlerData(req);
 	const { path, isRequestFromMainSite } = input;
-
 	if (path.startsWith('/oemf7z50uh7w/')) {
 		return dataUnlockerRouteHandler(input);
 	} else if (path.startsWith('/m/')) {
 		return messageRouteHandler(input);
-	} else if (path.startsWith('/c/')) {
+	} else if (
+		path.startsWith('/search') &&
+		!input.params.includes('communityId=')
+	) {
+		return NextResponse.rewrite(
+			new URL(
+				`${input.params}`,
+				`http://tenant:3001/c/1037547185492996207/search`,
+			),
+		);
+	} else if (
+		// Check if path matches "/c/[:id]"
+		path.startsWith('/c/') &&
+		path.split('/').length === 2
+	) {
 		return communityPageRouteHandler(input);
 	} else if (path === '/') {
 		return homePageRouteHandler(input);

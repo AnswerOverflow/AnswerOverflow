@@ -125,6 +125,10 @@ export const useGetRectForElement = (element: RefObject<HTMLDivElement>) => {
 	return rect;
 };
 
+export const useIsServer = () => {
+	return typeof window === 'undefined';
+};
+
 export const useRouterQuery = () => {
 	const router = useRouter();
 	const routerQuery = typeof router.query.q === 'string' ? router.query.q : '';

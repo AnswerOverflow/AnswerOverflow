@@ -11,9 +11,10 @@ import React, { useEffect } from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Heading, Paragraph } from '@answeroverflow/ui';
 import { MDXProvider } from '@mdx-js/react';
-import { useAnalytics } from '@answeroverflow/hooks';
+import { TenantContextProvider, useAnalytics } from '@answeroverflow/hooks';
 import Link from 'next/link';
 import type { Components } from '@mdx-js/react/lib';
+import type { ServerPublic } from '@answeroverflow/api';
 
 const components: Components = {
 	h1: Heading.H1,
@@ -43,10 +44,10 @@ const components: Components = {
 };
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-const MyApp: AppType<{ session: Session | null }> = ({
-	Component,
-	pageProps: { session, ...pageProps },
-}) => {
+const MyApp: AppType<{
+	session: Session | null;
+	tenantData: ServerPublic | null;
+}> = ({ Component, pageProps: { session, tenantData, ...pageProps } }) => {
 	useEffect(() => {
 		hljs.configure({
 			ignoreUnescapedHTML: true,
@@ -61,21 +62,23 @@ const MyApp: AppType<{ session: Session | null }> = ({
 	};
 
 	return (
-		<ThemeProvider>
-			<SessionProvider
-				session={session}
-				basePath="http://localhost:3000/api/auth"
-			>
-				<WithAnalytics>
-					<PageWrapper disabledRoutes={['/', '/c/[communityId]']}>
-						<MDXProvider components={components}>
-							<Component {...pageProps} />
-						</MDXProvider>
-					</PageWrapper>
-					<ReactQueryDevtools initialIsOpen={false} />
-				</WithAnalytics>
-			</SessionProvider>
-		</ThemeProvider>
+		<TenantContextProvider value={tenantData}>
+			<ThemeProvider>
+				<SessionProvider
+					session={session}
+					basePath="http://localhost:3000/api/auth"
+				>
+					<WithAnalytics>
+						<PageWrapper disabledRoutes={['/', '/c/[communityId]']}>
+							<MDXProvider components={components}>
+								<Component {...pageProps} />
+							</MDXProvider>
+						</PageWrapper>
+						<ReactQueryDevtools initialIsOpen={false} />
+					</WithAnalytics>
+				</SessionProvider>
+			</ThemeProvider>
+		</TenantContextProvider>
 	);
 };
 export default (trpc as NextTRPC).withTRPC(MyApp);

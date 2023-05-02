@@ -1,6 +1,6 @@
 import type { User } from '@answeroverflow/api';
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { trpc } from '~ui/utils/trpc';
 import { GetStarted, SignInButton } from './Callouts';
@@ -25,6 +25,8 @@ import {
 	GITHUB_LINK,
 } from '@answeroverflow/constants/src/links';
 import { signIn, signOut } from '@answeroverflow/next-auth/react';
+import { useTenantContext } from '@answeroverflow/hooks';
+import { ServerIcon } from './ServerIcon';
 // TODO: Clean up this navbar area, bit of a mess
 
 const UserAvatar = ({ user }: { user: User }) => (
@@ -69,22 +71,24 @@ const UserAvatar = ({ user }: { user: User }) => (
 );
 
 export function NavbarRenderer(props: { user: User | null; path: string }) {
-	const sticky = false;
-	// const [sticky, setSticky] = useState(false);
-	// useEffect(() => {
-	// 	const handleScroll = () => {
-	// 		if (window.pageYOffset > 80) {
-	// 			setSticky(true);
-	// 		} else {
-	// 			setSticky(false);
-	// 		}
-	// 	};
-	// 	window.addEventListener('scroll', handleScroll);
-	// 	return () => {
-	// 		window.removeEventListener('scroll', handleScroll);
-	// 	};
-	// }, []);
+	const useStickyNavbar = false;
+	const [sticky, setSticky] = useState(false);
+	useEffect(() => {
+		if (!useStickyNavbar) return;
+		const handleScroll = () => {
+			if (window.pageYOffset > 80) {
+				setSticky(true);
+			} else {
+				setSticky(false);
+			}
+		};
+		window.addEventListener('scroll', handleScroll);
+		return () => {
+			window.removeEventListener('scroll', handleScroll);
+		};
+	}, [useStickyNavbar]);
 
+	const tenantData = useTenantContext();
 	const UserSection = () =>
 		props.user ? <UserAvatar user={props.user} /> : <SignInButton />;
 
@@ -173,8 +177,17 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 			<NavigationMenuList>
 				<NavigationMenuItem>
 					<Link href="/">
-						<AnswerOverflowLogo />
-						<span className="sr-only">Answer Overflow Logo</span>
+						{tenantData ? (
+							<div className="flex items-center space-x-2">
+								<ServerIcon server={tenantData} />
+								<span>{tenantData.name}</span>
+							</div>
+						) : (
+							<>
+								<AnswerOverflowLogo />
+								<span className="sr-only">Answer Overflow Logo</span>
+							</>
+						)}
 					</Link>
 				</NavigationMenuItem>
 			</NavigationMenuList>
