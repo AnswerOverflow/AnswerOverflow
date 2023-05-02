@@ -5,12 +5,12 @@ import { useRouter } from 'next/router';
 
 export const useIsUserInServer = (serverId: string) => {
 	const session = useSession();
-	if (session.status === 'unauthenticated') {
-		return 'not_in_server';
-	}
 	const { data: servers } = trpc.auth.getServers.useQuery(undefined, {
 		enabled: session.status === 'authenticated',
 	});
+	if (session.status === 'unauthenticated') {
+		return 'not_in_server';
+	}
 	if (!servers) return 'loading';
 	// Return string types to avoid accidental boolean casting
 	return servers?.some((s) => s.id === serverId)
