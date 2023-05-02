@@ -3806,10 +3806,10 @@
     "@storybook/global" "^5.0.0"
     "@storybook/preview-api" "7.0.6"
 
-"@storybook/jest@^0.0.11--canary.22.2783ae7.0":
-  version "0.0.11-next.2"
-  resolved "https://registry.yarnpkg.com/@storybook/jest/-/jest-0.0.11-next.2.tgz#0f02fbb875c7613b7ecf3e76d59ab0e2d2f9cb48"
-  integrity sha512-D0cKu+vMXvggYrJFyTGu0WnFFSGcauJFgTmm2/bx4rSY29duvJkTyOJjNmNAtahLek6Ip1SjxZy+E+/vfTfLBg==
+"@storybook/jest@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@storybook/jest/-/jest-0.1.0.tgz#73e51e390b36e93e51e6082f4a5bfbad0097d5e3"
+  integrity sha512-TmybnEXlv5Fu2/Hq4nRj7alS9mw4CasLR0RDwaAzS+Vpvu1TC4+j9rh+b1BHtmWebbJh0JMT6mgzPqOyJdgtQA==
   dependencies:
     "@storybook/expect" storybook-jest
     "@storybook/instrumenter" "^7.0.0-beta.0 || ^7.0.0-rc.0 || ^7.0.0"
