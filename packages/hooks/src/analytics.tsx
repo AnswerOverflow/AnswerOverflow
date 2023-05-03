@@ -116,6 +116,8 @@ const analyticsContext = createContext<{
 	loaded: boolean;
 } | null>(null);
 
+export const AnalyticsContextProvider = analyticsContext.Provider;
+
 export const useAnalyticsContext = () => {
 	const context = useContext(analyticsContext);
 	if (!context) {
@@ -165,8 +167,8 @@ export const AnalyticsProvider = ({
 		};
 	}, [session, status, analyticsLoaded, setAnalyticsLoaded, router]);
 	return (
-		<analyticsContext.Provider value={{ loaded: analyticsLoaded }}>
+		<AnalyticsContextProvider value={{ loaded: analyticsLoaded }}>
 			{children}
-		</analyticsContext.Provider>
+		</AnalyticsContextProvider>
 	);
 };
