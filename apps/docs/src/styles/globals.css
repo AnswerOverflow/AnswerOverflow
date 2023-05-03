@@ -9,11 +9,14 @@
 @tailwind utilities;
 
 .hljs {
-	@apply my-4 w-full rounded-lg  bg-neutral-50 text-sm dark:bg-stone-900 !important;
+	@apply my-4 w-full rounded-lg bg-white text-sm dark:bg-stone-900 !important;
 	/* Fixes overflowing code blocks */
 	white-space: break-spaces;
 	line-break: anywhere;
 	font-family: 'Courier New', Courier, monospace;
+}
+.discord-message a {
+	@apply text-blue-600 underline  hover:text-blue-800 !important;
 }
 
 .d-emoji {
@@ -32,4 +35,11 @@ body {
 
 .dark {
 	color-scheme: dark;
+}
+
+/* Speculative fix for lacking of loading of images on mobile in a marquee */
+@supports (font: -apple-system-body) and (-webkit-appearance: none) {
+	img[loading='lazy'] {
+		clip-path: inset(0.6px);
+	}
 }
