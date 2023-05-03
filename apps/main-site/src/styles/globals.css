@@ -15,6 +15,9 @@
 	line-break: anywhere;
 	font-family: 'Courier New', Courier, monospace;
 }
+.discord-message a {
+	@apply text-blue-600 underline  hover:text-blue-800 !important;
+}
 
 .d-emoji {
 	@apply inline-block h-6 w-6;
