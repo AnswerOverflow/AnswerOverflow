@@ -8,6 +8,7 @@ import {
 	WithAuth,
 	WithTailwindTheme,
 	WithHighlightJS,
+	WithAnalytics,
 } from '../src/utils/decorators';
 
 export const parameters: Preview = {
@@ -46,6 +47,7 @@ export const globalTypes = {
 
 export const decorators: Decorator[] = [
 	WithTailwindTheme,
+	WithAnalytics,
 	WithAuth,
 	WithHighlightJS,
 ];
