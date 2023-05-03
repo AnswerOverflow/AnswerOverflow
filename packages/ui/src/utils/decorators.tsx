@@ -8,6 +8,7 @@ import { trpc, type StorybookTRPC } from './trpc';
 import hljs from 'highlight.js';
 import { ThemeProvider } from './theme';
 import { SessionProvider } from 'next-auth/react';
+import { AnalyticsContextProvider } from '@answeroverflow/hooks';
 const storybookTrpc = trpc as StorybookTRPC;
 type Globals = {
 	tailwindTheme: 'dark' | 'light' | 'both';
@@ -122,4 +123,16 @@ export function WithHighlightJS(Story: PartialStoryFn<ReactRenderer, Args>) {
 		hljs.highlightAll();
 	}, []);
 	return <Story />;
+}
+
+export function WithAnalytics(Story: PartialStoryFn<ReactRenderer, Args>) {
+	return (
+		<AnalyticsContextProvider
+			value={{
+				loaded: true,
+			}}
+		>
+			<Story />
+		</AnalyticsContextProvider>
+	);
 }

@@ -12,11 +12,11 @@ import {
 	trpc,
 	ThemeProvider,
 } from '@answeroverflow/ui';
+import { AnalyticsProvider } from '@answeroverflow/hooks';
 import React, { useEffect } from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Heading, Paragraph } from '@answeroverflow/ui';
 import { MDXProvider } from '@mdx-js/react';
-import { useAnalytics } from '@answeroverflow/hooks';
 import Link from 'next/link';
 import type { Components } from '@mdx-js/react/lib';
 import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner';
@@ -61,15 +61,11 @@ const MyApp: AppType<{ session: Session | null }> = ({
 	}, []);
 
 	// TODO: wow this is ugly but use analytics needs session provider data
-	const WithAnalytics = ({ children }: { children: React.ReactNode }) => {
-		useAnalytics();
-		return <>{children}</>;
-	};
 
 	return (
 		<ThemeProvider>
 			<SessionProvider session={session}>
-				<WithAnalytics>
+				<AnalyticsProvider>
 					<PageWrapper disabledRoutes={['/', '/c/[communityId]']}>
 						<CommitBanner />
 						<MDXProvider components={components}>
@@ -77,7 +73,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 						</MDXProvider>
 					</PageWrapper>
 					<ReactQueryDevtools initialIsOpen={false} />
-				</WithAnalytics>
+				</AnalyticsProvider>
 			</SessionProvider>
 		</ThemeProvider>
 	);
