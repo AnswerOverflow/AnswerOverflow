@@ -18,7 +18,9 @@
 .discord-message a {
 	@apply text-blue-600 underline  hover:text-blue-800 !important;
 }
-
+.bar-of-progress {
+	z-index: 50;
+}
 .d-emoji {
 	@apply inline-block h-6 w-6;
 }
