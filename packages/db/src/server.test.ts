@@ -1,7 +1,7 @@
 import {
 	addFlagsToServer,
 	bitfieldToServerFlags,
-	Server,
+	type Server,
 } from '@answeroverflow/prisma-types';
 import { mockServer } from '@answeroverflow/db-mock';
 import {

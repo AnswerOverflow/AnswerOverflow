@@ -1,7 +1,7 @@
 import {
 	zServerPublic,
 	findServerById,
-	ServerWithFlags,
+	type ServerWithFlags,
 	getDefaultServerWithFlags,
 	upsertServer,
 	zServerCreate,

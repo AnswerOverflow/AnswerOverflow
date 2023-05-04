@@ -103,6 +103,7 @@
     "prettier.configPath": "prettierrc.cjs",
     "javascript.suggest.autoImports": true,
     "javascript.updateImportsOnFileMove.enabled": "always",
+    "typescript.tsserver.experimental.enableProjectDiagnostics": true,
     "[typescript]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
@@ -221,6 +222,7 @@
     "cSpell.enableFiletypes": [
       "mdx"
     ],
+    "typescript.tsdk": "root/node_modules/typescript/lib",
   },
   "extensions": {
     "recommendations": [

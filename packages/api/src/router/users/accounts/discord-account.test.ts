@@ -2,7 +2,7 @@ import {
 	createDiscordAccount,
 	createManyDiscordAccounts,
 	deleteDiscordAccount,
-	DiscordAccount,
+	type DiscordAccount,
 } from '@answeroverflow/db';
 import { mockDiscordAccount } from '@answeroverflow/db-mock';
 import { pick } from '@answeroverflow/utils';

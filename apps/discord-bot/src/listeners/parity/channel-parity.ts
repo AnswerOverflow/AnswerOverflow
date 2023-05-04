@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
 import {
-	Channel,
+	type Channel,
 	ChannelType,
 	DMChannel,
 	Events,

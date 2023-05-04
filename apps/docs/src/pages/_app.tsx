@@ -7,9 +7,10 @@ import type { Session } from 'next-auth';
 import type { AppType } from 'next/app';
 import hljs from 'highlight.js';
 
-import { NextTRPC, trpc } from '@answeroverflow/ui';
+import { type NextTRPC, trpc } from '@answeroverflow/ui';
 import { useEffect } from 'react';
-import { useAnalytics } from '@answeroverflow/hooks';
+import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner';
+import { AnalyticsProvider } from '@answeroverflow/hooks';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -24,16 +25,12 @@ const MyApp: AppType<{ session: Session | null }> = ({
 		hljs.highlightAll();
 	}, []);
 
-	const WithAnalytics = ({ children }: { children: React.ReactNode }) => {
-		useAnalytics();
-		return <>{children}</>;
-	};
-
 	return (
 		<SessionProvider session={session}>
-			<WithAnalytics>
+			<AnalyticsProvider>
+				<CommitBanner />
 				<Component {...pageProps} />
-			</WithAnalytics>
+			</AnalyticsProvider>
 		</SessionProvider>
 	);
 };

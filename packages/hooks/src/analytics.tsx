@@ -1,23 +1,24 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { DefaultSession } from 'next-auth';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
 import posthog from 'posthog-js';
-import React, { useEffect, useRef } from 'react';
+import { createContext, useContext, useEffect, useRef } from 'react';
 import {
-	ChannelProps,
-	CommunityPageLinkEvent,
-	JoinWaitlistClickProps,
+	type ChannelProps,
+	type CommunityPageLinkEvent,
+	type JoinWaitlistClickProps,
 	JOIN_WAITLIST_EVENT_NAME,
-	MessageProps,
-	ServerInviteEvent,
-	ServerProps,
-	ThreadProps,
+	type MessageProps,
+	type ServerInviteEvent,
+	type ServerProps,
+	type ThreadProps,
 } from '@answeroverflow/constants/src/analytics';
 import type {
 	APIMessageFull,
 	APIMessageWithDiscordAccount,
 } from '@answeroverflow/api';
+import React from 'react';
+import { useRouter } from 'next/router';
+import { useSession } from 'next-auth/react';
 // TODO: This type should be inferred from the auth package
 declare module 'next-auth' {
 	interface Session extends DefaultSession {
@@ -81,48 +82,20 @@ export function useTrackEvent<K extends keyof EventMap>(
 	},
 ): void {
 	const hasSentAnalyticsEvent = useRef(false);
+	const { loaded: isAnalyticsLoaded } = useAnalyticsContext();
 	useEffect(() => {
 		const options = opts || {};
 		const enabled = opts?.enabled ?? true;
 		if (!enabled) return;
+		if (!isAnalyticsLoaded) return;
 		if (!hasSentAnalyticsEvent.current) {
 			trackEvent(eventName, props);
 			if (options.runOnce) {
 				hasSentAnalyticsEvent.current = true;
 			}
 		}
-	}, [hasSentAnalyticsEvent, eventName, props, opts]);
+	}, [hasSentAnalyticsEvent, eventName, props, opts, isAnalyticsLoaded]);
 }
-
-export const useAnalytics = () => {
-	const [analyticsLoaded, setAnalyticsLoaded] = React.useState(false);
-	const { data: session, status } = useSession();
-	const router = useRouter();
-	useEffect(() => {
-		if (!analyticsLoaded) {
-			posthog.init(process.env.NEXT_PUBLIC_POSTHOG_TOKEN as string, {
-				disable_session_recording: process.env.NODE_ENV === 'development',
-				loaded: () => {
-					setAnalyticsLoaded(true);
-				},
-			});
-		} else {
-			if (
-				status === 'authenticated' &&
-				session.user &&
-				session.user.id != posthog.get_distinct_id()
-			) {
-				posthog.identify(session.user.id);
-			}
-		}
-
-		const handleRouteChange = () => posthog.capture('$pageview');
-		router.events.on('routeChangeComplete', handleRouteChange);
-		return () => {
-			router.events.off('routeChangeComplete', handleRouteChange);
-		};
-	}, [session, status, analyticsLoaded, setAnalyticsLoaded, router]);
-};
 
 export function messageWithDiscordAccountToAnalyticsData(
 	message: APIMessageFull | APIMessageWithDiscordAccount,
@@ -138,3 +111,64 @@ export function messageWithDiscordAccountToAnalyticsData(
 		'Solution Id': message.solutionIds?.[0] ?? undefined,
 	};
 }
+
+const analyticsContext = createContext<{
+	loaded: boolean;
+} | null>(null);
+
+export const AnalyticsContextProvider = analyticsContext.Provider;
+
+export const useAnalyticsContext = () => {
+	const context = useContext(analyticsContext);
+	if (!context) {
+		throw new Error('useAnalyticsContext must be used within Analytics');
+	}
+	return context;
+};
+
+export const AnalyticsProvider = ({
+	children,
+}: {
+	children: React.ReactNode;
+}) => {
+	const [analyticsLoaded, setAnalyticsLoaded] = React.useState(false);
+	const { data: session, status } = useSession();
+	const router = useRouter();
+	useEffect(() => {
+		if (status === 'loading') {
+			return;
+		}
+		if (!analyticsLoaded) {
+			posthog.init(process.env.NEXT_PUBLIC_POSTHOG_TOKEN as string, {
+				disable_session_recording: process.env.NODE_ENV === 'development',
+				persistence: 'memory',
+				bootstrap: {
+					distinctID: session?.user?.id,
+				},
+				loaded: () => {
+					setAnalyticsLoaded(true);
+				},
+			});
+		} else {
+			// TODO: Still needed?
+			if (
+				status === 'authenticated' &&
+				session.user &&
+				session.user.id != posthog.get_distinct_id()
+			) {
+				posthog.identify(session.user.id);
+			}
+		}
+
+		const handleRouteChange = () => posthog.capture('$pageview');
+		router.events.on('routeChangeComplete', handleRouteChange);
+		return () => {
+			router.events.off('routeChangeComplete', handleRouteChange);
+		};
+	}, [session, status, analyticsLoaded, setAnalyticsLoaded, router]);
+	return (
+		<AnalyticsContextProvider value={{ loaded: analyticsLoaded }}>
+			{children}
+		</AnalyticsContextProvider>
+	);
+};

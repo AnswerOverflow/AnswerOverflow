@@ -1,5 +1,5 @@
 import type { SapphireClient } from '@sapphire/framework';
-import { Events, PublicThreadChannel, TextChannel } from 'discord.js';
+import { Events, type PublicThreadChannel, TextChannel } from 'discord.js';
 import {
 	toAOChannel,
 	toAOServer,

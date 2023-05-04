@@ -3,9 +3,10 @@ import {
 	PermissionsBitField,
 	Guild,
 	User,
-	PermissionResolvable,
+	type PermissionResolvable,
 	Role,
 	Client,
+	GuildSystemChannelFlags,
 } from 'discord.js';
 import type { RawRoleData } from 'discord.js/typings/rawDataTypes';
 import { randomSnowflake } from '@answeroverflow/discordjs-utils';
@@ -44,7 +45,7 @@ export function mockGuild(
 		explicit_content_filter: 0,
 		application_id: null,
 		system_channel_id: null,
-		system_channel_flags: 0,
+		system_channel_flags: GuildSystemChannelFlags.SuppressPremiumSubscriptions,
 		rules_channel_id: null,
 		vanity_url_code: null,
 		premium_tier: 0,

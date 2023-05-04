@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import Xarrow from 'react-xarrows';
-import { DemoMessage, MessageProps } from '../DemoMessage';
+import { DemoMessage, type MessageProps } from '../DemoMessage';
 import { useThemeContext } from '~ui/utils/theme';
 import { GooglePage } from './GooglePage/GooglePage';
 import './DashAnimation.css';
