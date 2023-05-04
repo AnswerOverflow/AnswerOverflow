@@ -6,6 +6,7 @@ import {
 	upsertServer,
 	zServerCreate,
 	findServerByAliasOrId,
+	findAllServers,
 } from '@answeroverflow/db';
 import { z } from 'zod';
 import type { Context } from '~api/router/context';
@@ -74,6 +75,13 @@ export const serverRouter = router({
 		const data = await findOrThrowNotFound(
 			() => findServerByAliasOrId(input),
 			'Server not found',
+		);
+		return zServerPublic.parse(data);
+	}),
+	getAllServers: publicProcedure.query(async () => {
+		const data = await findOrThrowNotFound(
+			() => findAllServers(),
+			'No servers found',
 		);
 		return zServerPublic.parse(data);
 	}),
