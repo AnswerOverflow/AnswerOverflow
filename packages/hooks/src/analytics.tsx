@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { DefaultSession } from 'next-auth';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
 import posthog from 'posthog-js';
-import React, { useEffect, useRef } from 'react';
+import { createContext, useContext, useEffect, useRef } from 'react';
 import {
 	type ChannelProps,
 	type CommunityPageLinkEvent,
@@ -18,6 +16,9 @@ import type {
 	APIMessageFull,
 	APIMessageWithDiscordAccount,
 } from '@answeroverflow/api';
+import React from 'react';
+import { useRouter } from 'next/router';
+import { useSession } from 'next-auth/react';
 // TODO: This type should be inferred from the auth package
 declare module 'next-auth' {
 	interface Session extends DefaultSession {
@@ -81,20 +82,55 @@ export function useTrackEvent<K extends keyof EventMap>(
 	},
 ): void {
 	const hasSentAnalyticsEvent = useRef(false);
+	const { loaded: isAnalyticsLoaded } = useAnalyticsContext();
 	useEffect(() => {
 		const options = opts || {};
 		const enabled = opts?.enabled ?? true;
 		if (!enabled) return;
+		if (!isAnalyticsLoaded) return;
 		if (!hasSentAnalyticsEvent.current) {
 			trackEvent(eventName, props);
 			if (options.runOnce) {
 				hasSentAnalyticsEvent.current = true;
 			}
 		}
-	}, [hasSentAnalyticsEvent, eventName, props, opts]);
+	}, [hasSentAnalyticsEvent, eventName, props, opts, isAnalyticsLoaded]);
 }
 
-export const useAnalytics = () => {
+export function messageWithDiscordAccountToAnalyticsData(
+	message: APIMessageFull | APIMessageWithDiscordAccount,
+): MessageProps {
+	return {
+		'Channel Id': message.parentChannelId
+			? message.parentChannelId
+			: message.channelId,
+		'Thread Id': message.childThreadId ?? undefined,
+		'Server Id': message.serverId,
+		'Message Author Id': message.author.id,
+		'Message Id': message.id,
+		'Solution Id': message.solutionIds?.[0] ?? undefined,
+	};
+}
+
+const analyticsContext = createContext<{
+	loaded: boolean;
+} | null>(null);
+
+export const AnalyticsContextProvider = analyticsContext.Provider;
+
+export const useAnalyticsContext = () => {
+	const context = useContext(analyticsContext);
+	if (!context) {
+		throw new Error('useAnalyticsContext must be used within Analytics');
+	}
+	return context;
+};
+
+export const AnalyticsProvider = ({
+	children,
+}: {
+	children: React.ReactNode;
+}) => {
 	const [analyticsLoaded, setAnalyticsLoaded] = React.useState(false);
 	const { data: session, status } = useSession();
 	const router = useRouter();
@@ -130,19 +166,9 @@ export const useAnalytics = () => {
 			router.events.off('routeChangeComplete', handleRouteChange);
 		};
 	}, [session, status, analyticsLoaded, setAnalyticsLoaded, router]);
+	return (
+		<AnalyticsContextProvider value={{ loaded: analyticsLoaded }}>
+			{children}
+		</AnalyticsContextProvider>
+	);
 };
-
-export function messageWithDiscordAccountToAnalyticsData(
-	message: APIMessageFull | APIMessageWithDiscordAccount,
-): MessageProps {
-	return {
-		'Channel Id': message.parentChannelId
-			? message.parentChannelId
-			: message.channelId,
-		'Thread Id': message.childThreadId ?? undefined,
-		'Server Id': message.serverId,
-		'Message Author Id': message.author.id,
-		'Message Id': message.id,
-		'Solution Id': message.solutionIds?.[0] ?? undefined,
-	};
-}

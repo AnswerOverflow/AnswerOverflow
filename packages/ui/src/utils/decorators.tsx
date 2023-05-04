@@ -8,6 +8,7 @@ import { trpc, type StorybookTRPC } from './trpc';
 import hljs from 'highlight.js';
 import { ThemeProvider } from './theme';
 import { SessionProvider } from 'next-auth/react';
+import { AnalyticsContextProvider } from '@answeroverflow/hooks';
 const storybookTrpc = trpc as StorybookTRPC;
 type Globals = {
 	tailwindTheme: 'dark' | 'light' | 'both';
@@ -26,6 +27,8 @@ export function WithTailwindTheme(
 					flexDirection: 'center',
 					padding:
 						context.parameters.layout === 'fullscreen' ? 0 : '2rem 0 2rem',
+					backgroundImage:
+						"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='199' viewBox='0 0 100 199'%3E%3Cg fill='%23bababa' fill-opacity='0.34'%3E%3Cpath d='M0 199V0h1v1.99L100 199h-1.12L1 4.22V199H0zM100 2h-.12l-1-2H100v2z'%3E%3C/path%3E%3C/g%3E%3C/svg%3E\")",
 				}}
 			/>
 		);
@@ -33,7 +36,7 @@ export function WithTailwindTheme(
 
 	const { tailwindTheme } = context.globals as Globals;
 	const Dark = () => (
-		<Flex className="dark bg-ao-black">
+		<Flex className="dark bg-black">
 			<ThemeProvider defaultTheme="dark">
 				<Story />
 			</ThemeProvider>
@@ -122,4 +125,16 @@ export function WithHighlightJS(Story: PartialStoryFn<ReactRenderer, Args>) {
 		hljs.highlightAll();
 	}, []);
 	return <Story />;
+}
+
+export function WithAnalytics(Story: PartialStoryFn<ReactRenderer, Args>) {
+	return (
+		<AnalyticsContextProvider
+			value={{
+				loaded: true,
+			}}
+		>
+			<Story />
+		</AnalyticsContextProvider>
+	);
 }
