@@ -1,10 +1,11 @@
 import type { ServerPublic } from '@answeroverflow/api';
 import Link from 'next/link';
-import { Button, LinkButton, LockIcon } from './base';
+import { Button, LinkButton } from './base';
 import { ServerIcon } from './ServerIcon';
 import Image from 'next/image';
+import { LockClosedIcon } from '@heroicons/react/24/solid';
 
-export type ManageServerCardProps =
+export type ServerCardProps =
 	| {
 			server: ServerPublic;
 			role: string;
@@ -15,7 +16,7 @@ export type ManageServerCardProps =
 			type: 'join';
 	  };
 
-export function ServerCard(props: ManageServerCardProps) {
+export function ServerCard(props: ServerCardProps) {
 	const ServerTitle = () => {
 		if (props.type !== 'manage')
 			return (
@@ -60,8 +61,8 @@ export function ServerCard(props: ManageServerCardProps) {
 			if (!props.server.vanityUrl)
 				return (
 					<Button variant="default" disabled>
-						<LockIcon className="mr-2 h-4 w-4" />
-						Join
+						<LockClosedIcon className="mr-2 h-4 w-4" />
+						Private
 					</Button>
 				);
 
