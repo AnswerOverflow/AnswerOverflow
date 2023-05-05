@@ -1,12 +1,12 @@
 import type { Meta, StoryFn } from '@storybook/react';
 import { mockServer } from '~ui/test/props';
-import { ServerCard, type ManageServerCardProps } from './ServerCard';
+import { ServerCard, type ServerCardProps } from './ServerCard';
 export default {
 	component: ServerCard,
 } as Meta;
 
 //👇 We create a “template” of how args map to rendering
-const Template: StoryFn<typeof ServerCard> = (args: ManageServerCardProps) => (
+const Template: StoryFn<typeof ServerCard> = (args: ServerCardProps) => (
 	<ServerCard {...args} />
 );
 

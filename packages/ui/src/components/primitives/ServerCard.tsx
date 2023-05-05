@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { LockClosedIcon } from '@heroicons/react/24/solid';
 import { createContext, useContext } from 'react';
 
-type ServerCardProps = {
+export type ServerCardProps = {
 	server?: ServerPublic | undefined;
 	hero?: React.ReactNode;
 	title?: React.ReactNode;
