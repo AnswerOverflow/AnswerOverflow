@@ -83,7 +83,7 @@ export const serverRouter = router({
 			() => findAllServers(),
 			'No servers found',
 		);
-		return zServerPublic.parse(data);
+		return zServerPublic.array().parse(data);
 	}),
 	setReadTheRulesConsentEnabled: withUserServersProcedure
 		.input(
