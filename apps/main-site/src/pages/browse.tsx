@@ -1,21 +1,13 @@
+'use server';
 import { BrowseCommunitiesPage } from '@answeroverflow/ui/src/components/pages/BrowseCommunitiesPage';
-import type { ServerPublic } from '~api/router/server/types';
-import { trpc } from '@answeroverflow/ui';
+import { findAllServers } from '@answeroverflow/db';
 
-export default function BrowseCommunitiesPageWeb({
-	servers,
-}: {
-	servers: ServerPublic[];
-}) {
+const BrowseCommunitiesPageWeb = async () => {
+	const servers = (await findAllServers()).filter(
+		(server) => server.kickedTime !== null,
+	);
+
 	return <BrowseCommunitiesPage servers={servers} />;
-}
+};
 
-export function getServerSideProps() {
-	const servers = trpc.servers.getAllServers.useQuery().data;
-
-	return {
-		props: {
-			servers: servers,
-		}, // will be passed to the page component as props
-	};
-}
+export default BrowseCommunitiesPageWeb;
