@@ -11,14 +11,23 @@ type ServerCardProps = {
 	hero?: React.ReactNode;
 	title?: React.ReactNode;
 	cta?: React.ReactNode;
+	roleComponent?: React.ReactNode;
 	className?: string;
-	type: 'join' | 'manage';
-};
+} & (
+	| {
+			type: 'manage';
+			role: string;
+	  }
+	| {
+			type: 'join';
+	  }
+);
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const ServerCardContext = createContext<{
 	server: ServerPublic | undefined;
 	type: 'join' | 'manage';
+	role?: string | undefined;
 } | null>(null);
 
 export function useServerCardContext() {
@@ -94,20 +103,34 @@ const ServerTitle = () => {
 	);
 };
 
-export const ServerCard = ({
-	server,
-	hero = <ServerHero />,
-	title = <ServerTitle />,
-	cta = <ServerCTA />,
-	type,
-}: ServerCardProps) => {
+const ServerRole = () => {
+	const { role } = useServerCardContext();
+	if (!role) return null;
+
 	return (
-		<ServerCardContext.Provider value={{ server, type }}>
+		<span className="text-sm text-gray-600 dark:text-neutral-400">{role}</span>
+	);
+};
+
+export const ServerCard = (props: ServerCardProps) => {
+	const hero = props.hero ?? <ServerHero />;
+	const title = props.title ?? <ServerTitle />;
+	const cta = props.cta ?? <ServerCTA />;
+	const roleComponent = props.roleComponent ?? <ServerRole />;
+	const role = props.type === 'manage' ? props.role : undefined;
+
+	return (
+		<ServerCardContext.Provider
+			value={{ server: props.server, type: props.type, role }}
+		>
 			<div className="grid max-w-xs grid-cols-2 grid-rows-2 gap-3 rounded-lg">
 				{hero}
 
 				<div className="col-span-2 flex flex-row items-center justify-between">
-					{title}
+					<div className="flex flex-col">
+						{title}
+						{props.type === 'manage' ? roleComponent : null}
+					</div>
 					<div className="ml-auto">{cta}</div>
 				</div>
 			</div>
