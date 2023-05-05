@@ -1,5 +1,9 @@
 import { mockServer, mockServerWithFlags } from '@answeroverflow/db-mock';
-import { addFlagsToServer, createServer, Server } from '@answeroverflow/db';
+import {
+	addFlagsToServer,
+	createServer,
+	type Server,
+} from '@answeroverflow/db';
 import { pickPublicServerData } from '~api/test/public-data';
 import {
 	mockAccountWithServersCallerCtx,

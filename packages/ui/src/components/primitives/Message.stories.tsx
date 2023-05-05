@@ -128,3 +128,13 @@ export const Blurred: Story = {
 		},
 	},
 };
+
+export const WithLink: Story = {
+	args: {
+		...Primary.args,
+		message: {
+			...mockMessageWithDiscordAccount(),
+			content: 'Maybe try Googling your question first https://google.com',
+		},
+	},
+};

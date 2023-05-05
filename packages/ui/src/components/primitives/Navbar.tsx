@@ -166,7 +166,7 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 		<NavigationMenu
 			className={
 				sticky
-					? 'fixed top-0 left-0 w-full backdrop-blur-md dark:bg-ao-black/75'
+					? 'fixed left-0 top-0 w-full backdrop-blur-md dark:bg-ao-black/75'
 					: 'relative min-h-[4rem] py-2 sm:px-[4rem] 2xl:px-[6rem]'
 			}
 		>

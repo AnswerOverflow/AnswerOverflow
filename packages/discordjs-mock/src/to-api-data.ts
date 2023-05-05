@@ -1,17 +1,18 @@
 import {
 	Message,
-	APIMessage,
+	type APIMessage,
 	User,
-	APIUser,
-	Channel,
-	APIChannel,
+	type APIUser,
+	type Channel,
+	type APIChannel,
 	ChannelType,
-	APIGuildForumTag,
-	GuildForumTag,
-	APITextChannel,
-	APIDMChannel,
-	APIThreadChannel,
-	APIChannelMention,
+	type APIGuildForumTag,
+	type GuildForumTag,
+	type APITextChannel,
+	type APIDMChannel,
+	type APIThreadChannel,
+	type APIChannelMention,
+	ThreadAutoArchiveDuration,
 } from 'discord.js';
 
 export function userToAPIUser(user: User): APIUser {
@@ -74,7 +75,8 @@ export function channelToAPIChannel(channel: Channel): APIChannel {
 					channel.createdAt?.toISOString() ??
 					new Date().toISOString(),
 				invitable: channel.invitable ?? false,
-				auto_archive_duration: channel.autoArchiveDuration ?? 0,
+				auto_archive_duration:
+					channel.autoArchiveDuration ?? ThreadAutoArchiveDuration.OneDay,
 				archived: channel.archived ?? false,
 			},
 			owner_id: channel.ownerId ?? undefined,

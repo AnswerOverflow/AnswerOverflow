@@ -1,4 +1,4 @@
-import { Session, getServerSession } from '@answeroverflow/auth';
+import { type Session, getServerSession } from '@answeroverflow/auth';
 import type {
 	DiscordAPIServerSchema,
 	getDiscordUser,

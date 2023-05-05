@@ -43,6 +43,7 @@
 		"@total-typescript/ts-reset": "^0.4.2",
 		"tslib": "^2.5.0",
 		"turbo": "latest",
+		"typescript": "^5.0.4",
 		"vite": "^4.1.1",
 		"vitest": "^0.29.8"
 	},

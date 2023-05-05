@@ -6,14 +6,33 @@ import { SessionProvider } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import type { AppType } from 'next/app';
 import hljs from 'highlight.js';
-import { NextTRPC, PageWrapper, trpc, ThemeProvider } from '@answeroverflow/ui';
+import {
+	type NextTRPC,
+	PageWrapper,
+	trpc,
+	ThemeProvider,
+} from '@answeroverflow/ui';
+import { AnalyticsProvider } from '@answeroverflow/hooks';
 import React, { useEffect } from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Heading, Paragraph } from '@answeroverflow/ui';
 import { MDXProvider } from '@mdx-js/react';
-import { useAnalytics } from '@answeroverflow/hooks';
 import Link from 'next/link';
 import type { Components } from '@mdx-js/react/lib';
+import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner';
+import ProgressBar from '@badrap/bar-of-progress';
+import Router from 'next/router';
+
+const progress = new ProgressBar({
+	size: 2,
+	color: '#0094ff',
+	className: 'bar-of-progress',
+	delay: 100,
+});
+
+Router.events.on('routeChangeStart', progress.start);
+Router.events.on('routeChangeComplete', progress.finish);
+Router.events.on('routeChangeError', progress.finish);
 
 const components: Components = {
 	h1: Heading.H1,
@@ -55,22 +74,19 @@ const MyApp: AppType<{ session: Session | null }> = ({
 	}, []);
 
 	// TODO: wow this is ugly but use analytics needs session provider data
-	const WithAnalytics = ({ children }: { children: React.ReactNode }) => {
-		useAnalytics();
-		return <>{children}</>;
-	};
 
 	return (
 		<ThemeProvider>
 			<SessionProvider session={session}>
-				<WithAnalytics>
+				<AnalyticsProvider>
 					<PageWrapper disabledRoutes={['/', '/c/[communityId]']}>
+						<CommitBanner />
 						<MDXProvider components={components}>
 							<Component {...pageProps} />
 						</MDXProvider>
 					</PageWrapper>
 					<ReactQueryDevtools initialIsOpen={false} />
-				</WithAnalytics>
+				</AnalyticsProvider>
 			</SessionProvider>
 		</ThemeProvider>
 	);

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
+import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 import { cn } from '~ui/utils/styling';
 import {
 	CheckIcon,
@@ -9,7 +10,13 @@ import {
 	CircleStackIcon,
 } from '@heroicons/react/24/outline';
 
-const DropdownMenu = DropdownMenuPrimitive.Root;
+const DropdownMenu = (props: DropdownMenuProps) => {
+	return (
+		<DropdownMenuPrimitive.Root modal={false} {...props}>
+			{props.children}
+		</DropdownMenuPrimitive.Root>
+	);
+};
 
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 
@@ -30,7 +37,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
 	<DropdownMenuPrimitive.SubTrigger
 		ref={ref}
 		className={cn(
-			'flex cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm font-medium outline-none focus:bg-slate-100 data-[state=open]:bg-slate-100 dark:focus:bg-slate-700 dark:data-[state=open]:bg-slate-700',
+			'flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm font-medium outline-none focus:bg-slate-100 data-[state=open]:bg-slate-100 dark:focus:bg-slate-700 dark:data-[state=open]:bg-slate-700',
 			inset && 'pl-8',
 			className,
 		)}
@@ -86,7 +93,7 @@ const DropdownMenuItem = React.forwardRef<
 	<DropdownMenuPrimitive.Item
 		ref={ref}
 		className={cn(
-			'relative flex cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm font-medium outline-none focus:bg-slate-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-700',
+			'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm font-medium outline-none focus:bg-slate-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-700',
 			inset && 'pl-8',
 			className,
 		)}

@@ -20,7 +20,7 @@
 		},
 		"format:check": {
 			"outputs": [],
-			"cache": false
+			"cache": true
 		},
 		"lint": {
 			"inputs": [
@@ -70,6 +70,7 @@
 		"DISCORD_TOKEN",
 		"OWNERS",
 		"VERCEL_URL",
+		"NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA",
 		"SITE_URL",
 		"PORT",
 		"DEFAULT_DELAY_IN_MS",
@@ -97,6 +98,7 @@
 		"INDEXING_DISABLED",
 		"MAX_NUMBER_OF_THREADS_TO_COLLECT",
 		"NEXT_PUBLIC_POSTHOG_TOKEN",
+		"STATUS_UPDATE_INTERVAL_IN_HOURS",
 		"PRINT_COMMUNITIES",
 		"MAX_NUMBER_OF_MESSAGES_TO_COLLECT"
 	]

@@ -21,6 +21,7 @@ import {
 	serverToAnalyticsData,
 	threadToAnalyticsData,
 } from '@answeroverflow/constants/src/analytics';
+import { isServer } from '~ui/utils/checks';
 export type MessageResultPageProps = {
 	messages: APIMessageWithDiscordAccount[];
 	server: ServerPublic;
@@ -45,6 +46,7 @@ export function MessageResultPage({
 		firstMessage && firstMessage.content?.length > 0
 			? firstMessage.content
 			: `Questions related to ${channelName} in ${server.name}`;
+	const shouldTrackAnalyticsEvent = isUserInServer !== 'loading' && !isServer();
 
 	// TODO: Ugly
 	useTrackEvent(
@@ -60,7 +62,7 @@ export function MessageResultPage({
 		},
 		{
 			runOnce: true,
-			enabled: isUserInServer !== 'loading',
+			enabled: shouldTrackAnalyticsEvent,
 		},
 	);
 	const solutionMessageId = messages.at(0)?.solutionIds?.at(0);

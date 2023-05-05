@@ -1,14 +1,21 @@
-import { RefObject, useEffect, useState } from 'react';
+import { type RefObject, useEffect, useState } from 'react';
 import { trpc } from './trpc';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 
 export const useIsUserInServer = (serverId: string) => {
 	const session = useSession();
-	const { data: servers } = trpc.auth.getServers.useQuery(undefined, {
-		enabled: session.status === 'authenticated',
-	});
-	if (!servers) return 'loading';
+	const { data: servers, isLoading } = trpc.auth.getServers.useQuery(
+		undefined,
+		{
+			enabled: session.status === 'authenticated',
+		},
+	);
+
+	if (session.status === 'unauthenticated') {
+		return 'not_in_server';
+	}
+	if (isLoading) return 'loading';
 	// Return string types to avoid accidental boolean casting
 	return servers?.some((s) => s.id === serverId)
 		? 'in_server'

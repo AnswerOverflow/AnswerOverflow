@@ -302,6 +302,7 @@ describe('ElasticSearch', () => {
 			expect(count).toBe(0);
 		});
 	});
+
 	describe('find latest message in channel', () => {
 		it('should return the latest message in a channel', async () => {
 			await elastic.upsertMessage(msg1);

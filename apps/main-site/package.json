@@ -5,7 +5,7 @@
 	"scripts": {
 		"with-env": "dotenv -e ../../.env --",
 		"dev": "yarn with-env next dev",
-		"build": "yarn with-env next build",
+		"build": "(cd ../../ && yarn db:generate) && yarn with-env next build",
 		"clean": "rm -rf .next .turbo node_modules",
 		"start": "yarn run with-env next start",
 		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
@@ -22,11 +22,12 @@
 		"@answeroverflow/hooks": "*",
 		"@answeroverflow/tailwind-config": "*",
 		"@answeroverflow/ui": "*",
+		"@badrap/bar-of-progress": "^0.2.2",
 		"@mdx-js/loader": "^2.3.0",
 		"@mdx-js/react": "^2.3.0",
 		"@next/font": "^13.1.2",
 		"@next/mdx": "^13.2.4",
-		"@sentry/nextjs": "^7.45.0",
+		"@sentry/nextjs": "^7.50.0",
 		"@tanstack/react-query": "^4.19.0",
 		"@tanstack/react-query-devtools": "^4.26.1",
 		"@trpc/client": "^10.4.3",
@@ -40,7 +41,6 @@
 		"raw-body": "^2.5.2",
 		"react": "18.2.0",
 		"react-dom": "18.2.0",
-		"react-fast-marquee": "^1.3.5",
 		"sharp": "^0.32.0",
 		"superjson": "^1.9.1",
 		"zod": "^3.20.6"
@@ -58,7 +58,6 @@
 		"eslint-config-next": "13.2.4",
 		"postcss": "^8.4.19",
 		"sass": "^1.59.3",
-		"tailwindcss": "^3.2.4",
-		"typescript": "^4.9.4"
+		"tailwindcss": "^3.2.4"
 	}
 }

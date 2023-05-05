@@ -14,7 +14,7 @@ import {
 	Message,
 	EmbedBuilder,
 	User,
-	GuildTextBasedChannel,
+	type GuildTextBasedChannel,
 	Client,
 } from 'discord.js';
 import type { ReactNode } from 'react';
@@ -162,6 +162,10 @@ export function isHumanMessage(message: Message) {
 	if (message.author.bot) return false;
 	if (message.author.system) return false;
 	return true;
+}
+
+export function hoursToMs(hours: number) {
+	return hours * 60 * 60 * 1000;
 }
 
 export function printCommunities(client: Client) {

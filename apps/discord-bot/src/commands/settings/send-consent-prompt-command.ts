@@ -1,9 +1,9 @@
 import { ApplyOptions } from '@sapphire/decorators';
-import { ChatInputCommand, Command } from '@sapphire/framework';
+import { type ChatInputCommand, Command } from '@sapphire/framework';
 import {
 	ChannelType,
 	ChatInputCommandInteraction,
-	GuildTextBasedChannel,
+	type GuildTextBasedChannel,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 } from 'discord.js';

@@ -11,7 +11,7 @@ export const GoogleSearchBar = () => {
 					className="object-contain"
 				/>
 			</div>
-			<div className="w-full grow rounded-[24px] bg-[#303134] py-3 px-5 font-sans text-[#e8eaed]">
+			<div className="w-full grow rounded-[24px] bg-[#303134] px-5 py-3 font-sans text-[#e8eaed]">
 				<span className="whitespace-nowrap">
 					How do I index my discord channels into google?
 				</span>

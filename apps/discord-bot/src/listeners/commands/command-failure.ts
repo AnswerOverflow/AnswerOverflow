@@ -1,11 +1,11 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import {
-	ChatInputCommandErrorPayload,
-	CommandDoesNotHaveChatInputCommandHandlerPayload,
-	CommandDoesNotHaveContextMenuCommandHandlerPayload,
+	type ChatInputCommandErrorPayload,
+	type CommandDoesNotHaveChatInputCommandHandlerPayload,
+	type CommandDoesNotHaveContextMenuCommandHandlerPayload,
 	Events,
-	UnknownChatInputCommandPayload,
-	UnknownContextMenuCommandPayload,
+	type UnknownChatInputCommandPayload,
+	type UnknownContextMenuCommandPayload,
 } from '@sapphire/framework';
 import { Listener } from '@sapphire/framework';
 import type { ContextMenuCommandInteraction, Interaction } from 'discord.js';

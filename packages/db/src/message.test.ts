@@ -29,7 +29,8 @@ import {
 import { createServer } from './server';
 import { createChannel } from './channel';
 import { createDiscordAccount, deleteDiscordAccount } from './discord-account';
-import { createUserServerSettings, Message } from '..';
+import type { Message } from '@answeroverflow/elastic-types';
+import { createUserServerSettings } from './user-server-settings';
 import { getRandomId } from '@answeroverflow/utils';
 
 describe('Message Operations', () => {
