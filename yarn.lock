@@ -11975,6 +11975,11 @@ next@^13.3.0:
     "@next/swc-win32-ia32-msvc" "13.3.1"
     "@next/swc-win32-x64-msvc" "13.3.1"
 
+nextjs@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/nextjs/-/nextjs-0.0.3.tgz#4f4d1d6a257be920d9b9649d4d9522c724a4e543"
+  integrity sha512-mYbDUo4/sRAZ8TqK63PCpYnFiLg7BICG/ot9+guOrUKd4/Fo71ZmEQ41IZbH6nqbQvG7SXTBuofJXAIWfNho0w==
+
 nextra-theme-docs@^2.4.1:
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/nextra-theme-docs/-/nextra-theme-docs-2.4.1.tgz#1a90a6ba08813dde344a4a8cef38c83c07973a30"
