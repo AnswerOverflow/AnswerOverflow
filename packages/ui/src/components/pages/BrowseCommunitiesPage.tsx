@@ -17,13 +17,15 @@ export const BrowseCommunitiesRenderer = ({
 				path="/communities"
 			/>
 
-			<Heading.H1 className="my-16">Browse Communities</Heading.H1>
-			<div className="grid grid-cols-4 gap-12">
+			<Heading.H1 className="my-16 text-4xl md:text-5xl">
+				Browse Communities
+			</Heading.H1>
+			<div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				{servers.map((server) => {
 					return (
 						<FollowCursor
 							key={`server-${server.id}-area`}
-							className="rounded-md bg-neutral-900 p-4 drop-shadow-xl hover:scale-105"
+							className="w-full justify-self-center rounded-md bg-ao-black/[0.03] p-4 drop-shadow-xl hover:scale-105 dark:bg-ao-white/[0.01] md:max-w-sm"
 						>
 							<ViewServerCard server={server} />
 						</FollowCursor>
