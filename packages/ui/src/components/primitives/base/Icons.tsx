@@ -47,7 +47,7 @@ export function DiscordIcon(
 }
 
 import * as React from 'react';
-import { classNames } from '~ui/utils/styling';
+import { classNames, cn } from '~ui/utils/styling';
 
 export function AnswerOverflowLogo({
 	className,
@@ -139,7 +139,7 @@ export const ExternalLinkIcon = () => {
 	);
 };
 
-export const CopyIcon = () => {
+export const CopyIcon = ({ className }: { className?: string }) => {
 	return (
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
@@ -147,7 +147,7 @@ export const CopyIcon = () => {
 			viewBox="0 0 24 24"
 			strokeWidth={1.5}
 			stroke="currentColor"
-			className="h-4 w-4"
+			className={cn('h-4 w-4', className)}
 		>
 			<path
 				strokeLinecap="round"
