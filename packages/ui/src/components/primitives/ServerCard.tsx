@@ -44,20 +44,18 @@ const ServerHero = () => {
 	const { server } = useServerCardContext();
 
 	return (
-		<div className="col-span-2 col-start-1 row-span-2 row-start-1">
-			<div className="relative mx-auto aspect-video rounded-lg">
-				{server.icon && (
-					<Image
-						src={`https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png`}
-						alt={server.name}
-						fill
-						className="h-full w-full overflow-hidden rounded-lg object-cover opacity-25"
-					/>
-				)}
-				<div className="relative z-10 h-full w-full rounded-lg bg-black/5 shadow-md backdrop-blur-md " />
-				<div className="absolute inset-0 z-20 flex items-center justify-center">
-					{server && <ServerIcon server={server} size={'lg'} />}
-				</div>
+		<div className="relative mx-auto aspect-video w-full rounded-lg">
+			{server.icon && (
+				<Image
+					src={`https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png`}
+					alt={server.name}
+					fill
+					className="h-full w-full overflow-hidden rounded-lg object-cover opacity-25"
+				/>
+			)}
+			<div className="relative z-10 h-full w-full rounded-lg bg-black/5 shadow-md backdrop-blur-md " />
+			<div className="absolute inset-0 z-20 flex items-center justify-center">
+				{server && <ServerIcon server={server} size={'lg'} />}
 			</div>
 		</div>
 	);
@@ -76,9 +74,9 @@ const ServerTitle = () => {
 export const ServerCard = (props: ServerCardProps) => {
 	return (
 		<ServerCardContext.Provider value={{ server: props.server }}>
-			<div className="grid max-h-64 grid-cols-2 grid-rows-2 gap-3 rounded-lg md:max-h-none lg:max-w-md">
+			<div className="flex max-w-md flex-col gap-3 rounded-lg">
 				{props.hero ?? <ServerHero />}
-				<div className="col-span-2 flex w-full flex-row items-center justify-between align-bottom">
+				<div className="flex w-full flex-row items-center justify-between align-bottom">
 					{props.about ?? (
 						<>
 							<div className="flex flex-col">
