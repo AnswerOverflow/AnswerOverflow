@@ -102,7 +102,11 @@ const ViewServerAbout = () => {
 		<div className="flex w-full flex-col gap-4">
 			<div className="flex w-full flex-row items-center justify-between gap-2">
 				<ServerTitle />
-				<LinkButton href={`/c/${server.id}`} variant={'default'}>
+				<LinkButton
+					className="ml-4"
+					href={`/c/${server.id}`}
+					variant={'default'}
+				>
 					View
 				</LinkButton>
 			</div>
