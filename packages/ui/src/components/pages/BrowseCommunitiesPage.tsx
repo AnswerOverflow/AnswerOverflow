@@ -25,7 +25,7 @@ export const BrowseCommunitiesRenderer = ({
 					return (
 						<FollowCursor
 							key={`server-${server.id}-area`}
-							className="w-full justify-self-center rounded-md bg-ao-black/[0.03] p-4 drop-shadow-xl hover:scale-105 dark:bg-ao-white/[0.01] md:max-w-sm"
+							className="w-full max-w-md rounded-md bg-ao-black/[0.03] p-4 drop-shadow-xl hover:scale-105 dark:bg-ao-white/[0.01]"
 						>
 							<ViewServerCard server={server} />
 						</FollowCursor>
