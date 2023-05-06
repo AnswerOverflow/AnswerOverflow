@@ -15,12 +15,15 @@ import { createServer } from './server';
 import { createDiscordAccount } from './discord-account';
 import {
 	CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE,
+	countConsentingUsersInManyServers,
+	countConsentingUsersInServer,
 	createUserServerSettings,
 	findUserServerSettingsById,
 	updateUserServerSettings,
 } from './user-server-settings';
 import { findMessageById, upsertMessage } from './message';
 import { createChannel } from './channel';
+import { getRandomId } from '@answeroverflow/utils';
 
 let server: Server;
 let account: DiscordAccount;
@@ -169,6 +172,96 @@ describe('User Server Settings', () => {
 			).rejects.toThrowError(
 				CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE,
 			);
+		});
+	});
+	describe('Count Consenting Users', () => {
+		it('should return 0 for no users', async () => {
+			const num = await countConsentingUsersInServer(getRandomId());
+			expect(num).toBe(0n);
+		});
+		it('should return 0 for no users with consent', async () => {
+			await createUserServerSettings({
+				serverId: server.id,
+				userId: account.id,
+				flags: {
+					canPubliclyDisplayMessages: false,
+				},
+			});
+			const num = await countConsentingUsersInServer(server.id);
+			expect(num).toBe(0n);
+		});
+		it('should return 1 for 1 user with consent', async () => {
+			await createUserServerSettings({
+				serverId: server.id,
+				userId: account.id,
+				flags: {
+					canPubliclyDisplayMessages: true,
+				},
+			});
+			const num = await countConsentingUsersInServer(server.id);
+			expect(num).toBe(1n);
+		});
+		it('should return 0 when every other flag is set', async () => {
+			await createUserServerSettings({
+				serverId: server.id,
+				userId: account.id,
+				flags: {
+					canPubliclyDisplayMessages: false,
+					messageIndexingDisabled: true,
+				},
+			});
+			const num = await countConsentingUsersInServer(server.id);
+			expect(num).toBe(0n);
+		});
+	});
+	describe('Count Consenting Users In Many Servers', () => {
+		let serverB: Server;
+		beforeEach(async () => {
+			serverB = await createServer(mockServer());
+		});
+		it('should return for each server with 1 user with consent', async () => {
+			await createUserServerSettings({
+				serverId: server.id,
+				userId: account.id,
+				flags: {
+					canPubliclyDisplayMessages: true,
+				},
+			});
+			await createUserServerSettings({
+				serverId: serverB.id,
+				userId: account.id,
+				flags: {
+					canPubliclyDisplayMessages: true,
+				},
+			});
+			const num = await countConsentingUsersInManyServers([
+				server.id,
+				serverB.id,
+			]);
+			expect(num.get(server.id)).toBe(1n);
+			expect(num.get(serverB.id)).toBe(1n);
+		});
+		it('should return 0 for each server with no users with consent', async () => {
+			await createUserServerSettings({
+				serverId: server.id,
+				userId: account.id,
+				flags: {
+					canPubliclyDisplayMessages: false,
+				},
+			});
+			await createUserServerSettings({
+				serverId: serverB.id,
+				userId: account.id,
+				flags: {
+					canPubliclyDisplayMessages: false,
+				},
+			});
+			const num = await countConsentingUsersInManyServers([
+				server.id,
+				serverB.id,
+			]);
+			expect(num.get(server.id)).toBe(0n);
+			expect(num.get(serverB.id)).toBe(0n);
 		});
 	});
 });

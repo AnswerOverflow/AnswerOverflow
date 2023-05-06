@@ -40,6 +40,7 @@
 		"highlight.js": "^11.7.0",
 		"next": "^13.4.1",
 		"react-fast-marquee": "^1.4.0",
+		"react-spring": "^9.7.1",
 		"react-use": "^17.4.0",
 		"react-use-measure": "^2.1.1",
 		"react-wrap-balancer": "^0.4.0",

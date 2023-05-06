@@ -3,13 +3,13 @@ import { LinkButton } from './base';
 import { ServerIcon } from './ServerIcon';
 import Image from 'next/image';
 import { createContext, useContext } from 'react';
+import { getServerDescription } from '~ui/utils/other';
 
 export type ServerCardProps = {
 	server: ServerPublic;
-	hero?: React.ReactNode;
-	description?: React.ReactNode;
-	cta?: React.ReactNode;
 	className?: string;
+	hero?: React.ReactNode;
+	about?: React.ReactNode;
 };
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -49,7 +49,7 @@ const ServerHero = () => {
 				{server.icon && (
 					<Image
 						src={`https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png`}
-						alt={server?.name}
+						alt={server.name}
 						fill
 						className="h-full w-full overflow-hidden rounded-lg object-cover opacity-25"
 					/>
@@ -68,25 +68,51 @@ const ServerTitle = () => {
 
 	return (
 		<span className="text-base font-bold text-black dark:text-neutral-300">
-			{server?.name}
+			{server.name}
 		</span>
 	);
 };
 
 export const ServerCard = (props: ServerCardProps) => {
-	const hero = props.hero ?? <ServerHero />;
-	const title = props.description ?? <ServerTitle />;
-	const cta = props.cta ?? <ServerCTA />;
 	return (
 		<ServerCardContext.Provider value={{ server: props.server }}>
 			<div className="grid max-w-xs grid-cols-2 grid-rows-2 gap-3 rounded-lg">
-				{hero}
-
-				<div className="col-span-2 flex flex-row items-center justify-between">
-					<div className="flex flex-col">{title}</div>
-					<div className="ml-auto">{cta}</div>
+				{props.hero ?? <ServerHero />}
+				<div className="col-span-2 flex w-full flex-row items-center justify-between align-bottom">
+					{props.about ?? (
+						<>
+							<div className="flex flex-col">
+								<ServerTitle />
+							</div>
+							<div className="ml-auto">
+								<ServerCTA />
+							</div>
+						</>
+					)}
 				</div>
 			</div>
 		</ServerCardContext.Provider>
 	);
+};
+
+const ViewServerAbout = () => {
+	const { server } = useServerCardContext();
+
+	return (
+		<div className="flex flex-col gap-4">
+			<div className="flex w-full flex-row items-center justify-between gap-2">
+				<ServerTitle />
+				<LinkButton href={`/c/${server.id}`} variant={'default'}>
+					View
+				</LinkButton>
+			</div>
+			<span className="text-sm text-neutral-500 dark:text-neutral-400">
+				{getServerDescription(server)}
+			</span>
+		</div>
+	);
+};
+
+export const ViewServerCard = (props: ServerCardProps) => {
+	return <ServerCard {...props} about={<ViewServerAbout />} />;
 };

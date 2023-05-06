@@ -1,6 +1,10 @@
 import { BrowseCommunitiesRenderer } from '@answeroverflow/ui/src/components/pages/BrowseCommunitiesPage';
-import { findAllServers, zServerPublic } from '@answeroverflow/db';
-import { InferGetStaticPropsType } from 'next';
+import {
+	countConsentingUsersInManyServers,
+	findAllServers,
+	zServerPublic,
+} from '@answeroverflow/db';
+import { type InferGetStaticPropsType } from 'next';
 
 export default function BrowseCommunitiesPage(
 	props: InferGetStaticPropsType<typeof getStaticProps>,
@@ -13,14 +17,26 @@ export async function getStaticProps() {
 	const nonKickedServers = servers.filter(
 		(server) => server.kickedTime === null,
 	);
-	const asPublic = nonKickedServers.map((server) =>
+	const consentingUserCountPerServer = await countConsentingUsersInManyServers(
+		nonKickedServers.map((server) => server.id),
+	);
+
+	const serversWithMoreThanTenConsentingUsers = nonKickedServers.filter(
+		(server) => (consentingUserCountPerServer.get(server.id) ?? 0) > 10,
+	);
+
+	const serversByNameAlphabetical = serversWithMoreThanTenConsentingUsers.sort(
+		(a, b) => a.name.localeCompare(b.name),
+	);
+
+	const asPublic = serversByNameAlphabetical.map((server) =>
 		zServerPublic.parse(server),
 	);
 	return {
 		props: {
 			servers: asPublic,
 		},
-		// every day
 		revalidate: 60 * 60 * 24,
+		// every day
 	};
 }
