@@ -1,19 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { BrowseCommunitiesPage } from './BrowseCommunitiesPage';
+import { BrowseCommunitiesRenderer } from './BrowseCommunitiesPage';
 import { mockServer } from '~ui/test/props';
 import { PageWrapper } from './PageWrapper';
 const meta = {
-	component: BrowseCommunitiesPage,
+	component: BrowseCommunitiesRenderer,
 	parameters: {
 		layout: 'fullscreen',
 	},
 	render: (args) => (
 		<PageWrapper>
-			<BrowseCommunitiesPage {...args} />
+			<BrowseCommunitiesRenderer {...args} />
 		</PageWrapper>
 	),
-} as Meta<typeof BrowseCommunitiesPage>;
+} as Meta<typeof BrowseCommunitiesRenderer>;
 
 export default meta;
 

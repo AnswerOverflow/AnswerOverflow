@@ -5,7 +5,7 @@ interface BrowseCommunitiesPageProps {
 	servers: ServerPublic[];
 }
 
-export const BrowseCommunitiesPage = ({
+export const BrowseCommunitiesRenderer = ({
 	servers,
 }: BrowseCommunitiesPageProps) => {
 	return (
@@ -17,14 +17,10 @@ export const BrowseCommunitiesPage = ({
 			/>
 
 			<Heading.H1 className="my-16">Browse Communities</Heading.H1>
-			<div className="grid grid-cols-4 gap-x-4 gap-y-8">
+			<div className="grid grid-cols-4 gap-x-8">
 				{servers.map((server) => {
 					return (
-						<ServerCard
-							server={server}
-							key={`server-${server.id}-area`}
-							type="join"
-						/>
+						<ServerCard server={server} key={`server-${server.id}-area`} />
 					);
 				})}
 			</div>

@@ -38,7 +38,7 @@
 		"discord-markdown": "^2.5.1",
 		"gsap": "^3.11.4",
 		"highlight.js": "^11.7.0",
-		"next": "13.3.0",
+		"next": "^13.4.1",
 		"react-fast-marquee": "^1.4.0",
 		"react-use": "^17.4.0",
 		"react-use-measure": "^2.1.1",

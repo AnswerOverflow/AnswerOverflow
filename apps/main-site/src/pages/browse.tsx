@@ -1,13 +1,26 @@
-'use server';
-import { BrowseCommunitiesPage } from '@answeroverflow/ui/src/components/pages/BrowseCommunitiesPage';
-import { findAllServers } from '@answeroverflow/db';
+import { BrowseCommunitiesRenderer } from '@answeroverflow/ui/src/components/pages/BrowseCommunitiesPage';
+import { findAllServers, zServerPublic } from '@answeroverflow/db';
+import { InferGetStaticPropsType } from 'next';
 
-const BrowseCommunitiesPageWeb = async () => {
-	const servers = (await findAllServers()).filter(
-		(server) => server.kickedTime !== null,
+export default function BrowseCommunitiesPage(
+	props: InferGetStaticPropsType<typeof getStaticProps>,
+) {
+	return <BrowseCommunitiesRenderer {...props} />;
+}
+
+export async function getStaticProps() {
+	const servers = await findAllServers();
+	const nonKickedServers = servers.filter(
+		(server) => server.kickedTime === null,
 	);
-
-	return <BrowseCommunitiesPage servers={servers} />;
-};
-
-export default BrowseCommunitiesPageWeb;
+	const asPublic = nonKickedServers.map((server) =>
+		zServerPublic.parse(server),
+	);
+	return {
+		props: {
+			servers: asPublic,
+		},
+		// every day
+		revalidate: 60 * 60 * 24,
+	};
+}

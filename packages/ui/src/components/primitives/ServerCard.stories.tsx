@@ -17,8 +17,6 @@ WithImageManageCard.args = {
 		id: '952724385238761475',
 		icon: '4e610bdea5aacf259013ed8cada0bc1d',
 	}),
-	role: 'Test Role',
-	type: 'manage',
 };
 
 export const JoinServerNoVanity = Template.bind({});
@@ -28,7 +26,6 @@ JoinServerNoVanity.args = {
 		id: '952724385238761475',
 		icon: '4e610bdea5aacf259013ed8cada0bc1d',
 	}),
-	type: 'join',
 };
 
 export const JoinServerWithVanity = Template.bind({});
@@ -39,5 +36,4 @@ JoinServerWithVanity.args = {
 		icon: '4e610bdea5aacf259013ed8cada0bc1d',
 		vanityUrl: 'answeroverflow',
 	}),
-	type: 'join',
 };

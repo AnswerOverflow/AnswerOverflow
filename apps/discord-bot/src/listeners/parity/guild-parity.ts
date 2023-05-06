@@ -5,6 +5,8 @@ import {
 	ALLOWED_ROOT_CHANNEL_TYPES,
 	upsertServer,
 	upsertManyChannels,
+	findAllServers,
+	updateServer,
 } from '@answeroverflow/db';
 import { toAOChannel, toAOServer } from '~discord-bot/utils/conversions';
 import { delay } from '@answeroverflow/discordjs-mock';
@@ -100,10 +102,28 @@ export class SyncOnReady extends Listener {
 		// 1. Sync all of the servers to have the most up to date data
 		const guilds = this.container.client.guilds.cache;
 		const syncs = guilds.map((guild) => syncServer(guild));
+		const activeServerIds = new Set();
 		for await (const sync of syncs) {
 			this.container.logger.info(`Synced server ${sync.name}`);
+			activeServerIds.add(sync.id);
 		}
 		// 2. For any servers that are in the database and not in the guilds the bot is in, mark them as kicked
+		const servers = await findAllServers();
+		const serversToMarkAsKicked = servers.filter(
+			(server) => !activeServerIds.has(server.id) && !server.kickedTime,
+		);
+		const kicks = serversToMarkAsKicked.map((server) =>
+			updateServer({
+				existing: server,
+				update: {
+					id: server.id,
+					kickedTime: new Date(),
+				},
+			}),
+		);
+		for await (const kick of kicks) {
+			this.container.logger.info(`Kicked server ${kick.name}`);
+		}
 	}
 }
 @ApplyOptions<Listener.Options>({
