@@ -9,9 +9,9 @@ const config: StorybookConfig = {
 		'@storybook/addon-interactions',
 		'@storybook/addon-a11y',
 		{
-			name: '@storybook/addon-postcss',
+			name: '@storybook/addon-styling',
 			options: {
-				postcssLoaderOptions: {
+				postCss: {
 					implementation: postcss,
 				},
 			},
