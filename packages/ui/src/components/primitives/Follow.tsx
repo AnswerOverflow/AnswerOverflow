@@ -11,10 +11,6 @@ const calc = (x: number, y: number, ref: React.RefObject<HTMLDivElement>) => {
 	];
 };
 
-export interface ICard {
-	image: String;
-}
-
 export const FollowCursor = (props: {
 	className?: string;
 	children: React.ReactNode;
