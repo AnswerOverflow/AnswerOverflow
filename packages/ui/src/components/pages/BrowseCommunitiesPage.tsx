@@ -1,6 +1,5 @@
 import type { ServerPublic } from '~api/router/server/types';
 import { AOHead, Heading, ViewServerCard } from '../primitives';
-import { FollowCursor } from '../primitives/Follow';
 
 interface BrowseCommunitiesPageProps {
 	servers: ServerPublic[];
@@ -23,12 +22,12 @@ export const BrowseCommunitiesRenderer = ({
 			<div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				{servers.map((server) => {
 					return (
-						<FollowCursor
+						<div
 							key={`server-${server.id}-area`}
-							className="w-full max-w-md rounded-md bg-ao-black/[0.03] p-4 drop-shadow-xl hover:scale-105 dark:bg-ao-white/[0.01]"
+							className="w-full max-w-md rounded-md  p-4 transition-all"
 						>
 							<ViewServerCard server={server} />
-						</FollowCursor>
+						</div>
 					);
 				})}
 			</div>
