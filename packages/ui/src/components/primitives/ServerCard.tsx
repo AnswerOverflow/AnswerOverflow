@@ -76,7 +76,7 @@ const ServerTitle = () => {
 export const ServerCard = (props: ServerCardProps) => {
 	return (
 		<ServerCardContext.Provider value={{ server: props.server }}>
-			<div className="grid max-w-xs grid-cols-2 grid-rows-2 gap-3 rounded-lg">
+			<div className="grid max-h-64 grid-cols-2 grid-rows-2 gap-3 rounded-lg md:max-h-none lg:max-w-md">
 				{props.hero ?? <ServerHero />}
 				<div className="col-span-2 flex w-full flex-row items-center justify-between align-bottom">
 					{props.about ?? (
@@ -99,7 +99,7 @@ const ViewServerAbout = () => {
 	const { server } = useServerCardContext();
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="flex w-full flex-col gap-4">
 			<div className="flex w-full flex-row items-center justify-between gap-2">
 				<ServerTitle />
 				<LinkButton href={`/c/${server.id}`} variant={'default'}>
