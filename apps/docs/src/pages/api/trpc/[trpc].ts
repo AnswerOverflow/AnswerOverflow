@@ -1,7 +1,7 @@
 import { createNextApiHandler } from '@trpc/server/adapters/next';
 import { createContext } from '@answeroverflow/api';
 import { appRouter } from '@answeroverflow/api';
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next/types';
 
 // create the API handler, but don't return it yet
 const nextApiHandler = createNextApiHandler({
@@ -10,7 +10,10 @@ const nextApiHandler = createNextApiHandler({
 });
 
 // @see https://nextjs.org/docs/api-routes/introduction
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default function handler(
+	req: NextApiRequest,
+	res: NextApiResponse<any>,
+) {
 	// Only enable CORS in development for accessing through Storybook
 	if (process.env.NODE_ENV !== 'production') {
 		// Modify `req` and `res` objects here

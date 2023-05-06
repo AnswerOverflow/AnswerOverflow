@@ -143,7 +143,7 @@ export async function countConsentingUsersInManyServers(serverIds: string[]) {
 	return new Map(
 		serverIds.map((x) => {
 			const count = asMap.get(x);
-			return [x, count ?? 0n];
+			return [x, count ?? BigInt(0)];
 		}),
 	);
 }
