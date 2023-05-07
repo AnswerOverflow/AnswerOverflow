@@ -5,7 +5,7 @@ export * from './AOHead';
 export * from './Callouts';
 export * from './DiscordAvatar';
 export * from './Footer';
-export * from './ManageServerCard';
+export * from './ServerCard';
 export * from './Message';
 export * from './Navbar';
 export * from './SearchBar';

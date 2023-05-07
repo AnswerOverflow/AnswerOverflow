@@ -16,15 +16,15 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@answeroverflow/analytics": "*",
 		"@answeroverflow/auth": "*",
 		"@answeroverflow/cache": "*",
 		"@answeroverflow/db": "*",
-		"@answeroverflow/analytics": "*",
 		"@answeroverflow/discordjs-utils": "*",
 		"@answeroverflow/utils": "*",
 		"@sapphire/bitfield": "^1.0.0",
-		"@trpc/client": "^10.4.3",
-		"@trpc/server": "^10.4.3",
+		"@trpc/client": "^10.25.0",
+		"@trpc/server": "^10.25.0",
 		"discord.js": "^14.8.0",
 		"dotenv-cra": "^3.0.3",
 		"superjson": "^1.9.1",

@@ -1,7 +1,6 @@
 {
 	"extends": "@answeroverflow/tsconfig/nextjs.json",
 	"compilerOptions": {
-		"target": "es2017",
 		"baseUrl": "../../"
 	},
 	"include": [

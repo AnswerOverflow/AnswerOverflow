@@ -22,6 +22,7 @@ import {
 	AOHead,
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
+import { getServerDescription } from '~ui/utils/other';
 
 type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];
@@ -114,8 +115,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 								<div className="hidden md:ml-16 md:flex md:flex-col">
 									<Heading.H1 className="pt-0">{server.name}</Heading.H1>
 									<Heading.H2 className="text-xl font-normal">
-										{server.description ??
-											`${server.name} community. Join the community to ask questions about ${server.name} and get answers from other members.`}
+										{getServerDescription(server)}
 									</Heading.H2>
 									<ServerInviteJoinButton className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0" />
 								</div>

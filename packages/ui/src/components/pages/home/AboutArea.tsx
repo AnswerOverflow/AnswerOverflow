@@ -1,4 +1,4 @@
-import { Heading, Paragraph } from '~ui/components/primitives';
+import { Heading, LinkButton, Paragraph } from '~ui/components/primitives';
 import Balancer from 'react-wrap-balancer';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -192,6 +192,7 @@ const FeaturedCommunitiesSection = (props: { className?: string }) => {
 					</div>
 				))}
 			</div>
+			<LinkButton href="/browse">View All Communities</LinkButton>
 		</div>
 	);
 };

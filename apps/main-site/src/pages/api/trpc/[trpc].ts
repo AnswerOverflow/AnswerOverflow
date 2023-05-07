@@ -1,8 +1,8 @@
 import { createNextApiHandler } from '@trpc/server/adapters/next';
 import { createContext } from '@answeroverflow/api';
 import { appRouter } from '@answeroverflow/api';
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { finishAnalyticsCollection } from '@answeroverflow/analytics';
+import type { NextApiRequest, NextApiResponse } from 'next/types';
 
 // create the API handler, but don't return it yet
 const nextApiHandler = createNextApiHandler({
@@ -13,7 +13,7 @@ const nextApiHandler = createNextApiHandler({
 // @see https://nextjs.org/docs/api-routes/introduction
 export default async function handler(
 	req: NextApiRequest,
-	res: NextApiResponse,
+	res: NextApiResponse<any>,
 ) {
 	// Only enable CORS in development for accessing through Storybook
 	if (process.env.NODE_ENV !== 'production') {
@@ -32,6 +32,8 @@ export default async function handler(
 	}
 
 	// pass the (modified) req/res to the handler
+	// weird type errors even though they're the same
+	// @ts-expect-error
 	const trpcOutput = await nextApiHandler(req, res);
 	await finishAnalyticsCollection();
 	return trpcOutput;
