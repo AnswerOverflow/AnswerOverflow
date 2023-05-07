@@ -108,7 +108,7 @@ const ViewServerAbout = () => {
 					View
 				</LinkButton>
 			</div>
-			<span className="text-sm text-neutral-500 dark:text-neutral-400">
+			<span className="text-sm text-neutral-600 dark:text-neutral-400">
 				{getServerDescription(server)}
 			</span>
 		</div>

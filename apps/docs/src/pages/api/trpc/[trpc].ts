@@ -31,5 +31,6 @@ export default function handler(
 	}
 
 	// pass the (modified) req/res to the handler
+	// weird type errors even though they're the same
 	return nextApiHandler(req, res);
 }

@@ -4466,10 +4466,10 @@
   resolved "https://registry.yarnpkg.com/@total-typescript/ts-reset/-/ts-reset-0.4.2.tgz#c564c173ba09973968e1046c93965b7a257878a4"
   integrity sha512-vqd7ZUDSrXFVT1n8b2kc3LnklncDQFPvR58yUS1kEP23/nHPAO9l1lMjUfnPrXYYk4Hj54rrLKMW5ipwk7k09A==
 
-"@trpc/client@^10.4.3":
-  version "10.21.1"
-  resolved "https://registry.yarnpkg.com/@trpc/client/-/client-10.21.1.tgz#1cc86ffddaabd7368b43b50070f2ca98bbfc460d"
-  integrity sha512-oZgPbghs9y2frTCA9mZPSAlVknV9stCTKYO5nsvRr0aX+oaA0URoXJTKZTSpLZxLfuwWgxBj4iTiCWWWmaVelw==
+"@trpc/client@^10.25.0":
+  version "10.25.0"
+  resolved "https://registry.yarnpkg.com/@trpc/client/-/client-10.25.0.tgz#ecd35e2ca5bbda9dd746a52e5342a5feebb06c10"
+  integrity sha512-XWuzbbACX2fzB9UHVkPJtaaAeFiyPjQSC3YgnRtDwjQx03/nt7OsxTBxvG0kblCN0Z2zZrnLF65aDrMJEP43LQ==
 
 "@trpc/next@^10.19.1":
   version "10.21.1"
@@ -4478,15 +4478,22 @@
   dependencies:
     react-ssr-prepass "^1.5.0"
 
-"@trpc/react-query@^10.4.3":
-  version "10.21.1"
-  resolved "https://registry.yarnpkg.com/@trpc/react-query/-/react-query-10.21.1.tgz#9e8717449f133b5a6944549f43d1f185c1955615"
-  integrity sha512-sCLJW9v79sJhVj3L6Ck74mImvKBXrq2KOKtdguxaZZ5rgeqMyQuc8bGHRpf9yfeV08uMNl4Svz1QTee9PjdSqg==
+"@trpc/next@^10.25.0":
+  version "10.25.0"
+  resolved "https://registry.yarnpkg.com/@trpc/next/-/next-10.25.0.tgz#08f40c3813219384783d69247bb09a3acfea9535"
+  integrity sha512-cKvW8ktu7IKbPMobx7lzAPzXUG+vGofQtoQ76P0fmKj2ckh9chDMUnOa6XUaXm8InJrq1HM3gamf35zzGz3gqQ==
+  dependencies:
+    react-ssr-prepass "^1.5.0"
 
-"@trpc/server@^10.4.3":
-  version "10.21.1"
-  resolved "https://registry.yarnpkg.com/@trpc/server/-/server-10.21.1.tgz#42a321d8199b4ad800b9e786b4249a9b6df45d6c"
-  integrity sha512-4E4upTD2/Aq0Dm9HW4nbKSoIlqbV/ajRqNl1MCFBd9FjTv47qq2ncmAWMbb0AIVh2UV87PJlTjpPNNecRm6g9Q==
+"@trpc/react-query@^10.25.0":
+  version "10.25.0"
+  resolved "https://registry.yarnpkg.com/@trpc/react-query/-/react-query-10.25.0.tgz#765703c39380dff94056ef327868268356599eb7"
+  integrity sha512-6+gHPjEo4ocTwgij5fLqEwTP6ud1ZW48Kt/STM8Kgz8/Vj7QhBSbGVEmUL++/8MD3Ro1SEBV63DTc1t7vMEZ/Q==
+
+"@trpc/server@^10.25.0":
+  version "10.25.0"
+  resolved "https://registry.yarnpkg.com/@trpc/server/-/server-10.25.0.tgz#2e578b0ef20ed1fe66dd770cf1e6ea8652f29a2b"
+  integrity sha512-OKcGw2iZMUV8zCHoS+uLYGVq2tbZhhK0TPbb0pGhT+KTN8oWYPG+oYpTe9He9J1A2y8qcRAoy5u1zdiUUOiFEg==
 
 "@tsconfig/node10@^1.0.7":
   version "1.0.9"

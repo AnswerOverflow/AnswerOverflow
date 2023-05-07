@@ -108,7 +108,8 @@ export class SyncOnReady extends Listener {
 			activeServerIds.add(sync.id);
 		}
 		// 2. For any servers that are in the database and not in the guilds the bot is in, mark them as kicked
-		const servers = await findAllServers();
+		const servers =
+			process.env.NODE_ENV === 'test' ? [] : await findAllServers();
 		const serversToMarkAsKicked = servers.filter(
 			(server) => !activeServerIds.has(server.id) && !server.kickedTime,
 		);
