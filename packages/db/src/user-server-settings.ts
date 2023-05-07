@@ -124,6 +124,7 @@ export async function countConsentingUsersInServer(serverId: string) {
 }
 
 export async function countConsentingUsersInManyServers(serverIds: string[]) {
+	if (serverIds.length === 0) return new Map();
 	const asSet = new Set(serverIds);
 	const res = await prisma.$queryRawUnsafe(
 		`SELECT COUNT(*) as count, serverId
