@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+
+concurrency:
+    group: deploy-preview-${{ github.head_ref }}
+    cancel-in-progress: true
+
+env:
+  # None of these are real secrets although this should probably be updated
+  DATABASE_URL: mysql://root:mysql@localhost:33306/api_dev
+
+  ELASTICSEARCH_URL: http://localhost:9200
+  ELASTICSEARCH_USERNAME: elastic
+  ELASTICSEARCH_PASSWORD: changeme
+  ELASTICSEARCH_MESSAGE_INDEX: messages
+  NEXT_PUBLIC_POSTHOG_TOKEN: "123" # Fake API key to make CI not fail
+  REDIS_URL: redis://:redis@localhost:6379
+  NEXT_PUBLIC_DEPLOYMENT_ENV: "ci"
+  OWNERS: "[]"
+  DISCORD_CLIENT_ID: "123"
+
+  # Long delay to give tests best chance at succeeding
+  DEFAULT_DELAY_IN_MS: "5000"
+
+  # Actual secrets now, no peeking
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+jobs:
+  build:
+      name: Build and Test
+      timeout-minutes: 45
+      runs-on: ubuntu-latest
+
+
+      steps:
+      - name: Checkout (GitHub)
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+
+      - name: Start containers # TODO: Use dev container docker-compose instead if possible
+        run: docker-compose -f "docker-compose.yml" up -d --build
+
+      - name: Install dependencies
+        # Playright is used for storybook, possible move that into package.json instead?
+        run: yarn && npx playwright install-deps
+
+      - name: Setup Database
+        run: yarn db:push
+
+      - name: Format
+        run: yarn format:check
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Build
+        run: yarn build
+
+      - name: Test
+        run: yarn test
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+
+      - name: Stop containers
+        if: always()
+        run: docker-compose -f "docker-compose.yml" down

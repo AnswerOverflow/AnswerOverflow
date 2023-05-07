@@ -1,0 +1,42 @@
+{
+	"name": "@answeroverflow/api",
+	"version": "0.1.0",
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"license": "MIT",
+	"scripts": {
+		"with-env": "dotenv -e ../../.env --",
+		"clean": "rm -rf .turbo node_modules coverage",
+		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
+		"lint": "eslint . && tsc --noEmit",
+		"lint:fix": "eslint . --fix",
+		"test": "yarn run with-env vitest run --coverage",
+		"test:watch": "yarn run with-env vitest",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@answeroverflow/analytics": "*",
+		"@answeroverflow/auth": "*",
+		"@answeroverflow/cache": "*",
+		"@answeroverflow/db": "*",
+		"@answeroverflow/discordjs-utils": "*",
+		"@answeroverflow/utils": "*",
+		"@sapphire/bitfield": "^1.0.0",
+		"@trpc/client": "^10.25.0",
+		"@trpc/server": "^10.25.0",
+		"discord.js": "^14.8.0",
+		"dotenv-cra": "^3.0.3",
+		"superjson": "^1.9.1",
+		"zod": "^3.20.6"
+	},
+	"devDependencies": {
+		"@answeroverflow/db-mock": "*",
+		"@answeroverflow/tsconfig": "*",
+		"@vitest/coverage-c8": "^0.28.5",
+		"dotenv-cli": "^7.1.0",
+		"eslint": "^8.28.0",
+		"tslib": "^2.4.1",
+		"vitest": "^0.29.8"
+	}
+}

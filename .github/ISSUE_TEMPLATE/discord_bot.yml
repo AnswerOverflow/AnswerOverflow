@@ -1,0 +1,47 @@
+name: Discord Bot
+description: File a feature request that relates to the discord bot
+title: "[Bot]: "
+labels: ["🤖bot"]
+body:
+  - type: dropdown
+    id: aspect
+    attributes:
+      label: aspect
+      description: What aspect of the bot does this relate to?
+      multiple: true
+      options:
+        - Command
+        - Event Listener
+        - Menu
+        - Mark Solution
+        - Indexing
+        - Server Settings Menu
+        - Channel Settings Menu
+        - User Settings Menu
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Suggestion?
+      description: What changes would you like to see?
+      placeholder: When I mark a question as solved...
+    validations:
+      required: true
+  - type: textarea
+    id: possible-solutions
+    attributes:
+      label: Possible Solutions
+      description: Got ideas for how to solve this?
+      placeholder: The bot should respond with...
+    validations:
+      required: false
+  - type: textarea
+    id: extra
+    attributes:
+      label: Extra Information
+      description: Post any extra links, screenshots, or references that might be helpful here
+      placeholder: Here is a sample implementation https://www.youtube.com/watch?v=dQw4w9WgXcQ
+    validations:
+      required: false

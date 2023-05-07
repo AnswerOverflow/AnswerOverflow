@@ -1,0 +1,53 @@
+{
+	"name": "ao-monorepo",
+	"version": "0.0.0",
+	"private": true,
+	"workspaces": {
+		"comment": "TODO: Replace with apps/** when turborepo fixes nameless packages",
+		"packages": [
+			"apps/main-site",
+			"apps/discord-bot",
+			"apps/docs",
+			"packages/**"
+		]
+	},
+	"scripts": {
+		"postinstall": "yarn db:generate",
+		"init": "turbo run init",
+		"build": "turbo run build",
+		"format": "turbo run format",
+		"format:check": "turbo run format:check",
+		"lint": "turbo run lint",
+		"lint:fix": "turbo run lint:fix",
+		"test": "yarn db:push && yarn db:wipe && turbo run test",
+		"generate": "yarn i && cd packages/db && yarn run generate",
+		"dev": "turbo run dev --parallel --no-cache",
+		"migrate": "turbo run migrate",
+		"db:generate": "turbo db:generate",
+		"db:wipe": "turbo db:wipe",
+		"db:push": "turbo db:push db:generate",
+		"db:push:staging": "turbo db:push:staging db:generate",
+		"clean": "turbo run clean && rm -rf node_modules",
+		"build:main-site": "turbo run build --filter=main-site",
+		"build:docs": "turbo run build --filter=docs",
+		"build:discord-bot": "turbo run build --filter=discord-bot",
+		"build:storybook": "turbo run build --filter=ui",
+		"test:watch": "turbo run test:watch",
+		"cloc": "npx cloc $(git ls-files)",
+		"cloc:no-tests": "npx cloc $(git ls-files | grep -v .test.ts.*$)",
+		"cloc:only-tests": "npx cloc $(git ls-files | grep .test.ts.*$)",
+		"pr-check": "yarn format:check && yarn lint && yarn build && yarn test"
+	},
+	"devDependencies": {
+		"@answeroverflow/eslint-config-custom": "*",
+		"@total-typescript/ts-reset": "^0.4.2",
+		"tslib": "^2.5.0",
+		"turbo": "latest",
+		"typescript": "^5.0.4",
+		"vite": "^4.1.1",
+		"vitest": "^0.29.8"
+	},
+	"engines": {
+		"node": ">=16.18.0"
+	}
+}

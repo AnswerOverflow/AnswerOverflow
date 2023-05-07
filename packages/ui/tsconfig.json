@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"target": "es2017",
+		"baseUrl": "../../",
+		"types": ["jest"]
+	},
+	"extends": "@answeroverflow/tsconfig/nextjs.json",
+	"include": [
+		"next-env.d.ts",
+		".storybook/*",
+		"test",
+		"next.config.mjs",
+		"../../reset.d.ts",
+		"postcss.config.cjs",
+		"tailwind.config.cjs",
+		"src"
+	],
+	"exclude": ["node_modules", "../../node_modules"]
+}

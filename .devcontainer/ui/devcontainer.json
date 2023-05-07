@@ -1,0 +1,15 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/typescript-node
+{
+  "name": "UI Dev Only",
+  "dockerComposeFile": [
+    "../docker-compose-workspace.yml"
+  ],
+  "service": "workspace",
+  "workspaceFolder": "/AnswerOverflow",
+  "postCreateCommand": "yarn install && npx playwright install && npx playwright install-deps",
+  "remoteUser": "node",
+  "mounts": [
+    "source=${localEnv:HOME}/repos,target=/home/node/repos,type=bind,consistency=cached"
+  ]
+}

@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db-mysql:
+    container_name: ao-db-sql
+    image: mysql:8.0.31-oracle
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_USER=mysql
+      - MYSQL_PASSWORD=mysql
+      - MYSQL_ROOT_PASSWORD=mysql
+    expose:
+      - 3306
+    ports:
+      - 33306:3306
+
+  db-elastic:
+    container_name: ao-db-elastic
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.0.1
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+    expose:
+      - 9200
+      - 9300
+    ports:
+      - 9200:9200
+      - 9300:9300
+
+  cache-redis:
+    container_name: ao-cache-redis
+    image: redis:alpine3.17
+    restart: always
+    command: redis-server --save 20 1 --loglevel warning --requirepass redis
+    expose:
+      - 6379
+    ports:
+      - 6379:6379

@@ -1,0 +1,5 @@
+tasks:
+  - init: yarn install && npx playwright install && npx playwright install-deps && docker-compose up -d
+    command: yarn run dev
+
+

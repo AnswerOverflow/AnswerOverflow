@@ -1,0 +1,29 @@
+{
+	"name": "@answeroverflow/analytics",
+	"version": "0.1.0",
+	"private": true,
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"scripts": {
+		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
+		"lint": "tsc --noEmit",
+		"clean": "rm -rf node_modules"
+	},
+	"devDependencies": {
+		"@answeroverflow/db": "*",
+		"@answeroverflow/prettier-config": "*",
+		"@answeroverflow/tsconfig": "*",
+		"@types/node": "^18.14.2",
+		"@types/react": "^18.0.14",
+		"@types/react-dom": "^18.0.5",
+		"type-fest": "^3.5.5"
+	},
+	"ct3aMetadata": {
+		"initVersion": "6.11.0"
+	},
+	"dependencies": {
+		"posthog-node": "^2.6.0",
+		"@answeroverflow/constants": "*"
+	}
+}

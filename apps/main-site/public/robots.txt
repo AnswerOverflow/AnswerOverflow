@@ -1,0 +1,5 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+Sitemap: https://www.answeroverflow.com/sitemap.xml
+Host: https://www.answeroverflow.com

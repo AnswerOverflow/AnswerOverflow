@@ -1,0 +1,34 @@
+{
+	"name": "@answeroverflow/elastic-types",
+	"version": "0.1.0",
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"license": "MIT",
+	"private": true,
+	"scripts": {
+		"clean": "rm -rf .turbo node_modules coverage",
+		"with-env": "dotenv -e ../../.env --",
+		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
+		"lint": "eslint . && tsc --noEmit",
+		"lint:fix": "eslint . --fix",
+		"test": "yarn run with-env vitest run  --coverage",
+		"test:watch": "yarn run with-env vitest",
+		"create-message-index": "cross-env NODE_ENV=development yarn with-env npx ts-node ./scripts/create-message-index.ts",
+		"create-message-index-safe": "cross-env NODE_ENV=production yarn with-env npx ts-node ./scripts/create-message-index.ts"
+	},
+	"dependencies": {
+		"@answeroverflow/utils": "*",
+		"@elastic/elasticsearch": "^8.6.0",
+		"discord-api-types": "^0.37.35",
+		"dotenv-cra": "^3.0.3",
+		"elastic-builder": "^2.18.1",
+		"zod": "^3.20.6"
+	},
+	"devDependencies": {
+		"@answeroverflow/tsconfig": "*",
+		"@vitest/coverage-c8": "^0.28.5",
+		"dotenv-cli": "^7.1.0",
+		"vitest": "^0.29.8"
+	}
+}

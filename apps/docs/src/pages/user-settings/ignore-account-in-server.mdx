@@ -1,0 +1,20 @@
+# Ignore account in server
+
+import {
+	IGNORE_ACCOUNT_IN_SERVER_LABEL,
+	STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL,
+} from '@answeroverflow/constants';
+
+It's important to provide flexibility for users who want to opt out of indexing their account in the server, in order to do this, they are able to from discord use the `/manage-account` slash command and click on the **{IGNORE_ACCOUNT_IN_SERVER_LABEL}** button to disable indexing of their account in the server.
+
+import { Callout } from 'nextra-theme-docs';
+
+<Callout type="error" emoji="❗">
+	This is a destructive action, it will: - Remove all stored messages of your
+	account in the server - Not index future messages of your account in the
+	server - Not track analytics events of your account in the server
+</Callout>
+
+## Restoring account in server
+
+If a user wants to restore their account, they can use the `/manage-account` slash command and click on the **{STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL}** button again to re-enable indexing of their account in the server. It will take some time for your messages to be re-indexed in the server and for analytics events to start being tracked again.
