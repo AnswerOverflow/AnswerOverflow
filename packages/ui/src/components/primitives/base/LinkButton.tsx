@@ -23,7 +23,6 @@ export const LinkButton = ({
 		<Link
 			href={href}
 			className={cn(buttonVariants({ variant, size, className }))}
-			target="_blank"
 			{...props}
 		>
 			{children}

@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 import {
 	prisma,
 	getDefaultUserServerSettingsWithFlags,
@@ -101,6 +101,51 @@ export async function findUserServerSettingsById(
 		},
 	});
 	return data ? addFlagsToUserServerSettings(data) : null;
+}
+
+export async function countConsentingUsersInServer(serverId: string) {
+	const res = await prisma.$queryRawUnsafe(
+		`SELECT COUNT(*) as count
+    FROM UserServerSettings
+    WHERE serverId = ${serverId} AND bitfield & 1 = 1;`,
+	);
+	const parsed = z
+		.array(
+			z.object({
+				count: z.bigint(),
+			}),
+		)
+		.parse(res);
+	const first = parsed[0];
+	if (!first) {
+		throw new Error('No count returned');
+	}
+	return first.count;
+}
+
+export async function countConsentingUsersInManyServers(serverIds: string[]) {
+	const asSet = new Set(serverIds);
+	const res = await prisma.$queryRawUnsafe(
+		`SELECT COUNT(*) as count, serverId
+    FROM UserServerSettings
+    WHERE serverId IN (${[...asSet].join(',')}) AND bitfield & 1 = 1
+    GROUP BY serverId;`,
+	);
+	const parsed = z
+		.array(
+			z.object({
+				count: z.bigint(),
+				serverId: z.string(),
+			}),
+		)
+		.parse(res);
+	const asMap = new Map(parsed.map((x) => [x.serverId, x.count]));
+	return new Map(
+		serverIds.map((x) => {
+			const count = asMap.get(x);
+			return [x, count ?? BigInt(0)];
+		}),
+	);
 }
 
 export async function findManyUserServerSettings(
