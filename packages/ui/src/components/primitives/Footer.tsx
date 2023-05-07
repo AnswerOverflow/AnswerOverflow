@@ -14,6 +14,10 @@ const navigation = {
 		{ name: 'Cookies', href: 'https://www.answeroverflow.com/cookies' },
 		{ name: 'EULA', href: 'https://www.answeroverflow.com/eula' },
 		{ name: 'Docs', href: 'https://docs.answeroverflow.com' },
+		{
+			name: 'Contributors',
+			href: 'https://www.answeroverflow.com/contributors',
+		},
 	],
 	social: [
 		{
