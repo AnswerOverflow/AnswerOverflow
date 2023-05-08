@@ -387,8 +387,8 @@ export async function searchMessages(opts: MessageSearchOptions) {
 				thread,
 			};
 		})
-		.filter(Boolean)
-		.sort((a, b) => b.score - a.score);
+		.filter((res) => res != null && res.server.kickedTime === null)
+		.sort((a, b) => b!.score - a!.score) as SearchResult[];
 }
 
 export async function getTotalNumberOfMessages() {

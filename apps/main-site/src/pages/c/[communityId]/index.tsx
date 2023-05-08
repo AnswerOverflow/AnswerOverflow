@@ -38,7 +38,7 @@ export async function getStaticProps(
 		limit: 20,
 	});
 
-	if (!communityPageData) {
+	if (!communityPageData || communityPageData.server.kickedTime != null) {
 		return {
 			notFound: true,
 		};
