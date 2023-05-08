@@ -47,7 +47,7 @@
 		"react-toastify": "^9.1.2",
 		"react-use": "^17.4.0",
 		"react-use-measure": "^2.1.1",
-		"react-wrap-balancer": "^0.4.0",
+		"react-wrap-balancer": "^0.4.1",
 		"react-xarrows": "^2.0.2",
 		"recharts": "^2.3.2",
 		"style-loader": "^3.3.1",
