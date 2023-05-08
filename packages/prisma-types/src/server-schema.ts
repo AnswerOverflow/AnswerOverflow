@@ -89,6 +89,7 @@ export const zServerPublic = z.object(
 		'icon',
 		'vanityUrl',
 		'description',
+		'kickedTime',
 	),
 );
 
