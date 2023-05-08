@@ -1,7 +1,6 @@
-import Image from 'next/image';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid';
 import { FollowCursor } from './Follow';
-import { GitHubIcon } from './base';
+import { Avatar, AvatarFallback, AvatarImage, GitHubIcon } from './base';
 
 export interface ContributorData {
 	name: string;
@@ -33,25 +32,21 @@ export const Contributor = ({
 	avatar,
 	socials,
 }: ContributorData) => (
-	<div className="flex h-full w-auto max-w-xs flex-col items-center justify-start rounded-standard bg-[#1F2124] px-8 py-16">
-		<Image
-			src={avatar}
-			alt={`The profile picture of ${name}`}
-			width={128}
-			height={128}
-			className="rounded-full drop-shadow-2xl"
-		/>
+	<div className="flex h-full w-auto max-w-xs flex-col items-center justify-start rounded-standard border-1 border-ao-black/25 bg-ao-black/[0.03] px-8 py-16 dark:border-0 dark:bg-[#1F2124]">
+		<Avatar size="xl">
+			<AvatarImage alt={`The profile picture of ${name}`} src={avatar} />
+			<AvatarFallback>{name}</AvatarFallback>
+		</Avatar>
 		<div className="flex flex-col items-center justify-center">
 			<h3 className="mt-2 font-header text-2xl font-semibold">{name}</h3>
 			<p className="mb-2 text-center font-body">{description}</p>
-			<div className="flex flex-col items-center justify-center space-y-2 border-t-2 border-ao-white/10 pt-2">
+			<div className="flex flex-col items-center justify-center space-y-2 border-t-2 border-ao-black/20 pt-2 dark:border-ao-white/10">
 				{Object.entries(socials).map(([key, value]) => (
 					<a
 						key={`${name}-${key}-${value}`}
 						href={value}
 						target="_blank"
-						rel="noopener noreferrer"
-						className="flex flex-row items-center justify-center font-body text-white hover:underline"
+						className="flex flex-row items-center justify-center font-body text-black hover:underline dark:text-white"
 					>
 						{key}
 						<span className="ml-1" aria-hidden>
