@@ -1,6 +1,7 @@
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid';
 import { FollowCursor } from './Follow';
 import { Avatar, AvatarFallback, AvatarImage, GitHubIcon } from './base';
+import Link from 'next/link';
 
 export interface ContributorData {
 	name: string;
@@ -42,7 +43,7 @@ export const Contributor = ({
 			<p className="mb-2 text-center font-body">{description}</p>
 			<div className="flex flex-col items-center justify-center space-y-2 border-t-2 border-ao-black/20 pt-2 dark:border-ao-white/10">
 				{Object.entries(socials).map(([key, value]) => (
-					<a
+					<Link
 						key={`${name}-${key}-${value}`}
 						href={value}
 						target="_blank"
@@ -52,7 +53,7 @@ export const Contributor = ({
 						<span className="ml-1" aria-hidden>
 							<SocialLogo socialKey={key} socialValue={value} />
 						</span>
-					</a>
+					</Link>
 				))}
 			</div>
 		</div>
