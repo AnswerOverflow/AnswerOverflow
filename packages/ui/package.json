@@ -81,7 +81,7 @@
 		"@storybook/types": "7.0.9",
 		"@types/node": "^18.14.2",
 		"@types/react": "^18.0.14",
-		"@types/react-dom": "^18.0.5",
+		"@types/react-dom": "^18.2.4",
 		"autoprefixer": "^10.4.7",
 		"axe-playwright": "^1.1.12",
 		"babel-loader": "^8.3.0",
