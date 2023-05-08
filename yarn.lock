@@ -2805,12 +2805,12 @@
   dependencies:
     tslib "^2.5.0"
 
-"@sapphire/discord-utilities@3.0.2", "@sapphire/discord-utilities@^3.0.1", "@sapphire/discord-utilities@^3.0.2":
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/@sapphire/discord-utilities/-/discord-utilities-3.0.2.tgz#074ba6f4244b8319d46a42b0d5458ae9e6802af4"
-  integrity sha512-ki1UXVAgKe+iklLhC3bUYz/sztIGbtTJMhYNMo8v+1h/GRlfOtcRoBAs9wF4hqFYZLVJ5RhwTENUC0sqkrceYw==
+"@sapphire/discord-utilities@3.0.3", "@sapphire/discord-utilities@^3.0.1", "@sapphire/discord-utilities@^3.0.2":
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/@sapphire/discord-utilities/-/discord-utilities-3.0.3.tgz#10d8446489f4d17b892a9f5be8208f501c61a546"
+  integrity sha512-1FN1JKU0jaMc1iq7u0SJ0G7QALZ2IC/Z8Pn0Q7ekjbYeB4AE7xyuBG09dZS5C1Dap0/gkThU2yUAsgn9esh4dQ==
   dependencies:
-    discord-api-types "^0.37.38"
+    discord-api-types "^0.37.41"
 
 "@sapphire/discord.js-utilities@6.0.5":
   version "6.0.5"
@@ -7153,10 +7153,10 @@ dir-glob@^3.0.1:
   dependencies:
     path-type "^4.0.0"
 
-discord-api-types@^0.37.20, discord-api-types@^0.37.30, discord-api-types@^0.37.31, discord-api-types@^0.37.35, discord-api-types@^0.37.37, discord-api-types@^0.37.38:
-  version "0.37.39"
-  resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.37.39.tgz#4b103bad3a1547b2106d8e65750ddb0374f9bb6a"
-  integrity sha512-hkhQsQyzsTJITp311WXvHZh9j4RAMfIk2hPmsWeOTN50QTpg6zqmJNfel9D/8lYNvsU01wzw9281Yke8NhYyHg==
+discord-api-types@^0.37.20, discord-api-types@^0.37.30, discord-api-types@^0.37.31, discord-api-types@^0.37.35, discord-api-types@^0.37.37, discord-api-types@^0.37.41:
+  version "0.37.41"
+  resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.37.41.tgz#b2719aa25ba6c5794d08524742ab008224b03710"
+  integrity sha512-FaPGBK9hx3zqSRX1x3KQWj+OElAJKmcyyfcdCy+U4AKv+gYuIkRySM7zd1So2sE4gc1DikkghkSBgBgKh6pe4Q==
 
 discord-markdown@^2.5.1:
   version "2.5.1"
