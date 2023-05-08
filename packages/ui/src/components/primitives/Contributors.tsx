@@ -10,19 +10,16 @@ export interface ContributorData {
 	socials: Record<string, string>;
 }
 
-const linkMap: { [key: string]: string | React.FC<{ className?: string }> } = {
-	Github: GitHubIcon,
-	Email: '📧',
-};
+const linkMap = new Map([
+	['Github', <GitHubIcon className="h-5 w-5" key={`github-icon`} />],
+	['Email', '📧'],
+]);
 
 const SocialLogo = (props: { socialKey: string; socialValue: string }) => {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	const Found = Object.entries(linkMap).find(
-		([linkKey]) => linkKey == props.socialKey,
-	)?.[1];
+	const found = linkMap.get(props.socialKey);
 
-	if (Found instanceof Function) return <Found className="h-5 w-5" />;
-	if (typeof Found == 'string') return <>{Found}</>;
+	if (typeof found === 'object' || typeof found === 'string')
+		return <>{found}</>;
 
 	return <ArrowTopRightOnSquareIcon className="h-4 w-4" />;
 };
