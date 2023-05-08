@@ -18,6 +18,10 @@ const navigation = {
 			name: 'Contributors',
 			href: 'https://www.answeroverflow.com/contributors',
 		},
+		{
+			name: 'Browse Communities',
+			href: 'https://www.answeroverflow.com/browse',
+		},
 	],
 	social: [
 		{
