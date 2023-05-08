@@ -12,7 +12,15 @@ import {
 import { omit, pick } from '@answeroverflow/utils';
 
 export function pickPublicServerData(server: Server) {
-	return pick(server, 'id', 'name', 'icon', 'description', 'vanityUrl');
+	return pick(
+		server,
+		'id',
+		'name',
+		'icon',
+		'description',
+		'vanityUrl',
+		'kickedTime',
+	);
 }
 
 type ToMessageWithDiscordAccount = {

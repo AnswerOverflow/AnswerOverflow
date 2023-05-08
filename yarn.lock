@@ -2805,12 +2805,12 @@
   dependencies:
     tslib "^2.5.0"
 
-"@sapphire/discord-utilities@3.0.2", "@sapphire/discord-utilities@^3.0.1", "@sapphire/discord-utilities@^3.0.2":
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/@sapphire/discord-utilities/-/discord-utilities-3.0.2.tgz#074ba6f4244b8319d46a42b0d5458ae9e6802af4"
-  integrity sha512-ki1UXVAgKe+iklLhC3bUYz/sztIGbtTJMhYNMo8v+1h/GRlfOtcRoBAs9wF4hqFYZLVJ5RhwTENUC0sqkrceYw==
+"@sapphire/discord-utilities@3.0.3", "@sapphire/discord-utilities@^3.0.1", "@sapphire/discord-utilities@^3.0.2":
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/@sapphire/discord-utilities/-/discord-utilities-3.0.3.tgz#10d8446489f4d17b892a9f5be8208f501c61a546"
+  integrity sha512-1FN1JKU0jaMc1iq7u0SJ0G7QALZ2IC/Z8Pn0Q7ekjbYeB4AE7xyuBG09dZS5C1Dap0/gkThU2yUAsgn9esh4dQ==
   dependencies:
-    discord-api-types "^0.37.38"
+    discord-api-types "^0.37.41"
 
 "@sapphire/discord.js-utilities@6.0.5":
   version "6.0.5"
@@ -4916,10 +4916,10 @@
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.4.tgz#cd667bcfdd025213aafb7ca5915a932590acdcdc"
   integrity sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==
 
-"@types/react-dom@^18.0.5", "@types/react-dom@^18.0.9":
-  version "18.0.11"
-  resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.0.11.tgz#321351c1459bc9ca3d216aefc8a167beec334e33"
-  integrity sha512-O38bPbI2CWtgw/OoQoY+BRelw7uysmXbWvw3nLWO21H1HSh+GOlqPuXshJfjmpNlKiiSDG9cc1JZAaMmVdcTlw==
+"@types/react-dom@^18.2.4":
+  version "18.2.4"
+  resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.2.4.tgz#13f25bfbf4e404d26f62ac6e406591451acba9e0"
+  integrity sha512-G2mHoTMTL4yoydITgOGwWdWMVd8sNgyEP85xVmMKAPUBwQWm9wBPQUmvbeF4V3WBY1P7mmL4BkjQ0SqUpf1snw==
   dependencies:
     "@types/react" "*"
 
@@ -7153,10 +7153,10 @@ dir-glob@^3.0.1:
   dependencies:
     path-type "^4.0.0"
 
-discord-api-types@^0.37.20, discord-api-types@^0.37.30, discord-api-types@^0.37.31, discord-api-types@^0.37.35, discord-api-types@^0.37.37, discord-api-types@^0.37.38:
-  version "0.37.39"
-  resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.37.39.tgz#4b103bad3a1547b2106d8e65750ddb0374f9bb6a"
-  integrity sha512-hkhQsQyzsTJITp311WXvHZh9j4RAMfIk2hPmsWeOTN50QTpg6zqmJNfel9D/8lYNvsU01wzw9281Yke8NhYyHg==
+discord-api-types@^0.37.20, discord-api-types@^0.37.30, discord-api-types@^0.37.31, discord-api-types@^0.37.35, discord-api-types@^0.37.37, discord-api-types@^0.37.41:
+  version "0.37.41"
+  resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.37.41.tgz#b2719aa25ba6c5794d08524742ab008224b03710"
+  integrity sha512-FaPGBK9hx3zqSRX1x3KQWj+OElAJKmcyyfcdCy+U4AKv+gYuIkRySM7zd1So2sE4gc1DikkghkSBgBgKh6pe4Q==
 
 discord-markdown@^2.5.1:
   version "2.5.1"
@@ -12926,7 +12926,7 @@ postcss@8.4.14:
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
 
-postcss@^8.0.9, postcss@^8.2.14, postcss@^8.4.14, postcss@^8.4.19, postcss@^8.4.21, postcss@^8.4.4:
+postcss@^8.0.9, postcss@^8.2.14, postcss@^8.4.14, postcss@^8.4.19, postcss@^8.4.21, postcss@^8.4.23, postcss@^8.4.4:
   version "8.4.23"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.4.23.tgz#df0aee9ac7c5e53e1075c24a3613496f9e6552ab"
   integrity sha512-bQ3qMcpF6A/YjR55xtoTr0jGOlnPOKAIMdOWiv0EIT6HVPEaJiJB4NLljSbiHoC2RX7DN5Uvjtpbg1NPdwv1oA==
@@ -13491,10 +13491,10 @@ react-use@^17.4.0:
     ts-easing "^0.2.0"
     tslib "^2.1.0"
 
-react-wrap-balancer@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/react-wrap-balancer/-/react-wrap-balancer-0.4.0.tgz#1ee2bcee25e2c7524cf69297cb355b79cc5daf08"
-  integrity sha512-MUsROihHd7bFHCo9kCOifKDYBEZPgKTyGvfa8RcwRQKtT2cL7Um9Cc8A7GvuT8t3np7LAGsEkzdEyJdKrr5lVQ==
+react-wrap-balancer@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/react-wrap-balancer/-/react-wrap-balancer-0.4.1.tgz#5b5500724879f5670ead177d7ab99cc9c5e36704"
+  integrity sha512-KbIwnnCBCxj5u4yr76NXKKriM94VL33LtO9bE0sedCp4yqdGYJD8TGU+2zlPxkguH5xxKxdapBtMYdMAODk/QQ==
 
 react-xarrows@^2.0.2:
   version "2.0.2"
@@ -13975,10 +13975,10 @@ rollup@2.78.0:
   optionalDependencies:
     fsevents "~2.3.2"
 
-rollup@^3.2.5, rollup@^3.20.2:
-  version "3.21.0"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-3.21.0.tgz#0a71517db56e150222670f88e5e7acfa4fede7c8"
-  integrity sha512-ANPhVcyeHvYdQMUyCbczy33nbLzI7RzrBje4uvNiTDJGIMtlKoOStmympwr9OtS1LZxiDmE2wvxHyVhoLtf1KQ==
+rollup@^3.2.5, rollup@^3.21.0:
+  version "3.21.5"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-3.21.5.tgz#1fbae43dc1079497b04604707f1cf979e51bfe49"
+  integrity sha512-a4NTKS4u9PusbUJcfF4IMxuqjFzjm6ifj76P54a7cKnvVzJaG12BLVR+hgU2YDGHzyMMQNxLAZWuALsn8q2oQg==
   optionalDependencies:
     fsevents "~2.3.2"
 
@@ -15870,14 +15870,14 @@ vite-node@0.29.8:
     picocolors "^1.0.0"
     vite "^3.0.0 || ^4.0.0"
 
-"vite@^3.0.0 || ^4.0.0", vite@^4.1.1:
-  version "4.3.1"
-  resolved "https://registry.yarnpkg.com/vite/-/vite-4.3.1.tgz#9badb1377f995632cdcf05f32103414db6fbb95a"
-  integrity sha512-EPmfPLAI79Z/RofuMvkIS0Yr091T2ReUoXQqc5ppBX/sjFRhHKiPPF/R46cTdoci/XgeQpB23diiJxq5w30vdg==
+"vite@^3.0.0 || ^4.0.0", vite@^4.3.5:
+  version "4.3.5"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-4.3.5.tgz#3871fe0f4b582ea7f49a85386ac80e84826367d9"
+  integrity sha512-0gEnL9wiRFxgz40o/i/eTBwm+NEbpUeTWhzKrZDSdKm6nplj+z4lKz8ANDgildxHm47Vg8EUia0aicKbawUVVA==
   dependencies:
     esbuild "^0.17.5"
-    postcss "^8.4.21"
-    rollup "^3.20.2"
+    postcss "^8.4.23"
+    rollup "^3.21.0"
   optionalDependencies:
     fsevents "~2.3.2"
 
