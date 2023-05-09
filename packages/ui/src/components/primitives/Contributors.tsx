@@ -2,6 +2,7 @@ import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid';
 import { FollowCursor } from './Follow';
 import { Avatar, AvatarFallback, AvatarImage, GitHubIcon } from './base';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 
 export interface ContributorData {
 	name: string;
@@ -10,7 +11,7 @@ export interface ContributorData {
 	socials: Record<string, string>;
 }
 
-const linkMap = new Map([
+const linkMap = new Map<string, ReactNode>([
 	['Github', <GitHubIcon className="h-5 w-5" key={`github-icon`} />],
 	['Email', '📧'],
 ]);
