@@ -16,7 +16,9 @@ import {
 import { getDiscordURLForMessage } from '~ui/utils/discord';
 import { Gallery, type Image as ImageType } from 'react-grid-gallery';
 import { useEffect } from 'react';
-import { Slide } from 'yet-another-react-lightbox/*';
+import Lightbox, { type Slide } from 'yet-another-react-lightbox';
+import { Zoom, Counter } from 'yet-another-react-lightbox/plugins';
+import 'yet-another-react-lightbox/styles.css';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MessageContext = createContext<{
@@ -130,7 +132,7 @@ export const MessageAttachments = () => {
 	const [images, setImages] = useState<ImageType[] | 'loading' | 'error'>(
 		'loading',
 	);
-	const [lightBoxOpen, setLightBoxOpen] = useState<boolean>(false);
+	const [currentImageOpen, setCurrentImageOpen] = useState<number>(-1);
 	const [slides, setSlides] = useState<Slide[]>();
 
 	useEffect(() => {
@@ -219,19 +221,6 @@ export const MessageAttachments = () => {
 		return <MessageImage attachment={message.attachments[0]} />;
 	}
 
-	// return (
-	// 	<div className="relative grid gap-2">
-	// 		{message.attachments[0] && (
-	// 			<div className="">
-	// 				<MessageImage attachment={message.attachments[0]} />
-	// 			</div>
-	// 		)}
-	// 		<div className="absolute inset-0 z-20 my-4 max-w-full bg-ao-blue/50 backdrop-blur-sm backdrop-brightness-50 md:max-w-[28rem]">
-	// 			<Heading.H2>+{message.attachments.length}</Heading.H2>
-	// 		</div>
-	// 	</div>
-	// );
-
 	if (images === 'loading') {
 		return (
 			<div className="flex h-[50vh] items-center justify-center">
@@ -248,7 +237,31 @@ export const MessageAttachments = () => {
 		);
 	}
 
-	return <Gallery images={images} enableImageSelection={false} />;
+	return (
+		<div className="mt-4">
+			<Gallery
+				images={images}
+				enableImageSelection={false}
+				onClick={(index) => setCurrentImageOpen(index)}
+			/>
+			<Lightbox
+				slides={slides}
+				open={currentImageOpen >= 0}
+				index={currentImageOpen}
+				close={() => setCurrentImageOpen(-1)}
+				plugins={[Zoom, Counter]}
+				styles={{
+					container: {
+						backgroundColor: 'rgba(0, 0, 0, 0.9)',
+					},
+				}}
+				counter={{
+					style: { top: 0, left: 0, position: 'absolute' },
+					className: 'p-4 m-4',
+				}}
+			/>
+		</div>
+	);
 };
 
 type MessageProps = {
