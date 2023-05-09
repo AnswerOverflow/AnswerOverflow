@@ -8,12 +8,15 @@ import { useIsUserInServer } from '~ui/utils/hooks';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import { cn } from '~ui/utils/styling';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
-import { LinkButton, DiscordIcon, CloseIcon } from './base';
+import { LinkButton, DiscordIcon, CloseIcon, Heading } from './base';
 import {
 	trackEvent,
 	messageWithDiscordAccountToAnalyticsData,
 } from '@answeroverflow/hooks';
 import { getDiscordURLForMessage } from '~ui/utils/discord';
+import { Gallery, type Image as ImageType } from 'react-grid-gallery';
+import { useEffect } from 'react';
+import { Slide } from 'yet-another-react-lightbox/*';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MessageContext = createContext<{
@@ -106,8 +109,72 @@ const MessageModalWrapper = ({
 	);
 };
 
+const getImageHeightWidth = async ({ imageSrc }: { imageSrc: string }) => {
+	return new Promise<{
+		width: number;
+		height: number;
+	}>((resolve, reject) => {
+		const img = new window.Image();
+		img.src = imageSrc;
+		img.onload = () => {
+			resolve({ width: img.width, height: img.height });
+		};
+		img.onerror = (event) => {
+			reject(event);
+		};
+	});
+};
+
 export const MessageAttachments = () => {
 	const { message } = useMessageContext();
+	const [images, setImages] = useState<ImageType[] | 'loading' | 'error'>(
+		'loading',
+	);
+	const [lightBoxOpen, setLightBoxOpen] = useState<boolean>(false);
+	const [slides, setSlides] = useState<Slide[]>();
+
+	useEffect(() => {
+		const fetchData = async () => {
+			const images = await Promise.all(
+				message.attachments.map(async (attachment) => {
+					if (!attachment.width || !attachment.height) {
+						const img = await getImageHeightWidth({ imageSrc: attachment.url });
+
+						return {
+							src: attachment.url,
+							width: img.width,
+							height: img.height,
+							alt: attachment.description,
+						};
+					}
+
+					return {
+						src: attachment.url,
+						width: attachment.width,
+						height: attachment.height,
+						alt: attachment.description,
+					};
+				}),
+			);
+
+			setImages(images);
+			setSlides(
+				images.map((image) => ({
+					src: image.src,
+					alt: image.alt,
+					width: image.width,
+					height: image.height,
+				})),
+			);
+		};
+
+		fetchData()
+			.then(() => {})
+			.catch(() => {
+				return setImages('error');
+			});
+	}, [message.attachments]);
+
 	function MessageImage({
 		attachment,
 	}: {
@@ -115,7 +182,6 @@ export const MessageAttachments = () => {
 	}) {
 		const width = attachment.width;
 		const height = attachment.height;
-
 		if (!width || !height)
 			return (
 				// TODO: Bit of a hack for now since next images don't work well with no w/h specified
@@ -148,13 +214,41 @@ export const MessageAttachments = () => {
 			</MessageModalWrapper>
 		);
 	}
-	return (
-		<div className="grid gap-2">
-			{message.attachments.map((attachment) => (
-				<MessageImage key={attachment.id} attachment={attachment} />
-			))}
-		</div>
-	);
+
+	if (message.attachments.length === 1 && message.attachments[0]) {
+		return <MessageImage attachment={message.attachments[0]} />;
+	}
+
+	// return (
+	// 	<div className="relative grid gap-2">
+	// 		{message.attachments[0] && (
+	// 			<div className="">
+	// 				<MessageImage attachment={message.attachments[0]} />
+	// 			</div>
+	// 		)}
+	// 		<div className="absolute inset-0 z-20 my-4 max-w-full bg-ao-blue/50 backdrop-blur-sm backdrop-brightness-50 md:max-w-[28rem]">
+	// 			<Heading.H2>+{message.attachments.length}</Heading.H2>
+	// 		</div>
+	// 	</div>
+	// );
+
+	if (images === 'loading') {
+		return (
+			<div className="flex h-[50vh] items-center justify-center">
+				<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-ao-blue" />
+			</div>
+		);
+	}
+
+	if (images === 'error') {
+		return (
+			<Heading.H2 className="mt-2 text-lg">
+				An error occurred loading images...
+			</Heading.H2>
+		);
+	}
+
+	return <Gallery images={images} enableImageSelection={false} />;
 };
 
 type MessageProps = {

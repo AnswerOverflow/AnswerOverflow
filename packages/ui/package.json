@@ -43,6 +43,7 @@
 		"highlight.js": "^11.7.0",
 		"next": "^13.4.1",
 		"react-fast-marquee": "^1.4.0",
+		"react-grid-gallery": "^1.0.0",
 		"react-spring": "^9.7.1",
 		"react-toastify": "^9.1.2",
 		"react-use": "^17.4.0",
@@ -53,6 +54,7 @@
 		"style-loader": "^3.3.1",
 		"tailwind-merge": "^1.10.0",
 		"tailwindcss-animate": "^1.0.5",
+		"yet-another-react-lightbox": "^3.5.4",
 		"zod": "^3.20.6"
 	},
 	"devDependencies": {

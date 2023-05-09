@@ -13321,6 +13321,11 @@ react-fast-marquee@^1.4.0:
   resolved "https://registry.yarnpkg.com/react-fast-marquee/-/react-fast-marquee-1.4.0.tgz#8ecb8c0581862029245ec13641c27234d23a8fe8"
   integrity sha512-aSjfFV6TaQkUsGBE9d1j3LhudPXKDoywLU1Ky2xke4IchHHqAtmXMAPqjnCPdSsvlOZSMuPAbIHN+EciqPCZWQ==
 
+react-grid-gallery@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/react-grid-gallery/-/react-grid-gallery-1.0.0.tgz#31604b9488dfa75a899aa39bc8884138f0409a12"
+  integrity sha512-S1gr6WXBlPFVrE0x2BHuu7jhyaB61mabcMQyx+8KCgAyKzGza0WF67AfAnS9Q00aurFEq4IP8eqb2Bk5F4RAmQ==
+
 react-inspector@^6.0.0:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/react-inspector/-/react-inspector-6.0.1.tgz#1a37f0165d9df81ee804d63259eaaeabe841287d"
@@ -16348,6 +16353,11 @@ yauzl@^2.10.0:
   dependencies:
     buffer-crc32 "~0.2.3"
     fd-slicer "~1.1.0"
+
+yet-another-react-lightbox@^3.5.4:
+  version "3.5.4"
+  resolved "https://registry.yarnpkg.com/yet-another-react-lightbox/-/yet-another-react-lightbox-3.5.4.tgz#1acf588c6c3ed8e6cc7e477897544c41287177b4"
+  integrity sha512-fpoHl7pHEaNHTgrDICcI7VdNTBsJvQhyWb+XnU0CSOTtFVER0kHZQnJQx9m93qQ0Wxq9+JLBFloNmxMarUM8MA==
 
 yn@3.1.1:
   version "3.1.1"
