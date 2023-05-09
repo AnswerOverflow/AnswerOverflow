@@ -95,6 +95,36 @@ export const WithMultipleImages: Story = {
 					proxyUrl:
 						'https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.png',
 				},
+				{
+					url: 'https://cdn.discordapp.com/attachments/1079799320745877547/1105532764821930095/image.png',
+					width: null,
+					height: null,
+					filename: 'image.png',
+					size: 123456,
+					id: '123456789',
+					proxyUrl:
+						'https://cdn.discordapp.com/attachments/1079799320745877547/1105532764821930095/image.png',
+				},
+				{
+					url: 'https://cdn.discordapp.com/attachments/1079799320745877547/1105533000881545336/image.png',
+					width: null,
+					height: null,
+					filename: 'image.png',
+					size: 123456,
+					id: '123456789',
+					proxyUrl:
+						'https://cdn.discordapp.com/attachments/1079799320745877547/1105533000881545336/image.png',
+				},
+				{
+					url: 'https://media.discordapp.net/attachments/1079799320745877547/1105533166812410018/image.png',
+					width: null,
+					height: null,
+					filename: 'image.png',
+					size: 123456,
+					id: '123456789',
+					proxyUrl:
+						'https://media.discordapp.net/attachments/1079799320745877547/1105533166812410018/image.png',
+				},
 			],
 		},
 	},
