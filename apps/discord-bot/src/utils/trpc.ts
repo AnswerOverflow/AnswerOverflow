@@ -57,10 +57,14 @@ export async function callAPI<T>({
 	} catch (error) {
 		if (!(error instanceof TRPCError)) throw error;
 		if (error.code === 'INTERNAL_SERVER_ERROR') {
+			const originalError = error.message;
+			error.message =
+				"An unexpected error occurred. We've been notified and are looking into it.";
 			await Error(
 				error,
-				"An unexpected error occurred. We've been notified and will fix it as soon as possible.",
+				"An unexpected error occurred. We've been notified and are looking into it.",
 			);
+			error.message = originalError;
 			throw error;
 		}
 		await Error(error, error.message);
