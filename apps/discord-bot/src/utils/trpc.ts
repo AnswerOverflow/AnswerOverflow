@@ -56,6 +56,13 @@ export async function callAPI<T>({
 		return data;
 	} catch (error) {
 		if (!(error instanceof TRPCError)) throw error;
+		if (error.code === 'INTERNAL_SERVER_ERROR') {
+			await Error(
+				error,
+				"An unexpected error occurred. We've been notified and will fix it as soon as possible.",
+			);
+			throw error;
+		}
 		await Error(error, error.message);
 		return null;
 	}
