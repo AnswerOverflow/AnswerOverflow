@@ -14,7 +14,11 @@ import {
 	messageWithDiscordAccountToAnalyticsData,
 } from '@answeroverflow/hooks';
 import { getDiscordURLForMessage } from '~ui/utils/discord';
-import { Gallery, type Image as ImageType } from 'react-grid-gallery';
+import {
+	Gallery,
+	type Image as ImageType,
+	type ThumbnailImageProps,
+} from 'react-grid-gallery';
 import { useEffect } from 'react';
 import Lightbox, { type Slide } from 'yet-another-react-lightbox';
 import { Zoom, Counter } from 'yet-another-react-lightbox/plugins';
@@ -177,6 +181,35 @@ export const MessageAttachments = () => {
 			});
 	}, [message.attachments]);
 
+	const CustomImageComponent = (props: ThumbnailImageProps) => {
+		if (props.index === 3 && images.length > 3) {
+			return (
+				<button className="relative h-full w-full" aria-label="Open image">
+					<Image
+						src={props.item.src}
+						fill
+						alt={`A preview of an image sent by ${message.author.name}`}
+					/>
+					<div className="absolute inset-0 flex items-center justify-center bg-black/75 backdrop-brightness-50">
+						<span className="text-3xl font-bold text-white">
+							+{images.length - 3}
+						</span>
+					</div>
+				</button>
+			);
+		}
+
+		return (
+			<button aria-label="Open image" className="h-full">
+				<Image
+					src={props.item.src}
+					fill
+					alt={`A preview of an image sent by ${message.author.name}`}
+				/>
+			</button>
+		);
+	};
+
 	function MessageImage({
 		attachment,
 	}: {
@@ -240,9 +273,10 @@ export const MessageAttachments = () => {
 	return (
 		<div className="mt-4">
 			<Gallery
-				images={images}
+				images={images.slice(0, 4)}
 				enableImageSelection={false}
 				onClick={(index) => setCurrentImageOpen(index)}
+				thumbnailImageComponent={CustomImageComponent}
 			/>
 			<Lightbox
 				slides={slides}
@@ -260,7 +294,7 @@ export const MessageAttachments = () => {
 				}}
 				counter={{
 					style: { top: 0, left: 0, position: 'absolute' },
-					className: 'p-4 m-4',
+					className: 'p-4 m-4 text-white',
 				}}
 			/>
 		</div>
