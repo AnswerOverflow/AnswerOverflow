@@ -255,6 +255,9 @@ export const MessageAttachments = () => {
 						backgroundColor: 'rgba(0, 0, 0, 0.9)',
 					},
 				}}
+				controller={{
+					closeOnBackdropClick: true,
+				}}
 				counter={{
 					style: { top: 0, left: 0, position: 'absolute' },
 					className: 'p-4 m-4',
