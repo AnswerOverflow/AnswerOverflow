@@ -39,6 +39,67 @@ export function useMessageContext() {
 	return context;
 }
 
+const getImageHeightWidth = async ({ imageSrc }: { imageSrc: string }) => {
+	return new Promise<{
+		width: number;
+		height: number;
+	}>((resolve, reject) => {
+		const img = new window.Image();
+		img.src = imageSrc;
+		img.onload = () => {
+			resolve({ width: img.width, height: img.height });
+		};
+		img.onerror = (event) => {
+			reject(event);
+		};
+	});
+};
+
+const useConfigImageAttachments = ({
+	setImages,
+	setSlides,
+}: {
+	setImages: (images: ImageType[]) => void;
+	setSlides: (slides: Slide[]) => void;
+}) => {
+	const { message } = useMessageContext();
+
+	const configImages = async () => {
+		const images = await Promise.all(
+			message.attachments.map(async (attachment) => {
+				if (!attachment.width || !attachment.height) {
+					const img = await getImageHeightWidth({ imageSrc: attachment.url });
+
+					return {
+						src: attachment.url,
+						width: img.width,
+						height: img.height,
+						alt: attachment.description,
+					};
+				}
+
+				return {
+					src: attachment.url,
+					width: attachment.width,
+					height: attachment.height,
+					alt: attachment.description,
+				};
+			}),
+		);
+
+		setImages(images);
+		setSlides(
+			images.map((image) => ({
+				src: image.src,
+				alt: image.alt,
+				width: image.width,
+				height: image.height,
+			})),
+		);
+	};
+	return configImages;
+};
+
 export const MessageAuthorArea = () => {
 	const { message } = useMessageContext();
 
@@ -84,51 +145,72 @@ export const MessageContents = () => {
 	);
 };
 
-const MessageModalWrapper = ({
-	children,
-	attachment,
-}: React.PropsWithChildren<{
-	attachment: APIMessageWithDiscordAccount['attachments'][number];
-}>) => {
-	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+const SingularImageAttachment = () => {
+	const { message } = useMessageContext();
+	const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
+	const [images, setImages] = useState<ImageType[] | 'loading' | 'error'>();
+	const [slides, setSlides] = useState<Slide[]>();
+
+	const configedImages = useConfigImageAttachments({
+		setImages: setImages,
+		setSlides: setSlides,
+	});
+
+	useEffect(() => {
+		configedImages()
+			.then(() => {})
+			.catch(() => {
+				return setImages('error');
+			});
+	}, [configedImages, setImages, setSlides, message.attachments]);
+
+	if (images === 'loading' || !images) {
+		return (
+			<div className="flex h-[50vh] items-center justify-center">
+				<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-ao-blue" />
+			</div>
+		);
+	}
+
+	if (images === 'error') {
+		return (
+			<Heading.H2 className="mt-2 text-lg">
+				An error occurred loading images...
+			</Heading.H2>
+		);
+	}
 
 	return (
-		<AlertDialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
-			<AlertDialog.Trigger asChild>{children}</AlertDialog.Trigger>
-			<AlertDialog.Portal>
-				<AlertDialog.Overlay className="fixed inset-0 z-50 flex h-full w-full items-center justify-center bg-black/75" />
-				<AlertDialog.Content className="fixed left-0 top-0 z-[75] flex h-full w-full flex-col items-center justify-center p-4">
-					<div className="absolute right-0 top-0 z-[100] p-2">
-						<AlertDialog.Cancel className="flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors duration-200 hover:bg-gray-200 focus:outline-none focus:ring focus:ring-gray-300 dark:bg-black dark:hover:bg-gray-800">
-							<CloseIcon />
-						</AlertDialog.Cancel>
-					</div>
-					{/* eslint-disable-next-line @next/next/no-img-element */}
-					<img
-						className="max-h-vh80 w-full max-w-2xl object-contain lg:h-full xl:p-10"
-						src={attachment?.url}
-						alt={attachment?.description ?? 'Image'}
-					/>
-				</AlertDialog.Content>
-			</AlertDialog.Portal>
-		</AlertDialog.Root>
-	);
-};
+		<div className="mt-4">
+			<button
+				aria-label="Open Image Modal"
+				onClick={() => setIsLightboxOpen(true)}
+			>
+				<Image
+					src={images[0]?.src ?? ''}
+					width={images[0]?.width}
+					height={images[0]?.height}
+					alt={`Image sent by ${message.author.name}`}
+				/>
+			</button>
 
-const getImageHeightWidth = async ({ imageSrc }: { imageSrc: string }) => {
-	return new Promise<{
-		width: number;
-		height: number;
-	}>((resolve, reject) => {
-		const img = new window.Image();
-		img.src = imageSrc;
-		img.onload = () => {
-			resolve({ width: img.width, height: img.height });
-		};
-		img.onerror = (event) => {
-			reject(event);
-		};
-	});
+			<Lightbox
+				slides={slides}
+				open={isLightboxOpen}
+				index={0}
+				close={() => setIsLightboxOpen(false)}
+				plugins={[Zoom]}
+				styles={{
+					container: {
+						backgroundColor: 'rgba(0, 0, 0, 0.9)',
+					},
+				}}
+				controller={{
+					closeOnBackdropClick: true,
+				}}
+			/>
+		</div>
+	);
 };
 
 export const MessageAttachments = () => {
@@ -139,47 +221,18 @@ export const MessageAttachments = () => {
 	const [currentImageOpen, setCurrentImageOpen] = useState<number>(-1);
 	const [slides, setSlides] = useState<Slide[]>();
 
+	const configedImages = useConfigImageAttachments({
+		setImages: setImages,
+		setSlides: setSlides,
+	});
+
 	useEffect(() => {
-		const fetchData = async () => {
-			const images = await Promise.all(
-				message.attachments.map(async (attachment) => {
-					if (!attachment.width || !attachment.height) {
-						const img = await getImageHeightWidth({ imageSrc: attachment.url });
-
-						return {
-							src: attachment.url,
-							width: img.width,
-							height: img.height,
-							alt: attachment.description,
-						};
-					}
-
-					return {
-						src: attachment.url,
-						width: attachment.width,
-						height: attachment.height,
-						alt: attachment.description,
-					};
-				}),
-			);
-
-			setImages(images);
-			setSlides(
-				images.map((image) => ({
-					src: image.src,
-					alt: image.alt,
-					width: image.width,
-					height: image.height,
-				})),
-			);
-		};
-
-		fetchData()
+		configedImages()
 			.then(() => {})
 			.catch(() => {
 				return setImages('error');
 			});
-	}, [message.attachments]);
+	}, [configedImages]);
 
 	const CustomImageComponent = (props: ThumbnailImageProps) => {
 		if (props.index === 3 && images.length > 3) {
@@ -210,48 +263,8 @@ export const MessageAttachments = () => {
 		);
 	};
 
-	function MessageImage({
-		attachment,
-	}: {
-		attachment: APIMessageWithDiscordAccount['attachments'][number];
-	}) {
-		const width = attachment.width;
-		const height = attachment.height;
-		if (!width || !height)
-			return (
-				// TODO: Bit of a hack for now since next images don't work well with no w/h specified
-				// eslint-disable-next-line @next/next/no-img-element
-				<MessageModalWrapper attachment={attachment}>
-					{/*  eslint-disable-next-line @next/next/no-img-element */}
-					<img
-						className="max-w-full cursor-zoom-in py-4 md:max-w-sm"
-						src={attachment.url}
-						style={{
-							width: 'fit-content',
-							height: 'auto',
-							objectFit: 'cover',
-						}}
-						alt={attachment.description ? attachment.description : 'Image'}
-					/>
-				</MessageModalWrapper>
-			);
-
-		return (
-			<MessageModalWrapper attachment={attachment}>
-				<Image
-					key={attachment.url}
-					src={attachment.url}
-					width={width}
-					height={height}
-					className="cursor-zoom-in py-4 md:max-w-md"
-					alt={attachment.description ? attachment.description : 'Image'}
-				/>
-			</MessageModalWrapper>
-		);
-	}
-
 	if (message.attachments.length === 1 && message.attachments[0]) {
-		return <MessageImage attachment={message.attachments[0]} />;
+		return <SingularImageAttachment />;
 	}
 
 	if (images === 'loading') {
