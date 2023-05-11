@@ -28,6 +28,7 @@ import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MessageContext = createContext<{
 	message: APIMessageWithDiscordAccount;
+	collapseContent?: boolean;
 } | null>(null);
 
 export function useMessageContext() {
@@ -180,11 +181,11 @@ const LongMessageContents = () => {
 };
 
 export const MessageContents = () => {
-	const { message } = useMessageContext();
+	const { message, collapseContent } = useMessageContext();
 	const { toHTML } = discordMarkdown;
 	const convertedMessageContent = toHTML(message.content);
 
-	if (message.content.length < 1000)
+	if (message.content.length < 1000 || collapseContent === false)
 		return (
 			<div
 				className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white"
@@ -358,6 +359,7 @@ type MessageProps = {
 	Blurrer?: React.FC<{ children: React.ReactNode }>;
 	className?: string;
 	fullRounded?: boolean;
+	collapseContent?: boolean;
 };
 
 export const Message = ({
@@ -369,9 +371,10 @@ export const Message = ({
 	images = <MessageAttachments />,
 	className,
 	fullRounded,
+	collapseContent,
 }: MessageProps) => {
 	return (
-		<MessageContext.Provider value={{ message }}>
+		<MessageContext.Provider value={{ message, collapseContent }}>
 			<Blurrer>
 				<div
 					className={cn(
