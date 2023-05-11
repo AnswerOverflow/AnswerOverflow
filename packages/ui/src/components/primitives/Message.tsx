@@ -268,6 +268,7 @@ export const MessageAttachments = () => {
 				enableImageSelection={false}
 				onClick={(index) => setCurrentImageOpen(index)}
 				thumbnailImageComponent={CustomImageComponent}
+				rowHeight={200}
 			/>
 			<Lightbox
 				slides={parsedSlides}
