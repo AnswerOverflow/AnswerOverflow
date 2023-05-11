@@ -91,6 +91,7 @@ export function MessageResultPage({
 				key={message.id}
 				message={message}
 				fullRounded
+        collapseContent={false}
 				Blurrer={(props) => <MultiMessageBlurrer {...props} count={count} />}
 			/>
 		);
