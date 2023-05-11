@@ -174,6 +174,7 @@ const SingularImageAttachment = () => {
 			<button
 				aria-label="Open Image Modal"
 				onClick={() => setIsLightboxOpen(true)}
+				className="max-w-sm lg:max-w-md"
 			>
 				<Image
 					src={parsedImages[0]?.src ?? ''}
