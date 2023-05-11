@@ -55,39 +55,43 @@ const getImageHeightWidth = async ({ imageSrc }: { imageSrc: string }) => {
 	});
 };
 
-const useConfigImageAttachments = ({
-	setImages,
-	setSlides,
-}: {
-	setImages: (images: ImageType[]) => void;
-	setSlides: (slides: Slide[]) => void;
-}) => {
+const useConfigImageAttachments = () => {
+	const [images, setImages] = useState<ImageType[] | 'loading' | 'error'>([]);
+	const [slides, setSlides] = useState<Slide[]>([]);
 	const { message } = useMessageContext();
 
-	const configImages = async () => {
-		const images = await Promise.all(
-			message.attachments.map(async (attachment) => {
-				if (!attachment.width || !attachment.height) {
-					const img = await getImageHeightWidth({ imageSrc: attachment.url });
+	useEffect(() => {
+		(async () => {
+			await Promise.all(
+				message.attachments.map(async (attachment) => {
+					if (!attachment.width || !attachment.height) {
+						const img = await getImageHeightWidth({ imageSrc: attachment.url });
+
+						return {
+							src: attachment.url,
+							width: img.width,
+							height: img.height,
+							alt: attachment.description,
+						};
+					}
 
 					return {
 						src: attachment.url,
-						width: img.width,
-						height: img.height,
+						width: attachment.width,
+						height: attachment.height,
 						alt: attachment.description,
 					};
-				}
+				}),
+			)
+				.then((parsedImages) => setImages(parsedImages))
+				.catch(() => setImages('error'));
+		})()
+			.then(() => {})
+			.catch(() => {});
+	}, [message.attachments]);
 
-				return {
-					src: attachment.url,
-					width: attachment.width,
-					height: attachment.height,
-					alt: attachment.description,
-				};
-			}),
-		);
-
-		setImages(images);
+	useEffect(() => {
+		if (images === 'loading' || images === 'error') return;
 		setSlides(
 			images.map((image) => ({
 				src: image.src,
@@ -96,8 +100,9 @@ const useConfigImageAttachments = ({
 				height: image.height,
 			})),
 		);
-	};
-	return configImages;
+	}, [images]);
+
+	return { parsedImages: images, parsedSlides: slides };
 };
 
 export const MessageAuthorArea = () => {
@@ -148,23 +153,9 @@ export const MessageContents = () => {
 const SingularImageAttachment = () => {
 	const { message } = useMessageContext();
 	const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
-	const [images, setImages] = useState<ImageType[] | 'loading' | 'error'>();
-	const [slides, setSlides] = useState<Slide[]>();
+	const { parsedImages, parsedSlides } = useConfigImageAttachments();
 
-	const configedImages = useConfigImageAttachments({
-		setImages: setImages,
-		setSlides: setSlides,
-	});
-
-	useEffect(() => {
-		configedImages()
-			.then(() => {})
-			.catch(() => {
-				return setImages('error');
-			});
-	}, [configedImages, setImages, setSlides, message.attachments]);
-
-	if (images === 'loading' || !images) {
+	if (parsedImages === 'loading' || !parsedImages) {
 		return (
 			<div className="flex h-[50vh] items-center justify-center">
 				<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-ao-blue" />
@@ -172,7 +163,7 @@ const SingularImageAttachment = () => {
 		);
 	}
 
-	if (images === 'error') {
+	if (parsedImages === 'error') {
 		return (
 			<Heading.H2 className="mt-2 text-lg">
 				An error occurred loading images...
@@ -187,15 +178,15 @@ const SingularImageAttachment = () => {
 				onClick={() => setIsLightboxOpen(true)}
 			>
 				<Image
-					src={images[0]?.src ?? ''}
-					width={images[0]?.width}
-					height={images[0]?.height}
+					src={parsedImages[0]?.src ?? ''}
+					width={parsedImages[0]?.width}
+					height={parsedImages[0]?.height}
 					alt={`Image sent by ${message.author.name}`}
 				/>
 			</button>
 
 			<Lightbox
-				slides={slides}
+				slides={parsedSlides}
 				open={isLightboxOpen}
 				index={0}
 				close={() => setIsLightboxOpen(false)}
@@ -214,28 +205,12 @@ const SingularImageAttachment = () => {
 };
 
 export const MessageAttachments = () => {
+	const { parsedImages, parsedSlides } = useConfigImageAttachments();
 	const { message } = useMessageContext();
-	const [images, setImages] = useState<ImageType[] | 'loading' | 'error'>(
-		'loading',
-	);
 	const [currentImageOpen, setCurrentImageOpen] = useState<number>(-1);
-	const [slides, setSlides] = useState<Slide[]>();
-
-	const configedImages = useConfigImageAttachments({
-		setImages: setImages,
-		setSlides: setSlides,
-	});
-
-	useEffect(() => {
-		configedImages()
-			.then(() => {})
-			.catch(() => {
-				return setImages('error');
-			});
-	}, [configedImages]);
 
 	const CustomImageComponent = (props: ThumbnailImageProps) => {
-		if (props.index === 3 && images.length > 3) {
+		if (props.index === 3 && parsedImages.length > 3) {
 			return (
 				<button className="relative h-full w-full" aria-label="Open image">
 					<Image
@@ -245,7 +220,7 @@ export const MessageAttachments = () => {
 					/>
 					<div className="absolute inset-0 flex items-center justify-center bg-black/75 backdrop-brightness-50">
 						<span className="text-3xl font-bold text-white">
-							+{images.length - 3}
+							+{parsedImages.length - 3}
 						</span>
 					</div>
 				</button>
@@ -267,7 +242,7 @@ export const MessageAttachments = () => {
 		return <SingularImageAttachment />;
 	}
 
-	if (images === 'loading') {
+	if (parsedImages === 'loading') {
 		return (
 			<div className="flex h-[50vh] items-center justify-center">
 				<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-ao-blue" />
@@ -275,7 +250,7 @@ export const MessageAttachments = () => {
 		);
 	}
 
-	if (images === 'error') {
+	if (parsedImages === 'error') {
 		return (
 			<Heading.H2 className="mt-2 text-lg">
 				An error occurred loading images...
@@ -286,13 +261,13 @@ export const MessageAttachments = () => {
 	return (
 		<div className="mt-4">
 			<Gallery
-				images={images.slice(0, 4)}
+				images={parsedImages.slice(0, 4)}
 				enableImageSelection={false}
 				onClick={(index) => setCurrentImageOpen(index)}
 				thumbnailImageComponent={CustomImageComponent}
 			/>
 			<Lightbox
-				slides={slides}
+				slides={parsedSlides}
 				open={currentImageOpen >= 0}
 				index={currentImageOpen}
 				close={() => setCurrentImageOpen(-1)}
