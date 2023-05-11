@@ -85,9 +85,7 @@ const useConfigImageAttachments = () => {
 			)
 				.then((parsedImages) => setImages(parsedImages))
 				.catch(() => setImages('error'));
-		})()
-			.then(() => {})
-			.catch(() => {});
+		})().catch(() => setImages('error'));
 	}, [message.attachments]);
 
 	useEffect(() => {
