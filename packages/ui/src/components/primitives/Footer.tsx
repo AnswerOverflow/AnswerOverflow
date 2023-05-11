@@ -5,7 +5,7 @@ import {
 	GITHUB_LINK,
 	TWITTER_LINK,
 } from '@answeroverflow/constants/src/links';
-import { DiscordIcon, GitHubIcon } from './base';
+import { DiscordIcon, GitHubIcon, Heading } from './base';
 
 type SocialItem = {
 	name: string;
@@ -94,9 +94,9 @@ export function Footer() {
 									key={`category-${category.category.name}`}
 									className="flex flex-col"
 								>
-									<h3 className="font-header text-lg font-bold text-black dark:text-white">
+									<Heading.H2 className="font-header text-lg font-bold text-black dark:text-white">
 										{category.category.name}
-									</h3>
+									</Heading.H2>
 									{category.category.data.map((item) => {
 										return (
 											<Link
