@@ -112,7 +112,7 @@ export function MessageResultPage({
 	});
 
 	return (
-		<div className="sm:mx-3 ">
+		<div className="sm:mx-3">
 			<AOHead
 				description={description}
 				path={`/m/${firstMessage?.id ?? requestedId}`}
@@ -133,7 +133,7 @@ export function MessageResultPage({
 			<div className="rounded-md">
 				<div className="mb-4 flex flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400 pb-2 text-center leading-5 dark:border-neutral-600  dark:text-white">
 					<ChannelIcon channelType={channel.type} className="h-6 w-6" />
-					<h1 className="text-3xl">
+					<h1 className="font-header text-3xl">
 						{thread ? `${thread.name}` : `${channel.name}`}
 					</h1>
 				</div>
