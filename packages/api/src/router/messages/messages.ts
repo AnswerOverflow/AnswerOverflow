@@ -48,7 +48,7 @@ export const messagesRouter = router({
 
 			if (!parentId) {
 				throw new TRPCError({
-					code: 'INTERNAL_SERVER_ERROR',
+					code: 'NOT_FOUND',
 					message: 'Message has no parent channel',
 				});
 			}
