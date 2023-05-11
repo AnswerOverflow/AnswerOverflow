@@ -197,6 +197,11 @@ const SingularImageAttachment = () => {
 				controller={{
 					closeOnBackdropClick: true,
 				}}
+				// Disable control buttons as there is only one slide
+				render={{
+					buttonPrev: () => null,
+					buttonNext: () => null,
+				}}
 			/>
 		</div>
 	);
