@@ -16,9 +16,7 @@ export const ContributorsStory: Story = {
 				avatar: 'https://avatars.githubusercontent.com/u/9919?s=200&v=4',
 				description: 'User description',
 				name: 'User name',
-				socials: {
-					github: 'github',
-				},
+				links: ['http://localhost:3000/contributors'],
 			},
 		],
 	},
