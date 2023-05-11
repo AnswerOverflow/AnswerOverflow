@@ -7,8 +7,8 @@ import { DiscordAvatar } from './DiscordAvatar';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import { cn } from '~ui/utils/styling';
-import * as AlertDialog from '@radix-ui/react-alert-dialog';
-import { LinkButton, DiscordIcon, CloseIcon, Heading } from './base';
+import * as Collapsible from '@radix-ui/react-collapsible';
+import { LinkButton, DiscordIcon, Heading, Button } from './base';
 import {
 	trackEvent,
 	messageWithDiscordAccountToAnalyticsData,
@@ -23,6 +23,7 @@ import { useEffect } from 'react';
 import Lightbox, { type Slide } from 'yet-another-react-lightbox';
 import { Zoom, Counter } from 'yet-another-react-lightbox/plugins';
 import 'yet-another-react-lightbox/styles.css';
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MessageContext = createContext<{
@@ -133,25 +134,76 @@ export const MessageAuthorArea = () => {
 	);
 };
 
+const LongMessageContents = () => {
+	const { message } = useMessageContext();
+	const { toHTML } = discordMarkdown;
+	const convertedMessageContent = toHTML(message.content);
+	const [messageContentToRender, setMessageContentToRender] = useState<string>(
+		convertedMessageContent,
+	);
+	const [isOpen, setIsOpen] = useState<boolean>(false);
+
+	useEffect(() => {
+		if (isOpen) {
+			setMessageContentToRender(convertedMessageContent);
+		} else {
+			setMessageContentToRender(`${convertedMessageContent.slice(0, 1000)}...`);
+		}
+	}, [convertedMessageContent, isOpen]);
+
+	return (
+		<Collapsible.Root open={isOpen} onOpenChange={setIsOpen}>
+			<div
+				className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white"
+				// The HTML from discord-markdown is escaped
+				dangerouslySetInnerHTML={{
+					__html: messageContentToRender,
+				}}
+			/>
+			<Collapsible.Trigger asChild>
+				<Button className="mt-2 gap-2" size="sm" variant="outline">
+					{isOpen ? (
+						<>
+							Collapse
+							<ChevronUpIcon className="h-4 w-4" />
+						</>
+					) : (
+						<>
+							Expand
+							<ChevronDownIcon className="h-4 w-4" />
+						</>
+					)}
+				</Button>
+			</Collapsible.Trigger>
+		</Collapsible.Root>
+	);
+};
+
 export const MessageContents = () => {
 	const { message } = useMessageContext();
 	const { toHTML } = discordMarkdown;
 	const convertedMessageContent = toHTML(message.content);
-	return (
-		<div
-			className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white"
-			// The HTML from discord-markdown is escaped
-			dangerouslySetInnerHTML={{
-				__html: convertedMessageContent,
-			}}
-		/>
-	);
+
+	if (message.content.length < 1000)
+		return (
+			<div
+				className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white"
+				// The HTML from discord-markdown is escaped
+				dangerouslySetInnerHTML={{
+					__html: convertedMessageContent,
+				}}
+			/>
+		);
+
+	return <LongMessageContents />;
 };
 
 const SingularImageAttachment = () => {
 	const { message } = useMessageContext();
 	const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
 	const { parsedImages, parsedSlides } = useConfigImageAttachments();
+
+	if (message.attachments.length === 0) return null;
 
 	if (parsedImages === 'loading' || !parsedImages) {
 		return (
@@ -212,6 +264,8 @@ export const MessageAttachments = () => {
 	const { parsedImages, parsedSlides } = useConfigImageAttachments();
 	const { message } = useMessageContext();
 	const [currentImageOpen, setCurrentImageOpen] = useState<number>(-1);
+
+	if (message.attachments.length === 0) return null;
 
 	const CustomImageComponent = (props: ThumbnailImageProps) => {
 		if (props.index === 3 && parsedImages.length > 3) {
