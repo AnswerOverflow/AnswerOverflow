@@ -7,8 +7,7 @@ import { DiscordAvatar } from './DiscordAvatar';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import { cn } from '~ui/utils/styling';
-import * as Collapsible from '@radix-ui/react-collapsible';
-import { LinkButton, DiscordIcon, Heading, Button } from './base';
+import { LinkButton, DiscordIcon, Heading } from './base';
 import {
 	trackEvent,
 	messageWithDiscordAccountToAnalyticsData,
@@ -23,13 +22,15 @@ import { useEffect } from 'react';
 import Lightbox, { type Slide } from 'yet-another-react-lightbox';
 import { Zoom, Counter } from 'yet-another-react-lightbox/plugins';
 import 'yet-another-react-lightbox/styles.css';
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+import { getImageHeightWidth } from '~ui/utils/other';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-const MessageContext = createContext<{
-	message: APIMessageWithDiscordAccount;
-	collapseContent?: boolean;
-} | null>(null);
+const MessageContext = createContext<
+	| ({
+			message: APIMessageWithDiscordAccount;
+	  } & Partial<MessageProps>)
+	| null
+>(null);
 
 export function useMessageContext() {
 	const context = useContext(MessageContext);
@@ -40,22 +41,6 @@ export function useMessageContext() {
 	}
 	return context;
 }
-
-const getImageHeightWidth = async ({ imageSrc }: { imageSrc: string }) => {
-	return new Promise<{
-		width: number;
-		height: number;
-	}>((resolve, reject) => {
-		const img = new window.Image();
-		img.src = imageSrc;
-		img.onload = () => {
-			resolve({ width: img.width, height: img.height });
-		};
-		img.onerror = (event) => {
-			reject(event);
-		};
-	});
-};
 
 const useConfigImageAttachments = () => {
 	const [images, setImages] = useState<ImageType[] | 'loading' | 'error'>([]);
@@ -139,44 +124,22 @@ const LongMessageContents = () => {
 	const { message } = useMessageContext();
 	const { toHTML } = discordMarkdown;
 	const convertedMessageContent = toHTML(message.content);
-	const [messageContentToRender, setMessageContentToRender] = useState<string>(
-		convertedMessageContent,
-	);
-	const [isOpen, setIsOpen] = useState<boolean>(false);
 
-	useEffect(() => {
-		if (isOpen) {
-			setMessageContentToRender(convertedMessageContent);
-		} else {
-			setMessageContentToRender(`${convertedMessageContent.slice(0, 1000)}...`);
-		}
-	}, [convertedMessageContent, isOpen]);
+	const textToRender =
+		convertedMessageContent.length > 1000
+			? `${convertedMessageContent.trim().slice(0, 1000)}... <a href={"/m/${
+					message.id
+			  }"}>View Message</a>`
+			: convertedMessageContent;
 
 	return (
-		<Collapsible.Root open={isOpen} onOpenChange={setIsOpen}>
-			<div
-				className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white"
-				// The HTML from discord-markdown is escaped
-				dangerouslySetInnerHTML={{
-					__html: messageContentToRender,
-				}}
-			/>
-			<Collapsible.Trigger asChild>
-				<Button className="mt-2 gap-2" size="sm" variant="outline">
-					{isOpen ? (
-						<>
-							Collapse
-							<ChevronUpIcon className="h-4 w-4" />
-						</>
-					) : (
-						<>
-							Expand
-							<ChevronDownIcon className="h-4 w-4" />
-						</>
-					)}
-				</Button>
-			</Collapsible.Trigger>
-		</Collapsible.Root>
+		<div
+			className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white"
+			// The HTML from discord-markdown is escaped
+			dangerouslySetInnerHTML={{
+				__html: textToRender,
+			}}
+		/>
 	);
 };
 
@@ -185,7 +148,13 @@ export const MessageContents = () => {
 	const { toHTML } = discordMarkdown;
 	const convertedMessageContent = toHTML(message.content);
 
-	if (message.content.length < 1000 || collapseContent === false)
+	if (
+		collapseContent === false ||
+		collapseContent == undefined ||
+		(typeof collapseContent === 'number'
+			? message.content.length > collapseContent
+			: message.content.length < 1000)
+	) {
 		return (
 			<div
 				className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white"
@@ -195,6 +164,7 @@ export const MessageContents = () => {
 				}}
 			/>
 		);
+	}
 
 	return <LongMessageContents />;
 };
@@ -311,9 +281,9 @@ export const MessageAttachments = () => {
 
 	if (parsedImages === 'error') {
 		return (
-			<Heading.H2 className="mt-2 text-lg">
+			<span className="mt-2 rounded-standard bg-ao-red/75 p-5 font-body text-lg font-bold text-black dark:text-white">
 				An error occurred loading images...
-			</Heading.H2>
+			</span>
 		);
 	}
 
@@ -359,7 +329,11 @@ type MessageProps = {
 	Blurrer?: React.FC<{ children: React.ReactNode }>;
 	className?: string;
 	fullRounded?: boolean;
-	collapseContent?: boolean;
+	/**
+	 * If typed as true, will collapse the content if longer than default
+	 * If typed as a number, will collapse the content if longer than the number
+	 */
+	collapseContent?: boolean | number;
 };
 
 export const Message = ({
@@ -386,7 +360,7 @@ export const Message = ({
 						className,
 					)}
 				>
-					<div className="p-6">
+					<div className="flex flex-col p-6">
 						<div className="flex items-center gap-2">{authorArea}</div>
 						{content}
 						{images}

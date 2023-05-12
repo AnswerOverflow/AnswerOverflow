@@ -12,6 +12,16 @@ const meta = {
 			disable: true,
 		},
 	},
+	argTypes: {
+		collapseContent: {
+			control: {
+				type: 'boolean',
+				if: {
+					arg: 'collapseContent',
+				},
+			},
+		},
+	},
 } as Meta<typeof Message>;
 
 export default meta;
