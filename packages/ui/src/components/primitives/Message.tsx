@@ -144,6 +144,7 @@ const LongMessageContents = () => {
 };
 
 export const MessageContents = () => {
+	const DEFAULT_COLLAPSE_CONTENT_LENGTH = 1000;
 	const { message, collapseContent } = useMessageContext();
 	const { toHTML } = discordMarkdown;
 	const convertedMessageContent = toHTML(message.content);
@@ -153,7 +154,7 @@ export const MessageContents = () => {
 		collapseContent == undefined ||
 		(typeof collapseContent === 'number'
 			? message.content.length > collapseContent
-			: message.content.length < 1000)
+			: message.content.length < DEFAULT_COLLAPSE_CONTENT_LENGTH)
 	) {
 		return (
 			<div
