@@ -5,15 +5,56 @@ import {
 	GITHUB_LINK,
 	TWITTER_LINK,
 } from '@answeroverflow/constants/src/links';
-import { DiscordIcon, GitHubIcon } from './base';
+import { DiscordIcon, GitHubIcon, Heading } from './base';
 
-const navigation = {
+type SocialItem = {
+	name: string;
+	href: string;
+	icon: any;
+};
+
+interface NavigationData {
+	main: {
+		category: {
+			name: string;
+			data: {
+				name: string;
+				href: string;
+			}[];
+		};
+	}[];
+	social: SocialItem[];
+}
+
+const navigation: NavigationData = {
 	main: [
-		{ name: 'Terms', href: 'https://www.answeroverflow.com/tos' },
-		{ name: 'Privacy', href: 'https://www.answeroverflow.com/privacy' },
-		{ name: 'Cookies', href: 'https://www.answeroverflow.com/cookies' },
-		{ name: 'EULA', href: 'https://www.answeroverflow.com/eula' },
-		{ name: 'Docs', href: 'https://docs.answeroverflow.com' },
+		{
+			category: {
+				name: 'Legal',
+				data: [
+					{ name: 'Terms', href: 'https://www.answeroverflow.com/tos' },
+					{ name: 'Privacy', href: 'https://www.answeroverflow.com/privacy' },
+					{ name: 'Cookies', href: 'https://www.answeroverflow.com/cookies' },
+					{ name: 'EULA', href: 'https://www.answeroverflow.com/eula' },
+				],
+			},
+		},
+		{
+			category: {
+				name: 'About',
+				data: [
+					{ name: 'Docs', href: 'https://docs.answeroverflow.com' },
+					{
+						name: 'Contributors',
+						href: 'https://www.answeroverflow.com/contributors',
+					},
+					{
+						name: 'Communities',
+						href: 'https://www.answeroverflow.com/browse',
+					},
+				],
+			},
+		},
 	],
 	social: [
 		{
@@ -46,18 +87,33 @@ export function Footer() {
 					className="-mb-6 columns-1 text-center sm:flex sm:columns-2  sm:justify-center sm:space-x-12"
 					aria-label="Footer"
 				>
-					{navigation.main.map((item) => (
-						<div key={item.name} className="pb-6">
-							<Link
-								href={item.href}
-								className="text-sm leading-6 text-gray-600 hover:text-gray-900 dark:text-neutral-400 dark:hover:text-neutral-300"
-							>
-								{item.name}
-							</Link>
-						</div>
-					))}
+					<div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-24">
+						{navigation.main.map((category) => {
+							return (
+								<div
+									key={`category-${category.category.name}`}
+									className="flex flex-col"
+								>
+									<Heading.H2 className="font-header text-lg font-bold text-black dark:text-white">
+										{category.category.name}
+									</Heading.H2>
+									{category.category.data.map((item) => {
+										return (
+											<Link
+												href={item.href}
+												key={`link-${item.name}-${item.href}`}
+												className="font-body leading-6 text-gray-600 hover:text-gray-900 dark:text-neutral-400 dark:hover:text-neutral-200"
+											>
+												{item.name}
+											</Link>
+										);
+									})}
+								</div>
+							);
+						})}
+					</div>
 				</nav>
-				<div className="mt-10 flex justify-center space-x-10">
+				<div className="mt-16 flex justify-center space-x-10">
 					{navigation.social.map((item) => (
 						<Link
 							key={item.name}
@@ -71,7 +127,7 @@ export function Footer() {
 						</Link>
 					))}
 				</div>
-				<p className="mt-10 text-center text-xs leading-5 text-gray-500 dark:text-neutral-400">
+				<p className="mt-10 text-center font-body text-xs leading-5 text-gray-500 dark:text-neutral-400">
 					&copy; 2023 Hedgehog Software, LLC. All rights reserved.
 				</p>
 			</div>
