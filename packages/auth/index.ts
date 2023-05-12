@@ -1,8 +1,11 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 export { authOptions as authOptions } from './src/auth-options';
 export { getServerSession as getServerSession } from './src/get-session';
-export type { Session } from 'next-auth';
-import type { DefaultSession } from 'next-auth';
+import type {
+	DefaultSession,
+	Account as nextAuthAccount,
+	Session,
+} from 'next-auth';
 
 declare global {
 	namespace NodeJS {
@@ -19,5 +22,9 @@ declare module 'next-auth' {
 		user: {
 			id: string;
 		} & DefaultSession['user'];
+	}
+
+	interface Account extends nextAuthAccount {
+		provider: 'discord';
 	}
 }

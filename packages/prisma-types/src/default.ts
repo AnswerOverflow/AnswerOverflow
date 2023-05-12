@@ -16,6 +16,7 @@ export function getDefaultUser(
 	return {
 		email: null,
 		emailVerified: null,
+		githubSponsersUsername: null,
 		image: null,
 		name: null,
 		...override,
