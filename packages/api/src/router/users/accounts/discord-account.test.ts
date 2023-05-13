@@ -118,4 +118,19 @@ describe('Discord Account Operations', () => {
 			);
 		});
 	});
+	describe('Link Github Sponsors', () => {
+		it('should link a github sponsors account to a discord account', async () => {
+			const account = await createDiscordAccount(discordAccount);
+			const { ctx } = await mockAccountCallerCtx('discord-bot', discordAccount);
+			const router = discordAccountRouter.createCaller(ctx);
+			await router.linkGithubSponsors(
+				mockDiscordAccount({
+					...account,
+					githubSponsorsUsername: 'sponsorsUsername',
+				}),
+			);
+			const data = await router.byId(discordAccount.id);
+			expect(data.githubSponsorsUsername).toBe('sponsorsUsername');
+		});
+	});
 });

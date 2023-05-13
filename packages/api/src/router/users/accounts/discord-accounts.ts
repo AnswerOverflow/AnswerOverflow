@@ -95,7 +95,6 @@ const accountCrudRouter = router({
 			return protectedMutation({
 				permissions: [() => assertIsUser(ctx, input.id)],
 				operation: () => upsertDiscordAccount(input),
-				// ^?
 			});
 		}),
 });
