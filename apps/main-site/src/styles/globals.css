@@ -15,8 +15,8 @@
 	line-break: anywhere;
 	font-family: 'Courier New', Courier, monospace;
 }
-.discord-message a {
-	@apply text-blue-600 hover:underline  dark:text-blue-400 !important;
+.discord-message a :not(.disableLinkHighlighting) {
+	@apply text-blue-700 hover:underline  dark:text-blue-400 !important;
 }
 .bar-of-progress {
 	z-index: 50;

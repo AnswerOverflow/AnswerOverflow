@@ -8,7 +8,7 @@ import { useIsUserInServer } from '~ui/utils/hooks';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import { cn } from '~ui/utils/styling';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
-import { LinkButton, DiscordIcon, CloseIcon } from './base';
+import { LinkButton, DiscordIcon, CloseIcon, ExternalLinkIcon } from './base';
 import {
 	trackEvent,
 	messageWithDiscordAccountToAnalyticsData,
@@ -39,6 +39,25 @@ export const MessageAuthorArea = () => {
 			<div className="flex w-full flex-row items-center gap-2 font-body text-lg text-black/[.7] dark:text-white/[.47]">
 				<DiscordAvatar user={message.author} size="sm" />
 				<span className="mr-1">{message.author.name}</span>
+				{message.author.githubSponsorsUsername && (
+					<LinkButton
+						href={`https://github.com/sponsors/${message.author.githubSponsorsUsername}`}
+						target="_blank"
+						variant="sponsor"
+						size="sm"
+						// To prevent discord message link highlighting from being applied (.disableLinkHighlighting)
+						// eslint-disable-next-line tailwindcss/no-custom-classname
+						className="disableLinkHighlighting"
+					>
+						{/* eslint-disable-next-line tailwindcss/no-custom-classname */}
+						Sponsor{' '}
+						<ExternalLinkIcon
+							// eslint-disable-next-line tailwindcss/no-custom-classname
+							className="disableLinkHighlighting ml-1"
+							pathClassName="disableLinkHighlighting"
+						/>
+					</LinkButton>
+				)}
 				<div className="ml-auto mr-4 flex flex-row gap-2">
 					<LinkButton
 						href={getDiscordURLForMessage(message)}
