@@ -255,6 +255,7 @@ export function toAODiscordAccount(user: User): AODiscordAccount {
 		id: user.id,
 		avatar: user.avatar,
 		name: user.username,
+		githubSponsorsUsername: null,
 	};
 	return convertedUser;
 }
