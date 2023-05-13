@@ -35,7 +35,13 @@ export const zDiscordAccountPrismaUpdate = z.object(
 export const zDiscordAccount = z.object(internalDiscordAccountProperties);
 
 export const zDiscordAccountPublic = z.object(
-	pick(internalDiscordAccountProperties, 'id', 'name', 'avatar', 'githubSponsorsUsername'),
+	pick(
+		internalDiscordAccountProperties,
+		'id',
+		'name',
+		'avatar',
+		'githubSponsorsUsername',
+	),
 );
 
 export const zDiscordAccountRequired = z.object(
