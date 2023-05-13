@@ -10,6 +10,7 @@ const internalDiscordAccountProperties = {
 	id: z.string(),
 	name: z.string(),
 	avatar: z.string().nullable(),
+	githubSponsorsUsername: z.string().nullable(),
 } as const satisfies DiscordAccountZodFormat;
 
 const internalDiscordAccountPropertiesMutable = z

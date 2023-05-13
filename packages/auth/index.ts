@@ -5,6 +5,7 @@ import type {
 	DefaultSession,
 	Account as nextAuthAccount,
 	Session,
+	TokenSet,
 } from 'next-auth';
 
 declare global {
@@ -22,9 +23,5 @@ declare module 'next-auth' {
 		user: {
 			id: string;
 		} & DefaultSession['user'];
-	}
-
-	interface Account extends nextAuthAccount {
-		provider: 'discord';
 	}
 }

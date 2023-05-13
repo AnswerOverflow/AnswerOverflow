@@ -2,7 +2,7 @@ import { type Account, prisma } from '@answeroverflow/prisma-types';
 import { getRandomId } from '@answeroverflow/utils';
 
 export function findAccountByProviderAccountId(input: {
-	provider: 'discord';
+	provider: string;
 	providerAccountId: string;
 }) {
 	return prisma.account.findUnique({

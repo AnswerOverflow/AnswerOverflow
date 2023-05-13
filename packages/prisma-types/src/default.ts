@@ -16,7 +16,6 @@ export function getDefaultUser(
 	return {
 		email: null,
 		emailVerified: null,
-		githubSponsersUsername: null,
 		image: null,
 		name: null,
 		...override,
@@ -69,6 +68,7 @@ export function getDefaultDiscordAccount(
 ): DiscordAccount {
 	const data: DiscordAccount = {
 		avatar: null,
+		githubSponsorsUsername: null,
 		...override,
 	};
 	return data;
