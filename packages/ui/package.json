@@ -67,7 +67,7 @@
 		"@storybook/addon-interactions": "^7.0.9",
 		"@storybook/addon-links": "^7.0.9",
 		"@storybook/addon-mdx-gfm": "^7.0.9",
-		"@storybook/addon-styling": "^1.0.6",
+		"@storybook/addon-styling": "^1.0.8",
 		"@storybook/addon-toolbars": "7.0.9",
 		"@storybook/addons": "^7.0.9",
 		"@storybook/client-api": "^7.0.9",

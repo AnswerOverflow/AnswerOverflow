@@ -3414,10 +3414,10 @@
     "@storybook/types" "7.0.9"
     ts-dedent "^2.0.0"
 
-"@storybook/addon-styling@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@storybook/addon-styling/-/addon-styling-1.0.6.tgz#c68e727986be080d990a59e35145e04af6bbf3f8"
-  integrity sha512-OHs6Yj04TjyFQ+1NQrMBxf+5tCEMDWGvkztB1XQf0+hNqNDRsoRvDkeXeS462RHCt3ffSYUi5leUvotmDYno6g==
+"@storybook/addon-styling@^1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-styling/-/addon-styling-1.0.8.tgz#3533c4c5322b286575c235adcec246e39dcdf913"
+  integrity sha512-Ubi75gHNFO60Sjti2n/i3f0utERNOYcpsRkWHdzV+C26kUemLG+2riKHUt8zVbNskyJxA0EZxh84HYItRe4coA==
   dependencies:
     "@storybook/api" "^7.0.2"
     "@storybook/components" "^7.0.2"
@@ -4080,7 +4080,7 @@
     semver "^7.3.7"
     webpack "5"
 
-"@storybook/preview-api@7.0.6", "@storybook/preview-api@^7.0.0-beta.0 || ^7.0.0-rc.0 || ^7.0.0":
+"@storybook/preview-api@7.0.6":
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/@storybook/preview-api/-/preview-api-7.0.6.tgz#2f12a0035243496e8777cb8122bc0b2db5820d16"
   integrity sha512-uNsedNyiEccBV2EDUC/xcKTbmiNCYuVHbgOoWTmBz0ZqFo9bX0jxkpyYWHEhJM79qqVqmrpiQ5jbS8QKn8TIxQ==
@@ -4101,7 +4101,7 @@
     ts-dedent "^2.0.0"
     util-deprecate "^1.0.2"
 
-"@storybook/preview-api@7.0.9", "@storybook/preview-api@^7.0.2":
+"@storybook/preview-api@7.0.9", "@storybook/preview-api@^7.0.0-beta.0 || ^7.0.0-rc.0 || ^7.0.0", "@storybook/preview-api@^7.0.2":
   version "7.0.9"
   resolved "https://registry.yarnpkg.com/@storybook/preview-api/-/preview-api-7.0.9.tgz#59fbf99e3f4d94263a65ba486f3e5be853ba4fee"
   integrity sha512-cLyhq2nk0eiMOUwIIKhgDgZoS1ecRGojl92hR0agZDzNJrb1lvXK6uIkJh/Anl2Jbir28lAjQGU54voPODwTUA==
@@ -6663,11 +6663,6 @@ core-util-is@~1.0.0:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.3.tgz#a6042d3634c2b27e9328f837b965fac83808db85"
   integrity sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==
-
-cosmiconfig-typescript-loader@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/cosmiconfig-typescript-loader/-/cosmiconfig-typescript-loader-4.3.0.tgz#c4259ce474c9df0f32274ed162c0447c951ef073"
-  integrity sha512-NTxV1MFfZDLPiBMjxbHRwSh5LaLcPMwNdCutmnHJCKoVnlvldPWlllonKwrsRJ5pYZBIBGRWWU2tfvzxgeSW5Q==
 
 cosmiconfig@^7.0.1:
   version "7.1.0"
@@ -12839,17 +12834,7 @@ postcss-load-config@^3.0.1, postcss-load-config@^3.1.4:
     lilconfig "^2.0.5"
     yaml "^1.10.2"
 
-postcss-loader@^7.0.2:
-  version "7.2.4"
-  resolved "https://registry.yarnpkg.com/postcss-loader/-/postcss-loader-7.2.4.tgz#2884f4ca172de633b2cf1f93dc852968f0632ba9"
-  integrity sha512-F88rpxxNspo5hatIc+orYwZDtHFaVFOSIVAx+fBfJC1GmhWbVmPWtmg2gXKE1OxJbneOSGn8PWdIwsZFcruS+w==
-  dependencies:
-    cosmiconfig "^8.1.3"
-    cosmiconfig-typescript-loader "^4.3.0"
-    klona "^2.0.6"
-    semver "^7.3.8"
-
-postcss-loader@^7.2.4:
+postcss-loader@^7.0.2, postcss-loader@^7.2.4:
   version "7.3.0"
   resolved "https://registry.yarnpkg.com/postcss-loader/-/postcss-loader-7.3.0.tgz#05991c1e490d8ff86ef18358d87db3b5b2dcb5f5"
   integrity sha512-qLAFjvR2BFNz1H930P7mj1iuWJFjGey/nVhimfOAAQ1ZyPpcClAxP8+A55Sl8mBvM+K2a9Pjgdj10KpANWrNfw==
