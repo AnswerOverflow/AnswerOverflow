@@ -50,7 +50,7 @@ export const MessageAuthorArea = () => {
 						className="disableLinkHighlighting"
 					>
 						{/* eslint-disable-next-line tailwindcss/no-custom-classname */}
-						Sponsor{' '}
+						Sponsor User{' '}
 						<ExternalLinkIcon
 							// eslint-disable-next-line tailwindcss/no-custom-classname
 							className="disableLinkHighlighting ml-1"
