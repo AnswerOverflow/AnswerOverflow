@@ -28,7 +28,6 @@ export const extendedAdapter: Adapter = {
 			id: discordAccount.id,
 			name: discordAccount.username,
 			avatar: discordAccount.avatar,
-			githubSponsorsUsername: discordAccount.githubSponsorsUsername,
 		});
 		return PrismaAdapter(prisma).linkAccount(
 			account,
