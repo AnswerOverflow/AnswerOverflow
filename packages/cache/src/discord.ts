@@ -104,6 +104,7 @@ export const zUserSchema = z.object({
 	username: z.string(),
 	discriminator: z.string(),
 	avatar: z.string().nullable(),
+	githubSponsorsUsername: z.string().nullable(),
 	bot: z.boolean().optional(),
 	system: z.boolean().optional(),
 	mfaEnabled: z.boolean().optional(),

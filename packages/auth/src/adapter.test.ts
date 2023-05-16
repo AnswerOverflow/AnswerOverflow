@@ -14,6 +14,7 @@ beforeEach(() => {
 		id: getRandomId(),
 		username: 'TestUser',
 		avatar: '1234567890',
+		githubSponsorsUsername: null,
 		discriminator: '1234',
 		publicFlags: 0,
 		flags: 0,
@@ -48,6 +49,7 @@ describe('Discord Auth', () => {
 			id: mockDiscordAccount.id,
 			name: mockDiscordAccount.username,
 			avatar: mockDiscordAccount.avatar,
+			githubSponsorsUsername: mockDiscordAccount.githubSponsorsUsername,
 		});
 	});
 	// We have first seen their account on Discord from indexing their messages, we are linking their indexed account to what was signed in with
@@ -57,6 +59,7 @@ describe('Discord Auth', () => {
 				id: mockDiscordAccount.id,
 				name: mockDiscordAccount.username,
 				avatar: mockDiscordAccount.avatar,
+				githubSponsorsUsername: mockDiscordAccount.githubSponsorsUsername,
 			},
 		});
 		const createdUser = await extendedAdapter.createUser({
@@ -79,6 +82,7 @@ describe('Discord Auth', () => {
 			id: mockDiscordAccount.id,
 			name: mockDiscordAccount.username,
 			avatar: mockDiscordAccount.avatar,
+			githubSponsorsUsername: mockDiscordAccount.githubSponsorsUsername,
 		});
 		const account = await prisma.account.findUnique({
 			where: {
