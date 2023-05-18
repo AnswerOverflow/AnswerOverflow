@@ -7,7 +7,7 @@ import { DiscordAvatar } from './DiscordAvatar';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import { cn } from '~ui/utils/styling';
-import { LinkButton, DiscordIcon, Heading } from './base';
+import { LinkButton, DiscordIcon } from './base';
 import {
 	trackEvent,
 	messageWithDiscordAccountToAnalyticsData,
@@ -186,11 +186,7 @@ const SingularImageAttachment = () => {
 	}
 
 	if (parsedImages === 'error') {
-		return (
-			<Heading.H2 className="mt-2 text-lg">
-				An error occurred loading images...
-			</Heading.H2>
-		);
+		return <p className="mt-2 text-lg">An error occurred loading images...</p>;
 	}
 
 	return (
