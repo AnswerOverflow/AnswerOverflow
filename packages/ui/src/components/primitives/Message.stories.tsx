@@ -15,10 +15,14 @@ const meta = {
 	argTypes: {
 		collapseContent: {
 			control: {
-				type: 'boolean',
+				type: 'range',
 				if: {
 					arg: 'collapseContent',
 				},
+				min: 0,
+				max: 4000,
+				step: 1,
+				defaultValue: 0,
 			},
 		},
 	},
