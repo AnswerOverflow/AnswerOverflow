@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { loremIpsum } from 'lorem-ipsum';
 import {
 	mockChannelWithSettings,
 	mockMessageFull,
@@ -20,55 +19,28 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-function makeMockedChannelQuestions(
-	amount: number,
-	someLongMessages?: boolean,
-) {
+function makeMockedChannelQuestions(amount: number) {
 	if (amount > 20) {
 		amount = 20;
 	}
-	return Array.from({ length: amount }).map(() => {
-		const randomBoolean = Math.random() >= 0.5;
-
-		if (!randomBoolean || !someLongMessages) {
-			return {
-				message: mockMessageFull(),
-				thread: mockChannelWithSettings({
-					type: ChannelType.PublicThread,
-				}),
-			};
-		}
-
-		return {
-			message: mockMessageFull({
-				content: loremIpsum({
-					count: 3500,
-				}),
-			}),
-			thread: mockChannelWithSettings({
-				type: ChannelType.PublicThread,
-			}),
-		};
-	});
+	return Array.from({ length: amount }).map(() => ({
+		message: mockMessageFull(),
+		thread: mockChannelWithSettings({
+			type: ChannelType.PublicThread,
+		}),
+	}));
 }
 
-function makeMockedChannels(amount: number, someLongMessages?: boolean) {
+function makeMockedChannels(amount: number) {
 	return Array.from({ length: amount }).map(() => ({
 		channel: mockChannelWithSettings(),
-		questions: makeMockedChannelQuestions(100, someLongMessages),
+		questions: makeMockedChannelQuestions(100),
 	}));
 }
 
 export const CommunityPageStory: Story = {
 	args: {
 		channels: makeMockedChannels(100),
-		server: mockServer(),
-	},
-};
-
-export const CommunityPageStoryWithSomeSuperLongQuestions: Story = {
-	args: {
-		channels: makeMockedChannels(100, true),
 		server: mockServer(),
 	},
 };
