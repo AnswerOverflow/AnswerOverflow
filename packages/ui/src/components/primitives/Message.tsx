@@ -127,9 +127,9 @@ const LongMessageContents = () => {
 
 	const textToRender =
 		convertedMessageContent.length > 1000
-			? `${convertedMessageContent.trim().slice(0, 1000)}... <a href={"/m/${
+			? `${convertedMessageContent.trim().slice(0, 1000)}... <a href="/m/${
 					message.id
-			  }"}>View Message</a>`
+			  }">View Message</a>`
 			: convertedMessageContent;
 
 	return (
