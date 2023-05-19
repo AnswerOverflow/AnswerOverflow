@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { loremIpsum } from 'lorem-ipsum';
 import {
 	mockChannelWithSettings,
 	mockMessageFull,
@@ -41,6 +42,29 @@ function makeMockedChannels(amount: number) {
 export const CommunityPageStory: Story = {
 	args: {
 		channels: makeMockedChannels(100),
+		server: mockServer(),
+	},
+};
+
+export const WithLongQuestion: Story = {
+	args: {
+		channels: [
+			{
+				channel: mockChannelWithSettings(),
+				questions: [
+					{
+						message: mockMessageFull({
+							content: loremIpsum({
+								count: 250,
+							}),
+						}),
+						thread: mockChannelWithSettings({
+							type: ChannelType.PublicThread,
+						}),
+					},
+				],
+			},
+		],
 		server: mockServer(),
 	},
 };

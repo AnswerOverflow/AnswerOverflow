@@ -155,6 +155,7 @@ export const LinkMessage = ({
 			message={message}
 			showBorders
 			className={className}
+			collapseContent
 			content={
 				<>
 					<Link href={`/m/${message.id}`} className="block w-fit ">

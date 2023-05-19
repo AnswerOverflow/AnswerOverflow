@@ -2272,19 +2272,6 @@
   dependencies:
     "@babel/runtime" "^7.13.10"
 
-"@radix-ui/react-alert-dialog@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@radix-ui/react-alert-dialog/-/react-alert-dialog-1.0.3.tgz#892726f4e4441622535e68a632ec833211b46988"
-  integrity sha512-QXFy7+bhGi0u+paF2QbJeSCHZs4gLMJIPm6sajUamyW0fro6g1CaSGc5zmc4QmK2NlSGUrq8m+UsUqJYtzvXow==
-  dependencies:
-    "@babel/runtime" "^7.13.10"
-    "@radix-ui/primitive" "1.0.0"
-    "@radix-ui/react-compose-refs" "1.0.0"
-    "@radix-ui/react-context" "1.0.0"
-    "@radix-ui/react-dialog" "1.0.3"
-    "@radix-ui/react-primitive" "1.0.2"
-    "@radix-ui/react-slot" "1.0.1"
-
 "@radix-ui/react-arrow@1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-arrow/-/react-arrow-1.0.2.tgz#93b0ff95f65e2264a05b14ef1031ec798243dd6f"
@@ -2328,27 +2315,6 @@
   integrity sha512-1pVM9RfOQ+n/N5PJK33kRSKsr1glNxomxONs5c49MliinBY6Yw2Q995qfBUUo0/Mbg05B/sGA0gkgPI7kmSHBg==
   dependencies:
     "@babel/runtime" "^7.13.10"
-
-"@radix-ui/react-dialog@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@radix-ui/react-dialog/-/react-dialog-1.0.3.tgz#a715bf30f35fcd80476c0a07fcc073c1968e6d3e"
-  integrity sha512-owNhq36kNPqC2/a+zJRioPg6HHnTn5B/sh/NjTY8r4W9g1L5VJlrzZIVcBr7R9Mg8iLjVmh6MGgMlfoVf/WO/A==
-  dependencies:
-    "@babel/runtime" "^7.13.10"
-    "@radix-ui/primitive" "1.0.0"
-    "@radix-ui/react-compose-refs" "1.0.0"
-    "@radix-ui/react-context" "1.0.0"
-    "@radix-ui/react-dismissable-layer" "1.0.3"
-    "@radix-ui/react-focus-guards" "1.0.0"
-    "@radix-ui/react-focus-scope" "1.0.2"
-    "@radix-ui/react-id" "1.0.0"
-    "@radix-ui/react-portal" "1.0.2"
-    "@radix-ui/react-presence" "1.0.0"
-    "@radix-ui/react-primitive" "1.0.2"
-    "@radix-ui/react-slot" "1.0.1"
-    "@radix-ui/react-use-controllable-state" "1.0.0"
-    aria-hidden "^1.1.1"
-    react-remove-scroll "2.5.5"
 
 "@radix-ui/react-direction@1.0.0":
   version "1.0.0"
@@ -13316,6 +13282,11 @@ react-fast-marquee@^1.4.0:
   resolved "https://registry.yarnpkg.com/react-fast-marquee/-/react-fast-marquee-1.4.0.tgz#8ecb8c0581862029245ec13641c27234d23a8fe8"
   integrity sha512-aSjfFV6TaQkUsGBE9d1j3LhudPXKDoywLU1Ky2xke4IchHHqAtmXMAPqjnCPdSsvlOZSMuPAbIHN+EciqPCZWQ==
 
+react-grid-gallery@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/react-grid-gallery/-/react-grid-gallery-1.0.0.tgz#31604b9488dfa75a899aa39bc8884138f0409a12"
+  integrity sha512-S1gr6WXBlPFVrE0x2BHuu7jhyaB61mabcMQyx+8KCgAyKzGza0WF67AfAnS9Q00aurFEq4IP8eqb2Bk5F4RAmQ==
+
 react-inspector@^6.0.0:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/react-inspector/-/react-inspector-6.0.1.tgz#1a37f0165d9df81ee804d63259eaaeabe841287d"
@@ -16350,6 +16321,11 @@ yauzl@^2.10.0:
   dependencies:
     buffer-crc32 "~0.2.3"
     fd-slicer "~1.1.0"
+
+yet-another-react-lightbox@^3.5.4:
+  version "3.5.4"
+  resolved "https://registry.yarnpkg.com/yet-another-react-lightbox/-/yet-another-react-lightbox-3.5.4.tgz#1acf588c6c3ed8e6cc7e477897544c41287177b4"
+  integrity sha512-fpoHl7pHEaNHTgrDICcI7VdNTBsJvQhyWb+XnU0CSOTtFVER0kHZQnJQx9m93qQ0Wxq9+JLBFloNmxMarUM8MA==
 
 yn@3.1.1:
   version "3.1.1"

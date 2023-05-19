@@ -16,7 +16,7 @@
 	font-family: 'Courier New', Courier, monospace;
 }
 .discord-message a {
-	@apply text-blue-600 hover:underline  dark:text-blue-400 !important;
+	@apply text-blue-700 hover:underline dark:text-blue-400 !important;
 }
 .bar-of-progress {
 	z-index: 50;
