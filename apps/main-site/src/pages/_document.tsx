@@ -27,11 +27,6 @@ class MyDocument extends Document {
 							__html: Buffer.from(DATA_UNBLOCKER, 'base64').toString(),
 						}}
 					/>
-					{/* TODO: Swap for Next font */}
-					<link
-						href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap"
-						rel="stylesheet"
-					/>
 				</Head>
 				<body className="bg-ao-white dark:bg-ao-black">
 					<Main />

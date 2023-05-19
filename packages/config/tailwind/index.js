@@ -12,7 +12,6 @@ module.exports = {
 	theme: {
 		extend: {
 			fontFamily: {
-				mono: ['var(--font-poppins)'],
 				discord: ['Noto Sans', 'sans-serif'],
 				header: ['Montserrat', 'sans-serif'],
 				body: ['Source Sans Pro', 'sans-serif'],
