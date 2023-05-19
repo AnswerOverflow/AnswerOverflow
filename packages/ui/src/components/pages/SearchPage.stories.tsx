@@ -67,7 +67,7 @@ export const ResultsWithSuperLongMessage: Story = {
 				message: {
 					...mockMessageWithDiscordAccount({
 						content: loremIpsum({
-							count: 3500,
+							count: 250,
 						}),
 					}),
 					solutionMessages: [],

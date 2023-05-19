@@ -56,7 +56,7 @@ export const SuperLongMessage: Story = {
 			...mockMessageWithDiscordAccount(),
 			// (3674 characters - discord nitro is max 4000 characters)
 			content: loremIpsum({
-				count: 3500,
+				count: 250,
 			}),
 			author: mockDiscordAccount(),
 		},

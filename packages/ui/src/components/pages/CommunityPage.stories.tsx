@@ -55,7 +55,7 @@ export const WithLongQuestion: Story = {
 					{
 						message: mockMessageFull({
 							content: loremIpsum({
-								count: 3500,
+								count: 250,
 							}),
 						}),
 						thread: mockChannelWithSettings({
