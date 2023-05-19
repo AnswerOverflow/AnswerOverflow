@@ -120,15 +120,17 @@ export const MessageAuthorArea = () => {
 	);
 };
 
+const DEFAULT_COLLAPSE_CONTENT_LENGTH = 500;
+
 const LongMessageContents = () => {
 	const { message } = useMessageContext();
 	const { toHTML } = discordMarkdown;
 	const convertedMessageContent = toHTML(message.content);
 
 	const textToRender =
-		convertedMessageContent.length > 1000
+		convertedMessageContent.length > DEFAULT_COLLAPSE_CONTENT_LENGTH
 			? `${convertedMessageContent
-					.slice(0, 1000)
+					.slice(0, DEFAULT_COLLAPSE_CONTENT_LENGTH)
 					.trim()}... <a class="underline" href="/m/${
 					message.id
 			  }">View Message</a>`
@@ -146,7 +148,6 @@ const LongMessageContents = () => {
 };
 
 export const MessageContents = () => {
-	const DEFAULT_COLLAPSE_CONTENT_LENGTH = 1000;
 	const { message, collapseContent } = useMessageContext();
 	const { toHTML } = discordMarkdown;
 	const convertedMessageContent = toHTML(message.content);
