@@ -1,5 +1,6 @@
 import type { APISearchResult } from '@answeroverflow/api';
 import type { Meta, StoryObj } from '@storybook/react';
+import { loremIpsum } from 'lorem-ipsum';
 import {
 	mockChannelWithSettings,
 	mockMessageWithDiscordAccount,
@@ -21,6 +22,34 @@ export const PublicSolution: Story = {
 		result: {
 			message: {
 				...mockMessageWithDiscordAccount(),
+				solutionMessages: [mockMessageWithDiscordAccount()],
+				referencedMessage: mockMessageWithDiscordAccount(),
+			},
+			thread: mockChannelWithSettings(),
+			score: 0.5,
+			channel: mockChannelWithSettings({
+				// AO's Discord server
+				inviteCode: 'sxDN2rEdwD',
+			}),
+			server: mockServer(),
+		},
+	},
+	render: ({ result }: { result: APISearchResult[number] }) => (
+		<div className="xl:w-2/3">
+			<SearchResult result={result} />
+		</div>
+	),
+};
+
+export const PublicSolutionWithSuperLongMessage: Story = {
+	args: {
+		result: {
+			message: {
+				...mockMessageWithDiscordAccount({
+					content: loremIpsum({
+						count: 250,
+					}),
+				}),
 				solutionMessages: [mockMessageWithDiscordAccount()],
 				referencedMessage: mockMessageWithDiscordAccount(),
 			},

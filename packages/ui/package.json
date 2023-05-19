@@ -25,7 +25,6 @@
 		"@answeroverflow/hooks": "*",
 		"@heroicons/react": "^2.0.13",
 		"@next/font": "^13.1.2",
-		"@radix-ui/react-alert-dialog": "^1.0.3",
 		"@radix-ui/react-avatar": "^1.0.2",
 		"@radix-ui/react-dropdown-menu": "^2.0.4",
 		"@radix-ui/react-label": "^2.0.1",
@@ -42,6 +41,7 @@
 		"highlight.js": "^11.7.0",
 		"next": "^13.4.1",
 		"react-fast-marquee": "^1.4.0",
+		"react-grid-gallery": "^1.0.0",
 		"react-social-icons": "^5.15.0",
 		"react-spring": "^9.7.1",
 		"react-toastify": "^9.1.2",
@@ -53,6 +53,7 @@
 		"style-loader": "^3.3.1",
 		"tailwind-merge": "^1.10.0",
 		"tailwindcss-animate": "^1.0.5",
+		"yet-another-react-lightbox": "^3.5.4",
 		"zod": "^3.20.6"
 	},
 	"devDependencies": {
