@@ -17,11 +17,15 @@ async function autoThread(channelSettings: ChannelWithFlags, message: Message) {
 	if (!isHumanMessage(message)) return;
 	if (message.type !== MessageType.Default) return;
 	if (message.thread) return;
-	// Channel is text based, and message has been sent by a human
+	const authorName = message.member?.nickname ?? message.author.username;
 
-	let textTitle = `${message.member?.nickname ?? message.author.username} - ${
-		message.cleanContent
-	}`;
+	let textTitle = `${authorName} - ${message.cleanContent}`;
+	if (message.attachments.size > 0 && message.content.length === 0) {
+		textTitle = `${authorName} - ${
+			message.attachments.first()?.name ?? 'Attachment'
+		}`;
+	}
+
 	// Remove all markdown characters
 	textTitle = removeDiscordMarkdown(textTitle);
 	if (textTitle.length > 47) {
