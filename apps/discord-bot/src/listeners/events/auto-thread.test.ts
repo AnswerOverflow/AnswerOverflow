@@ -255,7 +255,7 @@ describe('Auto thread', () => {
 
 		expect(message.thread?.name).toEqual(`serverUsername - thread title`);
 	});
-	it('should use the filename when message content is empty', async () => {
+	it('should use the first filename when message content is empty and an attachment is present', async () => {
 		// Make sure that the success case works, then we can test other cases
 		await succeedCreatingAThread();
 
