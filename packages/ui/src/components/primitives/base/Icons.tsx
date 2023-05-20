@@ -1,5 +1,6 @@
 /* eslint-disable tailwindcss/no-custom-classname */
 import { cva, type VariantProps } from 'cva';
+import { Poppins } from 'next/font/google';
 
 export const GitHubIcon = (props: React.SVGProps<SVGSVGElement>) => (
 	<svg fill="currentColor" viewBox="0 0 24 24" {...props}>
@@ -50,6 +51,11 @@ export function DiscordIcon(
 import * as React from 'react';
 import { cn, classNames } from '~ui/utils/styling';
 
+const poppins = Poppins({
+	weight: ['400', '600'],
+	subsets: ['latin'],
+});
+
 export function AnswerOverflowLogo({
 	className,
 	...props
@@ -66,10 +72,7 @@ export function AnswerOverflowLogo({
 			<g id="TEXT">
 				<text
 					transform="translate(41.82 122.17)"
-					style={{
-						fontFamily: 'Poppins-Regular,Poppins',
-						fontSize: '98.04px',
-					}}
+					className={`${poppins.className} text-[98.04px]`}
 				>
 					<tspan x={0} y={0}>
 						{'Answer'}
@@ -77,11 +80,7 @@ export function AnswerOverflowLogo({
 				</text>
 				<text
 					transform="translate(407.69 124.15)"
-					style={{
-						fontFamily: 'Poppins-Medium,Poppins',
-						fontSize: '100.71px',
-						fontWeight: 'bold',
-					}}
+					className={`${poppins.className} text-[100.71px] font-semibold`}
 				>
 					<tspan className="cls-3" x={0} y={0}>
 						{'Ove'}

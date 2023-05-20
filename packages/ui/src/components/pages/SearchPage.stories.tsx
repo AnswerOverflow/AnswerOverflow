@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { loremIpsum } from 'lorem-ipsum';
 import {
 	mockChannelWithSettings,
 	mockMessageWithDiscordAccount,
@@ -58,6 +59,33 @@ export const Results: Story = {
 		isLoading: false,
 	},
 };
+
+export const ResultsWithSuperLongMessage: Story = {
+	args: {
+		results: [
+			{
+				message: {
+					...mockMessageWithDiscordAccount({
+						content: loremIpsum({
+							count: 250,
+						}),
+					}),
+					solutionMessages: [],
+					referencedMessage: mockMessageWithDiscordAccount(),
+				},
+				thread: mockChannelWithSettings(),
+				score: 0.5,
+				channel: mockChannelWithSettings({
+					// AO's Discord server
+					inviteCode: 'sxDN2rEdwD',
+				}),
+				server: mockServer(),
+			},
+		],
+		isLoading: false,
+	},
+};
+
 export const Loading: Story = {
 	args: {
 		isLoading: true,

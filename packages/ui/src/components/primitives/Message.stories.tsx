@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { loremIpsum } from 'lorem-ipsum';
 import { Message } from './Message';
 import {
 	mockDiscordAccount,
@@ -10,6 +11,20 @@ const meta = {
 	parameters: {
 		a11y: {
 			disable: true,
+		},
+	},
+	argTypes: {
+		collapseContent: {
+			control: {
+				type: 'range',
+				if: {
+					arg: 'collapseContent',
+				},
+				min: 0,
+				max: 4000,
+				step: 1,
+				defaultValue: 0,
+			},
 		},
 	},
 } as Meta<typeof Message>;
@@ -44,7 +59,59 @@ export const OverflowLetters: Story = {
 	},
 };
 
-export const WithImages: Story = {
+export const SuperLongMessage: Story = {
+	args: {
+		...Primary.args,
+		message: {
+			...mockMessageWithDiscordAccount(),
+			// (3674 characters - discord nitro is max 4000 characters)
+			content: loremIpsum({
+				count: 250,
+			}),
+			author: mockDiscordAccount(),
+		},
+	},
+};
+
+export const SuperLongMessageCollapsed: Story = {
+	args: {
+		...Primary.args,
+		collapseContent: true,
+		message: {
+			...mockMessageWithDiscordAccount(),
+			// (3674 characters - discord nitro is max 4000 characters)
+			content: loremIpsum({
+				count: 250,
+			}),
+			author: mockDiscordAccount(),
+		},
+	},
+};
+
+export const WithSingularImage: Story = {
+	args: {
+		...Primary.args,
+		message: {
+			...mockMessageWithDiscordAccount(),
+			channelId: '1031266112802914305',
+			serverId: '701008832645824553',
+			attachments: [
+				{
+					url: 'https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.png',
+					width: 897,
+					height: 672,
+					filename: 'image.png',
+					size: 123456,
+					id: '123456789',
+					proxyUrl:
+						'https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.png',
+				},
+			],
+		},
+	},
+};
+
+export const WithMultipleImages: Story = {
 	args: {
 		...Primary.args,
 		message: {
@@ -81,6 +148,36 @@ export const WithImages: Story = {
 					id: '123456789',
 					proxyUrl:
 						'https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.png',
+				},
+				{
+					url: 'https://cdn.discordapp.com/attachments/1079799320745877547/1105532764821930095/image.png',
+					width: null,
+					height: null,
+					filename: 'image.png',
+					size: 123456,
+					id: '123456789',
+					proxyUrl:
+						'https://cdn.discordapp.com/attachments/1079799320745877547/1105532764821930095/image.png',
+				},
+				{
+					url: 'https://cdn.discordapp.com/attachments/1079799320745877547/1105533000881545336/image.png',
+					width: null,
+					height: null,
+					filename: 'image.png',
+					size: 123456,
+					id: '123456789',
+					proxyUrl:
+						'https://cdn.discordapp.com/attachments/1079799320745877547/1105533000881545336/image.png',
+				},
+				{
+					url: 'https://media.discordapp.net/attachments/1079799320745877547/1105533166812410018/image.png',
+					width: null,
+					height: null,
+					filename: 'image.png',
+					size: 123456,
+					id: '123456789',
+					proxyUrl:
+						'https://media.discordapp.net/attachments/1079799320745877547/1105533166812410018/image.png',
 				},
 			],
 		},
