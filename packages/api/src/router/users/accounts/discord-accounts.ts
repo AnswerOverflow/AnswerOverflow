@@ -6,8 +6,6 @@ import {
 	deleteDiscordAccount,
 	deleteIgnoredDiscordAccount,
 	findIgnoredDiscordAccountById,
-	upsertDiscordAccount,
-	zDiscordAccountUpsert,
 } from '@answeroverflow/db';
 import { z } from 'zod';
 import {
@@ -88,14 +86,6 @@ const accountCrudRouter = router({
 					throw error;
 				return false;
 			}
-		}),
-	linkGithubSponsors: withDiscordAccountProcedure
-		.input(zDiscordAccountUpsert)
-		.mutation(({ ctx, input }) => {
-			return protectedMutation({
-				permissions: [() => assertIsUser(ctx, input.id)],
-				operation: () => upsertDiscordAccount(input),
-			});
 		}),
 });
 

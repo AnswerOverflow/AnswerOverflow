@@ -14,7 +14,6 @@ export const messageData: HomeMessages = {
 				name: 'Jolt',
 				id: '0',
 				avatar: null,
-				githubSponsorsUsername: null,
 			},
 
 			public: true,
@@ -56,7 +55,6 @@ export const messageData: HomeMessages = {
 				name: 'Rhys',
 				id: '0',
 				avatar: null,
-				githubSponsorsUsername: null,
 			},
 			parentChannelId: null,
 			public: true,

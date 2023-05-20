@@ -37,16 +37,6 @@ export const Primary: Story = {
 	args: { message: mockMessageWithDiscordAccount() },
 };
 
-export const PrimaryWithSponsor: Story = {
-	args: {
-		message: mockMessageWithDiscordAccount({
-			author: mockDiscordAccount({
-				githubSponsorsUsername: 't3dotgg',
-			}),
-		}),
-	},
-};
-
 export const OverflowLetters: Story = {
 	args: {
 		...Primary.args,

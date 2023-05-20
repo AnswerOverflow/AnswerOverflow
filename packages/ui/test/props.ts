@@ -19,7 +19,6 @@ export function mockDiscordAccount(
 		id: randomId(),
 		name: 'John Doe',
 		avatar: null,
-		githubSponsorsUsername: null,
 		...override,
 	};
 	return data;

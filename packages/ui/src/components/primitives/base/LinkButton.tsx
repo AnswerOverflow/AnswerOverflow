@@ -22,7 +22,7 @@ export const LinkButton = ({
 	return (
 		<Link
 			href={href}
-			className={cn(buttonVariants({ variant, size, className }), className)}
+			className={cn(buttonVariants({ variant, size, className }))}
 			{...props}
 		>
 			{children}
