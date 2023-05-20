@@ -19,7 +19,6 @@ async function autoThread(channelSettings: ChannelWithFlags, message: Message) {
 	if (message.thread) return;
 	const authorName = message.member?.nickname ?? message.author.username;
 	let threadTitleContent = message.cleanContent;
-	let textTitle = `${authorName} - ${threadTitleContent}`;
 
 	if (message.attachments.size > 0 && message.content.length === 0) {
 		threadTitleContent = message.attachments.first()?.name ?? 'Attachment';
@@ -27,6 +26,8 @@ async function autoThread(channelSettings: ChannelWithFlags, message: Message) {
 
 	// Remove all markdown characters
 	threadTitleContent = removeDiscordMarkdown(threadTitleContent);
+
+	let textTitle = `${authorName} - ${threadTitleContent}`;
 	if (textTitle.length > 47) {
 		textTitle = textTitle.slice(0, 47) + '...';
 	}
