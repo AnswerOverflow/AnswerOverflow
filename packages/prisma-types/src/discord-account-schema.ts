@@ -10,6 +10,7 @@ const internalDiscordAccountProperties = {
 	id: z.string(),
 	name: z.string(),
 	avatar: z.string().nullable(),
+	githubSponsorsUsername: z.string().nullable(),
 } as const satisfies DiscordAccountZodFormat;
 
 const internalDiscordAccountPropertiesMutable = z
@@ -34,7 +35,13 @@ export const zDiscordAccountPrismaUpdate = z.object(
 export const zDiscordAccount = z.object(internalDiscordAccountProperties);
 
 export const zDiscordAccountPublic = z.object(
-	pick(internalDiscordAccountProperties, 'id', 'name', 'avatar'),
+	pick(
+		internalDiscordAccountProperties,
+		'id',
+		'name',
+		'avatar',
+		'githubSponsorsUsername',
+	),
 );
 
 export const zDiscordAccountRequired = z.object(

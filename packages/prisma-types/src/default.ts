@@ -68,6 +68,7 @@ export function getDefaultDiscordAccount(
 ): DiscordAccount {
 	const data: DiscordAccount = {
 		avatar: null,
+		githubSponsorsUsername: null,
 		...override,
 	};
 	return data;

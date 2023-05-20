@@ -31,6 +31,7 @@ const defaultMessage: MessageProps = {
 			name: 'John Doe',
 			id: '0',
 			avatar: null,
+			githubSponsorsUsername: null,
 		},
 		parentChannelId: null,
 		public: true,
