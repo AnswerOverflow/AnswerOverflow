@@ -18,16 +18,15 @@ async function autoThread(channelSettings: ChannelWithFlags, message: Message) {
 	if (message.type !== MessageType.Default) return;
 	if (message.thread) return;
 	const authorName = message.member?.nickname ?? message.author.username;
+	let threadTitleContent = message.cleanContent;
+	let textTitle = `${authorName} - ${threadTitleContent}`;
 
-	let textTitle = `${authorName} - ${message.cleanContent}`;
 	if (message.attachments.size > 0 && message.content.length === 0) {
-		textTitle = `${authorName} - ${
-			message.attachments.first()?.name ?? 'Attachment'
-		}`;
+		threadTitleContent = message.attachments.first()?.name ?? 'Attachment';
 	}
 
 	// Remove all markdown characters
-	textTitle = removeDiscordMarkdown(textTitle);
+	threadTitleContent = removeDiscordMarkdown(threadTitleContent);
 	if (textTitle.length > 47) {
 		textTitle = textTitle.slice(0, 47) + '...';
 	}
