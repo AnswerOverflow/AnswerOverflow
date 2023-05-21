@@ -131,9 +131,7 @@ const LongMessageContents = () => {
 		convertedMessageContent.length > DEFAULT_COLLAPSE_CONTENT_LENGTH
 			? `${convertedMessageContent
 					.slice(0, DEFAULT_COLLAPSE_CONTENT_LENGTH)
-					.trim()}... <a class="underline" href="/m/${
-					message.id
-			  }">View Message</a>`
+					.trim()}...`
 			: convertedMessageContent;
 
 	return (
