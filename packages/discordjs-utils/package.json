@@ -9,7 +9,7 @@
 		"discord.js": "^14.8.0"
 	},
 	"devDependencies": {
-		"@swc/core": "^1.3.32",
+		"@swc/core": "^1.3.59",
 		"@swc/jest": "^0.2.24",
 		"@types/jest": "^29.5.0",
 		"@types/node": "^18.14.2",
