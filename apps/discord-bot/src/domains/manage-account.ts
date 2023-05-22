@@ -102,7 +102,7 @@ export async function provideConsentOnForumChannelMessage(
 	) {
 		return null;
 	}
-	if (!isHumanMessage(message)) {
+	if (!isHumanMessage(message) && !message.author.bot) {
 		return null;
 	}
 	return updateUserConsent({
