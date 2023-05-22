@@ -4,6 +4,7 @@ import Document, {
 	NextScript,
 	type DocumentContext,
 	type DocumentInitialProps,
+	Head,
 } from 'next/document';
 
 class MyDocument extends Document {
@@ -18,6 +19,7 @@ class MyDocument extends Document {
 	override render() {
 		return (
 			<Html className="dark">
+				<Head />
 				<Main />
 				<NextScript />
 			</Html>
