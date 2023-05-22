@@ -255,4 +255,49 @@ describe('Auto thread', () => {
 
 		expect(message.thread?.name).toEqual(`serverUsername - thread title`);
 	});
+	it('should use the first filename when message content is empty and an attachment is present', async () => {
+		// Make sure that the success case works, then we can test other cases
+		await succeedCreatingAThread();
+
+		const channel = mockTextChannel(client);
+
+		await createServer(toAOServer(channel.guild));
+		await createChannel({
+			...toAOChannel(channel),
+			flags: { autoThreadEnabled: true },
+		});
+
+		const author = mockGuildMember({
+			client,
+
+			data: {
+				user: {
+					username: 'serverUsername',
+					id: randomSnowflake().toString(),
+				},
+			},
+		});
+		const message = mockMessage({
+			client,
+			channel: channel,
+			author: author.user,
+			override: {
+				content: '',
+				attachments: [
+					{
+						filename: 'image.png',
+						id: randomSnowflake().toString(),
+						size: 12345,
+						url: 'https://media.discordapp.net/attachments/998841982212382731/1109114715348668456/image.png',
+						proxy_url:
+							'https://media.discordapp.net/attachments/998841982212382731/1109114715348668456/image.png',
+					},
+				],
+			},
+		});
+
+		await emitEvent(client, Events.MessageCreate, message);
+
+		expect(message.thread?.name).toEqual(`serverUsername - image.png`);
+	});
 });
