@@ -122,18 +122,14 @@ export const MessageAuthorArea = () => {
 
 const DEFAULT_COLLAPSE_CONTENT_LENGTH = 500;
 
-const LongMessageContents = () => {
+const LongMessageContents = (props: { collapseBy: number }) => {
 	const { message } = useMessageContext();
 	const { toHTML } = discordMarkdown;
 	const convertedMessageContent = toHTML(message.content);
 
 	const textToRender =
-		convertedMessageContent.length > DEFAULT_COLLAPSE_CONTENT_LENGTH
-			? `${convertedMessageContent
-					.slice(0, DEFAULT_COLLAPSE_CONTENT_LENGTH)
-					.trim()}... <a class="underline" href="/m/${
-					message.id
-			  }">View Message</a>`
+		convertedMessageContent.length > props.collapseBy
+			? `${convertedMessageContent.slice(0, props.collapseBy).trim()}...`
 			: convertedMessageContent;
 
 	return (
@@ -151,14 +147,14 @@ export const MessageContents = () => {
 	const { message, collapseContent } = useMessageContext();
 	const { toHTML } = discordMarkdown;
 	const convertedMessageContent = toHTML(message.content);
+	const shouldCollapse =
+		collapseContent !== false && collapseContent !== undefined;
+	const collapseBy =
+		typeof collapseContent === 'number'
+			? collapseContent
+			: DEFAULT_COLLAPSE_CONTENT_LENGTH;
 
-	if (
-		collapseContent === false ||
-		collapseContent == undefined ||
-		(typeof collapseContent === 'number'
-			? message.content.length > collapseContent
-			: message.content.length < DEFAULT_COLLAPSE_CONTENT_LENGTH)
-	) {
+	if (!shouldCollapse) {
 		return (
 			<div
 				className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white"
@@ -170,7 +166,7 @@ export const MessageContents = () => {
 		);
 	}
 
-	return <LongMessageContents />;
+	return <LongMessageContents collapseBy={collapseBy} />;
 };
 
 const SingularImageAttachment = () => {
