@@ -66,7 +66,7 @@ export const SuperLongMessage: Story = {
 export const SuperLongMessageCollapsed: Story = {
 	args: {
 		...Primary.args,
-		collapseContent: 3500,
+		collapseContent: 500,
 		message: {
 			...mockMessageWithDiscordAccount(),
 			// (3674 characters - discord nitro is max 4000 characters)
