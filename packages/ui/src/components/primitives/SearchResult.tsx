@@ -3,7 +3,7 @@ import type {
 	APIMessageWithDiscordAccount,
 	ChannelPublicWithFlags,
 } from '@answeroverflow/api';
-import { Message, MessageContents, MessageAttachments } from './Message';
+import { Message, MessageContents } from './Message';
 import { ServerInvite } from './ServerInvite';
 import { Paragraph, Heading } from './base';
 import { createContext, useContext } from 'react';
@@ -164,7 +164,6 @@ export const LinkMessage = ({
 						</Heading.H4>
 					</Link>
 					<MessageContents />
-					<MessageAttachments />
 				</>
 			}
 		/>
