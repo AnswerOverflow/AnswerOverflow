@@ -154,7 +154,9 @@ export async function indexRootChannel(
 			...archivedThreads.reverse(),
 			...activeThreads.threads.values(),
 		]
-			.filter((x) => x.type === ChannelType.PublicThread)
+			.filter(
+				(x) => x.type === ChannelType.PublicThread && x.parentId === channel.id,
+			)
 			.slice(0, maxNumberOfThreadsToCollect);
 		container.logger.debug(
 			`Pruned threads to index from ${
