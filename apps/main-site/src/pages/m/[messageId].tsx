@@ -62,12 +62,7 @@ export async function getStaticProps(
 		const { server, messages } = await ssg.messages.threadFromMessageId.fetch(
 			context.params.messageId,
 		);
-		// 404 for servers that are waiting to be cleaned up
-		if (server.kickedTime !== null) {
-			return {
-				notFound: true,
-			};
-		}
+
 		const areAllMessagesPublic = messages.every((message) => message.public);
 		return {
 			props: {

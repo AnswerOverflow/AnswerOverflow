@@ -93,6 +93,21 @@ export const messagesRouter = router({
 					threadId ? findMessageById(threadId) : undefined,
 				]);
 
+			// 404 for servers that are waiting to be cleaned up
+			if (server.kickedTime !== null) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Channel has indexing disabled',
+				});
+			}
+
+			if (!channel.flags.indexingEnabled) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Channel has indexing disabled',
+				});
+			}
+
 			// We've collected all of the data, now we need to strip out the private info
 			const messagesWithRefs = await addReferencesToMessages(
 				threadId && rootMessage && channel.type !== ChannelType.GuildForum
@@ -102,6 +117,7 @@ export const messagesRouter = router({
 			const messagesWithDiscordAccounts = await addAuthorsToMessages(
 				messagesWithRefs,
 			);
+
 			return {
 				messages: messagesWithDiscordAccounts.map((message) =>
 					stripPrivateFullMessageData(message, ctx.userServers),
