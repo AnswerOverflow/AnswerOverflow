@@ -368,9 +368,7 @@ export async function searchMessages(opts: MessageSearchOptions) {
 		addReferencesToMessages(messages),
 	]);
 	const messagesWithAuthors = await addAuthorsToMessages(messagesWithRefs);
-	const channelLookup = new Map(
-		channels.filter((x) => x.flags.indexingEnabled).map((c) => [c.id, c]),
-	);
+	const channelLookup = new Map(channels.map((c) => [c.id, c]));
 	const serverLookup = new Map(
 		servers.filter((x) => x.kickedTime === null).map((s) => [s.id, s]),
 	);
@@ -383,6 +381,9 @@ export async function searchMessages(opts: MessageSearchOptions) {
 				? channelLookup.get(m.channelId)
 				: undefined;
 			if (!channel || !server) return null;
+			if (!channel.flags.indexingEnabled) {
+				return null;
+			}
 			return {
 				message: m,
 				channel,
