@@ -1,10 +1,10 @@
 import type {
-	Channel,
+	ChannelWithFlags,
 	DiscordAccount,
 	Server,
 } from '@answeroverflow/prisma-types';
 import {
-	mockChannel,
+	mockChannelWithFlags,
 	mockDiscordAccount,
 	mockMessage,
 	mockServer,
@@ -35,12 +35,16 @@ import { getRandomId } from '@answeroverflow/utils';
 
 describe('Message Operations', () => {
 	let server: Server;
-	let channel: Channel;
+	let channel: ChannelWithFlags;
 	let message: Message;
 	let author: DiscordAccount;
 	beforeEach(async () => {
 		server = mockServer();
-		channel = mockChannel(server);
+		channel = mockChannelWithFlags(server, {
+			flags: {
+				indexingEnabled: true,
+			},
+		});
 		author = mockDiscordAccount();
 		message = mockMessage(server, channel, author);
 		await createServer(server);
