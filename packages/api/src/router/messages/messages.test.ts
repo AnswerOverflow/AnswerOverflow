@@ -22,7 +22,6 @@ import {
 } from '~api/test/public-data';
 import {
 	mockServer,
-	mockChannel,
 	mockDiscordAccount,
 	mockMessage,
 	mockThread,
@@ -48,7 +47,13 @@ beforeEach(async () => {
 	author = mockDiscordAccount();
 
 	await createServer(server);
-	channel = await createChannel(mockChannel(server));
+	channel = await createChannel(
+		mockChannelWithFlags(server, {
+			flags: {
+				indexingEnabled: true,
+			},
+		}),
+	);
 	await createDiscordAccount(author);
 	const unauthedCtx = await mockUnauthedCtx('web-client');
 	unauthedMessagePageRouter = messagesRouter.createCaller(unauthedCtx);
@@ -211,8 +216,11 @@ describe('Message Results', () => {
 		});
 		it('should get follow up messages of a forum post correctly starting from the root of the post', async () => {
 			const forumChannel = await createChannel(
-				mockChannel(server, {
+				mockChannelWithFlags(server, {
 					type: ChannelType.GuildForum,
+					flags: {
+						indexingEnabled: true,
+					},
 				}),
 			);
 			const forumThread = await createChannel(mockThread(forumChannel));
@@ -252,8 +260,11 @@ describe('Message Results', () => {
 		});
 		it('should get follow up messages of a forum post correctly starting from a non root message', async () => {
 			const forumChannel = await createChannel(
-				mockChannel(server, {
+				mockChannelWithFlags(server, {
 					type: ChannelType.GuildForum,
+					flags: {
+						indexingEnabled: true,
+					},
 				}),
 			);
 			const forumThread = await createChannel(mockThread(forumChannel));
@@ -359,7 +370,11 @@ describe('Search Results', () => {
 			content: getRandomId(),
 		});
 		const otherServer = mockServer();
-		const otherChannel = mockChannel(otherServer);
+		const otherChannel = mockChannelWithFlags(otherServer, {
+			flags: {
+				indexingEnabled: true,
+			},
+		});
 		await createServer(otherServer);
 		await createChannel(otherChannel);
 		const otherMessage = mockMessage(otherServer, otherChannel, author, {
@@ -400,7 +415,11 @@ describe('Search Results', () => {
 			content: getRandomId(),
 		});
 		const otherServer = mockServer();
-		const otherChannel = mockChannel(otherServer);
+		const otherChannel = mockChannelWithFlags(otherServer, {
+			flags: {
+				indexingEnabled: true,
+			},
+		});
 		await createServer(otherServer);
 		await createChannel(otherChannel);
 		const otherMessage = mockMessage(otherServer, otherChannel, author, {

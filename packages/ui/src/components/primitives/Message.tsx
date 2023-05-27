@@ -122,18 +122,14 @@ export const MessageAuthorArea = () => {
 
 const DEFAULT_COLLAPSE_CONTENT_LENGTH = 500;
 
-const LongMessageContents = () => {
+const LongMessageContents = (props: { collapseBy: number }) => {
 	const { message } = useMessageContext();
 	const { toHTML } = discordMarkdown;
 	const convertedMessageContent = toHTML(message.content);
 
 	const textToRender =
-		convertedMessageContent.length > DEFAULT_COLLAPSE_CONTENT_LENGTH
-			? `${convertedMessageContent
-					.slice(0, DEFAULT_COLLAPSE_CONTENT_LENGTH)
-					.trim()}... <a class="underline" href="/m/${
-					message.id
-			  }">View Message</a>`
+		convertedMessageContent.length > props.collapseBy
+			? `${convertedMessageContent.slice(0, props.collapseBy).trim()}...`
 			: convertedMessageContent;
 
 	return (
@@ -151,14 +147,14 @@ export const MessageContents = () => {
 	const { message, collapseContent } = useMessageContext();
 	const { toHTML } = discordMarkdown;
 	const convertedMessageContent = toHTML(message.content);
+	const shouldCollapse =
+		collapseContent !== false && collapseContent !== undefined;
+	const collapseBy =
+		typeof collapseContent === 'number'
+			? collapseContent
+			: DEFAULT_COLLAPSE_CONTENT_LENGTH;
 
-	if (
-		collapseContent === false ||
-		collapseContent == undefined ||
-		(typeof collapseContent === 'number'
-			? message.content.length > collapseContent
-			: message.content.length < DEFAULT_COLLAPSE_CONTENT_LENGTH)
-	) {
+	if (!shouldCollapse) {
 		return (
 			<div
 				className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white"
@@ -170,7 +166,7 @@ export const MessageContents = () => {
 		);
 	}
 
-	return <LongMessageContents />;
+	return <LongMessageContents collapseBy={collapseBy} />;
 };
 
 const SingularImageAttachment = () => {
@@ -203,7 +199,7 @@ const SingularImageAttachment = () => {
 					src={parsedImages[0]?.src ?? ''}
 					width={parsedImages[0]?.width}
 					height={parsedImages[0]?.height}
-					alt={`Image sent by ${message.author.name}`}
+					alt={parsedImages[0]?.alt ?? `Image sent by ${message.author.name}`}
 				/>
 			</button>
 
@@ -241,11 +237,14 @@ export const MessageAttachments = () => {
 	const CustomImageComponent = (props: ThumbnailImageProps) => {
 		if (props.index === 3 && parsedImages.length > 3) {
 			return (
-				<button className="relative h-full w-full" aria-label="Open image">
+				<button className="relative" aria-label="Open image">
 					<Image
 						src={props.item.src}
 						fill
-						alt={`A preview of an image sent by ${message.author.name}`}
+						alt={
+							props.item.alt ??
+							`A preview of an image sent by ${message.author.name}`
+						}
 					/>
 					<div className="absolute inset-0 flex items-center justify-center bg-black/75 backdrop-brightness-50">
 						<span className="text-3xl font-bold text-white">
@@ -261,7 +260,10 @@ export const MessageAttachments = () => {
 				<Image
 					src={props.item.src}
 					fill
-					alt={`A preview of an image sent by ${message.author.name}`}
+					alt={
+						props.item.alt ??
+						`A preview of an image sent by ${message.author.name}`
+					}
 				/>
 			</button>
 		);
@@ -294,7 +296,12 @@ export const MessageAttachments = () => {
 				enableImageSelection={false}
 				onClick={(index) => setCurrentImageOpen(index)}
 				thumbnailImageComponent={CustomImageComponent}
-				rowHeight={200}
+				thumbnailStyle={{
+					backgroundColor: 'transparent',
+				}}
+				tileViewportStyle={{
+					backgroundColor: 'transparent',
+				}}
 			/>
 			<Lightbox
 				slides={parsedSlides}
