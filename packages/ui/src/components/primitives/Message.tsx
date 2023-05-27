@@ -301,12 +301,6 @@ export const MessageAttachments = () => {
 				enableImageSelection={false}
 				onClick={(index) => setCurrentImageOpen(index)}
 				thumbnailImageComponent={CustomImageComponent}
-				thumbnailStyle={{
-					backgroundColor: 'transparent',
-				}}
-				tileViewportStyle={{
-					backgroundColor: 'transparent',
-				}}
 			/>
 			<Lightbox
 				slides={parsedSlides}
