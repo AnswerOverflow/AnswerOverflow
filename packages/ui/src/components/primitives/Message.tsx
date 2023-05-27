@@ -232,6 +232,13 @@ export const MessageAttachments = () => {
 	const { message } = useMessageContext();
 	const [currentImageOpen, setCurrentImageOpen] = useState<number>(-1);
 
+	const imageFileRegex = new RegExp(
+		'(.*/)*.+.(png|jpg|gif|bmp|jpeg|PNG|JPG|GIF|BMP|JPEG)$',
+	);
+	message.attachments = message.attachments.filter((attachment) =>
+		imageFileRegex.test(attachment.filename),
+	);
+
 	if (message.attachments.length === 0) return null;
 
 	const CustomImageComponent = (props: ThumbnailImageProps) => {
