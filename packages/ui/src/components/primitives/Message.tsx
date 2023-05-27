@@ -232,11 +232,9 @@ export const MessageAttachments = () => {
 	const { message } = useMessageContext();
 	const [currentImageOpen, setCurrentImageOpen] = useState<number>(-1);
 
-	const imageFileRegex = new RegExp(
-		'(.*/)*.+.(png|jpg|gif|bmp|jpeg|PNG|JPG|GIF|BMP|JPEG)$',
-	);
+	const imageFileRegex = new RegExp('(.*/)*.+.(png|jpg|gif|bmp|jpeg|webp)$');
 	message.attachments = message.attachments.filter((attachment) =>
-		imageFileRegex.test(attachment.filename),
+		imageFileRegex.test(attachment.filename.toLowerCase()),
 	);
 
 	if (message.attachments.length === 0) return null;
