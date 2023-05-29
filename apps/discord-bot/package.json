@@ -24,7 +24,7 @@
 		"@sapphire/time-utilities": "^1.7.8",
 		"@sapphire/type": "^2.2.4",
 		"@sapphire/utilities": "^3.10.1",
-		"@sentry/node": "^7.43.0",
+		"@sentry/node": "^7.53.1",
 		"@sentry/tracing": "^7.47.0",
 		"@trpc/server": "^10.25.0",
 		"colorette": "^2.0.19",
