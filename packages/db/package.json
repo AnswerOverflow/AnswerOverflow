@@ -33,6 +33,6 @@
 		"@vitest/coverage-c8": "^0.28.5",
 		"cross-env": "^7.0.3",
 		"dotenv-cli": "^7.1.0",
-		"vitest": "^0.29.8"
+		"vitest": "^0.31.1"
 	}
 }
