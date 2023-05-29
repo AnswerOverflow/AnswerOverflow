@@ -99,7 +99,7 @@
 		"tslib": "^2.4.1",
 		"type-fest": "^3.5.5",
 		"wait-on": "^7.0.1",
-		"webpack": "^5.76.0"
+		"webpack": "^5.84.1"
 	},
 	"ct3aMetadata": {
 		"initVersion": "6.11.0"
