@@ -13,14 +13,10 @@ import {
 	messageWithDiscordAccountToAnalyticsData,
 } from '@answeroverflow/hooks';
 import { getDiscordURLForMessage } from '~ui/utils/discord';
-import {
-	Gallery,
-	type Image as ImageType,
-	type ThumbnailImageProps,
-} from 'react-grid-gallery';
+import { type Image as ImageType } from 'react-grid-gallery';
 import { useEffect } from 'react';
 import Lightbox, { type Slide } from 'yet-another-react-lightbox';
-import { Zoom, Counter } from 'yet-another-react-lightbox/plugins';
+import { Zoom } from 'yet-another-react-lightbox/plugins';
 import 'yet-another-react-lightbox/styles.css';
 import { getImageHeightWidth } from '~ui/utils/other';
 
@@ -189,141 +185,60 @@ const SingularImageAttachment = () => {
 	}
 
 	return (
-		<div className="mt-4">
-			<button
-				aria-label="Open Image Modal"
-				onClick={() => setIsLightboxOpen(true)}
-				className="max-w-sm lg:max-w-md"
-			>
-				<Image
-					src={parsedImages[0]?.src ?? ''}
-					width={parsedImages[0]?.width}
-					height={parsedImages[0]?.height}
-					alt={parsedImages[0]?.alt ?? `Image sent by ${message.author.name}`}
-				/>
-			</button>
+		<>
+			{parsedImages.map((x) => (
+				<div className="mt-4" key={x.key ?? x.src}>
+					<button
+						aria-label="Open Image Modal"
+						onClick={() => setIsLightboxOpen(true)}
+						className="max-w-sm lg:max-w-md"
+					>
+						<Image
+							src={x?.src ?? ''}
+							width={x?.width}
+							height={x?.height}
+							alt={x?.alt ?? `Image sent by ${message.author.name}`}
+						/>
+					</button>
 
-			<Lightbox
-				slides={parsedSlides}
-				open={isLightboxOpen}
-				index={0}
-				close={() => setIsLightboxOpen(false)}
-				plugins={[Zoom]}
-				styles={{
-					container: {
-						backgroundColor: 'rgba(0, 0, 0, 0.9)',
-					},
-				}}
-				controller={{
-					closeOnBackdropClick: true,
-				}}
-				// Disable control buttons as there is only one slide
-				render={{
-					buttonPrev: () => null,
-					buttonNext: () => null,
-				}}
-			/>
-		</div>
+					<Lightbox
+						slides={parsedSlides}
+						open={isLightboxOpen}
+						index={0}
+						close={() => setIsLightboxOpen(false)}
+						plugins={[Zoom]}
+						styles={{
+							container: {
+								backgroundColor: 'rgba(0, 0, 0, 0.9)',
+							},
+						}}
+						controller={{
+							closeOnBackdropClick: true,
+						}}
+						// Disable control buttons as there is only one slide
+						render={{
+							buttonPrev: () => null,
+							buttonNext: () => null,
+						}}
+					/>
+				</div>
+			))}
+		</>
 	);
 };
 
 export const MessageAttachments = () => {
-	const { parsedImages, parsedSlides } = useConfigImageAttachments();
 	const { message } = useMessageContext();
-	const [currentImageOpen, setCurrentImageOpen] = useState<number>(-1);
 
+	const imageFileRegex = new RegExp('(.*/)*.+.(png|jpg|gif|bmp|jpeg|webp)$');
+	// TODO: Do not mutate here, ugly
+	message.attachments = message.attachments.filter((attachment) =>
+		imageFileRegex.test(attachment.filename.toLowerCase()),
+	);
 	if (message.attachments.length === 0) return null;
 
-	const CustomImageComponent = (props: ThumbnailImageProps) => {
-		if (props.index === 3 && parsedImages.length > 3) {
-			return (
-				<button className="relative" aria-label="Open image">
-					<Image
-						src={props.item.src}
-						fill
-						alt={
-							props.item.alt ??
-							`A preview of an image sent by ${message.author.name}`
-						}
-					/>
-					<div className="absolute inset-0 flex items-center justify-center bg-black/75 backdrop-brightness-50">
-						<span className="text-3xl font-bold text-white">
-							+{parsedImages.length - 3}
-						</span>
-					</div>
-				</button>
-			);
-		}
-
-		return (
-			<button aria-label="Open image" className="h-full">
-				<Image
-					src={props.item.src}
-					fill
-					alt={
-						props.item.alt ??
-						`A preview of an image sent by ${message.author.name}`
-					}
-				/>
-			</button>
-		);
-	};
-
-	if (message.attachments.length === 1 && message.attachments[0]) {
-		return <SingularImageAttachment />;
-	}
-
-	if (parsedImages === 'loading') {
-		return (
-			<div className="flex h-[50vh] items-center justify-center">
-				<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-ao-blue" />
-			</div>
-		);
-	}
-
-	if (parsedImages === 'error') {
-		return (
-			<span className="mt-2 rounded-standard bg-ao-red/75 p-5 font-body text-lg font-bold text-black dark:text-white">
-				An error occurred loading images...
-			</span>
-		);
-	}
-
-	return (
-		<div className="mt-4">
-			<Gallery
-				images={parsedImages.slice(0, 4)}
-				enableImageSelection={false}
-				onClick={(index) => setCurrentImageOpen(index)}
-				thumbnailImageComponent={CustomImageComponent}
-				thumbnailStyle={{
-					backgroundColor: 'transparent',
-				}}
-				tileViewportStyle={{
-					backgroundColor: 'transparent',
-				}}
-			/>
-			<Lightbox
-				slides={parsedSlides}
-				open={currentImageOpen >= 0}
-				index={currentImageOpen}
-				close={() => setCurrentImageOpen(-1)}
-				plugins={[Zoom, Counter]}
-				styles={{
-					container: {
-						backgroundColor: 'rgba(0, 0, 0, 0.9)',
-					},
-				}}
-				controller={{
-					closeOnBackdropClick: true,
-				}}
-				counter={{
-					style: { top: 0, left: 0, position: 'absolute' },
-					className: 'p-4 m-4 text-white',
-				}}
-			/>
-		</div>
-	);
+	// TODO: Rename this and such, whole file needs a revisit but I'm on vacation 🌴
+	return <SingularImageAttachment />;
 };
 
 type MessageProps = {
