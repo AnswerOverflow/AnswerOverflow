@@ -15,8 +15,7 @@ import {
 import { getDiscordURLForMessage } from '~ui/utils/discord';
 import { type Image as ImageType } from 'react-grid-gallery';
 import { useEffect } from 'react';
-import Lightbox, { type Slide } from 'yet-another-react-lightbox';
-import { Zoom } from 'yet-another-react-lightbox/plugins';
+import { type Slide } from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import { getImageHeightWidth } from '~ui/utils/other';
 
@@ -167,7 +166,9 @@ export const MessageContents = () => {
 
 const SingularImageAttachment = () => {
 	const { message } = useMessageContext();
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { parsedImages, parsedSlides } = useConfigImageAttachments();
 
 	if (message.attachments.length === 0) return null;
@@ -186,40 +187,13 @@ const SingularImageAttachment = () => {
 
 	return (
 		<>
-			{parsedImages.map((x) => (
-				<div className="mt-4" key={x.key ?? x.src}>
-					<button
-						aria-label="Open Image Modal"
-						onClick={() => setIsLightboxOpen(true)}
-						className="max-w-sm lg:max-w-md"
-					>
-						<Image
-							src={x?.src ?? ''}
-							width={x?.width}
-							height={x?.height}
-							alt={x?.alt ?? `Image sent by ${message.author.name}`}
-						/>
-					</button>
-
-					<Lightbox
-						slides={parsedSlides}
-						open={isLightboxOpen}
-						index={0}
-						close={() => setIsLightboxOpen(false)}
-						plugins={[Zoom]}
-						styles={{
-							container: {
-								backgroundColor: 'rgba(0, 0, 0, 0.9)',
-							},
-						}}
-						controller={{
-							closeOnBackdropClick: true,
-						}}
-						// Disable control buttons as there is only one slide
-						render={{
-							buttonPrev: () => null,
-							buttonNext: () => null,
-						}}
+			{parsedImages.map((x, i) => (
+				<div className="mt-4 max-w-sm lg:max-w-md" key={i}>
+					<Image
+						src={x?.src ?? ''}
+						width={x?.width}
+						height={x?.height}
+						alt={x?.alt ?? `Image sent by ${message.author.name}`}
 					/>
 				</div>
 			))}
