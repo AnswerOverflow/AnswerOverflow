@@ -192,8 +192,9 @@ const SingularImageAttachment = () => {
 					<Image
 						src={x?.src ?? ''}
 						width={x?.width}
-						height={x?.height}
-						alt={x?.alt ?? `Image sent by ${message.author.name}`}
+					 height={x?.height}
+					 alt={x?.alt ?? `Image sent by ${message.author.name}`}
+      unoptimized
 					/>
 				</div>
 			))}
