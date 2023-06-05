@@ -101,6 +101,29 @@ export const WithSingularImage: Story = {
 	},
 };
 
+export const WithSingularRandomFileAttachment: Story = {
+	args: {
+		...Primary.args,
+		message: {
+			...mockMessageWithDiscordAccount(),
+			channelId: '1031266112802914305',
+			serverId: '701008832645824553',
+			attachments: [
+				{
+					url: 'https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.randomExtension',
+					width: 897,
+					height: 672,
+					filename: 'image.randomExtension',
+					size: 123456,
+					id: '123456789',
+					proxyUrl:
+						'https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.randomExtension',
+				},
+			],
+		},
+	},
+};
+
 export const WithMultipleImages: Story = {
 	args: {
 		...Primary.args,
