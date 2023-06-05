@@ -45,7 +45,7 @@
 		"turbo": "latest",
 		"typescript": "^5.0.4",
 		"vite": "^4.3.5",
-		"vitest": "^0.29.8"
+		"vitest": "^0.31.4"
 	},
 	"engines": {
 		"node": ">=16.18.0"
