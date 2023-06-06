@@ -121,7 +121,7 @@ const featuredCommunities: FeaturedCommunityProps[] = [
 		iconUrl: '/featured-communities/twill_logo.png',
 		approximateMemberCount: '1,000+',
 	},
-  {
+	{
 		name: 'Drizzle Team',
 		id: '1043890932593987624',
 		approximateMemberCount: '1,000+',
