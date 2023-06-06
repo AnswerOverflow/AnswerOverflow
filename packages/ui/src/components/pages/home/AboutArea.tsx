@@ -86,12 +86,6 @@ const featuredCommunities: FeaturedCommunityProps[] = [
 		iconUrl: '/featured-communities/mecha_keys_logo.png',
 	},
 	{
-		name: 'Two Hours One Life',
-		id: '423293333864054833',
-		approximateMemberCount: '25,000+',
-		iconUrl: '/featured-communities/two_hours_one_life_logo.png',
-	},
-	{
 		name: "Theo's Typesafe Cult",
 		id: '966627436387266600',
 		approximateMemberCount: '15,000+',
@@ -126,6 +120,12 @@ const featuredCommunities: FeaturedCommunityProps[] = [
 		id: '811936425858695198',
 		iconUrl: '/featured-communities/twill_logo.png',
 		approximateMemberCount: '1,000+',
+	},
+  {
+		name: 'Drizzle Team',
+		id: '1043890932593987624',
+		approximateMemberCount: '1,000+',
+		iconUrl: '/featured-communities/drizzle_logo.png',
 	},
 	{
 		name: 'Apache TinkerPop',
