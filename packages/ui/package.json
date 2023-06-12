@@ -94,7 +94,7 @@
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"require-from-string": "^2.0.2",
-		"storybook": "^7.0.12",
+		"storybook": "^7.0.20",
 		"tailwindcss": "^3.2.0",
 		"tslib": "^2.4.1",
 		"type-fest": "^3.5.5",
