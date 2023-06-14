@@ -121,20 +121,11 @@ export async function checkIfCanMarkSolution(
 	// Check if the user has permission to mark the question as solved
 	const guildMember = await guild.members.fetch(userMarkingAsSolved.id);
 	if (questionMessage.author.id !== userMarkingAsSolved.id) {
-		const userPermissions = guildMember.permissions;
-		const doesUserHaveOverridePermissions =
-			PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.some((permission) =>
-				userPermissions.has(permission),
-			);
-
-		const doesUserHaveThreadOverwritesPermissions = threadParent
+		const userHasThreadPerms = threadParent
 			.permissionsFor(guildMember)
 			.has('ManageThreads');
 
-		if (
-			!doesUserHaveOverridePermissions ||
-			!doesUserHaveThreadOverwritesPermissions
-		) {
+		if (!userHasThreadPerms) {
 			throw new MarkSolutionError(
 				'NO_PERMISSION',
 				`You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
