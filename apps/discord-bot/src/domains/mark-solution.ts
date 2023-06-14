@@ -32,6 +32,7 @@ import {
 	threadWithDiscordInfoToAnalyticsData,
 	trackDiscordEvent,
 } from '~discord-bot/utils/analytics';
+import { OverwriteType } from 'discord.js';
 const markSolutionErrorReasons = [
 	'NOT_IN_GUILD',
 	'NOT_IN_THREAD',
@@ -127,24 +128,22 @@ export async function checkIfCanMarkSolution(
 				userPermissions.has(permission),
 			);
 
-		const channelOverwrites = threadParent.permissionOverwrites.cache.entries();
-
-		const userRoles = guildMember.roles.cache.values();
 		const doesUserHaveThreadOverridePermissions = () => {
-			for (const item of channelOverwrites) {
-				const doesRoleHaveManageThreadsPerms =
-					item[1].allow.serialize().ManageThreads;
-				let doesUserHaveRole: boolean | undefined;
-				checkRoles: for (const role of userRoles) {
-					if (role.id === item[0]) {
-						doesUserHaveRole = true;
-						break checkRoles;
-					}
-				}
+			const userHasRequiredPerms = threadParent.permissionOverwrites.cache
+				.filter((overWrite) => overWrite.type === OverwriteType.Role)
+				.map((overwrite) => {
+					const doesRoleHaveManageThreadsPerms =
+						overwrite.allow.serialize().ManageThreads;
 
-				return doesRoleHaveManageThreadsPerms && doesUserHaveRole;
-			}
-			return false;
+					const userRoles = guildMember.roles.cache.find(
+						(role) => overwrite.id === role.id,
+					);
+
+					return (
+						doesRoleHaveManageThreadsPerms && typeof userRoles !== 'undefined'
+					);
+				});
+			return userHasRequiredPerms.find((item) => item === true);
 		};
 
 		if (!doesUserHaveOverridePermissions) {
