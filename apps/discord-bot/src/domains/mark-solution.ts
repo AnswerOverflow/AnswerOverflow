@@ -128,17 +128,23 @@ export async function checkIfCanMarkSolution(
 			);
 
 		const channelOverwrites = threadParent.permissionOverwrites.cache.entries();
-		const userRoles = await guildMember.guild.roles.fetch();
+
+		const userRoles = guildMember.roles.cache.values();
 		const doesUserHaveThreadOverridePermissions = () => {
 			for (const item of channelOverwrites) {
 				const doesRoleHaveManageThreadsPerms =
 					item[1].allow.serialize().ManageThreads;
-				const doesUserHaveRole = userRoles.find((role) => role.id === item[0])
-					? true
-					: false;
+				let doesUserHaveRole: boolean | undefined;
+				checkRoles: for (const role of userRoles) {
+					if (role.id === item[0]) {
+						doesUserHaveRole = true;
+						break checkRoles;
+					}
+				}
 
 				return doesRoleHaveManageThreadsPerms && doesUserHaveRole;
 			}
+			return false;
 		};
 
 		if (!doesUserHaveOverridePermissions) {
