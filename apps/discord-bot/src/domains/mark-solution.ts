@@ -131,15 +131,16 @@ export async function checkIfCanMarkSolution(
 			.permissionsFor(guildMember)
 			.has('ManageThreads');
 
-		if (!doesUserHaveOverridePermissions) {
-			if (!doesUserHaveThreadOverwritesPermissions) {
-				throw new MarkSolutionError(
-					'NO_PERMISSION',
-					`You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
-						', ',
-					)} can mark a question as solved.`,
-				);
-			}
+		if (
+			!doesUserHaveOverridePermissions ||
+			!doesUserHaveThreadOverwritesPermissions
+		) {
+			throw new MarkSolutionError(
+				'NO_PERMISSION',
+				`You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
+					', ',
+				)} can mark a question as solved.`,
+			);
 		}
 	}
 
