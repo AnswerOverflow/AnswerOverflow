@@ -128,7 +128,7 @@ export async function checkIfCanMarkSolution(
 				userPermissions.has(permission),
 			);
 
-		const doesUserHaveThreadOverridePermissions = () => {
+		const doesUserHaveThreadOverwritesPermissions = () => {
 			const userHasRequiredPerms = threadParent.permissionOverwrites.cache
 				.filter((overWrite) => overWrite.type === OverwriteType.Role)
 				.map((overwrite) => {
@@ -147,7 +147,7 @@ export async function checkIfCanMarkSolution(
 		};
 
 		if (!doesUserHaveOverridePermissions) {
-			if (!doesUserHaveThreadOverridePermissions()) {
+			if (!doesUserHaveThreadOverwritesPermissions()) {
 				throw new MarkSolutionError(
 					'NO_PERMISSION',
 					`You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
