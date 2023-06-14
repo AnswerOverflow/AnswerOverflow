@@ -127,7 +127,7 @@ export async function checkIfCanMarkSolution(
 				userPermissions.has(permission),
 			);
 
-		const doesUserHaveThreadOverwritesPermissions = thread
+		const doesUserHaveThreadOverwritesPermissions = threadParent
 			.permissionsFor(guildMember)
 			.has('ManageThreads');
 
