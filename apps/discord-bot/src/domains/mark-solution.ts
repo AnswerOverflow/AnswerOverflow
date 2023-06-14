@@ -33,6 +33,8 @@ import {
 	trackDiscordEvent,
 } from '~discord-bot/utils/analytics';
 import { OverwriteType } from 'discord.js';
+import { PermissionFlagsBits } from 'discord.js';
+import { PermissionsBitField } from 'discord.js';
 const markSolutionErrorReasons = [
 	'NOT_IN_GUILD',
 	'NOT_IN_THREAD',
@@ -128,26 +130,12 @@ export async function checkIfCanMarkSolution(
 				userPermissions.has(permission),
 			);
 
-		const doesUserHaveThreadOverwritesPermissions = () => {
-			const userHasRequiredPerms = threadParent.permissionOverwrites.cache
-				.filter((overWrite) => overWrite.type === OverwriteType.Role)
-				.map((overwrite) => {
-					const doesRoleHaveManageThreadsPerms =
-						overwrite.allow.serialize().ManageThreads;
-
-					const userRoles = guildMember.roles.cache.find(
-						(role) => overwrite.id === role.id,
-					);
-
-					return (
-						doesRoleHaveManageThreadsPerms && typeof userRoles !== 'undefined'
-					);
-				});
-			return userHasRequiredPerms.find((item) => item === true);
-		};
+		const doesUserHaveThreadOverwritesPermissions = thread
+			.permissionsFor(guildMember)
+			.has(PermissionsBitField.Flags.ManageThreads);
 
 		if (!doesUserHaveOverridePermissions) {
-			if (!doesUserHaveThreadOverwritesPermissions()) {
+			if (!doesUserHaveThreadOverwritesPermissions) {
 				throw new MarkSolutionError(
 					'NO_PERMISSION',
 					`You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
