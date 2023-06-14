@@ -32,9 +32,6 @@ import {
 	threadWithDiscordInfoToAnalyticsData,
 	trackDiscordEvent,
 } from '~discord-bot/utils/analytics';
-import { OverwriteType } from 'discord.js';
-import { PermissionFlagsBits } from 'discord.js';
-import { PermissionsBitField } from 'discord.js';
 const markSolutionErrorReasons = [
 	'NOT_IN_GUILD',
 	'NOT_IN_THREAD',
@@ -132,7 +129,7 @@ export async function checkIfCanMarkSolution(
 
 		const doesUserHaveThreadOverwritesPermissions = thread
 			.permissionsFor(guildMember)
-			.has(PermissionsBitField.Flags.ManageThreads);
+			.has('ManageThreads');
 
 		if (!doesUserHaveOverridePermissions) {
 			if (!doesUserHaveThreadOverwritesPermissions) {
