@@ -126,13 +126,30 @@ export async function checkIfCanMarkSolution(
 			PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.some((permission) =>
 				userPermissions.has(permission),
 			);
+
+		const channelOverwrites = threadParent.permissionOverwrites.cache.entries();
+		const userRoles = await guildMember.guild.roles.fetch();
+		const doesUserHaveThreadOverridePermissions = () => {
+			for (const item of channelOverwrites) {
+				const doesRoleHaveManageThreadsPerms =
+					item[1].allow.serialize().ManageThreads;
+				const doesUserHaveRole = userRoles.find((role) => role.id === item[0])
+					? true
+					: false;
+
+				return doesRoleHaveManageThreadsPerms && doesUserHaveRole;
+			}
+		};
+
 		if (!doesUserHaveOverridePermissions) {
-			throw new MarkSolutionError(
-				'NO_PERMISSION',
-				`You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
-					', ',
-				)} can mark a question as solved.`,
-			);
+			if (!doesUserHaveThreadOverridePermissions()) {
+				throw new MarkSolutionError(
+					'NO_PERMISSION',
+					`You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
+						', ',
+					)} can mark a question as solved.`,
+				);
+			}
 		}
 	}
 
