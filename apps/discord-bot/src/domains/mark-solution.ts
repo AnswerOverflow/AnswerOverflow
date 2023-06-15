@@ -121,41 +121,17 @@ export async function checkIfCanMarkSolution(
 	// Check if the user has permission to mark the question as solved
 	const guildMember = await guild.members.fetch(userMarkingAsSolved.id);
 	if (questionMessage.author.id !== userMarkingAsSolved.id) {
-		const userPermissions = guildMember.permissions;
-		const doesUserHaveOverridePermissions =
-			PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.some((permission) =>
-				userPermissions.has(permission),
+		const doesUserHavePerms = PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.some(
+			(permission) => threadParent.permissionsFor(guildMember).has(permission),
+		);
+
+		if (!doesUserHavePerms) {
+			throw new MarkSolutionError(
+				'NO_PERMISSION',
+				`You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
+					', ',
+				)} can mark a question as solved.`,
 			);
-
-		const channelOverwrites = threadParent.permissionOverwrites.cache.entries();
-
-		const userRoles = guildMember.roles.cache.values();
-		const doesUserHaveThreadOverridePermissions = () => {
-			for (const item of channelOverwrites) {
-				const doesRoleHaveManageThreadsPerms =
-					item[1].allow.serialize().ManageThreads;
-				let doesUserHaveRole: boolean | undefined;
-				checkRoles: for (const role of userRoles) {
-					if (role.id === item[0]) {
-						doesUserHaveRole = true;
-						break checkRoles;
-					}
-				}
-
-				return doesRoleHaveManageThreadsPerms && doesUserHaveRole;
-			}
-			return false;
-		};
-
-		if (!doesUserHaveOverridePermissions) {
-			if (!doesUserHaveThreadOverridePermissions()) {
-				throw new MarkSolutionError(
-					'NO_PERMISSION',
-					`You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
-						', ',
-					)} can mark a question as solved.`,
-				);
-			}
 		}
 	}
 
