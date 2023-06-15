@@ -111,6 +111,19 @@ export function MessageResultPage({
 		return <Msg key={message.id} count={consecutivePrivateMessages} />;
 	});
 
+	const JoinServerArea = () => {
+		if (!channel.inviteCode) return null;
+
+		return (
+			<ServerInvite
+				className="my-16"
+				server={server}
+				location="Message Result Page"
+				channel={channel}
+			/>
+		);
+	};
+
 	return (
 		<div className="sm:mx-3">
 			<AOHead
@@ -138,6 +151,7 @@ export function MessageResultPage({
 					</h1>
 				</div>
 				<div className="flex flex-col gap-4">{messageStack}</div>
+				<JoinServerArea />
 			</div>
 		</div>
 	);
