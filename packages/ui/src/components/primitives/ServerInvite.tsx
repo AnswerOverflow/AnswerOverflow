@@ -18,7 +18,7 @@ import {
 	serverToAnalyticsData,
 } from '@answeroverflow/constants/src/analytics';
 // eslint-disable-next-line @typescript-eslint/naming-convention
-const ServerInviteContext = createContext<{
+export const ServerInviteContext = createContext<{
 	server: ServerPublic;
 	location: ServerInviteClickProps['Button Location'];
 	channel?: ChannelPublicWithFlags;
@@ -134,17 +134,23 @@ type ServerInviteProps = {
 	Body?: React.ReactNode;
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	JoinButton?: React.ReactNode;
+	className?: string;
 };
 
 export const ServerInviteRenderer = (props: ServerInviteProps) => {
 	return (
 		<ServerInviteContext.Provider value={props}>
-			<div className="flex h-full w-full flex-col items-center justify-center gap-1">
+			<div
+				className={cn(
+					'flex h-full w-full flex-col items-center justify-center gap-1',
+					props.className,
+				)}
+			>
 				<div className="flex flex-col">
 					<div className="flex flex-row items-center justify-center pb-5 align-middle">
-						{props.Icon || <ServerInviteIcon />}
+						{props.Icon ?? <ServerInviteIcon />}
 						<div className="flex flex-col items-center justify-center pl-2">
-							{props.Body || (
+							{props.Body ?? (
 								<>
 									<ServerInviteTitle />
 									{props.channel && <ChannelName channel={props.channel} />}
@@ -152,7 +158,7 @@ export const ServerInviteRenderer = (props: ServerInviteProps) => {
 							)}
 						</div>
 					</div>
-					{props.JoinButton || <ServerInviteJoinButton />}
+					{props.JoinButton ?? <ServerInviteJoinButton />}
 				</div>
 			</div>
 		</ServerInviteContext.Provider>
