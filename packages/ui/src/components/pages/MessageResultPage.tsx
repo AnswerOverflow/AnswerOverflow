@@ -91,6 +91,7 @@ export function MessageResultPage({
 				key={message.id}
 				message={message}
 				fullRounded
+				loadingStyle={index === 0 ? 'eager' : 'lazy'} // Images above the fold should have priority
 				Blurrer={(props) => <MultiMessageBlurrer {...props} count={count} />}
 			/>
 		);
