@@ -196,6 +196,7 @@ const SingularImageAttachment = () => {
 						alt={x?.alt ?? `Image sent by ${message.author.name}`}
 						unoptimized
 						loading={loadingStyle}
+						priority={loadingStyle === 'lazy' ? false : true}
 					/>
 				</div>
 			))}
