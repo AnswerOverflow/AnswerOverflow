@@ -165,7 +165,7 @@ export const MessageContents = () => {
 };
 
 const SingularImageAttachment = () => {
-	const { message } = useMessageContext();
+	const { message, loadingStyle } = useMessageContext();
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -195,6 +195,7 @@ const SingularImageAttachment = () => {
 						height={x?.height}
 						alt={x?.alt ?? `Image sent by ${message.author.name}`}
 						unoptimized
+						loading={loadingStyle}
 					/>
 				</div>
 			))}
@@ -231,6 +232,7 @@ type MessageProps = {
 	 * If typed as a number, will collapse the content if longer than the number
 	 */
 	collapseContent?: boolean | number;
+	loadingStyle?: 'lazy' | 'eager';
 };
 
 export const Message = ({
@@ -242,10 +244,11 @@ export const Message = ({
 	images = <MessageAttachments />,
 	className,
 	fullRounded,
+	loadingStyle = 'lazy',
 	collapseContent,
 }: MessageProps) => {
 	return (
-		<MessageContext.Provider value={{ message, collapseContent }}>
+		<MessageContext.Provider value={{ message, collapseContent, loadingStyle }}>
 			<Blurrer>
 				<div
 					className={cn(
