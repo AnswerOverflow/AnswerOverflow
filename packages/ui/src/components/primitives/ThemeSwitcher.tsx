@@ -23,8 +23,8 @@ function MoonIcon<T extends {}>(props: T) {
 export function ThemeIcon() {
 	return (
 		<>
-			<SunIcon className="h-8 w-8 stroke-zinc-900 dark:hidden" />
-			<MoonIcon className="hidden h-8 w-8 stroke-white dark:block" />
+			<SunIcon className="h-9 w-9 stroke-zinc-900 dark:hidden" />
+			<MoonIcon className="hidden h-9 w-9 stroke-white dark:block" />
 		</>
 	);
 }
