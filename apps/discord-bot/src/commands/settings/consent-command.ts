@@ -10,7 +10,6 @@ import { getCommandIds } from '~discord-bot/utils/utils';
 	name: 'consent',
 	description: 'Publicly Display Messages On Answer Overflow',
 	runIn: ['GUILD_ANY'],
-	requiredUserPermissions: ['ManageGuild'],
 })
 export class ConsentCommand extends Command {
 	public override registerApplicationCommands(
