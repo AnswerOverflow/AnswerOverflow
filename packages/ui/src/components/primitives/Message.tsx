@@ -156,7 +156,7 @@ export const MessageContentWithSolution = (props: {
 			<MessageContents />
 			<MessageAttachments />
 			<div className="mt-4 w-full rounded-lg  border-2 border-green-500 p-2 dark:border-green-400">
-				<span className="text-green-700 dark:text-green-400">Solution:</span>
+				<span className="text-green-800 dark:text-green-400">Solution:</span>
 				<MessageContext.Provider
 					value={{ ...props.solution, loadingStyle: 'eager' }}
 				>
