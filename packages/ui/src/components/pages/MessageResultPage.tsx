@@ -74,9 +74,12 @@ export function MessageResultPage({
 	const messagesWithMergedContent = messages.map((message, index) => {
 		const nextMessage = messages.at(index + 1);
 		contents += message.content;
-		const isSameAuthor = message.author.id === nextMessage?.author.id;
+		const isSameAuthor =
+			message.author.id === nextMessage?.author.id && message.public;
 		const isCollapsible =
-			message.attachments.length === 0 && message.id !== solutionMessageId;
+			message.attachments.length === 0 &&
+			message.id !== solutionMessageId &&
+			message.public;
 		if (isSameAuthor && isCollapsible) {
 			contents += '\n';
 			return null;
@@ -89,72 +92,70 @@ export function MessageResultPage({
 		};
 	});
 
-	const messageStack = messagesWithMergedContent
-		.filter(Boolean)
-		.map((message, index) => {
-			const nextMessage = messagesWithMergedContent.at(index + 1);
-			if (!message.public && isUserInServer !== 'in_server') {
-				consecutivePrivateMessages++;
-				if (nextMessage && !nextMessage.public) {
-					return;
-				}
-			} else {
-				consecutivePrivateMessages = 0;
+	const messagesToDisplay = messagesWithMergedContent.filter(Boolean);
+
+	const messageStack = messagesToDisplay.map((message, index) => {
+		const nextMessage = messagesToDisplay.at(index + 1);
+		if (!message.public && isUserInServer !== 'in_server') {
+			consecutivePrivateMessages++;
+			if (nextMessage && !nextMessage.public) {
+				return;
 			}
-			// TODO: Remove when embeds are supported
-			if (
-				(message.public || isUserInServer === 'in_server') &&
-				message.content.length === 0 &&
-				message.attachments.length === 0
-			)
-				return null;
+		} else {
+			consecutivePrivateMessages = 0;
+		}
+		// TODO: Remove when embeds are supported
+		if (
+			(message.public || isUserInServer === 'in_server') &&
+			message.content.length === 0 &&
+			message.attachments.length === 0
+		)
+			return null;
 
-			const Msg = ({ count }: { count: number }) => {
-				const shouldShowSolutionInContent = index === 0 && solution;
+		const Msg = ({ count }: { count: number }) => {
+			const shouldShowSolutionInContent = index === 0 && solution;
 
-				return (
-					<Message
-						key={message.id}
-						message={message}
-						fullRounded
-						content={
-							shouldShowSolutionInContent ? (
-								<MessageContentWithSolution
-									solution={{
-										message: solution,
-									}}
-								/>
-							) : undefined
-						}
-						images={shouldShowSolutionInContent ? null : undefined}
-						loadingStyle={index === 0 ? 'eager' : 'lazy'} // Images above the fold should have priority
-						Blurrer={(props) => (
-							<MultiMessageBlurrer {...props} count={count} />
-						)}
-					/>
-				);
-			};
+			return (
+				<Message
+					key={message.id}
+					message={message}
+					fullRounded
+					content={
+						shouldShowSolutionInContent ? (
+							<MessageContentWithSolution
+								solution={{
+									message: solution,
+								}}
+							/>
+						) : undefined
+					}
+					images={shouldShowSolutionInContent ? null : undefined}
+					loadingStyle={index === 0 ? 'eager' : 'lazy'} // Images above the fold should have priority
+					Blurrer={(props) => <MultiMessageBlurrer {...props} count={count} />}
+				/>
+			);
+		};
 
-			if (message.id === solutionMessageId) {
-				return (
+		if (message.id === solutionMessageId) {
+			return (
+				<div
+					className="text-green-700 dark:text-green-400"
+					key={message.id}
+					id={`solution-${message.id}`}
+				>
+					Solution
 					<div
-						className="text-green-700 dark:text-green-400"
+						className="rounded-lg border-2 border-green-500  dark:border-green-400 "
 						key={message.id}
-						id={`solution-${message.id}`}
 					>
-						Solution
-						<div
-							className="rounded-lg border-2 border-green-500  dark:border-green-400 "
-							key={message.id}
-						>
-							<Msg key={message.id} count={consecutivePrivateMessages} />
-						</div>
+						<Msg key={message.id} count={consecutivePrivateMessages} />
 					</div>
-				);
-			}
+				</div>
+			);
+		}
 
-			return <Msg key={message.id} count={consecutivePrivateMessages} />;
-		});
+		return <Msg key={message.id} count={consecutivePrivateMessages} />;
+	});
 
 	return (
 		<div className="sm:mx-3">
