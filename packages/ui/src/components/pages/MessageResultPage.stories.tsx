@@ -212,7 +212,7 @@ export const ManyFromSameAuthor: Story = {
 			}),
 			mockMessageWithDiscordAccount({
 				id: '4',
-				public: false,
+				public: true,
 				author: {
 					id: '1',
 					name: 'John Doe',
