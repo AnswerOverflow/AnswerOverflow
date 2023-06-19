@@ -86,6 +86,11 @@ export function MessageResultPage({
 		)
 			return null;
 
+		if (message.author.id === nextMessage?.author.id) {
+			nextMessage.content += `\n${message.content}`;
+			return;
+		}
+
 		const Msg = ({ count }: { count: number }) => (
 			<Message
 				key={message.id}
