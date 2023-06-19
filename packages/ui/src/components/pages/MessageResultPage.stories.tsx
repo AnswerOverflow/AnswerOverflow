@@ -182,3 +182,61 @@ export const PrivateSolution: Story = {
 		],
 	},
 };
+
+export const ManyFromSameAuthor: Story = {
+	args: {
+		...defaultMessage,
+		messages: [
+			mockMessageWithDiscordAccount({
+				id: '1',
+				solutionIds: ['4'],
+				public: true,
+				author: {
+					id: '1',
+					name: 'John Doe',
+					avatar: 'https://cdn.discordapp.com/embed/avatars/0.png',
+				},
+			}),
+			mockMessageWithDiscordAccount({
+				id: '2',
+				public: true,
+				author: {
+					id: '1',
+					name: 'John Doe',
+					avatar: 'https://cdn.discordapp.com/embed/avatars/0.png',
+				},
+			}),
+			mockMessageWithDiscordAccount({
+				id: '3',
+				public: true,
+			}),
+			mockMessageWithDiscordAccount({
+				id: '4',
+				public: false,
+				author: {
+					id: '1',
+					name: 'John Doe',
+					avatar: 'https://cdn.discordapp.com/embed/avatars/0.png',
+				},
+			}),
+			mockMessageWithDiscordAccount({
+				id: '5',
+				public: true,
+				author: {
+					id: '1',
+					name: 'John Doe',
+					avatar: 'https://cdn.discordapp.com/embed/avatars/0.png',
+				},
+			}),
+			mockMessageWithDiscordAccount({
+				id: '6',
+				public: true,
+				author: {
+					id: '1',
+					name: 'John Doe',
+					avatar: 'https://cdn.discordapp.com/embed/avatars/0.png',
+				},
+			}),
+		],
+	},
+};

@@ -253,7 +253,7 @@ export const Message = ({
 			<Blurrer>
 				<div
 					className={cn(
-						`discord-message grow bg-[#E9ECF2] dark:bg-[#181B1F] ${
+						`discord-message grow bg-[#E9ECF2] leading-6 dark:bg-[#181B1F] ${
 							showBorders ? 'border-2' : ''
 						} border-black/[.13] dark:border-white/[.13] ${
 							fullRounded ? 'rounded-standard' : 'lg:rounded-tl-standard'
