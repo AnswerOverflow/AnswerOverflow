@@ -187,6 +187,9 @@ Server: ${channel.guildId} | ${channel.guild.name}`,
 }
 
 export async function indexTextBasedChannel(channel: GuildTextBasedChannel) {
+	if (!channel.viewable) {
+		return;
+	}
 	const lastIndexedMessage = await findLatestMessageInChannel(channel.id);
 	const start = lastIndexedMessage?.id;
 	container.logger.debug(
