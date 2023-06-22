@@ -27,14 +27,26 @@ export async function updateChannelIndexingEnabled({
 }: ChannelSettingsUpdateAPICall & { enabled: boolean }) {
 	let newInviteCode: string | null = null;
 	if (enabled) {
-		const channelInvite = await channel.createInvite({
-			maxAge: 0,
-			maxUses: 0,
-			reason: 'Channel indexing enabled invite',
-			unique: false,
-			temporary: false,
-		});
-		newInviteCode = channelInvite.code;
+		if (
+			!channel.permissionsFor(channel.client.id!)!.has('CreateInstantInvite')
+		) {
+			if (!channel.guild.vanityURLCode) {
+				Error(
+					"I don't have permission to create invites in this channel and there is no vanity URL set. Please give me permission to create invites or set a vanity URL.",
+				);
+				return;
+			}
+			newInviteCode = channel.guild.vanityURLCode;
+		} else {
+			const channelInvite = await channel.createInvite({
+				maxAge: 0,
+				maxUses: 0,
+				reason: 'Channel indexing enabled invite',
+				unique: false,
+				temporary: false,
+			});
+			newInviteCode = channelInvite.code;
+		}
 	}
 	return callAPI({
 		apiCall: (router) =>
