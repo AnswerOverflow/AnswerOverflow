@@ -132,7 +132,7 @@
     /*
       EDITOR STYLE
     */
-    "prettier.prettierPath": "./node_modules/prettier",
+    // "prettier.prettierPath": "./node_modules/prettier",
     "editor.wordWrap": "on",
     "editor.tabSize": 2,
     "editor.bracketPairColorization.enabled": true,
