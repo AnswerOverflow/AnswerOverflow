@@ -165,6 +165,11 @@ export function IndexingSettingsMenu({
 				<EmbedMenuInstruction
 					instructions={[
 						{
+							title: 'Invite Code',
+							instructions: `[${channel.inviteCode!}](https://discord.com/invite/${channel.inviteCode!})`,
+							enabled: channel.inviteCode !== null,
+						},
+						{
 							title: ENABLE_CHANNEL_INDEXING_LABEL,
 							enabled: !channel.flags.indexingEnabled,
 							instructions:
