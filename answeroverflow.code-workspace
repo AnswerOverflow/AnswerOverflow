@@ -176,6 +176,7 @@
       "root",
       "discord-bot"
     ],
+    "jest.autoRun": "off",
     /*
       MISC
     */
