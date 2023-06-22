@@ -216,6 +216,13 @@ export async function sendConsentPrompt(input: {
 		);
 		return;
 	}
+  if(!interaction.appPermissions?.has('SendMessages') || !interaction.appPermissions?.has('EmbedLinks')) {
+    await oneTimeStatusHandler(
+      interaction,
+      'I am missing permissions to send a consent prompt. I need the `Send Messages` and `Embed Links` permissions.',
+    );
+    return;
+  }
 	const consentEmbed = new EmbedBuilder();
 	consentEmbed.setDescription(makeRequestForConsentString(channel.guild.name));
 	consentEmbed.addFields({
