@@ -1,4 +1,4 @@
-import { Button, LinkButton, type LinkButtonProps } from '.';
+import { Button, LinkButton, type ButtonProps, type LinkButtonProps } from '.';
 import { signIn } from 'next-auth/react';
 import { GETTING_STARTED_URL } from '@answeroverflow/constants/src/links';
 import {
@@ -31,11 +31,11 @@ export function GetStarted(
 	);
 }
 
-export function SignInButton() {
+export function SignInButton(props: ButtonProps) {
 	return (
 		// TODO: Swap to href
 		// eslint-disable-next-line @typescript-eslint/no-misused-promises
-		<Button variant="outline" onClick={() => signIn('discord')}>
+		<Button variant="outline" onClick={() => signIn('discord')} {...props}>
 			Login
 		</Button>
 	);
