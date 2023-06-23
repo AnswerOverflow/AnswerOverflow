@@ -1,4 +1,4 @@
-import { useThemeContext } from '~ui/utils/theme';
+import { useTheme } from 'next-themes';
 
 function SunIcon<T extends {}>(props: T) {
 	return (
@@ -37,17 +37,21 @@ export function ThemeSwitcher({
 		toggleTheme: () => void;
 	}>;
 }) {
-	const { toggleTheme } = useThemeContext();
+	const { theme, setTheme } = useTheme();
 	if (!Switcher)
 		return (
 			<button
 				type="button"
 				className="flex h-9 w-9 items-center justify-center rounded-md transition hover:bg-zinc-900/5 dark:hover:bg-white/5"
 				aria-label="Toggle dark mode"
-				onClick={() => toggleTheme()}
+				onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
 			>
 				<ThemeIcon />
 			</button>
 		);
-	return <Switcher toggleTheme={() => toggleTheme()} />;
+	return (
+		<Switcher
+			toggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+		/>
+	);
 }

@@ -6,12 +6,8 @@ import { SessionProvider } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import type { AppType } from 'next/app';
 import hljs from 'highlight.js';
-import {
-	type NextTRPC,
-	PageWrapper,
-	trpc,
-	ThemeProvider,
-} from '@answeroverflow/ui';
+import { type NextTRPC, PageWrapper, trpc } from '@answeroverflow/ui';
+import { ThemeProvider } from 'next-themes';
 import { AnalyticsProvider } from '@answeroverflow/hooks';
 import React, { useEffect } from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -76,7 +72,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 	// TODO: wow this is ugly but use analytics needs session provider data
 
 	return (
-		<ThemeProvider>
+		<ThemeProvider attribute="class">
 			<SessionProvider session={session}>
 				<AnalyticsProvider>
 					<PageWrapper disabledRoutes={['/', '/c/[communityId]']}>
