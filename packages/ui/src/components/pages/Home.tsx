@@ -1,10 +1,12 @@
 import { Footer } from '../primitives/Footer';
 import { Navbar } from '../primitives/Navbar';
 import { AboutArea } from './home/AboutArea';
-import { HeroArea } from './home/HeroArea';
+import { HowDoesItWorkArea } from './home/HowDoesItWorkArea';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Button } from '../primitives';
 import { useRef } from 'react';
+import { HeroArea } from './home/HeroArea';
+import type { ServerPublic } from '~api/router/server/types';
 const DownChevron = (props: { scrollIntoView: () => unknown }) => (
 	<div className="absolute bottom-10 left-1/2 block -translate-x-1/2 sm:hidden xl:block">
 		<div className="mx-auto h-16 w-16 rounded-full text-black/[.65] dark:text-white/[.65]">
@@ -19,7 +21,7 @@ const DownChevron = (props: { scrollIntoView: () => unknown }) => (
 		</div>
 	</div>
 );
-export const Home = () => {
+export const Home = (props: { servers: ServerPublic[] }) => {
 	const aboutRef = useRef<HTMLDivElement>(null);
 	const executeScroll = () =>
 		aboutRef.current?.scrollIntoView({
@@ -30,12 +32,13 @@ export const Home = () => {
 	return (
 		<div className="flex w-full flex-col items-center bg-ao-white font-body dark:bg-[linear-gradient(180.49deg,_#1A1818_-12.07%,_#0E0D0D_-12.07%,_#040405_-12.06%,_#101214_103.52%)]">
 			<div className="max-w-screen-3xl">
-				<div className="relative ">
+				<div className="relative">
 					<Navbar />
 					<div className="">
-						<HeroArea />
+						<HeroArea servers={props.servers} />
 					</div>
 				</div>
+				<HowDoesItWorkArea />
 				<DownChevron scrollIntoView={executeScroll} />
 				<div className="flex justify-center py-2" ref={aboutRef}>
 					<AboutArea />

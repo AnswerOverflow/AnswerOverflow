@@ -8,7 +8,6 @@ export * from './Footer';
 export * from './ServerCard';
 export * from './Message';
 export * from './Navbar';
-export * from './SearchBar';
 export * from './SearchResult';
 export * from './ServerIcon';
 export * from './ServerInvite';
