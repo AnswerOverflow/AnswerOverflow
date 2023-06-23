@@ -101,11 +101,11 @@ export class SyncOnReady extends Listener {
 		if (process.env.NODE_ENV === 'production') await delay(30 * 1000); // give time for dbs to start up
 		// 1. Sync all of the servers to have the most up to date data
 		const guilds = this.container.client.guilds.cache;
-		const syncs = guilds.map((guild) => syncServer(guild));
 		const activeServerIds = new Set();
-		for await (const sync of syncs) {
-			this.container.logger.info(`Synced server ${sync.name}`);
-			activeServerIds.add(sync.id);
+		for await (const guild of guilds.values()) {
+			// eslint-disable-next-line no-await-in-loop
+			await syncServer(guild);
+			activeServerIds.add(guild);
 		}
 		// 2. For any servers that are in the database and not in the guilds the bot is in, mark them as kicked
 		const servers =
@@ -113,17 +113,16 @@ export class SyncOnReady extends Listener {
 		const serversToMarkAsKicked = servers.filter(
 			(server) => !activeServerIds.has(server.id) && !server.kickedTime,
 		);
-		const kicks = serversToMarkAsKicked.map((server) =>
-			updateServer({
-				existing: server,
+
+		for await (const i of serversToMarkAsKicked.keys()) {
+			// eslint-disable-next-line no-await-in-loop
+			await updateServer({
+				existing: serversToMarkAsKicked[i]!,
 				update: {
-					id: server.id,
+					id: serversToMarkAsKicked[i]!.id,
 					kickedTime: new Date(),
 				},
-			}),
-		);
-		for await (const kick of kicks) {
-			this.container.logger.info(`Kicked server ${kick.name}`);
+			});
 		}
 	}
 }
