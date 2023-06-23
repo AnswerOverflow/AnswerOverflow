@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VARIANT: "16"
+        VARIANT: "18"
 
     volumes:
       - ..:/AnswerOverflow:cached
