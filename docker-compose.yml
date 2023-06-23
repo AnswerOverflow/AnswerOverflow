@@ -20,12 +20,20 @@ services:
     environment:
       - xpack.security.enabled=false
       - "discovery.type=single-node"
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
     expose:
       - 9200
       - 9300
     ports:
       - 9200:9200
       - 9300:9300
+    deploy:
+      resources:
+        limits:
+          memory: 2048m
+        reservations:
+          memory: 1024m
 
   cache-redis:
     container_name: ao-cache-redis
@@ -36,3 +44,11 @@ services:
       - 6379
     ports:
       - 6379:6379
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 50M
+        reservations:
+          cpus: '0.25'
+          memory: 20M
