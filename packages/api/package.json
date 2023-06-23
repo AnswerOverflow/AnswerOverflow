@@ -35,7 +35,7 @@
 		"@answeroverflow/tsconfig": "*",
 		"@vitest/coverage-c8": "^0.28.5",
 		"dotenv-cli": "^7.1.0",
-		"eslint": "^8.28.0",
+		"eslint": "^8.43.0",
 		"tslib": "^2.4.1",
 		"vitest": "^0.29.8"
 	}

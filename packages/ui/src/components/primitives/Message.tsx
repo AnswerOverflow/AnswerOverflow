@@ -18,6 +18,7 @@ import { useEffect } from 'react';
 import { type Slide } from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import { getImageHeightWidth } from '~ui/utils/other';
+import Link from 'next/link';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MessageContext = createContext<
@@ -117,15 +118,24 @@ export const MessageAuthorArea = () => {
 
 const DEFAULT_COLLAPSE_CONTENT_LENGTH = 500;
 
-const LongMessageContents = (props: { collapseBy: number }) => {
-	const { message } = useMessageContext();
+export const MessageContents = () => {
+	const { message, collapseContent } = useMessageContext();
 	const { toHTML } = discordMarkdown;
 	const convertedMessageContent = toHTML(message.content);
 
-	const textToRender =
-		convertedMessageContent.length > props.collapseBy
-			? `${convertedMessageContent.slice(0, props.collapseBy).trim()}...`
-			: convertedMessageContent;
+	const collapseBy =
+		typeof collapseContent === 'number'
+			? collapseContent
+			: DEFAULT_COLLAPSE_CONTENT_LENGTH;
+
+	const shouldCollapse =
+		collapseContent !== false &&
+		collapseContent !== undefined &&
+		convertedMessageContent.length > collapseBy;
+
+	const textToRender = shouldCollapse
+		? `${convertedMessageContent.slice(0, collapseBy).trim()}...`
+		: convertedMessageContent;
 
 	return (
 		<div
@@ -138,34 +148,32 @@ const LongMessageContents = (props: { collapseBy: number }) => {
 	);
 };
 
-export const MessageContents = () => {
-	const { message, collapseContent } = useMessageContext();
-	const { toHTML } = discordMarkdown;
-	const convertedMessageContent = toHTML(message.content);
-	const shouldCollapse =
-		collapseContent !== false && collapseContent !== undefined;
-	const collapseBy =
-		typeof collapseContent === 'number'
-			? collapseContent
-			: DEFAULT_COLLAPSE_CONTENT_LENGTH;
-
-	if (!shouldCollapse) {
-		return (
-			<div
-				className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white"
-				// The HTML from discord-markdown is escaped
-				dangerouslySetInnerHTML={{
-					__html: convertedMessageContent,
-				}}
-			/>
-		);
-	}
-
-	return <LongMessageContents collapseBy={collapseBy} />;
+export const MessageContentWithSolution = (props: {
+	solution: Pick<MessageProps, 'message'>;
+}) => {
+	return (
+		<div>
+			<MessageContents />
+			<MessageAttachments />
+			<div className="mt-4 w-full rounded-lg  border-2 border-green-500 p-2 dark:border-green-400">
+				<span className="text-green-800 dark:text-green-400">Solution:</span>
+				<MessageContext.Provider
+					value={{ ...props.solution, loadingStyle: 'eager' }}
+				>
+					<MessageBlurrer>
+						<MessageContents />
+					</MessageBlurrer>
+				</MessageContext.Provider>
+				<Link href={`#solution-${props.solution.message.id}`}>
+					Jump to solution
+				</Link>
+			</div>
+		</div>
+	);
 };
 
 const SingularImageAttachment = () => {
-	const { message } = useMessageContext();
+	const { message, loadingStyle } = useMessageContext();
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -195,6 +203,8 @@ const SingularImageAttachment = () => {
 						height={x?.height}
 						alt={x?.alt ?? `Image sent by ${message.author.name}`}
 						unoptimized
+						loading={loadingStyle}
+						priority={loadingStyle === 'lazy' ? false : true}
 					/>
 				</div>
 			))}
@@ -231,6 +241,7 @@ type MessageProps = {
 	 * If typed as a number, will collapse the content if longer than the number
 	 */
 	collapseContent?: boolean | number;
+	loadingStyle?: 'lazy' | 'eager';
 };
 
 export const Message = ({
@@ -242,14 +253,15 @@ export const Message = ({
 	images = <MessageAttachments />,
 	className,
 	fullRounded,
+	loadingStyle = 'lazy',
 	collapseContent,
 }: MessageProps) => {
 	return (
-		<MessageContext.Provider value={{ message, collapseContent }}>
+		<MessageContext.Provider value={{ message, collapseContent, loadingStyle }}>
 			<Blurrer>
 				<div
 					className={cn(
-						`discord-message grow bg-[#E9ECF2] dark:bg-[#181B1F] ${
+						`discord-message grow bg-[#E9ECF2] leading-6 dark:bg-[#181B1F] ${
 							showBorders ? 'border-2' : ''
 						} border-black/[.13] dark:border-white/[.13] ${
 							fullRounded ? 'rounded-standard' : 'lg:rounded-tl-standard'

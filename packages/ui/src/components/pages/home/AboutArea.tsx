@@ -41,8 +41,8 @@ const FeaturesSection = (props: { className?: string }) => {
 					featureName="🤖 AI Question Answers"
 					featureDescription={
 						<>
-							<b>Automate answering repeat questions</b>, with AI answers based on
-							your community data.
+							<b>Automate answering repeat questions</b>, with AI answers
+							sourced from your community content.
 						</>
 					}
 				/>

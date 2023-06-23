@@ -10,6 +10,7 @@ import {
 	MultiMessageBlurrer,
 	ServerInvite,
 	ChannelIcon,
+	MessageContentWithSolution,
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
 import {
@@ -66,10 +67,35 @@ export function MessageResultPage({
 		},
 	);
 	const solutionMessageId = messages.at(0)?.solutionIds?.at(0);
-
+	const solution = messages.find((message) => message.id === solutionMessageId);
 	let consecutivePrivateMessages = 0;
-	const messageStack = messages.map((message, index) => {
+
+	let contents = '';
+	const messagesWithMergedContent = messages.map((message, index) => {
 		const nextMessage = messages.at(index + 1);
+		contents += message.content;
+		const isSameAuthor =
+			message.author.id === nextMessage?.author.id && message.public;
+		const isCollapsible =
+			message.attachments.length === 0 &&
+			message.id !== solutionMessageId &&
+			message.public;
+		if (isSameAuthor && isCollapsible) {
+			contents += '\n';
+			return null;
+		}
+		const mergedContent = contents;
+		contents = '';
+		return {
+			...message,
+			content: mergedContent,
+		};
+	});
+
+	const messagesToDisplay = messagesWithMergedContent.filter(Boolean);
+
+	const messageStack = messagesToDisplay.map((message, index) => {
+		const nextMessage = messagesToDisplay.at(index + 1);
 		if (!message.public && isUserInServer !== 'in_server') {
 			consecutivePrivateMessages++;
 			if (nextMessage && !nextMessage.public) {
@@ -86,18 +112,37 @@ export function MessageResultPage({
 		)
 			return null;
 
-		const Msg = ({ count }: { count: number }) => (
-			<Message
-				key={message.id}
-				message={message}
-				fullRounded
-				Blurrer={(props) => <MultiMessageBlurrer {...props} count={count} />}
-			/>
-		);
+		const Msg = ({ count }: { count: number }) => {
+			const shouldShowSolutionInContent = index === 0 && solution;
+
+			return (
+				<Message
+					key={message.id}
+					message={message}
+					fullRounded
+					content={
+						shouldShowSolutionInContent ? (
+							<MessageContentWithSolution
+								solution={{
+									message: solution,
+								}}
+							/>
+						) : undefined
+					}
+					images={shouldShowSolutionInContent ? null : undefined}
+					loadingStyle={index === 0 ? 'eager' : 'lazy'} // Images above the fold should have priority
+					Blurrer={(props) => <MultiMessageBlurrer {...props} count={count} />}
+				/>
+			);
+		};
 
 		if (message.id === solutionMessageId) {
 			return (
-				<div className="text-green-700 dark:text-green-400" key={message.id}>
+				<div
+					className="text-green-700 dark:text-green-400"
+					key={message.id}
+					id={`solution-${message.id}`}
+				>
 					Solution
 					<div
 						className="rounded-lg border-2 border-green-500  dark:border-green-400 "
@@ -108,6 +153,7 @@ export function MessageResultPage({
 				</div>
 			);
 		}
+
 		return <Msg key={message.id} count={consecutivePrivateMessages} />;
 	});
 

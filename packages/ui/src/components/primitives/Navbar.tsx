@@ -18,7 +18,11 @@ import {
 	PopoverContent,
 	Button,
 } from './base';
-import { Bars3Icon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import {
+	Bars3Icon,
+	ChevronDownIcon,
+	MagnifyingGlassIcon,
+} from '@heroicons/react/24/outline';
 import { ThemeIcon } from './ThemeSwitcher';
 import {
 	GETTING_STARTED_URL,
@@ -91,6 +95,12 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 	const Desktop = () => (
 		<>
 			<NavigationMenuItem>
+				<Link href={'/search'}>
+					<MagnifyingGlassIcon className="h-8 w-8 text-ao-black hover:text-neutral-300 dark:text-ao-white dark:hover:text-neutral-400" />
+					<span className="sr-only">Search Answer Overflow</span>
+				</Link>
+			</NavigationMenuItem>
+			<NavigationMenuItem>
 				<ThemeSwitcher />
 			</NavigationMenuItem>
 			<NavigationMenuItem>
@@ -143,6 +153,16 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 							Get Started
 						</LinkButton>
 					</div>
+					<div className="flex flex-row space-y-2">
+						<LinkButton
+							variant="ghost"
+							className="w-full items-start justify-between"
+							href={GITHUB_LINK}
+						>
+							GitHub
+							<GitHubIcon className="h-6 w-6" />
+						</LinkButton>
+					</div>
 					<div className="flex w-full flex-row space-y-2">
 						<ThemeSwitcher
 							Switcher={({ toggleTheme }) => (
@@ -184,9 +204,9 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 				</NavigationMenuList>
 				<NavigationMenuList>
 					<NavigationMenuItem className="md:hidden">
-						<Link href={GITHUB_LINK} target="_blank">
-							<GitHubIcon className="h-8 w-8 hover:text-neutral-300" />
-							<span className="sr-only">GitHub</span>
+						<Link href={'/search'}>
+							<MagnifyingGlassIcon className="h-8 w-8 text-ao-black hover:text-neutral-300 dark:text-ao-white dark:hover:text-neutral-400" />
+							<span className="sr-only">Search Answer Overflow</span>
 						</Link>
 					</NavigationMenuItem>
 					<NavigationMenuItem className="md:hidden">
