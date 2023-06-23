@@ -7,6 +7,7 @@ import {
 	zServerCreate,
 	findServerByAliasOrId,
 } from '@answeroverflow/db';
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import type { Context } from '~api/router/context';
 import {
@@ -63,18 +64,34 @@ async function mutateServer({
 }
 
 export const serverRouter = router({
-	byId: withUserServersProcedure.input(z.string()).query(({ ctx, input }) => {
-		return protectedFetch({
-			fetch: () => findServerByAliasOrId(input),
-			permissions: () => assertCanEditServer(ctx, input),
-			notFoundMessage: 'Server not found',
-		});
-	}),
+	byId: withUserServersProcedure
+		.input(z.string())
+		.query(async ({ ctx, input }) => {
+			const data = await protectedFetch({
+				fetch: () => findServerByAliasOrId(input),
+				permissions: () => assertCanEditServer(ctx, input),
+				notFoundMessage: 'Server not found',
+			});
+			if (data.kickedTime) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Server not found',
+				});
+			}
+			return data;
+		}),
 	byIdPublic: publicProcedure.input(z.string()).query(async ({ input }) => {
 		const data = await findOrThrowNotFound(
 			() => findServerByAliasOrId(input),
 			'Server not found',
 		);
+		if (data.kickedTime) {
+			throw new TRPCError({
+				code: 'NOT_FOUND',
+				message: 'Server not found',
+			});
+		}
+
 		return zServerPublic.parse(data);
 	}),
 	setReadTheRulesConsentEnabled: withUserServersProcedure

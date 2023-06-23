@@ -124,6 +124,12 @@ export const ManageServerCard = (props: {
 		highestRole: 'Owner' | 'Administrator' | 'Manage Guild';
 		hasBot: boolean;
 	};
+	onSetupClick?: (
+		server: ServerPublic & {
+			highestRole: 'Owner' | 'Administrator' | 'Manage Guild';
+			hasBot: boolean;
+		},
+	) => void;
 }) => {
 	const Title = () => (
 		<div className="flex flex-col pr-4 text-left">
@@ -144,10 +150,11 @@ export const ManageServerCard = (props: {
 					<LinkButton href={`/c/${props.server.id}`}>View</LinkButton>
 				) : (
 					<LinkButton
-						href={`https://discord.com/oauth2/authorize?client_id=`}
+						href={`https://discord.com/oauth2/authorize?client_id=841032662973415454&permissions=328565083201&scope=bot+applications.commands&guild_id=${props.server.id}&disable_guild_select=true`}
 						target={'Blank'}
 						referrerPolicy="no-referrer"
 						variant={'outline'}
+						onMouseDown={() => props.onSetupClick?.(props.server)}
 					>
 						Setup
 					</LinkButton>
