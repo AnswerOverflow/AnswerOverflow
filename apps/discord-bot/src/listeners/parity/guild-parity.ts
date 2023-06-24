@@ -104,6 +104,7 @@ export class SyncOnReady extends Listener {
 		const activeServerIds = new Set();
 		for await (const guild of guilds.values()) {
 			// eslint-disable-next-line no-await-in-loop
+			this.container.logger.info(`Syncing guild ${guild.name}`);
 			await syncServer(guild);
 			activeServerIds.add(guild.id);
 		}
@@ -114,12 +115,13 @@ export class SyncOnReady extends Listener {
 			(server) => !activeServerIds.has(server.id) && !server.kickedTime,
 		);
 
-		for await (const i of serversToMarkAsKicked.keys()) {
+		for await (const server of serversToMarkAsKicked.values()) {
 			// eslint-disable-next-line no-await-in-loop
+			this.container.logger.info(`Marking server ${server.name} as kicked`);
 			await updateServer({
-				existing: serversToMarkAsKicked[i]!,
+				existing: server,
 				update: {
-					id: serversToMarkAsKicked[i]!.id,
+					id: server.id,
 					kickedTime: new Date(),
 				},
 			});
