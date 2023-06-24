@@ -105,7 +105,7 @@ export class SyncOnReady extends Listener {
 		for await (const guild of guilds.values()) {
 			// eslint-disable-next-line no-await-in-loop
 			await syncServer(guild);
-			activeServerIds.add(guild);
+			activeServerIds.add(guild.id);
 		}
 		// 2. For any servers that are in the database and not in the guilds the bot is in, mark them as kicked
 		const servers =
