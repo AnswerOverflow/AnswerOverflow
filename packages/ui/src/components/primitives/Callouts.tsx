@@ -1,6 +1,5 @@
 import { Button, LinkButton, type ButtonProps, type LinkButtonProps } from '.';
 import { signIn } from 'next-auth/react';
-import { GETTING_STARTED_URL } from '@answeroverflow/constants/src/links';
 import {
 	trackEvent,
 	type GettingStartedClickProps,
@@ -12,11 +11,7 @@ export function GetStarted(
 ) {
 	return (
 		<LinkButton
-			href={
-				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local'
-					? 'http://localhost:5234/quick-start'
-					: GETTING_STARTED_URL
-			}
+			href={'/onboarding'}
 			variant="outline"
 			onMouseUp={() => {
 				// Use mouse up to capture middle click and right click

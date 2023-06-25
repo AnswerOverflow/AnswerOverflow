@@ -59,6 +59,16 @@ type EventMap = {
 	'Add To Server Click': AddToServerClickProps;
 	[JOIN_WAITLIST_EVENT_NAME]: JoinWaitlistClickProps;
 	'Community Page View': CommunityPageViewProps;
+	'Onboarding Page View': {
+		'Page Name': string;
+		'Community Type': 'Commercial' | 'Non-Commercial' | undefined;
+		'Community Topic':
+			| 'Gaming'
+			| 'Education'
+			| 'Software'
+			| 'Other'
+			| undefined;
+	} & ServerProps;
 } & ServerInviteEvent &
 	CommunityPageLinkEvent;
 

@@ -24,10 +24,7 @@ import {
 	MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import { ThemeIcon } from './ThemeSwitcher';
-import {
-	GETTING_STARTED_URL,
-	GITHUB_LINK,
-} from '@answeroverflow/constants/src/links';
+import { GITHUB_LINK } from '@answeroverflow/constants/src/links';
 import { signIn, signOut } from 'next-auth/react';
 // TODO: Clean up this navbar area, bit of a mess
 
@@ -148,7 +145,7 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 						<LinkButton
 							variant="ghost"
 							className="w-full items-start justify-start"
-							href={GETTING_STARTED_URL}
+							href={'/onboarding'}
 						>
 							Get Started
 						</LinkButton>
