@@ -36,7 +36,7 @@ export async function getStaticProps() {
 		props: {
 			servers: asPublic,
 		},
-		revalidate: 60 * 60 * 24,
-		// every day
+		revalidate: 60 * 10,
+		// every 10 minutes
 	};
 }
