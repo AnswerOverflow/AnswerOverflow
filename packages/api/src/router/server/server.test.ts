@@ -15,9 +15,7 @@ describe('Server Operations', () => {
 	describe('Server Fetch', () => {
 		let server: Server;
 		beforeEach(async () => {
-			server = mockServer({
-				kickedTime: new Date(),
-			});
+			server = mockServer();
 			await createServer(server);
 		});
 		describe('By Id Public', () => {

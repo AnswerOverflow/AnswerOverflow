@@ -1,6 +1,9 @@
 {
 	"index": "Overview",
-	"quick-start": "Quick Start",
+	"quick-start": {
+		"title": "Quick Start",
+		"href": "https://answeroverflow.com/onboarding"
+	},
 	"recommended-setup": "Recommended Discord Setup",
 	"channel-settings": "Channel Settings",
 	"server-settings": "Server Settings",
