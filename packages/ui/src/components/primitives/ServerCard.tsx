@@ -150,7 +150,7 @@ export const ManageServerCard = (props: {
 					<LinkButton href={`/c/${props.server.id}`}>View</LinkButton>
 				) : (
 					<LinkButton
-						href={`https://discord.com/oauth2/authorize?client_id=841032662973415454&permissions=328565083201&scope=bot+applications.commands&guild_id=${props.server.id}&disable_guild_select=true`}
+						href={`https://discord.com/oauth2/authorize?client_id=958907348389339146&permissions=328565083201&scope=bot+applications.commands&guild_id=${props.server.id}&disable_guild_select=true`}
 						target={'Blank'}
 						referrerPolicy="no-referrer"
 						variant={'outline'}
