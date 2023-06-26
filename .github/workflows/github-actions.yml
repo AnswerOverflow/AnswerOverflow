@@ -34,20 +34,23 @@ env:
 jobs:
   build:
       name: Build and Test
-      timeout-minutes: 45
-      runs-on: ubuntu-latest
+      timeout-minutes: 90
+      runs-on: self-hosted
 
 
       steps:
       - name: Checkout (GitHub)
         uses: actions/checkout@v3
 
+      - name: Install yarn
+        run: sudo apt update && sudo apt install yarn
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: 'yarn'
-
+      
       - name: Start containers # TODO: Use dev container docker-compose instead if possible
         run: docker-compose -f "docker-compose.yml" up -d --build
 
