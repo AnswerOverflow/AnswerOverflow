@@ -322,9 +322,10 @@ export function EnableMarkSolution() {
 		<SetupPage
 			icon={<CheckCircleIcon className="hidden h-32 w-32 md:block" />}
 			title="Enable Mark Solution"
-			description="This allows users to mark a message as the solution to a question."
+			description='Open the "Help channel utilities" menu via /channel-settings and click the "Enable mark as solution" button'
 			command="channel-settings"
 			bulletPoints={[
+				'This allows users to mark a message as the solution to a question.',
 				`Anyone with the ManageThreads, ManageGuild, or Administrator permission can mark a message as the solution.`,
 				'For normal users to mark a message as solved, they must be the question author',
 				'You can manage who has access to this command in the integrations tab',
