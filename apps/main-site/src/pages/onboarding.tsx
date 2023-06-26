@@ -4,11 +4,6 @@ import { AOHead, OnboardingLanding } from '@answeroverflow/ui';
 const HomePage: NextPage = () => {
 	return (
 		<>
-			<AOHead
-				path="/"
-				title="Answer Overflow - Index Your Discord Server Channels Into Google"
-				addPrefix={false}
-			/>
 			<OnboardingLanding />
 		</>
 	);
