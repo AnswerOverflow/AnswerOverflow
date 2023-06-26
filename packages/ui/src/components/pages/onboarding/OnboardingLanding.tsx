@@ -1,19 +1,9 @@
 import { AOHead } from '~ui/components/primitives';
-import { WaitingToBeAdded, WelcomePage, type OnboardingPage } from './Pages';
+import { pageLookup, type OnboardingPage } from './Pages';
 import { useState } from 'react';
 import React from 'react';
 import type { ServerPublic } from '@answeroverflow/api';
 import { trackEvent } from '@answeroverflow/hooks';
-
-const pageLookup: Record<OnboardingPage, React.FC> = {
-	start: WelcomePage,
-	'waiting-to-be-added': WaitingToBeAdded,
-	'what-type-of-community': WelcomePage,
-	'enable-indexing': WelcomePage,
-	'enable-read-the-rules-consent': WelcomePage,
-	'enable-mark-solution': WelcomePage,
-	'final-checklist': WelcomePage,
-};
 
 type SubmittedData = {
 	server?: ServerPublic & {
@@ -60,7 +50,7 @@ export const OnboardingLanding = () => {
 				<OnboardingContext.Provider
 					value={{
 						goToPage: (page) => {
-							trackEvent('Onboarding Page View', {
+							trackEvent(`Onboarding Page View - ${page}`, {
 								'Page Name': page,
 								'Server Id': data.server?.id ?? '',
 								'Server Name': data.server?.name ?? '',
