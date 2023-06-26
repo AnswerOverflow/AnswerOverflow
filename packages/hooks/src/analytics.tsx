@@ -62,9 +62,9 @@ type EventMap = {
 } & ServerInviteEvent &
 	CommunityPageLinkEvent;
 
-export function trackEvent<K extends keyof EventMap>(
+export function trackEvent<K extends keyof EventMap | string>(
 	eventName: K,
-	props: EventMap[K],
+	props: K extends keyof EventMap ? EventMap[K] : Record<string, unknown>,
 ): void {
 	const isServer = typeof window === 'undefined';
 	posthog.capture(eventName, {
@@ -73,9 +73,9 @@ export function trackEvent<K extends keyof EventMap>(
 	});
 }
 
-export function useTrackEvent<K extends keyof EventMap>(
+export function useTrackEvent<K extends keyof EventMap | string>(
 	eventName: K,
-	props: EventMap[K],
+	props: K extends keyof EventMap ? EventMap[K] : Record<string, unknown>,
 	opts?: {
 		runOnce?: boolean;
 		enabled?: boolean;
@@ -140,7 +140,7 @@ export const AnalyticsProvider = ({
 		}
 		if (!analyticsLoaded) {
 			posthog.init(process.env.NEXT_PUBLIC_POSTHOG_TOKEN as string, {
-				disable_session_recording: process.env.NODE_ENV === 'development',
+				disable_session_recording: true,
 				persistence: 'memory',
 				bootstrap: {
 					distinctID: session?.user?.id,
