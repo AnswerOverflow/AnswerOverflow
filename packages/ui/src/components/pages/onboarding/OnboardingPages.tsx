@@ -1,11 +1,12 @@
 import {
 	Button,
 	Heading,
+	LinkButton,
 	ManageServerCard,
 	ServerIcon,
 	SignInButton,
 } from '~ui/components/primitives';
-import { useOnboardingContext } from './OnboardingLanding';
+import { useOnboardingContext } from './OnboardingContainer';
 import { trpc } from '~ui/utils/trpc';
 import type { ServerPublic } from '@answeroverflow/api';
 import { useEffect, useState } from 'react';
@@ -21,8 +22,8 @@ import { IoGameControllerOutline } from 'react-icons/io5';
 import { MdMoneyOffCsred, MdAttachMoney } from 'react-icons/md';
 import { CiCircleMore } from 'react-icons/ci';
 import { Command } from '~ui/components/primitives/base/Command';
-import Link from 'next/link';
 import { usePostHog } from 'posthog-js/react';
+import Link from 'next/link';
 
 export const pages = [
 	'start',
@@ -43,7 +44,7 @@ export const pageLookup: Record<OnboardingPage, React.FC> = {
 	'enable-indexing': EnableIndexingPage,
 	'enable-read-the-rules-consent': EnableForumGuidelinesConsent,
 	'enable-mark-solution': EnableMarkSolution,
-	'final-checklist': WelcomePage,
+	'final-checklist': FinalChecklistPage,
 };
 export function WaitingToBeAdded() {
 	const { data } = useOnboardingContext();
@@ -391,4 +392,43 @@ export function WelcomePage() {
 				</div>
 			);
 	}
+}
+
+export function FinalChecklistPage() {
+	const { data } = useOnboardingContext();
+	return (
+		<div className="text-ao-black dark:text-ao-white">
+			<Heading.H1>Setup Complete!</Heading.H1>
+			<Heading.H2>{"Here's"} a few extra things you can do</Heading.H2>
+			<ul className="list-inside list-disc py-4 text-left text-lg">
+				<li>
+					Make an announcement post in your server to let people {"you've "}
+					started indexing your channels
+				</li>
+				<li>
+					Link your Answer Overflow page in your documentation / GitHub to
+					improve your performance in search results
+				</li>
+				<li>
+					Browse{' '}
+					<Link
+						href="https://docs.answeroverflow.com"
+						className="
+					 text-ao-blue dark:hover:text-ao-blue"
+					>
+						the documentation
+					</Link>{' '}
+					to learn more about Answer Overflow
+				</li>
+			</ul>
+			<div className="mx-auto py-4">
+				<LinkButton href={`/c/${data.server!.id}`}>
+					View Your Community
+				</LinkButton>
+			</div>
+			<span>
+				Your page may take some time to update due to caching & indexing times.
+			</span>
+		</div>
+	);
 }

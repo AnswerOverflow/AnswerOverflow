@@ -1,14 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { OnboardingContext, OnboardingLanding } from './OnboardingLanding';
+import { OnboardingContext, OnboardingLanding } from './OnboardingContainer';
 import {
 	EnableForumGuidelinesConsent,
 	EnableIndexingPage,
 	EnableMarkSolution,
+	FinalChecklistPage,
 	WaitingToBeAddedRenderer,
 	WhatIsYourCommunityAbout,
 	WhatTypeOfCommunityDoYouHave,
-} from './Pages';
+} from './OnboardingPages';
 import { mockServer } from '~ui/test/props';
 const meta = {
 	component: OnboardingLanding,
@@ -151,6 +152,28 @@ export const EnableMarkSolutionStory: Story = {
 				}}
 			>
 				<EnableMarkSolution />
+			</OnboardingContext.Provider>
+		</div>
+	),
+};
+
+export const FinalChecklistPageStory: Story = {
+	render: () => (
+		<div className="flex min-h-screen flex-col items-center justify-center text-center">
+			<OnboardingContext.Provider
+				value={{
+					goToPage: () => {},
+					data: {
+						server: {
+							...mockServer(),
+							hasBot: true,
+							highestRole: 'Administrator',
+						},
+					},
+					setData: () => {},
+				}}
+			>
+				<FinalChecklistPage />
 			</OnboardingContext.Provider>
 		</div>
 	),
