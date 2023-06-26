@@ -47,7 +47,10 @@ jobs:
         with:
           node-version: 18
           cache: 'yarn'
-
+      
+      - name: Install yarn
+        run: sudo apt update && sudo apt install yarn
+        
       - name: Start containers # TODO: Use dev container docker-compose instead if possible
         run: docker-compose -f "docker-compose.yml" up -d --build
 
