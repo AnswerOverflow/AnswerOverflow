@@ -36,7 +36,7 @@
 	},
 	"scripts": {
 		"prepublishOnly": "yarn build",
-		"build": "tsup index.ts --target node16 --format cjs,esm --dts --sourcemap",
+		"build": "tsup index.ts --target node18 --format cjs,esm --dts --sourcemap",
 		"build-watch": "yarn build -- --watch",
 		"clean": "rm -rf dist node_modules turbo coverage",
 		"test": "yarn jest --coverage",

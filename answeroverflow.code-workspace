@@ -135,6 +135,13 @@
     // "prettier.prettierPath": "./node_modules/prettier",
     "editor.wordWrap": "on",
     "editor.tabSize": 2,
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+      "*": "${basename}.*.${extname}",
+      "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml"
+    },
+    "explorer.fileNesting.expand": false,
+    "prettier.ignorePath": ".prettierignore",
     "editor.bracketPairColorization.enabled": true,
     "editor.guides.bracketPairs": "active",
     "editor.quickSuggestions": {
