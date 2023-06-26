@@ -43,8 +43,8 @@ export const OnboardingLanding = () => {
 		<>
 			<AOHead
 				title="Onboarding"
-				description="Browse communities on Answer Overflow."
-				path="/communities"
+				description="Setup your server with AnswerOverflow."
+				path="/onboarding"
 			/>
 			<div className="flex min-h-screen flex-col items-center justify-center text-center">
 				<OnboardingContext.Provider
