@@ -19,6 +19,4 @@ export const DISCORD_LINK = 'https://discord.answeroverflow.com';
 
 export const WEBSITE_URL = 'https://answeroverflow.com';
 export const DOCS_URL = 'https://docs.answeroverflow.com';
-export const GETTING_STARTED_URL =
-	'https://docs.answeroverflow.com/quick-start';
 export const WAITLIST_URL = 'https://forms.gle/6YLPPGi8X2DCr29T7';
