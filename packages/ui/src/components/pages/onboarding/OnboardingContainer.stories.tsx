@@ -7,6 +7,7 @@ import {
 	EnableMarkSolution,
 	FinalChecklistPage,
 	WaitingToBeAddedRenderer,
+	WelcomePageRenderer,
 	WhatIsYourCommunityAbout,
 	WhatTypeOfCommunityDoYouHave,
 } from './OnboardingPages';
@@ -21,6 +22,102 @@ type Story = StoryObj<typeof meta>;
 
 export const ContributorsStory: Story = {
 	args: {},
+};
+
+export const SignInStory: Story = {
+	render: () => (
+		<div className="flex min-h-screen flex-col items-center justify-center text-center">
+			<OnboardingContext.Provider
+				value={{
+					goToPage: () => {},
+					data: {
+						server: undefined,
+					},
+					setData: () => {},
+				}}
+			>
+				<WelcomePageRenderer authState="unauthenticated" />
+			</OnboardingContext.Provider>
+		</div>
+	),
+};
+
+export const SignedInStory: Story = {
+	render: () => (
+		<div className="flex min-h-screen flex-col items-center justify-center text-center">
+			<OnboardingContext.Provider
+				value={{
+					goToPage: () => {},
+					data: {
+						server: undefined,
+					},
+					setData: () => {},
+				}}
+			>
+				<WelcomePageRenderer
+					authState="authenticated"
+					servers={[
+						{
+							...mockServer(),
+							highestRole: 'Owner',
+							hasBot: true,
+							permissions: 0,
+							features: [],
+							owner: true,
+						},
+						{
+							...mockServer(),
+							highestRole: 'Owner',
+							hasBot: true,
+							permissions: 0,
+							features: [],
+							owner: true,
+						},
+						{
+							...mockServer(),
+							highestRole: 'Owner',
+							hasBot: true,
+							permissions: 0,
+							features: [],
+							owner: true,
+						},
+						{
+							...mockServer(),
+							highestRole: 'Owner',
+							hasBot: true,
+							permissions: 0,
+							features: [],
+							owner: true,
+						},
+						{
+							...mockServer(),
+							highestRole: 'Owner',
+							hasBot: true,
+							permissions: 0,
+							features: [],
+							owner: true,
+						},
+						{
+							...mockServer(),
+							highestRole: 'Owner',
+							hasBot: true,
+							permissions: 0,
+							features: [],
+							owner: true,
+						},
+						{
+							...mockServer(),
+							highestRole: 'Owner',
+							hasBot: true,
+							permissions: 0,
+							features: [],
+							owner: true,
+						},
+					]}
+				/>
+			</OnboardingContext.Provider>
+		</div>
+	),
 };
 
 export const WaitingToBeAddedStory: Story = {

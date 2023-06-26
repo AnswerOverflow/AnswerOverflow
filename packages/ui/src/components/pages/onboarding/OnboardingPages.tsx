@@ -297,10 +297,20 @@ export function EnableForumGuidelinesConsent() {
 		<SetupPage
 			icon={<ChatBubbleLeftIcon className="hidden h-32 w-32 md:block" />}
 			title="Enable Forum Guidelines Consent"
-			description="Users have to provide consent for their messages to be shown publicly. This provides consent for all users posting in a channel."
+			description='Open the "Indexing Settings" menu via /channel-settings and click the "Enable Forum Guidelines Consent" button'
 			command="channel-settings"
 			bulletPoints={[
+				'Users have to provide consent for their messages to be shown publicly.',
+				'Fourm guidelines consent marks users who post in the channel as consenting',
 				'Users can manage their account with the /manage-account command.',
+				<Link
+					href="https://docs.answeroverflow.com/user-settings/displaying-messages"
+					target="_blank"
+					className="text-ao-blue"
+					key={'displaying-messages'}
+				>
+					Learn more about displaying messages on Answer Overflow
+				</Link>,
 			]}
 			nextPage="enable-mark-solution"
 		/>
@@ -325,14 +335,7 @@ export function EnableMarkSolution() {
 }
 
 export function WelcomePage() {
-	const { goToPage, setData } = useOnboardingContext();
 	const session = useSession();
-	const posthog = usePostHog();
-
-	useEffect(() => {
-		posthog?.startSessionRecording();
-	}, [posthog]);
-
 	const { data: servers } = trpc.auth.getServersForOnboarding.useQuery(
 		undefined,
 		{
@@ -344,8 +347,31 @@ export function WelcomePage() {
 			},
 		},
 	);
+	return <WelcomePageRenderer authState={session.status} servers={servers} />;
+}
 
-	switch (session.status) {
+export function WelcomePageRenderer(props: {
+	authState: 'authenticated' | 'unauthenticated' | 'loading';
+	servers?: {
+		highestRole: 'Administrator' | 'Manage Guild' | 'Owner';
+		hasBot: boolean;
+		id: string;
+		name: string;
+		icon: string | null;
+		owner: boolean;
+		permissions: number;
+		features: string[];
+	}[];
+}) {
+	const { goToPage, setData } = useOnboardingContext();
+
+	const posthog = usePostHog();
+
+	useEffect(() => {
+		posthog?.startSessionRecording();
+	}, [posthog]);
+
+	switch (props.authState) {
 		case 'authenticated':
 			return (
 				<div>
@@ -353,7 +379,7 @@ export function WelcomePage() {
 						Select a server to get started
 					</Heading.H1>
 					<div className="grid max-h-vh60 max-w-4xl grid-cols-1 gap-16 overflow-y-scroll p-8 md:grid-cols-3 ">
-						{servers?.map((server) => (
+						{props.servers?.map((server) => (
 							<div key={server.id}>
 								<ManageServerCard
 									server={{
@@ -385,10 +411,10 @@ export function WelcomePage() {
 					<Heading.H1 className="text-4xl">
 						Welcome to Answer Overflow!
 					</Heading.H1>
-					<Heading.H2 className="text-2xl">
+					<Heading.H2 className="py-8 text-2xl">
 						{"Let's"} get you signed in
 					</Heading.H2>
-					<SignInButton />
+					<SignInButton className="w-64 " variant="default" />
 				</div>
 			);
 	}
