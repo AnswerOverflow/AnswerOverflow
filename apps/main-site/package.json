@@ -12,7 +12,9 @@
 		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
 		"lint": "next lint && tsc --noEmit",
 		"lint:fix": "next lint --fix",
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"test": "yarn with-env vitest --coverage",
+		"test:watch": "yarn with-env vitest --watch"
 	},
 	"dependencies": {
 		"@answeroverflow/analytics": "*",
@@ -59,6 +61,9 @@
 		"eslint-config-next": "13.2.4",
 		"postcss": "^8.4.19",
 		"sass": "^1.59.3",
-		"tailwindcss": "^3.2.4"
+		"tailwindcss": "^3.2.4",
+		"@edge-runtime/vm": "^2.1.2",
+		"@vitest/coverage-c8": "^0.30.1",
+		"vitest": "^0.30.1"
 	}
 }

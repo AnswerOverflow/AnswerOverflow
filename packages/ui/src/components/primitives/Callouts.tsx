@@ -3,6 +3,8 @@ import { signIn } from 'next-auth/react';
 import {
 	trackEvent,
 	type GettingStartedClickProps,
+	useIsOnTenantSite,
+	useTenantContext,
 } from '@answeroverflow/hooks';
 export function GetStarted(
 	props: Omit<LinkButtonProps, 'href'> & {
@@ -27,6 +29,21 @@ export function GetStarted(
 }
 
 export function SignInButton(props: ButtonProps) {
+	const tenant = useTenantContext();
+
+	if (tenant) {
+		const link =
+			process.env.NODE_ENV === 'development'
+				? 'http://localhost:3000/api/auth/tenant'
+				: '/api/auth/tenant';
+		const redirect = typeof window !== 'undefined' ? window.location.href : '';
+		console.log(redirect);
+		return (
+			<LinkButton variant="outline" href={`${link}?redirect=${redirect}`}>
+				Login
+			</LinkButton>
+		);
+	}
 	return (
 		// TODO: Swap to href
 		// eslint-disable-next-line @typescript-eslint/no-misused-promises

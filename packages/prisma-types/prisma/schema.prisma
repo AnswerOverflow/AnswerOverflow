@@ -56,6 +56,15 @@ model Session {
   @@index([userId])
 }
 
+model TenantSession {
+  id       String @id @default(cuid())
+  serverId String
+  token    String
+  server   Server @relation(fields: [serverId], references: [id], onUpdate: NoAction)
+
+  @@index([serverId])
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -107,6 +116,7 @@ model Server {
   // Relations
   userServerSettings UserServerSettings[]
   channels           Channel[]
+  TenantSession      TenantSession[]
 }
 
 model Channel {
