@@ -3,7 +3,7 @@ import type {
 	NextApiRequest,
 	NextApiResponse,
 } from 'next';
-import { unstable_getServerSession } from 'next-auth';
+import { getServerSession as getNextAuthSession } from 'next-auth';
 
 import { authOptions } from './auth-options';
 
@@ -15,5 +15,5 @@ export const getServerSession = async (
 		  }
 		| { req: NextApiRequest; res: NextApiResponse },
 ) => {
-	return await unstable_getServerSession(ctx.req, ctx.res, authOptions);
+	return await getNextAuthSession(ctx.req, ctx.res, authOptions);
 };

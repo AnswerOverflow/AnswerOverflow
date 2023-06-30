@@ -3,7 +3,7 @@ import { createContext } from '@answeroverflow/api';
 import { appRouter } from '@answeroverflow/api';
 import { finishAnalyticsCollection } from '@answeroverflow/analytics';
 import type { NextApiRequest, NextApiResponse } from 'next/types';
-
+import { prisma } from '@answeroverflow/db';
 // create the API handler, but don't return it yet
 const nextApiHandler = createNextApiHandler({
 	router: appRouter,
@@ -30,11 +30,39 @@ export default async function handler(
 			return res.end();
 		}
 	}
-
+	const token = req.cookies['answeroverflow.tenant-token'];
+	if (token) {
+		const nextAuthSession = await prisma.tenantSession.findUnique({
+			where: {
+				id: token,
+			},
+		});
+		// add a cookie to the request using the next auth header
+		req.cookies['next-auth.session-token'] = nextAuthSession?.sessionToken;
+		req.cookies['next-auth.hello'] = 'world';
+	}
+	const oldSetHeader = res.setHeader;
+	res.setHeader = (key, value) => {
+		if (req.headers.host === 'localhost:3000') {
+			return oldSetHeader(key, value);
+		}
+		if (key === 'Set-Cookie') {
+			if (value instanceof Array) {
+				value = value.filter((v) => !v.startsWith('next-auth.session-token='));
+			} else {
+				value = value
+					.split(';')
+					.filter((v) => !v.startsWith('next-auth.session-token='))
+					.join(';');
+			}
+		}
+		return oldSetHeader(key, value);
+	};
 	// pass the (modified) req/res to the handler
 	// weird type errors even though they're the same
 	// @ts-expect-error
 	const trpcOutput = await nextApiHandler(req, res);
+
 	await finishAnalyticsCollection();
 	return trpcOutput;
 }
