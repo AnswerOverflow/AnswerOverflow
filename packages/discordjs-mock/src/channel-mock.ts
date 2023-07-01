@@ -36,10 +36,7 @@ import {
 	ThreadMemberFlags,
 	type FetchedThreadsMore,
 } from 'discord.js';
-import type {
-	RawMessageData,
-	RawMessageReactionData,
-} from 'discord.js/typings/rawDataTypes';
+import type { RawMessageReactionData } from 'discord.js/typings/rawDataTypes';
 import {
 	isSnowflakeLarger,
 	isSnowflakeLargerAsInt,
@@ -502,46 +499,6 @@ export function mockReaction({
 	}
 	message.reactions.cache.set(emojiId, reaction);
 	return reaction;
-}
-
-export function mockMarkedAsSolvedReply({
-	client,
-	questionId,
-	solutionId,
-	channel,
-	override = {},
-}: {
-	client: Client;
-	questionId: string;
-	solutionId: string;
-	channel?: TextBasedChannel;
-	override?: Partial<RawMessageData>;
-}) {
-	const markedAsSolvedReply = mockMessage({
-		client,
-		author: client.user!,
-		override: {
-			embeds: [
-				{
-					fields: [
-						{
-							name: 'Solution Message ID',
-							value: solutionId,
-							inline: true,
-						},
-						{
-							name: 'Question Message ID',
-							value: questionId,
-							inline: true,
-						},
-					],
-				},
-			],
-			...override,
-		},
-		channel,
-	});
-	return markedAsSolvedReply;
 }
 
 export function mockInvite(

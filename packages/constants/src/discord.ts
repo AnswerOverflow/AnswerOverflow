@@ -37,8 +37,6 @@ export const PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED: DiscordPermissions[] = [
 	'ManageThreads',
 	'ManageGuild',
 ];
-export const QUESTION_ID_FIELD_NAME = 'Question Message ID';
-export const SOLUTION_EMBED_ID_FIELD_NAME = 'Solution Message ID';
 export const ANSWER_OVERFLOW_BLUE_HEX = '#8CD1FF';
 export const ANSWER_OVERFLOW_BLUE_AS_INT = parseInt(
 	ANSWER_OVERFLOW_BLUE_HEX.replace('#', '0x'),

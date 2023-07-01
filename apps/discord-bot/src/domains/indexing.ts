@@ -1,6 +1,5 @@
 import {
 	upsertManyDiscordAccounts,
-	type Message as AOMessage,
 	upsertManyMessages,
 	upsertChannel,
 	findManyUserServerSettings,
@@ -258,7 +257,6 @@ async function storeIndexData(
 		throw new Error('Received a null client id when indexing');
 	}
 
-	addSolutionsToMessages(filteredMessages, convertedMessages);
 	container.logger.debug(
 		`Upserting ${convertedUsers.length} discord accounts `,
 	);
@@ -280,40 +278,6 @@ type MessageFetchOptions = {
 	start?: Snowflake | undefined;
 	limit?: number | undefined;
 };
-
-export function addSolutionsToMessages(
-	messages: Message[],
-	convertedMessages: AOMessage[],
-) {
-	// Loop through filtered messages for everything from the Answer Overflow bot
-	// Put the solution messages on the relevant messages
-	const messageLookup = new Map(convertedMessages.map((x) => [x.id, x]));
-	for (const msg of messages) {
-		const { questionId, solutionId } = findSolutionsToMessage(msg);
-		if (questionId && solutionId && messageLookup.has(questionId)) {
-			messageLookup.get(questionId)!.solutionIds.push(solutionId);
-		}
-	}
-}
-
-export function findSolutionsToMessage(msg: Message) {
-	let questionId: string | null = null;
-	let solutionId: string | null = null;
-	if (msg.author.id != msg.client.user.id) {
-		return { questionId, solutionId };
-	}
-	for (const embed of msg.embeds) {
-		for (const field of embed.fields) {
-			if (field.name === 'Question Message ID') {
-				questionId = field.value;
-			}
-			if (field.name === 'Solution Message ID') {
-				solutionId = field.value;
-			}
-		}
-	}
-	return { questionId, solutionId };
-}
 
 export async function filterMessages(
 	messages: Message[],
