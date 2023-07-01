@@ -15,7 +15,6 @@
 		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
 		"importHelpers": true,
-		"verbatimModuleSyntax": true,
 		"incremental": true,
 		"tsBuildInfoFile": ".tsbuildinfo",
 		"lib": ["esnext"],

@@ -42,6 +42,7 @@ const internalServerProperties = {
 	description: z.string().nullable(),
 	bitfield: z.number(),
 	vanityUrl: z.string().nullable(),
+	customDomain: z.string().nullable(),
 } as const satisfies ServerZodFormat;
 
 const internalServerPropertiesMutable = z
@@ -90,6 +91,7 @@ export const zServerPublic = z.object(
 		'vanityUrl',
 		'description',
 		'kickedTime',
+		'customDomain',
 	),
 );
 

@@ -38,6 +38,7 @@ export const AOHead = ({
 	}
 	if (addPrefix) title += ' - Answer Overflow';
 	const tenant = useTenantContext();
+	const baseDomain = tenant?.customDomain ?? 'https://www.answeroverflow.com/';
 	return (
 		<Head>
 			<title>{title}</title>
@@ -47,9 +48,7 @@ export const AOHead = ({
 			<link
 				rel="canonical"
 				// Prevent incorrectly doing a double slash
-				href={`https://www.answeroverflow.com/${
-					path.startsWith('/') ? path.slice(1) : path
-				}`}
+				href={`${baseDomain}${path.startsWith('/') ? path.slice(1) : path}`}
 			/>
 			{tenant && (
 				<link

@@ -3,7 +3,6 @@ import { signIn } from 'next-auth/react';
 import {
 	trackEvent,
 	type GettingStartedClickProps,
-	useIsOnTenantSite,
 	useTenantContext,
 } from '@answeroverflow/hooks';
 export function GetStarted(

@@ -31,6 +31,7 @@ export function getDefaultServer(
 		bitfield: 0,
 		description: null,
 		vanityUrl: null,
+		customDomain: null,
 		...override,
 	};
 	return data;

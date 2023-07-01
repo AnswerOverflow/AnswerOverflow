@@ -111,11 +111,19 @@ model Server {
   icon        String? @db.VarChar(45)
   description String?
 
-  // Answer Overflow Settings
+  //
+  // Answer Overflow Settings Start
+  //
   bitfield   Int       @default(0) @db.UnsignedInt
   kickedTime DateTime?
   vanityUrl  String?   @unique
 
+  // Tenant Settings
+  customDomain String?
+
+  //
+  // Answer Overflow Settings End
+  //
   // Relations
   userServerSettings UserServerSettings[]
   channels           Channel[]
