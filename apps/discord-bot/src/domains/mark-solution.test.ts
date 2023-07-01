@@ -19,6 +19,7 @@ import {
 import {
 	toAOChannel,
 	toAOChannelWithServer,
+	toAOMessage,
 	toAOServer,
 } from '~discord-bot/utils/conversions';
 
@@ -33,17 +34,12 @@ import {
 	mockMessage,
 	overrideVariables,
 	mockReaction,
-	mockMarkedAsSolvedReply,
 	testAllPermissions,
 } from '@answeroverflow/discordjs-mock';
 import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
 import { randomSnowflake } from '@answeroverflow/discordjs-utils';
-import { createChannel, createServer } from '@answeroverflow/db';
-import {
-	PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED,
-	QUESTION_ID_FIELD_NAME,
-	SOLUTION_EMBED_ID_FIELD_NAME,
-} from '@answeroverflow/constants';
+import { createChannel, createServer, upsertMessage } from '@answeroverflow/db';
+import { PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED } from '@answeroverflow/constants';
 
 let client: Client;
 let guild: Guild;
@@ -261,7 +257,7 @@ describe('Can Mark Solution', () => {
 				checkIfCanMarkSolution(solutionMessage, defaultAuthor.user),
 			).rejects.toThrowError('This question is already marked as solved');
 		});
-		it('should fail if the solution message is already sent', async () => {
+		it('should fail if the question is already solved', async () => {
 			const rootMessage = mockMessage({
 				client,
 				channel: textChannel,
@@ -274,12 +270,10 @@ describe('Can Mark Solution', () => {
 				client,
 				channel: textChannelThread,
 			});
-
-			mockMarkedAsSolvedReply({
-				client,
-				channel: textChannelThread,
-				questionId: rootMessage.id,
-				solutionId: solutionMessage.id,
+			const asAoMessage = await toAOMessage(rootMessage);
+			await upsertMessage({
+				...asAoMessage,
+				solutionIds: [solutionMessage.id],
 			});
 
 			await createChannel({
@@ -414,16 +408,6 @@ describe('Make Mark Solution Response', () => {
 			description: solutionMessageWithConsentRequest,
 			color: 9228799,
 			fields: [
-				{
-					name: QUESTION_ID_FIELD_NAME,
-					value: question.id,
-					inline: true,
-				},
-				{
-					name: SOLUTION_EMBED_ID_FIELD_NAME,
-					value: solution.id,
-					inline: true,
-				},
 				{
 					name: 'Learn more',
 					value: 'https://answeroverflow.com',
