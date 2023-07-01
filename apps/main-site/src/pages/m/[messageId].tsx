@@ -70,6 +70,7 @@ export async function getStaticProps(
 				serverId: server.id,
 				areAllMessagesPublic,
 				messageId: context.params.messageId,
+				tenant: server,
 			},
 			revalidate: 60 * 10, // every 10 minutes
 		};

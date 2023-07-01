@@ -1,6 +1,7 @@
 import type { ServerPublic } from '@answeroverflow/api';
 import Head from 'next/head';
 import { makeServerIconLink } from './ServerIcon';
+import { useTenantContext } from '@answeroverflow/hooks';
 
 interface HeadProps {
 	title: string;
@@ -36,6 +37,7 @@ export const AOHead = ({
 		}
 	}
 	if (addPrefix) title += ' - Answer Overflow';
+	const tenant = useTenantContext();
 	return (
 		<Head>
 			<title>{title}</title>
@@ -49,6 +51,13 @@ export const AOHead = ({
 					path.startsWith('/') ? path.slice(1) : path
 				}`}
 			/>
+			{tenant && (
+				<link
+					rel="icon"
+					type="image/x-icon"
+					href={makeServerIconLink(tenant, 16)}
+				/>
+			)}
 			<meta name="description" content={description} key="desc" />
 			<meta property="og:site_name" content="Answer Overflow" />
 			<meta property="og:title" content={title} />

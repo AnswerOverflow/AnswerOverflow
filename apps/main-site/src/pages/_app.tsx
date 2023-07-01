@@ -64,7 +64,7 @@ const components: Components = {
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MyApp: AppType<{
 	session: Session | null;
-	tenantData: ServerPublic | null;
+	tenant: ServerPublic | undefined;
 }> = ({ Component, pageProps: { session, ...pageProps } }) => {
 	useEffect(() => {
 		hljs.configure({
@@ -74,7 +74,7 @@ const MyApp: AppType<{
 	}, []);
 
 	return (
-		<TenantContextProvider value={pageProps.tenantData}>
+		<TenantContextProvider value={pageProps.tenant}>
 			<ThemeProvider attribute="class">
 				<SessionProvider session={session}>
 					<AnalyticsProvider>

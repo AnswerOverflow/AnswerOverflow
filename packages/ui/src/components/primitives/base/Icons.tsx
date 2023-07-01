@@ -48,7 +48,7 @@ export function DiscordIcon(
 }
 
 import * as React from 'react';
-import { classNames } from '~ui/utils/styling';
+import { classNames, cn } from '~ui/utils/styling';
 
 const poppins = Poppins({
 	weight: ['400', '600'],
@@ -63,7 +63,10 @@ export function AnswerOverflowLogo({
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			viewBox="0 0 889.87 240.34"
-			className={`w-full fill-black stroke-black dark:fill-white dark:stroke-white`}
+			className={cn(
+				`w-full fill-black stroke-black dark:fill-white dark:stroke-white`,
+				className,
+			)}
 		>
 			<defs>
 				<style>{'.cls-3{letter-spacing:-.02em}'}</style>

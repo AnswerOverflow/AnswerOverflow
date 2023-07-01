@@ -49,7 +49,7 @@ export async function getStaticProps(
 		return {
 			props: {
 				data: superjson.stringify(communityPageData),
-				tenantData: communityPageData.server,
+				tenant: communityPageData.server,
 			},
 			revalidate: 60 * 10, // every 10 minutes
 		};
