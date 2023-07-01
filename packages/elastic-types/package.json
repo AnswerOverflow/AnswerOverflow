@@ -19,7 +19,7 @@
 	},
 	"dependencies": {
 		"@answeroverflow/utils": "*",
-		"@elastic/elasticsearch": "^8.6.0",
+		"@elastic/elasticsearch": "^8.8.1",
 		"discord-api-types": "^0.37.35",
 		"dotenv-cra": "^3.0.3",
 		"elastic-builder": "^2.18.1",

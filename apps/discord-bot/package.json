@@ -25,7 +25,7 @@
 		"@sapphire/type": "^2.2.4",
 		"@sapphire/utilities": "^3.10.1",
 		"@sentry/node": "^7.53.1",
-		"@sentry/tracing": "^7.47.0",
+		"@sentry/tracing": "^7.56.0",
 		"@trpc/server": "^10.25.0",
 		"colorette": "^2.0.19",
 		"discord-api-types": "^0.37.20",
