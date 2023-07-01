@@ -26,6 +26,8 @@ import {
 import { ThemeIcon } from './ThemeSwitcher';
 import { GITHUB_LINK } from '@answeroverflow/constants/src/links';
 import { signIn, signOut } from 'next-auth/react';
+import { useTenantContext } from '@answeroverflow/hooks';
+import { ServerIcon } from './ServerIcon';
 // TODO: Clean up this navbar area, bit of a mess
 
 const UserAvatar = ({ user }: { user: User }) => (
@@ -70,21 +72,7 @@ const UserAvatar = ({ user }: { user: User }) => (
 );
 
 export function NavbarRenderer(props: { user: User | null; path: string }) {
-	const sticky = false;
-	// const [sticky, setSticky] = useState(false);
-	// useEffect(() => {
-	// 	const handleScroll = () => {
-	// 		if (window.pageYOffset > 80) {
-	// 			setSticky(true);
-	// 		} else {
-	// 			setSticky(false);
-	// 		}
-	// 	};
-	// 	window.addEventListener('scroll', handleScroll);
-	// 	return () => {
-	// 		window.removeEventListener('scroll', handleScroll);
-	// 	};
-	// }, []);
+	const tenant = useTenantContext();
 
 	const UserSection = () =>
 		props.user ? <UserAvatar user={props.user} /> : <SignInButton />;
@@ -100,15 +88,19 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 			<NavigationMenuItem>
 				<ThemeSwitcher />
 			</NavigationMenuItem>
-			<NavigationMenuItem>
-				<Link href={GITHUB_LINK} target="_blank">
-					<GitHubIcon className="h-8 w-8 text-ao-black hover:fill-neutral-300 dark:text-ao-white" />
-					<span className="sr-only">GitHub</span>
-				</Link>
-			</NavigationMenuItem>
-			<NavigationMenuItem>
-				<GetStarted location="Navbar" />
-			</NavigationMenuItem>
+			{tenant === undefined && (
+				<>
+					<NavigationMenuItem>
+						<Link href={GITHUB_LINK} target="_blank">
+							<GitHubIcon className="h-8 w-8 text-ao-black hover:fill-neutral-300 dark:text-ao-white" />
+							<span className="sr-only">GitHub</span>
+						</Link>
+					</NavigationMenuItem>
+					<NavigationMenuItem>
+						<GetStarted location="Navbar" />
+					</NavigationMenuItem>
+				</>
+			)}
 			<NavigationMenuItem>
 				<UserSection />
 			</NavigationMenuItem>
@@ -141,25 +133,29 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 							{props.user ? 'Sign Out' : 'Sign In'}
 						</Button>
 					</div>
-					<div className="flex flex-row space-y-2">
-						<LinkButton
-							variant="ghost"
-							className="w-full items-start justify-start"
-							href={'/onboarding'}
-						>
-							Get Started
-						</LinkButton>
-					</div>
-					<div className="flex flex-row space-y-2">
-						<LinkButton
-							variant="ghost"
-							className="w-full items-start justify-between"
-							href={GITHUB_LINK}
-						>
-							GitHub
-							<GitHubIcon className="h-6 w-6" />
-						</LinkButton>
-					</div>
+					{tenant === undefined && (
+						<>
+							<div className="flex flex-row space-y-2">
+								<LinkButton
+									variant="ghost"
+									className="w-full items-start justify-start"
+									href={'/onboarding'}
+								>
+									Get Started
+								</LinkButton>
+							</div>
+							<div className="flex flex-row space-y-2">
+								<LinkButton
+									variant="ghost"
+									className="w-full items-start justify-between"
+									href={GITHUB_LINK}
+								>
+									GitHub
+									<GitHubIcon className="h-6 w-6" />
+								</LinkButton>
+							</div>
+						</>
+					)}
 					<div className="flex w-full flex-row space-y-2">
 						<ThemeSwitcher
 							Switcher={({ toggleTheme }) => (
@@ -180,18 +176,23 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 	);
 
 	return (
-		<NavigationMenu
-			className={
-				sticky
-					? 'fixed left-0 top-0 w-full backdrop-blur-md dark:bg-ao-black/75'
-					: 'relative min-h-[4rem] py-2 sm:px-[4rem] 2xl:px-[6rem]'
-			}
-		>
+		<NavigationMenu className="relative min-h-[4rem] py-2 sm:px-[4rem] 2xl:px-[6rem]">
 			<NavigationMenuList>
 				<NavigationMenuItem>
 					<Link href="/">
-						<AnswerOverflowLogo />
-						<span className="sr-only">Answer Overflow Logo</span>
+						{tenant ? (
+							<div className="flex items-center space-x-2">
+								<ServerIcon server={tenant} />
+								<span className="font-bold text-ao-black dark:text-ao-white">
+									{tenant.name}
+								</span>
+							</div>
+						) : (
+							<>
+								<AnswerOverflowLogo />
+								<span className="sr-only">Answer Overflow Logo</span>
+							</>
+						)}
 					</Link>
 				</NavigationMenuItem>
 			</NavigationMenuList>

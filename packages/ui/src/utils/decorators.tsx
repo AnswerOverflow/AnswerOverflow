@@ -8,11 +8,16 @@ import { trpc, type StorybookTRPC } from './trpc';
 import hljs from 'highlight.js';
 import { ThemeProvider } from 'next-themes';
 import { SessionProvider } from 'next-auth/react';
-import { AnalyticsContextProvider } from '@answeroverflow/hooks';
+import {
+	AnalyticsContextProvider,
+	TenantContextProvider,
+} from '@answeroverflow/hooks';
+import { mockServer } from '~ui/test/props';
 const storybookTrpc = trpc as StorybookTRPC;
 type Globals = {
 	tailwindTheme: 'dark' | 'light' | 'both';
 	authState: 'signedIn' | 'signedOut';
+	isTenantSite: 'true' | 'false';
 };
 
 export function WithTailwindTheme(
@@ -136,5 +141,18 @@ export function WithAnalytics(Story: PartialStoryFn<ReactRenderer, Args>) {
 		>
 			<Story />
 		</AnalyticsContextProvider>
+	);
+}
+
+export function WithTenantSite(
+	Story: PartialStoryFn<ReactRenderer, Args>,
+	context: StoryContext<ReactRenderer, Args>,
+) {
+	const { isTenantSite } = context.globals as Globals;
+	const server = isTenantSite === 'true' ? mockServer() : undefined;
+	return (
+		<TenantContextProvider value={server}>
+			<Story />
+		</TenantContextProvider>
 	);
 }

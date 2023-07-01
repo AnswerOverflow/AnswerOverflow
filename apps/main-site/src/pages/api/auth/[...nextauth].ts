@@ -18,17 +18,9 @@ export default async function handler(
 		// add a cookie to the request using the next auth header
 		req.cookies['next-auth.session-token'] = nextAuthSession?.sessionToken;
 	}
-	const oldSend = res.send;
-	res.send = (data) => {
-		// remove the next-auth.session-token cookie from the response if it's a tenant session
-		if (req.headers.host !== 'localhost:3000') {
-			res.setHeader(
-				'Set-Cookie',
-				'next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT',
-			);
-		}
-		return oldSend(data);
-	};
+	if (req.headers.host !== 'localhost:3000') {
+		res.setHeader = () => res; // eslint-disable-line @typescript-eslint/no-empty-function
+	}
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 	await NextAuth(req, res, authOptions);
 }

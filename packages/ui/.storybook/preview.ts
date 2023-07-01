@@ -9,6 +9,7 @@ import {
 	WithTailwindTheme,
 	WithHighlightJS,
 	WithAnalytics,
+	WithTenantSite,
 } from '../src/utils/decorators';
 
 export const parameters: Preview = {
@@ -43,9 +44,20 @@ export const globalTypes = {
 			items: ['signedIn', 'signedOut'],
 		},
 	},
+	isTenantSite: {
+		name: 'Is Tenant Site',
+		description: 'Toggle between tenant site and main site',
+		defaultValue: 'false',
+		toolbar: {
+			icon: 'globe',
+			dynamicTitle: true,
+			items: ['true', 'false'],
+		},
+	},
 };
 
 export const decorators: Decorator[] = [
+	WithTenantSite,
 	WithTailwindTheme,
 	WithAnalytics,
 	WithAuth,

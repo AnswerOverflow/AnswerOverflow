@@ -7,10 +7,8 @@
 */
 import { createContext, useContext } from 'react';
 import type { ServerPublic } from '@answeroverflow/api';
-import { useRouter } from 'next/router';
 
 export function useIsOnTenantSite() {
-	const router = useRouter();
 	if (typeof window === 'undefined') return false;
 
 	const { host } = window.location;
@@ -20,7 +18,7 @@ export function useIsOnTenantSite() {
 	return host !== 'localhost:3000';
 }
 
-const TenantContext = createContext<ServerPublic | null>(null);
+const TenantContext = createContext<ServerPublic | undefined>(undefined);
 
 export const TenantContextProvider = TenantContext.Provider;
 

@@ -39,25 +39,15 @@ export default async function handler(
 		});
 		// add a cookie to the request using the next auth header
 		req.cookies['next-auth.session-token'] = nextAuthSession?.sessionToken;
-		req.cookies['next-auth.hello'] = 'world';
 	}
-	const oldSetHeader = res.setHeader;
-	res.setHeader = (key, value) => {
-		if (req.headers.host === 'localhost:3000') {
+	if (req.headers.host !== 'localhost:3000') {
+		// eslint-disable-next-line @typescript-eslint/unbound-method
+		const oldSetHeader = res.setHeader;
+		res.setHeader = (key, value) => {
+			if (key.toLowerCase() === 'set-cookie') return res;
 			return oldSetHeader(key, value);
-		}
-		if (key === 'Set-Cookie') {
-			if (value instanceof Array) {
-				value = value.filter((v) => !v.startsWith('next-auth.session-token='));
-			} else {
-				value = value
-					.split(';')
-					.filter((v) => !v.startsWith('next-auth.session-token='))
-					.join(';');
-			}
-		}
-		return oldSetHeader(key, value);
-	};
+		}; // eslint-disable-line @typescript-eslint/no-empty-function
+	}
 	// pass the (modified) req/res to the handler
 	// weird type errors even though they're the same
 	// @ts-expect-error

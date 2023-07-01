@@ -15,5 +15,12 @@ export const getServerSession = async (
 		  }
 		| { req: NextApiRequest; res: NextApiResponse },
 ) => {
-	return await getNextAuthSession(ctx.req, ctx.res, authOptions);
+	const isTenantSession =
+		ctx.req.cookies['answeroverflow.tenant-token'] !== undefined;
+	const session = await getNextAuthSession(ctx.req, ctx.res, authOptions);
+	if (!session) return null;
+	return {
+		...session,
+		isTenantSession,
+	};
 };

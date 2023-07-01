@@ -7,16 +7,24 @@ import {
 } from './trpc';
 import { PermissionsBitField } from 'discord.js';
 export const authRouter = router({
-	getSession: publicProcedure.query(({ ctx }) => {
-		return ctx.session;
-	}),
+	getSession: publicProcedure
+		.meta({
+			tenantAuthAccessible: true,
+		})
+		.query(({ ctx }) => {
+			return ctx.session;
+		}),
 	getSecretMessage: withDiscordAccountProcedure.query(() => {
 		// testing type validation of overridden next-auth Session in @answeroverflow/auth package
 		return 'you can see this secret message!';
 	}),
-	getServers: withUserServersProcedure.query(({ ctx }) => {
-		return ctx.userServers;
-	}),
+	getServers: withUserServersProcedure
+		.meta({
+			tenantAuthAccessible: true,
+		})
+		.query(({ ctx }) => {
+			return ctx.userServers;
+		}),
 	getServersForOnboarding: withUserServersProcedure.query(async ({ ctx }) => {
 		const serversToFetch = ctx.userServers.filter((server) => {
 			const permissionBitfield = new PermissionsBitField(
