@@ -37,6 +37,7 @@ import {
 	Text,
 } from '@tremor/react';
 import { useState } from 'react';
+import Form from '../../components/Form';
 
 export function DashboardServerSelect() {
 	const { data } = trpc.auth.getServersForOnboarding.useQuery();
@@ -99,7 +100,7 @@ function KpiCard() {
 			</Flex>
 			<Flex className="mt-4">
 				<Text className="truncate">20%</Text>
-				<Text>100,000</Text>
+				<Text>100,000 Limit</Text>
 			</Flex>
 			<ProgressBar value={20} className="mt-2" />
 		</Card>
@@ -154,7 +155,22 @@ export default function Dashboard() {
 							<KpiCard />
 							<CurrentPlanCard />
 						</Grid>
-						<div className="mt-6"></div>
+						<div className="mt-6">
+							<Form
+								title="Custom Domain"
+								description="The custom domain for your site."
+								helpText="Please enter a valid domain."
+								inputAttrs={{
+									name: 'customDomain',
+									type: 'text',
+									defaultValue: '',
+									placeholder: 'yourdomain.com',
+									maxLength: 64,
+									pattern: '^[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}$',
+								}}
+								handleSubmit={() => {}}
+							/>
+						</div>
 					</TabPanel>
 					<TabPanel>
 						<div className="mt-6">

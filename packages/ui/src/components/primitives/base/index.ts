@@ -10,4 +10,5 @@ export * from './Menubar';
 export * from './NavigationMenu';
 export * from './Paragraph';
 export * from './Popover';
-export * from './Link'
+export * from './Link';
+export * from './LoadingSpinner';
