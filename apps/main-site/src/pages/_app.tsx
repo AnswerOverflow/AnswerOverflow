@@ -79,7 +79,12 @@ const MyApp: AppType<{
 				<SessionProvider session={session}>
 					<AnalyticsProvider>
 						<PageWrapper
-							disabledRoutes={['/', '/c/[communityId]', '/onboarding']}
+							disabledRoutes={[
+								'/',
+								'/c/[communityId]',
+								'/onboarding',
+								'/[domain]',
+							]}
 						>
 							<CommitBanner />
 							<MDXProvider components={components}>

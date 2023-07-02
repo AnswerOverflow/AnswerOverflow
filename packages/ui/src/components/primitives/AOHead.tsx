@@ -38,7 +38,9 @@ export const AOHead = ({
 	}
 	if (addPrefix) title += ' - Answer Overflow';
 	const tenant = useTenantContext();
-	const baseDomain = tenant?.customDomain ?? 'https://www.answeroverflow.com/';
+	const baseDomain = `https://${
+		tenant?.customDomain ?? 'www.answeroverflow.com'
+	}/`;
 	return (
 		<Head>
 			<title>{title}</title>

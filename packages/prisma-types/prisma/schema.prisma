@@ -119,7 +119,7 @@ model Server {
   vanityUrl  String?   @unique
 
   // Tenant Settings
-  customDomain String?
+  customDomain String? @unique
 
   //
   // Answer Overflow Settings End

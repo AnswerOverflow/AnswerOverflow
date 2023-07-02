@@ -13,7 +13,6 @@
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix",
 		"db:wipe": "cross-env NODE_ENV=test yarn with-env npx ts-node ./scripts/wipe.ts",
-		"dev": "yarn with-env prisma studio --port 5556 --browser none",
 		"test": "yarn run with-env vitest run --coverage",
 		"test:watch": "yarn run with-env vitest"
 	},

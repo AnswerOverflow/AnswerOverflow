@@ -3,6 +3,7 @@ import { TRPCError } from '@trpc/server';
 import {
 	type CommunityPageData,
 	findServerWithCommunityPageData,
+	findServerByCustomDomain,
 } from '@answeroverflow/db';
 import superjson from 'superjson';
 import { CommunityPage } from '@answeroverflow/ui';
@@ -24,7 +25,7 @@ export function getStaticPaths() {
 }
 
 export async function getStaticProps(
-	context: GetStaticPropsContext<{ communityId: string }>,
+	context: GetStaticPropsContext<{ domain: string }>,
 ) {
 	if (!context.params) {
 		return {
@@ -32,9 +33,15 @@ export async function getStaticProps(
 		};
 	}
 
-	const serverId = context.params.communityId;
+	const domain = context.params.domain;
+	const server = await findServerByCustomDomain(domain);
+	if (!server) {
+		return {
+			notFound: true,
+		};
+	}
 	const communityPageData = await findServerWithCommunityPageData({
-		idOrVanityUrl: serverId,
+		idOrVanityUrl: server.id,
 		limit: 20,
 	});
 
@@ -44,23 +51,12 @@ export async function getStaticProps(
 		};
 	}
 
-	if (communityPageData.server.customDomain) {
-		// TODO: VALIDATE THE SUBSCRIPTION IS STILL ACTIVE
-		return {
-			redirect: {
-				destination: `http${
-					process.env.NODE_ENV === 'production' ? 's' : ''
-				}://${communityPageData.server.customDomain}`,
-				permanent: process.env.NODE_ENV === 'production',
-			},
-		};
-	}
-
 	// prefetch `post.byId`
 	try {
 		return {
 			props: {
 				data: superjson.stringify(communityPageData),
+				tenant: communityPageData.server,
 			},
 			revalidate: 60 * 10, // every 10 minutes
 		};

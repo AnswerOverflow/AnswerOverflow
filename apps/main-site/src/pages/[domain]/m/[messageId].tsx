@@ -6,6 +6,7 @@ import superjson from 'superjson';
 import { trpc } from '@answeroverflow/ui';
 import type { GetStaticPropsContext, InferGetStaticPropsType } from 'next';
 import { TRPCError } from '@trpc/server';
+
 export default function MessageResult(
 	props: InferGetStaticPropsType<typeof getStaticProps>,
 ) {
@@ -62,10 +63,10 @@ export async function getStaticProps(
 		const { server, messages } = await ssg.messages.threadFromMessageId.fetch(
 			context.params.messageId,
 		);
-		if (server.customDomain) {
+		if (!server.customDomain) {
 			return {
 				redirect: {
-					destination: `https://${server.customDomain}/m/${context.params.messageId}`,
+					destination: `https://www.answeroverflow.com/m/${context.params.messageId}`,
 					permanent: process.env.NODE_ENV === 'production',
 				},
 			};
@@ -78,6 +79,7 @@ export async function getStaticProps(
 				serverId: server.id,
 				areAllMessagesPublic,
 				messageId: context.params.messageId,
+				tenant: server,
 			},
 			revalidate: 60 * 10, // every 10 minutes
 		};

@@ -47,8 +47,7 @@ export function rewriteToMainSite(input: PathHandler) {
 	);
 }
 
-function dataUnlockerRouteHandler(input: PathHandler) {
-	const { req } = input;
+function dataUnlockerRouteHandler(req: NextRequest) {
 	const rewrite = NextResponse.rewrite(
 		new URL(
 			`${req.nextUrl.pathname}${req.nextUrl.search}`,
@@ -60,81 +59,15 @@ function dataUnlockerRouteHandler(input: PathHandler) {
 	return rewrite;
 }
 
-function messageRouteHandler(input: PathHandler) {
-	const { req, params, isRequestFromMainSite } = input;
-	if (isRequestFromMainSite) {
-		// TODO: Get the server id from the database
-		return NextResponse.redirect(
-			new URL(`${req.nextUrl.pathname}${params}`, `http://tenant:3001/`),
-			{
-				status: redirectCode,
-			},
-		);
-	} else {
-		return rewriteToMainSite(input);
-	}
-}
-
-function communityPageRouteHandler(input: PathHandler) {
-	const { params, isRequestFromMainSite } = input;
-	if (isRequestFromMainSite) {
-		// TODO: Get the server id from the database
-		return NextResponse.redirect(new URL(`${params}`, `http://tenant:3001/`), {
-			status: redirectCode,
-		});
-	} else {
-		// Redirect back to homepage, tenant sites only have one community
-		return NextResponse.redirect(new URL(`/`, mainSiteBase), {
-			status: redirectCode,
-		});
-	}
-}
-
-function homePageRouteHandler(input: PathHandler) {
-	const { isRequestFromMainSite } = input;
-	console.log(isRequestFromMainSite);
-	if (!isRequestFromMainSite) {
-		return NextResponse.rewrite(
-			new URL(`/c/1037547185492996207`, mainSiteBase),
-		);
-	} else {
-		return NextResponse.next();
-	}
-}
-
-export function toPathHandlerData(req: NextRequest) {
-	const url = req.nextUrl;
-	// gross, ugly, disgusting
-	const origin = req.headers.get('Referer') || req.headers.get('Host'); // TODO: Is this the right header?
-	const path = url.pathname;
-	const params = req.nextUrl.search;
-
-	if (!origin) {
-		throw new Error('No hostname'); // TODO: Handle this better
-	}
-	const isRequestFromMainSite = origin.includes(mainSiteHostName); // TODO: Prevent this from being abused
-	console.log(origin, isRequestFromMainSite, path);
-	const input: PathHandler = {
-		url,
-		req,
-		origin,
-		path,
-		params,
-		isRequestFromMainSite,
-	};
-	return input;
-}
-
 export function middleware(req: NextRequest) {
-	const input = toPathHandlerData(req);
-	const { path } = input;
+	const url = req.nextUrl;
+	const path = url.pathname;
 	if (path.startsWith('/oemf7z50uh7w/')) {
-		return dataUnlockerRouteHandler(input);
-	} else if (path === '/' || path === '') {
-		console.log(path);
-		return homePageRouteHandler(input);
+		return dataUnlockerRouteHandler(req);
 	}
-	return NextResponse.next();
+	const host = req.headers.get('host')!;
+	const newUrl = new URL(`/${host}${path}`, req.url);
+	return NextResponse.rewrite(newUrl);
 }
 // See "Matching Paths" below to learn more
 export const config = {
@@ -148,6 +81,7 @@ export const config = {
 		 * 3. /examples (inside /public)
 		 * 4. all root files inside /public (e.g. /favicon.ico)
 		 */
-		'/((?!_next/|_static/|[\\w-]+\\.\\w+).*)',
+		'/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)',
+		'/sitemap.xml',
 	],
 };
