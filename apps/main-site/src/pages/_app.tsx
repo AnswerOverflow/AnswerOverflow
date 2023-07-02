@@ -84,6 +84,7 @@ const MyApp: AppType<{
 								'/c/[communityId]',
 								'/onboarding',
 								'/[domain]',
+								'/dashboard',
 							]}
 						>
 							<CommitBanner />

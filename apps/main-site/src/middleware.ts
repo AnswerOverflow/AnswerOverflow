@@ -66,6 +66,10 @@ export function middleware(req: NextRequest) {
 		return dataUnlockerRouteHandler(req);
 	}
 	const host = req.headers.get('host')!;
+	if (host === mainSiteHostName) {
+		return NextResponse.next();
+	}
+	// rewrite everything else to `/[domain]/[path] dynamic route
 	const newUrl = new URL(`/${host}${path}`, req.url);
 	return NextResponse.rewrite(newUrl);
 }

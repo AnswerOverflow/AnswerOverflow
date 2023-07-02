@@ -30,7 +30,7 @@ import { useTenantContext } from '@answeroverflow/hooks';
 import { ServerIcon } from './ServerIcon';
 // TODO: Clean up this navbar area, bit of a mess
 
-const UserAvatar = ({ user }: { user: User }) => (
+export const UserAvatar = ({ user }: { user: User }) => (
 	<Popover>
 		<PopoverTrigger asChild>
 			<Button

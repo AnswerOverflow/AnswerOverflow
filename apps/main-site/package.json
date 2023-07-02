@@ -32,6 +32,7 @@
 		"@sentry/nextjs": "^7.55.2",
 		"@tanstack/react-query": "^4.19.0",
 		"@tanstack/react-query-devtools": "^4.26.1",
+		"@tremor/react": "^3.3.0",
 		"@trpc/client": "^10.25.0",
 		"@trpc/next": "^10.25.0",
 		"@trpc/react-query": "^10.25.0",
@@ -51,10 +52,12 @@
 	"devDependencies": {
 		"@answeroverflow/eslint-config-custom": "*",
 		"@answeroverflow/tsconfig": "*",
+		"@edge-runtime/vm": "^2.1.2",
 		"@types/core-js": "^2.5.5",
 		"@types/node": "^18.14.2",
 		"@types/react": "^18.0.26",
 		"@types/react-dom": "^18.2.4",
+		"@vitest/coverage-c8": "^0.30.1",
 		"autoprefixer": "^10.4.13",
 		"dotenv-cli": "^7.1.0",
 		"eslint": "^8.43.0",
@@ -62,8 +65,6 @@
 		"postcss": "^8.4.24",
 		"sass": "^1.59.3",
 		"tailwindcss": "^3.2.4",
-		"@edge-runtime/vm": "^2.1.2",
-		"@vitest/coverage-c8": "^0.30.1",
 		"vitest": "^0.30.1"
 	}
 }
