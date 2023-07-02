@@ -10,3 +10,4 @@ export * from './Menubar';
 export * from './NavigationMenu';
 export * from './Paragraph';
 export * from './Popover';
+export * from './Link'

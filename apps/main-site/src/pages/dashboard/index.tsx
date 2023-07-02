@@ -1,5 +1,6 @@
 import { ServerPublic } from '@answeroverflow/api';
 import {
+	AOHead,
 	AnswerOverflowLogo,
 	Button,
 	DropdownMenu,
@@ -14,7 +15,7 @@ import { trpc } from '~ui/utils/trpc';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { HiChevronUp, HiChevronDown } from 'react-icons/hi';
-
+import { AOLink } from '@answeroverflow/ui';
 import {
 	LineChart,
 	Grid,
@@ -24,6 +25,8 @@ import {
 	TabGroup,
 	TabPanel,
 	TabPanels,
+	AreaChart,
+	Color,
 } from '@tremor/react';
 import {
 	BadgeDelta,
@@ -33,6 +36,7 @@ import {
 	ProgressBar,
 	Text,
 } from '@tremor/react';
+import { useState } from 'react';
 
 export function DashboardServerSelect() {
 	const { data } = trpc.auth.getServersForOnboarding.useQuery();
@@ -84,67 +88,39 @@ export function DashboardServerSelect() {
 	);
 }
 
-const chartdata = [
-	{
-		year: 1970,
-		'Export Growth Rate': 2.04,
-		'Import Growth Rate': 1.53,
-	},
-	{
-		year: 1971,
-		'Export Growth Rate': 1.96,
-		'Import Growth Rate': 1.58,
-	},
-	{
-		year: 1972,
-		'Export Growth Rate': 1.96,
-		'Import Growth Rate': 1.61,
-	},
-	{
-		year: 1973,
-		'Export Growth Rate': 1.93,
-		'Import Growth Rate': 1.61,
-	},
-	{
-		year: 1974,
-		'Export Growth Rate': 1.88,
-		'Import Growth Rate': 1.67,
-	},
-];
-
-const dataFormatter = (number: number) =>
-	`${Intl.NumberFormat('us').format(number).toString()}%`;
-
-const LineChartTest = () => (
-	<Card>
-		<Title>Export/Import Growth Rates (1970 to 2021)</Title>
-		<LineChart
-			className="mt-6"
-			data={chartdata}
-			index="year"
-			categories={['Export Growth Rate', 'Import Growth Rate']}
-			colors={['emerald', 'gray']}
-			valueFormatter={dataFormatter}
-			yAxisWidth={40}
-		/>
-	</Card>
-);
-
 function KpiCard() {
 	return (
 		<Card className="mx-auto max-w-lg">
 			<Flex alignItems="start">
 				<div>
-					<Text>Sales</Text>
-					<Metric>$ 12,699</Metric>
+					<Text>Page Views</Text>
+					<Metric>20,000</Metric>
 				</div>
-				<BadgeDelta deltaType="moderateIncrease">13.2%</BadgeDelta>
 			</Flex>
 			<Flex className="mt-4">
-				<Text className="truncate">68% ($ 149,940)</Text>
-				<Text>$ 220,500</Text>
+				<Text className="truncate">20%</Text>
+				<Text>100,000</Text>
 			</Flex>
-			<ProgressBar value={15.9} className="mt-2" />
+			<ProgressBar value={20} className="mt-2" />
+		</Card>
+	);
+}
+
+function CurrentPlanCard() {
+	return (
+		<Card className="mx-auto max-w-lg">
+			<Flex alignItems="start">
+				<div>
+					<Text>Current Plan</Text>
+					<Metric>Pro</Metric>
+				</div>
+			</Flex>
+			<Flex className="mt-4">
+				<Text>Renews on 12/3/20</Text>
+				<AOLink href="www.stripe.com">
+					<Text>Change Plan</Text>
+				</AOLink>
+			</Flex>
 		</Card>
 	);
 }
@@ -153,6 +129,7 @@ export default function Dashboard() {
 	const user = useSession();
 	return (
 		<>
+			<AOHead title="Dashboard" path={'/dashboard'} />
 			<nav className="flex w-full items-center justify-between p-8">
 				<div className="flex flex-row items-center justify-between space-x-4">
 					<Link href="/">
@@ -166,31 +143,18 @@ export default function Dashboard() {
 					{user.data && <UserAvatar user={user.data.user} />}
 				</div>
 			</nav>
-			<TabGroup className="mt-6">
+			<TabGroup className="px-8">
 				<TabList>
 					<Tab>Overview</Tab>
-					<Tab>Detail</Tab>
+					<Tab>Settings</Tab>
 				</TabList>
 				<TabPanels>
 					<TabPanel>
 						<Grid numItemsMd={2} numItemsLg={3} className="mt-6 gap-6">
-							<Card>
-								<KpiCard />
-							</Card>
-							<Card>
-								{/* Placeholder to set height */}
-								<div className="h-28" />
-							</Card>
-							<Card>
-								{/* Placeholder to set height */}
-								<div className="h-28" />
-							</Card>
+							<KpiCard />
+							<CurrentPlanCard />
 						</Grid>
-						<div className="mt-6">
-							<Card>
-								<div className="h-80" />
-							</Card>
-						</div>
+						<div className="mt-6"></div>
 					</TabPanel>
 					<TabPanel>
 						<div className="mt-6">
