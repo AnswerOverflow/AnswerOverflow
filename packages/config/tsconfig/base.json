@@ -3,6 +3,13 @@
 	"display": "Default",
 	"compileOnSave": true,
 	"compilerOptions": {
+		"composite": false,
+		"declaration": true,
+		"declarationMap": true,
+		"inlineSources": false,
+		"isolatedModules": true,
+		"preserveWatchOutput": true,
+
 		"allowJs": true,
 		"noEmit": true,
 		"types": ["node"],

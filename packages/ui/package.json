@@ -4,7 +4,9 @@
 	"private": true,
 	"main": "./src/index.ts",
 	"types": "./src/index.ts",
+	"license": "MIT",
 	"scripts": {
+		"build": "tsup ./src/index.ts --dts",
 		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
 		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
 		"lint": "next lint && tsc --noEmit",
@@ -15,7 +17,6 @@
 		"test:ui:light:no-serve": "npx wait-on http://127.0.0.1:6007 && test-storybook --maxWorkers=2 --url=http://127.0.0.1:6007",
 		"test:ui:light": "cross-env THEME=\"light\" storybook build --quiet -o storybook-static-light && npx concurrently -k -s first -n \"SB,LIGHT\" -c \"magenta,blue\" \"npx http-server storybook-static-light --port 6007 --silent\" \"yarn test:ui:light:no-serve\"",
 		"test": "yarn test:ui:dark && yarn test:ui:light",
-		"build": "storybook build --quiet",
 		"storybook": "yarn dev",
 		"build-storybook": "storybook build public",
 		"clean": "rm -rf .next storybook-static* node_modules"

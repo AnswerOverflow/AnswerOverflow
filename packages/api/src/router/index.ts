@@ -4,7 +4,6 @@ import { channelRouter } from '~api/router/channel/channel';
 import { serverRouter } from '~api/router/server/server';
 import { discordAccountRouter } from './users/accounts/discord-accounts';
 import { userServerSettingsRouter } from './user-server-settings/user-server-settings';
-import { userRouter } from './users/user/user';
 import { messagesRouter } from './messages/messages';
 
 export const botRouter = router({
@@ -13,9 +12,6 @@ export const botRouter = router({
 	channels: channelRouter,
 	discordAccounts: discordAccountRouter,
 	userServerSettings: userServerSettingsRouter,
-
-	// Other:
-	users: userRouter,
 });
 
 export const appRouter = router({
@@ -26,7 +22,6 @@ export const appRouter = router({
 	messages: messagesRouter,
 
 	// Other:
-	users: userRouter,
 	auth: authRouter,
 });
 

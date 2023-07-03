@@ -126,7 +126,7 @@ function CurrentPlanCard() {
 
 export function ServerDashboard(props: { serverId: string }) {
 	const user = useSession();
-	const { data } = trpc.servers.byId.useQuery(props.serverId);
+	const { data } = trpc.servers.byIdPublic.useQuery(props.serverId);
 
 	return (
 		<>

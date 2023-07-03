@@ -9,7 +9,6 @@ import {
 } from '@answeroverflow/db';
 import { z } from 'zod';
 import {
-	MergeRouters,
 	router,
 	withDiscordAccountProcedure,
 } from '~api/router/trpc';
@@ -89,4 +88,4 @@ const accountCrudRouter = router({
 		}),
 });
 
-export const discordAccountRouter = MergeRouters(accountCrudRouter);
+export const discordAccountRouter = accountCrudRouter;
