@@ -99,6 +99,16 @@ export async function findServerById(id: string) {
 	return addFlagsToServer(found);
 }
 
+export async function findServerByStripeCustomerId(stripeCustomerId: string) {
+	const found = await prisma.server.findUnique({
+		where: {
+			stripeCustomerId,
+		},
+	});
+	if (!found) return null;
+	return addFlagsToServer(found);
+}
+
 export async function findServerByAlias(alias: string) {
 	const found = await prisma.server.findUnique({
 		where: {

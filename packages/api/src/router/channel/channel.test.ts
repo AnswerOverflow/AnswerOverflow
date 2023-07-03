@@ -28,7 +28,6 @@ import {
 	zChannelWithServerCreate,
 } from './channel';
 import { mockChannel, mockServer } from '@answeroverflow/db-mock';
-import { pickPublicChannelData } from '~api/test/public-data';
 import type { z } from 'zod';
 import { getRandomId } from '@answeroverflow/utils';
 import { ChannelType } from 'discord.js';
@@ -133,31 +132,6 @@ describe('Channel Operations', () => {
 				);
 				const router = channelRouter.createCaller(account.ctx);
 				await expect(router.byId('non-existent-channel')).rejects.toThrow(
-					'Channel does not exist',
-				);
-			});
-		});
-		describe('By Id Public', () => {
-			it('should only get public channel data', async () => {
-				const account = await mockAccountWithServersCallerCtx(
-					server,
-					'discord-bot',
-					'ManageGuild',
-				);
-				const router = channelRouter.createCaller(account.ctx);
-				const fetchedChannel = await router.byIdPublic(channel.id);
-				expect(fetchedChannel).toEqual(
-					pickPublicChannelData(addFlagsToChannel(channel)),
-				);
-			});
-			it("should fail if the channel doesn't exist", async () => {
-				const account = await mockAccountWithServersCallerCtx(
-					server,
-					'discord-bot',
-					'ManageGuild',
-				);
-				const router = channelRouter.createCaller(account.ctx);
-				await expect(router.byIdPublic('non-existent-channel')).rejects.toThrow(
 					'Channel does not exist',
 				);
 			});

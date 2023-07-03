@@ -1,3 +1,5 @@
+/* eslint-disable turbo/no-undeclared-env-vars */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import {
 	DomainResponse,
 	DomainConfigResponse,
@@ -45,6 +47,7 @@ export const removeDomainFromVercelTeam = async (domain: string) => {
 export const getDomainResponse = async (
 	domain: string,
 ): Promise<DomainResponse & { error: { code: string; message: string } }> => {
+	// @ts-ignore
 	return await fetch(
 		`https://api.vercel.com/v9/projects/${process.env.PROJECT_ID_VERCEL}/domains/${domain}?teamId=${process.env.TEAM_ID_VERCEL}`,
 		{
@@ -59,9 +62,12 @@ export const getDomainResponse = async (
 	});
 };
 
-export const getConfigResponse = async (
-	domain: string,
-): Promise<DomainConfigResponse> => {
+export const getConfigResponse = async ({
+	domain,
+}: {
+	domain: string;
+}): Promise<DomainConfigResponse> => {
+	// @ts-ignore
 	return await fetch(
 		`https://api.vercel.com/v6/domains/${domain}/config?teamId=${process.env.TEAM_ID_VERCEL}`,
 		{
@@ -77,6 +83,7 @@ export const getConfigResponse = async (
 export const verifyDomain = async (
 	domain: string,
 ): Promise<DomainVerificationResponse> => {
+	// @ts-ignore
 	return await fetch(
 		`https://api.vercel.com/v9/projects/${process.env.PROJECT_ID_VERCEL}/domains/${domain}/verify?teamId=${process.env.TEAM_ID_VERCEL}`,
 		{

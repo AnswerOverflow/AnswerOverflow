@@ -32,6 +32,7 @@ import { useSession } from 'next-auth/react';
 import { ServerPublic } from '@answeroverflow/api';
 import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
 import { useRouter } from 'next/router';
+import type { ServerWithFlags } from '@answeroverflow/prisma-types';
 
 export function DashboardServerSelect() {
 	const router = useRouter();
@@ -105,20 +106,36 @@ function KpiCard() {
 	);
 }
 
-function CurrentPlanCard() {
+function planToPrettyText(props: { server: Pick<ServerWithFlags, 'plan'> }) {
+	switch (props.server.plan) {
+		case 'FREE':
+			return 'Free';
+		case 'PRO':
+			return 'Pro';
+		case 'OPEN_SOURCE':
+			return 'Open Source';
+	}
+}
+
+function CurrentPlanCard(props: {
+	server: Pick<ServerWithFlags, 'id' | 'plan'>;
+	stripeUrl: string | null;
+}) {
 	return (
 		<Card className="mx-auto max-w-lg">
 			<Flex alignItems="start">
 				<div>
 					<Text>Current Plan</Text>
-					<Metric>Pro</Metric>
+					<Metric>{planToPrettyText(props)}</Metric>
 				</div>
 			</Flex>
 			<Flex className="mt-4">
 				<Text>Renews on 12/3/20</Text>
-				<AOLink href="www.stripe.com">
-					<Text>Change Plan</Text>
-				</AOLink>
+				{props.stripeUrl && (
+					<AOLink href={props.stripeUrl}>
+						<Text>Change Plan</Text>
+					</AOLink>
+				)}
 			</Flex>
 		</Card>
 	);
@@ -126,7 +143,7 @@ function CurrentPlanCard() {
 
 export function ServerDashboard(props: { serverId: string }) {
 	const user = useSession();
-	const { data } = trpc.servers.byIdPublic.useQuery(props.serverId);
+	const { data } = trpc.servers.fetchDashboardById.useQuery(props.serverId);
 
 	return (
 		<>
@@ -156,7 +173,10 @@ export function ServerDashboard(props: { serverId: string }) {
 						<TabPanel>
 							<Grid numItemsMd={2} numItemsLg={3} className="mt-6 gap-6">
 								<KpiCard />
-								<CurrentPlanCard />
+								<CurrentPlanCard
+									server={data}
+									stripeUrl={data.stripeCheckoutUrl}
+								/>
 							</Grid>
 							<div className="mt-6">
 								<ConfigureDomainCard server={data} />

@@ -51,7 +51,7 @@ export function WaitingToBeAdded() {
 	const [lastChecked, setLastChecked] = useState(Date.now());
 	const [currentTimestamp, setCurrentTimestamp] = useState(Date.now());
 
-	const { status } = trpc.servers.byIdPublic.useQuery(data.server!.id, {
+	const { status } = trpc.servers.byId.useQuery(data.server!.id, {
 		refetchInterval: 5000,
 		refetchIntervalInBackground: false,
 		refetchOnWindowFocus: true,

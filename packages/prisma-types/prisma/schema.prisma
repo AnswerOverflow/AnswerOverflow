@@ -62,7 +62,7 @@ model TenantSession {
   serverId     String
   server       Server  @relation(fields: [serverId], references: [id], onUpdate: NoAction)
   sessionToken String
-  session      Session @relation(fields: [sessionToken], references: [sessionToken], onUpdate: NoAction)
+  session      Session @relation(fields: [sessionToken], references: [sessionToken], onUpdate: NoAction, onDelete: Cascade)
 
   @@index([serverId])
   @@index([sessionToken])
@@ -104,6 +104,12 @@ model IgnoredDiscordAccount {
   id String @id @unique
 }
 
+enum Plan {
+  FREE
+  PRO
+  OPEN_SOURCE
+}
+
 model Server {
   // Discord Data
   id          String  @id @unique
@@ -120,6 +126,11 @@ model Server {
 
   // Tenant Settings
   customDomain String? @unique
+
+  // Stripe Settings
+  stripeCustomerId     String? @unique
+  stripeSubscriptionId String? @unique
+  plan                 Plan    @default(FREE)
 
   //
   // Answer Overflow Settings End

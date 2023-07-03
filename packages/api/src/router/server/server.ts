@@ -1,5 +1,4 @@
 import {
-	zServerPublic,
 	findServerById,
 	type ServerWithFlags,
 	getDefaultServerWithFlags,
@@ -9,13 +8,11 @@ import {
 	updateServer,
 } from '@answeroverflow/db';
 import { TRPCError } from '@trpc/server';
-import { custom, z } from 'zod';
+import { getBaseUrl } from '@answeroverflow/constants';
+import Stripe from 'stripe';
+import { z } from 'zod';
 import type { Context } from '~api/router/context';
-import {
-	publicProcedure,
-	router,
-	withUserServersProcedure,
-} from '~api/router/trpc';
+import { router, withUserServersProcedure } from '~api/router/trpc';
 import {
 	addDomainToVercel,
 	getConfigResponse,
@@ -23,7 +20,6 @@ import {
 	removeDomainFromVercelProject,
 	verifyDomain,
 } from '~api/utils/domains';
-import { findOrThrowNotFound } from '~api/utils/operations';
 import {
 	assertBoolsAreNotEqual,
 	assertCanEditServer,
@@ -92,20 +88,6 @@ export const serverRouter = router({
 			}
 			return data;
 		}),
-	byIdPublic: publicProcedure.input(z.string()).query(async ({ input }) => {
-		const data = await findOrThrowNotFound(
-			() => findServerByAliasOrId(input),
-			'Server not found',
-		);
-		if (data.kickedTime) {
-			throw new TRPCError({
-				code: 'NOT_FOUND',
-				message: 'Server not found',
-			});
-		}
-
-		return zServerPublic.parse(data);
-	}),
 	setReadTheRulesConsentEnabled: withUserServersProcedure
 		.input(
 			z.object({
@@ -155,7 +137,7 @@ export const serverRouter = router({
 				customDomain: z.string(), // TODO: Could validate regex here
 			}),
 		)
-		.mutation(async ({ ctx, input }) => {
+		.mutation(async ({ input }) => {
 			const { serverId, customDomain: newCustomDomain } = input;
 			try {
 				const oldServerInfo = await findServerById(serverId);
@@ -196,7 +178,11 @@ export const serverRouter = router({
 
 				return response;
 			} catch (error: any) {
-				if (error.code === 'P2002') {
+				if (
+					'code' in error &&
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+					error.code === 'P2002'
+				) {
 					throw new TRPCError({
 						code: 'BAD_REQUEST',
 						message: `Domain ${newCustomDomain} already in use`,
@@ -204,20 +190,21 @@ export const serverRouter = router({
 				} else {
 					throw new TRPCError({
 						code: 'INTERNAL_SERVER_ERROR',
-						message: error.message,
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+						message: 'message' in error ? error.message : 'Unknown error',
 					});
 				}
 			}
 		}),
 	verifyCustomDomain: withUserServersProcedure
 		.input(z.string())
-		.query(async ({ ctx, input }) => {
+		.query(async ({ input }) => {
 			const domain = input;
 			let status: DomainVerificationStatusProps = 'Valid Configuration';
 
 			const [domainJson, configJson] = await Promise.all([
 				getDomainResponse(domain),
-				getConfigResponse(domain),
+				getConfigResponse({ domain }),
 			]);
 
 			if (domainJson?.error?.code === 'not_found') {
@@ -245,6 +232,76 @@ export const serverRouter = router({
 			return {
 				status,
 				domainJson,
+			};
+		}),
+	fetchDashboardById: withUserServersProcedure
+		.input(z.string())
+		.query(async ({ input }) => {
+			const server = await findServerById(input);
+			if (!server) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Server not found',
+				});
+			}
+
+			const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+				apiVersion: '2022-11-15',
+				typescript: true,
+			});
+
+			// If they have a subscription already, we display the portal
+			if (server.stripeCustomerId && server.stripeSubscriptionId) {
+				const session = await stripe.billingPortal.sessions.create({
+					customer: server.stripeCustomerId,
+				});
+
+				return {
+					...server,
+					stripeCheckoutUrl: session.url,
+				};
+			}
+
+			// else we upsert them and then display checkout
+
+			if (!server.stripeCustomerId) {
+				const customer = await stripe.customers.create({
+					name: server.name,
+				});
+				server.stripeCustomerId = customer.id;
+				await updateServer({
+					existing: server,
+					update: {
+						id: server.id,
+						stripeCustomerId: customer.id,
+					},
+				});
+			}
+			const returnUrl = `${getBaseUrl()}/dashboard/${server.id}`;
+
+			const session = await stripe.checkout.sessions.create({
+				billing_address_collection: 'auto',
+				line_items: [
+					{
+						// base
+						price: process.env.STRIPE_PRO_PLAN_PRICE_ID,
+						quantity: 1,
+					},
+					{
+						// additional page views
+						price: process.env.STRIPE_PAGE_VIEWS_PRICE_ID,
+					},
+				],
+				mode: 'subscription',
+				success_url: returnUrl,
+				cancel_url: returnUrl,
+				currency: 'USD',
+				allow_promotion_codes: true,
+				customer: server.stripeCustomerId,
+			});
+			return {
+				...server,
+				stripeCheckoutUrl: session.url,
 			};
 		}),
 });

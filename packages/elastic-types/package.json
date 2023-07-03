@@ -1,12 +1,11 @@
 {
 	"name": "@answeroverflow/elastic-types",
 	"version": "0.1.0",
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
+	"main": "./index.ts",
+	"types": "./index.ts",
 	"license": "MIT",
 	"private": true,
 	"scripts": {
-		"build": "tsup index.ts --dts",
 		"clean": "rm -rf .turbo node_modules coverage",
 		"with-env": "dotenv -e ../../.env --",
 		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",

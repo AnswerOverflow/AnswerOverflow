@@ -13,7 +13,7 @@ export default function ConfigureDomainCard(props: {
 	const mutation = trpc.servers.setCustomDomain.useMutation({
 		onSuccess: () => {
 			toast.success('Custom domain updated!');
-			void util.servers.byId.invalidate(id);
+			void util.servers.fetchDashboardById.invalidate(id);
 		},
 		onError: (err) => {
 			toast.error(err.message);
