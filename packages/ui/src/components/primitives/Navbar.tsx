@@ -54,6 +54,16 @@ export const UserAvatar = ({ user }: { user: User }) => (
 		<PopoverContent className="w-40">
 			<div className="grid gap-4">
 				<div className="flex flex-row space-y-2">
+					<LinkButton
+						variant="ghost"
+						className="w-full"
+						size="sm"
+						href="/dashboard"
+					>
+						Dashboard
+					</LinkButton>
+				</div>
+				<div className="flex flex-row space-y-2">
 					<Button
 						variant="ghost"
 						className="w-full"
@@ -142,6 +152,15 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 									href={'/onboarding'}
 								>
 									Get Started
+								</LinkButton>
+							</div>
+							<div className="flex flex-row space-y-2">
+								<LinkButton
+									variant="ghost"
+									className="w-full items-start justify-start"
+									href={'/dashboard'}
+								>
+									Dashboard
 								</LinkButton>
 							</div>
 							<div className="flex flex-row space-y-2">

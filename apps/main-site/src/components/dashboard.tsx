@@ -154,7 +154,7 @@ export function ServerDashboard(props: { serverId: string }) {
 					</TabList>
 					<TabPanels>
 						<TabPanel>
-							<Grid numItemsMd={2} className="mt-6 gap-6">
+							<Grid numItemsMd={2} numItemsLg={3} className="mt-6 gap-6">
 								<KpiCard />
 								<CurrentPlanCard />
 							</Grid>
