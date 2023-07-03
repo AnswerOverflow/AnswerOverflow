@@ -1,5 +1,5 @@
 import { useCopyToClipboard } from 'react-use';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './CopyButtonToastStyles.css';
 import { Button } from './Button';
@@ -26,7 +26,6 @@ export const CopyButton = ({ textToCopy }: { textToCopy: string }) => {
 			>
 				<ClipboardIcon className="h-6 w-6" />
 			</Button>
-			<ToastContainer toastClassName="dark:bg-ao-black dark:text-white bg-white text-black" />
 		</>
 	);
 };

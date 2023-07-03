@@ -22,6 +22,7 @@ import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner
 import ProgressBar from '@badrap/bar-of-progress';
 import Router from 'next/router';
 import type { ServerPublic } from '@answeroverflow/api';
+import { ToastContainer } from 'react-toastify';
 
 const progress = new ProgressBar({
 	size: 2,
@@ -85,11 +86,13 @@ const MyApp: AppType<{
 								'/onboarding',
 								'/[domain]',
 								'/dashboard',
+								'/dashboard/[serverId]',
 							]}
 						>
 							<CommitBanner />
 							<MDXProvider components={components}>
 								<Component {...pageProps} />
+								<ToastContainer toastClassName="dark:bg-ao-black dark:text-white bg-white text-black" />
 							</MDXProvider>
 						</PageWrapper>
 						<ReactQueryDevtools initialIsOpen={false} />

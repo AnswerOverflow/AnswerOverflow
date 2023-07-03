@@ -1,29 +1,18 @@
-import { DomainResponse, DomainVerificationStatusProps } from './types';
+import { trpc } from '@answeroverflow/ui';
 
-export function useDomainStatus({ domain }: { domain: string }) {
-	const status: DomainVerificationStatusProps =
-		'Domain Not Found' as DomainVerificationStatusProps;
-	const isValidating = false;
-	const data: DomainResponse & {
-		error: {
-			code: string;
-			message: string;
-		};
-	} = {
-		apexName: 'apexName',
-		name: 'name',
-		projectId: 'projectId',
-		verification: [],
-		verified: false,
-		error: {
-			code: 'code',
-			message: 'message',
-		},
-	};
+export function useDomainStatus({ domain }: { domain?: string }) {
+	const { data, isLoading, isFetching } =
+		trpc.servers.verifyCustomDomain.useQuery(domain ?? '', {
+			refetchOnMount: true,
+			refetchInterval: 5000,
+			keepPreviousData: true,
+			enabled: domain !== undefined,
+		});
 
 	return {
-		status: status,
-		domainJson: data,
-		loading: isValidating,
+		status: data?.status,
+		domainJson: data?.domainJson,
+		loading: isLoading,
+		fetching: isFetching,
 	};
 }
