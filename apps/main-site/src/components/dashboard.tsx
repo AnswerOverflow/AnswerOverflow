@@ -33,6 +33,7 @@ import { ServerPublic } from '@answeroverflow/api';
 import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
 import { useRouter } from 'next/router';
 import type { ServerWithFlags } from '@answeroverflow/prisma-types';
+import { Disabled } from './disabled';
 
 export function DashboardServerSelect() {
 	const router = useRouter();
@@ -202,7 +203,9 @@ export function ServerDashboard(props: { serverId: string }) {
 								/>
 							</Grid>
 							<div className="mt-6">
-								<ConfigureDomainCard server={data} />
+								<Disabled>
+									<ConfigureDomainCard server={data} />
+								</Disabled>
 							</div>
 						</TabPanel>
 						<TabPanel>
