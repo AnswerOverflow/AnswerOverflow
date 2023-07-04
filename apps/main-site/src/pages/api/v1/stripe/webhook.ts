@@ -65,9 +65,6 @@ export default async function webhookHandler(
 
 		console.log(
 			`Incoming stripe event ${event.type} for server ${existingServer.id}`,
-			subscription,
-			event.type,
-			existingServer.id,
 		);
 		switch (event.type) {
 			case 'customer.subscription.created':

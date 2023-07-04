@@ -120,7 +120,23 @@ function planToPrettyText(props: { server: Pick<ServerWithFlags, 'plan'> }) {
 function CurrentPlanCard(props: {
 	server: Pick<ServerWithFlags, 'id' | 'plan'>;
 	stripeUrl: string | null;
+	dateCancelationTakesEffect: number | null;
+	dateSubscriptionRenews: number | null;
+	dateTrialEnds: number | null;
 }) {
+	const dateInMs =
+		props.dateCancelationTakesEffect ??
+		props.dateSubscriptionRenews ??
+		props.dateTrialEnds ??
+		null;
+
+	const label = props.dateCancelationTakesEffect
+		? 'Cancelation Takes Effect'
+		: props.dateSubscriptionRenews
+		? 'Renews'
+		: props.dateTrialEnds
+		? 'Trial Ends'
+		: '';
 	return (
 		<Card className="mx-auto max-w-lg">
 			<Flex alignItems="start">
@@ -130,7 +146,11 @@ function CurrentPlanCard(props: {
 				</div>
 			</Flex>
 			<Flex className="mt-4">
-				<Text>Renews on 12/3/20</Text>
+				<Text>
+					{`${label} ${
+						dateInMs ? new Date(dateInMs * 1000).toLocaleDateString() : ''
+					}`}
+				</Text>
 				{props.stripeUrl && (
 					<AOLink href={props.stripeUrl}>
 						<Text>Change Plan</Text>
@@ -176,6 +196,9 @@ export function ServerDashboard(props: { serverId: string }) {
 								<CurrentPlanCard
 									server={data}
 									stripeUrl={data.stripeCheckoutUrl}
+									dateCancelationTakesEffect={data.cancelAt}
+									dateSubscriptionRenews={data.currentPeriodEnd}
+									dateTrialEnds={data.trialEnd}
 								/>
 							</Grid>
 							<div className="mt-6">

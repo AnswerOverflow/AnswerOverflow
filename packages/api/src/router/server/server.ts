@@ -252,13 +252,25 @@ export const serverRouter = router({
 
 			// If they have a subscription already, we display the portal
 			if (server.stripeCustomerId && server.stripeSubscriptionId) {
-				const session = await stripe.billingPortal.sessions.create({
-					customer: server.stripeCustomerId,
-				});
-
+				const [session, sub] = await Promise.all([
+					stripe.billingPortal.sessions.create({
+						customer: server.stripeCustomerId,
+					}),
+					stripe.subscriptions.retrieve(server.stripeSubscriptionId),
+				]);
+				const {
+					cancel_at: cancelAt, // This is when a cancellation will take effect
+					current_period_end: currentPeriodEnd, // This is when an active subscription will renew
+					trial_end: trialEnd, // This is when a trial will end
+					// get when subscription will renew
+				} = sub;
+				console.log(sub);
 				return {
 					...server,
 					stripeCheckoutUrl: session.url,
+					cancelAt,
+					currentPeriodEnd,
+					trialEnd,
 				};
 			}
 
@@ -302,6 +314,9 @@ export const serverRouter = router({
 			return {
 				...server,
 				stripeCheckoutUrl: session.url,
+				cancelAt: null,
+				currentPeriodEnd: null,
+				trialEnd: null,
 			};
 		}),
 });
