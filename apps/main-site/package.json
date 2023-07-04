@@ -12,9 +12,7 @@
 		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
 		"lint": "next lint && tsc --noEmit",
 		"lint:fix": "next lint --fix",
-		"type-check": "tsc --noEmit",
-		"test": "yarn with-env vitest --coverage",
-		"test:watch": "yarn with-env vitest --watch"
+		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@answeroverflow/analytics": "*",
