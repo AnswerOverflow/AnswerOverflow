@@ -36,7 +36,7 @@
 		"@trpc/react-query": "^10.25.0",
 		"@trpc/server": "^10.25.0",
 		"core-js": "^3.29.1",
-		"next": "^13.3.0",
+		"next": "13.4.8",
 		"next-auth": "^4.20.1",
 		"next-themes": "^0.2.1",
 		"node-fetch": "^3.3.1",

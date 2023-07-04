@@ -10,6 +10,7 @@ import {
 	Metric,
 	ProgressBar,
 	Text,
+	Col,
 } from '@tremor/react';
 import Link from 'next/link';
 import {
@@ -33,7 +34,7 @@ import { ServerPublic } from '@answeroverflow/api';
 import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
 import { useRouter } from 'next/router';
 import type { ServerWithFlags } from '@answeroverflow/prisma-types';
-import { Disabled } from './disabled';
+import { TierAccessOnly } from './disabled';
 
 export function DashboardServerSelect() {
 	const router = useRouter();
@@ -162,6 +163,50 @@ function CurrentPlanCard(props: {
 	);
 }
 
+import { LineChart, Title } from '@tremor/react';
+
+const chartdata = [
+	{
+		year: 1970,
+		'Export Growth Rate': 2.04,
+		'Import Growth Rate': 1.53,
+	},
+	{
+		year: 1971,
+		'Export Growth Rate': 1.96,
+		'Import Growth Rate': 1.58,
+	},
+	{
+		year: 1972,
+		'Export Growth Rate': 1.96,
+		'Import Growth Rate': 1.61,
+	},
+	{
+		year: 1973,
+		'Export Growth Rate': 1.93,
+		'Import Growth Rate': 1.61,
+	},
+	{
+		year: 1974,
+		'Export Growth Rate': 1.88,
+		'Import Growth Rate': 1.67,
+	},
+	//...
+];
+
+const LineChartCard = () => (
+	<Card>
+		<Title>Page Views This Month</Title>
+		<LineChart
+			data={chartdata}
+			index="year"
+			className="max-h-64"
+			categories={['Export Growth Rate']}
+			yAxisWidth={40}
+		/>
+	</Card>
+);
+
 export function ServerDashboard(props: { serverId: string }) {
 	const user = useSession();
 	const { data } = trpc.servers.fetchDashboardById.useQuery(props.serverId);
@@ -169,7 +214,7 @@ export function ServerDashboard(props: { serverId: string }) {
 	return (
 		<>
 			<AOHead title="Dashboard" path={'/dashboard'} />
-			<nav className="flex w-full items-center justify-between p-8">
+			<nav className="mx-auto flex max-w-screen-2xl items-center justify-between p-2 md:p-8">
 				<div className="flex flex-row items-center justify-between space-x-4">
 					<Link href="/" className="hidden md:block">
 						<AnswerOverflowLogo className="w-52" />
@@ -185,34 +230,39 @@ export function ServerDashboard(props: { serverId: string }) {
 				</div>
 			</nav>
 			{data ? (
-				<TabGroup className="px-8">
-					<TabList>
+				<TabGroup className="px-2 md:px-8">
+					<TabList className="mx-auto max-w-7xl">
 						<Tab>Overview</Tab>
-						<Tab>Settings</Tab>
 					</TabList>
-					<TabPanels>
+					<TabPanels className="mx-auto max-w-7xl">
 						<TabPanel>
-							<Grid numItemsMd={2} numItemsLg={3} className="mt-6 gap-6">
-								<KpiCard />
-								<CurrentPlanCard
-									server={data}
-									stripeUrl={data.stripeCheckoutUrl}
-									dateCancelationTakesEffect={data.cancelAt}
-									dateSubscriptionRenews={data.currentPeriodEnd}
-									dateTrialEnds={data.trialEnd}
-								/>
+							<Grid numItemsLg={6} className="mt-6 gap-6">
+								{/* Main section */}
+								<Col numColSpanLg={4}>
+									<LineChartCard />
+								</Col>
+
+								{/* KPI sidebar */}
+								<Col
+									numColSpanLg={2}
+									className="flex flex-col justify-between gap-4"
+								>
+									<KpiCard />
+
+									<CurrentPlanCard
+										server={data}
+										stripeUrl={data.stripeCheckoutUrl}
+										dateCancelationTakesEffect={data.cancelAt}
+										dateSubscriptionRenews={data.currentPeriodEnd}
+										dateTrialEnds={data.trialEnd}
+									/>
+								</Col>
 							</Grid>
+
 							<div className="mt-6">
-								<Disabled>
+								<TierAccessOnly enabledFor={['PRO', 'OPEN_SOURCE']}>
 									<ConfigureDomainCard server={data} />
-								</Disabled>
-							</div>
-						</TabPanel>
-						<TabPanel>
-							<div className="mt-6">
-								<Card>
-									<div className="h-96" />
-								</Card>
+								</TierAccessOnly>
 							</div>
 						</TabPanel>
 					</TabPanels>
