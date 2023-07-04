@@ -63,7 +63,7 @@
 		"@answeroverflow/prettier-config": "*",
 		"@answeroverflow/tailwind-config": "*",
 		"@answeroverflow/tsconfig": "*",
-		"@babel/core": "^7.21.8",
+		"@babel/core": "^7.22.5",
 		"@storybook/addon-a11y": "^7.0.22",
 		"@storybook/addon-actions": "^7.0.22",
 		"@storybook/addon-essentials": "^7.0.22",
