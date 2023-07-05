@@ -26,8 +26,11 @@
 		"@sapphire/bitfield": "^1.0.0",
 		"@trpc/client": "^10.25.0",
 		"@trpc/server": "^10.25.0",
+		"@types/qs": "^6.9.7",
+		"dayjs": "^1.11.9",
 		"discord.js": "^14.8.0",
 		"dotenv-cra": "^3.0.3",
+		"qs": "^6.11.2",
 		"stripe": "^12.11.0",
 		"superjson": "^1.9.1",
 		"zod": "^3.20.6"

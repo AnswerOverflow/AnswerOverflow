@@ -30,6 +30,10 @@ import {
 	protectedFetch,
 } from '~api/utils/protected-procedures';
 import { DomainVerificationStatusProps } from '~api/utils/types';
+import {
+	fetchServerPageViewsAsLineChart,
+	fetchServerPageViewsNumber,
+} from '~api/utils/posthog';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
 	'Read the rules consent already enabled';
@@ -264,7 +268,6 @@ export const serverRouter = router({
 					trial_end: trialEnd, // This is when a trial will end
 					// get when subscription will renew
 				} = sub;
-				console.log(sub);
 				return {
 					...server,
 					stripeCheckoutUrl: session.url,
@@ -305,6 +308,9 @@ export const serverRouter = router({
 					},
 				],
 				mode: 'subscription',
+				subscription_data: {
+					trial_period_days: 14,
+				},
 				success_url: returnUrl,
 				cancel_url: returnUrl,
 				currency: 'USD',
@@ -318,5 +324,15 @@ export const serverRouter = router({
 				currentPeriodEnd: null,
 				trialEnd: null,
 			};
+		}),
+	fetchPageViewCount: withUserServersProcedure
+		.input(z.string())
+		.query(async ({ input }) => {
+			return fetchServerPageViewsNumber(input);
+		}),
+	fetchPageViewsAsLineChart: withUserServersProcedure
+		.input(z.string())
+		.query(({ input }) => {
+			return fetchServerPageViewsAsLineChart(input);
 		}),
 });

@@ -34,8 +34,8 @@ import { ServerPublic } from '@answeroverflow/api';
 import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
 import { useRouter } from 'next/router';
 import type { ServerWithFlags } from '@answeroverflow/prisma-types';
-import { TierAccessOnly } from './disabled';
-
+import { TierAccessOnly } from './tier-access-only';
+import { GoLinkExternal } from 'react-icons/go';
 export function DashboardServerSelect() {
 	const router = useRouter();
 	const serverId = router.query.serverId as string | undefined;
@@ -90,20 +90,23 @@ export function DashboardServerSelect() {
 	);
 }
 
-function KpiCard() {
+function PageViewsCard(props: { serverId: string }) {
+	const { data } = trpc.servers.fetchPageViewCount.useQuery(props.serverId);
+	const limit = 100000;
+	const progress = (data ?? 0) / limit;
 	return (
-		<Card className="mx-auto max-w-lg">
+		<Card className="mx-auto">
 			<Flex alignItems="start">
 				<div>
-					<Text>Page Views</Text>
-					<Metric>20,000</Metric>
+					<Title>Page Views</Title>
+					<Metric>{data ?? ''}</Metric>
 				</div>
 			</Flex>
 			<Flex className="mt-4">
-				<Text className="truncate">20%</Text>
-				<Text>100,000 Limit</Text>
+				<Text className="truncate">{`${(progress * 100).toFixed(2)}%`}</Text>
+				<Text>{limit.toLocaleString('en-US')} Limit</Text>
 			</Flex>
-			<ProgressBar value={20} className="mt-2" />
+			<ProgressBar value={progress} className="mt-2" />
 		</Card>
 	);
 }
@@ -128,22 +131,22 @@ function CurrentPlanCard(props: {
 }) {
 	const dateInMs =
 		props.dateCancelationTakesEffect ??
-		props.dateSubscriptionRenews ??
 		props.dateTrialEnds ??
+		props.dateSubscriptionRenews ??
 		null;
 
 	const label = props.dateCancelationTakesEffect
 		? 'Cancelation Takes Effect'
-		: props.dateSubscriptionRenews
-		? 'Renews'
 		: props.dateTrialEnds
 		? 'Trial Ends'
+		: props.dateSubscriptionRenews
+		? 'Renews'
 		: '';
 	return (
-		<Card className="mx-auto max-w-lg">
+		<Card className="mx-auto">
 			<Flex alignItems="start">
 				<div>
-					<Text>Current Plan</Text>
+					<Title>Current Plan</Title>
 					<Metric>{planToPrettyText(props)}</Metric>
 				</div>
 			</Flex>
@@ -194,18 +197,24 @@ const chartdata = [
 	//...
 ];
 
-const LineChartCard = () => (
-	<Card>
-		<Title>Page Views This Month</Title>
-		<LineChart
-			data={chartdata}
-			index="year"
-			className="max-h-64"
-			categories={['Export Growth Rate']}
-			yAxisWidth={40}
-		/>
-	</Card>
-);
+const LineChartCard = (props: { serverId: string }) => {
+	const { data } = trpc.servers.fetchPageViewsAsLineChart.useQuery(
+		props.serverId,
+	);
+	return (
+		<Card>
+			<Title>Page Views This Month</Title>
+			{data && (
+				<LineChart
+					data={data}
+					index="label"
+					categories={['value']}
+					yAxisWidth={40}
+				/>
+			)}
+		</Card>
+	);
+};
 
 export function ServerDashboard(props: { serverId: string }) {
 	const user = useSession();
@@ -239,7 +248,7 @@ export function ServerDashboard(props: { serverId: string }) {
 							<Grid numItemsLg={6} className="mt-6 gap-6">
 								{/* Main section */}
 								<Col numColSpanLg={4}>
-									<LineChartCard />
+									<LineChartCard serverId={data.id} />
 								</Col>
 
 								{/* KPI sidebar */}
@@ -247,7 +256,20 @@ export function ServerDashboard(props: { serverId: string }) {
 									numColSpanLg={2}
 									className="flex flex-col justify-between gap-4"
 								>
-									<KpiCard />
+									<Card>
+										<AOLink
+											href={
+												data.customDomain
+													? `https://${data.customDomain}`
+													: `/c/${data.id}`
+											}
+											className="flex items-center gap-2"
+										>
+											<Title>View Community</Title>
+											<GoLinkExternal className="mt-1 h-5 w-5" />
+										</AOLink>
+									</Card>
+									<PageViewsCard serverId={data.id} />
 
 									<CurrentPlanCard
 										server={data}
@@ -260,7 +282,10 @@ export function ServerDashboard(props: { serverId: string }) {
 							</Grid>
 
 							<div className="mt-6">
-								<TierAccessOnly enabledFor={['PRO', 'OPEN_SOURCE']}>
+								<TierAccessOnly
+									enabledFor={['PRO', 'OPEN_SOURCE']}
+									currentPlan={data.plan}
+								>
 									<ConfigureDomainCard server={data} />
 								</TierAccessOnly>
 							</div>

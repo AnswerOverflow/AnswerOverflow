@@ -5,9 +5,11 @@ import { Button, Input, LoadingSpinner, trpc } from '@answeroverflow/ui';
 import { ServerPublic } from '@answeroverflow/api';
 import { useDomainStatus } from './use-domain-status';
 import { Card, Title, Subtitle } from '@tremor/react';
+import { useTierAccess } from './tier-access-only';
 export default function ConfigureDomainCard(props: {
 	server: Pick<ServerPublic, 'id' | 'customDomain'>;
 }) {
+	const { enabled } = useTierAccess();
 	const { customDomain: currentDomain, id } = props.server;
 	const util = trpc.useContext();
 	const mutation = trpc.servers.setCustomDomain.useMutation({
@@ -53,7 +55,7 @@ export default function ConfigureDomainCard(props: {
 								void util.servers.verifyCustomDomain.invalidate();
 							}}
 							type="button"
-							disabled={fetching}
+							disabled={!enabled || fetching}
 							variant={'outline'}
 							className="relative"
 						>
@@ -75,6 +77,7 @@ export default function ConfigureDomainCard(props: {
 							defaultValue={currentDomain || ''}
 							placeholder="yourdomain.com"
 							maxLength={64}
+							disabled={!enabled}
 							pattern={'[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}$'}
 						/>
 						{currentDomain && <DomainStatus domain={currentDomain} />}

@@ -60,7 +60,8 @@ export default async function webhookHandler(
 				subscription.customer.toString(),
 			);
 			res.status(500).send('Server not found');
-			return res.end();
+			res.end();
+			return;
 		}
 
 		console.log(
@@ -103,11 +104,13 @@ export default async function webhookHandler(
 				break;
 		}
 		res.send('OK');
-		return res.end();
+		res.end();
+		return;
 	} catch (e) {
 		const err = e as Error;
 		console.error(err.message);
 		res.status(500).send(err.message);
-		return res.end();
+		res.end();
+		return;
 	}
 }
