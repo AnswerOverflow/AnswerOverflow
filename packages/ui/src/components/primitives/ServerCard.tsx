@@ -9,6 +9,8 @@ export type ServerCardProps = {
 	server: ServerPublic;
 	className?: string;
 	hero?: React.ReactNode;
+	title?: React.ReactNode;
+	cta?: React.ReactNode;
 	about?: React.ReactNode;
 };
 
@@ -80,11 +82,9 @@ export const ServerCard = (props: ServerCardProps) => {
 					{props.about ?? (
 						<>
 							<div className="flex flex-col">
-								<ServerTitle />
+								{props.title ?? <ServerTitle />}
 							</div>
-							<div className="ml-auto">
-								<ServerCTA />
-							</div>
+							<div className="ml-auto">{props.cta ?? <ServerCTA />}</div>
 						</>
 					)}
 				</div>
@@ -117,4 +117,49 @@ const ViewServerAbout = () => {
 
 export const ViewServerCard = (props: ServerCardProps) => {
 	return <ServerCard {...props} about={<ViewServerAbout />} />;
+};
+
+export const ManageServerCard = (props: {
+	server: ServerPublic & {
+		highestRole: 'Owner' | 'Administrator' | 'Manage Guild';
+		hasBot: boolean;
+	};
+	onSetupClick?: (
+		server: ServerPublic & {
+			highestRole: 'Owner' | 'Administrator' | 'Manage Guild';
+			hasBot: boolean;
+		},
+	) => void;
+}) => {
+	const Title = () => (
+		<div className="flex flex-col pr-4 text-left">
+			<ServerTitle />
+			<span className="text-base text-neutral-600 dark:text-neutral-400">
+				{props.server.highestRole}
+			</span>
+		</div>
+	);
+	return (
+		<ServerCard
+			server={{
+				...props.server,
+			}}
+			title={<Title />}
+			cta={
+				props.server.hasBot ? (
+					<LinkButton href={`/c/${props.server.id}`}>View</LinkButton>
+				) : (
+					<LinkButton
+						href={`https://discord.com/oauth2/authorize?client_id=958907348389339146&permissions=328565083201&scope=bot+applications.commands&guild_id=${props.server.id}&disable_guild_select=true`}
+						target={'Blank'}
+						referrerPolicy="no-referrer"
+						variant={'outline'}
+						onMouseDown={() => props.onSetupClick?.(props.server)}
+					>
+						Setup
+					</LinkButton>
+				)
+			}
+		/>
+	);
 };

@@ -75,7 +75,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
 		<ThemeProvider attribute="class">
 			<SessionProvider session={session}>
 				<AnalyticsProvider>
-					<PageWrapper disabledRoutes={['/', '/c/[communityId]']}>
+					<PageWrapper
+						disabledRoutes={['/', '/c/[communityId]', '/onboarding']}
+					>
 						<CommitBanner />
 						<MDXProvider components={components}>
 							<Component {...pageProps} />

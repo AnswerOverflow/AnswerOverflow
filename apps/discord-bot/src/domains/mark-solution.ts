@@ -13,15 +13,17 @@ import {
 	TextChannel,
 	User,
 } from 'discord.js';
-import { findSolutionsToMessage } from './indexing';
 import type { ChannelWithFlags } from '@answeroverflow/api';
 import { makeConsentButton } from './manage-account';
-import { findChannelById, findServerById } from '@answeroverflow/db';
+import {
+	findChannelById,
+	findMessageById,
+	findServerById,
+	upsertMessage,
+} from '@answeroverflow/db';
 import {
 	ANSWER_OVERFLOW_BLUE_HEX,
 	PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED,
-	QUESTION_ID_FIELD_NAME,
-	SOLUTION_EMBED_ID_FIELD_NAME,
 } from '@answeroverflow/constants';
 import {
 	type QuestionSolvedProps,
@@ -32,6 +34,7 @@ import {
 	threadWithDiscordInfoToAnalyticsData,
 	trackDiscordEvent,
 } from '~discord-bot/utils/analytics';
+import { toAOMessage } from '~discord-bot/utils/conversions';
 const markSolutionErrorReasons = [
 	'NOT_IN_GUILD',
 	'NOT_IN_THREAD',
@@ -136,7 +139,7 @@ export async function checkIfCanMarkSolution(
 	}
 
 	// Check if the question is already solved
-	assertMessageIsUnsolved(
+	await assertMessageIsUnsolved(
 		thread,
 		questionMessage,
 		channelSettings.solutionTagId,
@@ -151,7 +154,7 @@ export async function checkIfCanMarkSolution(
 	};
 }
 
-export function assertMessageIsUnsolved(
+export async function assertMessageIsUnsolved(
 	thread: AnyThreadChannel,
 	questionMessage: Message,
 	solutionTagId: string | null,
@@ -175,12 +178,13 @@ export function assertMessageIsUnsolved(
 
 	// 3. Look at the message history to see if it contains the solution message from the Answer Overflow Bot
 	// This is more of a backup, so we only do the cached falues
-	const isSolutionInCache = thread.messages.cache.some((message) => {
-		const { questionId, solutionId } = findSolutionsToMessage(message);
-		return questionId && solutionId;
-	});
+	const existingMessage = await findMessageById(questionMessage.id);
 
-	if (isSolutionInCache) {
+	const isAlreadySolved = existingMessage
+		? existingMessage.solutionIds.length > 0
+		: false;
+
+	if (isAlreadySolved) {
 		throw new MarkSolutionError(
 			'ALREADY_SOLVED_VIA_EMBED',
 			'This question is already marked as solved',
@@ -215,7 +219,6 @@ export function makeRequestForConsentString(serverName: string) {
 }
 
 export function makeMarkSolutionResponse({
-	question,
 	solution,
 	serverName,
 	settings,
@@ -227,22 +230,10 @@ export function makeMarkSolutionResponse({
 }) {
 	const components = new ActionRowBuilder<MessageActionRowComponentBuilder>();
 	const embed = new EmbedBuilder()
-		.addFields(
-			{
-				name: QUESTION_ID_FIELD_NAME,
-				value: question.id,
-				inline: true,
-			},
-			{
-				name: SOLUTION_EMBED_ID_FIELD_NAME,
-				value: solution.id,
-				inline: true,
-			},
-			{
-				name: 'Learn more',
-				value: 'https://answeroverflow.com',
-			},
-		)
+		.addFields({
+			name: 'Learn more',
+			value: 'https://answeroverflow.com',
+		})
 		.setColor(ANSWER_OVERFLOW_BLUE_HEX);
 
 	if (
@@ -284,6 +275,11 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 		question,
 		channelSettings.solutionTagId,
 	);
+	const asAOMessage = await toAOMessage(question);
+	await upsertMessage({
+		...asAOMessage,
+		solutionIds: [solution.id],
+	});
 	const { embed, components } = makeMarkSolutionResponse({
 		question,
 		solution,
