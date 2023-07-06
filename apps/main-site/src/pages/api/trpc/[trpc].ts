@@ -4,7 +4,10 @@ import { appRouter } from '@answeroverflow/api';
 import { finishAnalyticsCollection } from '@answeroverflow/analytics';
 import type { NextApiRequest, NextApiResponse } from 'next/types';
 import { prisma } from '@answeroverflow/db';
-import { getNextAuthCookieName, getTenantCookieName } from 'packages/auth';
+import {
+	getNextAuthCookieName,
+	getTenantCookieName,
+} from '@answeroverflow/auth';
 // create the API handler, but don't return it yet
 const nextApiHandler = createNextApiHandler({
 	router: appRouter,

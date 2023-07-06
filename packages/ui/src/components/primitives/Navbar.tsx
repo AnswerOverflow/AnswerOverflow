@@ -12,32 +12,17 @@ import {
 	NavigationMenuItem,
 	NavigationMenuList,
 	AnswerOverflowLogo,
-	LinkButton,
-	Popover,
-	PopoverTrigger,
-	PopoverContent,
-	Button,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuGroup,
 	DropdownMenuSeparator,
-	DropdownMenuSub,
-	DropdownMenuSubTrigger,
-	DropdownMenuPortal,
-	DropdownMenuShortcut,
-	DropdownMenuSubContent,
 	DropdownMenu,
 	DropdownMenuTrigger,
 	DropdownMenuContent,
 } from './base';
-import {
-	Bars3Icon,
-	ChevronDownIcon,
-	MagnifyingGlassIcon,
-} from '@heroicons/react/24/outline';
-import { ThemeIcon } from './ThemeSwitcher';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { GITHUB_LINK } from '@answeroverflow/constants/src/links';
-import { signIn, signOut } from 'next-auth/react';
+import { signOut } from 'next-auth/react';
 import { useTenantContext } from '@answeroverflow/hooks';
 import { ServerIcon } from './ServerIcon';
 

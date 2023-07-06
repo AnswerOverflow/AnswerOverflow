@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import type { NextURL } from 'next/dist/server/web/next-url';
 import { getNextAuthCookieName } from '@answeroverflow/auth/src/tenant-cookie';
-import { makeMainSiteLink } from 'packages/constants';
+import { makeMainSiteLink } from '@answeroverflow/constants';
 
 const mainSiteHostName =
 	process.env.NODE_ENV === 'production'
@@ -61,7 +61,7 @@ function dataUnlockerRouteHandler(req: NextRequest) {
 	return rewrite;
 }
 
-export async function middleware(req: NextRequest) {
+export function middleware(req: NextRequest) {
 	const url = req.nextUrl;
 	const path = url.pathname;
 	if (path.startsWith('/oemf7z50uh7w/')) {

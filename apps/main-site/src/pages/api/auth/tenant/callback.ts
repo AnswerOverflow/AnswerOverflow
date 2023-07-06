@@ -1,6 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+// eslint-disable-next-line no-restricted-imports
 import { setCookie } from '../../../../../../../node_modules/next-auth/next/utils';
-import { getTenantCookieName, getTenantCookieOptions } from 'packages/auth';
+import {
+	getTenantCookieName,
+	getTenantCookieOptions,
+} from '@answeroverflow/auth';
 
 export default function handler(
 	req: NextApiRequest,
