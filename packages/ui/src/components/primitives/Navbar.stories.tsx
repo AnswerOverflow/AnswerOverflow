@@ -1,19 +1,22 @@
 import type { Story } from '@ladle/react';
 import { NavbarRenderer } from './Navbar';
 
-type NavbarRendererProps = React.ComponentPropsWithoutRef<typeof NavbarRenderer>
+type NavbarRendererProps = React.ComponentPropsWithoutRef<
+	typeof NavbarRenderer
+>;
 
-const NotSignedIn: Story<NavbarRendererProps> = (props) => <NavbarRenderer {...props} />
+const NotSignedIn: Story<NavbarRendererProps> = (props) => (
+	<NavbarRenderer {...props} />
+);
 
 NotSignedIn.args = {
-  path: '/',
+	path: '/',
 };
 
-export const SignedIn = NotSignedIn.bind({})
+export const SignedIn = NotSignedIn.bind({});
 SignedIn.args = {
-  path: '/',
-  user: {
-    id: '123',
-  },
+	path: '/',
+	user: {
+		id: '123',
+	},
 };
-

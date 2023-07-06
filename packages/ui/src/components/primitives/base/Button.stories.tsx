@@ -1,33 +1,32 @@
 import type { Story } from '@ladle/react';
 import { Button } from './Button';
 
-type ButtonProps = React.ComponentPropsWithoutRef<typeof Button>
+type ButtonProps = React.ComponentPropsWithoutRef<typeof Button>;
 
 export const Primary: Story<ButtonProps> = (props) => (
-  <Button {...props}>Test</Button>
-)
+	<Button {...props}>Test</Button>
+);
 
 Primary.args = {
-  variant: 'default',
+	variant: 'default',
 };
 
-export const Destructive = Primary.bind({})
+export const Destructive = Primary.bind({});
 Destructive.args = {
-  variant: "destructive"
-}
-
-export const Outline = Primary.bind({})
-Outline.args = {
-  variant: "outline"
-}
-
-export const Subtle = Primary.bind({})
-Subtle.args = {
-  variant: 'subtle',
+	variant: 'destructive',
 };
 
-export const Ghost = Primary.bind({})
-Ghost.args = {
-  variant: "ghost"
-}
+export const Outline = Primary.bind({});
+Outline.args = {
+	variant: 'outline',
+};
 
+export const Subtle = Primary.bind({});
+Subtle.args = {
+	variant: 'subtle',
+};
+
+export const Ghost = Primary.bind({});
+Ghost.args = {
+	variant: 'ghost',
+};
