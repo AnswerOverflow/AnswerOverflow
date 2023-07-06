@@ -2,7 +2,8 @@
 	"compilerOptions": {
 		"target": "es2017",
 		"baseUrl": "../../",
-		"types": ["jest"]
+		"types": ["jest"],
+		"esModuleInterop": true
 	},
 	"extends": "@answeroverflow/tsconfig/nextjs.json",
 	"include": [
@@ -13,7 +14,8 @@
 		"../../reset.d.ts",
 		"postcss.config.cjs",
 		"tailwind.config.cjs",
-		"src"
+		"src",
+		".ladle/decorators.tsx"
 	],
 	"exclude": ["node_modules", "../../node_modules"]
 }

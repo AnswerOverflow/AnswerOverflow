@@ -1,32 +1,83 @@
-import type { ReactRenderer } from '@storybook/react';
-import type { Args, PartialStoryFn, StoryContext } from '@storybook/types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
 import { transformer } from '@answeroverflow/api/transformer';
 import React, { useEffect, useState } from 'react';
-import { trpc, type StorybookTRPC } from './trpc';
+import { trpc, type StorybookTRPC } from '../src/utils/trpc';
+import { RouterContext } from 'next/dist/shared/lib/router-context';
+import Router, { NextRouter } from 'next/router';
 import hljs from 'highlight.js';
 import { ThemeProvider } from 'next-themes';
 import { SessionProvider } from 'next-auth/react';
 import { AnalyticsContextProvider } from '@answeroverflow/hooks';
+import { useGlobalState, type GlobalState } from './GlobalState';
+import { ModeState } from '@ladle/react';
+
 const storybookTrpc = trpc as StorybookTRPC;
-type Globals = {
-	tailwindTheme: 'dark' | 'light' | 'both';
-	authState: 'signedIn' | 'signedOut';
+
+export const WithNextRouter = (props: { children: React.ReactNode }) => {
+	const { Provider, ...parameters } = RouterContext;
+
+	if (Provider === undefined)
+		throw new Error(
+			'NextContext.Provider is undefined, please add it to parameters.nextRouter.Provider',
+		);
+
+	Router.router = {
+		locale: undefined,
+		route: '/',
+		pathname: '/',
+		query: {},
+		asPath: '/',
+		push(...args: unknown[]) {
+			action('nextRouter.push')(...args);
+			return Promise.resolve(true);
+		},
+		replace(...args: unknown[]) {
+			action('nextRouter.replace')(...args);
+			return Promise.resolve(true);
+		},
+		reload(...args: unknown[]) {
+			action('nextRouter.reload')(...args);
+		},
+		back(...args: unknown[]) {
+			action('nextRouter.back')(...args);
+		},
+		prefetch(...args: unknown[]) {
+			action('nextRouter.prefetch')(...args);
+			return Promise.resolve();
+		},
+		beforePopState(...args: unknown[]) {
+			action('nextRouter.beforePopState')(...args);
+		},
+		events: {
+			on(...args: unknown[]) {
+				action('nextRouter.events.on')(...args);
+			},
+			off(...args: unknown[]) {
+				action('nextRouter.events.off')(...args);
+			},
+			emit(...args: unknown[]) {
+				action('nextRouter.events.emit')(...args);
+			},
+		},
+		isFallback: false,
+		...parameters,
+	} as typeof Router.router;
+
+	return (
+		<Provider value={Router.router as NextRouter}>{props.children}</Provider>
+	);
 };
 
-export function WithTailwindTheme(
-	Story: PartialStoryFn<ReactRenderer, Args>,
-	context: StoryContext<ReactRenderer, Args>,
-) {
+export function WithTailwindTheme(props: { children: React.ReactNode }) {
+	const { mode, theme } = useGlobalState();
 	function Flex(props: any) {
 		return (
 			<div
 				{...props}
 				style={{
 					flexDirection: 'center',
-					padding:
-						context.parameters.layout === 'fullscreen' ? 0 : '2rem 0 2rem',
+					padding: mode === ModeState.Full ? 0 : '2rem 0 2rem',
 					backgroundImage:
 						"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='199' viewBox='0 0 100 199'%3E%3Cg fill='%23bababa' fill-opacity='0.34'%3E%3Cpath d='M0 199V0h1v1.99L100 199h-1.12L1 4.22V199H0zM100 2h-.12l-1-2H100v2z'%3E%3C/path%3E%3C/g%3E%3C/svg%3E\")",
 				}}
@@ -34,28 +85,27 @@ export function WithTailwindTheme(
 		);
 	}
 
-	const { tailwindTheme } = context.globals as Globals;
 	const Dark = () => (
 		<Flex className="dark bg-black">
 			<ThemeProvider defaultTheme="dark" attribute="class">
-				<Story />
+				{props.children}
 			</ThemeProvider>
 		</Flex>
 	);
 
-	if (tailwindTheme === 'dark') {
+	if (theme === 'dark') {
 		return <Dark />;
 	}
 
 	const Light = () => (
 		<Flex className="bg-ao-white">
 			<ThemeProvider defaultTheme="light" attribute="class">
-				<Story />
+				{props.children}
 			</ThemeProvider>
 		</Flex>
 	);
 
-	if (tailwindTheme === 'light') {
+	if (theme === 'light') {
 		return <Light />;
 	}
 	return (
@@ -66,11 +116,11 @@ export function WithTailwindTheme(
 	);
 }
 
-export function WithAuth(
-	Story: PartialStoryFn<ReactRenderer, Args>,
-	context: StoryContext<ReactRenderer, Args>,
-) {
-	const { authState } = context.globals as Globals;
+export function WithAuth(props: {
+	children: React.ReactNode;
+	authState: 'signedIn' | 'signedOut';
+}) {
+	const { authState } = props;
 	const [queryClient] = useState(() => new QueryClient());
 	const [trpcClient, setTRPCClient] = useState(
 		storybookTrpc.createClient({
@@ -110,31 +160,31 @@ export function WithAuth(
 		<storybookTrpc.Provider client={trpcClient} queryClient={queryClient}>
 			<SessionProvider session={null}>
 				<QueryClientProvider client={queryClient}>
-					{Story()}
+					{props.children}
 				</QueryClientProvider>
 			</SessionProvider>
 		</storybookTrpc.Provider>
 	);
 }
 
-export function WithHighlightJS(Story: PartialStoryFn<ReactRenderer, Args>) {
+export function WithHighlightJS(props: { children: React.ReactNode }) {
 	useEffect(() => {
 		hljs.configure({
 			ignoreUnescapedHTML: true,
 		});
 		hljs.highlightAll();
 	}, []);
-	return <Story />;
+	return <>{props.children}</>;
 }
 
-export function WithAnalytics(Story: PartialStoryFn<ReactRenderer, Args>) {
+export function WithAnalytics(props: { children: React.ReactNode }) {
 	return (
 		<AnalyticsContextProvider
 			value={{
 				loaded: true,
 			}}
 		>
-			<Story />
+			{props.children}
 		</AnalyticsContextProvider>
 	);
 }
