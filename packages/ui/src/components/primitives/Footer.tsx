@@ -145,11 +145,11 @@ const PoweredByAnswerOverflowFooter = () => (
 );
 
 export function Footer() {
-	const tenant = useTenantContext();
+	const { isOnTenantSite } = useTenantContext();
 
 	return (
 		<footer>
-			{tenant ? <PoweredByAnswerOverflowFooter /> : <MainSiteFooter />}
+			{isOnTenantSite ? <PoweredByAnswerOverflowFooter /> : <MainSiteFooter />}
 		</footer>
 	);
 }

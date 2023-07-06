@@ -24,7 +24,7 @@ export function findTenantSessionByToken(token: string) {
 }
 
 export function deleteTenantSessionByToken(token: string) {
-	return prisma.tenantSession.delete({
+	return prisma.tenantSession.deleteMany({
 		where: {
 			id: token,
 		},

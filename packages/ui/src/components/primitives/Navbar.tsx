@@ -52,10 +52,59 @@ import {
 	LuSun,
 } from 'react-icons/lu';
 import { useTheme } from 'next-themes';
-
+const MainSiteDropdownMenuGroup = () => (
+	<>
+		<DropdownMenuGroup>
+			<DropdownMenuItem>
+				<LuLayoutDashboard className="mr-2 h-4 w-4" />
+				<Link href="/dashboard" className="w-full">
+					Dashboard
+				</Link>
+			</DropdownMenuItem>
+		</DropdownMenuGroup>
+		<DropdownMenuItem>
+			<LuPlus className="mr-2 h-4 w-4" />
+			<Link href="/onboarding" className="w-full">
+				Add To Server
+			</Link>
+		</DropdownMenuItem>
+		<DropdownMenuSeparator />
+		<DropdownMenuItem>
+			<LuGithub className="mr-2 h-4 w-4" />
+			<Link
+				href="https://www.github.com/answeroverflow/answeroverflow"
+				target="_blank"
+				className="w-full"
+			>
+				GitHub
+			</Link>
+		</DropdownMenuItem>
+		<DropdownMenuItem>
+			<DiscordIcon className="mr-2 h-4 w-4" />
+			<Link
+				href="https://discord.answeroverflow.com"
+				target="_blank"
+				className="w-full"
+			>
+				Discord
+			</Link>
+		</DropdownMenuItem>
+		<DropdownMenuItem>
+			<LuTwitter className="mr-2 h-4 w-4" />
+			<Link
+				href="https://www.twitter.com/answeroverflow"
+				target="_blank"
+				className="w-full"
+			>
+				Twitter
+			</Link>
+		</DropdownMenuItem>
+	</>
+);
 export const UserAvatar = ({ user }: { user: Session['user'] }) => {
 	const { theme, setTheme } = useTheme();
-
+	const { isOnTenantSite } = useTenantContext();
+	const { push } = useRouter();
 	return (
 		<DropdownMenu modal={false}>
 			<DropdownMenuTrigger className="flex flex-row justify-center">
@@ -74,52 +123,38 @@ export const UserAvatar = ({ user }: { user: Session['user'] }) => {
 			<DropdownMenuContent className="mr-4 mt-2 max-h-96 w-52">
 				<DropdownMenuLabel>My Account</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
-					<DropdownMenuItem>
-						<LuLayoutDashboard className="mr-2 h-4 w-4" />
-						<Link href="/dashboard">Dashboard</Link>
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
-				<DropdownMenuItem>
-					<LuPlus className="mr-2 h-4 w-4" />
-					<Link href="/onboarding">Add To Server</Link>
-				</DropdownMenuItem>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem>
-					<LuGithub className="mr-2 h-4 w-4" />
-					<Link
-						href="https://www.github.com/answeroverflow/answeroverflow"
-						target="_blank"
-					>
-						GitHub
-					</Link>
-				</DropdownMenuItem>
-				<DropdownMenuItem>
-					<DiscordIcon className="mr-2 h-4 w-4" />
-					<Link href="https://discord.answeroverflow.com" target="_blank">
-						Discord
-					</Link>
-				</DropdownMenuItem>
-				<DropdownMenuItem>
-					<LuTwitter className="mr-2 h-4 w-4" />
-					<Link href="https://www.twitter.com/answeroverflow" target="_blank">
-						Twitter
-					</Link>
-				</DropdownMenuItem>
-				<DropdownMenuSeparator />
+				{!isOnTenantSite && (
+					<>
+						<MainSiteDropdownMenuGroup />
+						<DropdownMenuSeparator />
+					</>
+				)}
 				<DropdownMenuItem
 					onClick={() => {
 						setTheme(theme === 'dark' ? 'light' : 'dark');
 					}}
 				>
-					<LuSun className="mr-2 hidden h-4 w-4 dark:block" />
-					<LuMoon className="mr-2 block h-4 w-4 dark:hidden" />
+					<LuSun className="mr-2 block h-4 w-4 dark:hidden" />
+					<LuMoon className="mr-2 hidden h-4 w-4 dark:block" />
 
-					<span>Change Theme</span>
+					<span className="w-full">Change Theme</span>
 				</DropdownMenuItem>
-				<DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={() => {
+						if (isOnTenantSite) {
+							const redirect =
+								typeof window !== 'undefined' ? window.location.href : '';
+							// navigate to /api/auth/tenant/signout?redirect=currentUrl
+							void push(`/api/auth/tenant/signout?redirect=${redirect}`);
+						} else {
+							void signOut({
+								callbackUrl: '/',
+							});
+						}
+					}}
+				>
 					<LuLogOut className="mr-2 h-4 w-4" />
-					<span>Log out</span>
+					<span className="w-full">Log out</span>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
@@ -130,8 +165,8 @@ export function NavbarRenderer(props: {
 	user: Session['user'] | null;
 	path: string;
 }) {
-	const tenant = useTenantContext();
-
+	const { isOnTenantSite, tenant } = useTenantContext();
+	console.log(props.user);
 	const UserSection = () =>
 		props.user ? <UserAvatar user={props.user} /> : <SignInButton />;
 
@@ -146,7 +181,7 @@ export function NavbarRenderer(props: {
 			<NavigationMenuItem>
 				<ThemeSwitcher />
 			</NavigationMenuItem>
-			{tenant === undefined && (
+			{!isOnTenantSite && (
 				<>
 					<NavigationMenuItem>
 						<Link href={GITHUB_LINK} target="_blank">

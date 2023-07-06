@@ -6,11 +6,16 @@ import {
 	getTenantCookieName,
 	getTenantCookieOptions,
 } from '@answeroverflow/auth';
+import { z } from 'zod';
 
 export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse<any>,
 ) {
+	const redirect = z
+		.string()
+		.url()
+		.parse(decodeURIComponent(req.query.redirect as string));
 	const authCookie = req.cookies[getTenantCookieName()];
 	if (!authCookie) {
 		res.status(201);
@@ -21,7 +26,10 @@ export default async function handler(
 	setCookie(res, {
 		name: getTenantCookieName(),
 		value: '',
-		options: getTenantCookieOptions(),
+		options: getTenantCookieOptions({
+			expires: new Date(0),
+		}),
 	});
-	res.status(200).json({ success: true });
+	res.redirect(redirect);
+	res.end();
 }

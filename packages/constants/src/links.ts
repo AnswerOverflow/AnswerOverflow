@@ -20,5 +20,11 @@ export const DISCORD_LINK = 'https://discord.answeroverflow.com';
 export const WEBSITE_URL = 'https://answeroverflow.com';
 export const DOCS_URL = 'https://docs.answeroverflow.com';
 export const WAITLIST_URL = 'https://forms.gle/6YLPPGi8X2DCr29T7';
-export const getBaseUrl = () =>
-	process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.answeroverflow.com';
+export const getBaseUrl = () => {
+	const base =
+		process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.answeroverflow.com';
+	return base.endsWith('/') ? base.slice(0, -1) : base;
+};
+export const makeMainSiteLink = (path: string) => {
+	return `${getBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`;
+};

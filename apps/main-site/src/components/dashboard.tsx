@@ -177,8 +177,8 @@ const LineChartCard = (props: { serverId: string }) => {
 			{data && (
 				<LineChart
 					data={data}
-					index="label"
-					categories={['value']}
+					index="day"
+					categories={['View Count']}
 					yAxisWidth={40}
 				/>
 			)}

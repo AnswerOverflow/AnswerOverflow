@@ -145,7 +145,7 @@ async function fetchPosthogInsight(input: {
 			dayjs(data.last_refresh),
 			'minute',
 		);
-		console.log('last refreshed', timeSinceLastRefresh);
+
 		if (timeSinceLastRefresh > 10) {
 			const refreshedData: TrendAPIResponse = await fetchPosthogInsight({
 				...input,
@@ -172,8 +172,8 @@ export async function fetchServerPageViewsAsLineChart(serverId: string) {
 		display: 'ActionsLineGraph',
 	});
 	const chartValues = data.result[0]!.labels.map((label, index) => ({
-		label,
-		value: data.result[0]!.data[index] ?? 0,
+		day: label,
+		'View Count': data.result[0]!.data[index] ?? 0,
 	}));
 	return chartValues;
 }

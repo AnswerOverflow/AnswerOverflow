@@ -22,6 +22,7 @@ export default function ConfigureDomainCard(props: {
 		},
 	});
 	const { fetching } = useDomainStatus({ domain: currentDomain ?? undefined });
+
 	return (
 		<Card>
 			<form
@@ -74,6 +75,7 @@ export default function ConfigureDomainCard(props: {
 						<Input
 							name="customDomain"
 							type="text"
+							key={currentDomain ?? props.server.id}
 							defaultValue={currentDomain || ''}
 							placeholder="yourdomain.com"
 							maxLength={64}

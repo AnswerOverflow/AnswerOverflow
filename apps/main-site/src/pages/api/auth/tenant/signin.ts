@@ -47,11 +47,15 @@ export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse<any>,
 ) {
-	const redirect = z.string().url().parse(req.query.redirect);
+	const redirect = z
+		.string()
+		.url()
+		.parse(decodeURIComponent(req.query.redirect as string));
 	const redirectURL = new URL(redirect);
 
 	const session = await getSession({ req });
 	const token = req.cookies[getNextAuthCookieName()] as string;
+	console.log('token', token);
 	if (!session || !token) {
 		const redirect = await getServerSignInUrl(
 			req,
@@ -64,11 +68,12 @@ export default async function handler(
 		res.end();
 		return;
 	}
-	console.log('host', redirectURL.host, 'hotname', redirectURL.hostname);
+
 	const tenant = await findServerByCustomDomain(redirectURL.host);
 	if (!tenant) {
 		return res.status(404).json({ error: 'Tenant not found' });
 	}
+
 	const tenantSession = await prisma.tenantSession.create({
 		data: {
 			id: crypto.randomUUID(),

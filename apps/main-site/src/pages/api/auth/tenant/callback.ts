@@ -18,6 +18,13 @@ export default function handler(
 		options: getTenantCookieOptions(),
 		value: token as string,
 	});
+	console.log(
+		'Setting cookie',
+		token,
+		getTenantCookieName(),
+		getTenantCookieOptions(),
+	);
 	// redirect to the original redirect
-	return res.redirect(redirect);
+	res.redirect(redirect);
+	return;
 }

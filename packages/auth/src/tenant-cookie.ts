@@ -11,14 +11,16 @@ export function getTenantCookieOptions(
 ): CookieSerializeOptions {
 	return {
 		httpOnly: true,
-		sameSite: 'strict',
+		sameSite: 'lax',
 		secure: process.env.NODE_ENV === 'production',
 		expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 1 month
+		domain: '',
+		path: '/',
 		...override,
 	};
 }
 
 export function getNextAuthCookieName() {
-	const cookiePrefix = process.env.NODE_ENV ? '__Secure-' : '';
+	const cookiePrefix = process.env.NODE_ENV === 'production' ? '__Secure-' : '';
 	return `${cookiePrefix}next-auth.session-token`;
 }

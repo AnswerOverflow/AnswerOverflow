@@ -22,8 +22,26 @@ const TenantContext = createContext<ServerPublic | undefined>(undefined);
 
 export const TenantContextProvider = TenantContext.Provider;
 
-export function useTenantContext() {
+export function useTenantContext():
+	| {
+			isOnTenantSite: true;
+			tenant: ServerPublic;
+	  }
+	| {
+			isOnTenantSite: false;
+			tenant: undefined;
+	  } {
 	const tenant = useContext(TenantContext);
 	// TODO: If we're not on the main site and we're on the client, warn
-	return tenant;
+	const isOnTenantSite = tenant !== undefined;
+	if (isOnTenantSite) {
+		return {
+			tenant,
+			isOnTenantSite: true,
+		};
+	}
+	return {
+		tenant: undefined,
+		isOnTenantSite: false,
+	};
 }

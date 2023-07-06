@@ -1,6 +1,10 @@
 import NextAuth from 'next-auth';
 
-import { authOptions, getNextAuthCookieName, getTenantCookieName } from '@answeroverflow/auth';
+import {
+	authOptions,
+	getNextAuthCookieName,
+	getTenantCookieName,
+} from '@answeroverflow/auth';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { findTenantSessionByToken } from '@answeroverflow/db';
 export default async function handler(

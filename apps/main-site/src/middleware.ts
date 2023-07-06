@@ -3,6 +3,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import type { NextURL } from 'next/dist/server/web/next-url';
+import { getNextAuthCookieName } from '@answeroverflow/auth/src/tenant-cookie';
+import { makeMainSiteLink } from 'packages/constants';
 
 const mainSiteHostName =
 	process.env.NODE_ENV === 'production'
@@ -59,7 +61,7 @@ function dataUnlockerRouteHandler(req: NextRequest) {
 	return rewrite;
 }
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
 	const url = req.nextUrl;
 	const path = url.pathname;
 	if (path.startsWith('/oemf7z50uh7w/')) {
@@ -67,6 +69,13 @@ export function middleware(req: NextRequest) {
 	}
 	const host = req.headers.get('host')!;
 	if (host === mainSiteHostName) {
+		const authedRoutes = new Set(['/dashboard']);
+		if (authedRoutes.has(path)) {
+			const authToken = req.cookies.get(getNextAuthCookieName());
+			if (!authToken) {
+				return NextResponse.redirect(makeMainSiteLink('/api/auth/signin'));
+			}
+		}
 		return NextResponse.next();
 	}
 	// rewrite everything else to `/[domain]/[path] dynamic route

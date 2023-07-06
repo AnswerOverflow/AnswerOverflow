@@ -86,7 +86,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 	const [selectedChannelId, setSelectedChannelId] = useState<null | string>(
 		channels.at(0)?.channel.id ?? null,
 	);
-	const tenant = useTenantContext();
+	const { isOnTenantSite } = useTenantContext();
 	useTrackEvent('Community Page View', serverToAnalyticsData(server));
 
 	const selectedChannel = channels.find(
@@ -217,7 +217,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 						server.description ??
 						`The community page for ${server.name} on Answer Overflow.`
 					}
-					path={tenant ? '/' : `/c/${server.id}`}
+					path={isOnTenantSite ? '/' : `/c/${server.id}`}
 					server={server}
 				/>
 
