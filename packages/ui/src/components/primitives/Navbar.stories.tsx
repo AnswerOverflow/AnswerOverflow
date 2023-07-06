@@ -1,25 +1,19 @@
-import type { Meta, StoryObj } from '@storybook/react';
-
+import type { Story } from '@ladle/react';
 import { NavbarRenderer } from './Navbar';
-const meta = {
-	component: NavbarRenderer,
-} as Meta<typeof NavbarRenderer>;
 
-export default meta;
+type NavbarRendererProps = React.ComponentPropsWithoutRef<typeof NavbarRenderer>
 
-type Story = StoryObj<typeof meta>;
+const NotSignedIn: Story<NavbarRendererProps> = (props) => <NavbarRenderer {...props} />
 
-export const NotSignedIn: Story = {
-	args: {
-		path: '/',
-	},
+NotSignedIn.args = {
+  path: '/',
 };
 
-export const SignedIn: Story = {
-	args: {
-		path: '/',
-		user: {
-			id: '123',
-		},
-	},
+export const SignedIn = NotSignedIn.bind({})
+SignedIn.args = {
+  path: '/',
+  user: {
+    id: '123',
+  },
 };
+

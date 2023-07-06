@@ -1,27 +1,23 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Story } from '@ladle/react';
 import { StatsCard, type StatsCardProps } from './StatsCard';
-const meta = {
-	component: StatsCard,
-	argTypes: {
-		changeType: {
-			control: 'radio',
-			options: ['increase', 'decrease'],
-		},
-	},
-} as Meta<typeof StatsCard>;
 
-export default meta;
+export const Primary: Story<StatsCardProps> = (props) => <StatsCard {...props} />
 
-type Story = StoryObj<typeof meta>;
-
-const primaryArgs: StatsCardProps = {
-	title: 'Questions asked',
-	stat: '123',
-	percentageChange: '12.52%',
-	changeType: 'decrease',
-	changeCount: '12',
-	changeDuration: '15 days',
+Primary.args = {
+  title: 'Questions asked',
+  stat: '123',
+  percentageChange: '12.52%',
+  changeType: 'decrease',
+  changeCount: '12',
+  changeDuration: '15 days',
 };
-export const Primary: Story = {
-	args: primaryArgs,
-};
+
+Primary.argTypes = {
+  changeType: {
+    control: {
+      type: "radio"
+    },
+    options: ["increase", "decrease"]
+  }
+}
+
