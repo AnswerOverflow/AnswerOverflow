@@ -80,6 +80,7 @@ function setupMockedInteractionAPIData<Type extends InteractionType>({
 			avatar: caller.avatar,
 			discriminator: caller.discriminator,
 			username: caller.username,
+			global_name: caller.username,
 		},
 		member: guild
 			? {
@@ -89,7 +90,8 @@ function setupMockedInteractionAPIData<Type extends InteractionType>({
 						.get(caller.id)!
 						.joinedAt!.toISOString(),
 					mute: false,
-					permissions: memberPermissions!,
+					permissions:
+						memberPermissions ?? PermissionsBitField.Default.toString(),
 					roles: guild.members.cache
 						.get(caller.id)!
 						.roles.cache.map((r) => r.id),
@@ -98,6 +100,7 @@ function setupMockedInteractionAPIData<Type extends InteractionType>({
 						avatar: caller.avatar,
 						discriminator: caller.discriminator,
 						username: caller.username,
+						global_name: caller.username,
 					},
 					avatar: caller.avatar,
 			  }
