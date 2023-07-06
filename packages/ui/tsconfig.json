@@ -8,7 +8,6 @@
 	"extends": "@answeroverflow/tsconfig/nextjs.json",
 	"include": [
 		"next-env.d.ts",
-		".storybook/*",
 		"test",
 		"next.config.mjs",
 		"../../reset.d.ts",

@@ -4,13 +4,13 @@ import { transformer } from '@answeroverflow/api/transformer';
 import React, { useEffect, useState } from 'react';
 import { trpc, type StorybookTRPC } from '../src/utils/trpc';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
-import Router, { NextRouter } from 'next/router';
+import Router, { type NextRouter } from 'next/router';
 import hljs from 'highlight.js';
 import { ThemeProvider } from 'next-themes';
 import { SessionProvider } from 'next-auth/react';
 import { AnalyticsContextProvider } from '@answeroverflow/hooks';
 import { useGlobalState, type GlobalState } from './GlobalState';
-import { ModeState } from '@ladle/react';
+import { ModeState, action } from '@ladle/react';
 
 const storybookTrpc = trpc as StorybookTRPC;
 
@@ -62,7 +62,7 @@ export const WithNextRouter = (props: { children: React.ReactNode }) => {
 		},
 		isFallback: false,
 		...parameters,
-	} as typeof Router.router;
+	} as unknown as typeof Router.router;
 
 	return (
 		<Provider value={Router.router as NextRouter}>{props.children}</Provider>
