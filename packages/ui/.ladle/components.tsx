@@ -7,7 +7,7 @@ import {
 	WithNextRouter,
 	WithTailwindTheme,
 } from './decorators';
-import { GlobalState, GlobalStateProvider } from './GlobalState';
+import { GlobalStateProvider } from './global-state';
 import React from 'react';
 
 export const Provider: GlobalProvider = ({ children, globalState }) => {

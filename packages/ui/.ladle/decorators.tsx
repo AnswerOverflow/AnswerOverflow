@@ -9,7 +9,7 @@ import hljs from 'highlight.js';
 import { ThemeProvider } from 'next-themes';
 import { SessionProvider } from 'next-auth/react';
 import { AnalyticsContextProvider } from '@answeroverflow/hooks';
-import { useGlobalState, type GlobalState } from './GlobalState';
+import { useGlobalState, type GlobalState } from './global-state';
 import { ModeState, action } from '@ladle/react';
 
 const storybookTrpc = trpc as StorybookTRPC;
