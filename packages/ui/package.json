@@ -10,14 +10,6 @@
 		"lint": "next lint && tsc --noEmit",
 		"lint:fix": "next lint --fix",
 		"dev": "cross-env THEME=\"both\" ladle dev -p 6006",
-		"test:ui:dark:no-serve": "npx wait-on http://127.0.0.1:6006 && cross-env THEME=\"dark\" test-storybook --maxWorkers=2 --url=http://127.0.0.1:6006",
-		"test:ui:dark": "cross-env THEME=\"dark\" storybook build --quiet -o storybook-static-dark && npx concurrently -k -s first -n \"SB,DARK\" -c \"magenta,blue\" \"npx http-server storybook-static-dark --port 6006 --silent\" \"yarn test:ui:dark:no-serve\"",
-		"test:ui:light:no-serve": "npx wait-on http://127.0.0.1:6007 && test-storybook --maxWorkers=2 --url=http://127.0.0.1:6007",
-		"test:ui:light": "cross-env THEME=\"light\" storybook build --quiet -o storybook-static-light && npx concurrently -k -s first -n \"SB,LIGHT\" -c \"magenta,blue\" \"npx http-server storybook-static-light --port 6007 --silent\" \"yarn test:ui:light:no-serve\"",
-		"test": "yarn test:ui:dark && yarn test:ui:light",
-		"build": "storybook build --quiet",
-		"storybook": "yarn dev",
-		"build-storybook": "storybook build public",
 		"clean": "rm -rf .next storybook-static* node_modules"
 	},
 	"dependencies": {

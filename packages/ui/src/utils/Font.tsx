@@ -1,3 +1,3 @@
 export const Font = () => {
-  return null
-}
+	return null;
+};

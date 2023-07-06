@@ -6,7 +6,7 @@ import {
 	mockMessageWithDiscordAccount,
 } from '~ui/test/props';
 
-export default {
+const args = {
 	argTypes: {
 		collapseContent: {
 			control: {
@@ -22,6 +22,8 @@ export default {
 		},
 	},
 };
+
+export default args;
 
 export const Primary: Story<MessageProps> = (props) => <Message {...props} />;
 Primary.args = {

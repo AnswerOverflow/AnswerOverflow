@@ -26,11 +26,13 @@ const config = ({ mode }: { mode: string }) => {
 				),
 			},
 		},
-		optimizeDeps: {
-			exclude: ['next/font', 'next/font/google'],
-		},
-
 		publicDir: '../../apps/main-site/public/',
+		build: {
+			manifest: true,
+			rollupOptions: {
+				external: ['@answeroverflow/db', '@answeroverflow/api'],
+			},
+		},
 	});
 };
 
