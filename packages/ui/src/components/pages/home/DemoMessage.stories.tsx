@@ -51,6 +51,7 @@ const defaultMessage: MessageProps = {
 export const Primary: Story<MessageProps> = (props) => (
 	<DemoMessage {...props} />
 );
+Primary.args = defaultMessage;
 export const OverflowLetters = Primary.bind({});
 export const WithImages = Primary.bind({});
 export const WithCode = Primary.bind({});

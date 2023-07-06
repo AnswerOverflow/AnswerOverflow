@@ -12,16 +12,16 @@ import React from 'react';
 
 export const Provider: GlobalProvider = ({ children, globalState }) => {
 	return (
-		<GlobalStateProvider value={globalState}>
-			<WithNextRouter>
-				<WithAuth authState="signedIn">
-					<WithTailwindTheme>
-						<WithHighlightJS>
-							<WithAnalytics>{children}</WithAnalytics>
-						</WithHighlightJS>
-					</WithTailwindTheme>
-				</WithAuth>
-			</WithNextRouter>
-		</GlobalStateProvider>
+			<GlobalStateProvider value={globalState}>
+				<WithNextRouter>
+					<WithAuth authState="signedIn">
+						<WithTailwindTheme>
+							<WithHighlightJS>
+								<WithAnalytics>{children}</WithAnalytics>
+							</WithHighlightJS>
+						</WithTailwindTheme>
+					</WithAuth>
+				</WithNextRouter>
+			</GlobalStateProvider>
 	);
 };

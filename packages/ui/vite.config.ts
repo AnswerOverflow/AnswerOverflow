@@ -2,14 +2,14 @@ import { defineConfig, loadEnv } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
 
-export default ({ mode }) => {
+const config = ({ mode }: { mode: string }) => {
 	const env = loadEnv(mode, '../../../.env', '');
 	return defineConfig({
 		define: {
 			'process.env': {
-        ...env,
-        LADLE: true
-      },
+				...env,
+				LADLE: true,
+			},
 		},
 		server: {
 			open: false,
@@ -21,5 +21,9 @@ export default ({ mode }) => {
 				'next/link': path.resolve(__dirname, './.ladle/UnoptimizedLink.tsx'),
 			},
 		},
+
+		publicDir: '../../apps/main-site/public/',
 	});
 };
+
+export default config;

@@ -4219,11 +4219,6 @@ dayjs@^1.11.7:
   resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.11.9.tgz#9ca491933fadd0a60a2c19f6c237c03517d71d1a"
   integrity sha512-QvzAURSbQ0pKdIye2txOzNaHmxtUBXerpY0FJsFXUMKbIZeFm5ht1LS/jFsrncjnmtv8HsG0W2g6c0zUjZWmpA==
 
-debounce@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/debounce/-/debounce-1.2.1.tgz#38881d8f4166a5c5848020c11827b834bcb3e0a5"
-  integrity sha512-XRRe6Glud4rd/ZGQfiV1ruXSfbvfJedlV9Y6zOlP+2K04vBYiJEte6stfFkCP03aMnY5tsipamumUjL14fofug==
-
 debug@4, debug@^4.0.0, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2, debug@^4.3.4:
   version "4.3.4"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.4.tgz#1319f6579357f2338d3337d2cdd4914bb5dcc865"
@@ -5676,11 +5671,6 @@ gray-matter@^4.0.3:
     kind-of "^6.0.2"
     section-matter "^1.0.0"
     strip-bom-string "^1.0.0"
-
-gsap@^3.11.4:
-  version "3.12.2"
-  resolved "https://registry.yarnpkg.com/gsap/-/gsap-3.12.2.tgz#6e88203eed360761cbf2a2cb3a8d702aa87f3f6d"
-  integrity sha512-EkYnpG8qHgYBFAwsgsGEqvT1WUidX0tt/ijepx7z8EUJHElykg91RvW1XbkT59T0gZzzszOpjQv7SE41XuIXyQ==
 
 has-bigints@^1.0.1, has-bigints@^1.0.2:
   version "1.0.2"
@@ -8961,11 +8951,6 @@ react-fast-compare@^3.0.1:
   resolved "https://registry.yarnpkg.com/react-fast-compare/-/react-fast-compare-3.2.2.tgz#929a97a532304ce9fee4bcae44234f1ce2c21d49"
   integrity sha512-nsO+KSNgo1SbJqJEYRE9ERzo7YtYbou/OqjSQKxV7jcKox7+usiUVZOAC+XnDOABXggQTno0Y1CpVnuWEc1boQ==
 
-react-fast-marquee@^1.4.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/react-fast-marquee/-/react-fast-marquee-1.6.0.tgz#3749a9d0f522234e1e3ab776f105cd0accd76a4a"
-  integrity sha512-jtuwT9SNjrqxnE7lGZ8mTL1I8Q4+9G4aBta2p+y2Pa3SjR17QROblwrLICyM8rbjQFHgHawTHcaH9HvoVO2NOA==
-
 react-frame-component@5.2.4:
   version "5.2.4"
   resolved "https://registry.yarnpkg.com/react-frame-component/-/react-frame-component-5.2.4.tgz#8282849fe0eb315fb30b00c67e5e979f8f63c01a"
@@ -9118,13 +9103,6 @@ react-universal-interface@^0.6.2:
   version "0.6.2"
   resolved "https://registry.yarnpkg.com/react-universal-interface/-/react-universal-interface-0.6.2.tgz#5e8d438a01729a4dbbcbeeceb0b86be146fe2b3b"
   integrity sha512-dg8yXdcQmvgR13RIlZbTRQOoUrDciFVoSBZILwjE2LFISxZZ8loVJKAkuzswl5js8BHda79bIb2b84ehU8IjXw==
-
-react-use-measure@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/react-use-measure/-/react-use-measure-2.1.1.tgz#5824537f4ee01c9469c45d5f7a8446177c6cc4ba"
-  integrity sha512-nocZhN26cproIiIduswYpV5y5lQpSQS1y/4KuvUCjSKmw7ZWIS/+g3aFnX3WdBkyuGUtTLif3UTqnLLhbDoQig==
-  dependencies:
-    debounce "^1.2.1"
 
 react-use@^17.4.0:
   version "17.4.0"
@@ -10059,11 +10037,6 @@ strtok3@^7.0.0:
     "@tokenizer/token" "^0.3.0"
     peek-readable "^5.0.0"
 
-style-loader@^3.3.3:
-  version "3.3.3"
-  resolved "https://registry.yarnpkg.com/style-loader/-/style-loader-3.3.3.tgz#bba8daac19930169c0c9c96706749a597ae3acff"
-  integrity sha512-53BiGLXAcll9maCYtZi2RCQZKa8NQQai5C4horqKyRmHj9H7QmcUyucrH+4KW/gBQbXM2AsB0axoEcFZPlfPcw==
-
 style-to-object@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/style-to-object/-/style-to-object-0.4.1.tgz#53cf856f7cf7f172d72939d9679556469ba5de37"
@@ -10153,11 +10126,6 @@ tailwind-scrollbar-hide@^1.1.7:
   version "1.1.7"
   resolved "https://registry.yarnpkg.com/tailwind-scrollbar-hide/-/tailwind-scrollbar-hide-1.1.7.tgz#90b481fb2e204030e3919427416650c54f56f847"
   integrity sha512-X324n9OtpTmOMqEgDUEA/RgLrNfBF/jwJdctaPZDzB3mppxJk7TLIDmOreEDm1Bq4R9LSPu4Epf8VSdovNU+iA==
-
-tailwindcss-animate@^1.0.5:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/tailwindcss-animate/-/tailwindcss-animate-1.0.6.tgz#c7195037481552cc47962ea50113830360fd0c28"
-  integrity sha512-4WigSGMvbl3gCCact62ZvOngA+PRqhAn7si3TQ3/ZuPuQZcIEtVap+ENSXbzWhpojKB8CpvnIsrwBu8/RnHtuw==
 
 tailwindcss@^3.2.0, tailwindcss@^3.2.4, tailwindcss@^3.2.6:
   version "3.3.2"

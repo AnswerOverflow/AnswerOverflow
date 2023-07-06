@@ -1,9 +1,12 @@
 {
 	"compilerOptions": {
-		"target": "es2017",
 		"baseUrl": "../../",
 		"types": ["jest"],
-		"esModuleInterop": true
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"module": "esnext",
+		"target": "ESNext",
+		"moduleResolution": "Node"
 	},
 	"extends": "@answeroverflow/tsconfig/nextjs.json",
 	"include": [
@@ -14,7 +17,8 @@
 		"postcss.config.cjs",
 		"tailwind.config.cjs",
 		"src",
-		".ladle/decorators.tsx"
+		".ladle",
+		"vite.config.ts"
 	],
 	"exclude": ["node_modules", "../../node_modules"]
 }
