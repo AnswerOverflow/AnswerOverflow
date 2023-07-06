@@ -8,10 +8,7 @@ import {
 	findIgnoredDiscordAccountById,
 } from '@answeroverflow/db';
 import { z } from 'zod';
-import {
-	router,
-	withDiscordAccountProcedure,
-} from '~api/router/trpc';
+import { router, withDiscordAccountProcedure } from '~api/router/trpc';
 import {
 	protectedFetch,
 	protectedFetchManyWithPublicData,

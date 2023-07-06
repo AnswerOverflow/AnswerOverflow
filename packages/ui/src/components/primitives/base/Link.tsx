@@ -6,8 +6,5 @@ export const AOLink = ({
 	className,
 	...rest
 }: React.ComponentPropsWithoutRef<typeof Link>) => (
-	<Link
-		className={cn('text-blue-600 hover:underline', className)}
-		{...rest}
-	/>
+	<Link className={cn('text-blue-600 hover:underline', className)} {...rest} />
 );
