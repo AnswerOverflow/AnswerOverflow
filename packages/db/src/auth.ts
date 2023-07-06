@@ -15,6 +15,22 @@ export function findAccountByProviderAccountId(input: {
 	});
 }
 
+export function findTenantSessionByToken(token: string) {
+	return prisma.tenantSession.findUnique({
+		where: {
+			id: token,
+		},
+	});
+}
+
+export function deleteTenantSessionByToken(token: string) {
+	return prisma.tenantSession.delete({
+		where: {
+			id: token,
+		},
+	});
+}
+
 export function findDiscordOauthByProviderAccountId(discordId: string) {
 	return findAccountByProviderAccountId({
 		provider: 'discord',

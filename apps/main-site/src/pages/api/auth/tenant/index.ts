@@ -1,8 +1,47 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/react';
+import { getCsrfToken, getSession } from 'next-auth/react';
 import { findServerByCustomDomain, prisma } from '@answeroverflow/db';
 import { z } from 'zod';
 import crypto from 'crypto';
+// 👀 why are you here looking at this code? 👀
+// eslint-disable-next-line no-restricted-imports
+import { init } from '../../../../../../../node_modules/next-auth/core/init';
+// eslint-disable-next-line no-restricted-imports
+import getAuthorizationUrl from '../../../../../../../node_modules/next-auth/core/lib/oauth/authorization-url';
+// eslint-disable-next-line no-restricted-imports
+import { setCookie } from '../../../../../../../node_modules/next-auth/next/utils';
+// if you can do it better please make a PR please please please
+import { authOptions, getNextAuthCookieName } from '@answeroverflow/auth';
+import { IncomingMessage } from 'http';
+import { NextAuthOptions } from 'next-auth';
+import { NextApiRequestCookies } from 'next/dist/server/api-utils';
+
+async function getServerSignInUrl(
+	req: IncomingMessage,
+	cookies: NextApiRequestCookies,
+	authOptions: NextAuthOptions,
+) {
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+	const { options, cookies: initCookies } = await init({
+		action: 'signin',
+		authOptions,
+		isPost: true,
+		providerId: 'discord',
+		cookies,
+		csrfToken: await getCsrfToken({ req }),
+		callbackUrl: req.url,
+	});
+	const { redirect, cookies: authCookies } = await getAuthorizationUrl({
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		options,
+		query: {},
+	});
+	return {
+		redirect,
+		// @ts-expect-error
+		cookies: [...initCookies, ...authCookies],
+	};
+}
 
 export default async function handler(
 	req: NextApiRequest,
@@ -12,9 +51,18 @@ export default async function handler(
 	const redirectURL = new URL(redirect);
 
 	const session = await getSession({ req });
-	const token = req.cookies['next-auth.session-token'] as string;
+	const token = req.cookies[getNextAuthCookieName()] as string;
 	if (!session || !token) {
-		return res.redirect(`/tenant-auth?redirect=${redirect}`);
+		const redirect = await getServerSignInUrl(
+			req,
+			req.cookies,
+			authOptions, // your authOptions
+		);
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+		redirect.cookies?.forEach((cookie) => setCookie(res, cookie));
+		res.writeHead(302, { Location: redirect.redirect });
+		res.end();
+		return;
 	}
 	console.log('host', redirectURL.host, 'hotname', redirectURL.hostname);
 	const tenant = await findServerByCustomDomain(redirectURL.host);
@@ -33,5 +81,6 @@ export default async function handler(
 
 	const redirectWithToken = `${redirectURL.origin}/api/auth/tenant/callback?redirect=${redirect}&code=${tenantSessionId}`;
 
-	return res.redirect(redirectWithToken);
+	res.redirect(redirectWithToken);
+	return;
 }

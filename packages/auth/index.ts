@@ -22,3 +22,5 @@ declare module 'next-auth' {
 		isTenantSession: boolean;
 	}
 }
+
+export * from './src/tenant-cookie';

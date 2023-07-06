@@ -1,4 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { setCookie } from '../../../../../../../node_modules/next-auth/next/utils';
+import { getTenantCookieName, getTenantCookieOptions } from 'packages/auth';
 
 export default function handler(
 	req: NextApiRequest,
@@ -11,12 +13,11 @@ export default function handler(
 		return res.status(400);
 	}
 	// set the answeroverflow.tenant.token cookie
-	res.setHeader(
-		'Set-Cookie',
-		`answeroverflow.tenant-token=${
-			token as string
-		}; Path=/; HttpOnly; SameSite=Lax; Max-Age=31536000`,
-	);
+	setCookie(res, {
+		name: getTenantCookieName(),
+		options: getTenantCookieOptions(),
+		value: token as string,
+	});
 	// redirect to the original redirect
 	return res.redirect(redirect);
 }

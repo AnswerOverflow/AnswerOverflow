@@ -16,7 +16,6 @@ import Link from 'next/link';
 import {
 	AOHead,
 	AnswerOverflowLogo,
-	ThemeSwitcher,
 	UserAvatar,
 	GetStarted,
 	AOLink,
@@ -168,35 +167,6 @@ function CurrentPlanCard(props: {
 
 import { LineChart, Title } from '@tremor/react';
 
-const chartdata = [
-	{
-		year: 1970,
-		'Export Growth Rate': 2.04,
-		'Import Growth Rate': 1.53,
-	},
-	{
-		year: 1971,
-		'Export Growth Rate': 1.96,
-		'Import Growth Rate': 1.58,
-	},
-	{
-		year: 1972,
-		'Export Growth Rate': 1.96,
-		'Import Growth Rate': 1.61,
-	},
-	{
-		year: 1973,
-		'Export Growth Rate': 1.93,
-		'Import Growth Rate': 1.61,
-	},
-	{
-		year: 1974,
-		'Export Growth Rate': 1.88,
-		'Import Growth Rate': 1.67,
-	},
-	//...
-];
-
 const LineChartCard = (props: { serverId: string }) => {
 	const { data } = trpc.servers.fetchPageViewsAsLineChart.useQuery(
 		props.serverId,
@@ -232,9 +202,6 @@ export function ServerDashboard(props: { serverId: string }) {
 					<DashboardServerSelect />
 				</div>
 				<div className="flex flex-row items-center space-x-4">
-					<div className="hidden md:block">
-						<ThemeSwitcher />
-					</div>
 					{user.data && <UserAvatar user={user.data.user} />}
 				</div>
 			</nav>

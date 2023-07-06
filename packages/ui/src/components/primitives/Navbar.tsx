@@ -1,4 +1,4 @@
-import type { User } from '@answeroverflow/api';
+import type { Session } from 'next-auth';
 import Link from 'next/link';
 import React from 'react';
 import { useRouter } from 'next/router';
@@ -6,7 +6,7 @@ import { trpc } from '~ui/utils/trpc';
 import { GetStarted, SignInButton } from './Callouts';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { Avatar, AvatarFallback, AvatarImage } from './base/Avatar';
-import { GitHubIcon } from './base/Icons';
+import { DiscordIcon, GitHubIcon } from './base/Icons';
 import {
 	NavigationMenu,
 	NavigationMenuItem,
@@ -17,6 +17,18 @@ import {
 	PopoverTrigger,
 	PopoverContent,
 	Button,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuGroup,
+	DropdownMenuSeparator,
+	DropdownMenuSub,
+	DropdownMenuSubTrigger,
+	DropdownMenuPortal,
+	DropdownMenuShortcut,
+	DropdownMenuSubContent,
+	DropdownMenu,
+	DropdownMenuTrigger,
+	DropdownMenuContent,
 } from './base';
 import {
 	Bars3Icon,
@@ -28,15 +40,25 @@ import { GITHUB_LINK } from '@answeroverflow/constants/src/links';
 import { signIn, signOut } from 'next-auth/react';
 import { useTenantContext } from '@answeroverflow/hooks';
 import { ServerIcon } from './ServerIcon';
-// TODO: Clean up this navbar area, bit of a mess
 
-export const UserAvatar = ({ user }: { user: User }) => (
-	<Popover>
-		<PopoverTrigger asChild>
-			<Button
-				variant="outline"
-				className="h-16 rounded-full border-0 bg-inherit dark:bg-inherit"
-			>
+// TODO: Clean up this navbar area, bit of a mess
+import {
+	LuGithub,
+	LuLogOut,
+	LuPlus,
+	LuLayoutDashboard,
+	LuTwitter,
+	LuMoon,
+	LuSun,
+} from 'react-icons/lu';
+import { useTheme } from 'next-themes';
+
+export const UserAvatar = ({ user }: { user: Session['user'] }) => {
+	const { theme, setTheme } = useTheme();
+
+	return (
+		<DropdownMenu modal={false}>
+			<DropdownMenuTrigger className="flex flex-row justify-center">
 				<Avatar>
 					<AvatarImage
 						alt={user.name ?? 'Signed In User'}
@@ -48,40 +70,66 @@ export const UserAvatar = ({ user }: { user: User }) => (
 							.map((word) => word.at(0)?.toUpperCase())}
 					</AvatarFallback>
 				</Avatar>
-				<ChevronDownIcon className="h-4 w-4" />
-			</Button>
-		</PopoverTrigger>
-		<PopoverContent className="w-40">
-			<div className="grid gap-4">
-				<div className="flex flex-row space-y-2">
-					<LinkButton
-						variant="ghost"
-						className="w-full"
-						size="sm"
-						href="/dashboard"
+			</DropdownMenuTrigger>
+			<DropdownMenuContent className="mr-4 mt-2 max-h-96 w-52">
+				<DropdownMenuLabel>My Account</DropdownMenuLabel>
+				<DropdownMenuSeparator />
+				<DropdownMenuGroup>
+					<DropdownMenuItem>
+						<LuLayoutDashboard className="mr-2 h-4 w-4" />
+						<Link href="/dashboard">Dashboard</Link>
+					</DropdownMenuItem>
+				</DropdownMenuGroup>
+				<DropdownMenuItem>
+					<LuPlus className="mr-2 h-4 w-4" />
+					<Link href="/onboarding">Add To Server</Link>
+				</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem>
+					<LuGithub className="mr-2 h-4 w-4" />
+					<Link
+						href="https://www.github.com/answeroverflow/answeroverflow"
+						target="_blank"
 					>
-						Dashboard
-					</LinkButton>
-				</div>
-				<div className="flex flex-row space-y-2">
-					<Button
-						variant="ghost"
-						className="w-full"
-						size="sm"
-						// eslint-disable-next-line @typescript-eslint/no-misused-promises
-						onClick={async () => {
-							await signOut();
-						}}
-					>
-						Sign Out
-					</Button>
-				</div>
-			</div>
-		</PopoverContent>
-	</Popover>
-);
+						GitHub
+					</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem>
+					<DiscordIcon className="mr-2 h-4 w-4" />
+					<Link href="https://discord.answeroverflow.com" target="_blank">
+						Discord
+					</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem>
+					<LuTwitter className="mr-2 h-4 w-4" />
+					<Link href="https://www.twitter.com/answeroverflow" target="_blank">
+						Twitter
+					</Link>
+				</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem
+					onClick={() => {
+						setTheme(theme === 'dark' ? 'light' : 'dark');
+					}}
+				>
+					<LuSun className="mr-2 hidden h-4 w-4 dark:block" />
+					<LuMoon className="mr-2 block h-4 w-4 dark:hidden" />
 
-export function NavbarRenderer(props: { user: User | null; path: string }) {
+					<span>Change Theme</span>
+				</DropdownMenuItem>
+				<DropdownMenuItem>
+					<LuLogOut className="mr-2 h-4 w-4" />
+					<span>Log out</span>
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
+};
+
+export function NavbarRenderer(props: {
+	user: Session['user'] | null;
+	path: string;
+}) {
 	const tenant = useTenantContext();
 
 	const UserSection = () =>
@@ -111,87 +159,7 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 					</NavigationMenuItem>
 				</>
 			)}
-			<NavigationMenuItem>
-				<UserSection />
-			</NavigationMenuItem>
 		</>
-	);
-
-	const Mobile = () => (
-		<Popover>
-			<PopoverTrigger asChild>
-				<Button variant="outline" className="w-10 rounded-full border-0 p-0">
-					<Bars3Icon className="h-6 w-6" />
-					<span className="sr-only">Open popover</span>
-				</Button>
-			</PopoverTrigger>
-			<PopoverContent className="w-40">
-				<div className="grid gap-4">
-					<div className="flex flex-row space-y-2">
-						<Button
-							variant="ghost"
-							className="w-full items-start justify-start"
-							// eslint-disable-next-line @typescript-eslint/no-misused-promises
-							onClick={async () => {
-								if (props.user) {
-									await signOut();
-								} else {
-									await signIn('discord');
-								}
-							}}
-						>
-							{props.user ? 'Sign Out' : 'Sign In'}
-						</Button>
-					</div>
-					{tenant === undefined && (
-						<>
-							<div className="flex flex-row space-y-2">
-								<LinkButton
-									variant="ghost"
-									className="w-full items-start justify-start"
-									href={'/onboarding'}
-								>
-									Get Started
-								</LinkButton>
-							</div>
-							<div className="flex flex-row space-y-2">
-								<LinkButton
-									variant="ghost"
-									className="w-full items-start justify-start"
-									href={'/dashboard'}
-								>
-									Dashboard
-								</LinkButton>
-							</div>
-							<div className="flex flex-row space-y-2">
-								<LinkButton
-									variant="ghost"
-									className="w-full items-start justify-between"
-									href={GITHUB_LINK}
-								>
-									GitHub
-									<GitHubIcon className="h-6 w-6" />
-								</LinkButton>
-							</div>
-						</>
-					)}
-					<div className="flex w-full flex-row space-y-2">
-						<ThemeSwitcher
-							Switcher={({ toggleTheme }) => (
-								<Button
-									variant="ghost"
-									onClick={toggleTheme}
-									className="text-left"
-								>
-									Change Theme
-									<ThemeIcon />
-								</Button>
-							)}
-						/>
-					</div>
-				</div>
-			</PopoverContent>
-		</Popover>
 	);
 
 	return (
@@ -215,7 +183,7 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 					</Link>
 				</NavigationMenuItem>
 			</NavigationMenuList>
-			<div className="flex items-center">
+			<div className="flex items-center gap-4">
 				<NavigationMenuList className="hidden md:flex">
 					<Desktop />
 				</NavigationMenuList>
@@ -226,8 +194,8 @@ export function NavbarRenderer(props: { user: User | null; path: string }) {
 							<span className="sr-only">Search Answer Overflow</span>
 						</Link>
 					</NavigationMenuItem>
-					<NavigationMenuItem className="md:hidden">
-						<Mobile />
+					<NavigationMenuItem>
+						<UserSection />
 					</NavigationMenuItem>
 				</NavigationMenuList>
 			</div>

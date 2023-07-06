@@ -4,6 +4,7 @@ import { appRouter } from '@answeroverflow/api';
 import { finishAnalyticsCollection } from '@answeroverflow/analytics';
 import type { NextApiRequest, NextApiResponse } from 'next/types';
 import { prisma } from '@answeroverflow/db';
+import { getNextAuthCookieName, getTenantCookieName } from 'packages/auth';
 // create the API handler, but don't return it yet
 const nextApiHandler = createNextApiHandler({
 	router: appRouter,
@@ -30,7 +31,7 @@ export default async function handler(
 			return res.end();
 		}
 	}
-	const token = req.cookies['answeroverflow.tenant-token'];
+	const token = req.cookies[getTenantCookieName()];
 	if (token) {
 		const nextAuthSession = await prisma.tenantSession.findUnique({
 			where: {
@@ -38,7 +39,7 @@ export default async function handler(
 			},
 		});
 		// add a cookie to the request using the next auth header
-		req.cookies['next-auth.session-token'] = nextAuthSession?.sessionToken;
+		req.cookies[getNextAuthCookieName()] = nextAuthSession?.sessionToken;
 	}
 	if (req.headers.host !== 'localhost:3000') {
 		// eslint-disable-next-line @typescript-eslint/unbound-method
@@ -50,7 +51,7 @@ export default async function handler(
 	}
 	// pass the (modified) req/res to the handler
 	// weird type errors even though they're the same
-	// @ts-expect-error
+
 	const trpcOutput = await nextApiHandler(req, res);
 
 	await finishAnalyticsCollection();
