@@ -1,18 +1,12 @@
-import type { Meta, StoryObj } from '@storybook/react';
-
+import type { Story } from '@ladle/react';
 import { LinkButton } from './LinkButton';
-const meta = {
-	component: LinkButton,
-	render: (args) => <LinkButton {...args}>Text</LinkButton>,
-} as Meta<typeof LinkButton>;
 
-export default meta;
+type LinkButtonProps = React.ComponentPropsWithoutRef<typeof LinkButton>
 
-type Story = StoryObj<typeof meta>;
+export const LinkButtonStory: Story<LinkButtonProps> = (props) => <LinkButton {...props} />
 
-export const LinkButtonStory: Story = {
-	args: {
-		variant: 'default',
-		href: 'https://answeroverflow.com',
-	},
+LinkButtonStory.args = {
+  variant: 'default',
+  href: 'https://answeroverflow.com',
 };
+
