@@ -1,20 +1,15 @@
-import type { Meta, StoryObj } from '@storybook/react';
-
+import type { Story } from '@ladle/react';
 import { GooglePage } from './GooglePage/GooglePage';
-const meta = {
-	component: GooglePage,
-} as Meta<typeof GooglePage>;
 
-export default meta;
+type GooglePageProps = React.ComponentPropsWithoutRef<typeof GooglePage>
 
-type Story = StoryObj<typeof meta>;
+export const GooglePageStory: Story<GooglePageProps> = (props) => < GooglePage {...props} />
 
-export const Primary: Story = {
-	args: {
-		result: {
-			url: 'https://www.answeroverflow.com > ...',
-			title: 'How do I index my discord channels into google?',
-			description: `How do I index my discord channels into google? How do I index my discord channels into google? How do I index my discord channels into google?`,
-		},
-	},
-};
+GooglePageStory.args = {
+  result: {
+    url: 'https://www.answeroverflow.com > ...',
+    title: 'How do I index my discord channels into google?',
+    description: `How do I index my discord channels into google? How do I index my discord channels into google? How do I index my discord channels into google?`
+  }
+}
+
