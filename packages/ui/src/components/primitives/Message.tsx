@@ -226,7 +226,7 @@ export const MessageAttachments = () => {
 	return <SingularImageAttachment />;
 };
 
-type MessageProps = {
+export type MessageProps = {
 	message: APIMessageWithDiscordAccount;
 	avatar?: React.ReactNode;
 	content?: React.ReactNode;

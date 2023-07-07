@@ -3,13 +3,7 @@
 // Reference: https://dev.to/mryechkin/streamlining-your-tailwind-css-workflow-with-eslint-prettier-1hg
 // eslint-disable-next-line no-undef
 module.exports = {
-	extends: [
-		'./index.js',
-		'plugin:storybook/recommended',
-		'plugin:tailwindcss/recommended',
-		'next',
-		'prettier',
-	],
+	extends: ['./index.js', 'plugin:tailwindcss/recommended', 'next', 'prettier'],
 	plugins: ['@typescript-eslint'],
 	parser: '@typescript-eslint/parser',
 	parserOptions: {

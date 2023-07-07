@@ -25,6 +25,7 @@ export function mockGuild(
 	const guildId = data.id ?? randomSnowflake().toString();
 	const rawData: APIGuild = {
 		id: guildId,
+		safety_alerts_channel_id: null,
 		owner_id: owner.id,
 		verification_level: 0,
 		emojis: [],

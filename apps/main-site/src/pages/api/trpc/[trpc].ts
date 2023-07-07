@@ -33,7 +33,6 @@ export default async function handler(
 
 	// pass the (modified) req/res to the handler
 	// weird type errors even though they're the same
-	// @ts-expect-error
 	const trpcOutput = await nextApiHandler(req, res);
 	await finishAnalyticsCollection();
 	return trpcOutput;

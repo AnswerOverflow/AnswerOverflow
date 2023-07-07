@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Story } from '@ladle/react';
 import { loremIpsum } from 'lorem-ipsum';
 import {
 	mockChannelWithSettings,
@@ -6,19 +6,8 @@ import {
 	mockServer,
 } from '~ui/test/props';
 import { ChannelType } from '~ui/utils/discord';
-
 import { CommunityPage } from './CommunityPage';
-const meta = {
-	component: CommunityPage,
-	render: (props) => <CommunityPage {...props} />,
-	parameters: {
-		layout: 'fullscreen',
-	},
-} as Meta<typeof CommunityPage>;
-
-export default meta;
-
-type Story = StoryObj<typeof meta>;
+type CommunityPageProps = React.ComponentPropsWithoutRef<typeof CommunityPage>;
 
 function makeMockedChannelQuestions(amount: number) {
 	if (amount > 20) {
@@ -39,32 +28,33 @@ function makeMockedChannels(amount: number) {
 	}));
 }
 
-export const CommunityPageStory: Story = {
-	args: {
-		channels: makeMockedChannels(100),
-		server: mockServer(),
-	},
+export const CommunityPageStory: Story<CommunityPageProps> = (props) => (
+	<CommunityPage {...props} />
+);
+export const WithLongQuestion = CommunityPageStory.bind({});
+
+CommunityPageStory.args = {
+	channels: makeMockedChannels(100),
+	server: mockServer(),
 };
 
-export const WithLongQuestion: Story = {
-	args: {
-		channels: [
-			{
-				channel: mockChannelWithSettings(),
-				questions: [
-					{
-						message: mockMessageFull({
-							content: loremIpsum({
-								count: 250,
-							}),
+WithLongQuestion.args = {
+	channels: [
+		{
+			channel: mockChannelWithSettings(),
+			questions: [
+				{
+					message: mockMessageFull({
+						content: loremIpsum({
+							count: 250,
 						}),
-						thread: mockChannelWithSettings({
-							type: ChannelType.PublicThread,
-						}),
-					},
-				],
-			},
-		],
-		server: mockServer(),
-	},
+					}),
+					thread: mockChannelWithSettings({
+						type: ChannelType.PublicThread,
+					}),
+				},
+			],
+		},
+	],
+	server: mockServer(),
 };
