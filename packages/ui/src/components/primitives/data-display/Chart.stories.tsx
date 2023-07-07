@@ -1,42 +1,15 @@
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
-
+import type { Story } from '@ladle/react';
 import { Chart, type ChartProps } from './Chart';
-const meta = {
-	component: Chart,
-	// For the moment, we need to disable a11y checks for the charts - failing a11y checks
-	// We need to investigate this further in the future
-	// To ensure that our charts are accessible or at least as accessible as possible
-	parameters: {
-		a11y: {
-			disable: true,
-		},
-	},
-	argTypes: {
-		type: {
-			table: {
-				disable: true,
-			},
-		},
-		showGrid: {
-			control: 'boolean',
-		},
-		showLegend: {
-			control: 'boolean',
-			defaultValue: true,
-		},
-		showTooltip: {
-			control: 'boolean',
-			defaultValue: true,
-		},
-	},
-} as Meta<typeof Chart>;
 
-export default meta;
+// Todo: disable a11y
+const LineChart: Story<ChartProps> = (props) => (
+	<div className="h-40">
+		<Chart {...props} />
+	</div>
+);
 
-type Story = StoryObj<typeof meta>;
-
-const lineProps: ChartProps = {
+LineChart.args = {
 	type: 'line',
 	showGrid: false,
 	lines: [
@@ -94,23 +67,9 @@ const lineProps: ChartProps = {
 	],
 };
 
-export const LineChart: Story = {
-	render: (props: ChartProps) => (
-		<div className="h-40">
-			<Chart {...props} />
-		</div>
-	),
-	parameters: {
-		a11y: {
-			disable: true,
-		},
-	},
-	// todo: fix this
-	// @ts-ignore
-	args: lineProps,
-};
+export const BarChart = LineChart.bind({});
 
-const barProps: ChartProps = {
+BarChart.args = {
 	type: 'bar',
 	showGrid: false,
 	bars: [
@@ -158,21 +117,4 @@ const barProps: ChartProps = {
 			pv: 4300,
 		},
 	],
-};
-
-export const BarChart: Story = {
-	render: (props: ChartProps) => (
-		<div className="h-40">
-			<Chart {...props} />
-		</div>
-	),
-
-	parameters: {
-		a11y: {
-			disable: true,
-		},
-	},
-	// todo: fix this
-	// @ts-ignore
-	args: barProps,
 };

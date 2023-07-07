@@ -1,16 +1,12 @@
-import type { Meta, StoryObj } from '@storybook/react';
-
+import type { Story } from '@ladle/react';
 import { Command } from './Command';
-const meta = {
-	component: Command,
-} as Meta<typeof Command>;
 
-export default meta;
+type CommandProps = React.ComponentPropsWithoutRef<typeof Command>;
 
-type Story = StoryObj<typeof meta>;
+export const CommandPrimary: Story<CommandProps> = (props) => (
+	<Command {...props} />
+);
 
-export const CommandPrimary: Story = {
-	args: {
-		command: 'answeroverflow',
-	},
+CommandPrimary.args = {
+	command: 'answeroverflow',
 };

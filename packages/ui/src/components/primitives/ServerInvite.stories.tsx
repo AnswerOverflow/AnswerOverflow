@@ -1,34 +1,32 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Story } from '@ladle/react';
 import { mockChannelWithSettings, mockServer } from '~ui/test/props';
-
 import { ServerInviteRenderer } from './ServerInvite';
-const meta = {
-	component: ServerInviteRenderer,
-} as Meta<typeof ServerInviteRenderer>;
 
-export default meta;
+type ServerInviteRendererProps = React.ComponentPropsWithoutRef<
+	typeof ServerInviteRenderer
+>;
 
-type Story = StoryObj<typeof meta>;
+export const InServer: Story<ServerInviteRendererProps> = (props) => (
+	<ServerInviteRenderer {...props} />
+);
 
-export const InServer: Story = {
-	args: {
-		server: mockServer(),
-		channel: mockChannelWithSettings({
-			// AO's Discord server
-			inviteCode: 'sxDN2rEdwD',
-		}),
-		location: 'Search Results',
-		isUserInServer: 'in_server',
-	},
+InServer.args = {
+	server: mockServer(),
+	channel: mockChannelWithSettings({
+		// AO's Discord server
+		inviteCode: 'sxDN2rEdwD',
+	}),
+	location: 'Search Results',
+	isUserInServer: 'in_server',
 };
 
-export const NotInServer: Story = {
-	args: {
-		server: mockServer(),
-		channel: mockChannelWithSettings({
-			// AO's Discord server
-			inviteCode: 'sxDN2rEdwD',
-		}),
-		isUserInServer: 'not_in_server',
-	},
+export const NotInServer = InServer.bind({});
+
+NotInServer.args = {
+	server: mockServer(),
+	channel: mockChannelWithSettings({
+		// AO's Discord server
+		inviteCode: 'sxDN2rEdwD',
+	}),
+	isUserInServer: 'not_in_server',
 };
