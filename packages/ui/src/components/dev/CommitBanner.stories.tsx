@@ -1,16 +1,14 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Story } from '@ladle/react';
 
 import { CommitBannerRenderer } from './CommitBanner';
-const meta = {
-	component: CommitBannerRenderer,
-} as Meta<typeof CommitBannerRenderer>;
+type CommitBannerProps = React.ComponentPropsWithoutRef<
+	typeof CommitBannerRenderer
+>;
 
-export default meta;
+export const CommitBannerStory: Story<CommitBannerProps> = (props) => {
+	return <CommitBannerRenderer {...props} />;
+};
 
-type Story = StoryObj<typeof meta>;
-
-export const CommitBannerStory: Story = {
-	args: {
-		commitSha: '1234567890abcdef',
-	},
+CommitBannerStory.args = {
+	commitSha: '1234567890abcdef',
 };

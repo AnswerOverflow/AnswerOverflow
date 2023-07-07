@@ -54,7 +54,6 @@ export default async function handler(
 	}
 	// pass the (modified) req/res to the handler
 	// weird type errors even though they're the same
-
 	const trpcOutput = await nextApiHandler(req, res);
 
 	await finishAnalyticsCollection();

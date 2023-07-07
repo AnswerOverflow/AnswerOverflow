@@ -1,20 +1,24 @@
 {
 	"compilerOptions": {
-		"target": "es2017",
 		"baseUrl": "../../",
 		"types": ["jest"],
-		"declaration": false
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"module": "esnext",
+		"target": "ESNext",
+		"moduleResolution": "Node"
 	},
 	"extends": "@answeroverflow/tsconfig/nextjs.json",
 	"include": [
 		"next-env.d.ts",
-		".storybook/*",
 		"test",
 		"next.config.mjs",
 		"../../reset.d.ts",
 		"postcss.config.cjs",
 		"tailwind.config.cjs",
-		"src"
+		"src",
+		".ladle",
+		"vite.config.ts"
 	],
 	"exclude": ["node_modules", "../../node_modules"]
 }

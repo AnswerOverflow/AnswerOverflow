@@ -1,41 +1,32 @@
-import type { Meta, StoryObj } from '@storybook/react';
-
+import type { Story } from '@ladle/react';
 import { Button } from './Button';
-const meta = {
-	component: Button,
-	render: (args) => <Button {...args}>Text</Button>,
-} as Meta<typeof Button>;
 
-export default meta;
+type ButtonProps = React.ComponentPropsWithoutRef<typeof Button>;
 
-type Story = StoryObj<typeof meta>;
+export const Primary: Story<ButtonProps> = (props) => (
+	<Button {...props}>Test</Button>
+);
 
-export const Primary: Story = {
-	args: {
-		variant: 'default',
-	},
+Primary.args = {
+	variant: 'default',
 };
 
-export const Destructive: Story = {
-	args: {
-		variant: 'destructive',
-	},
+export const Destructive = Primary.bind({});
+Destructive.args = {
+	variant: 'destructive',
 };
 
-export const Outline: Story = {
-	args: {
-		variant: 'outline',
-	},
+export const Outline = Primary.bind({});
+Outline.args = {
+	variant: 'outline',
 };
 
-export const Subtle: Story = {
-	args: {
-		variant: 'subtle',
-	},
+export const Subtle = Primary.bind({});
+Subtle.args = {
+	variant: 'subtle',
 };
 
-export const Ghost: Story = {
-	args: {
-		variant: 'ghost',
-	},
+export const Ghost = Primary.bind({});
+Ghost.args = {
+	variant: 'ghost',
 };

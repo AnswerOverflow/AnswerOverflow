@@ -107,6 +107,7 @@ export function mockMessage(input: {
 			id: author.id,
 			username: author.username,
 			discriminator: author.discriminator,
+			global_name: author.username,
 			avatar: author.avatar,
 		},
 		content: '',
