@@ -1,16 +1,14 @@
-import type { Meta, StoryFn } from '@storybook/react';
+import type { Story } from '@ladle/react';
 import { mockServer } from '~ui/test/props';
 import { ServerCard, ViewServerCard, type ServerCardProps } from './ServerCard';
-export default {
-	component: ServerCard,
-} as Meta;
 
-//👇 We create a “template” of how args map to rendering
-const Template: StoryFn<typeof ServerCard> = (args: ServerCardProps) => (
-	<ServerCard {...args} />
+type ViewServerCardProps = React.ComponentPropsWithoutRef<
+	typeof ViewServerCard
+>;
+
+export const BaseCard: Story<ServerCardProps> = (props) => (
+	<ServerCard {...props} />
 );
-
-export const BaseCard = Template.bind({});
 BaseCard.args = {
 	server: mockServer({
 		name: 'AnswerOverflow',
@@ -19,11 +17,9 @@ BaseCard.args = {
 	}),
 };
 
-const ViewTemplate: StoryFn<typeof ViewServerCard> = (args) => (
-	<ViewServerCard {...args} />
+export const ViewCard: Story<ViewServerCardProps> = (props) => (
+	<ViewServerCard {...props} />
 );
-
-export const ViewCard = ViewTemplate.bind({});
 ViewCard.args = {
 	server: mockServer({
 		name: 'AnswerOverflow',

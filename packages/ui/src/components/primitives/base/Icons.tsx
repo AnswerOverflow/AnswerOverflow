@@ -1,7 +1,7 @@
 /* eslint-disable tailwindcss/no-custom-classname */
 import { cva, type VariantProps } from 'cva';
 import { Poppins } from 'next/font/google';
-
+import { classNames } from '~ui/utils/styling';
 export const GitHubIcon = (props: React.SVGProps<SVGSVGElement>) => (
 	<svg fill="currentColor" viewBox="0 0 24 24" {...props}>
 		<path
@@ -11,7 +11,6 @@ export const GitHubIcon = (props: React.SVGProps<SVGSVGElement>) => (
 		/>
 	</svg>
 );
-
 const discordIconStyles = cva('', {
 	variants: {
 		color: {
@@ -26,7 +25,6 @@ const discordIconStyles = cva('', {
 		},
 	},
 });
-
 export function DiscordIcon(
 	props: React.SVGProps<SVGSVGElement> & VariantProps<typeof discordIconStyles>,
 ) {
@@ -46,15 +44,11 @@ export function DiscordIcon(
 		</svg>
 	);
 }
-
 import * as React from 'react';
-import { classNames } from '~ui/utils/styling';
-
 const poppins = Poppins({
 	weight: ['400', '600'],
 	subsets: ['latin'],
 });
-
 export function AnswerOverflowLogo({
 	className,
 	...props
@@ -118,7 +112,6 @@ export function AnswerOverflowLogo({
 		</div>
 	);
 }
-
 export const ExternalLinkIcon = () => {
 	return (
 		<svg
@@ -137,7 +130,6 @@ export const ExternalLinkIcon = () => {
 		</svg>
 	);
 };
-
 export const CloseIcon = () => {
 	return (
 		<svg

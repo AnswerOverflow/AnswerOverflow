@@ -1,19 +1,7 @@
-import type { Meta, StoryObj } from '@storybook/react';
-
+import type { Story } from '@ladle/react';
 import { SearchBar, type SearchBarProps } from './SearchBar';
-const meta = {
-	component: SearchBar,
-} as Meta<typeof SearchBar>;
 
-export default meta;
-
-type Story = StoryObj<typeof meta>;
-
-//👇 Each story then reuses that template
-const defaultMessage: SearchBarProps = {
+const Primary: Story<SearchBarProps> = (props) => <SearchBar {...props} />;
+Primary.args = {
 	placeholder: 'Search for anything',
-};
-
-export const Primary: Story = {
-	args: defaultMessage,
 };
