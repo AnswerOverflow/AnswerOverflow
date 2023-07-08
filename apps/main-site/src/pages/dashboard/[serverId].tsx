@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 // eslint-disable-next-line no-restricted-imports
-import { ServerDashboard } from '../../components/dashboard';
+import { ServerDashboard } from '@answeroverflow/ui';
 
 export default function ServerIdDashboard() {
 	const router = useRouter();

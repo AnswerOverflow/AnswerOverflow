@@ -1,6 +1,4 @@
-import { GetStarted, trpc } from '@answeroverflow/ui';
-// eslint-disable-next-line no-restricted-imports
-import { ServerDashboard } from '../../components/dashboard';
+import { GetStarted, trpc, ServerDashboard } from '@answeroverflow/ui';
 
 export default function Dashboard() {
 	const { data } = trpc.auth.getServersForOnboarding.useQuery();
