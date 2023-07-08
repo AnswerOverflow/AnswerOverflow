@@ -1,0 +1,11 @@
+{
+  "name": "@irp/blog",
+  "version": "1.0.0",
+  "dependencies": {
+    "next": "^13.4.9",
+    "nextra": "^2.9.0",
+    "nextra-theme-blog": "^2.9.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
