@@ -55,7 +55,7 @@ export default async function handler(
 
 	const session = await getSession({ req });
 	const token = req.cookies[getNextAuthCookieName()] as string;
-	console.log('token', token);
+
 	if (!session || !token) {
 		const redirect = await getServerSignInUrl(
 			req,

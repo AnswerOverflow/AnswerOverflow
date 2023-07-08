@@ -151,7 +151,7 @@ export function NavbarRenderer(props: {
 	path: string;
 }) {
 	const { isOnTenantSite, tenant } = useTenantContext();
-	console.log(props.user);
+
 	const UserSection = () =>
 		props.user ? <UserAvatar user={props.user} /> : <SignInButton />;
 
