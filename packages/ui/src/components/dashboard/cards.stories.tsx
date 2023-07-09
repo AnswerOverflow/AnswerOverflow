@@ -1,8 +1,8 @@
 import type { Story, StoryDefault } from '@ladle/react';
 import {
 	PageViewsCardRenderer,
-	CurrentPlanCard,
 	PageViewChartRenderer,
+	CurrentPlanCardRenderer,
 } from './cards';
 
 export default {
@@ -13,41 +13,32 @@ export const PageViewsCard: Story = () => (
 );
 
 export const FreePlan: Story = () => (
-	<CurrentPlanCard
-		server={{
-			id: '1',
-			plan: 'FREE',
-		}}
+	<CurrentPlanCardRenderer
 		dateCancelationTakesEffect={null}
 		dateSubscriptionRenews={null}
 		dateTrialEnds={null}
-		stripeUrl={null}
+		stripeCheckoutUrl={null}
+		plan="FREE"
 	/>
 );
 
 export const ProPlan: Story = () => (
-	<CurrentPlanCard
-		server={{
-			id: '1',
-			plan: 'PRO',
-		}}
+	<CurrentPlanCardRenderer
 		dateCancelationTakesEffect={new Date().getTime() / 1000}
 		dateSubscriptionRenews={null}
 		dateTrialEnds={null}
-		stripeUrl={'/'}
+		stripeCheckoutUrl={'/'}
+		plan="PRO"
 	/>
 );
 
 export const OpenSourcePlan: Story = () => (
-	<CurrentPlanCard
-		server={{
-			id: '1',
-			plan: 'OPEN_SOURCE',
-		}}
+	<CurrentPlanCardRenderer
+		plan="OPEN_SOURCE"
 		dateCancelationTakesEffect={null}
 		dateSubscriptionRenews={null}
 		dateTrialEnds={null}
-		stripeUrl={'/'}
+		stripeCheckoutUrl={null}
 	/>
 );
 

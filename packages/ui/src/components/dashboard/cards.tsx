@@ -57,8 +57,20 @@ function planToPrettyText(plan: Plan) {
 	}
 }
 
-export function CurrentPlanCard() {
-	const {dateCancelationTakesEffect, dateTrialEnds, dateSubscriptionRenews, plan, stripeCheckoutUrl} = useDashboardContext();
+export function CurrentPlanCardRenderer(props: {
+	plan: Plan;
+	dateCancelationTakesEffect: number | null;
+	dateTrialEnds: number | null;
+	dateSubscriptionRenews: number | null;
+	stripeCheckoutUrl: string | null;
+}) {
+	const {
+		plan,
+		dateCancelationTakesEffect,
+		dateTrialEnds,
+		dateSubscriptionRenews,
+		stripeCheckoutUrl,
+	} = props;
 	const dateInMs =
 		dateCancelationTakesEffect ??
 		dateTrialEnds ??
@@ -96,6 +108,25 @@ export function CurrentPlanCard() {
 	);
 }
 
+export function CurrentPlanCard() {
+	const {
+		dateCancelationTakesEffect,
+		dateTrialEnds,
+		dateSubscriptionRenews,
+		plan,
+		stripeCheckoutUrl,
+	} = useDashboardContext();
+	return (
+		<CurrentPlanCardRenderer
+			plan={plan}
+			dateCancelationTakesEffect={dateCancelationTakesEffect}
+			dateTrialEnds={dateTrialEnds}
+			dateSubscriptionRenews={dateSubscriptionRenews}
+			stripeCheckoutUrl={stripeCheckoutUrl}
+		/>
+	);
+}
+
 export function PageViewChartRenderer(props: {
 	data: {
 		day: string;
@@ -113,16 +144,15 @@ export function PageViewChartRenderer(props: {
 				categories={['View Count']}
 				yAxisWidth={40}
 				noDataText="No Data"
+				className="h-96"
 			/>
 		</Card>
 	);
 }
 
 export const PageViewChart = () => {
-	const {id} = useDashboardContext();
-	const { data, status } = trpc.servers.fetchPageViewsAsLineChart.useQuery(
-		id,
-	);
+	const { id } = useDashboardContext();
+	const { data, status } = trpc.servers.fetchPageViewsAsLineChart.useQuery(id);
 	return (
 		<PageViewChartRenderer
 			data={status === 'success' ? data : []}

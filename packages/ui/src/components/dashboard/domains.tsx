@@ -134,7 +134,6 @@ export function ConfigureDomainCard() {
 }
 
 export function DomainConfiguration({ domain }: { domain: string }) {
-	const [recordType, setRecordType] = useState<'A' | 'CNAME'>('A');
 	const { status, domainJson } = useDomainStatus({ domain });
 
 	if (!status || status === 'Valid Configuration' || !domainJson) return null;
@@ -147,7 +146,7 @@ export function DomainConfiguration({ domain }: { domain: string }) {
 				(x) => (x.type as 'TXT' | 'CNAME' | 'A') === 'TXT',
 			)) ||
 		null;
-
+	const recordType = domainJson.apexName === domain ? 'A' : 'CNAME';
 	return (
 		<div className="border-t border-gray-200 px-6 pb-5 pt-7">
 			<div className="mb-4 flex items-center space-x-2">
@@ -199,9 +198,8 @@ export function DomainConfiguration({ domain }: { domain: string }) {
 			) : (
 				<>
 					<TabGroup
-						onIndexChange={(index) => {
-							setRecordType(index === 0 ? 'A' : 'CNAME');
-						}}
+						key={`${domainJson.name}-${domainJson.apexName}`}
+						defaultIndex={subdomain ? 1 : 0}
 					>
 						<TabList>
 							<Tab>A Record{!subdomain && ' (recommended)'}</Tab>
@@ -244,7 +242,9 @@ export function DomainConfiguration({ domain }: { domain: string }) {
 									</div>
 									<div>
 										<p className="text-sm font-bold">Value</p>
-										<p className="mt-2 font-mono text-sm">cname.dub.sh</p>
+										<p className="mt-2 font-mono text-sm">
+											cname.answeroverflow.com
+										</p>
 									</div>
 									<div>
 										<p className="text-sm font-bold">TTL</p>

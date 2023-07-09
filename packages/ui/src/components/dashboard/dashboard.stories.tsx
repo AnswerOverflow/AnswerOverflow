@@ -1,7 +1,7 @@
 import { StoryDefault, Story } from '@ladle/react';
 import { PageViewsCardRenderer } from './cards';
 import { ServerDashboardRenderer } from './dashboard';
-import { mockPublicServer, mockServer } from '~ui/test/props';
+import { mockServer } from '~ui/test/props';
 
 export default {
 	title: 'Dashboard / Dashboards',
@@ -17,6 +17,9 @@ export const FreeDashboardStory: Story = () => (
 			dateTrialEnds: null,
 			bitfield: 0,
 		}}
+		PageViewsCardOverride={
+			<PageViewsCardRenderer status="success" numberOfPageViews={10} />
+		}
 	/>
 );
 
@@ -25,6 +28,7 @@ export const ProDashboardStory: Story = () => (
 		data={{
 			...mockServer({
 				plan: 'PRO',
+				customDomain: 'support.rhyssullivan.dev',
 			}),
 			dateCancelationTakesEffect: null,
 			dateSubscriptionRenews: null,

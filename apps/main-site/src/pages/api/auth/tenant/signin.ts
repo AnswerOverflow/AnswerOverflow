@@ -71,7 +71,8 @@ export default async function handler(
 
 	const tenant = await findServerByCustomDomain(redirectURL.host);
 	if (!tenant) {
-		return res.status(404).json({ error: 'Tenant not found' });
+		res.status(404).json({ error: 'Tenant not found' });
+		return;
 	}
 
 	const tenantSession = await prisma.tenantSession.create({
