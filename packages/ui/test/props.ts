@@ -6,6 +6,7 @@ import type {
 	APIMessageFull,
 } from '@answeroverflow/api';
 import { getRandomName, getRandomSentence } from '@answeroverflow/utils';
+import { ServerWithFlags } from 'packages/prisma-types';
 import { ChannelType } from '~ui/utils/discord';
 
 export function randomId() {
@@ -70,7 +71,7 @@ export function mockMessageWithDiscordAccount(
 	return data;
 }
 
-export function mockServer(override: Partial<ServerPublic> = {}) {
+export function mockPublicServer(override: Partial<ServerPublic> = {}) {
 	const data: ServerPublic = {
 		id: randomId(),
 		name: 'Test Server',
@@ -79,6 +80,26 @@ export function mockServer(override: Partial<ServerPublic> = {}) {
 		vanityUrl: null,
 		kickedTime: null,
 		customDomain: null,
+		...override,
+	};
+	return data;
+}
+
+export function mockServer(override: Partial<ServerWithFlags> = {}) {
+	const data: ServerWithFlags = {
+		id: randomId(),
+		name: 'Test Server',
+		icon: null,
+		description: null,
+		vanityUrl: null,
+		kickedTime: null,
+		customDomain: null,
+		flags: {
+			readTheRulesConsentEnabled: false,
+		},
+		plan: 'FREE',
+		stripeCustomerId: null,
+		stripeSubscriptionId: null,
 		...override,
 	};
 	return data;

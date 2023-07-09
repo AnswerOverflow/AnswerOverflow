@@ -271,9 +271,9 @@ export const serverRouter = router({
 				return {
 					...server,
 					stripeCheckoutUrl: session.url,
-					cancelAt,
-					currentPeriodEnd,
-					trialEnd,
+					dateCancelationTakesEffect: cancelAt,
+					dateSubscriptionRenews: currentPeriodEnd,
+					dateTrialEnds: trialEnd,
 				};
 			}
 
@@ -320,9 +320,9 @@ export const serverRouter = router({
 			return {
 				...server,
 				stripeCheckoutUrl: session.url,
-				cancelAt: null,
-				currentPeriodEnd: null,
-				trialEnd: null,
+				dateCancelationTakesEffect: null,
+				dateSubscriptionRenews: null,
+				dateTrialEnds: null,
 			};
 		}),
 	fetchPageViewCount: withUserServersProcedure

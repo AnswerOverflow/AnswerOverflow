@@ -37,6 +37,7 @@ export function DashboardServerSelect() {
 			<span>{props.server.name}</span>
 		</div>
 	);
+
 	return (
 		<div>
 			<DropdownMenu>

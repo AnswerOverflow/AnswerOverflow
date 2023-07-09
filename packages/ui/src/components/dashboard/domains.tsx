@@ -8,13 +8,13 @@ import {
 	TabPanels,
 	TabPanel,
 } from '@tremor/react';
-import type { ServerPublic } from '@answeroverflow/api';
 import { useState } from 'react';
 import { LuAlertCircle, LuXCircle, LuCheckCircle2 } from 'react-icons/lu';
 import { toast } from 'react-toastify';
 import { trpc } from '~ui/utils/trpc';
 import { Button, Input, LoadingSpinner } from '../primitives';
 import { useTierAccess } from '../primitives/tier-access-only';
+import { useDashboardContext } from './dashboard-context';
 
 export function useDomainStatus({ domain }: { domain?: string }) {
 	const { data, isLoading, isFetching } =
@@ -45,11 +45,9 @@ const InlineSnippet = ({ children }: { children: string }) => {
 	);
 };
 
-export function ConfigureDomainCard(props: {
-	server: Pick<ServerPublic, 'id' | 'customDomain'>;
-}) {
+export function ConfigureDomainCard() {
 	const { enabled } = useTierAccess();
-	const { customDomain: currentDomain, id } = props.server;
+	const { id, customDomain: currentDomain } = useDashboardContext();
 	const util = trpc.useContext();
 	const mutation = trpc.servers.setCustomDomain.useMutation({
 		onSuccess: () => {
@@ -114,7 +112,7 @@ export function ConfigureDomainCard(props: {
 						<Input
 							name="customDomain"
 							type="text"
-							key={currentDomain ?? props.server.id}
+							key={currentDomain ?? id}
 							defaultValue={currentDomain || ''}
 							placeholder="yourdomain.com"
 							maxLength={64}

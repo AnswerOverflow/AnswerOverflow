@@ -1,1 +1,1 @@
-export * from './server-dashboard';
+export * from './dashboard';

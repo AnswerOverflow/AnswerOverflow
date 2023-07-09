@@ -1,5 +1,5 @@
 import type { Story } from '@ladle/react';
-import { mockChannelWithSettings, mockServer } from '~ui/test/props';
+import { mockChannelWithSettings, mockPublicServer } from '~ui/test/props';
 import { ServerInviteRenderer } from './ServerInvite';
 
 type ServerInviteRendererProps = React.ComponentPropsWithoutRef<
@@ -11,7 +11,7 @@ export const InServer: Story<ServerInviteRendererProps> = (props) => (
 );
 
 InServer.args = {
-	server: mockServer(),
+	server: mockPublicServer(),
 	channel: mockChannelWithSettings({
 		// AO's Discord server
 		inviteCode: 'sxDN2rEdwD',
@@ -23,7 +23,7 @@ InServer.args = {
 export const NotInServer = InServer.bind({});
 
 NotInServer.args = {
-	server: mockServer(),
+	server: mockPublicServer(),
 	channel: mockChannelWithSettings({
 		// AO's Discord server
 		inviteCode: 'sxDN2rEdwD',

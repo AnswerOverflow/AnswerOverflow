@@ -2,7 +2,7 @@ import type { Story } from '@ladle/react';
 import {
 	mockChannelWithSettings,
 	mockMessageWithDiscordAccount,
-	mockServer,
+	mockPublicServer,
 } from '~ui/test/props';
 import {
 	MessageResultPage,
@@ -49,7 +49,7 @@ const defaultMessage: MessageResultPageProps = {
 	],
 	requestedId: '1',
 	channel: mockChannelWithSettings(),
-	server: { ...mockServer(), id: '83730679338106880' },
+	server: { ...mockPublicServer(), id: '83730679338106880' },
 };
 
 Primary.args = defaultMessage;
