@@ -47,7 +47,7 @@ export default async function handler(
 		// add a cookie to the request using the next auth header
 		req.cookies[getNextAuthCookieName()] = nextAuthSession?.sessionToken;
 	}
-	if (req.headers.host !== getMainSiteHostname()) {		
+	if (req.headers.host !== getMainSiteHostname()) {
 		disableSettingNextAuthCookie(res);
 	}
 	// pass the (modified) req/res to the handler
