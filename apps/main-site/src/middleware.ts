@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server';
 import { getNextAuthCookieName } from '@answeroverflow/auth/src/tenant-cookie';
 import {
 	getMainSiteHostname,
+	isOnMainSite,
 	makeMainSiteLink,
 } from '@answeroverflow/constants/src/links';
 
@@ -26,7 +27,7 @@ export function middleware(req: NextRequest) {
 		return dataUnlockerRouteHandler(req);
 	}
 	const host = req.headers.get('host')!;
-	if (host === getMainSiteHostname()) {
+	if (isOnMainSite(host)) {
 		const authedRoutes = new Set(['/dashboard']);
 		if (authedRoutes.has(path)) {
 			const authToken = req.cookies.get(getNextAuthCookieName());

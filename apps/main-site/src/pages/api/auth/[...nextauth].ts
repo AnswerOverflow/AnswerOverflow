@@ -8,7 +8,7 @@ import {
 } from '@answeroverflow/auth';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { findTenantSessionByToken } from '@answeroverflow/db';
-import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
+import { isOnMainSite } from '@answeroverflow/constants/src/links';
 export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse<any>,
@@ -19,7 +19,7 @@ export default async function handler(
 		// add a cookie to the request using the next auth header
 		req.cookies[getNextAuthCookieName()] = nextAuthSession?.sessionToken;
 	}
-	if (req.headers.host !== getMainSiteHostname()) {
+	if (!isOnMainSite(req.headers.host!)) {
 		disableSettingNextAuthCookie(res);
 	}
 	await NextAuth(req, res, authOptions);

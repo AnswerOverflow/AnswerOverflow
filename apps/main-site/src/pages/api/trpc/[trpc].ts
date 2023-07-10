@@ -9,7 +9,7 @@ import {
 	getNextAuthCookieName,
 	getTenantCookieName,
 } from '@answeroverflow/auth';
-import { getMainSiteHostname } from '@answeroverflow/constants';
+import { isOnMainSite } from '@answeroverflow/constants';
 // create the API handler, but don't return it yet
 const nextApiHandler = createNextApiHandler({
 	router: appRouter,
@@ -47,7 +47,7 @@ export default async function handler(
 		// add a cookie to the request using the next auth header
 		req.cookies[getNextAuthCookieName()] = nextAuthSession?.sessionToken;
 	}
-	if (req.headers.host !== getMainSiteHostname()) {
+	if (!isOnMainSite(req.headers.host!)) {
 		disableSettingNextAuthCookie(res);
 	}
 	// pass the (modified) req/res to the handler

@@ -32,6 +32,10 @@ export const getMainSiteHostname = () => {
 	return url.host;
 };
 
+export const isOnMainSite = (host: string) => {
+	return host === getMainSiteHostname() || host.endsWith('.vercel.app');
+};
+
 export const makeMainSiteLink = (path: string) => {
 	return `${getBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`;
 };
