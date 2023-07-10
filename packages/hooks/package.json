@@ -26,7 +26,7 @@
 		"@types/node": "^18.14.2",
 		"@types/react": "^18.0.14",
 		"@types/react-dom": "^18.2.4",
-		"type-fest": "^3.5.5"
+		"type-fest": "^3.13.0"
 	},
 	"ct3aMetadata": {
 		"initVersion": "6.11.0"
