@@ -1,17 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import type { NextURL } from 'next/dist/server/web/next-url';
 import { getNextAuthCookieName } from '@answeroverflow/auth/src/tenant-cookie';
-import { makeMainSiteLink } from '@answeroverflow/constants';
-
-const mainSiteHostName =
-	process.env.NODE_ENV === 'production'
-		? 'www.answeroverflow.com'
-		: 'localhost:3000';
-
-const redirectCode = process.env.NODE_ENV === 'production' ? 308 : 302;
+import { getMainSiteHostname, makeMainSiteLink } from '@answeroverflow/constants/src/links';
 
 function dataUnlockerRouteHandler(req: NextRequest) {
 	const rewrite = NextResponse.rewrite(
@@ -20,7 +11,7 @@ function dataUnlockerRouteHandler(req: NextRequest) {
 			`https://oemf7z50uh7w.ddns.dataunlocker.com/`,
 		),
 	);
-	rewrite.headers.set('host', mainSiteHostName);
+	rewrite.headers.set('host', getMainSiteHostname());
 	rewrite.headers.set('x-forwarded-for', req.ip!);
 	return rewrite;
 }
@@ -32,7 +23,7 @@ export function middleware(req: NextRequest) {
 		return dataUnlockerRouteHandler(req);
 	}
 	const host = req.headers.get('host')!;
-	if (host === mainSiteHostName) {
+	if (host === getMainSiteHostname()) {
 		const authedRoutes = new Set(['/dashboard']);
 		if (authedRoutes.has(path)) {
 			const authToken = req.cookies.get(getNextAuthCookieName());
