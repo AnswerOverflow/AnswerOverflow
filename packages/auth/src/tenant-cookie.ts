@@ -11,7 +11,7 @@ export function getTenantCookieOptions(
 ): CookieSerializeOptions {
 	return {
 		httpOnly: true,
-		sameSite: 'lax',
+		sameSite: 'strict',
 		secure: process.env.NODE_ENV === 'production',
 		expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 1 month
 		domain: '',

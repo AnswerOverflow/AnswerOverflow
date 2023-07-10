@@ -1,12 +1,4 @@
-import {
-	Card,
-	Flex,
-	LineChart,
-	Metric,
-	ProgressBar,
-	Title,
-	Text,
-} from '@tremor/react';
+import { Card, Flex, LineChart, Metric, Title, Text } from '@tremor/react';
 import type { Plan } from '@answeroverflow/db';
 import { trpc } from '~ui/utils/trpc';
 import { AOLink } from '../primitives';
@@ -17,6 +9,7 @@ export function PageViewsCardRenderer(props: {
 	status: 'success' | 'loading' | 'error';
 }) {
 	const limit = 100000;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const progress = (props.numberOfPageViews ?? 0) / limit;
 	return (
 		<Card className="mx-auto">
@@ -26,11 +19,11 @@ export function PageViewsCardRenderer(props: {
 					<Metric>{props.numberOfPageViews ?? ''}</Metric>
 				</div>
 			</Flex>
-			<Flex className="mt-4">
+			{/* <Flex className="mt-4">
 				<Text className="truncate">{`${(progress * 100).toFixed(2)}%`}</Text>
 				<Text>{limit.toLocaleString('en-US')} Limit</Text>
 			</Flex>
-			<ProgressBar value={progress} className="mt-2" />
+			<ProgressBar value={progress} className="mt-2" /> */}
 		</Card>
 	);
 }
@@ -144,7 +137,6 @@ export function PageViewChartRenderer(props: {
 				categories={['View Count']}
 				yAxisWidth={40}
 				noDataText="No Data"
-				className="h-96"
 			/>
 		</Card>
 	);

@@ -450,8 +450,8 @@ export function FinalChecklistPage() {
 				</li>
 			</ul>
 			<div className="mx-auto py-4">
-				<LinkButton href={`/c/${data.server!.id}`}>
-					View Your Community
+				<LinkButton href={`/dashboard/${data.server!.id}`}>
+					View Dashboard
 				</LinkButton>
 			</div>
 			<span>

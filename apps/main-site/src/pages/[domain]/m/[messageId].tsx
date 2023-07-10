@@ -6,6 +6,7 @@ import superjson from 'superjson';
 import { trpc } from '@answeroverflow/ui';
 import type { GetStaticPropsContext, InferGetStaticPropsType } from 'next';
 import { TRPCError } from '@trpc/server';
+import { makeMainSiteLink } from '@answeroverflow/constants';
 
 export default function MessageResult(
 	props: InferGetStaticPropsType<typeof getStaticProps>,
@@ -66,7 +67,7 @@ export async function getStaticProps(
 		if (!server.customDomain) {
 			return {
 				redirect: {
-					destination: `https://www.answeroverflow.com/m/${context.params.messageId}`,
+					destination: makeMainSiteLink(`/m/${context.params.messageId}`),
 					permanent: process.env.NODE_ENV === 'production',
 				},
 			};

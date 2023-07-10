@@ -193,12 +193,10 @@ export function WithAnalytics(props: { children: React.ReactNode }) {
 	);
 }
 
-export function WithTenantSite(props: {
-  children: React.ReactNode;
-}) {
+export function WithTenantSite(props: { children: React.ReactNode }) {
 	const { isTenantSite } = {
-    isTenantSite: 'false',
-  }
+		isTenantSite: 'false',
+	};
 	const server = isTenantSite === 'true' ? mockServer() : undefined;
 	return (
 		<TenantContextProvider value={server}>

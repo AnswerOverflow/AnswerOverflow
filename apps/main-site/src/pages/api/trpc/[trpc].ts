@@ -31,7 +31,8 @@ export default async function handler(
 		res.setHeader('Access-Control-Allow-Credentials', 'true');
 		if (req.method === 'OPTIONS') {
 			res.writeHead(200);
-			return res.end();
+			res.end();
+			return;
 		}
 	}
 	const token = req.cookies[getTenantCookieName()];
@@ -54,8 +55,6 @@ export default async function handler(
 	}
 	// pass the (modified) req/res to the handler
 	// weird type errors even though they're the same
-	const trpcOutput = await nextApiHandler(req, res);
-
+	await nextApiHandler(req, res);
 	await finishAnalyticsCollection();
-	return trpcOutput;
 }

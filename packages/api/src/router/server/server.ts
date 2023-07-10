@@ -8,7 +8,6 @@ import {
 	updateServer,
 } from '@answeroverflow/db';
 import { TRPCError } from '@trpc/server';
-import { getBaseUrl } from '@answeroverflow/constants';
 import Stripe from 'stripe';
 import { z } from 'zod';
 import type { Context } from '~api/router/context';
@@ -24,10 +23,13 @@ import {
 	assertBoolsAreNotEqual,
 	assertCanEditServer,
 	assertCanEditServerBotOnly,
+	assertIsAdminOrOwnerOfServer,
+	assertIsOnPlan,
 } from '~api/utils/permissions';
 import {
 	protectedMutation,
 	protectedFetch,
+	protectedMutationFetchFirst,
 } from '~api/utils/protected-procedures';
 import { DomainVerificationStatusProps } from '~api/utils/types';
 import {
@@ -141,65 +143,75 @@ export const serverRouter = router({
 				customDomain: z.string(), // TODO: Could validate regex here
 			}),
 		)
-		.mutation(async ({ input }) => {
-			const { serverId, customDomain: newCustomDomain } = input;
-			try {
-				const oldServerInfo = await findServerById(serverId);
-				if (!oldServerInfo) {
-					throw new TRPCError({
-						code: 'NOT_FOUND',
-						message: 'Server not found',
-					});
-				}
+		.mutation(async ({ input, ctx }) =>
+			protectedMutationFetchFirst({
+				async operation() {
+					const { serverId, customDomain: newCustomDomain } = input;
+					try {
+						const oldServerInfo = await findServerById(serverId);
+						if (!oldServerInfo) {
+							throw new TRPCError({
+								code: 'NOT_FOUND',
+								message: 'Server not found',
+							});
+						}
 
-				const isValidDomain =
-					validDomainRegex.test(newCustomDomain) || newCustomDomain === '';
-				if (!isValidDomain) {
-					throw new TRPCError({
-						code: 'BAD_REQUEST',
-						message: 'Invalid domain',
-					});
-				}
+						const isValidDomain =
+							validDomainRegex.test(newCustomDomain) || newCustomDomain === '';
+						if (!isValidDomain) {
+							throw new TRPCError({
+								code: 'BAD_REQUEST',
+								message: 'Invalid domain',
+							});
+						}
 
-				const response = await updateServer({
-					existing: oldServerInfo,
-					update: {
-						customDomain: newCustomDomain === '' ? null : newCustomDomain,
-						id: serverId,
-					},
-				});
-				await addDomainToVercel(newCustomDomain);
+						const response = await updateServer({
+							existing: oldServerInfo,
+							update: {
+								customDomain: newCustomDomain === '' ? null : newCustomDomain,
+								id: serverId,
+							},
+						});
+						await addDomainToVercel(newCustomDomain);
 
-				// if the site had a different customDomain before, we need to remove it from Vercel
-				if (
-					oldServerInfo.customDomain &&
-					oldServerInfo.customDomain !== newCustomDomain
-				) {
-					await removeDomainFromVercelProject(oldServerInfo.customDomain);
-				}
+						// if the site had a different customDomain before, we need to remove it from Vercel
+						if (
+							oldServerInfo.customDomain &&
+							oldServerInfo.customDomain !== newCustomDomain
+						) {
+							await removeDomainFromVercelProject(oldServerInfo.customDomain);
+						}
 
-				// TODO: Update cache?
+						// TODO: Update cache?
 
-				return response;
-			} catch (error: any) {
-				if (
-					'code' in error &&
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-					error.code === 'P2002'
-				) {
-					throw new TRPCError({
-						code: 'BAD_REQUEST',
-						message: `Domain ${newCustomDomain} already in use`,
-					});
-				} else {
-					throw new TRPCError({
-						code: 'INTERNAL_SERVER_ERROR',
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-						message: 'message' in error ? error.message : 'Unknown error',
-					});
-				}
-			}
-		}),
+						return response;
+					} catch (error: any) {
+						if (
+							'code' in error &&
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+							error.code === 'P2002'
+						) {
+							throw new TRPCError({
+								code: 'BAD_REQUEST',
+								message: `Domain ${newCustomDomain} already in use`,
+							});
+						} else {
+							throw new TRPCError({
+								code: 'INTERNAL_SERVER_ERROR',
+								// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+								message: 'message' in error ? error.message : 'Unknown error',
+							});
+						}
+					}
+				},
+				fetch: () => findServerById(input.serverId),
+				notFoundMessage: 'Server not found',
+				permissions: [
+					() => assertIsAdminOrOwnerOfServer(ctx, input.serverId),
+					(server) => assertIsOnPlan(server, ['PRO', 'OPEN_SOURCE']),
+				],
+			}),
+		),
 	verifyCustomDomain: withUserServersProcedure
 		.input(z.string())
 		.query(async ({ input }) => {
@@ -240,99 +252,113 @@ export const serverRouter = router({
 		}),
 	fetchDashboardById: withUserServersProcedure
 		.input(z.string())
-		.query(async ({ input }) => {
-			const server = await findServerById(input);
-			if (!server) {
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'Server not found',
-				});
-			}
+		.query(async ({ input, ctx }) =>
+			protectedFetch({
+				fetch: async () => {
+					const server = await findServerById(input);
+					if (!server) {
+						throw new TRPCError({
+							code: 'NOT_FOUND',
+							message: 'Server not found',
+						});
+					}
 
-			const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-				apiVersion: '2022-11-15',
-				typescript: true,
-			});
+					const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+						apiVersion: '2022-11-15',
+						typescript: true,
+					});
 
-			// If they have a subscription already, we display the portal
-			if (server.stripeCustomerId && server.stripeSubscriptionId) {
-				const [session, sub] = await Promise.all([
-					stripe.billingPortal.sessions.create({
-						customer: server.stripeCustomerId,
-					}),
-					stripe.subscriptions.retrieve(server.stripeSubscriptionId),
-				]);
-				const {
-					cancel_at: cancelAt, // This is when a cancellation will take effect
-					current_period_end: currentPeriodEnd, // This is when an active subscription will renew
-					trial_end: trialEnd, // This is when a trial will end
-					// get when subscription will renew
-				} = sub;
-				return {
-					...server,
-					stripeCheckoutUrl: session.url,
-					dateCancelationTakesEffect: cancelAt,
-					dateSubscriptionRenews: currentPeriodEnd,
-					dateTrialEnds: trialEnd,
-				};
-			}
+					// If they have a subscription already, we display the portal
+					if (server.stripeCustomerId && server.stripeSubscriptionId) {
+						const [session, sub] = await Promise.all([
+							stripe.billingPortal.sessions.create({
+								customer: server.stripeCustomerId,
+							}),
+							stripe.subscriptions.retrieve(server.stripeSubscriptionId),
+						]);
+						const {
+							cancel_at: cancelAt, // This is when a cancellation will take effect
+							current_period_end: currentPeriodEnd, // This is when an active subscription will renew
+							trial_end: trialEnd, // This is when a trial will end
+							// get when subscription will renew
+						} = sub;
+						return {
+							...server,
+							stripeCheckoutUrl: session.url,
+							dateCancelationTakesEffect: cancelAt,
+							dateSubscriptionRenews: currentPeriodEnd,
+							dateTrialEnds: trialEnd,
+						};
+					}
 
-			// else we upsert them and then display checkout
+					// else we upsert them and then display checkout
 
-			if (!server.stripeCustomerId) {
-				const customer = await stripe.customers.create({
-					name: server.name,
-				});
-				server.stripeCustomerId = customer.id;
-				await updateServer({
-					existing: server,
-					update: {
-						id: server.id,
-						stripeCustomerId: customer.id,
-					},
-				});
-			}
-			const returnUrl = `${getBaseUrl()}/dashboard/${server.id}`;
+					if (!server.stripeCustomerId) {
+						const customer = await stripe.customers.create({
+							name: server.name,
+						});
+						server.stripeCustomerId = customer.id;
+						await updateServer({
+							existing: server,
+							update: {
+								id: server.id,
+								stripeCustomerId: customer.id,
+							},
+						});
+					}
+					// const returnUrl = `${getBaseUrl()}/dashboard/${server.id}`;
 
-			const session = await stripe.checkout.sessions.create({
-				billing_address_collection: 'auto',
-				line_items: [
-					{
-						// base
-						price: process.env.STRIPE_PRO_PLAN_PRICE_ID,
-						quantity: 1,
-					},
-					{
-						// additional page views
-						price: process.env.STRIPE_PAGE_VIEWS_PRICE_ID,
-					},
-				],
-				mode: 'subscription',
-				subscription_data: {
-					trial_period_days: 14,
+					// const session = await stripe.checkout.sessions.create({
+					// 	billing_address_collection: 'auto',
+					// 	line_items: [
+					// 		{
+					// 			// base
+					// 			price: process.env.STRIPE_PRO_PLAN_PRICE_ID,
+					// 			quantity: 1,
+					// 		},
+					// 		{
+					// 			// additional page views
+					// 			price: process.env.STRIPE_PAGE_VIEWS_PRICE_ID,
+					// 		},
+					// 	],
+					// 	mode: 'subscription',
+					// 	subscription_data: {
+					// 		trial_period_days: 14,
+					// 	},
+					// 	success_url: returnUrl,
+					// 	cancel_url: returnUrl,
+					// 	currency: 'USD',
+					// 	allow_promotion_codes: true,
+					// 	customer: server.stripeCustomerId,
+					// });
+					return {
+						...server,
+						stripeCheckoutUrl: null,
+						dateCancelationTakesEffect: null,
+						dateSubscriptionRenews: null,
+						dateTrialEnds: null,
+					};
 				},
-				success_url: returnUrl,
-				cancel_url: returnUrl,
-				currency: 'USD',
-				allow_promotion_codes: true,
-				customer: server.stripeCustomerId,
-			});
-			return {
-				...server,
-				stripeCheckoutUrl: session.url,
-				dateCancelationTakesEffect: null,
-				dateSubscriptionRenews: null,
-				dateTrialEnds: null,
-			};
-		}),
+				notFoundMessage: 'Server not found',
+				permissions: () => assertCanEditServer(ctx, input),
+			}),
+		),
 	fetchPageViewCount: withUserServersProcedure
 		.input(z.string())
-		.query(async ({ input }) => {
-			return fetchServerPageViewsNumber(input);
+		.query(async ({ input, ctx }) => {
+			return protectedFetch({
+				fetch: () => fetchServerPageViewsNumber(input),
+				notFoundMessage: 'Server not found',
+				permissions: () => assertCanEditServer(ctx, input),
+			});
 		}),
 	fetchPageViewsAsLineChart: withUserServersProcedure
 		.input(z.string())
-		.query(({ input }) => {
-			return fetchServerPageViewsAsLineChart(input);
+		.query(({ input, ctx }) => {
+			return protectedFetch({
+				fetch: () => fetchServerPageViewsAsLineChart(input),
+				notFoundMessage: 'Server not found',
+				permissions: () => assertCanEditServer(ctx, input),
+			});
 		}),
 });

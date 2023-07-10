@@ -8,7 +8,6 @@ import {
 	TabPanels,
 	TabPanel,
 } from '@tremor/react';
-import { useState } from 'react';
 import { LuAlertCircle, LuXCircle, LuCheckCircle2 } from 'react-icons/lu';
 import { toast } from 'react-toastify';
 import { trpc } from '~ui/utils/trpc';
@@ -61,7 +60,7 @@ export function ConfigureDomainCard() {
 	const { fetching } = useDomainStatus({ domain: currentDomain ?? undefined });
 
 	return (
-		<Card>
+		<Card className={`${enabled ? '' : 'rounded-none border-b-0'}`}>
 			<form
 				onSubmit={(e) => {
 					e.preventDefault();

@@ -10,6 +10,7 @@ import {
 	type ServerWithFlags,
 	zChannelPublic,
 	zServerPublic,
+	Plan,
 } from '@answeroverflow/db';
 import type { Source, Context } from '~api/router/context';
 import type { DiscordAPIServerSchema } from '@answeroverflow/cache';
@@ -58,7 +59,12 @@ export function assertIsNotValue<T>({
 }
 
 export function isSuperUser(ctx: Context) {
-	if (ctx.discordAccount?.id === '523949187663134754') return true; // This is the ID of Rhys - TODO: Swap to an env var
+	if (
+		ctx.discordAccount?.id === '523949187663134754' &&
+		ctx.session?.isTenantSession === false
+	) {
+		return true; // This is the ID of Rhys - TODO: Swap to an env var
+	}
 	return false;
 }
 
@@ -92,6 +98,53 @@ export function assertCanEditServer(
 		return new TRPCError({
 			code: 'FORBIDDEN',
 			message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+		});
+	}
+	return;
+}
+
+export function assertIsAdminOrOwnerOfServer(
+	ctx: Context,
+	serverId: string,
+): PermissionCheckResult {
+	if (isSuperUser(ctx)) return;
+	if (!ctx.userServers) {
+		return new TRPCError({
+			code: 'UNAUTHORIZED',
+			message:
+				'User servers missing, cannot verify if user has permission to edit server',
+		});
+	}
+
+	const serverToCheckPermissionsOf = ctx.userServers.find(
+		(userServer) => userServer.id === serverId,
+	);
+	if (!serverToCheckPermissionsOf) {
+		return new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'You are not a member of the server you are trying to view',
+		});
+	}
+	const permissionBitfield = new PermissionsBitField(
+		BigInt(serverToCheckPermissionsOf.permissions),
+	);
+	if (
+		!permissionBitfield.has('Administrator') ||
+		serverToCheckPermissionsOf.owner
+	) {
+		return new TRPCError({
+			code: 'FORBIDDEN',
+			message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+		});
+	}
+	return;
+}
+
+export function assertIsOnPlan(server: ServerWithFlags, plans: Plan[]) {
+	if (!plans.some((plan) => plan === server.plan)) {
+		return new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'You are not on the correct plan to do this',
 		});
 	}
 	return;

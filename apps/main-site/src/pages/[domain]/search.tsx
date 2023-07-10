@@ -7,15 +7,17 @@ import {
 } from '@answeroverflow/ui';
 import { findServerByCustomDomain, zServerPublic } from '@answeroverflow/db';
 import { GetStaticPropsContext } from 'next';
+import { useTenantContext } from '@answeroverflow/hooks';
 
 export default function Search() {
 	// get the query from the url in the q param
 	const routerQuery = useRouterQuery();
 	const serverIdToFilterTo = useRouterServerId();
+	const { tenant } = useTenantContext();
 	const results = trpc.messages.search.useQuery(
 		{
 			query: routerQuery,
-			serverId: serverIdToFilterTo,
+			serverId: tenant?.id ?? serverIdToFilterTo,
 		},
 		{
 			enabled: routerQuery.length > 0,
