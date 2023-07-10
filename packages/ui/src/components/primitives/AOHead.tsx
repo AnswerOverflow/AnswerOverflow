@@ -27,14 +27,15 @@ export const AOHead = ({
 	path,
 }: HeadProps) => {
 	const { tenant } = useTenantContext();
-	if(tenant){
+	if (tenant) {
 		server = tenant;
 	}
-	if(description === undefined){
-		if(tenant){
-			description = `View the ${tenant.name} Discord server on the web. Browse questions asked by the community and find answers.`
+	if (description === undefined) {
+		if (tenant) {
+			description = `View the ${tenant.name} Discord server on the web. Browse questions asked by the community and find answers.`;
 		} else {
-			description = 'Build the best Discord support server with Answer Overflow. Index your content into Google, answer questions with AI, and gain insights into your community.';
+			description =
+				'Build the best Discord support server with Answer Overflow. Index your content into Google, answer questions with AI, and gain insights into your community.';
 		}
 	}
 	if (server) {
@@ -70,9 +71,10 @@ export const AOHead = ({
 				/>
 			)}
 			<meta name="description" content={description} key="desc" />
-			<meta property="og:site_name" content={
-				tenant?.name ?? 'Answer Overflow'
-			}/>
+			<meta
+				property="og:site_name"
+				content={tenant?.name ?? 'Answer Overflow'}
+			/>
 			<meta property="og:title" content={title} />
 			<meta property="og:type" content={type} />
 			<meta property="og:description" content={description} />

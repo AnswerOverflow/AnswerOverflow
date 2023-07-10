@@ -21,12 +21,13 @@ export async function generateCommunityPageSitemap(input: {
 			priority: 0.9,
 		})),
 	);
-	// TODO: Don't add this for tenant sites
-	sitemap.add({
-		loc: `/c/${input.communityId}`, // Community page
-		changefreq: 'weekly',
-		priority: 1,
-	});
+	if (communityData && communityData.server.customDomain === undefined) {
+		sitemap.add({
+			loc: `/c/${input.communityId}`, // Community page
+			changefreq: 'weekly',
+			priority: 1,
+		});
+	}
 	sitemap.applyToRes(input.res);
 	input.res.end();
 	return;
