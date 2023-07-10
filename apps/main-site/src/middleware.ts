@@ -2,7 +2,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getNextAuthCookieName } from '@answeroverflow/auth/src/tenant-cookie';
-import { getMainSiteHostname, makeMainSiteLink } from '@answeroverflow/constants/src/links';
+import {
+	getMainSiteHostname,
+	makeMainSiteLink,
+} from '@answeroverflow/constants/src/links';
 
 function dataUnlockerRouteHandler(req: NextRequest) {
 	const rewrite = NextResponse.rewrite(

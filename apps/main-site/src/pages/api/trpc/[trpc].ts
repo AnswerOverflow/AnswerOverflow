@@ -5,9 +5,11 @@ import { finishAnalyticsCollection } from '@answeroverflow/analytics';
 import type { NextApiRequest, NextApiResponse } from 'next/types';
 import { prisma } from '@answeroverflow/db';
 import {
+	disableSettingNextAuthCookie,
 	getNextAuthCookieName,
 	getTenantCookieName,
 } from '@answeroverflow/auth';
+import { getMainSiteHostname } from '@answeroverflow/constants';
 // create the API handler, but don't return it yet
 const nextApiHandler = createNextApiHandler({
 	router: appRouter,
@@ -45,13 +47,8 @@ export default async function handler(
 		// add a cookie to the request using the next auth header
 		req.cookies[getNextAuthCookieName()] = nextAuthSession?.sessionToken;
 	}
-	if (req.headers.host !== 'localhost:3000') {
-		// eslint-disable-next-line @typescript-eslint/unbound-method
-		const oldSetHeader = res.setHeader;
-		res.setHeader = (key, value) => {
-			if (key.toLowerCase() === 'set-cookie') return res;
-			return oldSetHeader(key, value);
-		}; // eslint-disable-line @typescript-eslint/no-empty-function
+	if (req.headers.host !== getMainSiteHostname()) {		
+		disableSettingNextAuthCookie(res);
 	}
 	// pass the (modified) req/res to the handler
 	// weird type errors even though they're the same

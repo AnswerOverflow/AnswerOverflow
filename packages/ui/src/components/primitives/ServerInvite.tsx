@@ -40,9 +40,7 @@ export const ServerInviteTitle = () => {
 	const { server, location, channel } = useServerInviteContext();
 	return (
 		<Link
-			href={
-				getServerHomepageUrl(server)
-			}
+			href={getServerHomepageUrl(server)}
 			onMouseUp={() => {
 				trackEvent('Community Page Link Click', {
 					'Link Location': location,

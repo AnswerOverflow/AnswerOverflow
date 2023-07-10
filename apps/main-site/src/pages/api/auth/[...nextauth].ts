@@ -2,11 +2,13 @@ import NextAuth from 'next-auth';
 
 import {
 	authOptions,
+	disableSettingNextAuthCookie,
 	getNextAuthCookieName,
 	getTenantCookieName,
 } from '@answeroverflow/auth';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { findTenantSessionByToken } from '@answeroverflow/db';
+import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
 export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse<any>,
@@ -17,9 +19,8 @@ export default async function handler(
 		// add a cookie to the request using the next auth header
 		req.cookies[getNextAuthCookieName()] = nextAuthSession?.sessionToken;
 	}
-	if (req.headers.host !== 'localhost:3000') {
-		res.setHeader = () => res; // eslint-disable-line @typescript-eslint/no-empty-function
+	if (req.headers.host !== getMainSiteHostname()) {
+		disableSettingNextAuthCookie(res);
 	}
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 	await NextAuth(req, res, authOptions);
 }

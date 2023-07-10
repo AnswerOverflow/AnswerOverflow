@@ -54,9 +54,7 @@ export function ServerDashboardRenderer(props: {
 							>
 								<Card>
 									<AOLink
-										href={
-											getServerHomepageUrl(data)
-										}
+										href={getServerHomepageUrl(data)}
 										className="flex items-center gap-2"
 									>
 										<Title>View Community</Title>

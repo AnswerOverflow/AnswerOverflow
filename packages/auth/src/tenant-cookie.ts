@@ -1,4 +1,5 @@
 import { CookieSerializeOptions } from 'cookie';
+import { NextApiResponse } from 'next';
 
 export function getTenantCookieName() {
 	return `${
@@ -23,4 +24,18 @@ export function getTenantCookieOptions(
 export function getNextAuthCookieName() {
 	const cookiePrefix = process.env.NODE_ENV === 'production' ? '__Secure-' : '';
 	return `${cookiePrefix}next-auth.session-token`;
+}
+
+export function disableSettingNextAuthCookie(res: NextApiResponse<any>){
+	// eslint-disable-next-line @typescript-eslint/unbound-method
+	const originalSetHeader = res.setHeader;
+		res.setHeader = function (name, value) {
+			if (name.toLowerCase() === 'set-cookie') {
+				const cookie = value as string;
+				if (cookie.startsWith(`${getNextAuthCookieName()}=`)) {
+					return res;
+				}
+			}
+			return originalSetHeader.call(this, name, value);
+		}
 }
