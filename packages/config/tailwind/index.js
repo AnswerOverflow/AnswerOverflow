@@ -85,8 +85,8 @@ module.exports = {
 						DEFAULT: '#1f2937', // gray-800
 					},
 					content: {
-						subtle: '#f0f8ff7a', // gray-600
-						DEFAULT: '#6b7280', // gray-600
+						subtle: '#afafaf', // gray-600
+						DEFAULT: '#afafaf', // gray-600
 						emphasis: '#e5e7eb', // gray-200
 						strong: '#f9fafb', // gray-50
 						inverted: '#000000', // black

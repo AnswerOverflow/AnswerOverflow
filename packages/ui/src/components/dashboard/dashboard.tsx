@@ -18,6 +18,7 @@ import { CurrentPlanCard, PageViewChart, PageViewsCard } from './cards';
 import { TierAccessOnly } from '../primitives/tier-access-only';
 import type { ServerDashboard } from '@answeroverflow/api';
 import { DashboardProvider } from './dashboard-context';
+import { getServerHomepageUrl } from '~ui/utils/server';
 
 export function ServerDashboardRenderer(props: {
 	data: ServerDashboard;
@@ -35,7 +36,7 @@ export function ServerDashboardRenderer(props: {
 	} = props;
 	return (
 		<DashboardProvider value={data}>
-			<TabGroup className="px-2 md:px-8">
+			<TabGroup className="bg-ao-white px-2 dark:bg-ao-black md:px-8">
 				<TabList className="mx-auto max-w-7xl">
 					<Tab>Overview</Tab>
 				</TabList>
@@ -54,9 +55,7 @@ export function ServerDashboardRenderer(props: {
 								<Card>
 									<AOLink
 										href={
-											data.customDomain
-												? `https://${data.customDomain}`
-												: `/c/${data.id}`
+											getServerHomepageUrl(data)
 										}
 										className="flex items-center gap-2"
 									>
@@ -64,7 +63,7 @@ export function ServerDashboardRenderer(props: {
 										<GoLinkExternal className="mt-1 h-5 w-5" />
 									</AOLink>
 								</Card>
-								
+
 								{PageViewsCardOverride ?? <PageViewsCard />}
 								{CurrentPlanCardOverride ?? <CurrentPlanCard />}
 							</Col>

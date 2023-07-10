@@ -14,7 +14,8 @@ export default function handler(
 	// ?code=...
 	const token = req.query.code;
 	if (!token) {
-		return res.status(400);
+		res.status(400);
+		return;
 	}
 	// set the answeroverflow.tenant.token cookie
 	setCookie(res, {
@@ -22,12 +23,6 @@ export default function handler(
 		options: getTenantCookieOptions(),
 		value: token as string,
 	});
-	console.log(
-		'Setting cookie',
-		token,
-		getTenantCookieName(),
-		getTenantCookieOptions(),
-	);
 	// redirect to the original redirect
 	res.redirect(redirect);
 	return;

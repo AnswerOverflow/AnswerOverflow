@@ -42,7 +42,9 @@ export function TierAccessOnly(props: {
 					) : (
 						<div className="flex flex-row items-center justify-between space-y-2 rounded-b-lg border border-stone-200 bg-stone-50 p-3 dark:bg-stone-900 sm:space-y-0 sm:px-10">
 							<span>You must be on the pro plan to use this feature.</span>
-							<Button variant="outline">Start free trial</Button>
+							<Button variant="outline" disabled>
+								Pro Tier Avaliable Starting 7/24
+							</Button>
 							{/* TODO: Change to start free trial for better conversion? */}
 						</div>
 					)}
