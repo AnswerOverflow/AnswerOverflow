@@ -8,16 +8,6 @@
 import { createContext, useContext } from 'react';
 import type { ServerPublic } from '@answeroverflow/api';
 
-export function useIsOnTenantSite() {
-	if (typeof window === 'undefined') return false;
-
-	const { host } = window.location;
-	if (process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'production') {
-		return host !== 'www.answeroverflow.com';
-	}
-	return host !== 'localhost:3000';
-}
-
 const TenantContext = createContext<ServerPublic | undefined>(undefined);
 
 export const TenantContextProvider = TenantContext.Provider;
