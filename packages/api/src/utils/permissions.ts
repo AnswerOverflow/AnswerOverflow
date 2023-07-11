@@ -128,13 +128,12 @@ export function assertIsAdminOrOwnerOfServer(
 	const permissionBitfield = new PermissionsBitField(
 		BigInt(serverToCheckPermissionsOf.permissions),
 	);
-	if (
-		!permissionBitfield.has('Administrator') ||
-		serverToCheckPermissionsOf.owner
-	) {
+  const isAdminOrOwner = permissionBitfield.has('Administrator') || serverToCheckPermissionsOf.owner;
+	if (!isAdminOrOwner) {
+	{
 		return new TRPCError({
 			code: 'FORBIDDEN',
-			message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+			message: "Only administrators or the server owner can do this",
 		});
 	}
 	return;
