@@ -1,4 +1,4 @@
-import type { ServerPublic } from '~api/router/server/types';
+import type { ServerPublic } from '@answeroverflow/api';
 import { AOHead, Heading, ViewServerCard } from '../primitives';
 
 interface BrowseCommunitiesPageProps {

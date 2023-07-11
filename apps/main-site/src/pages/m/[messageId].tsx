@@ -62,6 +62,14 @@ export async function getStaticProps(
 		const { server, messages } = await ssg.messages.threadFromMessageId.fetch(
 			context.params.messageId,
 		);
+		if (server.customDomain) {
+			return {
+				redirect: {
+					destination: `https://${server.customDomain}/m/${context.params.messageId}`,
+					permanent: process.env.NODE_ENV === 'production',
+				},
+			};
+		}
 
 		const areAllMessagesPublic = messages.every((message) => message.public);
 		return {

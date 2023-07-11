@@ -24,6 +24,7 @@ export async function clearDatabase() {
 			},
 		},
 	});
+	await prisma.tenantSession.deleteMany({});
 	await prisma.channel.deleteMany({});
 	await prisma.server.deleteMany({});
 	await prisma.account.deleteMany({});

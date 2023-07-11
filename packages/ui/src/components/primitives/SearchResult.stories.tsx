@@ -3,7 +3,7 @@ import { loremIpsum } from 'lorem-ipsum';
 import {
 	mockChannelWithSettings,
 	mockMessageWithDiscordAccount,
-	mockServer,
+	mockPublicServer,
 } from '~ui/test/props';
 import { SearchResult } from './SearchResult';
 
@@ -28,7 +28,7 @@ PublicSolution.args = {
 			// AO's Discord server
 			inviteCode: 'sxDN2rEdwD',
 		}),
-		server: mockServer(),
+		server: mockPublicServer(),
 	},
 };
 
@@ -51,7 +51,7 @@ PublicSolutionWithSuperLongMessage.args = {
 			// AO's Discord server
 			inviteCode: 'sxDN2rEdwD',
 		}),
-		server: mockServer(),
+		server: mockPublicServer(),
 	},
 };
 
@@ -75,7 +75,7 @@ PrivateSolution.args = {
 			// AO's Discord server
 			inviteCode: 'sxDN2rEdwD',
 		}),
-		server: mockServer(),
+		server: mockPublicServer(),
 	},
 };
 
@@ -93,6 +93,6 @@ NoSolution.args = {
 			// AO's Discord server
 			inviteCode: 'sxDN2rEdwD',
 		}),
-		server: mockServer(),
+		server: mockPublicServer(),
 	},
 };

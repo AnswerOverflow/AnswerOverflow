@@ -12,16 +12,16 @@
 	},
 	"dependencies": {
 		"@answeroverflow/api": "*",
-		"next": "^13.3.0",
+		"next": "13.4.8",
 		"next-auth": "^4.20.1",
 		"posthog-js": "^1.57.2",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0"
 	},
 	"devDependencies": {
+		"@answeroverflow/auth": "*",
 		"@answeroverflow/db": "*",
 		"@answeroverflow/prettier-config": "*",
-		"@answeroverflow/auth": "*",
 		"@answeroverflow/tsconfig": "*",
 		"@types/node": "^18.14.2",
 		"@types/react": "^18.0.14",

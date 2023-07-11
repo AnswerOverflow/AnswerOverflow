@@ -1,16 +1,26 @@
-import { initTRPC } from '@trpc/server';
+import { TRPCError, initTRPC } from '@trpc/server';
 import type { Context } from './context';
 import superjson from 'superjson';
 import { getDiscordOauthThrowIfNotFound } from '../utils/discord-operations';
 import { getDiscordUser, getUserServers } from '@answeroverflow/cache';
 import { clearProviderAuthToken } from '@answeroverflow/db';
 
-const t = initTRPC.context<Context>().create({
-	transformer: superjson,
-	errorFormatter({ shape }) {
-		return shape;
-	},
-});
+export interface Meta {
+	tenantAuthAccessible: boolean; // Whether this endpoint is accessible by tenant auth
+}
+
+const t = initTRPC
+	.context<Context>()
+	.meta<Meta>()
+	.create({
+		transformer: superjson,
+		errorFormatter({ shape }) {
+			return shape;
+		},
+		defaultMeta: {
+			tenantAuthAccessible: false,
+		},
+	});
 
 async function getDiscordOauth(ctx: Context) {
 	if (!ctx.session) {
@@ -73,8 +83,20 @@ const addUserServers = t.middleware(async ({ ctx, next }) => {
 	});
 });
 
+const checkTenantAuth = t.middleware(async ({ ctx, next, meta }) => {
+	const isTenantAuthAccessible = meta?.tenantAuthAccessible ?? false;
+	if (ctx.session?.isTenantSession && !isTenantAuthAccessible) {
+		throw new TRPCError({
+			code: 'METHOD_NOT_SUPPORTED',
+			message: 'This operation is not supported on tenant sites.',
+		});
+	}
+	return next();
+});
+
 export const router = t.router;
 export const MergeRouters = t.mergeRouters;
-export const publicProcedure = t.procedure;
-export const withDiscordAccountProcedure = t.procedure.use(addDiscordAccount);
-export const withUserServersProcedure = t.procedure.use(addUserServers);
+const procedureBase = t.procedure.use(checkTenantAuth);
+export const publicProcedure = procedureBase;
+export const withDiscordAccountProcedure = procedureBase.use(addDiscordAccount);
+export const withUserServersProcedure = procedureBase.use(addUserServers);

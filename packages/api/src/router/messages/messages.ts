@@ -34,6 +34,9 @@ export const messagesRouter = router({
   */
 	threadFromMessageId: withUserServersProcedure
 		.input(z.string())
+		.meta({
+			tenantAuthAccessible: true,
+		})
 		.query(async ({ input, ctx }) => {
 			// This is the message we're starting from
 			const targetMessage = await findOrThrowNotFound(
@@ -135,6 +138,9 @@ export const messagesRouter = router({
 				channelId: z.string().optional(),
 			}),
 		)
+		.meta({
+			tenantAuthAccessible: true,
+		})
 		.query(async ({ input, ctx }) => {
 			const searchResults = await searchMessages(input);
 			const strippedSearchResults = searchResults.map(

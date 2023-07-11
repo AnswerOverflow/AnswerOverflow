@@ -1,0 +1,27 @@
+{
+	"name": "@answeroverflow/proxy",
+	"version": "0.1.0",
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"license": "MIT",
+	"type": "module",
+	"scripts": {
+		"with-env": "dotenv -e ../../.env --",
+		"clean": "rm -rf .turbo node_modules coverage",
+		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
+		"lint": "eslint . && tsc --noEmit",
+		"dev": "tsup index.ts && node dist/index.cjs",
+		"lint:fix": "eslint . --fix"
+	},
+	"devDependencies": {
+		"@answeroverflow/tsconfig": "*",
+		"@types/http-proxy": "^1.17.10",
+		"dotenv-cli": "^7.1.0",
+		"eslint": "^8.28.0",
+		"http-proxy": "^1.18.1",
+		"tslib": "^2.4.1",
+		"tsup": "^6.7.0",
+		"typescript": "^4.9.4"
+	}
+}

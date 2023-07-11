@@ -42,6 +42,10 @@ const internalServerProperties = {
 	description: z.string().nullable(),
 	bitfield: z.number(),
 	vanityUrl: z.string().nullable(),
+	customDomain: z.string().nullable(),
+	stripeSubscriptionId: z.string().nullable(),
+	stripeCustomerId: z.string().nullable(),
+	plan: z.enum(['FREE', 'PRO', 'OPEN_SOURCE']),
 } as const satisfies ServerZodFormat;
 
 const internalServerPropertiesMutable = z
@@ -90,6 +94,7 @@ export const zServerPublic = z.object(
 		'vanityUrl',
 		'description',
 		'kickedTime',
+		'customDomain',
 	),
 );
 

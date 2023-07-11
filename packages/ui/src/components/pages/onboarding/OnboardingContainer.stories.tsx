@@ -10,7 +10,7 @@ import {
 	WhatIsYourCommunityAbout,
 	WhatTypeOfCommunityDoYouHave,
 } from './OnboardingPages';
-import { mockServer } from '~ui/test/props';
+import { mockPublicServer } from '~ui/test/props';
 
 export const ContributorsStory: Story = () => <OnboardingLanding />;
 
@@ -45,7 +45,7 @@ export const SignedInStory: Story = () => (
 				authState="authenticated"
 				servers={[
 					{
-						...mockServer(),
+						...mockPublicServer(),
 						highestRole: 'Owner',
 						hasBot: true,
 						permissions: 0,
@@ -53,7 +53,7 @@ export const SignedInStory: Story = () => (
 						owner: true,
 					},
 					{
-						...mockServer(),
+						...mockPublicServer(),
 						highestRole: 'Owner',
 						hasBot: true,
 						permissions: 0,
@@ -61,7 +61,7 @@ export const SignedInStory: Story = () => (
 						owner: true,
 					},
 					{
-						...mockServer(),
+						...mockPublicServer(),
 						highestRole: 'Owner',
 						hasBot: true,
 						permissions: 0,
@@ -69,7 +69,7 @@ export const SignedInStory: Story = () => (
 						owner: true,
 					},
 					{
-						...mockServer(),
+						...mockPublicServer(),
 						highestRole: 'Owner',
 						hasBot: true,
 						permissions: 0,
@@ -77,7 +77,7 @@ export const SignedInStory: Story = () => (
 						owner: true,
 					},
 					{
-						...mockServer(),
+						...mockPublicServer(),
 						highestRole: 'Owner',
 						hasBot: true,
 						permissions: 0,
@@ -85,7 +85,7 @@ export const SignedInStory: Story = () => (
 						owner: true,
 					},
 					{
-						...mockServer(),
+						...mockPublicServer(),
 						highestRole: 'Owner',
 						hasBot: true,
 						permissions: 0,
@@ -93,7 +93,7 @@ export const SignedInStory: Story = () => (
 						owner: true,
 					},
 					{
-						...mockServer(),
+						...mockPublicServer(),
 						highestRole: 'Owner',
 						hasBot: true,
 						permissions: 0,
@@ -118,7 +118,7 @@ export const WaitingToBeAddedStory: Story = () => (
 			}}
 		>
 			<WaitingToBeAddedRenderer
-				server={mockServer()}
+				server={mockPublicServer()}
 				timeSinceLastCheckInSeconds={5}
 				hasJoined={false}
 			/>
@@ -138,7 +138,7 @@ export const SuccessfullyJoinedStory: Story = () => (
 			}}
 		>
 			<WaitingToBeAddedRenderer
-				server={mockServer()}
+				server={mockPublicServer()}
 				timeSinceLastCheckInSeconds={5}
 				hasJoined={true}
 			/>
@@ -233,7 +233,7 @@ export const FinalChecklistPageStory: Story = () => (
 				goToPage: () => {},
 				data: {
 					server: {
-						...mockServer(),
+						...mockPublicServer(),
 						hasBot: true,
 						highestRole: 'Administrator',
 					},

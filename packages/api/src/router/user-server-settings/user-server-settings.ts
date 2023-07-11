@@ -7,7 +7,7 @@ import {
 	zUserServerSettingsFind,
 	zUserServerSettingsFlags,
 } from '@answeroverflow/db';
-import { withDiscordAccountProcedure, MergeRouters, router } from '../trpc';
+import { withDiscordAccountProcedure, router } from '../trpc';
 import {
 	protectedFetch,
 	protectedMutation,
@@ -165,6 +165,4 @@ const userServerSettingsCrudRouter = router({
 		}),
 });
 
-export const userServerSettingsRouter = MergeRouters(
-	userServerSettingsCrudRouter,
-);
+export const userServerSettingsRouter = userServerSettingsCrudRouter;

@@ -51,7 +51,7 @@ export function WaitingToBeAdded() {
 	const [lastChecked, setLastChecked] = useState(Date.now());
 	const [currentTimestamp, setCurrentTimestamp] = useState(Date.now());
 
-	const { status } = trpc.servers.byIdPublic.useQuery(data.server!.id, {
+	const { status } = trpc.servers.byId.useQuery(data.server!.id, {
 		refetchInterval: 5000,
 		refetchIntervalInBackground: false,
 		refetchOnWindowFocus: true,
@@ -388,6 +388,7 @@ export function WelcomePageRenderer(props: {
 										description: null,
 										vanityUrl: null,
 										kickedTime: null,
+										customDomain: null,
 									}}
 									onSetupClick={(clickedServer) => {
 										// wait a second then go this page:
@@ -449,8 +450,8 @@ export function FinalChecklistPage() {
 				</li>
 			</ul>
 			<div className="mx-auto py-4">
-				<LinkButton href={`/c/${data.server!.id}`}>
-					View Your Community
+				<LinkButton href={`/dashboard/${data.server!.id}`}>
+					View Dashboard
 				</LinkButton>
 			</div>
 			<span>
