@@ -4,7 +4,6 @@ import {
 	createServer,
 	type Server,
 } from '@answeroverflow/db';
-import { pickPublicServerData } from '~api/test/public-data';
 import {
 	mockAccountWithServersCallerCtx,
 	testAllSourceAndPermissionVariantsThatThrowErrors,
@@ -17,29 +16,6 @@ describe('Server Operations', () => {
 		beforeEach(async () => {
 			server = mockServer();
 			await createServer(server);
-		});
-		describe('By Id Public', () => {
-			it('should only get public server data', async () => {
-				const account = await mockAccountWithServersCallerCtx(
-					server,
-					'discord-bot',
-					'ManageGuild',
-				);
-				const router = serverRouter.createCaller(account.ctx);
-				const fetchedServer = await router.byIdPublic(server.id);
-				expect(fetchedServer).toEqual(pickPublicServerData(server));
-			});
-			it("should fail if the server doesn't exist", async () => {
-				const account = await mockAccountWithServersCallerCtx(
-					server,
-					'discord-bot',
-					'ManageGuild',
-				);
-				const router = serverRouter.createCaller(account.ctx);
-				await expect(router.byIdPublic('non-existent-server')).rejects.toThrow(
-					'Server not found',
-				);
-			});
 		});
 		describe('By Id', () => {
 			it('should succeed with permission variants', async () => {

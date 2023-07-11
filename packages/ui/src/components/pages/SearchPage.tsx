@@ -2,7 +2,7 @@ import type { APISearchResult } from '@answeroverflow/api';
 import { useState } from 'react';
 import { SearchInput, SearchResult, Heading } from '~ui/components/primitives';
 import { useRouter } from 'next/router';
-import { useRouterQuery } from '~ui/utils/hooks';
+import { useRouterQuery, useRouterServerId } from '~ui/utils/hooks';
 import { twMerge } from 'tailwind-merge';
 
 interface SearchResultProps {
@@ -17,6 +17,7 @@ export const MessagesSearchBar = (props: {
 }) => {
 	const router = useRouter();
 	const query = useRouterQuery();
+	const serverId = useRouterServerId();
 	const [searchInput, setSearchInput] = useState<string>(query);
 	return (
 		<form
@@ -25,8 +26,9 @@ export const MessagesSearchBar = (props: {
 				e.preventDefault();
 				const params = new URLSearchParams();
 				params.set('q', searchInput);
-				if (props.serverId) {
-					params.set('s', props.serverId);
+				const serverIdToFilterTo = props.serverId ?? serverId;
+				if (serverIdToFilterTo) {
+					params.set('s', serverIdToFilterTo);
 				}
 				await router.push(`/search?${params.toString()}`, undefined, {
 					shallow: true,

@@ -17,6 +17,7 @@ import {
 	channelToAnalyticsData,
 	serverToAnalyticsData,
 } from '@answeroverflow/constants/src/analytics';
+import { getServerHomepageUrl } from '~ui/utils/server';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const ServerInviteContext = createContext<{
 	server: ServerPublic;
@@ -39,7 +40,7 @@ export const ServerInviteTitle = () => {
 	const { server, location, channel } = useServerInviteContext();
 	return (
 		<Link
-			href={`/c/${server.id}`}
+			href={getServerHomepageUrl(server)}
 			onMouseUp={() => {
 				trackEvent('Community Page Link Click', {
 					'Link Location': location,

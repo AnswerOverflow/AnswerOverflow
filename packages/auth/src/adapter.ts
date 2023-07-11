@@ -33,4 +33,19 @@ export const extendedAdapter: Adapter = {
 			account,
 		) as unknown as AdapterAccount;
 	},
+	createSession: (data) => {
+		return prisma.session.create({ data });
+	},
+	updateSession: (data) => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { userId, sessionToken, ...rest } = data;
+		return prisma.session.update({
+			where: { sessionToken: data.sessionToken },
+			data: rest,
+		});
+	},
+	deleteSession: async (sessionToken) => {
+		await prisma.tenantSession.deleteMany({ where: { sessionToken } });
+		return prisma.session.delete({ where: { sessionToken } });
+	},
 };

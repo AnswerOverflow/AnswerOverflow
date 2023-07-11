@@ -16,3 +16,10 @@ ENV CHOKIDAR_USEPOLLING=true
 RUN su node -c "npm install @sapphire/cli -g"
 RUN su node -c "npm install -g eslint"
 RUN su node -c "npm i -g @railway/cli"
+RUN sudo apt-get install xdg-utils
+
+# Strip CLI
+RUN curl -s https://packages.stripe.dev/api/security/keypair/stripe-cli-gpg/public | gpg --dearmor | sudo tee /usr/share/keyrings/stripe.gpg
+RUN echo "deb [signed-by=/usr/share/keyrings/stripe.gpg] https://packages.stripe.dev/stripe-cli-debian-local stable main" | sudo tee -a /etc/apt/sources.list.d/stripe.list
+RUN sudo apt-get update
+RUN sudo apt-get install stripe

@@ -1,0 +1,10 @@
+{
+	"extends": "@answeroverflow/tsconfig/base.json",
+	"compilerOptions": {
+		"types": ["vitest/globals"],
+		"baseUrl": "../../",
+		"noEmit": false,
+		"outDir": "dist"
+	},
+	"include": ["src", "index.ts", "../../reset.d.ts", "prettierrc.cjs"]
+}

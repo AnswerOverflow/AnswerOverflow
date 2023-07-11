@@ -52,7 +52,7 @@ export type ViewOnDiscordClickProps = Pick<ServerProps, 'Server Id'> &
 	Partial<Pick<ThreadProps, 'Thread Id'>> &
 	MessageProps;
 
-type EventMap = {
+export type EventMap = {
 	'Message Page View': MessagePageViewProps;
 	'View On Discord Click': ViewOnDiscordClickProps;
 	'Getting Started Click': GettingStartedClickProps;

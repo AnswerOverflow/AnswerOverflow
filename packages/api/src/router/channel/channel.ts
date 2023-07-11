@@ -1,5 +1,4 @@
 import {
-	zChannelPublic,
 	findChannelById,
 	type ChannelWithFlags,
 	zChannelCreate,
@@ -26,7 +25,6 @@ import {
 	protectedMutation,
 } from '~api/utils/protected-procedures';
 import type { Context } from '../context';
-import { findOrThrowNotFound } from '~api/utils/operations';
 
 export const CHANNEL_NOT_FOUND_MESSAGES = 'Channel does not exist';
 
@@ -127,13 +125,6 @@ export const channelRouter = router({
 			permissions: (data) => assertCanEditServer(ctx, data.serverId),
 			notFoundMessage: CHANNEL_NOT_FOUND_MESSAGES,
 		});
-	}),
-	byIdPublic: publicProcedure.input(z.string()).query(async ({ input }) => {
-		const channel = await findOrThrowNotFound(
-			() => findChannelById(input),
-			CHANNEL_NOT_FOUND_MESSAGES,
-		);
-		return zChannelPublic.parse(channel);
 	}),
 	setIndexingEnabled: withUserServersProcedure
 		.input(
