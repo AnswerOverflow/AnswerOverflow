@@ -31,8 +31,10 @@ export function disableSettingNextAuthCookie(res: NextApiResponse<any>) {
 	const originalSetHeader = res.setHeader;
 	res.setHeader = function (name, value) {
 		if (name.toLowerCase() === 'set-cookie') {
-			const cookie = value as string;
-			if (cookie.startsWith(`${getNextAuthCookieName()}=`)) {
+			if (
+				typeof value === 'string' &&
+				value.startsWith(`${getNextAuthCookieName()}=`)
+			) {
 				return res;
 			}
 		}
