@@ -1,11 +1,15 @@
 import { ApplyOptions } from '@sapphire/decorators';
-import { Listener } from '@sapphire/framework';
-import { Client, Events } from 'discord.js';
+import { Listener, Events } from '@sapphire/framework';
+import { Client } from 'discord.js';
 import { container } from '@sapphire/framework';
 import { indexServers } from '~discord-bot/domains/indexing';
 import { delay } from '@answeroverflow/discordjs-mock';
 
-@ApplyOptions<Listener.Options>({ once: true, event: Events.ClientReady })
+@ApplyOptions<Listener.Options>({
+	once: true,
+	event: Events.ClientReady,
+	name: 'indexing-timer',
+})
 export class Indexing extends Listener {
 	public async run(client: Client) {
 		if (process.env.INDEXING_DISABLED) {
