@@ -1,9 +1,23 @@
 {
 	"extends": "@answeroverflow/tsconfig/base.json",
 	"compilerOptions": {
-		"types": ["vitest/globals"],
+		"types": ["vitest/globals", "node"],
 		"baseUrl": "../../"
 	},
-	"include": ["index.ts", "src", "test", "vitest.config.ts", "prettierrc.cjs"],
+	"include": [
+		"index.ts",
+		"src",
+		"test",
+		"vitest.config.ts",
+		"prettierrc.cjs",
+		"scripts",
+		"../../reset.d.ts"
+	],
+	"ts-node": {
+		"compilerOptions": {
+			"module": "commonjs",
+			"verbatimModuleSyntax": false
+		}
+	},
 	"exclude": ["node_modules", "../../node_modules/*"]
 }

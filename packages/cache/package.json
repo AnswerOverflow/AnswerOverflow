@@ -13,9 +13,11 @@
 		"lint": "eslint . \"*.ts*\" && tsc --noEmit",
 		"lint:fix": "eslint . \"*.ts*\" --fix",
 		"test": "yarn run with-env vitest run  --coverage",
-		"test:watch": "yarn run with-env vitest"
+		"test:watch": "yarn run with-env vitest",
+		"db:wipe": "cross-env NODE_ENV=test yarn with-env npx ts-node ./scripts/wipe.ts"
 	},
 	"dependencies": {
+		"@answeroverflow/db": "*",
 		"@answeroverflow/utils": "*",
 		"axios": "^1.4.0",
 		"dotenv-cra": "^3.0.3",
@@ -24,6 +26,7 @@
 	},
 	"devDependencies": {
 		"@answeroverflow/tsconfig": "*",
+		"@types/node": "^20.4.2",
 		"@vitest/coverage-c8": "^0.28.5",
 		"dotenv-cli": "^7.1.0",
 		"vitest": "^0.29.8"

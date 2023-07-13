@@ -57,6 +57,7 @@ export async function findDiscordOauthByUserId(userId: string) {
 export async function clearProviderAuthToken(
 	input: Pick<Account, 'provider' | 'providerAccountId'>,
 ) {
+	console.log('Token invalid, clearing');
 	await prisma.account.update({
 		where: {
 			provider_providerAccountId: {

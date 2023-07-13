@@ -5,7 +5,7 @@
 	"scripts": {
 		"with-env": "dotenv -e ../../.env --",
 		"dev": "yarn with-env next dev",
-		"build": "(cd ../../ && yarn db:generate) && yarn with-env next build",
+		"build": "(cd ../../ && yarn db:generate && cd apps/main-site) && yarn run with-env next build",
 		"clean": "rm -rf .next .turbo node_modules",
 		"start": "yarn run with-env next start",
 		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
@@ -39,7 +39,6 @@
 		"next": "13.4.8",
 		"next-auth": "^4.20.1",
 		"next-themes": "^0.2.1",
-		"node-fetch": "^3.3.1",
 		"raw-body": "^2.5.2",
 		"react": "18.2.0",
 		"react-dom": "18.2.0",

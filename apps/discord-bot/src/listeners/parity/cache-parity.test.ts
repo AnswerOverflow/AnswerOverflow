@@ -49,7 +49,6 @@ describe('Account Parity', () => {
 			]);
 			const userServers = await getUserServers({
 				accessToken: oauth.access_token!,
-				onInvalidToken: () => {},
 			});
 			expect(userServers).toEqual([toDiscordAPIServer(member)]);
 			const member2 = mockGuildMember({ client, user: member.user });
@@ -57,7 +56,6 @@ describe('Account Parity', () => {
 
 			const userServers2 = await getUserServers({
 				accessToken: oauth.access_token!,
-				onInvalidToken: () => {},
 			});
 			expect(userServers2).toHaveLength(2);
 			expect(userServers2).toContainEqual(toDiscordAPIServer(member2));
@@ -75,7 +73,6 @@ describe('Account Parity', () => {
 			]);
 			const userServers = await getUserServers({
 				accessToken: oauth.access_token!,
-				onInvalidToken: () => {},
 			});
 			expect(userServers).toEqual([toDiscordAPIServer(member)]);
 
@@ -83,7 +80,6 @@ describe('Account Parity', () => {
 
 			const userServers2 = await getUserServers({
 				accessToken: oauth.access_token!,
-				onInvalidToken: () => {},
 			});
 			expect(userServers2).toHaveLength(0);
 		});
@@ -102,7 +98,6 @@ describe('Account Parity', () => {
 			});
 			const cachedUser = await getDiscordUser({
 				accessToken: oauth.access_token!,
-				onInvalidToken: () => {},
 			});
 			expect(cachedUser.username).toEqual(member.user.username);
 			const newUser = copyClass(member.user, member.client, {
@@ -112,7 +107,6 @@ describe('Account Parity', () => {
 			await emitEvent(client, Events.UserUpdate, member.user, newUser);
 			const cachedUser2 = await getDiscordUser({
 				accessToken: oauth.access_token!,
-				onInvalidToken: () => {},
 			});
 			expect(cachedUser2.username).toEqual(newUser.username);
 		});

@@ -88,7 +88,6 @@ describe('Discord API', () => {
 
 			const notCachedUser = await getDiscordUser({
 				accessToken,
-				onInvalidToken: () => {},
 			});
 			expect(notCachedUser).toEqual(
 				zUserSchema.parse(mockDiscordApiUserResponse),
@@ -96,7 +95,6 @@ describe('Discord API', () => {
 
 			const cachedUser = await getDiscordUser({
 				accessToken,
-				onInvalidToken: () => {},
 			});
 			expect(cachedUser).toEqual(zUserSchema.parse(mockDiscordApiUserResponse));
 			expect(axios.get).toHaveBeenCalledTimes(1);
@@ -106,7 +104,6 @@ describe('Discord API', () => {
 
 			const notCachedUser = await getDiscordUser({
 				accessToken,
-				onInvalidToken: () => {},
 			});
 			expect(notCachedUser).toEqual(
 				zUserSchema.parse(mockDiscordApiUserResponse),
@@ -114,7 +111,6 @@ describe('Discord API', () => {
 
 			const cachedUser = await getDiscordUser({
 				accessToken,
-				onInvalidToken: () => {},
 			});
 			expect(cachedUser).toEqual(zUserSchema.parse(mockDiscordApiUserResponse));
 			expect(axios.get).toHaveBeenCalledTimes(1);
@@ -126,7 +122,6 @@ describe('Discord API', () => {
 			await updateCachedDiscordUser(accessToken, updatedUser);
 			const updatedCachedUser = await getDiscordUser({
 				accessToken,
-				onInvalidToken: () => {},
 			});
 			expect(updatedCachedUser).toEqual(zUserSchema.parse(updatedUser));
 			expect(axios.get).toHaveBeenCalledTimes(1);
@@ -137,7 +132,6 @@ describe('Discord API', () => {
 			mockAxiosGet(mockDiscordApiServersResponse);
 			const notCachedServers = await getUserServers({
 				accessToken,
-				onInvalidToken: () => {},
 			});
 			expect(notCachedServers).toEqual(
 				zDiscordApiServerArraySchema.parse(mockDiscordApiServersResponse),
@@ -145,7 +139,6 @@ describe('Discord API', () => {
 
 			const cachedServers = await getUserServers({
 				accessToken,
-				onInvalidToken: () => {},
 			});
 			expect(cachedServers).toEqual(
 				zDiscordApiServerArraySchema.parse(mockDiscordApiServersResponse),
@@ -156,7 +149,6 @@ describe('Discord API', () => {
 			mockAxiosGet(mockDiscordApiServersResponse);
 			const notCachedServers = await getUserServers({
 				accessToken,
-				onInvalidToken: () => {},
 			});
 			expect(notCachedServers).toEqual(
 				zDiscordApiServerArraySchema.parse(mockDiscordApiServersResponse),
@@ -164,7 +156,6 @@ describe('Discord API', () => {
 
 			const cachedServers = await getUserServers({
 				accessToken,
-				onInvalidToken: () => {},
 			});
 			expect(cachedServers).toHaveLength(2);
 			expect(cachedServers).toEqual(
@@ -174,11 +165,9 @@ describe('Discord API', () => {
 			await removeServerFromUserCache({
 				accessToken,
 				serverId: idToRemove,
-				onInvalidToken: () => {},
 			});
 			const cachedServersAfterRemoval = await getUserServers({
 				accessToken,
-				onInvalidToken: () => {},
 			});
 			expect(cachedServersAfterRemoval).toHaveLength(1);
 			expect(
@@ -189,7 +178,6 @@ describe('Discord API', () => {
 			mockAxiosGet(mockDiscordApiServersResponse);
 			const notCachedServers = await getUserServers({
 				accessToken,
-				onInvalidToken: () => {},
 			});
 			expect(notCachedServers).toEqual(
 				zDiscordApiServerArraySchema.parse(mockDiscordApiServersResponse),
@@ -197,7 +185,6 @@ describe('Discord API', () => {
 
 			const cachedServers = await getUserServers({
 				accessToken,
-				onInvalidToken: () => {},
 			});
 			expect(cachedServers).toHaveLength(2);
 			expect(cachedServers).toEqual(
@@ -214,11 +201,9 @@ describe('Discord API', () => {
 					permissions: 0,
 					features: [],
 				},
-				onInvalidToken: () => {},
 			});
 			const cachedServersAfterRemoval = await getUserServers({
 				accessToken,
-				onInvalidToken: () => {},
 			});
 			expect(cachedServersAfterRemoval).toHaveLength(3);
 			expect(

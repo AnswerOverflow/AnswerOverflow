@@ -1,9 +1,8 @@
 import { TRPCError, initTRPC } from '@trpc/server';
 import type { Context } from './context';
 import superjson from 'superjson';
-import { getDiscordOauthThrowIfNotFound } from '../utils/discord-operations';
 import { getDiscordUser, getUserServers } from '@answeroverflow/cache';
-import { clearProviderAuthToken } from '@answeroverflow/db';
+import { findDiscordOauthByUserId } from '@answeroverflow/db';
 
 export interface Meta {
 	tenantAuthAccessible: boolean; // Whether this endpoint is accessible by tenant auth
@@ -26,9 +25,7 @@ async function getDiscordOauth(ctx: Context) {
 	if (!ctx.session) {
 		return null;
 	}
-	const discordOauth = await getDiscordOauthThrowIfNotFound(
-		ctx.session.user.id,
-	);
+	const discordOauth = await findDiscordOauthByUserId(ctx.session.user.id);
 	return discordOauth;
 }
 
@@ -38,11 +35,6 @@ const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
 		if (discordOauth && discordOauth.access_token) {
 			const discordAccount = await getDiscordUser({
 				accessToken: discordOauth.access_token,
-				onInvalidToken: () =>
-					clearProviderAuthToken({
-						provider: discordOauth.provider,
-						providerAccountId: discordOauth.providerAccountId,
-					}),
 			});
 			ctx.discordAccount = discordAccount;
 		}
@@ -59,7 +51,6 @@ export const getUserServersFromCtx = async (ctx: Context) => {
 	if (discordOauth && discordOauth.access_token) {
 		const userServers = await getUserServers({
 			accessToken: discordOauth.access_token,
-			onInvalidToken: () => clearProviderAuthToken(discordOauth),
 		});
 		ctx.userServers = userServers;
 		return userServers;

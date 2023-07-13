@@ -1,8 +1,4 @@
-import {
-	clearProviderAuthToken,
-	prisma,
-	upsertDiscordAccount,
-} from '@answeroverflow/db';
+import { prisma, upsertDiscordAccount } from '@answeroverflow/db';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { getDiscordUser } from '@answeroverflow/cache';
 import type { Adapter, AdapterAccount } from 'next-auth/adapters';
@@ -18,11 +14,6 @@ export const extendedAdapter: Adapter = {
 		}
 		const discordAccount = await getDiscordUser({
 			accessToken: account.access_token,
-			onInvalidToken: () =>
-				clearProviderAuthToken({
-					provider: account.provider,
-					providerAccountId: account.providerAccountId,
-				}),
 		});
 		await upsertDiscordAccount({
 			id: discordAccount.id,
