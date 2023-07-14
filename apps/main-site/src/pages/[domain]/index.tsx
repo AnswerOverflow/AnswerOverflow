@@ -12,11 +12,7 @@ export default function MessageResult(
 	props: InferGetStaticPropsType<typeof getStaticProps>,
 ) {
 	const data = superjson.parse<CommunityPageData>(props.data);
-	return (
-		<>
-			<CommunityPage {...data} />
-		</>
-	);
+	return <CommunityPage {...data} />;
 }
 
 // TODO: Do all at build time?
