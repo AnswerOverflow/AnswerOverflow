@@ -20,7 +20,8 @@ import {
 } from '~api/utils/permissions';
 import { TRPCError } from '@trpc/server';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
-import { ChannelType } from 'discord.js';
+import { ChannelType } from 'discord-api-types/v10';
+
 export const messagesRouter = router({
 	/*
     Message page by ID

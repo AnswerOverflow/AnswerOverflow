@@ -26,6 +26,9 @@
 		"@answeroverflow/tsconfig": "*",
 		"@vitest/coverage-c8": "^0.28.5",
 		"dotenv-cli": "^7.1.0",
+		"@answeroverflow/prettier-config": "*",
+		"prettier": "^2.8.4",
+		"eslint": "^8.44.0",
 		"vitest": "^0.29.8"
 	}
 }

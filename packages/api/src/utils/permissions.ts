@@ -1,5 +1,4 @@
 import { TRPCError } from '@trpc/server';
-import { PermissionsBitField } from 'discord.js';
 import {
 	type ChannelWithFlags,
 	findIgnoredDiscordAccountById,
@@ -14,6 +13,7 @@ import {
 } from '@answeroverflow/db';
 import type { Source, Context } from '~api/router/context';
 import type { DiscordAPIServerSchema } from '@answeroverflow/cache';
+import { PermissionsBitField } from './types';
 
 export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
 	'You are missing the required permissions to do this';
@@ -91,10 +91,11 @@ export function assertCanEditServer(
 				'You are not a member of the server you are trying to create channel settings for',
 		});
 	}
-	const permissionBitfield = new PermissionsBitField(
+	const hasPermsToEdit = PermissionsBitField.any(
 		BigInt(serverToCheckPermissionsOf.permissions),
+		['Administrator', 'ManageGuild'],
 	);
-	if (!permissionBitfield.has('ManageGuild')) {
+	if (!(hasPermsToEdit || serverToCheckPermissionsOf.owner)) {
 		return new TRPCError({
 			code: 'FORBIDDEN',
 			message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
@@ -125,11 +126,11 @@ export function assertIsAdminOrOwnerOfServer(
 			message: 'You are not a member of the server you are trying to view',
 		});
 	}
-	const permissionBitfield = new PermissionsBitField(
-		BigInt(serverToCheckPermissionsOf.permissions),
-	);
 	const isAdminOrOwner =
-		permissionBitfield.has('Administrator') || serverToCheckPermissionsOf.owner;
+		PermissionsBitField.has(
+			BigInt(serverToCheckPermissionsOf.permissions),
+			'Administrator',
+		) || serverToCheckPermissionsOf.owner;
 	if (!isAdminOrOwner) {
 		{
 			return new TRPCError({

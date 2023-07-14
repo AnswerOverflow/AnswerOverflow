@@ -30,8 +30,7 @@ import {
 import { mockChannel, mockServer } from '@answeroverflow/db-mock';
 import type { z } from 'zod';
 import { getRandomId } from '@answeroverflow/utils';
-import { ChannelType } from 'discord.js';
-
+import { ChannelType } from 'discord-api-types/v10';
 let server: Server;
 let channel: Channel;
 let router: ReturnType<typeof channelRouter.createCaller>;

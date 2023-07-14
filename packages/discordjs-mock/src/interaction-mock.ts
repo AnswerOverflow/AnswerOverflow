@@ -21,15 +21,14 @@ import {
 	type APIMessageStringSelectInteractionData,
 	type GuildTextBasedChannel,
 	GuildMemberFlags,
+	APIMessageButtonInteractionData,
+	APIMessageComponentInteraction,
+	CacheType,
 } from 'discord.js';
 import { randomSnowflake } from '@answeroverflow/discordjs-utils';
 import { mockTextChannel } from './channel-mock';
 import { mockMessage } from './message-mock';
 import { mockGuildMember } from './user-mock';
-import type {
-	RawMessageButtonInteractionData,
-	RawMessageComponentInteractionData,
-} from 'discord.js/typings/rawDataTypes';
 import { messageToAPIData } from './to-api-data';
 
 function setupMockedInteractionAPIData<Type extends InteractionType>({
@@ -300,7 +299,7 @@ export function mockButtonInteraction({
 	message: Message;
 	override?: Partial<
 		Omit<
-			RawMessageButtonInteractionData & RawMessageComponentInteractionData,
+			APIMessageButtonInteractionData & APIMessageComponentInteraction,
 			'component_type'
 		>
 	>;
@@ -323,8 +322,7 @@ export function mockButtonInteraction({
 			component_type: ComponentType.Button,
 			custom_id: customId,
 		},
-	} satisfies RawMessageButtonInteractionData &
-		RawMessageComponentInteractionData;
+	} satisfies APIMessageButtonInteractionData & APIMessageComponentInteraction;
 	const interaction = Reflect.construct(ButtonInteraction, [
 		client,
 		rawData,
@@ -347,8 +345,8 @@ export function mockStringSelectInteraction({
 	> & {
 		values: string[] | string;
 	};
-	override?: Partial<Omit<RawMessageComponentInteractionData, 'data'>>;
-}) {
+	override?: Partial<Omit<APIMessageComponentInteraction, 'data'>>;
+}): StringSelectMenuInteraction<CacheType> {
 	const client = message.client;
 	const rawData = {
 		message: messageToAPIData(message),
@@ -365,7 +363,7 @@ export function mockStringSelectInteraction({
 			custom_id: data.custom_id,
 			values: Array.isArray(data.values) ? data.values : [data.values],
 		},
-	} satisfies RawMessageComponentInteractionData & {
+	} satisfies APIMessageComponentInteraction & {
 		data: APIMessageStringSelectInteractionData;
 	};
 	const interaction = Reflect.construct(StringSelectMenuInteraction, [

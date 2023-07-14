@@ -12,9 +12,9 @@
 		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
 		"lint": "eslint . \"*.ts*\" && tsc --noEmit",
 		"lint:fix": "eslint . \"*.ts*\" --fix",
-		"test": "yarn run with-env vitest run  --coverage",
-		"test:watch": "yarn run with-env vitest",
-		"db:wipe": "cross-env NODE_ENV=test yarn with-env npx ts-node ./scripts/wipe.ts"
+		"test": "pnpm with-env vitest run  --coverage",
+		"test:watch": "pnpm with-env vitest",
+		"db:wipe": "cross-env NODE_ENV=test pnpm with-env npx ts-node ./scripts/wipe.ts"
 	},
 	"dependencies": {
 		"@answeroverflow/db": "*",
@@ -25,10 +25,15 @@
 		"zod": "^3.20.6"
 	},
 	"devDependencies": {
+		"@answeroverflow/prettier-config": "*",
 		"@answeroverflow/tsconfig": "*",
 		"@types/node": "^20.4.2",
 		"@vitest/coverage-c8": "^0.28.5",
 		"dotenv-cli": "^7.1.0",
+		"eslint": "^8.44.0",
+		"prettier": "^2.8.4",
+		"cross-env": "^7.0.3",
+		"ts-node": "^10.9.1",
 		"vitest": "^0.29.8"
 	}
 }
