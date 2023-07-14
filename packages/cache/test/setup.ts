@@ -1,4 +1,4 @@
-import { cleanupRedis } from '@answeroverflow/cache';
+import { cleanupRedis } from '../';
 import { config } from 'dotenv-cra';
 
 config({

@@ -42,36 +42,33 @@ jobs:
       - name: Checkout (GitHub)
         uses: actions/checkout@v3
 
-      - name: Install yarn
-        run: sudo apt update && sudo apt install yarn
-
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'yarn'
+          cache: 'pnpm'
       
       - name: Start containers # TODO: Use dev container docker-compose instead if possible
         run: docker-compose -f "docker-compose.yml" up -d --build
 
       - name: Install dependencies
         # Playright is used for storybook, possible move that into package.json instead?
-        run: yarn && npx playwright install-deps
+        run: pnpm i && npx playwright install-deps
 
       - name: Setup Database
-        run: yarn db:push
+        run: pnpm db:push
 
       - name: Format
-        run: yarn format:check
+        run: pnpm format:check
 
       - name: Lint
-        run: yarn lint
+        run: pnpm lint
 
       - name: Build
-        run: yarn build
+        run: pnpm build
 
       - name: Test
-        run: yarn test
+        run: pnpm test
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3

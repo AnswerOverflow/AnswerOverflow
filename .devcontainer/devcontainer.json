@@ -7,7 +7,7 @@
   ],
   "service": "workspace",
   "workspaceFolder": "/AnswerOverflow",
-  "postCreateCommand": "yarn install && npx playwright install && npx playwright install-deps",
+  "postCreateCommand": "pnpm i && npx playwright install && npx playwright install-deps",
   "remoteUser": "node",
   "mounts": [
     "source=${localEnv:HOME}/repos,target=/home/node/repos,type=bind,consistency=cached"

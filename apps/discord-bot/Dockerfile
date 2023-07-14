@@ -8,7 +8,7 @@ RUN apk add --no-cache python3 make g++
 RUN apk update
 # Set working directory
 WORKDIR /app
-RUN yarn global add turbo
+RUN pnpm add -g turbo
 COPY . .
 RUN turbo prune --scope=@answeroverflow/discord-bot --docker
 
@@ -23,10 +23,10 @@ WORKDIR /app
 # First install dependencies (as they change less often)
 COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
-COPY --from=builder /app/out/yarn.lock ./yarn.lock
+COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY turbo.json turbo.json
 
-RUN yarn install
+RUN pnpm i
 
 # Build the project and its dependencies
 COPY --from=builder /app/out/full/ .
@@ -38,7 +38,7 @@ ENV TURBO_TEAM=$TURBO_TEAM
 ARG TURBO_TOKEN
 ENV TURBO_TOKEN=$TURBO_TOKEN
 RUN (cd packages/prisma-types/ && npx prisma generate)
-RUN yarn turbo run build --filter=discord-bot...
+RUN pnpm turbo run build --filter=discord-bot...
 
 FROM node:lts-alpine AS runner
 WORKDIR /app
@@ -52,4 +52,4 @@ RUN adduser --system --uid 1001 sapphire
 USER sapphire
 COPY --from=installer /app .
 
-CMD cd apps/discord-bot/ && yarn start
+CMD cd apps/discord-bot/ && pnpm start

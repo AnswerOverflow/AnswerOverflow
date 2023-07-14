@@ -6,7 +6,7 @@ import type {
 	APIMessageFull,
 } from '@answeroverflow/api';
 import { getRandomName, getRandomSentence } from '@answeroverflow/utils';
-import { ServerWithFlags } from '@answeroverflow/prisma-types';
+import { ServerWithFlags } from '@answeroverflow/db';
 import { ChannelType } from '~ui/utils/discord';
 
 export function randomId() {

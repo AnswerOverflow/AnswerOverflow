@@ -11,8 +11,8 @@
 		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix",
-		"test": "yarn run vitest run  --coverage",
-		"test:watch": "yarn run vitest"
+		"test": "pnpm run vitest run  --coverage",
+		"test:watch": "pnpm run vitest"
 	},
 	"dependencies": {
 		"dotenv-cra": "^3.0.3",
@@ -21,6 +21,9 @@
 	"devDependencies": {
 		"@answeroverflow/tsconfig": "*",
 		"@vitest/coverage-c8": "^0.28.5",
+		"@answeroverflow/prettier-config": "*",
+		"prettier": "^2.8.4",
+		"eslint": "^8.44.0",
 		"vitest": "^0.29.8"
 	}
 }

@@ -22,6 +22,8 @@
 		"http-proxy": "^1.18.1",
 		"tslib": "^2.4.1",
 		"tsup": "^6.7.0",
+		"@answeroverflow/prettier-config": "*",
+		"prettier": "^2.8.4",
 		"typescript": "^4.9.4"
 	}
 }

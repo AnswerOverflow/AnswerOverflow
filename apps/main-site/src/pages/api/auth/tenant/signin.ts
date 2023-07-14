@@ -3,14 +3,12 @@ import { getCsrfToken, getSession } from 'next-auth/react';
 import { findServerByCustomDomain, prisma } from '@answeroverflow/db';
 import { z } from 'zod';
 import crypto from 'crypto';
-// 👀 why are you here looking at this code? 👀
 // eslint-disable-next-line no-restricted-imports
-import { init } from '../../../../../../../node_modules/next-auth/core/init';
+import { init } from '../../../../../node_modules/next-auth/core/init';
 // eslint-disable-next-line no-restricted-imports
-import getAuthorizationUrl from '../../../../../../../node_modules/next-auth/core/lib/oauth/authorization-url';
+import getAuthorizationUrl from '../../../../../node_modules/next-auth/core/lib/oauth/authorization-url';
 // eslint-disable-next-line no-restricted-imports
-import { setCookie } from '../../../../../../../node_modules/next-auth/next/utils';
-// if you can do it better please make a PR please please please
+import { setCookie } from '../../../../../node_modules/next-auth/next/utils';
 import { authOptions, getNextAuthCookieName } from '@answeroverflow/auth';
 import { IncomingMessage } from 'http';
 import { NextAuthOptions } from 'next-auth';

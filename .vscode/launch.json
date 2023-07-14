@@ -11,7 +11,7 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "command": "yarn run dev:discord-bot",
+      "command": "pnpm run dev:discord-bot",
     }
   ]
 }

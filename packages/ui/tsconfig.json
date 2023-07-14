@@ -1,4 +1,5 @@
 {
+	"extends": "@answeroverflow/tsconfig/nextjs.json",
 	"compilerOptions": {
 		"baseUrl": "../../",
 		"types": ["jest"],
@@ -8,7 +9,6 @@
 		"target": "ESNext",
 		"moduleResolution": "Node"
 	},
-	"extends": "@answeroverflow/tsconfig/nextjs.json",
 	"include": [
 		"next-env.d.ts",
 		"test",
