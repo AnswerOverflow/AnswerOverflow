@@ -30,6 +30,7 @@ export const AOHead = ({
 	if (tenant) {
 		server = tenant;
 	}
+	console.log(server, tenant);
 	if (description === undefined) {
 		if (tenant) {
 			description = `View the ${tenant.name} Discord server on the web. Browse questions asked by the community and find answers.`;
