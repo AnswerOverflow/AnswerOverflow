@@ -9,7 +9,7 @@ import {
 	AvatarFallback,
 } from '~ui/components/primitives';
 import Link from 'next/link';
-import type { ChannelPublicWithFlags } from '~api/router/channel/types';
+import type { ChannelPublicWithFlags } from '@answeroverflow/api';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { forwardRef } from 'react';
 export type MessageProps = {

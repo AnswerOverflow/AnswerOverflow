@@ -44,6 +44,18 @@ export async function getStaticProps(
 		};
 	}
 
+	if (communityPageData.server.customDomain) {
+		// TODO: VALIDATE THE SUBSCRIPTION IS STILL ACTIVE
+		return {
+			redirect: {
+				destination: `http${
+					process.env.NODE_ENV === 'production' ? 's' : ''
+				}://${communityPageData.server.customDomain}`,
+				permanent: process.env.NODE_ENV === 'production',
+			},
+		};
+	}
+
 	// prefetch `post.byId`
 	try {
 		return {

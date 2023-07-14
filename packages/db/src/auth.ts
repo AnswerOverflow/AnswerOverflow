@@ -15,6 +15,22 @@ export function findAccountByProviderAccountId(input: {
 	});
 }
 
+export function findTenantSessionByToken(token: string) {
+	return prisma.tenantSession.findUnique({
+		where: {
+			id: token,
+		},
+	});
+}
+
+export function deleteTenantSessionByToken(token: string) {
+	return prisma.tenantSession.deleteMany({
+		where: {
+			id: token,
+		},
+	});
+}
+
 export function findDiscordOauthByProviderAccountId(discordId: string) {
 	return findAccountByProviderAccountId({
 		provider: 'discord',
@@ -41,6 +57,7 @@ export async function findDiscordOauthByUserId(userId: string) {
 export async function clearProviderAuthToken(
 	input: Pick<Account, 'provider' | 'providerAccountId'>,
 ) {
+	console.log('Token invalid, clearing');
 	await prisma.account.update({
 		where: {
 			provider_providerAccountId: {

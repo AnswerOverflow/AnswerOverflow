@@ -3,10 +3,13 @@ import { AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import { Avatar, type AvatarProps, getAvatarSize } from './base';
 
 export interface ServerIconProps extends Omit<AvatarProps, 'url' | 'alt'> {
-	server: ServerPublic;
+	server: Pick<ServerPublic, 'id' | 'name' | 'icon'>;
 }
 
-export const makeServerIconLink = (server: ServerPublic, size: number = 64) => {
+export const makeServerIconLink = (
+	server: Pick<ServerPublic, 'id' | 'icon'>,
+	size: number = 64,
+) => {
 	if (!server.icon) return undefined;
 	return `https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png?size=${size}`;
 };

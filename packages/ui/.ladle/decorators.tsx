@@ -8,7 +8,11 @@ import Router, { type NextRouter } from 'next/router';
 import hljs from 'highlight.js';
 import { ThemeProvider } from 'next-themes';
 import { SessionProvider } from 'next-auth/react';
-import { AnalyticsContextProvider } from '@answeroverflow/hooks';
+import {
+	AnalyticsContextProvider,
+	TenantContextProvider,
+} from '@answeroverflow/hooks';
+import { mockServer } from '~ui/test/props';
 import { useGlobalState, type GlobalState } from './global-state';
 import { ModeState, action } from '@ladle/react';
 
@@ -186,5 +190,17 @@ export function WithAnalytics(props: { children: React.ReactNode }) {
 		>
 			{props.children}
 		</AnalyticsContextProvider>
+	);
+}
+
+export function WithTenantSite(props: { children: React.ReactNode }) {
+	const { isTenantSite } = {
+		isTenantSite: 'false',
+	};
+	const server = isTenantSite === 'true' ? mockServer() : undefined;
+	return (
+		<TenantContextProvider value={server}>
+			{props.children}
+		</TenantContextProvider>
 	);
 }

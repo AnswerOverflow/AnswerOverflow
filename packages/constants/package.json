@@ -19,9 +19,13 @@
 		"zod": "^3.20.6"
 	},
 	"devDependencies": {
-		"@answeroverflow/tsconfig": "*",
-		"@answeroverflow/prisma-types": "*",
 		"@answeroverflow/elastic-types": "*",
-		"dotenv-cli": "^7.1.0"
+		"@answeroverflow/prisma-types": "*",
+		"@answeroverflow/tsconfig": "*",
+		"@answeroverflow/prettier-config": "*",
+		"prettier": "^2.8.4",
+		"@types/node": "^20.4.2",
+		"dotenv-cli": "^7.1.0",
+		"eslint": "^8.44.0"
 	}
 }

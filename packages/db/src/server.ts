@@ -37,6 +37,16 @@ export async function applyServerSettingsSideEffects<
 	};
 }
 
+export async function findServerByCustomDomain(domain: string) {
+	const found = await prisma.server.findUnique({
+		where: {
+			customDomain: domain,
+		},
+	});
+	if (!found) return null;
+	return addFlagsToServer(found);
+}
+
 export async function createServer(input: z.infer<typeof zServerCreate>) {
 	// Explicitly type this to avoid passing into .parse missing information
 	const combinedCreateData = await applyServerSettingsSideEffects({
@@ -83,6 +93,16 @@ export async function findServerById(id: string) {
 	const found = await prisma.server.findUnique({
 		where: {
 			id,
+		},
+	});
+	if (!found) return null;
+	return addFlagsToServer(found);
+}
+
+export async function findServerByStripeCustomerId(stripeCustomerId: string) {
+	const found = await prisma.server.findUnique({
+		where: {
+			stripeCustomerId,
 		},
 	});
 	if (!found) return null;

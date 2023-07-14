@@ -2,25 +2,17 @@
 	"name": "ao-monorepo",
 	"version": "0.0.0",
 	"private": true,
-	"workspaces": {
-		"comment": "TODO: Replace with apps/** when turborepo fixes nameless packages",
-		"packages": [
-			"apps/main-site",
-			"apps/discord-bot",
-			"apps/docs",
-			"packages/**"
-		]
-	},
 	"scripts": {
-		"postinstall": "yarn db:generate",
+		"preinstall": "npx only-allow pnpm",
+		"postinstall": "pnpm db:generate",
 		"init": "turbo run init",
 		"build": "turbo run build",
 		"format": "turbo run format",
 		"format:check": "turbo run format:check",
 		"lint": "turbo run lint",
 		"lint:fix": "turbo run lint:fix",
-		"test": "yarn db:push && yarn db:wipe && turbo run test",
-		"generate": "yarn i && cd packages/db && yarn run generate",
+		"test": "pnpm db:push && pnpm db:wipe && turbo run test",
+		"generate": "pnpm i && cd packages/db && pnpm generate",
 		"dev": "turbo run dev --parallel --no-cache",
 		"migrate": "turbo run migrate",
 		"db:generate": "turbo db:generate",
@@ -36,11 +28,27 @@
 		"cloc": "npx cloc $(git ls-files)",
 		"cloc:no-tests": "npx cloc $(git ls-files | grep -v .test.ts.*$)",
 		"cloc:only-tests": "npx cloc $(git ls-files | grep .test.ts.*$)",
-		"pr-check": "yarn format:check && yarn lint && yarn build && yarn test"
+		"pr-check": "yarn format:check && yarn lint && yarn build && yarn test",
+		"stripe:forward": "stripe listen --forward-to localhost:3000/api/v1/stripe/webhook",
+		"docker:build:discord-bot": "docker build -f ./apps/discord-bot/Dockerfile ."
 	},
 	"devDependencies": {
 		"@answeroverflow/eslint-config-custom": "*",
+		"@answeroverflow/tsconfig": "*",
 		"@total-typescript/ts-reset": "^0.4.2",
+		"@typescript-eslint/eslint-plugin": "^5.51.0",
+		"@typescript-eslint/parser": "^5.51.0",
+		"eslint-config-next": "^13.4.10",
+		"eslint-config-prettier": "^8.3.0",
+		"eslint-config-turbo": "0.0.7",
+		"eslint-import-resolver-typescript": "^3.5.3",
+		"eslint-plugin-import": "^2.27.5",
+		"eslint-plugin-jest": "^27.2.1",
+		"eslint-plugin-no-only-tests": "^3.1.0",
+		"eslint-plugin-prettier": "^4.2.1",
+		"eslint-plugin-react": "7.32.2",
+		"eslint-plugin-tailwindcss": "^3.8.3",
+		"eslint-plugin-turbo": "^1.10.7",
 		"tslib": "^2.5.0",
 		"turbo": "latest",
 		"typescript": "^5.0.4",
@@ -48,6 +56,7 @@
 		"vitest": "^0.29.8"
 	},
 	"engines": {
-		"node": ">=18.15.0"
+		"node": ">=18.15.0",
+		"pnpm": ">=8.6.0"
 	}
 }

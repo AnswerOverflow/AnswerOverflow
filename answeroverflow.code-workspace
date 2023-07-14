@@ -16,6 +16,10 @@
       "path": "apps/discord-bot"
     },
     {
+      "name": "proxy",
+      "path": "apps/proxy"
+    },
+    {
       "name": "discordjs-mock",
       "path": "packages/discordjs-mock"
     },
@@ -148,7 +152,7 @@
       "strings": true
     },
     "files.exclude": {
-      "**/node_modules": true,
+      // "**/node_modules": true,
       "**/coverage/": true,
       "**/.next": true,
       "**/.turbo": true

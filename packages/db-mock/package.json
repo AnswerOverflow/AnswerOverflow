@@ -19,13 +19,16 @@
 		"@answeroverflow/utils": "*",
 		"@sapphire/bitfield": "^1.0.0",
 		"discord-api-types": "^0.37.31",
-		"type-fest": "^3.5.7",
+		"type-fest": "^3.13.0",
 		"zod": "^3.20.6"
 	},
 	"devDependencies": {
 		"@answeroverflow/tsconfig": "*",
 		"@vitest/coverage-c8": "^0.28.5",
 		"dotenv-cli": "^7.1.0",
+		"@answeroverflow/prettier-config": "*",
+		"prettier": "^2.8.4",
+		"eslint": "^8.44.0",
 		"vitest": "^0.29.8"
 	}
 }

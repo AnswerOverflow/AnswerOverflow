@@ -11,7 +11,7 @@
 		"@typescript-eslint/eslint-plugin": "^5.51.0",
 		"@typescript-eslint/parser": "^5.51.0",
 		"eslint": "^8.43.0",
-		"eslint-config-next": "^13.1.6",
+		"eslint-config-next": "^13.4.9",
 		"eslint-config-prettier": "^8.3.0",
 		"eslint-config-turbo": "0.0.7",
 		"eslint-import-resolver-typescript": "^3.5.3",
@@ -21,7 +21,7 @@
 		"eslint-plugin-prettier": "^4.2.1",
 		"eslint-plugin-react": "7.32.2",
 		"eslint-plugin-tailwindcss": "^3.8.3",
-		"eslint-plugin-turbo": "^0.0.7",
+		"eslint-plugin-turbo": "^1.10.7",
 		"prettier": "^2.8.4",
 		"prettier-plugin-tailwindcss": "^0.3.0"
 	},

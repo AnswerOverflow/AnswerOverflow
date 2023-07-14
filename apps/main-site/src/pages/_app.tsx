@@ -8,7 +8,10 @@ import type { AppType } from 'next/app';
 import hljs from 'highlight.js';
 import { type NextTRPC, PageWrapper, trpc } from '@answeroverflow/ui';
 import { ThemeProvider } from 'next-themes';
-import { AnalyticsProvider } from '@answeroverflow/hooks';
+import {
+	AnalyticsProvider,
+	TenantContextProvider,
+} from '@answeroverflow/hooks';
 import React, { useEffect } from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Heading, Paragraph } from '@answeroverflow/ui';
@@ -18,6 +21,8 @@ import type { Components } from '@mdx-js/react/lib';
 import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner';
 import ProgressBar from '@badrap/bar-of-progress';
 import Router from 'next/router';
+import type { ServerPublic } from '@answeroverflow/api';
+import { ToastContainer } from 'react-toastify';
 
 const progress = new ProgressBar({
 	size: 2,
@@ -58,10 +63,10 @@ const components: Components = {
 };
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-const MyApp: AppType<{ session: Session | null }> = ({
-	Component,
-	pageProps: { session, ...pageProps },
-}) => {
+const MyApp: AppType<{
+	session: Session | null;
+	tenant: ServerPublic | undefined;
+}> = ({ Component, pageProps: { session, ...pageProps } }) => {
 	useEffect(() => {
 		hljs.configure({
 			ignoreUnescapedHTML: true,
@@ -69,24 +74,32 @@ const MyApp: AppType<{ session: Session | null }> = ({
 		hljs.highlightAll();
 	}, []);
 
-	// TODO: wow this is ugly but use analytics needs session provider data
-
 	return (
-		<ThemeProvider attribute="class">
-			<SessionProvider session={session}>
-				<AnalyticsProvider>
-					<PageWrapper
-						disabledRoutes={['/', '/c/[communityId]', '/onboarding']}
-					>
-						<CommitBanner />
-						<MDXProvider components={components}>
-							<Component {...pageProps} />
-						</MDXProvider>
-					</PageWrapper>
-					<ReactQueryDevtools initialIsOpen={false} />
-				</AnalyticsProvider>
-			</SessionProvider>
-		</ThemeProvider>
+		<TenantContextProvider value={pageProps.tenant}>
+			<ThemeProvider attribute="class">
+				<SessionProvider session={session}>
+					<AnalyticsProvider>
+						<PageWrapper
+							disabledRoutes={[
+								'/',
+								'/c/[communityId]',
+								'/onboarding',
+								'/[domain]',
+								'/dashboard',
+								'/dashboard/[serverId]',
+							]}
+						>
+							<CommitBanner />
+							<MDXProvider components={components}>
+								<Component {...pageProps} />
+								<ToastContainer toastClassName="dark:bg-ao-black dark:text-white bg-white text-black" />
+							</MDXProvider>
+						</PageWrapper>
+						<ReactQueryDevtools initialIsOpen={false} />
+					</AnalyticsProvider>
+				</SessionProvider>
+			</ThemeProvider>
+		</TenantContextProvider>
 	);
 };
 export default (trpc as NextTRPC).withTRPC(MyApp);

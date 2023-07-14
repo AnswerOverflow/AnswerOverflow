@@ -12,21 +12,24 @@
 	},
 	"dependencies": {
 		"@answeroverflow/api": "*",
-		"next": "^13.3.0",
+		"@answeroverflow/constants": "*",
+		"next": "13.4.8",
 		"next-auth": "^4.20.1",
 		"posthog-js": "^1.57.2",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0"
 	},
 	"devDependencies": {
+		"@answeroverflow/auth": "*",
 		"@answeroverflow/db": "*",
 		"@answeroverflow/prettier-config": "*",
-		"@answeroverflow/auth": "*",
+		"prettier": "^2.8.4",
 		"@answeroverflow/tsconfig": "*",
+		"eslint": "^8.44.0",
 		"@types/node": "^18.14.2",
 		"@types/react": "^18.0.14",
 		"@types/react-dom": "^18.2.4",
-		"type-fest": "^3.5.5"
+		"type-fest": "^3.13.0"
 	},
 	"ct3aMetadata": {
 		"initVersion": "6.11.0"

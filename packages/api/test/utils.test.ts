@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server';
-import { PermissionFlagsBits, type PermissionResolvable } from 'discord.js';
+import { PermissionFlagsBits } from 'discord-api-types/v10';
 import { type Source, sourceTypes } from '~api/router/context';
 import {
 	createInvalidSourceError,
@@ -10,6 +10,7 @@ import {
 	testAllSources,
 	testAllSourceAndPermissionVariantsThatThrowErrors,
 } from './utils';
+import { PermissionResolvable } from '~api/utils/types';
 
 describe('Test All Permissions', () => {
 	it('should validate permissions are succeeding correctly', async () => {

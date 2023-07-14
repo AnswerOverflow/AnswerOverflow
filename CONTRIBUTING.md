@@ -21,7 +21,7 @@ Follow this [Getting Started Guide](https://code.visualstudio.com/docs/devcontai
 
 ## Local Environment
 
-We use [yarn](https://pnpm.io) as our package manager, so make sure to [install](https://yarnpkg.com/getting-started/install) it first.
+We use [pnpm](https://pnpm.io) as our package manager, so make sure to [install](https://pnpm.io) it first.
 
 Along with this, you will need to have a [MySQL Server](https://dev.mysql.com/downloads/installer/) running
 
@@ -85,32 +85,32 @@ Follow the steps listed in .env.example to properly configure your environment v
 
 ```bash
 # in project root directory
-yarn install
-yarn db:push
-yarn db:wipe
-yarn dev
+pnpm install
+pnpm db:push
+pnpm db:wipe
+pnpm dev
 ```
 
 ### Testing
 
 ```bash
 # in project root directory
-yarn test
+pnpm test
 
 # to test an individual package:
-cd [apps|packages]/[package_name] yarn test:watch
+cd [apps|packages]/[package_name] pnpm test:watch
 ```
 
 ### Linting
 
 ```bash
-yarn lint:fix
+pnpm lint:fix
 ```
 
 ### Building
 
 ```bash
-yarn build
+pnpm build
 ```
 
 ## Setting up your Developer Bot

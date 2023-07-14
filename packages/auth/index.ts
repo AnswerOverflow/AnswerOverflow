@@ -19,5 +19,8 @@ declare module 'next-auth' {
 		user: {
 			id: string;
 		} & DefaultSession['user'];
+		isTenantSession: boolean;
 	}
 }
+
+export * from './src/tenant-cookie';

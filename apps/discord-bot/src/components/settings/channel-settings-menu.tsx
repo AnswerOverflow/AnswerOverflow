@@ -38,7 +38,7 @@ import {
 	SEND_CONSENT_PROMPT_LABEL,
 	DISCORD_EMOJI_ID,
 } from '@answeroverflow/constants';
-import type { ChannelWithFlags } from '@answeroverflow/prisma-types';
+import type { ChannelWithFlags } from '@answeroverflow/db';
 import React from 'react';
 import {
 	ToggleButton,

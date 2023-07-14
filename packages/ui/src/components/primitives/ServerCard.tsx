@@ -4,6 +4,7 @@ import { ServerIcon } from './ServerIcon';
 import Image from 'next/image';
 import { createContext, useContext } from 'react';
 import { getServerDescription } from '~ui/utils/other';
+import { getServerHomepageUrl } from '~ui/utils/server';
 
 export type ServerCardProps = {
 	server: ServerPublic;
@@ -33,7 +34,7 @@ const ServerCTA = () => {
 	const { server } = useServerCardContext();
 	return (
 		<LinkButton
-			href={`/c/${server.id}`}
+			href={getServerHomepageUrl(server)}
 			target={'Blank'}
 			referrerPolicy="no-referrer"
 		>
@@ -102,7 +103,7 @@ const ViewServerAbout = () => {
 				<ServerTitle />
 				<LinkButton
 					className="ml-4"
-					href={`/c/${server.id}`}
+					href={getServerHomepageUrl(server)}
 					variant={'default'}
 				>
 					View
@@ -147,7 +148,7 @@ export const ManageServerCard = (props: {
 			title={<Title />}
 			cta={
 				props.server.hasBot ? (
-					<LinkButton href={`/c/${props.server.id}`}>View</LinkButton>
+					<LinkButton href={`/dashboard/${props.server.id}`}>View</LinkButton>
 				) : (
 					<LinkButton
 						href={`https://discord.com/oauth2/authorize?client_id=958907348389339146&permissions=328565083201&scope=bot+applications.commands&guild_id=${props.server.id}&disable_guild_select=true`}

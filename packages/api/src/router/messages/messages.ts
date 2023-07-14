@@ -20,7 +20,8 @@ import {
 } from '~api/utils/permissions';
 import { TRPCError } from '@trpc/server';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
-import { ChannelType } from 'discord.js';
+import { ChannelType } from 'discord-api-types/v10';
+
 export const messagesRouter = router({
 	/*
     Message page by ID
@@ -34,6 +35,9 @@ export const messagesRouter = router({
   */
 	threadFromMessageId: withUserServersProcedure
 		.input(z.string())
+		.meta({
+			tenantAuthAccessible: true,
+		})
 		.query(async ({ input, ctx }) => {
 			// This is the message we're starting from
 			const targetMessage = await findOrThrowNotFound(
@@ -135,6 +139,9 @@ export const messagesRouter = router({
 				channelId: z.string().optional(),
 			}),
 		)
+		.meta({
+			tenantAuthAccessible: true,
+		})
 		.query(async ({ input, ctx }) => {
 			const searchResults = await searchMessages(input);
 			const strippedSearchResults = searchResults.map(

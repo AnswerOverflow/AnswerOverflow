@@ -1,6 +1,6 @@
 import type { Story } from '@ladle/react';
 import { BrowseCommunitiesRenderer } from './BrowseCommunitiesPage';
-import { mockServer } from '~ui/test/props';
+import { mockPublicServer } from '~ui/test/props';
 import { PageWrapper } from './PageWrapper';
 
 type BrowseCommunitiesRenderProps = React.ComponentPropsWithoutRef<
@@ -8,7 +8,7 @@ type BrowseCommunitiesRenderProps = React.ComponentPropsWithoutRef<
 >;
 
 // Mock 10 servers
-const servers = Array.from({ length: 10 }, () => mockServer());
+const servers = Array.from({ length: 10 }, () => mockPublicServer());
 
 export const Primary: Story<BrowseCommunitiesRenderProps> = (props) => {
 	return (

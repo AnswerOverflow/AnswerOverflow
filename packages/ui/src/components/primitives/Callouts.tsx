@@ -3,7 +3,9 @@ import { signIn } from 'next-auth/react';
 import {
 	trackEvent,
 	type GettingStartedClickProps,
+	useTenantContext,
 } from '@answeroverflow/hooks';
+import { makeMainSiteLink } from '@answeroverflow/constants/src/links';
 export function GetStarted(
 	props: Omit<LinkButtonProps, 'href'> & {
 		location: GettingStartedClickProps['Button Location'];
@@ -27,6 +29,21 @@ export function GetStarted(
 }
 
 export function SignInButton(props: ButtonProps) {
+	const { isOnTenantSite } = useTenantContext();
+
+	if (isOnTenantSite) {
+		const link = makeMainSiteLink('/api/auth/tenant/signin');
+		const redirect = typeof window !== 'undefined' ? window.location.href : '';
+
+		return (
+			<LinkButton
+				variant="outline"
+				href={`${link}?redirect=${encodeURIComponent(redirect)}`}
+			>
+				Login
+			</LinkButton>
+		);
+	}
 	return (
 		// TODO: Swap to href
 		// eslint-disable-next-line @typescript-eslint/no-misused-promises

@@ -3,7 +3,7 @@ import { loremIpsum } from 'lorem-ipsum';
 import {
 	mockChannelWithSettings,
 	mockMessageFull,
-	mockServer,
+	mockPublicServer,
 } from '~ui/test/props';
 import { ChannelType } from '~ui/utils/discord';
 import { CommunityPage } from './CommunityPage';
@@ -35,7 +35,7 @@ export const WithLongQuestion = CommunityPageStory.bind({});
 
 CommunityPageStory.args = {
 	channels: makeMockedChannels(100),
-	server: mockServer(),
+	server: mockPublicServer(),
 };
 
 WithLongQuestion.args = {
@@ -56,5 +56,5 @@ WithLongQuestion.args = {
 			],
 		},
 	],
-	server: mockServer(),
+	server: mockPublicServer(),
 };
