@@ -26,18 +26,14 @@ export function getNextAuthCookieName() {
 	return `${cookiePrefix}next-auth.session-token`;
 }
 
-export function disableSettingNextAuthCookie(res: NextApiResponse<any>) {
+export function disableSettingCookies(res: NextApiResponse<any>) {
 	// eslint-disable-next-line @typescript-eslint/unbound-method
 	const originalSetHeader = res.setHeader;
 	res.setHeader = function (name, value) {
 		if (name.toLowerCase() === 'set-cookie') {
-			if (
-				typeof value === 'string' &&
-				value.startsWith(`${getNextAuthCookieName()}=`)
-			) {
-				return res;
-			}
+			return res; // tenant sites don't need to set cookies
+		} else {
+			return originalSetHeader.call(this, name, value);
 		}
-		return originalSetHeader.call(this, name, value);
 	};
 }

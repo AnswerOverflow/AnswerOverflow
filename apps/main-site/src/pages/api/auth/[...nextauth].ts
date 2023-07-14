@@ -2,7 +2,7 @@ import NextAuth from 'next-auth';
 
 import {
 	authOptions,
-	disableSettingNextAuthCookie,
+	disableSettingCookies,
 	getNextAuthCookieName,
 	getTenantCookieName,
 } from '@answeroverflow/auth';
@@ -20,7 +20,7 @@ export default async function handler(
 		req.cookies[getNextAuthCookieName()] = nextAuthSession?.sessionToken;
 	}
 	if (!isOnMainSite(req.headers.host!)) {
-		disableSettingNextAuthCookie(res);
+		disableSettingCookies(res);
 	}
 	await NextAuth(req, res, authOptions);
 }
