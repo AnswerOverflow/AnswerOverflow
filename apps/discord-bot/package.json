@@ -75,10 +75,10 @@
 		"lint:fix": "eslint . --fix",
 		"build-deps": "(cd ../../packages/discordjs-mock && pnpm build)",
 		"build": "pnpm build-deps && tsup --format cjs",
-		"dev": "pnpm build-deps && pnpm run with-env rm -rf dist && pnpm run build && run-p watch start",
-		"start": "pnpm run with-env node dist/index.js",
-		"test": "pnpm build-deps && pnpm run with-env jest --coverage",
-		"test:watch": "pnpm run with-env jest --watch",
+		"dev": "pnpm build-deps && pnpm with-env rm -rf dist && pnpm build && run-p watch start",
+		"start": "pnpm with-env node dist/index.js",
+		"test": "pnpm build-deps && pnpm with-env jest --coverage",
+		"test:watch": "pnpm with-env jest --watch",
 		"install-local-discordjs-react": "cp -r ~/repos/discordjs-react/packages/discordjs-react/dist/ /AnswerOverflow/node_modules/@answeroverflow/discordjs-react/"
 	}
 }

@@ -10,7 +10,7 @@
 		"clean": "rm -rf .next .turbo node_modules",
 		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
 		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
-		"start": "pnpm run with-env next start -p 5234",
+		"start": "pnpm with-env next start -p 5234",
 		"lint": "next lint && tsc --noEmit",
 		"lint:fix": "next lint --fix",
 		"type-check": "tsc --noEmit"

@@ -12,7 +12,7 @@
 		"lint": "turbo run lint",
 		"lint:fix": "turbo run lint:fix",
 		"test": "pnpm db:push && pnpm db:wipe && turbo run test",
-		"generate": "pnpm i && cd packages/db && pnpm run generate",
+		"generate": "pnpm i && cd packages/db && pnpm generate",
 		"dev": "turbo run dev --parallel --no-cache",
 		"migrate": "turbo run migrate",
 		"db:generate": "turbo db:generate",

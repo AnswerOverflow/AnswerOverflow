@@ -11,8 +11,8 @@
 		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix",
-		"test": "pnpm run vitest run  --coverage",
-		"test:watch": "pnpm run vitest"
+		"test": "pnpm vitest run  --coverage",
+		"test:watch": "pnpm vitest"
 	},
 	"dependencies": {
 		"dotenv-cra": "^3.0.3",
