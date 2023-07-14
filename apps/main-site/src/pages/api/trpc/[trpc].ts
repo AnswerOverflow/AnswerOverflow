@@ -5,7 +5,7 @@ import { finishAnalyticsCollection } from '@answeroverflow/analytics';
 import type { NextApiRequest, NextApiResponse } from 'next/types';
 import { prisma } from '@answeroverflow/db';
 import {
-	disableSettingNextAuthCookie,
+	disableSettingCookies,
 	getNextAuthCookieName,
 	getTenantCookieName,
 } from '@answeroverflow/auth';
@@ -48,7 +48,7 @@ export default async function handler(
 		req.cookies[getNextAuthCookieName()] = nextAuthSession?.sessionToken;
 	}
 	if (!isOnMainSite(req.headers.host!)) {
-		disableSettingNextAuthCookie(res);
+		disableSettingCookies(res);
 	}
 	// pass the (modified) req/res to the handler
 	// weird type errors even though they're the same
