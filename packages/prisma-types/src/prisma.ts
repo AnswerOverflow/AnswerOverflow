@@ -17,4 +17,8 @@ export const prisma =
 
 if (process.env.NODE_ENV !== 'production') {
 	global.prisma = prisma;
+} else {
+	if (process.env.ENVIRONMENT === 'discord-bot') {
+		global.prisma = prisma;
+	}
 }
