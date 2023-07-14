@@ -90,4 +90,6 @@ export const MergeRouters = t.mergeRouters;
 const procedureBase = t.procedure.use(checkTenantAuth);
 export const publicProcedure = procedureBase;
 export const withDiscordAccountProcedure = procedureBase.use(addDiscordAccount);
-export const withUserServersProcedure = procedureBase.use(addUserServers);
+export const withUserServersProcedure = procedureBase
+	.use(addDiscordAccount)
+	.use(addUserServers);
