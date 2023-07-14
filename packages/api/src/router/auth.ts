@@ -29,9 +29,10 @@ export const authRouter = router({
 	getServersForOnboarding: withUserServersProcedure.query(async ({ ctx }) => {
 		const serversToFetch = ctx.userServers.filter((server) => {
 			return (
-				PermissionsBitField.has(BigInt(server.permissions), 'ManageGuild') ||
-				PermissionsBitField.has(BigInt(server.permissions), 'Administrator') ||
-				server.owner
+				PermissionsBitField.any(BigInt(server.permissions), [
+					'ManageGuild',
+					'Administrator',
+				]) || server.owner
 			);
 		});
 		const fetchedServers = await findManyServersById(

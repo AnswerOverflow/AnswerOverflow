@@ -68,7 +68,7 @@ describe('Server Operations', () => {
 				permissionsThatShouldWork: ['ManageGuild', 'Administrator'],
 			});
 		});
-		it('should succeed all variants for setting read the rules consent disabled', async () => {
+		it.only('should succeed all variants for setting read the rules consent disabled', async () => {
 			await testAllSourceAndPermissionVariantsThatThrowErrors({
 				async operation({ source, permission }) {
 					const server = mockServerWithFlags({

@@ -70,6 +70,7 @@ type CtxOverride = {
 };
 
 export function createCtxWithServers(input: CtxOverride) {
+	const num = PermissionsBitField.resolve(input.permissions);
 	return createContextInner({
 		session: null,
 		source: input.caller,
@@ -86,7 +87,7 @@ export function createCtxWithServers(input: CtxOverride) {
 				name: input.server.name,
 				owner: false,
 				icon: null,
-				permissions: Number(PermissionsBitField.resolve(input.permissions)),
+				permissions: Number(num),
 			},
 		],
 	});

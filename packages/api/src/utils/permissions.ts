@@ -91,12 +91,11 @@ export function assertCanEditServer(
 				'You are not a member of the server you are trying to create channel settings for',
 		});
 	}
-	if (
-		!PermissionsBitField.has(
-			BigInt(serverToCheckPermissionsOf.permissions),
-			'ManageGuild',
-		)
-	) {
+	const hasPermsToEdit = PermissionsBitField.any(
+		BigInt(serverToCheckPermissionsOf.permissions),
+		['Administrator', 'ManageGuild'],
+	);
+	if (!(hasPermsToEdit || serverToCheckPermissionsOf.owner)) {
 		return new TRPCError({
 			code: 'FORBIDDEN',
 			message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
