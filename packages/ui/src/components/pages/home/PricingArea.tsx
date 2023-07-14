@@ -26,11 +26,11 @@ const pricing = {
 					implemented: true,
 				},
 				{
-					name: 'AI Question Answers',
-					implemented: false,
+					name: 'Host on your own domain*',
+					implemented: true,
 				},
 				{
-					name: 'Host on your own domain*',
+					name: 'AI Question Answers',
 					implemented: false,
 				},
 				{
@@ -72,9 +72,9 @@ export const PricingArea = (props: { className?: string }) => {
 				</Heading.H3>
 			</div>
 			<div className="flex w-full items-center justify-center pb-8 pt-4">
-				<GetStarted location="Pricing" variant={'outline'}>
+				{/* <GetStarted location="Pricing" variant={'outline'}>
 					Add to server
-				</GetStarted>
+				</GetStarted> */}
 			</div>
 
 			{/* Tiers */}
@@ -100,11 +100,11 @@ export const PricingArea = (props: { className?: string }) => {
 								<div className="flex flex-row font-semibold text-neutral-600 dark:text-neutral-300">
 									<CheckIcon
 										className={cn(
-											'h-6 w-6 shrink-0 text-gray-600 dark:text-gray-300',
+											'h-6 w-6 shrink-0 text-green-800 dark:text-green-400',
 										)}
 										aria-hidden="true"
 									/>
-									<label className="ml-3 text-gray-600 dark:text-gray-300">
+									<label className="ml-3 text-green-800 dark:text-green-400">
 										Implemented
 									</label>
 								</div>
@@ -126,7 +126,7 @@ export const PricingArea = (props: { className?: string }) => {
 										{feature.implemented ? (
 											<CheckIcon
 												className={cn(
-													'h-6 w-6 shrink-0 text-gray-600 dark:text-gray-300',
+													'h-6 w-6 shrink-0 text-green-800 dark:text-green-400',
 												)}
 												aria-hidden="true"
 											/>
@@ -137,7 +137,14 @@ export const PricingArea = (props: { className?: string }) => {
 											/>
 										)}
 
-										<span className="ml-3 text-gray-600 dark:text-gray-300">
+										<span
+											className={cn(
+												'ml-3',
+												feature.implemented
+													? 'text-green-800 dark:text-green-400 '
+													: 'text-gray-600 dark:text-gray-300',
+											)}
+										>
 											{feature.name}
 										</span>
 									</li>
