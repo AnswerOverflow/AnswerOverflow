@@ -93,8 +93,8 @@ importers:
         specifier: '*'
         version: link:../../packages/db-mock
       '@answeroverflow/discordjs-react':
-        specifier: ^0.0.35
-        version: 0.0.35(discord.js@14.11.0)(react@18.2.0)
+        specifier: ^0.0.36
+        version: 0.0.36(@answeroverflow/discordjs-mock@packages+discordjs-mock)(discord.js@14.11.0)(react@18.2.0)
       '@answeroverflow/discordjs-utils':
         specifier: '*'
         version: link:../../packages/discordjs-utils
@@ -1512,21 +1512,14 @@ packages:
       '@jridgewell/gen-mapping': 0.3.3
       '@jridgewell/trace-mapping': 0.3.18
 
-  /@answeroverflow/discordjs-mock@0.0.12(discord.js@14.11.0):
-    resolution: {integrity: sha512-3XZ/0ps5JQuD9UnYUvGJSLCoFVU4R6SQE4wtH2nLkYM+oI9MTMoyrFpbO+9wTckTk3NDzGf+rHNSqL+nbR1Duw==}
+  /@answeroverflow/discordjs-react@0.0.36(@answeroverflow/discordjs-mock@packages+discordjs-mock)(discord.js@14.11.0)(react@18.2.0):
+    resolution: {integrity: sha512-yLvwyUFGG2KZIXRo8hdJw9g7EbgrbgOIBXV8b9bj3PADMTZh6rdFpY813u1iH+VKXzxVd3K7QSaG0SH+SySgJA==}
     peerDependencies:
-      discord.js: ^14.7.1
-    dependencies:
-      discord.js: 14.11.0
-    dev: false
-
-  /@answeroverflow/discordjs-react@0.0.35(discord.js@14.11.0)(react@18.2.0):
-    resolution: {integrity: sha512-e2RkD5NGguD4IAbBVLFyjh1xrTwcaecuh7POm2hnasSGAlDXPSkWZcm4cmdLGD/kLT4bubST6salOT0qTMlR2A==}
-    peerDependencies:
+      '@answeroverflow/discordjs-mock': 0.0.13
       discord.js: ^14
       react: '>=18'
     dependencies:
-      '@answeroverflow/discordjs-mock': 0.0.12(discord.js@14.11.0)
+      '@answeroverflow/discordjs-mock': link:packages/discordjs-mock
       discord.js: 14.11.0
       react: 18.2.0
       react-reconciler: 0.29.0(react@18.2.0)
