@@ -32,10 +32,7 @@ import {
 	protectedMutationFetchFirst,
 } from '~api/utils/protected-procedures';
 import { DomainVerificationStatusProps } from '~api/utils/types';
-import {
-	fetchServerPageViewsAsLineChart,
-	fetchServerPageViewsNumber,
-} from '~api/utils/posthog';
+import { fetchServerPageViewsAsLineChart } from '~api/utils/posthog';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
 	'Read the rules consent already enabled';
@@ -343,15 +340,6 @@ export const serverRouter = router({
 				permissions: () => assertCanEditServer(ctx, input),
 			}),
 		),
-	fetchPageViewCount: withUserServersProcedure
-		.input(z.string())
-		.query(async ({ input, ctx }) => {
-			return protectedFetch({
-				fetch: () => fetchServerPageViewsNumber(input),
-				notFoundMessage: 'Server not found',
-				permissions: () => assertCanEditServer(ctx, input),
-			});
-		}),
 	fetchPageViewsAsLineChart: withUserServersProcedure
 		.input(z.string())
 		.query(({ input, ctx }) => {
