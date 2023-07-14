@@ -13,17 +13,18 @@
 		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix",
-		"db:generate": "yarn with-env prisma generate",
-		"db:push": "yarn with-env prisma db push --skip-generate",
-		"db:push:staging": "yarn with-env-staging prisma db push --skip-generate",
-		"dev": "yarn with-env prisma studio --port 5556 --browser none",
-		"test": "yarn run with-env vitest run  --coverage",
-		"test:watch": "yarn run with-env vitest"
+		"db:generate": "pnpm with-env prisma generate",
+		"db:push": "pnpm with-env prisma db push --skip-generate",
+		"db:push:staging": "pnpm with-env-staging prisma db push --skip-generate",
+		"dev": "pnpm with-env prisma studio --port 5556 --browser none",
+		"test": "pnpm with-env vitest run  --coverage",
+		"test:watch": "pnpm with-env vitest"
 	},
 	"dependencies": {
 		"@answeroverflow/utils": "*",
 		"@prisma/client": "^4.8.1",
 		"@sapphire/bitfield": "^1.0.0",
+		"discord-api-types": "^0.37.48",
 		"dotenv-cra": "^3.0.3",
 		"zod": "^3.20.6"
 	},
@@ -31,6 +32,9 @@
 		"@answeroverflow/tsconfig": "*",
 		"@vitest/coverage-c8": "^0.28.5",
 		"dotenv-cli": "^7.1.0",
+		"@answeroverflow/prettier-config": "*",
+		"prettier": "^2.8.4",
+		"eslint": "^8.44.0",
 		"prisma": "^4.16.1",
 		"vitest": "^0.29.8"
 	}

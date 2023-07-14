@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import dayjs from 'dayjs';
 import { TrendAPIResponse } from './posthog-types';
-import type { EventMap } from '@answeroverflow/hooks';
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 async function posthogFetch(url: string, input: RequestInit) {
 	const { headers, ...rest } = input;
@@ -67,7 +66,7 @@ type PosthogParams = {
 	refresh: boolean;
 	events: {
 		type: 'events';
-		id: keyof EventMap;
+		id: string;
 		order: number;
 		name: string;
 		math: 'total';

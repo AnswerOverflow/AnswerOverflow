@@ -1,0 +1,6 @@
+packages:
+  - "apps/main-site"
+  - "apps/discord-bot"
+  - "apps/docs"
+  - "apps/proxy"
+  - "packages/**"

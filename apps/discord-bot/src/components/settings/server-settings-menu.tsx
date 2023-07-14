@@ -1,5 +1,5 @@
 import { ActionRow, Link } from '@answeroverflow/discordjs-react';
-import type { ServerWithFlags } from '@answeroverflow/prisma-types';
+import type { ServerWithFlags } from '@answeroverflow/db';
 import React from 'react';
 import { updateReadTheRulesConsentEnabled } from '~discord-bot/domains/server-settings';
 import {

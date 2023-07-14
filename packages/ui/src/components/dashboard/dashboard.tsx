@@ -10,7 +10,8 @@ import {
 	Col,
 	Title,
 } from '@tremor/react';
-import { AOHead, GetStarted, AOLink, trpc } from '@answeroverflow/ui';
+import { AOHead, GetStarted, AOLink } from '../primitives';
+import { trpc } from '~ui/utils/trpc';
 import { ConfigureDomainCard } from './domains';
 import { GoLinkExternal } from 'react-icons/go';
 import { DashboardNavbar } from './dashboard-navbar';
