@@ -30,7 +30,7 @@ export const AOHead = ({
 	if (tenant) {
 		server = tenant;
 	}
-	console.log(server, tenant);
+
 	if (description === undefined) {
 		if (tenant) {
 			description = `View the ${tenant.name} Discord server on the web. Browse questions asked by the community and find answers.`;
@@ -46,7 +46,7 @@ export const AOHead = ({
 		if (serverIconImage) {
 			image = serverIconImage;
 		} else {
-			image = 'https://answeroverflow.com/content/branding/logoIcon.png';
+			image = 'https://www.answeroverflow.com/answer_overflow_icon_256.png';
 		}
 	}
 	if (addPrefix) title += tenant ? ` - ${tenant.name}` : ' - Answer Overflow';
