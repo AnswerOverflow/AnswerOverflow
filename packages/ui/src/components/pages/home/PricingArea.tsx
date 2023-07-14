@@ -72,9 +72,9 @@ export const PricingArea = (props: { className?: string }) => {
 				</Heading.H3>
 			</div>
 			<div className="flex w-full items-center justify-center pb-8 pt-4">
-				{/* <GetStarted location="Pricing" variant={'outline'}>
+				<GetStarted location="Pricing" variant={'outline'}>
 					Add to server
-				</GetStarted> */}
+				</GetStarted>
 			</div>
 
 			{/* Tiers */}
