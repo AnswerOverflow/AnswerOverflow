@@ -48,10 +48,9 @@ export const config = {
 		'/oemf7z50uh7w/:path*',
 		/*
 		 * Match all paths except for:
-		 * 1. /api routes
-		 * 2. /_next (Next.js internals)
-		 * 3. /examples (inside /public)
-		 * 4. all root files inside /public (e.g. /favicon.ico)
+		 * 1. /_next (Next.js internals)
+		 * 2. /examples (inside /public)
+		 * 3. all root files inside /public (e.g. /favicon.ico)
 		 */
 		'/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)',
 		'/sitemap.xml',
