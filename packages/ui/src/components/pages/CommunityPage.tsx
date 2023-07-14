@@ -212,7 +212,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 			<Navbar />
 			<main className="bg-ao-white dark:bg-ao-black">
 				<AOHead
-					title={`${server.name} Community Page`}
+					title={`${server.name} Community`}
 					description={
 						server.description ?? isOnTenantSite
 							? `${server.name} community - Join the community to ask questions about ${server.name} and get answers from other members!`
