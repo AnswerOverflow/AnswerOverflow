@@ -214,8 +214,9 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 				<AOHead
 					title={`${server.name} Community Page`}
 					description={
-						server.description ??
-						`The community page for ${server.name} on Answer Overflow.`
+						server.description ?? isOnTenantSite
+							? `${server.name} community - Join the community to ask questions about ${server.name} and get answers from other members!`
+							: `The community page for ${server.name} on Answer Overflow.`
 					}
 					path={isOnTenantSite ? '/' : `/c/${server.id}`}
 					server={server}
