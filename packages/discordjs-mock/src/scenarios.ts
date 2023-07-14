@@ -1,4 +1,4 @@
-import { Client, Guild, PermissionFlagsBits } from 'discord.js';
+import { Client, Guild, GuildMember, PermissionFlagsBits } from 'discord.js';
 import { mockGuild } from './guild-mock';
 import { mockGuildMember } from './user-mock';
 
@@ -9,7 +9,13 @@ export type GuildMemberVariants = Awaited<
 export async function createGuildMemberVariants(
 	client: Client,
 	guild: Guild | undefined = undefined,
-) {
+): Promise<{
+	guildMemberOwner: GuildMember;
+	guildMemberDefault: GuildMember;
+	pendingGuildMemberDefault: GuildMember;
+	guildMemberManageGuild: GuildMember;
+	guildMemberAdmin: GuildMember;
+}> {
 	if (!guild) guild = mockGuild(client);
 	const guildMemberOwner = await guild.members.fetch(guild.ownerId);
 	const guildMemberDefault = mockGuildMember({ client, guild });

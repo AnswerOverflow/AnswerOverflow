@@ -1,11 +1,6 @@
 import type { DiscordAccount, Server } from '@answeroverflow/db';
 import { TRPCError } from '@trpc/server';
 import {
-	PermissionFlagsBits,
-	type PermissionResolvable,
-	PermissionsBitField,
-} from 'discord.js';
-import {
 	type Source,
 	sourceTypes,
 	createContextInner,
@@ -16,10 +11,12 @@ import {
 	MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
 } from '~api/utils/permissions';
 import { mockDiscordAccount } from '@answeroverflow/db-mock';
+import { PermissionResolvable, PermissionsBitField } from '~api/utils/types';
+import { PermissionFlagsBits } from 'discord-api-types/v10';
 export async function mockAccountWithServersCallerCtx(
 	server: Server,
 	caller: Source,
-	permissions: PermissionResolvable = PermissionsBitField.Default,
+	permissions: PermissionResolvable = [],
 	override: Partial<DiscordAccount> = {},
 ) {
 	const account = mockDiscordAccount(override);

@@ -5,7 +5,8 @@ import {
 	publicProcedure,
 	router,
 } from './trpc';
-import { PermissionsBitField } from 'discord.js';
+import { PermissionsBitField } from '~api/utils/types';
+
 export const authRouter = router({
 	getSession: publicProcedure
 		.meta({
@@ -27,12 +28,9 @@ export const authRouter = router({
 		}),
 	getServersForOnboarding: withUserServersProcedure.query(async ({ ctx }) => {
 		const serversToFetch = ctx.userServers.filter((server) => {
-			const permissionBitfield = new PermissionsBitField(
-				BigInt(server.permissions),
-			);
 			return (
-				permissionBitfield.has('ManageGuild') ||
-				permissionBitfield.has('Administrator') ||
+				PermissionsBitField.has(BigInt(server.permissions), 'ManageGuild') ||
+				PermissionsBitField.has(BigInt(server.permissions), 'Administrator') ||
 				server.owner
 			);
 		});
@@ -46,10 +44,9 @@ export const authRouter = router({
 		const serversWithMetaData = serversToFetch.map((server) => {
 			let highestRole: 'Manage Guild' | 'Administrator' | 'Owner' =
 				'Manage Guild';
-			const permissionBitfield = new PermissionsBitField(
-				BigInt(server.permissions),
-			);
-			if (permissionBitfield.has('Administrator')) {
+			if (
+				PermissionsBitField.has(BigInt(server.permissions), 'Administrator')
+			) {
 				highestRole = 'Administrator';
 			}
 			if (server.owner) {
@@ -66,17 +63,17 @@ export const authRouter = router({
 			// In this order:
 			// has bot + owner, has bot + admin, has bot + manage guild
 			// no bot + owner, no bot + admin, no bot + manage guild
-			const aPermissions = new PermissionsBitField(BigInt(a.permissions));
-			const bPermissions = new PermissionsBitField(BigInt(b.permissions));
+			const aPermissions = BigInt(a.permissions);
+			const bPermissions = BigInt(b.permissions);
 			const aHasBot = serverLookup.get(a.id)?.kickedTime === null;
 			const bHasBot = serverLookup.get(b.id)?.kickedTime === null;
-			const score = aPermissions.has('Administrator')
+			const score = PermissionsBitField.has(aPermissions, 'Administrator')
 				? -1
-				: bPermissions.has('Administrator')
+				: PermissionsBitField.has(bPermissions, 'Administrator')
 				? 1
-				: aPermissions.has('ManageGuild')
+				: PermissionsBitField.has(aPermissions, 'ManageGuild')
 				? -1
-				: bPermissions.has('ManageGuild')
+				: PermissionsBitField.has(bPermissions, 'ManageGuild')
 				? 1
 				: 0;
 

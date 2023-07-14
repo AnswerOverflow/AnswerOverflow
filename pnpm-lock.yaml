@@ -631,7 +631,7 @@ importers:
         specifier: '*'
         version: link:../utils
       '@sapphire/bitfield':
-        specifier: ^1.0.0
+        specifier: ^1.2.0
         version: 1.2.0
       '@trpc/client':
         specifier: ^10.25.0
@@ -648,9 +648,6 @@ importers:
       discord-api-types:
         specifier: ^0.37.48
         version: 0.37.48
-      discord.js:
-        specifier: ^14.11.0
-        version: 14.11.0
       dotenv-cra:
         specifier: ^3.0.3
         version: 3.0.3
@@ -16295,7 +16292,7 @@ packages:
       picocolors: 1.0.0
       source-map: 0.6.1
       source-map-support: 0.5.21
-      vite: 4.4.3(@types/node@20.4.2)(sass@1.63.6)
+      vite: 4.4.3(@types/node@20.4.2)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -16317,7 +16314,7 @@ packages:
       mlly: 1.4.0
       pathe: 1.1.1
       picocolors: 1.0.0
-      vite: 4.4.3(@types/node@20.4.2)(sass@1.63.6)
+      vite: 4.4.3(@types/node@20.4.2)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -16418,6 +16415,42 @@ packages:
       fsevents: 2.3.2
     dev: true
 
+  /vite@4.4.3(@types/node@20.4.2):
+    resolution: {integrity: sha512-IMnXQXXWgLi5brBQx/4WzDxdzW0X3pjO4nqFJAuNvwKtxzAmPzFE1wszW3VDpAGQJm3RZkm/brzRdyGsnwgJIA==}
+    engines: {node: ^14.18.0 || >=16.0.0}
+    hasBin: true
+    peerDependencies:
+      '@types/node': '>= 14'
+      less: '*'
+      lightningcss: ^1.21.0
+      sass: '*'
+      stylus: '*'
+      sugarss: '*'
+      terser: ^5.4.0
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      less:
+        optional: true
+      lightningcss:
+        optional: true
+      sass:
+        optional: true
+      stylus:
+        optional: true
+      sugarss:
+        optional: true
+      terser:
+        optional: true
+    dependencies:
+      '@types/node': 20.4.2
+      esbuild: 0.18.12
+      postcss: 8.4.26
+      rollup: 3.26.2
+    optionalDependencies:
+      fsevents: 2.3.2
+    dev: true
+
   /vite@4.4.3(@types/node@20.4.2)(sass@1.63.6):
     resolution: {integrity: sha512-IMnXQXXWgLi5brBQx/4WzDxdzW0X3pjO4nqFJAuNvwKtxzAmPzFE1wszW3VDpAGQJm3RZkm/brzRdyGsnwgJIA==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -16498,7 +16531,7 @@ packages:
       tinybench: 2.5.0
       tinypool: 0.3.1
       tinyspy: 1.1.1
-      vite: 4.4.3(@types/node@20.4.2)(sass@1.63.6)
+      vite: 4.4.3(@types/node@20.4.2)
       vite-node: 0.28.5(@types/node@20.4.2)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
@@ -16563,7 +16596,7 @@ packages:
       tinybench: 2.5.0
       tinypool: 0.4.0
       tinyspy: 1.1.1
-      vite: 4.4.3(@types/node@20.4.2)(sass@1.63.6)
+      vite: 4.4.3(@types/node@20.4.2)
       vite-node: 0.29.8(@types/node@20.4.2)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
