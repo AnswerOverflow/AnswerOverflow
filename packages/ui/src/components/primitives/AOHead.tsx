@@ -64,13 +64,7 @@ export const AOHead = ({
 				// Prevent incorrectly doing a double slash
 				href={`${baseDomain}${path.startsWith('/') ? path.slice(1) : path}`}
 			/>
-			{tenant && (
-				<link
-					rel="icon"
-					type="image/x-icon"
-					href={makeServerIconLink(tenant, 16)}
-				/>
-			)}
+			{tenant && <link rel="icon" type="image/x-icon" href={'/favicon.png'} />}
 			<meta name="description" content={description} key="desc" />
 			<meta
 				property="og:site_name"
