@@ -30,10 +30,15 @@ export function PageViewsCardRenderer(props: {
 
 export function PageViewsCard() {
 	const { id } = useDashboardContext();
-	const { data, status } = trpc.servers.fetchPageViewCount.useQuery(id);
+	const { data, status } = trpc.servers.fetchPageViewsAsLineChart.useQuery(id);
+
 	return (
 		<PageViewsCardRenderer
-			numberOfPageViews={status === 'success' ? data : undefined}
+			numberOfPageViews={
+				status === 'success'
+					? data.reduce((acc, cur) => acc + cur['View Count'], 0)
+					: undefined
+			}
 			status={status}
 		/>
 	);

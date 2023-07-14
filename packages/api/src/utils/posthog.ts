@@ -158,14 +158,6 @@ async function fetchPosthogInsight(input: {
 	return data;
 }
 
-export async function fetchServerPageViewsNumber(serverId: string) {
-	const data = await fetchPosthogInsight({
-		serverId,
-		display: 'BoldNumber',
-	});
-	return data.result[0]!.aggregated_value;
-}
-
 export async function fetchServerPageViewsAsLineChart(serverId: string) {
 	const data = await fetchPosthogInsight({
 		serverId,
