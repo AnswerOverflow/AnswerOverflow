@@ -68,7 +68,7 @@ export const AOHead = ({
 				<link
 					rel="icon"
 					type="image/x-icon"
-					href={makeServerIconLink(tenant, 16)}
+					href={makeServerIconLink(tenant, 48)}
 				/>
 			)}
 			<meta name="description" content={description} key="desc" />
