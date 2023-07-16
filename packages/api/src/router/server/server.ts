@@ -14,6 +14,7 @@ import type { Context } from '~api/router/context';
 import { router, withUserServersProcedure } from '~api/router/trpc';
 import {
 	addDomainToVercel,
+	DomainVerificationStatusProps,
 	getConfigResponse,
 	getDomainResponse,
 	removeDomainFromVercelProject,
@@ -31,7 +32,6 @@ import {
 	protectedFetch,
 	protectedMutationFetchFirst,
 } from '~api/utils/protected-procedures';
-import { DomainVerificationStatusProps } from '~api/utils/types';
 import { fetchServerPageViewsAsLineChart } from '~api/utils/posthog';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =

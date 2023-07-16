@@ -17,25 +17,25 @@
 		"test:watch": "pnpm with-env vitest"
 	},
 	"dependencies": {
-		"@answeroverflow/constants": "*",
-		"@answeroverflow/db-mock": "*",
-		"@answeroverflow/elastic-types": "*",
-		"@answeroverflow/prisma-types": "*",
-		"@answeroverflow/utils": "*",
-		"@sapphire/bitfield": "^1.0.0",
-		"discord-api-types": "^0.37.30",
+		"@answeroverflow/constants": "^0.1.0",
+		"@answeroverflow/db-mock": "^0.1.0",
+		"@answeroverflow/elastic-types": "^0.1.0",
+		"@answeroverflow/prisma-types": "^0.1.0",
+		"@answeroverflow/utils": "^0.1.0",
+		"@sapphire/bitfield": "^1.2.0",
+		"discord-api-types": "^0.37.48",
 		"dotenv-cra": "^3.0.3",
-		"zod": "^3.20.6"
+		"zod": "^3.21.4"
 	},
 	"devDependencies": {
-		"@answeroverflow/prettier-config": "*",
-		"@answeroverflow/tsconfig": "*",
+		"@answeroverflow/prettier-config": "^0.0.0",
+		"@answeroverflow/tsconfig": "^0.0.0",
 		"@types/node": "^20.4.2",
 		"@vitest/coverage-c8": "^0.28.5",
 		"cross-env": "^7.0.3",
-		"dotenv-cli": "^7.1.0",
-		"eslint": "^8.44.0",
-		"prettier": "^2.8.4",
+		"dotenv-cli": "^7.2.1",
+		"eslint": "^8.45.0",
+		"prettier": "^2.8.8",
 		"ts-node": "^10.9.1",
 		"vitest": "^0.29.8"
 	}
