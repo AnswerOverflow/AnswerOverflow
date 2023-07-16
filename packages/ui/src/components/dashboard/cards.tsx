@@ -91,11 +91,9 @@ export function CurrentPlanCardRenderer(props: {
 				</div>
 			</Flex>
 			<Flex className="mt-4">
-				<Text>
-					{`${label} ${
-						dateInMs ? new Date(dateInMs * 1000).toLocaleDateString() : ''
-					}`}
-				</Text>
+				<Text>{`${label} ${
+					dateInMs ? new Date(dateInMs * 1000).toLocaleDateString() : ''
+				}`}</Text>
 				{stripeCheckoutUrl && (
 					<AOLink href={stripeCheckoutUrl}>
 						<Text>Change Plan</Text>

@@ -13,3 +13,7 @@ export * from './src/router/server/types';
 export * from './src/router/channel/types';
 export * from './src/router/user-server-settings/types';
 export type { User } from '@answeroverflow/db';
+export type {
+	VercelDomainVerificationResponse,
+	DomainVerificationStatusProps,
+} from './src/utils/domains';

@@ -19,11 +19,11 @@
 		"lorem-ipsum": "^2.0.8"
 	},
 	"devDependencies": {
-		"@answeroverflow/tsconfig": "*",
+		"@answeroverflow/prettier-config": "^0.0.0",
+		"@answeroverflow/tsconfig": "^0.0.0",
 		"@vitest/coverage-c8": "^0.28.5",
-		"@answeroverflow/prettier-config": "*",
-		"prettier": "^2.8.4",
-		"eslint": "^8.44.0",
+		"eslint": "^8.45.0",
+		"prettier": "^2.8.8",
 		"vitest": "^0.29.8"
 	}
 }
