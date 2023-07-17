@@ -8,7 +8,6 @@ import {
 	updateServer,
 } from '@answeroverflow/db';
 import { TRPCError } from '@trpc/server';
-import Stripe from 'stripe';
 import { z } from 'zod';
 import type { Context } from '~api/router/context';
 import { router, withUserServersProcedure } from '~api/router/trpc';
@@ -34,6 +33,12 @@ import {
 } from '~api/utils/protected-procedures';
 import { fetchServerPageViewsAsLineChart } from '~api/utils/posthog';
 import { getBaseUrl } from '@answeroverflow/constants';
+import {
+	createCheckoutSession,
+	createNewCustomer,
+	fetchSubscriptionInfo,
+	updateServerCustomerName,
+} from '@answeroverflow/payments';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
 	'Read the rules consent already enabled';
@@ -261,28 +266,30 @@ export const serverRouter = router({
 						});
 					}
 
-					const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-						apiVersion: '2022-11-15',
-						typescript: true,
-					});
+					if (server.stripeCustomerId) {
+						// Update the customer's name and description
+						// We can just let this run in the background and not await it
+						void updateServerCustomerName({
+							name: server.name,
+							customerId: server.stripeCustomerId,
+						});
+					}
 
 					// If they have a subscription already, we display the portal
 					if (server.stripeCustomerId && server.stripeSubscriptionId) {
-						const [session, sub] = await Promise.all([
-							stripe.billingPortal.sessions.create({
-								customer: server.stripeCustomerId,
-							}),
-							stripe.subscriptions.retrieve(server.stripeSubscriptionId),
-						]);
+						const sub = await fetchSubscriptionInfo(
+							server.stripeSubscriptionId,
+						);
 						const {
 							cancel_at: cancelAt, // This is when a cancellation will take effect
 							current_period_end: currentPeriodEnd, // This is when an active subscription will renew
 							trial_end: trialEnd, // This is when a trial will end
 							// get when subscription will renew
 						} = sub;
+
 						return {
 							...server,
-							stripeCheckoutUrl: session.url,
+							stripeCheckoutUrl: process.env.STRIPE_CHECKOUT_URL as string,
 							dateCancelationTakesEffect: cancelAt,
 							dateSubscriptionRenews: currentPeriodEnd,
 							dateTrialEnds: trialEnd,
@@ -292,9 +299,7 @@ export const serverRouter = router({
 					// else we upsert them and then display checkout
 
 					if (!server.stripeCustomerId) {
-						const customer = await stripe.customers.create({
-							name: server.name,
-						});
+						const customer = await createNewCustomer(server.name);
 						server.stripeCustomerId = customer.id;
 						await updateServer({
 							existing: server,
@@ -304,30 +309,13 @@ export const serverRouter = router({
 							},
 						});
 					}
+
 					const returnUrl = `${getBaseUrl()}/dashboard/${server.id}`;
 
-					const session = await stripe.checkout.sessions.create({
-						billing_address_collection: 'auto',
-						line_items: [
-							{
-								// base
-								price: process.env.STRIPE_PRO_PLAN_PRICE_ID,
-								quantity: 1,
-							},
-							{
-								// additional page views
-								price: process.env.STRIPE_PAGE_VIEWS_PRICE_ID,
-							},
-						],
-						mode: 'subscription',
-						subscription_data: {
-							trial_period_days: 14,
-						},
-						success_url: returnUrl,
-						cancel_url: returnUrl,
-						currency: 'USD',
-						allow_promotion_codes: true,
-						customer: server.stripeCustomerId,
+					const session = await createCheckoutSession({
+						customerId: server.stripeCustomerId,
+						successUrl: returnUrl,
+						cancelUrl: returnUrl,
 					});
 					return {
 						...server,

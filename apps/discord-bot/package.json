@@ -8,6 +8,7 @@
 		"@answeroverflow/analytics": "^0.1.0",
 		"@answeroverflow/api": "^0.1.0",
 		"@answeroverflow/cache": "^0.1.0",
+		"@answeroverflow/payments": "^0.1.0",
 		"@answeroverflow/constants": "^0.1.0",
 		"@answeroverflow/db": "^0.1.0",
 		"@answeroverflow/db-mock": "^0.1.0",

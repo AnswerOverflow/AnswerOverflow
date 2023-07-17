@@ -17,6 +17,7 @@
 	"dependencies": {
 		"@answeroverflow/analytics": "^0.1.0",
 		"@answeroverflow/api": "^0.1.0",
+		"@answeroverflow/payments": "^0.1.0",
 		"@answeroverflow/auth": "^0.1.0",
 		"@answeroverflow/constants": "^0.1.0",
 		"@answeroverflow/db": "^0.1.0",
