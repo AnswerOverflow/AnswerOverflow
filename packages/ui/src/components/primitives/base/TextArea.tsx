@@ -1,10 +1,9 @@
 import { cn } from "~ui/utils/styling";
-import { InputProps } from "~ui/components/primitives";
 import * as React from "react";
 
 export interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
 
-export const TextArea: React.FC<React.PropsWithChildren<TextAreaProps>> = (props) => {
+export const TextArea: React.FC<TextAreaProps> = (props) => {
   const { children, className, ...remainingProps } = props;
 
   return (

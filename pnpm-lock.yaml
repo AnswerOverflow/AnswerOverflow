@@ -1330,6 +1330,9 @@ importers:
       '@radix-ui/react-popover':
         specifier: ^1.0.5
         version: 1.0.6(@types/react-dom@18.2.7)(@types/react@18.2.15)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-slider':
+        specifier: ^1.1.2
+        version: 1.1.2(@types/react-dom@18.2.7)(@types/react@18.2.15)(react-dom@18.2.0)(react@18.2.0)
       '@tanstack/react-query':
         specifier: ^4.19.0
         version: 4.29.19(react-dom@18.2.0)(react-native@0.72.3)(react@18.2.0)
@@ -1450,7 +1453,7 @@ importers:
         version: 8.44.0
       jest:
         specifier: ^29.4.1
-        version: 29.6.1(@types/node@18.16.19)
+        version: 29.6.1(@types/node@18.16.19)(ts-node@10.9.1)
       lorem-ipsum:
         specifier: ^2.0.8
         version: 2.0.8
@@ -1474,7 +1477,7 @@ importers:
         version: 3.13.0
       vite-tsconfig-paths:
         specifier: ^4.2.0
-        version: 4.2.0(vite@4.4.3)
+        version: 4.2.0(typescript@5.1.6)(vite@4.4.3)
       wait-on:
         specifier: ^7.0.1
         version: 7.0.1
@@ -3629,48 +3632,6 @@ packages:
       jest-util: 29.6.1
       slash: 3.0.0
 
-  /@jest/core@29.6.1:
-    resolution: {integrity: sha512-CcowHypRSm5oYQ1obz1wfvkjZZ2qoQlrKKvlfPwh5jUXVU12TWr2qMeH8chLMuTFzHh5a1g2yaqlqDICbr+ukQ==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-    peerDependencies:
-      node-notifier: ^8.0.1 || ^9.0.0 || ^10.0.0
-    peerDependenciesMeta:
-      node-notifier:
-        optional: true
-    dependencies:
-      '@jest/console': 29.6.1
-      '@jest/reporters': 29.6.1
-      '@jest/test-result': 29.6.1
-      '@jest/transform': 29.6.1
-      '@jest/types': 29.6.1
-      '@types/node': 20.4.2
-      ansi-escapes: 4.3.2
-      chalk: 4.1.2
-      ci-info: 3.8.0
-      exit: 0.1.2
-      graceful-fs: 4.2.11
-      jest-changed-files: 29.5.0
-      jest-config: 29.6.1(@types/node@20.4.2)
-      jest-haste-map: 29.6.1
-      jest-message-util: 29.6.1
-      jest-regex-util: 29.4.3
-      jest-resolve: 29.6.1
-      jest-resolve-dependencies: 29.6.1
-      jest-runner: 29.6.1
-      jest-runtime: 29.6.1
-      jest-snapshot: 29.6.1
-      jest-util: 29.6.1
-      jest-validate: 29.6.1
-      jest-watcher: 29.6.1
-      micromatch: 4.0.5
-      pretty-format: 29.6.1
-      slash: 3.0.0
-      strip-ansi: 6.0.1
-    transitivePeerDependencies:
-      - supports-color
-      - ts-node
-    dev: true
-
   /@jest/core@29.6.1(ts-node@10.9.1):
     resolution: {integrity: sha512-CcowHypRSm5oYQ1obz1wfvkjZZ2qoQlrKKvlfPwh5jUXVU12TWr2qMeH8chLMuTFzHh5a1g2yaqlqDICbr+ukQ==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -3868,7 +3829,7 @@ packages:
     dependencies:
       '@types/istanbul-lib-coverage': 2.0.4
       '@types/istanbul-reports': 3.0.1
-      '@types/node': 18.16.19
+      '@types/node': 20.4.2
       '@types/yargs': 15.0.15
       chalk: 4.1.2
     dev: false
@@ -4361,6 +4322,12 @@ packages:
   /@prisma/engines@4.16.2:
     resolution: {integrity: sha512-vx1nxVvN4QeT/cepQce68deh/Turxy5Mr+4L4zClFuK1GlxN3+ivxfuv+ej/gvidWn1cE1uAhW7ALLNlYbRUAw==}
     requiresBuild: true
+
+  /@radix-ui/number@1.0.1:
+    resolution: {integrity: sha512-T5gIdVO2mmPW3NNhjNgEP3cqMXjXL9UbO0BzWcXfvdBs+BohbQxvd/K5hSVKmn9/lbTdsQVKbUcP5WLCwvUbBg==}
+    dependencies:
+      '@babel/runtime': 7.22.6
+    dev: false
 
   /@radix-ui/primitive@1.0.1:
     resolution: {integrity: sha512-yQ8oGX2GVsEYMWGxcovu1uGWPCxV5BFfeeYxqPmuAzUyLT9qmaMXSAhXpb0WrspIeqYzdJpkh2vHModJPgRIaw==}
@@ -4858,6 +4825,37 @@ packages:
       '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.7)(@types/react@18.2.15)(react-dom@18.2.0)(react@18.2.0)
       '@radix-ui/react-use-callback-ref': 1.0.1(@types/react@18.2.15)(react@18.2.0)
       '@radix-ui/react-use-controllable-state': 1.0.1(@types/react@18.2.15)(react@18.2.0)
+      '@types/react': 18.2.15
+      '@types/react-dom': 18.2.7
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /@radix-ui/react-slider@1.1.2(@types/react-dom@18.2.7)(@types/react@18.2.15)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-NKs15MJylfzVsCagVSWKhGGLNR1W9qWs+HtgbmjjVUB3B9+lb3PYoXxVju3kOrpf0VKyVCtZp+iTwVoqpa1Chw==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.22.6
+      '@radix-ui/number': 1.0.1
+      '@radix-ui/primitive': 1.0.1
+      '@radix-ui/react-collection': 1.0.3(@types/react-dom@18.2.7)(@types/react@18.2.15)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-compose-refs': 1.0.1(@types/react@18.2.15)(react@18.2.0)
+      '@radix-ui/react-context': 1.0.1(@types/react@18.2.15)(react@18.2.0)
+      '@radix-ui/react-direction': 1.0.1(@types/react@18.2.15)(react@18.2.0)
+      '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.7)(@types/react@18.2.15)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-use-controllable-state': 1.0.1(@types/react@18.2.15)(react@18.2.0)
+      '@radix-ui/react-use-layout-effect': 1.0.1(@types/react@18.2.15)(react@18.2.0)
+      '@radix-ui/react-use-previous': 1.0.1(@types/react@18.2.15)(react@18.2.0)
+      '@radix-ui/react-use-size': 1.0.1(@types/react@18.2.15)(react@18.2.0)
       '@types/react': 18.2.15
       '@types/react-dom': 18.2.7
       react: 18.2.0
@@ -10654,34 +10652,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /jest-cli@29.6.1(@types/node@18.16.19):
-    resolution: {integrity: sha512-607dSgTA4ODIN6go9w6xY3EYkyPFGicx51a69H7yfvt7lN53xNswEVLovq+E77VsTRi5fWprLH0yl4DJgE8Ing==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-    hasBin: true
-    peerDependencies:
-      node-notifier: ^8.0.1 || ^9.0.0 || ^10.0.0
-    peerDependenciesMeta:
-      node-notifier:
-        optional: true
-    dependencies:
-      '@jest/core': 29.6.1
-      '@jest/test-result': 29.6.1
-      '@jest/types': 29.6.1
-      chalk: 4.1.2
-      exit: 0.1.2
-      graceful-fs: 4.2.11
-      import-local: 3.1.0
-      jest-config: 29.6.1(@types/node@18.16.19)
-      jest-util: 29.6.1
-      jest-validate: 29.6.1
-      prompts: 2.4.2
-      yargs: 17.7.2
-    transitivePeerDependencies:
-      - '@types/node'
-      - supports-color
-      - ts-node
-    dev: true
-
   /jest-cli@29.6.1(@types/node@18.16.19)(ts-node@10.9.1):
     resolution: {integrity: sha512-607dSgTA4ODIN6go9w6xY3EYkyPFGicx51a69H7yfvt7lN53xNswEVLovq+E77VsTRi5fWprLH0yl4DJgE8Ing==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -10708,45 +10678,6 @@ packages:
       - '@types/node'
       - supports-color
       - ts-node
-
-  /jest-config@29.6.1(@types/node@18.16.19):
-    resolution: {integrity: sha512-XdjYV2fy2xYixUiV2Wc54t3Z4oxYPAELUzWnV6+mcbq0rh742X2p52pii5A3oeRzYjLnQxCsZmp0qpI6klE2cQ==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-    peerDependencies:
-      '@types/node': '*'
-      ts-node: '>=9.0.0'
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      ts-node:
-        optional: true
-    dependencies:
-      '@babel/core': 7.22.9
-      '@jest/test-sequencer': 29.6.1
-      '@jest/types': 29.6.1
-      '@types/node': 18.16.19
-      babel-jest: 29.6.1(@babel/core@7.22.9)
-      chalk: 4.1.2
-      ci-info: 3.8.0
-      deepmerge: 4.3.1
-      glob: 7.2.3
-      graceful-fs: 4.2.11
-      jest-circus: 29.6.1
-      jest-environment-node: 29.6.1
-      jest-get-type: 29.4.3
-      jest-regex-util: 29.4.3
-      jest-resolve: 29.6.1
-      jest-runner: 29.6.1
-      jest-util: 29.6.1
-      jest-validate: 29.6.1
-      micromatch: 4.0.5
-      parse-json: 5.2.0
-      pretty-format: 29.6.1
-      slash: 3.0.0
-      strip-json-comments: 3.1.1
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
 
   /jest-config@29.6.1(@types/node@18.16.19)(ts-node@10.9.1):
     resolution: {integrity: sha512-XdjYV2fy2xYixUiV2Wc54t3Z4oxYPAELUzWnV6+mcbq0rh742X2p52pii5A3oeRzYjLnQxCsZmp0qpI6klE2cQ==}
@@ -10786,45 +10717,6 @@ packages:
       ts-node: 10.9.1(@swc/core@1.3.69)(@types/node@18.16.19)(typescript@5.1.6)
     transitivePeerDependencies:
       - supports-color
-
-  /jest-config@29.6.1(@types/node@20.4.2):
-    resolution: {integrity: sha512-XdjYV2fy2xYixUiV2Wc54t3Z4oxYPAELUzWnV6+mcbq0rh742X2p52pii5A3oeRzYjLnQxCsZmp0qpI6klE2cQ==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-    peerDependencies:
-      '@types/node': '*'
-      ts-node: '>=9.0.0'
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      ts-node:
-        optional: true
-    dependencies:
-      '@babel/core': 7.22.9
-      '@jest/test-sequencer': 29.6.1
-      '@jest/types': 29.6.1
-      '@types/node': 20.4.2
-      babel-jest: 29.6.1(@babel/core@7.22.9)
-      chalk: 4.1.2
-      ci-info: 3.8.0
-      deepmerge: 4.3.1
-      glob: 7.2.3
-      graceful-fs: 4.2.11
-      jest-circus: 29.6.1
-      jest-environment-node: 29.6.1
-      jest-get-type: 29.4.3
-      jest-regex-util: 29.4.3
-      jest-resolve: 29.6.1
-      jest-runner: 29.6.1
-      jest-util: 29.6.1
-      jest-validate: 29.6.1
-      micromatch: 4.0.5
-      parse-json: 5.2.0
-      pretty-format: 29.6.1
-      slash: 3.0.0
-      strip-json-comments: 3.1.1
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
 
   /jest-config@29.6.1(@types/node@20.4.2)(ts-node@10.9.1):
     resolution: {integrity: sha512-XdjYV2fy2xYixUiV2Wc54t3Z4oxYPAELUzWnV6+mcbq0rh742X2p52pii5A3oeRzYjLnQxCsZmp0qpI6klE2cQ==}
@@ -11094,7 +10986,7 @@ packages:
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     dependencies:
       '@jest/types': 27.5.1
-      '@types/node': 18.16.19
+      '@types/node': 20.4.2
       chalk: 4.1.2
       ci-info: 3.8.0
       graceful-fs: 4.2.11
@@ -11140,7 +11032,7 @@ packages:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
     dependencies:
-      '@types/node': 18.16.19
+      '@types/node': 20.4.2
       merge-stream: 2.0.0
       supports-color: 8.1.1
     dev: false
@@ -11153,26 +11045,6 @@ packages:
       jest-util: 29.6.1
       merge-stream: 2.0.0
       supports-color: 8.1.1
-
-  /jest@29.6.1(@types/node@18.16.19):
-    resolution: {integrity: sha512-Nirw5B4nn69rVUZtemCQhwxOBhm0nsp3hmtF4rzCeWD7BkjAXRIji7xWQfnTNbz9g0aVsBX6aZK3n+23LM6uDw==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-    hasBin: true
-    peerDependencies:
-      node-notifier: ^8.0.1 || ^9.0.0 || ^10.0.0
-    peerDependenciesMeta:
-      node-notifier:
-        optional: true
-    dependencies:
-      '@jest/core': 29.6.1
-      '@jest/types': 29.6.1
-      import-local: 3.1.0
-      jest-cli: 29.6.1(@types/node@18.16.19)
-    transitivePeerDependencies:
-      - '@types/node'
-      - supports-color
-      - ts-node
-    dev: true
 
   /jest@29.6.1(@types/node@18.16.19)(ts-node@10.9.1):
     resolution: {integrity: sha512-Nirw5B4nn69rVUZtemCQhwxOBhm0nsp3hmtF4rzCeWD7BkjAXRIji7xWQfnTNbz9g0aVsBX6aZK3n+23LM6uDw==}
@@ -15853,7 +15725,7 @@ packages:
       typescript: 5.1.6
     dev: true
 
-  /tsconfck@2.1.1:
+  /tsconfck@2.1.1(typescript@5.1.6):
     resolution: {integrity: sha512-ZPCkJBKASZBmBUNqGHmRhdhM8pJYDdOXp4nRgj/O0JwUwsMq50lCDRQP/M5GBNAA0elPrq4gAeu4dkaVCuKWww==}
     engines: {node: ^14.13.1 || ^16 || >=18}
     hasBin: true
@@ -15862,6 +15734,8 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+    dependencies:
+      typescript: 5.1.6
     dev: true
 
   /tsconfig-paths@3.14.2:
@@ -16528,7 +16402,7 @@ packages:
       - supports-color
     dev: true
 
-  /vite-tsconfig-paths@4.2.0(vite@4.4.3):
+  /vite-tsconfig-paths@4.2.0(typescript@5.1.6)(vite@4.4.3):
     resolution: {integrity: sha512-jGpus0eUy5qbbMVGiTxCL1iB9ZGN6Bd37VGLJU39kTDD6ZfULTTb1bcc5IeTWqWJKiWV5YihCaibeASPiGi8kw==}
     peerDependencies:
       vite: '*'
@@ -16538,7 +16412,7 @@ packages:
     dependencies:
       debug: 4.3.4
       globrex: 0.1.2
-      tsconfck: 2.1.1
+      tsconfck: 2.1.1(typescript@5.1.6)
       vite: 4.4.3(@types/node@18.16.19)
     transitivePeerDependencies:
       - supports-color
