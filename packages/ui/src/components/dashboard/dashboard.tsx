@@ -72,6 +72,7 @@ export function ServerDashboardRenderer(props: {
 							<TierAccessOnly
 								enabledFor={['PRO', 'OPEN_SOURCE']}
 								currentPlan={data.plan}
+								checkoutUrl={data.stripeCheckoutUrl}
 							>
 								{ConfigureDomainCardOverride ?? <ConfigureDomainCard />}
 							</TierAccessOnly>

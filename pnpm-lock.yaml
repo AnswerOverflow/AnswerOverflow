@@ -11,6 +11,9 @@ importers:
       '@answeroverflow/eslint-config-custom':
         specifier: ^0.0.0
         version: link:packages/config/eslint-config-custom
+      '@answeroverflow/prettier-config':
+        specifier: ^0.0.0
+        version: link:packages/config/prettier
       '@answeroverflow/tsconfig':
         specifier: ^0.0.0
         version: link:packages/config/tsconfig

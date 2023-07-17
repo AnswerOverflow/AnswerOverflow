@@ -8,8 +8,8 @@
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules coverage",
 		"with-env": "dotenv -e ../../.env --",
-		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix"
 	},
