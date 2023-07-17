@@ -13,7 +13,7 @@
 		"next-env.d.ts",
 		"../../reset.d.ts",
 		"vitest.config.ts",
-		"prettierrc.cjs",
+		".prettierrc.cjs",
 		"__tests__"
 	]
 }

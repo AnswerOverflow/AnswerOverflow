@@ -21,5 +21,6 @@ export default defineConfig({
 		'@answeroverflow/constants',
 		'@answeroverflow/cache',
 		'@answeroverflow/discordjs-mock',
+		'@answeroverflow/payments',
 	],
 });

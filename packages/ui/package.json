@@ -5,8 +5,8 @@
 	"main": "./src/index.ts",
 	"types": "./src/index.ts",
 	"scripts": {
-		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
 		"lint": "next lint && tsc --noEmit",
 		"lint:fix": "next lint --fix",
 		"dev": "cross-env THEME=\"both\" ladle dev -p 6006",

@@ -6,6 +6,8 @@ import superjson from 'superjson';
 import { trpc } from '@answeroverflow/ui';
 import type { GetStaticPropsContext, InferGetStaticPropsType } from 'next';
 import { TRPCError } from '@trpc/server';
+import { findServerById } from '@answeroverflow/db';
+import { fetchSubscriptionInfo } from '@answeroverflow/payments';
 export default function MessageResult(
 	props: InferGetStaticPropsType<typeof getStaticProps>,
 ) {
@@ -63,10 +65,21 @@ export async function getStaticProps(
 			context.params.messageId,
 		);
 		if (server.customDomain) {
+			const fullServer = await findServerById(server.id); // TODO: We're double fetching here, could be improved
+			let shouldTemporaryRedirectDueToTrial = false;
+			if (fullServer && fullServer.stripeSubscriptionId) {
+				const subscriptionInfo = await fetchSubscriptionInfo(
+					fullServer.stripeSubscriptionId,
+				);
+				shouldTemporaryRedirectDueToTrial = subscriptionInfo.isTrialActive;
+			}
 			return {
 				redirect: {
 					destination: `https://${server.customDomain}/m/${context.params.messageId}`,
-					permanent: process.env.NODE_ENV === 'production',
+					// If it's a trial then keep the redirect temporary incase they don't continue
+					permanent:
+						process.env.NODE_ENV === 'production' &&
+						!shouldTemporaryRedirectDueToTrial,
 				},
 			};
 		}

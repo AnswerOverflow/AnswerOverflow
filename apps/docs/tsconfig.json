@@ -14,6 +14,6 @@
 		"next-env.d.ts",
 		"theme.config.tsx",
 		"../../reset.d.ts",
-		"prettierrc.cjs"
+		".prettierrc.cjs"
 	]
 }
