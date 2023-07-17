@@ -1,2 +1,2 @@
-....................prettierrc.cjs
+.prettierrc.cjs
 tsup.config.ts
