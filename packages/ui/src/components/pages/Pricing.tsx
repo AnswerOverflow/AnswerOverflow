@@ -24,7 +24,7 @@ const findPrice = (price: string) => {
 };
 
 const PricingSlider = () => {
-  const [price, setPrice] = useState<string>(prices[0][0] ?? "5000");
+  const [price, setPrice] = useState<string>(findPrice(prices[0]));
   const [sliderVal, setSliderVal] = useState<number>(0);
 
   return (
