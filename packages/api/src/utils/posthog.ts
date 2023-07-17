@@ -63,6 +63,7 @@ type PosthogParams = {
 	properties: any;
 	date_from: string;
 	entity_type: 'events';
+	filter_test_accounts: boolean;
 	refresh: boolean;
 	events: {
 		type: 'events';
@@ -95,6 +96,7 @@ async function fetchPosthogInsight(input: {
 	const params: PosthogParams = {
 		insight: 'TRENDS',
 		refresh: input.refresh ?? false,
+		filter_test_accounts: process.env.NODE_ENV === 'production',
 		properties: {
 			type: 'AND',
 			values: [

@@ -26,8 +26,8 @@
 		"clean": "rm -rf dist .turbo coverage",
 		"test": "pnpm jest --coverage",
 		"test:watch": "pnpm jest --watch",
-		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix"
 	},

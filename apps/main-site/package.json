@@ -8,8 +8,8 @@
 		"build": "(cd ../../ && pnpm db:generate && cd apps/main-site) && pnpm with-env next build",
 		"clean": "rm -rf .next .turbo node_modules",
 		"start": "pnpm with-env next start",
-		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
 		"lint": "next lint && tsc --noEmit",
 		"lint:fix": "next lint --fix",
 		"type-check": "tsc --noEmit"
@@ -17,6 +17,7 @@
 	"dependencies": {
 		"@answeroverflow/analytics": "^0.1.0",
 		"@answeroverflow/api": "^0.1.0",
+		"@answeroverflow/payments": "^0.1.0",
 		"@answeroverflow/auth": "^0.1.0",
 		"@answeroverflow/constants": "^0.1.0",
 		"@answeroverflow/db": "^0.1.0",

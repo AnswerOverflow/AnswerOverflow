@@ -1,7 +1,7 @@
 import { Card, Flex, LineChart, Metric, Title, Text } from '@tremor/react';
 import type { Plan } from '@answeroverflow/db';
 import { trpc } from '~ui/utils/trpc';
-import { AOLink } from '../primitives';
+import { AOLink, LinkButton } from '../primitives';
 import { useDashboardContext } from './dashboard-context';
 
 export function PageViewsCardRenderer(props: {
@@ -94,11 +94,16 @@ export function CurrentPlanCardRenderer(props: {
 				<Text>{`${label} ${
 					dateInMs ? new Date(dateInMs * 1000).toLocaleDateString() : ''
 				}`}</Text>
-				{stripeCheckoutUrl && (
-					<AOLink href={stripeCheckoutUrl}>
-						<Text>Change Plan</Text>
-					</AOLink>
-				)}
+				{stripeCheckoutUrl &&
+					(plan === 'FREE' ? (
+						<LinkButton href={stripeCheckoutUrl} variant={'outline'}>
+							<Text>Start Pro Trial</Text>
+						</LinkButton>
+					) : (
+						<AOLink href={stripeCheckoutUrl}>
+							<Text>Change Plan</Text>
+						</AOLink>
+					))}
 			</Flex>
 		</Card>
 	);
