@@ -21,7 +21,6 @@ env:
   NEXT_PUBLIC_POSTHOG_TOKEN: "123" # Fake API key to make CI not fail
   REDIS_URL: redis://:redis@localhost:6379
   NEXT_PUBLIC_DEPLOYMENT_ENV: "ci"
-  OWNERS: "[]"
   DISCORD_CLIENT_ID: "123"
 
   # Long delay to give tests best chance at succeeding
@@ -67,7 +66,7 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-      
+
       - name: Start containers # TODO: Use dev container docker-compose instead if possible
         run: docker-compose -f "docker-compose.yml" up -d --build
 
