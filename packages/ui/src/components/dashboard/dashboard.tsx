@@ -75,6 +75,9 @@ export function ServerDashboardRenderer(props: {
 								proPlanCheckoutUrl={
 									data.status === 'inactive' ? data.proPlanCheckoutUrl : null
 								}
+								hasSubscribedBefore={
+									data.status === 'inactive' ? data.hasSubscribedBefore : true
+								}
 								enterprisePlanCheckoutUrl={
 									data.status === 'inactive'
 										? data.enterprisePlanCheckoutUrl

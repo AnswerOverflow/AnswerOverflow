@@ -153,10 +153,10 @@ const PricingElement = (props: {
 	);
 };
 
-const ProPlan = (props: { ctaLink: string }) => (
+const ProPlan = (props: { ctaLink: string; hasSubscribedBefore?: boolean }) => (
 	<PricingElement
 		title={'Pro'}
-		cta={'Start Free Trial'}
+		cta={props.hasSubscribedBefore ? 'Resubscribe' : 'Start Free Trial'}
 		price={'$25 / month'}
 		features={[
 			{
@@ -173,10 +173,13 @@ const ProPlan = (props: { ctaLink: string }) => (
 	/>
 );
 
-const EnterprisePlan = (props: { ctaLink: string }) => (
+const EnterprisePlan = (props: {
+	ctaLink: string;
+	hasSubscribedBefore?: boolean;
+}) => (
 	<PricingElement
 		title={'Enterprise'}
-		cta={'Start Free Trial'}
+		cta={props.hasSubscribedBefore ? 'Resubscribe' : 'Start Free Trial'}
 		price={'$150 / month'}
 		features={[
 			{
@@ -275,11 +278,14 @@ export const Pricing = () => {
 export const PricingDialog = (props: {
 	proPlanCheckoutUrl: string;
 	enterprisePlanCheckoutUrl: string;
+	hasSubscribedBefore?: boolean;
 }) => {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button variant="outline">Start free trial</Button>
+				<Button variant="outline">
+					{props.hasSubscribedBefore ? 'Resubscribe' : 'Start free trial'}
+				</Button>
 			</DialogTrigger>
 			<DialogContent className="max-h-screen max-w-5xl overflow-y-auto bg-white dark:bg-ao-black">
 				<DialogHeader>
@@ -287,8 +293,14 @@ export const PricingDialog = (props: {
 				</DialogHeader>
 				{/* TODO: If the server has more than 50k page views don't show pro plan */}
 				<div className="mx-auto my-16 grid w-full grid-cols-1 gap-16 md:grid-cols-2">
-					<ProPlan ctaLink={props.proPlanCheckoutUrl} />
-					<EnterprisePlan ctaLink={props.enterprisePlanCheckoutUrl} />
+					<ProPlan
+						ctaLink={props.proPlanCheckoutUrl}
+						hasSubscribedBefore={props.hasSubscribedBefore}
+					/>
+					<EnterprisePlan
+						ctaLink={props.enterprisePlanCheckoutUrl}
+						hasSubscribedBefore={props.hasSubscribedBefore}
+					/>
 				</div>
 				<DialogFooter>
 					<LinkButton href={'/pricing'}>Learn more</LinkButton>

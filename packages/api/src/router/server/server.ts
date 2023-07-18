@@ -272,6 +272,7 @@ export const serverRouter = router({
 						// Update the customer's name and description
 						// We can just let this run in the background and not await it
 						void updateServerCustomerName({
+							serverId: server.id,
 							name: server.name,
 							customerId: server.stripeCustomerId,
 						});
@@ -302,7 +303,10 @@ export const serverRouter = router({
 					// else we upsert them and then display checkout
 
 					if (!server.stripeCustomerId) {
-						const customer = await createNewCustomer(server.name);
+						const customer = await createNewCustomer({
+							name: server.name,
+							serverId: server.id,
+						});
 						server.stripeCustomerId = customer.id;
 						await updateServer({
 							existing: server,
@@ -331,6 +335,9 @@ export const serverRouter = router({
 					return {
 						...server,
 						status: 'inactive',
+						hasSubscribedBefore:
+							proPlanCheckout.hasSubscribedInPast ||
+							enterprisePlanCheckout.hasSubscribedInPast,
 						proPlanCheckoutUrl: proPlanCheckout.url,
 						enterprisePlanCheckoutUrl: enterprisePlanCheckout.url,
 						dateCancelationTakesEffect: null,

@@ -29,6 +29,12 @@ const requestValidation = z.object({
 		'stripe-signature': z.string(),
 	}),
 });
+
+const allowedEvents = new Set([
+	'customer.subscription.created',
+	'customer.subscription.updated',
+	'customer.subscription.deleted',
+]);
 export default async function webhookHandler(
 	req: NextApiRequest,
 	res: NextApiResponse,
@@ -52,6 +58,10 @@ export default async function webhookHandler(
 			signature,
 			process.env.STRIPE_WEBHOOK_SECRET!,
 		);
+
+		if (!allowedEvents.has(event.type)) {
+			throw new Error(`Unexpected event type ${event.type}`);
+		}
 
 		const subscription = event.data.object as Stripe.Subscription;
 		const existingServer = await findServerByStripeCustomerId(
