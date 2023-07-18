@@ -45,7 +45,7 @@ const internalServerProperties = {
 	customDomain: z.string().nullable(),
 	stripeSubscriptionId: z.string().nullable(),
 	stripeCustomerId: z.string().nullable(),
-	plan: z.enum(['FREE', 'PRO', 'OPEN_SOURCE']),
+	plan: z.enum(['FREE', 'PRO', 'OPEN_SOURCE', 'ENTERPRISE']),
 } as const satisfies ServerZodFormat;
 
 const internalServerPropertiesMutable = z

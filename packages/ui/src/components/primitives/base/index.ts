@@ -13,3 +13,6 @@ export * from './Popover';
 export * from './Link';
 export * from './LoadingSpinner';
 export * from './Skeleton';
+export * from './Accordion';
+export * from './Dialog';
+export * from './AlertDialog';

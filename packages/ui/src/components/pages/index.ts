@@ -5,3 +5,4 @@ export * from './PageWrapper';
 export * from './MessageResultPage';
 export * from './SearchPage';
 export * from './onboarding/OnboardingContainer';
+export * from './Pricing';

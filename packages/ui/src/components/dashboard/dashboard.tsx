@@ -10,7 +10,7 @@ import {
 	Col,
 	Title,
 } from '@tremor/react';
-import { AOHead, GetStarted, AOLink } from '../primitives';
+import { AOHead, GetStarted, AOLink, Footer } from '../primitives';
 import { trpc } from '~ui/utils/trpc';
 import { ConfigureDomainCard } from './domains';
 import { GoLinkExternal } from 'react-icons/go';
@@ -70,9 +70,16 @@ export function ServerDashboardRenderer(props: {
 
 						<div className="mt-6">
 							<TierAccessOnly
-								enabledFor={['PRO', 'OPEN_SOURCE']}
+								enabledFor={['PRO', 'OPEN_SOURCE', 'ENTERPRISE']}
 								currentPlan={data.plan}
-								checkoutUrl={data.stripeCheckoutUrl}
+								proPlanCheckoutUrl={
+									data.status === 'inactive' ? data.proPlanCheckoutUrl : null
+								}
+								enterprisePlanCheckoutUrl={
+									data.status === 'inactive'
+										? data.enterprisePlanCheckoutUrl
+										: null
+								}
 							>
 								{ConfigureDomainCardOverride ?? <ConfigureDomainCard />}
 							</TierAccessOnly>
@@ -115,6 +122,7 @@ export function ServerDashboard(props: { serverId: string }) {
 			<AOHead title="Dashboard" path={'/dashboard'} />
 			<DashboardNavbar />
 			<Body />
+			<Footer />
 		</>
 	);
 }
