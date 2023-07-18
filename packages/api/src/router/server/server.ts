@@ -34,10 +34,11 @@ import {
 import { fetchServerPageViewsAsLineChart } from '~api/utils/posthog';
 import { getBaseUrl } from '@answeroverflow/constants';
 import {
-	createCheckoutSession,
+	createProPlanCheckoutSession,
 	createNewCustomer,
 	fetchSubscriptionInfo,
 	updateServerCustomerName,
+	createEnterprisePlanCheckoutSession,
 } from '@answeroverflow/payments';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
@@ -211,7 +212,8 @@ export const serverRouter = router({
 				notFoundMessage: 'Server not found',
 				permissions: [
 					() => assertIsAdminOrOwnerOfServer(ctx, input.serverId),
-					(server) => assertIsOnPlan(server, ['PRO', 'OPEN_SOURCE']),
+					(server) =>
+						assertIsOnPlan(server, ['PRO', 'OPEN_SOURCE', 'ENTERPRISE']),
 				],
 			}),
 		),
@@ -289,11 +291,12 @@ export const serverRouter = router({
 
 						return {
 							...server,
+							status: 'active',
 							stripeCheckoutUrl: process.env.STRIPE_CHECKOUT_URL as string,
 							dateCancelationTakesEffect: cancelAt,
 							dateSubscriptionRenews: currentPeriodEnd,
 							dateTrialEnds: trialEnd,
-						};
+						} as const;
 					}
 
 					// else we upsert them and then display checkout
@@ -312,18 +315,28 @@ export const serverRouter = router({
 
 					const returnUrl = `${getBaseUrl()}/dashboard/${server.id}`;
 
-					const session = await createCheckoutSession({
-						customerId: server.stripeCustomerId,
-						successUrl: returnUrl,
-						cancelUrl: returnUrl,
-					});
+					const [proPlanCheckout, enterprisePlanCheckout] = await Promise.all([
+						createProPlanCheckoutSession({
+							customerId: server.stripeCustomerId,
+							successUrl: returnUrl,
+							cancelUrl: returnUrl,
+						}),
+						createEnterprisePlanCheckoutSession({
+							customerId: server.stripeCustomerId,
+							successUrl: returnUrl,
+							cancelUrl: returnUrl,
+						}),
+					]);
+
 					return {
 						...server,
-						stripeCheckoutUrl: session.url,
+						status: 'inactive',
+						proPlanCheckoutUrl: proPlanCheckout.url,
+						enterprisePlanCheckoutUrl: enterprisePlanCheckout.url,
 						dateCancelationTakesEffect: null,
 						dateSubscriptionRenews: null,
 						dateTrialEnds: null,
-					};
+					} as const;
 				},
 				notFoundMessage: 'Server not found',
 				permissions: () => assertCanEditServer(ctx, input),

@@ -9,6 +9,8 @@ import {
 } from './decorators';
 import { GlobalStateProvider } from './global-state';
 import React from 'react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const Provider: GlobalProvider = ({ children, globalState }) => {
 	return (
@@ -17,6 +19,8 @@ export const Provider: GlobalProvider = ({ children, globalState }) => {
 				<WithAuth authState="signedIn">
 					<WithTailwindTheme>
 						<WithHighlightJS>
+							<ToastContainer toastClassName="dark:bg-ao-black dark:text-white bg-white text-black" />
+
 							<WithAnalytics>{children}</WithAnalytics>
 						</WithHighlightJS>
 					</WithTailwindTheme>

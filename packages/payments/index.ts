@@ -31,22 +31,41 @@ export function createNewCustomer(name: string) {
 	});
 }
 
-export function createCheckoutSession(input: {
+export function createProPlanCheckoutSession(input: {
 	customerId: string;
 	successUrl: string;
 	cancelUrl: string;
+}) {
+	return createPlanCheckoutSession({
+		...input,
+		planId: process.env.STRIPE_PRO_PLAN_PRICE_ID!,
+	});
+}
+
+export function createEnterprisePlanCheckoutSession(input: {
+	customerId: string;
+	successUrl: string;
+	cancelUrl: string;
+}) {
+	return createPlanCheckoutSession({
+		...input,
+		planId: process.env.STRIPE_ENTERPRISE_PLAN_PRICE_ID!,
+	});
+}
+
+export function createPlanCheckoutSession(input: {
+	customerId: string;
+	successUrl: string;
+	cancelUrl: string;
+	planId: string;
 }) {
 	return stripe.checkout.sessions.create({
 		billing_address_collection: 'auto',
 		line_items: [
 			{
 				// base
-				price: process.env.STRIPE_PRO_PLAN_PRICE_ID,
+				price: input.planId,
 				quantity: 1,
-			},
-			{
-				// additional page views
-				price: process.env.STRIPE_PAGE_VIEWS_PRICE_ID,
 			},
 		],
 		mode: 'subscription',
@@ -61,7 +80,7 @@ export function createCheckoutSession(input: {
 		success_url: input.successUrl,
 		cancel_url: input.cancelUrl,
 		currency: 'USD',
-		allow_promotion_codes: true,
+		allow_promotion_codes: false,
 		customer: input.customerId,
 	});
 }

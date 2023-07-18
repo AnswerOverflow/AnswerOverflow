@@ -59,6 +59,10 @@ export type EventMap = {
 	'Add To Server Click': AddToServerClickProps;
 	[JOIN_WAITLIST_EVENT_NAME]: JoinWaitlistClickProps;
 	'Community Page View': CommunityPageViewProps;
+	'Pricing Feedback': {
+		email?: string;
+		feedback: string;
+	};
 } & ServerInviteEvent &
 	CommunityPageLinkEvent;
 
