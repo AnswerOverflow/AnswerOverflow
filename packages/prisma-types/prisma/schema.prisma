@@ -107,6 +107,7 @@ model IgnoredDiscordAccount {
 enum Plan {
   FREE
   PRO
+  ENTERPRISE
   OPEN_SOURCE
 }
 

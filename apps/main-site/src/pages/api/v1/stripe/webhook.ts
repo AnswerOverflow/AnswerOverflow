@@ -2,7 +2,11 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
 import { Readable } from 'node:stream';
 import { z } from 'zod';
-import { findServerByStripeCustomerId, updateServer } from '@answeroverflow/db';
+import {
+	findServerByStripeCustomerId,
+	updateServer,
+	Plan,
+} from '@answeroverflow/db';
 
 // Stripe requires the raw body to construct the event.
 export const config = {
@@ -70,12 +74,27 @@ export default async function webhookHandler(
 		switch (event.type) {
 			case 'customer.subscription.created':
 			case 'customer.subscription.updated': {
+				const subscriptionPlanId = subscription.items.data[0]?.plan.id;
+				if (!subscriptionPlanId) {
+					throw new Error('subscription level not found');
+				}
+				let plan: Plan;
+				switch (subscriptionPlanId) {
+					case process.env.STRIPE_ENTERPRISE_PLAN_PRICE_ID:
+						plan = 'ENTERPRISE';
+						break;
+					case process.env.STRIPE_PRO_PLAN_PRICE_ID!:
+						plan = 'PRO';
+						break;
+					default:
+						throw new Error(`Unknown subscription level ${subscriptionPlanId}`);
+				}
 				await updateServer({
 					existing: existingServer,
 					update: {
 						stripeCustomerId: subscription.customer.toString(),
 						stripeSubscriptionId: subscription.id,
-						plan: 'PRO',
+						plan,
 						id: existingServer.id,
 					},
 				});

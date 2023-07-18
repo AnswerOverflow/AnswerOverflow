@@ -18,6 +18,7 @@ export const FreePlan: Story = () => (
 		dateSubscriptionRenews={null}
 		dateTrialEnds={null}
 		stripeCheckoutUrl={null}
+		status={'active'}
 		plan="FREE"
 	/>
 );
@@ -28,6 +29,7 @@ export const ProPlan: Story = () => (
 		dateSubscriptionRenews={null}
 		dateTrialEnds={null}
 		stripeCheckoutUrl={'/'}
+		status={'active'}
 		plan="PRO"
 	/>
 );
@@ -38,6 +40,7 @@ export const OpenSourcePlan: Story = () => (
 		dateCancelationTakesEffect={null}
 		dateSubscriptionRenews={null}
 		dateTrialEnds={null}
+		status={'active'}
 		stripeCheckoutUrl={null}
 	/>
 );
