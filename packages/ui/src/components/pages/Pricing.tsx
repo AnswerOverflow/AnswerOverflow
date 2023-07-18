@@ -179,6 +179,7 @@ const ProPlan = (props: { ctaLink: string; hasSubscribedBefore?: boolean }) => (
 	<PricingElement
 		title={'Pro'}
 		cta={props.hasSubscribedBefore ? 'Resubscribe' : 'Start Free Trial'}
+		bestValue={true}
 		price={'$25 / month'}
 		features={[
 			{
