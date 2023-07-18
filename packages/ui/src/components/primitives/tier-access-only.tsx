@@ -21,6 +21,7 @@ export function TierAccessOnly(props: {
 	children: React.ReactNode;
 	proPlanCheckoutUrl: string | null;
 	enterprisePlanCheckoutUrl: string | null;
+	hasSubscribedBefore: boolean;
 	enabledFor: Plan[];
 	currentPlan: Plan;
 }) {
@@ -46,6 +47,7 @@ export function TierAccessOnly(props: {
 							<PricingDialog
 								proPlanCheckoutUrl={props.proPlanCheckoutUrl}
 								enterprisePlanCheckoutUrl={props.enterprisePlanCheckoutUrl}
+								hasSubscribedBefore={props.hasSubscribedBefore}
 							/>
 						)}
 					</div>

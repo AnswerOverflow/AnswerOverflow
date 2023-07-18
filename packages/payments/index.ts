@@ -20,14 +20,24 @@ export async function fetchSubscriptionInfo(subscriptionId: string) {
 export function updateServerCustomerName(input: {
 	customerId: string;
 	name: string;
+	serverId: string;
 }) {
 	return stripe.customers.update(input.customerId, {
-		name: input.name,
+		metadata: {
+			server_name: input.name,
+			server_id: input.serverId,
+		},
 	});
 }
-export function createNewCustomer(name: string) {
+export function createNewCustomer(input: { name: string; serverId: string }) {
+	const { name } = input;
 	return stripe.customers.create({
 		name,
+		description: `${name} Community`,
+		metadata: {
+			server_name: name,
+			server_id: input.serverId,
+		},
 	});
 }
 
@@ -53,13 +63,19 @@ export function createEnterprisePlanCheckoutSession(input: {
 	});
 }
 
-export function createPlanCheckoutSession(input: {
+export async function createPlanCheckoutSession(input: {
 	customerId: string;
 	successUrl: string;
 	cancelUrl: string;
 	planId: string;
 }) {
-	return stripe.checkout.sessions.create({
+	const previousSubscriptions = await stripe.subscriptions.list({
+		customer: input.customerId,
+		status: 'all',
+	});
+	const hasSubscribedInPast = previousSubscriptions.data.length > 0;
+
+	const data = await stripe.checkout.sessions.create({
 		billing_address_collection: 'auto',
 		line_items: [
 			{
@@ -70,7 +86,7 @@ export function createPlanCheckoutSession(input: {
 		],
 		mode: 'subscription',
 		subscription_data: {
-			trial_period_days: 14,
+			trial_period_days: hasSubscribedInPast ? undefined : 14,
 			trial_settings: {
 				end_behavior: {
 					missing_payment_method: 'cancel',
@@ -78,9 +94,23 @@ export function createPlanCheckoutSession(input: {
 			},
 		},
 		success_url: input.successUrl,
+		automatic_tax: {
+			enabled: true,
+		},
+		customer_update: {
+			address: 'auto',
+			name: 'auto',
+		},
+		tax_id_collection: {
+			enabled: true,
+		},
 		cancel_url: input.cancelUrl,
 		currency: 'USD',
 		allow_promotion_codes: false,
 		customer: input.customerId,
 	});
+	return {
+		...data,
+		hasSubscribedInPast,
+	};
 }

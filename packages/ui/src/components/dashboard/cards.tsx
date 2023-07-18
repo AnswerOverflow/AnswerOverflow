@@ -73,6 +73,7 @@ export function CurrentPlanCardRenderer(
 				status: 'inactive';
 				proPlanCheckoutUrl: string | null;
 				enterprisePlanCheckoutUrl: string | null;
+				hasSubscribedBefore: boolean;
 		  }
 	),
 ) {
@@ -106,6 +107,7 @@ export function CurrentPlanCardRenderer(
 				<PricingDialog
 					proPlanCheckoutUrl={props.proPlanCheckoutUrl}
 					enterprisePlanCheckoutUrl={props.enterprisePlanCheckoutUrl}
+					hasSubscribedBefore={props.hasSubscribedBefore}
 				/>
 			);
 		} else {
