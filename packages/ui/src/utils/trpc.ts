@@ -5,14 +5,14 @@ import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import type { AppRouter } from '@answeroverflow/api';
 import { transformer } from '@answeroverflow/api/transformer';
 import { createTRPCReact } from '@trpc/react-query';
-import { sharedEnvs } from '@answeroverflow/env/shared';
+import { webClientEnv } from '@answeroverflow/env/web';
 
 const getBaseUrl = () => {
 	if (typeof window !== 'undefined') return ''; // browser should use relative url
 	if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
 	return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
-
+console.log(webClientEnv.NEXT_PUBLIC_NODE_ENV);
 const nextTRPC = () =>
 	createTRPCNext<AppRouter>({
 		config() {
@@ -21,7 +21,7 @@ const nextTRPC = () =>
 				links: [
 					loggerLink({
 						enabled: (opts) =>
-							sharedEnvs.NODE_ENV === 'development' ||
+							webClientEnv.NEXT_PUBLIC_NODE_ENV === 'development' ||
 							(opts.direction === 'down' && opts.result instanceof Error),
 					}),
 					httpBatchLink({

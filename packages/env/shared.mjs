@@ -1,12 +1,18 @@
 import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod';
 
-const envNumber = z
+export const envNumber = z
 	.string()
 	// transform to number
 	.transform((s) => parseInt(s, 10))
 	// make sure transform worked
 	.pipe(z.boolean());
+
+export const nodeEnv = z
+  .string()
+  .optional()
+  .default('development')
+  .pipe(z.enum(['development', 'production', 'test']));
 
 export const sharedEnvs = createEnv({
 	// TODO: Fix
@@ -15,11 +21,12 @@ export const sharedEnvs = createEnv({
 		/*
       Environment
      */
-		NODE_ENV: z
-			.string()
-			.optional()
-			.default('development')
-			.pipe(z.enum(['development', 'production', 'test'])),
+    NODE_ENV: z
+      .string()
+      .optional()
+      .default('development')
+      .pipe(z.enum(['development', 'production', 'test'])),
+
 		// SKIP_ENV_VALIDATION: z.string(),
 		// CI: z.string(),
 		// /*
@@ -56,6 +63,8 @@ export const sharedEnvs = createEnv({
 		//  */
 		// PROJECT_ID_VERCEL: z.string(),
 	},
+  client: {
+  },
 	// If you're using Next.js < 13.4.4, you'll need to specify the runtimeEnv manually
 	runtimeEnv: {
 		...process.env,

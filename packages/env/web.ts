@@ -1,1 +1,1 @@
-export { webEnv } from './web.mjs';
+export { webClientEnv, webServerEnv } from './web.mjs';
