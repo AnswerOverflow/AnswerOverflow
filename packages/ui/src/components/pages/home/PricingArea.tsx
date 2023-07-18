@@ -1,7 +1,5 @@
 import { CheckIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
-import { WAITLIST_URL } from '@answeroverflow/constants/src/links';
-import { LinkButton, Heading, GetStarted } from '~ui/components/primitives';
-import { trackEvent } from '@answeroverflow/hooks';
+import { Heading, GetStarted } from '~ui/components/primitives';
 import { cn } from '~ui/utils/styling';
 const pricing = {
 	tiers: [
