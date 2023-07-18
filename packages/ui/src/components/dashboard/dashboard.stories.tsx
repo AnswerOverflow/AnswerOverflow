@@ -21,7 +21,11 @@ export const FreeDashboardStory: Story = () => (
 			bitfield: 0,
 		}}
 		PageViewsCardOverride={
-			<PageViewsCardRenderer status="success" numberOfPageViews={10} />
+			<PageViewsCardRenderer
+				status="success"
+				numberOfPageViews={10}
+				plan={'PRO'}
+			/>
 		}
 	/>
 );

@@ -8,9 +8,6 @@ import {
 export default {
 	title: 'Dashboard / Cards',
 } satisfies StoryDefault;
-export const PageViewsCard: Story = () => (
-	<PageViewsCardRenderer numberOfPageViews={30} status="success" />
-);
 
 export const FreePlan: Story = () => (
 	<CurrentPlanCardRenderer
@@ -62,5 +59,37 @@ export const PageViewsChart = () => (
 			},
 		]}
 		status="success"
+	/>
+);
+
+export const FreePageViewsCard = () => (
+	<PageViewsCardRenderer
+		status={'success'}
+		plan={'FREE'}
+		numberOfPageViews={34000}
+	/>
+);
+
+export const ProPageViewsCard = () => (
+	<PageViewsCardRenderer
+		status={'success'}
+		plan={'PRO'}
+		numberOfPageViews={82340}
+	/>
+);
+
+export const OpenSourcePageViewsCard = () => (
+	<PageViewsCardRenderer
+		status={'success'}
+		plan={'OPEN_SOURCE'}
+		numberOfPageViews={50103123}
+	/>
+);
+
+export const EnterprisePageViewsCard = () => (
+	<PageViewsCardRenderer
+		status={'success'}
+		plan={'ENTERPRISE'}
+		numberOfPageViews={341233}
 	/>
 );
