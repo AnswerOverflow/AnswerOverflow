@@ -20,6 +20,7 @@ import { LuCheck } from 'react-icons/lu';
 import { trackEvent } from '@answeroverflow/hooks';
 import { toast } from 'react-toastify';
 import React from 'react';
+import { classNames } from '~ui/utils/styling';
 
 const faqs: {
 	question: React.ReactNode;
@@ -37,6 +38,12 @@ const faqs: {
 		),
 	},
 	{
+		question:
+			'Do you have plans for non-profit / non-commercial open source use?',
+		answer:
+			"We do! The limitation on the free plan page views is primarily focused on commercial use. If you're a non-profit or open source project, when you're approaching the free tier limits we will reach out to move you over to our non-profit / open source plan.",
+	},
+	{
 		question: 'How are page views calculated?',
 		answer:
 			'Page views are based off of total views, not unique views. If one person views your pages 30 times and another views it 20 times, your total for page views will be 50. Page views are any page that can be viewed, for instance your homepage (/), your search page (/search) and any question pages (/m/messageId).',
@@ -48,8 +55,7 @@ const faqs: {
 	},
 	{
 		question: 'What plan is right for me?',
-		answer:
-			'If you’re a company using Discord to manage your community support, the Pro plan is the best fit as you get to keep all of your branding the same by hosting on your own domain. If you’re a smaller community, the free plan should work well while you get started.',
+		answer: `If you're a non profit or open source project, our free tier is great place to get started. For companies & commercial projects, the Pro plan is a great way to get content hosted on your own domain to eventually move up to the enterprise plan.`,
 	},
 	{
 		question: 'What if I cancel my subscription?',
@@ -73,8 +79,14 @@ const faqs: {
 const PricingFAQ = () => (
 	<Accordion type="multiple" className="my-16 w-full">
 		{faqs.map((faq, i) => (
-			<AccordionItem value={`item-${i}`} key={i}>
-				<AccordionTrigger>{faq.question}</AccordionTrigger>
+			<AccordionItem
+				value={`item-${i}`}
+				key={i}
+				className={'dark:border-neutral-700'}
+			>
+				<AccordionTrigger className={'text-left'}>
+					{faq.question}
+				</AccordionTrigger>
 				<AccordionContent>{faq.answer}</AccordionContent>
 			</AccordionItem>
 		))}
@@ -85,6 +97,7 @@ const PricingElement = (props: {
 	title: string;
 	cta: string;
 	price: string;
+	bestValue?: boolean;
 	features: {
 		icon?: React.ReactNode;
 		name: React.ReactNode;
@@ -93,8 +106,18 @@ const PricingElement = (props: {
 	ctaLink: string;
 }) => {
 	return (
-		<div className="flex h-full flex-col items-center justify-start rounded-2xl border-2 border-ao-black/25 p-8 dark:border-ao-white/25">
+		<div
+			className={classNames(
+				'flex h-full flex-col items-center justify-start rounded-2xl border-2 border-ao-black/25 p-8 dark:border-ao-white/25',
+				props.bestValue ? 'border-indigo-600/75 dark:border-indigo-600/75' : '',
+			)}
+		>
 			<div className={'flex h-24 w-full flex-col items-start justify-center'}>
+				{props.bestValue && (
+					<p className="rounded-full bg-indigo-600/10 px-2.5 py-1 text-xs font-semibold leading-5 text-indigo-600 dark:text-indigo-400">
+						Most popular
+					</p>
+				)}
 				<Heading.H2 className={'my-0 py-0 text-2xl font-medium'}>
 					{props.title}
 				</Heading.H2>
@@ -179,13 +202,13 @@ const PricingOptions = () => (
 		<PricingElement
 			title={'Free'}
 			cta={'Setup Now'}
-			price={'$0'}
+			price={'$0 / month'}
 			features={[
 				{
 					name: 'Hosted on answeroverflow.com',
 				},
 				{
-					name: 'Up to 50,000 monthly page views',
+					name: 'Up to 30,000 monthly page views',
 				},
 			]}
 			clarifications={[
@@ -213,7 +236,7 @@ export const Pricing = () => {
 			<PricingOptions />
 			<PricingFAQ />
 			<form
-				className="mx-auto my-16 flex  flex-col gap-4"
+				className="mx-auto my-16 flex  max-w-2xl flex-col gap-4"
 				onSubmit={(e) => {
 					e.preventDefault();
 					// @ts-ignore
@@ -255,7 +278,7 @@ export const PricingDialog = (props: {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button variant="outline">Pick a plan</Button>
+				<Button variant="outline">Start free trial</Button>
 			</DialogTrigger>
 			<DialogContent className="max-h-screen max-w-5xl overflow-y-auto bg-white">
 				<DialogHeader>
