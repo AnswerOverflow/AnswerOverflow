@@ -193,7 +193,7 @@ const EnterprisePlan = (props: { ctaLink: string }) => (
 		]}
 		ctaLink={props.ctaLink}
 		clarifications={[
-			'If you need more than 300k page views, we will work with you to figure out a custom plan',
+			'If you need more than 300,000 page views, we will work with you to create a custom plan',
 		]}
 	/>
 );
@@ -280,12 +280,12 @@ export const PricingDialog = (props: {
 			<DialogTrigger asChild>
 				<Button variant="outline">Start free trial</Button>
 			</DialogTrigger>
-			<DialogContent className="max-h-screen max-w-5xl overflow-y-auto bg-white">
+			<DialogContent className="max-h-screen max-w-5xl overflow-y-auto bg-white dark:bg-ao-black">
 				<DialogHeader>
 					<DialogTitle>Pick a plan</DialogTitle>
 				</DialogHeader>
 				{/* TODO: If the server has more than 50k page views don't show pro plan */}
-				<div className="mx-auto my-16 grid w-full grid-cols-1 gap-16  md:grid-cols-2">
+				<div className="mx-auto my-16 grid w-full grid-cols-1 gap-16 md:grid-cols-2">
 					<ProPlan ctaLink={props.proPlanCheckoutUrl} />
 					<EnterprisePlan ctaLink={props.enterprisePlanCheckoutUrl} />
 				</div>
