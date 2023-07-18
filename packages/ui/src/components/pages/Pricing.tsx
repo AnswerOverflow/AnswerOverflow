@@ -159,7 +159,7 @@ const ProPlan = (props: { ctaLink: string }) => (
 		price={'$25 / month'}
 		features={[
 			{
-				name: 'Hosted on your own domain',
+				name: 'Host on your own domain',
 			},
 			{
 				name: 'Up to 50,000 monthly page views',
@@ -179,7 +179,7 @@ const EnterprisePlan = (props: { ctaLink: string }) => (
 		price={'$150 / month'}
 		features={[
 			{
-				name: 'Hosted on your own domain',
+				name: 'Host on your own domain',
 			},
 			{
 				name: 'Up to 300,000 monthly page views',
