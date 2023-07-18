@@ -52,7 +52,7 @@ const faqs: {
 	{
 		question: 'What if someone spams my site?',
 		answer:
-			'If your site is DDoSed / page views are increased by some form of artificial usage, you will not be billed for that.',
+			'If your site is DDoSed / page views are increased by some form of artificial usage, that will not count towards your limit.',
 	},
 	{
 		question: 'What plan is right for me?',
@@ -83,7 +83,7 @@ const faqs: {
 ];
 
 const PricingFAQ = () => (
-	<Accordion type="single" className="my-16 w-full">
+	<Accordion type="single" className="my-16 w-full" collapsible>
 		{faqs.map((faq, i) => (
 			<AccordionItem
 				value={`item-${i}`}
