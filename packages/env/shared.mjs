@@ -32,13 +32,16 @@ export const sharedEnvs = createEnv({
 		// /*
 		//   Database
 		//  */
-		DATABASE_URL: z.string().optional(),
-		// ELASTICSEARCH_URL: z.string(),
-		// ELASTICSEARCH_PASSWORD: z.string(),
-		// ELASTICSEARCH_USERNAME: z.string(),
-		// ELASTICSEARCH_MESSAGE_INDEX: z.string(),
-		// REDIS_URL: z.string(),
-		// ELASTICSEARCH_CLOUD_ID: z.string(),
+		DATABASE_URL: z.string(),
+
+    // TODO: Make it cloud ID oro username / password, not both
+    ELASTICSEARCH_URL: z.string().optional(),
+		ELASTICSEARCH_CLOUD_ID: z.string().optional(),
+		ELASTICSEARCH_PASSWORD: z.string(),
+		ELASTICSEARCH_USERNAME: z.string(),
+		ELASTICSEARCH_MESSAGE_INDEX: z.string(),
+
+    REDIS_URL: z.string(),
 		// /*
 		//   Discord
 		//  */
@@ -63,8 +66,6 @@ export const sharedEnvs = createEnv({
 		//  */
 		// PROJECT_ID_VERCEL: z.string(),
 	},
-  client: {
-  },
 	// If you're using Next.js < 13.4.4, you'll need to specify the runtimeEnv manually
 	runtimeEnv: {
 		...process.env,

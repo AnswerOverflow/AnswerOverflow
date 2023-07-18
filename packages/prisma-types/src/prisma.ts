@@ -12,7 +12,7 @@ export const prisma =
 		log: sharedEnvs.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
 		datasources: {
 			db: {
-				url: process.env.DATABASE_URL,
+				url: sharedEnvs.DATABASE_URL,
 			},
 		},
 	});

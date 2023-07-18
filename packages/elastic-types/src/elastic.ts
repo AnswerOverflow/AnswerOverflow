@@ -38,30 +38,30 @@ export type MessageSearchOptions = {
 function getElasticClient(): Elastic {
 	if (sharedEnvs.NODE_ENV === 'development' || sharedEnvs.NODE_ENV === 'test') {
 		return new Elastic({
-			node: process.env.ELASTICSEARCH_URL,
+			node: sharedEnvs.ELASTICSEARCH_URL,
 			auth: {
-				password: process.env.ELASTICSEARCH_PASSWORD,
-				username: process.env.ELASTICSEARCH_USERNAME,
+				password: sharedEnvs.ELASTICSEARCH_PASSWORD,
+				username: sharedEnvs.ELASTICSEARCH_USERNAME,
 			},
 		});
 	} else if (sharedEnvs.NODE_ENV === 'production') {
 		// Allow for building locally
-		if (!process.env.ELASTICSEARCH_CLOUD_ID) {
+		if (!sharedEnvs.ELASTICSEARCH_CLOUD_ID) {
 			return new Elastic({
-				node: process.env.ELASTICSEARCH_URL,
+				node: sharedEnvs.ELASTICSEARCH_URL,
 				auth: {
-					password: process.env.ELASTICSEARCH_PASSWORD,
-					username: process.env.ELASTICSEARCH_USERNAME,
+					password: sharedEnvs.ELASTICSEARCH_PASSWORD,
+					username: sharedEnvs.ELASTICSEARCH_USERNAME,
 				},
 			});
 		} else {
 			return new Elastic({
 				cloud: {
-					id: process.env.ELASTICSEARCH_CLOUD_ID,
+					id: sharedEnvs.ELASTICSEARCH_CLOUD_ID,
 				},
 				auth: {
-					password: process.env.ELASTICSEARCH_PASSWORD,
-					username: process.env.ELASTICSEARCH_USERNAME,
+					password: sharedEnvs.ELASTICSEARCH_PASSWORD,
+					username: sharedEnvs.ELASTICSEARCH_USERNAME,
 				},
 			});
 		}
@@ -75,7 +75,7 @@ export class Elastic extends Client {
 
 	constructor(opts: ClientOptions) {
 		super(opts);
-		this.messagesIndex = process.env.ELASTICSEARCH_MESSAGE_INDEX;
+		this.messagesIndex = sharedEnvs.ELASTICSEARCH_MESSAGE_INDEX;
 	}
 
 	public destroyMessagesIndex() {
