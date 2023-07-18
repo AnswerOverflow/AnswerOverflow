@@ -10,7 +10,7 @@
 		"index.ts",
 		"vitest.config.ts",
 		"../../reset.d.ts",
-		"prettierrc.cjs"
+		".prettierrc.cjs"
 	],
 	"exclude": ["node_modules"]
 }

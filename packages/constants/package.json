@@ -8,24 +8,24 @@
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules coverage",
 		"with-env": "dotenv -e ../../.env --",
-		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix"
 	},
 	"dependencies": {
-		"discord-api-types": "^0.37.30",
+		"discord-api-types": "^0.37.48",
 		"dotenv-cra": "^3.0.3",
-		"zod": "^3.20.6"
+		"zod": "^3.21.4"
 	},
 	"devDependencies": {
-		"@answeroverflow/elastic-types": "*",
-		"@answeroverflow/prisma-types": "*",
-		"@answeroverflow/tsconfig": "*",
-		"@answeroverflow/prettier-config": "*",
-		"prettier": "^2.8.4",
+		"@answeroverflow/elastic-types": "^0.1.0",
+		"@answeroverflow/prettier-config": "^0.0.0",
+		"@answeroverflow/prisma-types": "^0.1.0",
+		"@answeroverflow/tsconfig": "^0.0.0",
 		"@types/node": "^20.4.2",
-		"dotenv-cli": "^7.1.0",
-		"eslint": "^8.44.0"
+		"dotenv-cli": "^7.2.1",
+		"eslint": "^8.45.0",
+		"prettier": "^2.8.8"
 	}
 }

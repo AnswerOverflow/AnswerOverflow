@@ -11,6 +11,6 @@
 		"vitest.config.ts",
 		"test",
 		"../../reset.d.ts",
-		"prettierrc.cjs"
+		".prettierrc.cjs"
 	]
 }

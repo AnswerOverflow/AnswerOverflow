@@ -9,8 +9,8 @@
 		"clean": "rm -rf .turbo node_modules coverage",
 		"with-env": "dotenv -e ../../.env --",
 		"with-env-staging": "dotenv -e ../../.env.staging --",
-		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix",
 		"db:generate": "pnpm with-env prisma generate",
@@ -21,21 +21,21 @@
 		"test:watch": "pnpm with-env vitest"
 	},
 	"dependencies": {
-		"@answeroverflow/utils": "*",
-		"@prisma/client": "^4.8.1",
-		"@sapphire/bitfield": "^1.0.0",
+		"@answeroverflow/utils": "^0.1.0",
+		"@prisma/client": "^4.16.2",
+		"@sapphire/bitfield": "^1.2.0",
 		"discord-api-types": "^0.37.48",
 		"dotenv-cra": "^3.0.3",
-		"zod": "^3.20.6"
+		"zod": "^3.21.4"
 	},
 	"devDependencies": {
-		"@answeroverflow/tsconfig": "*",
+		"@answeroverflow/prettier-config": "^0.0.0",
+		"@answeroverflow/tsconfig": "^0.0.0",
 		"@vitest/coverage-c8": "^0.28.5",
-		"dotenv-cli": "^7.1.0",
-		"@answeroverflow/prettier-config": "*",
-		"prettier": "^2.8.4",
-		"eslint": "^8.44.0",
-		"prisma": "^4.16.1",
+		"dotenv-cli": "^7.2.1",
+		"eslint": "^8.45.0",
+		"prettier": "^2.8.8",
+		"prisma": "^4.16.2",
 		"vitest": "^0.29.8"
 	}
 }

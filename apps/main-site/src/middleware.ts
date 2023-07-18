@@ -28,8 +28,8 @@ export function middleware(req: NextRequest) {
 	}
 	const host = req.headers.get('host')!;
 	if (isOnMainSite(host)) {
-		const authedRoutes = new Set(['/dashboard']);
-		if (authedRoutes.has(path)) {
+		const authedRoutes = ['/dashboard'];
+		if (authedRoutes.some((route) => path.startsWith(route))) {
 			const authToken = req.cookies.get(getNextAuthCookieName());
 			if (!authToken) {
 				return NextResponse.redirect(makeMainSiteLink('/api/auth/signin'));
