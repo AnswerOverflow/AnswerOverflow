@@ -1,12 +1,13 @@
 import type { DefaultSession } from 'next-auth';
 import { PostHog } from 'posthog-node';
 import type { ServerProps } from '@answeroverflow/constants';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 const apiKey = process.env.NEXT_PUBLIC_POSTHOG_TOKEN;
 const shouldCollectAnalytics =
-	apiKey !== undefined && process.env.NODE_ENV !== 'test';
+	apiKey !== undefined && sharedEnvs.NODE_ENV !== 'test';
 
 const client = shouldCollectAnalytics ? new PostHog(apiKey) : undefined;
-if (!client && process.env.NODE_ENV !== 'test') {
+if (!client && sharedEnvs.NODE_ENV !== 'test') {
 	console.warn('Analytics collection is disabled');
 }
 // TODO: This type should be inferred from the auth package

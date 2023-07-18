@@ -28,6 +28,7 @@
 		"@answeroverflow/constants": "^0.1.0",
 		"discord-api-types": "^0.37.48",
 		"next-auth": "^4.22.1",
+    "@answeroverflow/env": "^0.1.0",
 		"posthog-node": "^2.6.0"
 	}
 }

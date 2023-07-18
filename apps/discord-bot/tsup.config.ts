@@ -1,3 +1,4 @@
+import { sharedEnvs } from '@answeroverflow/env/shared';
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
@@ -22,5 +23,6 @@ export default defineConfig({
 		'@answeroverflow/cache',
 		'@answeroverflow/discordjs-mock',
 		'@answeroverflow/payments',
+		'@answeroverflow/env',
 	],
 });

@@ -29,6 +29,7 @@ import {
 import { container } from '@sapphire/framework';
 import { sortMessagesById } from '@answeroverflow/discordjs-utils';
 import * as Sentry from '@sentry/node';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export async function indexServers(client: Client) {
 	const indexingStartTime = Date.now();
@@ -94,7 +95,7 @@ export async function indexRootChannel(
 		let threadCutoffTimestamp = await findLatestArchivedTimestampByChannelId(
 			channel.id,
 		);
-		if (process.env.NODE_ENV === 'test') {
+		if (sharedEnvs.NODE_ENV === 'test') {
 			threadCutoffTimestamp = null;
 		}
 		const archivedThreads: AnyThreadChannel[] = [];
@@ -125,7 +126,7 @@ export async function indexRootChannel(
 		};
 
 		// Fetching all archived threads is very expensive, so only do it on the very first indexing pass
-		if (process.env.NODE_ENV === 'test') {
+		if (sharedEnvs.NODE_ENV === 'test') {
 			const data = await channel.threads.fetchArchived({
 				type: 'public',
 				fetchAll: true,

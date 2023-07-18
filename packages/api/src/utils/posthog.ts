@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import dayjs from 'dayjs';
 import { TrendAPIResponse } from './posthog-types';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 async function posthogFetch(url: string, input: RequestInit) {
 	const { headers, ...rest } = input;
@@ -96,7 +97,7 @@ async function fetchPosthogInsight(input: {
 	const params: PosthogParams = {
 		insight: 'TRENDS',
 		refresh: input.refresh ?? false,
-		filter_test_accounts: process.env.NODE_ENV === 'production',
+		filter_test_accounts: sharedEnvs.NODE_ENV === 'production',
 		properties: {
 			type: 'AND',
 			values: [

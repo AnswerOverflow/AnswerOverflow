@@ -9,8 +9,9 @@ import {
 	white,
 	yellow,
 } from 'colorette';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
-const dev = process.env.NODE_ENV !== 'production';
+const dev = sharedEnvs.NODE_ENV !== 'production';
 
 @ApplyOptions<Listener.Options>({ once: true })
 export class UserEvent extends Listener {

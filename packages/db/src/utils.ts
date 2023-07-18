@@ -1,7 +1,8 @@
 import { prisma } from '@answeroverflow/prisma-types';
 import { elastic } from '@answeroverflow/elastic-types';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 export async function clearDatabase() {
-	if (process.env.NODE_ENV !== 'test') {
+	if (sharedEnvs.NODE_ENV !== 'test') {
 		throw new Error('clearDatabase can only be used in test environment');
 	}
 

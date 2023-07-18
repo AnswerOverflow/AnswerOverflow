@@ -18,6 +18,7 @@ import { Subject } from 'rxjs';
 import { printCommunities } from './utils';
 import { Partials } from 'discord.js';
 import type { ClientOptions } from 'discord.js';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 declare module '@sapphire/pieces' {
 	interface Container {
@@ -34,7 +35,7 @@ declare module '@sapphire/pieces' {
 }
 
 function getLogLevel() {
-	switch (process.env.NODE_ENV) {
+	switch (sharedEnvs.NODE_ENV) {
 		case 'development':
 			return process.env.BOT_DEV_LOG_LEVEL
 				? parseInt(process.env.BOT_DEV_LOG_LEVEL)
@@ -77,10 +78,10 @@ export function createClient(override: Partial<ClientOptions> = {}) {
 			Partials.Reaction,
 		],
 		hmr: {
-			enabled: process.env.NODE_ENV === 'development',
+			enabled: sharedEnvs.NODE_ENV === 'development',
 		},
 		api: {
-			automaticallyConnect: process.env.NODE_ENV !== 'test', // TODO: Bit of a hack? No point starting API during testing but would be good to verify it
+			automaticallyConnect: sharedEnvs.NODE_ENV !== 'test', // TODO: Bit of a hack? No point starting API during testing but would be good to verify it
 		},
 		...override,
 	});
@@ -92,7 +93,7 @@ export const login = async (client: SapphireClient) => {
 	try {
 		container.events = new Subject();
 		client.logger.info('LOGGING IN');
-		client.logger.info(`NODE_ENV: ${process.env.NODE_ENV}`);
+		client.logger.info(`NODE_ENV: ${sharedEnvs.NODE_ENV}`);
 		client.logger.info(
 			`DEPLOYMENT ENV: ${process.env.NEXT_PUBLIC_DEPLOYMENT_ENV!}`,
 		);
@@ -118,7 +119,7 @@ export const login = async (client: SapphireClient) => {
 			wrapper: ({ children }) => <Router>{children}</Router>,
 		};
 		container.discordJSReact =
-			process.env.NODE_ENV === 'test'
+			sharedEnvs.NODE_ENV === 'test'
 				? new TestDiscordJSReact(client, config)
 				: new DiscordJSReact(client, config);
 		container.messageHistory = new LRUCache<

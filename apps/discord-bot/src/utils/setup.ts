@@ -1,7 +1,9 @@
 // Unless explicitly defined, set NODE_ENV as development:
+import { sharedEnvs } from '@answeroverflow/env/shared';
+
 process.env = {
 	...process.env,
-	NODE_ENV: process.env.NODE_ENV ?? 'development',
+	NODE_ENV: sharedEnvs.NODE_ENV ?? 'development',
 };
 
 import 'reflect-metadata';

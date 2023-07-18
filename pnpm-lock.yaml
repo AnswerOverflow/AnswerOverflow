@@ -101,6 +101,9 @@ importers:
       '@answeroverflow/discordjs-utils':
         specifier: ^1.0.0
         version: link:../../packages/discordjs-utils
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../../packages/env
       '@answeroverflow/payments':
         specifier: ^0.1.0
         version: link:../../packages/payments
@@ -267,6 +270,9 @@ importers:
       '@answeroverflow/db':
         specifier: ^0.1.0
         version: link:../../packages/db
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../../packages/env
       '@answeroverflow/hooks':
         specifier: ^0.1.0
         version: link:../../packages/hooks
@@ -388,6 +394,9 @@ importers:
       '@answeroverflow/db':
         specifier: ^0.1.0
         version: link:../../packages/db
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../../packages/env
       '@answeroverflow/hooks':
         specifier: ^0.1.0
         version: link:../../packages/hooks
@@ -538,6 +547,10 @@ importers:
         version: 0.30.1(@edge-runtime/vm@2.1.2)(sass@1.63.6)
 
   apps/proxy:
+    dependencies:
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../../packages/env
     devDependencies:
       '@answeroverflow/prettier-config':
         specifier: ^0.0.0
@@ -575,6 +588,9 @@ importers:
       '@answeroverflow/constants':
         specifier: ^0.1.0
         version: link:../constants
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../env
       discord-api-types:
         specifier: ^0.37.48
         version: 0.37.48
@@ -633,6 +649,9 @@ importers:
       '@answeroverflow/discordjs-utils':
         specifier: ^1.0.0
         version: link:../discordjs-utils
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../env
       '@answeroverflow/payments':
         specifier: ^0.1.0
         version: link:../payments
@@ -715,6 +734,9 @@ importers:
       '@answeroverflow/db':
         specifier: ^0.1.0
         version: link:../db
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../env
       '@answeroverflow/utils':
         specifier: ^0.1.0
         version: link:../utils
@@ -776,6 +798,9 @@ importers:
       '@answeroverflow/db':
         specifier: ^0.1.0
         version: link:../db
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../env
       '@answeroverflow/utils':
         specifier: ^0.1.0
         version: link:../utils
@@ -920,6 +945,9 @@ importers:
 
   packages/constants:
     dependencies:
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../env
       discord-api-types:
         specifier: ^0.37.48
         version: 0.37.48
@@ -966,6 +994,9 @@ importers:
       '@answeroverflow/elastic-types':
         specifier: ^0.1.0
         version: link:../elastic-types
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../env
       '@answeroverflow/prisma-types':
         specifier: ^0.1.0
         version: link:../prisma-types
@@ -1021,6 +1052,9 @@ importers:
       '@answeroverflow/elastic-types':
         specifier: ^0.1.0
         version: link:../elastic-types
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../env
       '@answeroverflow/prisma-types':
         specifier: ^0.1.0
         version: link:../prisma-types
@@ -1113,6 +1147,9 @@ importers:
 
   packages/discordjs-utils:
     dependencies:
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../env
       discord.js:
         specifier: ^14.11.0
         version: 14.11.0
@@ -1153,6 +1190,9 @@ importers:
 
   packages/elastic-types:
     dependencies:
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../env
       '@answeroverflow/utils':
         specifier: ^0.1.0
         version: link:../utils
@@ -1218,6 +1258,9 @@ importers:
       '@answeroverflow/tsconfig':
         specifier: ^0.0.0
         version: link:../config/tsconfig
+      '@types/node':
+        specifier: ^20.4.2
+        version: 20.4.2
       eslint:
         specifier: ^8.45.0
         version: 8.45.0
@@ -1233,6 +1276,9 @@ importers:
       '@answeroverflow/constants':
         specifier: ^0.1.0
         version: link:../constants
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../env
       next:
         specifier: 13.4.8
         version: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.63.6)
@@ -1282,6 +1328,9 @@ importers:
 
   packages/payments:
     dependencies:
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../env
       dotenv-cra:
         specifier: ^3.0.3
         version: 3.0.3
@@ -1310,6 +1359,9 @@ importers:
 
   packages/prisma-types:
     dependencies:
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../env
       '@answeroverflow/utils':
         specifier: ^0.1.0
         version: link:../utils
@@ -1362,6 +1414,9 @@ importers:
       '@answeroverflow/constants':
         specifier: ^0.1.0
         version: link:../constants
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../env
       '@answeroverflow/hooks':
         specifier: ^0.1.0
         version: link:../hooks
@@ -1555,6 +1610,9 @@ importers:
 
   packages/utils:
     dependencies:
+      '@answeroverflow/env':
+        specifier: ^0.1.0
+        version: link:../env
       dotenv-cra:
         specifier: ^3.0.3
         version: 3.0.3

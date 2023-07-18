@@ -5,6 +5,7 @@ import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import type { AppRouter } from '@answeroverflow/api';
 import { transformer } from '@answeroverflow/api/transformer';
 import { createTRPCReact } from '@trpc/react-query';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 const getBaseUrl = () => {
 	if (typeof window !== 'undefined') return ''; // browser should use relative url
@@ -20,7 +21,7 @@ const nextTRPC = () =>
 				links: [
 					loggerLink({
 						enabled: (opts) =>
-							process.env.NODE_ENV === 'development' ||
+							sharedEnvs.NODE_ENV === 'development' ||
 							(opts.direction === 'down' && opts.result instanceof Error),
 					}),
 					httpBatchLink({

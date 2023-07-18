@@ -19,6 +19,7 @@
 	"dependencies": {
 		"@answeroverflow/constants": "^0.1.0",
 		"@answeroverflow/db-mock": "^0.1.0",
+    "@answeroverflow/env": "^0.1.0",
 		"@answeroverflow/elastic-types": "^0.1.0",
 		"@answeroverflow/prisma-types": "^0.1.0",
 		"@answeroverflow/utils": "^0.1.0",

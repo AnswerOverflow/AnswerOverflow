@@ -3,6 +3,7 @@ import type { Context } from './context';
 import superjson from 'superjson';
 import { getDiscordUser, getUserServers } from '@answeroverflow/cache';
 import { findDiscordOauthByUserId } from '@answeroverflow/db';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export interface Meta {
 	tenantAuthAccessible: boolean; // Whether this endpoint is accessible by tenant auth
@@ -61,7 +62,7 @@ export const getUserServersFromCtx = async (ctx: Context) => {
 
 const addUserServers = t.middleware(async ({ ctx, next }) => {
 	// In a test environment, we manually populate it
-	if (ctx.caller === 'web-client' && process.env.NODE_ENV !== 'test') {
+	if (ctx.caller === 'web-client' && sharedEnvs.NODE_ENV !== 'test') {
 		ctx.userServers = await getUserServersFromCtx(ctx);
 	}
 	if (!ctx.userServers) {

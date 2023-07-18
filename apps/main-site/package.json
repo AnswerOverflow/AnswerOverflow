@@ -20,6 +20,7 @@
 		"@answeroverflow/payments": "^0.1.0",
 		"@answeroverflow/auth": "^0.1.0",
 		"@answeroverflow/constants": "^0.1.0",
+    "@answeroverflow/env": "^0.1.0",
 		"@answeroverflow/db": "^0.1.0",
 		"@answeroverflow/hooks": "^0.1.0",
 		"@answeroverflow/tailwind-config": "^0.1.0",

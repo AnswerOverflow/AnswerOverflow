@@ -1,8 +1,12 @@
 {
 	"name": "@answeroverflow/env",
 	"version": "0.1.0",
-	"main": "./index.ts",
-	"types": "./index.ts",
+	"types": "shared.mjs",
+	"files": [
+		"bot.mjs",
+		"web.mjs",
+		"shared.mjs"
+	],
 	"license": "MIT",
 	"private": true,
 	"scripts": {
@@ -21,6 +25,7 @@
 	"devDependencies": {
 		"@answeroverflow/prettier-config": "^0.0.0",
 		"@answeroverflow/tsconfig": "^0.0.0",
+		"@types/node": "^20.4.2",
 		"eslint": "^8.45.0",
 		"prettier": "^2.8.8"
 	}

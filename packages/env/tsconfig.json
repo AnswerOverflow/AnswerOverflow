@@ -1,9 +1,18 @@
 {
 	"extends": "@answeroverflow/tsconfig/base.json",
 	"compilerOptions": {
-		"types": ["vitest/globals"],
 		"baseUrl": "../../"
 	},
-	"include": ["index.ts", "src", "test", "vitest.config.ts", ".prettierrc.cjs"],
+	"include": [
+		"shared.mjs",
+		"shared.ts",
+    "typed-shared.ts",
+		"bot.ts",
+		"web.mjs",
+		"web.ts",
+		".prettierrc.cjs",
+		"*.mjs",
+		"shared.d.ts"
+	],
 	"exclude": ["node_modules", "../../node_modules/*"]
 }
