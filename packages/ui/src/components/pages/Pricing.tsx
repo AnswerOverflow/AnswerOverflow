@@ -75,6 +75,11 @@ const faqs: {
 		answer:
 			"For the duration of your trial, your content will be doing a temporary redirect rather than a permanent redirect. This is to prevent having a lot of dead links in the event that you do not renew your subscription after your trial ends. When you're on the Pro plan, your pages do a permanent redirect.",
 	},
+	{
+		question: 'None of these plans work for me, what can I do?',
+		answer:
+			"Answer Overflow is open source and you can self host it in the future! Self hosting is not currently supported, but if you'd like to submit a PR to add it, we'd love to work with you on that. If you have feedback on how our pricing can be improved, please use the feedback box below.",
+	},
 ];
 
 const PricingFAQ = () => (
