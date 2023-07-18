@@ -4,6 +4,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 	AOHead,
+	AOLink,
 	Button,
 	Dialog,
 	DialogContent,
@@ -48,6 +49,22 @@ const faqs: {
 		question: 'How are page views calculated?',
 		answer:
 			'Page views are based off of total views, not unique views. If one person views your pages 30 times and another views it 20 times, your total for page views will be 50. Page views are any page that can be viewed, for instance your homepage (/), your search page (/search) and any question pages (/m/messageId).',
+	},
+	{
+		question: 'What does a site hosted on my domain look like?',
+		answer: (
+			<>
+				{"We've"} got a few examples of sites hosted on custom domains! Checkout{' '}
+				<AOLink href={'https://questions.answeroverflow.com'}>
+					questions.answeroverflow.com
+				</AOLink>{' '}
+				and{' '}
+				<AOLink href={'https://discord-questions.trpc.io'}>
+					discord-questions.trpc.io
+				</AOLink>{' '}
+				to see live examples.
+			</>
+		),
 	},
 	{
 		question: 'What if someone spams my site?',
@@ -207,7 +224,7 @@ const EnterprisePlan = (props: {
 	/>
 );
 const PricingOptions = () => (
-	<div className="mx-auto my-16 grid  grid-cols-1 gap-16 md:grid-cols-3">
+	<div className="mx-auto my-16 grid  grid-cols-1 gap-16 xl:grid-cols-3">
 		<PricingElement
 			title={'Free'}
 			cta={'Setup Now'}
