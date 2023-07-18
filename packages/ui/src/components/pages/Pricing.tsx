@@ -78,17 +78,17 @@ const faqs: {
 ];
 
 const PricingFAQ = () => (
-	<Accordion type="multiple" className="my-16 w-full">
+	<Accordion type="single" className="my-16 w-full">
 		{faqs.map((faq, i) => (
 			<AccordionItem
 				value={`item-${i}`}
 				key={i}
 				className={'dark:border-neutral-700'}
 			>
-				<AccordionTrigger className={'text-left'}>
+				<AccordionTrigger className={'text-left text-xl'}>
 					{faq.question}
 				</AccordionTrigger>
-				<AccordionContent>{faq.answer}</AccordionContent>
+				<AccordionContent className={'text-lg'}>{faq.answer}</AccordionContent>
 			</AccordionItem>
 		))}
 	</Accordion>
@@ -163,7 +163,7 @@ const ProPlan = (props: { ctaLink: string; hasSubscribedBefore?: boolean }) => (
 				name: 'Host on your own domain',
 			},
 			{
-				name: 'Up to 50,000 monthly page views',
+				name: 'Up to 100,000 monthly page views',
 			},
 			{
 				name: 'Basic analytics (coming soon)',
@@ -186,7 +186,7 @@ const EnterprisePlan = (props: {
 				name: 'Host on your own domain',
 			},
 			{
-				name: 'Up to 300,000 monthly page views',
+				name: 'Up to 500,000 monthly page views',
 			},
 			{
 				name: 'Advanced analytics (coming soon)',
@@ -197,7 +197,7 @@ const EnterprisePlan = (props: {
 		]}
 		ctaLink={props.ctaLink}
 		clarifications={[
-			'If you need more than 300,000 page views, we will work with you to create a custom plan',
+			'If you need more than 500,000 page views, we will work with you to create a custom plan',
 		]}
 	/>
 );
@@ -212,7 +212,7 @@ const PricingOptions = () => (
 					name: 'Hosted on answeroverflow.com',
 				},
 				{
-					name: 'Up to 30,000 monthly page views',
+					name: 'Up to 50,000 monthly page views',
 				},
 			]}
 			clarifications={[
