@@ -1,11 +1,4 @@
 // Unless explicitly defined, set NODE_ENV as development:
-import { sharedEnvs } from '@answeroverflow/env/shared';
-
-process.env = {
-	...process.env,
-	NODE_ENV: sharedEnvs.NODE_ENV ?? 'development',
-};
-
 import 'reflect-metadata';
 import '@sapphire/plugin-hmr/register';
 import '@sapphire/plugin-api/register';

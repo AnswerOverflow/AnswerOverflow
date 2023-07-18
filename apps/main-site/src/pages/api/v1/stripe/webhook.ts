@@ -7,6 +7,7 @@ import {
 	updateServer,
 	Plan,
 } from '@answeroverflow/db';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 // Stripe requires the raw body to construct the event.
 export const config = {
@@ -44,11 +45,7 @@ export default async function webhookHandler(
 			headers: { 'stripe-signature': signature },
 		} = requestValidation.parse(req);
 
-		if (!process.env.STRIPE_SECRET_KEY) {
-			throw new Error('stripe env variables are not set up');
-		}
-
-		const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+		const stripe = new Stripe(sharedEnvs.STRIPE_SECRET_KEY, {
 			apiVersion: '2022-11-15',
 			typescript: true,
 		});
@@ -56,7 +53,7 @@ export default async function webhookHandler(
 		const event = stripe.webhooks.constructEvent(
 			(await buffer(req)).toString(),
 			signature,
-			process.env.STRIPE_WEBHOOK_SECRET!,
+			sharedEnvs.STRIPE_WEBHOOK_SECRET,
 		);
 
 		if (!allowedEvents.has(event.type)) {
@@ -90,10 +87,10 @@ export default async function webhookHandler(
 				}
 				let plan: Plan;
 				switch (subscriptionPlanId) {
-					case process.env.STRIPE_ENTERPRISE_PLAN_PRICE_ID:
+					case sharedEnvs.STRIPE_ENTERPRISE_PLAN_PRICE_ID:
 						plan = 'ENTERPRISE';
 						break;
-					case process.env.STRIPE_PRO_PLAN_PRICE_ID!:
+					case sharedEnvs.STRIPE_PRO_PLAN_PRICE_ID:
 						plan = 'PRO';
 						break;
 					default:

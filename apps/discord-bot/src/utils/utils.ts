@@ -19,6 +19,7 @@ import {
 } from 'discord.js';
 import type { ReactNode } from 'react';
 import { LOADING_MESSAGES } from './constants';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export function getCommandIds(ids: {
 	local?: string | string[];
@@ -27,7 +28,7 @@ export function getCommandIds(ids: {
 }): string[] {
 	const { local, production, staging } = ids;
 
-	switch (process.env.NEXT_PUBLIC_DEPLOYMENT_ENV) {
+	switch (sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV) {
 		case 'production':
 			if (!production) return [];
 			return Array.isArray(production) ? production : [production];
@@ -40,11 +41,6 @@ export function getCommandIds(ids: {
 		case 'ci':
 			return [];
 	}
-	container.logger.warn(
-		'No command id found for environment',
-		process.env.NEXT_PUBLIC_DEPLOYMENT_ENV,
-	);
-	return [];
 }
 
 /**

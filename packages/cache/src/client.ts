@@ -1,5 +1,5 @@
 import { createClient } from 'redis';
-import { sharedEnvs } from '@answeroverflow/env';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 type RedisClientType = ReturnType<typeof createClient>;
 
 let redisClient: RedisClientType;

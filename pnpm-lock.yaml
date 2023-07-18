@@ -877,6 +877,9 @@ importers:
       eslint-plugin-jest:
         specifier: ^27.2.3
         version: 27.2.3(@typescript-eslint/eslint-plugin@5.62.0)(eslint@8.45.0)(jest@29.6.1)(typescript@5.1.6)
+      eslint-plugin-n:
+        specifier: ^16.0.1
+        version: 16.0.1(eslint@8.45.0)
       eslint-plugin-no-only-tests:
         specifier: ^3.1.0
         version: 3.1.0
@@ -1105,6 +1108,9 @@ importers:
       '@answeroverflow/discordjs-utils':
         specifier: ^1.0.0
         version: link:../discordjs-utils
+      '@answeroverflow/eslint-config-custom':
+        specifier: ^0.0.0
+        version: link:../config/eslint-config-custom
       '@answeroverflow/prettier-config':
         specifier: ^0.0.0
         version: link:../config/prettier
@@ -7689,6 +7695,12 @@ packages:
       ieee754: 1.2.1
     dev: false
 
+  /builtins@5.0.1:
+    resolution: {integrity: sha512-qwVpFEHNfhYJIzNRBvd2C1kyo6jz3ZSMPyyuR47OPdiKWlbYnZNyDWuyR175qDnAJLiCo5fBBqPb3RiXgWlkOQ==}
+    dependencies:
+      semver: 7.5.4
+    dev: false
+
   /bundle-name@3.0.0:
     resolution: {integrity: sha512-PKA4BeSvBpQKQ8iPOGCSiell+N8P+Tf1DlwqmYhpe2gAhKPHn8EYOxVT+ShuGmhg8lN8XiSlS80yiExKXrURlw==}
     engines: {node: '>=12'}
@@ -9292,6 +9304,17 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
+  /eslint-plugin-es-x@7.1.0(eslint@8.45.0):
+    resolution: {integrity: sha512-AhiaF31syh4CCQ+C5ccJA0VG6+kJK8+5mXKKE7Qs1xcPRg02CDPOj3mWlQxuWS/AYtg7kxrDNgW9YW3vc0Q+Mw==}
+    engines: {node: ^14.18.0 || >=16.0.0}
+    peerDependencies:
+      eslint: '>=8'
+    dependencies:
+      '@eslint-community/eslint-utils': 4.4.0(eslint@8.45.0)
+      '@eslint-community/regexpp': 4.5.1
+      eslint: 8.45.0
+    dev: false
+
   /eslint-plugin-import@2.27.5(@typescript-eslint/parser@5.62.0)(eslint-import-resolver-typescript@3.5.5)(eslint@8.45.0):
     resolution: {integrity: sha512-LmEt3GVofgiGuiE+ORpnvP+kAm3h6MLZJ4Q5HCyHADofsb4VzXFsRiWj3c0OFiV+3DWFh0qg3v9gcPlfc3zRow==}
     engines: {node: '>=4'}
@@ -9368,6 +9391,23 @@ packages:
       object.entries: 1.1.6
       object.fromentries: 2.0.6
       semver: 6.3.1
+
+  /eslint-plugin-n@16.0.1(eslint@8.45.0):
+    resolution: {integrity: sha512-CDmHegJN0OF3L5cz5tATH84RPQm9kG+Yx39wIqIwPR2C0uhBGMWfbbOtetR83PQjjidA5aXMu+LEFw1jaSwvTA==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      eslint: '>=7.0.0'
+    dependencies:
+      '@eslint-community/eslint-utils': 4.4.0(eslint@8.45.0)
+      builtins: 5.0.1
+      eslint: 8.45.0
+      eslint-plugin-es-x: 7.1.0(eslint@8.45.0)
+      ignore: 5.2.4
+      is-core-module: 2.12.1
+      minimatch: 3.1.2
+      resolve: 1.22.2
+      semver: 7.5.4
+    dev: false
 
   /eslint-plugin-no-only-tests@3.1.0:
     resolution: {integrity: sha512-Lf4YW/bL6Un1R6A76pRZyE1dl1vr31G/ev8UzIc/geCgFWyrKil8hVjYqWVKGB/UIGmb6Slzs9T0wNezdSVegw==}

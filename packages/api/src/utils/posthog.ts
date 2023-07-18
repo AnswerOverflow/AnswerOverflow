@@ -6,12 +6,12 @@ import { sharedEnvs } from '@answeroverflow/env/shared';
 async function posthogFetch(url: string, input: RequestInit) {
 	const { headers, ...rest } = input;
 	return await fetch(
-		`https://app.posthog.com/api/projects/${process.env.POSTHOG_PROJECT_ID}/${
+		`https://app.posthog.com/api/projects/${sharedEnvs.POSTHOG_PROJECT_ID}/${
 			url.startsWith('/') ? url.slice(1) : url
 		}`,
 		{
 			headers: {
-				Authorization: `Bearer ${process.env.POSTHOG_PERSONAL_API_KEY}`,
+				Authorization: `Bearer ${sharedEnvs.POSTHOG_PERSONAL_API_KEY}`,
 				...headers,
 			},
 			method: 'GET',

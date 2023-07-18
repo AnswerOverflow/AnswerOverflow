@@ -6,6 +6,7 @@ module.exports = {
 		'eslint:recommended',
 		'plugin:@typescript-eslint/recommended-requiring-type-checking',
 		'prettier',
+		'plugin:n/recommended',
 	],
 	plugins: ['@typescript-eslint', 'import', 'no-only-tests'],
 	parser: '@typescript-eslint/parser',
@@ -24,6 +25,10 @@ module.exports = {
 		'coverage/',
 	],
 	rules: {
+		'n/no-missing-import': 'off',
+		'n/no-missing-require': 'off',
+		'n/no-unpublished-import': 'off',
+		'n/no-process-env': 'error',
 		'@next/next/no-html-link-for-pages': 'off',
 		'react/jsx-key': 'off',
 		'@typescript-eslint/no-floating-promises': 'error',

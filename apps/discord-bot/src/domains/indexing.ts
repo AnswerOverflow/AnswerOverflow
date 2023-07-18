@@ -30,6 +30,7 @@ import { container } from '@sapphire/framework';
 import { sortMessagesById } from '@answeroverflow/discordjs-utils';
 import * as Sentry from '@sentry/node';
 import { sharedEnvs } from '@answeroverflow/env/shared';
+import { botEnv } from '@answeroverflow/env/bot';
 
 export async function indexServers(client: Client) {
 	const indexingStartTime = Date.now();
@@ -88,10 +89,7 @@ export async function indexRootChannel(
 
 	container.logger.debug(`Indexing channel ${channel.id} | ${channel.name}`);
 	if (channel.type === ChannelType.GuildForum) {
-		const maxNumberOfThreadsToCollect = process.env
-			.MAX_NUMBER_OF_THREADS_TO_COLLECT
-			? parseInt(process.env.MAX_NUMBER_OF_THREADS_TO_COLLECT)
-			: 1000;
+		const maxNumberOfThreadsToCollect = botEnv.MAX_NUMBER_OF_THREADS_TO_COLLECT;
 		let threadCutoffTimestamp = await findLatestArchivedTimestampByChannelId(
 			channel.id,
 		);
@@ -314,12 +312,7 @@ export async function fetchAllMessages(
 	channel: TextBasedChannel,
 	opts: MessageFetchOptions = {},
 ) {
-	const {
-		start,
-		limit = process.env.MAX_NUMBER_OF_MESSAGES_TO_COLLECT
-			? parseInt(process.env.MAX_NUMBER_OF_MESSAGES_TO_COLLECT)
-			: 20000,
-	} = opts;
+	const { start, limit = botEnv.MAX_NUMBER_OF_MESSAGES_TO_COLLECT } = opts;
 	const messages: Message[] = [];
 	if (channel.lastMessageId && start == channel.lastMessageId) {
 		return [];

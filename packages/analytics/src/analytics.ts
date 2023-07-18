@@ -2,7 +2,7 @@ import type { DefaultSession } from 'next-auth';
 import { PostHog } from 'posthog-node';
 import type { ServerProps } from '@answeroverflow/constants';
 import { sharedEnvs } from '@answeroverflow/env/shared';
-const apiKey = process.env.NEXT_PUBLIC_POSTHOG_TOKEN;
+const apiKey = sharedEnvs.NEXT_PUBLIC_POSTHOG_TOKEN;
 const shouldCollectAnalytics =
 	apiKey !== undefined && sharedEnvs.NODE_ENV !== 'test';
 

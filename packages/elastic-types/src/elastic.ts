@@ -489,7 +489,7 @@ export const elastic = global.elastic || getElasticClient();
 if (sharedEnvs.NODE_ENV !== 'production') {
 	global.elastic = elastic;
 } else {
-	if (process.env.ENVIRONMENT === 'discord-bot') {
+	if (sharedEnvs.ENVIRONMENT === 'discord-bot') {
 		global.elastic = elastic;
 	}
 }

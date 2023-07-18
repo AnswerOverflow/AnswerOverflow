@@ -20,7 +20,7 @@ export const prisma =
 if (sharedEnvs.NODE_ENV !== 'production') {
 	global.prisma = prisma;
 } else {
-	if (process.env.ENVIRONMENT === 'discord-bot') {
+	if (sharedEnvs.ENVIRONMENT === 'discord-bot') {
 		global.prisma = prisma;
 	}
 }

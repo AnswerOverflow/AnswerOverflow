@@ -40,6 +40,7 @@ import {
 	updateServerCustomerName,
 	createEnterprisePlanCheckoutSession,
 } from '@answeroverflow/payments';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
 	'Read the rules consent already enabled';
@@ -293,7 +294,7 @@ export const serverRouter = router({
 						return {
 							...server,
 							status: 'active',
-							stripeCheckoutUrl: process.env.STRIPE_CHECKOUT_URL as string,
+							stripeCheckoutUrl: sharedEnvs.STRIPE_CHECKOUT_URL,
 							dateCancelationTakesEffect: cancelAt,
 							dateSubscriptionRenews: currentPeriodEnd,
 							dateTrialEnds: trialEnd,

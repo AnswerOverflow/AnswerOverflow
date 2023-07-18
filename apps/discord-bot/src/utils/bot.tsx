@@ -19,6 +19,7 @@ import { printCommunities } from './utils';
 import { Partials } from 'discord.js';
 import type { ClientOptions } from 'discord.js';
 import { sharedEnvs } from '@answeroverflow/env/shared';
+import { botEnv } from '@answeroverflow/env/bot';
 
 declare module '@sapphire/pieces' {
 	interface Container {
@@ -35,22 +36,7 @@ declare module '@sapphire/pieces' {
 }
 
 function getLogLevel() {
-	switch (sharedEnvs.NODE_ENV) {
-		case 'development':
-			return process.env.BOT_DEV_LOG_LEVEL
-				? parseInt(process.env.BOT_DEV_LOG_LEVEL)
-				: LogLevel.Debug;
-		case 'test':
-			return process.env.BOT_TEST_LOG_LEVEL
-				? parseInt(process.env.BOT_TEST_LOG_LEVEL)
-				: LogLevel.None;
-		case 'production':
-			return process.env.BOT_PROD_LOG_LEVEL
-				? parseInt(process.env.BOT_PROD_LOG_LEVEL)
-				: LogLevel.Debug;
-		default:
-			return LogLevel.Debug;
-	}
+	return LogLevel.Debug;
 }
 
 export function createClient(override: Partial<ClientOptions> = {}) {
@@ -95,20 +81,13 @@ export const login = async (client: SapphireClient) => {
 		client.logger.info('LOGGING IN');
 		client.logger.info(`NODE_ENV: ${sharedEnvs.NODE_ENV}`);
 		client.logger.info(
-			`DEPLOYMENT ENV: ${process.env.NEXT_PUBLIC_DEPLOYMENT_ENV!}`,
+			`DEPLOYMENT ENV: ${sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV}`,
 		);
-		client.logger.info(
-			`DISCORD_ID: ${process.env.DISCORD_CLIENT_ID ?? 'UNKNOWN'}`,
-		);
-		if (process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === undefined) {
-			throw new Error(
-				'NEXT_PUBLIC_DEPLOYMENT_ENV is not defined, you must explicitly set it to "local", "staging", "ci" or "production"',
-			);
-		}
+		client.logger.info(`DISCORD_ID: ${sharedEnvs.DISCORD_CLIENT_ID}`);
 
-		await client.login(process.env.DISCORD_TOKEN);
+		await client.login(botEnv.DISCORD_TOKEN);
 		client.addListener(Events.ClientReady, () => {
-			if (process.env.PRINT_COMMUNITIES) {
+			if (botEnv.PRINT_COMMUNITIES) {
 				printCommunities(client); // TODO: Make a listener
 			}
 		});
@@ -136,6 +115,6 @@ export const login = async (client: SapphireClient) => {
 	} catch (error) {
 		client.logger.fatal(error);
 		client.destroy();
-		process.exit(1);
+		throw error;
 	}
 };

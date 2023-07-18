@@ -5,6 +5,7 @@ import { container } from '@sapphire/framework';
 import { indexServers } from '~discord-bot/domains/indexing';
 import { delay } from '@answeroverflow/discordjs-mock';
 import { sharedEnvs } from '@answeroverflow/env/shared';
+import { botEnv } from '@answeroverflow/env/bot';
 
 @ApplyOptions<Listener.Options>({
 	once: true,
@@ -13,14 +14,12 @@ import { sharedEnvs } from '@answeroverflow/env/shared';
 })
 export class Indexing extends Listener {
 	public async run(client: Client) {
-		if (process.env.INDEXING_DISABLED) {
+		if (botEnv.INDEXING_DISABLED) {
 			return;
 		}
 		// Wait for everything to be ready
 		if (sharedEnvs.NODE_ENV === 'production') await delay(120 * 1000);
-		const intervalInHours = process.env.INDEXING_INTERVAL_IN_HOURS
-			? parseFloat(process.env.INDEXING_INTERVAL_IN_HOURS)
-			: 24;
+		const intervalInHours = botEnv.STATUS_UPDATE_INTERVAL_IN_HOURS;
 		container.logger.info(
 			`Indexing all servers every ${intervalInHours} hours`,
 		);
