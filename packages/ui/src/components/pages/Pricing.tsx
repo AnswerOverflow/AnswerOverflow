@@ -30,9 +30,10 @@ const faqs: {
 		question: 'What happens if I go over my page view limits?',
 		answer: (
 			<span>
-				<b>Your site will not be immediately taken down.</b> We will reach out
-				to you to figure out a plan that works for you. If you are consistently
-				going over your page view limits, we will ask you to upgrade to a higher
+				<b>Your site will stay active</b> while we will reach out to you to
+				figure out a plan that works for you. If it is a one off burst of
+				traffic, {"we'll"} keep you on the plan {"you're"} on. If it is a
+				consistent increase in traffic, {"we'll"} ask you to upgrade to the next
 				plan.
 			</span>
 		),
