@@ -3,7 +3,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from '@sentry/nextjs';
-import { sharedEnvs } from '@answeroverflow/env/web-schema.mjs';
+import { sharedEnvs } from '@answeroverflow/env/shared-schema.mjs';
 
 Sentry.init({
 	dsn: sharedEnvs.NEXT_PUBLIC_SENTRY_DSN,
