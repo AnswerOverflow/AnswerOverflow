@@ -1,7 +1,7 @@
 /*
   GITHUB
 */
-import { webClientEnv } from '@answeroverflow/env/web';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export const GITHUB_LINK = 'https://github.com/AnswerOverflow/AnswerOverflow';
 export const CREATE_NEW_DOCS_ISSUE_LINK = `https://github.com/AnswerOverflow/AnswerOverflow/issues/new?assignees=&labels=%F0%9F%93%96+documentation&template=documentation.yml&title=%5BDocs%5D%3A+`;
@@ -25,7 +25,7 @@ export const WAITLIST_URL = 'https://forms.gle/6YLPPGi8X2DCr29T7';
 
 export const getBaseUrl = () => {
 	const base =
-		webClientEnv.NEXT_PUBLIC_SITE_URL ?? 'https://www.answeroverflow.com';
+		sharedEnvs.NEXT_PUBLIC_SITE_URL ?? 'https://www.answeroverflow.com';
 	return base.endsWith('/') ? base.slice(0, -1) : base;
 };
 
