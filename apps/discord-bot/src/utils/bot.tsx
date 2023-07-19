@@ -36,6 +36,7 @@ declare module '@sapphire/pieces' {
 }
 
 function getLogLevel() {
+	if (sharedEnvs.NODE_ENV === 'test') return LogLevel.None;
 	return LogLevel.Debug;
 }
 
