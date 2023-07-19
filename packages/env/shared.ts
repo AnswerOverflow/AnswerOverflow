@@ -23,7 +23,7 @@ export const zStringRequiredInProduction = z
 			) {
 				return true;
 			}
-			return token !== undefined;
+			return token ? token.length > 0 : false;
 		},
 		{ message: 'Required in production' },
 	);
@@ -31,13 +31,6 @@ export const zStringRequiredInProduction = z
 export const zNumberRequiredInProduction = z
 	.string()
 	.optional()
-	.transform((s) => {
-		if (s === undefined) {
-			return undefined;
-		}
-		return parseInt(s, 10);
-	})
-	.pipe(z.number().optional())
 	.refine(
 		(token) => {
 			if (
@@ -46,10 +39,17 @@ export const zNumberRequiredInProduction = z
 			) {
 				return true;
 			}
-			return token !== undefined;
+			return token ? token.length > 0 : false;
 		},
 		{ message: 'Required in production' },
-	);
+	)
+	.transform((s) => {
+		if (s) {
+			return parseInt(s, 10);
+		}
+		return undefined;
+	})
+	.pipe(z.number().optional());
 
 export const nodeEnv = z
 	.string()
