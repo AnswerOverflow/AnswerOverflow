@@ -6,6 +6,7 @@ import {
 	prisma,
 	type Account,
 } from '@answeroverflow/db';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 type DiscordApiCallOpts = {
 	accessToken: string;
@@ -194,8 +195,8 @@ export async function refreshAccessToken(discord: Account) {
 		throw new Error('No refresh token');
 	}
 	const params = new URLSearchParams();
-	params.append('client_id', process.env.DISCORD_CLIENT_ID ?? '');
-	params.append('client_secret', process.env.DISCORD_CLIENT_SECRET ?? '');
+	params.append('client_id', sharedEnvs.DISCORD_CLIENT_ID);
+	params.append('client_secret', sharedEnvs.DISCORD_CLIENT_SECRET);
 	params.append('grant_type', 'refresh_token');
 	params.append('refresh_token', discord.refresh_token ?? '');
 	try {
@@ -209,8 +210,8 @@ export async function refreshAccessToken(discord: Account) {
 		const res = await axios.postForm(
 			'https://discord.com/api/v10/oauth2/token',
 			{
-				client_id: process.env.DISCORD_CLIENT_ID ?? '',
-				client_secret: process.env.DISCORD_CLIENT_SECRET ?? '',
+				client_id: sharedEnvs.DISCORD_CLIENT_ID,
+				client_secret: sharedEnvs.DISCORD_CLIENT_SECRET,
 				grant_type: 'refresh_token',
 				refresh_token: discord.refresh_token ?? '',
 			},

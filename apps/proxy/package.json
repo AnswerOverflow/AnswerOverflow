@@ -14,6 +14,9 @@
 		"dev": "tsup index.ts && node dist/index.cjs",
 		"lint:fix": "eslint . --fix"
 	},
+	"dependencies": {
+		"@answeroverflow/env": "^0.1.0"
+	},
 	"devDependencies": {
 		"@answeroverflow/prettier-config": "^0.0.0",
 		"@answeroverflow/tsconfig": "^0.0.0",

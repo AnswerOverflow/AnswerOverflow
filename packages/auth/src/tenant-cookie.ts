@@ -1,9 +1,10 @@
 import { CookieSerializeOptions } from 'cookie';
 import { NextApiResponse } from 'next';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export function getTenantCookieName() {
 	return `${
-		process.env.NODE_ENV === 'production' ? '__Host-' : ''
+		sharedEnvs.NODE_ENV === 'production' ? '__Host-' : ''
 	}answeroverflow.tenant-token`;
 }
 
@@ -13,7 +14,7 @@ export function getTenantCookieOptions(
 	return {
 		httpOnly: true,
 		sameSite: 'strict',
-		secure: process.env.NODE_ENV === 'production',
+		secure: sharedEnvs.NODE_ENV === 'production',
 		expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 1 month
 		domain: '',
 		path: '/',
@@ -22,7 +23,7 @@ export function getTenantCookieOptions(
 }
 
 export function getNextAuthCookieName() {
-	const cookiePrefix = process.env.NODE_ENV === 'production' ? '__Secure-' : '';
+	const cookiePrefix = sharedEnvs.NODE_ENV === 'production' ? '__Secure-' : '';
 	return `${cookiePrefix}next-auth.session-token`;
 }
 

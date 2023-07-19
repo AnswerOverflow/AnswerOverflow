@@ -2,6 +2,7 @@ import type { ServerPublic } from '@answeroverflow/api';
 import Head from 'next/head';
 import { makeServerIconLink } from './ServerIcon';
 import { useTenantContext } from '@answeroverflow/hooks';
+import { webClientEnv } from '@answeroverflow/env/web';
 
 interface HeadProps {
 	title: string;
@@ -56,7 +57,7 @@ export const AOHead = ({
 	return (
 		<Head>
 			<title>{title}</title>
-			{process.env.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'production' && (
+			{webClientEnv.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'production' && (
 				<meta name="robots" content="noindex" />
 			)}
 			<link

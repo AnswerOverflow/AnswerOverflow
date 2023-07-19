@@ -8,6 +8,7 @@ import type { GetStaticPropsContext, InferGetStaticPropsType } from 'next';
 import { TRPCError } from '@trpc/server';
 import { findServerById } from '@answeroverflow/db';
 import { fetchSubscriptionInfo } from '@answeroverflow/payments';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 export default function MessageResult(
 	props: InferGetStaticPropsType<typeof getStaticProps>,
 ) {
@@ -78,7 +79,7 @@ export async function getStaticProps(
 					destination: `https://${server.customDomain}/m/${context.params.messageId}`,
 					// If it's a trial then keep the redirect temporary incase they don't continue
 					permanent:
-						process.env.NODE_ENV === 'production' &&
+						sharedEnvs.NODE_ENV === 'production' &&
 						!shouldTemporaryRedirectDueToTrial,
 				},
 			};
