@@ -1,13 +1,14 @@
 import { prisma } from '@answeroverflow/prisma-types';
 import { elastic } from '@answeroverflow/elastic-types';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 export async function clearDatabase() {
-	if (process.env.NODE_ENV !== 'test') {
+	if (sharedEnvs.NODE_ENV !== 'test') {
 		throw new Error('clearDatabase can only be used in test environment');
 	}
 
 	if (
-		process.env.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'local' &&
-		process.env.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'ci'
+		sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'local' &&
+		sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'ci'
 	) {
 		throw new Error('clearDatabase can only be used in local environment');
 	}

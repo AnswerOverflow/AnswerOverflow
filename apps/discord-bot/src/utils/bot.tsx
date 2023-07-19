@@ -18,6 +18,8 @@ import { Subject } from 'rxjs';
 import { printCommunities } from './utils';
 import { Partials } from 'discord.js';
 import type { ClientOptions } from 'discord.js';
+import { sharedEnvs } from '@answeroverflow/env/shared';
+import { botEnv } from '@answeroverflow/env/bot';
 
 declare module '@sapphire/pieces' {
 	interface Container {
@@ -34,22 +36,8 @@ declare module '@sapphire/pieces' {
 }
 
 function getLogLevel() {
-	switch (process.env.NODE_ENV) {
-		case 'development':
-			return process.env.BOT_DEV_LOG_LEVEL
-				? parseInt(process.env.BOT_DEV_LOG_LEVEL)
-				: LogLevel.Debug;
-		case 'test':
-			return process.env.BOT_TEST_LOG_LEVEL
-				? parseInt(process.env.BOT_TEST_LOG_LEVEL)
-				: LogLevel.None;
-		case 'production':
-			return process.env.BOT_PROD_LOG_LEVEL
-				? parseInt(process.env.BOT_PROD_LOG_LEVEL)
-				: LogLevel.Debug;
-		default:
-			return LogLevel.Debug;
-	}
+	if (sharedEnvs.NODE_ENV === 'test') return LogLevel.None;
+	return LogLevel.Debug;
 }
 
 export function createClient(override: Partial<ClientOptions> = {}) {
@@ -77,10 +65,10 @@ export function createClient(override: Partial<ClientOptions> = {}) {
 			Partials.Reaction,
 		],
 		hmr: {
-			enabled: process.env.NODE_ENV === 'development',
+			enabled: sharedEnvs.NODE_ENV === 'development',
 		},
 		api: {
-			automaticallyConnect: process.env.NODE_ENV !== 'test', // TODO: Bit of a hack? No point starting API during testing but would be good to verify it
+			automaticallyConnect: sharedEnvs.NODE_ENV !== 'test', // TODO: Bit of a hack? No point starting API during testing but would be good to verify it
 		},
 		...override,
 	});
@@ -92,22 +80,15 @@ export const login = async (client: SapphireClient) => {
 	try {
 		container.events = new Subject();
 		client.logger.info('LOGGING IN');
-		client.logger.info(`NODE_ENV: ${process.env.NODE_ENV}`);
+		client.logger.info(`NODE_ENV: ${sharedEnvs.NODE_ENV}`);
 		client.logger.info(
-			`DEPLOYMENT ENV: ${process.env.NEXT_PUBLIC_DEPLOYMENT_ENV!}`,
+			`DEPLOYMENT ENV: ${sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV}`,
 		);
-		client.logger.info(
-			`DISCORD_ID: ${process.env.DISCORD_CLIENT_ID ?? 'UNKNOWN'}`,
-		);
-		if (process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === undefined) {
-			throw new Error(
-				'NEXT_PUBLIC_DEPLOYMENT_ENV is not defined, you must explicitly set it to "local", "staging", "ci" or "production"',
-			);
-		}
+		client.logger.info(`DISCORD_ID: ${sharedEnvs.DISCORD_CLIENT_ID}`);
 
-		await client.login(process.env.DISCORD_TOKEN);
+		await client.login(botEnv.DISCORD_TOKEN);
 		client.addListener(Events.ClientReady, () => {
-			if (process.env.PRINT_COMMUNITIES) {
+			if (botEnv.PRINT_COMMUNITIES) {
 				printCommunities(client); // TODO: Make a listener
 			}
 		});
@@ -118,7 +99,7 @@ export const login = async (client: SapphireClient) => {
 			wrapper: ({ children }) => <Router>{children}</Router>,
 		};
 		container.discordJSReact =
-			process.env.NODE_ENV === 'test'
+			sharedEnvs.NODE_ENV === 'test'
 				? new TestDiscordJSReact(client, config)
 				: new DiscordJSReact(client, config);
 		container.messageHistory = new LRUCache<
@@ -135,6 +116,6 @@ export const login = async (client: SapphireClient) => {
 	} catch (error) {
 		client.logger.fatal(error);
 		client.destroy();
-		process.exit(1);
+		throw error;
 	}
 };

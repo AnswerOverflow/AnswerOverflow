@@ -10,6 +10,7 @@ import {
 	getTenantCookieName,
 } from '@answeroverflow/auth';
 import { isOnMainSite } from '@answeroverflow/constants';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 // create the API handler, but don't return it yet
 const nextApiHandler = createNextApiHandler({
 	router: appRouter,
@@ -22,7 +23,7 @@ export default async function handler(
 	res: NextApiResponse<any>,
 ) {
 	// Only enable CORS in development for accessing through Storybook
-	if (process.env.NODE_ENV !== 'production') {
+	if (sharedEnvs.NODE_ENV !== 'production') {
 		// Modify `req` and `res` objects here
 		// In this case, we are enabling CORS
 		res.setHeader('Access-Control-Allow-Origin', 'http://localhost:6006');

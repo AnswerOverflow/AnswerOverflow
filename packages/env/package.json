@@ -1,8 +1,13 @@
 {
-	"name": "@answeroverflow/payments",
+	"name": "@answeroverflow/env",
 	"version": "0.1.0",
-	"main": "./index.ts",
-	"types": "./index.ts",
+	"files": [
+		"bot.ts",
+		"web-schema.mjs",
+		"web.ts",
+		"shared.ts",
+		"shared-schema.mjs"
+	],
 	"license": "MIT",
 	"private": true,
 	"scripts": {
@@ -13,16 +18,14 @@
 		"lint:fix": "eslint . --fix"
 	},
 	"dependencies": {
-		"dotenv-cra": "^3.0.3",
-		"stripe": "^12.13.0",
-		"@answeroverflow/env": "^0.1.0"
+		"@t3-oss/env-nextjs": "^0.6.0",
+		"zod": "^3.21.4"
 	},
 	"devDependencies": {
 		"@answeroverflow/prettier-config": "^0.0.0",
 		"@answeroverflow/tsconfig": "^0.0.0",
-		"@vitest/coverage-c8": "^0.28.5",
+		"@types/node": "^20.4.2",
 		"eslint": "^8.45.0",
-		"prettier": "^2.8.8",
-		"vitest": "^0.29.8"
+		"prettier": "^2.8.8"
 	}
 }

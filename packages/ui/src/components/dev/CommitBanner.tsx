@@ -1,15 +1,12 @@
 import Link from 'next/link';
 import { Heading } from '../primitives';
+import { webClientEnv } from '@answeroverflow/env/web';
 
 export const CommitBanner = () => {
-	if (
-		process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'staging' &&
-		process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA &&
-		process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA.length > 0
-	)
+	if (webClientEnv.NEXT_PUBLIC_DEPLOYMENT_ENV === 'staging')
 		return (
 			<CommitBannerRenderer
-				commitSha={process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA}
+				commitSha={webClientEnv.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA}
 			/>
 		);
 	else return null;

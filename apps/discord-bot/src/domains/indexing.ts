@@ -29,6 +29,8 @@ import {
 import { container } from '@sapphire/framework';
 import { sortMessagesById } from '@answeroverflow/discordjs-utils';
 import * as Sentry from '@sentry/node';
+import { sharedEnvs } from '@answeroverflow/env/shared';
+import { botEnv } from '@answeroverflow/env/bot';
 
 export async function indexServers(client: Client) {
 	const indexingStartTime = Date.now();
@@ -87,14 +89,11 @@ export async function indexRootChannel(
 
 	container.logger.debug(`Indexing channel ${channel.id} | ${channel.name}`);
 	if (channel.type === ChannelType.GuildForum) {
-		const maxNumberOfThreadsToCollect = process.env
-			.MAX_NUMBER_OF_THREADS_TO_COLLECT
-			? parseInt(process.env.MAX_NUMBER_OF_THREADS_TO_COLLECT)
-			: 1000;
+		const maxNumberOfThreadsToCollect = botEnv.MAX_NUMBER_OF_THREADS_TO_COLLECT;
 		let threadCutoffTimestamp = await findLatestArchivedTimestampByChannelId(
 			channel.id,
 		);
-		if (process.env.NODE_ENV === 'test') {
+		if (sharedEnvs.NODE_ENV === 'test') {
 			threadCutoffTimestamp = null;
 		}
 		const archivedThreads: AnyThreadChannel[] = [];
@@ -125,7 +124,7 @@ export async function indexRootChannel(
 		};
 
 		// Fetching all archived threads is very expensive, so only do it on the very first indexing pass
-		if (process.env.NODE_ENV === 'test') {
+		if (sharedEnvs.NODE_ENV === 'test') {
 			const data = await channel.threads.fetchArchived({
 				type: 'public',
 				fetchAll: true,
@@ -313,12 +312,7 @@ export async function fetchAllMessages(
 	channel: TextBasedChannel,
 	opts: MessageFetchOptions = {},
 ) {
-	const {
-		start,
-		limit = process.env.MAX_NUMBER_OF_MESSAGES_TO_COLLECT
-			? parseInt(process.env.MAX_NUMBER_OF_MESSAGES_TO_COLLECT)
-			: 20000,
-	} = opts;
+	const { start, limit = botEnv.MAX_NUMBER_OF_MESSAGES_TO_COLLECT } = opts;
 	const messages: Message[] = [];
 	if (channel.lastMessageId && start == channel.lastMessageId) {
 		return [];

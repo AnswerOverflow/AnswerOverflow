@@ -8,6 +8,7 @@ import {
 import superjson from 'superjson';
 import { CommunityPage } from '@answeroverflow/ui';
 import { fetchSubscriptionInfo } from '@answeroverflow/payments';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export default function MessageResult(
 	props: InferGetStaticPropsType<typeof getStaticProps>,
@@ -58,10 +59,10 @@ export async function getStaticProps(
 		return {
 			redirect: {
 				destination: `http${
-					process.env.NODE_ENV === 'production' ? 's' : ''
+					sharedEnvs.NODE_ENV === 'production' ? 's' : ''
 				}://${communityPageData.server.customDomain}`,
 				permanent:
-					process.env.NODE_ENV === 'production' &&
+					sharedEnvs.NODE_ENV === 'production' &&
 					!shouldTemporaryRedirectDueToTrial,
 			},
 		};

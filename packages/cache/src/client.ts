@@ -1,4 +1,5 @@
 import { createClient } from 'redis';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 type RedisClientType = ReturnType<typeof createClient>;
 
 let redisClient: RedisClientType;
@@ -7,7 +8,7 @@ export async function getRedisClient() {
 		return redisClient;
 	}
 	const cacheInstance = createClient({
-		url: process.env.REDIS_URL,
+		url: sharedEnvs.REDIS_URL,
 	});
 	process.on('exit', () => cleanupRedis);
 
