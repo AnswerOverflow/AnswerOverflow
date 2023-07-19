@@ -4,9 +4,9 @@
  * This is especially useful for Docker builds.
  */
 
-// @ts-ignore
 !process.env.SKIP_ENV_VALIDATION &&
-	(await import('../../packages/env/web-schema.mjs'));
+// @ts-expect-error
+	(await import('@answeroverflow/env/web-schema.mjs'));
 const nextJSMDX = await import('@next/mdx');
 import remarkGfm from 'remark-gfm';
 
