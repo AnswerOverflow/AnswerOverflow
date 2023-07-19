@@ -9,7 +9,7 @@ const config = ({ mode }: { mode: string }) => {
 		define: {
 			'process.env': {
 				...env,
-				LADLE: true,
+				LADLE: 'true',
 			},
 		},
 		server: {

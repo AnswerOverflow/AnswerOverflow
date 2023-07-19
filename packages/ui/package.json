@@ -10,7 +10,7 @@
 		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
 		"lint": "next lint && tsc --noEmit",
 		"lint:fix": "next lint --fix",
-		"dev": "cross-env THEME=\"both\" ladle dev -p 6006",
+		"dev": "pnpm with-env cross-env THEME=\"both\" ladle dev -p 6006",
 		"clean": "rm -rf .next storybook-static* node_modules"
 	},
 	"dependencies": {

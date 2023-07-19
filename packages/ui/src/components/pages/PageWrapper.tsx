@@ -15,6 +15,7 @@ export const PageWrapper = ({
 	disabledRoutes = [],
 }: PageWrapperProps) => {
 	const router = useRouter();
+
 	// Check if running in storybook
 	if (webClientEnv.NEXT_PUBLIC_LADLE) {
 		return <PageWrapperRenderer>{children}</PageWrapperRenderer>;

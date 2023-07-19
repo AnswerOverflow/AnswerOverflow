@@ -14,12 +14,15 @@ export const webClientEnv = createEnv({
 		NEXT_PUBLIC_LADLE: z
 			.string()
 			.default('false')
-			.refine((value) => {
-				if (value === 'true' || value === 'false') {
-					return true;
-				}
-				return 'Must be either "true" or "false"';
-			})
+			.refine(
+				(value) => {
+					return value === 'true' || value === 'false';
+				},
+				{
+					message: 'Must be either "true" or "false"',
+				},
+			)
+			.transform((s) => s === 'true')
 			.pipe(z.boolean())
 			.optional(),
 		NEXT_PUBLIC_VERCEL_URL: z.string().optional(),
