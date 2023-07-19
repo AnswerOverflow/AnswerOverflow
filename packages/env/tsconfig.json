@@ -5,10 +5,10 @@
 		"lib": ["dom"]
 	},
 	"include": [
-		"shared.mjs",
+		"shared-schema.mjs",
 		"shared.ts",
 		"bot.ts",
-		"web.mjs",
+		"web-schema.mjs",
 		"web.ts",
 		".prettierrc.cjs",
 		"*.mjs",
