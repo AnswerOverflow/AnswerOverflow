@@ -15,8 +15,8 @@
 	"dependencies": {
 		"dotenv-cra": "^3.0.3",
 		"stripe": "^12.13.0",
-    "@answeroverflow/env": "^0.1.0"
-  },
+		"@answeroverflow/env": "^0.1.0"
+	},
 	"devDependencies": {
 		"@answeroverflow/prettier-config": "^0.0.0",
 		"@answeroverflow/tsconfig": "^0.0.0",

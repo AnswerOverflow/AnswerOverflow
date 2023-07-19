@@ -20,11 +20,14 @@ export const webClientEnv = createEnv({
 				}
 				return 'Must be either "true" or "false"';
 			})
-			.pipe(z.boolean()).optional(),
+			.pipe(z.boolean())
+			.optional(),
 		NEXT_PUBLIC_VERCEL_URL: z.string().optional(),
 		NEXT_PUBLIC_PORT: z
-			.string().transform((s) => parseInt(s, 10))
-			.pipe(z.number()).optional(),
+			.string()
+			.transform((s) => parseInt(s, 10))
+			.pipe(z.number())
+			.optional(),
 	},
 	experimental__runtimeEnv: {
 		NEXT_PUBLIC_DEPLOYMENT_ENV: process.env.NEXT_PUBLIC_DEPLOYMENT_ENV,
@@ -35,6 +38,6 @@ export const webClientEnv = createEnv({
 		NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA,
 		NEXT_PUBLIC_LADLE: process.env.LADLE,
 		NEXT_PUBLIC_VERCEL_URL: process.env.VERCEL_URL,
-    NEXT_PUBLIC_PORT: process.env.PORT,
+		NEXT_PUBLIC_PORT: process.env.PORT,
 	},
 });

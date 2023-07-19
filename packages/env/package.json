@@ -1,11 +1,7 @@
 {
 	"name": "@answeroverflow/env",
 	"version": "0.1.0",
-	"files": [
-		"bot.mjs",
-		"web.mjs",
-		"shared.mjs"
-	],
+	"files": ["bot.mjs", "web.mjs", "shared.mjs"],
 	"license": "MIT",
 	"private": true,
 	"scripts": {

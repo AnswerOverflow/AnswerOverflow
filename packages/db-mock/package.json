@@ -17,7 +17,7 @@
 		"@answeroverflow/elastic-types": "^0.1.0",
 		"@answeroverflow/prisma-types": "^0.1.0",
 		"@answeroverflow/utils": "^0.1.0",
-    "@answeroverflow/env": "^0.1.0",
+		"@answeroverflow/env": "^0.1.0",
 		"@sapphire/bitfield": "^1.2.0",
 		"discord-api-types": "^0.37.48",
 		"type-fest": "^3.13.0",

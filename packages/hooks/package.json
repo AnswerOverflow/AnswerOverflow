@@ -16,7 +16,7 @@
 		"next": "13.4.8",
 		"next-auth": "^4.22.1",
 		"posthog-js": "^1.71.0",
-    "@answeroverflow/env": "^0.1.0",
+		"@answeroverflow/env": "^0.1.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0"
 	},

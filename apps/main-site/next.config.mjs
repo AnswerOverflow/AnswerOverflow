@@ -5,7 +5,8 @@
  */
 
 // @ts-ignore
-!process.env.SKIP_ENV_VALIDATION && (await import('@answeroverflow/env/web.mjs'));
+!process.env.SKIP_ENV_VALIDATION &&
+	(await import('@answeroverflow/env/web.mjs'));
 const nextJSMDX = await import('@next/mdx');
 import remarkGfm from 'remark-gfm';
 
@@ -33,7 +34,7 @@ const config = {
 		'@answeroverflow/db',
 		'@answeroverflow/tailwind-config',
 		'@answeroverflow/ui',
-    '@answeroverflow/env'
+		'@answeroverflow/env',
 	],
 	experimental: {
 		outputFileTracingIgnores: ['**swc/core**'],

@@ -16,7 +16,7 @@
 	},
 	"dependencies": {
 		"dotenv-cra": "^3.0.3",
-    "@answeroverflow/env": "^0.1.0",
+		"@answeroverflow/env": "^0.1.0",
 		"lorem-ipsum": "^2.0.8"
 	},
 	"devDependencies": {
