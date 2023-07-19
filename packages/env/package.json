@@ -1,7 +1,13 @@
 {
 	"name": "@answeroverflow/env",
 	"version": "0.1.0",
-	"files": ["bot.ts", "web-schema.mjs",  "web.ts", "shared.ts","shared-schema.mjs"],
+	"files": [
+		"bot.ts",
+		"web-schema.mjs",
+		"web.ts",
+		"shared.ts",
+		"shared-schema.mjs"
+	],
 	"license": "MIT",
 	"private": true,
 	"scripts": {
