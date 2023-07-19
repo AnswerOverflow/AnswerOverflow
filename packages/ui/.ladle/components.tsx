@@ -1,4 +1,5 @@
 import './styles.css';
+import './code.scss';
 import type { ArgTypes, GlobalProvider } from '@ladle/react';
 import {
 	WithAnalytics,
