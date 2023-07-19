@@ -1,4 +1,4 @@
-import { sharedEnvs } from '@answeroverflow/env/shared';
+import '../../packages/env/bot';
 import { defineConfig } from 'tsup';
 
 export default defineConfig({

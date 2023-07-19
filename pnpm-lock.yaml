@@ -158,6 +158,9 @@ importers:
       '@sentry/tracing':
         specifier: ^7.58.1
         version: 7.58.1
+      '@t3-oss/env-nextjs':
+        specifier: ^0.6.0
+        version: 0.6.0(typescript@5.1.6)(zod@3.21.4)
       '@trpc/server':
         specifier: ^10.34.0
         version: 10.34.0
@@ -188,6 +191,9 @@ importers:
       tsx:
         specifier: ^3.12.7
         version: 3.12.7
+      zod:
+        specifier: ^3.21.4
+        version: 3.21.4
     devDependencies:
       '@answeroverflow/discordjs-mock':
         specifier: ^0.0.13

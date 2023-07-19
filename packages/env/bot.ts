@@ -15,7 +15,14 @@ export const botEnv = {
 				.string()
 				.optional()
 				.default('false')
-				.pipe(z.boolean()),
+				.refine((value) => {
+					if (value === 'true' || value === 'false') {
+						return true;
+					}
+					return 'Must be either "true" or "false"';
+				})
+				.pipe(z.boolean())
+				.optional(),
 			STATUS_UPDATE_INTERVAL_IN_HOURS: z
 				.string()
 				.optional()
@@ -24,9 +31,15 @@ export const botEnv = {
 				.pipe(z.number()),
 			INDEXING_DISABLED: z
 				.string()
-				.optional()
 				.default('false')
-				.pipe(z.boolean()),
+				.refine((value) => {
+					if (value === 'true' || value === 'false') {
+						return true;
+					}
+					return 'Must be either "true" or "false"';
+				})
+				.pipe(z.boolean())
+				.optional(),
 			INDEXING_INTERVAL_IN_HOURS: z
 				.string()
 				.optional()
