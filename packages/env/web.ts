@@ -28,6 +28,7 @@ export const webClientEnv = createEnv({
 			.transform((s) => parseInt(s, 10))
 			.pipe(z.number())
 			.optional(),
+		NEXT_PUBLIC_SITE_URL: z.string().url(),
 	},
 	experimental__runtimeEnv: {
 		NEXT_PUBLIC_DEPLOYMENT_ENV: process.env.NEXT_PUBLIC_DEPLOYMENT_ENV,
