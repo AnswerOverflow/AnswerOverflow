@@ -37,7 +37,7 @@ export const zNumberRequiredInProduction = z
 		}
 		return parseInt(s, 10);
 	})
-	.pipe(z.number())
+	.pipe(z.number().optional())
 	.refine(
 		(token) => {
 			if (
