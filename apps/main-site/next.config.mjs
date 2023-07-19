@@ -6,7 +6,7 @@
 
 // @ts-ignore
 !process.env.SKIP_ENV_VALIDATION &&
-	(await import('@answeroverflow/env/web.mjs'));
+	(await import('../../packages/env/web.mjs'));
 const nextJSMDX = await import('@next/mdx');
 import remarkGfm from 'remark-gfm';
 

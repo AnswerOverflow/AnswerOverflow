@@ -27,7 +27,12 @@ export const zStringRequiredInProduction = z
 export const zNumberRequiredInProduction = z
 	.string()
 	.optional()
-	.transform((s) => parseInt(s, 10))
+	.transform((s) => {
+		if (s === undefined) {
+			return undefined;
+		}
+		return parseInt(s, 10);
+	})
 	.pipe(z.number())
 	.refine(
 		(token) => {
@@ -65,7 +70,7 @@ export const sharedEnvs = createEnv({
       Environment
      */
 		NODE_ENV: nodeEnv,
-		ENVIRONMENT: z.string().pipe(z.enum(['discord-bot', 'main-site'])),
+		ENVIRONMENT: z.string().pipe(z.enum(['discord-bot', 'main-site', 'docs'])),
 		// SKIP_ENV_VALIDATION: z.string(),
 		// CI: z.string(),
 
