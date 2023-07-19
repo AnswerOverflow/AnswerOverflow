@@ -60,7 +60,6 @@ export const nodeEnv = z
 export const sharedClientEnvs = {
 	NEXT_PUBLIC_POSTHOG_TOKEN: zStringRequiredInProduction,
 	NEXT_PUBLIC_SENTRY_DSN: zStringRequiredInProduction,
-	NEXT_PUBLIC_SITE_URL: z.string().url(),
 	NEXT_PUBLIC_DEPLOYMENT_ENV: z
 		.string()
 		.pipe(z.enum(['local', 'staging', 'production', 'ci'])),
@@ -121,6 +120,5 @@ export const sharedEnvs = createEnv({
 		NEXT_PUBLIC_DEPLOYMENT_ENV: process.env.NEXT_PUBLIC_DEPLOYMENT_ENV,
 		NEXT_PUBLIC_POSTHOG_TOKEN: process.env.NEXT_PUBLIC_POSTHOG_TOKEN,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
-		NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
 	},
 });
