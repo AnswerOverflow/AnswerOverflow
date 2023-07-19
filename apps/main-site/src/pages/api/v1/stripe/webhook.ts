@@ -44,7 +44,9 @@ export default async function webhookHandler(
 		const {
 			headers: { 'stripe-signature': signature },
 		} = requestValidation.parse(req);
-
+		if (!sharedEnvs.STRIPE_WEBHOOK_SECRET || !sharedEnvs.STRIPE_SECRET_KEY) {
+			throw new Error('Stripe env vars not set');
+		}
 		const stripe = new Stripe(sharedEnvs.STRIPE_SECRET_KEY, {
 			apiVersion: '2022-11-15',
 			typescript: true,

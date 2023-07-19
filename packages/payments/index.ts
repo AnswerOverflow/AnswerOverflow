@@ -1,13 +1,15 @@
 import Stripe from 'stripe';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 
-const stripe = new Stripe(sharedEnvs.STRIPE_SECRET_KEY, {
-	apiVersion: '2022-11-15',
-	typescript: true,
-});
+const stripe = sharedEnvs.STRIPE_SECRET_KEY
+	? new Stripe(sharedEnvs.STRIPE_SECRET_KEY, {
+			apiVersion: '2022-11-15',
+			typescript: true,
+	  })
+	: undefined;
 
 export async function fetchSubscriptionInfo(subscriptionId: string) {
-	const data = await stripe.subscriptions.retrieve(subscriptionId);
+	const data = await stripe!.subscriptions.retrieve(subscriptionId);
 	const isTrialActive = data.trial_end
 		? new Date() < new Date(data.trial_end * 1000)
 		: false;
@@ -23,7 +25,7 @@ export function updateServerCustomerName(input: {
 	name: string;
 	serverId: string;
 }) {
-	return stripe.customers.update(input.customerId, {
+	return stripe!.customers.update(input.customerId, {
 		metadata: {
 			server_name: input.name,
 			server_id: input.serverId,
@@ -32,7 +34,7 @@ export function updateServerCustomerName(input: {
 }
 export function createNewCustomer(input: { name: string; serverId: string }) {
 	const { name } = input;
-	return stripe.customers.create({
+	return stripe!.customers.create({
 		name,
 		description: `${name} Community`,
 		metadata: {
@@ -49,7 +51,7 @@ export function createProPlanCheckoutSession(input: {
 }) {
 	return createPlanCheckoutSession({
 		...input,
-		planId: sharedEnvs.STRIPE_PRO_PLAN_PRICE_ID,
+		planId: sharedEnvs.STRIPE_PRO_PLAN_PRICE_ID!,
 	});
 }
 
@@ -70,13 +72,13 @@ export async function createPlanCheckoutSession(input: {
 	cancelUrl: string;
 	planId: string;
 }) {
-	const previousSubscriptions = await stripe.subscriptions.list({
+	const previousSubscriptions = await stripe!.subscriptions.list({
 		customer: input.customerId,
 		status: 'all',
 	});
 	const hasSubscribedInPast = previousSubscriptions.data.length > 0;
 
-	const data = await stripe.checkout.sessions.create({
+	const data = await stripe!.checkout.sessions.create({
 		billing_address_collection: 'auto',
 		line_items: [
 			{

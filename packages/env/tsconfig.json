@@ -6,7 +6,6 @@
 	"include": [
 		"shared.mjs",
 		"shared.ts",
-    "typed-shared.ts",
 		"bot.ts",
 		"web.mjs",
 		"web.ts",

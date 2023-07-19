@@ -294,7 +294,7 @@ export const serverRouter = router({
 						return {
 							...server,
 							status: 'active',
-							stripeCheckoutUrl: sharedEnvs.STRIPE_CHECKOUT_URL,
+							stripeCheckoutUrl: sharedEnvs.STRIPE_CHECKOUT_URL ?? null,
 							dateCancelationTakesEffect: cancelAt,
 							dateSubscriptionRenews: currentPeriodEnd,
 							dateTrialEnds: trialEnd,

@@ -25,9 +25,11 @@ module.exports = {
 		'coverage/',
 	],
 	rules: {
+		// todo: reenable the n/ stuff
 		'n/no-missing-import': 'off',
 		'n/no-missing-require': 'off',
 		'n/no-unpublished-import': 'off',
+		'n/no-unsupported-features/node-builtins': 'off',
 		'n/no-process-env': 'error',
 		'@next/next/no-html-link-for-pages': 'off',
 		'react/jsx-key': 'off',

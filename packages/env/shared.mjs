@@ -1,89 +1,119 @@
-import {createEnv} from '@t3-oss/env-nextjs';
-import {z} from 'zod';
+/* eslint-disable n/no-process-env */
+
+import { createEnv } from '@t3-oss/env-nextjs';
+import { z } from 'zod';
 
 export const envNumber = z
-  .string()
-  // transform to number
-  .transform((s) => parseInt(s, 10))
-  // make sure transform worked
-  .pipe(z.boolean());
+	.string()
+	.transform((s) => parseInt(s, 10))
+	.pipe(z.number());
+
+export const zStringRequiredInProduction = z
+	.string()
+	.optional()
+	.refine(
+		(token) => {
+			if (
+				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local' ||
+				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'ci'
+			) {
+				return true;
+			}
+			return token !== undefined;
+		},
+		{ message: 'Required in production' },
+	);
+
+export const zNumberRequiredInProduction = z
+	.string()
+	.optional()
+	.transform((s) => parseInt(s, 10))
+	.pipe(z.number())
+	.refine(
+		(token) => {
+			if (
+				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local' ||
+				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'ci'
+			) {
+				return true;
+			}
+			return token !== undefined;
+		},
+		{ message: 'Required in production' },
+	);
 
 export const nodeEnv = z
-  .string()
-  .optional()
-  .default('development')
-  .pipe(z.enum(['development', 'production', 'test']));
+	.string()
+	.optional()
+	.default('development')
+	.pipe(z.enum(['development', 'production', 'test']));
 
 export const sharedClientEnvs = {
-  NEXT_PUBLIC_POSTHOG_TOKEN: z.string(),
-  NEXT_PUBLIC_SENTRY_DSN: z.string(),
-  NEXT_PUBLIC_DEPLOYMENT_ENV: z.string().pipe(
-    z.enum(['local', 'staging', 'production', 'ci'])
-  )
-  NEXT_PUBLIC_SITE_URL: z.string().url()
-}
+	NEXT_PUBLIC_POSTHOG_TOKEN: zStringRequiredInProduction,
+	NEXT_PUBLIC_SENTRY_DSN: zStringRequiredInProduction,
+	NEXT_PUBLIC_SITE_URL: z.string().url(),
+	NEXT_PUBLIC_DEPLOYMENT_ENV: z
+		.string()
+		.pipe(z.enum(['local', 'staging', 'production', 'ci'])),
+};
 
 export const sharedEnvs = createEnv({
-  // TODO: Fix
-  isServer: typeof window === 'undefined',
-  server: {
-    /*
+	// TODO: Fix
+	isServer: typeof window === 'undefined',
+	server: {
+		/*
       Environment
      */
-    NODE_ENV: nodeEnv,
-    ENVIRONMENT: z.string().pipe(
-      z.enum(['discord-bot', 'main-site'])
-    ),
-    // SKIP_ENV_VALIDATION: z.string(),
-    // CI: z.string(),
+		NODE_ENV: nodeEnv,
+		ENVIRONMENT: z.string().pipe(z.enum(['discord-bot', 'main-site'])),
+		// SKIP_ENV_VALIDATION: z.string(),
+		// CI: z.string(),
 
-    /*
+		/*
       Database
      */
-    DATABASE_URL: z.string(),
+		DATABASE_URL: z.string(),
 
-    // TODO: Make it cloud ID oro username / password, not both
-    ELASTICSEARCH_URL: z.string().optional(),
-    ELASTICSEARCH_CLOUD_ID: z.string().optional(),
-    ELASTICSEARCH_PASSWORD: z.string(),
-    ELASTICSEARCH_USERNAME: z.string(),
-    ELASTICSEARCH_MESSAGE_INDEX: z.string(),
+		// TODO: Make it cloud ID oro username / password, not both
+		ELASTICSEARCH_URL: z.string().optional(),
+		ELASTICSEARCH_CLOUD_ID: zStringRequiredInProduction,
+		ELASTICSEARCH_PASSWORD: z.string(),
+		ELASTICSEARCH_USERNAME: z.string(),
+		ELASTICSEARCH_MESSAGE_INDEX: z.string(),
 
-    REDIS_URL: z.string(),
+		REDIS_URL: z.string(),
 
-    /*
+		/*
       Discord
      */
-    DISCORD_CLIENT_ID: z.string(),
-    DISCORD_CLIENT_SECRET: z.string(),
-    /*
+		DISCORD_CLIENT_ID: z.string(),
+		DISCORD_CLIENT_SECRET: z.string(),
+		/*
       Analytics
      */
-    POSTHOG_PROJECT_ID: envNumber,
-    POSTHOG_PERSONAL_API_KEY: z.string(),
-    /*
+		POSTHOG_PROJECT_ID: zNumberRequiredInProduction,
+		POSTHOG_PERSONAL_API_KEY: zStringRequiredInProduction,
+		/*
       Payments
      */
 
-    STRIPE_PRO_PLAN_PRICE_ID: z.string(),
-    STRIPE_ENTERPRISE_PLAN_PRICE_ID: z.string(),
-    STRIPE_SECRET_KEY: z.string(),
-    STRIPE_WEBHOOK_SECRET: z.string(),
-    STRIPE_CHECKOUT_URL: z.string(),
-    /*
+		STRIPE_PRO_PLAN_PRICE_ID: zStringRequiredInProduction,
+		STRIPE_ENTERPRISE_PLAN_PRICE_ID: zStringRequiredInProduction,
+		STRIPE_SECRET_KEY: zStringRequiredInProduction,
+		STRIPE_WEBHOOK_SECRET: zStringRequiredInProduction,
+		STRIPE_CHECKOUT_URL: zStringRequiredInProduction,
+		/*
       Multi Tenant
      */
-      PROJECT_ID_VERCEL: z.string(),
-      AUTH_BEARER_TOKEN_VERCEL: z.string(),
-    TEAM_ID_VERCEL: z.string(),
-
-  },
-  client: sharedClientEnvs,
-  // If you're using Next.js < 13.4.4, you'll need to specify the runtimeEnv manually
-  experimental__runtimeEnv: process.env,
-  },
-  // For Next.js >= 13.4.4, you only need to destructure client variables:
-  // experimental__runtimeEnv: {
-  //   NEXT_PUBLIC_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_PUBLISHABLE_KEY,
-  // }
+		PROJECT_ID_VERCEL: zStringRequiredInProduction,
+		AUTH_BEARER_TOKEN_VERCEL: zStringRequiredInProduction,
+		TEAM_ID_VERCEL: zStringRequiredInProduction,
+	},
+	client: sharedClientEnvs,
+	experimental__runtimeEnv: {
+		NEXT_PUBLIC_DEPLOYMENT_ENV: process.env.NEXT_PUBLIC_DEPLOYMENT_ENV,
+		NEXT_PUBLIC_POSTHOG_TOKEN: process.env.NEXT_PUBLIC_POSTHOG_TOKEN,
+		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
+		NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+	},
 });

@@ -1,7 +1,6 @@
 {
 	"name": "@answeroverflow/env",
 	"version": "0.1.0",
-	"types": "shared.mjs",
 	"files": [
 		"bot.mjs",
 		"web.mjs",
@@ -14,9 +13,7 @@
 		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
 		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
 		"lint": "eslint . && tsc --noEmit",
-		"lint:fix": "eslint . --fix",
-		"test": "pnpm vitest run  --coverage",
-		"test:watch": "pnpm vitest"
+		"lint:fix": "eslint . --fix"
 	},
 	"dependencies": {
 		"@t3-oss/env-nextjs": "^0.6.0",

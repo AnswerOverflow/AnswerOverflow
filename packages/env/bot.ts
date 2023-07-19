@@ -1,3 +1,4 @@
+/* eslint-disable n/no-process-env */
 import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod';
 import { sharedEnvs } from './shared';
@@ -45,7 +46,6 @@ export const botEnv = {
 				.transform((s) => parseInt(s, 10))
 				.pipe(z.number()),
 		},
-		// eslint-disable-next-line n/no-process-env
 		experimental__runtimeEnv: process.env,
 	}),
 };

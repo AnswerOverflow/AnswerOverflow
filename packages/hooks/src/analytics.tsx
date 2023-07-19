@@ -143,7 +143,7 @@ export const AnalyticsProvider = ({
 		if (status === 'loading') {
 			return;
 		}
-		if (!analyticsLoaded) {
+		if (!analyticsLoaded && webClientEnv.NEXT_PUBLIC_POSTHOG_TOKEN) {
 			posthog.init(webClientEnv.NEXT_PUBLIC_POSTHOG_TOKEN, {
 				disable_session_recording: true,
 				persistence: 'memory',
