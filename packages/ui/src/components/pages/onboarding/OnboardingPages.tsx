@@ -387,6 +387,7 @@ export function WelcomePageRenderer(props: {
 										...server,
 										description: null,
 										vanityUrl: null,
+										vanityInviteCode: null,
 										kickedTime: null,
 										customDomain: null,
 									}}

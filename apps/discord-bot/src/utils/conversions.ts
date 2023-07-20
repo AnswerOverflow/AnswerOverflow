@@ -265,6 +265,7 @@ export function toAOServer(guild: Guild) {
 		name: guild.name,
 		icon: guild.icon,
 		description: guild.description,
+		vanityInviteCode: guild.vanityURLCode,
 	});
 }
 

@@ -113,10 +113,11 @@ enum Plan {
 
 model Server {
   // Discord Data
-  id          String  @id @unique
-  name        String  @db.VarChar(100)
-  icon        String? @db.VarChar(45)
-  description String?
+  id               String  @id @unique
+  name             String  @db.VarChar(100)
+  icon             String? @db.VarChar(45)
+  description      String?
+  vanityInviteCode String? @unique
 
   //
   // Answer Overflow Settings Start

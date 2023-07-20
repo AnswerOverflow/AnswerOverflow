@@ -31,6 +31,7 @@ async function autoUpdateServerInfo(guild: Guild) {
 			name: convertedServer.name,
 			description: convertedServer.description,
 			kickedTime: null,
+			vanityInviteCode: convertedServer.vanityInviteCode,
 		},
 	});
 	registerServerGroup(
