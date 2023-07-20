@@ -22,6 +22,8 @@ import { ServerSettingsMenu } from '~discord-bot/components/settings/server-sett
 import {
 	ENABLE_READ_THE_RULES_CONSENT_LABEL,
 	DISABLE_READ_THE_RULES_CONSENT_LABEL,
+	ENABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
+	DISABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
 } from '@answeroverflow/constants';
 
 let textChannel: TextChannel;
@@ -77,6 +79,47 @@ describe('Server Settings Menu', () => {
 			});
 			const updated2 = await findServerById(server.id);
 			expect(updated2!.flags.readTheRulesConsentEnabled).toBeFalsy();
+		});
+	});
+	describe('Toggle Consider All Messages As Public Button', () => {
+		it('should enable consider all messages as public', async () => {
+			const message = await mockReply({
+				content: <ServerSettingsMenu server={server} />,
+				channel: textChannel,
+				member: members.guildMemberOwner,
+			});
+			await toggleButtonTest({
+				clicker: members.guildMemberOwner.user,
+				preClickLabel: ENABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
+				postClickLabel: DISABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
+				message: message,
+			});
+			const updated = await findServerById(server.id);
+			expect(updated!.flags.considerAllMessagesPublic).toBeTruthy();
+		});
+		it('should disable consider all messages as public', async () => {
+			const updated = await updateServer({
+				existing: null,
+				update: {
+					id: server.id,
+					flags: {
+						considerAllMessagesPublic: true,
+					},
+				},
+			});
+			const message = await mockReply({
+				content: <ServerSettingsMenu server={updated} />,
+				channel: textChannel,
+				member: members.guildMemberOwner,
+			});
+			await toggleButtonTest({
+				clicker: members.guildMemberOwner.user,
+				preClickLabel: DISABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
+				postClickLabel: ENABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
+				message: message,
+			});
+			const disabled = await findServerById(server.id);
+			expect(disabled!.flags.considerAllMessagesPublic).toBeFalsy();
 		});
 	});
 	// describe("View On Answer Overflow Link", () => {
