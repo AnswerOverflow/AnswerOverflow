@@ -22,6 +22,8 @@ import { ServerSettingsMenu } from '~discord-bot/components/settings/server-sett
 import {
 	ENABLE_READ_THE_RULES_CONSENT_LABEL,
 	DISABLE_READ_THE_RULES_CONSENT_LABEL,
+	ENABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
+	DISABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
 } from '@answeroverflow/constants';
 
 let textChannel: TextChannel;
@@ -88,8 +90,8 @@ describe('Server Settings Menu', () => {
 			});
 			await toggleButtonTest({
 				clicker: members.guildMemberOwner.user,
-				preClickLabel: 'Consider all messages as public',
-				postClickLabel: 'Stop considering all messages as public',
+				preClickLabel: ENABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
+				postClickLabel: DISABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
 				message: message,
 			});
 			const updated = await findServerById(server.id);
@@ -112,8 +114,8 @@ describe('Server Settings Menu', () => {
 			});
 			await toggleButtonTest({
 				clicker: members.guildMemberOwner.user,
-				postClickLabel: 'Consider all messages as public',
-				preClickLabel: 'Stop considering all messages as public',
+				preClickLabel: DISABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
+				postClickLabel: ENABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
 				message: message,
 			});
 			const disabled = await findServerById(server.id);

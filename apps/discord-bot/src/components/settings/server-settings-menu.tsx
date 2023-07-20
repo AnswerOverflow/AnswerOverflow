@@ -11,7 +11,9 @@ import {
 	ToggleButton,
 } from '../primitives';
 import {
+	DISABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
 	DISABLE_READ_THE_RULES_CONSENT_LABEL,
+	ENABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
 	ENABLE_READ_THE_RULES_CONSENT_LABEL,
 	READ_THE_RULES_CONSENT_PROMPT,
 	VIEW_ON_ANSWEROVERFLOW_LABEL,
@@ -54,8 +56,8 @@ const ToggleConsiderAllMessagesAsPublic = ({
 }) => (
 	<ToggleButton
 		currentlyEnabled={server.flags.considerAllMessagesPublic}
-		enableLabel={'Consider all messages as public'}
-		disableLabel={'Stop considering all messages as public'}
+		enableLabel={ENABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL}
+		disableLabel={DISABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL}
 		onClick={async (interaction, enabled) =>
 			guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
 				updateConsiderAllMessagesPublic({
@@ -92,6 +94,17 @@ export function ServerSettingsMenu({
 							enabled: !server.flags.readTheRulesConsentEnabled,
 							title: ENABLE_READ_THE_RULES_CONSENT_LABEL,
 							instructions: `New members who agree to the membership screening will be marked as consenting. You must have the following test in your membership screening before enabling: \n\n\`${READ_THE_RULES_CONSENT_PROMPT}\``,
+						},
+						{
+							enabled: server.flags.considerAllMessagesPublic,
+							title: DISABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
+							instructions:
+								'Only messages from members who have consented will be displayed',
+						},
+						{
+							enabled: !server.flags.considerAllMessagesPublic,
+							title: ENABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
+							instructions: 'All messages from your server will be displayed',
 						},
 						{
 							enabled: true,
