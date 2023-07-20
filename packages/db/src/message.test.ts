@@ -2,6 +2,7 @@ import type {
 	ChannelWithFlags,
 	DiscordAccount,
 	Server,
+	ServerWithFlags,
 } from '@answeroverflow/prisma-types';
 import {
 	mockChannelWithFlags,
@@ -32,14 +33,17 @@ import { createDiscordAccount, deleteDiscordAccount } from './discord-account';
 import type { Message } from '@answeroverflow/elastic-types';
 import { createUserServerSettings } from './user-server-settings';
 import { getRandomId } from '@answeroverflow/utils';
+import { addFlagsToServer } from '@answeroverflow/prisma-types';
 
 describe('Message Operations', () => {
 	let server: Server;
+	let serverWithFlags: ServerWithFlags;
 	let channel: ChannelWithFlags;
 	let message: Message;
 	let author: DiscordAccount;
 	beforeEach(async () => {
 		server = mockServer();
+		serverWithFlags = addFlagsToServer(server);
 		channel = mockChannelWithFlags(server, {
 			flags: {
 				indexingEnabled: true,
@@ -314,14 +318,14 @@ describe('Message Operations', () => {
 			const created = await upsertMessage(msg);
 			const withRef = await addReferenceToMessage(created);
 			await deleteDiscordAccount(author.id);
-			const withAuthor = await addAuthorToMessage(withRef!);
+			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
 			expect(withAuthor).toBeNull();
 		});
 		it('should add the author to the message', async () => {
 			const msg = mockMessage(server, channel, author);
 			const created = await upsertMessage(msg);
 			const withRef = await addReferenceToMessage(created);
-			const withAuthor = await addAuthorToMessage(withRef!);
+			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
 			expect(withAuthor?.author).not.toBeNull();
 			expect(withAuthor?.author?.id).toBe(author.id);
 		});
@@ -337,7 +341,7 @@ describe('Message Operations', () => {
 			await upsertMessage(reply);
 			const created = await upsertMessage(msg);
 			const withRef = await addReferenceToMessage(created);
-			const withAuthor = await addAuthorToMessage(withRef!);
+			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
 			expect(withAuthor?.referencedMessage?.author).not.toBeNull();
 			expect(withAuthor?.referencedMessage?.author?.id).toBe(author.id);
 		});
@@ -353,7 +357,7 @@ describe('Message Operations', () => {
 			await upsertMessage(reply);
 			const created = await upsertMessage(msg);
 			const withRef = await addReferenceToMessage(created);
-			const withAuthor = await addAuthorToMessage(withRef!);
+			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
 			expect(withAuthor?.referencedMessage).toBeNull();
 		});
 		it('should add the author to the solution message', async () => {
@@ -364,7 +368,7 @@ describe('Message Operations', () => {
 			const created = await upsertMessage(msg);
 			await upsertMessage(solution);
 			const withRef = await addReferenceToMessage(created);
-			const withAuthor = await addAuthorToMessage(withRef!);
+			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
 			expect(withAuthor!.solutionMessages[0]!.author).not.toBeNull();
 			expect(withAuthor!.solutionMessages[0]!.author?.id).toBe(author.id);
 		});
@@ -376,8 +380,49 @@ describe('Message Operations', () => {
 			const created = await upsertMessage(msg);
 			await upsertMessage(solution);
 			const withRef = await addReferenceToMessage(created);
-			const withAuthor = await addAuthorToMessage(withRef!);
+			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
 			expect(withAuthor?.solutionMessages).toHaveLength(0);
+		});
+		it('should mark a message as public if the server has require consent disabled', async () => {
+			const msg = mockMessage(server, channel, author);
+			const created = await upsertMessage(msg);
+			const withRef = await addReferenceToMessage(created);
+			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
+			expect(withAuthor!.public).toBe(false);
+			const withAuthorAndPublic = await addAuthorToMessage(withRef!, {
+				...serverWithFlags,
+				flags: {
+					...serverWithFlags.flags,
+					considerAllMessagesPublic: true,
+				},
+			});
+			expect(withAuthorAndPublic!.public).toBe(true);
+		});
+		it('should mark a message as public if the author has consented', async () => {
+			const msg = mockMessage(server, channel, author);
+			const created = await upsertMessage(msg);
+			const withRef = await addReferenceToMessage(created);
+			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
+			expect(withAuthor!.public).toBe(false);
+			await createUserServerSettings({
+				userId: author.id,
+				serverId: server.id,
+				flags: {
+					canPubliclyDisplayMessages: true,
+				},
+			});
+			const withAuthorAndPublic = await addAuthorToMessage(
+				withRef!,
+				serverWithFlags,
+			);
+			expect(withAuthorAndPublic!.public).toBe(true);
+		});
+		it("shouldn't be public by default", async () => {
+			const msg = mockMessage(server, channel, author);
+			const created = await upsertMessage(msg);
+			const withRef = await addReferenceToMessage(created);
+			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
+			expect(withAuthor!.public).toBe(false);
 		});
 	});
 	describe('Search', () => {
