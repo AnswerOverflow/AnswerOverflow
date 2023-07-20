@@ -79,6 +79,47 @@ describe('Server Settings Menu', () => {
 			expect(updated2!.flags.readTheRulesConsentEnabled).toBeFalsy();
 		});
 	});
+	describe('Toggle Consider All Messages As Public Button', () => {
+		it('should enable consider all messages as public', async () => {
+			const message = await mockReply({
+				content: <ServerSettingsMenu server={server} />,
+				channel: textChannel,
+				member: members.guildMemberOwner,
+			});
+			await toggleButtonTest({
+				clicker: members.guildMemberOwner.user,
+				preClickLabel: 'Consider all messages as public',
+				postClickLabel: 'Stop considering all messages as public',
+				message: message,
+			});
+			const updated = await findServerById(server.id);
+			expect(updated!.flags.considerAllMessagesPublic).toBeTruthy();
+		});
+		it('should disable consider all messages as public', async () => {
+			const updated = await updateServer({
+				existing: null,
+				update: {
+					id: server.id,
+					flags: {
+						considerAllMessagesPublic: true,
+					},
+				},
+			});
+			const message = await mockReply({
+				content: <ServerSettingsMenu server={updated} />,
+				channel: textChannel,
+				member: members.guildMemberOwner,
+			});
+			await toggleButtonTest({
+				clicker: members.guildMemberOwner.user,
+				postClickLabel: 'Consider all messages as public',
+				preClickLabel: 'Stop considering all messages as public',
+				message: message,
+			});
+			const disabled = await findServerById(server.id);
+			expect(disabled!.flags.considerAllMessagesPublic).toBeFalsy();
+		});
+	});
 	// describe("View On Answer Overflow Link", () => {
 	//   it("should have a link to the server's page on Answer Overflow", async () => {
 	//     const message = await reply(reacord, <ServerSettingsMenu server={server} />);

@@ -1,7 +1,10 @@
 import { ActionRow, Link } from '@answeroverflow/discordjs-react';
 import type { ServerWithFlags } from '@answeroverflow/db';
 import React from 'react';
-import { updateReadTheRulesConsentEnabled } from '~discord-bot/domains/server-settings';
+import {
+	updateConsiderAllMessagesPublic,
+	updateReadTheRulesConsentEnabled,
+} from '~discord-bot/domains/server-settings';
 import {
 	EmbedMenuInstruction,
 	InstructionsContainer,
@@ -30,6 +33,32 @@ const ToggleReadTheRulesConsentButton = ({
 		onClick={async (interaction, enabled) =>
 			guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
 				updateReadTheRulesConsentEnabled({
+					enabled,
+					member,
+					Error: (error) => ephemeralReply(error.message, interaction),
+					Ok(result) {
+						setServer(result);
+					},
+				}),
+			)
+		}
+	/>
+);
+
+const ToggleConsiderAllMessagesAsPublic = ({
+	server,
+	setServer,
+}: {
+	server: ServerWithFlags;
+	setServer: (server: ServerWithFlags) => void;
+}) => (
+	<ToggleButton
+		currentlyEnabled={server.flags.considerAllMessagesPublic}
+		enableLabel={'Consider all messages as public'}
+		disableLabel={'Stop considering all messages as public'}
+		onClick={async (interaction, enabled) =>
+			guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
+				updateConsiderAllMessagesPublic({
 					enabled,
 					member,
 					Error: (error) => ephemeralReply(error.message, interaction),
@@ -73,6 +102,10 @@ export function ServerSettingsMenu({
 				/>
 			</InstructionsContainer>
 			<ToggleReadTheRulesConsentButton setServer={setServer} server={server} />
+			<ToggleConsiderAllMessagesAsPublic
+				setServer={setServer}
+				server={server}
+			/>
 			<ActionRow>
 				<Link
 					url={`https://answeroverflow.com/c/${server.id}`}

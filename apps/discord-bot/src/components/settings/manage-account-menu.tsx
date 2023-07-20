@@ -43,7 +43,7 @@ const ToggleConsentButton = ({
 		onClick={(interaction, enabled) =>
 			guildTextChannelOnlyInteraction(interaction, async ({ member }) => {
 				await updateUserConsent({
-					aa: enabled,
+					canPubliclyDisplayMessages: enabled,
 					consentSource: 'manage-account-menu',
 					member,
 					Ok(updatedSettings) {

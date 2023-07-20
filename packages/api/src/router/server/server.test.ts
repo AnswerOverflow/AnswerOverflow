@@ -147,7 +147,7 @@ describe('Server Operations', () => {
 						permission,
 					);
 					const router = serverRouter.createCaller(account.ctx);
-					await router.setRequireConsentToDisplayMessagesDisabled({
+					await router.setConsiderAllMessagesPublic({
 						server,
 						enabled: true,
 					});

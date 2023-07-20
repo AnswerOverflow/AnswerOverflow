@@ -47,9 +47,9 @@ export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
 export const READ_THE_RULES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE =
 	'Read the rules consent already disabled';
 export const DISABLE_CONSENT_TO_DISPLAY_MESSAGES_ALREADY_ENABLED_ERROR_MESSAGE =
-  'Disable consent to display messages already enabled';
+	'Disable consent to display messages already enabled';
 export const DISABLE_CONSENT_TO_DISPLAY_MESSAGES_ALREADY_DISABLED_ERROR_MESSAGE =
-  'Disable consent to display messages already disabled';
+	'Disable consent to display messages already disabled';
 export const validDomainRegex = new RegExp(
 	/^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/,
 );
@@ -145,48 +145,48 @@ export const serverRouter = router({
 				},
 			});
 		}),
-  setRequireConsentToDisplayMessagesDisabled: withUserServersProcedure
-    .input(
-      z.object({
-        server: zServerCreate.omit({
-          flags: true,
-        }),
-        enabled: z.boolean(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      return mutateServer({
-        ctx,
-        server: input.server,
-        operation: async ({ oldSettings }) => {
-          return protectedMutation({
-            permissions: () =>
-              assertBoolsAreNotEqual({
-                oldValue: oldSettings.flags.readTheRulesConsentEnabled,
-                newValue: input.enabled,
-                messageIfBothFalse:
-                DISABLE_CONSENT_TO_DISPLAY_MESSAGES_ALREADY_DISABLED_ERROR_MESSAGE,
-                messageIfBothTrue:
-                DISABLE_CONSENT_TO_DISPLAY_MESSAGES_ALREADY_ENABLED_ERROR_MESSAGE,
-              }),
-            operation: () =>
-              upsertServer({
-                create: {
-                  ...input.server,
-                  flags: {
-                    consentRequiredToDisplayMessagesDisabled: input.enabled,
-                  },
-                },
-                update: {
-                  flags: {
-                    consentRequiredToDisplayMessagesDisabled: input.enabled,
-                  },
-                },
-              }),
-          });
-        },
-      });
-    }),
+	setConsiderAllMessagesPublic: withUserServersProcedure
+		.input(
+			z.object({
+				server: zServerCreate.omit({
+					flags: true,
+				}),
+				enabled: z.boolean(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			return mutateServer({
+				ctx,
+				server: input.server,
+				operation: async ({ oldSettings }) => {
+					return protectedMutation({
+						permissions: () =>
+							assertBoolsAreNotEqual({
+								oldValue: oldSettings.flags.considerAllMessagesPublic,
+								newValue: input.enabled,
+								messageIfBothFalse:
+									DISABLE_CONSENT_TO_DISPLAY_MESSAGES_ALREADY_DISABLED_ERROR_MESSAGE,
+								messageIfBothTrue:
+									DISABLE_CONSENT_TO_DISPLAY_MESSAGES_ALREADY_ENABLED_ERROR_MESSAGE,
+							}),
+						operation: () =>
+							upsertServer({
+								create: {
+									...input.server,
+									flags: {
+										considerAllMessagesPublic: input.enabled,
+									},
+								},
+								update: {
+									flags: {
+										considerAllMessagesPublic: input.enabled,
+									},
+								},
+							}),
+					});
+				},
+			});
+		}),
 	setCustomDomain: withUserServersProcedure
 		.input(
 			z.object({

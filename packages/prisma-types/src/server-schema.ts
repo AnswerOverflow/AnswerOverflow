@@ -6,7 +6,7 @@ import { bitfieldToDict, dictToBitfield, mergeFlags } from './bitfield';
 
 export const serverSettingsFlags = [
 	'readTheRulesConsentEnabled',
-	'consentRequiredToDisplayMessagesDisabled',
+	'considerAllMessagesPublic',
 ] as const;
 export const zServerSettingsFlags = toZObject(...serverSettingsFlags);
 
@@ -77,7 +77,7 @@ const externalServerProperties = {
 
 const externalServerPropertiesMutable = z
 	.object(omit(externalServerProperties, 'id'))
-  .deepPartial().shape;
+	.deepPartial().shape;
 
 const externalServerPropertiesRequired = pick(
 	externalServerProperties,
@@ -101,7 +101,7 @@ export const zServerPublic = z.object(
 	),
 );
 
-export const zServerMutable = z.object(externalServerPropertiesMutable)
+export const zServerMutable = z.object(externalServerPropertiesMutable);
 
 export const zServerRequired = z.object(externalServerPropertiesRequired);
 

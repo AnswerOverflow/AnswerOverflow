@@ -114,4 +114,12 @@ describe('Server flags', () => {
 	it('should disable read the rules consent correctly', () => {
 		expect(bitfieldToServerFlags(0).readTheRulesConsentEnabled).toBeFalsy();
 	});
+	it('should enable consider all messages public correctly', () => {
+		expect(
+			bitfieldToServerFlags(1 << 1).considerAllMessagesPublic,
+		).toBeTruthy();
+	});
+	it('should disable consider all messages public correctly', () => {
+		expect(bitfieldToServerFlags(0).considerAllMessagesPublic).toBeFalsy();
+	});
 });

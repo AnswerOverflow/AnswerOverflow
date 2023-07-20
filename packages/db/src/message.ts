@@ -101,19 +101,19 @@ export async function addReferencesToMessages(messages: Message[]) {
 
 export async function addAuthorToMessage(
 	message: Awaited<ReturnType<typeof addReferencesToMessages>>[number],
-  server: ServerWithFlags
+	server: ServerWithFlags,
 ) {
 	return (await addAuthorsToMessages([message], [server]))[0] ?? null;
 }
 
 export async function addAuthorsToMessages(
 	messages: Awaited<ReturnType<typeof addReferencesToMessages>>,
-  servers: ServerWithFlags[]
+	servers: ServerWithFlags[],
 ): Promise<MessageFull[]> {
 	if (messages.length === 0) {
 		return [];
 	}
-  const serverLookup = new Map(servers.map((s) => [s.id, s]));
+	const serverLookup = new Map(servers.map((s) => [s.id, s]));
 	const authorIds = new Set(messages.map((m) => m.authorId));
 	const authorServers = new Set(messages.map((m) => m.serverId));
 	const solutionAuthorIds = new Set(
@@ -155,7 +155,7 @@ export async function addAuthorsToMessages(
 
 	const makeMessageWithAuthor = (message: Message) => {
 		const author = authorLookup.get(message.authorId);
-    const server = serverLookup.get(message.serverId);
+		const server = serverLookup.get(message.serverId);
 		const authorServerSettings = authorServerSettingsLookup.get(
 			`${message.authorId}-${message.serverId}`,
 		);
@@ -166,7 +166,10 @@ export async function addAuthorsToMessages(
 		return {
 			...omit(message, 'authorId'),
 			author: zDiscordAccountPublic.parse(author),
-			public: server.flags.consentRequiredToDisplayMessagesDisabled || authorServerSettings?.flags.canPubliclyDisplayMessages || false,
+			public:
+				server.flags.considerAllMessagesPublic ||
+				authorServerSettings?.flags.canPubliclyDisplayMessages ||
+				false,
 		};
 	};
 
@@ -219,7 +222,7 @@ export async function findManyMessages(ids: string[]) {
 
 export async function findManyMessagesWithAuthors(
 	ids: string[],
-  servers: ServerWithFlags[]
+	servers: ServerWithFlags[],
 ): Promise<MessageFull[]> {
 	const messages = await findManyMessages(ids);
 	// TODO: Make work without adding references
@@ -231,7 +234,7 @@ export async function findAllChannelQuestions(input: {
 	channelId: string;
 	limit?: number;
 	includePrivateMessages?: boolean;
-  server: ServerWithFlags
+	server: ServerWithFlags;
 }) {
 	const threads = await findAllThreadsByParentId({
 		parentId: input.channelId,
@@ -239,7 +242,8 @@ export async function findAllChannelQuestions(input: {
 	});
 
 	const messages = await findManyMessagesWithAuthors(
-		threads.map((thread) => thread.id), [input.server]
+		threads.map((thread) => thread.id),
+		[input.server],
 	);
 
 	const messagesLookup = new Map(
@@ -372,7 +376,10 @@ export async function searchMessages(opts: MessageSearchOptions) {
 		findManyServersById(serverIds),
 		addReferencesToMessages(messages),
 	]);
-	const messagesWithAuthors = await addAuthorsToMessages(messagesWithRefs, servers);
+	const messagesWithAuthors = await addAuthorsToMessages(
+		messagesWithRefs,
+		servers,
+	);
 	const channelLookup = new Map(channels.map((c) => [c.id, c]));
 	const serverLookup = new Map(
 		servers.filter((x) => x.kickedTime === null).map((s) => [s.id, s]),
