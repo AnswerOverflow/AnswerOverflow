@@ -98,7 +98,7 @@ export const ChannelName = ({
 export const ServerInviteJoinButton = (props: { className?: string }) => {
 	const { channel, location, server, isUserInServer } =
 		useServerInviteContext();
-	const inviteCode = channel?.inviteCode;
+	const inviteCode = channel?.inviteCode || server.vanityInviteCode;
 	if (!inviteCode) return <></>;
 	return (
 		<LinkButton
@@ -108,7 +108,7 @@ export const ServerInviteJoinButton = (props: { className?: string }) => {
 			className={cn('text-center font-header font-bold', props.className)}
 			onMouseUp={() => {
 				trackEvent('Server Invite Click', {
-					...channelToAnalyticsData(channel),
+					...(channel && channelToAnalyticsData(channel)),
 					...serverToAnalyticsData(server),
 					'Button Location': location,
 				});

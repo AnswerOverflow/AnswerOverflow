@@ -21,6 +21,7 @@ export function pickPublicServerData(server: Server) {
 		'vanityUrl',
 		'kickedTime',
 		'customDomain',
+		'vanityInviteCode',
 	);
 }
 
