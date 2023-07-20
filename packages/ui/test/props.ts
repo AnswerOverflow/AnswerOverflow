@@ -96,7 +96,7 @@ export function mockServer(override: Partial<ServerWithFlags> = {}) {
 		customDomain: null,
 		flags: {
 			readTheRulesConsentEnabled: false,
-      consentRequiredToDisplayMessagesDisabled: false,
+			consentRequiredToDisplayMessagesDisabled: false,
 		},
 		plan: 'FREE',
 		stripeCustomerId: null,

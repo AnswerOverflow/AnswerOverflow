@@ -120,7 +120,7 @@ export const messagesRouter = router({
 			);
 			const messagesWithDiscordAccounts = await addAuthorsToMessages(
 				messagesWithRefs,
-        [server]
+				[server],
 			);
 
 			return {
