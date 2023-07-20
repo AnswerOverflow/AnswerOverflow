@@ -4,7 +4,10 @@ import { z } from 'zod';
 import { toZObject } from './zod-utils';
 import { bitfieldToDict, dictToBitfield, mergeFlags } from './bitfield';
 
-export const serverSettingsFlags = ['readTheRulesConsentEnabled'] as const;
+export const serverSettingsFlags = [
+	'readTheRulesConsentEnabled',
+	'consentRequiredToDisplayMessagesDisabled',
+] as const;
 export const zServerSettingsFlags = toZObject(...serverSettingsFlags);
 
 export const bitfieldToServerFlags = (bitfield: number) =>
@@ -74,7 +77,7 @@ const externalServerProperties = {
 
 const externalServerPropertiesMutable = z
 	.object(omit(externalServerProperties, 'id'))
-	.partial().shape;
+  .deepPartial().shape;
 
 const externalServerPropertiesRequired = pick(
 	externalServerProperties,
@@ -98,7 +101,7 @@ export const zServerPublic = z.object(
 	),
 );
 
-export const zServerMutable = z.object(externalServerPropertiesMutable);
+export const zServerMutable = z.object(externalServerPropertiesMutable)
 
 export const zServerRequired = z.object(externalServerPropertiesRequired);
 

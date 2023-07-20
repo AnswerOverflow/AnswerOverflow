@@ -28,7 +28,8 @@ export async function findServerWithCommunityPageData(opts: {
 		.map(addFlagsToChannel)
 		.filter((c) => c.flags.indexingEnabled)
 		.map((c) => zChannelPublic.parse(c));
-	const server = zServerPublic.parse(addFlagsToServer(found));
+  const server = addFlagsToServer(found);
+	const serverPublic = zServerPublic.parse(server);
 
 	const allChannelQuestions = await Promise.all(
 		channels.map((c) =>
@@ -36,6 +37,7 @@ export async function findServerWithCommunityPageData(opts: {
 				channelId: c.id,
 				includePrivateMessages: false,
 				limit: 10000,
+        server
 			}),
 		),
 	);
@@ -86,7 +88,7 @@ export async function findServerWithCommunityPageData(opts: {
 		})
 		.filter(Boolean);
 	return {
-		server,
+		server: serverPublic,
 		channels: channelsWithQuestions,
 	};
 }

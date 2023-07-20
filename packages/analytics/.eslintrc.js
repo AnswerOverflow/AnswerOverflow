@@ -4,13 +4,15 @@ module.exports = {
 	extends: ['@answeroverflow/eslint-config-custom'],
 	overrides: [
 		{
-			rules: {
+      rules: {
+      files: ['*.ts'], // Add the "files" property with the file patterns you want to target
 				'@typescript-eslint/naming-convention': [
 					'warn',
 					{
 						selector: 'typeProperty',
 						format: ['PascalCase'],
 					},
+
 				],
 			},
 		},
