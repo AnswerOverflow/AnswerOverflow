@@ -41,3 +41,22 @@ export async function updateConsiderAllMessagesPublic({
 		...statusHandlers,
 	});
 }
+
+export async function setAnonymizeMessages({
+	member,
+	enabled,
+	...statusHandlers
+}: {
+	member: GuildMember;
+	enabled: boolean;
+} & TRPCStatusHandler<ServerWithFlags>) {
+	return callAPI({
+		apiCall: (router) =>
+			router.servers.setAnonymizeMessages({
+				server: toAOServer(member.guild),
+				enabled,
+			}),
+		getCtx: () => createMemberCtx(member),
+		...statusHandlers,
+	});
+}

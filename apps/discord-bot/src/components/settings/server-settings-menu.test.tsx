@@ -24,6 +24,8 @@ import {
 	DISABLE_READ_THE_RULES_CONSENT_LABEL,
 	ENABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
 	DISABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
+	DISABLE_ANONYMIZE_MESSAGES_LABEL,
+	ENABLE_ANONYMIZE_MESSAGES_LABEL,
 } from '@answeroverflow/constants';
 
 let textChannel: TextChannel;
@@ -120,6 +122,47 @@ describe('Server Settings Menu', () => {
 			});
 			const disabled = await findServerById(server.id);
 			expect(disabled!.flags.considerAllMessagesPublic).toBeFalsy();
+		});
+		describe('Toggle Anonymize Messages Button', () => {
+			it('should enable anonymize messages', async () => {
+				const message = await mockReply({
+					content: <ServerSettingsMenu server={server} />,
+					channel: textChannel,
+					member: members.guildMemberOwner,
+				});
+				await toggleButtonTest({
+					clicker: members.guildMemberOwner.user,
+					preClickLabel: ENABLE_ANONYMIZE_MESSAGES_LABEL,
+					postClickLabel: DISABLE_ANONYMIZE_MESSAGES_LABEL,
+					message: message,
+				});
+				const updated = await findServerById(server.id);
+				expect(updated!.flags.anonymizeMessages).toBeTruthy();
+			});
+			it('should disable anonymize messages', async () => {
+				const updated = await updateServer({
+					existing: null,
+					update: {
+						id: server.id,
+						flags: {
+							anonymizeMessages: true,
+						},
+					},
+				});
+				const message = await mockReply({
+					content: <ServerSettingsMenu server={updated} />,
+					channel: textChannel,
+					member: members.guildMemberOwner,
+				});
+				await toggleButtonTest({
+					clicker: members.guildMemberOwner.user,
+					preClickLabel: DISABLE_ANONYMIZE_MESSAGES_LABEL,
+					postClickLabel: ENABLE_ANONYMIZE_MESSAGES_LABEL,
+					message: message,
+				});
+				const disabled = await findServerById(server.id);
+				expect(disabled!.flags.anonymizeMessages).toBeFalsy();
+			});
 		});
 	});
 	// describe("View On Answer Overflow Link", () => {

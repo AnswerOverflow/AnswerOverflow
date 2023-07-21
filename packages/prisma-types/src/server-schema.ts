@@ -7,6 +7,7 @@ import { bitfieldToDict, dictToBitfield, mergeFlags } from './bitfield';
 export const serverSettingsFlags = [
 	'readTheRulesConsentEnabled',
 	'considerAllMessagesPublic',
+	'anonymizeMessages',
 ] as const;
 export const zServerSettingsFlags = toZObject(...serverSettingsFlags);
 

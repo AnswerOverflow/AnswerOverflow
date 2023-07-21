@@ -20,10 +20,11 @@ import {
 	findUserServerSettingsById,
 } from './user-server-settings';
 import { findManyDiscordAccountsWithUserServerSettings } from './discord-account';
-import { omit } from '@answeroverflow/utils';
+import { getRandomId, omit } from '@answeroverflow/utils';
 import { findAllThreadsByParentId, findManyChannelsById } from './channel';
 import { findManyServersById } from './server';
 import type { MessageProps } from '@answeroverflow/constants';
+import { anonymizeDiscordAccount } from './utils/anonymization';
 export type MessageWithDiscordAccount = z.infer<
 	typeof zMessageWithDiscordAccount
 >;
@@ -152,9 +153,10 @@ export async function addAuthorsToMessages(
 		),
 	);
 	const authorLookup = new Map(authors.map((a) => [a.id, a]));
-
+	const seedLookup = new Map(authors.map((a) => [a.id, getRandomId()]));
 	const makeMessageWithAuthor = (message: Message) => {
 		const author = authorLookup.get(message.authorId);
+		const seed = seedLookup.get(message.authorId) ?? getRandomId();
 		const server = serverLookup.get(message.serverId);
 		const authorServerSettings = authorServerSettingsLookup.get(
 			`${message.authorId}-${message.serverId}`,
@@ -162,10 +164,14 @@ export async function addAuthorsToMessages(
 		if (!author || !server) {
 			return null;
 		}
-
+		const publicAccount = zDiscordAccountPublic.parse(author);
 		return {
 			...omit(message, 'authorId'),
-			author: zDiscordAccountPublic.parse(author),
+			author:
+				server.flags.anonymizeMessages &&
+				!authorServerSettings?.flags.canPubliclyDisplayMessages
+					? anonymizeDiscordAccount(publicAccount, seed)
+					: publicAccount,
 			public:
 				server.flags.considerAllMessagesPublic ||
 				authorServerSettings?.flags.canPubliclyDisplayMessages ||

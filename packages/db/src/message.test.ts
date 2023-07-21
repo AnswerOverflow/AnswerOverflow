@@ -424,6 +424,22 @@ describe('Message Operations', () => {
 			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
 			expect(withAuthor!.public).toBe(false);
 		});
+		it('should anonymize the author if the server has anonymization enabled', async () => {
+			const msg = mockMessage(server, channel, author);
+			const created = await upsertMessage(msg);
+			const withRef = await addReferenceToMessage(created);
+			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
+			expect(withAuthor!.author.name).toBe(author.name);
+			const withAuthorAndAnonymized = await addAuthorToMessage(withRef!, {
+				...serverWithFlags,
+				flags: {
+					...serverWithFlags.flags,
+					anonymizeMessages: true,
+				},
+			});
+			expect(withAuthorAndAnonymized!.author.name).not.toBe(author.name);
+			expect(withAuthorAndAnonymized!.author.id).not.toBe(author.id);
+		});
 	});
 	describe('Search', () => {
 		it('should search for a message in a normal channel', async () => {
