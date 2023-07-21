@@ -19,6 +19,7 @@ import {
 	findChannelById,
 	findMessageById,
 	findServerById,
+	ServerWithFlags,
 	upsertMessage,
 } from '@answeroverflow/db';
 import {
@@ -220,12 +221,12 @@ export function makeRequestForConsentString(serverName: string) {
 
 export function makeMarkSolutionResponse({
 	solution,
-	serverName,
+	server,
 	settings,
 }: {
 	question: Message;
 	solution: Message;
-	serverName: string;
+	server: ServerWithFlags;
 	settings: ChannelWithFlags;
 }) {
 	const components = new ActionRowBuilder<MessageActionRowComponentBuilder>();
@@ -238,12 +239,13 @@ export function makeMarkSolutionResponse({
 
 	if (
 		settings.flags.indexingEnabled &&
-		!settings.flags.forumGuidelinesConsentEnabled
+		!settings.flags.forumGuidelinesConsentEnabled &&
+		!server.flags.considerAllMessagesPublic
 	) {
 		embed.setDescription(
 			[
 				`**Thank you for marking this question as solved!**`,
-				`Want to help others find the answer to this question? Use the button below to display your messages in ${serverName} on the web!`,
+				`Want to help others find the answer to this question? Use the button below to display your messages in ${server.name} on the web!`,
 			].join('\n\n'),
 		);
 		components.addComponents(makeConsentButton('mark-solution-response'));
@@ -269,6 +271,7 @@ export function makeMarkSolutionResponse({
 export async function markAsSolved(targetMessage: Message, user: User) {
 	const { parentChannel, question, solution, thread, channelSettings, server } =
 		await checkIfCanMarkSolution(targetMessage, user);
+	const aoServer = await findServerById(server.id);
 	await addSolvedIndicatorToThread(
 		thread,
 		parentChannel,
@@ -283,13 +286,12 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 	const { embed, components } = makeMarkSolutionResponse({
 		question,
 		solution,
-		serverName: server.name,
+		server: aoServer!,
 		settings: channelSettings,
 	});
 	await solution.react('✅');
 
 	trackDiscordEvent('Solved Question', async () => {
-		const serverSettings = await findServerById(server.id);
 		const [asker, solver, commandUser] = await Promise.all([
 			thread.guild.members.fetch(question.author.id),
 			thread.guild.members.fetch(solution.author.id),
@@ -298,7 +300,7 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 		const data: QuestionSolvedProps = {
 			...serverWithDiscordInfoToAnalyticsData({
 				guild: thread.guild,
-				serverWithSettings: serverSettings!,
+				serverWithSettings: aoServer!,
 			}),
 			...channelWithDiscordInfoToAnalyticsData({
 				answerOverflowChannel: channelSettings,

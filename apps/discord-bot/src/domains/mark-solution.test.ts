@@ -38,7 +38,12 @@ import {
 } from '@answeroverflow/discordjs-mock';
 import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
 import { randomSnowflake } from '@answeroverflow/discordjs-utils';
-import { createChannel, createServer, upsertMessage } from '@answeroverflow/db';
+import {
+	createChannel,
+	createServer,
+	ServerWithFlags,
+	upsertMessage,
+} from '@answeroverflow/db';
 import { PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED } from '@answeroverflow/constants';
 
 let client: Client;
@@ -48,13 +53,14 @@ let textChannel: TextChannel;
 let forumChannel: ForumChannel;
 let textChannelThread: AnyThreadChannel;
 let forumChannelThread: AnyThreadChannel;
+let server: ServerWithFlags;
 beforeEach(async () => {
 	client = await setupAnswerOverflowBot();
 	guild = mockGuild(client);
 	textChannel = mockTextChannel(client, guild);
 	forumChannel = mockForumChannel(client, guild);
 	defaultAuthor = mockGuildMember({ client, guild });
-	await createServer(toAOServer(guild));
+	server = await createServer(toAOServer(guild));
 	textChannelThread = mockPublicThread({
 		client,
 		parentChannel: textChannel,
@@ -420,7 +426,7 @@ describe('Make Mark Solution Response', () => {
 		const { components, embed } = makeMarkSolutionResponse({
 			question,
 			solution,
-			serverName: textChannel.guild.name,
+			server,
 			settings: {
 				...settings,
 				flags: {
@@ -440,7 +446,7 @@ describe('Make Mark Solution Response', () => {
 		const { components, embed } = makeMarkSolutionResponse({
 			question,
 			solution,
-			serverName: textChannel.guild.name,
+			server,
 			settings: {
 				...settings,
 				flags: {
