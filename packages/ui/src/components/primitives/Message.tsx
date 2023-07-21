@@ -173,7 +173,7 @@ export const MessageContentWithSolution = (props: {
 };
 
 const SingularImageAttachment = () => {
-	const { message, loadingStyle } = useMessageContext();
+	const { message, loadingStyle, collapseContent } = useMessageContext();
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -193,9 +193,13 @@ const SingularImageAttachment = () => {
 		return <p className="mt-2 text-lg">An error occurred loading images...</p>;
 	}
 
+	const imagesToShow = collapseContent
+		? parsedImages.slice(0, 1)
+		: parsedImages;
+
 	return (
 		<>
-			{parsedImages.map((x, i) => (
+			{imagesToShow.map((x, i) => (
 				<div className="mt-4 max-w-sm lg:max-w-md" key={i}>
 					<Image
 						src={x?.src ?? ''}
