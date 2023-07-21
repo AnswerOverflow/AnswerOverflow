@@ -121,7 +121,6 @@ const DEFAULT_COLLAPSE_CONTENT_LENGTH = 500;
 export const MessageContents = () => {
 	const { message, collapseContent } = useMessageContext();
 	const { toHTML } = discordMarkdown;
-	const convertedMessageContent = toHTML(message.content);
 
 	const collapseBy =
 		typeof collapseContent === 'number'
@@ -131,18 +130,19 @@ export const MessageContents = () => {
 	const shouldCollapse =
 		collapseContent !== false &&
 		collapseContent !== undefined &&
-		convertedMessageContent.length > collapseBy;
+		message.content.length > collapseBy;
 
-	const textToRender = shouldCollapse
-		? `${convertedMessageContent.slice(0, collapseBy).trim()}...`
-		: convertedMessageContent;
+	const trimmedText = shouldCollapse
+		? `${message.content.slice(0, collapseBy).trim()}...`
+		: message.content;
+	const convertedMessageContent = toHTML(trimmedText);
 
 	return (
 		<div
 			className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white"
 			// The HTML from discord-markdown is escaped
 			dangerouslySetInnerHTML={{
-				__html: textToRender,
+				__html: convertedMessageContent,
 			}}
 		/>
 	);
