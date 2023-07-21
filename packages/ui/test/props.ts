@@ -98,6 +98,7 @@ export function mockServer(override: Partial<ServerWithFlags> = {}) {
 		flags: {
 			readTheRulesConsentEnabled: false,
 			considerAllMessagesPublic: false,
+			anonymizeMessages: false,
 		},
 		plan: 'FREE',
 		stripeCustomerId: null,

@@ -187,6 +187,46 @@ export const serverRouter = router({
 				},
 			});
 		}),
+	setAnonymizeMessages: withUserServersProcedure
+		.input(
+			z.object({
+				server: zServerCreate.omit({
+					flags: true,
+				}),
+				enabled: z.boolean(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			return mutateServer({
+				ctx,
+				server: input.server,
+				operation: async ({ oldSettings }) => {
+					return protectedMutation({
+						permissions: () =>
+							assertBoolsAreNotEqual({
+								oldValue: oldSettings.flags.anonymizeMessages,
+								newValue: input.enabled,
+								messageIfBothFalse: 'Anonymize messages already disabled',
+								messageIfBothTrue: 'Anonymize messages already enabled',
+							}),
+						operation: () =>
+							upsertServer({
+								create: {
+									...input.server,
+									flags: {
+										anonymizeMessages: input.enabled,
+									},
+								},
+								update: {
+									flags: {
+										anonymizeMessages: input.enabled,
+									},
+								},
+							}),
+					});
+				},
+			});
+		}),
 	setCustomDomain: withUserServersProcedure
 		.input(
 			z.object({
