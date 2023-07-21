@@ -25,6 +25,6 @@
 		"@vitest/coverage-c8": "^0.28.5",
 		"eslint": "^8.45.0",
 		"prettier": "^2.8.8",
-		"vitest": "^0.29.8"
+		"vitest": "^0.33.0"
 	}
 }
