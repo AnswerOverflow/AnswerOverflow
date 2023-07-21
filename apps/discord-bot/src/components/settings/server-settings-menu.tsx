@@ -2,6 +2,7 @@ import { ActionRow, Link } from '@answeroverflow/discordjs-react';
 import type { ServerWithFlags } from '@answeroverflow/db';
 import React from 'react';
 import {
+	setAnonymizeMessages,
 	updateConsiderAllMessagesPublic,
 	updateReadTheRulesConsentEnabled,
 } from '~discord-bot/domains/server-settings';
@@ -11,8 +12,10 @@ import {
 	ToggleButton,
 } from '../primitives';
 import {
+	DISABLE_ANONYMIZE_MESSAGES_LABEL,
 	DISABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
 	DISABLE_READ_THE_RULES_CONSENT_LABEL,
+	ENABLE_ANONYMIZE_MESSAGES_LABEL,
 	ENABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
 	ENABLE_READ_THE_RULES_CONSENT_LABEL,
 	READ_THE_RULES_CONSENT_PROMPT,
@@ -73,6 +76,32 @@ const ToggleConsiderAllMessagesAsPublic = ({
 	/>
 );
 
+const ToggleAnonymizeMessages = ({
+	server,
+	setServer,
+}: {
+	server: ServerWithFlags;
+	setServer: (server: ServerWithFlags) => void;
+}) => (
+	<ToggleButton
+		currentlyEnabled={server.flags.anonymizeMessages}
+		enableLabel={ENABLE_ANONYMIZE_MESSAGES_LABEL}
+		disableLabel={DISABLE_ANONYMIZE_MESSAGES_LABEL}
+		onClick={async (interaction, enabled) =>
+			guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
+				setAnonymizeMessages({
+					enabled,
+					member,
+					Error: (error) => ephemeralReply(error.message, interaction),
+					Ok(result) {
+						setServer(result);
+					},
+				}),
+			)
+		}
+	/>
+);
+
 export function ServerSettingsMenu({
 	server: initialServer,
 }: {
@@ -104,7 +133,20 @@ export function ServerSettingsMenu({
 						{
 							enabled: !server.flags.considerAllMessagesPublic,
 							title: ENABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL,
-							instructions: 'All messages from your server will be displayed',
+							instructions:
+								'All messages from your server will be displayed without users having to give consent. This is recommended for highly public servers.',
+						},
+						{
+							enabled: !server.flags.anonymizeMessages,
+							title: ENABLE_ANONYMIZE_MESSAGES_LABEL,
+							instructions:
+								'Hides the name, id, and avatar of the author of messages unless they have consented to have their messages publicly displayed. If `Consider all messages as public` is enabled, this setting will still apply.\n\n*This is not completely anonymous as someone can still join your server, search for the message content, and find the author.*',
+						},
+						{
+							enabled: server.flags.anonymizeMessages,
+							title: DISABLE_ANONYMIZE_MESSAGES_LABEL,
+							instructions:
+								'Display the name, id, and avatar of the author of messages for all users in your server',
 						},
 						{
 							enabled: true,
@@ -119,6 +161,7 @@ export function ServerSettingsMenu({
 				setServer={setServer}
 				server={server}
 			/>
+			<ToggleAnonymizeMessages setServer={setServer} server={server} />
 			<ActionRow>
 				<Link
 					url={`https://answeroverflow.com/c/${server.id}`}

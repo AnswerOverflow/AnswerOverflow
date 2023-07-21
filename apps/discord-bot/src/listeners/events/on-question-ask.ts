@@ -10,7 +10,8 @@ import {
 	threadWithDiscordInfoToAnalyticsData,
 	trackDiscordEvent,
 } from '~discord-bot/utils/analytics';
-
+import { delay } from '@answeroverflow/discordjs-mock';
+import { botEnv } from '@answeroverflow/env/bot';
 @ApplyOptions<Listener.Options>({ event: Events.ClientReady })
 export class QuestionAskedListener extends Listener<Events.ClientReady> {
 	public run() {
@@ -24,6 +25,11 @@ export class QuestionAskedListener extends Listener<Events.ClientReady> {
 			if (thread.type === ChannelType.PrivateThread) {
 				return; // TODO: Support private threads?
 			}
+			/*
+        Discord sends the threadCreate and messageCreate events at the same time, however, the threadCreate event can be recevied before the messageCreate event, resulting in the first message not being available yet.
+       */
+			await delay(botEnv.NODE_ENV === 'test' ? 0 : 1000);
+
 			const firstMessage = await thread.fetchStarterMessage();
 			if (!firstMessage) {
 				this.container.logger.warn(
