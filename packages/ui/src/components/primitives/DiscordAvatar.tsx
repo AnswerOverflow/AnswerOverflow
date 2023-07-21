@@ -6,6 +6,7 @@ import {
 	type AvatarProps,
 	getAvatarSize,
 } from './base';
+import { getInitials } from '~ui/utils/avatars';
 
 export interface DiscordAvatarProps extends Omit<AvatarProps, 'alt' | 'url'> {
 	user: DiscordAccountPublic;
@@ -30,9 +31,7 @@ export function DiscordAvatar(props: DiscordAvatarProps) {
 	return (
 		<Avatar {...props}>
 			<AvatarImage src={profilePictureUrl} alt={props.user.name} {...props} />
-			<AvatarFallback {...props}>
-				{props.user.name.split(' ').map((word) => word.at(0)?.toUpperCase())}
-			</AvatarFallback>
+			<AvatarFallback {...props}>{getInitials(props.user.name)}</AvatarFallback>
 		</Avatar>
 	);
 }
