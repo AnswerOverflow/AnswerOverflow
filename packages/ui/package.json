@@ -41,7 +41,7 @@
 		"cva": "npm:class-variance-authority@^0.6.1",
 		"discord-markdown": "^2.5.1",
 		"highlight.js": "^11.8.0",
-		"next": "13.4.8",
+		"next": "13.4.12",
 		"next-auth": "^4.22.1",
 		"next-themes": "^0.2.1",
 		"posthog-js": "^1.71.0",
