@@ -28,7 +28,7 @@ export class QuestionAskedListener extends Listener<Events.ClientReady> {
 			/*
         Discord sends the threadCreate and messageCreate events at the same time, however, the threadCreate event can be recevied before the messageCreate event, resulting in the first message not being available yet.
        */
-			await delay(botEnv.NODE_ENV === 'test' ? 0 : 1000);
+			if (botEnv.NODE_ENV !== 'test') await delay(1000);
 
 			const firstMessage = await thread.fetchStarterMessage();
 			if (!firstMessage) {
