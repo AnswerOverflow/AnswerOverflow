@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
-import { ChannelType, Events } from 'discord.js';
+import { ChannelType, DiscordAPIError, Events } from 'discord.js';
 import { findServerById, getDefaultServerWithFlags } from '@answeroverflow/db';
 import {
 	channelWithDiscordInfoToAnalyticsData,
@@ -12,6 +12,7 @@ import {
 } from '~discord-bot/utils/analytics';
 import { delay } from '@answeroverflow/discordjs-mock';
 import { botEnv } from '@answeroverflow/env/bot';
+
 @ApplyOptions<Listener.Options>({ event: Events.ClientReady })
 export class QuestionAskedListener extends Listener<Events.ClientReady> {
 	public run() {
@@ -28,19 +29,25 @@ export class QuestionAskedListener extends Listener<Events.ClientReady> {
 			/*
         Discord sends the threadCreate and messageCreate events at the same time, however, the threadCreate event can be recevied before the messageCreate event, resulting in the first message not being available yet.
        */
-			if (botEnv.NODE_ENV !== 'test') await delay(1000);
+			const fetchAfterDelay = async (time: number) => {
+				try {
+					if (botEnv.NODE_ENV !== 'test') await delay(time);
+					return await thread.fetchStarterMessage();
+				} catch (error) {
+					if (!(error instanceof DiscordAPIError && error.status === 404))
+						throw error;
+					return null;
+				}
+			};
 
-			const firstMessage = await thread.fetchStarterMessage();
-			if (!firstMessage) {
-				this.container.logger.warn(
-					`Thread ${thread.id} was created but no message was found.`,
-				);
-				return;
-			}
+			const firstMessage =
+				(await fetchAfterDelay(1000)) || (await fetchAfterDelay(10000));
+
+			const questionAskerId = firstMessage?.author.id || thread.ownerId;
 
 			const questionAsker =
-				thread.guild.members.cache.get(firstMessage.author.id) ||
-				(await thread.guild.members.fetch(firstMessage.author.id));
+				thread.guild.members.cache.get(questionAskerId!) ||
+				(await thread.guild.members.fetch(questionAskerId!));
 			if (
 				channelSettings.flags.indexingEnabled ||
 				channelSettings.flags.markSolutionEnabled
@@ -70,7 +77,8 @@ export class QuestionAskedListener extends Listener<Events.ClientReady> {
 							thread,
 						}),
 						...memberToAnalyticsUser('Question Asker', questionAsker),
-						...messageToAnalyticsMessage('Question', firstMessage),
+						...(firstMessage &&
+							messageToAnalyticsMessage('Question', firstMessage)),
 					};
 				});
 			}
