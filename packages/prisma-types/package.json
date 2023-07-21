@@ -23,7 +23,7 @@
 	"dependencies": {
 		"@answeroverflow/utils": "^0.1.0",
 		"@answeroverflow/env": "^0.1.0",
-		"@prisma/client": "^4.16.2",
+		"@prisma/client": "^5.0.0",
 		"@sapphire/bitfield": "^1.2.0",
 		"discord-api-types": "^0.37.48",
 		"dotenv-cra": "^3.0.3",
@@ -36,7 +36,7 @@
 		"dotenv-cli": "^7.2.1",
 		"eslint": "^8.45.0",
 		"prettier": "^2.8.8",
-		"prisma": "^4.16.2",
+		"prisma": "^5.0.0",
 		"vitest": "^0.29.8"
 	}
 }
