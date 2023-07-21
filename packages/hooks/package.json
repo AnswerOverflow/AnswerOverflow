@@ -13,7 +13,7 @@
 	"dependencies": {
 		"@answeroverflow/api": "^0.1.0",
 		"@answeroverflow/constants": "^0.1.0",
-		"next": "13.4.8",
+		"next": "13.4.11",
 		"next-auth": "^4.22.1",
 		"posthog-js": "^1.71.0",
 		"@answeroverflow/env": "^0.1.0",
