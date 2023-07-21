@@ -38,7 +38,7 @@ export async function sendMarkSolutionInstructionsInThread(
 	newlyCreated: boolean,
 	channelSettings: ChannelWithFlags,
 	threadOwner: GuildMember,
-	question: Message,
+	question: Message | null,
 ) {
 	if (!channelSettings.flags.sendMarkSolutionInstructionsInNewThreads) {
 		throw new SendMarkSolutionInstructionsError(
@@ -68,7 +68,7 @@ export async function sendMarkSolutionInstructionsInThread(
 		const server = await findServerById(thread.guildId);
 		return {
 			...memberToAnalyticsUser('Question Asker', threadOwner),
-			...messageToAnalyticsMessage('Question', question),
+			...(question && messageToAnalyticsMessage('Question', question)),
 			'Answer Overflow Account Id': threadOwner.id,
 			...threadWithDiscordInfoToAnalyticsData({ thread }),
 			...channelWithDiscordInfoToAnalyticsData({

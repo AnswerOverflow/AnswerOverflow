@@ -103,7 +103,7 @@ type QuestionAskedProps = ServerPropsWithDiscordData &
 	ChannelPropsWithDiscordData &
 	ThreadProps &
 	UserProps<'Question Asker'> &
-	MessageProps<'Question'>;
+	Partial<MessageProps<'Question'>>;
 
 export type QuestionSolvedProps = QuestionAskedProps &
 	UserProps<'Question Solver'> &
