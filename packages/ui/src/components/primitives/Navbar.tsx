@@ -37,6 +37,7 @@ import {
 	LuSun,
 } from 'react-icons/lu';
 import { useTheme } from 'next-themes';
+import { getInitials } from '~ui/utils/avatars';
 const MainSiteDropdownMenuGroup = () => (
 	<>
 		<DropdownMenuGroup>
@@ -99,9 +100,7 @@ export const UserAvatar = ({ user }: { user: Session['user'] }) => {
 						src={user.image ?? undefined}
 					/>
 					<AvatarFallback>
-						{(user.name ?? 'Signed In User')
-							.split(' ')
-							.map((word) => word.at(0)?.toUpperCase())}
+						{getInitials(user.name ?? 'Signed In User')}
 					</AvatarFallback>
 				</Avatar>
 			</DropdownMenuTrigger>

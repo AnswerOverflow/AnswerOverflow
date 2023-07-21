@@ -1,6 +1,7 @@
 import type { ServerPublic } from '@answeroverflow/api';
 import { AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import { Avatar, type AvatarProps, getAvatarSize } from './base';
+import { getInitials } from '~ui/utils/avatars';
 
 export interface ServerIconProps extends Omit<AvatarProps, 'url' | 'alt'> {
 	server: Pick<ServerPublic, 'id' | 'name' | 'icon'>;
@@ -27,7 +28,7 @@ export function ServerIcon(props: ServerIconProps) {
 				{...props}
 			/>
 			<AvatarFallback {...props}>
-				{props.server.name.split(' ').map((word) => word.at(0)?.toUpperCase())}
+				{getInitials(props.server.name)}
 			</AvatarFallback>
 		</Avatar>
 	);
