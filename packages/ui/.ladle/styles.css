@@ -45,3 +45,7 @@ body {
 		clip-path: inset(0.6px);
 	}
 }
+
+.overlay{
+  --gradient-width: 1000px!important;
+}
