@@ -15,6 +15,7 @@ import {
 	serverWithDiscordInfoToAnalyticsData,
 	trackDiscordEvent,
 } from '~discord-bot/utils/analytics';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 /*
   Guild related events are tracked here, this may make sense to split into multiple files as the complexity grows.
@@ -30,6 +31,7 @@ async function autoUpdateServerInfo(guild: Guild) {
 			name: convertedServer.name,
 			description: convertedServer.description,
 			kickedTime: null,
+			vanityInviteCode: convertedServer.vanityInviteCode,
 		},
 	});
 	registerServerGroup(
@@ -98,32 +100,33 @@ function makeGuildEmbed(guild: Guild, joined: boolean) {
 @ApplyOptions<Listener.Options>({ once: true, event: Events.ClientReady })
 export class SyncOnReady extends Listener {
 	public async run() {
-		if (process.env.NODE_ENV === 'production') await delay(30 * 1000); // give time for dbs to start up
+		if (sharedEnvs.NODE_ENV === 'production') await delay(30 * 1000); // give time for dbs to start up
 		// 1. Sync all of the servers to have the most up to date data
 		const guilds = this.container.client.guilds.cache;
-		const syncs = guilds.map((guild) => syncServer(guild));
 		const activeServerIds = new Set();
-		for await (const sync of syncs) {
-			this.container.logger.info(`Synced server ${sync.name}`);
-			activeServerIds.add(sync.id);
+		for await (const guild of guilds.values()) {
+			// eslint-disable-next-line no-await-in-loop
+			this.container.logger.info(`Syncing guild ${guild.name}`);
+			await syncServer(guild);
+			activeServerIds.add(guild.id);
 		}
 		// 2. For any servers that are in the database and not in the guilds the bot is in, mark them as kicked
 		const servers =
-			process.env.NODE_ENV === 'test' ? [] : await findAllServers();
+			sharedEnvs.NODE_ENV === 'test' ? [] : await findAllServers();
 		const serversToMarkAsKicked = servers.filter(
 			(server) => !activeServerIds.has(server.id) && !server.kickedTime,
 		);
-		const kicks = serversToMarkAsKicked.map((server) =>
-			updateServer({
+
+		for await (const server of serversToMarkAsKicked.values()) {
+			// eslint-disable-next-line no-await-in-loop
+			this.container.logger.info(`Marking server ${server.name} as kicked`);
+			await updateServer({
 				existing: server,
 				update: {
 					id: server.id,
 					kickedTime: new Date(),
 				},
-			}),
-		);
-		for await (const kick of kicks) {
-			this.container.logger.info(`Kicked server ${kick.name}`);
+			});
 		}
 	}
 }
@@ -141,7 +144,7 @@ export class SyncOnJoin extends Listener {
 			}),
 			'Answer Overflow Account Id': guild.ownerId, // <---TODO: Not a great id to track with but best we've got
 		});
-		if (process.env.NODE_ENV !== 'test') {
+		if (sharedEnvs.NODE_ENV !== 'test') {
 			const rhysUser = await this.container.client.users.fetch(
 				'523949187663134754',
 			);
@@ -177,7 +180,7 @@ export class SyncOnDelete extends Listener {
 				serverWithSettings: upserted,
 			}),
 		});
-		if (process.env.NODE_ENV !== 'test') {
+		if (sharedEnvs.NODE_ENV !== 'test') {
 			const rhysUser = await this.container.client.users.fetch(
 				'523949187663134754',
 			);

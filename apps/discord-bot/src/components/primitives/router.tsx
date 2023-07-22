@@ -14,7 +14,7 @@ function popHistory(key: string) {
 	}
 	const { history, setHistory } = data;
 	const newHistory = [...history];
-	newHistory.pop();
+	void newHistory.pop();
 	container.messageHistory.set(key, {
 		history: newHistory,
 		setHistory,

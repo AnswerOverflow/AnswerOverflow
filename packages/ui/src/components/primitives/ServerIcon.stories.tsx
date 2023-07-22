@@ -1,31 +1,22 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Story } from '@ladle/react';
 import { ServerIcon } from './ServerIcon';
-import { mockServer } from '~ui/test/props';
-const meta = {
-	component: ServerIcon,
-} as Meta<typeof ServerIcon>;
+import { mockPublicServer } from '~ui/test/props';
 
-export default meta;
+type ServerIconProps = React.ComponentPropsWithoutRef<typeof ServerIcon>;
 
-type Story = StoryObj<typeof meta>;
-export const Primary: Story = {
-	args: {
-		server: mockServer(),
-	},
+export const Primary: Story<ServerIconProps> = (props) => (
+	<ServerIcon {...props} />
+);
+Primary.args = {
+	server: mockPublicServer(),
 };
 
-export const WithImage: Story = {
-	args: {
-		server: mockServer({
-			name: 'AnswerOverflow',
-			id: '952724385238761475',
-			icon: '4e610bdea5aacf259013ed8cada0bc1d',
-		}),
-	},
-};
+export const WithImage = Primary.bind({});
 
-export const Tertiary: Story = {
-	args: {
-		...Primary.args,
-	},
+WithImage.args = {
+	server: mockPublicServer({
+		name: 'AnswerOverflow',
+		id: '952724385238761475',
+		icon: '4e610bdea5aacf259013ed8cada0bc1d',
+	}),
 };

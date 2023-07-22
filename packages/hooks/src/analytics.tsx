@@ -19,6 +19,7 @@ import type {
 import React from 'react';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
+import { webClientEnv } from '@answeroverflow/env/web';
 // TODO: This type should be inferred from the auth package
 declare module 'next-auth' {
 	interface Session extends DefaultSession {
@@ -52,19 +53,23 @@ export type ViewOnDiscordClickProps = Pick<ServerProps, 'Server Id'> &
 	Partial<Pick<ThreadProps, 'Thread Id'>> &
 	MessageProps;
 
-type EventMap = {
+export type EventMap = {
 	'Message Page View': MessagePageViewProps;
 	'View On Discord Click': ViewOnDiscordClickProps;
 	'Getting Started Click': GettingStartedClickProps;
 	'Add To Server Click': AddToServerClickProps;
 	[JOIN_WAITLIST_EVENT_NAME]: JoinWaitlistClickProps;
 	'Community Page View': CommunityPageViewProps;
+	'Pricing Feedback': {
+		email?: string;
+		feedback: string;
+	};
 } & ServerInviteEvent &
 	CommunityPageLinkEvent;
 
-export function trackEvent<K extends keyof EventMap>(
+export function trackEvent<K extends keyof EventMap | string>(
 	eventName: K,
-	props: EventMap[K],
+	props: K extends keyof EventMap ? EventMap[K] : Record<string, unknown>,
 ): void {
 	const isServer = typeof window === 'undefined';
 	posthog.capture(eventName, {
@@ -73,9 +78,9 @@ export function trackEvent<K extends keyof EventMap>(
 	});
 }
 
-export function useTrackEvent<K extends keyof EventMap>(
+export function useTrackEvent<K extends keyof EventMap | string>(
 	eventName: K,
-	props: EventMap[K],
+	props: K extends keyof EventMap ? EventMap[K] : Record<string, unknown>,
 	opts?: {
 		runOnce?: boolean;
 		enabled?: boolean;
@@ -138,9 +143,9 @@ export const AnalyticsProvider = ({
 		if (status === 'loading') {
 			return;
 		}
-		if (!analyticsLoaded) {
-			posthog.init(process.env.NEXT_PUBLIC_POSTHOG_TOKEN as string, {
-				disable_session_recording: process.env.NODE_ENV === 'development',
+		if (!analyticsLoaded && webClientEnv.NEXT_PUBLIC_POSTHOG_TOKEN) {
+			posthog.init(webClientEnv.NEXT_PUBLIC_POSTHOG_TOKEN, {
+				disable_session_recording: true,
 				persistence: 'memory',
 				bootstrap: {
 					distinctID: session?.user?.id,

@@ -17,6 +17,7 @@ import {
 	channelToAnalyticsData,
 	serverToAnalyticsData,
 } from '@answeroverflow/constants/src/analytics';
+import { getServerHomepageUrl } from '~ui/utils/server';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const ServerInviteContext = createContext<{
 	server: ServerPublic;
@@ -39,7 +40,7 @@ export const ServerInviteTitle = () => {
 	const { server, location, channel } = useServerInviteContext();
 	return (
 		<Link
-			href={`/c/${server.id}`}
+			href={getServerHomepageUrl(server)}
 			onMouseUp={() => {
 				trackEvent('Community Page Link Click', {
 					'Link Location': location,
@@ -97,7 +98,7 @@ export const ChannelName = ({
 export const ServerInviteJoinButton = (props: { className?: string }) => {
 	const { channel, location, server, isUserInServer } =
 		useServerInviteContext();
-	const inviteCode = channel?.inviteCode;
+	const inviteCode = channel?.inviteCode || server.vanityInviteCode;
 	if (!inviteCode) return <></>;
 	return (
 		<LinkButton
@@ -107,7 +108,7 @@ export const ServerInviteJoinButton = (props: { className?: string }) => {
 			className={cn('text-center font-header font-bold', props.className)}
 			onMouseUp={() => {
 				trackEvent('Server Invite Click', {
-					...channelToAnalyticsData(channel),
+					...(channel && channelToAnalyticsData(channel)),
 					...serverToAnalyticsData(server),
 					'Button Location': location,
 				});

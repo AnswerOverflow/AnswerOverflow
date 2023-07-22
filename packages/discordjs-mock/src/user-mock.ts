@@ -6,11 +6,10 @@ import {
 	type PermissionResolvable,
 	PermissionsBitField,
 	User,
+	type APIGuildMember,
+	GuildMemberFlags,
 } from 'discord.js';
-import type {
-	RawGuildMemberData,
-	RawUserData,
-} from 'discord.js/typings/rawDataTypes';
+import type { RawUserData } from 'discord.js/typings/rawDataTypes';
 import { randomSnowflake } from '@answeroverflow/discordjs-utils';
 import { mockGuild, mockRole } from './guild-mock';
 
@@ -33,10 +32,8 @@ export function mockClientUser(
 	override: Partial<RawUserData> = {},
 ) {
 	const rawData: RawUserData = {
-		id:
-			process.env.DISCORD_CLIENT_ID ??
-			process.env.VITEST_DISCORD_CLIENT_ID ??
-			randomSnowflake().toString(),
+		// eslint-disable-next-line n/no-process-env
+		id: process.env.DISCORD_CLIENT_ID ?? randomSnowflake().toString(),
 		username: 'test',
 		discriminator: '0000',
 		avatar: null,
@@ -57,7 +54,7 @@ export function mockGuildMember(input: {
 	user?: User;
 	guild?: Guild;
 	permissions?: PermissionResolvable;
-	data?: Partial<RawGuildMemberData>;
+	data?: Partial<APIGuildMember>;
 }) {
 	const {
 		client,
@@ -75,15 +72,19 @@ export function mockGuildMember(input: {
 	// Create a custom role that represents the permission the user has
 	const role = mockRole(client, permissions, guild);
 
-	const rawData: RawGuildMemberData = {
-		guild_id: guild.id,
+	const rawData: APIGuildMember = {
 		roles: [role.id],
 		deaf: false,
 		user: {
 			id: user.id,
+			avatar: user.avatar,
+			discriminator: user.discriminator,
+			username: user.username,
+			global_name: user.username,
 		},
 		joined_at: '33',
 		mute: false,
+		flags: GuildMemberFlags.CompletedOnboarding,
 		...data,
 	};
 

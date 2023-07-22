@@ -1,5 +1,5 @@
 # [Choice] Node.js version (use -bullseye variants on local arm64/Apple Silicon): 18, 16, 14, 18-bullseye, 16-bullseye, 14-bullseye, 18-buster, 16-buster, 14-buster
-ARG VARIANT=16-bullseye
+ARG VARIANT=18-bullseye
 FROM mcr.microsoft.com/vscode/devcontainers/typescript-node:0-${VARIANT}
 ENV CHOKIDAR_USEPOLLING=true
 
@@ -16,3 +16,10 @@ ENV CHOKIDAR_USEPOLLING=true
 RUN su node -c "npm install @sapphire/cli -g"
 RUN su node -c "npm install -g eslint"
 RUN su node -c "npm i -g @railway/cli"
+RUN sudo apt-get install xdg-utils
+
+# Strip CLI
+RUN curl -s https://packages.stripe.dev/api/security/keypair/stripe-cli-gpg/public | gpg --dearmor | sudo tee /usr/share/keyrings/stripe.gpg
+RUN echo "deb [signed-by=/usr/share/keyrings/stripe.gpg] https://packages.stripe.dev/stripe-cli-debian-local stable main" | sudo tee -a /etc/apt/sources.list.d/stripe.list
+RUN sudo apt-get update
+RUN sudo apt-get install stripe

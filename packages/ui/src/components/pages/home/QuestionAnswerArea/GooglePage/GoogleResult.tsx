@@ -22,9 +22,9 @@ export const GoogleResult = forwardRef<
 					</div>
 				</div>
 				<div ref={ref}>
-					<h3 className="mb-[3px] pt-[5px] text-[20px] text-[#8ab4f8]">
+					<p className="mb-[3px] pt-[5px] text-[20px] text-[#8ab4f8]">
 						{title}
-					</h3>
+					</p>
 				</div>
 			</div>
 			<p className="text-[14px] leading-[1.58] text-[#bdc1c6]">{description}</p>

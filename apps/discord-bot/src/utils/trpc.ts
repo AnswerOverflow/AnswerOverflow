@@ -84,5 +84,5 @@ export function oneTimeStatusHandler(
 	message: string,
 ) {
 	if (interaction.deferred) return interaction.editReply({ content: message });
-	else return interaction.reply({ content: message, ephemeral: true });
+	else return container.discordJSReact.ephemeralReply(interaction, message);
 }

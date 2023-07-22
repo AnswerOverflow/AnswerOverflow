@@ -1,8 +1,8 @@
 @use 'sass:meta';
 
-html[data-theme='light'] {
+html[class='light'] {
 	@include meta.load-css('highlight.js/styles/github');
 }
-html[data-theme='dark'] {
+html[class='dark'] {
 	@include meta.load-css('highlight.js/styles/github-dark');
 }

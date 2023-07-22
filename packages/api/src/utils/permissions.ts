@@ -1,5 +1,4 @@
 import { TRPCError } from '@trpc/server';
-import { PermissionsBitField } from 'discord.js';
 import {
 	type ChannelWithFlags,
 	findIgnoredDiscordAccountById,
@@ -10,9 +9,11 @@ import {
 	type ServerWithFlags,
 	zChannelPublic,
 	zServerPublic,
+	Plan,
 } from '@answeroverflow/db';
 import type { Source, Context } from '~api/router/context';
 import type { DiscordAPIServerSchema } from '@answeroverflow/cache';
+import { PermissionsBitField } from './types';
 
 export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
 	'You are missing the required permissions to do this';
@@ -58,7 +59,12 @@ export function assertIsNotValue<T>({
 }
 
 export function isSuperUser(ctx: Context) {
-	if (ctx.discordAccount?.id === '523949187663134754') return true; // This is the ID of Rhys - TODO: Swap to an env var
+	if (
+		ctx.discordAccount?.id === '523949187663134754' &&
+		ctx.session?.isTenantSession === false
+	) {
+		return true; // This is the ID of Rhys - TODO: Swap to an env var
+	}
 	return false;
 }
 
@@ -85,13 +91,62 @@ export function assertCanEditServer(
 				'You are not a member of the server you are trying to create channel settings for',
 		});
 	}
-	const permissionBitfield = new PermissionsBitField(
+	const hasPermsToEdit = PermissionsBitField.any(
 		BigInt(serverToCheckPermissionsOf.permissions),
+		['Administrator', 'ManageGuild'],
 	);
-	if (!permissionBitfield.has('ManageGuild')) {
+	if (!(hasPermsToEdit || serverToCheckPermissionsOf.owner)) {
 		return new TRPCError({
 			code: 'FORBIDDEN',
 			message: MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+		});
+	}
+	return;
+}
+
+export function assertIsAdminOrOwnerOfServer(
+	ctx: Context,
+	serverId: string,
+): PermissionCheckResult {
+	if (isSuperUser(ctx)) return;
+	if (!ctx.userServers) {
+		return new TRPCError({
+			code: 'UNAUTHORIZED',
+			message:
+				'User servers missing, cannot verify if user has permission to edit server',
+		});
+	}
+
+	const serverToCheckPermissionsOf = ctx.userServers.find(
+		(userServer) => userServer.id === serverId,
+	);
+	if (!serverToCheckPermissionsOf) {
+		return new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'You are not a member of the server you are trying to view',
+		});
+	}
+	const isAdminOrOwner =
+		PermissionsBitField.has(
+			BigInt(serverToCheckPermissionsOf.permissions),
+			'Administrator',
+		) || serverToCheckPermissionsOf.owner;
+	if (!isAdminOrOwner) {
+		{
+			return new TRPCError({
+				code: 'FORBIDDEN',
+				message: 'Only administrators or the server owner can do this',
+			});
+		}
+	}
+	return;
+}
+
+export function assertIsOnPlan(server: ServerWithFlags, plans: Plan[]) {
+	if (!plans.some((plan) => plan === server.plan)) {
+		return new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'You are not on the correct plan to do this',
 		});
 	}
 	return;

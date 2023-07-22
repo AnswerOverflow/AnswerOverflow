@@ -16,22 +16,14 @@ import {
 	findManyChannelsById,
 	findManyDiscordAccountsById,
 	findManyMessages,
-	type Message as AOMessage,
 	upsertChannel,
 } from '@answeroverflow/db';
 import {
 	toAOChannel,
 	toAODiscordAccount,
-	toAOMessage,
 	toAOServer,
 } from '~discord-bot/utils/conversions';
-import {
-	addSolutionsToMessages,
-	fetchAllMessages,
-	filterMessages,
-	findSolutionsToMessage,
-	indexRootChannel,
-} from './indexing';
+import { fetchAllMessages, filterMessages, indexRootChannel } from './indexing';
 import {
 	mockTextChannel,
 	mockForumChannel,
@@ -40,10 +32,8 @@ import {
 	mockThreadFromParentMessage,
 	mockMessage,
 	mockPublicThread,
-	mockMarkedAsSolvedReply,
 	mockGuildMember,
 } from '@answeroverflow/discordjs-mock';
-import { randomSnowflake } from '@answeroverflow/discordjs-utils';
 import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
 
 let client: Client;
@@ -190,100 +180,6 @@ describe('Indexing', () => {
 				expectedUsers: 200,
 				expectedMessages: 200,
 			});
-		});
-	});
-	describe('Add Solutions To Messages', () => {
-		let questionMessage: Message;
-		let solutionMessage: Message;
-		let markedAsSolvedReply: Message;
-		let questionMessageAsAoMessage: AOMessage;
-		let solutionMessageAsAoMessage: AOMessage;
-		let markedAsSolvedReplyAsAoMessage: AOMessage;
-		let messages: Message[];
-		beforeEach(async () => {
-			questionMessage = mockMessage({ client });
-			solutionMessage = mockMessage({ client });
-			markedAsSolvedReply = mockMarkedAsSolvedReply({
-				client,
-				questionId: questionMessage.id,
-				solutionId: solutionMessage.id,
-			});
-			messages = [questionMessage, solutionMessage, markedAsSolvedReply];
-			questionMessageAsAoMessage = await toAOMessage(questionMessage);
-			solutionMessageAsAoMessage = await toAOMessage(solutionMessage);
-			markedAsSolvedReplyAsAoMessage = await toAOMessage(markedAsSolvedReply);
-		});
-		it('should add solutions to messages with reply at the end', () => {
-			addSolutionsToMessages(messages, [
-				questionMessageAsAoMessage,
-				solutionMessageAsAoMessage,
-				markedAsSolvedReplyAsAoMessage,
-			]);
-			expect(questionMessageAsAoMessage.solutionIds).toEqual([
-				solutionMessageAsAoMessage.id,
-			]);
-		});
-		it('should add solutions to messages with reply in the middle', () => {
-			addSolutionsToMessages(messages, [
-				questionMessageAsAoMessage,
-				markedAsSolvedReplyAsAoMessage,
-				solutionMessageAsAoMessage,
-			]);
-			expect(questionMessageAsAoMessage.solutionIds).toEqual([
-				solutionMessageAsAoMessage.id,
-			]);
-		});
-		it('should add solutions to messages with reply at the beginning', () => {
-			addSolutionsToMessages(messages, [
-				markedAsSolvedReplyAsAoMessage,
-				questionMessageAsAoMessage,
-				solutionMessageAsAoMessage,
-			]);
-			expect(questionMessageAsAoMessage.solutionIds).toEqual([
-				solutionMessageAsAoMessage.id,
-			]);
-		});
-	});
-	describe('Find Solutions To Messages', () => {
-		it('should find solutions from a mark as solved reply', () => {
-			const questionMessage = mockMessage({ client });
-			const solutionMessage = mockMessage({ client });
-			const markedAsSolvedReply = mockMarkedAsSolvedReply({
-				client,
-				questionId: questionMessage.id,
-				solutionId: solutionMessage.id,
-			});
-			const { questionId, solutionId } =
-				findSolutionsToMessage(markedAsSolvedReply);
-			expect(questionId).toBe(questionMessage.id);
-			expect(solutionId).toBe(solutionMessage.id);
-		});
-		it('should not find solutions on a regular message', () => {
-			const regularMessage = mockMessage({ client });
-			const { questionId, solutionId } = findSolutionsToMessage(regularMessage);
-			expect(questionId).toBeNull();
-			expect(solutionId).toBeNull();
-		});
-		it('should not find solutions from a mark as solved reply that is not sent by the bot', () => {
-			const questionMessage = mockMessage({ client });
-			const solutionMessage = mockMessage({ client });
-			const markedAsSolvedReply = mockMarkedAsSolvedReply({
-				client,
-				questionId: questionMessage.id,
-				solutionId: solutionMessage.id,
-				override: {
-					author: {
-						id: randomSnowflake().toString(),
-						avatar: '123',
-						username: '123',
-						discriminator: '123',
-					},
-				},
-			});
-			const { questionId, solutionId } =
-				findSolutionsToMessage(markedAsSolvedReply);
-			expect(questionId).toBeNull();
-			expect(solutionId).toBeNull();
 		});
 	});
 	describe('Filter Messages', () => {

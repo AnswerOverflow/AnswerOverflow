@@ -1,5 +1,4 @@
 export * from './base';
-export * from './data-display';
 export * from './Message';
 export * from './AOHead';
 export * from './Callouts';

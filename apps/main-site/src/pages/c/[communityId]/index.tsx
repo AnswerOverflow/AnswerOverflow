@@ -2,10 +2,13 @@ import type { GetStaticPropsContext, InferGetStaticPropsType } from 'next';
 import { TRPCError } from '@trpc/server';
 import {
 	type CommunityPageData,
+	findServerById,
 	findServerWithCommunityPageData,
 } from '@answeroverflow/db';
 import superjson from 'superjson';
 import { CommunityPage } from '@answeroverflow/ui';
+import { fetchSubscriptionInfo } from '@answeroverflow/payments';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export default function MessageResult(
 	props: InferGetStaticPropsType<typeof getStaticProps>,
@@ -41,6 +44,27 @@ export async function getStaticProps(
 	if (!communityPageData || communityPageData.server.kickedTime != null) {
 		return {
 			notFound: true,
+		};
+	}
+
+	if (communityPageData.server.customDomain) {
+		const fullServer = await findServerById(serverId);
+		let shouldTemporaryRedirectDueToTrial = false;
+		if (fullServer && fullServer.stripeSubscriptionId) {
+			const subscriptionInfo = await fetchSubscriptionInfo(
+				fullServer.stripeSubscriptionId,
+			);
+			shouldTemporaryRedirectDueToTrial = subscriptionInfo.isTrialActive;
+		}
+		return {
+			redirect: {
+				destination: `http${
+					sharedEnvs.NODE_ENV === 'production' ? 's' : ''
+				}://${communityPageData.server.customDomain}`,
+				permanent:
+					sharedEnvs.NODE_ENV === 'production' &&
+					!shouldTemporaryRedirectDueToTrial,
+			},
 		};
 	}
 

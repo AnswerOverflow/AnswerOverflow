@@ -1,6 +1,5 @@
 import {
 	upsertManyDiscordAccounts,
-	type Message as AOMessage,
 	upsertManyMessages,
 	upsertChannel,
 	findManyUserServerSettings,
@@ -30,6 +29,8 @@ import {
 import { container } from '@sapphire/framework';
 import { sortMessagesById } from '@answeroverflow/discordjs-utils';
 import * as Sentry from '@sentry/node';
+import { sharedEnvs } from '@answeroverflow/env/shared';
+import { botEnv } from '@answeroverflow/env/bot';
 
 export async function indexServers(client: Client) {
 	const indexingStartTime = Date.now();
@@ -88,14 +89,11 @@ export async function indexRootChannel(
 
 	container.logger.debug(`Indexing channel ${channel.id} | ${channel.name}`);
 	if (channel.type === ChannelType.GuildForum) {
-		const maxNumberOfThreadsToCollect = process.env
-			.MAX_NUMBER_OF_THREADS_TO_COLLECT
-			? parseInt(process.env.MAX_NUMBER_OF_THREADS_TO_COLLECT)
-			: 1000;
+		const maxNumberOfThreadsToCollect = botEnv.MAX_NUMBER_OF_THREADS_TO_COLLECT;
 		let threadCutoffTimestamp = await findLatestArchivedTimestampByChannelId(
 			channel.id,
 		);
-		if (process.env.NODE_ENV === 'test') {
+		if (sharedEnvs.NODE_ENV === 'test') {
 			threadCutoffTimestamp = null;
 		}
 		const archivedThreads: AnyThreadChannel[] = [];
@@ -126,7 +124,7 @@ export async function indexRootChannel(
 		};
 
 		// Fetching all archived threads is very expensive, so only do it on the very first indexing pass
-		if (process.env.NODE_ENV === 'test') {
+		if (sharedEnvs.NODE_ENV === 'test') {
 			const data = await channel.threads.fetchArchived({
 				type: 'public',
 				fetchAll: true,
@@ -258,7 +256,6 @@ async function storeIndexData(
 		throw new Error('Received a null client id when indexing');
 	}
 
-	addSolutionsToMessages(filteredMessages, convertedMessages);
 	container.logger.debug(
 		`Upserting ${convertedUsers.length} discord accounts `,
 	);
@@ -280,40 +277,6 @@ type MessageFetchOptions = {
 	start?: Snowflake | undefined;
 	limit?: number | undefined;
 };
-
-export function addSolutionsToMessages(
-	messages: Message[],
-	convertedMessages: AOMessage[],
-) {
-	// Loop through filtered messages for everything from the Answer Overflow bot
-	// Put the solution messages on the relevant messages
-	const messageLookup = new Map(convertedMessages.map((x) => [x.id, x]));
-	for (const msg of messages) {
-		const { questionId, solutionId } = findSolutionsToMessage(msg);
-		if (questionId && solutionId && messageLookup.has(questionId)) {
-			messageLookup.get(questionId)!.solutionIds.push(solutionId);
-		}
-	}
-}
-
-export function findSolutionsToMessage(msg: Message) {
-	let questionId: string | null = null;
-	let solutionId: string | null = null;
-	if (msg.author.id != msg.client.user.id) {
-		return { questionId, solutionId };
-	}
-	for (const embed of msg.embeds) {
-		for (const field of embed.fields) {
-			if (field.name === 'Question Message ID') {
-				questionId = field.value;
-			}
-			if (field.name === 'Solution Message ID') {
-				solutionId = field.value;
-			}
-		}
-	}
-	return { questionId, solutionId };
-}
 
 export async function filterMessages(
 	messages: Message[],
@@ -349,12 +312,7 @@ export async function fetchAllMessages(
 	channel: TextBasedChannel,
 	opts: MessageFetchOptions = {},
 ) {
-	const {
-		start,
-		limit = process.env.MAX_NUMBER_OF_MESSAGES_TO_COLLECT
-			? parseInt(process.env.MAX_NUMBER_OF_MESSAGES_TO_COLLECT)
-			: 20000,
-	} = opts;
+	const { start, limit = botEnv.MAX_NUMBER_OF_MESSAGES_TO_COLLECT } = opts;
 	const messages: Message[] = [];
 	if (channel.lastMessageId && start == channel.lastMessageId) {
 		return [];

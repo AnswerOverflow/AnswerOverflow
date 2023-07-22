@@ -16,6 +16,10 @@
       "path": "apps/discord-bot"
     },
     {
+      "name": "proxy",
+      "path": "apps/proxy"
+    },
+    {
       "name": "discordjs-mock",
       "path": "packages/discordjs-mock"
     },
@@ -100,7 +104,7 @@
     },
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "prettier.requireConfig": true,
-    "prettier.configPath": "prettierrc.cjs",
+    "prettier.configPath": ".prettierrc.cjs",
     "javascript.suggest.autoImports": true,
     "javascript.updateImportsOnFileMove.enabled": "always",
     "typescript.tsserver.experimental.enableProjectDiagnostics": true,
@@ -135,13 +139,20 @@
     // "prettier.prettierPath": "./node_modules/prettier",
     "editor.wordWrap": "on",
     "editor.tabSize": 2,
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+      "*": "${basename}.*.${extname}",
+      "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml"
+    },
+    "explorer.fileNesting.expand": false,
+    "prettier.ignorePath": ".prettierignore",
     "editor.bracketPairColorization.enabled": true,
     "editor.guides.bracketPairs": "active",
     "editor.quickSuggestions": {
       "strings": true
     },
     "files.exclude": {
-      "**/node_modules": true,
+      // "**/node_modules": true,
       "**/coverage/": true,
       "**/.next": true,
       "**/.turbo": true

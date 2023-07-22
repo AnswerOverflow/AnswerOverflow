@@ -41,7 +41,6 @@ export async function updateChannelIndexingEnabled({
 				);
 				return;
 			}
-			newInviteCode = channel.guild.vanityURLCode;
 		} else {
 			const channelInvite = await channel.createInvite({
 				maxAge: 0,

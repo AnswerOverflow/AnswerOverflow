@@ -1,11 +1,5 @@
 import { CheckIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
-import { WAITLIST_URL } from '@answeroverflow/constants/src/links';
-import {
-	LinkButton,
-	Heading,
-	GetStarted,
-} from '@answeroverflow/ui/src/components/primitives';
-import { trackEvent } from '@answeroverflow/hooks';
+import { Heading, GetStarted } from '~ui/components/primitives';
 import { cn } from '~ui/utils/styling';
 const pricing = {
 	tiers: [
@@ -26,11 +20,11 @@ const pricing = {
 					implemented: true,
 				},
 				{
-					name: 'AI Question Answers',
-					implemented: false,
+					name: 'Host on your own domain*',
+					implemented: true,
 				},
 				{
-					name: 'Host on your own domain*',
+					name: 'AI Question Answers',
 					implemented: false,
 				},
 				{
@@ -43,16 +37,9 @@ const pricing = {
 				},
 			],
 			cta: (
-				<LinkButton
-					href={WAITLIST_URL}
-					onMouseUp={() => {
-						trackEvent('Join Waitlist Click', {
-							'Button Location': 'Pricing Page',
-						});
-					}}
-				>
-					Join Waitlist
-				</LinkButton>
+				<GetStarted location="Pricing" variant={'default'}>
+					Setup Today
+				</GetStarted>
 			),
 			mostPopular: true,
 		},
@@ -62,20 +49,9 @@ const pricing = {
 export const PricingArea = (props: { className?: string }) => {
 	return (
 		<div className={cn('w-full', props.className)} id="roadmap">
-			<Heading.H2 className="text-center ">
+			<Heading.H2 className="mb-8 text-center">
 				{"And we're"} just getting started
 			</Heading.H2>
-			<div className="flex w-full items-center justify-center py-2">
-				<Heading.H3 className="pt-0 text-center  text-lg lg:w-1/2">
-					Add to your server and sign up to be notified as new features are
-					released
-				</Heading.H3>
-			</div>
-			<div className="flex w-full items-center justify-center pb-8 pt-4">
-				<GetStarted location="Pricing" variant={'outline'}>
-					Add to server
-				</GetStarted>
-			</div>
 
 			{/* Tiers */}
 			<div className="flex w-full justify-center">
@@ -100,11 +76,11 @@ export const PricingArea = (props: { className?: string }) => {
 								<div className="flex flex-row font-semibold text-neutral-600 dark:text-neutral-300">
 									<CheckIcon
 										className={cn(
-											'h-6 w-6 shrink-0 text-gray-600 dark:text-gray-300',
+											'h-6 w-6 shrink-0 text-green-800 dark:text-green-400',
 										)}
 										aria-hidden="true"
 									/>
-									<label className="ml-3 text-gray-600 dark:text-gray-300">
+									<label className="ml-3  text-neutral-600 dark:text-neutral-300">
 										Implemented
 									</label>
 								</div>
@@ -126,7 +102,7 @@ export const PricingArea = (props: { className?: string }) => {
 										{feature.implemented ? (
 											<CheckIcon
 												className={cn(
-													'h-6 w-6 shrink-0 text-gray-600 dark:text-gray-300',
+													'h-6 w-6 shrink-0 text-green-800 dark:text-green-400',
 												)}
 												aria-hidden="true"
 											/>
@@ -137,7 +113,14 @@ export const PricingArea = (props: { className?: string }) => {
 											/>
 										)}
 
-										<span className="ml-3 text-gray-600 dark:text-gray-300">
+										<span
+											className={cn(
+												'ml-3',
+												feature.implemented
+													? 'text-neutral-600 dark:text-neutral-300 '
+													: 'text-gray-600 dark:text-gray-300',
+											)}
+										>
 											{feature.name}
 										</span>
 									</li>

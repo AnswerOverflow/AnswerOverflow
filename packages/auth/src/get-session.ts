@@ -3,9 +3,10 @@ import type {
 	NextApiRequest,
 	NextApiResponse,
 } from 'next';
-import { unstable_getServerSession } from 'next-auth';
+import { getServerSession as getNextAuthSession } from 'next-auth';
 
 import { authOptions } from './auth-options';
+import { getTenantCookieName } from './tenant-cookie';
 
 export const getServerSession = async (
 	ctx:
@@ -15,5 +16,11 @@ export const getServerSession = async (
 		  }
 		| { req: NextApiRequest; res: NextApiResponse },
 ) => {
-	return await unstable_getServerSession(ctx.req, ctx.res, authOptions);
+	const isTenantSession = ctx.req.cookies[getTenantCookieName()] !== undefined;
+	const session = await getNextAuthSession(ctx.req, ctx.res, authOptions);
+	if (!session) return null;
+	return {
+		...session,
+		isTenantSession,
+	};
 };

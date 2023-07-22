@@ -1,7 +1,7 @@
 {
 	"extends": "@answeroverflow/tsconfig/base.json",
 	"compilerOptions": {
-		"types": ["vitest/globals"],
+		"types": ["vitest/globals", "node"],
 		"baseUrl": "../../"
 	},
 	"include": [
@@ -11,7 +11,7 @@
 		"vitest.config.ts",
 		"scripts",
 		"../../reset.d.ts",
-		"prettierrc.cjs"
+		".prettierrc.cjs"
 	],
 	"ts-node": {
 		// these options are overrides used only by ts-node

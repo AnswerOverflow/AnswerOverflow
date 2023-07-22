@@ -1,10 +1,11 @@
-import { Button, LinkButton, type LinkButtonProps } from '.';
+import { Button, LinkButton, type ButtonProps, type LinkButtonProps } from '.';
 import { signIn } from 'next-auth/react';
-import { GETTING_STARTED_URL } from '@answeroverflow/constants/src/links';
 import {
 	trackEvent,
 	type GettingStartedClickProps,
+	useTenantContext,
 } from '@answeroverflow/hooks';
+import { makeMainSiteLink } from '@answeroverflow/constants/src/links';
 export function GetStarted(
 	props: Omit<LinkButtonProps, 'href'> & {
 		location: GettingStartedClickProps['Button Location'];
@@ -12,11 +13,7 @@ export function GetStarted(
 ) {
 	return (
 		<LinkButton
-			href={
-				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local'
-					? 'http://localhost:5234/quick-start'
-					: GETTING_STARTED_URL
-			}
+			href={'/onboarding'}
 			variant="outline"
 			onMouseUp={() => {
 				// Use mouse up to capture middle click and right click
@@ -31,11 +28,26 @@ export function GetStarted(
 	);
 }
 
-export function SignInButton() {
+export function SignInButton(props: ButtonProps) {
+	const { isOnTenantSite } = useTenantContext();
+
+	if (isOnTenantSite) {
+		const link = makeMainSiteLink('/api/auth/tenant/signin');
+		const redirect = typeof window !== 'undefined' ? window.location.href : '';
+
+		return (
+			<LinkButton
+				variant="outline"
+				href={`${link}?redirect=${encodeURIComponent(redirect)}`}
+			>
+				Login
+			</LinkButton>
+		);
+	}
 	return (
 		// TODO: Swap to href
 		// eslint-disable-next-line @typescript-eslint/no-misused-promises
-		<Button variant="outline" onClick={() => signIn('discord')}>
+		<Button variant="outline" onClick={() => signIn('discord')} {...props}>
 			Login
 		</Button>
 	);

@@ -1,7 +1,7 @@
 {
 	"extends": "@answeroverflow/tsconfig/base.json",
 	"compilerOptions": {
-		"types": ["vitest/globals"],
+		"types": ["vitest/globals", "node"],
 		"baseUrl": "../../"
 	},
 	"include": [
@@ -10,7 +10,7 @@
 		"index.ts",
 		"vitest.config.ts",
 		"../../reset.d.ts",
-		"prettierrc.cjs"
+		".prettierrc.cjs"
 	],
 	"exclude": ["node_modules"]
 }

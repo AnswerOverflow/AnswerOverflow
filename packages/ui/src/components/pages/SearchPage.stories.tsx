@@ -1,93 +1,70 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Story } from '@ladle/react';
 import { loremIpsum } from 'lorem-ipsum';
 import {
 	mockChannelWithSettings,
 	mockMessageWithDiscordAccount,
-	mockServer,
+	mockPublicServer,
 } from '~ui/test/props';
 import { PageWrapper } from './PageWrapper';
 import { SearchPage } from './SearchPage';
 
-const meta = {
-	component: SearchPage,
-	argTypes: {},
-	render: (args) => (
-		<PageWrapper>
-			<SearchPage {...args} />
-		</PageWrapper>
-	),
-	parameters: {
-		layout: 'fullscreen',
-		a11y: {
-			config: {
-				rules: [
-					{
-						id: 'heading-order',
-						enabled: false,
-					},
-					{
-						id: 'duplicate-id',
-						enabled: false,
-					},
-				],
+type SearchPageProps = React.ComponentPropsWithoutRef<typeof SearchPage>;
+
+const Primary: Story<SearchPageProps> = (props) => (
+	<PageWrapper>
+		<SearchPage {...props} />
+	</PageWrapper>
+);
+
+export const NoResults = Primary.bind({});
+export const Results = Primary.bind({});
+export const ResultsWithSuperLongMessage = Primary.bind({});
+export const Loading = Primary.bind({});
+
+Results.args = {
+	results: [
+		{
+			message: {
+				...mockMessageWithDiscordAccount(),
+				solutionMessages: [],
+				referencedMessage: mockMessageWithDiscordAccount(),
 			},
+			thread: mockChannelWithSettings(),
+			score: 0.5,
+			channel: mockChannelWithSettings({
+				// AO's Discord server
+				inviteCode: 'sxDN2rEdwD',
+			}),
+			server: mockPublicServer(),
 		},
-	},
-} as Meta<typeof SearchPage>;
-
-export default meta;
-type Story = StoryObj<typeof meta>;
-export const NoResults: Story = {};
-export const Results: Story = {
-	args: {
-		results: [
-			{
-				message: {
-					...mockMessageWithDiscordAccount(),
-					solutionMessages: [],
-					referencedMessage: mockMessageWithDiscordAccount(),
-				},
-				thread: mockChannelWithSettings(),
-				score: 0.5,
-				channel: mockChannelWithSettings({
-					// AO's Discord server
-					inviteCode: 'sxDN2rEdwD',
-				}),
-				server: mockServer(),
-			},
-		],
-		isLoading: false,
-	},
+	],
+	isLoading: false,
 };
 
-export const ResultsWithSuperLongMessage: Story = {
-	args: {
-		results: [
-			{
-				message: {
-					...mockMessageWithDiscordAccount({
-						content: loremIpsum({
-							count: 250,
-						}),
+ResultsWithSuperLongMessage.args = {
+	results: [
+		{
+			message: {
+				...mockMessageWithDiscordAccount({
+					content: loremIpsum({
+						count: 250,
 					}),
-					solutionMessages: [],
-					referencedMessage: mockMessageWithDiscordAccount(),
-				},
-				thread: mockChannelWithSettings(),
-				score: 0.5,
-				channel: mockChannelWithSettings({
-					// AO's Discord server
-					inviteCode: 'sxDN2rEdwD',
 				}),
-				server: mockServer(),
+				solutionMessages: [],
+				referencedMessage: mockMessageWithDiscordAccount(),
 			},
-		],
-		isLoading: false,
-	},
+			thread: mockChannelWithSettings(),
+			score: 0.5,
+			channel: mockChannelWithSettings({
+				// AO's Discord server
+				inviteCode: 'sxDN2rEdwD',
+			}),
+			server: mockPublicServer(),
+		},
+	],
+	isLoading: false,
 };
 
-export const Loading: Story = {
-	args: {
-		isLoading: true,
-	},
+Loading.args = {
+	isLoading: true,
 };

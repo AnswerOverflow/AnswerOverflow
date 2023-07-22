@@ -26,6 +26,7 @@ export function userToAPIUser(user: User): APIUser {
 		bot: user.bot,
 		flags: user.flags?.bitfield,
 		system: user.system,
+		global_name: user.username,
 	};
 }
 

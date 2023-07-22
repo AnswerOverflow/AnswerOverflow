@@ -17,7 +17,7 @@ export type AOEvents = {
 		{
 			channelSettings: ChannelWithFlags;
 			questionAsker: GuildMember;
-			question: Message;
+			question: Message | null;
 		}
 	>;
 	clientReady: AOEvent<'clientReady'>;

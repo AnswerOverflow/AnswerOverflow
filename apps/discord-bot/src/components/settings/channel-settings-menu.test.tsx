@@ -36,7 +36,7 @@ import {
 	mockForumChannel,
 	mockPublicThread,
 } from '@answeroverflow/discordjs-mock';
-import type { ChannelWithFlags } from '@answeroverflow/prisma-types';
+import type { ChannelWithFlags } from '@answeroverflow/db';
 import {
 	ChannelSettingsMenu,
 	CLEAR_TAG_VALUE,

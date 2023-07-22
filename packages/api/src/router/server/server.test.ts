@@ -4,7 +4,6 @@ import {
 	createServer,
 	type Server,
 } from '@answeroverflow/db';
-import { pickPublicServerData } from '~api/test/public-data';
 import {
 	mockAccountWithServersCallerCtx,
 	testAllSourceAndPermissionVariantsThatThrowErrors,
@@ -15,33 +14,8 @@ describe('Server Operations', () => {
 	describe('Server Fetch', () => {
 		let server: Server;
 		beforeEach(async () => {
-			server = mockServer({
-				kickedTime: new Date(),
-			});
+			server = mockServer();
 			await createServer(server);
-		});
-		describe('By Id Public', () => {
-			it('should only get public server data', async () => {
-				const account = await mockAccountWithServersCallerCtx(
-					server,
-					'discord-bot',
-					'ManageGuild',
-				);
-				const router = serverRouter.createCaller(account.ctx);
-				const fetchedServer = await router.byIdPublic(server.id);
-				expect(fetchedServer).toEqual(pickPublicServerData(server));
-			});
-			it("should fail if the server doesn't exist", async () => {
-				const account = await mockAccountWithServersCallerCtx(
-					server,
-					'discord-bot',
-					'ManageGuild',
-				);
-				const router = serverRouter.createCaller(account.ctx);
-				await expect(router.byIdPublic('non-existent-server')).rejects.toThrow(
-					'Server not found',
-				);
-			});
 		});
 		describe('By Id', () => {
 			it('should succeed with permission variants', async () => {
@@ -159,6 +133,50 @@ describe('Server Operations', () => {
 					enabled: false,
 				}),
 			).rejects.toThrowError('Read the rules consent already disabled');
+		});
+	});
+	describe('Set require consent to display messages disabled', () => {
+		it('should succeed setting require consent to display messages enabled with permission variants', async () => {
+			await testAllSourceAndPermissionVariantsThatThrowErrors({
+				async operation({ source, permission }) {
+					const server = mockServer();
+					await createServer(server);
+					const account = await mockAccountWithServersCallerCtx(
+						server,
+						source,
+						permission,
+					);
+					const router = serverRouter.createCaller(account.ctx);
+					await router.setConsiderAllMessagesPublic({
+						server,
+						enabled: true,
+					});
+				},
+				sourcesThatShouldWork: ['discord-bot'],
+				permissionsThatShouldWork: ['ManageGuild', 'Administrator'],
+			});
+		});
+	});
+	describe('Set anonymize messages enabled', () => {
+		it('should succeed setting anonymize messages enabled with permission variants', async () => {
+			await testAllSourceAndPermissionVariantsThatThrowErrors({
+				async operation({ source, permission }) {
+					const server = mockServer();
+					await createServer(server);
+					const account = await mockAccountWithServersCallerCtx(
+						server,
+						source,
+						permission,
+					);
+					const router = serverRouter.createCaller(account.ctx);
+					await router.setAnonymizeMessages({
+						server,
+						enabled: true,
+					});
+				},
+				sourcesThatShouldWork: ['discord-bot'],
+				permissionsThatShouldWork: ['ManageGuild', 'Administrator'],
+			});
 		});
 	});
 });

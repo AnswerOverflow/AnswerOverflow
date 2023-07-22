@@ -3,11 +3,9 @@ import { Listener, SapphireClient } from '@sapphire/framework';
 import { type ActivityOptions, ActivityType, Events } from 'discord.js';
 import { getTotalNumberOfMessages } from '@answeroverflow/db';
 import { hoursToMs } from '~discord-bot/utils/utils';
+import { botEnv } from '@answeroverflow/env/bot';
 
-const timeBetweenStatusChangesInHours = process.env
-	.STATUS_UPDATE_INTERVAL_IN_HOURS
-	? parseFloat(process.env.STATUS_UPDATE_INTERVAL_IN_HOURS)
-	: 1;
+const timeBetweenStatusChangesInHours = botEnv.STATUS_UPDATE_INTERVAL_IN_HOURS;
 
 type StatusUpdate = {
 	getStatus: (() => Promise<string> | string) | string;

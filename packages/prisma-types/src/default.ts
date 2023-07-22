@@ -31,6 +31,11 @@ export function getDefaultServer(
 		bitfield: 0,
 		description: null,
 		vanityUrl: null,
+		customDomain: null,
+		stripeCustomerId: null,
+		stripeSubscriptionId: null,
+		plan: 'FREE',
+		vanityInviteCode: null,
 		...override,
 	};
 	return data;

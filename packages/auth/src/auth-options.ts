@@ -6,30 +6,48 @@ import {
 	identifyDiscordAccount,
 } from '@answeroverflow/analytics';
 import { extendedAdapter } from './adapter';
-import { getDiscordUser } from '@answeroverflow/cache';
+import { getDiscordUser, refreshAccessToken } from '@answeroverflow/cache';
 import {
-	clearProviderAuthToken,
 	findAccountByProviderAccountId,
 	updateProviderAuthToken,
+	prisma,
 } from '@answeroverflow/db';
-
+import { sharedEnvs } from '@answeroverflow/env/shared';
 export const authOptions: NextAuthOptions = {
 	// Configure one or more authentication providers
 	adapter: extendedAdapter,
 	providers: [
 		DiscordProvider({
-			clientId: process.env.DISCORD_CLIENT_ID,
-			clientSecret: process.env.DISCORD_CLIENT_SECRET,
+			clientId: sharedEnvs.DISCORD_CLIENT_ID,
+			clientSecret: sharedEnvs.DISCORD_CLIENT_SECRET,
 			authorization:
 				'https://discord.com/api/oauth2/authorize?scope=identify+email+guilds',
 		}),
 		// ...add more providers here
 	],
 	callbacks: {
-		session({ session, user }) {
+		async session({ session, user }) {
 			if (session.user) {
 				session.user.id = user.id;
 			}
+			const updateAccountAccessToken = async () => {
+				const discord = await prisma.account.findFirst({
+					where: {
+						provider: 'discord',
+						userId: user.id,
+					},
+				});
+				if (!discord) {
+					return;
+				}
+				const hasExpired =
+					Date.now() > (discord.expires_at ?? 0) * 1000 ||
+					discord.access_token === null;
+				if (hasExpired) {
+					await refreshAccessToken(discord);
+				}
+			};
+			await updateAccountAccessToken();
 			return session;
 		},
 		// TODO: Ugly
@@ -37,7 +55,6 @@ export const authOptions: NextAuthOptions = {
 			if (!account) {
 				return true;
 			}
-
 			const identifyAccount = async () => {
 				linkAnalyticsAccount({
 					answerOverflowAccountId: user.id,
@@ -46,11 +63,6 @@ export const authOptions: NextAuthOptions = {
 				if (account?.provider === 'discord' && account?.access_token) {
 					const discordAccount = await getDiscordUser({
 						accessToken: account.access_token,
-						onInvalidToken: () =>
-							clearProviderAuthToken({
-								provider: account.provider,
-								providerAccountId: account.providerAccountId,
-							}),
 					});
 					identifyDiscordAccount(user.id, {
 						id: discordAccount.id,
@@ -60,8 +72,7 @@ export const authOptions: NextAuthOptions = {
 				}
 				return finishAnalyticsCollection();
 			};
-
-			const updateAccountAccessToken = async () => {
+			const updateAccountInfo = async () => {
 				const foundAccount = await findAccountByProviderAccountId({
 					provider: account.provider,
 					providerAccountId: account.providerAccountId,
@@ -69,8 +80,7 @@ export const authOptions: NextAuthOptions = {
 				if (!foundAccount) return;
 				return updateProviderAuthToken(account);
 			};
-
-			await Promise.all([identifyAccount(), updateAccountAccessToken()]);
+			await Promise.all([identifyAccount(), updateAccountInfo()]);
 			return true;
 		},
 	},

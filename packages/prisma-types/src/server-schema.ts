@@ -4,7 +4,11 @@ import { z } from 'zod';
 import { toZObject } from './zod-utils';
 import { bitfieldToDict, dictToBitfield, mergeFlags } from './bitfield';
 
-export const serverSettingsFlags = ['readTheRulesConsentEnabled'] as const;
+export const serverSettingsFlags = [
+	'readTheRulesConsentEnabled',
+	'considerAllMessagesPublic',
+	'anonymizeMessages',
+] as const;
 export const zServerSettingsFlags = toZObject(...serverSettingsFlags);
 
 export const bitfieldToServerFlags = (bitfield: number) =>
@@ -42,6 +46,11 @@ const internalServerProperties = {
 	description: z.string().nullable(),
 	bitfield: z.number(),
 	vanityUrl: z.string().nullable(),
+	customDomain: z.string().nullable(),
+	stripeSubscriptionId: z.string().nullable(),
+	stripeCustomerId: z.string().nullable(),
+	plan: z.enum(['FREE', 'PRO', 'OPEN_SOURCE', 'ENTERPRISE']),
+	vanityInviteCode: z.string().nullable(),
 } as const satisfies ServerZodFormat;
 
 const internalServerPropertiesMutable = z
@@ -70,7 +79,7 @@ const externalServerProperties = {
 
 const externalServerPropertiesMutable = z
 	.object(omit(externalServerProperties, 'id'))
-	.partial().shape;
+	.deepPartial().shape;
 
 const externalServerPropertiesRequired = pick(
 	externalServerProperties,
@@ -88,8 +97,10 @@ export const zServerPublic = z.object(
 		'name',
 		'icon',
 		'vanityUrl',
+		'vanityInviteCode',
 		'description',
 		'kickedTime',
+		'customDomain',
 	),
 );
 

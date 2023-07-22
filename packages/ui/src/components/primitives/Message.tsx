@@ -121,7 +121,6 @@ const DEFAULT_COLLAPSE_CONTENT_LENGTH = 500;
 export const MessageContents = () => {
 	const { message, collapseContent } = useMessageContext();
 	const { toHTML } = discordMarkdown;
-	const convertedMessageContent = toHTML(message.content);
 
 	const collapseBy =
 		typeof collapseContent === 'number'
@@ -131,18 +130,19 @@ export const MessageContents = () => {
 	const shouldCollapse =
 		collapseContent !== false &&
 		collapseContent !== undefined &&
-		convertedMessageContent.length > collapseBy;
+		message.content.length > collapseBy;
 
-	const textToRender = shouldCollapse
-		? `${convertedMessageContent.slice(0, collapseBy).trim()}...`
-		: convertedMessageContent;
+	const trimmedText = shouldCollapse
+		? `${message.content.slice(0, collapseBy).trim()}...`
+		: message.content;
+	const convertedMessageContent = toHTML(trimmedText);
 
 	return (
 		<div
 			className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white"
 			// The HTML from discord-markdown is escaped
 			dangerouslySetInnerHTML={{
-				__html: textToRender,
+				__html: convertedMessageContent,
 			}}
 		/>
 	);
@@ -173,7 +173,7 @@ export const MessageContentWithSolution = (props: {
 };
 
 const SingularImageAttachment = () => {
-	const { message, loadingStyle } = useMessageContext();
+	const { message, loadingStyle, collapseContent } = useMessageContext();
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -193,9 +193,13 @@ const SingularImageAttachment = () => {
 		return <p className="mt-2 text-lg">An error occurred loading images...</p>;
 	}
 
+	const imagesToShow = collapseContent
+		? parsedImages.slice(0, 1)
+		: parsedImages;
+
 	return (
 		<>
-			{parsedImages.map((x, i) => (
+			{imagesToShow.map((x, i) => (
 				<div className="mt-4 max-w-sm lg:max-w-md" key={i}>
 					<Image
 						src={x?.src ?? ''}
@@ -226,7 +230,7 @@ export const MessageAttachments = () => {
 	return <SingularImageAttachment />;
 };
 
-type MessageProps = {
+export type MessageProps = {
 	message: APIMessageWithDiscordAccount;
 	avatar?: React.ReactNode;
 	content?: React.ReactNode;

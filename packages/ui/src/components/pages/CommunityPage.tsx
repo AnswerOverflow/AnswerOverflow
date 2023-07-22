@@ -2,7 +2,7 @@ import type {
 	ChannelPublicWithFlags,
 	CommunityPageData,
 } from '@answeroverflow/db';
-import { useTrackEvent } from '@answeroverflow/hooks';
+import { useTenantContext, useTrackEvent } from '@answeroverflow/hooks';
 import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
 import { useState } from 'react';
 import {
@@ -86,7 +86,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 	const [selectedChannelId, setSelectedChannelId] = useState<null | string>(
 		channels.at(0)?.channel.id ?? null,
 	);
-
+	const { isOnTenantSite } = useTenantContext();
 	useTrackEvent('Community Page View', serverToAnalyticsData(server));
 
 	const selectedChannel = channels.find(
@@ -212,12 +212,13 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 			<Navbar />
 			<main className="bg-ao-white dark:bg-ao-black">
 				<AOHead
-					title={`${server.name} Community Page`}
+					title={`${server.name} Community`}
 					description={
-						server.description ??
-						`The community page for ${server.name} on Answer Overflow.`
+						server.description ?? isOnTenantSite
+							? `${server.name} community - Join the community to ask questions about ${server.name} and get answers from other members!`
+							: `The community page for ${server.name} on Answer Overflow.`
 					}
-					path={`/c/${server.id}`}
+					path={isOnTenantSite ? '/' : `/c/${server.id}`}
 					server={server}
 				/>
 

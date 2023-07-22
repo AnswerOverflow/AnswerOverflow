@@ -1,4 +1,5 @@
 import { createClient } from 'redis';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 type RedisClientType = ReturnType<typeof createClient>;
 
 let redisClient: RedisClientType;
@@ -7,22 +8,7 @@ export async function getRedisClient() {
 		return redisClient;
 	}
 	const cacheInstance = createClient({
-		url: process.env.REDIS_URL,
-	});
-	cacheInstance.on('connect', () => {
-		console.log('CacheStore - Connection status: connected');
-	});
-
-	cacheInstance.on('end', () => {
-		console.log('CacheStore - Connection status: disconnected');
-	});
-
-	cacheInstance.on('reconnecting', () => {
-		console.log('CacheStore - Connection status: reconnecting');
-	});
-
-	cacheInstance.on('error', (err) => {
-		console.log('CacheStore - Connection status: error ', err);
+		url: sharedEnvs.REDIS_URL,
 	});
 	process.on('exit', () => cleanupRedis);
 

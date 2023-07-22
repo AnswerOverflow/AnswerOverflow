@@ -1,7 +1,8 @@
 {
 	"extends": "@answeroverflow/tsconfig/nextjs.json",
 	"compilerOptions": {
-		"baseUrl": "../../"
+		"baseUrl": "../../",
+		"types": ["vitest/globals", "node"]
 	},
 	"include": [
 		"src",
@@ -11,6 +12,8 @@
 		"tailwind.config.cjs",
 		"next-env.d.ts",
 		"../../reset.d.ts",
-		"prettierrc.cjs"
+		"vitest.config.ts",
+		".prettierrc.cjs",
+		"__tests__"
 	]
 }

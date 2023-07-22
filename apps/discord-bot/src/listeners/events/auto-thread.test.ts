@@ -70,6 +70,10 @@ describe('Auto thread', () => {
 				user: {
 					bot: true,
 					id: randomSnowflake().toString(),
+					avatar: null,
+					discriminator: '0000',
+					global_name: 'test',
+					username: 'test',
 				},
 			},
 		});
@@ -97,6 +101,10 @@ describe('Auto thread', () => {
 				user: {
 					system: true,
 					id: randomSnowflake().toString(),
+					avatar: null,
+					discriminator: '0000',
+					global_name: 'test',
+					username: 'test',
 				},
 			},
 		});
@@ -165,6 +173,9 @@ describe('Auto thread', () => {
 				user: {
 					username: 'serverUsername',
 					id: randomSnowflake().toString(),
+					avatar: null,
+					discriminator: '0000',
+					global_name: 'serverUsername',
 				},
 				nick: 'serverNickname',
 			},
@@ -201,6 +212,9 @@ describe('Auto thread', () => {
 				user: {
 					username: 'serverUsername',
 					id: randomSnowflake().toString(),
+					avatar: null,
+					discriminator: '0000',
+					global_name: 'serverUsername',
 				},
 			},
 		});
@@ -239,6 +253,9 @@ describe('Auto thread', () => {
 				user: {
 					username: 'serverUsername',
 					id: randomSnowflake().toString(),
+					avatar: null,
+					discriminator: '0000',
+					global_name: 'serverUsername',
 				},
 			},
 		});
@@ -274,6 +291,9 @@ describe('Auto thread', () => {
 				user: {
 					username: 'serverUsername',
 					id: randomSnowflake().toString(),
+					avatar: null,
+					discriminator: '0000',
+					global_name: 'test',
 				},
 			},
 		});

@@ -21,8 +21,11 @@ env:
   NEXT_PUBLIC_POSTHOG_TOKEN: "123" # Fake API key to make CI not fail
   REDIS_URL: redis://:redis@localhost:6379
   NEXT_PUBLIC_DEPLOYMENT_ENV: "ci"
-  OWNERS: "[]"
   DISCORD_CLIENT_ID: "123"
+  DISCORD_CLIENT_SECRET: "123"
+  DISCORD_TOKEN: "123"
+  ENVIRONMENT: 'discord-bot' # todo: needs to be set on a per proj level
+  NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
 
   # Long delay to give tests best chance at succeeding
   DEFAULT_DELAY_IN_MS: "5000"
@@ -34,7 +37,7 @@ env:
 jobs:
   build:
       name: Build and Test
-      timeout-minutes: 45
+      timeout-minutes: 90
       runs-on: ubuntu-latest
 
 
@@ -45,30 +48,50 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
         with:
-          node-version: 16
-          cache: 'yarn'
+          node-version: 18
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 8.6.7
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Start containers # TODO: Use dev container docker-compose instead if possible
         run: docker-compose -f "docker-compose.yml" up -d --build
 
       - name: Install dependencies
         # Playright is used for storybook, possible move that into package.json instead?
-        run: yarn && npx playwright install-deps
+        run: pnpm i && npx playwright install-deps
 
       - name: Setup Database
-        run: yarn db:push
+        run: pnpm db:push
 
       - name: Format
-        run: yarn format:check
+        run: pnpm format:check
 
       - name: Lint
-        run: yarn lint
+        run: pnpm lint
 
       - name: Build
-        run: yarn build
+        run: pnpm build
 
       - name: Test
-        run: yarn test
+        run: pnpm test
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3

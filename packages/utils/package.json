@@ -7,20 +7,24 @@
 	"private": true,
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules coverage",
-		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix",
-		"test": "yarn run vitest run  --coverage",
-		"test:watch": "yarn run vitest"
+		"test": "pnpm vitest run  --coverage",
+		"test:watch": "pnpm vitest"
 	},
 	"dependencies": {
 		"dotenv-cra": "^3.0.3",
+		"@answeroverflow/env": "^0.1.0",
 		"lorem-ipsum": "^2.0.8"
 	},
 	"devDependencies": {
-		"@answeroverflow/tsconfig": "*",
+		"@answeroverflow/prettier-config": "^0.0.0",
+		"@answeroverflow/tsconfig": "^0.0.0",
 		"@vitest/coverage-c8": "^0.28.5",
+		"eslint": "^8.45.0",
+		"prettier": "^2.8.8",
 		"vitest": "^0.29.8"
 	}
 }
