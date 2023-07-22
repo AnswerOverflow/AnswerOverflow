@@ -18,6 +18,7 @@ export const makeServerIconLink = (
 export function ServerIcon(props: ServerIconProps) {
 	const size = getAvatarSize(props.size ?? 'md');
 	const serverIconUrl = makeServerIconLink(props.server, size);
+	console.log(size);
 	return (
 		<Avatar {...props}>
 			<AvatarImage

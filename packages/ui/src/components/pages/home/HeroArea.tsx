@@ -51,10 +51,11 @@ const ServerGrid = (props: { servers: ServerPublic[] }) => {
 			<Marquee
 				gradient
 				gradientColor={[6, 6, 7]}
-				speed={150}
+				speed={20}
 				direction={props.direction}
 				delay={props.delay ?? 0}
-				className="flex h-full max-w-4xl flex-col justify-center"
+				pauseOnHover
+				className="flex h-full flex-col justify-center"
 			>
 				<div className={'my-4 flex flex-row justify-between'}>
 					{props.servers.map((server) => {
@@ -66,16 +67,11 @@ const ServerGrid = (props: { servers: ServerPublic[] }) => {
 									width: '80%',
 								}}
 							>
-								<div
-									className="flex
-      flex-col items-center transition-all duration-200
-      hover:z-10 hover:scale-110 hover:shadow-lg
-      "
-								>
+								<div className="flex flex-col items-center transition-all duration-200 hover:z-10 hover:scale-110 hover:shadow-lg">
 									<ServerIcon
 										server={server}
 										className={'mx-2'}
-										size={96}
+										size={128}
 										key={`${server.id}-${props.direction}`}
 									/>
 								</div>
@@ -95,7 +91,7 @@ const ServerGrid = (props: { servers: ServerPublic[] }) => {
 						key={`column-${index}`}
 						servers={column}
 						direction={'left'}
-						delay={index}
+						delay={index * -1}
 					/>
 				);
 			})}
@@ -105,12 +101,12 @@ const ServerGrid = (props: { servers: ServerPublic[] }) => {
 
 export const HeroArea = (props: { servers: ServerPublic[] }) => {
 	return (
-		<div className="z-20 flex min-h-[calc(100vh-10rem)] items-center px-4 pb-20 pt-10 sm:px-[4rem] 2xl:px-[6rem]">
-			<div className=" grid h-full grid-cols-2 transition-all lg:gap-32 xl:flex-row 2xl:gap-72">
+		<div className="relative flex min-h-[calc(100vh-10rem)] items-center px-4 pb-20 pt-10 sm:px-[4rem] 2xl:px-[6rem]">
+			<div className="grid h-full grid-cols-2 transition-all lg:gap-32 xl:flex-row 2xl:gap-72">
 				<HeroAreaText />
-				<div className="hidden items-center justify-center sm:flex">
-					<ServerGrid servers={props.servers} />
-				</div>
+			</div>
+			<div className="absolute right-0 top-20 hidden max-w-vw40 items-center justify-center sm:flex">
+				<ServerGrid servers={props.servers} />
 			</div>
 		</div>
 	);

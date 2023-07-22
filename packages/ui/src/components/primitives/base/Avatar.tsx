@@ -49,11 +49,17 @@ const Avatar = React.forwardRef<
 		ref={ref}
 		className={cn(
 			'relative flex h-full shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-50 text-center text-ao-black dark:bg-neutral-700 dark:text-ao-white',
+			typeof size !== 'number' && getAvatarSizeAsClass(size ?? 'md'),
 			className,
-			typeof size === 'number'
-				? `w-[${size}px] h-[${size}px]`
-				: getAvatarSizeAsClass(size ?? 'md'),
 		)}
+		style={
+			typeof size === 'number'
+				? {
+						width: size,
+						height: size,
+				  }
+				: {}
+		}
 		{...props}
 	/>
 ));
