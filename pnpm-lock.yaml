@@ -1522,6 +1522,9 @@ importers:
       posthog-js:
         specifier: ^1.71.0
         version: 1.71.0
+      react-fast-marquee:
+        specifier: ^1.6.0
+        version: 1.6.0(react-dom@18.2.0)(react@18.2.0)
       react-grid-gallery:
         specifier: ^1.0.0
         version: 1.0.0(react@18.2.0)
@@ -14110,6 +14113,16 @@ packages:
 
   /react-fast-compare@3.2.2:
     resolution: {integrity: sha512-nsO+KSNgo1SbJqJEYRE9ERzo7YtYbou/OqjSQKxV7jcKox7+usiUVZOAC+XnDOABXggQTno0Y1CpVnuWEc1boQ==}
+    dev: false
+
+  /react-fast-marquee@1.6.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-jtuwT9SNjrqxnE7lGZ8mTL1I8Q4+9G4aBta2p+y2Pa3SjR17QROblwrLICyM8rbjQFHgHawTHcaH9HvoVO2NOA==}
+    peerDependencies:
+      react: '>= 16.8.0 || 18.0.0'
+      react-dom: '>= 16.8.0 || 18.0.0'
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /react-frame-component@5.2.6(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0):

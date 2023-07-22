@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
 import Marquee from 'react-fast-marquee';
 import type { ServerPublic } from '~api/router/server/types';
-import { SearchInput } from '~ui/components/primitives';
+import { Paragraph, SearchInput, ServerIcon } from '~ui/components/primitives';
+import { trackEvent } from '@answeroverflow/hooks';
+import { serverToAnalyticsData } from '@answeroverflow/constants';
+import Image from 'next/image';
+import Link from 'next/link';
 
 const HeroAreaText = () => {
 	return (
-		<div className="flex w-full flex-col items-start justify-center gap-6 pb-20 xl:w-[40%]">
+		<div className="flex w-full flex-col items-start justify-center gap-6 pb-20 ">
 			<h1 className="text-center font-header text-4xl font-bold leading-[114.5%] text-ao-black dark:text-ao-white md:text-start md:text-6xl">
 				Search All Of Discord
 			</h1>
 			<p className="w-4/5 text-center font-body text-lg text-ao-black/[.95] dark:text-ao-white/[.85] md:text-start md:text-xl">
-				Answer Overflow is an open source project designed to bring discord
-				channels to your favorite search engine, enabling users to easily find
-				the info they need, fast.
+				A search engine for all public Discord servers. Find results from
+				indexed content or find a community to join.
 			</p>
 			<div className="flex w-full flex-col items-center justify-center gap-8 sm:flex-row">
 				<SearchInput />
@@ -27,10 +30,11 @@ const ServerGrid = (props: { servers: ServerPublic[] }) => {
 
 	useEffect(() => {
 		// 8 columns
-		const columns: ServerPublic[][] = [[], [], [], [], [], [], [], []];
+		const numCols = 6;
+		const columns: ServerPublic[][] = Array.from({ length: numCols }, () => []);
 		props.servers.forEach((server, index) => {
 			// 4 in each column, 8 columns
-			const column = index % 8;
+			const column = index % numCols;
 			columns[column]?.push(server);
 		});
 		setServerColumnsState(columns);
@@ -38,38 +42,73 @@ const ServerGrid = (props: { servers: ServerPublic[] }) => {
 
 	console.log(serverColumnsState);
 
-	const EachColumn = (props: { servers: ServerPublic[] }) => {
+	const EachColumn = (props: {
+		servers: ServerPublic[];
+		direction: 'left' | 'right';
+		delay?: number;
+	}) => {
 		return (
-			<div className="mx-4 grid grid-cols-1 grid-rows-4 gap-y-6">
-				{props.servers.map((server) => {
-					return (
-						<div
-							key={`server-${server.id}`}
-							className="flex h-8 w-36 items-center justify-center rounded-standard border-2 border-ao-white/25 bg-ao-white/5 p-6"
-						>
-							{server.name}
-						</div>
-					);
-				})}
-			</div>
+			<Marquee
+				gradient
+				gradientColor={[6, 6, 7]}
+				speed={150}
+				direction={props.direction}
+				delay={props.delay ?? 0}
+				className="flex h-full max-w-4xl flex-col justify-center"
+			>
+				<div className={'my-4 flex flex-row justify-between'}>
+					{props.servers.map((server) => {
+						return (
+							<Link
+								key={`${server.id}-${props.direction}`}
+								href={`c/${server.id}`}
+								style={{
+									width: '80%',
+								}}
+							>
+								<div
+									className="flex
+      flex-col items-center transition-all duration-200
+      hover:z-10 hover:scale-110 hover:shadow-lg
+      "
+								>
+									<ServerIcon
+										server={server}
+										className={'mx-2'}
+										size={96}
+										key={`${server.id}-${props.direction}`}
+									/>
+								</div>
+							</Link>
+						);
+					})}
+				</div>
+			</Marquee>
 		);
 	};
 
 	return (
-		<Marquee className="grid" speed={50} pauseOnHover>
+		<div className="grid grid-cols-1 grid-rows-4 ">
 			{serverColumnsState?.map((column, index) => {
-				return <EachColumn key={`column-${index}`} servers={column} />;
+				return (
+					<EachColumn
+						key={`column-${index}`}
+						servers={column}
+						direction={'left'}
+						delay={index}
+					/>
+				);
 			})}
-		</Marquee>
+		</div>
 	);
 };
 
 export const HeroArea = (props: { servers: ServerPublic[] }) => {
 	return (
 		<div className="z-20 flex min-h-[calc(100vh-10rem)] items-center px-4 pb-20 pt-10 sm:px-[4rem] 2xl:px-[6rem]">
-			<div className="flex h-full w-full flex-col transition-all lg:gap-32 xl:flex-row 2xl:gap-72">
+			<div className=" grid h-full grid-cols-2 transition-all lg:gap-32 xl:flex-row 2xl:gap-72">
 				<HeroAreaText />
-				<div className="hidden items-center justify-center sm:flex 2xl:grow">
+				<div className="hidden items-center justify-center sm:flex">
 					<ServerGrid servers={props.servers} />
 				</div>
 			</div>

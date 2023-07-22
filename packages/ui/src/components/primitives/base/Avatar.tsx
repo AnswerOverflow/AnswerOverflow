@@ -5,7 +5,7 @@ import { cn } from '~ui/utils/styling';
 export type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
 
 export type ExtraAvatarProps = {
-	size?: AvatarSize;
+	size?: AvatarSize | number;
 };
 
 export type AvatarProps = React.ComponentPropsWithoutRef<
@@ -13,7 +13,9 @@ export type AvatarProps = React.ComponentPropsWithoutRef<
 > &
 	ExtraAvatarProps;
 
-export function getAvatarSize(size: AvatarSize) {
+export function getAvatarSize(size: AvatarSize | number) {
+	if (typeof size === 'number') return size;
+
 	switch (size) {
 		case 'sm':
 			return 40;
@@ -48,7 +50,9 @@ const Avatar = React.forwardRef<
 		className={cn(
 			'relative flex h-full shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-50 text-center text-ao-black dark:bg-neutral-700 dark:text-ao-white',
 			className,
-			getAvatarSizeAsClass(size ?? 'md'),
+			typeof size === 'number'
+				? `w-[${size}px] h-[${size}px]`
+				: getAvatarSizeAsClass(size ?? 'md'),
 		)}
 		{...props}
 	/>
@@ -75,13 +79,15 @@ const AvatarFallback = React.forwardRef<
 	React.ElementRef<typeof AvatarPrimitive.Fallback>,
 	React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback> &
 		ExtraAvatarProps
->(({ className, ...props }, ref) => (
+>(({ className, size, ...props }, ref) => (
 	<AvatarPrimitive.Fallback
 		ref={ref}
 		className={cn(
 			'relative flex h-full shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-50 text-center dark:bg-neutral-700',
 			className,
-			getAvatarSizeAsClass(props.size ?? 'md'),
+			typeof size === 'number'
+				? `w-[${size}px] h-[${size}px]`
+				: getAvatarSizeAsClass(size ?? 'md'),
 		)}
 		{...props}
 	/>
