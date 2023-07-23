@@ -208,6 +208,9 @@ export function NavbarRenderer(props: {
 				</NavigationMenuList>
 				<NavigationMenuList>
 					<NavigationMenuItem className="md:hidden">
+						<ThemeSwitcher />
+					</NavigationMenuItem>
+					<NavigationMenuItem className="md:hidden">
 						<Link href={'/search'}>
 							<MagnifyingGlassIcon className="h-8 w-8 text-ao-black hover:text-neutral-300 dark:text-ao-white dark:hover:text-neutral-400" />
 							<span className="sr-only">Search Answer Overflow</span>
