@@ -12,7 +12,7 @@ export const makeServerIconLink = (
 	server: Pick<ServerPublic, 'id' | 'icon'>,
 	size: number = 64,
 ) => {
-	if (webClientEnv.NEXT_PUBLIC_LADLE)
+	if (webClientEnv.NEXT_PUBLIC_LADLE && !server.icon)
 		return `https://api.dicebear.com/6.x/icons/png?size=${size}&seed=${server.id}`;
 	if (!server.icon) return undefined;
 	return `https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png?size=${size}`;

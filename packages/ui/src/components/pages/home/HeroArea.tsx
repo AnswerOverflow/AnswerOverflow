@@ -1,29 +1,19 @@
-import { useEffect, useState } from 'react';
 import Marquee from 'react-fast-marquee';
 import type { ServerPublic } from '~api/router/server/types';
-import {
-	Button,
-	Paragraph,
-	SearchInput,
-	ServerIcon,
-} from '~ui/components/primitives';
-import { trackEvent } from '@answeroverflow/hooks';
-import { serverToAnalyticsData } from '@answeroverflow/constants';
-import Image from 'next/image';
-import Link from 'next/link';
+import { Button, SearchInput, ServerIcon } from '~ui/components/primitives';
 
 const HeroAreaText = () => {
 	return (
-		<div className="flex h-full w-full flex-col items-start justify-center gap-6 rounded-md bg-gray-900/40 bg-clip-padding p-16 backdrop-blur-lg">
+		<div className="flex h-full w-full flex-col items-center justify-center gap-6 rounded-3xl bg-gray-900/40 bg-clip-padding p-16 backdrop-blur-3xl">
 			<h1 className="text-center font-header text-4xl font-bold leading-[114.5%] text-ao-black dark:text-ao-white md:text-start md:text-6xl">
-				Search All Of Discord
+				Search all of Discord
 			</h1>
 			<p className="w-4/5 text-center font-body text-lg text-ao-black/[.95] dark:text-ao-white/[.85] md:text-start md:text-xl">
-				A search engine for all public Discord servers. Find results from
-				indexed content or find a community to join.
+				Answer Overflow is a Discord search engine. Find results from indexed
+				content or a community to join.
 			</p>
 			<div className="flex w-full flex-col items-center justify-center gap-8 sm:flex-row">
-				<SearchInput />
+				<SearchInput className={'bg-neutral-900'} />
 			</div>
 			<div className="flex flex-row gap-4">
 				<Button size={'lg'} className={'text-xl'}>
@@ -38,88 +28,47 @@ const HeroAreaText = () => {
 };
 
 const ServerGrid = (props: { servers: ServerPublic[] }) => {
-	const [serverColumnsState, setServerColumnsState] =
-		useState<ServerPublic[][]>();
-
-	useEffect(() => {
-		// 8 columns
-		const numCols = 5;
-		const columns: ServerPublic[][] = Array.from({ length: numCols }, () => []);
-		props.servers.forEach((server, index) => {
-			// 4 in each column, 8 columns
-			const column = index % numCols;
-			columns[column]?.push(server);
-		});
-		setServerColumnsState(columns);
-	}, [props.servers]);
-
-	console.log(serverColumnsState);
-
-	const EachColumn = (props: {
-		servers: ServerPublic[];
-		direction: 'left' | 'right';
-		delay?: number;
-	}) => {
-		return (
-			<Marquee
-				gradient
-				gradientColor={[6, 6, 7]}
-				speed={20}
-				direction={props.direction}
-				delay={props.delay ?? 0}
-				pauseOnHover
-				className="flex h-full flex-col justify-center"
-			>
-				<div className={'my-4 flex flex-row justify-between'}>
-					{props.servers.map((server) => {
-						return (
-							<Link
-								key={`${server.id}-${props.direction}`}
-								href={`c/${server.id}`}
-								style={{
-									width: '80%',
-								}}
-							>
-								<div className="z-50 flex flex-col items-center transition-all duration-200 hover:z-10 hover:scale-110 hover:shadow-lg ">
-									<ServerIcon
-										server={server}
-										className={'mx-2'}
-										size={150}
-										key={`${server.id}-${props.direction}`}
-									/>
-								</div>
-							</Link>
-						);
-					})}
-				</div>
-			</Marquee>
-		);
-	};
-
 	return (
-		<div className="grid grid-cols-1 grid-rows-4 ">
-			{serverColumnsState?.map((column, index) => {
-				return (
-					<EachColumn
-						key={`column-${index}`}
-						servers={column}
-						direction={'left'}
-						delay={index * -1}
-					/>
-				);
-			})}
-		</div>
+		<Marquee speed={10}>
+			<div className={'grid max-w-vw40 grid-flow-col grid-rows-4 gap-16'}>
+				{props.servers.map((server) => {
+					return <ServerIcon server={server} size={160} key={server.id} />;
+				})}
+			</div>
+		</Marquee>
 	);
 };
 
 export const HeroArea = (props: { servers: ServerPublic[] }) => {
 	return (
-		<div className="relative flex min-h-[calc(100vh-10rem)] items-center px-4 pb-20 pt-10 sm:px-[4rem] 2xl:px-[6rem]">
-			<div className="z-20 grid h-full grid-cols-2 transition-all lg:gap-32 xl:flex-row 2xl:gap-72">
-				<HeroAreaText />
-			</div>
-			<div className="absolute right-0 top-20 -z-0 hidden max-w-vw80 items-center justify-center blur-sm sm:flex">
+		<div className="relative mt-32 min-h-[calc(100vh-10rem)] w-full">
+			<div className="blur-sm">
 				<ServerGrid servers={props.servers} />
+				<div
+					className="absolute right-0 top-0 z-10 h-full w-1/4"
+					style={{
+						// from right to left, fade from 0 to 1 opacity
+						background:
+							'linear-gradient(to right, rgba(6, 6, 7, 0), rgba(6, 6, 7, 1))',
+					}}
+				/>
+				<div
+					className="absolute left-0 top-0 z-10 h-full w-1/4"
+					style={{
+						background:
+							'linear-gradient(to right, rgba(6, 6, 7, 1), rgba(6, 6, 7, 0))',
+					}}
+				/>
+			</div>
+			<div
+				className="fixed z-20 m-auto transition-all "
+				style={{
+					top: '50%',
+					left: '50%',
+					transform: 'translate(-50%, -50%)',
+				}}
+			>
+				<HeroAreaText />
 			</div>
 		</div>
 	);

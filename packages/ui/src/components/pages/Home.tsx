@@ -34,9 +34,7 @@ export const Home = (props: { servers: ServerPublic[] }) => {
 			<div className="max-w-screen-3xl">
 				<div className="relative">
 					<Navbar />
-					<div className="">
-						<HeroArea servers={props.servers} />
-					</div>
+					<HeroArea servers={props.servers} />
 				</div>
 				<HowDoesItWorkArea />
 				<DownChevron scrollIntoView={executeScroll} />
