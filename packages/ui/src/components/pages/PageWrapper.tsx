@@ -30,7 +30,7 @@ export const PageWrapper = ({
 
 export const PageWrapperRenderer = ({ children }: PageWrapperProps) => {
 	return (
-		<div className="mx-auto flex w-full flex-col items-center overflow-x-hidden overflow-y-scroll bg-ao-white font-body scrollbar-hide dark:bg-ao-black">
+		<div className="mx-auto flex w-full flex-col items-center overflow-x-hidden overflow-y-scroll bg-ao-white font-body text-ao-black scrollbar-hide dark:bg-ao-black dark:text-ao-white">
 			<div className="w-full max-w-screen-2xl justify-center">
 				<Navbar />
 				{webClientEnv.NEXT_PUBLIC_LADLE ? (

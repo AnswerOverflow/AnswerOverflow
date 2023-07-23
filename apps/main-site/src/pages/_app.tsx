@@ -91,7 +91,7 @@ const MyApp: AppType<{
 
 	return (
 		<TenantContextProvider value={pageProps.tenant}>
-			<ThemeProvider attribute="class" defaultTheme={'light'}>
+			<ThemeProvider attribute="class" defaultTheme={'dark'} enableSystem>
 				<SessionProvider session={session}>
 					<AnalyticsProvider>
 						<PageWrapper
