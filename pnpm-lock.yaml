@@ -73,7 +73,7 @@ importers:
         version: 5.1.6
       vite:
         specifier: ^4.4.4
-        version: 4.4.4(@types/node@20.4.2)(sass@1.63.6)
+        version: 4.4.4(@types/node@20.4.2)(sass@1.64.1)
       vitest:
         specifier: ^0.29.8
         version: 0.29.8
@@ -311,7 +311,7 @@ importers:
         version: 11.8.0
       next:
         specifier: 13.4.8
-        version: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.63.6)
+        version: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.64.1)
       next-auth:
         specifier: ^4.22.1
         version: 4.22.1(next@13.4.8)(react-dom@18.2.0)(react@18.2.0)
@@ -465,7 +465,7 @@ importers:
         version: 11.8.0
       next:
         specifier: 13.4.8
-        version: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.63.6)
+        version: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.64.1)
       next-auth:
         specifier: ^4.22.1
         version: 4.22.1(next@13.4.8)(react-dom@18.2.0)(react@18.2.0)
@@ -549,14 +549,14 @@ importers:
         specifier: ^2.8.8
         version: 2.8.8
       sass:
-        specifier: ^1.63.6
-        version: 1.63.6
+        specifier: ^1.64.1
+        version: 1.64.1
       tailwindcss:
         specifier: ^3.3.3
         version: 3.3.3
       vitest:
         specifier: ^0.30.1
-        version: 0.30.1(@edge-runtime/vm@2.1.2)(sass@1.63.6)
+        version: 0.30.1(@edge-runtime/vm@2.1.2)(sass@1.64.1)
 
   apps/proxy:
     dependencies:
@@ -763,7 +763,7 @@ importers:
         version: 3.0.3
       next:
         specifier: 13.4.8
-        version: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.63.6)
+        version: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.64.1)
       next-auth:
         specifier: ^4.22.1
         version: 4.22.1(next@13.4.8)(react-dom@18.2.0)(react@18.2.0)
@@ -1302,7 +1302,7 @@ importers:
         version: link:../env
       next:
         specifier: 13.4.8
-        version: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.63.6)
+        version: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.64.1)
       next-auth:
         specifier: ^4.22.1
         version: 4.22.1(next@13.4.8)(react-dom@18.2.0)(react@18.2.0)
@@ -6026,7 +6026,7 @@ packages:
       '@sentry/utils': 7.58.1
       '@sentry/webpack-plugin': 1.20.0
       chalk: 3.0.0
-      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.63.6)
+      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.64.1)
       react: 18.2.0
       rollup: 2.78.0
       stacktrace-parser: 0.1.10
@@ -6400,7 +6400,7 @@ packages:
       '@trpc/client': 10.34.0(@trpc/server@10.34.0)
       '@trpc/react-query': 10.34.0(@tanstack/react-query@4.29.23)(@trpc/client@10.34.0)(@trpc/server@10.34.0)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/server': 10.34.0
-      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.63.6)
+      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.64.1)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-ssr-prepass: 1.5.0(react@18.2.0)
@@ -6901,7 +6901,7 @@ packages:
       c8: 7.14.0
       picocolors: 1.0.0
       std-env: 3.3.3
-      vitest: 0.30.1(@edge-runtime/vm@2.1.2)(sass@1.63.6)
+      vitest: 0.30.1(@edge-runtime/vm@2.1.2)(sass@1.64.1)
     dev: true
 
   /@vitest/expect@0.28.5:
@@ -12928,7 +12928,7 @@ packages:
       '@panva/hkdf': 1.1.1
       cookie: 0.5.0
       jose: 4.14.4
-      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.63.6)
+      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.64.1)
       oauth: 0.9.15
       openid-client: 5.4.3
       preact: 10.16.0
@@ -12962,7 +12962,7 @@ packages:
       react: '>=16.0.0'
       react-dom: '>=16.0.0'
     dependencies:
-      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.63.6)
+      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.64.1)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -12978,7 +12978,7 @@ packages:
       '@next/env': 13.4.9
       fast-glob: 3.3.0
       minimist: 1.2.8
-      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.63.6)
+      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.64.1)
     dev: false
 
   /next-themes@0.2.1(next@13.4.8)(react-dom@18.2.0)(react@18.2.0):
@@ -12988,7 +12988,7 @@ packages:
       react: '*'
       react-dom: '*'
     dependencies:
-      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.63.6)
+      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.64.1)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -13036,7 +13036,7 @@ packages:
       - babel-plugin-macros
     dev: false
 
-  /next@13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.63.6):
+  /next@13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.64.1):
     resolution: {integrity: sha512-lxUjndYKjZHGK3CWeN2RI+/6ni6EUvjiqGWXAYPxUfGIdFGQ5XoisrqAJ/dF74aP27buAfs8MKIbIMMdxjqSBg==}
     engines: {node: '>=16.8.0'}
     hasBin: true
@@ -13061,7 +13061,7 @@ packages:
       postcss: 8.4.14
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-      sass: 1.63.6
+      sass: 1.64.1
       styled-jsx: 5.1.1(@babel/core@7.22.9)(react@18.2.0)
       watchpack: 2.4.0
       zod: 3.21.4
@@ -13086,7 +13086,7 @@ packages:
       next: '>=11.0.0'
       react: '>=17.0.0'
     dependencies:
-      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.63.6)
+      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.64.1)
       react: 18.2.0
     optionalDependencies:
       fsevents: 2.3.2
@@ -13108,7 +13108,7 @@ packages:
       git-url-parse: 13.1.0
       intersection-observer: 0.12.2
       match-sorter: 6.3.1
-      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.63.6)
+      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.64.1)
       next-seo: 6.1.0(next@13.4.8)(react-dom@18.2.0)(react@18.2.0)
       next-themes: 0.2.1(next@13.4.8)(react-dom@18.2.0)(react@18.2.0)
       nextra: 2.10.0(next@13.4.8)(react-dom@18.2.0)(react@18.2.0)
@@ -13138,7 +13138,7 @@ packages:
       gray-matter: 4.0.3
       katex: 0.16.8
       lodash.get: 4.4.2
-      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.63.6)
+      next: 13.4.8(react-dom@18.2.0)(react@18.2.0)(sass@1.64.1)
       next-mdx-remote: 4.4.1(react-dom@18.2.0)(react@18.2.0)
       p-limit: 3.1.0
       react: 18.2.0
@@ -14957,8 +14957,8 @@ packages:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
     dev: false
 
-  /sass@1.63.6:
-    resolution: {integrity: sha512-MJuxGMHzaOW7ipp+1KdELtqKbfAWbH7OLIdoSMnVe3EXPMTmxTmlaZDCTsgIpPCs3w99lLo9/zDKkOrJuT5byw==}
+  /sass@1.64.1:
+    resolution: {integrity: sha512-16rRACSOFEE8VN7SCgBu1MpYCyN7urj9At898tyzdXFhC+a+yOX5dXwAR7L8/IdPJ1NB8OYoXmD55DM30B2kEQ==}
     engines: {node: '>=14.0.0'}
     hasBin: true
     dependencies:
@@ -16697,7 +16697,7 @@ packages:
       picocolors: 1.0.0
       source-map: 0.6.1
       source-map-support: 0.5.21
-      vite: 4.4.4(@types/node@20.4.2)(sass@1.63.6)
+      vite: 4.4.4(@types/node@20.4.2)(sass@1.64.1)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -16719,7 +16719,7 @@ packages:
       mlly: 1.4.0
       pathe: 1.1.1
       picocolors: 1.0.0
-      vite: 4.4.4(@types/node@20.4.2)(sass@1.63.6)
+      vite: 4.4.4(@types/node@20.4.2)(sass@1.64.1)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -16731,7 +16731,7 @@ packages:
       - terser
     dev: true
 
-  /vite-node@0.30.1(@types/node@20.4.2)(sass@1.63.6):
+  /vite-node@0.30.1(@types/node@20.4.2)(sass@1.64.1):
     resolution: {integrity: sha512-vTikpU/J7e6LU/8iM3dzBo8ZhEiKZEKRznEMm+mJh95XhWaPrJQraT/QsT2NWmuEf+zgAoMe64PKT7hfZ1Njmg==}
     engines: {node: '>=v14.18.0'}
     hasBin: true
@@ -16741,7 +16741,7 @@ packages:
       mlly: 1.4.0
       pathe: 1.1.1
       picocolors: 1.0.0
-      vite: 4.4.4(@types/node@20.4.2)(sass@1.63.6)
+      vite: 4.4.4(@types/node@20.4.2)(sass@1.64.1)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -16784,7 +16784,7 @@ packages:
       - typescript
     dev: true
 
-  /vite@4.4.3(@types/node@20.4.2)(sass@1.63.6):
+  /vite@4.4.3(@types/node@20.4.2)(sass@1.64.1):
     resolution: {integrity: sha512-IMnXQXXWgLi5brBQx/4WzDxdzW0X3pjO4nqFJAuNvwKtxzAmPzFE1wszW3VDpAGQJm3RZkm/brzRdyGsnwgJIA==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -16816,7 +16816,7 @@ packages:
       esbuild: 0.18.12
       postcss: 8.4.26
       rollup: 3.26.2
-      sass: 1.63.6
+      sass: 1.64.1
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
@@ -16857,7 +16857,7 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /vite@4.4.4(@types/node@20.4.2)(sass@1.63.6):
+  /vite@4.4.4(@types/node@20.4.2)(sass@1.64.1):
     resolution: {integrity: sha512-4mvsTxjkveWrKDJI70QmelfVqTm+ihFAb6+xf4sjEU2TmUCTlVX87tmg/QooPEMQb/lM9qGHT99ebqPziEd3wg==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -16889,7 +16889,7 @@ packages:
       esbuild: 0.18.12
       postcss: 8.4.26
       rollup: 3.26.2
-      sass: 1.63.6
+      sass: 1.64.1
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
@@ -16937,7 +16937,7 @@ packages:
       tinybench: 2.5.0
       tinypool: 0.3.1
       tinyspy: 1.1.1
-      vite: 4.4.4(@types/node@20.4.2)(sass@1.63.6)
+      vite: 4.4.4(@types/node@20.4.2)(sass@1.64.1)
       vite-node: 0.28.5(@types/node@20.4.2)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
@@ -17002,7 +17002,7 @@ packages:
       tinybench: 2.5.0
       tinypool: 0.4.0
       tinyspy: 1.1.1
-      vite: 4.4.4(@types/node@20.4.2)(sass@1.63.6)
+      vite: 4.4.4(@types/node@20.4.2)(sass@1.64.1)
       vite-node: 0.29.8(@types/node@20.4.2)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
@@ -17015,7 +17015,7 @@ packages:
       - terser
     dev: true
 
-  /vitest@0.30.1(@edge-runtime/vm@2.1.2)(sass@1.63.6):
+  /vitest@0.30.1(@edge-runtime/vm@2.1.2)(sass@1.64.1):
     resolution: {integrity: sha512-y35WTrSTlTxfMLttgQk4rHcaDkbHQwDP++SNwPb+7H8yb13Q3cu2EixrtHzF27iZ8v0XCciSsLg00RkPAzB/aA==}
     engines: {node: '>=v14.18.0'}
     hasBin: true
@@ -17070,8 +17070,8 @@ packages:
       strip-literal: 1.0.1
       tinybench: 2.5.0
       tinypool: 0.4.0
-      vite: 4.4.3(@types/node@20.4.2)(sass@1.63.6)
-      vite-node: 0.30.1(@types/node@20.4.2)(sass@1.63.6)
+      vite: 4.4.3(@types/node@20.4.2)(sass@1.64.1)
+      vite-node: 0.30.1(@types/node@20.4.2)(sass@1.64.1)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less
