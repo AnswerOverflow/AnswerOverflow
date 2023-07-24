@@ -29,9 +29,11 @@ const HeroAreaText = () => {
 	);
 };
 
-const ServerGrid = (props: { servers: ServerPublic[] }) => {
+const ServerGrid = (props: {
+	servers: Pick<ServerPublic, 'id' | 'icon' | 'name'>[];
+}) => {
 	return (
-		<Marquee speed={10}>
+		<Marquee speed={20}>
 			<div
 				className={
 					'mr-8 grid min-h-[calc(100vh-10rem)] grid-flow-col grid-rows-6 gap-8 py-4 md:grid-rows-4 md:gap-16'
@@ -61,7 +63,9 @@ const ServerGrid = (props: { servers: ServerPublic[] }) => {
 	);
 };
 
-export const HeroArea = (props: { servers: ServerPublic[] }) => {
+export const HeroArea = (props: {
+	servers: Pick<ServerPublic, 'id' | 'icon' | 'name'>[];
+}) => {
 	return (
 		<div className="relative w-full">
 			<ServerGrid servers={props.servers} />

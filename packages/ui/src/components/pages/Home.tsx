@@ -21,7 +21,9 @@ const DownChevron = (props: { scrollIntoView: () => unknown }) => (
 		</div>
 	</div>
 );
-export const Home = (props: { servers: ServerPublic[] }) => {
+export const Home = (props: {
+	servers: Pick<ServerPublic, 'id' | 'icon' | 'name'>[];
+}) => {
 	const aboutRef = useRef<HTMLDivElement>(null);
 	const executeScroll = () =>
 		aboutRef.current?.scrollIntoView({
