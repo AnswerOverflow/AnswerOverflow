@@ -8,7 +8,7 @@ import { useRef } from 'react';
 import { HeroArea } from './home/HeroArea';
 import type { ServerPublic } from '~api/router/server/types';
 const DownChevron = (props: { scrollIntoView: () => unknown }) => (
-	<div className="absolute bottom-10 left-1/2 block -translate-x-1/2 sm:hidden xl:block">
+	<div className="absolute bottom-5 left-1/2 z-[60] block -translate-x-1/2 sm:hidden xl:block">
 		<div className="mx-auto h-16 w-16 rounded-full text-black/[.65] dark:text-white/[.65]">
 			<Button
 				variant="ghost"
@@ -31,7 +31,7 @@ export const Home = (props: { servers: ServerPublic[] }) => {
 
 	return (
 		<div className="flex w-full flex-col items-center bg-ao-white font-body dark:bg-[linear-gradient(180.49deg,_#1A1818_-12.07%,_#0E0D0D_-12.07%,_#040405_-12.06%,_#101214_103.52%)]">
-			<div className={'mb-6 w-full max-w-screen-3xl'}>
+			<div className={'w-full max-w-screen-3xl'}>
 				<Navbar />
 			</div>
 			<HeroArea servers={props.servers} />

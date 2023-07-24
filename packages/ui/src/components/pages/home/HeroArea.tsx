@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 const HeroAreaText = () => {
 	return (
-		<div className="flex h-full w-[calc(100vw-2rem)] max-w-screen-lg flex-col items-center justify-center gap-6 rounded-3xl bg-gray-900/40 bg-clip-padding p-8 backdrop-blur-3xl sm:w-[80vw] md:p-16">
+		<div className="flex h-full w-[calc(100vw-2rem)] max-w-screen-lg flex-col items-center justify-center gap-6 rounded-3xl bg-gray-200/40 bg-clip-padding p-8 backdrop-blur-3xl dark:bg-gray-900/40 sm:w-[80vw] md:p-16">
 			<h1 className="text-center font-header text-5xl font-bold leading-[114.5%] text-ao-black dark:text-ao-white md:text-7xl">
 				Search all of Discord
 			</h1>
@@ -34,19 +34,25 @@ const ServerGrid = (props: { servers: ServerPublic[] }) => {
 		<Marquee speed={10}>
 			<div
 				className={
-					'mr-8 grid min-h-[calc(100vh-10rem)] grid-flow-col grid-rows-6 gap-8 md:grid-rows-4 md:gap-16'
+					'mr-8 grid min-h-[calc(100vh-10rem)] grid-flow-col grid-rows-6 gap-8 py-4 md:grid-rows-4 md:gap-16'
 				}
 			>
 				{props.servers.map((server) => {
 					return (
 						<Link
 							className={
-								'max-h-[92px] max-w-[92px] blur-sm brightness-50 transition-all duration-500 ease-out hover:blur-none hover:brightness-100 md:max-h-full md:max-w-full'
+								'flex items-center blur-sm brightness-50  transition-all duration-1000 hover:blur-none hover:brightness-100 hover:duration-300'
 							}
 							href={`/c/${server.id}`}
 							key={server.id}
 						>
-							<ServerIcon server={server} size={160} />
+							<ServerIcon
+								server={server}
+								size={160}
+								className={
+									'max-h-[92px] max-w-[92px] md:max-h-full md:max-w-full'
+								}
+							/>
 						</Link>
 					);
 				})}
@@ -59,15 +65,8 @@ export const HeroArea = (props: { servers: ServerPublic[] }) => {
 	return (
 		<div className="relative w-full">
 			<ServerGrid servers={props.servers} />
-			<div
-				className="pointer-events-none absolute right-0 top-0 z-10 h-full w-1/4"
-				style={{
-					// from right to left, fade from 0 to 1 opacity
-					background:
-						'linear-gradient(to right, rgba(6, 6, 7, 0), rgba(6, 6, 7, 1))',
-				}}
-			/>
-			<div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-1/4 bg-gradient-to-r from-[rgba(6,6,7,1)] to-[rgba(6_,6_,7_,0_)]" />
+			<div className="pointer-events-none absolute right-0 top-0 z-10 hidden h-full w-52 bg-gradient-to-l from-[rgba(245,248,255,.5)] to-[rgba(245,248,255,0)] dark:from-[rgba(6,6,7,1)] dark:to-[rgba(6_,6_,7_,0_)] sm:block" />
+			<div className="pointer-events-none absolute left-0 top-0 z-10 hidden h-full w-52 bg-gradient-to-r from-[rgba(245,248,255,.5)] to-[rgba(245,248,255,0)] dark:from-[rgba(6,6,7,1)] dark:to-[rgba(6_,6_,7_,0_)] sm:block" />
 			<div className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2">
 				<HeroAreaText />
 			</div>
