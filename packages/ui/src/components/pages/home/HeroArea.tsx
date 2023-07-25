@@ -1,7 +1,6 @@
 import Marquee from 'react-fast-marquee';
 import type { ServerPublic } from '~api/router/server/types';
 import { Button, SearchInput, ServerIcon } from '~ui/components/primitives';
-import Balancer from 'react-wrap-balancer';
 import Link from 'next/link';
 
 const HeroAreaText = () => {
@@ -36,14 +35,14 @@ const ServerGrid = (props: {
 		<Marquee speed={20}>
 			<div
 				className={
-					'mr-8 grid min-h-[calc(100vh-10rem)] grid-flow-col grid-rows-6 gap-8 py-4 md:grid-rows-4 md:gap-16'
+					'mr-8 grid min-h-[calc(100vh-10rem)] grid-flow-col grid-rows-5 gap-8 py-4 md:grid-rows-4 md:gap-16'
 				}
 			>
 				{props.servers.map((server) => {
 					return (
 						<Link
 							className={
-								'flex items-center blur-sm brightness-50  transition-all duration-1000 hover:blur-none hover:brightness-100 hover:duration-300'
+								'flex items-center blur-sm brightness-[80%] transition-all duration-1000 hover:blur-none hover:brightness-100 hover:duration-300 dark:brightness-50 dark:hover:brightness-100'
 							}
 							href={`/c/${server.id}`}
 							key={server.id}
