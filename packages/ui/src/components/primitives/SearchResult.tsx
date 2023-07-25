@@ -186,9 +186,9 @@ export const SearchResult = ({
 }) => {
 	return (
 		<SearchResultContext.Provider value={{ result }}>
-			<div className="flex h-full w-full flex-col-reverse rounded-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:flex-row">
+			<div className="flex h-full flex-col-reverse rounded-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:flex-row">
 				<SearchResultMainContent />
-				<div className="w-full flex-col items-center justify-center rounded-t-standard border-x-2 border-t-2 border-black/[.13] px-5 pb-2 pt-6 dark:border-white/[.13] lg:flex lg:w-1/4 lg:rounded-br-standard lg:rounded-tl-none lg:border-y-2 lg:border-l-0 lg:border-r-2 2xl:w-1/6">
+				<div className="w-full shrink-0 flex-col items-center justify-center rounded-t-standard border-x-2 border-t-2 border-black/[.13] px-5 pb-2 pt-6 dark:border-white/[.13] lg:flex lg:w-64 lg:rounded-br-standard lg:rounded-tl-none lg:border-y-2 lg:border-l-0 lg:border-r-2">
 					<SearchResultSidebar />
 				</div>
 			</div>

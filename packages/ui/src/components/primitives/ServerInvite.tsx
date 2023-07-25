@@ -9,7 +9,7 @@ import { ChannelType } from '~ui/utils/discord';
 import { ServerIcon } from './ServerIcon';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { LinkButton } from './base';
-import { cn } from '~ui/utils/styling';
+import { classNames, cn } from '~ui/utils/styling';
 import Link from 'next/link';
 import { trackEvent } from '@answeroverflow/hooks';
 import {
@@ -48,10 +48,9 @@ export const ServerInviteTitle = () => {
 					...(channel && channelToAnalyticsData(channel)),
 				});
 			}}
+			className="min-w-0 truncate text-left font-header text-lg font-bold leading-5 text-ao-black  hover:text-ao-black/[.5] dark:text-ao-white dark:hover:text-ao-white/80"
 		>
-			<h3 className="text-center font-header text-lg font-bold leading-5 text-ao-black  hover:text-ao-black/[.5] dark:text-ao-white dark:hover:text-ao-white/80">
-				{server.name}
-			</h3>
+			<p>{server.name}</p>
 		</Link>
 	);
 };
@@ -67,13 +66,19 @@ export const ChannelIcon = ({
 		case ChannelType.GuildForum:
 			return (
 				<ChatBubbleLeftRightIcon
-					className={cn('h-4 w-4 text-ao-black dark:text-ao-white', className)}
+					className={classNames(
+						'h-4 w-4 text-ao-black dark:text-ao-white',
+						className ?? '',
+					)}
 				/>
 			);
 		default:
 			return (
 				<HashtagIcon
-					className={cn('h-4 w-4 text-ao-black dark:text-ao-white', className)}
+					className={classNames(
+						'h-4 w-4 text-ao-black dark:text-ao-white',
+						className ?? '',
+					)}
 				/>
 			);
 	}
@@ -86,11 +91,14 @@ export const ChannelName = ({
 	channel: ChannelPublicWithFlags;
 }) => {
 	return (
-		<div className="flex w-full flex-row items-center justify-start ">
-			<ChannelIcon channelType={channel.type} />
-			<h4 className="overflow-hidden text-ellipsis text-center font-body text-base font-bold leading-5 text-ao-black dark:text-ao-white">
+		<div className="flex w-full flex-row items-center">
+			<ChannelIcon
+				channelType={channel.type}
+				className={'text-right font-bold'}
+			/>
+			<p className="truncate text-left text-base font-bold leading-5 text-ao-black dark:text-ao-white">
 				{channel.name}
-			</h4>
+			</p>
 		</div>
 	);
 };
@@ -121,7 +129,7 @@ export const ServerInviteJoinButton = (props: { className?: string }) => {
 
 export const ServerInviteIcon = () => {
 	const { server } = useServerInviteContext();
-	return <ServerIcon server={server} size="md" />;
+	return <ServerIcon server={server} size="md" className={'shrink-0'} />;
 };
 
 type ServerInviteProps = {
@@ -140,21 +148,17 @@ type ServerInviteProps = {
 export const ServerInviteRenderer = (props: ServerInviteProps) => {
 	return (
 		<ServerInviteContext.Provider value={props}>
-			<div className="flex h-full w-full flex-col items-center justify-center gap-1">
-				<div className="flex flex-col">
-					<div className="flex flex-row items-center justify-center pb-5 align-middle">
-						{props.Icon || <ServerInviteIcon />}
-						<div className="flex flex-col items-center justify-center pl-2">
-							{props.Body || (
-								<>
-									<ServerInviteTitle />
-									{props.channel && <ChannelName channel={props.channel} />}
-								</>
-							)}
-						</div>
-					</div>
-					{props.JoinButton || <ServerInviteJoinButton />}
+			<div className="flex w-full flex-col gap-4">
+				<div className="flex w-full max-w-full flex-row items-center justify-start gap-4 align-middle">
+					{props.Icon || <ServerInviteIcon />}
+					<ServerInviteTitle />
 				</div>
+				<div className="max-w-full items-center justify-center text-left">
+					{props.Body || (
+						<>{props.channel && <ChannelName channel={props.channel} />}</>
+					)}
+				</div>
+				{props.JoinButton || <ServerInviteJoinButton />}
 			</div>
 		</ServerInviteContext.Provider>
 	);
