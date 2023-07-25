@@ -200,10 +200,10 @@ export function MessageResultPage({
 			<div className="my-8 flex flex-col-reverse items-center justify-between gap-2 sm:flex-row sm:py-0">
 				<div className="flex h-full grow flex-col justify-between gap-4">
 					<MessagesSearchBar />
-					<div className="flex flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400 text-center leading-5 dark:border-neutral-600  dark:text-white">
+					<div className="flex flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400 text-center  dark:border-neutral-600  dark:text-white">
 						<ChannelIcon channelType={channel.type} className="mb-4 h-6 w-6" />
 						<h1
-							className="mb-4 truncate text-left font-header text-3xl font-bold leading-5 text-ao-black dark:text-ao-white"
+							className="mb-4 truncate text-left font-header text-3xl text-ao-black dark:text-ao-white"
 							dangerouslySetInnerHTML={{ __html: toHTML(question) }}
 						></h1>
 					</div>
