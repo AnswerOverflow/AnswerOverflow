@@ -143,6 +143,8 @@ type ServerInviteProps = {
 	Body?: React.ReactNode;
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	JoinButton?: React.ReactNode;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	Title?: React.ReactNode;
 };
 
 export const ServerInviteRenderer = (props: ServerInviteProps) => {
@@ -150,8 +152,8 @@ export const ServerInviteRenderer = (props: ServerInviteProps) => {
 		<ServerInviteContext.Provider value={props}>
 			<div className="flex w-full flex-col gap-4">
 				<div className="flex w-full max-w-full flex-row items-center justify-start gap-4 align-middle">
-					{props.Icon || <ServerInviteIcon />}
-					<ServerInviteTitle />
+					{props.Icon === undefined ? <ServerInviteIcon /> : props.Icon}
+					{props.Title === undefined ? <ServerInviteTitle /> : props.Title}
 				</div>
 				<div className="max-w-full items-center justify-center text-left">
 					{props.Body || (
