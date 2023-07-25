@@ -54,6 +54,7 @@
 		"react-wrap-balancer": "^0.4.1",
 		"react-xarrows": "^2.0.2",
 		"recharts": "^2.7.2",
+		"schema-dts": "^1.1.2",
 		"tailwind-merge": "^1.13.2",
 		"yet-another-react-lightbox": "^3.11.3",
 		"zod": "^3.21.4"

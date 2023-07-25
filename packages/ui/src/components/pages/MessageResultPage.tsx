@@ -24,6 +24,10 @@ import {
 	threadToAnalyticsData,
 } from '@answeroverflow/constants/src/analytics';
 import { isServer } from '~ui/utils/checks';
+import Head from 'next/head';
+import type { QAPage, WithContext } from 'schema-dts';
+import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
+import { toHTML } from 'discord-markdown';
 export type MessageResultPageProps = {
 	messages: APIMessageWithDiscordAccount[];
 	server: ServerPublic;
@@ -158,8 +162,34 @@ export function MessageResultPage({
 		return <Msg key={message.id} count={consecutivePrivateMessages} />;
 	});
 
+	const question = thread?.name ?? firstMessage.content?.slice(0, 100);
+
+	const qaHeader: WithContext<QAPage> = {
+		'@context': 'https://schema.org',
+		'@type': 'QAPage',
+		mainEntity: {
+			'@type': 'Question',
+			name: toHTML(question),
+			text: toHTML(firstMessage.content),
+			answerCount: solution ? 1 : 0,
+			acceptedAnswer: solution && {
+				'@type': 'Answer',
+				text: toHTML(solution.content),
+				url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
+					solution.id
+				}#solution-${solution.id}`,
+			},
+		},
+	};
+
 	return (
 		<div className="sm:mx-3">
+			<Head>
+				<script
+					type="application/ld+json"
+					dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}
+				/>
+			</Head>
 			<AOHead
 				description={description}
 				path={`/m/${firstMessage?.id ?? requestedId}`}
@@ -172,9 +202,10 @@ export function MessageResultPage({
 					<MessagesSearchBar />
 					<div className="flex flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400 text-center leading-5 dark:border-neutral-600  dark:text-white">
 						<ChannelIcon channelType={channel.type} className="mb-4 h-6 w-6" />
-						<h1 className="mb-4 truncate text-left font-header text-3xl font-bold leading-5 text-ao-black dark:text-ao-white">
-							{thread ? `${thread.name}` : `${channel.name}`}
-						</h1>
+						<h1
+							className="mb-4 truncate text-left font-header text-3xl font-bold leading-5 text-ao-black dark:text-ao-white"
+							dangerouslySetInnerHTML={{ __html: toHTML(question) }}
+						></h1>
 					</div>
 				</div>
 				<div className="hidden shrink-0 sm:pl-8 md:block">
@@ -188,7 +219,7 @@ export function MessageResultPage({
 			<div className="rounded-md">
 				<div className="flex flex-col gap-4">{messageStack}</div>
 			</div>
-			<div className="mt-4 flex flex-col items-center justify-center gap-8">
+			<div className="mt-4 flex flex-col items-center justify-center gap-8 text-center">
 				<Heading.H2>Looking for more? Join the community!</Heading.H2>
 				<div className={'w-full max-w-[300px]'}>
 					<ServerInvite
