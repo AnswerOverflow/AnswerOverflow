@@ -150,6 +150,7 @@ export const MessageContents = () => {
 
 export const MessageContentWithSolution = (props: {
 	solution: Pick<MessageProps, 'message'>;
+	showJumpToSolutionCTA?: boolean;
 }) => {
 	return (
 		<div>
@@ -164,9 +165,11 @@ export const MessageContentWithSolution = (props: {
 						<MessageContents />
 					</MessageBlurrer>
 				</MessageContext.Provider>
-				<Link href={`#solution-${props.solution.message.id}`}>
-					Jump to solution
-				</Link>
+				{props.showJumpToSolutionCTA && (
+					<Link href={`#solution-${props.solution.message.id}`}>
+						Jump to solution
+					</Link>
+				)}
 			</div>
 		</div>
 	);
@@ -265,7 +268,7 @@ export const Message = ({
 			<Blurrer>
 				<div
 					className={cn(
-						`discord-message grow bg-[#E9ECF2] leading-6 dark:bg-[#181B1F] ${
+						`discord-message w-full bg-[#E9ECF2] leading-6 dark:bg-[#181B1F] ${
 							showBorders ? 'border-2' : ''
 						} border-black/[.13] dark:border-white/[.13] ${
 							fullRounded ? 'rounded-standard' : 'lg:rounded-tl-standard'

@@ -161,13 +161,12 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 			);
 		}
 		const qs = questions.map((question) => (
-			<div className="drop-shadow-sm " key={question.message.id}>
-				<LinkMessage
-					message={question.message}
-					thread={question.thread}
-					className="rounded-standard"
-				/>
-			</div>
+			<LinkMessage
+				key={question.message.id}
+				message={question.message}
+				thread={question.thread}
+				className="rounded-standard drop-shadow-sm"
+			/>
 		));
 		return <div className="flex w-full flex-1 flex-col gap-2">{qs}</div>;
 	};

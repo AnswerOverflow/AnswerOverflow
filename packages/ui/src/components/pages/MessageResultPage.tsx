@@ -131,6 +131,7 @@ export function MessageResultPage({
 								solution={{
 									message: solution,
 								}}
+								showJumpToSolutionCTA
 							/>
 						) : undefined
 					}
