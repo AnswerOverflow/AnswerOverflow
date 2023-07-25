@@ -203,7 +203,7 @@ export function MessageResultPage({
 					<div className="flex flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400 text-center  dark:border-neutral-600  dark:text-white">
 						<ChannelIcon channelType={channel.type} className="mb-4 h-6 w-6" />
 						<h1
-							className="mb-4 truncate text-left font-header text-3xl text-ao-black dark:text-ao-white"
+							className="mb-4 text-left font-header text-3xl text-ao-black dark:text-ao-white"
 							dangerouslySetInnerHTML={{ __html: toHTML(question) }}
 						></h1>
 					</div>
@@ -219,8 +219,10 @@ export function MessageResultPage({
 			<div className="rounded-md">
 				<div className="flex flex-col gap-4">{messageStack}</div>
 			</div>
-			<div className="mt-4 flex flex-col items-center justify-center gap-8 text-center">
-				<Heading.H2>Looking for more? Join the community!</Heading.H2>
+			<div className="mt-4 flex flex-col items-center justify-center gap-4 text-center">
+				<Heading.H2 className={'text-lg md:text-2xl'}>
+					Looking for more? Join the community!
+				</Heading.H2>
 				<div className={'w-full max-w-[300px]'}>
 					<ServerInvite
 						server={server}
