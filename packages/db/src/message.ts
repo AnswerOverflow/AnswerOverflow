@@ -342,6 +342,10 @@ export async function findLatestMessageInChannel(channelId: string) {
 	return elastic.findLatestMessageInChannel(channelId);
 }
 
+export async function bulkFindLatestMessageInChannel(channelIds: string[]) {
+	return elastic.batchFindLatestMessageInChannel(channelIds);
+}
+
 export function findLatestMessageInChannelAndThreads(channelId: string) {
 	return elastic.findLatestMessageInChannelAndThreads(channelId);
 }

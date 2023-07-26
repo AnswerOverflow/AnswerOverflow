@@ -447,6 +447,48 @@ export class Elastic extends Client {
 		return result.hits.hits[0]?._source ?? null;
 	}
 
+	public async batchFindLatestMessageInChannel(channelIds: string[]) {
+		const chunkSize = 5000;
+		const batches = [];
+		for (let i = 0; i < channelIds.length; i += chunkSize) {
+			batches.push(channelIds.slice(i, i + chunkSize));
+		}
+		const results = await Promise.all(
+			batches.map((batch) =>
+				this.msearch<Message>({
+					searches: batch
+						.map((channelId) => {
+							return [
+								{
+									index: this.messagesIndex,
+								},
+								{
+									query: {
+										match: {
+											channelId,
+										},
+									},
+									size: 1,
+									sort: [{ id: 'desc' }],
+								},
+							];
+						})
+						.flatMap((x) => x),
+				}),
+			),
+		);
+		const res: Message[] = [];
+		for (const result of results) {
+			for (const hit of result.responses) {
+				if ('error' in hit) continue;
+				if (hit.hits.hits[0]?._source) {
+					res.push(hit.hits.hits[0]._source);
+				}
+			}
+		}
+		return res;
+	}
+
 	public async findLatestMessageInChannelAndThreads(channelId: string) {
 		const result = await this.search<Message>({
 			index: this.messagesIndex,
