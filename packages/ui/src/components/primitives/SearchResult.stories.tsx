@@ -79,6 +79,31 @@ PrivateSolution.args = {
 	},
 };
 
+export const PrivateResult = PublicSolution.bind({});
+
+PrivateResult.args = {
+	result: {
+		message: {
+			...mockMessageWithDiscordAccount(),
+			solutionMessages: [
+				{
+					...mockMessageWithDiscordAccount(),
+					public: false,
+				},
+			],
+			referencedMessage: mockMessageWithDiscordAccount(),
+			public: false,
+		},
+		thread: mockChannelWithSettings(),
+		score: 0.5,
+		channel: mockChannelWithSettings({
+			// AO's Discord server
+			inviteCode: 'sxDN2rEdwD',
+		}),
+		server: mockPublicServer(),
+	},
+};
+
 export const NoSolution = PublicSolution.bind({});
 NoSolution.args = {
 	result: {
