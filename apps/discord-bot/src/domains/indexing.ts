@@ -173,10 +173,18 @@ export async function indexRootChannel(
 		const outOfDateThreads = threadsToIndex.filter(
 			(x) => threadMessageLookup.get(x.id) !== x.lastMessageId,
 		);
+		container.logger.debug(
+			`Truncated threads to index from ${threadsToIndex.length} to ${
+				outOfDateThreads.length
+			} out of date threads, skipped ${
+				threadsToIndex.length - outOfDateThreads.length
+			}`,
+		);
 
 		for await (const thread of outOfDateThreads) {
 			container.logger.debug(
 				`(${++threadsIndexed}/${threadsToIndex.length}) Indexing:
+      }
 Thread: ${thread.id} | ${thread.name}
 Channel: ${channel.id} | ${channel.name}
 Server: ${channel.guildId} | ${channel.guild.name}`,
