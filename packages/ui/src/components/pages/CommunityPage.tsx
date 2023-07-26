@@ -104,6 +104,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 							server={server}
 							location="Community Page"
 							channel={selectedChannel?.channel}
+							maxWidth={'max-w-2xl'}
 							Title={
 								<Heading.H1 className="hidden pt-0 md:block">
 									{server.name}

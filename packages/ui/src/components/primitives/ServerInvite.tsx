@@ -48,9 +48,9 @@ export const ServerInviteTitle = () => {
 					...(channel && channelToAnalyticsData(channel)),
 				});
 			}}
-			className="min-w-0 truncate text-left font-header text-lg font-bold leading-5 text-ao-black  hover:text-ao-black/[.5] dark:text-ao-white dark:hover:text-ao-white/80"
+			className="text-left font-header text-lg font-bold text-ao-black  hover:text-ao-black/[.5] dark:text-ao-white dark:hover:text-ao-white/80"
 		>
-			<p>{server.name}</p>
+			{server.name}
 		</Link>
 	);
 };
@@ -145,17 +145,23 @@ type ServerInviteProps = {
 	JoinButton?: React.ReactNode;
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	Title?: React.ReactNode;
+	maxWidth?: string;
 };
 
 export const ServerInviteRenderer = (props: ServerInviteProps) => {
 	return (
 		<ServerInviteContext.Provider value={props}>
-			<div className="flex w-full flex-col gap-4">
+			<div
+				className={classNames(
+					'flex w-full flex-col gap-4',
+					props.maxWidth ?? 'max-w-sm',
+				)}
+			>
 				<div className={'flex flex-row gap-4'}>
-					<div className="flex max-w-full flex-row items-center justify-start gap-4 align-middle">
+					<div className="flex max-w-full shrink-0 flex-row items-center justify-start gap-4 align-middle">
 						{props.Icon === undefined ? <ServerInviteIcon /> : props.Icon}
 					</div>
-					<div className="max-w-full items-center justify-center text-left">
+					<div className="grow items-center justify-center truncate text-left">
 						{props.Title === undefined ? <ServerInviteTitle /> : props.Title}
 						{props.Body || (
 							<>{props.channel && <ChannelName channel={props.channel} />}</>
