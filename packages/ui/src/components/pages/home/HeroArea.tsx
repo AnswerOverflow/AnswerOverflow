@@ -6,7 +6,7 @@ const HomeLeadText = () => {
 	return (
 		<div className="flex w-full flex-col items-start justify-center gap-6 pb-20 xl:w-[60%]">
 			<h1 className="text-center font-header text-4xl font-bold leading-[114.5%] text-ao-black dark:text-ao-white md:text-start md:text-6xl">
-				Search all of Discord
+				Bringing your Discord channels to Google
 			</h1>
 			<p className="text-center font-body text-lg text-ao-black/[.95] dark:text-ao-white/[.85] md:text-start md:text-xl">
 				Answer Overflow is an open source project designed to bring discord
