@@ -345,7 +345,7 @@ export const ContentBlurrer = ({
 	}
 
 	return (
-		<div className="relative">
+		<div className="relative w-full">
 			<div
 				style={{
 					filter: `blur(${blurAmount})`,
