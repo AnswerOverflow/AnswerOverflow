@@ -151,14 +151,16 @@ export const ServerInviteRenderer = (props: ServerInviteProps) => {
 	return (
 		<ServerInviteContext.Provider value={props}>
 			<div className="flex w-full flex-col gap-4">
-				<div className="flex w-full max-w-full flex-row items-center justify-start gap-4 align-middle">
-					{props.Icon === undefined ? <ServerInviteIcon /> : props.Icon}
-					{props.Title === undefined ? <ServerInviteTitle /> : props.Title}
-				</div>
-				<div className="max-w-full items-center justify-center text-left">
-					{props.Body || (
-						<>{props.channel && <ChannelName channel={props.channel} />}</>
-					)}
+				<div className={'flex flex-row gap-4'}>
+					<div className="flex max-w-full flex-row items-center justify-start gap-4 align-middle">
+						{props.Icon === undefined ? <ServerInviteIcon /> : props.Icon}
+					</div>
+					<div className="max-w-full items-center justify-center text-left">
+						{props.Title === undefined ? <ServerInviteTitle /> : props.Title}
+						{props.Body || (
+							<>{props.channel && <ChannelName channel={props.channel} />}</>
+						)}
+					</div>
 				</div>
 				{props.JoinButton || <ServerInviteJoinButton />}
 			</div>
