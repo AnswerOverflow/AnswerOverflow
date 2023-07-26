@@ -1,11 +1,12 @@
 import {
-	upsertManyDiscordAccounts,
-	upsertManyMessages,
-	upsertChannel,
-	findManyUserServerSettings,
+	bulkFindLatestMessageInChannel,
 	findChannelById,
 	findLatestArchivedTimestampByChannelId,
 	findLatestMessageInChannel,
+	findManyUserServerSettings,
+	upsertChannel,
+	upsertManyDiscordAccounts,
+	upsertManyMessages,
 } from '@answeroverflow/db';
 import {
 	type AnyThreadChannel,
@@ -163,14 +164,26 @@ export async function indexRootChannel(
 		);
 
 		let threadsIndexed = 0;
-		for await (const thread of threadsToIndex) {
+		const mostRecentlyIndexedMessages = await bulkFindLatestMessageInChannel(
+			threadsToIndex.map((x) => x.id),
+		);
+		const threadMessageLookup = new Map<string, string>(
+			mostRecentlyIndexedMessages.map((x) => [x.channelId, x.id]),
+		);
+		const outOfDateThreads = threadsToIndex.filter(
+			(x) => threadMessageLookup.get(x.id) !== x.lastMessageId,
+		);
+
+		for await (const thread of outOfDateThreads) {
 			container.logger.debug(
 				`(${++threadsIndexed}/${threadsToIndex.length}) Indexing:
 Thread: ${thread.id} | ${thread.name}
 Channel: ${channel.id} | ${channel.name}
 Server: ${channel.guildId} | ${channel.guild.name}`,
 			);
-			await indexTextBasedChannel(thread);
+			await indexTextBasedChannel(thread, {
+				fromMessageId: threadMessageLookup.get(thread.id),
+			});
 		}
 	} else {
 		/*
@@ -184,12 +197,18 @@ Server: ${channel.guildId} | ${channel.guild.name}`,
 	}
 }
 
-export async function indexTextBasedChannel(channel: GuildTextBasedChannel) {
+export async function indexTextBasedChannel(
+	channel: GuildTextBasedChannel,
+	opts?: {
+		fromMessageId?: Snowflake;
+	},
+) {
 	if (!channel.viewable) {
 		return;
 	}
-	const lastIndexedMessage = await findLatestMessageInChannel(channel.id);
-	const start = lastIndexedMessage?.id;
+	const start =
+		opts?.fromMessageId ??
+		(await findLatestMessageInChannel(channel.id).then((x) => x?.id));
 	container.logger.debug(
 		`Indexing channel ${channel.id} | ${channel.name} from message id ${
 			start ?? 'beginning'
