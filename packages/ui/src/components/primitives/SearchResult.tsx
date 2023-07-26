@@ -3,11 +3,16 @@ import type {
 	APIMessageWithDiscordAccount,
 	ChannelPublicWithFlags,
 } from '@answeroverflow/api';
-import { Message, MessageContents } from './Message';
+import {
+	Message,
+	MessageContents,
+	MessageContentWithSolution,
+} from './Message';
 import { ServerInvite } from './ServerInvite';
 import { Paragraph, Heading } from './base';
 import { createContext, useContext } from 'react';
 import Link from 'next/link';
+import { MessageFull } from '@answeroverflow/db';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const SearchResultContext = createContext<{
@@ -111,71 +116,59 @@ const SearchResultSidebar = () => {
 	);
 };
 
-const NoSolution = ({ messageId }: { messageId: string }) => {
-	return (
-		<div className="w-full rounded-b-standard border-2 border-t-0 border-black/[.13] bg-white/[.01] dark:border-white/[.13] lg:rounded-br-none">
-			<Paragraph className="p-6 font-body text-ao-black dark:text-white/[.66]">
-				No replies marked as solution...{' '}
-				<Link
-					href={`/m/${messageId}`}
-					className="font-bold text-ao-black underline dark:text-ao-white"
-				>
-					View thread
-				</Link>
-			</Paragraph>
-		</div>
-	);
-};
-
-const SearchResultAnswer = () => {
-	const { result } = useSearchResultContext();
-	const solution = result.message.solutionMessages?.[0];
-	if (!solution) return <NoSolution messageId={result.message.id} />;
-	return (
-		<div className="rounded-b-standard border-2  border-ao-green  bg-ao-green/10 dark:bg-ao-green/[0.02] lg:rounded-br-none">
-			<Message message={solution} />
-		</div>
-	);
-};
-
 export const LinkMessage = ({
 	message,
 	thread,
 	className,
+	showNoSolutionCTA,
 }: {
-	message: APIMessageWithDiscordAccount;
+	message: APIMessageWithDiscordAccount | MessageFull;
 	thread?: ChannelPublicWithFlags;
 	/**
 	 * className passed directly to the message component
 	 */
 	className?: string;
+} & {
+	showNoSolutionCTA?: boolean;
 }) => {
+	const solution =
+		'solutionMessages' in message ? message.solutionMessages?.[0] : undefined;
 	return (
-		<Message
-			message={message}
-			showBorders
-			className={className}
-			collapseContent
-			content={
-				<>
-					<Link href={`/m/${message.id}`} className="block w-fit ">
-						<Heading.H4 className="pt-4 text-lg text-blue-700 decoration-2 hover:text-blue-600 hover:underline dark:text-blue-400 hover:dark:text-blue-500">
-							{thread?.name ?? message.content.slice(0, 20).trim() + '...'}
-						</Heading.H4>
-					</Link>
-					<MessageContents />
-				</>
-			}
-		/>
-	);
-};
-const SearchResultMainContent = () => {
-	const { result } = useSearchResultContext();
-	return (
-		<div className="flex grow flex-col">
-			<LinkMessage message={result.message} thread={result.thread} />
-			<SearchResultAnswer />
-		</div>
+		<>
+			<Message
+				message={message}
+				showBorders
+				className={className}
+				collapseContent
+				content={
+					<>
+						<Link href={`/m/${message.id}`} className="block w-fit ">
+							<Heading.H4 className="pt-4 text-lg text-blue-700 decoration-2 hover:text-blue-600 hover:underline dark:text-blue-400 hover:dark:text-blue-500">
+								{thread?.name ?? message.content.slice(0, 20).trim() + '...'}
+							</Heading.H4>
+						</Link>
+						{solution ? (
+							<MessageContentWithSolution solution={{ message: solution }} />
+						) : (
+							<MessageContents />
+						)}
+					</>
+				}
+			/>
+			{!solution && showNoSolutionCTA && (
+				<div className="w-full rounded-b-standard border-2 border-t-0 border-black/[.13] bg-white/[.01] dark:border-white/[.13] lg:rounded-br-none">
+					<Paragraph className="p-6 font-body text-ao-black dark:text-white/[.66]">
+						No replies marked as solution...{' '}
+						<Link
+							href={`/m/${message.id}`}
+							className="font-bold text-ao-black underline dark:text-ao-white"
+						>
+							View thread
+						</Link>
+					</Paragraph>
+				</div>
+			)}
+		</>
 	);
 };
 
@@ -186,9 +179,9 @@ export const SearchResult = ({
 }) => {
 	return (
 		<SearchResultContext.Provider value={{ result }}>
-			<div className="flex h-full w-full flex-col-reverse rounded-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:flex-row">
-				<SearchResultMainContent />
-				<div className="w-full flex-col items-center justify-center rounded-t-standard border-x-2 border-t-2 border-black/[.13] px-5 pb-2 pt-6 dark:border-white/[.13] lg:flex lg:w-1/4 lg:rounded-br-standard lg:rounded-tl-none lg:border-y-2 lg:border-l-0 lg:border-r-2 2xl:w-1/6">
+			<div className="flex h-full flex-col-reverse rounded-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:flex-row">
+				<LinkMessage message={result.message} thread={result.thread} />
+				<div className="w-full shrink-0 flex-col items-center justify-center rounded-t-standard border-x-2 border-t-2 border-black/[.13] px-5 pb-2 pt-6 dark:border-white/[.13] lg:flex lg:w-64 lg:rounded-br-standard lg:rounded-tl-none lg:border-y-2 lg:border-l-0 lg:border-r-2">
 					<SearchResultSidebar />
 				</div>
 			</div>

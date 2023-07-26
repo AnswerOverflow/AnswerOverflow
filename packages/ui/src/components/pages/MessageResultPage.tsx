@@ -11,6 +11,7 @@ import {
 	ServerInvite,
 	ChannelIcon,
 	MessageContentWithSolution,
+	Heading,
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
 import {
@@ -23,6 +24,10 @@ import {
 	threadToAnalyticsData,
 } from '@answeroverflow/constants/src/analytics';
 import { isServer } from '~ui/utils/checks';
+import Head from 'next/head';
+import type { QAPage, WithContext } from 'schema-dts';
+import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
+import { toHTML } from 'discord-markdown';
 export type MessageResultPageProps = {
 	messages: APIMessageWithDiscordAccount[];
 	server: ServerPublic;
@@ -126,6 +131,7 @@ export function MessageResultPage({
 								solution={{
 									message: solution,
 								}}
+								showJumpToSolutionCTA
 							/>
 						) : undefined
 					}
@@ -157,8 +163,34 @@ export function MessageResultPage({
 		return <Msg key={message.id} count={consecutivePrivateMessages} />;
 	});
 
+	const question = thread?.name ?? firstMessage.content?.slice(0, 100);
+
+	const qaHeader: WithContext<QAPage> = {
+		'@context': 'https://schema.org',
+		'@type': 'QAPage',
+		mainEntity: {
+			'@type': 'Question',
+			name: toHTML(question),
+			text: toHTML(firstMessage.content),
+			answerCount: solution ? 1 : 0,
+			acceptedAnswer: solution && {
+				'@type': 'Answer',
+				text: toHTML(solution.content),
+				url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
+					solution.id
+				}#solution-${solution.id}`,
+			},
+		},
+	};
+
 	return (
 		<div className="sm:mx-3">
+			<Head>
+				<script
+					type="application/ld+json"
+					dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}
+				/>
+			</Head>
 			<AOHead
 				description={description}
 				path={`/m/${firstMessage?.id ?? requestedId}`}
@@ -166,9 +198,18 @@ export function MessageResultPage({
 				server={server}
 			/>
 
-			<div className="my-8 flex flex-col items-center justify-between gap-2 sm:flex-row sm:py-0">
-				<MessagesSearchBar />
-				<div className="shrink-0 sm:pl-8">
+			<div className="my-8 flex flex-col-reverse items-center justify-between gap-2 sm:flex-row sm:py-0">
+				<div className="flex h-full grow flex-col justify-between gap-4">
+					<MessagesSearchBar />
+					<div className="flex flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400 text-center  dark:border-neutral-600  dark:text-white">
+						<ChannelIcon channelType={channel.type} className="mb-4 h-6 w-6" />
+						<h1
+							className="mb-4 text-left font-header text-3xl text-ao-black dark:text-ao-white"
+							dangerouslySetInnerHTML={{ __html: toHTML(question) }}
+						></h1>
+					</div>
+				</div>
+				<div className="hidden shrink-0 sm:pl-8 md:block">
 					<ServerInvite
 						server={server}
 						channel={channel}
@@ -177,13 +218,19 @@ export function MessageResultPage({
 				</div>
 			</div>
 			<div className="rounded-md">
-				<div className="mb-4 flex flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400 pb-2 text-center leading-5 dark:border-neutral-600  dark:text-white">
-					<ChannelIcon channelType={channel.type} className="h-6 w-6" />
-					<h1 className="font-header text-3xl">
-						{thread ? `${thread.name}` : `${channel.name}`}
-					</h1>
-				</div>
 				<div className="flex flex-col gap-4">{messageStack}</div>
+			</div>
+			<div className="mt-4 flex flex-col items-center justify-center gap-4 text-center">
+				<Heading.H2 className={'text-lg md:text-2xl'}>
+					Looking for more? Join the community!
+				</Heading.H2>
+				<div className={'w-full max-w-[300px]'}>
+					<ServerInvite
+						server={server}
+						channel={channel}
+						location="Message Result Page"
+					/>
+				</div>
 			</div>
 		</div>
 	);

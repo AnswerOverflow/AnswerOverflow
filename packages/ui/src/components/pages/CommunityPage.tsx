@@ -98,48 +98,52 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 	const HeroArea = () => {
 		return (
 			<div className="flex flex-col">
-				<div className="my-auto flex flex-row bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
-					<ServerInvite
-						server={server}
-						location="Community Page"
-						channel={selectedChannel?.channel}
-						Icon={
-							<ServerIcon
-								server={server}
-								size="xl"
-								className="hidden sm:flex"
-							/>
-						}
-						Body={
-							<>
-								<div className="hidden md:ml-16 md:flex md:flex-col">
-									<Heading.H1 className="pt-0">{server.name}</Heading.H1>
-									<Heading.H2 className="text-xl font-normal">
-										{getServerDescription(server)}
-									</Heading.H2>
-									<ServerInviteJoinButton className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0" />
-								</div>
-								<div className="flex w-full flex-col items-center text-center md:hidden">
-									<div className="flex flex-row items-center justify-center gap-2">
+				<div className="mx-auto my-auto flex w-full flex-row bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
+					<div className={'mx-auto'}>
+						<ServerInvite
+							server={server}
+							location="Community Page"
+							channel={selectedChannel?.channel}
+							Title={null}
+							Icon={null}
+							Body={
+								<>
+									<div className="mx-auto hidden w-full gap-4 md:ml-16 md:flex md:flex-row">
 										<ServerIcon
 											server={server}
-											size="lg"
-											className="flex sm:hidden"
+											size="xl"
+											className="hidden sm:flex"
 										/>
-										<Heading.H1 className="pt-0 text-3xl">
-											{server.name}
-										</Heading.H1>
+										<div>
+											<Heading.H1 className="pt-0">{server.name}</Heading.H1>
+											<Heading.H2 className="text-xl font-normal">
+												{getServerDescription(server)}
+											</Heading.H2>
+											<ServerInviteJoinButton className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0" />
+										</div>
 									</div>
-									<Heading.H2 className="text-base font-normal">
-										{server.description ??
-											`${server.name} community. Join the community to ask questions about ${server.name} and get answers from other members.`}
-									</Heading.H2>
-									<ServerInviteJoinButton className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0" />
-								</div>
-							</>
-						}
-						JoinButton={<></>}
-					/>
+									<div className="flex w-full flex-col items-center text-center md:hidden">
+										<div className="flex flex-row items-center justify-center gap-2">
+											<ServerIcon
+												server={server}
+												size="lg"
+												className="flex sm:hidden"
+											/>
+											<Heading.H1 className="pt-0 text-3xl">
+												{server.name}
+											</Heading.H1>
+										</div>
+										<Heading.H2 className="text-base font-normal">
+											{server.description ??
+												`${server.name} community. Join the community to ask questions about ${server.name} and get answers from other members.`}
+										</Heading.H2>
+										<ServerInviteJoinButton className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0" />
+									</div>
+								</>
+							}
+							JoinButton={<></>}
+						/>
+					</div>
 				</div>
 			</div>
 		);
@@ -161,13 +165,12 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 			);
 		}
 		const qs = questions.map((question) => (
-			<div className="drop-shadow-sm " key={question.message.id}>
-				<LinkMessage
-					message={question.message}
-					thread={question.thread}
-					className="rounded-standard"
-				/>
-			</div>
+			<LinkMessage
+				key={question.message.id}
+				message={question.message}
+				thread={question.thread}
+				className="rounded-standard drop-shadow-sm"
+			/>
 		));
 		return <div className="flex w-full flex-1 flex-col gap-2">{qs}</div>;
 	};

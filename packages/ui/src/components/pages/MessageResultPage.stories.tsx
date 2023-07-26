@@ -9,16 +9,20 @@ import {
 	type MessageResultPageProps,
 } from './MessageResultPage';
 import { PageWrapper } from './PageWrapper';
+import { StoryDefault } from '@ladle/react/typings-for-build/app/exports';
+export default {
+	title: '!Pages / Message Result',
+} satisfies StoryDefault;
 
-const Primary: Story<MessageResultPageProps> = (props) => (
+export const Primary: Story<MessageResultPageProps> = (props) => (
 	<PageWrapper>
 		<MessageResultPage {...props} />
 	</PageWrapper>
 );
-const AllPublic = Primary.bind({});
-const AllPrivate = Primary.bind({});
-const PrivateSolution = Primary.bind({});
-const ManyFromSameAuthor = Primary.bind({});
+export const AllPublic = Primary.bind({});
+export const AllPrivate = Primary.bind({});
+export const PrivateSolution = Primary.bind({});
+export const ManyFromSameAuthor = Primary.bind({});
 
 const defaultMessage: MessageResultPageProps = {
 	messages: [
