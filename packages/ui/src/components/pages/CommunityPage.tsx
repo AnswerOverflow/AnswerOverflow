@@ -98,13 +98,17 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 	const HeroArea = () => {
 		return (
 			<div className="flex flex-col">
-				<div className="mx-auto my-auto flex w-full flex-row bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
+				<div className="m-auto flex w-full flex-row bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
 					<div className={'mx-auto'}>
 						<ServerInvite
 							server={server}
 							location="Community Page"
 							channel={selectedChannel?.channel}
-							Title={<Heading.H1 className="pt-0">{server.name}</Heading.H1>}
+							Title={
+								<Heading.H1 className="hidden pt-0 md:block">
+									{server.name}
+								</Heading.H1>
+							}
 							Icon={
 								<ServerIcon
 									server={server}
@@ -114,7 +118,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 							}
 							Body={
 								<>
-									<div>
+									<div className={'hidden md:block'}>
 										<Heading.H2 className="text-xl font-normal">
 											{getServerDescription(server)}
 										</Heading.H2>
@@ -133,7 +137,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 										</div>
 										<Heading.H2 className="text-base font-normal">
 											{server.description ??
-												`${server.name} community. Join the community to ask questions about ${server.name} and get answers from other members.`}
+												`Join the community to ask questions about ${server.name} and get answers from other members.`}
 										</Heading.H2>
 										<ServerInviteJoinButton className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0" />
 									</div>

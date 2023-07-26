@@ -9,7 +9,6 @@ import {
 	Message,
 	MultiMessageBlurrer,
 	ServerInvite,
-	ChannelIcon,
 	MessageContentWithSolution,
 	Heading,
 } from '../primitives';
