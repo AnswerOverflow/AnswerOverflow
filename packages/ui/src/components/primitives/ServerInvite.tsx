@@ -146,9 +146,11 @@ type ServerInviteProps = {
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	Title?: React.ReactNode;
 	maxWidth?: string;
+	truncate?: boolean;
 };
 
 export const ServerInviteRenderer = (props: ServerInviteProps) => {
+	const { truncate = true } = props;
 	return (
 		<ServerInviteContext.Provider value={props}>
 			<div
@@ -161,7 +163,12 @@ export const ServerInviteRenderer = (props: ServerInviteProps) => {
 					<div className="flex max-w-full shrink-0 flex-row items-center justify-start gap-4 align-middle">
 						{props.Icon === undefined ? <ServerInviteIcon /> : props.Icon}
 					</div>
-					<div className="grow items-center justify-center truncate text-left">
+					<div
+						className={classNames(
+							'grow items-center justify-center text-left',
+							truncate ? 'truncate' : '',
+						)}
+					>
 						{props.Title === undefined ? <ServerInviteTitle /> : props.Title}
 						{props.Body || (
 							<>{props.channel && <ChannelName channel={props.channel} />}</>
