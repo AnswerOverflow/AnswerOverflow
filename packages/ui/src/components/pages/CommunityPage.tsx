@@ -104,23 +104,21 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 							server={server}
 							location="Community Page"
 							channel={selectedChannel?.channel}
-							Title={null}
-							Icon={null}
+							Title={<Heading.H1 className="pt-0">{server.name}</Heading.H1>}
+							Icon={
+								<ServerIcon
+									server={server}
+									size="xl"
+									className="hidden sm:flex"
+								/>
+							}
 							Body={
 								<>
-									<div className="mx-auto hidden w-full gap-4 md:ml-16 md:flex md:flex-row">
-										<ServerIcon
-											server={server}
-											size="xl"
-											className="hidden sm:flex"
-										/>
-										<div>
-											<Heading.H1 className="pt-0">{server.name}</Heading.H1>
-											<Heading.H2 className="text-xl font-normal">
-												{getServerDescription(server)}
-											</Heading.H2>
-											<ServerInviteJoinButton className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0" />
-										</div>
+									<div>
+										<Heading.H2 className="text-xl font-normal">
+											{getServerDescription(server)}
+										</Heading.H2>
+										<ServerInviteJoinButton className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0" />
 									</div>
 									<div className="flex w-full flex-col items-center text-center md:hidden">
 										<div className="flex flex-row items-center justify-center gap-2">
