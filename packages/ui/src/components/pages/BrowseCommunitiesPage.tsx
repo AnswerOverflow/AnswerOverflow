@@ -1,6 +1,7 @@
 import type { ServerPublic } from '@answeroverflow/api';
-import { AOHead, Heading, ViewServerCard } from '../primitives';
-
+import AOHead from '~ui/components/primitives/AOHead';
+import { Heading } from '~ui/components/primitives/base/Heading';
+import { ViewServerCard } from '~ui/components/primitives/ServerCard';
 interface BrowseCommunitiesPageProps {
 	servers: ServerPublic[];
 }

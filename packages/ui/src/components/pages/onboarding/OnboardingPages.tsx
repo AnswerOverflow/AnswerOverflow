@@ -1,11 +1,3 @@
-import {
-	AOLink,
-	Heading,
-	LinkButton,
-	ManageServerCard,
-	ServerIcon,
-	SignInButton,
-} from '~ui/components/primitives';
 import { useOnboardingContext } from './OnboardingContainer';
 import { trpc } from '~ui/utils/trpc';
 import type { ServerPublic } from '@answeroverflow/api';
@@ -24,6 +16,12 @@ import { CiCircleMore } from 'react-icons/ci';
 import { usePostHog } from 'posthog-js/react';
 import { Command } from '~ui/components/primitives/base/Command';
 import { Button } from '~ui/components/primitives/ui/button';
+import { ServerIcon } from '~ui/components/primitives/ServerIcon';
+import { Heading } from '~ui/components/primitives/base/Heading';
+import { AOLink } from '~ui/components/primitives/base/Link';
+import { ManageServerCard } from '~ui/components/primitives/ServerCard';
+import { SignInButton } from '~ui/components/primitives/Callouts';
+import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 
 export const pages = [
 	'start',

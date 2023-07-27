@@ -1,5 +1,6 @@
 import type { NextPage } from 'next';
-import { AOHead, Home } from '@answeroverflow/ui';
+import AOHead from '@answeroverflow/ui/src/components/primitives/AOHead';
+import { Home } from '@answeroverflow/ui/src/components/pages/Home';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const HomePage: NextPage = () => {
 	return (

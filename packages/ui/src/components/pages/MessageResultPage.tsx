@@ -4,14 +4,6 @@ import type {
 	ServerPublic,
 } from '@answeroverflow/api';
 import { useIsUserInServer } from '~ui/utils/hooks';
-import {
-	AOHead,
-	Message,
-	MultiMessageBlurrer,
-	ServerInvite,
-	MessageContentWithSolution,
-	Heading,
-} from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
 import {
 	messageWithDiscordAccountToAnalyticsData,
@@ -27,6 +19,14 @@ import Head from 'next/head';
 import type { QAPage, WithContext } from 'schema-dts';
 import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
 import { toHTML } from 'discord-markdown';
+import { ServerInvite } from '~ui/components/primitives/ServerInvite';
+import {
+	Message,
+	MessageContentWithSolution,
+	MultiMessageBlurrer,
+} from '~ui/components/primitives/Message';
+import { Heading } from '~ui/components/primitives/base/Heading';
+import AOHead from '~ui/components/primitives/AOHead';
 export type MessageResultPageProps = {
 	messages: APIMessageWithDiscordAccount[];
 	server: ServerPublic;

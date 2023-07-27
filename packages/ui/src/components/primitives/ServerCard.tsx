@@ -1,5 +1,5 @@
 import { type ServerPublic } from '@answeroverflow/api';
-import { LinkButton } from './base';
+import { LinkButton } from './base/LinkButton';
 import { ServerIcon } from './ServerIcon';
 import Image from 'next/image';
 import { createContext, useContext } from 'react';

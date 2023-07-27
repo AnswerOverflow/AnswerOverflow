@@ -1,6 +1,7 @@
 import React from 'react';
 import type { DocsThemeConfig } from 'nextra-theme-docs';
-import { AnswerOverflowLogo, Footer } from '@answeroverflow/ui';
+import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/base/Icons';
+import { Footer } from '@answeroverflow/ui/src/components/primitives/Footer';
 import {
 	CREATE_NEW_DOCS_ISSUE_LINK,
 	DISCORD_LINK,

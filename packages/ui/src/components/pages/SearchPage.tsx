@@ -1,10 +1,11 @@
 import type { APISearchResult } from '@answeroverflow/api';
 import { useState } from 'react';
-import { SearchResult, Heading } from '~ui/components/primitives';
+import { Heading } from '~ui/components/primitives/base/Heading';
 import { useRouter } from 'next/router';
 import { useRouterQuery, useRouterServerId } from '~ui/utils/hooks';
 import { twMerge } from 'tailwind-merge';
 import { Input } from '~ui/components/primitives/ui/input';
+import { SearchResult } from '~ui/components/primitives/SearchResult';
 
 interface SearchResultProps {
 	results: APISearchResult[number][];
