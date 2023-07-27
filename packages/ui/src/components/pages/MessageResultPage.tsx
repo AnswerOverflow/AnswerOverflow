@@ -136,7 +136,7 @@ export function MessageResultPage({
 					}
 					showBorders={message.id !== solutionMessageId}
 					images={shouldShowSolutionInContent ? null : undefined}
-					loadingStyle={index === 0 ? 'eager' : 'lazy'} // Images above the fold should have priority
+					loadingStyle={'lazy'}
 					Blurrer={(props) => <MultiMessageBlurrer {...props} count={count} />}
 				/>
 			);
