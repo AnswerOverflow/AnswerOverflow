@@ -37,7 +37,7 @@ const ThreadIcon = () => {
 			viewBox="0 0 24 24"
 			strokeWidth={1.5}
 			stroke="currentColor"
-			className="h-6 w-6 text-primary/50"
+			className="text-primary/50 h-6 w-6"
 		>
 			<path
 				strokeLinecap="round"
@@ -89,7 +89,7 @@ const SearchResultMetaData = () => {
 	return (
 		<div className="mt-8 flex flex-row items-center justify-center">
 			{/* Thread count */}
-			<span className="flex items-center justify-center px-1 text-primary/50">
+			<span className="text-primary/50 flex items-center justify-center px-1">
 				{result.thread?.messageCount ?? 20}
 			</span>
 			<ThreadIcon />
@@ -152,7 +152,7 @@ export const LinkMessage = ({
 			/>
 			{!solution && showNoSolutionCTA && (
 				<div className="w-full rounded-b-standard border-2 border-t-0 border-black/[.13] bg-white/[.01] dark:border-white/[.13] lg:rounded-br-none">
-					<Paragraph className="p-6 font-body text-primary/50">
+					<Paragraph className="text-primary/50 p-6 font-body">
 						No replies marked as solution...{' '}
 						<Link
 							href={`/m/${message.id}`}
