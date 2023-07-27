@@ -11,7 +11,6 @@ import {
 	ServerInvite,
 	MessageContentWithSolution,
 	Heading,
-	ServerInviteJoinButton,
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
 import {
