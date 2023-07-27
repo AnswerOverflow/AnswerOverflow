@@ -33,14 +33,6 @@ module.exports = {
 				body: ['Source Sans Pro', 'sans-serif'],
 			},
 			colors: {
-				ao: {
-					white: '#F5F8FF',
-					black: '#141619',
-					blue: '#396FF8',
-					green: '#4BB543',
-					yellow: '#DECB33',
-					red: '#DE3D33',
-				},
 				tremor: {
 					brand: {
 						faint: '#eff6ff', // blue-50

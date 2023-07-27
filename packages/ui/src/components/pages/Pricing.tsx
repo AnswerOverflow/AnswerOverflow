@@ -5,7 +5,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from '../primitives/ui/accordion';
-import { LuCheck } from 'react-icons/lu';
+import { Check } from 'lucide-react';
 import { trackEvent } from '@answeroverflow/hooks';
 import { toast } from 'react-toastify';
 import React from 'react';
@@ -150,7 +150,7 @@ const PricingElement = (props: {
 					<ul className="grid w-full grid-cols-1 items-center gap-2">
 						{props.features.map((feature, index) => (
 							<li key={index} className="flex w-full flex-row gap-4">
-								{feature.icon ?? <LuCheck className="h-6 w-6 shrink-0" />}
+								{feature.icon ?? <Check className="h-6 w-6 shrink-0" />}
 								{feature.name}
 							</li>
 						))}

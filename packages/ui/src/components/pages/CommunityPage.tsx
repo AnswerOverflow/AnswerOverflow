@@ -216,7 +216,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 	);
 
 	return (
-		<div className="mx-auto w-full overflow-x-hidden overflow-y-scroll bg-ao-white scrollbar-hide dark:bg-ao-black">
+		<div className="mx-auto w-full overflow-x-hidden overflow-y-scroll scrollbar-hide bg-background">
 			<Navbar />
 			<main className="bg-ao-white dark:bg-ao-black">
 				<AOHead
