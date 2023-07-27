@@ -113,7 +113,7 @@ export function WaitingToBeAddedRenderer(props: {
 	return (
 		<div className="flex flex-col items-center justify-center gap-8 text-center">
 			<Heading.H1>Waiting to join {props.server.name}</Heading.H1>
-			<div className="border-highlight h-32 w-32 animate-spin rounded-full border-b-4" />
+			<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-highlight" />
 			<span>
 				Last checked {props.timeSinceLastCheckInSeconds} second
 				{props.timeSinceLastCheckInSeconds === 1 ? '' : 's'} ago.
