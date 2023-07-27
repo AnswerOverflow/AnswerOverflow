@@ -9,8 +9,8 @@ export const Primary: Story<ServerIconProps> = (props) => (
 );
 Primary.args = {
 	server: mockPublicServer({
-    name: 'AnswerOverflow',
-  }),
+		name: 'AnswerOverflow',
+	}),
 };
 
 export const WithImage = Primary.bind({});
@@ -21,5 +21,5 @@ WithImage.args = {
 		id: '952724385238761475',
 		icon: '528d997ddc414ff316c4c61014d38f8b',
 	}),
-  size: 64
+	size: 64,
 };

@@ -1,6 +1,10 @@
 import { FollowCursor } from './Follow';
 import { SocialIcon } from 'react-social-icons';
-import {Avatar, AvatarFallback, AvatarImage} from "~ui/components/primitives/ui/avatar";
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from '~ui/components/primitives/ui/avatar';
 
 export interface ContributorData {
 	name: string;

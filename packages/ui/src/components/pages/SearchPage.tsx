@@ -4,7 +4,7 @@ import { SearchResult, Heading } from '~ui/components/primitives';
 import { useRouter } from 'next/router';
 import { useRouterQuery, useRouterServerId } from '~ui/utils/hooks';
 import { twMerge } from 'tailwind-merge';
-import {TextInput} from "@tremor/react";
+import { TextInput } from '@tremor/react';
 
 interface SearchResultProps {
 	results: APISearchResult[number][];

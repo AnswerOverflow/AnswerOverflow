@@ -4,7 +4,7 @@ import { AboutArea } from './home/AboutArea';
 import { HeroArea } from './home/HeroArea';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { useRef } from 'react';
-import {Button} from "~ui/components/primitives/ui/button";
+import { Button } from '~ui/components/primitives/ui/button';
 const DownChevron = (props: { scrollIntoView: () => unknown }) => (
 	<div className="absolute bottom-10 left-1/2 block -translate-x-1/2 sm:hidden xl:block">
 		<div className="mx-auto h-16 w-16 rounded-full text-black/[.65] dark:text-white/[.65]">

@@ -1,7 +1,7 @@
 import { QuestionAnswerArea } from './QuestionAnswerArea/QuestionAnswerArea';
 import { messageData } from './HomeMessages';
 import { GetStarted } from '~ui/components/primitives';
-import {Button} from "~ui/components/primitives/ui/button";
+import { Button } from '~ui/components/primitives/ui/button';
 
 const HomeLeadText = () => {
 	return (

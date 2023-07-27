@@ -2,13 +2,12 @@ import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import Image from 'next/image';
 import discordMarkdown from 'discord-markdown';
 import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
+import { DiscordIcon } from '~ui/components/primitives';
 import {
-	DiscordIcon,
-
-} from '~ui/components/primitives';
-import {Avatar,
-  AvatarImage,
-  AvatarFallback,} from '~ui/components/primitives/ui/avatar';
+	Avatar,
+	AvatarImage,
+	AvatarFallback,
+} from '~ui/components/primitives/ui/avatar';
 import Link from 'next/link';
 import type { ChannelPublicWithFlags } from '@answeroverflow/api';
 import { useIsUserInServer } from '~ui/utils/hooks';

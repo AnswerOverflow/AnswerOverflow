@@ -6,7 +6,7 @@ import {
 	useTenantContext,
 } from '@answeroverflow/hooks';
 import { makeMainSiteLink } from '@answeroverflow/constants/src/links';
-import {Button, ButtonProps} from "~ui/components/primitives/ui/button";
+import { Button, ButtonProps } from '~ui/components/primitives/ui/button';
 export function GetStarted(
 	props: Omit<LinkButtonProps, 'href'> & {
 		location: GettingStartedClickProps['Button Location'];

@@ -18,12 +18,13 @@ import {
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
 import { getServerDescription } from '~ui/utils/other';
-import {Button} from "~ui/components/primitives/ui/button";
+import { Button } from '~ui/components/primitives/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuTrigger
-} from "~ui/components/primitives/ui/dropdown-menu";
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '~ui/components/primitives/ui/dropdown-menu';
 
 type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];

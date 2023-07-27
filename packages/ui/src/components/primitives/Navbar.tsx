@@ -6,10 +6,7 @@ import { trpc } from '~ui/utils/trpc';
 import { GetStarted, SignInButton } from './Callouts';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { DiscordIcon, GitHubIcon } from './base/Icons';
-import {
-	AnswerOverflowLogo,
-
-} from './base';
+import { AnswerOverflowLogo } from './base';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { GITHUB_LINK } from '@answeroverflow/constants/src/links';
 import { signOut } from 'next-auth/react';
@@ -29,18 +26,24 @@ import {
 import { useTheme } from 'next-themes';
 import { getInitials } from '~ui/utils/avatars';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem, DropdownMenuLabel,
-  DropdownMenuSeparator, DropdownMenuTrigger
-} from "~ui/components/primitives/ui/dropdown-menu";
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '~ui/components/primitives/ui/dropdown-menu';
 import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuList
-} from "~ui/components/primitives/ui/navigation-menu";
-import {Avatar, AvatarFallback, AvatarImage} from "~ui/components/primitives/ui/avatar";
+	NavigationMenu,
+	NavigationMenuItem,
+	NavigationMenuList,
+} from '~ui/components/primitives/ui/navigation-menu';
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from '~ui/components/primitives/ui/avatar';
 const MainSiteDropdownMenuGroup = () => (
 	<>
 		<DropdownMenuGroup>
@@ -185,7 +188,7 @@ export function NavbarRenderer(props: {
 	);
 
 	return (
-		<NavigationMenu className="relative min-h-[4rem] py-2 sm:px-[4rem] 2xl:px-[6rem]">
+		<NavigationMenu className="relative min-h-[4rem] py-2 sm:px-[4rem] 2xl:px-[6rem] w-full">
 			<NavigationMenuList>
 				<NavigationMenuItem>
 					<Link href="/">

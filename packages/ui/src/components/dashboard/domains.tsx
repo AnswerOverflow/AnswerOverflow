@@ -19,8 +19,8 @@ import {
 	DomainVerificationStatusProps,
 	VercelDomainVerificationResponse,
 } from '@answeroverflow/api';
-import {Input} from "~ui/components/primitives/ui/input";
-import {Button} from "~ui/components/primitives/ui/button";
+import { Input } from '~ui/components/primitives/ui/input';
+import { Button } from '~ui/components/primitives/ui/button';
 
 function useDomainStatus({ domain }: { domain?: string }) {
 	const { data, isLoading, isFetching } =

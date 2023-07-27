@@ -22,8 +22,8 @@ import { MdMoneyOffCsred, MdAttachMoney } from 'react-icons/md';
 import { CiCircleMore } from 'react-icons/ci';
 import { usePostHog } from 'posthog-js/react';
 import Link from 'next/link';
-import {Command} from "~ui/components/primitives/base/Command";
-import {Button} from "~ui/components/primitives/ui/button";
+import { Command } from '~ui/components/primitives/base/Command';
+import { Button } from '~ui/components/primitives/ui/button';
 
 export const pages = [
 	'start',

@@ -1,27 +1,26 @@
+import { AOHead, AOLink, Heading, LinkButton } from '../primitives';
 import {
-	AOHead,
-	AOLink,
-	Heading,
-	LinkButton,
-} from '../primitives';
-import {	Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger} from '../primitives/ui/accordion';
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from '../primitives/ui/accordion';
 import { LuCheck } from 'react-icons/lu';
 import { trackEvent } from '@answeroverflow/hooks';
 import { toast } from 'react-toastify';
 import React from 'react';
 import { classNames } from '~ui/utils/styling';
 import {
-  Dialog,
-  DialogContent, DialogFooter,
-  DialogHeader, DialogTitle,
-  DialogTrigger
-} from "~ui/components/primitives/ui/dialog";
-import {Button} from "~ui/components/primitives/ui/button";
-import {Input} from "~ui/components/primitives/ui/input";
-import {Textarea} from "~ui/components/primitives/ui/textarea";
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '~ui/components/primitives/ui/dialog';
+import { Button } from '~ui/components/primitives/ui/button';
+import { Input } from '~ui/components/primitives/ui/input';
+import { Textarea } from '~ui/components/primitives/ui/textarea';
 
 const faqs: {
 	question: React.ReactNode;
@@ -282,6 +281,7 @@ export const Pricing = () => {
 					placeholder={'email (optional)'}
 					type={'email'}
 					autoComplete={'email'}
+          className={'bg-inherit'}
 				/>
 				<Textarea
 					className="h-32"
