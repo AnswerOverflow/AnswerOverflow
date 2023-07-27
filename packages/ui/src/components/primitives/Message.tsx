@@ -139,7 +139,7 @@ export const MessageContents = () => {
 
 	return (
 		<div
-			className="pt-2 font-body [word-wrap:_break-word]"
+			className="pt-2 font-body text-primary [word-wrap:_break-word]"
 			// The HTML from discord-markdown is escaped
 			dangerouslySetInnerHTML={{
 				__html: convertedMessageContent,
@@ -345,7 +345,7 @@ export const ContentBlurrer = ({
 	}
 
 	return (
-		<div className="relative w-full">
+		<div className="relative w-full text-primary">
 			<div
 				style={{
 					filter: `blur(${blurAmount})`,

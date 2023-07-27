@@ -29,7 +29,7 @@ export const Provider: GlobalProvider = ({ children, globalState }) => {
 						>
 							<WithAuth authState="signedIn">
 								<WithHighlightJS>
-									<ToastContainer toastClassName="dark:bg-ao-black dark:text-white bg-white text-black" />
+									<ToastContainer toastClassName="bg-background dark:bg-background text-primary dark:text-primary" />
 
 									<WithAnalytics>
 										<div className={'bg-background'}>{children}</div>

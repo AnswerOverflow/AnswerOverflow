@@ -24,6 +24,7 @@ import Router from 'next/router';
 import type { ServerPublic } from '@answeroverflow/api';
 import { ToastContainer } from 'react-toastify';
 import { GoogleAnalytics, event } from 'nextjs-google-analytics';
+import { Command } from '~ui/components/primitives/base/Command';
 
 const progress = new ProgressBar({
 	size: 2,
@@ -55,7 +56,7 @@ const components: Components = {
 	) => (
 		<Link
 			href={props.href ?? ''}
-			className="font-bold underline decoration-2 underline-offset-2 transition-colors hover:decoration-ao-blue"
+			className="hover:decoration-ao-blue font-bold underline decoration-2 underline-offset-2 transition-colors"
 			target="_blank"
 		>
 			{props.children}
@@ -106,8 +107,9 @@ const MyApp: AppType<{
 						>
 							<CommitBanner />
 							<MDXProvider components={components}>
+								<Command command={'npm i @answeroverflow/ui'} />
 								<Component {...pageProps} />
-								<ToastContainer toastClassName="dark:bg-ao-black dark:text-white bg-white text-black" />
+								<ToastContainer toastClassName="bg-background dark:bg-background text-primary dark:text-primary" />
 							</MDXProvider>
 						</PageWrapper>
 						<ReactQueryDevtools initialIsOpen={false} />
