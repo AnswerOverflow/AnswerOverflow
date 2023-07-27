@@ -48,7 +48,7 @@ export const ServerInviteTitle = () => {
 					...(channel && channelToAnalyticsData(channel)),
 				});
 			}}
-			className="text-left font-header text-lg font-bold text-ao-black  hover:text-ao-black/[.5] dark:text-ao-white dark:hover:text-ao-white/80"
+			className="text-left font-header text-lg  font-bold hover:text-primary/70 hover:underline"
 		>
 			{server.name}
 		</Link>
@@ -66,21 +66,11 @@ export const ChannelIcon = ({
 		case ChannelType.GuildForum:
 			return (
 				<ChatBubbleLeftRightIcon
-					className={classNames(
-						'h-4 w-4 text-ao-black dark:text-ao-white',
-						className ?? '',
-					)}
+					className={classNames('h-4 w-4', className ?? '')}
 				/>
 			);
 		default:
-			return (
-				<HashtagIcon
-					className={classNames(
-						'h-4 w-4 text-ao-black dark:text-ao-white',
-						className ?? '',
-					)}
-				/>
-			);
+			return <HashtagIcon className={classNames('h-4 w-4', className ?? '')} />;
 	}
 };
 
@@ -96,7 +86,7 @@ export const ChannelName = ({
 				channelType={channel.type}
 				className={'text-right font-bold'}
 			/>
-			<p className="truncate text-left text-base font-bold leading-5 text-ao-black dark:text-ao-white">
+			<p className="text-ao-black dark:text-ao-white truncate text-left text-base font-bold leading-5">
 				{channel.name}
 			</p>
 		</div>

@@ -1,4 +1,5 @@
 import { useTheme } from 'next-themes';
+import { Button } from '~ui/components/primitives/ui/button';
 
 function SunIcon<T extends {}>(props: T) {
 	return (
@@ -20,15 +21,6 @@ function MoonIcon<T extends {}>(props: T) {
 	);
 }
 
-export function ThemeIcon() {
-	return (
-		<>
-			<SunIcon className="h-9 w-9 stroke-zinc-900 dark:hidden" />
-			<MoonIcon className="hidden h-9 w-9 stroke-white dark:block" />
-		</>
-	);
-}
-
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function ThemeSwitcher({
 	Switcher,
@@ -40,14 +32,14 @@ export function ThemeSwitcher({
 	const { theme, setTheme } = useTheme();
 	if (!Switcher)
 		return (
-			<button
-				type="button"
-				className="flex h-9 w-9 items-center justify-center rounded-md transition hover:bg-zinc-900/5 dark:hover:bg-white/5"
-				aria-label="Toggle dark mode"
+			<Button
 				onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+				variant={'ghost'}
+				size={'icon'}
 			>
-				<ThemeIcon />
-			</button>
+				<SunIcon className="h-9 w-9 stroke-zinc-900 dark:hidden" />
+				<MoonIcon className="hidden h-9 w-9 stroke-white dark:block" />
+			</Button>
 		);
 	return (
 		<Switcher

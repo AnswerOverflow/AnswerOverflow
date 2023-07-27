@@ -44,6 +44,7 @@ import {
 	AvatarFallback,
 	AvatarImage,
 } from '~ui/components/primitives/ui/avatar';
+import { Button } from '~ui/components/primitives/ui/button';
 const MainSiteDropdownMenuGroup = () => (
 	<>
 		<DropdownMenuGroup>
@@ -163,10 +164,12 @@ export function NavbarRenderer(props: {
 	const Desktop = () => (
 		<>
 			<NavigationMenuItem>
-				<Link href={'/search'}>
-					<MagnifyingGlassIcon className="h-8 w-8 text-ao-black hover:text-neutral-300 dark:text-ao-white dark:hover:text-neutral-400" />
-					<span className="sr-only">Search Answer Overflow</span>
-				</Link>
+				<Button variant={'ghost'} size={'icon'} asChild>
+					<Link href={'/search'}>
+						<MagnifyingGlassIcon className="h-8 w-8" />
+						<span className="sr-only">Search Answer Overflow</span>
+					</Link>
+				</Button>
 			</NavigationMenuItem>
 			<NavigationMenuItem>
 				<ThemeSwitcher />
@@ -174,10 +177,12 @@ export function NavbarRenderer(props: {
 			{!isOnTenantSite && (
 				<>
 					<NavigationMenuItem>
-						<Link href={GITHUB_LINK} target="_blank">
-							<GitHubIcon className="h-8 w-8 text-ao-black hover:fill-neutral-300 dark:text-ao-white" />
-							<span className="sr-only">GitHub</span>
-						</Link>
+						<Button variant={'ghost'} size={'icon'} asChild>
+							<Link href={GITHUB_LINK} target="_blank">
+								<GitHubIcon className="h-8 w-8" />
+								<span className="sr-only">GitHub</span>
+							</Link>
+						</Button>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
 						<GetStarted location="Navbar" />
@@ -188,16 +193,14 @@ export function NavbarRenderer(props: {
 	);
 
 	return (
-		<NavigationMenu className="relative min-h-[4rem] py-2 sm:px-[4rem] 2xl:px-[6rem] w-full">
+		<NavigationMenu className="relative min-h-[4rem] w-full py-2 sm:px-[4rem] 2xl:px-[6rem]">
 			<NavigationMenuList>
 				<NavigationMenuItem>
 					<Link href="/">
 						{tenant ? (
 							<div className="flex items-center space-x-2">
 								<ServerIcon server={tenant} />
-								<span className="font-bold text-ao-black dark:text-ao-white">
-									{tenant.name}
-								</span>
+								<span className="font-bold">{tenant.name}</span>
 							</div>
 						) : (
 							<>
@@ -217,10 +220,12 @@ export function NavbarRenderer(props: {
 						<ThemeSwitcher />
 					</NavigationMenuItem>
 					<NavigationMenuItem className="md:hidden">
-						<Link href={'/search'}>
-							<MagnifyingGlassIcon className="h-8 w-8 text-ao-black hover:text-neutral-300 dark:text-ao-white dark:hover:text-neutral-400" />
-							<span className="sr-only">Search Answer Overflow</span>
-						</Link>
+						<Button variant={'ghost'} size={'icon'}>
+							<Link href={'/search'}>
+								<MagnifyingGlassIcon className="h-8 w-8 " />
+								<span className="sr-only">Search Answer Overflow</span>
+							</Link>
+						</Button>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
 						<UserSection />
