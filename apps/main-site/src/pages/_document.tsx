@@ -28,7 +28,7 @@ class MyDocument extends Document {
 						}}
 					/>
 				</Head>
-				<body className="bg-ao-white dark:bg-ao-black">
+				<body className="bg-background">
 					<Main />
 					<NextScript />
 				</body>

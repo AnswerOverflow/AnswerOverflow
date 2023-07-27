@@ -19,9 +19,7 @@ export const CommitBannerRenderer = ({ commitSha }: { commitSha: string }) => {
 				<span className="align-middle text-black dark:text-white">
 					Commit:{' '}
 				</span>
-				<span className="align-middle text-ao-black/75 dark:text-ao-white/75">
-					{commitSha}
-				</span>
+				<span className="align-middle text-primary/75">{commitSha}</span>
 			</Heading.H2>
 			<Heading.H3 className="hidden font-body text-lg md:block">
 				<Link href="https://vercel.com">

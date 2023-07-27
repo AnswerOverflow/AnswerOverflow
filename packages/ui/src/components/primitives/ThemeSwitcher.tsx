@@ -39,6 +39,7 @@ export function ThemeSwitcher({
 			>
 				<SunIcon className="h-9 w-9 stroke-zinc-900 dark:hidden" />
 				<MoonIcon className="hidden h-9 w-9 stroke-white dark:block" />
+				<span className="sr-only">Change Theme</span>
 			</Button>
 		);
 	return (

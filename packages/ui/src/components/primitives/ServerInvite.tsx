@@ -48,7 +48,7 @@ export const ServerInviteTitle = () => {
 					...(channel && channelToAnalyticsData(channel)),
 				});
 			}}
-			className="text-left font-header text-lg  font-bold hover:text-primary/70 hover:underline"
+			className="hover:text-primary/70 text-left font-header  text-lg font-bold hover:underline"
 		>
 			{server.name}
 		</Link>
@@ -86,7 +86,7 @@ export const ChannelName = ({
 				channelType={channel.type}
 				className={'text-right font-bold'}
 			/>
-			<p className="text-ao-black dark:text-ao-white truncate text-left text-base font-bold leading-5">
+			<p className="truncate text-left text-base font-bold leading-5">
 				{channel.name}
 			</p>
 		</div>

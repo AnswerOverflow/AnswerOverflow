@@ -55,7 +55,7 @@ const components: Components = {
 	) => (
 		<Link
 			href={props.href ?? ''}
-			className="hover:decoration-ao-blue font-bold underline decoration-2 underline-offset-2 transition-colors"
+			className="font-bold underline decoration-2 underline-offset-2 transition-colors hover:decoration-blue-500"
 			target="_blank"
 		>
 			{props.children}

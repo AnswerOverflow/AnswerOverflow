@@ -49,6 +49,9 @@ export const Provider: GlobalProvider = ({ children, globalState }) => {
 							) : (
 								<AiOutlineHome className={'h-6 w-6'} />
 							)}
+							<span className={'sr-only'}>
+								Toggle between tenant and non-tenant site
+							</span>
 						</Button>
 					</div>
 				</WithTailwindTheme>

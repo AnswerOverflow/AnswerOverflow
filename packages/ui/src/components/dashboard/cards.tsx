@@ -132,7 +132,11 @@ export function CurrentPlanCardRenderer(
 
 	const CTA = () => {
 		if (status === 'inactive') {
-			if (!props.proPlanCheckoutUrl || !props.enterprisePlanCheckoutUrl) {
+			if (
+				!props.proPlanCheckoutUrl ||
+				!props.enterprisePlanCheckoutUrl ||
+				props.plan === 'OPEN_SOURCE'
+			) {
 				return;
 			}
 			return (

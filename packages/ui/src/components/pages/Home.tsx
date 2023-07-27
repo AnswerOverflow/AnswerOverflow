@@ -12,8 +12,9 @@ const DownChevron = (props: { scrollIntoView: () => unknown }) => (
 				variant="ghost"
 				className="rounded-lg focus:ring-0 focus:ring-offset-0 dark:hover:bg-inherit"
 				onClick={props.scrollIntoView}
+				size={'icon'}
 			>
-				<ChevronDownIcon className="h-8 w-8 rounded-full text-ao-black/[.6] hover:text-ao-black  dark:text-ao-white/[.6] dark:hover:text-ao-white" />
+				<ChevronDownIcon className="h-8 w-8 rounded-full" />
 				<span className="sr-only">Scroll down</span>
 			</Button>
 		</div>
@@ -28,11 +29,11 @@ export const Home = () => {
 		});
 
 	return (
-		<div className="flex w-full flex-col items-center bg-ao-white font-body dark:bg-[linear-gradient(180.49deg,_#1A1818_-12.07%,_#0E0D0D_-12.07%,_#040405_-12.06%,_#101214_103.52%)]">
+		<div className="flex w-full flex-col items-center bg-background font-body dark:bg-[linear-gradient(180.49deg,_#1A1818_-12.07%,_#0E0D0D_-12.07%,_#040405_-12.06%,_#101214_103.52%)]">
 			<div className="max-w-screen-3xl">
-				<div className="relative ">
+				<div className="relative">
 					<Navbar />
-					<div className="">
+					<div>
 						<HeroArea />
 					</div>
 				</div>
