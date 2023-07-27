@@ -216,9 +216,9 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 	);
 
 	return (
-		<div className="mx-auto w-full overflow-x-hidden overflow-y-scroll scrollbar-hide bg-background">
+		<div className="mx-auto w-full overflow-x-hidden overflow-y-scroll bg-background scrollbar-hide">
 			<Navbar />
-			<main className="bg-ao-white dark:bg-ao-black">
+			<main className="bg-background">
 				<AOHead
 					title={`${server.name} Community`}
 					description={

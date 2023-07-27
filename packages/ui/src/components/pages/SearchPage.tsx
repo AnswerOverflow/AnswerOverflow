@@ -4,7 +4,7 @@ import { SearchResult, Heading } from '~ui/components/primitives';
 import { useRouter } from 'next/router';
 import { useRouterQuery, useRouterServerId } from '~ui/utils/hooks';
 import { twMerge } from 'tailwind-merge';
-import { TextInput } from '@tremor/react';
+import { Input } from '~ui/components/primitives/ui/input';
 
 interface SearchResultProps {
 	results: APISearchResult[number][];
@@ -37,7 +37,7 @@ export const MessagesSearchBar = (props: {
 			}}
 			className={twMerge('w-full', props.className)}
 		>
-			<TextInput
+			<Input
 				defaultValue={query || ''}
 				className="mb-4 w-full"
 				onChange={(e) => setSearchInput(e.target.value)}
@@ -50,13 +50,11 @@ export const SearchPage = ({ results, isLoading }: SearchResultProps) => {
 	const noResults = !results || results.length === 0;
 	const resultsSection = isLoading ? (
 		<div className="flex h-[50vh] items-center justify-center">
-			<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-ao-blue" />
+			<div className="h-32 w-32 animate-spin rounded-full border-b-4" />
 		</div>
 	) : noResults ? (
 		<div className="flex h-[50vh] items-center justify-center">
-			<p className="font-header text-xl text-ao-black dark:text-ao-white">
-				No results found
-			</p>
+			<p className="font-header text-xl">No results found</p>
 		</div>
 	) : (
 		results.map((result) => (

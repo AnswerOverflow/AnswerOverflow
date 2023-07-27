@@ -20,7 +20,7 @@ module.exports = {
 	},
 	rules: {
 		'tailwindcss/no-custom-classname': [
-			'warn', // TODO: Renable this eventually, whitelist is not working
+			'error', // TODO: Renable this eventually, whitelist is not working
 			{
 				config: './tailwind.config.cjs',
 				whitelist: ['scrollbar-hide', 'dark'],

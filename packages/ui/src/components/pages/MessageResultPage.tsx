@@ -134,6 +134,7 @@ export function MessageResultPage({
 							/>
 						) : undefined
 					}
+					showBorders={message.id !== solutionMessageId}
 					images={shouldShowSolutionInContent ? null : undefined}
 					loadingStyle={index === 0 ? 'eager' : 'lazy'} // Images above the fold should have priority
 					Blurrer={(props) => <MultiMessageBlurrer {...props} count={count} />}
@@ -202,7 +203,7 @@ export function MessageResultPage({
 					<MessagesSearchBar className={'hidden sm:block'} />
 					<div className="flex flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400 text-center  dark:border-neutral-600  dark:text-white">
 						<h1
-							className="mb-4 text-left font-header text-3xl text-ao-black dark:text-ao-white"
+							className="text-ao-black dark:text-ao-white mb-4 text-left font-header text-3xl"
 							dangerouslySetInnerHTML={{ __html: toHTML(question) }}
 						></h1>
 					</div>

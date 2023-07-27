@@ -130,7 +130,7 @@ const PricingElement = (props: {
 	return (
 		<div
 			className={classNames(
-				'flex h-full flex-col items-center justify-start rounded-2xl border-2 border-ao-black/25 p-8 dark:border-ao-white/25',
+				'border-ao-black/25 dark:border-ao-white/25 flex h-full flex-col items-center justify-start rounded-2xl border-2 p-8',
 				props.bestValue ? 'border-indigo-600/75 dark:border-indigo-600/75' : '',
 			)}
 		>
@@ -281,7 +281,7 @@ export const Pricing = () => {
 					placeholder={'email (optional)'}
 					type={'email'}
 					autoComplete={'email'}
-          className={'bg-inherit'}
+					className={'bg-inherit'}
 				/>
 				<Textarea
 					className="h-32"
@@ -310,7 +310,7 @@ export const PricingDialog = (props: {
 					{props.hasSubscribedBefore ? 'Resubscribe' : 'Start free trial'}
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="max-h-screen max-w-5xl overflow-y-auto bg-white dark:bg-ao-black">
+			<DialogContent className="max-h-screen max-w-5xl overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>Pick a plan</DialogTitle>
 				</DialogHeader>

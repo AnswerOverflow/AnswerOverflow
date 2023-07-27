@@ -8,14 +8,6 @@ module.exports = {
 		'./node_modules/@tremor/**/*.{js,ts,jsx,tsx}', // Tremor module
 		'../../node_modules/@tremor/**/*.{js,ts,jsx,tsx}', // Tremor module
 	],
-	plugins: [
-		// eslint-disable-next-line no-undef
-		require('@tailwindcss/forms'),
-		// eslint-disable-next-line no-undef
-		require('tailwind-scrollbar-hide'),
-		require('@headlessui/tailwindcss'),
-		require('tailwindcss-animate'),
-	],
 	theme: {
 		transparent: 'transparent',
 		current: 'currentColor',
@@ -33,6 +25,40 @@ module.exports = {
 				body: ['Source Sans Pro', 'sans-serif'],
 			},
 			colors: {
+				border: 'hsl(var(--border))',
+				input: 'hsl(var(--input))',
+				ring: 'hsl(var(--ring))',
+				background: 'hsl(var(--background))',
+				foreground: 'hsl(var(--foreground))',
+				primary: {
+					DEFAULT: 'hsl(var(--primary))',
+					foreground: 'hsl(var(--primary-foreground))',
+				},
+				secondary: {
+					DEFAULT: 'hsl(var(--secondary))',
+					foreground: 'hsl(var(--secondary-foreground))',
+				},
+				destructive: {
+					DEFAULT: 'hsl(var(--destructive) / <alpha-value>)',
+					foreground: 'hsl(var(--destructive-foreground) / <alpha-value>)',
+				},
+				muted: {
+					DEFAULT: 'hsl(var(--muted))',
+					foreground: 'hsl(var(--muted-foreground))',
+				},
+				accent: {
+					DEFAULT: 'hsl(var(--accent))',
+					foreground: 'hsl(var(--accent-foreground))',
+				},
+				popover: {
+					DEFAULT: 'hsl(var(--popover))',
+					foreground: 'hsl(var(--popover-foreground))',
+				},
+				card: {
+					DEFAULT: 'hsl(var(--card))',
+					foreground: 'hsl(var(--card-foreground))',
+				},
+				// light mode
 				tremor: {
 					brand: {
 						faint: '#eff6ff', // blue-50
@@ -62,67 +88,35 @@ module.exports = {
 						inverted: '#ffffff', // white
 					},
 				},
+				// dark mode
 				'dark-tremor': {
 					brand: {
 						faint: '#0B1229', // custom
 						muted: '#172554', // blue-950
 						subtle: '#1e40af', // blue-800
-						DEFAULT: '#3b82f6', // blue-500
+						DEFAULT: 'hsl(var(--primary))',
 						emphasis: '#60a5fa', // blue-400
 						inverted: '#030712', // gray-950
 					},
 					background: {
-						muted: '#131A2B', // custom
-						subtle: '#1f2937', // gray-800
-						DEFAULT: '#181b1f', // gray-900
+						muted: 'hsl(var(--muted))',
+						subtle: 'hsl(var(--foreground))',
+						DEFAULT: 'hsl(var(--background))',
 						emphasis: '#d1d5db', // gray-300
 					},
 					border: {
-						DEFAULT: '#1f2937', // gray-800
+						DEFAULT: 'hsl(var(--border))',
 					},
 					ring: {
-						DEFAULT: '#1f2937', // gray-800
+						DEFAULT: 'hsl(var(--ring))',
 					},
 					content: {
-						subtle: '#afafaf', // gray-600
-						DEFAULT: '#afafaf', // gray-600
+						subtle: '#4b5563', // gray-600
+						DEFAULT: '#6b7280', // gray-600
 						emphasis: '#e5e7eb', // gray-200
 						strong: '#f9fafb', // gray-50
 						inverted: '#000000', // black
 					},
-				},
-				border: 'hsl(var(--border))',
-				input: 'hsl(var(--input))',
-				ring: 'hsl(var(--ring))',
-				background: 'hsl(var(--background))',
-				foreground: 'hsl(var(--foreground))',
-				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))',
-				},
-				secondary: {
-					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))',
-				},
-				destructive: {
-					DEFAULT: 'hsl(var(--destructive))',
-					foreground: 'hsl(var(--destructive-foreground))',
-				},
-				muted: {
-					DEFAULT: 'hsl(var(--muted))',
-					foreground: 'hsl(var(--muted-foreground))',
-				},
-				accent: {
-					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))',
-				},
-				popover: {
-					DEFAULT: 'hsl(var(--popover))',
-					foreground: 'hsl(var(--popover-foreground))',
-				},
-				card: {
-					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))',
 				},
 			},
 			keyframes: {
@@ -230,6 +224,14 @@ module.exports = {
 			},
 		},
 	},
+	plugins: [
+		// eslint-disable-next-line no-undef
+		require('@tailwindcss/forms'),
+		// eslint-disable-next-line no-undef
+		require('tailwind-scrollbar-hide'),
+		require('@headlessui/tailwindcss'),
+		require('tailwindcss-animate'),
+	],
 	safelist: [
 		{
 			pattern:
