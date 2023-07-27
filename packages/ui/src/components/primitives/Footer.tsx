@@ -102,7 +102,7 @@ const MainSiteFooter = () => (
 									<Link
 										href={item.href}
 										key={`link-${item.name}-${item.href}`}
-										className="text-primary/50 my-1 font-body hover:text-primary"
+										className="my-1 font-body text-primary/75 hover:text-primary"
 									>
 										{item.name}
 									</Link>

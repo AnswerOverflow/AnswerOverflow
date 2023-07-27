@@ -49,7 +49,7 @@ export const ServerInviteTitle = () => {
 					...(channel && channelToAnalyticsData(channel)),
 				});
 			}}
-			className="hover:text-primary/70 text-left font-header  text-lg font-bold hover:underline"
+			className="text-left font-header text-lg  font-bold hover:text-primary/75 hover:underline"
 		>
 			{server.name}
 		</Link>

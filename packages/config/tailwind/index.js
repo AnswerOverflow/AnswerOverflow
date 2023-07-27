@@ -25,42 +25,38 @@ module.exports = {
 				body: ['Source Sans Pro', 'sans-serif'],
 			},
 			colors: {
-				border: 'var(--border)',
-				input: 'var(--input)',
-				ring: 'var(--ring)',
-				background: 'var(--background)',
-				foreground: 'var(--foreground)',
+				border: 'hsl(var(--border))',
+				input: 'hsl(var(--input))',
+				ring: 'hsl(var(--ring))',
+				background: 'hsl(var(--background))',
+				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'var(--primary)',
-					foreground: 'var(--primary-foreground)',
+					DEFAULT: 'hsl(var(--primary))',
+					foreground: 'hsl(var(--primary-foreground))',
 				},
 				secondary: {
-					DEFAULT: 'var(--secondary)',
-					foreground: 'var(--secondary-foreground)',
+					DEFAULT: 'hsl(var(--secondary))',
+					foreground: 'hsl(var(--secondary-foreground))',
 				},
 				destructive: {
-					DEFAULT: 'var(--destructive) / <alpha-value>',
-					foreground: 'var(--destructive-foreground) / <alpha-value>',
+					DEFAULT: 'hsl(var(--destructive) / <alpha-value>)',
+					foreground: 'hsl(var(--destructive-foreground) / <alpha-value>)',
 				},
 				muted: {
-					DEFAULT: 'var(--muted)',
-					foreground: 'var(--muted-foreground)',
+					DEFAULT: 'hsl(var(--muted))',
+					foreground: 'hsl(var(--muted-foreground))',
 				},
 				accent: {
-					DEFAULT: 'var(--accent)',
-					foreground: 'var(--accent-foreground)',
-				},
-				highlight: {
-					DEFAULT: 'var(--highlight)',
-					foreground: 'var(--highlight-foreground)',
+					DEFAULT: 'hsl(var(--accent))',
+					foreground: 'hsl(var(--accent-foreground))',
 				},
 				popover: {
-					DEFAULT: 'var(--popover)',
-					foreground: 'var(--popover-foreground)',
+					DEFAULT: 'hsl(var(--popover))',
+					foreground: 'hsl(var(--popover-foreground))',
 				},
 				card: {
-					DEFAULT: 'var(--card)',
-					foreground: 'var(--card-foreground)',
+					DEFAULT: 'hsl(var(--card))',
+					foreground: 'hsl(var(--card-foreground))',
 				},
 				// light mode
 				tremor: {
@@ -98,27 +94,27 @@ module.exports = {
 						faint: '#0B1229', // custom
 						muted: '#172554', // blue-950
 						subtle: '#1e40af', // blue-800
-						DEFAULT: 'var(--primary)',
+						DEFAULT: 'hsl(var(--primary))',
 						emphasis: '#60a5fa', // blue-400
 						inverted: '#030712', // gray-950
 					},
 					background: {
-						muted: 'var(--muted)',
-						subtle: 'var(--foreground)',
-						DEFAULT: 'var(--background)',
+						muted: 'hsl(var(--muted))',
+						subtle: 'hsl(var(--foreground))',
+						DEFAULT: 'hsl(var(--background))',
 						emphasis: '#d1d5db', // gray-300
 					},
 					border: {
-						DEFAULT: 'var(--border)',
+						DEFAULT: 'hsl(var(--border))',
 					},
 					ring: {
-						DEFAULT: 'var(--ring)',
+						DEFAULT: 'hsl(var(--ring))',
 					},
 					content: {
-						subtle: 'var(--muted-foreground)',
-						DEFAULT: 'var(--foreground)',
-						emphasis: 'var(--foreground)',
-						strong: 'var(--foreground)',
+						subtle: 'hsl(var(--muted-foreground))',
+						DEFAULT: 'hsl(var(--foreground))',
+						emphasis: 'hsl(var(--foreground))',
+						strong: 'hsl(var(--foreground))',
 						inverted: '#000000', // black
 					},
 				},

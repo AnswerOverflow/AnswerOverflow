@@ -165,7 +165,7 @@ export function MessageResultPage({
 	});
 
 	const question = thread?.name ?? firstMessage.content?.slice(0, 100);
-
+	const isFirstMessageSolution = solution && solution.id !== firstMessage.id;
 	const qaHeader: WithContext<QAPage> = {
 		'@context': 'https://schema.org',
 		'@type': 'QAPage',
@@ -173,14 +173,17 @@ export function MessageResultPage({
 			'@type': 'Question',
 			name: toHTML(question),
 			text: toHTML(firstMessage.content),
-			answerCount: solution ? 1 : 0,
-			acceptedAnswer: solution && {
-				'@type': 'Answer',
-				text: toHTML(solution.content),
-				url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
-					solution.id
-				}#solution-${solution.id}`,
-			},
+			answerCount: solution && !isFirstMessageSolution ? 1 : 0,
+			acceptedAnswer:
+				solution && !isFirstMessageSolution
+					? {
+							'@type': 'Answer',
+							text: toHTML(solution.content),
+							url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
+								solution.id
+							}#solution-${solution.id}`,
+					  }
+					: undefined,
 		},
 	};
 
