@@ -437,7 +437,10 @@ export function FinalChecklistPage() {
 				</li>
 				<li>
 					Browse{' '}
-					<AOLink href="https://docs.answeroverflow.com">
+					<AOLink
+						href="https://docs.answeroverflow.com"
+						className={'underline'}
+					>
 						the documentation
 					</AOLink>{' '}
 					to learn more about Answer Overflow

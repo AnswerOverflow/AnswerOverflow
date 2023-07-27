@@ -7,7 +7,10 @@ export const AOLink = ({
 	...rest
 }: React.ComponentPropsWithoutRef<typeof Link>) => (
 	<Link
-		className={cn('text-blue-600 underline dark:text-blue-400', className)}
+		className={cn(
+			'text-blue-600 hover:underline dark:text-blue-400',
+			className,
+		)}
 		{...rest}
 	/>
 );

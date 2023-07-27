@@ -151,9 +151,9 @@ export function CurrentPlanCardRenderer(
 				return;
 			}
 			return (
-				<AOLink href={props.stripeCheckoutUrl}>
-					<Text>Change Plan</Text>
-				</AOLink>
+				<Text>
+					<AOLink href={props.stripeCheckoutUrl}>Change Plan</AOLink>
+				</Text>
 			);
 		}
 	};

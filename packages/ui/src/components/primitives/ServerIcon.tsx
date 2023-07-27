@@ -41,6 +41,7 @@ export function ServerIcon(props: ServerIconProps) {
 				{...props}
 				className={cn(
 					'relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-50 text-center dark:bg-neutral-700',
+					size > 64 ? 'text-4xl' : 'text-xl',
 					className,
 				)}
 				style={{

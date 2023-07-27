@@ -115,10 +115,10 @@ module.exports = {
 						DEFAULT: 'var(--ring)',
 					},
 					content: {
-						subtle: '#4b5563', // gray-600
-						DEFAULT: '#6b7280', // gray-600
-						emphasis: '#e5e7eb', // gray-200
-						strong: '#f9fafb', // gray-50
+						subtle: 'var(--muted-foreground)',
+						DEFAULT: 'var(--foreground)',
+						emphasis: 'var(--foreground)',
+						strong: 'var(--foreground)',
 						inverted: '#000000', // black
 					},
 				},

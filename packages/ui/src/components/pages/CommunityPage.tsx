@@ -38,7 +38,9 @@ function ChannelSidebar(props: ChannelSelectProps) {
 		return (
 			<Button
 				className={
-					selected ? 'text-left' : 'bg-inherit text-left dark:bg-inherit'
+					selected
+						? 'bg-accent text-left text-accent-foreground'
+						: 'bg-inherit text-left dark:bg-inherit'
 				}
 				variant={'ghost'}
 				onClick={() => props.setSelectedChannelId(channel.id)}
@@ -50,9 +52,9 @@ function ChannelSidebar(props: ChannelSelectProps) {
 
 	const channels = props.channels;
 	return (
-		<div className="mr-4 ">
-			<Heading.H4 className="my-0 py-0">Channels</Heading.H4>
-			<div className="flex shrink-0 flex-col gap-2">
+		<div className="mr-4 max-w-[250px]">
+			<Heading.H4 className="ml-4 text-left">Channels</Heading.H4>
+			<div className="flex shrink-0 flex-col gap-2 text-left">
 				{channels.map((channel) => (
 					<ChannelSelect channel={channel} key={channel.id} />
 				))}
