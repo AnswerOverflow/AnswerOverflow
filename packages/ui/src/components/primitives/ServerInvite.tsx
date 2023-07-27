@@ -18,6 +18,7 @@ import {
 	serverToAnalyticsData,
 } from '@answeroverflow/constants/src/analytics';
 import { getServerHomepageUrl } from '~ui/utils/server';
+import { ButtonProps } from '~ui/components/primitives/ui/button';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const ServerInviteContext = createContext<{
 	server: ServerPublic;
@@ -93,7 +94,10 @@ export const ChannelName = ({
 	);
 };
 
-export const ServerInviteJoinButton = (props: { className?: string }) => {
+export const ServerInviteJoinButton = (props: {
+	className?: string;
+	size?: ButtonProps['size'];
+}) => {
 	const { channel, location, server, isUserInServer } =
 		useServerInviteContext();
 	const inviteCode = channel?.inviteCode || server.vanityInviteCode;
@@ -104,6 +108,7 @@ export const ServerInviteJoinButton = (props: { className?: string }) => {
 			variant="default"
 			referrerPolicy="no-referrer"
 			className={cn('text-center font-header font-bold', props.className)}
+			size={props.size}
 			onMouseUp={() => {
 				trackEvent('Server Invite Click', {
 					...(channel && channelToAnalyticsData(channel)),
@@ -165,7 +170,11 @@ export const ServerInviteRenderer = (props: ServerInviteProps) => {
 						)}
 					</div>
 				</div>
-				{props.JoinButton || <ServerInviteJoinButton />}
+				{props.JoinButton === undefined ? (
+					<ServerInviteJoinButton />
+				) : (
+					props.JoinButton
+				)}
 			</div>
 		</ServerInviteContext.Provider>
 	);
