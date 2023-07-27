@@ -37,7 +37,7 @@ const ThreadIcon = () => {
 			viewBox="0 0 24 24"
 			strokeWidth={1.5}
 			stroke="currentColor"
-			className="h-6 w-6 text-ao-black/[.55] dark:text-ao-white/[.55]"
+			className="text-primary/50 h-6 w-6"
 		>
 			<path
 				strokeLinecap="round"
@@ -56,7 +56,7 @@ const ViewsIcon = () => {
 			viewBox="0 0 24 24"
 			strokeWidth={1.5}
 			stroke="currentColor"
-			className="h-6 w-6 text-ao-black/[.55] dark:text-ao-white/[.55]"
+			className="h-6 w-6"
 		>
 			<path
 				strokeLinecap="round"
@@ -75,15 +75,10 @@ const ViewsIcon = () => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Views = () => (
 	<>
-		<div
-			className="ml-2 h-2 w-2 rounded-[50%] bg-ao-black/[.55] dark:bg-ao-white/[.55]"
-			aria-hidden
-		/>
+		<div className="ml-2 h-2 w-2 rounded-[50%]" aria-hidden />
 
 		{/* Views */}
-		<span className="px-1 text-ao-black/[.75] dark:text-ao-white/[.55]">
-			{0}
-		</span>
+		<span className="px-1">{0}</span>
 		<ViewsIcon />
 	</>
 );
@@ -92,9 +87,9 @@ const Views = () => (
 const SearchResultMetaData = () => {
 	const { result } = useSearchResultContext();
 	return (
-		<div className="mt-2 flex flex-row items-center justify-center">
+		<div className="mt-8 flex flex-row items-center justify-center">
 			{/* Thread count */}
-			<span className="flex items-center justify-center px-1 text-ao-black/[.75] dark:text-ao-white/[.55]">
+			<span className="text-primary/50 flex items-center justify-center px-1">
 				{result.thread?.messageCount ?? 20}
 			</span>
 			<ThreadIcon />
@@ -134,7 +129,7 @@ export const LinkMessage = ({
 	const solution =
 		'solutionMessages' in message ? message.solutionMessages?.[0] : undefined;
 	return (
-		<>
+		<div className={'flex w-full flex-col'}>
 			<Message
 				message={message}
 				showBorders
@@ -157,18 +152,18 @@ export const LinkMessage = ({
 			/>
 			{!solution && showNoSolutionCTA && (
 				<div className="w-full rounded-b-standard border-2 border-t-0 border-black/[.13] bg-white/[.01] dark:border-white/[.13] lg:rounded-br-none">
-					<Paragraph className="p-6 font-body text-ao-black dark:text-white/[.66]">
+					<Paragraph className="text-primary/50 p-6 font-body">
 						No replies marked as solution...{' '}
 						<Link
 							href={`/m/${message.id}`}
-							className="font-bold text-ao-black underline dark:text-ao-white"
+							className="font-bold text-primary underline"
 						>
 							View thread
 						</Link>
 					</Paragraph>
 				</div>
 			)}
-		</>
+		</div>
 	);
 };
 
@@ -179,8 +174,12 @@ export const SearchResult = ({
 }) => {
 	return (
 		<SearchResultContext.Provider value={{ result }}>
-			<div className="flex h-full flex-col-reverse rounded-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:flex-row">
-				<LinkMessage message={result.message} thread={result.thread} />
+			<div className="flex h-full w-full flex-col-reverse rounded-standard lg:flex-row">
+				<LinkMessage
+					message={result.message}
+					thread={result.thread}
+					showNoSolutionCTA
+				/>
 				<div className="w-full shrink-0 flex-col items-center justify-center rounded-t-standard border-x-2 border-t-2 border-black/[.13] px-5 pb-2 pt-6 dark:border-white/[.13] lg:flex lg:w-64 lg:rounded-br-standard lg:rounded-tl-none lg:border-y-2 lg:border-l-0 lg:border-r-2">
 					<SearchResultSidebar />
 				</div>

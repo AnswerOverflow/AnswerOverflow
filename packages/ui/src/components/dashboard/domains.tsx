@@ -12,13 +12,15 @@ import {
 import { LuAlertCircle, LuXCircle, LuCheckCircle2 } from 'react-icons/lu';
 import { toast } from 'react-toastify';
 import { trpc } from '~ui/utils/trpc';
-import { Button, Input, LoadingSpinner } from '../primitives';
+import { LoadingSpinner } from '../primitives';
 import { useTierAccess } from '../primitives/tier-access-only';
 import { useDashboardContext } from './dashboard-context';
 import {
 	DomainVerificationStatusProps,
 	VercelDomainVerificationResponse,
 } from '@answeroverflow/api';
+import { Input } from '~ui/components/primitives/ui/input';
+import { Button } from '~ui/components/primitives/ui/button';
 
 function useDomainStatus({ domain }: { domain?: string }) {
 	const { data, isLoading, isFetching } =
@@ -138,10 +140,8 @@ export function ConfigureDomainCardRenderer(props: {
 				)}
 
 				{props.status !== 'Valid Configuration' && (
-					<div className="flex flex-col items-center justify-center space-y-2 rounded-b-lg border-t border-stone-200 bg-stone-50 p-3 dark:bg-stone-900 sm:flex-row sm:justify-between sm:space-y-0 sm:px-6">
-						<p className="text-sm text-stone-500 dark:text-stone-400">
-							Please enter a valid domain.
-						</p>
+					<div className="bg-muted/20 flex flex-col items-center justify-center space-y-2 rounded-b-lg border-t  border-stone-200 p-3 sm:flex-row sm:justify-between sm:space-y-0 sm:px-6">
+						<p className="text-sm text-primary">Please enter a valid domain.</p>
 					</div>
 				)}
 			</form>

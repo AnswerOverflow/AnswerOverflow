@@ -48,7 +48,7 @@ export const ServerInviteTitle = () => {
 					...(channel && channelToAnalyticsData(channel)),
 				});
 			}}
-			className="text-left font-header text-lg font-bold text-ao-black  hover:text-ao-black/[.5] dark:text-ao-white dark:hover:text-ao-white/80"
+			className="hover:text-primary/70 text-left font-header  text-lg font-bold hover:underline"
 		>
 			{server.name}
 		</Link>
@@ -66,21 +66,11 @@ export const ChannelIcon = ({
 		case ChannelType.GuildForum:
 			return (
 				<ChatBubbleLeftRightIcon
-					className={classNames(
-						'h-4 w-4 text-ao-black dark:text-ao-white',
-						className ?? '',
-					)}
+					className={classNames('h-4 w-4', className ?? '')}
 				/>
 			);
 		default:
-			return (
-				<HashtagIcon
-					className={classNames(
-						'h-4 w-4 text-ao-black dark:text-ao-white',
-						className ?? '',
-					)}
-				/>
-			);
+			return <HashtagIcon className={classNames('h-4 w-4', className ?? '')} />;
 	}
 };
 
@@ -96,7 +86,7 @@ export const ChannelName = ({
 				channelType={channel.type}
 				className={'text-right font-bold'}
 			/>
-			<p className="truncate text-left text-base font-bold leading-5 text-ao-black dark:text-ao-white">
+			<p className="truncate text-left text-base font-bold leading-5">
 				{channel.name}
 			</p>
 		</div>
@@ -129,7 +119,7 @@ export const ServerInviteJoinButton = (props: { className?: string }) => {
 
 export const ServerInviteIcon = () => {
 	const { server } = useServerInviteContext();
-	return <ServerIcon server={server} size="md" className={'shrink-0'} />;
+	return <ServerIcon server={server} size={48} className={'shrink-0'} />;
 };
 
 type ServerInviteProps = {

@@ -58,7 +58,7 @@ const ServerHero = () => {
 			)}
 			<div className="relative z-10 h-full w-full rounded-lg bg-black/5 shadow-md backdrop-blur-md " />
 			<div className="absolute inset-0 z-20 flex items-center justify-center">
-				{server && <ServerIcon server={server} size={'lg'} />}
+				{server && <ServerIcon server={server} size={64} />}
 			</div>
 		</div>
 	);

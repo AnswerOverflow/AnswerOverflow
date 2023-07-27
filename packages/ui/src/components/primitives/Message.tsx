@@ -93,7 +93,7 @@ export const MessageAuthorArea = () => {
 		<div className="flex w-full min-w-0 gap-2">
 			{/* TODO: sort out responsive styling */}
 			<div className="flex w-full flex-row items-center gap-2 font-body text-lg text-black/[.7] dark:text-white/[.47]">
-				<DiscordAvatar user={message.author} size="sm" />
+				<DiscordAvatar user={message.author} size={40} />
 				<span className="mr-1">{message.author.name}</span>
 				<div className="ml-auto mr-4 flex flex-row gap-2">
 					<LinkButton
@@ -139,7 +139,7 @@ export const MessageContents = () => {
 
 	return (
 		<div
-			className="pt-2 font-body text-ao-black [word-wrap:_break-word] dark:text-ao-white"
+			className="pt-2 font-body text-primary [word-wrap:_break-word]"
 			// The HTML from discord-markdown is escaped
 			dangerouslySetInnerHTML={{
 				__html: convertedMessageContent,
@@ -187,7 +187,7 @@ const SingularImageAttachment = () => {
 	if (parsedImages === 'loading' || !parsedImages) {
 		return (
 			<div className="flex h-[50vh] items-center justify-center">
-				<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-ao-blue" />
+				<div className="h-32 w-32 animate-spin rounded-full border-b-4" />
 			</div>
 		);
 	}
@@ -211,7 +211,7 @@ const SingularImageAttachment = () => {
 						alt={x?.alt ?? `Image sent by ${message.author.name}`}
 						unoptimized
 						loading={loadingStyle}
-						priority={loadingStyle === 'lazy' ? false : true}
+						priority={loadingStyle !== 'lazy'}
 					/>
 				</div>
 			))}
@@ -268,8 +268,8 @@ export const Message = ({
 			<Blurrer>
 				<div
 					className={cn(
-						`discord-message w-full bg-[#E9ECF2] leading-6 dark:bg-[#181B1F] ${
-							showBorders ? 'border-2' : ''
+						`discord-message w-full ${
+							showBorders ? 'border-2 border-foreground' : ''
 						} border-black/[.13] dark:border-white/[.13] ${
 							fullRounded ? 'rounded-standard' : 'lg:rounded-tl-standard'
 						}`,
@@ -305,7 +305,7 @@ export function MessageBlurrer({ children }: { children: React.ReactNode }) {
 }
 
 export function MultiMessageBlurrer(props: {
-	children: React.ReactNode;
+	children?: React.ReactNode;
 	count: number;
 }) {
 	const { count, children } = props;
@@ -345,7 +345,7 @@ export const ContentBlurrer = ({
 	}
 
 	return (
-		<div className="relative w-full">
+		<div className="relative w-full text-primary">
 			<div
 				style={{
 					filter: `blur(${blurAmount})`,
@@ -365,7 +365,7 @@ export const ContentBlurrer = ({
 				<div className="absolute inset-0 " />
 				<div className="absolute inset-0 flex items-center justify-center ">
 					<div
-						className={`flex flex-col items-center justify-center rounded-standard bg-ao-white/25 p-5 text-center text-ao-black backdrop-blur-sm dark:bg-ao-black/75 dark:text-ao-white`}
+						className={`flex flex-col items-center justify-center rounded-standard text-center backdrop-blur-sm`}
 					>
 						<div className="text-2xl">{notPublicTitle}</div>
 						<div>{notPublicInstructions}</div>

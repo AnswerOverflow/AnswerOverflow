@@ -1,9 +1,8 @@
-'use client';
-
 import * as React from 'react';
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
-import { LuChevronDown } from 'react-icons/lu';
-import { cn } from '~ui/utils/styling';
+import { ChevronDown } from 'lucide-react';
+
+import { cn } from '~ui/utils/utils';
 
 const Accordion = AccordionPrimitive.Root;
 
@@ -33,7 +32,7 @@ const AccordionTrigger = React.forwardRef<
 			{...props}
 		>
 			{children}
-			<LuChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+			<ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
 		</AccordionPrimitive.Trigger>
 	</AccordionPrimitive.Header>
 ));
@@ -46,7 +45,7 @@ const AccordionContent = React.forwardRef<
 	<AccordionPrimitive.Content
 		ref={ref}
 		className={cn(
-			'data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm transition-all',
+			'overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down',
 			className,
 		)}
 		{...props}

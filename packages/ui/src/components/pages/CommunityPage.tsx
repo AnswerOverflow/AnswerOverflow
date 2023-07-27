@@ -7,10 +7,6 @@ import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
 import { useState } from 'react';
 import {
 	Footer,
-	Button,
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
 	Heading,
 	Navbar,
 	LinkMessage,
@@ -18,11 +14,17 @@ import {
 	ServerInvite,
 	ServerInviteJoinButton,
 	ServerIcon,
-	DropdownMenuTrigger,
 	AOHead,
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
 import { getServerDescription } from '~ui/utils/other';
+import { Button } from '~ui/components/primitives/ui/button';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '~ui/components/primitives/ui/dropdown-menu';
 
 type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];
@@ -36,11 +38,12 @@ function ChannelSidebar(props: ChannelSelectProps) {
 		return (
 			<Button
 				className={
-					selected ? 'text-left' : 'bg-inherit text-left dark:bg-inherit'
+					selected
+						? 'bg-accent text-left text-accent-foreground'
+						: 'bg-inherit text-left dark:bg-inherit'
 				}
 				variant={'ghost'}
 				onClick={() => props.setSelectedChannelId(channel.id)}
-				selected={selected}
 			>
 				<ChannelName channel={channel} />
 			</Button>
@@ -49,9 +52,9 @@ function ChannelSidebar(props: ChannelSelectProps) {
 
 	const channels = props.channels;
 	return (
-		<div className="mr-4 ">
-			<Heading.H4 className="my-0 py-0">Channels</Heading.H4>
-			<div className="flex shrink-0 flex-col gap-2">
+		<div className="mr-4 max-w-[250px]">
+			<Heading.H4 className="ml-4 text-left">Channels</Heading.H4>
+			<div className="flex shrink-0 flex-col gap-2 text-left">
 				{channels.map((channel) => (
 					<ChannelSelect channel={channel} key={channel.id} />
 				))}
@@ -62,7 +65,7 @@ function ChannelSidebar(props: ChannelSelectProps) {
 
 function ChannelDropdown(props: ChannelSelectProps) {
 	return (
-		<DropdownMenu>
+		<DropdownMenu modal={false}>
 			<DropdownMenuTrigger asChild>
 				<Button variant="outline" className="w-full">
 					<ChannelName channel={props.selectedChannel} />
@@ -114,7 +117,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 							Icon={
 								<ServerIcon
 									server={server}
-									size="xl"
+									size={128}
 									className="hidden sm:flex"
 								/>
 							}
@@ -130,7 +133,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 										<div className="flex flex-row items-center justify-center gap-2">
 											<ServerIcon
 												server={server}
-												size="lg"
+												size={64}
 												className="flex sm:hidden"
 											/>
 											<Heading.H1 className="pt-0 text-3xl">
@@ -215,9 +218,9 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 	);
 
 	return (
-		<div className="mx-auto w-full overflow-x-hidden overflow-y-scroll bg-ao-white scrollbar-hide dark:bg-ao-black">
+		<div className="mx-auto w-full overflow-x-hidden overflow-y-scroll bg-background scrollbar-hide">
 			<Navbar />
-			<main className="bg-ao-white dark:bg-ao-black">
+			<main className="bg-background">
 				<AOHead
 					title={`${server.name} Community`}
 					description={

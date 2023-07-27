@@ -1,5 +1,5 @@
 import type { Story } from '@ladle/react';
-import { Button } from './Button';
+import { Button } from './button';
 
 type ButtonProps = React.ComponentPropsWithoutRef<typeof Button>;
 
@@ -23,7 +23,7 @@ Outline.args = {
 
 export const Subtle = Primary.bind({});
 Subtle.args = {
-	variant: 'subtle',
+	variant: 'secondary',
 };
 
 export const Ghost = Primary.bind({});

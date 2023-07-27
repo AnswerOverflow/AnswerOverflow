@@ -37,7 +37,7 @@ export function ServerDashboardRenderer(props: {
 	} = props;
 	return (
 		<DashboardProvider value={data}>
-			<TabGroup className="bg-ao-white px-2 dark:bg-ao-black md:px-8">
+			<TabGroup className="px-2 md:px-8">
 				<TabList className="mx-auto max-w-7xl">
 					<Tab>Overview</Tab>
 				</TabList>
@@ -56,7 +56,7 @@ export function ServerDashboardRenderer(props: {
 								<Card>
 									<AOLink
 										href={getServerHomepageUrl(data)}
-										className="flex items-center gap-2"
+										className="flex items-center gap-2 no-underline hover:underline"
 									>
 										<Title>View Community</Title>
 										<GoLinkExternal className="mt-1 h-5 w-5" />
@@ -103,7 +103,7 @@ export function ServerDashboard(props: { serverId: string }) {
 			case 'loading':
 				return (
 					<div className="flex h-[50vh] items-center justify-center">
-						<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-ao-blue" />
+						<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-blue-400" />
 					</div>
 				);
 			case 'error':

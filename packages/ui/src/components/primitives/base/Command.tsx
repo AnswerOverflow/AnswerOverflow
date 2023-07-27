@@ -10,7 +10,7 @@ export const Command: React.FC<{
 }> = ({ command }) => {
 	return (
 		<div className="flex flex-col">
-			<div className="flex w-max flex-row items-center justify-center rounded-standard border-1 border-[#CBCED1] bg-[#F4F4F4] px-4 py-2 text-black dark:border-[#32353A] dark:bg-[#1F2226] dark:text-white">
+			<div className="flex w-max flex-row items-center justify-center gap-2 rounded-standard border-1 px-4 py-2">
 				<span className="font-body text-lg">/{command}</span>
 				<CopyButton textToCopy={`/${command}`} />
 			</div>

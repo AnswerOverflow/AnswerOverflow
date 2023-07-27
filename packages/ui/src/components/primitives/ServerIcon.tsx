@@ -1,7 +1,9 @@
 import type { ServerPublic } from '@answeroverflow/api';
 import { AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
-import { Avatar, type AvatarProps, getAvatarSize } from './base';
+
 import { getInitials } from '~ui/utils/avatars';
+import { Avatar, AvatarProps } from '~ui/components/primitives/ui/avatar';
+import { cn } from '~ui/utils/styling';
 
 export interface ServerIconProps extends Omit<AvatarProps, 'url' | 'alt'> {
 	server: Pick<ServerPublic, 'id' | 'name' | 'icon'>;
@@ -16,10 +18,18 @@ export const makeServerIconLink = (
 };
 
 export function ServerIcon(props: ServerIconProps) {
-	const size = getAvatarSize(props.size ?? 'md');
+	const { className, size = 64, ...rest } = props;
 	const serverIconUrl = makeServerIconLink(props.server, size);
 	return (
-		<Avatar {...props}>
+		<Avatar
+			{...props}
+			className={className}
+			style={{
+				width: size,
+				height: size,
+			}}
+			{...rest}
+		>
 			<AvatarImage
 				src={serverIconUrl}
 				width={size}
@@ -27,7 +37,18 @@ export function ServerIcon(props: ServerIconProps) {
 				alt={props.server.name}
 				{...props}
 			/>
-			<AvatarFallback {...props}>
+			<AvatarFallback
+				{...props}
+				className={cn(
+					'relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-50 text-center dark:bg-neutral-700',
+					size > 64 ? 'text-4xl' : 'text-xl',
+					className,
+				)}
+				style={{
+					width: size,
+					height: size,
+				}}
+			>
 				{getInitials(props.server.name)}
 			</AvatarFallback>
 		</Avatar>

@@ -1,11 +1,12 @@
-import { cn } from '~ui/utils/styling';
+import { cn } from '~ui/utils/utils';
+
 function Skeleton({
 	className,
 	...props
 }: React.HTMLAttributes<HTMLDivElement>) {
 	return (
 		<div
-			className={cn('bg-primary/10 animate-pulse rounded-md', className)}
+			className={cn('animate-pulse rounded-md bg-muted', className)}
 			{...props}
 		/>
 	);

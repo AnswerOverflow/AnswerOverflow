@@ -1,17 +1,18 @@
 import { QuestionAnswerArea } from './QuestionAnswerArea/QuestionAnswerArea';
 import { messageData } from './HomeMessages';
-import { Button, GetStarted } from '~ui/components/primitives';
+import { GetStarted } from '~ui/components/primitives';
+import { Button } from '~ui/components/primitives/ui/button';
 
 const HomeLeadText = () => {
 	return (
 		<div className="flex w-full flex-col items-start justify-center gap-6 pb-20 xl:w-[60%]">
-			<h1 className="text-center font-header text-4xl font-bold leading-[114.5%] text-ao-black dark:text-ao-white md:text-start md:text-6xl">
+			<h1 className="text-center font-header text-4xl font-bold leading-[114.5%] md:text-start md:text-6xl">
 				Bringing your Discord channels to Google
 			</h1>
-			<p className="text-center font-body text-lg text-ao-black/[.95] dark:text-ao-white/[.85] md:text-start md:text-xl">
+			<p className="text-primary/75 text-center font-body text-lg md:text-start md:text-xl">
 				Answer Overflow is an open source project designed to bring discord
-				channels to your favorite search engine, enabling users to easily find
-				the info they need, fast.
+				channels to your favorite search engine. Set it up in minutes and bring
+				discovery to your hidden content.
 			</p>
 			<div className="flex w-full flex-col items-center justify-center gap-8 sm:w-fit sm:flex-row">
 				<GetStarted
