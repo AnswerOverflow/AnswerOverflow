@@ -81,7 +81,7 @@
 }
 
 .hljs {
-	@apply my-4 w-full rounded-lg bg-white text-sm dark:bg-stone-900 !important;
+	@apply my-4 w-full rounded-lg bg-neutral-100 text-sm dark:bg-neutral-900 !important;
 	/* Fixes overflowing code blocks */
 	white-space: break-spaces;
 	line-break: anywhere;
@@ -95,6 +95,12 @@
 }
 .d-emoji {
 	@apply inline-block h-6 w-6;
+}
+.hljs-built_in{
+  @apply text-red-700 dark:text-red-400 !important;
+}
+.hljs-keyword{
+  @apply text-red-700 dark:text-red-400 !important;
 }
 
 html {
