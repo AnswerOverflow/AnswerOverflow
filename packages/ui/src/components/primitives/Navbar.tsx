@@ -193,7 +193,7 @@ export function NavbarRenderer(props: {
 	);
 
 	return (
-		<NavigationMenu className="relative min-h-[4rem] w-full py-2 sm:px-[4rem] 2xl:px-[6rem]">
+		<NavigationMenu className="relative min-h-[4rem] w-full sm:px-[4rem] md:py-2 2xl:px-[6rem]">
 			<NavigationMenuList>
 				<NavigationMenuItem>
 					<Link href="/">

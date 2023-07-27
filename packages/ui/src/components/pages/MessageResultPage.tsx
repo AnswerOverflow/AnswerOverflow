@@ -11,6 +11,7 @@ import {
 	ServerInvite,
 	MessageContentWithSolution,
 	Heading,
+	ServerInviteJoinButton,
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
 import {
@@ -198,12 +199,20 @@ export function MessageResultPage({
 				server={server}
 			/>
 
-			<div className="my-8 flex flex-col-reverse items-center justify-between gap-2 sm:flex-row sm:py-0">
-				<div className="flex h-full grow flex-col justify-between gap-4">
-					<MessagesSearchBar className={'hidden sm:block'} />
-					<div className="flex flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400 text-center  dark:border-neutral-600  dark:text-white">
+			<div className="mb-2 flex flex-col-reverse items-center justify-between gap-2 sm:flex-row sm:py-0 md:my-8">
+				<div className="flex h-full w-full grow flex-col items-center justify-between gap-2 md:gap-4">
+					<MessagesSearchBar className={'hidden md:block'} />
+					<div className={'block md:hidden'}>
+						<ServerInvite
+							server={server}
+							location={'Message Result Page'}
+							channel={channel}
+							JoinButton={null}
+						/>
+					</div>
+					<div className="flex w-full flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400  text-center  dark:border-neutral-600 dark:text-white">
 						<h1
-							className="mb-4 text-left font-header text-3xl text-primary"
+							className="w-full text-center font-header text-xl text-primary md:text-left md:text-3xl"
 							dangerouslySetInnerHTML={{ __html: toHTML(question) }}
 						></h1>
 					</div>
