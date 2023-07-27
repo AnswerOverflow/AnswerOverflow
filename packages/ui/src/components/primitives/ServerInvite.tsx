@@ -129,7 +129,7 @@ export const ServerInviteJoinButton = (props: { className?: string }) => {
 
 export const ServerInviteIcon = () => {
 	const { server } = useServerInviteContext();
-	return <ServerIcon server={server} size="md" className={'shrink-0'} />;
+	return <ServerIcon server={server} size={48} className={'shrink-0'} />;
 };
 
 type ServerInviteProps = {

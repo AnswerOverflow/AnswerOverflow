@@ -93,7 +93,7 @@ export const MessageAuthorArea = () => {
 		<div className="flex w-full min-w-0 gap-2">
 			{/* TODO: sort out responsive styling */}
 			<div className="flex w-full flex-row items-center gap-2 font-body text-lg text-black/[.7] dark:text-white/[.47]">
-				<DiscordAvatar user={message.author} size="sm" />
+				<DiscordAvatar user={message.author} size={40} />
 				<span className="mr-1">{message.author.name}</span>
 				<div className="ml-auto mr-4 flex flex-row gap-2">
 					<LinkButton

@@ -1,12 +1,11 @@
 import type { DiscordAccountPublic } from '@answeroverflow/api';
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-	type AvatarProps,
-	getAvatarSize,
-} from './base';
 import { getInitials } from '~ui/utils/avatars';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  AvatarProps
+} from "~ui/components/primitives/ui/avatar";
 
 export interface DiscordAvatarProps extends Omit<AvatarProps, 'alt' | 'url'> {
 	user: DiscordAccountPublic;
@@ -26,7 +25,7 @@ const makeUserIconLink = (
 export function DiscordAvatar(props: DiscordAvatarProps) {
 	const profilePictureUrl = makeUserIconLink(
 		props.user,
-		getAvatarSize(props.size ?? 'md'),
+		props.size ?? 64,
 	);
 	return (
 		<Avatar {...props}>

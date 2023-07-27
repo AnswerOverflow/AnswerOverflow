@@ -5,20 +5,10 @@ import { useRouter } from 'next/router';
 import { trpc } from '~ui/utils/trpc';
 import { GetStarted, SignInButton } from './Callouts';
 import { ThemeSwitcher } from './ThemeSwitcher';
-import { Avatar, AvatarFallback, AvatarImage } from './base/Avatar';
 import { DiscordIcon, GitHubIcon } from './base/Icons';
 import {
-	NavigationMenu,
-	NavigationMenuItem,
-	NavigationMenuList,
 	AnswerOverflowLogo,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuGroup,
-	DropdownMenuSeparator,
-	DropdownMenu,
-	DropdownMenuTrigger,
-	DropdownMenuContent,
+
 } from './base';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { GITHUB_LINK } from '@answeroverflow/constants/src/links';
@@ -38,6 +28,19 @@ import {
 } from 'react-icons/lu';
 import { useTheme } from 'next-themes';
 import { getInitials } from '~ui/utils/avatars';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem, DropdownMenuLabel,
+  DropdownMenuSeparator, DropdownMenuTrigger
+} from "~ui/components/primitives/ui/dropdown-menu";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuList
+} from "~ui/components/primitives/ui/navigation-menu";
+import {Avatar, AvatarFallback, AvatarImage} from "~ui/components/primitives/ui/avatar";
 const MainSiteDropdownMenuGroup = () => (
 	<>
 		<DropdownMenuGroup>

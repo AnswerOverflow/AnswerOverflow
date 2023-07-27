@@ -1,6 +1,6 @@
 import { FollowCursor } from './Follow';
-import { Avatar, AvatarFallback, AvatarImage } from './base';
 import { SocialIcon } from 'react-social-icons';
+import {Avatar, AvatarFallback, AvatarImage} from "~ui/components/primitives/ui/avatar";
 
 export interface ContributorData {
 	name: string;
@@ -16,7 +16,7 @@ export const Contributor = ({
 	links,
 }: ContributorData) => (
 	<div className="flex h-full w-64 flex-col items-center justify-start rounded-standard border-1 border-ao-black/25 bg-ao-black/[0.03] px-8 py-16 dark:border-0 dark:bg-[#1F2124]">
-		<Avatar size="xl">
+		<Avatar>
 			<AvatarImage alt={`The profile picture of ${name}`} src={avatar} />
 			<AvatarFallback>{name}</AvatarFallback>
 		</Avatar>

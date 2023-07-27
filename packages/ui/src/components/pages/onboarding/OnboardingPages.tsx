@@ -1,5 +1,4 @@
 import {
-	Button,
 	Heading,
 	LinkButton,
 	ManageServerCard,
@@ -21,9 +20,10 @@ import {
 import { IoGameControllerOutline } from 'react-icons/io5';
 import { MdMoneyOffCsred, MdAttachMoney } from 'react-icons/md';
 import { CiCircleMore } from 'react-icons/ci';
-import { Command } from '~ui/components/primitives/base/Command';
 import { usePostHog } from 'posthog-js/react';
 import Link from 'next/link';
+import {Command} from "~ui/components/primitives/base/Command";
+import {Button} from "~ui/components/primitives/ui/button";
 
 export const pages = [
 	'start',
@@ -98,7 +98,7 @@ export function WaitingToBeAddedRenderer(props: {
 		return (
 			<div className="flex flex-col items-center justify-center gap-8 text-center">
 				<Heading.H1>Joined {props.server.name}!</Heading.H1>
-				<ServerIcon size={'xl'} server={props.server} />
+				<ServerIcon size={128} server={props.server} />
 				<Button
 					size={'lg'}
 					onClick={() => {

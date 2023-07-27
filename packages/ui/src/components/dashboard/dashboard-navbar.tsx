@@ -1,11 +1,6 @@
 import Link from 'next/link';
 import {
 	AnswerOverflowLogo,
-	Button,
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
 	ServerIcon,
 	UserAvatar,
 } from '../primitives';
@@ -15,6 +10,13 @@ import { trpc } from '~ui/utils/trpc';
 import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
 import type { Session } from 'next-auth';
 import { useSession } from 'next-auth/react';
+import {Button} from "~ui/components/primitives/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "~ui/components/primitives/ui/dropdown-menu";
 
 export function DashboardServerSelect() {
 	const router = useRouter();
@@ -33,7 +35,7 @@ export function DashboardServerSelect() {
 				maxWidth: '200px',
 			}}
 		>
-			<ServerIcon server={props.server} size={'sm'} />
+			<ServerIcon server={props.server} size={40} />
 			<span>{props.server.name}</span>
 		</div>
 	);

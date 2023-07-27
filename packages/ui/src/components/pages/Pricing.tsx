@@ -1,27 +1,27 @@
 import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
 	AOHead,
 	AOLink,
-	Button,
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
 	Heading,
-	Input,
 	LinkButton,
 } from '../primitives';
-import { TextArea } from '~ui/components/primitives/base/TextArea';
+import {	Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger} from '../primitives/ui/accordion';
 import { LuCheck } from 'react-icons/lu';
 import { trackEvent } from '@answeroverflow/hooks';
 import { toast } from 'react-toastify';
 import React from 'react';
 import { classNames } from '~ui/utils/styling';
+import {
+  Dialog,
+  DialogContent, DialogFooter,
+  DialogHeader, DialogTitle,
+  DialogTrigger
+} from "~ui/components/primitives/ui/dialog";
+import {Button} from "~ui/components/primitives/ui/button";
+import {Input} from "~ui/components/primitives/ui/input";
+import {Textarea} from "~ui/components/primitives/ui/textarea";
 
 const faqs: {
 	question: React.ReactNode;
@@ -283,7 +283,7 @@ export const Pricing = () => {
 					type={'email'}
 					autoComplete={'email'}
 				/>
-				<TextArea
+				<Textarea
 					className="h-32"
 					placeholder={
 						'What do you think of our pricing? What would you like to see?'

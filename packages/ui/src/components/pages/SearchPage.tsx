@@ -1,9 +1,10 @@
 import type { APISearchResult } from '@answeroverflow/api';
 import { useState } from 'react';
-import { SearchInput, SearchResult, Heading } from '~ui/components/primitives';
+import { SearchResult, Heading } from '~ui/components/primitives';
 import { useRouter } from 'next/router';
 import { useRouterQuery, useRouterServerId } from '~ui/utils/hooks';
 import { twMerge } from 'tailwind-merge';
+import {TextInput} from "@tremor/react";
 
 interface SearchResultProps {
 	results: APISearchResult[number][];
@@ -36,7 +37,7 @@ export const MessagesSearchBar = (props: {
 			}}
 			className={twMerge('w-full', props.className)}
 		>
-			<SearchInput
+			<TextInput
 				defaultValue={query || ''}
 				className="mb-4 w-full"
 				onChange={(e) => setSearchInput(e.target.value)}

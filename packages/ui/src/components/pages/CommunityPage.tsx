@@ -7,10 +7,6 @@ import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
 import { useState } from 'react';
 import {
 	Footer,
-	Button,
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
 	Heading,
 	Navbar,
 	LinkMessage,
@@ -18,11 +14,16 @@ import {
 	ServerInvite,
 	ServerInviteJoinButton,
 	ServerIcon,
-	DropdownMenuTrigger,
 	AOHead,
 } from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
 import { getServerDescription } from '~ui/utils/other';
+import {Button} from "~ui/components/primitives/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuTrigger
+} from "~ui/components/primitives/ui/dropdown-menu";
 
 type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];
@@ -40,7 +41,6 @@ function ChannelSidebar(props: ChannelSelectProps) {
 				}
 				variant={'ghost'}
 				onClick={() => props.setSelectedChannelId(channel.id)}
-				selected={selected}
 			>
 				<ChannelName channel={channel} />
 			</Button>
@@ -62,7 +62,7 @@ function ChannelSidebar(props: ChannelSelectProps) {
 
 function ChannelDropdown(props: ChannelSelectProps) {
 	return (
-		<DropdownMenu>
+		<DropdownMenu modal={false}>
 			<DropdownMenuTrigger asChild>
 				<Button variant="outline" className="w-full">
 					<ChannelName channel={props.selectedChannel} />
@@ -114,7 +114,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 							Icon={
 								<ServerIcon
 									server={server}
-									size="xl"
+									size={128}
 									className="hidden sm:flex"
 								/>
 							}
@@ -130,7 +130,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 										<div className="flex flex-row items-center justify-center gap-2">
 											<ServerIcon
 												server={server}
-												size="lg"
+												size={64}
 												className="flex sm:hidden"
 											/>
 											<Heading.H1 className="pt-0 text-3xl">
