@@ -7,14 +7,14 @@ export const Primary: Story<DiscordAvatarProps> = (props) => (
 );
 
 Primary.args = {
-	size: 'md',
+	size: 48,
 	user: mockDiscordAccount(),
 };
 
 export const WithImage = Primary.bind({});
 
 WithImage.args = {
-	size: 'md',
+	size: 48,
 	user: mockDiscordAccount({
 		avatar: '7716e305f7de26045526d9da6eef2dab',
 		id: '523949187663134754',

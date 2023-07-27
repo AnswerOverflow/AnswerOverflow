@@ -39,7 +39,7 @@ export function TierAccessOnly(props: {
 			) : (
 				<div className="grid grid-cols-1 grid-rows-1">
 					<div className="cursor-not-allowed opacity-50">{props.children}</div>
-					<div className="flex flex-row items-center justify-between space-y-2 rounded-b-lg border border-stone-200 bg-stone-50 p-3 dark:bg-stone-900 sm:space-y-0 sm:px-10">
+					<div className="bg-muted/20 flex flex-row items-center justify-between space-y-2 rounded-b-lg border p-3 sm:space-y-0 sm:px-10">
 						<span>
 							You must be on the pro plan or higher to use this feature.
 						</span>

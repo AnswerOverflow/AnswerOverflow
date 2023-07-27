@@ -4,7 +4,7 @@ import { ServerDashboardRenderer } from './dashboard';
 import { mockServer } from '~ui/test/props';
 
 export default {
-	title: 'Dashboard / Dashboards',
+	title: '!Pages / Dashboard / Dashboards',
 } satisfies StoryDefault;
 
 export const FreeDashboardStory: Story = () => (

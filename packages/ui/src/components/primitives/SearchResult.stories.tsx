@@ -10,9 +10,7 @@ import { SearchResult } from './SearchResult';
 type SearchResultProps = React.ComponentPropsWithoutRef<typeof SearchResult>;
 
 export const PublicSolution: Story<SearchResultProps> = (props) => (
-	<div className="xl:w-2/3">
-		<SearchResult {...props} />
-	</div>
+	<SearchResult {...props} />
 );
 
 PublicSolution.args = {

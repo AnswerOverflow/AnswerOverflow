@@ -1,4 +1,4 @@
-import { Button, LinkButton, type ButtonProps, type LinkButtonProps } from '.';
+import { LinkButton, type LinkButtonProps } from '.';
 import { signIn } from 'next-auth/react';
 import {
 	trackEvent,
@@ -6,6 +6,7 @@ import {
 	useTenantContext,
 } from '@answeroverflow/hooks';
 import { makeMainSiteLink } from '@answeroverflow/constants/src/links';
+import { Button, ButtonProps } from '~ui/components/primitives/ui/button';
 export function GetStarted(
 	props: Omit<LinkButtonProps, 'href'> & {
 		location: GettingStartedClickProps['Button Location'];

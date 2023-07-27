@@ -55,7 +55,7 @@ const components: Components = {
 	) => (
 		<Link
 			href={props.href ?? ''}
-			className="font-bold underline decoration-2 underline-offset-2 transition-colors hover:decoration-ao-blue"
+			className="font-bold underline decoration-2 underline-offset-2 transition-colors hover:decoration-blue-500"
 			target="_blank"
 		>
 			{props.children}
@@ -107,7 +107,7 @@ const MyApp: AppType<{
 							<CommitBanner />
 							<MDXProvider components={components}>
 								<Component {...pageProps} />
-								<ToastContainer toastClassName="dark:bg-ao-black dark:text-white bg-white text-black" />
+								<ToastContainer toastClassName="bg-background dark:bg-background text-primary dark:text-primary" />
 							</MDXProvider>
 						</PageWrapper>
 						<ReactQueryDevtools initialIsOpen={false} />

@@ -4,11 +4,12 @@ export default function Dashboard() {
 	const { data, status } = trpc.auth.getServersForOnboarding.useQuery();
 	const serversWithDashboard = data?.filter((server) => server.hasBot);
 	const selectedServer = serversWithDashboard?.[0];
+
 	switch (status) {
 		case 'loading':
 			return (
 				<div className="flex h-[50vh] items-center justify-center">
-					<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-ao-blue" />
+					<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-blue-400" />
 				</div>
 			);
 		case 'error':

@@ -11,7 +11,10 @@ import {
 	WhatTypeOfCommunityDoYouHave,
 } from './OnboardingPages';
 import { mockPublicServer } from '~ui/test/props';
-
+import { StoryDefault } from '@ladle/react/lib/app/exports';
+export default {
+	title: '!Pages / Onboarding',
+} satisfies StoryDefault;
 export const ContributorsStory: Story = () => <OnboardingLanding />;
 
 export const SignInStory = () => {

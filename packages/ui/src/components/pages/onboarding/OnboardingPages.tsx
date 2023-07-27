@@ -1,5 +1,5 @@
 import {
-	Button,
+	AOLink,
 	Heading,
 	LinkButton,
 	ManageServerCard,
@@ -21,9 +21,9 @@ import {
 import { IoGameControllerOutline } from 'react-icons/io5';
 import { MdMoneyOffCsred, MdAttachMoney } from 'react-icons/md';
 import { CiCircleMore } from 'react-icons/ci';
-import { Command } from '~ui/components/primitives/base/Command';
 import { usePostHog } from 'posthog-js/react';
-import Link from 'next/link';
+import { Command } from '~ui/components/primitives/base/Command';
+import { Button } from '~ui/components/primitives/ui/button';
 
 export const pages = [
 	'start',
@@ -98,7 +98,7 @@ export function WaitingToBeAddedRenderer(props: {
 		return (
 			<div className="flex flex-col items-center justify-center gap-8 text-center">
 				<Heading.H1>Joined {props.server.name}!</Heading.H1>
-				<ServerIcon size={'xl'} server={props.server} />
+				<ServerIcon size={128} server={props.server} />
 				<Button
 					size={'lg'}
 					onClick={() => {
@@ -113,8 +113,8 @@ export function WaitingToBeAddedRenderer(props: {
 	return (
 		<div className="flex flex-col items-center justify-center gap-8 text-center">
 			<Heading.H1>Waiting to join {props.server.name}</Heading.H1>
-			<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-ao-blue" />
-			<span className="text-ao-black dark:text-ao-white">
+			<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-highlight" />
+			<span>
 				Last checked {props.timeSinceLastCheckInSeconds} second
 				{props.timeSinceLastCheckInSeconds === 1 ? '' : 's'} ago.
 			</span>
@@ -238,7 +238,7 @@ const SetupPage = (props: {
 }) => {
 	const { goToPage } = useOnboardingContext();
 	return (
-		<div className="mx-auto grid max-w-2xl grid-cols-1 gap-4 p-4 text-ao-black dark:text-ao-white">
+		<div className="mx-auto grid max-w-2xl grid-cols-1 gap-4 p-4">
 			<div className="mx-auto flex flex-row gap-4 py-4">
 				{props.icon}
 				<div className="grid grid-cols-1">
@@ -250,9 +250,7 @@ const SetupPage = (props: {
 					</div>
 				</div>
 			</div>
-			<span className="text-lg text-ao-black dark:text-ao-white">
-				{props.description}
-			</span>
+			<span className="text-lg">{props.description}</span>
 			<ul className="list-inside list-disc py-4 text-left text-lg">
 				{props.bulletPoints.map((bulletPoint, i) => (
 					<li key={i} className="py-2">
@@ -303,14 +301,13 @@ export function EnableForumGuidelinesConsent() {
 				'Users have to provide consent for their messages to be shown publicly.',
 				'Fourm guidelines consent marks users who post in the channel as consenting',
 				'Users can manage their account with the /manage-account command.',
-				<Link
+				<AOLink
 					href="https://docs.answeroverflow.com/user-settings/displaying-messages"
 					target="_blank"
-					className="text-ao-blue"
 					key={'displaying-messages'}
 				>
 					Learn more about displaying messages on Answer Overflow
-				</Link>,
+				</AOLink>,
 			]}
 			nextPage="enable-mark-solution"
 		/>
@@ -426,7 +423,7 @@ export function WelcomePageRenderer(props: {
 export function FinalChecklistPage() {
 	const { data } = useOnboardingContext();
 	return (
-		<div className="text-ao-black dark:text-ao-white">
+		<div>
 			<Heading.H1>Setup Complete!</Heading.H1>
 			<Heading.H2>{"Here's"} a few extra things you can do</Heading.H2>
 			<ul className="list-inside list-disc py-4 text-left text-lg">
@@ -440,13 +437,12 @@ export function FinalChecklistPage() {
 				</li>
 				<li>
 					Browse{' '}
-					<Link
+					<AOLink
 						href="https://docs.answeroverflow.com"
-						className="
-					 text-ao-blue dark:hover:text-ao-blue"
+						className={'underline'}
 					>
 						the documentation
-					</Link>{' '}
+					</AOLink>{' '}
 					to learn more about Answer Overflow
 				</li>
 			</ul>
