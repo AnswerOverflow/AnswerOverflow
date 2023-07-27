@@ -9,7 +9,7 @@ const HomeLeadText = () => {
 			<h1 className="text-center font-header text-4xl font-bold leading-[114.5%] md:text-start md:text-6xl">
 				Bringing your Discord channels to Google
 			</h1>
-			<p className="text-primary/75 text-center font-body text-lg md:text-start md:text-xl">
+			<p className="text-center font-body text-lg text-primary/75 md:text-start md:text-xl">
 				Answer Overflow is an open source project designed to bring discord
 				channels to your favorite search engine. Set it up in minutes and bring
 				discovery to your hidden content.
