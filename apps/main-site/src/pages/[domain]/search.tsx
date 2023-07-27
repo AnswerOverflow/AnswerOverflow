@@ -1,13 +1,13 @@
-import {
-	AOHead,
-	SearchPage,
-	trpc,
-	useRouterQuery,
-	useRouterServerId,
-} from '@answeroverflow/ui';
 import { findServerByCustomDomain, zServerPublic } from '@answeroverflow/db';
 import { GetStaticPropsContext } from 'next';
 import { useTenantContext } from '@answeroverflow/hooks';
+import {
+	useRouterQuery,
+	useRouterServerId,
+} from '@answeroverflow/ui/src/utils/hooks';
+import { trpc } from '@answeroverflow/ui/src/utils/trpc';
+import AOHead from '@answeroverflow/ui/src/components/primitives/AOHead';
+import { SearchPage } from '@answeroverflow/ui/src/components/pages/SearchPage';
 
 export default function Search() {
 	// get the query from the url in the q param

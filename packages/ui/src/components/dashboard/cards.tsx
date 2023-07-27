@@ -9,9 +9,9 @@ import {
 } from '@tremor/react';
 import type { Plan } from '@answeroverflow/db';
 import { trpc } from '~ui/utils/trpc';
-import { AOLink } from '../primitives';
 import { useDashboardContext } from './dashboard-context';
-import { PricingDialog } from '~ui/components/pages';
+import { PricingDialog } from '~ui/components/pages/Pricing';
+import { AOLink } from '~ui/components/primitives/base/Link';
 
 export function PageViewsCardRenderer(props: {
 	numberOfPageViews?: number;

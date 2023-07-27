@@ -2,7 +2,6 @@ import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import Image from 'next/image';
 import discordMarkdown from 'discord-markdown';
 import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
-import { DiscordIcon } from '~ui/components/primitives';
 import {
 	Avatar,
 	AvatarImage,
@@ -13,6 +12,7 @@ import type { ChannelPublicWithFlags } from '@answeroverflow/api';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { forwardRef } from 'react';
 import { getInitials } from '~ui/utils/avatars';
+import { DiscordIcon } from '~ui/components/primitives/base/Icons';
 export type MessageProps = {
 	message: APIMessageWithDiscordAccount;
 	thread?: ChannelPublicWithFlags;

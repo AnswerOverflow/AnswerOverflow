@@ -6,7 +6,6 @@ import { SessionProvider } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import type { AppType, NextWebVitalsMetric } from 'next/app';
 import hljs from 'highlight.js';
-import { type NextTRPC, PageWrapper, trpc } from '@answeroverflow/ui';
 import { ThemeProvider } from 'next-themes';
 import {
 	AnalyticsProvider,
@@ -14,7 +13,6 @@ import {
 } from '@answeroverflow/hooks';
 import React, { useEffect } from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { Heading, Paragraph } from '@answeroverflow/ui';
 import { MDXProvider } from '@mdx-js/react';
 import Link from 'next/link';
 import type { Components } from '@mdx-js/react/lib';
@@ -24,6 +22,10 @@ import Router from 'next/router';
 import type { ServerPublic } from '@answeroverflow/api';
 import { ToastContainer } from 'react-toastify';
 import { GoogleAnalytics, event } from 'nextjs-google-analytics';
+import { Heading } from '@answeroverflow/ui/src/components/primitives/base/Heading';
+import { PageWrapper } from '@answeroverflow/ui/src/components/pages/PageWrapper';
+import { NextTRPC, trpc } from '@answeroverflow/ui/src/utils/trpc';
+import { Paragraph } from '@answeroverflow/ui/src/components/primitives/base/Paragraph';
 
 const progress = new ProgressBar({
 	size: 2,

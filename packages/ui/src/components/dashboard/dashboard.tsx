@@ -10,7 +10,6 @@ import {
 	Col,
 	Title,
 } from '@tremor/react';
-import { AOHead, GetStarted, AOLink, Footer } from '../primitives';
 import { trpc } from '~ui/utils/trpc';
 import { ConfigureDomainCard } from './domains';
 import { GoLinkExternal } from 'react-icons/go';
@@ -20,6 +19,10 @@ import { TierAccessOnly } from '../primitives/tier-access-only';
 import type { ServerDashboard } from '@answeroverflow/api';
 import { DashboardProvider } from './dashboard-context';
 import { getServerHomepageUrl } from '~ui/utils/server';
+import { AOLink } from '~ui/components/primitives/base/Link';
+import { GetStarted } from '~ui/components/primitives/Callouts';
+import AOHead from '~ui/components/primitives/AOHead';
+import { Footer } from '~ui/components/primitives/Footer';
 
 export function ServerDashboardRenderer(props: {
 	data: ServerDashboard;

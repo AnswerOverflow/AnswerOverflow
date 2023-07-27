@@ -5,9 +5,13 @@ import {
 	GITHUB_LINK,
 	TWITTER_LINK,
 } from '@answeroverflow/constants/src/links';
-import { AnswerOverflowLogo, DiscordIcon, GitHubIcon, Heading } from './base';
 import { useTenantContext } from '@answeroverflow/hooks';
-
+import {
+	AnswerOverflowLogo,
+	DiscordIcon,
+	GitHubIcon,
+} from '~ui/components/primitives/base/Icons';
+import { Heading } from '~ui/components/primitives/base/Heading';
 type SocialItem = {
 	name: string;
 	href: string;

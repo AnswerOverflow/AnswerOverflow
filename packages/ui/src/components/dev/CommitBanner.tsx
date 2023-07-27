@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Heading } from '../primitives';
+import { Heading } from '~ui/components/primitives/base/Heading';
 import { webClientEnv } from '@answeroverflow/env/web';
 
 export const CommitBanner = () => {

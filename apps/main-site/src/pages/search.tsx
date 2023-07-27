@@ -1,10 +1,10 @@
 import {
-	AOHead,
-	SearchPage,
-	trpc,
 	useRouterQuery,
 	useRouterServerId,
-} from '@answeroverflow/ui';
+} from '@answeroverflow/ui/src/utils/hooks';
+import AOHead from '@answeroverflow/ui/src/components/primitives/AOHead';
+import { SearchPage } from '@answeroverflow/ui/src/components/pages/SearchPage';
+import { trpc } from '@answeroverflow/ui/src/utils/trpc';
 
 export default function Search() {
 	// get the query from the url in the q param

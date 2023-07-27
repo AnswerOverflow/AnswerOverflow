@@ -5,17 +5,6 @@ import type {
 import { useTenantContext, useTrackEvent } from '@answeroverflow/hooks';
 import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
 import { useState } from 'react';
-import {
-	Footer,
-	Heading,
-	Navbar,
-	LinkMessage,
-	ChannelName,
-	ServerInvite,
-	ServerInviteJoinButton,
-	ServerIcon,
-	AOHead,
-} from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
 import { getServerDescription } from '~ui/utils/other';
 import { Button } from '~ui/components/primitives/ui/button';
@@ -25,6 +14,17 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '~ui/components/primitives/ui/dropdown-menu';
+import { Heading } from '~ui/components/primitives/base/Heading';
+import {
+	ChannelName,
+	ServerInvite,
+	ServerInviteJoinButton,
+} from '~ui/components/primitives/ServerInvite';
+import { ServerIcon } from '~ui/components/primitives/ServerIcon';
+import { LinkMessage } from '~ui/components/primitives/SearchResult';
+import { Navbar } from '~ui/components/primitives/Navbar';
+import AOHead from '~ui/components/primitives/AOHead';
+import { Footer } from '~ui/components/primitives/Footer';
 
 type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];

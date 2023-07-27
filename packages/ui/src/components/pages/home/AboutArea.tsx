@@ -1,4 +1,3 @@
-import { Heading, LinkButton, Paragraph } from '~ui/components/primitives';
 import Balancer from 'react-wrap-balancer';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -6,7 +5,9 @@ import { cn } from '~ui/utils/styling';
 import { trackEvent } from '@answeroverflow/hooks';
 import { PricingArea } from './PricingArea';
 import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
-
+import { Paragraph } from '~ui/components/primitives/base/Paragraph';
+import { Heading } from '~ui/components/primitives/base/Heading';
+import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 // TODO: Link to docs for feature?
 const HomeFeature = (props: {
 	featureName: React.ReactNode;

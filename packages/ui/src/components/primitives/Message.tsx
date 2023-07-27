@@ -7,7 +7,6 @@ import { DiscordAvatar } from './DiscordAvatar';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import { cn } from '~ui/utils/styling';
-import { LinkButton, DiscordIcon } from './base';
 import {
 	trackEvent,
 	messageWithDiscordAccountToAnalyticsData,
@@ -19,6 +18,8 @@ import { type Slide } from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import { getImageHeightWidth } from '~ui/utils/other';
 import Link from 'next/link';
+import { LinkButton } from '~ui/components/primitives/base/LinkButton';
+import { DiscordIcon } from '~ui/components/primitives/base/Icons';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MessageContext = createContext<

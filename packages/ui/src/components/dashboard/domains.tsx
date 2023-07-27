@@ -12,7 +12,6 @@ import {
 import { LuAlertCircle, LuXCircle, LuCheckCircle2 } from 'react-icons/lu';
 import { toast } from 'react-toastify';
 import { trpc } from '~ui/utils/trpc';
-import { LoadingSpinner } from '../primitives';
 import { useTierAccess } from '../primitives/tier-access-only';
 import { useDashboardContext } from './dashboard-context';
 import {
@@ -21,6 +20,7 @@ import {
 } from '@answeroverflow/api';
 import { Input } from '~ui/components/primitives/ui/input';
 import { Button } from '~ui/components/primitives/ui/button';
+import { LoadingSpinner } from '~ui/components/primitives/base/LoadingSpinner';
 
 function useDomainStatus({ domain }: { domain?: string }) {
 	const { data, isLoading, isFetching } =

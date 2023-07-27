@@ -1,9 +1,9 @@
-import { AOHead } from '~ui/components/primitives';
 import { pageLookup, type OnboardingPage } from './OnboardingPages';
 import { useState } from 'react';
 import React from 'react';
 import type { ServerPublic } from '@answeroverflow/api';
 import { trackEvent } from '@answeroverflow/hooks';
+import AOHead from '~ui/components/primitives/AOHead';
 
 type SubmittedData = {
 	server?: ServerPublic & {

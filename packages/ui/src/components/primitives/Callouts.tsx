@@ -1,4 +1,3 @@
-import { LinkButton, type LinkButtonProps } from '.';
 import { signIn } from 'next-auth/react';
 import {
 	trackEvent,
@@ -7,6 +6,10 @@ import {
 } from '@answeroverflow/hooks';
 import { makeMainSiteLink } from '@answeroverflow/constants/src/links';
 import { Button, ButtonProps } from '~ui/components/primitives/ui/button';
+import {
+	LinkButton,
+	LinkButtonProps,
+} from '~ui/components/primitives/base/LinkButton';
 export function GetStarted(
 	props: Omit<LinkButtonProps, 'href'> & {
 		location: GettingStartedClickProps['Button Location'];

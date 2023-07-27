@@ -8,7 +8,6 @@ import React from 'react';
 import { ChannelType } from '~ui/utils/discord';
 import { ServerIcon } from './ServerIcon';
 import { useIsUserInServer } from '~ui/utils/hooks';
-import { LinkButton } from './base';
 import { classNames, cn } from '~ui/utils/styling';
 import Link from 'next/link';
 import { trackEvent } from '@answeroverflow/hooks';
@@ -19,6 +18,7 @@ import {
 } from '@answeroverflow/constants/src/analytics';
 import { getServerHomepageUrl } from '~ui/utils/server';
 import { ButtonProps } from '~ui/components/primitives/ui/button';
+import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const ServerInviteContext = createContext<{
 	server: ServerPublic;

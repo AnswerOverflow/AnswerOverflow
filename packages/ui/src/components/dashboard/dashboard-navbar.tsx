@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { AnswerOverflowLogo, ServerIcon, UserAvatar } from '../primitives';
 import { useRouter } from 'next/router';
 import type { ServerPublic } from '@answeroverflow/api';
 import { trpc } from '~ui/utils/trpc';
@@ -13,6 +12,9 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '~ui/components/primitives/ui/dropdown-menu';
+import { ServerIcon } from '~ui/components/primitives/ServerIcon';
+import { AnswerOverflowLogo } from '~ui/components/primitives/base/Icons';
+import { UserAvatar } from '~ui/components/primitives/Navbar';
 
 export function DashboardServerSelect() {
 	const router = useRouter();
