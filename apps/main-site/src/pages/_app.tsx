@@ -24,7 +24,6 @@ import Router from 'next/router';
 import type { ServerPublic } from '@answeroverflow/api';
 import { ToastContainer } from 'react-toastify';
 import { GoogleAnalytics, event } from 'nextjs-google-analytics';
-import { Command } from '~ui/components/primitives/base/Command';
 
 const progress = new ProgressBar({
 	size: 2,
@@ -107,7 +106,6 @@ const MyApp: AppType<{
 						>
 							<CommitBanner />
 							<MDXProvider components={components}>
-								<Command command={'npm i @answeroverflow/ui'} />
 								<Component {...pageProps} />
 								<ToastContainer toastClassName="bg-background dark:bg-background text-primary dark:text-primary" />
 							</MDXProvider>
