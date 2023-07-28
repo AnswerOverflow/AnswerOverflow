@@ -8,7 +8,7 @@ export async function getServerSideProps({ res }: GetServerSidePropsContext) {
 		'https://www.answeroverflow.com',
 		'sitemap',
 		servers
-			.filter((x) => x.customDomain === null)
+			.filter((x) => x.customDomain === null && x.kickedTime === null)
 			.map((server) => ({
 				loc: `/c/${server.id}/sitemap.xml`,
 			})),
