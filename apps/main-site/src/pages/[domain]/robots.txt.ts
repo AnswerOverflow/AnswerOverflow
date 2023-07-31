@@ -8,8 +8,7 @@ Allow: /
 Disallow: /api/
 Disallow: /dashboard/
 Disallow: /oemf7z50uh7w/
-Sitemap: https://www.answeroverflow.com/sitemap.xml
-
+Allow: /api/og/*
 Sitemap: https://${domain}/sitemap.xml
 `);
 	res.end();
