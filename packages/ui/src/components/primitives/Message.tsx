@@ -210,9 +210,6 @@ const SingularImageAttachment = () => {
 						width={x?.width}
 						height={x?.height}
 						alt={x?.alt ?? `Image sent by ${message.author.name}`}
-						unoptimized
-						loading={loadingStyle}
-						priority={loadingStyle !== 'lazy'}
 					/>
 				</div>
 			))}
