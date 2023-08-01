@@ -5,9 +5,13 @@ import {
 	GITHUB_LINK,
 	TWITTER_LINK,
 } from '@answeroverflow/constants/src/links';
-import { AnswerOverflowLogo, DiscordIcon, GitHubIcon, Heading } from './base';
 import { useTenantContext } from '@answeroverflow/hooks';
-
+import {
+	AnswerOverflowLogo,
+	DiscordIcon,
+	GitHubIcon,
+} from '~ui/components/primitives/base/Icons';
+import { Heading } from '~ui/components/primitives/base/Heading';
 type SocialItem = {
 	name: string;
 	href: string;
@@ -45,6 +49,7 @@ const navigation: NavigationData = {
 				name: 'About',
 				data: [
 					{ name: 'Docs', href: 'https://docs.answeroverflow.com' },
+					{ name: 'Pricing', href: 'https://www.answeroverflow.com/pricing' },
 					{
 						name: 'Contributors',
 						href: 'https://www.answeroverflow.com/contributors',
@@ -101,7 +106,7 @@ const MainSiteFooter = () => (
 									<Link
 										href={item.href}
 										key={`link-${item.name}-${item.href}`}
-										className="font-body leading-6 text-gray-600 hover:text-gray-900 dark:text-neutral-400 dark:hover:text-neutral-200"
+										className="my-1 font-body text-primary/75  hover:text-primary"
 									>
 										{item.name}
 									</Link>
@@ -136,7 +141,7 @@ const PoweredByAnswerOverflowFooter = () => (
 	<div className="flex flex-col items-center justify-center">
 		<Link
 			href="https://www.answeroverflow.com"
-			className="flex flex-col items-center justify-center gap-2 fill-black stroke-black py-8 font-bold text-ao-black  hover:fill-blue-500 hover:stroke-blue-500 hover:text-ao-blue dark:fill-white dark:stroke-white dark:text-ao-white hover:dark:fill-blue-500 hover:dark:stroke-blue-500 hover:dark:text-ao-blue"
+			className="flex flex-col items-center justify-center gap-2 fill-black stroke-black  py-8 font-bold hover:fill-blue-500 hover:stroke-blue-500 hover:text-blue-500 dark:fill-white dark:stroke-white hover:dark:fill-blue-500 hover:dark:stroke-blue-500"
 		>
 			<span>Powered by</span>
 			<AnswerOverflowLogo className="mx-auto w-36 fill-inherit stroke-inherit dark:fill-inherit dark:stroke-inherit" />

@@ -1,11 +1,11 @@
 import type { DiscordAccountPublic } from '@answeroverflow/api';
+import { getInitials } from '~ui/utils/avatars';
 import {
 	Avatar,
 	AvatarFallback,
 	AvatarImage,
-	type AvatarProps,
-	getAvatarSize,
-} from './base';
+	AvatarProps,
+} from '~ui/components/primitives/ui/avatar';
 
 export interface DiscordAvatarProps extends Omit<AvatarProps, 'alt' | 'url'> {
 	user: DiscordAccountPublic;
@@ -23,16 +23,11 @@ const makeUserIconLink = (
 };
 
 export function DiscordAvatar(props: DiscordAvatarProps) {
-	const profilePictureUrl = makeUserIconLink(
-		props.user,
-		getAvatarSize(props.size ?? 'md'),
-	);
+	const profilePictureUrl = makeUserIconLink(props.user, props.size ?? 64);
 	return (
 		<Avatar {...props}>
 			<AvatarImage src={profilePictureUrl} alt={props.user.name} {...props} />
-			<AvatarFallback {...props}>
-				{props.user.name.split(' ').map((word) => word.at(0)?.toUpperCase())}
-			</AvatarFallback>
+			<AvatarFallback {...props}>{getInitials(props.user.name)}</AvatarFallback>
 		</Avatar>
 	);
 }

@@ -20,10 +20,11 @@ import {
 	findUserServerSettingsById,
 } from './user-server-settings';
 import { findManyDiscordAccountsWithUserServerSettings } from './discord-account';
-import { omit } from '@answeroverflow/utils';
+import { getRandomId, omit } from '@answeroverflow/utils';
 import { findAllThreadsByParentId, findManyChannelsById } from './channel';
 import { findManyServersById } from './server';
 import type { MessageProps } from '@answeroverflow/constants';
+import { anonymizeDiscordAccount } from './utils/anonymization';
 export type MessageWithDiscordAccount = z.infer<
 	typeof zMessageWithDiscordAccount
 >;
@@ -101,16 +102,19 @@ export async function addReferencesToMessages(messages: Message[]) {
 
 export async function addAuthorToMessage(
 	message: Awaited<ReturnType<typeof addReferencesToMessages>>[number],
+	server: ServerWithFlags,
 ) {
-	return (await addAuthorsToMessages([message]))[0] ?? null;
+	return (await addAuthorsToMessages([message], [server]))[0] ?? null;
 }
 
 export async function addAuthorsToMessages(
 	messages: Awaited<ReturnType<typeof addReferencesToMessages>>,
+	servers: ServerWithFlags[],
 ): Promise<MessageFull[]> {
 	if (messages.length === 0) {
 		return [];
 	}
+	const serverLookup = new Map(servers.map((s) => [s.id, s]));
 	const authorIds = new Set(messages.map((m) => m.authorId));
 	const authorServers = new Set(messages.map((m) => m.serverId));
 	const solutionAuthorIds = new Set(
@@ -149,21 +153,29 @@ export async function addAuthorsToMessages(
 		),
 	);
 	const authorLookup = new Map(authors.map((a) => [a.id, a]));
-
+	const seedLookup = new Map(authors.map((a) => [a.id, getRandomId()]));
 	const makeMessageWithAuthor = (message: Message) => {
 		const author = authorLookup.get(message.authorId);
+		const seed = seedLookup.get(message.authorId) ?? getRandomId();
+		const server = serverLookup.get(message.serverId);
 		const authorServerSettings = authorServerSettingsLookup.get(
 			`${message.authorId}-${message.serverId}`,
 		);
-		if (!author) {
+		if (!author || !server) {
 			return null;
 		}
+		const publicAccount = zDiscordAccountPublic.parse(author);
 		return {
 			...omit(message, 'authorId'),
-			author: zDiscordAccountPublic.parse(author),
-			public: authorServerSettings
-				? authorServerSettings.flags.canPubliclyDisplayMessages
-				: false,
+			author:
+				server.flags.anonymizeMessages &&
+				!authorServerSettings?.flags.canPubliclyDisplayMessages
+					? anonymizeDiscordAccount(publicAccount, seed)
+					: publicAccount,
+			public:
+				server.flags.considerAllMessagesPublic ||
+				authorServerSettings?.flags.canPubliclyDisplayMessages ||
+				false,
 		};
 	};
 
@@ -216,17 +228,19 @@ export async function findManyMessages(ids: string[]) {
 
 export async function findManyMessagesWithAuthors(
 	ids: string[],
+	servers: ServerWithFlags[],
 ): Promise<MessageFull[]> {
 	const messages = await findManyMessages(ids);
 	// TODO: Make work without adding references
 	const withRefs = await addReferencesToMessages(messages);
-	return addAuthorsToMessages(withRefs);
+	return addAuthorsToMessages(withRefs, servers);
 }
 // TODO: Paginate get all questions response
 export async function findAllChannelQuestions(input: {
 	channelId: string;
 	limit?: number;
 	includePrivateMessages?: boolean;
+	server: ServerWithFlags;
 }) {
 	const threads = await findAllThreadsByParentId({
 		parentId: input.channelId,
@@ -235,6 +249,7 @@ export async function findAllChannelQuestions(input: {
 
 	const messages = await findManyMessagesWithAuthors(
 		threads.map((thread) => thread.id),
+		[input.server],
 	);
 
 	const messagesLookup = new Map(
@@ -327,6 +342,10 @@ export async function findLatestMessageInChannel(channelId: string) {
 	return elastic.findLatestMessageInChannel(channelId);
 }
 
+export async function bulkFindLatestMessageInChannel(channelIds: string[]) {
+	return elastic.batchFindLatestMessageInChannel(channelIds);
+}
+
 export function findLatestMessageInChannelAndThreads(channelId: string) {
 	return elastic.findLatestMessageInChannelAndThreads(channelId);
 }
@@ -367,7 +386,10 @@ export async function searchMessages(opts: MessageSearchOptions) {
 		findManyServersById(serverIds),
 		addReferencesToMessages(messages),
 	]);
-	const messagesWithAuthors = await addAuthorsToMessages(messagesWithRefs);
+	const messagesWithAuthors = await addAuthorsToMessages(
+		messagesWithRefs,
+		servers,
+	);
 	const channelLookup = new Map(channels.map((c) => [c.id, c]));
 	const serverLookup = new Map(
 		servers.filter((x) => x.kickedTime === null).map((s) => [s.id, s]),

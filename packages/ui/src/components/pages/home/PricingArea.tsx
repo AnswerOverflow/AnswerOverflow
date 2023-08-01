@@ -1,8 +1,7 @@
 import { CheckIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
-import { WAITLIST_URL } from '@answeroverflow/constants/src/links';
-import { LinkButton, Heading, GetStarted } from '~ui/components/primitives';
-import { trackEvent } from '@answeroverflow/hooks';
+import { Heading } from '~ui/components/primitives/base/Heading';
 import { cn } from '~ui/utils/styling';
+import { GetStarted } from '~ui/components/primitives/Callouts';
 const pricing = {
 	tiers: [
 		{
@@ -39,16 +38,9 @@ const pricing = {
 				},
 			],
 			cta: (
-				<LinkButton
-					href={WAITLIST_URL}
-					onMouseUp={() => {
-						trackEvent('Join Waitlist Click', {
-							'Button Location': 'Pricing Page',
-						});
-					}}
-				>
-					Join Waitlist
-				</LinkButton>
+				<GetStarted location="Pricing" variant={'default'}>
+					Setup Today
+				</GetStarted>
 			),
 			mostPopular: true,
 		},
@@ -58,20 +50,9 @@ const pricing = {
 export const PricingArea = (props: { className?: string }) => {
 	return (
 		<div className={cn('w-full', props.className)} id="roadmap">
-			<Heading.H2 className="text-center ">
+			<Heading.H2 className="mb-8 text-center">
 				{"And we're"} just getting started
 			</Heading.H2>
-			<div className="flex w-full items-center justify-center py-2">
-				<Heading.H3 className="pt-0 text-center  text-lg lg:w-1/2">
-					Add to your server and sign up to be notified as new features are
-					released
-				</Heading.H3>
-			</div>
-			<div className="flex w-full items-center justify-center pb-8 pt-4">
-				<GetStarted location="Pricing" variant={'outline'}>
-					Add to server
-				</GetStarted>
-			</div>
 
 			{/* Tiers */}
 			<div className="flex w-full justify-center">
@@ -79,9 +60,9 @@ export const PricingArea = (props: { className?: string }) => {
 					<div
 						key={tier.title}
 						className={cn(
-							'relative flex w-full max-w-xl flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-ao-black',
+							'relative flex w-full max-w-xl flex-col rounded-2xl border border-gray-200 p-8 shadow-sm dark:border-gray-700',
 							tier.mostPopular
-								? 'shadow-xl shadow-ao-blue/[.5] lg:shadow-2xl'
+								? 'shadow-ao-blue/[.5] shadow-xl lg:shadow-2xl'
 								: '',
 						)}
 					>
@@ -100,13 +81,13 @@ export const PricingArea = (props: { className?: string }) => {
 										)}
 										aria-hidden="true"
 									/>
-									<label className="ml-3 text-green-800 dark:text-green-400">
+									<label className="ml-3  text-neutral-600 dark:text-neutral-300">
 										Implemented
 									</label>
 								</div>
 								<div className="flex flex-row font-semibold text-neutral-600 dark:text-neutral-300">
 									<RocketLaunchIcon
-										className={cn('h-6 w-6 shrink-0 text-ao-blue')}
+										className={cn('text-ao-blue h-6 w-6 shrink-0')}
 										aria-hidden="true"
 									/>
 									<label className="ml-3 text-gray-600 dark:text-gray-300">
@@ -128,7 +109,7 @@ export const PricingArea = (props: { className?: string }) => {
 											/>
 										) : (
 											<RocketLaunchIcon
-												className={cn('h-6 w-6 shrink-0 text-ao-blue')}
+												className={cn('text-ao-blue h-6 w-6 shrink-0')}
 												aria-hidden="true"
 											/>
 										)}
@@ -137,7 +118,7 @@ export const PricingArea = (props: { className?: string }) => {
 											className={cn(
 												'ml-3',
 												feature.implemented
-													? 'text-green-800 dark:text-green-400 '
+													? 'text-neutral-600 dark:text-neutral-300 '
 													: 'text-gray-600 dark:text-gray-300',
 											)}
 										>

@@ -9,8 +9,8 @@
 		"clean": "rm -rf .turbo node_modules coverage",
 		"with-env": "dotenv -e ../../.env --",
 		"with-env-staging": "dotenv -e ../../.env.staging --",
-		"format": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config ./prettierrc.cjs --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix",
 		"db:generate": "pnpm with-env prisma generate",
@@ -22,6 +22,7 @@
 	},
 	"dependencies": {
 		"@answeroverflow/utils": "^0.1.0",
+		"@answeroverflow/env": "^0.1.0",
 		"@prisma/client": "^4.16.2",
 		"@sapphire/bitfield": "^1.2.0",
 		"discord-api-types": "^0.37.48",

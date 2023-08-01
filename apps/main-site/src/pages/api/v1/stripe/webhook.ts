@@ -2,7 +2,12 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
 import { Readable } from 'node:stream';
 import { z } from 'zod';
-import { findServerByStripeCustomerId, updateServer } from '@answeroverflow/db';
+import {
+	findServerByStripeCustomerId,
+	updateServer,
+	Plan,
+} from '@answeroverflow/db';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 // Stripe requires the raw body to construct the event.
 export const config = {
@@ -25,6 +30,12 @@ const requestValidation = z.object({
 		'stripe-signature': z.string(),
 	}),
 });
+
+const allowedEvents = new Set([
+	'customer.subscription.created',
+	'customer.subscription.updated',
+	'customer.subscription.deleted',
+]);
 export default async function webhookHandler(
 	req: NextApiRequest,
 	res: NextApiResponse,
@@ -33,12 +44,10 @@ export default async function webhookHandler(
 		const {
 			headers: { 'stripe-signature': signature },
 		} = requestValidation.parse(req);
-
-		if (!process.env.STRIPE_SECRET_KEY) {
-			throw new Error('stripe env variables are not set up');
+		if (!sharedEnvs.STRIPE_WEBHOOK_SECRET || !sharedEnvs.STRIPE_SECRET_KEY) {
+			throw new Error('Stripe env vars not set');
 		}
-
-		const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+		const stripe = new Stripe(sharedEnvs.STRIPE_SECRET_KEY, {
 			apiVersion: '2022-11-15',
 			typescript: true,
 		});
@@ -46,8 +55,12 @@ export default async function webhookHandler(
 		const event = stripe.webhooks.constructEvent(
 			(await buffer(req)).toString(),
 			signature,
-			process.env.STRIPE_WEBHOOK_SECRET!,
+			sharedEnvs.STRIPE_WEBHOOK_SECRET,
 		);
+
+		if (!allowedEvents.has(event.type)) {
+			throw new Error(`Unexpected event type ${event.type}`);
+		}
 
 		const subscription = event.data.object as Stripe.Subscription;
 		const existingServer = await findServerByStripeCustomerId(
@@ -70,12 +83,27 @@ export default async function webhookHandler(
 		switch (event.type) {
 			case 'customer.subscription.created':
 			case 'customer.subscription.updated': {
+				const subscriptionPlanId = subscription.items.data[0]?.plan.id;
+				if (!subscriptionPlanId) {
+					throw new Error('subscription level not found');
+				}
+				let plan: Plan;
+				switch (subscriptionPlanId) {
+					case sharedEnvs.STRIPE_ENTERPRISE_PLAN_PRICE_ID:
+						plan = 'ENTERPRISE';
+						break;
+					case sharedEnvs.STRIPE_PRO_PLAN_PRICE_ID:
+						plan = 'PRO';
+						break;
+					default:
+						throw new Error(`Unknown subscription level ${subscriptionPlanId}`);
+				}
 				await updateServer({
 					existing: existingServer,
 					update: {
 						stripeCustomerId: subscription.customer.toString(),
 						stripeSubscriptionId: subscription.id,
-						plan: 'PRO',
+						plan,
 						id: existingServer.id,
 					},
 				});

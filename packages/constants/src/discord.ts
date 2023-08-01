@@ -22,6 +22,12 @@ export const ENABLE_READ_THE_RULES_CONSENT_LABEL =
 	'Enable read the rules consent';
 export const DISABLE_READ_THE_RULES_CONSENT_LABEL =
 	'Disable read the rules consent';
+export const ENABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL =
+	'Consider all messages as public';
+export const DISABLE_CONSIDER_ALL_MESSAGES_PUBLIC_LABEL =
+	'Stop considering all messages as public';
+export const ENABLE_ANONYMIZE_MESSAGES_LABEL = 'Anonymize messages';
+export const DISABLE_ANONYMIZE_MESSAGES_LABEL = 'Stop anonymizing messages';
 export const VIEW_ON_ANSWEROVERFLOW_LABEL = 'View on Answer Overflow';
 export const FORUM_GUIDELINES_CONSENT_PROMPT =
 	'This server uses Answer Overflow to index content on the web. By posting in this channel your messages will be indexed on the web to help others find answers.';

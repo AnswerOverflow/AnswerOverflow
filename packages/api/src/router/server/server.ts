@@ -8,7 +8,6 @@ import {
 	updateServer,
 } from '@answeroverflow/db';
 import { TRPCError } from '@trpc/server';
-import Stripe from 'stripe';
 import { z } from 'zod';
 import type { Context } from '~api/router/context';
 import { router, withUserServersProcedure } from '~api/router/trpc';
@@ -33,11 +32,24 @@ import {
 	protectedMutationFetchFirst,
 } from '~api/utils/protected-procedures';
 import { fetchServerPageViewsAsLineChart } from '~api/utils/posthog';
+import { getBaseUrl } from '@answeroverflow/constants';
+import {
+	createProPlanCheckoutSession,
+	createNewCustomer,
+	fetchSubscriptionInfo,
+	updateServerCustomerName,
+	createEnterprisePlanCheckoutSession,
+} from '@answeroverflow/payments';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
 	'Read the rules consent already enabled';
 export const READ_THE_RULES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE =
 	'Read the rules consent already disabled';
+export const DISABLE_CONSENT_TO_DISPLAY_MESSAGES_ALREADY_ENABLED_ERROR_MESSAGE =
+	'Disable consent to display messages already enabled';
+export const DISABLE_CONSENT_TO_DISPLAY_MESSAGES_ALREADY_DISABLED_ERROR_MESSAGE =
+	'Disable consent to display messages already disabled';
 export const validDomainRegex = new RegExp(
 	/^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/,
 );
@@ -133,6 +145,88 @@ export const serverRouter = router({
 				},
 			});
 		}),
+	setConsiderAllMessagesPublic: withUserServersProcedure
+		.input(
+			z.object({
+				server: zServerCreate.omit({
+					flags: true,
+				}),
+				enabled: z.boolean(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			return mutateServer({
+				ctx,
+				server: input.server,
+				operation: async ({ oldSettings }) => {
+					return protectedMutation({
+						permissions: () =>
+							assertBoolsAreNotEqual({
+								oldValue: oldSettings.flags.considerAllMessagesPublic,
+								newValue: input.enabled,
+								messageIfBothFalse:
+									DISABLE_CONSENT_TO_DISPLAY_MESSAGES_ALREADY_DISABLED_ERROR_MESSAGE,
+								messageIfBothTrue:
+									DISABLE_CONSENT_TO_DISPLAY_MESSAGES_ALREADY_ENABLED_ERROR_MESSAGE,
+							}),
+						operation: () =>
+							upsertServer({
+								create: {
+									...input.server,
+									flags: {
+										considerAllMessagesPublic: input.enabled,
+									},
+								},
+								update: {
+									flags: {
+										considerAllMessagesPublic: input.enabled,
+									},
+								},
+							}),
+					});
+				},
+			});
+		}),
+	setAnonymizeMessages: withUserServersProcedure
+		.input(
+			z.object({
+				server: zServerCreate.omit({
+					flags: true,
+				}),
+				enabled: z.boolean(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			return mutateServer({
+				ctx,
+				server: input.server,
+				operation: async ({ oldSettings }) => {
+					return protectedMutation({
+						permissions: () =>
+							assertBoolsAreNotEqual({
+								oldValue: oldSettings.flags.anonymizeMessages,
+								newValue: input.enabled,
+								messageIfBothFalse: 'Anonymize messages already disabled',
+								messageIfBothTrue: 'Anonymize messages already enabled',
+							}),
+						operation: () =>
+							upsertServer({
+								create: {
+									...input.server,
+									flags: {
+										anonymizeMessages: input.enabled,
+									},
+								},
+								update: {
+									flags: {
+										anonymizeMessages: input.enabled,
+									},
+								},
+							}),
+					});
+				},
+			});
+		}),
 	setCustomDomain: withUserServersProcedure
 		.input(
 			z.object({
@@ -205,7 +299,8 @@ export const serverRouter = router({
 				notFoundMessage: 'Server not found',
 				permissions: [
 					() => assertIsAdminOrOwnerOfServer(ctx, input.serverId),
-					(server) => assertIsOnPlan(server, ['PRO', 'OPEN_SOURCE']),
+					(server) =>
+						assertIsOnPlan(server, ['PRO', 'OPEN_SOURCE', 'ENTERPRISE']),
 				],
 			}),
 		),
@@ -260,39 +355,44 @@ export const serverRouter = router({
 						});
 					}
 
-					const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-						apiVersion: '2022-11-15',
-						typescript: true,
-					});
+					if (server.stripeCustomerId) {
+						// Update the customer's name and description
+						// We can just let this run in the background and not await it
+						void updateServerCustomerName({
+							serverId: server.id,
+							name: server.name,
+							customerId: server.stripeCustomerId,
+						});
+					}
 
 					// If they have a subscription already, we display the portal
 					if (server.stripeCustomerId && server.stripeSubscriptionId) {
-						const [session, sub] = await Promise.all([
-							stripe.billingPortal.sessions.create({
-								customer: server.stripeCustomerId,
-							}),
-							stripe.subscriptions.retrieve(server.stripeSubscriptionId),
-						]);
+						const sub = await fetchSubscriptionInfo(
+							server.stripeSubscriptionId,
+						);
 						const {
 							cancel_at: cancelAt, // This is when a cancellation will take effect
 							current_period_end: currentPeriodEnd, // This is when an active subscription will renew
 							trial_end: trialEnd, // This is when a trial will end
 							// get when subscription will renew
 						} = sub;
+
 						return {
 							...server,
-							stripeCheckoutUrl: session.url,
+							status: 'active',
+							stripeCheckoutUrl: sharedEnvs.STRIPE_CHECKOUT_URL ?? null,
 							dateCancelationTakesEffect: cancelAt,
 							dateSubscriptionRenews: currentPeriodEnd,
 							dateTrialEnds: trialEnd,
-						};
+						} as const;
 					}
 
 					// else we upsert them and then display checkout
 
 					if (!server.stripeCustomerId) {
-						const customer = await stripe.customers.create({
+						const customer = await createNewCustomer({
 							name: server.name,
+							serverId: server.id,
 						});
 						server.stripeCustomerId = customer.id;
 						await updateServer({
@@ -303,38 +403,34 @@ export const serverRouter = router({
 							},
 						});
 					}
-					// const returnUrl = `${getBaseUrl()}/dashboard/${server.id}`;
 
-					// const session = await stripe.checkout.sessions.create({
-					// 	billing_address_collection: 'auto',
-					// 	line_items: [
-					// 		{
-					// 			// base
-					// 			price: process.env.STRIPE_PRO_PLAN_PRICE_ID,
-					// 			quantity: 1,
-					// 		},
-					// 		{
-					// 			// additional page views
-					// 			price: process.env.STRIPE_PAGE_VIEWS_PRICE_ID,
-					// 		},
-					// 	],
-					// 	mode: 'subscription',
-					// 	subscription_data: {
-					// 		trial_period_days: 14,
-					// 	},
-					// 	success_url: returnUrl,
-					// 	cancel_url: returnUrl,
-					// 	currency: 'USD',
-					// 	allow_promotion_codes: true,
-					// 	customer: server.stripeCustomerId,
-					// });
+					const returnUrl = `${getBaseUrl()}/dashboard/${server.id}`;
+
+					const [proPlanCheckout, enterprisePlanCheckout] = await Promise.all([
+						createProPlanCheckoutSession({
+							customerId: server.stripeCustomerId,
+							successUrl: returnUrl,
+							cancelUrl: returnUrl,
+						}),
+						createEnterprisePlanCheckoutSession({
+							customerId: server.stripeCustomerId,
+							successUrl: returnUrl,
+							cancelUrl: returnUrl,
+						}),
+					]);
+
 					return {
 						...server,
-						stripeCheckoutUrl: null,
+						status: 'inactive',
+						hasSubscribedBefore:
+							proPlanCheckout.hasSubscribedInPast ||
+							enterprisePlanCheckout.hasSubscribedInPast,
+						proPlanCheckoutUrl: proPlanCheckout.url,
+						enterprisePlanCheckoutUrl: enterprisePlanCheckout.url,
 						dateCancelationTakesEffect: null,
 						dateSubscriptionRenews: null,
 						dateTrialEnds: null,
-					};
+					} as const;
 				},
 				notFoundMessage: 'Server not found',
 				permissions: () => assertCanEditServer(ctx, input),

@@ -1,12 +1,14 @@
 import { appRouter } from '@answeroverflow/api';
 import { createSSGContext } from '@answeroverflow/api/src/router/context';
-import { MessageResultPage, useIsUserInServer } from '@answeroverflow/ui';
+import { MessageResultPage } from '@answeroverflow/ui/src/components/pages/MessageResultPage';
+import { useIsUserInServer } from '@answeroverflow/ui/src/utils/hooks';
+import { trpc } from '@answeroverflow/ui/src/utils/trpc';
 import { createServerSideHelpers } from '@trpc/react-query/server';
 import superjson from 'superjson';
-import { trpc } from '@answeroverflow/ui';
 import type { GetStaticPropsContext, InferGetStaticPropsType } from 'next';
 import { TRPCError } from '@trpc/server';
 import { makeMainSiteLink } from '@answeroverflow/constants';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export default function MessageResult(
 	props: InferGetStaticPropsType<typeof getStaticProps>,
@@ -68,7 +70,7 @@ export async function getStaticProps(
 			return {
 				redirect: {
 					destination: makeMainSiteLink(`/m/${context.params.messageId}`),
-					permanent: process.env.NODE_ENV === 'production',
+					permanent: sharedEnvs.NODE_ENV === 'production',
 				},
 			};
 		}

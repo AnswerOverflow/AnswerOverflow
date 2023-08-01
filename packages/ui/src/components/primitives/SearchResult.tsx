@@ -3,11 +3,17 @@ import type {
 	APIMessageWithDiscordAccount,
 	ChannelPublicWithFlags,
 } from '@answeroverflow/api';
-import { Message, MessageContents } from './Message';
+import {
+	Message,
+	MessageContents,
+	MessageContentWithSolution,
+} from './Message';
 import { ServerInvite } from './ServerInvite';
-import { Paragraph, Heading } from './base';
 import { createContext, useContext } from 'react';
 import Link from 'next/link';
+import { MessageFull } from '@answeroverflow/db';
+import { Heading } from '~ui/components/primitives/base/Heading';
+import { Paragraph } from '~ui/components/primitives/base/Paragraph';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const SearchResultContext = createContext<{
@@ -32,7 +38,7 @@ const ThreadIcon = () => {
 			viewBox="0 0 24 24"
 			strokeWidth={1.5}
 			stroke="currentColor"
-			className="h-6 w-6 text-ao-black/[.55] dark:text-ao-white/[.55]"
+			className="h-6 w-6 text-primary/75"
 		>
 			<path
 				strokeLinecap="round"
@@ -51,7 +57,7 @@ const ViewsIcon = () => {
 			viewBox="0 0 24 24"
 			strokeWidth={1.5}
 			stroke="currentColor"
-			className="h-6 w-6 text-ao-black/[.55] dark:text-ao-white/[.55]"
+			className="h-6 w-6"
 		>
 			<path
 				strokeLinecap="round"
@@ -70,15 +76,10 @@ const ViewsIcon = () => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Views = () => (
 	<>
-		<div
-			className="ml-2 h-2 w-2 rounded-[50%] bg-ao-black/[.55] dark:bg-ao-white/[.55]"
-			aria-hidden
-		/>
+		<div className="ml-2 h-2 w-2 rounded-[50%]" aria-hidden />
 
 		{/* Views */}
-		<span className="px-1 text-ao-black/[.75] dark:text-ao-white/[.55]">
-			{0}
-		</span>
+		<span className="px-1">{0}</span>
 		<ViewsIcon />
 	</>
 );
@@ -87,9 +88,9 @@ const Views = () => (
 const SearchResultMetaData = () => {
 	const { result } = useSearchResultContext();
 	return (
-		<div className="mt-2 flex flex-row items-center justify-center">
+		<div className="mt-8 flex flex-row items-center justify-center">
 			{/* Thread count */}
-			<span className="flex items-center justify-center px-1 text-ao-black/[.75] dark:text-ao-white/[.55]">
+			<span className="flex items-center justify-center px-1 text-primary/75">
 				{result.thread?.messageCount ?? 20}
 			</span>
 			<ThreadIcon />
@@ -111,70 +112,58 @@ const SearchResultSidebar = () => {
 	);
 };
 
-const NoSolution = ({ messageId }: { messageId: string }) => {
-	return (
-		<div className="w-full rounded-b-standard border-2 border-t-0 border-black/[.13] bg-white/[.01] dark:border-white/[.13] lg:rounded-br-none">
-			<Paragraph className="p-6 font-body text-ao-black dark:text-white/[.66]">
-				No replies marked as solution...{' '}
-				<Link
-					href={`/m/${messageId}`}
-					className="font-bold text-ao-black underline dark:text-ao-white"
-				>
-					View thread
-				</Link>
-			</Paragraph>
-		</div>
-	);
-};
-
-const SearchResultAnswer = () => {
-	const { result } = useSearchResultContext();
-	const solution = result.message.solutionMessages?.[0];
-	if (!solution) return <NoSolution messageId={result.message.id} />;
-	return (
-		<div className="rounded-b-standard border-2  border-ao-green  bg-ao-green/10 dark:bg-ao-green/[0.02] lg:rounded-br-none">
-			<Message message={solution} />
-		</div>
-	);
-};
-
 export const LinkMessage = ({
 	message,
 	thread,
 	className,
+	showNoSolutionCTA,
 }: {
-	message: APIMessageWithDiscordAccount;
+	message: APIMessageWithDiscordAccount | MessageFull;
 	thread?: ChannelPublicWithFlags;
 	/**
 	 * className passed directly to the message component
 	 */
 	className?: string;
+} & {
+	showNoSolutionCTA?: boolean;
 }) => {
+	const solution =
+		'solutionMessages' in message ? message.solutionMessages?.[0] : undefined;
 	return (
-		<Message
-			message={message}
-			showBorders
-			className={className}
-			collapseContent
-			content={
-				<>
-					<Link href={`/m/${message.id}`} className="block w-fit ">
-						<Heading.H4 className="pt-4 text-lg text-blue-700 decoration-2 hover:text-blue-600 hover:underline dark:text-blue-400 hover:dark:text-blue-500">
-							{thread?.name ?? message.content.slice(0, 20).trim() + '...'}
-						</Heading.H4>
-					</Link>
-					<MessageContents />
-				</>
-			}
-		/>
-	);
-};
-const SearchResultMainContent = () => {
-	const { result } = useSearchResultContext();
-	return (
-		<div className="flex grow flex-col">
-			<LinkMessage message={result.message} thread={result.thread} />
-			<SearchResultAnswer />
+		<div className={'flex w-full flex-col'}>
+			<Message
+				message={message}
+				showBorders
+				className={className}
+				collapseContent
+				content={
+					<>
+						<Link href={`/m/${message.id}`} className="block w-fit ">
+							<Heading.H4 className="pt-4 text-lg text-blue-700 decoration-2 hover:text-blue-600 hover:underline dark:text-blue-400 hover:dark:text-blue-500">
+								{thread?.name ?? message.content.slice(0, 20).trim() + '...'}
+							</Heading.H4>
+						</Link>
+						{solution ? (
+							<MessageContentWithSolution solution={{ message: solution }} />
+						) : (
+							<MessageContents />
+						)}
+					</>
+				}
+			/>
+			{!solution && showNoSolutionCTA && (
+				<div className="w-full rounded-b-standard border-2 border-t-0 border-black/[.13] bg-white/[.01] dark:border-white/[.13] lg:rounded-br-none">
+					<Paragraph className="p-6 font-body text-primary/75">
+						No replies marked as solution...{' '}
+						<Link
+							href={`/m/${message.id}`}
+							className="font-bold text-primary underline"
+						>
+							View thread
+						</Link>
+					</Paragraph>
+				</div>
+			)}
 		</div>
 	);
 };
@@ -186,9 +175,13 @@ export const SearchResult = ({
 }) => {
 	return (
 		<SearchResultContext.Provider value={{ result }}>
-			<div className="flex h-full w-full flex-col-reverse rounded-standard bg-[#E9ECF2] dark:bg-[#181B1F] lg:flex-row">
-				<SearchResultMainContent />
-				<div className="w-full flex-col items-center justify-center rounded-t-standard border-x-2 border-t-2 border-black/[.13] px-5 pb-2 pt-6 dark:border-white/[.13] lg:flex lg:w-1/4 lg:rounded-br-standard lg:rounded-tl-none lg:border-y-2 lg:border-l-0 lg:border-r-2 2xl:w-1/6">
+			<div className="flex h-full w-full flex-col-reverse rounded-standard lg:flex-row">
+				<LinkMessage
+					message={result.message}
+					thread={result.thread}
+					showNoSolutionCTA
+				/>
+				<div className="w-full shrink-0 flex-col items-center justify-center rounded-t-standard border-x-2 border-t-2 border-black/[.13] px-5 pb-2 pt-6 dark:border-white/[.13] lg:flex lg:w-64 lg:rounded-br-standard lg:rounded-tl-none lg:border-y-2 lg:border-l-0 lg:border-r-2">
 					<SearchResultSidebar />
 				</div>
 			</div>

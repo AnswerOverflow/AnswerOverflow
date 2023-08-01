@@ -55,3 +55,4 @@ export const zDiscordAccountUpdate = z.object({
 	id: internalDiscordAccountPropertiesRequired.id,
 });
 export const zDiscordAccountUpsert = zDiscordAccountCreate;
+export type DiscordAccountPublic = z.infer<typeof zDiscordAccountPublic>;

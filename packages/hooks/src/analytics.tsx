@@ -19,6 +19,7 @@ import type {
 import React from 'react';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
+import { webClientEnv } from '@answeroverflow/env/web';
 // TODO: This type should be inferred from the auth package
 declare module 'next-auth' {
 	interface Session extends DefaultSession {
@@ -59,6 +60,10 @@ export type EventMap = {
 	'Add To Server Click': AddToServerClickProps;
 	[JOIN_WAITLIST_EVENT_NAME]: JoinWaitlistClickProps;
 	'Community Page View': CommunityPageViewProps;
+	'Pricing Feedback': {
+		email?: string;
+		feedback: string;
+	};
 } & ServerInviteEvent &
 	CommunityPageLinkEvent;
 
@@ -138,8 +143,8 @@ export const AnalyticsProvider = ({
 		if (status === 'loading') {
 			return;
 		}
-		if (!analyticsLoaded) {
-			posthog.init(process.env.NEXT_PUBLIC_POSTHOG_TOKEN as string, {
+		if (!analyticsLoaded && webClientEnv.NEXT_PUBLIC_POSTHOG_TOKEN) {
+			posthog.init(webClientEnv.NEXT_PUBLIC_POSTHOG_TOKEN, {
 				disable_session_recording: true,
 				persistence: 'memory',
 				bootstrap: {

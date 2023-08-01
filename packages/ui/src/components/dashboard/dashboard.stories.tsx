@@ -4,7 +4,7 @@ import { ServerDashboardRenderer } from './dashboard';
 import { mockServer } from '~ui/test/props';
 
 export default {
-	title: 'Dashboard / Dashboards',
+	title: '!Pages / Dashboard / Dashboards',
 } satisfies StoryDefault;
 
 export const FreeDashboardStory: Story = () => (
@@ -13,12 +13,19 @@ export const FreeDashboardStory: Story = () => (
 			...mockServer(),
 			dateCancelationTakesEffect: null,
 			dateSubscriptionRenews: null,
-			stripeCheckoutUrl: null,
+			status: 'inactive',
+			hasSubscribedBefore: false,
+			proPlanCheckoutUrl: '/',
+			enterprisePlanCheckoutUrl: '/',
 			dateTrialEnds: null,
 			bitfield: 0,
 		}}
 		PageViewsCardOverride={
-			<PageViewsCardRenderer status="success" numberOfPageViews={10} />
+			<PageViewsCardRenderer
+				status="success"
+				numberOfPageViews={10}
+				plan={'PRO'}
+			/>
 		}
 	/>
 );
@@ -30,9 +37,10 @@ export const ProDashboardStory: Story = () => (
 				plan: 'PRO',
 				customDomain: 'support.rhyssullivan.dev',
 			}),
+			status: 'active',
 			dateCancelationTakesEffect: null,
-			dateSubscriptionRenews: null,
-			stripeCheckoutUrl: null,
+			dateSubscriptionRenews: new Date().getTime() + 1000 * 60 * 60 * 24 * 30,
+			stripeCheckoutUrl: '/',
 			dateTrialEnds: null,
 			bitfield: 0,
 		}}
@@ -47,7 +55,10 @@ export const OpenSourceDashboardStory: Story = () => (
 			}),
 			dateCancelationTakesEffect: null,
 			dateSubscriptionRenews: null,
-			stripeCheckoutUrl: null,
+			status: 'inactive',
+			proPlanCheckoutUrl: '/',
+			hasSubscribedBefore: false,
+			enterprisePlanCheckoutUrl: '/',
 			dateTrialEnds: null,
 			bitfield: 0,
 		}}

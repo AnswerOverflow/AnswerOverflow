@@ -1,6 +1,7 @@
 import React from 'react';
 import type { DocsThemeConfig } from 'nextra-theme-docs';
-import { AnswerOverflowLogo, Footer } from '@answeroverflow/ui';
+import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/base/Icons';
+import { Footer } from '@answeroverflow/ui/src/components/primitives/Footer';
 import {
 	CREATE_NEW_DOCS_ISSUE_LINK,
 	DISCORD_LINK,
@@ -9,6 +10,7 @@ import {
 	ANSWER_OVERFLOW_BLUE_HEX,
 } from '@answeroverflow/constants';
 import { useRouter } from 'next/router';
+import { webClientEnv } from '@answeroverflow/env/web';
 
 // https://nextra.site/docs/docs-theme/theme-configuration
 const config: DocsThemeConfig = {
@@ -38,7 +40,7 @@ const config: DocsThemeConfig = {
 			themeColor: ANSWER_OVERFLOW_BLUE_HEX,
 			description:
 				'Improve & index your Discord help channels into Google with Answer Overflow',
-			noindex: process.env.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'production',
+			noindex: webClientEnv.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'production',
 		};
 	},
 	docsRepositoryBase: DOCS_LINK_BASE,

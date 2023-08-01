@@ -9,7 +9,7 @@
 		"src",
 		"test",
 		"vitest.config.ts",
-		"prettierrc.cjs",
+		".prettierrc.cjs",
 		"scripts",
 		"../../reset.d.ts"
 	],

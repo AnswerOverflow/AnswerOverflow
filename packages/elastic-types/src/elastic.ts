@@ -4,11 +4,12 @@ import type {
 	QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { elasticMessageIndexProperties, type Message } from './message';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 declare global {
 	// eslint-disable-next-line no-var, no-unused-vars
 	var elastic: Elastic | undefined;
 }
-
+const shouldRefreshIndexes = sharedEnvs.NODE_ENV === 'test';
 export function getThreadIdOfMessage(message: Message): string | null {
 	if (message.childThreadId) {
 		return message.childThreadId;
@@ -35,35 +36,32 @@ export type MessageSearchOptions = {
 };
 
 function getElasticClient(): Elastic {
-	if (
-		process.env.NODE_ENV === 'development' ||
-		process.env.NODE_ENV === 'test'
-	) {
+	if (sharedEnvs.NODE_ENV === 'development' || sharedEnvs.NODE_ENV === 'test') {
 		return new Elastic({
-			node: process.env.ELASTICSEARCH_URL,
+			node: sharedEnvs.ELASTICSEARCH_URL,
 			auth: {
-				password: process.env.ELASTICSEARCH_PASSWORD,
-				username: process.env.ELASTICSEARCH_USERNAME,
+				password: sharedEnvs.ELASTICSEARCH_PASSWORD,
+				username: sharedEnvs.ELASTICSEARCH_USERNAME,
 			},
 		});
-	} else if (process.env.NODE_ENV === 'production') {
+	} else if (sharedEnvs.NODE_ENV === 'production') {
 		// Allow for building locally
-		if (!process.env.ELASTICSEARCH_CLOUD_ID) {
+		if (!sharedEnvs.ELASTICSEARCH_CLOUD_ID) {
 			return new Elastic({
-				node: process.env.ELASTICSEARCH_URL,
+				node: sharedEnvs.ELASTICSEARCH_URL,
 				auth: {
-					password: process.env.ELASTICSEARCH_PASSWORD,
-					username: process.env.ELASTICSEARCH_USERNAME,
+					password: sharedEnvs.ELASTICSEARCH_PASSWORD,
+					username: sharedEnvs.ELASTICSEARCH_USERNAME,
 				},
 			});
 		} else {
 			return new Elastic({
 				cloud: {
-					id: process.env.ELASTICSEARCH_CLOUD_ID,
+					id: sharedEnvs.ELASTICSEARCH_CLOUD_ID,
 				},
 				auth: {
-					password: process.env.ELASTICSEARCH_PASSWORD,
-					username: process.env.ELASTICSEARCH_USERNAME,
+					password: sharedEnvs.ELASTICSEARCH_PASSWORD,
+					username: sharedEnvs.ELASTICSEARCH_USERNAME,
 				},
 			});
 		}
@@ -77,7 +75,7 @@ export class Elastic extends Client {
 
 	constructor(opts: ClientOptions) {
 		super(opts);
-		this.messagesIndex = process.env.ELASTICSEARCH_MESSAGE_INDEX;
+		this.messagesIndex = sharedEnvs.ELASTICSEARCH_MESSAGE_INDEX;
 	}
 
 	public destroyMessagesIndex() {
@@ -188,7 +186,7 @@ export class Elastic extends Client {
 			const message = await this.delete({
 				index: this.messagesIndex,
 				id,
-				refresh: process.env.NODE_ENV === 'test',
+				refresh: shouldRefreshIndexes,
 			});
 			switch (message.result) {
 				case 'deleted':
@@ -210,7 +208,7 @@ export class Elastic extends Client {
 	public async deleteByChannelId(threadId: string) {
 		const result = await this.deleteByQuery({
 			index: this.messagesIndex,
-			refresh: process.env.NODE_ENV === 'test',
+			refresh: shouldRefreshIndexes,
 			query: {
 				term: {
 					channelId: threadId,
@@ -223,7 +221,7 @@ export class Elastic extends Client {
 	public async deleteByUserId(userId: string) {
 		const result = await this.deleteByQuery({
 			index: this.messagesIndex,
-			refresh: process.env.NODE_ENV === 'test',
+			refresh: shouldRefreshIndexes,
 			query: {
 				term: {
 					authorId: userId,
@@ -242,7 +240,7 @@ export class Elastic extends Client {
 	}) {
 		const result = await this.deleteByQuery({
 			index: this.messagesIndex,
-			refresh: process.env.NODE_ENV === 'test',
+			refresh: shouldRefreshIndexes,
 			query: {
 				// @ts-ignore
 				bool: {
@@ -271,7 +269,7 @@ export class Elastic extends Client {
 		]);
 		const result = await this.bulk({
 			operations: body,
-			refresh: process.env.NODE_ENV === 'test',
+			refresh: shouldRefreshIndexes,
 		});
 		if (result.errors) {
 			console.error(result);
@@ -285,7 +283,7 @@ export class Elastic extends Client {
 			const fetchedMessage = await this.update({
 				index: this.messagesIndex,
 				id: message.id,
-				refresh: process.env.NODE_ENV === 'test',
+				refresh: shouldRefreshIndexes,
 				doc: message,
 			});
 			switch (fetchedMessage.result) {
@@ -313,7 +311,7 @@ export class Elastic extends Client {
 			index: this.messagesIndex,
 			id: message.id,
 			doc: message,
-			refresh: process.env.NODE_ENV === 'test',
+			refresh: shouldRefreshIndexes,
 			upsert: message,
 		});
 		switch (fetchedMessage.result) {
@@ -337,7 +335,7 @@ export class Elastic extends Client {
 				{ update: { _index: this.messagesIndex, _id: message.id } },
 				{ doc: message, doc_as_upsert: true },
 			]),
-			refresh: process.env.NODE_ENV === 'test',
+			refresh: sharedEnvs.NODE_ENV === 'test',
 		});
 		if (result.errors) {
 			console.error(
@@ -418,7 +416,7 @@ export class Elastic extends Client {
 			index: this.messagesIndex,
 		});
 		if (exists) {
-			if (process.env.NODE_ENV === 'production') {
+			if (sharedEnvs.NODE_ENV === 'production') {
 				throw new Error('Messages index already exists. Cannot overwrite');
 			} else {
 				await this.destroyMessagesIndex();
@@ -447,6 +445,48 @@ export class Elastic extends Client {
 			sort: [{ id: 'desc' }],
 		});
 		return result.hits.hits[0]?._source ?? null;
+	}
+
+	public async batchFindLatestMessageInChannel(channelIds: string[]) {
+		const chunkSize = 5000;
+		const batches = [];
+		for (let i = 0; i < channelIds.length; i += chunkSize) {
+			batches.push(channelIds.slice(i, i + chunkSize));
+		}
+		const results = await Promise.all(
+			batches.map((batch) =>
+				this.msearch<Message>({
+					searches: batch
+						.map((channelId) => {
+							return [
+								{
+									index: this.messagesIndex,
+								},
+								{
+									query: {
+										match: {
+											channelId,
+										},
+									},
+									size: 1,
+									sort: [{ id: 'desc' }],
+								},
+							];
+						})
+						.flatMap((x) => x),
+				}),
+			),
+		);
+		const res: Message[] = [];
+		for (const result of results) {
+			for (const hit of result.responses) {
+				if ('error' in hit) continue;
+				if (hit.hits.hits[0]?._source) {
+					res.push(hit.hits.hits[0]._source);
+				}
+			}
+		}
+		return res;
 	}
 
 	public async findLatestMessageInChannelAndThreads(channelId: string) {
@@ -488,10 +528,10 @@ export class Elastic extends Client {
 
 export const elastic = global.elastic || getElasticClient();
 
-if (process.env.NODE_ENV !== 'production') {
+if (sharedEnvs.NODE_ENV !== 'production') {
 	global.elastic = elastic;
 } else {
-	if (process.env.ENVIRONMENT === 'discord-bot') {
+	if (sharedEnvs.ENVIRONMENT === 'discord-bot') {
 		global.elastic = elastic;
 	}
 }

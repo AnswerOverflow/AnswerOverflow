@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import dayjs from 'dayjs';
 import { TrendAPIResponse } from './posthog-types';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 async function posthogFetch(url: string, input: RequestInit) {
 	const { headers, ...rest } = input;
 	return await fetch(
-		`https://app.posthog.com/api/projects/${process.env.POSTHOG_PROJECT_ID}/${
+		`https://app.posthog.com/api/projects/${sharedEnvs.POSTHOG_PROJECT_ID}/${
 			url.startsWith('/') ? url.slice(1) : url
 		}`,
 		{
 			headers: {
-				Authorization: `Bearer ${process.env.POSTHOG_PERSONAL_API_KEY}`,
+				Authorization: `Bearer ${sharedEnvs.POSTHOG_PERSONAL_API_KEY}`,
 				...headers,
 			},
 			method: 'GET',
@@ -63,6 +64,7 @@ type PosthogParams = {
 	properties: any;
 	date_from: string;
 	entity_type: 'events';
+	filter_test_accounts: boolean;
 	refresh: boolean;
 	events: {
 		type: 'events';
@@ -95,6 +97,7 @@ async function fetchPosthogInsight(input: {
 	const params: PosthogParams = {
 		insight: 'TRENDS',
 		refresh: input.refresh ?? false,
+		filter_test_accounts: sharedEnvs.NODE_ENV === 'production',
 		properties: {
 			type: 'AND',
 			values: [

@@ -332,4 +332,62 @@ describe('ElasticSearch', () => {
 			expect(latestMessage).toBeNull();
 		});
 	});
+
+	describe('batch find latest message in channel', () => {
+		it('should return the latest message in a channel', async () => {
+			await elastic.upsertMessage(msg1);
+			const lastMsg = {
+				...msg1,
+				id: getRandomIdGreaterThan(parseInt(msg1.id)),
+			};
+			await elastic.upsertMessage(lastMsg);
+			const msg2 = {
+				...msg1,
+				channelId: getRandomId(),
+				id: getRandomIdGreaterThan(parseInt(msg1.id)),
+			};
+			await elastic.upsertMessage(msg2);
+			const lastMsg2 = {
+				...msg2,
+				id: getRandomIdGreaterThan(parseInt(msg2.id)),
+			};
+			await elastic.upsertMessage(lastMsg2);
+
+			const latestMessage = await elastic.batchFindLatestMessageInChannel([
+				msg1.channelId,
+				msg2.channelId,
+			]);
+			expect(latestMessage).toBeDefined();
+			expect(latestMessage).toHaveLength(2);
+			const foundIds = latestMessage.map((msg) => msg.id);
+			expect(foundIds).toContain(lastMsg.id);
+			expect(foundIds).toContain(lastMsg2.id);
+		});
+		it('should return latest message in a channel with 5,000 messages in different channels', async () => {
+			const size = 15000;
+			const channelIds = Array.from({ length: size }, (_, i) => i).map(() =>
+				getRandomId(),
+			);
+			const messages = channelIds.map((channelId) => ({
+				...msg1,
+				channelId,
+				id: getRandomId(),
+			}));
+			const lastMessages = messages.map((msg) => ({
+				...msg,
+				id: getRandomIdGreaterThan(parseInt(msg.id)),
+			}));
+			await elastic.bulkUpsertMessages([...messages, ...lastMessages]);
+			const latestMessage = await elastic.batchFindLatestMessageInChannel(
+				channelIds,
+			);
+			expect(latestMessage).toBeDefined();
+
+			const foundIds = latestMessage.map((msg) => msg.id);
+			expect(foundIds).toHaveLength(size);
+			expect(foundIds).toEqual(
+				expect.arrayContaining(lastMessages.map((msg) => msg.id)),
+			);
+		});
+	});
 });

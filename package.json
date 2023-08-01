@@ -30,14 +30,17 @@
 		"cloc:only-tests": "npx cloc $(git ls-files | grep .test.ts.*$)",
 		"pr-check": "yarn format:check && yarn lint && yarn build && yarn test",
 		"stripe:forward": "stripe listen --forward-to localhost:3000/api/v1/stripe/webhook",
+		"with-env": "dotenv -e .env --",
 		"docker:build:discord-bot": "docker build -f ./apps/discord-bot/Dockerfile ."
 	},
 	"devDependencies": {
 		"@answeroverflow/eslint-config-custom": "^0.0.0",
+		"@answeroverflow/prettier-config": "^0.0.0",
 		"@answeroverflow/tsconfig": "^0.0.0",
 		"@total-typescript/ts-reset": "^0.4.2",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
+		"dotenv-cli": "^7.2.1",
 		"eslint-config-next": "^13.4.10",
 		"eslint-config-prettier": "^8.8.0",
 		"eslint-config-turbo": "0.0.7",

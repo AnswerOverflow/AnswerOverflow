@@ -7,6 +7,12 @@ import {
 } from '~ui/test/props';
 import { ChannelType } from '~ui/utils/discord';
 import { CommunityPage } from './CommunityPage';
+import { StoryDefault } from '@ladle/react';
+
+export default {
+	title: '!Pages / Community Page',
+} satisfies StoryDefault;
+
 type CommunityPageProps = React.ComponentPropsWithoutRef<typeof CommunityPage>;
 
 function makeMockedChannelQuestions(amount: number) {
@@ -57,4 +63,56 @@ WithLongQuestion.args = {
 		},
 	],
 	server: mockPublicServer(),
+};
+
+export const WithSolvedQuestion = CommunityPageStory.bind({});
+WithSolvedQuestion.args = {
+	channels: [
+		{
+			channel: mockChannelWithSettings(),
+			questions: [
+				{
+					message: mockMessageFull({
+						content: loremIpsum({
+							count: 250,
+						}),
+						solutionMessages: [mockMessageFull()],
+					}),
+					thread: mockChannelWithSettings({
+						type: ChannelType.PublicThread,
+					}),
+				},
+			],
+		},
+	],
+	server: mockPublicServer(),
+};
+
+export const WithLongNameAndDescription = CommunityPageStory.bind({});
+WithLongNameAndDescription.args = {
+	channels: [
+		{
+			channel: mockChannelWithSettings({
+				name: 'This is a very long channel name that will be truncated',
+			}),
+			questions: [
+				{
+					message: mockMessageFull({
+						content: loremIpsum({
+							count: 250,
+						}),
+						solutionMessages: [mockMessageFull()],
+					}),
+					thread: mockChannelWithSettings({
+						type: ChannelType.PublicThread,
+					}),
+				},
+			],
+		},
+	],
+	server: mockPublicServer({
+		name: 'This is a very long server name that will be truncated',
+		description:
+			"This is a very long server description that will be truncated and won't be visible on mobile devices asd asd asdasd asd asdasd asd asd asdas dasd asd asd adas",
+	}),
 };

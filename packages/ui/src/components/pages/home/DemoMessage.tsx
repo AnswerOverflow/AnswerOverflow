@@ -3,15 +3,16 @@ import Image from 'next/image';
 import discordMarkdown from 'discord-markdown';
 import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
 import {
-	DiscordIcon,
 	Avatar,
 	AvatarImage,
 	AvatarFallback,
-} from '~ui/components/primitives';
+} from '~ui/components/primitives/ui/avatar';
 import Link from 'next/link';
 import type { ChannelPublicWithFlags } from '@answeroverflow/api';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { forwardRef } from 'react';
+import { getInitials } from '~ui/utils/avatars';
+import { DiscordIcon } from '~ui/components/primitives/base/Icons';
 export type MessageProps = {
 	message: APIMessageWithDiscordAccount;
 	thread?: ChannelPublicWithFlags;
@@ -136,9 +137,7 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 					<div className="mr-4 hidden shrink-0 sm:block">
 						<Avatar>
 							<AvatarImage alt={props.alt} src={props.src} />
-							<AvatarFallback>
-								{props.alt.split(' ').map((word) => word.at(0)?.toUpperCase())}
-							</AvatarFallback>
+							<AvatarFallback>{getInitials(props.alt)}</AvatarFallback>
 						</Avatar>
 					</div>
 					<div className="w-full">
@@ -147,11 +146,7 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 								<div className="shrink-0 sm:hidden">
 									<Avatar>
 										<AvatarImage alt={props.alt} src={props.src} />
-										<AvatarFallback>
-											{props.alt
-												.split(' ')
-												.map((word) => word.at(0)?.toUpperCase())}
-										</AvatarFallback>
+										<AvatarFallback>{getInitials(props.alt)}</AvatarFallback>
 									</Avatar>
 								</div>
 								<div className="flex flex-col sm:flex-row">

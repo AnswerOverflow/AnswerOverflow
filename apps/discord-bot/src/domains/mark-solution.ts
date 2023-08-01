@@ -19,6 +19,7 @@ import {
 	findChannelById,
 	findMessageById,
 	findServerById,
+	ServerWithFlags,
 	upsertMessage,
 } from '@answeroverflow/db';
 import {
@@ -42,6 +43,7 @@ const markSolutionErrorReasons = [
 	'COULD_NOT_FIND_PARENT_CHANNEL',
 	'MARK_SOLUTION_NOT_ENABLED',
 	'COULD_NOT_FIND_ROOT_MESSAGE',
+	'QUESTION_CANNOT_BE_SOLUTION',
 	'NO_PERMISSION',
 	'ALREADY_SOLVED_VIA_EMBED',
 	'ALREADY_SOLVED_VIA_TAG',
@@ -120,6 +122,13 @@ export async function checkIfCanMarkSolution(
 		} else {
 			throw error;
 		}
+	}
+
+	if (questionMessage.id === possibleSolution.id) {
+		throw new MarkSolutionError(
+			'QUESTION_CANNOT_BE_SOLUTION',
+			'You cannot mark the question message as the solution, please select the message that best matches the solution.\n\nIf the solution is in the question message, please copy and paste it into a new message and mark that as the solution.',
+		);
 	}
 	// Check if the user has permission to mark the question as solved
 	const guildMember = await guild.members.fetch(userMarkingAsSolved.id);
@@ -220,12 +229,12 @@ export function makeRequestForConsentString(serverName: string) {
 
 export function makeMarkSolutionResponse({
 	solution,
-	serverName,
+	server,
 	settings,
 }: {
 	question: Message;
 	solution: Message;
-	serverName: string;
+	server: ServerWithFlags;
 	settings: ChannelWithFlags;
 }) {
 	const components = new ActionRowBuilder<MessageActionRowComponentBuilder>();
@@ -238,12 +247,13 @@ export function makeMarkSolutionResponse({
 
 	if (
 		settings.flags.indexingEnabled &&
-		!settings.flags.forumGuidelinesConsentEnabled
+		!settings.flags.forumGuidelinesConsentEnabled &&
+		!server.flags.considerAllMessagesPublic
 	) {
 		embed.setDescription(
 			[
 				`**Thank you for marking this question as solved!**`,
-				`Want to help others find the answer to this question? Use the button below to display your messages in ${serverName} on the web!`,
+				`Want to help others find the answer to this question? Use the button below to display your messages in ${server.name} on the web!`,
 			].join('\n\n'),
 		);
 		components.addComponents(makeConsentButton('mark-solution-response'));
@@ -269,6 +279,7 @@ export function makeMarkSolutionResponse({
 export async function markAsSolved(targetMessage: Message, user: User) {
 	const { parentChannel, question, solution, thread, channelSettings, server } =
 		await checkIfCanMarkSolution(targetMessage, user);
+	const aoServer = await findServerById(server.id);
 	await addSolvedIndicatorToThread(
 		thread,
 		parentChannel,
@@ -283,13 +294,12 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 	const { embed, components } = makeMarkSolutionResponse({
 		question,
 		solution,
-		serverName: server.name,
+		server: aoServer!,
 		settings: channelSettings,
 	});
 	await solution.react('✅');
 
 	trackDiscordEvent('Solved Question', async () => {
-		const serverSettings = await findServerById(server.id);
 		const [asker, solver, commandUser] = await Promise.all([
 			thread.guild.members.fetch(question.author.id),
 			thread.guild.members.fetch(solution.author.id),
@@ -298,7 +308,7 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 		const data: QuestionSolvedProps = {
 			...serverWithDiscordInfoToAnalyticsData({
 				guild: thread.guild,
-				serverWithSettings: serverSettings!,
+				serverWithSettings: aoServer!,
 			}),
 			...channelWithDiscordInfoToAnalyticsData({
 				answerOverflowChannel: channelSettings,

@@ -79,6 +79,7 @@ export function mockPublicServer(override: Partial<ServerPublic> = {}) {
 		description: null,
 		vanityUrl: null,
 		kickedTime: null,
+		vanityInviteCode: null,
 		customDomain: null,
 		...override,
 	};
@@ -96,10 +97,13 @@ export function mockServer(override: Partial<ServerWithFlags> = {}) {
 		customDomain: null,
 		flags: {
 			readTheRulesConsentEnabled: false,
+			considerAllMessagesPublic: false,
+			anonymizeMessages: false,
 		},
 		plan: 'FREE',
 		stripeCustomerId: null,
 		stripeSubscriptionId: null,
+		vanityInviteCode: null,
 		...override,
 	};
 	return data;

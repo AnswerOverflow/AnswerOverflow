@@ -1,3 +1,4 @@
+import '../../packages/env/bot';
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
@@ -21,5 +22,7 @@ export default defineConfig({
 		'@answeroverflow/constants',
 		'@answeroverflow/cache',
 		'@answeroverflow/discordjs-mock',
+		'@answeroverflow/payments',
+		'@answeroverflow/env',
 	],
 });

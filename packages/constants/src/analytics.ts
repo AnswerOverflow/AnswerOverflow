@@ -73,7 +73,6 @@ export type ChannelProps = {
 	'Channel Server Id': Snowflake;
 	'Channel Invite Code'?: string;
 };
-
 export function channelToAnalyticsData(
 	channel: Pick<Channel, 'id' | 'name' | 'type' | 'serverId' | 'inviteCode'>,
 ): ChannelProps {
@@ -153,7 +152,7 @@ export type ServerInviteClickProps = {
 		| 'Community Page'
 		| 'Message Result Page';
 } & ServerProps &
-	ChannelProps &
+	Partial<ChannelProps> &
 	Partial<ThreadProps>;
 
 export type ServerInviteEvent = {

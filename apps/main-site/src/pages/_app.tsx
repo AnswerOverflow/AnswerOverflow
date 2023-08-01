@@ -4,9 +4,8 @@ import '../styles/globals.css';
 import '../styles/code.scss';
 import { SessionProvider } from 'next-auth/react';
 import type { Session } from 'next-auth';
-import type { AppType } from 'next/app';
+import type { AppType, NextWebVitalsMetric } from 'next/app';
 import hljs from 'highlight.js';
-import { type NextTRPC, PageWrapper, trpc } from '@answeroverflow/ui';
 import { ThemeProvider } from 'next-themes';
 import {
 	AnalyticsProvider,
@@ -14,7 +13,6 @@ import {
 } from '@answeroverflow/hooks';
 import React, { useEffect } from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { Heading, Paragraph } from '@answeroverflow/ui';
 import { MDXProvider } from '@mdx-js/react';
 import Link from 'next/link';
 import type { Components } from '@mdx-js/react/lib';
@@ -23,6 +21,11 @@ import ProgressBar from '@badrap/bar-of-progress';
 import Router from 'next/router';
 import type { ServerPublic } from '@answeroverflow/api';
 import { ToastContainer } from 'react-toastify';
+import { GoogleAnalytics, event } from 'nextjs-google-analytics';
+import { Heading } from '@answeroverflow/ui/src/components/primitives/base/Heading';
+import { PageWrapper } from '@answeroverflow/ui/src/components/pages/PageWrapper';
+import { NextTRPC, trpc } from '@answeroverflow/ui/src/utils/trpc';
+import { Paragraph } from '@answeroverflow/ui/src/components/primitives/base/Paragraph';
 
 const progress = new ProgressBar({
 	size: 2,
@@ -54,13 +57,27 @@ const components: Components = {
 	) => (
 		<Link
 			href={props.href ?? ''}
-			className="font-bold underline decoration-2 underline-offset-2 transition-colors hover:decoration-ao-blue"
+			className="font-bold underline decoration-2 underline-offset-2 transition-colors hover:decoration-blue-500"
 			target="_blank"
 		>
 			{props.children}
 		</Link>
 	),
 };
+
+export function reportWebVitals({
+	id,
+	name,
+	label,
+	value,
+}: NextWebVitalsMetric) {
+	event(name, {
+		category: label === 'web-vital' ? 'Web Vitals' : 'Next.js custom metric',
+		value: Math.round(name === 'CLS' ? value * 1000 : value), // values must be integers
+		label: id, // id unique to current page load
+		nonInteraction: true, // avoids affecting bounce rate.
+	});
+}
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MyApp: AppType<{
@@ -76,7 +93,7 @@ const MyApp: AppType<{
 
 	return (
 		<TenantContextProvider value={pageProps.tenant}>
-			<ThemeProvider attribute="class">
+			<ThemeProvider attribute="class" defaultTheme={'dark'} enableSystem>
 				<SessionProvider session={session}>
 					<AnalyticsProvider>
 						<PageWrapper
@@ -92,13 +109,14 @@ const MyApp: AppType<{
 							<CommitBanner />
 							<MDXProvider components={components}>
 								<Component {...pageProps} />
-								<ToastContainer toastClassName="dark:bg-ao-black dark:text-white bg-white text-black" />
+								<ToastContainer toastClassName="bg-background dark:bg-background text-primary dark:text-primary" />
 							</MDXProvider>
 						</PageWrapper>
 						<ReactQueryDevtools initialIsOpen={false} />
 					</AnalyticsProvider>
 				</SessionProvider>
 			</ThemeProvider>
+			<GoogleAnalytics trackPageViews />
 		</TenantContextProvider>
 	);
 };

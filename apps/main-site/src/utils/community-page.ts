@@ -21,7 +21,7 @@ export async function generateCommunityPageSitemap(input: {
 			priority: 0.9,
 		})),
 	);
-	if (communityData && communityData.server.customDomain === undefined) {
+	if (communityData && !communityData.server.customDomain) {
 		sitemap.add({
 			loc: `/c/${input.communityId}`, // Community page
 			changefreq: 'weekly',

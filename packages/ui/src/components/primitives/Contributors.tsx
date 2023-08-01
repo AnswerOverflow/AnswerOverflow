@@ -1,6 +1,10 @@
 import { FollowCursor } from './Follow';
-import { Avatar, AvatarFallback, AvatarImage } from './base';
 import { SocialIcon } from 'react-social-icons';
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from '~ui/components/primitives/ui/avatar';
 
 export interface ContributorData {
 	name: string;
@@ -15,8 +19,8 @@ export const Contributor = ({
 	avatar,
 	links,
 }: ContributorData) => (
-	<div className="flex h-full w-64 flex-col items-center justify-start rounded-standard border-1 border-ao-black/25 bg-ao-black/[0.03] px-8 py-16 dark:border-0 dark:bg-[#1F2124]">
-		<Avatar size="xl">
+	<div className="flex h-full w-64 flex-col items-center justify-start rounded-standard border-2 px-8 py-16">
+		<Avatar>
 			<AvatarImage alt={`The profile picture of ${name}`} src={avatar} />
 			<AvatarFallback>{name}</AvatarFallback>
 		</Avatar>
@@ -28,7 +32,7 @@ export const Contributor = ({
 				</p>
 			</div>
 		</div>
-		<div className="flex h-20 flex-row gap-4 border-t-2 border-ao-black/20 pt-4 dark:border-ao-white/10">
+		<div className="flex h-20 flex-row gap-4 border-t-2 pt-4">
 			{Object.entries(links).map(([key, value]) => (
 				<SocialIcon
 					url={value}

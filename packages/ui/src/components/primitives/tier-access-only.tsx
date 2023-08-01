@@ -1,6 +1,6 @@
 import type { Plan } from '@answeroverflow/db';
 import React from 'react';
-import { Button } from '~ui/components/primitives';
+import { PricingDialog } from '~ui/components/pages/Pricing';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const TierAccessContext = React.createContext<{
@@ -19,7 +19,9 @@ export const useTierAccess = () => {
 
 export function TierAccessOnly(props: {
 	children: React.ReactNode;
-	cta?: React.ReactNode;
+	proPlanCheckoutUrl: string | null;
+	enterprisePlanCheckoutUrl: string | null;
+	hasSubscribedBefore: boolean;
 	enabledFor: Plan[];
 	currentPlan: Plan;
 }) {
@@ -37,17 +39,18 @@ export function TierAccessOnly(props: {
 			) : (
 				<div className="grid grid-cols-1 grid-rows-1">
 					<div className="cursor-not-allowed opacity-50">{props.children}</div>
-					{props.cta ? (
-						props.cta
-					) : (
-						<div className="flex flex-row items-center justify-between space-y-2 rounded-b-lg border border-stone-200 bg-stone-50 p-3 dark:bg-stone-900 sm:space-y-0 sm:px-10">
-							<span>You must be on the pro plan to use this feature.</span>
-							<Button variant="outline" disabled>
-								Pro Tier Avaliable Starting 7/24
-							</Button>
-							{/* TODO: Change to start free trial for better conversion? */}
-						</div>
-					)}
+					<div className="flex flex-row items-center justify-between space-y-2 rounded-b-lg border bg-muted/20 p-3 sm:space-y-0 sm:px-10">
+						<span>
+							You must be on the pro plan or higher to use this feature.
+						</span>
+						{props.proPlanCheckoutUrl && props.enterprisePlanCheckoutUrl && (
+							<PricingDialog
+								proPlanCheckoutUrl={props.proPlanCheckoutUrl}
+								enterprisePlanCheckoutUrl={props.enterprisePlanCheckoutUrl}
+								hasSubscribedBefore={props.hasSubscribedBefore}
+							/>
+						)}
+					</div>
 				</div>
 			)}
 		</TierAccessContext.Provider>

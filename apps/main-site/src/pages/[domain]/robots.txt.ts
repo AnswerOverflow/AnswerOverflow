@@ -5,6 +5,10 @@ export function getServerSideProps({ res, params }: GetServerSidePropsContext) {
 	res.setHeader('content-type', 'text/plain');
 	res.write(`User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /oemf7z50uh7w/
+Allow: /api/og/*
 Sitemap: https://${domain}/sitemap.xml
 `);
 	res.end();

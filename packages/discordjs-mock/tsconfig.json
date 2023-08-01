@@ -13,6 +13,6 @@
 		"jest.config.ts",
 		"index.ts",
 		"../../reset.d.ts",
-		"prettierrc.cjs"
+		".prettierrc.cjs"
 	]
 }

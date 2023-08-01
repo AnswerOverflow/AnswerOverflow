@@ -32,10 +32,8 @@ export function mockClientUser(
 	override: Partial<RawUserData> = {},
 ) {
 	const rawData: RawUserData = {
-		id:
-			process.env.DISCORD_CLIENT_ID ??
-			process.env.VITEST_DISCORD_CLIENT_ID ??
-			randomSnowflake().toString(),
+		// eslint-disable-next-line n/no-process-env
+		id: process.env.DISCORD_CLIENT_ID ?? randomSnowflake().toString(),
 		username: 'test',
 		discriminator: '0000',
 		avatar: null,

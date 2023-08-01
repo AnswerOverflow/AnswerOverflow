@@ -8,9 +8,6 @@ import {
 export default {
 	title: 'Dashboard / Cards',
 } satisfies StoryDefault;
-export const PageViewsCard: Story = () => (
-	<PageViewsCardRenderer numberOfPageViews={30} status="success" />
-);
 
 export const FreePlan: Story = () => (
 	<CurrentPlanCardRenderer
@@ -18,6 +15,7 @@ export const FreePlan: Story = () => (
 		dateSubscriptionRenews={null}
 		dateTrialEnds={null}
 		stripeCheckoutUrl={null}
+		status={'active'}
 		plan="FREE"
 	/>
 );
@@ -28,6 +26,7 @@ export const ProPlan: Story = () => (
 		dateSubscriptionRenews={null}
 		dateTrialEnds={null}
 		stripeCheckoutUrl={'/'}
+		status={'active'}
 		plan="PRO"
 	/>
 );
@@ -38,6 +37,7 @@ export const OpenSourcePlan: Story = () => (
 		dateCancelationTakesEffect={null}
 		dateSubscriptionRenews={null}
 		dateTrialEnds={null}
+		status={'active'}
 		stripeCheckoutUrl={null}
 	/>
 );
@@ -59,5 +59,37 @@ export const PageViewsChart = () => (
 			},
 		]}
 		status="success"
+	/>
+);
+
+export const FreePageViewsCard = () => (
+	<PageViewsCardRenderer
+		status={'success'}
+		plan={'FREE'}
+		numberOfPageViews={34000}
+	/>
+);
+
+export const ProPageViewsCard = () => (
+	<PageViewsCardRenderer
+		status={'success'}
+		plan={'PRO'}
+		numberOfPageViews={82340}
+	/>
+);
+
+export const OpenSourcePageViewsCard = () => (
+	<PageViewsCardRenderer
+		status={'success'}
+		plan={'OPEN_SOURCE'}
+		numberOfPageViews={50103123}
+	/>
+);
+
+export const EnterprisePageViewsCard = () => (
+	<PageViewsCardRenderer
+		status={'success'}
+		plan={'ENTERPRISE'}
+		numberOfPageViews={341233}
 	/>
 );

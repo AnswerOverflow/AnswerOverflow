@@ -12,13 +12,14 @@ import {
 	updateProviderAuthToken,
 	prisma,
 } from '@answeroverflow/db';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 export const authOptions: NextAuthOptions = {
 	// Configure one or more authentication providers
 	adapter: extendedAdapter,
 	providers: [
 		DiscordProvider({
-			clientId: process.env.DISCORD_CLIENT_ID,
-			clientSecret: process.env.DISCORD_CLIENT_SECRET,
+			clientId: sharedEnvs.DISCORD_CLIENT_ID,
+			clientSecret: sharedEnvs.DISCORD_CLIENT_SECRET,
 			authorization:
 				'https://discord.com/api/oauth2/authorize?scope=identify+email+guilds',
 		}),

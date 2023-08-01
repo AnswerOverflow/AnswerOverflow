@@ -1,39 +1,72 @@
-import { Card, Flex, LineChart, Metric, Title, Text } from '@tremor/react';
+import {
+	Card,
+	Flex,
+	LineChart,
+	Metric,
+	Title,
+	Text,
+	ProgressBar,
+} from '@tremor/react';
 import type { Plan } from '@answeroverflow/db';
 import { trpc } from '~ui/utils/trpc';
-import { AOLink } from '../primitives';
 import { useDashboardContext } from './dashboard-context';
+import { PricingDialog } from '~ui/components/pages/Pricing';
+import { AOLink } from '~ui/components/primitives/base/Link';
 
 export function PageViewsCardRenderer(props: {
 	numberOfPageViews?: number;
 	status: 'success' | 'loading' | 'error';
+	plan: Plan;
 }) {
-	const limit = 100000;
+	let limit: number | undefined = undefined;
+	switch (props.plan) {
+		case 'FREE':
+			limit = 50000;
+			break;
+		case 'PRO':
+			limit = 100000;
+			break;
+		case 'OPEN_SOURCE':
+			limit = undefined;
+			break;
+		case 'ENTERPRISE':
+			limit = 500000;
+			break;
+	}
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const progress = (props.numberOfPageViews ?? 0) / limit;
+	const AmountUsed = () => {
+		if (!limit) return null;
+		const progress = (props.numberOfPageViews ?? 0) / limit;
+		return (
+			<>
+				<Flex className="mt-4">
+					<Text className="truncate">{`${(progress * 100).toFixed(2)}%`}</Text>
+					<Text>{limit.toLocaleString('en-US')} Limit</Text>
+				</Flex>
+				<ProgressBar value={progress * 100} className="mt-2" />
+			</>
+		);
+	};
 	return (
 		<Card className="mx-auto">
 			<Flex alignItems="start">
 				<div>
 					<Title>Page Views</Title>
-					<Metric>{props.numberOfPageViews ?? ''}</Metric>
+					<Metric>{props.numberOfPageViews?.toLocaleString() ?? ''}</Metric>
 				</div>
 			</Flex>
-			{/* <Flex className="mt-4">
-				<Text className="truncate">{`${(progress * 100).toFixed(2)}%`}</Text>
-				<Text>{limit.toLocaleString('en-US')} Limit</Text>
-			</Flex>
-			<ProgressBar value={progress} className="mt-2" /> */}
+			<AmountUsed />
 		</Card>
 	);
 }
 
 export function PageViewsCard() {
-	const { id } = useDashboardContext();
+	const { id, plan } = useDashboardContext();
 	const { data, status } = trpc.servers.fetchPageViewsAsLineChart.useQuery(id);
 
 	return (
 		<PageViewsCardRenderer
+			plan={plan}
 			numberOfPageViews={
 				status === 'success'
 					? data.reduce((acc, cur) => acc + cur['View Count'], 0)
@@ -52,22 +85,36 @@ function planToPrettyText(plan: Plan) {
 			return 'Pro';
 		case 'OPEN_SOURCE':
 			return 'Open Source';
+		case 'ENTERPRISE':
+			return 'Enterprise';
 	}
 }
 
-export function CurrentPlanCardRenderer(props: {
-	plan: Plan;
-	dateCancelationTakesEffect: number | null;
-	dateTrialEnds: number | null;
-	dateSubscriptionRenews: number | null;
-	stripeCheckoutUrl: string | null;
-}) {
+export function CurrentPlanCardRenderer(
+	props: {
+		plan: Plan;
+		dateCancelationTakesEffect: number | null;
+		dateTrialEnds: number | null;
+		dateSubscriptionRenews: number | null;
+	} & (
+		| {
+				status: 'active';
+				stripeCheckoutUrl: string | null;
+		  }
+		| {
+				status: 'inactive';
+				proPlanCheckoutUrl: string | null;
+				enterprisePlanCheckoutUrl: string | null;
+				hasSubscribedBefore: boolean;
+		  }
+	),
+) {
 	const {
 		plan,
 		dateCancelationTakesEffect,
 		dateTrialEnds,
 		dateSubscriptionRenews,
-		stripeCheckoutUrl,
+		status,
 	} = props;
 	const dateInMs =
 		dateCancelationTakesEffect ??
@@ -82,6 +129,35 @@ export function CurrentPlanCardRenderer(props: {
 		: dateSubscriptionRenews
 		? 'Renews'
 		: '';
+
+	const CTA = () => {
+		if (status === 'inactive') {
+			if (
+				!props.proPlanCheckoutUrl ||
+				!props.enterprisePlanCheckoutUrl ||
+				props.plan === 'OPEN_SOURCE'
+			) {
+				return;
+			}
+			return (
+				<PricingDialog
+					proPlanCheckoutUrl={props.proPlanCheckoutUrl}
+					enterprisePlanCheckoutUrl={props.enterprisePlanCheckoutUrl}
+					hasSubscribedBefore={props.hasSubscribedBefore}
+				/>
+			);
+		} else {
+			if (!props.stripeCheckoutUrl) {
+				return;
+			}
+			return (
+				<Text>
+					<AOLink href={props.stripeCheckoutUrl}>Change Plan</AOLink>
+				</Text>
+			);
+		}
+	};
+
 	return (
 		<Card className="mx-auto">
 			<Flex alignItems="start">
@@ -94,33 +170,16 @@ export function CurrentPlanCardRenderer(props: {
 				<Text>{`${label} ${
 					dateInMs ? new Date(dateInMs * 1000).toLocaleDateString() : ''
 				}`}</Text>
-				{stripeCheckoutUrl && (
-					<AOLink href={stripeCheckoutUrl}>
-						<Text>Change Plan</Text>
-					</AOLink>
-				)}
+
+				<CTA />
 			</Flex>
 		</Card>
 	);
 }
 
 export function CurrentPlanCard() {
-	const {
-		dateCancelationTakesEffect,
-		dateTrialEnds,
-		dateSubscriptionRenews,
-		plan,
-		stripeCheckoutUrl,
-	} = useDashboardContext();
-	return (
-		<CurrentPlanCardRenderer
-			plan={plan}
-			dateCancelationTakesEffect={dateCancelationTakesEffect}
-			dateTrialEnds={dateTrialEnds}
-			dateSubscriptionRenews={dateSubscriptionRenews}
-			stripeCheckoutUrl={stripeCheckoutUrl}
-		/>
-	);
+	const server = useDashboardContext();
+	return <CurrentPlanCardRenderer {...server} />;
 }
 
 export function PageViewChartRenderer(props: {
