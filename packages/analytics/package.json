@@ -11,23 +11,23 @@
 		"clean": "rm -rf node_modules"
 	},
 	"devDependencies": {
-		"@answeroverflow/db": "*",
-		"@answeroverflow/prettier-config": "*",
-		"@answeroverflow/tsconfig": "*",
-		"@types/node": "^18.14.2",
-		"@types/react": "^18.0.14",
-		"@types/react-dom": "^18.2.4",
-		"prettier": "^2.8.4",
-		"eslint": "^8.44.0",
+		"@answeroverflow/db": "^0.1.0",
+		"@answeroverflow/prettier-config": "^0.0.0",
+		"@answeroverflow/tsconfig": "^0.0.0",
+		"@types/node": "^18.16.19",
+		"@types/react": "^18.2.15",
+		"@types/react-dom": "^18.2.7",
+		"eslint": "^8.45.0",
+		"prettier": "^2.8.8",
 		"type-fest": "^3.13.0"
 	},
 	"ct3aMetadata": {
 		"initVersion": "6.11.0"
 	},
 	"dependencies": {
-		"@answeroverflow/constants": "*",
+		"@answeroverflow/constants": "^0.1.0",
 		"discord-api-types": "^0.37.48",
-		"next-auth": "^4.20.1",
+		"next-auth": "^4.22.1",
 		"posthog-node": "^2.6.0"
 	}
 }
