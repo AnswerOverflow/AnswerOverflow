@@ -6,7 +6,23 @@ import {
 } from '@answeroverflow/prisma-types';
 import { addFlagsToServer } from '@answeroverflow/prisma-types';
 import type { z } from 'zod';
-import { findAllChannelQuestions, type MessageFull } from './message';
+import {
+	addAuthorsToMessages,
+	addReferencesToMessages,
+	findAllChannelQuestions,
+	findMessageById,
+	findMessagesByChannelId,
+	type MessageFull,
+} from './message';
+import { findOrThrowNotFound } from '~api/utils/operations';
+import {
+	getParentChannelOfMessage,
+	getThreadIdOfMessage,
+} from '@answeroverflow/elastic-types';
+import { findChannelById } from './channel';
+import { findServerById } from './server';
+import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
+import { ChannelType } from 'discord-api-types/v10';
 
 // TODO: Do not merge w/out tests
 export async function findServerWithCommunityPageData(opts: {
@@ -96,3 +112,65 @@ export async function findServerWithCommunityPageData(opts: {
 export type CommunityPageData = NonNullable<
 	Awaited<ReturnType<typeof findServerWithCommunityPageData>>
 >;
+
+export async function findMessageResultPage(messageId: string) {
+	const targetMessage = await findMessageById(messageId);
+	if (!targetMessage) {
+		return null;
+	}
+	// Declare as const to make Typescript not yell at us when used in arrow functions
+	const threadId = getThreadIdOfMessage(targetMessage);
+	// TODO: These should maybe be a different error code
+	const parentId = getParentChannelOfMessage(targetMessage);
+
+	if (!parentId) {
+		return null;
+	}
+
+	const threadFetch = threadId ? findChannelById(threadId) : undefined;
+
+	const serverFetch = findServerById(targetMessage.serverId);
+	const parentChannelFetch = threadId
+		? findChannelById(parentId)
+		: findChannelById(targetMessage.channelId);
+
+	const messageFetch = threadId
+		? findMessagesByChannelId({
+				channelId: threadId,
+		  })
+		: findMessagesByChannelId({
+				channelId: parentId,
+				after: targetMessage.id,
+				limit: NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
+		  });
+
+	const [thread, server, channel, messages, rootMessage] = await Promise.all([
+		threadFetch,
+		serverFetch,
+		parentChannelFetch,
+		messageFetch,
+		threadId ? findMessageById(threadId) : undefined,
+	]);
+	if (!server || server.kickedTime) return null;
+
+	if (!channel || !channel.flags.indexingEnabled) {
+		return null;
+	}
+	const messagesWithRefs = await addReferencesToMessages(
+		threadId && rootMessage && channel.type !== ChannelType.GuildForum
+			? [rootMessage, ...messages]
+			: messages,
+	);
+	const messagesWithDiscordAccounts = await addAuthorsToMessages(
+		messagesWithRefs,
+		[server],
+	);
+
+	return {
+		server,
+		channel,
+		messages: messagesWithDiscordAccounts,
+		rootMessage,
+		thread,
+	};
+}
