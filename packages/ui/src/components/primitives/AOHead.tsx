@@ -19,7 +19,7 @@ interface HeadProps {
 export const AOHead = ({
 	title,
 	description,
-	image = 'https://www.answeroverflow.com/answer-overflow-banner-v3.png',
+	image,
 	server = undefined,
 	addPrefix: addPrefix = false,
 	imageWidth: imageWidth = '1200',
@@ -40,14 +40,18 @@ export const AOHead = ({
 				'Build the best Discord support server with Answer Overflow. Index your content into Google, answer questions with AI, and gain insights into your community.';
 		}
 	}
-	if (server && !image) {
-		const serverIconImage = makeServerIconLink(server, 256);
-		imageWidth = '256';
-		imageHeight = '256';
-		if (serverIconImage) {
-			image = serverIconImage;
+	if (!image) {
+		if (server) {
+			const serverIconImage = makeServerIconLink(server, 256);
+			imageWidth = '256';
+			imageHeight = '256';
+			if (serverIconImage) {
+				image = serverIconImage;
+			} else {
+				image = 'https://www.answeroverflow.com/answer_overflow_icon_256.png';
+			}
 		} else {
-			image = 'https://www.answeroverflow.com/answer_overflow_icon_256.png';
+			image = 'https://www.answeroverflow.com/answer-overflow-banner-v3.png';
 		}
 	}
 	if (addPrefix) title += tenant ? ` - ${tenant.name}` : ' - Answer Overflow';
