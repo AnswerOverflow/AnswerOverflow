@@ -14,7 +14,6 @@ import {
 	findMessagesByChannelId,
 	type MessageFull,
 } from './message';
-import { findOrThrowNotFound } from '~api/utils/operations';
 import {
 	getParentChannelOfMessage,
 	getThreadIdOfMessage,
