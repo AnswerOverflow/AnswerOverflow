@@ -319,7 +319,6 @@ export default async function handler(
 					fontSize: '60px',
 					fontFamily: 'Satoshi Bold',
 					color: 'black',
-					height: '200px',
 					marginTop: '0px',
 					width: '100%',
 					textAlign: 'left',
