@@ -234,6 +234,50 @@ export default async function handler(
 				gap: '50px',
 			}}
 		>
+			<div
+				style={{
+					display: 'flex',
+					flexDirection: 'row',
+					alignItems: 'center',
+					justifyContent: 'center',
+					gap: '10px',
+				}}
+			>
+				<CalendarIcon />
+				<p
+					style={{
+						fontSize: '30px',
+						fontFamily: 'Satoshi Bold',
+						color: 'black',
+						textAlign: 'center',
+						opacity: 0.8,
+					}}
+				>
+					{date}
+				</p>
+			</div>
+			<div
+				style={{
+					display: 'flex',
+					flexDirection: 'row',
+					alignItems: 'center',
+					justifyContent: 'center',
+					gap: '10px',
+				}}
+			>
+				<MessagesIcon />
+				<p
+					style={{
+						fontSize: '30px',
+						fontFamily: 'Satoshi Bold',
+						color: 'black',
+						textAlign: 'center',
+						opacity: 0.8,
+					}}
+				>
+					{numReplies} replies
+				</p>
+			</div>
 			{isSolved && (
 				<div
 					style={{
@@ -258,50 +302,6 @@ export default async function handler(
 					</p>
 				</div>
 			)}
-			<div
-				style={{
-					display: 'flex',
-					flexDirection: 'row',
-					alignItems: 'center',
-					justifyContent: 'center',
-					gap: '10px',
-				}}
-			>
-				<MessagesIcon />
-				<p
-					style={{
-						fontSize: '30px',
-						fontFamily: 'Satoshi Bold',
-						color: 'black',
-						textAlign: 'center',
-						opacity: 0.8,
-					}}
-				>
-					{numReplies} replies
-				</p>
-			</div>
-			<div
-				style={{
-					display: 'flex',
-					flexDirection: 'row',
-					alignItems: 'center',
-					justifyContent: 'center',
-					gap: '10px',
-				}}
-			>
-				<CalendarIcon />
-				<p
-					style={{
-						fontSize: '30px',
-						fontFamily: 'Satoshi Bold',
-						color: 'black',
-						textAlign: 'center',
-						opacity: 0.8,
-					}}
-				>
-					{date}
-				</p>
-			</div>
 		</div>
 	);
 
@@ -311,7 +311,7 @@ export default async function handler(
 				width: '100%',
 				display: 'flex',
 				flexDirection: 'column',
-				gap: '10px',
+				gap: '40px',
 			}}
 		>
 			<p
