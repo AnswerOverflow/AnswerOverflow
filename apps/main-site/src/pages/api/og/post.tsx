@@ -8,6 +8,38 @@ import { z } from 'zod';
 import { getSnowflakeUTCDate } from '@answeroverflow/ui/src/utils/snowflake';
 import { ServerPublic } from '~api/router/server/types';
 
+const U200D = String.fromCharCode(8205);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const UFE0Fg = /\uFE0F/g;
+function toCodePoint(unicodeSurrogates: string) {
+	const r: string[] = [];
+	let c = 0,
+		p = 0,
+		i = 0;
+	while (i < unicodeSurrogates.length) {
+		c = unicodeSurrogates.charCodeAt(i++);
+		if (p) {
+			r.push((65536 + ((p - 55296) << 10) + (c - 56320)).toString(16));
+			p = 0;
+		} else if (55296 <= c && c <= 56319) {
+			p = c;
+		} else {
+			r.push(c.toString(16));
+		}
+	}
+	return r.join('-');
+}
+function getIconCode(char: string) {
+	return toCodePoint(char.indexOf(U200D) < 0 ? char.replace(UFE0Fg, '') : char);
+}
+function loadEmoji(code: string) {
+	return fetch(
+		'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/' +
+			code.toLowerCase() +
+			'.svg',
+	);
+}
+
 const currentPath = process.cwd();
 const satoshiBLack = fs.readFileSync(
 	currentPath + '/src/styles/Satoshi-Black.ttf',
@@ -380,6 +412,16 @@ export default async function handler(
 					data: satoshiBold,
 				},
 			],
+			loadAdditionalAsset: async (code: string, text: string) => {
+				if (code === 'emoji') {
+					return (
+						`data:image/svg+xml;base64,` +
+						btoa(await (await loadEmoji(getIconCode(text))).text())
+					);
+				}
+				// return a promise to undefined
+				return new Promise(() => undefined);
+			},
 		},
 	);
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
