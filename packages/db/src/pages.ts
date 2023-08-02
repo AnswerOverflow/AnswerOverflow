@@ -23,7 +23,6 @@ import { findServerById } from './server';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 import { ChannelType } from 'discord-api-types/v10';
 
-// TODO: Do not merge w/out tests
 export async function findServerWithCommunityPageData(opts: {
 	idOrVanityUrl: string;
 	limit?: number;
