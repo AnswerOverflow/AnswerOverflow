@@ -1,6 +1,5 @@
 // This component file is based off - https://www.youtube.com/watch?v=vPRdY87_SH0
 import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
-import discordMarkdown from 'discord-markdown';
 import Image from 'next/image';
 import React, { createContext, useContext, useState } from 'react';
 import { DiscordAvatar } from './DiscordAvatar';
@@ -20,6 +19,7 @@ import { getImageHeightWidth } from '~ui/utils/other';
 import Link from 'next/link';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import { DiscordIcon } from '~ui/components/primitives/base/Icons';
+import { useParsedMarkdown } from '~ui/utils/markdown';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MessageContext = createContext<
@@ -121,7 +121,6 @@ const DEFAULT_COLLAPSE_CONTENT_LENGTH = 500;
 
 export const MessageContents = () => {
 	const { message, collapseContent } = useMessageContext();
-	const { toHTML } = discordMarkdown;
 
 	const collapseBy =
 		typeof collapseContent === 'number'
@@ -136,11 +135,11 @@ export const MessageContents = () => {
 	const trimmedText = shouldCollapse
 		? `${message.content.slice(0, collapseBy).trim()}...`
 		: message.content;
-	const convertedMessageContent = toHTML(trimmedText);
+	const convertedMessageContent = useParsedMarkdown(trimmedText);
 
 	return (
 		<div
-			className="pt-2 font-body text-primary [word-wrap:_break-word]"
+			className="prose pt-2 font-body text-primary [word-wrap:_break-word] dark:prose-invert"
 			// The HTML from discord-markdown is escaped
 			dangerouslySetInnerHTML={{
 				__html: convertedMessageContent,

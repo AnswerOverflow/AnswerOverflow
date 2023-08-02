@@ -5,7 +5,6 @@ import React, { useEffect, useState } from 'react';
 import { trpc, type StorybookTRPC } from '../src/utils/trpc';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import Router, { type NextRouter } from 'next/router';
-import hljs from 'highlight.js';
 import { ThemeProvider } from 'next-themes';
 import { SessionProvider } from 'next-auth/react';
 import {
@@ -169,16 +168,6 @@ export function WithAuth(props: {
 			</SessionProvider>
 		</storybookTrpc.Provider>
 	);
-}
-
-export function WithHighlightJS(props: { children: React.ReactNode }) {
-	useEffect(() => {
-		hljs.configure({
-			ignoreUnescapedHTML: true,
-		});
-		hljs.highlightAll();
-	}, []);
-	return <>{props.children}</>;
 }
 
 export function WithAnalytics(props: { children: React.ReactNode }) {

@@ -4,7 +4,6 @@ import type { ArgTypes, GlobalProvider } from '@ladle/react';
 import {
 	WithAnalytics,
 	WithAuth,
-	WithHighlightJS,
 	WithNextRouter,
 	WithTailwindTheme,
 } from './decorators';
@@ -28,13 +27,11 @@ export const Provider: GlobalProvider = ({ children, globalState }) => {
 							value={isOnTenantSite ? mockServer() : undefined}
 						>
 							<WithAuth authState="signedIn">
-								<WithHighlightJS>
-									<ToastContainer toastClassName="bg-background dark:bg-background text-primary dark:text-primary" />
+								<ToastContainer toastClassName="bg-background dark:bg-background text-primary dark:text-primary" />
 
-									<WithAnalytics>
-										<div className={'bg-background'}>{children}</div>
-									</WithAnalytics>
-								</WithHighlightJS>
+								<WithAnalytics>
+									<div className={'bg-background'}>{children}</div>
+								</WithAnalytics>
 							</WithAuth>
 						</TenantContextProvider>
 					</WithNextRouter>

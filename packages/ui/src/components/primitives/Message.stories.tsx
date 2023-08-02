@@ -243,3 +243,51 @@ WithLink.args = {
 		content: 'Maybe try Googling your question first https://google.com',
 	},
 };
+
+export const WithTitles = Primary.bind({});
+
+WithTitles.args = {
+	...Primary.args,
+	message: {
+		...mockMessageWithDiscordAccount(),
+		content: `# Title 122\n## Title 2\n### Title 3\n#### Title 4\n##### Title 5\n###### Title 6`,
+	},
+};
+
+export const WithLotsOfMarkdown = Primary.bind({});
+WithLotsOfMarkdown.args = {
+	...Primary.args,
+	message: {
+		...mockMessageWithDiscordAccount(),
+		content: `# Title 122\n## Title 2\n### Title 3\n#### Title 4\n##### Title 5
+- list item 1
+- list item 2
+- list item 3
+- list item 4
+
+1. list item 1
+2. list item 2
+3. list item 3
+4. list item 4
+
+> quote
+
+**bold**
+
+*italic*
+
+~~strikethrough~~
+
+__underline__
+
+[link](https://google.com)
+
+
+\`\`\`typescript
+const variable = 'hello';
+\`\`\`
+
+# More text
+    `,
+	},
+};

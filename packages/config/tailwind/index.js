@@ -235,6 +235,7 @@ module.exports = {
 		require('tailwind-scrollbar-hide'),
 		require('@headlessui/tailwindcss'),
 		require('tailwindcss-animate'),
+		require('@tailwindcss/typography'),
 	],
 	safelist: [
 		{
