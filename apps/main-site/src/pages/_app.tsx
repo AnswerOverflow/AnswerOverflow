@@ -5,13 +5,12 @@ import '../styles/code.scss';
 import { SessionProvider } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import type { AppType, NextWebVitalsMetric } from 'next/app';
-import hljs from 'highlight.js';
 import { ThemeProvider } from 'next-themes';
 import {
 	AnalyticsProvider,
 	TenantContextProvider,
 } from '@answeroverflow/hooks';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { MDXProvider } from '@mdx-js/react';
 import Link from 'next/link';
@@ -84,13 +83,6 @@ const MyApp: AppType<{
 	session: Session | null;
 	tenant: ServerPublic | undefined;
 }> = ({ Component, pageProps: { session, ...pageProps } }) => {
-	useEffect(() => {
-		hljs.configure({
-			ignoreUnescapedHTML: true,
-		});
-		hljs.highlightAll();
-	}, []);
-
 	return (
 		<TenantContextProvider value={pageProps.tenant}>
 			<ThemeProvider attribute="class" defaultTheme={'dark'} enableSystem>
