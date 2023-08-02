@@ -337,10 +337,11 @@ export default async function handler(
 				height: '100%',
 				width: '100%',
 				fontFamily: 'Satoshi Black',
+				position: 'relative',
 				display: 'flex',
 				flexDirection: 'column',
 				alignItems: 'center',
-				padding: '40px',
+				padding: '60px',
 				backgroundColor: 'white',
 				gap: '20px',
 			}}
@@ -352,8 +353,8 @@ export default async function handler(
 				style={{
 					position: 'absolute',
 					display: 'flex',
-					right: '40px',
-					bottom: '10px',
+					right: '80px',
+					bottom: '40px',
 					gap: '20px',
 					alignItems: 'center',
 				}}
