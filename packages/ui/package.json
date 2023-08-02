@@ -51,7 +51,6 @@
 		"next-auth": "^4.22.1",
 		"next-themes": "^0.2.1",
 		"posthog-js": "^1.71.0",
-		"prismjs": "^1.29.0",
 		"react-grid-gallery": "^1.0.0",
 		"react-icons": "^4.10.1",
 		"react-social-icons": "^5.15.0",
@@ -62,8 +61,10 @@
 		"react-xarrows": "^2.0.2",
 		"recharts": "^2.7.2",
 		"schema-dts": "^1.1.2",
+		"shiki": "^0.14.3",
 		"tailwind-merge": "^1.13.2",
 		"tailwindcss-animate": "^1.0.6",
+		"vite-plugin-wasm": "^3.2.2",
 		"yet-another-react-lightbox": "^3.11.3",
 		"zod": "^3.21.4"
 	},

@@ -1,0 +1,13 @@
+.shiki {
+  @apply my-0 w-full rounded-lg text-sm bg-neutral-900 !important;
+  /*@apply my-4 w-full rounded-lg bg-neutral-100 text-sm dark:bg-neutral-900 !important;*/
+  /* Fixes overflowing code blocks */
+  white-space: break-spaces;
+  line-break: anywhere;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.prose pre:not([class]) {
+  @apply bg-transparent p-0 !important;
+  min-width: max-content;
+}

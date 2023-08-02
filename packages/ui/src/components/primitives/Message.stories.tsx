@@ -193,7 +193,7 @@ WithCode.args = {
 	message: {
 		...mockMessageWithDiscordAccount(),
 		content: `
-      \`\`\`typescript
+      \`\`\`ts
     const variable = 'hello';
 
     function getProfile(id: string): {
@@ -203,6 +203,22 @@ WithCode.args = {
         name: 'ben', address: "ben's house", photo: "/ben.png"
       };
     }
+      \`\`\`
+    `,
+	},
+};
+
+export const WithPythonCode = Primary.bind({});
+WithPythonCode.args = {
+	...Primary.args,
+	message: {
+		...mockMessageWithDiscordAccount(),
+		content: `
+      \`\`\`python
+    def get_profile(id: str) -> dict:
+      return {
+        'name': 'ben', 'address': "ben's house", 'photo': "/ben.png"
+      }
       \`\`\`
     `,
 	},
