@@ -40,7 +40,7 @@ export const AOHead = ({
 				'Build the best Discord support server with Answer Overflow. Index your content into Google, answer questions with AI, and gain insights into your community.';
 		}
 	}
-	if (server) {
+	if (server && !image) {
 		const serverIconImage = makeServerIconLink(server, 256);
 		imageWidth = '256';
 		imageHeight = '256';

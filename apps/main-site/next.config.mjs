@@ -34,7 +34,7 @@ const config = {
 		'@answeroverflow/db',
 		'@answeroverflow/tailwind-config',
 		'@answeroverflow/ui',
-		'@answeroverflow/env'
+		'@answeroverflow/env',
 	],
 	experimental: {
 		outputFileTracingIgnores: ['**swc/core**'],
