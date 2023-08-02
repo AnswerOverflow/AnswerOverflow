@@ -59,7 +59,7 @@ export const AOHead = ({
 		tenant?.customDomain ?? 'www.answeroverflow.com'
 	}/`;
 	description =
-		description.length > 160 ? description.slice(0, 160) : description;
+		description.length > 160 ? description.slice(0, 160) + '...' : description;
 	return (
 		<Head>
 			<title>{title}</title>
