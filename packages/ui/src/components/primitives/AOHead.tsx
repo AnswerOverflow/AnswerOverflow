@@ -90,8 +90,10 @@ export const AOHead = ({
 			<meta property="og:image:width" content={imageWidth} />
 			<meta property="og:image:height" content={imageHeight} />
 			<meta property="robots" content="index,follow" />
-			{!server && (
-				<meta property="twitter:card" content="summary_large_image" />
+			{parseInt(imageWidth) < 300 ? (
+				<meta name="twitter:card" content="summary" />
+			) : (
+				<meta name="twitter:card" content="summary_large_image" />
 			)}
 			<meta property="twitter:title" content={title} />
 			<meta property="twitter:description" content={description} />
