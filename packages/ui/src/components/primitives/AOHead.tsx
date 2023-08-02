@@ -78,13 +78,13 @@ export const AOHead = ({
 					href={makeServerIconLink(tenant, 48)}
 				/>
 			)}
-			<meta property="description" content={description} key="desc" />
 			<meta
 				property="og:site_name"
 				content={tenant?.name ?? 'Answer Overflow'}
 			/>
 			<meta property="og:title" content={title} />
 			<meta property="og:type" content={type} />
+			<meta property="description" content={description} />
 			<meta property="og:description" content={description} />
 			<meta property="og:image" content={image} />
 			<meta property="og:image:width" content={imageWidth} />
