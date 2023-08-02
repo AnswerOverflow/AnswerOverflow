@@ -58,11 +58,13 @@ export const AOHead = ({
 	const baseDomain = `https://${
 		tenant?.customDomain ?? 'www.answeroverflow.com'
 	}/`;
+	description =
+		description.length > 160 ? description.slice(0, 160) : description;
 	return (
 		<Head>
 			<title>{title}</title>
 			{webClientEnv.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'production' && (
-				<meta name="robots" content="noindex" />
+				<meta property="robots" content="noindex" />
 			)}
 			<link
 				rel="canonical"
@@ -76,7 +78,7 @@ export const AOHead = ({
 					href={makeServerIconLink(tenant, 48)}
 				/>
 			)}
-			<meta name="description" content={description} key="desc" />
+			<meta property="description" content={description} key="desc" />
 			<meta
 				property="og:site_name"
 				content={tenant?.name ?? 'Answer Overflow'}
@@ -87,7 +89,7 @@ export const AOHead = ({
 			<meta property="og:image" content={image} />
 			<meta property="og:image:width" content={imageWidth} />
 			<meta property="og:image:height" content={imageHeight} />
-			<meta name="robots" content="index,follow" />
+			<meta property="robots" content="index,follow" />
 			{!server && (
 				<meta property="twitter:card" content="summary_large_image" />
 			)}

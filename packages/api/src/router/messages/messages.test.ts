@@ -70,7 +70,7 @@ describe('Message Results', () => {
 	it("should 404 if the root message doesn't exists", async () => {
 		await expect(
 			unauthedMessagePageRouter.threadFromMessageId(getRandomId()),
-		).rejects.toThrow('Target message not found');
+		).rejects.toThrow('Message not found');
 	});
 	describe('Text Channel Message Pages', () => {
 		let message: Message;
