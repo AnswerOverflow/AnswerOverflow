@@ -8,7 +8,7 @@ Allow: /
 Disallow: /api/
 Disallow: /dashboard/
 Disallow: /oemf7z50uh7w/
-Allow: /api/og/*
+Allow: /api/og/
 Sitemap: https://${domain}/sitemap.xml
 `);
 	res.end();
