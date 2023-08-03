@@ -9,7 +9,7 @@ import {
 import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod';
 
-export const webServerEnv = sharedEnvs;
+export const webServerEnv = createEnv({});
 
 export const webClientEnv = createEnv({
 	client: {
