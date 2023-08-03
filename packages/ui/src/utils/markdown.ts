@@ -57,32 +57,16 @@ export const useParsedMarkdown = (content: string) => {
 	const [safeHtml, setSafeHtml] = useState<string>('');
 	const { highlighter, requestLang } = useMarkdownContext();
 
-	// HTML Encode content with regex
-	// const REGEX_HTML_ENCODE = /[\u00A0-\u9999<>\&]/gim;
-	//
-	// const HTML_ENCODE_CODES = {
-	// 	'<': '&lt;',
-	// 	'>': '&gt;',
-	// 	'&': '&amp;',
-	// 	'"': '&quot;',
-	// 	"'": '&apos;',
-	// 	'/': '&#x2F;',
-	// };
-	//
-	// content = String(content).replace(REGEX_HTML_ENCODE, function (chr) {
-	// 	return HTML_ENCODE_CODES[chr];
-	// });
-	//
-	// console.log(content);
+	let escapedContent = content.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 	useEffect(() => {
 		(async () => {
-			const mayIncludeCode = content.includes('```');
+			const mayIncludeCode = escapedContent.includes('```');
 
 			if (mayIncludeCode) {
-				const lines = content.split('\n');
+				const lines = escapedContent.split('\n');
 
-				content = lines
+				escapedContent = lines
 					.map((line) => {
 						if (line.trim().startsWith('```')) {
 							return line.trim();
@@ -96,6 +80,7 @@ export const useParsedMarkdown = (content: string) => {
 			marked.use(
 				markedHighlight({
 					highlight: async (code, lang) => {
+						code = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 						const isSupported = await requestLang(lang);
 
 						if (!isSupported) return code;
@@ -110,7 +95,8 @@ export const useParsedMarkdown = (content: string) => {
 				}),
 			);
 
-			const [parsedHtml] = await Promise.all([marked(content)]);
+			// Incorrect typing
+			const [parsedHtml] = await Promise.all([marked(escapedContent, {})]);
 			const safeHtml = DOMPurify.sanitize(parsedHtml);
 
 			return setSafeHtml(safeHtml);
