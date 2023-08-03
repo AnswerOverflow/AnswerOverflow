@@ -19,7 +19,7 @@ interface HeadProps {
 export const AOHead = ({
 	title,
 	description,
-	image = 'https://www.answeroverflow.com/answer-overflow-banner-v3.png',
+	image,
 	server = undefined,
 	addPrefix: addPrefix = false,
 	imageWidth: imageWidth = '1200',
@@ -40,25 +40,31 @@ export const AOHead = ({
 				'Build the best Discord support server with Answer Overflow. Index your content into Google, answer questions with AI, and gain insights into your community.';
 		}
 	}
-	if (server) {
-		const serverIconImage = makeServerIconLink(server, 256);
-		imageWidth = '256';
-		imageHeight = '256';
-		if (serverIconImage) {
-			image = serverIconImage;
+	if (!image) {
+		if (server) {
+			const serverIconImage = makeServerIconLink(server, 256);
+			imageWidth = '256';
+			imageHeight = '256';
+			if (serverIconImage) {
+				image = serverIconImage;
+			} else {
+				image = 'https://www.answeroverflow.com/answer_overflow_icon_256.png';
+			}
 		} else {
-			image = 'https://www.answeroverflow.com/answer_overflow_icon_256.png';
+			image = 'https://www.answeroverflow.com/answer-overflow-banner-v3.png';
 		}
 	}
 	if (addPrefix) title += tenant ? ` - ${tenant.name}` : ' - Answer Overflow';
 	const baseDomain = `https://${
 		tenant?.customDomain ?? 'www.answeroverflow.com'
 	}/`;
+	description =
+		description.length > 160 ? description.slice(0, 160) + '...' : description;
 	return (
 		<Head>
 			<title>{title}</title>
 			{webClientEnv.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'production' && (
-				<meta name="robots" content="noindex" />
+				<meta property="robots" content="noindex" />
 			)}
 			<link
 				rel="canonical"
@@ -72,20 +78,22 @@ export const AOHead = ({
 					href={makeServerIconLink(tenant, 48)}
 				/>
 			)}
-			<meta name="description" content={description} key="desc" />
 			<meta
 				property="og:site_name"
 				content={tenant?.name ?? 'Answer Overflow'}
 			/>
 			<meta property="og:title" content={title} />
 			<meta property="og:type" content={type} />
+			<meta property="description" content={description} />
 			<meta property="og:description" content={description} />
 			<meta property="og:image" content={image} />
 			<meta property="og:image:width" content={imageWidth} />
 			<meta property="og:image:height" content={imageHeight} />
-			<meta name="robots" content="index,follow" />
-			{!server && (
-				<meta property="twitter:card" content="summary_large_image" />
+			<meta property="robots" content="index,follow" />
+			{parseInt(imageWidth) < 300 ? (
+				<meta name="twitter:card" content="summary" />
+			) : (
+				<meta name="twitter:card" content="summary_large_image" />
 			)}
 			<meta property="twitter:title" content={title} />
 			<meta property="twitter:description" content={description} />
