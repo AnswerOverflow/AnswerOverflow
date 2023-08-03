@@ -57,7 +57,14 @@ export const useParsedMarkdown = (content: string) => {
 	const [safeHtml, setSafeHtml] = useState<string>('');
 	const { highlighter, requestLang } = useMarkdownContext();
 
-	let escapedContent = content.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	const HTML_ESCAPE_MAP = {
+		'<': '&lt;',
+		'>': '&gt;',
+	};
+
+	let escapedContent = content.replace(/[<>]/g, (char) => {
+		return HTML_ESCAPE_MAP[char as keyof typeof HTML_ESCAPE_MAP];
+	});
 
 	useEffect(() => {
 		(async () => {
@@ -95,8 +102,8 @@ export const useParsedMarkdown = (content: string) => {
 				}),
 			);
 
-			// Incorrect typing
-			const [parsedHtml] = await Promise.all([marked(escapedContent, {})]);
+			let [parsedHtml] = await Promise.all([marked(escapedContent, {})]);
+			parsedHtml = parsedHtml.replace(/&amp;/g, '&');
 			const safeHtml = DOMPurify.sanitize(parsedHtml);
 
 			return setSafeHtml(safeHtml);
