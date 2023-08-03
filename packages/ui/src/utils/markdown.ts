@@ -4,7 +4,6 @@ import DOMPurify from 'dompurify';
 import { markedHighlight } from 'marked-highlight';
 import { BUNDLED_LANGUAGES, getHighlighter, Highlighter, Lang } from 'shiki';
 import './markdown.css';
-import sanitizeHtml from 'sanitize-html';
 
 export const MarkdownContext = createContext<{
 	langs: Lang[];
@@ -57,6 +56,24 @@ export const useMarkdownContext = () => {
 export const useParsedMarkdown = (content: string) => {
 	const [safeHtml, setSafeHtml] = useState<string>('');
 	const { highlighter, requestLang } = useMarkdownContext();
+
+	// HTML Encode content with regex
+	// const REGEX_HTML_ENCODE = /[\u00A0-\u9999<>\&]/gim;
+	//
+	// const HTML_ENCODE_CODES = {
+	// 	'<': '&lt;',
+	// 	'>': '&gt;',
+	// 	'&': '&amp;',
+	// 	'"': '&quot;',
+	// 	"'": '&apos;',
+	// 	'/': '&#x2F;',
+	// };
+	//
+	// content = String(content).replace(REGEX_HTML_ENCODE, function (chr) {
+	// 	return HTML_ENCODE_CODES[chr];
+	// });
+	//
+	// console.log(content);
 
 	useEffect(() => {
 		(async () => {
