@@ -18,7 +18,6 @@ import { isServer } from '~ui/utils/checks';
 import Head from 'next/head';
 import type { QAPage, WithContext } from 'schema-dts';
 import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
-import { toHTML } from 'discord-markdown';
 import { ServerInvite } from '~ui/components/primitives/ServerInvite';
 import {
 	Message,
@@ -27,6 +26,7 @@ import {
 } from '~ui/components/primitives/Message';
 import { Heading } from '~ui/components/primitives/base/Heading';
 import AOHead from '~ui/components/primitives/AOHead';
+import { useParsedMarkdown } from '~ui/utils/markdown';
 export type MessageResultPageProps = {
 	messages: APIMessageWithDiscordAccount[];
 	server: ServerPublic;
@@ -165,19 +165,24 @@ export function MessageResultPage({
 
 	const question = thread?.name ?? firstMessage.content?.slice(0, 100);
 	const isFirstMessageSolution = solution && solution.id !== firstMessage.id;
+
+	const nameHtml = useParsedMarkdown(question);
+	const textHtml = useParsedMarkdown(firstMessage.content);
+	const solutionHtml = useParsedMarkdown(solution?.content ?? '');
+
 	const qaHeader: WithContext<QAPage> = {
 		'@context': 'https://schema.org',
 		'@type': 'QAPage',
 		mainEntity: {
 			'@type': 'Question',
-			name: toHTML(question),
-			text: toHTML(firstMessage.content),
+			name: nameHtml,
+			text: textHtml,
 			answerCount: solution && !isFirstMessageSolution ? 1 : 0,
 			acceptedAnswer:
 				solution && !isFirstMessageSolution
 					? {
 							'@type': 'Answer',
-							text: toHTML(solution.content),
+							text: solutionHtml,
 							url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
 								solution.id
 							}#solution-${solution.id}`,
@@ -215,7 +220,7 @@ export function MessageResultPage({
 					<div className="flex w-full flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400  text-center  dark:border-neutral-600 dark:text-white">
 						<h1
 							className="w-full text-center font-header text-xl text-primary md:text-left md:text-3xl"
-							dangerouslySetInnerHTML={{ __html: toHTML(question) }}
+							dangerouslySetInnerHTML={{ __html: nameHtml }}
 						></h1>
 					</div>
 				</div>

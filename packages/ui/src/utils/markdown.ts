@@ -1,37 +1,62 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import { markedHighlight } from 'marked-highlight';
-import { getHighlighter } from 'shiki';
+import { BUNDLED_LANGUAGES, getHighlighter, Highlighter, Lang } from 'shiki';
 import './markdown.css';
+import sanitizeHtml from 'sanitize-html';
 
-const themeUrl = new URL(
-	'shiki/themes/nord.json',
-	import.meta.url,
-).href.replace('/nord.json', '');
+export const MarkdownContext = createContext<{
+	langs: Lang[];
+	setLangs: (langs: Lang[]) => void;
+	highlighter: Promise<Highlighter>;
+} | null>(null);
 
-const languagesUrl = new URL(
-	'shiki/languages/tsx.tmLanguage.json',
-	import.meta.url,
-).href.replace('/tsx.tmLanguage.json', '');
+export const useMarkdownContext = () => {
+	const context = useContext(MarkdownContext);
 
-const wasmUrl = new URL('shiki/dist/onig.wasm', import.meta.url).href.replace(
-	'/onig.wasm',
-	'',
-);
+	if (!context) {
+		throw new Error(
+			'useMarkdownContext must be used within a MarkdownContextProvider',
+		);
+	}
+
+	const requestLang = async (requestedLang: string) => {
+		const langs = await context.highlighter.then((highlighter) => {
+			return highlighter.getLoadedLanguages();
+		});
+
+		if (!langs.includes(requestedLang)) {
+			const isLangSupported =
+				BUNDLED_LANGUAGES.filter((bundle) => {
+					return (
+						bundle.id === requestedLang ||
+						bundle.aliases?.includes(requestedLang)
+					);
+				}).length > 0;
+
+			if (!isLangSupported) return false;
+
+			await context.highlighter.then(async (highlighter) => {
+				return highlighter.loadLanguage(requestedLang as Lang);
+			});
+
+			return true;
+		}
+
+		return true;
+	};
+
+	return {
+		langs: context.langs,
+		highlighter: context.highlighter,
+		requestLang,
+	};
+};
 
 export const useParsedMarkdown = (content: string) => {
 	const [safeHtml, setSafeHtml] = useState<string>('');
-
-	const highlighter = getHighlighter({
-		theme: 'github-dark',
-		langs: ['typescript', 'python'],
-		paths: {
-			themes: themeUrl,
-			languages: languagesUrl,
-			wasm: wasmUrl,
-		},
-	});
+	const { highlighter, requestLang } = useMarkdownContext();
 
 	useEffect(() => {
 		(async () => {
@@ -54,6 +79,10 @@ export const useParsedMarkdown = (content: string) => {
 			marked.use(
 				markedHighlight({
 					highlight: async (code, lang) => {
+						const isSupported = await requestLang(lang);
+
+						if (!isSupported) return code;
+
 						const text = await highlighter.then((highlighterReturned) => {
 							return highlighterReturned.codeToHtml(code, lang);
 						});
@@ -64,17 +93,6 @@ export const useParsedMarkdown = (content: string) => {
 				}),
 			);
 
-			// if (typeof window === 'undefined') {
-			// 	const { JSDOM } = await import('jsdom');
-			//
-			// 	const window = new JSDOM('').window;
-			//
-			// 	const parsedHtml = marked.parse(content);
-			// 	const purify = DOMPurify(window);
-			// 	const sanitizedHtml = purify.sanitize(parsedHtml);
-			//
-			// 	return setSafeHtml(sanitizedHtml);
-			// }
 			const [parsedHtml] = await Promise.all([marked(content)]);
 			const safeHtml = DOMPurify.sanitize(parsedHtml);
 
