@@ -50,6 +50,14 @@ const config = {
 	sentry: {
 		hideSourceMaps: false,
 	},
+	async rewrites() {
+		return [
+			{
+				source: '/og/:path*',
+				destination: '/api/og/:path*',
+			},
+		];
+	},
 };
 
 const sentryWebpackPluginOptions = {

@@ -206,9 +206,7 @@ export function MessageResultPage({
 				path={`/m/${firstMessage?.id ?? requestedId}`}
 				title={`${channelName} - ${server.name}`}
 				server={server}
-				image={`${baseDomain}/api/og/post?id=${
-					firstMessage?.id ?? requestedId
-				}`}
+				image={`${baseDomain}/og/post?id=${firstMessage?.id ?? requestedId}`}
 			/>
 
 			<div className="mb-2 flex flex-col-reverse items-center justify-between gap-2 sm:flex-row sm:py-0 md:my-8">
