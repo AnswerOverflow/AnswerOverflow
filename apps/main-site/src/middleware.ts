@@ -27,6 +27,9 @@ export function middleware(req: NextRequest) {
 		return dataUnlockerRouteHandler(req);
 	}
 	const host = req.headers.get('host')!;
+	if (path.startsWith('/og')) {
+		return NextResponse.next();
+	}
 	if (isOnMainSite(host)) {
 		const authedRoutes = ['/dashboard'];
 		if (authedRoutes.some((route) => path.startsWith(route))) {
