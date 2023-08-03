@@ -7,6 +7,7 @@ import { useIsUserInServer } from '~ui/utils/hooks';
 import { MessagesSearchBar } from './SearchPage';
 import {
 	messageWithDiscordAccountToAnalyticsData,
+	useTenantContext,
 	useTrackEvent,
 } from '@answeroverflow/hooks';
 import {
@@ -17,7 +18,15 @@ import {
 import { isServer } from '~ui/utils/checks';
 import Head from 'next/head';
 import type { QAPage, WithContext } from 'schema-dts';
+<<<<<<< HEAD
 import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
+=======
+import {
+	getBaseUrl,
+	getMainSiteHostname,
+} from '@answeroverflow/constants/src/links';
+import { toHTML } from 'discord-markdown';
+>>>>>>> main
 import { ServerInvite } from '~ui/components/primitives/ServerInvite';
 import {
 	Message,
@@ -43,6 +52,7 @@ export function MessageResultPage({
 	requestedId,
 	thread,
 }: MessageResultPageProps) {
+	const { tenant } = useTenantContext();
 	const isUserInServer = useIsUserInServer(server.id);
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
@@ -190,7 +200,9 @@ export function MessageResultPage({
 					: undefined,
 		},
 	};
-
+	const baseDomain = tenant?.customDomain
+		? `https://${tenant.customDomain}`
+		: getBaseUrl();
 	return (
 		<div className="sm:mx-3">
 			<Head>
@@ -204,6 +216,9 @@ export function MessageResultPage({
 				path={`/m/${firstMessage?.id ?? requestedId}`}
 				title={`${channelName} - ${server.name}`}
 				server={server}
+				image={`${baseDomain}/api/og/post?id=${
+					firstMessage?.id ?? requestedId
+				}`}
 			/>
 
 			<div className="mb-2 flex flex-col-reverse items-center justify-between gap-2 sm:flex-row sm:py-0 md:my-8">
