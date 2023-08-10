@@ -56,7 +56,7 @@ const MainSiteDropdownMenuGroup = () => (
 		</DropdownMenuGroup>
 		<DropdownMenuItem>
 			<LuPlus className="mr-2 h-4 w-4" />
-			<Link href="/onboarding" className="w-full">
+			<Link href="/onboarding" className="w-full" prefetch={false}>
 				Add To Server
 			</Link>
 		</DropdownMenuItem>
