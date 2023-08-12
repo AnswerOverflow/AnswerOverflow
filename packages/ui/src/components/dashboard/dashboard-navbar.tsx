@@ -13,8 +13,9 @@ import {
 	DropdownMenuTrigger,
 } from '~ui/components/primitives/ui/dropdown-menu';
 import { ServerIcon } from '~ui/components/primitives/ServerIcon';
-import { AnswerOverflowLogo } from '~ui/components/primitives/base/Icons';
+import { AnswerOverflowLogo } from '~ui/components/primitives/base/AnswerOverflowLogo';
 import { UserAvatar } from '~ui/components/primitives/Navbar';
+import React from 'react';
 
 export function DashboardServerSelect() {
 	const router = useRouter();
@@ -76,7 +77,9 @@ function DashboardNavbarRenderer(props: { user: Session['user'] | undefined }) {
 		<nav className="mx-auto flex max-w-screen-2xl items-center justify-between p-2 md:p-8">
 			<div className="flex flex-row items-center justify-between space-x-4">
 				<Link href="/" className="hidden md:block">
-					<AnswerOverflowLogo className="w-52" />
+					<div className={'w-40 md:w-52'}>
+						<AnswerOverflowLogo width={'full'} />
+					</div>
 				</Link>
 				<div className="hidden h-6 rotate-[30deg] border-l border-stone-400 md:block" />
 				<DashboardServerSelect />
