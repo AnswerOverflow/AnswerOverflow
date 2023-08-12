@@ -27,7 +27,7 @@ const withMDX = nextJSMDX.default({
 const config = {
 	reactStrictMode: true,
 	swcMinify: true,
-  compress: true,
+	compress: true,
 	pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
 	transpilePackages: [
 		'@answeroverflow/api',
