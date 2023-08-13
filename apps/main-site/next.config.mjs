@@ -27,6 +27,7 @@ const withMDX = nextJSMDX.default({
 const config = {
 	reactStrictMode: true,
 	swcMinify: true,
+	compress: true,
 	pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
 	transpilePackages: [
 		'@answeroverflow/api',
@@ -49,6 +50,14 @@ const config = {
 	productionBrowserSourceMaps: true, // we're open source so why not
 	sentry: {
 		hideSourceMaps: false,
+	},
+	async rewrites() {
+		return [
+			{
+				source: '/og/:path*',
+				destination: '/api/og/:path*',
+			},
+		];
 	},
 };
 

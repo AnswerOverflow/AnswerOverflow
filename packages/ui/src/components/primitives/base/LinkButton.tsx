@@ -18,7 +18,9 @@ export const LinkButton = ({
 	size,
 	className,
 	...props
-}: LinkButtonProps) => {
+}: LinkButtonProps & {
+	prefetch?: boolean;
+}) => {
 	return (
 		<Link
 			href={href}
