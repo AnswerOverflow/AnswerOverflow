@@ -1,20 +1,34 @@
 import type { GetServerSidePropsContext } from 'next';
 import { findAllServers } from '@answeroverflow/db';
 import { Sitemap } from '../utils/sitemap';
+import { addCommunityQuestionsToSitemap } from '../utils/community-page';
+import { trackServerSideEvent } from '@answeroverflow/analytics';
 
 export async function getServerSideProps({ res }: GetServerSidePropsContext) {
 	const servers = await findAllServers();
-	const sitemap = new Sitemap(
-		'https://www.answeroverflow.com',
-		'sitemap',
-		servers
-			.filter((x) => !x.customDomain && x.kickedTime === null)
-			.map((server) => ({
-				loc: `/c/${server.id}/sitemap.xml`,
-			})),
+	const activeCommunities = servers.filter(
+		(x) => !x.customDomain && x.kickedTime === null,
 	);
+	const sitemap = new Sitemap('https://answeroverflow.com', 'url');
+
+	// TODO: Needs optimization but it's cached and only runs once a day
+	for await (const server of activeCommunities) {
+		await addCommunityQuestionsToSitemap({
+			sitemap,
+			communityId: server.id,
+		});
+	}
+	try {
+		trackServerSideEvent('Sitemap Generated', {
+			'Answer Overflow Account Id': 'server-web',
+			'Number of Communities': activeCommunities.length,
+			'Number of Entries': sitemap.entries.length,
+			'Number of Questions': sitemap.entries.length - activeCommunities.length,
+		});
+	} catch {
+		// ignore
+	}
 	sitemap.applyToRes(res);
-	res.end();
 
 	return {
 		props: {},
