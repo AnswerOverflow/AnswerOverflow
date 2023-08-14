@@ -17,6 +17,7 @@ export async function getServerSideProps({ res }: GetServerSidePropsContext) {
 	for (let i = 0; i < activeCommunities.length; i += chunkSize) {
 		chunks.push(activeCommunities.slice(i, i + chunkSize).map((x) => x.id));
 	}
+	console.log('Starting to generate sitemap');
 	let i = 0;
 	for await (const chunk of chunks) {
 		console.log(`Generating sitemap chunk ${i + 1}/${chunks.length}`);
@@ -29,8 +30,10 @@ export async function getServerSideProps({ res }: GetServerSidePropsContext) {
 			),
 		);
 		console.log(`Finished generating sitemap chunk ${i + 1}/${chunks.length}`);
-		i += chunkSize;
+		i += 1;
 	}
+	console.log('Finished generating sitemap');
+
 	try {
 		trackServerSideEvent('Sitemap Generated', {
 			'Answer Overflow Account Id': 'server-web',
