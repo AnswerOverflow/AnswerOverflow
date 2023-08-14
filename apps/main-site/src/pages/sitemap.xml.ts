@@ -9,17 +9,24 @@ export async function getServerSideProps({ res }: GetServerSidePropsContext) {
 	const activeCommunities = servers.filter(
 		(x) => !x.customDomain && x.kickedTime === null,
 	);
-	const sitemap = new Sitemap('https://answeroverflow.com', 'url');
+	const sitemap = new Sitemap('https://www.answeroverflow.com', 'url');
 
 	// TODO: Needs optimization but it's cached and only runs once a day
-	await Promise.all(
-		activeCommunities.map(async (community) =>
-			addCommunityQuestionsToSitemap({
-				sitemap,
-				communityId: community.id,
-			}),
-		),
-	);
+	const chunkSize = 50;
+	const chunks: string[][] = [];
+	for (let i = 0; i < activeCommunities.length; i += chunkSize) {
+		chunks.push(activeCommunities.slice(i, i + chunkSize).map((x) => x.id));
+	}
+	for await (const chunk of chunks) {
+		await Promise.all(
+			chunk.map((x) =>
+				addCommunityQuestionsToSitemap({
+					sitemap,
+					communityId: x,
+				}),
+			),
+		);
+	}
 	try {
 		trackServerSideEvent('Sitemap Generated', {
 			'Answer Overflow Account Id': 'server-web',
