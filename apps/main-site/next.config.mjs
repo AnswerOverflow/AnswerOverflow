@@ -41,7 +41,7 @@ const config = {
 		outputFileTracingIgnores: ['**swc/core**'],
 	},
 	images: {
-		domains: ['cdn.discordapp.com', 'avatars.githubusercontent.com'],
+    domains: ['cdn.discordapp.com', 'avatars.githubusercontent.com', 'media.discordapp.net'],
 	},
 	// We already do linting on GH actions
 	eslint: {
