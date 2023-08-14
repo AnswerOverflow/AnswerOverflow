@@ -6,6 +6,7 @@ export async function addCommunityQuestionsToSitemap(input: {
 	communityId: string;
 	sitemap: Sitemap;
 }) {
+	console.log(`Generating sitemap for community ${input.communityId}`);
 	const communityData = await findServerWithCommunityPageData({
 		idOrVanityUrl: input.communityId,
 	});
@@ -25,6 +26,7 @@ export async function addCommunityQuestionsToSitemap(input: {
 			priority: 1,
 		});
 	}
+	console.log(`Finished generating sitemap for community ${input.communityId}`);
 }
 
 export async function generateCommunityPageSitemap(input: {
