@@ -17,7 +17,9 @@ export async function getServerSideProps({ res }: GetServerSidePropsContext) {
 	for (let i = 0; i < activeCommunities.length; i += chunkSize) {
 		chunks.push(activeCommunities.slice(i, i + chunkSize).map((x) => x.id));
 	}
+	let i = 0;
 	for await (const chunk of chunks) {
+		console.log(`Generating sitemap chunk ${i + 1}/${chunks.length}`);
 		await Promise.all(
 			chunk.map((x) =>
 				addCommunityQuestionsToSitemap({
@@ -26,6 +28,8 @@ export async function getServerSideProps({ res }: GetServerSidePropsContext) {
 				}),
 			),
 		);
+		console.log(`Finished generating sitemap chunk ${i + 1}/${chunks.length}`);
+		i += chunkSize;
 	}
 	try {
 		trackServerSideEvent('Sitemap Generated', {
