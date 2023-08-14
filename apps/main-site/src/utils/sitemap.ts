@@ -18,10 +18,14 @@ export class Sitemap {
 	constructor(
 		private baseUrl: string,
 		private type: 'url' | 'sitemap',
-		private entries: SitemapEntry[] = [],
+		public entries: SitemapEntry[] = [],
 	) {}
 
 	add(...entries: SitemapEntry[]) {
+		this.entries.push(...entries);
+	}
+
+	addMany(entries: SitemapEntry[]) {
 		this.entries.push(...entries);
 	}
 
@@ -73,7 +77,13 @@ export class Sitemap {
 
 	applyToRes(res: ServerResponse<IncomingMessage>) {
 		res.setHeader('Content-Type', 'text/xml');
-		// we send the XML to the browser
+
+		// we cache the sitemap for 6 hours and revalidate it every 24 hours
+
+		res.setHeader(
+			'Cache-Control',
+			'public, s-maxage=21600, stale-while-revalidate=86400',
+		);
 		res.write(this.toXml());
 		res.end();
 	}
