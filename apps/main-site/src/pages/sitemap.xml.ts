@@ -12,12 +12,14 @@ export async function getServerSideProps({ res }: GetServerSidePropsContext) {
 	const sitemap = new Sitemap('https://answeroverflow.com', 'url');
 
 	// TODO: Needs optimization but it's cached and only runs once a day
-	for await (const server of activeCommunities) {
-		await addCommunityQuestionsToSitemap({
-			sitemap,
-			communityId: server.id,
-		});
-	}
+	await Promise.all(
+		activeCommunities.map(async (community) =>
+			addCommunityQuestionsToSitemap({
+				sitemap,
+				communityId: community.id,
+			}),
+		),
+	);
 	try {
 		trackServerSideEvent('Sitemap Generated', {
 			'Answer Overflow Account Id': 'server-web',
