@@ -4,7 +4,6 @@
  * This is especially useful for Docker builds.
  */
 
-import { resolve } from 'path';
 
 !process.env.SKIP_ENV_VALIDATION &&
 	// @ts-expect-error
@@ -56,14 +55,6 @@ const config = {
 	productionBrowserSourceMaps: true, // we're open source so why not
 	sentry: {
 		hideSourceMaps: false,
-	},
-	webpack: (config, { isServer }) => {
-		if (isServer) {
-			config.resolve.alias['@sentry/nextjs'] = resolve(
-				'@sentry/nextjs/cjs/edge',
-			);
-		}
-		return config;
 	},
 	async rewrites() {
 		return [
