@@ -13,15 +13,15 @@
 		"lint:fix": "eslint . --fix"
 	},
 	"dependencies": {
+		"@answeroverflow/env": "workspace:^",
 		"dotenv-cra": "^3.0.3",
-		"stripe": "^12.13.0",
-		"@answeroverflow/env": "^0.1.0"
+		"stripe": "^12.18.0"
 	},
 	"devDependencies": {
-		"@answeroverflow/prettier-config": "^0.0.0",
-		"@answeroverflow/tsconfig": "^0.0.0",
+		"@answeroverflow/prettier-config": "workspace:^",
+		"@answeroverflow/tsconfig": "workspace:^",
 		"@vitest/coverage-c8": "^0.28.5",
-		"eslint": "^8.45.0",
+		"eslint": "^8.47.0",
 		"prettier": "^2.8.8",
 		"vitest": "^0.29.8"
 	}

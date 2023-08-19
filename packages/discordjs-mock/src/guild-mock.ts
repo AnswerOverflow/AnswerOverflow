@@ -7,6 +7,7 @@ import {
 	Role,
 	Client,
 	GuildSystemChannelFlags,
+	RoleFlagsBitField,
 } from 'discord.js';
 import type { RawRoleData } from 'discord.js/typings/rawDataTypes';
 import { randomSnowflake } from '@answeroverflow/discordjs-utils';
@@ -108,6 +109,7 @@ export function mockRole(
 		mentionable: false,
 		name: 'test',
 		position: 0,
+		flags: RoleFlagsBitField.Flags.InPrompt,
 		permissions: PermissionsBitField.resolve(permissions).toString(),
 		...role,
 	};
