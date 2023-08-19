@@ -4,6 +4,8 @@
  * This is especially useful for Docker builds.
  */
 
+import { resolve } from 'path';
+
 !process.env.SKIP_ENV_VALIDATION &&
 	// @ts-expect-error
 	(await import('@answeroverflow/env/web-schema.mjs'));
@@ -57,7 +59,7 @@ const config = {
 	},
 	webpack: (config, { isServer }) => {
 		if (isServer) {
-			config.resolve.alias['@sentry/nextjs'] = require.resolve(
+			config.resolve.alias['@sentry/nextjs'] = resolve(
 				'@sentry/nextjs/cjs/edge',
 			);
 		}
