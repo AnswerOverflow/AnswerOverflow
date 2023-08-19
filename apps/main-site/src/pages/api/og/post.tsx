@@ -154,6 +154,7 @@ export default async function handler(
 	const ServerIcon = () => {
 		if (icon) {
 			return (
+				// eslint-disable-next-line @next/next/no-img-element
 				<img
 					src={icon}
 					alt="Server Icon"

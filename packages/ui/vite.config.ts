@@ -1,4 +1,7 @@
-import { defineConfig, loadEnv } from 'vite';
+// eslint-disable-next-line n/no-extraneous-import
+import { loadEnv } from 'vite';
+// eslint-disable-next-line n/no-extraneous-import
+import { defineConfig } from 'vitest/config';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
 import react from '@vitejs/plugin-react-swc';

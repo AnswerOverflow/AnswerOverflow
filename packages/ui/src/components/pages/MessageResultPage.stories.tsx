@@ -25,6 +25,7 @@ export const PrivateSolution = Primary.bind({});
 export const ManyFromSameAuthor = Primary.bind({});
 
 const defaultMessage: MessageResultPageProps = {
+	relatedPosts: [],
 	messages: [
 		mockMessageWithDiscordAccount({
 			id: '1',
