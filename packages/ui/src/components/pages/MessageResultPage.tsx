@@ -254,14 +254,14 @@ export function MessageResultPage({
 					<div className="flex flex-col gap-4">
 						{relatedPosts.slice(0, messages.length * 2).map((post) => (
 							<Link
-								className="flex flex-col gap-2 truncate rounded-md border-2 border-solid border-secondary p-4 text-left transition-colors duration-700 ease-out hover:border-primary hover:text-primary"
+								className="flex flex-col gap-2 rounded-md border-2 border-solid border-secondary p-4 text-left transition-colors duration-700 ease-out hover:border-primary hover:text-primary"
 								href={`/m/${post.message.id}`}
 								key={post.thread.id}
 							>
-								<span className="text-lg font-semibold">
+								<span className="truncate text-lg font-semibold">
 									{post.thread.name}
 								</span>
-								<span className="text-sm">
+								<span className="truncate text-sm">
 									{post.message.content.slice(0, 100)}
 								</span>
 							</Link>

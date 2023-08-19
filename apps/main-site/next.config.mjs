@@ -4,7 +4,6 @@
  * This is especially useful for Docker builds.
  */
 
-
 !process.env.SKIP_ENV_VALIDATION &&
 	// @ts-expect-error
 	(await import('@answeroverflow/env/web-schema.mjs'));
