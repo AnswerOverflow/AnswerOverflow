@@ -14,19 +14,19 @@
 		"lint:fix": "eslint . --fix"
 	},
 	"dependencies": {
-		"discord-api-types": "^0.37.48",
-		"@answeroverflow/env": "^0.1.0",
+		"@answeroverflow/env": "workspace:^",
+		"discord-api-types": "^0.37.54",
 		"dotenv-cra": "^3.0.3",
-		"zod": "^3.21.4"
+		"zod": "^3.22.2"
 	},
 	"devDependencies": {
-		"@answeroverflow/elastic-types": "^0.1.0",
-		"@answeroverflow/prettier-config": "^0.0.0",
-		"@answeroverflow/prisma-types": "^0.1.0",
-		"@answeroverflow/tsconfig": "^0.0.0",
-		"@types/node": "^20.4.2",
-		"dotenv-cli": "^7.2.1",
-		"eslint": "^8.45.0",
+		"@answeroverflow/elastic-types": "workspace:^",
+		"@answeroverflow/prettier-config": "workspace:^",
+		"@answeroverflow/prisma-types": "workspace:^",
+		"@answeroverflow/tsconfig": "workspace:^",
+		"@types/node": "^20.5.1",
+		"dotenv-cli": "^7.3.0",
+		"eslint": "^8.47.0",
 		"prettier": "^2.8.8"
 	}
 }
