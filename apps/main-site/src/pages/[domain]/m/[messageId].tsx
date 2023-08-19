@@ -31,13 +31,14 @@ export default function MessageResult(
 	if (!data) {
 		return null;
 	}
-	const { messages, parentChannel, server, thread } = data;
+	const { messages, parentChannel, server, thread, recommendedPosts } = data;
 	return (
 		<MessageResultPage
 			messages={messages}
 			channel={parentChannel}
 			server={server}
 			requestedId={messageId}
+			relatedPosts={recommendedPosts}
 			thread={thread ?? undefined}
 		/>
 	);
