@@ -5,6 +5,12 @@ import { provideConsentOnReadTheRules } from '~discord-bot/domains/manage-accoun
 
 @ApplyOptions<Listener.Options>({ event: Events.GuildMemberUpdate })
 export class ReadTheRulesConsent extends Listener {
+	public constructor(context: Listener.Context, options: Listener.Options) {
+		super(context, {
+			...options,
+			event: Events.GuildMemberUpdate,
+		});
+	}
 	public async run(oldMember: GuildMember, newMember: GuildMember) {
 		await provideConsentOnReadTheRules({
 			oldMember,

@@ -63,6 +63,7 @@ export function createClient(override: Partial<ClientOptions> = {}) {
 			Partials.Message,
 			Partials.GuildMember,
 			Partials.Reaction,
+			Partials.User,
 		],
 		hmr: {
 			enabled: sharedEnvs.NODE_ENV === 'development',
@@ -115,7 +116,7 @@ export const login = async (client: SapphireClient) => {
 		});
 	} catch (error) {
 		client.logger.fatal(error);
-		client.destroy();
+		await client.destroy();
 		throw error;
 	}
 };

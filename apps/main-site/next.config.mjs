@@ -55,6 +55,14 @@ const config = {
 	sentry: {
 		hideSourceMaps: false,
 	},
+	webpack: (config, { isServer }) => {
+		if (isServer) {
+			config.resolve.alias['@sentry/nextjs'] = require.resolve(
+				'@sentry/nextjs/cjs/edge',
+			);
+		}
+		return config;
+	},
 	async rewrites() {
 		return [
 			{
