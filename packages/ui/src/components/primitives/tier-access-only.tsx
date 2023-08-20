@@ -1,6 +1,6 @@
 import type { Plan } from '@answeroverflow/db';
 import React from 'react';
-import { PricingDialog } from '~ui/components/pages';
+import { PricingDialog } from '~ui/components/pages/Pricing';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const TierAccessContext = React.createContext<{
@@ -39,7 +39,7 @@ export function TierAccessOnly(props: {
 			) : (
 				<div className="grid grid-cols-1 grid-rows-1">
 					<div className="cursor-not-allowed opacity-50">{props.children}</div>
-					<div className="flex flex-row items-center justify-between space-y-2 rounded-b-lg border border-stone-200 bg-stone-50 p-3 dark:bg-stone-900 sm:space-y-0 sm:px-10">
+					<div className="flex flex-row items-center justify-between space-y-2 rounded-b-lg border bg-muted/20 p-3 sm:space-y-0 sm:px-10">
 						<span>
 							You must be on the pro plan or higher to use this feature.
 						</span>

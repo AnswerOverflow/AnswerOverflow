@@ -1,6 +1,7 @@
 import React from 'react';
 import type { DocsThemeConfig } from 'nextra-theme-docs';
-import { AnswerOverflowLogo, Footer } from '@answeroverflow/ui';
+import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/base/AnswerOverflowLogo';
+import { Footer } from '@answeroverflow/ui/src/components/primitives/Footer';
 import {
 	CREATE_NEW_DOCS_ISSUE_LINK,
 	DISCORD_LINK,
@@ -13,13 +14,7 @@ import { webClientEnv } from '@answeroverflow/env/web';
 
 // https://nextra.site/docs/docs-theme/theme-configuration
 const config: DocsThemeConfig = {
-	logo: (
-		<AnswerOverflowLogo
-			style={{
-				width: '168px',
-			}}
-		/>
-	),
+	logo: <AnswerOverflowLogo width={168} />,
 	logoLink: 'https://www.answeroverflow.com',
 	project: {
 		link: GITHUB_LINK,

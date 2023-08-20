@@ -1,9 +1,10 @@
 import { appRouter } from '@answeroverflow/api';
 import { createSSGContext } from '@answeroverflow/api/src/router/context';
-import { MessageResultPage, useIsUserInServer } from '@answeroverflow/ui';
+import { MessageResultPage } from '@answeroverflow/ui/src/components/pages/MessageResultPage';
+import { useIsUserInServer } from '@answeroverflow/ui/src/utils/hooks';
+import { trpc } from '@answeroverflow/ui/src/utils/trpc';
 import { createServerSideHelpers } from '@trpc/react-query/server';
 import superjson from 'superjson';
-import { trpc } from '@answeroverflow/ui';
 import type { GetStaticPropsContext, InferGetStaticPropsType } from 'next';
 import { TRPCError } from '@trpc/server';
 import { findServerById } from '@answeroverflow/db';
@@ -30,13 +31,14 @@ export default function MessageResult(
 	if (!data) {
 		return null;
 	}
-	const { messages, parentChannel, server, thread } = data;
+	const { messages, parentChannel, server, thread, recommendedPosts } = data;
 	return (
 		<MessageResultPage
 			messages={messages}
 			channel={parentChannel}
 			server={server}
 			requestedId={messageId}
+			relatedPosts={recommendedPosts}
 			thread={thread ?? undefined}
 		/>
 	);

@@ -1,10 +1,10 @@
-import { useRef } from 'react';
+import React, { useRef } from 'react';
 import Xarrow from 'react-xarrows';
 import { DemoMessage, type MessageProps } from '../DemoMessage';
 import { GooglePage } from './GooglePage/GooglePage';
 import './DashAnimation.css';
 import { useTheme } from 'next-themes';
-
+if (typeof window === 'undefined') React.useLayoutEffect = () => {};
 export interface NewLandingAnimationProps {
 	questionMessage: MessageProps;
 	answerMessage: MessageProps;

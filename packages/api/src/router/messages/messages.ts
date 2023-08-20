@@ -1,17 +1,11 @@
 import { z } from 'zod';
 import { router, withUserServersProcedure } from '~api/router/trpc';
 import {
-	addAuthorsToMessages,
-	addReferencesToMessages,
-	findChannelById,
-	findMessageById,
-	findMessagesByChannelId,
-	findServerById,
-	getParentChannelOfMessage,
-	getThreadIdOfMessage,
+	findChannelsBeforeArchivedTimestamp,
+	findManyMessagesWithAuthors,
+	findMessageResultPage,
 	searchMessages,
 } from '@answeroverflow/db';
-import { findOrThrowNotFound } from '~api/utils/operations';
 import {
 	canUserViewPrivateMessage,
 	stripPrivateChannelData,
@@ -19,8 +13,6 @@ import {
 	stripPrivateServerData,
 } from '~api/utils/permissions';
 import { TRPCError } from '@trpc/server';
-import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
-import { ChannelType } from 'discord-api-types/v10';
 
 export const messagesRouter = router({
 	/*
@@ -39,97 +31,47 @@ export const messagesRouter = router({
 			tenantAuthAccessible: true,
 		})
 		.query(async ({ input, ctx }) => {
-			// This is the message we're starting from
-			const targetMessage = await findOrThrowNotFound(
-				() => findMessageById(input),
-				'Target message not found',
-			);
-
-			// Declare as const to make Typescript not yell at us when used in arrow functions
-			const threadId = getThreadIdOfMessage(targetMessage);
-			// TODO: These should maybe be a different error code
-			const parentId = getParentChannelOfMessage(targetMessage);
-
-			if (!parentId) {
+			const data = await findMessageResultPage(input);
+			if (!data) {
 				throw new TRPCError({
 					code: 'NOT_FOUND',
-					message: 'Message has no parent channel',
+					message: 'Message not found',
 				});
 			}
-
-			const threadFetch = threadId
-				? findOrThrowNotFound(
-						() => findChannelById(threadId),
-						'Thread not found',
-				  )
-				: undefined;
-
-			const serverFetch = findOrThrowNotFound(
-				() => findServerById(targetMessage.serverId),
-				'Server for message not found',
-			);
-			const parentChannelFetch = threadId
-				? findOrThrowNotFound(
-						() => findChannelById(parentId),
-						'Parent channel for message not found',
-				  )
-				: findOrThrowNotFound(
-						() => findChannelById(targetMessage.channelId),
-						'Channel for message not found',
-				  );
-
-			const messageFetch = threadId
-				? findMessagesByChannelId({
-						channelId: threadId,
+			const { messages, channel, server, thread } = data;
+			const recommendedChannels = thread
+				? await findChannelsBeforeArchivedTimestamp({
+						take: 100,
+						timestamp: thread.archivedTimestamp ?? BigInt(999999999),
+						serverId: server.id,
 				  })
-				: findMessagesByChannelId({
-						channelId: parentId,
-						after: targetMessage.id,
-						limit: NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
-				  });
-
-			const [thread, server, channel, messages, rootMessage] =
-				await Promise.all([
-					threadFetch,
-					serverFetch,
-					parentChannelFetch,
-					messageFetch,
-					threadId ? findMessageById(threadId) : undefined,
-				]);
-
-			// 404 for servers that are waiting to be cleaned up
-			if (server.kickedTime !== null) {
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'Channel has indexing disabled',
-				});
-			}
-
-			if (!channel.flags.indexingEnabled) {
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'Channel has indexing disabled',
-				});
-			}
-
-			// We've collected all of the data, now we need to strip out the private info
-			const messagesWithRefs = await addReferencesToMessages(
-				threadId && rootMessage && channel.type !== ChannelType.GuildForum
-					? [rootMessage, ...messages]
-					: messages,
+				: [];
+			const recommendedChannelLookup = new Map(
+				recommendedChannels.map((c) => [c.id, c]),
 			);
-			const messagesWithDiscordAccounts = await addAuthorsToMessages(
-				messagesWithRefs,
+			const recommendedPosts = await findManyMessagesWithAuthors(
+				recommendedChannels.map((c) => c.id),
 				[server],
+			).then((posts) =>
+				posts
+					.filter((p) => p.public)
+					.map((p) => ({
+						message: stripPrivateFullMessageData(p, ctx.userServers),
+						thread: stripPrivateChannelData(
+							recommendedChannelLookup.get(p.id)!,
+						),
+					}))
+					.slice(0, 10),
 			);
 
 			return {
-				messages: messagesWithDiscordAccounts.map((message) =>
+				messages: messages.map((message) =>
 					stripPrivateFullMessageData(message, ctx.userServers),
 				),
 				parentChannel: stripPrivateChannelData(channel),
 				server: stripPrivateServerData(server),
 				thread: thread ? stripPrivateChannelData(thread) : undefined,
+				recommendedPosts,
 			};
 		}),
 	search: withUserServersProcedure

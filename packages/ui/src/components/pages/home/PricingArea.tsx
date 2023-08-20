@@ -1,6 +1,7 @@
 import { CheckIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
-import { Heading, GetStarted } from '~ui/components/primitives';
+import { Heading } from '~ui/components/primitives/base/Heading';
 import { cn } from '~ui/utils/styling';
+import { GetStarted } from '~ui/components/primitives/Callouts';
 const pricing = {
 	tiers: [
 		{
@@ -59,9 +60,9 @@ export const PricingArea = (props: { className?: string }) => {
 					<div
 						key={tier.title}
 						className={cn(
-							'relative flex w-full max-w-xl flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-ao-black',
+							'relative flex w-full max-w-xl flex-col rounded-2xl border border-gray-200 p-8 shadow-sm dark:border-gray-700',
 							tier.mostPopular
-								? 'shadow-xl shadow-ao-blue/[.5] lg:shadow-2xl'
+								? 'shadow-ao-blue/[.5] shadow-xl lg:shadow-2xl'
 								: '',
 						)}
 					>
@@ -86,7 +87,7 @@ export const PricingArea = (props: { className?: string }) => {
 								</div>
 								<div className="flex flex-row font-semibold text-neutral-600 dark:text-neutral-300">
 									<RocketLaunchIcon
-										className={cn('h-6 w-6 shrink-0 text-ao-blue')}
+										className={cn('text-ao-blue h-6 w-6 shrink-0')}
 										aria-hidden="true"
 									/>
 									<label className="ml-3 text-gray-600 dark:text-gray-300">
@@ -108,7 +109,7 @@ export const PricingArea = (props: { className?: string }) => {
 											/>
 										) : (
 											<RocketLaunchIcon
-												className={cn('h-6 w-6 shrink-0 text-ao-blue')}
+												className={cn('text-ao-blue h-6 w-6 shrink-0')}
 												aria-hidden="true"
 											/>
 										)}

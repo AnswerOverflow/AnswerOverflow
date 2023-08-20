@@ -43,6 +43,7 @@ const markSolutionErrorReasons = [
 	'COULD_NOT_FIND_PARENT_CHANNEL',
 	'MARK_SOLUTION_NOT_ENABLED',
 	'COULD_NOT_FIND_ROOT_MESSAGE',
+	'QUESTION_CANNOT_BE_SOLUTION',
 	'NO_PERMISSION',
 	'ALREADY_SOLVED_VIA_EMBED',
 	'ALREADY_SOLVED_VIA_TAG',
@@ -121,6 +122,13 @@ export async function checkIfCanMarkSolution(
 		} else {
 			throw error;
 		}
+	}
+
+	if (questionMessage.id === possibleSolution.id) {
+		throw new MarkSolutionError(
+			'QUESTION_CANNOT_BE_SOLUTION',
+			'You cannot mark the question message as the solution, please select the message that best matches the solution.\n\nIf the solution is in the question message, please copy and paste it into a new message and mark that as the solution.',
+		);
 	}
 	// Check if the user has permission to mark the question as solved
 	const guildMember = await guild.members.fetch(userMarkingAsSolved.id);

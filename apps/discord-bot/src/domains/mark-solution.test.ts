@@ -294,6 +294,32 @@ describe('Can Mark Solution', () => {
 				checkIfCanMarkSolution(solutionMessage, defaultAuthor.user),
 			).rejects.toThrowError('This question is already marked as solved');
 		});
+		it('should fail to mark a solution if the solution is the question', async () => {
+			const rootMessage = mockMessage({
+				client,
+				channel: forumChannelThread,
+				author: defaultAuthor.user,
+				override: {
+					id: forumChannelThread.id,
+				},
+			});
+			mockMessage({
+				client,
+				channel: forumChannelThread,
+			});
+			await createChannel({
+				...toAOChannel(forumChannel),
+				flags: {
+					markSolutionEnabled: true,
+				},
+				solutionTagId: 'solved',
+			});
+			await expect(
+				checkIfCanMarkSolution(rootMessage, defaultAuthor.user),
+			).rejects.toThrowError(
+				'You cannot mark the question message as the solution, please select the message that best matches the solution.\n\nIf the solution is in the question message, please copy and paste it into a new message and mark that as the solution.',
+			);
+		});
 	});
 	describe('Check If Can Mark Solution Success', () => {
 		let questionMessage: Message;

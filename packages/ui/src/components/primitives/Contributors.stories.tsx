@@ -1,6 +1,9 @@
 import type { Story } from '@ladle/react';
 import { Contributors } from './Contributors';
-
+import { StoryDefault } from '@ladle/react/typings-for-build/app/exports';
+export default {
+	title: '!Pages / Contributors',
+} satisfies StoryDefault;
 type ContributorsProps = React.ComponentPropsWithoutRef<typeof Contributors>;
 
 export const ContributorsStory: Story<ContributorsProps> = (props) => (

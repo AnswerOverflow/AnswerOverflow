@@ -10,9 +10,7 @@ import { SearchResult } from './SearchResult';
 type SearchResultProps = React.ComponentPropsWithoutRef<typeof SearchResult>;
 
 export const PublicSolution: Story<SearchResultProps> = (props) => (
-	<div className="xl:w-2/3">
-		<SearchResult {...props} />
-	</div>
+	<SearchResult {...props} />
 );
 
 PublicSolution.args = {
@@ -68,6 +66,31 @@ PrivateSolution.args = {
 				},
 			],
 			referencedMessage: mockMessageWithDiscordAccount(),
+		},
+		thread: mockChannelWithSettings(),
+		score: 0.5,
+		channel: mockChannelWithSettings({
+			// AO's Discord server
+			inviteCode: 'sxDN2rEdwD',
+		}),
+		server: mockPublicServer(),
+	},
+};
+
+export const PrivateResult = PublicSolution.bind({});
+
+PrivateResult.args = {
+	result: {
+		message: {
+			...mockMessageWithDiscordAccount(),
+			solutionMessages: [
+				{
+					...mockMessageWithDiscordAccount(),
+					public: false,
+				},
+			],
+			referencedMessage: mockMessageWithDiscordAccount(),
+			public: false,
 		},
 		thread: mockChannelWithSettings(),
 		score: 0.5,

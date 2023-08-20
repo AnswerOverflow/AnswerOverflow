@@ -3,26 +3,27 @@ import {
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
-	AOHead,
-	AOLink,
-	Button,
+} from '../primitives/ui/accordion';
+import { Check } from 'lucide-react';
+import { trackEvent } from '@answeroverflow/hooks';
+import { toast } from 'react-toastify';
+import React from 'react';
+import { classNames } from '~ui/utils/styling';
+import {
 	Dialog,
 	DialogContent,
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-	Heading,
-	Input,
-	LinkButton,
-} from '../primitives';
-import { TextArea } from '~ui/components/primitives/base/TextArea';
-import { LuCheck } from 'react-icons/lu';
-import { trackEvent } from '@answeroverflow/hooks';
-import { toast } from 'react-toastify';
-import React from 'react';
-import { classNames } from '~ui/utils/styling';
-
+} from '~ui/components/primitives/ui/dialog';
+import { Button } from '~ui/components/primitives/ui/button';
+import { Input } from '~ui/components/primitives/ui/input';
+import { Textarea } from '~ui/components/primitives/ui/textarea';
+import { AOLink } from '~ui/components/primitives/base/Link';
+import AOHead from '~ui/components/primitives/AOHead';
+import { LinkButton } from '~ui/components/primitives/base/LinkButton';
+import { Heading } from '~ui/components/primitives/base/Heading';
 const faqs: {
 	question: React.ReactNode;
 	answer: React.ReactNode;
@@ -131,7 +132,7 @@ const PricingElement = (props: {
 	return (
 		<div
 			className={classNames(
-				'flex h-full flex-col items-center justify-start rounded-2xl border-2 border-ao-black/25 p-8 dark:border-ao-white/25',
+				'border-ao-black/25 dark:border-ao-white/25 flex h-full flex-col items-center justify-start rounded-2xl border-2 p-8',
 				props.bestValue ? 'border-indigo-600/75 dark:border-indigo-600/75' : '',
 			)}
 		>
@@ -151,7 +152,7 @@ const PricingElement = (props: {
 					<ul className="grid w-full grid-cols-1 items-center gap-2">
 						{props.features.map((feature, index) => (
 							<li key={index} className="flex w-full flex-row gap-4">
-								{feature.icon ?? <LuCheck className="h-6 w-6 shrink-0" />}
+								{feature.icon ?? <Check className="h-6 w-6 shrink-0" />}
 								{feature.name}
 							</li>
 						))}
@@ -282,8 +283,9 @@ export const Pricing = () => {
 					placeholder={'email (optional)'}
 					type={'email'}
 					autoComplete={'email'}
+					className={'bg-inherit'}
 				/>
-				<TextArea
+				<Textarea
 					className="h-32"
 					placeholder={
 						'What do you think of our pricing? What would you like to see?'
@@ -310,7 +312,7 @@ export const PricingDialog = (props: {
 					{props.hasSubscribedBefore ? 'Resubscribe' : 'Start free trial'}
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="max-h-screen max-w-5xl overflow-y-auto bg-white dark:bg-ao-black">
+			<DialogContent className="max-h-screen max-w-5xl overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>Pick a plan</DialogTitle>
 				</DialogHeader>

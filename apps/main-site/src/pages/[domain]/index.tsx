@@ -6,7 +6,7 @@ import {
 	findServerByCustomDomain,
 } from '@answeroverflow/db';
 import superjson from 'superjson';
-import { CommunityPage } from '@answeroverflow/ui';
+import { CommunityPage } from '@answeroverflow/ui/src/components/pages/CommunityPage';
 
 export default function MessageResult(
 	props: InferGetStaticPropsType<typeof getStaticProps>,

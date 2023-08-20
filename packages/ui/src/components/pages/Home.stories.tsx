@@ -1,5 +1,9 @@
 import { Home } from './Home';
 import { mockServer } from '~ui/test/props';
+import { StoryDefault } from '@ladle/react';
+export default {
+	title: '!Pages / Home',
+} satisfies StoryDefault;
 
 const realData = [
 	{ id: '1003731983970615406', icon: 'b1522fcb5d6534026874b81957ee6746' },

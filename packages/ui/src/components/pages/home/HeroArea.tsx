@@ -1,20 +1,21 @@
 import Marquee from 'react-fast-marquee';
 import type { ServerPublic } from '~api/router/server/types';
-import { Button, SearchInput, ServerIcon } from '~ui/components/primitives';
 import Link from 'next/link';
+import { Button } from '~ui/components/primitives/ui/button';
+import { MessagesSearchBar } from '~ui/components/pages/SearchPage';
 
 const HeroAreaText = () => {
 	return (
 		<div className="flex h-full w-[calc(100vw-2rem)] max-w-screen-lg flex-col items-center justify-center gap-6 rounded-3xl bg-gray-200/40 bg-clip-padding p-8 backdrop-blur-3xl dark:bg-gray-900/40 sm:w-[80vw] md:p-16">
-			<h1 className="text-center font-header text-5xl font-bold leading-[114.5%] text-ao-black dark:text-ao-white md:text-7xl">
+			<h1 className="text-ao-black dark:text-ao-white text-center font-header text-5xl font-bold leading-[114.5%] md:text-7xl">
 				Search all of Discord
 			</h1>
-			<h2 className="w-4/5 text-center font-body text-lg text-ao-black/[.95] dark:text-ao-white/[.85] md:text-2xl">
+			<h2 className="text-ao-black/[.95] dark:text-ao-white/[.85] w-4/5 text-center font-body text-lg md:text-2xl">
 				Answer Overflow is a Discord search engine. Find results from indexed
 				content or a community to join.
 			</h2>
 			<div className="flex w-full flex-col items-center justify-center gap-8 sm:flex-row">
-				<SearchInput />
+				<MessagesSearchBar />
 			</div>
 			<div className="grid w-full grid-cols-1 grid-rows-2 gap-4 sm:w-auto sm:grid-cols-2 sm:grid-rows-1  sm:gap-8">
 				<Button size={'lg'} className={'w-full text-xl'}>

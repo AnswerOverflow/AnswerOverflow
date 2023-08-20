@@ -4,18 +4,10 @@ import type {
 	ServerPublic,
 } from '@answeroverflow/api';
 import { useIsUserInServer } from '~ui/utils/hooks';
-import {
-	AOHead,
-	Message,
-	MultiMessageBlurrer,
-	ServerInvite,
-	ChannelIcon,
-	MessageContentWithSolution,
-	Heading,
-} from '../primitives';
 import { MessagesSearchBar } from './SearchPage';
 import {
 	messageWithDiscordAccountToAnalyticsData,
+	useTenantContext,
 	useTrackEvent,
 } from '@answeroverflow/hooks';
 import {
@@ -26,14 +18,30 @@ import {
 import { isServer } from '~ui/utils/checks';
 import Head from 'next/head';
 import type { QAPage, WithContext } from 'schema-dts';
-import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
+import {
+	getBaseUrl,
+	getMainSiteHostname,
+} from '@answeroverflow/constants/src/links';
 import { toHTML } from 'discord-markdown';
+import { ServerInvite } from '~ui/components/primitives/ServerInvite';
+import {
+	Message,
+	MessageContentWithSolution,
+	MultiMessageBlurrer,
+} from '~ui/components/primitives/Message';
+import { Heading } from '~ui/components/primitives/base/Heading';
+import AOHead from '~ui/components/primitives/AOHead';
+import Link from 'next/link';
 export type MessageResultPageProps = {
 	messages: APIMessageWithDiscordAccount[];
 	server: ServerPublic;
 	channel: ChannelPublicWithFlags;
 	thread?: ChannelPublicWithFlags;
 	requestedId: string;
+	relatedPosts: {
+		message: APIMessageWithDiscordAccount;
+		thread: ChannelPublicWithFlags;
+	}[];
 };
 
 // TODO: Align text to be same level with the avatar
@@ -43,7 +51,9 @@ export function MessageResultPage({
 	channel,
 	requestedId,
 	thread,
+	relatedPosts,
 }: MessageResultPageProps) {
+	const { tenant } = useTenantContext();
 	const isUserInServer = useIsUserInServer(server.id);
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
@@ -135,8 +145,9 @@ export function MessageResultPage({
 							/>
 						) : undefined
 					}
+					showBorders={message.id !== solutionMessageId}
 					images={shouldShowSolutionInContent ? null : undefined}
-					loadingStyle={index === 0 ? 'eager' : 'lazy'} // Images above the fold should have priority
+					loadingStyle={'lazy'}
 					Blurrer={(props) => <MultiMessageBlurrer {...props} count={count} />}
 				/>
 			);
@@ -164,7 +175,7 @@ export function MessageResultPage({
 	});
 
 	const question = thread?.name ?? firstMessage.content?.slice(0, 100);
-
+	const isFirstMessageSolution = solution && solution.id !== firstMessage.id;
 	const qaHeader: WithContext<QAPage> = {
 		'@context': 'https://schema.org',
 		'@type': 'QAPage',
@@ -172,49 +183,42 @@ export function MessageResultPage({
 			'@type': 'Question',
 			name: toHTML(question),
 			text: toHTML(firstMessage.content),
-			answerCount: solution ? 1 : 0,
-			acceptedAnswer: solution && {
-				'@type': 'Answer',
-				text: toHTML(solution.content),
-				url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
-					solution.id
-				}#solution-${solution.id}`,
-			},
+			answerCount: solution && !isFirstMessageSolution ? 1 : 0,
+			acceptedAnswer:
+				solution && !isFirstMessageSolution
+					? {
+							'@type': 'Answer',
+							text: toHTML(solution.content),
+							url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
+								solution.id
+							}#solution-${solution.id}`,
+					  }
+					: undefined,
 		},
 	};
+	const baseDomain = tenant?.customDomain
+		? `https://${tenant.customDomain}`
+		: getBaseUrl();
 
-	return (
-		<div className="sm:mx-3">
-			<Head>
-				<script
-					type="application/ld+json"
-					dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}
-				/>
-			</Head>
-			<AOHead
-				description={description}
-				path={`/m/${firstMessage?.id ?? requestedId}`}
-				title={`${channelName} - ${server.name}`}
-				server={server}
-			/>
-
-			<div className="my-8 flex flex-col-reverse items-center justify-between gap-2 sm:flex-row sm:py-0">
-				<div className="flex h-full grow flex-col justify-between gap-4">
-					<MessagesSearchBar />
-					<div className="flex flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400 text-center  dark:border-neutral-600  dark:text-white">
-						<ChannelIcon channelType={channel.type} className="mb-4 h-6 w-6" />
+	const Main = () => (
+		<div className={'flex grow flex-col'}>
+			<div className="mb-2 flex flex-col-reverse items-center justify-between gap-2 sm:flex-row sm:py-0 md:my-8">
+				<div className="flex h-full w-full grow flex-col items-center justify-between gap-2 md:gap-4">
+					<MessagesSearchBar className={'hidden md:block'} />
+					<div className={'block xl:hidden'}>
+						<ServerInvite
+							server={server}
+							location={'Message Result Page'}
+							channel={channel}
+							JoinButton={null}
+						/>
+					</div>
+					<div className="flex w-full flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400  text-center  dark:border-neutral-600 dark:text-white">
 						<h1
-							className="mb-4 text-left font-header text-3xl text-ao-black dark:text-ao-white"
+							className="w-full text-center font-header text-xl text-primary md:text-left md:text-3xl"
 							dangerouslySetInnerHTML={{ __html: toHTML(question) }}
 						></h1>
 					</div>
-				</div>
-				<div className="hidden shrink-0 sm:pl-8 md:block">
-					<ServerInvite
-						server={server}
-						channel={channel}
-						location="Message Result Page"
-					/>
 				</div>
 			</div>
 			<div className="rounded-md">
@@ -231,6 +235,61 @@ export function MessageResultPage({
 						location="Message Result Page"
 					/>
 				</div>
+			</div>
+		</div>
+	);
+
+	const Sidebar = () => (
+		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center xl:mt-6 xl:w-[400px]">
+			<div className={'hidden w-full  xl:block'}>
+				<ServerInvite
+					server={server}
+					channel={channel}
+					location="Message Result Page"
+				/>
+			</div>
+			{relatedPosts.length > 0 && (
+				<div className="flex w-full flex-col justify-center gap-4 text-center xl:mt-6 ">
+					<span className="text-2xl">Recommended Posts</span>
+					<div className="flex flex-col gap-4">
+						{relatedPosts.slice(0, messages.length * 2).map((post) => (
+							<Link
+								className="flex flex-col gap-2 rounded-md border-2 border-solid border-secondary p-4 text-left transition-colors duration-700 ease-out hover:border-primary hover:text-primary"
+								href={`/m/${post.message.id}`}
+								key={post.thread.id}
+							>
+								<span className="truncate text-lg font-semibold">
+									{post.thread.name}
+								</span>
+								<span className="truncate text-sm">
+									{post.message.content.slice(0, 100)}
+								</span>
+							</Link>
+						))}
+					</div>
+				</div>
+			)}
+		</div>
+	);
+
+	return (
+		<div className="sm:mx-3">
+			<Head>
+				<script
+					type="application/ld+json"
+					dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}
+				/>
+			</Head>
+			<AOHead
+				description={description}
+				path={`/m/${firstMessage?.id ?? requestedId}`}
+				title={`${channelName} - ${server.name}`}
+				server={server}
+				image={`${baseDomain}/og/post?id=${firstMessage?.id ?? requestedId}`}
+			/>
+			<div className="flex flex-col gap-8 xl:flex-row">
+				<Main />
+				<Sidebar />
 			</div>
 		</div>
 	);

@@ -183,8 +183,7 @@ export async function indexRootChannel(
 
 		for await (const thread of outOfDateThreads) {
 			container.logger.debug(
-				`(${++threadsIndexed}/${threadsToIndex.length}) Indexing:
-      }
+				`(${++threadsIndexed}/${outOfDateThreads.length}) Indexing:
 Thread: ${thread.id} | ${thread.name}
 Channel: ${channel.id} | ${channel.name}
 Server: ${channel.guildId} | ${channel.guild.name}`,
@@ -220,7 +219,7 @@ export async function indexTextBasedChannel(
 	container.logger.debug(
 		`Indexing channel ${channel.id} | ${channel.name} from message id ${
 			start ?? 'beginning'
-		}`,
+		} until ${channel.lastMessageId ?? 'unknown'}`,
 	);
 	let messages: Message[] = [];
 	if (

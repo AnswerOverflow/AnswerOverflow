@@ -9,9 +9,9 @@ import {
 } from '@tremor/react';
 import type { Plan } from '@answeroverflow/db';
 import { trpc } from '~ui/utils/trpc';
-import { AOLink } from '../primitives';
 import { useDashboardContext } from './dashboard-context';
-import { PricingDialog } from '~ui/components/pages';
+import { PricingDialog } from '~ui/components/pages/Pricing';
+import { AOLink } from '~ui/components/primitives/base/Link';
 
 export function PageViewsCardRenderer(props: {
 	numberOfPageViews?: number;
@@ -132,7 +132,11 @@ export function CurrentPlanCardRenderer(
 
 	const CTA = () => {
 		if (status === 'inactive') {
-			if (!props.proPlanCheckoutUrl || !props.enterprisePlanCheckoutUrl) {
+			if (
+				!props.proPlanCheckoutUrl ||
+				!props.enterprisePlanCheckoutUrl ||
+				props.plan === 'OPEN_SOURCE'
+			) {
 				return;
 			}
 			return (
@@ -147,9 +151,9 @@ export function CurrentPlanCardRenderer(
 				return;
 			}
 			return (
-				<AOLink href={props.stripeCheckoutUrl}>
-					<Text>Change Plan</Text>
-				</AOLink>
+				<Text>
+					<AOLink href={props.stripeCheckoutUrl}>Change Plan</AOLink>
+				</Text>
 			);
 		}
 	};

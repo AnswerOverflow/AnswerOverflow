@@ -30,3 +30,14 @@ NotInServer.args = {
 	}),
 	isUserInServer: 'not_in_server',
 };
+export const LongNames = InServer.bind({});
+LongNames.args = {
+	server: mockPublicServer({
+		name: 'This is a very long server name that will be truncated',
+	}),
+	channel: mockChannelWithSettings({
+		// AO's Discord server
+		inviteCode: 'sxDN2rEdwD',
+		name: 'This is a very long channel name that will be truncated',
+	}),
+};

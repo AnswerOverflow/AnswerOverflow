@@ -1,18 +1,17 @@
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import Image from 'next/image';
-import discordMarkdown from 'discord-markdown';
 import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
 import {
-	DiscordIcon,
 	Avatar,
 	AvatarImage,
 	AvatarFallback,
-} from '~ui/components/primitives';
+} from '~ui/components/primitives/ui/avatar';
 import Link from 'next/link';
 import type { ChannelPublicWithFlags } from '@answeroverflow/api';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { forwardRef } from 'react';
 import { getInitials } from '~ui/utils/avatars';
+import { DiscordIcon } from '~ui/components/primitives/base/Icons';
 export type MessageProps = {
 	message: APIMessageWithDiscordAccount;
 	thread?: ChannelPublicWithFlags;
@@ -32,8 +31,6 @@ export type MessageProps = {
 	alt: string;
 	src: string;
 };
-
-const { toHTML } = discordMarkdown;
 
 // TODO: Align text to be same level with the avatar
 export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
@@ -55,7 +52,6 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 		const dateOfMessage = customMessageDateString
 			? customMessageDateString
 			: getSnowflakeUTCDate(message.id);
-		const convertedMessageContent = toHTML(message.content);
 		const isUserInServer = useIsUserInServer(message.serverId);
 		if (isUserInServer === 'in_server') {
 			blurred = false;
@@ -191,8 +187,9 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 							className={`mt-2 max-w-[80vw] text-black ${
 								forceDarkMode ? 'text-neutral-50' : 'dark:text-neutral-50'
 							} sm:mt-0 sm:max-w-[70vw] md:max-w-full`}
-							dangerouslySetInnerHTML={{ __html: convertedMessageContent }}
-						/>
+						>
+							{message.content}
+						</div>
 						<div className="grid gap-2">
 							{message.attachments.map((attachment) => (
 								<MessageAttachment

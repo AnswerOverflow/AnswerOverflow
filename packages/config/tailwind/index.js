@@ -8,16 +8,16 @@ module.exports = {
 		'./node_modules/@tremor/**/*.{js,ts,jsx,tsx}', // Tremor module
 		'../../node_modules/@tremor/**/*.{js,ts,jsx,tsx}', // Tremor module
 	],
-	plugins: [
-		// eslint-disable-next-line no-undef
-		require('@tailwindcss/forms'),
-		// eslint-disable-next-line no-undef
-		require('tailwind-scrollbar-hide'),
-		require('@headlessui/tailwindcss'),
-	],
 	theme: {
 		transparent: 'transparent',
 		current: 'currentColor',
+		container: {
+			center: true,
+			padding: '2rem',
+			screens: {
+				'2xl': '1400px',
+			},
+		},
 		extend: {
 			fontFamily: {
 				discord: ['Noto Sans', 'sans-serif'],
@@ -25,14 +25,44 @@ module.exports = {
 				body: ['Source Sans Pro', 'sans-serif'],
 			},
 			colors: {
-				ao: {
-					white: '#F5F8FF',
-					black: '#141619',
-					blue: '#396FF8',
-					green: '#4BB543',
-					yellow: '#DECB33',
-					red: '#DE3D33',
+				border: 'hsl(var(--border))',
+				input: 'hsl(var(--input))',
+				ring: 'hsl(var(--ring))',
+				background: 'hsl(var(--background))',
+				foreground: 'hsl(var(--foreground))',
+				primary: {
+					DEFAULT: 'hsl(var(--primary))',
+					foreground: 'hsl(var(--primary-foreground))',
 				},
+				secondary: {
+					DEFAULT: 'hsl(var(--secondary))',
+					foreground: 'hsl(var(--secondary-foreground))',
+				},
+				destructive: {
+					DEFAULT: 'hsl(var(--destructive) / <alpha-value>)',
+					foreground: 'hsl(var(--destructive-foreground) / <alpha-value>)',
+				},
+				highlight: {
+					DEFAULT: 'hsl(var(--highlight) / <alpha-value>)',
+					foreground: 'hsl(var(--highlight-foreground) / <alpha-value>)',
+				},
+				muted: {
+					DEFAULT: 'hsl(var(--muted))',
+					foreground: 'hsl(var(--muted-foreground))',
+				},
+				accent: {
+					DEFAULT: 'hsl(var(--accent))',
+					foreground: 'hsl(var(--accent-foreground))',
+				},
+				popover: {
+					DEFAULT: 'hsl(var(--popover))',
+					foreground: 'hsl(var(--popover-foreground))',
+				},
+				card: {
+					DEFAULT: 'hsl(var(--card))',
+					foreground: 'hsl(var(--card-foreground))',
+				},
+				// light mode
 				tremor: {
 					brand: {
 						faint: '#eff6ff', // blue-50
@@ -68,30 +98,44 @@ module.exports = {
 						faint: '#0B1229', // custom
 						muted: '#172554', // blue-950
 						subtle: '#1e40af', // blue-800
-						DEFAULT: '#3b82f6', // blue-500
+						DEFAULT: 'hsl(var(--primary))',
 						emphasis: '#60a5fa', // blue-400
 						inverted: '#030712', // gray-950
 					},
 					background: {
-						muted: '#131A2B', // custom
-						subtle: '#1f2937', // gray-800
-						DEFAULT: '#181b1f', // gray-900
+						muted: 'hsl(var(--muted))',
+						subtle: 'hsl(var(--foreground))',
+						DEFAULT: 'hsl(var(--background))',
 						emphasis: '#d1d5db', // gray-300
 					},
 					border: {
-						DEFAULT: '#1f2937', // gray-800
+						DEFAULT: 'hsl(var(--border))',
 					},
 					ring: {
-						DEFAULT: '#1f2937', // gray-800
+						DEFAULT: 'hsl(var(--ring))',
 					},
 					content: {
-						subtle: '#afafaf', // gray-600
-						DEFAULT: '#afafaf', // gray-600
-						emphasis: '#e5e7eb', // gray-200
-						strong: '#f9fafb', // gray-50
+						subtle: 'hsl(var(--muted-foreground))',
+						DEFAULT: 'hsl(var(--foreground))',
+						emphasis: 'hsl(var(--foreground))',
+						strong: 'hsl(var(--foreground))',
 						inverted: '#000000', // black
 					},
 				},
+			},
+			keyframes: {
+				'accordion-down': {
+					from: { height: 0 },
+					to: { height: 'var(--radix-accordion-content-height)' },
+				},
+				'accordion-up': {
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: 0 },
+				},
+			},
+			animation: {
+				'accordion-down': 'accordion-down 0.2s ease-out',
+				'accordion-up': 'accordion-up 0.2s ease-out',
 			},
 			boxShadow: {
 				// light
@@ -112,6 +156,9 @@ module.exports = {
 				'tremor-default': '0.5rem',
 				'tremor-full': '9999px',
 				standard: '5px',
+				lg: 'var(--radius)',
+				md: 'calc(var(--radius) - 2px)',
+				sm: 'calc(var(--radius) - 4px)',
 			},
 			fontSize: {
 				'tremor-label': ['0.75rem'],
@@ -181,6 +228,14 @@ module.exports = {
 			},
 		},
 	},
+	plugins: [
+		// eslint-disable-next-line no-undef
+		require('@tailwindcss/forms'),
+		// eslint-disable-next-line no-undef
+		require('tailwind-scrollbar-hide'),
+		require('@headlessui/tailwindcss'),
+		require('tailwindcss-animate'),
+	],
 	safelist: [
 		{
 			pattern:

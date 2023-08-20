@@ -6,7 +6,7 @@ import {
 	findServerWithCommunityPageData,
 } from '@answeroverflow/db';
 import superjson from 'superjson';
-import { CommunityPage } from '@answeroverflow/ui';
+import { CommunityPage } from '@answeroverflow/ui/src/components/pages/CommunityPage';
 import { fetchSubscriptionInfo } from '@answeroverflow/payments';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 

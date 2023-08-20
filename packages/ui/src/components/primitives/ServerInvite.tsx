@@ -8,7 +8,6 @@ import React from 'react';
 import { ChannelType } from '~ui/utils/discord';
 import { ServerIcon } from './ServerIcon';
 import { useIsUserInServer } from '~ui/utils/hooks';
-import { LinkButton } from './base';
 import { classNames, cn } from '~ui/utils/styling';
 import Link from 'next/link';
 import { trackEvent } from '@answeroverflow/hooks';
@@ -18,6 +17,8 @@ import {
 	serverToAnalyticsData,
 } from '@answeroverflow/constants/src/analytics';
 import { getServerHomepageUrl } from '~ui/utils/server';
+import { ButtonProps } from '~ui/components/primitives/ui/button';
+import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const ServerInviteContext = createContext<{
 	server: ServerPublic;
@@ -48,9 +49,9 @@ export const ServerInviteTitle = () => {
 					...(channel && channelToAnalyticsData(channel)),
 				});
 			}}
-			className="min-w-0 truncate text-left font-header text-lg font-bold leading-5 text-ao-black  hover:text-ao-black/[.5] dark:text-ao-white dark:hover:text-ao-white/80"
+			className="text-left font-header text-lg font-bold  hover:text-primary/75  hover:underline"
 		>
-			<p>{server.name}</p>
+			{server.name}
 		</Link>
 	);
 };
@@ -66,21 +67,11 @@ export const ChannelIcon = ({
 		case ChannelType.GuildForum:
 			return (
 				<ChatBubbleLeftRightIcon
-					className={classNames(
-						'h-4 w-4 text-ao-black dark:text-ao-white',
-						className ?? '',
-					)}
+					className={classNames('h-4 w-4', className ?? '')}
 				/>
 			);
 		default:
-			return (
-				<HashtagIcon
-					className={classNames(
-						'h-4 w-4 text-ao-black dark:text-ao-white',
-						className ?? '',
-					)}
-				/>
-			);
+			return <HashtagIcon className={classNames('h-4 w-4', className ?? '')} />;
 	}
 };
 
@@ -96,14 +87,17 @@ export const ChannelName = ({
 				channelType={channel.type}
 				className={'text-right font-bold'}
 			/>
-			<p className="truncate text-left text-base font-bold leading-5 text-ao-black dark:text-ao-white">
+			<p className="truncate text-left text-base font-bold leading-5">
 				{channel.name}
 			</p>
 		</div>
 	);
 };
 
-export const ServerInviteJoinButton = (props: { className?: string }) => {
+export const ServerInviteJoinButton = (props: {
+	className?: string;
+	size?: ButtonProps['size'];
+}) => {
 	const { channel, location, server, isUserInServer } =
 		useServerInviteContext();
 	const inviteCode = channel?.inviteCode || server.vanityInviteCode;
@@ -114,6 +108,7 @@ export const ServerInviteJoinButton = (props: { className?: string }) => {
 			variant="default"
 			referrerPolicy="no-referrer"
 			className={cn('text-center font-header font-bold', props.className)}
+			size={props.size}
 			onMouseUp={() => {
 				trackEvent('Server Invite Click', {
 					...(channel && channelToAnalyticsData(channel)),
@@ -129,7 +124,7 @@ export const ServerInviteJoinButton = (props: { className?: string }) => {
 
 export const ServerInviteIcon = () => {
 	const { server } = useServerInviteContext();
-	return <ServerIcon server={server} size="md" className={'shrink-0'} />;
+	return <ServerIcon server={server} size={48} className={'shrink-0'} />;
 };
 
 type ServerInviteProps = {
@@ -145,22 +140,41 @@ type ServerInviteProps = {
 	JoinButton?: React.ReactNode;
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	Title?: React.ReactNode;
+	maxWidth?: string;
+	truncate?: boolean;
 };
 
 export const ServerInviteRenderer = (props: ServerInviteProps) => {
+	const { truncate = true } = props;
 	return (
 		<ServerInviteContext.Provider value={props}>
-			<div className="flex w-full flex-col gap-4">
-				<div className="flex w-full max-w-full flex-row items-center justify-start gap-4 align-middle">
-					{props.Icon === undefined ? <ServerInviteIcon /> : props.Icon}
-					{props.Title === undefined ? <ServerInviteTitle /> : props.Title}
+			<div
+				className={classNames(
+					'flex w-full flex-col gap-4',
+					props.maxWidth ?? 'max-w-sm',
+				)}
+			>
+				<div className={'flex flex-row gap-4'}>
+					<div className="flex max-w-full shrink-0 flex-row items-center justify-start gap-4 align-middle">
+						{props.Icon === undefined ? <ServerInviteIcon /> : props.Icon}
+					</div>
+					<div
+						className={classNames(
+							'grow items-center justify-center text-left',
+							truncate ? 'truncate' : '',
+						)}
+					>
+						{props.Title === undefined ? <ServerInviteTitle /> : props.Title}
+						{props.Body || (
+							<>{props.channel && <ChannelName channel={props.channel} />}</>
+						)}
+					</div>
 				</div>
-				<div className="max-w-full items-center justify-center text-left">
-					{props.Body || (
-						<>{props.channel && <ChannelName channel={props.channel} />}</>
-					)}
-				</div>
-				{props.JoinButton || <ServerInviteJoinButton />}
+				{props.JoinButton === undefined ? (
+					<ServerInviteJoinButton />
+				) : (
+					props.JoinButton
+				)}
 			</div>
 		</ServerInviteContext.Provider>
 	);
