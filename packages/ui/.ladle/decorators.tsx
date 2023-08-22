@@ -187,7 +187,7 @@ const wasmUrl = new URL('shiki/dist/onig.wasm', import.meta.url).href.replace(
 	'',
 );
 
-export function WIthMarkdown(props: { children: React.ReactNode }) {
+export function WithMarkdown(props: { children: React.ReactNode }) {
 	const [langsState, setLangsState] = useState<Lang[]>([]);
 
 	const highlighter = getHighlighter({

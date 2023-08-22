@@ -4,7 +4,7 @@ import type { ArgTypes, GlobalProvider } from '@ladle/react';
 import {
 	WithAnalytics,
 	WithAuth,
-	WIthMarkdown,
+	WithMarkdown,
 	WithNextRouter,
 	WithTailwindTheme,
 } from './decorators';
@@ -31,9 +31,9 @@ export const Provider: GlobalProvider = ({ children, globalState }) => {
 								<ToastContainer toastClassName="bg-background dark:bg-background text-primary dark:text-primary" />
 
 								<WithAnalytics>
-									<WIthMarkdown>
+									<WithMarkdown>
 										<div className={'bg-background'}>{children}</div>
-									</WIthMarkdown>
+									</WithMarkdown>
 								</WithAnalytics>
 							</WithAuth>
 						</TenantContextProvider>
