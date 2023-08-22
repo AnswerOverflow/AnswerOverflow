@@ -18,7 +18,6 @@ import {
 import { isServer } from '~ui/utils/checks';
 import Head from 'next/head';
 import type { QAPage, WithContext } from 'schema-dts';
-import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
 import {
 	getBaseUrl,
 	getMainSiteHostname,
@@ -179,8 +178,8 @@ export function MessageResultPage({
 	const question = thread?.name ?? firstMessage.content?.slice(0, 100);
 	const isFirstMessageSolution = solution && solution.id !== firstMessage.id;
 
-	const nameHtml = useParsedMarkdown(question);
-	const textHtml = useParsedMarkdown(firstMessage.content);
+	const safeNameHtml = useParsedMarkdown(question);
+	const safeTextHtml = useParsedMarkdown(firstMessage.content);
 	const solutionHtml = useParsedMarkdown(solution?.content ?? '');
 
 	const qaHeader: WithContext<QAPage> = {
@@ -188,8 +187,8 @@ export function MessageResultPage({
 		'@type': 'QAPage',
 		mainEntity: {
 			'@type': 'Question',
-			name: nameHtml,
-			text: textHtml,
+			name: safeNameHtml,
+			text: safeTextHtml,
 			answerCount: solution && !isFirstMessageSolution ? 1 : 0,
 			acceptedAnswer:
 				solution && !isFirstMessageSolution
