@@ -11,3 +11,11 @@
   @apply bg-transparent p-0 !important;
   min-width: max-content;
 }
+
+.discord-message a {
+  @apply text-blue-700 hover:underline dark:text-blue-400 !important;
+}
+
+.d-emoji {
+  @apply inline-block h-6 w-6;
+}
