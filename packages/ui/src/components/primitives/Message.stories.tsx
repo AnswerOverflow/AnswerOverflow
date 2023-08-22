@@ -30,6 +30,15 @@ Primary.args = {
 	message: mockMessageWithDiscordAccount(),
 };
 
+export const WithDefaultEmojis = Primary.bind({});
+WithDefaultEmojis.args = {
+	...Primary.args,
+	message: {
+		...mockMessageWithDiscordAccount(),
+		content: 'Hello :smile: :wave:',
+	},
+};
+
 export const OverflowLetters = Primary.bind({});
 
 OverflowLetters.args = {

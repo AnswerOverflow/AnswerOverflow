@@ -1543,6 +1543,12 @@ importers:
       lucide-react:
         specifier: ^0.263.1
         version: 0.263.1(react@18.2.0)
+      marked:
+        specifier: ^7.0.4
+        version: 7.0.4
+      marked-highlight:
+        specifier: ^2.0.4
+        version: 2.0.4(marked@7.0.4)
       next:
         specifier: 13.4.8
         version: 13.4.8(@babel/core@7.22.9)(react-dom@18.2.0)(react@18.2.0)
@@ -13488,6 +13494,20 @@ packages:
 
   /markdown-table@3.0.3:
     resolution: {integrity: sha512-Z1NL3Tb1M9wH4XESsCDEksWoKTdlUafKc4pt0GRwjUyXaCFZ+dc3g2erqB6zm3szA2IUSi7VnPI+o/9jnxh9hw==}
+
+  /marked-highlight@2.0.4(marked@7.0.4):
+    resolution: {integrity: sha512-hnm+rY3p+DQlSd2uY3zSXec+1kq5x9lD3+PWOMz0ROcil4Btcbt///Fto52jqWWt7XBGiTRk+1+w2rGfx2U2Sw==}
+    peerDependencies:
+      marked: ^4 || ^5 || ^6 || ^7
+    dependencies:
+      marked: 7.0.4
+    dev: false
+
+  /marked@7.0.4:
+    resolution: {integrity: sha512-t8eP0dXRJMtMvBojtkcsA7n48BkauktUKzfkPSCq85ZMTJ0v76Rke4DYz01omYpPTUh4p/f7HePgRo3ebG8+QQ==}
+    engines: {node: '>= 16'}
+    hasBin: true
+    dev: false
 
   /match-sorter@6.3.1:
     resolution: {integrity: sha512-mxybbo3pPNuA+ZuCUhm5bwNkXrJTbsk5VWbR5wiwz/GC6LIiegBGn2w3O08UG/jdbYLinw51fSQ5xNU1U3MgBw==}

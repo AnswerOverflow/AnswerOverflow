@@ -57,6 +57,17 @@ export const useParsedMarkdown = (content: string) => {
 	const [safeHtml, setSafeHtml] = useState<string>('');
 	const { highlighter, requestLang } = useMarkdownContext();
 
+	// Render emojis
+	marked.use({
+		renderer: {
+			text: (text) => {
+				return text.replace(/:([a-z0-9_\-\+]+):/gim, (match, p1) => {
+					return `<span class="emoji emoji-${p1}"></span>`;
+				});
+			},
+		},
+	});
+
 	const HTML_ESCAPE_MAP = {
 		'<': '&lt;',
 		'>': '&gt;',
