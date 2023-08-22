@@ -49,10 +49,12 @@ const useConfigImageAttachments = () => {
 			await Promise.all(
 				message.attachments.map(async (attachment) => {
 					if (!attachment.width || !attachment.height) {
-						const img = await getImageHeightWidth({ imageSrc: attachment.url });
+						const img = await getImageHeightWidth({
+							imageSrc: attachment.proxyUrl,
+						});
 
 						return {
-							src: attachment.url,
+							src: attachment.proxyUrl,
 							width: img.width,
 							height: img.height,
 							alt: attachment.description,
@@ -60,7 +62,7 @@ const useConfigImageAttachments = () => {
 					}
 
 					return {
-						src: attachment.url,
+						src: attachment.proxyUrl,
 						width: attachment.width,
 						height: attachment.height,
 						alt: attachment.description,

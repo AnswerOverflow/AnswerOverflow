@@ -6,12 +6,9 @@ import {
 	TWITTER_LINK,
 } from '@answeroverflow/constants/src/links';
 import { useTenantContext } from '@answeroverflow/hooks';
-import {
-	AnswerOverflowLogo,
-	DiscordIcon,
-	GitHubIcon,
-} from '~ui/components/primitives/base/Icons';
+import { DiscordIcon, GitHubIcon } from '~ui/components/primitives/base/Icons';
 import { Heading } from '~ui/components/primitives/base/Heading';
+import { AnswerOverflowLogo } from '~ui/components/primitives/base/AnswerOverflowLogo';
 type SocialItem = {
 	name: string;
 	href: string;
@@ -144,7 +141,12 @@ const PoweredByAnswerOverflowFooter = () => (
 			className="flex flex-col items-center justify-center gap-2 fill-black stroke-black  py-8 font-bold hover:fill-blue-500 hover:stroke-blue-500 hover:text-blue-500 dark:fill-white dark:stroke-white hover:dark:fill-blue-500 hover:dark:stroke-blue-500"
 		>
 			<span>Powered by</span>
-			<AnswerOverflowLogo className="mx-auto w-36 fill-inherit stroke-inherit dark:fill-inherit dark:stroke-inherit" />
+			<div className={'w-36'}>
+				<AnswerOverflowLogo
+					className="mx-auto fill-inherit stroke-inherit dark:fill-inherit dark:stroke-inherit"
+					width={'full'}
+				/>
+			</div>
 		</Link>
 	</div>
 );

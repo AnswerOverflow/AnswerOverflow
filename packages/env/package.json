@@ -18,14 +18,14 @@
 		"lint:fix": "eslint . --fix"
 	},
 	"dependencies": {
-		"@t3-oss/env-nextjs": "^0.6.0",
-		"zod": "^3.21.4"
+		"@t3-oss/env-nextjs": "^0.6.1",
+		"zod": "^3.22.2"
 	},
 	"devDependencies": {
-		"@answeroverflow/prettier-config": "^0.0.0",
-		"@answeroverflow/tsconfig": "^0.0.0",
-		"@types/node": "^20.4.2",
-		"eslint": "^8.45.0",
+		"@answeroverflow/prettier-config": "workspace:^",
+		"@answeroverflow/tsconfig": "workspace:^",
+		"@types/node": "^20.5.1",
+		"eslint": "^8.47.0",
 		"prettier": "^2.8.8"
 	}
 }

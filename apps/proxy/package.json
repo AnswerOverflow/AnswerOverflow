@@ -15,17 +15,17 @@
 		"lint:fix": "eslint . --fix"
 	},
 	"dependencies": {
-		"@answeroverflow/env": "^0.1.0"
+		"@answeroverflow/env": "workspace:^"
 	},
 	"devDependencies": {
-		"@answeroverflow/prettier-config": "^0.0.0",
-		"@answeroverflow/tsconfig": "^0.0.0",
+		"@answeroverflow/prettier-config": "workspace:^",
+		"@answeroverflow/tsconfig": "workspace:^",
 		"@types/http-proxy": "^1.17.11",
-		"dotenv-cli": "^7.2.1",
-		"eslint": "^8.45.0",
+		"dotenv-cli": "^7.3.0",
+		"eslint": "^8.47.0",
 		"http-proxy": "^1.18.1",
 		"prettier": "^2.8.8",
-		"tslib": "^2.6.0",
+		"tslib": "^2.6.2",
 		"tsup": "^6.7.0",
 		"typescript": "^4.9.5"
 	}

@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { router, withUserServersProcedure } from '~api/router/trpc';
-import { findMessageResultPage, searchMessages } from '@answeroverflow/db';
+import {
+	findChannelsBeforeArchivedTimestamp,
+	findManyMessagesWithAuthors,
+	findMessageResultPage,
+	searchMessages,
+} from '@answeroverflow/db';
 import {
 	canUserViewPrivateMessage,
 	stripPrivateChannelData,
@@ -34,6 +39,30 @@ export const messagesRouter = router({
 				});
 			}
 			const { messages, channel, server, thread } = data;
+			const recommendedChannels = thread
+				? await findChannelsBeforeArchivedTimestamp({
+						take: 100,
+						timestamp: thread.archivedTimestamp ?? BigInt(999999999),
+						serverId: server.id,
+				  })
+				: [];
+			const recommendedChannelLookup = new Map(
+				recommendedChannels.map((c) => [c.id, c]),
+			);
+			const recommendedPosts = await findManyMessagesWithAuthors(
+				recommendedChannels.map((c) => c.id),
+				[server],
+			).then((posts) =>
+				posts
+					.filter((p) => p.public)
+					.map((p) => ({
+						message: stripPrivateFullMessageData(p, ctx.userServers),
+						thread: stripPrivateChannelData(
+							recommendedChannelLookup.get(p.id)!,
+						),
+					}))
+					.slice(0, 10),
+			);
 
 			return {
 				messages: messages.map((message) =>
@@ -42,6 +71,7 @@ export const messagesRouter = router({
 				parentChannel: stripPrivateChannelData(channel),
 				server: stripPrivateServerData(server),
 				thread: thread ? stripPrivateChannelData(thread) : undefined,
+				recommendedPosts,
 			};
 		}),
 	search: withUserServersProcedure

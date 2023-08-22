@@ -108,7 +108,7 @@ const MyApp: AppType<{
 					</AnalyticsProvider>
 				</SessionProvider>
 			</ThemeProvider>
-			<GoogleAnalytics trackPageViews />
+			<GoogleAnalytics trackPageViews strategy={'lazyOnload'} />
 		</TenantContextProvider>
 	);
 };

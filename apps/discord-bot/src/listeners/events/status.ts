@@ -9,7 +9,7 @@ const timeBetweenStatusChangesInHours = botEnv.STATUS_UPDATE_INTERVAL_IN_HOURS;
 
 type StatusUpdate = {
 	getStatus: (() => Promise<string> | string) | string;
-} & ActivityOptions;
+} & Omit<ActivityOptions, 'name'>;
 
 function getStatuses(client: SapphireClient) {
 	const statuses: StatusUpdate[] = [

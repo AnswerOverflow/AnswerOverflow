@@ -320,3 +320,23 @@ export function upsertManyChannels(data: z.infer<typeof zChannelUpsertMany>) {
 			),
 	});
 }
+
+export async function findChannelsBeforeArchivedTimestamp(input: {
+	serverId: string;
+	timestamp: bigint;
+	take?: number;
+}) {
+	const res = await prisma.channel.findMany({
+		where: {
+			serverId: input.serverId,
+			archivedTimestamp: {
+				lt: input.timestamp,
+			},
+		},
+		orderBy: {
+			archivedTimestamp: 'desc',
+		},
+		take: input.take,
+	});
+	return res.map(addFlagsToChannel);
+}
