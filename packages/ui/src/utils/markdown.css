@@ -1,21 +1,21 @@
 .shiki {
-  @apply my-0 w-full rounded-lg text-sm bg-neutral-900 !important;
-  /*@apply my-4 w-full rounded-lg bg-neutral-100 text-sm dark:bg-neutral-900 !important;*/
-  /* Fixes overflowing code blocks */
-  white-space: break-spaces;
-  line-break: anywhere;
-  font-family: 'Courier New', Courier, monospace;
+	@apply my-0 w-full rounded-lg bg-neutral-900 text-sm !important;
+	/*@apply my-4 w-full rounded-lg bg-neutral-100 text-sm dark:bg-neutral-900 !important;*/
+	/* Fixes overflowing code blocks */
+	white-space: break-spaces;
+	line-break: anywhere;
+	font-family: 'Courier New', Courier, monospace;
 }
 
 .prose pre:not([class]) {
-  @apply bg-transparent p-0 !important;
-  min-width: max-content;
+	@apply bg-transparent p-0 !important;
+	min-width: max-content;
 }
 
 .discord-message a {
-  @apply text-blue-700 hover:underline dark:text-blue-400 !important;
+	@apply text-blue-700 hover:underline dark:text-blue-400 !important;
 }
 
 .d-emoji {
-  @apply inline-block h-6 w-6;
+	@apply inline-block h-6 w-6;
 }
