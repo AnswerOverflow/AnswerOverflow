@@ -56,14 +56,50 @@ export const useMarkdownContext = () => {
 export const useParsedMarkdown = (content: string) => {
 	const [safeHtml, setSafeHtml] = useState<string>('');
 	const { highlighter, requestLang } = useMarkdownContext();
+	const EMOJI_REGEX = /^(&lt;|<)(a?):[a-zA-Z0-9-]+:\d+(&gt;|>)/;
 
-	// Render emojis
+	// Format emojis
 	marked.use({
 		renderer: {
 			text: (text) => {
-				return text.replace(/:([a-z0-9_\-\+]+):/gim, (match, p1) => {
-					return `<span class="emoji emoji-${p1}"></span>`;
-				});
+				return text
+					.split(' ')
+					.map((word) => {
+						const match = word.match(EMOJI_REGEX);
+
+						if (match) {
+							const formattedText = match[0]
+								.replace(/&lt;/g, '')
+								.replace(/&gt;/g, '')
+								.replace(/</g, '')
+								.replace(/>/g, '');
+							const [animatedToken, emojiName, emojiId] =
+								formattedText.split(':');
+							return `<img class="emoji" src="https://cdn.discordapp.com/emojis/${emojiId}.${
+								animatedToken === 'a' ? 'gif' : 'png'
+							}?v=1" alt="${emojiName} emoji"  />`;
+						}
+
+						return word;
+					})
+					.join(' ');
+			},
+		},
+	});
+
+	// Disable table formatting
+	marked.use({
+		tokenizer: {
+			// @ts-expect-error we are telling marked not to tokenize tables
+			table: () => {},
+		},
+	});
+
+	// Format headings
+	marked.use({
+		renderer: {
+			heading: (text, level) => {
+				return `<p class="heading-${level}">${text}</p>`;
 			},
 		},
 	});
