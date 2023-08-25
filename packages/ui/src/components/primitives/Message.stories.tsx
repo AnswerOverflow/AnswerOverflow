@@ -35,7 +35,16 @@ WithDefaultEmojis.args = {
 	...Primary.args,
 	message: {
 		...mockMessageWithDiscordAccount(),
-		content: 'Hello :smile: :wave:',
+		content: 'Hello \ud83d\ude40 \ud83d\ude40, with unescaped 🙀 🙀',
+	},
+};
+
+export const WithDiscordEmojis = Primary.bind({});
+WithDiscordEmojis.args = {
+	...Primary.args,
+	message: {
+		...mockMessageWithDiscordAccount(),
+		content: 'Hello <:github-2:1081060505122263154> <:blobcat:123456789>',
 	},
 };
 
@@ -313,6 +322,14 @@ const variable = 'hello';
 \`\`\`
 
 # More text
+
+Table:
+
+| Item         | Price     | # In stock |
+|--------------|-----------|------------|
+| Juicy Apples | 1.99      | *7*        |
+| Bananas      | **1.89**  | 5234       |
+
     `,
 	},
 };
