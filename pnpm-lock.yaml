@@ -1534,9 +1534,6 @@ importers:
       cva:
         specifier: npm:class-variance-authority@^0.6.1
         version: /class-variance-authority@0.6.1
-      discord-markdown:
-        specifier: ^2.5.1
-        version: 2.5.1
       dompurify:
         specifier: ^3.0.5
         version: 3.0.5
@@ -9634,13 +9631,6 @@ packages:
     resolution: {integrity: sha512-xNO6yzEMfpVSVUa6lOOzgLDy3Gyd8yuBAozGQdjpW9VjRq2Ccboz4FhTrd5v4Hw7pbkCKwnHvddjIYrX0INkUQ==}
     dev: false
 
-  /discord-markdown@2.5.1:
-    resolution: {integrity: sha512-SGNlL1Y8NYjY2MA5Vj1SI5+Ue5GUW2HkkDAq5jPQ6fI5j/rwOB814lFNhfs2AJMT72Jij8usTEqWZfdU8C3uag==}
-    dependencies:
-      highlight.js: 11.8.0
-      simple-markdown: 0.7.3
-    dev: false
-
   /discord.js@14.13.0:
     resolution: {integrity: sha512-Kufdvg7fpyTEwANGy9x7i4od4yu5c6gVddGi5CKm4Y5a6sF0VBODObI3o0Bh7TGCj0LfNT8Qp8z04wnLFzgnbA==}
     engines: {node: '>=16.11.0'}
@@ -16523,12 +16513,6 @@ packages:
       decompress-response: 6.0.0
       once: 1.4.0
       simple-concat: 1.0.1
-    dev: false
-
-  /simple-markdown@0.7.3:
-    resolution: {integrity: sha512-uGXIc13NGpqfPeFJIt/7SHHxd6HekEJYtsdoCM06mEBPL9fQH/pSD7LRM6PZ7CKchpSvxKL4tvwMamqAaNDAyg==}
-    dependencies:
-      '@types/react': 18.2.20
     dev: false
 
   /simple-swizzle@0.2.2:

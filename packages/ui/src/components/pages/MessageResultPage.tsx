@@ -22,7 +22,6 @@ import {
 	getBaseUrl,
 	getMainSiteHostname,
 } from '@answeroverflow/constants/src/links';
-import { toHTML } from 'discord-markdown';
 import { ServerInvite } from '~ui/components/primitives/ServerInvite';
 import {
 	Message,
