@@ -23,6 +23,9 @@ const withMDX = nextJSMDX.default({
 	},
 });
 
+// Import the Million.js compiler
+import million from 'million/compiler';
+
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
@@ -79,4 +82,5 @@ const sentryWebpackPluginOptions = {
 
 import { withSentryConfig } from '@sentry/nextjs';
 
-export default withSentryConfig(withMDX(config), sentryWebpackPluginOptions);
+// Wrap the configuration with Million.js optimization
+export default million.next(withSentryConfig(withMDX(config), sentryWebpackPluginOptions));
