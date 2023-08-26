@@ -32,4 +32,4 @@ export const createVitestConfig = (options: UserConfig = {}) =>
 	});
 
 // Wrap the configuration with Million.js's block() function
-module.exports = million.block(createVitestConfig());
+module.exports = million.next(createVitestConfig());
