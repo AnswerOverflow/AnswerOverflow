@@ -2,6 +2,8 @@
 import type { ESBuildOptions } from 'vite';
 import { defineConfig, type UserConfig } from 'vitest/config';
 
+const million = require("million/compiler"); // Import Million.js compiler
+
 export const createVitestConfig = (options: UserConfig = {}) =>
 	defineConfig({
 		...options,
@@ -28,3 +30,6 @@ export const createVitestConfig = (options: UserConfig = {}) =>
 				(options?.esbuild as ESBuildOptions | undefined)?.target ?? 'es2020',
 		},
 	});
+
+// Wrap the configuration with Million.js's block() function
+module.exports = million.block(createVitestConfig());
