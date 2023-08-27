@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import { markedHighlight } from 'marked-highlight';
-import { BUNDLED_LANGUAGES, getHighlighter, Highlighter, Lang } from 'shiki';
+import { BUNDLED_LANGUAGES, Highlighter, Lang } from 'shiki';
 import './markdown.css';
 
 export const MarkdownContext = createContext<{
@@ -58,63 +58,63 @@ export const useParsedMarkdown = (content: string) => {
 	const { highlighter, requestLang } = useMarkdownContext();
 	const EMOJI_REGEX = /^(&lt;|<)(a?):[a-zA-Z0-9-]+:\d+(&gt;|>)/;
 
-	// Format emojis
-	marked.use({
-		renderer: {
-			text: (text) => {
-				return text
-					.split(' ')
-					.map((word) => {
-						const match = word.match(EMOJI_REGEX);
-
-						if (match) {
-							const formattedText = match[0]
-								.replace(/&lt;/g, '')
-								.replace(/&gt;/g, '')
-								.replace(/</g, '')
-								.replace(/>/g, '');
-							const [animatedToken, emojiName, emojiId] =
-								formattedText.split(':');
-							return `<img class="emoji" src="https://cdn.discordapp.com/emojis/${emojiId}.${
-								animatedToken === 'a' ? 'gif' : 'png'
-							}?v=1" alt="${emojiName} emoji"  />`;
-						}
-
-						return word;
-					})
-					.join(' ');
-			},
-		},
-	});
-
-	// Disable table formatting
-	marked.use({
-		tokenizer: {
-			// @ts-expect-error we are telling marked not to tokenize tables
-			table: () => {},
-		},
-	});
-
-	// Format headings
-	marked.use({
-		renderer: {
-			heading: (text, level) => {
-				return `<p class="heading-${level}">${text}</p>`;
-			},
-		},
-	});
-
-	const HTML_ESCAPE_MAP = {
-		'<': '&lt;',
-		'>': '&gt;',
-	};
-
-	let escapedContent = content.replace(/[<>]/g, (char) => {
-		return HTML_ESCAPE_MAP[char as keyof typeof HTML_ESCAPE_MAP];
-	});
-
 	useEffect(() => {
 		(async () => {
+			// Format emojis
+			marked.use({
+				renderer: {
+					text: (text) => {
+						return text
+							.split(' ')
+							.map((word) => {
+								const match = word.match(EMOJI_REGEX);
+
+								if (match) {
+									const formattedText = match[0]
+										.replace(/&lt;/g, '')
+										.replace(/&gt;/g, '')
+										.replace(/</g, '')
+										.replace(/>/g, '');
+									const [animatedToken, emojiName, emojiId] =
+										formattedText.split(':');
+									return `<img class="emoji" src="https://cdn.discordapp.com/emojis/${emojiId}.${
+										animatedToken === 'a' ? 'gif' : 'png'
+									}?v=1" alt="${emojiName} emoji"  />`;
+								}
+
+								return word;
+							})
+							.join(' ');
+					},
+				},
+			});
+
+			// Disable table formatting
+			marked.use({
+				tokenizer: {
+					// @ts-expect-error we are telling marked not to tokenize tables
+					table: () => {},
+				},
+			});
+
+			// Format headings
+			marked.use({
+				renderer: {
+					heading: (text, level) => {
+						return `<p class="heading-${level}">${text}</p>`;
+					},
+				},
+			});
+
+			const HTML_ESCAPE_MAP = {
+				'<': '&lt;',
+				'>': '&gt;',
+			};
+
+			let escapedContent = content.replace(/[<>]/g, (char) => {
+				return HTML_ESCAPE_MAP[char as keyof typeof HTML_ESCAPE_MAP];
+			});
+
 			const mayIncludeCode = escapedContent.includes('```');
 
 			if (mayIncludeCode) {
