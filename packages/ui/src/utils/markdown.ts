@@ -248,7 +248,7 @@ export const useParsedMarkdown = (content: string) => {
 			};
 
 			// Handle quotes
-			const QUOTE_REGEX = /(>|&gt;) .+/;
+			const QUOTE_REGEX = /^(>|&gt;)\s.*/;
 
 			const quote: TokenizerAndRendererExtension = {
 				name: 'quote',
