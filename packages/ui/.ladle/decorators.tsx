@@ -13,9 +13,8 @@ import {
 } from '@answeroverflow/hooks';
 import { mockServer } from '~ui/test/props';
 import { useGlobalState, type GlobalState } from './global-state';
-import { ModeState, action } from '@ladle/react';
-import { MarkdownContext } from '~ui/utils/markdown';
-import { getHighlighter, Lang } from 'shiki';
+import { action } from '@ladle/react';
+import { MarkdownContextProvider } from '~ui/components/pages/MarkdownContextProvider';
 
 const storybookTrpc = trpc as StorybookTRPC;
 
@@ -172,45 +171,8 @@ export function WithAuth(props: {
 	);
 }
 
-const themeUrl = new URL(
-	'shiki/themes/nord.json',
-	import.meta.url,
-).href.replace('/nord.json', '');
-
-const languagesUrl = new URL(
-	'shiki/languages/tsx.tmLanguage.json',
-	import.meta.url,
-).href.replace('/tsx.tmLanguage.json', '');
-
-const wasmUrl = new URL('shiki/dist/onig.wasm', import.meta.url).href.replace(
-	'/onig.wasm',
-	'',
-);
-
 export function WithMarkdown(props: { children: React.ReactNode }) {
-	const [langsState, setLangsState] = useState<Lang[]>([]);
-
-	const highlighter = getHighlighter({
-		theme: 'github-dark',
-		langs: langsState,
-		paths: {
-			themes: themeUrl,
-			languages: languagesUrl,
-			wasm: wasmUrl,
-		},
-	});
-
-	return (
-		<MarkdownContext.Provider
-			value={{
-				langs: langsState,
-				highlighter: highlighter,
-				setLangs: setLangsState,
-			}}
-		>
-			{props.children}
-		</MarkdownContext.Provider>
-	);
+	return <MarkdownContextProvider>{props.children}</MarkdownContextProvider>;
 }
 
 export function WithAnalytics(props: { children: React.ReactNode }) {

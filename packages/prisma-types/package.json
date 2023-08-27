@@ -25,7 +25,7 @@
 		"@answeroverflow/utils": "workspace:^",
 		"@prisma/client": "^4.16.2",
 		"@sapphire/bitfield": "^1.2.0",
-		"discord-api-types": "^0.37.54",
+		"discord-api-types": "^0.37.55",
 		"dotenv-cra": "^3.0.3",
 		"zod": "^3.22.2"
 	},
@@ -34,7 +34,7 @@
 		"@answeroverflow/tsconfig": "workspace:^",
 		"@vitest/coverage-c8": "^0.28.5",
 		"dotenv-cli": "^7.3.0",
-		"eslint": "^8.47.0",
+		"eslint": "^8.48.0",
 		"prettier": "^2.8.8",
 		"prisma": "^4.16.2",
 		"vitest": "^0.29.8"

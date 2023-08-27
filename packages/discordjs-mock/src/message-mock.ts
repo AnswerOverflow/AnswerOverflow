@@ -126,7 +126,7 @@ export function mockMessage(input: {
 	};
 	const message = Reflect.construct(Message, [client, rawData]) as Message;
 	// TODO: Fix ts ignore?
-	// @ts-ignore
+	// @ts-expect-error
 	channel.messages.cache.set(message.id, message);
 	message.react = async (emoji: EmojiIdentifierResolvable) => {
 		const isCustomEmoji = typeof emoji === 'string' && emoji.startsWith('<:');

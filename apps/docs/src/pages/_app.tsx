@@ -11,6 +11,7 @@ import { type NextTRPC, trpc } from '@answeroverflow/ui/src/utils/trpc';
 import { useEffect } from 'react';
 import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner';
 import { AnalyticsProvider } from '@answeroverflow/hooks';
+import { MarkdownContextProvider } from '@answeroverflow/ui/src/components/pages/MarkdownContextProvider';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -28,8 +29,10 @@ const MyApp: AppType<{ session: Session | null }> = ({
 	return (
 		<SessionProvider session={session}>
 			<AnalyticsProvider>
-				<CommitBanner />
-				<Component {...pageProps} />
+				<MarkdownContextProvider>
+					<CommitBanner />
+					<Component {...pageProps} />
+				</MarkdownContextProvider>
 			</AnalyticsProvider>
 		</SessionProvider>
 	);

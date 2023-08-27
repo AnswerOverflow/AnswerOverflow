@@ -267,7 +267,7 @@ export const Pricing = () => {
 				className="mx-auto my-16 flex  max-w-2xl flex-col gap-4"
 				onSubmit={(e) => {
 					e.preventDefault();
-					// @ts-ignore
+					// @ts-expect-error
 					const [emailElement, feedbackElement] = e.target;
 					const email = (emailElement as HTMLInputElement).value;
 					const feedback = (feedbackElement as HTMLTextAreaElement).value;

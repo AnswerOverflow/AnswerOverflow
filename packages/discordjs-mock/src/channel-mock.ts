@@ -166,7 +166,7 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 		};
 	}
 	if (channel.isTextBased()) {
-		// @ts-ignore
+		// @ts-expect-error
 		channel.send = (
 			options: string | MessagePayload | MessageCreateOptions,
 		) => {
@@ -368,7 +368,7 @@ export function mockPublicThread(input: {
 			client,
 		]) as PublicThreadChannel;
 
-		// @ts-ignore
+		// @ts-expect-error
 		parentChannel.threads.cache.set(thread.id, thread);
 		return thread;
 	});

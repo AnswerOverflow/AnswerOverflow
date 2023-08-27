@@ -67,7 +67,7 @@ export function ConfigureDomainCardRenderer(props: {
 			<form
 				onSubmit={(e) => {
 					e.preventDefault();
-					// @ts-ignore
+					// @ts-expect-error
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 					const newDomain = e.target[1].value as string;
 					if (

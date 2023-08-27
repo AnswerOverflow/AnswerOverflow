@@ -115,7 +115,7 @@ function setupMockedInteractionAPIData<Type extends InteractionType>({
 function applyInteractionResponseHandlers(interaction: Interaction) {
 	const client = interaction.client;
 	if ('update' in interaction) {
-		// @ts-ignore
+		// @ts-expect-error
 		interaction.update = async (
 			options:
 				| (InteractionUpdateOptions & { fetchReply: true })
@@ -134,7 +134,7 @@ function applyInteractionResponseHandlers(interaction: Interaction) {
 		};
 	}
 	if ('deferUpdate' in interaction) {
-		// @ts-ignore
+		// @ts-expect-error
 		interaction.deferUpdate = (options) => {
 			interaction.deferred = true;
 			if (options?.fetchReply) {
@@ -150,7 +150,7 @@ function applyInteractionResponseHandlers(interaction: Interaction) {
 	}
 
 	if ('deferReply' in interaction) {
-		// @ts-ignore
+		// @ts-expect-error
 		interaction.deferReply = (options) => {
 			interaction.deferred = true;
 			const msg = mockMessage({
@@ -174,7 +174,7 @@ function applyInteractionResponseHandlers(interaction: Interaction) {
 	}
 
 	if ('reply' in interaction) {
-		// @ts-ignore
+		// @ts-expect-error
 		interaction.reply = (opts) => {
 			const msg = mockMessage({
 				client,

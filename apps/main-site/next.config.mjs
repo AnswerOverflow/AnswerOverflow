@@ -39,6 +39,7 @@ const config = {
 	],
 	experimental: {
 		outputFileTracingIgnores: ['**swc/core**'],
+    serverComponentsExternalPackages: ['vscode-oniguruma', 'shiki'],
 	},
 	images: {
 		domains: [
@@ -55,7 +56,8 @@ const config = {
 	sentry: {
 		hideSourceMaps: false,
 	},
-	async rewrites() {
+
+  async rewrites() {
 		return [
 			{
 				source: '/og/:path*',

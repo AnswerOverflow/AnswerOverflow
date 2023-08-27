@@ -2,9 +2,10 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import { markedHighlight } from 'marked-highlight';
-import { BUNDLED_LANGUAGES, getHighlighter, Highlighter, Lang } from 'shiki';
+import { BUNDLED_LANGUAGES, Highlighter, Lang } from 'shiki';
 import './markdown.css';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const MarkdownContext = createContext<{
 	langs: Lang[];
 	setLangs: (langs: Lang[]) => void;
@@ -114,7 +115,7 @@ export const useParsedMarkdown = (content: string) => {
 	});
 
 	useEffect(() => {
-		(async () => {
+		void (async () => {
 			const mayIncludeCode = escapedContent.includes('```');
 
 			if (mayIncludeCode) {

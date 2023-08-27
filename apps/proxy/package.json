@@ -22,7 +22,7 @@
 		"@answeroverflow/tsconfig": "workspace:^",
 		"@types/http-proxy": "^1.17.11",
 		"dotenv-cli": "^7.3.0",
-		"eslint": "^8.47.0",
+		"eslint": "^8.48.0",
 		"http-proxy": "^1.18.1",
 		"prettier": "^2.8.8",
 		"tslib": "^2.6.2",

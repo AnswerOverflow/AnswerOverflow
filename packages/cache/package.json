@@ -20,19 +20,19 @@
 		"@answeroverflow/db": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
-		"axios": "^1.4.0",
+		"axios": "^1.5.0",
 		"dotenv-cra": "^3.0.3",
-		"redis": "^4.6.7",
+		"redis": "^4.6.8",
 		"zod": "^3.22.2"
 	},
 	"devDependencies": {
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
-		"@types/node": "^20.5.1",
+		"@types/node": "^20.5.6",
 		"@vitest/coverage-c8": "^0.28.5",
 		"cross-env": "^7.0.3",
 		"dotenv-cli": "^7.3.0",
-		"eslint": "^8.47.0",
+		"eslint": "^8.48.0",
 		"prettier": "^2.8.8",
 		"ts-node": "^10.9.1",
 		"vitest": "^0.29.8"

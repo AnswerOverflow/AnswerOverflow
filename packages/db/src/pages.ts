@@ -155,7 +155,7 @@ export async function findMessageResultPage(messageId: string) {
 		return null;
 	}
 	const messagesWithRefs = await addReferencesToMessages(
-		threadId && rootMessage && channel.type !== ChannelType.GuildForum
+		threadId && rootMessage && channel.type !== Number(ChannelType.GuildForum)
 			? [rootMessage, ...messages]
 			: messages,
 	);

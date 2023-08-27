@@ -67,7 +67,7 @@ const mockDiscordApiServersResponse = [
 ];
 
 function mockAxiosGet<T>(data: T) {
-	// @ts-ignore
+	// @ts-expect-error
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
 	return axios.get.mockResolvedValue({
 		data,

@@ -23,7 +23,7 @@
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
 		"@vitest/coverage-c8": "^0.28.5",
-		"eslint": "^8.47.0",
+		"eslint": "^8.48.0",
 		"prettier": "^2.8.8",
 		"vitest": "^0.29.8"
 	}

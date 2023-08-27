@@ -65,6 +65,7 @@ export function createClient(override: Partial<ClientOptions> = {}) {
 			Partials.Reaction,
 			Partials.User,
 		],
+		// @ts-ignore
 		hmr: {
 			enabled: sharedEnvs.NODE_ENV === 'development',
 		},
@@ -76,7 +77,7 @@ export function createClient(override: Partial<ClientOptions> = {}) {
 }
 
 export const login = async (client: SapphireClient) => {
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call,@typescript-eslint/no-var-requires
 	require('dotenv').config();
 	try {
 		container.events = new Subject();
@@ -96,7 +97,6 @@ export const login = async (client: SapphireClient) => {
 		client.logger.info('LOGGED IN');
 		client.logger.info(`LOGGED IN AS: ${client.user?.username ?? 'UNKNOWN'}`);
 		const config: DiscordJSReact['config'] = {
-			// @ts-ignore
 			wrapper: ({ children }) => <Router>{children}</Router>,
 		};
 		container.discordJSReact =

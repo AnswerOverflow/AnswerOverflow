@@ -73,7 +73,7 @@ export function mockGuild(
 
 	// replace guild members fetched with accessing from the cache of the fetched user id in the fetch argument
 	// TODO: Remove tsignore
-	// @ts-ignore
+	// @ts-expect-error
 	guild.members.fetch = async (
 		id:
 			| string

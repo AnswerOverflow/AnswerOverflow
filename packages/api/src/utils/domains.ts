@@ -105,7 +105,7 @@ export const removeDomainFromVercelTeam = async (domain: string) => {
 export const getDomainResponse = async (
 	domain: string,
 ): Promise<VercelDomainVerificationResponse> => {
-	// @ts-ignore
+	// @ts-expect-error
 	return await fetch(
 		`https://api.vercel.com/v9/projects/${sharedEnvs.PROJECT_ID_VERCEL}/domains/${domain}?teamId=${sharedEnvs.TEAM_ID_VERCEL}`,
 		{
@@ -125,7 +125,7 @@ export const getConfigResponse = async ({
 }: {
 	domain: string;
 }): Promise<DomainConfigResponse> => {
-	// @ts-ignore
+	// @ts-expect-error
 	return await fetch(
 		`https://api.vercel.com/v6/domains/${domain}/config?teamId=${sharedEnvs.TEAM_ID_VERCEL}`,
 		{
@@ -141,7 +141,7 @@ export const getConfigResponse = async ({
 export const verifyDomain = async (
 	domain: string,
 ): Promise<DomainVerificationResponse> => {
-	// @ts-ignore
+	// @ts-expect-error
 	return await fetch(
 		`https://api.vercel.com/v9/projects/${sharedEnvs.PROJECT_ID_VERCEL}/domains/${domain}/verify?teamId=${sharedEnvs.TEAM_ID_VERCEL}`,
 		{

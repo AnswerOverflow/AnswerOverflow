@@ -193,7 +193,7 @@ export function MessageResultPage({
 				solution && !isFirstMessageSolution
 					? {
 							'@type': 'Answer',
-							text: toHTML(solution.content),
+							text: solutionHtml,
 							url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
 								solution.id
 							}#solution-${solution.id}`,
@@ -221,7 +221,7 @@ export function MessageResultPage({
 					<div className="flex w-full flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400  text-center  dark:border-neutral-600 dark:text-white">
 						<h1
 							className="w-full text-center font-header text-xl text-primary md:text-left md:text-3xl"
-							dangerouslySetInnerHTML={{ __html: toHTML(question) }}
+							dangerouslySetInnerHTML={{ __html: safeNameHtml }}
 						></h1>
 					</div>
 				</div>

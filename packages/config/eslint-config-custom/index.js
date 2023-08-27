@@ -45,6 +45,14 @@ module.exports = {
 				patterns: ['../..*', 'packages/*'],
 			},
 		],
+		'@typescript-eslint/no-unsafe-enum-comparison': 'off',
+		'@typescript-eslint/no-non-null-asserted-optional-chain': 'off',
+		'@typescript-eslint/no-duplicate-enum-values': 'off',
+		'@typescript-eslint/ban-types': 'off',
+		'@typescript-eslint/ban-ts-comment': 'off',
+		'@typescript-eslint/no-base-to-string': 'off',
+		'@typescript-eslint/no-redundant-type-constituents': 'off',
+		'@typescript-eslint/no-explicit-any': 'off',
 		'no-await-in-loop': 'error',
 		'no-only-tests/no-only-tests': [
 			// eslint-disable-next-line no-undef

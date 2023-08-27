@@ -25,6 +25,7 @@ import { Heading } from '@answeroverflow/ui/src/components/primitives/base/Headi
 import { PageWrapper } from '@answeroverflow/ui/src/components/pages/PageWrapper';
 import { NextTRPC, trpc } from '@answeroverflow/ui/src/utils/trpc';
 import { Paragraph } from '@answeroverflow/ui/src/components/primitives/base/Paragraph';
+import { MarkdownContextProvider } from '@answeroverflow/ui/src/components/pages/MarkdownContextProvider';
 
 const progress = new ProgressBar({
 	size: 2,
@@ -100,7 +101,9 @@ const MyApp: AppType<{
 						>
 							<CommitBanner />
 							<MDXProvider components={components}>
-								<Component {...pageProps} />
+								<MarkdownContextProvider>
+									<Component {...pageProps} />
+								</MarkdownContextProvider>
 								<ToastContainer toastClassName="bg-background dark:bg-background text-primary dark:text-primary" />
 							</MDXProvider>
 						</PageWrapper>

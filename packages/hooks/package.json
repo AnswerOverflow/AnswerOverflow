@@ -16,7 +16,7 @@
 		"@answeroverflow/env": "workspace:^",
 		"next": "13.4.13",
 		"next-auth": "^4.23.1",
-		"posthog-js": "^1.77.0",
+		"posthog-js": "^1.77.2",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0"
 	},
@@ -25,10 +25,10 @@
 		"@answeroverflow/db": "workspace:^",
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
-		"@types/node": "^18.17.6",
-		"@types/react": "^18.2.20",
+		"@types/node": "^18.17.11",
+		"@types/react": "^18.2.21",
 		"@types/react-dom": "^18.2.7",
-		"eslint": "^8.47.0",
+		"eslint": "^8.48.0",
 		"prettier": "^2.8.8",
 		"type-fest": "^3.13.1"
 	},
