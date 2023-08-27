@@ -293,7 +293,7 @@ WithLotsOfMarkdown.args = {
 	...Primary.args,
 	message: {
 		...mockMessageWithDiscordAccount(),
-		content: `# Title 122\n## Title 2\n### Title 3\n#### Title 4\n##### Title 5
+		content: `# Title 122\n## Title 2\n### Title 3\n#### Title 4\n##### Title 5 \n###### Title 6
 - list item 1
 - list item 2
 - list item 3
