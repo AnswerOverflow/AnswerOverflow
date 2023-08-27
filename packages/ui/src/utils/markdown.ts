@@ -1,9 +1,10 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { marked } from 'marked';
+import { marked, type Token } from 'marked';
 import DOMPurify from 'dompurify';
 import { markedHighlight } from 'marked-highlight';
 import { BUNDLED_LANGUAGES, Highlighter, Lang } from 'shiki';
 import './markdown.css';
+import { MarkedExtension, TokenizerAndRendererExtension } from 'MarkedOptions';
 
 export const MarkdownContext = createContext<{
 	langs: Lang[];
@@ -89,11 +90,15 @@ export const useParsedMarkdown = (content: string) => {
 				},
 			});
 
-			// Disable table formatting
+			// Disable table, strong, and quote default tokenizers
 			marked.use({
 				tokenizer: {
 					// @ts-expect-error we are telling marked not to tokenize tables
 					table: () => {},
+					// @ts-expect-error we are telling marked not to tokenize strong (bold, italic, underline)
+					emStrong: () => {},
+					// @ts-expect-error we are telling marked not to tokenize blockquotes
+					blockquote: () => {},
 				},
 			});
 
@@ -149,7 +154,140 @@ export const useParsedMarkdown = (content: string) => {
 				}),
 			);
 
-			let [parsedHtml] = await Promise.all([marked(escapedContent, {})]);
+			// Handle underlines
+			const underline: TokenizerAndRendererExtension = {
+				name: 'underline',
+				level: 'inline',
+				start(src: string) {
+					return src.match(/^__(.*?)__/)?.index;
+				},
+				tokenizer(src: string) {
+					const match = src.match(/^__(.*?)__/);
+
+					if (match) {
+						return {
+							type: 'underline',
+							raw: match[0],
+							text: match[1],
+							tokens: [],
+						};
+					}
+
+					return undefined;
+				},
+				renderer(token: Token) {
+					if (token.type === 'underline') {
+						return `<u>${token.text}</u>`;
+					}
+
+					return false;
+				},
+			};
+
+			// Handle italics
+			const ITALICS_REGEX = /(?<!\*)\*([^*]+)\*(?!\*)/;
+			const italics: TokenizerAndRendererExtension = {
+				name: 'italics',
+				level: 'inline',
+				start(src: string) {
+					return src.match(ITALICS_REGEX)?.index;
+				},
+				tokenizer(src: string) {
+					const match = src.match(ITALICS_REGEX);
+
+					if (match) {
+						return {
+							type: 'italics',
+							raw: match[0],
+							text: match[1],
+							tokens: [],
+						};
+					}
+
+					return undefined;
+				},
+				renderer(token: Token) {
+					if (token.type === 'italics') {
+						return `<i>${token.text}</i>`;
+					}
+
+					return false;
+				},
+			};
+
+			// Handle bold
+			const BOLD_REGEX = /(?<!\*)\*\*([^*]+)\*\*(?!\*)/;
+
+			const bold: TokenizerAndRendererExtension = {
+				name: 'bold',
+				level: 'inline',
+				start(src: string) {
+					return src.match(BOLD_REGEX)?.index;
+				},
+				tokenizer(src: string) {
+					const match = src.match(BOLD_REGEX);
+
+					if (match) {
+						return {
+							type: 'bold',
+							raw: match[0],
+							text: match[1],
+							tokens: [],
+						};
+					}
+
+					return undefined;
+				},
+				renderer(token: Token) {
+					if (token.type === 'bold') {
+						return `<b>${token.text}</b>`;
+					}
+
+					return false;
+				},
+			};
+
+			// Handle quotes
+			const QUOTE_REGEX = /(>|&gt;) .+/;
+
+			const quote: TokenizerAndRendererExtension = {
+				name: 'quote',
+				level: 'inline',
+				start(src: string) {
+					return src.match(QUOTE_REGEX)?.index;
+				},
+				tokenizer(src: string) {
+					const match = src.match(QUOTE_REGEX);
+
+					if (match) {
+						return {
+							type: 'quote',
+							raw: match[0],
+							text: match[0],
+							tokens: [],
+						};
+					}
+
+					return undefined;
+				},
+				renderer(token: Token) {
+					if (token.type === 'quote') {
+						const text = token.text.replace(/&gt;/g, '');
+
+						return `<blockquote>${text}</blockquote>`;
+					}
+
+					return false;
+				},
+			};
+
+			marked.use({
+				extensions: [underline, italics, bold, quote],
+			});
+
+			let parsedHtml = await marked(escapedContent, {
+				async: true,
+			});
 			parsedHtml = parsedHtml.replace(/&amp;/g, '&');
 			const safeHtml = DOMPurify.sanitize(parsedHtml);
 
