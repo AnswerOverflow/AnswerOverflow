@@ -141,7 +141,7 @@ export const MessageContents = () => {
 
 	return (
 		<div
-			className="prose pt-2 font-body text-primary [word-wrap:_break-word] dark:prose-invert"
+			className="prose max-w-none pt-2 font-body text-primary [word-wrap:_break-word] dark:prose-invert"
 			// The HTML from discord-markdown is escaped
 			dangerouslySetInnerHTML={{
 				__html: convertedMessageContent,
