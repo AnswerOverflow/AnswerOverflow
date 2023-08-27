@@ -80,7 +80,7 @@ export const useParsedMarkdown = (content: string) => {
 										formattedText.split(':');
 									return `<img class="emoji" src="https://cdn.discordapp.com/emojis/${emojiId}.${
 										animatedToken === 'a' ? 'gif' : 'png'
-									}?v=1" alt="${emojiName} emoji"  />`;
+									}?v=1" alt="${emojiName} emoji" onerror="this.classList.add('broken-image');"  />`;
 								}
 
 								return word;
