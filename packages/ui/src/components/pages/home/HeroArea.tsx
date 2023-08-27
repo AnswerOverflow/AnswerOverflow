@@ -7,11 +7,11 @@ import { ServerIcon } from '~ui/components/primitives/ServerIcon';
 
 const HeroAreaText = () => {
 	return (
-		<div className="bg-ao-white dark:bg-ao-black flex h-full w-[calc(100vw-2rem)] max-w-screen-lg flex-col items-center justify-center gap-6 rounded-3xl bg-clip-padding p-8 backdrop-blur-3xl sm:w-[80vw] md:p-16">
-			<h1 className="text-ao-black dark:text-ao-white text-center font-header text-5xl font-bold leading-[114.5%] md:text-7xl">
+		<div className="flex h-full w-[calc(100vw-2rem)] max-w-screen-lg flex-col items-center justify-center gap-6 rounded-3xl bg-background bg-clip-padding p-8 backdrop-blur-3xl sm:w-[80vw] md:p-16">
+			<h1 className="text-center font-header text-5xl font-bold leading-[114.5%] text-primary md:text-7xl">
 				Search all of Discord
 			</h1>
-			<h2 className="text-ao-black/[.95] dark:text-ao-white/[.85] w-4/5 text-center font-body text-lg md:text-2xl">
+			<h2 className="w-4/5 text-center font-body text-lg text-primary/[.95] md:text-2xl">
 				Answer Overflow is a Discord search engine. Find results from indexed
 				content or a community to join.
 			</h2>
