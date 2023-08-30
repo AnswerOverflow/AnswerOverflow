@@ -271,8 +271,12 @@ export const useParsedMarkdown = (content: string) => {
 
 					return undefined;
 				},
-				renderer(token: Token) {
-					if (token.type === 'quote') {
+				renderer(
+					token: Token & {
+						text?: string;
+					},
+				) {
+					if (token.type === 'quote' && token.text) {
 						const text = token.text.replace(/&gt;/g, '');
 
 						return `<blockquote>${text}</blockquote>`;
@@ -294,7 +298,7 @@ export const useParsedMarkdown = (content: string) => {
 
 			return setSafeHtml(safeHtml);
 		})();
-	}, [content]);
+	}, [EMOJI_REGEX, content, highlighter, requestLang]);
 
 	return safeHtml;
 };
