@@ -101,7 +101,7 @@ const MyApp: AppType<{
 						>
 							<CommitBanner />
 							<MDXProvider components={components}>
-								<MarkdownContextProvider>
+								<MarkdownContextProvider> 
 									<Component {...pageProps} />
 								</MarkdownContextProvider>
 								<ToastContainer toastClassName="bg-background dark:bg-background text-primary dark:text-primary" />

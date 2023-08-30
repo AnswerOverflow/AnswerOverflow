@@ -4,11 +4,15 @@
  * This is especially useful for Docker builds.
  */
 
+import CopyPlugin from 'copy-webpack-plugin';
+
 !process.env.SKIP_ENV_VALIDATION &&
 	// @ts-expect-error
 	(await import('@answeroverflow/env/web-schema.mjs'));
 const nextJSMDX = await import('@next/mdx');
 import remarkGfm from 'remark-gfm';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
 
 const withMDX = nextJSMDX.default({
 	extension: /\.mdx?$/,
@@ -65,6 +69,24 @@ const config = {
 			},
 		];
 	},
+	webpack: (config, { webpack }) => {
+		/**
+		 * Copying the whole npm package of shiki to static/shiki because it
+		 * loads some files from a "cdn" in the browser (semi-hacky)
+		 * @see https://github.com/shikijs/shiki#specify-a-custom-root-directory
+		 */
+		config.plugins.push(
+			new CopyPlugin({
+				patterns: [
+					{
+						from: path.resolve(path.dirname(require.resolve('shiki')), '..'),
+						to: 'static/shiki/',
+					},
+				],
+			}),
+		);
+		return config;
+	},
 };
 
 const sentryWebpackPluginOptions = {
@@ -80,5 +102,6 @@ const sentryWebpackPluginOptions = {
 };
 
 import { withSentryConfig } from '@sentry/nextjs';
+import path from 'node:path';
 
 export default withSentryConfig(withMDX(config), sentryWebpackPluginOptions);
