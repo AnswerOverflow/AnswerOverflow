@@ -1,13 +1,9 @@
-export * from './src/server';
-export * from './src/pages';
-export * from './src/channel';
-export * from './src/discord-account';
-export * from './src/ignored-discord-account';
-export * from './src/auth';
-export * from './src/user-server-settings';
-export * from './src/message';
-export * from './src/utils';
-export * from './src/utils/error';
-export * from './src/utils/operations';
-export * from '@answeroverflow/prisma-types';
-export * from '@answeroverflow/elastic-types';
+import { drizzle } from 'drizzle-orm/planetscale-serverless';
+import { connect } from '@planetscale/database';
+import { sharedEnvs } from '@answeroverflow/env/shared';
+
+const connection = connect({
+	url: sharedEnvs.DATABASE_URL,
+});
+
+export const db = drizzle(connection);
