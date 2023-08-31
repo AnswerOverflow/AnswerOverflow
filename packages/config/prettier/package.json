@@ -14,7 +14,7 @@
 		"prettier-plugin-tailwindcss": "^0.3.0"
 	},
 	"devDependencies": {
-		"@answeroverflow/tsconfig": "^0.0.0"
+		"@answeroverflow/tsconfig": "workspace:^"
 	},
 	"publishConfig": {
 		"access": "public"

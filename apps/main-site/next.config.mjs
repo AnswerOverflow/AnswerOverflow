@@ -27,6 +27,7 @@ const withMDX = nextJSMDX.default({
 const config = {
 	reactStrictMode: true,
 	swcMinify: true,
+	compress: true,
 	pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
 	transpilePackages: [
 		'@answeroverflow/api',
@@ -40,7 +41,11 @@ const config = {
 		outputFileTracingIgnores: ['**swc/core**'],
 	},
 	images: {
-		domains: ['cdn.discordapp.com', 'avatars.githubusercontent.com'],
+		domains: [
+			'cdn.discordapp.com',
+			'avatars.githubusercontent.com',
+			'media.discordapp.net',
+		],
 	},
 	// We already do linting on GH actions
 	eslint: {
@@ -49,6 +54,14 @@ const config = {
 	productionBrowserSourceMaps: true, // we're open source so why not
 	sentry: {
 		hideSourceMaps: false,
+	},
+	async rewrites() {
+		return [
+			{
+				source: '/og/:path*',
+				destination: '/api/og/:path*',
+			},
+		];
 	},
 };
 

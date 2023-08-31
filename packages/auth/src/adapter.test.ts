@@ -28,11 +28,11 @@ beforeEach(() => {
 describe('Discord Auth', () => {
 	// This is the first time we have ever seen this user, we need to generate information for them
 	it('should create a Discord user for a new account', async () => {
-		const createdUser = await extendedAdapter.createUser({
+		const createdUser = await extendedAdapter.createUser!({
 			email: mockDiscordAccount.email!,
 			emailVerified: null,
 		});
-		await extendedAdapter.linkAccount({
+		await extendedAdapter.linkAccount!({
 			provider: 'discord',
 			providerAccountId: mockDiscordAccount.id,
 			type: 'oauth',
@@ -59,11 +59,11 @@ describe('Discord Auth', () => {
 				avatar: mockDiscordAccount.avatar,
 			},
 		});
-		const createdUser = await extendedAdapter.createUser({
+		const createdUser = await extendedAdapter.createUser!({
 			email: mockDiscordAccount.email!,
 			emailVerified: null,
 		});
-		await extendedAdapter.linkAccount({
+		await extendedAdapter.linkAccount!({
 			provider: 'discord',
 			providerAccountId: mockDiscordAccount.id,
 			type: 'oauth',

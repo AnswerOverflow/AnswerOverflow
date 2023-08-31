@@ -24,10 +24,12 @@ import {
 	updateManyChannels,
 	upsertChannel,
 	upsertManyChannels,
+	findChannelsBeforeArchivedTimestamp,
 } from './channel';
 import { createDiscordAccount } from './discord-account';
 import { findMessageById, upsertMessage } from './message';
 import { createServer } from './server';
+import { beforeEach } from 'vitest';
 
 let server: Server;
 beforeEach(async () => {
@@ -401,6 +403,43 @@ describe('Channel Operations', () => {
 				}),
 			);
 			expect(found).toContainEqual(addFlagsToChannel(chnl2));
+		});
+	});
+
+	describe('Channel Find After', () => {
+		beforeEach(async () => {
+			await upsertChannel({
+				create: mockChannel(server, { archivedTimestamp: BigInt(1) }),
+			});
+			await upsertChannel({
+				create: mockChannel(server, { archivedTimestamp: BigInt(2) }),
+			});
+			await upsertChannel({
+				create: mockChannel(server, { archivedTimestamp: BigInt(3) }),
+			});
+		});
+		it('should find before a timestamp', async () => {
+			const chnls = await findChannelsBeforeArchivedTimestamp({
+				serverId: server.id,
+				timestamp: BigInt(4),
+			});
+			expect(chnls).toHaveLength(3);
+		});
+		it('shouldnt find anything if no channels before', async () => {
+			const chnls = await findChannelsBeforeArchivedTimestamp({
+				serverId: server.id,
+				timestamp: BigInt(0),
+			});
+			expect(chnls).toHaveLength(0);
+		});
+		it('should find from highest to lowest', async () => {
+			const chnls = await findChannelsBeforeArchivedTimestamp({
+				serverId: server.id,
+				timestamp: BigInt(2),
+				take: 1,
+			});
+			expect(chnls).toHaveLength(1);
+			expect(chnls[0]!.archivedTimestamp).toBe(BigInt(1));
 		});
 	});
 });

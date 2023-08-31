@@ -18,6 +18,7 @@ export function GetStarted(
 	return (
 		<LinkButton
 			href={'/onboarding'}
+			prefetch={false}
 			variant="outline"
 			onMouseUp={() => {
 				// Use mouse up to capture middle click and right click

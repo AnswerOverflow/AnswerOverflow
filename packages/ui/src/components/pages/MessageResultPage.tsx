@@ -31,12 +31,17 @@ import {
 } from '~ui/components/primitives/Message';
 import { Heading } from '~ui/components/primitives/base/Heading';
 import AOHead from '~ui/components/primitives/AOHead';
+import Link from 'next/link';
 export type MessageResultPageProps = {
 	messages: APIMessageWithDiscordAccount[];
 	server: ServerPublic;
 	channel: ChannelPublicWithFlags;
 	thread?: ChannelPublicWithFlags;
 	requestedId: string;
+	relatedPosts: {
+		message: APIMessageWithDiscordAccount;
+		thread: ChannelPublicWithFlags;
+	}[];
 };
 
 // TODO: Align text to be same level with the avatar
@@ -46,6 +51,7 @@ export function MessageResultPage({
 	channel,
 	requestedId,
 	thread,
+	relatedPosts,
 }: MessageResultPageProps) {
 	const { tenant } = useTenantContext();
 	const isUserInServer = useIsUserInServer(server.id);
@@ -193,28 +199,13 @@ export function MessageResultPage({
 	const baseDomain = tenant?.customDomain
 		? `https://${tenant.customDomain}`
 		: getBaseUrl();
-	return (
-		<div className="sm:mx-3">
-			<Head>
-				<script
-					type="application/ld+json"
-					dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}
-				/>
-			</Head>
-			<AOHead
-				description={description}
-				path={`/m/${firstMessage?.id ?? requestedId}`}
-				title={`${channelName} - ${server.name}`}
-				server={server}
-				image={`${baseDomain}/api/og/post?id=${
-					firstMessage?.id ?? requestedId
-				}`}
-			/>
 
+	const Main = () => (
+		<div className={'flex grow flex-col'}>
 			<div className="mb-2 flex flex-col-reverse items-center justify-between gap-2 sm:flex-row sm:py-0 md:my-8">
 				<div className="flex h-full w-full grow flex-col items-center justify-between gap-2 md:gap-4">
 					<MessagesSearchBar className={'hidden md:block'} />
-					<div className={'block md:hidden'}>
+					<div className={'block xl:hidden'}>
 						<ServerInvite
 							server={server}
 							location={'Message Result Page'}
@@ -228,13 +219,6 @@ export function MessageResultPage({
 							dangerouslySetInnerHTML={{ __html: toHTML(question) }}
 						></h1>
 					</div>
-				</div>
-				<div className="hidden shrink-0 sm:pl-8 md:block">
-					<ServerInvite
-						server={server}
-						channel={channel}
-						location="Message Result Page"
-					/>
 				</div>
 			</div>
 			<div className="rounded-md">
@@ -251,6 +235,61 @@ export function MessageResultPage({
 						location="Message Result Page"
 					/>
 				</div>
+			</div>
+		</div>
+	);
+
+	const Sidebar = () => (
+		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center xl:mt-6 xl:w-[400px]">
+			<div className={'hidden w-full  xl:block'}>
+				<ServerInvite
+					server={server}
+					channel={channel}
+					location="Message Result Page"
+				/>
+			</div>
+			{relatedPosts.length > 0 && (
+				<div className="flex w-full flex-col justify-center gap-4 text-center xl:mt-6 ">
+					<span className="text-2xl">Recommended Posts</span>
+					<div className="flex flex-col gap-4">
+						{relatedPosts.slice(0, messages.length * 2).map((post) => (
+							<Link
+								className="flex flex-col gap-2 rounded-md border-2 border-solid border-secondary p-4 text-left transition-colors duration-700 ease-out hover:border-primary hover:text-primary"
+								href={`/m/${post.message.id}`}
+								key={post.thread.id}
+							>
+								<span className="truncate text-lg font-semibold">
+									{post.thread.name}
+								</span>
+								<span className="truncate text-sm">
+									{post.message.content.slice(0, 100)}
+								</span>
+							</Link>
+						))}
+					</div>
+				</div>
+			)}
+		</div>
+	);
+
+	return (
+		<div className="sm:mx-3">
+			<Head>
+				<script
+					type="application/ld+json"
+					dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}
+				/>
+			</Head>
+			<AOHead
+				description={description}
+				path={`/m/${firstMessage?.id ?? requestedId}`}
+				title={`${channelName} - ${server.name}`}
+				server={server}
+				image={`${baseDomain}/og/post?id=${firstMessage?.id ?? requestedId}`}
+			/>
+			<div className="flex flex-col gap-8 xl:flex-row">
+				<Main />
+				<Sidebar />
 			</div>
 		</div>
 	);
