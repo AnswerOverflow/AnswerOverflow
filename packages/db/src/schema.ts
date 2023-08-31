@@ -51,6 +51,8 @@ export const accounts = mysqlTable(
 	}),
 );
 
+export type Account = typeof accounts.$inferSelect;
+
 export const accountRelations = relations(accounts, ({ one }) => ({
 	user: one(users, {
 		fields: [accounts.userId],
