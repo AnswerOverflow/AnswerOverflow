@@ -1,7 +1,7 @@
 import {
 	addFlagsToChannel,
-	prisma,
 	zChannelPublic,
+	zServerPrismaCreate,
 	zServerPublic,
 } from '@answeroverflow/prisma-types';
 import { addFlagsToServer } from '@answeroverflow/prisma-types';
@@ -22,6 +22,9 @@ import { findChannelById } from './channel';
 import { findServerById } from './server';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 import { ChannelType } from 'discord-api-types/v10';
+import { db } from '../index';
+import { eq, or } from 'drizzle-orm';
+import { servers } from './schema';
 
 export async function findServerWithCommunityPageData(opts: {
 	idOrVanityUrl: string;
@@ -29,11 +32,12 @@ export async function findServerWithCommunityPageData(opts: {
 }) {
 	const { idOrVanityUrl, limit } = opts;
 	// TODO: Micro optimization, if the idOrVanityUrl is a number, we can skip the vanityUrl check
-	const found = await prisma.server.findFirst({
-		where: {
-			OR: [{ id: idOrVanityUrl }, { vanityUrl: idOrVanityUrl }],
-		},
-		include: {
+	const found = await db.query.servers.findFirst({
+		where: or(
+			eq(servers.id, idOrVanityUrl),
+			eq(servers.vanityUrl, idOrVanityUrl),
+		),
+		with: {
 			channels: true,
 		},
 	});
@@ -42,7 +46,7 @@ export async function findServerWithCommunityPageData(opts: {
 		.map(addFlagsToChannel)
 		.filter((c) => c.flags.indexingEnabled)
 		.map((c) => zChannelPublic.parse(c));
-	const server = addFlagsToServer(found);
+	const server = addFlagsToServer(zServerPrismaCreate.parse(found));
 	const serverPublic = zServerPublic.parse(server);
 
 	const allChannelQuestions = await Promise.all(
