@@ -192,7 +192,7 @@ export async function findManyDiscordAccountsWithUserServerSettings({
 	return data.map((i) => ({
 		...i,
 		userServerSettings: i.userServerSettings.map((j) => {
-			addFlagsToUserServerSettings(zUserServerSettingsFlags.parse(j));
+			return addFlagsToUserServerSettings(zUserServerSettingsFlags.parse(j));
 		}),
 	}));
 }
