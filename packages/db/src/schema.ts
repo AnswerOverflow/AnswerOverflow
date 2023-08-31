@@ -167,8 +167,10 @@ export const servers = mysqlTable('server', {
 	//
 });
 
+export type Server = typeof servers.$inferSelect;
+
 // Relations
-export const serversRelations = relations(servers, ({ one, many }) => ({
+export const serversRelations = relations(servers, ({ many }) => ({
 	userServerSettings: many(userServerSettings),
 	channels: many(channels),
 	tenantSessions: many(tenantSessions), //!: pluralised
