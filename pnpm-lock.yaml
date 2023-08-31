@@ -342,6 +342,9 @@ importers:
       sharp:
         specifier: ^0.32.5
         version: 0.32.5
+      shiki:
+        specifier: ^0.14.3
+        version: 0.14.3
       superjson:
         specifier: ^1.13.1
         version: 1.13.1
@@ -370,6 +373,9 @@ importers:
       autoprefixer:
         specifier: ^10.4.15
         version: 10.4.15(postcss@8.4.28)
+      copy-webpack-plugin:
+        specifier: ^11.0.0
+        version: 11.0.0(webpack@5.88.2)
       dotenv-cli:
         specifier: ^7.3.0
         version: 7.3.0

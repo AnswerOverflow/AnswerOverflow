@@ -5,7 +5,10 @@
  */
 
 import nextra from 'nextra';
-
+import CopyPlugin from 'copy-webpack-plugin';
+import path from 'node:path';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
@@ -27,6 +30,24 @@ const config = {
 	// We already do linting on GH actions
 	eslint: {
 		ignoreDuringBuilds: !!process.env.CI,
+	},
+	webpack: (config, { webpack }) => {
+		/**
+		 * Copying the whole npm package of shiki to static/shiki because it
+		 * loads some files from a "cdn" in the browser (semi-hacky)
+		 * @see https://github.com/shikijs/shiki#specify-a-custom-root-directory
+		 */
+		config.plugins.push(
+			new CopyPlugin({
+				patterns: [
+					{
+						from: path.resolve(path.dirname(require.resolve('shiki')), '..'),
+						to: 'static/shiki/',
+					},
+				],
+			}),
+		);
+		return config;
 	},
 };
 const withNextra = nextra({
