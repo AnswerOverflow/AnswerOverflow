@@ -21,6 +21,7 @@
 		"test:watch": "pnpm with-env vitest"
 	},
 	"dependencies": {
+		"@answeroverflow/db": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
 		"@prisma/client": "^4.16.2",

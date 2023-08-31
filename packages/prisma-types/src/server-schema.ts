@@ -1,4 +1,4 @@
-import type { Server } from '@prisma/client';
+import type { Server } from '@answeroverflow/db/src/schema';
 import { omit, pick } from '@answeroverflow/utils';
 import { z } from 'zod';
 import { toZObject } from './zod-utils';

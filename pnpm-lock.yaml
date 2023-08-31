@@ -1413,6 +1413,9 @@ importers:
 
   packages/prisma-types:
     dependencies:
+      '@answeroverflow/db':
+        specifier: workspace:^
+        version: link:../db
       '@answeroverflow/env':
         specifier: workspace:^
         version: link:../env
