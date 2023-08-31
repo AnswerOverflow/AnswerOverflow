@@ -1,9 +1,7 @@
 import { z } from 'zod';
 import {
 	addFlagsToUserServerSettings,
-	type DiscordAccount,
 	getDefaultDiscordAccount,
-	prisma,
 	zDiscordAccountCreate,
 	zDiscordAccountPrismaCreate,
 	zDiscordAccountPrismaUpdate,
@@ -98,21 +96,6 @@ export async function updateManyDiscordAccounts(
 		z.infer<typeof zDiscordAccountUpdate>
 	>(data.map((i) => [i.id, i]));
 	const accountSet = Array.from(uniqueAccountsToCreate.values());
-
-	const operations: Promise<DiscordAccount[]>[] = [];
-	for (let i = 0; i < accountSet.length; i += 50) {
-		const chunk = accountSet.slice(i, i + 50);
-		operations.push(
-			prisma.$transaction(
-				chunk.map((account) =>
-					prisma.discordAccount.update({
-						where: { id: account.id },
-						data: zDiscordAccountPrismaUpdate.parse(account),
-					}),
-				),
-			),
-		);
-	}
 
 	const updatedDiscordAccounts = await Promise.all(
 		accountSet.map(async (account) => {
