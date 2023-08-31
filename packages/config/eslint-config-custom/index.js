@@ -8,9 +8,13 @@ module.exports = {
 		'prettier',
 		'plugin:n/recommended',
 	],
-	plugins: ['@typescript-eslint', 'import', 'no-only-tests'],
+	plugins: ['@typescript-eslint', 'no-only-tests'],
 	parser: '@typescript-eslint/parser',
 	parserOptions: {
+		ecmaVersion: 2021,
+		ecmaFeatures: {
+			jsx: true,
+		},
 		project: ['./tsconfig.json'],
 		sourceType: 'module',
 	},

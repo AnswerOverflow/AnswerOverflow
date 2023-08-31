@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { trpc } from '~ui/utils/trpc';
 import { GetStarted, SignInButton } from './Callouts';
 import { ThemeSwitcher } from './ThemeSwitcher';
-import { AnswerOverflowLogo, DiscordIcon, GitHubIcon } from './base/Icons';
+import { DiscordIcon, GitHubIcon } from './base/Icons';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { GITHUB_LINK } from '@answeroverflow/constants/src/links';
 import { signOut } from 'next-auth/react';
@@ -44,6 +44,7 @@ import {
 	AvatarImage,
 } from '~ui/components/primitives/ui/avatar';
 import { Button } from '~ui/components/primitives/ui/button';
+import { AnswerOverflowLogo } from '~ui/components/primitives/base/AnswerOverflowLogo';
 const MainSiteDropdownMenuGroup = () => (
 	<>
 		<DropdownMenuGroup>
@@ -56,7 +57,7 @@ const MainSiteDropdownMenuGroup = () => (
 		</DropdownMenuGroup>
 		<DropdownMenuItem>
 			<LuPlus className="mr-2 h-4 w-4" />
-			<Link href="/onboarding" className="w-full">
+			<Link href="/onboarding" className="w-full" prefetch={false}>
 				Add To Server
 			</Link>
 		</DropdownMenuItem>
@@ -203,7 +204,9 @@ export function NavbarRenderer(props: {
 							</div>
 						) : (
 							<>
-								<AnswerOverflowLogo />
+								<div className={'w-40 md:w-56'}>
+									<AnswerOverflowLogo width={'full'} />
+								</div>
 								<span className="sr-only">Answer Overflow Logo</span>
 							</>
 						)}

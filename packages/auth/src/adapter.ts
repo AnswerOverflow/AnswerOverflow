@@ -20,7 +20,7 @@ export const extendedAdapter: Adapter = {
 			name: discordAccount.username,
 			avatar: discordAccount.avatar,
 		});
-		return PrismaAdapter(prisma).linkAccount(
+		return PrismaAdapter(prisma).linkAccount!(
 			account,
 		) as unknown as AdapterAccount;
 	},

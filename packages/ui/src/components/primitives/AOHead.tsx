@@ -60,17 +60,22 @@ export const AOHead = ({
 	}/`;
 	description =
 		description.length > 160 ? description.slice(0, 160) + '...' : description;
+	// Prevent incorrectly doing a double slash
+	const canonical = `${baseDomain}${
+		path.startsWith('/') ? path.slice(1) : path
+	}`;
 	return (
 		<Head>
 			<title>{title}</title>
-			{webClientEnv.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'production' && (
-				<meta property="robots" content="noindex" />
-			)}
-			<link
-				rel="canonical"
-				// Prevent incorrectly doing a double slash
-				href={`${baseDomain}${path.startsWith('/') ? path.slice(1) : path}`}
+			<meta
+				property="robots"
+				content={
+					webClientEnv.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'production'
+						? 'noindex,nofollow'
+						: 'index,follow'
+				}
 			/>
+			<link rel="canonical" href={canonical} key="canonical" />
 			{tenant && (
 				<link
 					rel="icon"
@@ -78,26 +83,47 @@ export const AOHead = ({
 					href={makeServerIconLink(tenant, 48)}
 				/>
 			)}
+			<meta property="description" name="description" content={description} />
+			{/* Open Graph */}
 			<meta
 				property="og:site_name"
+				key="og:site_name"
 				content={tenant?.name ?? 'Answer Overflow'}
 			/>
-			<meta property="og:title" content={title} />
-			<meta property="og:type" content={type} />
-			<meta property="description" content={description} />
-			<meta property="og:description" content={description} />
-			<meta property="og:image" content={image} />
-			<meta property="og:image:width" content={imageWidth} />
-			<meta property="og:image:height" content={imageHeight} />
-			<meta property="robots" content="index,follow" />
-			{parseInt(imageWidth) < 300 ? (
-				<meta name="twitter:card" content="summary" />
-			) : (
-				<meta name="twitter:card" content="summary_large_image" />
-			)}
-			<meta property="twitter:title" content={title} />
-			<meta property="twitter:description" content={description} />
-			<meta property="twitter:image" content={image} />
+			<meta property="og:title" key="og:title" content={title} />
+			<meta property="og:type" key="og:type" content={type} />
+			<meta
+				property="og:description"
+				key="og:description"
+				content={description}
+			/>
+			<meta property="og:image" key="og:image" content={image} />
+			<meta
+				property="og:image:width"
+				key="og:image:width"
+				content={imageWidth}
+			/>
+			<meta
+				property="og:image:height"
+				key="og:image:height"
+				content={imageHeight}
+			/>
+			<meta property="og:url" key="og:url" content={canonical} />
+
+			{/*Twitter*/}
+
+			<meta
+				name="twitter:card"
+				key="twitter:card"
+				content={parseInt(imageWidth) < 300 ? 'summary' : 'summary_large_image'}
+			/>
+			<meta property="twitter:title" key="twitter:title" content={title} />
+			<meta
+				property="twitter:description"
+				key="twitter:description"
+				content={description}
+			/>
+			<meta property="twitter:image" key="twitter:image" content={image} />
 		</Head>
 	);
 };
