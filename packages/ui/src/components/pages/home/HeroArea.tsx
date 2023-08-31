@@ -7,7 +7,7 @@ import { ServerIcon } from '~ui/components/primitives/ServerIcon';
 
 const HeroAreaText = () => {
 	return (
-		<div className="flex h-full w-[calc(100vw-2rem)] max-w-screen-lg flex-col items-center justify-center gap-6 rounded-3xl bg-background bg-clip-padding p-8 backdrop-blur-3xl sm:w-[80vw] md:p-16">
+		<div className="flex h-full w-[calc(100vw-2rem)] max-w-screen-lg flex-col items-center justify-center gap-6 rounded-3xl bg-clip-padding p-8 backdrop-blur-3xl sm:w-[80vw] md:p-16">
 			<h1 className="text-center font-header text-5xl font-bold leading-[114.5%] text-primary md:text-7xl">
 				Search all of Discord
 			</h1>
