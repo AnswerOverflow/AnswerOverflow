@@ -1,34 +1,30 @@
-import { type Account, prisma } from '@answeroverflow/prisma-types';
+import { prisma } from '@answeroverflow/prisma-types';
 import { getRandomId } from '@answeroverflow/utils';
+import { db } from '../index';
+import { accounts, tenantSessions, users, type Account } from './schema';
+import { and, eq } from 'drizzle-orm';
 
 export function findAccountByProviderAccountId(input: {
 	provider: string;
 	providerAccountId: string;
 }) {
-	return prisma.account.findUnique({
-		where: {
-			provider_providerAccountId: {
-				provider: input.provider,
-				providerAccountId: input.providerAccountId,
-			},
-		},
-	});
+	return db
+		.select()
+		.from(accounts)
+		.where(
+			and(
+				eq(accounts.provider, input.provider),
+				eq(accounts.providerAccountId, input.providerAccountId),
+			),
+		);
 }
 
 export function findTenantSessionByToken(token: string) {
-	return prisma.tenantSession.findUnique({
-		where: {
-			id: token,
-		},
-	});
+	return db.select().from(tenantSessions).where(eq(tenantSessions.id, token));
 }
 
 export function deleteTenantSessionByToken(token: string) {
-	return prisma.tenantSession.deleteMany({
-		where: {
-			id: token,
-		},
-	});
+	return db.delete(tenantSessions).where(eq(tenantSessions.id, token));
 }
 
 export function findDiscordOauthByProviderAccountId(discordId: string) {
@@ -39,40 +35,33 @@ export function findDiscordOauthByProviderAccountId(discordId: string) {
 }
 
 export async function findDiscordOauthByUserId(userId: string) {
-	const account = await prisma.user.findUnique({
-		where: {
-			id: userId,
-		},
-		select: {
-			accounts: {
-				where: {
-					provider: 'discord',
-				},
-			},
-		},
+	const account = await db.query.users.findFirst({
+		where: and(eq(users.id, userId), eq(accounts.provider, 'discord')),
 	});
-	return account?.accounts[0] ?? null;
+
+	return account ?? null;
 }
 
 export async function clearProviderAuthToken(
 	input: Pick<Account, 'provider' | 'providerAccountId'>,
 ) {
 	console.log('Token invalid, clearing');
-	await prisma.account.update({
-		where: {
-			provider_providerAccountId: {
-				provider: input.provider,
-				providerAccountId: input.providerAccountId,
-			},
-		},
-		data: {
+
+	await db
+		.update(accounts)
+		.set({
 			access_token: null,
 			refresh_token: null,
 			scope: null,
 			expires_at: null,
 			token_type: null,
-		},
-	});
+		})
+		.where(
+			and(
+				eq(accounts.provider, input.provider),
+				eq(accounts.providerAccountId, input.providerAccountId),
+			),
+		);
 }
 
 export async function updateProviderAuthToken(
@@ -88,21 +77,22 @@ export async function updateProviderAuthToken(
 		token_type?: string;
 		// eslint-disable-next-line @typescript-eslint/naming-convention
 		session_state?: string;
-		type?: string;
+		type?: Account['type'];
 		// eslint-disable-next-line @typescript-eslint/naming-convention
 		id_token?: string;
 	},
 ) {
 	const { provider, providerAccountId, ...update } = input;
-	await prisma.account.update({
-		where: {
-			provider_providerAccountId: {
-				provider: provider,
-				providerAccountId: providerAccountId,
-			},
-		},
-		data: update,
-	});
+
+	await db
+		.update(accounts)
+		.set(update)
+		.where(
+			and(
+				eq(accounts.provider, provider),
+				eq(accounts.providerAccountId, providerAccountId),
+			),
+		);
 }
 
 // todo: move to its own package
@@ -114,13 +104,11 @@ export function _NOT_PROD_createOauthAccountEntry({
 	discordUserId: string;
 	userId: string;
 }) {
-	return prisma.account.create({
-		data: {
-			provider: 'discord',
-			type: 'oauth',
-			providerAccountId: discordUserId,
-			userId: userId,
-			access_token: getRandomId(),
-		},
+	return db.insert(accounts).values({
+		provider: 'discord',
+		type: 'oauth',
+		providerAccountId: discordUserId,
+		userId: userId,
+		access_token: getRandomId(),
 	});
 }
