@@ -114,18 +114,30 @@ export async function updateProviderAuthToken(
 
 // todo: move to its own package
 //! MAINLY TEST ONLY
-export function _NOT_PROD_createOauthAccountEntry({
+export async function _NOT_PROD_createOauthAccountEntry({
 	discordUserId,
 	userId,
 }: {
 	discordUserId: string;
 	userId: string;
 }) {
-	return db.insert(accounts).values({
+	await db.insert(accounts).values({
+		id: getRandomId(), // TODO: Is this okay?
 		provider: 'discord',
 		type: 'oauth',
 		providerAccountId: discordUserId,
 		userId: userId,
 		access_token: getRandomId(),
 	});
+
+	const inserted = await db.query.accounts.findFirst({
+		where: and(
+			eq(accounts.provider, 'discord'),
+			eq(accounts.providerAccountId, discordUserId),
+		),
+	});
+
+	if (!inserted) throw new Error('Failed to insert account');
+
+	return inserted;
 }

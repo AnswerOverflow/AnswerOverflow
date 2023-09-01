@@ -99,10 +99,12 @@ export const verificationTokens = mysqlTable(
 );
 
 export const discordAccounts = mysqlTable('discordAccount', {
-	id: varchar('id', { length: 255 }).notNull().primaryKey(),
-	name: varchar('name', { length: 255 }),
+	id: varchar('id', { length: 255 }).notNull().primaryKey().unique(),
+	name: varchar('name', { length: 255 }).notNull(),
 	avatar: varchar('avatar', { length: 255 }),
 });
+
+export type DiscordAccount = typeof discordAccounts.$inferSelect;
 
 export const discordAccountsRelations = relations(
 	discordAccounts,
@@ -192,6 +194,8 @@ export const channels = mysqlTable('channel', {
 	bitfield: int('bitfield').default(0).notNull(),
 	solutionTagId: varchar('solutionTagId', { length: 255 }),
 });
+
+export type Channel = typeof channels.$inferSelect;
 
 export const channelsRelations = relations(channels, ({ one, many }) => ({
 	parent: one(channels, {

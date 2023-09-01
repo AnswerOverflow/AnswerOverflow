@@ -1,12 +1,11 @@
 import { z } from 'zod';
 import axios from 'axios';
 import { getRedisClient } from './client';
-import {
-	updateProviderAuthToken,
-	prisma,
-	type Account,
-} from '@answeroverflow/db';
+import { db } from '@answeroverflow/db';
 import { sharedEnvs } from '@answeroverflow/env/shared';
+import { and, eq } from 'drizzle-orm';
+import { Account, accounts, sessions } from '@answeroverflow/db/src/schema';
+import { updateProviderAuthToken } from '@answeroverflow/db/src/auth';
 
 type DiscordApiCallOpts = {
 	accessToken: string;
@@ -24,11 +23,11 @@ export async function discordApiFetch(
 		},
 	});
 	if (data.status === 401) {
-		const account = await prisma.account.findFirst({
-			where: {
-				provider: 'discord',
-				access_token: callOpts.accessToken,
-			},
+		const account = await db.query.accounts.findFirst({
+			where: and(
+				eq(accounts.provider, 'discord'),
+				eq(accounts.access_token, callOpts.accessToken),
+			),
 		});
 		if (!account) {
 			throw new Error('Invalid access token');
@@ -250,10 +249,6 @@ export async function refreshAccessToken(discord: Account) {
 			console.log('Error refreshing token', error);
 		}
 		// We're in a bad state so just prompt a re-auth
-		await prisma.session.deleteMany({
-			where: {
-				userId: discord.userId,
-			},
-		});
+		await db.delete(sessions).where(eq(sessions.userId, discord.userId));
 	}
 }

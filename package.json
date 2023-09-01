@@ -19,6 +19,7 @@
 		"db:wipe": "turbo db:wipe",
 		"db:push": "turbo db:push db:generate",
 		"db:push:staging": "turbo db:push:staging db:generate",
+		"db:introspect": "turbo db:introspect",
 		"clean": "turbo run clean && rm -rf node_modules",
 		"build:main-site": "turbo run build --filter=main-site",
 		"build:docs": "turbo run build --filter=docs",

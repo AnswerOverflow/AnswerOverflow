@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCsrfToken, getSession } from 'next-auth/react';
-import { findServerByCustomDomain, prisma } from '@answeroverflow/db';
+import { db } from '@answeroverflow/db';
 import { z } from 'zod';
 import crypto from 'crypto';
 // eslint-disable-next-line no-restricted-imports
@@ -13,6 +13,8 @@ import { authOptions, getNextAuthCookieName } from '@answeroverflow/auth';
 import { IncomingMessage } from 'http';
 import { NextAuthOptions } from 'next-auth';
 import { NextApiRequestCookies } from 'next/dist/server/api-utils';
+import { findServerByCustomDomain } from '@answeroverflow/db/src/server';
+import { tenantSessions } from '@answeroverflow/db/src/schema';
 
 async function getServerSignInUrl(
 	req: IncomingMessage,
@@ -73,15 +75,13 @@ export default async function handler(
 		return;
 	}
 
-	const tenantSession = await prisma.tenantSession.create({
-		data: {
-			id: crypto.randomUUID(),
-			serverId: tenant.id,
-			sessionToken: token,
-		},
+	const tenantSessionId = crypto.randomUUID();
+
+	await db.insert(tenantSessions).values({
+		id: tenantSessionId,
+		serverId: tenant.id,
+		sessionToken: token,
 	});
-	const tenantSessionId = tenantSession.id;
-	// add token to redirect
 
 	const redirectWithToken = `${redirectURL.origin}/api/auth/tenant/callback?redirect=${redirect}&code=${tenantSessionId}`;
 

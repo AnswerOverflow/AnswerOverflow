@@ -6,12 +6,7 @@ import {
 	mockGuildMember,
 } from '@answeroverflow/discordjs-mock';
 import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
-import {
-	createDiscordAccount,
-	prisma,
-	type User,
-	_NOT_PROD_createOauthAccountEntry,
-} from '@answeroverflow/db';
+import { db } from '@answeroverflow/db';
 import {
 	toAODiscordAccount,
 	toDiscordAPIServer,
@@ -22,6 +17,9 @@ import {
 	updateCachedDiscordUser,
 	updateUserServersCache,
 } from '@answeroverflow/cache';
+import { users } from '@answeroverflow/db/src/schema';
+import { createDiscordAccount } from '@answeroverflow/db/src/discord-account';
+import { _NOT_PROD_createOauthAccountEntry } from '@answeroverflow/db/src/auth';
 // import { updateUserServersCache } from "@answeroverflow/cache";
 let client: Client;
 let guild: Guild;
@@ -31,9 +29,7 @@ beforeEach(async () => {
 	client = await setupAnswerOverflowBot();
 	guild = mockGuild(client);
 	member = mockGuildMember({ client, guild });
-	user = await prisma.user.create({
-		data: {},
-	});
+	user = await db.insert(users).values({}); // TODO: set values (prisma -> drizzle)
 	await createDiscordAccount(toAODiscordAccount(member.user));
 });
 
@@ -44,18 +40,19 @@ describe('Account Parity', () => {
 				discordUserId: member.user.id,
 				userId: user.id,
 			});
-			await updateUserServersCache(oauth.access_token!, [
+			if (!oauth.access_token) throw new Error('No access token');
+			await updateUserServersCache(oauth.access_token, [
 				toDiscordAPIServer(member),
 			]);
 			const userServers = await getUserServers({
-				accessToken: oauth.access_token!,
+				accessToken: oauth.access_token,
 			});
 			expect(userServers).toEqual([toDiscordAPIServer(member)]);
 			const member2 = mockGuildMember({ client, user: member.user });
 			await emitEvent(client, Events.GuildMemberAdd, member2);
 
 			const userServers2 = await getUserServers({
-				accessToken: oauth.access_token!,
+				accessToken: oauth.access_token,
 			});
 			expect(userServers2).toHaveLength(2);
 			expect(userServers2).toContainEqual(toDiscordAPIServer(member2));

@@ -41,13 +41,6 @@ export function getDefaultChannel(
 	return data;
 }
 
-export function getDefaultChannelWithFlags(
-	override: Partial<Channel> &
-		Pick<Channel, 'id' | 'serverId' | 'type' | 'parentId' | 'name'>,
-) {
-	return addFlagsToChannel(getDefaultChannel(override));
-}
-
 export function getDefaultDiscordAccount(
 	override: Partial<DiscordAccount> & { id: string; name: string },
 ): DiscordAccount {

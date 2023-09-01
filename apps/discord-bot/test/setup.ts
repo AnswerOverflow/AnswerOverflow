@@ -1,7 +1,7 @@
 import { cleanupRedis } from '@answeroverflow/cache';
-import { prisma } from '@answeroverflow/db';
+import { db } from '@answeroverflow/db';
 
 afterAll(async () => {
 	await cleanupRedis();
-	await prisma.$disconnect();
+	// TODO: It doesn't appear that we can close the db connection (prisma -> drizzle)
 });

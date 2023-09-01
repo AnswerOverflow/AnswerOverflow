@@ -13,6 +13,7 @@
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix",
 		"db:wipe": "cross-env NODE_ENV=test pnpm with-env npx ts-node ./scripts/wipe.ts",
+		"db:introspect": "drizzle-kit introspect:mysql",
 		"test": "pnpm with-env vitest run --coverage",
 		"test:watch": "pnpm with-env vitest"
 	},
@@ -28,6 +29,7 @@
 		"@planetscale/database": "^1.11.0",
 		"@sapphire/bitfield": "^1.2.0",
 		"discord-api-types": "^0.37.54",
+		"dotenv": "^16.3.1",
 		"dotenv-cra": "^3.0.3",
 		"drizzle-orm": "^0.28.5",
 		"drizzle-zod": "^0.5.1",
