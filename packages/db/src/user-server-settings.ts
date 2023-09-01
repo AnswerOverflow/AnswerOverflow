@@ -11,11 +11,15 @@ import {
 	zUserServerSettingsMutable,
 	zUserServerSettingsUpdate,
 	zUserServerSettingsPrismaUpdate,
+	zUserServerSettingsFind,
 } from '@answeroverflow/prisma-types';
 import { upsertDiscordAccount } from './discord-account';
-import { addFlagsToUserServerSettings } from '@answeroverflow/prisma-types';
+import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
 import { upsert } from './utils/operations';
 import { DBError } from './utils/error';
+import { db } from '../index';
+import { and, eq, isNotNull } from 'drizzle-orm';
+import { userServerSettings } from './schema';
 
 export const CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE =
 	'You cannot grant consent to publicly display messages with message indexing disabled. Enable messaging indexing first';
@@ -92,14 +96,14 @@ interface UserServerSettingsFindById {
 export async function findUserServerSettingsById(
 	where: UserServerSettingsFindById,
 ) {
-	const data = await prisma.userServerSettings.findUnique({
-		where: {
-			userId_serverId: {
-				userId: where.userId,
-				serverId: where.serverId,
-			},
-		},
-	});
+	const data = (await db.query.userServerSettings.findFirst({
+		where: and(
+			eq(userServerSettings.userId, where.userId),
+			eq(userServerSettings.serverId, where.serverId),
+			isNotNull(userServerSettings.bitfield),
+		),
+	})) as UserServerSettingsWithFlags | null;
+
 	return data ? addFlagsToUserServerSettings(data) : null;
 }
 
