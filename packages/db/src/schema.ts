@@ -120,6 +120,8 @@ export const userServerSettings = mysqlTable('userServerSettings', {
 	bitfield: int('bitfield'),
 });
 
+export type UserServerSettings = typeof userServerSettings.$inferSelect;
+
 export const userServerSettingsRelations = relations(
 	userServerSettings,
 	({ one }) => ({
@@ -143,17 +145,17 @@ export const servers = mysqlTable('server', {
 	name: varchar('name', { length: 255 }),
 	icon: varchar('icon', { length: 255 }),
 	description: varchar('description', { length: 255 }),
-	vanityInviteCode: varchar('vanityInviteCode', { length: 255 }),
+	vanityInviteCode: varchar('vanityInviteCode', { length: 255 }).unique(),
 
 	//
 	// Answer Overflow Settings Start
 	//
 	bitfield: int('bitfield').default(0).notNull(),
 	kickedTime: datetime('kickedTime'),
-	vanityUrl: varchar('vanityUrl', { length: 255 }),
+	vanityUrl: varchar('vanityUrl', { length: 255 }).unique(),
 
 	// Tenant Settings
-	customDomain: varchar('customDomain', { length: 255 }),
+	customDomain: varchar('customDomain', { length: 255 }).unique(),
 
 	// Stripe Settings
 	stripeCustomerId: varchar('stripeCustomerId', { length: 255 }),
