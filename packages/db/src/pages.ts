@@ -1,10 +1,7 @@
 import {
 	addFlagsToChannel,
 	zChannelPublic,
-	zServerPrismaCreate,
-	zServerPublic,
 } from '@answeroverflow/prisma-types';
-import { addFlagsToServer } from '@answeroverflow/prisma-types';
 import type { z } from 'zod';
 import {
 	addAuthorsToMessages,
@@ -25,6 +22,8 @@ import { ChannelType } from 'discord-api-types/v10';
 import { db } from '../index';
 import { eq, or } from 'drizzle-orm';
 import { servers } from './schema';
+import { zServerPublic, zServerSchema } from './zodSchemas/serverSchemas';
+import { addFlagsToServer } from './utils/serverUtils';
 
 export async function findServerWithCommunityPageData(opts: {
 	idOrVanityUrl: string;
@@ -46,7 +45,7 @@ export async function findServerWithCommunityPageData(opts: {
 		.map(addFlagsToChannel)
 		.filter((c) => c.flags.indexingEnabled)
 		.map((c) => zChannelPublic.parse(c));
-	const server = addFlagsToServer(zServerPrismaCreate.parse(found));
+	const server = addFlagsToServer(zServerSchema.parse(found));
 	const serverPublic = zServerPublic.parse(server);
 
 	const allChannelQuestions = await Promise.all(
