@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import {
-	prisma,
 	getDefaultUserServerSettingsWithFlags,
 	dictToBitfield,
 	type UserServerSettingsWithFlags,
@@ -11,14 +10,13 @@ import {
 	zUserServerSettingsMutable,
 	zUserServerSettingsUpdate,
 	zUserServerSettingsPrismaUpdate,
-	zUserServerSettingsFind,
 } from '@answeroverflow/prisma-types';
 import { upsertDiscordAccount } from './discord-account';
 import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
 import { upsert } from './utils/operations';
 import { DBError } from './utils/error';
 import { db } from '../index';
-import { and, eq, isNotNull } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { userServerSettings } from './schema';
 
 export const CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE =
@@ -108,11 +106,9 @@ export async function findUserServerSettingsById(
 }
 
 export async function countConsentingUsersInServer(serverId: string) {
-	const res = await prisma.$queryRawUnsafe(
-		`SELECT COUNT(*) as count
+	const res = await db.execute(sql`SELECT COUNT(*) as count
     FROM UserServerSettings
-    WHERE serverId = ${serverId} AND bitfield & 1 = 1;`,
-	);
+    WHERE serverId = ${serverId} AND bitfield & 1 = 1;`);
 	const parsed = z
 		.array(
 			z.object({
@@ -130,12 +126,10 @@ export async function countConsentingUsersInServer(serverId: string) {
 export async function countConsentingUsersInManyServers(serverIds: string[]) {
 	if (serverIds.length === 0) return new Map();
 	const asSet = new Set(serverIds);
-	const res = await prisma.$queryRawUnsafe(
-		`SELECT COUNT(*) as count, serverId
+	const res = await db.execute(sql`SELECT COUNT(*) as count, serverId
     FROM UserServerSettings
     WHERE serverId IN (${[...asSet].join(',')}) AND bitfield & 1 = 1
-    GROUP BY serverId;`,
-	);
+    GROUP BY serverId;`);
 	const parsed = z
 		.array(
 			z.object({
@@ -156,18 +150,19 @@ export async function countConsentingUsersInManyServers(serverIds: string[]) {
 export async function findManyUserServerSettings(
 	where: UserServerSettingsFindById[],
 ) {
-	const data = await prisma.userServerSettings.findMany({
-		where: {
-			AND: {
-				userId: {
-					in: where.map((x) => x.userId),
-				},
-				serverId: {
-					in: where.map((x) => x.serverId),
-				},
-			},
-		},
-	});
+	const data = (await db.query.userServerSettings.findMany({
+		where: and(
+			inArray(
+				userServerSettings.userId,
+				where.map((x) => x.userId),
+			),
+			inArray(
+				userServerSettings.serverId,
+				where.map((x) => x.serverId),
+			),
+			isNotNull(userServerSettings.bitfield),
+		),
+	})) as UserServerSettingsWithFlags[];
 	return data.map(addFlagsToUserServerSettings);
 }
 
@@ -180,9 +175,16 @@ export async function createUserServerSettings(
 		}),
 		data,
 	);
-	const created = await prisma.userServerSettings.create({
-		data: zUserServerSettingsPrismaCreate.parse(updateData),
-	});
+	await db
+		.insert(userServerSettings)
+		.values(zUserServerSettingsPrismaCreate.parse(updateData));
+	const created = (await db.query.userServerSettings.findFirst({
+		where: and(
+			eq(userServerSettings.userId, data.userId),
+			isNotNull(userServerSettings.bitfield),
+		),
+	})) as UserServerSettingsWithFlags | null;
+	if (!created) throw new Error('Error creating user server settings');
 	return addFlagsToUserServerSettings(created);
 }
 
@@ -203,15 +205,22 @@ export async function updateUserServerSettings(
 		existing,
 		data,
 	);
-	const updated = await prisma.userServerSettings.update({
-		where: {
-			userId_serverId: {
-				userId: data.userId,
-				serverId: data.serverId,
-			},
-		},
-		data: zUserServerSettingsPrismaUpdate.parse(updateData),
-	});
+	await db
+		.update(userServerSettings)
+		.set(zUserServerSettingsPrismaUpdate.parse(updateData))
+		.where(
+			and(
+				eq(userServerSettings.userId, data.userId),
+				eq(userServerSettings.serverId, data.serverId),
+			),
+		);
+	const updated = (await db.query.userServerSettings.findFirst({
+		where: and(
+			eq(userServerSettings.userId, data.userId),
+			eq(userServerSettings.serverId, data.serverId),
+		),
+	})) as UserServerSettingsWithFlags | null;
+	if (!updated) throw new Error('Error updating user server settings');
 	return addFlagsToUserServerSettings(updated);
 }
 

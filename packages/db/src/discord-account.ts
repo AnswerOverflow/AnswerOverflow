@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import {
-	addFlagsToUserServerSettings,
 	getDefaultDiscordAccount,
 	zDiscordAccountCreate,
 	zDiscordAccountPrismaCreate,
@@ -19,6 +18,7 @@ import { deleteManyMessagesByUserId } from './message';
 import { db } from '../index';
 import { eq, inArray } from 'drizzle-orm';
 import { discordAccounts, userServerSettings } from './schema';
+import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
 
 const zUserServerSettingsFlags = z.object({
 	userId: z.string(),

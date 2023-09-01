@@ -17,11 +17,7 @@ import {
 	zChannelUpsert,
 	zChannelUpsertMany,
 } from '@answeroverflow/prisma-types';
-import {
-	prisma,
-	getDefaultChannel,
-	type Channel,
-} from '@answeroverflow/prisma-types';
+import { getDefaultChannel } from '@answeroverflow/prisma-types';
 import { dictToBitfield } from '@answeroverflow/prisma-types/src/bitfield';
 import { deleteManyMessagesByChannelId } from './message';
 import { omit } from '@answeroverflow/utils';
@@ -222,19 +218,12 @@ export async function createChannel(data: z.infer<typeof zChannelCreate>) {
 export async function createManyChannels(
 	data: z.infer<typeof zChannelCreateMany>[],
 ) {
-	const operations: Promise<unknown>[] = [];
-	for (let i = 0; i < data.length; i += 50) {
-		const chunk = data.slice(i, i + 50);
-		operations.push(
-			prisma.channel.createMany({
-				data: chunk.map((c) => zChannelCreateMany.parse(c)),
-			}),
-			db
-				.insert(channels)
-				.values(chunk.map((c) => zChannelPrismaCreate.parse(c))),
-		);
-	}
-	await Promise.all(operations);
+	await Promise.all(
+		data.map((channel) => {
+			return db.insert(channels).values(zChannelPrismaCreate.parse(channel));
+		}),
+	);
+
 	return data.map((c) => getDefaultChannel({ ...c }));
 }
 

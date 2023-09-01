@@ -1,4 +1,3 @@
-import { prisma } from '@answeroverflow/prisma-types';
 import { getRandomId } from '@answeroverflow/utils';
 import { db } from '../index';
 import { accounts, tenantSessions, users, type Account } from './schema';

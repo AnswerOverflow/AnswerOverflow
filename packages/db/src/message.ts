@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import type {
-	ChannelWithFlags,
+import {
+	type ChannelWithFlags,
 	zDiscordAccountPublic,
 } from '@answeroverflow/prisma-types';
 import {
