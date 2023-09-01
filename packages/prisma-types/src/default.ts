@@ -1,7 +1,6 @@
 import type {
 	Channel,
 	DiscordAccount,
-	Server,
 	User,
 	UserServerSettings,
 } from '@prisma/client';
@@ -20,25 +19,6 @@ export function getDefaultUser(
 		name: null,
 		...override,
 	};
-}
-
-export function getDefaultServer(
-	override: Partial<Server> & { id: string; name: string },
-): Server {
-	const data: Server = {
-		icon: null,
-		kickedTime: null,
-		bitfield: 0,
-		description: null,
-		vanityUrl: null,
-		customDomain: null,
-		stripeCustomerId: null,
-		stripeSubscriptionId: null,
-		plan: 'FREE',
-		vanityInviteCode: null,
-		...override,
-	};
-	return data;
 }
 
 export function getDefaultServerWithFlags(

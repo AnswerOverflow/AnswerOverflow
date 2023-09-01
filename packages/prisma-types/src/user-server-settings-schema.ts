@@ -13,15 +13,6 @@ export const userServerSettingsFlags = [
 export const bitfieldToUserServerSettingsFlags = (bitfield: number) =>
 	bitfieldToDict(bitfield, userServerSettingsFlags);
 
-export function addFlagsToUserServerSettings<T extends UserServerSettings>(
-	userServerSettings: T,
-) {
-	return {
-		...userServerSettings,
-		flags: bitfieldToUserServerSettingsFlags(userServerSettings.bitfield),
-	};
-}
-
 export function userServerSettingsFlagsToBitfield(
 	old: number,
 	newFlags: Record<string, boolean>,
