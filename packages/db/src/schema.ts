@@ -30,6 +30,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 export const accounts = mysqlTable(
 	'account',
 	{
+		id: varchar('id', { length: 255 }).notNull().primaryKey(),
 		userId: varchar('userId', { length: 255 })
 			.notNull()
 			.references(() => users.id, { onDelete: 'cascade' }),
