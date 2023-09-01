@@ -1,4 +1,3 @@
-import type { DiscordAccount } from '@answeroverflow/prisma-types';
 import { findMessageById, upsertMessage } from './message';
 import {
 	deleteDiscordAccount,
@@ -12,6 +11,7 @@ import {
 } from '@answeroverflow/db-mock';
 import { createServer } from './server';
 import { createChannel } from './channel';
+import { DiscordAccount } from './schema';
 let account1: DiscordAccount;
 let account2: DiscordAccount;
 let account3: DiscordAccount;

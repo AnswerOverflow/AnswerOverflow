@@ -6,30 +6,30 @@ import {
 	addFlagsToServer,
 	getDefaultServer,
 	getDefaultUserServerSettings,
-} from '@answeroverflow/db/src/utils/serverUtils';
+} from '../db/src/utils/serverUtils';
 import {
 	serverSettingsFlags,
 	ServerWithFlags,
-} from '@answeroverflow/db/src/zodSchemas/serverSchemas';
+} from '../db/src/zodSchemas/serverSchemas';
 import {
 	addFlagsToUserServerSettings,
 	userServerSettingsFlags,
 	UserServerSettingsWithFlags,
-} from '@answeroverflow/db/src/utils/userServerSettingsUtils';
-import { getDefaultDiscordAccount } from '@answeroverflow/db/src/utils/discordAccountUtils';
+} from '../db/src/utils/userServerSettingsUtils';
+import { getDefaultDiscordAccount } from '../db/src/utils/discordAccountUtils';
 import {
 	Channel,
 	DiscordAccount,
 	Server,
 	UserServerSettings,
-} from '@answeroverflow/db/src/schema';
+} from '../db/src/schema';
 import {
 	addFlagsToChannel,
 	channelBitfieldFlags,
 	ChannelWithFlags,
-} from '@answeroverflow/db/src/zodSchemas/channelSchemas';
-import { dictToBitfield } from '@answeroverflow/db/src/utils/bitfieldUtils';
-import { getDefaultChannel } from '@answeroverflow/db/src/utils/channelUtils';
+} from '../db/src/zodSchemas/channelSchemas';
+import { dictToBitfield } from '../db/src/utils/bitfieldUtils';
+import { getDefaultChannel } from '../db/src/utils/channelUtils';
 export function mockDiscordAccount(override: Partial<DiscordAccount> = {}) {
 	const account = getDefaultDiscordAccount({
 		id: getRandomId(),

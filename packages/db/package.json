@@ -22,7 +22,6 @@
 		"@answeroverflow/db-mock": "workspace:^",
 		"@answeroverflow/elastic-types": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
-		"@answeroverflow/prisma-types": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
 		"@auth/core": "^0.12.0",
 		"@auth/drizzle-adapter": "^0.3.2",

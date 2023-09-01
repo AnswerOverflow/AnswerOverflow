@@ -1,8 +1,3 @@
-import {
-	addFlagsToServer,
-	bitfieldToServerFlags,
-	type Server,
-} from '@answeroverflow/prisma-types';
 import { mockServer } from '@answeroverflow/db-mock';
 import {
 	createServer,
@@ -11,6 +6,8 @@ import {
 	updateServer,
 } from './server';
 import { getRandomId } from '@answeroverflow/utils';
+import { Server } from './schema';
+import { addFlagsToServer, bitfieldToServerFlags } from './utils/serverUtils';
 
 let server: Server;
 

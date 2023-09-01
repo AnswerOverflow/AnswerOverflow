@@ -1006,9 +1006,6 @@ importers:
       '@answeroverflow/prettier-config':
         specifier: workspace:^
         version: link:../config/prettier
-      '@answeroverflow/prisma-types':
-        specifier: workspace:^
-        version: link:../prisma-types
       '@answeroverflow/tsconfig':
         specifier: workspace:^
         version: link:../config/tsconfig
@@ -1039,9 +1036,6 @@ importers:
       '@answeroverflow/env':
         specifier: workspace:^
         version: link:../env
-      '@answeroverflow/prisma-types':
-        specifier: workspace:^
-        version: link:../prisma-types
       '@answeroverflow/utils':
         specifier: workspace:^
         version: link:../utils
@@ -1115,18 +1109,12 @@ importers:
 
   packages/db-mock:
     dependencies:
-      '@answeroverflow/db':
-        specifier: workspace:^
-        version: link:../db
       '@answeroverflow/elastic-types':
         specifier: workspace:^
         version: link:../elastic-types
       '@answeroverflow/env':
         specifier: workspace:^
         version: link:../env
-      '@answeroverflow/prisma-types':
-        specifier: workspace:^
-        version: link:../prisma-types
       '@answeroverflow/utils':
         specifier: workspace:^
         version: link:../utils
