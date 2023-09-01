@@ -1,20 +1,19 @@
 import type { z } from 'zod';
 import {
-	getDefaultServerWithFlags,
-	prisma,
-	type Server,
 	zServerCreate,
 	zServerMutable,
-	zServerPrismaCreate,
-	zServerPrismaUpdate,
 	zServerUpdate,
 	zServerUpsert,
-} from '@answeroverflow/prisma-types';
-import { upsert } from './utils/operations';
+} from './zod';
 import {
 	addFlagsToServer,
 	mergeServerFlags,
-} from '@answeroverflow/prisma-types';
+	getDefaultServerWithFlags,
+} from './utils/serverUtils';
+import { upsert } from './utils/operations';
+import { Server, servers } from './schema';
+import { db } from '../index';
+import { eq, inArray, or } from 'drizzle-orm';
 
 export async function applyServerSettingsSideEffects<
 	F extends { bitfield: number },
@@ -38,30 +37,34 @@ export async function applyServerSettingsSideEffects<
 }
 
 export async function findServerByCustomDomain(domain: string) {
-	const found = await prisma.server.findUnique({
-		where: {
-			customDomain: domain,
-		},
+	const found = await db.query.servers.findFirst({
+		where: eq(servers.customDomain, domain),
 	});
 	if (!found) return null;
 	return addFlagsToServer(found);
 }
 
-export async function createServer(input: z.infer<typeof zServerCreate>) {
+export async function createServer(
+	input: z.infer<typeof zServerCreate> & {
+		id: string;
+		name: string;
+	},
+) {
 	// Explicitly type this to avoid passing into .parse missing information
 	const combinedCreateData = await applyServerSettingsSideEffects({
 		old: getDefaultServerWithFlags(input),
 		updated: input,
 	});
-	const created = await prisma.server.create({
-		// Strip out any extra data that isn't in the model
-		data: zServerPrismaCreate.parse(combinedCreateData),
+	await db.insert(servers).values(zServerCreate.parse(combinedCreateData));
+	const created = await db.query.servers.findFirst({
+		where: eq(servers.id, input.id),
 	});
+	if (!created) throw new Error(`Error creating server with id ${input.id}`);
 	return addFlagsToServer(created);
 }
 
 export async function findAllServers() {
-	const found = await prisma.server.findMany();
+	const found = await db.query.servers.findMany();
 	return found.map(addFlagsToServer);
 }
 
@@ -81,67 +84,67 @@ export async function updateServer({
 		old: existing,
 		updated: update,
 	});
-	const updated = await prisma.server.update({
-		where: { id: update.id },
-		// Strip out any extra data that isn't in the model
-		data: zServerPrismaUpdate.parse(combinedUpdateData),
+
+	await db
+		.update(servers)
+		.set(zServerUpdate.parse(combinedUpdateData))
+		.where(eq(servers.id, update.id));
+
+	const updated = await db.query.servers.findFirst({
+		where: eq(servers.id, update.id),
 	});
+
+	if (!updated) throw new Error(`Error updating server with id ${update.id}`);
 	return addFlagsToServer(updated);
 }
 
 export async function findServerById(id: string) {
-	const found = await prisma.server.findUnique({
-		where: {
-			id,
-		},
+	const found = await db.query.servers.findFirst({
+		where: eq(servers.id, id),
 	});
 	if (!found) return null;
 	return addFlagsToServer(found);
 }
 
 export async function findServerByStripeCustomerId(stripeCustomerId: string) {
-	const found = await prisma.server.findUnique({
-		where: {
-			stripeCustomerId,
-		},
+	const found = await db.query.servers.findFirst({
+		where: eq(servers.stripeCustomerId, stripeCustomerId),
 	});
 	if (!found) return null;
 	return addFlagsToServer(found);
 }
 
 export async function findServerByAlias(alias: string) {
-	const found = await prisma.server.findUnique({
-		where: {
-			vanityUrl: alias,
-		},
+	const found = await db.query.servers.findFirst({
+		where: eq(servers.vanityUrl, alias),
 	});
 	if (!found) return null;
 	return addFlagsToServer(found);
 }
 
 export async function findServerByAliasOrId(aliasOrId: string) {
-	const found = await prisma.server.findFirst({
-		where: {
-			OR: [
-				{
-					vanityUrl: aliasOrId,
-				},
-				{
-					id: aliasOrId,
-				},
-			],
-		},
+	const found = await db.query.servers.findFirst({
+		where: or(eq(servers.vanityUrl, aliasOrId), eq(servers.id, aliasOrId)),
 	});
 	if (!found) return null;
 	return addFlagsToServer(found);
 }
 
 export async function findManyServersById(ids: string[]) {
-	const found = await prisma.server.findMany({ where: { id: { in: ids } } });
+	const found = await db.query.servers.findMany({
+		where: inArray(servers.id, ids),
+	});
 	return found.map(addFlagsToServer);
 }
 
-export function upsertServer(input: z.infer<typeof zServerUpsert>) {
+export function upsertServer(
+	input: z.infer<typeof zServerUpsert> & {
+		create: z.infer<typeof zServerCreate> & {
+			id: string;
+			name: string;
+		};
+	},
+) {
 	return upsert({
 		find: () => findServerById(input.create.id),
 		create: () => createServer(input.create),
