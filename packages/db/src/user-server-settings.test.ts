@@ -1,16 +1,9 @@
 import {
-	bitfieldToUserServerSettingsFlags,
-	type DiscordAccount,
-	type Server,
-	type UserServerSettingsWithFlags,
-} from '@answeroverflow/prisma-types';
-import {
 	mockChannel,
 	mockDiscordAccount,
 	mockMessage,
 	mockServer,
 } from '@answeroverflow/db-mock';
-import { addFlagsToUserServerSettings } from '@answeroverflow/prisma-types';
 import { createServer } from './server';
 import { createDiscordAccount } from './discord-account';
 import {
@@ -24,6 +17,12 @@ import {
 import { findMessageById, upsertMessage } from './message';
 import { createChannel } from './channel';
 import { getRandomId } from '@answeroverflow/utils';
+import { DiscordAccount, Server } from './schema';
+import {
+	addFlagsToUserServerSettings,
+	bitfieldToUserServerSettingsFlags,
+	UserServerSettingsWithFlags,
+} from './utils/userServerSettingsUtils';
 
 let server: Server;
 let account: DiscordAccount;

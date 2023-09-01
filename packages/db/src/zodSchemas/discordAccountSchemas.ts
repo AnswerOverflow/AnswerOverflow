@@ -1,6 +1,6 @@
-import type { DiscordAccount } from '@prisma/client';
 import { omit, pick } from '@answeroverflow/utils';
 import { z } from 'zod';
+import { DiscordAccount } from '../schema';
 
 type DiscordAccountZodFormat = {
 	[K in keyof DiscordAccount]: z.ZodTypeAny;

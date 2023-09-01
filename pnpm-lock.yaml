@@ -1115,6 +1115,9 @@ importers:
 
   packages/db-mock:
     dependencies:
+      '@answeroverflow/db':
+        specifier: workspace:^
+        version: link:../db
       '@answeroverflow/elastic-types':
         specifier: workspace:^
         version: link:../elastic-types

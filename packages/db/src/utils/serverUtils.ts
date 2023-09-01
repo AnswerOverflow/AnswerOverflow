@@ -1,10 +1,7 @@
-import {
-	bitfieldToDict,
-	dictToBitfield,
-	mergeFlags,
-} from '@answeroverflow/prisma-types';
-import { serverSettingsFlags } from '../zod';
-import type { Server } from '../schema';
+import type { Server, User, UserServerSettings } from '../schema';
+import { addFlagsToUserServerSettings } from './userServerSettingsUtils';
+import { bitfieldToDict, dictToBitfield, mergeFlags } from './bitfieldUtils';
+import { serverSettingsFlags } from '../zodSchemas/serverSchemas';
 
 export const bitfieldToServerFlags = (bitfield: number) =>
 	bitfieldToDict(bitfield, serverSettingsFlags);
@@ -49,5 +46,42 @@ export function mergeServerFlags(
 		() => bitfieldToServerFlags(old),
 		newFlags,
 		(flags) => dictToBitfield(flags, serverSettingsFlags),
+	);
+}
+
+// TODO: sort to separate files
+export function getDefaultUser(
+	override: Partial<User> & {
+		id: string;
+	},
+): User {
+	return {
+		email: null,
+		emailVerified: null,
+		image: null,
+		name: null,
+		...override,
+	};
+}
+
+export function getDefaultUserServerSettings(
+	override: Partial<UserServerSettings> & { userId: string; serverId: string },
+): UserServerSettings {
+	const data: UserServerSettings = {
+		bitfield: 0,
+		...override,
+	};
+	return data;
+}
+
+export function getDefaultUserServerSettingsWithFlags({
+	userId,
+	serverId,
+}: {
+	userId: string;
+	serverId: string;
+}) {
+	return addFlagsToUserServerSettings(
+		getDefaultUserServerSettings({ userId, serverId }),
 	);
 }

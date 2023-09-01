@@ -1,9 +1,5 @@
 import { z } from 'zod';
 import {
-	type ChannelWithFlags,
-	zDiscordAccountPublic,
-} from '@answeroverflow/prisma-types';
-import {
 	type Message,
 	elastic,
 	zMessage,
@@ -25,6 +21,8 @@ import { findManyServersById } from './server';
 import type { MessageProps } from '@answeroverflow/constants';
 import { anonymizeDiscordAccount } from './utils/anonymization';
 import { ServerWithFlags } from './zodSchemas/serverSchemas';
+import { zDiscordAccountPublic } from './zodSchemas/discordAccountSchemas';
+import { ChannelWithFlags } from './zodSchemas/channelSchemas';
 export type MessageWithDiscordAccount = z.infer<
 	typeof zMessageWithDiscordAccount
 >;

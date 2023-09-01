@@ -1,7 +1,3 @@
-import {
-	addFlagsToChannel,
-	zChannelPublic,
-} from '@answeroverflow/prisma-types';
 import type { z } from 'zod';
 import {
 	addAuthorsToMessages,
@@ -24,6 +20,7 @@ import { eq, or } from 'drizzle-orm';
 import { servers } from './schema';
 import { zServerPublic, zServerSchema } from './zodSchemas/serverSchemas';
 import { addFlagsToServer } from './utils/serverUtils';
+import { addFlagsToChannel, zChannelPublic } from './zodSchemas/channelSchemas';
 
 export async function findServerWithCommunityPageData(opts: {
 	idOrVanityUrl: string;

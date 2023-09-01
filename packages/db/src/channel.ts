@@ -1,11 +1,23 @@
 import type { z } from 'zod';
 import { upsertServer } from './server';
 import { upsert, upsertMany } from './utils/operations';
+import { deleteManyMessagesByChannelId } from './message';
+import { omit } from '@answeroverflow/utils';
+import { elastic } from '@answeroverflow/elastic-types';
+import { DBError } from './utils/error';
+import { ChannelType } from 'discord-api-types/v10';
+import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
+import { db } from '../index';
+import { and, desc, eq, inArray, isNotNull, lt, sql } from 'drizzle-orm';
+import { channels } from './schema';
+import {
+	getDefaultChannel,
+	getDefaultChannelWithFlags,
+} from './utils/channelUtils';
 import {
 	addFlagsToChannel,
 	channelBitfieldFlags,
-	type ChannelWithFlags,
-	getDefaultChannelWithFlags,
+	ChannelWithFlags,
 	zChannelCreate,
 	zChannelCreateMany,
 	zChannelCreateWithDeps,
@@ -16,18 +28,8 @@ import {
 	zChannelUpdateMany,
 	zChannelUpsert,
 	zChannelUpsertMany,
-} from '@answeroverflow/prisma-types';
-import { getDefaultChannel } from '@answeroverflow/prisma-types';
-import { dictToBitfield } from '@answeroverflow/prisma-types/src/bitfield';
-import { deleteManyMessagesByChannelId } from './message';
-import { omit } from '@answeroverflow/utils';
-import { elastic } from '@answeroverflow/elastic-types';
-import { DBError } from './utils/error';
-import { ChannelType } from 'discord-api-types/v10';
-import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
-import { db } from '../index';
-import { and, desc, eq, inArray, isNotNull, lt, sql } from 'drizzle-orm';
-import { channels } from './schema';
+} from './zodSchemas/channelSchemas';
+import { dictToBitfield } from './utils/bitfieldUtils';
 export const CHANNELS_THAT_CAN_HAVE_AUTOTHREAD = new Set([
 	ChannelType.GuildAnnouncement,
 	ChannelType.GuildText,

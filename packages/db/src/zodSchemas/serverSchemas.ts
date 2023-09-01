@@ -1,13 +1,21 @@
-import { toZObject } from '@answeroverflow/prisma-types';
 import { createInsertSchema } from 'drizzle-zod';
 import { servers } from '../schema';
 import { z } from 'zod';
+import { toDict } from '../utils/bitfieldUtils';
 
 export const serverSettingsFlags = [
 	'readTheRulesConsentEnabled',
 	'considerAllMessagesPublic',
 	'anonymizeMessages',
 ] as const;
+
+export function toZObject<T extends readonly string[]>(...keys: T) {
+	return z.object(toDict(() => z.boolean(), ...keys));
+}
+
+export const zUniqueArray = z
+	.array(z.string())
+	.transform((arr) => [...new Set(arr)]);
 
 export const zServerSettingsFlags = toZObject(...serverSettingsFlags);
 

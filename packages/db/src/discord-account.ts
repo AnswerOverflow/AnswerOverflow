@@ -1,13 +1,5 @@
 import { z } from 'zod';
 import {
-	getDefaultDiscordAccount,
-	zDiscordAccountCreate,
-	zDiscordAccountPrismaCreate,
-	zDiscordAccountPrismaUpdate,
-	zDiscordAccountUpdate,
-	zDiscordAccountUpsert,
-} from '@answeroverflow/prisma-types';
-import {
 	upsertIgnoredDiscordAccount,
 	findIgnoredDiscordAccountById,
 	findManyIgnoredDiscordAccountsById,
@@ -19,6 +11,14 @@ import { db } from '../index';
 import { eq, inArray } from 'drizzle-orm';
 import { discordAccounts, userServerSettings } from './schema';
 import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
+import {
+	zDiscordAccountCreate,
+	zDiscordAccountPrismaCreate,
+	zDiscordAccountPrismaUpdate,
+	zDiscordAccountUpdate,
+	zDiscordAccountUpsert,
+} from './zodSchemas/discordAccountSchemas';
+import { getDefaultDiscordAccount } from './utils/discordAccountUtils';
 
 const zUserServerSettingsFlags = z.object({
 	userId: z.string(),

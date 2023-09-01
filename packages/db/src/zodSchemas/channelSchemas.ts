@@ -1,10 +1,9 @@
 import { z } from 'zod';
-import { bitfieldToDict } from './bitfield';
 import { ChannelType } from 'discord-api-types/v10';
-import type { Channel } from '@prisma/client';
-import { toZObject } from './zod-utils';
 import { omit, pick } from '@answeroverflow/utils';
-import { zServerUpsert } from './server-schema';
+import { Channel } from '../schema';
+import { zServerUpsert } from './serverSchemas';
+import { bitfieldToDict } from '../utils/bitfieldUtils';
 
 export const ALLOWED_THREAD_TYPES = new Set([
 	ChannelType.PublicThread,
@@ -30,7 +29,13 @@ export const channelBitfieldFlags = [
 	'forumGuidelinesConsentEnabled',
 ] as const;
 
-export const zChannelBitfieldFlags = toZObject(...channelBitfieldFlags);
+export const zChannelBitfieldFlags = z.object({
+	indexingEnabled: z.boolean(),
+	markSolutionEnabled: z.boolean(),
+	sendMarkSolutionInstructionsInNewThreads: z.boolean(),
+	autoThreadEnabled: z.boolean(),
+	forumGuidelinesConsentEnabled: z.boolean(),
+});
 
 type ChannelZodFormat = {
 	[K in keyof Channel]: z.ZodTypeAny;

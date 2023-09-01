@@ -14,13 +14,15 @@ import { relations } from 'drizzle-orm';
 export const users = mysqlTable('user', {
 	id: varchar('id', { length: 255 }).notNull().primaryKey(),
 	name: varchar('name', { length: 255 }),
-	email: varchar('email', { length: 255 }).notNull(),
+	email: varchar('email', { length: 255 }),
 	emailVerified: timestamp('emailVerified', {
 		mode: 'date',
 		fsp: 3,
 	}).defaultNow(),
 	image: varchar('image', { length: 255 }),
 });
+
+export type User = typeof users.$inferSelect;
 
 export const usersRelations = relations(users, ({ many }) => ({
 	accounts: many(accounts),
@@ -118,9 +120,9 @@ export const discordAccountsRelations = relations(
 );
 
 export const userServerSettings = mysqlTable('userServerSettings', {
-	userId: varchar('userId', { length: 255 }),
-	serverId: varchar('serverId', { length: 255 }),
-	bitfield: int('bitfield'),
+	userId: varchar('userId', { length: 255 }).notNull(),
+	serverId: varchar('serverId', { length: 255 }).notNull(),
+	bitfield: int('bitfield').default(0).notNull(),
 });
 
 export type UserServerSettings = typeof userServerSettings.$inferSelect;
@@ -145,7 +147,7 @@ export const ignoredDiscordAccounts = mysqlTable('ignoredDiscordAccount', {
 
 export const servers = mysqlTable('server', {
 	id: varchar('id', { length: 255 }).notNull().primaryKey(),
-	name: varchar('name', { length: 255 }),
+	name: varchar('name', { length: 255 }).notNull(),
 	icon: varchar('icon', { length: 255 }),
 	description: varchar('description', { length: 255 }),
 	vanityInviteCode: varchar('vanityInviteCode', { length: 255 }).unique(),

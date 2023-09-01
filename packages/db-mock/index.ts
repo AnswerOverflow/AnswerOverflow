@@ -1,27 +1,35 @@
 import { type Message, getDefaultMessage } from '@answeroverflow/elastic-types';
-import {
-	type DiscordAccount,
-	getDefaultDiscordAccount,
-	type Server,
-	type Channel,
-	getDefaultServer,
-	getDefaultChannel,
-	getDefaultUserServerSettings,
-	type UserServerSettings,
-	type UserServerSettingsWithFlags,
-	addFlagsToUserServerSettings,
-	type ChannelWithFlags,
-	addFlagsToChannel,
-	dictToBitfield,
-	channelBitfieldFlags,
-	userServerSettingsFlags,
-	addFlagsToServer,
-	serverSettingsFlags,
-	type ServerWithFlags,
-} from '@answeroverflow/prisma-types';
 import { getRandomId, getRandomSentence } from '@answeroverflow/utils';
 import { ChannelType } from 'discord-api-types/v10';
 import type { PartialDeep } from 'type-fest';
+import {
+	addFlagsToServer,
+	getDefaultServer,
+	getDefaultUserServerSettings,
+} from '@answeroverflow/db/src/utils/serverUtils';
+import {
+	serverSettingsFlags,
+	ServerWithFlags,
+} from '@answeroverflow/db/src/zodSchemas/serverSchemas';
+import {
+	addFlagsToUserServerSettings,
+	userServerSettingsFlags,
+	UserServerSettingsWithFlags,
+} from '@answeroverflow/db/src/utils/userServerSettingsUtils';
+import { getDefaultDiscordAccount } from '@answeroverflow/db/src/utils/discordAccountUtils';
+import {
+	Channel,
+	DiscordAccount,
+	Server,
+	UserServerSettings,
+} from '@answeroverflow/db/src/schema';
+import {
+	addFlagsToChannel,
+	channelBitfieldFlags,
+	ChannelWithFlags,
+} from '@answeroverflow/db/src/zodSchemas/channelSchemas';
+import { dictToBitfield } from '@answeroverflow/db/src/utils/bitfieldUtils';
+import { getDefaultChannel } from '@answeroverflow/db/src/utils/channelUtils';
 export function mockDiscordAccount(override: Partial<DiscordAccount> = {}) {
 	const account = getDefaultDiscordAccount({
 		id: getRandomId(),

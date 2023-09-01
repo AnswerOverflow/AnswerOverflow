@@ -1,23 +1,25 @@
 import { z } from 'zod';
-import {
-	getDefaultUserServerSettingsWithFlags,
-	dictToBitfield,
-	type UserServerSettingsWithFlags,
-	userServerSettingsFlags,
-	zUserServerSettingsPrismaCreate,
-	zUserServerSettingsCreate,
-	zUserServerSettingsCreateWithDeps,
-	zUserServerSettingsMutable,
-	zUserServerSettingsUpdate,
-	zUserServerSettingsPrismaUpdate,
-} from '@answeroverflow/prisma-types';
 import { upsertDiscordAccount } from './discord-account';
-import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
+import {
+	addFlagsToUserServerSettings,
+	userServerSettingsFlags,
+	UserServerSettingsWithFlags,
+} from './utils/userServerSettingsUtils';
 import { upsert } from './utils/operations';
 import { DBError } from './utils/error';
 import { db } from '../index';
 import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { userServerSettings } from './schema';
+import {
+	zUserServerSettingsCreate,
+	zUserServerSettingsCreateWithDeps,
+	zUserServerSettingsMutable,
+	zUserServerSettingsPrismaCreate,
+	zUserServerSettingsPrismaUpdate,
+	zUserServerSettingsUpdate,
+} from './zodSchemas/userServerSettingsSchemas';
+import { getDefaultUserServerSettingsWithFlags } from './utils/serverUtils';
+import { dictToBitfield } from './utils/bitfieldUtils';
 
 export const CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE =
 	'You cannot grant consent to publicly display messages with message indexing disabled. Enable messaging indexing first';

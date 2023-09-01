@@ -1,13 +1,9 @@
-import type {
-	ChannelPublicWithFlags,
-	DiscordAccountPublic,
-	APIMessageWithDiscordAccount,
-	ServerPublic,
-	APIMessageFull,
-} from '@answeroverflow/api';
+import type { ServerPublic } from '@answeroverflow/api';
 import { getRandomName, getRandomSentence } from '@answeroverflow/utils';
-import { ServerWithFlags } from '@answeroverflow/db';
 import { ChannelType } from '~ui/utils/discord';
+import { ServerWithFlags } from '@answeroverflow/db/src/zodSchemas/serverSchemas';
+import { ChannelPublicWithFlags } from '@answeroverflow/db/src/zodSchemas/channelSchemas';
+import { DiscordAccountPublic } from '@answeroverflow/db/src/zodSchemas/discordAccountSchemas';
 
 export function randomId() {
 	return Math.floor(Math.random() * 10000000).toString();
