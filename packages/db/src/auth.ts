@@ -2,6 +2,7 @@ import { getRandomId } from '@answeroverflow/utils';
 import { db } from '../index';
 import { accounts, tenantSessions, users, type Account } from './schema';
 import { and, eq } from 'drizzle-orm';
+import { z } from 'zod';
 
 export function findAccountByProviderAccountId(input: {
 	provider: string;
@@ -76,16 +77,33 @@ export async function updateProviderAuthToken(
 		token_type?: string;
 		// eslint-disable-next-line @typescript-eslint/naming-convention
 		session_state?: string;
-		type?: Account['type'];
+		type?: string;
 		// eslint-disable-next-line @typescript-eslint/naming-convention
 		id_token?: string;
 	},
 ) {
 	const { provider, providerAccountId, ...update } = input;
 
+	const zAccountUpdate = z.object({
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		access_token: z.string().optional(),
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		refresh_token: z.string().optional(),
+		scope: z.string().optional(),
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		expires_at: z.number().optional(),
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		token_type: z.string().optional(),
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		session_state: z.string().optional(),
+		type: z.enum(['oidc', 'oauth', 'email']).optional(),
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		id_token: z.string().optional(),
+	});
+
 	await db
 		.update(accounts)
-		.set(update)
+		.set(zAccountUpdate.parse(update))
 		.where(
 			and(
 				eq(accounts.provider, provider),
