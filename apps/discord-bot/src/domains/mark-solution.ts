@@ -13,7 +13,7 @@ import {
 	TextChannel,
 	User,
 } from 'discord.js';
-import type { ChannelWithFlags } from '@answeroverflow/api';
+import type { ChannelWithFlags } from '@answeroverflow/db';
 import { makeConsentButton } from './manage-account';
 import {
 	findChannelById,
@@ -294,7 +294,7 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 	const { embed, components } = makeMarkSolutionResponse({
 		question,
 		solution,
-		server: aoServer!,
+		server: aoServer,
 		settings: channelSettings,
 	});
 	await solution.react('✅');
@@ -308,7 +308,7 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 		const data: QuestionSolvedProps = {
 			...serverWithDiscordInfoToAnalyticsData({
 				guild: thread.guild,
-				serverWithSettings: aoServer!,
+				serverWithSettings: aoServer,
 			}),
 			...channelWithDiscordInfoToAnalyticsData({
 				answerOverflowChannel: channelSettings,
