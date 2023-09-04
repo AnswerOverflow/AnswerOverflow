@@ -27,7 +27,7 @@ export const AOHead = ({
 	type = 'website',
 	path,
 }: HeadProps) => {
-	const { tenant } = useTenantContext();
+	const { tenant, isOnTenantSite } = useTenantContext();
 	if (tenant) {
 		server = tenant;
 	}
@@ -124,6 +124,15 @@ export const AOHead = ({
 				content={description}
 			/>
 			<meta property="twitter:image" key="twitter:image" content={image} />
+
+			{!isOnTenantSite && (
+				// Adsense verification
+				<script
+					async
+					src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1392153990042810"
+					crossOrigin="anonymous"
+				></script>
+			)}
 		</Head>
 	);
 };
