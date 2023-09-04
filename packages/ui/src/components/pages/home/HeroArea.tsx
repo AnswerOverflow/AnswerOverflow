@@ -7,15 +7,18 @@ import { ServerIcon } from '~ui/components/primitives/ServerIcon';
 
 const HeroAreaText = () => {
 	return (
-		<div className="flex h-full w-[calc(100vw-2rem)] max-w-screen-lg flex-col items-center justify-center gap-6 rounded-3xl bg-clip-padding p-8 backdrop-blur-3xl sm:w-[80vw] md:p-16">
+		<div className="flex h-full w-[calc(100vw-2rem)] max-w-screen-lg flex-col items-center justify-center gap-6 rounded-3xl border-2 border-solid border-primary/[.3] bg-clip-padding p-4 backdrop-blur-3xl sm:w-[80vw] sm:p-8 md:p-16">
 			<h1 className="text-center font-header text-5xl font-bold leading-[114.5%] text-primary md:text-7xl">
 				Search all of Discord
 			</h1>
-			<h2 className="w-4/5 text-center font-body text-lg text-primary/[.95] md:text-2xl">
+			<div className="flex w-full flex-col items-center justify-center gap-8 sm:hidden sm:flex-row">
+				<MessagesSearchBar />
+			</div>
+			<h2 className="text-center font-body text-lg text-primary/[.95] sm:w-4/5 md:text-2xl">
 				Answer Overflow is a Discord search engine. Find results from indexed
 				content or a community to join.
 			</h2>
-			<div className="flex w-full flex-col items-center justify-center gap-8 sm:flex-row">
+			<div className="hidden w-full flex-col items-center justify-center gap-8 sm:flex sm:flex-row">
 				<MessagesSearchBar />
 			</div>
 			<div className="grid w-full grid-cols-1 grid-rows-2 gap-4 sm:w-auto sm:grid-cols-2 sm:grid-rows-1  sm:gap-8">
@@ -37,7 +40,7 @@ const ServerGrid = (props: {
 		<Marquee speed={20}>
 			<div
 				className={
-					'mr-8 grid min-h-[calc(100vh-10rem)] grid-flow-col grid-rows-5 gap-8 py-4 md:grid-rows-4 md:gap-16'
+					'mr-8 grid min-h-[calc(100vh-5rem)] grid-flow-col grid-rows-5 gap-8 py-4 md:grid-rows-4 md:gap-16'
 				}
 			>
 				{props.servers.map((server) => {
