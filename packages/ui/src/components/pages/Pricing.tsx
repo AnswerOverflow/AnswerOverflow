@@ -24,7 +24,9 @@ import { AOLink } from '~ui/components/primitives/base/Link';
 import AOHead from '~ui/components/primitives/AOHead';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import { Heading } from '~ui/components/primitives/base/Heading';
-const faqs: {
+import { queryTypes, useQueryState } from 'next-usequerystate';
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@tremor/react';
+const enterpriseFAQs: {
 	question: React.ReactNode;
 	answer: React.ReactNode;
 }[] = [
@@ -44,7 +46,7 @@ const faqs: {
 		question:
 			'Do you have plans for non-profit / non-commercial open source use?',
 		answer:
-			"We do! The limitation on the free plan page views is primarily focused on commercial use. If you're a non-profit or open source project, when you're approaching the free tier limits we will reach out to move you over to our non-profit / open source plan.",
+			"Our public is perfect for non-profit / non-commercial open source use. If for some reason our public platform doesn't work for you, please reach out to us and we'll see what we can do.",
 	},
 	{
 		question: 'How are page views calculated?',
@@ -100,9 +102,14 @@ const faqs: {
 	},
 ];
 
-const PricingFAQ = () => (
+const FAQ = (props: {
+	faqs: {
+		question: React.ReactNode;
+		answer: React.ReactNode;
+	}[];
+}) => (
 	<Accordion type="single" className="my-16 w-full" collapsible>
-		{faqs.map((faq, i) => (
+		{props.faqs.map((faq, i) => (
 			<AccordionItem
 				value={`item-${i}`}
 				key={i}
@@ -132,7 +139,7 @@ const PricingElement = (props: {
 	return (
 		<div
 			className={classNames(
-				'border-ao-black/25 dark:border-ao-white/25 flex h-full flex-col items-center justify-start rounded-2xl border-2 p-8',
+				'border-ao-black/25 dark:border-ao-white/25 flex h-full max-w-lg flex-col items-center justify-start rounded-2xl border-2 p-8',
 				props.bestValue ? 'border-indigo-600/75 dark:border-indigo-600/75' : '',
 			)}
 		>
@@ -178,11 +185,14 @@ const PricingElement = (props: {
 
 const ProPlan = (props: { ctaLink: string; hasSubscribedBefore?: boolean }) => (
 	<PricingElement
-		title={'Pro'}
+		title={'Starter'}
 		cta={props.hasSubscribedBefore ? 'Resubscribe' : 'Start Free Trial'}
 		bestValue={true}
 		price={'$25 / month'}
 		features={[
+			{
+				name: 'Ad free',
+			},
 			{
 				name: 'Host on your own domain',
 			},
@@ -202,10 +212,13 @@ const EnterprisePlan = (props: {
 	hasSubscribedBefore?: boolean;
 }) => (
 	<PricingElement
-		title={'Enterprise'}
+		title={'Pro'}
 		cta={props.hasSubscribedBefore ? 'Resubscribe' : 'Start Free Trial'}
 		price={'$150 / month'}
 		features={[
+			{
+				name: 'Ad free',
+			},
 			{
 				name: 'Host on your own domain',
 			},
@@ -225,31 +238,82 @@ const EnterprisePlan = (props: {
 		]}
 	/>
 );
-const PricingOptions = () => (
-	<div className="mx-auto my-16 grid  grid-cols-1 gap-16 xl:grid-cols-3">
-		<PricingElement
-			title={'Free'}
-			cta={'Setup Now'}
-			price={'$0 / month'}
-			features={[
-				{
-					name: 'Hosted on answeroverflow.com',
-				},
-				{
-					name: 'Up to 50,000 monthly page views',
-				},
-			]}
-			clarifications={[
-				'Upgrade to your own domain at any time and your content will be redirected',
-			]}
-			ctaLink={'/onboarding'}
-		/>
-		<ProPlan ctaLink={'/dashboard'} />
-		<EnterprisePlan ctaLink={'/dashboard'} />
+const EnterprisePricingOptions = () => (
+	<div className="mx-auto my-8 grid w-full grid-cols-1 justify-items-center gap-8">
+		<span className="max-w-2xl text-center text-lg">
+			Your own instance of Answer Overflow, hosted on your own domain. Perfect
+			for companies looking for minimal branding, and to have full control over
+			their content.
+		</span>
+		<div className="mx-auto grid  grid-cols-1 gap-16 xl:grid-cols-2">
+			<ProPlan ctaLink={'/dashboard'} />
+			<EnterprisePlan ctaLink={'/dashboard'} />
+		</div>
 	</div>
 );
 
+const EnterprisePricing = () => (
+	<>
+		<EnterprisePricingOptions />
+		<FAQ faqs={enterpriseFAQs} />
+	</>
+);
+
+const PublicPlatformPricing = () => (
+	<>
+		<div className="mx-auto my-8 grid w-full grid-cols-1 justify-items-center gap-8">
+			<span className="max-w-2xl text-center text-lg">
+				An ad supported version of Answer Overflow allowing for unlimited page
+				views and revenue share to communities. Perfect for communities of all
+				sizes.
+			</span>
+			<PricingElement
+				title={'Free'}
+				cta={'Setup Now'}
+				price={'$0 / month'}
+				features={[
+					{
+						name: 'Hosted on answeroverflow.com',
+					},
+					{
+						name: 'Unlimited page views',
+					},
+					{
+						name: 'Ad supported',
+					},
+					{
+						name: 'Revenue share (coming soon)',
+					},
+				]}
+				clarifications={[
+					'If you upgrade to a custom domain at any time your content will be redirected',
+				]}
+				ctaLink={'/onboarding'}
+			/>
+			<FAQ
+				faqs={[
+					{
+						question: 'What ad provider is used?',
+						answer:
+							'We are still working on the revenue share model, but the goal is to give back to communities that are creating content on Answer Overflow. If you have any feedback on this, please use the feedback box below.',
+					},
+					{
+						question: 'How does the revenue share work?',
+						answer:
+							'We are still working on the revenue share model, but the goal is to give back to communities that are creating content on Answer Overflow. If you have any feedback on this, please use the feedback box below.',
+					},
+				]}
+			/>
+		</div>
+	</>
+);
 export const Pricing = () => {
+	const [pricingType, setPricingType] = useQueryState(
+		'type',
+		queryTypes
+			.stringEnum(['enterprise', 'public-platform'])
+			.withDefault('public-platform'),
+	);
 	return (
 		<div className="my-6 max-w-6xl sm:mx-3 md:mx-auto">
 			<AOHead
@@ -261,10 +325,33 @@ export const Pricing = () => {
 			/>
 
 			<Heading.H1 className={'text-center'}>Plans</Heading.H1>
-			<PricingOptions />
-			<PricingFAQ />
+			<TabGroup
+				index={pricingType === 'enterprise' ? 1 : 0}
+				onIndexChange={(index) => {
+					void setPricingType(index === 0 ? 'public-platform' : 'enterprise');
+				}}
+			>
+				<TabList>
+					<Tab>
+						<h3 className={'text-center text-xl font-medium'}>
+							Public Platform
+						</h3>
+					</Tab>
+					<Tab>
+						<h3 className={'text-center text-xl font-medium'}>Enterprise</h3>
+					</Tab>
+				</TabList>
+				<TabPanels>
+					<TabPanel>
+						<PublicPlatformPricing />
+					</TabPanel>
+					<TabPanel>
+						<EnterprisePricing />
+					</TabPanel>
+				</TabPanels>
+			</TabGroup>
 			<form
-				className="mx-auto my-16 flex  max-w-2xl flex-col gap-4"
+				className="mx-auto my-16 flex max-w-2xl flex-col gap-4"
 				onSubmit={(e) => {
 					e.preventDefault();
 					// @ts-ignore
