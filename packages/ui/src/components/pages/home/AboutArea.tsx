@@ -8,6 +8,10 @@ import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
 import { Paragraph } from '~ui/components/primitives/base/Paragraph';
 import { Heading } from '~ui/components/primitives/base/Heading';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
+import { HowDoesItWorkArea } from '~ui/components/pages/home/HowDoesItWorkArea';
+import { Navbar } from '~ui/components/primitives/Navbar';
+import { Footer } from '~ui/components/primitives/Footer';
+import { PricingOptions } from '~ui/components/pages/Pricing';
 // TODO: Link to docs for feature?
 const HomeFeature = (props: {
 	featureName: React.ReactNode;
@@ -182,7 +186,7 @@ const FeaturedCommunitiesSection = (props: { className?: string }) => {
 	return (
 		<div className={cn('overflow-x-hidden text-center', props.className)}>
 			<Heading.H2>
-				<Balancer>Serving 450,000+ users across 80 servers</Balancer>
+				<Balancer>Serving 2+ million users across 300 servers</Balancer>
 			</Heading.H2>
 			<div className="grid grid-cols-2 gap-8 py-8 sm:grid-cols-4">
 				{featuredCommunities.map((community) => (
@@ -198,10 +202,17 @@ const FeaturedCommunitiesSection = (props: { className?: string }) => {
 
 export const AboutArea = () => {
 	return (
-		<div className="flex flex-col items-center px-4 pb-20 pt-10 sm:px-[4rem] 2xl:px-[6rem]">
-			<FeaturesSection />
-			<FeaturedCommunitiesSection className="pt-20" />
-			<PricingArea className="py-20" />
+		<div className={'mx-auto max-w-screen-3xl'}>
+			<Navbar />
+			<HowDoesItWorkArea />
+			<div className="flex flex-col items-center px-4 pb-20 pt-10 sm:px-[4rem] 2xl:px-[6rem]">
+				<FeaturesSection />
+				<div className={'mt-20 w-full'}>
+					<PricingOptions />
+				</div>
+				<FeaturedCommunitiesSection className="pt-20" />
+			</div>
+			<Footer />
 		</div>
 	);
 };

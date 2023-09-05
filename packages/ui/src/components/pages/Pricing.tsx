@@ -4,7 +4,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from '../primitives/ui/accordion';
-import { Check } from 'lucide-react';
+import { Check, GlobeIcon } from 'lucide-react';
 import { trackEvent } from '@answeroverflow/hooks';
 import { toast } from 'react-toastify';
 import React from 'react';
@@ -26,6 +26,9 @@ import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import { Heading } from '~ui/components/primitives/base/Heading';
 import { queryTypes, useQueryState } from 'next-usequerystate';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@tremor/react';
+import { IoBusiness } from 'react-icons/io5';
+import Balancer from 'react-wrap-balancer';
+import { IoMdGlobe } from 'react-icons/io';
 const enterpriseFAQs: {
 	question: React.ReactNode;
 	answer: React.ReactNode;
@@ -240,11 +243,6 @@ const EnterprisePlan = (props: {
 );
 const EnterprisePricingOptions = () => (
 	<div className="mx-auto my-8 grid w-full grid-cols-1 justify-items-center gap-8">
-		<span className="max-w-2xl text-center text-lg">
-			Your own instance of Answer Overflow, hosted on your own domain. Perfect
-			for companies looking for minimal branding, and to have full control over
-			their content.
-		</span>
 		<div className="mx-auto grid  grid-cols-1 gap-16 xl:grid-cols-2">
 			<ProPlan ctaLink={'/dashboard'} />
 			<EnterprisePlan ctaLink={'/dashboard'} />
@@ -252,21 +250,16 @@ const EnterprisePricingOptions = () => (
 	</div>
 );
 
-const EnterprisePricing = () => (
+const EnterprisePricing = (props: { showFaqs?: boolean }) => (
 	<>
 		<EnterprisePricingOptions />
-		<FAQ faqs={enterpriseFAQs} />
+		{props.showFaqs && <FAQ faqs={enterpriseFAQs} />}
 	</>
 );
 
-const PublicPlatformPricing = () => (
+const PublicPlatformPricing = (props: { showFaqs?: boolean }) => (
 	<>
 		<div className="mx-auto my-8 grid w-full grid-cols-1 justify-items-center gap-8">
-			<span className="max-w-2xl text-center text-lg">
-				An ad supported version of Answer Overflow allowing for unlimited page
-				views and revenue share to communities. Perfect for communities of all
-				sizes.
-			</span>
 			<PricingElement
 				title={'Free'}
 				cta={'Setup Now'}
@@ -290,30 +283,95 @@ const PublicPlatformPricing = () => (
 				]}
 				ctaLink={'/onboarding'}
 			/>
-			<FAQ
-				faqs={[
-					{
-						question: 'What ad provider is used?',
-						answer:
-							'We are still working on the revenue share model, but the goal is to give back to communities that are creating content on Answer Overflow. If you have any feedback on this, please use the feedback box below.',
-					},
-					{
-						question: 'How does the revenue share work?',
-						answer:
-							'We are still working on the revenue share model, but the goal is to give back to communities that are creating content on Answer Overflow. If you have any feedback on this, please use the feedback box below.',
-					},
-				]}
-			/>
+			{props.showFaqs && (
+				<FAQ
+					faqs={[
+						{
+							question: 'What ad provider is used?',
+							answer:
+								'We are still working on the revenue share model, but the goal is to give back to communities that are creating content on Answer Overflow. If you have any feedback on this, please use the feedback box below.',
+						},
+						{
+							question: 'How does the revenue share work?',
+							answer:
+								'We are still working on the revenue share model, but the goal is to give back to communities that are creating content on Answer Overflow. If you have any feedback on this, please use the feedback box below.',
+						},
+					]}
+				/>
+			)}
 		</div>
 	</>
 );
-export const Pricing = () => {
+
+export const PricingOptions = (props: { showFaqs?: boolean }) => {
 	const [pricingType, setPricingType] = useQueryState(
 		'type',
 		queryTypes
 			.stringEnum(['enterprise', 'public-platform'])
 			.withDefault('public-platform'),
 	);
+	return (
+		<TabGroup
+			index={pricingType === 'enterprise' ? 1 : 0}
+			onIndexChange={(index) => {
+				void setPricingType(index === 0 ? 'public-platform' : 'enterprise', {
+					scroll: false,
+				});
+			}}
+		>
+			<TabList className={'grid w-full grid-cols-2'}>
+				<Tab
+					className={
+						'flex h-full max-h-full max-w-full grow flex-col items-center justify-start'
+					}
+				>
+					<div className={'flex max-w-full flex-row items-center gap-4'}>
+						<IoMdGlobe className={'hidden h-16 w-16 shrink-0 md:block'} />
+						<div className={'flex flex-col gap-4'}>
+							<h2 className={'text-center text-xl font-bold'}>
+								Public Platform
+							</h2>
+							<Balancer className="whitespace-pre-wrap text-center text-base md:text-lg">
+								Ad supported version of Answer Overflow allowing for unlimited
+								page views and revenue share to communities. Perfect for
+								communities of all sizes.
+							</Balancer>
+						</div>
+					</div>
+				</Tab>
+				<Tab
+					className={
+						'flex h-full max-h-full max-w-full grow flex-col items-center justify-start'
+					}
+				>
+					<div className={'flex max-w-full flex-row items-center gap-4'}>
+						<IoBusiness className={'hidden h-16 w-16 shrink-0 md:block'} />
+						<div className={'flex flex-col gap-4'}>
+							<h2 className={'text-center text-lg font-bold md:text-xl'}>
+								Enterprise Platform
+							</h2>
+							<Balancer className="whitespace-pre-wrap text-base md:text-lg">
+								Your own instance of Answer Overflow, hosted on your own domain.
+								Perfect for companies looking for minimal branding, and to have
+								full control over their content.
+							</Balancer>
+						</div>
+					</div>
+				</Tab>
+			</TabList>
+			<TabPanels>
+				<TabPanel>
+					<PublicPlatformPricing showFaqs={props.showFaqs} />
+				</TabPanel>
+				<TabPanel>
+					<EnterprisePricing showFaqs={props.showFaqs} />
+				</TabPanel>
+			</TabPanels>
+		</TabGroup>
+	);
+};
+
+export const Pricing = () => {
 	return (
 		<div className="my-6 max-w-6xl sm:mx-3 md:mx-auto">
 			<AOHead
@@ -325,31 +383,7 @@ export const Pricing = () => {
 			/>
 
 			<Heading.H1 className={'text-center'}>Plans</Heading.H1>
-			<TabGroup
-				index={pricingType === 'enterprise' ? 1 : 0}
-				onIndexChange={(index) => {
-					void setPricingType(index === 0 ? 'public-platform' : 'enterprise');
-				}}
-			>
-				<TabList>
-					<Tab>
-						<h3 className={'text-center text-xl font-medium'}>
-							Public Platform
-						</h3>
-					</Tab>
-					<Tab>
-						<h3 className={'text-center text-xl font-medium'}>Enterprise</h3>
-					</Tab>
-				</TabList>
-				<TabPanels>
-					<TabPanel>
-						<PublicPlatformPricing />
-					</TabPanel>
-					<TabPanel>
-						<EnterprisePricing />
-					</TabPanel>
-				</TabPanels>
-			</TabGroup>
+			<PricingOptions showFaqs={true} />
 			<form
 				className="mx-auto my-16 flex max-w-2xl flex-col gap-4"
 				onSubmit={(e) => {

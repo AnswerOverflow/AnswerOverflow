@@ -1,6 +1,6 @@
-import type { NextPage } from 'next';
+import type { GetStaticProps, InferGetStaticPropsType } from 'next';
 
-const data = [
+const fakeData = [
 	{
 		name: 'Хижина программиста',
 		id: '1003731983970615406',
@@ -905,8 +905,19 @@ const data = [
 
 import AOHead from '@answeroverflow/ui/src/components/primitives/AOHead';
 import { Home } from '@answeroverflow/ui/src/components/pages/Home';
+export const getStaticProps: GetStaticProps<{
+	data: {
+		name: string;
+		id: string;
+		icon: string;
+	}[];
+}> = () => {
+	return { props: { data: fakeData } };
+};
 // eslint-disable-next-line @typescript-eslint/naming-convention
-const HomePage: NextPage = () => {
+export default function Page(
+	props: InferGetStaticPropsType<typeof getStaticProps>,
+) {
 	return (
 		<>
 			<AOHead
@@ -914,9 +925,7 @@ const HomePage: NextPage = () => {
 				title="Answer Overflow - Index Your Discord Server Channels Into Google"
 				addPrefix={false}
 			/>
-			<Home servers={data} />
+			<Home servers={props.data} />
 		</>
 	);
-};
-
-export default HomePage;
+}

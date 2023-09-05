@@ -2,6 +2,7 @@ import { Navbar } from '../primitives/Navbar';
 import type { ServerPublic } from '@answeroverflow/api';
 import { HeroArea } from '~ui/components/pages/home/HeroArea';
 import { Footer } from '~ui/components/primitives/Footer';
+import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 
 export const Home = (props: {
 	servers: Pick<ServerPublic, 'id' | 'icon' | 'name'>[];
@@ -28,11 +29,16 @@ export const Home = (props: {
 						results from humans?
 					</span>
 				</div>
-				<div className={'bg-red-700'}>
+				<div
+					className={
+						'h-40 rounded-2xl border-2 border-primary/[.3] p-8 drop-shadow-xl'
+					}
+				>
 					<h1>Setup for Free</h1>
 					<span className={'text-xl'}>
 						Used to adding {'Reddit'} to every search in order to get relevant
 					</span>
+					<LinkButton href={'/about'}>Learn More</LinkButton>
 				</div>
 				<div className={'bg-red-700'}>
 					<h1>Test</h1>
