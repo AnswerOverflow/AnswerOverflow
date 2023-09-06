@@ -82,7 +82,12 @@ export const zChannelCreate = z.object({
 	...zChannelRequired.shape,
 });
 
-export type ChannelWithFlags = Omit<z.infer<typeof zChannelSchema>, 'bitfield'>;
+export type ChannelWithFlags = Omit<
+	z.infer<typeof zChannelSchema>,
+	'bitfield'
+> & {
+	messageCount?: number;
+};
 
 export const zChannelCreateMany = zChannelCreate.omit({
 	flags: true,

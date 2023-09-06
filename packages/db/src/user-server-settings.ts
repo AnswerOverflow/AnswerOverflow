@@ -108,21 +108,19 @@ export async function findUserServerSettingsById(
 }
 
 export async function countConsentingUsersInServer(serverId: string) {
-	const res = await db.execute(sql`SELECT COUNT(*) as count
-    FROM UserServerSettings
-    WHERE serverId = ${serverId} AND bitfield & 1 = 1;`);
-	const parsed = z
-		.array(
-			z.object({
-				count: z.bigint(),
-			}),
+	const res = await db
+		.select({
+			count: sql<number>`count(*)`,
+		})
+		.from(userServerSettings)
+		.where(
+			and(eq(userServerSettings.serverId, serverId), sql`bitfield & 1 = 1`),
 		)
-		.parse(res);
-	const first = parsed[0];
-	if (!first) {
+		.then((x) => x[0]);
+	if (!res) {
 		throw new Error('No count returned');
 	}
-	return first.count;
+	return BigInt(res.count);
 }
 
 export async function countConsentingUsersInManyServers(serverIds: string[]) {
