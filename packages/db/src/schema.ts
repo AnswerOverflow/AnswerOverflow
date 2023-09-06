@@ -1,26 +1,32 @@
 import {
 	int,
-	timestamp,
 	mysqlTable,
 	primaryKey,
 	varchar,
 	datetime,
 	mysqlEnum,
 	bigint,
+	index,
+	unique,
 } from 'drizzle-orm/mysql-core';
-import type { AdapterAccount } from '@auth/core/adapters';
 import { relations } from 'drizzle-orm';
 
-export const users = mysqlTable('User', {
-	id: varchar('id', { length: 255 }).notNull().primaryKey(),
-	name: varchar('name', { length: 255 }),
-	email: varchar('email', { length: 255 }),
-	emailVerified: timestamp('emailVerified', {
-		mode: 'date',
-		fsp: 3,
-	}).defaultNow(),
-	image: varchar('image', { length: 255 }),
-});
+export const users = mysqlTable(
+	'User',
+	{
+		id: varchar('id', { length: 191 }).notNull(),
+		name: varchar('name', { length: 191 }),
+		email: varchar('email', { length: 191 }),
+		emailVerified: datetime('emailVerified', { mode: 'string', fsp: 3 }),
+		image: varchar('image', { length: 191 }),
+	},
+	(table) => {
+		return {
+			userId: primaryKey(table.id),
+			userEmailKey: unique('User_email_key').on(table.email),
+		};
+	},
+);
 
 export type User = typeof users.$inferSelect;
 
@@ -32,26 +38,31 @@ export const usersRelations = relations(users, ({ many }) => ({
 export const accounts = mysqlTable(
 	'Account',
 	{
-		id: varchar('id', { length: 255 }).notNull().primaryKey(),
-		userId: varchar('userId', { length: 255 })
-			.notNull()
-			.references(() => users.id, { onDelete: 'cascade' }),
-		type: varchar('type', { length: 255 })
-			.$type<AdapterAccount['type']>()
-			.notNull(),
-		provider: varchar('provider', { length: 255 }).notNull(),
-		providerAccountId: varchar('providerAccountId', { length: 255 }).notNull(),
-		refresh_token: varchar('refresh_token', { length: 255 }),
-		access_token: varchar('access_token', { length: 255 }),
-		expires_at: int('expires_at'),
-		token_type: varchar('token_type', { length: 255 }),
-		scope: varchar('scope', { length: 255 }),
-		id_token: varchar('id_token', { length: 255 }),
-		session_state: varchar('session_state', { length: 255 }),
+		id: varchar('id', { length: 191 }).notNull(),
+		userId: varchar('userId', { length: 191 }).notNull(),
+		type: varchar('type', { length: 191 }).notNull(),
+		provider: varchar('provider', { length: 191 }).notNull(),
+		providerAccountId: varchar('providerAccountId', { length: 191 }).notNull(),
+		refreshToken: varchar('refresh_token', { length: 191 }),
+		accessToken: varchar('access_token', { length: 191 }),
+		expiresAt: int('expires_at'),
+		tokenType: varchar('token_type', { length: 191 }),
+		scope: varchar('scope', { length: 191 }),
+		idToken: varchar('id_token', { length: 191 }),
+		sessionState: varchar('session_state', { length: 191 }),
 	},
-	(account) => ({
-		compoundKey: primaryKey(account.provider, account.providerAccountId),
-	}),
+	(table) => {
+		return {
+			userIdIdx: index('Account_userId_idx').on(table.userId),
+			accountId: primaryKey(table.id),
+			accountProviderAccountIdKey: unique('Account_providerAccountId_key').on(
+				table.providerAccountId,
+			),
+			accountProviderProviderAccountIdKey: unique(
+				'Account_provider_providerAccountId_key',
+			).on(table.provider, table.providerAccountId),
+		};
+	},
 );
 
 export type Account = typeof accounts.$inferSelect;
@@ -67,19 +78,42 @@ export const accountRelations = relations(accounts, ({ one }) => ({
 	}),
 }));
 
-export const sessions = mysqlTable('Session', {
-	sessionToken: varchar('sessionToken', { length: 255 }).notNull().primaryKey(),
-	userId: varchar('userId', { length: 255 })
-		.notNull()
-		.references(() => users.id, { onDelete: 'cascade' }),
-	expires: timestamp('expires', { mode: 'date' }).notNull(),
-});
+export const sessions = mysqlTable(
+	'Session',
+	{
+		id: varchar('id', { length: 191 }).notNull(),
+		sessionToken: varchar('sessionToken', { length: 191 }).notNull(),
+		userId: varchar('userId', { length: 191 }).notNull(),
+		expires: datetime('expires', { mode: 'string', fsp: 3 }).notNull(),
+	},
+	(table) => {
+		return {
+			userIdIdx: index('Session_userId_idx').on(table.userId),
+			sessionId: primaryKey(table.id),
+			sessionSessionTokenKey: unique('Session_sessionToken_key').on(
+				table.sessionToken,
+			),
+		};
+	},
+);
 
-export const tenantSessions = mysqlTable('TenantSession', {
-	id: varchar('id', { length: 255 }).notNull().primaryKey(),
-	serverId: varchar('serverId', { length: 255 }).notNull(),
-	sessionToken: varchar('sessionToken', { length: 255 }).notNull(),
-});
+export const tenantSessions = mysqlTable(
+	'TenantSession',
+	{
+		id: varchar('id', { length: 191 }).notNull(),
+		serverId: varchar('serverId', { length: 191 }).notNull(),
+		sessionToken: varchar('sessionToken', { length: 191 }).notNull(),
+	},
+	(table) => {
+		return {
+			serverIdIdx: index('TenantSession_serverId_idx').on(table.serverId),
+			sessionTokenIdx: index('TenantSession_sessionToken_idx').on(
+				table.sessionToken,
+			),
+			tenantSessionId: primaryKey(table.id),
+		};
+	},
+);
 
 export const tenantSessionsRelations = relations(tenantSessions, ({ one }) => ({
 	server: one(servers, {
@@ -91,20 +125,36 @@ export const tenantSessionsRelations = relations(tenantSessions, ({ one }) => ({
 export const verificationTokens = mysqlTable(
 	'VerificationToken',
 	{
-		identifier: varchar('identifier', { length: 255 }).notNull(),
-		token: varchar('token', { length: 255 }).notNull(),
-		expires: timestamp('expires', { mode: 'date' }).notNull(),
+		identifier: varchar('identifier', { length: 191 }).notNull(),
+		token: varchar('token', { length: 191 }).notNull(),
+		expires: datetime('expires', { mode: 'string', fsp: 3 }).notNull(),
 	},
-	(vt) => ({
-		compoundKey: primaryKey(vt.identifier, vt.token),
-	}),
+	(table) => {
+		return {
+			verificationTokenTokenKey: unique('VerificationToken_token_key').on(
+				table.token,
+			),
+			verificationTokenIdentifierTokenKey: unique(
+				'VerificationToken_identifier_token_key',
+			).on(table.identifier, table.token),
+		};
+	},
 );
 
-export const discordAccounts = mysqlTable('DiscordAccount', {
-	id: varchar('id', { length: 255 }).notNull().primaryKey().unique(),
-	name: varchar('name', { length: 255 }).notNull(),
-	avatar: varchar('avatar', { length: 255 }),
-});
+export const discordAccounts = mysqlTable(
+	'DiscordAccount',
+	{
+		id: varchar('id', { length: 191 }).notNull(),
+		name: varchar('name', { length: 191 }).notNull(),
+		avatar: varchar('avatar', { length: 191 }),
+	},
+	(table) => {
+		return {
+			discordAccountId: primaryKey(table.id),
+			discordAccountIdKey: unique('DiscordAccount_id_key').on(table.id),
+		};
+	},
+);
 
 export type DiscordAccount = typeof discordAccounts.$inferSelect;
 
@@ -119,11 +169,24 @@ export const discordAccountsRelations = relations(
 	}),
 );
 
-export const userServerSettings = mysqlTable('UserServerSettings', {
-	userId: varchar('userId', { length: 255 }).notNull(),
-	serverId: varchar('serverId', { length: 255 }).notNull(),
-	bitfield: int('bitfield').default(0).notNull(),
-});
+export const userServerSettings = mysqlTable(
+	'UserServerSettings',
+	{
+		userId: varchar('userId', { length: 191 }).notNull(),
+		serverId: varchar('serverId', { length: 191 }).notNull(),
+		bitfield: int('bitfield').default(0).notNull(),
+	},
+	(table) => {
+		return {
+			userIdIdx: index('UserServerSettings_userId_idx').on(table.userId),
+			serverIdIdx: index('UserServerSettings_serverId_idx').on(table.serverId),
+			userServerSettingsServerIdUserId: primaryKey(
+				table.serverId,
+				table.userId,
+			),
+		};
+	},
+);
 
 export type UserServerSettings = typeof userServerSettings.$inferSelect;
 
@@ -141,38 +204,59 @@ export const userServerSettingsRelations = relations(
 	}),
 );
 
-export const ignoredDiscordAccounts = mysqlTable('IgnoredDiscordAccount', {
-	id: varchar('id', { length: 255 }).notNull().primaryKey(),
-});
+export const ignoredDiscordAccounts = mysqlTable(
+	'IgnoredDiscordAccount',
+	{
+		id: varchar('id', { length: 191 }).notNull(),
+	},
+	(table) => {
+		return {
+			ignoredDiscordAccountId: primaryKey(table.id),
+			ignoredDiscordAccountIdKey: unique('IgnoredDiscordAccount_id_key').on(
+				table.id,
+			),
+		};
+	},
+);
 
-export const servers = mysqlTable('Server', {
-	id: varchar('id', { length: 255 }).notNull().primaryKey(),
-	name: varchar('name', { length: 255 }).notNull(),
-	icon: varchar('icon', { length: 255 }),
-	description: varchar('description', { length: 255 }),
-	vanityInviteCode: varchar('vanityInviteCode', { length: 255 }).unique(),
-
-	//
-	// Answer Overflow Settings Start
-	//
-	bitfield: int('bitfield').default(0).notNull(),
-	kickedTime: datetime('kickedTime'),
-	vanityUrl: varchar('vanityUrl', { length: 255 }).unique(),
-
-	// Tenant Settings
-	customDomain: varchar('customDomain', { length: 255 }).unique(),
-
-	// Stripe Settings
-	stripeCustomerId: varchar('stripeCustomerId', { length: 255 }),
-	stripeSubscriptionId: varchar('stripeSubscriptionId', { length: 255 }),
-	plan: mysqlEnum('plan', ['FREE', 'PRO', 'ENTERPRISE', 'OPEN_SOURCE']).default(
-		'FREE',
-	),
-
-	//
-	// Answer Overflow Settings End
-	//
-});
+export const servers = mysqlTable(
+	'Server',
+	{
+		id: varchar('id', { length: 191 }).notNull(),
+		name: varchar('name', { length: 100 }).notNull(),
+		icon: varchar('icon', { length: 45 }),
+		description: varchar('description', { length: 191 }),
+		vanityInviteCode: varchar('vanityInviteCode', { length: 191 }),
+		bitfield: int('bitfield').default(0).notNull(),
+		kickedTime: datetime('kickedTime', { mode: 'string', fsp: 3 }),
+		vanityUrl: varchar('vanityUrl', { length: 191 }),
+		customDomain: varchar('customDomain', { length: 191 }),
+		stripeCustomerId: varchar('stripeCustomerId', { length: 191 }),
+		stripeSubscriptionId: varchar('stripeSubscriptionId', { length: 191 }),
+		plan: mysqlEnum('plan', ['FREE', 'PRO', 'ENTERPRISE', 'OPEN_SOURCE'])
+			.default('FREE')
+			.notNull(),
+	},
+	(table) => {
+		return {
+			serverId: primaryKey(table.id),
+			serverIdKey: unique('Server_id_key').on(table.id),
+			serverVanityInviteCodeKey: unique('Server_vanityInviteCode_key').on(
+				table.vanityInviteCode,
+			),
+			serverVanityUrlKey: unique('Server_vanityUrl_key').on(table.vanityUrl),
+			serverCustomDomainKey: unique('Server_customDomain_key').on(
+				table.customDomain,
+			),
+			serverStripeCustomerIdKey: unique('Server_stripeCustomerId_key').on(
+				table.stripeCustomerId,
+			),
+			serverStripeSubscriptionIdKey: unique(
+				'Server_stripeSubscriptionId_key',
+			).on(table.stripeSubscriptionId),
+		};
+	},
+);
 
 export type Server = typeof servers.$inferSelect;
 
@@ -183,19 +267,30 @@ export const serversRelations = relations(servers, ({ many }) => ({
 	tenantSessions: many(tenantSessions), //!: pluralised
 }));
 
-export const channels = mysqlTable('Channel', {
-	id: varchar('id', { length: 255 }).notNull().primaryKey(),
-	serverId: varchar('serverId', { length: 255 }).notNull(),
-	name: varchar('name', { length: 100 }).notNull(),
-	type: int('type').notNull(),
-	parentId: varchar('parentId', { length: 255 }),
-	inviteCode: varchar('inviteCode', { length: 15 }).unique(),
-	archivedTimestamp: bigint('archivedTimestamp', { mode: 'bigint' }),
-
-	// Answer Overflow Settings
-	bitfield: int('bitfield').default(0).notNull(),
-	solutionTagId: varchar('solutionTagId', { length: 255 }),
-});
+export const channels = mysqlTable(
+	'Channel',
+	{
+		id: varchar('id', { length: 191 }).notNull(),
+		serverId: varchar('serverId', { length: 191 }).notNull(),
+		name: varchar('name', { length: 100 }).notNull(),
+		type: int('type').notNull(),
+		parentId: varchar('parentId', { length: 191 }),
+		inviteCode: varchar('inviteCode', { length: 15 }),
+		archivedTimestamp: bigint('archivedTimestamp', { mode: 'number' }),
+		bitfield: int('bitfield').default(0).notNull(),
+		solutionTagId: varchar('solutionTagId', { length: 191 }),
+	},
+	(table) => {
+		return {
+			serverIdIdx: index('Channel_serverId_idx').on(table.serverId),
+			parentIdIdx: index('Channel_parentId_idx').on(table.parentId),
+			channelId: primaryKey(table.id),
+			channelInviteCodeKey: unique('Channel_inviteCode_key').on(
+				table.inviteCode,
+			),
+		};
+	},
+);
 
 export type Channel = typeof channels.$inferSelect;
 

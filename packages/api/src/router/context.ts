@@ -3,7 +3,7 @@ import type {
 	DiscordAPIServerSchema,
 	getDiscordUser,
 } from '@answeroverflow/cache';
-import { prisma, elastic } from '@answeroverflow/db';
+import { elastic } from '@answeroverflow/db';
 import type { inferAsyncReturnType } from '@trpc/server';
 import type { CreateNextContextOptions } from '@trpc/server/adapters/next';
 

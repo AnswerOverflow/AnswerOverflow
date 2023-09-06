@@ -40,19 +40,6 @@ export const zChannelBitfieldFlags = z.object({
 const zChannelSchema = createInsertSchema(channels)
 	.required()
 	.extend({
-		archivedTimestamp: z.preprocess((n) => {
-			if (n === null) {
-				return null;
-			}
-			if (
-				typeof n === 'number' ||
-				typeof n === 'bigint' ||
-				typeof n === 'string'
-			) {
-				return BigInt(n);
-			}
-			return n;
-		}, z.bigint().nullable()),
 		flags: zChannelBitfieldFlags,
 		type: z.number().refine(
 			(n) => ALLOWED_CHANNEL_TYPES.has(n),

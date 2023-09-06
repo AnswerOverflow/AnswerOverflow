@@ -12,7 +12,6 @@ export default defineConfig({
 	tsconfig: 'tsconfig.json',
 	noExternal: [
 		'@answeroverflow/elastic-types',
-		'@answeroverflow/prisma-types',
 		'@answeroverflow/db',
 		'@answeroverflow/auth',
 		'@answeroverflow/api',

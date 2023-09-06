@@ -114,9 +114,6 @@
     "[json]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "[prisma]": {
-      "editor.defaultFormatter": "Prisma.prisma"
-    },
     "tailwindCSS.includeLanguages": {
       "plaintext": "html"
     },
