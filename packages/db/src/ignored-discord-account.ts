@@ -11,6 +11,7 @@ export function findIgnoredDiscordAccountById(id: string) {
 }
 
 export function findManyIgnoredDiscordAccountsById(ids: string[]) {
+	if (ids.length === 0) return Promise.resolve([]);
 	return db.query.ignoredDiscordAccounts.findMany({
 		where: inArray(ignoredDiscordAccounts.id, ids),
 	});

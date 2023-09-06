@@ -300,6 +300,7 @@ export async function upsertMessage(data: z.infer<typeof zMessage>) {
 }
 
 export async function upsertManyMessages(data: z.infer<typeof zMessage>[]) {
+	if (data.length === 0) return Promise.resolve(true);
 	const authorIds = new Set(data.map((msg) => msg.authorId));
 	const [ignoredAccounts, userServerSettings] = await Promise.all([
 		await findManyIgnoredDiscordAccountsById(Array.from(authorIds)),

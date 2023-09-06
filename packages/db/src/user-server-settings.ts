@@ -150,6 +150,7 @@ export async function countConsentingUsersInManyServers(serverIds: string[]) {
 export async function findManyUserServerSettings(
 	where: UserServerSettingsFindById[],
 ) {
+	if (where.length === 0) return [];
 	const data = (await db.query.userServerSettings.findMany({
 		where: and(
 			inArray(
