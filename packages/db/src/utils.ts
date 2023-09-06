@@ -1,6 +1,6 @@
 import { elastic } from '@answeroverflow/elastic-types';
 import { sharedEnvs } from '@answeroverflow/env/shared';
-import { db } from '../index';
+import { db } from './db';
 import {
 	accounts,
 	channels,

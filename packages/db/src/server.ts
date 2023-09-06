@@ -12,7 +12,7 @@ import {
 } from './utils/serverUtils';
 import { upsert } from './utils/operations';
 import { Server, servers } from './schema';
-import { db } from '../index';
+import { db } from './db';
 import { eq, inArray, or } from 'drizzle-orm';
 
 export async function applyServerSettingsSideEffects<

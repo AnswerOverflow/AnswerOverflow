@@ -7,7 +7,7 @@ import {
 import { DBError } from './utils/error';
 import { upsert, upsertMany } from './utils/operations';
 import { deleteManyMessagesByUserId } from './message';
-import { db } from '../index';
+import { db } from './db';
 import { eq, inArray } from 'drizzle-orm';
 import { discordAccounts, userServerSettings } from './schema';
 import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';

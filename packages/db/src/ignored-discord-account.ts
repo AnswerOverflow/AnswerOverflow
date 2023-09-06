@@ -1,6 +1,6 @@
 import { findDiscordAccountById } from './discord-account';
 import { DBError } from './utils/error';
-import { db } from '../index';
+import { db } from './db';
 import { ignoredDiscordAccounts } from './schema';
 import { eq, inArray } from 'drizzle-orm';
 

@@ -15,7 +15,7 @@ import { findChannelById } from './channel';
 import { findServerById } from './server';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 import { ChannelType } from 'discord-api-types/v10';
-import { db } from '../index';
+import { db } from './db';
 import { eq, or } from 'drizzle-orm';
 import { servers } from './schema';
 import { zServerPublic, zServerSchema } from './zodSchemas/serverSchemas';

@@ -1,21 +1,9 @@
-import { drizzle } from 'drizzle-orm/planetscale-serverless';
-import { connect } from '@planetscale/database';
-import { sharedEnvs } from '@answeroverflow/env/shared';
-import * as schema from './src/schema';
-
-const connection = connect({
-	url: sharedEnvs.DATABASE_URL,
-});
-
-export const db = drizzle(connection, {
-	schema,
-});
-
 export * from './src/schema';
 export * from './src/channel';
 export * from './src/server';
 export * from './src/user-server-settings';
 export * from './src/message';
+export * from './src/db';
 
 // Zod Schemas
 export * from './src/zodSchemas/channelSchemas';

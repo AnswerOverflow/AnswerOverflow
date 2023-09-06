@@ -25,6 +25,6 @@ export const createVitestConfig = (options: UserConfig = {}) =>
 		esbuild: {
 			...options?.esbuild,
 			target:
-				(options?.esbuild as ESBuildOptions | undefined)?.target ?? 'es2020',
+				(options?.esbuild as ESBuildOptions | undefined)?.target ?? 'esnext',
 		},
 	});

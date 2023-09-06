@@ -7,7 +7,7 @@ import { elastic } from '@answeroverflow/elastic-types';
 import { DBError } from './utils/error';
 import { ChannelType } from 'discord-api-types/v10';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
-import { db } from '../index';
+import { db } from './db';
 import { and, desc, eq, inArray, isNotNull, lt, sql } from 'drizzle-orm';
 import { channels } from './schema';
 import {
@@ -22,14 +22,19 @@ import {
 	zChannelCreateMany,
 	zChannelCreateWithDeps,
 	zChannelMutable,
-	zChannelPrismaCreate,
-	zChannelPrismaUpdate,
 	zChannelUpdate,
 	zChannelUpdateMany,
 	zChannelUpsert,
 	zChannelUpsertMany,
 } from './zodSchemas/channelSchemas';
 import { dictToBitfield } from './utils/bitfieldUtils';
+import { createInsertSchema } from 'drizzle-zod';
+const channelInsertSchema = createInsertSchema(channels).omit({
+	serverId: true,
+	parentId: true,
+	id: true,
+	type: true,
+});
 export const CHANNELS_THAT_CAN_HAVE_AUTOTHREAD = new Set([
 	ChannelType.GuildAnnouncement,
 	ChannelType.GuildText,
@@ -202,16 +207,13 @@ export async function findLatestArchivedTimestampByChannelId(parentId: string) {
 }
 
 export async function createChannel(data: z.infer<typeof zChannelCreate>) {
-	const combinedData: z.infer<typeof zChannelPrismaCreate> =
-		applyChannelSettingsChangesSideEffects({
-			old: getDefaultChannelWithFlags(data),
-			updated: data,
-		});
-
-	const parsedData = zChannelPrismaCreate.parse(combinedData);
-	await db.insert(channels).values(parsedData);
+	const combinedData = applyChannelSettingsChangesSideEffects({
+		old: getDefaultChannelWithFlags(data),
+		updated: data,
+	});
+	await db.insert(channels).values(combinedData);
 	const created = await db.query.channels.findFirst({
-		where: eq(channels.id, parsedData.id),
+		where: eq(channels.id, combinedData.id),
 	});
 	if (!created) throw new Error('Error creating channel');
 	return addFlagsToChannel(created);
@@ -222,7 +224,7 @@ export async function createManyChannels(
 ) {
 	await Promise.all(
 		data.map((channel) => {
-			return db.insert(channels).values(zChannelPrismaCreate.parse(channel));
+			return db.insert(channels).values(channel);
 		}),
 	);
 
@@ -238,14 +240,13 @@ export async function updateChannel({
 }) {
 	if (!old) old = await findChannelById(update.id);
 	if (!old) throw new Error('Channel not found');
-	const combinedData: z.infer<typeof zChannelPrismaUpdate> =
-		applyChannelSettingsChangesSideEffects({
-			old,
-			updated: update,
-		});
+	const combinedData = applyChannelSettingsChangesSideEffects({
+		old,
+		updated: update,
+	});
 	await db
 		.update(channels)
-		.set(zChannelPrismaUpdate.parse(combinedData))
+		.set(channelInsertSchema.parse(combinedData))
 		.where(eq(channels.id, update.id));
 
 	const updated = await db.query.channels.findFirst({
@@ -265,7 +266,7 @@ export async function updateManyChannels(
 			return await db.transaction(async (tx) => {
 				await tx
 					.update(channels)
-					.set(zChannelPrismaUpdate.parse(channel))
+					.set(channelInsertSchema.parse(channel))
 					.where(eq(channels.id, channel.id));
 
 				const updated = await tx.query.channels.findFirst({

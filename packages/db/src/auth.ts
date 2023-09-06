@@ -1,10 +1,10 @@
 import { getRandomId } from '@answeroverflow/utils';
-import { db } from '../index';
+import { db } from './db';
 import { accounts, tenantSessions, users, type Account } from './schema';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 
-export function findAccountByProviderAccountId(input: {
+export async function findAccountByProviderAccountId(input: {
 	provider: string;
 	providerAccountId: string;
 }) {
@@ -16,7 +16,8 @@ export function findAccountByProviderAccountId(input: {
 				eq(accounts.provider, input.provider),
 				eq(accounts.providerAccountId, input.providerAccountId),
 			),
-		);
+		)
+		.then((x) => x.at(0));
 }
 
 export function findTenantSessionByToken(token: string) {

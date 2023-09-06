@@ -61,5 +61,3 @@ export const zServerPublic = zServerSchema.pick({
 	kickedTime: true,
 	customDomain: true,
 });
-
-export type ServerPublicWithFlags = z.infer<typeof zServerPublic>;

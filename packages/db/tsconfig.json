@@ -11,7 +11,8 @@
 		"vitest.config.ts",
 		"scripts",
 		"../../reset.d.ts",
-		".prettierrc.cjs"
+		".prettierrc.cjs",
+    "drizzle.config.ts"
 	],
 	"ts-node": {
 		// these options are overrides used only by ts-node

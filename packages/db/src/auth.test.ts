@@ -5,7 +5,7 @@ import {
 	_NOT_PROD_createOauthAccountEntry,
 	findDiscordOauthByProviderAccountId,
 } from './auth';
-import { db } from '../index';
+import { db } from './db';
 import { users } from './schema';
 describe('Auth', () => {
 	it('should find a linked discord account auth by id', async () => {
@@ -13,7 +13,7 @@ describe('Auth', () => {
 		const discordUserId = getRandomId();
 
 		const USER_ID = getRandomId();
-		const USER_EMAIL = 'example@example.com';
+		const USER_EMAIL = `example+${getRandomId()}@example.com`;
 
 		// const user = await prisma.user.create({
 		// 	data: {},

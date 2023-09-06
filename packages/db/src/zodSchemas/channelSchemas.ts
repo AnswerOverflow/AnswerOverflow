@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { ChannelType } from 'discord-api-types/v10';
-import { omit, pick } from '@answeroverflow/utils';
-import { Channel } from '../schema';
+import { channels } from '../schema';
 import { zServerUpsert } from './serverSchemas';
 import { bitfieldToDict } from '../utils/bitfieldUtils';
+import { createInsertSchema } from 'drizzle-zod';
 
 export const ALLOWED_THREAD_TYPES = new Set([
 	ChannelType.PublicThread,
@@ -37,124 +37,67 @@ export const zChannelBitfieldFlags = z.object({
 	forumGuidelinesConsentEnabled: z.boolean(),
 });
 
-type ChannelZodFormat = {
-	[K in keyof Channel]: z.ZodTypeAny;
-};
+const zChannelSchema = createInsertSchema(channels)
+	.required()
+	.extend({
+		archivedTimestamp: z.preprocess((n) => {
+			if (n === null) {
+				return null;
+			}
+			if (
+				typeof n === 'number' ||
+				typeof n === 'bigint' ||
+				typeof n === 'string'
+			) {
+				return BigInt(n);
+			}
+			return n;
+		}, z.bigint().nullable()),
+		flags: zChannelBitfieldFlags,
+		type: z.number().refine(
+			(n) => ALLOWED_CHANNEL_TYPES.has(n),
+			'Channel type can only be guild forum, text, or announcement', // TODO: Make a type error if possible
+		),
+	});
 
-const internalChannelProperties = {
-	id: z.string(),
-	name: z.string(),
-	serverId: z.string(),
-	bitfield: z.number(),
-	type: z.number().refine(
-		(n) => ALLOWED_CHANNEL_TYPES.has(n),
-		'Channel type can only be guild forum, text, or announcement', // TODO: Make a type error if possible
-	),
-	parentId: z.string().nullable(),
-	inviteCode: z.string().nullable(),
-	solutionTagId: z.string().nullable(),
-	archivedTimestamp: z.preprocess((n) => {
-		if (n === null) {
-			return null;
-		}
-		if (
-			typeof n === 'number' ||
-			typeof n === 'bigint' ||
-			typeof n === 'string'
-		) {
-			return BigInt(n);
-		}
-		return n;
-	}, z.bigint().nullable()),
-} as const satisfies ChannelZodFormat;
-
-const internalRequiredChannelProperties = pick(
-	internalChannelProperties,
-	'id',
-	'name',
-	'serverId',
-	'type',
-	'parentId',
-);
-
-const internalMutableChannelProperties = z
-	.object(omit(internalChannelProperties, 'id', 'parentId', 'type', 'serverId'))
-	.partial().shape;
-
-export const zChannelPrismaCreate = z.object({
-	...internalMutableChannelProperties,
-	...internalRequiredChannelProperties,
-});
-
-export const zChannelPrismaUpdate = z
-	.object(omit(internalChannelProperties, 'id', 'serverId', 'parentId'))
-	.partial();
-
-const externalChannelProperties = {
-	...omit(internalChannelProperties, 'bitfield'),
-	flags: zChannelBitfieldFlags,
-	messageCount: z.number().optional(),
-} as const;
-
-const externalChannelPropertiesMutable = z.object(
-	omit(
-		externalChannelProperties,
-		'id',
-		'serverId',
-		'parentId',
-		'type',
-		'parentId',
-	),
-).shape;
-
-const externalRequiredChannelProperties = pick(
-	externalChannelProperties,
-	'id',
-	'name',
-	'serverId',
-	'type',
-	'parentId',
-);
-
-export const zChannel = z.object({
-	...externalChannelPropertiesMutable,
-	...externalRequiredChannelProperties,
-});
-
-export type ChannelWithFlags = z.infer<typeof zChannel>;
-
-export const zChannelMutable = z
-	.object(externalChannelPropertiesMutable)
+export const zChannelMutable = zChannelSchema
+	.omit({
+		id: true,
+		parentId: true,
+		type: true,
+		serverId: true,
+	})
 	.deepPartial();
+
+export const zChannelRequired = zChannelSchema.pick({
+	id: true,
+	name: true,
+	serverId: true,
+	type: true,
+	parentId: true,
+});
 
 export const zChannelCreate = z.object({
 	...zChannelMutable.shape,
-	...externalRequiredChannelProperties,
+	...zChannelRequired.shape,
 });
 
-export const zChannelCreateMany = z.object(
-	omit(
-		{
-			...externalChannelPropertiesMutable,
-			...externalRequiredChannelProperties,
-		},
-		'flags',
-	),
-);
+export type ChannelWithFlags = Omit<z.infer<typeof zChannelSchema>, 'bitfield'>;
 
-export const zChannelUpdateMany = z.object(
-	omit(
-		{
-			...zChannelMutable.shape,
-			id: externalRequiredChannelProperties.id,
-		},
-		'flags',
-	),
-);
+export const zChannelCreateMany = zChannelCreate.omit({
+	flags: true,
+});
 
-export const zChannelUpdate = z.object({
-	...zChannelMutable.shape,
-	id: externalRequiredChannelProperties.id,
+export const zChannelUpdateMany = zChannelMutable
+	.omit({
+		flags: true,
+	})
+	.extend({
+		id: zChannelSchema.shape.id,
+	});
+
+export const zChannelUpdate = zChannelMutable.extend({
+	id: zChannelSchema.shape.id,
 });
 
 export const zChannelUpsert = z.object({
@@ -165,21 +108,20 @@ export const zChannelUpsert = z.object({
 export const zChannelUpsertMany = z.array(
 	z.object({
 		create: zChannelCreateMany,
-		update: z
-			.object({
-				...omit(zChannelUpdateMany.shape, 'id'),
+		update: zChannelUpdateMany
+			.omit({
+				id: true,
 			})
 			.optional(),
 	}),
 );
 
 export const zChannelCreateWithDeps = z.object({
-	...externalChannelPropertiesMutable,
-	...omit(externalRequiredChannelProperties, 'serverId'),
+	...zChannelCreate.omit({
+		serverId: true,
+	}).shape,
 	server: zServerUpsert,
 });
-
-export const zChannelUpsertWithDeps = zChannelCreateWithDeps;
 
 export const bitfieldToChannelFlags = (bitfield: number) =>
 	bitfieldToDict(bitfield, channelBitfieldFlags);
@@ -195,7 +137,7 @@ export function addFlagsToChannel<
 	};
 }
 
-export const zChannelPublic = zChannel.pick({
+export const zChannelPublic = zChannelSchema.pick({
 	id: true,
 	name: true,
 	serverId: true,

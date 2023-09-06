@@ -11,7 +11,7 @@ import {
 import type { AdapterAccount } from '@auth/core/adapters';
 import { relations } from 'drizzle-orm';
 
-export const users = mysqlTable('user', {
+export const users = mysqlTable('User', {
 	id: varchar('id', { length: 255 }).notNull().primaryKey(),
 	name: varchar('name', { length: 255 }),
 	email: varchar('email', { length: 255 }),
@@ -30,7 +30,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 }));
 
 export const accounts = mysqlTable(
-	'account',
+	'Account',
 	{
 		id: varchar('id', { length: 255 }).notNull().primaryKey(),
 		userId: varchar('userId', { length: 255 })
@@ -67,7 +67,7 @@ export const accountRelations = relations(accounts, ({ one }) => ({
 	}),
 }));
 
-export const sessions = mysqlTable('session', {
+export const sessions = mysqlTable('Session', {
 	sessionToken: varchar('sessionToken', { length: 255 }).notNull().primaryKey(),
 	userId: varchar('userId', { length: 255 })
 		.notNull()
@@ -75,7 +75,7 @@ export const sessions = mysqlTable('session', {
 	expires: timestamp('expires', { mode: 'date' }).notNull(),
 });
 
-export const tenantSessions = mysqlTable('tenantSession', {
+export const tenantSessions = mysqlTable('TenantSession', {
 	id: varchar('id', { length: 255 }).notNull().primaryKey(),
 	serverId: varchar('serverId', { length: 255 }).notNull(),
 	sessionToken: varchar('sessionToken', { length: 255 }).notNull(),
@@ -89,7 +89,7 @@ export const tenantSessionsRelations = relations(tenantSessions, ({ one }) => ({
 }));
 
 export const verificationTokens = mysqlTable(
-	'verificationToken',
+	'VerificationToken',
 	{
 		identifier: varchar('identifier', { length: 255 }).notNull(),
 		token: varchar('token', { length: 255 }).notNull(),
@@ -100,7 +100,7 @@ export const verificationTokens = mysqlTable(
 	}),
 );
 
-export const discordAccounts = mysqlTable('discordAccount', {
+export const discordAccounts = mysqlTable('DiscordAccount', {
 	id: varchar('id', { length: 255 }).notNull().primaryKey().unique(),
 	name: varchar('name', { length: 255 }).notNull(),
 	avatar: varchar('avatar', { length: 255 }),
@@ -119,7 +119,7 @@ export const discordAccountsRelations = relations(
 	}),
 );
 
-export const userServerSettings = mysqlTable('userServerSettings', {
+export const userServerSettings = mysqlTable('UserServerSettings', {
 	userId: varchar('userId', { length: 255 }).notNull(),
 	serverId: varchar('serverId', { length: 255 }).notNull(),
 	bitfield: int('bitfield').default(0).notNull(),
@@ -141,11 +141,11 @@ export const userServerSettingsRelations = relations(
 	}),
 );
 
-export const ignoredDiscordAccounts = mysqlTable('ignoredDiscordAccount', {
+export const ignoredDiscordAccounts = mysqlTable('IgnoredDiscordAccount', {
 	id: varchar('id', { length: 255 }).notNull().primaryKey(),
 });
 
-export const servers = mysqlTable('server', {
+export const servers = mysqlTable('Server', {
 	id: varchar('id', { length: 255 }).notNull().primaryKey(),
 	name: varchar('name', { length: 255 }).notNull(),
 	icon: varchar('icon', { length: 255 }),
@@ -183,7 +183,7 @@ export const serversRelations = relations(servers, ({ many }) => ({
 	tenantSessions: many(tenantSessions), //!: pluralised
 }));
 
-export const channels = mysqlTable('channel', {
+export const channels = mysqlTable('Channel', {
 	id: varchar('id', { length: 255 }).notNull().primaryKey(),
 	serverId: varchar('serverId', { length: 255 }).notNull(),
 	name: varchar('name', { length: 100 }).notNull(),

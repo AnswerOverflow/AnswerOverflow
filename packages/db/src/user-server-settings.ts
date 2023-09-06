@@ -7,7 +7,7 @@ import {
 } from './utils/userServerSettingsUtils';
 import { upsert } from './utils/operations';
 import { DBError } from './utils/error';
-import { db } from '../index';
+import { db } from './db';
 import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { userServerSettings } from './schema';
 import {
@@ -127,24 +127,24 @@ export async function countConsentingUsersInServer(serverId: string) {
 
 export async function countConsentingUsersInManyServers(serverIds: string[]) {
 	if (serverIds.length === 0) return new Map();
-	const asSet = new Set(serverIds);
-	const res = await db.execute(sql`SELECT COUNT(*) as count, serverId
-    FROM UserServerSettings
-    WHERE serverId IN (${[...asSet].join(',')}) AND bitfield & 1 = 1
-    GROUP BY serverId;`);
-	const parsed = z
-		.array(
-			z.object({
-				count: z.bigint(),
-				serverId: z.string(),
-			}),
+	const res = await db
+		.select({
+			count: sql<number>`count(*)`,
+			serverId: userServerSettings.serverId,
+		})
+		.from(userServerSettings)
+		.where(
+			and(
+				inArray(userServerSettings.serverId, Array.from(new Set(serverIds))),
+				sql`bitfield & 1 = 1`,
+			),
 		)
-		.parse(res);
-	const asMap = new Map(parsed.map((x) => [x.serverId, x.count]));
+		.groupBy(userServerSettings.serverId);
+	const asMap = new Map(res.map((x) => [x.serverId, x.count]));
 	return new Map(
 		serverIds.map((x) => {
 			const count = asMap.get(x);
-			return [x, count ?? BigInt(0)];
+			return [x, count ? BigInt(count) : BigInt(0)];
 		}),
 	);
 }
