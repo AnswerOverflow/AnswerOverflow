@@ -42,7 +42,7 @@ export async function findServerWithCommunityPageData(opts: {
 		.map(addFlagsToChannel)
 		.filter((c) => c.flags.indexingEnabled)
 		.map((c) => zChannelPublic.parse(c));
-	const server = addFlagsToServer(zServerSchema.parse(found));
+	const server = addFlagsToServer(found);
 	const serverPublic = zServerPublic.parse(server);
 
 	const allChannelQuestions = await Promise.all(
