@@ -8,8 +8,19 @@ import {
 	bigint,
 	index,
 	unique,
+	customType,
 } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
+const unsignedInt = customType<{
+	data: number; // TODO: BigInt?
+	// I also tried this ↓ https://orm.drizzle.team/docs/custom-types#examples
+	// notNull: true;
+	// default: true;
+}>({
+	dataType() {
+		return 'int unsigned';
+	},
+});
 
 export const users = mysqlTable(
 	'User',
@@ -174,7 +185,7 @@ export const userServerSettings = mysqlTable(
 	{
 		userId: varchar('userId', { length: 191 }).notNull(),
 		serverId: varchar('serverId', { length: 191 }).notNull(),
-		bitfield: int('bitfield').default(0).notNull(),
+		bitfield: unsignedInt('bitfield').default(0).notNull(),
 	},
 	(table) => {
 		return {
@@ -227,7 +238,7 @@ export const servers = mysqlTable(
 		icon: varchar('icon', { length: 45 }),
 		description: varchar('description', { length: 191 }),
 		vanityInviteCode: varchar('vanityInviteCode', { length: 191 }),
-		bitfield: int('bitfield').default(0).notNull(),
+		bitfield: unsignedInt('bitfield').default(0).notNull(),
 		kickedTime: datetime('kickedTime', { mode: 'string', fsp: 3 }),
 		vanityUrl: varchar('vanityUrl', { length: 191 }),
 		customDomain: varchar('customDomain', { length: 191 }),
@@ -277,7 +288,7 @@ export const channels = mysqlTable(
 		parentId: varchar('parentId', { length: 191 }),
 		inviteCode: varchar('inviteCode', { length: 15 }),
 		archivedTimestamp: bigint('archivedTimestamp', { mode: 'number' }),
-		bitfield: int('bitfield').default(0).notNull(),
+		bitfield: unsignedInt('bitfield').default(0).notNull(),
 		solutionTagId: varchar('solutionTagId', { length: 191 }),
 	},
 	(table) => {
