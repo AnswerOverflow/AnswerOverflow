@@ -6,7 +6,7 @@ import {
 	mockGuildMember,
 } from '@answeroverflow/discordjs-mock';
 import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
-import { db } from '@answeroverflow/db';
+import { createUser, User } from '@answeroverflow/db';
 import {
 	toAODiscordAccount,
 	toDiscordAPIServer,
@@ -17,7 +17,6 @@ import {
 	updateCachedDiscordUser,
 	updateUserServersCache,
 } from '@answeroverflow/cache';
-import { users } from '@answeroverflow/db/src/schema';
 import { createDiscordAccount } from '@answeroverflow/db/src/discord-account';
 import { _NOT_PROD_createOauthAccountEntry } from '@answeroverflow/db/src/auth';
 // import { updateUserServersCache } from "@answeroverflow/cache";
@@ -29,7 +28,7 @@ beforeEach(async () => {
 	client = await setupAnswerOverflowBot();
 	guild = mockGuild(client);
 	member = mockGuildMember({ client, guild });
-	user = await db.insert(users).values({}); // TODO: set values (prisma -> drizzle)
+	user = await createUser().then((x) => x!);
 	await createDiscordAccount(toAODiscordAccount(member.user));
 });
 

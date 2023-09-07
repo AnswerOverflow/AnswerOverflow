@@ -1,8 +1,8 @@
+import type { APISearchResult } from '@answeroverflow/api';
 import type {
-	APISearchResult,
-	APIMessageWithDiscordAccount,
+	MessageWithDiscordAccount,
 	ChannelPublicWithFlags,
-} from '@answeroverflow/api';
+} from '@answeroverflow/db';
 import {
 	Message,
 	MessageContents,
@@ -118,7 +118,7 @@ export const LinkMessage = ({
 	className,
 	showNoSolutionCTA,
 }: {
-	message: APIMessageWithDiscordAccount | MessageFull;
+	message: MessageWithDiscordAccount | MessageFull;
 	thread?: ChannelPublicWithFlags;
 	/**
 	 * className passed directly to the message component

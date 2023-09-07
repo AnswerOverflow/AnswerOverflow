@@ -2,7 +2,7 @@ import type { Story } from '@ladle/react';
 import { type MessageProps, DemoMessage } from './DemoMessage';
 import { mockDiscordAccount } from '~ui/test/props';
 
-import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
+import type { MessageWithDiscordAccount } from '@answeroverflow/db';
 
 const loremIpsum =
 	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quidem fugit iure delectus tempore! Nam nihil animi nemo nisi eligendi veniam obcaecati accusantium, sunt maiores tenetur illum saepe incidunt beatae hic.';
@@ -44,7 +44,7 @@ const defaultMessage: MessageProps = {
 		webhookId: null,
 		tts: false,
 		interactionId: null,
-	} as APIMessageWithDiscordAccount,
+	} as MessageWithDiscordAccount,
 };
 
 // Stories

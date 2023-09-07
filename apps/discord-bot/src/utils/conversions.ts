@@ -15,7 +15,7 @@ import {
 	type Channel as AOChannel,
 	type DiscordAccount as AODiscordAccount,
 } from '@answeroverflow/db/src/schema';
-import { type Message as AOMessage } from '@answeroverflow/elastic-types';
+import { type Message as AOMessage } from '@answeroverflow/db';
 import type { DiscordAPIServerSchema } from '@answeroverflow/cache';
 import { getDefaultServer } from '@answeroverflow/db/src/utils/serverUtils';
 import { getDefaultChannelWithFlags } from '@answeroverflow/db/src/utils/channelUtils';

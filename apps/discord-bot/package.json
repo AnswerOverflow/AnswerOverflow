@@ -13,7 +13,6 @@
 		"@answeroverflow/db-mock": "workspace:^",
 		"@answeroverflow/discordjs-react": "^0.0.36",
 		"@answeroverflow/discordjs-utils": "workspace:^",
-		"@answeroverflow/elastic-types": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/payments": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",

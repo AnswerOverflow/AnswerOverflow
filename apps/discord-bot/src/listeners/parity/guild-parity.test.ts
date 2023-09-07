@@ -67,7 +67,7 @@ describe('Guild Parity', () => {
 		it('should clear the kick status of a server on join', async () => {
 			await createServer({
 				...toAOServer(guild),
-				kickedTime: new Date(),
+				kickedTime: new Date().getUTCDate().toString(),
 			});
 			await emitEvent(client, Events.GuildCreate, guild);
 			const createdServer = await findServerById(guild.id);
@@ -82,7 +82,7 @@ describe('Guild Parity', () => {
 
 			await emitEvent(client, Events.GuildDelete, guild);
 			const deletedServer = await findServerById(guild.id);
-			expect(deletedServer?.kickedTime?.getUTCDate()).toBeCloseTo(
+			expect(new Date(deletedServer!.kickedTime!)).toBeCloseTo(
 				new Date().getUTCDate(),
 			);
 		});
@@ -91,7 +91,7 @@ describe('Guild Parity', () => {
 			const deletedServer = await findServerById(guild.id);
 			expect(deletedServer).toBeDefined();
 			expect(deletedServer?.name).toBe(guild.name);
-			expect(deletedServer?.kickedTime?.getUTCDate()).toBeCloseTo(
+			expect(new Date(deletedServer!.kickedTime!)).toBeCloseTo(
 				new Date().getUTCDate(),
 			);
 		});
