@@ -1,10 +1,11 @@
-import { getDefaultChannel, getDefaultUserServerSettings } from './default';
+import { getDefaultUserServerSettings } from './serverUtils';
 import { getRandomId } from '@answeroverflow/utils';
-import { db } from './db';
-import { channels, servers, userServerSettings } from './schema';
-import { createServer } from './server';
-import { createDiscordAccount } from './discord-account';
+import { db } from '../db';
+import { channels, servers, userServerSettings } from '../schema';
+import { createServer } from '../server';
+import { createDiscordAccount } from '../discord-account';
 import { and, eq } from 'drizzle-orm';
+import { getDefaultChannel } from './channelUtils';
 
 describe('Default Channel Values', () => {
 	it('should verify channel default values are correct', async () => {

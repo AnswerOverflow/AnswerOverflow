@@ -4,6 +4,10 @@ export * from './src/server';
 export * from './src/user-server-settings';
 export * from './src/message';
 export * from './src/db';
+export * from './src/discord-account';
+export * from './src/auth';
+export * from './src/pages';
+export * from './src/ignored-discord-account';
 
 // Zod Schemas
 export * from './src/zodSchemas/channelSchemas';
@@ -20,3 +24,4 @@ export * from './src/utils/error';
 export * from './src/utils/operations';
 export * from './src/utils/serverUtils';
 export * from './src/utils/userServerSettingsUtils';
+export * from '@answeroverflow/elastic-types';

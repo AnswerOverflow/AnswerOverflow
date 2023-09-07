@@ -36,33 +36,10 @@ export function findDiscordOauthByProviderAccountId(discordId: string) {
 }
 
 export async function findDiscordOauthByUserId(userId: string) {
-	const account = await db.query.users.findFirst({
+	const account = await db.query.accounts.findFirst({
 		where: and(eq(users.id, userId), eq(accounts.provider, 'discord')),
 	});
-
 	return account ?? null;
-}
-
-export async function clearProviderAuthToken(
-	input: Pick<Account, 'provider' | 'providerAccountId'>,
-) {
-	console.log('Token invalid, clearing');
-
-	await db
-		.update(accounts)
-		.set({
-			access_token: null,
-			refresh_token: null,
-			scope: null,
-			expires_at: null,
-			token_type: null,
-		})
-		.where(
-			and(
-				eq(accounts.provider, input.provider),
-				eq(accounts.providerAccountId, input.providerAccountId),
-			),
-		);
 }
 
 export async function updateProviderAuthToken(

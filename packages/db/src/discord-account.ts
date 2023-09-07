@@ -26,7 +26,7 @@ const zUserServerSettingsFlags = z.object({
 	bitfield: z.number(),
 });
 
-export function findDiscordAccountById(id: string) {
+export async function findDiscordAccountById(id: string) {
 	return db.query.discordAccounts.findFirst({
 		where: eq(discordAccounts.id, id),
 	});

@@ -45,6 +45,7 @@ const zChannelSchema = createInsertSchema(channels)
 			(n) => ALLOWED_CHANNEL_TYPES.has(n),
 			'Channel type can only be guild forum, text, or announcement', // TODO: Make a type error if possible
 		),
+		messageCount: z.number().optional(),
 	});
 
 export const zChannelMutable = zChannelSchema
@@ -69,12 +70,7 @@ export const zChannelCreate = z.object({
 	...zChannelRequired.shape,
 });
 
-export type ChannelWithFlags = Omit<
-	z.infer<typeof zChannelSchema>,
-	'bitfield'
-> & {
-	messageCount?: number;
-};
+export type ChannelWithFlags = Omit<z.infer<typeof zChannelSchema>, 'bitfield'>;
 
 export const zChannelCreateMany = zChannelCreate.omit({
 	flags: true,

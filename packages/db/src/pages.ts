@@ -18,7 +18,7 @@ import { ChannelType } from 'discord-api-types/v10';
 import { db } from './db';
 import { eq, or } from 'drizzle-orm';
 import { servers } from './schema';
-import { zServerPublic, zServerSchema } from './zodSchemas/serverSchemas';
+import { zServerPublic } from './zodSchemas/serverSchemas';
 import { addFlagsToServer } from './utils/serverUtils';
 import { addFlagsToChannel, zChannelPublic } from './zodSchemas/channelSchemas';
 

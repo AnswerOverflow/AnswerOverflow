@@ -28,7 +28,10 @@ export const extendedAdapter: Adapter = {
 		) as unknown as AdapterAccount;
 	},
 	createSession: async (data) => {
-		await db.insert(sessions).values(data);
+		await db.insert(sessions).values({
+			id: crypto.randomUUID(),
+			...data,
+		});
 		const created = await db.query.sessions.findFirst({
 			where: eq(sessions.sessionToken, data.sessionToken),
 		});

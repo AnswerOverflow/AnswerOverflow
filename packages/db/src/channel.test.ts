@@ -439,7 +439,7 @@ describe('Channel Operations', () => {
 				take: 1,
 			});
 			expect(chnls).toHaveLength(1);
-			expect(chnls[0]!.archivedTimestamp).toBe(1);
+			expect(chnls[0]!.archivedTimestamp).toBe(BigInt(1));
 		});
 	});
 });

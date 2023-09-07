@@ -13,9 +13,6 @@ import {
 import { relations } from 'drizzle-orm';
 const unsignedInt = customType<{
 	data: number; // TODO: BigInt?
-	// I also tried this ↓ https://orm.drizzle.team/docs/custom-types#examples
-	// notNull: true;
-	// default: true;
 }>({
 	dataType() {
 		return 'int unsigned';
@@ -54,13 +51,13 @@ export const accounts = mysqlTable(
 		type: varchar('type', { length: 191 }).notNull(),
 		provider: varchar('provider', { length: 191 }).notNull(),
 		providerAccountId: varchar('providerAccountId', { length: 191 }).notNull(),
-		refreshToken: varchar('refresh_token', { length: 191 }),
-		accessToken: varchar('access_token', { length: 191 }),
-		expiresAt: int('expires_at'),
-		tokenType: varchar('token_type', { length: 191 }),
+		refresh_token: varchar('refresh_token', { length: 191 }),
+		access_token: varchar('access_token', { length: 191 }),
+		expires_at: int('expires_at'),
+		token_type: varchar('token_type', { length: 191 }),
 		scope: varchar('scope', { length: 191 }),
 		idToken: varchar('id_token', { length: 191 }),
-		sessionState: varchar('session_state', { length: 191 }),
+		session_state: varchar('session_state', { length: 191 }),
 	},
 	(table) => {
 		return {
@@ -95,7 +92,7 @@ export const sessions = mysqlTable(
 		id: varchar('id', { length: 191 }).notNull(),
 		sessionToken: varchar('sessionToken', { length: 191 }).notNull(),
 		userId: varchar('userId', { length: 191 }).notNull(),
-		expires: datetime('expires', { mode: 'string', fsp: 3 }).notNull(),
+		expires: datetime('expires', { mode: 'date', fsp: 3 }).notNull(),
 	},
 	(table) => {
 		return {
@@ -229,7 +226,8 @@ export const ignoredDiscordAccounts = mysqlTable(
 		};
 	},
 );
-
+const plans = ['FREE', 'PRO', 'ENTERPRISE', 'OPEN_SOURCE'] as const;
+export type Plan = (typeof plans)[number];
 export const servers = mysqlTable(
 	'Server',
 	{
@@ -244,9 +242,7 @@ export const servers = mysqlTable(
 		customDomain: varchar('customDomain', { length: 191 }),
 		stripeCustomerId: varchar('stripeCustomerId', { length: 191 }),
 		stripeSubscriptionId: varchar('stripeSubscriptionId', { length: 191 }),
-		plan: mysqlEnum('plan', ['FREE', 'PRO', 'ENTERPRISE', 'OPEN_SOURCE'])
-			.default('FREE')
-			.notNull(),
+		plan: mysqlEnum('plan', plans).default('FREE').notNull(),
 	},
 	(table) => {
 		return {
@@ -287,7 +283,7 @@ export const channels = mysqlTable(
 		type: int('type').notNull(),
 		parentId: varchar('parentId', { length: 191 }),
 		inviteCode: varchar('inviteCode', { length: 15 }),
-		archivedTimestamp: bigint('archivedTimestamp', { mode: 'number' }),
+		archivedTimestamp: bigint('archivedTimestamp', { mode: 'bigint' }),
 		bitfield: unsignedInt('bitfield').default(0).notNull(),
 		solutionTagId: varchar('solutionTagId', { length: 191 }),
 	},
