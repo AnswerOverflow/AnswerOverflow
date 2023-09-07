@@ -49,7 +49,7 @@ export const zServerUpsert = z.object({
 	update: zServerMutable.optional(),
 });
 
-export type ServerWithFlags = z.infer<typeof zServerSchema>;
+export type ServerWithFlags = Omit<z.infer<typeof zServerSchema>, 'bitfield'>;
 
 export const zServerPublic = zServerSchema.pick({
 	id: true,

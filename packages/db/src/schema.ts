@@ -237,7 +237,7 @@ export const servers = mysqlTable(
 		description: varchar('description', { length: 191 }),
 		vanityInviteCode: varchar('vanityInviteCode', { length: 191 }),
 		bitfield: unsignedInt('bitfield').default(0).notNull(),
-		kickedTime: datetime('kickedTime', { mode: 'string', fsp: 3 }),
+		kickedTime: datetime('kickedTime', { mode: 'date', fsp: 3 }),
 		vanityUrl: varchar('vanityUrl', { length: 191 }),
 		customDomain: varchar('customDomain', { length: 191 }),
 		stripeCustomerId: varchar('stripeCustomerId', { length: 191 }),
