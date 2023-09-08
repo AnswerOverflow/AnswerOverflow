@@ -3,7 +3,7 @@ import { db } from './db';
 import { accounts, tenantSessions, users, type Account } from './schema';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
-import crypto from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 
 export async function findAccountByProviderAccountId(input: {
 	provider: string;
@@ -126,7 +126,7 @@ export async function _NOT_PROD_createOauthAccountEntry({
 }
 
 export async function createUser(input: { id?: string; email: string }) {
-	const userId = input.id ?? crypto.randomUUID();
+	const userId = input.id ?? randomUUID();
 	await db.insert(users).values({
 		id: userId,
 		email: input.email,

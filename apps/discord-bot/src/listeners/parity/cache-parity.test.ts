@@ -19,7 +19,8 @@ import {
 } from '@answeroverflow/cache';
 import { createDiscordAccount } from '@answeroverflow/db/src/discord-account';
 import { _NOT_PROD_createOauthAccountEntry } from '@answeroverflow/db/src/auth';
-import { randomId } from '~ui/test/props';
+import { getRandomId } from '@answeroverflow/utils';
+
 // import { updateUserServersCache } from "@answeroverflow/cache";
 let client: Client;
 let guild: Guild;
@@ -30,7 +31,7 @@ beforeEach(async () => {
 	guild = mockGuild(client);
 	member = mockGuildMember({ client, guild });
 	user = await createUser({
-		email: `test+${randomId()}@test.com`,
+		email: `test+${getRandomId()}@test.com`,
 	}).then((x) => x!);
 	await createDiscordAccount(toAODiscordAccount(member.user));
 });

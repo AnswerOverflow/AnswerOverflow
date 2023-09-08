@@ -4,10 +4,11 @@ import { sessions, tenantSessions } from '@answeroverflow/db/src/schema';
 import { upsertDiscordAccount } from '@answeroverflow/db/src/discord-account';
 import { and, eq } from 'drizzle-orm';
 import type { Adapter } from '@auth/core/adapters';
+import { randomUUID } from 'node:crypto';
 
 export const extendedAdapter: Adapter = {
 	async createUser(data) {
-		const id = crypto.randomUUID();
+		const id = randomUUID();
 
 		await db.insert(users).values({
 			id,
@@ -42,7 +43,7 @@ export const extendedAdapter: Adapter = {
 	},
 	async createSession(data) {
 		await db.insert(sessions).values({
-			id: crypto.randomUUID(),
+			id: randomUUID(),
 			...data,
 		});
 		return await db
@@ -108,7 +109,7 @@ export const extendedAdapter: Adapter = {
 			avatar: discordAccount.avatar,
 		});
 		await db.insert(accounts).values({
-			id: crypto.randomUUID(),
+			id: randomUUID(),
 			...rawAccount,
 		});
 	},

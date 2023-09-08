@@ -2,7 +2,6 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCsrfToken, getSession } from 'next-auth/react';
 import { db } from '@answeroverflow/db';
 import { z } from 'zod';
-import crypto from 'crypto';
 // eslint-disable-next-line no-restricted-imports
 import { init } from '../../../../../node_modules/next-auth/core/init';
 // eslint-disable-next-line no-restricted-imports
@@ -15,6 +14,7 @@ import { NextAuthOptions } from 'next-auth';
 import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 import { findServerByCustomDomain } from '@answeroverflow/db/src/server';
 import { tenantSessions } from '@answeroverflow/db/src/schema';
+import { randomUUID } from 'node:crypto';
 
 async function getServerSignInUrl(
 	req: IncomingMessage,
@@ -75,7 +75,7 @@ export default async function handler(
 		return;
 	}
 
-	const tenantSessionId = crypto.randomUUID();
+	const tenantSessionId = randomUUID();
 
 	await db.insert(tenantSessions).values({
 		id: tenantSessionId,
