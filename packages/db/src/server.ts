@@ -131,6 +131,7 @@ export async function findServerByAliasOrId(aliasOrId: string) {
 }
 
 export async function findManyServersById(ids: string[]) {
+	if (ids.length === 0) return [];
 	const found = await db.query.servers.findMany({
 		where: inArray(servers.id, ids),
 	});

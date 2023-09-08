@@ -3,7 +3,7 @@ import { db } from './db';
 import { accounts, tenantSessions, users, type Account } from './schema';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
-import * as crypto from 'crypto';
+import crypto from 'node:crypto';
 
 export async function findAccountByProviderAccountId(input: {
 	provider: string;
@@ -42,7 +42,7 @@ export function findDiscordOauthByProviderAccountId(discordId: string) {
 
 export async function findDiscordOauthByUserId(userId: string) {
 	const account = await db.query.accounts.findFirst({
-		where: and(eq(users.id, userId), eq(accounts.provider, 'discord')),
+		where: and(eq(accounts.userId, userId), eq(accounts.provider, 'discord')),
 	});
 	return account ?? null;
 }

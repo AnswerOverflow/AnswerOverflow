@@ -9,7 +9,6 @@ import { db } from './db';
 import { users } from './schema';
 describe('Auth', () => {
 	it('should find a linked discord account auth by id', async () => {
-		// TODO: Check if this is okay (migrated from prisma -> drizzle)
 		const discordUserId = getRandomId();
 
 		const USER_ID = getRandomId();

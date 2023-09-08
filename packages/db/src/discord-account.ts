@@ -33,6 +33,7 @@ export async function findDiscordAccountById(id: string) {
 }
 
 export function findManyDiscordAccountsById(ids: string[]) {
+	if (ids.length === 0) return Promise.resolve([]);
 	return db.query.discordAccounts.findMany({
 		where: inArray(discordAccounts.id, ids),
 	});
@@ -148,32 +149,6 @@ export async function upsertManyDiscordAccounts(
 	});
 }
 
-export async function findDiscordAccountWithUserServerSettings({
-	authorId,
-	authorServerId,
-}: {
-	authorId: string;
-	authorServerId: string[];
-}) {
-	const data = await db.query.discordAccounts.findFirst({
-		where: eq(discordAccounts.id, authorId),
-		with: {
-			userServerSettings: {
-				where: inArray(userServerSettings.serverId, authorServerId),
-			},
-		},
-	});
-	if (!data) return null;
-
-	const userServerSettingsWithFlags = data.userServerSettings.map((i) => {
-		addFlagsToUserServerSettings(zUserServerSettingsFlags.parse(i));
-	});
-	return {
-		...data,
-		userServerSettings: userServerSettingsWithFlags,
-	};
-}
-
 export async function findManyDiscordAccountsWithUserServerSettings({
 	authorIds,
 	authorServerIds,
@@ -181,6 +156,8 @@ export async function findManyDiscordAccountsWithUserServerSettings({
 	authorIds: string[];
 	authorServerIds: string[];
 }) {
+	if (authorIds.length === 0 || authorServerIds.length === 0)
+		return Promise.resolve([]);
 	const data = await db.query.discordAccounts.findMany({
 		where: inArray(discordAccounts.id, authorIds),
 		with: {

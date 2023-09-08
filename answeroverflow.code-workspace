@@ -64,10 +64,6 @@
       "path": "packages/cache"
     },
     {
-      "name": "prisma-types",
-      "path": "packages/prisma-types"
-    },
-    {
       "name": "elastic-types",
       "path": "packages/elastic-types"
     },
@@ -173,7 +169,6 @@
       "analytics",
       "db-mock",
       "constants",
-      "prisma-types",
       "elastic-types",
       "cache",
       "docs"
@@ -242,7 +237,6 @@
       "dbaeumer.vscode-eslint",
       "GitHub.copilot",
       "eamodio.gitlens",
-      "Prisma.prisma",
       "aaron-bond.better-comments",
       "ZixuanChen.vitest-explorer",
       "EditorConfig.EditorConfig",

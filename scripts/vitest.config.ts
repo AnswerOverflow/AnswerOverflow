@@ -24,6 +24,7 @@ export const createVitestConfig = (options: UserConfig = {}) =>
 		},
 		esbuild: {
 			...options?.esbuild,
+			platform: 'node',
 			target:
 				(options?.esbuild as ESBuildOptions | undefined)?.target ?? 'esnext',
 		},

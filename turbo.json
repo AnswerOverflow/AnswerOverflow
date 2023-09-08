@@ -47,9 +47,6 @@
 		"clean": {
 			"cache": false
 		},
-		"db:generate": {
-			"cache": false
-		},
 		"db:wipe": {
 			"cache": false
 		},

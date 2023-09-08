@@ -39,4 +39,7 @@ export async function clearDatabase() {
 	await db.delete(ignoredDiscordAccounts);
 	await elastic.createMessagesIndex();
 	console.log('Database wiped successfully');
+	// quit the process
+	// eslint-disable-next-line n/no-process-exit
+	process.exit(0);
 }

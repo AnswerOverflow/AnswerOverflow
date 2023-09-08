@@ -150,6 +150,7 @@ export async function findManyChannelsById(
 		includeMessageCount?: boolean;
 	} = {},
 ): Promise<ChannelWithFlags[]> {
+	if (ids.length === 0) return Promise.resolve([]);
 	const data = await db.query.channels.findMany({
 		where: inArray(channels.id, ids),
 	});

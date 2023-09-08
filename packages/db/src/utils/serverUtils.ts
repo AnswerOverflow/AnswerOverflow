@@ -2,7 +2,7 @@ import type { Server, User, UserServerSettings } from '../schema';
 import { addFlagsToUserServerSettings } from './userServerSettingsUtils';
 import { bitfieldToDict, dictToBitfield, mergeFlags } from './bitfieldUtils';
 import { serverSettingsFlags } from '../zodSchemas/serverSchemas';
-import { randomId } from '~ui/test/props';
+import { getRandomId } from '@answeroverflow/utils';
 
 export const bitfieldToServerFlags = (bitfield: number) =>
 	bitfieldToDict(bitfield, serverSettingsFlags);
@@ -57,7 +57,7 @@ export function getDefaultUser(
 	},
 ): User {
 	return {
-		email: `test+${randomId()}@test.com`,
+		email: `test+${getRandomId()}@test.com`,
 		emailVerified: null,
 		image: null,
 		name: null,
