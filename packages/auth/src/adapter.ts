@@ -131,7 +131,12 @@ export const extendedAdapter: Adapter = {
 			return null;
 		}
 
-		return dbAccount.User;
+		return {
+			...dbAccount.User,
+			email: dbAccount.User!.email ?? '',
+			emailVerified: dbAccount.User!.emailVerified ?? null,
+			id: dbAccount.User!.id ?? null,
+		};
 	},
 	async deleteSession(sessionToken) {
 		await db

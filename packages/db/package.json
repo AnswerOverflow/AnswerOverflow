@@ -12,6 +12,7 @@
 		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix",
+		"db:push": "cross-env drizzle-kit push:mysql",
 		"db:wipe": "cross-env NODE_ENV=test pnpm with-env npx ts-node ./scripts/wipe.ts",
 		"db:introspect": "drizzle-kit introspect:mysql",
 		"test": "pnpm with-env vitest run --coverage",
