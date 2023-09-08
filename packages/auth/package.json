@@ -22,7 +22,7 @@
 		"@answeroverflow/db": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
-		"@auth/drizzle-adapter": "^0.3.2",
+		"@auth/core": "^0.12.0",
 		"dotenv-cra": "^3.0.3",
 		"drizzle-orm": "^0.28.5",
 		"next": "13.4.13",

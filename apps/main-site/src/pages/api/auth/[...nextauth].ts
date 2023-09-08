@@ -17,6 +17,7 @@ export default async function handler(
 	if (token) {
 		const nextAuthSession = await findTenantSessionByToken(token);
 		// add a cookie to the request using the next auth header
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		req.cookies[getNextAuthCookieName()] = nextAuthSession?.sessionToken;
 	}
 	if (!isOnMainSite(req.headers.host!)) {

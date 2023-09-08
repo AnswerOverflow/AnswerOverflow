@@ -24,8 +24,8 @@ export const users = mysqlTable(
 	{
 		id: varchar('id', { length: 191 }).notNull(),
 		name: varchar('name', { length: 191 }),
-		email: varchar('email', { length: 191 }),
-		emailVerified: datetime('emailVerified', { mode: 'string', fsp: 3 }),
+		email: varchar('email', { length: 191 }).notNull(),
+		emailVerified: datetime('emailVerified', { mode: 'date', fsp: 3 }),
 		image: varchar('image', { length: 191 }),
 	},
 	(table) => {
@@ -135,7 +135,7 @@ export const verificationTokens = mysqlTable(
 	{
 		identifier: varchar('identifier', { length: 191 }).notNull(),
 		token: varchar('token', { length: 191 }).notNull(),
-		expires: datetime('expires', { mode: 'string', fsp: 3 }).notNull(),
+		expires: datetime('expires', { mode: 'date', fsp: 3 }).notNull(),
 	},
 	(table) => {
 		return {

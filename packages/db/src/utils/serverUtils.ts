@@ -2,6 +2,7 @@ import type { Server, User, UserServerSettings } from '../schema';
 import { addFlagsToUserServerSettings } from './userServerSettingsUtils';
 import { bitfieldToDict, dictToBitfield, mergeFlags } from './bitfieldUtils';
 import { serverSettingsFlags } from '../zodSchemas/serverSchemas';
+import { randomId } from '~ui/test/props';
 
 export const bitfieldToServerFlags = (bitfield: number) =>
 	bitfieldToDict(bitfield, serverSettingsFlags);
@@ -56,7 +57,7 @@ export function getDefaultUser(
 	},
 ): User {
 	return {
-		email: null,
+		email: `test+${randomId()}@test.com`,
 		emailVerified: null,
 		image: null,
 		name: null,

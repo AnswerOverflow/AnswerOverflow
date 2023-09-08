@@ -14,6 +14,7 @@ export default defineConfig({
 		'@answeroverflow/elastic-types',
 		'@answeroverflow/db',
 		'@answeroverflow/auth',
+		'@auth/drizzle-adapter',
 		'@answeroverflow/api',
 		'@answeroverflow/analytics',
 		'@answeroverflow/discordjs-utils',

@@ -22,7 +22,11 @@ export async function findAccountByProviderAccountId(input: {
 }
 
 export function findTenantSessionByToken(token: string) {
-	return db.select().from(tenantSessions).where(eq(tenantSessions.id, token));
+	return db
+		.select()
+		.from(tenantSessions)
+		.where(eq(tenantSessions.id, token))
+		.then((x) => x.at(0));
 }
 
 export function deleteTenantSessionByToken(token: string) {
@@ -121,10 +125,11 @@ export async function _NOT_PROD_createOauthAccountEntry({
 	return inserted;
 }
 
-export async function createUser(id?: string) {
-	const userId = id ?? crypto.randomUUID();
+export async function createUser(input: { id?: string; email: string }) {
+	const userId = input.id ?? crypto.randomUUID();
 	await db.insert(users).values({
 		id: userId,
+		email: input.email,
 	});
 	return db.query.users.findFirst({
 		where: eq(users.id, userId),

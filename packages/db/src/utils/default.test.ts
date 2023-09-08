@@ -50,13 +50,10 @@ describe('Default User Server Settings Values', () => {
 			id: userId,
 			name: 'test',
 		});
-		await db
-			.insert(userServerSettings)
-			.values({
-				serverId,
-				userId,
-			})
-			.then((res) => res[0]);
+		await db.insert(userServerSettings).values({
+			serverId,
+			userId,
+		});
 		const expectedDefaults = await db
 			.select()
 			.from(userServerSettings)
