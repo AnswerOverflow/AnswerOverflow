@@ -117,8 +117,8 @@ importers:
         specifier: ^1.6.5
         version: 1.6.5
       '@sapphire/decorators':
-        specifier: 6.0.1
-        version: 6.0.1
+        specifier: 6.0.2
+        version: 6.0.2
       '@sapphire/discord-utilities':
         specifier: 3.0.3
         version: 3.0.3
@@ -6085,8 +6085,8 @@ packages:
       '@sapphire/utilities': 3.13.0
     dev: false
 
-  /@sapphire/decorators@6.0.1:
-    resolution: {integrity: sha512-CyekhzVeiIda5E/IQzm0TWj+ZqKhWRaLWmB/6MTaOtXUwTlNMm/o7/bS54yM5PEAf1LTwwwuNL91sNUDS8sCPg==}
+  /@sapphire/decorators@6.0.2:
+    resolution: {integrity: sha512-R0bsVvvT/iclElvdglpneIB6UGhzqT3DbMy8b0VHcjSSWArAfxFXiv7mVO/5VeiQduZFhWPgqtTWayKdRYY1NA==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
     dependencies:
       tslib: 2.6.2
@@ -6744,7 +6744,7 @@ packages:
       '@trpc/client': 10.37.1(@trpc/server@10.37.1)
       '@trpc/react-query': 10.37.1(@tanstack/react-query@4.32.6)(@trpc/client@10.37.1)(@trpc/server@10.37.1)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/server': 10.37.1
-      next: 13.4.13(@babel/core@7.22.10)(react-dom@18.2.0)(react@18.2.0)
+      next: 13.4.13(react-dom@18.2.0)(react@18.2.0)(sass@1.66.1)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-ssr-prepass: 1.5.0(react@18.2.0)
@@ -13455,7 +13455,7 @@ packages:
       '@panva/hkdf': 1.1.1
       cookie: 0.5.0
       jose: 4.14.4
-      next: 13.4.13(@babel/core@7.22.10)(react-dom@18.2.0)(react@18.2.0)
+      next: 13.4.13(react-dom@18.2.0)(react@18.2.0)(sass@1.66.1)
       oauth: 0.9.15
       openid-client: 5.4.3
       preact: 10.17.1
@@ -13515,7 +13515,7 @@ packages:
       react: '*'
       react-dom: '*'
     dependencies:
-      next: 13.4.13(@babel/core@7.22.10)(react-dom@18.2.0)(react@18.2.0)
+      next: 13.4.13(react-dom@18.2.0)(react@18.2.0)(sass@1.66.1)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
