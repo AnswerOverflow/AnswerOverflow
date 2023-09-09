@@ -3,7 +3,6 @@ import Head from 'next/head';
 import { makeServerIconLink } from './ServerIcon';
 import { useTenantContext } from '@answeroverflow/hooks';
 import { webClientEnv } from '@answeroverflow/env/web';
-import Script from 'next/script';
 
 interface HeadProps {
 	title: string;
