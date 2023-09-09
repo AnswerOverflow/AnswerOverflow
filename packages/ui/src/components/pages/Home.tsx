@@ -28,7 +28,7 @@ export const Home = (props: {
 				<FollowCursor intensity={40}>
 					<div
 						className={
-							'flex flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
+							'flex max-w-xl flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
 						}
 					>
 						<h2 className={'mb-8 text-2xl'}>Browse All Communities</h2>
@@ -48,7 +48,7 @@ export const Home = (props: {
 				<FollowCursor intensity={40}>
 					<div
 						className={
-							'flex flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
+							'flex max-w-xl  flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
 						}
 					>
 						<h2 className={'mb-8 text-2xl'}>Setup for free</h2>
@@ -64,7 +64,7 @@ export const Home = (props: {
 				<FollowCursor intensity={40}>
 					<div
 						className={
-							'flex flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
+							'flex max-w-xl flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
 						}
 					>
 						<h2 className={'mb-8 text-2xl'}>Open Source</h2>
