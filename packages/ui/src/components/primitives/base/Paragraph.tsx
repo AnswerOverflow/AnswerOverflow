@@ -7,10 +7,7 @@ export const Paragraph = (
 
 	return (
 		<p
-			className={twMerge(
-				'text-ao-black dark:text-ao-white py-4 font-body text-lg',
-				className,
-			)}
+			className={twMerge('py-4 font-body text-lg text-primary', className)}
 			{...otherProps}
 		>
 			{children}

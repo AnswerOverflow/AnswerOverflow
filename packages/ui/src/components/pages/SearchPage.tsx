@@ -43,6 +43,7 @@ export const MessagesSearchBar = (props: {
 				className="mb-4 w-full"
 				onChange={(e) => setSearchInput(e.target.value)}
 				placeholder={props.placeholder ?? 'Search'}
+				type={'search'}
 			/>
 		</form>
 	);
