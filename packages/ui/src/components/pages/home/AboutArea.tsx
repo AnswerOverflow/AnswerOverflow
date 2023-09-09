@@ -3,7 +3,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '~ui/utils/styling';
 import { trackEvent } from '@answeroverflow/hooks';
-import { PricingArea } from './PricingArea';
 import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
 import { Paragraph } from '~ui/components/primitives/base/Paragraph';
 import { Heading } from '~ui/components/primitives/base/Heading';
@@ -12,6 +11,7 @@ import { HowDoesItWorkArea } from '~ui/components/pages/home/HowDoesItWorkArea';
 import { Navbar } from '~ui/components/primitives/Navbar';
 import { Footer } from '~ui/components/primitives/Footer';
 import { PricingOptions } from '~ui/components/pages/Pricing';
+import AOHead from '~ui/components/primitives/AOHead';
 // TODO: Link to docs for feature?
 const HomeFeature = (props: {
 	featureName: React.ReactNode;
@@ -204,6 +204,11 @@ export const AboutArea = () => {
 	return (
 		<div className={'mx-auto max-w-screen-3xl'}>
 			<Navbar />
+			<AOHead
+				path="/about"
+				title="Answer Overflow - Index Your Discord Server Channels Into Google"
+				addPrefix={false}
+			/>
 			<HowDoesItWorkArea />
 			<div className="flex flex-col items-center px-4 pb-20 pt-10 sm:px-[4rem] 2xl:px-[6rem]">
 				<FeaturesSection />

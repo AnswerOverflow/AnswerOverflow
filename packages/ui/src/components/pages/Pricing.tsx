@@ -4,7 +4,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from '../primitives/ui/accordion';
-import { Check, GlobeIcon } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { trackEvent } from '@answeroverflow/hooks';
 import { toast } from 'react-toastify';
 import React from 'react';
@@ -27,7 +27,6 @@ import { Heading } from '~ui/components/primitives/base/Heading';
 import { queryTypes, useQueryState } from 'next-usequerystate';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@tremor/react';
 import { IoBusiness } from 'react-icons/io5';
-import Balancer from 'react-wrap-balancer';
 import { IoMdGlobe } from 'react-icons/io';
 const enterpriseFAQs: {
 	question: React.ReactNode;
@@ -252,6 +251,17 @@ const EnterprisePricingOptions = () => (
 
 const EnterprisePricing = (props: { showFaqs?: boolean }) => (
 	<>
+		<div
+			className={
+				'mx-auto my-8 grid w-full grid-cols-1 justify-items-center gap-8'
+			}
+		>
+			<span className="whitespace-pre-wrap text-center sm:hidden">
+				Your own instance of Answer Overflow, hosted on your own domain. Perfect
+				for companies looking for minimal branding, and to have full control
+				over their content.
+			</span>
+		</div>
 		<EnterprisePricingOptions />
 		{props.showFaqs && <FAQ faqs={enterpriseFAQs} />}
 	</>
@@ -260,6 +270,11 @@ const EnterprisePricing = (props: { showFaqs?: boolean }) => (
 const PublicPlatformPricing = (props: { showFaqs?: boolean }) => (
 	<>
 		<div className="mx-auto my-8 grid w-full grid-cols-1 justify-items-center gap-8">
+			<span className="whitespace-pre-wrap text-center sm:hidden">
+				Ad supported version of Answer Overflow allowing for unlimited page
+				views and revenue share to communities. Perfect for communities of all
+				sizes.
+			</span>
 			<PricingElement
 				title={'Free'}
 				cta={'Setup Now'}
@@ -288,13 +303,11 @@ const PublicPlatformPricing = (props: { showFaqs?: boolean }) => (
 					faqs={[
 						{
 							question: 'What ad provider is used?',
-							answer:
-								'We are still working on the revenue share model, but the goal is to give back to communities that are creating content on Answer Overflow. If you have any feedback on this, please use the feedback box below.',
+							answer: `We're using Google AdSense to serve ads. If you have any feedback on this, please use the feedback box below.`,
 						},
 						{
 							question: 'How does the revenue share work?',
-							answer:
-								'We are still working on the revenue share model, but the goal is to give back to communities that are creating content on Answer Overflow. If you have any feedback on this, please use the feedback box below.',
+							answer: `We're still figuring out how to best do this. If you have any feedback on this, please use the feedback box below.`,
 						},
 					]}
 				/>
@@ -325,17 +338,26 @@ export const PricingOptions = (props: { showFaqs?: boolean }) => {
 						'flex h-full max-h-full max-w-full grow flex-col items-center justify-start'
 					}
 				>
-					<div className={'flex max-w-full flex-row items-center gap-4'}>
+					<div
+						className={
+							'flex max-w-full flex-row items-center gap-4 text-primary'
+						}
+					>
 						<IoMdGlobe className={'hidden h-16 w-16 shrink-0 md:block'} />
 						<div className={'flex flex-col gap-4'}>
 							<h2 className={'text-center text-xl font-bold'}>
 								Public Platform
 							</h2>
-							<Balancer className="whitespace-pre-wrap text-center text-base md:text-lg">
+
+							<span
+								className={
+									'hidden whitespace-pre-wrap text-center text-lg sm:block'
+								}
+							>
 								Ad supported version of Answer Overflow allowing for unlimited
 								page views and revenue share to communities. Perfect for
 								communities of all sizes.
-							</Balancer>
+							</span>
 						</div>
 					</div>
 				</Tab>
@@ -344,17 +366,21 @@ export const PricingOptions = (props: { showFaqs?: boolean }) => {
 						'flex h-full max-h-full max-w-full grow flex-col items-center justify-start'
 					}
 				>
-					<div className={'flex max-w-full flex-row items-center gap-4'}>
+					<div
+						className={
+							'flex max-w-full flex-row items-center gap-4 text-primary'
+						}
+					>
 						<IoBusiness className={'hidden h-16 w-16 shrink-0 md:block'} />
 						<div className={'flex flex-col gap-4'}>
 							<h2 className={'text-center text-lg font-bold md:text-xl'}>
 								Enterprise Platform
 							</h2>
-							<Balancer className="whitespace-pre-wrap text-base md:text-lg">
+							<span className="hidden whitespace-pre-wrap text-center text-lg sm:block">
 								Your own instance of Answer Overflow, hosted on your own domain.
 								Perfect for companies looking for minimal branding, and to have
 								full control over their content.
-							</Balancer>
+							</span>
 						</div>
 					</div>
 				</Tab>
