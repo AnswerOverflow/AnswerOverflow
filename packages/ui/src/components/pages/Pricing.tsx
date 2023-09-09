@@ -48,7 +48,7 @@ const enterpriseFAQs: {
 		question:
 			'Do you have plans for non-profit / non-commercial open source use?',
 		answer:
-			"Our public is perfect for non-profit / non-commercial open source use. If for some reason our public platform doesn't work for you, please reach out to us and we'll see what we can do.",
+			"Our public platform is perfect for non-profit / non-commercial open source use. If for some reason our public platform doesn't work for you, please reach out to us and we'll see what we can do.",
 	},
 	{
 		question: 'How are page views calculated?',
