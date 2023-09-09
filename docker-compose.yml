@@ -9,6 +9,7 @@ services:
       - MYSQL_USER=mysql
       - MYSQL_PASSWORD=mysql
       - MYSQL_ROOT_PASSWORD=mysql
+      - MYSQL_DATABASE=api_dev
     expose:
       - 3306
     ports:
