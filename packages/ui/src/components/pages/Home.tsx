@@ -22,13 +22,13 @@ export const Home = (props: {
 			<HeroArea servers={props.servers} />
 			<div
 				className={
-					'grid w-full grid-cols-1 grid-rows-1 gap-8 p-8 text-center md:grid-cols-3'
+					'grid w-full max-w-screen-3xl grid-cols-1 grid-rows-1 gap-8 p-8 text-center md:grid-cols-3'
 				}
 			>
 				<FollowCursor intensity={40}>
 					<div
 						className={
-							'flex max-w-xl flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
+							'flex h-full flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
 						}
 					>
 						<h2 className={'mb-8 text-2xl'}>Browse All Communities</h2>
@@ -48,7 +48,7 @@ export const Home = (props: {
 				<FollowCursor intensity={40}>
 					<div
 						className={
-							'flex max-w-xl  flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
+							'flex   h-full flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
 						}
 					>
 						<h2 className={'mb-8 text-2xl'}>Setup for free</h2>
@@ -64,7 +64,7 @@ export const Home = (props: {
 				<FollowCursor intensity={40}>
 					<div
 						className={
-							'flex max-w-xl flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
+							'flex  h-full flex-col  justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
 						}
 					>
 						<h2 className={'mb-8 text-2xl'}>Open Source</h2>
