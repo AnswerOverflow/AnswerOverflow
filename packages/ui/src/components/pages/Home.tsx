@@ -1,48 +1,88 @@
-import { Footer } from '../primitives/Footer';
 import { Navbar } from '../primitives/Navbar';
-import { AboutArea } from './home/AboutArea';
-import { HeroArea } from './home/HeroArea';
-import { ChevronDownIcon } from '@heroicons/react/24/solid';
-import { useRef } from 'react';
-import { Button } from '~ui/components/primitives/ui/button';
-const DownChevron = (props: { scrollIntoView: () => unknown }) => (
-	<div className="absolute bottom-10 left-1/2 block -translate-x-1/2 sm:hidden xl:block">
-		<div className="mx-auto h-16 w-16 rounded-full text-black/[.65] dark:text-white/[.65]">
-			<Button
-				variant="ghost"
-				className="rounded-lg focus:ring-0 focus:ring-offset-0 dark:hover:bg-inherit"
-				onClick={props.scrollIntoView}
-				size={'icon'}
-			>
-				<ChevronDownIcon className="h-8 w-8 rounded-full" />
-				<span className="sr-only">Scroll down</span>
-			</Button>
-		</div>
-	</div>
-);
-export const Home = () => {
-	const aboutRef = useRef<HTMLDivElement>(null);
-	const executeScroll = () =>
-		aboutRef.current?.scrollIntoView({
-			behavior: 'smooth',
-			block: 'start',
-		});
+import type { ServerPublic } from '@answeroverflow/api';
+import { HeroArea } from '~ui/components/pages/home/HeroArea';
+import { Footer } from '~ui/components/primitives/Footer';
+import { LinkButton } from '~ui/components/primitives/base/LinkButton';
+import { FollowCursor } from '~ui/components/primitives/Follow';
+import AOHead from '~ui/components/primitives/AOHead';
 
+export const Home = (props: {
+	servers: Pick<ServerPublic, 'id' | 'icon' | 'name'>[];
+}) => {
 	return (
-		<div className="flex w-full flex-col items-center bg-background font-body dark:bg-[linear-gradient(180.49deg,_#1A1818_-12.07%,_#0E0D0D_-12.07%,_#040405_-12.06%,_#101214_103.52%)]">
-			<div className="max-w-screen-3xl">
-				<div className="relative">
-					<Navbar />
-					<div>
-						<HeroArea />
-					</div>
-				</div>
-				<DownChevron scrollIntoView={executeScroll} />
-				<div className="flex justify-center py-2" ref={aboutRef}>
-					<AboutArea />
-				</div>
-				<Footer />
+		<div className="flex w-full flex-col items-center bg-background font-body">
+			<AOHead
+				path="/"
+				title="Answer Overflow - Search all of Discord"
+				addPrefix={false}
+			/>
+			<div className={'w-full max-w-screen-3xl'}>
+				<Navbar />
 			</div>
+			<HeroArea servers={props.servers} />
+			<div
+				className={
+					'grid w-full grid-cols-1 grid-rows-1 gap-8 p-8 text-center md:grid-cols-3'
+				}
+			>
+				<FollowCursor intensity={40}>
+					<div
+						className={
+							'flex flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
+						}
+					>
+						<h2 className={'mb-8 text-2xl'}>Browse All Communities</h2>
+						<span className={'text-lg'}>
+							Browse the hundreds of communities using Answer Overflow to make
+							their content more accessible.
+						</span>
+						<LinkButton
+							href={'/browse'}
+							className={'mx-auto mt-8'}
+							variant={'outline'}
+						>
+							Browse
+						</LinkButton>
+					</div>
+				</FollowCursor>
+				<FollowCursor intensity={40}>
+					<div
+						className={
+							'flex flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
+						}
+					>
+						<h2 className={'mb-8 text-2xl'}>Setup for free</h2>
+						<span className={'text-lg'}>
+							Answer Overflow is free to use and setup for your community to
+							start getting your Discord discussions indexed.
+						</span>
+						<LinkButton href={'/about'} className={'mx-auto mt-8'}>
+							Learn More
+						</LinkButton>
+					</div>
+				</FollowCursor>
+				<FollowCursor intensity={40}>
+					<div
+						className={
+							'flex flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
+						}
+					>
+						<h2 className={'mb-8 text-2xl'}>Open Source</h2>
+						<span className={'text-lg'}>
+							Answer Overflow is open source and MIT licensed, our goal is to
+							make finding Discord content available to everyone.
+						</span>
+						<LinkButton
+							href={'https://github.com/AnswerOverflow/AnswerOverflow/'}
+							className={'mx-auto mt-8'}
+							variant={'outline'}
+						>
+							Star on GitHub
+						</LinkButton>
+					</div>
+				</FollowCursor>
+			</div>
+			<Footer />
 		</div>
 	);
 };

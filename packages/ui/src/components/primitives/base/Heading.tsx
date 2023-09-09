@@ -3,7 +3,7 @@ import { twMerge } from 'tailwind-merge';
 export interface HeadingProps
 	extends React.PropsWithChildren<React.HTMLAttributes<HTMLHeadingElement>> {}
 
-const mutualClasses = 'text-ao-black dark:text-ao-white py-2 font-header';
+const mutualClasses = 'text-primary py-2 font-header';
 
 const H1 = (props: HeadingProps) => {
 	const { children, className, ...otherProps }: HeadingProps = props;
