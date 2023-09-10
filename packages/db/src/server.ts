@@ -138,14 +138,7 @@ export async function findManyServersById(ids: string[]) {
 	return found.map(addFlagsToServer);
 }
 
-export function upsertServer(
-	input: z.infer<typeof zServerUpsert> & {
-		create: z.infer<typeof zServerCreate> & {
-			id: string;
-			name: string;
-		};
-	},
-) {
+export function upsertServer(input: z.infer<typeof zServerUpsert>) {
 	return upsert({
 		find: () => findServerById(input.create.id),
 		create: () => createServer(input.create),

@@ -105,7 +105,7 @@ export async function _NOT_PROD_createOauthAccountEntry({
 	userId: string;
 }) {
 	await db.insert(accounts).values({
-		id: getRandomId(), // TODO: Is this okay?
+		id: getRandomId(),
 		provider: 'discord',
 		type: 'oauth',
 		providerAccountId: discordUserId,
