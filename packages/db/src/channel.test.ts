@@ -6,11 +6,6 @@ import {
 	mockServer,
 	mockThread,
 } from '@answeroverflow/db-mock';
-import {
-	addFlagsToChannel,
-	bitfieldToChannelFlags,
-	type Server,
-} from '@answeroverflow/prisma-types';
 import { getRandomId } from '@answeroverflow/utils';
 import {
 	createChannel,
@@ -30,6 +25,11 @@ import { createDiscordAccount } from './discord-account';
 import { findMessageById, upsertMessage } from './message';
 import { createServer } from './server';
 import { beforeEach } from 'vitest';
+import { Server } from './schema';
+import {
+	addFlagsToChannel,
+	bitfieldToChannelFlags,
+} from './zodSchemas/channelSchemas';
 
 let server: Server;
 beforeEach(async () => {

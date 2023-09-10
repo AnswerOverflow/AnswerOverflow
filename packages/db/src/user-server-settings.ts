@@ -1,21 +1,24 @@
 import { z } from 'zod';
+import { upsertDiscordAccount } from './discord-account';
 import {
-	prisma,
-	getDefaultUserServerSettingsWithFlags,
-	dictToBitfield,
-	type UserServerSettingsWithFlags,
+	addFlagsToUserServerSettings,
 	userServerSettingsFlags,
-	zUserServerSettingsPrismaCreate,
+	UserServerSettingsWithFlags,
+} from './utils/userServerSettingsUtils';
+import { upsert } from './utils/operations';
+import { DBError } from './utils/error';
+import { db } from './db';
+import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
+import { userServerSettings } from './schema';
+import {
 	zUserServerSettingsCreate,
 	zUserServerSettingsCreateWithDeps,
 	zUserServerSettingsMutable,
 	zUserServerSettingsUpdate,
-	zUserServerSettingsPrismaUpdate,
-} from '@answeroverflow/prisma-types';
-import { upsertDiscordAccount } from './discord-account';
-import { addFlagsToUserServerSettings } from '@answeroverflow/prisma-types';
-import { upsert } from './utils/operations';
-import { DBError } from './utils/error';
+} from './zodSchemas/userServerSettingsSchemas';
+import { getDefaultUserServerSettingsWithFlags } from './utils/serverUtils';
+import { dictToBitfield } from './utils/bitfieldUtils';
+import { createInsertSchema } from 'drizzle-zod';
 
 export const CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE =
 	'You cannot grant consent to publicly display messages with message indexing disabled. Enable messaging indexing first';
@@ -92,59 +95,53 @@ interface UserServerSettingsFindById {
 export async function findUserServerSettingsById(
 	where: UserServerSettingsFindById,
 ) {
-	const data = await prisma.userServerSettings.findUnique({
-		where: {
-			userId_serverId: {
-				userId: where.userId,
-				serverId: where.serverId,
-			},
-		},
-	});
+	const data = (await db.query.userServerSettings.findFirst({
+		where: and(
+			eq(userServerSettings.userId, where.userId),
+			eq(userServerSettings.serverId, where.serverId),
+			isNotNull(userServerSettings.bitfield),
+		),
+	})) as UserServerSettingsWithFlags | null;
+
 	return data ? addFlagsToUserServerSettings(data) : null;
 }
 
 export async function countConsentingUsersInServer(serverId: string) {
-	const res = await prisma.$queryRawUnsafe(
-		`SELECT COUNT(*) as count
-    FROM UserServerSettings
-    WHERE serverId = ${serverId} AND bitfield & 1 = 1;`,
-	);
-	const parsed = z
-		.array(
-			z.object({
-				count: z.bigint(),
-			}),
+	const res = await db
+		.select({
+			count: sql<number>`count(*)`,
+		})
+		.from(userServerSettings)
+		.where(
+			and(eq(userServerSettings.serverId, serverId), sql`bitfield & 1 = 1`),
 		)
-		.parse(res);
-	const first = parsed[0];
-	if (!first) {
+		.then((x) => x[0]);
+	if (!res) {
 		throw new Error('No count returned');
 	}
-	return first.count;
+	return BigInt(res.count);
 }
 
 export async function countConsentingUsersInManyServers(serverIds: string[]) {
 	if (serverIds.length === 0) return new Map();
-	const asSet = new Set(serverIds);
-	const res = await prisma.$queryRawUnsafe(
-		`SELECT COUNT(*) as count, serverId
-    FROM UserServerSettings
-    WHERE serverId IN (${[...asSet].join(',')}) AND bitfield & 1 = 1
-    GROUP BY serverId;`,
-	);
-	const parsed = z
-		.array(
-			z.object({
-				count: z.bigint(),
-				serverId: z.string(),
-			}),
+	const res = await db
+		.select({
+			count: sql<number>`count(*)`,
+			serverId: userServerSettings.serverId,
+		})
+		.from(userServerSettings)
+		.where(
+			and(
+				inArray(userServerSettings.serverId, Array.from(new Set(serverIds))),
+				sql`bitfield & 1 = 1`,
+			),
 		)
-		.parse(res);
-	const asMap = new Map(parsed.map((x) => [x.serverId, x.count]));
+		.groupBy(userServerSettings.serverId);
+	const asMap = new Map(res.map((x) => [x.serverId, x.count]));
 	return new Map(
 		serverIds.map((x) => {
 			const count = asMap.get(x);
-			return [x, count ?? BigInt(0)];
+			return [x, count ? BigInt(count) : BigInt(0)];
 		}),
 	);
 }
@@ -152,18 +149,20 @@ export async function countConsentingUsersInManyServers(serverIds: string[]) {
 export async function findManyUserServerSettings(
 	where: UserServerSettingsFindById[],
 ) {
-	const data = await prisma.userServerSettings.findMany({
-		where: {
-			AND: {
-				userId: {
-					in: where.map((x) => x.userId),
-				},
-				serverId: {
-					in: where.map((x) => x.serverId),
-				},
-			},
-		},
-	});
+	if (where.length === 0) return [];
+	const data = (await db.query.userServerSettings.findMany({
+		where: and(
+			inArray(
+				userServerSettings.userId,
+				where.map((x) => x.userId),
+			),
+			inArray(
+				userServerSettings.serverId,
+				where.map((x) => x.serverId),
+			),
+			isNotNull(userServerSettings.bitfield),
+		),
+	})) as UserServerSettingsWithFlags[];
 	return data.map(addFlagsToUserServerSettings);
 }
 
@@ -176,9 +175,16 @@ export async function createUserServerSettings(
 		}),
 		data,
 	);
-	const created = await prisma.userServerSettings.create({
-		data: zUserServerSettingsPrismaCreate.parse(updateData),
-	});
+	await db
+		.insert(userServerSettings)
+		.values(createInsertSchema(userServerSettings).parse(updateData));
+	const created = (await db.query.userServerSettings.findFirst({
+		where: and(
+			eq(userServerSettings.userId, data.userId),
+			isNotNull(userServerSettings.bitfield),
+		),
+	})) as UserServerSettingsWithFlags | null;
+	if (!created) throw new Error('Error creating user server settings');
 	return addFlagsToUserServerSettings(created);
 }
 
@@ -199,15 +205,22 @@ export async function updateUserServerSettings(
 		existing,
 		data,
 	);
-	const updated = await prisma.userServerSettings.update({
-		where: {
-			userId_serverId: {
-				userId: data.userId,
-				serverId: data.serverId,
-			},
-		},
-		data: zUserServerSettingsPrismaUpdate.parse(updateData),
-	});
+	await db
+		.update(userServerSettings)
+		.set(createInsertSchema(userServerSettings).parse(updateData))
+		.where(
+			and(
+				eq(userServerSettings.userId, data.userId),
+				eq(userServerSettings.serverId, data.serverId),
+			),
+		);
+	const updated = (await db.query.userServerSettings.findFirst({
+		where: and(
+			eq(userServerSettings.userId, data.userId),
+			eq(userServerSettings.serverId, data.serverId),
+		),
+	})) as UserServerSettingsWithFlags | null;
+	if (!updated) throw new Error('Error updating user server settings');
 	return addFlagsToUserServerSettings(updated);
 }
 

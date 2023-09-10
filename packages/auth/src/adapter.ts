@@ -1,42 +1,231 @@
-import { prisma, upsertDiscordAccount } from '@answeroverflow/db';
-import { PrismaAdapter } from '@next-auth/prisma-adapter';
+import { accounts, db, users, verificationTokens } from '@answeroverflow/db';
 import { getDiscordUser } from '@answeroverflow/cache';
-import type { Adapter, AdapterAccount } from 'next-auth/adapters';
+import { sessions, tenantSessions } from '@answeroverflow/db/src/schema';
+import { upsertDiscordAccount } from '@answeroverflow/db/src/discord-account';
+import { and, eq } from 'drizzle-orm';
+import type { Adapter } from '@auth/core/adapters';
+import { randomUUID } from 'node:crypto';
 
+// Custom adapter due to published drizzel adapter not matching schema
 export const extendedAdapter: Adapter = {
-	...PrismaAdapter(prisma),
-	async linkAccount(account) {
-		if (account.provider !== 'discord') {
+	async createUser(data) {
+		const id = randomUUID();
+
+		await db.insert(users).values({
+			id,
+			...data,
+		});
+
+		return await db
+			.select()
+			.from(users)
+			.where(eq(users.id, id))
+			.then((res) => ({
+				...res[0]!,
+				email: res[0]?.email ?? '',
+			}));
+	},
+	async getUser(data) {
+		const thing =
+			(await db
+				.select()
+				.from(users)
+				.where(eq(users.id, data))
+				.then((res) => res[0])) ?? null;
+
+		return thing
+			? {
+					...thing,
+					email: thing.email ?? '',
+			  }
+			: null;
+	},
+	async getUserByEmail(data) {
+		const user =
+			(await db
+				.select()
+				.from(users)
+				.where(eq(users.email, data))
+				.then((res) => res[0])) ?? null;
+		if (!user) return null;
+		return {
+			...user,
+			email: user?.email ?? '',
+		};
+	},
+	async createSession(data) {
+		await db.insert(sessions).values({
+			id: randomUUID(),
+			...data,
+		});
+		return await db
+			.select()
+			.from(sessions)
+			.where(eq(sessions.sessionToken, data.sessionToken))
+			.then((res) => res[0]!);
+	},
+	async getSessionAndUser(data) {
+		const sessionAndUser =
+			(await db
+				.select({
+					session: sessions,
+					user: users,
+				})
+				.from(sessions)
+				.where(eq(sessions.sessionToken, data))
+				.innerJoin(users, eq(users.id, sessions.userId))
+				.then((res) => res[0])) ?? null;
+		if (!sessionAndUser) return null;
+		return {
+			session: sessionAndUser.session,
+			user: {
+				...sessionAndUser?.user,
+				email: sessionAndUser?.user?.email ?? '',
+			},
+		};
+	},
+	async updateUser(data) {
+		if (!data.id) {
+			throw new Error('No user id.');
+		}
+
+		await db.update(users).set(data).where(eq(users.id, data.id));
+
+		return await db
+			.select()
+			.from(users)
+			.where(eq(users.id, data.id))
+			.then((res) => ({
+				...res[0]!,
+				email: res[0]?.email ?? '',
+			}));
+	},
+	async updateSession(data) {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { userId, sessionToken, ...rest } = data;
+
+		await db
+			.update(sessions)
+			.set(data)
+			.where(eq(sessions.sessionToken, data.sessionToken));
+		const updated = await db.query.sessions.findFirst({
+			where: eq(sessions.sessionToken, data.sessionToken),
+		});
+		if (!updated) throw new Error('Error updating session');
+		return updated;
+	},
+	async linkAccount(rawAccount) {
+		if (rawAccount.provider !== 'discord') {
 			throw Error('Unknown account provider');
 		}
-		if (!account.access_token) {
+		if (!rawAccount.access_token) {
 			throw Error('No access token');
 		}
 		const discordAccount = await getDiscordUser({
-			accessToken: account.access_token,
+			accessToken: rawAccount.access_token,
 		});
 		await upsertDiscordAccount({
 			id: discordAccount.id,
 			name: discordAccount.username,
 			avatar: discordAccount.avatar,
 		});
-		return PrismaAdapter(prisma).linkAccount!(
-			account,
-		) as unknown as AdapterAccount;
-	},
-	createSession: (data) => {
-		return prisma.session.create({ data });
-	},
-	updateSession: (data) => {
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { userId, sessionToken, ...rest } = data;
-		return prisma.session.update({
-			where: { sessionToken: data.sessionToken },
-			data: rest,
+		await db.insert(accounts).values({
+			id: randomUUID(),
+			...rawAccount,
 		});
 	},
-	deleteSession: async (sessionToken) => {
-		await prisma.tenantSession.deleteMany({ where: { sessionToken } });
-		return prisma.session.delete({ where: { sessionToken } });
+	async getUserByAccount(account) {
+		const dbAccount =
+			(await db
+				.select()
+				.from(accounts)
+				.where(
+					and(
+						eq(accounts.providerAccountId, account.providerAccountId),
+						eq(accounts.provider, account.provider),
+					),
+				)
+				.leftJoin(users, eq(accounts.userId, users.id))
+				.then((res) => res[0])) ?? null;
+
+		if (!dbAccount) {
+			return null;
+		}
+
+		return {
+			...dbAccount.User,
+			email: dbAccount.User!.email ?? '',
+			emailVerified: dbAccount.User!.emailVerified ?? null,
+			id: dbAccount.User!.id ?? null,
+		};
+	},
+	async deleteSession(sessionToken) {
+		await db
+			.delete(tenantSessions)
+			.where(eq(tenantSessions.sessionToken, sessionToken));
+		await db.delete(sessions).where(eq(sessions.sessionToken, sessionToken));
+	},
+	async createVerificationToken(token) {
+		await db.insert(verificationTokens).values(token);
+
+		return await db
+			.select()
+			.from(verificationTokens)
+			.where(eq(verificationTokens.identifier, token.identifier))
+			.then((res) => res[0]);
+	},
+	async useVerificationToken(token) {
+		try {
+			const deletedToken =
+				(await db
+					.select()
+					.from(verificationTokens)
+					.where(
+						and(
+							eq(verificationTokens.identifier, token.identifier),
+							eq(verificationTokens.token, token.token),
+						),
+					)
+					.then((res) => res[0])) ?? null;
+
+			await db
+				.delete(verificationTokens)
+				.where(
+					and(
+						eq(verificationTokens.identifier, token.identifier),
+						eq(verificationTokens.token, token.token),
+					),
+				);
+
+			return deletedToken;
+		} catch (err) {
+			throw new Error('No verification token found.');
+		}
+	},
+	async deleteUser(id) {
+		const user = await db
+			.select()
+			.from(users)
+			.where(eq(users.id, id))
+			.then((res) => res[0] ?? null);
+		if (!user) return null;
+		await db.delete(users).where(eq(users.id, id));
+
+		return {
+			...user,
+			email: user?.email ?? '',
+		};
+	},
+	async unlinkAccount(account) {
+		await db
+			.delete(accounts)
+			.where(
+				and(
+					eq(accounts.providerAccountId, account.providerAccountId),
+					eq(accounts.provider, account.provider),
+				),
+			);
+
+		return undefined;
 	},
 };

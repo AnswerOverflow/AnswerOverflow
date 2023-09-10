@@ -1,10 +1,10 @@
-import type {
-	Channel,
-	ChannelWithFlags,
-	Server,
-	ServerWithFlags,
-} from '@answeroverflow/prisma-types';
 import type { Message } from '@answeroverflow/elastic-types';
+// eslint-disable-next-line no-restricted-imports
+import type { Channel, Server } from '../../db/src/schema';
+// eslint-disable-next-line no-restricted-imports
+import { ServerWithFlags } from '../../db/src/zodSchemas/serverSchemas';
+// eslint-disable-next-line no-restricted-imports
+import { ChannelWithFlags } from '../../db/src/zodSchemas/channelSchemas';
 export const NUMBER_OF_MESSAGES_FIELD_NAME = 'Number of Messages';
 export type Snowflake = string;
 

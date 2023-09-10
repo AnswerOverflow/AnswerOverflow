@@ -12,9 +12,9 @@ export default defineConfig({
 	tsconfig: 'tsconfig.json',
 	noExternal: [
 		'@answeroverflow/elastic-types',
-		'@answeroverflow/prisma-types',
 		'@answeroverflow/db',
 		'@answeroverflow/auth',
+		'@auth/drizzle-adapter',
 		'@answeroverflow/api',
 		'@answeroverflow/analytics',
 		'@answeroverflow/discordjs-utils',

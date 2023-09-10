@@ -2,8 +2,8 @@ import { TRPCError, initTRPC } from '@trpc/server';
 import type { Context } from './context';
 import superjson from 'superjson';
 import { getDiscordUser, getUserServers } from '@answeroverflow/cache';
-import { findDiscordOauthByUserId } from '@answeroverflow/db';
 import { sharedEnvs } from '@answeroverflow/env/shared';
+import { findDiscordOauthByUserId } from '@answeroverflow/db';
 
 export interface Meta {
 	tenantAuthAccessible: boolean; // Whether this endpoint is accessible by tenant auth

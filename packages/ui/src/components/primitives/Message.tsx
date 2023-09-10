@@ -1,5 +1,5 @@
 // This component file is based off - https://www.youtube.com/watch?v=vPRdY87_SH0
-import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
+import type { MessageWithDiscordAccount } from '@answeroverflow/db';
 import discordMarkdown from 'discord-markdown';
 import Image from 'next/image';
 import React, { createContext, useContext, useState } from 'react';
@@ -24,7 +24,7 @@ import { DiscordIcon } from '~ui/components/primitives/base/Icons';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MessageContext = createContext<
 	| ({
-			message: APIMessageWithDiscordAccount;
+			message: MessageWithDiscordAccount;
 	  } & Partial<MessageProps>)
 	| null
 >(null);
@@ -237,7 +237,7 @@ export const MessageAttachments = () => {
 };
 
 export type MessageProps = {
-	message: APIMessageWithDiscordAccount;
+	message: MessageWithDiscordAccount;
 	avatar?: React.ReactNode;
 	content?: React.ReactNode;
 	authorArea?: React.ReactNode;
@@ -290,7 +290,7 @@ export const Message = ({
 	);
 };
 
-export function useCanViewMessage(message: APIMessageWithDiscordAccount) {
+export function useCanViewMessage(message: MessageWithDiscordAccount) {
 	const isUserInServer = useIsUserInServer(message.serverId);
 	if (isUserInServer === 'loading' && !message.public) return false;
 	return message.public || isUserInServer === 'in_server';

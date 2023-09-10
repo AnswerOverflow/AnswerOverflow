@@ -1,19 +1,19 @@
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import Image from 'next/image';
-import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
+import type { MessageWithDiscordAccount } from '@answeroverflow/db';
 import {
 	Avatar,
 	AvatarImage,
 	AvatarFallback,
 } from '~ui/components/primitives/ui/avatar';
 import Link from 'next/link';
-import type { ChannelPublicWithFlags } from '@answeroverflow/api';
+import type { ChannelPublicWithFlags } from '@answeroverflow/db';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { forwardRef } from 'react';
 import { getInitials } from '~ui/utils/avatars';
 import { DiscordIcon } from '~ui/components/primitives/base/Icons';
 export type MessageProps = {
-	message: APIMessageWithDiscordAccount;
+	message: MessageWithDiscordAccount;
 	thread?: ChannelPublicWithFlags;
 	blurred?: boolean;
 	notPublicTitle?: string;
@@ -60,7 +60,7 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 		function MessageAttachment({
 			attachment,
 		}: {
-			attachment: APIMessageWithDiscordAccount['attachments'][number];
+			attachment: MessageWithDiscordAccount['attachments'][number];
 		}) {
 			if (!attachment.contentType?.startsWith('image/')) return null;
 			let width = attachment.width;

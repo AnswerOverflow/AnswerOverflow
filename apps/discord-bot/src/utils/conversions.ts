@@ -11,14 +11,14 @@ import {
 	User,
 } from 'discord.js';
 import {
-	getDefaultServer,
-	type Message as AOMessage,
-	type Channel as AOChannel,
 	type Server as AOServer,
+	type Channel as AOChannel,
 	type DiscordAccount as AODiscordAccount,
-	getDefaultChannelWithFlags,
-} from '@answeroverflow/db';
+} from '@answeroverflow/db/src/schema';
+import { type Message as AOMessage } from '@answeroverflow/db';
 import type { DiscordAPIServerSchema } from '@answeroverflow/cache';
+import { getDefaultServer } from '@answeroverflow/db/src/utils/serverUtils';
+import { getDefaultChannelWithFlags } from '@answeroverflow/db/src/utils/channelUtils';
 
 export function toAOMessageReference(
 	reference: MessageReference,

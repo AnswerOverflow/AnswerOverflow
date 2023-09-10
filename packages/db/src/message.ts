@@ -1,9 +1,4 @@
 import { z } from 'zod';
-import type {
-	ChannelWithFlags,
-	ServerWithFlags,
-} from '@answeroverflow/prisma-types';
-import { zDiscordAccountPublic } from '@answeroverflow/prisma-types';
 import {
 	type Message,
 	elastic,
@@ -25,6 +20,9 @@ import { findAllThreadsByParentId, findManyChannelsById } from './channel';
 import { findManyServersById } from './server';
 import type { MessageProps } from '@answeroverflow/constants';
 import { anonymizeDiscordAccount } from './utils/anonymization';
+import { ServerWithFlags } from './zodSchemas/serverSchemas';
+import { zDiscordAccountPublic } from './zodSchemas/discordAccountSchemas';
+import { ChannelWithFlags } from './zodSchemas/channelSchemas';
 export type MessageWithDiscordAccount = z.infer<
 	typeof zMessageWithDiscordAccount
 >;
@@ -302,6 +300,7 @@ export async function upsertMessage(data: z.infer<typeof zMessage>) {
 }
 
 export async function upsertManyMessages(data: z.infer<typeof zMessage>[]) {
+	if (data.length === 0) return Promise.resolve(true);
 	const authorIds = new Set(data.map((msg) => msg.authorId));
 	const [ignoredAccounts, userServerSettings] = await Promise.all([
 		await findManyIgnoredDiscordAccountsById(Array.from(authorIds)),

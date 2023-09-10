@@ -13,7 +13,7 @@ import {
 	TextChannel,
 	User,
 } from 'discord.js';
-import type { ChannelWithFlags } from '@answeroverflow/api';
+import type { ChannelWithFlags } from '@answeroverflow/db';
 import { makeConsentButton } from './manage-account';
 import {
 	findChannelById,
