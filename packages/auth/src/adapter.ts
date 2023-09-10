@@ -6,7 +6,7 @@ import { and, eq } from 'drizzle-orm';
 import type { Adapter } from '@auth/core/adapters';
 import { randomUUID } from 'node:crypto';
 
-// Custom adapter due to original adapter not matching prisma schema
+// Custom adapter due to published drizzel adapter not matching schema
 export const extendedAdapter: Adapter = {
 	async createUser(data) {
 		const id = randomUUID();

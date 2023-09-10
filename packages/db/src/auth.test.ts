@@ -14,9 +14,6 @@ describe('Auth', () => {
 		const USER_ID = getRandomId();
 		const USER_EMAIL = `example+${getRandomId()}@example.com`;
 
-		// const user = await prisma.user.create({
-		// 	data: {},
-		// });
 		await db.insert(users).values({
 			id: USER_ID,
 			email: USER_EMAIL,

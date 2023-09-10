@@ -285,7 +285,7 @@ export async function updateManyChannels(
 
 export async function deleteChannel(id: string) {
 	await deleteManyMessagesByChannelId(id);
-	// TODO: Ugly & how does this handle large amounts of threads? (at time of writing when this was a prisma query)
+	// TODO: Ugly & how does this handle large amounts of threads?
 	const threads = await db.query.channels.findMany({
 		where: and(eq(channels.parentId, id), isNotNull(channels.id)),
 	});
