@@ -16,6 +16,7 @@ import {
 	trackDiscordEvent,
 } from '~discord-bot/utils/analytics';
 import { sharedEnvs } from '@answeroverflow/env/shared';
+import { leaveServerIfNecessary } from '~discord-bot/utils/denylist';
 
 /*
   Guild related events are tracked here, this may make sense to split into multiple files as the complexity grows.
@@ -128,6 +129,9 @@ export class SyncOnReady extends Listener {
 				},
 			});
 		}
+
+		for await (const server of guilds.values())
+			await leaveServerIfNecessary(server);
 	}
 }
 @ApplyOptions<Listener.Options>({
@@ -136,6 +140,8 @@ export class SyncOnReady extends Listener {
 })
 export class SyncOnJoin extends Listener {
 	public async run(guild: Guild) {
+		const leftServer = await leaveServerIfNecessary(guild);
+		if (leftServer) return;
 		const synced = await syncServer(guild);
 		trackDiscordEvent('Server Join', {
 			...serverWithDiscordInfoToAnalyticsData({

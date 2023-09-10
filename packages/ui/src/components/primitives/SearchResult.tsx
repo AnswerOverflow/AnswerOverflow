@@ -12,7 +12,6 @@ import { ServerInvite } from './ServerInvite';
 import { createContext, useContext } from 'react';
 import Link from 'next/link';
 import { MessageFull } from '@answeroverflow/db';
-import { Heading } from '~ui/components/primitives/base/Heading';
 import { Paragraph } from '~ui/components/primitives/base/Paragraph';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -139,9 +138,9 @@ export const LinkMessage = ({
 				content={
 					<>
 						<Link href={`/m/${message.id}`} className="block w-fit ">
-							<Heading.H4 className="pt-4 text-lg text-blue-700 decoration-2 hover:text-blue-600 hover:underline dark:text-blue-400 hover:dark:text-blue-500">
+							<Paragraph className="py-2 pt-4 font-header text-xl text-blue-700 decoration-2 hover:text-blue-600 hover:underline dark:text-blue-400 hover:dark:text-blue-500">
 								{thread?.name ?? message.content.slice(0, 20).trim() + '...'}
-							</Heading.H4>
+							</Paragraph>
 						</Link>
 						{solution ? (
 							<MessageContentWithSolution solution={{ message: solution }} />

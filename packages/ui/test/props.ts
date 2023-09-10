@@ -86,7 +86,7 @@ export function mockPublicServer(override: Partial<ServerPublic> = {}) {
 export function mockServer(override: Partial<ServerWithFlags> = {}) {
 	const data: ServerWithFlags = {
 		id: randomId(),
-		name: 'Test Server',
+		name: getRandomName(),
 		icon: null,
 		description: null,
 		vanityUrl: null,

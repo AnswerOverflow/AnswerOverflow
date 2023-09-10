@@ -102,7 +102,7 @@ export function WithTailwindTheme(props: { children: React.ReactNode }) {
 	}
 
 	const Light = () => (
-		<Flex className="bg-ao-white">
+		<Flex className="bg-background">
 			<ThemeProvider defaultTheme="light" attribute="class">
 				{props.children}
 			</ThemeProvider>
