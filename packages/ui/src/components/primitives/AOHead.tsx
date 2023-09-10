@@ -27,7 +27,7 @@ export const AOHead = ({
 	type = 'website',
 	path,
 }: HeadProps) => {
-	const { tenant, isOnTenantSite } = useTenantContext();
+	const { tenant } = useTenantContext();
 	if (tenant) {
 		server = tenant;
 	}

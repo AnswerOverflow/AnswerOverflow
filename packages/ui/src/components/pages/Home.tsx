@@ -14,6 +14,9 @@ export const Home = (props: {
 			<AOHead
 				path="/"
 				title="Answer Overflow - Search all of Discord"
+				description={
+					'A global search engine for Discord communities. Find results from indexed communities or a server to join.'
+				}
 				addPrefix={false}
 			/>
 			<div className={'w-full max-w-screen-3xl'}>
