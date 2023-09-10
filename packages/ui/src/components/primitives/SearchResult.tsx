@@ -12,7 +12,6 @@ import { ServerInvite } from './ServerInvite';
 import { createContext, useContext } from 'react';
 import Link from 'next/link';
 import { MessageFull } from '@answeroverflow/db';
-import { Heading } from '~ui/components/primitives/base/Heading';
 import { Paragraph } from '~ui/components/primitives/base/Paragraph';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
