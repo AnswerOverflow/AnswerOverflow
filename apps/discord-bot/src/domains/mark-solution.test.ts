@@ -23,7 +23,7 @@ import {
 	toAOServer,
 } from '~discord-bot/utils/conversions';
 
-import type { ChannelWithFlags } from '@answeroverflow/api';
+import type { ChannelWithFlags } from '@answeroverflow/db';
 import { makeConsentButtonData } from './manage-account';
 import {
 	mockGuild,

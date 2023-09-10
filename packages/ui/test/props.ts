@@ -1,13 +1,10 @@
-import type {
-	ChannelPublicWithFlags,
-	DiscordAccountPublic,
-	APIMessageWithDiscordAccount,
-	ServerPublic,
-	APIMessageFull,
-} from '@answeroverflow/api';
+import type { ServerPublic } from '@answeroverflow/api';
 import { getRandomName, getRandomSentence } from '@answeroverflow/utils';
-import { ServerWithFlags } from '@answeroverflow/db';
 import { ChannelType } from '~ui/utils/discord';
+import { ServerWithFlags } from '@answeroverflow/db/src/zodSchemas/serverSchemas';
+import { ChannelPublicWithFlags } from '@answeroverflow/db/src/zodSchemas/channelSchemas';
+import { DiscordAccountPublic } from '@answeroverflow/db/src/zodSchemas/discordAccountSchemas';
+import { MessageFull, MessageWithDiscordAccount } from '@answeroverflow/db';
 
 export function randomId() {
 	return Math.floor(Math.random() * 10000000).toString();
@@ -25,8 +22,8 @@ export function mockDiscordAccount(
 	return data;
 }
 
-export function mockMessageFull(override: Partial<APIMessageFull> = {}) {
-	const data: APIMessageFull = {
+export function mockMessageFull(override: Partial<MessageFull> = {}) {
+	const data: MessageFull = {
 		...mockMessageWithDiscordAccount(),
 		referencedMessage: null,
 		solutionMessages: [],
@@ -36,9 +33,9 @@ export function mockMessageFull(override: Partial<APIMessageFull> = {}) {
 }
 
 export function mockMessageWithDiscordAccount(
-	override: Partial<APIMessageWithDiscordAccount> = {},
-): APIMessageWithDiscordAccount {
-	const data: APIMessageWithDiscordAccount = {
+	override: Partial<MessageWithDiscordAccount> = {},
+): MessageWithDiscordAccount {
+	const data: MessageWithDiscordAccount = {
 		channelId: '0',
 		id: randomId(),
 		serverId: '0',

@@ -47,20 +47,16 @@
 		"clean": {
 			"cache": false
 		},
-		"db:generate": {
-			"inputs": ["prisma/schema.prisma"],
-			"cache": false
-		},
 		"db:wipe": {
-			"inputs": ["prisma/schema.prisma"],
 			"cache": false
 		},
 		"db:push": {
-			"inputs": ["prisma/schema.prisma"],
 			"cache": false
 		},
 		"db:push:staging": {
-			"inputs": ["prisma/schema.prisma"],
+			"cache": false
+		},
+		"db:introspect": {
 			"cache": false
 		}
 	},

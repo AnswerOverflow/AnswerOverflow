@@ -8,10 +8,6 @@ export type BotRouterOutput = inferRouterOutputs<BotRouter>;
 export type AppRouterOutput = inferRouterOutputs<AppRouter>;
 export type ChannelFindByIdOutput = BotRouterOutput['channels']['byId'];
 export type APISearchResult = AppRouterOutput['messages']['search'];
-export type {
-	MessageWithDiscordAccount as APIMessageWithDiscordAccount,
-	MessageFull as APIMessageFull,
-} from '@answeroverflow/db';
 import { PermissionFlagsBits } from 'discord-api-types/v10';
 import { BitField, enumToObject, ValueResolvable } from '@sapphire/bitfield';
 

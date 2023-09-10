@@ -3,7 +3,6 @@ import type {
 	DiscordAPIServerSchema,
 	getDiscordUser,
 } from '@answeroverflow/cache';
-import { prisma, elastic } from '@answeroverflow/db';
 import type { inferAsyncReturnType } from '@trpc/server';
 import type { CreateNextContextOptions } from '@trpc/server/adapters/next';
 
@@ -35,8 +34,6 @@ export const createContextInner = async (opts: CreateContextOptions) => {
 		userServers: opts.userServers,
 		caller: opts.source,
 		discordAccount: opts.discordAccount,
-		prisma,
-		elastic,
 	};
 };
 

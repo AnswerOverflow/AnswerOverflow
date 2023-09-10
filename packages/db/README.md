@@ -13,4 +13,3 @@ This is to put these fundamental permission checks as close to the database as p
 ### Core dependencies
 
 - `@answeroverflow/elastic-types`
-- `@answeroverflow/prisma-types`

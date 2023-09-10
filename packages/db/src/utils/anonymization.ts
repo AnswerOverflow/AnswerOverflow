@@ -1,10 +1,10 @@
-import { DiscordAccountPublic } from '@answeroverflow/prisma-types';
 import {
 	uniqueNamesGenerator,
 	adjectives,
 	colors,
 	animals,
 } from 'unique-names-generator';
+import { DiscordAccountPublic } from '../zodSchemas/discordAccountSchemas';
 
 export function anonymizeDiscordAccount(
 	account: DiscordAccountPublic,

@@ -1,9 +1,3 @@
-import type {
-	ChannelWithFlags,
-	DiscordAccount,
-	Server,
-	ServerWithFlags,
-} from '@answeroverflow/prisma-types';
 import {
 	mockChannelWithFlags,
 	mockDiscordAccount,
@@ -33,7 +27,10 @@ import { createDiscordAccount, deleteDiscordAccount } from './discord-account';
 import type { Message } from '@answeroverflow/elastic-types';
 import { createUserServerSettings } from './user-server-settings';
 import { getRandomId } from '@answeroverflow/utils';
-import { addFlagsToServer } from '@answeroverflow/prisma-types';
+import { DiscordAccount, Server } from './schema';
+import { ServerWithFlags } from './zodSchemas/serverSchemas';
+import { ChannelWithFlags } from './zodSchemas/channelSchemas';
+import { addFlagsToServer } from './utils/serverUtils';
 
 describe('Message Operations', () => {
 	let server: Server;

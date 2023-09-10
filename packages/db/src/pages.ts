@@ -1,10 +1,3 @@
-import {
-	addFlagsToChannel,
-	prisma,
-	zChannelPublic,
-	zServerPublic,
-} from '@answeroverflow/prisma-types';
-import { addFlagsToServer } from '@answeroverflow/prisma-types';
 import type { z } from 'zod';
 import {
 	addAuthorsToMessages,
@@ -22,6 +15,12 @@ import { findChannelById } from './channel';
 import { findServerById } from './server';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 import { ChannelType } from 'discord-api-types/v10';
+import { db } from './db';
+import { eq, or } from 'drizzle-orm';
+import { servers } from './schema';
+import { zServerPublic } from './zodSchemas/serverSchemas';
+import { addFlagsToServer } from './utils/serverUtils';
+import { addFlagsToChannel, zChannelPublic } from './zodSchemas/channelSchemas';
 
 export async function findServerWithCommunityPageData(opts: {
 	idOrVanityUrl: string;
@@ -29,11 +28,12 @@ export async function findServerWithCommunityPageData(opts: {
 }) {
 	const { idOrVanityUrl, limit } = opts;
 	// TODO: Micro optimization, if the idOrVanityUrl is a number, we can skip the vanityUrl check
-	const found = await prisma.server.findFirst({
-		where: {
-			OR: [{ id: idOrVanityUrl }, { vanityUrl: idOrVanityUrl }],
-		},
-		include: {
+	const found = await db.query.servers.findFirst({
+		where: or(
+			eq(servers.id, idOrVanityUrl),
+			eq(servers.vanityUrl, idOrVanityUrl),
+		),
+		with: {
 			channels: true,
 		},
 	});

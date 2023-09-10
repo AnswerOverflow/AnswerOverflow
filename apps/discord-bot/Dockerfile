@@ -115,8 +115,6 @@ ARG MAX_NUMBER_OF_MESSAGES_TO_COLLECT
 ENV MAX_NUMBER_OF_MESSAGES_TO_COLLECT=$MAX_NUMBER_OF_MESSAGES_TO_COLLECT
 ###
 
-
-RUN (cd packages/prisma-types/ && npx prisma generate)
 RUN pnpm turbo run build --filter=discord-bot...
 
 FROM node:lts-alpine AS runner
