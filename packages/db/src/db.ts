@@ -13,7 +13,8 @@ import * as schema from './schema';
 
 // Allow for connecting to a local database
 export const db: PlanetScaleDatabase<typeof schema> =
-	sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV === 'production'
+	sharedEnvs.DATABASE_URL.includes('psdb') ||
+	sharedEnvs.DATABASE_URL.includes('pscale_pw')
 		? psDrizzle(
 				connect({
 					url: sharedEnvs.DATABASE_URL,
