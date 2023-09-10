@@ -24,7 +24,7 @@ export const users = mysqlTable(
 	{
 		id: varchar('id', { length: 191 }).notNull(),
 		name: varchar('name', { length: 191 }),
-		email: varchar('email', { length: 191 }).notNull(),
+		email: varchar('email', { length: 191 }),
 		emailVerified: datetime('emailVerified', { mode: 'date', fsp: 3 }),
 		image: varchar('image', { length: 191 }),
 	},
