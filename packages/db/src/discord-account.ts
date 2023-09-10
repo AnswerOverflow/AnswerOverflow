@@ -13,12 +13,11 @@ import { discordAccounts, userServerSettings } from './schema';
 import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
 import {
 	zDiscordAccountCreate,
-	zDiscordAccountPrismaCreate,
-	zDiscordAccountPrismaUpdate,
 	zDiscordAccountUpdate,
 	zDiscordAccountUpsert,
 } from './zodSchemas/discordAccountSchemas';
 import { getDefaultDiscordAccount } from './utils/discordAccountUtils';
+import { createInsertSchema } from 'drizzle-zod';
 
 const zUserServerSettingsFlags = z.object({
 	userId: z.string(),
@@ -47,7 +46,7 @@ export async function createDiscordAccount(
 		throw new DBError('Account is ignored', 'IGNORED_ACCOUNT');
 	await db
 		.insert(discordAccounts)
-		.values(zDiscordAccountPrismaCreate.parse(data));
+		.values(createInsertSchema(discordAccounts).parse(data));
 	const createdAccount = await findDiscordAccountById(data.id);
 	if (!createdAccount) throw new Error('Failed to create account');
 	return createdAccount;
@@ -68,7 +67,7 @@ export async function createManyDiscordAccounts(
 		allowedToCreateAccounts.map(async (account) => {
 			await db
 				.insert(discordAccounts)
-				.values(zDiscordAccountPrismaCreate.parse(account));
+				.values(createInsertSchema(discordAccounts).parse(account));
 		}),
 	);
 	return allowedToCreateAccounts.map((i) => getDefaultDiscordAccount(i));
@@ -79,7 +78,7 @@ export async function updateDiscordAccount(
 ) {
 	await db
 		.update(discordAccounts)
-		.set(zDiscordAccountPrismaUpdate.parse(data))
+		.set(createInsertSchema(discordAccounts).parse(data))
 		.where(eq(discordAccounts.id, data.id));
 
 	const updatedDiscordAccount = await db.query.discordAccounts.findFirst({
@@ -102,7 +101,7 @@ export async function updateManyDiscordAccounts(
 		accountSet.map(async (account) => {
 			await db
 				.update(discordAccounts)
-				.set(zDiscordAccountPrismaUpdate.parse(account))
+				.set(createInsertSchema(discordAccounts).parse(account))
 				.where(eq(discordAccounts.id, account.id));
 
 			return db.query.discordAccounts.findFirst({

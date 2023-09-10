@@ -14,12 +14,11 @@ import {
 	zUserServerSettingsCreate,
 	zUserServerSettingsCreateWithDeps,
 	zUserServerSettingsMutable,
-	zUserServerSettingsPrismaCreate,
-	zUserServerSettingsPrismaUpdate,
 	zUserServerSettingsUpdate,
 } from './zodSchemas/userServerSettingsSchemas';
 import { getDefaultUserServerSettingsWithFlags } from './utils/serverUtils';
 import { dictToBitfield } from './utils/bitfieldUtils';
+import { createInsertSchema } from 'drizzle-zod';
 
 export const CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE =
 	'You cannot grant consent to publicly display messages with message indexing disabled. Enable messaging indexing first';
@@ -178,7 +177,7 @@ export async function createUserServerSettings(
 	);
 	await db
 		.insert(userServerSettings)
-		.values(zUserServerSettingsPrismaCreate.parse(updateData));
+		.values(createInsertSchema(userServerSettings).parse(updateData));
 	const created = (await db.query.userServerSettings.findFirst({
 		where: and(
 			eq(userServerSettings.userId, data.userId),
@@ -208,7 +207,7 @@ export async function updateUserServerSettings(
 	);
 	await db
 		.update(userServerSettings)
-		.set(zUserServerSettingsPrismaUpdate.parse(updateData))
+		.set(createInsertSchema(userServerSettings).parse(updateData))
 		.where(
 			and(
 				eq(userServerSettings.userId, data.userId),

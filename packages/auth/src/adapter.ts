@@ -20,7 +20,10 @@ export const extendedAdapter: Adapter = {
 			.select()
 			.from(users)
 			.where(eq(users.id, id))
-			.then((res) => res[0]!);
+			.then((res) => ({
+				...res[0]!,
+				email: res[0]?.email ?? '',
+			}));
 	},
 	async getUser(data) {
 		const thing =
@@ -30,7 +33,12 @@ export const extendedAdapter: Adapter = {
 				.where(eq(users.id, data))
 				.then((res) => res[0])) ?? null;
 
-		return thing;
+		return thing
+			? {
+					...thing,
+					email: thing.email ?? '',
+			  }
+			: null;
 	},
 	async getUserByEmail(data) {
 		const user =
@@ -39,8 +47,11 @@ export const extendedAdapter: Adapter = {
 				.from(users)
 				.where(eq(users.email, data))
 				.then((res) => res[0])) ?? null;
-
-		return user;
+		if (!user) return null;
+		return {
+			...user,
+			email: user?.email ?? '',
+		};
 	},
 	async createSession(data) {
 		await db.insert(sessions).values({
@@ -64,8 +75,14 @@ export const extendedAdapter: Adapter = {
 				.where(eq(sessions.sessionToken, data))
 				.innerJoin(users, eq(users.id, sessions.userId))
 				.then((res) => res[0])) ?? null;
-
-		return sessionAndUser;
+		if (!sessionAndUser) return null;
+		return {
+			session: sessionAndUser.session,
+			user: {
+				...sessionAndUser?.user,
+				email: sessionAndUser?.user?.email ?? '',
+			},
+		};
 	},
 	async updateUser(data) {
 		if (!data.id) {
@@ -78,7 +95,10 @@ export const extendedAdapter: Adapter = {
 			.select()
 			.from(users)
 			.where(eq(users.id, data.id))
-			.then((res) => res[0]!);
+			.then((res) => ({
+				...res[0]!,
+				email: res[0]?.email ?? '',
+			}));
 	},
 	async updateSession(data) {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -188,10 +208,13 @@ export const extendedAdapter: Adapter = {
 			.from(users)
 			.where(eq(users.id, id))
 			.then((res) => res[0] ?? null);
-
+		if (!user) return null;
 		await db.delete(users).where(eq(users.id, id));
 
-		return user;
+		return {
+			...user,
+			email: user?.email ?? '',
+		};
 	},
 	async unlinkAccount(account) {
 		await db
