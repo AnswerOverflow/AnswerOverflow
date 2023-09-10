@@ -34,10 +34,12 @@ export const zUserServerSettingsFind = zUserServerSettingsSchema.pick({
 export const zUserServerSettingsCreate = zUserServerSettingsMutable.merge(
 	zUserServerSettingsRequired,
 );
-export const zUserServerSettingsCreateWithDeps =
-	zUserServerSettingsCreate.extend({
-		user: zDiscordAccountUpsert,
-	});
+export const zUserServerSettingsCreateWithDeps = z.object({
+	...zUserServerSettingsCreate.omit({
+		userId: true,
+	}).shape,
+	user: zDiscordAccountUpsert,
+});
 
 export const zUserServerSettingsUpdate = zUserServerSettingsMutable.merge(
 	zUserServerSettingsFind,
