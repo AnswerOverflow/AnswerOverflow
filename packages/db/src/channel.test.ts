@@ -425,7 +425,7 @@ describe('Channel Operations', () => {
 			});
 			expect(chnls).toHaveLength(3);
 		});
-		it('shouldn\'t find anything if no channels before', async () => {
+		it("shouldn't find anything if no channels before", async () => {
 			const chnls = await findChannelsBeforeArchivedTimestamp({
 				serverId: server.id,
 				timestamp: BigInt(0),

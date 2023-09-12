@@ -265,7 +265,7 @@ describe('Message Operations', () => {
 		});
 	});
 	describe('Add Reference To Message', () => {
-		it('should return null if the referenced message isn\'t found', async () => {
+		it("should return null if the referenced message isn't found", async () => {
 			const msg = mockMessage(server, channel, author);
 			const created = await upsertMessage(msg);
 			const withRef = await addReferenceToMessage(created);
@@ -310,7 +310,7 @@ describe('Message Operations', () => {
 		});
 	});
 	describe('Add Authors To Message', () => {
-		it('should return null if the author isn\'t found', async () => {
+		it("should return null if the author isn't found", async () => {
 			const msg = mockMessage(server, channel, author);
 			const created = await upsertMessage(msg);
 			const withRef = await addReferenceToMessage(created);
