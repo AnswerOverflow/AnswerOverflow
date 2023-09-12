@@ -34,11 +34,13 @@ export function GetStarted(
 }
 
 export function SignInButton(props: ButtonProps) {
-	const { isOnTenantSite } = useTenantContext();
-
+	const { isOnTenantSite, tenant } = useTenantContext();
 	if (isOnTenantSite) {
 		const link = makeMainSiteLink('/api/auth/tenant/signin');
-		const redirect = typeof window !== 'undefined' ? window.location.href : '';
+		const redirect =
+			typeof window !== 'undefined'
+				? window.location.href
+				: `http://${tenant.customDomain!}`;
 
 		return (
 			<LinkButton
