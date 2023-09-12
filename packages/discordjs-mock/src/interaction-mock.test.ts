@@ -166,7 +166,7 @@ describe('Interaction Mock', () => {
 			expect(interaction.replied).toBe(true);
 		});
 	});
-	describe('String Select Interacation', () => {
+	describe('String Select Interaction', () => {
 		let message: Message;
 		let caller: GuildMember;
 		beforeEach(() => {

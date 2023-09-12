@@ -79,7 +79,7 @@ describe('Member Mock', () => {
 		expect(manager).toBeDefined();
 		expect(manager.permissions.has('ManageGuild')).toBe(true);
 	});
-	it('should create an adminstrator member', async () => {
+	it('should create an administrator member', async () => {
 		const client = await setupBot();
 		const owner = mockGuildMember({ client });
 		const admin = mockGuildMember({

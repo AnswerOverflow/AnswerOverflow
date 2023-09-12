@@ -280,7 +280,7 @@ export function EnableIndexingPage() {
 			bulletPoints={[
 				'Indexing starts from the beginning of your channel',
 				'If you have a lot of posts it may take a few days for them to all be indexed',
-				"If you're indexing a fourm channel, run this command in a thread of the forum channel",
+				"If you're indexing a forum channel, run this command in a thread of the forum channel",
 			]}
 			nextPage="enable-read-the-rules-consent"
 		/>
@@ -297,7 +297,7 @@ export function EnableForumGuidelinesConsent() {
 			command="channel-settings"
 			bulletPoints={[
 				'Users have to provide consent for their messages to be shown publicly.',
-				'Fourm guidelines consent marks users who post in the channel as consenting',
+				'Forum guidelines consent marks users who post in the channel as consenting',
 				'Users can manage their account with the /manage-account command.',
 				<AOLink
 					href="https://docs.answeroverflow.com/user-settings/displaying-messages"
