@@ -108,7 +108,7 @@ export async function checkIfCanMarkSolution(
 	try {
 		// TODO: Support headless threads
 		if (threadParent.type === ChannelType.GuildForum) {
-			// If we fail to find the message with the same id as the thread, fetch the first message in the thread as a fallbacck
+			// If we fail to find the message with the same id as the thread, fetch the first message in the thread as a fallback
 			questionMessage = await thread.messages.fetch(thread.id);
 		} else {
 			questionMessage = await threadParent.messages.fetch(thread.id);
@@ -186,7 +186,7 @@ export async function assertMessageIsUnsolved(
 	}
 
 	// 3. Look at the message history to see if it contains the solution message from the Answer Overflow Bot
-	// This is more of a backup, so we only do the cached falues
+	// This is more of a backup, so we only do the cached values
 	const existingMessage = await findMessageById(questionMessage.id);
 
 	const isAlreadySolved = existingMessage
