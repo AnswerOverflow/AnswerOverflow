@@ -126,7 +126,7 @@ describe('User Server Settings Operations', () => {
 				userId: discordAccount.id,
 			});
 		});
-		it('should fail all varaints getting user server settings by id as a different user', async () => {
+		it('should fail all variants getting user server settings by id as a different user', async () => {
 			await testAllSources({
 				async operation(source) {
 					const { ctx } = await mockAccountWithServersCallerCtx(server, source);
