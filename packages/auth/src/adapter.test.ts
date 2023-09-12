@@ -4,7 +4,7 @@ import type { zUserSchema } from '@answeroverflow/cache';
 import { db } from '@answeroverflow/db';
 import { getRandomEmail, getRandomId } from '@answeroverflow/utils';
 import { and, eq } from 'drizzle-orm';
-import { accounts, discordAccounts } from '@answeroverflow/db/src/schema';
+import { dbAccounts, dbDiscordAccounts } from '@answeroverflow/db/src/schema';
 let mockDiscordAccount: z.infer<typeof zUserSchema>;
 beforeEach(() => {
 	vitest.mock('@answeroverflow/cache', () => ({
@@ -42,7 +42,7 @@ describe('Discord Auth', () => {
 			access_token: '1234567890',
 		});
 		const user = await db.query.discordAccounts.findFirst({
-			where: eq(accounts.id, mockDiscordAccount.id),
+			where: eq(dbAccounts.id, mockDiscordAccount.id),
 		});
 		expect(user).toEqual({
 			id: mockDiscordAccount.id,
@@ -52,7 +52,7 @@ describe('Discord Auth', () => {
 	});
 	// We have first seen their account on Discord from indexing their messages, we are linking their indexed account to what was signed in with
 	it('should link to a Discord user for an existing account', async () => {
-		await db.insert(discordAccounts).values({
+		await db.insert(dbDiscordAccounts).values({
 			id: mockDiscordAccount.id,
 			name: mockDiscordAccount.username,
 			avatar: mockDiscordAccount.avatar,
@@ -69,7 +69,7 @@ describe('Discord Auth', () => {
 			access_token: '1234567890',
 		});
 		const user = await db.query.discordAccounts.findFirst({
-			where: eq(accounts.id, mockDiscordAccount.id),
+			where: eq(dbAccounts.id, mockDiscordAccount.id),
 		});
 		expect(user).toEqual({
 			id: mockDiscordAccount.id,
@@ -78,8 +78,8 @@ describe('Discord Auth', () => {
 		});
 		const account = await db.query.accounts.findFirst({
 			where: and(
-				eq(accounts.provider, 'discord'),
-				eq(accounts.providerAccountId, mockDiscordAccount.id),
+				eq(dbAccounts.provider, 'discord'),
+				eq(dbAccounts.providerAccountId, mockDiscordAccount.id),
 			),
 		});
 		expect(account?.providerAccountId).toBe(mockDiscordAccount.id);

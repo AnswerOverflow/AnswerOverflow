@@ -6,7 +6,7 @@ import {
 	findDiscordOauthByProviderAccountId,
 } from './auth';
 import { db } from './db';
-import { users } from './schema';
+import { dbUsers } from './schema';
 describe('Auth', () => {
 	it('should find a linked discord account auth by id', async () => {
 		const discordUserId = getRandomId();
@@ -14,7 +14,7 @@ describe('Auth', () => {
 		const USER_ID = getRandomId();
 		const USER_EMAIL = `example+${getRandomId()}@example.com`;
 
-		await db.insert(users).values({
+		await db.insert(dbUsers).values({
 			id: USER_ID,
 			email: USER_EMAIL,
 		});

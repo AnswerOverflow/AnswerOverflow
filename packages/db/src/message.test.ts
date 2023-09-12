@@ -14,6 +14,8 @@ import {
 	deleteManyMessagesByChannelId,
 	deleteManyMessagesByUserId,
 	deleteMessage,
+	findFullMessageById,
+	findManyMessagesWithAuthors,
 	findMessageById,
 	findMessagesByChannelId,
 	searchMessages,
@@ -24,10 +26,9 @@ import {
 import { createServer } from './server';
 import { createChannel } from './channel';
 import { createDiscordAccount, deleteDiscordAccount } from './discord-account';
-import type { Message } from '@answeroverflow/elastic-types';
 import { createUserServerSettings } from './user-server-settings';
 import { getRandomId } from '@answeroverflow/utils';
-import { DiscordAccount, Server } from './schema';
+import { BaseMessageWithRelations, DiscordAccount, Server } from './schema';
 import { ServerWithFlags } from './zodSchemas/serverSchemas';
 import { ChannelWithFlags } from './zodSchemas/channelSchemas';
 import { addFlagsToServer } from './utils/serverUtils';
@@ -85,46 +86,6 @@ describe('Message Operations', () => {
 			expect(found).toHaveLength(2);
 		});
 		test.todo('should find messages after a given message id');
-	});
-	describe('Upsert', () => {
-		it('should upsert create a message', async () => {
-			await upsertMessage(message);
-			const found = await findMessageById(message.id);
-			expect(found).not.toBeNull();
-			expect(found?.id).toBe(message.id);
-		});
-		it('should upsert update a message', async () => {
-			await upsertMessage(message);
-			const found = await findMessageById(message.id);
-			expect(found).not.toBeNull();
-			expect(found?.id).toBe(message.id);
-			expect(found?.content).toBe(message.content);
-			const updated = { ...message, content: 'updated' };
-			await upsertMessage(updated);
-			const foundUpdated = await findMessageById(message.id);
-			expect(foundUpdated).not.toBeNull();
-			expect(foundUpdated?.id).toBe(message.id);
-			expect(foundUpdated?.content).toBe(updated.content);
-		});
-		it('should fail to upsert a message with an ignored account', async () => {
-			await deleteDiscordAccount(author.id);
-			const ignoredMessage = mockMessage(server, channel, author);
-			await expect(upsertMessage(ignoredMessage)).rejects.toThrowError(
-				CANNOT_UPSERT_MESSAGE_FOR_IGNORED_ACCOUNT_MESSAGE,
-			);
-		});
-		it('should fail to upsert a message for a user with message indexing disabled', async () => {
-			await createUserServerSettings({
-				userId: author.id,
-				serverId: server.id,
-				flags: {
-					messageIndexingDisabled: true,
-				},
-			});
-			await expect(upsertMessage(message)).rejects.toThrowError(
-				CANNOT_UPSERT_MESSAGE_FOR_USER_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE,
-			);
-		});
 	});
 	describe('Update', () => {
 		it('should update a message', async () => {
@@ -478,6 +439,139 @@ describe('Message Operations', () => {
 			});
 			const firstResult = found[0];
 			expect(firstResult?.channel.messageCount).toBe(20);
+		});
+	});
+});
+
+describe('Message Ops', () => {
+	let server: Server;
+	let serverWithFlags: ServerWithFlags;
+	let channel: ChannelWithFlags;
+	let msg: BaseMessageWithRelations;
+	let author: DiscordAccount;
+	beforeEach(async () => {
+		server = mockServer();
+		serverWithFlags = addFlagsToServer(server);
+		channel = mockChannelWithFlags(server, {
+			flags: {
+				indexingEnabled: true,
+			},
+		});
+		author = mockDiscordAccount();
+		msg = mockMessage(server, channel, author);
+		await createServer(server);
+		await createChannel(channel);
+		await createDiscordAccount(author);
+	});
+	describe('Upsert Message', () => {
+		it('should upsert create a message', async () => {
+			await upsertMessage(msg);
+			const found = await findMessageById(msg.id);
+			expect(found).not.toBeNull();
+			expect(found?.id).toBe(msg.id);
+		});
+		it('should upsert update a message', async () => {
+			await upsertMessage(msg);
+			const found = await findMessageById(msg.id);
+			expect(found).not.toBeNull();
+			expect(found?.id).toBe(msg.id);
+			expect(found?.content).toBe(msg.content);
+			const updated = { ...msg, content: 'updated' };
+			await upsertMessage(updated);
+			const foundUpdated = await findMessageById(msg.id);
+			expect(foundUpdated).not.toBeNull();
+			expect(foundUpdated?.id).toBe(msg.id);
+			expect(foundUpdated?.content).toBe(updated.content);
+		});
+		it('should fail to upsert a message with an ignored account', async () => {
+			await deleteDiscordAccount(author.id);
+			const ignoredMessage = mockMessage(server, channel, author);
+			await expect(upsertMessage(ignoredMessage)).rejects.toThrowError(
+				CANNOT_UPSERT_MESSAGE_FOR_IGNORED_ACCOUNT_MESSAGE,
+			);
+		});
+		it('should fail to upsert a message for a user with message indexing disabled', async () => {
+			await createUserServerSettings({
+				userId: author.id,
+				serverId: server.id,
+				flags: {
+					messageIndexingDisabled: true,
+				},
+			});
+			await expect(upsertMessage(msg)).rejects.toThrowError(
+				CANNOT_UPSERT_MESSAGE_FOR_USER_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE,
+			);
+		});
+		describe('reactions', () => {
+			test('with reaction create', async () => {});
+			test('with reaction update', async () => {});
+		});
+		test('with attachments', () => {
+			test('with attachment create', async () => {
+				const msgWithAttachment = mockMessage(server, channel, author, {
+					attachments: [
+						{
+							id: getRandomId(),
+							messageId: msg.id,
+							contentType: 'image/png',
+							description: 'test',
+							filename: 'test.png',
+							height: 100,
+							url: 'https://example.com/test.png',
+							proxyUrl: 'https://example.com/test.png',
+							size: 100,
+							width: 100,
+						},
+					],
+				});
+				const attachment = msgWithAttachment.attachments![0]!;
+				await upsertMessage(msg);
+				const found = await findFullMessageById(msg.id);
+				expect(found?.attachments).toHaveLength(1);
+				expect(found?.attachments[0]!.id).toBe(attachment);
+			});
+			test('with attachment update', async () => {
+				const msgWithAttachment = mockMessage(server, channel, author, {
+					attachments: [
+						{
+							id: getRandomId(),
+							messageId: msg.id,
+							contentType: 'image/png',
+							description: 'test',
+							filename: 'test.png',
+							height: 100,
+							url: 'https://example.com/test.png',
+							proxyUrl: 'https://example.com/test.png',
+							size: 100,
+							width: 100,
+						},
+					],
+				});
+				const attachment = msgWithAttachment.attachments![0]!;
+				await upsertMessage(msg);
+				const updated = {
+					...msgWithAttachment,
+					attachments: [
+						{
+							...attachment,
+							description: 'updated',
+						},
+					],
+				};
+				await upsertMessage(updated);
+				const found = await findFullMessageById(msg.id);
+				expect(found?.attachments).toHaveLength(1);
+				expect(found?.attachments[0]!.description).toBe('updated');
+			});
+		});
+		test('with embeds', async () => {});
+		test('with reference', async () => {});
+		test('with solution', async () => {});
+	});
+	describe('Find Many Messages With Authors', () => {
+		test('empty array', async () => {
+			const found = await findManyMessagesWithAuthors([]);
+			expect(found).toHaveLength(0);
 		});
 	});
 });

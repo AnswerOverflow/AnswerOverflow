@@ -1,6 +1,6 @@
 import { getRandomId } from '@answeroverflow/utils';
 import { db } from './db';
-import { accounts, tenantSessions, users, type Account } from './schema';
+import { dbAccounts, dbTenantSessions, dbUsers, type Account } from './schema';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
@@ -11,11 +11,11 @@ export async function findAccountByProviderAccountId(input: {
 }) {
 	return db
 		.select()
-		.from(accounts)
+		.from(dbAccounts)
 		.where(
 			and(
-				eq(accounts.provider, input.provider),
-				eq(accounts.providerAccountId, input.providerAccountId),
+				eq(dbAccounts.provider, input.provider),
+				eq(dbAccounts.providerAccountId, input.providerAccountId),
 			),
 		)
 		.then((x) => x.at(0));
@@ -24,13 +24,13 @@ export async function findAccountByProviderAccountId(input: {
 export function findTenantSessionByToken(token: string) {
 	return db
 		.select()
-		.from(tenantSessions)
-		.where(eq(tenantSessions.id, token))
+		.from(dbTenantSessions)
+		.where(eq(dbTenantSessions.id, token))
 		.then((x) => x.at(0));
 }
 
 export function deleteTenantSessionByToken(token: string) {
-	return db.delete(tenantSessions).where(eq(tenantSessions.id, token));
+	return db.delete(dbTenantSessions).where(eq(dbTenantSessions.id, token));
 }
 
 export function findDiscordOauthByProviderAccountId(discordId: string) {
@@ -41,8 +41,11 @@ export function findDiscordOauthByProviderAccountId(discordId: string) {
 }
 
 export async function findDiscordOauthByUserId(userId: string) {
-	const account = await db.query.accounts.findFirst({
-		where: and(eq(accounts.userId, userId), eq(accounts.provider, 'discord')),
+	const account = await db.query.dbAccounts.findFirst({
+		where: and(
+			eq(dbAccounts.userId, userId),
+			eq(dbAccounts.provider, 'discord'),
+		),
 	});
 	return account ?? null;
 }
@@ -85,12 +88,12 @@ export async function updateProviderAuthToken(
 	});
 
 	await db
-		.update(accounts)
+		.update(dbAccounts)
 		.set(zAccountUpdate.parse(update))
 		.where(
 			and(
-				eq(accounts.provider, provider),
-				eq(accounts.providerAccountId, providerAccountId),
+				eq(dbAccounts.provider, provider),
+				eq(dbAccounts.providerAccountId, providerAccountId),
 			),
 		);
 }
@@ -104,7 +107,7 @@ export async function _NOT_PROD_createOauthAccountEntry({
 	discordUserId: string;
 	userId: string;
 }) {
-	await db.insert(accounts).values({
+	await db.insert(dbAccounts).values({
 		id: getRandomId(),
 		provider: 'discord',
 		type: 'oauth',
@@ -113,10 +116,10 @@ export async function _NOT_PROD_createOauthAccountEntry({
 		access_token: getRandomId(),
 	});
 
-	const inserted = await db.query.accounts.findFirst({
+	const inserted = await db.query.dbAccounts.findFirst({
 		where: and(
-			eq(accounts.provider, 'discord'),
-			eq(accounts.providerAccountId, discordUserId),
+			eq(dbAccounts.provider, 'discord'),
+			eq(dbAccounts.providerAccountId, discordUserId),
 		),
 	});
 
@@ -127,11 +130,11 @@ export async function _NOT_PROD_createOauthAccountEntry({
 
 export async function createUser(input: { id?: string; email: string }) {
 	const userId = input.id ?? randomUUID();
-	await db.insert(users).values({
+	await db.insert(dbUsers).values({
 		id: userId,
 		email: input.email,
 	});
-	return db.query.users.findFirst({
-		where: eq(users.id, userId),
+	return db.query.dbUsers.findFirst({
+		where: eq(dbUsers.id, userId),
 	});
 }

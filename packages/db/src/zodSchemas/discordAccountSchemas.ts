@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { createInsertSchema } from 'drizzle-zod';
-import { discordAccounts } from '../schema';
+import { dbDiscordAccounts } from '../schema';
 
-const zDiscordAccount = createInsertSchema(discordAccounts).required();
+const zDiscordAccount = createInsertSchema(dbDiscordAccounts).required();
 
 export const zDiscordAccountPublic = zDiscordAccount.pick({
 	id: true,

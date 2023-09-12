@@ -1,6 +1,11 @@
-import { accounts, db, users, verificationTokens } from '@answeroverflow/db';
+import {
+	dbAccounts,
+	db,
+	dbUsers,
+	dbVerificationTokens,
+} from '@answeroverflow/db';
 import { getDiscordUser } from '@answeroverflow/cache';
-import { sessions, tenantSessions } from '@answeroverflow/db/src/schema';
+import { dbSessions, dbTenantSessions } from '@answeroverflow/db/src/schema';
 import { upsertDiscordAccount } from '@answeroverflow/db/src/discord-account';
 import { and, eq } from 'drizzle-orm';
 import type { Adapter } from '@auth/core/adapters';
@@ -11,15 +16,15 @@ export const extendedAdapter: Adapter = {
 	async createUser(data) {
 		const id = randomUUID();
 
-		await db.insert(users).values({
+		await db.insert(dbUsers).values({
 			id,
 			...data,
 		});
 
 		return await db
 			.select()
-			.from(users)
-			.where(eq(users.id, id))
+			.from(dbUsers)
+			.where(eq(dbUsers.id, id))
 			.then((res) => ({
 				...res[0]!,
 				email: res[0]?.email ?? '',
@@ -29,8 +34,8 @@ export const extendedAdapter: Adapter = {
 		const thing =
 			(await db
 				.select()
-				.from(users)
-				.where(eq(users.id, data))
+				.from(dbUsers)
+				.where(eq(dbUsers.id, data))
 				.then((res) => res[0])) ?? null;
 
 		return thing
@@ -44,8 +49,8 @@ export const extendedAdapter: Adapter = {
 		const user =
 			(await db
 				.select()
-				.from(users)
-				.where(eq(users.email, data))
+				.from(dbUsers)
+				.where(eq(dbUsers.email, data))
 				.then((res) => res[0])) ?? null;
 		if (!user) return null;
 		return {
@@ -54,26 +59,26 @@ export const extendedAdapter: Adapter = {
 		};
 	},
 	async createSession(data) {
-		await db.insert(sessions).values({
+		await db.insert(dbSessions).values({
 			id: randomUUID(),
 			...data,
 		});
 		return await db
 			.select()
-			.from(sessions)
-			.where(eq(sessions.sessionToken, data.sessionToken))
+			.from(dbSessions)
+			.where(eq(dbSessions.sessionToken, data.sessionToken))
 			.then((res) => res[0]!);
 	},
 	async getSessionAndUser(data) {
 		const sessionAndUser =
 			(await db
 				.select({
-					session: sessions,
-					user: users,
+					session: dbSessions,
+					user: dbUsers,
 				})
-				.from(sessions)
-				.where(eq(sessions.sessionToken, data))
-				.innerJoin(users, eq(users.id, sessions.userId))
+				.from(dbSessions)
+				.where(eq(dbSessions.sessionToken, data))
+				.innerJoin(dbUsers, eq(dbUsers.id, dbSessions.userId))
 				.then((res) => res[0])) ?? null;
 		if (!sessionAndUser) return null;
 		return {
@@ -89,12 +94,12 @@ export const extendedAdapter: Adapter = {
 			throw new Error('No user id.');
 		}
 
-		await db.update(users).set(data).where(eq(users.id, data.id));
+		await db.update(dbUsers).set(data).where(eq(dbUsers.id, data.id));
 
 		return await db
 			.select()
-			.from(users)
-			.where(eq(users.id, data.id))
+			.from(dbUsers)
+			.where(eq(dbUsers.id, data.id))
 			.then((res) => ({
 				...res[0]!,
 				email: res[0]?.email ?? '',
@@ -105,11 +110,11 @@ export const extendedAdapter: Adapter = {
 		const { userId, sessionToken, ...rest } = data;
 
 		await db
-			.update(sessions)
+			.update(dbSessions)
 			.set(data)
-			.where(eq(sessions.sessionToken, data.sessionToken));
+			.where(eq(dbSessions.sessionToken, data.sessionToken));
 		const updated = await db.query.sessions.findFirst({
-			where: eq(sessions.sessionToken, data.sessionToken),
+			where: eq(dbSessions.sessionToken, data.sessionToken),
 		});
 		if (!updated) throw new Error('Error updating session');
 		return updated;
@@ -129,7 +134,7 @@ export const extendedAdapter: Adapter = {
 			name: discordAccount.username,
 			avatar: discordAccount.avatar,
 		});
-		await db.insert(accounts).values({
+		await db.insert(dbAccounts).values({
 			id: randomUUID(),
 			...rawAccount,
 		});
@@ -138,14 +143,14 @@ export const extendedAdapter: Adapter = {
 		const dbAccount =
 			(await db
 				.select()
-				.from(accounts)
+				.from(dbAccounts)
 				.where(
 					and(
-						eq(accounts.providerAccountId, account.providerAccountId),
-						eq(accounts.provider, account.provider),
+						eq(dbAccounts.providerAccountId, account.providerAccountId),
+						eq(dbAccounts.provider, account.provider),
 					),
 				)
-				.leftJoin(users, eq(accounts.userId, users.id))
+				.leftJoin(dbUsers, eq(dbAccounts.userId, dbUsers.id))
 				.then((res) => res[0])) ?? null;
 
 		if (!dbAccount) {
@@ -161,17 +166,19 @@ export const extendedAdapter: Adapter = {
 	},
 	async deleteSession(sessionToken) {
 		await db
-			.delete(tenantSessions)
-			.where(eq(tenantSessions.sessionToken, sessionToken));
-		await db.delete(sessions).where(eq(sessions.sessionToken, sessionToken));
+			.delete(dbTenantSessions)
+			.where(eq(dbTenantSessions.sessionToken, sessionToken));
+		await db
+			.delete(dbSessions)
+			.where(eq(dbSessions.sessionToken, sessionToken));
 	},
 	async createVerificationToken(token) {
-		await db.insert(verificationTokens).values(token);
+		await db.insert(dbVerificationTokens).values(token);
 
 		return await db
 			.select()
-			.from(verificationTokens)
-			.where(eq(verificationTokens.identifier, token.identifier))
+			.from(dbVerificationTokens)
+			.where(eq(dbVerificationTokens.identifier, token.identifier))
 			.then((res) => res[0]);
 	},
 	async useVerificationToken(token) {
@@ -179,21 +186,21 @@ export const extendedAdapter: Adapter = {
 			const deletedToken =
 				(await db
 					.select()
-					.from(verificationTokens)
+					.from(dbVerificationTokens)
 					.where(
 						and(
-							eq(verificationTokens.identifier, token.identifier),
-							eq(verificationTokens.token, token.token),
+							eq(dbVerificationTokens.identifier, token.identifier),
+							eq(dbVerificationTokens.token, token.token),
 						),
 					)
 					.then((res) => res[0])) ?? null;
 
 			await db
-				.delete(verificationTokens)
+				.delete(dbVerificationTokens)
 				.where(
 					and(
-						eq(verificationTokens.identifier, token.identifier),
-						eq(verificationTokens.token, token.token),
+						eq(dbVerificationTokens.identifier, token.identifier),
+						eq(dbVerificationTokens.token, token.token),
 					),
 				);
 
@@ -205,11 +212,11 @@ export const extendedAdapter: Adapter = {
 	async deleteUser(id) {
 		const user = await db
 			.select()
-			.from(users)
-			.where(eq(users.id, id))
+			.from(dbUsers)
+			.where(eq(dbUsers.id, id))
 			.then((res) => res[0] ?? null);
 		if (!user) return null;
-		await db.delete(users).where(eq(users.id, id));
+		await db.delete(dbUsers).where(eq(dbUsers.id, id));
 
 		return {
 			...user,
@@ -218,11 +225,11 @@ export const extendedAdapter: Adapter = {
 	},
 	async unlinkAccount(account) {
 		await db
-			.delete(accounts)
+			.delete(dbAccounts)
 			.where(
 				and(
-					eq(accounts.providerAccountId, account.providerAccountId),
-					eq(accounts.provider, account.provider),
+					eq(dbAccounts.providerAccountId, account.providerAccountId),
+					eq(dbAccounts.provider, account.provider),
 				),
 			);
 

@@ -1,34 +1,26 @@
 import { MessageType } from 'discord-api-types/v10';
-import type { Message } from './message';
+import type { BaseMessageWithRelations } from '../schema';
 
 export function getDefaultMessage(
-	override: Partial<Message> & {
+	override: Partial<BaseMessageWithRelations> & {
 		id: string;
 		channelId: string;
 		serverId: string;
 		authorId: string;
 	},
-): Message {
-	const data: Message = {
+): BaseMessageWithRelations {
+	const data: BaseMessageWithRelations = {
 		content: '',
 		attachments: [],
 		applicationId: null,
-		messageReference: null,
 		childThreadId: null,
 		parentChannelId: null,
-		solutionIds: [],
-		mentions: [],
-		mentionRoles: [],
-		mentionChannels: [],
-		mentionEveryone: false,
 		nonce: null,
 		pinned: false,
 		type: MessageType.Default,
 		flags: 0,
-		components: [],
 		embeds: [],
 		reactions: [],
-		stickerIds: [],
 		webhookId: null,
 		tts: false,
 		interactionId: null,

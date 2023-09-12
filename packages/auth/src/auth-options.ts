@@ -10,7 +10,7 @@ import { getDiscordUser, refreshAccessToken } from '@answeroverflow/cache';
 import { db } from '@answeroverflow/db';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { and, eq } from 'drizzle-orm';
-import { accounts } from '@answeroverflow/db/src/schema';
+import { dbAccounts } from '@answeroverflow/db/src/schema';
 import {
 	findAccountByProviderAccountId,
 	updateProviderAuthToken,
@@ -36,8 +36,8 @@ export const authOptions: NextAuthOptions = {
 			const updateAccountAccessToken = async () => {
 				const discord = await db.query.accounts.findFirst({
 					where: and(
-						eq(accounts.provider, 'discord'),
-						eq(accounts.userId, user.id),
+						eq(dbAccounts.provider, 'discord'),
+						eq(dbAccounts.userId, user.id),
 					),
 				});
 				if (!discord) {

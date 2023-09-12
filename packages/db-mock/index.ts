@@ -1,4 +1,3 @@
-import { type Message, getDefaultMessage } from '@answeroverflow/elastic-types';
 import { getRandomId, getRandomSentence } from '@answeroverflow/utils';
 import { ChannelType } from 'discord-api-types/v10';
 import type { PartialDeep } from 'type-fest';
@@ -18,6 +17,7 @@ import {
 } from '../db/src/utils/userServerSettingsUtils';
 import { getDefaultDiscordAccount } from '../db/src/utils/discordAccountUtils';
 import {
+	BaseMessageWithRelations,
 	Channel,
 	DiscordAccount,
 	Server,
@@ -30,6 +30,7 @@ import {
 } from '../db/src/zodSchemas/channelSchemas';
 import { dictToBitfield } from '../db/src/utils/bitfieldUtils';
 import { getDefaultChannel } from '../db/src/utils/channelUtils';
+import { getDefaultMessage } from '../db/src/utils/message-default';
 export function mockDiscordAccount(override: Partial<DiscordAccount> = {}) {
 	const account = getDefaultDiscordAccount({
 		id: getRandomId(),
@@ -43,7 +44,10 @@ export function mockMessage(
 	server: Server,
 	channel: Channel | ChannelWithFlags,
 	author: DiscordAccount,
-	override: Omit<Partial<Message>, 'authorId' | 'channelId' | 'serverId'> = {},
+	override: Omit<
+		Partial<BaseMessageWithRelations>,
+		'authorId' | 'channelId' | 'serverId'
+	> = {},
 ) {
 	return getDefaultMessage({
 		id: getRandomId(),

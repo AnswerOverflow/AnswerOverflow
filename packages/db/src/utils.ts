@@ -2,15 +2,15 @@ import { elastic } from '@answeroverflow/elastic-types';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { db } from './db';
 import {
-	accounts,
-	channels,
-	discordAccounts,
-	ignoredDiscordAccounts,
-	servers,
-	sessions,
-	tenantSessions,
-	users,
-	userServerSettings,
+	dbAccounts,
+	dbChannels,
+	dbDiscordAccounts,
+	dbIgnoredDiscordAccounts,
+	dbServers,
+	dbSessions,
+	dbTenantSessions,
+	dbUsers,
+	dbUserServerSettings,
 } from './schema';
 import { isNotNull } from 'drizzle-orm';
 export async function clearDatabase() {
@@ -27,16 +27,16 @@ export async function clearDatabase() {
 
 	console.log('Wiping database...');
 
-	await db.delete(userServerSettings);
-	await db.delete(channels).where(isNotNull(channels.parentId));
-	await db.delete(tenantSessions);
-	await db.delete(channels);
-	await db.delete(servers);
-	await db.delete(accounts);
-	await db.delete(discordAccounts);
-	await db.delete(sessions);
-	await db.delete(users);
-	await db.delete(ignoredDiscordAccounts);
+	await db.delete(dbUserServerSettings);
+	await db.delete(dbChannels).where(isNotNull(dbChannels.parentId));
+	await db.delete(dbTenantSessions);
+	await db.delete(dbChannels);
+	await db.delete(dbServers);
+	await db.delete(dbAccounts);
+	await db.delete(dbDiscordAccounts);
+	await db.delete(dbSessions);
+	await db.delete(dbUsers);
+	await db.delete(dbIgnoredDiscordAccounts);
 	await elastic.createMessagesIndex();
 	console.log('Database wiped successfully');
 	// quit the process

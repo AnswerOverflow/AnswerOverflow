@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ChannelType } from 'discord-api-types/v10';
-import { channels } from '../schema';
+import { dbChannels } from '../schema';
 import { zServerUpsert } from './serverSchemas';
 import { bitfieldToDict } from '../utils/bitfieldUtils';
 import { createInsertSchema } from 'drizzle-zod';
@@ -37,7 +37,7 @@ export const zChannelBitfieldFlags = z.object({
 	forumGuidelinesConsentEnabled: z.boolean(),
 });
 
-const zChannelSchema = createInsertSchema(channels)
+const zChannelSchema = createInsertSchema(dbChannels)
 	.required()
 	.extend({
 		flags: zChannelBitfieldFlags,

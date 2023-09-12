@@ -1,5 +1,5 @@
 import { createInsertSchema } from 'drizzle-zod';
-import { servers } from '../schema';
+import { dbServers } from '../schema';
 import { z } from 'zod';
 import { toDict } from '../utils/bitfieldUtils';
 
@@ -19,7 +19,7 @@ export const zUniqueArray = z
 
 export const zServerSettingsFlags = toZObject(...serverSettingsFlags);
 
-export const zServerSchema = createInsertSchema(servers).required().extend({
+export const zServerSchema = createInsertSchema(dbServers).required().extend({
 	flags: zServerSettingsFlags,
 });
 
