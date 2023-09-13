@@ -8,11 +8,13 @@ export function getDefaultMessage(
 		serverId: string;
 		authorId: string;
 	},
-): BaseMessageWithRelations {
-	const data: BaseMessageWithRelations = {
+): NonNullable<BaseMessageWithRelations> {
+	const data: NonNullable<BaseMessageWithRelations> = {
 		content: '',
 		attachments: [],
 		applicationId: null,
+		referenceId: null,
+		questionId: null,
 		childThreadId: null,
 		parentChannelId: null,
 		nonce: null,

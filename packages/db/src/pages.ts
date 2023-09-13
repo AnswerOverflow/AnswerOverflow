@@ -1,20 +1,15 @@
 import type { z } from 'zod';
 import {
-	addAuthorsToMessages,
-	addReferencesToMessages,
 	findAllChannelQuestions,
 	findMessageById,
-	findMessagesByChannelId,
-	type MessageFull,
-} from './message';
-import {
+	findMessagesByChannelIdWithDiscordAccounts,
 	getParentChannelOfMessage,
 	getThreadIdOfMessage,
-} from '@answeroverflow/elastic-types';
+	type MessageFull,
+} from './message';
 import { findChannelById } from './channel';
 import { findServerById } from './server';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
-import { ChannelType } from 'discord-api-types/v10';
 import { db } from './db';
 import { eq, or } from 'drizzle-orm';
 import { dbServers } from './schema';
@@ -133,10 +128,10 @@ export async function findMessageResultPage(messageId: string) {
 		: findChannelById(targetMessage.channelId);
 
 	const messageFetch = threadId
-		? findMessagesByChannelId({
+		? findMessagesByChannelIdWithDiscordAccounts({
 				channelId: threadId,
 		  })
-		: findMessagesByChannelId({
+		: findMessagesByChannelIdWithDiscordAccounts({
 				channelId: parentId,
 				after: targetMessage.id,
 				limit: NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
@@ -154,20 +149,11 @@ export async function findMessageResultPage(messageId: string) {
 	if (!channel || !channel.flags.indexingEnabled) {
 		return null;
 	}
-	const messagesWithRefs = await addReferencesToMessages(
-		threadId && rootMessage && channel.type !== ChannelType.GuildForum
-			? [rootMessage, ...messages]
-			: messages,
-	);
-	const messagesWithDiscordAccounts = await addAuthorsToMessages(
-		messagesWithRefs,
-		[server],
-	);
 
 	return {
 		server,
 		channel,
-		messages: messagesWithDiscordAccounts,
+		messages,
 		rootMessage,
 		thread,
 	};

@@ -15,7 +15,6 @@ import {
 } from './user-server-settings';
 import { findAllThreadsByParentId } from './channel';
 import { ServerWithFlags } from './zodSchemas/serverSchemas';
-import { ChannelWithFlags } from './zodSchemas/channelSchemas';
 import { db } from './db';
 import {
 	BaseMessage,
@@ -28,13 +27,12 @@ import {
 	dbReactions,
 	dbEmojis,
 } from './schema';
-import { and, eq, gt, inArray, sql } from 'drizzle-orm';
+import { and, eq, gt, inArray, or, sql } from 'drizzle-orm';
 import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
 import { addFlagsToServer } from './utils/serverUtils';
 import { getRandomId, pick } from '@answeroverflow/utils';
 import { zDiscordAccountPublic } from './zodSchemas/discordAccountSchemas';
 import { anonymizeDiscordAccount } from './utils/anonymization';
-import { MessageSearchOptions } from '@answeroverflow/elastic-types';
 import { createInsertSchema } from 'drizzle-zod';
 
 export const zFindMessagesByChannelId = z.object({
@@ -57,7 +55,7 @@ type MessageWithAuthorServerSettings = BaseMessage & {
 export function applyPublicFlagsToMessages<
 	T extends MessageWithAuthorServerSettings & {
 		solutions: MessageWithAuthorServerSettings[];
-		reference?: MessageWithAuthorServerSettings;
+		reference: MessageWithAuthorServerSettings | null;
 		server: Server;
 	},
 >(messages: T[]) {
@@ -124,13 +122,20 @@ export function applyPublicFlagsToMessages<
 		};
 	});
 }
-export type MessageWithDiscordAccount = Awaited<
-	ReturnType<typeof applyPublicFlagsToMessages>
->[number]['reference'];
 
-export type MessageFull = Awaited<
-	ReturnType<typeof applyPublicFlagsToMessages>
->[number];
+export type MessageWithDiscordAccount = NonNullable<
+	Awaited<ReturnType<typeof applyPublicFlagsToMessages>>[number]['reference']
+>;
+
+export type MessageFull = NonNullable<
+	Awaited<ReturnType<typeof applyPublicFlagsToMessages>>[number]
+>;
+
+export function isMessageFull(
+	message: MessageFull | MessageWithDiscordAccount,
+): message is MessageFull {
+	return 'solutions' in message;
+}
 
 export async function findMessageById(id: string) {
 	return db
@@ -146,25 +151,56 @@ export async function findFullMessageById(id: string) {
 		with: {
 			author: true,
 			solutions: true,
-			reactions: true,
+			reactions: {
+				with: {
+					emoji: true,
+				},
+			},
+			reference: true,
 			attachments: true,
 		},
 	});
 }
 
-export async function findMessagesByChannelId(
+export async function findMessagesByChannelIdWithDiscordAccounts(
 	input: z.infer<typeof zFindMessagesByChannelId>,
 ) {
-	return db
-		.select()
-		.from(dbMessages)
-		.where(
-			and(
+	return db.query.dbMessages
+		.findMany({
+			where: and(
 				eq(dbMessages.channelId, input.channelId),
 				input.after ? gt(dbMessages.id, input.after) : undefined,
 			),
-		)
-		.limit(input.limit ?? 100);
+			with: {
+				author: {
+					with: {
+						userServerSettings: true,
+					},
+				},
+				reactions: true,
+				solutions: {
+					with: {
+						author: {
+							with: {
+								userServerSettings: true,
+							},
+						},
+					},
+				},
+				reference: {
+					with: {
+						author: {
+							with: {
+								userServerSettings: true,
+							},
+						},
+					},
+				},
+				server: true,
+			},
+			limit: input.limit ?? 100,
+		})
+		.then(applyPublicFlagsToMessages);
 }
 
 export async function findManyMessages(ids: string[]) {
@@ -243,25 +279,32 @@ export async function findAllChannelQuestions(input: {
 		.filter(Boolean);
 }
 
-export async function upsertMessage(data: BaseMessageWithRelations) {
-	const [ignoredAccount, userServerSettings] = await Promise.all([
-		findIgnoredDiscordAccountById(data.authorId),
-		findUserServerSettingsById({
-			userId: data.authorId,
-			serverId: data.serverId,
-		}),
-	]);
-	if (ignoredAccount) {
-		throw new DBError(
-			CANNOT_UPSERT_MESSAGE_FOR_IGNORED_ACCOUNT_MESSAGE,
-			'IGNORED_ACCOUNT',
-		);
-	}
-	if (userServerSettings?.flags.messageIndexingDisabled) {
-		throw new DBError(
-			CANNOT_UPSERT_MESSAGE_FOR_USER_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE,
-			'MESSAGE_INDEXING_DISABLED',
-		);
+export async function upsertMessage(
+	data: BaseMessageWithRelations,
+	opts?: {
+		ignoreChecks?: boolean;
+	},
+) {
+	if (!opts?.ignoreChecks) {
+		const [ignoredAccount, userServerSettings] = await Promise.all([
+			findIgnoredDiscordAccountById(data.authorId),
+			findUserServerSettingsById({
+				userId: data.authorId,
+				serverId: data.serverId,
+			}),
+		]);
+		if (ignoredAccount) {
+			throw new DBError(
+				CANNOT_UPSERT_MESSAGE_FOR_IGNORED_ACCOUNT_MESSAGE,
+				'IGNORED_ACCOUNT',
+			);
+		}
+		if (userServerSettings?.flags.messageIndexingDisabled) {
+			throw new DBError(
+				CANNOT_UPSERT_MESSAGE_FOR_USER_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE,
+				'MESSAGE_INDEXING_DISABLED',
+			);
+		}
 	}
 	const { attachments, reactions, ...msg } = data;
 	const parsed = {
@@ -273,8 +316,8 @@ export async function upsertMessage(data: BaseMessageWithRelations) {
 		set: parsed,
 	});
 	const updateAttachments = async () => {
-		if (!attachments) return;
 		await db.delete(dbAttachments).where(eq(dbAttachments.messageId, msg.id));
+		if (!attachments) return;
 		await Promise.all(
 			attachments.map((a) => {
 				const p = createInsertSchema(dbAttachments).parse(a);
@@ -285,11 +328,12 @@ export async function upsertMessage(data: BaseMessageWithRelations) {
 		);
 	};
 	const updateReactions = async () => {
-		if (!reactions) return;
 		await db.delete(dbReactions).where(eq(dbReactions.messageId, msg.id));
+		if (!reactions) return;
+		const emojis = new Set(reactions.map((r) => r.emoji));
 		await Promise.all(
-			reactions.map((r) => {
-				const p = createInsertSchema(dbReactions).parse(r.emoji);
+			[...emojis].map((r) => {
+				const p = createInsertSchema(dbEmojis).parse(r);
 				return db.insert(dbEmojis).values(p).onDuplicateKeyUpdate({
 					set: p,
 				});
@@ -332,25 +376,14 @@ export async function upsertManyMessages(data: BaseMessageWithRelations[]) {
 			!userServerSettingsLookup.get(`${msg.authorId}-${msg.serverId}`)?.flags
 				.messageIndexingDisabled,
 	);
-	const existingMessages = await findManyMessages(
-		filteredMessages.map((msg) => msg.id),
-	);
-	const existingMessageIds = new Set(existingMessages.map((msg) => msg.id));
-	const messagesToInsert = filteredMessages.filter(
-		(msg) => !existingMessageIds.has(msg.id),
-	);
-	const messagesToUpdate = filteredMessages.filter((msg) =>
-		existingMessageIds.has(msg.id),
-	);
 
-	// TODO: Get this all down to 1 call to the db
-
-	await Promise.all([
-		db.insert(dbMessages).values(messagesToInsert),
-		...messagesToUpdate.map((msg) =>
-			db.update(dbMessages).set(msg).where(eq(dbMessages.id, msg.id)),
+	await Promise.all(
+		filteredMessages.map((msg) =>
+			upsertMessage(msg, {
+				ignoreChecks: true,
+			}),
 		),
-	]);
+	);
 	return filteredMessages;
 }
 
@@ -378,11 +411,30 @@ export async function findLatestMessageInChannel(channelId: string) {
 }
 
 export async function bulkFindLatestMessageInChannel(channelIds: string[]) {
-	return elastic.batchFindLatestMessageInChannel(channelIds);
+	return db
+		.select({
+			latestMessageId: sql<string>`MAX(${dbMessages.id})`,
+			channelId: dbMessages.channelId,
+		})
+		.from(dbMessages)
+		.where(inArray(dbMessages.channelId, channelIds))
+		.groupBy(dbMessages.channelId);
 }
 
 export function findLatestMessageInChannelAndThreads(channelId: string) {
-	return elastic.findLatestMessageInChannelAndThreads(channelId);
+	return db
+		.select({
+			max: sql<string>`MAX(${dbMessages.id})`,
+		})
+		.from(dbMessages)
+		.where(
+			or(
+				eq(dbMessages.channelId, channelId),
+				eq(dbMessages.parentChannelId, channelId),
+			),
+		)
+		.limit(1)
+		.then((x) => x?.at(0)?.max);
 }
 
 export async function deleteManyMessagesByUserId(userId: string) {
@@ -397,38 +449,6 @@ export function getDiscordURLForMessage(message: BaseMessage) {
 	return `https://discord.com/channels/${serverId}/${channelId}/${messageId}`;
 }
 
-export type SearchResult = {
-	message: MessageFull;
-	score: number;
-	channel: ChannelWithFlags;
-	server: ServerWithFlags;
-	thread?: ChannelWithFlags;
-};
-
-export async function searchMessages(opts: MessageSearchOptions) {
-	// return messagesWithAuthors
-	// 	.map((m): SearchResult | null => {
-	// 		const channel = channelLookup.get(m.parentChannelId ?? m.channelId);
-	// 		const server = serverLookup.get(m.serverId);
-	// 		const thread = m.parentChannelId
-	// 			? channelLookup.get(m.channelId)
-	// 			: undefined;
-	// 		if (!channel || !server) return null;
-	// 		if (!channel.flags.indexingEnabled) {
-	// 			return null;
-	// 		}
-	// 		return {
-	// 			message: m,
-	// 			channel,
-	// 			score: resultsLookup.get(m.id)!._score ?? 0,
-	// 			server: server,
-	// 			thread,
-	// 		};
-	// 	})
-	// 	.filter((res) => res != null && res.server.kickedTime === null)
-	// 	.sort((a, b) => b!.score - a!.score) as SearchResult[];
-}
-
 export async function getTotalNumberOfMessages() {
 	return db
 		.select({
@@ -436,4 +456,18 @@ export async function getTotalNumberOfMessages() {
 		})
 		.from(dbMessages)
 		.then((x) => x?.at(0)?.count ?? 2000000);
+}
+
+export function getThreadIdOfMessage(message: BaseMessage): string | null {
+	if (message.childThreadId) {
+		return message.childThreadId;
+	}
+	if (message.parentChannelId) {
+		return message.channelId;
+	}
+	return null;
+}
+
+export function getParentChannelOfMessage(message: BaseMessage): string | null {
+	return message.parentChannelId ?? message.channelId;
 }

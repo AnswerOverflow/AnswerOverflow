@@ -282,7 +282,7 @@ describe('Channel Operations', () => {
 			await upsertMessage(msg);
 			await deleteChannel(chnl.id);
 			const found = await findMessageById(msg.id);
-			expect(found).toBeNull();
+			expect(found).toBeUndefined();
 		});
 		it('should delete all of a channels threads messages on parent channel delete', async () => {
 			const chnl = mockChannel(server);
@@ -295,7 +295,7 @@ describe('Channel Operations', () => {
 			await upsertMessage(msg);
 			await deleteChannel(chnl.id);
 			const found = await findMessageById(msg.id);
-			expect(found).toBeNull();
+			expect(found).toBeUndefined();
 		});
 	});
 	describe('Create channel with deps', () => {

@@ -405,6 +405,9 @@ export const dbMessages = mysqlTable(
 		parentChannelId: varchar('parentChannelId', { length: 191 }),
 		childThreadId: varchar('childThreadId', { length: 191 }),
 
+		questionId: varchar('questionId', { length: 191 }),
+		referenceId: varchar('referenceId', { length: 191 }),
+
 		applicationId: varchar('applicationId', { length: 191 }),
 		interactionId: varchar('interactionId', { length: 191 }),
 		webhookId: varchar('webhookId', { length: 191 }),
@@ -436,19 +439,24 @@ export const dbMessages = mysqlTable(
 
 export const messageRelations = relations(dbMessages, ({ one, many }) => ({
 	attachments: many(dbAttachments),
-	reactions: many(dbReactions),
+	reactions: many(dbReactions, {
+		relationName: 'message-reactions',
+	}),
 	author: one(dbDiscordAccounts, {
 		fields: [dbMessages.authorId],
 		references: [dbDiscordAccounts.id],
 	}),
 	reference: one(dbMessages, {
-		fields: [dbMessages.id],
+		fields: [dbMessages.referenceId],
 		references: [dbMessages.id],
 	}),
-	solutions: many(dbMessages),
+	solutions: many(dbMessages, {
+		relationName: 'solutions-questions',
+	}),
 	question: one(dbMessages, {
-		fields: [dbMessages.id],
+		fields: [dbMessages.questionId],
 		references: [dbMessages.id],
+		relationName: 'solutions-questions',
 	}),
 	server: one(dbServers, {
 		fields: [dbMessages.serverId],
@@ -476,6 +484,7 @@ export const reactionsRelations = relations(dbReactions, ({ one }) => ({
 	message: one(dbMessages, {
 		fields: [dbReactions.messageId],
 		references: [dbMessages.id],
+		relationName: 'message-reactions',
 	}),
 }));
 

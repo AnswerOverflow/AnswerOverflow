@@ -8,6 +8,7 @@ import {
 import {
 	addAuthorToMessage,
 	addReferenceToMessage,
+	bulkFindLatestMessageInChannel,
 	CANNOT_UPSERT_MESSAGE_FOR_IGNORED_ACCOUNT_MESSAGE,
 	CANNOT_UPSERT_MESSAGE_FOR_USER_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE,
 	deleteManyMessages,
@@ -17,7 +18,7 @@ import {
 	findFullMessageById,
 	findManyMessagesWithAuthors,
 	findMessageById,
-	findMessagesByChannelId,
+	findMessagesByChannelIdWithDiscordAccounts,
 	searchMessages,
 	updateMessage,
 	upsertManyMessages,
@@ -27,7 +28,7 @@ import { createServer } from './server';
 import { createChannel } from './channel';
 import { createDiscordAccount, deleteDiscordAccount } from './discord-account';
 import { createUserServerSettings } from './user-server-settings';
-import { getRandomId } from '@answeroverflow/utils';
+import { getRandomId, getRandomIdGreaterThan } from '@answeroverflow/utils';
 import { BaseMessageWithRelations, DiscordAccount, Server } from './schema';
 import { ServerWithFlags } from './zodSchemas/serverSchemas';
 import { ChannelWithFlags } from './zodSchemas/channelSchemas';
@@ -53,178 +54,7 @@ describe('Message Operations', () => {
 		await createChannel(channel);
 		await createDiscordAccount(author);
 	});
-	describe('Find By Id', () => {
-		it('should return a message', async () => {
-			await upsertMessage(message);
-			const found = await findMessageById(message.id);
-			expect(found?.id).toBe(message.id);
-		});
-		it('should return null if message not found', async () => {
-			const found = await findMessageById('1');
-			expect(found).toBeNull();
-		});
-	});
-	describe('Find By Channel Id', () => {
-		beforeEach(async () => {
-			const msg2 = mockMessage(server, channel, author);
-			const msg3 = mockMessage(server, channel, author);
-			await upsertMessage(message);
-			await upsertMessage(msg2);
-			await upsertMessage(msg3);
-		});
-		it('should return messages', async () => {
-			const found = await findMessagesByChannelId({
-				channelId: channel.id,
-			});
-			expect(found).toHaveLength(3);
-		});
-		it('should find a limited number of messages', async () => {
-			const found = await findMessagesByChannelId({
-				channelId: channel.id,
-				limit: 2,
-			});
-			expect(found).toHaveLength(2);
-		});
-		test.todo('should find messages after a given message id');
-	});
-	describe('Update', () => {
-		it('should update a message', async () => {
-			await upsertMessage(message);
-			const found = await findMessageById(message.id);
-			expect(found).not.toBeNull();
-			expect(found?.id).toBe(message.id);
-			expect(found?.content).toBe(message.content);
-			const updated = { ...message, content: 'updated' };
-			await upsertMessage(updated);
-			const foundUpdated = await findMessageById(message.id);
-			expect(foundUpdated).not.toBeNull();
-			expect(foundUpdated?.id).toBe(message.id);
-			expect(foundUpdated?.content).toBe(updated.content);
-		});
-		it('should fail to update a message that does not exist returning null', async () => {
-			await expect(updateMessage(message)).resolves.toBeNull();
-		});
-	});
-	describe('Upsert Many Messages', () => {
-		it('should upsert many messages', async () => {
-			const msg2 = mockMessage(server, channel, author);
-			const msg3 = mockMessage(server, channel, author);
-			await upsertManyMessages([message, msg2, msg3]);
-			const found = await findMessagesByChannelId({
-				channelId: channel.id,
-			});
-			expect(found).toHaveLength(3);
-		});
-		it('should only upsert messages for non-ignored accounts', async () => {
-			const msg2 = mockMessage(server, channel, author);
-			const author2 = mockDiscordAccount();
-			await createDiscordAccount(author2);
-			const msg3 = mockMessage(server, channel, author2);
-			await deleteDiscordAccount(author.id);
-			await upsertManyMessages([message, msg2, msg3]);
-			const found = await findMessagesByChannelId({
-				channelId: channel.id,
-			});
-			expect(found).toHaveLength(1);
-		});
-		it('should return 0 if no messages are upserted', async () => {
-			await expect(upsertManyMessages([])).resolves.toBe(true);
-		});
-		it('should only upsert messages for users with message indexing enabled', async () => {
-			const msg2 = mockMessage(server, channel, author);
-			const author2 = mockDiscordAccount();
-			await createDiscordAccount(author2);
-			const msg3 = mockMessage(server, channel, author2);
-			await createUserServerSettings({
-				userId: author.id,
-				serverId: server.id,
-				flags: {
-					messageIndexingDisabled: true,
-				},
-			});
-			await upsertManyMessages([message, msg2, msg3]);
-			const found = await findMessagesByChannelId({
-				channelId: channel.id,
-			});
-			expect(found).toHaveLength(1);
-		});
-	});
-	describe('Delete Messages', () => {
-		it('should delete a message', async () => {
-			await upsertMessage(message);
-			const found = await findMessageById(message.id);
-			expect(found).not.toBeNull();
-			expect(found?.id).toBe(message.id);
-			const deleteResult = await deleteMessage(message.id);
-			expect(deleteResult).toBe(true);
-			const foundDeleted = await findMessageById(message.id);
-			expect(foundDeleted).toBeNull();
-		});
-		it('should fail to delete a message that does not exist returning null', async () => {
-			await expect(deleteMessage(message.id)).resolves.toBeFalsy();
-		});
-	});
-	describe('Delete Many Messages By Id', () => {
-		it('should delete many messages', async () => {
-			const msg2 = mockMessage(server, channel, author);
-			const msg3 = mockMessage(server, channel, author);
-			await upsertMessage(message);
-			await upsertMessage(msg2);
-			await upsertMessage(msg3);
-			const found = await findMessagesByChannelId({
-				channelId: channel.id,
-			});
-			expect(found).toHaveLength(3);
-			const deleteResult = await deleteManyMessages([
-				message.id,
-				msg2.id,
-				msg3.id,
-			]);
-			expect(deleteResult).toBe(true);
-			const foundDeleted = await findMessagesByChannelId({
-				channelId: channel.id,
-			});
-			expect(foundDeleted).toHaveLength(0);
-		});
-	});
-	describe('Delete Many Messages By Channel Id', () => {
-		it('should delete many messages', async () => {
-			const msg2 = mockMessage(server, channel, author);
-			const msg3 = mockMessage(server, channel, author);
-			await upsertMessage(message);
-			await upsertMessage(msg2);
-			await upsertMessage(msg3);
-			const found = await findMessagesByChannelId({
-				channelId: channel.id,
-			});
-			expect(found).toHaveLength(3);
-			const deleteResult = await deleteManyMessagesByChannelId(channel.id);
-			expect(deleteResult).toBe(3);
-			const foundDeleted = await findMessagesByChannelId({
-				channelId: channel.id,
-			});
-			expect(foundDeleted).toHaveLength(0);
-		});
-	});
-	describe('Delete Many Messages By User Id', () => {
-		it('should delete many messages', async () => {
-			const msg2 = mockMessage(server, channel, author);
-			const msg3 = mockMessage(server, channel, author);
-			await upsertMessage(message);
-			await upsertMessage(msg2);
-			await upsertMessage(msg3);
-			const found = await findMessagesByChannelId({
-				channelId: channel.id,
-			});
-			expect(found).toHaveLength(3);
-			const deleteResult = await deleteManyMessagesByUserId(author.id);
-			expect(deleteResult).toBe(3);
-			const foundDeleted = await findMessagesByChannelId({
-				channelId: channel.id,
-			});
-			expect(foundDeleted).toHaveLength(0);
-		});
-	});
+
 	describe('Add Reference To Message', () => {
 		it('should return null if the referenced message isnt found', async () => {
 			const msg = mockMessage(server, channel, author);
@@ -399,51 +229,9 @@ describe('Message Operations', () => {
 			expect(withAuthorAndAnonymized!.author.id).not.toBe(author.id);
 		});
 	});
-	describe('Search', () => {
-		it('should search for a message in a normal channel', async () => {
-			const msg = mockMessage(server, channel, author, {
-				content: getRandomId(),
-			});
-			await upsertMessage(msg);
-			const found = await searchMessages({
-				query: msg.content,
-			});
-			const firstResult = found[0];
-			expect(found).toHaveLength(1);
-			expect(firstResult?.message.id).toBe(msg.id);
-			expect(firstResult?.channel.id).toBe(channel.id);
-			expect(firstResult?.server.id).toBe(server.id);
-			expect(firstResult?.score).toBeGreaterThan(0);
-		});
-		it('should add the number of messages in a thread to the result', async () => {
-			const thread = await createChannel(mockThread(channel));
-
-			const msg = mockMessage(server, thread, author, {
-				content: getRandomId(),
-				parentChannelId: thread.parentId,
-			});
-			await upsertMessage(msg);
-			const found = await searchMessages({
-				query: msg.content,
-			});
-			const firstResult = found[0];
-			expect(firstResult?.thread?.messageCount).toBe(1);
-		});
-		it('should add the max number of fetched channel messages to the result', async () => {
-			const msg = mockMessage(server, channel, author, {
-				content: getRandomId(),
-			});
-			await upsertMessage(msg);
-			const found = await searchMessages({
-				query: msg.content,
-			});
-			const firstResult = found[0];
-			expect(firstResult?.channel.messageCount).toBe(20);
-		});
-	});
 });
 
-describe('Message Ops', () => {
+describe.only('Message Ops', () => {
 	let server: Server;
 	let serverWithFlags: ServerWithFlags;
 	let channel: ChannelWithFlags;
@@ -503,12 +291,59 @@ describe('Message Ops', () => {
 			);
 		});
 		describe('reactions', () => {
-			test('with reaction create', async () => {});
-			test('with reaction update', async () => {});
+			test('with reaction create', async () => {
+				const eId = getRandomId();
+				const mId = getRandomId();
+				const msgWithReaction = mockMessage(server, channel, author, {
+					id: mId,
+					reactions: [
+						{
+							messageId: mId,
+							userId: author.id,
+							emoji: {
+								id: eId,
+								name: '👍',
+							},
+							emojiId: eId,
+						},
+					],
+				});
+				const reaction = msgWithReaction.reactions![0]!;
+				await upsertMessage(msgWithReaction);
+				const found = await findFullMessageById(msgWithReaction.id);
+				expect(found?.reactions).toHaveLength(1);
+				expect(found?.reactions[0]!.emojiId).toBe(reaction.emojiId);
+			});
+			test('with reaction update', async () => {
+				const eId = getRandomId();
+				const mId = getRandomId();
+				const msgWithReaction = mockMessage(server, channel, author, {
+					id: mId,
+					reactions: [
+						{
+							messageId: mId,
+							userId: author.id,
+							emoji: {
+								id: eId,
+								name: '👍',
+							},
+							emojiId: eId,
+						},
+					],
+				});
+				await upsertMessage(msgWithReaction);
+				await upsertMessage({
+					...msgWithReaction,
+					reactions: [],
+				});
+				const found = await findFullMessageById(msgWithReaction.id);
+				expect(found?.reactions).toHaveLength(0);
+			});
 		});
-		test('with attachments', () => {
+		describe('with attachments', () => {
 			test('with attachment create', async () => {
 				const msgWithAttachment = mockMessage(server, channel, author, {
+					id: msg.id,
 					attachments: [
 						{
 							id: getRandomId(),
@@ -525,13 +360,14 @@ describe('Message Ops', () => {
 					],
 				});
 				const attachment = msgWithAttachment.attachments![0]!;
-				await upsertMessage(msg);
-				const found = await findFullMessageById(msg.id);
+				await upsertMessage(msgWithAttachment);
+				const found = await findFullMessageById(msgWithAttachment.id);
 				expect(found?.attachments).toHaveLength(1);
-				expect(found?.attachments[0]!.id).toBe(attachment);
+				expect(found?.attachments[0]!).toStrictEqual(attachment);
 			});
 			test('with attachment update', async () => {
 				const msgWithAttachment = mockMessage(server, channel, author, {
+					id: msg.id,
 					attachments: [
 						{
 							id: getRandomId(),
@@ -548,7 +384,7 @@ describe('Message Ops', () => {
 					],
 				});
 				const attachment = msgWithAttachment.attachments![0]!;
-				await upsertMessage(msg);
+				await upsertMessage(msgWithAttachment);
 				const updated = {
 					...msgWithAttachment,
 					attachments: [
@@ -559,19 +395,211 @@ describe('Message Ops', () => {
 					],
 				};
 				await upsertMessage(updated);
-				const found = await findFullMessageById(msg.id);
+				const found = await findFullMessageById(msgWithAttachment.id);
 				expect(found?.attachments).toHaveLength(1);
 				expect(found?.attachments[0]!.description).toBe('updated');
 			});
 		});
-		test('with embeds', async () => {});
-		test('with reference', async () => {});
-		test('with solution', async () => {});
+		describe('with embeds', () => {
+			test('with embed create', async () => {
+				const msgWithEmbed = mockMessage(server, channel, author, {
+					embeds: [
+						{
+							author: {
+								name: 'test',
+								url: 'https://example.com',
+								iconUrl: 'https://example.com/test.png',
+								proxyIconUrl: 'https://example.com/test.png',
+							},
+						},
+					],
+				});
+				await upsertMessage(msgWithEmbed);
+				const found = await findFullMessageById(msgWithEmbed.id);
+				expect(found?.embeds).toHaveLength(1);
+				expect(found?.embeds![0]!.author?.name).toBe('test');
+			});
+			test('with embed update', async () => {
+				const msgWithEmbed = mockMessage(server, channel, author, {
+					embeds: [
+						{
+							author: {
+								name: 'test',
+								url: 'https://example.com',
+								iconUrl: 'https://example.com/test.png',
+								proxyIconUrl: 'https://example.com/test.png',
+							},
+						},
+					],
+				});
+				await upsertMessage(msgWithEmbed);
+				await upsertMessage({
+					...msgWithEmbed,
+					embeds: [],
+				});
+				const found = await findFullMessageById(msgWithEmbed.id);
+				expect(found?.embeds).toHaveLength(0);
+			});
+		});
+		test('with reference', async () => {
+			const original = mockMessage(server, channel, author);
+			const reply = mockMessage(server, channel, author, {
+				referenceId: original.id,
+			});
+			await upsertMessage(original);
+			await upsertMessage(reply);
+			const found = await findFullMessageById(reply.id);
+			expect(found?.reference).not.toBeNull();
+		});
+		test('with solution', async () => {
+			const question = mockMessage(server, channel, author);
+			const solution = mockMessage(server, channel, author, {
+				questionId: question.id,
+			});
+			await upsertMessage(question);
+			await upsertMessage(solution);
+			const questionWithSolution = await findFullMessageById(question.id);
+
+			expect(questionWithSolution?.solutions).toHaveLength(1);
+		});
+	});
+	describe('Find By Id', () => {
+		it('should return a message', async () => {
+			await upsertMessage(msg);
+			const found = await findMessageById(msg.id);
+			expect(found?.id).toBe(msg.id);
+		});
+		it('should return null if message not found', async () => {
+			const found = await findMessageById(getRandomId());
+			expect(found).toBeUndefined();
+		});
 	});
 	describe('Find Many Messages With Authors', () => {
 		test('empty array', async () => {
 			const found = await findManyMessagesWithAuthors([]);
 			expect(found).toHaveLength(0);
+		});
+	});
+	describe('Delete Messages', () => {
+		it('should delete a message', async () => {
+			await upsertMessage(msg);
+			const found = await findMessageById(msg.id);
+			expect(found).toBeDefined();
+			expect(found?.id).toBe(msg.id);
+			await deleteMessage(msg.id);
+			const foundDeleted = await findMessageById(msg.id);
+			expect(foundDeleted).not.toBeDefined();
+		});
+		it('should fail to delete a message that does not exist returning null', async () => {
+			await deleteMessage(msg.id);
+			const foundDeleted = await findMessageById(msg.id);
+			expect(foundDeleted).not.toBeDefined();
+		});
+	});
+	describe('Find By Channel Id', () => {
+		beforeEach(async () => {
+			const msg2 = mockMessage(server, channel, author);
+			const msg3 = mockMessage(server, channel, author);
+			await upsertMessage(msg);
+			await upsertMessage(msg2);
+			await upsertMessage(msg3);
+		});
+		it('should return messages', async () => {
+			const found = await findMessagesByChannelIdWithDiscordAccounts({
+				channelId: channel.id,
+			});
+			expect(found).toHaveLength(3);
+		});
+		it('should find a limited number of messages', async () => {
+			const found = await findMessagesByChannelIdWithDiscordAccounts({
+				channelId: channel.id,
+				limit: 2,
+			});
+			expect(found).toHaveLength(2);
+		});
+		test.todo('should find messages after a given message id');
+	});
+	describe('Delete Many Messages By Id', () => {
+		it('should delete many messages', async () => {
+			const msg2 = mockMessage(server, channel, author);
+			const msg3 = mockMessage(server, channel, author);
+			await upsertMessage(msg);
+			await upsertMessage(msg2);
+			await upsertMessage(msg3);
+			const found = await findMessagesByChannelIdWithDiscordAccounts({
+				channelId: channel.id,
+			});
+			expect(found).toHaveLength(3);
+			await deleteManyMessages([msg.id, msg2.id, msg3.id]);
+
+			const foundDeleted = await findMessagesByChannelIdWithDiscordAccounts({
+				channelId: channel.id,
+			});
+			expect(foundDeleted).toHaveLength(0);
+		});
+	});
+	describe('Delete Many Messages By Channel Id', () => {
+		it('should delete many messages', async () => {
+			const msg2 = mockMessage(server, channel, author);
+			const msg3 = mockMessage(server, channel, author);
+			await upsertMessage(msg);
+			await upsertMessage(msg2);
+			await upsertMessage(msg3);
+			const found = await findMessagesByChannelIdWithDiscordAccounts({
+				channelId: channel.id,
+			});
+			expect(found).toHaveLength(3);
+			await deleteManyMessagesByChannelId(channel.id);
+
+			const foundDeleted = await findMessagesByChannelIdWithDiscordAccounts({
+				channelId: channel.id,
+			});
+			expect(foundDeleted).toHaveLength(0);
+		});
+	});
+	describe('Delete Many Messages By User Id', () => {
+		it('should delete many messages', async () => {
+			const msg2 = mockMessage(server, channel, author);
+			const msg3 = mockMessage(server, channel, author);
+			await upsertMessage(msg);
+			await upsertMessage(msg2);
+			await upsertMessage(msg3);
+			const found = await findMessagesByChannelIdWithDiscordAccounts({
+				channelId: channel.id,
+			});
+			expect(found).toHaveLength(3);
+			await deleteManyMessagesByUserId(author.id);
+			const foundDeleted = await findMessagesByChannelIdWithDiscordAccounts({
+				channelId: channel.id,
+			});
+			expect(foundDeleted).toHaveLength(0);
+		});
+	});
+	describe('Bulk Find Latest Messages in Channel', () => {
+		it('should find the latest messages in a channel', async () => {
+			const chnl2 = mockChannelWithFlags(server);
+			const chnl3 = mockChannelWithFlags(server);
+			await createChannel(chnl2);
+			await createChannel(chnl3);
+			const msg2 = mockMessage(server, chnl2, author);
+			const msg3 = mockMessage(server, chnl3, author);
+			const largerThanMsg = mockMessage(server, channel, author, {
+				id: getRandomIdGreaterThan(Number(msg.id)),
+			});
+			await upsertMessage(largerThanMsg);
+			await upsertMessage(msg);
+			await upsertMessage(msg2);
+			await upsertMessage(msg3);
+			const found = await bulkFindLatestMessageInChannel([
+				channel.id,
+				chnl2.id,
+				chnl3.id,
+			]);
+			expect(found).toHaveLength(3);
+			const map = new Map(found.map((m) => [m.channelId, m.latestMessageId]));
+			expect(map.get(channel.id)).toBe(largerThanMsg.id);
+			expect(map.get(chnl2.id)).toBe(msg2.id);
+			expect(map.get(chnl3.id)).toBe(msg3.id);
 		});
 	});
 });

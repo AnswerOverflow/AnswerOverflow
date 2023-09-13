@@ -122,7 +122,8 @@ describe('User Server Settings', () => {
 		it('should delete user server messages when setting indexing enabled to false', async () => {
 			const chnl = mockChannel(server);
 			await createChannel(chnl);
-			const msg = await upsertMessage(mockMessage(server, chnl, account));
+			const msg = mockMessage(server, chnl, account);
+			await upsertMessage(msg);
 			const createdMsg = await findMessageById(msg.id);
 			expect(createdMsg).not.toBe(null);
 			const updated = await updateUserServerSettings(
@@ -144,7 +145,7 @@ describe('User Server Settings', () => {
 			expect(found!.flags.canPubliclyDisplayMessages).toBe(false);
 			expect(found!.flags.messageIndexingDisabled).toBe(true);
 			const deletedMsg = await findMessageById(msg.id);
-			expect(deletedMsg).toBe(null);
+			expect(deletedMsg).not.toBeDefined();
 		});
 		it('should throw an error when trying to grant consent when indexing is disabled', async () => {
 			await updateUserServerSettings(
