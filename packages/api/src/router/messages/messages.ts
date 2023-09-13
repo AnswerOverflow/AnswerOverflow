@@ -4,7 +4,6 @@ import {
 	findChannelsBeforeArchivedTimestamp,
 	findManyMessagesWithAuthors,
 	findMessageResultPage,
-	searchMessages,
 } from '@answeroverflow/db';
 import {
 	canUserViewPrivateMessage,
@@ -13,6 +12,7 @@ import {
 	stripPrivateServerData,
 } from '~api/utils/permissions';
 import { TRPCError } from '@trpc/server';
+import { searchMessages } from '@answeroverflow/search/src';
 
 export const messagesRouter = router({
 	/*
@@ -51,7 +51,6 @@ export const messagesRouter = router({
 			);
 			const recommendedPosts = await findManyMessagesWithAuthors(
 				recommendedChannels.map((c) => c.id),
-				[server],
 			).then((posts) =>
 				posts
 					.filter((p) => p.public)

@@ -1,4 +1,3 @@
-import { elastic } from '@answeroverflow/elastic-types';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { db } from './db';
 import {
@@ -37,7 +36,6 @@ export async function clearDatabase() {
 	await db.delete(dbSessions);
 	await db.delete(dbUsers);
 	await db.delete(dbIgnoredDiscordAccounts);
-	await elastic.createMessagesIndex();
 	console.log('Database wiped successfully');
 	// quit the process
 	// eslint-disable-next-line n/no-process-exit

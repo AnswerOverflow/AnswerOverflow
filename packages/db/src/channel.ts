@@ -3,7 +3,6 @@ import { upsertServer } from './server';
 import { upsert, upsertMany } from './utils/operations';
 import { deleteManyMessagesByChannelId } from './message';
 import { omit } from '@answeroverflow/utils';
-import { elastic } from '@answeroverflow/elastic-types';
 import { DBError } from './utils/error';
 import { ChannelType } from 'discord-api-types/v10';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';

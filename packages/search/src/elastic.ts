@@ -1,6 +1,8 @@
 import { Client, type ClientOptions } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { sharedEnvs } from '@answeroverflow/env/shared';
+import { elasticMessageIndexProperties } from './schema';
+import { findManyMessagesWithAuthors } from '@answeroverflow/db';
 declare global {
 	// eslint-disable-next-line no-var, no-unused-vars
 	var elastic: Elastic | undefined;
@@ -104,16 +106,10 @@ export class Elastic extends Client {
 				});
 			}
 		}
-		const result = await this.search<Message>({
+		const result = await this.search({
 			index: this.messagesIndex,
 			query: q,
 			track_scores: true,
-			// TODO: Enable highlighting
-			// highlight: {
-			//   fields: {
-			//     content: {},
-			//   },
-			// },
 			size: limit ?? 100,
 			sort: '_score',
 		});
@@ -121,8 +117,8 @@ export class Elastic extends Client {
 		return result.hits.hits
 			.filter((hit) => hit._source)
 			.map((hit) => ({
-				...hit,
-				_source: hit._source!,
+				id: hit._id,
+				score: hit._score,
 			}));
 	}
 

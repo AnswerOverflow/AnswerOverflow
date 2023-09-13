@@ -20,7 +20,7 @@
 		"@answeroverflow/auth": "workspace:^",
 		"@answeroverflow/constants": "workspace:^",
 		"@answeroverflow/db": "workspace:^",
-		"@answeroverflow/elastic-types": "workspace:^",
+		"@answeroverflow/search": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/hooks": "workspace:^",
 		"@answeroverflow/payments": "workspace:^",

@@ -1,5 +1,5 @@
 {
-	"name": "@answeroverflow/elastic-types",
+	"name": "@answeroverflow/search",
 	"version": "0.1.0",
 	"main": "./index.ts",
 	"types": "./index.ts",
@@ -20,6 +20,7 @@
 	"dependencies": {
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
+    "@answeroverflow/db": "workspace:^",
 		"@elastic/elasticsearch": "^8.9.0",
 		"discord-api-types": "^0.37.54",
 		"dotenv-cra": "^3.0.3",

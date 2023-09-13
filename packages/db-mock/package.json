@@ -14,7 +14,6 @@
 		"lint:fix": "eslint . \"*.ts*\" --fix"
 	},
 	"dependencies": {
-		"@answeroverflow/elastic-types": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
 		"@sapphire/bitfield": "^1.2.0",

@@ -26,6 +26,7 @@
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/payments": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
+    "@answeroverflow/search": "workspace:^",
 		"@sapphire/bitfield": "^1.2.0",
 		"@trpc/client": "^10.37.1",
 		"@trpc/server": "^10.37.1",

@@ -21,7 +21,6 @@
 	"dependencies": {
 		"@answeroverflow/constants": "workspace:^",
 		"@answeroverflow/db-mock": "workspace:^",
-		"@answeroverflow/elastic-types": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
 		"@auth/core": "^0.12.0",
