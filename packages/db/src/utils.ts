@@ -24,7 +24,7 @@ export async function clearDatabase() {
 		throw new Error('clearDatabase can only be used in local environment');
 	}
 
-	console.log('Wiping database...');
+	console.log('Wiping MySQL database...');
 
 	await db.delete(dbUserServerSettings);
 	await db.delete(dbChannels).where(isNotNull(dbChannels.parentId));
@@ -36,7 +36,7 @@ export async function clearDatabase() {
 	await db.delete(dbSessions);
 	await db.delete(dbUsers);
 	await db.delete(dbIgnoredDiscordAccounts);
-	console.log('Database wiped successfully');
+	console.log('MySQL Database wiped successfully');
 	// quit the process
 	// eslint-disable-next-line n/no-process-exit
 	process.exit(0);

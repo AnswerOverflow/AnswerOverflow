@@ -312,7 +312,7 @@ export const dbAttachments = mysqlTable(
 	{
 		id: varchar('id', { length: 191 }).notNull(),
 		messageId: varchar('messageId', { length: 191 }).notNull(),
-		contentType: varchar('contentType', { length: 191 }).notNull(),
+		contentType: varchar('contentType', { length: 191 }),
 		filename: varchar('filename', { length: 191 }).notNull(),
 		proxyUrl: varchar('proxyUrl', { length: 191 }).notNull(),
 		url: varchar('url', { length: 191 }).notNull(),
@@ -413,7 +413,7 @@ export const dbMessages = mysqlTable(
 		webhookId: varchar('webhookId', { length: 191 }),
 
 		// TODO: Optimize not using 2 bools, use bitfield in future
-		content: varchar('content', { length: 191 }),
+		content: varchar('content', { length: 191 }).notNull(),
 		flags: int('flags'),
 		type: int('type'),
 		pinned: boolean('pinned'),
@@ -505,3 +505,5 @@ export type BaseMessageWithRelations = BaseMessage & {
 	attachments?: (typeof dbAttachments.$inferSelect)[];
 	reactions?: ReactionWithRelations[];
 };
+
+export type Attachment = typeof dbAttachments.$inferSelect;

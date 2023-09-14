@@ -1,7 +1,5 @@
 import {
 	type AnyThreadChannel,
-	ButtonStyle,
-	ComponentType,
 	Guild,
 	type GuildBasedChannel,
 	GuildChannel,
@@ -14,23 +12,12 @@ import {
 	type Server as AOServer,
 	type Channel as AOChannel,
 	type DiscordAccount as AODiscordAccount,
+	ReactionWithRelations,
 } from '@answeroverflow/db/src/schema';
-import { type Message as AOMessage } from '@answeroverflow/db';
+import { type BaseMessageWithRelations as AOMessage } from '@answeroverflow/db';
 import type { DiscordAPIServerSchema } from '@answeroverflow/cache';
 import { getDefaultServer } from '@answeroverflow/db/src/utils/serverUtils';
 import { getDefaultChannelWithFlags } from '@answeroverflow/db/src/utils/channelUtils';
-
-export function toAOMessageReference(
-	reference: MessageReference,
-): AOMessage['messageReference'] {
-	if (!reference.messageId) return null;
-	if (!reference.guildId) return null;
-	return {
-		channelId: reference.channelId,
-		messageId: reference.messageId,
-		serverId: reference.guildId,
-	};
-}
 
 export function toDiscordAPIServer(
 	member: GuildMember,
@@ -46,100 +33,29 @@ export function toDiscordAPIServer(
 	};
 }
 
-function toAOComponent(
-	component: Message['components'][number]['components'][number],
-): AOMessage['components'][number]['components'][number] {
-	if (component.type === ComponentType.Button) {
-		if (component.style === ButtonStyle.Link) {
-			return {
-				type: component.type,
-				label: component.label ?? undefined,
-				url: component.url ?? '',
-				disabled: component.disabled ?? false,
-				style: component.style,
-				emoji: component.emoji ?? undefined,
-			};
-		} else {
-			return {
-				type: component.type,
-				label: component.label ?? undefined,
-				customId: component.customId ?? '',
-				disabled: component.disabled ?? false,
-				style: component.style,
-				emoji: component.emoji ?? undefined,
-			};
-		}
-	}
-	if (component.type === ComponentType.StringSelect) {
-		return {
-			type: component.type,
-			customId: component.customId ?? '',
-			disabled: component.disabled ?? false,
-			options: component.options ?? [],
-			placeholder: component.placeholder ?? undefined,
-			minValues: component.minValues ?? 1,
-			maxValues: component.maxValues ?? 1,
-		};
-	}
-	if (component.type === ComponentType.RoleSelect) {
-		return {
-			type: component.type,
-			customId: component.customId ?? '',
-			disabled: component.disabled ?? false,
-			placeholder: component.placeholder ?? undefined,
-			minValues: component.minValues ?? 1,
-			maxValues: component.maxValues ?? 1,
-		};
-	}
-	if (component.type === ComponentType.UserSelect) {
-		return {
-			type: component.type,
-			customId: component.customId ?? '',
-			disabled: component.disabled ?? false,
-			placeholder: component.placeholder ?? undefined,
-			minValues: component.minValues ?? 1,
-			maxValues: component.maxValues ?? 1,
-		};
-	}
-	if (component.type === ComponentType.ChannelSelect) {
-		return {
-			type: component.type,
-			customId: component.customId ?? '',
-			disabled: component.disabled ?? false,
-			placeholder: component.placeholder ?? undefined,
-			minValues: component.minValues ?? 1,
-			maxValues: component.maxValues ?? 1,
-		};
-	}
-	if (component.type === ComponentType.MentionableSelect) {
-		return {
-			type: component.type,
-			customId: component.customId ?? '',
-			disabled: component.disabled ?? false,
-			placeholder: component.placeholder ?? undefined,
-			minValues: component.minValues ?? 1,
-			maxValues: component.maxValues ?? 1,
-		};
-	}
-	throw new Error('Unknown component type');
-}
-
-// ActionRow<MessageActionRowComponent>[]
-function toAOActionRow(
-	components: Message['components'],
-): AOMessage['components'] {
-	return components.map((row) => ({
-		type: row.type,
-		components: row.components.map(toAOComponent),
-	}));
-}
-
 // top 10 ugliest functions in this codebase
 export async function toAOMessage(message: Message): Promise<AOMessage> {
 	if (message.partial) {
 		message = await message.fetch();
 	}
 	if (!message.guildId) throw new Error('Message is not in a guild');
+	const reactions: ReactionWithRelations[] = [];
+	for (const reaction of message.reactions.cache.values()) {
+		const users = reaction.users.cache;
+		for (const user of users.values()) {
+			const emoji = reaction.emoji;
+			if (!emoji || !emoji.name || !emoji.id) continue;
+			reactions.push({
+				userId: user.id,
+				messageId: message.id,
+				emojiId: emoji.id,
+				emoji: {
+					id: emoji.id,
+					name: emoji.name,
+				},
+			});
+		}
+	}
 
 	const convertedMessage: AOMessage = {
 		id: message.id,
@@ -152,13 +68,14 @@ export async function toAOMessage(message: Message): Promise<AOMessage> {
 			return {
 				id: attachment.id,
 				url: attachment.url,
+				messageId: message.id,
 				proxyUrl: attachment.proxyURL,
 				filename: attachment.name ?? '',
 				size: attachment.size,
 				height: attachment.height,
 				width: attachment.width,
-				contentType: attachment.contentType ?? undefined,
-				description: attachment.description ?? '',
+				contentType: attachment.contentType,
+				description: attachment.description,
 				ephemeral: attachment.ephemeral ?? false,
 			};
 		}),
@@ -166,12 +83,7 @@ export async function toAOMessage(message: Message): Promise<AOMessage> {
 		flags: message.flags.bitfield,
 		nonce: message.nonce ? message.nonce.toString() : null,
 		tts: message.tts,
-		reactions: message.reactions.cache.map((reaction) => ({
-			emojiId: reaction.emoji.id,
-			emojiName: reaction.emoji.name,
-			reactorIds: reaction.users.cache.map((user) => user.id),
-		})),
-		components: toAOActionRow(message.components),
+		reactions,
 		embeds: message.embeds.map((embed) => ({
 			title: embed.title ?? undefined,
 			description: embed.description ?? undefined,
@@ -231,20 +143,13 @@ export async function toAOMessage(message: Message): Promise<AOMessage> {
 			})),
 		})),
 		interactionId: message.interaction?.id ?? null,
-		mentionChannels: message.mentions.channels.map((channel) => channel.id),
-		mentionEveryone: message.mentions.everyone,
-		mentionRoles: message.mentions.roles.map((role) => role.id),
-		mentions: message.mentions.users.map((user) => user.id),
 		pinned: message.pinned,
-		stickerIds: message.stickers.map((sticker) => sticker.id),
 		type: message.type,
 		webhookId: message.webhookId,
-		messageReference: message.reference
-			? toAOMessageReference(message.reference)
-			: null,
+		referenceId: message.reference?.messageId ?? null,
 		authorId: message.author.id,
 		serverId: message.guildId,
-		solutionIds: [],
+		questionId: null,
 		childThreadId: message.thread?.id ?? null,
 	};
 	return convertedMessage;

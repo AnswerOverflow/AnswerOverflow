@@ -39,7 +39,8 @@ const config = {
 	],
 	experimental: {
 		outputFileTracingIgnores: ['**swc/core**'],
-	},
+    serverComponentsExternalPackages: ["mysql2"],
+  },
 	images: {
 		domains: [
 			'cdn.discordapp.com',

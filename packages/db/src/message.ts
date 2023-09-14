@@ -26,6 +26,7 @@ import {
 	dbAttachments,
 	dbReactions,
 	dbEmojis,
+	Attachment,
 } from './schema';
 import { and, eq, gt, inArray, or, sql } from 'drizzle-orm';
 import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
@@ -50,6 +51,7 @@ type MessageWithAuthorServerSettings = BaseMessage & {
 	author: DiscordAccount & {
 		userServerSettings: UserServerSettings[];
 	};
+	attachments: Attachment[];
 };
 
 export function applyPublicFlagsToMessages<
@@ -98,8 +100,19 @@ export function applyPublicFlagsToMessages<
 				'id',
 				'channelId',
 				'serverId',
+				'attachments',
 				'parentChannelId',
 				'embeds',
+				'channelId',
+				'childThreadId',
+				'attachments',
+				'embeds',
+				'flags',
+				'interactionId',
+				'nonce',
+				'parentChannelId',
+				'pinned',
+				'questionId',
 			),
 			author:
 				serverWithFlags.flags.anonymizeMessages && !isMessagePublic
@@ -177,7 +190,7 @@ export async function findMessagesByChannelIdWithDiscordAccounts(
 						userServerSettings: true,
 					},
 				},
-				reactions: true,
+				attachments: true,
 				solutions: {
 					with: {
 						author: {
@@ -185,6 +198,7 @@ export async function findMessagesByChannelIdWithDiscordAccounts(
 								userServerSettings: true,
 							},
 						},
+						attachments: true,
 					},
 				},
 				reference: {
@@ -194,6 +208,7 @@ export async function findMessagesByChannelIdWithDiscordAccounts(
 								userServerSettings: true,
 							},
 						},
+						attachments: true,
 					},
 				},
 				server: true,
@@ -219,7 +234,7 @@ export async function findManyMessagesWithAuthors(ids: string[]) {
 						userServerSettings: true,
 					},
 				},
-				reactions: true,
+				attachments: true,
 				solutions: {
 					with: {
 						author: {
@@ -227,6 +242,7 @@ export async function findManyMessagesWithAuthors(ids: string[]) {
 								userServerSettings: true,
 							},
 						},
+						attachments: true,
 					},
 				},
 				reference: {
@@ -236,6 +252,7 @@ export async function findManyMessagesWithAuthors(ids: string[]) {
 								userServerSettings: true,
 							},
 						},
+						attachments: true,
 					},
 				},
 				server: true,
@@ -403,28 +420,35 @@ export async function findLatestMessageInChannel(channelId: string) {
 	return db
 		.select({
 			// TODO: Check if this actually works, also cast to bigint
-			max: sql<string>`MAX(${dbMessages.id})`,
+			max: sql<bigint>`MAX(CAST(${dbMessages.id} AS SIGNED))`,
 		})
 		.from(dbMessages)
 		.where(eq(dbMessages.channelId, channelId))
-		.limit(1);
+		.limit(1)
+		.then((x) => x?.at(0)?.max?.toString());
 }
 
 export async function bulkFindLatestMessageInChannel(channelIds: string[]) {
 	return db
 		.select({
-			latestMessageId: sql<string>`MAX(${dbMessages.id})`,
+			latestMessageId: sql<bigint>`MAX(CAST(${dbMessages.id} AS SIGNED))`,
 			channelId: dbMessages.channelId,
 		})
 		.from(dbMessages)
 		.where(inArray(dbMessages.channelId, channelIds))
-		.groupBy(dbMessages.channelId);
+		.groupBy(dbMessages.channelId)
+		.then((x) =>
+			x.map((y) => ({
+				channelId: y.channelId,
+				latestMessageId: y.latestMessageId?.toString(),
+			})),
+		);
 }
 
-export function findLatestMessageInChannelAndThreads(channelId: string) {
+export async function findLatestMessageInChannelAndThreads(channelId: string) {
 	return db
 		.select({
-			max: sql<string>`MAX(${dbMessages.id})`,
+			max: sql<bigint>`MAX(CAST(${dbMessages.id} AS SIGNED))`,
 		})
 		.from(dbMessages)
 		.where(
@@ -434,7 +458,7 @@ export function findLatestMessageInChannelAndThreads(channelId: string) {
 			),
 		)
 		.limit(1)
-		.then((x) => x?.at(0)?.max);
+		.then((x) => x?.at(0)?.max?.toString());
 }
 
 export async function deleteManyMessagesByUserId(userId: string) {

@@ -3,11 +3,8 @@ import {
 	mockDiscordAccount,
 	mockMessage,
 	mockServer,
-	mockThread,
 } from '@answeroverflow/db-mock';
 import {
-	addAuthorToMessage,
-	addReferenceToMessage,
 	bulkFindLatestMessageInChannel,
 	CANNOT_UPSERT_MESSAGE_FOR_IGNORED_ACCOUNT_MESSAGE,
 	CANNOT_UPSERT_MESSAGE_FOR_USER_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE,
@@ -16,12 +13,10 @@ import {
 	deleteManyMessagesByUserId,
 	deleteMessage,
 	findFullMessageById,
+	findLatestMessageInChannel,
 	findManyMessagesWithAuthors,
 	findMessageById,
 	findMessagesByChannelIdWithDiscordAccounts,
-	searchMessages,
-	updateMessage,
-	upsertManyMessages,
 	upsertMessage,
 } from './message';
 import { createServer } from './server';
@@ -30,216 +25,15 @@ import { createDiscordAccount, deleteDiscordAccount } from './discord-account';
 import { createUserServerSettings } from './user-server-settings';
 import { getRandomId, getRandomIdGreaterThan } from '@answeroverflow/utils';
 import { BaseMessageWithRelations, DiscordAccount, Server } from './schema';
-import { ServerWithFlags } from './zodSchemas/serverSchemas';
 import { ChannelWithFlags } from './zodSchemas/channelSchemas';
-import { addFlagsToServer } from './utils/serverUtils';
-
-describe('Message Operations', () => {
-	let server: Server;
-	let serverWithFlags: ServerWithFlags;
-	let channel: ChannelWithFlags;
-	let message: Message;
-	let author: DiscordAccount;
-	beforeEach(async () => {
-		server = mockServer();
-		serverWithFlags = addFlagsToServer(server);
-		channel = mockChannelWithFlags(server, {
-			flags: {
-				indexingEnabled: true,
-			},
-		});
-		author = mockDiscordAccount();
-		message = mockMessage(server, channel, author);
-		await createServer(server);
-		await createChannel(channel);
-		await createDiscordAccount(author);
-	});
-
-	describe('Add Reference To Message', () => {
-		it('should return null if the referenced message isnt found', async () => {
-			const msg = mockMessage(server, channel, author);
-			const created = await upsertMessage(msg);
-			const withRef = await addReferenceToMessage(created);
-			expect(withRef?.referencedMessage).toBeNull();
-		});
-		it('should add the reference to the message', async () => {
-			const ref = mockMessage(server, channel, author);
-			const msg = mockMessage(server, channel, author, {
-				messageReference: {
-					messageId: ref.id,
-					channelId: ref.channelId,
-					serverId: ref.serverId,
-				},
-			});
-			await upsertMessage(ref);
-			const created = await upsertMessage(msg);
-			const withRef = await addReferenceToMessage(created);
-			expect(withRef).not.toBeNull();
-			expect(withRef?.referencedMessage).not.toBeNull();
-			expect(withRef?.referencedMessage?.id).toBe(ref.id);
-		});
-		it('should add the solution to the message', async () => {
-			const solution = mockMessage(server, channel, author);
-			const msg = mockMessage(server, channel, author, {
-				solutionIds: [solution.id],
-			});
-			const created = await upsertMessage(msg);
-			await upsertMessage(solution);
-			const withRef = await addReferenceToMessage(created);
-			expect(withRef).not.toBeNull();
-			expect(withRef?.solutionMessages).toHaveLength(1);
-			expect(withRef?.solutionMessages[0]!.id).toBe(solution.id);
-		});
-		it('should have a empty solution if the solution message is not found', async () => {
-			const msg = mockMessage(server, channel, author, {
-				solutionIds: ['123'],
-			});
-			const created = await upsertMessage(msg);
-			const withRef = await addReferenceToMessage(created);
-			expect(withRef).not.toBeNull();
-			expect(withRef?.solutionMessages).toHaveLength(0);
-		});
-	});
-	describe('Add Authors To Message', () => {
-		it('should return null if the author isnt found', async () => {
-			const msg = mockMessage(server, channel, author);
-			const created = await upsertMessage(msg);
-			const withRef = await addReferenceToMessage(created);
-			await deleteDiscordAccount(author.id);
-			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
-			expect(withAuthor).toBeNull();
-		});
-		it('should add the author to the message', async () => {
-			const msg = mockMessage(server, channel, author);
-			const created = await upsertMessage(msg);
-			const withRef = await addReferenceToMessage(created);
-			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
-			expect(withAuthor?.author).not.toBeNull();
-			expect(withAuthor?.author?.id).toBe(author.id);
-		});
-		it('should add the author to the referenced message', async () => {
-			const reply = mockMessage(server, channel, author);
-			const msg = mockMessage(server, channel, author, {
-				messageReference: {
-					messageId: reply.id,
-					channelId: reply.channelId,
-					serverId: reply.serverId,
-				},
-			});
-			await upsertMessage(reply);
-			const created = await upsertMessage(msg);
-			const withRef = await addReferenceToMessage(created);
-			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
-			expect(withAuthor?.referencedMessage?.author).not.toBeNull();
-			expect(withAuthor?.referencedMessage?.author?.id).toBe(author.id);
-		});
-		it('should have a null referenced message if the author is not found', async () => {
-			const reply = mockMessage(server, channel, mockDiscordAccount());
-			const msg = mockMessage(server, channel, author, {
-				messageReference: {
-					messageId: reply.id,
-					channelId: reply.channelId,
-					serverId: reply.serverId,
-				},
-			});
-			await upsertMessage(reply);
-			const created = await upsertMessage(msg);
-			const withRef = await addReferenceToMessage(created);
-			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
-			expect(withAuthor?.referencedMessage).toBeNull();
-		});
-		it('should add the author to the solution message', async () => {
-			const solution = mockMessage(server, channel, author);
-			const msg = mockMessage(server, channel, author, {
-				solutionIds: [solution.id],
-			});
-			const created = await upsertMessage(msg);
-			await upsertMessage(solution);
-			const withRef = await addReferenceToMessage(created);
-			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
-			expect(withAuthor!.solutionMessages[0]!.author).not.toBeNull();
-			expect(withAuthor!.solutionMessages[0]!.author?.id).toBe(author.id);
-		});
-		it('should have a null solution message if the author is not found', async () => {
-			const solution = mockMessage(server, channel, mockDiscordAccount());
-			const msg = mockMessage(server, channel, author, {
-				solutionIds: [solution.id],
-			});
-			const created = await upsertMessage(msg);
-			await upsertMessage(solution);
-			const withRef = await addReferenceToMessage(created);
-			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
-			expect(withAuthor?.solutionMessages).toHaveLength(0);
-		});
-		it('should mark a message as public if the server has require consent disabled', async () => {
-			const msg = mockMessage(server, channel, author);
-			const created = await upsertMessage(msg);
-			const withRef = await addReferenceToMessage(created);
-			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
-			expect(withAuthor!.public).toBe(false);
-			const withAuthorAndPublic = await addAuthorToMessage(withRef!, {
-				...serverWithFlags,
-				flags: {
-					...serverWithFlags.flags,
-					considerAllMessagesPublic: true,
-				},
-			});
-			expect(withAuthorAndPublic!.public).toBe(true);
-		});
-		it('should mark a message as public if the author has consented', async () => {
-			const msg = mockMessage(server, channel, author);
-			const created = await upsertMessage(msg);
-			const withRef = await addReferenceToMessage(created);
-			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
-			expect(withAuthor!.public).toBe(false);
-			await createUserServerSettings({
-				userId: author.id,
-				serverId: server.id,
-				flags: {
-					canPubliclyDisplayMessages: true,
-				},
-			});
-			const withAuthorAndPublic = await addAuthorToMessage(
-				withRef!,
-				serverWithFlags,
-			);
-			expect(withAuthorAndPublic!.public).toBe(true);
-		});
-		it("shouldn't be public by default", async () => {
-			const msg = mockMessage(server, channel, author);
-			const created = await upsertMessage(msg);
-			const withRef = await addReferenceToMessage(created);
-			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
-			expect(withAuthor!.public).toBe(false);
-		});
-		it('should anonymize the author if the server has anonymization enabled', async () => {
-			const msg = mockMessage(server, channel, author);
-			const created = await upsertMessage(msg);
-			const withRef = await addReferenceToMessage(created);
-			const withAuthor = await addAuthorToMessage(withRef!, serverWithFlags);
-			expect(withAuthor!.author.name).toBe(author.name);
-			const withAuthorAndAnonymized = await addAuthorToMessage(withRef!, {
-				...serverWithFlags,
-				flags: {
-					...serverWithFlags.flags,
-					anonymizeMessages: true,
-				},
-			});
-			expect(withAuthorAndAnonymized!.author.name).not.toBe(author.name);
-			expect(withAuthorAndAnonymized!.author.id).not.toBe(author.id);
-		});
-	});
-});
 
 describe.only('Message Ops', () => {
 	let server: Server;
-	let serverWithFlags: ServerWithFlags;
 	let channel: ChannelWithFlags;
 	let msg: BaseMessageWithRelations;
 	let author: DiscordAccount;
 	beforeEach(async () => {
 		server = mockServer();
-		serverWithFlags = addFlagsToServer(server);
 		channel = mockChannelWithFlags(server, {
 			flags: {
 				indexingEnabled: true,
@@ -600,6 +394,21 @@ describe.only('Message Ops', () => {
 			expect(map.get(channel.id)).toBe(largerThanMsg.id);
 			expect(map.get(chnl2.id)).toBe(msg2.id);
 			expect(map.get(chnl3.id)).toBe(msg3.id);
+		});
+	});
+	describe('Find Latest Message in Channel', () => {
+		test('should find the latest message in a channel', async () => {
+			const largerThanMsg = mockMessage(server, channel, author, {
+				id: getRandomIdGreaterThan(Number(msg.id)),
+			});
+			const largerThanMsg2 = mockMessage(server, channel, author, {
+				id: getRandomIdGreaterThan(Number(largerThanMsg.id)),
+			});
+			await upsertMessage(largerThanMsg);
+			await upsertMessage(largerThanMsg2);
+			await upsertMessage(msg);
+			const found = await findLatestMessageInChannel(channel.id);
+			expect(found).toBe(largerThanMsg2.id);
 		});
 	});
 });
