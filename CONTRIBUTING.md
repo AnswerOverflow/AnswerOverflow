@@ -38,7 +38,7 @@ There are shortcut buttons in the README to jump start running from a remote env
   - In this case, consider creating a smaller machine and just running the package you're developing in
   - This is only for packages that don't make any calls to the databases. If you try to run the tests on the whole project without databases setup the tests will fail
 
-### Cloud Development Enviroment Env's
+### Cloud Development Environment Env's
 
 #### Github Codespaces Secrets
 

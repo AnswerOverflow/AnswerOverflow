@@ -89,7 +89,7 @@ const enterpriseFAQs: {
 		question:
 			'What happens if I have content indexed on answeroverflow.com and I upgrade to my own domain?',
 		answer:
-			'All of your pages on answeroveroverflow are set as a permanent redirect to your new domain. Any visitors while the answeroverflow.com pages are still indexed in Google will be redirected to your custom domain. Eventually they will drop off and only your site will be  in search results.',
+			'All of your pages on answeroverflow are set as a permanent redirect to your new domain. Any visitors while the answeroverflow.com pages are still indexed in Google will be redirected to your custom domain. Eventually they will drop off and only your site will be  in search results.',
 	},
 	{
 		question:
