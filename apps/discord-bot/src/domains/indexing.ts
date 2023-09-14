@@ -2,7 +2,7 @@ import {
 	bulkFindLatestMessageInChannel,
 	findChannelById,
 	findLatestArchivedTimestampByChannelId,
-	findLatestMessageInChannel,
+	findLatestMessageIdInChannel,
 	findManyUserServerSettings,
 	upsertChannel,
 	upsertManyDiscordAccounts,
@@ -168,7 +168,7 @@ export async function indexRootChannel(
 			threadsToIndex.map((x) => x.id),
 		);
 		const threadMessageLookup = new Map<string, string>(
-			mostRecentlyIndexedMessages.map((x) => [x.channelId, x.id]),
+			mostRecentlyIndexedMessages.map((x) => [x.channelId, x.latestMessageId]),
 		);
 		const outOfDateThreads = threadsToIndex.filter(
 			(x) => threadMessageLookup.get(x.id) !== x.lastMessageId,
@@ -215,7 +215,7 @@ export async function indexTextBasedChannel(
 	}
 	const start =
 		opts?.fromMessageId ??
-		(await findLatestMessageInChannel(channel.id).then((x) => x?.id));
+		(await findLatestMessageIdInChannel(channel.id).then((x) => x));
 	container.logger.debug(
 		`Indexing channel ${channel.id} | ${channel.name} from message id ${
 			start ?? 'beginning'

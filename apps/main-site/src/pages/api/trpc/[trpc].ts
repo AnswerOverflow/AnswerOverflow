@@ -42,7 +42,7 @@ export default async function handler(
 	}
 	const token = req.cookies[getTenantCookieName()];
 	if (token) {
-		const nextAuthSession = await db.query.tenantSessions.findFirst({
+		const nextAuthSession = await db.query.dbTenantSessions.findFirst({
 			where: eq(dbTenantSessions.id, token),
 		});
 		// add a cookie to the request using the next auth header

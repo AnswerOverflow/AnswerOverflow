@@ -126,7 +126,6 @@ describe('Message Results', () => {
 			const pageData = await unauthedMessagePageRouter.threadFromMessageId(
 				message.id,
 			);
-
 			expect(pageData.messages).toEqual([
 				toPrivateMessageWithStrippedData(
 					toMessageWithAccountAndRepliesTo({
@@ -194,6 +193,7 @@ describe('Message Results', () => {
 			const pageData = await unauthedMessagePageRouter.threadFromMessageId(
 				message.id,
 			);
+
 			expect(pageData.messages).toEqual([
 				toPrivateMessageWithStrippedData(
 					toMessageWithAccountAndRepliesTo({

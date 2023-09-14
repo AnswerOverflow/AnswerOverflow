@@ -47,7 +47,7 @@ const useConfigImageAttachments = () => {
 	useEffect(() => {
 		(async () => {
 			await Promise.all(
-				message.attachments.map(async (attachment) => {
+				message.attachments.map(async (attachment): Promise<ImageType> => {
 					if (!attachment.width || !attachment.height) {
 						const img = await getImageHeightWidth({
 							imageSrc: attachment.proxyUrl,
@@ -57,7 +57,7 @@ const useConfigImageAttachments = () => {
 							src: attachment.proxyUrl,
 							width: img.width,
 							height: img.height,
-							alt: attachment.description,
+							alt: attachment.description ?? 'No description',
 						};
 					}
 
@@ -65,7 +65,7 @@ const useConfigImageAttachments = () => {
 						src: attachment.proxyUrl,
 						width: attachment.width,
 						height: attachment.height,
-						alt: attachment.description,
+						alt: attachment.description ?? 'No description',
 					};
 				}),
 			)

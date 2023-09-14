@@ -279,7 +279,7 @@ export const canUserViewPrivateMessage = (
 export function stripPrivatePartialMessageData(
 	message: MessageWithDiscordAccount,
 	userServers: DiscordAPIServerSchema[] | null,
-) {
+): MessageFull | MessageWithDiscordAccount {
 	if (canUserViewPrivateMessage(userServers, message)) {
 		return message;
 	}
@@ -299,6 +299,8 @@ export function stripPrivatePartialMessageData(
 	return {
 		...defaultMessage,
 		author: defaultAuthor,
+		attachments: [],
+		embeds: [],
 		public: false,
 	};
 }
@@ -323,7 +325,7 @@ export function stripPrivateFullMessageData(
 
 	const reply = message.reference
 		? stripPrivatePartialMessageData(message.reference, userServers)
-		: null;
+		: undefined;
 
 	const solutions = message.solutions.map((solution) =>
 		stripPrivatePartialMessageData(solution, userServers),
@@ -339,6 +341,8 @@ export function stripPrivateFullMessageData(
 		...defaultMessage,
 		author: defaultAuthor,
 		public: false,
+		attachments: [],
+		embeds: [],
 		reference: reply ?? undefined,
 		solutions: solutions,
 	};

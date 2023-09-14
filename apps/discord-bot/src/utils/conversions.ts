@@ -5,7 +5,6 @@ import {
 	GuildChannel,
 	GuildMember,
 	Message,
-	type MessageReference,
 	User,
 } from 'discord.js';
 import {

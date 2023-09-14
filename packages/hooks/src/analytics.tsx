@@ -113,7 +113,6 @@ export function messageWithDiscordAccountToAnalyticsData(
 		'Server Id': message.serverId,
 		'Message Author Id': message.author.id,
 		'Message Id': message.id,
-		'Solution Id': message.solutionIds?.[0] ?? undefined,
 	};
 }
 

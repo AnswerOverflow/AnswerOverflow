@@ -23,7 +23,7 @@ export async function discordApiFetch(
 		},
 	});
 	if (data.status === 401) {
-		const account = await db.query.accounts.findFirst({
+		const account = await db.query.dbAccounts.findFirst({
 			where: and(
 				eq(dbAccounts.provider, 'discord'),
 				eq(dbAccounts.access_token, callOpts.accessToken),

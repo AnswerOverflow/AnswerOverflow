@@ -113,7 +113,7 @@ export const extendedAdapter: Adapter = {
 			.update(dbSessions)
 			.set(data)
 			.where(eq(dbSessions.sessionToken, data.sessionToken));
-		const updated = await db.query.sessions.findFirst({
+		const updated = await db.query.dbSessions.findFirst({
 			where: eq(dbSessions.sessionToken, data.sessionToken),
 		});
 		if (!updated) throw new Error('Error updating session');

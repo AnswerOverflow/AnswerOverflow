@@ -41,7 +41,7 @@ describe('Discord Auth', () => {
 			userId: createdUser.id,
 			access_token: '1234567890',
 		});
-		const user = await db.query.discordAccounts.findFirst({
+		const user = await db.query.dbDiscordAccounts.findFirst({
 			where: eq(dbAccounts.id, mockDiscordAccount.id),
 		});
 		expect(user).toEqual({
@@ -68,7 +68,7 @@ describe('Discord Auth', () => {
 			userId: createdUser.id,
 			access_token: '1234567890',
 		});
-		const user = await db.query.discordAccounts.findFirst({
+		const user = await db.query.dbDiscordAccounts.findFirst({
 			where: eq(dbAccounts.id, mockDiscordAccount.id),
 		});
 		expect(user).toEqual({
@@ -76,7 +76,7 @@ describe('Discord Auth', () => {
 			name: mockDiscordAccount.username,
 			avatar: mockDiscordAccount.avatar,
 		});
-		const account = await db.query.accounts.findFirst({
+		const account = await db.query.dbAccounts.findFirst({
 			where: and(
 				eq(dbAccounts.provider, 'discord'),
 				eq(dbAccounts.providerAccountId, mockDiscordAccount.id),

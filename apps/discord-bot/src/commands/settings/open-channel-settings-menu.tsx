@@ -123,7 +123,7 @@ export class ChannelSettingsCommand extends Command {
 							<ChannelSettingsMenu
 								channelWithFlags={channelSettings}
 								targetChannel={targetChannelToConfigure as RootChannel}
-								lastIndexedMessage={lastIndexedMessage}
+								lastIndexedMessage={lastIndexedMessage ?? null}
 							/>
 						);
 						ephemeralReply(menu, interaction);

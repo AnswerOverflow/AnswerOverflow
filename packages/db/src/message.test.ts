@@ -13,7 +13,7 @@ import {
 	deleteManyMessagesByUserId,
 	deleteMessage,
 	findFullMessageById,
-	findLatestMessageInChannel,
+	findLatestMessageIdInChannel,
 	findManyMessagesWithAuthors,
 	findMessageById,
 	findMessagesByChannelIdWithDiscordAccounts,
@@ -27,7 +27,7 @@ import { getRandomId, getRandomIdGreaterThan } from '@answeroverflow/utils';
 import { BaseMessageWithRelations, DiscordAccount, Server } from './schema';
 import { ChannelWithFlags } from './zodSchemas/channelSchemas';
 
-describe.only('Message Ops', () => {
+describe('Message Ops', () => {
 	let server: Server;
 	let channel: ChannelWithFlags;
 	let msg: BaseMessageWithRelations;
@@ -407,7 +407,7 @@ describe.only('Message Ops', () => {
 			await upsertMessage(largerThanMsg);
 			await upsertMessage(largerThanMsg2);
 			await upsertMessage(msg);
-			const found = await findLatestMessageInChannel(channel.id);
+			const found = await findLatestMessageIdInChannel(channel.id);
 			expect(found).toBe(largerThanMsg2.id);
 		});
 	});

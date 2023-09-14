@@ -1,7 +1,4 @@
-import type {
-	ChannelPublicWithFlags,
-	MessageWithDiscordAccount,
-} from '@answeroverflow/db';
+import type { ChannelPublicWithFlags, MessageFull } from '@answeroverflow/db';
 import type { ServerPublic } from '@answeroverflow/api';
 import { useIsUserInServer } from '~ui/utils/hooks';
 import { MessagesSearchBar } from './SearchPage';
@@ -33,13 +30,13 @@ import { Heading } from '~ui/components/primitives/base/Heading';
 import AOHead from '~ui/components/primitives/AOHead';
 import Link from 'next/link';
 export type MessageResultPageProps = {
-	messages: MessageWithDiscordAccount[];
+	messages: MessageFull[];
 	server: ServerPublic;
 	channel: ChannelPublicWithFlags;
 	thread?: ChannelPublicWithFlags;
 	requestedId: string;
 	relatedPosts: {
-		message: MessageWithDiscordAccount;
+		message: MessageFull;
 		thread: ChannelPublicWithFlags;
 	}[];
 };
@@ -81,7 +78,7 @@ export function MessageResultPage({
 			enabled: shouldTrackAnalyticsEvent,
 		},
 	);
-	const solutionMessageId = messages.at(0)?.solutionIds?.at(0);
+	const solutionMessageId = messages.at(0)?.solutions?.at(0)?.id;
 	const solution = messages.find((message) => message.id === solutionMessageId);
 	let consecutivePrivateMessages = 0;
 

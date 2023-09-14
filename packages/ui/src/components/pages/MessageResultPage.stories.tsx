@@ -29,7 +29,7 @@ const defaultMessage: MessageResultPageProps = {
 		{
 			message: mockMessageWithDiscordAccount({
 				id: '1',
-				solutionIds: ['4'],
+
 				public: true,
 				content:
 					'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
@@ -42,7 +42,6 @@ const defaultMessage: MessageResultPageProps = {
 	messages: [
 		mockMessageWithDiscordAccount({
 			id: '1',
-			solutionIds: ['4'],
 			public: false,
 			content: ' THis is the first private message',
 		}),
@@ -77,7 +76,11 @@ AllPublic.args = {
 	messages: [
 		mockMessageWithDiscordAccount({
 			id: '1',
-			solutionIds: ['4'],
+			solutions: [
+				mockMessageWithDiscordAccount({
+					id: '4',
+				}),
+			],
 			content: ' THis is the first public message',
 		}),
 		mockMessageWithDiscordAccount({
@@ -91,6 +94,11 @@ const foo = "bar"\`\`\``,
 			attachments: [
 				{
 					id: '1',
+					messageId: '3',
+					description: null,
+					width: 700,
+					height: 700,
+					contentType: 'image/png',
 					filename: 'mark_solution_instructions.png',
 					size: 700,
 					proxyUrl:
@@ -119,7 +127,11 @@ AllPrivate.args = {
 	messages: [
 		mockMessageWithDiscordAccount({
 			id: '1',
-			solutionIds: ['4'],
+			solutions: [
+				mockMessageWithDiscordAccount({
+					id: '4',
+				}),
+			],
 			public: false,
 			content: ' THis is the first private message',
 		}),
@@ -151,7 +163,11 @@ PrivateSolution.args = {
 	messages: [
 		mockMessageWithDiscordAccount({
 			id: '1',
-			solutionIds: ['4'],
+			solutions: [
+				mockMessageWithDiscordAccount({
+					id: '4',
+				}),
+			],
 			public: true,
 		}),
 		mockMessageWithDiscordAccount({
@@ -178,7 +194,11 @@ ManyFromSameAuthor.args = {
 	messages: [
 		mockMessageWithDiscordAccount({
 			id: '1',
-			solutionIds: ['4'],
+			solutions: [
+				mockMessageWithDiscordAccount({
+					id: '4',
+				}),
+			],
 			public: true,
 			author: {
 				id: '1',

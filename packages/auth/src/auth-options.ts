@@ -34,7 +34,7 @@ export const authOptions: NextAuthOptions = {
 				session.user.id = user.id;
 			}
 			const updateAccountAccessToken = async () => {
-				const discord = await db.query.accounts.findFirst({
+				const discord = await db.query.dbAccounts.findFirst({
 					where: and(
 						eq(dbAccounts.provider, 'discord'),
 						eq(dbAccounts.userId, user.id),

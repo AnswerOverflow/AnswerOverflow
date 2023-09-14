@@ -2,7 +2,6 @@ import { Client, type ClientOptions } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { elasticMessageIndexProperties } from './schema';
-import { findManyMessagesWithAuthors } from '@answeroverflow/db';
 declare global {
 	// eslint-disable-next-line no-var, no-unused-vars
 	var elastic: Elastic | undefined;

@@ -143,6 +143,17 @@ export async function findAllChannelsByServerId(
 	return data.map(addFlagsToChannel);
 }
 
+export async function findManyChannelMessagesCounts(channelIds: string[]) {
+	return db
+		.select({
+			count: sql<number>`count(*)`,
+			channelId: dbChannels.id,
+		})
+		.from(dbChannels)
+		.where(inArray(dbChannels.serverId, Array.from(new Set(channelIds))))
+		.groupBy(dbChannels.id);
+}
+
 export async function findManyChannelsById(
 	ids: string[],
 	opts: {
@@ -164,11 +175,9 @@ export async function findManyChannelsById(
 		const threadIds = withFlags
 			.filter((c) => isThreadType(c.type))
 			.map((c) => c.id);
-		const threadMessageCounts = await Promise.all(
-			threadIds.map((id) => elastic.getChannelMessagesCount(id)),
-		);
+		const threadMessageCounts = await findManyChannelMessagesCounts(threadIds);
 		threadMessageCountLookup = new Map(
-			threadIds.map((id, i) => [id, threadMessageCounts[i] ?? undefined]),
+			threadMessageCounts.map((x) => [x.channelId, x.count]),
 		);
 	}
 	return withFlags.map((c) => {

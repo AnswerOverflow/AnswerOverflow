@@ -28,7 +28,7 @@ import {
 	dbEmojis,
 	Attachment,
 } from './schema';
-import { and, eq, gt, inArray, or, sql } from 'drizzle-orm';
+import { and, eq, inArray, or, sql } from 'drizzle-orm';
 import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
 import { addFlagsToServer } from './utils/serverUtils';
 import { getRandomId, pick } from '@answeroverflow/utils';
@@ -158,6 +158,44 @@ export async function findMessageById(id: string) {
 		.then((x) => x.at(0));
 }
 
+export async function findMessageByIdWithDiscordAccount(id: string) {
+	return db.query.dbMessages
+		.findFirst({
+			where: eq(dbMessages.id, id),
+			// TODO: Optimize we don't need all these fields
+			with: {
+				author: {
+					with: {
+						userServerSettings: true,
+					},
+				},
+				attachments: true,
+				solutions: {
+					with: {
+						author: {
+							with: {
+								userServerSettings: true,
+							},
+						},
+						attachments: true,
+					},
+				},
+				reference: {
+					with: {
+						author: {
+							with: {
+								userServerSettings: true,
+							},
+						},
+						attachments: true,
+					},
+				},
+				server: true,
+			},
+		})
+		.then((x) => (x ? applyPublicFlagsToMessages([x])[0]! : null));
+}
+
 export async function findFullMessageById(id: string) {
 	return db.query.dbMessages.findFirst({
 		where: eq(dbMessages.id, id),
@@ -182,7 +220,9 @@ export async function findMessagesByChannelIdWithDiscordAccounts(
 		.findMany({
 			where: and(
 				eq(dbMessages.channelId, input.channelId),
-				input.after ? gt(dbMessages.id, input.after) : undefined,
+				input.after
+					? sql`CAST(${dbMessages.id} AS SIGNED) >= ${BigInt(input.after)}`
+					: undefined,
 			),
 			with: {
 				author: {
@@ -416,7 +456,7 @@ export async function deleteManyMessagesByChannelId(channelId: string) {
 	return db.delete(dbMessages).where(eq(dbMessages.channelId, channelId));
 }
 
-export async function findLatestMessageInChannel(channelId: string) {
+export async function findLatestMessageIdInChannel(channelId: string) {
 	return db
 		.select({
 			// TODO: Check if this actually works, also cast to bigint
@@ -446,7 +486,7 @@ export async function bulkFindLatestMessageInChannel(channelIds: string[]) {
 }
 
 export async function findLatestMessageInChannelAndThreads(channelId: string) {
-	return db
+	const id = await db
 		.select({
 			max: sql<bigint>`MAX(CAST(${dbMessages.id} AS SIGNED))`,
 		})
@@ -459,6 +499,8 @@ export async function findLatestMessageInChannelAndThreads(channelId: string) {
 		)
 		.limit(1)
 		.then((x) => x?.at(0)?.max?.toString());
+	if (!id) return null;
+	return findMessageById(id);
 }
 
 export async function deleteManyMessagesByUserId(userId: string) {

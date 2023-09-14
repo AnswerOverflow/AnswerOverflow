@@ -2,6 +2,7 @@ import type { z } from 'zod';
 import {
 	findAllChannelQuestions,
 	findMessageById,
+	findMessageByIdWithDiscordAccount,
 	findMessagesByChannelIdWithDiscordAccounts,
 	getParentChannelOfMessage,
 	getThreadIdOfMessage,
@@ -142,7 +143,7 @@ export async function findMessageResultPage(messageId: string) {
 		serverFetch,
 		parentChannelFetch,
 		messageFetch,
-		threadId ? findMessageById(threadId) : undefined,
+		threadId ? findMessageByIdWithDiscordAccount(threadId) : undefined,
 	]);
 	if (!server || server.kickedTime) return null;
 
@@ -153,7 +154,7 @@ export async function findMessageResultPage(messageId: string) {
 	return {
 		server,
 		channel,
-		messages,
+		messages: rootMessage ? [rootMessage, ...messages] : messages,
 		rootMessage,
 		thread,
 	};

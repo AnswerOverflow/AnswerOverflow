@@ -40,6 +40,8 @@ export function toMessageWithDiscordAccount({
 		...omit(message, 'authorId'),
 		author,
 		public: publicMessage,
+		embeds: [],
+		attachments: [],
 	};
 	return msg;
 }
@@ -81,6 +83,8 @@ export function toPrivateMessageWithStrippedData(
 		}),
 		author,
 		public: false,
+		embeds: [],
+		attachments: [],
 	};
 	if (isReply) {
 		return privateMsg;
