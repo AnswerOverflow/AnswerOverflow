@@ -4,7 +4,7 @@ import { loremIpsum } from 'lorem-ipsum';
   Returns an ID of only numbers, i.e 123456789
 */
 export function getRandomId(length: number = 15): string {
-	// 10 to the power of lenght
+	// 10 to the power of length
 	const max = Math.pow(10, length);
 	return Math.floor(Math.random() * max).toString();
 }
@@ -23,7 +23,7 @@ export function getRandomSentence() {
 		count: 1, // Number of "words", "sentences", or "paragraphs"
 		format: 'plain', // "plain" or "html"
 		paragraphLowerBound: 3, // Min. number of sentences per paragraph.
-		paragraphUpperBound: 7, // Max. number of sentences per paragarph.
+		paragraphUpperBound: 7, // Max. number of sentences per paragraph.
 		random: Math.random, // A PRNG function
 		sentenceLowerBound: 5, // Min. number of words per sentence.
 		sentenceUpperBound: 15, // Max. number of words per sentence.
@@ -36,7 +36,7 @@ export function getRandomName() {
 		count: 4, // Number of "words", "sentences", or "paragraphs"
 		format: 'plain', // "plain" or "html"
 		paragraphLowerBound: 1, // Min. number of sentences per paragraph.
-		paragraphUpperBound: 1, // Max. number of sentences per paragarph.
+		paragraphUpperBound: 1, // Max. number of sentences per paragraph.
 		random: Math.random, // A PRNG function
 		sentenceLowerBound: 1, // Min. number of words per sentence.
 		sentenceUpperBound: 1, // Max. number of words per sentence.

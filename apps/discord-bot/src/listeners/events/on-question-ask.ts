@@ -27,7 +27,7 @@ export class QuestionAskedListener extends Listener<Events.ClientReady> {
 				return; // TODO: Support private threads?
 			}
 			/*
-        Discord sends the threadCreate and messageCreate events at the same time, however, the threadCreate event can be recevied before the messageCreate event, resulting in the first message not being available yet.
+        Discord sends the threadCreate and messageCreate events at the same time, however, the threadCreate event can be received before the messageCreate event, resulting in the first message not being available yet.
        */
 			const fetchAfterDelay = async (time: number) => {
 				try {

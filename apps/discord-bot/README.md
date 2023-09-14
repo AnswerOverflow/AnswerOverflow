@@ -20,7 +20,7 @@ Long running button interactions that need to run again on a bot restart.
 
       Example: The consent button is sent in announcement channels and can be used months after sending it, it's important to capture this interaction
 
-### precondiitons
+### preconditions
 
       Checks to run before executing a command
 

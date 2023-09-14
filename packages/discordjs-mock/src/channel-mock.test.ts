@@ -66,13 +66,13 @@ describe('Message Mock', () => {
 	});
 	it('should create a message in a forum thread channel', () => {
 		const forumChannel = mockForumChannel(client);
-		const fourmThread = mockPublicThread({
+		const forumThread = mockPublicThread({
 			client,
 			parentChannel: forumChannel,
 		});
-		const message = mockMessage({ client, channel: fourmThread });
+		const message = mockMessage({ client, channel: forumThread });
 		expect(message).toBeDefined();
-		expect(fourmThread.messages.cache.get(message.id)).toBeDefined();
+		expect(forumThread.messages.cache.get(message.id)).toBeDefined();
 	});
 	it('should have a guild member created for a new message in a guild channel', () => {
 		const guild = mockGuild(client);

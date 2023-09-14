@@ -14,16 +14,16 @@ import { PermissionResolvable } from '~api/utils/types';
 
 describe('Test All Permissions', () => {
 	it('should validate permissions are succeeding correctly', async () => {
-		const successfullPermissions: PermissionResolvable[] = [];
+		const successfulPermissions: PermissionResolvable[] = [];
 		await testAllPermissions({
 			permissionsThatShouldWork: ['AddReactions'],
 			operation: (permission, shouldPermissionSucceed) => {
 				if (shouldPermissionSucceed) {
-					successfullPermissions.push(permission);
+					successfulPermissions.push(permission);
 				}
 			},
 		});
-		expect(successfullPermissions).toEqual(['AddReactions']);
+		expect(successfulPermissions).toEqual(['AddReactions']);
 	});
 	it('should validate permissions are failing correctly', async () => {
 		const failedPermissions: PermissionResolvable[] = [];
@@ -43,16 +43,16 @@ describe('Test All Permissions', () => {
 
 describe('Test All Sources', () => {
 	it('should validate sources are succeeding correctly', async () => {
-		const successfullSources: string[] = [];
+		const successfulSources: string[] = [];
 		await testAllSources({
 			sourcesThatShouldWork: ['discord-bot'],
 			operation: (source, shouldSourceSucceed) => {
 				if (shouldSourceSucceed) {
-					successfullSources.push(source);
+					successfulSources.push(source);
 				}
 			},
 		});
-		expect(successfullSources).toEqual(['discord-bot']);
+		expect(successfulSources).toEqual(['discord-bot']);
 	});
 	it('should validate sources are failing correctly', async () => {
 		const failedSources: string[] = [];

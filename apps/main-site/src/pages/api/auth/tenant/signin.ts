@@ -15,6 +15,7 @@ import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 import { findServerByCustomDomain } from '@answeroverflow/db/src/server';
 import { dbTenantSessions } from '@answeroverflow/db/src/schema';
 import { randomUUID } from 'node:crypto';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 async function getServerSignInUrl(
 	req: IncomingMessage,
@@ -23,6 +24,7 @@ async function getServerSignInUrl(
 ) {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 	const { options, cookies: initCookies } = await init({
+		origin: sharedEnvs.NEXT_PUBLIC_SITE_URL,
 		action: 'signin',
 		authOptions,
 		isPost: true,

@@ -29,7 +29,7 @@ describe('Server', () => {
 			const found = await findServerById(server.id);
 			expect(found!.flags.readTheRulesConsentEnabled).toBe(true);
 		});
-		it("should fail if creating a server with an alais the same as an existing server's id", async () => {
+		it("should fail if creating a server with an alias the same as an existing server's id", async () => {
 			const existing = await createServer(server);
 			const newServer = mockServer({ vanityUrl: existing.id });
 			await expect(createServer(newServer)).rejects.toThrow();
