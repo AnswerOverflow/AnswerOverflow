@@ -363,10 +363,10 @@ export async function upsertMessage(
 			);
 		}
 	}
-	const { attachments, reactions, ...msg } = data;
+	const { attachments, reactions, embeds, ...msg } = data;
 	const parsed = {
 		...createInsertSchema(dbMessages).parse(msg),
-		embeds: msg.embeds,
+		embeds,
 	};
 
 	await db.insert(dbMessages).values(parsed).onDuplicateKeyUpdate({
