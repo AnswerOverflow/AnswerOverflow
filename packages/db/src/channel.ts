@@ -7,7 +7,7 @@ import { DBError } from './utils/error';
 import { ChannelType } from 'discord-api-types/v10';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 import { db } from './db';
-import { and, desc, eq, inArray, isNotNull, lt, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { dbChannels } from './schema';
 import {
 	getDefaultChannel,
@@ -349,18 +349,21 @@ export function upsertManyChannels(data: z.infer<typeof zChannelUpsertMany>) {
 	});
 }
 
-export async function findChannelsBeforeArchivedTimestamp(input: {
+export async function findChannelsBeforeId(input: {
 	serverId: string;
-	timestamp: bigint;
+	id: string;
 	take?: number;
 }) {
-	const res = await db.query.dbChannels.findMany({
-		where: and(
-			eq(dbChannels.serverId, input.serverId),
-			lt(dbChannels.archivedTimestamp, input.timestamp),
-		),
-		orderBy: desc(dbChannels.archivedTimestamp),
-		limit: input.take,
-	});
+	const res = await db
+		.select()
+		.from(dbChannels)
+		.where(
+			and(
+				eq(dbChannels.serverId, input.serverId),
+				sql`CAST(${dbChannels.id} AS SIGNED) < ${BigInt(input.id)}`,
+			),
+		)
+		.orderBy(sql`CAST(${dbChannels.id} AS SIGNED) DESC`)
+		.limit(input.take ?? 100);
 	return res.map(addFlagsToChannel);
 }

@@ -154,7 +154,10 @@ export async function findMessageResultPage(messageId: string) {
 	return {
 		server,
 		channel,
-		messages: rootMessage ? [rootMessage, ...messages] : messages,
+		messages:
+			rootMessage && rootMessage.channelId != thread?.id
+				? [rootMessage, ...messages]
+				: messages,
 		rootMessage,
 		thread,
 	};

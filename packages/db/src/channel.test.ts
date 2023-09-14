@@ -19,7 +19,7 @@ import {
 	updateManyChannels,
 	upsertChannel,
 	upsertManyChannels,
-	findChannelsBeforeArchivedTimestamp,
+	findChannelsBeforeId,
 } from './channel';
 import { createDiscordAccount } from './discord-account';
 import { findMessageById, upsertMessage } from './message';
@@ -419,21 +419,21 @@ describe('Channel Operations', () => {
 			});
 		});
 		it('should find before a timestamp', async () => {
-			const chnls = await findChannelsBeforeArchivedTimestamp({
+			const chnls = await findChannelsBeforeId({
 				serverId: server.id,
 				timestamp: BigInt(4),
 			});
 			expect(chnls).toHaveLength(3);
 		});
 		it('shouldnt find anything if no channels before', async () => {
-			const chnls = await findChannelsBeforeArchivedTimestamp({
+			const chnls = await findChannelsBeforeId({
 				serverId: server.id,
 				timestamp: BigInt(0),
 			});
 			expect(chnls).toHaveLength(0);
 		});
 		it('should find from highest to lowest', async () => {
-			const chnls = await findChannelsBeforeArchivedTimestamp({
+			const chnls = await findChannelsBeforeId({
 				serverId: server.id,
 				timestamp: BigInt(2),
 				take: 1,

@@ -265,7 +265,7 @@ export async function findManyMessages(ids: string[]) {
 // TODO: We want USS to only be for the server the message is in, not all servers the user is in, is that possible?
 export async function findManyMessagesWithAuthors(ids: string[]) {
 	if (ids.length === 0) return [];
-	return db.query.dbMessages
+	const msgs = await db.query.dbMessages
 		.findMany({
 			where: inArray(dbMessages.id, ids),
 			with: {
@@ -299,6 +299,8 @@ export async function findManyMessagesWithAuthors(ids: string[]) {
 			},
 		})
 		.then((x) => applyPublicFlagsToMessages(x));
+	const msgLookup = new Map(msgs.map((msg) => [msg.id, msg]));
+	return ids.map((id) => msgLookup.get(id)).filter(Boolean);
 }
 // TODO: Paginate get all questions response
 export async function findAllChannelQuestions(input: {
