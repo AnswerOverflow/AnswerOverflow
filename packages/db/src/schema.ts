@@ -313,9 +313,9 @@ export const dbAttachments = mysqlTable(
 		id: varchar('id', { length: 191 }).notNull(),
 		messageId: varchar('messageId', { length: 191 }).notNull(),
 		contentType: varchar('contentType', { length: 191 }),
-		filename: varchar('filename', { length: 191 }).notNull(),
-		proxyUrl: varchar('proxyUrl', { length: 191 }).notNull(),
-		url: varchar('url', { length: 191 }).notNull(),
+		filename: varchar('filename', { length: 1024 }).notNull(),
+		proxyUrl: varchar('proxyUrl', { length: 1024 }).notNull(), // some of these are really long, need to find what the actual limit is
+		url: varchar('url', { length: 1024 }).notNull(),
 		width: int('width'),
 		height: int('height'),
 		size: int('size').notNull(),
