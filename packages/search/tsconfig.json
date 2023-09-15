@@ -11,7 +11,7 @@
 		"scripts",
 		"vitest.config.ts",
 		".prettierrc.cjs",
-    "../../reset.d.ts"
+		"../../reset.d.ts"
 	],
 	"ts-node": {
 		// these options are overrides used only by ts-node

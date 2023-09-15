@@ -62,14 +62,20 @@ export async function createManyDiscordAccounts(
 	const allowedToCreateAccounts = data.filter(
 		(x) => !ignoredIdsLookup.has(x.id),
 	);
-
-	await Promise.all(
-		allowedToCreateAccounts.map(async (account) => {
-			await db
-				.insert(dbDiscordAccounts)
-				.values(createInsertSchema(dbDiscordAccounts).parse(account));
-		}),
-	);
+	const chunkSize = 25;
+	const chunks = [];
+	for (let i = 0; i < allowedToCreateAccounts.length; i += chunkSize) {
+		chunks.push(allowedToCreateAccounts.slice(i, i + chunkSize));
+	}
+	for await (const chunk of chunks) {
+		await Promise.all(
+			chunk.map(async (account) =>
+				db
+					.insert(dbDiscordAccounts)
+					.values(createInsertSchema(dbDiscordAccounts).parse(account)),
+			),
+		);
+	}
 	return allowedToCreateAccounts.map((i) => getDefaultDiscordAccount(i));
 }
 
@@ -97,20 +103,22 @@ export async function updateManyDiscordAccounts(
 	>(data.map((i) => [i.id, i]));
 	const accountSet = Array.from(uniqueAccountsToCreate.values());
 
-	const updatedDiscordAccounts = await Promise.all(
-		accountSet.map(async (account) => {
-			await db
-				.update(dbDiscordAccounts)
-				.set(createInsertSchema(dbDiscordAccounts).parse(account))
-				.where(eq(dbDiscordAccounts.id, account.id));
-
-			return db.query.dbDiscordAccounts.findFirst({
-				where: eq(dbDiscordAccounts.id, account.id),
-			});
-		}),
-	);
-
-	return updatedDiscordAccounts.flat();
+	const chunkSize = 25;
+	const chunks = [];
+	for (let i = 0; i < accountSet.length; i += chunkSize) {
+		chunks.push(accountSet.slice(i, i + chunkSize));
+	}
+	for await (const chunk of chunks) {
+		await Promise.all(
+			chunk.map(async (account) =>
+				db
+					.update(dbDiscordAccounts)
+					.set(createInsertSchema(dbDiscordAccounts).parse(account))
+					.where(eq(dbDiscordAccounts.id, account.id)),
+			),
+		);
+	}
+	return accountSet.map((i) => getDefaultDiscordAccount(i));
 }
 
 export async function deleteDiscordAccount(id: string) {

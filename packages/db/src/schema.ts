@@ -319,7 +319,7 @@ export const dbAttachments = mysqlTable(
 		width: int('width'),
 		height: int('height'),
 		size: int('size').notNull(),
-		description: varchar('description', { length: 191 }),
+		description: varchar('description', { length: 1000 }),
 	},
 	(table) => {
 		return {

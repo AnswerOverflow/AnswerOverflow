@@ -436,13 +436,16 @@ export async function upsertManyMessages(data: BaseMessageWithRelations[]) {
 				.messageIndexingDisabled,
 	);
 
-	await Promise.all(
-		filteredMessages.map((msg) =>
-			upsertMessage(msg, {
-				ignoreChecks: true,
-			}),
-		),
-	);
+	const chunkSize = 25;
+	const chunks = [];
+	for (let i = 0; i < filteredMessages.length; i += chunkSize) {
+		chunks.push(filteredMessages.slice(i, i + chunkSize));
+	}
+	for await (const chunk of chunks) {
+		await Promise.all(
+			chunk.map((msg) => upsertMessage(msg, { ignoreChecks: true })),
+		);
+	}
 	return filteredMessages;
 }
 
