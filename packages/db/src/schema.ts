@@ -12,7 +12,7 @@ import {
 	boolean,
 	json,
 } from 'drizzle-orm/mysql-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 const unsignedInt = customType<{
 	data: number; // TODO: BigInt?
 }>({
@@ -181,11 +181,11 @@ export const dbUserServerSettings = mysqlTable(
 	(table) => {
 		return {
 			userIdIdx: index('UserServerSettings_userId_idx').on(table.userId),
-			serverIdIdx: index('UserServerSettings_serverId_idx').on(table.serverId),
-			userServerSettingsServerIdUserId: primaryKey(
-				table.serverId,
+			userServerSettingsUserIdServerId: primaryKey(
 				table.userId,
+				table.serverId,
 			),
+			serverIdIdx: index('UserServerSettings_serverId_idx').on(table.serverId),
 		};
 	},
 );
@@ -328,10 +328,18 @@ export const dbAttachments = mysqlTable(
 	},
 );
 
-export const dbEmojis = mysqlTable('Emoji', {
-	id: varchar('id', { length: 191 }).notNull(),
-	name: varchar('name', { length: 191 }).notNull(),
-});
+export const dbEmojis = mysqlTable(
+	'Emoji',
+	{
+		id: varchar('id', { length: 191 }).notNull(),
+		name: varchar('name', { length: 191 }).notNull(),
+	},
+	(table) => {
+		return {
+			emojiId: primaryKey(table.id),
+		};
+	},
+);
 
 export const dbReactions = mysqlTable(
 	'Reaction',
