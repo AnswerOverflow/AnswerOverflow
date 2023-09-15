@@ -436,7 +436,7 @@ export async function upsertManyMessages(data: BaseMessageWithRelations[]) {
 				.messageIndexingDisabled,
 	);
 
-	const chunkSize = 25;
+	const chunkSize = 500;
 	const chunks = [];
 	for (let i = 0; i < filteredMessages.length; i += chunkSize) {
 		chunks.push(filteredMessages.slice(i, i + chunkSize));

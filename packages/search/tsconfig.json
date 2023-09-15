@@ -19,7 +19,8 @@
 		"compilerOptions": {
 			"module": "commonjs",
 			"verbatimModuleSyntax": false // Transpile only also works
-		}
+		},
+		"transpileOnly": true
 	},
 	"exclude": ["node_modules", "../../node_modules/*"]
 }

@@ -16,7 +16,8 @@
 		"test:watch": "pnpm with-env vitest",
 		"create-message-index": "cross-env NODE_ENV=development pnpm with-env npx ts-node ./scripts/create-message-index.ts",
 		"create-message-index-safe": "cross-env NODE_ENV=production pnpm with-env npx ts-node ./scripts/create-message-index.ts",
-		"db:wipe": "cross-env NODE_ENV=development pnpm with-env npx ts-node ./scripts/wipe.ts"
+		"db:wipe": "cross-env NODE_ENV=development pnpm with-env npx ts-node ./scripts/wipe.ts",
+		"db:migrate:elastic-to-ps": "cross-env NODE_ENV=development pnpm with-env npx ts-node ./scripts/migrate.ts"
 	},
 	"dependencies": {
 		"@answeroverflow/env": "workspace:^",

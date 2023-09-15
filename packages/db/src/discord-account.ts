@@ -118,7 +118,7 @@ export async function updateManyDiscordAccounts(
 			),
 		);
 	}
-	return accountSet.map((i) => getDefaultDiscordAccount(i));
+	return findManyDiscordAccountsById(accountSet.map((i) => i.id));
 }
 
 export async function deleteDiscordAccount(id: string) {

@@ -1,12 +1,9 @@
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { z } from 'zod';
 import type {
-	APIActionRowComponent,
 	APIAttachment,
 	APIEmbed,
-	APIMessageActionRowComponent,
 	APIMessageReference,
-	APISelectMenuOption,
 } from 'discord-api-types/v10';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
@@ -141,8 +138,8 @@ const messageReferenceProperties: MessageReferenceMappingProperty = {
 };
 
 const zMessageReaction = z.object({
-	emojiName: z.string().nullable(),
-	emojiId: z.string().nullable(),
+	emojiName: z.string().nullable().optional(),
+	emojiId: z.string().nullable().optional(),
 	reactorIds: z.array(z.string()),
 });
 
