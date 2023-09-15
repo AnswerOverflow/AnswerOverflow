@@ -2,14 +2,14 @@ import {
 	type ChannelWithFlags,
 	type DiscordAccount,
 	getDefaultDiscordAccount,
-	getDefaultMessage,
 	isMessageFull,
-	type Message,
+	type BaseMessage,
 	type MessageFull,
 	type MessageWithDiscordAccount,
 	type Server,
 } from '@answeroverflow/db';
 import { omit, pick } from '@answeroverflow/utils';
+import { getDefaultMessage } from '@answeroverflow/db/src/utils/message-default';
 
 export function pickPublicServerData(server: Server) {
 	return pick(
@@ -26,7 +26,7 @@ export function pickPublicServerData(server: Server) {
 }
 
 type ToMessageWithDiscordAccount = {
-	message: Message;
+	message: BaseMessage;
 	author: DiscordAccount;
 	publicMessage: boolean;
 };
@@ -40,6 +40,8 @@ export function toMessageWithDiscordAccount({
 		...omit(message, 'authorId'),
 		author,
 		public: publicMessage,
+		embeds: [],
+		attachments: [],
 	};
 	return msg;
 }
@@ -56,8 +58,8 @@ export function toMessageWithAccountAndRepliesTo({
 }) {
 	const publicMsg: MessageFull = {
 		...toMessageWithDiscordAccount({ message, author, publicMessage }),
-		solutionMessages: solutions,
-		referencedMessage: referenced ?? null,
+		solutions: solutions,
+		reference: referenced,
 	};
 	return publicMsg;
 }
@@ -81,16 +83,18 @@ export function toPrivateMessageWithStrippedData(
 		}),
 		author,
 		public: false,
+		embeds: [],
+		attachments: [],
 	};
 	if (isReply) {
 		return privateMsg;
 	}
 	return {
 		...privateMsg,
-		referencedMessage: message.referencedMessage
-			? toPrivateMessageWithStrippedData(message.referencedMessage)
-			: null,
-		solutionMessages: message.solutionMessages.map((m) =>
+		reference: message.reference
+			? toPrivateMessageWithStrippedData(message.reference)
+			: undefined,
+		solutions: message.solutions.map((m) =>
 			toPrivateMessageWithStrippedData(m),
 		),
 	};

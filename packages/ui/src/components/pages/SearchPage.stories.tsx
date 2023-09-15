@@ -30,8 +30,8 @@ Results.args = {
 		{
 			message: {
 				...mockMessageWithDiscordAccount(),
-				solutionMessages: [],
-				referencedMessage: mockMessageWithDiscordAccount(),
+				solutions: [],
+				reference: mockMessageWithDiscordAccount(),
 			},
 			thread: mockChannelWithSettings(),
 			score: 0.5,
@@ -44,8 +44,8 @@ Results.args = {
 		{
 			message: {
 				...mockMessageWithDiscordAccount(),
-				solutionMessages: [],
-				referencedMessage: mockMessageWithDiscordAccount(),
+				solutions: [],
+				reference: mockMessageWithDiscordAccount(),
 			},
 			thread: mockChannelWithSettings(),
 			score: 0.5,
@@ -58,8 +58,8 @@ Results.args = {
 		{
 			message: {
 				...mockMessageWithDiscordAccount(),
-				solutionMessages: [],
-				referencedMessage: mockMessageWithDiscordAccount(),
+				solutions: [],
+				reference: mockMessageWithDiscordAccount(),
 			},
 			thread: mockChannelWithSettings(),
 			score: 0.5,
@@ -84,8 +84,8 @@ ResultsWithSuperLongMessage.args = {
 						count: 250,
 					}),
 				}),
-				solutionMessages: [],
-				referencedMessage: mockMessageWithDiscordAccount(),
+				solutions: [],
+				reference: mockMessageWithDiscordAccount(),
 			},
 			thread: mockChannelWithSettings(),
 			score: 0.5,

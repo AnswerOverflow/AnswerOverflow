@@ -13,7 +13,7 @@ import { IncomingMessage } from 'http';
 import { NextAuthOptions } from 'next-auth';
 import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 import { findServerByCustomDomain } from '@answeroverflow/db/src/server';
-import { tenantSessions } from '@answeroverflow/db/src/schema';
+import { dbTenantSessions } from '@answeroverflow/db/src/schema';
 import { randomUUID } from 'node:crypto';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 
@@ -79,7 +79,7 @@ export default async function handler(
 
 	const tenantSessionId = randomUUID();
 
-	await db.insert(tenantSessions).values({
+	await db.insert(dbTenantSessions).values({
 		id: tenantSessionId,
 		serverId: tenant.id,
 		sessionToken: token,

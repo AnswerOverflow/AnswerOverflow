@@ -126,8 +126,7 @@ export const LinkMessage = ({
 } & {
 	showNoSolutionCTA?: boolean;
 }) => {
-	const solution =
-		'solutionMessages' in message ? message.solutionMessages?.[0] : undefined;
+	const solution = 'solutions' in message ? message.solutions?.[0] : undefined;
 	return (
 		<div className={'flex w-full flex-col'}>
 			<Message

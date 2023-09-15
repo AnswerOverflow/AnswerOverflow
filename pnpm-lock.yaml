@@ -110,6 +110,9 @@ importers:
       '@answeroverflow/payments':
         specifier: workspace:^
         version: link:../../packages/payments
+      '@answeroverflow/search':
+        specifier: workspace:^
+        version: link:../../packages/search
       '@answeroverflow/utils':
         specifier: workspace:^
         version: link:../../packages/utils
@@ -406,9 +409,6 @@ importers:
       '@answeroverflow/db':
         specifier: workspace:^
         version: link:../../packages/db
-      '@answeroverflow/elastic-types':
-        specifier: workspace:^
-        version: link:../../packages/elastic-types
       '@answeroverflow/env':
         specifier: workspace:^
         version: link:../../packages/env
@@ -418,6 +418,9 @@ importers:
       '@answeroverflow/payments':
         specifier: workspace:^
         version: link:../../packages/payments
+      '@answeroverflow/search':
+        specifier: workspace:^
+        version: link:../../packages/search
       '@answeroverflow/tailwind-config':
         specifier: workspace:^
         version: link:../../packages/config/tailwind
@@ -439,9 +442,6 @@ importers:
       '@next/mdx':
         specifier: ^13.4.19
         version: 13.4.19(@mdx-js/loader@2.3.0)(@mdx-js/react@2.3.0)
-      '@resvg/resvg-js':
-        specifier: ^2.4.1
-        version: 2.4.1
       '@sentry/nextjs':
         specifier: ^7.64.0
         version: 7.64.0(next@13.4.13)(react@18.2.0)(webpack@5.88.2)
@@ -466,6 +466,9 @@ importers:
       '@trpc/server':
         specifier: ^10.37.1
         version: 10.37.1
+      '@vercel/og':
+        specifier: ^0.5.13
+        version: 0.5.13
       core-js:
         specifier: ^3.32.1
         version: 3.32.1
@@ -505,9 +508,6 @@ importers:
       remark-gfm:
         specifier: ^3.0.1
         version: 3.0.1
-      satori:
-        specifier: ^0.10.3
-        version: 0.10.3
       sharp:
         specifier: ^0.32.5
         version: 0.32.5
@@ -685,6 +685,9 @@ importers:
       '@answeroverflow/payments':
         specifier: workspace:^
         version: link:../payments
+      '@answeroverflow/search':
+        specifier: workspace:^
+        version: link:../search
       '@answeroverflow/utils':
         specifier: workspace:^
         version: link:../utils
@@ -997,9 +1000,6 @@ importers:
         specifier: ^3.22.2
         version: 3.22.2
     devDependencies:
-      '@answeroverflow/elastic-types':
-        specifier: workspace:^
-        version: link:../elastic-types
       '@answeroverflow/prettier-config':
         specifier: workspace:^
         version: link:../config/prettier
@@ -1027,9 +1027,6 @@ importers:
       '@answeroverflow/db-mock':
         specifier: workspace:^
         version: link:../db-mock
-      '@answeroverflow/elastic-types':
-        specifier: workspace:^
-        version: link:../elastic-types
       '@answeroverflow/env':
         specifier: workspace:^
         version: link:../env
@@ -1109,9 +1106,6 @@ importers:
 
   packages/db-mock:
     dependencies:
-      '@answeroverflow/elastic-types':
-        specifier: workspace:^
-        version: link:../elastic-types
       '@answeroverflow/env':
         specifier: workspace:^
         version: link:../env
@@ -1248,61 +1242,6 @@ importers:
         specifier: ^10.9.1
         version: 10.9.1(@swc/core@1.3.78)(@types/node@18.17.6)(typescript@5.1.6)
 
-  packages/elastic-types:
-    dependencies:
-      '@answeroverflow/env':
-        specifier: workspace:^
-        version: link:../env
-      '@answeroverflow/utils':
-        specifier: workspace:^
-        version: link:../utils
-      '@elastic/elasticsearch':
-        specifier: ^8.9.0
-        version: 8.9.0
-      discord-api-types:
-        specifier: ^0.37.54
-        version: 0.37.54
-      dotenv-cra:
-        specifier: ^3.0.3
-        version: 3.0.3
-      elastic-builder:
-        specifier: ^2.21.0
-        version: 2.21.0
-      zod:
-        specifier: ^3.22.2
-        version: 3.22.2
-    devDependencies:
-      '@answeroverflow/prettier-config':
-        specifier: workspace:^
-        version: link:../config/prettier
-      '@answeroverflow/tsconfig':
-        specifier: workspace:^
-        version: link:../config/tsconfig
-      '@vitest/coverage-c8':
-        specifier: ^0.28.5
-        version: 0.28.5
-      cross-env:
-        specifier: ^7.0.3
-        version: 7.0.3
-      dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
-      eslint:
-        specifier: ^8.47.0
-        version: 8.47.0
-      prettier:
-        specifier: ^2.8.8
-        version: 2.8.8
-      ts-node:
-        specifier: ^10.9.1
-        version: 10.9.1(@types/node@20.5.1)(typescript@5.1.6)
-      type-fest:
-        specifier: ^3.13.1
-        version: 3.13.1
-      vitest:
-        specifier: ^0.29.8
-        version: 0.29.8
-
   packages/env:
     dependencies:
       '@t3-oss/env-nextjs':
@@ -1413,6 +1352,64 @@ importers:
       prettier:
         specifier: ^2.8.8
         version: 2.8.8
+      vitest:
+        specifier: ^0.29.8
+        version: 0.29.8
+
+  packages/search:
+    dependencies:
+      '@answeroverflow/db':
+        specifier: workspace:^
+        version: link:../db
+      '@answeroverflow/env':
+        specifier: workspace:^
+        version: link:../env
+      '@answeroverflow/utils':
+        specifier: workspace:^
+        version: link:../utils
+      '@elastic/elasticsearch':
+        specifier: ^8.9.0
+        version: 8.9.0
+      discord-api-types:
+        specifier: ^0.37.54
+        version: 0.37.54
+      dotenv-cra:
+        specifier: ^3.0.3
+        version: 3.0.3
+      elastic-builder:
+        specifier: ^2.21.0
+        version: 2.21.0
+      zod:
+        specifier: ^3.22.2
+        version: 3.22.2
+    devDependencies:
+      '@answeroverflow/prettier-config':
+        specifier: workspace:^
+        version: link:../config/prettier
+      '@answeroverflow/tsconfig':
+        specifier: workspace:^
+        version: link:../config/tsconfig
+      '@vitest/coverage-c8':
+        specifier: ^0.28.5
+        version: 0.28.5
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
+      dotenv-cli:
+        specifier: ^7.3.0
+        version: 7.3.0
+      eslint:
+        specifier: ^8.47.0
+        version: 8.47.0
+      prettier:
+        specifier: ^2.8.8
+        version: 2.8.8
+      ts-node:
+        specifier: ^10.9.1
+        version: 10.9.1(@types/node@20.5.1)(typescript@5.1.6)
+      type-fest:
+        specifier: ^3.13.1
+        version: 3.13.1
       vitest:
         specifier: ^0.29.8
         version: 0.29.8
@@ -3819,7 +3816,7 @@ packages:
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
       '@jest/types': 29.6.1
-      '@types/node': 18.17.6
+      '@types/node': 20.5.1
       chalk: 4.1.2
       jest-message-util: 29.6.2
       jest-util: 29.6.2
@@ -3887,7 +3884,7 @@ packages:
     dependencies:
       '@jest/fake-timers': 29.6.2
       '@jest/types': 29.6.1
-      '@types/node': 18.17.6
+      '@types/node': 20.5.1
       jest-mock: 29.6.2
 
   /@jest/expect-utils@29.6.2:
@@ -3911,7 +3908,7 @@ packages:
     dependencies:
       '@jest/types': 29.6.1
       '@sinonjs/fake-timers': 10.3.0
-      '@types/node': 18.17.6
+      '@types/node': 20.5.1
       jest-message-util: 29.6.2
       jest-mock: 29.6.2
       jest-util: 29.6.2
@@ -3942,7 +3939,7 @@ packages:
       '@jest/transform': 29.6.2
       '@jest/types': 29.6.1
       '@jridgewell/trace-mapping': 0.3.19
-      '@types/node': 18.17.6
+      '@types/node': 20.5.1
       chalk: 4.1.2
       collect-v8-coverage: 1.0.2
       exit: 0.1.2
@@ -4034,7 +4031,7 @@ packages:
     dependencies:
       '@types/istanbul-lib-coverage': 2.0.4
       '@types/istanbul-reports': 3.0.1
-      '@types/node': 18.17.6
+      '@types/node': 20.5.1
       '@types/yargs': 16.0.5
       chalk: 4.1.2
 
@@ -5877,130 +5874,9 @@ packages:
       '@redis/client': 1.5.8
     dev: false
 
-  /@resvg/resvg-js-android-arm-eabi@2.4.1:
-    resolution: {integrity: sha512-AA6f7hS0FAPpvQMhBCf6f1oD1LdlqNXKCxAAPpKh6tR11kqV0YIB9zOlIYgITM14mq2YooLFl6XIbbvmY+jwUw==}
+  /@resvg/resvg-wasm@2.4.1:
+    resolution: {integrity: sha512-yi6R0HyHtsoWTRA06Col4WoDs7SvlXU3DLMNP2bdAgs7HK18dTEVl1weXgxRzi8gwLteGUbIg29zulxIB3GSdg==}
     engines: {node: '>= 10'}
-    cpu: [arm]
-    os: [android]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@resvg/resvg-js-android-arm64@2.4.1:
-    resolution: {integrity: sha512-/QleoRdPfsEuH9jUjilYcDtKK/BkmWcK+1LXM8L2nsnf/CI8EnFyv7ZzCj4xAIvZGAy9dTYr/5NZBcTwxG2HQg==}
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [android]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@resvg/resvg-js-darwin-arm64@2.4.1:
-    resolution: {integrity: sha512-U1oMNhea+kAXgiEXgzo7EbFGCD1Edq5aSlQoe6LMly6UjHzgx2W3N5kEXCwU/CgN5FiQhZr7PlSJSlcr7mdhfg==}
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [darwin]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@resvg/resvg-js-darwin-x64@2.4.1:
-    resolution: {integrity: sha512-avyVh6DpebBfHHtTQTZYSr6NG1Ur6TEilk1+H0n7V+g4F7x7WPOo8zL00ZhQCeRQ5H4f8WXNWIEKL8fwqcOkYw==}
-    engines: {node: '>= 10'}
-    cpu: [x64]
-    os: [darwin]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@resvg/resvg-js-linux-arm-gnueabihf@2.4.1:
-    resolution: {integrity: sha512-isY/mdKoBWH4VB5v621co+8l101jxxYjuTkwOLsbW+5RK9EbLciPlCB02M99ThAHzI2MYxIUjXNmNgOW8btXvw==}
-    engines: {node: '>= 10'}
-    cpu: [arm]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@resvg/resvg-js-linux-arm64-gnu@2.4.1:
-    resolution: {integrity: sha512-uY5voSCrFI8TH95vIYBm5blpkOtltLxLRODyhKJhGfskOI7XkRw5/t1u0sWAGYD8rRSNX+CA+np86otKjubrNg==}
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@resvg/resvg-js-linux-arm64-musl@2.4.1:
-    resolution: {integrity: sha512-6mT0+JBCsermKMdi/O2mMk3m7SqOjwi9TKAwSngRZ/nQoL3Z0Z5zV+572ztgbWr0GODB422uD8e9R9zzz38dRQ==}
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@resvg/resvg-js-linux-x64-gnu@2.4.1:
-    resolution: {integrity: sha512-60KnrscLj6VGhkYOJEmmzPlqqfcw1keDh6U+vMcNDjPhV3B5vRSkpP/D/a8sfokyeh4VEacPSYkWGezvzS2/mg==}
-    engines: {node: '>= 10'}
-    cpu: [x64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@resvg/resvg-js-linux-x64-musl@2.4.1:
-    resolution: {integrity: sha512-0AMyZSICC1D7ge115cOZQW8Pcad6PjWuZkBFF3FJuSxC6Dgok0MQnLTs2MfMdKBlAcwO9dXsf3bv9tJZj8pATA==}
-    engines: {node: '>= 10'}
-    cpu: [x64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@resvg/resvg-js-win32-arm64-msvc@2.4.1:
-    resolution: {integrity: sha512-76XDFOFSa3d0QotmcNyChh2xHwk+JTFiEQBVxMlHpHMeq7hNrQJ1IpE1zcHSQvrckvkdfLboKRrlGB86B10Qjw==}
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [win32]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@resvg/resvg-js-win32-ia32-msvc@2.4.1:
-    resolution: {integrity: sha512-odyVFGrEWZIzzJ89KdaFtiYWaIJh9hJRW/frcEcG3agJ464VXkN/2oEVF5ulD+5mpGlug9qJg7htzHcKxDN8sg==}
-    engines: {node: '>= 10'}
-    cpu: [ia32]
-    os: [win32]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@resvg/resvg-js-win32-x64-msvc@2.4.1:
-    resolution: {integrity: sha512-vY4kTLH2S3bP+puU5x7hlAxHv+ulFgcK6Zn3efKSr0M0KnZ9A3qeAjZteIpkowEFfUeMPNg2dvvoFRJA9zqxSw==}
-    engines: {node: '>= 10'}
-    cpu: [x64]
-    os: [win32]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@resvg/resvg-js@2.4.1:
-    resolution: {integrity: sha512-wTOf1zerZX8qYcMmLZw3czR4paI4hXqPjShNwJRh5DeHxvgffUS5KM7XwxtbIheUW6LVYT5fhT2AJiP6mU7U4A==}
-    engines: {node: '>= 10'}
-    optionalDependencies:
-      '@resvg/resvg-js-android-arm-eabi': 2.4.1
-      '@resvg/resvg-js-android-arm64': 2.4.1
-      '@resvg/resvg-js-darwin-arm64': 2.4.1
-      '@resvg/resvg-js-darwin-x64': 2.4.1
-      '@resvg/resvg-js-linux-arm-gnueabihf': 2.4.1
-      '@resvg/resvg-js-linux-arm64-gnu': 2.4.1
-      '@resvg/resvg-js-linux-arm64-musl': 2.4.1
-      '@resvg/resvg-js-linux-x64-gnu': 2.4.1
-      '@resvg/resvg-js-linux-x64-musl': 2.4.1
-      '@resvg/resvg-js-win32-arm64-msvc': 2.4.1
-      '@resvg/resvg-js-win32-ia32-msvc': 2.4.1
-      '@resvg/resvg-js-win32-x64-msvc': 2.4.1
     dev: false
 
   /@rollup/plugin-commonjs@24.0.0(rollup@2.78.0):
@@ -6877,7 +6753,7 @@ packages:
   /@types/graceful-fs@4.1.6:
     resolution: {integrity: sha512-Sig0SNORX9fdW+bQuTEovKj3uHcUL6LQKbCrrqb1X7J6/ReAbhCXRAhc+SMejhLELFj2QcyuxmUooZ4bt5ReSw==}
     dependencies:
-      '@types/node': 18.17.6
+      '@types/node': 20.5.1
 
   /@types/hast@2.3.5:
     resolution: {integrity: sha512-SvQi0L/lNpThgPoleH53cdjB3y9zpLlVjRbqB3rH8hx1jiRSBGAhyjV3H+URFjNVRqt2EdYNrbZE5IsGlNfpRg==}
@@ -7148,6 +7024,15 @@ packages:
     dependencies:
       '@typescript-eslint/types': 5.62.0
       eslint-visitor-keys: 3.4.3
+
+  /@vercel/og@0.5.13:
+    resolution: {integrity: sha512-okWQ2Jt+155Hn518Y8Tt4Iqb7QdNFoPvH/n4sMpC4K4bcijjo2RAEwXwlhTYHAAkoiJ0AEEeWeknZj1aBgOOqw==}
+    engines: {node: '>=16'}
+    dependencies:
+      '@resvg/resvg-wasm': 2.4.1
+      satori: 0.10.4
+      yoga-wasm-web: 0.3.3
+    dev: false
 
   /@vitejs/plugin-react-swc@3.1.0(vite@4.4.9):
     resolution: {integrity: sha512-xnDULNrkEbtTtRNnMPp+RsuIuIbk1JJV0xY7irchYyv9JJS4uvmc1EYip+qyrnkcX7TQ9c8vCS3AmkQqADI0Fw==}
@@ -11630,7 +11515,7 @@ packages:
       '@jest/expect': 29.6.2
       '@jest/test-result': 29.6.2
       '@jest/types': 29.6.1
-      '@types/node': 18.17.6
+      '@types/node': 20.5.1
       chalk: 4.1.2
       co: 4.6.0
       dedent: 1.5.1
@@ -11750,7 +11635,7 @@ packages:
       '@jest/environment': 29.6.2
       '@jest/fake-timers': 29.6.2
       '@jest/types': 29.6.1
-      '@types/node': 18.17.6
+      '@types/node': 20.5.1
       jest-mock: 29.6.2
       jest-util: 29.6.2
 
@@ -11764,7 +11649,7 @@ packages:
     dependencies:
       '@jest/types': 29.6.1
       '@types/graceful-fs': 4.1.6
-      '@types/node': 18.17.6
+      '@types/node': 20.5.1
       anymatch: 3.1.3
       fb-watchman: 2.0.2
       graceful-fs: 4.2.11
@@ -11811,7 +11696,7 @@ packages:
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
       '@jest/types': 29.6.1
-      '@types/node': 18.17.6
+      '@types/node': 20.5.1
       jest-util: 29.6.2
 
   /jest-pnp-resolver@1.2.3(jest-resolve@29.6.2):
@@ -11866,7 +11751,7 @@ packages:
       '@jest/test-result': 29.6.2
       '@jest/transform': 29.6.2
       '@jest/types': 29.6.1
-      '@types/node': 18.17.6
+      '@types/node': 20.5.1
       chalk: 4.1.2
       emittery: 0.13.1
       graceful-fs: 4.2.11
@@ -11896,7 +11781,7 @@ packages:
       '@jest/test-result': 29.6.2
       '@jest/transform': 29.6.2
       '@jest/types': 29.6.1
-      '@types/node': 18.17.6
+      '@types/node': 20.5.1
       chalk: 4.1.2
       cjs-module-lexer: 1.2.3
       collect-v8-coverage: 1.0.2
@@ -11981,7 +11866,7 @@ packages:
     dependencies:
       '@jest/test-result': 29.6.2
       '@jest/types': 29.6.1
-      '@types/node': 18.17.6
+      '@types/node': 20.5.1
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       emittery: 0.13.1
@@ -12001,7 +11886,7 @@ packages:
     resolution: {integrity: sha512-l3ccBOabTdkng8I/ORCkADz4eSMKejTYv1vB/Z83UiubqhC1oQ5Li6dWCyqOIvSifGjUBxuvxvlm6KGK2DtuAQ==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
-      '@types/node': 18.17.6
+      '@types/node': 20.5.1
       jest-util: 29.6.2
       merge-stream: 2.0.0
       supports-color: 8.1.1
@@ -15823,8 +15708,8 @@ packages:
       immutable: 4.3.2
       source-map-js: 1.0.2
 
-  /satori@0.10.3:
-    resolution: {integrity: sha512-8tZPu7AGiRWimbOyja1s2HK0hEC4DacZ8cAKDITxlVI5tKQZbOuMiVgSB50CABwc0I4Imgtkq7o9Egj1WOJTKg==}
+  /satori@0.10.4:
+    resolution: {integrity: sha512-GJNIsuiXhiC9kWGLvz04Op5DZy2UFYZAWsuUtkTlQt3r15o0K96PeD+FMfGN4luMPUHc4uV9gXqAoPxOK0omSw==}
     engines: {node: '>=16'}
     dependencies:
       '@shuding/opentype.js': 1.4.0-beta.0

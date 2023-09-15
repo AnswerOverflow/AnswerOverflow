@@ -32,12 +32,11 @@ class MyDocument extends Document {
 						id="Adsense-id"
 						data-ad-client="ca-pub-1392153990042810"
 						async={true}
-						strategy="beforeInteractive"
 						src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1392153990042810"
 						crossOrigin="anonymous"
 					/>
 				</Head>
-				<body className="bg-background">
+				<body className="bg-background text-primary">
 					<Main />
 					<NextScript />
 				</body>

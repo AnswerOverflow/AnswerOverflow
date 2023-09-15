@@ -76,7 +76,7 @@ WithSolvedQuestion.args = {
 						content: loremIpsum({
 							count: 250,
 						}),
-						solutionMessages: [mockMessageFull()],
+						solutions: [mockMessageFull()],
 					}),
 					thread: mockChannelWithSettings({
 						type: ChannelType.PublicThread,
@@ -101,7 +101,7 @@ WithLongNameAndDescription.args = {
 						content: loremIpsum({
 							count: 250,
 						}),
-						solutionMessages: [mockMessageFull()],
+						solutions: [mockMessageFull()],
 					}),
 					thread: mockChannelWithSettings({
 						type: ChannelType.PublicThread,

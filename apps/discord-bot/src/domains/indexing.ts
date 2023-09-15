@@ -2,7 +2,7 @@ import {
 	bulkFindLatestMessageInChannel,
 	findChannelById,
 	findLatestArchivedTimestampByChannelId,
-	findLatestMessageInChannel,
+	findLatestMessageIdInChannel,
 	findManyUserServerSettings,
 	upsertChannel,
 	upsertManyDiscordAccounts,
@@ -32,6 +32,7 @@ import { sortMessagesById } from '@answeroverflow/discordjs-utils';
 import * as Sentry from '@sentry/node';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { botEnv } from '@answeroverflow/env/bot';
+import { indexMessageForSearch } from '@answeroverflow/search/src';
 
 export async function indexServers(client: Client) {
 	const indexingStartTime = Date.now();
@@ -40,6 +41,10 @@ export async function indexServers(client: Client) {
 		try {
 			await indexServer(guild);
 		} catch (error) {
+			container.logger.error(
+				`Error indexing server ${guild.id} | ${guild.name}`,
+				error,
+			);
 			Sentry.withScope((scope) => {
 				scope.setExtra('guild', guild);
 				Sentry.captureException(error);
@@ -168,7 +173,7 @@ export async function indexRootChannel(
 			threadsToIndex.map((x) => x.id),
 		);
 		const threadMessageLookup = new Map<string, string>(
-			mostRecentlyIndexedMessages.map((x) => [x.channelId, x.id]),
+			mostRecentlyIndexedMessages.map((x) => [x.channelId, x.latestMessageId]),
 		);
 		const outOfDateThreads = threadsToIndex.filter(
 			(x) => threadMessageLookup.get(x.id) !== x.lastMessageId,
@@ -200,7 +205,9 @@ Server: ${channel.guildId} | ${channel.guild.name}`,
       Threads can be found from normal messages or system create messages
       TODO: Handle threads without any parent messages in the channel, unsure if possible
       */
-		await indexTextBasedChannel(channel);
+		await indexTextBasedChannel(channel, {
+			skipIndexingEnabledCheck: true,
+		});
 	}
 }
 
@@ -208,14 +215,23 @@ export async function indexTextBasedChannel(
 	channel: GuildTextBasedChannel,
 	opts?: {
 		fromMessageId?: Snowflake;
+		skipIndexingEnabledCheck?: boolean;
 	},
 ) {
+	if (!opts?.skipIndexingEnabledCheck) {
+		const settings = await findChannelById(
+			channel.isThread() ? channel.parentId! : channel.id,
+		);
+		if (!settings?.flags?.indexingEnabled) {
+			return;
+		}
+	}
 	if (!channel.viewable) {
 		return;
 	}
 	const start =
 		opts?.fromMessageId ??
-		(await findLatestMessageInChannel(channel.id).then((x) => x?.id));
+		(await findLatestMessageIdInChannel(channel.id).then((x) => x));
 	container.logger.debug(
 		`Indexing channel ${channel.id} | ${channel.name} from message id ${
 			start ?? 'beginning'
@@ -296,7 +312,8 @@ async function storeIndexData(
 		},
 	});
 	container.logger.debug(`Upserting ${convertedMessages.length} messages`);
-	await upsertManyMessages(convertedMessages);
+	const upserted = await upsertManyMessages(convertedMessages);
+	await indexMessageForSearch(upserted);
 }
 
 type MessageFetchOptions = {

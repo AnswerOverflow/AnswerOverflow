@@ -13,7 +13,7 @@
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix",
 		"db:push": "cross-env drizzle-kit push:mysql",
-		"db:wipe": "cross-env NODE_ENV=test pnpm with-env npx ts-node ./scripts/wipe.ts",
+		"db:wipe": "cross-env pnpm with-env npx ts-node ./scripts/wipe.ts",
 		"db:introspect": "drizzle-kit introspect:mysql",
 		"test": "pnpm with-env vitest run --coverage",
 		"test:watch": "pnpm with-env vitest"
@@ -21,7 +21,6 @@
 	"dependencies": {
 		"@answeroverflow/constants": "workspace:^",
 		"@answeroverflow/db-mock": "workspace:^",
-		"@answeroverflow/elastic-types": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
 		"@auth/core": "^0.12.0",

@@ -13,10 +13,10 @@ import {
 import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
 import {
 	createDiscordAccount,
+	findFullMessageById,
 	findMessageById,
 	upsertMessage,
 } from '@answeroverflow/db';
-import { getRandomId } from '@answeroverflow/utils';
 
 let client: SapphireClient;
 let message: Message;
@@ -34,7 +34,7 @@ describe('Message Delete Tests', () => {
 		await upsertMessage(await toAOMessage(message));
 		await emitEvent(client, Events.MessageDelete, message);
 		const deletedMsg = await findMessageById(message.id);
-		expect(deletedMsg).toBeNull();
+		expect(deletedMsg).not.toBeDefined();
 	});
 	test.todo('should delete an uncached message');
 });
@@ -44,14 +44,15 @@ describe('Message Update Tests', () => {
 		const updatedMessage = copyClass(message, client, {
 			content: 'updated',
 		});
-		const created = await upsertMessage({
+		const q = mockMessage({ client, channel: textChannel });
+		await upsertMessage(await toAOMessage(q));
+		await upsertMessage({
 			...(await toAOMessage(message)),
-			solutionIds: [getRandomId()],
+			questionId: q.id,
 		});
 		await emitEvent(client, Events.MessageUpdate, message, updatedMessage);
-		const updated = await findMessageById(message.id);
-		expect(updated!.content).toBe('updated');
-		expect(updated!.solutionIds).toEqual(created.solutionIds);
+		const updated = await findFullMessageById(q.id);
+		expect(updated!.solutions[0]!.id).toEqual(message.id);
 	});
 	test.todo('should update an uncached edited message');
 });
@@ -67,7 +68,7 @@ describe('Message Bulk Delete Tests', () => {
 		);
 
 		const deletedMsg = await findMessageById(message.id);
-		expect(deletedMsg).toBeNull();
+		expect(deletedMsg).not.toBeDefined();
 	});
 	test.todo('should delete an uncached bulk messages');
 });

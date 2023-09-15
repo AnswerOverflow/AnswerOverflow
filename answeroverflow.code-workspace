@@ -64,8 +64,8 @@
       "path": "packages/cache"
     },
     {
-      "name": "elastic-types",
-      "path": "packages/elastic-types"
+      "name": "search",
+      "path": "packages/search"
     },
     {
       "name": "utils",
@@ -169,7 +169,7 @@
       "analytics",
       "db-mock",
       "constants",
-      "elastic-types",
+      "search",
       "cache",
       "docs"
     ],

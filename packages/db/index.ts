@@ -24,4 +24,3 @@ export * from './src/utils/error';
 export * from './src/utils/operations';
 export * from './src/utils/serverUtils';
 export * from './src/utils/userServerSettingsUtils';
-export * from '@answeroverflow/elastic-types';

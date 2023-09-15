@@ -1,5 +1,5 @@
 {
-	"name": "@answeroverflow/elastic-types",
+	"name": "@answeroverflow/search",
 	"version": "0.1.0",
 	"main": "./index.ts",
 	"types": "./index.ts",
@@ -15,11 +15,14 @@
 		"test": "pnpm with-env vitest run  --coverage",
 		"test:watch": "pnpm with-env vitest",
 		"create-message-index": "cross-env NODE_ENV=development pnpm with-env npx ts-node ./scripts/create-message-index.ts",
-		"create-message-index-safe": "cross-env NODE_ENV=production pnpm with-env npx ts-node ./scripts/create-message-index.ts"
+		"create-message-index-safe": "cross-env NODE_ENV=production pnpm with-env npx ts-node ./scripts/create-message-index.ts",
+		"db:wipe": "cross-env NODE_ENV=development pnpm with-env npx ts-node ./scripts/wipe.ts",
+		"db:migrate:elastic-to-ps": "cross-env NODE_ENV=development pnpm with-env npx ts-node ./scripts/migrate.ts"
 	},
 	"dependencies": {
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
+		"@answeroverflow/db": "workspace:^",
 		"@elastic/elasticsearch": "^8.9.0",
 		"discord-api-types": "^0.37.54",
 		"dotenv-cra": "^3.0.3",

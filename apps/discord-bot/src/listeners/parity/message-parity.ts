@@ -5,7 +5,7 @@ import {
 	deleteManyMessages,
 	deleteMessage,
 	findMessageById,
-	updateMessage,
+	upsertMessage,
 } from '@answeroverflow/db';
 import { toAOMessage } from '~discord-bot/utils/conversions';
 
@@ -39,9 +39,9 @@ export class OnMessageUpdate extends Listener {
 		const existing = await findMessageById(newMessage.id);
 		if (!existing) return;
 		const converted = await toAOMessage(newMessage);
-		await updateMessage({
+		await upsertMessage({
 			...converted,
-			solutionIds: existing.solutionIds,
+			questionId: existing.questionId,
 		});
 	}
 }

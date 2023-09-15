@@ -17,8 +17,8 @@ PublicSolution.args = {
 	result: {
 		message: {
 			...mockMessageWithDiscordAccount(),
-			solutionMessages: [mockMessageWithDiscordAccount()],
-			referencedMessage: mockMessageWithDiscordAccount(),
+			solutions: [mockMessageWithDiscordAccount()],
+			reference: mockMessageWithDiscordAccount(),
 		},
 		thread: mockChannelWithSettings(),
 		score: 0.5,
@@ -40,8 +40,8 @@ PublicSolutionWithSuperLongMessage.args = {
 					count: 250,
 				}),
 			}),
-			solutionMessages: [mockMessageWithDiscordAccount()],
-			referencedMessage: mockMessageWithDiscordAccount(),
+			solutions: [mockMessageWithDiscordAccount()],
+			reference: mockMessageWithDiscordAccount(),
 		},
 		thread: mockChannelWithSettings(),
 		score: 0.5,
@@ -59,13 +59,13 @@ PrivateSolution.args = {
 	result: {
 		message: {
 			...mockMessageWithDiscordAccount(),
-			solutionMessages: [
+			solutions: [
 				{
 					...mockMessageWithDiscordAccount(),
 					public: false,
 				},
 			],
-			referencedMessage: mockMessageWithDiscordAccount(),
+			reference: mockMessageWithDiscordAccount(),
 		},
 		thread: mockChannelWithSettings(),
 		score: 0.5,
@@ -83,13 +83,13 @@ PrivateResult.args = {
 	result: {
 		message: {
 			...mockMessageWithDiscordAccount(),
-			solutionMessages: [
+			solutions: [
 				{
 					...mockMessageWithDiscordAccount(),
 					public: false,
 				},
 			],
-			referencedMessage: mockMessageWithDiscordAccount(),
+			reference: mockMessageWithDiscordAccount(),
 			public: false,
 		},
 		thread: mockChannelWithSettings(),
@@ -107,8 +107,8 @@ NoSolution.args = {
 	result: {
 		message: {
 			...mockMessageWithDiscordAccount(),
-			solutionMessages: [],
-			referencedMessage: mockMessageWithDiscordAccount(),
+			solutions: [],
+			reference: mockMessageWithDiscordAccount(),
 		},
 		thread: mockChannelWithSettings(),
 		score: 0.5,
