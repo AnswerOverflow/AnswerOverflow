@@ -390,63 +390,113 @@ export async function upsertMessage(
 		await db.delete(dbReactions).where(eq(dbReactions.messageId, msg.id));
 		if (!reactions) return;
 		const emojis = new Set(reactions.map((r) => r.emoji));
-		await Promise.all(
-			[...emojis].map((r) => {
-				const p = createInsertSchema(dbEmojis).parse(r);
-				return db.insert(dbEmojis).values(p).onDuplicateKeyUpdate({
-					set: p,
-				});
-			}),
-		);
-		await Promise.all(
-			reactions.map((r) => {
-				const p = createInsertSchema(dbReactions).parse(r);
-				return db.insert(dbReactions).values(p).onDuplicateKeyUpdate({
-					set: p,
-				});
-			}),
-		);
+		for await (const emoji of emojis) {
+			const p = createInsertSchema(dbEmojis).parse(emoji);
+			await db.insert(dbEmojis).values(p).onDuplicateKeyUpdate({
+				set: p,
+			});
+		}
+		for await (const reaction of reactions) {
+			const p = createInsertSchema(dbReactions).parse(reaction);
+			await db.insert(dbReactions).values(p).onDuplicateKeyUpdate({
+				set: p,
+			});
+		}
 	};
-	await Promise.all([updateAttachments(), updateReactions()]);
+	await updateReactions();
+	await updateAttachments();
 }
 
-export async function upsertManyMessages(data: BaseMessageWithRelations[]) {
+export async function upsertManyMessages(
+	data: BaseMessageWithRelations[],
+	opts?: {
+		ignoreChecks?: boolean;
+	},
+) {
 	if (data.length === 0) return Promise.resolve([]);
 	const authorIds = new Set(data.map((msg) => msg.authorId));
 
 	// Todo: make one query for all of these
-	const [ignoredAccounts, userServerSettings] = await Promise.all([
-		findManyIgnoredDiscordAccountsById(Array.from(authorIds)),
-		findManyUserServerSettings(
-			data.map((msg) => ({
-				userId: msg.authorId,
-				serverId: msg.serverId,
-			})),
-		),
-	]);
-	const userServerSettingsLookup = new Map(
-		userServerSettings.map((uss) => [`${uss.userId}-${uss.serverId}`, uss]),
-	);
+	if (!opts?.ignoreChecks) {
+		const [ignoredAccounts, userServerSettings] = await Promise.all([
+			findManyIgnoredDiscordAccountsById(Array.from(authorIds)),
+			findManyUserServerSettings(
+				data.map((msg) => ({
+					userId: msg.authorId,
+					serverId: msg.serverId,
+				})),
+			),
+		]);
+		const userServerSettingsLookup = new Map(
+			userServerSettings.map((uss) => [`${uss.userId}-${uss.serverId}`, uss]),
+		);
 
-	const ignoredAccountIds = new Set(ignoredAccounts.map((i) => i.id));
-	const filteredMessages = data.filter(
-		(msg) =>
-			!ignoredAccountIds.has(msg.authorId) &&
-			!userServerSettingsLookup.get(`${msg.authorId}-${msg.serverId}`)?.flags
-				.messageIndexingDisabled,
-	);
-
-	const chunkSize = 500;
+		const ignoredAccountIds = new Set(ignoredAccounts.map((i) => i.id));
+		data = data.filter(
+			(msg) =>
+				!ignoredAccountIds.has(msg.authorId) &&
+				!userServerSettingsLookup.get(`${msg.authorId}-${msg.serverId}`)?.flags
+					.messageIndexingDisabled,
+		);
+	}
+	const chunkSize = 100;
 	const chunks = [];
-	for (let i = 0; i < filteredMessages.length; i += chunkSize) {
-		chunks.push(filteredMessages.slice(i, i + chunkSize));
+	for (let i = 0; i < data.length; i += chunkSize) {
+		chunks.push(data.slice(i, i + chunkSize));
 	}
 	for await (const chunk of chunks) {
 		await Promise.all(
 			chunk.map((msg) => upsertMessage(msg, { ignoreChecks: true })),
 		);
 	}
-	return filteredMessages;
+	return data;
+}
+
+export async function fastUpsertManyMessages(data: BaseMessageWithRelations[]) {
+	const attachments = new Set<typeof dbAttachments.$inferInsert>();
+	const emojis = new Set<typeof dbEmojis.$inferInsert>();
+	const reactions = new Set<typeof dbReactions.$inferInsert>();
+	const msgs = new Set<typeof dbMessages.$inferInsert>();
+	for (const msg of data) {
+		const { attachments: a, reactions: r, embeds: e, ...m } = msg;
+		msgs.add({
+			...createInsertSchema(dbMessages).parse(m),
+			embeds: e,
+		});
+		if (a) {
+			for (const attachment of a) {
+				attachments.add(createInsertSchema(dbAttachments).parse(attachment));
+			}
+		}
+		if (r) {
+			for (const reaction of r) {
+				if (!reaction.emoji.id || !reaction.emoji.name) continue;
+				emojis.add(createInsertSchema(dbEmojis).parse(reaction.emoji));
+				reactions.add(createInsertSchema(dbReactions).parse(reaction));
+			}
+		}
+	}
+
+	if (msgs.size > 0)
+		await db
+			.insert(dbMessages)
+			.values(Array.from(msgs))
+			.onDuplicateKeyUpdate({ set: { id: sql.raw('id') } });
+	if (attachments.size > 0)
+		await db
+			.insert(dbAttachments)
+			.values(Array.from(attachments))
+			.onDuplicateKeyUpdate({ set: { id: sql.raw('id') } });
+	if (emojis.size > 0)
+		await db
+			.insert(dbEmojis)
+			.values(Array.from(emojis))
+			.onDuplicateKeyUpdate({ set: { id: sql.raw('id') } });
+	if (reactions.size > 0)
+		await db
+			.insert(dbReactions)
+			.values(Array.from(reactions))
+			.onDuplicateKeyUpdate({ set: { messageId: sql.raw('messageId') } });
 }
 
 export async function deleteMessage(id: string) {
