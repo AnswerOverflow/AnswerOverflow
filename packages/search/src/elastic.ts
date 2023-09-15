@@ -1,7 +1,7 @@
 import { Client, type ClientOptions } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { sharedEnvs } from '@answeroverflow/env/shared';
-import { elasticMessageIndexProperties } from './schema';
+import { ElasticMessage, elasticMessageIndexProperties } from './schema';
 declare global {
 	// eslint-disable-next-line no-var, no-unused-vars
 	var elastic: Elastic | undefined;
@@ -141,6 +141,26 @@ export class Elastic extends Client {
 				properties: elasticMessageIndexProperties,
 			},
 		});
+	}
+
+	public async bulkUpsertMessages(messages: ElasticMessage[]) {
+		if (messages.length === 0) return true;
+		const result = await this.bulk({
+			operations: messages.flatMap((message) => [
+				{ update: { _index: this.messagesIndex, _id: message.id } },
+				{ doc: message, doc_as_upsert: true },
+			]),
+			refresh: sharedEnvs.NODE_ENV !== 'production',
+		});
+		if (result.errors) {
+			console.error(
+				result.errors,
+				`Wrote ${result.took} successfully out of ${messages.length} messages`,
+				result.items.map((item) => item.update?.error),
+			);
+			return false;
+		}
+		return true;
 	}
 }
 

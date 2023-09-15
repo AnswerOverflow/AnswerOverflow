@@ -2,9 +2,13 @@ import { sharedEnvs } from '@answeroverflow/env/shared';
 import { db } from './db';
 import {
 	dbAccounts,
+	dbAttachments,
 	dbChannels,
 	dbDiscordAccounts,
+	dbEmojis,
 	dbIgnoredDiscordAccounts,
+	dbMessages,
+	dbReactions,
 	dbServers,
 	dbSessions,
 	dbTenantSessions,
@@ -13,10 +17,6 @@ import {
 } from './schema';
 import { isNotNull } from 'drizzle-orm';
 export async function clearDatabase() {
-	if (sharedEnvs.NODE_ENV !== 'test') {
-		throw new Error('clearDatabase can only be used in test environment');
-	}
-
 	if (
 		sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'local' &&
 		sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'ci'
@@ -26,6 +26,10 @@ export async function clearDatabase() {
 
 	console.log('Wiping MySQL database...');
 
+	await db.delete(dbAttachments);
+	await db.delete(dbEmojis);
+	await db.delete(dbReactions);
+	await db.delete(dbMessages);
 	await db.delete(dbUserServerSettings);
 	await db.delete(dbChannels).where(isNotNull(dbChannels.parentId));
 	await db.delete(dbTenantSessions);

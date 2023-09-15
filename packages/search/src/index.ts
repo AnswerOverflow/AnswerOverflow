@@ -1,4 +1,5 @@
 import {
+	BaseMessageWithRelations,
 	ChannelWithFlags,
 	findManyChannelsById,
 	findManyMessagesWithAuthors,
@@ -28,10 +29,14 @@ export async function searchMessages(opts: MessageSearchOptions) {
 	const messagesWithAuthors = await findManyMessagesWithAuthors(
 		results.map((r) => r.id),
 	);
-	// TODO: Include w/ query
+	// TODO: Include w/ query above
 	const [servers, channels] = await Promise.all([
 		findManyServersById(messagesWithAuthors.map((m) => m.serverId)),
-		findManyChannelsById(messagesWithAuthors.map((m) => m.channelId)),
+		findManyChannelsById(
+			messagesWithAuthors.flatMap((m) =>
+				m.parentChannelId ? [m.channelId, m.parentChannelId] : [m.channelId],
+			),
+		),
 	]);
 	const serverLookup = new Map(servers.map((s) => [s.id, s]));
 	const channelLookup = new Map(channels.map((c) => [c.id, c]));
@@ -44,7 +49,9 @@ export async function searchMessages(opts: MessageSearchOptions) {
 			const thread = m.parentChannelId
 				? channelLookup.get(m.channelId)
 				: undefined;
-			if (!channel || !server) return null;
+			if (!channel || !server) {
+				return null;
+			}
 			if (!channel.flags.indexingEnabled) {
 				return null;
 			}
@@ -58,4 +65,21 @@ export async function searchMessages(opts: MessageSearchOptions) {
 		})
 		.filter((res) => res != null && res.server.kickedTime === null)
 		.sort((a, b) => b!.score - a!.score) as SearchResult[];
+}
+
+export function indexMessageForSearch(messages: BaseMessageWithRelations[]) {
+	return elastic.bulkUpsertMessages(
+		messages.map((m) => ({
+			...m,
+			embeds: [],
+			attachments: [],
+			reactions: [],
+			solutionIds: [],
+			messageReference: null,
+			flags: 0,
+			type: 0,
+			pinned: false,
+			tts: false,
+		})),
+	);
 }

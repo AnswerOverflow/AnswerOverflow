@@ -413,7 +413,7 @@ export const dbMessages = mysqlTable(
 		webhookId: varchar('webhookId', { length: 191 }),
 
 		// TODO: Optimize not using 2 bools, use bitfield in future
-		content: varchar('content', { length: 191 }).notNull(),
+		content: varchar('content', { length: 4100 }).notNull(),
 		flags: int('flags'),
 		type: int('type'),
 		pinned: boolean('pinned'),

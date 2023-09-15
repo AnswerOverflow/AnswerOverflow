@@ -89,7 +89,7 @@ export function applyPublicFlagsToMessages<
 		const areAllServerMessagesPublic =
 			serverWithFlags.flags.considerAllMessagesPublic;
 		const hasUserGrantedConsent =
-			authorServerSettings?.flags.messageIndexingDisabled ?? false;
+			authorServerSettings?.flags.canPubliclyDisplayMessages ?? false;
 		const isMessagePublic = areAllServerMessagesPublic || hasUserGrantedConsent;
 
 		const publicAccount = zDiscordAccountPublic.parse(author);
@@ -411,7 +411,7 @@ export async function upsertMessage(
 }
 
 export async function upsertManyMessages(data: BaseMessageWithRelations[]) {
-	if (data.length === 0) return Promise.resolve(true);
+	if (data.length === 0) return Promise.resolve([]);
 	const authorIds = new Set(data.map((msg) => msg.authorId));
 
 	// Todo: make one query for all of these

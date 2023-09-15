@@ -92,7 +92,11 @@ export function MessageResultPage({
 			message.attachments.length === 0 &&
 			message.id !== solutionMessageId &&
 			message.public;
-		if (isSameAuthor && isCollapsible) {
+		const isNextMessageCollapsible =
+			nextMessage?.attachments.length === 0 &&
+			nextMessage?.id !== solutionMessageId &&
+			nextMessage?.public;
+		if (isSameAuthor && isCollapsible && isNextMessageCollapsible) {
 			contents += '\n';
 			return null;
 		}
