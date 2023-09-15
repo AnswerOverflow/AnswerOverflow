@@ -9,7 +9,7 @@ import { upsert, upsertMany } from './utils/operations';
 import { deleteManyMessagesByUserId } from './message';
 import { db } from './db';
 import { eq, inArray } from 'drizzle-orm';
-import { discordAccounts, userServerSettings } from './schema';
+import { dbDiscordAccounts, dbUserServerSettings } from './schema';
 import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
 import {
 	zDiscordAccountCreate,
@@ -26,15 +26,15 @@ const zUserServerSettingsFlags = z.object({
 });
 
 export async function findDiscordAccountById(id: string) {
-	return db.query.discordAccounts.findFirst({
-		where: eq(discordAccounts.id, id),
+	return db.query.dbDiscordAccounts.findFirst({
+		where: eq(dbDiscordAccounts.id, id),
 	});
 }
 
 export function findManyDiscordAccountsById(ids: string[]) {
 	if (ids.length === 0) return Promise.resolve([]);
-	return db.query.discordAccounts.findMany({
-		where: inArray(discordAccounts.id, ids),
+	return db.query.dbDiscordAccounts.findMany({
+		where: inArray(dbDiscordAccounts.id, ids),
 	});
 }
 
@@ -45,8 +45,8 @@ export async function createDiscordAccount(
 	if (deletedAccount)
 		throw new DBError('Account is ignored', 'IGNORED_ACCOUNT');
 	await db
-		.insert(discordAccounts)
-		.values(createInsertSchema(discordAccounts).parse(data));
+		.insert(dbDiscordAccounts)
+		.values(createInsertSchema(dbDiscordAccounts).parse(data));
 	const createdAccount = await findDiscordAccountById(data.id);
 	if (!createdAccount) throw new Error('Failed to create account');
 	return createdAccount;
@@ -62,14 +62,20 @@ export async function createManyDiscordAccounts(
 	const allowedToCreateAccounts = data.filter(
 		(x) => !ignoredIdsLookup.has(x.id),
 	);
-
-	await Promise.all(
-		allowedToCreateAccounts.map(async (account) => {
-			await db
-				.insert(discordAccounts)
-				.values(createInsertSchema(discordAccounts).parse(account));
-		}),
-	);
+	const chunkSize = 25;
+	const chunks = [];
+	for (let i = 0; i < allowedToCreateAccounts.length; i += chunkSize) {
+		chunks.push(allowedToCreateAccounts.slice(i, i + chunkSize));
+	}
+	for await (const chunk of chunks) {
+		await Promise.all(
+			chunk.map(async (account) =>
+				db
+					.insert(dbDiscordAccounts)
+					.values(createInsertSchema(dbDiscordAccounts).parse(account)),
+			),
+		);
+	}
 	return allowedToCreateAccounts.map((i) => getDefaultDiscordAccount(i));
 }
 
@@ -77,12 +83,12 @@ export async function updateDiscordAccount(
 	data: z.infer<typeof zDiscordAccountUpdate>,
 ) {
 	await db
-		.update(discordAccounts)
-		.set(createInsertSchema(discordAccounts).parse(data))
-		.where(eq(discordAccounts.id, data.id));
+		.update(dbDiscordAccounts)
+		.set(createInsertSchema(dbDiscordAccounts).parse(data))
+		.where(eq(dbDiscordAccounts.id, data.id));
 
-	const updatedDiscordAccount = await db.query.discordAccounts.findFirst({
-		where: eq(discordAccounts.id, data.id),
+	const updatedDiscordAccount = await db.query.dbDiscordAccounts.findFirst({
+		where: eq(dbDiscordAccounts.id, data.id),
 	});
 
 	if (!updatedDiscordAccount) throw new Error('Failed to update account');
@@ -97,26 +103,28 @@ export async function updateManyDiscordAccounts(
 	>(data.map((i) => [i.id, i]));
 	const accountSet = Array.from(uniqueAccountsToCreate.values());
 
-	const updatedDiscordAccounts = await Promise.all(
-		accountSet.map(async (account) => {
-			await db
-				.update(discordAccounts)
-				.set(createInsertSchema(discordAccounts).parse(account))
-				.where(eq(discordAccounts.id, account.id));
-
-			return db.query.discordAccounts.findFirst({
-				where: eq(discordAccounts.id, account.id),
-			});
-		}),
-	);
-
-	return updatedDiscordAccounts.flat();
+	const chunkSize = 25;
+	const chunks = [];
+	for (let i = 0; i < accountSet.length; i += chunkSize) {
+		chunks.push(accountSet.slice(i, i + chunkSize));
+	}
+	for await (const chunk of chunks) {
+		await Promise.all(
+			chunk.map(async (account) =>
+				db
+					.update(dbDiscordAccounts)
+					.set(createInsertSchema(dbDiscordAccounts).parse(account))
+					.where(eq(dbDiscordAccounts.id, account.id)),
+			),
+		);
+	}
+	return findManyDiscordAccountsById(accountSet.map((i) => i.id));
 }
 
 export async function deleteDiscordAccount(id: string) {
 	const existingAccount = await findDiscordAccountById(id);
 	if (existingAccount)
-		await db.delete(discordAccounts).where(eq(discordAccounts.id, id));
+		await db.delete(dbDiscordAccounts).where(eq(dbDiscordAccounts.id, id));
 	await Promise.all([
 		upsertIgnoredDiscordAccount(id),
 		deleteManyMessagesByUserId(id),
@@ -157,11 +165,11 @@ export async function findManyDiscordAccountsWithUserServerSettings({
 }) {
 	if (authorIds.length === 0 || authorServerIds.length === 0)
 		return Promise.resolve([]);
-	const data = await db.query.discordAccounts.findMany({
-		where: inArray(discordAccounts.id, authorIds),
+	const data = await db.query.dbDiscordAccounts.findMany({
+		where: inArray(dbDiscordAccounts.id, authorIds),
 		with: {
 			userServerSettings: {
-				where: inArray(userServerSettings.serverId, authorServerIds),
+				where: inArray(dbUserServerSettings.serverId, authorServerIds),
 			},
 		},
 	});

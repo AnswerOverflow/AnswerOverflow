@@ -12,7 +12,7 @@ import {
 import { isOnMainSite } from '@answeroverflow/constants';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { eq } from 'drizzle-orm';
-import { tenantSessions } from '@answeroverflow/db/src/schema';
+import { dbTenantSessions } from '@answeroverflow/db/src/schema';
 // create the API handler, but don't return it yet
 const nextApiHandler = createNextApiHandler({
 	router: appRouter,
@@ -42,8 +42,8 @@ export default async function handler(
 	}
 	const token = req.cookies[getTenantCookieName()];
 	if (token) {
-		const nextAuthSession = await db.query.tenantSessions.findFirst({
-			where: eq(tenantSessions.id, token),
+		const nextAuthSession = await db.query.dbTenantSessions.findFirst({
+			where: eq(dbTenantSessions.id, token),
 		});
 		// add a cookie to the request using the next auth header
 		req.cookies[getNextAuthCookieName()] = nextAuthSession?.sessionToken;

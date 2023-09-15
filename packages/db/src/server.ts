@@ -11,7 +11,7 @@ import {
 	getDefaultServerWithFlags,
 } from './utils/serverUtils';
 import { upsert } from './utils/operations';
-import { Server, servers } from './schema';
+import { Server, dbServers } from './schema';
 import { db } from './db';
 import { eq, inArray, or } from 'drizzle-orm';
 
@@ -37,8 +37,8 @@ export async function applyServerSettingsSideEffects<
 }
 
 export async function findServerByCustomDomain(domain: string) {
-	const found = await db.query.servers.findFirst({
-		where: eq(servers.customDomain, domain),
+	const found = await db.query.dbServers.findFirst({
+		where: eq(dbServers.customDomain, domain),
 	});
 	if (!found) return null;
 	return addFlagsToServer(found);
@@ -55,16 +55,16 @@ export async function createServer(
 		old: getDefaultServerWithFlags(input),
 		updated: input,
 	});
-	await db.insert(servers).values(zServerCreate.parse(combinedCreateData));
-	const created = await db.query.servers.findFirst({
-		where: eq(servers.id, input.id),
+	await db.insert(dbServers).values(zServerCreate.parse(combinedCreateData));
+	const created = await db.query.dbServers.findFirst({
+		where: eq(dbServers.id, input.id),
 	});
 	if (!created) throw new Error(`Error creating server with id ${input.id}`);
 	return addFlagsToServer(created);
 }
 
 export async function findAllServers() {
-	const found = await db.query.servers.findMany();
+	const found = await db.query.dbServers.findMany();
 	return found.map(addFlagsToServer);
 }
 
@@ -86,12 +86,12 @@ export async function updateServer({
 	});
 
 	await db
-		.update(servers)
+		.update(dbServers)
 		.set(zServerUpdate.parse(combinedUpdateData))
-		.where(eq(servers.id, update.id));
+		.where(eq(dbServers.id, update.id));
 
-	const updated = await db.query.servers.findFirst({
-		where: eq(servers.id, update.id),
+	const updated = await db.query.dbServers.findFirst({
+		where: eq(dbServers.id, update.id),
 	});
 
 	if (!updated) throw new Error(`Error updating server with id ${update.id}`);
@@ -99,32 +99,32 @@ export async function updateServer({
 }
 
 export async function findServerById(id: string) {
-	const found = await db.query.servers.findFirst({
-		where: eq(servers.id, id),
+	const found = await db.query.dbServers.findFirst({
+		where: eq(dbServers.id, id),
 	});
 	if (!found) return null;
 	return addFlagsToServer(found);
 }
 
 export async function findServerByStripeCustomerId(stripeCustomerId: string) {
-	const found = await db.query.servers.findFirst({
-		where: eq(servers.stripeCustomerId, stripeCustomerId),
+	const found = await db.query.dbServers.findFirst({
+		where: eq(dbServers.stripeCustomerId, stripeCustomerId),
 	});
 	if (!found) return null;
 	return addFlagsToServer(found);
 }
 
 export async function findServerByAlias(alias: string) {
-	const found = await db.query.servers.findFirst({
-		where: eq(servers.vanityUrl, alias),
+	const found = await db.query.dbServers.findFirst({
+		where: eq(dbServers.vanityUrl, alias),
 	});
 	if (!found) return null;
 	return addFlagsToServer(found);
 }
 
 export async function findServerByAliasOrId(aliasOrId: string) {
-	const found = await db.query.servers.findFirst({
-		where: or(eq(servers.vanityUrl, aliasOrId), eq(servers.id, aliasOrId)),
+	const found = await db.query.dbServers.findFirst({
+		where: or(eq(dbServers.vanityUrl, aliasOrId), eq(dbServers.id, aliasOrId)),
 	});
 	if (!found) return null;
 	return addFlagsToServer(found);
@@ -132,8 +132,8 @@ export async function findServerByAliasOrId(aliasOrId: string) {
 
 export async function findManyServersById(ids: string[]) {
 	if (ids.length === 0) return [];
-	const found = await db.query.servers.findMany({
-		where: inArray(servers.id, ids),
+	const found = await db.query.dbServers.findMany({
+		where: inArray(dbServers.id, ids),
 	});
 	return found.map(addFlagsToServer);
 }

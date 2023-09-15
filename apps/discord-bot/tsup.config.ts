@@ -11,7 +11,7 @@ export default defineConfig({
 	skipNodeModulesBundle: true,
 	tsconfig: 'tsconfig.json',
 	noExternal: [
-		'@answeroverflow/elastic-types',
+		'@answeroverflow/search',
 		'@answeroverflow/db',
 		'@answeroverflow/auth',
 		'@auth/drizzle-adapter',

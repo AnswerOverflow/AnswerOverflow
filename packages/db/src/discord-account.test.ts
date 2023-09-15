@@ -39,7 +39,7 @@ describe('Discord Account Operations', () => {
 			await upsertMessage(msg);
 			await deleteDiscordAccount(account.id);
 			const fetchedMsg = await findMessageById(msg.id);
-			expect(fetchedMsg).toBeNull();
+			expect(fetchedMsg).not.toBeDefined();
 		});
 	});
 });

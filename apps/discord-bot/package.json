@@ -11,6 +11,7 @@
 		"@answeroverflow/constants": "workspace:^",
 		"@answeroverflow/db": "workspace:^",
 		"@answeroverflow/db-mock": "workspace:^",
+		"@answeroverflow/search": "workspace:^",
 		"@answeroverflow/discordjs-react": "^0.0.36",
 		"@answeroverflow/discordjs-utils": "workspace:^",
 		"@answeroverflow/env": "workspace:^",

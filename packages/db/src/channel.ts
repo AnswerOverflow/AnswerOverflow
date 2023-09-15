@@ -3,13 +3,12 @@ import { upsertServer } from './server';
 import { upsert, upsertMany } from './utils/operations';
 import { deleteManyMessagesByChannelId } from './message';
 import { omit } from '@answeroverflow/utils';
-import { elastic } from '@answeroverflow/elastic-types';
 import { DBError } from './utils/error';
 import { ChannelType } from 'discord-api-types/v10';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 import { db } from './db';
-import { and, desc, eq, inArray, isNotNull, lt, sql } from 'drizzle-orm';
-import { channels } from './schema';
+import { and, desc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
+import { dbChannels } from './schema';
 import {
 	getDefaultChannel,
 	getDefaultChannelWithFlags,
@@ -29,7 +28,7 @@ import {
 } from './zodSchemas/channelSchemas';
 import { dictToBitfield } from './utils/bitfieldUtils';
 import { createInsertSchema } from 'drizzle-zod';
-const channelInsertSchema = createInsertSchema(channels).omit({
+const channelInsertSchema = createInsertSchema(dbChannels).omit({
 	serverId: true,
 	parentId: true,
 	id: true,
@@ -107,8 +106,8 @@ function applyChannelSettingsChangesSideEffects<
 export async function findChannelById(
 	id: string,
 ): Promise<ChannelWithFlags | null> {
-	const data = await db.query.channels.findFirst({
-		where: eq(channels.id, id),
+	const data = await db.query.dbChannels.findFirst({
+		where: eq(dbChannels.id, id),
 	});
 	if (!data) return null;
 	return addFlagsToChannel(data);
@@ -117,8 +116,8 @@ export async function findChannelById(
 export async function findChannelByInviteCode(
 	inviteCode: string,
 ): Promise<ChannelWithFlags | null> {
-	const data = await db.query.channels.findFirst({
-		where: eq(channels.inviteCode, inviteCode),
+	const data = await db.query.dbChannels.findFirst({
+		where: eq(dbChannels.inviteCode, inviteCode),
 	});
 	if (!data) return null;
 	return addFlagsToChannel(data);
@@ -128,8 +127,8 @@ export async function findAllThreadsByParentId(input: {
 	parentId: string;
 	limit?: number;
 }): Promise<ChannelWithFlags[]> {
-	const data = await db.query.channels.findMany({
-		where: eq(channels.parentId, input.parentId),
+	const data = await db.query.dbChannels.findMany({
+		where: eq(dbChannels.parentId, input.parentId),
 		limit: input.limit,
 	});
 	return data.map(addFlagsToChannel);
@@ -138,10 +137,21 @@ export async function findAllThreadsByParentId(input: {
 export async function findAllChannelsByServerId(
 	serverId: string,
 ): Promise<ChannelWithFlags[]> {
-	const data = await db.query.channels.findMany({
-		where: eq(channels.serverId, serverId),
+	const data = await db.query.dbChannels.findMany({
+		where: eq(dbChannels.serverId, serverId),
 	});
 	return data.map(addFlagsToChannel);
+}
+
+export async function findManyChannelMessagesCounts(channelIds: string[]) {
+	return db
+		.select({
+			count: sql<number>`count(*)`,
+			channelId: dbChannels.id,
+		})
+		.from(dbChannels)
+		.where(inArray(dbChannels.serverId, Array.from(new Set(channelIds))))
+		.groupBy(dbChannels.id);
 }
 
 export async function findManyChannelsById(
@@ -151,8 +161,8 @@ export async function findManyChannelsById(
 	} = {},
 ): Promise<ChannelWithFlags[]> {
 	if (ids.length === 0) return Promise.resolve([]);
-	const data = await db.query.channels.findMany({
-		where: inArray(channels.id, ids),
+	const data = await db.query.dbChannels.findMany({
+		where: inArray(dbChannels.id, ids),
 	});
 	const withFlags = data.map(addFlagsToChannel);
 	let threadMessageCountLookup: Map<string, number | undefined> | undefined =
@@ -165,11 +175,9 @@ export async function findManyChannelsById(
 		const threadIds = withFlags
 			.filter((c) => isThreadType(c.type))
 			.map((c) => c.id);
-		const threadMessageCounts = await Promise.all(
-			threadIds.map((id) => elastic.getChannelMessagesCount(id)),
-		);
+		const threadMessageCounts = await findManyChannelMessagesCounts(threadIds);
 		threadMessageCountLookup = new Map(
-			threadIds.map((id, i) => [id, threadMessageCounts[i] ?? undefined]),
+			threadMessageCounts.map((x) => [x.channelId, x.count]),
 		);
 	}
 	return withFlags.map((c) => {
@@ -192,16 +200,16 @@ export async function findLatestArchivedTimestampByChannelId(parentId: string) {
 	// TODO: Check this is correct?
 	const data = await db
 		.select({
-			archivedTimestamp: sql<number>`MAX(${channels.archivedTimestamp})`,
+			archivedTimestamp: sql<number>`MAX(${dbChannels.archivedTimestamp})`,
 		})
-		.from(channels)
+		.from(dbChannels)
 		.where(
 			and(
-				eq(channels.parentId, parentId),
-				isNotNull(channels.archivedTimestamp),
+				eq(dbChannels.parentId, parentId),
+				isNotNull(dbChannels.archivedTimestamp),
 			),
 		)
-		.orderBy(desc(channels.archivedTimestamp))
+		.orderBy(desc(dbChannels.archivedTimestamp))
 		.limit(1);
 
 	return data[0]?.archivedTimestamp ?? null;
@@ -212,9 +220,9 @@ export async function createChannel(data: z.infer<typeof zChannelCreate>) {
 		old: getDefaultChannelWithFlags(data),
 		updated: data,
 	});
-	await db.insert(channels).values(combinedData);
-	const created = await db.query.channels.findFirst({
-		where: eq(channels.id, combinedData.id),
+	await db.insert(dbChannels).values(combinedData);
+	const created = await db.query.dbChannels.findFirst({
+		where: eq(dbChannels.id, combinedData.id),
 	});
 	if (!created) throw new Error('Error creating channel');
 	return addFlagsToChannel(created);
@@ -225,7 +233,7 @@ export async function createManyChannels(
 ) {
 	await Promise.all(
 		data.map((channel) => {
-			return db.insert(channels).values(channel);
+			return db.insert(dbChannels).values(channel);
 		}),
 	);
 
@@ -246,12 +254,12 @@ export async function updateChannel({
 		updated: update,
 	});
 	await db
-		.update(channels)
+		.update(dbChannels)
 		.set(channelInsertSchema.parse(combinedData))
-		.where(eq(channels.id, update.id));
+		.where(eq(dbChannels.id, update.id));
 
-	const updated = await db.query.channels.findFirst({
-		where: eq(channels.id, update.id),
+	const updated = await db.query.dbChannels.findFirst({
+		where: eq(dbChannels.id, update.id),
 	});
 
 	if (!updated) throw new Error('Error updating channel');
@@ -266,12 +274,12 @@ export async function updateManyChannels(
 		data.map(async (channel) => {
 			return await db.transaction(async (tx) => {
 				await tx
-					.update(channels)
+					.update(dbChannels)
 					.set(channelInsertSchema.parse(channel))
-					.where(eq(channels.id, channel.id));
+					.where(eq(dbChannels.id, channel.id));
 
-				const updated = await tx.query.channels.findFirst({
-					where: eq(channels.id, channel.id),
+				const updated = await tx.query.dbChannels.findFirst({
+					where: eq(dbChannels.id, channel.id),
 				});
 
 				if (!updated) throw new Error('Error updating channel');
@@ -286,11 +294,11 @@ export async function updateManyChannels(
 export async function deleteChannel(id: string) {
 	await deleteManyMessagesByChannelId(id);
 	// TODO: Ugly & how does this handle large amounts of threads?
-	const threads = await db.query.channels.findMany({
-		where: and(eq(channels.parentId, id), isNotNull(channels.id)),
+	const threads = await db.query.dbChannels.findMany({
+		where: and(eq(dbChannels.parentId, id), isNotNull(dbChannels.id)),
 	});
 	await Promise.all(threads.map((t) => deleteChannel(t.id)));
-	return db.delete(channels).where(eq(channels.id, id));
+	return db.delete(dbChannels).where(eq(dbChannels.id, id));
 }
 
 export async function createChannelWithDeps(
@@ -341,18 +349,21 @@ export function upsertManyChannels(data: z.infer<typeof zChannelUpsertMany>) {
 	});
 }
 
-export async function findChannelsBeforeArchivedTimestamp(input: {
+export async function findChannelsBeforeId(input: {
 	serverId: string;
-	timestamp: bigint;
+	id: string;
 	take?: number;
 }) {
-	const res = await db.query.channels.findMany({
-		where: and(
-			eq(channels.serverId, input.serverId),
-			lt(channels.archivedTimestamp, input.timestamp),
-		),
-		orderBy: desc(channels.archivedTimestamp),
-		limit: input.take,
-	});
+	const res = await db
+		.select()
+		.from(dbChannels)
+		.where(
+			and(
+				eq(dbChannels.serverId, input.serverId),
+				sql`CAST(${dbChannels.id} AS SIGNED) < ${BigInt(input.id)}`,
+			),
+		)
+		.orderBy(sql`CAST(${dbChannels.id} AS SIGNED) DESC`)
+		.limit(input.take ?? 100);
 	return res.map(addFlagsToChannel);
 }

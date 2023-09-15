@@ -1,14 +1,14 @@
 import { zDiscordAccountUpsert } from './discordAccountSchemas';
 import { z } from 'zod';
 import { createInsertSchema } from 'drizzle-zod';
-import { userServerSettings } from '../schema';
+import { dbUserServerSettings } from '../schema';
 
 export const zUserServerSettingsFlags = z.object({
 	canPubliclyDisplayMessages: z.boolean(),
 	messageIndexingDisabled: z.boolean(),
 });
 
-const zUserServerSettingsSchema = createInsertSchema(userServerSettings)
+const zUserServerSettingsSchema = createInsertSchema(dbUserServerSettings)
 	.required()
 	.extend({
 		flags: zUserServerSettingsFlags,

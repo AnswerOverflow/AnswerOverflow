@@ -1,7 +1,7 @@
 import { getDefaultUserServerSettings } from './serverUtils';
 import { getRandomId } from '@answeroverflow/utils';
 import { db } from '../db';
-import { channels, servers, userServerSettings } from '../schema';
+import { dbChannels, dbServers, dbUserServerSettings } from '../schema';
 import { createServer } from '../server';
 import { createDiscordAccount } from '../discord-account';
 import { and, eq } from 'drizzle-orm';
@@ -11,11 +11,11 @@ describe('Default Channel Values', () => {
 	it('should verify channel default values are correct', async () => {
 		const serverId = getRandomId();
 		const channelId = getRandomId();
-		await db.insert(servers).values({
+		await db.insert(dbServers).values({
 			id: serverId,
 			name: 'test',
 		});
-		await db.insert(channels).values({
+		await db.insert(dbChannels).values({
 			name: 'test',
 			type: 0,
 			serverId: serverId,
@@ -24,8 +24,8 @@ describe('Default Channel Values', () => {
 
 		const expectedDefaults = await db
 			.select()
-			.from(channels)
-			.where(eq(channels.id, channelId))
+			.from(dbChannels)
+			.where(eq(dbChannels.id, channelId))
 			.then((res) => res[0]);
 		const defaults = getDefaultChannel({
 			id: channelId,
@@ -50,17 +50,17 @@ describe('Default User Server Settings Values', () => {
 			id: userId,
 			name: 'test',
 		});
-		await db.insert(userServerSettings).values({
+		await db.insert(dbUserServerSettings).values({
 			serverId,
 			userId,
 		});
 		const expectedDefaults = await db
 			.select()
-			.from(userServerSettings)
+			.from(dbUserServerSettings)
 			.where(
 				and(
-					eq(userServerSettings.serverId, serverId),
-					eq(userServerSettings.userId, userId),
+					eq(dbUserServerSettings.serverId, serverId),
+					eq(dbUserServerSettings.userId, userId),
 				),
 			)
 			.then((res) => res[0]);

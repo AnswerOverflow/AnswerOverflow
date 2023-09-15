@@ -9,7 +9,7 @@ import { upsert } from './utils/operations';
 import { DBError } from './utils/error';
 import { db } from './db';
 import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
-import { userServerSettings } from './schema';
+import { dbMessages, dbUserServerSettings } from './schema';
 import {
 	zUserServerSettingsCreate,
 	zUserServerSettingsCreateWithDeps,
@@ -72,10 +72,14 @@ export async function applyUserServerSettingsChangesSideEffects<
 		pendingSettings?.flags.messageIndexingDisabled &&
 		!oldFlags.messageIndexingDisabled
 	) {
-		await elastic?.deleteByUserIdInServer({
-			userId: old.userId,
-			serverId: old.serverId,
-		});
+		await db
+			.delete(dbMessages)
+			.where(
+				and(
+					eq(dbMessages.serverId, pendingSettings.serverId),
+					eq(dbMessages.authorId, pendingSettings.userId),
+				),
+			);
 	}
 	const bitfield = dictToBitfield(
 		pendingSettings.flags,
@@ -95,11 +99,11 @@ interface UserServerSettingsFindById {
 export async function findUserServerSettingsById(
 	where: UserServerSettingsFindById,
 ) {
-	const data = (await db.query.userServerSettings.findFirst({
+	const data = (await db.query.dbUserServerSettings.findFirst({
 		where: and(
-			eq(userServerSettings.userId, where.userId),
-			eq(userServerSettings.serverId, where.serverId),
-			isNotNull(userServerSettings.bitfield),
+			eq(dbUserServerSettings.userId, where.userId),
+			eq(dbUserServerSettings.serverId, where.serverId),
+			isNotNull(dbUserServerSettings.bitfield),
 		),
 	})) as UserServerSettingsWithFlags | null;
 
@@ -111,9 +115,9 @@ export async function countConsentingUsersInServer(serverId: string) {
 		.select({
 			count: sql<number>`count(*)`,
 		})
-		.from(userServerSettings)
+		.from(dbUserServerSettings)
 		.where(
-			and(eq(userServerSettings.serverId, serverId), sql`bitfield & 1 = 1`),
+			and(eq(dbUserServerSettings.serverId, serverId), sql`bitfield & 1 = 1`),
 		)
 		.then((x) => x[0]);
 	if (!res) {
@@ -127,16 +131,16 @@ export async function countConsentingUsersInManyServers(serverIds: string[]) {
 	const res = await db
 		.select({
 			count: sql<number>`count(*)`,
-			serverId: userServerSettings.serverId,
+			serverId: dbUserServerSettings.serverId,
 		})
-		.from(userServerSettings)
+		.from(dbUserServerSettings)
 		.where(
 			and(
-				inArray(userServerSettings.serverId, Array.from(new Set(serverIds))),
+				inArray(dbUserServerSettings.serverId, Array.from(new Set(serverIds))),
 				sql`bitfield & 1 = 1`,
 			),
 		)
-		.groupBy(userServerSettings.serverId);
+		.groupBy(dbUserServerSettings.serverId);
 	const asMap = new Map(res.map((x) => [x.serverId, x.count]));
 	return new Map(
 		serverIds.map((x) => {
@@ -150,17 +154,17 @@ export async function findManyUserServerSettings(
 	where: UserServerSettingsFindById[],
 ) {
 	if (where.length === 0) return [];
-	const data = (await db.query.userServerSettings.findMany({
+	const data = (await db.query.dbUserServerSettings.findMany({
 		where: and(
 			inArray(
-				userServerSettings.userId,
+				dbUserServerSettings.userId,
 				where.map((x) => x.userId),
 			),
 			inArray(
-				userServerSettings.serverId,
+				dbUserServerSettings.serverId,
 				where.map((x) => x.serverId),
 			),
-			isNotNull(userServerSettings.bitfield),
+			isNotNull(dbUserServerSettings.bitfield),
 		),
 	})) as UserServerSettingsWithFlags[];
 	return data.map(addFlagsToUserServerSettings);
@@ -176,12 +180,12 @@ export async function createUserServerSettings(
 		data,
 	);
 	await db
-		.insert(userServerSettings)
-		.values(createInsertSchema(userServerSettings).parse(updateData));
-	const created = (await db.query.userServerSettings.findFirst({
+		.insert(dbUserServerSettings)
+		.values(createInsertSchema(dbUserServerSettings).parse(updateData));
+	const created = (await db.query.dbUserServerSettings.findFirst({
 		where: and(
-			eq(userServerSettings.userId, data.userId),
-			isNotNull(userServerSettings.bitfield),
+			eq(dbUserServerSettings.userId, data.userId),
+			isNotNull(dbUserServerSettings.bitfield),
 		),
 	})) as UserServerSettingsWithFlags | null;
 	if (!created) throw new Error('Error creating user server settings');
@@ -206,18 +210,18 @@ export async function updateUserServerSettings(
 		data,
 	);
 	await db
-		.update(userServerSettings)
-		.set(createInsertSchema(userServerSettings).parse(updateData))
+		.update(dbUserServerSettings)
+		.set(createInsertSchema(dbUserServerSettings).parse(updateData))
 		.where(
 			and(
-				eq(userServerSettings.userId, data.userId),
-				eq(userServerSettings.serverId, data.serverId),
+				eq(dbUserServerSettings.userId, data.userId),
+				eq(dbUserServerSettings.serverId, data.serverId),
 			),
 		);
-	const updated = (await db.query.userServerSettings.findFirst({
+	const updated = (await db.query.dbUserServerSettings.findFirst({
 		where: and(
-			eq(userServerSettings.userId, data.userId),
-			eq(userServerSettings.serverId, data.serverId),
+			eq(dbUserServerSettings.userId, data.userId),
+			eq(dbUserServerSettings.serverId, data.serverId),
 		),
 	})) as UserServerSettingsWithFlags | null;
 	if (!updated) throw new Error('Error updating user server settings');

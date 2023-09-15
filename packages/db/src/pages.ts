@@ -1,23 +1,19 @@
 import type { z } from 'zod';
 import {
-	addAuthorsToMessages,
-	addReferencesToMessages,
 	findAllChannelQuestions,
 	findMessageById,
-	findMessagesByChannelId,
-	type MessageFull,
-} from './message';
-import {
+	findMessageByIdWithDiscordAccount,
+	findMessagesByChannelIdWithDiscordAccounts,
 	getParentChannelOfMessage,
 	getThreadIdOfMessage,
-} from '@answeroverflow/elastic-types';
+	type MessageFull,
+} from './message';
 import { findChannelById } from './channel';
 import { findServerById } from './server';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
-import { ChannelType } from 'discord-api-types/v10';
 import { db } from './db';
 import { eq, or } from 'drizzle-orm';
-import { servers } from './schema';
+import { dbServers } from './schema';
 import { zServerPublic } from './zodSchemas/serverSchemas';
 import { addFlagsToServer } from './utils/serverUtils';
 import { addFlagsToChannel, zChannelPublic } from './zodSchemas/channelSchemas';
@@ -28,10 +24,10 @@ export async function findServerWithCommunityPageData(opts: {
 }) {
 	const { idOrVanityUrl, limit } = opts;
 	// TODO: Micro optimization, if the idOrVanityUrl is a number, we can skip the vanityUrl check
-	const found = await db.query.servers.findFirst({
+	const found = await db.query.dbServers.findFirst({
 		where: or(
-			eq(servers.id, idOrVanityUrl),
-			eq(servers.vanityUrl, idOrVanityUrl),
+			eq(dbServers.id, idOrVanityUrl),
+			eq(dbServers.vanityUrl, idOrVanityUrl),
 		),
 		with: {
 			channels: true,
@@ -133,10 +129,10 @@ export async function findMessageResultPage(messageId: string) {
 		: findChannelById(targetMessage.channelId);
 
 	const messageFetch = threadId
-		? findMessagesByChannelId({
+		? findMessagesByChannelIdWithDiscordAccounts({
 				channelId: threadId,
 		  })
-		: findMessagesByChannelId({
+		: findMessagesByChannelIdWithDiscordAccounts({
 				channelId: parentId,
 				after: targetMessage.id,
 				limit: NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
@@ -147,27 +143,21 @@ export async function findMessageResultPage(messageId: string) {
 		serverFetch,
 		parentChannelFetch,
 		messageFetch,
-		threadId ? findMessageById(threadId) : undefined,
+		threadId ? findMessageByIdWithDiscordAccount(threadId) : undefined,
 	]);
 	if (!server || server.kickedTime) return null;
 
 	if (!channel || !channel.flags.indexingEnabled) {
 		return null;
 	}
-	const messagesWithRefs = await addReferencesToMessages(
-		threadId && rootMessage && channel.type !== ChannelType.GuildForum
-			? [rootMessage, ...messages]
-			: messages,
-	);
-	const messagesWithDiscordAccounts = await addAuthorsToMessages(
-		messagesWithRefs,
-		[server],
-	);
 
 	return {
 		server,
 		channel,
-		messages: messagesWithDiscordAccounts,
+		messages:
+			rootMessage && rootMessage.channelId != thread?.id
+				? [rootMessage, ...messages]
+				: messages,
 		rootMessage,
 		thread,
 	};

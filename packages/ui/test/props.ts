@@ -4,7 +4,7 @@ import { ChannelType } from '~ui/utils/discord';
 import { ServerWithFlags } from '@answeroverflow/db/src/zodSchemas/serverSchemas';
 import { ChannelPublicWithFlags } from '@answeroverflow/db/src/zodSchemas/channelSchemas';
 import { DiscordAccountPublic } from '@answeroverflow/db/src/zodSchemas/discordAccountSchemas';
-import { MessageFull, MessageWithDiscordAccount } from '@answeroverflow/db';
+import type { MessageFull } from '@answeroverflow/db';
 
 export function randomId() {
 	return Math.floor(Math.random() * 10000000).toString();
@@ -25,44 +25,34 @@ export function mockDiscordAccount(
 export function mockMessageFull(override: Partial<MessageFull> = {}) {
 	const data: MessageFull = {
 		...mockMessageWithDiscordAccount(),
-		referencedMessage: null,
-		solutionMessages: [],
+		solutions: [],
+		reference: undefined,
 		...override,
 	};
 	return data;
 }
 
 export function mockMessageWithDiscordAccount(
-	override: Partial<MessageWithDiscordAccount> = {},
-): MessageWithDiscordAccount {
-	const data: MessageWithDiscordAccount = {
+	override: Partial<MessageFull> = {},
+): MessageFull {
+	const data: MessageFull = {
 		channelId: '0',
 		id: randomId(),
+		questionId: '0',
 		serverId: '0',
 		attachments: [],
-		applicationId: null,
-		messageReference: null,
 		childThreadId: null,
 		parentChannelId: null,
-		solutionIds: [],
-		mentions: [],
-		mentionRoles: [],
-		mentionChannels: [],
-		mentionEveryone: false,
 		nonce: null,
 		pinned: false,
-		type: 0,
 		flags: 0,
-		components: [],
 		embeds: [],
-		reactions: [],
-		stickerIds: [],
-		webhookId: null,
-		tts: false,
 		interactionId: null,
 		content: getRandomSentence(),
 		author: mockDiscordAccount(),
 		public: true,
+		solutions: [],
+		reference: undefined,
 		...override,
 	};
 	return data;

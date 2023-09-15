@@ -279,7 +279,10 @@ describe('Can Mark Solution', () => {
 			const asAoMessage = await toAOMessage(rootMessage);
 			await upsertMessage({
 				...asAoMessage,
-				solutionIds: [solutionMessage.id],
+			});
+			await upsertMessage({
+				...(await toAOMessage(solutionMessage)),
+				questionId: asAoMessage.id,
 			});
 
 			await createChannel({

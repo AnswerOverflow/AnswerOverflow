@@ -80,6 +80,7 @@ export const sharedEnvs = createEnv({
       Database
      */
 		DATABASE_URL: z.string(),
+		TEST_DATABASE_URL: z.string().optional(),
 
 		// TODO: Make it cloud ID oro username / password, not both
 		ELASTICSEARCH_URL: z.string().optional(),

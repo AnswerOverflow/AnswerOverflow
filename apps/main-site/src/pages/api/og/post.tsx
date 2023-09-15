@@ -1,53 +1,19 @@
-import satori from 'satori';
-import * as fs from 'fs';
-import { NextApiRequest, NextApiResponse } from 'next';
-import { renderAsync } from '@resvg/resvg-js';
-import { sharedEnvs } from '@answeroverflow/env/shared';
-import { findMessageResultPage } from '@answeroverflow/db';
+import { ImageResponse } from '@vercel/og';
+import { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { Server } from '@answeroverflow/db/src/schema';
+import { findMessageResultPage } from '@answeroverflow/db/src/pages';
 import { getSnowflakeUTCDate } from '@answeroverflow/ui/src/utils/snowflake';
-import { ServerPublic } from '~api/router/server/types';
 import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/base/AnswerOverflowLogo';
 
-const U200D = String.fromCharCode(8205);
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const UFE0Fg = /\uFE0F/g;
-function toCodePoint(unicodeSurrogates: string) {
-	const r: string[] = [];
-	let c = 0,
-		p = 0,
-		i = 0;
-	while (i < unicodeSurrogates.length) {
-		c = unicodeSurrogates.charCodeAt(i++);
-		if (p) {
-			r.push((65536 + ((p - 55296) << 10) + (c - 56320)).toString(16));
-			p = 0;
-		} else if (55296 <= c && c <= 56319) {
-			p = c;
-		} else {
-			r.push(c.toString(16));
-		}
-	}
-	return r.join('-');
-}
-function getIconCode(char: string) {
-	return toCodePoint(char.indexOf(U200D) < 0 ? char.replace(UFE0Fg, '') : char);
-}
-function loadEmoji(code: string) {
-	return fetch(
-		'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/' +
-			code.toLowerCase() +
-			'.svg',
-	);
-}
+export const runtime = 'edge';
 
-const currentPath = process.cwd();
-const satoshiBLack = fs.readFileSync(
-	currentPath + '/src/styles/Satoshi-Black.ttf',
-);
-const satoshiBold = fs.readFileSync(
-	currentPath + '/src/styles/Satoshi-Bold.ttf',
-);
+const satoshiBold = fetch(
+	new URL('../../../styles/Satoshi-Black.ttf', import.meta.url),
+).then((res) => res.arrayBuffer());
+const interMedium = fetch(
+	new URL('../../../styles/Satoshi-Bold.ttf', import.meta.url),
+).then((res) => res.arrayBuffer());
 
 const CalendarIcon = () => (
 	<svg
@@ -115,38 +81,42 @@ function truncate(str: string, n: number = 30) {
 	return str.length > n ? str.slice(0, n - 1) + '...' : str;
 }
 const makeServerIconLink = (
-	server: Pick<ServerPublic, 'id' | 'icon'>,
+	server: Pick<Server, 'id' | 'icon'>,
 	size: number = 64,
 ) => {
 	if (!server.icon) return undefined;
 	return `https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png?size=${size}`;
 };
-export default async function handler(
-	req: NextApiRequest,
-	res: NextApiResponse,
-) {
+export default async function handler(req: NextRequest) {
+	const [satoshiBoldData, interMediumData] = await Promise.all([
+		satoshiBold,
+		interMedium,
+	]);
 	// NextURL is undefined for some reason
-	const id = req.query.id;
-
+	const { searchParams } = new URL(req.url);
+	const id = searchParams.get('id');
 	if (!id) {
-		res.status(400).send('No id provided');
-		return;
+		return new Response(`Failed to generate the image`, {
+			status: 400,
+		});
 	}
 	const parsedId = z.string().parse(id);
 	const data = await findMessageResultPage(parsedId);
 	if (!data) {
-		res.status(400).send('No data found');
-		return;
+		return new Response(`Post not found`, {
+			status: 404,
+		});
 	}
 	const { server, channel, thread, messages } = data;
 
 	const rootMessage = messages.at(0);
 	if (!rootMessage || !rootMessage.public) {
-		res.status(400).send('No data found');
-		return;
+		return new Response(`Post not found`, {
+			status: 404,
+		});
 	}
 	const title = thread ? thread.name : rootMessage.content;
-	const isSolved = rootMessage.solutionIds.length > 0;
+	const isSolved = rootMessage.solutions.length > 0;
 	const numReplies = messages.length - 1;
 	const date = getSnowflakeUTCDate(rootMessage.id);
 	const icon = makeServerIconLink(server, 96);
@@ -313,91 +283,65 @@ export default async function handler(
 			<MetaData />
 		</div>
 	);
-
-	const svg = await satori(
-		<div
-			style={{
-				height: '100%',
-				width: '100%',
-				fontFamily: 'Satoshi Black',
-				position: 'relative',
-				display: 'flex',
-				flexDirection: 'column',
-				alignItems: 'center',
-				padding: '60px',
-				backgroundColor: 'white',
-				gap: '20px',
-			}}
-		>
-			{/* Header */}
-			<Header />
-			<Body />
-			<div
-				style={{
-					position: 'absolute',
-					display: 'flex',
-					right: '80px',
-					bottom: '40px',
-					gap: '20px',
-					alignItems: 'center',
-				}}
-			>
-				<AnswerOverflowLogo
-					style={{
-						fill: 'none',
-						stroke: '#000',
-						strokeWidth: 13,
-						strokeMiterlimit: 10,
-					}}
-				/>
-			</div>
+	return new ImageResponse(
+		(
 			<div
 				style={{
 					height: '100%',
-					backgroundColor: 'red',
+					width: '100%',
+					fontFamily: 'Satoshi Black',
+					position: 'relative',
+					display: 'flex',
+					flexDirection: 'column',
+					alignItems: 'center',
+					padding: '60px',
+					backgroundColor: 'white',
+					gap: '20px',
 				}}
-			></div>
-		</div>,
+			>
+				{/* Header */}
+				<Header />
+				<Body />
+				<div
+					style={{
+						position: 'absolute',
+						display: 'flex',
+						right: '80px',
+						bottom: '40px',
+						gap: '20px',
+						alignItems: 'center',
+					}}
+				>
+					<AnswerOverflowLogo
+						style={{
+							fill: 'none',
+							stroke: '#000',
+							strokeWidth: 13,
+							strokeMiterlimit: 10,
+						}}
+					/>
+				</div>
+				<div
+					style={{
+						height: '100%',
+						backgroundColor: 'red',
+					}}
+				></div>
+			</div>
+		),
 		{
 			width: 1200,
 			height: 630,
 			fonts: [
 				{
-					name: 'Satoshi Black',
-					data: satoshiBLack,
+					name: 'Satoshi Bold',
+					data: satoshiBoldData,
 				},
 				{
-					name: 'Satoshi Bold',
-					data: satoshiBold,
+					name: 'Inter Medium',
+					data: interMediumData,
 				},
 			],
-			loadAdditionalAsset: async (code: string, text: string) => {
-				if (code === 'emoji') {
-					return (
-						`data:image/svg+xml;base64,` +
-						btoa(await (await loadEmoji(getIconCode(text))).text())
-					);
-				}
-				// return a promise to undefined
-				return new Promise(() => undefined);
-			},
 		},
 	);
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-	const image = await renderAsync(svg, {
-		fitTo: {
-			mode: 'width',
-			value: 1200,
-		},
-	});
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-	const asPng = image.asPng();
-	res.setHeader('Content-Type', 'image/png');
-	res.setHeader(
-		'cache-control',
-		sharedEnvs.NODE_ENV === 'development'
-			? 'no-cache, no-store'
-			: 'public, immutable, no-transform, max-age=86400',
-	);
-	res.send(asPng);
 }

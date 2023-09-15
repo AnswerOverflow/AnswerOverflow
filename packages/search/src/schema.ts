@@ -1,12 +1,9 @@
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { z } from 'zod';
 import type {
-	APIActionRowComponent,
 	APIAttachment,
 	APIEmbed,
-	APIMessageActionRowComponent,
 	APIMessageReference,
-	APISelectMenuOption,
 } from 'discord-api-types/v10';
 import type { CamelCasedPropertiesDeep } from 'type-fest';
 
@@ -140,46 +137,9 @@ const messageReferenceProperties: MessageReferenceMappingProperty = {
 	serverId: idProperty,
 };
 
-export const zDiscordMessageComponent: z.ZodType<
-	CamelCasedPropertiesDeep<APIActionRowComponent<APIMessageActionRowComponent>>
-> = z.any();
-const selectOptionsProperties: CustomMappingProperty<APISelectMenuOption> = {
-	label: { type: 'text' },
-	value: { type: 'text' },
-	default: { type: 'boolean' },
-	description: { type: 'text' },
-	emoji: { type: 'text' },
-};
-
-const baseMessageComponentProperties: CustomMappingProperty<
-	CamelCasedPropertiesDeep<APIMessageActionRowComponent>
-> = {
-	type: { type: 'integer' },
-	url: { type: 'text' },
-	style: { type: 'integer' },
-	options: { properties: selectOptionsProperties },
-	disabled: { type: 'boolean' },
-	maxValues: { type: 'integer' },
-	minValues: { type: 'integer' },
-	placeholder: { type: 'text' },
-	emoji: { type: 'text' },
-	label: { type: 'text' },
-	customId: { type: 'text' },
-	channelTypes: { type: 'integer' },
-};
-
-const messageComponentProperties: CustomMappingProperty<
-	z.infer<typeof zDiscordMessageComponent>
-> = {
-	...baseMessageComponentProperties,
-	components: {
-		properties: baseMessageComponentProperties,
-	},
-};
-
 const zMessageReaction = z.object({
-	emojiName: z.string().nullable(),
-	emojiId: z.string().nullable(),
+	emojiName: z.string().nullable().optional(),
+	emojiId: z.string().nullable().optional(),
 	reactorIds: z.array(z.string()),
 });
 
@@ -198,7 +158,6 @@ export const zMessage = z.object({
 	childThreadId: z.string().nullable(), // The thread started by this message
 	parentChannelId: z.string().nullable(), // If the message is in a thread, this is the channel id of the parent channel for the thread
 	serverId: z.string(),
-	stickerIds: z.array(z.string()),
 	webhookId: z.string().nullable(),
 	applicationId: z.string().nullable(),
 	interactionId: z.string().nullable(),
@@ -206,16 +165,11 @@ export const zMessage = z.object({
 
 	content: z.string(),
 	attachments: z.array(zDiscordAttachment),
-	components: z.array(zDiscordMessageComponent),
 	reactions: z.array(zMessageReaction),
 	embeds: z.array(zDiscordEmbed),
 	messageReference: zMessageReference.nullable(),
 
 	tts: z.boolean(),
-	mentionEveryone: z.boolean(),
-	mentionRoles: z.array(z.string()), // List of role ids mentioned in the message
-	mentions: z.array(z.string()), // List of user ids mentioned in the message
-	mentionChannels: z.array(z.string()), // List of channel ids mentioned in the message
 	nonce: z.string().nullable(),
 	pinned: z.boolean(),
 	type: z.number(),
@@ -223,10 +177,10 @@ export const zMessage = z.object({
 });
 
 // https://discord.com/developers/docs/resources/channel#message-objects
-export type Message = z.infer<typeof zMessage>;
+export type ElasticMessage = z.infer<typeof zMessage>;
 
 type ElasticMessageIndexProperties = {
-	[K in keyof Message]: MappingProperty;
+	[K in keyof ElasticMessage]: MappingProperty;
 };
 
 export const elasticMessageIndexProperties: ElasticMessageIndexProperties = {
@@ -238,28 +192,20 @@ export const elasticMessageIndexProperties: ElasticMessageIndexProperties = {
 	childThreadId: idProperty,
 	applicationId: idProperty,
 	interactionId: idProperty,
-	stickerIds: idProperty,
 	webhookId: idProperty,
 	solutionIds: idProperty,
-	mentions: idProperty,
-	mentionRoles: idProperty,
-	mentionChannels: idProperty,
-
 	content: { type: 'text' },
 	flags: { type: 'integer' },
 	type: { type: 'integer' },
 	pinned: { type: 'boolean' },
 	nonce: { type: 'text' },
 	tts: { type: 'boolean' },
-	mentionEveryone: { type: 'boolean' },
+
 	attachments: {
 		properties: attachmentProperties,
 	},
 	embeds: {
 		properties: embedProperties,
-	},
-	components: {
-		properties: messageComponentProperties,
 	},
 	reactions: {
 		properties: messageReactionProperties,

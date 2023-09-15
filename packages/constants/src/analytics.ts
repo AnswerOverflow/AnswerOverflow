@@ -1,6 +1,5 @@
-import type { Message } from '@answeroverflow/elastic-types';
 // eslint-disable-next-line no-restricted-imports
-import type { Channel, Server } from '../../db/src/schema';
+import type { Channel, Server, BaseMessage } from '../../db/src/schema';
 // eslint-disable-next-line no-restricted-imports
 import { ServerWithFlags } from '../../db/src/zodSchemas/serverSchemas';
 // eslint-disable-next-line no-restricted-imports
@@ -18,13 +17,8 @@ export type MessageProps = {
 
 export function messageToAnalyticsData(
 	message: Pick<
-		Message,
-		| 'id'
-		| 'authorId'
-		| 'solutionIds'
-		| 'channelId'
-		| 'serverId'
-		| 'parentChannelId'
+		BaseMessage,
+		'id' | 'authorId' | 'channelId' | 'serverId' | 'parentChannelId'
 	>,
 ): MessageProps {
 	return {
@@ -33,8 +27,6 @@ export function messageToAnalyticsData(
 		'Channel Id': message.parentChannelId ?? message.channelId,
 		'Thread Id': message.parentChannelId ? message.channelId : undefined,
 		'Server Id': message.serverId,
-		'Solution Id':
-			message.solutionIds.length > 0 ? message.solutionIds[0] : undefined,
 	};
 }
 
