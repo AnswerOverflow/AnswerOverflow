@@ -259,6 +259,7 @@ export async function findMessagesByChannelIdWithDiscordAccounts(
 }
 
 export async function findManyMessages(ids: string[]) {
+	if (ids.length === 0) return [];
 	return db.select().from(dbMessages).where(inArray(dbMessages.id, ids));
 }
 
@@ -504,6 +505,7 @@ export async function deleteMessage(id: string) {
 }
 
 export async function deleteManyMessages(ids: string[]) {
+	if (ids.length === 0) return Promise.resolve();
 	return db.delete(dbMessages).where(inArray(dbMessages.id, ids));
 }
 
@@ -524,6 +526,7 @@ export async function findLatestMessageIdInChannel(channelId: string) {
 }
 
 export async function bulkFindLatestMessageInChannel(channelIds: string[]) {
+	if (channelIds.length === 0) return [];
 	return db
 		.select({
 			latestMessageId: sql<bigint>`MAX(CAST(${dbMessages.id} AS SIGNED))`,
