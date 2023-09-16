@@ -59,7 +59,7 @@ export function toMessageWithAccountAndRepliesTo({
 	const publicMsg: MessageFull = {
 		...toMessageWithDiscordAccount({ message, author, publicMessage }),
 		solutions: solutions,
-		reference: referenced,
+		reference: referenced ?? null,
 	};
 	return publicMsg;
 }
@@ -93,7 +93,7 @@ export function toPrivateMessageWithStrippedData(
 		...privateMsg,
 		reference: message.reference
 			? toPrivateMessageWithStrippedData(message.reference)
-			: undefined,
+			: null,
 		solutions: message.solutions.map((m) =>
 			toPrivateMessageWithStrippedData(m),
 		),

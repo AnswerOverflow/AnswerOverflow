@@ -325,7 +325,7 @@ export function stripPrivateFullMessageData(
 
 	const reply = message.reference
 		? stripPrivatePartialMessageData(message.reference, userServers)
-		: undefined;
+		: null;
 
 	const solutions = message.solutions.map((solution) =>
 		stripPrivatePartialMessageData(solution, userServers),
@@ -333,7 +333,7 @@ export function stripPrivateFullMessageData(
 	if (message.public || canUserViewPrivateMessage(userServers, message)) {
 		return {
 			...message,
-			reference: reply ?? undefined,
+			reference: reply,
 			solutions,
 		};
 	}
@@ -343,7 +343,7 @@ export function stripPrivateFullMessageData(
 		public: false,
 		attachments: [],
 		embeds: [],
-		reference: reply ?? undefined,
+		reference: reply,
 		solutions: solutions,
 	};
 }

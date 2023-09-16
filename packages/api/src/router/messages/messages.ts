@@ -39,6 +39,7 @@ export const messagesRouter = router({
 				});
 			}
 			const { messages, channel, server, thread } = data;
+
 			const recommendedChannels = thread
 				? await findChannelsBeforeId({
 						take: 100,
@@ -53,7 +54,7 @@ export const messagesRouter = router({
 				recommendedChannels.map((c) => c.id),
 			).then((posts) =>
 				posts
-					.filter((p) => p.public)
+					.filter((p) => p.public && recommendedChannelLookup.has(p.id))
 					.map((p) => ({
 						message: stripPrivateFullMessageData(p, ctx.userServers),
 						thread: stripPrivateChannelData(
@@ -63,9 +64,9 @@ export const messagesRouter = router({
 			);
 
 			return {
-				messages: messages.map((message) =>
-					stripPrivateFullMessageData(message, ctx.userServers),
-				),
+				messages: messages.map((msg) => {
+					return stripPrivateFullMessageData(msg, ctx.userServers);
+				}),
 				parentChannel: stripPrivateChannelData(channel),
 				server: stripPrivateServerData(server),
 				thread: thread ? stripPrivateChannelData(thread) : undefined,

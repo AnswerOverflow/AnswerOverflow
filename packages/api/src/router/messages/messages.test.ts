@@ -269,7 +269,7 @@ describe('Message Results', () => {
 			);
 			const forumThread = await createChannel(mockThread(forumChannel));
 			const message = mockMessage(server, forumThread, author, {
-				id: forumChannel.id,
+				id: forumThread.id,
 				parentChannelId: forumChannel.id,
 			});
 			const message2 = mockMessage(server, forumThread, author, {
@@ -280,6 +280,7 @@ describe('Message Results', () => {
 			const pageData = await unauthedMessagePageRouter.threadFromMessageId(
 				message2.id,
 			);
+			expect(pageData.messages.length).toBe(2);
 			expect(pageData.messages).toEqual([
 				toPrivateMessageWithStrippedData(
 					toMessageWithAccountAndRepliesTo({
