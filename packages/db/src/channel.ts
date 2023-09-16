@@ -144,6 +144,7 @@ export async function findAllChannelsByServerId(
 }
 
 export async function findManyChannelMessagesCounts(channelIds: string[]) {
+	if (channelIds.length === 0) return Promise.resolve([]);
 	return db
 		.select({
 			count: sql<number>`count(*)`,
