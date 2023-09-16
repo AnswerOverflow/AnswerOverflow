@@ -12,7 +12,7 @@ import {
 	boolean,
 	json,
 } from 'drizzle-orm/mysql-core';
-import { relations, sql } from 'drizzle-orm';
+import { relations } from 'drizzle-orm';
 const unsignedInt = customType<{
 	data: number; // TODO: BigInt?
 }>({
@@ -305,6 +305,7 @@ export const channelsRelations = relations(dbChannels, ({ one, many }) => ({
 		fields: [dbChannels.serverId],
 		references: [dbServers.id],
 	}),
+	messages: many(dbMessages),
 }));
 
 export const dbAttachments = mysqlTable(
@@ -469,6 +470,10 @@ export const messageRelations = relations(dbMessages, ({ one, many }) => ({
 	server: one(dbServers, {
 		fields: [dbMessages.serverId],
 		references: [dbServers.id],
+	}),
+	channel: one(dbChannels, {
+		fields: [dbMessages.channelId],
+		references: [dbChannels.id],
 	}),
 }));
 

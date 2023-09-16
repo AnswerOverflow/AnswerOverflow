@@ -131,7 +131,7 @@ export function applyPublicFlagsToMessages<
 			),
 			reference: msg.reference
 				? makeMessageWithAuthor(msg.reference, serverWithFlags)
-				: undefined,
+				: null,
 		};
 	});
 }

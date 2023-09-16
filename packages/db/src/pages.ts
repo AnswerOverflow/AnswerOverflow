@@ -1,19 +1,22 @@
 import type { z } from 'zod';
 import {
+	applyPublicFlagsToMessages,
 	findAllChannelQuestions,
 	findMessageById,
 	findMessageByIdWithDiscordAccount,
-	findMessagesByChannelIdWithDiscordAccounts,
 	getParentChannelOfMessage,
 	getThreadIdOfMessage,
 	type MessageFull,
 } from './message';
-import { findChannelById } from './channel';
-import { findServerById } from './server';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 import { db } from './db';
-import { eq, or } from 'drizzle-orm';
-import { dbServers } from './schema';
+import { and, eq, or, sql } from 'drizzle-orm';
+import {
+	dbChannels,
+	dbMessages,
+	dbServers,
+	dbUserServerSettings,
+} from './schema';
 import { zServerPublic } from './zodSchemas/serverSchemas';
 import { addFlagsToServer } from './utils/serverUtils';
 import { addFlagsToChannel, zChannelPublic } from './zodSchemas/channelSchemas';
@@ -121,44 +124,102 @@ export async function findMessageResultPage(messageId: string) {
 		return null;
 	}
 
-	const threadFetch = threadId ? findChannelById(threadId) : undefined;
-
-	const serverFetch = findServerById(targetMessage.serverId);
-	const parentChannelFetch = threadId
-		? findChannelById(parentId)
-		: findChannelById(targetMessage.channelId);
-
-	const messageFetch = threadId
-		? findMessagesByChannelIdWithDiscordAccounts({
-				channelId: threadId,
-		  })
-		: findMessagesByChannelIdWithDiscordAccounts({
-				channelId: parentId,
-				after: targetMessage.id,
-				limit: NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
-		  });
-
-	const [thread, server, channel, messages, rootMessage] = await Promise.all([
-		threadFetch,
-		serverFetch,
-		parentChannelFetch,
-		messageFetch,
+	const [result, rootMessage] = await Promise.all([
+		db.query.dbChannels.findFirst({
+			where: eq(dbChannels.id, threadId ?? parentId),
+			with: {
+				server: true,
+				parent: true,
+				messages: {
+					where: !threadId
+						? sql`CAST(${dbMessages.id} AS SIGNED) >= CAST(${targetMessage.id} AS SIGNED)`
+						: undefined,
+					orderBy: sql`CAST(${dbMessages.id} AS SIGNED) ASC`,
+					limit: parentId ? NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD : undefined,
+					with: {
+						author: {
+							with: {
+								userServerSettings: {
+									where: and(
+										eq(dbUserServerSettings.serverId, targetMessage.serverId),
+										eq(dbUserServerSettings.userId, targetMessage.authorId),
+									),
+								},
+							},
+						},
+						attachments: true,
+						reference: {
+							with: {
+								author: {
+									with: {
+										userServerSettings: {
+											where: and(
+												eq(
+													dbUserServerSettings.serverId,
+													targetMessage.serverId,
+												),
+												eq(dbUserServerSettings.userId, targetMessage.authorId),
+											),
+										},
+									},
+								},
+								attachments: true,
+							},
+						},
+						reactions: true,
+						solutions: {
+							with: {
+								author: {
+									with: {
+										userServerSettings: {
+											where: and(
+												eq(
+													dbUserServerSettings.serverId,
+													targetMessage.serverId,
+												),
+												eq(dbUserServerSettings.userId, targetMessage.authorId),
+											),
+										},
+									},
+								},
+								attachments: true,
+							},
+						},
+					},
+				},
+			},
+		}),
 		threadId ? findMessageByIdWithDiscordAccount(threadId) : undefined,
 	]);
+	if (!result) {
+		return null;
+	}
+	const { messages, server, ...channel } = result;
+
+	const msgsWithAccounts = applyPublicFlagsToMessages(
+		messages.map((m) => ({
+			...m,
+			server,
+		})),
+	);
+
+	const parentChannel = addFlagsToChannel(channel?.parent ?? channel);
 	if (!server || server.kickedTime) return null;
 
-	if (!channel || !channel.flags.indexingEnabled) {
+	if (!parentChannel || !parentChannel.flags.indexingEnabled) {
 		return null;
 	}
 
+	const combinedMessages =
+		rootMessage && !msgsWithAccounts.find((m) => m.id === rootMessage?.id)
+			? [rootMessage, ...msgsWithAccounts]
+			: msgsWithAccounts;
+
 	return {
-		server,
-		channel,
-		messages:
-			rootMessage && rootMessage.channelId != thread?.id
-				? [rootMessage, ...messages]
-				: messages,
+		server: addFlagsToServer(server),
+		channel: parentChannel,
+		messages: combinedMessages,
 		rootMessage,
-		thread,
+		thread: channel?.parent ? addFlagsToChannel(channel) : null,
 	};
 }
