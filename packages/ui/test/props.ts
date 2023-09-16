@@ -26,7 +26,7 @@ export function mockMessageFull(override: Partial<MessageFull> = {}) {
 	const data: MessageFull = {
 		...mockMessageWithDiscordAccount(),
 		solutions: [],
-		reference: undefined,
+		reference: null,
 		...override,
 	};
 	return data;
@@ -52,7 +52,7 @@ export function mockMessageWithDiscordAccount(
 		author: mockDiscordAccount(),
 		public: true,
 		solutions: [],
-		reference: undefined,
+		reference: null,
 		...override,
 	};
 	return data;
