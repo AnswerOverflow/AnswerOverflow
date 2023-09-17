@@ -10,7 +10,8 @@ These files will be merged into one file with dynamic imports when we move to bu
 dynamic imports and top level await dont work with the bot. if you can fix it make a pr 💖
  */
 
-if (!dbUrl.includes('psdb') || dbUrl.includes('pscale_pw')) {
+const isPsDb = dbUrl.includes('psdb') || dbUrl.includes('pscale_pw');
+if (!isPsDb) {
 	console.error(
 		"Database URL is not a PlanetScale database URL. You need to either use a PlanetScale database or run the 'use-mysql2' script from the root of the repository.",
 	);
