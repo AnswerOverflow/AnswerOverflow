@@ -29,6 +29,14 @@ export const channelBitfieldFlags = [
 	'forumGuidelinesConsentEnabled',
 ] as const;
 
+export const channelBitfieldValues = {
+	indexingEnabled: 1 << 0,
+	markSolutionEnabled: 1 << 1,
+	sendMarkSolutionInstructionsInNewThreads: 1 << 2,
+	autoThreadEnabled: 1 << 3,
+	forumGuidelinesConsentEnabled: 1 << 4,
+} as const;
+
 export const zChannelBitfieldFlags = z.object({
 	indexingEnabled: z.boolean(),
 	markSolutionEnabled: z.boolean(),

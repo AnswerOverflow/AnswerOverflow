@@ -102,7 +102,9 @@ describe('Page Operations', () => {
 			expect(result).toBeNull();
 		});
 		it('should work for a vanity url', async () => {
-			const serverWithVanity = mockServer({ vanityUrl: getRandomId() });
+			const serverWithVanity = mockServer({
+				vanityUrl: `asd+${getRandomId()}`,
+			});
 			await createServer(serverWithVanity);
 			const result = await findServerWithCommunityPageData({
 				idOrVanityUrl: serverWithVanity.vanityUrl!,

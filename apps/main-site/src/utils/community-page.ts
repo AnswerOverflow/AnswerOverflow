@@ -1,4 +1,4 @@
-import { findServerWithCommunityPageData } from '@answeroverflow/db';
+import { findQuestionsForSitemap } from '@answeroverflow/db';
 import { Sitemap } from './sitemap';
 import { ServerResponse } from 'http';
 
@@ -7,11 +7,10 @@ export async function addCommunityQuestionsToSitemap(input: {
 	sitemap: Sitemap;
 }) {
 	console.log(`Generating sitemap for community ${input.communityId}`);
-	const communityData = await findServerWithCommunityPageData({
-		idOrVanityUrl: input.communityId,
-	});
-	const questions =
-		communityData?.channels.flatMap((channel) => channel.questions) ?? [];
+	const lookup = await findQuestionsForSitemap(input.communityId);
+	if (!lookup) return;
+	const { questions, server } = lookup;
+
 	input.sitemap.addMany(
 		questions.map(({ thread }) => ({
 			loc: `/m/${thread.id}`,
@@ -19,7 +18,7 @@ export async function addCommunityQuestionsToSitemap(input: {
 			priority: 0.9,
 		})),
 	);
-	if (communityData && !communityData.server.customDomain) {
+	if (!server.customDomain) {
 		input.sitemap.add({
 			loc: `/c/${input.communityId}`, // Community page
 			changefreq: 'weekly',
