@@ -8,6 +8,11 @@ export const zUserServerSettingsFlags = z.object({
 	messageIndexingDisabled: z.boolean(),
 });
 
+export const userServerSettingsValues = {
+	canPubliclyDisplayMessages: 1 << 0,
+	messageIndexingDisabled: 1 << 1,
+};
+
 const zUserServerSettingsSchema = createInsertSchema(dbUserServerSettings)
 	.required()
 	.extend({

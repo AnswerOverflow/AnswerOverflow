@@ -180,11 +180,11 @@ export const dbUserServerSettings = mysqlTable(
 	},
 	(table) => {
 		return {
-			userIdIdx: index('UserServerSettings_userId_idx').on(table.userId),
 			userServerSettingsUserIdServerId: primaryKey(
 				table.userId,
 				table.serverId,
 			),
+			userIdIdx: index('UserServerSettings_userId_idx').on(table.userId),
 			serverIdIdx: index('UserServerSettings_serverId_idx').on(table.serverId),
 		};
 	},
@@ -285,10 +285,8 @@ export const dbChannels = mysqlTable(
 		return {
 			serverIdIdx: index('Channel_serverId_idx').on(table.serverId),
 			parentIdIdx: index('Channel_parentId_idx').on(table.parentId),
+			inviteCodeKey: unique('Channel_inviteCode_key').on(table.inviteCode),
 			channelId: primaryKey(table.id),
-			channelInviteCodeKey: unique('Channel_inviteCode_key').on(
-				table.inviteCode,
-			),
 		};
 	},
 );
@@ -299,8 +297,11 @@ export const channelsRelations = relations(dbChannels, ({ one, many }) => ({
 	parent: one(dbChannels, {
 		fields: [dbChannels.parentId],
 		references: [dbChannels.id],
+		relationName: 'parent-child',
 	}),
-	threads: many(dbChannels),
+	threads: many(dbChannels, {
+		relationName: 'parent-child',
+	}),
 	server: one(dbServers, {
 		fields: [dbChannels.serverId],
 		references: [dbServers.id],
@@ -325,6 +326,7 @@ export const dbAttachments = mysqlTable(
 	(table) => {
 		return {
 			attachmentId: primaryKey(table.id),
+			messageIdIdx: index('Attachment_messageId_idx').on(table.messageId),
 		};
 	},
 );
@@ -352,6 +354,9 @@ export const dbReactions = mysqlTable(
 	(table) => {
 		return {
 			reactionId: primaryKey(table.messageId, table.userId, table.emojiId),
+			messageIdIdx: index('Reaction_messageId_idx').on(table.messageId),
+			userIdIdx: index('Reaction_userId_idx').on(table.userId),
+			emojiIdIdx: index('Reaction_emojiId_idx').on(table.emojiId),
 		};
 	},
 );
@@ -441,6 +446,8 @@ export const dbMessages = mysqlTable(
 			childThreadIdIdx: index('Message_childThreadId_idx').on(
 				table.childThreadId,
 			),
+			questionIdIdx: index('Message_questionId_idx').on(table.questionId),
+			referenceIdIdx: index('Message_referenceId_idx').on(table.referenceId),
 			messageId: primaryKey(table.id),
 		};
 	},

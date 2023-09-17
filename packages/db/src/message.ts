@@ -64,10 +64,12 @@ export function applyPublicFlagsToMessages<
 	if (messages.length === 0) {
 		return [];
 	}
+
 	const getLookupKey = (m: { userId: string; serverId: string }) =>
 		`${m.userId}-${m.serverId}`;
 	const authorServerSettingsLookup = new Map(
 		messages
+			.filter((msg) => msg.author && msg.author.userServerSettings)
 			.flatMap((msg) => msg.author.userServerSettings)
 			.map((uss) => [getLookupKey(uss), addFlagsToUserServerSettings(uss)]),
 	);
@@ -264,7 +266,12 @@ export async function findManyMessages(ids: string[]) {
 }
 
 // TODO: We want USS to only be for the server the message is in, not all servers the user is in, is that possible?
-export async function findManyMessagesWithAuthors(ids: string[]) {
+export async function findManyMessagesWithAuthors(
+	ids: string[],
+	opts?: {
+		excludePrivateMessages?: boolean;
+	},
+): Promise<MessageFull[]> {
 	if (ids.length === 0) return [];
 	const msgs = await db.query.dbMessages
 		.findMany({
@@ -301,7 +308,15 @@ export async function findManyMessagesWithAuthors(ids: string[]) {
 		})
 		.then((x) => applyPublicFlagsToMessages(x));
 	const msgLookup = new Map(msgs.map((msg) => [msg.id, msg]));
-	return ids.map((id) => msgLookup.get(id)).filter(Boolean);
+	return ids
+		.map((id) => msgLookup.get(id))
+		.filter((x) => {
+			if (!x) return false;
+			if (opts?.excludePrivateMessages) {
+				return x.public;
+			}
+			return true;
+		}) as MessageFull[];
 }
 // TODO: Paginate get all questions response
 export async function findAllChannelQuestions(input: {
@@ -582,7 +597,9 @@ export async function getTotalNumberOfMessages() {
 		.then((x) => x?.at(0)?.count ?? 2000000);
 }
 
-export function getThreadIdOfMessage(message: BaseMessage): string | null {
+export function getThreadIdOfMessage(
+	message: Pick<BaseMessage, 'childThreadId' | 'parentChannelId' | 'channelId'>,
+): string | null {
 	if (message.childThreadId) {
 		return message.childThreadId;
 	}

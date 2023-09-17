@@ -164,7 +164,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 		}
 		if (!questions || questions.length === 0) {
 			return (
-				<div className="flex flex-col items-center justify-center">
+				<div className="flex flex-col items-center">
 					<Heading.H4 className="text-center">
 						No questions found for this channel.
 					</Heading.H4>
