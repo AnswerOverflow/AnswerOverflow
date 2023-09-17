@@ -154,7 +154,7 @@ export async function findManyUserServerSettings(
 	where: UserServerSettingsFindById[],
 ) {
 	if (where.length === 0) return [];
-	const data = (await db.query.dbUserServerSettings.findMany({
+	const data = await db.query.dbUserServerSettings.findMany({
 		where: and(
 			inArray(
 				dbUserServerSettings.userId,
@@ -166,7 +166,7 @@ export async function findManyUserServerSettings(
 			),
 			isNotNull(dbUserServerSettings.bitfield),
 		),
-	})) as UserServerSettingsWithFlags[];
+	});
 	return data.map(addFlagsToUserServerSettings);
 }
 

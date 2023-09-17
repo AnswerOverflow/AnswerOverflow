@@ -52,23 +52,26 @@ export async function findQuestionsForSitemap(serverId: string) {
 	if (!res) return null;
 	const questionIds = res.channels.flatMap((c) => c.threads.map((t) => t.id));
 
-	const questions = await db.query.dbMessages.findMany({
-		where: and(
-			eq(dbMessages.serverId, serverId),
-			inArray(dbMessages.id, questionIds),
-		),
-		columns: {
-			id: true,
-			authorId: true,
-		},
-		with: {
-			author: {
-				with: {
-					userServerSettings: true,
-				},
-			},
-		},
-	});
+	const questions =
+		questionids.length > 0
+			? await db.query.dbMessages.findMany({
+					where: and(
+						eq(dbMessages.serverId, serverId),
+						inArray(dbMessages.id, questionIds),
+					),
+					columns: {
+						id: true,
+						authorId: true,
+					},
+					with: {
+						author: {
+							with: {
+								userServerSettings: true,
+							},
+						},
+					},
+			  })
+			: [];
 
 	const questionLookup = new Map(questions.map((m) => [m.id, m]));
 	const areAllServerMessagesPublic =
