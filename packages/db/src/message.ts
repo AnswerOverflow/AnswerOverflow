@@ -69,7 +69,6 @@ export function applyPublicFlagsToMessages<
 		`${m.userId}-${m.serverId}`;
 	const authorServerSettingsLookup = new Map(
 		messages
-			.filter((msg) => msg.author && msg.author.userServerSettings)
 			.flatMap((msg) => msg.author.userServerSettings)
 			.map((uss) => [getLookupKey(uss), addFlagsToUserServerSettings(uss)]),
 	);
@@ -79,6 +78,9 @@ export function applyPublicFlagsToMessages<
 		msg: MessageWithAuthorServerSettings,
 		serverWithFlags: ServerWithFlags,
 	) => {
+		if (!msg.author || !msg.author.userServerSettings) {
+			return null;
+		}
 		const author = msg.author;
 		const seed = seedLookup.get(author.id) ?? getRandomId();
 		const authorServerSettings = authorServerSettingsLookup.get(
@@ -124,18 +126,22 @@ export function applyPublicFlagsToMessages<
 		};
 	};
 
-	return messages.map((msg) => {
-		const serverWithFlags = addFlagsToServer(msg.server);
-		return {
-			...makeMessageWithAuthor(msg, serverWithFlags),
-			solutions: msg.solutions.map((s) =>
-				makeMessageWithAuthor(s, serverWithFlags),
-			),
-			reference: msg.reference
-				? makeMessageWithAuthor(msg.reference, serverWithFlags)
-				: null,
-		};
-	});
+	return messages
+		.map((msg) => {
+			const serverWithFlags = addFlagsToServer(msg.server);
+			const withAuthor = makeMessageWithAuthor(msg, serverWithFlags);
+			if (!withAuthor) return null;
+			return {
+				...withAuthor,
+				solutions: msg.solutions
+					.map((s) => makeMessageWithAuthor(s, serverWithFlags))
+					.filter(Boolean),
+				reference: msg.reference
+					? makeMessageWithAuthor(msg.reference, serverWithFlags)
+					: null,
+			};
+		})
+		.filter(Boolean);
 }
 
 export type MessageWithDiscordAccount = NonNullable<
