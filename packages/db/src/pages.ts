@@ -53,7 +53,7 @@ export async function findQuestionsForSitemap(serverId: string) {
 	const questionIds = res.channels.flatMap((c) => c.threads.map((t) => t.id));
 
 	const questions =
-		questionids.length > 0
+		questionIds.length > 0
 			? await db.query.dbMessages.findMany({
 					where: and(
 						eq(dbMessages.serverId, serverId),
