@@ -268,9 +268,11 @@ export function makeMarkSolutionResponse({
 			.setLabel('Jump To Solution')
 			.setURL(solution.url)
 			.setStyle(ButtonStyle.Link),
+		new ButtonBuilder()
+			.setLabel('View on Answer Overflow')
+			.setURL(`https://answeroverflow.com/m/${solution.channelId}`)
+			.setStyle(ButtonStyle.Link),
 	);
-
-	// TODO: Add view on Answer Overflow
 
 	return {
 		embed,
