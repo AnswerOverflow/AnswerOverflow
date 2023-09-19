@@ -233,6 +233,8 @@ export async function findMessageResultPage(messageId: string) {
 		return null;
 	}
 
+	const startTime = Date.now();
+
 	const [result, rootMessage] = await Promise.all([
 		db.query.dbChannels.findFirst({
 			where: eq(dbChannels.id, threadId ?? parentId),
@@ -245,6 +247,17 @@ export async function findMessageResultPage(messageId: string) {
 						: undefined,
 					orderBy: sql`CAST(${dbMessages.id} AS SIGNED) ASC`,
 					limit: parentId ? undefined : NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
+					columns: {
+						id: true,
+						content: true,
+						questionId: true,
+						serverId: true,
+						authorId: true,
+						channelId: true,
+						parentChannelId: true,
+						childThreadId: true,
+						embeds: true,
+					},
 					with: {
 						author: {
 							with: {
@@ -271,6 +284,17 @@ export async function findMessageResultPage(messageId: string) {
 								},
 								attachments: true,
 							},
+							columns: {
+								id: true,
+								content: true,
+								questionId: true,
+								serverId: true,
+								authorId: true,
+								channelId: true,
+								parentChannelId: true,
+								childThreadId: true,
+								embeds: true,
+							},
 						},
 						reactions: true,
 						solutions: {
@@ -287,6 +311,17 @@ export async function findMessageResultPage(messageId: string) {
 								},
 								attachments: true,
 							},
+							columns: {
+								id: true,
+								content: true,
+								questionId: true,
+								serverId: true,
+								authorId: true,
+								channelId: true,
+								parentChannelId: true,
+								childThreadId: true,
+								embeds: true,
+							},
 						},
 					},
 				},
@@ -294,6 +329,9 @@ export async function findMessageResultPage(messageId: string) {
 		}),
 		threadId ? findMessageByIdWithDiscordAccount(threadId) : undefined,
 	]);
+
+	const endTime = Date.now();
+	console.log(`findMessageResultPage took ${endTime - startTime}ms`);
 
 	if (!result) {
 		return null;

@@ -47,7 +47,18 @@ export const CANNOT_UPSERT_MESSAGE_FOR_IGNORED_ACCOUNT_MESSAGE =
 export const CANNOT_UPSERT_MESSAGE_FOR_USER_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE =
 	'Message author has disabled message indexing, cannot upsert message';
 
-type MessageWithAuthorServerSettings = BaseMessage & {
+type MessageWithAuthorServerSettings = Pick<
+	BaseMessage,
+	| 'id'
+	| 'content'
+	| 'questionId'
+	| 'serverId'
+	| 'authorId'
+	| 'channelId'
+	| 'parentChannelId'
+	| 'childThreadId'
+	| 'embeds'
+> & {
 	author: DiscordAccount & {
 		userServerSettings: UserServerSettings[];
 	};
@@ -58,7 +69,7 @@ export function applyPublicFlagsToMessages<
 	T extends MessageWithAuthorServerSettings & {
 		solutions: MessageWithAuthorServerSettings[];
 		reference: MessageWithAuthorServerSettings | null;
-		server: Server;
+		server: Pick<Server, 'bitfield'>;
 	},
 >(messages: T[]) {
 	if (messages.length === 0) {
@@ -77,7 +88,7 @@ export function applyPublicFlagsToMessages<
 
 	const makeMessageWithAuthor = (
 		msg: MessageWithAuthorServerSettings,
-		serverWithFlags: ServerWithFlags,
+		serverWithFlags: Pick<ServerWithFlags, 'flags'>,
 	) => {
 		if (!msg.author || !msg.author.userServerSettings) {
 			return null;
@@ -112,11 +123,7 @@ export function applyPublicFlagsToMessages<
 				'childThreadId',
 				'attachments',
 				'embeds',
-				'flags',
-				'interactionId',
-				'nonce',
 				'parentChannelId',
-				'pinned',
 				'questionId',
 			),
 			author:
@@ -171,7 +178,17 @@ export async function findMessageByIdWithDiscordAccount(id: string) {
 	return db.query.dbMessages
 		.findFirst({
 			where: eq(dbMessages.id, id),
-			// TODO: Optimize we don't need all these fields
+			columns: {
+				id: true,
+				content: true,
+				questionId: true,
+				serverId: true,
+				authorId: true,
+				channelId: true,
+				parentChannelId: true,
+				childThreadId: true,
+				embeds: true,
+			},
 			with: {
 				author: {
 					with: {
@@ -188,6 +205,17 @@ export async function findMessageByIdWithDiscordAccount(id: string) {
 						},
 						attachments: true,
 					},
+					columns: {
+						id: true,
+						content: true,
+						questionId: true,
+						serverId: true,
+						authorId: true,
+						channelId: true,
+						parentChannelId: true,
+						childThreadId: true,
+						embeds: true,
+					},
 				},
 				reference: {
 					with: {
@@ -198,8 +226,23 @@ export async function findMessageByIdWithDiscordAccount(id: string) {
 						},
 						attachments: true,
 					},
+					columns: {
+						id: true,
+						content: true,
+						questionId: true,
+						serverId: true,
+						authorId: true,
+						channelId: true,
+						parentChannelId: true,
+						childThreadId: true,
+						embeds: true,
+					},
 				},
-				server: true,
+				server: {
+					columns: {
+						bitfield: true,
+					},
+				},
 			},
 		})
 		.then((x) => (x ? applyPublicFlagsToMessages([x])[0]! : null));
@@ -208,6 +251,17 @@ export async function findMessageByIdWithDiscordAccount(id: string) {
 export async function findFullMessageById(id: string) {
 	return db.query.dbMessages.findFirst({
 		where: eq(dbMessages.id, id),
+		columns: {
+			id: true,
+			content: true,
+			questionId: true,
+			serverId: true,
+			authorId: true,
+			channelId: true,
+			parentChannelId: true,
+			childThreadId: true,
+			embeds: true,
+		},
 		with: {
 			author: true,
 			solutions: true,
@@ -233,6 +287,17 @@ export async function findMessagesByChannelIdWithDiscordAccounts(
 					? sql`CAST(${dbMessages.id} AS SIGNED) >= ${BigInt(input.after)}`
 					: undefined,
 			),
+			columns: {
+				id: true,
+				content: true,
+				questionId: true,
+				serverId: true,
+				authorId: true,
+				channelId: true,
+				parentChannelId: true,
+				childThreadId: true,
+				embeds: true,
+			},
 			with: {
 				author: {
 					with: {
@@ -249,6 +314,17 @@ export async function findMessagesByChannelIdWithDiscordAccounts(
 						},
 						attachments: true,
 					},
+					columns: {
+						id: true,
+						content: true,
+						questionId: true,
+						serverId: true,
+						authorId: true,
+						channelId: true,
+						parentChannelId: true,
+						childThreadId: true,
+						embeds: true,
+					},
 				},
 				reference: {
 					with: {
@@ -259,8 +335,23 @@ export async function findMessagesByChannelIdWithDiscordAccounts(
 						},
 						attachments: true,
 					},
+					columns: {
+						id: true,
+						content: true,
+						questionId: true,
+						serverId: true,
+						authorId: true,
+						channelId: true,
+						parentChannelId: true,
+						childThreadId: true,
+						embeds: true,
+					},
 				},
-				server: true,
+				server: {
+					columns: {
+						bitfield: true,
+					},
+				},
 			},
 			limit: input.limit ?? 100,
 		})
