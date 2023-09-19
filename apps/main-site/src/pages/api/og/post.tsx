@@ -78,7 +78,9 @@ const MessagesIcon = () => (
 );
 
 function truncate(str: string, n: number = 30) {
-	return str.length > n ? str.slice(0, n - 1) + '...' : str;
+	const truncated = str.length > n ? str.slice(0, n - 1) + '...' : str;
+	// Sometimes it breaks if we don't remove non-unicode characters
+	return truncated.replace(/[^\p{L}\d\s-]+/gu, '');
 }
 const makeServerIconLink = (
 	server: Pick<Server, 'id' | 'icon'>,
@@ -139,7 +141,6 @@ export default async function handler(req: NextRequest) {
 		}
 		return null;
 	};
-
 	const Header = () => (
 		<div
 			style={{
