@@ -331,7 +331,7 @@ export async function findMessageResultPage(messageId: string) {
 	]);
 
 	const endTime = Date.now();
-	console.log(`findMessageResultPage took ${endTime - startTime}ms`);
+	console.log(`findMessageResultPage /m/${messageId} took ${endTime - startTime}ms`);
 
 	if (!result) {
 		return null;
