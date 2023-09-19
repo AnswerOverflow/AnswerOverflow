@@ -142,7 +142,7 @@ export const MessageContents = () => {
 
 	return (
 		<div
-			className="pt-2 font-body text-primary [word-wrap:_break-word]"
+			className="pt-2 font-body text-primary [overflow-wrap:_anywhere]"
 			// The HTML from discord-markdown is escaped
 			dangerouslySetInnerHTML={{
 				__html: convertedMessageContent,
