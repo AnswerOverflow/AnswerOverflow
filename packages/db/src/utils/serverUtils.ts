@@ -7,7 +7,9 @@ import { getRandomId } from '@answeroverflow/utils';
 export const bitfieldToServerFlags = (bitfield: number) =>
 	bitfieldToDict(bitfield, serverSettingsFlags);
 
-export function addFlagsToServer<T extends Server>(serverSettings: T) {
+export function addFlagsToServer<T extends Pick<Server, 'bitfield'>>(
+	serverSettings: T,
+) {
 	return {
 		...serverSettings,
 		flags: bitfieldToServerFlags(serverSettings.bitfield),
