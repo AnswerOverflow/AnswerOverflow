@@ -14,7 +14,7 @@
 		"lint:fix": "eslint . \"*.ts*\" --fix",
 		"test": "pnpm with-env vitest run  --coverage",
 		"test:watch": "pnpm with-env vitest",
-		"db:wipe": "cross-env NODE_ENV=test pnpm with-env npx ts-node ./scripts/wipe.ts"
+		"db:wipe": "cross-env pnpm with-env npx ts-node ./scripts/wipe.ts"
 	},
 	"dependencies": {
 		"@answeroverflow/db": "workspace:^",
@@ -22,6 +22,7 @@
 		"@answeroverflow/utils": "workspace:^",
 		"axios": "^1.4.0",
 		"dotenv-cra": "^3.0.3",
+		"drizzle-orm": "^0.28.5",
 		"redis": "^4.6.7",
 		"zod": "^3.22.2"
 	},

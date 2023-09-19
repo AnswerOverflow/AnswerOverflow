@@ -2,7 +2,7 @@ import type { Story } from '@ladle/react';
 import { type MessageProps, DemoMessage } from './DemoMessage';
 import { mockDiscordAccount } from '~ui/test/props';
 
-import type { APIMessageWithDiscordAccount } from '@answeroverflow/api';
+import type { MessageWithDiscordAccount } from '@answeroverflow/db';
 
 const loremIpsum =
 	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quidem fugit iure delectus tempore! Nam nihil animi nemo nisi eligendi veniam obcaecati accusantium, sunt maiores tenetur illum saepe incidunt beatae hic.';
@@ -24,15 +24,10 @@ const defaultMessage: MessageProps = {
 		images: [],
 		channelId: '0',
 		serverId: '0',
-		solutionIds: [],
-		messageReference: null,
 		attachments: [],
 		applicationId: null,
 		childThreadId: null,
-		mentions: [],
-		mentionRoles: [],
-		mentionChannels: [],
-		mentionEveryone: false,
+		questionId: null,
 		nonce: null,
 		pinned: false,
 		type: 0,
@@ -44,7 +39,7 @@ const defaultMessage: MessageProps = {
 		webhookId: null,
 		tts: false,
 		interactionId: null,
-	} as APIMessageWithDiscordAccount,
+	} as MessageWithDiscordAccount,
 };
 
 // Stories
@@ -79,6 +74,9 @@ WithImages.args = {
 				url: 'https://cdn.discordapp.com/attachments/1037547270733832242/1063119696334966794/image.png',
 				width: 897,
 				height: 672,
+				messageId: defaultMessage.message.id,
+				contentType: 'image/png',
+				description: null,
 				filename: 'image.png',
 				id: '1063028763656458270',
 				proxyUrl:
@@ -89,6 +87,9 @@ WithImages.args = {
 				url: 'https://cdn.discordapp.com/attachments/1037547270733832242/1063121784578261033/image.png',
 				width: 1440,
 				height: 2560,
+				messageId: defaultMessage.message.id,
+				contentType: 'image/png',
+				description: null,
 				filename: 'image.png',
 				id: '1063028763656458270',
 				proxyUrl:
@@ -100,6 +101,9 @@ WithImages.args = {
 				width: null,
 				height: null,
 				id: '1063028763656458270',
+				messageId: defaultMessage.message.id,
+				contentType: 'image/png',
+				description: null,
 				proxyUrl:
 					'https://media.discordapp.net/attachments/1037547270733832242/1063121784578261033/image.png',
 				filename: 'image.png',

@@ -37,6 +37,6 @@ describe('Guild Member Update', () => {
 		});
 		await emitEvent(client, Events.UserUpdate, oldUser, newUser);
 		const updated = await findDiscordAccountById(oldUser.id);
-		expect(updated).toBeNull();
+		expect(updated).toBeUndefined();
 	});
 });

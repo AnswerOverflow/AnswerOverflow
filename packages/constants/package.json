@@ -20,9 +20,7 @@
 		"zod": "^3.22.2"
 	},
 	"devDependencies": {
-		"@answeroverflow/elastic-types": "workspace:^",
 		"@answeroverflow/prettier-config": "workspace:^",
-		"@answeroverflow/prisma-types": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
 		"@types/node": "^20.5.1",
 		"dotenv-cli": "^7.3.0",

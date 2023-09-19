@@ -1,4 +1,4 @@
-import type { DiscordAccountPublic } from '@answeroverflow/api';
+import type { DiscordAccountPublic } from '@answeroverflow/db';
 import { getInitials } from '~ui/utils/avatars';
 import {
 	Avatar,

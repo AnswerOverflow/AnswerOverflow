@@ -7,12 +7,15 @@ import {
 } from '@answeroverflow/analytics';
 import { extendedAdapter } from './adapter';
 import { getDiscordUser, refreshAccessToken } from '@answeroverflow/cache';
+import { db } from '@answeroverflow/db';
+import { sharedEnvs } from '@answeroverflow/env/shared';
+import { and, eq } from 'drizzle-orm';
+import { dbAccounts } from '@answeroverflow/db/src/schema';
 import {
 	findAccountByProviderAccountId,
 	updateProviderAuthToken,
-	prisma,
-} from '@answeroverflow/db';
-import { sharedEnvs } from '@answeroverflow/env/shared';
+} from '@answeroverflow/db/src/auth';
+
 export const authOptions: NextAuthOptions = {
 	// Configure one or more authentication providers
 	adapter: extendedAdapter,
@@ -31,11 +34,11 @@ export const authOptions: NextAuthOptions = {
 				session.user.id = user.id;
 			}
 			const updateAccountAccessToken = async () => {
-				const discord = await prisma.account.findFirst({
-					where: {
-						provider: 'discord',
-						userId: user.id,
-					},
+				const discord = await db.query.dbAccounts.findFirst({
+					where: and(
+						eq(dbAccounts.provider, 'discord'),
+						eq(dbAccounts.userId, user.id),
+					),
 				});
 				if (!discord) {
 					return;

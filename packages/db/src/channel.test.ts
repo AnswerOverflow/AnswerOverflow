@@ -6,12 +6,7 @@ import {
 	mockServer,
 	mockThread,
 } from '@answeroverflow/db-mock';
-import {
-	addFlagsToChannel,
-	bitfieldToChannelFlags,
-	type Server,
-} from '@answeroverflow/prisma-types';
-import { getRandomId } from '@answeroverflow/utils';
+import { getRandomId, getRandomIdGreaterThan } from '@answeroverflow/utils';
 import {
 	createChannel,
 	createManyChannels,
@@ -24,12 +19,17 @@ import {
 	updateManyChannels,
 	upsertChannel,
 	upsertManyChannels,
-	findChannelsBeforeArchivedTimestamp,
+	findChannelsBeforeId,
 } from './channel';
 import { createDiscordAccount } from './discord-account';
 import { findMessageById, upsertMessage } from './message';
 import { createServer } from './server';
 import { beforeEach } from 'vitest';
+import { Server } from './schema';
+import {
+	addFlagsToChannel,
+	bitfieldToChannelFlags,
+} from './zodSchemas/channelSchemas';
 
 let server: Server;
 beforeEach(async () => {
@@ -282,7 +282,7 @@ describe('Channel Operations', () => {
 			await upsertMessage(msg);
 			await deleteChannel(chnl.id);
 			const found = await findMessageById(msg.id);
-			expect(found).toBeNull();
+			expect(found).toBeUndefined();
 		});
 		it('should delete all of a channels threads messages on parent channel delete', async () => {
 			const chnl = mockChannel(server);
@@ -295,7 +295,7 @@ describe('Channel Operations', () => {
 			await upsertMessage(msg);
 			await deleteChannel(chnl.id);
 			const found = await findMessageById(msg.id);
-			expect(found).toBeNull();
+			expect(found).toBeUndefined();
 		});
 	});
 	describe('Create channel with deps', () => {
@@ -407,39 +407,45 @@ describe('Channel Operations', () => {
 	});
 
 	describe('Channel Find After', () => {
+		let id1: string;
+		let id2: string;
+		let id3: string;
 		beforeEach(async () => {
+			id1 = getRandomId();
+			id2 = getRandomIdGreaterThan(Number(id1));
+			id3 = getRandomIdGreaterThan(Number(id2));
 			await upsertChannel({
-				create: mockChannel(server, { archivedTimestamp: BigInt(1) }),
+				create: mockChannel(server, { id: id1 }),
 			});
 			await upsertChannel({
-				create: mockChannel(server, { archivedTimestamp: BigInt(2) }),
+				create: mockChannel(server, { id: id2 }),
 			});
 			await upsertChannel({
-				create: mockChannel(server, { archivedTimestamp: BigInt(3) }),
+				create: mockChannel(server, { id: id3 }),
 			});
 		});
-		it('should find before a timestamp', async () => {
-			const chnls = await findChannelsBeforeArchivedTimestamp({
+		it('should find before an id', async () => {
+			const chnls = await findChannelsBeforeId({
 				serverId: server.id,
-				timestamp: BigInt(4),
+				id: id3,
 			});
-			expect(chnls).toHaveLength(3);
+			expect(chnls).toHaveLength(2);
 		});
 		it('shouldnt find anything if no channels before', async () => {
-			const chnls = await findChannelsBeforeArchivedTimestamp({
+			const chnls = await findChannelsBeforeId({
 				serverId: server.id,
-				timestamp: BigInt(0),
+				id: id1,
 			});
 			expect(chnls).toHaveLength(0);
 		});
 		it('should find from highest to lowest', async () => {
-			const chnls = await findChannelsBeforeArchivedTimestamp({
+			const chnls = await findChannelsBeforeId({
 				serverId: server.id,
-				timestamp: BigInt(2),
+				id: id3,
 				take: 1,
 			});
 			expect(chnls).toHaveLength(1);
-			expect(chnls[0]!.archivedTimestamp).toBe(BigInt(1));
+			expect(chnls[0]!.id).toBe(id2);
 		});
 	});
 });

@@ -4,6 +4,12 @@
 		"types": ["vitest/globals"],
 		"baseUrl": "../../"
 	},
-	"include": ["index.ts", "src", "vitest.config.ts", ".prettierrc.cjs"],
+	"include": [
+		"index.ts",
+		"src",
+		"vitest.config.ts",
+		".prettierrc.cjs",
+		"../../reset.d.ts"
+	],
 	"exclude": ["node_modules", "../../node_modules/*"]
 }

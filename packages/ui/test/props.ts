@@ -1,13 +1,10 @@
-import type {
-	ChannelPublicWithFlags,
-	DiscordAccountPublic,
-	APIMessageWithDiscordAccount,
-	ServerPublic,
-	APIMessageFull,
-} from '@answeroverflow/api';
+import type { ServerPublic } from '@answeroverflow/api';
 import { getRandomName, getRandomSentence } from '@answeroverflow/utils';
-import { ServerWithFlags } from '@answeroverflow/db';
 import { ChannelType } from '~ui/utils/discord';
+import { ServerWithFlags } from '@answeroverflow/db/src/zodSchemas/serverSchemas';
+import { ChannelPublicWithFlags } from '@answeroverflow/db/src/zodSchemas/channelSchemas';
+import { DiscordAccountPublic } from '@answeroverflow/db/src/zodSchemas/discordAccountSchemas';
+import type { MessageFull } from '@answeroverflow/db';
 
 export function randomId() {
 	return Math.floor(Math.random() * 10000000).toString();
@@ -25,47 +22,33 @@ export function mockDiscordAccount(
 	return data;
 }
 
-export function mockMessageFull(override: Partial<APIMessageFull> = {}) {
-	const data: APIMessageFull = {
+export function mockMessageFull(override: Partial<MessageFull> = {}) {
+	const data: MessageFull = {
 		...mockMessageWithDiscordAccount(),
-		referencedMessage: null,
-		solutionMessages: [],
+		solutions: [],
+		reference: null,
 		...override,
 	};
 	return data;
 }
 
 export function mockMessageWithDiscordAccount(
-	override: Partial<APIMessageWithDiscordAccount> = {},
-): APIMessageWithDiscordAccount {
-	const data: APIMessageWithDiscordAccount = {
+	override: Partial<MessageFull> = {},
+): MessageFull {
+	const data: MessageFull = {
 		channelId: '0',
 		id: randomId(),
+		questionId: '0',
 		serverId: '0',
 		attachments: [],
-		applicationId: null,
-		messageReference: null,
 		childThreadId: null,
 		parentChannelId: null,
-		solutionIds: [],
-		mentions: [],
-		mentionRoles: [],
-		mentionChannels: [],
-		mentionEveryone: false,
-		nonce: null,
-		pinned: false,
-		type: 0,
-		flags: 0,
-		components: [],
 		embeds: [],
-		reactions: [],
-		stickerIds: [],
-		webhookId: null,
-		tts: false,
-		interactionId: null,
 		content: getRandomSentence(),
 		author: mockDiscordAccount(),
 		public: true,
+		solutions: [],
+		reference: null,
 		...override,
 	};
 	return data;
@@ -89,7 +72,7 @@ export function mockPublicServer(override: Partial<ServerPublic> = {}) {
 export function mockServer(override: Partial<ServerWithFlags> = {}) {
 	const data: ServerWithFlags = {
 		id: randomId(),
-		name: 'Test Server',
+		name: getRandomName(),
 		icon: null,
 		description: null,
 		vanityUrl: null,

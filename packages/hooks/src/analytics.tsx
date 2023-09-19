@@ -13,9 +13,9 @@ import {
 	type ThreadProps,
 } from '@answeroverflow/constants/src/analytics';
 import type {
-	APIMessageFull,
-	APIMessageWithDiscordAccount,
-} from '@answeroverflow/api';
+	MessageFull,
+	MessageWithDiscordAccount,
+} from '@answeroverflow/db';
 import React from 'react';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
@@ -103,7 +103,7 @@ export function useTrackEvent<K extends keyof EventMap | string>(
 }
 
 export function messageWithDiscordAccountToAnalyticsData(
-	message: APIMessageFull | APIMessageWithDiscordAccount,
+	message: MessageFull | MessageWithDiscordAccount,
 ): MessageProps {
 	return {
 		'Channel Id': message.parentChannelId
@@ -113,7 +113,6 @@ export function messageWithDiscordAccountToAnalyticsData(
 		'Server Id': message.serverId,
 		'Message Author Id': message.author.id,
 		'Message Id': message.id,
-		'Solution Id': message.solutionIds?.[0] ?? undefined,
 	};
 }
 

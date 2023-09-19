@@ -13,11 +13,11 @@ import {
 	TextChannel,
 	User,
 } from 'discord.js';
-import type { ChannelWithFlags } from '@answeroverflow/api';
+import type { ChannelWithFlags } from '@answeroverflow/db';
 import { makeConsentButton } from './manage-account';
 import {
 	findChannelById,
-	findMessageById,
+	findFullMessageById,
 	findServerById,
 	ServerWithFlags,
 	upsertMessage,
@@ -36,6 +36,7 @@ import {
 	trackDiscordEvent,
 } from '~discord-bot/utils/analytics';
 import { toAOMessage } from '~discord-bot/utils/conversions';
+import { indexTextBasedChannel } from '~discord-bot/domains/indexing';
 const markSolutionErrorReasons = [
 	'NOT_IN_GUILD',
 	'NOT_IN_THREAD',
@@ -108,7 +109,7 @@ export async function checkIfCanMarkSolution(
 	try {
 		// TODO: Support headless threads
 		if (threadParent.type === ChannelType.GuildForum) {
-			// If we fail to find the message with the same id as the thread, fetch the first message in the thread as a fallbacck
+			// If we fail to find the message with the same id as the thread, fetch the first message in the thread as a fallback
 			questionMessage = await thread.messages.fetch(thread.id);
 		} else {
 			questionMessage = await threadParent.messages.fetch(thread.id);
@@ -186,11 +187,12 @@ export async function assertMessageIsUnsolved(
 	}
 
 	// 3. Look at the message history to see if it contains the solution message from the Answer Overflow Bot
+
 	// This is more of a backup, so we only do the cached falues
-	const existingMessage = await findMessageById(questionMessage.id);
+	const existingMessage = await findFullMessageById(questionMessage.id);
 
 	const isAlreadySolved = existingMessage
-		? existingMessage.solutionIds.length > 0
+		? existingMessage.solutions.length > 0
 		: false;
 
 	if (isAlreadySolved) {
@@ -280,55 +282,61 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 	const { parentChannel, question, solution, thread, channelSettings, server } =
 		await checkIfCanMarkSolution(targetMessage, user);
 	const aoServer = await findServerById(server.id);
-	await addSolvedIndicatorToThread(
-		thread,
-		parentChannel,
-		question,
-		channelSettings.solutionTagId,
-	);
-	const asAOMessage = await toAOMessage(question);
-	await upsertMessage({
-		...asAOMessage,
-		solutionIds: [solution.id],
-	});
+	// TODO: This sucks having here but we don't want to block while waiting to index
+	const nonBlockingUpdates = async () => {
+		await addSolvedIndicatorToThread(
+			thread,
+			parentChannel,
+			question,
+			channelSettings.solutionTagId,
+		);
+		await indexTextBasedChannel(thread);
+
+		// TODO: This bottom part is a bit redundant but we want to make sure both exist in db
+		await upsertMessage(await toAOMessage(question));
+		await upsertMessage({
+			...(await toAOMessage(solution)),
+			questionId: question.id,
+		});
+		trackDiscordEvent('Solved Question', async () => {
+			const [asker, solver, commandUser] = await Promise.all([
+				thread.guild.members.fetch(question.author.id),
+				thread.guild.members.fetch(solution.author.id),
+				thread.guild.members.fetch(user.id),
+			]);
+			const data: QuestionSolvedProps = {
+				...serverWithDiscordInfoToAnalyticsData({
+					guild: thread.guild,
+					serverWithSettings: aoServer!,
+				}),
+				...channelWithDiscordInfoToAnalyticsData({
+					answerOverflowChannel: channelSettings,
+					discordChannel: parentChannel,
+				}),
+				...threadWithDiscordInfoToAnalyticsData({
+					thread,
+				}),
+				...memberToAnalyticsUser('Mark As Solver', commandUser),
+				...memberToAnalyticsUser('Question Asker', asker),
+				...memberToAnalyticsUser('Question Solver', solver),
+				...messageToAnalyticsMessage('Question', question),
+				...messageToAnalyticsMessage('Solution', solution),
+				'Time To Solve In Ms':
+					solution.createdTimestamp - question.createdTimestamp,
+			};
+			return {
+				...data,
+				'Answer Overflow Account Id': solver.id,
+			};
+		});
+		await solution.react('✅');
+	};
+	void nonBlockingUpdates();
 	const { embed, components } = makeMarkSolutionResponse({
 		question,
 		solution,
 		server: aoServer!,
 		settings: channelSettings,
-	});
-	await solution.react('✅');
-
-	trackDiscordEvent('Solved Question', async () => {
-		const [asker, solver, commandUser] = await Promise.all([
-			thread.guild.members.fetch(question.author.id),
-			thread.guild.members.fetch(solution.author.id),
-			thread.guild.members.fetch(user.id),
-		]);
-		const data: QuestionSolvedProps = {
-			...serverWithDiscordInfoToAnalyticsData({
-				guild: thread.guild,
-				serverWithSettings: aoServer!,
-			}),
-			...channelWithDiscordInfoToAnalyticsData({
-				answerOverflowChannel: channelSettings,
-				discordChannel: parentChannel,
-			}),
-			...threadWithDiscordInfoToAnalyticsData({
-				thread,
-			}),
-			...memberToAnalyticsUser('Mark As Solver', commandUser),
-			...memberToAnalyticsUser('Question Asker', asker),
-			...memberToAnalyticsUser('Question Solver', solver),
-			...messageToAnalyticsMessage('Question', question),
-			...messageToAnalyticsMessage('Solution', solution),
-			'Time To Solve In Ms':
-				solution.createdTimestamp - question.createdTimestamp,
-		};
-		return {
-			...data,
-			'Answer Overflow Account Id': solver.id,
-		};
 	});
 	return {
 		embed,

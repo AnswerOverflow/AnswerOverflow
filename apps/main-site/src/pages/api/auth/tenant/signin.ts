@@ -1,8 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCsrfToken, getSession } from 'next-auth/react';
-import { findServerByCustomDomain, prisma } from '@answeroverflow/db';
+import { db } from '@answeroverflow/db';
 import { z } from 'zod';
-import crypto from 'crypto';
 // eslint-disable-next-line no-restricted-imports
 import { init } from '../../../../../node_modules/next-auth/core/init';
 // eslint-disable-next-line no-restricted-imports
@@ -13,6 +12,10 @@ import { authOptions, getNextAuthCookieName } from '@answeroverflow/auth';
 import { IncomingMessage } from 'http';
 import { NextAuthOptions } from 'next-auth';
 import { NextApiRequestCookies } from 'next/dist/server/api-utils';
+import { findServerByCustomDomain } from '@answeroverflow/db/src/server';
+import { dbTenantSessions } from '@answeroverflow/db/src/schema';
+import { randomUUID } from 'node:crypto';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 async function getServerSignInUrl(
 	req: IncomingMessage,
@@ -21,6 +24,7 @@ async function getServerSignInUrl(
 ) {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 	const { options, cookies: initCookies } = await init({
+		origin: sharedEnvs.NEXT_PUBLIC_SITE_URL,
 		action: 'signin',
 		authOptions,
 		isPost: true,
@@ -73,15 +77,13 @@ export default async function handler(
 		return;
 	}
 
-	const tenantSession = await prisma.tenantSession.create({
-		data: {
-			id: crypto.randomUUID(),
-			serverId: tenant.id,
-			sessionToken: token,
-		},
+	const tenantSessionId = randomUUID();
+
+	await db.insert(dbTenantSessions).values({
+		id: tenantSessionId,
+		serverId: tenant.id,
+		sessionToken: token,
 	});
-	const tenantSessionId = tenantSession.id;
-	// add token to redirect
 
 	const redirectWithToken = `${redirectURL.origin}/api/auth/tenant/callback?redirect=${redirect}&code=${tenantSessionId}`;
 

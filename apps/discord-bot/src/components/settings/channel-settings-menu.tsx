@@ -59,7 +59,7 @@ import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
 import { oneTimeStatusHandler } from '~discord-bot/utils/trpc';
 import type { RootChannel } from '~discord-bot/utils/utils';
 import { sendConsentPrompt } from '~discord-bot/domains/manage-account';
-import { type Message, getDiscordURLForMessage } from '@answeroverflow/db';
+import { type BaseMessage, getDiscordURLForMessage } from '@answeroverflow/db';
 
 type ChannelSettingsMenuItemProps<T extends RootChannel = RootChannel> = {
 	channelInDB: ChannelWithFlags;
@@ -151,7 +151,7 @@ export function IndexingSettingsMenu({
 	initialChannelData,
 	lastIndexedMessage,
 }: ChannelSettingsSubMenuProps & {
-	lastIndexedMessage: Message | null;
+	lastIndexedMessage: BaseMessage | null;
 }) {
 	const [channel, setChannel] = React.useState<ChannelWithFlags>(
 		channelCache.get(targetChannel.id) ?? initialChannelData,
@@ -540,7 +540,7 @@ export function ChannelSettingsMenu({
 }: {
 	channelWithFlags: ChannelWithFlags;
 	targetChannel: RootChannel;
-	lastIndexedMessage: Message | null;
+	lastIndexedMessage: BaseMessage | null;
 }) {
 	const [channel] = React.useState<ChannelWithFlags>(
 		channelCache.get(targetChannel.id) ?? channelWithFlags,

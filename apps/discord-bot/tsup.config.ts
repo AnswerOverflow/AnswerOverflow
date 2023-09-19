@@ -11,10 +11,10 @@ export default defineConfig({
 	skipNodeModulesBundle: true,
 	tsconfig: 'tsconfig.json',
 	noExternal: [
-		'@answeroverflow/elastic-types',
-		'@answeroverflow/prisma-types',
+		'@answeroverflow/search',
 		'@answeroverflow/db',
 		'@answeroverflow/auth',
+		'@auth/drizzle-adapter',
 		'@answeroverflow/api',
 		'@answeroverflow/analytics',
 		'@answeroverflow/discordjs-utils',

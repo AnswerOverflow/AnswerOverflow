@@ -33,7 +33,7 @@ describe('Discord Account Operations', () => {
 			await createDiscordAccount(discordAccount);
 		});
 
-		it('should test all varaints of finding a discord account by id', async () => {
+		it('should test all variants of finding a discord account by id', async () => {
 			await testAllPublicAndPrivateDataVariants({
 				async fetch({ source }) {
 					const { ctx } = await mockAccountCallerCtx(source);
@@ -52,7 +52,7 @@ describe('Discord Account Operations', () => {
 		beforeEach(async () => {
 			await createManyDiscordAccounts([discordAccount, discordAccount2]);
 		});
-		it('should test all varaints of finding many discord accounts by id', async () => {
+		it('should test all variants of finding many discord accounts by id', async () => {
 			await testAllPublicAndPrivateDataVariants({
 				async fetch({ source }) {
 					const { ctx } = await mockAccountCallerCtx(source);

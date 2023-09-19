@@ -6,16 +6,12 @@ import {
 	mockThread,
 } from '@answeroverflow/db-mock';
 import { createServer } from './server';
-import type {
-	Server,
-	Channel,
-	DiscordAccount,
-} from '@answeroverflow/prisma-types';
 import { createChannel } from './channel';
 import { createDiscordAccount } from './discord-account';
 import { findServerWithCommunityPageData } from './pages';
 import { upsertMessage } from './message';
 import { getRandomId } from '@answeroverflow/utils';
+import { Channel, DiscordAccount, Server } from './schema';
 
 describe('Page Operations', () => {
 	let server: Server;
@@ -106,7 +102,9 @@ describe('Page Operations', () => {
 			expect(result).toBeNull();
 		});
 		it('should work for a vanity url', async () => {
-			const serverWithVanity = mockServer({ vanityUrl: getRandomId() });
+			const serverWithVanity = mockServer({
+				vanityUrl: `asd+${getRandomId()}`,
+			});
 			await createServer(serverWithVanity);
 			const result = await findServerWithCommunityPageData({
 				idOrVanityUrl: serverWithVanity.vanityUrl!,

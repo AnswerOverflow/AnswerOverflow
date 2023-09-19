@@ -1,10 +1,9 @@
 import { z } from 'zod';
 import { router, withUserServersProcedure } from '~api/router/trpc';
 import {
-	findChannelsBeforeArchivedTimestamp,
+	findChannelsBeforeId,
 	findManyMessagesWithAuthors,
 	findMessageResultPage,
-	searchMessages,
 } from '@answeroverflow/db';
 import {
 	canUserViewPrivateMessage,
@@ -13,6 +12,7 @@ import {
 	stripPrivateServerData,
 } from '~api/utils/permissions';
 import { TRPCError } from '@trpc/server';
+import { searchMessages } from '@answeroverflow/search/src';
 
 export const messagesRouter = router({
 	/*
@@ -39,10 +39,11 @@ export const messagesRouter = router({
 				});
 			}
 			const { messages, channel, server, thread } = data;
+
 			const recommendedChannels = thread
-				? await findChannelsBeforeArchivedTimestamp({
+				? await findChannelsBeforeId({
 						take: 100,
-						timestamp: thread.archivedTimestamp ?? BigInt(999999999),
+						id: thread.id,
 						serverId: server.id,
 				  })
 				: [];
@@ -51,23 +52,22 @@ export const messagesRouter = router({
 			);
 			const recommendedPosts = await findManyMessagesWithAuthors(
 				recommendedChannels.map((c) => c.id),
-				[server],
 			).then((posts) =>
 				posts
-					.filter((p) => p.public)
+					.filter((p) => p.public && recommendedChannelLookup.has(p.id))
 					.map((p) => ({
 						message: stripPrivateFullMessageData(p, ctx.userServers),
 						thread: stripPrivateChannelData(
 							recommendedChannelLookup.get(p.id)!,
 						),
 					}))
-					.slice(0, 10),
+					.slice(0, 20),
 			);
 
 			return {
-				messages: messages.map((message) =>
-					stripPrivateFullMessageData(message, ctx.userServers),
-				),
+				messages: messages.map((msg) => {
+					return stripPrivateFullMessageData(msg, ctx.userServers);
+				}),
 				parentChannel: stripPrivateChannelData(channel),
 				server: stripPrivateServerData(server),
 				thread: thread ? stripPrivateChannelData(thread) : undefined,

@@ -3,7 +3,6 @@ import {
 	type ChannelWithFlags,
 	findIgnoredDiscordAccountById,
 	getDefaultDiscordAccount,
-	getDefaultMessage,
 	type MessageFull,
 	type MessageWithDiscordAccount,
 	type ServerWithFlags,
@@ -14,6 +13,7 @@ import {
 import type { Source, Context } from '~api/router/context';
 import type { DiscordAPIServerSchema } from '@answeroverflow/cache';
 import { PermissionsBitField } from './types';
+import { getDefaultMessage } from '@answeroverflow/db/src/utils/message-default';
 
 export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
 	'You are missing the required permissions to do this';
@@ -279,7 +279,7 @@ export const canUserViewPrivateMessage = (
 export function stripPrivatePartialMessageData(
 	message: MessageWithDiscordAccount,
 	userServers: DiscordAPIServerSchema[] | null,
-) {
+): MessageFull | MessageWithDiscordAccount {
 	if (canUserViewPrivateMessage(userServers, message)) {
 		return message;
 	}
@@ -299,6 +299,8 @@ export function stripPrivatePartialMessageData(
 	return {
 		...defaultMessage,
 		author: defaultAuthor,
+		attachments: [],
+		embeds: [],
 		public: false,
 	};
 }
@@ -321,26 +323,28 @@ export function stripPrivateFullMessageData(
 		childThreadId: null,
 	});
 
-	const reply = message.referencedMessage
-		? stripPrivatePartialMessageData(message.referencedMessage, userServers)
+	const reply = message.reference
+		? stripPrivatePartialMessageData(message.reference, userServers)
 		: null;
 
-	const solutions = message.solutionMessages.map((solution) =>
+	const solutions = message.solutions.map((solution) =>
 		stripPrivatePartialMessageData(solution, userServers),
 	);
 	if (message.public || canUserViewPrivateMessage(userServers, message)) {
 		return {
 			...message,
-			referencedMessage: reply,
-			solutionMessages: solutions,
+			reference: reply,
+			solutions,
 		};
 	}
 	return {
 		...defaultMessage,
 		author: defaultAuthor,
 		public: false,
-		referencedMessage: reply,
-		solutionMessages: solutions,
+		attachments: [],
+		embeds: [],
+		reference: reply,
+		solutions: solutions,
 	};
 }
 

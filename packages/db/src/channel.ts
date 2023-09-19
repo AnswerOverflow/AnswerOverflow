@@ -1,34 +1,39 @@
 import type { z } from 'zod';
 import { upsertServer } from './server';
 import { upsert, upsertMany } from './utils/operations';
+import { deleteManyMessagesByChannelId } from './message';
+import { omit } from '@answeroverflow/utils';
+import { DBError } from './utils/error';
+import { ChannelType } from 'discord-api-types/v10';
+import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
+import { db } from './db';
+import { and, desc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
+import { dbChannels } from './schema';
+import {
+	getDefaultChannel,
+	getDefaultChannelWithFlags,
+} from './utils/channelUtils';
 import {
 	addFlagsToChannel,
 	channelBitfieldFlags,
-	type ChannelWithFlags,
-	getDefaultChannelWithFlags,
+	ChannelWithFlags,
 	zChannelCreate,
 	zChannelCreateMany,
 	zChannelCreateWithDeps,
 	zChannelMutable,
-	zChannelPrismaCreate,
-	zChannelPrismaUpdate,
 	zChannelUpdate,
 	zChannelUpdateMany,
 	zChannelUpsert,
 	zChannelUpsertMany,
-} from '@answeroverflow/prisma-types';
-import {
-	prisma,
-	getDefaultChannel,
-	type Channel,
-} from '@answeroverflow/prisma-types';
-import { dictToBitfield } from '@answeroverflow/prisma-types/src/bitfield';
-import { deleteManyMessagesByChannelId } from './message';
-import { omit } from '@answeroverflow/utils';
-import { elastic } from '@answeroverflow/elastic-types';
-import { DBError } from './utils/error';
-import { ChannelType } from 'discord-api-types/v10';
-import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
+} from './zodSchemas/channelSchemas';
+import { dictToBitfield } from './utils/bitfieldUtils';
+import { createInsertSchema } from 'drizzle-zod';
+const channelInsertSchema = createInsertSchema(dbChannels).omit({
+	serverId: true,
+	parentId: true,
+	id: true,
+	type: true,
+});
 export const CHANNELS_THAT_CAN_HAVE_AUTOTHREAD = new Set([
 	ChannelType.GuildAnnouncement,
 	ChannelType.GuildText,
@@ -101,7 +106,9 @@ function applyChannelSettingsChangesSideEffects<
 export async function findChannelById(
 	id: string,
 ): Promise<ChannelWithFlags | null> {
-	const data = await prisma.channel.findUnique({ where: { id } });
+	const data = await db.query.dbChannels.findFirst({
+		where: eq(dbChannels.id, id),
+	});
 	if (!data) return null;
 	return addFlagsToChannel(data);
 }
@@ -109,7 +116,9 @@ export async function findChannelById(
 export async function findChannelByInviteCode(
 	inviteCode: string,
 ): Promise<ChannelWithFlags | null> {
-	const data = await prisma.channel.findUnique({ where: { inviteCode } });
+	const data = await db.query.dbChannels.findFirst({
+		where: eq(dbChannels.inviteCode, inviteCode),
+	});
 	if (!data) return null;
 	return addFlagsToChannel(data);
 }
@@ -118,9 +127,9 @@ export async function findAllThreadsByParentId(input: {
 	parentId: string;
 	limit?: number;
 }): Promise<ChannelWithFlags[]> {
-	const data = await prisma.channel.findMany({
-		where: { parentId: input.parentId },
-		take: input.limit,
+	const data = await db.query.dbChannels.findMany({
+		where: eq(dbChannels.parentId, input.parentId),
+		limit: input.limit,
 	});
 	return data.map(addFlagsToChannel);
 }
@@ -128,8 +137,22 @@ export async function findAllThreadsByParentId(input: {
 export async function findAllChannelsByServerId(
 	serverId: string,
 ): Promise<ChannelWithFlags[]> {
-	const data = await prisma.channel.findMany({ where: { serverId } });
+	const data = await db.query.dbChannels.findMany({
+		where: eq(dbChannels.serverId, serverId),
+	});
 	return data.map(addFlagsToChannel);
+}
+
+export async function findManyChannelMessagesCounts(channelIds: string[]) {
+	if (channelIds.length === 0) return Promise.resolve([]);
+	return db
+		.select({
+			count: sql<number>`count(*)`,
+			channelId: dbChannels.id,
+		})
+		.from(dbChannels)
+		.where(inArray(dbChannels.serverId, Array.from(new Set(channelIds))))
+		.groupBy(dbChannels.id);
 }
 
 export async function findManyChannelsById(
@@ -138,7 +161,10 @@ export async function findManyChannelsById(
 		includeMessageCount?: boolean;
 	} = {},
 ): Promise<ChannelWithFlags[]> {
-	const data = await prisma.channel.findMany({ where: { id: { in: ids } } });
+	if (ids.length === 0) return Promise.resolve([]);
+	const data = await db.query.dbChannels.findMany({
+		where: inArray(dbChannels.id, ids),
+	});
 	const withFlags = data.map(addFlagsToChannel);
 	let threadMessageCountLookup: Map<string, number | undefined> | undefined =
 		undefined;
@@ -150,11 +176,9 @@ export async function findManyChannelsById(
 		const threadIds = withFlags
 			.filter((c) => isThreadType(c.type))
 			.map((c) => c.id);
-		const threadMessageCounts = await Promise.all(
-			threadIds.map((id) => elastic.getChannelMessagesCount(id)),
-		);
+		const threadMessageCounts = await findManyChannelMessagesCounts(threadIds);
 		threadMessageCountLookup = new Map(
-			threadIds.map((id, i) => [id, threadMessageCounts[i] ?? undefined]),
+			threadMessageCounts.map((x) => [x.channelId, x.count]),
 		);
 	}
 	return withFlags.map((c) => {
@@ -174,49 +198,46 @@ export async function findManyChannelsById(
 }
 
 export async function findLatestArchivedTimestampByChannelId(parentId: string) {
-	const data = await prisma.channel.aggregate({
-		where: {
-			parentId,
-			archivedTimestamp: {
-				not: null,
-			},
-		},
-		_max: {
-			archivedTimestamp: true,
-		},
-		orderBy: {
-			archivedTimestamp: 'desc',
-		},
-		take: 1,
-	});
-	return data._max?.archivedTimestamp ?? null;
+	// TODO: Check this is correct?
+	const data = await db
+		.select({
+			archivedTimestamp: sql<number>`MAX(${dbChannels.archivedTimestamp})`,
+		})
+		.from(dbChannels)
+		.where(
+			and(
+				eq(dbChannels.parentId, parentId),
+				isNotNull(dbChannels.archivedTimestamp),
+			),
+		)
+		.orderBy(desc(dbChannels.archivedTimestamp))
+		.limit(1);
+
+	return data[0]?.archivedTimestamp ?? null;
 }
 
 export async function createChannel(data: z.infer<typeof zChannelCreate>) {
-	const combinedData: z.infer<typeof zChannelPrismaCreate> =
-		applyChannelSettingsChangesSideEffects({
-			old: getDefaultChannelWithFlags(data),
-			updated: data,
-		});
-	const created = await prisma.channel.create({
-		data: zChannelPrismaCreate.parse(combinedData),
+	const combinedData = applyChannelSettingsChangesSideEffects({
+		old: getDefaultChannelWithFlags(data),
+		updated: data,
 	});
+	await db.insert(dbChannels).values(combinedData);
+	const created = await db.query.dbChannels.findFirst({
+		where: eq(dbChannels.id, combinedData.id),
+	});
+	if (!created) throw new Error('Error creating channel');
 	return addFlagsToChannel(created);
 }
 
 export async function createManyChannels(
 	data: z.infer<typeof zChannelCreateMany>[],
 ) {
-	const operations: Promise<unknown>[] = [];
-	for (let i = 0; i < data.length; i += 50) {
-		const chunk = data.slice(i, i + 50);
-		operations.push(
-			prisma.channel.createMany({
-				data: chunk.map((c) => zChannelCreateMany.parse(c)),
-			}),
-		);
-	}
-	await Promise.all(operations);
+	await Promise.all(
+		data.map((channel) => {
+			return db.insert(dbChannels).values(channel);
+		}),
+	);
+
 	return data.map((c) => getDefaultChannel({ ...c }));
 }
 
@@ -229,48 +250,56 @@ export async function updateChannel({
 }) {
 	if (!old) old = await findChannelById(update.id);
 	if (!old) throw new Error('Channel not found');
-	const combinedData: z.infer<typeof zChannelPrismaUpdate> =
-		applyChannelSettingsChangesSideEffects({
-			old,
-			updated: update,
-		});
-	const updated = await prisma.channel.update({
-		where: { id: update.id },
-		data: zChannelPrismaUpdate.parse(combinedData),
+	const combinedData = applyChannelSettingsChangesSideEffects({
+		old,
+		updated: update,
 	});
+	await db
+		.update(dbChannels)
+		.set(channelInsertSchema.parse(combinedData))
+		.where(eq(dbChannels.id, update.id));
+
+	const updated = await db.query.dbChannels.findFirst({
+		where: eq(dbChannels.id, update.id),
+	});
+
+	if (!updated) throw new Error('Error updating channel');
+
 	return addFlagsToChannel(updated);
 }
 
 export async function updateManyChannels(
 	data: z.infer<typeof zChannelUpdateMany>[],
 ) {
-	const operations: Promise<Channel[]>[] = [];
-	for (let i = 0; i < data.length; i += 50) {
-		const chunk = data.slice(i, i + 50);
-		operations.push(
-			prisma.$transaction(
-				chunk.map((c) =>
-					prisma.channel.update({
-						where: { id: c.id },
-						data: zChannelPrismaUpdate.parse(c),
-					}),
-				),
-			),
-		);
-	}
-	const results = await Promise.all(operations);
-	return results.flat().map(addFlagsToChannel);
+	const dataReturned = await Promise.all(
+		data.map(async (channel) => {
+			return await db.transaction(async (tx) => {
+				await tx
+					.update(dbChannels)
+					.set(channelInsertSchema.parse(channel))
+					.where(eq(dbChannels.id, channel.id));
+
+				const updated = await tx.query.dbChannels.findFirst({
+					where: eq(dbChannels.id, channel.id),
+				});
+
+				if (!updated) throw new Error('Error updating channel');
+				return updated;
+			});
+		}),
+	);
+
+	return dataReturned.flat().map(addFlagsToChannel);
 }
 
 export async function deleteChannel(id: string) {
 	await deleteManyMessagesByChannelId(id);
 	// TODO: Ugly & how does this handle large amounts of threads?
-	const threads = await prisma.channel.findMany({
-		where: { parentId: id },
-		select: { id: true },
+	const threads = await db.query.dbChannels.findMany({
+		where: and(eq(dbChannels.parentId, id), isNotNull(dbChannels.id)),
 	});
 	await Promise.all(threads.map((t) => deleteChannel(t.id)));
-	return prisma.channel.delete({ where: { id } });
+	return db.delete(dbChannels).where(eq(dbChannels.id, id));
 }
 
 export async function createChannelWithDeps(
@@ -321,22 +350,21 @@ export function upsertManyChannels(data: z.infer<typeof zChannelUpsertMany>) {
 	});
 }
 
-export async function findChannelsBeforeArchivedTimestamp(input: {
+export async function findChannelsBeforeId(input: {
 	serverId: string;
-	timestamp: bigint;
+	id: string;
 	take?: number;
 }) {
-	const res = await prisma.channel.findMany({
-		where: {
-			serverId: input.serverId,
-			archivedTimestamp: {
-				lt: input.timestamp,
-			},
-		},
-		orderBy: {
-			archivedTimestamp: 'desc',
-		},
-		take: input.take,
-	});
+	const res = await db
+		.select()
+		.from(dbChannels)
+		.where(
+			and(
+				eq(dbChannels.serverId, input.serverId),
+				sql`CAST(${dbChannels.id} AS SIGNED) < ${BigInt(input.id)}`,
+			),
+		)
+		.orderBy(sql`CAST(${dbChannels.id} AS SIGNED) DESC`)
+		.limit(input.take ?? 100);
 	return res.map(addFlagsToChannel);
 }

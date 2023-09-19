@@ -1,7 +1,7 @@
 import type { ServerPublic } from '@answeroverflow/api';
 import { AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
-
 import { getInitials } from '~ui/utils/avatars';
+import { webClientEnv } from '@answeroverflow/env/web';
 import { Avatar, AvatarProps } from '~ui/components/primitives/ui/avatar';
 import { cn } from '~ui/utils/styling';
 
@@ -13,6 +13,8 @@ export const makeServerIconLink = (
 	server: Pick<ServerPublic, 'id' | 'icon'>,
 	size: number = 64,
 ) => {
+	if (webClientEnv.NEXT_PUBLIC_LADLE && !server.icon)
+		return `https://api.dicebear.com/6.x/icons/png?size=${size}&seed=${server.id}`;
 	if (!server.icon) return undefined;
 	return `https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png?size=${size}`;
 };

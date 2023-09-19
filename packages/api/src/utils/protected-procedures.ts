@@ -64,7 +64,7 @@ async function validatePermissionsWithData<T>(
 }
 
 type ProtectedFetchInput<T> = {
-	fetch: () => Promise<T | null>;
+	fetch: () => Promise<T | null | undefined>;
 	permissions: PermissionsChecksWithData<T>;
 	notFoundMessage: string;
 };

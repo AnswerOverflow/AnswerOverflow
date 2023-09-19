@@ -1,15 +1,4 @@
-import type { z } from 'zod';
-import {
-	addFlagsToUserServerSettings,
-	type DiscordAccount,
-	getDefaultDiscordAccount,
-	prisma,
-	zDiscordAccountCreate,
-	zDiscordAccountPrismaCreate,
-	zDiscordAccountPrismaUpdate,
-	zDiscordAccountUpdate,
-	zDiscordAccountUpsert,
-} from '@answeroverflow/prisma-types';
+import { z } from 'zod';
 import {
 	upsertIgnoredDiscordAccount,
 	findIgnoredDiscordAccountById,
@@ -18,16 +7,34 @@ import {
 import { DBError } from './utils/error';
 import { upsert, upsertMany } from './utils/operations';
 import { deleteManyMessagesByUserId } from './message';
+import { db } from './db';
+import { eq, inArray } from 'drizzle-orm';
+import { dbDiscordAccounts, dbUserServerSettings } from './schema';
+import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
+import {
+	zDiscordAccountCreate,
+	zDiscordAccountUpdate,
+	zDiscordAccountUpsert,
+} from './zodSchemas/discordAccountSchemas';
+import { getDefaultDiscordAccount } from './utils/discordAccountUtils';
+import { createInsertSchema } from 'drizzle-zod';
 
-export function findDiscordAccountById(id: string) {
-	return prisma.discordAccount.findUnique({
-		where: { id },
+const zUserServerSettingsFlags = z.object({
+	userId: z.string(),
+	serverId: z.string(),
+	bitfield: z.number(),
+});
+
+export async function findDiscordAccountById(id: string) {
+	return db.query.dbDiscordAccounts.findFirst({
+		where: eq(dbDiscordAccounts.id, id),
 	});
 }
 
 export function findManyDiscordAccountsById(ids: string[]) {
-	return prisma.discordAccount.findMany({
-		where: { id: { in: ids } },
+	if (ids.length === 0) return Promise.resolve([]);
+	return db.query.dbDiscordAccounts.findMany({
+		where: inArray(dbDiscordAccounts.id, ids),
 	});
 }
 
@@ -37,9 +44,12 @@ export async function createDiscordAccount(
 	const deletedAccount = await findIgnoredDiscordAccountById(data.id);
 	if (deletedAccount)
 		throw new DBError('Account is ignored', 'IGNORED_ACCOUNT');
-	return prisma.discordAccount.create({
-		data: zDiscordAccountPrismaCreate.parse(data),
-	});
+	await db
+		.insert(dbDiscordAccounts)
+		.values(createInsertSchema(dbDiscordAccounts).parse(data));
+	const createdAccount = await findDiscordAccountById(data.id);
+	if (!createdAccount) throw new Error('Failed to create account');
+	return createdAccount;
 }
 
 export async function createManyDiscordAccounts(
@@ -52,27 +62,37 @@ export async function createManyDiscordAccounts(
 	const allowedToCreateAccounts = data.filter(
 		(x) => !ignoredIdsLookup.has(x.id),
 	);
-
-	const createOps: Promise<unknown>[] = [];
-	for (let i = 0; i < allowedToCreateAccounts.length; i += 50) {
-		const chunk = allowedToCreateAccounts.slice(i, i + 50);
-		createOps.push(
-			prisma.discordAccount.createMany({
-				data: chunk.map((i) => zDiscordAccountPrismaCreate.parse(i)),
-			}),
+	const chunkSize = 25;
+	const chunks = [];
+	for (let i = 0; i < allowedToCreateAccounts.length; i += chunkSize) {
+		chunks.push(allowedToCreateAccounts.slice(i, i + chunkSize));
+	}
+	for await (const chunk of chunks) {
+		await Promise.all(
+			chunk.map(async (account) =>
+				db
+					.insert(dbDiscordAccounts)
+					.values(createInsertSchema(dbDiscordAccounts).parse(account)),
+			),
 		);
 	}
-	await Promise.all(createOps);
 	return allowedToCreateAccounts.map((i) => getDefaultDiscordAccount(i));
 }
 
 export async function updateDiscordAccount(
 	data: z.infer<typeof zDiscordAccountUpdate>,
 ) {
-	return prisma.discordAccount.update({
-		where: { id: data.id },
-		data: zDiscordAccountPrismaUpdate.parse(data),
+	await db
+		.update(dbDiscordAccounts)
+		.set(createInsertSchema(dbDiscordAccounts).parse(data))
+		.where(eq(dbDiscordAccounts.id, data.id));
+
+	const updatedDiscordAccount = await db.query.dbDiscordAccounts.findFirst({
+		where: eq(dbDiscordAccounts.id, data.id),
 	});
+
+	if (!updatedDiscordAccount) throw new Error('Failed to update account');
+	return updatedDiscordAccount;
 }
 export async function updateManyDiscordAccounts(
 	data: z.infer<typeof zDiscordAccountUpdate>[],
@@ -83,27 +103,28 @@ export async function updateManyDiscordAccounts(
 	>(data.map((i) => [i.id, i]));
 	const accountSet = Array.from(uniqueAccountsToCreate.values());
 
-	const operations: Promise<DiscordAccount[]>[] = [];
-	for (let i = 0; i < accountSet.length; i += 50) {
-		const chunk = accountSet.slice(i, i + 50);
-		operations.push(
-			prisma.$transaction(
-				chunk.map((account) =>
-					prisma.discordAccount.update({
-						where: { id: account.id },
-						data: zDiscordAccountPrismaUpdate.parse(account),
-					}),
-				),
+	const chunkSize = 25;
+	const chunks = [];
+	for (let i = 0; i < accountSet.length; i += chunkSize) {
+		chunks.push(accountSet.slice(i, i + chunkSize));
+	}
+	for await (const chunk of chunks) {
+		await Promise.all(
+			chunk.map(async (account) =>
+				db
+					.update(dbDiscordAccounts)
+					.set(createInsertSchema(dbDiscordAccounts).parse(account))
+					.where(eq(dbDiscordAccounts.id, account.id)),
 			),
 		);
 	}
-	const results = await Promise.all(operations);
-	return results.flat();
+	return findManyDiscordAccountsById(accountSet.map((i) => i.id));
 }
 
 export async function deleteDiscordAccount(id: string) {
 	const existingAccount = await findDiscordAccountById(id);
-	if (existingAccount) await prisma.discordAccount.delete({ where: { id } });
+	if (existingAccount)
+		await db.delete(dbDiscordAccounts).where(eq(dbDiscordAccounts.id, id));
 	await Promise.all([
 		upsertIgnoredDiscordAccount(id),
 		deleteManyMessagesByUserId(id),
@@ -135,37 +156,6 @@ export async function upsertManyDiscordAccounts(
 	});
 }
 
-export async function findDiscordAccountWithUserServerSettings({
-	authorId,
-	authorServerId,
-}: {
-	authorId: string;
-	authorServerId: string[];
-}) {
-	const data = await prisma.discordAccount.findUnique({
-		where: {
-			id: authorId,
-		},
-		include: {
-			userServerSettings: {
-				where: {
-					serverId: {
-						in: authorServerId,
-					},
-				},
-			},
-		},
-	});
-	if (!data) return null;
-	const userServerSettingsWithFlags = data.userServerSettings.map((i) =>
-		addFlagsToUserServerSettings(i),
-	);
-	return {
-		...data,
-		userServerSettings: userServerSettingsWithFlags,
-	};
-}
-
 export async function findManyDiscordAccountsWithUserServerSettings({
 	authorIds,
 	authorServerIds,
@@ -173,26 +163,20 @@ export async function findManyDiscordAccountsWithUserServerSettings({
 	authorIds: string[];
 	authorServerIds: string[];
 }) {
-	const data = await prisma.discordAccount.findMany({
-		where: {
-			id: {
-				in: authorIds,
-			},
-		},
-		include: {
+	if (authorIds.length === 0 || authorServerIds.length === 0)
+		return Promise.resolve([]);
+	const data = await db.query.dbDiscordAccounts.findMany({
+		where: inArray(dbDiscordAccounts.id, authorIds),
+		with: {
 			userServerSettings: {
-				where: {
-					serverId: {
-						in: authorServerIds,
-					},
-				},
+				where: inArray(dbUserServerSettings.serverId, authorServerIds),
 			},
 		},
 	});
 	return data.map((i) => ({
 		...i,
-		userServerSettings: i.userServerSettings.map((j) =>
-			addFlagsToUserServerSettings(j),
-		),
+		userServerSettings: i.userServerSettings.map((j) => {
+			return addFlagsToUserServerSettings(zUserServerSettingsFlags.parse(j));
+		}),
 	}));
 }

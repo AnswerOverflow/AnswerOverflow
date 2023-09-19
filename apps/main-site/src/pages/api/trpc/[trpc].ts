@@ -3,7 +3,7 @@ import { createContext } from '@answeroverflow/api';
 import { appRouter } from '@answeroverflow/api';
 import { finishAnalyticsCollection } from '@answeroverflow/analytics';
 import type { NextApiRequest, NextApiResponse } from 'next/types';
-import { prisma } from '@answeroverflow/db';
+import { db } from '@answeroverflow/db';
 import {
 	disableSettingCookies,
 	getNextAuthCookieName,
@@ -11,6 +11,8 @@ import {
 } from '@answeroverflow/auth';
 import { isOnMainSite } from '@answeroverflow/constants';
 import { sharedEnvs } from '@answeroverflow/env/shared';
+import { eq } from 'drizzle-orm';
+import { dbTenantSessions } from '@answeroverflow/db/src/schema';
 // create the API handler, but don't return it yet
 const nextApiHandler = createNextApiHandler({
 	router: appRouter,
@@ -40,10 +42,8 @@ export default async function handler(
 	}
 	const token = req.cookies[getTenantCookieName()];
 	if (token) {
-		const nextAuthSession = await prisma.tenantSession.findUnique({
-			where: {
-				id: token,
-			},
+		const nextAuthSession = await db.query.dbTenantSessions.findFirst({
+			where: eq(dbTenantSessions.id, token),
 		});
 		// add a cookie to the request using the next auth header
 		req.cookies[getNextAuthCookieName()] = nextAuthSession?.sessionToken;

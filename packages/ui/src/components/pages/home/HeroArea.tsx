@@ -1,54 +1,92 @@
-import { QuestionAnswerArea } from './QuestionAnswerArea/QuestionAnswerArea';
-import { messageData } from './HomeMessages';
+import Marquee from 'react-fast-marquee';
+import type { ServerPublic } from '~api/router/server/types';
+import Link from 'next/link';
+import { MessagesSearchBar } from '~ui/components/pages/SearchPage';
+import { ServerIcon } from '~ui/components/primitives/ServerIcon';
+import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 
-import { Button } from '~ui/components/primitives/ui/button';
-import { GetStarted } from '~ui/components/primitives/Callouts';
-
-const HomeLeadText = () => {
+const HeroAreaText = () => {
 	return (
-		<div className="flex w-full flex-col items-start justify-center gap-6 pb-20 xl:w-[60%]">
-			<h1 className="text-center font-header text-4xl font-bold leading-[114.5%] md:text-start md:text-6xl">
-				Bringing your Discord channels to Google
+		<div className="flex h-full w-[calc(100vw-2rem)] max-w-screen-lg flex-col items-center justify-center gap-6 rounded-3xl border-2 border-solid border-primary/[.6] bg-background/[.4] bg-clip-padding px-4 py-8 backdrop-blur-3xl sm:w-[80vw] sm:p-8 md:p-16">
+			<h1 className="text-center font-header text-5xl font-bold leading-[114.5%] text-primary md:text-7xl">
+				Search all of Discord
 			</h1>
-			<p className="text-center font-body text-lg text-primary/75 md:text-start md:text-xl">
-				Answer Overflow is an open source project designed to bring discord
-				channels to your favorite search engine. Set it up in minutes and bring
-				discovery to your hidden content.
-			</p>
-			<div className="flex w-full flex-col items-center justify-center gap-8 sm:w-fit sm:flex-row">
-				<GetStarted
-					variant={'default'}
-					location="Hero"
-					className="mx-auto text-xl shadow-[0px_0px_40px_rgba(255,_255,_255,_0.2)] duration-200 hover:shadow-[0px_0px_40px_rgba(255,_255,_255,_0.4)] xl:mx-0"
-				/>
-				<Button
-					variant="outline"
-					className="mx-auto text-xl xl:mx-0"
-					onClick={() => {
-						document
-							.getElementById('roadmap')
-							?.scrollIntoView({ behavior: 'smooth' });
-					}}
+			<div className="flex w-full flex-col items-center justify-center gap-8 sm:hidden sm:flex-row">
+				<MessagesSearchBar />
+			</div>
+			<h2 className="text-center font-body text-lg text-primary/[.95] sm:w-4/5 md:text-2xl">
+				Answer Overflow is a Discord search engine. Find results from indexed
+				content or a community to join.
+			</h2>
+			<div className="hidden w-full flex-col items-center justify-center gap-8 sm:flex sm:flex-row">
+				<MessagesSearchBar />
+			</div>
+			<div className="grid w-full grid-cols-1 grid-rows-2 gap-4 sm:w-auto sm:grid-cols-2 sm:grid-rows-1  sm:gap-8">
+				<LinkButton
+					size={'lg'}
+					className={'w-full text-xl'}
+					href={'/search?q=nextjs+trpc+app+router'}
 				>
-					View roadmap
-				</Button>
+					Try a search
+				</LinkButton>
+				<LinkButton
+					size={'lg'}
+					variant={'outline'}
+					href={'/onboarding'}
+					className={'w-full  text-xl'}
+				>
+					Add your server
+				</LinkButton>
 			</div>
 		</div>
 	);
 };
 
-export const HeroArea = () => {
+const ServerGrid = (props: {
+	servers: Pick<ServerPublic, 'id' | 'icon' | 'name'>[];
+}) => {
 	return (
-		<div className="z-20 flex min-h-[calc(100vh-10rem)] items-center px-4 pb-20 pt-10 sm:px-[4rem] 2xl:px-[6rem]">
-			<div className="flex h-full w-full flex-col transition-all lg:gap-32 xl:flex-row 2xl:gap-72">
-				<HomeLeadText />
-				<div className="hidden items-center justify-center sm:flex 2xl:grow">
-					<QuestionAnswerArea
-						discordChannelName={'How do I index discord channels into google?'}
-						questionMessage={messageData.questionMessage}
-						answerMessage={messageData.answerMessage}
-					/>
-				</div>
+		<Marquee speed={20}>
+			<div
+				className={
+					'my-auto mr-8 grid min-h-[calc(100vh-5rem)] grid-flow-col grid-rows-5 gap-8 py-4 md:grid-rows-4 md:gap-16'
+				}
+			>
+				{props.servers.map((server) => {
+					return (
+						<Link
+							className={
+								'flex items-center blur-sm brightness-[80%] transition-all duration-1000 hover:blur-none hover:brightness-100 hover:duration-300 dark:brightness-50 dark:hover:brightness-100'
+							}
+							href={`/c/${server.id}`}
+							key={server.id}
+							tabIndex={-1}
+						>
+							<ServerIcon
+								server={server}
+								size={160}
+								className={
+									'max-h-[92px] max-w-[92px] md:max-h-full md:max-w-full'
+								}
+							/>
+						</Link>
+					);
+				})}
+			</div>
+		</Marquee>
+	);
+};
+
+export const HeroArea = (props: {
+	servers: Pick<ServerPublic, 'id' | 'icon' | 'name'>[];
+}) => {
+	return (
+		<div className="relative min-h-[calc(100vh-5rem)] w-full">
+			<ServerGrid servers={props.servers} />
+			<div className="pointer-events-none absolute right-0 top-0 z-10 hidden h-full w-52 bg-gradient-to-l from-[rgba(245,248,255,.5)] to-[rgba(245,248,255,0)] dark:from-[rgba(6,6,7,1)] dark:to-[rgba(6_,6_,7_,0_)] sm:block" />
+			<div className="pointer-events-none absolute left-0 top-0 z-10 hidden h-full w-52 bg-gradient-to-r from-[rgba(245,248,255,.5)] to-[rgba(245,248,255,0)] dark:from-[rgba(6,6,7,1)] dark:to-[rgba(6_,6_,7_,0_)] sm:block" />
+			<div className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2">
+				<HeroAreaText />
 			</div>
 		</div>
 	);

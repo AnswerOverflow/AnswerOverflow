@@ -1,16 +1,9 @@
 import {
-	bitfieldToUserServerSettingsFlags,
-	type DiscordAccount,
-	type Server,
-	type UserServerSettingsWithFlags,
-} from '@answeroverflow/prisma-types';
-import {
 	mockChannel,
 	mockDiscordAccount,
 	mockMessage,
 	mockServer,
 } from '@answeroverflow/db-mock';
-import { addFlagsToUserServerSettings } from '@answeroverflow/prisma-types';
 import { createServer } from './server';
 import { createDiscordAccount } from './discord-account';
 import {
@@ -24,6 +17,12 @@ import {
 import { findMessageById, upsertMessage } from './message';
 import { createChannel } from './channel';
 import { getRandomId } from '@answeroverflow/utils';
+import { DiscordAccount, Server } from './schema';
+import {
+	addFlagsToUserServerSettings,
+	bitfieldToUserServerSettingsFlags,
+	UserServerSettingsWithFlags,
+} from './utils/userServerSettingsUtils';
 
 let server: Server;
 let account: DiscordAccount;
@@ -123,7 +122,8 @@ describe('User Server Settings', () => {
 		it('should delete user server messages when setting indexing enabled to false', async () => {
 			const chnl = mockChannel(server);
 			await createChannel(chnl);
-			const msg = await upsertMessage(mockMessage(server, chnl, account));
+			const msg = mockMessage(server, chnl, account);
+			await upsertMessage(msg);
 			const createdMsg = await findMessageById(msg.id);
 			expect(createdMsg).not.toBe(null);
 			const updated = await updateUserServerSettings(
@@ -145,7 +145,7 @@ describe('User Server Settings', () => {
 			expect(found!.flags.canPubliclyDisplayMessages).toBe(false);
 			expect(found!.flags.messageIndexingDisabled).toBe(true);
 			const deletedMsg = await findMessageById(msg.id);
-			expect(deletedMsg).toBe(null);
+			expect(deletedMsg).not.toBeDefined();
 		});
 		it('should throw an error when trying to grant consent when indexing is disabled', async () => {
 			await updateUserServerSettings(

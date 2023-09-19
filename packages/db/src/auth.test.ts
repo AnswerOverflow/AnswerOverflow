@@ -1,4 +1,3 @@
-import { prisma } from '@answeroverflow/prisma-types';
 import { getRandomId } from '@answeroverflow/utils';
 import { mockDiscordAccount } from '@answeroverflow/db-mock';
 import { createDiscordAccount } from './discord-account';
@@ -6,12 +5,18 @@ import {
 	_NOT_PROD_createOauthAccountEntry,
 	findDiscordOauthByProviderAccountId,
 } from './auth';
+import { db } from './db';
+import { dbUsers } from './schema';
 describe('Auth', () => {
 	it('should find a linked discord account auth by id', async () => {
 		const discordUserId = getRandomId();
 
-		const user = await prisma.user.create({
-			data: {},
+		const USER_ID = getRandomId();
+		const USER_EMAIL = `example+${getRandomId()}@example.com`;
+
+		await db.insert(dbUsers).values({
+			id: USER_ID,
+			email: USER_EMAIL,
 		});
 		await createDiscordAccount(
 			mockDiscordAccount({
@@ -20,7 +25,7 @@ describe('Auth', () => {
 		);
 		const oauth = await _NOT_PROD_createOauthAccountEntry({
 			discordUserId,
-			userId: user.id,
+			userId: USER_ID,
 		});
 		const found = await findDiscordOauthByProviderAccountId(discordUserId);
 		expect(found).toEqual(oauth);

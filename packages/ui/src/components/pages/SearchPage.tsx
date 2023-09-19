@@ -40,9 +40,10 @@ export const MessagesSearchBar = (props: {
 		>
 			<Input
 				defaultValue={query || ''}
-				className="mb-4 w-full"
+				className={twMerge('mb-4 w-full', props.className)}
 				onChange={(e) => setSearchInput(e.target.value)}
 				placeholder={props.placeholder ?? 'Search'}
+				type={'search'}
 			/>
 		</form>
 	);
@@ -65,10 +66,20 @@ export const SearchPage = ({ results, isLoading }: SearchResultProps) => {
 		))
 	);
 
+	const uniqueServers = new Set(results.map((result) => result.server.id));
 	return (
 		<div className="w-full">
 			<Heading.H1 className="py-4 text-3xl xl:text-5xl">Search</Heading.H1>
-			<MessagesSearchBar />
+			<MessagesSearchBar className={'mb-4'} />
+			{!isLoading && !noResults && (
+				<div className={'mb-4'}>
+					<span className="text-base text-primary/[.6]">
+						Found {results.length} result{results.length === 1 ? '' : 's'} from{' '}
+						{uniqueServers.size}{' '}
+						{uniqueServers.size === 1 ? 'community' : 'communities'}
+					</span>
+				</div>
+			)}
 			{resultsSection}
 		</div>
 	);

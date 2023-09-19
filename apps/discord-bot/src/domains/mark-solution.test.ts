@@ -23,7 +23,7 @@ import {
 	toAOServer,
 } from '~discord-bot/utils/conversions';
 
-import type { ChannelWithFlags } from '@answeroverflow/api';
+import type { ChannelWithFlags } from '@answeroverflow/db';
 import { makeConsentButtonData } from './manage-account';
 import {
 	mockGuild,
@@ -279,7 +279,10 @@ describe('Can Mark Solution', () => {
 			const asAoMessage = await toAOMessage(rootMessage);
 			await upsertMessage({
 				...asAoMessage,
-				solutionIds: [solutionMessage.id],
+			});
+			await upsertMessage({
+				...(await toAOMessage(solutionMessage)),
+				questionId: asAoMessage.id,
 			});
 
 			await createChannel({

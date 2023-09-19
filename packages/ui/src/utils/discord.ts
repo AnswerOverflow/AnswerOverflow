@@ -3,9 +3,9 @@
 */
 
 import type {
-	APIMessageFull,
-	APIMessageWithDiscordAccount,
-} from '@answeroverflow/api';
+	MessageFull,
+	MessageWithDiscordAccount,
+} from '@answeroverflow/db';
 
 export enum ChannelType {
 	/**
@@ -93,7 +93,7 @@ export enum ChannelType {
 }
 
 export function getDiscordURLForMessage(
-	message: APIMessageWithDiscordAccount | APIMessageFull,
+	message: MessageWithDiscordAccount | MessageFull,
 ) {
 	const serverId = message.serverId;
 	const channelId = message.channelId;

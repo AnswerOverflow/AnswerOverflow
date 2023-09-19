@@ -14,9 +14,7 @@
 		"lint:fix": "eslint . \"*.ts*\" --fix"
 	},
 	"dependencies": {
-		"@answeroverflow/elastic-types": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
-		"@answeroverflow/prisma-types": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
 		"@sapphire/bitfield": "^1.2.0",
 		"discord-api-types": "^0.37.54",

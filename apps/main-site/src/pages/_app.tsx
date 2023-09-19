@@ -95,6 +95,7 @@ const MyApp: AppType<{
 								'/onboarding',
 								'/[domain]',
 								'/dashboard',
+								'/about',
 								'/dashboard/[serverId]',
 							]}
 						>

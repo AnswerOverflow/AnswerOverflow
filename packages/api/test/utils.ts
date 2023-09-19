@@ -153,7 +153,7 @@ export async function testAllSources({
 	}
 }
 
-export type AllVaraintsTest = {
+export type AllVariantsTest = {
 	sourcesThatShouldWork?: Source[];
 	permissionsThatShouldWork?: PermissionResolvable[];
 	operation: (
@@ -170,7 +170,7 @@ export async function testAllSourceAndPermissionVariants({
 		PermissionFlagsBits,
 	) as PermissionResolvable[],
 	operation,
-}: AllVaraintsTest) {
+}: AllVariantsTest) {
 	await testAllSources({
 		sourcesThatShouldWork,
 		operation: (source, shouldSourceSucceed) =>
@@ -192,7 +192,7 @@ export async function testAllPublicAndPrivateDataVariants<F, T extends F>({
 	permissionsThatShouldWork,
 	sourcesThatShouldWork,
 	fetch,
-}: Omit<AllVaraintsTest, 'operation'> & {
+}: Omit<AllVariantsTest, 'operation'> & {
 	fetch: (input: {
 		source: Source;
 		permission: PermissionResolvable;
@@ -273,7 +273,7 @@ export async function testAllPublicAndPrivateDataVariants<F, T extends F>({
 	});
 }
 
-export async function testAllVaraints<T>({
+export async function testAllVariants<T>({
 	arr,
 	operation,
 }: {
@@ -290,7 +290,7 @@ export async function testAllSourceAndPermissionVariantsThatThrowErrors({
 	) as PermissionResolvable[],
 	operation,
 	permissionFailureMessage = MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
-}: Omit<AllVaraintsTest, 'operation'> & {
+}: Omit<AllVariantsTest, 'operation'> & {
 	permissionFailureMessage?: string;
 	operation: (input: {
 		source: Source;
