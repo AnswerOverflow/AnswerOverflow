@@ -22,20 +22,7 @@ class MyDocument extends Document {
 	override render() {
 		return (
 			<Html className="dark" data-theme="dark" lang="en">
-				<Head>
-					<script
-						dangerouslySetInnerHTML={{
-							__html: Buffer.from(DATA_UNBLOCKER, 'base64').toString(),
-						}}
-					/>
-					<Script
-						id="Adsense-id"
-						data-ad-client="ca-pub-1392153990042810"
-						async={true}
-						src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1392153990042810"
-						crossOrigin="anonymous"
-					/>
-				</Head>
+				<Head></Head>
 				<body className="bg-background text-primary">
 					<Main />
 					<NextScript />

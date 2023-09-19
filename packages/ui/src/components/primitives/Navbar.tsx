@@ -1,7 +1,7 @@
 import type { Session } from 'next-auth';
 import Link from 'next/link';
 import React from 'react';
-import { useRouter } from 'next/router';
+import { usePathname, useRouter } from 'next/navigation';
 import { trpc } from '~ui/utils/trpc';
 import { GetStarted, SignInButton } from './Callouts';
 import { ThemeSwitcher } from './ThemeSwitcher';
@@ -239,7 +239,8 @@ export function NavbarRenderer(props: {
 }
 export const Navbar = () => {
 	const router = useRouter();
+	const pathname = usePathname();
 	const userQuery = trpc.auth.getSession.useQuery();
 	const user = userQuery.data?.user;
-	return <NavbarRenderer user={user ?? null} path={router.pathname} />;
+	return <NavbarRenderer user={user ?? null} path={pathname} />;
 };

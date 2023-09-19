@@ -1,3 +1,5 @@
+'use client';
+
 import type { ServerPublic } from '@answeroverflow/api';
 import { AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import { getInitials } from '~ui/utils/avatars';

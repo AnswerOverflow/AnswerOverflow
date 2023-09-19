@@ -1,3 +1,5 @@
+'use client';
+
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { DefaultSession } from 'next-auth';
 import posthog from 'posthog-js';
@@ -17,7 +19,7 @@ import type {
 	MessageWithDiscordAccount,
 } from '@answeroverflow/db';
 import React from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { webClientEnv } from '@answeroverflow/env/web';
 // TODO: This type should be inferred from the auth package
@@ -165,10 +167,11 @@ export const AnalyticsProvider = ({
 		}
 
 		const handleRouteChange = () => posthog.capture('$pageview');
-		router.events.on('routeChangeComplete', handleRouteChange);
-		return () => {
-			router.events.off('routeChangeComplete', handleRouteChange);
-		};
+		// router.events.on('routeChangeComplete', handleRouteChange);
+		// TODO: handle route change completes with next/navigation
+		// return () => {
+		// 	router.events.off('routeChangeComplete', handleRouteChange);
+		// };
 	}, [session, status, analyticsLoaded, setAnalyticsLoaded, router]);
 	return (
 		<AnalyticsContextProvider value={{ loaded: analyticsLoaded }}>
