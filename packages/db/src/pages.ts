@@ -244,7 +244,7 @@ export async function findMessageResultPage(messageId: string) {
 						? sql`CAST(${dbMessages.id} AS SIGNED) >= CAST(${targetMessage.id} AS SIGNED)`
 						: undefined,
 					orderBy: sql`CAST(${dbMessages.id} AS SIGNED) ASC`,
-					limit: parentId ? NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD : undefined,
+					limit: parentId ? undefined : NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
 					with: {
 						author: {
 							with: {
