@@ -60,7 +60,8 @@ export const messagesRouter = router({
 						thread: stripPrivateChannelData(
 							recommendedChannelLookup.get(p.id)!,
 						),
-					})),
+					}))
+					.slice(0, 20),
 			);
 
 			return {
