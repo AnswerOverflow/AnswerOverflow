@@ -1,9 +1,8 @@
 import {
 	bulkFindLatestMessageInChannel,
 	findChannelById,
-	findLatestArchivedTimestampByChannelId,
-	findLatestMessageIdInChannel,
 	findManyUserServerSettings,
+	updateChannel,
 	upsertChannel,
 	upsertManyDiscordAccounts,
 	upsertManyMessages,
@@ -96,11 +95,12 @@ export async function indexRootChannel(
 	container.logger.debug(`Indexing channel ${channel.id} | ${channel.name}`);
 	if (channel.type === ChannelType.GuildForum) {
 		const maxNumberOfThreadsToCollect = botEnv.MAX_NUMBER_OF_THREADS_TO_COLLECT;
-		let threadCutoffTimestamp = await findLatestArchivedTimestampByChannelId(
-			channel.id,
-		);
+		let threadCutoffId =
+			settings.lastIndexedSnowflake === '0'
+				? null
+				: settings.lastIndexedSnowflake;
 		if (sharedEnvs.NODE_ENV === 'test') {
-			threadCutoffTimestamp = null;
+			threadCutoffId = null;
 		}
 		const archivedThreads: AnyThreadChannel[] = [];
 		container.logger.debug(
@@ -114,9 +114,7 @@ export async function indexRootChannel(
 
 			const last = fetched.threads.last();
 			const isLastThreadOlderThanCutoff =
-				last?.archiveTimestamp &&
-				threadCutoffTimestamp &&
-				last.archiveTimestamp < threadCutoffTimestamp;
+				last && threadCutoffId && BigInt(last.id) >= BigInt(threadCutoffId);
 			archivedThreads.push(...fetched.threads.values());
 
 			if (
@@ -126,7 +124,7 @@ export async function indexRootChannel(
 				isLastThreadOlderThanCutoff
 			)
 				return;
-			await fetchAllArchivedThreads(last.archiveTimestamp ?? last.id);
+			await fetchAllArchivedThreads(last.id);
 		};
 
 		// Fetching all archived threads is very expensive, so only do it on the very first indexing pass
@@ -172,12 +170,16 @@ export async function indexRootChannel(
 		const mostRecentlyIndexedMessages = await bulkFindLatestMessageInChannel(
 			threadsToIndex.map((x) => x.id),
 		);
-		const threadMessageLookup = new Map<string, string>(
+		const threadMessageLookup = new Map<string, string | null>(
 			mostRecentlyIndexedMessages.map((x) => [x.channelId, x.latestMessageId]),
 		);
-		const outOfDateThreads = threadsToIndex.filter(
-			(x) => threadMessageLookup.get(x.id) !== x.lastMessageId,
-		);
+		const outOfDateThreads = threadsToIndex.filter((x) => {
+			const lookup = threadMessageLookup.get(x.id);
+			if (!lookup) {
+				return true; // either undefined or null, either way we need to index
+			}
+			return BigInt(lookup) < BigInt(x.lastMessageId ?? x.id);
+		});
 		container.logger.debug(
 			`Truncated threads to index from ${threadsToIndex.length} to ${
 				outOfDateThreads.length
@@ -194,7 +196,20 @@ Channel: ${channel.id} | ${channel.name}
 Server: ${channel.guildId} | ${channel.guild.name}`,
 			);
 			await indexTextBasedChannel(thread, {
-				fromMessageId: threadMessageLookup.get(thread.id),
+				fromMessageId: threadMessageLookup.get(thread.id)?.toString(),
+			});
+		}
+		const lastIndexedSnowflake =
+			outOfDateThreads
+				.sort((a, b) => (BigInt(b.id) > BigInt(a.id) ? 1 : -1))
+				.at(0)?.id ?? null;
+		if (lastIndexedSnowflake != null) {
+			await updateChannel({
+				old: null, // Indexing takes a while so we don't want to overwrite any changes made to the channel while indexing
+				update: {
+					id: channel.id,
+					lastIndexedSnowflake: lastIndexedSnowflake,
+				},
 			});
 		}
 	} else {
@@ -218,6 +233,7 @@ export async function indexTextBasedChannel(
 		skipIndexingEnabledCheck?: boolean;
 	},
 ) {
+	let start = opts?.fromMessageId;
 	if (!opts?.skipIndexingEnabledCheck) {
 		const settings = await findChannelById(
 			channel.isThread() ? channel.parentId! : channel.id,
@@ -225,13 +241,14 @@ export async function indexTextBasedChannel(
 		if (!settings?.flags?.indexingEnabled) {
 			return;
 		}
+		start = settings?.lastIndexedSnowflake?.toString();
 	}
 	if (!channel.viewable) {
 		return;
 	}
-	const start =
+	start =
 		opts?.fromMessageId ??
-		(await findLatestMessageIdInChannel(channel.id).then((x) => x));
+		(await findChannelById(channel.id))?.lastIndexedSnowflake?.toString();
 	container.logger.debug(
 		`Indexing channel ${channel.id} | ${channel.name} from message id ${
 			start ?? 'beginning'
@@ -303,12 +320,17 @@ async function storeIndexData(
 	);
 	await upsertManyDiscordAccounts(convertedUsers);
 	container.logger.debug(`Upserting channel: ${channel.id}`);
+	const lastIndexedSnowflake =
+		messages.sort((a, b) => (BigInt(b.id) > BigInt(a.id) ? 1 : -1)).at(0)?.id ??
+		'0';
+
 	await upsertChannel({
 		create: {
 			...toAOChannel(channel),
 		},
 		update: {
 			archivedTimestamp: toAOChannel(channel).archivedTimestamp,
+			lastIndexedSnowflake,
 		},
 	});
 	container.logger.debug(`Upserting ${convertedMessages.length} messages`);

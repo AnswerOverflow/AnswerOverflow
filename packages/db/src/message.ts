@@ -27,6 +27,7 @@ import {
 	dbReactions,
 	dbEmojis,
 	Attachment,
+	dbChannels,
 } from './schema';
 import { and, eq, inArray, or, sql } from 'drizzle-orm';
 import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
@@ -642,18 +643,12 @@ export async function bulkFindLatestMessageInChannel(channelIds: string[]) {
 	if (channelIds.length === 0) return [];
 	return db
 		.select({
-			latestMessageId: sql<bigint>`MAX(CAST(${dbMessages.id} AS SIGNED))`,
-			channelId: dbMessages.channelId,
+			latestMessageId: dbChannels.lastIndexedSnowflake,
+			channelId: dbChannels.id,
 		})
-		.from(dbMessages)
-		.where(inArray(dbMessages.channelId, channelIds))
-		.groupBy(dbMessages.channelId)
-		.then((x) =>
-			x.map((y) => ({
-				channelId: y.channelId,
-				latestMessageId: y.latestMessageId?.toString(),
-			})),
-		);
+		.from(dbChannels)
+		.where(inArray(dbChannels.id, channelIds))
+		.groupBy(dbChannels.id);
 }
 
 export async function findLatestMessageInChannelAndThreads(channelId: string) {
