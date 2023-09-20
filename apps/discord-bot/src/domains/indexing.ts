@@ -114,7 +114,7 @@ export async function indexRootChannel(
 
 			const last = fetched.threads.last();
 			const isLastThreadOlderThanCutoff =
-				last && threadCutoffId && BigInt(last.id) >= BigInt(threadCutoffId);
+				last && threadCutoffId && BigInt(last.id) < BigInt(threadCutoffId);
 			archivedThreads.push(...fetched.threads.values());
 
 			if (
