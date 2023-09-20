@@ -17,6 +17,7 @@ export function getDefaultChannel(
 		inviteCode: null,
 		archivedTimestamp: null,
 		solutionTagId: null,
+		lastIndexedSnowflake: null,
 		...override,
 	};
 	return data;

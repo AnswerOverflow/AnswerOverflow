@@ -280,6 +280,12 @@ export const dbChannels = mysqlTable(
 		archivedTimestamp: bigint('archivedTimestamp', { mode: 'bigint' }),
 		bitfield: unsignedInt('bitfield').default(0).notNull(),
 		solutionTagId: varchar('solutionTagId', { length: 191 }),
+		/*
+      Instead of looking up the last indexed message in a channel, we're going to store it here
+      This allows us to use this as our reference point for where we left off indexing legacy content
+      So we can do realtime indexing
+     */
+		lastIndexedSnowflake: varchar('lastIndexedSnowflake', { length: 30 }),
 	},
 	(table) => {
 		return {

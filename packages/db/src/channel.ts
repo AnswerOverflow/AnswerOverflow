@@ -7,7 +7,7 @@ import { DBError } from './utils/error';
 import { ChannelType } from 'discord-api-types/v10';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 import { db } from './db';
-import { and, desc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { dbChannels } from './schema';
 import {
 	getDefaultChannel,
@@ -195,25 +195,6 @@ export async function findManyChannelsById(
 			messageCount,
 		};
 	});
-}
-
-export async function findLatestArchivedTimestampByChannelId(parentId: string) {
-	// TODO: Check this is correct?
-	const data = await db
-		.select({
-			archivedTimestamp: sql<number>`MAX(${dbChannels.archivedTimestamp})`,
-		})
-		.from(dbChannels)
-		.where(
-			and(
-				eq(dbChannels.parentId, parentId),
-				isNotNull(dbChannels.archivedTimestamp),
-			),
-		)
-		.orderBy(desc(dbChannels.archivedTimestamp))
-		.limit(1);
-
-	return data[0]?.archivedTimestamp ?? null;
 }
 
 export async function createChannel(data: z.infer<typeof zChannelCreate>) {

@@ -371,19 +371,14 @@ describe('Message Ops', () => {
 	});
 	describe('Bulk Find Latest Messages in Channel', () => {
 		it('should find the latest messages in a channel', async () => {
-			const chnl2 = mockChannelWithFlags(server);
-			const chnl3 = mockChannelWithFlags(server);
+			const chnl2 = mockChannelWithFlags(server, {
+				lastIndexedSnowflake: '340',
+			});
+			const chnl3 = mockChannelWithFlags(server, {
+				lastIndexedSnowflake: '521',
+			});
 			await createChannel(chnl2);
 			await createChannel(chnl3);
-			const msg2 = mockMessage(server, chnl2, author);
-			const msg3 = mockMessage(server, chnl3, author);
-			const largerThanMsg = mockMessage(server, channel, author, {
-				id: getRandomIdGreaterThan(Number(msg.id)),
-			});
-			await upsertMessage(largerThanMsg);
-			await upsertMessage(msg);
-			await upsertMessage(msg2);
-			await upsertMessage(msg3);
 			const found = await bulkFindLatestMessageInChannel([
 				channel.id,
 				chnl2.id,
@@ -391,9 +386,9 @@ describe('Message Ops', () => {
 			]);
 			expect(found).toHaveLength(3);
 			const map = new Map(found.map((m) => [m.channelId, m.latestMessageId]));
-			expect(map.get(channel.id)).toBe(largerThanMsg.id);
-			expect(map.get(chnl2.id)).toBe(msg2.id);
-			expect(map.get(chnl3.id)).toBe(msg3.id);
+			expect(map.get(channel.id)).toBe(null);
+			expect(map.get(chnl2.id)).toBe('340');
+			expect(map.get(chnl3.id)).toBe('521');
 		});
 	});
 	describe('Find Latest Message in Channel', () => {
