@@ -25,6 +25,7 @@ import { Heading } from '@answeroverflow/ui/src/components/primitives/base/Headi
 import { PageWrapper } from '@answeroverflow/ui/src/components/pages/PageWrapper';
 import { NextTRPC, trpc } from '@answeroverflow/ui/src/utils/trpc';
 import { Paragraph } from '@answeroverflow/ui/src/components/primitives/base/Paragraph';
+import 'react-toastify/dist/ReactToastify.css';
 
 const progress = new ProgressBar({
 	size: 2,
@@ -88,6 +89,7 @@ const MyApp: AppType<{
 			<ThemeProvider attribute="class" defaultTheme={'dark'} enableSystem>
 				<SessionProvider session={session}>
 					<AnalyticsProvider>
+						<ToastContainer toastClassName="bg-background dark:bg-background text-primary dark:text-primary" />
 						<PageWrapper
 							disabledRoutes={[
 								'/',
@@ -102,7 +104,6 @@ const MyApp: AppType<{
 							<CommitBanner />
 							<MDXProvider components={components}>
 								<Component {...pageProps} />
-								<ToastContainer toastClassName="bg-background dark:bg-background text-primary dark:text-primary" />
 							</MDXProvider>
 						</PageWrapper>
 						<ReactQueryDevtools initialIsOpen={false} />
