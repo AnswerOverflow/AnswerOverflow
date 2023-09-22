@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -30,16 +29,22 @@ async function fetchSitemap() {
 	let urlCount = 0;
 	const startTime2 = new Date();
 	console.log('Fetching and parsing each sitemap...');
-	for (const sitemap of data.sitemapindex.sitemap) {
+	const promises = data.sitemapindex.sitemap.map(async (sitemap) => {
 		const resp = await fetch(sitemap.loc[0]);
 		const textData = await resp.text();
 		const xmlDoc = await parseStringPromise(textData);
-		for (const urlobj of xmlDoc.urlset.url) {
-			// console.log(urlobj.loc[0]);  this is gives the url we want
-			urlCount++;
-		}
+
+		await Promise.all(
+			xmlDoc.urlset.url.map(async (urlobj) => {
+				// console.log(urlobj.loc[0]);  this gives the URL you want
+				urlCount++;
+			}),
+		);
+
 		sitemapCount++;
-	}
+	});
+	await Promise.all(promises);
+
 	const endTime2 = new Date();
 	console.log(`Total number of sitemap fetched ${sitemapCount}`);
 	console.log(
