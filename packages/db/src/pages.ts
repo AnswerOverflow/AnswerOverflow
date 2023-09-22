@@ -233,6 +233,10 @@ export async function findMessageResultPage(messageId: string) {
 		return null;
 	}
 
+	if (!threadId) {
+		return null; // temporarily disabled while we fix a bug with text channels
+	}
+
 	const startTime = Date.now();
 
 	const [result, rootMessage] = await Promise.all([
