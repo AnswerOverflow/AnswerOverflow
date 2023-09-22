@@ -1,10 +1,25 @@
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { NextApiRequest, NextApiResponse } from 'next';
 import { parseStringPromise } from 'xml2js';
+type SitemapDataProps = {
+	sitemapindex: {
+		$: {
+			xmlns: string;
+		};
+		sitemap: {
+			loc: string[];
+		}[];
+	};
+};
+type UrlObjProps = {
+	loc: string[];
+	changefreq: string[];
+	priority: string[] | number[];
+};
+type XmlDocProps = {
+	urlset: {
+		url: UrlObjProps[];
+	};
+};
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
 	void fetchSitemap();
 }
@@ -22,27 +37,41 @@ async function fetchSitemap() {
 
 	// parsing answeroverflow sitemap's xml to js
 	const sitemapText = await sitemapResponse.text();
-	const data = await parseStringPromise(sitemapText);
-
+	const data: SitemapDataProps = (await parseStringPromise(
+		sitemapText,
+	)) as SitemapDataProps;
 	// Fetching and parsing each sitemap then retrieving all urls from each sitemap
 	let sitemapCount = 0;
 	let urlCount = 0;
 	const startTime2 = new Date();
 	console.log('Fetching and parsing each sitemap...');
 	const promises = data.sitemapindex.sitemap.map(async (sitemap) => {
-		const resp = await fetch(sitemap.loc[0]);
-		const textData = await resp.text();
-		const xmlDoc = await parseStringPromise(textData);
+		try {
+			const url = sitemap.loc[0];
+			if (url) {
+				const parsedUrl = new URL(url);
+				const resp = await fetch(parsedUrl);
+				const textData = await resp.text();
+				const xmlDoc: XmlDocProps = (await parseStringPromise(
+					textData,
+				)) as XmlDocProps;
 
-		await Promise.all(
-			xmlDoc.urlset.url.map(async (urlobj) => {
-				// console.log(urlobj.loc[0]);  this gives the URL you want
-				urlCount++;
-			}),
-		);
+				await Promise.all(
+					xmlDoc.urlset.url.map((urlobj: UrlObjProps) => {
+						if (urlobj.loc[0]) {
+							urlCount++;
+						}
+					}),
+				);
 
-		sitemapCount++;
+				sitemapCount++;
+			}
+		} catch (error) {
+			console.error('Error processing sitemap or parsing Url:', error);
+			// Handle the error here as needed
+		}
 	});
+
 	await Promise.all(promises);
 
 	const endTime2 = new Date();
