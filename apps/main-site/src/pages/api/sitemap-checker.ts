@@ -51,18 +51,16 @@ async function fetchSitemap() {
 			if (url) {
 				const parsedUrl = new URL(url);
 				const resp = await fetch(parsedUrl);
-				const textData = await resp.text();
+				const textData = resp.text();
 				const xmlDoc: XmlDocProps = (await parseStringPromise(
 					textData,
 				)) as XmlDocProps;
 
-				await Promise.all(
-					xmlDoc.urlset.url.map((urlobj: UrlObjProps) => {
-						if (urlobj.loc[0]) {
-							urlCount++;
-						}
-					}),
-				);
+				xmlDoc.urlset.url.forEach((urlobj: UrlObjProps) => {
+					if (urlobj.loc[0]) {
+						urlCount++;
+					}
+				});
 
 				sitemapCount++;
 			}
