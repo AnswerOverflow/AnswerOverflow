@@ -250,7 +250,7 @@ export const dbServers = mysqlTable(
 	'Server',
 	{
 		id: snowflake('id').notNull(),
-		name: varchar('name', { length: 100 }).notNull(),
+		name: varchar('name', { length: 200 }).notNull(),
 		icon: varchar('icon', { length: 45 }),
 		description: varchar('description', { length: 191 }),
 		vanityInviteCode: varchar('vanityInviteCode', { length: 191 }),
@@ -300,7 +300,7 @@ export const dbChannels = mysqlTable(
 	{
 		id: snowflake('id').notNull(),
 		serverId: snowflake('serverId').notNull(),
-		name: varchar('name', { length: 100 }).notNull(),
+		name: varchar('name', { length: 200 }).notNull(),
 		type: int('type').notNull(),
 		parentId: snowflake('parentId'),
 		inviteCode: varchar('inviteCode', { length: 15 }),
