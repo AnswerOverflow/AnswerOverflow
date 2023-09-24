@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db-mysql:
     container_name: ao-db-sql
-    image: mysql:8.0.31-oracle
+    image: mysql:8.1.0-oracle
     command: mysqld --default-authentication-plugin=mysql_native_password
     environment:
       - MYSQL_USER=mysql

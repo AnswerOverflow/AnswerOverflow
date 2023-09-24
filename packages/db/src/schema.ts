@@ -13,11 +13,25 @@ import {
 	json,
 } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
+import { createInsertSchema } from 'drizzle-zod';
+import { z } from 'zod';
 const unsignedInt = customType<{
 	data: number; // TODO: BigInt?
 }>({
 	dataType() {
 		return 'int unsigned';
+	},
+});
+
+const snowflake = customType<{
+	data: string;
+}>({
+	dataType() {
+		return 'bigint';
+	},
+	// @ts-ignore
+	fromDriver(value: string) {
+		return value.toString();
 	},
 });
 
@@ -111,7 +125,7 @@ export const dbTenantSessions = mysqlTable(
 	'TenantSession',
 	{
 		id: varchar('id', { length: 191 }).notNull(),
-		serverId: varchar('serverId', { length: 191 }).notNull(),
+		serverId: snowflake('serverId').notNull(),
 		sessionToken: varchar('sessionToken', { length: 191 }).notNull(),
 	},
 	(table) => {
@@ -157,7 +171,7 @@ export const dbVerificationTokens = mysqlTable(
 export const dbDiscordAccounts = mysqlTable(
 	'DiscordAccount',
 	{
-		id: varchar('id', { length: 191 }).notNull(),
+		id: snowflake('id').notNull(),
 		name: varchar('name', { length: 191 }).notNull(),
 		avatar: varchar('avatar', { length: 191 }),
 	},
@@ -170,12 +184,16 @@ export const dbDiscordAccounts = mysqlTable(
 );
 
 export type DiscordAccount = typeof dbDiscordAccounts.$inferSelect;
-
+export const discordAccountSchema = createInsertSchema(
+	dbDiscordAccounts,
+).extend({
+	id: z.string(),
+});
 export const dbUserServerSettings = mysqlTable(
 	'UserServerSettings',
 	{
-		userId: varchar('userId', { length: 191 }).notNull(),
-		serverId: varchar('serverId', { length: 191 }).notNull(),
+		userId: snowflake('userId').notNull(),
+		serverId: snowflake('serverId').notNull(),
 		bitfield: unsignedInt('bitfield').default(0).notNull(),
 	},
 	(table) => {
@@ -189,6 +207,12 @@ export const dbUserServerSettings = mysqlTable(
 		};
 	},
 );
+export const userServerSettingsSchema = createInsertSchema(
+	dbUserServerSettings,
+).extend({
+	userId: z.string(),
+	serverId: z.string(),
+});
 
 export type UserServerSettings = typeof dbUserServerSettings.$inferSelect;
 
@@ -209,7 +233,7 @@ export const userServerSettingsRelations = relations(
 export const dbIgnoredDiscordAccounts = mysqlTable(
 	'IgnoredDiscordAccount',
 	{
-		id: varchar('id', { length: 191 }).notNull(),
+		id: snowflake('id').notNull(),
 	},
 	(table) => {
 		return {
@@ -225,7 +249,7 @@ export type Plan = (typeof plans)[number];
 export const dbServers = mysqlTable(
 	'Server',
 	{
-		id: varchar('id', { length: 191 }).notNull(),
+		id: snowflake('id').notNull(),
 		name: varchar('name', { length: 100 }).notNull(),
 		icon: varchar('icon', { length: 45 }),
 		description: varchar('description', { length: 191 }),
@@ -260,6 +284,9 @@ export const dbServers = mysqlTable(
 );
 
 export type Server = typeof dbServers.$inferSelect;
+export const serverSchema = createInsertSchema(dbServers).extend({
+	id: z.string(),
+});
 
 // Relations
 export const serversRelations = relations(dbServers, ({ many }) => ({
@@ -271,21 +298,21 @@ export const serversRelations = relations(dbServers, ({ many }) => ({
 export const dbChannels = mysqlTable(
 	'Channel',
 	{
-		id: varchar('id', { length: 191 }).notNull(),
-		serverId: varchar('serverId', { length: 191 }).notNull(),
+		id: snowflake('id').notNull(),
+		serverId: snowflake('serverId').notNull(),
 		name: varchar('name', { length: 100 }).notNull(),
 		type: int('type').notNull(),
-		parentId: varchar('parentId', { length: 191 }),
+		parentId: snowflake('parentId'),
 		inviteCode: varchar('inviteCode', { length: 15 }),
 		archivedTimestamp: bigint('archivedTimestamp', { mode: 'bigint' }),
 		bitfield: unsignedInt('bitfield').default(0).notNull(),
-		solutionTagId: varchar('solutionTagId', { length: 191 }),
+		solutionTagId: snowflake('solutionTagId'),
 		/*
       Instead of looking up the last indexed message in a channel, we're going to store it here
       This allows us to use this as our reference point for where we left off indexing legacy content
       So we can do realtime indexing
      */
-		lastIndexedSnowflake: varchar('lastIndexedSnowflake', { length: 30 }),
+		lastIndexedSnowflake: snowflake('lastIndexedSnowflake'),
 	},
 	(table) => {
 		return {
@@ -296,6 +323,13 @@ export const dbChannels = mysqlTable(
 		};
 	},
 );
+export const channelSchema = createInsertSchema(dbChannels).extend({
+	id: z.string(),
+	serverId: z.string(),
+	parentId: z.string().nullable().optional(),
+	solutionTagId: z.string().nullable().optional(),
+	lastIndexedSnowflake: z.string().nullable().optional(),
+});
 
 export type Channel = typeof dbChannels.$inferSelect;
 
@@ -319,7 +353,7 @@ export const dbAttachments = mysqlTable(
 	'Attachment',
 	{
 		id: varchar('id', { length: 191 }).notNull(),
-		messageId: varchar('messageId', { length: 191 }).notNull(),
+		messageId: snowflake('messageId').notNull(),
 		contentType: varchar('contentType', { length: 191 }),
 		filename: varchar('filename', { length: 1024 }).notNull(),
 		proxyUrl: varchar('proxyUrl', { length: 1024 }).notNull(), // some of these are really long, need to find what the actual limit is
@@ -337,10 +371,14 @@ export const dbAttachments = mysqlTable(
 	},
 );
 
+export const attachmentSchema = createInsertSchema(dbAttachments).extend({
+	messageId: z.string(),
+});
+
 export const dbEmojis = mysqlTable(
 	'Emoji',
 	{
-		id: varchar('id', { length: 191 }).notNull(),
+		id: snowflake('id').notNull(),
 		name: varchar('name', { length: 191 }).notNull(),
 	},
 	(table) => {
@@ -350,12 +388,16 @@ export const dbEmojis = mysqlTable(
 	},
 );
 
+export const emojiSchema = createInsertSchema(dbEmojis).extend({
+	id: z.string(),
+});
+
 export const dbReactions = mysqlTable(
 	'Reaction',
 	{
-		messageId: varchar('messageId', { length: 191 }).notNull(),
-		userId: varchar('userId', { length: 191 }).notNull(),
-		emojiId: varchar('emojiId', { length: 191 }).notNull(),
+		messageId: snowflake('messageId').notNull(),
+		userId: snowflake('userId').notNull(),
+		emojiId: snowflake('emojiId').notNull(),
 	},
 	(table) => {
 		return {
@@ -366,7 +408,11 @@ export const dbReactions = mysqlTable(
 		};
 	},
 );
-
+export const reactionSchema = createInsertSchema(dbReactions).extend({
+	messageId: z.string(),
+	userId: z.string(),
+	emojiId: z.string(),
+});
 export type Embed = {
 	title?: string;
 	type?: string;
@@ -417,20 +463,20 @@ export type Embed = {
 export const dbMessages = mysqlTable(
 	'Message',
 	{
-		id: varchar('id', { length: 191 }).notNull(),
+		id: snowflake('id').notNull(),
 
-		authorId: varchar('authorId', { length: 191 }).notNull(),
-		serverId: varchar('serverId', { length: 191 }).notNull(),
-		channelId: varchar('channelId', { length: 191 }).notNull(),
-		parentChannelId: varchar('parentChannelId', { length: 191 }),
-		childThreadId: varchar('childThreadId', { length: 191 }),
+		authorId: snowflake('authorId').notNull(),
+		serverId: snowflake('serverId').notNull(),
+		channelId: snowflake('channelId').notNull(),
+		parentChannelId: snowflake('parentChannelId'),
+		childThreadId: snowflake('childThreadId'),
 
-		questionId: varchar('questionId', { length: 191 }),
-		referenceId: varchar('referenceId', { length: 191 }),
+		questionId: snowflake('questionId'),
+		referenceId: snowflake('referenceId'),
 
-		applicationId: varchar('applicationId', { length: 191 }),
-		interactionId: varchar('interactionId', { length: 191 }),
-		webhookId: varchar('webhookId', { length: 191 }),
+		applicationId: snowflake('applicationId'),
+		interactionId: snowflake('interactionId'),
+		webhookId: snowflake('webhookId'),
 
 		// TODO: Optimize not using 2 bools, use bitfield in future
 		content: varchar('content', { length: 4100 }).notNull(),
@@ -458,7 +504,19 @@ export const dbMessages = mysqlTable(
 		};
 	},
 );
-
+export const messageSchema = createInsertSchema(dbMessages).extend({
+	id: z.string(),
+	authorId: z.string(),
+	serverId: z.string(),
+	channelId: z.string(),
+	parentChannelId: z.string().nullable().optional(),
+	childThreadId: z.string().nullable().optional(),
+	questionId: z.string().nullable().optional(),
+	referenceId: z.string().nullable().optional(),
+	applicationId: z.string().nullable().optional(),
+	interactionId: z.string().nullable().optional(),
+	webhookId: z.string().nullable().optional(),
+});
 export const messageRelations = relations(dbMessages, ({ one, many }) => ({
 	attachments: many(dbAttachments),
 	reactions: many(dbReactions, {

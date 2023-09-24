@@ -9,7 +9,11 @@ import { upsert } from './utils/operations';
 import { DBError } from './utils/error';
 import { db } from './db';
 import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
-import { dbMessages, dbUserServerSettings } from './schema';
+import {
+	dbMessages,
+	dbUserServerSettings,
+	userServerSettingsSchema,
+} from './schema';
 import {
 	zUserServerSettingsCreate,
 	zUserServerSettingsCreateWithDeps,
@@ -18,7 +22,6 @@ import {
 } from './zodSchemas/userServerSettingsSchemas';
 import { getDefaultUserServerSettingsWithFlags } from './utils/serverUtils';
 import { dictToBitfield } from './utils/bitfieldUtils';
-import { createInsertSchema } from 'drizzle-zod';
 
 export const CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE =
 	'You cannot grant consent to publicly display messages with message indexing disabled. Enable messaging indexing first';
@@ -181,7 +184,7 @@ export async function createUserServerSettings(
 	);
 	await db
 		.insert(dbUserServerSettings)
-		.values(createInsertSchema(dbUserServerSettings).parse(updateData));
+		.values(userServerSettingsSchema.parse(updateData));
 	const created = (await db.query.dbUserServerSettings.findFirst({
 		where: and(
 			eq(dbUserServerSettings.userId, data.userId),
@@ -211,7 +214,7 @@ export async function updateUserServerSettings(
 	);
 	await db
 		.update(dbUserServerSettings)
-		.set(createInsertSchema(dbUserServerSettings).parse(updateData))
+		.set(userServerSettingsSchema.parse(updateData))
 		.where(
 			and(
 				eq(dbUserServerSettings.userId, data.userId),

@@ -33,6 +33,7 @@
 		"dotenv-cra": "^3.0.3",
 		"drizzle-orm": "^0.28.5",
 		"drizzle-zod": "^0.5.1",
+		"json-bigint": "^1.0.0",
 		"mysql2": "^3.6.0",
 		"unique-names-generator": "^4.7.1",
 		"zod": "^3.22.2"
@@ -40,6 +41,7 @@
 	"devDependencies": {
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
+		"@types/json-bigint": "^1.0.2",
 		"@types/node": "^20.5.1",
 		"@vitest/coverage-c8": "^0.28.5",
 		"cross-env": "^7.0.3",

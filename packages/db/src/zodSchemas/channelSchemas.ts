@@ -1,9 +1,8 @@
 import { z } from 'zod';
 import { ChannelType } from 'discord-api-types/v10';
-import { dbChannels } from '../schema';
 import { zServerUpsert } from './serverSchemas';
 import { bitfieldToDict } from '../utils/bitfieldUtils';
-import { createInsertSchema } from 'drizzle-zod';
+import { channelSchema } from '../schema';
 
 export const ALLOWED_THREAD_TYPES = new Set([
 	ChannelType.PublicThread,
@@ -45,16 +44,16 @@ export const zChannelBitfieldFlags = z.object({
 	forumGuidelinesConsentEnabled: z.boolean(),
 });
 
-const zChannelSchema = createInsertSchema(dbChannels)
-	.required()
-	.extend({
-		flags: zChannelBitfieldFlags,
-		type: z.number().refine(
-			(n) => ALLOWED_CHANNEL_TYPES.has(n),
-			'Channel type can only be guild forum, text, or announcement', // TODO: Make a type error if possible
-		),
-		messageCount: z.number().optional(),
-	});
+// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+const zChannelSchema = channelSchema.required().extend({
+	flags: zChannelBitfieldFlags,
+	type: z.number().refine(
+		(n) => ALLOWED_CHANNEL_TYPES.has(n),
+		'Channel type can only be guild forum, text, or announcement', // TODO: Make a type error if possible
+	),
+	messageCount: z.number().optional(),
+	id: z.string(),
+});
 
 export const zChannelMutable = zChannelSchema
 	.omit({

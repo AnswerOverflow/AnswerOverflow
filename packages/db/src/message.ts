@@ -28,14 +28,17 @@ import {
 	dbEmojis,
 	Attachment,
 	dbChannels,
+	messageSchema,
+	attachmentSchema,
+	emojiSchema,
+	reactionSchema,
 } from './schema';
-import { and, eq, inArray, or, sql } from 'drizzle-orm';
+import { and, eq, gte, inArray, or, sql } from 'drizzle-orm';
 import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
 import { addFlagsToServer } from './utils/serverUtils';
 import { getRandomId, pick } from '@answeroverflow/utils';
 import { zDiscordAccountPublic } from './zodSchemas/discordAccountSchemas';
 import { anonymizeDiscordAccount } from './utils/anonymization';
-import { createInsertSchema } from 'drizzle-zod';
 
 export const zFindMessagesByChannelId = z.object({
 	channelId: z.string(),
@@ -284,9 +287,8 @@ export async function findMessagesByChannelIdWithDiscordAccounts(
 		.findMany({
 			where: and(
 				eq(dbMessages.channelId, input.channelId),
-				input.after
-					? sql`CAST(${dbMessages.id} AS SIGNED) >= ${BigInt(input.after)}`
-					: undefined,
+				// @ts-expect-error
+				input.after ? gte(dbMessages.id, BigInt(input.after)) : undefined,
 			),
 			columns: {
 				id: true,
@@ -482,7 +484,7 @@ export async function upsertMessage(
 	}
 	const { attachments, reactions, embeds, ...msg } = data;
 	const parsed = {
-		...createInsertSchema(dbMessages).parse(msg),
+		...messageSchema.parse(msg),
 		embeds,
 	};
 
@@ -494,7 +496,7 @@ export async function upsertMessage(
 		if (!attachments) return;
 		await Promise.all(
 			attachments.map((a) => {
-				const p = createInsertSchema(dbAttachments).parse(a);
+				const p = attachmentSchema.parse(a);
 				return db.insert(dbAttachments).values(p).onDuplicateKeyUpdate({
 					set: p,
 				});
@@ -506,13 +508,13 @@ export async function upsertMessage(
 		if (!reactions) return;
 		const emojis = new Set(reactions.map((r) => r.emoji));
 		for await (const emoji of emojis) {
-			const p = createInsertSchema(dbEmojis).parse(emoji);
+			const p = emojiSchema.parse(emoji);
 			await db.insert(dbEmojis).values(p).onDuplicateKeyUpdate({
 				set: p,
 			});
 		}
 		for await (const reaction of reactions) {
-			const p = createInsertSchema(dbReactions).parse(reaction);
+			const p = reactionSchema.parse(reaction);
 			await db.insert(dbReactions).values(p).onDuplicateKeyUpdate({
 				set: p,
 			});
@@ -575,19 +577,19 @@ export async function fastUpsertManyMessages(data: BaseMessageWithRelations[]) {
 	for (const msg of data) {
 		const { attachments: a, reactions: r, embeds: e, ...m } = msg;
 		msgs.add({
-			...createInsertSchema(dbMessages).parse(m),
+			...messageSchema.parse(m),
 			embeds: e,
 		});
 		if (a) {
 			for (const attachment of a) {
-				attachments.add(createInsertSchema(dbAttachments).parse(attachment));
+				attachments.add(attachmentSchema.parse(attachment));
 			}
 		}
 		if (r) {
 			for (const reaction of r) {
 				if (!reaction.emoji.id || !reaction.emoji.name) continue;
-				emojis.add(createInsertSchema(dbEmojis).parse(reaction.emoji));
-				reactions.add(createInsertSchema(dbReactions).parse(reaction));
+				emojis.add(emojiSchema.parse(reaction.emoji));
+				reactions.add(reactionSchema.parse(reaction));
 			}
 		}
 	}
@@ -627,18 +629,6 @@ export async function deleteManyMessagesByChannelId(channelId: string) {
 	return db.delete(dbMessages).where(eq(dbMessages.channelId, channelId));
 }
 
-export async function findLatestMessageIdInChannel(channelId: string) {
-	return db
-		.select({
-			// TODO: Check if this actually works, also cast to bigint
-			max: sql<bigint>`MAX(CAST(${dbMessages.id} AS SIGNED))`,
-		})
-		.from(dbMessages)
-		.where(eq(dbMessages.channelId, channelId))
-		.limit(1)
-		.then((x) => x?.at(0)?.max?.toString());
-}
-
 export async function bulkFindLatestMessageInChannel(channelIds: string[]) {
 	if (channelIds.length === 0) return [];
 	return db
@@ -654,7 +644,7 @@ export async function bulkFindLatestMessageInChannel(channelIds: string[]) {
 export async function findLatestMessageInChannelAndThreads(channelId: string) {
 	const id = await db
 		.select({
-			max: sql<bigint>`MAX(CAST(${dbMessages.id} AS SIGNED))`,
+			max: sql<bigint>`MAX(${dbMessages.id})`,
 		})
 		.from(dbMessages)
 		.where(
@@ -702,6 +692,6 @@ export function getThreadIdOfMessage(
 	return null;
 }
 
-export function getParentChannelOfMessage(message: BaseMessage): string | null {
+export function getParentChannelOfMessage(message: BaseMessage) {
 	return message.parentChannelId ?? message.channelId;
 }

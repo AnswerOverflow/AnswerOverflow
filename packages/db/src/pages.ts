@@ -10,7 +10,7 @@ import {
 } from './message';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 import { db } from './db';
-import { and, eq, inArray, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, or, sql } from 'drizzle-orm';
 import {
 	dbChannels,
 	dbMessages,
@@ -42,7 +42,7 @@ export async function findQuestionsForSitemap(serverId: string) {
 				),
 				with: {
 					threads: {
-						orderBy: sql`CAST(${dbChannels.id} AS SIGNED) DESC`,
+						orderBy: desc(dbChannels.id),
 					},
 				},
 			},
@@ -139,7 +139,7 @@ export async function findServerWithCommunityPageData(opts: {
 				with: {
 					threads: {
 						limit: 200,
-						orderBy: sql`CAST(${dbChannels.id} AS SIGNED) DESC`,
+						orderBy: desc(dbChannels.id),
 					},
 				},
 			},
@@ -246,11 +246,9 @@ export async function findMessageResultPage(messageId: string) {
 				server: true,
 				parent: true,
 				messages: {
-					where: !threadId
-						? sql`CAST(${dbMessages.id} AS SIGNED) >= CAST(${targetMessage.id} AS SIGNED)`
-						: undefined,
-					orderBy: sql`CAST(${dbMessages.id} AS SIGNED) ASC`,
-					limit: parentId ? undefined : NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
+					where: !threadId ? gte(dbMessages.id, targetMessage.id) : undefined,
+					orderBy: asc(dbMessages.id),
+					limit: !threadId ? NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD : undefined,
 					columns: {
 						id: true,
 						content: true,

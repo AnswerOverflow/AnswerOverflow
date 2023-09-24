@@ -4,6 +4,7 @@ import {
 	findServerByAlias,
 	findServerById,
 	updateServer,
+	upsertServer,
 } from './server';
 import { getRandomId } from '@answeroverflow/utils';
 import { Server } from './schema';
@@ -98,6 +99,19 @@ describe('Server', () => {
 				existing: created,
 			});
 			expect(updated.flags.readTheRulesConsentEnabled).toBe(true);
+		});
+	});
+	describe('Large Ids', () => {
+		it('should create a server with a large id', async () => {
+			await upsertServer({
+				create: {
+					...server,
+					id: '1154666902883410021',
+				},
+			});
+			const found = await findServerById('1154666902883410021');
+			expect(found).not.toBeNull();
+			expect(found!.id).toBe('1154666902883410021');
 		});
 	});
 });

@@ -7,8 +7,8 @@ import { DBError } from './utils/error';
 import { ChannelType } from 'discord-api-types/v10';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 import { db } from './db';
-import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
-import { dbChannels } from './schema';
+import { and, desc, eq, inArray, isNotNull, lt, sql } from 'drizzle-orm';
+import { channelSchema, dbChannels } from './schema';
 import {
 	getDefaultChannel,
 	getDefaultChannelWithFlags,
@@ -27,8 +27,8 @@ import {
 	zChannelUpsertMany,
 } from './zodSchemas/channelSchemas';
 import { dictToBitfield } from './utils/bitfieldUtils';
-import { createInsertSchema } from 'drizzle-zod';
-const channelInsertSchema = createInsertSchema(dbChannels).omit({
+
+const channelInsertSchema = channelSchema.omit({
 	serverId: true,
 	parentId: true,
 	id: true,
@@ -342,10 +342,11 @@ export async function findChannelsBeforeId(input: {
 		.where(
 			and(
 				eq(dbChannels.serverId, input.serverId),
-				sql`CAST(${dbChannels.id} AS SIGNED) < ${BigInt(input.id)}`,
+				// @ts-expect-error
+				lt(dbChannels.id, BigInt(input.id)),
 			),
 		)
-		.orderBy(sql`CAST(${dbChannels.id} AS SIGNED) DESC`)
+		.orderBy(desc(dbChannels.id))
 		.limit(input.take ?? 100);
 	return res.map(addFlagsToChannel);
 }

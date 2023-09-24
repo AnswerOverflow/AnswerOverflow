@@ -45,6 +45,7 @@ import {
 	upsertMessage,
 } from '@answeroverflow/db';
 import { PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED } from '@answeroverflow/constants';
+import { getRandomId } from '@answeroverflow/utils';
 
 let client: Client;
 let guild: Guild;
@@ -119,7 +120,7 @@ describe('Can Mark Solution', () => {
 				flags: {
 					markSolutionEnabled: false,
 				},
-				solutionTagId: 'solved',
+				solutionTagId: getRandomId(),
 			});
 			await expect(
 				checkIfCanMarkSolution(message, defaultAuthor.user),
@@ -160,7 +161,7 @@ describe('Can Mark Solution', () => {
 				flags: {
 					markSolutionEnabled: true,
 				},
-				solutionTagId: 'solved',
+				solutionTagId: getRandomId(),
 			});
 			await expect(
 				checkIfCanMarkSolution(solutionMessage, defaultAuthor.user),
@@ -195,11 +196,12 @@ describe('Can Mark Solution', () => {
 	});
 	describe('Check If Can Mark Solution Failures - Solved Indicator Applied Already', () => {
 		it('should fail if the solution tag is already set', async () => {
+			const tag = getRandomId();
 			const threadWithSolvedTag = mockPublicThread({
 				client,
 				parentChannel: forumChannel,
 				data: {
-					applied_tags: ['solved'],
+					applied_tags: [tag],
 				},
 			});
 			mockMessage({
@@ -220,7 +222,7 @@ describe('Can Mark Solution', () => {
 				flags: {
 					markSolutionEnabled: true,
 				},
-				solutionTagId: 'solved',
+				solutionTagId: tag,
 			});
 			await expect(
 				checkIfCanMarkSolution(solutionMessage, defaultAuthor.user),
@@ -256,7 +258,7 @@ describe('Can Mark Solution', () => {
 				flags: {
 					markSolutionEnabled: true,
 				},
-				solutionTagId: 'solved',
+				solutionTagId: getRandomId(),
 			});
 
 			await expect(
@@ -290,7 +292,7 @@ describe('Can Mark Solution', () => {
 				flags: {
 					markSolutionEnabled: true,
 				},
-				solutionTagId: 'solved',
+				solutionTagId: getRandomId(),
 			});
 
 			await expect(
@@ -315,7 +317,7 @@ describe('Can Mark Solution', () => {
 				flags: {
 					markSolutionEnabled: true,
 				},
-				solutionTagId: 'solved',
+				solutionTagId: getRandomId(),
 			});
 			await expect(
 				checkIfCanMarkSolution(rootMessage, defaultAuthor.user),
@@ -333,7 +335,7 @@ describe('Can Mark Solution', () => {
 				flags: {
 					markSolutionEnabled: true,
 				},
-				solutionTagId: 'solved',
+				solutionTagId: getRandomId(),
 			});
 
 			questionMessage = mockMessage({
@@ -350,20 +352,13 @@ describe('Can Mark Solution', () => {
 			});
 		});
 		it('should pass if the user is the question author', async () => {
-			const {
-				question,
-				solution,
-				server,
-				thread,
-				parentChannel,
-				channelSettings,
-			} = await checkIfCanMarkSolution(solutionMessage, defaultAuthor.user);
+			const { question, solution, server, thread, parentChannel } =
+				await checkIfCanMarkSolution(solutionMessage, defaultAuthor.user);
 			expect(question).toEqual(questionMessage);
 			expect(solution).toEqual(solutionMessage);
 			expect(server).toEqual(textChannel.guild);
 			expect(thread).toEqual(textChannelThread);
 			expect(parentChannel).toEqual(textChannel);
-			expect(channelSettings.solutionTagId).toEqual('solved');
 		});
 		it('should pass if the user has administrator', async () => {
 			await testAllPermissions({
@@ -428,7 +423,7 @@ describe('Make Mark Solution Response', () => {
 				sendMarkSolutionInstructionsInNewThreads: true,
 			},
 			inviteCode: null,
-			solutionTagId: 'solved',
+			solutionTagId: getRandomId(),
 			archivedTimestamp: null,
 		};
 		jumpToSolutionButtonData = new ButtonBuilder()

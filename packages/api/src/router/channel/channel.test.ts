@@ -468,14 +468,15 @@ describe('Channel Operations', () => {
 	});
 	describe('set solution tag id', () => {
 		it('should have all variants of setting solution tag id succeed', async () => {
+			const id = getRandomId();
 			await validateChannelSettingsChange({
 				act(channel, router) {
 					return router.setSolutionTagId({
 						channel,
-						tagId: 'tagId',
+						tagId: id,
 					});
 				},
-				assert: (updated) => expect(updated.solutionTagId).toBe('tagId'),
+				assert: (updated) => expect(updated.solutionTagId).toBe(id),
 			});
 		});
 		it('should have all variants of clearing the solution tag id succeed', async () => {
@@ -484,7 +485,7 @@ describe('Channel Operations', () => {
 					await createServer(server);
 					await createChannel({
 						...channel,
-						solutionTagId: 'tagId',
+						solutionTagId: getRandomId(),
 					});
 				},
 				act(channel, router) {
@@ -497,9 +498,10 @@ describe('Channel Operations', () => {
 			});
 		});
 		it('should throw the correct error when setting solution tag id on a channel with solution tag id already set', async () => {
+			const id = getRandomId();
 			await createChannel({
 				...channel,
-				solutionTagId: 'tagId',
+				solutionTagId: id,
 			});
 			await expect(
 				router.setSolutionTagId({
@@ -507,7 +509,7 @@ describe('Channel Operations', () => {
 						server,
 						...channel,
 					},
-					tagId: 'tagId',
+					tagId: id,
 				}),
 			).rejects.toThrowError(SOLVED_LABEL_ALREADY_SELECTED_ERROR_MESSAGE);
 		});
