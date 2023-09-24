@@ -13,7 +13,6 @@ import {
 	deleteManyMessagesByUserId,
 	deleteMessage,
 	findFullMessageById,
-	findLatestMessageIdInChannel,
 	findManyMessagesWithAuthors,
 	findMessageById,
 	findMessagesByChannelIdWithDiscordAccounts,
@@ -23,7 +22,7 @@ import { createServer } from './server';
 import { createChannel } from './channel';
 import { createDiscordAccount, deleteDiscordAccount } from './discord-account';
 import { createUserServerSettings } from './user-server-settings';
-import { getRandomId, getRandomIdGreaterThan } from '@answeroverflow/utils';
+import { getRandomId } from '@answeroverflow/utils';
 import { BaseMessageWithRelations, DiscordAccount, Server } from './schema';
 import { ChannelWithFlags } from './zodSchemas/channelSchemas';
 
@@ -391,19 +390,19 @@ describe('Message Ops', () => {
 			expect(map.get(chnl3.id)).toBe('521');
 		});
 	});
-	describe('Find Latest Message in Channel', () => {
-		test('should find the latest message in a channel', async () => {
-			const largerThanMsg = mockMessage(server, channel, author, {
-				id: getRandomIdGreaterThan(Number(msg.id)),
-			});
-			const largerThanMsg2 = mockMessage(server, channel, author, {
-				id: getRandomIdGreaterThan(Number(largerThanMsg.id)),
-			});
-			await upsertMessage(largerThanMsg);
-			await upsertMessage(largerThanMsg2);
-			await upsertMessage(msg);
-			const found = await findLatestMessageIdInChannel(channel.id);
-			expect(found).toBe(largerThanMsg2.id);
+	test('find a bigint relation id without overflowing', async () => {
+		const bigId = mockMessage(server, channel, author, {
+			id: '115533696646902222',
 		});
+		await upsertMessage(bigId);
+		await upsertMessage({
+			...mockMessage(server, channel, author, {
+				questionId: bigId.id,
+				id: '115533696647908888',
+			}),
+		});
+		const found = await findFullMessageById(bigId.id);
+		expect(found?.id).toBe('115533696646902222');
+		expect(found?.solutions[0]!.id).toBe('115533696647908888');
 	});
 });

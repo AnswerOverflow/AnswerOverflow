@@ -30,8 +30,8 @@
 		"pr-check": "pnpm format:check && pnpm lint && pnpm build && yarn test",
 		"stripe:forward": "stripe listen --forward-to localhost:3000/api/v1/stripe/webhook",
 		"with-env": "dotenv -e .env --",
-    "use-planetscale": "cp packages/db/src/db-planetscale.ts packages/db/src/db.ts",
-    "use-mysql2": "cp packages/db/src/db-mysql2.ts packages/db/src/db.ts",
+		"use-planetscale": "cp packages/db/src/db-planetscale.ts packages/db/src/db.ts",
+		"use-mysql2": "cp packages/db/src/db-mysql2.ts packages/db/src/db.ts",
 		"docker:build:discord-bot": "docker build -f ./apps/discord-bot/Dockerfile ."
 	},
 	"devDependencies": {
@@ -62,5 +62,10 @@
 	"engines": {
 		"node": ">=18.15.0",
 		"pnpm": ">=8.6.0"
+	},
+	"pnpm": {
+		"patchedDependencies": {
+			"mysql2@3.6.0": "patches/mysql2@3.6.0.patch"
+		}
 	}
 }

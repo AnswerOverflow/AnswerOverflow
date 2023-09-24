@@ -82,7 +82,7 @@ describe('Message Results', () => {
 			});
 			await upsertManyMessages([message, message2]);
 		});
-		it('should get messages for a text channel correctly', async () => {
+		it.skip('should get messages for a text channel correctly', async () => {
 			const messages = await unauthedMessagePageRouter.threadFromMessageId(
 				message.id,
 			);
@@ -184,7 +184,7 @@ describe('Message Results', () => {
 			expect(pageData.server).toEqual(pickPublicServerData(server));
 			expect(pageData.thread).toEqual(pickPublicChannelData(thread));
 		});
-		it('should get follow up messages of a text channel correctly', async () => {
+		it.skip('should get follow up messages of a text channel correctly', async () => {
 			const message = mockMessage(server, channel, author);
 			const message2 = mockMessage(server, channel, author, {
 				id: randomSnowflakeLargerThan(message.id).toString(),

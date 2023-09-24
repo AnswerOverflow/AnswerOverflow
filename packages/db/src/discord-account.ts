@@ -9,7 +9,11 @@ import { upsert, upsertMany } from './utils/operations';
 import { deleteManyMessagesByUserId } from './message';
 import { db } from './db';
 import { eq, inArray } from 'drizzle-orm';
-import { dbDiscordAccounts, dbUserServerSettings } from './schema';
+import {
+	dbDiscordAccounts,
+	dbUserServerSettings,
+	discordAccountSchema,
+} from './schema';
 import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
 import {
 	zDiscordAccountCreate,
@@ -17,7 +21,6 @@ import {
 	zDiscordAccountUpsert,
 } from './zodSchemas/discordAccountSchemas';
 import { getDefaultDiscordAccount } from './utils/discordAccountUtils';
-import { createInsertSchema } from 'drizzle-zod';
 
 const zUserServerSettingsFlags = z.object({
 	userId: z.string(),
@@ -44,9 +47,7 @@ export async function createDiscordAccount(
 	const deletedAccount = await findIgnoredDiscordAccountById(data.id);
 	if (deletedAccount)
 		throw new DBError('Account is ignored', 'IGNORED_ACCOUNT');
-	await db
-		.insert(dbDiscordAccounts)
-		.values(createInsertSchema(dbDiscordAccounts).parse(data));
+	await db.insert(dbDiscordAccounts).values(discordAccountSchema.parse(data));
 	const createdAccount = await findDiscordAccountById(data.id);
 	if (!createdAccount) throw new Error('Failed to create account');
 	return createdAccount;
@@ -72,7 +73,7 @@ export async function createManyDiscordAccounts(
 			chunk.map(async (account) =>
 				db
 					.insert(dbDiscordAccounts)
-					.values(createInsertSchema(dbDiscordAccounts).parse(account)),
+					.values(discordAccountSchema.parse(account)),
 			),
 		);
 	}
@@ -84,7 +85,7 @@ export async function updateDiscordAccount(
 ) {
 	await db
 		.update(dbDiscordAccounts)
-		.set(createInsertSchema(dbDiscordAccounts).parse(data))
+		.set(discordAccountSchema.parse(data))
 		.where(eq(dbDiscordAccounts.id, data.id));
 
 	const updatedDiscordAccount = await db.query.dbDiscordAccounts.findFirst({
@@ -113,7 +114,7 @@ export async function updateManyDiscordAccounts(
 			chunk.map(async (account) =>
 				db
 					.update(dbDiscordAccounts)
-					.set(createInsertSchema(dbDiscordAccounts).parse(account))
+					.set(discordAccountSchema.parse(account))
 					.where(eq(dbDiscordAccounts.id, account.id)),
 			),
 		);
