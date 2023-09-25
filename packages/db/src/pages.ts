@@ -233,33 +233,45 @@ export async function findMessageResultPage(messageId: string) {
 		return null;
 	}
 
-	if (!threadId) {
-		return null; // temporarily disabled while we fix a bug with text channels
-	}
-
 	const startTime = Date.now();
 
-	const [result, rootMessage] = await Promise.all([
+	const [result, rootMessage, messages] = await Promise.all([
 		db.query.dbChannels.findFirst({
 			where: eq(dbChannels.id, threadId ?? parentId),
 			with: {
 				server: true,
 				parent: true,
-				messages: {
-					where: !threadId ? gte(dbMessages.id, targetMessage.id) : undefined,
-					orderBy: asc(dbMessages.id),
-					limit: !threadId ? NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD : undefined,
-					columns: {
-						id: true,
-						content: true,
-						questionId: true,
-						serverId: true,
-						authorId: true,
-						channelId: true,
-						parentChannelId: true,
-						childThreadId: true,
-						embeds: true,
+			},
+		}),
+		threadId ? findMessageByIdWithDiscordAccount(threadId) : undefined,
+		db.query.dbMessages.findMany({
+			where: and(
+				eq(dbMessages.channelId, threadId ?? parentId),
+				!threadId ? gte(dbMessages.id, targetMessage.id) : undefined,
+			),
+			orderBy: asc(dbMessages.id),
+			limit: !threadId ? NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD : undefined,
+			columns: {
+				id: true,
+				content: true,
+				questionId: true,
+				serverId: true,
+				authorId: true,
+				channelId: true,
+				parentChannelId: true,
+				childThreadId: true,
+				embeds: true,
+			},
+			with: {
+				author: {
+					with: {
+						userServerSettings: {
+							where: eq(dbUserServerSettings.serverId, targetMessage.serverId),
+						},
 					},
+				},
+				attachments: true,
+				reference: {
 					with: {
 						author: {
 							with: {
@@ -272,64 +284,48 @@ export async function findMessageResultPage(messageId: string) {
 							},
 						},
 						attachments: true,
-						reference: {
+					},
+					columns: {
+						id: true,
+						content: true,
+						questionId: true,
+						serverId: true,
+						authorId: true,
+						channelId: true,
+						parentChannelId: true,
+						childThreadId: true,
+						embeds: true,
+					},
+				},
+				reactions: true,
+				solutions: {
+					with: {
+						author: {
 							with: {
-								author: {
-									with: {
-										userServerSettings: {
-											where: eq(
-												dbUserServerSettings.serverId,
-												targetMessage.serverId,
-											),
-										},
-									},
+								userServerSettings: {
+									where: eq(
+										dbUserServerSettings.serverId,
+										targetMessage.serverId,
+									),
 								},
-								attachments: true,
-							},
-							columns: {
-								id: true,
-								content: true,
-								questionId: true,
-								serverId: true,
-								authorId: true,
-								channelId: true,
-								parentChannelId: true,
-								childThreadId: true,
-								embeds: true,
 							},
 						},
-						reactions: true,
-						solutions: {
-							with: {
-								author: {
-									with: {
-										userServerSettings: {
-											where: eq(
-												dbUserServerSettings.serverId,
-												targetMessage.serverId,
-											),
-										},
-									},
-								},
-								attachments: true,
-							},
-							columns: {
-								id: true,
-								content: true,
-								questionId: true,
-								serverId: true,
-								authorId: true,
-								channelId: true,
-								parentChannelId: true,
-								childThreadId: true,
-								embeds: true,
-							},
-						},
+						attachments: true,
+					},
+					columns: {
+						id: true,
+						content: true,
+						questionId: true,
+						serverId: true,
+						authorId: true,
+						channelId: true,
+						parentChannelId: true,
+						childThreadId: true,
+						embeds: true,
 					},
 				},
 			},
 		}),
-		threadId ? findMessageByIdWithDiscordAccount(threadId) : undefined,
 	]);
 
 	const endTime = Date.now();
@@ -340,7 +336,7 @@ export async function findMessageResultPage(messageId: string) {
 	if (!result) {
 		return null;
 	}
-	const { messages, server, ...channel } = result;
+	const { server, ...channel } = result;
 
 	const msgsWithAccounts = applyPublicFlagsToMessages(
 		messages.map((m) => ({

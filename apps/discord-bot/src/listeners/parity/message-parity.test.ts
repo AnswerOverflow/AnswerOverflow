@@ -51,7 +51,6 @@ describe('Message Update Tests', () => {
 			questionId: q.id,
 		});
 		await emitEvent(client, Events.MessageUpdate, message, updatedMessage);
-		console.log('fetching full message, q.id: ', q.id);
 		const updated = await findFullMessageById(q.id);
 		expect(updated!.id).toEqual(q.id);
 		expect(updated!.solutions[0]!.id).toEqual(message.id);
