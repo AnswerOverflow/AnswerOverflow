@@ -16,7 +16,7 @@ export async function createMemberCtx(member: GuildMember) {
 		discordAccount: {
 			avatar: member.displayAvatarURL(),
 			discriminator: member.user.discriminator,
-			username: member.user.username,
+			username: member.user.displayName,
 			id: member.id,
 		},
 		// The only server that we care about is the one we are currently interacting with, so only having 1 server makes sense here

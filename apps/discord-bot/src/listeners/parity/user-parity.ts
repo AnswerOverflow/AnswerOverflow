@@ -17,7 +17,7 @@ export class SyncOnUserUpdate extends Listener<typeof Events.UserUpdate> {
 		await updateDiscordAccount({
 			id: updated.id,
 			avatar: updated.avatar,
-			name: updated.username,
+			name: updated.displayName,
 		});
 	}
 }

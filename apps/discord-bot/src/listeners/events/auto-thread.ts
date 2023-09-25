@@ -17,7 +17,7 @@ async function autoThread(channelSettings: ChannelWithFlags, message: Message) {
 	if (!isHumanMessage(message)) return;
 	if (message.type !== MessageType.Default) return;
 	if (message.thread) return;
-	const authorName = message.member?.nickname ?? message.author.username;
+	const authorName = message.member?.nickname ?? message.author.displayName;
 	let threadTitleContent = message.cleanContent;
 
 	if (message.attachments.size > 0 && message.content.length === 0) {

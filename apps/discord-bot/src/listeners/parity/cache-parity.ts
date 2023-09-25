@@ -80,7 +80,7 @@ export class SyncOnUpdate extends Listener {
 			...account,
 			// We only need to update the avatar, username, and discriminator
 			avatar: newUser.avatar,
-			username: newUser.username,
+			username: newUser.displayName,
 			discriminator: newUser.discriminator,
 		});
 	}
