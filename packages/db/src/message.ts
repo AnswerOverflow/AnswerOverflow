@@ -82,10 +82,16 @@ export function applyPublicFlagsToMessages<
 
 	const getLookupKey = (m: { userId: string; serverId: string }) =>
 		`${m.userId}-${m.serverId}`;
+
+	// TODO: Ew 🤮
 	const authorServerSettingsLookup = new Map(
 		messages
 			.filter((msg) => msg.author && msg.author.userServerSettings)
-			.flatMap((msg) => msg.author.userServerSettings)
+			.flatMap((msg) => [
+				...msg.author.userServerSettings,
+				...msg.solutions.flatMap((s) => s.author.userServerSettings),
+				...(msg?.reference?.author.userServerSettings ?? []),
+			])
 			.map((uss) => [getLookupKey(uss), addFlagsToUserServerSettings(uss)]),
 	);
 	const seedLookup = new Map(messages.map((a) => [a.authorId, getRandomId()]));
