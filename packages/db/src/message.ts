@@ -555,12 +555,18 @@ export async function upsertManyMessages(
 		);
 
 		const ignoredAccountIds = new Set(ignoredAccounts.map((i) => i.id));
-		data = data.filter(
-			(msg) =>
-				!ignoredAccountIds.has(msg.authorId) &&
-				!userServerSettingsLookup.get(`${msg.authorId}-${msg.serverId}`)?.flags
-					.messageIndexingDisabled,
-		);
+		data = data.filter((msg) => {
+			if (ignoredAccountIds.has(msg.authorId)) {
+				return false;
+			}
+			if (
+				userServerSettingsLookup.get(`${msg.authorId}-${msg.serverId}`)?.flags
+					.messageIndexingDisabled
+			) {
+				return false;
+			}
+			return true;
+		});
 	}
 	const chunkSize = 100;
 	const chunks = [];
@@ -568,9 +574,7 @@ export async function upsertManyMessages(
 		chunks.push(data.slice(i, i + chunkSize));
 	}
 	for await (const chunk of chunks) {
-		await Promise.all(
-			chunk.map((msg) => upsertMessage(msg, { ignoreChecks: true })),
-		);
+		await fastUpsertManyMessages(chunk);
 	}
 	return data;
 }
@@ -683,7 +687,7 @@ export async function getTotalNumberOfMessages() {
 			count: sql<string>`COUNT(${dbMessages.id})`,
 		})
 		.from(dbMessages)
-		.then((x) => x?.at(0)?.count ?? 2000000);
+		.then((x) => (x?.at(0)?.count ? Number(x?.at(0)?.count) : 2000000));
 }
 
 export function getThreadIdOfMessage(
