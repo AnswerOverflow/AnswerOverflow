@@ -158,7 +158,7 @@ export function toAODiscordAccount(user: User): AODiscordAccount {
 	const convertedUser: AODiscordAccount = {
 		id: user.id,
 		avatar: user.avatar,
-		name: user.username,
+		name: user.displayName,
 	};
 	return convertedUser;
 }

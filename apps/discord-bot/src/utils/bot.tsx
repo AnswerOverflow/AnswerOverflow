@@ -94,7 +94,9 @@ export const login = async (client: SapphireClient) => {
 			}
 		});
 		client.logger.info('LOGGED IN');
-		client.logger.info(`LOGGED IN AS: ${client.user?.username ?? 'UNKNOWN'}`);
+		client.logger.info(
+			`LOGGED IN AS: ${client.user?.displayName ?? 'UNKNOWN'}`,
+		);
 		const config: DiscordJSReact['config'] = {
 			// @ts-ignore
 			wrapper: ({ children }) => <Router>{children}</Router>,

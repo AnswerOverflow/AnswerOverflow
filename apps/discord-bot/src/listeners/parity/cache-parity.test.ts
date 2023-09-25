@@ -94,12 +94,12 @@ describe('Account Parity', () => {
 				avatar: member.user.avatar,
 				discriminator: member.user.discriminator,
 				id: member.user.id,
-				username: member.user.username,
+				username: member.user.displayName,
 			});
 			const cachedUser = await getDiscordUser({
 				accessToken: oauth.access_token!,
 			});
-			expect(cachedUser.username).toEqual(member.user.username);
+			expect(cachedUser.username).toEqual(member.user.displayName);
 			const newUser = copyClass(member.user, member.client, {
 				username: 'New User',
 			});
@@ -108,7 +108,7 @@ describe('Account Parity', () => {
 			const cachedUser2 = await getDiscordUser({
 				accessToken: oauth.access_token!,
 			});
-			expect(cachedUser2.username).toEqual(newUser.username);
+			expect(cachedUser2.username).toEqual(newUser.displayName);
 		});
 	});
 });
