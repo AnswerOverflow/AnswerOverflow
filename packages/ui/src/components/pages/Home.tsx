@@ -11,17 +11,15 @@ export const Home = (props: {
 }) => {
 	return (
 		<div className="flex w-full flex-col items-center bg-background font-body">
-			<AOHead
-				path="/"
-				title="Answer Overflow - Search all of Discord"
-				description={
-					'A global search engine for Discord communities. Find results from indexed communities or a server to join.'
-				}
-				addPrefix={false}
-			/>
-			<div className={'w-full max-w-screen-3xl'}>
-				<Navbar />
-			</div>
+			{/*<AOHead*/}
+			{/*	path="/"*/}
+			{/*	title="Answer Overflow - Search all of Discord"*/}
+			{/*	description={*/}
+			{/*		'A global search engine for Discord communities. Find results from indexed communities or a server to join.'*/}
+			{/*	}*/}
+			{/*	addPrefix={false}*/}
+			{/*/>*/}
+			<div className={'w-full max-w-screen-3xl'}>{/*<Navbar />*/}</div>
 			<HeroArea servers={props.servers} />
 			<div
 				className={
@@ -85,7 +83,7 @@ export const Home = (props: {
 					</div>
 				</FollowCursor>
 			</div>
-			<Footer />
+			{/*<Footer />*/}
 		</div>
 	);
 };

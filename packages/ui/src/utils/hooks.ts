@@ -1,7 +1,8 @@
+'use client';
 import { type RefObject, useEffect, useState } from 'react';
 import { trpc } from './trpc';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 export const useIsUserInServer = (serverId: string) => {
 	const session = useSession();
@@ -133,14 +134,11 @@ export const useGetRectForElement = (element: RefObject<HTMLDivElement>) => {
 };
 
 export const useRouterQuery = () => {
-	const router = useRouter();
-	const routerQuery = typeof router.query.q === 'string' ? router.query.q : '';
-	return routerQuery;
+	const searchParams = useSearchParams();
+	return searchParams.get('q');
 };
 
 export const useRouterServerId = () => {
-	const router = useRouter();
-	const routerServerId =
-		typeof router.query.s === 'string' ? router.query.s : '';
-	return routerServerId;
+	const searchParams = useSearchParams();
+	return searchParams.get('s');
 };

@@ -18,7 +18,7 @@ import type {
 	MessageWithDiscordAccount,
 } from '@answeroverflow/db';
 import React from 'react';
-import { useSession } from 'next-auth/react';
+
 import { webClientEnv } from '@answeroverflow/env/web';
 import { useNavigationEvent } from './use-navigation-event';
 // TODO: This type should be inferred from the auth package

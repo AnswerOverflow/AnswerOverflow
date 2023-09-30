@@ -1,3 +1,4 @@
+'use client';
 import type { APISearchResult } from '@answeroverflow/api';
 import { useState } from 'react';
 import { Heading } from '~ui/components/primitives/base/Heading';

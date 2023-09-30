@@ -1,4 +1,4 @@
-import { getServerSession as getNextAuthSession } from 'next-auth/next';
+import { getServerSession as getNextAuthSession } from 'next-auth';
 import { cookies } from 'next/headers';
 
 import { authOptions } from './auth-options';
