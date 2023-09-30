@@ -17,7 +17,7 @@ import Link from 'next/link';
 import type { Components } from '@mdx-js/react/lib';
 import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner';
 import ProgressBar from '@badrap/bar-of-progress';
-import Router from 'next/router';
+import Router from 'next/navigation';
 import type { ServerPublic } from '@answeroverflow/api';
 import { ToastContainer } from 'react-toastify';
 import { GoogleAnalytics, event } from 'nextjs-google-analytics';
@@ -86,30 +86,24 @@ const MyApp: AppType<{
 }> = ({ Component, pageProps: { session, ...pageProps } }) => {
 	return (
 		<TenantContextProvider value={pageProps.tenant}>
-			<ThemeProvider attribute="class" defaultTheme={'dark'} enableSystem>
-				<SessionProvider session={session}>
-					<AnalyticsProvider>
-						<ToastContainer toastClassName="bg-background dark:bg-background text-primary dark:text-primary" />
-						<PageWrapper
-							disabledRoutes={[
-								'/',
-								'/c/[communityId]',
-								'/onboarding',
-								'/[domain]',
-								'/dashboard',
-								'/about',
-								'/dashboard/[serverId]',
-							]}
-						>
-							<CommitBanner />
-							<MDXProvider components={components}>
-								<Component {...pageProps} />
-							</MDXProvider>
-						</PageWrapper>
-						<ReactQueryDevtools initialIsOpen={false} />
-					</AnalyticsProvider>
-				</SessionProvider>
-			</ThemeProvider>
+			<ToastContainer toastClassName="bg-background dark:bg-background text-primary dark:text-primary" />
+			<PageWrapper
+				disabledRoutes={[
+					'/',
+					'/c/[communityId]',
+					'/onboarding',
+					'/[domain]',
+					'/dashboard',
+					'/about',
+					'/dashboard/[serverId]',
+				]}
+			>
+				<CommitBanner />
+				<MDXProvider components={components}>
+					<Component {...pageProps} />
+				</MDXProvider>
+			</PageWrapper>
+			<ReactQueryDevtools initialIsOpen={false} />
 			<GoogleAnalytics trackPageViews strategy={'lazyOnload'} />
 		</TenantContextProvider>
 	);

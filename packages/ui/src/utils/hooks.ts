@@ -1,7 +1,7 @@
 import { type RefObject, useEffect, useState } from 'react';
 import { trpc } from './trpc';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 export const useIsUserInServer = (serverId: string) => {
 	const session = useSession();

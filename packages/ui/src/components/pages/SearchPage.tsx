@@ -1,7 +1,7 @@
 import type { APISearchResult } from '@answeroverflow/api';
 import { useState } from 'react';
 import { Heading } from '~ui/components/primitives/base/Heading';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useRouterQuery, useRouterServerId } from '~ui/utils/hooks';
 import { twMerge } from 'tailwind-merge';
 import { Input } from '~ui/components/primitives/ui/input';

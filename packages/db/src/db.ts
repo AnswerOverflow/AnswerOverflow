@@ -1,5 +1,7 @@
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import * as schema from './schema';
+import { drizzle as mysqlDrizzle } from 'drizzle-orm/mysql2';
+import mysql from 'mysql2/promise';
 import { PlanetScaleDatabase } from 'drizzle-orm/planetscale-serverless';
 const dbUrl = sharedEnvs.DATABASE_URL;
 
@@ -9,22 +11,15 @@ If you are a contributor, you can run the 'use-mysql2' script from the root of t
 These files will be merged into one file with dynamic imports when we move to bun and get top level await, at the moment
 dynamic imports and top level await dont work with the bot. if you can fix it make a pr 💖
  */
-
-const isPsDb = dbUrl.includes('psdb') || dbUrl.includes('pscale_pw');
-if (!isPsDb) {
-	console.error(
-		"Database URL is not a PlanetScale database URL. You need to either use a PlanetScale database or run the 'use-mysql2' script from the root of the repository.",
-	);
-	// eslint-disable-next-line n/no-process-exit
-	process.exit(1);
-}
-import { drizzle as psDrizzle } from 'drizzle-orm/planetscale-serverless';
-import { connect } from '@planetscale/database';
 import 'json-bigint-patch';
-
-export const db: PlanetScaleDatabase<typeof schema> = psDrizzle(
-	connect({
-		url: dbUrl,
+export const db: PlanetScaleDatabase<typeof schema> = mysqlDrizzle(
+	mysql.createPool({
+		supportBigNumbers: true,
+		bigNumberStrings: true,
+		uri: dbUrl,
 	}),
-	{ schema },
-);
+	{
+		schema,
+		mode: 'default',
+	},
+) as unknown as PlanetScaleDatabase<typeof schema>;

@@ -4,7 +4,7 @@ import { transformer } from '@answeroverflow/api/transformer';
 import React, { useEffect, useState } from 'react';
 import { trpc, type StorybookTRPC } from '../src/utils/trpc';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
-import Router, { type NextRouter } from 'next/router';
+import Router, { type NextRouter } from 'next/navigation';
 import hljs from 'highlight.js';
 import { ThemeProvider } from 'next-themes';
 import { SessionProvider } from 'next-auth/react';

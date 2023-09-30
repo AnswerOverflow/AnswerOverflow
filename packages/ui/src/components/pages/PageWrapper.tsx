@@ -1,6 +1,6 @@
 import { Navbar } from '../primitives/Navbar';
 import { Footer } from '../primitives/Footer';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { webClientEnv } from '@answeroverflow/env/web';
 
 export interface PageWrapperProps extends React.PropsWithChildren {

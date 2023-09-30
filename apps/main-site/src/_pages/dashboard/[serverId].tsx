@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 // eslint-disable-next-line no-restricted-imports
 import { ServerDashboard } from '@answeroverflow/ui/src/components/dashboard/dashboard';
 

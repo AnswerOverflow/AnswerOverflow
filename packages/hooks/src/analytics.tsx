@@ -1,5 +1,6 @@
+'use client';
 /* eslint-disable @typescript-eslint/naming-convention */
-import type { DefaultSession } from 'next-auth';
+import type { DefaultSession, Session } from 'next-auth';
 import posthog from 'posthog-js';
 import { createContext, useContext, useEffect, useRef } from 'react';
 import {
@@ -17,9 +18,9 @@ import type {
 	MessageWithDiscordAccount,
 } from '@answeroverflow/db';
 import React from 'react';
-import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import { webClientEnv } from '@answeroverflow/env/web';
+import { useNavigationEvent } from './use-navigation-event';
 // TODO: This type should be inferred from the auth package
 declare module 'next-auth' {
 	interface Session extends DefaultSession {
@@ -132,16 +133,18 @@ export const useAnalyticsContext = () => {
 
 export const AnalyticsProvider = ({
 	children,
+	session,
 }: {
 	children: React.ReactNode;
+	session?: Session | null;
 }) => {
 	const [analyticsLoaded, setAnalyticsLoaded] = React.useState(false);
-	const { data: session, status } = useSession();
-	const router = useRouter();
+	useNavigationEvent({
+		onChange: () => {
+			posthog.capture('$pageview');
+		},
+	});
 	useEffect(() => {
-		if (status === 'loading') {
-			return;
-		}
 		if (!analyticsLoaded && webClientEnv.NEXT_PUBLIC_POSTHOG_TOKEN) {
 			posthog.init(webClientEnv.NEXT_PUBLIC_POSTHOG_TOKEN, {
 				disable_session_recording: true,
@@ -155,21 +158,11 @@ export const AnalyticsProvider = ({
 			});
 		} else {
 			// TODO: Still needed?
-			if (
-				status === 'authenticated' &&
-				session.user &&
-				session.user.id != posthog.get_distinct_id()
-			) {
+			if (session && session?.user?.id != posthog.get_distinct_id()) {
 				posthog.identify(session.user.id);
 			}
 		}
-
-		const handleRouteChange = () => posthog.capture('$pageview');
-		router.events.on('routeChangeComplete', handleRouteChange);
-		return () => {
-			router.events.off('routeChangeComplete', handleRouteChange);
-		};
-	}, [session, status, analyticsLoaded, setAnalyticsLoaded, router]);
+	}, [session, analyticsLoaded, setAnalyticsLoaded]);
 	return (
 		<AnalyticsContextProvider value={{ loaded: analyticsLoaded }}>
 			{children}

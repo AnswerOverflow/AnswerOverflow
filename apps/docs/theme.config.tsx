@@ -9,7 +9,7 @@ import {
 	GITHUB_LINK,
 	ANSWER_OVERFLOW_BLUE_HEX,
 } from '@answeroverflow/constants';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { webClientEnv } from '@answeroverflow/env/web';
 
 // https://nextra.site/docs/docs-theme/theme-configuration
