@@ -21,11 +21,11 @@ export const MessagesSearchBar = (props: {
 	const router = useRouter();
 	const query = useRouterQuery();
 	const serverId = useRouterServerId();
-	const [searchInput, setSearchInput] = useState<string>(query);
+	const [searchInput, setSearchInput] = useState<string>(query ?? '');
 	return (
 		<form
 			// eslint-disable-next-line @typescript-eslint/no-misused-promises
-			onSubmit={async (e) => {
+			onSubmit={(e) => {
 				e.preventDefault();
 				const params = new URLSearchParams();
 				params.set('q', searchInput);
@@ -33,9 +33,7 @@ export const MessagesSearchBar = (props: {
 				if (serverIdToFilterTo) {
 					params.set('s', serverIdToFilterTo);
 				}
-				await router.push(`/search?${params.toString()}`, undefined, {
-					shallow: true,
-				});
+				router.push(`/search?${params.toString()}`);
 			}}
 			className={twMerge('w-full', props.className)}
 		>

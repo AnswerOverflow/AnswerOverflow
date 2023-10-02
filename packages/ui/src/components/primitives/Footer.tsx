@@ -1,3 +1,4 @@
+'use client';
 import Link from 'next/link';
 // TODO: Storybook breaks when importing from the root of @answeroverflow/constants - figure out why
 import {

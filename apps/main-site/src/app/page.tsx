@@ -1,11 +1,11 @@
-import { Home } from '~ui/components/pages/Home';
+import { Home } from '@answeroverflow/ui/src/components/pages/Home';
 import {
 	countConsentingUsersInManyServers,
 	findAllServers,
 	zServerPublic,
 } from '@answeroverflow/db';
 
-export default async function HomePage() {
+async function fetchServers() {
 	const servers = await findAllServers();
 	const nonKickedServers = servers.filter(
 		(server) => server.kickedTime === null,
@@ -27,8 +27,10 @@ export default async function HomePage() {
 		(a, b) => a.name.localeCompare(b.name),
 	);
 
-	const asPublic = serversByNameAlphabetical.map((server) =>
-		zServerPublic.parse(server),
-	);
-	return <Home servers={asPublic} />;
+	return serversByNameAlphabetical.map((server) => zServerPublic.parse(server));
+}
+
+export default async function HomePage() {
+	const data = await fetchServers();
+	return <Home servers={data} />;
 }

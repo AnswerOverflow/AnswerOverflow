@@ -19,7 +19,9 @@ export const Home = (props: {
 			{/*	}*/}
 			{/*	addPrefix={false}*/}
 			{/*/>*/}
-			<div className={'w-full max-w-screen-3xl'}>{/*<Navbar />*/}</div>
+			<div className={'w-full max-w-screen-3xl'}>
+				<Navbar />
+			</div>
 			<HeroArea servers={props.servers} />
 			<div
 				className={
@@ -83,7 +85,7 @@ export const Home = (props: {
 					</div>
 				</FollowCursor>
 			</div>
-			{/*<Footer />*/}
+			<Footer />
 		</div>
 	);
 };

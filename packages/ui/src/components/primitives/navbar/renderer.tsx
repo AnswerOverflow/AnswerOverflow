@@ -1,17 +1,4 @@
 'use client';
-import type { Session } from 'next-auth';
-import Link from 'next/link';
-import React from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { GetStarted, SignInButton } from './Callouts';
-import { ThemeSwitcher } from './ThemeSwitcher';
-import { DiscordIcon, GitHubIcon } from './base/Icons';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { GITHUB_LINK } from '@answeroverflow/constants/src/links';
-import { signOut } from 'next-auth/react';
-import { useTenantContext } from '@answeroverflow/hooks';
-import { ServerIcon } from './ServerIcon';
-
 // TODO: Clean up this navbar area, bit of a mess
 import {
 	LuGithub,
@@ -45,6 +32,18 @@ import {
 } from '~ui/components/primitives/ui/avatar';
 import { Button } from '~ui/components/primitives/ui/button';
 import { AnswerOverflowLogo } from '~ui/components/primitives/base/AnswerOverflowLogo';
+import { ServerPublic } from '~api/router/server/types';
+import { GetStarted, SignInButton } from '../Callouts';
+import { ThemeSwitcher } from '../ThemeSwitcher';
+import { DiscordIcon, GitHubIcon } from '../base/Icons';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { GITHUB_LINK } from '@answeroverflow/constants/src/links';
+import { signOut } from 'next-auth/react';
+import { ServerIcon } from '../ServerIcon';
+import type { Session } from 'next-auth';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 const MainSiteDropdownMenuGroup = () => (
 	<>
 		<DropdownMenuGroup>
@@ -94,9 +93,14 @@ const MainSiteDropdownMenuGroup = () => (
 		</DropdownMenuItem>
 	</>
 );
-export const UserAvatar = ({ user }: { user: Session['user'] }) => {
+export const UserAvatar = ({
+	user,
+	tenant,
+}: {
+	user: Session['user'];
+	tenant: ServerPublic | undefined;
+}) => {
 	const { theme, setTheme } = useTheme();
-	const { isOnTenantSite } = useTenantContext();
 	const router = useRouter();
 	return (
 		<DropdownMenu modal={false}>
@@ -114,7 +118,7 @@ export const UserAvatar = ({ user }: { user: Session['user'] }) => {
 			<DropdownMenuContent className="mr-4 mt-2 max-h-96 w-52">
 				<DropdownMenuLabel>My Account</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				{!isOnTenantSite && (
+				{!tenant && (
 					<>
 						<MainSiteDropdownMenuGroup />
 						<DropdownMenuSeparator />
@@ -132,7 +136,7 @@ export const UserAvatar = ({ user }: { user: Session['user'] }) => {
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					onClick={() => {
-						if (isOnTenantSite) {
+						if (tenant) {
 							const redirect =
 								typeof window !== 'undefined' ? window.location.href : '';
 							// navigate to /api/auth/tenant/signout?redirect=currentUrl
@@ -155,11 +159,14 @@ export const UserAvatar = ({ user }: { user: Session['user'] }) => {
 export function NavbarRenderer(props: {
 	user: Session['user'] | null;
 	path: string;
+	tenant: ServerPublic | undefined;
 }) {
-	const { isOnTenantSite, tenant } = useTenantContext();
-
 	const UserSection = () =>
-		props.user ? <UserAvatar user={props.user} /> : <SignInButton />;
+		props.user ? (
+			<UserAvatar user={props.user} tenant={props.tenant} />
+		) : (
+			<SignInButton />
+		);
 
 	const Desktop = () => (
 		<>
@@ -174,7 +181,7 @@ export function NavbarRenderer(props: {
 			<NavigationMenuItem>
 				<ThemeSwitcher />
 			</NavigationMenuItem>
-			{!isOnTenantSite && (
+			{!props.tenant && (
 				<>
 					<NavigationMenuItem>
 						<Button variant={'ghost'} size={'icon'} asChild>
@@ -197,10 +204,10 @@ export function NavbarRenderer(props: {
 			<NavigationMenuList>
 				<NavigationMenuItem>
 					<Link href="/">
-						{tenant ? (
+						{props.tenant ? (
 							<div className="flex items-center space-x-2">
-								<ServerIcon server={tenant} />
-								<span className="font-bold">{tenant.name}</span>
+								<ServerIcon server={props.tenant} />
+								<span className="font-bold">{props.tenant.name}</span>
 							</div>
 						) : (
 							<>
@@ -237,7 +244,3 @@ export function NavbarRenderer(props: {
 		</NavigationMenu>
 	);
 }
-export const Navbar = () => {
-	const pathname = usePathname();
-	return <NavbarRenderer user={null} path={pathname} />;
-};

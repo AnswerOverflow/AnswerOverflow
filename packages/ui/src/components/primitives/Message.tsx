@@ -10,7 +10,7 @@ import { cn } from '~ui/utils/styling';
 import {
 	trackEvent,
 	messageWithDiscordAccountToAnalyticsData,
-} from '@answeroverflow/hooks';
+} from '@answeroverflow/hooks/src/analytics';
 import { getDiscordURLForMessage } from '~ui/utils/discord';
 import { type Image as ImageType } from 'react-grid-gallery';
 import { useEffect } from 'react';

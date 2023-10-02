@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Components } from '@mdx-js/react/lib';
-import { Paragraph } from '@answeroverflow/ui/src/components/primitives/base/Paragraph';
-import { Heading } from '@answeroverflow/ui/src/components/primitives/base/Heading';
+import { Paragraph } from '~ui/components/primitives/base/Paragraph';
+import { Heading } from '~ui/components/primitives/base/Heading';
 import { MDXProvider } from '@mdx-js/react';
 import { ToastContainer } from 'react-toastify';
 import React from 'react';

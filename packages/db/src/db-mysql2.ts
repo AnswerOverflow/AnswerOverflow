@@ -11,7 +11,7 @@ If you are a contributor, you can run the 'use-mysql2' script from the root of t
 These files will be merged into one file with dynamic imports when we move to bun and get top level await, at the moment
 dynamic imports and top level await dont work with the bot. if you can fix it make a pr 💖
  */
-import 'json-bigint-patch';
+// import 'json-bigint-patch';
 export const db: PlanetScaleDatabase<typeof schema> = mysqlDrizzle(
 	mysql.createPool({
 		supportBigNumbers: true,

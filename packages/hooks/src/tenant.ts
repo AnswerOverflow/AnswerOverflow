@@ -1,3 +1,4 @@
+'use client';
 /*
   Main Site Info:
   host: "www.answeroverflow.com"

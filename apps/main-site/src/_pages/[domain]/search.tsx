@@ -5,27 +5,14 @@ import {
 	useRouterQuery,
 	useRouterServerId,
 } from '@answeroverflow/ui/src/utils/hooks';
-import { trpc } from '@answeroverflow/ui/src/utils/trpc';
 import AOHead from '@answeroverflow/ui/src/components/primitives/AOHead';
 import { SearchPage } from '@answeroverflow/ui/src/components/pages/SearchPage';
 
-export default function Search() {
+export default async function Search() {
 	// get the query from the url in the q param
 	const routerQuery = useRouterQuery();
 	const serverIdToFilterTo = useRouterServerId();
-	const { tenant } = useTenantContext();
-	const results = trpc.messages.search.useQuery(
-		{
-			query: routerQuery,
-			serverId: tenant?.id ?? serverIdToFilterTo,
-		},
-		{
-			enabled: routerQuery.length > 0,
-			refetchOnMount: false,
-			refetchOnReconnect: false,
-			refetchOnWindowFocus: false,
-		},
-	);
+	const { tenant } = await useTenantContext();
 
 	return (
 		<>
@@ -34,10 +21,7 @@ export default function Search() {
 				path="/search"
 				title="Search"
 			/>
-			<SearchPage
-				results={results.data ?? []}
-				isLoading={results.isLoading && routerQuery.length > 0}
-			/>
+			<SearchPage results={[]} isLoading={true} />
 		</>
 	);
 }

@@ -1,11 +1,16 @@
 import '../styles/globals.css';
 import '../styles/code.scss';
-import { Providers } from './providers';
+import React from 'react';
+import { Providers } from '../components/providers';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@answeroverflow/auth';
 import Script from 'next/script';
-import { CommitBanner } from '~ui/components/dev/CommitBanner';
-import React from 'react';
+import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner';
+import { headers } from 'next/headers';
+import { isOnMainSite } from '@answeroverflow/constants';
+import { findServerByCustomDomain } from '@answeroverflow/db/src/server';
+import { zServerPublic } from '@answeroverflow/db/src/zodSchemas/serverSchemas';
+import { webClientEnv } from '@answeroverflow/env/web';
 
 export default async function RootLayout({
 	// Layouts must accept a children prop.
@@ -15,28 +20,37 @@ export default async function RootLayout({
 	children: React.ReactNode;
 }) {
 	const session = await getServerSession(authOptions);
+	const hostname = headers().get('host');
+	if (!hostname) throw new Error('No hostname');
+	const tenant = isOnMainSite(hostname)
+		? undefined
+		: zServerPublic.parse(await findServerByCustomDomain(hostname));
+
 	return (
 		<html lang="en">
 			<Script
-				src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
+				src={`https://www.googletagmanager.com/gtag/js?id=${webClientEnv.NEXT_PUBLIC_GA_MEASUREMENT_ID!}`}
 			/>
 			<Script id="google-analytics">
 				{`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
+			  window.dataLayer = window.dataLayer || [];
+			  function gtag(){dataLayer.push(arguments);}
+			  gtag('js', new Date());
 
-          gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}');
-        `}
+			  gtag('config', '${webClientEnv.NEXT_PUBLIC_GA_MEASUREMENT_ID!}');
+			`}
 			</Script>
 			<body>
-				<Providers session={undefined}>{children}</Providers>
+				<Providers session={undefined} tenant={tenant}>
+					{children}
+				</Providers>
 				{session && (
 					<h1>
 						{session.user.name} {session.user.email}
 					</h1>
 				)}
 				<CommitBanner />
+				{/*<CommitBanner />*/}
 			</body>
 		</html>
 	);

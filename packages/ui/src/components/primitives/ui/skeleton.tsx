@@ -1,3 +1,4 @@
+'use client';
 import { cn } from '~ui/utils/utils';
 
 function Skeleton({

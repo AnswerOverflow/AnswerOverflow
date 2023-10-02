@@ -20,7 +20,7 @@ if (!isPsDb) {
 }
 import { drizzle as psDrizzle } from 'drizzle-orm/planetscale-serverless';
 import { connect } from '@planetscale/database';
-import 'json-bigint-patch';
+// import 'json-bigint-patch';
 
 export const db: PlanetScaleDatabase<typeof schema> = psDrizzle(
 	connect({

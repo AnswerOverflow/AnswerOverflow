@@ -1,3 +1,5 @@
+'use client';
+
 import type { Story } from '@ladle/react';
 import { Button } from './button';
 
