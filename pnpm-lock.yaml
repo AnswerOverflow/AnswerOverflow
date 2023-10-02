@@ -65,8 +65,8 @@ importers:
         specifier: ^3.13.0
         version: 3.13.0(tailwindcss@3.3.3)
       eslint-plugin-turbo:
-        specifier: ^1.10.12
-        version: 1.10.12(eslint@8.47.0)
+        specifier: ^1.10.14
+        version: 1.10.14(eslint@8.47.0)
       tslib:
         specifier: ^2.6.2
         version: 2.6.2
@@ -934,8 +934,8 @@ importers:
         specifier: ^3.13.0
         version: 3.13.0(tailwindcss@3.3.3)
       eslint-plugin-turbo:
-        specifier: ^1.10.12
-        version: 1.10.12(eslint@8.47.0)
+        specifier: ^1.10.14
+        version: 1.10.14(eslint@8.47.0)
       prettier:
         specifier: ^2.8.8
         version: 2.8.8
@@ -10017,8 +10017,8 @@ packages:
     dependencies:
       eslint: 8.47.0
 
-  /eslint-plugin-turbo@1.10.12(eslint@8.47.0):
-    resolution: {integrity: sha512-uNbdj+ohZaYo4tFJ6dStRXu2FZigwulR1b3URPXe0Q8YaE7thuekKNP+54CHtZPH9Zey9dmDx5btAQl9mfzGOw==}
+  /eslint-plugin-turbo@1.10.14(eslint@8.47.0):
+    resolution: {integrity: sha512-sBdBDnYr9AjT1g4lR3PBkZDonTrMnR4TvuGv5W0OiF7z9az1rI68yj2UHJZvjkwwcGu5mazWA1AfB0oaagpmfg==}
     peerDependencies:
       eslint: '>6.6.0'
     dependencies:
