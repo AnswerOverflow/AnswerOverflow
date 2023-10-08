@@ -1,11 +1,9 @@
-'use client';
 import type {
 	ChannelPublicWithFlags,
 	CommunityPageData,
 } from '@answeroverflow/db';
-import { useTenantContext, useTrackEvent } from '@answeroverflow/hooks';
+import { useTrackEvent } from '@answeroverflow/hooks';
 import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
-import { useState } from 'react';
 import { MessagesSearchBar } from './SearchPage';
 import { getServerDescription } from '~ui/utils/other';
 import { Button } from '~ui/components/primitives/ui/button';
@@ -23,31 +21,32 @@ import {
 } from '~ui/components/primitives/ServerInvite';
 import { ServerIcon } from '~ui/components/primitives/ServerIcon';
 import { LinkMessage } from '~ui/components/primitives/SearchResult';
-import { Navbar } from '~ui/components/primitives/Navbar';
+import { Navbar } from '~ui/components/primitives/navbar/Navbar';
 import AOHead from '~ui/components/primitives/AOHead';
 import { Footer } from '~ui/components/primitives/Footer';
+import { LinkButton } from '~ui/components/primitives/base/LinkButton';
+import Link from 'next/link';
 
 type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];
 	selectedChannel: ChannelPublicWithFlags;
-	setSelectedChannelId: (id: string) => void;
 };
 
 function ChannelSidebar(props: ChannelSelectProps) {
 	const ChannelSelect = ({ channel }: { channel: ChannelPublicWithFlags }) => {
 		const selected = props.selectedChannel.id === channel.id;
 		return (
-			<Button
+			<LinkButton
 				className={
 					selected
 						? 'bg-accent text-left text-accent-foreground'
 						: 'bg-inherit text-left dark:bg-inherit'
 				}
 				variant={'ghost'}
-				onClick={() => props.setSelectedChannelId(channel.id)}
+				href={`/c/${channel.serverId}/${channel.id}`}
 			>
 				<ChannelName channel={channel} />
-			</Button>
+			</LinkButton>
 		);
 	};
 
@@ -74,11 +73,10 @@ function ChannelDropdown(props: ChannelSelectProps) {
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="max-h-vh30 w-vw80">
 				{props.channels.map((channel) => (
-					<DropdownMenuItem
-						key={channel.id}
-						onClick={() => props.setSelectedChannelId(channel.id)}
-					>
-						<ChannelName channel={channel} />
+					<DropdownMenuItem key={channel.id} asChild>
+						<Link href={`/c/${channel.serverId}/${channel.id}`}>
+							<ChannelName channel={channel} />
+						</Link>
 					</DropdownMenuItem>
 				))}
 			</DropdownMenuContent>
@@ -86,12 +84,14 @@ function ChannelDropdown(props: ChannelSelectProps) {
 	);
 }
 
-export const CommunityPage = ({ server, channels }: CommunityPageData) => {
-	const [selectedChannelId, setSelectedChannelId] = useState<null | string>(
-		channels.at(0)?.channel.id ?? null,
-	);
-	const { isOnTenantSite } = useTenantContext();
-	useTrackEvent('Community Page View', serverToAnalyticsData(server));
+export const CommunityPage = ({
+	server,
+	channels,
+	isOnTenantSite,
+}: CommunityPageData) => {
+	const selectedChannelId = channels[0]?.channel.id;
+
+	// useTrackEvent('Community Page View', serverToAnalyticsData(server));
 
 	const selectedChannel = channels.find(
 		(c) => c.channel.id === selectedChannelId,
@@ -199,7 +199,6 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 					<ChannelDropdown
 						channels={channels.map((c) => c.channel)}
 						selectedChannel={selectedChannel.channel}
-						setSelectedChannelId={setSelectedChannelId}
 					/>
 				)}
 			</div>
@@ -209,7 +208,6 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 						<ChannelSidebar
 							channels={channels.map((c) => c.channel)}
 							selectedChannel={selectedChannel.channel}
-							setSelectedChannelId={setSelectedChannelId}
 						/>
 					)}
 				</div>

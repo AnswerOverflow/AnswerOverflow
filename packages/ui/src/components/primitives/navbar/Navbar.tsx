@@ -1,15 +1,15 @@
-'use client';
+import type { Session } from 'next-auth';
+import Link from 'next/link';
+import React, { Suspense } from 'react';
+import { GetStarted } from '../Callouts';
+import { ThemeSwitcher } from '../ThemeSwitcher';
+import { DiscordIcon, GitHubIcon } from '../base/Icons';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { GITHUB_LINK } from '@answeroverflow/constants/src/links';
+import { ServerIcon } from '../ServerIcon';
+
 // TODO: Clean up this navbar area, bit of a mess
-import {
-	LuGithub,
-	LuLogOut,
-	LuPlus,
-	LuLayoutDashboard,
-	LuTwitter,
-	LuMoon,
-	LuSun,
-} from 'react-icons/lu';
-import { useTheme } from 'next-themes';
+import { LuGithub, LuPlus, LuLayoutDashboard, LuTwitter } from 'react-icons/lu';
 import { getInitials } from '~ui/utils/avatars';
 import {
 	DropdownMenu,
@@ -30,20 +30,13 @@ import {
 	AvatarFallback,
 	AvatarImage,
 } from '~ui/components/primitives/ui/avatar';
-import { Button } from '~ui/components/primitives/ui/button';
 import { AnswerOverflowLogo } from '~ui/components/primitives/base/AnswerOverflowLogo';
+import { SignInButton } from '~ui/components/primitives/navbar/sign-in-button';
 import { ServerPublic } from '~api/router/server/types';
-import { GetStarted, SignInButton } from '../Callouts';
-import { ThemeSwitcher } from '../ThemeSwitcher';
-import { DiscordIcon, GitHubIcon } from '../base/Icons';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { GITHUB_LINK } from '@answeroverflow/constants/src/links';
-import { signOut } from 'next-auth/react';
-import { ServerIcon } from '../ServerIcon';
-import type { Session } from 'next-auth';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-
+import { headers } from 'next/headers';
+import { ChangeThemeItem } from '~ui/components/primitives/navbar/change-theme-item';
+import { LogoutItem } from '~ui/components/primitives/navbar/logout-item';
+import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 const MainSiteDropdownMenuGroup = () => (
 	<>
 		<DropdownMenuGroup>
@@ -93,103 +86,80 @@ const MainSiteDropdownMenuGroup = () => (
 		</DropdownMenuItem>
 	</>
 );
-export const UserAvatar = ({
-	user,
-	tenant,
-}: {
+export const UserAvatar = (props: {
 	user: Session['user'];
-	tenant: ServerPublic | undefined;
+	isOnTenantSite: boolean;
 }) => {
-	const { theme, setTheme } = useTheme();
-	const router = useRouter();
 	return (
 		<DropdownMenu modal={false}>
 			<DropdownMenuTrigger className="flex flex-row justify-center">
 				<Avatar>
 					<AvatarImage
-						alt={user.name ?? 'Signed In User'}
-						src={user.image ?? undefined}
+						alt={props.user.name ?? 'Signed In User'}
+						src={props.user.image ?? undefined}
 					/>
 					<AvatarFallback>
-						{getInitials(user.name ?? 'Signed In User')}
+						{getInitials(props.user.name ?? 'Signed In User')}
 					</AvatarFallback>
 				</Avatar>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="mr-4 mt-2 max-h-96 w-52">
 				<DropdownMenuLabel>My Account</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				{!tenant && (
+				{!props.isOnTenantSite && (
 					<>
 						<MainSiteDropdownMenuGroup />
 						<DropdownMenuSeparator />
 					</>
 				)}
-				<DropdownMenuItem
-					onClick={() => {
-						setTheme(theme === 'dark' ? 'light' : 'dark');
-					}}
-				>
-					<LuSun className="mr-2 block h-4 w-4 dark:hidden" />
-					<LuMoon className="mr-2 hidden h-4 w-4 dark:block" />
-
-					<span className="w-full">Change Theme</span>
-				</DropdownMenuItem>
-				<DropdownMenuItem
-					onClick={() => {
-						if (tenant) {
-							const redirect =
-								typeof window !== 'undefined' ? window.location.href : '';
-							// navigate to /api/auth/tenant/signout?redirect=currentUrl
-							router.push(`/api/auth/tenant/signout?redirect=${redirect}`);
-						} else {
-							void signOut({
-								callbackUrl: '/',
-							});
-						}
-					}}
-				>
-					<LuLogOut className="mr-2 h-4 w-4" />
-					<span className="w-full">Log out</span>
-				</DropdownMenuItem>
+				<ChangeThemeItem />
+				<LogoutItem isOnTenantSite={props.isOnTenantSite} />
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
 };
 
+import { getServerSession } from '@answeroverflow/auth';
+export async function UserSection(props: { isOnTenantSite: boolean }) {
+	const session = await getServerSession();
+	if (!session) {
+		return <SignInButton />;
+	}
+	return (
+		<UserAvatar user={session.user} isOnTenantSite={props.isOnTenantSite} />
+	);
+}
+
 export function NavbarRenderer(props: {
-	user: Session['user'] | null;
 	path: string;
+	isOnTenantSite: boolean;
 	tenant: ServerPublic | undefined;
 }) {
-	const UserSection = () =>
-		props.user ? (
-			<UserAvatar user={props.user} tenant={props.tenant} />
-		) : (
-			<SignInButton />
-		);
+	const { isOnTenantSite, tenant } = props;
 
 	const Desktop = () => (
 		<>
 			<NavigationMenuItem>
-				<Button variant={'ghost'} size={'icon'} asChild>
-					<Link href={'/search'}>
-						<MagnifyingGlassIcon className="h-8 w-8" />
-						<span className="sr-only">Search Answer Overflow</span>
-					</Link>
-				</Button>
+				<LinkButton variant={'ghost'} size={'icon'} href={'/search'}>
+					<MagnifyingGlassIcon className="h-8 w-8" />
+					<span className="sr-only">Search Answer Overflow</span>
+				</LinkButton>
 			</NavigationMenuItem>
 			<NavigationMenuItem>
 				<ThemeSwitcher />
 			</NavigationMenuItem>
-			{!props.tenant && (
+			{!isOnTenantSite && (
 				<>
 					<NavigationMenuItem>
-						<Button variant={'ghost'} size={'icon'} asChild>
-							<Link href={GITHUB_LINK} target="_blank">
-								<GitHubIcon className="h-8 w-8" />
-								<span className="sr-only">GitHub</span>
-							</Link>
-						</Button>
+						<LinkButton
+							variant={'ghost'}
+							size={'icon'}
+							href={GITHUB_LINK}
+							target="_blank"
+						>
+							<GitHubIcon className="h-8 w-8" />
+							<span className="sr-only">GitHub</span>
+						</LinkButton>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
 						<GetStarted location="Navbar" />
@@ -204,10 +174,10 @@ export function NavbarRenderer(props: {
 			<NavigationMenuList>
 				<NavigationMenuItem>
 					<Link href="/">
-						{props.tenant ? (
+						{tenant ? (
 							<div className="flex items-center space-x-2">
-								<ServerIcon server={props.tenant} />
-								<span className="font-bold">{props.tenant.name}</span>
+								<ServerIcon server={tenant} />
+								<span className="font-bold">{tenant.name}</span>
 							</div>
 						) : (
 							<>
@@ -229,18 +199,26 @@ export function NavbarRenderer(props: {
 						<ThemeSwitcher />
 					</NavigationMenuItem>
 					<NavigationMenuItem className="md:hidden">
-						<Button variant={'ghost'} size={'icon'}>
-							<Link href={'/search'}>
-								<MagnifyingGlassIcon className="h-8 w-8 " />
-								<span className="sr-only">Search Answer Overflow</span>
-							</Link>
-						</Button>
+						<LinkButton variant={'ghost'} size={'icon'} href={'/search'}>
+							<MagnifyingGlassIcon className="h-8 w-8 " />
+							<span className="sr-only">Search Answer Overflow</span>
+						</LinkButton>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
-						<UserSection />
+						<Suspense fallback={<div>Loading...</div>}>
+							<UserSection isOnTenantSite={isOnTenantSite} />
+						</Suspense>
 					</NavigationMenuItem>
 				</NavigationMenuList>
 			</div>
 		</NavigationMenu>
 	);
 }
+
+export const Navbar = () => {
+	const headersList = headers();
+	const pathname = headersList.get('x-invoke-path') ?? '';
+	return (
+		<NavbarRenderer path={pathname} isOnTenantSite={false} tenant={undefined} />
+	);
+};

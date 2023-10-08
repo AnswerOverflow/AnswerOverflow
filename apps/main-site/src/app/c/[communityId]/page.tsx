@@ -3,7 +3,7 @@ import { CommunityPage } from '@answeroverflow/ui/src/components/pages/Community
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { notFound, permanentRedirect, RedirectType } from 'next/navigation';
 
-export default async function MessageResult({
+export default async function CommunityPageContainer({
 	params,
 }: {
 	params: { communityId: string };
@@ -23,9 +23,13 @@ export default async function MessageResult({
 			RedirectType.replace,
 		);
 	}
+
 	return (
 		<>
-			<CommunityPage {...communityPageData} />
+			<CommunityPage
+				{...communityPageData}
+				isOnTenantSite={communityPageData.server.customDomain != null}
+			/>
 		</>
 	);
 }

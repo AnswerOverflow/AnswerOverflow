@@ -1,3 +1,4 @@
+'use client';
 import type { ServerPublic } from '@answeroverflow/api';
 import Head from 'next/head';
 import { makeServerIconLink } from './ServerIcon';

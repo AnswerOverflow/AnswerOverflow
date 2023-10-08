@@ -6,11 +6,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@answeroverflow/auth';
 import Script from 'next/script';
 import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner';
-import { headers } from 'next/headers';
-import { isOnMainSite } from '@answeroverflow/constants';
-import { findServerByCustomDomain } from '@answeroverflow/db/src/server';
-import { zServerPublic } from '@answeroverflow/db/src/zodSchemas/serverSchemas';
 import { webClientEnv } from '@answeroverflow/env/web';
+import { getTenantInfo } from '../utils/get-tenant-info';
 
 export default async function RootLayout({
 	// Layouts must accept a children prop.
@@ -20,11 +17,7 @@ export default async function RootLayout({
 	children: React.ReactNode;
 }) {
 	const session = await getServerSession(authOptions);
-	const hostname = headers().get('host');
-	if (!hostname) throw new Error('No hostname');
-	const tenant = isOnMainSite(hostname)
-		? undefined
-		: zServerPublic.parse(await findServerByCustomDomain(hostname));
+	const tenant = await getTenantInfo();
 
 	return (
 		<html lang="en">
@@ -41,14 +34,9 @@ export default async function RootLayout({
 			`}
 			</Script>
 			<body>
-				<Providers session={undefined} tenant={tenant}>
+				<Providers session={undefined} tenant={tenant?.tenant}>
 					{children}
 				</Providers>
-				{session && (
-					<h1>
-						{session.user.name} {session.user.email}
-					</h1>
-				)}
 				<CommitBanner />
 				{/*<CommitBanner />*/}
 			</body>

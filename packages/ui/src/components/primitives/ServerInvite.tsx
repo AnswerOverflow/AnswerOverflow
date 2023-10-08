@@ -1,3 +1,4 @@
+'use client';
 import type { ServerPublic } from '@answeroverflow/api';
 import type { ChannelPublicWithFlags } from '@answeroverflow/db';
 import { createContext } from 'react';

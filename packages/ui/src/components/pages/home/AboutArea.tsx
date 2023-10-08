@@ -8,7 +8,7 @@ import { Paragraph } from '~ui/components/primitives/base/Paragraph';
 import { Heading } from '~ui/components/primitives/base/Heading';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import { HowDoesItWorkArea } from '~ui/components/pages/home/HowDoesItWorkArea';
-import { Navbar } from '~ui/components/primitives/Navbar';
+import { Navbar } from '~ui/components/primitives/navbar/Navbar';
 import { Footer } from '~ui/components/primitives/Footer';
 import { PricingOptions } from '~ui/components/pages/Pricing';
 import AOHead from '~ui/components/primitives/AOHead';

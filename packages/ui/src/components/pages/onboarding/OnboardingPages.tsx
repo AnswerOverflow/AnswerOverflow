@@ -20,8 +20,8 @@ import { ServerIcon } from '~ui/components/primitives/ServerIcon';
 import { Heading } from '~ui/components/primitives/base/Heading';
 import { AOLink } from '~ui/components/primitives/base/Link';
 import { ManageServerCard } from '~ui/components/primitives/ServerCard';
-import { SignInButton } from '~ui/components/primitives/Callouts';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
+import { SignInButton } from '~ui/components/primitives/navbar/sign-in-button';
 
 export const pages = [
 	'start',

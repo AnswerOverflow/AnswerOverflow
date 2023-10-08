@@ -1,4 +1,4 @@
-import { Navbar } from '../primitives/Navbar';
+import { Navbar } from '../primitives/navbar/Navbar';
 import type { ServerPublic } from '@answeroverflow/api';
 import { HeroArea } from '~ui/components/pages/home/HeroArea';
 import { Footer } from '~ui/components/primitives/Footer';

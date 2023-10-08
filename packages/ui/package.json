@@ -18,6 +18,7 @@
 		"@answeroverflow/constants": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/hooks": "workspace:^",
+    "@answeroverflow/auth": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
 		"@heroicons/react": "^2.0.18",
 		"@radix-ui/react-accordion": "^1.1.2",

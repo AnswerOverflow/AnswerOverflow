@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { deleteTenantSessionByToken } from '@answeroverflow/db';
 // eslint-disable-next-line no-restricted-imports
-import { setCookie } from '../../../../../node_modules/next-auth/next/utils';
+import { setCookie } from 'next-auth/next/utils';
 import {
 	getTenantCookieName,
 	getTenantCookieOptions,

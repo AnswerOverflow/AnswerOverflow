@@ -1,4 +1,4 @@
-import { Navbar } from '../primitives/Navbar';
+import { Navbar } from '../primitives/navbar/Navbar';
 import { Footer } from '../primitives/Footer';
 import { useRouter } from 'next/navigation';
 import { webClientEnv } from '@answeroverflow/env/web';

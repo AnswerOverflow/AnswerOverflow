@@ -14,7 +14,7 @@ import {
 } from '~ui/components/primitives/ui/dropdown-menu';
 import { ServerIcon } from '~ui/components/primitives/ServerIcon';
 import { AnswerOverflowLogo } from '~ui/components/primitives/base/AnswerOverflowLogo';
-import { UserAvatar } from '~ui/components/primitives/Navbar';
+import { UserAvatar } from '~ui/components/primitives/navbar/Navbar';
 import React from 'react';
 
 export function DashboardServerSelect() {

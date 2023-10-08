@@ -3,11 +3,11 @@ import { getCsrfToken, getSession } from 'next-auth/react';
 import { db } from '@answeroverflow/db';
 import { z } from 'zod';
 // eslint-disable-next-line no-restricted-imports
-import { init } from '../../../../../node_modules/next-auth/core/init';
+import { init } from 'next-auth/core/init';
 // eslint-disable-next-line no-restricted-imports
-import getAuthorizationUrl from '../../../../../node_modules/next-auth/core/lib/oauth/authorization-url';
+import getAuthorizationUrl from 'next-auth/core/lib/oauth/authorization-url';
 // eslint-disable-next-line no-restricted-imports
-import { setCookie } from '../../../../../node_modules/next-auth/next/utils';
+import { setCookie } from 'next-auth/next/utils';
 import { authOptions, getNextAuthCookieName } from '@answeroverflow/auth';
 import { IncomingMessage } from 'http';
 import { NextAuthOptions } from 'next-auth';

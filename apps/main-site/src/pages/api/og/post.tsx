@@ -3,8 +3,8 @@ import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { Server } from '@answeroverflow/db/src/schema';
 import { findMessageResultPage } from '@answeroverflow/db/src/pages';
-import { getSnowflakeUTCDate } from '@answeroverflow/ui/src/utils/snowflake';
-import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/base/AnswerOverflowLogo';
+import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
+import { AnswerOverflowLogo } from '~ui/components/primitives/base/AnswerOverflowLogo';
 
 export const runtime = 'edge';
 export const preferredRegion = 'iad1';

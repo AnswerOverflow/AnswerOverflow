@@ -1,3 +1,4 @@
+'use client';
 import type { APISearchResult } from '@answeroverflow/api';
 import type {
 	MessageWithDiscordAccount,
