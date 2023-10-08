@@ -1,4 +1,3 @@
-'use client';
 import Link from 'next/link';
 // TODO: Storybook breaks when importing from the root of @answeroverflow/constants - figure out why
 import {
@@ -6,10 +5,10 @@ import {
 	GITHUB_LINK,
 	TWITTER_LINK,
 } from '@answeroverflow/constants/src/links';
-import { useTenantContext } from '@answeroverflow/hooks';
 import { DiscordIcon, GitHubIcon } from '~ui/components/primitives/base/Icons';
 import { Heading } from '~ui/components/primitives/base/Heading';
 import { AnswerOverflowLogo } from '~ui/components/primitives/base/AnswerOverflowLogo';
+import { getTenantInfo } from '~ui/utils/get-tenant-info';
 type SocialItem = {
 	name: string;
 	href: string;
@@ -156,9 +155,9 @@ const PoweredByAnswerOverflowFooter = () => (
 	</div>
 );
 
-export function Footer() {
-	const { isOnTenantSite } = useTenantContext();
-
+export async function Footer() {
+	// TODO: Suspense? Tenant info should be populated by the time the footer is rendered though
+	const { isOnTenantSite } = await getTenantInfo();
 	return (
 		<footer>
 			{isOnTenantSite ? <PoweredByAnswerOverflowFooter /> : <MainSiteFooter />}

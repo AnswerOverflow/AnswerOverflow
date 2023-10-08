@@ -2,12 +2,11 @@ import '../styles/globals.css';
 import '../styles/code.scss';
 import React from 'react';
 import { Providers } from '../components/providers';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@answeroverflow/auth';
 import Script from 'next/script';
 import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner';
 import { webClientEnv } from '@answeroverflow/env/web';
 import { getTenantInfo } from '../utils/get-tenant-info';
+import { getServerSession } from '@answeroverflow/auth';
 
 export default async function RootLayout({
 	// Layouts must accept a children prop.
@@ -16,8 +15,8 @@ export default async function RootLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	const session = await getServerSession(authOptions);
-	const tenant = await getTenantInfo();
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [_, session] = await Promise.all([getTenantInfo(), getServerSession()]);
 
 	return (
 		<html lang="en">
@@ -34,11 +33,8 @@ export default async function RootLayout({
 			`}
 			</Script>
 			<body>
-				<Providers session={undefined} tenant={tenant?.tenant}>
-					{children}
-				</Providers>
+				<Providers session={session}>{children}</Providers>
 				<CommitBanner />
-				{/*<CommitBanner />*/}
 			</body>
 		</html>
 	);

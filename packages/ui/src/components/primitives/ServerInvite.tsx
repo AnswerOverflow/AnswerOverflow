@@ -1,7 +1,5 @@
-'use client';
 import type { ServerPublic } from '@answeroverflow/api';
 import type { ChannelPublicWithFlags } from '@answeroverflow/db';
-import { createContext } from 'react';
 import {
 	ChatBubbleLeftRightIcon,
 	HashtagIcon,
@@ -9,10 +7,7 @@ import {
 import React from 'react';
 import { ChannelType } from '~ui/utils/discord';
 import { ServerIcon } from './ServerIcon';
-import { useIsUserInServer } from '~ui/utils/hooks';
 import { classNames, cn } from '~ui/utils/styling';
-import Link from 'next/link';
-import { trackEvent } from '@answeroverflow/hooks';
 import {
 	type ServerInviteClickProps,
 	channelToAnalyticsData,
@@ -20,41 +15,35 @@ import {
 } from '@answeroverflow/constants/src/analytics';
 import { getServerHomepageUrl } from '~ui/utils/server';
 import { ButtonProps } from '~ui/components/primitives/ui/button';
-import { LinkButton } from '~ui/components/primitives/base/LinkButton';
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const ServerInviteContext = createContext<{
+import { TrackLink } from '~ui/components/primitives/track-link';
+import { TrackLinkButton } from '~ui/components/primitives/track-link-button';
+import { isUserInServer } from '~ui/utils/is-user-in-server';
+
+type ServerInviteProps = {
 	server: ServerPublic;
-	location: ServerInviteClickProps['Button Location'];
 	channel?: ChannelPublicWithFlags;
-	isUserInServer: ReturnType<typeof useIsUserInServer>;
-} | null>(null);
+	isUserInServer: ReturnType<typeof isUserInServer>;
+	location: ServerInviteClickProps['Button Location'];
+	maxWidth?: string;
+	truncate?: boolean;
+};
 
-function useServerInviteContext() {
-	const context = React.useContext(ServerInviteContext);
-	if (!context) {
-		throw new Error(
-			'useServerInviteContext must be used within a ServerInviteContext',
-		);
-	}
-	return context;
-}
-
-export const ServerInviteTitle = () => {
-	const { server, location, channel } = useServerInviteContext();
+export const ServerInviteTitle = (
+	props: Pick<ServerInviteProps, 'server' | 'channel' | 'location'>,
+) => {
 	return (
-		<Link
-			href={getServerHomepageUrl(server)}
-			onMouseUp={() => {
-				trackEvent('Community Page Link Click', {
-					'Link Location': location,
-					...serverToAnalyticsData(server),
-					...(channel && channelToAnalyticsData(channel)),
-				});
+		<TrackLink
+			href={getServerHomepageUrl(props.server)}
+			eventName={'Community Page Link Click'}
+			eventData={{
+				'Link Location': props.location,
+				...serverToAnalyticsData(props.server),
+				...(props.channel && channelToAnalyticsData(props.channel)),
 			}}
 			className="text-left font-header text-lg font-bold  hover:text-primary/75  hover:underline"
 		>
-			{server.name}
-		</Link>
+			{props.server.name}
+		</TrackLink>
 	);
 };
 
@@ -96,95 +85,61 @@ export const ChannelName = ({
 	);
 };
 
-export const ServerInviteJoinButton = (props: {
-	className?: string;
-	size?: ButtonProps['size'];
-}) => {
-	const { channel, location, server, isUserInServer } =
-		useServerInviteContext();
+export const ServerInviteJoinButton = async (
+	props: {
+		className?: string;
+		size?: ButtonProps['size'];
+	} & Pick<ServerInviteProps, 'server' | 'channel' | 'location'>,
+) => {
+	const { server, channel, location } = props;
 	const inviteCode = channel?.inviteCode || server.vanityInviteCode;
 	if (!inviteCode) return <></>;
+	const inServer = await isUserInServer();
 	return (
-		<LinkButton
+		<TrackLinkButton
 			href={`https://discord.gg/${inviteCode}`}
 			variant="default"
 			referrerPolicy="no-referrer"
 			className={cn('text-center font-header font-bold', props.className)}
 			size={props.size}
-			onMouseUp={() => {
-				trackEvent('Server Invite Click', {
-					...(channel && channelToAnalyticsData(channel)),
-					...serverToAnalyticsData(server),
-					'Button Location': location,
-				});
+			eventName={'Server Invite Click'}
+			eventData={{
+				...(channel && channelToAnalyticsData(channel)),
+				...serverToAnalyticsData(server),
+				'Button Location': location,
 			}}
 		>
-			{isUserInServer === 'in_server' ? <>Joined</> : <>Join Server</>}
-		</LinkButton>
-	);
-};
-
-export const ServerInviteIcon = () => {
-	const { server } = useServerInviteContext();
-	return <ServerIcon server={server} size={48} className={'shrink-0'} />;
-};
-
-type ServerInviteProps = {
-	server: ServerPublic;
-	channel?: ChannelPublicWithFlags;
-	isUserInServer: ReturnType<typeof useIsUserInServer>;
-	location: ServerInviteClickProps['Button Location'];
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	Icon?: React.ReactNode;
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	Body?: React.ReactNode;
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	JoinButton?: React.ReactNode;
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	Title?: React.ReactNode;
-	maxWidth?: string;
-	truncate?: boolean;
-};
-
-export const ServerInviteRenderer = (props: ServerInviteProps) => {
-	const { truncate = true } = props;
-	return (
-		<ServerInviteContext.Provider value={props}>
-			<div
-				className={classNames(
-					'flex w-full flex-col gap-4',
-					props.maxWidth ?? 'max-w-sm',
-				)}
-			>
-				<div className={'flex flex-row gap-4'}>
-					<div className="flex max-w-full shrink-0 flex-row items-center justify-start gap-4 align-middle">
-						{props.Icon === undefined ? <ServerInviteIcon /> : props.Icon}
-					</div>
-					<div
-						className={classNames(
-							'grow items-center justify-center text-left',
-							truncate ? 'truncate' : '',
-						)}
-					>
-						{props.Title === undefined ? <ServerInviteTitle /> : props.Title}
-						{props.Body || (
-							<>{props.channel && <ChannelName channel={props.channel} />}</>
-						)}
-					</div>
-				</div>
-				{props.JoinButton === undefined ? (
-					<ServerInviteJoinButton />
-				) : (
-					props.JoinButton
-				)}
-			</div>
-		</ServerInviteContext.Provider>
+			{inServer === 'in_server' ? <>Joined</> : <>Join Server</>}
+		</TrackLinkButton>
 	);
 };
 
 export const ServerInvite = (
 	props: Omit<ServerInviteProps, 'isUserInServer'>,
 ) => {
-	const isUserInServer = useIsUserInServer(props.server.id);
-	return <ServerInviteRenderer {...props} isUserInServer={isUserInServer} />;
+	const { truncate = true } = props;
+	return (
+		<div
+			className={classNames(
+				'flex w-full flex-col gap-4',
+				props.maxWidth ?? 'max-w-sm',
+			)}
+		>
+			<div className={'flex flex-row gap-4'}>
+				<div className="flex max-w-full shrink-0 flex-row items-center justify-start gap-4 align-middle">
+					<ServerIcon server={props.server} size={48} className={'shrink-0'} />
+				</div>
+				<div
+					className={classNames(
+						'grow items-center justify-center text-left',
+						truncate ? 'truncate' : '',
+					)}
+				>
+					<ServerInviteTitle {...props} />
+					{props.channel && <ChannelName channel={props.channel} />}
+				</div>
+			</div>
+			<ServerInviteJoinButton {...props} />
+		</div>
+	);
 };

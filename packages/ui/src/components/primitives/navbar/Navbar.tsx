@@ -205,7 +205,7 @@ export function NavbarRenderer(props: {
 						</LinkButton>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
-						<Suspense fallback={<div>Loading...</div>}>
+						<Suspense fallback={<SignInButton />}>
 							<UserSection isOnTenantSite={isOnTenantSite} />
 						</Suspense>
 					</NavigationMenuItem>
