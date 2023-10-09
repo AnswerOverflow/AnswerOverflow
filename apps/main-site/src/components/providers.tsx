@@ -1,6 +1,6 @@
 'use client';
 import { ThemeProvider } from 'next-themes';
-import { AnalyticsProvider } from '@answeroverflow/hooks/src/analytics';
+import { AnalyticsProvider } from '@answeroverflow/hooks/src/analytics/client';
 import { Session } from 'next-auth';
 
 export function Providers(props: {

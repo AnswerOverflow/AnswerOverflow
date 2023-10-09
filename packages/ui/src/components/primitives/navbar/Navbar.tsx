@@ -120,13 +120,24 @@ export const UserAvatar = (props: {
 };
 
 import { getServerSession } from '@answeroverflow/auth';
-export async function UserSection(props: { isOnTenantSite: boolean }) {
-	const session = await getServerSession();
-	if (!session) {
-		return <SignInButton />;
-	}
+import { Lazy } from '~ui/components/primitives/base/lazy';
+export function UserSection(props: { isOnTenantSite: boolean }) {
 	return (
-		<UserAvatar user={session.user} isOnTenantSite={props.isOnTenantSite} />
+		<Lazy
+			fallback={<SignInButton />}
+			load={async () => {
+				const session = await getServerSession();
+				if (!session) {
+					return <SignInButton />;
+				}
+				return (
+					<UserAvatar
+						user={session.user}
+						isOnTenantSite={props.isOnTenantSite}
+					/>
+				);
+			}}
+		/>
 	);
 }
 
@@ -205,9 +216,7 @@ export function NavbarRenderer(props: {
 						</LinkButton>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
-						<Suspense fallback={<SignInButton />}>
-							<UserSection isOnTenantSite={isOnTenantSite} />
-						</Suspense>
+						<UserSection isOnTenantSite={isOnTenantSite} />
 					</NavigationMenuItem>
 				</NavigationMenuList>
 			</div>

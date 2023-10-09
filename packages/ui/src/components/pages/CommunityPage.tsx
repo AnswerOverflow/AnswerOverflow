@@ -4,7 +4,6 @@ import type {
 } from '@answeroverflow/db';
 import { useTrackEvent } from '@answeroverflow/hooks';
 import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
-import { MessagesSearchBar } from './SearchPage';
 import { getServerDescription } from '~ui/utils/other';
 import { Button } from '~ui/components/primitives/ui/button';
 import {
@@ -19,12 +18,13 @@ import {
 	ServerInviteJoinButton,
 } from '~ui/components/primitives/ServerInvite';
 import { ServerIcon } from '~ui/components/primitives/ServerIcon';
-import { LinkMessage } from '~ui/components/primitives/SearchResult';
+import { LinkMessage } from '~ui/components/primitives/message/link-message';
 import { Navbar } from '~ui/components/primitives/navbar/Navbar';
 import AOHead from '~ui/components/primitives/AOHead';
 import { Footer } from '~ui/components/primitives/Footer';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import Link from 'next/link';
+import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
 
 type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];
@@ -102,21 +102,23 @@ export const CommunityPage = ({
 		return (
 			<div className="flex flex-col">
 				<div className="m-auto flex w-full flex-row bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
-					<div className={'mx-auto'}>
-						<Heading.H1 className="hidden pt-0 md:block">
-							{server.name}
-						</Heading.H1>
+					<div className={'mx-auto flex flex-row gap-4'}>
 						<ServerIcon server={server} size={128} className="hidden sm:flex" />
-						<div className={'hidden md:block'}>
-							<Heading.H2 className="text-xl font-normal">
-								{getServerDescription(server)}
-							</Heading.H2>
-							<ServerInviteJoinButton
-								className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0"
-								server={server}
-								location={'Community Page'}
-								channel={selectedChannel?.channel}
-							/>
+						<div>
+							<Heading.H1 className="hidden pt-0 md:block">
+								{server.name}
+							</Heading.H1>
+							<div className={'hidden md:block'}>
+								<Heading.H2 className="text-xl font-normal">
+									{getServerDescription(server)}
+								</Heading.H2>
+								<ServerInviteJoinButton
+									className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0"
+									server={server}
+									location={'Community Page'}
+									channel={selectedChannel?.channel}
+								/>
+							</div>
 						</div>
 						<div className="flex w-full flex-col items-center text-center md:hidden">
 							<div className="flex flex-row items-center justify-center gap-2">

@@ -1,19 +1,8 @@
 'use client';
 import type { APISearchResult } from '@answeroverflow/api';
-import type {
-	MessageWithDiscordAccount,
-	ChannelPublicWithFlags,
-} from '@answeroverflow/db';
-import {
-	Message,
-	MessageContents,
-	MessageContentWithSolution,
-} from './Message';
-import { ServerInvite } from './ServerInvite';
+import { ServerInvite } from '../ServerInvite';
 import { createContext, useContext } from 'react';
-import Link from 'next/link';
-import { MessageFull } from '@answeroverflow/db';
-import { Paragraph } from '~ui/components/primitives/base/Paragraph';
+import { LinkMessage } from '~ui/components/primitives/message/link-message';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const SearchResultContext = createContext<{
@@ -109,61 +98,6 @@ const SearchResultSidebar = () => {
 			/>
 			<SearchResultMetaData />
 		</>
-	);
-};
-
-export const LinkMessage = ({
-	message,
-	thread,
-	className,
-	showNoSolutionCTA,
-}: {
-	message: MessageWithDiscordAccount | MessageFull;
-	thread?: ChannelPublicWithFlags;
-	/**
-	 * className passed directly to the message component
-	 */
-	className?: string;
-} & {
-	showNoSolutionCTA?: boolean;
-}) => {
-	const solution = 'solutions' in message ? message.solutions?.[0] : undefined;
-	return (
-		<div className={'flex w-full flex-col'}>
-			<Message
-				message={message}
-				showBorders
-				className={className}
-				collapseContent
-				content={
-					<>
-						<Link href={`/m/${message.id}`} className="block w-fit ">
-							<Paragraph className="py-2 pt-4 font-header text-xl text-blue-700 decoration-2 hover:text-blue-600 hover:underline dark:text-blue-400 hover:dark:text-blue-500">
-								{thread?.name ?? message.content.slice(0, 20).trim() + '...'}
-							</Paragraph>
-						</Link>
-						{solution ? (
-							<MessageContentWithSolution solution={{ message: solution }} />
-						) : (
-							<MessageContents />
-						)}
-					</>
-				}
-			/>
-			{!solution && showNoSolutionCTA && (
-				<div className="w-full rounded-b-standard border-2 border-t-0 border-black/[.13] bg-white/[.01] dark:border-white/[.13] lg:rounded-br-none">
-					<Paragraph className="p-6 font-body text-primary/75">
-						No replies marked as solution...{' '}
-						<Link
-							href={`/m/${message.id}`}
-							className="font-bold text-primary underline"
-						>
-							View thread
-						</Link>
-					</Paragraph>
-				</div>
-			)}
-		</div>
 	);
 };
 

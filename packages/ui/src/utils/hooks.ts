@@ -3,26 +3,6 @@ import { type RefObject, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 
-export const useIsUserInServer = (serverId: string) => {
-	return 'not_in_server';
-	// const session = useSession();
-	// const { data: servers, isLoading } = trpc.auth.getServers.useQuery(
-	// 	undefined,
-	// 	{
-	// 		enabled: session.status === 'authenticated',
-	// 	},
-	// );
-	//
-	// if (session.status === 'unauthenticated') {
-	// 	return 'not_in_server';
-	// }
-	// if (isLoading) return 'loading';
-	// // Return string types to avoid accidental boolean casting
-	// return servers?.some((s) => s.id === serverId)
-	// 	? 'in_server'
-	// 	: 'not_in_server';
-};
-
 export const useElementPosition = (element: RefObject<HTMLDivElement>) => {
 	const [elementBox, setElementBox] = useState<DOMRect | null>(null);
 	useEffect(() => {

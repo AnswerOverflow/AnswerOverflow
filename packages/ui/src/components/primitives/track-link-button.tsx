@@ -8,12 +8,13 @@ export function TrackLinkButton<K extends keyof EventMap | string>(
 		eventData: K extends keyof EventMap ? EventMap[K] : Record<string, unknown>;
 	},
 ) {
+	const { eventName, eventData, ...rest } = props;
 	return (
 		<LinkButton
 			onMouseUp={() => {
-				trackEvent(props.eventName, props.eventData);
+				trackEvent(eventName, eventData);
 			}}
-			{...props}
+			{...rest}
 		/>
 	);
 }

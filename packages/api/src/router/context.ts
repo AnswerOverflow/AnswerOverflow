@@ -4,7 +4,6 @@ import type {
 	getDiscordUser,
 } from '@answeroverflow/cache';
 import type { inferAsyncReturnType } from '@trpc/server';
-import type { CreateNextContextOptions } from '@trpc/server/adapters/next';
 
 /**
  * Replace this with an object if you want to pass things to createContextInner
@@ -51,8 +50,8 @@ export const createBotContext = async (opts: BotContextCreate) => {
  * This is the actual context you'll use in your router
  * @link https://trpc.io/docs/context
  **/
-export const createContext = async (opts: CreateNextContextOptions) => {
-	const session = await getServerSession(opts);
+export const createContext = async () => {
+	const session = await getServerSession();
 
 	return await createContextInner({
 		session,

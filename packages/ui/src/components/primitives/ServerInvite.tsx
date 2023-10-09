@@ -94,7 +94,7 @@ export const ServerInviteJoinButton = async (
 	const { server, channel, location } = props;
 	const inviteCode = channel?.inviteCode || server.vanityInviteCode;
 	if (!inviteCode) return <></>;
-	const inServer = await isUserInServer();
+	const inServer = await isUserInServer(server.id);
 	return (
 		<TrackLinkButton
 			href={`https://discord.gg/${inviteCode}`}
