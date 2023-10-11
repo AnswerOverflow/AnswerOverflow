@@ -26,7 +26,7 @@ export function getStaticPaths() {
 
 export async function getStaticProps(
 	context: GetStaticPropsContext<{ communityId: string }>,
-) {
+)
 	if (!context.params) {
 		return {
 			notFound: true,

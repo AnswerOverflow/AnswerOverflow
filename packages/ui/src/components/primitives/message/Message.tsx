@@ -9,7 +9,7 @@ import { getDiscordURLForMessage } from '~ui/utils/discord';
 import 'yet-another-react-lightbox/styles.css';
 import Link from 'next/link';
 import { DiscordIcon } from '~ui/components/primitives/base/Icons';
-import { isUserInServer } from '~ui/utils/is-user-in-server';
+import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
 import { MessageProps } from './props';
 import { MessageAttachments } from '~ui/components/primitives/message/attachments';
 import { TrackLinkButton } from '~ui/components/primitives/track-link-button';
@@ -123,7 +123,7 @@ export const Message = (props: MessageProps) => {
 };
 
 export async function canViewMessage(message: MessageWithDiscordAccount) {
-	const inServer = await isUserInServer(message.serverId);
+	const inServer = await fetchIsUserInServer(message.serverId);
 	return message.public || inServer === 'in_server';
 }
 

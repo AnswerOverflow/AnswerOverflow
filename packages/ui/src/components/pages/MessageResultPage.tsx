@@ -1,17 +1,5 @@
 import type { ChannelPublicWithFlags, MessageFull } from '@answeroverflow/db';
 import type { ServerPublic } from '@answeroverflow/api';
-import { useIsUserInServer } from '~ui/utils/hooks';
-import {
-	messageWithDiscordAccountToAnalyticsData,
-	useTenantContext,
-	useTrackEvent,
-} from '@answeroverflow/hooks';
-import {
-	channelToAnalyticsData,
-	serverToAnalyticsData,
-	threadToAnalyticsData,
-} from '@answeroverflow/constants/src/analytics';
-import { isServer } from '~ui/utils/checks';
 import Head from 'next/head';
 import type { QAPage, WithContext } from 'schema-dts';
 import {
@@ -29,6 +17,8 @@ import { Heading } from '~ui/components/primitives/base/Heading';
 import AOHead from '~ui/components/primitives/AOHead';
 import Link from 'next/link';
 import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
+import { getTenantInfo } from '~ui/utils/get-tenant-info';
+import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
 export type MessageResultPageProps = {
 	messages: MessageFull[];
 	server: ServerPublic;
@@ -42,7 +32,7 @@ export type MessageResultPageProps = {
 };
 
 // TODO: Align text to be same level with the avatar
-export function MessageResultPage({
+export async function MessageResultPage({
 	messages,
 	server,
 	channel,
@@ -50,8 +40,8 @@ export function MessageResultPage({
 	thread,
 	relatedPosts,
 }: MessageResultPageProps) {
-	const { tenant } = useTenantContext();
-	const isUserInServer = useIsUserInServer(server.id);
+	const { tenant } = await getTenantInfo();
+	const isUserInServer = await fetchIsUserInServer(server.id);
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
 	const channelName = thread?.name ?? channel.name;
@@ -59,25 +49,24 @@ export function MessageResultPage({
 		firstMessage && firstMessage.content?.length > 0
 			? firstMessage.content
 			: `Questions related to ${channelName} in ${server.name}`;
-	const shouldTrackAnalyticsEvent = isUserInServer !== 'loading' && !isServer();
 
-	// TODO: Ugly
-	useTrackEvent(
-		'Message Page View',
-		{
-			...channelToAnalyticsData(channel),
-			...serverToAnalyticsData(server),
-			...(thread && {
-				...threadToAnalyticsData(thread),
-				'Number of Messages': messages.length,
-			}),
-			...messageWithDiscordAccountToAnalyticsData(firstMessage),
-		},
-		{
-			runOnce: true,
-			enabled: shouldTrackAnalyticsEvent,
-		},
-	);
+	// // TODO: Ugly
+	// useTrackEvent(
+	// 	'Message Page View',
+	// 	{
+	// 		...channelToAnalyticsData(channel),
+	// 		...serverToAnalyticsData(server),
+	// 		...(thread && {
+	// 			...threadToAnalyticsData(thread),
+	// 			'Number of Messages': messages.length,
+	// 		}),
+	// 		...messageWithDiscordAccountToAnalyticsData(firstMessage),
+	// 	},
+	// 	{
+	// 		runOnce: true,
+	// 		enabled: shouldTrackAnalyticsEvent,
+	// 	},
+	// );
 	const solutionMessageId = messages.at(0)?.solutions?.at(0)?.id;
 	const solution = messages.find((message) => message.id === solutionMessageId);
 	let consecutivePrivateMessages = 0;
@@ -139,9 +128,8 @@ export function MessageResultPage({
 					content={
 						shouldShowSolutionInContent ? (
 							<MessageContentWithSolution
-								solution={{
-									message: solution,
-								}}
+								solution={solution}
+								message={message}
 								showJumpToSolutionCTA
 							/>
 						) : undefined
@@ -149,7 +137,7 @@ export function MessageResultPage({
 					showBorders={message.id !== solutionMessageId}
 					images={shouldShowSolutionInContent ? null : undefined}
 					loadingStyle={'lazy'}
-					Blurrer={(props) => <MultiMessageBlurrer {...props} count={count} />}
+					// Blurrer={(props) => <MultiMessageBlurrer {...props} count={count} />}
 				/>
 			);
 		};

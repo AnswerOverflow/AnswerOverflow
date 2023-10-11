@@ -49,11 +49,6 @@ export function getStaticPaths() {
 export async function getStaticProps(
 	context: GetStaticPropsContext<{ messageId: string }>,
 ) {
-	const ssg = createServerSideHelpers({
-		router: appRouter,
-		ctx: await createSSGContext(),
-		transformer: superjson, // optional - adds superjson serialization
-	});
 	if (!context.params) {
 		return {
 			notFound: true,
@@ -62,9 +57,6 @@ export async function getStaticProps(
 
 	// prefetch `post.byId`
 	try {
-		const { server, messages } = await ssg.messages.threadFromMessageId.fetch(
-			context.params.messageId,
-		);
 		if (server.customDomain) {
 			// const fullServer = await findServerById(server.id); // TODO: We're double fetching here, could be improved
 			// let shouldTemporaryRedirectDueToTrial = false;

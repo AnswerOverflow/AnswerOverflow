@@ -2,7 +2,7 @@ import { appRouter } from '@answeroverflow/api';
 import { getServerSession } from '@answeroverflow/auth';
 import { createContextInner } from '~api/router/context';
 
-export async function isUserInServer(
+export async function fetchIsUserInServer(
 	id: string,
 ): Promise<'in_server' | 'not_in_server'> {
 	const session = await getServerSession();

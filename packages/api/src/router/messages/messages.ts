@@ -1,18 +1,13 @@
 import { z } from 'zod';
 import { router, withUserServersProcedure } from '~api/router/trpc';
-import {
-	findChannelsBeforeId,
-	findManyMessagesWithAuthors,
-	findMessageResultPage,
-} from '@answeroverflow/db';
+import { makeMessageResultPage } from '@answeroverflow/db';
+import { searchMessages } from '@answeroverflow/search/src';
 import {
 	canUserViewPrivateMessage,
 	stripPrivateChannelData,
 	stripPrivateFullMessageData,
 	stripPrivateServerData,
-} from '~api/utils/permissions';
-import { TRPCError } from '@trpc/server';
-import { searchMessages } from '@answeroverflow/search/src';
+} from '@answeroverflow/db/src/permissions';
 
 export const messagesRouter = router({
 	/*
@@ -30,49 +25,8 @@ export const messagesRouter = router({
 		.meta({
 			tenantAuthAccessible: true,
 		})
-		.query(async ({ input, ctx }) => {
-			const data = await findMessageResultPage(input);
-			if (!data) {
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'Message not found',
-				});
-			}
-			const { messages, channel, server, thread } = data;
-
-			const recommendedChannels = thread
-				? await findChannelsBeforeId({
-						take: 100,
-						id: thread.id,
-						serverId: server.id,
-				  })
-				: [];
-			const recommendedChannelLookup = new Map(
-				recommendedChannels.map((c) => [c.id, c]),
-			);
-			const recommendedPosts = await findManyMessagesWithAuthors(
-				recommendedChannels.map((c) => c.id),
-			).then((posts) =>
-				posts
-					.filter((p) => p.public && recommendedChannelLookup.has(p.id))
-					.map((p) => ({
-						message: stripPrivateFullMessageData(p, ctx.userServers),
-						thread: stripPrivateChannelData(
-							recommendedChannelLookup.get(p.id)!,
-						),
-					}))
-					.slice(0, 20),
-			);
-
-			return {
-				messages: messages.map((msg) => {
-					return stripPrivateFullMessageData(msg, ctx.userServers);
-				}),
-				parentChannel: stripPrivateChannelData(channel),
-				server: stripPrivateServerData(server),
-				thread: thread ? stripPrivateChannelData(thread) : undefined,
-				recommendedPosts,
-			};
+		.query(({ input, ctx }) => {
+			return makeMessageResultPage(input, ctx.userServers);
 		}),
 	search: withUserServersProcedure
 		.input(

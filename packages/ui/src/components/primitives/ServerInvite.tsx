@@ -17,12 +17,12 @@ import { getServerHomepageUrl } from '~ui/utils/server';
 import { ButtonProps } from '~ui/components/primitives/ui/button';
 import { TrackLink } from '~ui/components/primitives/track-link';
 import { TrackLinkButton } from '~ui/components/primitives/track-link-button';
-import { isUserInServer } from '~ui/utils/is-user-in-server';
+import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
 
 type ServerInviteProps = {
 	server: ServerPublic;
 	channel?: ChannelPublicWithFlags;
-	isUserInServer: ReturnType<typeof isUserInServer>;
+	isUserInServer: ReturnType<typeof fetchIsUserInServer>;
 	location: ServerInviteClickProps['Button Location'];
 	maxWidth?: string;
 	truncate?: boolean;
@@ -94,7 +94,7 @@ export const ServerInviteJoinButton = async (
 	const { server, channel, location } = props;
 	const inviteCode = channel?.inviteCode || server.vanityInviteCode;
 	if (!inviteCode) return <></>;
-	const inServer = await isUserInServer(server.id);
+	const inServer = await fetchIsUserInServer(server.id);
 	return (
 		<TrackLinkButton
 			href={`https://discord.gg/${inviteCode}`}

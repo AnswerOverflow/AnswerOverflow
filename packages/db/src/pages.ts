@@ -26,6 +26,13 @@ import {
 } from './zodSchemas/channelSchemas';
 import { ChannelType } from 'discord-api-types/v10';
 import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
+import { findChannelsBeforeId } from './channel';
+import {
+	DiscordAPIServer,
+	stripPrivateChannelData,
+	stripPrivateFullMessageData,
+	stripPrivateServerData,
+} from './permissions';
 
 export async function findQuestionsForSitemap(serverId: string) {
 	const res = await db.query.dbServers.findFirst({
@@ -365,5 +372,48 @@ export async function findMessageResultPage(messageId: string) {
 		messages: combinedMessages,
 		rootMessage,
 		thread: channel?.parent ? addFlagsToChannel(channel) : null,
+	};
+}
+
+export async function makeMessageResultPage(
+	messageId: string,
+	userServers: DiscordAPIServer[] | null,
+) {
+	const data = await findMessageResultPage(messageId);
+	if (!data) {
+		return null;
+	}
+	const { messages, channel, server, thread } = data;
+
+	const recommendedChannels = thread
+		? await findChannelsBeforeId({
+				take: 100,
+				id: thread.id,
+				serverId: server.id,
+		  })
+		: [];
+	const recommendedChannelLookup = new Map(
+		recommendedChannels.map((c) => [c.id, c]),
+	);
+	const recommendedPosts = await findManyMessagesWithAuthors(
+		recommendedChannels.map((c) => c.id),
+	).then((posts) =>
+		posts
+			.filter((p) => p.public && recommendedChannelLookup.has(p.id))
+			.map((p) => ({
+				message: stripPrivateFullMessageData(p, userServers),
+				thread: stripPrivateChannelData(recommendedChannelLookup.get(p.id)!),
+			}))
+			.slice(0, 20),
+	);
+
+	return {
+		messages: messages.map((msg) => {
+			return stripPrivateFullMessageData(msg, userServers);
+		}),
+		parentChannel: stripPrivateChannelData(channel),
+		server: stripPrivateServerData(server),
+		thread: thread ? stripPrivateChannelData(thread) : undefined,
+		recommendedPosts,
 	};
 }

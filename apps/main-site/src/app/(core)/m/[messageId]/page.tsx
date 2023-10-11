@@ -1,0 +1,23 @@
+import { makeMessageResultPage } from '@answeroverflow/db';
+import { MessageResultPage } from '~ui/components/pages/MessageResultPage';
+
+export default async function MessageResult({
+	params,
+}: {
+	params: { messageId: string };
+}) {
+	const data = await makeMessageResultPage(params.messageId, []);
+	if (!data) {
+		return null;
+	}
+	return (
+		<MessageResultPage
+			messages={data.messages}
+			channel={data.parentChannel}
+			server={data.server}
+			requestedId={params.messageId}
+			relatedPosts={data.recommendedPosts}
+			thread={data.thread ?? undefined}
+		/>
+	);
+}

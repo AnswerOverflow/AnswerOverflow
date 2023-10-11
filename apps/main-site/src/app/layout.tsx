@@ -7,6 +7,7 @@ import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner
 import { webClientEnv } from '@answeroverflow/env/web';
 import { getTenantInfo } from '../utils/get-tenant-info';
 import { getServerSession } from '@answeroverflow/auth';
+import { DATA_UNBLOCKER } from '../utils/data-unblocker';
 
 export default async function RootLayout({
 	// Layouts must accept a children prop.
@@ -20,18 +21,25 @@ export default async function RootLayout({
 
 	return (
 		<html lang="en">
-			<Script
-				src={`https://www.googletagmanager.com/gtag/js?id=${webClientEnv.NEXT_PUBLIC_GA_MEASUREMENT_ID!}`}
-			/>
-			<Script id="google-analytics">
-				{`
+			<head>
+				<Script
+					src={`https://www.googletagmanager.com/gtag/js?id=${webClientEnv.NEXT_PUBLIC_GA_MEASUREMENT_ID!}`}
+				/>
+				<Script id="google-analytics">
+					{`
 			  window.dataLayer = window.dataLayer || [];
 			  function gtag(){dataLayer.push(arguments);}
 			  gtag('js', new Date());
 
 			  gtag('config', '${webClientEnv.NEXT_PUBLIC_GA_MEASUREMENT_ID!}');
 			`}
-			</Script>
+				</Script>
+				<script
+					dangerouslySetInnerHTML={{
+						__html: Buffer.from(DATA_UNBLOCKER, 'base64').toString(),
+					}}
+				/>
+			</head>
 			<body>
 				<Providers session={session}>{children}</Providers>
 				<CommitBanner />
