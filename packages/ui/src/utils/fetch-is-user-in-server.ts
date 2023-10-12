@@ -1,6 +1,6 @@
 import { appRouter } from '@answeroverflow/api';
 import { getServerSession } from '@answeroverflow/auth';
-import { createContextInner } from '~api/router/context';
+import { createContextInner } from '@answeroverflow/api';
 
 export async function fetchIsUserInServer(
 	id: string,
