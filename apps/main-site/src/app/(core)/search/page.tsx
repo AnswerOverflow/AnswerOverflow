@@ -1,12 +1,9 @@
-import {
-	useRouterQuery,
-	useRouterServerId,
-} from '@answeroverflow/ui/src/utils/hooks';
-import AOHead from '@answeroverflow/ui/src/components/primitives/AOHead';
-import { SearchPage } from '@answeroverflow/ui/src/components/pages/SearchPage';
+import { useRouterQuery, useRouterServerId } from '~ui/utils/hooks';
+import AOHead from '~ui/components/primitives/AOHead';
+import { SearchPage } from '~ui/components/pages/SearchPage';
 import { trpc } from '@answeroverflow/ui/src/utils/trpc';
 
-export default function Search() {
+export default function Page() {
 	// get the query from the url in the q param
 	const routerQuery = useRouterQuery();
 	const serverIdToFilterTo = useRouterServerId();

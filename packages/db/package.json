@@ -17,7 +17,8 @@
 		"db:apply-last-indexed": "cross-env pnpm with-env npx ts-node ./scripts/apply-last-indexed.ts",
 		"db:introspect": "drizzle-kit introspect:mysql",
 		"test": "pnpm with-env vitest run --coverage",
-		"test:watch": "pnpm with-env vitest"
+		"test:watch": "pnpm with-env vitest",
+    "dev": "echo http://localhost:4983 && pnpm drizzle-kit studio"
 	},
 	"dependencies": {
 		"@answeroverflow/constants": "workspace:^",

@@ -4,6 +4,7 @@ import {
 	findAllServers,
 	zServerPublic,
 } from '@answeroverflow/db';
+const UGLY_ICONS = new Set(['883929594179256350']);
 
 async function fetchServers() {
 	const servers = await findAllServers();
@@ -27,7 +28,13 @@ async function fetchServers() {
 		(a, b) => a.name.localeCompare(b.name),
 	);
 
-	return serversByNameAlphabetical.map((server) => zServerPublic.parse(server));
+	return serversByNameAlphabetical
+		.map((server) => zServerPublic.parse(server))
+		.filter((server) => {
+			if (server.icon === null) return false;
+			if (UGLY_ICONS.has(server.id)) return false;
+			return true;
+		});
 }
 
 export default async function HomePage() {

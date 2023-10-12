@@ -56,7 +56,9 @@ export type User = typeof dbUsers.$inferSelect;
 
 export const usersRelations = relations(dbUsers, ({ many }) => ({
 	accounts: many(dbAccounts),
-	sessions: many(dbSessions),
+	sessions: many(dbSessions, {
+		relationName: 'user-sessions',
+	}),
 }));
 
 export const dbAccounts = mysqlTable(
@@ -120,6 +122,14 @@ export const dbSessions = mysqlTable(
 		};
 	},
 );
+
+export const sessionRelations = relations(dbSessions, ({ one }) => ({
+	user: one(dbUsers, {
+		fields: [dbSessions.userId],
+		references: [dbUsers.id],
+		relationName: 'user-sessions',
+	}),
+}));
 
 export const dbTenantSessions = mysqlTable(
 	'TenantSession',
