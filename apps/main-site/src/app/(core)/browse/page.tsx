@@ -1,18 +1,11 @@
-import { BrowseCommunitiesRenderer } from '@answeroverflow/ui/src/components/pages/BrowseCommunitiesPage';
+import { BrowseCommunitiesRenderer } from '~ui/components/pages/BrowseCommunitiesPage';
 import {
 	countConsentingUsersInManyServers,
 	findAllServers,
 	zServerPublic,
 } from '@answeroverflow/db';
-import { type InferGetStaticPropsType } from 'next';
 
-export default function BrowseCommunitiesPage(
-	props: InferGetStaticPropsType<typeof getStaticProps>,
-) {
-	return <BrowseCommunitiesRenderer {...props} />;
-}
-
-export async function getStaticProps() {
+export default async function BrowseCommunitiesPage() {
 	const servers = await findAllServers();
 	const nonKickedServers = servers.filter(
 		(server) => server.kickedTime === null,
@@ -32,11 +25,5 @@ export async function getStaticProps() {
 	const asPublic = serversByNameAlphabetical.map((server) =>
 		zServerPublic.parse(server),
 	);
-	return {
-		props: {
-			servers: asPublic,
-		},
-		revalidate: 60 * 10,
-		// every 10 minutes
-	};
+	return <BrowseCommunitiesRenderer servers={asPublic} />;
 }

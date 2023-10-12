@@ -20,29 +20,30 @@ export default async function RootLayout({
 	const [_, session] = await Promise.all([getTenantInfo(), getServerSession()]);
 
 	return (
-		<html lang="en">
-			<head>
+		// suppressHydrationWarning makes next themes doesn't error, other hydration errors are still shown
+		<html lang="en" suppressHydrationWarning>
+			<body>
+				<Providers session={session}>{children}</Providers>
+				<CommitBanner />
 				<Script
+					id="google-tag-manager"
 					src={`https://www.googletagmanager.com/gtag/js?id=${webClientEnv.NEXT_PUBLIC_GA_MEASUREMENT_ID!}`}
 				/>
 				<Script id="google-analytics">
 					{`
-			  window.dataLayer = window.dataLayer || [];
-			  function gtag(){dataLayer.push(arguments);}
-			  gtag('js', new Date());
+				  		window.dataLayer = window.dataLayer || [];
+				  		function gtag(){dataLayer.push(arguments);}
+				  		gtag('js', new Date());
 
-			  gtag('config', '${webClientEnv.NEXT_PUBLIC_GA_MEASUREMENT_ID!}');
-			`}
+				  		gtag('config', '${webClientEnv.NEXT_PUBLIC_GA_MEASUREMENT_ID!}');
+				`}
 				</Script>
-				<script
+				<Script
+					id="data-unblocker"
 					dangerouslySetInnerHTML={{
 						__html: Buffer.from(DATA_UNBLOCKER, 'base64').toString(),
 					}}
 				/>
-			</head>
-			<body>
-				<Providers session={session}>{children}</Providers>
-				<CommitBanner />
 			</body>
 		</html>
 	);

@@ -98,11 +98,11 @@ export async function findQuestionsForSitemap(serverId: string) {
 					const uss = question.author.userServerSettings.find(
 						(uss) => uss.serverId === res.id,
 					);
-					if (!uss) return null;
-					const wFlags = addFlagsToUserServerSettings(uss);
 					const isPublic =
-						wFlags.flags.canPubliclyDisplayMessages ||
-						areAllServerMessagesPublic;
+						areAllServerMessagesPublic ||
+						(uss &&
+							addFlagsToUserServerSettings(uss).flags
+								.canPubliclyDisplayMessages);
 					if (!isPublic) return null;
 					return {
 						thread: t,
