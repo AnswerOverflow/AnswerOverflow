@@ -1484,6 +1484,9 @@ importers:
       '@tremor/react':
         specifier: ^3.6.1
         version: 3.6.1(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.3.3)
+      '@trpc/server':
+        specifier: ^10.37.1
+        version: 10.37.1
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.0
@@ -13360,7 +13363,7 @@ packages:
       '@panva/hkdf': 1.1.1
       cookie: 0.5.0
       jose: 4.14.4
-      next: 13.5.3(react-dom@18.2.0)(react@18.2.0)(sass@1.66.1)
+      next: 13.5.3(@babel/core@7.22.10)(react-dom@18.2.0)(react@18.2.0)
       oauth: 0.9.15
       openid-client: 5.5.0
       preact: 10.11.3
@@ -13420,7 +13423,7 @@ packages:
       react: '*'
       react-dom: '*'
     dependencies:
-      next: 13.5.3(react-dom@18.2.0)(react@18.2.0)(sass@1.66.1)
+      next: 13.5.3(@babel/core@7.22.10)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false

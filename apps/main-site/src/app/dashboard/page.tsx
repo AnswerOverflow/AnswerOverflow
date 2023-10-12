@@ -1,22 +1,14 @@
-import { trpc } from '@answeroverflow/ui/src/utils/trpc';
-import { ServerDashboard } from '~ui/components/dashboard/dashboard';
-import { GetStarted } from '~ui/components/primitives/Callouts';
+import { ServerDashboard } from '@answeroverflow/ui/src/components/dashboard/dashboard';
+import { GetStarted } from '@answeroverflow/ui/src/components/primitives/Callouts';
+import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
 
-export default function Dashboard() {
-	const { data, status } = trpc.auth.getServersForOnboarding.useQuery();
-	const serversWithDashboard = data?.filter((server) => server.hasBot);
+export default async function Dashboard() {
+	const data = await callAPI({
+		apiCall: (api) => api.auth.getServersForOnboarding(),
+	});
+	const serversWithDashboard = data.filter((server) => server.hasBot);
 	const selectedServer = serversWithDashboard?.[0];
-
-	switch (status) {
-		case 'loading':
-			return (
-				<div className="flex h-[50vh] items-center justify-center">
-					<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-blue-400" />
-				</div>
-			);
-		case 'error':
-			return <div>Error</div>;
-	}
+	// TODO: Parallel routes
 	return selectedServer ? (
 		<ServerDashboard serverId={selectedServer.id} />
 	) : (
