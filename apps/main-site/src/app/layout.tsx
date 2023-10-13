@@ -5,7 +5,6 @@ import { Providers } from '../components/providers';
 import Script from 'next/script';
 import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner';
 import { webClientEnv } from '@answeroverflow/env/web';
-import { getTenantInfo } from '../utils/get-tenant-info';
 import { getServerSession } from '@answeroverflow/auth';
 import { DATA_UNBLOCKER } from '../utils/data-unblocker';
 
@@ -16,8 +15,8 @@ export default async function RootLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [_, session] = await Promise.all([getTenantInfo(), getServerSession()]);
+	// TODO: Session really shouldn't block first byte
+	const session = await getServerSession();
 
 	return (
 		// suppressHydrationWarning makes next themes doesn't error, other hydration errors are still shown

@@ -17,7 +17,6 @@ import { Heading } from '~ui/components/primitives/base/Heading';
 import AOHead from '~ui/components/primitives/AOHead';
 import Link from 'next/link';
 import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
-import { getTenantInfo } from '~ui/utils/get-tenant-info';
 import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
 export type MessageResultPageProps = {
 	messages: MessageFull[];
@@ -40,7 +39,7 @@ export async function MessageResultPage({
 	thread,
 	relatedPosts,
 }: MessageResultPageProps) {
-	const { tenant } = await getTenantInfo();
+	const tenant = server.customDomain ? server : undefined;
 	const isUserInServer = await fetchIsUserInServer(server.id);
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better

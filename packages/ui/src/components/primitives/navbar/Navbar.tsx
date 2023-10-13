@@ -1,6 +1,6 @@
 import type { Session } from 'next-auth';
 import Link from 'next/link';
-import React, { Suspense } from 'react';
+import React from 'react';
 import { GetStarted } from '../Callouts';
 import { ThemeSwitcher } from '../ThemeSwitcher';
 import { DiscordIcon, GitHubIcon } from '../base/Icons';
@@ -33,7 +33,6 @@ import {
 import { AnswerOverflowLogo } from '~ui/components/primitives/base/AnswerOverflowLogo';
 import { SignInButton } from '~ui/components/primitives/navbar/sign-in-button';
 import { ServerPublic } from '~api/router/server/types';
-import { headers } from 'next/headers';
 import { ChangeThemeItem } from '~ui/components/primitives/navbar/change-theme-item';
 import { LogoutItem } from '~ui/components/primitives/navbar/logout-item';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
@@ -121,14 +120,18 @@ export const UserAvatar = (props: {
 
 import { getServerSession } from '@answeroverflow/auth';
 import { Lazy } from '~ui/components/primitives/base/lazy';
-export function UserSection(props: { isOnTenantSite: boolean }) {
+
+export function UserSection(props: {
+	isOnTenantSite: boolean;
+	tenant: ServerPublic | undefined;
+}) {
 	return (
 		<Lazy
-			fallback={<SignInButton />}
+			fallback={<SignInButton {...props} />}
 			load={async () => {
 				const session = await getServerSession();
 				if (!session) {
-					return <SignInButton />;
+					return <SignInButton {...props} />;
 				}
 				return (
 					<UserAvatar
@@ -141,11 +144,11 @@ export function UserSection(props: { isOnTenantSite: boolean }) {
 	);
 }
 
-export function NavbarRenderer(props: {
-	path: string;
+export const Navbar = (props: {
 	isOnTenantSite: boolean;
 	tenant: ServerPublic | undefined;
-}) {
+	hideIcon?: boolean;
+}) => {
 	const { isOnTenantSite, tenant } = props;
 
 	const Desktop = () => (
@@ -184,7 +187,7 @@ export function NavbarRenderer(props: {
 		<NavigationMenu className="relative min-h-[4rem] w-full sm:px-[4rem] md:py-2 2xl:px-[6rem]">
 			<NavigationMenuList>
 				<NavigationMenuItem>
-					<Link href="/">
+					<Link href="/" className={props.hideIcon ? 'hidden' : ''}>
 						{tenant ? (
 							<div className="flex items-center space-x-2">
 								<ServerIcon server={tenant} />
@@ -216,18 +219,10 @@ export function NavbarRenderer(props: {
 						</LinkButton>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
-						<UserSection isOnTenantSite={isOnTenantSite} />
+						<UserSection isOnTenantSite={isOnTenantSite} tenant={tenant} />
 					</NavigationMenuItem>
 				</NavigationMenuList>
 			</div>
 		</NavigationMenu>
-	);
-}
-
-export const Navbar = () => {
-	const headersList = headers();
-	const pathname = headersList.get('x-invoke-path') ?? '';
-	return (
-		<NavbarRenderer path={pathname} isOnTenantSite={false} tenant={undefined} />
 	);
 };

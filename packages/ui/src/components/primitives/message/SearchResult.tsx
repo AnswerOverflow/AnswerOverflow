@@ -1,24 +1,7 @@
-'use client';
 import type { APISearchResult } from '@answeroverflow/api';
 import { ServerInvite } from '../ServerInvite';
-import { createContext, useContext } from 'react';
 import { LinkMessage } from '~ui/components/primitives/message/link-message';
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const SearchResultContext = createContext<{
-	result: APISearchResult[number];
-} | null>(null);
-
-export function useSearchResultContext() {
-	const context = useContext(SearchResultContext);
-	if (!context) {
-		throw new Error(
-			'This component must be rendered as a child of Search component',
-		);
-	}
-	return context;
-}
-
+type SearchResultProps = APISearchResult[number];
 const ThreadIcon = () => {
 	return (
 		<svg
@@ -74,50 +57,44 @@ const Views = () => (
 );
 // TODO: Use data from the API
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const SearchResultMetaData = () => {
-	const { result } = useSearchResultContext();
+const SearchResultMetaData = (props: Pick<SearchResultProps, 'thread'>) => {
 	return (
 		<div className="mt-8 flex flex-row items-center justify-center">
 			{/* Thread count */}
 			<span className="flex items-center justify-center px-1 text-primary/75">
-				{result.thread?.messageCount ?? 20}
+				{props.thread?.messageCount ?? 20}
 			</span>
 			<ThreadIcon />
 		</div>
 	);
 };
 
-const SearchResultSidebar = () => {
-	const { result } = useSearchResultContext();
+const SearchResultSidebar = (
+	props: Pick<SearchResultProps, 'server' | 'channel' | 'thread'>,
+) => {
 	return (
 		<>
 			<ServerInvite
-				server={result.server}
-				channel={result.channel}
+				server={props.server}
+				channel={props.channel}
 				location="Search Results"
 			/>
-			<SearchResultMetaData />
+			<SearchResultMetaData thread={props.thread} />
 		</>
 	);
 };
 
-export const SearchResult = ({
-	result,
-}: {
-	result: APISearchResult[number];
-}) => {
+export const SearchResult = ({ result }: { result: SearchResultProps }) => {
 	return (
-		<SearchResultContext.Provider value={{ result }}>
-			<div className="flex h-full w-full flex-col-reverse rounded-standard lg:flex-row">
-				<LinkMessage
-					message={result.message}
-					thread={result.thread}
-					showNoSolutionCTA
-				/>
-				<div className="w-full shrink-0 flex-col items-center justify-center rounded-t-standard border-x-2 border-t-2 border-black/[.13] px-5 pb-2 pt-6 dark:border-white/[.13] lg:flex lg:w-64 lg:rounded-br-standard lg:rounded-tl-none lg:border-y-2 lg:border-l-0 lg:border-r-2">
-					<SearchResultSidebar />
-				</div>
+		<div className="flex h-full w-full flex-col-reverse rounded-standard lg:flex-row">
+			<LinkMessage
+				message={result.message}
+				thread={result.thread}
+				showNoSolutionCTA
+			/>
+			<div className="w-full shrink-0 flex-col items-center justify-center rounded-t-standard border-x-2 border-t-2 border-black/[.13] px-5 pb-2 pt-6 dark:border-white/[.13] lg:flex lg:w-64 lg:rounded-br-standard lg:rounded-tl-none lg:border-y-2 lg:border-l-0 lg:border-r-2">
+				<SearchResultSidebar {...result} />
 			</div>
-		</SearchResultContext.Provider>
+		</div>
 	);
 };

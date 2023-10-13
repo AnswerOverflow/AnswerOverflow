@@ -1,12 +1,17 @@
 'use client';
 import { Button, ButtonProps } from '~ui/components/primitives/ui/button';
-import { useTenantContext } from '@answeroverflow/hooks';
 import { makeMainSiteLink } from '@answeroverflow/constants';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import { signIn } from 'next-auth/react';
+import type { ServerPublic } from '@answeroverflow/api';
 
-export function SignInButton(props: ButtonProps) {
-	const { isOnTenantSite, tenant } = useTenantContext();
+export function SignInButton(
+	props: ButtonProps & {
+		isOnTenantSite: boolean;
+		tenant: ServerPublic | undefined;
+	},
+) {
+	const { isOnTenantSite, tenant } = props;
 	if (isOnTenantSite) {
 		const link = makeMainSiteLink('/api/auth/tenant/signin');
 		const redirect =

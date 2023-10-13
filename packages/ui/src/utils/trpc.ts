@@ -27,7 +27,8 @@ export async function callAPI<
 		if (!(error instanceof TRPCError)) throw error;
 		if (!Array.isArray(allowedErrors))
 			allowedErrors = allowedErrors ? [allowedErrors] : [];
-		if (allowedErrors.includes(error.code)) {
+		if (allowedErrors.includes(error.code as E)) {
+			// @ts-ignore
 			return null;
 		} else {
 			throw error;

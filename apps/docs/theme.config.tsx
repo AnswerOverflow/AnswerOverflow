@@ -39,7 +39,7 @@ const config: DocsThemeConfig = {
 	},
 	docsRepositoryBase: DOCS_LINK_BASE,
 	footer: {
-		component: <Footer />,
+		component: <Footer isOnTenantSite={false} />,
 	},
 };
 

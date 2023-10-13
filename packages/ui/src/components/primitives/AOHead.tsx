@@ -2,7 +2,6 @@
 import type { ServerPublic } from '@answeroverflow/api';
 import Head from 'next/head';
 import { makeServerIconLink } from './ServerIcon';
-import { useTenantContext } from '@answeroverflow/hooks';
 import { webClientEnv } from '@answeroverflow/env/web';
 
 interface HeadProps {
@@ -28,7 +27,7 @@ export const AOHead = ({
 	type = 'website',
 	path,
 }: HeadProps) => {
-	const { tenant } = useTenantContext();
+	const tenant = undefined;
 	if (tenant) {
 		server = tenant;
 	}

@@ -155,12 +155,14 @@ const PoweredByAnswerOverflowFooter = () => (
 	</div>
 );
 
-export async function Footer() {
-	// TODO: Suspense? Tenant info should be populated by the time the footer is rendered though
-	const { isOnTenantSite } = await getTenantInfo();
+export function Footer(props: { isOnTenantSite: boolean }) {
 	return (
 		<footer>
-			{isOnTenantSite ? <PoweredByAnswerOverflowFooter /> : <MainSiteFooter />}
+			{props.isOnTenantSite ? (
+				<PoweredByAnswerOverflowFooter />
+			) : (
+				<MainSiteFooter />
+			)}
 		</footer>
 	);
 }

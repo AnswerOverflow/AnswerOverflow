@@ -202,7 +202,11 @@ export const CommunityPage = ({
 
 	return (
 		<div className="mx-auto w-full overflow-x-hidden overflow-y-scroll bg-background scrollbar-hide">
-			<Navbar />
+			<Navbar
+				isOnTenantSite={server.customDomain != null}
+				tenant={server}
+				hideIcon={isOnTenantSite}
+			/>
 			<main className="bg-background">
 				<AOHead
 					title={`${server.name} Community`}
@@ -222,7 +226,7 @@ export const CommunityPage = ({
 					</div>
 				</div>
 			</main>
-			<Footer />
+			<Footer isOnTenantSite={server.customDomain != null} />
 		</div>
 	);
 };
