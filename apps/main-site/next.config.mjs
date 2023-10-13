@@ -55,6 +55,7 @@ const config = {
 	eslint: {
 		ignoreDuringBuilds: !!process.env.CI,
 	},
+
 	productionBrowserSourceMaps: true, // we're open source so why not
 	sentry: {
 		hideSourceMaps: false,

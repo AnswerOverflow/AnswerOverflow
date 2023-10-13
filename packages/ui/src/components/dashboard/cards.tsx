@@ -8,14 +8,13 @@ import {
 	ProgressBar,
 } from '@tremor/react';
 import type { Plan } from '@answeroverflow/db';
-import { trpc } from '~ui/utils/trpc';
-import { useDashboardContext } from './dashboard-context';
 import { PricingDialog } from '~ui/components/pages/Pricing';
 import { AOLink } from '~ui/components/primitives/base/Link';
+import { callAPI } from '~ui/utils/trpc';
+import { ServerDashboard } from '~api/router/server/types';
 
 export function PageViewsCardRenderer(props: {
 	numberOfPageViews?: number;
-	status: 'success' | 'loading' | 'error';
 	plan: Plan;
 }) {
 	let limit: number | undefined = undefined;
@@ -60,19 +59,15 @@ export function PageViewsCardRenderer(props: {
 	);
 }
 
-export function PageViewsCard() {
-	const { id, plan } = useDashboardContext();
-	const { data, status } = trpc.servers.fetchPageViewsAsLineChart.useQuery(id);
+export async function PageViewsCard(props: { id: string; plan: Plan }) {
+	const data = await callAPI({
+		apiCall: (api) => api.servers.fetchPageViewsAsLineChart(props.id),
+	});
 
 	return (
 		<PageViewsCardRenderer
-			plan={plan}
-			numberOfPageViews={
-				status === 'success'
-					? data.reduce((acc, cur) => acc + cur['View Count'], 0)
-					: undefined
-			}
-			status={status}
+			plan={props.plan}
+			numberOfPageViews={data.reduce((acc, cur) => acc + cur['View Count'], 0)}
 		/>
 	);
 }
@@ -177,9 +172,8 @@ export function CurrentPlanCardRenderer(
 	);
 }
 
-export function CurrentPlanCard() {
-	const server = useDashboardContext();
-	return <CurrentPlanCardRenderer {...server} />;
+export function CurrentPlanCard(props: { server: ServerDashboard }) {
+	return <CurrentPlanCardRenderer {...props.server} />;
 }
 
 export function PageViewChartRenderer(props: {
@@ -188,7 +182,6 @@ export function PageViewChartRenderer(props: {
 		// eslint-disable-next-line @typescript-eslint/naming-convention
 		'View Count': number;
 	}[];
-	status: 'error' | 'loading' | 'success';
 }) {
 	return (
 		<Card>
@@ -204,13 +197,10 @@ export function PageViewChartRenderer(props: {
 	);
 }
 
-export const PageViewChart = () => {
-	const { id } = useDashboardContext();
-	const { data, status } = trpc.servers.fetchPageViewsAsLineChart.useQuery(id);
-	return (
-		<PageViewChartRenderer
-			data={status === 'success' ? data : []}
-			status={status}
-		/>
-	);
+export const PageViewChart = async (props: { id: string }) => {
+	const data = await callAPI({
+		apiCall: (api) => api.servers.fetchPageViewsAsLineChart(props.id),
+	});
+
+	return <PageViewChartRenderer data={data} />;
 };

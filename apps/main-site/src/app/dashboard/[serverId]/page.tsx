@@ -1,12 +1,10 @@
-import { useRouter } from 'next/navigation';
-// eslint-disable-next-line no-restricted-imports
-import { ServerDashboard } from '~ui/components/dashboard/dashboard';
+// import { ServerDashboard } from '@answeroverflow/ui/src/components/dashboard/dashboard';
 
 export default function ServerIdDashboard() {
-	const router = useRouter();
-	const serverId = router.query.serverId as string | undefined;
+	const serverId = '3';
 	if (!serverId) {
 		return null;
 	}
-	return <ServerDashboard serverId={serverId} />;
+	return <></>;
+	// return <ServerDashboard serverId={serverId} />;
 }
