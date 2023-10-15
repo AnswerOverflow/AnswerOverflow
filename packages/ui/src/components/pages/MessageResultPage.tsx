@@ -6,7 +6,6 @@ import {
 	getBaseUrl,
 	getMainSiteHostname,
 } from '@answeroverflow/constants/src/links';
-import { toHTML } from 'discord-markdown';
 import { ServerInvite } from '~ui/components/primitives/ServerInvite';
 import {
 	Message,
@@ -18,6 +17,7 @@ import AOHead from '~ui/components/primitives/AOHead';
 import Link from 'next/link';
 import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
 import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
+import { parseDiscordMarkdown } from '~ui/utils/markdown/parser';
 export type MessageResultPageProps = {
 	messages: MessageFull[];
 	server: ServerPublic;
@@ -169,14 +169,14 @@ export async function MessageResultPage({
 		'@type': 'QAPage',
 		mainEntity: {
 			'@type': 'Question',
-			name: toHTML(question),
-			text: toHTML(firstMessage.content),
+			name: await parseDiscordMarkdown(question),
+			text: await parseDiscordMarkdown(firstMessage.content),
 			answerCount: solution && !isFirstMessageSolution ? 1 : 0,
 			acceptedAnswer:
 				solution && !isFirstMessageSolution
 					? {
 							'@type': 'Answer',
-							text: toHTML(solution.content),
+							text: await parseDiscordMarkdown(solution.content),
 							url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
 								solution.id
 							}#solution-${solution.id}`,

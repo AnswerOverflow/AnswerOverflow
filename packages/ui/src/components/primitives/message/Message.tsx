@@ -1,5 +1,4 @@
 import type { MessageWithDiscordAccount } from '@answeroverflow/db';
-import discordMarkdown from 'discord-markdown';
 import React from 'react';
 import { DiscordAvatar } from '../DiscordAvatar';
 import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
@@ -13,6 +12,8 @@ import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
 import { MessageProps } from './props';
 import { MessageAttachments } from '~ui/components/primitives/message/attachments';
 import { TrackLinkButton } from '~ui/components/primitives/track-link-button';
+import { parseDiscordMarkdown } from '~ui/utils/markdown/parser';
+import { Code } from 'bright';
 
 export const MessageAuthorArea = (props: Pick<MessageProps, 'message'>) => {
 	const { message } = props;
@@ -41,11 +42,10 @@ export const MessageAuthorArea = (props: Pick<MessageProps, 'message'>) => {
 
 const DEFAULT_COLLAPSE_CONTENT_LENGTH = 500;
 
-export const MessageContents = (
+export const MessageContents = async (
 	props: Pick<MessageProps, 'collapseContent' | 'message'>,
 ) => {
 	const { message, collapseContent } = props;
-	const { toHTML } = discordMarkdown;
 
 	const collapseBy =
 		typeof collapseContent === 'number'
@@ -60,14 +60,14 @@ export const MessageContents = (
 	const trimmedText = shouldCollapse
 		? `${message.content.slice(0, collapseBy).trim()}...`
 		: message.content;
-	const convertedMessageContent = toHTML(trimmedText);
+	const discordMarkdownAsHTML = await parseDiscordMarkdown(trimmedText);
 
 	return (
 		<div
 			className="pt-2 font-body text-primary [overflow-wrap:_anywhere]"
 			// The HTML from discord-markdown is escaped
 			dangerouslySetInnerHTML={{
-				__html: convertedMessageContent,
+				__html: discordMarkdownAsHTML,
 			}}
 		/>
 	);
