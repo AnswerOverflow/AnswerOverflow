@@ -115,7 +115,9 @@ export const ServerInviteJoinButton = async (
 };
 
 export const ServerInvite = (
-	props: Omit<ServerInviteProps, 'isUserInServer'>,
+	props: Omit<ServerInviteProps, 'isUserInServer'> & {
+		JoinButton?: React.ReactNode;
+	},
 ) => {
 	const { truncate = true } = props;
 	return (
@@ -139,7 +141,11 @@ export const ServerInvite = (
 					{props.channel && <ChannelName channel={props.channel} />}
 				</div>
 			</div>
-			<ServerInviteJoinButton {...props} />
+			{props.JoinButton !== undefined ? (
+				props.JoinButton
+			) : (
+				<ServerInviteJoinButton {...props} />
+			)}
 		</div>
 	);
 };

@@ -96,10 +96,13 @@ export const MessageContentWithSolution = (
 	);
 };
 
-export const Message = (props: MessageProps) => {
-	const { Blurrer = MessageBlurrer } = props;
+export const Message = (
+	props: MessageProps & {
+		content?: React.ReactNode;
+	},
+) => {
 	return (
-		<Blurrer {...props}>
+		<MessageBlurrer {...props} blurCount={props.numberOfMessages}>
 			<div
 				className={cn(
 					`discord-message w-full ${
@@ -114,11 +117,11 @@ export const Message = (props: MessageProps) => {
 					<div className="flex items-center gap-2">
 						<MessageAuthorArea {...props} />
 					</div>
-					<MessageContents {...props} />
+					{props.content ? props.content : <MessageContents {...props} />}
 					<MessageAttachments {...props} />
 				</div>
 			</div>
-		</Blurrer>
+		</MessageBlurrer>
 	);
 };
 
@@ -130,36 +133,27 @@ export async function canViewMessage(message: MessageWithDiscordAccount) {
 export async function MessageBlurrer({
 	children,
 	message,
+	blurCount = 1,
 }: {
 	children: React.ReactNode;
 	message: MessageWithDiscordAccount;
+	blurCount?: number;
 }) {
 	const skipBlur = await canViewMessage(message);
 	// We must hide backdrop blur to prevent the border around the message from being blurred as well - causes weird color change
+	if (blurCount > 1) {
+		return (
+			<ContentBlurrer
+				blurred={!skipBlur}
+				hideBackdropBlur
+				notPublicTitle={`${blurCount} Messages Not Public`}
+			>
+				{children}
+			</ContentBlurrer>
+		);
+	}
 	return (
 		<ContentBlurrer blurred={!skipBlur} hideBackdropBlur>
-			{children}
-		</ContentBlurrer>
-	);
-}
-
-export async function MultiMessageBlurrer(props: {
-	children?: React.ReactNode;
-	count: number;
-	message: MessageWithDiscordAccount;
-}) {
-	const { count, children, message } = props;
-
-	const skipBlur = await canViewMessage(message);
-	// We must hide backdrop blur to prevent the border around the message from being blurred as well - causes weird color change
-	return (
-		<ContentBlurrer
-			blurred={!skipBlur}
-			hideBackdropBlur
-			notPublicTitle={
-				count === 1 ? 'Message Not Public' : `${count} Messages Not Public`
-			}
-		>
 			{children}
 		</ContentBlurrer>
 	);

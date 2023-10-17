@@ -6,6 +6,7 @@ import { TokenizerAndRendererExtension } from 'MarkedOptions';
 import React from 'react';
 import { JSDOM } from 'jsdom';
 import DOMPurify from 'dompurify';
+import { Tokens } from 'Tokens';
 
 Code.theme = {
 	dark: 'github-dark',
@@ -219,6 +220,10 @@ export const parseDiscordMarkdown = async (content: string) => {
 			emStrong: () => {},
 			// @ts-expect-error we are telling marked not to tokenize blockquotes
 			blockquote: () => {},
+			// @ts-expect-error we are telling marked not to tokenize blockquotes
+			hr: () => {},
+			// @ts-expect-error we are telling marked not to tokenize blockquotes
+			html: () => {},
 		},
 	});
 
@@ -230,9 +235,14 @@ export const parseDiscordMarkdown = async (content: string) => {
 	marked.use({
 		extensions: [quote, underline, bold],
 	});
+	const renderer = new marked.Renderer();
+	// renderer.image = (href, title, text) => {
+	// 	return renderer.link(href, title, text);
+	// };
 	const parsed = await marked(content, {
 		async: true,
 		breaks: true,
+		renderer,
 	});
 	const purify = DOMPurify(new JSDOM('<!DOCTYPE html>').window);
 	const clean = purify.sanitize(parsed);

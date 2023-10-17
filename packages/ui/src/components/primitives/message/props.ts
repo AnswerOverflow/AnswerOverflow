@@ -4,7 +4,7 @@ import React from 'react';
 export type MessageProps = {
 	message: MessageWithDiscordAccount;
 	showBorders?: boolean;
-	Blurrer?: React.FC<{ children: React.ReactNode }>;
+	numberOfMessages?: number;
 	className?: string;
 	fullRounded?: boolean;
 	/**

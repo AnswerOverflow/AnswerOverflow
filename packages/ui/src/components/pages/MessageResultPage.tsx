@@ -1,15 +1,11 @@
 import type { ChannelPublicWithFlags, MessageFull } from '@answeroverflow/db';
 import type { ServerPublic } from '@answeroverflow/api';
 import type { QAPage, WithContext } from 'schema-dts';
-import {
-	getBaseUrl,
-	getMainSiteHostname,
-} from '@answeroverflow/constants/src/links';
+import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
 import { ServerInvite } from '~ui/components/primitives/ServerInvite';
 import {
 	Message,
 	MessageContentWithSolution,
-	MultiMessageBlurrer,
 } from '~ui/components/primitives/message/Message';
 import { Heading } from '~ui/components/primitives/base/Heading';
 
@@ -17,6 +13,13 @@ import Link from 'next/link';
 import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
 import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
 import { parseDiscordMarkdown } from '~ui/utils/markdown/parser';
+import { TrackLoad } from '~ui/components/primitives/track-load';
+import {
+	channelToAnalyticsData,
+	serverToAnalyticsData,
+	threadToAnalyticsData,
+} from '@answeroverflow/constants';
+import { messageWithDiscordAccountToAnalyticsData } from '@answeroverflow/hooks';
 export type MessageResultPageProps = {
 	messages: MessageFull[];
 	server: ServerPublic;
@@ -34,11 +37,9 @@ export async function MessageResultPage({
 	messages,
 	server,
 	channel,
-	requestedId,
 	thread,
 	relatedPosts,
 }: MessageResultPageProps) {
-	const tenant = server.customDomain ? server : undefined;
 	const isUserInServer = await fetchIsUserInServer(server.id);
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
@@ -48,23 +49,6 @@ export async function MessageResultPage({
 			? firstMessage.content
 			: `Questions related to ${channelName} in ${server.name}`;
 
-	// // TODO: Ugly
-	// useTrackEvent(
-	// 	'Message Page View',
-	// 	{
-	// 		...channelToAnalyticsData(channel),
-	// 		...serverToAnalyticsData(server),
-	// 		...(thread && {
-	// 			...threadToAnalyticsData(thread),
-	// 			'Number of Messages': messages.length,
-	// 		}),
-	// 		...messageWithDiscordAccountToAnalyticsData(firstMessage),
-	// 	},
-	// 	{
-	// 		runOnce: true,
-	// 		enabled: shouldTrackAnalyticsEvent,
-	// 	},
-	// );
 	const solutionMessageId = messages.at(0)?.solutions?.at(0)?.id;
 	const solution = messages.find((message) => message.id === solutionMessageId);
 	let consecutivePrivateMessages = 0;
@@ -133,9 +117,8 @@ export async function MessageResultPage({
 						) : undefined
 					}
 					showBorders={message.id !== solutionMessageId}
-					images={shouldShowSolutionInContent ? null : undefined}
 					loadingStyle={'lazy'}
-					// Blurrer={(props) => <MultiMessageBlurrer {...props} count={count} />}
+					numberOfMessages={count}
 				/>
 			);
 		};
@@ -189,11 +172,8 @@ export async function MessageResultPage({
 					: undefined,
 		},
 	};
-	const baseDomain = tenant?.customDomain
-		? `https://${tenant.customDomain}`
-		: getBaseUrl();
 
-	const Main = async () => (
+	const Main = () => (
 		<div className={'flex grow flex-col'}>
 			<div className="mb-2 flex flex-col-reverse items-center justify-between gap-2 sm:flex-row sm:py-0 md:my-8">
 				<div className="flex h-full w-full grow flex-col items-center justify-between gap-2 md:gap-4">
@@ -276,6 +256,18 @@ export async function MessageResultPage({
 			<div className="flex flex-col gap-8 xl:flex-row">
 				<Main />
 				<Sidebar />
+				<TrackLoad
+					eventName={'Message Page View'}
+					eventData={{
+						...channelToAnalyticsData(channel),
+						...serverToAnalyticsData(server),
+						...(thread && {
+							...threadToAnalyticsData(thread),
+							'Number of Messages': messages.length,
+						}),
+						...messageWithDiscordAccountToAnalyticsData(firstMessage),
+					}}
+				/>
 			</div>
 		</div>
 	);
