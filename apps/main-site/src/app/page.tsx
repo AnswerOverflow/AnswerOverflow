@@ -4,8 +4,13 @@ import {
 	findAllServers,
 	zServerPublic,
 } from '@answeroverflow/db';
+import { Metadata } from 'next';
 const UGLY_ICONS = new Set(['883929594179256350']);
-
+export const metadata: Metadata = {
+	alternates: {
+		canonical: '/',
+	},
+};
 async function fetchServers() {
 	const servers = await findAllServers();
 	const nonKickedServers = servers.filter(

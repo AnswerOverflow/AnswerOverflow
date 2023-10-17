@@ -1,5 +1,9 @@
 import { makeMessageResultPage } from '@answeroverflow/db';
 import { MessageResultPage } from '~ui/components/pages/MessageResultPage';
+import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {};
 
 export default async function MessageResult({
 	params,
@@ -8,7 +12,7 @@ export default async function MessageResult({
 }) {
 	const data = await makeMessageResultPage(params.messageId, []);
 	if (!data) {
-		return null;
+		return notFound();
 	}
 	return (
 		<MessageResultPage

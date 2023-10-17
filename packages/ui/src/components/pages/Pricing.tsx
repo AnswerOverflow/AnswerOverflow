@@ -21,7 +21,7 @@ import { Button } from '~ui/components/primitives/ui/button';
 import { Input } from '~ui/components/primitives/ui/input';
 import { Textarea } from '~ui/components/primitives/ui/textarea';
 import { AOLink } from '~ui/components/primitives/base/Link';
-import AOHead from '~ui/components/primitives/AOHead';
+
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import { Heading } from '~ui/components/primitives/base/Heading';
 import { queryTypes, useQueryState } from 'next-usequerystate';
@@ -400,14 +400,6 @@ export const PricingOptions = (props: { showFaqs?: boolean }) => {
 export const Pricing = () => {
 	return (
 		<div className="my-6 max-w-6xl sm:mx-3 md:mx-auto">
-			<AOHead
-				path="/pricing"
-				title="Pricing"
-				description={
-					'Index your Discord server content into Google, starting at $0/month '
-				}
-			/>
-
 			<Heading.H1 className={'text-center'}>Plans</Heading.H1>
 			<PricingOptions showFaqs={true} />
 			<form

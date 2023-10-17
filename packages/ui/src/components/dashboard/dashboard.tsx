@@ -17,7 +17,6 @@ import { TierAccessOnly } from '../primitives/tier-access-only';
 import type { ServerDashboard } from '@answeroverflow/api';
 import { getServerHomepageUrl } from '~ui/utils/server';
 import { AOLink } from '~ui/components/primitives/base/Link';
-import AOHead from '~ui/components/primitives/AOHead';
 import { callAPI } from '~ui/utils/trpc';
 
 export function ServerDashboardRenderer(props: { data: ServerDashboard }) {
@@ -85,7 +84,6 @@ export async function ServerDashboard(props: { serverId: string }) {
 	});
 	return (
 		<>
-			<AOHead title="Dashboard" path={'/dashboard'} />
 			<ServerDashboardRenderer data={data} />
 		</>
 	);

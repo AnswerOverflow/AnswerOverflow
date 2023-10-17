@@ -7,6 +7,42 @@ import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner
 import { webClientEnv } from '@answeroverflow/env/web';
 import { getServerSession } from '@answeroverflow/auth';
 import { DATA_UNBLOCKER } from '../utils/data-unblocker';
+import { Montserrat, Source_Sans_3 } from 'next/font/google';
+import type { Metadata } from 'next';
+export const metadata: Metadata = {
+	title: 'Answer Overflow - Search all of Discord',
+	metadataBase: new URL('https://www.answeroverflow.com/'),
+	description:
+		'Build the best Discord support server with Answer Overflow. Index your content into Google, answer questions with AI, and gain insights into your community.',
+	robots: {
+		index: webClientEnv.NEXT_PUBLIC_DEPLOYMENT_ENV === 'production',
+		follow: webClientEnv.NEXT_PUBLIC_DEPLOYMENT_ENV === 'production',
+	},
+	openGraph: {
+		type: 'website',
+		title: 'Answer Overflow - Search all of Discord',
+		siteName: 'Answer Overflow',
+		description:
+			'Build the best Discord support server with Answer Overflow. Index your content into Google, answer questions with AI, and gain insights into your community.',
+		images: [
+			{
+				url: 'https://www.answeroverflow.com/answer-overflow-banner-v3.png',
+				width: 1200,
+				height: 630,
+			},
+		],
+	},
+};
+const montserrat = Montserrat({
+	subsets: ['latin'],
+	display: 'swap',
+	variable: '--font-montserrat',
+});
+const sourceSans3 = Source_Sans_3({
+	subsets: ['latin'],
+	display: 'swap',
+	variable: '--font-source-sans-3',
+});
 
 export default async function RootLayout({
 	// Layouts must accept a children prop.
@@ -21,9 +57,9 @@ export default async function RootLayout({
 	return (
 		// suppressHydrationWarning makes next themes doesn't error, other hydration errors are still shown
 		<html lang="en" suppressHydrationWarning>
-			<body>
-				<Providers session={session}>{children}</Providers>
+			<body className={`${montserrat.variable} ${sourceSans3.variable}`}>
 				<CommitBanner />
+				<Providers session={session}>{children}</Providers>
 				<Script
 					id="google-tag-manager"
 					src={`https://www.googletagmanager.com/gtag/js?id=${webClientEnv.NEXT_PUBLIC_GA_MEASUREMENT_ID!}`}

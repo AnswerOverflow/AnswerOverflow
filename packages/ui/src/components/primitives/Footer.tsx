@@ -8,7 +8,7 @@ import {
 import { DiscordIcon, GitHubIcon } from '~ui/components/primitives/base/Icons';
 import { Heading } from '~ui/components/primitives/base/Heading';
 import { AnswerOverflowLogo } from '~ui/components/primitives/base/AnswerOverflowLogo';
-import { getTenantInfo } from '~ui/utils/get-tenant-info';
+import type { ServerPublic } from '@answeroverflow/api';
 type SocialItem = {
 	name: string;
 	href: string;
@@ -155,14 +155,10 @@ const PoweredByAnswerOverflowFooter = () => (
 	</div>
 );
 
-export function Footer(props: { isOnTenantSite: boolean }) {
+export function Footer(props: { tenant: ServerPublic }) {
 	return (
 		<footer>
-			{props.isOnTenantSite ? (
-				<PoweredByAnswerOverflowFooter />
-			) : (
-				<MainSiteFooter />
-			)}
+			{props.tenant ? <PoweredByAnswerOverflowFooter /> : <MainSiteFooter />}
 		</footer>
 	);
 }

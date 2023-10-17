@@ -1,4 +1,38 @@
 import { findServerByCustomDomain } from '@answeroverflow/db';
+import { Metadata, ResolvingMetadata } from 'next';
+import { notFound } from 'next/navigation';
+import { makeServerIconLink } from '~ui/components/primitives/ServerIcon';
+
+export async function generateMetadata({
+	params,
+}: {
+	params: { domain: string };
+}): Promise<Metadata> {
+	// read route params
+	const tenant = await findServerByCustomDomain(
+		decodeURIComponent(params.domain),
+	);
+	if (!tenant) {
+		return notFound();
+	}
+	const serverIconImage = makeServerIconLink(tenant, 256);
+	const image =
+		serverIconImage ??
+		'https://www.answeroverflow.com/answer_overflow_icon_256.png';
+	const description =
+		tenant.description ??
+		`View the ${tenant.name} Discord server on the web. Browse questions asked by the community and find answers.`;
+	const icon = makeServerIconLink(tenant, 48);
+	return {
+		title: tenant.name,
+		description,
+		icons: icon ? [icon] : undefined,
+		openGraph: {
+			images: [image],
+			siteName: tenant.name,
+		},
+	};
+}
 
 export default function Layout({
 	children,

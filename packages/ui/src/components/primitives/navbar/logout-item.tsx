@@ -4,14 +4,15 @@ import { signOut } from 'next-auth/react';
 import { LuLogOut } from 'react-icons/lu';
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import type { ServerPublic } from '@answeroverflow/api';
 
-export function LogoutItem(props: { isOnTenantSite: boolean }) {
+export function LogoutItem(props: { tenant: ServerPublic | undefined }) {
 	const router = useRouter();
 
 	return (
 		<DropdownMenuItem
 			onClick={() => {
-				if (props.isOnTenantSite) {
+				if (props.tenant) {
 					const redirect =
 						typeof window !== 'undefined' ? window.location.href : '';
 					// navigate to /api/auth/tenant/signout?redirect=currentUrl

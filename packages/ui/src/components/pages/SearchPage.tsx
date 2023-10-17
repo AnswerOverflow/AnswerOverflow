@@ -1,14 +1,14 @@
-import type { APISearchResult } from '@answeroverflow/api';
+import type { APISearchResult, ServerPublic } from '@answeroverflow/api';
 import { Heading } from '~ui/components/primitives/base/Heading';
 import { SearchResult } from '~ui/components/primitives/message/SearchResult';
 import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
 
 interface SearchResultProps {
 	results: APISearchResult[number][];
-	isOnTenant: boolean;
+	tenant: ServerPublic;
 }
 
-export const SearchPage = ({ results, isOnTenant }: SearchResultProps) => {
+export const SearchPage = ({ results, tenant }: SearchResultProps) => {
 	const noResults = results.length === 0;
 	const resultsSection = results.map((result) => (
 		<div className="mb-8" key={result.message.id}>
@@ -19,7 +19,7 @@ export const SearchPage = ({ results, isOnTenant }: SearchResultProps) => {
 	const uniqueServers = new Set(results.map((result) => result.server.id));
 	const resultsText = [
 		`Found ${results.length} result${results.length === 1 ? '' : 's'}`,
-		isOnTenant
+		tenant
 			? ''
 			: `from ${uniqueServers.size}{' '} ${
 					uniqueServers.size === 1 ? 'community' : 'communities'

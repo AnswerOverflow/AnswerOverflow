@@ -1,6 +1,5 @@
 import type { ChannelPublicWithFlags, MessageFull } from '@answeroverflow/db';
 import type { ServerPublic } from '@answeroverflow/api';
-import Head from 'next/head';
 import type { QAPage, WithContext } from 'schema-dts';
 import {
 	getBaseUrl,
@@ -13,7 +12,7 @@ import {
 	MultiMessageBlurrer,
 } from '~ui/components/primitives/message/Message';
 import { Heading } from '~ui/components/primitives/base/Heading';
-import AOHead from '~ui/components/primitives/AOHead';
+
 import Link from 'next/link';
 import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
 import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
@@ -163,20 +162,26 @@ export async function MessageResultPage({
 	});
 
 	const question = thread?.name ?? firstMessage.content?.slice(0, 100);
+	const [safeFirstMessageContent, safeQuestion, safeSolutionContent] =
+		await Promise.all([
+			parseDiscordMarkdown(firstMessage.content),
+			parseDiscordMarkdown(question),
+			solution && parseDiscordMarkdown(solution.content),
+		]);
 	const isFirstMessageSolution = solution && solution.id !== firstMessage.id;
 	const qaHeader: WithContext<QAPage> = {
 		'@context': 'https://schema.org',
 		'@type': 'QAPage',
 		mainEntity: {
 			'@type': 'Question',
-			name: await parseDiscordMarkdown(question),
-			text: await parseDiscordMarkdown(firstMessage.content),
+			name: safeQuestion,
+			text: safeFirstMessageContent,
 			answerCount: solution && !isFirstMessageSolution ? 1 : 0,
 			acceptedAnswer:
 				solution && !isFirstMessageSolution
 					? {
 							'@type': 'Answer',
-							text: await parseDiscordMarkdown(solution.content),
+							text: safeSolutionContent,
 							url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
 								solution.id
 							}#solution-${solution.id}`,
@@ -188,7 +193,7 @@ export async function MessageResultPage({
 		? `https://${tenant.customDomain}`
 		: getBaseUrl();
 
-	const Main = () => (
+	const Main = async () => (
 		<div className={'flex grow flex-col'}>
 			<div className="mb-2 flex flex-col-reverse items-center justify-between gap-2 sm:flex-row sm:py-0 md:my-8">
 				<div className="flex h-full w-full grow flex-col items-center justify-between gap-2 md:gap-4">
@@ -204,7 +209,9 @@ export async function MessageResultPage({
 					<div className="flex w-full flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400  text-center  dark:border-neutral-600 dark:text-white">
 						<h1
 							className="w-full text-center font-header text-xl text-primary md:text-left md:text-3xl"
-							dangerouslySetInnerHTML={{ __html: toHTML(question) }}
+							dangerouslySetInnerHTML={{
+								__html: safeQuestion,
+							}}
 						></h1>
 					</div>
 				</div>
@@ -262,18 +269,9 @@ export async function MessageResultPage({
 
 	return (
 		<div className="sm:mx-3">
-			<Head>
-				<script
-					type="application/ld+json"
-					dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}
-				/>
-			</Head>
-			<AOHead
-				description={description}
-				path={`/m/${firstMessage?.id ?? requestedId}`}
-				title={`${channelName} - ${server.name}`}
-				server={server}
-				image={`${baseDomain}/og/post?id=${firstMessage?.id ?? requestedId}`}
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}
 			/>
 			<div className="flex flex-col gap-8 xl:flex-row">
 				<Main />

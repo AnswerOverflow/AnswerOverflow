@@ -4,7 +4,10 @@ import {
 } from '@answeroverflow/db';
 import { notFound } from 'next/navigation';
 import { CommunityPage } from '@answeroverflow/ui/src/components/pages/CommunityPage';
-
+import { Metadata } from 'next';
+export const metadata: Metadata = {
+	appLinks: {},
+};
 export default async function TenantHome({
 	params,
 }: {
@@ -24,7 +27,6 @@ export default async function TenantHome({
 	}
 	return (
 		<CommunityPage
-			isOnTenantSite={true}
 			server={communityPageData.server}
 			channels={communityPageData.channels}
 		/>

@@ -224,9 +224,7 @@ export async function findServerWithCommunityPageData(opts: {
 
 export type CommunityPageData = NonNullable<
 	Awaited<ReturnType<typeof findServerWithCommunityPageData>>
-> & {
-	isOnTenantSite: boolean;
-};
+>;
 
 export async function findMessageResultPage(messageId: string) {
 	const targetMessage = await findMessageById(messageId);

@@ -87,7 +87,7 @@ const MainSiteDropdownMenuGroup = () => (
 );
 export const UserAvatar = (props: {
 	user: Session['user'];
-	isOnTenantSite: boolean;
+	tenant: ServerPublic | undefined;
 }) => {
 	return (
 		<DropdownMenu modal={false}>
@@ -105,14 +105,14 @@ export const UserAvatar = (props: {
 			<DropdownMenuContent className="mr-4 mt-2 max-h-96 w-52">
 				<DropdownMenuLabel>My Account</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				{!props.isOnTenantSite && (
+				{!props.tenant && (
 					<>
 						<MainSiteDropdownMenuGroup />
 						<DropdownMenuSeparator />
 					</>
 				)}
 				<ChangeThemeItem />
-				<LogoutItem isOnTenantSite={props.isOnTenantSite} />
+				<LogoutItem isOnTenantSite={props.tenant} />
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
@@ -121,17 +121,14 @@ export const UserAvatar = (props: {
 import { getServerSession } from '@answeroverflow/auth';
 import { Lazy } from '~ui/components/primitives/base/lazy';
 
-export function UserSection(props: {
-	isOnTenantSite: boolean;
-	tenant: ServerPublic | undefined;
-}) {
+export function UserSection(props: { tenant: ServerPublic | undefined }) {
 	return (
 		<Lazy
-			fallback={<SignInButton {...props} />}
+			fallback={<SignInButton tenant={props.tenant} />}
 			load={async () => {
 				const session = await getServerSession();
 				if (!session) {
-					return <SignInButton {...props} />;
+					return <SignInButton tenant={props.tenant} />;
 				}
 				return (
 					<UserAvatar
@@ -145,11 +142,10 @@ export function UserSection(props: {
 }
 
 export const Navbar = (props: {
-	isOnTenantSite: boolean;
 	tenant: ServerPublic | undefined;
 	hideIcon?: boolean;
 }) => {
-	const { isOnTenantSite, tenant } = props;
+	const { tenant } = props;
 
 	const Desktop = () => (
 		<>
@@ -162,7 +158,7 @@ export const Navbar = (props: {
 			<NavigationMenuItem>
 				<ThemeSwitcher />
 			</NavigationMenuItem>
-			{!isOnTenantSite && (
+			{!tenant && (
 				<>
 					<NavigationMenuItem>
 						<LinkButton
@@ -219,7 +215,7 @@ export const Navbar = (props: {
 						</LinkButton>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
-						<UserSection isOnTenantSite={isOnTenantSite} tenant={tenant} />
+						<UserSection tenant={tenant} />
 					</NavigationMenuItem>
 				</NavigationMenuList>
 			</div>

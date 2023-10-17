@@ -20,11 +20,12 @@ import {
 import { ServerIcon } from '~ui/components/primitives/ServerIcon';
 import { LinkMessage } from '~ui/components/primitives/message/link-message';
 import { Navbar } from '~ui/components/primitives/navbar/Navbar';
-import AOHead from '~ui/components/primitives/AOHead';
+
 import { Footer } from '~ui/components/primitives/Footer';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import Link from 'next/link';
 import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
+import { ServerPublic } from '~api/router/server/types';
 
 type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];
@@ -86,8 +87,9 @@ function ChannelDropdown(props: ChannelSelectProps) {
 export const CommunityPage = ({
 	server,
 	channels,
-	isOnTenantSite,
-}: CommunityPageData) => {
+}: CommunityPageData & {
+	tenant: ServerPublic;
+}) => {
 	const selectedChannelId = channels[0]?.channel.id;
 
 	// useTrackEvent('Community Page View', serverToAnalyticsData(server));
@@ -203,22 +205,10 @@ export const CommunityPage = ({
 	return (
 		<div className="mx-auto w-full overflow-x-hidden overflow-y-scroll bg-background scrollbar-hide">
 			<Navbar
-				isOnTenantSite={server.customDomain != null}
-				tenant={server}
-				hideIcon={isOnTenantSite}
+				tenant={server.customDomain ? server : undefined}
+				hideIcon={server.customDomain != null}
 			/>
 			<main className="bg-background">
-				<AOHead
-					title={`${server.name} Community`}
-					description={
-						server.description ?? isOnTenantSite
-							? `${server.name} community - Join the community to ask questions about ${server.name} and get answers from other members!`
-							: `The community page for ${server.name} on Answer Overflow.`
-					}
-					path={isOnTenantSite ? '/' : `/c/${server.id}`}
-					server={server}
-				/>
-
 				<HeroArea />
 				<div className="py-8">
 					<div className="px-4 2xl:px-[6rem]">
@@ -226,7 +216,7 @@ export const CommunityPage = ({
 					</div>
 				</div>
 			</main>
-			<Footer isOnTenantSite={server.customDomain != null} />
+			<Footer tenant={server} />
 		</div>
 	);
 };

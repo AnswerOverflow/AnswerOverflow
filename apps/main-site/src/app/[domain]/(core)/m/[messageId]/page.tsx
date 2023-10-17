@@ -4,6 +4,8 @@ import { makeMessageResultPage } from '@answeroverflow/db';
 import { notFound, permanentRedirect, redirect } from 'next/navigation';
 import MessageResultPage from '@answeroverflow/ui/src/components/pages/MessageResultPage';
 
+export const revalidate = 3600; // revalidate at most every hour
+
 export default async function TenantResultPage(props: {
 	params: { messageId: string };
 }) {
