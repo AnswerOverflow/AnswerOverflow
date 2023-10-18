@@ -12,8 +12,7 @@ import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
 import { MessageProps } from './props';
 import { MessageAttachments } from '~ui/components/primitives/message/attachments';
 import { TrackLinkButton } from '~ui/components/primitives/track-link-button';
-import { parseDiscordMarkdown } from '~ui/utils/markdown/parser';
-import { Code } from 'bright';
+import { parse } from '~ui/utils/markdown/render/index';
 
 export const MessageAuthorArea = (props: Pick<MessageProps, 'message'>) => {
 	const { message } = props;
@@ -60,16 +59,15 @@ export const MessageContents = async (
 	const trimmedText = shouldCollapse
 		? `${message.content.slice(0, collapseBy).trim()}...`
 		: message.content;
-	const discordMarkdownAsHTML = await parseDiscordMarkdown(trimmedText);
+	const discordMarkdownAsHTML = await parse(trimmedText);
 
 	return (
 		<div
 			className="pt-2 font-body text-primary [overflow-wrap:_anywhere]"
 			// The HTML from discord-markdown is escaped
-			dangerouslySetInnerHTML={{
-				__html: discordMarkdownAsHTML,
-			}}
-		/>
+		>
+			{discordMarkdownAsHTML}
+		</div>
 	);
 };
 

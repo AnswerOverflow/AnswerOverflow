@@ -12,7 +12,7 @@ import { Heading } from '~ui/components/primitives/base/Heading';
 import Link from 'next/link';
 import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
 import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
-import { parseDiscordMarkdown } from '~ui/utils/markdown/parser';
+import { parse } from '~ui/utils/markdown/render/index';
 import { TrackLoad } from '~ui/components/primitives/track-load';
 import {
 	channelToAnalyticsData,
@@ -147,9 +147,9 @@ export async function MessageResultPage({
 	const question = thread?.name ?? firstMessage.content?.slice(0, 100);
 	const [safeFirstMessageContent, safeQuestion, safeSolutionContent] =
 		await Promise.all([
-			parseDiscordMarkdown(firstMessage.content),
-			parseDiscordMarkdown(question),
-			solution && parseDiscordMarkdown(solution.content),
+			'', //parse(firstMessage.content),
+			'', //parse(question),
+			'', //solution && parse(solution.content),
 		]);
 	const isFirstMessageSolution = solution && solution.id !== firstMessage.id;
 	const qaHeader: WithContext<QAPage> = {
