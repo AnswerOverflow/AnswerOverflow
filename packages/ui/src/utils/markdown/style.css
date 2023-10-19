@@ -51,3 +51,8 @@
 img:not([src]):is(:empty) {
   @apply h-0 w-0 !important;
 }
+
+.discord-message {
+  white-space: break-spaces;
+  line-height: 16px;
+}

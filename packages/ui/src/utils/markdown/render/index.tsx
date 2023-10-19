@@ -74,7 +74,7 @@ function createRules(rule: { [key: string]: any }) {
 			) {
 				return (
 					// eslint-disable-next-line tailwindcss/no-custom-classname
-					<span className={`heading-${node.level}`} key={state.key}>
+					<span className={`heading-${node.level} block`} key={state.key}>
 						{parse(node.content, state)}
 					</span>
 				);
@@ -102,7 +102,9 @@ function createRules(rule: { [key: string]: any }) {
 				state: any,
 			) => {
 				return (
-					<span key={state.key}>{recurseOutput(node.content, state)}</span>
+					<span key={state.key} className={'block'}>
+						{recurseOutput(node.content, state)}
+					</span>
 				);
 			},
 		},
