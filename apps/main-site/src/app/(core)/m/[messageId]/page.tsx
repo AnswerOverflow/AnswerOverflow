@@ -1,11 +1,10 @@
-import { makeMessageResultPage } from '@answeroverflow/db';
 import { MessageResultPage } from '~ui/components/pages/MessageResultPage';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
 
 export const metadata: Metadata = {};
-
+export const dynamic = 'force-static';
 export default async function MessageResult({
 	params,
 }: {

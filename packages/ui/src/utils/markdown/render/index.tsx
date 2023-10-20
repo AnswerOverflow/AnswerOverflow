@@ -170,7 +170,14 @@ function createRules(rule: { [key: string]: any }) {
 				recurseOutput: (node: any, state: any) => any,
 				state: any,
 			) => (
-				<Code key={state.key} lang={node.lang}>
+				<Code
+					key={state.key}
+					lang={node.lang}
+					theme={{
+						light: 'github-light',
+						dark: 'github-dark',
+					}}
+				>
 					{recurse(node, recurseOutput, state)}
 				</Code>
 			),

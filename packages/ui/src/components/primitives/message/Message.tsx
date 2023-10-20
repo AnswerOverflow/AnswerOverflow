@@ -59,7 +59,10 @@ export const MessageContents = async (
 	const trimmedText = shouldCollapse
 		? `${message.content.slice(0, collapseBy).trim()}...`
 		: message.content;
+	const start = new Date().getTime();
 	const discordMarkdownAsHTML = await parse(trimmedText);
+	const end = new Date().getTime();
+	console.log(`Took ${end - start}ms to parse markdown`);
 
 	return (
 		<div

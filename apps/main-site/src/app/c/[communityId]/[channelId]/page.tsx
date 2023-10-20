@@ -1,12 +1,12 @@
 import { findServerWithCommunityPageData } from '@answeroverflow/db';
-import { CommunityPage } from '@answeroverflow/ui/src/components/pages/CommunityPage';
-import { sharedEnvs } from '@answeroverflow/env/shared';
 import { notFound, permanentRedirect, RedirectType } from 'next/navigation';
+import { sharedEnvs } from '@answeroverflow/env/shared';
+import { CommunityPage } from '~ui/components/pages/CommunityPage';
 
-export default async function CommunityPageContainer({
+export default async function ({
 	params,
 }: {
-	params: { communityId: string };
+	params: { communityId: string; channelId: string };
 }) {
 	const communityPageData = await findServerWithCommunityPageData({
 		idOrVanityUrl: params.communityId,
@@ -23,7 +23,12 @@ export default async function CommunityPageContainer({
 			RedirectType.replace,
 		);
 	}
-	const selectedChannel = communityPageData.channels[0];
+	const selectedChannel = communityPageData.channels.find(
+		(channel) => channel.channel.id === params.channelId,
+	);
+	if (!selectedChannel) {
+		return notFound();
+	}
 	return (
 		<CommunityPage
 			{...communityPageData}

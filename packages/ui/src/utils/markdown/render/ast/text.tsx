@@ -21,9 +21,12 @@ const text = {
 		},
 	) => {
 		const splitOnSpaces = node.content.split(' ');
+		console.log(
+			node.content.match(/(&lt;|<)(a?):[a-zA-Z0-9-]+:\d+(&gt;|>)/g)?.indices,
+		);
 		let areAnyEmojis = false;
 		const contentWithEmojis = splitOnSpaces.map((word) => {
-			const match = word.match(/^(&lt;|<)(a?):[a-zA-Z0-9-]+:\d+(&gt;|>)/);
+			const match = word.match(/(&lt;|<)(a?):[a-zA-Z0-9-]+:\d+(&gt;|>)/g);
 			if (match) {
 				areAnyEmojis = true;
 				const emoji = match[0]
@@ -45,6 +48,7 @@ const text = {
 				} as const;
 			}
 		});
+
 		if (!areAnyEmojis) {
 			return (
 				<span key={state.key} className={'block'}>

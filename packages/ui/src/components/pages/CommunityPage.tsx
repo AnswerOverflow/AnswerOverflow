@@ -2,8 +2,8 @@ import type {
 	ChannelPublicWithFlags,
 	CommunityPageData,
 } from '@answeroverflow/db';
-import { useTrackEvent } from '@answeroverflow/hooks';
-import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
+// import { useTrackEvent } from '@answeroverflow/hooks';
+// import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
 import { getServerDescription } from '~ui/utils/other';
 import { Button } from '~ui/components/primitives/ui/button';
 import {
@@ -37,12 +37,7 @@ function ChannelSidebar(props: ChannelSelectProps) {
 		const selected = props.selectedChannel.id === channel.id;
 		return (
 			<LinkButton
-				className={
-					selected
-						? 'bg-accent text-left text-accent-foreground'
-						: 'bg-inherit text-left dark:bg-inherit'
-				}
-				variant={'ghost'}
+				variant={selected ? 'secondary' : 'ghost'}
 				href={`/c/${channel.serverId}/${channel.id}`}
 			>
 				<ChannelName channel={channel} />
@@ -84,20 +79,16 @@ function ChannelDropdown(props: ChannelSelectProps) {
 	);
 }
 
-export const CommunityPage = ({
-	server,
-	channels,
-}: CommunityPageData & {
-	tenant: ServerPublic;
-}) => {
-	const selectedChannelId = channels[0]?.channel.id;
-
+export const CommunityPage = (
+	props: CommunityPageData & {
+		tenant: ServerPublic | undefined;
+		selectedChannel:
+			| Pick<CommunityPageData, 'channels'>['channels'][number]
+			| undefined;
+	},
+) => {
+	const { server, channels, selectedChannel } = props;
 	// useTrackEvent('Community Page View', serverToAnalyticsData(server));
-
-	const selectedChannel = channels.find(
-		(c) => c.channel.id === selectedChannelId,
-	);
-
 	const questions = selectedChannel?.questions ?? null;
 
 	const HeroArea = () => {
