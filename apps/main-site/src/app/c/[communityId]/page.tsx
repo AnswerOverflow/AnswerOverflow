@@ -11,6 +11,8 @@ export default async function CommunityPageContainer({
 	const communityPageData = await findServerWithCommunityPageData({
 		idOrVanityUrl: params.communityId,
 		limit: 20,
+		selectedChannel: undefined,
+		page: 0,
 	});
 	if (!communityPageData || communityPageData.server.kickedTime != null) {
 		return notFound();
@@ -29,6 +31,7 @@ export default async function CommunityPageContainer({
 			{...communityPageData}
 			selectedChannel={selectedChannel}
 			tenant={undefined}
+			page={0}
 		/>
 	);
 }

@@ -56,17 +56,12 @@ export const MessageContents = async (
 		collapseContent !== undefined &&
 		(message.content.length > collapseBy ||
 			(message.content.match(/\n/g)?.length ?? 0 > 5));
-	console.log('num \n', message.content.match(/\n/g)?.length);
 	const trimmedText = shouldCollapse
 		? message.content.match(/\n/g)?.length ?? 0 > 5
 			? message.content.split('\n').slice(0, 5).join('\n') + '\n...'
 			: `${message.content.slice(0, collapseBy).trim()}...`
 		: message.content;
-	const start = new Date().getTime();
 	const discordMarkdownAsHTML = await parse(trimmedText);
-	const end = new Date().getTime();
-	console.log(`Took ${end - start}ms to parse markdown`);
-
 	return (
 		<div
 			className="pt-2 font-body text-primary [overflow-wrap:_anywhere]"

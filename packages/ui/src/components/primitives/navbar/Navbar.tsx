@@ -1,6 +1,6 @@
 import type { Session } from 'next-auth';
 import Link from 'next/link';
-import React from 'react';
+import React, { Suspense } from 'react';
 import { GetStarted } from '../Callouts';
 import { ThemeSwitcher } from '../ThemeSwitcher';
 import { DiscordIcon, GitHubIcon } from '../base/Icons';
@@ -112,33 +112,20 @@ export const UserAvatar = (props: {
 					</>
 				)}
 				<ChangeThemeItem />
-				<LogoutItem isOnTenantSite={props.tenant} />
+				<LogoutItem tenant={props.tenant} />
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
 };
 
 import { getServerSession } from '@answeroverflow/auth';
-import { Lazy } from '~ui/components/primitives/base/lazy';
 
-export function UserSection(props: { tenant: ServerPublic | undefined }) {
-	return (
-		<Lazy
-			fallback={<SignInButton tenant={props.tenant} />}
-			load={async () => {
-				const session = await getServerSession();
-				if (!session) {
-					return <SignInButton tenant={props.tenant} />;
-				}
-				return (
-					<UserAvatar
-						user={session.user}
-						isOnTenantSite={props.isOnTenantSite}
-					/>
-				);
-			}}
-		/>
-	);
+export async function UserSection(props: { tenant: ServerPublic | undefined }) {
+	const session = await getServerSession();
+	if (!session) {
+		return <SignInButton tenant={props.tenant} />;
+	}
+	return <UserAvatar user={session.user} tenant={props.tenant} />;
 }
 
 export const Navbar = (props: {
@@ -215,7 +202,9 @@ export const Navbar = (props: {
 						</LinkButton>
 					</NavigationMenuItem>
 					<NavigationMenuItem>
-						<UserSection tenant={tenant} />
+						<Suspense fallback={<SignInButton tenant={tenant} />}>
+							<UserSection tenant={tenant} />
+						</Suspense>
 					</NavigationMenuItem>
 				</NavigationMenuList>
 			</div>

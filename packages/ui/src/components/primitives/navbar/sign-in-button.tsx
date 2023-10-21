@@ -7,12 +7,11 @@ import type { ServerPublic } from '@answeroverflow/api';
 
 export function SignInButton(
 	props: ButtonProps & {
-		isOnTenantSite: boolean;
 		tenant: ServerPublic | undefined;
 	},
 ) {
-	const { isOnTenantSite, tenant } = props;
-	if (isOnTenantSite) {
+	const { tenant } = props;
+	if (tenant) {
 		const link = makeMainSiteLink('/api/auth/tenant/signin');
 		const redirect =
 			typeof window !== 'undefined'

@@ -3,7 +3,7 @@
     wrap them with this component and they will be loaded lazily
  */
 import { Suspense } from 'react';
-
+// Doesn't work, need to revisit
 export function Lazy(props: {
 	load: () => React.ReactNode;
 	fallback?: React.ReactNode;

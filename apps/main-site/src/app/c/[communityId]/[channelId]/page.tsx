@@ -23,7 +23,6 @@ export default async function ({
 		selectedChannel: params.channelId,
 		page: page,
 	});
-	console.log(searchParams);
 	if (!communityPageData || communityPageData.server.kickedTime != null) {
 		return notFound();
 	}

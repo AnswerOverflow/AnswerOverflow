@@ -136,7 +136,7 @@ export async function findServerWithCommunityPageData(opts: {
 		serverId = found.id;
 	}
 
-	const [found, questions] = await Promise.all([
+	let [found, questions] = await Promise.all([
 		db.query.dbServers.findFirst({
 			where: eq(dbServers.id, serverId),
 			with: {
@@ -161,8 +161,16 @@ export async function findServerWithCommunityPageData(opts: {
 			  })
 			: [],
 	]);
-
 	if (!found || found.kickedTime != null) return null;
+	const firstChannel = found.channels[0];
+	if (!opts.selectedChannel && firstChannel) {
+		questions = await db.query.dbChannels.findMany({
+			where: eq(dbChannels.parentId, firstChannel.id),
+			orderBy: desc(dbChannels.id),
+			offset: opts.page * NUMBER_OF_THREADS_TO_LOAD,
+			limit: NUMBER_OF_THREADS_TO_LOAD,
+		});
+	}
 	const msgs = await findManyMessagesWithAuthors(
 		questions.map((q) => q.id),
 		{
