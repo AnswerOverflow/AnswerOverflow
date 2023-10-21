@@ -2,6 +2,7 @@ import type {
 	ChannelPublicWithFlags,
 	CommunityPageData,
 } from '@answeroverflow/db';
+import { NUMBER_OF_THREADS_TO_LOAD } from '@answeroverflow/constants/src/api';
 // import { useTrackEvent } from '@answeroverflow/hooks';
 // import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
 import { getServerDescription } from '~ui/utils/other';
@@ -26,6 +27,7 @@ import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import Link from 'next/link';
 import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
 import { ServerPublic } from '~api/router/server/types';
+import { LuArrowLeft, LuArrowRight } from 'react-icons/lu';
 
 type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];
@@ -79,18 +81,62 @@ function ChannelDropdown(props: ChannelSelectProps) {
 	);
 }
 
+const PageSwitcher = (props: {
+	numQuestions: number;
+	page: number;
+	selectedChannel: ChannelPublicWithFlags;
+}) => (
+	<div className={'flex w-full flex-row justify-between'}>
+		{props.page > 0 ? (
+			<LinkButton
+				variant={'outline'}
+				href={
+					props.page > 1
+						? `?page=${props.page - 1}`
+						: `/c/${props.selectedChannel.serverId}/${props.selectedChannel.id}`
+				}
+			>
+				<LuArrowLeft className={'mr-2'} />
+				Previous
+			</LinkButton>
+		) : (
+			<Button variant={'outline'} disabled={true}>
+				<LuArrowLeft className={'mr-2'} />
+				Previous
+			</Button>
+		)}
+		{props.numQuestions === NUMBER_OF_THREADS_TO_LOAD ? (
+			<LinkButton
+				variant={'outline'}
+				href={`/c/${props.selectedChannel.serverId}/${
+					props.selectedChannel.id
+				}?page=${props.page + 1}`}
+			>
+				Next
+				<LuArrowRight className={'ml-2'} />
+			</LinkButton>
+		) : (
+			<Button variant={'outline'} disabled={true}>
+				Next
+				<LuArrowRight className={'ml-2'} />
+			</Button>
+		)}
+	</div>
+);
+
 export const CommunityPage = (
 	props: CommunityPageData & {
 		tenant: ServerPublic | undefined;
 		selectedChannel:
 			| Pick<CommunityPageData, 'channels'>['channels'][number]
 			| undefined;
+		page: number | undefined;
 	},
 ) => {
 	const { server, channels, selectedChannel } = props;
 	// useTrackEvent('Community Page View', serverToAnalyticsData(server));
 	const questions = selectedChannel?.questions ?? null;
-
+	const { page = 0 } = props;
 	const HeroArea = () => {
 		return (
 			<div className="flex flex-col">
@@ -162,7 +208,16 @@ export const CommunityPage = (
 				className="rounded-standard drop-shadow-sm"
 			/>
 		));
-		return <div className="flex w-full flex-1 flex-col gap-2">{qs}</div>;
+		return (
+			<div className="flex w-full flex-1 flex-col gap-2">
+				{qs}
+				<PageSwitcher
+					numQuestions={questions.length}
+					page={page}
+					selectedChannel={selectedChannel.channel}
+				/>
+			</div>
+		);
 	};
 
 	const CommunityQuestionsSection = () => (

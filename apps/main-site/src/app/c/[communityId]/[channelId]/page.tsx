@@ -2,16 +2,28 @@ import { findServerWithCommunityPageData } from '@answeroverflow/db';
 import { notFound, permanentRedirect, RedirectType } from 'next/navigation';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { CommunityPage } from '~ui/components/pages/CommunityPage';
+import { z } from 'zod';
 
 export default async function ({
 	params,
+	searchParams,
 }: {
 	params: { communityId: string; channelId: string };
+	searchParams: {
+		page: string | undefined;
+	};
 }) {
+	const page = z.coerce.number().parse(searchParams.page ?? '0');
+	if (searchParams.page && page === 0) {
+		return permanentRedirect(`/c/${params.communityId}/${params.channelId}`);
+	}
 	const communityPageData = await findServerWithCommunityPageData({
 		idOrVanityUrl: params.communityId,
 		limit: 20,
+		selectedChannel: params.channelId,
+		page: page,
 	});
+	console.log(searchParams);
 	if (!communityPageData || communityPageData.server.kickedTime != null) {
 		return notFound();
 	}
@@ -34,6 +46,7 @@ export default async function ({
 			{...communityPageData}
 			selectedChannel={selectedChannel}
 			tenant={undefined}
+			page={page}
 		/>
 	);
 }

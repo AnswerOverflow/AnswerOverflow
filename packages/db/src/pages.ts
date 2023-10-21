@@ -8,7 +8,10 @@ import {
 	getThreadIdOfMessage,
 	type MessageFull,
 } from './message';
-import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
+import {
+	NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
+	NUMBER_OF_THREADS_TO_LOAD,
+} from '@answeroverflow/constants';
 import { db } from './db';
 import { and, asc, desc, eq, gte, inArray, or, sql } from 'drizzle-orm';
 import {
@@ -118,6 +121,8 @@ export async function findQuestionsForSitemap(serverId: string) {
 export async function findServerWithCommunityPageData(opts: {
 	idOrVanityUrl: string;
 	limit?: number;
+	selectedChannel: string | undefined;
+	page: number;
 }) {
 	const { idOrVanityUrl, limit } = opts;
 	let serverId = idOrVanityUrl;
@@ -131,31 +136,35 @@ export async function findServerWithCommunityPageData(opts: {
 		serverId = found.id;
 	}
 
-	const found = await db.query.dbServers.findFirst({
-		where: eq(dbServers.id, serverId),
-		with: {
-			channels: {
-				where: and(
-					or(
-						eq(dbChannels.type, ChannelType.GuildAnnouncement),
-						eq(dbChannels.type, ChannelType.GuildText),
-						eq(dbChannels.type, ChannelType.GuildForum),
+	const [found, questions] = await Promise.all([
+		db.query.dbServers.findFirst({
+			where: eq(dbServers.id, serverId),
+			with: {
+				channels: {
+					where: and(
+						or(
+							eq(dbChannels.type, ChannelType.GuildAnnouncement),
+							eq(dbChannels.type, ChannelType.GuildText),
+							eq(dbChannels.type, ChannelType.GuildForum),
+						),
+						sql`${dbChannels.bitfield} & ${channelBitfieldValues.indexingEnabled} > 0`,
 					),
-					sql`${dbChannels.bitfield} & ${channelBitfieldValues.indexingEnabled} > 0`,
-				),
-				with: {
-					threads: {
-						limit: 200,
-						orderBy: desc(dbChannels.id),
-					},
 				},
 			},
-		},
-	});
+		}),
+		opts.selectedChannel
+			? db.query.dbChannels.findMany({
+					where: eq(dbChannels.parentId, opts.selectedChannel),
+					orderBy: desc(dbChannels.id),
+					offset: opts.page * NUMBER_OF_THREADS_TO_LOAD,
+					limit: NUMBER_OF_THREADS_TO_LOAD,
+			  })
+			: [],
+	]);
 
 	if (!found || found.kickedTime != null) return null;
 	const msgs = await findManyMessagesWithAuthors(
-		found.channels.flatMap((c) => c.threads.map((t) => t.id)),
+		questions.map((q) => q.id),
 		{
 			excludePrivateMessages: true,
 		},
@@ -179,20 +188,20 @@ export async function findServerWithCommunityPageData(opts: {
 	found.channels.forEach((channel) => {
 		const settings = addFlagsToChannel(channel);
 		if (!settings.flags.indexingEnabled) return;
-		channel.threads.forEach((thread) => {
-			const threadMessage = threadMessageLookup.get(thread.id);
+		questions.forEach((question) => {
+			const threadMessage = threadMessageLookup.get(question.id);
 			if (!threadMessage) return;
 			if (!questionLookup.has(channel.id)) {
 				questionLookup.set(channel.id, [
 					{
 						message: threadMessage,
-						thread: zChannelPublic.parse(thread),
+						thread: zChannelPublic.parse(question),
 					},
 				]);
 			} else {
 				questionLookup.get(channel.id)?.push({
 					message: threadMessage,
-					thread: zChannelPublic.parse(thread),
+					thread: zChannelPublic.parse(question),
 				});
 			}
 		});
