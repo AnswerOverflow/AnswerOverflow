@@ -5,7 +5,7 @@ import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar
 
 interface SearchResultProps {
 	results: APISearchResult[number][];
-	tenant: ServerPublic;
+	tenant: ServerPublic | undefined;
 }
 
 export const SearchPage = ({ results, tenant }: SearchResultProps) => {
@@ -21,7 +21,7 @@ export const SearchPage = ({ results, tenant }: SearchResultProps) => {
 		`Found ${results.length} result${results.length === 1 ? '' : 's'}`,
 		tenant
 			? ''
-			: `from ${uniqueServers.size}{' '} ${
+			: `from ${uniqueServers.size} ${
 					uniqueServers.size === 1 ? 'community' : 'communities'
 			  }`,
 	].join(' ');

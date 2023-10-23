@@ -1,31 +1,35 @@
-import { useRouterQuery, useRouterServerId } from '~ui/utils/hooks';
+import { SearchPage } from '@answeroverflow/ui/src/components/pages/SearchPage';
+import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
+import { Metadata } from 'next';
+type Props = {
+	searchParams: {
+		q?: string | string[];
+	};
+};
 
-// import { SearchPage } from '~ui/components/pages/SearchPage';
-// import { trpc } from '@answeroverflow/ui/src/utils/trpc';
-
-export default function Page() {
-	// get the query from the url in the q param
-	// const routerQuery = useRouterQuery();
-	// const serverIdToFilterTo = useRouterServerId();
-	// const results = trpc.messages.search.useQuery(
-	// 	{
-	// 		query: routerQuery,
-	// 		serverId: serverIdToFilterTo,
-	// 	},
-	// 	{
-	// 		enabled: routerQuery.length > 0,
-	// 		refetchOnMount: false,
-	// 		refetchOnReconnect: false,
-	// 		refetchOnWindowFocus: false,
-	// 	},
-	// );
-
-	return (
-		<>
-			{/*<SearchPage*/}
-			{/*	results={results.data ?? []}*/}
-			{/*	isLoading={results.isLoading && routerQuery.length > 0}*/}
-			{/*/>*/}
-		</>
-	);
+export async function generateMetadata({
+	searchParams,
+}: Props): Promise<Metadata> {
+	const query = searchParams.q ? (searchParams.q as string) : undefined;
+	return {
+		title: query
+			? `Search Results for "${query}" - Answer Overflow`
+			: 'Search - Answer Overflow',
+		description: 'Search for answers to your questions on Answer Overflow.',
+		openGraph: {
+			title: query
+				? `Search Results for "${query}" - Answer Overflow`
+				: 'Search - Answer Overflow',
+			description: 'Search for answers to your questions on Answer Overflow.',
+		},
+	};
+}
+export default async function Search(props: Props) {
+	const results = await callAPI({
+		apiCall: (api) =>
+			api.messages.search({
+				query: props.searchParams.q ? (props.searchParams.q as string) : '',
+			}),
+	});
+	return <SearchPage results={results} tenant={undefined} />;
 }
