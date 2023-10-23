@@ -41,7 +41,7 @@ const MainSiteDropdownMenuGroup = () => (
 		<DropdownMenuGroup>
 			<DropdownMenuItem>
 				<LuLayoutDashboard className="mr-2 h-4 w-4" />
-				<Link href="/dashboard" className="w-full">
+				<Link href="/dashboard" className="w-full" prefetch={false}>
 					Dashboard
 				</Link>
 			</DropdownMenuItem>
