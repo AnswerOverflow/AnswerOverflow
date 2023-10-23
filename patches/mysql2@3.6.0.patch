@@ -27,7 +27,7 @@ index 49a128c049a611eb896b9755112beb3be853e0e4..dbc4664dbbf47b05688b236f691a1b79
        // we have to handle it according to JSON specs and use "utf8",
        // see https://github.com/sidorares/node-mysql2/issues/409
 +      if(typeof options.JSONParser === 'function') {
-+        return 'options.JSONParser.parse(packet.readLengthCodedString("utf8"))';
++        return 'options.JSONParser(packet.readLengthCodedString("utf8"))';
 +      }
        return 'JSON.parse(packet.readLengthCodedString("utf8"))';
      default:
@@ -39,6 +39,6 @@ index 49a128c049a611eb896b9755112beb3be853e0e4..dbc4664dbbf47b05688b236f691a1b79
 +  if(typeof config.JSONParser === 'function' && typeof options.JSONParser !== 'function') {
 +    options.JSONParser = config.JSONParser;
 +  }
- 
+
    function wrap(field, _this) {
      return {

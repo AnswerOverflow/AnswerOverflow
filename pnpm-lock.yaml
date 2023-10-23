@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   mysql2@3.6.0:
-    hash: agu7jhkhwexp3je6v57bzsz67q
+    hash: q5tj4ab7wpmbah6uclyjha7nle
     path: patches/mysql2@3.6.0.patch
 
 importers:
@@ -1041,12 +1041,6 @@ importers:
       '@answeroverflow/utils':
         specifier: workspace:^
         version: link:../utils
-      '@auth/core':
-        specifier: ^0.12.0
-        version: 0.12.0
-      '@auth/drizzle-adapter':
-        specifier: ^0.3.2
-        version: 0.3.2
       '@planetscale/database':
         specifier: ^1.11.0
         version: 1.11.0
@@ -1068,15 +1062,9 @@ importers:
       drizzle-zod:
         specifier: ^0.5.1
         version: 0.5.1(drizzle-orm@0.28.5)(zod@3.22.2)
-      json-bigint:
-        specifier: ^1.0.0
-        version: 1.0.0
-      json-bigint-patch:
-        specifier: ^0.0.8
-        version: 0.0.8
       mysql2:
         specifier: ^3.6.0
-        version: 3.6.0(patch_hash=agu7jhkhwexp3je6v57bzsz67q)
+        version: 3.6.0(patch_hash=q5tj4ab7wpmbah6uclyjha7nle)
       unique-names-generator:
         specifier: ^4.7.1
         version: 4.7.1
@@ -1090,15 +1078,9 @@ importers:
       '@answeroverflow/tsconfig':
         specifier: workspace:^
         version: link:../config/tsconfig
-      '@types/json-bigint':
-        specifier: ^1.0.2
-        version: 1.0.2
       '@types/node':
         specifier: ^20.5.1
         version: 20.5.1
-      '@vitest/coverage-c8':
-        specifier: ^0.28.5
-        version: 0.28.5
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -1691,14 +1673,6 @@ packages:
       oauth4webapi: 2.3.0
       preact: 10.11.3
       preact-render-to-string: 5.2.3(preact@10.11.3)
-    dev: false
-
-  /@auth/drizzle-adapter@0.3.2:
-    resolution: {integrity: sha512-fHfzwaTomm/RKgFKBO5AJ8JTfR44rX1KX2ASaKRk+4jvVhDh9FCir5BV1Fv68b5ay7XBo9DtcNSQuZp4hbpLYw==}
-    dependencies:
-      '@auth/core': 0.12.0
-    transitivePeerDependencies:
-      - nodemailer
     dev: false
 
   /@babel/code-frame@7.22.10:
@@ -6559,10 +6533,6 @@ packages:
     resolution: {integrity: sha512-FhpRzf927MNQdRZP0J5DLIdTXhjLYzeUTmLAu69mnVksLH9CJY3IuSeEgbKUki7GQZm0WqDkGzyxju2EZGD2wA==}
     dev: false
 
-  /@types/json-bigint@1.0.2:
-    resolution: {integrity: sha512-ZXqZc1YeBj1B2my/a/f5PWpNemgIb1r5s3cALPvsMqoGEZ0NOEo1UxrSRUEZr0EtChy1BH/CuORiYuvYr4/4Fw==}
-    dev: true
-
   /@types/json-schema@7.0.12:
     resolution: {integrity: sha512-Hr5Jfhc9eYOQNPYO5WLDq/n4jqijdHNlDXjuAQkkt+mWdQR+XJToOHrsD4cPaMXpn6KO7y2+wM8AZEs8VpBLVA==}
 
@@ -7596,10 +7566,6 @@ packages:
 
   /base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
-    dev: false
-
-  /bignumber.js@9.1.2:
-    resolution: {integrity: sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==}
     dev: false
 
   /binary-extensions@2.2.0:
@@ -9045,7 +9011,7 @@ packages:
         optional: true
     dependencies:
       '@planetscale/database': 1.11.0
-      mysql2: 3.6.0(patch_hash=agu7jhkhwexp3je6v57bzsz67q)
+      mysql2: 3.6.0(patch_hash=q5tj4ab7wpmbah6uclyjha7nle)
     dev: false
 
   /drizzle-zod@0.5.1(drizzle-orm@0.28.5)(zod@3.22.2):
@@ -11564,16 +11530,6 @@ packages:
     engines: {node: '>=4'}
     hasBin: true
 
-  /json-bigint-patch@0.0.8:
-    resolution: {integrity: sha512-xa0LTQsyaq8awYyZyuUsporWisZFiyqzxGW8CKM3t7oouf0GFAKYJnqAm6e9NLNBQOCtOLvy614DEiRX/rPbnA==}
-    dev: false
-
-  /json-bigint@1.0.0:
-    resolution: {integrity: sha512-SiPv/8VpZuWbvLSMtTDU8hEfrZWg/mH/nV/b4o0CYbSxu1UIQPLdwKOCIyLQX+VIPO5vrLX3i8qtqFyhdPSUSQ==}
-    dependencies:
-      bignumber.js: 9.1.2
-    dev: false
-
   /json-diff@0.9.0:
     resolution: {integrity: sha512-cVnggDrVkAAA3OvFfHpFEhOnmcsUpleEKq4d4O8sQWWSH40MBrWstKigVB1kGrgLWzuom+7rRdaCsnBD6VyObQ==}
     hasBin: true
@@ -13295,7 +13251,7 @@ packages:
   /ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  /mysql2@3.6.0(patch_hash=agu7jhkhwexp3je6v57bzsz67q):
+  /mysql2@3.6.0(patch_hash=q5tj4ab7wpmbah6uclyjha7nle):
     resolution: {integrity: sha512-EWUGAhv6SphezurlfI2Fpt0uJEWLmirrtQR7SkbTHFC+4/mJBrPiSzHESHKAWKG7ALVD6xaG/NBjjd1DGJGQQQ==}
     engines: {node: '>= 8.0'}
     dependencies:

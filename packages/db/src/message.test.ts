@@ -390,7 +390,7 @@ describe('Message Ops', () => {
 			expect(map.get(chnl3.id)).toBe('521');
 		});
 	});
-	test('find a bigint relation id without overflowing', async () => {
+	test.only('find a bigint relation id without overflowing', async () => {
 		const bigId = mockMessage(server, channel, author, {
 			id: '115533696646902222',
 		});

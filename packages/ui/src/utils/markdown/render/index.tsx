@@ -173,6 +173,7 @@ function createRules(rule: { [key: string]: any }) {
 				<Code
 					key={state.key}
 					lang={node.lang}
+					className={'overflow-x-scroll'}
 					theme={{
 						light: 'github-light',
 						dark: 'github-dark',
