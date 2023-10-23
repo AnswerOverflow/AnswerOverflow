@@ -28,6 +28,8 @@ import Link from 'next/link';
 import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
 import { ServerPublic } from '~api/router/server/types';
 import { LuArrowLeft, LuArrowRight } from 'react-icons/lu';
+import { TrackLoad } from '~ui/components/primitives/track-load';
+import { serverToAnalyticsData } from '@answeroverflow/constants';
 
 type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];
@@ -133,9 +135,8 @@ export const CommunityPage = (
 		page: number | undefined;
 	},
 ) => {
-	const { server, channels, selectedChannel } = props;
+	const { server, channels, selectedChannel, posts: questions } = props;
 	// useTrackEvent('Community Page View', serverToAnalyticsData(server));
-	const questions = selectedChannel?.questions ?? null;
 	const { page = 0 } = props;
 	const HeroArea = () => {
 		return (
@@ -155,7 +156,7 @@ export const CommunityPage = (
 									className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0"
 									server={server}
 									location={'Community Page'}
-									channel={selectedChannel?.channel}
+									channel={selectedChannel}
 								/>
 							</div>
 						</div>
@@ -176,7 +177,7 @@ export const CommunityPage = (
 								className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0"
 								server={server}
 								location={'Community Page'}
-								channel={selectedChannel?.channel}
+								channel={selectedChannel}
 							/>
 						</div>
 					</div>
@@ -214,7 +215,7 @@ export const CommunityPage = (
 				<PageSwitcher
 					numQuestions={questions.length}
 					page={page}
-					selectedChannel={selectedChannel.channel}
+					selectedChannel={selectedChannel}
 				/>
 			</div>
 		);
@@ -229,8 +230,8 @@ export const CommunityPage = (
 			<div className="flex w-full justify-center py-2 md:hidden">
 				{selectedChannel && (
 					<ChannelDropdown
-						channels={channels.map((c) => c.channel)}
-						selectedChannel={selectedChannel.channel}
+						channels={channels}
+						selectedChannel={selectedChannel}
 					/>
 				)}
 			</div>
@@ -238,8 +239,8 @@ export const CommunityPage = (
 				<div className="hidden md:block">
 					{selectedChannel && (
 						<ChannelSidebar
-							channels={channels.map((c) => c.channel)}
-							selectedChannel={selectedChannel.channel}
+							channels={channels}
+							selectedChannel={selectedChannel}
 						/>
 					)}
 				</div>
@@ -253,6 +254,10 @@ export const CommunityPage = (
 			<Navbar
 				tenant={server.customDomain ? server : undefined}
 				hideIcon={server.customDomain != null}
+			/>
+			<TrackLoad
+				eventName={'Community Page View'}
+				eventData={serverToAnalyticsData(server)}
 			/>
 			<main className="bg-background">
 				<HeroArea />

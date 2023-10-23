@@ -19,7 +19,6 @@ export default async function ({
 	}
 	const communityPageData = await findServerWithCommunityPageData({
 		idOrVanityUrl: params.communityId,
-		limit: 20,
 		selectedChannel: params.channelId,
 		page: page,
 	});
@@ -35,11 +34,12 @@ export default async function ({
 		);
 	}
 	const selectedChannel = communityPageData.channels.find(
-		(channel) => channel.channel.id === params.channelId,
+		(channel) => channel.id === params.channelId,
 	);
 	if (!selectedChannel) {
 		return notFound();
 	}
+
 	return (
 		<CommunityPage
 			{...communityPageData}

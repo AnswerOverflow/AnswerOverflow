@@ -1,86 +1,40 @@
-'use client';
 import Image from 'next/image';
-import { type Image as ImageType } from 'react-grid-gallery';
-import { useEffect, useState } from 'react';
-import { type Slide } from 'yet-another-react-lightbox';
-import { getImageHeightWidth } from '~ui/utils/other';
+
 import type { MessageProps } from './props';
-const useConfigImageAttachments = (props: Pick<MessageProps, 'message'>) => {
-	const [images, setImages] = useState<ImageType[] | 'loading' | 'error'>([]);
-	const [slides, setSlides] = useState<Slide[]>([]);
-	const { message } = props;
+import { Image as ImageType } from 'react-grid-gallery';
+import { getImageHeightWidth } from '~ui/utils/other';
 
-	useEffect(() => {
-		(async () => {
-			await Promise.all(
-				message.attachments.map(async (attachment): Promise<ImageType> => {
-					if (!attachment.width || !attachment.height) {
-						const img = await getImageHeightWidth({
-							imageSrc: attachment.proxyUrl,
-						});
-
-						return {
-							src: attachment.proxyUrl,
-							width: img.width,
-							height: img.height,
-							alt: attachment.description ?? 'No description',
-						};
-					}
-
-					return {
-						src: attachment.proxyUrl,
-						width: attachment.width,
-						height: attachment.height,
-						alt: attachment.description ?? 'No description',
-					};
-				}),
-			)
-				.then((parsedImages) => setImages(parsedImages))
-				.catch(() => setImages('error'));
-		})().catch(() => setImages('error'));
-	}, [message.attachments]);
-
-	useEffect(() => {
-		if (images === 'loading' || images === 'error') return;
-		setSlides(
-			images.map((image) => ({
-				src: image.src,
-				alt: image.alt,
-				width: image.width,
-				height: image.height,
-			})),
-		);
-	}, [images]);
-
-	return { parsedImages: images, parsedSlides: slides };
-};
-
-const SingularImageAttachment = (
+const SingularImageAttachment = async (
 	props: Pick<MessageProps, 'collapseContent' | 'message' | 'loadingStyle'>,
 ) => {
 	const { message, loadingStyle, collapseContent } = props;
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const { parsedImages, parsedSlides } = useConfigImageAttachments(props);
+	const images = await Promise.all(
+		message.attachments.map(async (attachment): Promise<ImageType> => {
+			if (!attachment.width || !attachment.height) {
+				const img = await getImageHeightWidth({
+					imageSrc: attachment.proxyUrl,
+				});
+
+				return {
+					src: attachment.proxyUrl,
+					width: img.width,
+					height: img.height,
+					alt: attachment.description ?? 'No description',
+				};
+			}
+
+			return {
+				src: attachment.proxyUrl,
+				width: attachment.width,
+				height: attachment.height,
+				alt: attachment.description ?? 'No description',
+			};
+		}),
+	);
 
 	if (message.attachments.length === 0) return null;
 
-	if (parsedImages === 'loading' || !parsedImages) {
-		return (
-			<div className="flex h-[50vh] items-center justify-center">
-				<div className="h-32 w-32 animate-spin rounded-full border-b-4" />
-			</div>
-		);
-	}
-
-	if (parsedImages === 'error') {
-		return <p className="mt-2 text-lg">An error occurred loading images...</p>;
-	}
-
-	const imagesToShow = collapseContent
-		? parsedImages.slice(0, 1)
-		: parsedImages;
+	const imagesToShow = collapseContent ? images.slice(0, 1) : images;
 
 	return (
 		<>

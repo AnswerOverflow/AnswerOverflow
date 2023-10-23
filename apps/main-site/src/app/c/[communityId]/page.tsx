@@ -10,7 +10,6 @@ export default async function CommunityPageContainer({
 }) {
 	const communityPageData = await findServerWithCommunityPageData({
 		idOrVanityUrl: params.communityId,
-		limit: 20,
 		selectedChannel: undefined,
 		page: 0,
 	});

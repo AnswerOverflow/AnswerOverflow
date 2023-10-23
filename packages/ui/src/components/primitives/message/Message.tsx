@@ -58,7 +58,7 @@ export const MessageContents = async (
 			(message.content.match(/\n/g)?.length ?? 0 > 5));
 	const trimmedText = shouldCollapse
 		? message.content.match(/\n/g)?.length ?? 0 > 5
-			? message.content.split('\n').slice(0, 5).join('\n') + '\n...'
+			? message.content.split('\n').slice(0, 5).join('\n') + '...'
 			: `${message.content.slice(0, collapseBy).trim()}...`
 		: message.content;
 	const discordMarkdownAsHTML = await parse(trimmedText);

@@ -147,9 +147,9 @@ export async function MessageResultPage({
 	const question = thread?.name ?? firstMessage.content?.slice(0, 100);
 	const [safeFirstMessageContent, safeQuestion, safeSolutionContent] =
 		await Promise.all([
-			'', //parse(firstMessage.content),
-			'', //parse(question),
-			'', //solution && parse(solution.content),
+			parse(firstMessage.content),
+			parse(question),
+			solution && parse(solution.content),
 		]);
 	const isFirstMessageSolution = solution && solution.id !== firstMessage.id;
 	const qaHeader: WithContext<QAPage> = {
@@ -187,12 +187,9 @@ export async function MessageResultPage({
 						/>
 					</div>
 					<div className="flex w-full flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400  text-center  dark:border-neutral-600 dark:text-white">
-						<h1
-							className="w-full text-center font-header text-xl text-primary md:text-left md:text-3xl"
-							dangerouslySetInnerHTML={{
-								__html: safeQuestion,
-							}}
-						></h1>
+						<h1 className="w-full text-center font-header text-xl text-primary md:text-left md:text-3xl">
+							{safeQuestion}
+						</h1>
 					</div>
 				</div>
 			</div>

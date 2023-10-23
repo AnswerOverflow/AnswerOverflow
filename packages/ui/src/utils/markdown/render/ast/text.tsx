@@ -21,9 +21,6 @@ const text = {
 		},
 	) => {
 		const splitOnSpaces = node.content.split(' ');
-		console.log(
-			node.content.match(/(&lt;|<)(a?):[a-zA-Z0-9-]+:\d+(&gt;|>)/g)?.indices,
-		);
 		let areAnyEmojis = false;
 		const contentWithEmojis = splitOnSpaces.map((word) => {
 			const match = word.match(/(&lt;|<)(a?):[a-zA-Z0-9-]+:\d+(&gt;|>)/g);
@@ -50,11 +47,7 @@ const text = {
 		});
 
 		if (!areAnyEmojis) {
-			return (
-				<span key={state.key} className={'block'}>
-					{node.content}
-				</span>
-			);
+			return <span key={state.key}>{node.content}</span>;
 		}
 		return contentWithEmojis.map((content, index) => {
 			if (content.type === 'emoji' && content.id) {

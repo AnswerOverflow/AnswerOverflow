@@ -124,7 +124,7 @@ export async function findServerWithCommunityPageData(opts: {
 	selectedChannel: string | undefined;
 	page: number;
 }) {
-	const { idOrVanityUrl, limit } = opts;
+	const { idOrVanityUrl, limit = NUMBER_OF_THREADS_TO_LOAD } = opts;
 	let serverId = idOrVanityUrl;
 	try {
 		BigInt(idOrVanityUrl);
@@ -136,6 +136,8 @@ export async function findServerWithCommunityPageData(opts: {
 		serverId = found.id;
 	}
 
+	const offset = (opts.page > 0 ? opts.page - 1 : opts.page) * limit;
+	// eslint-disable-next-line prefer-const
 	let [found, questions] = await Promise.all([
 		db.query.dbServers.findFirst({
 			where: eq(dbServers.id, serverId),
@@ -156,8 +158,8 @@ export async function findServerWithCommunityPageData(opts: {
 			? db.query.dbChannels.findMany({
 					where: eq(dbChannels.parentId, opts.selectedChannel),
 					orderBy: desc(dbChannels.id),
-					offset: opts.page * NUMBER_OF_THREADS_TO_LOAD,
-					limit: NUMBER_OF_THREADS_TO_LOAD,
+					offset,
+					limit: limit * 10, // Allow buffer room if some threads are private
 			  })
 			: [],
 	]);
@@ -167,8 +169,8 @@ export async function findServerWithCommunityPageData(opts: {
 		questions = await db.query.dbChannels.findMany({
 			where: eq(dbChannels.parentId, firstChannel.id),
 			orderBy: desc(dbChannels.id),
-			offset: opts.page * NUMBER_OF_THREADS_TO_LOAD,
-			limit: NUMBER_OF_THREADS_TO_LOAD,
+			offset,
+			limit: limit * 10, // Allow buffer room if some threads are private
 		});
 	}
 	const msgs = await findManyMessagesWithAuthors(
@@ -177,65 +179,23 @@ export async function findServerWithCommunityPageData(opts: {
 			excludePrivateMessages: true,
 		},
 	);
-
-	const server = addFlagsToServer(found);
-	const serverPublic = zServerPublic.parse(server);
-
-	const questionLookup = new Map<
-		string,
-		{
-			message: MessageFull;
-			thread: z.infer<typeof zChannelPublic>;
-		}[]
-	>();
-
-	const threadMessageLookup = new Map(
-		msgs.map((m) => [getThreadIdOfMessage(m), m]),
-	);
-
-	found.channels.forEach((channel) => {
-		const settings = addFlagsToChannel(channel);
-		if (!settings.flags.indexingEnabled) return;
-		questions.forEach((question) => {
-			const threadMessage = threadMessageLookup.get(question.id);
-			if (!threadMessage) return;
-			if (!questionLookup.has(channel.id)) {
-				questionLookup.set(channel.id, [
-					{
-						message: threadMessage,
-						thread: zChannelPublic.parse(question),
-					},
-				]);
-			} else {
-				questionLookup.get(channel.id)?.push({
-					message: threadMessage,
-					thread: zChannelPublic.parse(question),
-				});
-			}
-		});
-	});
-
-	const channelsWithQuestions = found.channels
-		.map((c) => {
-			const questions = questionLookup.get(c.id) ?? [];
+	const msgLookup = new Map(msgs.map((m) => [m.id, m]));
+	const posts = questions
+		.map((q) => {
+			const msg = msgLookup.get(q.id);
+			if (!msg) return null;
 			return {
-				channel: zChannelPublic.parse(c),
-				questions: questions
-					.sort((a, b) => {
-						const aDate = BigInt(a.thread.id);
-						const bDate = BigInt(b.thread.id);
-						if (aDate > bDate) return -1;
-						if (aDate < bDate) return 1;
-						return 0;
-					})
-					.slice(0, limit),
+				message: msg,
+				thread: q,
 			};
 		})
 		.filter(Boolean);
 
 	return {
-		server: serverPublic,
-		channels: channelsWithQuestions,
+		server: zServerPublic.parse(found),
+		channels: found.channels.map((c) => zChannelPublic.parse(c)),
+		posts:
+			opts.page > 0 ? posts.slice(limit, limit * 2) : posts.slice(0, limit),
 	};
 }
 
