@@ -17,7 +17,7 @@ import { useParams } from 'next/navigation';
 
 export function DashboardServerSelect() {
 	const params = useParams<{ serverId: string }>();
-	const serverId = params.serverId as string | undefined;
+	const serverId = params?.serverId as string | undefined;
 	const { data } = trpc.auth.getServersForOnboarding.useQuery();
 	const serversWithDashboard = data?.filter((server) => server.hasBot);
 	const selectedServer =
@@ -87,5 +87,5 @@ function DashboardNavbarRenderer() {
 }
 
 export function DashboardNavbar() {
-	return <DashboardNavbarRenderer user={undefined} />;
+	return <DashboardNavbarRenderer />;
 }

@@ -8,6 +8,7 @@ import {
 	stripPrivateFullMessageData,
 	stripPrivateServerData,
 } from '@answeroverflow/db/src/permissions';
+import { TRPCError } from '@trpc/server';
 
 export const messagesRouter = router({
 	/*
@@ -25,8 +26,14 @@ export const messagesRouter = router({
 		.meta({
 			tenantAuthAccessible: true,
 		})
-		.query(({ input, ctx }) => {
-			return makeMessageResultPage(input, ctx.userServers);
+		.query(async ({ input, ctx }) => {
+			const data = await makeMessageResultPage(input, ctx.userServers);
+			if (!data) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+				});
+			}
+			return data;
 		}),
 	search: withUserServersProcedure
 		.input(
