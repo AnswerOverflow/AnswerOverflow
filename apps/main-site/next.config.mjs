@@ -12,9 +12,7 @@ const nextJSMDX = await import('@next/mdx');
 
 const withMDX = nextJSMDX.default({
 	extension: /\.mdx?$/,
-	options: {
-
-	}
+	options: {},
 	// options: {
 	// 	// If you use remark-gfm, you'll need to use next.config.mjs
 	// 	// as the package is ESM only
@@ -51,18 +49,18 @@ const config = {
 			'media.discordapp.net',
 		],
 	},
-  // https://github.com/kkomelin/isomorphic-dompurify/issues/54
-   webpack: (config) => {
-     config.externals = [...config.externals, "canvas", "jsdom"];
-     return config;
-   },
+	// https://github.com/kkomelin/isomorphic-dompurify/issues/54
+	webpack: (config) => {
+		config.externals = [...config.externals, 'canvas', 'jsdom'];
+		return config;
+	},
 	// We already do linting on GH actions
 	eslint: {
-		ignoreDuringBuilds: true//!!process.env.CI,
+		ignoreDuringBuilds: true, //!!process.env.CI,
 	},
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+	typescript: {
+		ignoreBuildErrors: true,
+	},
 
 	productionBrowserSourceMaps: true, // we're open source so why not
 	sentry: {
