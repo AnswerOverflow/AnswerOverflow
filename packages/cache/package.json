@@ -24,7 +24,7 @@
 		"dotenv-cra": "^3.0.3",
 		"drizzle-orm": "^0.28.5",
 		"redis": "^4.6.7",
-		"zod": "^3.22.2"
+		"zod": "^3.22.3"
 	},
 	"devDependencies": {
 		"@answeroverflow/prettier-config": "workspace:^",

@@ -44,7 +44,7 @@
 		"reflect-metadata": "^0.1.13",
 		"rxjs": "^7.8.1",
 		"tsx": "^3.12.7",
-		"zod": "^3.22.2"
+		"zod": "^3.22.3"
 	},
 	"devDependencies": {
 		"@answeroverflow/discordjs-mock": "workspace:^",

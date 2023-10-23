@@ -27,7 +27,7 @@
 		"discord-api-types": "^0.37.54",
 		"dotenv-cra": "^3.0.3",
 		"elastic-builder": "^2.21.0",
-		"zod": "^3.22.2"
+		"zod": "^3.22.3"
 	},
 	"devDependencies": {
 		"@answeroverflow/prettier-config": "workspace:^",

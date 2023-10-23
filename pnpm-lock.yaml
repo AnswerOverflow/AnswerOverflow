@@ -171,7 +171,7 @@ importers:
         version: 7.64.0
       '@t3-oss/env-nextjs':
         specifier: ^0.6.1
-        version: 0.6.1(typescript@5.1.6)(zod@3.22.2)
+        version: 0.6.1(typescript@5.1.6)(zod@3.22.3)
       '@trpc/server':
         specifier: ^10.37.1
         version: 10.37.1
@@ -203,8 +203,8 @@ importers:
         specifier: ^3.12.7
         version: 3.12.7
       zod:
-        specifier: ^3.22.2
-        version: 3.22.2
+        specifier: ^3.22.3
+        version: 3.22.3
     devDependencies:
       '@answeroverflow/discordjs-mock':
         specifier: workspace:^
@@ -354,8 +354,8 @@ importers:
         specifier: ^1.13.1
         version: 1.13.1
       zod:
-        specifier: ^3.22.2
-        version: 3.22.2
+        specifier: ^3.22.3
+        version: 3.22.3
     devDependencies:
       '@answeroverflow/eslint-config-custom':
         specifier: workspace:^
@@ -523,8 +523,8 @@ importers:
         specifier: ^1.13.1
         version: 1.13.1
       zod:
-        specifier: ^3.22.2
-        version: 3.22.2
+        specifier: ^3.22.3
+        version: 3.22.3
     devDependencies:
       '@answeroverflow/eslint-config-custom':
         specifier: workspace:^
@@ -733,8 +733,8 @@ importers:
         specifier: ^1.13.1
         version: 1.13.1
       zod:
-        specifier: ^3.22.2
-        version: 3.22.2
+        specifier: ^3.22.3
+        version: 3.22.3
     devDependencies:
       '@answeroverflow/db-mock':
         specifier: workspace:^
@@ -806,8 +806,8 @@ importers:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
       zod:
-        specifier: ^3.22.2
-        version: 3.22.2
+        specifier: ^3.22.3
+        version: 3.22.3
     devDependencies:
       '@answeroverflow/prettier-config':
         specifier: workspace:^
@@ -858,8 +858,8 @@ importers:
         specifier: ^4.6.7
         version: 4.6.7
       zod:
-        specifier: ^3.22.2
-        version: 3.22.2
+        specifier: ^3.22.3
+        version: 3.22.3
     devDependencies:
       '@answeroverflow/prettier-config':
         specifier: workspace:^
@@ -1005,8 +1005,8 @@ importers:
         specifier: ^3.0.3
         version: 3.0.3
       zod:
-        specifier: ^3.22.2
-        version: 3.22.2
+        specifier: ^3.22.3
+        version: 3.22.3
     devDependencies:
       '@answeroverflow/prettier-config':
         specifier: workspace:^
@@ -1064,7 +1064,7 @@ importers:
         version: 0.28.5(@planetscale/database@1.11.0)(mysql2@3.6.0)
       drizzle-zod:
         specifier: ^0.5.1
-        version: 0.5.1(drizzle-orm@0.28.5)(zod@3.22.2)
+        version: 0.5.1(drizzle-orm@0.28.5)(zod@3.22.3)
       json-bigint:
         specifier: ^1.0.0
         version: 1.0.0
@@ -1075,8 +1075,8 @@ importers:
         specifier: ^4.7.1
         version: 4.7.1
       zod:
-        specifier: ^3.22.2
-        version: 3.22.2
+        specifier: ^3.22.3
+        version: 3.22.3
     devDependencies:
       '@answeroverflow/prettier-config':
         specifier: workspace:^
@@ -1130,8 +1130,8 @@ importers:
         specifier: ^3.13.1
         version: 3.13.1
       zod:
-        specifier: ^3.22.2
-        version: 3.22.2
+        specifier: ^3.22.3
+        version: 3.22.3
     devDependencies:
       '@answeroverflow/prettier-config':
         specifier: workspace:^
@@ -1254,10 +1254,10 @@ importers:
     dependencies:
       '@t3-oss/env-nextjs':
         specifier: ^0.6.1
-        version: 0.6.1(typescript@5.1.6)(zod@3.22.2)
+        version: 0.6.1(typescript@5.1.6)(zod@3.22.3)
       zod:
-        specifier: ^3.22.2
-        version: 3.22.2
+        specifier: ^3.22.3
+        version: 3.22.3
     devDependencies:
       '@answeroverflow/prettier-config':
         specifier: workspace:^
@@ -1388,8 +1388,8 @@ importers:
         specifier: ^2.21.0
         version: 2.21.0
       zod:
-        specifier: ^3.22.2
-        version: 3.22.2
+        specifier: ^3.22.3
+        version: 3.22.3
     devDependencies:
       '@answeroverflow/prettier-config':
         specifier: workspace:^
@@ -6168,25 +6168,25 @@ packages:
       jsonc-parser: 3.2.0
     dev: true
 
-  /@t3-oss/env-core@0.6.1(typescript@5.1.6)(zod@3.22.2):
+  /@t3-oss/env-core@0.6.1(typescript@5.1.6)(zod@3.22.3):
     resolution: {integrity: sha512-KQD7qEDJtkWIWWmTVjNvk0wnHpkvAQ6CRbUxbWMFNG/fiosBQDQvtRpBNu6USxBscJCoC4z6y7P9MN52/mLOzw==}
     peerDependencies:
       typescript: '>=4.7.2'
       zod: ^3.0.0
     dependencies:
       typescript: 5.1.6
-      zod: 3.22.2
+      zod: 3.22.3
     dev: false
 
-  /@t3-oss/env-nextjs@0.6.1(typescript@5.1.6)(zod@3.22.2):
+  /@t3-oss/env-nextjs@0.6.1(typescript@5.1.6)(zod@3.22.3):
     resolution: {integrity: sha512-z1dIC++Vxj9kmzX5nSPfcrCSkszy3dTEPC4Ssx7Ap5AqR3c2Qa7S0xf8axn6coy7D/vCXDAAnHYnCMDhtcY3SQ==}
     peerDependencies:
       typescript: '>=4.7.2'
       zod: ^3.0.0
     dependencies:
-      '@t3-oss/env-core': 0.6.1(typescript@5.1.6)(zod@3.22.2)
+      '@t3-oss/env-core': 0.6.1(typescript@5.1.6)(zod@3.22.3)
       typescript: 5.1.6
-      zod: 3.22.2
+      zod: 3.22.3
     dev: false
 
   /@tailwindcss/forms@0.5.4(tailwindcss@3.3.3):
@@ -8925,7 +8925,7 @@ packages:
       hanji: 0.0.5
       json-diff: 0.9.0
       minimatch: 7.4.6
-      zod: 3.21.4
+      zod: 3.22.3
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8996,14 +8996,14 @@ packages:
       mysql2: 3.6.0(patch_hash=q5tj4ab7wpmbah6uclyjha7nle)
     dev: false
 
-  /drizzle-zod@0.5.1(drizzle-orm@0.28.5)(zod@3.22.2):
+  /drizzle-zod@0.5.1(drizzle-orm@0.28.5)(zod@3.22.3):
     resolution: {integrity: sha512-C/8bvzUH/zSnVfwdSibOgFjLhtDtbKYmkbPbUCq46QZyZCH6kODIMSOgZ8R7rVjoI+tCj3k06MRJMDqsIeoS4A==}
     peerDependencies:
       drizzle-orm: '>=0.23.13'
       zod: '*'
     dependencies:
       drizzle-orm: 0.28.5(@planetscale/database@1.11.0)(mysql2@3.6.0)
-      zod: 3.22.2
+      zod: 3.22.3
     dev: false
 
   /duplexer@0.1.2:
@@ -13531,7 +13531,7 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       scroll-into-view-if-needed: 3.0.10
-      zod: 3.22.2
+      zod: 3.22.3
     dev: false
 
   /nextra@2.13.1(next@13.4.13)(react-dom@18.2.0)(react@18.2.0):
@@ -13570,7 +13570,7 @@ packages:
       title: 3.5.3
       unist-util-remove: 4.0.0
       unist-util-visit: 5.0.0
-      zod: 3.22.2
+      zod: 3.22.3
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -17862,10 +17862,10 @@ packages:
 
   /zod@3.21.4:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
-
-  /zod@3.22.2:
-    resolution: {integrity: sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==}
     dev: false
+
+  /zod@3.22.3:
+    resolution: {integrity: sha512-EjIevzuJRiRPbVH4mGc8nApb/lVLKVpmUhAaR5R5doKGfAnGJ6Gr3CViAVjP+4FWSxCsybeWQdcgCtbX+7oZug==}
 
   /zustand@3.7.2(react@18.2.0):
     resolution: {integrity: sha512-PIJDIZKtokhof+9+60cpockVOq05sJzHCriyvaLBmEJixseQ1a5Kdov6fWZfWOu5SK9c+FhH1jU0tntLxRJYMA==}
