@@ -45,7 +45,10 @@ export async function generateMetadata({
 		title: `${selectedChannel.name} - ${server.name} Community`,
 	};
 }
-export default async function ({ params, searchParams }: Props) {
+export default async function TenantChannelPage({
+	params,
+	searchParams,
+}: Props) {
 	const page = z.coerce.number().parse(searchParams.page ?? '0');
 	if (searchParams.page && page === 0) {
 		return permanentRedirect(`/c/${params.channelId}`);

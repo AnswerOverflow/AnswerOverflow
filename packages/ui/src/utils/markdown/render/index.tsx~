@@ -229,6 +229,4 @@ function createRules(rule: { [key: string]: any }) {
 	};
 }
 // @ts-ignore
-export const parse = parserFor(createRules(baseRules)) as (
-	str: string,
-) => React.ReactNode;
+export const parse = parserFor(createRules(baseRules)) as (str: string) => React.ReactNode;

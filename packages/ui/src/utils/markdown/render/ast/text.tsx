@@ -1,9 +1,10 @@
-// import Emoji from '@ui/shared/Emoji'
+/* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import SimpleMarkdown from 'simple-markdown';
 
 const text = {
 	...SimpleMarkdown.defaultRules.text,
-	parse: ([content], recurseParse, state) =>
+	parse: ([content]: string[], recurseParse: any, state: any) =>
 		state.nested
 			? { content }
 			: recurseParse(content, {

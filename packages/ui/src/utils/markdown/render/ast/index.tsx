@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import text from './text';
 import { defaultRules, inlineRegex } from 'simple-markdown';
-
-// import { customEmoji } from './customEmoji';
 
 const baseRules = {
 	newline: defaultRules.newline,
@@ -21,25 +21,38 @@ const baseRules = {
 	},
 	blockQuote: {
 		...defaultRules.blockQuote,
-		match: (source, { prevCapture }) =>
+		match: (
+			source: string,
+			{
+				prevCapture,
+			}: {
+				prevCapture: string | null;
+			},
+		) =>
 			/^$|\n *$/.test(prevCapture ?? '')
 				? /^( *>>> +([\s\S]*))|^( *>(?!>>) +[^\n]*(\n *>(?!>>) +[^\n]*)*\n?)/.exec(
 						source,
 				  )
 				: null,
-		parse: (capture, parse, state) => ({
-			content: parse(capture[0].replace(/^ *>(?:>>)? ?/gm, ''), state),
+		parse: (
+			capture: string[],
+			parse: (arg0: any, arg1: any) => any,
+			state: any,
+		) => ({
+			content: parse(capture[0]!.replace(/^ *>(?:>>)? ?/gm, ''), state),
 		}),
 	},
 	emoticon: {
 		order: defaultRules.text.order,
-		match: (source) => /^(¯\\_\(ツ\)_\/¯)/.exec(source),
-		parse: (capture) => ({ type: 'text', content: capture[1] }),
+		match: (source: string) => /^(¯\\_\(ツ\)_\/¯)/.exec(source),
+
+		parse: (capture: any[]) => ({ type: 'text', content: capture[1] }),
 	},
 	codeBlock: {
 		order: defaultRules.codeBlock.order,
-		match: (source) => /^```(([A-z0-9-]+?)\n+)?\n*([^]+?)\n*```/.exec(source),
-		parse: ([, , lang, content]) => ({
+		match: (source: string) =>
+			/^```(([A-z0-9-]+?)\n+)?\n*([^]+?)\n*```/.exec(source),
+		parse: ([, , lang, content]: string[]) => ({
 			lang: (lang || '').trim(),
 			content: content || '',
 		}),
@@ -62,13 +75,13 @@ const baseRules = {
 		order: defaultRules.u.order,
 		// https://github.com/discordjs/discord-api-types/blob/638c347dd8a1c5dc39b3626c76749c5f8a4afc6a/globals.ts#L69
 		match: inlineRegex(/^<t:(?<timestamp>-?\d{1,13})(:(?<style>[tTdDfFR]))?>/),
-		parse: ({ groups }) => groups,
+		parse: ({ groups }: { groups: any }) => groups,
 	},
 
 	command: {
 		order: defaultRules.u.order,
 		match: inlineRegex(/^<\/(.+?):\d{17,19}?>/),
-		parse: (capture) => ({ name: capture[1] }),
+		parse: (capture: string[]) => ({ name: capture[1] }),
 	},
 };
 

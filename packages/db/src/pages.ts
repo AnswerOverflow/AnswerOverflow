@@ -1,4 +1,3 @@
-import type { z } from 'zod';
 import {
 	applyPublicFlagsToMessages,
 	findManyMessagesWithAuthors,
@@ -6,7 +5,6 @@ import {
 	findMessageByIdWithDiscordAccount,
 	getParentChannelOfMessage,
 	getThreadIdOfMessage,
-	type MessageFull,
 } from './message';
 import {
 	NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,

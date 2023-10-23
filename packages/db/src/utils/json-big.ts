@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 /*
   Function to serialize data to JSON string
   Converts BigInt values to custom format (strings with "n" at the end) and then converts them to proper big integers in JSON string

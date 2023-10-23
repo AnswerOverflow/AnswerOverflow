@@ -1,6 +1,5 @@
 'use client';
 import { type RefObject, useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 
 export const useElementPosition = (element: RefObject<HTMLDivElement>) => {
