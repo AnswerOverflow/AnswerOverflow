@@ -22,7 +22,7 @@ export async function callAPI<
 	const { apiCall } = args;
 	let { allowedErrors } = args;
 	try {
-		return apiCall(caller);
+		return await apiCall(caller);
 	} catch (error) {
 		if (!(error instanceof TRPCError)) throw error;
 		if (!Array.isArray(allowedErrors))
