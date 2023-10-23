@@ -31,6 +31,7 @@ export const messagesRouter = router({
 			if (!data) {
 				throw new TRPCError({
 					code: 'NOT_FOUND',
+					message: 'Message not found',
 				});
 			}
 			return data;

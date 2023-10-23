@@ -27,7 +27,7 @@
 		"@answeroverflow/utils": "workspace:^",
 		"@planetscale/database": "^1.11.0",
 		"@sapphire/bitfield": "^1.2.0",
-		"@vitest/coverage-c8": "^0.33.0",
+		"@vitest/coverage-c8": "^0.28.5",
 		"discord-api-types": "^0.37.54",
 		"dotenv": "^16.3.1",
 		"dotenv-cra": "^3.0.3",
