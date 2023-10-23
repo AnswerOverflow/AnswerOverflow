@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 		canonical: '/',
 	},
 };
-async function fetchServers() {
+export async function fetchBrowseServers() {
 	const servers = await findAllServers();
 	const nonKickedServers = servers.filter(
 		(server) => server.kickedTime === null,
@@ -43,6 +43,6 @@ async function fetchServers() {
 }
 
 export default async function HomePage() {
-	const data = await fetchServers();
+	const data = await fetchBrowseServers();
 	return <Home servers={data} />;
 }

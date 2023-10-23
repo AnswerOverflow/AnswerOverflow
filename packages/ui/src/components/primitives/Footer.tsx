@@ -155,7 +155,7 @@ const PoweredByAnswerOverflowFooter = () => (
 	</div>
 );
 
-export function Footer(props: { tenant: ServerPublic }) {
+export function Footer(props: { tenant: ServerPublic | undefined }) {
 	return (
 		<footer>
 			{props.tenant ? <PoweredByAnswerOverflowFooter /> : <MainSiteFooter />}

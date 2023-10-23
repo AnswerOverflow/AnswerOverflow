@@ -1,29 +1,20 @@
 import { BrowseCommunitiesRenderer } from '~ui/components/pages/BrowseCommunitiesPage';
-import {
-	countConsentingUsersInManyServers,
-	findAllServers,
-	zServerPublic,
-} from '@answeroverflow/db';
 
+import { fetchBrowseServers } from '../../page';
+import { Metadata } from 'next';
+import { metadata as baseMetadata } from '../../layout';
+export const metadata: Metadata = {
+	title: 'Browse All Communities - Answer Overflow',
+	description:
+		'Browse all of the communities on Answer Overflow. Find the best Discord servers to join and learn about the communities that are out there.',
+	openGraph: {
+		...baseMetadata.openGraph,
+		title: 'Browse All Communities - Answer Overflow',
+		description:
+			'Browse all of the communities on Answer Overflow. Find the best Discord servers to join and learn about the communities that are out there.',
+	},
+};
 export default async function BrowseCommunitiesPage() {
-	const servers = await findAllServers();
-	const nonKickedServers = servers.filter(
-		(server) => server.kickedTime === null,
-	);
-	const consentingUserCountPerServer = await countConsentingUsersInManyServers(
-		nonKickedServers.map((server) => server.id),
-	);
-
-	const serversWithMoreThanTenConsentingUsers = nonKickedServers.filter(
-		(server) => (consentingUserCountPerServer.get(server.id) ?? 0) > 10,
-	);
-
-	const serversByNameAlphabetical = serversWithMoreThanTenConsentingUsers.sort(
-		(a, b) => a.name.localeCompare(b.name),
-	);
-
-	const asPublic = serversByNameAlphabetical.map((server) =>
-		zServerPublic.parse(server),
-	);
-	return <BrowseCommunitiesRenderer servers={asPublic} />;
+	const data = await fetchBrowseServers();
+	return <BrowseCommunitiesRenderer servers={data} />;
 }
