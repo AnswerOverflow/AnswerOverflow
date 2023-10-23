@@ -1,3 +1,4 @@
+'use client';
 import {
 	Accordion,
 	AccordionContent,
@@ -7,7 +8,7 @@ import {
 import { Check } from 'lucide-react';
 import { trackEvent } from '@answeroverflow/hooks';
 import { toast } from 'react-toastify';
-import React from 'react';
+import React, { useState } from 'react';
 import { classNames } from '~ui/utils/styling';
 import {
 	Dialog,
@@ -317,19 +318,13 @@ const PublicPlatformPricing = (props: { showFaqs?: boolean }) => (
 );
 
 export const PricingOptions = (props: { showFaqs?: boolean }) => {
-	const [pricingType, setPricingType] = useQueryState(
-		'type',
-		queryTypes
-			.stringEnum(['enterprise', 'public-platform'])
-			.withDefault('public-platform'),
-	);
+	// TODO: Move to URL
+	const [pricingType, setPricingType] = useState('public-platform');
 	return (
 		<TabGroup
 			index={pricingType === 'enterprise' ? 1 : 0}
 			onIndexChange={(index) => {
-				void setPricingType(index === 0 ? 'public-platform' : 'enterprise', {
-					scroll: false,
-				});
+				void setPricingType(index === 0 ? 'public-platform' : 'enterprise');
 			}}
 		>
 			<TabList className={'grid w-full grid-cols-2'}>

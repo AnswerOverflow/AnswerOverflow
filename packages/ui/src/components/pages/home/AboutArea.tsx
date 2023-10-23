@@ -11,6 +11,7 @@ import { HowDoesItWorkArea } from '~ui/components/pages/home/HowDoesItWorkArea';
 import { Navbar } from '~ui/components/primitives/navbar/Navbar';
 import { Footer } from '~ui/components/primitives/Footer';
 import { PricingOptions } from '~ui/components/pages/Pricing';
+import { TrackLink } from '~ui/components/primitives/track-link';
 
 // TODO: Link to docs for feature?
 const HomeFeature = (props: {
@@ -148,16 +149,15 @@ const featuredCommunities: FeaturedCommunityProps[] = [
 
 const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 	return (
-		<Link
+		<TrackLink
 			href={`c/${props.id}`}
 			style={{
 				width: '80%',
 			}}
-			onMouseUp={() => {
-				trackEvent('Community Page Link Click', {
-					'Link Location': 'About Marquee',
-					...serverToAnalyticsData(props),
-				});
+			eventName={'Community Page Link Click'}
+			eventData={{
+				'Link Location': 'About Marquee',
+				...serverToAnalyticsData(props),
 			}}
 		>
 			<div
@@ -177,7 +177,7 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 
 				<Paragraph className="py-2 text-center text-lg">{props.name}</Paragraph>
 			</div>
-		</Link>
+		</TrackLink>
 	);
 };
 
