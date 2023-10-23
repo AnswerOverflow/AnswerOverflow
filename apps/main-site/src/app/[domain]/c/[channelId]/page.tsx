@@ -2,7 +2,7 @@ import {
 	findServerByCustomDomain,
 	findServerWithCommunityPageData,
 } from '@answeroverflow/db';
-import { notFound, permanentRedirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { CommunityPage } from '@answeroverflow/ui/src/components/pages/CommunityPage';
 import { z } from 'zod';
 import { Metadata } from 'next';
@@ -18,7 +18,7 @@ export async function generateMetadata({
 }: Props): Promise<Metadata> {
 	const page = z.coerce.number().parse(searchParams.page ?? '0');
 	if (searchParams.page && page === 0) {
-		return permanentRedirect(`/c/${params.channelId}`);
+		return redirect(`/c/${params.channelId}`);
 	}
 	const domain = decodeURIComponent(params.domain);
 	const server = await findServerByCustomDomain(domain);
@@ -51,7 +51,7 @@ export default async function TenantChannelPage({
 }: Props) {
 	const page = z.coerce.number().parse(searchParams.page ?? '0');
 	if (searchParams.page && page === 0) {
-		return permanentRedirect(`/c/${params.channelId}`);
+		return redirect(`/c/${params.channelId}`);
 	}
 	const domain = decodeURIComponent(params.domain);
 	const server = await findServerByCustomDomain(domain);

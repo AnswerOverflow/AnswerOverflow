@@ -1,7 +1,7 @@
 import { findServerWithCommunityPageData } from '@answeroverflow/db';
 import { CommunityPage } from '@answeroverflow/ui/src/components/pages/CommunityPage';
 import { sharedEnvs } from '@answeroverflow/env/shared';
-import { notFound, permanentRedirect, RedirectType } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 type Props = {
 	params: { communityId: string };
@@ -17,11 +17,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 		return notFound();
 	}
 	if (communityPageData.server.customDomain) {
-		return permanentRedirect(
+		return redirect(
 			`http${sharedEnvs.NODE_ENV === 'production' ? 's' : ''}://${
 				communityPageData.server.customDomain
 			}`,
-			RedirectType.replace,
 		);
 	}
 	return {
@@ -47,11 +46,10 @@ export default async function CommunityPageContainer({ params }: Props) {
 		return notFound();
 	}
 	if (communityPageData.server.customDomain) {
-		return permanentRedirect(
+		return redirect(
 			`http${sharedEnvs.NODE_ENV === 'production' ? 's' : ''}://${
 				communityPageData.server.customDomain
 			}`,
-			RedirectType.replace,
 		);
 	}
 	const selectedChannel = communityPageData.channels[0];

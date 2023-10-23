@@ -16,7 +16,7 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 
 export function DashboardServerSelect() {
-	const params = useParams<{ serverId: string }>();
+	const params = useParams();
 	const serverId = params?.serverId as string | undefined;
 	const { data } = trpc.auth.getServersForOnboarding.useQuery();
 	const serversWithDashboard = data?.filter((server) => server.hasBot);
