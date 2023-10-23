@@ -12,6 +12,7 @@ export const getServerSession = async () => {
 		const nextAuthSession = await db.query.dbTenantSessions.findFirst({
 			where: eq(dbTenantSessions.id, tenantToken.value),
 		});
+
 		if (!nextAuthSession) return null;
 		const oldCookies = cookies().getAll();
 		// hacky
