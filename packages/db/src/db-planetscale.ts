@@ -19,12 +19,24 @@ if (!isPsDb) {
 	process.exit(1);
 }
 import { drizzle as psDrizzle } from 'drizzle-orm/planetscale-serverless';
-import { connect } from '@planetscale/database';
-import 'json-bigint-patch';
-
+import { cast, connect } from '@planetscale/database';
+import { JSONParse } from './utils/json-big';
+const decoder = new TextDecoder('utf-8');
+function bytes(text: string): number[] {
+	return text.split('').map((c) => c.charCodeAt(0));
+}
 export const db: PlanetScaleDatabase<typeof schema> = psDrizzle(
 	connect({
 		url: dbUrl,
+		cast: (field, value) => {
+			if (field.type === 'JSON') {
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+				if (value === null) return null;
+				return JSONParse(decoder.decode(Uint8Array.from(bytes(value))));
+			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+			return cast(field, value);
+		},
 	}),
 	{ schema },
 );

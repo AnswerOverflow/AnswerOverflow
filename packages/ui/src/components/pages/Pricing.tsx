@@ -1,3 +1,4 @@
+'use client';
 import {
 	Accordion,
 	AccordionContent,
@@ -7,7 +8,7 @@ import {
 import { Check } from 'lucide-react';
 import { trackEvent } from '@answeroverflow/hooks';
 import { toast } from 'react-toastify';
-import React from 'react';
+import React, { useState } from 'react';
 import { classNames } from '~ui/utils/styling';
 import {
 	Dialog,
@@ -21,10 +22,9 @@ import { Button } from '~ui/components/primitives/ui/button';
 import { Input } from '~ui/components/primitives/ui/input';
 import { Textarea } from '~ui/components/primitives/ui/textarea';
 import { AOLink } from '~ui/components/primitives/base/Link';
-import AOHead from '~ui/components/primitives/AOHead';
+
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import { Heading } from '~ui/components/primitives/base/Heading';
-import { queryTypes, useQueryState } from 'next-usequerystate';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@tremor/react';
 import { IoBusiness } from 'react-icons/io5';
 import { IoMdGlobe } from 'react-icons/io';
@@ -317,19 +317,13 @@ const PublicPlatformPricing = (props: { showFaqs?: boolean }) => (
 );
 
 export const PricingOptions = (props: { showFaqs?: boolean }) => {
-	const [pricingType, setPricingType] = useQueryState(
-		'type',
-		queryTypes
-			.stringEnum(['enterprise', 'public-platform'])
-			.withDefault('public-platform'),
-	);
+	// TODO: Move to URL
+	const [pricingType, setPricingType] = useState('public-platform');
 	return (
 		<TabGroup
 			index={pricingType === 'enterprise' ? 1 : 0}
 			onIndexChange={(index) => {
-				void setPricingType(index === 0 ? 'public-platform' : 'enterprise', {
-					scroll: false,
-				});
+				void setPricingType(index === 0 ? 'public-platform' : 'enterprise');
 			}}
 		>
 			<TabList className={'grid w-full grid-cols-2'}>
@@ -400,14 +394,6 @@ export const PricingOptions = (props: { showFaqs?: boolean }) => {
 export const Pricing = () => {
 	return (
 		<div className="my-6 max-w-6xl sm:mx-3 md:mx-auto">
-			<AOHead
-				path="/pricing"
-				title="Pricing"
-				description={
-					'Index your Discord server content into Google, starting at $0/month '
-				}
-			/>
-
 			<Heading.H1 className={'text-center'}>Plans</Heading.H1>
 			<PricingOptions showFaqs={true} />
 			<form
@@ -429,6 +415,7 @@ export const Pricing = () => {
 				<Input
 					placeholder={'email (optional)'}
 					type={'email'}
+					id={'feedback-email'}
 					autoComplete={'email'}
 					className={'bg-inherit'}
 				/>

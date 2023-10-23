@@ -2,10 +2,9 @@ import type {
 	ChannelPublicWithFlags,
 	CommunityPageData,
 } from '@answeroverflow/db';
-import { useTenantContext, useTrackEvent } from '@answeroverflow/hooks';
-import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
-import { useState } from 'react';
-import { MessagesSearchBar } from './SearchPage';
+import { NUMBER_OF_THREADS_TO_LOAD } from '@answeroverflow/constants/src/api';
+// import { useTrackEvent } from '@answeroverflow/hooks';
+// import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
 import { getServerDescription } from '~ui/utils/other';
 import { Button } from '~ui/components/primitives/ui/button';
 import {
@@ -17,36 +16,41 @@ import {
 import { Heading } from '~ui/components/primitives/base/Heading';
 import {
 	ChannelName,
-	ServerInvite,
 	ServerInviteJoinButton,
 } from '~ui/components/primitives/ServerInvite';
 import { ServerIcon } from '~ui/components/primitives/ServerIcon';
-import { LinkMessage } from '~ui/components/primitives/SearchResult';
-import { Navbar } from '~ui/components/primitives/Navbar';
-import AOHead from '~ui/components/primitives/AOHead';
+import { LinkMessage } from '~ui/components/primitives/message/link-message';
+import { Navbar } from '~ui/components/primitives/navbar/Navbar';
+
 import { Footer } from '~ui/components/primitives/Footer';
+import { LinkButton } from '~ui/components/primitives/base/LinkButton';
+import Link from 'next/link';
+import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
+import { ServerPublic } from '~api/router/server/types';
+import { LuArrowLeft, LuArrowRight } from 'react-icons/lu';
+import { TrackLoad } from '~ui/components/primitives/track-load';
+import { serverToAnalyticsData } from '@answeroverflow/constants';
 
 type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];
 	selectedChannel: ChannelPublicWithFlags;
-	setSelectedChannelId: (id: string) => void;
+	tenant: ServerPublic | undefined;
 };
 
 function ChannelSidebar(props: ChannelSelectProps) {
 	const ChannelSelect = ({ channel }: { channel: ChannelPublicWithFlags }) => {
 		const selected = props.selectedChannel.id === channel.id;
 		return (
-			<Button
-				className={
-					selected
-						? 'bg-accent text-left text-accent-foreground'
-						: 'bg-inherit text-left dark:bg-inherit'
+			<LinkButton
+				variant={selected ? 'secondary' : 'ghost'}
+				href={
+					props.tenant
+						? `/c/${channel.id}`
+						: `/c/${channel.serverId}/${channel.id}`
 				}
-				variant={'ghost'}
-				onClick={() => props.setSelectedChannelId(channel.id)}
 			>
 				<ChannelName channel={channel} />
-			</Button>
+			</LinkButton>
 		);
 	};
 
@@ -73,11 +77,16 @@ function ChannelDropdown(props: ChannelSelectProps) {
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="max-h-vh30 w-vw80">
 				{props.channels.map((channel) => (
-					<DropdownMenuItem
-						key={channel.id}
-						onClick={() => props.setSelectedChannelId(channel.id)}
-					>
-						<ChannelName channel={channel} />
+					<DropdownMenuItem key={channel.id} asChild>
+						<Link
+							href={
+								props.tenant
+									? `/c/${channel.id}`
+									: `/c/${channel.serverId}/${channel.id}`
+							}
+						>
+							<ChannelName channel={channel} />
+						</Link>
 					</DropdownMenuItem>
 				))}
 			</DropdownMenuContent>
@@ -85,71 +94,110 @@ function ChannelDropdown(props: ChannelSelectProps) {
 	);
 }
 
-export const CommunityPage = ({ server, channels }: CommunityPageData) => {
-	const [selectedChannelId, setSelectedChannelId] = useState<null | string>(
-		channels.at(0)?.channel.id ?? null,
-	);
-	const { isOnTenantSite } = useTenantContext();
-	useTrackEvent('Community Page View', serverToAnalyticsData(server));
+const PageSwitcher = (props: {
+	numQuestions: number;
+	page: number;
+	selectedChannel: ChannelPublicWithFlags;
+	tenant: ServerPublic | undefined;
+}) => (
+	<div className={'flex w-full flex-row justify-between'}>
+		{props.page > 0 ? (
+			<LinkButton
+				variant={'outline'}
+				href={
+					props.page > 1
+						? `?page=${props.page - 1}`
+						: props.tenant
+						? `/c/${props.selectedChannel.id}`
+						: `/c/${props.selectedChannel.serverId}/${props.selectedChannel.id}`
+				}
+			>
+				<LuArrowLeft className={'mr-2'} />
+				Previous
+			</LinkButton>
+		) : (
+			<Button variant={'outline'} disabled={true}>
+				<LuArrowLeft className={'mr-2'} />
+				Previous
+			</Button>
+		)}
+		{props.numQuestions === NUMBER_OF_THREADS_TO_LOAD ? (
+			<LinkButton
+				variant={'outline'}
+				href={
+					props.tenant
+						? `/c/${props.selectedChannel.id}?page=${props.page + 1}`
+						: `/c/${props.selectedChannel.serverId}/${
+								props.selectedChannel.id
+						  }?page=${props.page + 1}`
+				}
+			>
+				Next
+				<LuArrowRight className={'ml-2'} />
+			</LinkButton>
+		) : (
+			<Button variant={'outline'} disabled={true}>
+				Next
+				<LuArrowRight className={'ml-2'} />
+			</Button>
+		)}
+	</div>
+);
 
-	const selectedChannel = channels.find(
-		(c) => c.channel.id === selectedChannelId,
-	);
-
-	const questions = selectedChannel?.questions ?? null;
-
+export const CommunityPage = (
+	props: CommunityPageData & {
+		tenant: ServerPublic | undefined;
+		selectedChannel:
+			| Pick<CommunityPageData, 'channels'>['channels'][number]
+			| undefined;
+		page: number | undefined;
+	},
+) => {
+	const { server, channels, selectedChannel, tenant, posts: questions } = props;
+	// useTrackEvent('Community Page View', serverToAnalyticsData(server));
+	const { page = 0 } = props;
 	const HeroArea = () => {
 		return (
 			<div className="flex flex-col">
 				<div className="m-auto flex w-full flex-row bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
-					<div className={'mx-auto'}>
-						<ServerInvite
-							server={server}
-							location="Community Page"
-							channel={selectedChannel?.channel}
-							maxWidth={'max-w-4xl'}
-							truncate={false}
-							Title={
-								<Heading.H1 className="hidden pt-0 md:block">
-									{server.name}
-								</Heading.H1>
-							}
-							Icon={
+					<div className={'mx-auto flex flex-row gap-4'}>
+						<ServerIcon server={server} size={128} className="hidden sm:flex" />
+						<div>
+							<Heading.H1 className="hidden pt-0 md:block">
+								{server.name}
+							</Heading.H1>
+							<div className={'hidden md:block'}>
+								<Heading.H2 className="text-xl font-normal">
+									{getServerDescription(server)}
+								</Heading.H2>
+								<ServerInviteJoinButton
+									className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0"
+									server={server}
+									location={'Community Page'}
+									channel={selectedChannel}
+								/>
+							</div>
+						</div>
+						<div className="flex w-full flex-col items-center text-center md:hidden">
+							<div className="flex flex-row items-center justify-center gap-2">
 								<ServerIcon
 									server={server}
-									size={128}
-									className="hidden sm:flex"
+									size={64}
+									className="flex sm:hidden"
 								/>
-							}
-							Body={
-								<>
-									<div className={'hidden md:block'}>
-										<Heading.H2 className="text-xl font-normal">
-											{getServerDescription(server)}
-										</Heading.H2>
-										<ServerInviteJoinButton className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0" />
-									</div>
-									<div className="flex w-full flex-col items-center text-center md:hidden">
-										<div className="flex flex-row items-center justify-center gap-2">
-											<ServerIcon
-												server={server}
-												size={64}
-												className="flex sm:hidden"
-											/>
-											<Heading.H1 className="pt-0 text-3xl">
-												{server.name}
-											</Heading.H1>
-										</div>
-										<Heading.H2 className="text-base font-normal">
-											{server.description ??
-												`Join the community to ask questions about ${server.name} and get answers from other members.`}
-										</Heading.H2>
-										<ServerInviteJoinButton className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0" />
-									</div>
-								</>
-							}
-							JoinButton={<></>}
-						/>
+								<Heading.H1 className="pt-0 text-3xl">{server.name}</Heading.H1>
+							</div>
+							<Heading.H2 className="text-base font-normal">
+								{server.description ??
+									`Join the community to ask questions about ${server.name} and get answers from other members.`}
+							</Heading.H2>
+							<ServerInviteJoinButton
+								className="mx-auto mt-2 w-fit px-10 text-lg sm:mx-0"
+								server={server}
+								location={'Community Page'}
+								channel={selectedChannel}
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -179,26 +227,31 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 				className="rounded-standard drop-shadow-sm"
 			/>
 		));
-		return <div className="flex w-full flex-1 flex-col gap-2">{qs}</div>;
+		return (
+			<div className="flex w-full flex-1 flex-col gap-2">
+				{qs}
+				<PageSwitcher
+					tenant={tenant}
+					numQuestions={questions.length}
+					page={page}
+					selectedChannel={selectedChannel}
+				/>
+			</div>
+		);
 	};
 
 	const CommunityQuestionsSection = () => (
 		<>
-			<Heading.H3 className="text-center md:text-left">
-				Community questions
-			</Heading.H3>
-
 			<MessagesSearchBar
 				placeholder={`Search the ${server.name} community`}
 				serverId={server.id}
-				className="py-6"
 			/>
 			<div className="flex w-full justify-center py-2 md:hidden">
 				{selectedChannel && (
 					<ChannelDropdown
-						channels={channels.map((c) => c.channel)}
-						selectedChannel={selectedChannel.channel}
-						setSelectedChannelId={setSelectedChannelId}
+						channels={channels}
+						selectedChannel={selectedChannel}
+						tenant={tenant}
 					/>
 				)}
 			</div>
@@ -206,9 +259,9 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 				<div className="hidden md:block">
 					{selectedChannel && (
 						<ChannelSidebar
-							channels={channels.map((c) => c.channel)}
-							selectedChannel={selectedChannel.channel}
-							setSelectedChannelId={setSelectedChannelId}
+							channels={channels}
+							tenant={tenant}
+							selectedChannel={selectedChannel}
 						/>
 					)}
 				</div>
@@ -219,19 +272,12 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 
 	return (
 		<div className="mx-auto w-full overflow-x-hidden overflow-y-scroll bg-background scrollbar-hide">
-			<Navbar />
+			<Navbar tenant={tenant} hideIcon={server.customDomain != null} />
+			<TrackLoad
+				eventName={'Community Page View'}
+				eventData={serverToAnalyticsData(server)}
+			/>
 			<main className="bg-background">
-				<AOHead
-					title={`${server.name} Community`}
-					description={
-						server.description ?? isOnTenantSite
-							? `${server.name} community - Join the community to ask questions about ${server.name} and get answers from other members!`
-							: `The community page for ${server.name} on Answer Overflow.`
-					}
-					path={isOnTenantSite ? '/' : `/c/${server.id}`}
-					server={server}
-				/>
-
 				<HeroArea />
 				<div className="py-8">
 					<div className="px-4 2xl:px-[6rem]">
@@ -239,7 +285,7 @@ export const CommunityPage = ({ server, channels }: CommunityPageData) => {
 					</div>
 				</div>
 			</main>
-			<Footer />
+			<Footer tenant={tenant} />
 		</div>
 	);
 };

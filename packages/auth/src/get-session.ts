@@ -1,26 +1,32 @@
-import type {
-	GetServerSidePropsContext,
-	NextApiRequest,
-	NextApiResponse,
-} from 'next';
 import { getServerSession as getNextAuthSession } from 'next-auth';
+import { cookies } from 'next/headers';
 
 import { authOptions } from './auth-options';
-import { getTenantCookieName } from './tenant-cookie';
+import { getNextAuthCookieName, getTenantCookieName } from './tenant-cookie';
+import { db, dbTenantSessions } from '@answeroverflow/db';
+import { eq } from 'drizzle-orm';
 
-export const getServerSession = async (
-	ctx:
-		| {
-				req: GetServerSidePropsContext['req'];
-				res: GetServerSidePropsContext['res'];
-		  }
-		| { req: NextApiRequest; res: NextApiResponse },
-) => {
-	const isTenantSession = ctx.req.cookies[getTenantCookieName()] !== undefined;
-	const session = await getNextAuthSession(ctx.req, ctx.res, authOptions);
+export const getServerSession = async () => {
+	const tenantToken = cookies().get(getTenantCookieName());
+	if (tenantToken) {
+		const nextAuthSession = await db.query.dbTenantSessions.findFirst({
+			where: eq(dbTenantSessions.id, tenantToken.value),
+		});
+		if (!nextAuthSession) return null;
+		const oldCookies = cookies().getAll();
+		// hacky
+		cookies().getAll = () => {
+			return [
+				...oldCookies,
+				{ name: getNextAuthCookieName(), value: nextAuthSession.sessionToken },
+			];
+		};
+	}
+	// TODO: Does next auth early return if no auth cookie is set?
+	const session = await getNextAuthSession(authOptions);
 	if (!session) return null;
 	return {
 		...session,
-		isTenantSession,
+		isTenantSession: !!tenantToken,
 	};
 };

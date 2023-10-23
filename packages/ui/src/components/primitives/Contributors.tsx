@@ -20,7 +20,7 @@ export const Contributor = ({
 	links,
 }: ContributorData) => (
 	<div className="flex h-full w-64 flex-col items-center justify-start rounded-standard border-2 px-8 py-16">
-		<Avatar>
+		<Avatar className={'h-20 w-20'}>
 			<AvatarImage alt={`The profile picture of ${name}`} src={avatar} />
 			<AvatarFallback>{name}</AvatarFallback>
 		</Avatar>

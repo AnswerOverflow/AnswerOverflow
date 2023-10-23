@@ -1,4 +1,3 @@
-import type { z } from 'zod';
 import {
 	applyPublicFlagsToMessages,
 	findManyMessagesWithAuthors,
@@ -6,9 +5,11 @@ import {
 	findMessageByIdWithDiscordAccount,
 	getParentChannelOfMessage,
 	getThreadIdOfMessage,
-	type MessageFull,
 } from './message';
-import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
+import {
+	NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
+	NUMBER_OF_THREADS_TO_LOAD,
+} from '@answeroverflow/constants';
 import { db } from './db';
 import { and, asc, desc, eq, gte, inArray, or, sql } from 'drizzle-orm';
 import {
@@ -26,6 +27,13 @@ import {
 } from './zodSchemas/channelSchemas';
 import { ChannelType } from 'discord-api-types/v10';
 import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
+import { findChannelsBeforeId } from './channel';
+import {
+	DiscordAPIServer,
+	stripPrivateChannelData,
+	stripPrivateFullMessageData,
+	stripPrivateServerData,
+} from './permissions';
 
 export async function findQuestionsForSitemap(serverId: string) {
 	const res = await db.query.dbServers.findFirst({
@@ -91,11 +99,11 @@ export async function findQuestionsForSitemap(serverId: string) {
 					const uss = question.author.userServerSettings.find(
 						(uss) => uss.serverId === res.id,
 					);
-					if (!uss) return null;
-					const wFlags = addFlagsToUserServerSettings(uss);
 					const isPublic =
-						wFlags.flags.canPubliclyDisplayMessages ||
-						areAllServerMessagesPublic;
+						areAllServerMessagesPublic ||
+						(uss &&
+							addFlagsToUserServerSettings(uss).flags
+								.canPubliclyDisplayMessages);
 					if (!isPublic) return null;
 					return {
 						thread: t,
@@ -111,8 +119,10 @@ export async function findQuestionsForSitemap(serverId: string) {
 export async function findServerWithCommunityPageData(opts: {
 	idOrVanityUrl: string;
 	limit?: number;
+	selectedChannel: string | undefined;
+	page: number;
 }) {
-	const { idOrVanityUrl, limit } = opts;
+	const { idOrVanityUrl, limit = NUMBER_OF_THREADS_TO_LOAD } = opts;
 	let serverId = idOrVanityUrl;
 	try {
 		BigInt(idOrVanityUrl);
@@ -124,94 +134,66 @@ export async function findServerWithCommunityPageData(opts: {
 		serverId = found.id;
 	}
 
-	const found = await db.query.dbServers.findFirst({
-		where: eq(dbServers.id, serverId),
-		with: {
-			channels: {
-				where: and(
-					or(
-						eq(dbChannels.type, ChannelType.GuildAnnouncement),
-						eq(dbChannels.type, ChannelType.GuildText),
-						eq(dbChannels.type, ChannelType.GuildForum),
+	const offset = (opts.page > 0 ? opts.page - 1 : opts.page) * limit;
+	// eslint-disable-next-line prefer-const
+	let [found, questions] = await Promise.all([
+		db.query.dbServers.findFirst({
+			where: eq(dbServers.id, serverId),
+			with: {
+				channels: {
+					where: and(
+						or(
+							eq(dbChannels.type, ChannelType.GuildAnnouncement),
+							eq(dbChannels.type, ChannelType.GuildText),
+							eq(dbChannels.type, ChannelType.GuildForum),
+						),
+						sql`${dbChannels.bitfield} & ${channelBitfieldValues.indexingEnabled} > 0`,
 					),
-					sql`${dbChannels.bitfield} & ${channelBitfieldValues.indexingEnabled} > 0`,
-				),
-				with: {
-					threads: {
-						limit: 200,
-						orderBy: desc(dbChannels.id),
-					},
 				},
 			},
-		},
-	});
-
+		}),
+		opts.selectedChannel
+			? db.query.dbChannels.findMany({
+					where: eq(dbChannels.parentId, opts.selectedChannel),
+					orderBy: desc(dbChannels.id),
+					offset,
+					limit: limit * 10, // Allow buffer room if some threads are private
+			  })
+			: [],
+	]);
 	if (!found || found.kickedTime != null) return null;
+	const firstChannel = found.channels[0];
+	if (!opts.selectedChannel && firstChannel) {
+		questions = await db.query.dbChannels.findMany({
+			where: eq(dbChannels.parentId, firstChannel.id),
+			orderBy: desc(dbChannels.id),
+			offset,
+			limit: limit * 10, // Allow buffer room if some threads are private
+		});
+	}
 	const msgs = await findManyMessagesWithAuthors(
-		found.channels.flatMap((c) => c.threads.map((t) => t.id)),
+		questions.map((q) => q.id),
 		{
 			excludePrivateMessages: true,
 		},
 	);
-
-	const server = addFlagsToServer(found);
-	const serverPublic = zServerPublic.parse(server);
-
-	const questionLookup = new Map<
-		string,
-		{
-			message: MessageFull;
-			thread: z.infer<typeof zChannelPublic>;
-		}[]
-	>();
-
-	const threadMessageLookup = new Map(
-		msgs.map((m) => [getThreadIdOfMessage(m), m]),
-	);
-
-	found.channels.forEach((channel) => {
-		const settings = addFlagsToChannel(channel);
-		if (!settings.flags.indexingEnabled) return;
-		channel.threads.forEach((thread) => {
-			const threadMessage = threadMessageLookup.get(thread.id);
-			if (!threadMessage) return;
-			if (!questionLookup.has(channel.id)) {
-				questionLookup.set(channel.id, [
-					{
-						message: threadMessage,
-						thread: zChannelPublic.parse(thread),
-					},
-				]);
-			} else {
-				questionLookup.get(channel.id)?.push({
-					message: threadMessage,
-					thread: zChannelPublic.parse(thread),
-				});
-			}
-		});
-	});
-
-	const channelsWithQuestions = found.channels
-		.map((c) => {
-			const questions = questionLookup.get(c.id) ?? [];
+	const msgLookup = new Map(msgs.map((m) => [m.id, m]));
+	const posts = questions
+		.map((q) => {
+			const msg = msgLookup.get(q.id);
+			if (!msg) return null;
 			return {
-				channel: zChannelPublic.parse(c),
-				questions: questions
-					.sort((a, b) => {
-						const aDate = BigInt(a.thread.id);
-						const bDate = BigInt(b.thread.id);
-						if (aDate > bDate) return -1;
-						if (aDate < bDate) return 1;
-						return 0;
-					})
-					.slice(0, limit),
+				message: msg,
+				thread: q,
 			};
 		})
 		.filter(Boolean);
 
 	return {
-		server: serverPublic,
-		channels: channelsWithQuestions,
+		server: zServerPublic.parse(found),
+		channels: found.channels.map((c) => zChannelPublic.parse(c)),
+		posts:
+			opts.page > 0 ? posts.slice(limit, limit * 2) : posts.slice(0, limit),
 	};
 }
 
@@ -363,5 +345,48 @@ export async function findMessageResultPage(messageId: string) {
 		messages: combinedMessages,
 		rootMessage,
 		thread: channel?.parent ? addFlagsToChannel(channel) : null,
+	};
+}
+
+export async function makeMessageResultPage(
+	messageId: string,
+	userServers: DiscordAPIServer[] | null,
+) {
+	const data = await findMessageResultPage(messageId);
+	if (!data) {
+		return null;
+	}
+	const { messages, channel, server, thread } = data;
+
+	const recommendedChannels = thread
+		? await findChannelsBeforeId({
+				take: 100,
+				id: thread.id,
+				serverId: server.id,
+		  })
+		: [];
+	const recommendedChannelLookup = new Map(
+		recommendedChannels.map((c) => [c.id, c]),
+	);
+	const recommendedPosts = await findManyMessagesWithAuthors(
+		recommendedChannels.map((c) => c.id),
+	).then((posts) =>
+		posts
+			.filter((p) => p.public && recommendedChannelLookup.has(p.id))
+			.map((p) => ({
+				message: stripPrivateFullMessageData(p, userServers),
+				thread: stripPrivateChannelData(recommendedChannelLookup.get(p.id)!),
+			}))
+			.slice(0, 20),
+	);
+
+	return {
+		messages: messages.map((msg) => {
+			return stripPrivateFullMessageData(msg, userServers);
+		}),
+		parentChannel: stripPrivateChannelData(channel),
+		server: stripPrivateServerData(server),
+		thread: thread ? stripPrivateChannelData(thread) : undefined,
+		recommendedPosts,
 	};
 }

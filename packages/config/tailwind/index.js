@@ -20,9 +20,8 @@ module.exports = {
 		},
 		extend: {
 			fontFamily: {
-				discord: ['Noto Sans', 'sans-serif'],
-				header: ['Montserrat', 'sans-serif'],
-				body: ['Source Sans Pro', 'sans-serif'],
+				header: ['var(--font-montserrat)'],
+				body: ['var(--font-source-sans-3)'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',

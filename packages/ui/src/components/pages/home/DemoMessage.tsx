@@ -8,7 +8,6 @@ import {
 } from '~ui/components/primitives/ui/avatar';
 import Link from 'next/link';
 import type { ChannelPublicWithFlags } from '@answeroverflow/db';
-import { useIsUserInServer } from '~ui/utils/hooks';
 import { forwardRef } from 'react';
 import { getInitials } from '~ui/utils/avatars';
 import { DiscordIcon } from '~ui/components/primitives/base/Icons';
@@ -52,10 +51,7 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 		const dateOfMessage = customMessageDateString
 			? customMessageDateString
 			: getSnowflakeUTCDate(message.id);
-		const isUserInServer = useIsUserInServer(message.serverId);
-		if (isUserInServer === 'in_server') {
-			blurred = false;
-		}
+		blurred = false;
 
 		function MessageAttachment({
 			attachment,

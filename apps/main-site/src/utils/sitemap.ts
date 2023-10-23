@@ -2,7 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'http';
 
 export type SitemapEntry = {
 	loc: string;
-	lastmod?: string;
+	lastmod?: Date;
 	changefreq?:
 		| 'always'
 		| 'hourly'
@@ -41,7 +41,9 @@ export class Sitemap {
       <loc>${
 				entry.loc.startsWith('http') ? entry.loc : this.baseUrl + entry.loc
 			}</loc>
-      ${entry.lastmod ? `<lastmod>${entry.lastmod}</lastmod>` : ''}
+      ${
+				entry.lastmod ? `<lastmod>${entry.lastmod.toISOString()}</lastmod>` : ''
+			}
       ${
 				entry.changefreq && this.type === 'url'
 					? `<changefreq>${entry.changefreq}</changefreq>`

@@ -1,3 +1,4 @@
+'use client';
 import type { VariantProps } from 'cva';
 import Link from 'next/link';
 import type { SetRequired } from 'type-fest';

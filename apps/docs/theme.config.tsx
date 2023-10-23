@@ -9,7 +9,7 @@ import {
 	GITHUB_LINK,
 	ANSWER_OVERFLOW_BLUE_HEX,
 } from '@answeroverflow/constants';
-import { useRouter } from 'next/router';
+import { usePathname } from 'next/navigation';
 import { webClientEnv } from '@answeroverflow/env/web';
 
 // https://nextra.site/docs/docs-theme/theme-configuration
@@ -28,7 +28,7 @@ const config: DocsThemeConfig = {
 		useLink: () => CREATE_NEW_DOCS_ISSUE_LINK,
 	},
 	useNextSeoProps() {
-		const { asPath } = useRouter();
+		const asPath = usePathname();
 		return {
 			titleTemplate: asPath === '/' ? '%s' : '%s - Answer Overflow Docs',
 			themeColor: ANSWER_OVERFLOW_BLUE_HEX,
@@ -39,7 +39,7 @@ const config: DocsThemeConfig = {
 	},
 	docsRepositoryBase: DOCS_LINK_BASE,
 	footer: {
-		component: <Footer />,
+		component: <Footer tenant={undefined} />,
 	},
 };
 

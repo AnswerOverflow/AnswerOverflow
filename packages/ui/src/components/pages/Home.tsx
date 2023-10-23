@@ -1,26 +1,17 @@
-import { Navbar } from '../primitives/Navbar';
+import { Navbar } from '../primitives/navbar/Navbar';
 import type { ServerPublic } from '@answeroverflow/api';
 import { HeroArea } from '~ui/components/pages/home/HeroArea';
 import { Footer } from '~ui/components/primitives/Footer';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import { FollowCursor } from '~ui/components/primitives/Follow';
-import AOHead from '~ui/components/primitives/AOHead';
 
 export const Home = (props: {
 	servers: Pick<ServerPublic, 'id' | 'icon' | 'name'>[];
 }) => {
 	return (
 		<div className="flex w-full flex-col items-center bg-background font-body">
-			<AOHead
-				path="/"
-				title="Answer Overflow - Search all of Discord"
-				description={
-					'A global search engine for Discord communities. Find results from indexed communities or a server to join.'
-				}
-				addPrefix={false}
-			/>
 			<div className={'w-full max-w-screen-3xl'}>
-				<Navbar />
+				<Navbar tenant={undefined} hideIcon={true} />
 			</div>
 			<HeroArea servers={props.servers} />
 			<div
@@ -85,7 +76,7 @@ export const Home = (props: {
 					</div>
 				</FollowCursor>
 			</div>
-			<Footer />
+			<Footer tenant={undefined} />
 		</div>
 	);
 };

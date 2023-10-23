@@ -7,6 +7,7 @@ import { getSnowflakeUTCDate } from '@answeroverflow/ui/src/utils/snowflake';
 import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/base/AnswerOverflowLogo';
 
 export const runtime = 'edge';
+export const contentType = 'image/png';
 export const preferredRegion = 'iad1';
 
 const satoshiBold = fetch(

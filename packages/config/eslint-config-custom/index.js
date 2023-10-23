@@ -39,12 +39,7 @@ module.exports = {
 		'react/jsx-key': 'off',
 		'@typescript-eslint/no-floating-promises': 'error',
 		'@typescript-eslint/prefer-as-const': 'error',
-		'no-restricted-imports': [
-			'error',
-			{
-				patterns: ['../..*', 'packages/*'],
-			},
-		],
+		'no-restricted-imports': 'off',
 		'no-await-in-loop': 'error',
 		'no-only-tests/no-only-tests': [
 			// eslint-disable-next-line no-undef

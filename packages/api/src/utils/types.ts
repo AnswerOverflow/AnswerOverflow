@@ -3,6 +3,7 @@ import type { botRouter, appRouter } from '../router';
 export type BotRouter = typeof botRouter;
 export type AppRouter = typeof appRouter;
 export type BotRouterCaller = ReturnType<BotRouter['createCaller']>;
+export type AppRouterCaller = ReturnType<AppRouter['createCaller']>;
 export type BotRouterInput = inferRouterInputs<BotRouter>;
 export type BotRouterOutput = inferRouterOutputs<BotRouter>;
 export type AppRouterOutput = inferRouterOutputs<AppRouter>;

@@ -1,17 +1,16 @@
 import Balancer from 'react-wrap-balancer';
 import Image from 'next/image';
-import Link from 'next/link';
 import { cn } from '~ui/utils/styling';
-import { trackEvent } from '@answeroverflow/hooks';
 import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
 import { Paragraph } from '~ui/components/primitives/base/Paragraph';
 import { Heading } from '~ui/components/primitives/base/Heading';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import { HowDoesItWorkArea } from '~ui/components/pages/home/HowDoesItWorkArea';
-import { Navbar } from '~ui/components/primitives/Navbar';
+import { Navbar } from '~ui/components/primitives/navbar/Navbar';
 import { Footer } from '~ui/components/primitives/Footer';
 import { PricingOptions } from '~ui/components/pages/Pricing';
-import AOHead from '~ui/components/primitives/AOHead';
+import { TrackLink } from '~ui/components/primitives/track-link';
+
 // TODO: Link to docs for feature?
 const HomeFeature = (props: {
 	featureName: React.ReactNode;
@@ -148,16 +147,15 @@ const featuredCommunities: FeaturedCommunityProps[] = [
 
 const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 	return (
-		<Link
+		<TrackLink
 			href={`c/${props.id}`}
 			style={{
 				width: '80%',
 			}}
-			onMouseUp={() => {
-				trackEvent('Community Page Link Click', {
-					'Link Location': 'About Marquee',
-					...serverToAnalyticsData(props),
-				});
+			eventName={'Community Page Link Click'}
+			eventData={{
+				'Link Location': 'About Marquee',
+				...serverToAnalyticsData(props),
 			}}
 		>
 			<div
@@ -177,7 +175,7 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 
 				<Paragraph className="py-2 text-center text-lg">{props.name}</Paragraph>
 			</div>
-		</Link>
+		</TrackLink>
 	);
 };
 
@@ -203,12 +201,8 @@ const FeaturedCommunitiesSection = (props: { className?: string }) => {
 export const AboutArea = () => {
 	return (
 		<div className={'mx-auto max-w-screen-3xl'}>
-			<Navbar />
-			<AOHead
-				path="/about"
-				title="Answer Overflow - Index Your Discord Server Channels Into Google"
-				addPrefix={false}
-			/>
+			<Navbar tenant={undefined} />
+
 			<HowDoesItWorkArea />
 			<div className="flex flex-col items-center px-4 pb-20 pt-10 sm:px-[4rem] 2xl:px-[6rem]">
 				<FeaturesSection />
@@ -217,7 +211,7 @@ export const AboutArea = () => {
 				</div>
 				<FeaturedCommunitiesSection className="pt-20" />
 			</div>
-			<Footer />
+			<Footer tenant={undefined} />
 		</div>
 	);
 };
