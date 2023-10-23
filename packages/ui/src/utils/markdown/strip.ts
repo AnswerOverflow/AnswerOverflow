@@ -1,3 +1,4 @@
+/*  eslint-disable  no-useless-escape */
 export function stripMarkdownAndHTML(
 	md: string,
 	options: {

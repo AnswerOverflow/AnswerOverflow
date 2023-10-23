@@ -116,6 +116,7 @@ export const ServerInviteJoinButton = async (
 
 export const ServerInvite = (
 	props: Omit<ServerInviteProps, 'isUserInServer'> & {
+		// eslint-disable-next-line @typescript-eslint/naming-convention
 		JoinButton?: React.ReactNode;
 	},
 ) => {

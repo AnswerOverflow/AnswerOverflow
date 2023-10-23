@@ -1,8 +1,6 @@
 import Balancer from 'react-wrap-balancer';
 import Image from 'next/image';
-import Link from 'next/link';
 import { cn } from '~ui/utils/styling';
-import { trackEvent } from '@answeroverflow/hooks';
 import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
 import { Paragraph } from '~ui/components/primitives/base/Paragraph';
 import { Heading } from '~ui/components/primitives/base/Heading';

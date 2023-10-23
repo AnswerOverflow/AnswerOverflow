@@ -1,19 +1,12 @@
 import { TRPCError } from '@trpc/server';
 import {
-	type ChannelWithFlags,
 	findIgnoredDiscordAccountById,
-	getDefaultDiscordAccount,
-	type MessageFull,
-	type MessageWithDiscordAccount,
 	type ServerWithFlags,
-	zChannelPublic,
-	zServerPublic,
 	Plan,
 } from '@answeroverflow/db';
 import type { Source, Context } from '~api/router/context';
-import type { DiscordAPIServerSchema } from '@answeroverflow/cache';
+
 import { PermissionsBitField } from './types';
-import { getDefaultMessage } from '@answeroverflow/db/src/utils/message-default';
 
 export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
 	'You are missing the required permissions to do this';

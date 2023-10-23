@@ -1,5 +1,4 @@
 import { MessageWithDiscordAccount } from '@answeroverflow/db';
-import React from 'react';
 
 export type MessageProps = {
 	message: MessageWithDiscordAccount;

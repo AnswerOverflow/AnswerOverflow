@@ -4,7 +4,7 @@ import { sharedEnvs } from '@answeroverflow/env/shared';
 import { CommunityPage } from '~ui/components/pages/CommunityPage';
 import { z } from 'zod';
 
-export default async function ({
+export default async function CommunityChannelPage({
 	params,
 	searchParams,
 }: {

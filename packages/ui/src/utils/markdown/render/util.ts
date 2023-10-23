@@ -1,4 +1,9 @@
-export function flattenAst(node, parent?) {
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+export function flattenAst(node: any, parent?: any) {
 	if (Array.isArray(node)) {
 		for (let n = 0; n < node.length; n++) {
 			node[n] = flattenAst(node[n], parent);
@@ -18,11 +23,13 @@ export function flattenAst(node, parent?) {
 	return node;
 }
 
-export function astToString(node) {
-	function inner(node, result = []) {
+export function astToString(node: any) {
+	function inner(node: any, result = []) {
 		if (Array.isArray(node)) {
 			node.forEach((subNode) => inner(subNode, result));
 		} else if (typeof node.content === 'string') {
+			// @ts-ignore
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 			result.push(node.content);
 		} else if (node.content != null) {
 			inner(node.content, result);
@@ -34,34 +41,7 @@ export function astToString(node) {
 	return inner(node).join('');
 }
 
-export const recurse = (node, recurseOutput, state) =>
+export const recurse = (node: any, recurseOutput: any, state: any) =>
 	typeof node.content === 'string'
 		? node.content
 		: recurseOutput(node.content, state);
-
-export function jumboify(ast) {
-	const nonEmojiNodes = ast.some(
-		(node) =>
-			node.type !== 'img' &&
-			(typeof node.content !== 'string' || node.content.trim() !== ''),
-	);
-
-	if (nonEmojiNodes) return ast;
-
-	const maximum = 27;
-	let count = 0;
-
-	ast.forEach((node, i) => {
-		node.props.key = i;
-
-		if (node.type === 'img') count += 1;
-
-		if (count > maximum) return false;
-	});
-
-	if (count < maximum) {
-		ast.forEach((node) => (node.props.className += ' jumboable'));
-	}
-
-	return ast;
-}

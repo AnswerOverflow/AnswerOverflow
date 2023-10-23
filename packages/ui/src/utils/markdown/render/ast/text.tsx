@@ -53,6 +53,7 @@ const text = {
 		return contentWithEmojis.map((content, index) => {
 			if (content.type === 'emoji' && content.id) {
 				return (
+					// eslint-disable-next-line @next/next/no-img-element
 					<img
 						src={`https://cdn.discordapp.com/emojis/${content.id}.${
 							content.animated ? 'gif' : 'png'
