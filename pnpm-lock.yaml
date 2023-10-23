@@ -301,7 +301,7 @@ importers:
         version: link:../../packages/ui
       '@tanstack/react-query':
         specifier: ^4.32.6
-        version: 4.32.6(react-dom@18.2.0)(react@18.2.0)
+        version: 4.32.6(react-dom@18.2.0)(react-native@0.72.4)(react@18.2.0)
       '@tanstack/react-query-devtools':
         specifier: ^4.32.6
         version: 4.32.6(@tanstack/react-query@4.32.6)(react-dom@18.2.0)(react@18.2.0)
@@ -449,7 +449,7 @@ importers:
         version: 7.72.0(next@13.5.6)(react@18.2.0)(webpack@5.88.2)
       '@tanstack/react-query':
         specifier: ^4.32.6
-        version: 4.32.6(react-dom@18.2.0)(react@18.2.0)
+        version: 4.32.6(react-dom@18.2.0)(react-native@0.72.4)(react@18.2.0)
       '@tanstack/react-query-devtools':
         specifier: ^4.32.6
         version: 4.32.6(@tanstack/react-query@4.32.6)(react-dom@18.2.0)(react@18.2.0)
@@ -1466,6 +1466,9 @@ importers:
       '@tremor/react':
         specifier: ^3.6.1
         version: 3.6.1(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.3.3)
+      '@trpc/react-query':
+        specifier: ^10.37.1
+        version: 10.37.1(@tanstack/react-query@4.32.6)(@trpc/client@10.37.1)(@trpc/server@10.37.1)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/server':
         specifier: ^10.37.1
         version: 10.37.1
@@ -6227,14 +6230,14 @@ packages:
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       '@tanstack/match-sorter-utils': 8.8.4
-      '@tanstack/react-query': 4.32.6(react-dom@18.2.0)(react@18.2.0)
+      '@tanstack/react-query': 4.32.6(react-dom@18.2.0)(react-native@0.72.4)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       superjson: 1.13.1
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
 
-  /@tanstack/react-query@4.32.6(react-dom@18.2.0)(react@18.2.0):
+  /@tanstack/react-query@4.32.6(react-dom@18.2.0)(react-native@0.72.4)(react@18.2.0):
     resolution: {integrity: sha512-AITu/IKJJJXsHHeXNBy5bclu12t08usMCY0vFC2dh9SP/w6JAk5U9GwfjOIPj3p+ATADZvxQPe8UiCtMLNeQbg==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -6249,6 +6252,7 @@ packages:
       '@tanstack/query-core': 4.32.6
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
+      react-native: 0.72.4(@babel/core@7.22.10)(@babel/preset-env@7.22.10)(react@18.2.0)
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
 
@@ -6315,7 +6319,7 @@ packages:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
     dependencies:
-      '@tanstack/react-query': 4.32.6(react-dom@18.2.0)(react@18.2.0)
+      '@tanstack/react-query': 4.32.6(react-dom@18.2.0)(react-native@0.72.4)(react@18.2.0)
       '@trpc/client': 10.37.1(@trpc/server@10.37.1)
       '@trpc/react-query': 10.37.1(@tanstack/react-query@4.32.6)(@trpc/client@10.37.1)(@trpc/server@10.37.1)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/server': 10.37.1
@@ -6334,7 +6338,7 @@ packages:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
     dependencies:
-      '@tanstack/react-query': 4.32.6(react-dom@18.2.0)(react@18.2.0)
+      '@tanstack/react-query': 4.32.6(react-dom@18.2.0)(react-native@0.72.4)(react@18.2.0)
       '@trpc/client': 10.37.1(@trpc/server@10.37.1)
       '@trpc/server': 10.37.1
       react: 18.2.0
@@ -13341,7 +13345,7 @@ packages:
       '@panva/hkdf': 1.1.1
       cookie: 0.5.0
       jose: 4.14.4
-      next: 13.5.6(react-dom@18.2.0)(react@18.2.0)(sass@1.66.1)
+      next: 13.5.6(@babel/core@7.22.10)(react-dom@18.2.0)(react@18.2.0)
       oauth: 0.9.15
       openid-client: 5.5.0
       preact: 10.11.3
@@ -13401,7 +13405,7 @@ packages:
       react: '*'
       react-dom: '*'
     dependencies:
-      next: 13.5.6(react-dom@18.2.0)(react@18.2.0)(sass@1.66.1)
+      next: 13.5.6(@babel/core@7.22.10)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false

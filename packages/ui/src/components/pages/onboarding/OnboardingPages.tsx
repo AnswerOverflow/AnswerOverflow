@@ -1,8 +1,8 @@
 import { useOnboardingContext } from './OnboardingContainer';
-import { trpc } from '~ui/utils/trpc';
+import { trpc } from '~ui/utils/client';
 import type { ServerPublic } from '@answeroverflow/api';
 import { useEffect, useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { signOut } from 'next-auth/react';
 import {
 	AcademicCapIcon,
 	ChatBubbleLeftIcon,
@@ -331,11 +331,10 @@ export function EnableMarkSolution() {
 }
 
 export function WelcomePage() {
-	const session = useSession();
+	const session = trpc.auth.getSession.useQuery();
 	const { data: servers } = trpc.auth.getServersForOnboarding.useQuery(
 		undefined,
 		{
-			enabled: session.status === 'authenticated',
 			onError: (err) => {
 				if (err.data?.code === 'UNAUTHORIZED') {
 					void signOut();
@@ -343,7 +342,18 @@ export function WelcomePage() {
 			},
 		},
 	);
-	return <WelcomePageRenderer authState={session.status} servers={servers} />;
+	return (
+		<WelcomePageRenderer
+			authState={
+				session.isLoading
+					? 'loading'
+					: session.data
+					? 'authenticated'
+					: 'unauthenticated'
+			}
+			servers={servers}
+		/>
+	);
 }
 
 export function WelcomePageRenderer(props: {
@@ -412,7 +422,11 @@ export function WelcomePageRenderer(props: {
 					<Heading.H2 className="py-8 text-2xl">
 						{"Let's"} get you signed in
 					</Heading.H2>
-					<SignInButton className="w-64 " variant="default" />
+					<SignInButton
+						className="w-64 "
+						variant="default"
+						tenant={undefined}
+					/>
 				</div>
 			);
 	}

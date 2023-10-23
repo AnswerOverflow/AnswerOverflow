@@ -29,6 +29,7 @@
 		"@radix-ui/react-slider": "^1.1.2",
 		"@radix-ui/react-slot": "^1.0.2",
 		"@tremor/react": "^3.6.1",
+		"@trpc/react-query": "^10.37.1",
 		"@trpc/server": "^10.37.1",
 		"@types/memoizee": "^0.4.9",
 		"@types/ramda": "^0.29.6",

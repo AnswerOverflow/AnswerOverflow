@@ -1,22 +1,23 @@
-import Link from 'next/link';
-import type { ServerPublic } from '@answeroverflow/api';
+'use client';
+import { useParams } from 'next/navigation';
 import { trpc } from '~ui/utils/client';
-import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
-import { Button } from '~ui/components/primitives/ui/button';
+import { ServerPublic } from '~api/router/server/types';
+import { ServerIcon } from '~ui/components/primitives/ServerIcon';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '~ui/components/primitives/ui/dropdown-menu';
-import { ServerIcon } from '~ui/components/primitives/ServerIcon';
-import { AnswerOverflowLogo } from '~ui/components/primitives/base/AnswerOverflowLogo';
-
+import { Button } from '~ui/components/primitives/ui/button';
+import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
+import Link from 'next/link';
 import React from 'react';
-import { useParams } from 'next/navigation';
 
 export function DashboardServerSelect() {
-	const params = useParams<{ serverId: string }>();
+	const params = useParams<{
+		serverId: string;
+	}>();
 	const serverId = params.serverId as string | undefined;
 	const { data } = trpc.auth.getServersForOnboarding.useQuery();
 	const serversWithDashboard = data?.filter((server) => server.hasBot);
@@ -68,24 +69,4 @@ export function DashboardServerSelect() {
 			</DropdownMenu>
 		</div>
 	);
-}
-
-function DashboardNavbarRenderer() {
-	return (
-		<nav className="mx-auto flex max-w-screen-2xl items-center justify-between p-2 md:p-8">
-			<div className="flex flex-row items-center justify-between space-x-4">
-				<Link href="/" className="hidden md:block">
-					<div className={'w-40 md:w-52'}>
-						<AnswerOverflowLogo width={'full'} />
-					</div>
-				</Link>
-				<div className="hidden h-6 rotate-[30deg] border-l border-stone-400 md:block" />
-				<DashboardServerSelect />
-			</div>
-		</nav>
-	);
-}
-
-export function DashboardNavbar() {
-	return <DashboardNavbarRenderer user={undefined} />;
 }
