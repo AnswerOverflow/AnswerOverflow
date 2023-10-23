@@ -8,7 +8,7 @@ import {
 	ProgressBar,
 } from '@tremor/react';
 import type { Plan } from '@answeroverflow/db';
-import { trpc } from '~ui/utils/trpc';
+import { trpc } from '~ui/utils/client';
 import { useDashboardContext } from './dashboard-context';
 import { PricingDialog } from '~ui/components/pages/Pricing';
 import { AOLink } from '~ui/components/primitives/base/Link';
@@ -21,7 +21,7 @@ export function PageViewsCardRenderer(props: {
 	let limit: number | undefined = undefined;
 	switch (props.plan) {
 		case 'FREE':
-			limit = 50000;
+			limit = undefined;
 			break;
 		case 'PRO':
 			limit = 100000;

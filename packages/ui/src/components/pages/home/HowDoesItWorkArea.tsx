@@ -1,6 +1,5 @@
 import { QuestionAnswerArea } from './QuestionAnswerArea/QuestionAnswerArea';
 import { messageData } from './HomeMessages';
-import { Button } from '~ui/components/primitives/ui/button';
 import { GetStarted } from '~ui/components/primitives/Callouts';
 
 const HowDoesItWorkAreaText = () => {
@@ -20,17 +19,6 @@ const HowDoesItWorkAreaText = () => {
 					location="Hero"
 					className="mx-auto text-xl shadow-[0px_0px_40px_rgba(255,_255,_255,_0.2)] duration-200 hover:shadow-[0px_0px_40px_rgba(255,_255,_255,_0.4)] xl:mx-0"
 				/>
-				<Button
-					variant="outline"
-					className="mx-auto text-xl xl:mx-0"
-					onClick={() => {
-						document
-							.getElementById('roadmap')
-							?.scrollIntoView({ behavior: 'smooth' });
-					}}
-				>
-					View roadmap
-				</Button>
 			</div>
 		</div>
 	);

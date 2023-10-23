@@ -1,3 +1,4 @@
+'use client';
 import React, { useRef } from 'react';
 import Xarrow from 'react-xarrows';
 import { DemoMessage, type MessageProps } from '../DemoMessage';

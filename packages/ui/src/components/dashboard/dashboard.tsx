@@ -10,10 +10,9 @@ import {
 	Col,
 	Title,
 } from '@tremor/react';
-import { trpc } from '~ui/utils/trpc';
+import { trpc } from '~ui/utils/client';
 import { ConfigureDomainCard } from './domains';
 import { GoLinkExternal } from 'react-icons/go';
-import { DashboardNavbar } from './dashboard-navbar';
 import { CurrentPlanCard, PageViewChart, PageViewsCard } from './cards';
 import { TierAccessOnly } from '../primitives/tier-access-only';
 import type { ServerDashboard } from '@answeroverflow/api';
@@ -21,8 +20,6 @@ import { DashboardProvider } from './dashboard-context';
 import { getServerHomepageUrl } from '~ui/utils/server';
 import { AOLink } from '~ui/components/primitives/base/Link';
 import { GetStarted } from '~ui/components/primitives/Callouts';
-import AOHead from '~ui/components/primitives/AOHead';
-import { Footer } from '~ui/components/primitives/Footer';
 
 export function ServerDashboardRenderer(props: {
 	data: ServerDashboard;
@@ -123,12 +120,5 @@ export function ServerDashboard(props: { serverId: string }) {
 				return <ServerDashboardRenderer data={data} />;
 		}
 	};
-	return (
-		<>
-			<AOHead title="Dashboard" path={'/dashboard'} />
-			<DashboardNavbar />
-			<Body />
-			<Footer />
-		</>
-	);
+	return <Body />;
 }

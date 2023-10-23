@@ -1,2 +1,2 @@
-export * from './analytics';
-export * from './tenant';
+export * from './analytics/events';
+export * from './analytics/events';

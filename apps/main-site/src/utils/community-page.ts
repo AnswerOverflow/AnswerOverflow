@@ -1,6 +1,7 @@
 import { findQuestionsForSitemap } from '@answeroverflow/db';
 import { Sitemap } from './sitemap';
 import { ServerResponse } from 'http';
+import { getDate } from '@answeroverflow/ui/src/utils/snowflake';
 
 export async function addCommunityQuestionsToSitemap(input: {
 	communityId: string;
@@ -11,17 +12,31 @@ export async function addCommunityQuestionsToSitemap(input: {
 	if (!lookup) return;
 	const { questions, server } = lookup;
 
+	let largestTimestamp = -1;
 	input.sitemap.addMany(
-		questions.map(({ thread }) => ({
-			loc: `/m/${thread.id}`,
-			changefreq: thread.archivedTimestamp ? 'weekly' : 'daily',
-			priority: 0.9,
-		})),
+		questions.map(({ thread }) => {
+			if (
+				thread.archivedTimestamp &&
+				thread.archivedTimestamp > largestTimestamp
+			)
+				largestTimestamp = Number(thread.archivedTimestamp);
+			return {
+				loc: `/m/${thread.id}`,
+				// We really don't expect archived threads to be updated
+				changefreq: thread.archivedTimestamp ? 'yearly' : 'daily',
+				priority: 0.9,
+				lastmod: thread.archivedTimestamp
+					? new Date(Number(thread.archivedTimestamp))
+					: getDate(thread.id),
+			};
+		}),
 	);
+
 	if (!server.customDomain) {
 		input.sitemap.add({
 			loc: `/c/${input.communityId}`, // Community page
 			changefreq: 'weekly',
+			lastmod: largestTimestamp === -1 ? undefined : new Date(largestTimestamp),
 			priority: 1,
 		});
 	}

@@ -1,34 +1,25 @@
 import type { ChannelPublicWithFlags, MessageFull } from '@answeroverflow/db';
 import type { ServerPublic } from '@answeroverflow/api';
-import { useIsUserInServer } from '~ui/utils/hooks';
-import { MessagesSearchBar } from './SearchPage';
-import {
-	messageWithDiscordAccountToAnalyticsData,
-	useTenantContext,
-	useTrackEvent,
-} from '@answeroverflow/hooks';
-import {
-	channelToAnalyticsData,
-	serverToAnalyticsData,
-	threadToAnalyticsData,
-} from '@answeroverflow/constants/src/analytics';
-import { isServer } from '~ui/utils/checks';
-import Head from 'next/head';
 import type { QAPage, WithContext } from 'schema-dts';
-import {
-	getBaseUrl,
-	getMainSiteHostname,
-} from '@answeroverflow/constants/src/links';
-import { toHTML } from 'discord-markdown';
+import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
 import { ServerInvite } from '~ui/components/primitives/ServerInvite';
 import {
 	Message,
 	MessageContentWithSolution,
-	MultiMessageBlurrer,
-} from '~ui/components/primitives/Message';
+} from '~ui/components/primitives/message/Message';
 import { Heading } from '~ui/components/primitives/base/Heading';
-import AOHead from '~ui/components/primitives/AOHead';
+
 import Link from 'next/link';
+import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
+import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
+import { TrackLoad } from '~ui/components/primitives/track-load';
+import {
+	channelToAnalyticsData,
+	serverToAnalyticsData,
+	threadToAnalyticsData,
+} from '@answeroverflow/constants';
+import { messageWithDiscordAccountToAnalyticsData } from '@answeroverflow/hooks';
+import { stripMarkdownAndHTML } from '~ui/utils/markdown/strip';
 export type MessageResultPageProps = {
 	messages: MessageFull[];
 	server: ServerPublic;
@@ -42,42 +33,17 @@ export type MessageResultPageProps = {
 };
 
 // TODO: Align text to be same level with the avatar
-export function MessageResultPage({
+export async function MessageResultPage({
 	messages,
 	server,
 	channel,
-	requestedId,
 	thread,
 	relatedPosts,
 }: MessageResultPageProps) {
-	const { tenant } = useTenantContext();
-	const isUserInServer = useIsUserInServer(server.id);
+	const isUserInServer = await fetchIsUserInServer(server.id);
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
-	const channelName = thread?.name ?? channel.name;
-	const description =
-		firstMessage && firstMessage.content?.length > 0
-			? firstMessage.content
-			: `Questions related to ${channelName} in ${server.name}`;
-	const shouldTrackAnalyticsEvent = isUserInServer !== 'loading' && !isServer();
 
-	// TODO: Ugly
-	useTrackEvent(
-		'Message Page View',
-		{
-			...channelToAnalyticsData(channel),
-			...serverToAnalyticsData(server),
-			...(thread && {
-				...threadToAnalyticsData(thread),
-				'Number of Messages': messages.length,
-			}),
-			...messageWithDiscordAccountToAnalyticsData(firstMessage),
-		},
-		{
-			runOnce: true,
-			enabled: shouldTrackAnalyticsEvent,
-		},
-	);
 	const solutionMessageId = messages.at(0)?.solutions?.at(0)?.id;
 	const solution = messages.find((message) => message.id === solutionMessageId);
 	let consecutivePrivateMessages = 0;
@@ -139,17 +105,15 @@ export function MessageResultPage({
 					content={
 						shouldShowSolutionInContent ? (
 							<MessageContentWithSolution
-								solution={{
-									message: solution,
-								}}
+								solution={solution}
+								message={message}
 								showJumpToSolutionCTA
 							/>
 						) : undefined
 					}
 					showBorders={message.id !== solutionMessageId}
-					images={shouldShowSolutionInContent ? null : undefined}
 					loadingStyle={'lazy'}
-					Blurrer={(props) => <MultiMessageBlurrer {...props} count={count} />}
+					numberOfMessages={count}
 				/>
 			);
 		};
@@ -182,14 +146,14 @@ export function MessageResultPage({
 		'@type': 'QAPage',
 		mainEntity: {
 			'@type': 'Question',
-			name: toHTML(question),
-			text: toHTML(firstMessage.content),
+			name: stripMarkdownAndHTML(question),
+			text: stripMarkdownAndHTML(firstMessage.content),
 			answerCount: solution && !isFirstMessageSolution ? 1 : 0,
 			acceptedAnswer:
 				solution && !isFirstMessageSolution
 					? {
 							'@type': 'Answer',
-							text: toHTML(solution.content),
+							text: stripMarkdownAndHTML(solution.content),
 							url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
 								solution.id
 							}#solution-${solution.id}`,
@@ -197,9 +161,6 @@ export function MessageResultPage({
 					: undefined,
 		},
 	};
-	const baseDomain = tenant?.customDomain
-		? `https://${tenant.customDomain}`
-		: getBaseUrl();
 
 	const Main = () => (
 		<div className={'flex grow flex-col'}>
@@ -215,10 +176,9 @@ export function MessageResultPage({
 						/>
 					</div>
 					<div className="flex w-full flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400  text-center  dark:border-neutral-600 dark:text-white">
-						<h1
-							className="w-full text-center font-header text-xl text-primary md:text-left md:text-3xl"
-							dangerouslySetInnerHTML={{ __html: toHTML(question) }}
-						></h1>
+						<h1 className="w-full text-center font-header text-xl text-primary md:text-left md:text-3xl">
+							{question}
+						</h1>
 					</div>
 				</div>
 			</div>
@@ -275,22 +235,25 @@ export function MessageResultPage({
 
 	return (
 		<div className="sm:mx-3">
-			<Head>
-				<script
-					type="application/ld+json"
-					dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}
-				/>
-			</Head>
-			<AOHead
-				description={description}
-				path={`/m/${firstMessage?.id ?? requestedId}`}
-				title={`${channelName} - ${server.name}`}
-				server={server}
-				image={`${baseDomain}/og/post?id=${firstMessage?.id ?? requestedId}`}
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}
 			/>
 			<div className="flex flex-col gap-8 xl:flex-row">
 				<Main />
 				<Sidebar />
+				<TrackLoad
+					eventName={'Message Page View'}
+					eventData={{
+						...channelToAnalyticsData(channel),
+						...serverToAnalyticsData(server),
+						...(thread && {
+							...threadToAnalyticsData(thread),
+							'Number of Messages': messages.length,
+						}),
+						...messageWithDiscordAccountToAnalyticsData(firstMessage),
+					}}
+				/>
 			</div>
 		</div>
 	);

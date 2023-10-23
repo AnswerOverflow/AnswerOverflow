@@ -11,7 +11,7 @@ import {
 } from '@tremor/react';
 import { LuAlertCircle, LuXCircle, LuCheckCircle2 } from 'react-icons/lu';
 import { toast } from 'react-toastify';
-import { trpc } from '~ui/utils/trpc';
+import { trpc } from '~ui/utils/client';
 import { useTierAccess } from '../primitives/tier-access-only';
 import { useDashboardContext } from './dashboard-context';
 import {

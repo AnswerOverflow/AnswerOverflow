@@ -5,10 +5,10 @@ import {
 	GITHUB_LINK,
 	TWITTER_LINK,
 } from '@answeroverflow/constants/src/links';
-import { useTenantContext } from '@answeroverflow/hooks';
 import { DiscordIcon, GitHubIcon } from '~ui/components/primitives/base/Icons';
 import { Heading } from '~ui/components/primitives/base/Heading';
 import { AnswerOverflowLogo } from '~ui/components/primitives/base/AnswerOverflowLogo';
+import type { ServerPublic } from '@answeroverflow/api';
 type SocialItem = {
 	name: string;
 	href: string;
@@ -155,12 +155,10 @@ const PoweredByAnswerOverflowFooter = () => (
 	</div>
 );
 
-export function Footer() {
-	const { isOnTenantSite } = useTenantContext();
-
+export function Footer(props: { tenant: ServerPublic | undefined }) {
 	return (
 		<footer>
-			{isOnTenantSite ? <PoweredByAnswerOverflowFooter /> : <MainSiteFooter />}
+			{props.tenant ? <PoweredByAnswerOverflowFooter /> : <MainSiteFooter />}
 		</footer>
 	);
 }

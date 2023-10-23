@@ -1,8 +1,12 @@
 import type { ServerPublic } from '@answeroverflow/api';
-import { AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import { getInitials } from '~ui/utils/avatars';
 import { webClientEnv } from '@answeroverflow/env/web';
-import { Avatar, AvatarProps } from '~ui/components/primitives/ui/avatar';
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+	AvatarProps,
+} from '~ui/components/primitives/ui/avatar';
 import { cn } from '~ui/utils/styling';
 
 export interface ServerIconProps extends Omit<AvatarProps, 'url' | 'alt'> {

@@ -8,19 +8,20 @@
 	// @ts-expect-error
 	(await import('@answeroverflow/env/web-schema.mjs'));
 const nextJSMDX = await import('@next/mdx');
-import remarkGfm from 'remark-gfm';
+// import remarkGfm from 'remark-gfm';
 
 const withMDX = nextJSMDX.default({
 	extension: /\.mdx?$/,
-	options: {
-		// If you use remark-gfm, you'll need to use next.config.mjs
-		// as the package is ESM only
-		// https://github.com/remarkjs/remark-gfm#install
-		remarkPlugins: [remarkGfm],
-		rehypePlugins: [],
-		// If you use `MDXProvider`, uncomment the following line.
-		providerImportSource: '@mdx-js/react',
-	},
+	options: {},
+	// options: {
+	// 	// If you use remark-gfm, you'll need to use next.config.mjs
+	// 	// as the package is ESM only
+	// 	// https://github.com/remarkjs/remark-gfm#install
+	// 	remarkPlugins: [remarkGfm],
+	// 	rehypePlugins: [],
+	// 	// If you use `MDXProvider`, uncomment the following line.
+	// 	providerImportSource: '@mdx-js/react',
+	// },
 });
 
 /** @type {import("next").NextConfig} */
@@ -47,6 +48,11 @@ const config = {
 			'avatars.githubusercontent.com',
 			'media.discordapp.net',
 		],
+	},
+	// https://github.com/kkomelin/isomorphic-dompurify/issues/54
+	webpack: (config) => {
+		config.externals = [...config.externals, 'canvas', 'jsdom'];
+		return config;
 	},
 	// We already do linting on GH actions
 	eslint: {

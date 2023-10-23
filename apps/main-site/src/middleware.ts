@@ -22,7 +22,7 @@ function dataUnlockerRouteHandler(req: NextRequest) {
 
 export function middleware(req: NextRequest) {
 	const url = req.nextUrl;
-	const path = url.pathname;
+	const path = url.pathname + url.search;
 	if (path.startsWith('/oemf7z50uh7w/')) {
 		return dataUnlockerRouteHandler(req);
 	}

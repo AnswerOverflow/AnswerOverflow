@@ -3,7 +3,6 @@ import { useState } from 'react';
 import React from 'react';
 import type { ServerPublic } from '@answeroverflow/api';
 import { trackEvent } from '@answeroverflow/hooks';
-import AOHead from '~ui/components/primitives/AOHead';
 
 type SubmittedData = {
 	server?: ServerPublic & {
@@ -41,11 +40,6 @@ export const OnboardingLanding = () => {
 	const Page = pageLookup[currentPage];
 	return (
 		<>
-			<AOHead
-				title="Onboarding"
-				description="Setup your server with AnswerOverflow."
-				path="/onboarding"
-			/>
 			<div className="flex min-h-screen flex-col items-center justify-center text-center">
 				<OnboardingContext.Provider
 					value={{

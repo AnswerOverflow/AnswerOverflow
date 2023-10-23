@@ -1,10 +1,7 @@
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import type { ServerPublic } from '@answeroverflow/api';
-import { trpc } from '~ui/utils/trpc';
+import { trpc } from '~ui/utils/client';
 import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
-import type { Session } from 'next-auth';
-import { useSession } from 'next-auth/react';
 import { Button } from '~ui/components/primitives/ui/button';
 import {
 	DropdownMenu,
@@ -14,12 +11,13 @@ import {
 } from '~ui/components/primitives/ui/dropdown-menu';
 import { ServerIcon } from '~ui/components/primitives/ServerIcon';
 import { AnswerOverflowLogo } from '~ui/components/primitives/base/AnswerOverflowLogo';
-import { UserAvatar } from '~ui/components/primitives/Navbar';
+
 import React from 'react';
+import { useParams } from 'next/navigation';
 
 export function DashboardServerSelect() {
-	const router = useRouter();
-	const serverId = router.query.serverId as string | undefined;
+	const params = useParams();
+	const serverId = params?.serverId as string | undefined;
 	const { data } = trpc.auth.getServersForOnboarding.useQuery();
 	const serversWithDashboard = data?.filter((server) => server.hasBot);
 	const selectedServer =
@@ -72,7 +70,7 @@ export function DashboardServerSelect() {
 	);
 }
 
-function DashboardNavbarRenderer(props: { user: Session['user'] | undefined }) {
+function DashboardNavbarRenderer() {
 	return (
 		<nav className="mx-auto flex max-w-screen-2xl items-center justify-between p-2 md:p-8">
 			<div className="flex flex-row items-center justify-between space-x-4">
@@ -84,14 +82,10 @@ function DashboardNavbarRenderer(props: { user: Session['user'] | undefined }) {
 				<div className="hidden h-6 rotate-[30deg] border-l border-stone-400 md:block" />
 				<DashboardServerSelect />
 			</div>
-			<div className="flex flex-row items-center space-x-4">
-				{props.user && <UserAvatar user={props.user} />}
-			</div>
 		</nav>
 	);
 }
 
 export function DashboardNavbar() {
-	const user = useSession();
-	return <DashboardNavbarRenderer user={user?.data?.user} />;
+	return <DashboardNavbarRenderer />;
 }

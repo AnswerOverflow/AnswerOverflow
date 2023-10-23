@@ -1,5 +1,5 @@
 import type { ServerPublic } from '@answeroverflow/api';
-import AOHead from '~ui/components/primitives/AOHead';
+
 import { Heading } from '~ui/components/primitives/base/Heading';
 import { ViewServerCard } from '~ui/components/primitives/ServerCard';
 interface BrowseCommunitiesPageProps {
@@ -11,12 +11,6 @@ export const BrowseCommunitiesRenderer = ({
 }: BrowseCommunitiesPageProps) => {
 	return (
 		<>
-			<AOHead
-				title="Browse Communities On Answer Overflow"
-				description="Browse communities on Answer Overflow."
-				path="/communities"
-			/>
-
 			<Heading.H1 className="my-16 text-4xl md:text-5xl">
 				Browse Communities
 			</Heading.H1>

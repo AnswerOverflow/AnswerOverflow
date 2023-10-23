@@ -1,57 +1,37 @@
-// src/utils/trpc.ts
-import { createTRPCNext } from '@trpc/next';
-import { httpBatchLink, loggerLink } from '@trpc/client';
-import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
-import type { AppRouter } from '@answeroverflow/api';
-import { transformer } from '@answeroverflow/api/transformer';
-import { createTRPCReact } from '@trpc/react-query';
-import { webClientEnv } from '@answeroverflow/env/web';
+import { getServerSession } from '@answeroverflow/auth';
+import { createContextInner } from '@answeroverflow/api/src/router/context';
+import { appRouter, AppRouterCaller } from '@answeroverflow/api';
+import { TRPCError } from '@trpc/server';
 
-const getBaseUrl = () => {
-	if (typeof window !== 'undefined') return ''; // browser should use relative url
-	if (webClientEnv.NEXT_PUBLIC_VERCEL_URL)
-		return `https://${webClientEnv.NEXT_PUBLIC_VERCEL_URL}`; // SSR should use vercel url
-	return `http://localhost:${webClientEnv.NEXT_PUBLIC_PORT ?? 3000}`; // dev SSR should use localhost
+export type TRPCCall<T, E extends TRPCError['code'] | undefined> = {
+	apiCall: (router: AppRouterCaller) => Promise<T>;
+	allowedErrors?: E | E[];
 };
 
-const nextTRPC = () =>
-	createTRPCNext<AppRouter>({
-		config() {
-			return {
-				transformer,
-				links: [
-					loggerLink({
-						enabled: (opts) =>
-							webClientEnv.NEXT_PUBLIC_NODE_ENV === 'development' ||
-							(opts.direction === 'down' && opts.result instanceof Error),
-					}),
-					httpBatchLink({
-						url: `${getBaseUrl()}/api/trpc`,
-					}),
-				],
-			};
-		},
-		ssr: false,
-	});
-
-const storybookTRPC = () => createTRPCReact<AppRouter>();
-
-export type StorybookTRPC = ReturnType<typeof storybookTRPC>;
-export type NextTRPC = ReturnType<typeof nextTRPC>;
-
-// eslint-disable-next-line no-constant-condition
-export const trpc = webClientEnv.NEXT_PUBLIC_LADLE
-	? storybookTRPC()
-	: nextTRPC();
-
-/**
- * Inference helpers for input types
- * @example type HelloInput = RouterInputs['example']['hello']
- **/
-export type RouterInputs = inferRouterInputs<AppRouter>;
-
-/**
- * Inference helpers for output types
- * @example type HelloOutput = RouterOutputs['example']['hello']
- **/
-export type RouterOutputs = inferRouterOutputs<AppRouter>;
+export async function callAPI<
+	T,
+	E extends TRPCError['code'] | undefined = undefined,
+>(args: TRPCCall<T, E>): Promise<E extends undefined ? T : T | null> {
+	const session = await getServerSession();
+	const caller = appRouter.createCaller(
+		await createContextInner({
+			session: session,
+			source: 'web-client',
+		}),
+	);
+	const { apiCall } = args;
+	let { allowedErrors } = args;
+	try {
+		return apiCall(caller);
+	} catch (error) {
+		if (!(error instanceof TRPCError)) throw error;
+		if (!Array.isArray(allowedErrors))
+			allowedErrors = allowedErrors ? [allowedErrors] : [];
+		if (allowedErrors.includes(error.code as E)) {
+			// @ts-ignore
+			return null;
+		} else {
+			throw error;
+		}
+	}
+}

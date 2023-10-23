@@ -2,7 +2,6 @@ import { type ServerPublic } from '@answeroverflow/api';
 import { LinkButton } from './base/LinkButton';
 import { ServerIcon } from './ServerIcon';
 import Image from 'next/image';
-import { createContext, useContext } from 'react';
 import { getServerDescription } from '~ui/utils/other';
 import { getServerHomepageUrl } from '~ui/utils/server';
 
@@ -15,23 +14,7 @@ export type ServerCardProps = {
 	about?: React.ReactNode;
 };
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const ServerCardContext = createContext<{
-	server: ServerPublic;
-} | null>(null);
-
-export function useServerCardContext() {
-	const context = useContext(ServerCardContext);
-	if (!context) {
-		throw new Error(
-			'This component must be rendered as a child of Server Card component',
-		);
-	}
-	return context;
-}
-
-const ServerCTA = () => {
-	const { server } = useServerCardContext();
+const ServerCTA = ({ server }: Pick<ServerCardProps, 'server'>) => {
 	return (
 		<LinkButton
 			href={getServerHomepageUrl(server)}
@@ -43,9 +26,7 @@ const ServerCTA = () => {
 	);
 };
 
-const ServerHero = () => {
-	const { server } = useServerCardContext();
-
+const ServerHero = ({ server }: Pick<ServerCardProps, 'server'>) => {
 	return (
 		<div className="relative mx-auto aspect-video w-full rounded-lg">
 			{server.icon && (
@@ -64,9 +45,7 @@ const ServerHero = () => {
 	);
 };
 
-const ServerTitle = () => {
-	const { server } = useServerCardContext();
-
+const ServerTitle = ({ server }: Pick<ServerCardProps, 'server'>) => {
 	return (
 		<span className="text-base font-bold text-black dark:text-neutral-300">
 			{server.name}
@@ -76,31 +55,29 @@ const ServerTitle = () => {
 
 export const ServerCard = (props: ServerCardProps) => {
 	return (
-		<ServerCardContext.Provider value={{ server: props.server }}>
-			<div className="flex max-w-md flex-col gap-3 rounded-lg">
-				{props.hero ?? <ServerHero />}
-				<div className="flex w-full flex-row items-center justify-between align-bottom">
-					{props.about ?? (
-						<>
-							<div className="flex flex-col">
-								{props.title ?? <ServerTitle />}
-							</div>
-							<div className="ml-auto">{props.cta ?? <ServerCTA />}</div>
-						</>
-					)}
-				</div>
+		<div className="flex max-w-md flex-col gap-3 rounded-lg">
+			{props.hero ?? <ServerHero server={props.server} />}
+			<div className="flex w-full flex-row items-center justify-between align-bottom">
+				{props.about ?? (
+					<>
+						<div className="flex flex-col">
+							{props.title ?? <ServerTitle server={props.server} />}
+						</div>
+						<div className="ml-auto">
+							{props.cta ?? <ServerCTA server={props.server} />}
+						</div>
+					</>
+				)}
 			</div>
-		</ServerCardContext.Provider>
+		</div>
 	);
 };
 
-const ViewServerAbout = () => {
-	const { server } = useServerCardContext();
-
+const ViewServerAbout = ({ server }: Pick<ServerCardProps, 'server'>) => {
 	return (
 		<div className="flex w-full flex-col gap-4">
 			<div className="flex w-full flex-row items-center justify-between gap-2">
-				<ServerTitle />
+				<ServerTitle server={server} />
 				<LinkButton
 					className="ml-4"
 					href={getServerHomepageUrl(server)}
@@ -117,7 +94,9 @@ const ViewServerAbout = () => {
 };
 
 export const ViewServerCard = (props: ServerCardProps) => {
-	return <ServerCard {...props} about={<ViewServerAbout />} />;
+	return (
+		<ServerCard {...props} about={<ViewServerAbout server={props.server} />} />
+	);
 };
 
 export const ManageServerCard = (props: {
@@ -134,7 +113,7 @@ export const ManageServerCard = (props: {
 }) => {
 	const Title = () => (
 		<div className="flex flex-col pr-4 text-left">
-			<ServerTitle />
+			<ServerTitle server={props.server} />
 			<span className="text-base text-neutral-600 dark:text-neutral-400">
 				{props.server.highestRole}
 			</span>
