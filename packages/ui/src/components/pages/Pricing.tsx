@@ -25,7 +25,6 @@ import { AOLink } from '~ui/components/primitives/base/Link';
 
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import { Heading } from '~ui/components/primitives/base/Heading';
-import { queryTypes, useQueryState } from 'next-usequerystate';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@tremor/react';
 import { IoBusiness } from 'react-icons/io5';
 import { IoMdGlobe } from 'react-icons/io';
@@ -416,6 +415,7 @@ export const Pricing = () => {
 				<Input
 					placeholder={'email (optional)'}
 					type={'email'}
+					id={'feedback-email'}
 					autoComplete={'email'}
 					className={'bg-inherit'}
 				/>
