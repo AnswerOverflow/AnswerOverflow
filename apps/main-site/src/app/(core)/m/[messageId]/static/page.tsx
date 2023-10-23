@@ -5,6 +5,9 @@ import type { Metadata } from 'next';
 type Props = {
 	params: { messageId: string };
 };
+
+export const dynamic = 'force-static';
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	const data = await callAPI({
 		apiCall: (api) => api.messages.threadFromMessageId(params.messageId),

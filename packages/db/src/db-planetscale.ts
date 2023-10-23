@@ -21,13 +21,20 @@ if (!isPsDb) {
 import { drizzle as psDrizzle } from 'drizzle-orm/planetscale-serverless';
 import { cast, connect } from '@planetscale/database';
 import { JSONParse } from './utils/json-big';
+
 const decoder = new TextDecoder('utf-8');
 function bytes(text: string): number[] {
 	return text.split('').map((c) => c.charCodeAt(0));
 }
+
+const cachedFetch = (input: any, init?: any) =>
+	// @ts-ignore
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
+	fetch(input, { ...init, cache: 'force-cache' });
 export const db: PlanetScaleDatabase<typeof schema> = psDrizzle(
 	connect({
 		url: dbUrl,
+		fetch: cachedFetch,
 		cast: (field, value) => {
 			if (field.type === 'JSON') {
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-return
