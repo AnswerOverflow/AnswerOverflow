@@ -13,66 +13,9 @@ In order to comply with the Discord terms of service and respect user privacy, A
 
 **This is the default state for a user**. Their messages will only be shown to visitors of [answeroverflow.com](https://answeroverflow.com) if they are in the same server as the user.
 
-#### These messages will be displayed as:
-
-<br />
-<Message
-	message={{
-		content:
-			'This is a message that has not been publicly displayed on Answer Overflow.',
-		id: '0',
-		questionId: '0',
-		channelId: '0',
-		attachments: [],
-		childThreadId: null,
-		parentChannelId: null,
-		serverId: '0',
-		nonce: null,
-		pinned: false,
-		flags: 0,
-		embeds: [],
-		interactionId: null,
-		author: {
-			id: '0',
-			name: 'John Doe',
-			avatar: null,
-		},
-		public: false,
-	}}
-/>
-
-- You can't actually sign in to see this message as it is just a demonstration of what a message looks like when a user has not consented to publicly display their messages.
-
 - ### User has consented
 
 The user has provided consent via one of many methods to publicly display their message. Their messages in indexed channels will be shown to all visitors of [answeroverflow.com](https://answeroverflow.com).
-
-#### These messages will be displayed as:
-
-<Message
-	message={{
-		content:
-			'This is a message that has been publicly displayed on Answer Overflow.',
-		channelId: '0',
-		id: '0',
-		questionId: '0',
-		parentChannelId: '0',
-		serverId: '0',
-		childThreadId: null,
-		nonce: null,
-		pinned: false,
-		flags: 0,
-		embeds: [],
-		attachments: [],
-		interactionId: null,
-		author: {
-			id: '0',
-			name: 'John Doe',
-			avatar: null,
-		},
-		public: true,
-	}}
-/>
 
 ## Publicly display messages on Answer Overflow
 
@@ -83,7 +26,6 @@ Consent can also be provided via:
 - [Forum guidelines](/channel-settings/forum-guidelines-consent)
 - [Membership screening](/server-settings/read-the-rules-consent)
 
-import { Message } from '@answeroverflow/ui/src/components/primitives/message/Message';
 
 ## Disable
 

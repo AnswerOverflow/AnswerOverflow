@@ -1,6 +1,6 @@
 'use client';
 import React, { createContext, useContext, useEffect, useRef } from 'react';
-import { Session } from 'next-auth';
+import type { Session } from 'next-auth';
 import { useNavigationEvent } from '../use-navigation-event';
 import posthog from 'posthog-js';
 import { webClientEnv } from '@answeroverflow/env/web';

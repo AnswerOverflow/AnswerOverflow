@@ -3,7 +3,7 @@ import {
 	findServerWithCommunityPageData,
 } from '@answeroverflow/db';
 import { notFound, permanentRedirect } from 'next/navigation';
-import { CommunityPage } from '~ui/components/pages/CommunityPage';
+import { CommunityPage } from '@answeroverflow/ui/src/components/pages/CommunityPage';
 import { z } from 'zod';
 import { Metadata } from 'next';
 type Props = {

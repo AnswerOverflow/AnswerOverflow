@@ -1,4 +1,4 @@
-import { BrowseCommunitiesRenderer } from '~ui/components/pages/BrowseCommunitiesPage';
+import { BrowseCommunitiesRenderer } from '@answeroverflow/ui/src/components/pages/BrowseCommunitiesPage';
 
 import { fetchBrowseServers } from '../../page';
 import { Metadata } from 'next';

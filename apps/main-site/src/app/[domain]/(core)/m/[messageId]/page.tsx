@@ -1,4 +1,4 @@
-import { MessageResultPage } from '~ui/components/pages/MessageResultPage';
+import { MessageResultPage } from '@answeroverflow/ui/src/components/pages/MessageResultPage';
 import { notFound } from 'next/navigation';
 import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
 import type { Metadata } from 'next';

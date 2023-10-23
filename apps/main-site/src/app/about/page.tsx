@@ -1,4 +1,4 @@
-import { AboutArea } from '~ui/components/pages/home/AboutArea';
+import { AboutArea } from '@answeroverflow/ui/src/components/pages/home/AboutArea';
 import { metadata as baseMetadata } from '../layout';
 import { Metadata } from 'next';
 export const metadata: Metadata = {
