@@ -7,9 +7,7 @@ type Props = {
 	};
 };
 
-export async function generateMetadata({
-	searchParams,
-}: Props): Promise<Metadata> {
+export function generateMetadata({ searchParams }: Props): Promise<Metadata> {
 	const query = searchParams.q ? (searchParams.q as string) : undefined;
 	return {
 		title: query

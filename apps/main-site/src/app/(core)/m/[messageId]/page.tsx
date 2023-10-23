@@ -1,5 +1,5 @@
 import { MessageResultPage } from '~ui/components/pages/MessageResultPage';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
 import type { Metadata } from 'next';
 type Props = {
@@ -41,6 +41,11 @@ export default async function MessageResult({ params }: Props) {
 	});
 	if (!data) {
 		return notFound();
+	}
+	if (data.server.customDomain) {
+		return permanentRedirect(
+			`https://${data.server.customDomain}/m/${params.messageId}`,
+		);
 	}
 	return (
 		<MessageResultPage

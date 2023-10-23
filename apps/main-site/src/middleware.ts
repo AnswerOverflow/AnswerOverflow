@@ -42,7 +42,6 @@ export function middleware(req: NextRequest) {
 	}
 	// rewrite everything else to `/[domain]/[path] dynamic route
 	const newUrl = new URL(`/${host}${path}`, req.url);
-	console.log(`/${host}${path}`, req.url);
 	return NextResponse.rewrite(newUrl);
 }
 // See "Matching Paths" below to learn more

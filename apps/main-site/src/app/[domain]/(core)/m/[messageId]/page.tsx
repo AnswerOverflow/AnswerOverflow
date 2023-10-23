@@ -1,33 +1,53 @@
-import { makeMainSiteLink } from '@answeroverflow/constants';
-import { sharedEnvs } from '@answeroverflow/env/shared';
-import { makeMessageResultPage } from '@answeroverflow/db';
-import { notFound, permanentRedirect, redirect } from 'next/navigation';
-import MessageResultPage from '@answeroverflow/ui/src/components/pages/MessageResultPage';
-
-export const revalidate = 3600; // revalidate at most every hour
-
-export default async function TenantResultPage(props: {
+import { MessageResultPage } from '~ui/components/pages/MessageResultPage';
+import { notFound } from 'next/navigation';
+import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
+import type { Metadata } from 'next';
+type Props = {
 	params: { messageId: string };
-}) {
-	const data = await makeMessageResultPage(props.params.messageId, []);
+};
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+	const data = await callAPI({
+		apiCall: (api) => api.messages.threadFromMessageId(params.messageId),
+		allowedErrors: 'NOT_FOUND',
+	});
+
+	if (!data) return {};
+	const firstMessage = data.messages.at(0);
+	const channelName = data.thread?.name ?? data.parentChannel.name;
+	const server = data.server;
+	const description =
+		firstMessage && firstMessage.content?.length > 0
+			? firstMessage.content
+			: `Questions related to ${channelName} in ${server.name}`;
+	const title = data.thread?.name ?? firstMessage?.content ?? channelName;
+	return {
+		title: `${title} - ${server.name}`,
+		description,
+		openGraph: {
+			images: [`/og/post?id=${params.messageId}`],
+			title: `${title} - ${server.name}`,
+			description,
+		},
+		alternates: {
+			canonical: `/m/${data.thread?.id ?? params.messageId}`,
+		},
+	};
+}
+
+export default async function MessageResult({ params }: Props) {
+	const data = await callAPI({
+		apiCall: (api) => api.messages.threadFromMessageId(params.messageId),
+		allowedErrors: 'NOT_FOUND',
+	});
 	if (!data) {
 		return notFound();
-	}
-	if (!data.server.customDomain) {
-		if (sharedEnvs.NODE_ENV === 'production') {
-			return permanentRedirect(
-				makeMainSiteLink(`/m/${props.params.messageId}`),
-			);
-		} else {
-			return redirect(makeMainSiteLink(`/m/${props.params.messageId}`));
-		}
 	}
 	return (
 		<MessageResultPage
 			messages={data.messages}
 			channel={data.parentChannel}
 			server={data.server}
-			requestedId={props.params.messageId}
+			requestedId={params.messageId}
 			relatedPosts={data.recommendedPosts}
 			thread={data.thread ?? undefined}
 		/>

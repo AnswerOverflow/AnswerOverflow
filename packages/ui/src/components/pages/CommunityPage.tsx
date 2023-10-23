@@ -34,6 +34,7 @@ import { serverToAnalyticsData } from '@answeroverflow/constants';
 type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];
 	selectedChannel: ChannelPublicWithFlags;
+	tenant: ServerPublic | undefined;
 };
 
 function ChannelSidebar(props: ChannelSelectProps) {
@@ -42,7 +43,11 @@ function ChannelSidebar(props: ChannelSelectProps) {
 		return (
 			<LinkButton
 				variant={selected ? 'secondary' : 'ghost'}
-				href={`/c/${channel.serverId}/${channel.id}`}
+				href={
+					props.tenant
+						? `/c/${channel.id}`
+						: `/c/${channel.serverId}/${channel.id}`
+				}
 			>
 				<ChannelName channel={channel} />
 			</LinkButton>
@@ -73,7 +78,13 @@ function ChannelDropdown(props: ChannelSelectProps) {
 			<DropdownMenuContent className="max-h-vh30 w-vw80">
 				{props.channels.map((channel) => (
 					<DropdownMenuItem key={channel.id} asChild>
-						<Link href={`/c/${channel.serverId}/${channel.id}`}>
+						<Link
+							href={
+								props.tenant
+									? `/c/${channel.id}`
+									: `/c/${channel.serverId}/${channel.id}`
+							}
+						>
 							<ChannelName channel={channel} />
 						</Link>
 					</DropdownMenuItem>
@@ -87,6 +98,7 @@ const PageSwitcher = (props: {
 	numQuestions: number;
 	page: number;
 	selectedChannel: ChannelPublicWithFlags;
+	tenant: ServerPublic | undefined;
 }) => (
 	<div className={'flex w-full flex-row justify-between'}>
 		{props.page > 0 ? (
@@ -95,6 +107,8 @@ const PageSwitcher = (props: {
 				href={
 					props.page > 1
 						? `?page=${props.page - 1}`
+						: props.tenant
+						? `/c/${props.selectedChannel.id}`
 						: `/c/${props.selectedChannel.serverId}/${props.selectedChannel.id}`
 				}
 			>
@@ -110,9 +124,13 @@ const PageSwitcher = (props: {
 		{props.numQuestions === NUMBER_OF_THREADS_TO_LOAD ? (
 			<LinkButton
 				variant={'outline'}
-				href={`/c/${props.selectedChannel.serverId}/${
-					props.selectedChannel.id
-				}?page=${props.page + 1}`}
+				href={
+					props.tenant
+						? `/c/${props.selectedChannel.id}?page=${props.page + 1}`
+						: `/c/${props.selectedChannel.serverId}/${
+								props.selectedChannel.id
+						  }?page=${props.page + 1}`
+				}
 			>
 				Next
 				<LuArrowRight className={'ml-2'} />
@@ -135,7 +153,7 @@ export const CommunityPage = (
 		page: number | undefined;
 	},
 ) => {
-	const { server, channels, selectedChannel, posts: questions } = props;
+	const { server, channels, selectedChannel, tenant, posts: questions } = props;
 	// useTrackEvent('Community Page View', serverToAnalyticsData(server));
 	const { page = 0 } = props;
 	const HeroArea = () => {
@@ -213,6 +231,7 @@ export const CommunityPage = (
 			<div className="flex w-full flex-1 flex-col gap-2">
 				{qs}
 				<PageSwitcher
+					tenant={tenant}
 					numQuestions={questions.length}
 					page={page}
 					selectedChannel={selectedChannel}
@@ -232,6 +251,7 @@ export const CommunityPage = (
 					<ChannelDropdown
 						channels={channels}
 						selectedChannel={selectedChannel}
+						tenant={tenant}
 					/>
 				)}
 			</div>
@@ -240,6 +260,7 @@ export const CommunityPage = (
 					{selectedChannel && (
 						<ChannelSidebar
 							channels={channels}
+							tenant={tenant}
 							selectedChannel={selectedChannel}
 						/>
 					)}
@@ -251,10 +272,7 @@ export const CommunityPage = (
 
 	return (
 		<div className="mx-auto w-full overflow-x-hidden overflow-y-scroll bg-background scrollbar-hide">
-			<Navbar
-				tenant={server.customDomain ? server : undefined}
-				hideIcon={server.customDomain != null}
-			/>
+			<Navbar tenant={tenant} hideIcon={server.customDomain != null} />
 			<TrackLoad
 				eventName={'Community Page View'}
 				eventData={serverToAnalyticsData(server)}
@@ -267,7 +285,7 @@ export const CommunityPage = (
 					</div>
 				</div>
 			</main>
-			<Footer tenant={server} />
+			<Footer tenant={tenant} />
 		</div>
 	);
 };

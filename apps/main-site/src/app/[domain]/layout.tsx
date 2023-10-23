@@ -1,5 +1,5 @@
 import { findServerByCustomDomain } from '@answeroverflow/db';
-import { Metadata, ResolvingMetadata } from 'next';
+import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { makeServerIconLink } from '~ui/components/primitives/ServerIcon';
 
@@ -24,8 +24,9 @@ export async function generateMetadata({
 		`View the ${tenant.name} Discord server on the web. Browse questions asked by the community and find answers.`;
 	const icon = makeServerIconLink(tenant, 48);
 	return {
-		title: tenant.name,
+		title: `${tenant.name} Community`,
 		description,
+		metadataBase: new URL(`https://${tenant.customDomain!}`),
 		icons: icon ? [icon] : undefined,
 		openGraph: {
 			images: [image],

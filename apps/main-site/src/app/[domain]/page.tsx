@@ -6,7 +6,9 @@ import { notFound } from 'next/navigation';
 import { CommunityPage } from '@answeroverflow/ui/src/components/pages/CommunityPage';
 import { Metadata } from 'next';
 export const metadata: Metadata = {
-	appLinks: {},
+	alternates: {
+		canonical: '/',
+	},
 };
 export default async function TenantHome({
 	params,
@@ -20,15 +22,19 @@ export default async function TenantHome({
 	}
 	const communityPageData = await findServerWithCommunityPageData({
 		idOrVanityUrl: server.id,
-		limit: 20,
+		selectedChannel: undefined,
+		page: 0,
 	});
 	if (!communityPageData || communityPageData.server.kickedTime != null) {
 		return notFound();
 	}
+	const selectedChannel = communityPageData.channels[0];
 	return (
 		<CommunityPage
-			server={communityPageData.server}
-			channels={communityPageData.channels}
+			{...communityPageData}
+			selectedChannel={selectedChannel}
+			tenant={server}
+			page={0}
 		/>
 	);
 }

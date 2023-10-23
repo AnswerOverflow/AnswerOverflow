@@ -34,7 +34,7 @@ export const LinkMessage = (
 			<MessageBlurrer message={message}>
 				<div
 					className={cn(
-						`discord-message w-full border-2 border-black/[.13] border-foreground dark:border-white/[.13] lg:rounded-tl-standard`,
+						`discord-message w-full border-2 border-black/[.13] dark:border-white/[.13] lg:rounded-tl-standard`,
 						props.className,
 					)}
 				>
