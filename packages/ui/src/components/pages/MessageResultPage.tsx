@@ -12,7 +12,6 @@ import { Heading } from '~ui/components/primitives/base/Heading';
 import Link from 'next/link';
 import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
 import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
-import { parse } from '~ui/utils/markdown/render/index';
 import { TrackLoad } from '~ui/components/primitives/track-load';
 import {
 	channelToAnalyticsData,
@@ -20,6 +19,7 @@ import {
 	threadToAnalyticsData,
 } from '@answeroverflow/constants';
 import { messageWithDiscordAccountToAnalyticsData } from '@answeroverflow/hooks';
+import { stripMarkdownAndHTML } from '~ui/utils/markdown/strip';
 export type MessageResultPageProps = {
 	messages: MessageFull[];
 	server: ServerPublic;
@@ -43,11 +43,6 @@ export async function MessageResultPage({
 	const isUserInServer = await fetchIsUserInServer(server.id);
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
-	const channelName = thread?.name ?? channel.name;
-	const description =
-		firstMessage && firstMessage.content?.length > 0
-			? firstMessage.content
-			: `Questions related to ${channelName} in ${server.name}`;
 
 	const solutionMessageId = messages.at(0)?.solutions?.at(0)?.id;
 	const solution = messages.find((message) => message.id === solutionMessageId);
@@ -145,26 +140,20 @@ export async function MessageResultPage({
 	});
 
 	const question = thread?.name ?? firstMessage.content?.slice(0, 100);
-	const [safeFirstMessageContent, safeQuestion, safeSolutionContent] =
-		await Promise.all([
-			parse(firstMessage.content),
-			parse(question),
-			solution && parse(solution.content),
-		]);
 	const isFirstMessageSolution = solution && solution.id !== firstMessage.id;
 	const qaHeader: WithContext<QAPage> = {
 		'@context': 'https://schema.org',
 		'@type': 'QAPage',
 		mainEntity: {
 			'@type': 'Question',
-			name: safeQuestion,
-			text: safeFirstMessageContent,
+			name: stripMarkdownAndHTML(question),
+			text: stripMarkdownAndHTML(firstMessage.content),
 			answerCount: solution && !isFirstMessageSolution ? 1 : 0,
 			acceptedAnswer:
 				solution && !isFirstMessageSolution
 					? {
 							'@type': 'Answer',
-							text: safeSolutionContent,
+							text: stripMarkdownAndHTML(solution.content),
 							url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
 								solution.id
 							}#solution-${solution.id}`,
@@ -188,7 +177,7 @@ export async function MessageResultPage({
 					</div>
 					<div className="flex w-full flex-row items-center justify-start rounded-sm border-b-2 border-solid border-neutral-400  text-center  dark:border-neutral-600 dark:text-white">
 						<h1 className="w-full text-center font-header text-xl text-primary md:text-left md:text-3xl">
-							{safeQuestion}
+							{question}
 						</h1>
 					</div>
 				</div>
