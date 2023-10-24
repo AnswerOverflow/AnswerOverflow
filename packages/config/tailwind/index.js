@@ -232,7 +232,6 @@ module.exports = {
 		require('@tailwindcss/forms'),
 		// eslint-disable-next-line no-undef
 		require('tailwind-scrollbar-hide'),
-		require('@headlessui/tailwindcss'),
 		require('tailwindcss-animate'),
 	],
 	safelist: [
