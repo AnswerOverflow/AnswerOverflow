@@ -11,7 +11,7 @@ import {
 } from '~ui/components/primitives/ui/dropdown-menu';
 import { Button } from '~ui/components/primitives/ui/button';
 import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
-import Link from 'next/link';
+import Link from '~ui/components/primitives/base/Link';
 import React from 'react';
 
 export function DashboardServerSelect() {

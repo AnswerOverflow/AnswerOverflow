@@ -24,7 +24,7 @@ import { Navbar } from '~ui/components/primitives/navbar/Navbar';
 
 import { Footer } from '~ui/components/primitives/Footer';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
-import Link from 'next/link';
+import Link from '~ui/components/primitives/base/Link';
 import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
 import { ServerPublic } from '~api/router/server/types';
 import { LuArrowLeft, LuArrowRight } from 'react-icons/lu';

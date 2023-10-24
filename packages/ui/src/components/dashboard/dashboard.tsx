@@ -18,7 +18,7 @@ import { TierAccessOnly } from '../primitives/tier-access-only';
 import type { ServerDashboard } from '@answeroverflow/api';
 import { DashboardProvider } from './dashboard-context';
 import { getServerHomepageUrl } from '~ui/utils/server';
-import { AOLink } from '~ui/components/primitives/base/Link';
+import { AOLink } from '~ui/components/primitives/base/AOLink';
 import { GetStarted } from '~ui/components/primitives/Callouts';
 
 export function ServerDashboardRenderer(props: {

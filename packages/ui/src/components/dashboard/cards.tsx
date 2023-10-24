@@ -11,7 +11,7 @@ import type { Plan } from '@answeroverflow/db';
 import { trpc } from '~ui/utils/client';
 import { useDashboardContext } from './dashboard-context';
 import { PricingDialog } from '~ui/components/pages/Pricing';
-import { AOLink } from '~ui/components/primitives/base/Link';
+import { AOLink } from '~ui/components/primitives/base/AOLink';
 
 export function PageViewsCardRenderer(props: {
 	numberOfPageViews?: number;

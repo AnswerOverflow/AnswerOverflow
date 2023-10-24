@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import Link from '~ui/components/primitives/base/Link';
 import { EventMap, trackEvent } from '@answeroverflow/hooks';
 
 export function TrackLink<K extends keyof EventMap | string>(

@@ -11,7 +11,7 @@ import '../style.css';
 import { astToString, flattenAst, recurse } from './util';
 import SimpleMarkdown, { defaultRules } from 'simple-markdown';
 import { Code } from 'bright';
-import Link from 'next/link';
+import Link from '~ui/components/primitives/base/Link';
 
 function parserFor(rules: SimpleMarkdown.ReactRules, returnAst?: boolean) {
 	const parser = SimpleMarkdown.parserFor(rules);

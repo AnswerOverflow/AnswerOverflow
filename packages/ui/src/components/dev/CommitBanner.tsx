@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '~ui/components/primitives/base/Link';
 import { Heading } from '~ui/components/primitives/base/Heading';
 import { webClientEnv } from '@answeroverflow/env/web';
 

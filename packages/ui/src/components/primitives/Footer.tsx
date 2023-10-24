@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '~ui/components/primitives/base/Link';
 // TODO: Storybook breaks when importing from the root of @answeroverflow/constants - figure out why
 import {
 	DISCORD_LINK,

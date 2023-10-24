@@ -6,7 +6,7 @@ import {
 	AvatarImage,
 	AvatarFallback,
 } from '~ui/components/primitives/ui/avatar';
-import Link from 'next/link';
+import Link from '~ui/components/primitives/base/Link';
 import type { ChannelPublicWithFlags } from '@answeroverflow/db';
 import { forwardRef } from 'react';
 import { getInitials } from '~ui/utils/avatars';
