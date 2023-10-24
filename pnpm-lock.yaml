@@ -78,7 +78,7 @@ importers:
         version: 5.1.6
       vite:
         specifier: ^4.4.9
-        version: 4.4.9
+        version: 4.4.9(@types/node@18.17.6)(sass@1.66.1)
       vitest:
         specifier: ^0.29.8
         version: 0.29.8
@@ -377,7 +377,7 @@ importers:
         version: 18.2.7
       autoprefixer:
         specifier: ^10.4.15
-        version: 10.4.15(postcss@8.4.28)
+        version: 10.4.15(postcss@8.4.31)
       dotenv-cli:
         specifier: ^7.3.0
         version: 7.3.0
@@ -388,8 +388,8 @@ importers:
         specifier: 13.4.9
         version: 13.4.9(eslint@8.47.0)(typescript@5.1.6)
       postcss:
-        specifier: ^8.4.28
-        version: 8.4.28
+        specifier: ^8.4.31
+        version: 8.4.31
       prettier:
         specifier: ^2.8.8
         version: 2.8.8
@@ -558,7 +558,7 @@ importers:
         version: 0.30.1(vitest@0.30.1)
       autoprefixer:
         specifier: ^10.4.15
-        version: 10.4.15(postcss@8.4.28)
+        version: 10.4.15(postcss@8.4.31)
       dotenv-cli:
         specifier: ^7.3.0
         version: 7.3.0
@@ -569,8 +569,8 @@ importers:
         specifier: 13.4.9
         version: 13.4.9(eslint@8.47.0)(typescript@5.1.6)
       postcss:
-        specifier: ^8.4.28
-        version: 8.4.28
+        specifier: ^8.4.31
+        version: 8.4.31
       prettier:
         specifier: ^2.8.8
         version: 2.8.8
@@ -965,9 +965,6 @@ importers:
 
   packages/config/tailwind:
     dependencies:
-      tailwind-scrollbar-hide:
-        specifier: ^1.1.7
-        version: 1.1.7
       tailwindcss-animate:
         specifier: ^1.0.6
         version: 1.0.6(tailwindcss@3.3.3)
@@ -975,15 +972,12 @@ importers:
       '@answeroverflow/tsconfig':
         specifier: workspace:^
         version: link:../tsconfig
-      '@tailwindcss/forms':
-        specifier: ^0.5.4
-        version: 0.5.4(tailwindcss@3.3.3)
       autoprefixer:
         specifier: ^10.4.15
-        version: 10.4.15(postcss@8.4.28)
+        version: 10.4.15(postcss@8.4.31)
       postcss:
-        specifier: ^8.4.28
-        version: 8.4.28
+        specifier: ^8.4.31
+        version: 8.4.31
       tailwindcss:
         specifier: ^3.3.3
         version: 3.3.3
@@ -6186,15 +6180,6 @@ packages:
       zod: 3.22.2
     dev: false
 
-  /@tailwindcss/forms@0.5.4(tailwindcss@3.3.3):
-    resolution: {integrity: sha512-YAm12D3R7/9Mh4jFbYSMnsd6jG++8KxogWgqs7hbdo/86aWjjlIEvL7+QYdVELmAI0InXTpZqFIg5e7aDVWI2Q==}
-    peerDependencies:
-      tailwindcss: '>=3.0.0 || >= 3.0.0-alpha.1'
-    dependencies:
-      mini-svg-data-uri: 1.4.4
-      tailwindcss: 3.3.3
-    dev: true
-
   /@tanstack/match-sorter-utils@8.8.4:
     resolution: {integrity: sha512-rKH8LjZiszWEvmi01NR72QWZ8m4xmXre0OOwlRGnjU01Eqz/QnN+cqpty2PJ0efHblq09+KilvyR7lsbzmXVEw==}
     engines: {node: '>=12'}
@@ -7324,7 +7309,7 @@ packages:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
     dev: false
 
-  /autoprefixer@10.4.15(postcss@8.4.28):
+  /autoprefixer@10.4.15(postcss@8.4.31):
     resolution: {integrity: sha512-KCuPB8ZCIqFdA4HwKXsvz7j6gvSDNhDP7WnUjBleRkKjPdvCmHFuQ77ocavI8FT6NdvlBnE2UFr2H4Mycn8Vew==}
     engines: {node: ^10 || ^12 || >=14}
     hasBin: true
@@ -7336,7 +7321,7 @@ packages:
       fraction.js: 4.2.0
       normalize-range: 0.1.2
       picocolors: 1.0.0
-      postcss: 8.4.28
+      postcss: 8.4.31
       postcss-value-parser: 4.2.0
     dev: true
 
@@ -9588,7 +9573,7 @@ packages:
       tailwindcss: ^3.3.2
     dependencies:
       fast-glob: 3.3.1
-      postcss: 8.4.28
+      postcss: 8.4.31
       tailwindcss: 3.3.3
 
   /eslint-plugin-turbo@0.0.7(eslint@8.47.0):
@@ -13142,11 +13127,6 @@ packages:
     engines: {node: '>=10'}
     dev: false
 
-  /mini-svg-data-uri@1.4.4:
-    resolution: {integrity: sha512-r9deDe9p5FJUPZAk3A59wGH7Ii9YrjjWw0jmw/liSbHl2CHiyXj6FcDXDu2K3TjVAXqiJdaw3xxwlZZr9E6nHg==}
-    hasBin: true
-    dev: true
-
   /minimatch@3.1.2:
     resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}
     dependencies:
@@ -14102,25 +14082,25 @@ packages:
     resolution: {integrity: sha512-t7iitVY5jW9mGOFZEHphJOzB8eMhoYaE6I5HqsUX14rjsPa9F6OlMOCj3EpqDzNb/8XtMk2BxMpOyePPyuefHw==}
     dev: false
 
-  /postcss-import@15.1.0(postcss@8.4.28):
+  /postcss-import@15.1.0(postcss@8.4.31):
     resolution: {integrity: sha512-hpr+J05B2FVYUAXHeK1YyI267J/dDDhMU6B6civm8hSY1jYJnBXxzKDKDswzJmtLHryrjhnDjqqp/49t8FALew==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       postcss: ^8.0.0
     dependencies:
-      postcss: 8.4.28
+      postcss: 8.4.31
       postcss-value-parser: 4.2.0
       read-cache: 1.0.0
       resolve: 1.22.4
 
-  /postcss-js@4.0.1(postcss@8.4.28):
+  /postcss-js@4.0.1(postcss@8.4.31):
     resolution: {integrity: sha512-dDLF8pEO191hJMtlHFPRa8xsizHaM82MLfNkUHdUtVEV3tgTp5oj+8qbEqYM57SLfc74KSbw//4SeJma2LRVIw==}
     engines: {node: ^12 || ^14 || >= 16}
     peerDependencies:
       postcss: ^8.4.21
     dependencies:
       camelcase-css: 2.0.1
-      postcss: 8.4.28
+      postcss: 8.4.31
 
   /postcss-load-config@3.1.4(ts-node@10.9.1):
     resolution: {integrity: sha512-6DiM4E7v4coTE4uzA8U//WhtPwyhiim3eyjEMFCnUpzbrkK9wJHgKDT2mR+HbtSrd/NubVaYTOpSpjUl8NQeRg==}
@@ -14139,7 +14119,7 @@ packages:
       yaml: 1.10.2
     dev: true
 
-  /postcss-load-config@4.0.1(postcss@8.4.28):
+  /postcss-load-config@4.0.1(postcss@8.4.31):
     resolution: {integrity: sha512-vEJIc8RdiBRu3oRAI0ymerOn+7rPuMvRXslTvZUKZonDHFIczxztIyJ1urxM1x9JXEikvpWWTUUqal5j/8QgvA==}
     engines: {node: '>= 14'}
     peerDependencies:
@@ -14152,16 +14132,16 @@ packages:
         optional: true
     dependencies:
       lilconfig: 2.1.0
-      postcss: 8.4.28
+      postcss: 8.4.31
       yaml: 2.3.1
 
-  /postcss-nested@6.0.1(postcss@8.4.28):
+  /postcss-nested@6.0.1(postcss@8.4.31):
     resolution: {integrity: sha512-mEp4xPMi5bSWiMbsgoPfcP74lsWLHkQbZc3sY+jWYd65CUwXrUaTp0fmNpa01ZcETKlIgUdFN/MpS2xZtqL9dQ==}
     engines: {node: '>=12.0'}
     peerDependencies:
       postcss: ^8.2.14
     dependencies:
-      postcss: 8.4.28
+      postcss: 8.4.31
       postcss-selector-parser: 6.0.13
 
   /postcss-selector-parser@6.0.13:
@@ -14186,14 +14166,6 @@ packages:
       picocolors: 1.0.0
       source-map-js: 1.0.2
     dev: false
-
-  /postcss@8.4.28:
-    resolution: {integrity: sha512-Z7V5j0cq8oEKyejIKfpD8b4eBy9cwW2JWPk0+fB1HOAMsfHbnAXLLS+PfVWlzMSLQaWttKDt607I0XHmpE67Vw==}
-    engines: {node: ^10 || ^12 || >=14}
-    dependencies:
-      nanoid: 3.3.6
-      picocolors: 1.0.0
-      source-map-js: 1.0.2
 
   /postcss@8.4.31:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
@@ -16053,10 +16025,6 @@ packages:
     resolution: {integrity: sha512-3mFKyCo/MBcgyOTlrY8T7odzZFx+w+qKSMAmdFzRvqBfLlSigU6TZnlFHK0lkMwj9Bj8OYU+9yW9lmGuS0QEnQ==}
     dev: false
 
-  /tailwind-scrollbar-hide@1.1.7:
-    resolution: {integrity: sha512-X324n9OtpTmOMqEgDUEA/RgLrNfBF/jwJdctaPZDzB3mppxJk7TLIDmOreEDm1Bq4R9LSPu4Epf8VSdovNU+iA==}
-    dev: false
-
   /tailwindcss-animate@1.0.6(tailwindcss@3.3.3):
     resolution: {integrity: sha512-4WigSGMvbl3gCCact62ZvOngA+PRqhAn7si3TQ3/ZuPuQZcIEtVap+ENSXbzWhpojKB8CpvnIsrwBu8/RnHtuw==}
     peerDependencies:
@@ -16084,11 +16052,11 @@ packages:
       normalize-path: 3.0.0
       object-hash: 3.0.0
       picocolors: 1.0.0
-      postcss: 8.4.28
-      postcss-import: 15.1.0(postcss@8.4.28)
-      postcss-js: 4.0.1(postcss@8.4.28)
-      postcss-load-config: 4.0.1(postcss@8.4.28)
-      postcss-nested: 6.0.1(postcss@8.4.28)
+      postcss: 8.4.31
+      postcss-import: 15.1.0(postcss@8.4.31)
+      postcss-js: 4.0.1(postcss@8.4.31)
+      postcss-load-config: 4.0.1(postcss@8.4.31)
+      postcss-nested: 6.0.1(postcss@8.4.31)
       postcss-selector-parser: 6.0.13
       resolve: 1.22.4
       sucrase: 3.34.0
@@ -17195,41 +17163,6 @@ packages:
       - sugarss
       - supports-color
       - terser
-    dev: true
-
-  /vite@4.4.9:
-    resolution: {integrity: sha512-2mbUn2LlUmNASWwSCNSJ/EG2HuSRTnVNaydp6vMCm5VIqJsjMfbIWtbH2kDuwUVW5mMUKKZvGPX/rqeqVvv1XA==}
-    engines: {node: ^14.18.0 || >=16.0.0}
-    hasBin: true
-    peerDependencies:
-      '@types/node': '>= 14'
-      less: '*'
-      lightningcss: ^1.21.0
-      sass: '*'
-      stylus: '*'
-      sugarss: '*'
-      terser: ^5.4.0
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      less:
-        optional: true
-      lightningcss:
-        optional: true
-      sass:
-        optional: true
-      stylus:
-        optional: true
-      sugarss:
-        optional: true
-      terser:
-        optional: true
-    dependencies:
-      esbuild: 0.18.20
-      postcss: 8.4.28
-      rollup: 3.28.0
-    optionalDependencies:
-      fsevents: 2.3.2
     dev: true
 
   /vite@4.4.9(@types/node@18.17.6)(sass@1.66.1):
