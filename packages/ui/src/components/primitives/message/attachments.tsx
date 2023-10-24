@@ -7,7 +7,7 @@ import { getImageHeightWidth } from '~ui/utils/other';
 const SingularImageAttachment = async (
 	props: Pick<MessageProps, 'collapseContent' | 'message' | 'loadingStyle'>,
 ) => {
-	const { message, loadingStyle, collapseContent } = props;
+	const { message, collapseContent } = props;
 	const images = await Promise.all(
 		message.attachments.map(async (attachment): Promise<ImageType> => {
 			if (!attachment.width || !attachment.height) {
@@ -46,8 +46,6 @@ const SingularImageAttachment = async (
 						height={x?.height}
 						alt={x?.alt ?? `Image sent by ${message.author.name}`}
 						unoptimized
-						loading={loadingStyle}
-						priority={loadingStyle !== 'lazy'}
 					/>
 				</div>
 			))}
