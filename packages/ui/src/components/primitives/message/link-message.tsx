@@ -9,7 +9,7 @@ import {
 	MessageContents,
 	MessageContentWithSolution,
 } from '~ui/components/primitives/message/Message';
-import Link from 'next/link';
+import Link from '~ui/components/primitives/base/Link';
 import { Paragraph } from '~ui/components/primitives/base/Paragraph';
 import { cn } from '~ui/utils/styling';
 import { MessageAttachments } from '~ui/components/primitives/message/attachments';

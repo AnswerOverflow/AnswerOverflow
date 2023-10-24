@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '~ui/components/primitives/base/Link';
 import type { ServerPublic } from '@answeroverflow/api';
 import { trpc } from '~ui/utils/client';
 import { HiChevronDown, HiChevronUp } from 'react-icons/hi';

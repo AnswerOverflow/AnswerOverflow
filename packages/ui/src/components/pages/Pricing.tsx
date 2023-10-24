@@ -21,7 +21,7 @@ import {
 import { Button } from '~ui/components/primitives/ui/button';
 import { Input } from '~ui/components/primitives/ui/input';
 import { Textarea } from '~ui/components/primitives/ui/textarea';
-import { AOLink } from '~ui/components/primitives/base/Link';
+import { AOLink } from '~ui/components/primitives/base/AOLink';
 
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import { Heading } from '~ui/components/primitives/base/Heading';

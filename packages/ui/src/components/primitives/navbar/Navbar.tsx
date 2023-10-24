@@ -1,5 +1,5 @@
 import type { Session } from 'next-auth';
-import Link from 'next/link';
+import Link from '~ui/components/primitives/base/Link';
 import React, { Suspense } from 'react';
 import { GetStarted } from '../Callouts';
 import { ThemeSwitcher } from '../ThemeSwitcher';

@@ -9,7 +9,7 @@ import {
 } from '~ui/components/primitives/message/Message';
 import { Heading } from '~ui/components/primitives/base/Heading';
 
-import Link from 'next/link';
+import Link from '~ui/components/primitives/base/Link';
 import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
 import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
 import { TrackLoad } from '~ui/components/primitives/track-load';

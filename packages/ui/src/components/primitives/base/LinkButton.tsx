@@ -1,6 +1,6 @@
 'use client';
 import type { VariantProps } from 'cva';
-import Link from 'next/link';
+import Link from '~ui/components/primitives/base/Link';
 import type { SetRequired } from 'type-fest';
 import { cn } from '~ui/utils/styling';
 import { buttonVariants } from '~ui/components/primitives/ui/button';

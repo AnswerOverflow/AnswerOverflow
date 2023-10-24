@@ -18,7 +18,7 @@ import { Command } from '~ui/components/primitives/base/Command';
 import { Button } from '~ui/components/primitives/ui/button';
 import { ServerIcon } from '~ui/components/primitives/ServerIcon';
 import { Heading } from '~ui/components/primitives/base/Heading';
-import { AOLink } from '~ui/components/primitives/base/Link';
+import { AOLink } from '~ui/components/primitives/base/AOLink';
 import { ManageServerCard } from '~ui/components/primitives/ServerCard';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import { SignInButton } from '~ui/components/primitives/navbar/sign-in-button';
