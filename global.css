@@ -64,18 +64,6 @@
 .discord-message a {
 	@apply text-blue-700 hover:underline dark:text-blue-400 !important;
 }
-.bar-of-progress {
-	z-index: 50;
-}
-.d-emoji {
-	@apply inline-block h-6 w-6;
-}
-.hljs-built_in{
-  @apply text-red-700 dark:text-red-400 !important;
-}
-.hljs-keyword{
-  @apply text-red-700 dark:text-red-400 !important;
-}
 
 html {
 	margin: 0;
@@ -96,4 +84,54 @@ body {
 	img[loading='lazy'] {
 		clip-path: inset(0.6px);
 	}
+}
+
+.prose pre:not([class]) {
+  @apply bg-transparent p-0 !important;
+  min-width: max-content;
+}
+
+.discord-message a {
+  @apply text-blue-700 hover:underline dark:text-blue-400 !important;
+}
+
+.d-emoji {
+  @apply inline-block h-6 w-6;
+}
+
+.heading-1 {
+  @apply text-4xl font-bold !important;
+}
+
+.heading-2 {
+  @apply text-3xl font-bold !important;
+}
+
+.heading-3 {
+  @apply text-2xl font-bold !important;
+}
+
+.heading-4 {
+  @apply text-xl font-bold !important;
+}
+
+.heading-5 {
+  @apply text-lg font-bold !important;
+}
+
+.heading-6 {
+  @apply text-base font-bold !important;
+}
+
+.emoji {
+  @apply inline-block h-6 w-6;
+}
+
+img:not([src]):is(:empty) {
+  @apply h-0 w-0 !important;
+}
+
+.discord-message {
+  white-space: break-spaces;
+  line-height: 16px;
 }

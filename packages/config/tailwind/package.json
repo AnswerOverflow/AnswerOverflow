@@ -12,13 +12,11 @@
   },
   "devDependencies": {
     "@answeroverflow/tsconfig": "workspace:^",
-    "@tailwindcss/forms": "^0.5.4",
     "autoprefixer": "^10.4.15",
     "postcss": "^8.4.28",
     "tailwindcss": "^3.3.3"
   },
   "dependencies": {
-    "tailwind-scrollbar-hide": "^1.1.7",
     "tailwindcss-animate": "^1.0.6"
   }
 }
