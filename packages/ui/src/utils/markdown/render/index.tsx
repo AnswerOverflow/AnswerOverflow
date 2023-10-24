@@ -7,7 +7,6 @@
 import memoize from 'memoizee';
 import * as R from 'ramda';
 import baseRules from './ast';
-import '../style.css';
 import { astToString, flattenAst, recurse } from './util';
 import SimpleMarkdown, { defaultRules } from 'simple-markdown';
 import { Code } from 'bright';

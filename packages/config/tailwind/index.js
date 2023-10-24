@@ -227,13 +227,7 @@ module.exports = {
 			},
 		},
 	},
-	plugins: [
-		// eslint-disable-next-line no-undef
-		require('@tailwindcss/forms'),
-		// eslint-disable-next-line no-undef
-		require('tailwind-scrollbar-hide'),
-		require('tailwindcss-animate'),
-	],
+	plugins: [require('tailwindcss-animate')],
 	safelist: [
 		{
 			pattern:
