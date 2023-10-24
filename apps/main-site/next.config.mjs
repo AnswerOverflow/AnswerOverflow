@@ -50,20 +50,8 @@ const config = {
 		],
 	},
 	// https://github.com/kkomelin/isomorphic-dompurify/issues/54
-	webpack: (config, {isServer}) => {
+	webpack: (config) => {
 		config.externals = [...config.externals, 'canvas', 'jsdom'];
-
-      if (!isServer) {
-        config.optimization.splitChunks.cacheGroups = {
-          ...config.optimization.splitChunks.cacheGroups,
-          '@sentry': {
-            test: /[\\/]node_modules[\\/](@sentry)[\\/]/,
-            name: '@sentry',
-            priority: 10,
-            reuseExistingChunk: false,
-          },
-        };
-      }
 		return config;
 	},
 	// We already do linting on GH actions
