@@ -76,6 +76,7 @@ export default async function RootLayout({
 				</Script>
 				<Script
 					id="data-unblocker"
+					strategy={'lazyOnload'}
 					dangerouslySetInnerHTML={{
 						__html: Buffer.from(DATA_UNBLOCKER, 'base64').toString(),
 					}}
