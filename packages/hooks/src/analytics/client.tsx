@@ -3,7 +3,6 @@ import React, { createContext, useContext, useEffect, useRef } from 'react';
 import type { Session } from 'next-auth';
 import { useNavigationEvent } from '../use-navigation-event';
 import posthog from 'posthog-js';
-import { webClientEnv } from '@answeroverflow/env/web';
 import { EventMap, trackEvent } from './events';
 
 const analyticsContext = createContext<{
@@ -34,8 +33,10 @@ export const AnalyticsProvider = ({
 		},
 	});
 	useEffect(() => {
-		if (!analyticsLoaded && webClientEnv.NEXT_PUBLIC_POSTHOG_TOKEN) {
-			posthog.init(webClientEnv.NEXT_PUBLIC_POSTHOG_TOKEN, {
+		// eslint-disable-next-line n/no-process-env
+		if (!analyticsLoaded && process.env.NEXT_PUBLIC_POSTHOG_TOKEN) {
+			// eslint-disable-next-line n/no-process-env
+			posthog.init(process.env.NEXT_PUBLIC_POSTHOG_TOKEN, {
 				disable_session_recording: true,
 				persistence: 'memory',
 				bootstrap: {

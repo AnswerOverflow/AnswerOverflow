@@ -10,7 +10,6 @@ import {
 	ANSWER_OVERFLOW_BLUE_HEX,
 } from '@answeroverflow/constants';
 import { usePathname } from 'next/navigation';
-import { webClientEnv } from '@answeroverflow/env/web';
 
 // https://nextra.site/docs/docs-theme/theme-configuration
 const config: DocsThemeConfig = {
@@ -34,7 +33,8 @@ const config: DocsThemeConfig = {
 			themeColor: ANSWER_OVERFLOW_BLUE_HEX,
 			description:
 				'Improve & index your Discord help channels into Google with Answer Overflow',
-			noindex: webClientEnv.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'production',
+			// eslint-disable-next-line n/no-process-env
+			noindex: process.env.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'production',
 		};
 	},
 	docsRepositoryBase: DOCS_LINK_BASE,

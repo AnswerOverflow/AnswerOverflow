@@ -1,10 +1,10 @@
+/* eslint-disable n/no-process-env */
 import '../styles/globals.css';
 import '../styles/code.scss';
 import React from 'react';
 import { Providers } from '../components/providers';
 import Script from 'next/script';
 import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner';
-import { webClientEnv } from '@answeroverflow/env/web';
 import { getServerSession } from '@answeroverflow/auth';
 import { DATA_UNBLOCKER } from '../utils/data-unblocker';
 import { Montserrat, Source_Sans_3 } from 'next/font/google';
@@ -15,8 +15,10 @@ export const metadata: Metadata = {
 	description:
 		'Build the best Discord support server with Answer Overflow. Index your content into Google, answer questions with AI, and gain insights into your community.',
 	robots: {
-		index: webClientEnv.NEXT_PUBLIC_DEPLOYMENT_ENV === 'production',
-		follow: webClientEnv.NEXT_PUBLIC_DEPLOYMENT_ENV === 'production',
+		// eslint-disable-next-line n/no-process-env
+		index: process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'production',
+		// eslint-disable-next-line n/no-process-env
+		follow: process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'production',
 	},
 	openGraph: {
 		type: 'website',
@@ -63,7 +65,8 @@ export default async function RootLayout({
 				<Script
 					id="google-tag-manager"
 					strategy={'lazyOnload'}
-					src={`https://www.googletagmanager.com/gtag/js?id=${webClientEnv.NEXT_PUBLIC_GA_MEASUREMENT_ID!}`}
+					src={`https://www.googletagmanager.com/gtag/js?id=${process.env
+						.NEXT_PUBLIC_GA_MEASUREMENT_ID!}`}
 				/>
 				<Script id="google-analytics" strategy={'lazyOnload'}>
 					{`
@@ -71,7 +74,7 @@ export default async function RootLayout({
 				  		function gtag(){dataLayer.push(arguments);}
 				  		gtag('js', new Date());
 
-				  		gtag('config', '${webClientEnv.NEXT_PUBLIC_GA_MEASUREMENT_ID!}');
+				  		gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID!}');
 				`}
 				</Script>
 				<Script

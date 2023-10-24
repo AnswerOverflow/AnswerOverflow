@@ -1,12 +1,13 @@
 import Link from '~ui/components/primitives/base/Link';
 import { Heading } from '~ui/components/primitives/base/Heading';
-import { webClientEnv } from '@answeroverflow/env/web';
 
 export const CommitBanner = () => {
-	if (webClientEnv.NEXT_PUBLIC_DEPLOYMENT_ENV === 'staging')
+	// eslint-disable-next-line n/no-process-env
+	if (process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'staging')
 		return (
 			<CommitBannerRenderer
-				commitSha={webClientEnv.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA}
+				// eslint-disable-next-line n/no-process-env
+				commitSha={process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ?? ''}
 			/>
 		);
 	else return null;
