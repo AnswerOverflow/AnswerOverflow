@@ -5,13 +5,15 @@ import React, { useState } from 'react';
 import { trpc } from '@answeroverflow/ui/src/utils/client';
 
 import { transformer } from '@answeroverflow/api/transformer';
-import { webClientEnv } from '@answeroverflow/env/web';
 
 const getBaseUrl = () => {
 	if (typeof window !== 'undefined') return ''; // browser should use relative url
-	if (webClientEnv.NEXT_PUBLIC_VERCEL_URL)
-		return `https://${webClientEnv.NEXT_PUBLIC_VERCEL_URL}`; // SSR should use vercel url
-	return `http://localhost:${webClientEnv.NEXT_PUBLIC_PORT ?? 3000}`; // dev SSR should use localhost
+	// eslint-disable-next-line n/no-process-env,turbo/no-undeclared-env-vars
+	if (process.env.NEXT_PUBLIC_VERCEL_URL)
+		// eslint-disable-next-line n/no-process-env,turbo/no-undeclared-env-vars
+		return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`; // SSR should use vercel url
+	// eslint-disable-next-line n/no-process-env,turbo/no-undeclared-env-vars
+	return `http://localhost:${process.env.NEXT_PUBLIC_PORT ?? 3000}`; // dev SSR should use localhost
 };
 export default function TRPCProvider({
 	children,
@@ -25,7 +27,8 @@ export default function TRPCProvider({
 			links: [
 				loggerLink({
 					enabled: (opts) =>
-						webClientEnv.NEXT_PUBLIC_NODE_ENV === 'development' ||
+						// eslint-disable-next-line n/no-process-env,turbo/no-undeclared-env-vars
+						process.env.NEXT_PUBLIC_NODE_ENV === 'development' ||
 						(opts.direction === 'down' && opts.result instanceof Error),
 				}),
 				httpBatchLink({
