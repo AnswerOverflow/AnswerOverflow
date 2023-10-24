@@ -5,7 +5,6 @@ import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
 import { cn } from '~ui/utils/styling';
 import { messageWithDiscordAccountToAnalyticsData } from '@answeroverflow/hooks/src/analytics/events';
 import { getDiscordURLForMessage } from '~ui/utils/discord';
-import 'yet-another-react-lightbox/styles.css';
 import Link from '~ui/components/primitives/base/Link';
 import { DiscordIcon } from '~ui/components/primitives/base/Icons';
 import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
