@@ -44,8 +44,11 @@ const SingularImageAttachment = async (
 						src={x?.src ?? ''}
 						width={x?.width}
 						height={x?.height}
-						alt={x?.alt ?? `Image sent by ${message.author.name}`}
 						unoptimized
+						loading={props.loadingStyle === 'eager' ? 'eager' : 'lazy'}
+						priority={props.loadingStyle === 'eager'}
+						fetchPriority={props.loadingStyle === 'eager' ? 'high' : undefined}
+						alt={x?.alt ?? `Image sent by ${message.author.name}`}
 					/>
 				</div>
 			))}

@@ -21,7 +21,7 @@ export const makeServerIconLink = (
 	if (process.env.NEXT_PUBLIC_LADLE && !server.icon)
 		return `https://api.dicebear.com/6.x/icons/png?size=${size}&seed=${server.id}`;
 	if (!server.icon) return undefined;
-	return `https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png?size=${size}`;
+	return `https://cdn.discordapp.com/icons/${server.id}/${server.icon}.webp?size=${size}`;
 };
 
 export function ServerIcon(props: ServerIconProps) {

@@ -1,7 +1,6 @@
 /* eslint-disable n/no-process-env */
 import '../styles/globals.css';
-import '../styles/code.scss';
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Providers } from '../components/providers';
 import Script from 'next/script';
 import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner';
@@ -9,6 +8,7 @@ import { getServerSession } from '@answeroverflow/auth';
 import { DATA_UNBLOCKER } from '../utils/data-unblocker';
 import { Montserrat, Source_Sans_3 } from 'next/font/google';
 import type { Metadata } from 'next';
+import { PostHogPageview } from '@answeroverflow/hooks/src/analytics/client';
 export const metadata: Metadata = {
 	title: 'Answer Overflow - Search all of Discord',
 	metadataBase: new URL('https://www.answeroverflow.com/'),
@@ -59,7 +59,13 @@ export default async function RootLayout({
 	return (
 		// suppressHydrationWarning makes next themes doesn't error, other hydration errors are still shown
 		<html lang="en" suppressHydrationWarning>
+			<head>
+				<link rel={'dns-prefetch'} href={'https://cdn.discordapp.com'} />
+			</head>
 			<body className={`${montserrat.variable} ${sourceSans3.variable}`}>
+				<Suspense>
+					<PostHogPageview />
+				</Suspense>
 				<CommitBanner />
 				<Providers session={session}>{children}</Providers>
 				<Script

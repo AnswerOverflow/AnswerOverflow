@@ -317,9 +317,6 @@ importers:
       '@trpc/server':
         specifier: ^10.37.1
         version: 10.41.0
-      highlight.js:
-        specifier: ^11.8.0
-        version: 11.9.0
       next:
         specifier: 13.5.6
         version: 13.5.6(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
@@ -477,9 +474,6 @@ importers:
       drizzle-orm:
         specifier: ^0.28.5
         version: 0.28.6(@planetscale/database@1.11.0)(mysql2@3.6.0)
-      highlight.js:
-        specifier: ^11.8.0
-        version: 11.9.0
       next:
         specifier: 13.5.6
         version: 13.5.6(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
@@ -10549,11 +10543,6 @@ packages:
   /hex-rgb@4.3.0:
     resolution: {integrity: sha512-Ox1pJVrDCyGHMG9CFg1tmrRUMRPRsAWYc/PinY0XzJU4K7y7vjNoLKIQ7BR5UJMCxNN8EM1MNDmHWA/B3aZUuw==}
     engines: {node: '>=6'}
-    dev: false
-
-  /highlight.js@11.9.0:
-    resolution: {integrity: sha512-fJ7cW7fQGCYAkgv4CPfwFHrfd/cLS4Hau96JuJ+ZTOWhjnhoeN1ub1tFmALm/+lW5z4WCAuAV9bm05AP0mS6Gw==}
-    engines: {node: '>=12.0.0'}
     dev: false
 
   /hoist-non-react-statics@3.3.2:

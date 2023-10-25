@@ -31,7 +31,7 @@ const ServerHero = ({ server }: Pick<ServerCardProps, 'server'>) => {
 		<div className="relative mx-auto aspect-video w-full rounded-lg">
 			{server.icon && (
 				<Image
-					src={`https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png`}
+					src={`https://cdn.discordapp.com/icons/${server.id}/${server.icon}.webp`}
 					alt={server.name}
 					fill
 					className="h-full w-full overflow-hidden rounded-lg object-cover opacity-25"
