@@ -65,6 +65,7 @@ export function createClient(override: Partial<ClientOptions> = {}) {
 			Partials.Reaction,
 			Partials.User,
 		],
+		// @ts-ignore
 		hmr: {
 			enabled: sharedEnvs.NODE_ENV === 'development',
 		},

@@ -29,7 +29,7 @@ function bytes(text: string): number[] {
 
 const cachedFetch = (input: any, init?: any) =>
 	// @ts-ignore
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-argument
 	fetch(input, { ...init, cache: 'force-cache' });
 export const db: PlanetScaleDatabase<typeof schema> = psDrizzle(
 	connect({

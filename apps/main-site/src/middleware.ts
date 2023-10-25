@@ -43,24 +43,19 @@ export function middleware(req: NextRequest) {
 				return NextResponse.redirect(makeMainSiteLink('/api/auth/signin'));
 			}
 		}
-		if (path.includes('/m/')) {
+		if (path.startsWith('/m/')) {
 			if (authToken) {
 				return NextResponse.rewrite(makeMainSiteLink(`${path}/dynamic`));
-			} else {
-				return NextResponse.rewrite(makeMainSiteLink(`${path}/static`));
 			}
 		}
 		return NextResponse.next();
 	}
 	// rewrite everything else to `/[domain]/[path] dynamic route
 	const tenantAuthToken = req.cookies.get(getTenantCookieName());
-	console.log(tenantAuthToken);
 	let pathPostFix = '';
-	if (path.includes('/m/')) {
+	if (path.startsWith('/m/')) {
 		if (tenantAuthToken) {
 			pathPostFix += '/dynamic';
-		} else {
-			pathPostFix += '/static';
 		}
 	}
 	const newUrl = new URL(`/${host}${path}${pathPostFix}`, req.url);
