@@ -11,7 +11,7 @@ export const Home = (props: {
 	return (
 		<div className="flex w-full flex-col items-center bg-background font-body">
 			<div className={'w-full max-w-screen-3xl'}>
-				<Navbar tenant={undefined} hideIcon={true} />
+				<Navbar tenant={undefined} />
 			</div>
 			<HeroArea servers={props.servers} />
 			<div

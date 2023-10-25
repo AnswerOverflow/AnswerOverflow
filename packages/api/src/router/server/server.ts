@@ -41,6 +41,7 @@ import {
 	createEnterprisePlanCheckoutSession,
 } from '@answeroverflow/payments';
 import { sharedEnvs } from '@answeroverflow/env/shared';
+import { revalidateTag } from 'next/cache';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
 	'Read the rules consent already enabled';
@@ -91,7 +92,14 @@ export const serverRouter = router({
 		.input(z.string())
 		.query(async ({ ctx, input }) => {
 			const data = await protectedFetch({
-				fetch: () => findServerByAliasOrId(input),
+				fetch: () => {
+					try {
+						revalidateTag('cache');
+					} catch {
+						// ignore
+					}
+					return findServerByAliasOrId(input);
+				},
 				permissions: () => assertCanEditServer(ctx, input),
 				notFoundMessage: 'Server not found',
 			});

@@ -1,6 +1,5 @@
 /* eslint-disable-next-line @typescript-eslint/naming-convention */
 import type { DefaultSession } from 'next-auth';
-import posthog from 'posthog-js';
 
 import {
 	type ChannelProps,
@@ -69,10 +68,15 @@ export function trackEvent<K extends keyof EventMap | string>(
 	props: K extends keyof EventMap ? EventMap[K] : Record<string, unknown>,
 ): void {
 	const isServer = typeof window === 'undefined';
-	posthog.capture(eventName, {
-		...props,
-		'Is Server': isServer,
-	});
+	const capture = async () => {
+		await import('posthog-js').then(({ default: posthog }) => {
+			posthog.capture(eventName, {
+				...props,
+				'Is Server': isServer,
+			});
+		});
+	};
+	void capture();
 }
 
 export function messageWithDiscordAccountToAnalyticsData(

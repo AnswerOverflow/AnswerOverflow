@@ -13,7 +13,6 @@ import {
 import { IoGameControllerOutline } from 'react-icons/io5';
 import { MdMoneyOffCsred, MdAttachMoney } from 'react-icons/md';
 import { CiCircleMore } from 'react-icons/ci';
-import { usePostHog } from 'posthog-js/react';
 import { Command } from '~ui/components/primitives/base/Command';
 import { Button } from '~ui/components/primitives/ui/button';
 import { ServerIcon } from '~ui/components/primitives/ServerIcon';
@@ -371,11 +370,11 @@ export function WelcomePageRenderer(props: {
 }) {
 	const { goToPage, setData } = useOnboardingContext();
 
-	const posthog = usePostHog();
-
 	useEffect(() => {
-		posthog?.startSessionRecording();
-	}, [posthog]);
+		void import('posthog-js').then(({ posthog }) =>
+			posthog.startSessionRecording(),
+		);
+	}, []);
 
 	switch (props.authState) {
 		case 'authenticated':
