@@ -1,5 +1,5 @@
 'use client';
-import React, { lazy, useEffect, useRef, useState, Suspense } from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { Session } from 'next-auth';
 import { EventMap, trackEvent } from './events';
 import { usePathname, useSearchParams } from 'next/navigation';
