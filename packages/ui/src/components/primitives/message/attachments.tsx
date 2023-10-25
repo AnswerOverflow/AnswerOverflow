@@ -57,7 +57,7 @@ const SingularImageAttachment = async (
 };
 
 export const MessageAttachments = (
-	props: Pick<MessageProps, 'message'> & {
+	props: Pick<MessageProps, 'message' | 'loadingStyle'> & {
 		limit?: number;
 	},
 ) => {
@@ -72,5 +72,10 @@ export const MessageAttachments = (
 		message.attachments = message.attachments.slice(0, props.limit);
 
 	// TODO: Rename this and such, whole file needs a revisit but I'm on vacation 🌴
-	return <SingularImageAttachment message={message} />;
+	return (
+		<SingularImageAttachment
+			message={message}
+			loadingStyle={props.loadingStyle}
+		/>
+	);
 };

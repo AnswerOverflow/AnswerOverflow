@@ -108,6 +108,9 @@ export async function MessageResultPage({
 								solution={solution}
 								message={message}
 								showJumpToSolutionCTA
+								loadingStyle={
+									message.id === solutionMessageId ? 'eager' : 'lazy'
+								}
 							/>
 						) : undefined
 					}

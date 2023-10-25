@@ -72,7 +72,7 @@ export const MessageContents = async (
 };
 
 export const MessageContentWithSolution = (
-	props: Pick<MessageProps, 'collapseContent' | 'message'> & {
+	props: Pick<MessageProps, 'collapseContent' | 'message' | 'loadingStyle'> & {
 		solution: MessageWithDiscordAccount;
 		showJumpToSolutionCTA?: boolean;
 	},
