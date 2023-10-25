@@ -60,21 +60,23 @@ export default async function RootLayout({
 		// suppressHydrationWarning makes next themes doesn't error, other hydration errors are still shown
 		<html lang="en" suppressHydrationWarning>
 			<head>
+				<link rel={'preconnect'} href={'https://cdn.discordapp.com'} />
 				<link rel={'dns-prefetch'} href={'https://cdn.discordapp.com'} />
 			</head>
 			<body className={`${montserrat.variable} ${sourceSans3.variable}`}>
+				<Providers session={session}>{children}</Providers>
 				<Suspense>
 					<PostHogPageview />
 				</Suspense>
 				<CommitBanner />
-				<Providers session={session}>{children}</Providers>
 				<Script
+					async
 					id="google-tag-manager"
 					strategy={'lazyOnload'}
 					src={`https://www.googletagmanager.com/gtag/js?id=${process.env
 						.NEXT_PUBLIC_GA_MEASUREMENT_ID!}`}
 				/>
-				<Script id="google-analytics" strategy={'lazyOnload'}>
+				<Script id="google-analytics" strategy={'lazyOnload'} async>
 					{`
 				  		window.dataLayer = window.dataLayer || [];
 				  		function gtag(){dataLayer.push(arguments);}
@@ -84,6 +86,7 @@ export default async function RootLayout({
 				`}
 				</Script>
 				<Script
+					async
 					id="data-unblocker"
 					strategy={'lazyOnload'}
 					dangerouslySetInnerHTML={{

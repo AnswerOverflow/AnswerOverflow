@@ -49,8 +49,14 @@ const config = {
 		],
 	},
 	// https://github.com/kkomelin/isomorphic-dompurify/issues/54
-	webpack: (config) => {
+	webpack: (config, { webpack }) => {
 		config.externals = [...config.externals, 'canvas', 'jsdom'];
+		config.plugins.push(
+			new webpack.DefinePlugin({
+				__SENTRY_DEBUG__: false,
+				__SENTRY_TRACING__: false,
+			}),
+		);
 		return config;
 	},
 	// We already do linting on GH actions
@@ -61,28 +67,10 @@ const config = {
 	sentry: {
 		hideSourceMaps: false,
 	},
-	async rewrites() {
-		return [
-			{
-				source: '/og/:path*',
-				destination: '/api/og/:path*',
-			},
-		];
-	},
-};
-
-const sentryWebpackPluginOptions = {
-	// Additional config options for the Sentry Webpack plugin. Keep in mind that
-	// the following options are set automatically, and overriding them is not
-	// recommended:
-	//   release, url, org, project, authToken, configFile, stripPrefix,
-	//   urlPrefix, include, ignore
-
-	silent: true, // Suppresses all logs
-	// For all available options, see:
-	// https://github.com/getsentry/sentry-webpack-plugin#options.
 };
 
 import { withSentryConfig } from '@sentry/nextjs';
 
-export default withSentryConfig(withMDX(config), sentryWebpackPluginOptions);
+export default withSentryConfig(withMDX(config), {
+	silent: true,
+});

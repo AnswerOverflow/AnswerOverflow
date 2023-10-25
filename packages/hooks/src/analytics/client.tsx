@@ -1,9 +1,7 @@
 'use client';
-import React, { useEffect, useRef } from 'react';
+import React, { lazy, useEffect, useRef, useState, Suspense } from 'react';
 import type { Session } from 'next-auth';
-import posthog from 'posthog-js';
 import { EventMap, trackEvent } from './events';
-import { PostHogProvider } from 'posthog-js/react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 export function PostHogPageview() {
@@ -11,15 +9,19 @@ export function PostHogPageview() {
 	const searchParams = useSearchParams();
 	// Track pageviews
 	useEffect(() => {
-		if (pathname) {
-			let url = window.origin + pathname;
-			if (searchParams?.toString()) {
-				url = url + `?${searchParams.toString()}`;
+		const track = async () => {
+			if (pathname) {
+				let url = window.origin + pathname;
+				if (searchParams?.toString()) {
+					url = url + `?${searchParams.toString()}`;
+				}
+				const { posthog } = await import('posthog-js');
+				posthog.capture('$pageview', {
+					$current_url: url,
+				});
 			}
-			posthog.capture('$pageview', {
-				$current_url: url,
-			});
-		}
+		};
+		void track();
 	}, [pathname, searchParams]);
 	return <></>;
 }
@@ -32,17 +34,21 @@ export const AnalyticsProvider = ({
 	session?: Session | null;
 }) => {
 	useEffect(() => {
-		// eslint-disable-next-line n/no-process-env
-		posthog.init(process.env.NEXT_PUBLIC_POSTHOG_TOKEN!, {
-			disable_session_recording: true,
-			persistence: 'memory',
-			capture_pageview: false,
-			bootstrap: {
-				distinctID: session?.user?.id,
-			},
-		});
+		const load = async () => {
+			const { posthog } = await import('posthog-js');
+			// eslint-disable-next-line n/no-process-env
+			posthog.init(process.env.NEXT_PUBLIC_POSTHOG_TOKEN!, {
+				disable_session_recording: true,
+				persistence: 'memory',
+				capture_pageview: false,
+				bootstrap: {
+					distinctID: session?.user?.id,
+				},
+			});
+		};
+		void load();
 	}, [session?.user?.id]);
-	return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
+	return children;
 };
 
 export function useTrackEvent<K extends keyof EventMap | string>(
