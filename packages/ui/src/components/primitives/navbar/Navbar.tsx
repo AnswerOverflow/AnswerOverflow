@@ -32,7 +32,7 @@ import {
 } from '~ui/components/primitives/ui/avatar';
 import { AnswerOverflowLogo } from '~ui/components/primitives/base/AnswerOverflowLogo';
 import { SignInButton } from '~ui/components/primitives/navbar/sign-in-button';
-import { ServerPublic } from '~api/router/server/types';
+import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
 import { ChangeThemeItem } from '~ui/components/primitives/navbar/change-theme-item';
 import { LogoutItem } from '~ui/components/primitives/navbar/logout-item';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';

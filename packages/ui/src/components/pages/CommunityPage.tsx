@@ -3,8 +3,6 @@ import type {
 	CommunityPageData,
 } from '@answeroverflow/db';
 import { NUMBER_OF_THREADS_TO_LOAD } from '@answeroverflow/constants/src/api';
-// import { useTrackEvent } from '@answeroverflow/hooks';
-// import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
 import { getServerDescription } from '~ui/utils/other';
 import { Button } from '~ui/components/primitives/ui/button';
 import {
@@ -26,7 +24,7 @@ import { Footer } from '~ui/components/primitives/Footer';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import Link from '~ui/components/primitives/base/Link';
 import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
-import { ServerPublic } from '~api/router/server/types';
+import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
 import { LuArrowLeft, LuArrowRight } from 'react-icons/lu';
 import { TrackLoad } from '~ui/components/primitives/track-load';
 import { serverToAnalyticsData } from '@answeroverflow/constants';

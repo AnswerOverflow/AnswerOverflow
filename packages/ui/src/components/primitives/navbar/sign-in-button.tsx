@@ -1,6 +1,6 @@
 'use client';
 import { Button, ButtonProps } from '~ui/components/primitives/ui/button';
-import { makeMainSiteLink } from '@answeroverflow/constants';
+import { makeMainSiteLink } from '@answeroverflow/constants/src/links';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 import { signIn } from 'next-auth/react';
 import type { ServerPublic } from '@answeroverflow/api';

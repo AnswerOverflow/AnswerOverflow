@@ -1,7 +1,7 @@
 'use client';
 import { useParams } from 'next/navigation';
 import { trpc } from '~ui/utils/client';
-import { ServerPublic } from '~api/router/server/types';
+import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
 import { ServerIcon } from '~ui/components/primitives/ServerIcon';
 import {
 	DropdownMenu,

@@ -2,7 +2,7 @@ import { pageLookup, type OnboardingPage } from './OnboardingPages';
 import { useState } from 'react';
 import React from 'react';
 import type { ServerPublic } from '@answeroverflow/api';
-import { trackEvent } from '@answeroverflow/hooks';
+import { trackEvent } from '@answeroverflow/hooks/src/analytics/events';
 
 type SubmittedData = {
 	server?: ServerPublic & {
