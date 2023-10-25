@@ -16,10 +16,10 @@ const makeUserIconLink = (
 	size: number = 64,
 ) => {
 	if (user.avatar)
-		return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=${size}`;
+		return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=${size}`;
 	return `https://cdn.discordapp.com/embed/avatars/${
 		parseInt(user.id) % 5
-	}.png?size=${size}`;
+	}.webp?size=${size}`;
 };
 
 export function DiscordAvatar(props: DiscordAvatarProps) {

@@ -17,7 +17,7 @@ import {
 	channelToAnalyticsData,
 	serverToAnalyticsData,
 	threadToAnalyticsData,
-} from '@answeroverflow/constants';
+} from '@answeroverflow/constants/src/analytics';
 import { messageWithDiscordAccountToAnalyticsData } from '@answeroverflow/hooks';
 import { stripMarkdownAndHTML } from '~ui/utils/markdown/strip';
 export type MessageResultPageProps = {
@@ -112,7 +112,7 @@ export async function MessageResultPage({
 						) : undefined
 					}
 					showBorders={message.id !== solutionMessageId}
-					loadingStyle={'lazy'}
+					loadingStyle={message.id === solutionMessageId ? 'eager' : 'lazy'}
 					numberOfMessages={count}
 				/>
 			);
