@@ -6,7 +6,7 @@ import {
 	AccordionTrigger,
 } from '../primitives/ui/accordion';
 import { Check } from 'lucide-react';
-import { trackEvent } from '@answeroverflow/hooks';
+import { trackEvent } from '@answeroverflow/hooks/src/analytics/events';
 import { toast } from 'react-toastify';
 import React, { useState } from 'react';
 import { classNames } from '~ui/utils/styling';

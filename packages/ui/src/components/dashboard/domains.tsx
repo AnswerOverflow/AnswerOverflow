@@ -14,7 +14,7 @@ import { toast } from 'react-toastify';
 import { trpc } from '~ui/utils/client';
 import { useTierAccess } from '../primitives/tier-access-only';
 import { useDashboardContext } from './dashboard-context';
-import {
+import type {
 	DomainVerificationStatusProps,
 	VercelDomainVerificationResponse,
 } from '@answeroverflow/api';

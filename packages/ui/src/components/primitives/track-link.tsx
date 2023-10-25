@@ -1,6 +1,9 @@
 'use client';
 import Link from '~ui/components/primitives/base/Link';
-import { EventMap, trackEvent } from '@answeroverflow/hooks';
+import {
+	EventMap,
+	trackEvent,
+} from '@answeroverflow/hooks/src/analytics/events';
 
 export function TrackLink<K extends keyof EventMap | string>(
 	props: React.ComponentPropsWithoutRef<typeof Link> & {

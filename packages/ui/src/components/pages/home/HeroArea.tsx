@@ -1,5 +1,5 @@
 import Marquee from 'react-fast-marquee';
-import type { ServerPublic } from '~api/router/server/types';
+import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
 import Link from '~ui/components/primitives/base/Link';
 import { ServerIcon } from '~ui/components/primitives/ServerIcon';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';

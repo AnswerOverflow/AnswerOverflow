@@ -1,5 +1,5 @@
 'use client';
-import { EventMap } from '@answeroverflow/hooks';
+import { EventMap } from '@answeroverflow/hooks/src/analytics/events';
 import { useTrackEvent } from '@answeroverflow/hooks/src/analytics/client';
 
 export function TrackLoad<K extends keyof EventMap | string>(props: {

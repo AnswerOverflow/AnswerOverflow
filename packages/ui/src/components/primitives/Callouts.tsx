@@ -1,4 +1,4 @@
-import { type GettingStartedClickProps } from '@answeroverflow/hooks';
+import { type GettingStartedClickProps } from '@answeroverflow/hooks/src/analytics/events';
 import {
 	LinkButton,
 	LinkButtonProps,
