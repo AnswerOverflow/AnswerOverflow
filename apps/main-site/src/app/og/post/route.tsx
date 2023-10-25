@@ -1,5 +1,4 @@
-import { ImageResponse } from '@vercel/og';
-import { NextRequest } from 'next/server';
+import { ImageResponse } from 'next/server';
 import { z } from 'zod';
 import { Server } from '@answeroverflow/db/src/schema';
 import { findMessageResultPage } from '@answeroverflow/db/src/pages';
@@ -7,7 +6,6 @@ import { getSnowflakeUTCDate } from '@answeroverflow/ui/src/utils/snowflake';
 import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/base/AnswerOverflowLogo';
 
 export const runtime = 'edge';
-export const contentType = 'image/png';
 export const preferredRegion = 'iad1';
 
 const satoshiBold = fetch(
@@ -91,7 +89,7 @@ const makeServerIconLink = (
 	if (!server.icon) return undefined;
 	return `https://cdn.discordapp.com/icons/${server.id}/${server.icon}.png?size=${size}`;
 };
-export default async function handler(req: NextRequest) {
+export async function GET(req: Request) {
 	const [satoshiBoldData, interMediumData] = await Promise.all([
 		satoshiBold,
 		interMedium,

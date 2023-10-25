@@ -31,7 +31,7 @@
 		"@trpc/react-query": "^10.37.1",
 		"@trpc/server": "^10.37.1",
 		"highlight.js": "^11.8.0",
-		"next": "13.4.13",
+		"next": "13.5.6",
 		"next-auth": "^4.23.1",
 		"next-sitemap": "^4.2.2",
 		"nextra": "^2.13.1",

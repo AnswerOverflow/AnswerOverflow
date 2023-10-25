@@ -13,7 +13,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="mx-auto flex w-full flex-col items-center overflow-x-hidden overflow-y-scroll bg-background font-body scrollbar-hide">
+		<div className="scrollbar-hide mx-auto flex w-full flex-col items-center overflow-x-hidden overflow-y-scroll bg-background font-body">
 			<div className="w-full max-w-screen-2xl justify-center">
 				<Navbar tenant={undefined} />
 				<main className="px-4 sm:px-[4rem] 2xl:px-[6rem]">{children}</main>

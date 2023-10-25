@@ -1,6 +1,6 @@
 import { BrowseCommunitiesRenderer } from '@answeroverflow/ui/src/components/pages/BrowseCommunitiesPage';
 
-import { fetchBrowseServers } from '../../page';
+import { fetchBrowseServers } from '../../../data/browse';
 import { Metadata } from 'next';
 import { metadata as baseMetadata } from '../../layout';
 export const metadata: Metadata = {
