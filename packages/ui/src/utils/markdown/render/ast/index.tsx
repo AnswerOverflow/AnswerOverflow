@@ -70,13 +70,13 @@ const baseRules = {
 		match: inlineRegex(/^\|\|([\s\S]+?)\|\|/),
 		parse: defaultRules.strong.parse,
 	},
-
-	timestamp: {
-		order: defaultRules.u.order,
-		// https://github.com/discordjs/discord-api-types/blob/638c347dd8a1c5dc39b3626c76749c5f8a4afc6a/globals.ts#L69
-		match: inlineRegex(/^<t:(?<timestamp>-?\d{1,13})(:(?<style>[tTdDfFR]))?>/),
-		parse: ({ groups }: { groups: any }) => groups,
-	},
+	//
+	// timestamp: {
+	// 	order: defaultRules.u.order,
+	// 	// https://github.com/discordjs/discord-api-types/blob/638c347dd8a1c5dc39b3626c76749c5f8a4afc6a/globals.ts#L69
+	// 	match: inlineRegex(/^<t:(?<timestamp>-?\d{1,13})(:(?<style>[tTdDfFR]))?>/),
+	// 	parse: ({ groups }: { groups: any }) => groups,
+	// },
 
 	command: {
 		order: defaultRules.u.order,
