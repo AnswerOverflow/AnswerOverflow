@@ -27,9 +27,13 @@ function parserFor(rules: SimpleMarkdown.ReactRules, returnAst?: boolean) {
 				// @ts-ignore
 				[parser, flattenAst, transform, !returnAst && renderer].filter(Boolean),
 			);
-
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			return parse(input, { inline, ...state });
+			try {
+				return parse(input, { inline, ...state });
+			} catch {
+				console.error('Failed to parse markdown', input);
+				return input;
+			}
 		},
 		{
 			normalizer: (...args) => JSON.stringify(args),
