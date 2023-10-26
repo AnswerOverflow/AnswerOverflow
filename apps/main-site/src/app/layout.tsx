@@ -78,7 +78,6 @@ export default function RootLayout({
 				<link href="https://www.googletagmanager.com" rel="preconnect" />
 				<script
 					async
-					type="text/plain"
 					src={`https://www.googletagmanager.com/gtag/js?id=${process.env
 						.NEXT_PUBLIC_GA_MEASUREMENT_ID!}`}
 					charSet="utf-8"
