@@ -2,11 +2,6 @@ import React from 'react';
 import { Navbar } from '@answeroverflow/ui/src/components/primitives/navbar/Navbar';
 import { Footer } from '@answeroverflow/ui/src/components/primitives/Footer';
 
-/*
-  IF UPDATING THIS FILE ALSO UPDATE THE MATCHING ONE IN [domain]/
-  yes this should be automated / done with nextjs file routing
-  no i dont know how to do it
- */
 export default function RootLayout({
 	children,
 }: {

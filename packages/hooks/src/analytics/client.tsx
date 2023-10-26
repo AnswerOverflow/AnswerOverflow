@@ -30,7 +30,7 @@ export const AnalyticsProvider = ({
 	children,
 	session,
 }: {
-	children: React.ReactNode;
+	children?: React.ReactNode;
 	session?: Session | null;
 }) => {
 	useEffect(() => {

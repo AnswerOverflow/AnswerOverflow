@@ -270,7 +270,7 @@ export const CommunityPage = (
 
 	return (
 		<div className="mx-auto w-full overflow-y-auto overflow-x-hidden bg-background">
-			<Navbar tenant={tenant} hideIcon={server.customDomain != null} />
+			<Navbar tenant={tenant} hideIcon={!!tenant} />
 			<TrackLoad
 				eventName={'Community Page View'}
 				eventData={serverToAnalyticsData(server)}

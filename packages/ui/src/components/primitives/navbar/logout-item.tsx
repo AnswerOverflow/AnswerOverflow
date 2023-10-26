@@ -1,6 +1,5 @@
 'use client';
 import { DropdownMenuItem } from '~ui/components/primitives/ui/dropdown-menu';
-import { signOut } from 'next-auth/react';
 import { LuLogOut } from 'react-icons/lu';
 import React from 'react';
 import { useRouter } from 'next/navigation';
@@ -18,8 +17,10 @@ export function LogoutItem(props: { tenant: ServerPublic | undefined }) {
 					// navigate to /api/auth/tenant/signout?redirect=currentUrl
 					router.push(`/api/auth/tenant/signout?redirect=${redirect}`);
 				} else {
-					void signOut({
-						callbackUrl: '/',
+					void import('next-auth/react').then(({ signOut }) => {
+						void signOut({
+							callbackUrl: '/',
+						});
 					});
 				}
 			}}
