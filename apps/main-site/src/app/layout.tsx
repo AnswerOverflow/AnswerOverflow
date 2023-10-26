@@ -2,13 +2,16 @@
 import '../styles/globals.css';
 import React, { Suspense } from 'react';
 import { Providers } from '../components/providers';
-import Script from 'next/script';
 import { CommitBanner } from '@answeroverflow/ui/src/components/dev/CommitBanner';
 import { getServerSession } from '@answeroverflow/auth';
-import { DATA_UNBLOCKER } from '../utils/data-unblocker';
 import { Montserrat, Source_Sans_3 } from 'next/font/google';
 import type { Metadata } from 'next';
-import { PostHogPageview } from '@answeroverflow/hooks/src/analytics/client';
+import {
+	AnalyticsProvider,
+	PostHogPageview,
+} from '@answeroverflow/hooks/src/analytics/client';
+import Script from 'next/script';
+import { DATA_UNBLOCKER } from '../utils/data-unblocker';
 export const metadata: Metadata = {
 	title: 'Answer Overflow - Search all of Discord',
 	metadataBase: new URL('https://www.answeroverflow.com/'),
@@ -46,7 +49,12 @@ const sourceSans3 = Source_Sans_3({
 	variable: '--font-source-sans-3',
 });
 
-export default async function RootLayout({
+async function AnalyticsWithSession() {
+	const session = await getServerSession();
+	return <AnalyticsProvider session={session} />;
+}
+
+export default function RootLayout({
 	// Layouts must accept a children prop.
 	// This will be populated with nested layouts or pages
 	children,
@@ -54,28 +62,38 @@ export default async function RootLayout({
 	children: React.ReactNode;
 }) {
 	// TODO: Session really shouldn't block first byte
-	const session = await getServerSession();
-
 	return (
 		// suppressHydrationWarning makes next themes doesn't error, other hydration errors are still shown
-		<html lang="en" suppressHydrationWarning>
+		<html
+			lang="en"
+			suppressHydrationWarning
+			className={'dark'}
+			style={{
+				colorScheme: 'dark',
+			}}
+		>
 			<head>
 				<link rel={'preconnect'} href={'https://cdn.discordapp.com'} />
 				<link rel={'dns-prefetch'} href={'https://cdn.discordapp.com'} />
-			</head>
-			<body className={`${montserrat.variable} ${sourceSans3.variable}`}>
-				<Providers session={session}>{children}</Providers>
-				<Suspense>
-					<PostHogPageview />
-				</Suspense>
-				<CommitBanner />
-				<Script
+				<link href="https://www.googletagmanager.com" rel="preconnect" />
+				<script
 					async
-					id="google-tag-manager"
-					strategy={'lazyOnload'}
+					type="text/plain"
 					src={`https://www.googletagmanager.com/gtag/js?id=${process.env
 						.NEXT_PUBLIC_GA_MEASUREMENT_ID!}`}
+					charSet="utf-8"
 				/>
+			</head>
+			<body className={`${montserrat.variable} ${sourceSans3.variable}`}>
+				<CommitBanner />
+
+				<Suspense fallback={children}>
+					<Providers>{children}</Providers>
+				</Suspense>
+				<Suspense>
+					<AnalyticsWithSession />
+					<PostHogPageview />
+				</Suspense>
 				<Script id="google-analytics" strategy={'lazyOnload'} async>
 					{`
 				  		window.dataLayer = window.dataLayer || [];

@@ -2,7 +2,6 @@
 import { Button, ButtonProps } from '~ui/components/primitives/ui/button';
 import { makeMainSiteLink } from '@answeroverflow/constants/src/links';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
-import { signIn } from 'next-auth/react';
 import type { ServerPublic } from '@answeroverflow/api';
 
 export function SignInButton(
@@ -30,7 +29,15 @@ export function SignInButton(
 	return (
 		// TODO: Swap to href
 		// eslint-disable-next-line @typescript-eslint/no-misused-promises
-		<Button variant="outline" onClick={() => signIn('discord')} {...props}>
+		<Button
+			variant="outline"
+			onClick={() => {
+				void import('next-auth/react').then(({ signIn }) => {
+					void signIn('discord');
+				});
+			}}
+			{...props}
+		>
 			Login
 		</Button>
 	);
