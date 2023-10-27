@@ -34,7 +34,7 @@
 		"dayjs": "^1.11.9",
 		"discord-api-types": "^0.37.54",
 		"dotenv-cra": "^3.0.3",
-		"next": "13.5.6",
+		"next": "14.0.0",
 		"prettier": "^2.8.8",
 		"qs": "^6.11.2",
 		"stripe": "^12.18.0",
