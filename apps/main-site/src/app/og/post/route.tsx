@@ -1,4 +1,4 @@
-import { ImageResponse } from 'next/server';
+import { ImageResponse } from 'next/og';
 import { z } from 'zod';
 import { Server } from '@answeroverflow/db/src/schema';
 import { findMessageResultPage } from '@answeroverflow/db/src/pages';
