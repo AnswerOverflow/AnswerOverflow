@@ -1,13 +1,13 @@
-import Link from '~ui/components/primitives/base/Link';
+import Link from '@answeroverflow/ui/src/components/primitives/ui/link';
 import React, { Suspense } from 'react';
 import { GetStarted } from '@answeroverflow/ui/src/components/primitives/Callouts';
-import { ThemeSwitcher } from '@answeroverflow/ui/src/components/primitives/ThemeSwitcher';
-import { GitHubIcon } from '@answeroverflow/ui/src/components/primitives/base/Icons';
+import { ThemeSwitcher } from '@answeroverflow/ui/src/components/primitives/theme-switcher';
+import { GitHubIcon } from '@answeroverflow/ui/src/components/primitives/icons/icons';
 import { GITHUB_LINK } from '@answeroverflow/constants/src/links';
-import { ServerIcon } from '@answeroverflow/ui/src/components/primitives/ServerIcon';
-import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/base/AnswerOverflowLogo';
+import { ServerIcon } from '@answeroverflow/ui/src/components/primitives/server-icon';
+import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/icons/answer-overflow-logo';
 import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
-import { LinkButton } from '@answeroverflow/ui/src/components/primitives/base/LinkButton';
+import { LinkButton } from '@answeroverflow/ui/src/components/primitives/ui/link-button';
 import { SignInButton } from './sign-in-button';
 
 import { getServerSession } from '@answeroverflow/auth';

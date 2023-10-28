@@ -8,6 +8,7 @@ import { ServerIcon } from '@answeroverflow/ui/src/components/primitives/server-
 import Marquee from 'react-fast-marquee';
 import Link from '@answeroverflow/ui/src/components/primitives/ui/link';
 import { Footer } from '@answeroverflow/ui/src/components/primitives/footer';
+import { Navbar } from '../components/navbar/Navbar';
 
 const HeroAreaText = () => {
 	return (
@@ -107,7 +108,7 @@ export default async function HomePage() {
 	return (
 		<div className="flex w-full flex-col items-center bg-background font-body">
 			<div className={'w-full max-w-screen-3xl'}>
-				{/*<Navbar tenant={undefined} />*/}
+				<Navbar tenant={undefined} />
 			</div>
 			<HeroArea servers={data} />
 			<div
