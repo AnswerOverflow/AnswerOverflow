@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-duplicate-enum-values */
+
 /*
   Redeclare discord types to not have to import discord-api-types as we only need a few types
 */

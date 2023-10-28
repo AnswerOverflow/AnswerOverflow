@@ -50,10 +50,6 @@
 		"outDir": "dist",
 		"baseUrl": ".",
 		"paths": {
-			"~ui/utils/*": ["./packages/ui/src/utils/*"],
-			"~ui/components/*": ["./packages/ui/src/components/*"],
-			"~ui/test/*": ["./packages/ui/test/*"],
-			"~ui/pages/*": ["./packages/ui/src/pages/*"],
 			"~discord-bot/utils/*": ["./apps/discord-bot/src/utils/*"],
 			"~discord-bot/domains/*": ["./apps/discord-bot/src/domains/*"],
 			"~discord-bot/listeners": ["./apps/discord-bot/src/listeners/*"],

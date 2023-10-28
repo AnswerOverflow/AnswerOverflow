@@ -1,17 +1,17 @@
 import type { MessageWithDiscordAccount } from '@answeroverflow/db';
 import React from 'react';
-import { DiscordAvatar } from '../DiscordAvatar';
-import { getSnowflakeUTCDate } from '~ui/utils/snowflake';
-import { cn } from '~ui/utils/styling';
+import { DiscordAvatar } from '../discord-avatar';
+import { getSnowflakeUTCDate } from '../../../utils/snowflake';
+import { cn } from '../../../utils/utils';
 import { messageWithDiscordAccountToAnalyticsData } from '@answeroverflow/hooks/src/analytics/events';
-import { getDiscordURLForMessage } from '~ui/utils/discord';
-import Link from '~ui/components/primitives/base/Link';
-import { DiscordIcon } from '~ui/components/primitives/base/Icons';
-import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
+import { getDiscordURLForMessage } from '../../../utils/discord';
+import Link from '../ui/link';
+import { DiscordIcon } from '../icons/icons';
+import { fetchIsUserInServer } from '../../../utils/fetch-is-user-in-server';
 import { MessageProps } from './props';
-import { MessageAttachments } from '~ui/components/primitives/message/attachments';
-import { TrackLinkButton } from '~ui/components/primitives/track-link-button';
-import { parse } from '~ui/utils/markdown/render/index';
+import { MessageAttachments } from './attachments';
+import { TrackLinkButton } from '../ui/track-link-button';
+import { parse } from './markdown/render';
 
 export const MessageAuthorArea = (props: Pick<MessageProps, 'message'>) => {
 	const { message } = props;
