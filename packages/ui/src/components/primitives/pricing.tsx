@@ -4,12 +4,12 @@ import {
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
-} from '../primitives/ui/accordion';
+} from './ui/accordion';
 import { Check } from 'lucide-react';
 import { trackEvent } from '@answeroverflow/hooks/src/analytics/events';
-import { toast } from 'react-toastify';
-import React, { useState } from 'react';
-import { classNames } from '~ui/utils/styling';
+import { toast, ToastContainer } from 'react-toastify';
+import React from 'react';
+import { classNames } from '../../utils/utils';
 import {
 	Dialog,
 	DialogContent,
@@ -17,17 +17,17 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from '~ui/components/primitives/ui/dialog';
-import { Button } from '~ui/components/primitives/ui/button';
-import { Input } from '~ui/components/primitives/ui/input';
-import { Textarea } from '~ui/components/primitives/ui/textarea';
-import { AOLink } from '~ui/components/primitives/base/AOLink';
+} from './ui/dialog';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
+import { BlueLink } from './ui/blue-link';
 
-import { LinkButton } from '~ui/components/primitives/base/LinkButton';
-import { Heading } from '~ui/components/primitives/base/Heading';
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@tremor/react';
+import { LinkButton } from './ui/link-button';
+import { Heading } from './ui/heading';
 import { IoBusiness } from 'react-icons/io5';
 import { IoMdGlobe } from 'react-icons/io';
+import { usePathname } from 'next/navigation';
 const enterpriseFAQs: {
 	question: React.ReactNode;
 	answer: React.ReactNode;
@@ -60,13 +60,13 @@ const enterpriseFAQs: {
 		answer: (
 			<>
 				{"We've"} got a few examples of sites hosted on custom domains! Checkout{' '}
-				<AOLink href={'https://questions.answeroverflow.com'}>
+				<BlueLink href={'https://questions.answeroverflow.com'}>
 					questions.answeroverflow.com
-				</AOLink>{' '}
+				</BlueLink>{' '}
 				and{' '}
-				<AOLink href={'https://discord-questions.trpc.io'}>
+				<BlueLink href={'https://discord-questions.trpc.io'}>
 					discord-questions.trpc.io
-				</AOLink>{' '}
+				</BlueLink>{' '}
 				to see live examples.
 			</>
 		),
@@ -317,17 +317,13 @@ const PublicPlatformPricing = (props: { showFaqs?: boolean }) => (
 );
 
 export const PricingOptions = (props: { showFaqs?: boolean }) => {
-	// TODO: Move to URL
-	const [pricingType, setPricingType] = useState('public-platform');
+	const url = usePathname();
+
 	return (
-		<TabGroup
-			index={pricingType === 'enterprise' ? 1 : 0}
-			onIndexChange={(index) => {
-				void setPricingType(index === 0 ? 'public-platform' : 'enterprise');
-			}}
-		>
-			<TabList className={'grid w-full grid-cols-2'}>
-				<Tab
+		<div>
+			<div className={'grid w-full grid-cols-2'}>
+				<LinkButton
+					href={'/pricing/public-platform'}
 					className={
 						'flex h-full max-h-full max-w-full grow flex-col items-center justify-start'
 					}
@@ -354,11 +350,12 @@ export const PricingOptions = (props: { showFaqs?: boolean }) => {
 							</span>
 						</div>
 					</div>
-				</Tab>
-				<Tab
+				</LinkButton>
+				<LinkButton
 					className={
 						'flex h-full max-h-full max-w-full grow flex-col items-center justify-start'
 					}
+					href={'/pricing/enterprise'}
 				>
 					<div
 						className={
@@ -377,17 +374,14 @@ export const PricingOptions = (props: { showFaqs?: boolean }) => {
 							</span>
 						</div>
 					</div>
-				</Tab>
-			</TabList>
-			<TabPanels>
-				<TabPanel>
-					<PublicPlatformPricing showFaqs={props.showFaqs} />
-				</TabPanel>
-				<TabPanel>
-					<EnterprisePricing showFaqs={props.showFaqs} />
-				</TabPanel>
-			</TabPanels>
-		</TabGroup>
+				</LinkButton>
+			</div>
+			{url === '/pricing/enterprise' ? (
+				<EnterprisePricing showFaqs={props.showFaqs} />
+			) : (
+				<PublicPlatformPricing showFaqs={props.showFaqs} />
+			)}
+		</div>
 	);
 };
 
@@ -396,6 +390,7 @@ export const Pricing = () => {
 		<div className="my-6 max-w-6xl sm:mx-3 md:mx-auto">
 			<Heading.H1 className={'text-center'}>Plans</Heading.H1>
 			<PricingOptions showFaqs={true} />
+			<ToastContainer />
 			<form
 				className="mx-auto my-16 flex max-w-2xl flex-col gap-4"
 				onSubmit={(e) => {

@@ -17,7 +17,7 @@ import { Command } from '~ui/components/primitives/base/Command';
 import { Button } from '~ui/components/primitives/ui/button';
 import { ServerIcon } from '~ui/components/primitives/ServerIcon';
 import { Heading } from '~ui/components/primitives/base/Heading';
-import { AOLink } from '~ui/components/primitives/base/AOLink';
+import { BlueLink } from '~ui/components/primitives/base/blue-link';
 import { ManageServerCard } from '~ui/components/primitives/ServerCard';
 import { LinkButton } from '~ui/components/primitives/base/LinkButton';
 // import { SignInButton } from '~ui/components/primitives/navbar/sign-in-button';
@@ -298,13 +298,13 @@ export function EnableForumGuidelinesConsent() {
 				'Users have to provide consent for their messages to be shown publicly.',
 				'Forum guidelines consent marks users who post in the channel as consenting',
 				'Users can manage their account with the /manage-account command.',
-				<AOLink
+				<BlueLink
 					href="https://docs.answeroverflow.com/user-settings/displaying-messages"
 					target="_blank"
 					key={'displaying-messages'}
 				>
 					Learn more about displaying messages on Answer Overflow
-				</AOLink>,
+				</BlueLink>,
 			]}
 			nextPage="enable-mark-solution"
 		/>
@@ -448,12 +448,12 @@ export function FinalChecklistPage() {
 				</li>
 				<li>
 					Browse{' '}
-					<AOLink
+					<BlueLink
 						href="https://docs.answeroverflow.com"
 						className={'underline'}
 					>
 						the documentation
-					</AOLink>{' '}
+					</BlueLink>{' '}
 					to learn more about Answer Overflow
 				</li>
 			</ul>

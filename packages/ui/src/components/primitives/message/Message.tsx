@@ -6,7 +6,7 @@ import { cn } from '../../../utils/utils';
 import { messageWithDiscordAccountToAnalyticsData } from '@answeroverflow/hooks/src/analytics/events';
 import { getDiscordURLForMessage } from '../../../utils/discord';
 import Link from '../ui/link';
-import { DiscordIcon } from '../icons/icons';
+import { DiscordIcon } from '../icons';
 import { fetchIsUserInServer } from '../../../utils/fetch-is-user-in-server';
 import { MessageProps } from './props';
 import { MessageAttachments } from './attachments';

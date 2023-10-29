@@ -11,7 +11,7 @@ import type { Plan } from '@answeroverflow/db';
 import { trpc } from '~ui/utils/client';
 import { useDashboardContext } from './dashboard-context';
 import { PricingDialog } from '~ui/components/pages/Pricing';
-import { AOLink } from '~ui/components/primitives/base/AOLink';
+import { BlueLink } from '@answeroverflow/ui/src/components/primitives/ui/blue-link';
 
 export function PageViewsCardRenderer(props: {
 	numberOfPageViews?: number;
@@ -152,7 +152,7 @@ export function CurrentPlanCardRenderer(
 			}
 			return (
 				<Text>
-					<AOLink href={props.stripeCheckoutUrl}>Change Plan</AOLink>
+					<BlueLink href={props.stripeCheckoutUrl}>Change Plan</BlueLink>
 				</Text>
 			);
 		}

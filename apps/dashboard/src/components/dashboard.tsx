@@ -18,7 +18,7 @@ import { TierAccessOnly } from '../primitives/tier-access-only';
 import type { ServerDashboard } from '@answeroverflow/api';
 import { DashboardProvider } from './dashboard-context';
 import { getServerHomepageUrl } from '~ui/utils/server';
-import { AOLink } from '~ui/components/primitives/base/AOLink';
+import { BlueLink } from '~ui/components/primitives/base/blue-link';
 import { GetStarted } from '~ui/components/primitives/Callouts';
 
 export function ServerDashboardRenderer(props: {
@@ -54,13 +54,13 @@ export function ServerDashboardRenderer(props: {
 								className="flex flex-col justify-between gap-4"
 							>
 								<Card>
-									<AOLink
+									<BlueLink
 										href={getServerHomepageUrl(data)}
 										className="flex items-center gap-2 no-underline hover:underline"
 									>
 										<Title>View Community</Title>
 										<GoLinkExternal className="mt-1 h-5 w-5" />
-									</AOLink>
+									</BlueLink>
 								</Card>
 
 								{PageViewsCardOverride ?? <PageViewsCard />}

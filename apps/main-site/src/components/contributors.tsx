@@ -1,10 +1,10 @@
-import { FollowCursor } from './follow';
+import { FollowCursor } from '@answeroverflow/ui/src/components/primitives/ui/follow';
 import { SocialIcon } from 'react-social-icons';
 import {
 	Avatar,
 	AvatarFallback,
 	AvatarImage,
-} from '~ui/components/primitives/ui/avatar';
+} from '@answeroverflow/ui/src/components/primitives/ui/avatar';
 
 export interface ContributorData {
 	name: string;

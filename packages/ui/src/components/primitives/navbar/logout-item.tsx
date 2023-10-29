@@ -1,5 +1,5 @@
 'use client';
-import { DropdownMenuItem } from '@answeroverflow/ui/src/components/primitives/ui/dropdown-menu';
+import { DropdownMenuItem } from '../ui/dropdown-menu';
 import { LuLogOut } from 'react-icons/lu';
 import React from 'react';
 import { useRouter } from 'next/navigation';

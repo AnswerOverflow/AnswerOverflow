@@ -4,7 +4,7 @@ import {
 	GITHUB_LINK,
 	TWITTER_LINK,
 } from '@answeroverflow/constants/src/links';
-import { DiscordIcon, GitHubIcon } from './icons/icons';
+import { DiscordIcon, GitHubIcon } from './icons';
 import { Heading } from './ui/heading';
 import { AnswerOverflowLogo } from './icons/answer-overflow-logo';
 import type { ServerPublic } from '@answeroverflow/api';

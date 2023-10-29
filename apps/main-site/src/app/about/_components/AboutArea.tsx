@@ -1,15 +1,14 @@
 import Balancer from 'react-wrap-balancer';
 import Image from 'next/image';
-import { cn } from '~ui/utils/styling';
+import { cn } from '@answeroverflow/ui/src/utils/utils';
 import { serverToAnalyticsData } from '@answeroverflow/constants/src/analytics';
-import { Paragraph } from '~ui/components/primitives/base/Paragraph';
-import { Heading } from '~ui/components/primitives/base/Heading';
-import { LinkButton } from '~ui/components/primitives/base/LinkButton';
-import { HowDoesItWorkArea } from '~ui/components/pages/home/HowDoesItWorkArea';
-// import { Navbar } from '~ui/components/primitives/navbar/Navbar';
-import { Footer } from '~ui/components/primitives/Footer';
-import { PricingOptions } from '~ui/components/pages/Pricing';
-import { TrackLink } from '~ui/components/primitives/track-link';
+import { Paragraph } from '@answeroverflow/ui/src/components/primitives/ui/paragraph';
+import { Heading } from '@answeroverflow/ui/src/components/primitives/ui/heading';
+import { LinkButton } from '@answeroverflow/ui/src/components/primitives/ui/link-button';
+import { HowDoesItWorkArea } from './HowDoesItWorkArea';
+import { Footer } from '@answeroverflow/ui/src/components/primitives/Footer';
+import { PricingOptions } from '@answeroverflow/ui/src/components/primitives/pricing';
+import { TrackLink } from '@answeroverflow/ui/src/components/primitives/ui/track-link';
 
 // TODO: Link to docs for feature?
 const HomeFeature = (props: {
