@@ -5,13 +5,7 @@ import {
 	AvatarFallback,
 	AvatarImage,
 } from '@answeroverflow/ui/src/components/primitives/ui/avatar';
-
-export interface ContributorData {
-	name: string;
-	description: string;
-	avatar: string;
-	links: string[];
-}
+import { ContributorData } from './contributors-data';
 
 export const Contributor = ({
 	name,

@@ -8,7 +8,7 @@ import { ServerIcon } from '@answeroverflow/ui/src/components/primitives/server-
 import Marquee from 'react-fast-marquee';
 import Link from '@answeroverflow/ui/src/components/primitives/ui/link';
 import { Footer } from '@answeroverflow/ui/src/components/primitives/footer';
-import { Navbar } from '../components/navbar/Navbar';
+import { Navbar } from '@answeroverflow/ui/src/components/primitives/navbar';
 
 const HeroAreaText = () => {
 	return (

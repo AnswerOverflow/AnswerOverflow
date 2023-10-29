@@ -1,6 +1,6 @@
-import { QuestionAnswerArea } from './QuestionAnswerArea/QuestionAnswerArea';
+import { QuestionAnswerArea } from './QuestionAnswerArea';
 import { messageData } from './HomeMessages';
-import { GetStarted } from '~ui/components/primitives/Callouts';
+import { GetStarted } from '@answeroverflow/ui/src/components/primitives/Callouts';
 
 const HowDoesItWorkAreaText = () => {
 	return (

@@ -1,8 +1,8 @@
 'use client';
 import React, { useRef } from 'react';
 import Xarrow from 'react-xarrows';
-import { DemoMessage, type MessageProps } from '../DemoMessage';
-import { GooglePage } from './GooglePage/GooglePage';
+import { DemoMessage, type MessageProps } from './DemoMessage';
+import { GooglePage } from './GooglePage';
 import './DashAnimation.css';
 import { useTheme } from 'next-themes';
 if (typeof window === 'undefined') React.useLayoutEffect = () => {};

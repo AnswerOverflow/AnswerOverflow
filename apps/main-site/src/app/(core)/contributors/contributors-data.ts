@@ -1,6 +1,10 @@
-import type { ContributorData } from '@answeroverflow/ui/src/components/primitives/Contributors';
 /* eslint-disable @typescript-eslint/naming-convention */
-
+export interface ContributorData {
+	name: string;
+	description: string;
+	avatar: string;
+	links: string[];
+}
 export const coreTeamContributors: ContributorData[] = [
 	{
 		name: 'Rhys',

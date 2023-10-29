@@ -1,6 +1,8 @@
 import { fetchBrowseServers } from '../../../data/browse';
 import { Metadata } from 'next';
 import { metadata as baseMetadata } from '../../layout';
+import { Heading } from '@answeroverflow/ui/src/components/primitives/ui/heading';
+import { ViewServerCard } from '@answeroverflow/ui/src/components/primitives/server-card';
 export const metadata: Metadata = {
 	title: 'Browse All Communities - Answer Overflow',
 	description:
@@ -20,7 +22,7 @@ export default async function BrowseCommunitiesPage() {
 				Browse Communities
 			</Heading.H1>
 			<div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-				{servers.map((server) => {
+				{data.map((server) => {
 					return (
 						<div
 							key={`server-${server.id}-area`}
