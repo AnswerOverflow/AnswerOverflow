@@ -43,9 +43,9 @@ const config = {
 		return config;
 	},
 	// We already do linting on GH actions
-  eslint: {
-    ignoreDuringBuilds: !!process.env.CI,
-  },
+	eslint: {
+		ignoreDuringBuilds: !!process.env.CI,
+	},
 	productionBrowserSourceMaps: true, // we're open source so why not
 	sentry: {
 		hideSourceMaps: false,
