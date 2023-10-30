@@ -1,7 +1,7 @@
 'use client';
-import { Button, ButtonProps } from '~ui/components/primitives/ui/button';
+import { Button, ButtonProps } from '../ui/button';
 import { makeMainSiteLink } from '@answeroverflow/constants/src/links';
-import { LinkButton } from '~ui/components/primitives/base/LinkButton';
+import { LinkButton } from '../ui/link-button';
 import type { ServerPublic } from '@answeroverflow/api';
 
 export function SignInButton(

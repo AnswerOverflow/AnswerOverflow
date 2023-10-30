@@ -35,7 +35,7 @@ const applyLastIndexed = async () => {
 	for await (const channel of channelsWithIndexingEnabled) {
 		const latestThread = await db.query.dbMessages.findFirst({
 			where:
-				channel.type === ChannelType.GuildForum
+				channel.type === ChannelType.GuildForum.valueOf()
 					? eq(dbMessages.parentChannelId, channel.id)
 					: eq(dbMessages.channelId, channel.id),
 			orderBy: sql`CAST(${dbMessages.id} AS SIGNED) DESC`,

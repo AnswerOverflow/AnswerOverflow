@@ -26,14 +26,14 @@ export async function emitEvent<E extends keyof ClientEvents>(
 	return status;
 }
 
-export function overrideVariables<T extends {}>(obj: T, overrides: {}) {
+export function overrideVariables<T extends object>(obj: T, overrides: object) {
 	Object.assign(obj, overrides);
 }
 
 export function copyClass<T extends { client: Client }>(
 	obj: T,
 	client: Client,
-	overrides: {} = {},
+	overrides: object = {},
 ) {
 	const created = Object.assign(
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument

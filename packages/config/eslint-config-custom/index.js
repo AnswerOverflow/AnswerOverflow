@@ -41,6 +41,9 @@ module.exports = {
 		'@typescript-eslint/prefer-as-const': 'error',
 		'no-restricted-imports': 'off',
 		'no-await-in-loop': 'error',
+		'@typescript-eslint/no-explicit-any': 'off',
+		'@typescript-eslint/ban-ts-comment': 'off',
+		'@typescript-eslint/no-redundant-type-constituents': 'off',
 		'no-only-tests/no-only-tests': [
 			// eslint-disable-next-line no-undef
 			process.env.CI ? 'error' : 'warn', // CI should never allow .only,

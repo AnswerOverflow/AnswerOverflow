@@ -67,6 +67,26 @@ const config = {
 	sentry: {
 		hideSourceMaps: false,
 	},
+	redirects: async () => {
+		return [
+			{
+				source: '/onboarding:slug*',
+				destination:
+					process.env.NODE_ENV === 'development'
+						? 'http://localhost:5000/onboarding'
+						: 'https://app.answeroverflow.com/onboarding',
+				permanent: process.env.NODE_ENV === 'production',
+			},
+			{
+				source: '/dashboard:slug*',
+				destination:
+					process.env.NODE_ENV === 'development'
+						? 'http://localhost:5000/dashboard'
+						: 'https://app.answeroverflow.com/dashboard',
+				permanent: process.env.NODE_ENV === 'production',
+			},
+		];
+	},
 };
 
 import { withSentryConfig } from '@sentry/nextjs';

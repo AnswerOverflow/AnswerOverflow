@@ -8,7 +8,6 @@ import {
 	zUserSchema,
 } from './discord';
 
-import axios from 'axios';
 import { getRandomId } from '@answeroverflow/utils';
 
 const mockDiscordApiUserResponse = {
@@ -68,10 +67,11 @@ const mockDiscordApiServersResponse = [
 
 function mockAxiosGet<T>(data: T) {
 	// @ts-ignore
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
-	return axios.get.mockResolvedValue({
-		data,
-	});
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
+	return (fetch = vitest.fn().mockResolvedValue({
+		// eslint-disable-next-line @typescript-eslint/require-await
+		json: async () => data,
+	}));
 }
 
 let accessToken: string;
@@ -97,7 +97,7 @@ describe('Discord API', () => {
 				accessToken,
 			});
 			expect(cachedUser).toEqual(zUserSchema.parse(mockDiscordApiUserResponse));
-			expect(axios.get).toHaveBeenCalledTimes(1);
+			expect(fetch).toHaveBeenCalledTimes(1);
 		});
 		it('should update a cached user', async () => {
 			mockAxiosGet(mockDiscordApiUserResponse);
@@ -113,7 +113,7 @@ describe('Discord API', () => {
 				accessToken,
 			});
 			expect(cachedUser).toEqual(zUserSchema.parse(mockDiscordApiUserResponse));
-			expect(axios.get).toHaveBeenCalledTimes(1);
+			expect(fetch).toHaveBeenCalledTimes(1);
 
 			const updatedUser = {
 				...mockDiscordApiUserResponse,
@@ -124,7 +124,7 @@ describe('Discord API', () => {
 				accessToken,
 			});
 			expect(updatedCachedUser).toEqual(zUserSchema.parse(updatedUser));
-			expect(axios.get).toHaveBeenCalledTimes(1);
+			expect(fetch).toHaveBeenCalledTimes(1);
 		});
 	});
 	describe('Discord Servers', () => {
@@ -143,7 +143,7 @@ describe('Discord API', () => {
 			expect(cachedServers).toEqual(
 				zDiscordApiServerArraySchema.parse(mockDiscordApiServersResponse),
 			);
-			expect(axios.get).toHaveBeenCalledTimes(1);
+			expect(fetch).toHaveBeenCalledTimes(1);
 		});
 		it('should manually remove a server from the users cache', async () => {
 			mockAxiosGet(mockDiscordApiServersResponse);

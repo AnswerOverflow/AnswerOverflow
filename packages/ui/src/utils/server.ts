@@ -8,3 +8,10 @@ export function getServerHomepageUrl(server: ServerPublic) {
 		process.env.NEXT_PUBLIC_NODE_ENV === 'production' ? 's' : ''
 	}://${server.customDomain}`;
 }
+
+// TODO: Handle this at the API level
+export function getServerDescription(server: ServerPublic) {
+	return (
+		server.description ?? `Join the ${server.name} server to ask questions!`
+	);
+}

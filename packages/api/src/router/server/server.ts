@@ -32,7 +32,6 @@ import {
 	protectedMutationFetchFirst,
 } from '~api/utils/protected-procedures';
 import { fetchServerPageViewsAsLineChart } from '~api/utils/posthog';
-import { getBaseUrl } from '@answeroverflow/constants';
 import {
 	createProPlanCheckoutSession,
 	createNewCustomer,
@@ -412,7 +411,7 @@ export const serverRouter = router({
 						});
 					}
 
-					const returnUrl = `${getBaseUrl()}/dashboard/${server.id}`;
+					const returnUrl = `https://app.answeroverflow.com/dashboard/${server.id}`;
 
 					const [proPlanCheckout, enterprisePlanCheckout] = await Promise.all([
 						createProPlanCheckoutSession({

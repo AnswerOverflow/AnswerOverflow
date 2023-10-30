@@ -16,7 +16,7 @@ function makeErrorMessage(msg: string) {
 	return `Sorry! ${msg}. We've been notified of the problem and are looking into it. \n\nYou can try dismissing this and rerunning the command in the meantime.`;
 }
 
-async function handleError<T extends {}>(opts: {
+async function handleError<T extends object>(opts: {
 	interaction: Interaction | ContextMenuCommandInteraction;
 	userFacingMessage: string;
 	sentryMessage: string;

@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import axios from 'axios';
 import { getRedisClient } from './client';
 import { db } from '@answeroverflow/db';
 import { sharedEnvs } from '@answeroverflow/env/shared';
@@ -14,13 +13,12 @@ export async function discordApiFetch(
 	url: '/users/@me/guilds' | '/users/@me',
 	callOpts: DiscordApiCallOpts,
 ) {
-	const data = await axios.get('https://discordapp.com/api' + url, {
+	const data = await fetch('https://discordapp.com/api' + url, {
 		headers: {
 			Authorization: `Bearer ${callOpts.accessToken}`,
 		},
-		validateStatus(status) {
-			return status < 300 || status === 401;
-		},
+		// @ts-ignore
+		cache: 'no-cache',
 	});
 	if (data.status === 401) {
 		const account = await db.query.dbAccounts.findFirst({
@@ -78,7 +76,7 @@ export async function getUserServers(opts: DiscordApiCallOpts) {
 		return zDiscordApiServerArraySchema.parse(JSON.parse(cachedServers));
 	}
 	const data = await discordApiFetch('/users/@me/guilds', opts);
-	const servers = zDiscordApiServerArraySchema.parse(data.data);
+	const servers = zDiscordApiServerArraySchema.parse(await data.json());
 	await updateUserServersCache(opts.accessToken, servers);
 	return servers;
 }
@@ -158,7 +156,7 @@ export async function getDiscordUser(opts: DiscordApiCallOpts) {
 		return zUserSchema.parse(JSON.parse(cachedUser));
 	}
 	const data = await discordApiFetch('/users/@me', opts);
-	const parsed = zUserSchema.parse(data.data);
+	const parsed = zUserSchema.parse(await data.json());
 	await updateCachedDiscordUser(opts.accessToken, parsed);
 	return parsed;
 }
@@ -206,20 +204,19 @@ export async function refreshAccessToken(discord: Account) {
 			return;
 		}
 		await setRefreshTokenBeingUsed(discord.refresh_token, true);
-		const res = await axios.postForm(
-			'https://discord.com/api/v10/oauth2/token',
-			{
-				client_id: sharedEnvs.DISCORD_CLIENT_ID,
-				client_secret: sharedEnvs.DISCORD_CLIENT_SECRET,
-				grant_type: 'refresh_token',
-				refresh_token: discord.refresh_token ?? '',
+		const body = {
+			client_id: sharedEnvs.DISCORD_CLIENT_ID,
+			client_secret: sharedEnvs.DISCORD_CLIENT_SECRET,
+			grant_type: 'refresh_token',
+			refresh_token: discord.refresh_token ?? '',
+		};
+		const res = await fetch('https://discord.com/api/v10/oauth2/token', {
+			method: 'POST',
+			body: JSON.stringify(body),
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
 			},
-			{
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded',
-				},
-			},
-		);
+		});
 
 		const zAccessTokenResponse = z.object({
 			token_type: z.string(),
@@ -228,7 +225,7 @@ export async function refreshAccessToken(discord: Account) {
 			refresh_token: z.string(),
 			scope: z.string(),
 		});
-		const accessTokenResponse = zAccessTokenResponse.parse(res.data);
+		const accessTokenResponse = zAccessTokenResponse.parse(await res.json());
 		console.log('Updating token');
 		await updateProviderAuthToken({
 			provider: 'discord',
@@ -242,12 +239,7 @@ export async function refreshAccessToken(discord: Account) {
 		});
 		await setRefreshTokenBeingUsed(discord.refresh_token, false);
 	} catch (error) {
-		if (axios.isAxiosError(error)) {
-			await setRefreshTokenBeingUsed(discord.refresh_token, false);
-			console.log("Couldn't refresh token, deleting session", error.code);
-		} else {
-			console.log('Error refreshing token', error);
-		}
+		await setRefreshTokenBeingUsed(discord.refresh_token, false);
 		// We're in a bad state so just prompt a re-auth
 		await db.delete(dbSessions).where(eq(dbSessions.userId, discord.userId));
 	}

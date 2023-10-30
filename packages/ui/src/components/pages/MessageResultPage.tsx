@@ -2,24 +2,24 @@ import type { ChannelPublicWithFlags, MessageFull } from '@answeroverflow/db';
 import type { ServerPublic } from '@answeroverflow/api';
 import type { QAPage, WithContext } from 'schema-dts';
 import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
-import { ServerInvite } from '~ui/components/primitives/ServerInvite';
+import { ServerInvite } from '../primitives/server-invite';
 import {
 	Message,
 	MessageContentWithSolution,
-} from '~ui/components/primitives/message/Message';
-import { Heading } from '~ui/components/primitives/base/Heading';
+} from '../primitives/message/Message';
+import { Heading } from '../primitives/ui/heading';
 
-import Link from '~ui/components/primitives/base/Link';
-import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
-import { fetchIsUserInServer } from '~ui/utils/fetch-is-user-in-server';
-import { TrackLoad } from '~ui/components/primitives/track-load';
+import Link from '../primitives/ui/link';
+import { MessagesSearchBar } from '../primitives/messages-search-bar';
+import { fetchIsUserInServer } from '../../utils/fetch-is-user-in-server';
+import { TrackLoad } from '../primitives/ui/track-load';
 import {
 	channelToAnalyticsData,
 	serverToAnalyticsData,
 	threadToAnalyticsData,
 } from '@answeroverflow/constants/src/analytics';
 import { messageWithDiscordAccountToAnalyticsData } from '@answeroverflow/hooks';
-import { stripMarkdownAndHTML } from '~ui/utils/markdown/strip';
+import { stripMarkdownAndHTML } from '../primitives/message/markdown/strip';
 export type MessageResultPageProps = {
 	messages: MessageFull[];
 	server: ServerPublic;

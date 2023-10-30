@@ -1,7 +1,7 @@
 import type { MDXComponents } from 'mdx/types';
-import { Heading } from '@answeroverflow/ui/src/components/primitives/base/Heading';
-import { Paragraph } from '@answeroverflow/ui/src/components/primitives/base/Paragraph';
-import Link from '@answeroverflow/ui/src/components/primitives/base/Link';
+import { Heading } from '@answeroverflow/ui/src/components/primitives/ui/heading';
+import { Paragraph } from '@answeroverflow/ui/src/components/primitives/ui/paragraph';
+import Link from '@answeroverflow/ui/src/components/primitives/ui/link';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
 	return {
