@@ -40,11 +40,13 @@ export const metadata: Metadata = {
 const montserrat = Montserrat({
 	subsets: ['latin'],
 	display: 'swap',
+	weight: ['400', '500', '600', '700'],
 	variable: '--font-montserrat',
 });
 const sourceSans3 = Source_Sans_3({
 	subsets: ['latin'],
 	display: 'swap',
+	weight: ['400', '500', '600', '700'],
 	variable: '--font-source-sans-3',
 });
 

@@ -87,6 +87,7 @@ const config = {
 			},
 		];
 	},
+
 };
 
 import { withSentryConfig } from '@sentry/nextjs';

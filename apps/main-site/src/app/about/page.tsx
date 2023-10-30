@@ -9,7 +9,7 @@ import { Paragraph } from '@answeroverflow/ui/src/components/primitives/ui/parag
 import { Heading } from '@answeroverflow/ui/src/components/primitives/ui/heading';
 import { LinkButton } from '@answeroverflow/ui/src/components/primitives/ui/link-button';
 import { HowDoesItWorkArea } from './_components/HowDoesItWorkArea';
-import { Footer } from '@answeroverflow/ui/src/components/primitives/Footer';
+import { Footer } from '@answeroverflow/ui/src/components/primitives/footer';
 import { PricingOptions } from '@answeroverflow/ui/src/components/primitives/pricing';
 import { TrackLink } from '@answeroverflow/ui/src/components/primitives/ui/track-link';
 import { Navbar } from '@answeroverflow/ui/src/components/primitives/navbar';
