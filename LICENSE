@@ -1,4 +1,4 @@
-Basically MIT License
+MIT License
 
 Copyright (c) 2023 Hedgehog Software LLC
 
@@ -11,14 +11,6 @@ furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
-
-You cannot host this software as a service (SaaS) for other people to use.
-The only exclusion to this is the self hosted version, which you can host your own communities.
-
-If using a self hosted version, you must provide a link back to the main website
-(https://www.answeroverflow.com) with the text "Powered by AnswerOverflow"
-
-If you need an exception to these, please contact us at contact@answeroverflow.com
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
