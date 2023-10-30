@@ -15,11 +15,7 @@ const getBaseUrl = () => {
 	// eslint-disable-next-line n/no-process-env,turbo/no-undeclared-env-vars
 	return `http://localhost:${process.env.NEXT_PUBLIC_PORT ?? 3000}`; // dev SSR should use localhost
 };
-export default function TRPCProvider({
-	children,
-}: {
-	children?: React.ReactNode;
-}) {
+export default function TRPCProvider(props: { children?: React.ReactNode }) {
 	const [queryClient] = useState(() => new QueryClient());
 	const [trpcClient] = useState(() =>
 		trpc.createClient({
@@ -39,7 +35,9 @@ export default function TRPCProvider({
 	);
 	return (
 		<trpc.Provider client={trpcClient} queryClient={queryClient}>
-			<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+			<QueryClientProvider client={queryClient}>
+				{props.children}
+			</QueryClientProvider>
 		</trpc.Provider>
 	);
 }

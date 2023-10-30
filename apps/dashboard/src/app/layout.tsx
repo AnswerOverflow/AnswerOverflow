@@ -15,12 +15,14 @@ export const metadata: Metadata = {
 	},
 };
 
-export default function RootLayout(props: { children?: React.ReactNode }) {
+export default function RootLayout(
+	props: { children?: React.ReactNode } | null,
+) {
 	return (
 		<Layout>
 			<TRPCProvider>
 				<ToastContainer />
-				{props.children}
+				{props && props.children ? props.children : null}
 			</TRPCProvider>
 		</Layout>
 	);
