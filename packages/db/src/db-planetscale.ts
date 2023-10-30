@@ -10,8 +10,8 @@ These files will be merged into one file with dynamic imports when we move to bu
 dynamic imports and top level await dont work with the bot. if you can fix it make a pr 💖
  */
 
-// eslint-disable-next-line n/no-process-env
 const isPsDb =
+	// eslint-disable-next-line n/no-process-env
 	dbUrl.includes('psdb') || dbUrl.includes('pscale_pw') || !!process.env.CI;
 if (!isPsDb) {
 	console.error(
