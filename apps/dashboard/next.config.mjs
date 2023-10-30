@@ -8,7 +8,6 @@
 	// @ts-expect-error
 	(await import('@answeroverflow/env/web-schema.mjs'));
 
-
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
@@ -44,25 +43,22 @@ const config = {
 		return config;
 	},
 	// We already do linting on GH actions
-	eslint: {
-		ignoreDuringBuilds: true,
-	},
-	typescript: {
-	ignoreBuildErrors: true
-	},
+  eslint: {
+    ignoreDuringBuilds: !!process.env.CI,
+  },
 	productionBrowserSourceMaps: true, // we're open source so why not
 	sentry: {
 		hideSourceMaps: false,
 	},
-  redirects: async () => {
-    return [
-      {
-        source: '/',
-        destination: '/onboarding',
-        permanent: false,
-      },
-    ]
-  },
+	redirects: async () => {
+		return [
+			{
+				source: '/',
+				destination: '/onboarding',
+				permanent: false,
+			},
+		];
+	},
 };
 
 import { withSentryConfig } from '@sentry/nextjs';

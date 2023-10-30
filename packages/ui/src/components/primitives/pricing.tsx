@@ -318,13 +318,13 @@ const PublicPlatformPricing = (props: { showFaqs?: boolean }) => (
 
 export const PricingOptions = (props: { showFaqs?: boolean }) => {
 	const url = usePathname();
-	const isLookingAtPublicPlatform = !url.includes('enterprise');
+	const isViewingEnterprise = !url?.includes('enterprise');
 	return (
 		<div>
 			<div className={'grid w-full grid-cols-2 gap-8'}>
 				<LinkButton
 					href={'/pricing/public-platform'}
-					variant={isLookingAtPublicPlatform ? 'outline' : 'ghost'}
+					variant={isViewingEnterprise ? 'outline' : 'ghost'}
 					className={
 						'flex h-full max-h-full max-w-full grow flex-col items-center justify-start'
 					}
@@ -356,7 +356,7 @@ export const PricingOptions = (props: { showFaqs?: boolean }) => {
 					className={
 						'flex h-full max-h-full max-w-full grow flex-col items-center justify-start'
 					}
-					variant={!isLookingAtPublicPlatform ? 'outline' : 'ghost'}
+					variant={!isViewingEnterprise ? 'outline' : 'ghost'}
 					href={'/pricing/enterprise'}
 				>
 					<div

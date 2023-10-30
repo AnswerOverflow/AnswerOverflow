@@ -11,7 +11,7 @@ export function getServerHomepageUrl(server: ServerPublic) {
 
 // TODO: Handle this at the API level
 export function getServerDescription(server: ServerPublic) {
-  return (
-    server.description ?? `Join the ${server.name} server to ask questions!`
-  );
+	return (
+		server.description ?? `Join the ${server.name} server to ask questions!`
+	);
 }
