@@ -8,11 +8,11 @@ import {
 	MessageBlurrer,
 	MessageContents,
 	MessageContentWithSolution,
-} from '~ui/components/primitives/message/Message';
-import Link from '~ui/components/primitives/base/Link';
-import { Paragraph } from '~ui/components/primitives/base/Paragraph';
-import { cn } from '~ui/utils/styling';
-import { MessageAttachments } from '~ui/components/primitives/message/attachments';
+} from './Message';
+import Link from '../ui/link';
+import { Paragraph } from '../ui/paragraph';
+import { cn } from '../../../utils/utils';
+import { MessageAttachments } from './attachments';
 import React from 'react';
 
 export const LinkMessage = (

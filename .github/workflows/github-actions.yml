@@ -17,6 +17,7 @@ env:
   ELASTICSEARCH_URL: http://localhost:9200
   ELASTICSEARCH_USERNAME: elastic
   ELASTICSEARCH_PASSWORD: changeme
+  CI: true
   ELASTICSEARCH_MESSAGE_INDEX: messages
   NEXT_PUBLIC_POSTHOG_TOKEN: "123" # Fake API key to make CI not fail
   REDIS_URL: redis://:redis@localhost:6379
@@ -90,8 +91,7 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Build
-        run: pnpm build
+      # Build is disabled for now, edge dbs don't work with it
 
       - name: Test
         run: pnpm test

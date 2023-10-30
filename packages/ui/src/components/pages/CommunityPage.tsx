@@ -3,30 +3,29 @@ import type {
 	CommunityPageData,
 } from '@answeroverflow/db';
 import { NUMBER_OF_THREADS_TO_LOAD } from '@answeroverflow/constants/src/api';
-import { getServerDescription } from '~ui/utils/other';
-import { Button } from '~ui/components/primitives/ui/button';
+import { getServerDescription } from '../../utils/server';
+import { Button } from '../primitives/ui/button';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from '~ui/components/primitives/ui/dropdown-menu';
-import { Heading } from '~ui/components/primitives/base/Heading';
+} from '../primitives/ui/dropdown-menu';
+import { Heading } from '../primitives/ui/heading';
 import {
 	ChannelName,
 	ServerInviteJoinButton,
-} from '~ui/components/primitives/ServerInvite';
-import { ServerIcon } from '~ui/components/primitives/ServerIcon';
-import { LinkMessage } from '~ui/components/primitives/message/link-message';
-import { Navbar } from '~ui/components/primitives/navbar/Navbar';
-
-import { Footer } from '~ui/components/primitives/Footer';
-import { LinkButton } from '~ui/components/primitives/base/LinkButton';
-import Link from '~ui/components/primitives/base/Link';
-import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
+} from '../primitives/server-invite';
+import { ServerIcon } from '../primitives/server-icon';
+import { LinkMessage } from '../primitives/message/link-message';
+import { Navbar } from '../primitives/navbar';
+import { Footer } from '../primitives/footer';
+import { LinkButton } from '../primitives/ui/link-button';
+import Link from '../primitives/ui/link';
+import { MessagesSearchBar } from '../primitives/messages-search-bar';
 import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
 import { LuArrowLeft, LuArrowRight } from 'react-icons/lu';
-import { TrackLoad } from '~ui/components/primitives/track-load';
+import { TrackLoad } from '../primitives/ui/track-load';
 import { serverToAnalyticsData } from '@answeroverflow/constants';
 
 type ChannelSelectProps = {

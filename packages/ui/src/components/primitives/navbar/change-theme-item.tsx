@@ -1,6 +1,6 @@
 'use client';
 import { LuMoon, LuSun } from 'react-icons/lu';
-import { DropdownMenuItem } from '~ui/components/primitives/ui/dropdown-menu';
+import { DropdownMenuItem } from '../ui/dropdown-menu';
 import React from 'react';
 import { useTheme } from 'next-themes';
 

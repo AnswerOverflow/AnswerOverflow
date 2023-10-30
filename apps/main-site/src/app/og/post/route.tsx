@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { Server } from '@answeroverflow/db/src/schema';
 import { findMessageResultPage } from '@answeroverflow/db/src/pages';
 import { getSnowflakeUTCDate } from '@answeroverflow/ui/src/utils/snowflake';
-import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/base/AnswerOverflowLogo';
+import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/icons/answer-overflow-logo';
 
 export const runtime = 'edge';
 export const preferredRegion = 'iad1';

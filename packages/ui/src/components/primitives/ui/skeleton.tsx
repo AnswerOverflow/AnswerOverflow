@@ -1,5 +1,5 @@
 'use client';
-import { cn } from '~ui/utils/utils';
+import { cn } from '../../../utils/utils';
 
 function Skeleton({
 	className,

@@ -2,7 +2,25 @@ import Image from 'next/image';
 
 import type { MessageProps } from './props';
 import { Image as ImageType } from 'react-grid-gallery';
-import { getImageHeightWidth } from '~ui/utils/other';
+export const getImageHeightWidth = async ({
+	imageSrc,
+}: {
+	imageSrc: string;
+}) => {
+	return new Promise<{
+		width: number;
+		height: number;
+	}>((resolve, reject) => {
+		const img = new window.Image();
+		img.src = imageSrc;
+		img.onload = () => {
+			resolve({ width: img.width, height: img.height });
+		};
+		img.onerror = (event) => {
+			reject(event);
+		};
+	});
+};
 
 const SingularImageAttachment = async (
 	props: Pick<MessageProps, 'collapseContent' | 'message' | 'loadingStyle'>,

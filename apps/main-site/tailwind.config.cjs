@@ -6,6 +6,5 @@ module.exports = {
 	content: [
 		...data.content,
 		'../../packages/ui/src/**/*.{js,ts,jsx,tsx}', // Transpile breaks without this for tailwind styles
-		'../../node_modules/@tremor/**/*.{js,ts,jsx,tsx}', // Tremor module
 	],
 };

@@ -3,8 +3,4 @@
 const data = require('@answeroverflow/tailwind-config');
 module.exports = {
 	...data,
-	content: [
-		...data.content,
-		'../../node_modules/@tremor/**/*.{js,ts,jsx,tsx}', // Tremor module
-	],
 };

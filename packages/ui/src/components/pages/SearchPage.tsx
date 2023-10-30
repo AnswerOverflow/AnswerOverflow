@@ -1,7 +1,7 @@
 import type { APISearchResult, ServerPublic } from '@answeroverflow/api';
-import { Heading } from '~ui/components/primitives/base/Heading';
-import { SearchResult } from '~ui/components/primitives/message/SearchResult';
-import { MessagesSearchBar } from '~ui/components/primitives/messages-search-bar';
+import { Heading } from '../primitives/ui/heading';
+import { SearchResult } from '../primitives/message/SearchResult';
+import { MessagesSearchBar } from '../primitives/messages-search-bar';
 
 interface SearchResultProps {
 	results: APISearchResult[number][];

@@ -3,7 +3,7 @@ import * as React from 'react';
 import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu';
 import { cva } from 'cva';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
-import { cn } from '~ui/utils/styling';
+import { cn } from '../../../utils/utils';
 const NavigationMenu = React.forwardRef<
 	React.ElementRef<typeof NavigationMenuPrimitive.Root>,
 	React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root>

@@ -1,6 +1,6 @@
 import type { APISearchResult } from '@answeroverflow/api';
-import { ServerInvite } from '../ServerInvite';
-import { LinkMessage } from '~ui/components/primitives/message/link-message';
+import { ServerInvite } from '../server-invite';
+import { LinkMessage } from './link-message';
 type SearchResultProps = APISearchResult[number];
 const ThreadIcon = () => {
 	return (
