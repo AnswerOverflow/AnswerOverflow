@@ -156,7 +156,7 @@ describe('Message Ops', () => {
 				await upsertMessage(msgWithAttachment);
 				const found = await findFullMessageById(msgWithAttachment.id);
 				expect(found?.attachments).toHaveLength(1);
-				expect(found?.attachments[0]!).toStrictEqual(attachment);
+				expect(found!.attachments[0]!).toStrictEqual(attachment);
 			});
 			test('with attachment update', async () => {
 				const msgWithAttachment = mockMessage(server, channel, author, {

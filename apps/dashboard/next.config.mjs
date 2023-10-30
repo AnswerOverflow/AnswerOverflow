@@ -54,6 +54,15 @@ const config = {
 	sentry: {
 		hideSourceMaps: false,
 	},
+  redirects: async () => {
+    return [
+      {
+        source: '/',
+        destination: '/onboarding',
+        permanent: false,
+      },
+    ]
+  },
 };
 
 import { withSentryConfig } from '@sentry/nextjs';

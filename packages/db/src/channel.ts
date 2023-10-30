@@ -67,7 +67,7 @@ function applyChannelSettingsChangesSideEffects<
 
 	// Throw error if enabling forum post guidelines consent for a non forum channel
 	if (
-		pendingSettings.type !== ChannelType.GuildForum &&
+		pendingSettings.type !== ChannelType.GuildForum.valueOf() &&
 		pendingSettings.flags.forumGuidelinesConsentEnabled
 	) {
 		throw new DBError(

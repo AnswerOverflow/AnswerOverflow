@@ -73,13 +73,13 @@ const config = {
   redirects: async () => {
     return [
       {
-        source: '/onboarding',
-        destination: process.env.NODE_ENV === 'development' ? 'http://localhost:4000/onboarding' : 'https://app.answeroverflow.com/onboarding',
+        source: '/onboarding:slug*',
+        destination: process.env.NODE_ENV === 'development' ? 'http://localhost:5000/onboarding' : 'https://app.answeroverflow.com/onboarding',
         permanent: process.env.NODE_ENV === 'production',
       },
       {
         source: '/dashboard:slug*',
-        destination: process.env.NODE_ENV === 'development' ? 'http://localhost:4000/dashboard' : 'https://app.answeroverflow.com/dashboard',
+        destination: process.env.NODE_ENV === 'development' ? 'http://localhost:5000/dashboard' : 'https://app.answeroverflow.com/dashboard',
         permanent: process.env.NODE_ENV === 'production',
       }
     ]

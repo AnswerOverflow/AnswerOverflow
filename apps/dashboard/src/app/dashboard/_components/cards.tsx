@@ -8,9 +8,9 @@ import {
 	ProgressBar,
 } from '@tremor/react';
 import type { Plan } from '@answeroverflow/db';
-import { trpc } from '~ui/utils/client';
+import { trpc } from '@answeroverflow/ui/src/utils/client';
 import { useDashboardContext } from './dashboard-context';
-import { PricingDialog } from '~ui/components/pages/Pricing';
+import { PricingDialog } from '@answeroverflow/ui/src/components/primitives/pricing';
 import { BlueLink } from '@answeroverflow/ui/src/components/primitives/ui/blue-link';
 
 export function PageViewsCardRenderer(props: {

@@ -44,12 +44,12 @@ function setupMockedInteractionAPIData<Type extends InteractionType>({
 	message?: Message;
 	caller: User;
 	type: Type;
-	override?: Partial<APIBaseInteraction<Type, {}>>;
+	override?: Partial<APIBaseInteraction<Type, object>>;
 }): Omit<
-	Required<APIBaseInteraction<Type, {}>>,
+	Required<APIBaseInteraction<Type, object>>,
 	'guild_id' | 'message' | 'member'
 > &
-	Pick<APIBaseInteraction<Type, {}>, 'guild_id' | 'message' | 'member'> {
+	Pick<APIBaseInteraction<Type, object>, 'guild_id' | 'message' | 'member'> {
 	const guild = channel.isDMBased() ? undefined : channel.guild;
 	let appPermissions = null;
 	let memberPermissions = null;

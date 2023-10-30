@@ -1,15 +1,27 @@
 import '../styles/globals.css';
-export { metadata } from '@answeroverflow/ui/src/components/layouts/root';
-import { Layout } from '@answeroverflow/ui/src/components/layouts/root';
+import {
+	Layout,
+	metadata as baseMetadata,
+} from '@answeroverflow/ui/src/components/layouts/root';
 import { ToastContainer } from 'react-toastify';
 import React from 'react';
 import TRPCProvider from '../components/trpc-provider';
+import { Metadata } from 'next';
 
-export default function RootLayout(props: { children: React.ReactNode }) {
+export const metadata: Metadata = {
+	...baseMetadata,
+	robots: {
+		index: false, // It's the app dashboard, so we don't want to index it
+	},
+};
+
+export default function RootLayout(props: { children?: React.ReactNode }) {
 	return (
-		<TRPCProvider>
-			<ToastContainer />
-			<Layout>{props.children}</Layout>
-		</TRPCProvider>
+		<Layout>
+			<TRPCProvider>
+				<ToastContainer />
+				{props.children}
+			</TRPCProvider>
+		</Layout>
 	);
 }

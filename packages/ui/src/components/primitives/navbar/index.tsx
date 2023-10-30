@@ -12,6 +12,7 @@ import { SignInButton } from './sign-in-button';
 
 import { getServerSession } from '@answeroverflow/auth';
 import { ClientUserAvatar } from './client';
+import { LiaSearchSolid } from 'react-icons/lia';
 
 export async function UserSection(props: { tenant: ServerPublic | undefined }) {
 	const session = await getServerSession();
@@ -53,7 +54,7 @@ export const Navbar = (props: {
 			<div className="flex items-center gap-2">
 				<ThemeSwitcher />
 				<LinkButton variant={'ghost'} size={'icon'} href={'/search'}>
-					<GitHubIcon className="h-8 w-8" />
+					<LiaSearchSolid className="h-8 w-8" />
 					<span className="sr-only">Search Answer Overflow</span>
 				</LinkButton>
 				{!tenant && (

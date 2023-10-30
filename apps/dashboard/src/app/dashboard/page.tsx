@@ -1,7 +1,7 @@
 'use client';
 import { trpc } from '@answeroverflow/ui/src/utils/client';
-import { ServerDashboard } from '@answeroverflow/ui/src/components/dashboard/dashboard';
-import { GetStarted } from '@answeroverflow/ui/src/components/primitives/Callouts';
+import { ServerDashboard } from './_components/dashboard';
+import { GetStarted } from '@answeroverflow/ui/src/components/primitives/callouts';
 
 export default function Dashboard() {
 	const { data, status } = trpc.auth.getServersForOnboarding.useQuery();

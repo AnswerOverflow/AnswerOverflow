@@ -104,7 +104,10 @@ async function validatePermissionsOrFormatData<F, T extends F>({
 	return data;
 }
 
-export async function protectedFetchWithPublicData<F extends {}, T extends F>({
+export async function protectedFetchWithPublicData<
+	F extends object,
+	T extends F,
+>({
 	fetch,
 	notFoundMessage,
 	...validate
@@ -118,7 +121,7 @@ export async function protectedFetchWithPublicData<F extends {}, T extends F>({
 }
 
 export async function protectedFetchManyWithPublicData<
-	G extends {},
+	G extends object,
 	F extends G[],
 	T extends F,
 >({

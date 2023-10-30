@@ -64,12 +64,14 @@ export default async function webhookHandler(
 
 		const subscription = event.data.object as Stripe.Subscription;
 		const existingServer = await findServerByStripeCustomerId(
+			// eslint-disable-next-line @typescript-eslint/no-base-to-string
 			subscription.customer.toString(),
 		);
 
 		if (!existingServer) {
 			console.error(
 				'Server not found for stripe customer id',
+				// eslint-disable-next-line @typescript-eslint/no-base-to-string
 				subscription.customer.toString(),
 			);
 			res.status(500).send('Server not found');
@@ -101,6 +103,7 @@ export default async function webhookHandler(
 				await updateServer({
 					existing: existingServer,
 					update: {
+						// eslint-disable-next-line @typescript-eslint/no-base-to-string
 						stripeCustomerId: subscription.customer.toString(),
 						stripeSubscriptionId: subscription.id,
 						plan,
@@ -116,6 +119,7 @@ export default async function webhookHandler(
 				await updateServer({
 					existing: existingServer,
 					update: {
+						// eslint-disable-next-line @typescript-eslint/no-base-to-string
 						stripeCustomerId: subscription.customer.toString(),
 						stripeSubscriptionId: null,
 						plan: 'FREE',

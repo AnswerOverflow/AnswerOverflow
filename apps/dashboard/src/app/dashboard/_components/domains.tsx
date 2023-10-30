@@ -11,16 +11,16 @@ import {
 } from '@tremor/react';
 import { LuAlertCircle, LuXCircle, LuCheckCircle2 } from 'react-icons/lu';
 import { toast } from 'react-toastify';
-import { trpc } from '~ui/utils/client';
-import { useTierAccess } from '../primitives/tier-access-only';
+import { trpc } from '@answeroverflow/ui/src/utils/client';
+import { useTierAccess } from './tier-access-only';
 import { useDashboardContext } from './dashboard-context';
 import type {
 	DomainVerificationStatusProps,
 	VercelDomainVerificationResponse,
 } from '@answeroverflow/api';
-import { Input } from '~ui/components/primitives/ui/input';
-import { Button } from '~ui/components/primitives/ui/button';
-import { LoadingSpinner } from '~ui/components/primitives/base/LoadingSpinner';
+import { Input } from '@answeroverflow/ui/src/components/primitives/ui/input';
+import { Button } from '@answeroverflow/ui/src/components/primitives/ui/button';
+import { LoadingSpinner } from './loading-spinner';
 
 function useDomainStatus({ domain }: { domain?: string }) {
 	const { data, isLoading, isFetching } =

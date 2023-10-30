@@ -1,7 +1,4 @@
-import { useOnboardingContext } from './OnboardingContainer';
-import { trpc } from '~ui/utils/client';
-import type { ServerPublic } from '@answeroverflow/api';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { signOut } from 'next-auth/react';
 import {
 	AcademicCapIcon,
@@ -13,14 +10,45 @@ import {
 import { IoGameControllerOutline } from 'react-icons/io5';
 import { MdMoneyOffCsred, MdAttachMoney } from 'react-icons/md';
 import { CiCircleMore } from 'react-icons/ci';
-import { Command } from '~ui/components/primitives/base/Command';
-import { Button } from '~ui/components/primitives/ui/button';
-import { ServerIcon } from '~ui/components/primitives/ServerIcon';
-import { Heading } from '~ui/components/primitives/base/Heading';
-import { BlueLink } from '~ui/components/primitives/base/blue-link';
-import { ManageServerCard } from '~ui/components/primitives/ServerCard';
-import { LinkButton } from '~ui/components/primitives/base/LinkButton';
-// import { SignInButton } from '~ui/components/primitives/navbar/sign-in-button';
+import { trpc } from '@answeroverflow/ui/src/utils/client';
+import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
+import { Command } from '@answeroverflow/ui/src/components/primitives/ui/command';
+import { Button } from '@answeroverflow/ui/src/components/primitives/ui/button';
+import { ServerIcon } from '@answeroverflow/ui/src/components/primitives/server-icon';
+import { Heading } from '@answeroverflow/ui/src/components/primitives/ui/heading';
+import { BlueLink } from '@answeroverflow/ui/src/components/primitives/ui/blue-link';
+import { ManageServerCard } from '@answeroverflow/ui/src/components/primitives/server-card';
+import { LinkButton } from '@answeroverflow/ui/src/components/primitives/ui/link-button';
+import { SignInButton } from '@answeroverflow/ui/src/components/primitives/navbar/sign-in-button';
+
+export type SubmittedData = {
+	server?: ServerPublic & {
+		highestRole: 'Owner' | 'Administrator' | 'Manage Guild';
+		hasBot: boolean;
+	};
+	communityType?: 'Commercial' | 'Non-Commercial';
+	communityTopic?: 'Gaming' | 'Education' | 'Software' | 'Other';
+};
+
+export type OnboardingData = {
+	goToPage: (page: OnboardingPage) => void;
+	data: SubmittedData;
+	setData: (data: SubmittedData) => void;
+};
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const OnboardingContext = React.createContext<OnboardingData | null>(
+	null,
+);
+
+export const useOnboardingContext = () => {
+	const context = React.useContext(OnboardingContext);
+	if (context === null) {
+		throw new Error(
+			'`useOnboardingContext` must be used within a `OnboardingContext`',
+		);
+	}
+	return context;
+};
 
 export const pages = [
 	'start',
@@ -421,11 +449,11 @@ export function WelcomePageRenderer(props: {
 					<Heading.H2 className="py-8 text-2xl">
 						{"Let's"} get you signed in
 					</Heading.H2>
-					{/*<SignInButton*/}
-					{/*	className="w-64 "*/}
-					{/*	variant="default"*/}
-					{/*	tenant={undefined}*/}
-					{/*/>*/}
+					<SignInButton
+						className="w-64 "
+						variant="default"
+						tenant={undefined}
+					/>
 				</div>
 			);
 	}

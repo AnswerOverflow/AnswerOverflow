@@ -2,7 +2,7 @@ import type { ChannelWithFlags } from '@answeroverflow/db';
 import type { ClientEvents, GuildMember, Message } from 'discord.js';
 import type { Subject } from 'rxjs';
 
-type AOEvent<E extends keyof ClientEvents, D extends {} = {}> = {
+type AOEvent<E extends keyof ClientEvents, D extends object = object> = {
 	raw: ClientEvents[E];
 } & D;
 

@@ -10,16 +10,16 @@ import {
 	Col,
 	Title,
 } from '@tremor/react';
-import { trpc } from '~ui/utils/client';
+import { trpc } from '@answeroverflow/ui/src/utils/client';
 import { ConfigureDomainCard } from './domains';
 import { GoLinkExternal } from 'react-icons/go';
 import { CurrentPlanCard, PageViewChart, PageViewsCard } from './cards';
-import { TierAccessOnly } from '../primitives/tier-access-only';
+import { TierAccessOnly } from './tier-access-only';
 import type { ServerDashboard } from '@answeroverflow/api';
 import { DashboardProvider } from './dashboard-context';
-import { getServerHomepageUrl } from '~ui/utils/server';
-import { BlueLink } from '~ui/components/primitives/base/blue-link';
-import { GetStarted } from '~ui/components/primitives/Callouts';
+import { getServerHomepageUrl } from '@answeroverflow/ui/src/utils/server';
+import { BlueLink } from '@answeroverflow/ui/src/components/primitives/ui/blue-link';
+import { GetStarted } from '@answeroverflow/ui/src/components/primitives/callouts';
 
 export function ServerDashboardRenderer(props: {
 	data: ServerDashboard;

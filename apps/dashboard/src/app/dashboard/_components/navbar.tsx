@@ -1,19 +1,34 @@
-import Link from '~ui/components/primitives/base/Link';
+import Link from '@answeroverflow/ui/src/components/primitives/ui/link';
 import type { ServerPublic } from '@answeroverflow/api';
-import { trpc } from '~ui/utils/client';
+import { trpc } from '@answeroverflow/ui/src/utils/client';
 import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
-import { Button } from '~ui/components/primitives/ui/button';
+import { Button } from '@answeroverflow/ui/src/components/primitives/ui/button';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from '~ui/components/primitives/ui/dropdown-menu';
-import { ServerIcon } from '~ui/components/primitives/ServerIcon';
-import { AnswerOverflowLogo } from '~ui/components/primitives/base/AnswerOverflowLogo';
+} from '@answeroverflow/ui/src/components/primitives/ui/dropdown-menu';
+import { ServerIcon } from '@answeroverflow/ui/src/components/primitives/server-icon';
+import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/icons/answer-overflow-logo';
 
 import React from 'react';
 import { useParams } from 'next/navigation';
+import { LiaPlusCircleSolid } from 'react-icons/lia';
+
+const ServerCard = (props: {
+	server: Pick<ServerPublic, 'id' | 'name' | 'icon'>;
+}) => (
+	<div
+		className="flex items-center space-x-2 text-left"
+		style={{
+			maxWidth: '200px',
+		}}
+	>
+		<ServerIcon server={props.server} size={40} />
+		<span>{props.server.name}</span>
+	</div>
+);
 
 export function DashboardServerSelect() {
 	const params = useParams();
@@ -23,23 +38,10 @@ export function DashboardServerSelect() {
 	const selectedServer =
 		serversWithDashboard?.find((x) => x.id === serverId) ??
 		serversWithDashboard?.[0];
-	const ServerCard = (props: {
-		server: Pick<ServerPublic, 'id' | 'name' | 'icon'>;
-	}) => (
-		<div
-			className="flex items-center space-x-2 text-left"
-			style={{
-				maxWidth: '200px',
-			}}
-		>
-			<ServerIcon server={props.server} size={40} />
-			<span>{props.server.name}</span>
-		</div>
-	);
 
 	return (
 		<div>
-			<DropdownMenu>
+			<DropdownMenu modal={false}>
 				<DropdownMenuTrigger asChild>
 					{selectedServer ? (
 						<Button
@@ -64,13 +66,22 @@ export function DashboardServerSelect() {
 							</Link>
 						</DropdownMenuItem>
 					))}
+					<DropdownMenuItem>
+						<Link
+							href={'/onboarding'}
+							className={'flex items-center gap-2 text-left'}
+						>
+							<LiaPlusCircleSolid className={'h-[40px] w-[40px]'} />
+							Add new
+						</Link>
+					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
 		</div>
 	);
 }
 
-function DashboardNavbarRenderer() {
+export function Navbar() {
 	return (
 		<nav className="mx-auto flex max-w-screen-2xl items-center justify-between p-2 md:p-8">
 			<div className="flex flex-row items-center justify-between space-x-4">
@@ -84,8 +95,4 @@ function DashboardNavbarRenderer() {
 			</div>
 		</nav>
 	);
-}
-
-export function DashboardNavbar() {
-	return <DashboardNavbarRenderer />;
 }

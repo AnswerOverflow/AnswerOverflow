@@ -1,6 +1,6 @@
 import type { Plan } from '@answeroverflow/db';
 import React from 'react';
-import { PricingDialog } from '~ui/components/pages/Pricing';
+import { PricingDialog } from '@answeroverflow/ui/src/components/primitives/pricing';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const TierAccessContext = React.createContext<{

@@ -1,8 +1,8 @@
 'use client';
 import React from 'react';
 
-import { Footer } from '@answeroverflow/ui/src/components/primitives/Footer';
-import { DashboardNavbar } from '@answeroverflow/ui/src/components/dashboard/dashboard-navbar';
+import { Footer } from '@answeroverflow/ui/src/components/primitives/footer';
+import { Navbar } from './_components/navbar';
 
 export default function Layout({
 	// Layouts must accept a children prop.
@@ -14,7 +14,7 @@ export default function Layout({
 	return (
 		<div className="mx-auto flex w-full flex-col items-center overflow-y-auto overflow-x-hidden bg-background font-body">
 			<div className="w-full max-w-screen-2xl justify-center">
-				<DashboardNavbar />
+				<Navbar />
 				<main className="px-4 sm:px-[4rem] 2xl:px-[6rem]">{children}</main>
 				<Footer tenant={undefined} />
 			</div>

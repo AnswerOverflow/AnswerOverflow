@@ -121,6 +121,9 @@ importers:
       '@badrap/bar-of-progress':
         specifier: ^0.2.2
         version: 0.2.2
+      '@heroicons/react':
+        specifier: ^2.0.18
+        version: 2.0.18(react@18.2.0)
       '@mdx-js/loader':
         specifier: ^2.3.0
         version: 2.3.0(webpack@5.89.0)
@@ -181,6 +184,9 @@ importers:
       nextjs-google-analytics:
         specifier: ^2.3.3
         version: 2.3.3(next@14.0.0)(react@18.2.0)
+      posthog-js:
+        specifier: ^1.83.0
+        version: 1.84.3
       raw-body:
         specifier: ^2.5.2
         version: 2.5.2
@@ -999,9 +1005,6 @@ importers:
       '@answeroverflow/utils':
         specifier: workspace:^
         version: link:../utils
-      axios:
-        specifier: ^1.4.0
-        version: 1.5.1
       dotenv-cra:
         specifier: ^3.0.3
         version: 3.0.3
@@ -7655,16 +7658,6 @@ packages:
       - debug
     dev: false
 
-  /axios@1.5.1:
-    resolution: {integrity: sha512-Q28iYCWzNHjAm+yEAot5QaAMxhMghWLFVf7rRdwhUI+c2jix2DUXjAHXVi+s1ibs3mjPO/cCgbA++3BjD0vP/A==}
-    dependencies:
-      follow-redirects: 1.15.3
-      form-data: 4.0.0
-      proxy-from-env: 1.1.0
-    transitivePeerDependencies:
-      - debug
-    dev: false
-
   /axobject-query@3.2.1:
     resolution: {integrity: sha512-jsyHu61e6N4Vbz/v18DHwWYKK0bSWLqn47eeDSKPB7m8tqMHF9YJ+mhIk2lVteyZrY8tnSj/jHOv4YiTCuCJgg==}
     dependencies:
@@ -13720,7 +13713,7 @@ packages:
       '@panva/hkdf': 1.1.1
       cookie: 0.5.0
       jose: 4.15.4
-      next: 14.0.0(@babel/core@7.23.2)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.0.0(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       oauth: 0.9.15
       openid-client: 5.6.1
       preact: 10.18.1
@@ -13780,7 +13773,7 @@ packages:
       react: '*'
       react-dom: '*'
     dependencies:
-      next: 14.0.0(@babel/core@7.23.2)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.0.0(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false

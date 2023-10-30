@@ -23,7 +23,6 @@ export async function addCommunityQuestionsToSitemap(input: {
 			return {
 				loc: `/m/${thread.id}`,
 				// We really don't expect archived threads to be updated
-				changefreq: thread.archivedTimestamp ? 'yearly' : 'daily',
 				priority: 0.9,
 				lastmod: thread.archivedTimestamp
 					? new Date(Number(thread.archivedTimestamp))
@@ -35,7 +34,6 @@ export async function addCommunityQuestionsToSitemap(input: {
 	if (!server.customDomain) {
 		input.sitemap.add({
 			loc: `/c/${input.communityId}`, // Community page
-			changefreq: 'weekly',
 			lastmod: largestTimestamp === -1 ? undefined : new Date(largestTimestamp),
 			priority: 1,
 		});
