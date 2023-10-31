@@ -98,9 +98,9 @@ export const authOptions: NextAuthOptions = {
 				sameSite: 'lax',
 				path: '/',
 				domain:
-					'.' + sharedEnvs.NODE_ENV === 'production'
-						? 'answeroverflow.com'
-						: 'localhost',
+					'.' + sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local'
+						? 'localhost'
+						: 'answeroverflow.com',
 				secure: useSecureCookies,
 			},
 		},
