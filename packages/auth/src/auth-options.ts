@@ -15,6 +15,9 @@ import {
 	findAccountByProviderAccountId,
 	updateProviderAuthToken,
 } from '@answeroverflow/db/src/auth';
+import { getNextAuthCookieName } from './tenant-cookie';
+
+const useSecureCookies = sharedEnvs.NODE_ENV === 'production';
 
 export const authOptions: NextAuthOptions = {
 	// Configure one or more authentication providers
@@ -85,6 +88,21 @@ export const authOptions: NextAuthOptions = {
 			};
 			await Promise.all([identifyAccount(), updateAccountInfo()]);
 			return true;
+		},
+	},
+	cookies: {
+		sessionToken: {
+			name: getNextAuthCookieName(),
+			options: {
+				httpOnly: true,
+				sameSite: 'lax',
+				path: '/',
+				domain:
+					'.' + sharedEnvs.NODE_ENV === 'production'
+						? 'answeroverflow.com'
+						: 'localhost',
+				secure: useSecureCookies,
+			},
 		},
 	},
 };

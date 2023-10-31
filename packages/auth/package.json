@@ -20,6 +20,7 @@
 		"@answeroverflow/analytics": "workspace:^",
 		"@answeroverflow/cache": "workspace:^",
 		"@answeroverflow/db": "workspace:^",
+		"@answeroverflow/constants": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
 		"@auth/core": "^0.12.0",
