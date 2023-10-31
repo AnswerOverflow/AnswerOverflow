@@ -88,9 +88,7 @@ export function Layout({
 			<body className={`${montserrat.variable} ${sourceSans3.variable}`}>
 				<CommitBanner />
 
-				<Suspense fallback={children}>
-					<Providers>{children}</Providers>
-				</Suspense>
+				<Providers>{children}</Providers>
 				<Suspense>
 					<AnalyticsWithSession />
 					<PostHogPageview />
