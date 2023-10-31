@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { trpc } from '@answeroverflow/ui/src/utils/client';
 
 import { transformer } from '@answeroverflow/api/transformer';
+import { ToastContainer } from 'react-toastify';
 
 const getBaseUrl = () => {
 	if (typeof window !== 'undefined') return ''; // browser should use relative url
@@ -38,6 +39,7 @@ export default function TRPCProvider(
 	return (
 		<trpc.Provider client={trpcClient} queryClient={queryClient}>
 			<QueryClientProvider client={queryClient}>
+				<ToastContainer />
 				{props && props.children}
 			</QueryClientProvider>
 		</trpc.Provider>
