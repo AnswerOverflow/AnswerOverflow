@@ -15,9 +15,7 @@ export const metadata: Metadata = {
 	},
 };
 
-export default function RootLayout(
-	props: { children?: React.ReactNode } | null,
-) {
+export default function RootLayout(props: { children?: React.ReactNode }) {
 	return (
 		<Layout>
 			<TRPCProvider>
