@@ -19,7 +19,6 @@ import { Heading } from '@answeroverflow/ui/src/components/primitives/ui/heading
 import { BlueLink } from '@answeroverflow/ui/src/components/primitives/ui/blue-link';
 import { ManageServerCard } from '@answeroverflow/ui/src/components/primitives/server-card';
 import { LinkButton } from '@answeroverflow/ui/src/components/primitives/ui/link-button';
-import { SignInButton } from '@answeroverflow/ui/src/components/primitives/navbar/sign-in-button';
 
 export type SubmittedData = {
 	server?: ServerPublic & {
@@ -397,7 +396,6 @@ export function WelcomePageRenderer(props: {
 	}[];
 }) {
 	const { goToPage, setData } = useOnboardingContext();
-
 	useEffect(() => {
 		void import('posthog-js').then(({ posthog }) =>
 			posthog.startSessionRecording(),
@@ -449,11 +447,18 @@ export function WelcomePageRenderer(props: {
 					<Heading.H2 className="py-8 text-2xl">
 						{"Let's"} get you signed in
 					</Heading.H2>
-					<SignInButton
+					<LinkButton
 						className="w-64 "
+						href={
+							// eslint-disable-next-line n/no-process-env
+							(process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local'
+								? 'http://localhost:3000/'
+								: 'https://www.answeroverflow.com/') + `app-auth`
+						}
 						variant="default"
-						tenant={undefined}
-					/>
+					>
+						Sign In
+					</LinkButton>
 				</div>
 			);
 	}

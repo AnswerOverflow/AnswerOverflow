@@ -16,6 +16,10 @@ import {
 	updateProviderAuthToken,
 } from '@answeroverflow/db/src/auth';
 import { getNextAuthCookieName } from './tenant-cookie';
+const hostname =
+	sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local'
+		? 'localhost'
+		: 'answeroverflow.com';
 
 const useSecureCookies = sharedEnvs.NODE_ENV === 'production';
 
@@ -97,10 +101,7 @@ export const authOptions: NextAuthOptions = {
 				httpOnly: true,
 				sameSite: 'lax',
 				path: '/',
-				domain:
-					'.' + sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local'
-						? 'localhost'
-						: 'answeroverflow.com',
+				domain: '.' + hostname,
 				secure: useSecureCookies,
 			},
 		},
