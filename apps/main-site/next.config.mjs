@@ -91,9 +91,6 @@ const config = {
 
 import { withSentryConfig } from '@sentry/nextjs';
 import { withAxiom } from 'next-axiom';
-export default
-	withSentryConfig(
-    withMDX(
-      withAxiom(config)), {
-      silent: true,
-    });
+export default withSentryConfig(withMDX(withAxiom(config)), {
+	silent: true,
+});
