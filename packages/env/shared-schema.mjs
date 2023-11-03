@@ -72,7 +72,9 @@ export const sharedEnvs = createEnv({
       Environment
      */
 		NODE_ENV: nodeEnv,
-		ENVIRONMENT: z.string().pipe(z.enum(['discord-bot', 'main-site', 'docs'])),
+		ENVIRONMENT: z
+			.string()
+			.pipe(z.enum(['discord-bot', 'main-site', 'docs', 'dashboard'])),
 		// SKIP_ENV_VALIDATION: z.string(),
 		// CI: z.string(),
 
