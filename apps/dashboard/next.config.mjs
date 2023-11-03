@@ -62,7 +62,8 @@ const config = {
 };
 
 import { withSentryConfig } from '@sentry/nextjs';
+import { withAxiom } from 'next-axiom';
 
-export default withSentryConfig(config, {
+export default withSentryConfig(withAxiom(config), {
 	silent: true,
 });

@@ -11,6 +11,8 @@ import {
 } from '@answeroverflow/hooks/src/analytics/client';
 import Script from 'next/script';
 import { DATA_UNBLOCKER } from './data-unblocker';
+import { AxiomWebVitals } from 'next-axiom';
+
 export const metadata: Metadata = {
 	title: 'Answer Overflow - Search all of Discord',
 	metadataBase: new URL('https://www.answeroverflow.com/'),
@@ -89,6 +91,8 @@ export function Layout({
 				<CommitBanner />
 
 				<Providers>{children}</Providers>
+				<AxiomWebVitals />
+
 				<Suspense>
 					<AnalyticsWithSession />
 					<PostHogPageview />
