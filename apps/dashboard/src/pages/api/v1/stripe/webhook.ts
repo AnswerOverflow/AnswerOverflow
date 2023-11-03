@@ -6,6 +6,7 @@ import {
 	findServerByStripeCustomerId,
 	updateServer,
 	Plan,
+	findServerByStripeSubscriptionId,
 } from '@answeroverflow/db';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 
@@ -63,10 +64,14 @@ export default async function webhookHandler(
 		}
 
 		const subscription = event.data.object as Stripe.Subscription;
-		const existingServer = await findServerByStripeCustomerId(
-			// eslint-disable-next-line @typescript-eslint/no-base-to-string
-			subscription.customer.toString(),
-		);
+		const customerId =
+			typeof subscription.customer === 'string'
+				? subscription.customer
+				: subscription.customer.id;
+		let existingServer = await findServerByStripeCustomerId(customerId);
+		if (!existingServer) {
+			existingServer = await findServerByStripeSubscriptionId(subscription.id);
+		}
 
 		if (!existingServer) {
 			console.error(
@@ -103,8 +108,7 @@ export default async function webhookHandler(
 				await updateServer({
 					existing: existingServer,
 					update: {
-						// eslint-disable-next-line @typescript-eslint/no-base-to-string
-						stripeCustomerId: subscription.customer.toString(),
+						stripeCustomerId: customerId,
 						stripeSubscriptionId: subscription.id,
 						plan,
 						id: existingServer.id,

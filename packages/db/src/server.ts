@@ -114,6 +114,16 @@ export async function findServerByStripeCustomerId(stripeCustomerId: string) {
 	return addFlagsToServer(found);
 }
 
+export async function findServerByStripeSubscriptionId(
+	stripeSubscriptionId: string,
+) {
+	const found = await db.query.dbServers.findFirst({
+		where: eq(dbServers.stripeSubscriptionId, stripeSubscriptionId),
+	});
+	if (!found) return null;
+	return addFlagsToServer(found);
+}
+
 export async function findServerByAlias(alias: string) {
 	const found = await db.query.dbServers.findFirst({
 		where: eq(dbServers.vanityUrl, alias),

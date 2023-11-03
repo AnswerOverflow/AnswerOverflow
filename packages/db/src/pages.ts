@@ -352,12 +352,20 @@ export async function makeMessageResultPage(
 	messageId: string,
 	userServers: DiscordAPIServer[] | null,
 ) {
+	console.log(`Generating message result page for ${messageId}`);
+	const startPageGeneration = performance.now();
 	const data = await findMessageResultPage(messageId);
 	if (!data) {
 		return null;
 	}
 	const { messages, channel, server, thread } = data;
-
+	const endPageGeneration = performance.now();
+	console.log(
+		`Page generation for ${messageId} took ${
+			endPageGeneration - startPageGeneration
+		}ms`,
+	);
+	const startRecommendedPosts = performance.now();
 	const recommendedChannels = thread
 		? await findChannelsBeforeId({
 				take: 100,
@@ -378,6 +386,12 @@ export async function makeMessageResultPage(
 				thread: stripPrivateChannelData(recommendedChannelLookup.get(p.id)!),
 			}))
 			.slice(0, 20),
+	);
+	const endRecommendedPosts = performance.now();
+	console.log(
+		`Recommended posts for ${messageId} took ${
+			endRecommendedPosts - startRecommendedPosts
+		}ms`,
 	);
 
 	return {
