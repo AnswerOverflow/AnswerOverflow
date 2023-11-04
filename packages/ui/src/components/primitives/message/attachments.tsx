@@ -1,46 +1,13 @@
 import Image from 'next/image';
 
 import type { MessageProps } from './props';
-import { Image as ImageType } from 'react-grid-gallery';
-export const getImageHeightWidth = async ({
-	imageSrc,
-}: {
-	imageSrc: string;
-}) => {
-	return new Promise<{
-		width: number;
-		height: number;
-	}>((resolve, reject) => {
-		const img = new window.Image();
-		img.src = imageSrc;
-		img.onload = () => {
-			resolve({ width: img.width, height: img.height });
-		};
-		img.onerror = (event) => {
-			reject(event);
-		};
-	});
-};
 
 const SingularImageAttachment = async (
 	props: Pick<MessageProps, 'collapseContent' | 'message' | 'loadingStyle'>,
 ) => {
 	const { message, collapseContent } = props;
 	const images = await Promise.all(
-		message.attachments.map(async (attachment): Promise<ImageType> => {
-			if (!attachment.width || !attachment.height) {
-				const img = await getImageHeightWidth({
-					imageSrc: attachment.proxyUrl,
-				});
-
-				return {
-					src: attachment.proxyUrl,
-					width: img.width,
-					height: img.height,
-					alt: attachment.description ?? 'No description',
-				};
-			}
-
+		message.attachments.map((attachment) => {
 			return {
 				src: attachment.proxyUrl,
 				width: attachment.width,
@@ -60,8 +27,8 @@ const SingularImageAttachment = async (
 				<div className="mt-4 max-w-sm lg:max-w-md" key={i}>
 					<Image
 						src={x?.src ?? ''}
-						width={x?.width}
-						height={x?.height}
+						width={x?.width ?? undefined}
+						height={x?.height ?? undefined}
 						unoptimized
 						loading={props.loadingStyle === 'eager' ? 'eager' : 'lazy'}
 						priority={props.loadingStyle === 'eager'}
