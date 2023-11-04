@@ -182,7 +182,7 @@ function createRules(rule: { [key: string]: any }) {
 			) => (
 				<Code
 					key={state.key}
-					lang={node.lang}
+					lang={node.lang?.toLowerCase()}
 					className={'overflow-x-scroll'}
 					theme={{
 						light: 'github-light',
