@@ -8,6 +8,7 @@ import {
 	MessageContentWithSolution,
 } from '../primitives/message/Message';
 import { Heading } from '../primitives/ui/heading';
+import { trace } from '@opentelemetry/api';
 
 import Link from '../primitives/ui/link';
 import { MessagesSearchBar } from '../primitives/messages-search-bar';
@@ -235,8 +236,16 @@ export async function MessageResultPage({
 			)}
 		</div>
 	);
-
-	return (
+	const tracer = trace.getTracer('MessageResultPage');
+	const span = tracer.startSpan('MessageResultPage', {
+		attributes: {
+			messages: messages.length,
+			server: server.id,
+			channel: channel.id,
+			thread: thread?.id,
+		},
+	});
+	const rendered = (
 		<div className="sm:mx-3">
 			<script
 				type="application/ld+json"
@@ -260,6 +269,8 @@ export async function MessageResultPage({
 			</div>
 		</div>
 	);
+	span.end();
+	return rendered;
 }
 
 export default MessageResultPage;
