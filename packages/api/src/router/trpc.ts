@@ -85,10 +85,15 @@ const checkTenantAuth = t.middleware(async ({ ctx, next, meta }) => {
 	}
 	return next();
 });
+import { trpcTracingMiddleware } from '@baselime/node-opentelemetry';
 
 export const router = t.router;
 export const MergeRouters = t.mergeRouters;
-const procedureBase = t.procedure.use(checkTenantAuth);
+const procedureBase = t.procedure.use(checkTenantAuth).use(
+	trpcTracingMiddleware({
+		collectInput: true,
+	}),
+);
 export const publicProcedure = procedureBase;
 export const withDiscordAccountProcedure = procedureBase.use(addDiscordAccount);
 export const withUserServersProcedure = procedureBase

@@ -1,10 +1,22 @@
-import { registerOTel } from '@vercel/otel';
-import { sharedEnvs } from '@answeroverflow/env/shared';
+export async function register() {
+	// eslint-disable-next-line n/no-process-env,turbo/no-undeclared-env-vars
+	if (process.env.NEXT_RUNTIME === 'nodejs') {
+		const { BaselimeSDK, VercelPlugin, BetterHttpInstrumentation } =
+			await import('@baselime/node-opentelemetry');
 
-export function register() {
-	registerOTel('main-site', 'https://api.axiom.co/v1/traces', {
-		Authorization: `Bearer ${sharedEnvs.AXIOM_API_KEY}`,
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-		'X-Axiom-Dataset': sharedEnvs.AXIOM_OTL_DATASET!,
-	});
+		const sdk = new BaselimeSDK({
+			serverless: true,
+			service: 'main-site',
+			instrumentations: [
+				new BetterHttpInstrumentation({
+					plugins: [
+						// Add the Vercel plugin to enable correlation between your logs and traces for projects deployed on Vercel
+						new VercelPlugin(),
+					],
+				}),
+			],
+		});
+
+		sdk.start();
+	}
 }
