@@ -40,6 +40,7 @@ const config = {
 	experimental: {
 		outputFileTracingIgnores: ['**swc/core**'],
 		serverComponentsExternalPackages: ['mysql2'],
+		instrumentationHook: true,
 	},
 	images: {
 		domains: [
