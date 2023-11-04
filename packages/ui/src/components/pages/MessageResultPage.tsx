@@ -41,6 +41,15 @@ export async function MessageResultPage({
 	thread,
 	relatedPosts,
 }: MessageResultPageProps) {
+	const tracer = trace.getTracer('MessageResultPage');
+	const span = tracer.startSpan('MessageResultPage', {
+		attributes: {
+			messages: messages.length,
+			server: server.id,
+			channel: channel.id,
+			thread: thread?.id,
+		},
+	});
 	const isUserInServer = await fetchIsUserInServer(server.id);
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
@@ -236,15 +245,6 @@ export async function MessageResultPage({
 			)}
 		</div>
 	);
-	const tracer = trace.getTracer('MessageResultPage');
-	const span = tracer.startSpan('MessageResultPage', {
-		attributes: {
-			messages: messages.length,
-			server: server.id,
-			channel: channel.id,
-			thread: thread?.id,
-		},
-	});
 	const rendered = (
 		<div className="sm:mx-3">
 			<script
