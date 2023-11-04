@@ -83,7 +83,8 @@ export const sharedEnvs = createEnv({
      */
 		DATABASE_URL: z.string(),
 		TEST_DATABASE_URL: z.string().optional(),
-
+		AXIOM_API_KEY: zStringRequiredInProduction,
+		AXIOM_OTL_DATASET: zStringRequiredInProduction,
 		// TODO: Make it cloud ID oro username / password, not both
 		ELASTICSEARCH_URL: z.string().optional(),
 		ELASTICSEARCH_CLOUD_ID: zStringRequiredInProduction,
