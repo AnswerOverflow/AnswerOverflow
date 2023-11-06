@@ -18,7 +18,10 @@ export default function Page() {
 			<ul className={'divide-y divide-primary/[.3] py-4'}>
 				{sorted.map((changelog) => (
 					<li key={changelog.slug} className={'py-4'}>
-						<span>
+						<BlueLink href={changelog.slug}>
+							<h2 className={'w-fit text-3xl'}>{changelog.title}</h2>
+						</BlueLink>
+						<span className={'text-foreground/75'}>
 							Posted{' '}
 							{new Date(changelog.date).toLocaleDateString('en-US', {
 								year: 'numeric',
@@ -26,9 +29,6 @@ export default function Page() {
 								day: 'numeric',
 							})}
 						</span>
-						<BlueLink href={changelog.slug}>
-							<h2 className={'w-fit text-3xl'}>{changelog.title}</h2>
-						</BlueLink>
 						<div className={'prose py-4 dark:prose-invert'}>
 							<Mdx code={changelog.body.code} />
 						</div>
