@@ -24,6 +24,7 @@ const RecentChangeLogsPreview = () => {
 				justifyContent: 'center',
 				gap: '20px',
 				width: '100%',
+				maxHeight: '340px',
 			}}
 		>
 			{recentChangeLogs.map((changelog) => (
@@ -31,7 +32,7 @@ const RecentChangeLogsPreview = () => {
 					key={changelog.slug}
 					style={{
 						fontFamily: 'Satoshi Black',
-						fontSize: 30,
+						fontSize: 32,
 						textAlign: 'center',
 						width: '1000px',
 						justifyContent: 'center',
@@ -47,12 +48,13 @@ const RecentChangeLogsPreview = () => {
 							display: 'flex',
 							justifyContent: 'space-between',
 							width: '100%',
+							alignItems: 'center',
 						}}
 					>
 						<div>{changelog.title}</div>
 						<div
 							style={{
-								fontSize: 18,
+								fontSize: 22,
 								fontFamily: 'Satoshi Regular',
 							}}
 						>
@@ -128,7 +130,7 @@ export default async function Image() {
 							fontFamily: 'Satoshi Black',
 							fontSize: 100,
 							textAlign: 'center',
-							paddingBottom: 200,
+							paddingBottom: 330,
 						}}
 					>
 						Changelog
