@@ -79,13 +79,6 @@ export function Layout({
 			<head>
 				<link rel={'preconnect'} href={'https://cdn.discordapp.com'} />
 				<link rel={'dns-prefetch'} href={'https://cdn.discordapp.com'} />
-				<link href="https://www.googletagmanager.com" rel="preconnect" />
-				<script
-					async
-					src={`https://www.googletagmanager.com/gtag/js?id=${process.env
-						.NEXT_PUBLIC_GA_MEASUREMENT_ID!}`}
-					charSet="utf-8"
-				/>
 			</head>
 			<body className={`${montserrat.variable} ${sourceSans3.variable}`}>
 				<CommitBanner />
@@ -97,15 +90,6 @@ export function Layout({
 					<AnalyticsWithSession />
 					<PostHogPageview />
 				</Suspense>
-				<Script id="google-analytics" strategy={'lazyOnload'} async>
-					{`
-				  		window.dataLayer = window.dataLayer || [];
-				  		function gtag(){dataLayer.push(arguments);}
-				  		gtag('js', new Date());
-
-				  		gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID!}');
-				`}
-				</Script>
 				<Script
 					async
 					id="data-unblocker"
