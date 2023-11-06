@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
+    "postinstall": "(cd apps/main-site && pnpm build:content-layer)",
 		"init": "turbo run init",
 		"build": "turbo run build",
 		"format": "turbo run format",

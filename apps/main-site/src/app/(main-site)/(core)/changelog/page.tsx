@@ -3,7 +3,12 @@ import { allChangelogs } from 'contentlayer/generated';
 import { Mdx } from '../../../_components/mdx-components';
 import { BlueLink } from '@answeroverflow/ui/src/components/primitives/ui/blue-link';
 import { sortContentByDateNewestFirst } from '../../../../utils/sort-content-by-date';
-
+import { Metadata } from 'next';
+export const metadata: Metadata = {
+	title: 'Changelog - Answer Overflow',
+	description:
+		'Stay up to date about all of the changes and new updates being made to Answer Overflow',
+};
 export default function Page() {
 	const sorted = sortContentByDateNewestFirst(allChangelogs);
 	return (
