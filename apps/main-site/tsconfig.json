@@ -8,7 +8,7 @@
 				"name": "next"
 			}
 		],
-		"strictNullChecks": true,
+		"strictNullChecks": true
 	},
 	"include": [
 		"src",
@@ -22,6 +22,6 @@
 		".prettierrc.cjs",
 		"__tests__",
 		".next/types/**/*.ts",
-    ".contentlayer/generated"
-  ]
+		".contentlayer/generated"
+	]
 }

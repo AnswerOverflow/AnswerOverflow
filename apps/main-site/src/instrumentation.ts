@@ -5,6 +5,7 @@ export async function register() {
 	}
 	// eslint-disable-next-line n/no-process-env,turbo/no-undeclared-env-vars
 	if (process.env.NEXT_RUNTIME === 'nodejs') {
+		// eslint-disable-next-line @typescript-eslint/naming-convention
 		const { BaselimeSDK, VercelPlugin, BetterHttpInstrumentation } =
 			await import('@baselime/node-opentelemetry');
 

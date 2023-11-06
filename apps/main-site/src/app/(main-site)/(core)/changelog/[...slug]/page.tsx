@@ -51,6 +51,16 @@ export function generateMetadata({ params }: PostProps): Metadata {
 	return {
 		title: `${post.title} - Answer Overflow`,
 		description: post.description,
+		openGraph: {
+			images: [
+				{
+					url: `https://answeroverflow.com/og/changelog/${post.slugAsParams}`,
+					width: 1200,
+					height: 630,
+					alt: post.title,
+				},
+			],
+		},
 	};
 }
 
