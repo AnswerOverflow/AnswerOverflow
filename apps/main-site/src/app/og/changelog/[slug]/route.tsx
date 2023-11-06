@@ -78,6 +78,7 @@ export async function GET(req: Request) {
 						style={{
 							fontFamily: 'Inter Medium',
 							fontSize: 40,
+							paddingTop: 20,
 							textAlign: 'center',
 							opacity: 0.8,
 						}}
