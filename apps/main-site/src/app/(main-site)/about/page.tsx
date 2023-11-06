@@ -1,4 +1,4 @@
-import { metadata as baseMetadata } from '../layout';
+import { metadata as baseMetadata } from '../../layout';
 import { Metadata } from 'next';
 
 import Balancer from 'react-wrap-balancer';

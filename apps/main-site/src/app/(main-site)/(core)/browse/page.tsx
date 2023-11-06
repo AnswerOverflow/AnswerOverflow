@@ -1,6 +1,6 @@
-import { fetchBrowseServers } from '../../../data/browse';
+import { fetchBrowseServers } from '../../../../data/browse';
 import { Metadata } from 'next';
-import { metadata as baseMetadata } from '../../layout';
+import { metadata as baseMetadata } from '../../../layout';
 import { Heading } from '@answeroverflow/ui/src/components/primitives/ui/heading';
 import { ViewServerCard } from '@answeroverflow/ui/src/components/primitives/server-card';
 export const metadata: Metadata = {
