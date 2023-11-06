@@ -92,6 +92,8 @@ const config = {
 
 import { withSentryConfig } from '@sentry/nextjs';
 import { withAxiom } from 'next-axiom';
+
+// With content layer breaks things for us for some reason
 export default withSentryConfig(withMDX(withAxiom(config)), {
 	silent: true,
 });

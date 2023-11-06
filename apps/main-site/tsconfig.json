@@ -8,7 +8,7 @@
 				"name": "next"
 			}
 		],
-		"strictNullChecks": true
+		"strictNullChecks": true,
 	},
 	"include": [
 		"src",
@@ -21,6 +21,7 @@
 		"vitest.config.ts",
 		".prettierrc.cjs",
 		"__tests__",
-		".next/types/**/*.ts"
-	]
+		".next/types/**/*.ts",
+    ".contentlayer/generated"
+  ]
 }

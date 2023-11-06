@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { fetchBrowseServers } from '../data/browse';
+import { fetchBrowseServers } from '../../data/browse';
 import { FollowCursor } from '@answeroverflow/ui/src/components/primitives/ui/follow';
 import { LinkButton } from '@answeroverflow/ui/src/components/primitives/ui/link-button';
 import { MessagesSearchBar } from '@answeroverflow/ui/src/components/primitives/messages-search-bar';

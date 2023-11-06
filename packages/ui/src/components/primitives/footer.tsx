@@ -59,6 +59,10 @@ const navigation: NavigationData = {
 						name: 'Communities',
 						href: 'https://www.answeroverflow.com/browse',
 					},
+					{
+						name: 'Changelog',
+						href: 'https://www.answeroverflow.com/changelog',
+					},
 				],
 			},
 		},
