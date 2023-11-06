@@ -50,3 +50,7 @@ dist/
 .turbo
 
 .pnpm-store/
+
+
+# Contentlayer
+.contentlayer

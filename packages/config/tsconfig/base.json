@@ -61,7 +61,8 @@
 			"~discord-bot/test/*": ["./apps/discord-bot/test/*"],
 			"~api/router/*": ["./packages/api/src/router/*"],
 			"~api/test/*": ["./packages/api/test/*"],
-			"~api/utils/*": ["./packages/api/src/utils/*"]
+			"~api/utils/*": ["./packages/api/src/utils/*"],
+      "contentlayer/generated": ["./apps/main-site/.contentlayer/generated"]
 		}
 	},
 	"exclude": ["dist", "node_modules"]

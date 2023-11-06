@@ -6,5 +6,7 @@ module.exports = {
 	content: [
 		...data.content,
 		'../../packages/ui/src/**/*.{js,ts,jsx,tsx}', // Transpile breaks without this for tailwind styles
+		'./content/**/*.mdx',
 	],
+	plugins: [require('@tailwindcss/typography')],
 };
