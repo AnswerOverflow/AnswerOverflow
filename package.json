@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
-    "postinstall": "(cd apps/main-site && pnpm build:content-layer)",
+		"postinstall": "pnpm contentlayer build -c ./apps/main-site/contentlayer-from-root.config.ts && mv .contentlayer ./apps/main-site/.contentlayer",
 		"init": "turbo run init",
 		"build": "turbo run build",
 		"format": "turbo run format",
@@ -69,5 +69,8 @@
 			"mysql2@3.6.0": "patches/mysql2@3.6.0.patch",
 			"@vercel/otel@0.3.0": "patches/@vercel__otel@0.3.0.patch"
 		}
+	},
+	"dependencies": {
+		"contentlayer": "^0.3.4"
 	}
 }
