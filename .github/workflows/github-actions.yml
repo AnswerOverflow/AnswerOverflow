@@ -88,6 +88,9 @@ jobs:
       - name: Format
         run: pnpm format:check
 
+      - name: Build content layer
+        run: cd apps/main-site && pnpm build:content-layer
+
       - name: Lint
         run: pnpm lint
 

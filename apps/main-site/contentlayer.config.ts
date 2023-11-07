@@ -43,9 +43,7 @@ export const Changelog = defineDocumentType(() => ({
 	computedFields,
 }));
 
-export const config = {
+export default makeSource({
 	contentDirPath: './src/content',
 	documentTypes: [Changelog],
-};
-
-export default makeSource(config);
+});
