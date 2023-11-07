@@ -4,7 +4,6 @@
 	"private": true,
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
-		"postinstall": "pnpm contentlayer build -c ./apps/main-site/contentlayer-from-root.config.ts && mv .contentlayer ./apps/main-site/.contentlayer",
 		"init": "turbo run init",
 		"build": "turbo run build",
 		"format": "turbo run format",

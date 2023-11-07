@@ -3,6 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
+    "postinstall": "pnpm contentlayer build -c ./apps/main-site/contentlayer-from-root.config.ts && mv ../../.contentlayer ./",
 		"with-env": "dotenv -e ../../.env --",
 		"dev-next": "pnpm with-env next dev",
 		"dev-content-layer": "pnpm with-env contentlayer dev --clearCache",
