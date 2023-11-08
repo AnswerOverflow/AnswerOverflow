@@ -62,21 +62,16 @@ export type EventMap = {
 	};
 } & ServerInviteEvent &
 	CommunityPageLinkEvent;
-
+import posthog from 'posthog-js';
 export function trackEvent<K extends keyof EventMap | string>(
 	eventName: K,
 	props: K extends keyof EventMap ? EventMap[K] : Record<string, unknown>,
 ): void {
 	const isServer = typeof window === 'undefined';
-	const capture = async () => {
-		await import('posthog-js').then(({ default: posthog }) => {
-			posthog.capture(eventName, {
-				...props,
-				'Is Server': isServer,
-			});
-		});
-	};
-	void capture();
+	posthog.capture(eventName, {
+		...props,
+		'Is Server': isServer,
+	});
 }
 
 export function messageWithDiscordAccountToAnalyticsData(
