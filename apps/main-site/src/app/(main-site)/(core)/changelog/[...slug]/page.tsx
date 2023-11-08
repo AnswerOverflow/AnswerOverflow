@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { allChangelogs, Changelog } from 'contentlayer/generated';
+import { allChangelogs, Changelog } from '../../../../../data/contentlayer';
 
 import { Metadata } from 'next';
 import { Mdx } from '../../../../_components/mdx-components';

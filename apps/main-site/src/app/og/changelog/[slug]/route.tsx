@@ -1,7 +1,8 @@
 import { ImageResponse } from 'next/og';
 import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/icons/answer-overflow-logo';
 import { notFound } from 'next/navigation';
-import { allChangelogs } from 'contentlayer/generated';
+
+import { allChangelogs } from '../../../../data/contentlayer';
 
 export const runtime = 'edge';
 export const preferredRegion = 'iad1';

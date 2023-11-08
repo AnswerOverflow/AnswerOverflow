@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/icons/answer-overflow-logo';
-import { allChangelogs } from 'contentlayer/generated';
+import { allChangelogs } from '../../../../data/contentlayer';
 import { sortContentByDateNewestFirst } from '../../../../utils/sort-content-by-date';
 export const runtime = 'edge';
 export const alt = 'Changelog';

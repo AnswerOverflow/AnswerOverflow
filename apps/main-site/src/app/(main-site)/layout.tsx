@@ -1,4 +1,4 @@
-import { allChangelogs } from 'contentlayer/generated';
+import { allChangelogs } from '../../data/contentlayer';
 import { sortContentByDateNewestFirst } from '../../utils/sort-content-by-date';
 
 export default function AnnouncementBannerLayout({
