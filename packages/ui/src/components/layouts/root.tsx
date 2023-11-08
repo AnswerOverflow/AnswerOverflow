@@ -12,6 +12,7 @@ import {
 import Script from 'next/script';
 import { DATA_UNBLOCKER } from './data-unblocker';
 import { AxiomWebVitals } from 'next-axiom';
+import { IdentifyUser } from '@answeroverflow/hooks/src/analytics/user-identifier';
 
 export const metadata: Metadata = {
 	title: 'Answer Overflow - Search all of Discord',
@@ -52,9 +53,9 @@ const sourceSans3 = Source_Sans_3({
 	variable: '--font-source-sans-3',
 });
 
-async function AnalyticsWithSession() {
+async function IdUser() {
 	const session = await getServerSession();
-	return <AnalyticsProvider session={session} />;
+	return <IdentifyUser userId={session?.user?.id} />;
 }
 
 export function Layout({
@@ -81,15 +82,6 @@ export function Layout({
 				<link rel={'dns-prefetch'} href={'https://cdn.discordapp.com'} />
 			</head>
 			<body className={`${montserrat.variable} ${sourceSans3.variable}`}>
-				<CommitBanner />
-
-				<Providers>{children}</Providers>
-				<AxiomWebVitals />
-
-				<Suspense>
-					<AnalyticsWithSession />
-					<PostHogPageview />
-				</Suspense>
 				<Script
 					async
 					id="data-unblocker"
@@ -98,6 +90,13 @@ export function Layout({
 						__html: Buffer.from(DATA_UNBLOCKER, 'base64').toString(),
 					}}
 				/>
+				<CommitBanner />
+				<Suspense>
+					<PostHogPageview />
+					<IdUser />
+				</Suspense>
+				<Providers>{children}</Providers>
+				<AxiomWebVitals />
 			</body>
 		</html>
 	);

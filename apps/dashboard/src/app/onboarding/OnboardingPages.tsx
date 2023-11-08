@@ -19,6 +19,7 @@ import { Heading } from '@answeroverflow/ui/src/components/primitives/ui/heading
 import { BlueLink } from '@answeroverflow/ui/src/components/primitives/ui/blue-link';
 import { ManageServerCard } from '@answeroverflow/ui/src/components/primitives/server-card';
 import { LinkButton } from '@answeroverflow/ui/src/components/primitives/ui/link-button';
+import posthog from 'posthog-js';
 
 export type SubmittedData = {
 	server?: ServerPublic & {
@@ -397,9 +398,7 @@ export function WelcomePageRenderer(props: {
 }) {
 	const { goToPage, setData } = useOnboardingContext();
 	useEffect(() => {
-		void import('posthog-js').then(({ posthog }) =>
-			posthog.startSessionRecording(),
-		);
+		posthog.startSessionRecording();
 	}, []);
 
 	switch (props.authState) {
