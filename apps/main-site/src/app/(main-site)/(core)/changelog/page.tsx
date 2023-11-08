@@ -1,4 +1,4 @@
-import { allChangelogs } from 'contentlayer/generated';
+import { allChangelogs } from '../../../../data/contentlayer';
 
 import { Mdx } from '../../../_components/mdx-components';
 import { BlueLink } from '@answeroverflow/ui/src/components/primitives/ui/blue-link';

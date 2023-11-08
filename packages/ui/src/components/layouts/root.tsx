@@ -5,10 +5,7 @@ import { CommitBanner } from '../dev/commit-banner';
 import { getServerSession } from '@answeroverflow/auth';
 import { Montserrat, Source_Sans_3 } from 'next/font/google';
 import type { Metadata } from 'next';
-import {
-	AnalyticsProvider,
-	PostHogPageview,
-} from '@answeroverflow/hooks/src/analytics/client';
+import { PostHogPageview } from '@answeroverflow/hooks/src/analytics/client';
 import Script from 'next/script';
 import { DATA_UNBLOCKER } from './data-unblocker';
 import { AxiomWebVitals } from 'next-axiom';
