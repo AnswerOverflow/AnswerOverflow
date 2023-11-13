@@ -48,6 +48,7 @@ export default async function MessageResult({ params }: Props) {
 			channel={data.parentChannel}
 			server={data.server}
 			requestedId={params.messageId}
+			tenant={data.server}
 			relatedPosts={data.recommendedPosts}
 			thread={data.thread ?? undefined}
 		/>
