@@ -5,8 +5,6 @@ export function IdentifyUser(props: { userId?: string }) {
 	if (typeof window === 'undefined') return null;
 	if (props.userId) {
 		posthog.identify(props.userId);
-	} else {
-		console.log('not identifying user');
 	}
 	return <></>;
 }

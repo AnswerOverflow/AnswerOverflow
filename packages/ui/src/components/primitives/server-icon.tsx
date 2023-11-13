@@ -1,8 +1,7 @@
 import type { ServerPublic } from '@answeroverflow/api';
-import { getInitials } from '../../utils/avatars';
-
 import { Avatar, AvatarFallback, AvatarImage, AvatarProps } from './ui/avatar';
 import { cn } from '../../utils/utils';
+import { getInitials } from '../../utils/avatars';
 
 export interface ServerIconProps extends Omit<AvatarProps, 'url' | 'alt'> {
 	server: Pick<ServerPublic, 'id' | 'name' | 'icon'>;
@@ -12,9 +11,6 @@ export const makeServerIconLink = (
 	server: Pick<ServerPublic, 'id' | 'icon'>,
 	size: number = 64,
 ) => {
-	// eslint-disable-next-line n/no-process-env,turbo/no-undeclared-env-vars
-	if (process.env.NEXT_PUBLIC_LADLE && !server.icon)
-		return `https://api.dicebear.com/6.x/icons/png?size=${size}&seed=${server.id}`;
 	if (!server.icon) return undefined;
 	return `https://cdn.discordapp.com/icons/${server.id}/${server.icon}.webp?size=${size}`;
 };
