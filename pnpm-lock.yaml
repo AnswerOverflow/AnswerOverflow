@@ -121,7 +121,7 @@ importers:
         version: 2.0.18(react@18.2.0)
       '@sentry/nextjs':
         specifier: ^7.72.0
-        version: 7.75.0(next@14.0.0)(react@18.2.0)
+        version: 7.75.0(next@14.0.0)(react@18.2.0)(webpack@5.89.0)
       '@tanstack/react-query':
         specifier: ^4.32.6
         version: 4.36.1(react-dom@18.2.0)(react-native@0.72.6)(react@18.2.0)
@@ -136,7 +136,7 @@ importers:
         version: 10.41.0
       next:
         specifier: 14.0.0
-        version: 14.0.0(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
+        version: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       next-auth:
         specifier: ^4.23.1
         version: 4.24.3(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
@@ -459,7 +459,7 @@ importers:
         version: 10.41.0
       next:
         specifier: 14.0.0
-        version: 14.0.0(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
+        version: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       next-auth:
         specifier: ^4.23.1
         version: 4.24.3(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
@@ -905,10 +905,10 @@ importers:
         version: 3.0.3
       drizzle-orm:
         specifier: ^0.28.5
-        version: 0.28.6(@opentelemetry/api@1.4.1)(@planetscale/database@1.11.0)(mysql2@3.6.0)
+        version: 0.28.6(@opentelemetry/api@1.6.0)(@planetscale/database@1.11.0)(mysql2@3.6.0)
       next:
         specifier: 14.0.0
-        version: 14.0.0(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
+        version: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       next-auth:
         specifier: ^4.23.1
         version: 4.24.3(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
@@ -966,7 +966,7 @@ importers:
         version: 3.0.3
       drizzle-orm:
         specifier: ^0.28.5
-        version: 0.28.6(@opentelemetry/api@1.4.1)(@planetscale/database@1.11.0)(mysql2@3.6.0)
+        version: 0.28.6(@opentelemetry/api@1.6.0)(@planetscale/database@1.11.0)(mysql2@3.6.0)
       redis:
         specifier: ^4.6.7
         version: 4.6.10
@@ -1165,7 +1165,7 @@ importers:
         version: 3.0.3
       drizzle-orm:
         specifier: ^0.28.5
-        version: 0.28.6(@opentelemetry/api@1.4.1)(@planetscale/database@1.11.0)(mysql2@3.6.0)
+        version: 0.28.6(@opentelemetry/api@1.6.0)(@planetscale/database@1.11.0)(mysql2@3.6.0)
       drizzle-zod:
         specifier: ^0.5.1
         version: 0.5.1(drizzle-orm@0.28.6)(zod@3.22.4)
@@ -1392,7 +1392,7 @@ importers:
         version: link:../env
       next:
         specifier: 14.0.0
-        version: 14.0.0(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
+        version: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       next-auth:
         specifier: ^4.23.1
         version: 4.24.3(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
@@ -1549,6 +1549,9 @@ importers:
       '@radix-ui/react-accordion':
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@18.2.14)(@types/react@18.2.31)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-avatar':
+        specifier: ^1.0.4
+        version: 1.0.4(@types/react-dom@18.2.14)(@types/react@18.2.31)(react-dom@18.2.0)(react@18.2.0)
       '@radix-ui/react-dialog':
         specifier: ^1.0.4
         version: 1.0.5(@types/react-dom@18.2.14)(@types/react@18.2.31)(react-dom@18.2.0)(react@18.2.0)
@@ -4768,11 +4771,6 @@ packages:
       '@opentelemetry/api': 1.6.0
     dev: false
 
-  /@opentelemetry/api@1.4.1:
-    resolution: {integrity: sha512-O2yRJce1GOc6PAy3QxFM4NzFiWzvScDC1/5ihYBL6BUEVdq0XMWN01sppE+H6bBXbaFYipjwFLEWLg5PaSOThA==}
-    engines: {node: '>=8.0.0'}
-    dev: false
-
   /@opentelemetry/api@1.6.0:
     resolution: {integrity: sha512-OWlrQAnWn9577PhVgqjUvMr1pg57Bc4jv0iL4w0PRuOSRvq67rvHW9Ie/dZVMvCzhSCB+UxhcY/PmCmFj33Q+g==}
     engines: {node: '>=8.0.0'}
@@ -5550,6 +5548,30 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.2
       '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.14)(@types/react@18.2.31)(react-dom@18.2.0)(react@18.2.0)
+      '@types/react': 18.2.31
+      '@types/react-dom': 18.2.14
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /@radix-ui/react-avatar@1.0.4(@types/react-dom@18.2.14)(@types/react@18.2.31)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-kVK2K7ZD3wwj3qhle0ElXhOjbezIgyl2hVvgwfIdexL3rN6zJmy5AqqIf+D31lxVppdzV8CjAfZ6PklkmInZLw==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.23.2
+      '@radix-ui/react-context': 1.0.1(@types/react@18.2.31)(react@18.2.0)
+      '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.14)(@types/react@18.2.31)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-use-callback-ref': 1.0.1(@types/react@18.2.31)(react@18.2.0)
+      '@radix-ui/react-use-layout-effect': 1.0.1(@types/react@18.2.31)(react@18.2.0)
       '@types/react': 18.2.31
       '@types/react-dom': 18.2.14
       react: 18.2.0
@@ -6982,37 +7004,6 @@ packages:
       localforage: 1.10.0
     dev: false
 
-  /@sentry/nextjs@7.75.0(next@14.0.0)(react@18.2.0):
-    resolution: {integrity: sha512-EKdTUe5Q48qRgFM7T9s9sXwOEMvaouepHF5m343jSuTugTQ7CCJIR9jLGgUuRPgaUdE0F+PyJWopgVAZpaVFSg==}
-    engines: {node: '>=8'}
-    peerDependencies:
-      next: ^10.0.8 || ^11.0 || ^12.0 || ^13.0
-      react: 16.x || 17.x || 18.x
-      webpack: '>= 4.0.0'
-    peerDependenciesMeta:
-      webpack:
-        optional: true
-    dependencies:
-      '@rollup/plugin-commonjs': 24.0.0(rollup@2.78.0)
-      '@sentry/core': 7.75.0
-      '@sentry/integrations': 7.75.0
-      '@sentry/node': 7.75.0
-      '@sentry/react': 7.75.0(react@18.2.0)
-      '@sentry/types': 7.75.0
-      '@sentry/utils': 7.75.0
-      '@sentry/vercel-edge': 7.75.0
-      '@sentry/webpack-plugin': 1.20.0
-      chalk: 3.0.0
-      next: 14.0.0(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
-      react: 18.2.0
-      resolve: 1.22.8
-      rollup: 2.78.0
-      stacktrace-parser: 0.1.10
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
-    dev: false
-
   /@sentry/nextjs@7.75.0(next@14.0.0)(react@18.2.0)(webpack@5.89.0):
     resolution: {integrity: sha512-EKdTUe5Q48qRgFM7T9s9sXwOEMvaouepHF5m343jSuTugTQ7CCJIR9jLGgUuRPgaUdE0F+PyJWopgVAZpaVFSg==}
     engines: {node: '>=8'}
@@ -7424,7 +7415,7 @@ packages:
       '@trpc/client': 10.41.0(@trpc/server@10.41.0)
       '@trpc/react-query': 10.41.0(@tanstack/react-query@4.36.1)(@trpc/client@10.41.0)(@trpc/server@10.41.0)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/server': 10.41.0
-      next: 14.0.0(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
+      next: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-ssr-prepass: 1.5.0(react@18.2.0)
@@ -10279,7 +10270,7 @@ packages:
       - supports-color
     dev: true
 
-  /drizzle-orm@0.28.6(@opentelemetry/api@1.4.1)(@planetscale/database@1.11.0)(mysql2@3.6.0):
+  /drizzle-orm@0.28.6(@opentelemetry/api@1.6.0)(@planetscale/database@1.11.0)(mysql2@3.6.0):
     resolution: {integrity: sha512-yBe+F9htrlYER7uXgDJUQsTHFoIrI5yMm5A0bg0GiZ/kY5jNXTWoEy4KQtg35cE27sw1VbgzoMWHAgCckUUUww==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
@@ -10341,7 +10332,7 @@ packages:
       sqlite3:
         optional: true
     dependencies:
-      '@opentelemetry/api': 1.4.1
+      '@opentelemetry/api': 1.6.0
       '@planetscale/database': 1.11.0
       mysql2: 3.6.0(patch_hash=q5tj4ab7wpmbah6uclyjha7nle)
     dev: false
@@ -10352,7 +10343,7 @@ packages:
       drizzle-orm: '>=0.23.13'
       zod: '*'
     dependencies:
-      drizzle-orm: 0.28.6(@opentelemetry/api@1.4.1)(@planetscale/database@1.11.0)(mysql2@3.6.0)
+      drizzle-orm: 0.28.6(@opentelemetry/api@1.6.0)(@planetscale/database@1.11.0)(mysql2@3.6.0)
       zod: 3.22.4
     dev: false
 
@@ -14932,7 +14923,7 @@ packages:
       '@panva/hkdf': 1.1.1
       cookie: 0.5.0
       jose: 4.15.4
-      next: 13.5.6(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)
+      next: 13.5.6(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
       oauth: 0.9.15
       openid-client: 5.6.1
       preact: 10.18.1
@@ -14957,7 +14948,7 @@ packages:
       '@panva/hkdf': 1.1.1
       cookie: 0.5.0
       jose: 4.15.4
-      next: 14.0.0(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
+      next: 14.0.0(@babel/core@7.23.2)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
       oauth: 0.9.15
       openid-client: 5.6.1
       preact: 10.18.1
@@ -14974,7 +14965,7 @@ packages:
       next: '>=13.4'
       react: '>=18.0.0'
     dependencies:
-      next: 14.0.0(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
+      next: 14.0.0(@babel/core@7.23.2)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       whatwg-fetch: 3.6.19
     dev: false
@@ -15024,7 +15015,7 @@ packages:
       react: '>=16.0.0'
       react-dom: '>=16.0.0'
     dependencies:
-      next: 14.0.0(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
+      next: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -15040,7 +15031,7 @@ packages:
       '@next/env': 13.5.6
       fast-glob: 3.3.1
       minimist: 1.2.8
-      next: 14.0.0(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
+      next: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
     dev: false
 
   /next-themes@0.2.1(next@14.0.0)(react-dom@18.2.0)(react@18.2.0):
@@ -15050,7 +15041,7 @@ packages:
       react: '*'
       react-dom: '*'
     dependencies:
-      next: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
+      next: 14.0.0(@babel/core@7.23.2)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -15058,7 +15049,7 @@ packages:
   /next-tick@1.1.0:
     resolution: {integrity: sha512-CXdUiJembsNjuToQvxayPZF9Vqht7hewsvy2sOWafLvi2awflj9mOC6bHIg50orX8IJvWKY9wYQ/zB2kogPslQ==}
 
-  /next@13.5.6(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0):
+  /next@13.5.6(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-Y2wTcTbO4WwEsVb4A8VSnOsG1I9ok+h74q0ZdxkwM3EODqrs4pasq7O0iUxbcS9VtWMicG7f3+HAj0r1+NtKSw==}
     engines: {node: '>=16.14.0'}
     hasBin: true
@@ -15074,7 +15065,7 @@ packages:
         optional: true
     dependencies:
       '@next/env': 13.5.6
-      '@opentelemetry/api': 1.4.1
+      '@opentelemetry/api': 1.6.0
       '@swc/helpers': 0.5.2
       busboy: 1.6.0
       caniuse-lite: 1.0.30001553
@@ -15121,47 +15112,6 @@ packages:
       postcss: 8.4.31
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-      styled-jsx: 5.1.1(@babel/core@7.23.2)(react@18.2.0)
-      watchpack: 2.4.0
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 14.0.0
-      '@next/swc-darwin-x64': 14.0.0
-      '@next/swc-linux-arm64-gnu': 14.0.0
-      '@next/swc-linux-arm64-musl': 14.0.0
-      '@next/swc-linux-x64-gnu': 14.0.0
-      '@next/swc-linux-x64-musl': 14.0.0
-      '@next/swc-win32-arm64-msvc': 14.0.0
-      '@next/swc-win32-ia32-msvc': 14.0.0
-      '@next/swc-win32-x64-msvc': 14.0.0
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-    dev: false
-
-  /next@14.0.0(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4):
-    resolution: {integrity: sha512-J0jHKBJpB9zd4+c153sair0sz44mbaCHxggs8ryVXSFBuBqJ8XdE9/ozoV85xGh2VnSjahwntBZZgsihL9QznA==}
-    engines: {node: '>=18.17.0'}
-    hasBin: true
-    peerDependencies:
-      '@opentelemetry/api': ^1.1.0
-      react: ^18.2.0
-      react-dom: ^18.2.0
-      sass: ^1.3.0
-    peerDependenciesMeta:
-      '@opentelemetry/api':
-        optional: true
-      sass:
-        optional: true
-    dependencies:
-      '@next/env': 14.0.0
-      '@opentelemetry/api': 1.4.1
-      '@swc/helpers': 0.5.2
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001553
-      postcss: 8.4.31
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      sass: 1.69.4
       styled-jsx: 5.1.1(@babel/core@7.23.2)(react@18.2.0)
       watchpack: 2.4.0
     optionalDependencies:
@@ -15237,7 +15187,7 @@ packages:
       git-url-parse: 13.1.1
       intersection-observer: 0.12.2
       match-sorter: 6.3.1
-      next: 14.0.0(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
+      next: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       next-seo: 6.1.0(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
       next-themes: 0.2.1(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
       nextra: 2.13.2(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
@@ -15267,7 +15217,7 @@ packages:
       gray-matter: 4.0.3
       katex: 0.16.9
       lodash.get: 4.4.2
-      next: 14.0.0(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
+      next: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       next-mdx-remote: 4.4.1(react-dom@18.2.0)(react@18.2.0)
       p-limit: 3.1.0
       react: 18.2.0

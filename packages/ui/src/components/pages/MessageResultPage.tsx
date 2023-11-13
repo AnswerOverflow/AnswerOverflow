@@ -21,11 +21,15 @@ import {
 } from '@answeroverflow/constants/src/analytics';
 import { messageWithDiscordAccountToAnalyticsData } from '@answeroverflow/hooks';
 import { stripMarkdownAndHTML } from '../primitives/message/markdown/strip';
+import { TrackLinkButton } from '../primitives/ui/track-link-button';
+import { LazyInviteToAnswerOverflowPopover } from './message-result-page/lazy-invite-to-answer-overflow-popover';
+
 export type MessageResultPageProps = {
 	messages: MessageFull[];
 	server: ServerPublic;
 	channel: ChannelPublicWithFlags;
 	thread?: ChannelPublicWithFlags;
+	tenant: ServerPublic | undefined;
 	requestedId: string;
 	relatedPosts: {
 		message: MessageFull;
@@ -33,12 +37,43 @@ export type MessageResultPageProps = {
 	}[];
 };
 
+const JoinAnswerOverflowCard = () => (
+	<div
+		className={
+			'flex flex-col gap-4 rounded-md border-2 border-solid border-secondary p-4'
+		}
+	>
+		<span
+			className={'text-xl font-bold '}
+			style={{
+				// @ts-expect-error
+				textWrap: 'balance',
+			}}
+		>
+			Want results from more Discord servers?
+		</span>
+		<div className={'grid w-full grid-cols-2 gap-4'}>
+			<TrackLinkButton
+				eventName={'Join Answer Overflow From Message Result Page'}
+				eventData={{}}
+				variant={'default'}
+				target={'_blank'}
+				href={'https://app.answeroverflow.com/onboarding'}
+			>
+				Add your server
+			</TrackLinkButton>
+			<LazyInviteToAnswerOverflowPopover />
+		</div>
+	</div>
+);
+
 // TODO: Align text to be same level with the avatar
 export async function MessageResultPage({
 	messages,
 	server,
 	channel,
 	thread,
+	tenant,
 	relatedPosts,
 }: MessageResultPageProps) {
 	const tracer = trace.getTracer('MessageResultPage');
@@ -222,27 +257,30 @@ export async function MessageResultPage({
 					location="Message Result Page"
 				/>
 			</div>
-			{relatedPosts.length > 0 && (
-				<div className="flex w-full flex-col justify-center gap-4 text-center xl:mt-6 ">
-					<span className="text-2xl">Recommended Posts</span>
-					<div className="flex flex-col gap-4">
-						{relatedPosts.slice(0, messages.length * 2).map((post) => (
-							<Link
-								className="flex flex-col gap-2 rounded-md border-2 border-solid border-secondary p-4 text-left transition-colors duration-700 ease-out hover:border-primary hover:text-primary"
-								href={`/m/${post.message.id}`}
-								key={post.thread.id}
-							>
-								<span className="truncate text-lg font-semibold">
-									{post.thread.name}
-								</span>
-								<span className="truncate text-sm">
-									{post.message.content.slice(0, 100)}
-								</span>
-							</Link>
-						))}
-					</div>
-				</div>
-			)}
+			<div className="flex w-full flex-col justify-center gap-4 text-center xl:mt-6 ">
+				{!tenant && <JoinAnswerOverflowCard />}
+				{relatedPosts.length > 0 && (
+					<>
+						<span className="text-2xl">Recommended Posts</span>
+						<div className="flex flex-col gap-4">
+							{relatedPosts.slice(0, messages.length * 2).map((post) => (
+								<Link
+									className="flex flex-col gap-2 rounded-md border-2 border-solid border-secondary p-4 text-left transition-colors duration-700 ease-out hover:border-primary hover:text-primary"
+									href={`/m/${post.message.id}`}
+									key={post.thread.id}
+								>
+									<span className="truncate text-lg font-semibold">
+										{post.thread.name}
+									</span>
+									<span className="truncate text-sm">
+										{post.message.content.slice(0, 100)}
+									</span>
+								</Link>
+							))}
+						</div>
+					</>
+				)}
+			</div>
 		</div>
 	);
 	const rendered = (

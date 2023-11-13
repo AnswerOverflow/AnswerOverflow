@@ -60,6 +60,8 @@ export type EventMap = {
 		email?: string;
 		feedback: string;
 	};
+	'Join Answer Overflow From Message Result Page': {};
+	'Invite to Join Answer Overflow From Message Result Page': {};
 } & ServerInviteEvent &
 	CommunityPageLinkEvent;
 import posthog from 'posthog-js';
