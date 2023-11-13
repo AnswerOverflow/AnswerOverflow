@@ -4,6 +4,7 @@ import { Button } from '../../primitives/ui/button';
 import React from 'react';
 import { trackEvent } from '@answeroverflow/hooks';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const InviteToAnswerOverflowPopover = dynamic(
 	() =>
 		import('./invite-to-answer-overflow-popover').then(
