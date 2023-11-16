@@ -36,21 +36,23 @@ export const Navbar = (props: {
 				'relative z-10  flex min-h-[4rem] w-full flex-1 items-center justify-between px-3 sm:px-[4rem] md:py-2 2xl:px-[6rem]'
 			}
 		>
-			<Link href="/" className={props.hideIcon ? 'hidden' : ''}>
-				{tenant ? (
-					<div className="flex items-center space-x-2">
-						<ServerIcon server={tenant} />
-						<span className="font-bold">{tenant.name}</span>
-					</div>
-				) : (
-					<>
-						<div className={'w-40 md:w-56'}>
-							<AnswerOverflowLogo width={'full'} />
+			<div>
+				<Link href="/" className={props.hideIcon ? 'hidden' : ''}>
+					{tenant ? (
+						<div className="flex items-center space-x-2">
+							<ServerIcon server={tenant} />
+							<span className="font-bold">{tenant.name}</span>
 						</div>
-						<span className="sr-only">Answer Overflow Logo</span>
-					</>
-				)}
-			</Link>
+					) : (
+						<>
+							<div className={'w-40 md:w-56'}>
+								<AnswerOverflowLogo width={'full'} />
+							</div>
+							<span className="sr-only">Answer Overflow Logo</span>
+						</>
+					)}
+				</Link>
+			</div>
 			<div className="flex items-center gap-2">
 				<ThemeSwitcher />
 				<LinkButton variant={'ghost'} size={'icon'} href={'/search'}>
