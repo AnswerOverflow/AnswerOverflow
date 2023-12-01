@@ -34,7 +34,7 @@ export async function POST(
 			});
 		},
 		isApiTokenValid({ uss }) {
-			return uss.serverId !== params.id;
+			return uss.serverId === params.id;
 		},
 	});
 }
