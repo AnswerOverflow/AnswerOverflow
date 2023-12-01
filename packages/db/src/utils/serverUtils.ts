@@ -72,6 +72,8 @@ export function getDefaultUserServerSettings(
 ): UserServerSettings {
 	const data: UserServerSettings = {
 		bitfield: 0,
+		apiCallsUsed: 0,
+		apiKey: null,
 		...override,
 	};
 	return data;

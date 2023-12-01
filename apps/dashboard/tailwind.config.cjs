@@ -110,6 +110,7 @@ module.exports = {
 			},
 		},
 	},
+	plugins: [...data.plugins, require('@headlessui/tailwindcss')],
 	safelist: [
 		{
 			pattern:

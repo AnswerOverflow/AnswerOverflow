@@ -1,20 +1,26 @@
 import {
+	findServerById,
 	findUserServerSettingsById,
 	getDefaultUserServerSettingsWithFlags,
 	upsertUserServerSettingsWithDeps,
 	type UserServerSettingsWithFlags,
 	zUserServerSettingsCreateWithDeps,
-	zUserServerSettingsFind,
 	zUserServerSettingsFlags,
 } from '@answeroverflow/db';
-import { withDiscordAccountProcedure, router } from '../trpc';
 import {
-	protectedFetch,
+	withDiscordAccountProcedure,
+	router,
+	withUserServersProcedure,
+} from '../trpc';
+import {
 	protectedMutation,
+	protectedMutationFetchFirst,
 } from '~api/utils/protected-procedures';
 import {
 	assertBoolsAreNotEqual,
+	assertIsAdminOrOwnerOfServer,
 	assertIsNotValue,
+	assertIsOnPlan,
 	assertIsUser,
 } from '~api/utils/permissions';
 
@@ -33,7 +39,8 @@ import {
 import type { Context } from '../context';
 export const SERVER_NOT_SETUP_MESSAGE =
 	'Server is not setup for Answer Overflow yet';
-
+import crypto from 'crypto';
+import { findOrThrowNotFound } from '~api/utils/operations';
 async function mutateUserServerSettings({
 	operation,
 	find,
@@ -67,12 +74,48 @@ async function mutateUserServerSettings({
 
 const userServerSettingsCrudRouter = router({
 	byId: withDiscordAccountProcedure
-		.input(zUserServerSettingsFind)
+		.input(z.string())
 		.query(async ({ input, ctx }) => {
-			return protectedFetch({
-				permissions: () => assertIsUser(ctx, input.userId),
-				fetch: () => findUserServerSettingsById(input),
-				notFoundMessage: 'User server settings not found',
+			const userId = ctx.discordAccount?.id;
+			return findOrThrowNotFound(
+				() =>
+					userId
+						? findUserServerSettingsById({
+								userId,
+								serverId: input,
+						  })
+						: undefined,
+				'Server settings not found',
+			);
+		}),
+	refreshApiKey: withUserServersProcedure
+		.input(z.string())
+		.mutation(async ({ input, ctx }) => {
+			const discordAccount = ctx.discordAccount;
+			if (!discordAccount) {
+				throw new Error('Discord account not found');
+			}
+			return protectedMutationFetchFirst({
+				fetch() {
+					return findServerById(input);
+				},
+				permissions: [
+					(server) => assertIsOnPlan(server, ['PRO', 'ENTERPRISE']),
+					() => assertIsAdminOrOwnerOfServer(ctx, input),
+				],
+				notFoundMessage: SERVER_NOT_SETUP_MESSAGE,
+				async operation() {
+					const newApiKey = crypto.randomBytes(32).toString('hex');
+					return upsertUserServerSettingsWithDeps({
+						serverId: input,
+						user: {
+							...discordAccount,
+							avatar: discordAccount.avatar ?? null,
+							name: discordAccount.username,
+						},
+						apiKey: newApiKey,
+					});
+				},
 			});
 		}),
 	setIndexingDisabled: withDiscordAccountProcedure

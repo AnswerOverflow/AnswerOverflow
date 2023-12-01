@@ -40,6 +40,8 @@ describe('User Server Settings', () => {
 				bitfield: 0,
 				serverId: 'serverId',
 				userId: 'userId',
+				apiKey: null,
+				apiCallsUsed: 0,
 			});
 			expect(data.flags.canPubliclyDisplayMessages).toBe(false);
 			expect(data.flags.messageIndexingDisabled).toBe(false);

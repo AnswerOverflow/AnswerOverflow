@@ -13,7 +13,12 @@ import {
 import { trpc } from '@answeroverflow/ui/src/utils/client';
 import { ConfigureDomainCard } from './domains';
 import { GoLinkExternal } from 'react-icons/go';
-import { CurrentPlanCard, PageViewChart, PageViewsCard } from './cards';
+import {
+	ApiKeyCard,
+	CurrentPlanCard,
+	PageViewChart,
+	PageViewsCard,
+} from './cards';
 import { TierAccessOnly } from './tier-access-only';
 import type { ServerDashboard } from '@answeroverflow/api';
 import { DashboardProvider } from './dashboard-context';
@@ -40,6 +45,7 @@ export function ServerDashboardRenderer(props: {
 			<TabGroup className="px-2 md:px-8">
 				<TabList className="mx-auto max-w-7xl">
 					<Tab>Overview</Tab>
+					<Tab>API</Tab>
 				</TabList>
 				<TabPanels className="mx-auto max-w-7xl">
 					<TabPanel>
@@ -87,6 +93,11 @@ export function ServerDashboardRenderer(props: {
 								{ConfigureDomainCardOverride ?? <ConfigureDomainCard />}
 							</TierAccessOnly>
 						</div>
+					</TabPanel>
+					<TabPanel>
+						<Grid numItemsLg={2} className="mt-6 gap-6">
+							<ApiKeyCard />
+						</Grid>
 					</TabPanel>
 				</TabPanels>
 			</TabGroup>

@@ -102,13 +102,12 @@ interface UserServerSettingsFindById {
 export async function findUserServerSettingsById(
 	where: UserServerSettingsFindById,
 ) {
-	const data = (await db.query.dbUserServerSettings.findFirst({
+	const data = await db.query.dbUserServerSettings.findFirst({
 		where: and(
 			eq(dbUserServerSettings.userId, where.userId),
 			eq(dbUserServerSettings.serverId, where.serverId),
-			isNotNull(dbUserServerSettings.bitfield),
 		),
-	})) as UserServerSettingsWithFlags | null;
+	});
 
 	return data ? addFlagsToUserServerSettings(data) : null;
 }
@@ -212,6 +211,7 @@ export async function updateUserServerSettings(
 		existing,
 		data,
 	);
+
 	await db
 		.update(dbUserServerSettings)
 		.set(userServerSettingsSchema.parse(updateData))
@@ -221,12 +221,11 @@ export async function updateUserServerSettings(
 				eq(dbUserServerSettings.serverId, data.serverId),
 			),
 		);
-	const updated = (await db.query.dbUserServerSettings.findFirst({
-		where: and(
-			eq(dbUserServerSettings.userId, data.userId),
-			eq(dbUserServerSettings.serverId, data.serverId),
-		),
-	})) as UserServerSettingsWithFlags | null;
+	const updated = await findUserServerSettingsById({
+		userId: data.userId,
+		serverId: data.serverId,
+	});
+
 	if (!updated) throw new Error('Error updating user server settings');
 	return addFlagsToUserServerSettings(updated);
 }
@@ -246,6 +245,7 @@ export async function upsertUserServerSettingsWithDeps(
 				serverId: data.serverId,
 				userId: data.user.id,
 				flags: data.flags,
+				apiKey: data.apiKey,
 			});
 		},
 		update: async (existing) => {
@@ -254,9 +254,23 @@ export async function upsertUserServerSettingsWithDeps(
 					serverId: data.serverId,
 					userId: data.user.id,
 					flags: data.flags,
+					apiKey: data.apiKey,
 				},
 				existing,
 			);
 		},
 	});
+}
+
+export async function findUserServerSettingsByApiKey(apiKey: string) {
+	const data = await db.query.dbUserServerSettings.findFirst({
+		where: eq(dbUserServerSettings.apiKey, apiKey),
+	});
+	return data ? addFlagsToUserServerSettings(data) : undefined;
+}
+
+export async function increaseApiKeyUsage(apiKey: string) {
+	await db.execute(
+		sql`UPDATE ${dbUserServerSettings} SET ${dbUserServerSettings.apiCallsUsed} = ${dbUserServerSettings.apiCallsUsed} + 1 WHERE ${dbUserServerSettings.apiKey} = ${apiKey}`,
+	);
 }

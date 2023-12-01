@@ -9,24 +9,13 @@ import { upsert, upsertMany } from './utils/operations';
 import { deleteManyMessagesByUserId } from './message';
 import { db } from './db';
 import { eq, inArray } from 'drizzle-orm';
-import {
-	dbDiscordAccounts,
-	dbUserServerSettings,
-	discordAccountSchema,
-} from './schema';
-import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
+import { dbDiscordAccounts, discordAccountSchema } from './schema';
 import {
 	zDiscordAccountCreate,
 	zDiscordAccountUpdate,
 	zDiscordAccountUpsert,
 } from './zodSchemas/discordAccountSchemas';
 import { getDefaultDiscordAccount } from './utils/discordAccountUtils';
-
-const zUserServerSettingsFlags = z.object({
-	userId: z.string(),
-	serverId: z.string(),
-	bitfield: z.number(),
-});
 
 export async function findDiscordAccountById(id: string) {
 	return db.query.dbDiscordAccounts.findFirst({
@@ -155,29 +144,4 @@ export async function upsertManyDiscordAccounts(
 		getInputId: (i) => i.id,
 		input: data,
 	});
-}
-
-export async function findManyDiscordAccountsWithUserServerSettings({
-	authorIds,
-	authorServerIds,
-}: {
-	authorIds: string[];
-	authorServerIds: string[];
-}) {
-	if (authorIds.length === 0 || authorServerIds.length === 0)
-		return Promise.resolve([]);
-	const data = await db.query.dbDiscordAccounts.findMany({
-		where: inArray(dbDiscordAccounts.id, authorIds),
-		with: {
-			userServerSettings: {
-				where: inArray(dbUserServerSettings.serverId, authorServerIds),
-			},
-		},
-	});
-	return data.map((i) => ({
-		...i,
-		userServerSettings: i.userServerSettings.map((j) => {
-			return addFlagsToUserServerSettings(zUserServerSettingsFlags.parse(j));
-		}),
-	}));
 }

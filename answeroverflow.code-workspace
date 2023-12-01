@@ -7,6 +7,10 @@
       "path": "apps/main-site"
     },
     {
+      "name": "dashboard",
+      "path": "apps/dashboard"
+    },
+    {
       "name": "docs",
       "path": "apps/docs"
     },
