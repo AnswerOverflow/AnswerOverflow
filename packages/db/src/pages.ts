@@ -201,7 +201,10 @@ export type CommunityPageData = NonNullable<
 	Awaited<ReturnType<typeof findServerWithCommunityPageData>>
 >;
 
-export async function findMessageResultPage(messageId: string) {
+export async function findMessageResultPage(
+	messageId: string,
+	userServers: DiscordAPIServer[] | null,
+) {
 	const targetMessage = await findMessageById(messageId);
 	if (!targetMessage) {
 		return null;
@@ -340,11 +343,17 @@ export async function findMessageResultPage(messageId: string) {
 			: msgsWithAccounts;
 
 	return {
-		server: addFlagsToServer(server),
-		channel: parentChannel,
-		messages: combinedMessages,
-		rootMessage,
-		thread: channel?.parent ? addFlagsToChannel(channel) : null,
+		server: stripPrivateServerData(addFlagsToServer(server)),
+		channel: stripPrivateChannelData(addFlagsToChannel(channel)),
+		messages: combinedMessages.map((msg) => {
+			return stripPrivateFullMessageData(msg, userServers);
+		}),
+		rootMessage: rootMessage
+			? stripPrivateFullMessageData(rootMessage, userServers)
+			: undefined,
+		thread: channel?.parent
+			? stripPrivateChannelData(addFlagsToChannel(channel))
+			: null,
 	};
 }
 
@@ -354,11 +363,11 @@ export async function makeMessageResultPage(
 ) {
 	console.log(`Generating message result page for ${messageId}`);
 	const startPageGeneration = performance.now();
-	const data = await findMessageResultPage(messageId);
+	const data = await findMessageResultPage(messageId, userServers);
 	if (!data) {
 		return null;
 	}
-	const { messages, channel, server, thread } = data;
+	const { messages, server, thread, channel } = data;
 	const endPageGeneration = performance.now();
 	console.log(
 		`Page generation for ${messageId} took ${
@@ -395,12 +404,10 @@ export async function makeMessageResultPage(
 	);
 
 	return {
-		messages: messages.map((msg) => {
-			return stripPrivateFullMessageData(msg, userServers);
-		}),
-		parentChannel: stripPrivateChannelData(channel),
-		server: stripPrivateServerData(server),
-		thread: thread ? stripPrivateChannelData(thread) : undefined,
+		messages,
+		parentChannel: channel,
+		server,
+		thread,
 		recommendedPosts,
 	};
 }

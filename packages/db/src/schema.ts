@@ -205,6 +205,8 @@ export const dbUserServerSettings = mysqlTable(
 		userId: snowflake('userId').notNull(),
 		serverId: snowflake('serverId').notNull(),
 		bitfield: unsignedInt('bitfield').default(0).notNull(),
+		apiKey: varchar('apiKey', { length: 255 }),
+		apiCallsUsed: int('apiCallsUsed').default(0).notNull(),
 	},
 	(table) => {
 		return {

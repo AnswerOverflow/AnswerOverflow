@@ -131,12 +131,7 @@ describe('User Server Settings Operations', () => {
 				async operation(source) {
 					const { ctx } = await mockAccountWithServersCallerCtx(server, source);
 					const router = userServerSettingsRouter.createCaller(ctx);
-					await expect(
-						router.byId({
-							serverId: server.id,
-							userId: discordAccount.id,
-						}),
-					).rejects.toThrowError();
+					await expect(router.byId(server.id)).rejects.toThrowError();
 				},
 			});
 		});
@@ -150,10 +145,7 @@ describe('User Server Settings Operations', () => {
 						discordAccount,
 					);
 					const router = userServerSettingsRouter.createCaller(ctx);
-					const userServerSettings = await router.byId({
-						serverId: server.id,
-						userId: discordAccount.id,
-					});
+					const userServerSettings = await router.byId(server.id);
 					expect(userServerSettings).toBeDefined();
 					expect(userServerSettings?.serverId).toEqual(server.id);
 					expect(userServerSettings?.userId).toEqual(discordAccount.id);

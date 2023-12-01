@@ -139,7 +139,9 @@ export function assertIsOnPlan(server: ServerWithFlags, plans: Plan[]) {
 	if (!plans.some((plan) => plan === server.plan)) {
 		return new TRPCError({
 			code: 'FORBIDDEN',
-			message: 'You are not on the correct plan to do this',
+			message: `You are not on the correct plan to do this. You are on the ${
+				server.plan
+			} plan, but you need to be on the ${plans.join(' or ')} plan`,
 		});
 	}
 	return;

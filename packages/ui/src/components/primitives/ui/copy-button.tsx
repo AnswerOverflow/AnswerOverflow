@@ -16,10 +16,12 @@ export const CopyButton = ({ textToCopy }: { textToCopy: string }) => {
 				onClick={() => {
 					copy(textToCopy);
 					setHasCopied(true);
+					setTimeout(() => setHasCopied(false), 1000);
 				}}
 				aria-label={`Copy ${textToCopy} to clipboard`}
 				variant="ghost"
 				size={'icon'}
+				className={'transition-all duration-700 ease-in-out'}
 			>
 				{hasCopied ? (
 					<ClipboardCheckIcon className={'h-6 w-6 text-emerald-500'} />

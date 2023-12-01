@@ -12,6 +12,11 @@ import { trpc } from '@answeroverflow/ui/src/utils/client';
 import { useDashboardContext } from './dashboard-context';
 import { PricingDialog } from '@answeroverflow/ui/src/components/primitives/pricing';
 import { BlueLink } from '@answeroverflow/ui/src/components/primitives/ui/blue-link';
+import { Input } from '@answeroverflow/ui/src/components/primitives/ui/input';
+import { CopyButton } from '@answeroverflow/ui/src/components/primitives/ui/copy-button';
+import { Button } from '@answeroverflow/ui/src/components/primitives/ui/button';
+import { LuRefreshCw } from 'react-icons/lu';
+import { toast } from 'react-toastify';
 
 export function PageViewsCardRenderer(props: {
 	numberOfPageViews?: number;
@@ -212,5 +217,45 @@ export const PageViewChart = () => {
 			data={status === 'success' ? data : []}
 			status={status}
 		/>
+	);
+};
+
+export const ApiKeyCard = () => {
+	const { id } = useDashboardContext();
+	const uss = trpc.userServerSettings.byId.useQuery(id);
+
+	const mutation = trpc.userServerSettings.refreshApiKey.useMutation();
+	const apiKey = uss?.data?.apiKey ?? '';
+	return (
+		<Card>
+			<Title>API Key</Title>
+			<div className={'flex gap-2'}>
+				<Input value={apiKey} readOnly />
+				<CopyButton textToCopy={apiKey} />
+				<Button
+					aria-label={`Refresh API Key`}
+					variant="ghost"
+					size={'icon'}
+					className={'transition-all duration-700 ease-in-out'}
+					disabled={mutation.isLoading && !uss.isLoading}
+					onClick={() => {
+						mutation.mutate(id, {
+							onSuccess() {
+								void uss.refetch();
+							},
+							onError(error) {
+								toast.error(error.message);
+							},
+						});
+					}}
+				>
+					<LuRefreshCw
+						className={`h-6 w-6  ${
+							mutation.isLoading || uss.isLoading ? 'animate-spin' : ''
+						}`}
+					/>
+				</Button>
+			</div>
+		</Card>
 	);
 };

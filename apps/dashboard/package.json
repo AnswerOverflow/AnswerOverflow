@@ -47,6 +47,7 @@
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
 		"@edge-runtime/vm": "^2.1.2",
+		"@headlessui/tailwindcss": "^0.2.0",
 		"@types/node": "^18.17.6",
 		"@types/react": "^18.2.20",
 		"@types/react-dom": "^18.2.7",

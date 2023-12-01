@@ -103,7 +103,7 @@ export async function GET(req: Request) {
 		});
 	}
 	const parsedId = z.string().parse(id);
-	const data = await findMessageResultPage(parsedId);
+	const data = await findMessageResultPage(parsedId, []);
 	if (!data) {
 		return new Response(`Post not found`, {
 			status: 404,
