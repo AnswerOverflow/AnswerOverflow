@@ -48,7 +48,7 @@ export async function protectedGet<T, K>(input: {
 		});
 	}
 	if (
-		input.isApiTokenValid({
+		!input.isApiTokenValid({
 			uss,
 			data: result,
 		})

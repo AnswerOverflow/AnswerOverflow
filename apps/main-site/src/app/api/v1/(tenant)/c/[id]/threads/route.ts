@@ -13,7 +13,7 @@ export async function GET(
 			return findQuestionsForSitemap(params.id);
 		},
 		isApiTokenValid({ data, uss }) {
-			return uss.serverId !== data.server.id;
+			return uss.serverId === data.server.id;
 		},
 		transform(data) {
 			return data.questions.map((q) => ({
