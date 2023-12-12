@@ -79,7 +79,7 @@
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix",
 		"build-deps": "(cd ../../packages/discordjs-mock && pnpm build)",
-		"build": "pnpm build-deps && pnpm with-env tsup --format cjs",
+		"build": "pnpm build-deps && pnpm lint && pnpm with-env tsup --format cjs",
 		"dev": "pnpm build-deps && pnpm with-env rm -rf dist && pnpm build && run-p watch start",
 		"start": "pnpm with-env node dist/index.js",
 		"test": "pnpm build-deps && pnpm with-env jest --coverage",
