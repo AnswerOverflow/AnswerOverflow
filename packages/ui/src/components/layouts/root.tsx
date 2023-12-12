@@ -10,6 +10,7 @@ import Script from 'next/script';
 import { DATA_UNBLOCKER } from './data-unblocker';
 import { AxiomWebVitals } from 'next-axiom';
 import { IdentifyUser } from '@answeroverflow/hooks/src/analytics/user-identifier';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
 	title: 'Answer Overflow - Search all of Discord',
@@ -92,6 +93,7 @@ export function Layout({
 					<PostHogPageview />
 					<IdUser />
 				</Suspense>
+				<SpeedInsights sampleRate={10} />
 				<Providers>{children}</Providers>
 				<AxiomWebVitals />
 			</body>
