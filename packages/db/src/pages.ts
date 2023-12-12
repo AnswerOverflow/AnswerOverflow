@@ -344,7 +344,7 @@ export async function findMessageResultPage(
 
 	return {
 		server: stripPrivateServerData(addFlagsToServer(server)),
-		channel: stripPrivateChannelData(addFlagsToChannel(channel)),
+		channel: stripPrivateChannelData(addFlagsToChannel(parentChannel)),
 		messages: combinedMessages.map((msg) => {
 			return stripPrivateFullMessageData(msg, userServers);
 		}),
