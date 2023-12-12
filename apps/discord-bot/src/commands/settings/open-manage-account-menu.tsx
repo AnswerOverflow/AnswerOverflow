@@ -49,11 +49,7 @@ export class OpenManageAccountMenuCommand extends Command {
 				await callAPI({
 					async apiCall(router) {
 						const userServerSettingsFetch = callWithAllowedErrors({
-							call: () =>
-								router.userServerSettings.byId({
-									userId: member.id,
-									serverId: guild.id,
-								}),
+							call: () => router.userServerSettings.byId(guild.id),
 							allowedErrors: 'NOT_FOUND',
 						});
 						const isIgnoredAccountFetch = router.discordAccounts.checkIfIgnored(
