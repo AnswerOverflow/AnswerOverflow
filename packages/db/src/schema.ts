@@ -216,6 +216,7 @@ export const dbUserServerSettings = mysqlTable(
 			),
 			userIdIdx: index('UserServerSettings_userId_idx').on(table.userId),
 			serverIdIdx: index('UserServerSettings_serverId_idx').on(table.serverId),
+			apiKeyIdx: index('UserServerSettings_apiKey_idx').on(table.apiKey),
 		};
 	},
 );

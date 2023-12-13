@@ -1175,12 +1175,18 @@ importers:
       json-bigint:
         specifier: ^1.0.0
         version: 1.0.0
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       mysql2:
         specifier: 3.6.0
         version: 3.6.0(patch_hash=q5tj4ab7wpmbah6uclyjha7nle)
       unique-names-generator:
         specifier: ^4.7.1
         version: 4.7.1
+      uploadthing:
+        specifier: ^6.1.0
+        version: 6.1.0
       zod:
         specifier: ^3.22.2
         version: 3.22.4
@@ -1194,6 +1200,9 @@ importers:
       '@types/json-bigint':
         specifier: ^1.0.3
         version: 1.0.3
+      '@types/lodash':
+        specifier: ^4.14.202
+        version: 4.14.202
       '@types/node':
         specifier: ^20.5.1
         version: 20.8.8
@@ -7652,6 +7661,10 @@ packages:
     resolution: {integrity: sha512-DD2Y3xMlTQvAnN6d8803xdgnOeYZ+HwMglb7/9YCf49J9RkJL53azf9qKa40MkEYhqVwxZ1GS2+VlShnz4Z1Bw==}
     dev: false
 
+  /@types/lodash@4.14.202:
+    resolution: {integrity: sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==}
+    dev: true
+
   /@types/mdast@3.0.14:
     resolution: {integrity: sha512-gVZ04PGgw1qLZKsnWnyFv4ORnaJ+DXLdHTVSFbU8yX6xZ34Bjg4Q32yPkmveUP1yItXReKfB0Aknlh/3zxTKAw==}
     dependencies:
@@ -8027,6 +8040,21 @@ packages:
 
   /@ungap/structured-clone@1.2.0:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
+
+  /@uploadthing/mime-types@0.2.2:
+    resolution: {integrity: sha512-ZUo1JHOPPMZDsUw1mOhhVDIvJGlsjj6T0xJ/YJtulyJwL43S9B5pxg1cHcRuTEgjaxj7B55jiqQ6r9mDrrjH9A==}
+    dev: false
+
+  /@uploadthing/shared@6.0.2(@uploadthing/mime-types@0.2.2):
+    resolution: {integrity: sha512-yFOhvzBG8VB2qmEGWDuW/tV/ZcfRZ4a6rX7i9/ZS3IqHA0FO7CKa8yitltAl3yRdSI9it88iMEQg7Ah/ve8D4A==}
+    peerDependencies:
+      '@uploadthing/mime-types': ^0.2.2
+    peerDependenciesMeta:
+      '@uploadthing/mime-types':
+        optional: true
+    dependencies:
+      '@uploadthing/mime-types': 0.2.2
+    dev: false
 
   /@vercel/otel@0.3.0(patch_hash=j6q6k3mq47volm2y6pqfesoixq):
     resolution: {integrity: sha512-KgLZjBXmMPKCh9uswY81I6oaVZdH2Eyn4snbx86n20t2LW8iEmjSxzxuviET+lfiIQwWWCiZkC6+SiPXOc7naA==}
@@ -14968,7 +14996,7 @@ packages:
       '@panva/hkdf': 1.1.1
       cookie: 0.5.0
       jose: 4.15.4
-      next: 14.0.0(@babel/core@7.23.2)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       oauth: 0.9.15
       openid-client: 5.6.1
       preact: 10.18.1
@@ -14985,7 +15013,7 @@ packages:
       next: '>=13.4'
       react: '>=18.0.0'
     dependencies:
-      next: 14.0.0(@babel/core@7.23.2)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       react: 18.2.0
       whatwg-fetch: 3.6.19
     dev: false
@@ -15061,7 +15089,7 @@ packages:
       react: '*'
       react-dom: '*'
     dependencies:
-      next: 14.0.0(@babel/core@7.23.2)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -18861,6 +18889,14 @@ packages:
       browserslist: 4.22.1
       escalade: 3.1.1
       picocolors: 1.0.0
+
+  /uploadthing@6.1.0:
+    resolution: {integrity: sha512-3OhxRxY+cOoA+g5kAkuYo/pIyOJKZR6+iUt077QkfhmN8GCjekFyiQDAmH/X1IQ29U8lMpMkgcxHx9HetkPtdw==}
+    engines: {node: '>=18.13.0'}
+    dependencies:
+      '@uploadthing/mime-types': 0.2.2
+      '@uploadthing/shared': 6.0.2(@uploadthing/mime-types@0.2.2)
+    dev: false
 
   /uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
