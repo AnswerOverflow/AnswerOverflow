@@ -135,3 +135,7 @@ img:not([src]):is(:empty) {
   white-space: break-spaces;
   line-height: 22px;
 }
+
+* {
+  min-width: 0;
+}

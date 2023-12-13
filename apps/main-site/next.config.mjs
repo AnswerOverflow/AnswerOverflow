@@ -47,6 +47,7 @@ const config = {
 			'cdn.discordapp.com',
 			'avatars.githubusercontent.com',
 			'media.discordapp.net',
+			'utfs.io',
 		],
 	},
 	// https://github.com/kkomelin/isomorphic-dompurify/issues/54
