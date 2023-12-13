@@ -108,7 +108,7 @@ describe('Message Results', () => {
 				pickPublicChannelData(mockChannelWithFlags(server, channel)),
 			);
 			expect(messages.server).toEqual(pickPublicServerData(server));
-			expect(messages.thread).toEqual(undefined);
+			expect(messages.thread).toBeNull();
 		});
 	});
 	describe('Thread Message Pages', () => {
@@ -212,7 +212,7 @@ describe('Message Results', () => {
 			]);
 			expect(pageData.parentChannel).toEqual(pickPublicChannelData(channel));
 			expect(pageData.server).toEqual(pickPublicServerData(server));
-			expect(pageData.thread).toEqual(undefined);
+			expect(pageData.thread).toBeNull();
 		});
 		it('should get follow up messages of a forum post correctly starting from the root of the post', async () => {
 			const forumChannel = await createChannel(
@@ -364,7 +364,7 @@ describe.skip('Search Results', () => {
 			...pickPublicChannelData(channel),
 			messageCount: NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD,
 		});
-		expect(firstResult.thread).toEqual(undefined);
+		expect(firstResult.thread).toBeNull();
 	});
 	it('should fetch a result in a server correctly', async () => {
 		const message = mockMessage(server, channel, author, {
