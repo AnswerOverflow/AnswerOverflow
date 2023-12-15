@@ -40,6 +40,9 @@ import { getRandomId, pick } from '@answeroverflow/utils';
 import { zDiscordAccountPublic } from './zodSchemas/discordAccountSchemas';
 import { anonymizeDiscordAccount } from './utils/anonymization';
 
+// yes the way file uploading is handled here is bad, i'll fix it later i promise, i was young dumb and needed to ship
+import { uploadFileFromUrl } from './files';
+
 export const zFindMessagesByChannelId = z.object({
 	channelId: z.string(),
 	after: z.string().optional(),
@@ -498,16 +501,34 @@ export async function upsertMessage(
 		set: parsed,
 	});
 	const updateAttachments = async () => {
-		await db.delete(dbAttachments).where(eq(dbAttachments.messageId, msg.id));
-		if (!attachments) return;
-		await Promise.all(
-			attachments.map((a) => {
-				const p = attachmentSchema.parse(a);
-				return db.insert(dbAttachments).values(p).onDuplicateKeyUpdate({
-					set: p,
+		const existingAttachments = await db
+			.select()
+			.from(dbAttachments)
+			.where(eq(dbAttachments.messageId, msg.id));
+		const existingAttachmentIds = new Set(existingAttachments.map((a) => a.id));
+
+		if (!attachments) {
+			await db.delete(dbAttachments).where(eq(dbAttachments.messageId, msg.id));
+			return;
+		}
+		for await (const attachment of attachments) {
+			if (!existingAttachmentIds.has(attachment.id)) {
+				void uploadFileFromUrl({
+					url: attachment.url,
+					id: attachment.id,
+					contentType: attachment.contentType ?? undefined,
+					filename: attachment.filename,
+				}).then(async (uploaded) => {
+					if (!uploaded) return;
+					await db.insert(dbAttachments).values(
+						attachmentSchema.parse({
+							...attachment,
+							proxyUrl: uploaded.Location,
+						}),
+					);
 				});
-			}),
-		);
+			}
+		}
 	};
 	const updateReactions = async () => {
 		await db.delete(dbReactions).where(eq(dbReactions.messageId, msg.id));
@@ -609,11 +630,44 @@ export async function fastUpsertManyMessages(data: BaseMessageWithRelations[]) {
 			.insert(dbMessages)
 			.values(Array.from(msgs))
 			.onDuplicateKeyUpdate({ set: { id: sql.raw('id') } });
-	if (attachments.size > 0)
+	if (attachments.size > 0) {
+		void db
+			.select()
+			.from(dbAttachments)
+			.where(
+				inArray(
+					dbAttachments.id,
+					[...attachments].map((a) => a.id),
+				),
+			)
+			.then(async (existingAttachments) => {
+				const existingAttachmentIds = new Set(
+					existingAttachments.map((a) => a.id),
+				);
+				for await (const attachment of attachments) {
+					if (!existingAttachmentIds.has(attachment.id)) {
+						void uploadFileFromUrl({
+							url: attachment.url,
+							id: attachment.id,
+							contentType: attachment.contentType ?? undefined,
+							filename: attachment.filename,
+						}).then(async (uploaded) => {
+							if (!uploaded) return;
+							await db.insert(dbAttachments).values(
+								attachmentSchema.parse({
+									...attachment,
+									proxyUrl: uploaded.Location,
+								}),
+							);
+						});
+					}
+				}
+			});
 		await db
 			.insert(dbAttachments)
 			.values(Array.from(attachments))
 			.onDuplicateKeyUpdate({ set: { id: sql.raw('id') } });
+	}
 	if (emojis.size > 0)
 		await db
 			.insert(dbEmojis)
