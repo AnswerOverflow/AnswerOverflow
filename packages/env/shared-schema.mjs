@@ -116,6 +116,9 @@ export const sharedEnvs = createEnv({
 		PROJECT_ID_VERCEL: zStringRequiredInProduction,
 		AUTH_BEARER_TOKEN_VERCEL: zStringRequiredInProduction,
 		TEAM_ID_VERCEL: zStringRequiredInProduction,
+		BUCKET_NAME: zStringRequiredInProduction,
+		IAM_USER_KEY: zStringRequiredInProduction,
+		IAM_USER_SECRET: zStringRequiredInProduction,
 	},
 	client: sharedClientEnvs,
 	experimental__runtimeEnv: {
