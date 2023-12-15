@@ -22,7 +22,6 @@ export function uploadFile(file: {
 		})
 		.promise();
 }
-import { Readable } from 'stream';
 
 export async function uploadFileFromUrl(file: {
 	id: string;
@@ -32,7 +31,8 @@ export async function uploadFileFromUrl(file: {
 }) {
 	const res = await fetch(file.url);
 	if (!res.ok || !res.body) return null;
-	const stream = Readable.fromWeb(res.body);
+	const readable = await import('stream').then((m) => m.Readable);
+	const stream = readable.fromWeb(res.body);
 	return s3bucket
 		.upload({
 			Bucket: sharedEnvs.BUCKET_NAME as string,
