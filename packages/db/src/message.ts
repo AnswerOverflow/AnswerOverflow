@@ -663,10 +663,6 @@ export async function fastUpsertManyMessages(data: BaseMessageWithRelations[]) {
 					}
 				}
 			});
-		await db
-			.insert(dbAttachments)
-			.values(Array.from(attachments))
-			.onDuplicateKeyUpdate({ set: { id: sql.raw('id') } });
 	}
 	if (emojis.size > 0)
 		await db
