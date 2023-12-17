@@ -548,7 +548,7 @@ export async function upsertMessage(
 		}
 	};
 	await updateReactions();
-	await updateAttachments();
+	void updateAttachments();
 }
 
 export async function upsertManyMessages(
