@@ -19,6 +19,7 @@ export async function discordApiFetch(
 		},
 		// @ts-ignore
 		cache: 'force-cache',
+		// @ts-ignore
 		revalidate: 600,
 	});
 	if (data.status === 401) {
