@@ -24,7 +24,7 @@
 		"@answeroverflow/tailwind-config": "workspace:^",
 		"@answeroverflow/ui": "workspace:^",
 		"@heroicons/react": "^2.0.18",
-		"@tanstack/react-query": "^4.32.6",
+		"@tanstack/react-query": "^4.36.1",
 		"@tremor/react": "^3.6.1",
 		"@trpc/client": "^10.37.1",
 		"@trpc/server": "^10.37.1",
