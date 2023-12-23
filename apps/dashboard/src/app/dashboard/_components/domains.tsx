@@ -124,7 +124,7 @@ export function ConfigureDomainCardRenderer(props: {
 							placeholder="yourdomain.com"
 							maxLength={64}
 							disabled={!enabled}
-							pattern={'[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}$'}
+							pattern={'[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,9}$'}
 						/>
 						{currentDomain && (
 							<DomainStatus loading={fetching} status={props.status} />
