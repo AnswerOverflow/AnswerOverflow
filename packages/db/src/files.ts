@@ -10,7 +10,7 @@ export function uploadFile(file: {
 	id: string;
 	filename: string;
 	contentType?: string;
-	stream: NodeJS.ReadableStream;
+	stream: AWS.S3.Body;
 }) {
 	return s3bucket
 		.upload({
@@ -31,8 +31,7 @@ export async function uploadFileFromUrl(file: {
 }) {
 	const res = await fetch(file.url);
 	if (!res.ok || !res.body) return null;
-	const readable = await import('stream').then((m) => m.Readable);
-	const stream = readable.fromWeb(res.body);
+	const stream = res.body;
 	return s3bucket
 		.upload({
 			Bucket: sharedEnvs.BUCKET_NAME as string,

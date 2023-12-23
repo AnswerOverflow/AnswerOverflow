@@ -18,7 +18,8 @@ export async function discordApiFetch(
 			Authorization: `Bearer ${callOpts.accessToken}`,
 		},
 		// @ts-ignore
-		cache: 'no-cache',
+		cache: 'force-cache',
+		revalidate: 600,
 	});
 	if (data.status === 401) {
 		const account = await db.query.dbAccounts.findFirst({
@@ -31,6 +32,11 @@ export async function discordApiFetch(
 			throw new Error('Invalid access token');
 		}
 		await refreshAccessToken(account);
+	}
+	if (data.status !== 200) {
+		throw new Error(
+			`Invalid response from Discord ${data.status} ${data.statusText}`,
+		);
 	}
 	return data;
 }
@@ -153,7 +159,11 @@ export async function getDiscordUser(opts: DiscordApiCallOpts) {
 	const client = await getRedisClient();
 	const cachedUser = await client.get(getDiscordUserRedisKey(opts.accessToken));
 	if (cachedUser) {
-		return zUserSchema.parse(JSON.parse(cachedUser));
+		try {
+			return zUserSchema.parse(JSON.parse(cachedUser));
+		} catch (e) {
+			console.log(e);
+		}
 	}
 	const data = await discordApiFetch('/users/@me', opts);
 	const parsed = zUserSchema.parse(await data.json());
