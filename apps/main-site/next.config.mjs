@@ -61,7 +61,7 @@ const config = {
 		ignoreDuringBuilds: !!process.env.CI,
 	},
 	productionBrowserSourceMaps: true, // we're open source so why not
-	
+
 	redirects: async () => {
 		return [
 			{

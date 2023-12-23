@@ -33,14 +33,8 @@ const config = {
 		],
 	},
 	// https://github.com/kkomelin/isomorphic-dompurify/issues/54
-	webpack: (config, { webpack }) => {
+	webpack: (config) => {
 		config.externals = [...config.externals, 'canvas', 'jsdom'];
-		config.plugins.push(
-			new webpack.DefinePlugin({
-				__SENTRY_DEBUG__: false,
-				__SENTRY_TRACING__: false,
-			}),
-		);
 		return config;
 	},
 	// We already do linting on GH actions
@@ -48,9 +42,7 @@ const config = {
 		ignoreDuringBuilds: !!process.env.CI,
 	},
 	productionBrowserSourceMaps: true, // we're open source so why not
-	sentry: {
-		hideSourceMaps: false,
-	},
+
 	redirects: async () => {
 		return [
 			{
@@ -62,9 +54,6 @@ const config = {
 	},
 };
 
-import { withSentryConfig } from '@sentry/nextjs';
 import { withAxiom } from 'next-axiom';
 
-export default withSentryConfig(withAxiom(config), {
-	silent: true,
-});
+export default withAxiom(config);
