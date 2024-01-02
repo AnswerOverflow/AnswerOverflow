@@ -20,9 +20,9 @@
 		"db:migrate:elastic-to-ps": "cross-env NODE_ENV=development pnpm with-env npx ts-node ./scripts/migrate.ts"
 	},
 	"dependencies": {
+		"@answeroverflow/db": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
-		"@answeroverflow/db": "workspace:^",
 		"@elastic/elasticsearch": "^8.9.0",
 		"discord-api-types": "^0.37.54",
 		"dotenv-cra": "^3.0.3",
@@ -32,6 +32,7 @@
 	"devDependencies": {
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
+		"@types/node": "^20.10.6",
 		"@vitest/coverage-c8": "^0.28.5",
 		"cross-env": "^7.0.3",
 		"dotenv-cli": "^7.3.0",

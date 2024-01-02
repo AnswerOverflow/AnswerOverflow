@@ -144,7 +144,7 @@ function createRules(rule: { [key: string]: any }) {
 						title={masked ? `${node.title || content}\n\n(${url})` : url}
 						href={SimpleMarkdown.sanitizeUrl(node.target) ?? ''}
 						target="_blank"
-						rel="noreferrer"
+						rel="nofollow noreferrer"
 						key={state.key}
 					>
 						{recurseOutput(node.content, state)}
