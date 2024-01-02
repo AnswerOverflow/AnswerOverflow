@@ -1,7 +1,7 @@
 {
 	"extends": "@answeroverflow/tsconfig/base.json",
 	"compilerOptions": {
-		"types": ["vitest/globals"],
+    "types": ["vitest/globals", "node"],
 		"baseUrl": "../../"
 	},
 	"include": [
