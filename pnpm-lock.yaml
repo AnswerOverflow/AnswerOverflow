@@ -265,8 +265,8 @@ importers:
         specifier: ^1.6.5
         version: 1.6.5
       '@sapphire/decorators':
-        specifier: 6.0.1
-        version: 6.0.1
+        specifier: 6.0.3
+        version: 6.0.3
       '@sapphire/discord-utilities':
         specifier: 3.0.3
         version: 3.0.3
@@ -6740,8 +6740,8 @@ packages:
       '@sapphire/utilities': 3.13.0
     dev: false
 
-  /@sapphire/decorators@6.0.1:
-    resolution: {integrity: sha512-CyekhzVeiIda5E/IQzm0TWj+ZqKhWRaLWmB/6MTaOtXUwTlNMm/o7/bS54yM5PEAf1LTwwwuNL91sNUDS8sCPg==}
+  /@sapphire/decorators@6.0.3:
+    resolution: {integrity: sha512-gsfJhPYX/R3VZkjSY9CgVcUkg9HmcppRfKWfBT/d/0SS6V8Uuo7C7u936Re7PP7J16+9jnoxDHYoF3IGMlb9eA==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
     dependencies:
       tslib: 2.6.2
@@ -14852,7 +14852,7 @@ packages:
       '@panva/hkdf': 1.1.1
       cookie: 0.5.0
       jose: 4.15.4
-      next: 14.0.0(@babel/core@7.23.2)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       oauth: 0.9.15
       openid-client: 5.6.1
       preact: 10.18.1
@@ -14869,7 +14869,7 @@ packages:
       next: '>=13.4'
       react: '>=18.0.0'
     dependencies:
-      next: 14.0.0(@babel/core@7.23.2)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       react: 18.2.0
       whatwg-fetch: 3.6.19
     dev: false
@@ -14945,7 +14945,7 @@ packages:
       react: '*'
       react-dom: '*'
     dependencies:
-      next: 14.0.0(@babel/core@7.23.2)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.0.0(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.4)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
