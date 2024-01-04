@@ -8,7 +8,7 @@ export * from './src/discord-account';
 export * from './src/auth';
 export * from './src/pages';
 export * from './src/ignored-discord-account';
-
+export * from './src/message-node';
 // Zod Schemas
 export * from './src/zodSchemas/channelSchemas';
 export * from './src/zodSchemas/serverSchemas';

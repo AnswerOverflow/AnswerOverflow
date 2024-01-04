@@ -21,7 +21,8 @@ import {
 	findChannelsBeforeId,
 } from './channel';
 import { createDiscordAccount } from './discord-account';
-import { findMessageById, upsertMessage } from './message';
+import { findMessageById } from './message';
+import { upsertMessage } from './message-node';
 import { createServer } from './server';
 import { beforeEach } from 'vitest';
 import { Server } from './schema';
