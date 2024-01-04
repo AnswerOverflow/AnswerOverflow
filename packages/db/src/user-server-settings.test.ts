@@ -14,7 +14,7 @@ import {
 	findUserServerSettingsById,
 	updateUserServerSettings,
 } from './user-server-settings';
-import { findMessageById, upsertMessage } from './message';
+import { findMessageById } from './message';
 import { createChannel } from './channel';
 import { getRandomId } from '@answeroverflow/utils';
 import { DiscordAccount, Server } from './schema';
@@ -23,6 +23,7 @@ import {
 	bitfieldToUserServerSettingsFlags,
 	UserServerSettingsWithFlags,
 } from './utils/userServerSettingsUtils';
+import { upsertMessage } from './message-node';
 
 let server: Server;
 let account: DiscordAccount;

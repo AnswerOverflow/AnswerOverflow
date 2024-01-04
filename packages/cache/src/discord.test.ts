@@ -71,6 +71,7 @@ function mockAxiosGet<T>(data: T) {
 	return (fetch = vitest.fn().mockResolvedValue({
 		// eslint-disable-next-line @typescript-eslint/require-await
 		json: async () => data,
+		status: 200,
 	}));
 }
 

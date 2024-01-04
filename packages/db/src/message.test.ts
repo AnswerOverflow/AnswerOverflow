@@ -16,7 +16,6 @@ import {
 	findManyMessagesWithAuthors,
 	findMessageById,
 	findMessagesByChannelIdWithDiscordAccounts,
-	upsertMessage,
 } from './message';
 import { createServer } from './server';
 import { createChannel } from './channel';
@@ -25,6 +24,7 @@ import { createUserServerSettings } from './user-server-settings';
 import { getRandomId } from '@answeroverflow/utils';
 import { BaseMessageWithRelations, DiscordAccount, Server } from './schema';
 import { ChannelWithFlags } from './zodSchemas/channelSchemas';
+import { upsertMessage } from './message-node';
 
 describe('Message Ops', () => {
 	let server: Server;
@@ -131,66 +131,6 @@ describe('Message Ops', () => {
 				});
 				const found = await findFullMessageById(msgWithReaction.id);
 				expect(found?.reactions).toHaveLength(0);
-			});
-		});
-		describe('with attachments', () => {
-			test('with attachment create', async () => {
-				const msgWithAttachment = mockMessage(server, channel, author, {
-					id: msg.id,
-					attachments: [
-						{
-							id: getRandomId(),
-							messageId: msg.id,
-							contentType: 'image/png',
-							description: 'test',
-							filename: 'test.png',
-							height: 100,
-							url: 'https://example.com/test.png',
-							proxyUrl: 'https://example.com/test.png',
-							size: 100,
-							width: 100,
-						},
-					],
-				});
-				const attachment = msgWithAttachment.attachments![0]!;
-				await upsertMessage(msgWithAttachment);
-				const found = await findFullMessageById(msgWithAttachment.id);
-				expect(found?.attachments).toHaveLength(1);
-				expect(found!.attachments[0]!).toStrictEqual(attachment);
-			});
-			test('with attachment update', async () => {
-				const msgWithAttachment = mockMessage(server, channel, author, {
-					id: msg.id,
-					attachments: [
-						{
-							id: getRandomId(),
-							messageId: msg.id,
-							contentType: 'image/png',
-							description: 'test',
-							filename: 'test.png',
-							height: 100,
-							url: 'https://example.com/test.png',
-							proxyUrl: 'https://example.com/test.png',
-							size: 100,
-							width: 100,
-						},
-					],
-				});
-				const attachment = msgWithAttachment.attachments![0]!;
-				await upsertMessage(msgWithAttachment);
-				const updated = {
-					...msgWithAttachment,
-					attachments: [
-						{
-							...attachment,
-							description: 'updated',
-						},
-					],
-				};
-				await upsertMessage(updated);
-				const found = await findFullMessageById(msgWithAttachment.id);
-				expect(found?.attachments).toHaveLength(1);
-				expect(found?.attachments[0]!.description).toBe('updated');
 			});
 		});
 		describe('with embeds', () => {

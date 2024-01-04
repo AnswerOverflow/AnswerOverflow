@@ -1,4 +1,4 @@
-import { findMessageById, upsertMessage } from './message';
+import { findMessageById } from './message';
 import {
 	deleteDiscordAccount,
 	upsertManyDiscordAccounts,
@@ -12,6 +12,7 @@ import {
 import { createServer } from './server';
 import { createChannel } from './channel';
 import { DiscordAccount } from './schema';
+import { upsertMessage } from './message-node';
 let account1: DiscordAccount;
 let account2: DiscordAccount;
 let account3: DiscordAccount;
