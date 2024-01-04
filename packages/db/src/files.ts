@@ -1,6 +1,7 @@
 import * as AWS from 'aws-sdk';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { Readable } from 'stream';
+import { ReadableStream } from 'stream/web';
 
 const s3bucket = new AWS.S3({
 	accessKeyId: sharedEnvs.IAM_USER_KEY as string,
@@ -16,7 +17,7 @@ export async function uploadFileFromUrl(file: {
 	if (sharedEnvs.NODE_ENV === 'test') return null;
 	const res = await fetch(file.url);
 	if (!res.ok || !res.body) return null;
-	const stream = Readable.fromWeb(res.body);
+	const stream = Readable.fromWeb(res.body as ReadableStream<Uint8Array>);
 	return s3bucket
 		.upload({
 			Bucket: sharedEnvs.BUCKET_NAME as string,
