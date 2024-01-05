@@ -39,7 +39,7 @@ export default async function Search(props: {
 		apiCall: (api) =>
 			api.messages.search({
 				serverId: server.id,
-				query: props.searchParams.q as string,
+				query: props.searchParams.q ? (props.searchParams.q as string) : '',
 			}),
 	});
 	return <SearchPage results={results} tenant={server} />;
