@@ -33,7 +33,6 @@
 		"@trpc/server": "^10.37.1",
 		"@types/memoizee": "^0.4.9",
 		"@types/ramda": "^0.29.6",
-		"@vercel/speed-insights": "^1.0.1",
 		"bright": "^0.8.4",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^1.2.1",
