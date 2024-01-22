@@ -263,6 +263,14 @@ export const serverRouter = router({
 							});
 						}
 
+						if (newCustomDomain.toLowerCase().endsWith('.answeroverflow.com')) {
+							throw new TRPCError({
+								code: 'BAD_REQUEST',
+								message:
+									'Domain cannot end with .answeroverflow.com. Please use a domain that you own',
+							});
+						}
+
 						const response = await updateServer({
 							existing: oldServerInfo,
 							update: {
