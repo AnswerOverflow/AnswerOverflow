@@ -27,6 +27,13 @@ export async function generateMetadata({
 		title: `${tenant.name} Community`,
 		description,
 		metadataBase: new URL(`https://${tenant.customDomain!}`),
+		other:
+			tenant.id == '864296203746803753'
+				? {
+						'google-site-verification':
+							'oljHAdgYTW0OIkYe1hFIrUFg1ZnhCeIh9fDnXwDDYMo',
+				  }
+				: undefined,
 		icons: icon ? [icon] : undefined,
 		openGraph: {
 			images: [image],
@@ -42,6 +49,6 @@ export default function Layout({
 	children: React.ReactNode;
 	params: { domain: string };
 }) {
-	void findServerByCustomDomain(decodeURIComponent(params.domain));
-	return children;
+	findServerByCustomDomain(decodeURIComponent(params.domain));
+	return <>{children}</>;
 }
