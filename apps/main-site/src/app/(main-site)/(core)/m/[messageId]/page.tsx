@@ -7,7 +7,7 @@ type Props = {
 };
 
 export const dynamic = 'force-static';
-
+export const revalidate = 600;
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	const data = await makeMessageResultPage(params.messageId, []);
 

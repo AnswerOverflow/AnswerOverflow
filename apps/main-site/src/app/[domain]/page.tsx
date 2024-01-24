@@ -10,6 +10,8 @@ export const metadata: Metadata = {
 		canonical: '/',
 	},
 };
+
+export const revalidate = 600;
 export default async function TenantHome({
 	params,
 }: {
