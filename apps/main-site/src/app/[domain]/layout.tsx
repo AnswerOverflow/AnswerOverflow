@@ -49,6 +49,6 @@ export default function Layout({
 	children: React.ReactNode;
 	params: { domain: string };
 }) {
-	findServerByCustomDomain(decodeURIComponent(params.domain));
+	void findServerByCustomDomain(decodeURIComponent(params.domain));
 	return <>{children}</>;
 }

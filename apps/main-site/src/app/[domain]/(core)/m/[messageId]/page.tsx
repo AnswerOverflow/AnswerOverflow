@@ -6,6 +6,7 @@ type Props = {
 	params: { messageId: string };
 };
 export const dynamic = 'force-static';
+export const revalidate = 600;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	const data = await callAPI({
