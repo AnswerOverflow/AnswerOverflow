@@ -73,12 +73,12 @@ export const ChannelName = ({
 	channel: ChannelPublicWithFlags;
 }) => {
 	return (
-		<div className="grid w-full grid-cols-8 grid-rows-1">
+		<div className="flex flex-row gap-1 items-center justify-start">
 			<ChannelIcon
 				channelType={channel.type}
-				className={'col-span-1 text-right font-bold'}
+				className={'text-left font-bold'}
 			/>
-			<p className="col-span-7 truncate text-left text-base font-bold leading-5">
+			<p className="truncate text-left text-base font-bold leading-5 grow">
 				{channel.name}
 			</p>
 		</div>
