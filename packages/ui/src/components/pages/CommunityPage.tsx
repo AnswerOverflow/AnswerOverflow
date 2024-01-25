@@ -40,6 +40,7 @@ function ChannelSidebar(props: ChannelSelectProps) {
 		return (
 			<LinkButton
 				variant={selected ? 'secondary' : 'ghost'}
+        className="px-0"
 				href={
 					props.tenant
 						? `/c/${channel.id}`
