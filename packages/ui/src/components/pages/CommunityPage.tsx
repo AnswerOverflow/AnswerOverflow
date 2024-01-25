@@ -54,7 +54,7 @@ function ChannelSidebar(props: ChannelSelectProps) {
 	const channels = props.channels;
 	return (
 		<div className="mr-4 max-w-[250px]">
-			<Heading.H4 className="text-center px-4">Channels</Heading.H4>
+			<Heading.H4 className="px-4 text-center">Channels</Heading.H4>
 			<div className="flex shrink-0 flex-col gap-2 text-left">
 				{channels.map((channel) => (
 					<ChannelSelect channel={channel} key={channel.id} />
