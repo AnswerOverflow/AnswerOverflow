@@ -241,7 +241,7 @@ export const CommunityPage = (
 	const CommunityQuestionsSection = () => (
 		<>
 			<MessagesSearchBar
-				placeholder={`Search test ${server.name} community`}
+				placeholder={`Search the ${server.name} community`}
 				serverId={server.id}
 			/>
 			<div className="flex w-full justify-center py-2 md:hidden">
