@@ -48,6 +48,7 @@ export default async function MessageResult({ params }: Props) {
 	return (
 		<MessageResultPage
 			messages={data.messages}
+			attachments={data.attachments}
 			channel={data.parentChannel}
 			server={data.server}
 			tenant={data.server}

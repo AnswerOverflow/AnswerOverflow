@@ -388,6 +388,8 @@ export const attachmentSchema = createInsertSchema(dbAttachments).extend({
 	messageId: z.string(),
 });
 
+export type AttachmentFull = z.infer<typeof attachmentSchema>
+
 export const dbEmojis = mysqlTable(
 	'Emoji',
 	{

@@ -8,6 +8,7 @@ import {
 	ServerWithFlags,
 } from '@answeroverflow/db';
 import { elastic } from './elastic';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export type SearchResult = {
 	message: MessageFull;
@@ -68,6 +69,7 @@ export async function searchMessages(opts: MessageSearchOptions) {
 }
 
 export function indexMessageForSearch(messages: BaseMessageWithRelations[]) {
+  if (sharedEnvs.ELASTIC_DISABLED) return Promise.resolve(true);
 	return elastic.bulkUpsertMessages(
 		messages.map((m) => ({
 			...m,
