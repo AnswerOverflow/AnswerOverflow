@@ -81,7 +81,7 @@ export const MessageAttachments = (
 
 	// TODO: Rename this and such, whole file needs a revisit but I'm on vacation 🌴
 	return (
-		<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 pt-4">
+		<div className="grid grid-cols-1 gap-4 pt-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
 			{message.attachments.map((attachment, i) => (
 				<AttachmentDownloader
 					key={i}

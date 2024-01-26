@@ -1,8 +1,11 @@
 import type { ServerPublic } from '@answeroverflow/api';
 export function getServerHomepageUrl(server: ServerPublic) {
-  if (process.env.NEXT_PUBLIC_NODE_ENV !== 'production' && !server.customDomain) {
-    return `/c/${server.id}`;
-  }
+	if (
+		process.env.NEXT_PUBLIC_NODE_ENV !== 'production' &&
+		!server.customDomain
+	) {
+		return `/c/${server.id}`;
+	}
 	if (!server.customDomain) {
 		return `https://www.answeroverflow.com/c/${server.id}`;
 	}
