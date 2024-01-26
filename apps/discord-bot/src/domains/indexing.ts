@@ -195,9 +195,20 @@ Thread: ${thread.id} | ${thread.name}
 Channel: ${channel.id} | ${channel.name}
 Server: ${channel.guildId} | ${channel.guild.name}`,
 			);
-			await indexTextBasedChannel(thread, {
-				fromMessageId: threadMessageLookup.get(thread.id)?.toString(),
-			});
+			try {
+				await indexTextBasedChannel(thread, {
+					fromMessageId: threadMessageLookup.get(thread.id)?.toString(),
+				});
+			} catch (error) {
+				container.logger.error(
+					`Error indexing thread ${thread.id} | ${thread.name}`,
+					error,
+				);
+				Sentry.withScope((scope) => {
+					scope.setExtra('thread', thread);
+					Sentry.captureException(error);
+				});
+			}
 		}
 		const lastIndexedSnowflake =
 			outOfDateThreads
