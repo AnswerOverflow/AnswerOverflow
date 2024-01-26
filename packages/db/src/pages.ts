@@ -316,10 +316,6 @@ export async function findMessageResultPage(
 
 	const allMessageIds = messages.map((m) => m.id);
 
-	const attachments = await db.query.dbAttachments.findMany({
-		where: inArray(dbAttachments.messageId, allMessageIds),
-	});
-
 	const endTime = Date.now();
 	console.log(
 		`findMessageResultPage /m/${messageId} took ${endTime - startTime}ms`,
@@ -352,7 +348,6 @@ export async function findMessageResultPage(
 	return {
 		server: stripPrivateServerData(addFlagsToServer(server)),
 		channel: stripPrivateChannelData(addFlagsToChannel(parentChannel)),
-		attachments: attachments,
 		messages: combinedMessages.map((msg) => {
 			return stripPrivateFullMessageData(msg, userServers);
 		}),
@@ -375,7 +370,7 @@ export async function makeMessageResultPage(
 	if (!data) {
 		return null;
 	}
-	const { messages, attachments, server, thread, channel } = data;
+	const { messages, server, thread, channel } = data;
 	const endPageGeneration = performance.now();
 	console.log(
 		`Page generation for ${messageId} took ${
@@ -413,7 +408,6 @@ export async function makeMessageResultPage(
 
 	return {
 		messages,
-		attachments,
 		parentChannel: channel,
 		server,
 		thread,

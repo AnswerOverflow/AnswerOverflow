@@ -199,7 +199,7 @@ export function PageViewChartRenderer(props: {
 		<Card>
 			<Title>Page Views This Month</Title>
 			<LineChart
-				data={props.data}
+				{data=}{props.data}
 				index="day"
 				categories={['View Count']}
 				yAxisWidth={40}

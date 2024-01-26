@@ -533,7 +533,9 @@ export const messageSchema = createInsertSchema(dbMessages).extend({
 	webhookId: z.string().nullable().optional(),
 });
 export const messageRelations = relations(dbMessages, ({ one, many }) => ({
-	attachments: many(dbAttachments),
+	attachments: many(dbAttachments, {
+		relationName: 'message-attachments',
+	}),
 	reactions: many(dbReactions, {
 		relationName: 'message-reactions',
 	}),
@@ -591,6 +593,7 @@ export const attachmentsRelations = relations(dbAttachments, ({ one }) => ({
 	message: one(dbMessages, {
 		fields: [dbAttachments.messageId],
 		references: [dbMessages.id],
+		relationName: 'message-attachments',
 	}),
 }));
 

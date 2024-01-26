@@ -30,7 +30,6 @@ import { LazyInviteToAnswerOverflowPopover } from './message-result-page/lazy-in
 
 export type MessageResultPageProps = {
 	messages: MessageFull[];
-	attachments: AttachmentFull[];
 	server: ServerPublic;
 	channel: ChannelPublicWithFlags;
 	thread?: ChannelPublicWithFlags;
@@ -80,7 +79,6 @@ export async function MessageResultPage({
 	thread,
 	tenant,
 	relatedPosts,
-	attachments,
 }: MessageResultPageProps) {
 	const tracer = trace.getTracer('MessageResultPage');
 	const span = tracer.startSpan('MessageResultPage', {
@@ -101,13 +99,6 @@ export async function MessageResultPage({
 
 	let contents = '';
 	const messagesWithMergedContent = messages.map((message, index) => {
-		console.log(attachments);
-		const attachmentsForMessage = attachments
-			.filter((attachment) => attachment.messageId === message.id)
-			.map((attachment) => {
-				const { messageId, ...rest } = attachment;
-				return rest;
-			});
 		const nextMessage = messages.at(index + 1);
 		contents += message.content;
 		const isSameAuthor =
@@ -129,11 +120,8 @@ export async function MessageResultPage({
 		return {
 			...message,
 			content: mergedContent,
-			attachments: attachmentsForMessage,
 		};
 	});
-
-	console.log('attached!', attachments);
 
 	const messagesToDisplay = messagesWithMergedContent.filter(Boolean);
 
