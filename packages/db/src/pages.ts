@@ -314,8 +314,6 @@ export async function findMessageResultPage(
 		}),
 	]);
 
-	const allMessageIds = messages.map((m) => m.id);
-
 	const endTime = Date.now();
 	console.log(
 		`findMessageResultPage /m/${messageId} took ${endTime - startTime}ms`,

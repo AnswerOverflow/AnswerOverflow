@@ -3,7 +3,7 @@ import Image from 'next/image';
 import type { MessageProps } from './props';
 import { AttachmentDownloader } from './AttachmentDownloader';
 
-const SingularImageAttachment = async (
+const ImageAttachments = async (
 	props: Pick<MessageProps, 'collapseContent' | 'message' | 'loadingStyle'>,
 ) => {
 	const { message, collapseContent } = props;
@@ -42,7 +42,7 @@ const SingularImageAttachment = async (
 	);
 };
 
-const ImageAttachments = (
+const MessageImages = (
 	props: Pick<MessageProps, 'message' | 'loadingStyle'>,
 ) => {
 	const { message } = props;
@@ -54,12 +54,21 @@ const ImageAttachments = (
 	if (message.attachments.length === 0) return null;
 
 	return (
-		<SingularImageAttachment
-			message={message}
-			loadingStyle={props.loadingStyle}
-		/>
+		<ImageAttachments message={message} loadingStyle={props.loadingStyle} />
 	);
 };
+
+const AttachmentList = (props: { message: MessageProps['message'] }) => (
+	<div className="grid grid-cols-1 gap-4 pt-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+		{props.message.attachments.map((attachment, i) => (
+			<AttachmentDownloader
+				key={i}
+				filename={attachment.filename}
+				url={attachment.proxyUrl}
+			/>
+		))}
+	</div>
+);
 
 export const MessageAttachments = (
 	props: Pick<MessageProps, 'message' | 'loadingStyle'> & {
@@ -75,20 +84,31 @@ export const MessageAttachments = (
 	const imageAttachments = message.attachments.filter((attachment) =>
 		imageFileRegex.test(attachment.filename.toLowerCase()),
 	);
-	if (imageAttachments.length > 0) {
-		return <ImageAttachments message={message} />;
+
+	if (
+		imageAttachments.length > 0 &&
+		imageAttachments.length === message.attachments.length
+	) {
+		return <MessageImages message={message} />;
 	}
 
-	// TODO: Rename this and such, whole file needs a revisit but I'm on vacation 🌴
-	return (
-		<div className="grid grid-cols-1 gap-4 pt-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-			{message.attachments.map((attachment, i) => (
-				<AttachmentDownloader
-					key={i}
-					filename={attachment.filename}
-					url={attachment.proxyUrl}
-				/>
-			))}
-		</div>
+	const fileAttachments = message.attachments.filter(
+		(attachment) => !imageFileRegex.test(attachment.filename.toLowerCase()),
 	);
+
+	if (imageAttachments.length > 0) {
+		return (
+			<div className="flex flex-col">
+				<MessageImages message={message} loadingStyle={props.loadingStyle} />
+				<AttachmentList
+					message={{
+						...message,
+						attachments: fileAttachments,
+					}}
+				/>
+			</div>
+		);
+	}
+
+	return <AttachmentList message={message} />;
 };
