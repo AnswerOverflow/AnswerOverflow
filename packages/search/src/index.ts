@@ -69,7 +69,6 @@ export async function searchMessages(opts: MessageSearchOptions) {
 }
 
 export function indexMessageForSearch(messages: BaseMessageWithRelations[]) {
-	if (sharedEnvs.ELASTIC_DISABLED) return Promise.resolve(true);
 	return elastic.bulkUpsertMessages(
 		messages.map((m) => ({
 			...m,

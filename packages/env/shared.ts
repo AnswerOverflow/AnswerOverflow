@@ -89,7 +89,6 @@ export const sharedEnvs = createEnv({
 		ELASTICSEARCH_PASSWORD: z.string(),
 		ELASTICSEARCH_USERNAME: z.string(),
 		ELASTICSEARCH_MESSAGE_INDEX: z.string(),
-		ELASTIC_DISABLED: z.string().optional(),
 
 		REDIS_URL: z.string(),
 
