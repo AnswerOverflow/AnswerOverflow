@@ -20,10 +20,7 @@ import {
 	getRootChannel,
 	type RootChannel,
 } from '~discord-bot/utils/utils';
-import {
-	findLatestMessageInChannelAndThreads,
-	getDefaultChannelWithFlags,
-} from '@answeroverflow/db';
+import { getDefaultChannelWithFlags } from '@answeroverflow/db';
 import { createMemberCtx } from '~discord-bot/utils/context';
 import { toAOChannel } from '~discord-bot/utils/conversions';
 import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
@@ -108,7 +105,7 @@ export class ChannelSettingsCommand extends Command {
 								call: () => router.channels.byId(targetChannelToConfigure.id),
 								allowedErrors: 'NOT_FOUND',
 							}),
-							findLatestMessageInChannelAndThreads(targetChannelToConfigure.id),
+							undefined,
 						]);
 						return { channelSettings, lastIndexedMessage };
 					},
