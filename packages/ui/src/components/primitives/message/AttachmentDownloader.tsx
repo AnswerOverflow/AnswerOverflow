@@ -1,6 +1,5 @@
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { Paragraph } from '../ui/paragraph';
-import { Button } from '../ui/button';
 import { LinkButton } from '../ui/link-button';
 
 export interface AttachmentDownloaderProps {
