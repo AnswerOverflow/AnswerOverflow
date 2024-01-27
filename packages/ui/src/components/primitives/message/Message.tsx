@@ -62,10 +62,7 @@ export const MessageContents = async (
 		: message.content;
 	const discordMarkdownAsHTML = await parse(trimmedText);
 	return (
-		<div
-			className="max-w-4xl pt-2 font-body text-primary [overflow-wrap:_anywhere]"
-			// The HTML from discord-markdown is escaped
-		>
+		<div className="max-w-4xl pt-2 font-body text-primary [overflow-wrap:_anywhere]">
 			{discordMarkdownAsHTML}
 		</div>
 	);
