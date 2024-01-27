@@ -4,7 +4,7 @@ import type { MessageProps } from './props';
 import { AttachmentDownloader } from './AttachmentDownloader';
 
 const MessageImages = (
-	props: Pick<MessageProps, 'message' | 'loadingStyle'>,
+	props: Pick<MessageProps, 'message' | 'loadingStyle' | 'collapseContent'>,
 ) => {
 	const { message, collapseContent } = props;
 	const imageFileRegex = new RegExp('(.*/)*.+.(png|jpg|gif|bmp|jpeg|webp)$');
@@ -55,7 +55,7 @@ const AttachmentList = (props: { message: MessageProps['message'] }) => (
 );
 
 export const MessageAttachments = (
-	props: Pick<MessageProps, 'collapseContent' | 'message' | 'loadingStyle'> & {
+	props: Pick<MessageProps, 'message' | 'loadingStyle'> & {
 		limit?: number;
 	},
 ) => {
