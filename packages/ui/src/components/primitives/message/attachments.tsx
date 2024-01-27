@@ -55,7 +55,7 @@ const AttachmentList = (props: { message: MessageProps['message'] }) => (
 );
 
 export const MessageAttachments = (
-	props: Pick<MessageProps, 'message' | 'loadingStyle'> & {
+	props: Pick<MessageProps, 'collapseContent' | 'message' | 'loadingStyle'> & {
 		limit?: number;
 	},
 ) => {
