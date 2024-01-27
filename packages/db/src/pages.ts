@@ -13,7 +13,6 @@ import {
 import { db } from './db';
 import { and, asc, desc, eq, gte, inArray, or, sql } from 'drizzle-orm';
 import {
-	dbAttachments,
 	dbChannels,
 	dbMessages,
 	dbServers,

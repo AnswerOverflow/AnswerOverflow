@@ -8,7 +8,6 @@ import {
 	ServerWithFlags,
 } from '@answeroverflow/db';
 import { elastic } from './elastic';
-import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export type SearchResult = {
 	message: MessageFull;
