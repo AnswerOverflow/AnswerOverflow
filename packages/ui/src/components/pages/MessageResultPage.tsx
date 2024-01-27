@@ -131,7 +131,6 @@ export async function MessageResultPage({
 		} else {
 			consecutivePrivateMessages = 0;
 		}
-
 		// TODO: Remove when embeds are supported
 		if (
 			(message.public || isUserInServer === 'in_server') &&
