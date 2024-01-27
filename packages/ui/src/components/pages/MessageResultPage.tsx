@@ -1,4 +1,4 @@
-import { ChannelPublicWithFlags, MessageFull } from '@answeroverflow/db';
+import type { ChannelPublicWithFlags, MessageFull } from '@answeroverflow/db';
 import type { ServerPublic } from '@answeroverflow/api';
 import type { QAPage, WithContext } from 'schema-dts';
 import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
