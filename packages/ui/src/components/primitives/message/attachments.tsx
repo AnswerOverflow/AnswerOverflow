@@ -1,8 +1,9 @@
 import Image from 'next/image';
 
 import type { MessageProps } from './props';
+import { AttachmentDownloader } from './AttachmentDownloader';
 
-const SingularImageAttachment = async (
+const ImageAttachments = async (
 	props: Pick<MessageProps, 'collapseContent' | 'message' | 'loadingStyle'>,
 ) => {
 	const { message, collapseContent } = props;
@@ -41,26 +42,73 @@ const SingularImageAttachment = async (
 	);
 };
 
+const MessageImages = (
+	props: Pick<MessageProps, 'message' | 'loadingStyle'>,
+) => {
+	const { message } = props;
+	const imageFileRegex = new RegExp('(.*/)*.+.(png|jpg|gif|bmp|jpeg|webp)$');
+
+	message.attachments = message.attachments.filter((attachment) =>
+		imageFileRegex.test(attachment.filename.toLowerCase()),
+	);
+	if (message.attachments.length === 0) return null;
+
+	return (
+		<ImageAttachments message={message} loadingStyle={props.loadingStyle} />
+	);
+};
+
+const AttachmentList = (props: { message: MessageProps['message'] }) => (
+	<div className="grid grid-cols-1 gap-4 pt-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+		{props.message.attachments.map((attachment, i) => (
+			<AttachmentDownloader
+				key={i}
+				filename={attachment.filename}
+				url={attachment.proxyUrl}
+			/>
+		))}
+	</div>
+);
+
 export const MessageAttachments = (
 	props: Pick<MessageProps, 'message' | 'loadingStyle'> & {
 		limit?: number;
 	},
 ) => {
 	const { message } = props;
-	const imageFileRegex = new RegExp('(.*/)*.+.(png|jpg|gif|bmp|jpeg|webp)$');
-	// TODO: Do not mutate here, ugly
-	message.attachments = message.attachments.filter((attachment) =>
-		imageFileRegex.test(attachment.filename.toLowerCase()),
-	);
+
 	if (message.attachments.length === 0) return null;
 	if (props.limit)
 		message.attachments = message.attachments.slice(0, props.limit);
-
-	// TODO: Rename this and such, whole file needs a revisit but I'm on vacation 🌴
-	return (
-		<SingularImageAttachment
-			message={message}
-			loadingStyle={props.loadingStyle}
-		/>
+	const imageFileRegex = new RegExp('(.*/)*.+.(png|jpg|gif|bmp|jpeg|webp)$');
+	const imageAttachments = message.attachments.filter((attachment) =>
+		imageFileRegex.test(attachment.filename.toLowerCase()),
 	);
+
+	if (
+		imageAttachments.length > 0 &&
+		imageAttachments.length === message.attachments.length
+	) {
+		return <MessageImages message={message} />;
+	}
+
+	const fileAttachments = message.attachments.filter(
+		(attachment) => !imageFileRegex.test(attachment.filename.toLowerCase()),
+	);
+
+	if (imageAttachments.length > 0) {
+		return (
+			<div className="flex flex-col">
+				<MessageImages message={message} loadingStyle={props.loadingStyle} />
+				<AttachmentList
+					message={{
+						...message,
+						attachments: fileAttachments,
+					}}
+				/>
+			</div>
+		);
+	}
+
+	return <AttachmentList message={message} />;
 };
