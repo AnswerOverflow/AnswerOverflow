@@ -105,7 +105,7 @@ export default function PostPage({ params }: PostProps) {
 				<div className={'flex items-center justify-between'}>
 					<Link
 						className={
-							'grid max-w-[120px] grid-cols-2 no-underline transition-all hover:underline hover:opacity-80'
+							'flex  grid-cols-2 no-underline transition-all hover:underline hover:opacity-80'
 						}
 						href={'https://x.com/rhyssullivan'}
 					>
@@ -114,9 +114,9 @@ export default function PostPage({ params }: PostProps) {
 							alt={'Rhys'}
 							height={50}
 							width={50}
-							className={'col-span-1 m-0 rounded-full '}
+							className={'m-0 rounded-full '}
 						/>
-						<div className={'col-span-1 ml-2 grid w-fit grid-rows-2'}>
+						<div className={' ml-2 grid w-fit grid-rows-2'}>
 							<span className={'w-fit text-foreground '}>Rhys Sullivan</span>
 							<span
 								className={
