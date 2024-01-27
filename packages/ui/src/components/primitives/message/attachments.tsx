@@ -3,25 +3,25 @@ import Image from 'next/image';
 import type { MessageProps } from './props';
 import { AttachmentDownloader } from './AttachmentDownloader';
 
-const ImageAttachments = async (
-	props: Pick<MessageProps, 'collapseContent' | 'message' | 'loadingStyle'>,
+const MessageImages = (
+	props: Pick<MessageProps, 'message' | 'loadingStyle'>,
 ) => {
 	const { message, collapseContent } = props;
-	const images = await Promise.all(
-		message.attachments.map((attachment) => {
-			return {
-				src: attachment.proxyUrl,
-				width: attachment.width,
-				height: attachment.height,
-				alt: attachment.description ?? 'No description',
-			};
-		}),
+	const imageFileRegex = new RegExp('(.*/)*.+.(png|jpg|gif|bmp|jpeg|webp)$');
+
+	const onlyImageAttachments = message.attachments.filter((attachment) =>
+		imageFileRegex.test(attachment.filename.toLowerCase()),
 	);
-
-	if (message.attachments.length === 0) return null;
-
+	if (onlyImageAttachments.length === 0) return null;
+	const images = onlyImageAttachments.map((attachment) => {
+		return {
+			src: attachment.proxyUrl,
+			width: attachment.width,
+			height: attachment.height,
+			alt: attachment.description ?? 'No description',
+		};
+	});
 	const imagesToShow = collapseContent ? images.slice(0, 1) : images;
-
 	return (
 		<>
 			{imagesToShow.map((x, i) => (
@@ -39,22 +39,6 @@ const ImageAttachments = async (
 				</div>
 			))}
 		</>
-	);
-};
-
-const MessageImages = (
-	props: Pick<MessageProps, 'message' | 'loadingStyle'>,
-) => {
-	const { message } = props;
-	const imageFileRegex = new RegExp('(.*/)*.+.(png|jpg|gif|bmp|jpeg|webp)$');
-
-	message.attachments = message.attachments.filter((attachment) =>
-		imageFileRegex.test(attachment.filename.toLowerCase()),
-	);
-	if (message.attachments.length === 0) return null;
-
-	return (
-		<ImageAttachments message={message} loadingStyle={props.loadingStyle} />
 	);
 };
 
