@@ -27,7 +27,7 @@ export default function TRPCProvider(
 				loggerLink({
 					enabled: (opts) =>
 						// eslint-disable-next-line n/no-process-env,turbo/no-undeclared-env-vars
-						process.env.NEXT_PUBLIC_NODE_ENV === 'development' ||
+						process.env.NODE_ENV === 'development' ||
 						(opts.direction === 'down' && opts.result instanceof Error),
 				}),
 				httpBatchLink({
