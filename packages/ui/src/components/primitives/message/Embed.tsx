@@ -2,6 +2,7 @@ import React from 'react';
 import { MessageProps } from './props';
 import { cn } from 'packages/ui/src/utils/utils';
 import { BlueLink } from '../ui/blue-link';
+import { parse } from './markdown/render';
 
 const EmbedText = (props: {
 	children: React.ReactNode;
@@ -12,14 +13,19 @@ const EmbedText = (props: {
 	</span>
 );
 
-const EmbedField = (
+const EmbedField = async (
 	props: NonNullable<EmbedProps['embed']['fields']>[number],
-) => (
-	<div className="flex flex-col gap-1">
-		<EmbedText className="font-bold">{props.name}</EmbedText>
-		<EmbedText>{props.value}</EmbedText>
-	</div>
-);
+) => {
+	const nameHTML = await parse(props.name);
+	const valueHTML = await parse(props.value);
+
+	return (
+		<div className="flex flex-col gap-1">
+			<EmbedText className="font-bold">{nameHTML}</EmbedText>
+			<EmbedText>{valueHTML}</EmbedText>
+		</div>
+	);
+};
 
 export interface EmbedProps {
 	embed: NonNullable<MessageProps['message']['embeds']>[number];
@@ -31,8 +37,12 @@ const numberToHex = (number: number | undefined) => {
 	return hex.length === 1 ? '0' + hex : hex;
 };
 
-export const Embed = (props: EmbedProps) => {
+export const Embed = async (props: EmbedProps) => {
 	const { embed } = props;
+	const embedAuthorNameHTML = await parse(embed.author?.name ?? '');
+	const embedTitleHTML = await parse(embed.title ?? '');
+	const embedDescriptionHTML = await parse(embed.description ?? '');
+	const embedFooterTextHTML = await parse(embed.footer?.text ?? '');
 
 	return (
 		<div
@@ -45,17 +55,17 @@ export const Embed = (props: EmbedProps) => {
 		>
 			<EmbedText>
 				{embed.author?.url ? (
-					<BlueLink href={embed.author.url}>{embed.author.name}</BlueLink>
+					<BlueLink href={embed.author.url}>{embedAuthorNameHTML}</BlueLink>
 				) : (
-					embed.author?.name
+					embedAuthorNameHTML
 				)}
 			</EmbedText>
-			<EmbedText className="text-xl font-bold">{embed.title}</EmbedText>
-			<EmbedText>{embed.description}</EmbedText>
+			<EmbedText className="text-xl font-bold">{embedTitleHTML}</EmbedText>
+			<EmbedText>{embedDescriptionHTML}</EmbedText>
 			{embed.fields?.map((data, dataIteration) => (
 				<EmbedField {...data} key={`field-${dataIteration}`} />
 			))}
-			<EmbedText className="text-sm">{embed.footer?.text}</EmbedText>
+			<EmbedText className="text-sm">{embedFooterTextHTML}</EmbedText>
 		</div>
 	);
 };
