@@ -4,28 +4,28 @@ import { cn } from 'packages/ui/src/utils/utils';
 import { BlueLink } from '../ui/blue-link';
 import { parse } from './markdown/render';
 
-const EmbedText = (props: {
-	children: React.ReactNode;
+const EmbedText = async (props: {
+	text: string | undefined;
 	className?: string;
-}) => (
-	<div className={cn(`font-light text-primary`, props.className)}>
-		{props.children}
-	</div>
-);
-
-const EmbedField = async (
-	props: NonNullable<EmbedProps['embed']['fields']>[number],
-) => {
-	const nameHTML = await parse(props.name);
-	const valueHTML = await parse(props.value);
+}) => {
+	if (!props.text) return null;
+	const textToHTML = await parse(props.text);
 
 	return (
-		<div className="flex flex-col gap-1">
-			<EmbedText className="font-bold">{nameHTML}</EmbedText>
-			<EmbedText>{valueHTML}</EmbedText>
+		<div className={cn(`font-light text-primary`, props.className)}>
+			{textToHTML}
 		</div>
 	);
 };
+
+const EmbedField = (
+	props: NonNullable<EmbedProps['embed']['fields']>[number],
+) => (
+	<div className="flex flex-col gap-1">
+		<EmbedText className="font-bold" text={props.name} />
+		<EmbedText text={props.value} />
+	</div>
+);
 
 export interface EmbedProps {
 	embed: NonNullable<MessageProps['message']['embeds']>[number];
@@ -37,12 +37,8 @@ const numberToHex = (number: number | undefined) => {
 	return hex.length === 1 ? '0' + hex : hex;
 };
 
-export const Embed = async (props: EmbedProps) => {
+export const Embed = (props: EmbedProps) => {
 	const { embed } = props;
-	const embedAuthorNameHTML = await parse(embed.author?.name ?? '');
-	const embedTitleHTML = await parse(embed.title ?? '');
-	const embedDescriptionHTML = await parse(embed.description ?? '');
-	const embedFooterTextHTML = await parse(embed.footer?.text ?? '');
 
 	return (
 		<div
@@ -53,19 +49,20 @@ export const Embed = async (props: EmbedProps) => {
 				borderLeftWidth: '0.3rem',
 			}}
 		>
-			<EmbedText>
-				{embed.author?.url ? (
-					<BlueLink href={embed.author.url}>{embedAuthorNameHTML}</BlueLink>
-				) : (
-					embedAuthorNameHTML
-				)}
-			</EmbedText>
-			<EmbedText className="text-xl font-bold">{embedTitleHTML}</EmbedText>
-			<EmbedText>{embedDescriptionHTML}</EmbedText>
+			{embed.author?.url ? (
+				<BlueLink href={embed.author.url}>
+					<EmbedText text={embed.author?.name} />
+				</BlueLink>
+			) : (
+				<EmbedText text={embed.author?.name} />
+			)}
+
+			<EmbedText className="text-xl font-bold" text={embed.title} />
+			<EmbedText text={embed.description} />
 			{embed.fields?.map((data, dataIteration) => (
 				<EmbedField {...data} key={`field-${dataIteration}`} />
 			))}
-			<EmbedText className="text-sm">{embedFooterTextHTML}</EmbedText>
+			<EmbedText className="text-sm" text={embed.footer?.text} />
 		</div>
 	);
 };
