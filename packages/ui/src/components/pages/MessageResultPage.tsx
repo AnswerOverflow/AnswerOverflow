@@ -101,10 +101,12 @@ export async function MessageResultPage({
 			message.author.id === nextMessage?.author.id && message.public;
 		const isCollapsible =
 			message.attachments.length === 0 &&
+			message.embeds?.length === 0 &&
 			message.id !== solutionMessageId &&
 			message.public;
 		const isNextMessageCollapsible =
 			nextMessage?.attachments.length === 0 &&
+			nextMessage?.embeds?.length === 0 &&
 			nextMessage?.id !== solutionMessageId &&
 			nextMessage?.public;
 		if (isSameAuthor && isCollapsible && isNextMessageCollapsible) {
@@ -135,6 +137,7 @@ export async function MessageResultPage({
 		if (
 			(message.public || isUserInServer === 'in_server') &&
 			message.content.length === 0 &&
+			message.embeds?.length === 0 &&
 			message.attachments.length === 0
 		)
 			return null;

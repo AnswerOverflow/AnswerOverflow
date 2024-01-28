@@ -1,4 +1,4 @@
-import { MessageWithDiscordAccount } from '@answeroverflow/db';
+import type { MessageWithDiscordAccount } from '@answeroverflow/db';
 
 export type MessageProps = {
 	message: MessageWithDiscordAccount;
