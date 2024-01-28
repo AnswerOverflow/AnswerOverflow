@@ -133,7 +133,6 @@ export async function MessageResultPage({
 		} else {
 			consecutivePrivateMessages = 0;
 		}
-		if (!message.public && isUserInServer === 'not_in_server') return null;
 		if (message.author.id === '958907348389339146') return null;
 
 		const Msg = ({ count }: { count: number }) => {
