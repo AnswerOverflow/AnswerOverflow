@@ -134,8 +134,7 @@ export async function MessageResultPage({
 			consecutivePrivateMessages = 0;
 		}
 		if (
-			message.public ||
-			isUserInServer === 'in_server' ||
+			!(message.public || isUserInServer === 'in_server') ||
 			message.author.id === '958907348389339146'
 		)
 			return null;
