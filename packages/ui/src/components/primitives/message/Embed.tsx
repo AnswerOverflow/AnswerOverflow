@@ -42,7 +42,7 @@ export const Embed = (props: EmbedProps) => {
 
 	return (
 		<div
-			className="flex w-fit flex-col gap-1 rounded-standard bg-black/5 dark:bg-white/10 py-2 pl-4 pr-6"
+			className="flex w-fit flex-col gap-1 rounded-standard bg-black/5 py-2 pl-4 pr-6 dark:bg-white/10"
 			style={{
 				borderLeftColor: `#${numberToHex(props.embed.color)}` ?? '#FFFFFF',
 				borderLeftStyle: 'solid',
@@ -56,8 +56,17 @@ export const Embed = (props: EmbedProps) => {
 			) : (
 				<EmbedText text={embed.author?.name} />
 			)}
-
-			<EmbedText className="text-xl font-bold" text={embed.title} />
+			<EmbedText text={embed.provider?.name} />
+			{embed.url ? (
+				<BlueLink href={embed.url}>
+					<EmbedText
+						className="text-lg font-bold text-blue-600 hover:underline dark:text-blue-400"
+						text={embed.title}
+					/>
+				</BlueLink>
+			) : (
+				<EmbedText className="text-lg font-bold" text={embed.title} />
+			)}
 			<EmbedText text={embed.description} />
 			{embed.fields?.map((data, dataIteration) => (
 				<EmbedField {...data} key={`field-${dataIteration}`} />
