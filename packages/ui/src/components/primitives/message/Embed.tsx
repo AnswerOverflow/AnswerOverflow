@@ -7,7 +7,7 @@ const EmbedText = (props: {
 	children: React.ReactNode;
 	className?: string;
 }) => (
-	<span className={cn(`text-primary font-light`, props.className)}>
+	<span className={cn(`font-light text-primary`, props.className)}>
 		{props.children}
 	</span>
 );
@@ -36,7 +36,7 @@ export const Embed = (props: EmbedProps) => {
 
 	return (
 		<div
-			className="flex flex-col w-fit bg-white/10 rounded-standard pl-4 pr-6 gap-1 py-2"
+			className="flex w-fit flex-col gap-1 rounded-standard bg-white/10 py-2 pl-4 pr-6"
 			style={{
 				borderLeftColor: `#${numberToHex(props.embed.color)}` ?? '#FFFFFF',
 				borderLeftStyle: 'solid',
@@ -50,7 +50,7 @@ export const Embed = (props: EmbedProps) => {
 					embed.author?.name
 				)}
 			</EmbedText>
-			<EmbedText className="font-bold text-xl">{embed.title}</EmbedText>
+			<EmbedText className="text-xl font-bold">{embed.title}</EmbedText>
 			<EmbedText>{embed.description}</EmbedText>
 			{embed.fields?.map((data, dataIteration) => (
 				<EmbedField {...data} key={`field-${dataIteration}`} />
