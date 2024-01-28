@@ -70,11 +70,12 @@ export const MessageContents = async (
 };
 
 export const MessageEmbeds = (props: { message: MessageProps['message'] }) => {
-	if (props.message.embeds?.length === 0) return null;
+	const embeds = props.message.embeds?.filter((embed) => embed.type === 'rich');
+	if (!embeds || embeds.length === 0) return null;
 
 	return (
 		<div className="mt-2 flex w-full flex-col gap-2">
-			{props.message.embeds?.map((embed, embedIteration) => (
+			{embeds.map((embed, embedIteration) => (
 				<Embed embed={embed} key={`embed-${embedIteration}`} />
 			))}
 		</div>
