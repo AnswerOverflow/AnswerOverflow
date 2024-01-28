@@ -42,7 +42,7 @@ export const Embed = (props: EmbedProps) => {
 
 	return (
 		<div
-			className="flex w-fit flex-col gap-1 rounded-standard bg-white/10 py-2 pl-4 pr-6"
+			className="flex w-fit flex-col gap-1 rounded-standard bg-black/5 dark:bg-white/10 py-2 pl-4 pr-6"
 			style={{
 				borderLeftColor: `#${numberToHex(props.embed.color)}` ?? '#FFFFFF',
 				borderLeftStyle: 'solid',
