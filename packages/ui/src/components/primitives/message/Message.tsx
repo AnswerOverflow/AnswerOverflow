@@ -12,6 +12,7 @@ import { MessageProps } from './props';
 import { MessageAttachments } from './attachments';
 import { TrackLinkButton } from '../ui/track-link-button';
 import { parse } from './markdown/render';
+import { Embed } from './Embed';
 
 export const MessageAuthorArea = (props: Pick<MessageProps, 'message'>) => {
 	const { message } = props;
@@ -68,6 +69,18 @@ export const MessageContents = async (
 	);
 };
 
+export const MessageEmbeds = (props: { message: MessageProps['message'] }) => {
+	if (props.message.embeds?.length === 0) return null;
+
+	return (
+		<div className="mt-2 flex w-full flex-col gap-2">
+			{props.message.embeds?.map((embed, embedIteration) => (
+				<Embed embed={embed} key={`embed-${embedIteration}`} />
+			))}
+		</div>
+	);
+};
+
 export const MessageContentWithSolution = (
 	props: Pick<MessageProps, 'collapseContent' | 'message' | 'loadingStyle'> & {
 		solution: MessageWithDiscordAccount;
@@ -112,6 +125,7 @@ export const Message = (
 						<MessageAuthorArea {...props} />
 					</div>
 					{props.content ? props.content : <MessageContents {...props} />}
+					<MessageEmbeds {...props} />
 					<MessageAttachments {...props} />
 				</div>
 			</div>
