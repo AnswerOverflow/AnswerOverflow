@@ -8,9 +8,9 @@ const EmbedText = (props: {
 	children: React.ReactNode;
 	className?: string;
 }) => (
-	<span className={cn(`font-light text-primary`, props.className)}>
+	<div className={cn(`font-light text-primary`, props.className)}>
 		{props.children}
-	</span>
+	</div>
 );
 
 const EmbedField = async (
