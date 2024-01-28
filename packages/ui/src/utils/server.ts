@@ -2,7 +2,7 @@ import type { ServerPublic } from '@answeroverflow/api';
 export function getServerHomepageUrl(server: ServerPublic) {
 	if (
 		// eslint-disable-next-line n/no-process-env,turbo/no-undeclared-env-vars
-		process.env.NEXT_PUBLIC_NODE_ENV !== 'production' &&
+		process.env.NODE_ENV !== 'production' &&
 		!server.customDomain
 	) {
 		return `/c/${server.id}`;
@@ -12,7 +12,7 @@ export function getServerHomepageUrl(server: ServerPublic) {
 	}
 	return `http${
 		// eslint-disable-next-line n/no-process-env,turbo/no-undeclared-env-vars
-		process.env.NEXT_PUBLIC_NODE_ENV === 'production' ? 's' : ''
+		process.env.NODE_ENV === 'production' ? 's' : ''
 	}://${server.customDomain}`;
 }
 
