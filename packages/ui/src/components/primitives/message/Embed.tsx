@@ -42,7 +42,7 @@ export const Embed = (props: EmbedProps) => {
 
 	return (
 		<div
-			className="flex w-fit flex-col gap-1 rounded-standard bg-black/5 dark:bg-white/10 py-2 pl-4 pr-6"
+			className="flex w-fit flex-col gap-1 rounded-standard bg-black/5 py-2 pl-4 pr-6 dark:bg-white/10"
 			style={{
 				borderLeftColor: `#${numberToHex(props.embed.color)}` ?? '#FFFFFF',
 				borderLeftStyle: 'solid',
@@ -60,12 +60,12 @@ export const Embed = (props: EmbedProps) => {
 			{embed.url ? (
 				<BlueLink href={embed.url}>
 					<EmbedText
-						className="font-bold text-lg text-blue-600 hover:underline dark:text-blue-400"
+						className="text-lg font-bold text-blue-600 hover:underline dark:text-blue-400"
 						text={embed.title}
 					/>
 				</BlueLink>
 			) : (
-				<EmbedText className="font-bold text-lg" text={embed.title} />
+				<EmbedText className="text-lg font-bold" text={embed.title} />
 			)}
 			<EmbedText text={embed.description} />
 			{embed.fields?.map((data, dataIteration) => (
