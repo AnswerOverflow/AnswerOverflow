@@ -133,11 +133,8 @@ export async function MessageResultPage({
 		} else {
 			consecutivePrivateMessages = 0;
 		}
-		if (
-			!(message.public || isUserInServer === 'in_server') ||
-			message.author.id === '958907348389339146'
-		)
-			return null;
+		if (!message.public && isUserInServer === 'not_in_server') return null;
+		if (message.author.id === '958907348389339146') return null;
 
 		const Msg = ({ count }: { count: number }) => {
 			const shouldShowSolutionInContent = index === 0 && solution;
