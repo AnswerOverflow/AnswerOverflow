@@ -56,8 +56,17 @@ export const Embed = (props: EmbedProps) => {
 			) : (
 				<EmbedText text={embed.author?.name} />
 			)}
-
-			<EmbedText className="text-xl font-bold" text={embed.title} />
+			<EmbedText text={embed.provider?.name} />
+			{embed.url ? (
+				<BlueLink href={embed.url}>
+					<EmbedText
+						className="font-bold text-lg text-blue-600 hover:underline dark:text-blue-400"
+						text={embed.title}
+					/>
+				</BlueLink>
+			) : (
+				<EmbedText className="font-bold text-lg" text={embed.title} />
+			)}
 			<EmbedText text={embed.description} />
 			{embed.fields?.map((data, dataIteration) => (
 				<EmbedField {...data} key={`field-${dataIteration}`} />
