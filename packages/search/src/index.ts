@@ -68,7 +68,6 @@ export async function searchMessages(opts: MessageSearchOptions) {
 }
 
 export function indexMessageForSearch(messages: BaseMessageWithRelations[]) {
-	return; // TODO: Re-enable for push
 	return elastic.bulkUpsertMessages(
 		messages.map((m) => ({
 			...m,
