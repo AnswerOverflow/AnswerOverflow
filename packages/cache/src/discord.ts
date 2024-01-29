@@ -33,8 +33,7 @@ export async function discordApiFetch(
 			throw new Error('Invalid access token');
 		}
 		await refreshAccessToken(account);
-	}
-	if (data.status !== 200) {
+	} else if (data.status !== 200) {
 		throw new Error(
 			`Invalid response from Discord ${data.status} ${data.statusText}`,
 		);
