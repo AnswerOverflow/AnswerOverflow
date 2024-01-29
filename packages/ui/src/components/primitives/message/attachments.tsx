@@ -116,7 +116,7 @@ export const MessageAttachments = (
 		message.attachments = message.attachments.slice(0, props.limit);
 
 	return (
-		<div className="flex flex-col gap-4 mt-4">
+		<div className="mt-4 flex flex-col gap-4">
 			<MessageImages message={message} loadingStyle={props.loadingStyle} />
 			<VideoAttachments message={message} />
 			<AttachmentList message={message} />
