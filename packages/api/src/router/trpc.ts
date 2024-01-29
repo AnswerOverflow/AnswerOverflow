@@ -34,10 +34,14 @@ const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
 	if (ctx.caller === 'web-client' && ctx.session) {
 		const discordOauth = await getDiscordOauth(ctx);
 		if (discordOauth && discordOauth.access_token) {
-			const discordAccount = await getDiscordUser({
-				accessToken: discordOauth.access_token,
-			});
-			ctx.discordAccount = discordAccount;
+			try {
+				const discordAccount = await getDiscordUser({
+					accessToken: discordOauth.access_token,
+				});
+				ctx.discordAccount = discordAccount;
+			} catch (e) {
+				console.error(e);
+			}
 		}
 	}
 	return next({
@@ -63,7 +67,11 @@ export const getUserServersFromCtx = async (ctx: Context) => {
 const addUserServers = t.middleware(async ({ ctx, next }) => {
 	// In a test environment, we manually populate it
 	if (ctx.caller === 'web-client' && sharedEnvs.NODE_ENV !== 'test') {
-		ctx.userServers = await getUserServersFromCtx(ctx);
+		try {
+			ctx.userServers = await getUserServersFromCtx(ctx);
+		} catch (e) {
+			console.error(e);
+		}
 	}
 	if (!ctx.userServers) {
 		ctx.userServers = []; // TODO: Maybe throw error here instead?
