@@ -3,11 +3,23 @@ import Image from 'next/image';
 import type { MessageProps } from './props';
 import { AttachmentDownloader } from './AttachmentDownloader';
 
+const regexes = [
+	{
+		type: 'images',
+		regex: new RegExp('(.*/)*.+.(png|jpg|gif|bmp|jpeg|webp)$'),
+	},
+	{
+		type: 'videos',
+		regex: new RegExp('(.*/)*.+.(mp4|mov|webm|avi|mkv|flv|wmv)$'),
+	},
+] as const;
+
 const MessageImages = (
 	props: Pick<MessageProps, 'message' | 'loadingStyle' | 'collapseContent'>,
 ) => {
 	const { message, collapseContent } = props;
-	const imageFileRegex = new RegExp('(.*/)*.+.(png|jpg|gif|bmp|jpeg|webp)$');
+	const imageFileRegex = regexes.find((x) => x.type === 'images')?.regex;
+	if (!imageFileRegex) return null;
 
 	const onlyImageAttachments = message.attachments.filter((attachment) =>
 		imageFileRegex.test(attachment.filename.toLowerCase()),
@@ -42,17 +54,55 @@ const MessageImages = (
 	);
 };
 
-const AttachmentList = (props: { message: MessageProps['message'] }) => (
-	<div className="grid grid-cols-1 gap-4 pt-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-		{props.message.attachments.map((attachment, i) => (
-			<AttachmentDownloader
-				key={i}
-				filename={attachment.filename}
-				url={attachment.proxyUrl}
-			/>
-		))}
-	</div>
-);
+const VideoAttachments = ({
+	message,
+}: {
+	message: MessageProps['message'];
+}) => {
+	const videoFileRegex = regexes.find((x) => x.type === 'videos')?.regex;
+	if (!videoFileRegex) return null;
+	const onlyVideoAttachments = message.attachments.filter((attachment) =>
+		videoFileRegex.test(attachment.filename.toLowerCase()),
+	);
+
+	if (onlyVideoAttachments.length === 0) return null;
+
+	return (
+		<>
+			{onlyVideoAttachments.map((attachment, i) => (
+				<div className="mt-4 max-w-sm lg:max-w-md" key={i}>
+					<video
+						src={attachment.proxyUrl}
+						controls
+						className="w-full"
+						title={attachment.filename}
+					/>
+				</div>
+			))}
+		</>
+	);
+};
+
+const AttachmentList = (props: { message: MessageProps['message'] }) => {
+	const allRegexes = regexes.map((x) => x.regex);
+	const otherAttachments = props.message.attachments.filter((attachment) =>
+		allRegexes.every((regex) => !regex.test(attachment.filename.toLowerCase())),
+	);
+
+	if (otherAttachments.length === 0) return null;
+
+	return (
+		<div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+			{otherAttachments.map((attachment, i) => (
+				<AttachmentDownloader
+					key={i}
+					filename={attachment.filename}
+					url={attachment.proxyUrl}
+				/>
+			))}
+		</div>
+	);
+};
 
 export const MessageAttachments = (
 	props: Pick<MessageProps, 'message' | 'loadingStyle'> & {
@@ -64,35 +114,12 @@ export const MessageAttachments = (
 	if (message.attachments.length === 0) return null;
 	if (props.limit)
 		message.attachments = message.attachments.slice(0, props.limit);
-	const imageFileRegex = new RegExp('(.*/)*.+.(png|jpg|gif|bmp|jpeg|webp)$');
-	const imageAttachments = message.attachments.filter((attachment) =>
-		imageFileRegex.test(attachment.filename.toLowerCase()),
+
+	return (
+		<div className="mt-4 flex flex-col gap-4">
+			<MessageImages message={message} loadingStyle={props.loadingStyle} />
+			<VideoAttachments message={message} />
+			<AttachmentList message={message} />
+		</div>
 	);
-
-	if (
-		imageAttachments.length > 0 &&
-		imageAttachments.length === message.attachments.length
-	) {
-		return <MessageImages message={message} />;
-	}
-
-	const fileAttachments = message.attachments.filter(
-		(attachment) => !imageFileRegex.test(attachment.filename.toLowerCase()),
-	);
-
-	if (imageAttachments.length > 0) {
-		return (
-			<div className="flex flex-col">
-				<MessageImages message={message} loadingStyle={props.loadingStyle} />
-				<AttachmentList
-					message={{
-						...message,
-						attachments: fileAttachments,
-					}}
-				/>
-			</div>
-		);
-	}
-
-	return <AttachmentList message={message} />;
 };
