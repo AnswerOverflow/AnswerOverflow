@@ -39,7 +39,7 @@ const EmbedImage = (props: {
 		<div>
 			<Image
 				src={props.url}
-				className="w-auto h-96 rounded-standard object-contain"
+				className="h-96 w-auto rounded-standard object-contain"
 				width={props.width}
 				height={props.height}
 				// Would be nice to have proper alt text here in the future / AI generated alt text
