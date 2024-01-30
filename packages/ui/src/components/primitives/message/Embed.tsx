@@ -39,6 +39,7 @@ const EmbedImage = (props: {
 		<div>
 			<Image
 				src={props.url}
+				unoptimized
 				className="h-96 w-auto rounded-standard object-contain"
 				width={props.width}
 				height={props.height}
