@@ -3,6 +3,7 @@ import { MessageProps } from './props';
 import { cn } from 'packages/ui/src/utils/utils';
 import { BlueLink } from '../ui/blue-link';
 import { parse } from './markdown/render';
+import Image from 'next/image';
 
 const EmbedText = async (props: {
 	text: string | undefined;
@@ -26,6 +27,28 @@ const EmbedField = (
 		<EmbedText text={props.value} />
 	</div>
 );
+
+const EmbedImage = (props: {
+	url?: string;
+	authorUsername: string;
+	width?: number;
+	height?: number;
+}) => {
+	if (!props.url) return null;
+	return (
+		<div>
+			<Image
+				src={props.url}
+				className="w-auto h-96 rounded-standard object-contain"
+				width={props.width}
+				height={props.height}
+				// Would be nice to have proper alt text here in the future / AI generated alt text
+				// (Like x's (twitter) alt text)
+				alt={`From ${props.authorUsername}`}
+			/>
+		</div>
+	);
+};
 
 export interface EmbedProps {
 	embed: NonNullable<MessageProps['message']['embeds']>[number];
@@ -71,6 +94,12 @@ export const Embed = (props: EmbedProps) => {
 			{embed.fields?.map((data, dataIteration) => (
 				<EmbedField {...data} key={`field-${dataIteration}`} />
 			))}
+			<EmbedImage
+				url={embed.image?.proxyUrl}
+				width={embed.image?.width}
+				height={embed.image?.height}
+				authorUsername={embed.author?.name ?? 'An unknown user'}
+			/>
 			<EmbedText className="text-sm" text={embed.footer?.text} />
 		</div>
 	);
