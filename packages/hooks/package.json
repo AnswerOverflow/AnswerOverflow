@@ -31,8 +31,5 @@
 		"eslint": "^8.47.0",
 		"prettier": "^2.8.8",
 		"type-fest": "^3.13.1"
-	},
-	"ct3aMetadata": {
-		"initVersion": "6.11.0"
 	}
 }
