@@ -2,13 +2,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import {
-	getNextAuthCookieName,
-	getTenantCookieName,
-} from '@answeroverflow/auth/src/tenant-cookie';
-import {
 	getMainSiteHostname,
 	isOnMainSite,
-	makeMainSiteLink,
 } from '@answeroverflow/constants/src/links';
 
 function dataUnlockerRouteHandler(req: NextRequest) {
@@ -36,29 +31,10 @@ export function middleware(req: NextRequest) {
 	}
 
 	if (isOnMainSite(host)) {
-		const authedRoutes = ['/dashboard'];
-		const authToken = req.cookies.get(getNextAuthCookieName());
-		if (authedRoutes.some((route) => path.startsWith(route))) {
-			if (!authToken) {
-				return NextResponse.redirect(makeMainSiteLink('/api/auth/signin'));
-			}
-		}
-		if (path.startsWith('/m/')) {
-			if (authToken) {
-				return NextResponse.rewrite(makeMainSiteLink(`${path}/dynamic`));
-			}
-		}
 		return NextResponse.next();
 	}
 	// rewrite everything else to `/[domain]/[path] dynamic route
-	const tenantAuthToken = req.cookies.get(getTenantCookieName());
-	let pathPostFix = '';
-	if (path.startsWith('/m/')) {
-		if (tenantAuthToken) {
-			pathPostFix += '/dynamic';
-		}
-	}
-	const newUrl = new URL(`/${host}${path}${pathPostFix}`, req.url);
+	const newUrl = new URL(`/${host}${path}`, req.url);
 	return NextResponse.rewrite(newUrl);
 }
 // See "Matching Paths" below to learn more
