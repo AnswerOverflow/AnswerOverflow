@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 type Props = {
 	params: { messageId: string };
 };
-export const dynamic = 'force-static';
+
 export const revalidate = 600;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -50,8 +50,8 @@ export default async function MessageResult({ params }: Props) {
 			messages={data.messages}
 			channel={data.parentChannel}
 			server={data.server}
-			tenant={data.server}
 			requestedId={params.messageId}
+			tenant={data.server}
 			relatedPosts={data.recommendedPosts}
 			thread={data.thread ?? undefined}
 		/>

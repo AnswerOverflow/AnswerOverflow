@@ -264,7 +264,7 @@ export async function MessageResultPage({
 				{adsEnabled && (
 					<div className={'w-full'}>
 						<div
-							className={'text-white'}
+							className={'min-h-[220px] text-white'}
 							// NextJS is dumb and lifts script tags to <head/> so we have to use dangerouslySetInnerHTML
 							dangerouslySetInnerHTML={{
 								__html:
