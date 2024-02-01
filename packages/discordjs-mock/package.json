@@ -37,7 +37,7 @@
 		"prettier": "^2.8.8",
 		"ts-jest": "^29.1.1",
 		"ts-node": "^10.9.1",
-		"tsup": "^6.7.0"
+		"tsup": "^8.0.1"
 	},
 	"scripts": {
 		"prepublishOnly": "pnpm build",
