@@ -23,6 +23,7 @@ import { messageWithDiscordAccountToAnalyticsData } from '@answeroverflow/hooks'
 import { stripMarkdownAndHTML } from '../primitives/message/markdown/strip';
 import { TrackLinkButton } from '../primitives/ui/track-link-button';
 import { LazyInviteToAnswerOverflowPopover } from './message-result-page/lazy-invite-to-answer-overflow-popover';
+import { isFeatureEnabled } from '@answeroverflow/feature-flags';
 
 export type MessageResultPageProps = {
 	messages: MessageFull[];
@@ -244,6 +245,11 @@ export async function MessageResultPage({
 		</div>
 	);
 
+	const adsFeatureFlagEnabled = await isFeatureEnabled(
+		'enable-ads-on-post-page',
+	);
+	const adsEnabled = adsFeatureFlagEnabled && !tenant;
+
 	const Sidebar = () => (
 		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center xl:mt-6 xl:w-[400px]">
 			<div className={'hidden w-full  xl:block'}>
@@ -255,6 +261,24 @@ export async function MessageResultPage({
 			</div>
 			<div className="flex w-full flex-col justify-center gap-4 text-center xl:mt-6 ">
 				{!tenant && <JoinAnswerOverflowCard />}
+				{adsEnabled && (
+					<div className={'w-full'}>
+						<div
+							className={'text-white'}
+							// NextJS is dumb and lifts script tags to <head/> so we have to use dangerouslySetInnerHTML
+							dangerouslySetInnerHTML={{
+								__html:
+									'<script\n' +
+									'\t\t\t\t\t\t\tasync\n' +
+									'\t\t\t\t\t\t\ttype="text/javascript"\n' +
+									'\t\t\t\t\t\t\tsrc="//cdn.carbonads.com/carbon.js?serve=CWYIV53I&placement=wwwansweroverflowcom&format=cover"\n' +
+									'\t\t\t\t\t\t\tid="_carbonads_js"\n' +
+									'\t\t\t\t\t\t></script>' +
+									'',
+							}}
+						/>
+					</div>
+				)}
 				{relatedPosts.length > 0 && (
 					<>
 						<span className="text-2xl">Recommended Posts</span>

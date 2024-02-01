@@ -12,9 +12,11 @@
 		"clean": "rm -rf .next storybook-static* node_modules"
 	},
 	"dependencies": {
+		"@answeroverflow/feature-flags": "workspace:^",
 		"@answeroverflow/api": "workspace:^",
 		"@answeroverflow/auth": "workspace:^",
 		"@answeroverflow/constants": "workspace:^",
+		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/hooks": "workspace:^",
 		"@heroicons/react": "^2.0.18",
 		"@opentelemetry/api": "^1.6.0",
@@ -69,8 +71,5 @@
 		"react-dom": "^18.2.0",
 		"tailwindcss": "^3.3.3",
 		"type-fest": "^3.13.1"
-	},
-	"ct3aMetadata": {
-		"initVersion": "6.11.0"
 	}
 }
