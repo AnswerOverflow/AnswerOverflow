@@ -96,7 +96,7 @@ const checkTenantAuth = t.middleware(async ({ ctx, next, meta }) => {
 
 export const router = t.router;
 export const MergeRouters = t.mergeRouters;
-const procedureBase = t.procedure.use(checkTenantAuth)
+const procedureBase = t.procedure.use(checkTenantAuth);
 export const publicProcedure = procedureBase;
 export const withDiscordAccountProcedure = procedureBase.use(addDiscordAccount);
 export const withUserServersProcedure = procedureBase

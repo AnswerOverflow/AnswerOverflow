@@ -6,11 +6,9 @@ import {
 	ChannelType,
 	DiscordAPIError,
 	EmbedBuilder,
-	ForumChannel,
 	Message,
 	type MessageActionRowComponentBuilder,
-	NewsChannel,
-	TextChannel,
+	PermissionResolvable,
 	User,
 } from 'discord.js';
 import type { ChannelWithFlags } from '@answeroverflow/db';
@@ -37,6 +35,7 @@ import {
 } from '~discord-bot/utils/analytics';
 import { toAOMessage } from '~discord-bot/utils/conversions';
 import { indexTextBasedChannel } from '~discord-bot/domains/indexing';
+import { RootChannel } from '~discord-bot/utils/utils';
 const markSolutionErrorReasons = [
 	'NOT_IN_GUILD',
 	'NOT_IN_THREAD',
@@ -135,7 +134,10 @@ export async function checkIfCanMarkSolution(
 	const guildMember = await guild.members.fetch(userMarkingAsSolved.id);
 	if (questionMessage.author.id !== userMarkingAsSolved.id) {
 		const doesUserHavePerms = PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.some(
-			(permission) => threadParent.permissionsFor(guildMember).has(permission),
+			(permission) =>
+				threadParent
+					.permissionsFor(guildMember)
+					?.has(permission as PermissionResolvable),
 		);
 
 		if (!doesUserHavePerms) {
@@ -205,7 +207,7 @@ export async function assertMessageIsUnsolved(
 
 export async function addSolvedIndicatorToThread(
 	thread: AnyThreadChannel,
-	parentChannel: TextChannel | ForumChannel | NewsChannel,
+	parentChannel: RootChannel,
 	questionMessage: Message,
 	solvedTagId: string | null,
 ) {
