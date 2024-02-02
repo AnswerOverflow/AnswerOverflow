@@ -12,14 +12,13 @@
 		"clean": "rm -rf .next storybook-static* node_modules"
 	},
 	"dependencies": {
-		"@answeroverflow/feature-flags": "workspace:^",
 		"@answeroverflow/api": "workspace:^",
 		"@answeroverflow/auth": "workspace:^",
 		"@answeroverflow/constants": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
+		"@answeroverflow/feature-flags": "workspace:^",
 		"@answeroverflow/hooks": "workspace:^",
 		"@heroicons/react": "^2.0.18",
-		"@opentelemetry/api": "^1.6.0",
 		"@radix-ui/react-accordion": "^1.1.2",
 		"@radix-ui/react-avatar": "^1.0.4",
 		"@radix-ui/react-dialog": "^1.0.4",
@@ -35,6 +34,7 @@
 		"@trpc/server": "^10.37.1",
 		"@types/memoizee": "^0.4.9",
 		"@types/ramda": "^0.29.6",
+		"@vercel/speed-insights": "^1.0.9",
 		"bright": "^0.8.4",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^1.2.1",

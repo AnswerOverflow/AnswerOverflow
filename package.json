@@ -67,8 +67,7 @@
 	},
 	"pnpm": {
 		"patchedDependencies": {
-			"mysql2@3.6.0": "patches/mysql2@3.6.0.patch",
-			"@vercel/otel@0.3.0": "patches/@vercel__otel@0.3.0.patch"
+			"mysql2@3.6.0": "patches/mysql2@3.6.0.patch"
 		}
 	},
 	"dependencies": {

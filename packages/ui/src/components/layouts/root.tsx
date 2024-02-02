@@ -8,8 +8,8 @@ import type { Metadata } from 'next';
 import { PostHogPageview } from '@answeroverflow/hooks/src/analytics/client';
 import Script from 'next/script';
 import { DATA_UNBLOCKER } from './data-unblocker';
-import { AxiomWebVitals } from 'next-axiom';
 import { IdentifyUser } from '@answeroverflow/hooks/src/analytics/user-identifier';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
 	title: 'Answer Overflow - Search all of Discord',
@@ -88,12 +88,12 @@ export function Layout({
 					}}
 				/>
 				<CommitBanner />
+				<SpeedInsights sampleRate={0.1} />
 				<Suspense>
 					<PostHogPageview />
 					<IdUser />
 				</Suspense>
 				<Providers>{children}</Providers>
-				<AxiomWebVitals />
 			</body>
 		</html>
 	);
