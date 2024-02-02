@@ -8,7 +8,6 @@ import {
 	MessageContentWithSolution,
 } from '../primitives/message/Message';
 import { Heading } from '../primitives/ui/heading';
-import { trace } from '@opentelemetry/api';
 
 import Link from '../primitives/ui/link';
 import { MessagesSearchBar } from '../primitives/messages-search-bar';
@@ -23,7 +22,6 @@ import { messageWithDiscordAccountToAnalyticsData } from '@answeroverflow/hooks'
 import { stripMarkdownAndHTML } from '../primitives/message/markdown/strip';
 import { TrackLinkButton } from '../primitives/ui/track-link-button';
 import { LazyInviteToAnswerOverflowPopover } from './message-result-page/lazy-invite-to-answer-overflow-popover';
-import { isFeatureEnabled } from '@answeroverflow/feature-flags';
 
 export type MessageResultPageProps = {
 	messages: MessageFull[];
@@ -47,7 +45,6 @@ const JoinAnswerOverflowCard = () => (
 		<span
 			className={'text-xl font-bold '}
 			style={{
-				// @ts-expect-error
 				textWrap: 'balance',
 			}}
 		>
@@ -77,15 +74,6 @@ export async function MessageResultPage({
 	tenant,
 	relatedPosts,
 }: MessageResultPageProps) {
-	const tracer = trace.getTracer('MessageResultPage');
-	const span = tracer.startSpan('MessageResultPage', {
-		attributes: {
-			messages: messages.length,
-			server: server.id,
-			channel: channel.id,
-			thread: thread?.id,
-		},
-	});
 	const isUserInServer = await fetchIsUserInServer(server.id);
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
@@ -245,10 +233,7 @@ export async function MessageResultPage({
 		</div>
 	);
 
-	const adsFeatureFlagEnabled = await isFeatureEnabled(
-		'enable-ads-on-post-page',
-	);
-	const adsEnabled = adsFeatureFlagEnabled && !tenant;
+	const adsEnabled = !tenant;
 
 	const Sidebar = () => (
 		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center xl:mt-6 xl:w-[400px]">
@@ -327,7 +312,6 @@ export async function MessageResultPage({
 			</div>
 		</div>
 	);
-	span.end();
 	return rendered;
 }
 
