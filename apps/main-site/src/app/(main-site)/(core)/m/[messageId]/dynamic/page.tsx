@@ -1,12 +1,10 @@
 import { MessageResultPage } from '@answeroverflow/ui/src/components/pages/MessageResultPage';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
 import type { Metadata } from 'next';
 type Props = {
 	params: { messageId: string };
 };
-export const dynamic = 'force-static';
-export const revalidate = 600;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	const data = await callAPI({
@@ -45,12 +43,17 @@ export default async function MessageResult({ params }: Props) {
 	if (!data) {
 		return notFound();
 	}
+	if (data.server.customDomain) {
+		return redirect(
+			`https://${data.server.customDomain}/m/${params.messageId}`,
+		);
+	}
 	return (
 		<MessageResultPage
 			messages={data.messages}
 			channel={data.parentChannel}
 			server={data.server}
-			tenant={data.server}
+			tenant={undefined}
 			requestedId={params.messageId}
 			relatedPosts={data.recommendedPosts}
 			thread={data.thread ?? undefined}
