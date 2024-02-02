@@ -373,9 +373,8 @@ function ToggleAutoThreadButton({
 	);
 }
 
-const getThreadOrPostText = (
-	channel: TextChannel | NewsChannel | ForumChannel,
-) => (channel.type === ChannelType.GuildForum ? 'thread' : 'post');
+const getThreadOrPostText = (channel: RootChannel) =>
+	channel.type === ChannelType.GuildForum ? 'thread' : 'post';
 
 export function HelpChannelUtilitiesMenu({
 	initialChannelData,

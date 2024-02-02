@@ -32,7 +32,7 @@
 		"@trpc/server": "^10.37.1",
 		"@types/qs": "^6.9.7",
 		"dayjs": "^1.11.9",
-		"discord-api-types": "^0.37.54",
+		"discord-api-types": "^0.37.67",
 		"dotenv-cra": "^3.0.3",
 		"next": "14.0.0",
 		"prettier": "^2.8.8",

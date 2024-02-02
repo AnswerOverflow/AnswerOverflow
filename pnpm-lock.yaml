@@ -316,7 +316,7 @@ importers:
         specifier: ^2.0.20
         version: 2.0.20
       discord-api-types:
-        specifier: ^0.37.54
+        specifier: ^0.37.67
         version: 0.37.67
       discord.js:
         specifier: ^14.13.0
@@ -725,7 +725,7 @@ importers:
         specifier: workspace:^
         version: link:../env
       discord-api-types:
-        specifier: ^0.37.54
+        specifier: ^0.37.67
         version: 0.37.67
       next-auth:
         specifier: ^4.23.1
@@ -810,7 +810,7 @@ importers:
         specifier: ^1.11.9
         version: 1.11.10
       discord-api-types:
-        specifier: ^0.37.54
+        specifier: ^0.37.67
         version: 0.37.67
       dotenv-cra:
         specifier: ^3.0.3
@@ -1143,7 +1143,7 @@ importers:
         specifier: ^2.1519.0
         version: 2.1549.0
       discord-api-types:
-        specifier: ^0.37.54
+        specifier: ^0.37.67
         version: 0.37.67
       dotenv:
         specifier: ^16.3.1
@@ -1225,7 +1225,7 @@ importers:
         specifier: ^1.2.0
         version: 1.2.2
       discord-api-types:
-        specifier: ^0.37.54
+        specifier: ^0.37.67
         version: 0.37.67
       type-fest:
         specifier: ^3.13.1
@@ -1505,7 +1505,7 @@ importers:
         specifier: ^8.9.0
         version: 8.12.0
       discord-api-types:
-        specifier: ^0.37.54
+        specifier: ^0.37.67
         version: 0.37.67
       dotenv-cra:
         specifier: ^3.0.3
@@ -14871,7 +14871,7 @@ packages:
       '@panva/hkdf': 1.1.1
       cookie: 0.5.0
       jose: 4.15.4
-      next: 14.0.0(@babel/core@7.23.9)(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.0.0(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
       oauth: 0.9.15
       openid-client: 5.6.4
       preact: 10.19.3
@@ -14888,7 +14888,7 @@ packages:
       next: '>=13.4'
       react: '>=18.0.0'
     dependencies:
-      next: 14.0.0(@babel/core@7.23.9)(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.0.0(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
       react: 18.2.0
       remeda: 1.40.0
       whatwg-fetch: 3.6.20
@@ -14965,7 +14965,7 @@ packages:
       react: '*'
       react-dom: '*'
     dependencies:
-      next: 14.0.0(@babel/core@7.23.9)(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.0.0(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false

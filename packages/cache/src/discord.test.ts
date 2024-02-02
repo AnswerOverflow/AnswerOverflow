@@ -67,7 +67,7 @@ const mockDiscordApiServersResponse = [
 
 function mockAxiosGet<T>(data: T) {
 	// @ts-ignore
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,no-global-assign
 	return (fetch = vitest.fn().mockResolvedValue({
 		// eslint-disable-next-line @typescript-eslint/require-await
 		json: async () => data,

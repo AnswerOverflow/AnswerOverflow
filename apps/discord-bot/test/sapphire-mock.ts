@@ -69,6 +69,7 @@ export function mockSapphireClient(
 export async function setupAnswerOverflowBot(autoLogin = true) {
 	const client = mockSapphireClient();
 	await login(client);
-	if (autoLogin) await emitEvent(client, Events.ClientReady, client as Client);
+	if (autoLogin)
+		await emitEvent(client, Events.ClientReady, client as Client<true>);
 	return client;
 }
