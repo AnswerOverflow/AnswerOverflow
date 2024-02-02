@@ -160,8 +160,8 @@ export default async function HomePage() {
 					>
 						<h2 className={'mb-8 text-2xl'}>Open Source</h2>
 						<span className={'text-lg'}>
-							Answer Overflow is open source and MIT licensed, our goal is to
-							make finding Discord content available to everyone.
+							Answer Overflow is open source and FSL MIT licensed, our goal is
+							to make finding Discord content available to everyone.
 						</span>
 						<LinkButton
 							href={'https://github.com/AnswerOverflow/AnswerOverflow/'}
