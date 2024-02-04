@@ -67,7 +67,7 @@ function createRules(rule: { [key: string]: any }) {
 					// eslint-disable-next-line @typescript-eslint/restrict-plus-operands
 					source = isStartOfLineCapture[1] + source;
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-					return /^ *(#{1,3})([^\n]+?)(?:\n+|$)/.exec(source);
+					return /^(#{1,3})\s(.+)/.exec(source);
 				}
 
 				return null;
