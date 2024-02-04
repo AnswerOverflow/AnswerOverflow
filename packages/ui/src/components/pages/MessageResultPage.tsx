@@ -8,7 +8,6 @@ import {
 	MessageContentWithSolution,
 } from '../primitives/message/Message';
 import { Heading } from '../primitives/ui/heading';
-import { trace } from '@opentelemetry/api';
 
 import Link from '../primitives/ui/link';
 import { MessagesSearchBar } from '../primitives/messages-search-bar';
@@ -46,7 +45,6 @@ const JoinAnswerOverflowCard = () => (
 		<span
 			className={'text-xl font-bold '}
 			style={{
-				// @ts-expect-error
 				textWrap: 'balance',
 			}}
 		>
@@ -76,15 +74,6 @@ export async function MessageResultPage({
 	tenant,
 	relatedPosts,
 }: MessageResultPageProps) {
-	const tracer = trace.getTracer('MessageResultPage');
-	const span = tracer.startSpan('MessageResultPage', {
-		attributes: {
-			messages: messages.length,
-			server: server.id,
-			channel: channel.id,
-			thread: thread?.id,
-		},
-	});
 	const isUserInServer = await fetchIsUserInServer(server.id);
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
@@ -244,6 +233,8 @@ export async function MessageResultPage({
 		</div>
 	);
 
+	const adsEnabled = !tenant;
+
 	const Sidebar = () => (
 		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center xl:mt-6 xl:w-[400px]">
 			<div className={'hidden w-full  xl:block'}>
@@ -255,6 +246,24 @@ export async function MessageResultPage({
 			</div>
 			<div className="flex w-full flex-col justify-center gap-4 text-center xl:mt-6 ">
 				{!tenant && <JoinAnswerOverflowCard />}
+				{adsEnabled && (
+					<div className={'w-full'}>
+						<div
+							className={'min-h-[220px] text-white'}
+							// NextJS is dumb and lifts script tags to <head/> so we have to use dangerouslySetInnerHTML
+							dangerouslySetInnerHTML={{
+								__html:
+									'<script\n' +
+									'\t\t\t\t\t\t\tasync\n' +
+									'\t\t\t\t\t\t\ttype="text/javascript"\n' +
+									'\t\t\t\t\t\t\tsrc="//cdn.carbonads.com/carbon.js?serve=CWYIV53I&placement=wwwansweroverflowcom&format=cover"\n' +
+									'\t\t\t\t\t\t\tid="_carbonads_js"\n' +
+									'\t\t\t\t\t\t></script>' +
+									'',
+							}}
+						/>
+					</div>
+				)}
 				{relatedPosts.length > 0 && (
 					<>
 						<span className="text-2xl">Recommended Posts</span>
@@ -303,7 +312,6 @@ export async function MessageResultPage({
 			</div>
 		</div>
 	);
-	span.end();
 	return rendered;
 }
 

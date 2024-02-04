@@ -2,7 +2,11 @@ import { Guild } from 'discord.js';
 import { container } from '@sapphire/framework';
 
 export const DENYLIST = {
-	SERVER_IDS: new Set(['1133324597534654484', '1133132039466528818']),
+	SERVER_IDS: new Set([
+		'1133324597534654484',
+		'1133132039466528818',
+		'1154298795182526484',
+	]),
 	USER_IDS: new Set(['1073171830216589352']),
 } as const;
 

@@ -16,6 +16,7 @@ import {
 	updateProviderAuthToken,
 } from '@answeroverflow/db/src/auth';
 import { getNextAuthCookieName } from './tenant-cookie';
+
 const hostname =
 	sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local'
 		? 'localhost'
@@ -25,7 +26,7 @@ const useSecureCookies = sharedEnvs.NODE_ENV === 'production';
 
 export const authOptions: NextAuthOptions = {
 	// Configure one or more authentication providers
-	adapter: extendedAdapter,
+	adapter: extendedAdapter as NextAuthOptions['adapter'],
 	providers: [
 		DiscordProvider({
 			clientId: sharedEnvs.DISCORD_CLIENT_ID,
