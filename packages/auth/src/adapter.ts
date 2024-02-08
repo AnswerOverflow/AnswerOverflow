@@ -59,6 +59,7 @@ export const extendedAdapter: Adapter = {
 		};
 	},
 	async createSession(data) {
+		console.log(`Creating session for ${data.userId}`);
 		await db.insert(dbSessions).values({
 			id: randomUUID(),
 			...data,
