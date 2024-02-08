@@ -68,6 +68,7 @@ export const authOptions: NextAuthOptions = {
 		},
 		// TODO: Ugly
 		async signIn({ user, account }) {
+			console.log(`Sign in user: ${user.id}`);
 			if (!account) {
 				return true;
 			}
