@@ -58,7 +58,12 @@ export const authOptions: NextAuthOptions = {
 					await refreshAccessToken(discord);
 				}
 			};
-			await updateAccountAccessToken();
+			try {
+				await updateAccountAccessToken();
+			} catch (e) {
+				// TODO: Should we not create a new session if this fails?
+				console.error(`Error updating account access token: ${e}`);
+			}
 			return session;
 		},
 		// TODO: Ugly
