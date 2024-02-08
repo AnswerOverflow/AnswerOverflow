@@ -44,7 +44,7 @@
 		"@typescript-eslint/eslint-plugin": "^6.9.0",
 		"@typescript-eslint/parser": "^6.9.0",
 		"dotenv-cli": "^7.3.0",
-		"eslint-config-next": "^13.4.19",
+		"eslint-config-next": "^14.1.0",
 		"eslint-config-prettier": "^8.10.0",
 		"eslint-config-turbo": "0.0.7",
 		"eslint-import-resolver-typescript": "^3.6.0",
