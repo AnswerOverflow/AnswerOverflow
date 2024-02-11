@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 type Props = {
 	searchParams: {
 		q?: string | string[];
+		s?: string | string[];
 	};
 };
 
@@ -27,6 +28,9 @@ export default async function Search(props: Props) {
 		apiCall: (api) =>
 			api.messages.search({
 				query: props.searchParams.q ? (props.searchParams.q as string) : '',
+				serverId: props.searchParams.s
+					? (props.searchParams.s as string)
+					: undefined,
 			}),
 	});
 	return <SearchPage results={results} tenant={undefined} />;
