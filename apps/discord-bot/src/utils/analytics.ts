@@ -115,9 +115,10 @@ export type QuestionSolvedProps = QuestionAskedProps &
 type MarkSolutionUsedProps = UserProps<'User'> & {
 	Status: MarkSolutionErrorReason | 'Success';
 };
-type FeedbackGivenProps = UserProps<'User'> & {
+type FeedbackGivenProps = ServerPropsWithDiscordData &
+		ChannelPropsWithDiscordData & 
+		UserProps<'advisor'> & {
 	FeedbackType: 'Bug' | 'Suggestion';
-	Advisor: UserProps<'advisor'>;
 	CanFollowUp: boolean;
 };
 
