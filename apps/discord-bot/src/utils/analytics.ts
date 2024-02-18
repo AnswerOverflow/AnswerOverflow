@@ -67,6 +67,7 @@ export const userTypes = [
 	'User',
 	'Question Asker',
 	'Question Solver',
+	'advisor',
 	'Mark As Solver',
 ] as const;
 export type UserType = (typeof userTypes)[number];
@@ -114,6 +115,11 @@ export type QuestionSolvedProps = QuestionAskedProps &
 type MarkSolutionUsedProps = UserProps<'User'> & {
 	Status: MarkSolutionErrorReason | 'Success';
 };
+type FeedbackGivenProps = UserProps<'User'> & {
+	FeedbackType: 'Bug' | 'Suggestion';
+	Advisor: UserProps<'advisor'>;
+	CanFollowUp: boolean;
+};
 
 type EventMap = {
 	'Server Join': ServerJoinProps;
@@ -122,8 +128,10 @@ type EventMap = {
 	'User Left Server': UserLeftServerProps;
 	'Asked Question': QuestionAskedProps;
 	'Solved Question': QuestionSolvedProps;
+	'Feedback Given': FeedbackGivenProps;
 	'Mark Solution Instructions Sent': QuestionAskedProps; // TODO: Track if the user has ever had the instructions sent to them before
 	'Mark Solution Application Command Used': MarkSolutionUsedProps;
+
 	'Dismiss Button Clicked': UserProps<'User'> &
 		MessageProps<'Message'> & {
 			'Dismissed Message Type': 'Mark Solution Instructions';
