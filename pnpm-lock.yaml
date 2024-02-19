@@ -485,8 +485,8 @@ importers:
         specifier: ^0.32.5
         version: 0.32.6
       superjson:
-        specifier: ^1.13.1
-        version: 1.13.3
+        specifier: ^2.2.1
+        version: 2.2.1
       zod:
         specifier: ^3.22.2
         version: 3.22.4
@@ -828,8 +828,8 @@ importers:
         specifier: ^12.18.0
         version: 12.18.0
       superjson:
-        specifier: ^1.13.1
-        version: 1.13.3
+        specifier: ^2.2.1
+        version: 2.2.1
       zod:
         specifier: ^3.22.2
         version: 3.22.4
@@ -3311,10 +3311,6 @@ packages:
     peerDependencies:
       '@effect-ts/otel-node': '*'
     peerDependenciesMeta:
-      '@effect-ts/core':
-        optional: true
-      '@effect-ts/otel':
-        optional: true
       '@effect-ts/otel-node':
         optional: true
     dependencies:
@@ -17603,6 +17599,13 @@ packages:
   /superjson@1.13.3:
     resolution: {integrity: sha512-mJiVjfd2vokfDxsQPOwJ/PtanO87LhpYY88ubI5dUB1Ab58Txbyje3+jpm+/83R/fevaq/107NNhtYBLuoTrFg==}
     engines: {node: '>=10'}
+    dependencies:
+      copy-anything: 3.0.5
+    dev: false
+
+  /superjson@2.2.1:
+    resolution: {integrity: sha512-8iGv75BYOa0xRJHK5vRLEjE2H/i4lulTjzpUXic3Eg8akftYjkmQDa8JARQ42rlczXyFR3IeRoeFCc7RxHsYZA==}
+    engines: {node: '>=16'}
     dependencies:
       copy-anything: 3.0.5
     dev: false
