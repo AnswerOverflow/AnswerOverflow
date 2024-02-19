@@ -890,7 +890,7 @@ importers:
         version: 3.0.3
       drizzle-orm:
         specifier: ^0.28.5
-        version: 0.28.6(@opentelemetry/api@1.7.0)(@planetscale/database@1.14.0)(mysql2@3.6.0)
+        version: 0.28.6(@opentelemetry/api@1.7.0)(@planetscale/database@1.16.0)(mysql2@3.6.0)
       next:
         specifier: 14.0.0
         version: 14.0.0(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
@@ -951,7 +951,7 @@ importers:
         version: 3.0.3
       drizzle-orm:
         specifier: ^0.28.5
-        version: 0.28.6(@opentelemetry/api@1.7.0)(@planetscale/database@1.14.0)(mysql2@3.6.0)
+        version: 0.28.6(@opentelemetry/api@1.7.0)(@planetscale/database@1.16.0)(mysql2@3.6.0)
       redis:
         specifier: ^4.6.7
         version: 4.6.12
@@ -1131,8 +1131,8 @@ importers:
         specifier: workspace:^
         version: link:../utils
       '@planetscale/database':
-        specifier: ^1.11.0
-        version: 1.14.0
+        specifier: ^1.16.0
+        version: 1.16.0
       '@sapphire/bitfield':
         specifier: ^1.2.0
         version: 1.2.2
@@ -1153,7 +1153,7 @@ importers:
         version: 3.0.3
       drizzle-orm:
         specifier: ^0.28.5
-        version: 0.28.6(@opentelemetry/api@1.7.0)(@planetscale/database@1.14.0)(mysql2@3.6.0)
+        version: 0.28.6(@opentelemetry/api@1.7.0)(@planetscale/database@1.16.0)(mysql2@3.6.0)
       drizzle-zod:
         specifier: ^0.5.1
         version: 0.5.1(drizzle-orm@0.28.6)(zod@3.22.4)
@@ -3311,10 +3311,6 @@ packages:
     peerDependencies:
       '@effect-ts/otel-node': '*'
     peerDependenciesMeta:
-      '@effect-ts/core':
-        optional: true
-      '@effect-ts/otel':
-        optional: true
       '@effect-ts/otel-node':
         optional: true
     dependencies:
@@ -5311,8 +5307,8 @@ packages:
     requiresBuild: true
     optional: true
 
-  /@planetscale/database@1.14.0:
-    resolution: {integrity: sha512-7BB+iH6EH4YJuDeVeEbxpo60BFz3wIXJNXCmBGl40eC4HStRMGZ1COxKfiuPcINWwwrJhAhI9AEI97AOZYT7JQ==}
+  /@planetscale/database@1.16.0:
+    resolution: {integrity: sha512-HNUrTqrd8aTRZYMDcsoZ62s36sIWkMMmKZBOehoCWR2WrfNPKq+Q1yQef5okl3pSVlldFnu2h/dbHjOsDTHXug==}
     engines: {node: '>=16'}
     dev: false
 
@@ -10245,7 +10241,7 @@ packages:
       - supports-color
     dev: true
 
-  /drizzle-orm@0.28.6(@opentelemetry/api@1.7.0)(@planetscale/database@1.14.0)(mysql2@3.6.0):
+  /drizzle-orm@0.28.6(@opentelemetry/api@1.7.0)(@planetscale/database@1.16.0)(mysql2@3.6.0):
     resolution: {integrity: sha512-yBe+F9htrlYER7uXgDJUQsTHFoIrI5yMm5A0bg0GiZ/kY5jNXTWoEy4KQtg35cE27sw1VbgzoMWHAgCckUUUww==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
@@ -10308,7 +10304,7 @@ packages:
         optional: true
     dependencies:
       '@opentelemetry/api': 1.7.0
-      '@planetscale/database': 1.14.0
+      '@planetscale/database': 1.16.0
       mysql2: 3.6.0(patch_hash=q5tj4ab7wpmbah6uclyjha7nle)
     dev: false
 
@@ -10318,7 +10314,7 @@ packages:
       drizzle-orm: '>=0.23.13'
       zod: '*'
     dependencies:
-      drizzle-orm: 0.28.6(@opentelemetry/api@1.7.0)(@planetscale/database@1.14.0)(mysql2@3.6.0)
+      drizzle-orm: 0.28.6(@opentelemetry/api@1.7.0)(@planetscale/database@1.16.0)(mysql2@3.6.0)
       zod: 3.22.4
     dev: false
 
