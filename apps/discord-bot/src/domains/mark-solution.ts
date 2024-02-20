@@ -140,7 +140,13 @@ export async function checkIfCanMarkSolution(
 					?.has(permission as PermissionResolvable),
 		);
 
-		if (!doesUserHavePerms) {
+		// temp code for valorant server
+		const roleIdAllowedToMarkAsSolved = '684140826762149923';
+		const isUserInRole = guildMember.roles.cache.has(
+			roleIdAllowedToMarkAsSolved,
+		);
+
+		if (!doesUserHavePerms && !isUserInRole) {
 			throw new MarkSolutionError(
 				'NO_PERMISSION',
 				`You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
