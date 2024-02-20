@@ -21,6 +21,8 @@ export type AOEvents = {
 		}
 	>;
 	clientReady: AOEvent<'clientReady'>;
+	chatInputCommandFinish: AOEvent<'chatInputCommandFinish'>;
+	feedbackReceive: AOEvent<'chatInputCommandReceive'>;
 };
 
 // ☭
