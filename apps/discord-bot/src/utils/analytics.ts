@@ -67,7 +67,7 @@ export const userTypes = [
 	'User',
 	'Question Asker',
 	'Question Solver',
-	'advisor',
+	'Feedback Giver',
 	'Mark As Solver',
 ] as const;
 export type UserType = (typeof userTypes)[number];
@@ -116,11 +116,12 @@ type MarkSolutionUsedProps = UserProps<'User'> & {
 	Status: MarkSolutionErrorReason | 'Success';
 };
 type FeedbackGivenProps = ServerPropsWithDiscordData &
-		ChannelPropsWithDiscordData & 
-		UserProps<'advisor'> & {
-	FeedbackType: 'Bug' | 'Suggestion';
-	CanFollowUp: boolean;
-};
+	ChannelPropsWithDiscordData &
+	UserProps<'Feedback Giver'> & {
+		source: 'slash-cmd' | 'others'; //TODO: add other methods of feedback giving
+		FeedbackType: 'Bug' | 'Suggestion';
+		CanFollowUp: boolean;
+	};
 
 type EventMap = {
 	'Server Join': ServerJoinProps;
