@@ -58,7 +58,7 @@ const text = {
 						src={`https://cdn.discordapp.com/emojis/${content.id}.${
 							content.animated ? 'gif' : 'png'
 						}`}
-						className={'inline-block h-[22px] w-[22px]'}
+						className={'inline-block size-[22px]'}
 						key={index}
 						fetchPriority={'high'}
 						loading={'eager'}
