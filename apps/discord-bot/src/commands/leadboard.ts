@@ -1,14 +1,17 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { type ChatInputCommand, Command } from '@sapphire/framework';
 import {
+	ActionRowBuilder,
 	ChatInputCommandInteraction,
 	EmbedBuilder,
+	MessageActionRowComponentBuilder,
 	SlashCommandBuilder,
 } from 'discord.js';
 import { getCommandIds } from '~discord-bot/utils/utils';
 import { PostHog } from '@typelytics/posthog';
 import { events } from '../../events';
 import { sharedEnvs } from '@answeroverflow/env/shared';
+import { makeDismissButton } from '~discord-bot/domains/dismiss-button';
 
 const posthog = new PostHog({
 	events: events,
@@ -53,8 +56,9 @@ export class LeaderboardCommand extends Command {
 		);
 	}
 	public override async chatInputRun(interaction: ChatInputCommandInteraction) {
+		const isEphemeral = interaction.options.getBoolean('ephemeral') ?? false;
 		await interaction.deferReply({
-			ephemeral: interaction.options.getBoolean('ephemeral') ?? false,
+			ephemeral: isEphemeral,
 		});
 		const topUsers = await posthog
 			.query()
@@ -114,8 +118,16 @@ export class LeaderboardCommand extends Command {
 			.setColor('#89D3F8')
 			.setTimestamp();
 
+		const components = isEphemeral
+			? []
+			: [
+					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+						makeDismissButton(interaction.user.id),
+					),
+			  ];
 		await interaction.editReply({
 			embeds: [embed],
+			components,
 		});
 	}
 }
