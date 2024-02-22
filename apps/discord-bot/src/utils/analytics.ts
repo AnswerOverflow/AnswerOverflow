@@ -122,6 +122,7 @@ type EventMap = {
 	'User Left Server': UserLeftServerProps;
 	'Asked Question': QuestionAskedProps;
 	'Solved Question': QuestionSolvedProps;
+	'Leaderboard Viewed': UserProps<'User'>;
 	'Mark Solution Instructions Sent': QuestionAskedProps; // TODO: Track if the user has ever had the instructions sent to them before
 	'Mark Solution Application Command Used': MarkSolutionUsedProps;
 	'Dismiss Button Clicked': UserProps<'User'> &
