@@ -93,6 +93,7 @@ export class LeaderboardCommand extends Command {
 
 		const embedDescription = toDisplay
 			.filter((x) => x !== null)
+			.slice(0, 10)
 			.sort((a, b) => b!.questionsSolved - a!.questionsSolved)
 			.map((x, i) => {
 				const user = x!.user;
