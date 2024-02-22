@@ -138,7 +138,7 @@ export function WaitingToBeAddedRenderer(props: {
 	return (
 		<div className="flex flex-col items-center justify-center gap-8 text-center">
 			<Heading.H1>Waiting to join {props.server.name}</Heading.H1>
-			<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-highlight" />
+			<div className="size-32 animate-spin rounded-full border-b-4 border-highlight" />
 			<span>
 				Last checked {props.timeSinceLastCheckInSeconds} second
 				{props.timeSinceLastCheckInSeconds === 1 ? '' : 's'} ago.
@@ -160,7 +160,7 @@ function ButtonMenu(props: {
 			{props.options.map((option) => {
 				return (
 					<Button
-						className="grid h-32 w-32 grid-cols-1"
+						className="grid size-32 grid-cols-1"
 						key={option.value}
 						onClick={() => {
 							props.onSelect(option.value);
@@ -186,22 +186,22 @@ export function WhatIsYourCommunityAbout() {
 				options={[
 					{
 						label: 'Education',
-						icon: <AcademicCapIcon className="mx-auto h-12 w-12" />,
+						icon: <AcademicCapIcon className="mx-auto size-12" />,
 						value: 'Education',
 					},
 					{
 						label: 'Software',
-						icon: <CodeBracketIcon className="mx-auto h-12 w-12" />,
+						icon: <CodeBracketIcon className="mx-auto size-12" />,
 						value: 'Software',
 					},
 					{
 						label: 'Gaming',
-						icon: <IoGameControllerOutline className="mx-auto h-12 w-12" />,
+						icon: <IoGameControllerOutline className="mx-auto size-12" />,
 						value: 'Gaming',
 					},
 					{
 						label: 'Other',
-						icon: <CiCircleMore className="mx-auto h-12 w-12" />,
+						icon: <CiCircleMore className="mx-auto size-12" />,
 						value: 'Other',
 					},
 				]}
@@ -232,12 +232,12 @@ export function WhatTypeOfCommunityDoYouHave() {
 				options={[
 					{
 						label: 'Non Commercial',
-						icon: <MdMoneyOffCsred className="mx-auto h-12 w-12" />,
+						icon: <MdMoneyOffCsred className="mx-auto size-12" />,
 						value: 'Non-Commercial',
 					},
 					{
 						label: 'Commercial',
-						icon: <MdAttachMoney className="mx-auto h-12 w-12" />,
+						icon: <MdAttachMoney className="mx-auto size-12" />,
 						value: 'Commercial',
 					},
 				]}
@@ -300,7 +300,7 @@ const SetupPage = (props: {
 export function EnableIndexingPage() {
 	return (
 		<SetupPage
-			icon={<MagnifyingGlassCircleIcon className="hidden h-32 w-32 md:block" />}
+			icon={<MagnifyingGlassCircleIcon className="hidden size-32 md:block" />}
 			title="Enable Indexing"
 			description='Open the "Indexing Settings" menu via /channel-settings and click the "Enable Indexing" button'
 			command="channel-settings"
@@ -318,7 +318,7 @@ export function EnableIndexingPage() {
 export function EnableForumGuidelinesConsent() {
 	return (
 		<SetupPage
-			icon={<ChatBubbleLeftIcon className="hidden h-32 w-32 md:block" />}
+			icon={<ChatBubbleLeftIcon className="hidden size-32 md:block" />}
 			title="Enable Forum Guidelines Consent"
 			description='Open the "Indexing Settings" menu via /channel-settings and click the "Enable Forum Guidelines Consent" button'
 			command="channel-settings"
@@ -342,7 +342,7 @@ export function EnableForumGuidelinesConsent() {
 export function EnableMarkSolution() {
 	return (
 		<SetupPage
-			icon={<CheckCircleIcon className="hidden h-32 w-32 md:block" />}
+			icon={<CheckCircleIcon className="hidden size-32 md:block" />}
 			title="Enable Mark Solution"
 			description='Open the "Help channel utilities" menu via /channel-settings and click the "Enable mark as solution" button'
 			command="channel-settings"
