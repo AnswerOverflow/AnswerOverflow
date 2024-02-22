@@ -83,7 +83,7 @@ export default function PostPage({ params }: PostProps) {
 			<aside className={'py-4 md:py-0'}>
 				<Link href={'/changelog'} className={'no-underline hover:underline'}>
 					<div className="flex items-center text-primary">
-						<HiArrowUturnLeft className={'mr-2 inline-block h-5 w-5'} />
+						<HiArrowUturnLeft className={'mr-2 inline-block size-5'} />
 						Back to changelog
 					</div>
 				</Link>
@@ -140,7 +140,7 @@ export default function PostPage({ params }: PostProps) {
 						className={'ml-4'}
 					>
 						<LiaTwitter
-							className={'h-6 w-6 text-primary hover:text-primary/80'}
+							className={'size-6 text-primary hover:text-primary/80'}
 						/>
 					</Link>
 				</div>
@@ -150,7 +150,7 @@ export default function PostPage({ params }: PostProps) {
 					{prevPost ? (
 						<Link href={prevPost.slug}>
 							<div className="flex items-center py-2 text-primary">
-								<HiArrowLeft className={'ml-2 inline-block h-5 w-5'} />
+								<HiArrowLeft className={'ml-2 inline-block size-5'} />
 								{prevPost.title}
 							</div>
 						</Link>
@@ -161,7 +161,7 @@ export default function PostPage({ params }: PostProps) {
 						<Link href={nextPost.slug}>
 							<div className="flex items-center py-2 text-primary">
 								{nextPost.title}
-								<HiArrowRight className={'ml-2 inline-block h-5 w-5'} />
+								<HiArrowRight className={'ml-2 inline-block size-5'} />
 							</div>
 						</Link>
 					)}
