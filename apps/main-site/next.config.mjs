@@ -85,7 +85,6 @@ const config = {
 	},
 };
 
-import { withAxiom } from 'next-axiom';
 
 // With content layer breaks things for us for some reason
-export default withMDX(withAxiom(config));
+export default withMDX(config);

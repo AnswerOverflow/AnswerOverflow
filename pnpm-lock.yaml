@@ -134,9 +134,6 @@ importers:
       next-auth:
         specifier: ^4.23.1
         version: 4.24.5(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
-      next-axiom:
-        specifier: ^1.1.0
-        version: 1.1.1(next@14.0.0)(react@18.2.0)
       posthog-js:
         specifier: ^1.83.0
         version: 1.104.3
@@ -584,9 +581,6 @@ importers:
       next-auth:
         specifier: ^4.23.1
         version: 4.24.5(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
-      next-axiom:
-        specifier: ^1.1.0
-        version: 1.1.1(next@14.0.0)(react@18.2.0)
       next-contentlayer:
         specifier: ^0.3.4
         version: 0.3.4(contentlayer@0.3.4)(esbuild@0.20.0)(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
@@ -1646,9 +1640,6 @@ importers:
       next-auth:
         specifier: ^4.23.1
         version: 4.24.5(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
-      next-axiom:
-        specifier: ^1.1.0
-        version: 1.1.1(next@14.0.0)(react@18.2.0)
       next-themes:
         specifier: ^0.2.1
         version: 0.2.1(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
@@ -14778,19 +14769,6 @@ packages:
       uuid: 8.3.2
     dev: false
 
-  /next-axiom@1.1.1(next@14.0.0)(react@18.2.0):
-    resolution: {integrity: sha512-0r/TJ+/zetD+uDc7B+2E7WpC86hEtQ1U+DuWYrP/JNmUz+ZdPFbrZgzOSqaZ6TwYbXP56VVlPfYwq1YsKHTHYQ==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      next: '>=13.4'
-      react: '>=18.0.0'
-    dependencies:
-      next: 14.0.0(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
-      react: 18.2.0
-      remeda: 1.40.0
-      whatwg-fetch: 3.6.20
-    dev: false
-
   /next-contentlayer@0.3.4(contentlayer@0.3.4)(esbuild@0.20.0)(next@14.0.0)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-UtUCwgAl159KwfhNaOwyiI7Lg6sdioyKMeh+E7jxx0CJ29JuXGxBEYmCI6+72NxFGIFZKx8lvttbbQhbnYWYSw==}
     peerDependencies:
@@ -16732,10 +16710,6 @@ packages:
       '@types/mdast': 3.0.15
       mdast-util-to-hast: 12.3.0
       unified: 10.1.2
-    dev: false
-
-  /remeda@1.40.0:
-    resolution: {integrity: sha512-jrpzUSPTrCAnzyVko7h9lXyVZFT75hYeZGFLg3JomiUhASiZzbjpf938LJjn1uARNWMreMeTtX1FKzkFOTTziA==}
     dev: false
 
   /remove-accents@0.4.2:
