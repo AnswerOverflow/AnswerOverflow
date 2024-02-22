@@ -132,8 +132,8 @@ importers:
         specifier: 14.0.0
         version: 14.0.0(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
       next-auth:
-        specifier: ^4.23.1
-        version: 4.24.5(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^4.24.6
+        version: 4.24.6(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
       posthog-js:
         specifier: ^1.83.0
         version: 1.104.3
@@ -455,8 +455,8 @@ importers:
         specifier: 14.0.0
         version: 14.0.0(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
       next-auth:
-        specifier: ^4.23.1
-        version: 4.24.5(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^4.24.6
+        version: 4.24.6(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
       next-sitemap:
         specifier: ^4.2.2
         version: 4.2.3(next@14.0.0)
@@ -579,8 +579,8 @@ importers:
         specifier: 14.0.0
         version: 14.0.0(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
       next-auth:
-        specifier: ^4.23.1
-        version: 4.24.5(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^4.24.6
+        version: 4.24.6(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
       next-contentlayer:
         specifier: ^0.3.4
         version: 0.3.4(contentlayer@0.3.4)(esbuild@0.20.0)(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
@@ -722,8 +722,8 @@ importers:
         specifier: ^0.37.67
         version: 0.37.67
       next-auth:
-        specifier: ^4.23.1
-        version: 4.24.5(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^4.24.6
+        version: 4.24.6(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
       posthog-node:
         specifier: ^3.1.2
         version: 3.6.1
@@ -889,8 +889,8 @@ importers:
         specifier: 14.0.0
         version: 14.0.0(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
       next-auth:
-        specifier: ^4.23.1
-        version: 4.24.5(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^4.24.6
+        version: 4.24.6(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
       prettier:
         specifier: ^2.8.8
         version: 2.8.8
@@ -1410,8 +1410,8 @@ importers:
         specifier: 14.0.0
         version: 14.0.0(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
       next-auth:
-        specifier: ^4.23.1
-        version: 4.24.5(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^4.24.6
+        version: 4.24.6(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
       posthog-js:
         specifier: ^1.83.0
         version: 1.104.3
@@ -1638,8 +1638,8 @@ importers:
         specifier: 14.0.0
         version: 14.0.0(@babel/core@7.23.9)(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)
       next-auth:
-        specifier: ^4.23.1
-        version: 4.24.5(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^4.24.6
+        version: 4.24.6(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
       next-themes:
         specifier: ^0.2.1
         version: 0.2.1(next@14.0.0)(react-dom@18.2.0)(react@18.2.0)
@@ -3302,10 +3302,6 @@ packages:
     peerDependencies:
       '@effect-ts/otel-node': '*'
     peerDependenciesMeta:
-      '@effect-ts/core':
-        optional: true
-      '@effect-ts/otel':
-        optional: true
       '@effect-ts/otel-node':
         optional: true
     dependencies:
@@ -14744,8 +14740,8 @@ packages:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
     dev: false
 
-  /next-auth@4.24.5(next@14.0.0)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-3RafV3XbfIKk6rF6GlLE4/KxjTcuMCifqrmD+98ejFq73SRoj2rmzoca8u764977lH/Q7jo6Xu6yM+Re1Mz/Og==}
+  /next-auth@4.24.6(next@14.0.0)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-djQt3ZEaWEIxcsuh3HTW2uuzLfXMRjHH+ugAsichlQSbH4iA5MRcgMA2HvTNvsDTDLh44tyU72+/gWsxgTbAKg==}
     peerDependencies:
       next: ^12.2.5 || ^13 || ^14
       nodemailer: ^6.6.5
