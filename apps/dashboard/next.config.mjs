@@ -54,6 +54,6 @@ const config = {
 	},
 };
 
-import { withAxiom } from 'next-axiom';
 
-export default withAxiom(config);
+
+export default config;
