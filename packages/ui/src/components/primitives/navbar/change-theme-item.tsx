@@ -13,8 +13,8 @@ export function ChangeThemeItem() {
 				setTheme(theme === 'dark' ? 'light' : 'dark');
 			}}
 		>
-			<LuSun className="mr-2 block h-4 w-4 dark:hidden" />
-			<LuMoon className="mr-2 hidden h-4 w-4 dark:block" />
+			<LuSun className="mr-2 block size-4 dark:hidden" />
+			<LuMoon className="mr-2 hidden size-4 dark:block" />
 
 			<span className="w-full">Change Theme</span>
 		</DropdownMenuItem>

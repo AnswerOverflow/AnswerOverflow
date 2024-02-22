@@ -22,21 +22,21 @@ const MainSiteDropdownMenuGroup = () => (
 	<>
 		<DropdownMenuGroup>
 			<DropdownMenuItem>
-				<LuLayoutDashboard className="mr-2 h-4 w-4" />
+				<LuLayoutDashboard className="mr-2 size-4" />
 				<Link href="/dashboard" className="w-full" prefetch={false}>
 					Dashboard
 				</Link>
 			</DropdownMenuItem>
 		</DropdownMenuGroup>
 		<DropdownMenuItem>
-			<LuPlus className="mr-2 h-4 w-4" />
+			<LuPlus className="mr-2 size-4" />
 			<Link href="/onboarding" className="w-full" prefetch={false}>
 				Add To Server
 			</Link>
 		</DropdownMenuItem>
 		<DropdownMenuSeparator />
 		<DropdownMenuItem>
-			<LuGithub className="mr-2 h-4 w-4" />
+			<LuGithub className="mr-2 size-4" />
 			<Link
 				href="https://www.github.com/answeroverflow/answeroverflow"
 				target="_blank"
@@ -46,7 +46,7 @@ const MainSiteDropdownMenuGroup = () => (
 			</Link>
 		</DropdownMenuItem>
 		<DropdownMenuItem>
-			<DiscordIcon className="mr-2 h-4 w-4" />
+			<DiscordIcon className="mr-2 size-4" />
 			<Link
 				href="https://discord.answeroverflow.com"
 				target="_blank"
@@ -56,7 +56,7 @@ const MainSiteDropdownMenuGroup = () => (
 			</Link>
 		</DropdownMenuItem>
 		<DropdownMenuItem>
-			<LuTwitter className="mr-2 h-4 w-4" />
+			<LuTwitter className="mr-2 size-4" />
 			<Link
 				href="https://www.twitter.com/answeroverflow"
 				target="_blank"

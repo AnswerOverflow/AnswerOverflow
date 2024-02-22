@@ -27,9 +27,9 @@ export const MessageAuthorArea = (props: Pick<MessageProps, 'message'>) => {
 						href={getDiscordURLForMessage(message)}
 						eventName={'View On Discord Click'}
 						eventData={messageWithDiscordAccountToAnalyticsData(message)}
-						className="h-8 w-8 bg-transparent p-1 hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent"
+						className="size-8 bg-transparent p-1 hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent"
 					>
-						<DiscordIcon className="h-8 w-8" color="primary" />
+						<DiscordIcon className="size-8" color="primary" />
 						<span className="sr-only">View on Discord</span>
 					</TrackLinkButton>
 				</div>

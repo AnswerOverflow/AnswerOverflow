@@ -156,12 +156,12 @@ const PricingElement = (props: {
 				</Heading.H2>
 				<Heading.H3 className={'my-0 py-0 text-3xl'}>{props.price}</Heading.H3>
 			</div>
-			<div className="mt-8 flex h-full w-full flex-col justify-between">
-				<div className="flex h-full w-full flex-col items-center justify-between gap-4">
+			<div className="mt-8 flex size-full flex-col justify-between">
+				<div className="flex size-full flex-col items-center justify-between gap-4">
 					<ul className="grid w-full grid-cols-1 items-center gap-2">
 						{props.features.map((feature, index) => (
 							<li key={index} className="flex w-full flex-row gap-4">
-								{feature.icon ?? <Check className="h-6 w-6 shrink-0" />}
+								{feature.icon ?? <Check className="size-6 shrink-0" />}
 								{feature.name}
 							</li>
 						))}
@@ -334,7 +334,7 @@ export const PricingOptions = (props: { showFaqs?: boolean }) => {
 							'flex max-w-full flex-row items-center gap-4 text-primary'
 						}
 					>
-						<IoMdGlobe className={'hidden h-16 w-16 shrink-0 md:block'} />
+						<IoMdGlobe className={'hidden size-16 shrink-0 md:block'} />
 						<div className={'flex flex-col gap-4'}>
 							<h2 className={'text-center text-xl font-bold'}>
 								Public Platform
@@ -364,7 +364,7 @@ export const PricingOptions = (props: { showFaqs?: boolean }) => {
 							'flex max-w-full flex-row items-center gap-4 text-primary'
 						}
 					>
-						<IoBusiness className={'hidden h-16 w-16 shrink-0 md:block'} />
+						<IoBusiness className={'hidden size-16 shrink-0 md:block'} />
 						<div className={'flex flex-col gap-4'}>
 							<h2 className={'text-center text-lg font-bold md:text-xl'}>
 								Enterprise Platform

@@ -24,9 +24,9 @@ export const CopyButton = ({ textToCopy }: { textToCopy: string }) => {
 				className={'transition-all duration-700 ease-in-out'}
 			>
 				{hasCopied ? (
-					<ClipboardCheckIcon className={'h-6 w-6 text-emerald-500'} />
+					<ClipboardCheckIcon className={'size-6 text-emerald-500'} />
 				) : (
-					<ClipboardIcon className={'h-6 w-6'} />
+					<ClipboardIcon className={'size-6'} />
 				)}
 			</Button>
 		</>
