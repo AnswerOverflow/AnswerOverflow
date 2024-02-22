@@ -78,61 +78,19 @@ export class LeaderboardCommand extends Command {
 			.then((x) => x.results['Solved Question']);
 
 		const keys = Object.keys(topUsers);
-		// const toDisplay = await Promise.all(
-		// 	keys.map((key) => {
-		// 		const entry = topUsers[key];
-		// 		if (!entry) {
-		// 			return null;
-		// 		}
-		// 		return {
-		// 			user: key,
-		// 			questionsSolved: entry.aggregated_value,
-		// 		};
-		// 	}),
-		// );
+		const toDisplay = await Promise.all(
+			keys.map((key) => {
+				const entry = topUsers[key];
+				if (!entry) {
+					return null;
+				}
+				return {
+					user: key,
+					questionsSolved: entry.aggregated_value,
+				};
+			}),
+		);
 
-		const toDisplay = [
-			{
-				user: '12345647890',
-				questionsSolved: 10,
-			},
-			{
-				user: '123441567890',
-				questionsSolved: 10,
-			},
-			{
-				user: '12345467890',
-				questionsSolved: 10,
-			},
-			{
-				user: '12345678190',
-				questionsSolved: 10,
-			},
-			{
-				user: '123456789140',
-				questionsSolved: 10,
-			},
-			{
-				user: '123456789210',
-				questionsSolved: 10,
-			},
-			{
-				user: '12345678920',
-				questionsSolved: 10,
-			},
-			{
-				user: '12345678290',
-				questionsSolved: 10,
-			},
-			{
-				user: '12345678490',
-				questionsSolved: 10,
-			},
-			{
-				user: '12345678901',
-				questionsSolved: 10,
-			},
-		];
 		const embedDescription = toDisplay
 			.filter((x) => x !== null)
 			.sort((a, b) => b!.questionsSolved - a!.questionsSolved)
