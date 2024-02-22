@@ -12,6 +12,10 @@ import { PostHog } from '@typelytics/posthog';
 import { events } from '../../events';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { makeDismissButton } from '~discord-bot/domains/dismiss-button';
+import {
+	memberToAnalyticsUser,
+	trackDiscordEvent,
+} from '~discord-bot/utils/analytics';
 
 const posthog = new PostHog({
 	events: events,
@@ -125,6 +129,13 @@ export class LeaderboardCommand extends Command {
 						makeDismissButton(interaction.user.id),
 					),
 			  ];
+		const user = interaction.guild?.members.cache.get(interaction.user.id);
+		if (user) {
+			trackDiscordEvent('Leaderboard Viewed', {
+				'Answer Overflow Account Id': interaction.user.id,
+				...memberToAnalyticsUser('User', user),
+			});
+		}
 		await interaction.editReply({
 			embeds: [embed],
 			components,
