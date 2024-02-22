@@ -309,6 +309,9 @@ importers:
       '@trpc/server':
         specifier: ^10.37.1
         version: 10.45.0
+      '@typelytics/posthog':
+        specifier: ^0.1.1
+        version: 0.1.1
       colorette:
         specifier: ^2.0.20
         version: 2.0.20
@@ -7399,6 +7402,16 @@ packages:
 
   /@tsconfig/node16@1.0.4:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
+
+  /@typelytics/core@0.1.1:
+    resolution: {integrity: sha512-KUiW/fedCBZzvCF2FN+LUNO1Y9pw8OYmON1gGrIyNPQ6nyfBkr4o9Y3yg+tVWC3sKWnXiLUGquPlj0mZ57/VAA==}
+    dev: false
+
+  /@typelytics/posthog@0.1.1:
+    resolution: {integrity: sha512-HBUvVzBnLsdjkqUwIpfmYFuRf+49Lu4Fsln329+44Vf/58U7aaUDkDAKlfTpTjy3ikIliRBg+Bg1x/YT//fHdw==}
+    dependencies:
+      '@typelytics/core': 0.1.1
+    dev: false
 
   /@types/acorn@4.0.6:
     resolution: {integrity: sha512-veQTnWP+1D/xbxVrPC3zHnCZRjSrKfhbMUlEA43iMZLu7EsnTtkJklIuwrCPbOi8YkvDQAiW05VQQFvvz9oieQ==}
