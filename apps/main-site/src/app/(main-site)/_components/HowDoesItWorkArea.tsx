@@ -20,7 +20,7 @@ const HowDoesItWorkAreaText = () => {
 					location="Hero"
 					className="mx-auto px-6 w-auto text-lg shadow-[0px_0px_40px_rgba(255,_255,_255,_0.2)] duration-200 hover:shadow-[0px_0px_40px_rgba(255,_255,_255,_0.4)] xl:mx-0"
 				/>
-				<MessagesSearchBar className="w-auto m-0 text-lg border-primary/25" />
+				{/* <MessagesSearchBar className="w-auto m-0 text-lg border-primary/25" /> */}
 			</div>
 		</div>
 	);
