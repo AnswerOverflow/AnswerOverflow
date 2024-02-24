@@ -84,7 +84,7 @@ const config = {
 			{
 				source: '/about',
 				destination: '/',
-				permanent: true,
+				permanent: false, // We might want to use /about in the future
 			},
 		];
 	},
