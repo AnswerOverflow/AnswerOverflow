@@ -309,9 +309,6 @@ importers:
       '@trpc/server':
         specifier: ^10.37.1
         version: 10.45.0
-      '@typelytics/posthog':
-        specifier: ^0.1.1
-        version: 0.1.1
       colorette:
         specifier: ^2.0.20
         version: 2.0.20
@@ -718,6 +715,9 @@ importers:
       '@answeroverflow/env':
         specifier: workspace:^
         version: link:../env
+      '@typelytics/posthog':
+        specifier: ^0.1.1
+        version: 0.1.1
       discord-api-types:
         specifier: ^0.37.67
         version: 0.37.67
@@ -3305,6 +3305,10 @@ packages:
     peerDependencies:
       '@effect-ts/otel-node': '*'
     peerDependenciesMeta:
+      '@effect-ts/core':
+        optional: true
+      '@effect-ts/otel':
+        optional: true
       '@effect-ts/otel-node':
         optional: true
     dependencies:

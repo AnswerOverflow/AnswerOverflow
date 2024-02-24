@@ -35,7 +35,6 @@
 		"@sentry/tracing": "^7.64.0",
 		"@t3-oss/env-nextjs": "^0.6.1",
 		"@trpc/server": "^10.37.1",
-		"@typelytics/posthog": "^0.1.1",
 		"colorette": "^2.0.20",
 		"discord-api-types": "^0.37.67",
 		"discord.js": "^14.13.0",
