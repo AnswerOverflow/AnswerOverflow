@@ -25,7 +25,7 @@ export function generateMetadata({ searchParams }: Props): Metadata {
 }
 export default async function Search(props: Props) {
 	if (!props.searchParams.q && !props.searchParams.s) {
-		return <SearchPage results={undefined} tenant={undefined} />;
+		return <SearchPage results={[]} tenant={undefined} />;
 	}
 
 	const results = await callAPI({

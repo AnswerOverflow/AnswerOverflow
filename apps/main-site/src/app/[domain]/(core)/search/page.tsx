@@ -36,7 +36,7 @@ export default async function Search(props: {
 		return notFound();
 	}
 	if (!props.searchParams.q) {
-		return <SearchPage results={undefined} tenant={server} />;
+		return <SearchPage results={[]} tenant={server} />;
 	}
 
 	const results = await callAPI({
