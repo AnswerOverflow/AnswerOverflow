@@ -35,6 +35,10 @@ export default async function Search(props: {
 	if (!server) {
 		return notFound();
 	}
+	if (!props.searchParams.q) {
+		return <SearchPage results={[]} tenant={server} />;
+	}
+
 	const results = await callAPI({
 		apiCall: (api) =>
 			api.messages.search({
