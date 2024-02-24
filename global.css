@@ -3,53 +3,55 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --highlight: 217 91% 60%;
-    --highlight-foreground: 0 0% 98%;
-    --destructive-foreground: 0 0% 98%;
-    --ring: 0 0% 63.9%;
-    --radius: 0.5rem;
-  }
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 85.7% 97.3%;
-    --highlight: 217 91% 60%;
-    --highlight-foreground: 0 0% 98%;
-    --ring: 0 0% 14.9%;
-  }
+	:root {
+		--background: 0 0% 100%;
+		--foreground: 0 0% 3.9%;
+		--muted: 0 0% 96.1%;
+		--muted-foreground: 0 0% 45.1%;
+		--popover: 0 0% 100%;
+		--popover-foreground: 0 0% 3.9%;
+		--card: 0 0% 100%;
+		--card-foreground: 0 0% 3.9%;
+		--border: 0 0% 89.8%;
+		--input: 0 0% 89.8%;
+		--primary: 0 0% 9%;
+		--ao-blue: 217 90% 54%;
+		--primary-foreground: 0 0% 98%;
+		--secondary: 0 0% 96.1%;
+		--secondary-foreground: 0 0% 9%;
+		--accent: 0 0% 96.1%;
+		--accent-foreground: 0 0% 9%;
+		--destructive: 0 84.2% 60.2%;
+		--highlight: 217 91% 60%;
+		--highlight-foreground: 0 0% 98%;
+		--destructive-foreground: 0 0% 98%;
+		--ring: 0 0% 63.9%;
+		--radius: 0.5rem;
+	}
+	.dark {
+		--background: 0 0% 3.9%;
+		--foreground: 0 0% 98%;
+		--muted: 0 0% 14.9%;
+		--muted-foreground: 0 0% 63.9%;
+		--popover: 0 0% 3.9%;
+		--popover-foreground: 0 0% 98%;
+		--card: 0 0% 3.9%;
+		--card-foreground: 0 0% 98%;
+		--border: 0 0% 14.9%;
+		--input: 0 0% 14.9%;
+		--primary: 0 0% 98%;
+		--ao-blue: 217 90% 54%;
+		--primary-foreground: 0 0% 9%;
+		--secondary: 0 0% 14.9%;
+		--secondary-foreground: 0 0% 98%;
+		--accent: 0 0% 14.9%;
+		--accent-foreground: 0 0% 98%;
+		--destructive: 0 62.8% 30.6%;
+		--destructive-foreground: 0 85.7% 97.3%;
+		--highlight: 217 91% 60%;
+		--highlight-foreground: 0 0% 98%;
+		--ring: 0 0% 14.9%;
+	}
 }
 
 @layer base {
@@ -87,55 +89,55 @@ body {
 }
 
 .prose pre:not([class]) {
-  @apply bg-transparent p-0 !important;
-  min-width: max-content;
+	@apply bg-transparent p-0 !important;
+	min-width: max-content;
 }
 
 .discord-message a {
-  @apply text-blue-700 hover:underline dark:text-blue-400 !important;
+	@apply text-blue-700 hover:underline dark:text-blue-400 !important;
 }
 
 .d-emoji {
-  @apply inline-block h-6 w-6;
+	@apply inline-block h-6 w-6;
 }
 
 .heading-1 {
-  @apply text-4xl font-bold !important;
+	@apply text-4xl font-bold !important;
 }
 
 .heading-2 {
-  @apply text-3xl font-bold !important;
+	@apply text-3xl font-bold !important;
 }
 
 .heading-3 {
-  @apply text-2xl font-bold !important;
+	@apply text-2xl font-bold !important;
 }
 
 .heading-4 {
-  @apply text-xl font-bold !important;
+	@apply text-xl font-bold !important;
 }
 
 .heading-5 {
-  @apply text-lg font-bold !important;
+	@apply text-lg font-bold !important;
 }
 
 .heading-6 {
-  @apply text-base font-bold !important;
+	@apply text-base font-bold !important;
 }
 
 .emoji {
-  @apply inline-block h-6 w-6;
+	@apply inline-block h-6 w-6;
 }
 
 img:not([src]):is(:empty) {
-  @apply h-0 w-0 !important;
+	@apply h-0 w-0 !important;
 }
 
 .discord-message {
-  white-space: break-spaces;
-  line-height: 22px;
+	white-space: break-spaces;
+	line-height: 22px;
 }
 
 * {
-  min-width: 0;
+	min-width: 0;
 }
