@@ -100,7 +100,6 @@ export function applyPublicFlagsToMessages<
 		const hasUserGrantedConsent =
 			authorServerSettings?.flags.canPubliclyDisplayMessages ?? false;
 		const isMessagePublic = areAllServerMessagesPublic || hasUserGrantedConsent;
-
 		const publicAccount = zDiscordAccountPublic.parse(author);
 		return {
 			...pick(
@@ -120,7 +119,8 @@ export function applyPublicFlagsToMessages<
 				'questionId',
 			),
 			author:
-				serverWithFlags.flags.anonymizeMessages && !isMessagePublic
+				serverWithFlags.flags.anonymizeMessages &&
+				!authorServerSettings?.flags.canPubliclyDisplayMessages
 					? anonymizeDiscordAccount(publicAccount, seed)
 					: publicAccount,
 			public: isMessagePublic,
