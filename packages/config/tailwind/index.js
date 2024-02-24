@@ -28,6 +28,10 @@ module.exports = {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))',
 				},
+				'ao-blue': {
+					DEFAULT: 'hsl(var(--ao-blue))',
+					foreground: 'hsl(var(--ao-blue))',
+				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))',
