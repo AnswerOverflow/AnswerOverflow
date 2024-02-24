@@ -1,24 +1,26 @@
 import { QuestionAnswerArea } from './QuestionAnswerArea';
 import { messageData } from './HomeMessages';
 import { GetStarted } from '@answeroverflow/ui/src/components/primitives/callouts';
+import { MessagesSearchBar } from 'packages/ui/src/components/primitives/messages-search-bar';
 
 const HowDoesItWorkAreaText = () => {
 	return (
-		<div className="flex w-full flex-col items-start justify-center gap-6 pb-20 xl:w-[60%]">
-			<h1 className="text-center font-header text-4xl font-bold leading-[114.5%] md:text-start md:text-6xl">
-				Bringing your Discord channels to Google
+		<div className="flex w-full flex-col items-start justify-center gap-6 xl:w-[60%]">
+			<h1 className="text-center font-header text-4xl font-black leading-[114.5%] md:text-start md:text-6xl">
+				Bringing Discord To The Web
 			</h1>
-			<p className="text-center font-body text-lg text-primary/[.95] md:text-start md:text-xl">
+			<p className="text-center font-body text-md text-primary/[.95] md:text-start md:text-xl">
 				Answer Overflow is an open source project designed to bring discord
 				channels to your favorite search engine, enabling users to easily find
 				the info they need, fast.
 			</p>
-			<div className="flex w-full flex-col items-center justify-center gap-8 sm:w-fit sm:flex-row">
+			<div className="flex w-full flex-col items-center justify-center gap-4 sm:w-fit sm:flex-row mb-8 lg:mb-0">
 				<GetStarted
-					variant={'default'}
+					variant={'blue'}
 					location="Hero"
-					className="mx-auto text-xl shadow-[0px_0px_40px_rgba(255,_255,_255,_0.2)] duration-200 hover:shadow-[0px_0px_40px_rgba(255,_255,_255,_0.4)] xl:mx-0"
+					className="mx-auto px-6 w-auto text-lg shadow-[0px_0px_40px_rgba(255,_255,_255,_0.2)] duration-200 hover:shadow-[0px_0px_40px_rgba(255,_255,_255,_0.4)] xl:mx-0"
 				/>
+				{/* <MessagesSearchBar className="w-auto m-0 text-lg border-primary/25" /> */}
 			</div>
 		</div>
 	);
