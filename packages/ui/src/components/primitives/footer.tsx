@@ -45,10 +45,6 @@ const navigation: NavigationData = {
 			category: {
 				name: 'About',
 				data: [
-					{
-						name: 'About',
-						href: 'https://www.answeroverflow.com/about',
-					},
 					{ name: 'Docs', href: 'https://docs.answeroverflow.com' },
 					{ name: 'Pricing', href: 'https://www.answeroverflow.com/pricing' },
 					{
