@@ -2,11 +2,11 @@ import { metadata as baseMetadata } from '../layout';
 import { Metadata } from 'next';
 
 import { HowDoesItWorkArea } from './_components/HowDoesItWorkArea';
-import { Footer } from '@answeroverflow/ui/src/components/primitives/footer';
-import { PricingOptions } from '@answeroverflow/ui/src/components/primitives/pricing';
-import { Navbar } from '@answeroverflow/ui/src/components/primitives/navbar';
-import { FeaturedCommunitiesSection } from 'packages/ui/src/components/pages/home/FeaturedCommunities';
-import { FeaturesSection } from 'packages/ui/src/components/pages/home/Features';
+import { Footer } from '@answeroverflow/ui/src/footer';
+import { PricingOptions } from '@answeroverflow/ui/src/pricing';
+import { Navbar } from '@answeroverflow/ui/src/navbar';
+import { FeaturedCommunitiesSection } from '@answeroverflow/ui/src/pages/home/FeaturedCommunities';
+import { FeaturesSection } from '@answeroverflow/ui/src/pages/home/Features';
 
 export const metadata: Metadata = {
 	title: 'Index Your Discord Content Into Google - Answer Overflow',

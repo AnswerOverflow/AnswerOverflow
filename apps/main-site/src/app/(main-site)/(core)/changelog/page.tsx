@@ -1,7 +1,7 @@
 import { allChangelogs } from '../../../../data/contentlayer';
 
 import { Mdx } from '../../../_components/mdx-components';
-import { BlueLink } from '@answeroverflow/ui/src/components/primitives/ui/blue-link';
+import { BlueLink } from '@answeroverflow/ui/src/ui/blue-link';
 import { sortContentByDateNewestFirst } from '../../../../utils/sort-content-by-date';
 import { Metadata } from 'next';
 export const metadata: Metadata = {

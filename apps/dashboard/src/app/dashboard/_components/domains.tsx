@@ -18,8 +18,8 @@ import type {
 	DomainVerificationStatusProps,
 	VercelDomainVerificationResponse,
 } from '@answeroverflow/api';
-import { Input } from '@answeroverflow/ui/src/components/primitives/ui/input';
-import { Button } from '@answeroverflow/ui/src/components/primitives/ui/button';
+import { Input } from '@answeroverflow/ui/src/ui/input';
+import { Button } from '@answeroverflow/ui/src/ui/button';
 import { LoadingSpinner } from './loading-spinner';
 
 function useDomainStatus({ domain }: { domain?: string }) {

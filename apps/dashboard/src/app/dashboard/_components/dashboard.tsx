@@ -23,8 +23,8 @@ import { TierAccessOnly } from './tier-access-only';
 import type { ServerDashboard } from '@answeroverflow/api';
 import { DashboardProvider } from './dashboard-context';
 import { getServerHomepageUrl } from '@answeroverflow/ui/src/utils/server';
-import { BlueLink } from '@answeroverflow/ui/src/components/primitives/ui/blue-link';
-import { GetStarted } from '@answeroverflow/ui/src/components/primitives/callouts';
+import { BlueLink } from '@answeroverflow/ui/src/ui/blue-link';
+import { GetStarted } from '@answeroverflow/ui/src/callouts';
 
 export function ServerDashboardRenderer(props: {
 	data: ServerDashboard;

@@ -1,7 +1,7 @@
 import { allChangelogs } from '../../data/contentlayer';
 import { sortContentByDateNewestFirst } from '../../utils/sort-content-by-date';
 import { Metadata } from 'next';
-import { metadata as baseMetadata } from '@answeroverflow/ui/src/components/layouts/root';
+import { metadata as baseMetadata } from '@answeroverflow/ui/src/layouts/root';
 export const metadata: Metadata = {
 	...baseMetadata,
 	other: {

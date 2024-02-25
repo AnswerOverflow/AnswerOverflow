@@ -10,11 +10,11 @@ import {
 import type { Plan } from '@answeroverflow/db';
 import { trpc } from '@answeroverflow/ui/src/utils/client';
 import { useDashboardContext } from './dashboard-context';
-import { PricingDialog } from '@answeroverflow/ui/src/components/primitives/pricing';
-import { BlueLink } from '@answeroverflow/ui/src/components/primitives/ui/blue-link';
-import { Input } from '@answeroverflow/ui/src/components/primitives/ui/input';
-import { CopyButton } from '@answeroverflow/ui/src/components/primitives/ui/copy-button';
-import { Button } from '@answeroverflow/ui/src/components/primitives/ui/button';
+import { PricingDialog } from '@answeroverflow/ui/src/pricing';
+import { BlueLink } from '@answeroverflow/ui/src/ui/blue-link';
+import { Input } from '@answeroverflow/ui/src/ui/input';
+import { CopyButton } from '@answeroverflow/ui/src/ui/copy-button';
+import { Button } from '@answeroverflow/ui/src/ui/button';
 import { LuRefreshCw } from 'react-icons/lu';
 import { toast } from 'react-toastify';
 

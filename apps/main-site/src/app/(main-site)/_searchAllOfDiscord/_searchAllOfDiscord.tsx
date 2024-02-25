@@ -1,12 +1,12 @@
 // import { Metadata } from 'next';
 // import { fetchBrowseServers } from '../../../data/browse';
-// import { FollowCursor } from '@answeroverflow/ui/src/components/primitives/ui/follow';
-// import { LinkButton } from '@answeroverflow/ui/src/components/primitives/ui/link-button';
-// import { MessagesSearchBar } from '@answeroverflow/ui/src/components/primitives/messages-search-bar';
-// import { ServerIcon } from '@answeroverflow/ui/src/components/primitives/server-icon';
-// import Link from '@answeroverflow/ui/src/components/primitives/ui/link';
-// import { Footer } from '@answeroverflow/ui/src/components/primitives/footer';
-// import { Navbar } from '@answeroverflow/ui/src/components/primitives/navbar';
+// import { FollowCursor } from '@answeroverflow/ui/src/ui/follow';
+// import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
+// import { MessagesSearchBar } from '@answeroverflow/ui/src/messages-search-bar';
+// import { ServerIcon } from '@answeroverflow/ui/src/server-icon';
+// import Link from '@answeroverflow/ui/src/ui/link';
+// import { Footer } from '@answeroverflow/ui/src/footer';
+// import { Navbar } from '@answeroverflow/ui/src/navbar';
 // import { ServerPublic } from '~api/router/server/types';
 // import Marquee from 'react-fast-marquee';
 

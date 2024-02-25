@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/icons/answer-overflow-logo';
+import { AnswerOverflowLogo } from '@answeroverflow/ui/src/icons/answer-overflow-logo';
 import { notFound } from 'next/navigation';
 
 import { allChangelogs } from '../../../../data/contentlayer';

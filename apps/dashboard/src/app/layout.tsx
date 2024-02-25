@@ -2,7 +2,7 @@ import '../styles/globals.css';
 import {
 	Layout,
 	metadata as baseMetadata,
-} from '@answeroverflow/ui/src/components/layouts/root';
+} from '@answeroverflow/ui/src/layouts/root';
 import React from 'react';
 import TRPCProvider from '../components/trpc-provider';
 import { Metadata } from 'next';

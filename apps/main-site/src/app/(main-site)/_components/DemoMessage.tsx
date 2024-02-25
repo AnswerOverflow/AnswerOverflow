@@ -5,12 +5,12 @@ import {
 	Avatar,
 	AvatarImage,
 	AvatarFallback,
-} from '@answeroverflow/ui/src/components/primitives/ui/avatar';
-import Link from '@answeroverflow/ui/src/components/primitives/ui/link';
+} from '@answeroverflow/ui/src/ui/avatar';
+import Link from '@answeroverflow/ui/src/ui/link';
 import type { ChannelPublicWithFlags } from '@answeroverflow/db';
 import { forwardRef } from 'react';
 import { getInitials } from '@answeroverflow/ui/src/utils/avatars';
-import { DiscordIcon } from '@answeroverflow/ui/src/components/primitives/icons';
+import { DiscordIcon } from '@answeroverflow/ui/src/icons';
 export type MessageProps = {
 	message: MessageWithDiscordAccount;
 	thread?: ChannelPublicWithFlags;

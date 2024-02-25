@@ -1,16 +1,16 @@
-import Link from '@answeroverflow/ui/src/components/primitives/ui/link';
+import Link from '@answeroverflow/ui/src/ui/link';
 import type { ServerPublic } from '@answeroverflow/api';
 import { trpc } from '@answeroverflow/ui/src/utils/client';
 import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
-import { Button } from '@answeroverflow/ui/src/components/primitives/ui/button';
+import { Button } from '@answeroverflow/ui/src/ui/button';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from '@answeroverflow/ui/src/components/primitives/ui/dropdown-menu';
-import { ServerIcon } from '@answeroverflow/ui/src/components/primitives/server-icon';
-import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/icons/answer-overflow-logo';
+} from '@answeroverflow/ui/src/ui/dropdown-menu';
+import { ServerIcon } from '@answeroverflow/ui/src/server-icon';
+import { AnswerOverflowLogo } from '@answeroverflow/ui/src/icons/answer-overflow-logo';
 
 import React from 'react';
 import { useParams } from 'next/navigation';

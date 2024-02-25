@@ -1,6 +1,6 @@
 import React from 'react';
-import { Navbar } from '@answeroverflow/ui/src/components/primitives/navbar';
-import { Footer } from '@answeroverflow/ui/src/components/primitives/footer';
+import { Navbar } from '@answeroverflow/ui/src/navbar';
+import { Footer } from '@answeroverflow/ui/src/footer';
 import { notFound } from 'next/navigation';
 import { findServerByCustomDomain } from '@answeroverflow/db';
 

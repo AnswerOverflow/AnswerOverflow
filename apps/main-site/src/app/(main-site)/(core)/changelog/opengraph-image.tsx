@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { AnswerOverflowLogo } from '@answeroverflow/ui/src/components/primitives/icons/answer-overflow-logo';
+import { AnswerOverflowLogo } from '@answeroverflow/ui/src/icons/answer-overflow-logo';
 import { allChangelogs } from '../../../../data/contentlayer';
 import { sortContentByDateNewestFirst } from '../../../../utils/sort-content-by-date';
 export const runtime = 'edge';

@@ -12,13 +12,13 @@ import { MdMoneyOffCsred, MdAttachMoney } from 'react-icons/md';
 import { CiCircleMore } from 'react-icons/ci';
 import { trpc } from '@answeroverflow/ui/src/utils/client';
 import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
-import { Command } from '@answeroverflow/ui/src/components/primitives/ui/command';
-import { Button } from '@answeroverflow/ui/src/components/primitives/ui/button';
-import { ServerIcon } from '@answeroverflow/ui/src/components/primitives/server-icon';
-import { Heading } from '@answeroverflow/ui/src/components/primitives/ui/heading';
-import { BlueLink } from '@answeroverflow/ui/src/components/primitives/ui/blue-link';
-import { ManageServerCard } from '@answeroverflow/ui/src/components/primitives/server-card';
-import { LinkButton } from '@answeroverflow/ui/src/components/primitives/ui/link-button';
+import { Command } from '@answeroverflow/ui/src/ui/command';
+import { Button } from '@answeroverflow/ui/src/ui/button';
+import { ServerIcon } from '@answeroverflow/ui/src/server-icon';
+import { Heading } from '@answeroverflow/ui/src/ui/heading';
+import { BlueLink } from '@answeroverflow/ui/src/ui/blue-link';
+import { ManageServerCard } from '@answeroverflow/ui/src/server-card';
+import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
 import posthog from 'posthog-js';
 
 export type SubmittedData = {
