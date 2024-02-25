@@ -5,12 +5,26 @@ dotenv.config({
 	path: '../../.env',
 });
 
+// ps proxy has some issues w/ db push, so here's a workaround
+// eslint-disable-next-line n/no-process-env
+let dbUrl = process.env.DATABASE_URL ?? '';
+if (dbUrl.includes('http') && dbUrl.includes('localhost')) {
+	dbUrl = dbUrl.replace('http', 'mysql');
+	// remove from second : to @
+	const start = dbUrl.indexOf(':', 7);
+	const end = dbUrl.indexOf('@');
+	dbUrl = dbUrl.slice(0, start) + dbUrl.slice(end);
+	// remove :3900
+	dbUrl = dbUrl.replace(':3900', '');
+	// add /planetscale
+	dbUrl += '/planetscale';
+}
 export default {
 	schema: './src/schema.ts',
 	out: './drizzle',
 	driver: 'mysql2',
 	dbCredentials: {
 		// eslint-disable-next-line n/no-process-env
-		connectionString: process.env['DATABASE_URL'] ?? '',
+		connectionString: dbUrl,
 	},
 } satisfies Config;
