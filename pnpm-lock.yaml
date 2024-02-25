@@ -605,9 +605,6 @@ importers:
       react-social-icons:
         specifier: ^5.15.0
         version: 5.15.0(react@18.2.0)
-      react-wrap-balancer:
-        specifier: ^0.4.1
-        version: 0.4.1(react@18.2.0)
       react-xarrows:
         specifier: ^2.0.2
         version: 2.0.2(react@18.2.0)
@@ -1664,6 +1661,9 @@ importers:
       react-use:
         specifier: ^17.4.0
         version: 17.5.0(react-dom@18.2.0)(react@18.2.0)
+      react-wrap-balancer:
+        specifier: ^0.4.1
+        version: 0.4.1(react@18.2.0)
       schema-dts:
         specifier: ^1.1.2
         version: 1.1.2(typescript@5.3.3)
@@ -3305,6 +3305,10 @@ packages:
     peerDependencies:
       '@effect-ts/otel-node': '*'
     peerDependenciesMeta:
+      '@effect-ts/core':
+        optional: true
+      '@effect-ts/otel':
+        optional: true
       '@effect-ts/otel-node':
         optional: true
     dependencies:
