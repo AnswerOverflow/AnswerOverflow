@@ -13,7 +13,7 @@ export function GetStarted(
 			variant="outline"
 			{...props}
 		>
-			{props.children || 'Get Started'}
+			{props.children || 'Add Your Server'}
 		</LinkButton>
 	);
 }
