@@ -12,7 +12,7 @@ concurrency:
 
 env:
   # None of these are real secrets although this should probably be updated
-  DATABASE_URL: mysql://root:mysql@localhost:33306/api_dev
+  DATABASE_URL: http://root:nonNullPassword@localhost:3900
 
   ELASTICSEARCH_URL: http://localhost:9200
   ELASTICSEARCH_USERNAME: elastic
