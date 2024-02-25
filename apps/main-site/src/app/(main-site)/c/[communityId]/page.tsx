@@ -1,5 +1,5 @@
 import { findServerWithCommunityPageData } from '@answeroverflow/db';
-import { CommunityPage } from '@answeroverflow/ui/src/components/pages/CommunityPage';
+import { CommunityPage } from '@answeroverflow/ui/src/pages/CommunityPage';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';

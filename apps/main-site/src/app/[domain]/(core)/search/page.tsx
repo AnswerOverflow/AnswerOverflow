@@ -1,5 +1,5 @@
 import { findServerByCustomDomain } from '@answeroverflow/db';
-import { SearchPage } from '@answeroverflow/ui/src/components/pages/SearchPage';
+import { SearchPage } from '@answeroverflow/ui/src/pages/SearchPage';
 import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';

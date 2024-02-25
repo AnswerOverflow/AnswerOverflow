@@ -3,7 +3,7 @@ import { allChangelogs, Changelog } from '../../../../../data/contentlayer';
 
 import { Metadata } from 'next';
 import { Mdx } from '../../../../_components/mdx-components';
-import Link from '@answeroverflow/ui/src/components/primitives/ui/link';
+import Link from '@answeroverflow/ui/src/ui/link';
 import { HiArrowUturnLeft } from 'react-icons/hi2';
 import { HiArrowLeft, HiArrowRight } from 'react-icons/hi';
 import Image from 'next/image';

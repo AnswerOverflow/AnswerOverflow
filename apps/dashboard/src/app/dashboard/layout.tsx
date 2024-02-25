@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 
-import { Footer } from '@answeroverflow/ui/src/components/primitives/footer';
+import { Footer } from '@answeroverflow/ui/src/footer';
 import { Navbar } from './_components/navbar';
 
 export default function Layout({

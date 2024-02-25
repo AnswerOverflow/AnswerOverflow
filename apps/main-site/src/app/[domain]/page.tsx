@@ -3,7 +3,7 @@ import {
 	findServerWithCommunityPageData,
 } from '@answeroverflow/db';
 import { notFound } from 'next/navigation';
-import { CommunityPage } from '@answeroverflow/ui/src/components/pages/CommunityPage';
+import { CommunityPage } from '@answeroverflow/ui/src/pages/CommunityPage';
 import { Metadata } from 'next';
 export const metadata: Metadata = {
 	alternates: {

@@ -1,4 +1,4 @@
-import Link from '@answeroverflow/ui/src/components/primitives/ui/link';
+import Link from '@answeroverflow/ui/src/ui/link';
 import { DISCORD_LINK } from '@answeroverflow/constants';
 import { Callout } from 'nextra-theme-docs';
 export const NextraStyledLink = ({

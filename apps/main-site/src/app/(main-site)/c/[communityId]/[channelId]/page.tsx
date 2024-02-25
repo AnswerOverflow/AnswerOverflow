@@ -1,7 +1,7 @@
 import { findServerWithCommunityPageData } from '@answeroverflow/db';
 import { notFound, redirect } from 'next/navigation';
 import { sharedEnvs } from '@answeroverflow/env/shared';
-import { CommunityPage } from '@answeroverflow/ui/src/components/pages/CommunityPage';
+import { CommunityPage } from '@answeroverflow/ui/src/pages/CommunityPage';
 import { z } from 'zod';
 
 export default async function CommunityChannelPage({

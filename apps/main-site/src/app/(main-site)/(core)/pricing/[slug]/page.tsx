@@ -1,4 +1,4 @@
-import { Pricing } from '@answeroverflow/ui/src/components/primitives/pricing';
+import { Pricing } from '@answeroverflow/ui/src/pricing';
 import { Metadata } from 'next';
 export const metadata: Metadata = {
 	title: 'Pricing - Answer Overflow',
