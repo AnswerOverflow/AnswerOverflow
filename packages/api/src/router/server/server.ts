@@ -40,7 +40,6 @@ import {
 	createEnterprisePlanCheckoutSession,
 } from '@answeroverflow/payments';
 import { sharedEnvs } from '@answeroverflow/env/shared';
-import { revalidateTag } from 'next/cache';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
 	'Read the rules consent already enabled';
