@@ -1,19 +1,22 @@
 version: '3.8'
 
 services:
-  db-mysql:
-    container_name: ao-db-sql
-    image: mysql:8.1.0-oracle
-    command: mysqld --default-authentication-plugin=mysql_native_password
+  ps-mysql:
+    image: mysql:8.0
+    restart: always
     environment:
-      - MYSQL_USER=mysql
-      - MYSQL_PASSWORD=mysql
-      - MYSQL_ROOT_PASSWORD=mysql
-      - MYSQL_DATABASE=api_dev
-    expose:
-      - 3306
+      MYSQL_DATABASE: planetscale
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    command:
+      [
+        "--max_connections=10000",
+        "--default-authentication-plugin=mysql_native_password",
+      ]
     ports:
-      - 33306:3306
+      - 3306:3306
+    volumes:
+      - ps-mysql:/var/lib/mysql
 
   db-elastic:
     container_name: ao-db-elastic
@@ -53,3 +56,22 @@ services:
         reservations:
           cpus: '0.25'
           memory: 20M
+
+  planetscale-proxy:
+    image: ghcr.io/mattrobenolt/ps-http-sim:latest
+    command:
+      [
+        "-mysql-no-pass",
+        "-listen-port=3900",
+        "-mysql-dbname=planetscale",
+        "-mysql-addr=ps-mysql",
+      ]
+    depends_on:
+      - ps-mysql
+    ports:
+      - 3900:3900
+    links:
+      - ps-mysql
+
+volumes:
+  ps-mysql:

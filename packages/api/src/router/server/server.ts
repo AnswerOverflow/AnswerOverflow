@@ -92,11 +92,6 @@ export const serverRouter = router({
 		.query(async ({ ctx, input }) => {
 			const data = await protectedFetch({
 				fetch: () => {
-					try {
-						revalidateTag('cache');
-					} catch {
-						// ignore
-					}
 					return findServerByAliasOrId(input);
 				},
 				permissions: () => assertCanEditServer(ctx, input),

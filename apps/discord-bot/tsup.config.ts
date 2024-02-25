@@ -8,6 +8,7 @@ export default defineConfig({
 		'src/**/*.tsx',
 		'!src/**/*.test.ts*',
 	],
+	clean: true,
 	skipNodeModulesBundle: true,
 	tsconfig: 'tsconfig.json',
 	noExternal: [
