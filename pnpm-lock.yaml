@@ -1496,8 +1496,8 @@ importers:
         specifier: workspace:^
         version: link:../utils
       '@elastic/elasticsearch':
-        specifier: ^8.9.0
-        version: 8.12.0
+        specifier: ^8.12.2
+        version: 8.12.2
       discord-api-types:
         specifier: ^0.37.67
         version: 0.37.67
@@ -3499,18 +3499,18 @@ packages:
     resolution: {integrity: sha512-/crHGujo0xnuHIYNc1VgP0HGJGFSoSqq88JFXe6FmFyXPpWt8Xu39LyLg7rchsxfXFeEdA9CrIZvLV5eswXV5g==}
     dev: false
 
-  /@elastic/elasticsearch@8.12.0:
-    resolution: {integrity: sha512-cgUfEYyyXao/VqqS5RGsRMBKVck1fhPYX2Aux7jOwPqMAGE+VE+ra7KhU0T2ZqIpahPCbvx4ro4WPzhBrsVH6A==}
+  /@elastic/elasticsearch@8.12.2:
+    resolution: {integrity: sha512-04NvH3LIgcv1Uwguorfw2WwzC9Lhfsqs9f0L6uq6MrCw0lqe/HOQ6E8vJ6EkHAA15iEfbhtxOtenbZVVcE+mAQ==}
     engines: {node: '>=18'}
     dependencies:
-      '@elastic/transport': 8.4.0
+      '@elastic/transport': 8.4.1
       tslib: 2.6.2
     transitivePeerDependencies:
       - supports-color
     dev: false
 
-  /@elastic/transport@8.4.0:
-    resolution: {integrity: sha512-Yb3fDa7yGD0ca3uMbL64M3vM1cE5h5uHmBcTjkdB4VpCasRNKSd09iDpwqX8zX1tbBtxcaKYLceKthWvPeIxTw==}
+  /@elastic/transport@8.4.1:
+    resolution: {integrity: sha512-/SXVuVnuU5b4dq8OFY4izG+dmGla185PcoqgK6+AJMpmOeY1QYVNbWtCwvSvoAANN5D/wV+EBU8+x7Vf9EphbA==}
     engines: {node: '>=16'}
     dependencies:
       debug: 4.3.4
