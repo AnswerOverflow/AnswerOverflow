@@ -5,5 +5,5 @@ export default function Link(
 		href: string;
 	},
 ) {
-	return <NextLink prefetch={false} {...props} />;
+	return <NextLink prefetch={true} {...props} />;
 }
