@@ -22,6 +22,7 @@ Sitemap: https://${domain}/sitemap.xml
 		{
 			headers: {
 				'content-type': 'text/plain',
+				'cache-control': 'public, max-age=604800, immutable',
 			},
 			status: 200,
 		},
