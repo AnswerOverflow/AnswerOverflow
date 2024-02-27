@@ -22,7 +22,12 @@ Sitemap: https://${domain}/sitemap.xml
 		{
 			headers: {
 				'content-type': 'text/plain',
-				'cache-control': 'public, max-age=604800, immutable',
+				// client cache for 60 seconds
+				'Cache-Control': 'max-age=60',
+				// downstream cache for 12 hours
+				'CDN-Cache-Control': 'max-age=43200',
+				// downstream cache for 24 hours
+				'Vercel-CDN-Cache-Control': 'max-age=86400',
 			},
 			status: 200,
 		},
