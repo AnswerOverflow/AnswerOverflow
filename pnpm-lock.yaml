@@ -147,8 +147,8 @@ importers:
         specifier: ^4.10.1
         version: 4.12.0(react@18.2.0)
       react-toastify:
-        specifier: ^9.1.3
-        version: 9.1.3(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^10.0.4
+        version: 10.0.4(react-dom@18.2.0)(react@18.2.0)
       remark-gfm:
         specifier: ^3.0.1
         version: 3.0.1
@@ -1656,8 +1656,8 @@ importers:
         specifier: ^9.7.2
         version: 9.7.3(@react-three/fiber@8.15.16)(konva@9.3.2)(react-dom@18.2.0)(react-konva@18.2.10)(react-native@0.73.3)(react-zdog@1.2.2)(react@18.2.0)(three@0.161.0)(zdog@1.1.3)
       react-toastify:
-        specifier: ^9.1.3
-        version: 9.1.3(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^10.0.4
+        version: 10.0.4(react-dom@18.2.0)(react@18.2.0)
       react-use:
         specifier: ^17.4.0
         version: 17.5.0(react-dom@18.2.0)(react@18.2.0)
@@ -16255,13 +16255,13 @@ packages:
       tslib: 2.6.2
     dev: false
 
-  /react-toastify@9.1.3(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-fPfb8ghtn/XMxw3LkxQBk3IyagNpF/LIKjOBflbexr2AWxAH1MJgvnESwEwBn9liLFXgTKWgBSdZpw9m4OTHTg==}
+  /react-toastify@10.0.4(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-etR3RgueY8pe88SA67wLm8rJmL1h+CLqUGHuAoNsseW35oTGJEri6eBTyaXnFKNQ80v/eO10hBYLgz036XRGgA==}
     peerDependencies:
       react: '>=16'
       react-dom: '>=16'
     dependencies:
-      clsx: 1.2.1
+      clsx: 2.1.0
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
