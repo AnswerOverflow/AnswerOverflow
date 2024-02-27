@@ -9,7 +9,7 @@ export function GetStarted(
 	return (
 		<LinkButton
 			href={'/onboarding'}
-			prefetch={false}
+			prefetch={true}
 			variant="outline"
 			{...props}
 		>
