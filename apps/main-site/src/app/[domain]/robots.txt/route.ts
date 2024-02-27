@@ -22,8 +22,8 @@ Sitemap: https://${domain}/sitemap.xml
 		{
 			headers: {
 				'content-type': 'text/plain',
-				// client cache for 60 seconds
-				'Cache-Control': 'max-age=60',
+				// client cache for 12 hours
+				'Cache-Control': 'max-age=43200',
 				// downstream cache for 12 hours
 				'CDN-Cache-Control': 'max-age=43200',
 				// downstream cache for 24 hours
