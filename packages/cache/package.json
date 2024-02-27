@@ -28,7 +28,7 @@
 	"devDependencies": {
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
-		"@types/node": "^20.5.1",
+		"@types/node": "^20.11.20",
 		"@vitest/coverage-c8": "^0.28.5",
 		"cross-env": "^7.0.3",
 		"dotenv-cli": "^7.3.0",
