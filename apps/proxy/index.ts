@@ -1,5 +1,8 @@
 import { createProxyServer } from 'http-proxy';
 
-createProxyServer({
-	target: 'http://localhost:3000',
-}).listen(3001);
+// after 5 seconds
+setTimeout(() => {
+	createProxyServer({
+		target: 'http://localhost:3000',
+	}).listen(3001);
+}, 5000);
