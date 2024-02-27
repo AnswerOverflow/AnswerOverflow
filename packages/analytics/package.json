@@ -14,7 +14,7 @@
 		"@answeroverflow/db": "workspace:^",
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
-		"@types/node": "^18.17.6",
+		"@types/node": "^20.11.20",
 		"@types/react": "^18.2.20",
 		"@types/react-dom": "^18.2.7",
 		"eslint": "^8.47.0",
