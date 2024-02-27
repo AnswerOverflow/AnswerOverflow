@@ -1134,8 +1134,8 @@ importers:
         specifier: ^0.28.5
         version: 0.28.5
       aws-sdk:
-        specifier: ^2.1519.0
-        version: 2.1549.0
+        specifier: ^2.1565.0
+        version: 2.1565.0
       discord-api-types:
         specifier: ^0.37.67
         version: 0.37.67
@@ -3305,10 +3305,6 @@ packages:
     peerDependencies:
       '@effect-ts/otel-node': '*'
     peerDependenciesMeta:
-      '@effect-ts/core':
-        optional: true
-      '@effect-ts/otel':
-        optional: true
       '@effect-ts/otel-node':
         optional: true
     dependencies:
@@ -8596,8 +8592,8 @@ packages:
     resolution: {integrity: sha512-j1QzY8iPNPG4o4xmO3ptzpRxTciqD3MgEHtifP/YnJpIo58Xu+ne4BejlbkuaLfXn/nz6HFiw29bLpj2PNMdGg==}
     engines: {node: '>= 0.4'}
 
-  /aws-sdk@2.1549.0:
-    resolution: {integrity: sha512-SoVfrrV3A2mxH+NV2tA0eMtG301glhewvhL3Ob4107qLWjvwjy/CoWLclMLmfXniTGxbI8tsgN0r5mLZUKey3Q==}
+  /aws-sdk@2.1565.0:
+    resolution: {integrity: sha512-5+qkIUd6GfzybqWP43RCMqCNL5Ry3ztCWcC5d9Mq0O9cqQQM9eoUfktdgiu1eFc3zAM01dFNUR6fZfXnmZgkuQ==}
     engines: {node: '>= 10.0.0'}
     dependencies:
       buffer: 4.9.2
@@ -8841,7 +8837,7 @@ packages:
     resolution: {integrity: sha512-xq+q3SRMOxGivLhBNaUdC64hDTQwejJ+H0T/NB1XMtTVEwNTrfFF3gAxiyW0Bu/xWEGhjVKgUcMhCrUy2+uCWg==}
     dependencies:
       base64-js: 1.5.1
-      ieee754: 1.1.13
+      ieee754: 1.2.1
       isarray: 1.0.0
     dev: false
 
