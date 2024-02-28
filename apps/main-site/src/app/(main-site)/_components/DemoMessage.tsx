@@ -172,7 +172,7 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 										messageId: message.id,
 										threadId: thread?.id,
 									})}
-									className="absolute right-0 size-6 group-hover:visible"
+									className="absolute right-0 h-6 w-6 group-hover:visible"
 									aria-label="Open in Discord"
 								>
 									<DiscordIcon color="blurple" />
@@ -203,7 +203,7 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 
 		return (
 			<div
-				className={`relative size-full p-2 ${
+				className={`relative h-full w-full  p-2 ${
 					additionalMessageBoxClassNames ?? ''
 				} ${forceDarkMode ? 'bg-[#36393F]' : 'dark:bg-[#36393F]'}`}
 				ref={ref}
