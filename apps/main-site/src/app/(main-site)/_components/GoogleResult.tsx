@@ -10,7 +10,7 @@ export const GoogleResult = forwardRef<
 			<div className="group">
 				<div className="flex w-full flex-row items-center justify-start">
 					<span className="text-[14px] text-[#bdc1c6]">{url}</span>
-					<div className="ml-[12px] size-[22px]" aria-hidden>
+					<div className="ml-[12px] h-[22px] w-[22px]" aria-hidden>
 						<svg
 							focusable="false"
 							xmlns="http://www.w3.org/2000/svg"
