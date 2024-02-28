@@ -7,6 +7,6 @@ export const ClientUserAvatar = dynamic(
 	() => import('./user-dropdown').then((mod) => mod.UserAvatar),
 	{
 		ssr: false,
-		loading: () => <Skeleton className="size-12 rounded-full" />,
+		loading: () => <Skeleton className="h-12 w-12 rounded-full" />,
 	},
 );

@@ -128,7 +128,7 @@ const MainSiteFooter = () => (
 					referrerPolicy="no-referrer"
 				>
 					<span className="sr-only">{item.name}</span>
-					<item.icon className="size-6" aria-hidden="true" />
+					<item.icon className="h-6 w-6" aria-hidden="true" />
 				</Link>
 			))}
 		</div>
