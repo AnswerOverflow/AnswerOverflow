@@ -12,7 +12,7 @@ export default function Dashboard() {
 		case 'loading':
 			return (
 				<div className="flex h-[50vh] items-center justify-center">
-					<div className="size-32 animate-spin rounded-full border-b-4 border-blue-400" />
+					<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-blue-400" />
 				</div>
 			);
 		case 'error':

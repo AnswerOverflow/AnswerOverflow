@@ -50,8 +50,8 @@ export function DashboardServerSelect() {
 						>
 							<ServerCard server={selectedServer} />
 							<div className=" grid grid-cols-1 grid-rows-2">
-								<HiChevronUp className="size-4" />
-								<HiChevronDown className="size-4" />
+								<HiChevronUp className="h-4 w-4" />
+								<HiChevronDown className="h-4 w-4" />
 							</div>
 						</Button>
 					) : (
@@ -71,7 +71,7 @@ export function DashboardServerSelect() {
 							href={'/onboarding'}
 							className={'flex items-center gap-2 text-left'}
 						>
-							<LiaPlusCircleSolid className={'size-[40px]'} />
+							<LiaPlusCircleSolid className={'h-[40px] w-[40px]'} />
 							Add new
 						</Link>
 					</DropdownMenuItem>
