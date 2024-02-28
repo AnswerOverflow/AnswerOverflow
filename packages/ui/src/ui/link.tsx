@@ -1,9 +1,9 @@
 import NextLink from 'next/link';
 import React from 'react';
 export default function Link(
-	props: React.ComponentPropsWithoutRef<typeof NextLink> & {
+	props: React.HTMLAttributes<HTMLAnchorElement> & {
 		href: string;
 	},
 ) {
-	return <NextLink prefetch={false} {...props} />;
+	return <a {...props} />;
 }

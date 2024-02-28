@@ -1,0 +1,24 @@
+---
+import { HowDoesItWorkArea } from '@answeroverflow/ui/src/pages/home/HowDoesItWorkArea';
+import { Footer } from '@answeroverflow/ui/src/footer';
+import { PricingOptions } from '@answeroverflow/ui/src/pricing';
+import { Navbar } from '@answeroverflow/ui/src/navbar';
+import { FeaturedCommunitiesSection } from '@answeroverflow/ui/src/pages/home/FeaturedCommunities';
+import { FeaturesSection } from '@answeroverflow/ui/src/pages/home/Features';
+import '../../../../global.css';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+	<main class="max-w-screen-3xl mx-auto sm:px-[4rem] 2xl:px-[6rem]">
+		<HowDoesItWorkArea client:load />
+		<div className="flex flex-col items-center px-4 pb-20 pt-10">
+			<FeaturesSection client:load />
+			<div className={'mt-20 w-full'}>
+				<PricingOptions />
+			</div>
+			<FeaturedCommunitiesSection className="pt-20" />
+		</div>
+	</main>
+	<Footer tenant={undefined} />
+</Layout>

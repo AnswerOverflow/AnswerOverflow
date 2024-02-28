@@ -59,7 +59,7 @@ export const QuestionAnswerArea = ({
 				/>
 			</div>
 			<div className="arrow">
-				<Xarrow
+				{/* <Xarrow
 					start={discordPageRef}
 					end={googlePageRef}
 					color={theme === 'dark' ? 'white' : 'black'}
@@ -73,7 +73,7 @@ export const QuestionAnswerArea = ({
 					curveness={2}
 					_cpx1Offset={-60}
 					_cpx2Offset={-60}
-				/>
+				/> */}
 			</div>
 		</>
 	);

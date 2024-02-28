@@ -2,7 +2,7 @@
 
 // eslint-disable-next-line no-undef
 module.exports = {
-	content: ['./src/**/*.{ts,tsx}'],
+	content: ['./src/**/*.{ts,tsx,astro}'],
 	theme: {
 		transparent: 'transparent',
 		current: 'currentColor',

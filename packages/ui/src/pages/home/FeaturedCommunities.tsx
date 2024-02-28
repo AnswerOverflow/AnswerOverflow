@@ -108,11 +108,10 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
       hover:z-10 hover:scale-110 hover:shadow-lg
       "
 			>
-				<Image
+				<img
 					src={props.iconUrl}
 					width={92}
 					height={92}
-					unoptimized
 					alt={`${props.name} community icon`}
 					className="rounded-full"
 				/>
@@ -126,9 +125,11 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 // TODO: The marquee is really hacky here to get sizing right on all devices
 export const FeaturedCommunitiesSection = (props: { className?: string }) => {
 	return (
-		<div className={cn('overflow-x-hidden text-center', props.className)}>
+		<div className={cn('overflow-x-hidden text-center', props?.className)}>
 			<Heading.H2>
-				<Balancer>Serving 2+ million users across 300 servers</Balancer>
+				{/* <Balancer> */}
+				Serving 2+ million users across 300 servers
+				{/* </Balancer> */}
 			</Heading.H2>
 			<div className="grid grid-cols-2 gap-8 py-8 sm:grid-cols-4">
 				{featuredCommunities.map((community) => (

@@ -26,7 +26,7 @@ const HowDoesItWorkAreaText = () => {
 
 export const HowDoesItWorkArea = () => {
 	return (
-		<div className="z-20 flex min-h-[calc(100vh-10rem)] items-center px-4 pb-20 pt-10 sm:px-[4rem] 2xl:px-[6rem]">
+		<div className="z-20 flex min-h-[calc(100vh-10rem)] items-center pb-20 pt-10">
 			<div className="flex h-full w-full flex-col transition-all lg:gap-32 xl:flex-row 2xl:gap-72">
 				<HowDoesItWorkAreaText />
 				<div className="hidden items-center justify-center sm:flex 2xl:grow">

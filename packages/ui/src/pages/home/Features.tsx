@@ -18,14 +18,14 @@ const HomeFeature = (props: {
 
 export const FeaturesSection = (props: { className?: string }) => {
 	return (
-		<div className={cn('w-full', props.className)}>
+		<div className={cn('w-full', props?.className)}>
 			<Heading.H2 className="text-center md:text-right">
 				Tools tailored to your community
 			</Heading.H2>
 			<Heading.H3 className="pt-0 text-center text-lg md:text-right">
-				<Balancer>
-					Your community is unique, {"it's"} time you had a bot that matches it
-				</Balancer>
+				{/* <Balancer> */}
+				Your community is unique, {"it's"} time you had a bot that matches it
+				{/* </Balancer> */}
 			</Heading.H3>
 
 			<div className="mt-2 grid grid-cols-1 grid-rows-1 gap-10 md:grid-cols-2 md:grid-rows-2">
