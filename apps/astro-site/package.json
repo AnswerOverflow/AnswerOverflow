@@ -24,6 +24,7 @@
     "typescript": "^5.3.3"
   },
   "devDependencies": {
-    "@answeroverflow/tsconfig": "workspace:^"
+    "@answeroverflow/tsconfig": "workspace:^",
+    "vite-tsconfig-paths": "^4.3.1"
   }
 }

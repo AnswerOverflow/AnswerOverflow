@@ -7,12 +7,7 @@ export function GetStarted(
 	},
 ) {
 	return (
-		<LinkButton
-			href={'/onboarding'}
-			prefetch={false}
-			variant="outline"
-			{...props}
-		>
+		<LinkButton href={'/onboarding'} variant="outline" {...props}>
 			{props.children || 'Add Your Server'}
 		</LinkButton>
 	);

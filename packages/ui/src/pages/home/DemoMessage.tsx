@@ -1,5 +1,4 @@
 import { getSnowflakeUTCDate } from '@answeroverflow/ui/src/utils/snowflake';
-import Image from 'next/image';
 import type { MessageWithDiscordAccount } from '@answeroverflow/db';
 import {
 	Avatar,
@@ -91,7 +90,7 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 
 			const aspectRatio = width / height;
 			return (
-				<Image
+				<img
 					key={attachment.url}
 					src={attachment.url}
 					width={originalWidth}
