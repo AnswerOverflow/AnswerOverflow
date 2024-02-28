@@ -21,7 +21,7 @@ export const AttachmentDownloader = (props: AttachmentDownloaderProps) => {
 		>
 			<Paragraph className="py-0">{fileNameTruncated}</Paragraph>
 			{/* Download icon */}
-			<ArrowDownTrayIcon className="ml-auto size-5" />
+			<ArrowDownTrayIcon className="ml-auto h-5 w-5" />
 		</LinkButton>
 	);
 };

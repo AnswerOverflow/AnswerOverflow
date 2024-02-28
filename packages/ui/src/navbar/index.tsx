@@ -56,7 +56,7 @@ export const Navbar = (props: {
 			<div className="flex items-center gap-2">
 				<ThemeSwitcher />
 				<LinkButton variant={'ghost'} size={'icon'} href={'/search'}>
-					<LiaSearchSolid className="size-8" />
+					<LiaSearchSolid className="h-8 w-8" />
 					<span className="sr-only">Search Answer Overflow</span>
 				</LinkButton>
 				{!tenant && (
@@ -68,7 +68,7 @@ export const Navbar = (props: {
 							href={GITHUB_LINK}
 							target="_blank"
 						>
-							<GitHubIcon className="size-8" />
+							<GitHubIcon className="h-8 w-8" />
 							<span className="sr-only">GitHub</span>
 						</LinkButton>
 						<GetStarted className={'hidden md:block'} location="Navbar" />

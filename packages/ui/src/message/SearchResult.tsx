@@ -10,7 +10,7 @@ const ThreadIcon = () => {
 			viewBox="0 0 24 24"
 			strokeWidth={1.5}
 			stroke="currentColor"
-			className="size-6 text-primary/75"
+			className="h-6 w-6 text-primary/75"
 		>
 			<path
 				strokeLinecap="round"
@@ -29,7 +29,7 @@ const ViewsIcon = () => {
 			viewBox="0 0 24 24"
 			strokeWidth={1.5}
 			stroke="currentColor"
-			className="size-6"
+			className="h-6 w-6"
 		>
 			<path
 				strokeLinecap="round"
@@ -48,7 +48,7 @@ const ViewsIcon = () => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Views = () => (
 	<>
-		<div className="ml-2 size-2 rounded-[50%]" aria-hidden />
+		<div className="ml-2 h-2 w-2 rounded-[50%]" aria-hidden />
 
 		{/* Views */}
 		<span className="px-1">{0}</span>
@@ -86,7 +86,7 @@ const SearchResultSidebar = (
 
 export const SearchResult = ({ result }: { result: SearchResultProps }) => {
 	return (
-		<div className="flex size-full flex-col-reverse rounded-standard lg:flex-row">
+		<div className="flex h-full w-full flex-col-reverse rounded-standard lg:flex-row">
 			<LinkMessage
 				message={result.message}
 				thread={result.thread}
