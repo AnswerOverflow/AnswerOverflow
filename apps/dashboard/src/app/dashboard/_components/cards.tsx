@@ -250,7 +250,7 @@ export const ApiKeyCard = () => {
 					}}
 				>
 					<LuRefreshCw
-						className={`size-6  ${
+						className={`h-6 w-6  ${
 							mutation.isLoading || uss.isLoading ? 'animate-spin' : ''
 						}`}
 					/>

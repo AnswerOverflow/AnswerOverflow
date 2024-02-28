@@ -33,10 +33,10 @@ const ServerHero = ({ server }: Pick<ServerCardProps, 'server'>) => {
 					src={`https://cdn.discordapp.com/icons/${server.id}/${server.icon}.webp`}
 					alt={server.name}
 					fill
-					className="size-full overflow-hidden rounded-lg object-cover opacity-25"
+					className="h-full w-full overflow-hidden rounded-lg object-cover opacity-25"
 				/>
 			)}
-			<div className="relative z-10 size-full rounded-lg bg-black/5 shadow-md backdrop-blur-md " />
+			<div className="relative z-10 h-full w-full rounded-lg bg-black/5 shadow-md backdrop-blur-md " />
 			<div className="absolute inset-0 z-20 flex items-center justify-center">
 				{server && <ServerIcon server={server} size={64} />}
 			</div>

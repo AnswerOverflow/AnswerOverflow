@@ -195,7 +195,7 @@ export async function MessageResultPage({
 	const Main = () => (
 		<div className={'flex grow flex-col'}>
 			<div className="mb-2 flex flex-col-reverse items-center justify-between gap-2 sm:flex-row sm:py-0 md:my-8">
-				<div className="flex size-full grow flex-col items-center justify-between gap-2 md:gap-4">
+				<div className="flex h-full w-full grow flex-col items-center justify-between gap-2 md:gap-4">
 					<MessagesSearchBar className={'hidden md:block'} />
 					<div className={'block xl:hidden'}>
 						<ServerInvite

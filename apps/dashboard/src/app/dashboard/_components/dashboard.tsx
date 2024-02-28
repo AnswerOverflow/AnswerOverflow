@@ -65,7 +65,7 @@ export function ServerDashboardRenderer(props: {
 										className="flex items-center gap-2 no-underline hover:underline"
 									>
 										<Title>View Community</Title>
-										<GoLinkExternal className="mt-1 size-5" />
+										<GoLinkExternal className="mt-1 h-5 w-5" />
 									</BlueLink>
 								</Card>
 
@@ -114,7 +114,7 @@ export function ServerDashboard(props: { serverId: string }) {
 			case 'loading':
 				return (
 					<div className="flex h-[50vh] items-center justify-center">
-						<div className="size-32 animate-spin rounded-full border-b-4 border-blue-400" />
+						<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-blue-400" />
 					</div>
 				);
 			case 'error':

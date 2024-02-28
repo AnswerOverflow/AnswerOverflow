@@ -25,7 +25,7 @@ export function LogoutItem(props: { tenant: ServerPublic | undefined }) {
 				}
 			}}
 		>
-			<LuLogOut className="mr-2 size-4" />
+			<LuLogOut className="mr-2 h-4 w-4" />
 			<span className="w-full">Log out</span>
 		</DropdownMenuItem>
 	);
