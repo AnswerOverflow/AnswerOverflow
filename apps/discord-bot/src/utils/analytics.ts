@@ -123,6 +123,7 @@ type EventMap = {
 	'Asked Question': QuestionAskedProps;
 	'Solved Question': QuestionSolvedProps;
 	'Leaderboard Viewed': UserProps<'User'>;
+	'Quick Action Command Sent': UserProps<'User'>;
 	'Mark Solution Instructions Sent': QuestionAskedProps; // TODO: Track if the user has ever had the instructions sent to them before
 	'Mark Solution Application Command Used': MarkSolutionUsedProps;
 	'Dismiss Button Clicked': UserProps<'User'> &
