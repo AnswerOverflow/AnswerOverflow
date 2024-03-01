@@ -437,14 +437,12 @@ describe('Make Mark Solution Response', () => {
 		solutionEmbedData = {
 			description: solutionMessageWithConsentRequest,
 			color: 9228799,
-			fields: server.customDomain
-				? []
-				: [
-						{
-							name: 'Learn more',
-							value: 'https://answeroverflow.com',
-						},
-				  ],
+			fields: [
+				{
+					name: 'Learn more',
+					value: 'https://answeroverflow.com',
+				},
+			],
 		} as EmbedData;
 	});
 
