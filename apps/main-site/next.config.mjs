@@ -81,11 +81,6 @@ const config = {
 						: 'https://app.answeroverflow.com/dashboard',
 				permanent: process.env.NODE_ENV === 'production',
 			},
-			{
-				source: '/about',
-				destination: '/',
-				permanent: false, // We might want to use /about in the future
-			},
 		];
 	},
 };
