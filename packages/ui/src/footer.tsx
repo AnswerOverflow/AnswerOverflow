@@ -48,6 +48,10 @@ const navigation: NavigationData = {
 					{ name: 'Docs', href: 'https://docs.answeroverflow.com' },
 					{ name: 'Pricing', href: 'https://www.answeroverflow.com/pricing' },
 					{
+						name: 'About',
+						href: 'https://www.answeroverflow.com/about',
+					},
+					{
 						name: 'Contributors',
 						href: 'https://www.answeroverflow.com/contributors',
 					},

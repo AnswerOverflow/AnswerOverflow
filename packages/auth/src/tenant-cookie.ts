@@ -1,3 +1,4 @@
+// eslint-disable-next-line n/no-extraneous-import
 import { CookieSerializeOptions } from 'cookie';
 import { NextApiResponse } from 'next';
 import { sharedEnvs } from '@answeroverflow/env/shared';
