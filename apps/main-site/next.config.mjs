@@ -48,6 +48,7 @@ const config = {
 			'media.discordapp.net',
 			'utfs.io',
 			'images-ext-2.discordapp.net',
+			'answer-overflow-discord-attachments.s3.amazonaws.com',
 		],
 	},
 	// https://github.com/kkomelin/isomorphic-dompurify/issues/54
