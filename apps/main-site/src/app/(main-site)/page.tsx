@@ -9,6 +9,7 @@ import { Footer } from '@answeroverflow/ui/src/footer';
 import { Navbar } from '@answeroverflow/ui/src/navbar';
 import { ServerPublic } from '~api/router/server/types';
 import Marquee from 'react-fast-marquee';
+import { Suspense } from 'react';
 
 const HeroAreaText = () => {
 	return (
@@ -17,14 +18,18 @@ const HeroAreaText = () => {
 				Search all of Discord
 			</h1>
 			<div className="flex w-full flex-col items-center justify-center gap-8 sm:hidden sm:flex-row">
-				<MessagesSearchBar />
+				<Suspense>
+					<MessagesSearchBar />
+				</Suspense>
 			</div>
 			<h2 className="text-center font-body text-lg text-primary/[.95] sm:w-4/5 md:text-2xl">
 				Answer Overflow is a Discord search engine. Find results from indexed
 				content or a community to join.
 			</h2>
 			<div className="hidden w-full flex-col items-center justify-center gap-8 sm:flex sm:flex-row">
-				<MessagesSearchBar />
+				<Suspense>
+					<MessagesSearchBar />
+				</Suspense>
 			</div>
 			<div className="grid w-full grid-cols-1 grid-rows-2 gap-4 sm:w-auto sm:grid-cols-2 sm:grid-rows-1  sm:gap-8">
 				<LinkButton
