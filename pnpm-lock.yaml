@@ -603,8 +603,8 @@ importers:
         specifier: ^4.10.1
         version: 4.12.0(react@18.2.0)
       react-social-icons:
-        specifier: ^5.15.0
-        version: 5.15.0(react@18.2.0)
+        specifier: ^6.14.0
+        version: 6.14.0(react-dom@18.2.0)(react@18.2.0)
       react-xarrows:
         specifier: ^2.0.2
         version: 2.0.2(react@18.2.0)
@@ -16205,13 +16205,15 @@ packages:
       react-transition-group: 2.9.0(react-dom@18.2.0)(react@18.2.0)
     dev: false
 
-  /react-social-icons@5.15.0(react@18.2.0):
-    resolution: {integrity: sha512-khfDgUiUwEBe34T6br2+mkXQg3hLVDdviVjexxZoVCsogMgxTy/m8+KlX/j6Wa7P2BPxgZ7yZ2jXw3X06pUUFQ==}
+  /react-social-icons@6.14.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-1/ZdA3Q28XZSB44CEeOPOZFs9/pRaXKm1NfZD33KIMVR94I7JrsbJ/hCgsQ+3BCc9TyvR3GHD+mrxwVxv9qRBw==}
     peerDependencies:
       react: 15.x.x || 16.x.x || 17.x.x || 18.x.x
+      react-dom: 15.x.x || 16.x.x || 17.x.x || 18.x.x
     dependencies:
-      prop-types: 15.8.1
+      '@babel/runtime': 7.23.9
       react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /react-spring@9.7.3(@react-three/fiber@8.15.16)(konva@9.3.2)(react-dom@18.2.0)(react-konva@18.2.10)(react-native@0.73.3)(react-zdog@1.2.2)(react@18.2.0)(three@0.161.0)(zdog@1.1.3):
