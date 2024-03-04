@@ -18,7 +18,7 @@
 		"@answeroverflow/utils": "workspace:^",
 		"@sapphire/bitfield": "^1.2.0",
 		"discord-api-types": "^0.37.67",
-		"type-fest": "^3.13.1",
+		"type-fest": "^4.10.3",
 		"zod": "^3.22.2"
 	},
 	"devDependencies": {

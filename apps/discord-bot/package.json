@@ -69,7 +69,7 @@
 		"ts-node": "^10.9.1",
 		"tsc-watch": "^6.0.4",
 		"tsup": "^6.7.0",
-		"type-fest": "^3.13.1"
+		"type-fest": "^4.10.3"
 	},
 	"scripts": {
 		"with-env": "dotenv -e ../../.env --",
