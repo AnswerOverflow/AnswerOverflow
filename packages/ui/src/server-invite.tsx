@@ -109,7 +109,11 @@ export const ServerInviteJoinButton = async (
 				'Button Location': location,
 			}}
 		>
-			{inServer === 'in_server' ? <>Joined</> : <>Join Server</>}
+			{server.id === '864296203746803753'
+				? '질문하러가기'
+				: inServer === 'in_server'
+				? 'Joined'
+				: 'Join Server'}
 		</TrackLinkButton>
 	);
 };
