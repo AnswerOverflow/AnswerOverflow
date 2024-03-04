@@ -1614,8 +1614,8 @@ importers:
         specifier: ^0.29.6
         version: 0.29.10
       '@vercel/speed-insights':
-        specifier: ^1.0.9
-        version: 1.0.9(next@14.1.0)(react@18.2.0)
+        specifier: ^1.0.10
+        version: 1.0.10(next@14.1.0)(react@18.2.0)
       bright:
         specifier: ^0.8.4
         version: 0.8.4(react@18.2.0)
@@ -7983,8 +7983,8 @@ packages:
       std-env: 3.7.0
     dev: false
 
-  /@vercel/speed-insights@1.0.9(next@14.1.0)(react@18.2.0):
-    resolution: {integrity: sha512-f+XFP0O+aZ4Olj9h+BitkB1b4NJQaxtyCb69wWuDxytJHY6Pa4QtZPdBUftHOcajUCHRVeq062fk3MKXKtjNVQ==}
+  /@vercel/speed-insights@1.0.10(next@14.1.0)(react@18.2.0):
+    resolution: {integrity: sha512-4uzdKB0RW6Ff2FkzshzjZ+RlJfLPxgm/00i0XXgxfMPhwnnsk92YgtqsxT9OcPLdJUyVU1DqFlSWWjIQMPkh0g==}
     requiresBuild: true
     peerDependencies:
       '@sveltejs/kit': ^1 || ^2
