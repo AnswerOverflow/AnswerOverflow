@@ -54,8 +54,13 @@ export const Navbar = (props: {
 					)}
 				</Link>
 			</div>
+			{/*align search bar to absolutle middle horizontally, top vertically*/}
 
-			<MessagesSearchBar className={'hidden max-w-[600px] md:block'} />
+			<MessagesSearchBar
+				className={
+					'absolute left-1/2 top-1/2 hidden w-full max-w-[620px] -translate-x-1/2 -translate-y-1/2  md:block'
+				}
+			/>
 
 			<div className="flex items-center gap-2">
 				<ThemeSwitcher />
