@@ -10,7 +10,7 @@ import baseRules from './ast';
 import { astToString, flattenAst, recurse } from './util';
 import SimpleMarkdown, { defaultRules } from 'simple-markdown';
 import { Code } from 'bright';
-import Link from '../../../ui/link';
+import { BlueLink } from '../../../ui/blue-link';
 
 function parserFor(rules: SimpleMarkdown.ReactRules, returnAst?: boolean) {
 	const parser = SimpleMarkdown.parserFor(rules);
@@ -140,7 +140,7 @@ function createRules(rule: { [key: string]: any }) {
 				const masked = url !== content;
 
 				return (
-					<Link
+					<BlueLink
 						title={masked ? `${node.title || content}\n\n(${url})` : url}
 						href={SimpleMarkdown.sanitizeUrl(node.target) ?? ''}
 						target="_blank"
@@ -148,7 +148,7 @@ function createRules(rule: { [key: string]: any }) {
 						key={state.key}
 					>
 						{recurseOutput(node.content, state)}
-					</Link>
+					</BlueLink>
 				);
 			},
 		},

@@ -55,8 +55,13 @@ const FeedPost = async (props: { postId: string }) => {
 	const MainContent = () => (
 		<div className={'inner'}>
 			<div className="flex items-center gap-2 pb-2 text-xs md:text-base">
-				<ServerIcon server={server} size={24} />
-				<span>{server.name}</span>
+				<Link
+					href={`/c/${server.id}`}
+					className={'flex items-center gap-2 hover:underline'}
+				>
+					<ServerIcon server={server} size={24} />
+					<span>{server.name}</span>
+				</Link>
 				<div className={'flex flex-col gap-2 md:flex-row'}>
 					<span className={'hidden text-sm text-muted-foreground md:block'}>
 						•
@@ -79,7 +84,11 @@ const FeedPost = async (props: { postId: string }) => {
 			{/*
 			Make the overflow fade out from 1 to 0 opacity
 			*/}
-			<div className={'max-h-[300px] overflow-hidden whitespace-break-spaces'}>
+			<div
+				className={
+					'max-h-[300px] overflow-hidden whitespace-break-spaces font-body text-primary'
+				}
+			>
 				{discordMarkdownAsHTML}
 			</div>
 			<div className={'pt-2'}>
@@ -106,47 +115,60 @@ export default async function HomePage() {
 			<div className={'w-full max-w-screen-3xl'}>
 				<Navbar tenant={undefined} />
 			</div>
-
-			<div className={'mx-auto flex max-w-[650px] flex-col gap-4 px-4'}>
-				<div className={'rounded-md border-1 p-2'}>
-					<span>
-						Welcome to Answer Overflow! This site is an aggregator for Discord
-						content. You can find the most popular and trending content here.
-						You can also find the newest content here.
-					</span>
+			<div className={'flex flex-row'}>
+				<div className={'flex h-fit w-[300px] flex-col gap-4 border-1 p-4'}>
+					<div className={'text-sm font-bold text-white'}>Trending Servers</div>
+					<div className={'rounded-md border-1 p-2'}>
+						<span>Server 1</span>
+					</div>
+					<div className={'rounded-md border-1 p-2'}>
+						<span>Server 2</span>
+					</div>
+					<div className={'rounded-md border-1 p-2'}>
+						<span>Server 3</span>
+					</div>
 				</div>
-				<div className={'flex gap-4'}>
-					<LinkButton
-						className={'flex items-center gap-4'}
-						href={'/trending'}
-						variant={'outline'}
-					>
-						<FaArrowTrendUp className={'size-4'} />
-						<span className={'text-sm'}>Trending</span>
-					</LinkButton>
-					<LinkButton
-						className={'flex items-center gap-4'}
-						href={'/new'}
-						variant={'outline'}
-					>
-						<PiPlant className={'size-4'} />
-						<span className={'text-sm'}>New</span>
-					</LinkButton>
+				<div className={'mx-auto flex max-w-[650px] flex-col gap-4 px-4'}>
+					<div className={'rounded-md border-1 p-2'}>
+						<span>
+							Welcome to Answer Overflow! This site is an aggregator for Discord
+							content. You can find the most popular and trending content here.
+							You can also find the newest content here.
+						</span>
+					</div>
+					<div className={'flex gap-4'}>
+						<LinkButton
+							className={'flex items-center gap-4'}
+							href={'/trending'}
+							variant={'outline'}
+						>
+							<FaArrowTrendUp className={'size-4'} />
+							<span className={'text-sm'}>Trending</span>
+						</LinkButton>
+						<LinkButton
+							className={'flex items-center gap-4'}
+							href={'/new'}
+							variant={'outline'}
+						>
+							<PiPlant className={'size-4'} />
+							<span className={'text-sm'}>New</span>
+						</LinkButton>
+					</div>
+					<FeedPost postId={'1214786746609573908'} />
+					<FeedPost postId={'1214800638131834921'} />
+					<FeedPost postId={'1214786746609573908'} />
+					<FeedPost postId={'1214800638131834921'} />
+					<FeedPost postId={'1214786746609573908'} />
+					<FeedPost postId={'1214800638131834921'} />
+					<FeedPost postId={'1214786746609573908'} />
+					<FeedPost postId={'1214800638131834921'} />
+					<FeedPost postId={'1214786746609573908'} />
+					<FeedPost postId={'1214800638131834921'} />
+					<FeedPost postId={'1214786746609573908'} />
+					<FeedPost postId={'1214800638131834921'} />
+					<FeedPost postId={'1214786746609573908'} />
+					<FeedPost postId={'1214800638131834921'} />
 				</div>
-				<FeedPost postId={'1214786746609573908'} />
-				<FeedPost postId={'1214800638131834921'} />
-				<FeedPost postId={'1214786746609573908'} />
-				<FeedPost postId={'1214800638131834921'} />
-				<FeedPost postId={'1214786746609573908'} />
-				<FeedPost postId={'1214800638131834921'} />
-				<FeedPost postId={'1214786746609573908'} />
-				<FeedPost postId={'1214800638131834921'} />
-				<FeedPost postId={'1214786746609573908'} />
-				<FeedPost postId={'1214800638131834921'} />
-				<FeedPost postId={'1214786746609573908'} />
-				<FeedPost postId={'1214800638131834921'} />
-				<FeedPost postId={'1214786746609573908'} />
-				<FeedPost postId={'1214800638131834921'} />
 			</div>
 			<Footer tenant={undefined} />
 		</div>
