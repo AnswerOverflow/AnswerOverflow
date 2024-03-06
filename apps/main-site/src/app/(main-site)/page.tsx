@@ -109,24 +109,50 @@ const FeedPost = async (props: { postId: string }) => {
 		</div>
 	);
 };
-export default async function HomePage() {
+function shortenNumber(num: number) {
+	if (num >= 1000000) {
+		return (num / 1000000).toFixed(1) + 'M';
+	} else if (num >= 1000) {
+		return (num / 1000).toFixed(1) + 'k';
+	} else {
+		return num.toString();
+	}
+}
+const TrendingServer = async (props: { serverId: string }) => {
+	const server = await findServerById(props.serverId);
+	if (!server) return null;
+	server.approximateMemberCount = 1000000;
+	return (
+		<LinkButton
+			href={`/c/${server.id}`}
+			variant={'outline'}
+			className={'flex w-full flex-row justify-between gap-2'}
+		>
+			<div className={'flex items-center gap-2'}>
+				<ServerIcon server={server} size={24} />
+				<span>{server.name}</span>
+			</div>
+			<span>{shortenNumber(server.approximateMemberCount)} members</span>
+		</LinkButton>
+	);
+};
+
+export default function HomePage() {
 	return (
 		<div className="flex w-full flex-col items-center bg-background font-body">
 			<div className={'w-full max-w-screen-3xl'}>
 				<Navbar tenant={undefined} />
 			</div>
 			<div className={'flex flex-row'}>
-				<div className={'flex h-fit w-[300px] flex-col gap-4 border-1 p-4'}>
+				<div
+					className={'mr-4 flex h-fit w-[400px] flex-col gap-4 border-1 p-4'}
+				>
 					<div className={'text-sm font-bold text-white'}>Trending Servers</div>
-					<div className={'rounded-md border-1 p-2'}>
-						<span>Server 1</span>
-					</div>
-					<div className={'rounded-md border-1 p-2'}>
-						<span>Server 2</span>
-					</div>
-					<div className={'rounded-md border-1 p-2'}>
-						<span>Server 3</span>
-					</div>
+					<TrendingServer serverId={'1037547185492996207'} />
+					<TrendingServer serverId={'1037547185492996207'} />
+					<TrendingServer serverId={'1037547185492996207'} />
+					<TrendingServer serverId={'1037547185492996207'} />
+					<TrendingServer serverId={'1037547185492996207'} />
 				</div>
 				<div className={'mx-auto flex max-w-[650px] flex-col gap-4 px-4'}>
 					<div className={'rounded-md border-1 p-2'}>

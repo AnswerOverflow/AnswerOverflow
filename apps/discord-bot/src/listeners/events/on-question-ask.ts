@@ -66,8 +66,7 @@ export class QuestionAskedListener extends Listener<Events.ClientReady> {
 						'Answer Overflow Account Id': questionAsker.id,
 						...serverWithDiscordInfoToAnalyticsData({
 							guild: thread.guild,
-							serverWithSettings:
-								server || getDefaultServerWithFlags(thread.guild),
+							serverWithSettings: server!,
 						}),
 						...channelWithDiscordInfoToAnalyticsData({
 							answerOverflowChannel: channelSettings,
