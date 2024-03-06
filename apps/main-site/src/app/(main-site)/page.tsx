@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
-import { fetchBrowseServers } from '../../data/browse';
-import { FollowCursor } from '@answeroverflow/ui/src/ui/follow';
+import './home.css';
 import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
 import { MessagesSearchBar } from '@answeroverflow/ui/src/messages-search-bar';
 import { ServerIcon } from '@answeroverflow/ui/src/server-icon';
@@ -10,6 +9,20 @@ import { Navbar } from '@answeroverflow/ui/src/navbar';
 import { ServerPublic } from '~api/router/server/types';
 import Marquee from 'react-fast-marquee';
 import { Suspense } from 'react';
+import {
+	ChannelWithFlags,
+	findChannelById,
+	findMessageByIdWithDiscordAccount,
+	findServerById,
+	MessageWithDiscordAccount,
+	ServerWithFlags,
+} from '@answeroverflow/db';
+import { FaRegMessage } from 'react-icons/fa6';
+import { parse } from '@answeroverflow/ui/src/message/markdown/render';
+import {
+	getDate,
+	getSnowflakeUTCDate,
+} from '@answeroverflow/ui/src/utils/snowflake';
 
 const HeroAreaText = () => {
 	return (
@@ -87,96 +100,100 @@ const ServerGrid = (props: {
 	);
 };
 
-const HeroArea = (props: {
-	servers: Pick<ServerPublic, 'id' | 'icon' | 'name'>[];
-}) => {
-	return (
-		<div className="relative min-h-[calc(100vh-5rem)] w-full">
-			<ServerGrid servers={props.servers} />
-			<div className="pointer-events-none absolute right-0 top-0 z-10 hidden h-full w-52 bg-gradient-to-l from-[rgba(245,248,255,.5)] to-[rgba(245,248,255,0)] dark:from-[rgba(6,6,7,1)] dark:to-[rgba(6_,6_,7_,0_)] sm:block" />
-			<div className="pointer-events-none absolute left-0 top-0 z-10 hidden h-full w-52 bg-gradient-to-r from-[rgba(245,248,255,.5)] to-[rgba(245,248,255,0)] dark:from-[rgba(6,6,7,1)] dark:to-[rgba(6_,6_,7_,0_)] sm:block" />
-			<div className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2">
-				<HeroAreaText />
-			</div>
-		</div>
-	);
-};
-
 export const metadata: Metadata = {
 	alternates: {
 		canonical: '/',
 	},
 };
 
+/*
+.outer {
+position: relative;
+background-color: red;
+}
+
+.outer > a {
+position: absolute;
+top: 0; left: 0; bottom: 0; right: 0;
+}
+
+.inner {
+position: relative;
+pointer-events: none;
+z-index: 1;
+}
+
+.inner a {
+pointer-events: all;
+}
+ */
+
+const FeedPost = async (props: { postId: string }) => {
+	const message = await findMessageByIdWithDiscordAccount(props.postId);
+	if (!message || !message.parentChannelId) return null;
+	const thread = await findChannelById(message.channelId);
+	const parent = await findChannelById(message.parentChannelId);
+	const server = await findServerById(message.serverId);
+	if (!thread || !parent || !server) return null;
+	const discordMarkdownAsHTML = await parse(message.content);
+
+	const MainContent = () => (
+		<div className={'inner'}>
+			<div className="flex items-center gap-2 pb-2 text-xs md:text-base">
+				<ServerIcon server={server} size={24} />
+				<span>{server.name}</span>
+				<div className={'flex flex-col gap-2 md:flex-row'}>
+					<span className={'hidden text-sm text-muted-foreground md:block'}>
+						•
+					</span>
+					<span className={'text-sm text-muted-foreground'}>
+						Created by {message.author.name} on{' '}
+						{getSnowflakeUTCDate(message.id)} in{' '}
+						<Link
+							className={'hover:underline'}
+							href={`/c/${parent.serverId}/${parent.id}`}
+						>
+							#{parent.name}
+						</Link>
+					</span>
+				</div>
+			</div>
+			<div className={'pb-2 font-semibold'}>
+				<span className={'text-lg'}>{thread.name}</span>
+			</div>
+			{/*
+			Make the overflow fade out from 1 to 0 opacity
+			*/}
+			<div className={'max-h-[300px] overflow-hidden whitespace-break-spaces'}>
+				{discordMarkdownAsHTML}
+			</div>
+			<div className={'pt-2'}>
+				<div className={'flex items-center gap-2'}>
+					<FaRegMessage className={'size-4'} />
+					<span>300 replies</span>
+				</div>
+			</div>
+		</div>
+	);
+
+	return (
+		<div
+			className={'outer rounded-md border-1 p-2 hover:border-muted-foreground'}
+		>
+			<Link href={`/m/${thread.id}`} />
+			<MainContent />
+		</div>
+	);
+};
 export default async function HomePage() {
-	const data = await fetchBrowseServers();
 	return (
 		<div className="flex w-full flex-col items-center bg-background font-body">
 			<div className={'w-full max-w-screen-3xl'}>
 				<Navbar tenant={undefined} />
 			</div>
-			<HeroArea servers={data} />
-			<div
-				className={
-					'grid w-full max-w-screen-3xl grid-cols-1 grid-rows-1 gap-8 p-8 text-center md:grid-cols-3'
-				}
-			>
-				<FollowCursor intensity={40}>
-					<div
-						className={
-							'flex h-full flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
-						}
-					>
-						<h2 className={'mb-8 text-2xl'}>Browse All Communities</h2>
-						<span className={'text-lg'}>
-							Browse the hundreds of communities using Answer Overflow to make
-							their content more accessible.
-						</span>
-						<LinkButton
-							href={'/browse'}
-							className={'mx-auto mt-8'}
-							variant={'outline'}
-						>
-							Browse
-						</LinkButton>
-					</div>
-				</FollowCursor>
-				<FollowCursor intensity={40}>
-					<div
-						className={
-							'flex   h-full flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
-						}
-					>
-						<h2 className={'mb-8 text-2xl'}>Setup for free</h2>
-						<span className={'text-lg'}>
-							Answer Overflow is free to use and setup for your community to
-							start getting your Discord discussions indexed.
-						</span>
-						<LinkButton href={'/about'} className={'mx-auto mt-8'}>
-							Learn More
-						</LinkButton>
-					</div>
-				</FollowCursor>
-				<FollowCursor intensity={40}>
-					<div
-						className={
-							'flex  h-full flex-col  justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
-						}
-					>
-						<h2 className={'mb-8 text-2xl'}>Open Source</h2>
-						<span className={'text-lg'}>
-							Answer Overflow is open source and FSL MIT licensed, our goal is
-							to make finding Discord content available to everyone.
-						</span>
-						<LinkButton
-							href={'https://github.com/AnswerOverflow/AnswerOverflow/'}
-							className={'mx-auto mt-8'}
-							variant={'outline'}
-						>
-							Star on GitHub
-						</LinkButton>
-					</div>
-				</FollowCursor>
+			<div className={'mx-auto flex max-w-[650px] flex-col gap-4'}>
+				<FeedPost postId={'1214786746609573908'} />
+				<FeedPost postId={'1214800638131834921'} />
 			</div>
 			<Footer tenant={undefined} />
 		</div>

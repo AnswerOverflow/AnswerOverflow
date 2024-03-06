@@ -13,6 +13,7 @@ import { SignInButton } from './sign-in-button';
 import { getServerSession } from '@answeroverflow/auth';
 import { ClientUserAvatar } from './client';
 import { LiaSearchSolid } from 'react-icons/lia';
+import { MessagesSearchBar } from '../messages-search-bar';
 
 export async function UserSection(props: { tenant: ServerPublic | undefined }) {
 	const session = await getServerSession();
@@ -45,7 +46,7 @@ export const Navbar = (props: {
 						</div>
 					) : (
 						<>
-							<div className={'w-40 md:w-56'}>
+							<div className={'w-32 md:w-40'}>
 								<AnswerOverflowLogo width={'full'} />
 							</div>
 							<span className="sr-only">Answer Overflow Logo</span>
@@ -53,9 +54,17 @@ export const Navbar = (props: {
 					)}
 				</Link>
 			</div>
+
+			<MessagesSearchBar className={'hidden max-w-[600px] md:block'} />
+
 			<div className="flex items-center gap-2">
 				<ThemeSwitcher />
-				<LinkButton variant={'ghost'} size={'icon'} href={'/search'}>
+				<LinkButton
+					variant={'ghost'}
+					size={'icon'}
+					href={'/search'}
+					className={'block md:hidden'}
+				>
 					<LiaSearchSolid className="h-8 w-8" />
 					<span className="sr-only">Search Answer Overflow</span>
 				</LinkButton>
