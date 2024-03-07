@@ -530,6 +530,9 @@ importers:
 
   apps/main-site:
     dependencies:
+      '@answeroverflow/analytics':
+        specifier: workspace:^
+        version: link:../../packages/analytics
       '@answeroverflow/api':
         specifier: workspace:^
         version: link:../../packages/api

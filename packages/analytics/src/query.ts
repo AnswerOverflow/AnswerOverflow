@@ -39,3 +39,43 @@ export function getTopQuestionSolversForServer(id: string) {
 		})
 		.then((x) => x.results['Solved Question']);
 }
+
+export function getPopularPostPages() {
+	return posthog
+		.query()
+		.addSeries('Message Page View', {
+			sampling: 'total',
+			where: {
+				filters: {
+					compare: 'not_icontains',
+					property: 'Server Id',
+					value: '743801649377574924',
+				},
+				match: 'AND',
+			},
+		})
+		.execute({
+			type: 'table',
+			breakdown_hide_other_aggregation: true,
+			refresh: true,
+			date_from: 'Last 7 days',
+			breakdown: 'Message Id',
+		})
+		.then((x) => x.results['Message Page View']);
+}
+
+export async function getPopularServers() {
+	return posthog
+		.query()
+		.addSeries('Message Page View', {
+			sampling: 'total',
+		})
+		.execute({
+			type: 'table',
+			breakdown_hide_other_aggregation: true,
+			refresh: true,
+			date_from: 'Last 7 days',
+			breakdown: 'Server Id',
+		})
+		.then((x) => x.results['Message Page View']);
+}
