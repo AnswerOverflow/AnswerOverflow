@@ -249,12 +249,16 @@ export function makeMarkSolutionResponse({
 }) {
 	const components = new ActionRowBuilder<MessageActionRowComponentBuilder>();
 	const embed = new EmbedBuilder()
-		.addFields([
-			{
-				name: 'Learn more',
-				value: 'https://answeroverflow.com',
-			},
-		])
+		.addFields(
+			server.customDomain
+				? []
+				: [
+						{
+							name: 'Learn more',
+							value: 'https://answeroverflow.com',
+						},
+				  ],
+		)
 		.setColor(ANSWER_OVERFLOW_BLUE_HEX);
 
 	if (

@@ -48,6 +48,7 @@ const config = {
 			'media.discordapp.net',
 			'utfs.io',
 			'images-ext-2.discordapp.net',
+			'answer-overflow-discord-attachments.s3.amazonaws.com',
 		],
 	},
 	// https://github.com/kkomelin/isomorphic-dompurify/issues/54
@@ -79,11 +80,6 @@ const config = {
 						? 'http://localhost:5000/dashboard'
 						: 'https://app.answeroverflow.com/dashboard',
 				permanent: process.env.NODE_ENV === 'production',
-			},
-			{
-				source: '/about',
-				destination: '/',
-				permanent: false, // We might want to use /about in the future
 			},
 		];
 	},
