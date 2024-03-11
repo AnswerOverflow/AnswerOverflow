@@ -58,7 +58,7 @@ export const Navbar = (props: {
 
 			<MessagesSearchBar
 				className={
-					'absolute left-1/2 top-1/2 hidden w-full max-w-[620px] -translate-x-1/2 -translate-y-1/2  md:block'
+					'absolute left-1/2 top-1/2 hidden w-full max-w-[620px] -translate-x-1/2 -translate-y-1/2  2xl:block'
 				}
 			/>
 
@@ -68,7 +68,7 @@ export const Navbar = (props: {
 					variant={'ghost'}
 					size={'icon'}
 					href={'/search'}
-					className={'block md:hidden'}
+					className={'block 2xl:hidden'}
 				>
 					<LiaSearchSolid className="h-8 w-8" />
 					<span className="sr-only">Search Answer Overflow</span>

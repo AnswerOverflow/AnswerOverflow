@@ -14,6 +14,32 @@ const regexes = [
 	},
 ] as const;
 
+export const MessageImage = (
+	props: {
+		attachment: Pick<MessageProps, 'message'>['message']['attachments'][number];
+		className?: string;
+	} & Partial<Parameters<typeof Image>[0]>,
+) => {
+	const { attachment } = props;
+	return (
+		<div className={`mt-4 max-w-sm lg:max-w-md ${props.className ?? ''}`}>
+			<Image
+				src={attachment.proxyUrl}
+				width={attachment.width ?? undefined}
+				height={attachment.height ?? undefined}
+				unoptimized
+				alt={attachment.description ?? 'No description'}
+			/>
+		</div>
+	);
+};
+export function isImageAttachment(
+	attachment: MessageProps['message']['attachments'][number],
+) {
+	const imageFileRegex = regexes.find((x) => x.type === 'images')?.regex;
+	if (!imageFileRegex) return false;
+	return imageFileRegex.test(attachment.filename.toLowerCase());
+}
 const MessageImages = (
 	props: Pick<MessageProps, 'message' | 'loadingStyle' | 'collapseContent'>,
 ) => {
@@ -21,32 +47,21 @@ const MessageImages = (
 	const imageFileRegex = regexes.find((x) => x.type === 'images')?.regex;
 	if (!imageFileRegex) return null;
 
-	const onlyImageAttachments = message.attachments.filter((attachment) =>
-		imageFileRegex.test(attachment.filename.toLowerCase()),
-	);
+	const onlyImageAttachments = message.attachments.filter(isImageAttachment);
 	if (onlyImageAttachments.length === 0) return null;
-	const images = onlyImageAttachments.map((attachment) => {
-		return {
-			src: attachment.proxyUrl,
-			width: attachment.width,
-			height: attachment.height,
-			alt: attachment.description ?? 'No description',
-		};
-	});
-	const imagesToShow = collapseContent ? images.slice(0, 1) : images;
+	const imagesToShow = collapseContent
+		? onlyImageAttachments.slice(0, 1)
+		: onlyImageAttachments;
 	return (
 		<>
 			{imagesToShow.map((x, i) => (
 				<div className="mt-4 max-w-sm lg:max-w-md" key={i}>
-					<Image
-						src={x?.src ?? ''}
-						width={x?.width ?? undefined}
-						height={x?.height ?? undefined}
-						unoptimized
+					<MessageImage
+						attachment={x}
 						loading={props.loadingStyle === 'eager' ? 'eager' : 'lazy'}
 						priority={props.loadingStyle === 'eager'}
 						fetchPriority={props.loadingStyle === 'eager' ? 'high' : undefined}
-						alt={x?.alt ?? `Image sent by ${message.author.name}`}
+						alt={x.description ?? 'No description'}
 					/>
 				</div>
 			))}

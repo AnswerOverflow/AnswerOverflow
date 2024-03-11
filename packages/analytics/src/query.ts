@@ -58,7 +58,7 @@ export function getPopularPostPages() {
 			type: 'table',
 			breakdown_hide_other_aggregation: true,
 			refresh: true,
-			date_from: 'Last 7 days',
+			date_from: 'Last 30 days',
 			breakdown: 'Message Id',
 		})
 		.then((x) => x.results['Message Page View']);
@@ -74,7 +74,7 @@ export async function getPopularServers() {
 			type: 'table',
 			breakdown_hide_other_aggregation: true,
 			refresh: true,
-			date_from: 'Last 7 days',
+			date_from: 'Last 30 days',
 			breakdown: 'Server Id',
 		})
 		.then((x) => x.results['Message Page View']);

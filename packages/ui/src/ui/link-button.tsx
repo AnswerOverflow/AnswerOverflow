@@ -25,6 +25,7 @@ export const LinkButton = ({
 	prefetch?: boolean;
 	selectedVariant?: LinkButtonProps['variant'];
 }) => {
+	const { selectedVariant, ...rest } = props;
 	const pathname = usePathname();
 	return (
 		<Link
@@ -32,14 +33,12 @@ export const LinkButton = ({
 			className={cn(
 				buttonVariants({
 					variant:
-						href === pathname && props.selectedVariant
-							? props.selectedVariant
-							: variant,
+						href === pathname && selectedVariant ? selectedVariant : variant,
 					size,
 					className,
 				}),
 			)}
-			{...props}
+			{...rest}
 		>
 			{children}
 		</Link>

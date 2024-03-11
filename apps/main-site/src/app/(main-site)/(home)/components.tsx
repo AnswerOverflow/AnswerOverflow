@@ -11,10 +11,14 @@ import { getSnowflakeUTCDate } from '@answeroverflow/ui/src/utils/snowflake';
 import { FaRegMessage } from 'react-icons/fa6';
 import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
 import '../home.css';
+import {
+	isImageAttachment,
+	MessageImage,
+} from '@answeroverflow/ui/src/message/attachments';
 
 export const FeedPost = async (props: { postId: string }) => {
 	const message = await findMessageByIdWithDiscordAccount(props.postId);
-	if (!message || !message.parentChannelId) return null;
+	if (!message || !message.parentChannelId || !message.public) return null;
 	const thread = await findChannelById(message.channelId);
 	const parent = await findChannelById(message.parentChannelId);
 	const server = await findServerById(message.serverId);
@@ -22,6 +26,7 @@ export const FeedPost = async (props: { postId: string }) => {
 	const messageCount = await findChannelMessageCount(thread.id);
 	const discordMarkdownAsHTML = await parse(message.content);
 
+	const firstImage = message.attachments.filter(isImageAttachment).at(0);
 	const MainContent = () => (
 		<div className={'inner'}>
 			<div className="flex flex-col items-start gap-2  pb-2 text-xs sm:flex-row sm:items-center md:text-base">
@@ -56,7 +61,11 @@ export const FeedPost = async (props: { postId: string }) => {
 					'max-h-[300px] overflow-hidden whitespace-break-spaces font-body text-primary'
 				}
 			>
-				{discordMarkdownAsHTML}
+				{firstImage ? (
+					<MessageImage attachment={firstImage} />
+				) : (
+					<>{discordMarkdownAsHTML}</>
+				)}
 			</div>
 			<div className={'pt-2'}>
 				<div className={'flex items-center gap-2'}>
@@ -69,7 +78,9 @@ export const FeedPost = async (props: { postId: string }) => {
 
 	return (
 		<div
-			className={'outer rounded-md border-1 p-2 hover:border-muted-foreground'}
+			className={
+				'outer rounded-md border-2 bg-card p-2 hover:border-muted-foreground'
+			}
 		>
 			<Link href={`/m/${thread.id}`} />
 			<MainContent />
@@ -94,7 +105,7 @@ export const TrendingServer = async (props: { serverId: string }) => {
 		<LinkButton
 			href={`/c/${server.id}`}
 			variant={'outline'}
-			className={'flex w-full flex-row justify-between gap-2'}
+			className={'flex w-full flex-row justify-between gap-2 bg-card'}
 		>
 			<div className={'flex items-center gap-2'}>
 				<ServerIcon server={server} size={24} />
