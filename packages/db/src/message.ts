@@ -523,3 +523,89 @@ export function getThreadIdOfMessage(
 export function getParentChannelOfMessage(message: BaseMessage) {
 	return message.parentChannelId ?? message.channelId;
 }
+
+export async function findManyMessageWithRelations(ids: string[]) {
+	const start = Date.now();
+	const messages = await db.query.dbMessages.findMany({
+		where: inArray(dbMessages.id, ids),
+		columns: {
+			id: true,
+			content: true,
+			questionId: true,
+			serverId: true,
+			authorId: true,
+			channelId: true,
+			parentChannelId: true,
+			childThreadId: true,
+			embeds: true,
+		},
+		with: {
+			author: {
+				with: {
+					userServerSettings: true,
+				},
+			},
+			attachments: true,
+			solutions: {
+				with: {
+					author: {
+						with: {
+							userServerSettings: true,
+						},
+					},
+					attachments: true,
+				},
+				columns: {
+					id: true,
+					content: true,
+					questionId: true,
+					serverId: true,
+					authorId: true,
+					channelId: true,
+					parentChannelId: true,
+					childThreadId: true,
+					embeds: true,
+				},
+			},
+			reference: {
+				with: {
+					author: {
+						with: {
+							userServerSettings: true,
+						},
+					},
+					attachments: true,
+				},
+				columns: {
+					id: true,
+					content: true,
+					questionId: true,
+					serverId: true,
+					authorId: true,
+					channelId: true,
+					parentChannelId: true,
+					childThreadId: true,
+					embeds: true,
+				},
+			},
+			server: true,
+			channel: {
+				with: {
+					parent: true,
+				},
+			},
+		},
+	});
+	const end = Date.now();
+	console.log(`findManyMessageWithRelations took ${end - start}ms`);
+	const mapped = messages.map((msg) => ({
+		server: msg.server,
+		channel: msg.channel,
+		message: applyPublicFlagsToMessages([msg])[0]!,
+	}));
+	return mapped;
+}
+
+import Dataloader from 'dataloader';
+
+export const messages = new Dataloader(findManyMessageWithRelations);

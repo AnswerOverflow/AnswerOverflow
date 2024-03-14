@@ -274,7 +274,7 @@ export const dbServers = mysqlTable(
 		stripeCustomerId: varchar('stripeCustomerId', { length: 191 }),
 		stripeSubscriptionId: varchar('stripeSubscriptionId', { length: 191 }),
 		plan: mysqlEnum('plan', plans).default('FREE').notNull(),
-		approximateMemberCount: int('approximateMemberCount').default(0).notNull(),
+		// approximateMemberCount: int('approximateMemberCount').default(0).notNull(),
 	},
 	(table) => {
 		return {

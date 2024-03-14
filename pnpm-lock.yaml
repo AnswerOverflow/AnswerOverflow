@@ -1139,6 +1139,9 @@ importers:
       aws-sdk:
         specifier: ^2.1565.0
         version: 2.1565.0
+      dataloader:
+        specifier: ^2.2.2
+        version: 2.2.2
       discord-api-types:
         specifier: ^0.37.67
         version: 0.37.67
@@ -9906,6 +9909,10 @@ packages:
   /data-uri-to-buffer@4.0.1:
     resolution: {integrity: sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A==}
     engines: {node: '>= 12'}
+    dev: false
+
+  /dataloader@2.2.2:
+    resolution: {integrity: sha512-8YnDaaf7N3k/q5HnTJVuzSyLETjoZjVmHc4AeKAzOvKHEFQKcn64OKBfzHYtE9zGjctNM7V9I0MfnUVLpi7M5g==}
     dev: false
 
   /date-fns@2.30.0:

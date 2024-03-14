@@ -3,6 +3,7 @@ import {
 	findChannelMessageCount,
 	findMessageByIdWithDiscordAccount,
 	findServerById,
+	messages,
 } from '@answeroverflow/db';
 import { parse } from '@answeroverflow/ui/src/message/markdown/render';
 import Link from '@answeroverflow/ui/src/ui/link';
@@ -17,13 +18,9 @@ import {
 } from '@answeroverflow/ui/src/message/attachments';
 
 export const FeedPost = async (props: { postId: string }) => {
-	const message = await findMessageByIdWithDiscordAccount(props.postId);
+	const { message, server, channel } = await messages.load(props.postId);
+
 	if (!message || !message.parentChannelId || !message.public) return null;
-	const thread = await findChannelById(message.channelId);
-	const parent = await findChannelById(message.parentChannelId);
-	const server = await findServerById(message.serverId);
-	if (!thread || !parent || !server) return null;
-	const messageCount = await findChannelMessageCount(thread.id);
 	const discordMarkdownAsHTML = await parse(message.content);
 
 	const firstImage = message.attachments.filter(isImageAttachment).at(0);
@@ -31,7 +28,7 @@ export const FeedPost = async (props: { postId: string }) => {
 		<div className={'inner'}>
 			<div className="flex flex-col items-start gap-2  pb-2 text-xs sm:flex-row sm:items-center md:text-base">
 				<Link
-					href={`/c/${server.id}`}
+					href={`/c/${message.serverId}`}
 					className={'flex items-center gap-2 hover:underline'}
 				>
 					<ServerIcon server={server} size={24} />
@@ -46,15 +43,15 @@ export const FeedPost = async (props: { postId: string }) => {
 						{getSnowflakeUTCDate(message.id)} in{' '}
 						<Link
 							className={'hover:underline'}
-							href={`/c/${parent.serverId}/${parent.id}`}
+							href={`/c/${channel.parent.serverId}/${channel.parent.id}`}
 						>
-							#{parent.name}
+							#{channel.parent.name}
 						</Link>
 					</span>
 				</div>
 			</div>
 			<div className={'pb-2 font-semibold'}>
-				<span className={'text-lg'}>{thread.name}</span>
+				<span className={'text-lg'}>{channel.name}</span>
 			</div>
 			<div
 				className={
@@ -70,7 +67,7 @@ export const FeedPost = async (props: { postId: string }) => {
 			<div className={'pt-2'}>
 				<div className={'flex items-center gap-2'}>
 					<FaRegMessage className={'size-4'} />
-					<span>{messageCount} replies</span>
+					<span>{0} replies</span>
 				</div>
 			</div>
 		</div>
@@ -82,7 +79,7 @@ export const FeedPost = async (props: { postId: string }) => {
 				'outer rounded-md border-2 bg-card p-2 hover:border-muted-foreground'
 			}
 		>
-			<Link href={`/m/${thread.id}`} />
+			<Link href={`/m/${channel.id}`} />
 			<MainContent />
 		</div>
 	);
