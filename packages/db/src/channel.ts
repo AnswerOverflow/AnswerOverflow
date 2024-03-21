@@ -156,7 +156,6 @@ export async function findManyChannelMessagesCounts(channelIds: string[]) {
 }
 
 export async function findLatestThreads(args: { take: number }) {
-	// max 5 per server
 	const data = await db.query.dbChannels.findMany({
 		where: eq(dbChannels.type, ChannelType.PublicThread),
 		orderBy: desc(dbChannels.id),

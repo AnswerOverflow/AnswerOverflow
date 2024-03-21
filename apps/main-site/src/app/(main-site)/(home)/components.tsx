@@ -1,10 +1,4 @@
-import {
-	findChannelById,
-	findChannelMessageCount,
-	findMessageByIdWithDiscordAccount,
-	findServerById,
-	messages,
-} from '@answeroverflow/db';
+import { findServerById, messages } from '@answeroverflow/db';
 import { parse } from '@answeroverflow/ui/src/message/markdown/render';
 import Link from '@answeroverflow/ui/src/ui/link';
 import { ServerIcon } from '@answeroverflow/ui/src/server-icon';
@@ -18,7 +12,9 @@ import {
 } from '@answeroverflow/ui/src/message/attachments';
 
 export const FeedPost = async (props: { postId: string }) => {
-	const { message, server, channel } = await messages.load(props.postId);
+	const result = await messages.load(props.postId);
+	if (!result) return null;
+	const { message, channel, server } = result;
 
 	if (!message || !message.parentChannelId || !message.public) return null;
 	const discordMarkdownAsHTML = await parse(message.content);

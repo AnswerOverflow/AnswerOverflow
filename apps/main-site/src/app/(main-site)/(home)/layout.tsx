@@ -24,7 +24,7 @@ export default async function HomePage(props: { children: React.ReactNode }) {
 			<div className={'w-full max-w-screen-3xl'}>
 				<Navbar tenant={undefined} />
 			</div>
-			<div className={'flex flex-col-reverse 2xl:flex-row'}>
+			<div className={'flex flex-col-reverse py-4 2xl:flex-row'}>
 				<div
 					className={
 						'mr-4 flex h-fit max-w-[650px] flex-col  gap-4 p-4 2xl:w-[400px]'

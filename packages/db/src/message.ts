@@ -524,10 +524,10 @@ export function getParentChannelOfMessage(message: BaseMessage) {
 	return message.parentChannelId ?? message.channelId;
 }
 
-export async function findManyMessageWithRelations(ids: string[]) {
+export async function findManyMessageWithRelations(ids: readonly string[]) {
 	const start = Date.now();
 	const messages = await db.query.dbMessages.findMany({
-		where: inArray(dbMessages.id, ids),
+		where: inArray(dbMessages.id, ids as string[]),
 		columns: {
 			id: true,
 			content: true,
@@ -598,14 +598,26 @@ export async function findManyMessageWithRelations(ids: string[]) {
 	});
 	const end = Date.now();
 	console.log(`findManyMessageWithRelations took ${end - start}ms`);
-	const mapped = messages.map((msg) => ({
-		server: msg.server,
-		channel: msg.channel,
-		message: applyPublicFlagsToMessages([msg])[0]!,
-	}));
-	return mapped;
+	const lookUp = new Map(
+		messages.map((msg) => {
+			const parent = msg.channel.parent;
+			if (!parent) return [msg.id, undefined];
+			return [
+				msg.id,
+				{
+					server: stripPrivateServerData(addFlagsToServer(msg.server)),
+					channel: stripPrivateChannelData(addFlagsToChannel(msg.channel)),
+					parent: stripPrivateChannelData(addFlagsToChannel(parent)),
+					message: applyPublicFlagsToMessages([msg])[0]!,
+				},
+			];
+		}),
+	);
+	return ids.map((id) => lookUp.get(id));
 }
 
 import Dataloader from 'dataloader';
+import { stripPrivateChannelData, stripPrivateServerData } from './permissions';
+import { addFlagsToChannel } from './zodSchemas/channelSchemas';
 
 export const messages = new Dataloader(findManyMessageWithRelations);
