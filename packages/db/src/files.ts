@@ -28,3 +28,20 @@ export async function uploadFileFromUrl(file: {
 		})
 		.promise();
 }
+
+export async function uploadFile(file: {
+	filename: string;
+	contentType: string;
+	stream: AWS.S3.Body;
+}) {
+	if (sharedEnvs.NODE_ENV === 'test') return null;
+	return s3bucket
+		.upload({
+			Bucket: sharedEnvs.BUCKET_NAME as string,
+			Key: `${file.filename}`,
+			Body: file.stream,
+			ContentDisposition: 'inline',
+			ContentType: file.contentType,
+		})
+		.promise();
+}
