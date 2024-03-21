@@ -99,8 +99,7 @@
       "typescript"
     ],
     "editor.codeActionsOnSave": {
-      // TODO: Reenable when eslint performance is better
-      "source.fixAll.eslint": false
+      "source.fixAll.eslint": "never"
     },
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "prettier.requireConfig": true,
