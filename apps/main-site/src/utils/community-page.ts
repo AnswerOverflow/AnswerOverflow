@@ -1,5 +1,5 @@
 import { findQuestionsForSitemap } from '@answeroverflow/db';
-import { Sitemap } from './sitemap';
+import { Sitemap } from '@answeroverflow/utils/src/sitemap';
 import { ServerResponse } from 'http';
 import { getDate } from '@answeroverflow/ui/src/utils/snowflake';
 

@@ -523,3 +523,101 @@ export function getThreadIdOfMessage(
 export function getParentChannelOfMessage(message: BaseMessage) {
 	return message.parentChannelId ?? message.channelId;
 }
+
+export async function findManyMessageWithRelations(ids: readonly string[]) {
+	const start = Date.now();
+	const messages = await db.query.dbMessages.findMany({
+		where: inArray(dbMessages.id, ids as string[]),
+		columns: {
+			id: true,
+			content: true,
+			questionId: true,
+			serverId: true,
+			authorId: true,
+			channelId: true,
+			parentChannelId: true,
+			childThreadId: true,
+			embeds: true,
+		},
+		with: {
+			author: {
+				with: {
+					userServerSettings: true,
+				},
+			},
+			attachments: true,
+			solutions: {
+				with: {
+					author: {
+						with: {
+							userServerSettings: true,
+						},
+					},
+					attachments: true,
+				},
+				columns: {
+					id: true,
+					content: true,
+					questionId: true,
+					serverId: true,
+					authorId: true,
+					channelId: true,
+					parentChannelId: true,
+					childThreadId: true,
+					embeds: true,
+				},
+			},
+			reference: {
+				with: {
+					author: {
+						with: {
+							userServerSettings: true,
+						},
+					},
+					attachments: true,
+				},
+				columns: {
+					id: true,
+					content: true,
+					questionId: true,
+					serverId: true,
+					authorId: true,
+					channelId: true,
+					parentChannelId: true,
+					childThreadId: true,
+					embeds: true,
+				},
+			},
+			server: true,
+			channel: {
+				with: {
+					parent: true,
+				},
+			},
+		},
+	});
+	const end = Date.now();
+	console.log(`findManyMessageWithRelations took ${end - start}ms`);
+	const lookUp = new Map(
+		messages.map((msg) => {
+			const parent = msg.channel.parent;
+			if (!parent) return [msg.id, undefined];
+			return [
+				msg.id,
+				{
+					server: stripPrivateServerData(addFlagsToServer(msg.server)),
+					channel: stripPrivateChannelData(addFlagsToChannel(msg.channel)),
+					parent: stripPrivateChannelData(addFlagsToChannel(parent)),
+					message: applyPublicFlagsToMessages([msg])[0]!,
+				},
+			];
+		}),
+	);
+	return ids.map((id) => lookUp.get(id));
+}
+
+import Dataloader from 'dataloader';
+import { stripPrivateChannelData, stripPrivateServerData } from './permissions';
+import { addFlagsToChannel } from './zodSchemas/channelSchemas';
+
+export const messages = new Dataloader(findManyMessageWithRelations);

@@ -30,6 +30,7 @@
 		"@sapphire/bitfield": "^1.2.0",
 		"@vitest/coverage-c8": "^0.28.5",
 		"aws-sdk": "^2.1565.0",
+		"dataloader": "^2.2.2",
 		"discord-api-types": "^0.37.67",
 		"dotenv": "^16.3.1",
 		"dotenv-cra": "^3.0.3",

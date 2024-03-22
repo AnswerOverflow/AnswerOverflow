@@ -170,6 +170,7 @@ export function toAOServer(guild: Guild) {
 		icon: guild.icon,
 		description: guild.description,
 		vanityInviteCode: guild.vanityURLCode,
+		approximateMemberCount: guild.memberCount,
 	});
 }
 

@@ -347,9 +347,6 @@ importers:
       '@trpc/server':
         specifier: ^10.37.1
         version: 10.45.0
-      '@typelytics/posthog':
-        specifier: ^0.1.1
-        version: 0.1.1
       colorette:
         specifier: ^2.0.20
         version: 2.0.20
@@ -571,6 +568,9 @@ importers:
 
   apps/main-site:
     dependencies:
+      '@answeroverflow/analytics':
+        specifier: workspace:^
+        version: link:../../packages/analytics
       '@answeroverflow/api':
         specifier: workspace:^
         version: link:../../packages/api
@@ -592,6 +592,9 @@ importers:
       '@answeroverflow/ui':
         specifier: workspace:^
         version: link:../../packages/ui
+      '@answeroverflow/utils':
+        specifier: workspace:^
+        version: link:../../packages/utils
       '@mdx-js/loader':
         specifier: ^2.3.0
         version: 2.3.0(webpack@5.90.1)
@@ -756,6 +759,9 @@ importers:
       '@answeroverflow/env':
         specifier: workspace:^
         version: link:../env
+      '@typelytics/posthog':
+        specifier: ^0.1.1
+        version: 0.1.1
       discord-api-types:
         specifier: ^0.37.67
         version: 0.37.67
@@ -1174,6 +1180,9 @@ importers:
       aws-sdk:
         specifier: ^2.1565.0
         version: 2.1565.0
+      dataloader:
+        specifier: ^2.2.2
+        version: 2.2.2
       discord-api-types:
         specifier: ^0.37.67
         version: 0.37.67
@@ -3478,6 +3487,10 @@ packages:
     peerDependencies:
       '@effect-ts/otel-node': '*'
     peerDependenciesMeta:
+      '@effect-ts/core':
+        optional: true
+      '@effect-ts/otel':
+        optional: true
       '@effect-ts/otel-node':
         optional: true
     dependencies:
@@ -10329,6 +10342,10 @@ packages:
   /data-uri-to-buffer@4.0.1:
     resolution: {integrity: sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A==}
     engines: {node: '>= 12'}
+    dev: false
+
+  /dataloader@2.2.2:
+    resolution: {integrity: sha512-8YnDaaf7N3k/q5HnTJVuzSyLETjoZjVmHc4AeKAzOvKHEFQKcn64OKBfzHYtE9zGjctNM7V9I0MfnUVLpi7M5g==}
     dev: false
 
   /date-fns@2.30.0:
