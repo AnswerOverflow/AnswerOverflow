@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
 import { ChannelType, DiscordAPIError, Events } from 'discord.js';
-import { findServerById, getDefaultServerWithFlags } from '@answeroverflow/db';
+import { findServerById } from '@answeroverflow/db';
 import {
 	channelWithDiscordInfoToAnalyticsData,
 	memberToAnalyticsUser,
