@@ -12,7 +12,7 @@ import { IdentifyUser } from '@answeroverflow/hooks/src/analytics/user-identifie
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
-	title: 'Answer Overflow - Search all of Discord',
+	title: 'Answer Overflow - Discord Content Discovery',
 	metadataBase: new URL('https://www.answeroverflow.com/'),
 	description:
 		'Build the best Discord support server with Answer Overflow. Index your content into Google, answer questions with AI, and gain insights into your community.',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 	},
 	openGraph: {
 		type: 'website',
-		title: 'Answer Overflow - Search all of Discord',
+		title: 'Answer Overflow - Discord Content Discovery',
 		siteName: 'Answer Overflow',
 		description:
 			'Build the best Discord support server with Answer Overflow. Index your content into Google, answer questions with AI, and gain insights into your community.',

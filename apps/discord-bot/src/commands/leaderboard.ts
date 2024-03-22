@@ -8,20 +8,12 @@ import {
 	SlashCommandBuilder,
 } from 'discord.js';
 import { getCommandIds } from '~discord-bot/utils/utils';
-import { PostHog } from '@typelytics/posthog';
-import { events } from '../../events';
-import { sharedEnvs } from '@answeroverflow/env/shared';
 import { makeDismissButton } from '~discord-bot/domains/dismiss-button';
 import {
 	memberToAnalyticsUser,
 	trackDiscordEvent,
 } from '~discord-bot/utils/analytics';
-
-const posthog = new PostHog({
-	events: events,
-	apiKey: sharedEnvs.POSTHOG_PERSONAL_API_KEY!,
-	projectId: sharedEnvs.POSTHOG_PROJECT_ID!.toString(),
-});
+import { getTopQuestionSolversForServer } from '@answeroverflow/analytics/src/query';
 
 const medalMap = new Map<number, string>([
 	[0, ':first_place:'],
@@ -64,26 +56,7 @@ export class LeaderboardCommand extends Command {
 		await interaction.deferReply({
 			ephemeral: isEphemeral,
 		});
-		const topUsers = await posthog
-			.query()
-			.addSeries('Solved Question', {
-				sampling: 'total',
-			})
-			.addFilterGroup({
-				match: 'AND',
-				filters: {
-					compare: 'exact',
-					value: interaction.guildId,
-					property: 'Server Id',
-				},
-			})
-			.execute({
-				type: 'table',
-				date_from: 'All time',
-				breakdown_hide_other_aggregation: true,
-				breakdown: 'Question Solver Id',
-			})
-			.then((x) => x.results['Solved Question']);
+		const topUsers = await getTopQuestionSolversForServer(interaction.guildId!);
 
 		const keys = Object.keys(topUsers);
 		const toDisplay = await Promise.all(

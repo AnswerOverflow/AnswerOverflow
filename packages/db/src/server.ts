@@ -161,3 +161,15 @@ export function upsertServer(input: z.infer<typeof zServerUpsert>) {
 		},
 	});
 }
+
+import Dataloader from 'dataloader';
+
+export const serverLoader = new Dataloader(async (readOnlyIds) => {
+	const ids = readOnlyIds as string[];
+	const found = await findManyServersById(ids);
+	const foundMap = new Map<string, Server | null>();
+	for (const server of found) {
+		foundMap.set(server.id, server);
+	}
+	return ids.map((id) => foundMap.get(id) || null);
+});

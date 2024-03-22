@@ -36,6 +36,7 @@ export function getDefaultServer(
 		stripeSubscriptionId: null,
 		plan: 'FREE',
 		vanityInviteCode: null,
+		approximateMemberCount: 0,
 		...override,
 	};
 	return data;
