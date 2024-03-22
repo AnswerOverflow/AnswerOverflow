@@ -27,7 +27,7 @@ export default async function HomePage(props: { children: React.ReactNode }) {
 			<div className={'mx-auto flex flex-col py-4 2xl:flex-row'}>
 				<div
 					className={
-						'mr-4 flex h-fit max-w-[650px] flex-col gap-4 p-4 text-center  2xl:w-[400px] 2xl:text-left'
+						'2xl:mr-4 flex h-fit max-w-[650px] flex-col gap-4 p-4 text-center  2xl:w-[400px] 2xl:text-left'
 					}
 				>
 					<div className={'text-sm font-bold text-white'}>
