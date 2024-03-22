@@ -1,0 +1,21 @@
+.outer {
+	position: relative;
+}
+
+.outer > a {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+}
+
+.inner {
+	position: relative;
+	pointer-events: none;
+	z-index: 1;
+}
+
+.inner a {
+	pointer-events: all;
+}

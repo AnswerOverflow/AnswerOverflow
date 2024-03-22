@@ -8,7 +8,7 @@ import { ChannelType } from 'discord-api-types/v10';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 import { db } from './db';
 import { and, desc, eq, inArray, isNotNull, lt, sql } from 'drizzle-orm';
-import { channelSchema, dbChannels } from './schema';
+import { channelSchema, dbChannels, dbMessages } from './schema';
 import {
 	getDefaultChannel,
 	getDefaultChannelWithFlags,
@@ -153,6 +153,26 @@ export async function findManyChannelMessagesCounts(channelIds: string[]) {
 		.from(dbChannels)
 		.where(inArray(dbChannels.serverId, Array.from(new Set(channelIds))))
 		.groupBy(dbChannels.id);
+}
+
+export async function findLatestThreads(args: { take: number }) {
+	const data = await db.query.dbChannels.findMany({
+		where: eq(dbChannels.type, ChannelType.PublicThread),
+		orderBy: desc(dbChannels.id),
+		limit: args.take,
+	});
+	return data.map(addFlagsToChannel);
+}
+
+export async function findChannelMessageCount(channelId: string) {
+	const data = await db
+		.select({
+			count: sql<number>`count(*)`,
+		})
+		.from(dbMessages)
+		.where(eq(dbMessages.channelId, channelId));
+
+	return data[0]?.count ?? 0;
 }
 
 export async function findManyChannelsById(
