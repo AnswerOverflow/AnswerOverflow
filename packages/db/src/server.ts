@@ -164,7 +164,8 @@ export function upsertServer(input: z.infer<typeof zServerUpsert>) {
 
 import Dataloader from 'dataloader';
 
-export const serverLoader = new Dataloader(async (ids) => {
+export const serverLoader = new Dataloader(async (readOnlyIds) => {
+	const ids = readOnlyIds as string[];
 	const found = await findManyServersById(ids);
 	const foundMap = new Map<string, Server | null>();
 	for (const server of found) {
