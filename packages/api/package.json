@@ -48,7 +48,7 @@
 		"@types/node": "^20.11.20",
 		"@vitest/coverage-c8": "^0.28.5",
 		"dotenv-cli": "^7.3.0",
-		"eslint": "^8.47.0",
+		"eslint": "^8.57.0",
 		"tslib": "^2.6.2",
 		"vitest": "^0.29.8"
 	}
