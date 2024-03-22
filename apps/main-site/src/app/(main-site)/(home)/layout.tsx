@@ -20,14 +20,14 @@ export default async function HomePage(props: { children: React.ReactNode }) {
 		Object.keys(x).slice(0, 10),
 	);
 	return (
-		<div className="flex w-full flex-col items-center bg-background font-body">
+		<div className="flex w-full flex-col bg-background font-body">
 			<div className={'w-full max-w-screen-3xl'}>
 				<Navbar tenant={undefined} />
 			</div>
-			<div className={'flex flex-col-reverse py-4 2xl:flex-row'}>
+			<div className={'mx-auto flex flex-col py-4 2xl:flex-row'}>
 				<div
 					className={
-						'mr-4 flex h-fit max-w-[650px] flex-col  gap-4 p-4 2xl:w-[400px]'
+						'mr-4 flex h-fit max-w-[650px] flex-col gap-4 p-4 text-center  2xl:w-[400px] 2xl:text-left'
 					}
 				>
 					<div className={'text-sm font-bold text-white'}>
@@ -42,9 +42,7 @@ export default async function HomePage(props: { children: React.ReactNode }) {
 						</BlueLink>
 					</span>
 				</div>
-				<div
-					className={'mx-auto flex w-[95vw] max-w-[650px] flex-col gap-4 px-4'}
-				>
+				<div className={' flex w-[95vw] max-w-[650px] flex-col gap-4 md:px-4'}>
 					<div className={'flex gap-4'}>
 						<LinkButton
 							className={'flex items-center gap-4'}

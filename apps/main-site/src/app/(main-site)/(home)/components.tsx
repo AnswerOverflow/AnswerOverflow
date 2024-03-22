@@ -14,7 +14,7 @@ import {
 export const FeedPost = async (props: { postId: string }) => {
 	const result = await messages.load(props.postId);
 	if (!result) return null;
-	const { message, channel, server } = result;
+	const { message, channel, parent, server } = result;
 
 	if (!message || !message.parentChannelId || !message.public) return null;
 	const discordMarkdownAsHTML = await parse(message.content);
@@ -39,9 +39,9 @@ export const FeedPost = async (props: { postId: string }) => {
 						{getSnowflakeUTCDate(message.id)} in{' '}
 						<Link
 							className={'hover:underline'}
-							href={`/c/${channel.parent.serverId}/${channel.parent.id}`}
+							href={`/c/${channel.serverId}/${parent.id}`}
 						>
-							#{channel.parent.name}
+							#{parent.name}
 						</Link>
 					</span>
 				</div>
@@ -92,8 +92,7 @@ function shortenNumber(num: number) {
 export const TrendingServer = async (props: { serverId: string }) => {
 	const server = await findServerById(props.serverId);
 	if (!server) return null;
-	const approximateMemberCount =
-		(server as any).approximateMemberCount || 1000000;
+	const approximateMemberCount = server.approximateMemberCount;
 	return (
 		<LinkButton
 			href={`/c/${server.id}`}
