@@ -73,8 +73,8 @@ function getDate(snowflake: Snowflake) {
 export async function generateSitemap() {
 	let hasMore;
 	let offset = 0;
-	const safetyLimit = 20;
-	const limit = 10000;
+	const safetyLimit = 200;
+	const limit = 20000;
 	const allThreads: Channel[] = [];
 	do {
 		// eslint-disable-next-line no-await-in-loop
