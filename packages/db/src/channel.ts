@@ -147,12 +147,12 @@ export async function findManyChannelMessagesCounts(channelIds: string[]) {
 	if (channelIds.length === 0) return Promise.resolve([]);
 	return db
 		.select({
+			channelId: dbMessages.channelId,
 			count: sql<number>`count(*)`,
-			channelId: dbChannels.id,
 		})
-		.from(dbChannels)
-		.where(inArray(dbChannels.serverId, Array.from(new Set(channelIds))))
-		.groupBy(dbChannels.id);
+		.from(dbMessages)
+		.where(inArray(dbMessages.channelId, channelIds))
+		.groupBy(dbMessages.channelId);
 }
 
 export async function findLatestThreads(args: { take: number }) {
@@ -370,3 +370,13 @@ export async function findChannelsBeforeId(input: {
 		.limit(input.take ?? 100);
 	return res.map(addFlagsToChannel);
 }
+
+import Dataloader from 'dataloader';
+
+export const channelCountsLoader = new Dataloader(
+	async (ids: readonly string[]) => {
+		const data = await findManyChannelMessagesCounts(ids as string[]);
+		const lookup = new Map(data.map((x) => [x.channelId, x.count]));
+		return ids.map((id) => lookup.get(id));
+	},
+);
