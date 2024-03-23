@@ -7,7 +7,7 @@ import { Message, MessageContentWithSolution } from '../message/Message';
 import { Heading } from '../ui/heading';
 
 import Link from '../ui/link';
-import { MessagesSearchBar } from '../messages-search-bar';
+
 import { fetchIsUserInServer } from '../utils/fetch-is-user-in-server';
 import { TrackLoad } from '../ui/track-load';
 import {
@@ -196,7 +196,6 @@ export async function MessageResultPage({
 		<div className={'flex grow flex-col'}>
 			<div className="mb-2 flex flex-col-reverse items-center justify-between gap-2 sm:flex-row sm:py-0 md:my-8">
 				<div className="flex h-full w-full grow flex-col items-center justify-between gap-2 md:gap-4">
-					<MessagesSearchBar className={'hidden md:block'} />
 					<div className={'block xl:hidden'}>
 						<ServerInvite
 							server={server}
