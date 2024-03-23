@@ -1,4 +1,8 @@
-import { findServerById, messages } from '@answeroverflow/db';
+import {
+	channelCountsLoader,
+	findServerById,
+	messages,
+} from '@answeroverflow/db';
 import { parse } from '@answeroverflow/ui/src/message/markdown/render';
 import Link from '@answeroverflow/ui/src/ui/link';
 import { ServerIcon } from '@answeroverflow/ui/src/server-icon';
@@ -15,7 +19,7 @@ export const FeedPost = async (props: { postId: string }) => {
 	const result = await messages.load(props.postId);
 	if (!result) return null;
 	const { message, channel, parent, server } = result;
-
+	const count = await channelCountsLoader.load(channel.id);
 	if (!message || !message.parentChannelId || !message.public) return null;
 	const discordMarkdownAsHTML = await parse(message.content);
 
@@ -63,7 +67,7 @@ export const FeedPost = async (props: { postId: string }) => {
 			<div className={'pt-2'}>
 				<div className={'flex items-center gap-2'}>
 					<FaRegMessage className={'size-4'} />
-					<span>{0} replies</span>
+					<span>{count ?? 0} replies</span>
 				</div>
 			</div>
 		</div>

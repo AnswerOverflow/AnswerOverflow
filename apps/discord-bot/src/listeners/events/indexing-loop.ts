@@ -18,7 +18,7 @@ export class Indexing extends Listener {
 			return;
 		}
 		// Wait for everything to be ready
-		if (sharedEnvs.NODE_ENV === 'production') await delay(120 * 1000);
+		if (sharedEnvs.NODE_ENV === 'production') await delay(3600 * 1000);
 		const intervalInHours = botEnv.STATUS_UPDATE_INTERVAL_IN_HOURS;
 		container.logger.info(
 			`Indexing all servers every ${intervalInHours} hours`,
