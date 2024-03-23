@@ -21,10 +21,14 @@ export default async function HomePage(props: { children: React.ReactNode }) {
 	);
 	return (
 		<div className="flex w-full flex-col bg-background font-body">
-			<div className={'w-full max-w-screen-3xl'}>
+			<div className={'mx-auto w-full max-w-screen-3xl'}>
 				<Navbar tenant={undefined} />
 			</div>
-			<div className={'mx-auto flex flex-col py-4 2xl:flex-row items-center 2xl:items-start'}>
+			<div
+				className={
+					'mx-auto flex flex-col items-center py-4 2xl:flex-row 2xl:items-start'
+				}
+			>
 				<div
 					className={
 						'flex h-fit max-w-[650px] flex-col gap-4 p-4 text-center 2xl:mr-4  2xl:w-[400px] 2xl:text-left'
