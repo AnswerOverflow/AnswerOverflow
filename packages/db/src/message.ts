@@ -6,7 +6,7 @@
 import { z } from 'zod';
 import { findAllThreadsByParentId } from './channel';
 import { ServerWithFlags } from './zodSchemas/serverSchemas';
-import { db } from './db';
+import { db, dbReplica } from './db';
 import {
 	BaseMessage,
 	DiscordAccount,
@@ -168,7 +168,7 @@ export async function findMessageById(id: string) {
 }
 
 export async function findMessageByIdWithDiscordAccount(id: string) {
-	return db.query.dbMessages
+	return dbReplica.query.dbMessages
 		.findFirst({
 			where: eq(dbMessages.id, id),
 			columns: {
@@ -242,7 +242,7 @@ export async function findMessageByIdWithDiscordAccount(id: string) {
 }
 
 export async function findFullMessageById(id: string) {
-	return db.query.dbMessages.findFirst({
+	return dbReplica.query.dbMessages.findFirst({
 		where: eq(dbMessages.id, id),
 		columns: {
 			id: true,
@@ -272,7 +272,7 @@ export async function findFullMessageById(id: string) {
 export async function findMessagesByChannelIdWithDiscordAccounts(
 	input: z.infer<typeof zFindMessagesByChannelId>,
 ) {
-	return db.query.dbMessages
+	return dbReplica.query.dbMessages
 		.findMany({
 			where: and(
 				eq(dbMessages.channelId, input.channelId),
@@ -352,7 +352,7 @@ export async function findMessagesByChannelIdWithDiscordAccounts(
 
 export async function findManyMessages(ids: string[]) {
 	if (ids.length === 0) return [];
-	return db.select().from(dbMessages).where(inArray(dbMessages.id, ids));
+	return dbReplica.select().from(dbMessages).where(inArray(dbMessages.id, ids));
 }
 
 // TODO: We want USS to only be for the server the message is in, not all servers the user is in, is that possible?
@@ -363,7 +363,7 @@ export async function findManyMessagesWithAuthors(
 	},
 ): Promise<MessageFull[]> {
 	if (ids.length === 0) return [];
-	const msgs = await db.query.dbMessages
+	const msgs = await dbReplica.query.dbMessages
 		.findMany({
 			where: inArray(dbMessages.id, ids),
 			with: {
@@ -526,7 +526,7 @@ export function getParentChannelOfMessage(message: BaseMessage) {
 
 export async function findManyMessageWithRelations(ids: readonly string[]) {
 	const start = Date.now();
-	const messages = await db.query.dbMessages.findMany({
+	const messages = await dbReplica.query.dbMessages.findMany({
 		where: inArray(dbMessages.id, ids as string[]),
 		columns: {
 			id: true,
