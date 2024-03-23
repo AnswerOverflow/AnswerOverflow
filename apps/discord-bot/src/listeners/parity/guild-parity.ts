@@ -118,7 +118,7 @@ export class SyncOnReady extends Listener {
         await syncServer(guild);
       } catch (error) {
         this.container.logger.error(
-          `Error syncing guild ${guild.name}: ${error.message}`,
+          `Error syncing guild ${guild.name}: ${error as string}`,
         );
       }
       // dont kick in error
