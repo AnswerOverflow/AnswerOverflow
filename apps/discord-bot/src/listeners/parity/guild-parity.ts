@@ -107,9 +107,12 @@ function makeGuildEmbed(guild: Guild, joined: boolean) {
 @ApplyOptions<Listener.Options>({ once: true, event: Events.ClientReady })
 export class SyncOnReady extends Listener {
   public async run() {
-    if (sharedEnvs.NODE_ENV === 'production') await delay(60 * 1000); // give time for dbs to start up
+    if (sharedEnvs.NODE_ENV === 'production') await delay(600 * 1000); // give time for dbs to start up
     // 1. Sync all of the servers to have the most up to date data
-    const guilds = this.container.client.guilds.cache;
+    const guilds = this.container.client.guilds.cache.sort(
+      // sort by member count to give priority to larger servers
+      (a, b) => b.memberCount - a.memberCount,
+    )
     const activeServerIds = new Set();
     for await (const guild of guilds.values()) {
       // eslint-disable-next-line no-await-in-loop

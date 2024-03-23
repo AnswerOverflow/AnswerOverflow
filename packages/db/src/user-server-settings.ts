@@ -7,7 +7,7 @@ import {
 } from './utils/userServerSettingsUtils';
 import { upsert } from './utils/operations';
 import { DBError } from './utils/error';
-import { db } from './db';
+import { db, dbReplica } from './db';
 import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import {
 	dbMessages,
@@ -156,7 +156,7 @@ export async function findManyUserServerSettings(
 	where: UserServerSettingsFindById[],
 ) {
 	if (where.length === 0) return [];
-	const data = await db.query.dbUserServerSettings.findMany({
+	const data = await dbReplica.query.dbUserServerSettings.findMany({
 		where: and(
 			inArray(
 				dbUserServerSettings.userId,

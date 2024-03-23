@@ -12,7 +12,7 @@ import {
 } from './utils/serverUtils';
 import { upsert } from './utils/operations';
 import { Server, dbServers } from './schema';
-import { db } from './db';
+import { db, dbReplica } from './db';
 import { eq, inArray, or } from 'drizzle-orm';
 
 export async function applyServerSettingsSideEffects<
@@ -64,7 +64,7 @@ export async function createServer(
 }
 
 export async function findAllServers() {
-	const found = await db.query.dbServers.findMany();
+	const found = await dbReplica.query.dbServers.findMany();
 	return found.map(addFlagsToServer);
 }
 
@@ -142,7 +142,7 @@ export async function findServerByAliasOrId(aliasOrId: string) {
 
 export async function findManyServersById(ids: string[]) {
 	if (ids.length === 0) return [];
-	const found = await db.query.dbServers.findMany({
+	const found = await dbReplica.query.dbServers.findMany({
 		where: inArray(dbServers.id, ids),
 	});
 	return found.map(addFlagsToServer);

@@ -58,7 +58,7 @@ services:
           memory: 20M
 
   planetscale-proxy:
-    image: ghcr.io/mattrobenolt/ps-http-sim:latest
+    image: ghcr.io/mattrobenolt/ps-http-sim:v0.0.7
     command:
       [
         "-mysql-no-pass",

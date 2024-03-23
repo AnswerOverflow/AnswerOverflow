@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { chunk } from 'lodash';
 import { findManyChannelsById } from './channel';
-import { db } from './db';
+import { dbReplica } from './db';
 import { findManyMessagesWithAuthors } from './message';
 import { Channel, dbChannels } from './schema';
 import { ChannelType } from 'discord-api-types/v10';
@@ -15,7 +15,7 @@ export async function listPublicThreads(opts: {
 	const { limit = 50000 } = opts;
 
 	let start = Date.now();
-	const threads = await db.query.dbChannels.findMany({
+	const threads = await dbReplica.query.dbChannels.findMany({
 		where: eq(dbChannels.type, ChannelType.PublicThread),
 		offset: limit * opts.offset,
 		limit: limit,
