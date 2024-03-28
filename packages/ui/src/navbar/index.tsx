@@ -70,7 +70,7 @@ export const Navbar = (props: {
 					variant={'ghost'}
 					size={'icon'}
 					href={'/search'}
-					className={'block 2xl:hidden'}
+					className={'block 2xl:hidden flex items-center justify-center'}
 				>
 					<LiaSearchSolid className="h-8 w-8" />
 					<span className="sr-only">Search Answer Overflow</span>
