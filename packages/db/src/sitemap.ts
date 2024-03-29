@@ -91,6 +91,9 @@ export async function generateSitemap() {
 
   // Go from newest to oldest
   const chunks = chunk(allThreads, limit).reverse();
+  if (chunks.length == 0 || allThreads.length == 0) {
+    return;
+  }
   let i = 0;
   for await (const chunk of chunks) {
     const sitemap = new Sitemap('https://www.answeroverflow.com', 'url');
