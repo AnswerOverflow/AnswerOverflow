@@ -55,14 +55,7 @@ async function IdUser() {
 	return <IdentifyUser userId={session?.user?.id} />;
 }
 
-export function Layout({
-	// Layouts must accept a children prop.
-	// This will be populated with nested layouts or pages
-	children,
-}: {
-	children: React.ReactNode;
-}) {
-	// TODO: Session really shouldn't block first byte
+export function Layout({ children }: { children: React.ReactNode }) {
 	return (
 		// suppressHydrationWarning makes next themes doesn't error, other hydration errors are still shown
 		<html

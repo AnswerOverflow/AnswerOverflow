@@ -4,7 +4,6 @@ import {
 	metadata as baseMetadata,
 } from '@answeroverflow/ui/src/layouts/root';
 import React from 'react';
-import TRPCProvider from '../components/trpc-provider';
 import { Metadata } from 'next';
 export const metadata: Metadata = {
 	...baseMetadata,
@@ -14,11 +13,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout(props: { children?: React.ReactNode }) {
-	return (
-		<Layout>
-			<TRPCProvider>
-				{props && props.children ? props.children : null}
-			</TRPCProvider>
-		</Layout>
-	);
+	return <Layout>{props && props.children ? props.children : null}</Layout>;
 }
