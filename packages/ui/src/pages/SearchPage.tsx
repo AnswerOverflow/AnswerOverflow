@@ -26,7 +26,7 @@ export const SearchPage = ({ results, tenant }: SearchResultProps) => {
 	].join(' ');
 	return (
 		<div className="w-full">
-			<Heading.H1 className="py-4 text-3xl xl:text-5xl">Search</Heading.H1>
+			<Heading.H1 className="py-4 text-xl">Search Results</Heading.H1>
 			{!noResults && (
 				<div className={'mb-4'}>
 					<span className="text-base text-primary/[.6]">{resultsText}</span>

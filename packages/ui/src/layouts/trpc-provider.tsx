@@ -16,12 +16,6 @@ const getBaseUrl = () => {
 	// eslint-disable-next-line n/no-process-env,turbo/no-undeclared-env-vars
 	return `http://localhost:${process.env.NEXT_PUBLIC_PORT ?? 3000}`; // dev SSR should use localhost
 };
-import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
-
-const persister = createSyncStoragePersister({
-	storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-});
 
 export function TRPCProvider(props: { children?: React.ReactNode } | null) {
 	const [queryClient] = useState(
@@ -52,13 +46,10 @@ export function TRPCProvider(props: { children?: React.ReactNode } | null) {
 	);
 	return (
 		<trpc.Provider client={trpcClient} queryClient={queryClient}>
-			<PersistQueryClientProvider
-				client={queryClient}
-				persistOptions={{ persister }}
-			>
+			<QueryClientProvider client={queryClient}>
 				<ToastContainer />
 				{props && props.children}
-			</PersistQueryClientProvider>
+			</QueryClientProvider>
 		</trpc.Provider>
 	);
 }
