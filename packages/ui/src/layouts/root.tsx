@@ -1,14 +1,11 @@
 /* eslint-disable n/no-process-env */
-import React, { Suspense } from 'react';
+import React from 'react';
 import { Providers } from './providers';
 import { CommitBanner } from '../commit-banner';
-import { getServerSession } from '@answeroverflow/auth';
 import { Montserrat, Source_Sans_3 } from 'next/font/google';
 import type { Metadata } from 'next';
-import { PostHogPageview } from '@answeroverflow/hooks/src/analytics/client';
 import Script from 'next/script';
 import { DATA_UNBLOCKER } from './data-unblocker';
-import { IdentifyUser } from '@answeroverflow/hooks/src/analytics/user-identifier';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
@@ -50,11 +47,6 @@ const sourceSans3 = Source_Sans_3({
 	variable: '--font-source-sans-3',
 });
 
-async function IdUser() {
-	const session = await getServerSession();
-	return <IdentifyUser userId={session?.user?.id} />;
-}
-
 export function Layout({ children }: { children: React.ReactNode }) {
 	return (
 		// suppressHydrationWarning makes next themes doesn't error, other hydration errors are still shown
@@ -82,10 +74,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				/>
 				<CommitBanner />
 				<SpeedInsights sampleRate={0.1} />
-				<Suspense>
-					<PostHogPageview />
-					<IdUser />
-				</Suspense>
 				<Providers>{children}</Providers>
 			</body>
 		</html>

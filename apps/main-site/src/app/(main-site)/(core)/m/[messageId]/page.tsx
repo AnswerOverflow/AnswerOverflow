@@ -6,7 +6,6 @@ type Props = {
 	params: { messageId: string };
 };
 
-export const dynamic = 'force-static';
 export const revalidate = 600;
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	const data = await makeMessageResultPage(params.messageId, []);
@@ -52,6 +51,7 @@ export default async function MessageResult({ params }: Props) {
 			tenant={undefined}
 			requestedId={params.messageId}
 			relatedPosts={data.recommendedPosts}
+			isUserInServer={'not_in_server'}
 			thread={data.thread ?? undefined}
 		/>
 	);
