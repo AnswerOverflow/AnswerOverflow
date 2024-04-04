@@ -20,7 +20,6 @@ export function generateMetadata({ searchParams }: Props): Metadata {
 		},
 	};
 }
-export const dynamic = 'force-dynamic';
 
 export default async function Search(props: {
 	searchParams: {
