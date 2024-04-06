@@ -75,6 +75,8 @@ export class Sitemap {
 			'Cache-Control',
 			'public, s-maxage=21600, stale-while-revalidate=86400',
 		);
+		res.setHeader('CDN-Cache-Control', 'max-age=43200');
+		res.setHeader('Vercel-CDN-Cache-Control', 'max-age=86400');
 		res.write(this.toXml());
 		res.end();
 	}
