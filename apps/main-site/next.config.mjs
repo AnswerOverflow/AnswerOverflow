@@ -62,15 +62,7 @@ const config = {
 		ignoreDuringBuilds: !!process.env.CI,
 	},
 	productionBrowserSourceMaps: true, // we're open source so why not
-	rewrites: async () => {
-		return [
-			{
-				source: '/sitemap:path',
-				destination:
-					'https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap:path',
-			},
-		];
-	},
+
 	redirects: async () => {
 		return [
 			{
