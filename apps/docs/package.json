@@ -26,7 +26,6 @@
 		"@answeroverflow/ui": "workspace:^",
 		"@tanstack/react-query": "^4.32.6",
 		"@tanstack/react-query-devtools": "^4.32.6",
-		"@trpc/client": "^10.37.1",
 		"@trpc/next": "^10.37.1",
 		"@trpc/react-query": "^10.37.1",
 		"@trpc/server": "^10.37.1",

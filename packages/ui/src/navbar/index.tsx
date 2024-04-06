@@ -8,22 +8,9 @@ import { ServerIcon } from '../server-icon';
 import { AnswerOverflowLogo } from '../icons/answer-overflow-logo';
 import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
 import { LinkButton } from '../ui/link-button';
-import { SignInButton } from './sign-in-button';
-
-import { getServerSession } from '@answeroverflow/auth';
-import { ClientUserAvatar } from './client';
 import { LiaSearchSolid } from 'react-icons/lia';
 import { MessagesSearchBar } from '../messages-search-bar';
-
-export async function UserSection(props: { tenant: ServerPublic | undefined }) {
-	const session = await getServerSession();
-	if (!session) return <SignInButton tenant={props.tenant} />;
-	return (
-		<Suspense>
-			<ClientUserAvatar user={session.user} tenant={props.tenant} />
-		</Suspense>
-	);
-}
+import { UserSection } from './client';
 
 export const Navbar = (props: {
 	tenant: ServerPublic | undefined;
@@ -90,9 +77,7 @@ export const Navbar = (props: {
 						<GetStarted className={'hidden md:block'} location="Navbar" />
 					</>
 				)}
-				<Suspense fallback={<SignInButton tenant={tenant} />}>
-					<UserSection tenant={tenant} />
-				</Suspense>
+				<UserSection tenant={tenant} />
 			</div>
 		</nav>
 	);
