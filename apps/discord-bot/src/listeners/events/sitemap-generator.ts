@@ -4,6 +4,7 @@ import { Events } from 'discord.js';
 // import { hoursToMs } from '~discord-bot/utils/utils';
 // import { generateSitemap } from '@answeroverflow/db/src/sitemap';
 import { sharedEnvs } from '@answeroverflow/env/shared';
+// eslint-disable-next-line n/no-extraneous-import
 import { XMLParser } from 'fast-xml-parser';
 @ApplyOptions<Listener.Options>({ event: Events.ClientReady })
 export class LoopSitemap extends Listener {
