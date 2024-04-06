@@ -39,6 +39,7 @@
 		"discord-api-types": "^0.37.67",
 		"discord.js": "^14.13.0",
 		"dotenv-cra": "^3.0.3",
+		"fast-xml-parser": "^4.3.6",
 		"lru-cache": "^8.0.5",
 		"react": "^18.2.0",
 		"reflect-metadata": "^0.1.13",
