@@ -56,6 +56,7 @@ export const Navbar = (props: {
 				<LinkButton
 					variant={'ghost'}
 					size={'icon'}
+					prefetch={false}
 					href={'/search'}
 					className={'flex items-center justify-center 2xl:hidden'}
 				>
