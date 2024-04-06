@@ -91,7 +91,10 @@ export class QuickAction extends Command {
 				const author = targetMessage.author;
 				const authorMember = await interaction.guild!.members.fetch(author.id);
 				if (!authorMember) return null;
-				if (discordChannel.permissionsFor(authorMember)?.has('ViewChannel')) {
+				if (
+					discordChannel.permissionsFor(authorMember)?.has('ViewChannel') &&
+					discordChannel.permissionsFor(authorMember)?.has('SendMessages')
+				) {
 					return channel;
 				}
 				return null;
