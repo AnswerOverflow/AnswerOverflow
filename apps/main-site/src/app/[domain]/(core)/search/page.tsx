@@ -21,6 +21,8 @@ export function generateMetadata({ searchParams }: Props): Metadata {
 	};
 }
 
+export const dynamic = true;
+
 export default async function Search(props: {
 	searchParams: {
 		q?: string | string[];
