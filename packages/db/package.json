@@ -32,7 +32,7 @@
 		"aws-sdk": "^2.1565.0",
 		"dataloader": "^2.2.2",
 		"discord-api-types": "^0.37.67",
-		"dotenv": "^16.3.1",
+		"dotenv": "^16.4.5",
 		"dotenv-cra": "^3.0.3",
 		"drizzle-orm": "^0.28.5",
 		"drizzle-zod": "^0.5.1",
