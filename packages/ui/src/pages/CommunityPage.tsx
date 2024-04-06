@@ -24,7 +24,7 @@ import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
 import { LuArrowLeft, LuArrowRight } from 'react-icons/lu';
 import { TrackLoad } from '../ui/track-load';
 import { serverToAnalyticsData } from '@answeroverflow/constants';
-
+import { Suspense } from 'react';
 type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];
 	selectedChannel: ChannelPublicWithFlags;
@@ -237,10 +237,12 @@ export const CommunityPage = (
 
 	const CommunityQuestionsSection = () => (
 		<>
-			<MessagesSearchBar
-				placeholder={`Search the ${server.name} community`}
-				serverId={server.id}
-			/>
+			<Suspense>
+				<MessagesSearchBar
+					placeholder={`Search the ${server.name} community`}
+					serverId={server.id}
+				/>
+			</Suspense>
 			<div className="flex w-full justify-center py-2 md:hidden">
 				{selectedChannel && (
 					<ChannelDropdown

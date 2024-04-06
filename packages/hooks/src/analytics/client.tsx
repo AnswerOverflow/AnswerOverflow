@@ -3,29 +3,8 @@ import React, { useEffect, useRef } from 'react';
 import { EventMap, trackEvent } from './events';
 import { usePathname, useSearchParams } from 'next/navigation';
 import posthog from 'posthog-js';
-import { PostHogProvider } from 'posthog-js/react';
+import { PostHogProvider, usePostHog } from 'posthog-js/react';
 
-export function PostHogPageview() {
-	const pathname = usePathname();
-	const searchParams = useSearchParams();
-	// Track pageviews
-	useEffect(() => {
-		const track = () => {
-			if (pathname) {
-				let url = window.origin + pathname;
-				if (searchParams?.toString()) {
-					url = url + `?${searchParams.toString()}`;
-				}
-
-				posthog.capture('$pageview', {
-					$current_url: url,
-				});
-			}
-		};
-		void track();
-	}, [pathname, searchParams]);
-	return <></>;
-}
 if (typeof window !== 'undefined') {
 	// eslint-disable-next-line n/no-process-env
 	posthog.init(process.env.NEXT_PUBLIC_POSTHOG_TOKEN!, {
@@ -33,6 +12,27 @@ if (typeof window !== 'undefined') {
 		persistence: 'memory',
 		capture_pageview: false,
 	});
+}
+
+export function PostHogPageview() {
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+	const posthog = usePostHog();
+	// Track pageviews
+	useEffect(() => {
+		if (pathname && posthog) {
+			let url = window.origin + pathname;
+			const asString = searchParams?.toString();
+			if (asString) {
+				url = url + `?${asString}`;
+			}
+			posthog.capture('$pageview', {
+				$current_url: url,
+			});
+		}
+	}, [pathname, searchParams, posthog]);
+
+	return null;
 }
 
 export const AnalyticsProvider = ({

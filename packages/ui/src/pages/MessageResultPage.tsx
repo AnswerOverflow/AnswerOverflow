@@ -5,10 +5,7 @@ import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
 import { ServerInvite } from '../server-invite';
 import { Message, MessageContentWithSolution } from '../message/Message';
 import { Heading } from '../ui/heading';
-
 import Link from '../ui/link';
-
-import { fetchIsUserInServer } from '../utils/fetch-is-user-in-server';
 import { TrackLoad } from '../ui/track-load';
 import {
 	channelToAnalyticsData,
@@ -27,6 +24,7 @@ export type MessageResultPageProps = {
 	thread?: ChannelPublicWithFlags;
 	tenant: ServerPublic | undefined;
 	requestedId: string;
+	isUserInServer: 'in_server' | 'not_in_server';
 	relatedPosts: {
 		message: MessageFull;
 		thread: ChannelPublicWithFlags;
@@ -63,15 +61,15 @@ const JoinAnswerOverflowCard = () => (
 );
 
 // TODO: Align text to be same level with the avatar
-export async function MessageResultPage({
+export function MessageResultPage({
 	messages,
 	server,
 	channel,
 	thread,
 	tenant,
 	relatedPosts,
+	isUserInServer,
 }: MessageResultPageProps) {
-	const isUserInServer = await fetchIsUserInServer(server.id);
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
 

@@ -17,12 +17,12 @@ import { getServerHomepageUrl } from './utils/server';
 import { ButtonProps } from './ui/button';
 import { TrackLink } from './ui/track-link';
 import { TrackLinkButton } from './ui/track-link-button';
-import { fetchIsUserInServer } from './utils/fetch-is-user-in-server';
+
+import { ServerInviteJoinText } from './server-invite.client';
 
 type ServerInviteProps = {
 	server: ServerPublic;
 	channel?: ChannelPublicWithFlags;
-	isUserInServer: ReturnType<typeof fetchIsUserInServer>;
 	location: ServerInviteClickProps['Button Location'];
 	maxWidth?: string;
 	truncate?: boolean;
@@ -85,7 +85,7 @@ export const ChannelName = ({
 	);
 };
 
-export const ServerInviteJoinButton = async (
+export const ServerInviteJoinButton = (
 	props: {
 		className?: string;
 		size?: ButtonProps['size'];
@@ -94,7 +94,6 @@ export const ServerInviteJoinButton = async (
 	const { server, channel, location } = props;
 	const inviteCode = channel?.inviteCode || server.vanityInviteCode;
 	if (!inviteCode) return <></>;
-	const inServer = await fetchIsUserInServer(server.id);
 	return (
 		<TrackLinkButton
 			href={`https://discord.gg/${inviteCode}`}
@@ -109,17 +108,13 @@ export const ServerInviteJoinButton = async (
 				'Button Location': location,
 			}}
 		>
-			{server.id === '864296203746803753'
-				? '질문하러가기'
-				: inServer === 'in_server'
-				? 'Joined'
-				: 'Join Server'}
+			<ServerInviteJoinText id={server.id} />
 		</TrackLinkButton>
 	);
 };
 
 export const ServerInvite = (
-	props: Omit<ServerInviteProps, 'isUserInServer'> & {
+	props: ServerInviteProps & {
 		// eslint-disable-next-line @typescript-eslint/naming-convention
 		JoinButton?: React.ReactNode;
 	},

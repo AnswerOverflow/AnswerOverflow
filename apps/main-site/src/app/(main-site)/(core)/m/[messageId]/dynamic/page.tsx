@@ -2,6 +2,7 @@ import { MessageResultPage } from '@answeroverflow/ui/src/pages/MessageResultPag
 import { notFound, redirect } from 'next/navigation';
 import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
 import type { Metadata } from 'next';
+import { fetchIsUserInServer } from '@answeroverflow/ui/src/utils/fetch-is-user-in-server';
 type Props = {
 	params: { messageId: string };
 };
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 		},
 	};
 }
-
+export const dynamic = 'force-dynamic';
 export default async function MessageResult({ params }: Props) {
 	const data = await callAPI({
 		apiCall: (api) => api.messages.threadFromMessageId(params.messageId),
@@ -48,12 +49,14 @@ export default async function MessageResult({ params }: Props) {
 			`https://${data.server.customDomain}/m/${params.messageId}`,
 		);
 	}
+	const isInServer = await fetchIsUserInServer(data.server.id);
 	return (
 		<MessageResultPage
 			messages={data.messages}
 			channel={data.parentChannel}
 			server={data.server}
 			tenant={undefined}
+			isUserInServer={isInServer}
 			requestedId={params.messageId}
 			relatedPosts={data.recommendedPosts}
 			thread={data.thread ?? undefined}
