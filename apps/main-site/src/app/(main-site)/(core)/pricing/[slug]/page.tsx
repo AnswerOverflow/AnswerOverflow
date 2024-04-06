@@ -10,6 +10,8 @@ export const metadata: Metadata = {
 			'Start indexing your Discord content into Google for free. Explore our public and enterprise platforms to find what suits you best',
 	},
 };
+export const dynamic = 'force-static';
+
 export default function PricingPage() {
 	return <Pricing />;
 }
