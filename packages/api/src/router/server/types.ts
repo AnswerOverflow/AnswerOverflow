@@ -5,5 +5,5 @@ import { serverRouter } from './server';
 
 export type ServerPublic = z.infer<typeof zServerPublic>;
 export type ServerDashboard = inferProcedureOutput<
-	(typeof serverRouter)['fetchDashboardById']
+	(typeof serverRouter)['byId']
 >;

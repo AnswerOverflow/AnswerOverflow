@@ -31,15 +31,7 @@ import {
 	protectedFetch,
 	protectedMutationFetchFirst,
 } from '~api/utils/protected-procedures';
-import { fetchServerPageViewsAsLineChart } from '~api/utils/posthog';
-import {
-	createProPlanCheckoutSession,
-	createNewCustomer,
-	fetchSubscriptionInfo,
-	updateServerCustomerName,
-	createEnterprisePlanCheckoutSession,
-} from '@answeroverflow/payments';
-import { sharedEnvs } from '@answeroverflow/env/shared';
+import { mockServer } from '@answeroverflow/db-mock';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
 	'Read the rules consent already enabled';
@@ -350,108 +342,5 @@ export const serverRouter = router({
 				status,
 				domainJson,
 			};
-		}),
-	fetchDashboardById: withUserServersProcedure
-		.input(z.string())
-		.query(async ({ input, ctx }) =>
-			protectedFetch({
-				fetch: async () => {
-					const server = await findServerById(input);
-					if (!server) {
-						throw new TRPCError({
-							code: 'NOT_FOUND',
-							message: 'Server not found',
-						});
-					}
-
-					if (server.stripeCustomerId) {
-						// Update the customer's name and description
-						// We can just let this run in the background and not await it
-						void updateServerCustomerName({
-							serverId: server.id,
-							name: server.name,
-							customerId: server.stripeCustomerId,
-						});
-					}
-
-					// If they have a subscription already, we display the portal
-					if (server.stripeCustomerId && server.stripeSubscriptionId) {
-						const sub = await fetchSubscriptionInfo(
-							server.stripeSubscriptionId,
-						);
-						const {
-							cancel_at: cancelAt, // This is when a cancellation will take effect
-							current_period_end: currentPeriodEnd, // This is when an active subscription will renew
-							trial_end: trialEnd, // This is when a trial will end
-							// get when subscription will renew
-						} = sub;
-
-						return {
-							...server,
-							status: 'active',
-							stripeCheckoutUrl: sharedEnvs.STRIPE_CHECKOUT_URL ?? null,
-							dateCancelationTakesEffect: cancelAt,
-							dateSubscriptionRenews: currentPeriodEnd,
-							dateTrialEnds: trialEnd,
-						} as const;
-					}
-
-					// else we upsert them and then display checkout
-
-					if (!server.stripeCustomerId) {
-						const customer = await createNewCustomer({
-							name: server.name,
-							serverId: server.id,
-						});
-						server.stripeCustomerId = customer.id;
-						await updateServer({
-							existing: server,
-							update: {
-								id: server.id,
-								stripeCustomerId: customer.id,
-							},
-						});
-					}
-
-					const returnUrl = `https://app.answeroverflow.com/dashboard/${server.id}`;
-
-					const [proPlanCheckout, enterprisePlanCheckout] = await Promise.all([
-						createProPlanCheckoutSession({
-							customerId: server.stripeCustomerId,
-							successUrl: returnUrl,
-							cancelUrl: returnUrl,
-						}),
-						createEnterprisePlanCheckoutSession({
-							customerId: server.stripeCustomerId,
-							successUrl: returnUrl,
-							cancelUrl: returnUrl,
-						}),
-					]);
-
-					return {
-						...server,
-						status: 'inactive',
-						hasSubscribedBefore:
-							proPlanCheckout.hasSubscribedInPast ||
-							enterprisePlanCheckout.hasSubscribedInPast,
-						proPlanCheckoutUrl: proPlanCheckout.url,
-						enterprisePlanCheckoutUrl: enterprisePlanCheckout.url,
-						dateCancelationTakesEffect: null,
-						dateSubscriptionRenews: null,
-						dateTrialEnds: null,
-					} as const;
-				},
-				notFoundMessage: 'Server not found',
-				permissions: () => assertCanEditServer(ctx, input),
-			}),
-		),
-	fetchPageViewsAsLineChart: withUserServersProcedure
-		.input(z.string())
-		.query(({ input, ctx }) => {
-			return protectedFetch({
-				fetch: () => fetchServerPageViewsAsLineChart(input),
-				notFoundMessage: 'Server not found',
-				permissions: () => assertCanEditServer(ctx, input),
-			});
 		}),
 });

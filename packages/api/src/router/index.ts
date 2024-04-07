@@ -5,6 +5,7 @@ import { serverRouter } from '~api/router/server/server';
 import { discordAccountRouter } from './users/accounts/discord-accounts';
 import { userServerSettingsRouter } from './user-server-settings/user-server-settings';
 import { messagesRouter } from './messages/messages';
+import { dashboardRouter } from './dashboard';
 export const botRouter = router({
 	// Discord:
 	servers: serverRouter,
@@ -18,6 +19,7 @@ export const appRouter = router({
 	discordAccounts: discordAccountRouter,
 	userServerSettings: userServerSettingsRouter,
 	messages: messagesRouter,
+	dashboard: dashboardRouter,
 
 	// Other:
 	auth: authRouter,

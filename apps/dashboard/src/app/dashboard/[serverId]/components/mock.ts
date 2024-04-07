@@ -1,0 +1,20 @@
+export const demoServerData = {
+	approximateMemberCount: 10000,
+	bitfield: 0,
+	customDomain: null,
+	description: null,
+	flags: {
+		anonymizeMessages: false,
+		considerAllMessagesPublic: true,
+		readTheRulesConsentEnabled: true,
+	},
+	icon: null,
+	id: '1000',
+	kickedTime: null,
+	name: 'Demo Server',
+	plan: 'FREE',
+	stripeCustomerId: null,
+	stripeSubscriptionId: null,
+	vanityInviteCode: null,
+	vanityUrl: null,
+} as const;

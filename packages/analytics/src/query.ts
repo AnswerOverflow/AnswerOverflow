@@ -70,3 +70,57 @@ export async function getPopularServers() {
 		})
 		.then((x) => x.results['Message Page View']);
 }
+
+function getPosthogQueryClientForDashboard(opts: {
+	serverId: string;
+	to: Date;
+	from: Date;
+}) {
+	return new PostHog({
+		events,
+		apiKey: sharedEnvs.POSTHOG_PERSONAL_API_KEY!,
+		projectId: sharedEnvs.POSTHOG_PROJECT_ID!.toString(),
+		globalFilters: {
+			filters: {
+				compare: 'exact',
+				property: 'Server Id',
+				value: opts.serverId,
+			},
+		},
+		executionOptions: {
+			type: 'line',
+			// @ts-expect-error
+			date_to: opts.to.toISOString().split('T')[0]!,
+			// @ts-expect-error
+			date_from: opts.from.toISOString().split('T')[0]!,
+		},
+	});
+}
+
+export function getPageViewsForServer(opts: {
+	serverId: string;
+	to: Date;
+	from: Date;
+}) {
+	return getPosthogQueryClientForDashboard(opts)
+		.query()
+		.addSeries('Message Page View', {
+			label: 'Page Views',
+			sampling: 'total',
+		})
+		.execute({ type: 'line' });
+}
+
+export function getServerInvitesClicked(opts: {
+	serverId: string;
+	to: Date;
+	from: Date;
+}) {
+	return getPosthogQueryClientForDashboard(opts)
+		.query()
+		.addSeries('Server Invite Click', {
+			label: 'Invite Clicked',
+			sampling: 'total',
+		})
+		.execute({ type: 'number' });
+}

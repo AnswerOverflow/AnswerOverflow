@@ -1,13 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@answeroverflow/ui/src/ui/button';
 import {
-	Card,
-	CardHeader,
-	CardTitle,
-	CardDescription,
-	CardContent,
-} from '@answeroverflow/ui/src/ui/card';
-import {
 	Sheet,
 	SheetContent,
 	SheetTrigger,
@@ -16,6 +9,7 @@ import { UserSection } from '@answeroverflow/ui/src/navbar/client';
 import { AnswerOverflowLogo } from 'packages/ui/src/icons/answer-overflow-logo';
 import { FaHome } from 'react-icons/fa';
 import { FaGear } from 'react-icons/fa6';
+import { ServerSelectDropdown } from './components/navbar';
 
 export default function Layout(props: {
 	children?: React.ReactNode;
@@ -87,25 +81,11 @@ export default function Layout(props: {
 									);
 								})}
 							</nav>
-							<div className="mt-auto">
-								<Card>
-									<CardHeader>
-										<CardTitle>Upgrade to Pro</CardTitle>
-										<CardDescription>
-											Unlock all features and get unlimited access to our
-											support team.
-										</CardDescription>
-									</CardHeader>
-									<CardContent>
-										<Button size="sm" className="w-full">
-											Upgrade
-										</Button>
-									</CardContent>
-								</Card>
-							</div>
 						</SheetContent>
 					</Sheet>
-					<div className="w-full flex-1" />
+					<div className="w-full flex-1">
+						<ServerSelectDropdown />
+					</div>
 					<UserSection tenant={undefined} />
 				</header>
 				<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">

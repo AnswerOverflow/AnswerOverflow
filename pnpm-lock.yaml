@@ -125,6 +125,9 @@ importers:
       '@trpc/server':
         specifier: ^10.37.1
         version: 10.45.0
+      '@typelytics/tremor':
+        specifier: ^0.1.3
+        version: 0.1.3(prop-types@15.8.1)(react-dom@18.2.0)(tailwindcss@3.4.1)
       next:
         specifier: 14.1.0
         version: 14.1.0(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
@@ -719,8 +722,8 @@ importers:
         specifier: workspace:^
         version: link:../env
       '@typelytics/posthog':
-        specifier: ^0.1.1
-        version: 0.1.1
+        specifier: ^0.1.3
+        version: 0.1.3
       discord-api-types:
         specifier: ^0.37.67
         version: 0.37.67
@@ -1595,6 +1598,9 @@ importers:
       '@radix-ui/react-popover':
         specifier: ^1.0.6
         version: 1.0.7(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-select':
+        specifier: ^2.0.0
+        version: 2.0.0(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0)
       '@radix-ui/react-slider':
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0)
@@ -1640,6 +1646,9 @@ importers:
       cva:
         specifier: npm:class-variance-authority@^0.6.1
         version: /class-variance-authority@0.6.1
+      date-fns:
+        specifier: ^3.6.0
+        version: 3.6.0
       lucide-react:
         specifier: ^0.263.1
         version: 0.263.1(react@18.2.0)
@@ -1661,6 +1670,9 @@ importers:
       ramda:
         specifier: ^0.29.1
         version: 0.29.1
+      react-day-picker:
+        specifier: ^8.10.0
+        version: 8.10.0(date-fns@3.6.0)(react@18.2.0)
       react-grid-gallery:
         specifier: ^1.0.0
         version: 1.0.0(react@18.2.0)
@@ -5967,6 +5979,47 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
+  /@radix-ui/react-select@2.0.0(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-RH5b7af4oHtkcHS7pG6Sgv5rk5Wxa7XI8W5gvB1N/yiuDGZxko1ynvOiVhFM7Cis2A8zxF9bTOUVbRDzPepe6w==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.23.9
+      '@radix-ui/number': 1.0.1
+      '@radix-ui/primitive': 1.0.1
+      '@radix-ui/react-collection': 1.0.3(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-compose-refs': 1.0.1(@types/react@18.2.51)(react@18.2.0)
+      '@radix-ui/react-context': 1.0.1(@types/react@18.2.51)(react@18.2.0)
+      '@radix-ui/react-direction': 1.0.1(@types/react@18.2.51)(react@18.2.0)
+      '@radix-ui/react-dismissable-layer': 1.0.5(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-focus-guards': 1.0.1(@types/react@18.2.51)(react@18.2.0)
+      '@radix-ui/react-focus-scope': 1.0.4(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-id': 1.0.1(@types/react@18.2.51)(react@18.2.0)
+      '@radix-ui/react-popper': 1.1.3(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-portal': 1.0.4(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-slot': 1.0.2(@types/react@18.2.51)(react@18.2.0)
+      '@radix-ui/react-use-callback-ref': 1.0.1(@types/react@18.2.51)(react@18.2.0)
+      '@radix-ui/react-use-controllable-state': 1.0.1(@types/react@18.2.51)(react@18.2.0)
+      '@radix-ui/react-use-layout-effect': 1.0.1(@types/react@18.2.51)(react@18.2.0)
+      '@radix-ui/react-use-previous': 1.0.1(@types/react@18.2.51)(react@18.2.0)
+      '@radix-ui/react-visually-hidden': 1.0.3(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0)
+      '@types/react': 18.2.51
+      '@types/react-dom': 18.2.18
+      aria-hidden: 1.2.3
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-remove-scroll: 2.5.5(@types/react@18.2.51)(react@18.2.0)
+    dev: false
+
   /@radix-ui/react-slider@1.1.2(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-NKs15MJylfzVsCagVSWKhGGLNR1W9qWs+HtgbmjjVUB3B9+lb3PYoXxVju3kOrpf0VKyVCtZp+iTwVoqpa1Chw==}
     peerDependencies:
@@ -7442,14 +7495,27 @@ packages:
   /@tsconfig/node16@1.0.4:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
 
-  /@typelytics/core@0.1.1:
-    resolution: {integrity: sha512-KUiW/fedCBZzvCF2FN+LUNO1Y9pw8OYmON1gGrIyNPQ6nyfBkr4o9Y3yg+tVWC3sKWnXiLUGquPlj0mZ57/VAA==}
+  /@typelytics/core@0.1.3:
+    resolution: {integrity: sha512-Qf0HmfLxNWSBR8kFDuvddWeDFdIUTlKRJuy5e6rOm6hslsHYATtHU/LOYMYb8Jm87PsjeipFMVAeeqjyrVZsEQ==}
     dev: false
 
-  /@typelytics/posthog@0.1.1:
-    resolution: {integrity: sha512-HBUvVzBnLsdjkqUwIpfmYFuRf+49Lu4Fsln329+44Vf/58U7aaUDkDAKlfTpTjy3ikIliRBg+Bg1x/YT//fHdw==}
+  /@typelytics/posthog@0.1.3:
+    resolution: {integrity: sha512-jVi+JeuXhBBiCRcUHt5VLXOz/jq2Po1j4jehHnKcL+oYZKnjelYRW8XOCCujxUmLecMWUPQCBsSgcL29Hz7uVQ==}
     dependencies:
-      '@typelytics/core': 0.1.1
+      '@typelytics/core': 0.1.3
+    dev: false
+
+  /@typelytics/tremor@0.1.3(prop-types@15.8.1)(react-dom@18.2.0)(tailwindcss@3.4.1):
+    resolution: {integrity: sha512-aBEcTGtdtRC+vn89YUnzUHXQEO21bSuXuYdVnDii2J50xVgchzdc5wzS5Qe8GJSLp0V+iiKpV+OMxBgWY8v1TA==}
+    dependencies:
+      '@tremor/react': 3.13.4(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.4.1)
+      '@typelytics/core': 0.1.3
+      react: 18.2.0
+      react-svg-worldmap: 2.0.0-alpha.16(react-dom@18.2.0)(react@18.2.0)
+    transitivePeerDependencies:
+      - prop-types
+      - react-dom
+      - tailwindcss
     dev: false
 
   /@types/acorn@4.0.6:
@@ -9756,6 +9822,12 @@ packages:
     engines: {node: '>=12'}
     dev: false
 
+  /d3-geo@2.0.2:
+    resolution: {integrity: sha512-8pM1WGMLGFuhq9S+FpPURxic+gKzjluCD/CHTuUF3mXMeiCo0i6R0tO1s4+GArRFde96SLcW/kOFRjoAosPsFA==}
+    dependencies:
+      d3-array: 2.12.1
+    dev: false
+
   /d3-geo@3.1.0:
     resolution: {integrity: sha512-JEo5HxXDdDYXCaWdwLRt79y7giK8SbhZJbFWXqbRTolCHFI5jRqteLzCsq51NKbUoX0PjBVSohxrx+NoOUujYA==}
     engines: {node: '>=12'}
@@ -9953,6 +10025,10 @@ packages:
     engines: {node: '>=0.11'}
     dependencies:
       '@babel/runtime': 7.23.9
+
+  /date-fns@3.6.0:
+    resolution: {integrity: sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==}
+    dev: false
 
   /date-time@3.1.0:
     resolution: {integrity: sha512-uqCUKXE5q1PNBXjPqvwhwJf9SwMoAHBgWJ6DcrnS5o+W2JOiIILl0JEdVD8SGujrNS02GGxgwAg2PN2zONgtjg==}
@@ -14770,7 +14846,7 @@ packages:
       '@panva/hkdf': 1.1.1
       cookie: 0.5.0
       jose: 4.15.4
-      next: 14.1.0(@babel/core@7.23.9)(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.1.0(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
       oauth: 0.9.15
       openid-client: 5.6.4
       preact: 10.19.3
@@ -14851,7 +14927,7 @@ packages:
       react: '*'
       react-dom: '*'
     dependencies:
-      next: 14.1.0(@babel/core@7.23.9)(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.1.0(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -16020,6 +16096,16 @@ packages:
       react: 18.2.0
     dev: false
 
+  /react-day-picker@8.10.0(date-fns@3.6.0)(react@18.2.0):
+    resolution: {integrity: sha512-mz+qeyrOM7++1NCb1ARXmkjMkzWVh2GL9YiPbRjKe0zHccvekk4HE+0MPOZOrosn8r8zTHIIeOUXTmXRqmkRmg==}
+    peerDependencies:
+      date-fns: ^2.28.0 || ^3.0.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      date-fns: 3.6.0
+      react: 18.2.0
+    dev: false
+
   /react-devtools-core@4.28.5:
     resolution: {integrity: sha512-cq/o30z9W2Wb4rzBefjv5fBalHU0rJGZCHAkf/RHSBWSSYwh8PlQTqqOJmgIIbBtpj27T6FIPXeomIjZtCNVqA==}
     dependencies:
@@ -16151,6 +16237,17 @@ packages:
       - encoding
       - supports-color
       - utf-8-validate
+    dev: false
+
+  /react-path-tooltip@1.0.25(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-wT1+mDi10aFyP3nyRCz3ixcwWGPIeCb3QOPHFYC+kIzaQUPk82Lrm3TsDn2k24n8FdUbbsxpfL8iwIddzaG5LQ==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: '>=16'
+      react-dom: '>=16.0.0'
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /react-player@2.14.1(react@18.2.0):
@@ -16301,6 +16398,20 @@ packages:
       get-nonce: 1.0.1
       invariant: 2.2.4
       react: 18.2.0
+      tslib: 2.6.2
+    dev: false
+
+  /react-svg-worldmap@2.0.0-alpha.16(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-yztQgcshmUjN6GQ5irTuEiO54iWzY/iZsPP7vygEc+yY1IFlbXWOffRaZW7cHm9oBBmSk+/UNaaDI9iCQlHQ8g==}
+    engines: {node: '>=14.16'}
+    peerDependencies:
+      react: '>=16'
+      react-dom: '>=16.0.0'
+    dependencies:
+      d3-geo: 2.0.2
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-path-tooltip: 1.0.25(react-dom@18.2.0)(react@18.2.0)
       tslib: 2.6.2
     dev: false
 
