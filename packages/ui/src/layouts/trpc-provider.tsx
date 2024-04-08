@@ -33,10 +33,11 @@ export function TRPCProvider(props: { children?: React.ReactNode } | null) {
 			transformer,
 			links: [
 				loggerLink({
-					enabled: (opts) =>
+					enabled: () =>
 						// eslint-disable-next-line n/no-process-env,turbo/no-undeclared-env-vars
-						process.env.NODE_ENV === 'development' ||
-						(opts.direction === 'down' && opts.result instanceof Error),
+						// process.env.NODE_ENV === 'development' ||
+						// (opts.direction === 'down' && opts.result instanceof Error),
+						false,
 				}),
 				httpBatchLink({
 					url: `${getBaseUrl()}/api/trpc`,
