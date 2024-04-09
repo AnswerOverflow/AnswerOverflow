@@ -36,8 +36,8 @@ importers:
         specifier: ^6.9.0
         version: 6.20.0(eslint@8.57.0)(typescript@5.3.3)
       dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
+        specifier: ^7.4.1
+        version: 7.4.1
       eslint-config-next:
         specifier: ^14.1.3
         version: 14.1.3(eslint@8.57.0)(typescript@5.3.3)
@@ -190,8 +190,8 @@ importers:
         specifier: ^10.4.15
         version: 10.4.17(postcss@8.4.33)
       dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
+        specifier: ^7.4.1
+        version: 7.4.1
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -374,8 +374,8 @@ importers:
         specifier: ^8.5.5
         version: 8.5.10
       dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
+        specifier: ^7.4.1
+        version: 7.4.1
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -507,8 +507,8 @@ importers:
         specifier: ^10.4.15
         version: 10.4.17(postcss@8.4.33)
       dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
+        specifier: ^7.4.1
+        version: 7.4.1
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -649,8 +649,8 @@ importers:
         specifier: ^8.2.2
         version: 8.2.2
       dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
+        specifier: ^7.4.1
+        version: 7.4.1
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -689,8 +689,8 @@ importers:
         specifier: ^1.17.11
         version: 1.17.14
       dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
+        specifier: ^7.4.1
+        version: 7.4.1
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -844,8 +844,8 @@ importers:
         specifier: ^0.28.5
         version: 0.28.5
       dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
+        specifier: ^7.4.1
+        version: 7.4.1
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -920,8 +920,8 @@ importers:
         specifier: ^0.28.5
         version: 0.28.5
       dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
+        specifier: ^7.4.1
+        version: 7.4.1
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -969,8 +969,8 @@ importers:
         specifier: ^7.0.3
         version: 7.0.3
       dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
+        specifier: ^7.4.1
+        version: 7.4.1
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -1101,8 +1101,8 @@ importers:
         specifier: ^20.11.20
         version: 20.11.20
       dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
+        specifier: ^7.4.1
+        version: 7.4.1
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -1192,8 +1192,8 @@ importers:
         specifier: ^7.0.3
         version: 7.0.3
       dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
+        specifier: ^7.4.1
+        version: 7.4.1
       drizzle-kit:
         specifier: ^0.19.13
         version: 0.19.13
@@ -1241,8 +1241,8 @@ importers:
         specifier: ^0.28.5
         version: 0.28.5
       dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
+        specifier: ^7.4.1
+        version: 7.4.1
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -1530,8 +1530,8 @@ importers:
         specifier: ^7.0.3
         version: 7.0.3
       dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
+        specifier: ^7.4.1
+        version: 7.4.1
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -10220,8 +10220,8 @@ packages:
     resolution: {integrity: sha512-b7uwreMYL2eZhrSCRC4ahLTeZcPZxSmYfmcQGXGkXiZSNW1X85v+SDM5KsWcpivIiUBH47Ji7NtyUdpLeF5JZQ==}
     dev: false
 
-  /dotenv-cli@7.3.0:
-    resolution: {integrity: sha512-314CA4TyK34YEJ6ntBf80eUY+t1XaFLyem1k9P0sX1gn30qThZ5qZr/ZwE318gEnzyYP9yj9HJk6SqwE0upkfw==}
+  /dotenv-cli@7.4.1:
+    resolution: {integrity: sha512-fE1aywjRrWGxV3miaiUr3d2zC/VAiuzEGghi+QzgIA9fEf/M5hLMaRSXb4IxbUAwGmaLi0IozdZddnVU96acag==}
     hasBin: true
     dependencies:
       cross-spawn: 7.0.3
