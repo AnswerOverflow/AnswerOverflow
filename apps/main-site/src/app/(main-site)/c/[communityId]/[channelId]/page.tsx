@@ -3,6 +3,9 @@ import { notFound, redirect } from 'next/navigation';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { CommunityPage } from '@answeroverflow/ui/src/pages/CommunityPage';
 import { z } from 'zod';
+
+export { generateMetadata } from '../page';
+
 export const dynamic = 'force-static';
 
 export default async function CommunityChannelPage({

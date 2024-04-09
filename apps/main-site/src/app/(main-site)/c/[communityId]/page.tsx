@@ -29,6 +29,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 		description:
 			communityPageData.server.description ??
 			`Questions and answers related to ${communityPageData.server.name}`,
+		alternates: {
+			canonical: `/c/${communityPageData.server.id}`,
+		},
 		openGraph: {
 			title: `${communityPageData.server.name} Community - Answer Overflow`,
 			description:
