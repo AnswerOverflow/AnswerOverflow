@@ -54,34 +54,40 @@ export function DatePickerWithPresets() {
 	console.log('selected range is', selectedRange);
 
 	return (
-		<Popover open={selectedRange == 'custom'}>
-			<Select
-				onValueChange={(value) => {
-					console.log('updating value', value);
-					setSelectedRange(value);
-					if (value !== 'custom') {
-						setDate({
-							from: addDays(new Date(), -parseInt(value)),
-							to: new Date(),
-						});
-					}
-				}}
-			>
-				<PopoverTrigger asChild>
-					<SelectTrigger>
-						<SelectValue placeholder="Select" />
-					</SelectTrigger>
-				</PopoverTrigger>
-				<SelectContent position="popper">
-					<SelectItem value="0">Today</SelectItem>
-					<SelectItem value="1">Yesterday</SelectItem>
-					<SelectItem value="3">Past 3 days</SelectItem>
-					<SelectItem value="7">Past week</SelectItem>
-					<SelectItem value="custom">Custom</SelectItem>
-				</SelectContent>
-			</Select>
-			<PopoverContent>
-				<div className="rounded-md border">
+		<Select
+			onValueChange={(value) => {
+				console.log('updating value', value);
+				setSelectedRange(value);
+				if (value !== 'custom') {
+					setDate({
+						from: addDays(new Date(), -parseInt(value)),
+						to: new Date(),
+					});
+				}
+			}}
+		>
+			<SelectTrigger className="w-[400px]">
+				<CalendarIcon className="mr-2 h-4 w-4" />
+				{date?.from ? (
+					date.to ? (
+						<>
+							{format(date.from, 'LLL dd, y')} - {format(date.to, 'LLL dd, y')}
+						</>
+					) : (
+						format(date.from, 'LLL dd, y')
+					)
+				) : (
+					<span>Pick a date</span>
+				)}{' '}
+			</SelectTrigger>
+			<SelectContent position="popper">
+				<div className="flex flex-row gap-4 rounded-md ">
+					<div className="flex flex-col border-r pr-2">
+						<SelectItem value="0">Today</SelectItem>
+						<SelectItem value="1">Yesterday</SelectItem>
+						<SelectItem value="3">Past 3 days</SelectItem>
+						<SelectItem value="7">Past week</SelectItem>
+					</div>
 					<Calendar
 						initialFocus
 						mode="range"
@@ -91,7 +97,7 @@ export function DatePickerWithPresets() {
 						numberOfMonths={2}
 					/>
 				</div>
-			</PopoverContent>
-		</Popover>
+			</SelectContent>
+		</Select>
 	);
 }
