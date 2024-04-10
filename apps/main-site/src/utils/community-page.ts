@@ -1,4 +1,4 @@
-import { findQuestionsForSitemap } from '@answeroverflow/db';
+import { findQuestionsForSitemapCached } from '@answeroverflow/cache';
 import { Sitemap } from '@answeroverflow/utils/src/sitemap';
 import { ServerResponse } from 'http';
 import { getDate } from '@answeroverflow/ui/src/utils/snowflake';
@@ -8,7 +8,7 @@ export async function addCommunityQuestionsToSitemap(input: {
 	sitemap: Sitemap;
 }) {
 	console.log(`Generating sitemap for community ${input.communityId}`);
-	const lookup = await findQuestionsForSitemap(input.communityId);
+	const lookup = await findQuestionsForSitemapCached(input.communityId);
 	if (!lookup) return;
 	const { questions, server } = lookup;
 

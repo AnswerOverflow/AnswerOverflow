@@ -50,7 +50,7 @@
 		"@types/lodash": "^4.14.202",
 		"@types/node": "^20.11.20",
 		"cross-env": "^7.0.3",
-		"dotenv-cli": "^7.3.0",
+		"dotenv-cli": "^7.4.1",
 		"drizzle-kit": "^0.19.13",
 		"eslint": "^8.57.0",
 		"prettier": "^2.8.8",
