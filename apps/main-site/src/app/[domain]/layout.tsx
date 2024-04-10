@@ -35,6 +35,9 @@ export async function generateMetadata({
 				  }
 				: undefined,
 		icons: icon ? [icon] : undefined,
+		alternates: {
+			canonical: `https://${tenant.customDomain!}`,
+		},
 		openGraph: {
 			images: [image],
 			siteName: tenant.name,

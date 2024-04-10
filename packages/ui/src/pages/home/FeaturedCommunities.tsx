@@ -1,7 +1,7 @@
 import { Heading } from '../../ui/heading';
 import Balancer from 'react-wrap-balancer';
 import Image from 'next/image';
-import { serverToAnalyticsData } from 'packages/constants';
+import { serverToAnalyticsData } from '@answeroverflow/constants';
 import { TrackLink } from '../../ui/track-link';
 import { Paragraph } from '../../ui/paragraph';
 import { LinkButton } from '../../ui/link-button';

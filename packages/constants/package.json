@@ -23,7 +23,7 @@
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
 		"@types/node": "^20.11.20",
-		"dotenv-cli": "^7.3.0",
+		"dotenv-cli": "^7.4.1",
 		"eslint": "^8.57.0",
 		"prettier": "^2.8.8"
 	}
