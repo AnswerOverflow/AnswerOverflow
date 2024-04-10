@@ -6,8 +6,6 @@ import { z } from 'zod';
 
 export { generateMetadata } from '../page';
 
-export const dynamic = 'force-static';
-
 export default async function CommunityChannelPage({
 	params,
 	searchParams,
