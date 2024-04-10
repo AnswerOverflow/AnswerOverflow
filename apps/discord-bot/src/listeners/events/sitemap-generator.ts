@@ -32,6 +32,5 @@ export class LoopSitemap extends Listener {
 		};
 		// refresh sitemaps every 6 hours
 		setInterval(() => refreshSitemaps, hoursToMs(6));
-		void refreshSitemaps();
 	}
 }
