@@ -1,5 +1,5 @@
 import { protectedGet } from '../../../tokens';
-import { findQuestionsForSitemap } from '@answeroverflow/db/src/pages';
+import { findQuestionsForSitemapCached } from '@answeroverflow/cache';
 
 export const runtime = 'edge';
 export const preferredRegion = 'iad1';
@@ -10,7 +10,7 @@ export async function GET(
 ) {
 	return protectedGet({
 		fetch() {
-			return findQuestionsForSitemap(params.id);
+			return findQuestionsForSitemapCached(params.id);
 		},
 		isApiTokenValid({ data, uss }) {
 			return uss.serverId === data.server.id;

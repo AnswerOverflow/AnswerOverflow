@@ -63,6 +63,10 @@ const navigation: NavigationData = {
 						name: 'Changelog',
 						href: 'https://www.answeroverflow.com/changelog',
 					},
+					{
+						name: 'All Posts',
+						href: 'https://www.answeroverflow.com/posts',
+					},
 				],
 			},
 		},
