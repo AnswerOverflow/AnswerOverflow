@@ -63,9 +63,18 @@ export async function createServer(
 	return addFlagsToServer(created);
 }
 
-export async function findAllServers() {
+export async function findAllServers(opts?: {
+	includeKicked: boolean;
+	includeCustomDomain: boolean;
+}) {
 	const found = await dbReplica.query.dbServers.findMany();
-	return found.map(addFlagsToServer);
+	const withFlags = found.map(addFlagsToServer);
+	if (!opts) return withFlags;
+	return withFlags.filter((x) => {
+		if (x.kickedTime && !opts.includeKicked) return false;
+		if (x.customDomain && !opts.includeCustomDomain) return false;
+		return true;
+	});
 }
 
 export async function updateServer({
