@@ -6,7 +6,6 @@ import { Metadata } from 'next';
 type Props = {
 	params: { communityId: string };
 };
-export const dynamic = 'force-static';
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	const communityPageData = await findServerWithCommunityPageData({
