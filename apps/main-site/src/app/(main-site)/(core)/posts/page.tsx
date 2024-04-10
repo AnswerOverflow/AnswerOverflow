@@ -14,7 +14,7 @@ export default async function AllPosts() {
 			<ul className="ml-4 list-disc">
 				{servers.map((server) => (
 					<li key={server.id}>
-						<BlueLink prefetch={false} href={`/c/${server.id}/posts`}>
+						<BlueLink prefetch={false} href={`/c/${server.id}/posts/0`}>
 							{server.name}
 						</BlueLink>
 					</li>
