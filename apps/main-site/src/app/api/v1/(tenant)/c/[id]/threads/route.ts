@@ -1,7 +1,6 @@
 import { protectedGet } from '../../../tokens';
 import { findQuestionsForSitemapCached } from '@answeroverflow/cache';
 
-export const runtime = 'edge';
 export const preferredRegion = 'iad1';
 
 export async function GET(
