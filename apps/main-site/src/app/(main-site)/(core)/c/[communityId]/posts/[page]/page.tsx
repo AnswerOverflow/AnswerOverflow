@@ -1,4 +1,4 @@
-import { cacheQuestionsForSitemap } from '@answeroverflow/cache';
+import { findQuestionsForSitemapCached } from '@answeroverflow/cache';
 import { BlueLink } from '@answeroverflow/ui/src/ui/blue-link';
 
 type Props = {
@@ -7,7 +7,7 @@ type Props = {
 export const dynamic = 'force-static';
 
 export default async function CommunityPosts({ params }: Props) {
-	const lookup = await cacheQuestionsForSitemap(params.communityId);
+	const lookup = await findQuestionsForSitemapCached(params.communityId);
 
 	if (!lookup) return <div>Community not found</div>;
 	const pageSize = 5000;
