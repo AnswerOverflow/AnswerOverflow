@@ -8,7 +8,7 @@ export const BlueLink = (
 	},
 ) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const { prefetch, className, ...rest } = props;
+	const { className, ...rest } = props;
 	return (
 		<Link
 			className={cn(

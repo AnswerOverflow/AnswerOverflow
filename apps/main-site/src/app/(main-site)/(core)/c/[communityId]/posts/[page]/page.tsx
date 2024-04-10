@@ -2,14 +2,23 @@ import { findQuestionsForSitemapCached } from '@answeroverflow/cache';
 import { BlueLink } from '@answeroverflow/ui/src/ui/blue-link';
 
 type Props = {
-	params: { communityId: string };
+	params: { communityId: string; page: string };
 };
 export const dynamic = 'force-static';
 
 export default async function CommunityPosts({ params }: Props) {
 	const lookup = await findQuestionsForSitemapCached(params.communityId);
+
 	if (!lookup) return <div>Community not found</div>;
-	const { questions, server } = lookup;
+	const pageSize = 5000;
+	const currentPage = parseInt(params.page ?? '0');
+
+	const { questions: allQuestion, server } = lookup;
+	const questions = allQuestion.slice(
+		currentPage * pageSize,
+		(currentPage + 1) * pageSize,
+	);
+
 	return (
 		<div className="mx-auto max-w-2xl">
 			<h1 className="font-bold">All posts for {server.name}</h1>
@@ -21,6 +30,16 @@ export default async function CommunityPosts({ params }: Props) {
 						</BlueLink>
 					</li>
 				))}
+				{questions.length === pageSize && (
+					<li>
+						<BlueLink
+							prefetch={false}
+							href={`/c/${params.communityId}/posts/${currentPage + 1}`}
+						>
+							Next page
+						</BlueLink>
+					</li>
+				)}
 			</ul>
 		</div>
 	);
