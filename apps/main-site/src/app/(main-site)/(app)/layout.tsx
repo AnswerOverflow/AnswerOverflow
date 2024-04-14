@@ -13,7 +13,7 @@ export default function RootLayout({
 		<div className="mx-auto flex w-full flex-col items-center overflow-y-auto overflow-x-hidden bg-background font-body">
 			<div className="w-full justify-center">
 				<Navbar tenant={undefined} />
-				<div className="flex grid-flow-col">
+				<div className="grid grid-flow-col">
 					<div className="hidden h-screen min-w-[250px] max-w-[250px] overflow-y-auto border-b-2 border-r-2 p-4 xl:block">
 						<LinkButton
 							href="/new"
