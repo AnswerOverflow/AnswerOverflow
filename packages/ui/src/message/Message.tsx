@@ -42,7 +42,9 @@ export const MessageAuthorArea = (props: Pick<MessageProps, 'message'>) => {
 const DEFAULT_COLLAPSE_CONTENT_LENGTH = 500;
 
 export const MessageContents = async (
-	props: Pick<MessageProps, 'collapseContent' | 'message'>,
+	props: Pick<MessageProps, 'collapseContent' | 'message'> & {
+		className?: string;
+	},
 ) => {
 	const { message, collapseContent } = props;
 
@@ -63,7 +65,12 @@ export const MessageContents = async (
 		: message.content;
 	const discordMarkdownAsHTML = await parse(trimmedText);
 	return (
-		<div className="max-w-4xl pt-2 font-body text-primary [overflow-wrap:_anywhere]">
+		<div
+			className={cn(
+				'max-w-4xl whitespace-break-spaces pt-2 font-body text-primary [overflow-wrap:_anywhere]',
+				props.className,
+			)}
+		>
 			{discordMarkdownAsHTML}
 		</div>
 	);
@@ -99,6 +106,20 @@ export const MessageContentWithSolution = (
 					<Link href={`#solution-${props.solution.id}`}>Jump to solution</Link>
 				)}
 			</div>
+		</div>
+	);
+};
+
+export const MessageBody = (
+	props: MessageProps & {
+		content?: React.ReactNode;
+	},
+) => {
+	return (
+		<div className="flex flex-col gap-2">
+			{props.content ? props.content : <MessageContents {...props} />}
+			<MessageEmbeds {...props} />
+			<MessageAttachments {...props} />
 		</div>
 	);
 };
