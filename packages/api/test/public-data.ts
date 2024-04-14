@@ -22,6 +22,7 @@ export function pickPublicServerData(server: Server) {
 		'kickedTime',
 		'customDomain',
 		'vanityInviteCode',
+		'approximateMemberCount',
 	);
 }
 
