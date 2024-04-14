@@ -29,8 +29,8 @@ export const Navbar = (props: {
 					<Link href="/" className={props.hideIcon ? 'hidden' : ''}>
 						{tenant ? (
 							<div className="flex items-center space-x-2">
-								<ServerIcon server={tenant} />
-								<span className="font-bold">{tenant.name}</span>
+								<ServerIcon server={tenant} size={48} />
+								<span className="font-semibold">{tenant.name}</span>
 							</div>
 						) : (
 							<>

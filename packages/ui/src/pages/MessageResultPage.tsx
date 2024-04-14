@@ -175,15 +175,17 @@ export function MessageResultPage({
 	const Main = () => (
 		<div className={'flex w-full grow flex-col gap-4 '}>
 			<div className="flex flex-col gap-2">
-				<div className="flex flex-row items-center gap-2">
-					<Link href={`/c/${server.id}`}>
-						<ServerIcon server={server} size={48} />
-					</Link>
-					<div className="flex flex-col">
-						<Link href={`/c/${server.id}`}>{server.name}</Link>
-						{firstMessage.author.name}
+				{!tenant && (
+					<div className="flex flex-row items-center gap-2">
+						<Link href={`/c/${server.id}`}>
+							<ServerIcon server={server} size={48} />
+						</Link>
+						<div className="flex flex-col">
+							<Link href={`/c/${server.id}`}>{server.name}</Link>
+							{firstMessage.author.name}
+						</div>
 					</div>
-				</div>
+				)}
 				<h1 className="text-2xl font-semibold">{title}</h1>
 				<div>
 					<MessageBody
