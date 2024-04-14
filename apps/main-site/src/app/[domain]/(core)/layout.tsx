@@ -19,10 +19,14 @@ export default async function RootLayout({
 	}
 	return (
 		<div className="mx-auto flex w-full flex-col items-center overflow-y-auto overflow-x-hidden bg-background font-body">
-			<div className="w-full max-w-screen-2xl justify-center">
+			<div className="w-full justify-center">
 				<Navbar tenant={server} />
-				<main className="px-4 sm:px-[4rem] 2xl:px-[6rem]">{children}</main>
-				<Footer tenant={server} />
+				<div className="flex grid-flow-col">
+					<div className="mx-auto w-full max-w-screen-2xl px-2 pt-2 xl:pt-8">
+						<main className="w-full">{children}</main>
+						<Footer tenant={server} />
+					</div>
+				</div>
 			</div>
 		</div>
 	);
