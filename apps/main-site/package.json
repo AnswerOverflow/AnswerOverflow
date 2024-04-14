@@ -18,16 +18,16 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@answeroverflow/analytics": "workspace:^",
 		"@answeroverflow/api": "workspace:^",
 		"@answeroverflow/auth": "workspace:^",
+		"@answeroverflow/cache": "workspace:^",
 		"@answeroverflow/constants": "workspace:^",
 		"@answeroverflow/db": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/tailwind-config": "workspace:^",
-		"@answeroverflow/analytics": "workspace:^",
 		"@answeroverflow/ui": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
-		"@answeroverflow/cache": "workspace:^",
 		"@mdx-js/loader": "^2.3.0",
 		"@mdx-js/react": "^2.3.0",
 		"@next/mdx": "^13.4.19",

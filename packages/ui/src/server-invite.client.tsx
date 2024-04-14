@@ -10,7 +10,7 @@ export function ServerInviteJoinText(props: { id: string }) {
 		return '질문하러가기';
 	}
 	if (!data || !data?.some((server) => server.id === id)) {
-		return 'Join Server';
+		return 'Join';
 	}
-	return 'Joined Server';
+	return 'Joined';
 }

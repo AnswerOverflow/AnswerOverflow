@@ -19,6 +19,7 @@ import { TrackLink } from './ui/track-link';
 import { TrackLinkButton } from './ui/track-link-button';
 
 import { ServerInviteJoinText } from './server-invite.client';
+import { LinkButton } from './ui/link-button';
 
 type ServerInviteProps = {
 	server: ServerPublic;
@@ -89,9 +90,10 @@ export const ServerInviteJoinButton = (
 	props: {
 		className?: string;
 		size?: ButtonProps['size'];
-	} & Pick<ServerInviteProps, 'server' | 'channel' | 'location'>,
+	} & Pick<ServerInviteProps, 'server' | 'channel' | 'location'> &
+		Omit<React.ComponentPropsWithoutRef<typeof LinkButton>, 'href'>,
 ) => {
-	const { server, channel, location } = props;
+	const { server, channel, location, className, ...rest } = props;
 	const inviteCode = channel?.inviteCode || server.vanityInviteCode;
 	if (!inviteCode) return <></>;
 	return (
@@ -99,7 +101,7 @@ export const ServerInviteJoinButton = (
 			href={`https://discord.gg/${inviteCode}`}
 			variant="default"
 			referrerPolicy="no-referrer"
-			className={cn('text-center font-header font-bold', props.className)}
+			className={cn('text-center font-header font-bold', className)}
 			size={props.size}
 			eventName={'Server Invite Click'}
 			eventData={{
@@ -107,6 +109,7 @@ export const ServerInviteJoinButton = (
 				...serverToAnalyticsData(server),
 				'Button Location': location,
 			}}
+			{...rest}
 		>
 			<ServerInviteJoinText id={server.id} />
 		</TrackLinkButton>
