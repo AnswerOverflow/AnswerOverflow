@@ -17,7 +17,7 @@ export function ThinMessage(
 				<div className={cn('mx-auto h-full w-0 rounded-full border-1')} />
 			</div>
 			<div className="flex flex-col pl-2 pt-2 ">
-				<div className="flex flex-row gap-2 text-muted-foreground">
+				<div className="flex flex-row items-center gap-2 text-muted-foreground">
 					<span className="mr-1">{message.author.name}</span>
 					<span className="text-sm ">•</span>
 					<TimeAgo snowflake={message.id} />
