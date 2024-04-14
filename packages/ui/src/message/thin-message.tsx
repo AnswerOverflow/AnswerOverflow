@@ -11,7 +11,7 @@ export function ThinMessage(
 ) {
 	const { message } = props;
 	return (
-		<div className="flex flex-row gap-2">
+		<div className="grid grid-flow-col">
 			<div className="mb-8">
 				<DiscordAvatar user={message.author} size={40} />
 				<div className={cn('mx-auto h-full w-0 rounded-full border-1')} />
