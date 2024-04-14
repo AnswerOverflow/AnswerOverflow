@@ -1,4 +1,5 @@
 'use client';
+
 export function CarbonAds() {
 	return (
 		// TODO: Maybe have a "hey disable ad blocker" message here?

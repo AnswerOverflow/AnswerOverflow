@@ -22,7 +22,7 @@ export const MessageImage = (
 ) => {
 	const { attachment } = props;
 	return (
-		<div className={`mt-4 max-w-sm lg:max-w-md ${props.className ?? ''}`}>
+		<div className={`max-w-sm lg:max-w-md ${props.className ?? ''}`}>
 			<Image
 				src={attachment.proxyUrl}
 				width={attachment.width ?? undefined}
@@ -55,7 +55,7 @@ const MessageImages = (
 	return (
 		<>
 			{imagesToShow.map((x, i) => (
-				<div className="mt-4 max-w-sm lg:max-w-md" key={i}>
+				<div className="max-w-sm lg:max-w-md" key={i}>
 					<MessageImage
 						attachment={x}
 						loading={props.loadingStyle === 'eager' ? 'eager' : 'lazy'}
@@ -131,7 +131,7 @@ export const MessageAttachments = (
 		message.attachments = message.attachments.slice(0, props.limit);
 
 	return (
-		<div className="mt-4 flex flex-col gap-4">
+		<div className="flex flex-col gap-4">
 			<MessageImages message={message} loadingStyle={props.loadingStyle} />
 			<VideoAttachments message={message} />
 			<AttachmentList message={message} />

@@ -110,6 +110,20 @@ export const MessageContentWithSolution = (
 	);
 };
 
+export const MessageBody = (
+	props: MessageProps & {
+		content?: React.ReactNode;
+	},
+) => {
+	return (
+		<div className="flex flex-col gap-2">
+			{props.content ? props.content : <MessageContents {...props} />}
+			<MessageEmbeds {...props} />
+			<MessageAttachments {...props} />
+		</div>
+	);
+};
+
 export const Message = (
 	props: MessageProps & {
 		content?: React.ReactNode;

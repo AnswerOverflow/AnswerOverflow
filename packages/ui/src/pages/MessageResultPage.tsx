@@ -2,13 +2,8 @@ import type { ChannelPublicWithFlags, MessageFull } from '@answeroverflow/db';
 import type { ServerPublic } from '@answeroverflow/api';
 import type { QAPage, WithContext } from 'schema-dts';
 import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
-import { ServerInvite, ServerInviteJoinButton } from '../server-invite';
-import {
-	Message,
-	MessageContentWithSolution,
-	MessageContents,
-} from '../message/Message';
-import { Heading } from '../ui/heading';
+import { ServerInviteJoinButton } from '../server-invite';
+import { MessageBody, MessageContentWithSolution } from '../message/Message';
 import Link from '../ui/link';
 import { TrackLoad } from '../ui/track-load';
 import {
@@ -21,9 +16,11 @@ import { stripMarkdownAndHTML } from '../message/markdown/strip';
 import { TrackLinkButton } from '../ui/track-link-button';
 import { LazyInviteToAnswerOverflowPopover } from './message-result-page/lazy-invite-to-answer-overflow-popover';
 import { ServerIcon } from '../server-icon';
-import { MessageAttachments } from '../message/attachments';
 import { CarbonAds } from '../ui/ads';
 import { FormattedNumber } from '../ui/numbers';
+import { ThinMessage } from '../message/thin-message';
+import { getDiscordURLForMessage } from '../utils/discord';
+import { ExternalLink } from 'lucide-react';
 
 export type MessageResultPageProps = {
 	messages: MessageFull[];
@@ -46,7 +43,7 @@ const JoinAnswerOverflowCard = () => (
 		}
 	>
 		<span
-			className={'text-xl font-bold '}
+			className={'text-lg font-semibold '}
 			style={{
 				textWrap: 'balance',
 			}}
@@ -83,7 +80,6 @@ export function MessageResultPage({
 
 	const solutionMessageId = messages.at(0)?.solutions?.at(0)?.id;
 	const solution = messages.find((message) => message.id === solutionMessageId);
-	let consecutivePrivateMessages = 0;
 
 	let contents = '';
 	const messagesWithMergedContent = messages.map((message, index) => {
@@ -115,68 +111,44 @@ export function MessageResultPage({
 
 	const messagesToDisplay = messagesWithMergedContent.filter(Boolean);
 
-	const messageStack = messagesToDisplay.map((message, index) => {
-		if (message.id === firstMessage.id) {
-			return;
-		}
-		const nextMessage = messagesToDisplay.at(index + 1);
-		if (!message.public && isUserInServer !== 'in_server') {
-			consecutivePrivateMessages++;
-			if (nextMessage && !nextMessage.public) {
+	const messageStack = messagesToDisplay
+		.map((message, index) => {
+			if (message.id === firstMessage.id) {
 				return;
 			}
-		} else {
-			consecutivePrivateMessages = 0;
-		}
-		if (message.author.id === '958907348389339146') return null;
+			const nextMessage = messagesToDisplay.at(index + 1);
+			if (!message.public && isUserInServer !== 'in_server') {
+				if (nextMessage && !nextMessage.public) {
+					return;
+				}
+			}
+			if (message.author.id === '958907348389339146') return null;
 
-		const Msg = ({ count }: { count: number }) => {
-			const shouldShowSolutionInContent = index === 0 && solution;
-
-			return (
-				<Message
-					key={message.id}
-					message={message}
-					fullRounded
-					content={
-						shouldShowSolutionInContent ? (
-							<MessageContentWithSolution
-								solution={solution}
-								message={message}
-								showJumpToSolutionCTA
-								loadingStyle={
-									message.id === solutionMessageId ? 'eager' : 'lazy'
-								}
-							/>
-						) : undefined
-					}
-					showBorders={message.id !== solutionMessageId}
-					loadingStyle={message.id === solutionMessageId ? 'eager' : 'lazy'}
-					numberOfMessages={count}
-				/>
-			);
-		};
-
-		if (message.id === solutionMessageId) {
-			return (
-				<div
-					className="text-green-700 dark:text-green-400"
-					key={message.id}
-					id={`solution-${message.id}`}
-				>
-					Solution
+			if (message.id === solutionMessageId) {
+				return (
 					<div
-						className="rounded-lg border-2 border-green-500  dark:border-green-400 "
+						className="text-green-700 dark:text-green-400"
 						key={message.id}
+						id={`solution-${message.id}`}
 					>
-						<Msg key={message.id} count={consecutivePrivateMessages} />
+						Solution
+						<div
+							className="rounded-lg border-2 border-green-500  p-2 dark:border-green-400"
+							key={message.id}
+						>
+							<ThinMessage message={message} />
+						</div>
 					</div>
+				);
+			}
+
+			return (
+				<div className="p-2" key={message.id}>
+					<ThinMessage message={message} />
 				</div>
 			);
-		}
-
-		return <Msg key={message.id} count={consecutivePrivateMessages} />;
-	});
+		})
+		.filter(Boolean);
 
 	const title = thread?.name ?? firstMessage.content?.slice(0, 100);
 	const isFirstMessageSolution = solution && solution.id !== firstMessage.id;
@@ -200,7 +172,6 @@ export function MessageResultPage({
 					: undefined,
 		},
 	};
-
 	const Main = () => (
 		<div className={'flex w-full grow flex-col gap-4 '}>
 			<div className="flex flex-col gap-2">
@@ -213,17 +184,21 @@ export function MessageResultPage({
 						{firstMessage.author.name}
 					</div>
 				</div>
-				<h1 className="text-xl font-semibold">{title}</h1>
+				<h1 className="text-2xl font-semibold">{title}</h1>
 				<div>
-					{solution ? (
-						<MessageContentWithSolution
-							message={firstMessage}
-							solution={solution}
-						/>
-					) : (
-						<MessageContents message={firstMessage} />
-					)}
-					<MessageAttachments message={firstMessage} />
+					<MessageBody
+						message={firstMessage}
+						content={
+							solution &&
+							messageStack.length > 2 && (
+								<MessageContentWithSolution
+									message={firstMessage}
+									solution={solution}
+								/>
+							)
+						}
+						loadingStyle="eager"
+					/>
 				</div>
 			</div>
 			<div className="rounded-md">
@@ -235,9 +210,9 @@ export function MessageResultPage({
 	const adsEnabled = !tenant;
 
 	const Sidebar = () => (
-		<div className="flex w-full shrink-0 flex-col items-center gap-4 px-4 text-center  xl:w-[400px]">
+		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center  md:w-[400px]">
 			<div
-				className={'hidden w-full  border-2 bg-card drop-shadow-md xl:block'}
+				className={'hidden w-full  border-2 bg-card drop-shadow-md md:block'}
 			>
 				<div className="flex flex-col items-start gap-4 p-4">
 					<div className="flex w-full flex-row items-center justify-between truncate font-bold">
@@ -252,19 +227,29 @@ export function MessageResultPage({
 						/>
 					</div>
 					<span className="text-left text-sm">{server.description}</span>
-					<div className="flex flex-col items-start">
-						<span className="text-sm font-semibold">
-							<FormattedNumber value={server.approximateMemberCount} />
-						</span>
-						<span className="text-xs">Members</span>
+					<div className="flex w-full flex-row items-center justify-between">
+						<div className="flex flex-col items-start ">
+							<span className="text-sm font-semibold">
+								<FormattedNumber value={server.approximateMemberCount} />
+							</span>
+							<span className="text-xs">Members</span>
+						</div>
+						<Link
+							href={getDiscordURLForMessage(firstMessage)}
+							className="flex-row-reverse gap-1 text-sm font-semibold"
+							icon={<ExternalLink size={16} />}
+						>
+							View on Discord
+						</Link>
 					</div>
 				</div>
 			</div>
-			<div className="flex w-full flex-col justify-center gap-4 text-center xl:mt-6 ">
+			<div className="flex w-full flex-col justify-center gap-2 text-center xl:mt-6 ">
 				{adsEnabled && <CarbonAds />}
+				{!tenant && <JoinAnswerOverflowCard />}
 				{relatedPosts.length > 0 && (
 					<>
-						<span className="text-2xl">More Posts</span>
+						<span className="text-lg font-semibold">More Posts</span>
 						<div className="flex flex-col gap-4">
 							{relatedPosts.slice(0, messages.length * 2).map((post) => (
 								<Link
@@ -292,7 +277,7 @@ export function MessageResultPage({
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}
 			/>
-			<div className="flex flex-col xl:flex-row">
+			<div className="flex flex-col gap-4 md:flex-row">
 				<Main />
 				<Sidebar />
 				<TrackLoad
