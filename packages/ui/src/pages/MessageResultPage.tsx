@@ -272,7 +272,7 @@ export function MessageResultPage({
 		</div>
 	);
 	const rendered = (
-		<div className="sm:mx-3">
+		<div className="mx-auto">
 			<script
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}

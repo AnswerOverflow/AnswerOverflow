@@ -9,7 +9,7 @@ import { ServerIcon } from '@answeroverflow/ui/src/server-icon';
 import { getSnowflakeUTCDate } from '@answeroverflow/ui/src/utils/snowflake';
 import { FaRegMessage } from 'react-icons/fa6';
 import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
-import '../home.css';
+import './home.css';
 import {
 	isImageAttachment,
 	MessageImage,
