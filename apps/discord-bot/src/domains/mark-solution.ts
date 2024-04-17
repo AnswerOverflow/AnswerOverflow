@@ -65,6 +65,7 @@ export class MarkSolutionError extends Error {
 export async function checkIfCanMarkSolution(
 	possibleSolution: Message,
 	userMarkingAsSolved: User,
+	isChangingSolution: boolean = false,
 ) {
 	const guild = possibleSolution.guild;
 	if (!guild)
@@ -159,12 +160,14 @@ export async function checkIfCanMarkSolution(
 		}
 	}
 
-	// Check if the question is already solved
-	await assertMessageIsUnsolved(
-		thread,
-		questionMessage,
-		channelSettings.solutionTagId,
-	);
+	if (!isChangingSolution) {
+		// Check if the question is already solved
+		await assertMessageIsUnsolved(
+			thread,
+			questionMessage,
+			channelSettings.solutionTagId,
+		);
+	}
 	return {
 		question: questionMessage,
 		solution: possibleSolution,

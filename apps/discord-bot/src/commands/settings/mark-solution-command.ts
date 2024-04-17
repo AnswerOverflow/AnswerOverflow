@@ -1,10 +1,18 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { type ChatInputCommand, Command } from '@sapphire/framework';
 import {
+	ActionRowBuilder,
 	ApplicationCommandType,
+	ButtonBuilder,
+	ButtonStyle,
+	ComponentType,
 	ContextMenuCommandInteraction,
+	MessageActionRowComponentBuilder,
 } from 'discord.js';
+import { upsertMessage } from '@answeroverflow/db/src/message-node';
 import {
+	checkIfCanMarkSolution,
+	makeMarkSolutionResponse,
 	markAsSolved,
 	MarkSolutionError,
 } from '~discord-bot/domains/mark-solution';
@@ -12,7 +20,14 @@ import {
 	memberToAnalyticsUser,
 	trackDiscordEvent,
 } from '~discord-bot/utils/analytics';
+import { toAOMessage } from '~discord-bot/utils/conversions';
 import { getCommandIds } from '~discord-bot/utils/utils';
+import {
+	findChannelMessagesById,
+	findFullMessageById,
+	findServerById,
+} from '@answeroverflow/db';
+import { indexTextBasedChannel } from '~discord-bot/domains/indexing';
 
 @ApplyOptions<Command.Options>({
 	runIn: ['GUILD_ANY'],
@@ -60,8 +75,108 @@ export class MarkSolution extends Command {
 			});
 		} catch (error) {
 			if (error instanceof MarkSolutionError) {
-				await interaction.reply({ content: error.message, ephemeral: true });
-				errorStatus = error.reason;
+				if (
+					error.reason === 'ALREADY_SOLVED_VIA_EMBED' ||
+					error.reason === 'ALREADY_SOLVED_VIA_TAG' ||
+					error.reason === 'ALREADY_SOLVED_VIA_EMOJI'
+				) {
+					const { channelSettings } = await checkIfCanMarkSolution(
+						targetMessage,
+						interaction.user,
+						true,
+					);
+					if (targetMessage.channel.isDMBased()) {
+						return;
+					}
+					const reply = await interaction.reply({
+						content:
+							'This thread is already marked as solved, would you like to change the solution to this message?',
+						ephemeral: true,
+						components: [
+							new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+								new ButtonBuilder({
+									label: 'Yes',
+									style: ButtonStyle.Secondary,
+									custom_id: 'change-solution',
+									type: ComponentType.Button,
+								}),
+							),
+						],
+					});
+					const buttonClick = await reply.awaitMessageComponent({
+						componentType: ComponentType.Button,
+						time: 60 * 1000, // 5 minutes (more than enough time)
+						filter: (i) => i.user.id === interaction.user.id,
+					});
+					await buttonClick.reply({
+						content: 'The solution has been changed.',
+						ephemeral: true,
+					});
+
+					const botMessages = await findChannelMessagesById(
+						targetMessage.channel.id,
+						{
+							authorId: interaction.client.id!,
+						},
+					);
+
+					const toDelete = botMessages.filter((m) =>
+						m.embeds?.find((e) =>
+							e.description?.includes(
+								'Thank you for marking this question as solved',
+							),
+						),
+					);
+					await Promise.all(
+						toDelete.map((m) => targetMessage.channel.messages.delete(m.id)),
+					);
+
+					const firstMessage = await targetMessage.channel.messages.fetch(
+						targetMessage.channelId,
+					);
+
+					const inDb = await findFullMessageById(targetMessage.channelId);
+					if (inDb && inDb.solutions.length > 0) {
+						for await (const solution of inDb.solutions) {
+							await upsertMessage({
+								...solution,
+								questionId: null,
+							});
+							const inDiscord = await targetMessage.channel.messages.fetch(
+								solution.id,
+							);
+							try {
+								await inDiscord.reactions
+									.resolve('✅')
+									?.users.remove(inDiscord.client.id!);
+							} catch (error) {
+								console.error(error);
+							}
+						}
+					}
+
+					await upsertMessage({
+						...(await toAOMessage(targetMessage)),
+						questionId: targetMessage.channel.id,
+					});
+
+					const aoServer = await findServerById(targetMessage.guildId!);
+					const { embed, components } = makeMarkSolutionResponse({
+						question: firstMessage,
+						solution: targetMessage,
+						server: aoServer!,
+						settings: channelSettings,
+					});
+					await interaction.channel?.send({
+						embeds: [embed],
+						components: components ? [components] : undefined,
+					});
+
+					await indexTextBasedChannel(targetMessage.channel);
+				} else {
+					await interaction.reply({ content: error.message, ephemeral: true });
+					errorStatus = error.reason;
+				}
 			} else throw error;
 		}
 		trackDiscordEvent('Mark Solution Application Command Used', {
