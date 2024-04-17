@@ -8,7 +8,7 @@ export default async function DashboardAuth() {
 		redirect(
 			// eslint-disable-next-line n/no-process-env
 			process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local'
-				? 'http://localhost:5000'
+				? 'http://localhost:3002'
 				: 'https://app.answeroverflow.com',
 		);
 	}

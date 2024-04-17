@@ -11,7 +11,7 @@ export default function Dashboard() {
 		<div>
 			<DatePickerWithPresets />
 			<div>
-				<div className="flex flex-row justify-start">
+				<div className="flex flex-row justify-start" suppressHydrationWarning>
 					<PageViewsTotalCard />
 					<ServerInvitesClickedTotalCard />
 				</div>

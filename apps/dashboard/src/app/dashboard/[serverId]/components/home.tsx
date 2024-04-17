@@ -1,44 +1,80 @@
-import { trpc } from 'packages/ui/src/utils/client';
+'use client';
+import { trpc } from '@answeroverflow/ui/src/utils/client';
 import { useDashboardContext } from './dashboard-context';
 import { Chart } from '@typelytics/tremor';
+
+type ChartData = {
+	data: number[];
+	aggregated_value: number;
+	days: string[];
+	labels: string[];
+	label: string;
+};
+
+function randomSeeded(seed: number = 1) {
+	var x = Math.sin(seed++) * 10000;
+	return x - Math.floor(x);
+}
+
+function getFakeData(opts: {
+	min: number;
+	max: number;
+	to: Date;
+	from: Date;
+}): ChartData {
+	const daysBetween = Math.round(
+		(opts.to.getTime() - opts.from.getTime()) / (1000 * 60 * 60 * 24),
+	);
+
+	const data = Array.from({ length: daysBetween }, (i) =>
+		Math.floor(
+			randomSeeded(opts.from.getTime() + i) * (opts.max - opts.min) + opts.min,
+		),
+	);
+	return {
+		aggregated_value: data.reduce((acc, curr) => acc + curr, 0),
+		data: data,
+		label: 'Page Views',
+		days: Array.from(
+			{ length: daysBetween },
+			(
+				_,
+				i, // get in format of Day name, Month name abrv. Day number
+			) =>
+				new Date(opts.from.getTime() + i * 1000 * 60 * 60 * 24)
+					.toDateString()
+					.split(' ')
+					.slice(0, 3)
+					.join(' '),
+		),
+		labels: Array.from({ length: daysBetween }, (_, i) =>
+			new Date(opts.from.getTime() + i * 1000 * 60 * 60 * 24)
+				.toDateString()
+				.split(' ')
+				.slice(0, 3)
+				.join(' '),
+		),
+	};
+}
 
 function usePageViews() {
 	const { options } = useDashboardContext();
 	return trpc.dashboard.pageViews.useQuery(options, {
-		refetchOnReconnect: false,
-		refetchOnMount: false,
-		refetchOnWindowFocus: false,
 		initialData:
 			options.serverId === '1000'
 				? {
 						results: {
-							'Page Views': {
-								aggregated_value: 3000,
-								data: [200, 300, 500, 200, 300, 600, 200],
-								label: 'Page Views',
-								days: [
-									'Day 1',
-									'Day 2',
-									'Day 3',
-									'Day 4',
-									'Day 5',
-									'Day 6',
-									'Day 7',
-								],
-								labels: [
-									'Day 1',
-									'Day 2',
-									'Day 3',
-									'Day 4',
-									'Day 5',
-									'Day 6',
-									'Day 7',
-								],
-							},
+							'Page Views': getFakeData({
+								min: 1000,
+								max: 7000,
+								to: options.to,
+								from: options.from,
+							}),
 						},
 						type: 'line',
 				  }
 				: undefined,
+		keepPreviousData: true,
 	});
 }
 

@@ -45,6 +45,5 @@ export const Changelog = defineDocumentType(() => ({
 
 export default makeSource({
 	contentDirPath: './src/content',
-
 	documentTypes: [Changelog],
 });

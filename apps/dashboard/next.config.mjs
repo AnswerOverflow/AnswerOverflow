@@ -5,7 +5,6 @@
  */
 
 !process.env.SKIP_ENV_VALIDATION &&
-	// @ts-expect-error
 	(await import('@answeroverflow/env/web-schema.mjs'));
 
 /** @type {import("next").NextConfig} */
@@ -31,11 +30,6 @@ const config = {
 			'media.discordapp.net',
 			'utfs.io',
 		],
-	},
-	// https://github.com/kkomelin/isomorphic-dompurify/issues/54
-	webpack: (config) => {
-		config.externals = [...config.externals, 'canvas', 'jsdom'];
-		return config;
 	},
 	// We already do linting on GH actions
 	eslint: {

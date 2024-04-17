@@ -69,7 +69,7 @@ const config = {
 				source: '/onboarding:slug*',
 				destination:
 					process.env.NODE_ENV === 'development'
-						? 'http://localhost:5000/onboarding'
+						? 'http://localhost:3002/onboarding'
 						: 'https://app.answeroverflow.com/onboarding',
 				permanent: process.env.NODE_ENV === 'production',
 			},
@@ -77,7 +77,7 @@ const config = {
 				source: '/dashboard:slug*',
 				destination:
 					process.env.NODE_ENV === 'development'
-						? 'http://localhost:5000/dashboard'
+						? 'http://localhost:3002/dashboard'
 						: 'https://app.answeroverflow.com/dashboard',
 				permanent: process.env.NODE_ENV === 'production',
 			},

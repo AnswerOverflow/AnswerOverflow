@@ -24,6 +24,9 @@ export function TRPCProvider(props: { children?: React.ReactNode } | null) {
 				defaultOptions: {
 					queries: {
 						cacheTime: 1000 * 60 * 60 * 24, // 24 hours
+						refetchOnReconnect: false,
+						refetchOnMount: false,
+						refetchOnWindowFocus: false,
 					},
 				},
 			}),
