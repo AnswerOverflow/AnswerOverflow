@@ -49,6 +49,9 @@ const markSolutionErrorReasons = [
 	'ALREADY_SOLVED_VIA_TAG',
 	'ALREADY_SOLVED_VIA_EMOJI',
 ] as const;
+
+const PUBG_MOBILE_SERVER_ID = '393088095840370689';
+
 export type MarkSolutionErrorReason = (typeof markSolutionErrorReasons)[number];
 export class MarkSolutionError extends Error {
 	constructor(
@@ -217,6 +220,14 @@ export async function addSolvedIndicatorToThread(
 	questionMessage: Message,
 	solvedTagId: string | null,
 ) {
+	// special override for PUBG Mobile server
+	if (thread.guildId === PUBG_MOBILE_SERVER_ID && solvedTagId) {
+		await thread.setAppliedTags(
+			[solvedTagId],
+			'Question Solved, clearing all existing tags & setting solved tag.',
+		);
+		return;
+	}
 	// Apply the solved tag if it exists and it is a forum channel, otherwise add a checkmark reaction as a fallback
 	if (
 		parentChannel.type == ChannelType.GuildForum &&
@@ -343,11 +354,18 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 				'Answer Overflow Account Id': solver.id,
 			};
 		});
-		await solution.react('✅');
+		try {
+			await solution.react('✅');
+		} catch {
+			console.log('Could not react to solution message');
+		}
 		// wait 5 minutes then set the thread to archived
 		// TODO: Move this to a remote queue so it survives restarts
 		setTimeout(() => {
-			if (thread?.permissionsFor(thread.client.id!)?.has('ManageThreads')) {
+			if (
+				thread?.permissionsFor(thread.client.id!)?.has('ManageThreads') &&
+				thread.guildId !== PUBG_MOBILE_SERVER_ID
+			) {
 				void thread.setArchived(true);
 			} else {
 				console.log('Could not archive thread, missing permissions');
