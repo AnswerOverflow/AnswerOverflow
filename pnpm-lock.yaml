@@ -1502,8 +1502,8 @@ importers:
         specifier: workspace:^
         version: link:../utils
       '@elastic/elasticsearch':
-        specifier: ^8.12.2
-        version: 8.12.2
+        specifier: ^8.13.1
+        version: 8.13.1
       discord-api-types:
         specifier: ^0.37.67
         version: 0.37.67
@@ -3520,8 +3520,8 @@ packages:
     resolution: {integrity: sha512-/crHGujo0xnuHIYNc1VgP0HGJGFSoSqq88JFXe6FmFyXPpWt8Xu39LyLg7rchsxfXFeEdA9CrIZvLV5eswXV5g==}
     dev: false
 
-  /@elastic/elasticsearch@8.12.2:
-    resolution: {integrity: sha512-04NvH3LIgcv1Uwguorfw2WwzC9Lhfsqs9f0L6uq6MrCw0lqe/HOQ6E8vJ6EkHAA15iEfbhtxOtenbZVVcE+mAQ==}
+  /@elastic/elasticsearch@8.13.1:
+    resolution: {integrity: sha512-2G4Vu6OHw4+XTrp7AGIcOEezpPEoVrWg2JTK1v/exEKSLYquZkUdd+m4yOL3/UZ6bTj7hmXwrmYzW76BnLCkJQ==}
     engines: {node: '>=18'}
     dependencies:
       '@elastic/transport': 8.4.1

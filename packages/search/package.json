@@ -23,7 +23,7 @@
 		"@answeroverflow/db": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
-		"@elastic/elasticsearch": "^8.12.2",
+		"@elastic/elasticsearch": "^8.13.1",
 		"discord-api-types": "^0.37.67",
 		"dotenv-cra": "^3.0.3",
 		"elastic-builder": "^2.21.0",
