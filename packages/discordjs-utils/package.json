@@ -12,7 +12,7 @@
 	"devDependencies": {
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
-		"@swc/core": "^1.3.78",
+		"@swc/core": "^1.4.15",
 		"@swc/jest": "^0.2.29",
 		"@types/jest": "^29.5.3",
 		"@types/node": "^20.11.20",
