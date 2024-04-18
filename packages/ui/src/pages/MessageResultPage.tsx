@@ -83,6 +83,7 @@ export function MessageResultPage({
 
 	let contents = '';
 	const messagesWithMergedContent = messages.map((message, index) => {
+		if (message.id === firstMessage.id) return null;
 		const nextMessage = messages.at(index + 1);
 		contents += message.content;
 		const isSameAuthor =

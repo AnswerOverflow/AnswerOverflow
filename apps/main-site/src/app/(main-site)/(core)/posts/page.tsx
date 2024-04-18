@@ -1,8 +1,6 @@
 import { findAllServers } from '@answeroverflow/db';
 import { BlueLink } from '@answeroverflow/ui/src/ui/blue-link';
 
-export const dynamic = 'force-static';
-
 export default async function AllPosts() {
 	const servers = await findAllServers({
 		includeCustomDomain: false,
