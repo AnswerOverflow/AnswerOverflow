@@ -35,7 +35,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 		},
 	};
 }
-export const dynamic = 'force-static';
 
 export default async function MessageResult({ params }: Props) {
 	const data = await callAPI({

@@ -13,7 +13,6 @@ interface PostProps {
 		slug: string[];
 	};
 }
-export const dynamic = 'force-static';
 
 function getPostFromParams(params: PostProps['params']) {
 	const slug = params?.slug?.join('/');
