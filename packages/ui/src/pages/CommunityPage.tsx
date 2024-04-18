@@ -25,7 +25,6 @@ import { LuArrowLeft, LuArrowRight } from 'react-icons/lu';
 import { TrackLoad } from '../ui/track-load';
 import { serverToAnalyticsData } from '@answeroverflow/constants';
 import { Suspense } from 'react';
-import { ChannelType } from '../utils/discord';
 type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];
 	selectedChannel: ChannelPublicWithFlags;
@@ -149,38 +148,7 @@ export const CommunityPage = (
 		page: number | undefined;
 	},
 ) => {
-	const {
-		server,
-		channels: channelsRaw,
-		selectedChannel,
-		tenant,
-		posts: questions,
-	} = props;
-	// sort order: unarchived forums, unarchived text, archived forums, archived text
-	const channels = channelsRaw.sort((a, b) => {
-		if (
-			a.type === ChannelType.GuildForum.valueOf() &&
-			b.type !== ChannelType.GuildForum.valueOf()
-		)
-			return -1;
-		if (
-			a.type !== ChannelType.GuildForum.valueOf() &&
-			b.type === ChannelType.GuildForum.valueOf()
-		)
-			return 1;
-		if (
-			a.type === ChannelType.GuildText.valueOf() &&
-			b.type !== ChannelType.GuildText.valueOf()
-		)
-			return -1;
-		if (
-			a.type !== ChannelType.GuildText.valueOf() &&
-			b.type === ChannelType.GuildText.valueOf()
-		)
-			return 1;
-
-		return 0;
-	});
+	const { server, channels, selectedChannel, tenant, posts: questions } = props;
 	// useTrackEvent('Community Page View', serverToAnalyticsData(server));
 	const { page = 0 } = props;
 	const HeroArea = () => {
