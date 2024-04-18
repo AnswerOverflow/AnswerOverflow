@@ -1598,6 +1598,9 @@ importers:
       '@radix-ui/react-popover':
         specifier: ^1.0.6
         version: 1.0.7(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-separator':
+        specifier: ^1.0.3
+        version: 1.0.3(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0)
       '@radix-ui/react-slider':
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0)
@@ -5845,6 +5848,27 @@ packages:
       '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0)
       '@radix-ui/react-use-callback-ref': 1.0.1(@types/react@18.2.51)(react@18.2.0)
       '@radix-ui/react-use-controllable-state': 1.0.1(@types/react@18.2.51)(react@18.2.0)
+      '@types/react': 18.2.51
+      '@types/react-dom': 18.2.18
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /@radix-ui/react-separator@1.0.3(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-itYmTy/kokS21aiV5+Z56MZB54KrhPgn6eHDKkFeOLR34HMN2s8PaN47qZZAGnvupcjxHaFZnW4pQEh0BvvVuw==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.23.9
+      '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.18)(@types/react@18.2.51)(react-dom@18.2.0)(react@18.2.0)
       '@types/react': 18.2.51
       '@types/react-dom': 18.2.18
       react: 18.2.0
@@ -14674,7 +14698,7 @@ packages:
       '@panva/hkdf': 1.1.1
       cookie: 0.5.0
       jose: 4.15.4
-      next: 14.3.0-canary.9(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
+      next: 14.3.0-canary.9(@babel/core@7.23.9)(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)
       oauth: 0.9.15
       openid-client: 5.6.4
       preact: 10.19.3
@@ -14755,7 +14779,7 @@ packages:
       react: '*'
       react-dom: '*'
     dependencies:
-      next: 14.3.0-canary.9(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
+      next: 14.3.0-canary.9(@babel/core@7.23.9)(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
