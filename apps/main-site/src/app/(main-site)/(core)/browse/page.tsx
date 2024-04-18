@@ -14,7 +14,6 @@ export const metadata: Metadata = {
 			'Browse all of the communities on Answer Overflow. Find the best Discord servers to join and learn about the communities that are out there.',
 	},
 };
-export const dynamic = 'force-static';
 
 export const revalidate = 600;
 export default async function BrowseCommunitiesPage() {

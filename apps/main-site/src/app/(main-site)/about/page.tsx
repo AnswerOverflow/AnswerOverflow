@@ -19,7 +19,6 @@ export const metadata: Metadata = {
 			'Learn about how you can index Discord channels into Google search results with Answer Overflow.',
 	},
 };
-export const dynamic = 'force-static';
 
 export default function Page() {
 	return (

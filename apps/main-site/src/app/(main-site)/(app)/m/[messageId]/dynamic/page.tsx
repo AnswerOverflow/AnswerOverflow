@@ -35,7 +35,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 		},
 	};
 }
-export const dynamic = 'force-dynamic';
 export default async function MessageResult({ params }: Props) {
 	const data = await callAPI({
 		apiCall: (api) => api.messages.threadFromMessageId(params.messageId),
