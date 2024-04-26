@@ -309,6 +309,9 @@ importers:
       colorette:
         specifier: ^2.0.20
         version: 2.0.20
+      cron:
+        specifier: ^3.1.7
+        version: 3.1.7
       discord-api-types:
         specifier: ^0.37.67
         version: 0.37.67
@@ -381,7 +384,7 @@ importers:
         version: 8.57.0
       eslint-plugin-jest:
         specifier: ^27.2.3
-        version: 27.6.3(@typescript-eslint/eslint-plugin@6.20.0)(eslint@8.57.0)(jest@29.7.0)(typescript@5.3.3)
+        version: 27.6.3(eslint@8.57.0)(jest@29.7.0)(typescript@5.3.3)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@20.11.20)(ts-node@10.9.2)
@@ -7564,6 +7567,10 @@ packages:
     resolution: {integrity: sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==}
     dev: true
 
+  /@types/luxon@3.4.2:
+    resolution: {integrity: sha512-TifLZlFudklWlMBfhubvgqTXRzLDI5pCbGa4P8a3wPyUQSW+1xQ5eDsreP9DWHX3tjq1ke96uYG/nwundroWcA==}
+    dev: false
+
   /@types/mdast@3.0.15:
     resolution: {integrity: sha512-LnwD+mUEfxWMa1QpDraczIn6k0Ee3SMicuYSSzS6ZYl2gKS09EClnJYGd8Du6rfc5r/GZEk5o1mRb8TaTj03sQ==}
     dependencies:
@@ -9484,6 +9491,13 @@ packages:
   /create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
 
+  /cron@3.1.7:
+    resolution: {integrity: sha512-tlBg7ARsAMQLzgwqVxy8AZl/qlTc5nibqYwtNGoCrd+cV+ugI+tvZC1oT/8dFH8W455YrywGykx/KMmAqOr7Jw==}
+    dependencies:
+      '@types/luxon': 3.4.2
+      luxon: 3.4.4
+    dev: false
+
   /cross-env@7.0.3:
     resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
     engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
@@ -10800,6 +10814,27 @@ packages:
     transitivePeerDependencies:
       - supports-color
       - typescript
+
+  /eslint-plugin-jest@27.6.3(eslint@8.57.0)(jest@29.7.0)(typescript@5.3.3):
+    resolution: {integrity: sha512-+YsJFVH6R+tOiO3gCJon5oqn4KWc+mDq2leudk8mrp8RFubLOo9CVyi3cib4L7XMpxExmkmBZQTPDYVBzgpgOA==}
+    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
+    peerDependencies:
+      '@typescript-eslint/eslint-plugin': ^5.0.0 || ^6.0.0
+      eslint: ^7.0.0 || ^8.0.0
+      jest: '*'
+    peerDependenciesMeta:
+      '@typescript-eslint/eslint-plugin':
+        optional: true
+      jest:
+        optional: true
+    dependencies:
+      '@typescript-eslint/utils': 5.62.0(eslint@8.57.0)(typescript@5.3.3)
+      eslint: 8.57.0
+      jest: 29.7.0(@types/node@20.11.20)(ts-node@10.9.2)
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
+    dev: true
 
   /eslint-plugin-jsx-a11y@6.8.0(eslint@8.57.0):
     resolution: {integrity: sha512-Hdh937BS3KdwwbBaKd5+PLCOmYY6U4f2h9Z2ktwtNKvIdIEu137rjYbcb9ApSbVJfWxANNuiKTD/9tOKjK9qOA==}
@@ -13445,6 +13480,11 @@ packages:
       react: 18.2.0
     dev: false
 
+  /luxon@3.4.4:
+    resolution: {integrity: sha512-zobTr7akeGHnv7eBOXcRgMeCP6+uyYsczwmeRCauvpvaAltgNyTbLH/+VaEAPUeWBT+1GuNmz4wC/6jtQzbbVA==}
+    engines: {node: '>=12'}
+    dev: false
+
   /magic-bytes.js@1.8.0:
     resolution: {integrity: sha512-lyWpfvNGVb5lu8YUAbER0+UMBTdR63w2mcSUlhhBTyVbxJvjgqwyAf3AZD6MprgK0uHuBoWXSDAMWLupX83o3Q==}
     dev: false
@@ -14694,7 +14734,7 @@ packages:
       '@panva/hkdf': 1.1.1
       cookie: 0.5.0
       jose: 4.15.4
-      next: 14.3.0-canary.9(@babel/core@7.23.9)(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.3.0-canary.9(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
       oauth: 0.9.15
       openid-client: 5.6.4
       preact: 10.19.3
@@ -14775,7 +14815,7 @@ packages:
       react: '*'
       react-dom: '*'
     dependencies:
-      next: 14.3.0-canary.9(@babel/core@7.23.9)(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)
+      next: 14.3.0-canary.9(@opentelemetry/api@1.7.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
