@@ -3,6 +3,7 @@ import { Listener } from '@sapphire/framework';
 import { Events } from 'discord.js';
 import { generateSitemap } from '@answeroverflow/db/src/sitemap';
 import { sharedEnvs } from '@answeroverflow/env/shared';
+// eslint-disable-next-line n/no-extraneous-import
 import { CronJob } from 'cron';
 
 @ApplyOptions<Listener.Options>({ event: Events.ClientReady })
