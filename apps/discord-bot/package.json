@@ -36,6 +36,7 @@
 		"@t3-oss/env-nextjs": "^0.6.1",
 		"@trpc/server": "^10.37.1",
 		"colorette": "^2.0.20",
+		"cron": "^3.1.7",
 		"discord-api-types": "^0.37.67",
 		"discord.js": "^14.13.0",
 		"dotenv-cra": "^3.0.3",

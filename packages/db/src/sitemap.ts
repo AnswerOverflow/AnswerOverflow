@@ -74,7 +74,7 @@ export async function generateSitemap() {
 	let hasMore;
 	let offset = 0;
 	const safetyLimit = 200;
-	const limit = 5000;
+	const limit = 10000;
 	const allThreads: Channel[] = [];
 	do {
 		// eslint-disable-next-line no-await-in-loop
