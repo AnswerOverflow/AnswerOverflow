@@ -12,7 +12,7 @@ type ChartData = {
 };
 
 function randomSeeded(seed: number = 1) {
-	var x = Math.sin(seed++) * 10000;
+	const x = Math.sin(seed++) * 10000;
 	return x - Math.floor(x);
 }
 
@@ -26,33 +26,25 @@ function getFakeData(opts: {
 		(opts.to.getTime() - opts.from.getTime()) / (1000 * 60 * 60 * 24),
 	);
 
-	const data = Array.from({ length: daysBetween }, (i) =>
-		Math.floor(
-			randomSeeded(opts.from.getTime() + i) * (opts.max - opts.min) + opts.min,
-		),
+	const days = Array.from(
+		{ length: daysBetween },
+		(
+			_,
+			i, // get in format of Day name, Month name abrv. Day number
+		) => new Date(opts.from.getTime() + i * 1000 * 60 * 60 * 24),
+	);
+	const data = days.map((day) =>
+		Math.floor(randomSeeded(day.getTime()) * (opts.max - opts.min) + opts.min),
 	);
 	return {
 		aggregated_value: data.reduce((acc, curr) => acc + curr, 0),
 		data: data,
 		label: 'Page Views',
-		days: Array.from(
-			{ length: daysBetween },
-			(
-				_,
-				i, // get in format of Day name, Month name abrv. Day number
-			) =>
-				new Date(opts.from.getTime() + i * 1000 * 60 * 60 * 24)
-					.toDateString()
-					.split(' ')
-					.slice(0, 3)
-					.join(' '),
+		days: days.map((date) =>
+			date.toDateString().split(' ').slice(0, 3).join(' '),
 		),
-		labels: Array.from({ length: daysBetween }, (_, i) =>
-			new Date(opts.from.getTime() + i * 1000 * 60 * 60 * 24)
-				.toDateString()
-				.split(' ')
-				.slice(0, 3)
-				.join(' '),
+		labels: days.map((date) =>
+			date.toDateString().split(' ').slice(0, 3).join(' '),
 		),
 	};
 }
