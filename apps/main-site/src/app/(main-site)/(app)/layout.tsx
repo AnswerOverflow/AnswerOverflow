@@ -94,7 +94,7 @@ export default function RootLayout({
 			<div className="w-full justify-center">
 				<Navbar tenant={undefined} />
 				<div className="flex flex-row">
-					<div className="sticky hidden h-screen min-w-[250px] max-w-[250px] shrink-0 border-b-2 border-r-2 p-4 xl:block">
+					<div className="sticky top-0 hidden h-screen min-w-[250px] max-w-[250px] shrink-0 border-b-2 border-r-2 p-4 xl:block">
 						<LinkButton
 							href="/new"
 							className="flex flex-row justify-start gap-3"
