@@ -21,6 +21,7 @@ function getFakeData(opts: {
 	max: number;
 	to: Date;
 	from: Date;
+	label: string;
 }): ChartData {
 	const daysBetween = Math.round(
 		(opts.to.getTime() - opts.from.getTime()) / (1000 * 60 * 60 * 24),
@@ -39,7 +40,7 @@ function getFakeData(opts: {
 	return {
 		aggregated_value: data.reduce((acc, curr) => acc + curr, 0),
 		data: data,
-		label: 'Page Views',
+		label: opts.label,
 		days: days.map((date) =>
 			date.toDateString().split(' ').slice(0, 3).join(' '),
 		),
@@ -61,6 +62,7 @@ function usePageViews() {
 								max: 7000,
 								to: options.to,
 								from: options.from,
+								label: 'Page Views',
 							}),
 						},
 						type: 'line',
@@ -88,6 +90,21 @@ export function ServerInvitesClickedTotalCard() {
 		refetchOnReconnect: false,
 		refetchOnMount: false,
 		refetchOnWindowFocus: false,
+		initialData:
+			options.serverId === '1000'
+				? {
+						results: {
+							'Invite Clicked': getFakeData({
+								min: 100,
+								max: 400,
+								to: options.to,
+								from: options.from,
+								label: 'Invite Clicked',
+							}),
+						},
+						type: 'number',
+				  }
+				: undefined,
 	});
 	if (!data) return null;
 	return <Chart {...data} />;
