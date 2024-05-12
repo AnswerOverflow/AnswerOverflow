@@ -90,7 +90,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="mx-auto flex w-full flex-col items-center overflow-y-auto bg-background font-body">
+		<div className="mx-auto flex w-full flex-col items-center bg-background font-body">
 			<div className="w-full justify-center">
 				<Navbar tenant={undefined} />
 				<div className="flex flex-row">
