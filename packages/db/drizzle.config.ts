@@ -6,8 +6,9 @@ dotenv.config({
 });
 
 // ps proxy has some issues w/ db push, so here's a workaround
-// eslint-disable-next-line n/no-process-env
-let dbUrl = process.env.DATABASE_URL ?? '';
+let dbUrl =
+	// eslint-disable-next-line n/no-process-env
+	process.env.DATABASE_URL ?? 'http://root:nonNullPassword@localhost:3900';
 if (dbUrl.includes('http') && dbUrl.includes('localhost')) {
 	dbUrl = dbUrl.replace('http', 'mysql');
 	// remove from second : to @

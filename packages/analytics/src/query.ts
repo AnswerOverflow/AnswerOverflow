@@ -2,13 +2,17 @@ import { sharedEnvs } from '@answeroverflow/env/shared';
 import { PostHog } from '@typelytics/posthog';
 import { events } from './events';
 
-const posthog = new PostHog({
-	events: events,
-	apiKey: sharedEnvs.POSTHOG_PERSONAL_API_KEY!,
-	projectId: sharedEnvs.POSTHOG_PROJECT_ID!.toString(),
-});
+const posthog =
+	sharedEnvs.POSTHOG_PERSONAL_API_KEY && sharedEnvs.POSTHOG_PROJECT_ID
+		? new PostHog({
+				events: events,
+				apiKey: sharedEnvs.POSTHOG_PERSONAL_API_KEY,
+				projectId: sharedEnvs.POSTHOG_PROJECT_ID.toString(),
+		  })
+		: undefined;
 
 export function getTopQuestionSolversForServer(id: string) {
+	if (!posthog) return;
 	return posthog
 		.query()
 		.addSeries('Solved Question', {
@@ -32,6 +36,7 @@ export function getTopQuestionSolversForServer(id: string) {
 }
 
 export function getPopularPostPages() {
+	if (!posthog) return;
 	return posthog
 		.query()
 		.addSeries('Message Page View', {
@@ -56,6 +61,7 @@ export function getPopularPostPages() {
 }
 
 export async function getPopularServers() {
+	if (!posthog) return;
 	return posthog
 		.query()
 		.addSeries('Message Page View', {

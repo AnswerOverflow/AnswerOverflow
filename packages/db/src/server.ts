@@ -1,5 +1,7 @@
 import type { z } from 'zod';
 import {
+	ServerSettingsFlags,
+	serverSettingsFlags,
 	zServerCreate,
 	zServerMutable,
 	zServerUpdate,
@@ -182,3 +184,9 @@ export const serverLoader = new Dataloader(async (readOnlyIds) => {
 	}
 	return ids.map((id) => foundMap.get(id) || null);
 });
+
+import { dictToBitfield } from './utils/bitfieldUtils';
+
+export function serverFlagsToBitfield(newFlags: ServerSettingsFlags) {
+	return dictToBitfield(newFlags, serverSettingsFlags);
+}

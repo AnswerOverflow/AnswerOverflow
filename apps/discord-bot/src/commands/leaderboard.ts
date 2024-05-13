@@ -56,7 +56,8 @@ export class LeaderboardCommand extends Command {
 		await interaction.deferReply({
 			ephemeral: isEphemeral,
 		});
-		const topUsers = await getTopQuestionSolversForServer(interaction.guildId!);
+		const topUsers =
+			(await getTopQuestionSolversForServer(interaction.guildId!)) ?? {};
 
 		const keys = Object.keys(topUsers);
 		const toDisplay = await Promise.all(
