@@ -14,13 +14,8 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage(props: { children: React.ReactNode }) {
-	// if you're reading this do not judge my employability based on this line of code
-	// or do, and consider that it only runs like once every 10 minutes and doesn't need to be fast it just needs to be something i can set and forget
-	// sure, i could have done this in a more elegant way, but i didn't, and i'm not going to
-	// checkout my resume @ rhyssul.com
-	const popularServers = await getPopularServers().then((x) =>
-		Object.keys(x).slice(0, 10),
-	);
+	const popularServers =
+		(await getPopularServers()?.then((res) => Object.keys(res ?? {}))) ?? [];
 	const popularServersWithPubg = [
 		...new Set([
 			...popularServers.slice(0, 1),

@@ -43,6 +43,7 @@ export const zChannelBitfieldFlags = z.object({
 	autoThreadEnabled: z.boolean(),
 	forumGuidelinesConsentEnabled: z.boolean(),
 });
+export type ChannelSettingsFlags = z.infer<typeof zChannelBitfieldFlags>;
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 const zChannelSchema = channelSchema.required().extend({
