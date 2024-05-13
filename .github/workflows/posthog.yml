@@ -1,0 +1,19 @@
+name: Report Release Commit to PostHog
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  report-pr-to-posthog:
+    name: Report Release Commit to PostHog
+    runs-on: ubuntu-20.04
+    if: github.event_name == 'push' && github.ref == 'refs/heads/release'
+    steps:
+      - name: Report PR to PostHog
+        uses: PostHog/posthog-annotate-merges-github-action@0.1.4
+        with:
+          posthog-token: ${{secrets.POSTHOG_PERSONAL_API_KEY}}
+          posthog-project-id: ${{secrets.POSTHOG_PROJECT_ID}}
+          annotation-message: "${{ github.event.head_commit.message }}"

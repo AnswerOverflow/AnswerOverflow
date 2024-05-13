@@ -18,27 +18,6 @@ services:
     volumes:
       - ps-mysql:/var/lib/mysql
 
-  db-elastic:
-    container_name: ao-db-elastic
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.0.1
-    environment:
-      - xpack.security.enabled=false
-      - "discovery.type=single-node"
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
-    expose:
-      - 9200
-      - 9300
-    ports:
-      - 9200:9200
-      - 9300:9300
-    deploy:
-      resources:
-        limits:
-          memory: 2048m
-        reservations:
-          memory: 1024m
-
   cache-redis:
     container_name: ao-cache-redis
     image: redis:alpine3.17
