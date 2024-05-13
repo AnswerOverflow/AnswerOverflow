@@ -90,11 +90,11 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="mx-auto flex w-full flex-col items-center overflow-y-auto overflow-x-hidden bg-background font-body">
+		<div className="mx-auto flex w-full flex-col items-center bg-background font-body">
 			<div className="w-full justify-center">
 				<Navbar tenant={undefined} />
-				<div className="flex flex-row">
-					<div className="hidden h-screen min-w-[250px] max-w-[250px] shrink-0 overflow-y-auto border-b-2 border-r-2 p-4 xl:block">
+				<div className="mt-16 flex flex-row">
+					<div className="fixed top-0 mt-16 hidden h-screen min-w-[250px] max-w-[250px] shrink-0 border-b-2 border-r-2 p-4 xl:block">
 						<LinkButton
 							href="/new"
 							className="flex flex-row justify-start gap-3"
@@ -146,7 +146,7 @@ export default function RootLayout({
 							))}
 						</Accordion>
 					</div>
-					<div className="mx-auto w-full max-w-screen-2xl px-2 pt-2 xl:pt-8">
+					<div className="mx-auto w-full max-w-screen-2xl px-2 pt-2 xl:ml-[250px] xl:mr-auto xl:pt-8">
 						<main className="w-full">{children}</main>
 						<Footer tenant={undefined} />
 					</div>

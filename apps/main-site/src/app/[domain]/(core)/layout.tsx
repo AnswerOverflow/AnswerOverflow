@@ -18,11 +18,11 @@ export default async function RootLayout({
 		return notFound();
 	}
 	return (
-		<div className="mx-auto flex w-full flex-col items-center overflow-y-auto overflow-x-hidden bg-background font-body">
+		<div className="mx-auto flex w-full flex-col items-center overflow-y-auto bg-background font-body">
 			<div className="w-full justify-center">
 				<Navbar tenant={server} />
-				<div className="flex flex-row">
-					<div className="mx-auto w-full max-w-screen-2xl px-2 pt-2 xl:pt-8">
+				<div className="mt-16 flex flex-row">
+					<div className="ml-[250px] mr-auto max-w-screen-2xl px-2 pt-2 xl:pt-8">
 						<main className="w-full">{children}</main>
 						<Footer tenant={server} />
 					</div>
