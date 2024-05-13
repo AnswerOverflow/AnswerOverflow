@@ -16,6 +16,7 @@ import {
 import {
 	addFlagsToChannel,
 	channelBitfieldFlags,
+	ChannelSettingsFlags,
 	ChannelWithFlags,
 	zChannelCreate,
 	zChannelCreateMany,
@@ -389,4 +390,8 @@ export function findChannelMessagesById(
 			: eq(dbMessages.channelId, channelId),
 		orderBy: desc(dbMessages.id),
 	});
+}
+
+export function channelFlagsToBitfield(newFlags: ChannelSettingsFlags) {
+	return dictToBitfield(newFlags, channelBitfieldFlags);
 }

@@ -113,7 +113,8 @@ export class SyncOnReady extends Listener {
 			// sort by member count to give priority to larger servers
 			(a, b) => b.memberCount - a.memberCount,
 		);
-		const activeServerIds = new Set();
+		// default values are dev servers
+		const activeServerIds = new Set(['300', '402']);
 		for await (const guild of guilds.values()) {
 			// eslint-disable-next-line no-await-in-loop
 			try {
