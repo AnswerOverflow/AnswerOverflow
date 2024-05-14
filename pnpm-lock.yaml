@@ -688,43 +688,6 @@ importers:
         specifier: ^0.30.1
         version: 0.30.1(@edge-runtime/vm@2.1.2)(sass@1.70.0)
 
-  apps/proxy:
-    dependencies:
-      '@answeroverflow/env':
-        specifier: workspace:^
-        version: link:../../packages/env
-    devDependencies:
-      '@answeroverflow/prettier-config':
-        specifier: workspace:^
-        version: link:../../packages/config/prettier
-      '@answeroverflow/tsconfig':
-        specifier: workspace:^
-        version: link:../../packages/config/tsconfig
-      '@types/http-proxy':
-        specifier: ^1.17.11
-        version: 1.17.14
-      dotenv-cli:
-        specifier: ^7.4.1
-        version: 7.4.1
-      eslint:
-        specifier: ^8.57.0
-        version: 8.57.0
-      http-proxy:
-        specifier: ^1.18.1
-        version: 1.18.1
-      prettier:
-        specifier: ^2.8.8
-        version: 2.8.8
-      tslib:
-        specifier: ^2.6.2
-        version: 2.6.2
-      tsup:
-        specifier: ^6.7.0
-        version: 6.7.0(typescript@4.9.5)
-      typescript:
-        specifier: ^4.9.5
-        version: 4.9.5
-
   packages/analytics:
     dependencies:
       '@answeroverflow/constants':
@@ -6109,7 +6072,7 @@ packages:
       ip: 1.1.9
       node-stream-zip: 1.15.0
       ora: 5.4.1
-      semver: 7.5.4
+      semver: 7.6.2
       strip-ansi: 5.2.0
       wcwidth: 1.0.1
       yaml: 2.3.4
@@ -6188,7 +6151,7 @@ packages:
       node-fetch: 2.7.0
       open: 6.4.0
       ora: 5.4.1
-      semver: 7.5.4
+      semver: 7.6.2
       shell-quote: 1.8.1
       sudo-prompt: 9.2.1
     transitivePeerDependencies:
@@ -6223,7 +6186,7 @@ packages:
       fs-extra: 8.1.0
       graceful-fs: 4.2.11
       prompts: 2.4.2
-      semver: 7.5.4
+      semver: 7.6.2
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -17020,6 +16983,13 @@ packages:
     dependencies:
       lru-cache: 6.0.0
 
+  /semver@7.6.2:
+    resolution: {integrity: sha512-FNAIBWCx9qcRhoHcgcJ0gvU7SN1lYU2ZXuSfl04bSC5OpvDHFyJCjdNHomPXxjQlCBU67YW64PzY7/VIEH7F2w==}
+    engines: {node: '>=10'}
+    hasBin: true
+    requiresBuild: true
+    dev: false
+
   /send@0.18.0:
     resolution: {integrity: sha512-qqWzuOjSFOuqPjFe4NOsMLafToQQwBSOEpS+FwEt3A2V3vKubTquT3vmLTQpFgMXp8AlFWFuP1qKaJZOtPpVXg==}
     engines: {node: '>= 0.8.0'}
@@ -18154,42 +18124,6 @@ packages:
       - ts-node
     dev: true
 
-  /tsup@6.7.0(typescript@4.9.5):
-    resolution: {integrity: sha512-L3o8hGkaHnu5TdJns+mCqFsDBo83bJ44rlK7e6VdanIvpea4ArPcU3swWGsLVbXak1PqQx/V+SSmFPujBK+zEQ==}
-    engines: {node: '>=14.18'}
-    hasBin: true
-    peerDependencies:
-      '@swc/core': ^1
-      postcss: ^8.4.12
-      typescript: '>=4.1.0'
-    peerDependenciesMeta:
-      '@swc/core':
-        optional: true
-      postcss:
-        optional: true
-      typescript:
-        optional: true
-    dependencies:
-      bundle-require: 4.0.2(esbuild@0.17.19)
-      cac: 6.7.14
-      chokidar: 3.5.3
-      debug: 4.3.4
-      esbuild: 0.17.19
-      execa: 5.1.1
-      globby: 11.1.0
-      joycon: 3.1.1
-      postcss-load-config: 3.1.4(ts-node@10.9.2)
-      resolve-from: 5.0.0
-      rollup: 3.29.4
-      source-map: 0.8.0-beta.0
-      sucrase: 3.35.0
-      tree-kill: 1.2.2
-      typescript: 4.9.5
-    transitivePeerDependencies:
-      - supports-color
-      - ts-node
-    dev: true
-
   /tsutils@3.21.0(typescript@5.3.3):
     resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}
     engines: {node: '>= 6'}
@@ -18362,12 +18296,6 @@ packages:
     dependencies:
       ts-toolbelt: 9.6.0
     dev: false
-
-  /typescript@4.9.5:
-    resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
-    engines: {node: '>=4.2.0'}
-    hasBin: true
-    dev: true
 
   /typescript@5.3.3:
     resolution: {integrity: sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==}
