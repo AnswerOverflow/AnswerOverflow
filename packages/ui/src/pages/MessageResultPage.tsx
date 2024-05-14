@@ -162,7 +162,6 @@ export function MessageResultPage({
 		}`,
 		author: {
 			'@type': 'Person',
-			'@id': firstMessage.author.id,
 			name: stripMarkdownAndHTML(firstMessage.author.name),
 		},
 		headline: stripMarkdownAndHTML(title),
@@ -180,7 +179,6 @@ export function MessageResultPage({
 			datePublished: getDate(message.id).toISOString(),
 			author: {
 				'@type': 'Person',
-				'@id': message.author.id,
 				name: stripMarkdownAndHTML(message.author.name),
 			},
 		})),
