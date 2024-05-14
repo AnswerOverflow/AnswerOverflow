@@ -20,10 +20,6 @@
       "path": "apps/discord-bot"
     },
     {
-      "name": "proxy",
-      "path": "apps/proxy"
-    },
-    {
       "name": "discordjs-mock",
       "path": "packages/discordjs-mock"
     },
