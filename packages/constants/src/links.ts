@@ -37,7 +37,12 @@ export const getMainSiteHostname = () => {
 };
 
 export const isOnMainSite = (host: string) => {
-	return host === getMainSiteHostname() || host.endsWith('.vercel.app');
+	// TODO: Do we even need getMainSiteHostname()?
+	return (
+		host === getMainSiteHostname() ||
+		host.endsWith('.vercel.app') ||
+		host === 'https://www.answeroverflow.com'
+	);
 };
 
 export const makeMainSiteLink = (path: string) => {
