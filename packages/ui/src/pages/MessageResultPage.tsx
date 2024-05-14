@@ -122,7 +122,7 @@ export function MessageResultPage({
 			}
 		}
 		if (message.author.id === '958907348389339146') return false;
-		return false;
+		return true;
 	});
 
 	const messageStack = messagesToDisplay
