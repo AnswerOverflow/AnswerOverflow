@@ -45,14 +45,14 @@ export default async function UserPage(props: Props) {
 			<div className="flex max-w-[650px] flex-col  gap-4">
 				<div className="flex flex-row items-center gap-2">
 					<DiscordAvatar user={userInfo} size={40} />
-					<span>{userInfo.name}</span>
+					<span className="font-semibold">{userInfo.name}</span>
 				</div>
-				<div className="flex flex-row flex-wrap items-center gap-2 px-4">
+				<div className="flex flex-row flex-wrap items-center gap-2">
 					{servers.map((x) => (
 						<ServerSelect server={x} key={x.id} />
 					))}
 				</div>
-				<div className={'flex  flex-col gap-4 md:px-4'}>
+				<div className={'flex flex-col gap-4'}>
 					{threads.map((x) => (
 						<FeedPost postId={x.id} key={x.id} />
 					))}
