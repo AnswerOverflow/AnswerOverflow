@@ -138,7 +138,7 @@ const PageSwitcher = (props: {
 		)}
 	</div>
 );
-
+import Image from 'next/image';
 export const CommunityPage = (
 	props: CommunityPageData & {
 		tenant: ServerPublic | undefined;
@@ -146,17 +146,33 @@ export const CommunityPage = (
 			| Pick<CommunityPageData, 'channels'>['channels'][number]
 			| undefined;
 		page: number | undefined;
+		uwu?: boolean;
 	},
 ) => {
 	const { server, channels, selectedChannel, tenant, posts: questions } = props;
 	// useTrackEvent('Community Page View', serverToAnalyticsData(server));
 	const { page = 0 } = props;
+	const isNuxt = server.id === '473401852243869706';
 	const HeroArea = () => {
 		return (
 			<div className="flex flex-col">
 				<div className="m-auto flex w-full flex-row bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
 					<div className={'mx-auto flex flex-row gap-4'}>
-						<ServerIcon server={server} size={128} className="hidden sm:flex" />
+						{isNuxt && props.uwu ? (
+							<Image
+								src="/uwu/nuxt.png"
+								width={300}
+								height={168}
+								alt="Uwuified Nuxt Logo"
+							/>
+						) : (
+							<ServerIcon
+								server={server}
+								size={128}
+								className="hidden sm:flex"
+							/>
+						)}
+
 						<div>
 							<Heading.H1 className="hidden pt-0 md:block">
 								{server.name}
