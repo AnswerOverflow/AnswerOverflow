@@ -184,8 +184,8 @@ export function MessageResultPage({
 		})),
 	};
 	const Main = () => (
-		<div className={'flex w-full grow flex-col gap-4 '}>
-			<div className="flex flex-col gap-2">
+		<div className={'flex w-full grow flex-col gap-4'}>
+			<div className="flex flex-col gap-2 pl-2">
 				{!tenant && (
 					<div className="flex flex-row items-center gap-2">
 						<Link href={`/c/${server.id}`}>
@@ -225,7 +225,9 @@ export function MessageResultPage({
 	const Sidebar = () => (
 		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center  md:w-[400px]">
 			<div
-				className={'hidden w-full  border-2 bg-card drop-shadow-md md:block'}
+				className={
+					'hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block'
+				}
 			>
 				<div className="flex flex-col items-start gap-4 p-4">
 					<div className="flex w-full flex-row items-center justify-between truncate font-bold">
