@@ -152,18 +152,19 @@ export const CommunityPage = (
 	const { server, channels, selectedChannel, tenant, posts: questions } = props;
 	// useTrackEvent('Community Page View', serverToAnalyticsData(server));
 	const { page = 0 } = props;
-	const isNuxt = server.id === '473401852243869706';
+	const isNuxtUwu = server.id === '473401852243869706' && props.uwu;
 	const HeroArea = () => {
 		return (
 			<div className="flex flex-col">
 				<div className="m-auto flex w-full flex-row bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
 					<div className={'mx-auto flex flex-row gap-4'}>
-						{isNuxt && props.uwu ? (
+						{isNuxtUwu ? (
 							<Image
 								src="/uwu/nuxt.png"
 								width={300}
 								height={168}
 								alt="Uwuified Nuxt Logo"
+								className="hidden sm:flex"
 							/>
 						) : (
 							<ServerIcon
@@ -190,13 +191,28 @@ export const CommunityPage = (
 							</div>
 						</div>
 						<div className="flex w-full flex-col items-center text-center md:hidden">
-							<div className="flex flex-row items-center justify-center gap-2">
-								<ServerIcon
-									server={server}
-									size={64}
+							{isNuxtUwu && (
+								<Image
+									src="/uwu/nuxt.png"
+									width={300 / 1.5}
+									height={168 / 1.5}
+									alt="Uwuified Nuxt Logo"
 									className="flex sm:hidden"
 								/>
-								<Heading.H1 className="pt-0 text-3xl">{server.name}</Heading.H1>
+							)}
+							<div className="flex flex-row items-center justify-center gap-2">
+								{!isNuxtUwu && (
+									<>
+										<ServerIcon
+											server={server}
+											size={64}
+											className="flex sm:hidden"
+										/>
+										<Heading.H1 className="pt-0 text-3xl">
+											{server.name}
+										</Heading.H1>
+									</>
+								)}
 							</div>
 							<Heading.H2 className="text-base font-normal">
 								{server.description ??
