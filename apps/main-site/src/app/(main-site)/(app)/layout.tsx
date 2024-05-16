@@ -90,61 +90,63 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="mx-auto flex w-full flex-col items-center overflow-y-auto overflow-x-hidden bg-background font-body">
-			<div className="w-full justify-center">
+		<div className="mx-auto flex w-full flex-col items-center bg-background font-body">
+			<div className="relative w-full">
 				<Navbar tenant={undefined} />
-				<div className="flex flex-row">
-					<div className="hidden h-screen min-w-[250px] max-w-[250px] shrink-0 overflow-y-auto border-b-2 border-r-2 p-4 xl:block">
-						<LinkButton
-							href="/new"
-							className="flex flex-row justify-start gap-3"
-							variant={'ghost'}
-						>
-							<BsHouse className="size-6" />
-							Home
-						</LinkButton>
-						<LinkButton
-							href="/"
-							className="flex flex-row justify-start gap-3"
-							variant={'ghost'}
-						>
-							<BsArrowUpRightCircle className="size-6" />
-							Popular
-						</LinkButton>
-						<Separator className="my-2" />
-						<span className="px-4 font-semibold text-accent-foreground">
-							Topics
-						</span>
-						<Accordion type="multiple" className="py-2">
-							{categories.map((category) => (
-								<>
-									<AccordionItem
-										value={category.name}
-										className="border-0"
-										key={category.name}
-									>
-										<AccordionTrigger className="flex flex-row items-center justify-between gap-3 rounded-md px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-											<div className="flex flex-row items-center justify-start gap-3">
-												{category.icon}
-												{category.name}
-											</div>
-										</AccordionTrigger>
-										<AccordionContent className="flex flex-col">
-											{category.servers.map((server) => (
-												<LinkButton
-													href={`/c/${server.id}`}
-													key={server.id}
-													variant="ghost"
-													className="ml-7 w-full justify-start rounded-none border-l-2"
-												>
-													{server.name}
-												</LinkButton>
-											))}
-										</AccordionContent>
-									</AccordionItem>
-								</>
-							))}
-						</Accordion>
+				<div className="mt-16 flex flex-row">
+					<div className="hidden h-auto min-w-[250px] max-w-[250px] shrink-0 grow border-r-2 p-4 xl:block">
+						<div className="sticky left-0 top-[4rem]">
+							<LinkButton
+								href="/new"
+								className="flex flex-row justify-start gap-3"
+								variant={'ghost'}
+							>
+								<BsHouse className="size-6" />
+								Home
+							</LinkButton>
+							<LinkButton
+								href="/"
+								className="flex flex-row justify-start gap-3"
+								variant={'ghost'}
+							>
+								<BsArrowUpRightCircle className="size-6" />
+								Popular
+							</LinkButton>
+							<Separator className="my-2" />
+							<span className="px-4 font-semibold text-accent-foreground">
+								Topics
+							</span>
+							<Accordion type="multiple" className="py-2">
+								{categories.map((category) => (
+									<>
+										<AccordionItem
+											value={category.name}
+											className="border-0"
+											key={category.name}
+										>
+											<AccordionTrigger className="flex flex-row items-center justify-between gap-3 rounded-md px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+												<div className="flex flex-row items-center justify-start gap-3">
+													{category.icon}
+													{category.name}
+												</div>
+											</AccordionTrigger>
+											<AccordionContent className="flex flex-col">
+												{category.servers.map((server) => (
+													<LinkButton
+														href={`/c/${server.id}`}
+														key={server.id}
+														variant="ghost"
+														className="ml-7 w-full justify-start rounded-none border-l-2"
+													>
+														{server.name}
+													</LinkButton>
+												))}
+											</AccordionContent>
+										</AccordionItem>
+									</>
+								))}
+							</Accordion>
+						</div>
 					</div>
 					<div className="mx-auto w-full max-w-screen-2xl px-2 pt-2 xl:pt-8">
 						<main className="w-full">{children}</main>
