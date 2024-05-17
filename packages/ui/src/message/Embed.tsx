@@ -74,7 +74,11 @@ export const Embed = (props: EmbedProps) => {
 			}}
 		>
 			{embed.author?.url ? (
-				<BlueLink href={embed.author.url}>
+				<BlueLink
+					href={embed.author.url}
+					prefetch={false}
+					rel="noopener ugc nofollow"
+				>
 					<EmbedText text={embed.author?.name} />
 				</BlueLink>
 			) : (
@@ -82,7 +86,7 @@ export const Embed = (props: EmbedProps) => {
 			)}
 			<EmbedText text={embed.provider?.name} />
 			{embed.url ? (
-				<BlueLink href={embed.url}>
+				<BlueLink href={embed.url} prefetch={false} rel="noopener ugc nofollow">
 					<EmbedText
 						className="text-lg font-bold text-blue-600 hover:underline dark:text-blue-400"
 						text={embed.title}
