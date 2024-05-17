@@ -306,7 +306,7 @@ export const CommunityPage = (
 				eventName={'Community Page View'}
 				eventData={serverToAnalyticsData(server)}
 			/>
-			<main className="bg-background">
+			<main className="mt-8 bg-background">
 				<HeroArea />
 				<div className="py-8">
 					<div className="px-4 2xl:px-[6rem]">
