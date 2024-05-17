@@ -19,10 +19,10 @@ export const Navbar = (props: {
 	const { tenant } = props;
 
 	return (
-		<header className="px-4">
+		<header className="fixed left-0 top-0 z-10 h-[4rem] w-full bg-background px-4">
 			<nav
 				className={
-					'relative z-10 flex size-full min-h-[4rem] flex-1 items-center justify-between border-b-2 pb-2 md:py-2'
+					'relative z-10 flex size-full flex-1 items-center justify-between border-b-2 pb-2 md:py-2'
 				}
 			>
 				<div>

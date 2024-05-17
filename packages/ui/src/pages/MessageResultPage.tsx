@@ -1,7 +1,6 @@
 import type { ChannelPublicWithFlags, MessageFull } from '@answeroverflow/db';
 import type { ServerPublic } from '@answeroverflow/api';
-import type { QAPage, WithContext } from 'schema-dts';
-import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
+import type { DiscussionForumPosting, WithContext } from 'schema-dts';
 import { ServerInviteJoinButton } from '../server-invite';
 import { MessageBody, MessageContentWithSolution } from '../message/Message';
 import Link from '../ui/link';
@@ -21,6 +20,8 @@ import { FormattedNumber } from '../ui/numbers';
 import { ThinMessage } from '../message/thin-message';
 import { getDiscordURLForMessage } from '../utils/discord';
 import { ExternalLink } from 'lucide-react';
+import { getDate } from '../utils/snowflake';
+import { getMainSiteHostname } from '@answeroverflow/constants';
 
 export type MessageResultPageProps = {
 	messages: MessageFull[];
@@ -110,21 +111,22 @@ export function MessageResultPage({
 		};
 	});
 
-	const messagesToDisplay = messagesWithMergedContent.filter(Boolean);
+	// yes this could be done in one filter but i want the types to be right todo: refactor
+	const nonNull = messagesWithMergedContent.filter(Boolean);
+	const messagesToDisplay = nonNull.filter((message, index) => {
+		if (message.id === firstMessage.id) return false;
+		const nextMessage = nonNull.at(index + 1);
+		if (!message.public && isUserInServer !== 'in_server') {
+			if (nextMessage && !nextMessage.public) {
+				return false;
+			}
+		}
+		if (message.author.id === '958907348389339146') return false;
+		return true;
+	});
 
 	const messageStack = messagesToDisplay
-		.map((message, index) => {
-			if (message.id === firstMessage.id) {
-				return;
-			}
-			const nextMessage = messagesToDisplay.at(index + 1);
-			if (!message.public && isUserInServer !== 'in_server') {
-				if (nextMessage && !nextMessage.public) {
-					return;
-				}
-			}
-			if (message.author.id === '958907348389339146') return null;
-
+		.map((message) => {
 			if (message.id === solutionMessageId) {
 				return (
 					<div
@@ -152,30 +154,38 @@ export function MessageResultPage({
 		.filter(Boolean);
 
 	const title = thread?.name ?? firstMessage.content?.slice(0, 100);
-	const isFirstMessageSolution = solution && solution.id !== firstMessage.id;
-	const qaHeader: WithContext<QAPage> = {
+	const qaHeader: WithContext<DiscussionForumPosting> = {
 		'@context': 'https://schema.org',
-		'@type': 'QAPage',
-		mainEntity: {
-			'@type': 'Question',
-			name: stripMarkdownAndHTML(title),
-			text: stripMarkdownAndHTML(firstMessage.content),
-			answerCount: solution && !isFirstMessageSolution ? 1 : 0,
-			acceptedAnswer:
-				solution && !isFirstMessageSolution
-					? {
-							'@type': 'Answer',
-							text: stripMarkdownAndHTML(solution.content),
-							url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
-								solution.id
-							}#solution-${solution.id}`,
-					  }
-					: undefined,
+		'@type': 'DiscussionForumPosting',
+		url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
+			thread?.id ?? firstMessage.id
+		}`,
+		author: {
+			'@type': 'Person',
+			name: stripMarkdownAndHTML(firstMessage.author.name),
 		},
+		headline: stripMarkdownAndHTML(title),
+		articleBody: stripMarkdownAndHTML(firstMessage.content),
+		// TODO: Add author
+		datePublished: getDate(firstMessage.id).toISOString(),
+		dateModified: thread?.archivedTimestamp
+			? new Date(Number(thread.archivedTimestamp)).toISOString()
+			: undefined,
+		identifier: thread?.id ?? firstMessage.id,
+		commentCount: messagesToDisplay.length,
+		comment: messagesToDisplay.map((message) => ({
+			'@type': message.id === solutionMessageId ? 'Answer' : 'Comment',
+			text: stripMarkdownAndHTML(message.content),
+			datePublished: getDate(message.id).toISOString(),
+			author: {
+				'@type': 'Person',
+				name: stripMarkdownAndHTML(message.author.name),
+			},
+		})),
 	};
 	const Main = () => (
-		<div className={'flex w-full grow flex-col gap-4 '}>
-			<div className="flex flex-col gap-2">
+		<div className={'flex w-full grow flex-col gap-4'}>
+			<div className="flex flex-col gap-2 pl-2">
 				{!tenant && (
 					<div className="flex flex-row items-center gap-2">
 						<Link href={`/c/${server.id}`}>
@@ -215,7 +225,9 @@ export function MessageResultPage({
 	const Sidebar = () => (
 		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center  md:w-[400px]">
 			<div
-				className={'hidden w-full  border-2 bg-card drop-shadow-md md:block'}
+				className={
+					'hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block'
+				}
 			>
 				<div className="flex flex-col items-start gap-4 p-4">
 					<div className="flex w-full flex-row items-center justify-between truncate font-bold">
