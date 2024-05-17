@@ -5,7 +5,7 @@
 	"scripts": {
 		"with-env": "dotenv -e ../../.env --",
 		"dev-next": "pnpm with-env next dev",
-		"dev-proxy": "ts-node ./scripts/proxy.ts",
+		"dev-proxy": "ts-node --project tsconfig-tsnode.json scripts/proxy.ts",
 		"dev-content-layer": "pnpm with-env contentlayer dev --clearCache",
 		"dev": "pnpm concurrently \"pnpm dev-content-layer\" \"pnpm dev-next\" \"pnpm dev-proxy\"",
 		"build:content-layer": "pnpm with-env contentlayer build  --clearCache",
