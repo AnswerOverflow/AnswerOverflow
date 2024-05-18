@@ -446,7 +446,11 @@ importers:
         specifier: ^10.37.1
         version: 10.45.2(@tanstack/react-query@4.36.1)(@trpc/client@10.45.2)(@trpc/react-query@10.45.2)(@trpc/server@10.45.2)(next@14.3.0-canary.9)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/react-query':
+<<<<<<< HEAD
+        specifier: ^10.37.1
+=======
         specifier: ^10.45.2
+>>>>>>> upstream/main
         version: 10.45.2(@tanstack/react-query@4.36.1)(@trpc/client@10.45.2)(@trpc/server@10.45.2)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/server':
         specifier: ^10.37.1
@@ -637,7 +641,11 @@ importers:
         specifier: ^1.17.11
         version: 1.17.14
       '@types/mdx':
+<<<<<<< HEAD
+        specifier: ^2.0.13
+=======
         specifier: ^2.0.8
+>>>>>>> upstream/main
         version: 2.0.13
       '@types/node':
         specifier: ^20.11.20
@@ -1598,7 +1606,11 @@ importers:
         specifier: ^10.45.0
         version: 10.45.2(@trpc/server@10.45.2)
       '@trpc/react-query':
+<<<<<<< HEAD
+        specifier: ^10.37.1
+=======
         specifier: ^10.45.2
+>>>>>>> upstream/main
         version: 10.45.2(@tanstack/react-query@4.36.1)(@trpc/client@10.45.2)(@trpc/server@10.45.2)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/server':
         specifier: ^10.37.1
