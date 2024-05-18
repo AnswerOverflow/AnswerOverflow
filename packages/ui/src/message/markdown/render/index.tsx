@@ -145,6 +145,7 @@ function createRules(rule: { [key: string]: any }) {
 						href={SimpleMarkdown.sanitizeUrl(node.target) ?? ''}
 						target="_blank"
 						rel="noopener ugc nofollow"
+						prefetch={false}
 						key={state.key}
 					>
 						{recurseOutput(node.content, state)}

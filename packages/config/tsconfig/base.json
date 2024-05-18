@@ -4,8 +4,8 @@
 	"compileOnSave": true,
 	"compilerOptions": {
 		"composite": false,
-    "declaration": false,
-    "declarationMap": false,
+		"declaration": false,
+		"declarationMap": false,
 		"inlineSources": false,
 		"isolatedModules": true,
 		"preserveWatchOutput": true,

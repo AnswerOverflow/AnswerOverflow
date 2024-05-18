@@ -90,6 +90,14 @@ async function seedTwo() {
 			parentChannelId: channel.id,
 		}),
 	);
+	messages.push(
+		mockMessage(server, thread, account, {
+			id: '100',
+			parentChannelId: channel.id,
+			content:
+				'Can you make sure that your internal address is compossed of http://ip:port, ',
+		}),
+	);
 	await upsertServer({
 		create: server,
 		update: server,
