@@ -17,6 +17,7 @@ module.exports = {
 			},
 		],
 		'tailwindcss/enforces-shorthand': 'off',
+		'tailwindcss/no-unnecessary-arbitrary-value': 'off',
 		// Disable tailwindcss rearrange class
 		'tailwindcss/classnames-order': 'off',
 	},

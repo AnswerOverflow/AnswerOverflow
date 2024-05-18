@@ -12,14 +12,14 @@ import {
 import {
 	mockAccountWithServersCallerCtx,
 	mockUnauthedCtx,
-} from '~api/test/utils';
+} from '../../../test/utils';
 import { messagesRouter } from './messages';
 import {
 	pickPublicChannelData,
 	pickPublicServerData,
 	toMessageWithAccountAndRepliesTo,
 	toPrivateMessageWithStrippedData,
-} from '~api/test/public-data';
+} from '../../../test/public-data';
 import {
 	mockServer,
 	mockDiscordAccount,

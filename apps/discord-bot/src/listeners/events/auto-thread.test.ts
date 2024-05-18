@@ -5,11 +5,11 @@ import {
 	mockGuildMember,
 	emitEvent,
 } from '@answeroverflow/discordjs-mock';
-import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
 import { randomSnowflake } from '@answeroverflow/discordjs-utils';
 import { mockPublicThread } from '@answeroverflow/discordjs-mock';
 import { createChannel, createServer } from '@answeroverflow/db';
-import { toAOServer, toAOChannel } from '~discord-bot/utils/conversions';
+import { setupAnswerOverflowBot } from '../../../test/sapphire-mock';
+import { toAOServer, toAOChannel } from '../../utils/conversions';
 
 let client: Client;
 let textChannel: TextChannel;

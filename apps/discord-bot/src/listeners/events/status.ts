@@ -2,8 +2,8 @@ import { ApplyOptions } from '@sapphire/decorators';
 import { Listener, SapphireClient } from '@sapphire/framework';
 import { type ActivityOptions, ActivityType, Events } from 'discord.js';
 import { getTotalNumberOfMessages } from '@answeroverflow/db';
-import { hoursToMs } from '~discord-bot/utils/utils';
 import { botEnv } from '@answeroverflow/env/bot';
+import { hoursToMs } from '../../utils/utils';
 
 const timeBetweenStatusChangesInHours = botEnv.STATUS_UPDATE_INTERVAL_IN_HOURS;
 

@@ -1,12 +1,12 @@
 import type { SapphireClient } from '@sapphire/framework';
 import { Events } from 'discord.js';
 import { copyClass, emitEvent, mockUser } from '@answeroverflow/discordjs-mock';
-import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
+import { setupAnswerOverflowBot } from '../../../test/sapphire-mock';
 import {
 	createDiscordAccount,
 	findDiscordAccountById,
 } from '@answeroverflow/db';
-import { toAODiscordAccount } from '~discord-bot/utils/conversions';
+import { toAODiscordAccount } from '../../utils/conversions';
 
 let client: SapphireClient;
 

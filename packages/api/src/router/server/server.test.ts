@@ -7,7 +7,7 @@ import {
 import {
 	mockAccountWithServersCallerCtx,
 	testAllSourceAndPermissionVariantsThatThrowErrors,
-} from '~api/test/utils';
+} from '../../../test/utils';
 import { serverRouter } from './server';
 
 describe('Server Operations', () => {

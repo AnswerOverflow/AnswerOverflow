@@ -8,23 +8,20 @@ import {
 	zServerCreate,
 } from '@answeroverflow/db';
 import { z } from 'zod';
+
+import type { Context } from '../context';
 import {
-	router,
-	publicProcedure,
-	withUserServersProcedure,
-} from '~api/router/trpc';
-import {
-	assertBoolsAreNotEqual,
-	assertCanEditServer,
-	assertCanEditServerBotOnly,
-	assertIsNotValue,
-} from '~api/utils/permissions';
-import {
-	type PermissionsChecks,
+	PermissionsChecks,
 	protectedFetch,
 	protectedMutation,
-} from '~api/utils/protected-procedures';
-import type { Context } from '../context';
+} from '../../utils/protected-procedures';
+import {
+	assertCanEditServerBotOnly,
+	assertCanEditServer,
+	assertBoolsAreNotEqual,
+	assertIsNotValue,
+} from '../../utils/permissions';
+import { publicProcedure, router, withUserServersProcedure } from '../trpc';
 
 export const CHANNEL_NOT_FOUND_MESSAGES = 'Channel does not exist';
 

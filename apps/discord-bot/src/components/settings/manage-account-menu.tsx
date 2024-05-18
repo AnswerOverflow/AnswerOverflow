@@ -3,19 +3,9 @@ import {
 	getDefaultUserServerSettingsWithFlags,
 	type UserServerSettingsWithFlags,
 } from '@answeroverflow/db';
-import {
-	updateUserConsent,
-	updateUserServerIndexingEnabled,
-} from '~discord-bot/domains/manage-account';
-import { callAPI, oneTimeStatusHandler } from '~discord-bot/utils/trpc';
+
 import { Button } from '@answeroverflow/discordjs-react';
-import { createMemberCtx } from '~discord-bot/utils/context';
-import {
-	ToggleButton,
-	type MenuInstruction,
-	InstructionsContainer,
-	EmbedMenuInstruction,
-} from '~discord-bot/components/primitives';
+
 import {
 	IGNORE_ACCOUNT_IN_SERVER_LABEL,
 	GLOBALLY_IGNORE_ACCOUNT_LABEL,
@@ -24,7 +14,19 @@ import {
 	STOP_IGNORING_ACCOUNT_LABEL,
 	STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL,
 } from '@answeroverflow/constants';
-import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
+import {
+	updateUserConsent,
+	updateUserServerIndexingEnabled,
+} from '../../domains/manage-account';
+import { guildTextChannelOnlyInteraction } from '../../utils/conditions';
+import { createMemberCtx } from '../../utils/context';
+import { oneTimeStatusHandler, callAPI } from '../../utils/trpc';
+import {
+	ToggleButton,
+	MenuInstruction,
+	InstructionsContainer,
+	EmbedMenuInstruction,
+} from '../primitives';
 
 type ManageAccountMenuItemProps = {
 	state: ManageAccountMenuState;

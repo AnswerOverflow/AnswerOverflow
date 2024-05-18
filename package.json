@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
+    "dev:dbs": "docker-compose -f \"docker-compose.yml\" -f \"docker-compose-extras.yml\" up",
 		"init": "turbo run init",
 		"build": "turbo run build",
 		"format": "turbo run format",

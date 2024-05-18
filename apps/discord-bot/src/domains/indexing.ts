@@ -21,17 +21,18 @@ import {
 	type TextBasedChannel,
 	TextChannel,
 } from 'discord.js';
-import {
-	extractUsersSetFromMessages,
-	messagesToAOMessagesSet,
-	toAOChannel,
-} from '~discord-bot/utils/conversions';
+
 import { container } from '@sapphire/framework';
 import { sortMessagesById } from '@answeroverflow/discordjs-utils';
 import * as Sentry from '@sentry/node';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { botEnv } from '@answeroverflow/env/bot';
 import { indexMessageForSearch } from '@answeroverflow/search/src';
+import {
+	extractUsersSetFromMessages,
+	messagesToAOMessagesSet,
+	toAOChannel,
+} from '../utils/conversions';
 
 export async function indexServers(client: Client) {
 	const indexingStartTime = Date.now();

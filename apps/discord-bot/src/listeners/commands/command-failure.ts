@@ -9,8 +9,8 @@ import {
 } from '@sapphire/framework';
 import { Listener } from '@sapphire/framework';
 import type { ContextMenuCommandInteraction, Interaction } from 'discord.js';
-import { sentryLogger } from '~discord-bot/utils/sentry';
-import { oneTimeStatusHandler } from '~discord-bot/utils/trpc';
+import { sentryLogger } from '../../utils/sentry';
+import { oneTimeStatusHandler } from '../../utils/trpc';
 
 function makeErrorMessage(msg: string) {
 	return `Sorry! ${msg}. We've been notified of the problem and are looking into it. \n\nYou can try dismissing this and rerunning the command in the meantime.`;

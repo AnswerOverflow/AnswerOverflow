@@ -6,16 +6,15 @@ import {
 } from '@answeroverflow/db';
 import { mockDiscordAccount } from '@answeroverflow/db-mock';
 import { pick } from '@answeroverflow/utils';
-
-import {
-	testAllPublicAndPrivateDataVariants,
-	mockAccountCallerCtx,
-} from '~api/test/utils';
-import { NOT_AUTHORIZED_MESSAGE } from '~api/utils/permissions';
 import {
 	COULD_NOT_FIND_ACCOUNT_ERROR_MESSAGE,
 	discordAccountRouter,
 } from './discord-accounts';
+import { NOT_AUTHORIZED_MESSAGE } from '../../../utils/permissions';
+import {
+	testAllPublicAndPrivateDataVariants,
+	mockAccountCallerCtx,
+} from '../../../../test/utils';
 
 let discordAccount: DiscordAccount;
 let discordAccount2: DiscordAccount;

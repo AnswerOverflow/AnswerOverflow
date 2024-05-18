@@ -16,13 +16,7 @@ import {
 	findServerById,
 	type UserServerSettingsWithFlags,
 } from '@answeroverflow/db';
-import {
-	callAPI,
-	oneTimeStatusHandler,
-	type TRPCStatusHandler,
-} from '~discord-bot/utils/trpc';
-import { toAODiscordAccount } from '~discord-bot/utils/conversions';
-import { createMemberCtx } from '~discord-bot/utils/context';
+
 import {
 	type ConsentSource,
 	CONSENT_SOURCES,
@@ -31,11 +25,15 @@ import {
 import { CONSENT_BUTTON_LABEL, WEBSITE_URL } from '@answeroverflow/constants';
 import { makeRequestForConsentString } from './mark-solution';
 import type { RendererableInteractions } from '@answeroverflow/discordjs-react';
-import { isHumanMessage } from '~discord-bot/utils/utils';
+import { trackDiscordEvent, memberToAnalyticsUser } from '../utils/analytics';
+import { createMemberCtx } from '../utils/context';
+import { toAODiscordAccount } from '../utils/conversions';
 import {
-	memberToAnalyticsUser,
-	trackDiscordEvent,
-} from '~discord-bot/utils/analytics';
+	TRPCStatusHandler,
+	callAPI,
+	oneTimeStatusHandler,
+} from '../utils/trpc';
+import { isHumanMessage } from '../utils/utils';
 
 export const CONSENT_ACTION_PREFIX = 'consent';
 

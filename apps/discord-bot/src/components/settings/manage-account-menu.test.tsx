@@ -1,7 +1,3 @@
-import {
-	mockReply,
-	toggleButtonTest,
-} from '~discord-bot/test/discordjs-react-utils';
 import React from 'react';
 import {
 	createDiscordAccount,
@@ -15,7 +11,7 @@ import {
 } from '@answeroverflow/db';
 import { mockUserServerSettingsWithFlags } from '@answeroverflow/db-mock';
 import type { Guild, TextChannel } from 'discord.js';
-import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
+
 import {
 	createGuildMemberVariants,
 	type GuildMemberVariants,
@@ -23,7 +19,7 @@ import {
 	mockTextChannel,
 } from '@answeroverflow/discordjs-mock';
 import { ManageAccountMenu } from './manage-account-menu';
-import { toAODiscordAccount, toAOServer } from '~discord-bot/utils/conversions';
+
 import {
 	IGNORE_ACCOUNT_IN_SERVER_LABEL,
 	STOP_IGNORING_ACCOUNT_IN_SERVER_LABEL,
@@ -32,6 +28,12 @@ import {
 	REVOKE_CONSENT_LABEL,
 	STOP_IGNORING_ACCOUNT_LABEL,
 } from '@answeroverflow/constants';
+import {
+	mockReply,
+	toggleButtonTest,
+} from '../../../test/discordjs-react-utils';
+import { setupAnswerOverflowBot } from '../../../test/sapphire-mock';
+import { toAOServer, toAODiscordAccount } from '../../utils/conversions';
 let textChannel: TextChannel;
 let guild: Guild;
 let members: GuildMemberVariants;

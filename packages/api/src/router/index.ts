@@ -1,7 +1,7 @@
 import { router } from './trpc';
 import { authRouter } from './auth';
-import { channelRouter } from '~api/router/channel/channel';
-import { serverRouter } from '~api/router/server/server';
+import { channelRouter } from './channel/channel';
+import { serverRouter } from './server/server';
 import { discordAccountRouter } from './users/accounts/discord-accounts';
 import { userServerSettingsRouter } from './user-server-settings/user-server-settings';
 import { messagesRouter } from './messages/messages';

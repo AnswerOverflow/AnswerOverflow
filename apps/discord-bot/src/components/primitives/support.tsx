@@ -1,13 +1,14 @@
 import { Button, Link } from '@answeroverflow/discordjs-react';
 import React from 'react';
 import { useHistory } from './router';
-import { ephemeralReply } from '~discord-bot/utils/utils';
+
 import {
 	DISCORD_EMOJI_ID,
 	DISCORD_LINK,
 	DOCS_URL,
 	GITHUB_LINK,
 } from '@answeroverflow/constants';
+import { ephemeralReply } from '../../utils/utils';
 
 export const SupportMenu: React.FC = () => (
 	<>
