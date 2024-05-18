@@ -22,7 +22,9 @@ const config = {
 		domains: ['cdn.discordapp.com'],
 	},
 	experimental: {
-		outputFileTracingIgnores: ['**swc/core**'],
+		outputFileTracingExcludes: {
+			'*': ['**swc/core**'],
+		},
 	},
 	// We already do linting on GH actions
 	eslint: {
