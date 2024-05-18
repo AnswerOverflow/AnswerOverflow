@@ -38,7 +38,9 @@ const config = {
 		'@answeroverflow/env',
 	],
 	experimental: {
-		outputFileTracingIgnores: ['**swc/core**'],
+		outputFileTracingExcludes: {
+			'*': ['**swc/core**'],
+		},
 		serverComponentsExternalPackages: ['mysql2'],
 		ppr: true,
 	},
