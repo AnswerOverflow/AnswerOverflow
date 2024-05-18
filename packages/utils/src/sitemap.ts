@@ -33,30 +33,19 @@ export class Sitemap {
 		if (this.entries.length > 50000)
 			throw new Error('Sitemap cannot have more than 50,000 entries');
 
-		const clamp = (num: number, min: number, max: number) =>
-			Math.min(Math.max(num, min), max);
-		const urls = this.entries.map(
-			(entry) => `
-    ${this.type === 'sitemap' ? '<sitemap>' : '<url>'}
-      <loc>${
+		const urls = this.entries.map((entry) => {
+			let data = '';
+			data += this.type === 'sitemap' ? '<sitemap>' : '<url>';
+			data += `<loc>${
 				entry.loc.startsWith('http') ? entry.loc : this.baseUrl + entry.loc
-			}</loc>
-      ${
-				entry.lastmod ? `<lastmod>${entry.lastmod.toISOString()}</lastmod>` : ''
-			}
-      ${
-				entry.changefreq && this.type === 'url'
-					? `<changefreq>${entry.changefreq}</changefreq>`
-					: ''
-			}
-      ${
-				entry.priority && this.type === 'url'
-					? `<priority>${clamp(entry.priority, 0, 1)}</priority>`
-					: ''
-			}
-    ${this.type === 'sitemap' ? '</sitemap>' : '</url>'}
-  `,
-		);
+			}</loc>`;
+			if (entry.lastmod)
+				data += `<lastmod>${entry.lastmod.toISOString()}</lastmod>`;
+			if (entry.changefreq && this.type === 'url')
+				data += `<changefreq>${entry.changefreq}</changefreq>`;
+			data += this.type === 'sitemap' ? '</sitemap>' : '</url>';
+			return data;
+		});
 
 		if (this.type === 'url') {
 			return (
@@ -86,6 +75,8 @@ export class Sitemap {
 			'Cache-Control',
 			'public, s-maxage=21600, stale-while-revalidate=86400',
 		);
+		res.setHeader('CDN-Cache-Control', 'max-age=43200');
+		res.setHeader('Vercel-CDN-Cache-Control', 'max-age=86400');
 		res.write(this.toXml());
 		res.end();
 	}

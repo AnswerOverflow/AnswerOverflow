@@ -419,6 +419,7 @@ export function WelcomePageRenderer(props: {
 										vanityInviteCode: null,
 										kickedTime: null,
 										customDomain: null,
+										approximateMemberCount: 0,
 									}}
 									onSetupClick={(clickedServer) => {
 										// wait a second then go this page:

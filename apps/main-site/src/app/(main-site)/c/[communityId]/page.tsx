@@ -5,6 +5,9 @@ import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 type Props = {
 	params: { communityId: string };
+	searchParams: {
+		uwu?: string;
+	};
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -28,6 +31,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 		description:
 			communityPageData.server.description ??
 			`Questions and answers related to ${communityPageData.server.name}`,
+		alternates: {
+			canonical: `/c/${communityPageData.server.id}`,
+		},
 		openGraph: {
 			title: `${communityPageData.server.name} Community - Answer Overflow`,
 			description:
@@ -36,7 +42,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 		},
 	};
 }
-export default async function CommunityPageContainer({ params }: Props) {
+export default async function CommunityPageContainer({
+	params,
+	searchParams,
+}: Props) {
 	const communityPageData = await findServerWithCommunityPageData({
 		idOrVanityUrl: params.communityId,
 		selectedChannel: undefined,
@@ -56,6 +65,7 @@ export default async function CommunityPageContainer({ params }: Props) {
 	return (
 		<CommunityPage
 			{...communityPageData}
+			uwu={!!searchParams.uwu}
 			selectedChannel={selectedChannel}
 			tenant={undefined}
 			page={0}

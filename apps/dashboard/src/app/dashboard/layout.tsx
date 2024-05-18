@@ -12,7 +12,7 @@ export default function Layout({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="mx-auto flex w-full flex-col items-center overflow-y-auto overflow-x-hidden bg-background font-body">
+		<div className="mx-auto flex w-full flex-col items-center bg-background font-body">
 			{/*<div*/}
 			{/*	className={*/}
 			{/*		'w-full items-center justify-center bg-primary/5 py-1 text-center text-center md:flex'*/}

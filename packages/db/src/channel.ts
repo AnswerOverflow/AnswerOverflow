@@ -16,6 +16,7 @@ import {
 import {
 	addFlagsToChannel,
 	channelBitfieldFlags,
+	ChannelSettingsFlags,
 	ChannelWithFlags,
 	zChannelCreate,
 	zChannelCreateMany,
@@ -372,3 +373,25 @@ export const channelCountsLoader = new Dataloader(
 		return ids.map((id) => lookup.get(id));
 	},
 );
+
+export function findChannelMessagesById(
+	channelId: string,
+	opts?: {
+		authorId?: string;
+	},
+) {
+	const { authorId } = opts ?? {};
+	return db.query.dbMessages.findMany({
+		where: authorId
+			? and(
+					eq(dbMessages.channelId, channelId),
+					eq(dbMessages.authorId, authorId),
+			  )
+			: eq(dbMessages.channelId, channelId),
+		orderBy: desc(dbMessages.id),
+	});
+}
+
+export function channelFlagsToBitfield(newFlags: ChannelSettingsFlags) {
+	return dictToBitfield(newFlags, channelBitfieldFlags);
+}

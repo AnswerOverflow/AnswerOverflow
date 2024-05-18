@@ -4,6 +4,8 @@ import { sharedEnvs } from '@answeroverflow/env/shared';
 import { CommunityPage } from '@answeroverflow/ui/src/pages/CommunityPage';
 import { z } from 'zod';
 
+export { generateMetadata } from '../page';
+
 export default async function CommunityChannelPage({
 	params,
 	searchParams,
@@ -11,6 +13,7 @@ export default async function CommunityChannelPage({
 	params: { communityId: string; channelId: string };
 	searchParams: {
 		page: string | undefined;
+		uwu?: string | undefined;
 	};
 }) {
 	const page = z.coerce.number().parse(searchParams.page ?? '0');
@@ -38,11 +41,13 @@ export default async function CommunityChannelPage({
 	if (!selectedChannel) {
 		return notFound();
 	}
+	const uwu = !!searchParams.uwu;
 
 	return (
 		<CommunityPage
 			{...communityPageData}
 			selectedChannel={selectedChannel}
+			uwu={uwu}
 			tenant={undefined}
 			page={page}
 		/>

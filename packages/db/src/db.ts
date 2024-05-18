@@ -40,7 +40,7 @@ export const db: PlanetScaleDatabase<typeof schema> = psDrizzle(
 );
 
 const clientReplica = new Client({
-	url: dbUrl,
+	url: sharedEnvs.DATABASE_URL_REPLICA ?? dbUrl,
 	fetch: cachedFetch,
 	cast: (field, value) => {
 		if (field.type === 'JSON') {
@@ -68,5 +68,3 @@ export const dbReplica: PlanetScaleDatabase<typeof schema> = psDrizzle(
 	clientReplica,
 	{ schema },
 );
-
-void clientReplica.execute('USE @replica');

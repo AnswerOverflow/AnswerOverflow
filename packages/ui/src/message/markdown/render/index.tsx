@@ -18,7 +18,7 @@ function parserFor(rules: SimpleMarkdown.ReactRules, returnAst?: boolean) {
 	return memoize(
 		(input = '', inline = true, state = {}, transform = null) => {
 			if (!inline) {
-				input += '\n\n';
+				input += '\n';
 			}
 
 			const parse = R.pipe.apply(
@@ -141,10 +141,11 @@ function createRules(rule: { [key: string]: any }) {
 
 				return (
 					<BlueLink
-						title={masked ? `${node.title || content}\n\n(${url})` : url}
+						title={masked ? `${node.title || content}\n(${url})` : url}
 						href={SimpleMarkdown.sanitizeUrl(node.target) ?? ''}
 						target="_blank"
 						rel="noopener ugc nofollow"
+						prefetch={false}
 						key={state.key}
 					>
 						{recurseOutput(node.content, state)}

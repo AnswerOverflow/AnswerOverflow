@@ -2,6 +2,7 @@
 process.env = {
 	...process.env,
 	NODE_ENV: process.env.NODE_ENV ?? 'development',
+	NEXT_PUBLIC_DEPLOYMENT_ENV: process.env.NEXT_PUBLIC_DEPLOYMENT_ENV ?? 'local',
 };
 
 import { createEnv } from '@t3-oss/env-nextjs';
@@ -19,7 +20,8 @@ export const zStringRequiredInProduction = z
 		(token) => {
 			if (
 				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local' ||
-				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'ci'
+				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'ci' ||
+				process.env.NODE_ENV === 'development'
 			) {
 				return true;
 			}
@@ -35,7 +37,8 @@ export const zNumberRequiredInProduction = z
 		(token) => {
 			if (
 				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local' ||
-				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'ci'
+				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'ci' ||
+				process.env.NODE_ENV === 'development'
 			) {
 				return true;
 			}
@@ -60,11 +63,28 @@ export const nodeEnv = z
 export const sharedClientEnvs = {
 	NEXT_PUBLIC_POSTHOG_TOKEN: zStringRequiredInProduction,
 	NEXT_PUBLIC_SENTRY_DSN: zStringRequiredInProduction,
-	NEXT_PUBLIC_DEPLOYMENT_ENV: z
-		.string()
-		.pipe(z.enum(['local', 'staging', 'production', 'ci'])),
-	NEXT_PUBLIC_SITE_URL: z.string().url(),
+	NEXT_PUBLIC_DEPLOYMENT_ENV: zStringDefaultInDev('local').pipe(
+		z.enum(['local', 'staging', 'production', 'ci']),
+	),
+	NEXT_PUBLIC_SITE_URL: zStringDefaultInDev('http://localhost:3000'),
 };
+
+console.log(process.env.NEXT_PUBLIC_DEPLOYMENT_ENV);
+export function zStringDefaultInDev(defaultValue) {
+	const isDev =
+		process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local' ||
+		process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'ci' ||
+		process.env.NODE_ENV === 'development';
+	if (!isDev) {
+		return z.string();
+	}
+	return (
+		z
+			.string()
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+			.default(defaultValue)
+	);
+}
 
 export const sharedEnvs = createEnv({
 	server: {
@@ -72,24 +92,30 @@ export const sharedEnvs = createEnv({
       Environment
      */
 		NODE_ENV: nodeEnv,
-		ENVIRONMENT: z
-			.string()
-			.pipe(z.enum(['discord-bot', 'main-site', 'docs', 'dashboard'])),
+		ENVIRONMENT: zStringDefaultInDev('discord-bot').pipe(
+			z.enum(['discord-bot', 'main-site', 'docs', 'dashboard']),
+		),
 		// SKIP_ENV_VALIDATION: z.string(),
 		// CI: z.string(),
 
 		/*
       Database
      */
-		DATABASE_URL: z.string(),
-		// TODO: Make it cloud ID oro username / password, not both
-		ELASTICSEARCH_URL: z.string().optional(),
-		ELASTICSEARCH_CLOUD_ID: zStringRequiredInProduction,
-		ELASTICSEARCH_PASSWORD: z.string(),
-		ELASTICSEARCH_USERNAME: z.string(),
-		ELASTICSEARCH_MESSAGE_INDEX: z.string(),
+		DATABASE_URL: zStringDefaultInDev(
+			'http://root:nonNullPassword@localhost:3900',
+		),
+		DATABASE_URL_REPLICA: z.string().optional(),
 
-		REDIS_URL: z.string(),
+		ELASTICSEARCH_URL:
+			process.env.NODE_ENV !== 'development'
+				? z.string().optional()
+				: zStringDefaultInDev('http://localhost:9200'),
+		ELASTICSEARCH_CLOUD_ID: zStringRequiredInProduction,
+		ELASTICSEARCH_PASSWORD: zStringDefaultInDev('changeme'),
+		ELASTICSEARCH_USERNAME: zStringDefaultInDev('elastic'),
+		ELASTICSEARCH_MESSAGE_INDEX: zStringDefaultInDev('messages'),
+
+		REDIS_URL: zStringDefaultInDev('redis://localhost:6379'),
 
 		/*
       Discord

@@ -17,6 +17,7 @@ export const zUniqueArray = z
 	.transform((arr) => [...new Set(arr)]);
 
 export const zServerSettingsFlags = toZObject(...serverSettingsFlags);
+export type ServerSettingsFlags = z.infer<typeof zServerSettingsFlags>;
 
 export const zServerSchema = serverSchema.required().extend({
 	flags: zServerSettingsFlags,
@@ -59,4 +60,5 @@ export const zServerPublic = zServerSchema.pick({
 	description: true,
 	kickedTime: true,
 	customDomain: true,
+	approximateMemberCount: true,
 });

@@ -63,6 +63,10 @@ const navigation: NavigationData = {
 						name: 'Changelog',
 						href: 'https://www.answeroverflow.com/changelog',
 					},
+					{
+						name: 'All Posts',
+						href: 'https://www.answeroverflow.com/posts',
+					},
 				],
 			},
 		},
@@ -137,7 +141,7 @@ const MainSiteFooter = () => (
 			))}
 		</div>
 		<p className="mt-10 text-center font-body text-xs leading-5 text-gray-500 dark:text-neutral-400">
-			&copy; 2023 Hedgehog Software, LLC. All rights reserved.
+			&copy; 2024 Hedgehog Software, LLC. All rights reserved.
 		</p>
 	</div>
 );

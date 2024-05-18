@@ -26,7 +26,7 @@
 		"@auth/core": "^0.12.0",
 		"dotenv-cra": "^3.0.3",
 		"drizzle-orm": "^0.28.5",
-		"next": "14.1.0",
+		"next": "14.3.0-canary.9",
 		"next-auth": "^4.23.1",
 		"prettier": "^2.8.8",
 		"react": "18.2.0",
@@ -39,8 +39,8 @@
 		"@types/cookie": "^0.5.1",
 		"@types/node": "^20.11.20",
 		"@vitest/coverage-c8": "^0.28.5",
-		"dotenv-cli": "^7.3.0",
-		"eslint": "^8.47.0",
+		"dotenv-cli": "^7.4.1",
+		"eslint": "^8.57.0",
 		"vitest": "^0.29.8"
 	}
 }

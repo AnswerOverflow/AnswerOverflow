@@ -74,7 +74,7 @@ export async function generateSitemap() {
 	let hasMore;
 	let offset = 0;
 	const safetyLimit = 200;
-	const limit = 5000;
+	const limit = 10000;
 	const allThreads: Channel[] = [];
 	do {
 		// eslint-disable-next-line no-await-in-loop
@@ -89,7 +89,11 @@ export async function generateSitemap() {
 	} while (hasMore && offset < safetyLimit);
 	console.log(`Finished collecting ${allThreads.length} threads`);
 
-	const chunks = chunk(allThreads, limit);
+	// Go from newest to oldest
+	const chunks = chunk(allThreads, limit).reverse();
+	if (chunks.length == 0 || allThreads.length == 0) {
+		return;
+	}
 	let i = 0;
 	for await (const chunk of chunks) {
 		const sitemap = new Sitemap('https://www.answeroverflow.com', 'url');
@@ -104,7 +108,7 @@ export async function generateSitemap() {
 			})),
 		);
 		await uploadFile({
-			contentType: 'application/xml',
+			contentType: 'text/xml',
 			filename: `sitemaps/sitemap-${i}.xml`,
 			stream: sitemap.toXml(),
 		});
@@ -120,7 +124,7 @@ export async function generateSitemap() {
 		});
 	}
 	await uploadFile({
-		contentType: 'application/xml',
+		contentType: 'text/xml',
 		filename: 'sitemaps/sitemap.xml',
 		stream: sitemapIndex.toXml(),
 	});

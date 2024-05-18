@@ -191,7 +191,32 @@ export async function findServerWithCommunityPageData(opts: {
 
 	return {
 		server: zServerPublic.parse(found),
-		channels: found.channels.map((c) => zChannelPublic.parse(c)),
+		channels: found.channels
+			.map((c) => zChannelPublic.parse(c))
+			.sort((a, b) => {
+				if (
+					a.type === ChannelType.GuildForum.valueOf() &&
+					b.type !== ChannelType.GuildForum.valueOf()
+				)
+					return -1;
+				if (
+					a.type !== ChannelType.GuildForum.valueOf() &&
+					b.type === ChannelType.GuildForum.valueOf()
+				)
+					return 1;
+				if (
+					a.type === ChannelType.GuildText.valueOf() &&
+					b.type !== ChannelType.GuildText.valueOf()
+				)
+					return -1;
+				if (
+					a.type !== ChannelType.GuildText.valueOf() &&
+					b.type === ChannelType.GuildText.valueOf()
+				)
+					return 1;
+
+				return 0;
+			}),
 		posts:
 			opts.page > 0 ? posts.slice(limit, limit * 2) : posts.slice(0, limit),
 	};

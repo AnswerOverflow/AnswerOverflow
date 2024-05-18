@@ -16,6 +16,7 @@ module.exports = {
 				whitelist: ['scrollbar-hide', 'dark'],
 			},
 		],
+		'tailwindcss/enforces-shorthand': 'off',
 		// Disable tailwindcss rearrange class
 		'tailwindcss/classnames-order': 'off',
 	},
