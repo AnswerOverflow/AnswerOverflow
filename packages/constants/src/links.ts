@@ -26,6 +26,7 @@ export const getBaseUrl = () => {
 	const base =
 		// eslint-disable-next-line n/no-process-env
 		process.env.NEXT_PUBLIC_SITE_URL ??
+		// eslint-disable-next-line n/no-process-env
 		(process.env.NODE_ENV !== 'development'
 			? 'https://www.answeroverflow.com'
 			: 'http://localhost:3000');

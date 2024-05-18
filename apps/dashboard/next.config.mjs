@@ -20,12 +20,6 @@ const config = {
 		'@answeroverflow/ui',
 		'@answeroverflow/env',
 	],
-	experimental: {
-		outputFileTracingExcludes: {
-			'*': ['**swc/core**'],
-		},
-		serverComponentsExternalPackages: ['mysql2'],
-	},
 	images: {
 		domains: [
 			'cdn.discordapp.com',

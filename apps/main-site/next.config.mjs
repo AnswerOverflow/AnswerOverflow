@@ -27,7 +27,6 @@ const withMDX = nextJSMDX.default({
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
-	swcMinify: true,
 	pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
 	transpilePackages: [
 		'@answeroverflow/api',
@@ -38,10 +37,6 @@ const config = {
 		'@answeroverflow/env',
 	],
 	experimental: {
-		outputFileTracingExcludes: {
-			'*': ['**swc/core**'],
-		},
-		serverComponentsExternalPackages: ['mysql2'],
 		ppr: true,
 	},
 	images: {
