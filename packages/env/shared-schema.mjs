@@ -69,7 +69,6 @@ export const sharedClientEnvs = {
 	NEXT_PUBLIC_SITE_URL: zStringDefaultInDev('http://localhost:3000'),
 };
 
-console.log(process.env.NEXT_PUBLIC_DEPLOYMENT_ENV);
 export function zStringDefaultInDev(defaultValue) {
 	const isDev =
 		process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local' ||

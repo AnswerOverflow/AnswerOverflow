@@ -13,8 +13,8 @@
 		"test": "pnpm db:push && pnpm db:wipe && turbo run test",
 		"generate": "pnpm i && cd packages/db && pnpm generate",
 		"dev": "turbo run dev --parallel --no-cache",
-    "dev:lite": "turbo run dev --filter=main-site --filter=discord-bot --parallel --no-cache",
-    "dev:site": "turbo run dev --filter=main-site --no-cache",
+		"dev:lite": "turbo run dev --filter=main-site --filter=discord-bot --parallel --no-cache",
+		"dev:site": "turbo run dev --filter=main-site --no-cache",
 		"migrate": "turbo run migrate",
 		"db:wipe": "turbo db:wipe",
 		"db:push": "turbo db:push",
@@ -62,11 +62,6 @@
 	"engines": {
 		"node": ">=18.15.0",
 		"pnpm": ">=8.6.0"
-	},
-	"pnpm": {
-		"patchedDependencies": {
-			"mysql2@3.6.0": "patches/mysql2@3.6.0.patch"
-		}
 	},
 	"dependencies": {
 		"contentlayer": "^0.3.4"

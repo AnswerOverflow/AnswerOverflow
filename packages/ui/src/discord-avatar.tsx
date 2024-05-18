@@ -1,7 +1,6 @@
 import type { DiscordAccountPublic } from '@answeroverflow/db';
 import { AvatarProps } from './ui/avatar';
 import { cn } from './utils/utils';
-import Image from 'next/image';
 
 export interface DiscordAvatarProps extends Omit<AvatarProps, 'alt' | 'url'> {
 	user: DiscordAccountPublic;
@@ -35,7 +34,8 @@ export function DiscordAvatar(props: DiscordAvatarProps) {
 					props.className,
 				)}
 			>
-				<Image
+				{/* eslint-disable-next-line @next/next/no-img-element */}
+				<img
 					src={fallback}
 					alt={props.user.name}
 					width={props.size}
