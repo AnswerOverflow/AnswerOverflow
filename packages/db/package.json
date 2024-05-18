@@ -40,7 +40,7 @@
 		"drizzle-zod": "^0.5.1",
 		"json-bigint": "^1.0.0",
 		"lodash": "^4.17.21",
-		"mysql2": "3.6.0",
+		"mysql2": "3.9.7",
 		"unique-names-generator": "^4.7.1",
 		"uploadthing": "^6.1.0",
 		"zod": "^3.22.2"
