@@ -25,17 +25,18 @@ import {
 	PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED,
 } from '@answeroverflow/constants';
 import {
-	type QuestionSolvedProps,
+	trackDiscordEvent,
+	QuestionSolvedProps,
+	serverWithDiscordInfoToAnalyticsData,
 	channelWithDiscordInfoToAnalyticsData,
+	threadWithDiscordInfoToAnalyticsData,
 	memberToAnalyticsUser,
 	messageToAnalyticsMessage,
-	serverWithDiscordInfoToAnalyticsData,
-	threadWithDiscordInfoToAnalyticsData,
-	trackDiscordEvent,
-} from '~discord-bot/utils/analytics';
-import { toAOMessage } from '~discord-bot/utils/conversions';
-import { indexTextBasedChannel } from '~discord-bot/domains/indexing';
-import { RootChannel } from '~discord-bot/utils/utils';
+} from '../utils/analytics';
+import { toAOMessage } from '../utils/conversions';
+import { RootChannel } from '../utils/utils';
+import { indexTextBasedChannel } from './indexing';
+
 const markSolutionErrorReasons = [
 	'NOT_IN_GUILD',
 	'NOT_IN_THREAD',

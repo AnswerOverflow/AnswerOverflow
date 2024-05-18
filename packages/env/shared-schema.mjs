@@ -21,7 +21,8 @@ export const zStringRequiredInProduction = z
 			if (
 				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local' ||
 				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'ci' ||
-				process.env.NODE_ENV === 'development'
+				process.env.NODE_ENV === 'development' ||
+				process.env.NODE_ENV === 'test'
 			) {
 				return true;
 			}
@@ -38,7 +39,8 @@ export const zNumberRequiredInProduction = z
 			if (
 				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local' ||
 				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'ci' ||
-				process.env.NODE_ENV === 'development'
+				process.env.NODE_ENV === 'development' ||
+				process.env.NODE_ENV === 'test'
 			) {
 				return true;
 			}
@@ -73,7 +75,8 @@ export function zStringDefaultInDev(defaultValue) {
 	const isDev =
 		process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local' ||
 		process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'ci' ||
-		process.env.NODE_ENV === 'development';
+		process.env.NODE_ENV === 'development' ||
+		process.env.NODE_ENV === 'test';
 	if (!isDev) {
 		return z.string();
 	}

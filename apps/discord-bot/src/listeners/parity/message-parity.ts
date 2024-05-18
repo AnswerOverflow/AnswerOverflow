@@ -7,7 +7,7 @@ import {
 	findMessageById,
 	upsertMessage,
 } from '@answeroverflow/db';
-import { toAOMessage } from '~discord-bot/utils/conversions';
+import { toAOMessage } from '../../utils/conversions';
 
 @ApplyOptions<Listener.Options>({
 	event: Events.MessageDelete,

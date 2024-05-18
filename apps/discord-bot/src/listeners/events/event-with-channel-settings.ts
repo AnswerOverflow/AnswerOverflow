@@ -2,7 +2,7 @@ import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
 import { Events, Message, type AnyThreadChannel } from 'discord.js';
 import { findChannelById } from '@answeroverflow/db';
-import { getRootChannel } from '~discord-bot/utils/utils';
+import { getRootChannel } from '../../utils/utils';
 
 @ApplyOptions<Listener.Options>({
 	event: Events.MessageCreate,

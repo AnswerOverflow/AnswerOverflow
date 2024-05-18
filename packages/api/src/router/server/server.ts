@@ -9,29 +9,6 @@ import {
 } from '@answeroverflow/db';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import type { Context } from '~api/router/context';
-import { router, withUserServersProcedure } from '~api/router/trpc';
-import {
-	addDomainToVercel,
-	DomainVerificationStatusProps,
-	getConfigResponse,
-	getDomainResponse,
-	removeDomainFromVercelProject,
-	verifyDomain,
-} from '~api/utils/domains';
-import {
-	assertBoolsAreNotEqual,
-	assertCanEditServer,
-	assertCanEditServerBotOnly,
-	assertIsAdminOrOwnerOfServer,
-	assertIsOnPlan,
-} from '~api/utils/permissions';
-import {
-	protectedMutation,
-	protectedFetch,
-	protectedMutationFetchFirst,
-} from '~api/utils/protected-procedures';
-import { fetchServerPageViewsAsLineChart } from '~api/utils/posthog';
 import {
 	createProPlanCheckoutSession,
 	createNewCustomer,
@@ -40,6 +17,30 @@ import {
 	createEnterprisePlanCheckoutSession,
 } from '@answeroverflow/payments';
 import { sharedEnvs } from '@answeroverflow/env/shared';
+import { Context } from '../context';
+import { router } from '../trpc';
+import {
+	addDomainToVercel,
+	removeDomainFromVercelProject,
+	DomainVerificationStatusProps,
+	getDomainResponse,
+	getConfigResponse,
+	verifyDomain,
+} from '../../utils/domains';
+import {
+	assertCanEditServerBotOnly,
+	assertCanEditServer,
+	assertBoolsAreNotEqual,
+	assertIsAdminOrOwnerOfServer,
+	assertIsOnPlan,
+} from '../../utils/permissions';
+import { fetchServerPageViewsAsLineChart } from '../../utils/posthog';
+import {
+	protectedMutation,
+	protectedFetch,
+	protectedMutationFetchFirst,
+} from '../../utils/protected-procedures';
+import { withUserServersProcedure } from '../trpc';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
 	'Read the rules consent already enabled';

@@ -5,7 +5,6 @@
  */
 
 !process.env.SKIP_ENV_VALIDATION &&
-	// @ts-expect-error
 	(await import('@answeroverflow/env/web-schema.mjs'));
 
 /** @type {import("next").NextConfig} */

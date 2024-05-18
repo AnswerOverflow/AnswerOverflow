@@ -12,17 +12,6 @@ import {
 	router,
 	withUserServersProcedure,
 } from '../trpc';
-import {
-	protectedMutation,
-	protectedMutationFetchFirst,
-} from '~api/utils/protected-procedures';
-import {
-	assertBoolsAreNotEqual,
-	assertIsAdminOrOwnerOfServer,
-	assertIsNotValue,
-	assertIsOnPlan,
-	assertIsUser,
-} from '~api/utils/permissions';
 
 import { z } from 'zod';
 import {
@@ -40,7 +29,19 @@ import type { Context } from '../context';
 export const SERVER_NOT_SETUP_MESSAGE =
 	'Server is not setup for Answer Overflow yet';
 import crypto from 'crypto';
-import { findOrThrowNotFound } from '~api/utils/operations';
+import { findOrThrowNotFound } from '../../utils/operations';
+import {
+	assertIsUser,
+	assertIsOnPlan,
+	assertIsAdminOrOwnerOfServer,
+	assertBoolsAreNotEqual,
+	assertIsNotValue,
+} from '../../utils/permissions';
+import {
+	protectedMutation,
+	protectedMutationFetchFirst,
+} from '../../utils/protected-procedures';
+
 async function mutateUserServerSettings({
 	operation,
 	find,

@@ -10,24 +10,25 @@ import {
 	MessageActionRowComponentBuilder,
 } from 'discord.js';
 import { upsertMessage } from '@answeroverflow/db/src/message-node';
-import {
-	checkIfCanMarkSolution,
-	makeMarkSolutionResponse,
-	markAsSolved,
-	MarkSolutionError,
-} from '~discord-bot/domains/mark-solution';
-import {
-	memberToAnalyticsUser,
-	trackDiscordEvent,
-} from '~discord-bot/utils/analytics';
-import { toAOMessage } from '~discord-bot/utils/conversions';
-import { getCommandIds } from '~discord-bot/utils/utils';
+
 import {
 	findChannelMessagesById,
 	findFullMessageById,
 	findServerById,
 } from '@answeroverflow/db';
-import { indexTextBasedChannel } from '~discord-bot/domains/indexing';
+import { indexTextBasedChannel } from '../../domains/indexing';
+import {
+	markAsSolved,
+	MarkSolutionError,
+	checkIfCanMarkSolution,
+	makeMarkSolutionResponse,
+} from '../../domains/mark-solution';
+import {
+	trackDiscordEvent,
+	memberToAnalyticsUser,
+} from '../../utils/analytics';
+import { toAOMessage } from '../../utils/conversions';
+import { getCommandIds } from '../../utils/utils';
 
 @ApplyOptions<Command.Options>({
 	runIn: ['GUILD_ANY'],

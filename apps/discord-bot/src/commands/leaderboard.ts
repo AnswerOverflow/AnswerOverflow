@@ -7,13 +7,11 @@ import {
 	MessageActionRowComponentBuilder,
 	SlashCommandBuilder,
 } from 'discord.js';
-import { getCommandIds } from '~discord-bot/utils/utils';
-import { makeDismissButton } from '~discord-bot/domains/dismiss-button';
-import {
-	memberToAnalyticsUser,
-	trackDiscordEvent,
-} from '~discord-bot/utils/analytics';
+
 import { getTopQuestionSolversForServer } from '@answeroverflow/analytics/src/query';
+import { makeDismissButton } from '../domains/dismiss-button';
+import { trackDiscordEvent, memberToAnalyticsUser } from '../utils/analytics';
+import { getCommandIds } from '../utils/utils';
 
 const medalMap = new Map<number, string>([
 	[0, ':first_place:'],

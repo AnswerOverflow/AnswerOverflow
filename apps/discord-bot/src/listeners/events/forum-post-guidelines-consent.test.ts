@@ -11,13 +11,13 @@ import {
 	mockMessage,
 	emitEvent,
 } from '@answeroverflow/discordjs-mock';
-import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
-import { toAOChannel, toAOServer } from '~discord-bot/utils/conversions';
 import {
 	createChannel,
 	createServer,
 	findUserServerSettingsById,
 } from '@answeroverflow/db';
+import { setupAnswerOverflowBot } from '../../../test/sapphire-mock';
+import { toAOServer, toAOChannel } from '../../utils/conversions';
 
 let client: Client;
 let forumChannel: ForumChannel;

@@ -1,7 +1,3 @@
-import {
-	mockReply,
-	toggleButtonTest,
-} from '~discord-bot/test/discordjs-react-utils';
 import React from 'react';
 import {
 	createServer,
@@ -10,15 +6,12 @@ import {
 	updateServer,
 } from '@answeroverflow/db';
 import type { Client, Guild, TextChannel } from 'discord.js';
-import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
 import {
 	createGuildMemberVariants,
 	type GuildMemberVariants,
 	mockGuild,
 	mockTextChannel,
 } from '@answeroverflow/discordjs-mock';
-import { toAOServer } from '~discord-bot/utils/conversions';
-import { ServerSettingsMenu } from '~discord-bot/components/settings/server-settings-menu';
 import {
 	ENABLE_READ_THE_RULES_CONSENT_LABEL,
 	DISABLE_READ_THE_RULES_CONSENT_LABEL,
@@ -27,6 +20,13 @@ import {
 	DISABLE_ANONYMIZE_MESSAGES_LABEL,
 	ENABLE_ANONYMIZE_MESSAGES_LABEL,
 } from '@answeroverflow/constants';
+import {
+	mockReply,
+	toggleButtonTest,
+} from '../../../test/discordjs-react-utils';
+import { setupAnswerOverflowBot } from '../../../test/sapphire-mock';
+import { toAOServer } from '../../utils/conversions';
+import { ServerSettingsMenu } from './server-settings-menu';
 
 let textChannel: TextChannel;
 let guild: Guild;

@@ -5,7 +5,7 @@ import {
 	publicProcedure,
 	router,
 } from './trpc';
-import { PermissionsBitField } from '~api/utils/types';
+import { PermissionsBitField } from '../utils/types';
 
 export const authRouter = router({
 	getSession: publicProcedure

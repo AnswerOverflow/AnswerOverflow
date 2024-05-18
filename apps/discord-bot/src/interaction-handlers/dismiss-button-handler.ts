@@ -4,13 +4,13 @@ import {
 } from '@sapphire/framework';
 import type { ButtonInteraction } from 'discord.js';
 import {
-	DismissButtonInteractionParseError,
-	DismissErrorError,
-	dismissMessage,
 	parseDismissButtonId,
-} from '~discord-bot/domains/dismiss-button';
-import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
-import { oneTimeStatusHandler } from '~discord-bot/utils/trpc';
+	DismissButtonInteractionParseError,
+	dismissMessage,
+	DismissErrorError,
+} from '../domains/dismiss-button';
+import { guildTextChannelOnlyInteraction } from '../utils/conditions';
+import { oneTimeStatusHandler } from '../utils/trpc';
 
 export class ButtonHandler extends InteractionHandler {
 	public constructor(

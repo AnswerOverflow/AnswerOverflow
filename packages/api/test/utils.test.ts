@@ -1,16 +1,17 @@
 import { TRPCError } from '@trpc/server';
 import { PermissionFlagsBits } from 'discord-api-types/v10';
-import { type Source, sourceTypes } from '~api/router/context';
-import {
-	createInvalidSourceError,
-	MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
-} from '~api/utils/permissions';
+
 import {
 	testAllPermissions,
 	testAllSources,
 	testAllSourceAndPermissionVariantsThatThrowErrors,
 } from './utils';
-import { PermissionResolvable } from '~api/utils/types';
+import { PermissionResolvable } from '../src/utils/types';
+import {
+	MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
+	createInvalidSourceError,
+} from '../src/utils/permissions';
+import { sourceTypes, Source } from '../src/router/context';
 
 describe('Test All Permissions', () => {
 	it('should validate permissions are succeeding correctly', async () => {

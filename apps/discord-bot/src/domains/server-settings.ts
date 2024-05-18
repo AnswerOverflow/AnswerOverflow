@@ -1,8 +1,8 @@
 import type { GuildMember } from 'discord.js';
 import type { ServerWithFlags } from '@answeroverflow/db';
-import { callAPI, type TRPCStatusHandler } from '~discord-bot/utils/trpc';
-import { toAOServer } from '~discord-bot/utils/conversions';
-import { createMemberCtx } from '~discord-bot/utils/context';
+import { createMemberCtx } from '../utils/context';
+import { toAOServer } from '../utils/conversions';
+import { TRPCStatusHandler, callAPI } from '../utils/trpc';
 
 export async function updateReadTheRulesConsentEnabled({
 	member,

@@ -40,13 +40,7 @@ import {
 } from '@answeroverflow/constants';
 import type { ChannelWithFlags } from '@answeroverflow/db';
 import React from 'react';
-import {
-	ToggleButton,
-	InstructionsContainer,
-	EmbedMenuInstruction,
-	Spacer,
-	useHistory,
-} from '~discord-bot/components/primitives';
+import { type BaseMessage, getDiscordURLForMessage } from '@answeroverflow/db';
 import {
 	updateChannelIndexingEnabled,
 	updateChannelForumGuidelinesConsentEnabled,
@@ -54,12 +48,18 @@ import {
 	updateSendMarkAsSolutionInstructionsEnabled,
 	setSolutionTagId,
 	updateAutoThreadEnabled,
-} from '~discord-bot/domains/channel-settings';
-import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
-import { oneTimeStatusHandler } from '~discord-bot/utils/trpc';
-import type { RootChannel } from '~discord-bot/utils/utils';
-import { sendConsentPrompt } from '~discord-bot/domains/manage-account';
-import { type BaseMessage, getDiscordURLForMessage } from '@answeroverflow/db';
+} from '../../domains/channel-settings';
+import { sendConsentPrompt } from '../../domains/manage-account';
+import { guildTextChannelOnlyInteraction } from '../../utils/conditions';
+import { oneTimeStatusHandler } from '../../utils/trpc';
+import { RootChannel } from '../../utils/utils';
+import {
+	ToggleButton,
+	InstructionsContainer,
+	Spacer,
+	EmbedMenuInstruction,
+	useHistory,
+} from '../primitives';
 
 type ChannelSettingsMenuItemProps<T extends RootChannel = RootChannel> = {
 	channelInDB: ChannelWithFlags;

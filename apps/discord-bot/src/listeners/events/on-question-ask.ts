@@ -2,16 +2,16 @@ import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
 import { ChannelType, DiscordAPIError, Events } from 'discord.js';
 import { findServerById } from '@answeroverflow/db';
-import {
-	channelWithDiscordInfoToAnalyticsData,
-	memberToAnalyticsUser,
-	messageToAnalyticsMessage,
-	serverWithDiscordInfoToAnalyticsData,
-	threadWithDiscordInfoToAnalyticsData,
-	trackDiscordEvent,
-} from '~discord-bot/utils/analytics';
 import { delay } from '@answeroverflow/discordjs-mock';
 import { botEnv } from '@answeroverflow/env/bot';
+import {
+	trackDiscordEvent,
+	serverWithDiscordInfoToAnalyticsData,
+	channelWithDiscordInfoToAnalyticsData,
+	threadWithDiscordInfoToAnalyticsData,
+	memberToAnalyticsUser,
+	messageToAnalyticsMessage,
+} from '../../utils/analytics';
 
 @ApplyOptions<Listener.Options>({ event: Events.ClientReady })
 export class QuestionAskedListener extends Listener<Events.ClientReady> {

@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
 import { Events } from 'discord.js';
-import { provideConsentOnForumChannelMessage } from '~discord-bot/domains/manage-account';
+import { provideConsentOnForumChannelMessage } from '../../domains/manage-account';
 
 @ApplyOptions<Listener.Options>({ event: Events.ClientReady })
 export class ForumPostGuidelinesConsent extends Listener {

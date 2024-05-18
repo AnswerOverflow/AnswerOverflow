@@ -37,21 +37,22 @@ import {
 	mockPublicThread,
 } from '@answeroverflow/discordjs-mock';
 import type { ChannelWithFlags } from '@answeroverflow/db';
-import {
-	ChannelSettingsMenu,
-	CLEAR_TAG_VALUE,
-	HelpChannelUtilitiesMenu,
-	IndexingSettingsMenu,
-} from '~discord-bot/components/settings/channel-settings-menu';
+
+import React from 'react';
+import { mockChannelWithFlags } from '@answeroverflow/db-mock';
 import {
 	mockReply,
 	toggleButtonTest,
-} from '~discord-bot/test/discordjs-react-utils';
-import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
-import { toAOServer, toAOChannel } from '~discord-bot/utils/conversions';
-import React from 'react';
-import { mockChannelWithFlags } from '@answeroverflow/db-mock';
-import { makeRequestForConsentString } from '~discord-bot/domains/mark-solution';
+} from '../../../test/discordjs-react-utils';
+import { setupAnswerOverflowBot } from '../../../test/sapphire-mock';
+import { makeRequestForConsentString } from '../../domains/mark-solution';
+import { toAOServer, toAOChannel } from '../../utils/conversions';
+import {
+	IndexingSettingsMenu,
+	HelpChannelUtilitiesMenu,
+	CLEAR_TAG_VALUE,
+	ChannelSettingsMenu,
+} from './channel-settings-menu';
 
 let client: Client;
 let textChannel: TextChannel;

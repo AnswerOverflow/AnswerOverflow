@@ -5,12 +5,9 @@ import {
 	mockGuild,
 	mockGuildMember,
 } from '@answeroverflow/discordjs-mock';
-import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
+import { setupAnswerOverflowBot } from '../../../test/sapphire-mock';
 import { createUser, User } from '@answeroverflow/db';
-import {
-	toAODiscordAccount,
-	toDiscordAPIServer,
-} from '~discord-bot/utils/conversions';
+
 import {
 	getDiscordUser,
 	getUserServers,
@@ -20,6 +17,10 @@ import {
 import { createDiscordAccount } from '@answeroverflow/db/src/discord-account';
 import { _NOT_PROD_createOauthAccountEntry } from '@answeroverflow/db/src/auth';
 import { getRandomId } from '@answeroverflow/utils';
+import {
+	toAODiscordAccount,
+	toDiscordAPIServer,
+} from '../../utils/conversions';
 
 // import { updateUserServersCache } from "@answeroverflow/cache";
 let client: Client;
