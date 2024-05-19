@@ -1,0 +1,786 @@
+diff --git a/dist/cwd.js b/dist/cwd.js
+index d60cc34d0d72022d19aed108f9b3dd91c9067ac8..337b8f060fc15da8efd9c009fce8f9bd2127792b 100644
+--- a/dist/cwd.js
++++ b/dist/cwd.js
+@@ -1,14 +1,22 @@
+-import { unknownToAbsolutePosixFilePath } from '@contentlayer/utils';
+-import { T, tag } from '@contentlayer/utils/effect';
++import { unknownToAbsolutePosixFilePath } from "@contentlayer/utils";
++import { T, tag } from "@contentlayer/utils/effect";
+ export const makeCwd = T.gen(function* (_) {
+-    const cwd = yield* _(T.succeedWith(() => {
+-        const cwdValue = process.env.PWD ?? process.cwd();
+-        return unknownToAbsolutePosixFilePath(cwdValue);
+-    }));
+-    return { cwd };
++  const cwd = yield* _(
++    T.succeedWith(() => {
++      const cwdValue = process.env.PWD ?? process.cwd();
++      return unknownToAbsolutePosixFilePath(cwdValue);
++    })
++  );
++  return { cwd };
+ });
+-export const Cwd = tag(Symbol('contentlayer:Cwd'));
++export const Cwd = tag(Symbol("contentlayer:Cwd"));
+ export const provideCwd = T.provideServiceM(Cwd)(makeCwd);
+ export const provideCwdCustom = (cwd) => T.provideService(Cwd)({ cwd });
+-export const getCwd = T.accessService(Cwd)((_) => _.cwd);
++export const getCwd = T.accessService(Cwd)((_) => {
++  // if it ends with /AnswerOverflow, add /apps/main-site to it
++  if (_.cwd.endsWith("/AnswerOverflow")) {
++    return `${_.cwd}/apps/main-site`;
++  }
++  return _.cwd;
++});
+ //# sourceMappingURL=cwd.js.map
+diff --git a/dist/getConfig/index.js b/dist/getConfig/index.js
+index 4c8bae557a507a127dd583a978211eb240e73bd8..4694c26cffd47b86fcc03f8faea5073095f34db9 100644
+--- a/dist/getConfig/index.js
++++ b/dist/getConfig/index.js
+@@ -1,110 +1,206 @@
+-import * as path from 'node:path';
+-import { fs, unknownToAbsolutePosixFilePath } from '@contentlayer/utils';
+-import { Array, Chunk, O, OT, pipe, S, T } from '@contentlayer/utils/effect';
+-import { getCwd } from '../cwd.js';
+-import { ConfigNoDefaultExportError, ConfigReadError, NoConfigFoundError } from '../errors.js';
+-import { ArtifactsDir } from '../index.js';
+-import * as esbuild from './esbuild.js';
+-export const getConfig = ({ configPath, }) => pipe(getConfigWatch({ configPath }), S.take(1), S.runCollect, T.map(Chunk.unsafeHead), T.rightOrFail, OT.withSpan('@contentlayer/core/getConfig:getConfig', { attributes: { configPath } }));
+-export const getConfigWatch = ({ configPath: configPath_, }) => {
+-    const resolveParams = pipe(T.structPar({
+-        configPath: resolveConfigPath({ configPath: configPath_ }),
+-        cwd: getCwd,
+-        outfilePath: makeTmpDirAndResolveEntryPoint,
+-    }), T.either);
+-    return pipe(S.fromEffect(resolveParams), S.chainMapEitherRight(({ configPath, outfilePath, cwd }) => pipe(esbuild.makeAndSubscribe({
+-        entryPoints: [configPath],
+-        entryNames: '[name]-[hash]',
+-        outfile: outfilePath,
+-        sourcemap: true,
+-        platform: 'node',
+-        target: 'es2020',
+-        format: 'esm',
+-        // needed in case models are co-located with React components
+-        jsx: 'transform',
+-        bundle: true,
+-        logLevel: 'silent',
+-        metafile: true,
+-        absWorkingDir: cwd,
+-        plugins: [contentlayerGenPlugin(), makeAllPackagesExternalPlugin(configPath)],
+-    }), S.mapEffectEitherRight((result) => getConfigFromResult({ result, configPath })))));
++import * as path from "node:path";
++import { fs, unknownToAbsolutePosixFilePath } from "@contentlayer/utils";
++import { Array, Chunk, O, OT, pipe, S, T } from "@contentlayer/utils/effect";
++import { getCwd } from "../cwd.js";
++import {
++  ConfigNoDefaultExportError,
++  ConfigReadError,
++  NoConfigFoundError,
++} from "../errors.js";
++import { ArtifactsDir } from "../index.js";
++import * as esbuild from "./esbuild.js";
++export const getConfig = ({ configPath }) =>
++  pipe(
++    getConfigWatch({ configPath }),
++    S.take(1),
++    S.runCollect,
++    T.map(Chunk.unsafeHead),
++    T.rightOrFail,
++    OT.withSpan("@contentlayer/core/getConfig:getConfig", {
++      attributes: { configPath },
++    })
++  );
++export const getConfigWatch = ({ configPath: configPath_ }) => {
++  const resolveParams = pipe(
++    T.structPar({
++      configPath: resolveConfigPath({ configPath: configPath_ }),
++      cwd: getCwd,
++      outfilePath: makeTmpDirAndResolveEntryPoint,
++    }),
++    T.either
++  );
++  return pipe(
++    S.fromEffect(resolveParams),
++    S.chainMapEitherRight(({ configPath, outfilePath, cwd }) =>
++      pipe(
++        esbuild.makeAndSubscribe({
++          entryPoints: [configPath],
++          entryNames: "[name]-[hash]",
++          outfile: outfilePath,
++          sourcemap: true,
++          platform: "node",
++          target: "es2020",
++          format: "esm",
++          // needed in case models are co-located with React components
++          jsx: "transform",
++          bundle: true,
++          logLevel: "silent",
++          metafile: true,
++          absWorkingDir: cwd,
++          plugins: [
++            contentlayerGenPlugin(),
++            makeAllPackagesExternalPlugin(configPath),
++          ],
++        }),
++        S.mapEffectEitherRight((result) =>
++          getConfigFromResult({ result, configPath })
++        )
++      )
++    )
++  );
+ };
+-const resolveConfigPath = ({ configPath, }) => T.gen(function* ($) {
++const resolveConfigPath = ({ configPath }) =>
++  T.gen(function* ($) {
+     const cwd = yield* $(getCwd);
+     if (configPath) {
+-        if (path.isAbsolute(configPath)) {
+-            return configPath;
+-        }
+-        return path.join(cwd, configPath);
++      if (path.isAbsolute(configPath)) {
++        return configPath;
++      }
++      return path.join(cwd, configPath);
+     }
+-    const defaultFilePaths = [path.join(cwd, 'contentlayer.config.ts'), path.join(cwd, 'contentlayer.config.js')];
+-    const foundDefaultFiles = yield* $(pipe(defaultFilePaths, T.forEachPar(fs.fileOrDirExists), T.map(Chunk.toArray)));
+-    const foundDefaultFile = defaultFilePaths[foundDefaultFiles.findIndex((_) => _)];
++    const defaultFilePaths = [
++      path.join(cwd, "contentlayer.config.ts"),
++      path.join(cwd, "contentlayer.config.js"),
++    ];
++    const foundDefaultFiles = yield* $(
++      pipe(
++        defaultFilePaths,
++        T.forEachPar(fs.fileOrDirExists),
++        T.map(Chunk.toArray)
++      )
++    );
++    const foundDefaultFile =
++      defaultFilePaths[foundDefaultFiles.findIndex((_) => _)];
+     if (foundDefaultFile) {
+-        return foundDefaultFile;
++      return foundDefaultFile;
+     }
+     return yield* $(T.fail(new NoConfigFoundError({ cwd, configPath })));
+-});
+-const makeTmpDirAndResolveEntryPoint = pipe(ArtifactsDir.mkdirCache, T.map((cacheDir) => path.join(cacheDir, 'compiled-contentlayer-config.mjs')));
+-const getConfigFromResult = ({ result, configPath, }) => pipe(T.gen(function* ($) {
+-    const unknownWarnings = result.warnings.filter((warning) => warning.text.match(/Import \".*\" will always be undefined because the file \"contentlayer-gen:.contentlayer\/(data|types)\" has no exports/) === null);
+-    if (unknownWarnings.length > 0) {
++  });
++const makeTmpDirAndResolveEntryPoint = pipe(
++  ArtifactsDir.mkdirCache,
++  T.map((cacheDir) => path.join(cacheDir, "compiled-contentlayer-config.mjs"))
++);
++const getConfigFromResult = ({ result, configPath }) =>
++  pipe(
++    T.gen(function* ($) {
++      const unknownWarnings = result.warnings.filter(
++        (warning) =>
++          warning.text.match(
++            /Import \".*\" will always be undefined because the file \"contentlayer-gen:.contentlayer\/(data|types)\" has no exports/
++          ) === null
++      );
++      if (unknownWarnings.length > 0) {
+         console.error(`Contentlayer esbuild warnings:`);
+         console.error(unknownWarnings);
+-    }
+-    const cwd = yield* $(getCwd);
+-    // Deriving the exact outfilePath here since it's suffixed with a hash
+-    const outfilePath = pipe(Object.keys(result.metafile.outputs), 
+-    // Will look like `path.join(cacheDir, 'compiled-contentlayer-config-[SOME_HASH].mjs')
+-    Array.find((_) => _.match(/compiled-contentlayer-config-.+.mjs$/) !== null), 
+-    // Needs to be absolute path for ESM import to work
+-    O.map((_) => path.join(cwd, _)), O.map(unknownToAbsolutePosixFilePath), O.getUnsafe);
+-    const esbuildHash = outfilePath.match(/compiled-contentlayer-config-(.+).mjs$/)[1];
+-    // TODO make a simple OT call via `addAttributes`
+-    yield* $(OT.addAttribute('outfilePath', outfilePath));
+-    yield* $(OT.addAttribute('esbuildHash', esbuildHash));
+-    // Needed in order for source maps of dynamic file to work
+-    yield* $(pipe(T.tryCatchPromise(async () => (await import('source-map-support')).install(), (error) => new ConfigReadError({ error, configPath })), OT.withSpan('load-source-map-support')));
+-    // NOTES:
+-    // 1) `?x=` suffix needed in case of re-loading when watching the config file for changes
+-    // 2) `file://` prefix is needed for Windows to work properly
+-    const importFresh = async (modulePath) => import(`file://${modulePath}?x=${Date.now()}`);
+-    const exports = yield* $(pipe(T.tryCatchPromise(() => importFresh(outfilePath), (error) => new ConfigReadError({ error, configPath })), OT.withSpan('import-compiled-contentlayer-config')));
+-    if (!('default' in exports)) {
+-        return yield* $(T.fail(new ConfigNoDefaultExportError({ configPath, availableExports: Object.keys(exports) })));
+-    }
+-    // Note currently `makeSource` returns a Promise but we should reconsider that design decision
+-    const source = yield* $(pipe(T.tryCatchPromise(async () => exports.default(), (error) => new ConfigReadError({ error, configPath })), OT.withSpan('resolve-source-plugin-promise')));
+-    return { source, esbuildHash, filePath: outfilePath };
+-}), OT.withSpan('@contentlayer/core/getConfig:getConfigFromResult', { attributes: { configPath } }), T.either);
++      }
++      const cwd = yield* $(getCwd);
++      // Deriving the exact outfilePath here since it's suffixed with a hash
++      const outfilePath = pipe(
++        Object.keys(result.metafile.outputs),
++        // Will look like `path.join(cacheDir, 'compiled-contentlayer-config-[SOME_HASH].mjs')
++        Array.find(
++          (_) => _.match(/compiled-contentlayer-config-.+.mjs$/) !== null
++        ),
++        // Needs to be absolute path for ESM import to work
++        O.map((_) => path.join(cwd, _)),
++        O.map(unknownToAbsolutePosixFilePath),
++        O.getUnsafe
++      );
++      const esbuildHash = outfilePath.match(
++        /compiled-contentlayer-config-(.+).mjs$/
++      )[1];
++      // TODO make a simple OT call via `addAttributes`
++      yield* $(OT.addAttribute("outfilePath", outfilePath));
++      yield* $(OT.addAttribute("esbuildHash", esbuildHash));
++      // Needed in order for source maps of dynamic file to work
++      yield* $(
++        pipe(
++          T.tryCatchPromise(
++            async () => (await import("source-map-support")).install(),
++            (error) => new ConfigReadError({ error, configPath })
++          ),
++          OT.withSpan("load-source-map-support")
++        )
++      );
++      // NOTES:
++      // 1) `?x=` suffix needed in case of re-loading when watching the config file for changes
++      // 2) `file://` prefix is needed for Windows to work properly
++      const importFresh = async (modulePath) =>
++        import(`file://${modulePath}?x=${Date.now()}`);
++      const exports = yield* $(
++        pipe(
++          T.tryCatchPromise(
++            () => importFresh(outfilePath),
++            (error) => new ConfigReadError({ error, configPath })
++          ),
++          OT.withSpan("import-compiled-contentlayer-config")
++        )
++      );
++      if (!("default" in exports)) {
++        return yield* $(
++          T.fail(
++            new ConfigNoDefaultExportError({
++              configPath,
++              availableExports: Object.keys(exports),
++            })
++          )
++        );
++      }
++      // Note currently `makeSource` returns a Promise but we should reconsider that design decision
++      const source = yield* $(
++        pipe(
++          T.tryCatchPromise(
++            async () => exports.default(),
++            (error) => new ConfigReadError({ error, configPath })
++          ),
++          OT.withSpan("resolve-source-plugin-promise")
++        )
++      );
++      return { source, esbuildHash, filePath: outfilePath };
++    }),
++    OT.withSpan("@contentlayer/core/getConfig:getConfigFromResult", {
++      attributes: { configPath },
++    }),
++    T.either
++  );
+ /**
+  * This esbuild plugin is needed in some cases where users import code that imports from '.contentlayer/*'
+  * (e.g. when co-locating document type definitions with React components).
+  */
+ const contentlayerGenPlugin = () => ({
+-    name: 'contentlayer-gen',
+-    setup(build) {
+-        build.onResolve({ filter: /contentlayer\/generated/ }, (args) => ({
+-            path: args.path,
+-            namespace: 'contentlayer-gen',
+-        }));
+-        build.onLoad({ filter: /.*/, namespace: 'contentlayer-gen' }, () => ({
+-            contents: '// empty',
+-        }));
+-    },
++  name: "contentlayer-gen",
++  setup(build) {
++    build.onResolve({ filter: /contentlayer\/generated/ }, (args) => ({
++      path: args.path,
++      namespace: "contentlayer-gen",
++    }));
++    build.onLoad({ filter: /.*/, namespace: "contentlayer-gen" }, () => ({
++      contents: "// empty",
++    }));
++  },
+ });
+ // TODO also take tsconfig.json `paths` mapping into account
+ const makeAllPackagesExternalPlugin = (configPath) => ({
+-    name: 'make-all-packages-external',
+-    setup: (build) => {
+-        const filter = /^[^.\/]|^\.[^.\/]|^\.\.[^\/]/; // Must not start with "/" or "./" or "../"
+-        build.onResolve({ filter }, (args) => {
+-            // avoid marking config file as external
+-            if (args.path.includes(configPath)) {
+-                return { path: args.path, external: false };
+-            }
+-            return { path: args.path, external: true };
+-        });
+-    },
++  name: "make-all-packages-external",
++  setup: (build) => {
++    const filter = /^[^.\/]|^\.[^.\/]|^\.\.[^\/]/; // Must not start with "/" or "./" or "../"
++    build.onResolve({ filter }, (args) => {
++      // avoid marking config file as external
++      if (args.path.includes(configPath)) {
++        return { path: args.path, external: false };
++      }
++      return { path: args.path, external: true };
++    });
++  },
+ });
+ //# sourceMappingURL=index.js.map
+diff --git a/dist/markdown/mdx.js b/dist/markdown/mdx.js
+index 998eb483415e2ccf5c60f939e1810757f41682d3..4dd32a1ba040285acdd82cdab866119e9e37f2b1 100644
+--- a/dist/markdown/mdx.js
++++ b/dist/markdown/mdx.js
+@@ -1,53 +1,90 @@
+-import * as path from 'node:path';
+-import { errorToString } from '@contentlayer/utils';
+-import { OT, pipe, T, Tagged } from '@contentlayer/utils/effect';
+-import * as mdxBundler from 'mdx-bundler';
+-import { addRawDocumentToVFile } from './unified.js';
+-export const bundleMDX = ({ mdxString, options, contentDirPath, rawDocumentData, }) => pipe(T.gen(function* ($) {
+-    // TODO should be fixed in `mdx-bundler`
+-    if (mdxString.length === 0) {
+-        return '';
+-    }
+-    const { rehypePlugins, remarkPlugins, resolveCwd, cwd: cwd_, mdxOptions: mapMdxOptions, esbuildOptions: mapEsbuildOptions, ...restOptions } = options ?? {};
+-    const getCwdFromContentDirPath = () => 
+-    // TODO don't use `process.cwd()` but instead `HasCwd`
+-    path.isAbsolute(contentDirPath) ? contentDirPath : path.join(process.cwd(), contentDirPath);
+-    const getRelativeCwd = () => path.join(getCwdFromContentDirPath(), path.dirname(rawDocumentData.flattenedPath));
+-    const getCwd = () => (resolveCwd === 'contentDirPath' ? getCwdFromContentDirPath() : getRelativeCwd());
+-    // TODO when fixed https://github.com/kentcdodds/mdx-bundler/pull/206
+-    if (process.env.NODE_ENV === undefined) {
+-        process.env.NODE_ENV = 'development';
+-    }
+-    const mdxOptions = {
++import * as path from "node:path";
++import { errorToString } from "@contentlayer/utils";
++import { OT, pipe, T, Tagged } from "@contentlayer/utils/effect";
++import * as mdxBundler from "mdx-bundler";
++import { addRawDocumentToVFile } from "./unified.js";
++export const bundleMDX = ({
++  mdxString,
++  options,
++  contentDirPath,
++  rawDocumentData,
++}) =>
++  pipe(
++    T.gen(function* ($) {
++      // TODO should be fixed in `mdx-bundler`
++      if (mdxString.length === 0) {
++        return "";
++      }
++      const {
++        rehypePlugins,
++        remarkPlugins,
++        resolveCwd,
++        cwd: cwd_,
++        mdxOptions: mapMdxOptions,
++        esbuildOptions: mapEsbuildOptions,
++        ...restOptions
++      } = options ?? {};
++      const getCwdFromContentDirPath = () =>
++        // TODO don't use `process.cwd()` but instead `HasCwd`
++        path.isAbsolute(contentDirPath)
++          ? contentDirPath
++          : path.join(process.cwd(), contentDirPath);
++      const getRelativeCwd = () =>
++        path.join(
++          getCwdFromContentDirPath(),
++          path.dirname(rawDocumentData.flattenedPath)
++        );
++      const getCwd = () =>
++        resolveCwd === "contentDirPath"
++          ? getCwdFromContentDirPath()
++          : getRelativeCwd();
++      // TODO when fixed https://github.com/kentcdodds/mdx-bundler/pull/206
++      if (process.env.NODE_ENV === undefined) {
++        process.env.NODE_ENV = "development";
++      }
++      const mdxOptions = {
+         mdxOptions: (opts) => {
+-            opts.rehypePlugins = [...(opts.rehypePlugins ?? []), ...(rehypePlugins ?? [])];
+-            opts.remarkPlugins = [
+-                addRawDocumentToVFile(rawDocumentData),
+-                ...(opts.remarkPlugins ?? []),
+-                ...(remarkPlugins ?? []),
+-            ];
+-            return mapMdxOptions ? mapMdxOptions(opts) : opts;
++          opts.rehypePlugins = [
++            ...(opts.rehypePlugins ?? []),
++            ...(rehypePlugins ?? []),
++          ];
++          opts.remarkPlugins = [
++            addRawDocumentToVFile(rawDocumentData),
++            ...(opts.remarkPlugins ?? []),
++            ...(remarkPlugins ?? []),
++          ];
++          return mapMdxOptions ? mapMdxOptions(opts) : opts;
+         },
+         // User-provided cwd trumps resolution
+         cwd: cwd_ ?? getCwd(),
+         esbuildOptions: (opts, frontmatter) => {
+-            // NOTE this is needed to avoid `esbuild` from logging a warning regarding the `tsconfig.json` target option not being used
+-            opts.target = 'es2020';
+-            return mapEsbuildOptions ? mapEsbuildOptions(opts, frontmatter) : opts;
++          // NOTE this is needed to avoid `esbuild` from logging a warning regarding the `tsconfig.json` target option not being used
++          opts.target = "es2020";
++          return mapEsbuildOptions
++            ? mapEsbuildOptions(opts, frontmatter)
++            : opts;
+         },
+         // NOTE `restOptions` should be spread at the end to allow for user overrides
+         ...restOptions,
+-    };
+-    const res = yield* $(T.tryPromise(() => mdxBundler.bundleMDX({ source: mdxString, ...mdxOptions })));
+-    if (res.errors.length > 0) {
++      };
++      const res = yield* $(
++        T.tryPromise(() =>
++          mdxBundler.bundleMDX({ source: mdxString, ...mdxOptions })
++        )
++      );
++      if (res.errors.length > 0) {
+         return yield* $(T.fail(res.errors));
+-    }
+-    return res.code;
+-}), T.mapError((error) => new UnexpectedMDXError({ error })), T.tapError(() => OT.addAttribute('mdxString', mdxString)), OT.withSpan('@contentlayer/core/markdown:bundleMDX'));
+-export class UnexpectedMDXError extends Tagged('UnexpectedMDXError') {
+-    constructor() {
+-        super(...arguments);
+-        this.toString = () => `UnexpectedMDXError: ${errorToString(this.error)}`;
+-    }
++      }
++      return res.code;
++    }),
++    T.mapError((error) => new UnexpectedMDXError({ error })),
++    T.tapError(() => OT.addAttribute("mdxString", mdxString)),
++    OT.withSpan("@contentlayer/core/markdown:bundleMDX")
++  );
++export class UnexpectedMDXError extends Tagged("UnexpectedMDXError") {
++  constructor() {
++    super(...arguments);
++    this.toString = () => `UnexpectedMDXError: ${errorToString(this.error)}`;
++  }
+ }
+ //# sourceMappingURL=mdx.js.map
+diff --git a/dist/runMain.js b/dist/runMain.js
+index f160a2abb9271e97ee003c9b46371d54ff32af70..4ce4232a4db0fa89e8688525098d6754d59f9f91 100644
+--- a/dist/runMain.js
++++ b/dist/runMain.js
+@@ -1,43 +1,76 @@
+-import * as os from 'node:os';
+-import { provideCwd, provideCwdCustom } from '@contentlayer/core';
+-import * as core from '@contentlayer/core';
+-import { DummyTracing, InMemoryFsLive, provideTracing } from '@contentlayer/utils';
+-import { Cause, pipe, pretty, provideConsole, T } from '@contentlayer/utils/effect';
+-import { getContentlayerVersion, NodeFsLive } from '@contentlayer/utils/node';
+-export const runMain = ({ tracingServiceName, verbose, useInMemoryFs = false, customCwd, }) => (eff) => pipe(T.gen(function* ($) {
+-    if (process.platform === 'win32') {
+-        yield* $(T.log('Warning: Contentlayer might not work as expected on Windows'));
+-    }
+-    const provideCwd_ = customCwd ? provideCwdCustom(customCwd) : provideCwd;
+-    const result = yield* $(pipe(eff, provideTracing(tracingServiceName, 'based-on-env'), provideCwd_, T.result));
+-    if (result._tag === 'Failure') {
+-        const failOrCause = Cause.failureOrCause(result.cause);
+-        const errorWasManaged = failOrCause._tag === 'Left';
+-        if (!errorWasManaged) {
+-            yield* $(T.log(`\
++import * as os from "node:os";
++import { provideCwd, provideCwdCustom } from "@contentlayer/core";
++import * as core from "@contentlayer/core";
++import {
++  DummyTracing,
++  InMemoryFsLive,
++  provideTracing,
++} from "@contentlayer/utils";
++import {
++  Cause,
++  pipe,
++  pretty,
++  provideConsole,
++  T,
++} from "@contentlayer/utils/effect";
++import { getContentlayerVersion, NodeFsLive } from "@contentlayer/utils/node";
++export const runMain =
++  ({ tracingServiceName, verbose, useInMemoryFs = false, customCwd }) =>
++  (eff) =>
++    pipe(
++      T.gen(function* ($) {
++        const provideCwd_ = customCwd
++          ? provideCwdCustom(customCwd)
++          : provideCwd;
++        const result = yield* $(
++          pipe(
++            eff,
++            provideTracing(tracingServiceName, "based-on-env"),
++            provideCwd_,
++            T.result
++          )
++        );
++        if (result._tag === "Failure") {
++          const failOrCause = Cause.failureOrCause(result.cause);
++          const errorWasManaged = failOrCause._tag === "Left";
++          if (!errorWasManaged) {
++            yield* $(
++              T.log(`\
+ This error shouldn't have happened. Please consider opening a GitHub issue with the stack trace below here:
+-https://github.com/contentlayerdev/contentlayer/issues`));
+-        }
+-        // If failure was a managed error and no `--verbose` flag was provided, print the error message
+-        if (errorWasManaged && !verbose) {
+-            if (!core.isSourceFetchDataError(failOrCause.left) || !failOrCause.left.alreadyHandled) {
+-                yield* $(T.log(failOrCause.left));
++https://github.com/contentlayerdev/contentlayer/issues`)
++            );
++          }
++          // If failure was a managed error and no `--verbose` flag was provided, print the error message
++          if (errorWasManaged && !verbose) {
++            if (
++              !core.isSourceFetchDataError(failOrCause.left) ||
++              !failOrCause.left.alreadyHandled
++            ) {
++              yield* $(T.log(failOrCause.left));
+             }
+-        }
+-        // otherwise for unmanaged errors or with `--verbose` flag provided, print the entire stack trace
+-        else {
++          }
++          // otherwise for unmanaged errors or with `--verbose` flag provided, print the entire stack trace
++          else {
+             yield* $(T.log(pretty(result.cause)));
+-            const contentlayerVersion = yield* $(getContentlayerVersion()['|>'](T.provide(DummyTracing)));
+-            yield* $(T.log(`
++            const contentlayerVersion = yield* $(
++              getContentlayerVersion()["|>"](T.provide(DummyTracing))
++            );
++            yield* $(
++              T.log(`
+ OS: ${process.platform} ${os.release()} (arch: ${process.arch})
+-Process: ${process.argv.join(' ')}
++Process: ${process.argv.join(" ")}
+ Node version: ${process.version}
+ Contentlayer version: ${contentlayerVersion}
+-`));
++`)
++            );
++          }
++          yield* $(T.succeedWith(() => process.exit(1)));
++          return undefined;
+         }
+-        yield* $(T.succeedWith(() => process.exit(1)));
+-        return undefined;
+-    }
+-    return result.value;
+-}), provideConsole, T.provideSomeLayer(useInMemoryFs ? InMemoryFsLive : NodeFsLive), T.runPromise);
++        return result.value;
++      }),
++      provideConsole,
++      T.provideSomeLayer(useInMemoryFs ? InMemoryFsLive : NodeFsLive),
++      T.runPromise
++    );
+ //# sourceMappingURL=runMain.js.map
+diff --git a/dist/validate-tsconfig.js b/dist/validate-tsconfig.js
+index 0dba78b739bb0d3ff060a4b71e0f6ae222d177ef..4eb708239f9de9c9ed3f0e1362d9a9a23d0ef61e 100644
+--- a/dist/validate-tsconfig.js
++++ b/dist/validate-tsconfig.js
+@@ -1,42 +1,61 @@
+-import path from 'node:path';
+-import { filePathJoin, fs } from '@contentlayer/utils';
+-import { Chunk, O, OT, pipe, T, Tagged } from '@contentlayer/utils/effect';
+-import { parse as parseJsonc } from 'comment-json';
+-import { getCwd } from './cwd.js';
+-export const validateTsconfig = pipe(T.gen(function* ($) {
++import path from "node:path";
++import { filePathJoin, fs } from "@contentlayer/utils";
++import { Chunk, O, OT, pipe, T, Tagged } from "@contentlayer/utils/effect";
++import { parse as parseJsonc } from "comment-json";
++import { getCwd } from "./cwd.js";
++export const validateTsconfig = pipe(
++  T.gen(function* ($) {
+     const cwd = yield* $(getCwd);
+-    const possibleFileNames = ['tsconfig.json', 'jsconfig.json'].map((_) => filePathJoin(cwd, _));
+-    const tsconfigOption = yield* $(pipe(possibleFileNames, T.forEachPar(tryParseFile), T.map(Chunk.toArray), T.map((_) => O.getFirst(..._))));
+-    const warningMessage = (msg) => T.log(`\
+-Contentlayer (Warning): Importing from \`contentlayer\/generated\` might not work.
+-${msg}
+-
+-For more information see https://www.contentlayer.dev/docs/getting-started
+-To disable this warning you can set \`disableImportAliasWarning: true\` in your Contentlayer config.
+-`);
++    const possibleFileNames = ["tsconfig.json", "jsconfig.json"].map((_) =>
++      filePathJoin(cwd, _)
++    );
++    const tsconfigOption = yield* $(
++      pipe(
++        possibleFileNames,
++        T.forEachPar(tryParseFile),
++        T.map(Chunk.toArray),
++        T.map((_) => O.getFirst(..._))
++      )
++    );
+     if (O.isNone(tsconfigOption)) {
+-        yield* $(warningMessage(`No tsconfig.json or jsconfig.json file found`));
+-        return;
++      return;
+     }
+     const { config, fileName } = tsconfigOption.value;
+     if (config.compilerOptions?.baseUrl === undefined) {
+-        yield* $(warningMessage(`Config option \`compilerOptions.baseUrl\` not found in "${fileName}".`));
+-        return;
++      return;
+     }
+     if (config.compilerOptions?.paths === undefined) {
+-        yield* $(warningMessage(`Config option \`compilerOptions.paths\` not found in "${fileName}".`));
+-        return;
++      return;
+     }
+     const paths = Object.values(config.compilerOptions.paths).flat();
+-    if (!paths.some((_) => _.includes('./.contentlayer/generated'))) {
+-        yield* $(warningMessage(`No path alias found for "contentlayer/generated" via \`compilerOptions.paths\` in "${fileName}".`));
++    if (!paths.some((_) => _.includes("./.contentlayer/generated"))) {
+     }
+-}), OT.withSpan('validateTsconfig'));
+-const tryParseFile = (filePath) => pipe(fs.readFile(filePath), T.chain((contents) => T.tryCatch(() => parseJsonc(contents, undefined, true), (error) => new InvalidTsconfigError({ error }))), T.map((config) => ({ fileName: path.basename(filePath), config })), T.tapError((error) => T.succeedWith(() => {
+-    if (error._tag === 'InvalidTsconfigError' || error._tag === 'fs.ReadFileError') {
+-        console.log(`Contentlayer: Invalid jsconfig/tsconfig file found: ${filePath}`);
+-    }
+-})), T.option);
+-export class InvalidTsconfigError extends Tagged('InvalidTsconfigError') {
+-}
++  }),
++  OT.withSpan("validateTsconfig")
++);
++const tryParseFile = (filePath) =>
++  pipe(
++    fs.readFile(filePath),
++    T.chain((contents) =>
++      T.tryCatch(
++        () => parseJsonc(contents, undefined, true),
++        (error) => new InvalidTsconfigError({ error })
++      )
++    ),
++    T.map((config) => ({ fileName: path.basename(filePath), config })),
++    T.tapError((error) =>
++      T.succeedWith(() => {
++        if (
++          error._tag === "InvalidTsconfigError" ||
++          error._tag === "fs.ReadFileError"
++        ) {
++          console.log(
++            `Contentlayer: Invalid jsconfig/tsconfig file found: ${filePath}`
++          );
++        }
++      })
++    ),
++    T.option
++  );
++export class InvalidTsconfigError extends Tagged("InvalidTsconfigError") {}
+ //# sourceMappingURL=validate-tsconfig.js.map
+diff --git a/src/runMain.ts b/src/runMain.ts
+index 4a745aa4678fdf9a808fcfc517ce037b4ee85dc9..2230c986835495a8d4323feaadf9054673e95818 100644
+--- a/src/runMain.ts
++++ b/src/runMain.ts
+@@ -21,58 +21,54 @@ export const runMain =
+     useInMemoryFs?: boolean
+     customCwd?: AbsolutePosixFilePath
+   }) =>
+-  (eff: T.Effect<OT.HasTracer & HasClock & HasCwd & HasConsole & fs.HasFs, unknown, TResult>) =>
+-    pipe(
+-      T.gen(function* ($) {
+-        if (process.platform === 'win32') {
+-          yield* $(T.log('Warning: Contentlayer might not work as expected on Windows'))
+-        }
++    (eff: T.Effect<OT.HasTracer & HasClock & HasCwd & HasConsole & fs.HasFs, unknown, TResult>) =>
++      pipe(
++        T.gen(function* ($) {
++          const provideCwd_ = customCwd ? provideCwdCustom(customCwd) : provideCwd
+ 
+-        const provideCwd_ = customCwd ? provideCwdCustom(customCwd) : provideCwd
++          const result = yield* $(pipe(eff, provideTracing(tracingServiceName, 'based-on-env'), provideCwd_, T.result))
+ 
+-        const result = yield* $(pipe(eff, provideTracing(tracingServiceName, 'based-on-env'), provideCwd_, T.result))
++          if (result._tag === 'Failure') {
++            const failOrCause = Cause.failureOrCause(result.cause)
++            const errorWasManaged = failOrCause._tag === 'Left'
+ 
+-        if (result._tag === 'Failure') {
+-          const failOrCause = Cause.failureOrCause(result.cause)
+-          const errorWasManaged = failOrCause._tag === 'Left'
+-
+-          if (!errorWasManaged) {
+-            yield* $(
+-              T.log(`\
++            if (!errorWasManaged) {
++              yield* $(
++                T.log(`\
+ This error shouldn't have happened. Please consider opening a GitHub issue with the stack trace below here:
+ https://github.com/contentlayerdev/contentlayer/issues`),
+-            )
+-          }
++              )
++            }
+ 
+-          // If failure was a managed error and no `--verbose` flag was provided, print the error message
+-          if (errorWasManaged && !verbose) {
+-            if (!core.isSourceFetchDataError(failOrCause.left) || !failOrCause.left.alreadyHandled) {
+-              yield* $(T.log(failOrCause.left))
++            // If failure was a managed error and no `--verbose` flag was provided, print the error message
++            if (errorWasManaged && !verbose) {
++              if (!core.isSourceFetchDataError(failOrCause.left) || !failOrCause.left.alreadyHandled) {
++                yield* $(T.log(failOrCause.left))
++              }
+             }
+-          }
+-          // otherwise for unmanaged errors or with `--verbose` flag provided, print the entire stack trace
+-          else {
+-            yield* $(T.log(pretty(result.cause)))
++            // otherwise for unmanaged errors or with `--verbose` flag provided, print the entire stack trace
++            else {
++              yield* $(T.log(pretty(result.cause)))
+ 
+-            const contentlayerVersion = yield* $(getContentlayerVersion()['|>'](T.provide(DummyTracing)))
++              const contentlayerVersion = yield* $(getContentlayerVersion()['|>'](T.provide(DummyTracing)))
+ 
+-            yield* $(
+-              T.log(`
++              yield* $(
++                T.log(`
+ OS: ${process.platform} ${os.release()} (arch: ${process.arch})
+ Process: ${process.argv.join(' ')}
+ Node version: ${process.version}
+ Contentlayer version: ${contentlayerVersion}
+ `),
+-            )
+-          }
++              )
++            }
+ 
+-          yield* $(T.succeedWith(() => process.exit(1)))
+-          return undefined as never
+-        }
++            yield* $(T.succeedWith(() => process.exit(1)))
++            return undefined as never
++          }
+ 
+-        return result.value as TResult
+-      }),
+-      provideConsole,
+-      T.provideSomeLayer(useInMemoryFs ? InMemoryFsLive : NodeFsLive),
+-      T.runPromise,
+-    )
++          return result.value as TResult
++        }),
++        provideConsole,
++        T.provideSomeLayer(useInMemoryFs ? InMemoryFsLive : NodeFsLive),
++        T.runPromise,
++      )

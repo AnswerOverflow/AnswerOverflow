@@ -7,9 +7,7 @@ const shouldCollectAnalytics =
 	apiKey !== undefined && sharedEnvs.NODE_ENV !== 'test';
 
 const client = shouldCollectAnalytics ? new PostHog(apiKey) : undefined;
-if (!client && sharedEnvs.NODE_ENV !== 'test') {
-	console.warn('Analytics collection is disabled');
-}
+
 // TODO: This type should be inferred from the auth package
 declare module 'next-auth' {
 	interface Session extends DefaultSession {

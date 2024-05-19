@@ -91,5 +91,4 @@ const config = {
 };
 
 // With content layer breaks things for us for some reason
-// @ts-expect-error
 export default withMDX(config);
