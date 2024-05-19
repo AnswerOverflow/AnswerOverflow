@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@contentlayer/core@0.3.4':
+    hash: zyo2nqd4goqgf5i32a6ydgri4e
+    path: patches/@contentlayer__core@0.3.4.patch
+
 importers:
 
   .:
@@ -3882,7 +3887,7 @@ packages:
   /@contentlayer/cli@0.3.4(esbuild@0.21.3):
     resolution: {integrity: sha512-vNDwgLuhYNu+m70NZ3XK9kexKNguuxPXg7Yvzj3B34cEilQjjzSrcTY/i+AIQm9V7uT5GGshx9ukzPf+SmoszQ==}
     dependencies:
-      '@contentlayer/core': 0.3.4(esbuild@0.21.3)
+      '@contentlayer/core': 0.3.4(patch_hash=zyo2nqd4goqgf5i32a6ydgri4e)(esbuild@0.21.3)
       '@contentlayer/utils': 0.3.4
       clipanion: 3.2.1(typanion@3.14.0)
       typanion: 3.14.0
@@ -3896,7 +3901,7 @@ packages:
   /@contentlayer/client@0.3.4(esbuild@0.21.3):
     resolution: {integrity: sha512-QSlLyc3y4PtdC5lFw0L4wTZUH8BQnv2nk37hNCsPAqGf+dRO7TLAzdc+2/mVIRgK+vSH+pSOzjLsQpFxxXRTZA==}
     dependencies:
-      '@contentlayer/core': 0.3.4(esbuild@0.21.3)
+      '@contentlayer/core': 0.3.4(patch_hash=zyo2nqd4goqgf5i32a6ydgri4e)(esbuild@0.21.3)
     transitivePeerDependencies:
       - '@effect-ts/otel-node'
       - esbuild
@@ -3904,7 +3909,7 @@ packages:
       - supports-color
     dev: false
 
-  /@contentlayer/core@0.3.4(esbuild@0.21.3):
+  /@contentlayer/core@0.3.4(patch_hash=zyo2nqd4goqgf5i32a6ydgri4e)(esbuild@0.21.3):
     resolution: {integrity: sha512-o68oBLwfYZ+2vtgfk1lgHxOl3LoxvRNiUfeQ8IWFWy/L4wnIkKIqLZX01zlRE5IzYM+ZMMN5V0cKQlO7DsyR9g==}
     peerDependencies:
       esbuild: 0.17.x || 0.18.x
@@ -3932,11 +3937,12 @@ packages:
       - '@effect-ts/otel-node'
       - supports-color
     dev: false
+    patched: true
 
   /@contentlayer/source-files@0.3.4(esbuild@0.21.3):
     resolution: {integrity: sha512-4njyn0OFPu7WY4tAjMxiJgWOKeiHuBOGdQ36EYE03iij/pPPRbiWbL+cmLccYXUFEW58mDwpqROZZm6pnxjRDQ==}
     dependencies:
-      '@contentlayer/core': 0.3.4(esbuild@0.21.3)
+      '@contentlayer/core': 0.3.4(patch_hash=zyo2nqd4goqgf5i32a6ydgri4e)(esbuild@0.21.3)
       '@contentlayer/utils': 0.3.4
       chokidar: 3.6.0
       fast-glob: 3.3.2
@@ -3957,7 +3963,7 @@ packages:
   /@contentlayer/source-remote-files@0.3.4(esbuild@0.21.3):
     resolution: {integrity: sha512-cyiv4sNUySZvR0uAKlM+kSAELzNd2h2QT1R2e41dRKbwOUVxeLfmGiLugr0aVac6Q3xYcD99dbHyR1xWPV+w9w==}
     dependencies:
-      '@contentlayer/core': 0.3.4(esbuild@0.21.3)
+      '@contentlayer/core': 0.3.4(patch_hash=zyo2nqd4goqgf5i32a6ydgri4e)(esbuild@0.21.3)
       '@contentlayer/source-files': 0.3.4(esbuild@0.21.3)
       '@contentlayer/utils': 0.3.4
     transitivePeerDependencies:
@@ -10845,7 +10851,7 @@ packages:
     dependencies:
       '@contentlayer/cli': 0.3.4(esbuild@0.21.3)
       '@contentlayer/client': 0.3.4(esbuild@0.21.3)
-      '@contentlayer/core': 0.3.4(esbuild@0.21.3)
+      '@contentlayer/core': 0.3.4(patch_hash=zyo2nqd4goqgf5i32a6ydgri4e)(esbuild@0.21.3)
       '@contentlayer/source-files': 0.3.4(esbuild@0.21.3)
       '@contentlayer/source-remote-files': 0.3.4(esbuild@0.21.3)
       '@contentlayer/utils': 0.3.4
@@ -16277,7 +16283,7 @@ packages:
       react: '*'
       react-dom: '*'
     dependencies:
-      '@contentlayer/core': 0.3.4(esbuild@0.21.3)
+      '@contentlayer/core': 0.3.4(patch_hash=zyo2nqd4goqgf5i32a6ydgri4e)(esbuild@0.21.3)
       '@contentlayer/utils': 0.3.4
       contentlayer: 0.3.4(esbuild@0.21.3)
       next: 14.3.0-canary.9(@opentelemetry/api@1.8.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.77.2)
