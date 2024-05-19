@@ -20,13 +20,13 @@ export default async function HomePage(props: { children: React.ReactNode }) {
 		...new Set([
 			...popularServers.slice(0, 1),
 			'393088095840370689',
-			...popularServers.slice(1),
+			...popularServers.slice(1, 10),
 		]),
 	];
 	return (
 		<div
 			className={
-				'flex w-full flex-col items-center 2xl:flex-row 2xl:items-start'
+				'flex w-full flex-col items-center pt-2 2xl:flex-row 2xl:items-start'
 			}
 		>
 			<div
