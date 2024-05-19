@@ -61,8 +61,8 @@
 		"vitest": "^0.29.8"
 	},
 	"engines": {
-		"node": ">=20.4.0",
-		"pnpm": ">=9.1.1"
+		"node": ">=20.0.0",
+		"pnpm": ">=9.0.0"
 	},
 	"dependencies": {
 		"contentlayer": "^0.3.4"
