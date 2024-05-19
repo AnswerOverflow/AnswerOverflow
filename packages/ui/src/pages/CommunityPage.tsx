@@ -156,7 +156,7 @@ export const CommunityPage = (
 	const HeroArea = () => {
 		return (
 			<div className="flex flex-col">
-				<div className="m-auto flex w-full flex-row bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
+				<div className="m-auto flex w-full flex-row rounded-sm bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
 					<div className={'mx-auto flex flex-row gap-4'}>
 						{isNuxtUwu ? (
 							<Image
