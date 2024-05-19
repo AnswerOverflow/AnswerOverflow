@@ -184,7 +184,7 @@ export function MessageResultPage({
 		})),
 	};
 	const Main = () => (
-		<div className={'flex w-full grow flex-col gap-4'}>
+		<main className={'flex w-full grow flex-col gap-4'}>
 			<div className="flex flex-col gap-2 pl-2">
 				{!tenant && (
 					<div className="flex flex-row items-center gap-2">
@@ -217,7 +217,7 @@ export function MessageResultPage({
 			<div className="rounded-md">
 				<div className="flex flex-col gap-4">{messageStack}</div>
 			</div>
-		</div>
+		</main>
 	);
 
 	const adsEnabled = !tenant;
@@ -287,7 +287,7 @@ export function MessageResultPage({
 		</div>
 	);
 	const rendered = (
-		<div className="mx-auto">
+		<div className="mx-auto pt-2">
 			<script
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}

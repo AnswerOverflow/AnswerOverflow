@@ -20,9 +20,7 @@ export default async function BrowseCommunitiesPage() {
 	const data = await fetchBrowseServers();
 	return (
 		<>
-			<Heading.H1 className="my-16 text-4xl md:text-5xl">
-				Browse Communities
-			</Heading.H1>
+			<Heading.H1 className="text-xl md:text-xl">Browse Communities</Heading.H1>
 			<div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				{data.map((server) => {
 					return (

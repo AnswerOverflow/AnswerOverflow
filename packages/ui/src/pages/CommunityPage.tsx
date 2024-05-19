@@ -139,6 +139,7 @@ const PageSwitcher = (props: {
 	</div>
 );
 import Image from 'next/image';
+import { cn } from '../utils/utils';
 export const CommunityPage = (
 	props: CommunityPageData & {
 		tenant: ServerPublic | undefined;
@@ -301,12 +302,12 @@ export const CommunityPage = (
 
 	return (
 		<div className="mx-auto w-full overflow-y-auto overflow-x-hidden bg-background">
-			<Navbar tenant={tenant} hideIcon={!!tenant} />
+			{tenant && <Navbar tenant={tenant} hideIcon={!!tenant} />}
 			<TrackLoad
 				eventName={'Community Page View'}
 				eventData={serverToAnalyticsData(server)}
 			/>
-			<main className="mt-8 bg-background">
+			<main className={cn('bg-background', tenant ? 'mt-8' : 'pt-2')}>
 				<HeroArea />
 				<div className="py-8">
 					<div className="px-4 2xl:px-[6rem]">
@@ -314,7 +315,7 @@ export const CommunityPage = (
 					</div>
 				</div>
 			</main>
-			<Footer tenant={tenant} />
+			{tenant && <Footer tenant={tenant} />}
 		</div>
 	);
 };

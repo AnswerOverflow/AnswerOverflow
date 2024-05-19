@@ -1,7 +1,7 @@
 import React from 'react';
 import { Footer } from '@answeroverflow/ui/src/footer';
 import { Navbar } from '@answeroverflow/ui/src/navbar';
-import { LeftSidebar } from '@answeroverflow/ui/src/leftsidebar';
+import { LeftSidebar } from '@answeroverflow/ui/src/left-sidebar';
 
 export default function RootLayout({
 	children,
@@ -14,8 +14,8 @@ export default function RootLayout({
 				<Navbar tenant={undefined} />
 				<div className="mt-16 flex flex-row">
 					<LeftSidebar />
-					<div className="mx-auto w-full max-w-screen-2xl px-2 pt-2 xl:pt-8">
-						<main className="w-full">{children}</main>
+					<div className="mx-auto w-full max-w-screen-2xl pt-2">
+						<div className="w-full">{children}</div>
 						<Footer tenant={undefined} />
 					</div>
 				</div>
