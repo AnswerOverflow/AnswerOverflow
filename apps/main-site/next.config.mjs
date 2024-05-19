@@ -5,7 +5,6 @@
  */
 
 !process.env.SKIP_ENV_VALIDATION &&
-	// @ts-expect-error
 	(await import('@answeroverflow/env/web-schema.mjs'));
 const nextJSMDX = await import('@next/mdx');
 // import remarkGfm from 'remark-gfm';
@@ -27,7 +26,6 @@ const withMDX = nextJSMDX.default({
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
-	swcMinify: true,
 	pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
 	transpilePackages: [
 		'@answeroverflow/api',
@@ -38,10 +36,6 @@ const config = {
 		'@answeroverflow/env',
 	],
 	experimental: {
-		outputFileTracingExcludes: {
-			'*': ['**swc/core**'],
-		},
-		serverComponentsExternalPackages: ['mysql2'],
 		ppr: true,
 	},
 	images: {
@@ -97,4 +91,5 @@ const config = {
 };
 
 // With content layer breaks things for us for some reason
+// @ts-expect-error
 export default withMDX(config);

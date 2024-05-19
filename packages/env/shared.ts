@@ -21,7 +21,8 @@ export const zStringRequiredInProduction = z
 			if (
 				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local' ||
 				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'ci' ||
-				process.env.NODE_ENV === 'development'
+				process.env.NODE_ENV === 'development' ||
+				process.env.NODE_ENV === 'test'
 			) {
 				return true;
 			}
@@ -38,7 +39,8 @@ export const zNumberRequiredInProduction = z
 			if (
 				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local' ||
 				process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'ci' ||
-				process.env.NODE_ENV === 'development'
+				process.env.NODE_ENV === 'development' ||
+				process.env.NODE_ENV === 'test'
 			) {
 				return true;
 			}
@@ -64,7 +66,8 @@ export function zStringDefaultInDev(defaultValue: string) {
 	const isDev =
 		process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local' ||
 		process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'ci' ||
-		process.env.NODE_ENV === 'development';
+		process.env.NODE_ENV === 'development' ||
+		process.env.NODE_ENV === 'test';
 	if (!isDev) {
 		return z.string();
 	}
@@ -101,7 +104,7 @@ export const sharedEnvs = createEnv({
 		DATABASE_URL_REPLICA: z.string().optional(),
 
 		ELASTICSEARCH_URL:
-			process.env.NODE_ENV !== 'development'
+			process.env.NODE_ENV === 'production'
 				? z.string().optional()
 				: zStringDefaultInDev('http://localhost:9200'),
 		ELASTICSEARCH_CLOUD_ID: zStringRequiredInProduction,

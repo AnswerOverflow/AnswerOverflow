@@ -12,11 +12,10 @@ import {
 	mockTextChannel,
 	mockMessage,
 } from '@answeroverflow/discordjs-mock';
-import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
-import { toAOChannel, toAOServer } from '~discord-bot/utils/conversions';
+import { setupAnswerOverflowBot } from '../../test/sapphire-mock';
 import { sendMarkSolutionInstructionsInThread } from './send-mark-solution-instructions';
 import { mockChannelWithFlags } from '@answeroverflow/db-mock';
-
+import { toAOServer, toAOChannel } from '../utils/conversions';
 let client: Client;
 let textChannelThread: PublicThreadChannel;
 let questionAsker: GuildMember;

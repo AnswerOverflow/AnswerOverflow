@@ -1,16 +1,13 @@
 import { ChannelType, GuildMember } from 'discord.js';
 import type { ChannelWithFlags } from '@answeroverflow/db';
-import { callAPI, type TRPCStatusHandler } from '~discord-bot/utils/trpc';
-import { toAOChannelWithServer } from '~discord-bot/utils/conversions';
-import { createMemberCtx } from '~discord-bot/utils/context';
-import {
-	removeDiscordMarkdown,
-	type RootChannel,
-} from '~discord-bot/utils/utils';
 import {
 	FORUM_GUIDELINES_CONSENT_PROMPT,
 	FORUM_GUIDELINES_CONSENT_MISSING_ERROR_MESSAGE,
 } from '@answeroverflow/constants';
+import { createMemberCtx } from '../utils/context';
+import { toAOChannelWithServer } from '../utils/conversions';
+import { TRPCStatusHandler, callAPI } from '../utils/trpc';
+import { RootChannel, removeDiscordMarkdown } from '../utils/utils';
 
 type ChannelSettingsUpdateAPICall = {
 	member: GuildMember;

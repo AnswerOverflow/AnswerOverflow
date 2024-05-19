@@ -1,11 +1,7 @@
 import { ActionRow, Link } from '@answeroverflow/discordjs-react';
 import type { ServerWithFlags } from '@answeroverflow/db';
 import React from 'react';
-import {
-	setAnonymizeMessages,
-	updateConsiderAllMessagesPublic,
-	updateReadTheRulesConsentEnabled,
-} from '~discord-bot/domains/server-settings';
+
 import {
 	EmbedMenuInstruction,
 	InstructionsContainer,
@@ -21,8 +17,13 @@ import {
 	READ_THE_RULES_CONSENT_PROMPT,
 	VIEW_ON_ANSWEROVERFLOW_LABEL,
 } from '@answeroverflow/constants';
-import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
-import { ephemeralReply } from '~discord-bot/utils/utils';
+import {
+	updateReadTheRulesConsentEnabled,
+	updateConsiderAllMessagesPublic,
+	setAnonymizeMessages,
+} from '../../domains/server-settings';
+import { guildTextChannelOnlyInteraction } from '../../utils/conditions';
+import { ephemeralReply } from '../../utils/utils';
 
 const ToggleReadTheRulesConsentButton = ({
 	server,

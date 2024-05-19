@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { router, withUserServersProcedure } from '~api/router/trpc';
 import { makeMessageResultPage } from '@answeroverflow/db';
 import { searchMessages } from '@answeroverflow/search/src';
 import {
@@ -9,6 +8,7 @@ import {
 	stripPrivateServerData,
 } from '@answeroverflow/db/src/permissions';
 import { TRPCError } from '@trpc/server';
+import { router, withUserServersProcedure } from '../trpc';
 
 export const messagesRouter = router({
 	/*

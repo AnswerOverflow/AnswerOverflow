@@ -1,12 +1,9 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
 import { Events, Message, MessageType } from 'discord.js';
-import {
-	isHumanMessage,
-	removeDiscordMarkdown,
-} from '~discord-bot/utils/utils';
 import { ALLOWED_AUTO_THREAD_CHANNEL_TYPES } from '@answeroverflow/constants';
 import type { ChannelWithFlags } from '@answeroverflow/db';
+import { isHumanMessage, removeDiscordMarkdown } from '../../utils/utils';
 
 async function autoThread(channelSettings: ChannelWithFlags, message: Message) {
 	if (!channelSettings?.flags.autoThreadEnabled) return;

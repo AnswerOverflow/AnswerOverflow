@@ -4,7 +4,7 @@ import {
 	Listener,
 	type ListenerErrorPayload,
 } from '@sapphire/framework';
-import { sentryLogger } from '~discord-bot/utils/sentry';
+import { sentryLogger } from '../../utils/sentry';
 
 @ApplyOptions<Listener.Options>({
 	event: Events.ListenerError,

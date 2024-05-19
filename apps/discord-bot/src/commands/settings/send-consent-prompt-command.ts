@@ -7,8 +7,8 @@ import {
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 } from 'discord.js';
-import { sendConsentPrompt } from '~discord-bot/domains/manage-account';
-import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
+import { sendConsentPrompt } from '../../domains/manage-account';
+import { guildTextChannelOnlyInteraction } from '../../utils/conditions';
 
 @ApplyOptions<Command.Options>({
 	runIn: ['GUILD_ANY'],

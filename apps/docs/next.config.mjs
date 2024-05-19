@@ -9,7 +9,6 @@ import nextra from 'nextra';
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
-	swcMinify: true,
 	transpilePackages: [
 		'@answeroverflow/api',
 		'@answeroverflow/auth',
@@ -20,11 +19,6 @@ const config = {
 	],
 	images: {
 		domains: ['cdn.discordapp.com'],
-	},
-	experimental: {
-		outputFileTracingExcludes: {
-			'*': ['**swc/core**'],
-		},
 	},
 	// We already do linting on GH actions
 	eslint: {

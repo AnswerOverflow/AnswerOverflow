@@ -7,8 +7,8 @@ import {
 	mockMessage,
 	mockTextChannel,
 } from '@answeroverflow/discordjs-mock';
-import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
-import { toAOServer } from '~discord-bot/utils/conversions';
+import { setupAnswerOverflowBot } from '../../test/sapphire-mock';
+import { toAOServer } from '../utils/conversions';
 import { createServer, findUserServerSettingsById } from '@answeroverflow/db';
 
 let client: Client;

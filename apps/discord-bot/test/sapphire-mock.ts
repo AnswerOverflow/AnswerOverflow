@@ -2,7 +2,7 @@ import { assert } from 'console';
 import { type ClientOptions, Options, Events, Client } from 'discord.js';
 import { applyClientMocks, emitEvent } from '@answeroverflow/discordjs-mock';
 import { basename, extname } from 'path';
-import { createClient, login } from '~discord-bot/utils/bot';
+import { createClient, login } from '../src/utils/bot';
 
 export function mockSapphireClient(
 	override: Partial<ClientOptions> = {

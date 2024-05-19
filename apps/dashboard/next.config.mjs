@@ -5,7 +5,6 @@
  */
 
 !process.env.SKIP_ENV_VALIDATION &&
-	// @ts-expect-error
 	(await import('@answeroverflow/env/web-schema.mjs'));
 
 /** @type {import("next").NextConfig} */
@@ -20,12 +19,6 @@ const config = {
 		'@answeroverflow/ui',
 		'@answeroverflow/env',
 	],
-	experimental: {
-		outputFileTracingExcludes: {
-			'*': ['**swc/core**'],
-		},
-		serverComponentsExternalPackages: ['mysql2'],
-	},
 	images: {
 		domains: [
 			'cdn.discordapp.com',

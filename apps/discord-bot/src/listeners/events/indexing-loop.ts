@@ -2,10 +2,10 @@ import { ApplyOptions } from '@sapphire/decorators';
 import { Listener, Events } from '@sapphire/framework';
 import { Client } from 'discord.js';
 import { container } from '@sapphire/framework';
-import { indexServers } from '~discord-bot/domains/indexing';
 import { delay } from '@answeroverflow/discordjs-mock';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { botEnv } from '@answeroverflow/env/bot';
+import { indexServers } from '../../domains/indexing';
 
 @ApplyOptions<Listener.Options>({
 	once: true,

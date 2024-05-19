@@ -8,19 +8,20 @@ import {
 	findIgnoredDiscordAccountById,
 } from '@answeroverflow/db';
 import { z } from 'zod';
-import { router, withDiscordAccountProcedure } from '~api/router/trpc';
-import {
-	protectedFetch,
-	protectedFetchManyWithPublicData,
-	protectedFetchWithPublicData,
-	protectedMutation,
-} from '~api/utils/protected-procedures';
-import {
-	assertIsIgnoredAccount,
-	assertIsNotIgnoredAccount,
-	assertIsUser,
-} from '~api/utils/permissions';
+
 import { TRPCError } from '@trpc/server';
+import {
+	assertIsUser,
+	assertIsNotIgnoredAccount,
+	assertIsIgnoredAccount,
+} from '../../../utils/permissions';
+import {
+	protectedFetchWithPublicData,
+	protectedFetchManyWithPublicData,
+	protectedMutation,
+	protectedFetch,
+} from '../../../utils/protected-procedures';
+import { router, withDiscordAccountProcedure } from '../../trpc';
 
 export const COULD_NOT_FIND_ACCOUNT_ERROR_MESSAGE =
 	'Could not find discord account';

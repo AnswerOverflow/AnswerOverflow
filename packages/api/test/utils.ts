@@ -1,18 +1,16 @@
 import type { DiscordAccount, Server } from '@answeroverflow/db';
 import { TRPCError } from '@trpc/server';
+
+import { mockDiscordAccount } from '@answeroverflow/db-mock';
+
+import { PermissionFlagsBits } from 'discord-api-types/v10';
+import { PermissionResolvable, PermissionsBitField } from '../src/utils/types';
+import { Source, createContextInner, sourceTypes } from '../src/router/context';
 import {
-	type Source,
-	sourceTypes,
-	createContextInner,
-} from '~api/router/context';
-import {
+	MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
 	INVALID_ROUTE_FOR_BOT_ERROR,
 	INVALID_ROUTER_FOR_WEB_CLIENT_ERROR,
-	MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE,
-} from '~api/utils/permissions';
-import { mockDiscordAccount } from '@answeroverflow/db-mock';
-import { PermissionResolvable, PermissionsBitField } from '~api/utils/types';
-import { PermissionFlagsBits } from 'discord-api-types/v10';
+} from '../src/utils/permissions';
 export async function mockAccountWithServersCallerCtx(
 	server: Server,
 	caller: Source,

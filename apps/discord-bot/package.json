@@ -34,7 +34,7 @@
 		"@sentry/node": "^7.64.0",
 		"@sentry/tracing": "^7.64.0",
 		"@t3-oss/env-nextjs": "^0.6.1",
-		"@trpc/server": "^10.37.1",
+		"@trpc/server": "^10.45.2",
 		"colorette": "^2.0.20",
 		"cron": "^3.1.7",
 		"discord-api-types": "^0.37.67",

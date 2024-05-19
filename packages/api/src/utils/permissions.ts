@@ -4,7 +4,7 @@ import {
 	type ServerWithFlags,
 	Plan,
 } from '@answeroverflow/db';
-import type { Source, Context } from '~api/router/context';
+import type { Source, Context } from '../router/context';
 
 import { PermissionsBitField } from './types';
 

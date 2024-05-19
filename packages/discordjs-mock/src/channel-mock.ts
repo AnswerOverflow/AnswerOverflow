@@ -47,7 +47,7 @@ import { mockGuild } from './guild-mock';
 import { mockMessage } from './message-mock';
 
 export function getGuildTextChannelMockDataBase<
-	Type extends GuildTextChannelType,
+	Type extends GuildTextChannelType | ChannelType.GuildForum,
 >(type: Type, guild: Guild) {
 	const rawData: APIGuildTextChannel<Type> = {
 		id: randomSnowflake().toString(),
@@ -275,7 +275,7 @@ function setupMockedChannel<T extends GuildBasedChannel>(
 			} else {
 				return Promise.resolve(
 					channel.parent?.messages.cache.get(channel.id) ?? null,
-				);
+				) as Promise<Message<true> | null>;
 			}
 		};
 	}
@@ -396,7 +396,11 @@ export function mockForumChannel(
 			default_sort_order: null,
 			...data,
 		};
-		const channel = Reflect.construct(ForumChannel, [guild, rawData, client]);
+		const channel = Reflect.construct(ForumChannel, [
+			guild,
+			rawData,
+			client,
+		]) as ForumChannel;
 		return channel;
 	});
 }
@@ -512,6 +516,7 @@ export function mockInvite(
 	const inviteData: APIInvite = {
 		// random 5 letter string
 		code: Math.random().toString(36).substring(2, 7),
+		type: 0,
 		channel: {
 			id: channel.id,
 			name: channel.name,

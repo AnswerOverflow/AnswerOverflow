@@ -1,10 +1,6 @@
 import type { SapphireClient } from '@sapphire/framework';
 import { Events, type PublicThreadChannel, TextChannel } from 'discord.js';
-import {
-	toAOChannel,
-	toAOServer,
-	toAOThread,
-} from '~discord-bot/utils/conversions';
+
 import {
 	mockTextChannel,
 	mockPublicThread,
@@ -12,13 +8,15 @@ import {
 	emitEvent,
 	mockInvite,
 } from '@answeroverflow/discordjs-mock';
-import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
+
 import {
 	createChannel,
 	createServer,
 	findChannelById,
 } from '@answeroverflow/db';
 import { getRandomId } from '@answeroverflow/utils';
+import { setupAnswerOverflowBot } from '../../../test/sapphire-mock';
+import { toAOServer, toAOChannel, toAOThread } from '../../utils/conversions';
 
 let client: SapphireClient;
 let textChannel: TextChannel;

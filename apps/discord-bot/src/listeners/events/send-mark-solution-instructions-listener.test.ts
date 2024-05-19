@@ -6,8 +6,8 @@ import {
 	mockPublicThread,
 	mockTextChannel,
 } from '@answeroverflow/discordjs-mock';
-import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
-import { toAOChannel, toAOServer } from '~discord-bot/utils/conversions';
+import { setupAnswerOverflowBot } from '../../../test/sapphire-mock';
+import { toAOChannel, toAOServer } from '../../utils/conversions';
 import { emitEvent } from '@answeroverflow/discordjs-mock';
 
 let client: Client;
