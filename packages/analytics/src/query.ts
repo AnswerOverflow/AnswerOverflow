@@ -6,7 +6,7 @@ const posthog =
 	sharedEnvs.POSTHOG_PERSONAL_API_KEY && sharedEnvs.POSTHOG_PROJECT_ID
 		? new PostHog({
 				events: events,
-				host: 'https://us.posthog.com',
+				host: 'us.posthog.com',
 				apiKey: sharedEnvs.POSTHOG_PERSONAL_API_KEY,
 				projectId: sharedEnvs.POSTHOG_PROJECT_ID.toString(),
 		  })
