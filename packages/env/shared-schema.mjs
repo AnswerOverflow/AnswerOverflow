@@ -109,7 +109,8 @@ export const sharedEnvs = createEnv({
 		DATABASE_URL_REPLICA: z.string().optional(),
 
 		ELASTICSEARCH_URL:
-			process.env.NODE_ENV !== 'development'
+			process.env.NODE_ENV === 'production' &&
+			process.env.NEXT_PUBLIC_DEPLOYMENT_ENV !== 'local'
 				? z.string().optional()
 				: zStringDefaultInDev('http://localhost:9200'),
 		ELASTICSEARCH_CLOUD_ID: zStringRequiredInProduction,
