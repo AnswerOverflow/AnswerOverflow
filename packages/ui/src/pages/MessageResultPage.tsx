@@ -24,6 +24,8 @@ import { getDate } from '../utils/snowflake';
 import { getMainSiteHostname } from '@answeroverflow/constants';
 import { isImageAttachment } from '../message/attachments';
 import { TimeAgo } from '../ui/time-ago';
+import { DiscordAvatar } from '../discord-avatar';
+import { FaRegMessage } from 'react-icons/fa6';
 
 export type MessageResultPageProps = {
 	messages: MessageFull[];
@@ -128,6 +130,7 @@ export function MessageResultPage({
 	});
 
 	const messageStack = messagesToDisplay
+
 		.map((message) => {
 			if (message.id === solutionMessageId) {
 				return (
@@ -197,9 +200,25 @@ export function MessageResultPage({
 		})),
 	};
 	const Main = () => (
-		<main className={'flex w-full grow flex-col gap-4'}>
+		<main className={'flex w-full max-w-3xl grow flex-col gap-4'}>
 			<div className="flex flex-col gap-2 pl-2">
-				{!tenant && (
+				{tenant ? (
+					<div className="flex flex-row items-center gap-2">
+						<DiscordAvatar user={firstMessage.author} size={48} />
+						<div className="flex flex-col">
+							<div className="flex flex-row items-center gap-2">
+								<Link
+									href={`/u/${firstMessage.author.id}`}
+									className="hover:underline"
+								>
+									{firstMessage.author.name}
+								</Link>
+								<span className="text-sm text-muted-foreground">•</span>
+								<TimeAgo snowflake={firstMessage.id} />
+							</div>
+						</div>
+					</div>
+				) : (
 					<div className="flex flex-row items-center gap-2">
 						<Link href={`/c/${server.id}`}>
 							<ServerIcon server={server} size={48} />
@@ -238,9 +257,31 @@ export function MessageResultPage({
 					/>
 				</div>
 			</div>
+			<div className="flex flex-row gap-4 border-b-2 border-muted py-4 pl-2">
+				<div className={'flex items-center gap-2'}>
+					<FaRegMessage className={'size-4'} />
+					<span>
+						{messagesToDisplay.length}{' '}
+						{messagesToDisplay.length === 1 ? 'Reply' : 'Replies'}
+					</span>
+				</div>
+			</div>
 			<div className="rounded-md">
 				<div className="flex flex-col gap-4">{messageStack}</div>
 			</div>
+			{messagesToDisplay.length === 0 && (
+				<div className="flex flex-col gap-4 rounded-md border-2 border-solid border-secondary p-4">
+					<span className="text-lg font-semibold">No replies yet</span>
+					<span className="text-muted-foreground">
+						Be the first to reply to this message
+					</span>
+					<ServerInviteJoinButton
+						server={server}
+						channel={channel}
+						location="Message Result Page"
+					/>
+				</div>
+			)}
 		</main>
 	);
 

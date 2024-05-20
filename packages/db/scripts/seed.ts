@@ -30,6 +30,7 @@ async function seedOne() {
 			markSolutionEnabled: true,
 			sendMarkSolutionInstructionsInNewThreads: true,
 		},
+		inviteCode: 'invite-code',
 		type: ChannelType.GuildForum,
 	});
 	const thread = mockThread(channel, {
