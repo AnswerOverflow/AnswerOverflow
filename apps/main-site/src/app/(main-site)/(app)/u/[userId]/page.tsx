@@ -7,7 +7,7 @@ import {
 } from '@answeroverflow/db';
 import { DiscordAvatar } from '@answeroverflow/ui/src/discord-avatar';
 import { notFound } from 'next/navigation';
-import { FeedPost } from '../../(home)/components';
+import { FeedPost } from '@answeroverflow/ui/src/feed-post';
 import { ServerIcon } from '@answeroverflow/ui/src/server-icon';
 import { ServerPublic } from '@answeroverflow/api';
 import { LinkButton } from 'packages/ui/src/ui/link-button';

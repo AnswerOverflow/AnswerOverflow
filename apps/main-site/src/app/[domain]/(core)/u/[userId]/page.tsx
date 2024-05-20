@@ -7,7 +7,7 @@ import {
 import { DiscordAvatar } from '@answeroverflow/ui/src/discord-avatar';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import { FeedPost } from '../../../../(main-site)/(app)/(home)/components';
+import { FeedPost } from '@answeroverflow/ui/src/feed-post';
 
 type Props = {
 	params: { userId: string; domain: string };
