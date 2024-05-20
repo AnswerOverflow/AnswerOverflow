@@ -11,7 +11,6 @@ import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
 
 export type Props = {
 	params: { userId: string; domain: string };
-	searchParams?: { s?: string };
 };
 
 export async function getUserPageData(props: Props) {
@@ -22,10 +21,10 @@ export async function getUserPageData(props: Props) {
 	if (!userInfo || !server || !server.customDomain) return notFound();
 	const [threads, comments] = await Promise.all([
 		findLatestThreadsFromAuthor(props.params.userId, {
-			serverId: props.searchParams?.s,
+			serverId: server.id,
 		}),
 		findLatestCommentsFromAuthor(props.params.userId, {
-			serverId: props.searchParams?.s,
+			serverId: server.id,
 		}),
 	]);
 	const commentsWithMessage = await findManyMessagesWithAuthors(

@@ -20,7 +20,6 @@ export default async function Layout(
 	props: { children: React.ReactNode } & Props,
 ) {
 	const { userInfo } = await getUserPageData(props);
-	console.log('server', props.searchParams?.s);
 	return (
 		<main className=" flex w-full justify-center pt-4">
 			<div className="flex w-full max-w-[850px] flex-col gap-4">
