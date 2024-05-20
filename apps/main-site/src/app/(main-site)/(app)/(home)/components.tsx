@@ -1,7 +1,6 @@
 import { findServerById } from '@answeroverflow/db';
 import { ServerIcon } from '@answeroverflow/ui/src/server-icon';
 import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
-import './home.css';
 
 function shortenNumber(num: number) {
 	if (num >= 1000000) {
