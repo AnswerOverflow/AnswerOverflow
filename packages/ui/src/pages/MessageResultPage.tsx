@@ -22,6 +22,7 @@ import { getDiscordURLForMessage } from '../utils/discord';
 import { ExternalLink } from 'lucide-react';
 import { getDate } from '../utils/snowflake';
 import { getMainSiteHostname } from '@answeroverflow/constants';
+import { isImageAttachment } from '../message/attachments';
 
 export type MessageResultPageProps = {
 	messages: MessageFull[];
@@ -154,6 +155,10 @@ export function MessageResultPage({
 		.filter(Boolean);
 
 	const title = thread?.name ?? firstMessage.content?.slice(0, 100);
+	const firstMessageMedia = firstMessage.attachments
+		.filter((attachment) => isImageAttachment(attachment))
+		.at(0);
+
 	const qaHeader: WithContext<DiscussionForumPosting> = {
 		'@context': 'https://schema.org',
 		'@type': 'DiscussionForumPosting',
@@ -163,23 +168,30 @@ export function MessageResultPage({
 		author: {
 			'@type': 'Person',
 			name: stripMarkdownAndHTML(firstMessage.author.name),
+			identifier: firstMessage.author.id,
+			url: `/u/${firstMessage.author.id}`,
 		},
+		image:
+			firstMessageMedia && stripMarkdownAndHTML(firstMessageMedia.proxyUrl),
 		headline: stripMarkdownAndHTML(title),
 		articleBody: stripMarkdownAndHTML(firstMessage.content),
-		// TODO: Add author
 		datePublished: getDate(firstMessage.id).toISOString(),
 		dateModified: thread?.archivedTimestamp
 			? new Date(Number(thread.archivedTimestamp)).toISOString()
 			: undefined,
 		identifier: thread?.id ?? firstMessage.id,
 		commentCount: messagesToDisplay.length,
-		comment: messagesToDisplay.map((message) => ({
+		comment: messagesToDisplay.map((message, index) => ({
 			'@type': message.id === solutionMessageId ? 'Answer' : 'Comment',
 			text: stripMarkdownAndHTML(message.content),
+			identifier: message.id,
 			datePublished: getDate(message.id).toISOString(),
+			position: index + 1,
 			author: {
 				'@type': 'Person',
 				name: stripMarkdownAndHTML(message.author.name),
+				identifier: message.author.id,
+				url: `/u/${message.author.id}`,
 			},
 		})),
 	};

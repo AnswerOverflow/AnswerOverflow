@@ -40,6 +40,14 @@ export function isImageAttachment(
 	if (!imageFileRegex) return false;
 	return imageFileRegex.test(attachment.filename.toLowerCase());
 }
+
+export function isVideoAttachment(
+	attachment: MessageProps['message']['attachments'][number],
+) {
+	const videoFileRegex = regexes.find((x) => x.type === 'videos')?.regex;
+	if (!videoFileRegex) return false;
+	return videoFileRegex.test(attachment.filename.toLowerCase());
+}
 const MessageImages = (
 	props: Pick<MessageProps, 'message' | 'loadingStyle' | 'collapseContent'>,
 ) => {
