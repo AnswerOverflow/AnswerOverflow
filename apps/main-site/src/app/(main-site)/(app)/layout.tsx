@@ -14,7 +14,7 @@ export default function RootLayout({
 				<Navbar tenant={undefined} />
 				<div className="mt-16 flex flex-row">
 					<LeftSidebar />
-					<div className="mx-auto w-full max-w-screen-2xl pt-2">
+					<div className="mx-auto w-full max-w-screen-2xl px-2 pt-2">
 						<div className="w-full">{children}</div>
 						<Footer tenant={undefined} />
 					</div>
