@@ -2,7 +2,9 @@ import { DiscordAvatar } from '@answeroverflow/ui/src/discord-avatar';
 import { Metadata } from 'next';
 import { getUserPageData, Props } from './components';
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
+export async function generateMetadata(
+	props: Omit<Props, 'searchParams'>,
+): Promise<Metadata> {
 	const { userInfo } = await getUserPageData(props);
 	return {
 		title: `${userInfo.name} Posts - Answer Overflow`,
