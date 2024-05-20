@@ -43,6 +43,7 @@ export function toMessageWithDiscordAccount({
 		public: publicMessage,
 		embeds: [],
 		attachments: [],
+		isAnonymous: false,
 	};
 	return msg;
 }
@@ -86,6 +87,7 @@ export function toPrivateMessageWithStrippedData(
 		public: false,
 		embeds: [],
 		attachments: [],
+		isAnonymous: message.isAnonymous,
 	};
 	if (isReply) {
 		return privateMsg;

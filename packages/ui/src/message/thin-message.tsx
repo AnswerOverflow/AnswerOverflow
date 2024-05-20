@@ -20,12 +20,16 @@ export function ThinMessage(
 				</div>
 				<div className="flex flex-col pl-2 pt-2">
 					<div className="flex flex-row items-center gap-2 text-muted-foreground">
-						<Link
-							className="mr-1 hover:underline"
-							href={`/u/${message.author.id}`}
-						>
-							{message.author.name}
-						</Link>
+						{message.public && !message.isAnonymous ? (
+							<Link
+								className="mr-1 hover:underline"
+								href={`/u/${message.author.id}`}
+							>
+								{message.author.name}
+							</Link>
+						) : (
+							<span className="mr-1">{message.author.name}</span>
+						)}
 						<span className="text-sm ">•</span>
 						<TimeAgo snowflake={message.id} />
 					</div>
