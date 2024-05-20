@@ -7,7 +7,7 @@ import { DBError } from './utils/error';
 import { ChannelType } from 'discord-api-types/v10';
 import { NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD } from '@answeroverflow/constants';
 import { db, dbReplica } from './db';
-import { and, desc, eq, inArray, isNotNull, lt, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNotNull, lt, not, sql } from 'drizzle-orm';
 import { Channel, channelSchema, dbChannels, dbMessages } from './schema';
 import {
 	getDefaultChannel,
@@ -414,6 +414,27 @@ export function findLatestThreadsFromAuthor(
 		orderBy: desc(dbMessages.id),
 		limit: 20,
 	});
+}
+
+export async function findLatestCommentsFromAuthor(
+	authorId: string,
+	opts: {
+		serverId?: string;
+	},
+) {
+	return dbReplica
+		.selectDistinct({ channelId: dbMessages.channelId, id: dbMessages.id })
+		.from(dbMessages)
+		.where(
+			and(
+				eq(dbMessages.authorId, authorId),
+				not(eq(dbMessages.channelId, dbMessages.id)),
+				opts.serverId ? eq(dbMessages.serverId, opts.serverId) : undefined,
+			),
+		)
+		.orderBy(desc(dbMessages.id))
+		.limit(20)
+		.execute();
 }
 
 export function findServersUserHasPostedIn(authorId: string) {
