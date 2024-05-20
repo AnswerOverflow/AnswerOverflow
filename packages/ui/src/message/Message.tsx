@@ -21,7 +21,11 @@ export const MessageAuthorArea = (props: Pick<MessageProps, 'message'>) => {
 			{/* TODO: sort out responsive styling */}
 			<div className="flex w-full flex-row items-center gap-2 font-body text-lg text-black/[.7] dark:text-white/[.47]">
 				<DiscordAvatar user={message.author} size={40} />
-				<span className="mr-1">{message.author.name}</span>
+				<Link className="mr-1" href={`/u/${message.author.id}`}>
+					<span className="text-black/[.7] hover:underline dark:text-white/[.47]">
+						{message.author.name}
+					</span>
+				</Link>
 				<div className="ml-auto mr-4 flex flex-row gap-2">
 					<TrackLinkButton
 						href={getDiscordURLForMessage(message)}

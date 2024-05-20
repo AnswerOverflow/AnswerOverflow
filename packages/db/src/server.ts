@@ -151,12 +151,19 @@ export async function findServerByAliasOrId(aliasOrId: string) {
 	return addFlagsToServer(found);
 }
 
-export async function findManyServersById(ids: string[]) {
+export async function findManyServersById(
+	ids: string[],
+	opts?: { includeKicked: boolean },
+) {
 	if (ids.length === 0) return [];
 	const found = await dbReplica.query.dbServers.findMany({
 		where: inArray(dbServers.id, ids),
 	});
-	return found.map(addFlagsToServer);
+	return found.map(addFlagsToServer).filter((x) => {
+		if (!opts) return true;
+		if (x.kickedTime && !opts.includeKicked) return false;
+		return true;
+	});
 }
 
 export function upsertServer(input: z.infer<typeof zServerUpsert>) {

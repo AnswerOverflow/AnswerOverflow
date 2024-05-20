@@ -1,4 +1,4 @@
-import { FeedPost } from '../components';
+import { FeedPost } from '@answeroverflow/ui/src/feed-post';
 import { findLatestThreads } from '@answeroverflow/db';
 
 export default async function HomePage() {
