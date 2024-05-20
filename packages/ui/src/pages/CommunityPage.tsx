@@ -139,6 +139,7 @@ const PageSwitcher = (props: {
 	</div>
 );
 import Image from 'next/image';
+import { cn } from '../utils/utils';
 export const CommunityPage = (
 	props: CommunityPageData & {
 		tenant: ServerPublic | undefined;
@@ -156,7 +157,7 @@ export const CommunityPage = (
 	const HeroArea = () => {
 		return (
 			<div className="flex flex-col">
-				<div className="m-auto flex w-full flex-row bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
+				<div className="m-auto flex w-full flex-row rounded-sm bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
 					<div className={'mx-auto flex flex-row gap-4'}>
 						{isNuxtUwu ? (
 							<Image
@@ -301,12 +302,12 @@ export const CommunityPage = (
 
 	return (
 		<div className="mx-auto w-full overflow-y-auto overflow-x-hidden bg-background">
-			<Navbar tenant={tenant} hideIcon={!!tenant} />
+			{tenant && <Navbar tenant={tenant} hideIcon={!!tenant} />}
 			<TrackLoad
 				eventName={'Community Page View'}
 				eventData={serverToAnalyticsData(server)}
 			/>
-			<main className="mt-8 bg-background">
+			<main className={cn('bg-background', tenant ? 'mt-8' : 'pt-2')}>
 				<HeroArea />
 				<div className="py-8">
 					<div className="px-4 2xl:px-[6rem]">
@@ -314,7 +315,7 @@ export const CommunityPage = (
 					</div>
 				</div>
 			</main>
-			<Footer tenant={tenant} />
+			{tenant && <Footer tenant={tenant} />}
 		</div>
 	);
 };
