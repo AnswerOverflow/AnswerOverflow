@@ -18,11 +18,19 @@ function formatRelativeTime(date: Date) {
 	});
 
 	// Format and return the relative time
-	if (daysDifference !== 0) {
-		return rtf.format(daysDifference, 'day');
-	} else {
-		return rtf.format(hoursDifference, 'hour');
+	if (daysDifference < -500) {
+		return rtf.format(Math.floor(daysDifference / 365), 'year');
 	}
+	if (daysDifference < -30) {
+		return rtf.format(Math.floor(daysDifference / 30), 'month');
+	}
+	if (daysDifference < -7) {
+		return rtf.format(Math.floor(daysDifference / 7), 'week');
+	}
+	if (daysDifference < -1) {
+		return rtf.format(daysDifference, 'day');
+	}
+	return rtf.format(hoursDifference, 'hour');
 }
 
 export function TimeAgo(props: { snowflake: string; className?: string }) {

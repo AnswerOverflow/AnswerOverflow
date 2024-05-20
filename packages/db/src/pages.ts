@@ -162,7 +162,32 @@ export async function findServerWithCommunityPageData(opts: {
 			: [],
 	]);
 	if (!found || found.kickedTime != null) return null;
-	const firstChannel = found.channels[0];
+	const channels = found.channels
+		.map((c) => zChannelPublic.parse(c))
+		.sort((a, b) => {
+			if (
+				a.type === ChannelType.GuildForum.valueOf() &&
+				b.type !== ChannelType.GuildForum.valueOf()
+			)
+				return -1;
+			if (
+				a.type !== ChannelType.GuildForum.valueOf() &&
+				b.type === ChannelType.GuildForum.valueOf()
+			)
+				return 1;
+			if (
+				a.type === ChannelType.GuildText.valueOf() &&
+				b.type !== ChannelType.GuildText.valueOf()
+			)
+				return -1;
+			if (
+				a.type !== ChannelType.GuildText.valueOf() &&
+				b.type === ChannelType.GuildText.valueOf()
+			)
+				return 1;
+			return 0;
+		});
+	const firstChannel = channels[0];
 	if (!opts.selectedChannel && firstChannel) {
 		questions = await db.query.dbChannels.findMany({
 			where: eq(dbChannels.parentId, firstChannel.id),
@@ -191,32 +216,7 @@ export async function findServerWithCommunityPageData(opts: {
 
 	return {
 		server: zServerPublic.parse(found),
-		channels: found.channels
-			.map((c) => zChannelPublic.parse(c))
-			.sort((a, b) => {
-				if (
-					a.type === ChannelType.GuildForum.valueOf() &&
-					b.type !== ChannelType.GuildForum.valueOf()
-				)
-					return -1;
-				if (
-					a.type !== ChannelType.GuildForum.valueOf() &&
-					b.type === ChannelType.GuildForum.valueOf()
-				)
-					return 1;
-				if (
-					a.type === ChannelType.GuildText.valueOf() &&
-					b.type !== ChannelType.GuildText.valueOf()
-				)
-					return -1;
-				if (
-					a.type !== ChannelType.GuildText.valueOf() &&
-					b.type === ChannelType.GuildText.valueOf()
-				)
-					return 1;
-
-				return 0;
-			}),
+		channels: channels,
 		posts:
 			opts.page > 0 ? posts.slice(limit, limit * 2) : posts.slice(0, limit),
 	};

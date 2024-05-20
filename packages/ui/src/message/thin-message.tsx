@@ -1,4 +1,5 @@
 import { DiscordAvatar } from '../discord-avatar';
+import Link from '../ui/link';
 import { TimeAgo } from '../ui/time-ago';
 import { cn } from '../utils/utils';
 import { MessageBlurrer, MessageBody } from './Message';
@@ -19,7 +20,12 @@ export function ThinMessage(
 				</div>
 				<div className="flex flex-col pl-2 pt-2">
 					<div className="flex flex-row items-center gap-2 text-muted-foreground">
-						<span className="mr-1">{message.author.name}</span>
+						<Link
+							className="mr-1 hover:underline"
+							href={`/u/${message.author.id}`}
+						>
+							{message.author.name}
+						</Link>
 						<span className="text-sm ">•</span>
 						<TimeAgo snowflake={message.id} />
 					</div>

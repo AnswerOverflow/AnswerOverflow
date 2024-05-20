@@ -23,6 +23,7 @@ import { ExternalLink } from 'lucide-react';
 import { getDate } from '../utils/snowflake';
 import { getMainSiteHostname } from '@answeroverflow/constants';
 import { isImageAttachment } from '../message/attachments';
+import { TimeAgo } from '../ui/time-ago';
 
 export type MessageResultPageProps = {
 	messages: MessageFull[];
@@ -204,8 +205,19 @@ export function MessageResultPage({
 							<ServerIcon server={server} size={48} />
 						</Link>
 						<div className="flex flex-col">
-							<Link href={`/c/${server.id}`}>{server.name}</Link>
-							{firstMessage.author.name}
+							<div className="flex flex-row items-center gap-2">
+								<Link href={`/c/${server.id}`} className="hover:underline">
+									{server.name}
+								</Link>
+								<span className="text-sm text-muted-foreground">•</span>
+								<TimeAgo snowflake={firstMessage.id} />
+							</div>
+							<Link
+								href={`/u/${firstMessage.author.id}`}
+								className="text-foreground/70 hover:underline"
+							>
+								{firstMessage.author.name}
+							</Link>
 						</div>
 					</div>
 				)}
@@ -278,20 +290,22 @@ export function MessageResultPage({
 					<>
 						<span className="text-lg font-semibold">More Posts</span>
 						<div className="flex flex-col gap-4">
-							{relatedPosts.slice(0, messages.length * 2).map((post) => (
-								<Link
-									className="flex flex-col gap-2 rounded-md border-2 border-solid border-secondary p-4 text-left transition-colors duration-700 ease-out hover:border-primary hover:text-primary"
-									href={`/m/${post.message.id}`}
-									key={post.thread.id}
-								>
-									<span className="truncate text-lg font-semibold">
-										{post.thread.name}
-									</span>
-									<span className="truncate text-sm">
-										{post.message.content.slice(0, 100)}
-									</span>
-								</Link>
-							))}
+							{relatedPosts
+								.slice(0, Math.min(messages.length * 2, 10))
+								.map((post) => (
+									<Link
+										className="flex flex-col gap-2 rounded-md border-2 border-solid border-secondary p-4 text-left transition-colors duration-700 ease-out hover:border-primary hover:text-primary"
+										href={`/m/${post.message.id}`}
+										key={post.thread.id}
+									>
+										<span className="truncate text-lg font-semibold">
+											{post.thread.name}
+										</span>
+										<span className="truncate text-sm">
+											{post.message.content.slice(0, 100)}
+										</span>
+									</Link>
+								))}
 						</div>
 					</>
 				)}
