@@ -51,11 +51,7 @@ export function ServerSelect(props: {
 }) {
 	return (
 		<LinkButton
-			href={
-				props.selected
-					? `/u/${props.userId}`
-					: `/u/${props.userId}?s=${props.server.id}`
-			}
+			href={props.selected ? `/u/${props.userId}` : `?s=${props.server.id}`}
 			variant={props.selected ? 'secondary' : 'outline'}
 			className="gap-2"
 		>
