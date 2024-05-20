@@ -13,7 +13,7 @@ WORKDIR /app
 ENV PNPM_HOME="/root/.local/share/pnpm"
 ENV PATH="${PATH}:${PNPM_HOME}"
 
-RUN npm install --global pnpm@8.6.0
+RUN npm install --global pnpm@9.1.1
 RUN pnpm add -g turbo
 COPY . .
 RUN turbo prune --scope=@answeroverflow/discord-bot --docker
@@ -28,7 +28,7 @@ RUN apk update
 ENV PNPM_HOME="/root/.local/share/pnpm"
 ENV PATH="${PATH}:${PNPM_HOME}"
 
-RUN npm install --global pnpm@8.6.0
+RUN npm install --global pnpm@9.1.1
 
 WORKDIR /app
 
@@ -128,7 +128,7 @@ FROM node:lts-alpine AS runner
 ENV PNPM_HOME="/root/.local/share/pnpm"
 ENV PATH="${PATH}:${PNPM_HOME}"
 
-RUN npm install --global pnpm@8.6.0
+RUN npm install --global pnpm@9.1.1
 
 WORKDIR /app
 
