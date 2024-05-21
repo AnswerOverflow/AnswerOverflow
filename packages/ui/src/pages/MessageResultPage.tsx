@@ -359,7 +359,7 @@ export function MessageResultPage({
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}
 			/>
-			<div className="flex flex-col gap-4 md:flex-row">
+			<div className="flex flex-col gap-4 md:flex-row justify-center w-full">
 				<Main />
 				<Sidebar />
 				<TrackLoad
