@@ -30,7 +30,9 @@ export async function getUserPageData(props: Props) {
 		}),
 		findServersUserHasPostedIn(props.params.userId),
 	]);
-	const servers = await findManyServersById(serverIds);
+	const servers = await findManyServersById(serverIds, {
+		includeKicked: false,
+	});
 	const commentsWithMessage = await findManyMessagesWithAuthors(
 		comments.map((x) => x.id),
 	);

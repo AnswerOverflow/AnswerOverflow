@@ -1,4 +1,8 @@
-import { channelCountsLoader, messages } from '@answeroverflow/db';
+import {
+	channelCountsLoader,
+	findMessageByIdWithDiscordAccount,
+	messages,
+} from '@answeroverflow/db';
 import { isImageAttachment, MessageImage } from './message/attachments';
 import { getSnowflakeUTCDate } from './utils/snowflake';
 import { parse } from './message/markdown/render';
@@ -10,17 +14,33 @@ import { FaRegMessage } from 'react-icons/fa6';
 export const FeedPost = async (props: { postId: string }) => {
 	const result = await messages.load(props.postId);
 	if (!result) return null;
-	const { message, channel, parent, server } = result;
-	const count = await channelCountsLoader.load(channel.id);
-	if (!message || !message.parentChannelId || !message.public) return null;
-	const discordMarkdownAsHTML = await parse(message.content);
+	const { message: rootOrComment, channel: thread, parent, server } = result;
+	if (
+		!rootOrComment ||
+		!rootOrComment.parentChannelId ||
+		!rootOrComment.public ||
+		server.kickedTime
+	)
+		return null;
 
-	const firstImage = message.attachments.filter(isImageAttachment).at(0);
+	const root =
+		rootOrComment.id !== thread.id
+			? await findMessageByIdWithDiscordAccount(thread.id)
+			: rootOrComment;
+	if (!root || !root.public) return null;
+	const comment = rootOrComment.id !== thread.id ? rootOrComment : null;
+
+	const count = await channelCountsLoader.load(thread.id);
+
+	const focused = comment ?? root;
+	const discordMarkdownAsHTML = await parse(focused.content);
+	const firstImage = focused.attachments.filter(isImageAttachment).at(0);
+
 	const MainContent = () => (
 		<div className={'inner'}>
 			<div className="flex flex-col items-start gap-2  pb-2 text-xs sm:flex-row sm:items-center md:text-base">
 				<Link
-					href={`/c/${message.serverId}`}
+					href={`/c/${server.id}`}
 					className={'flex items-center gap-2 hover:underline'}
 				>
 					<ServerIcon server={server} size={24} />
@@ -31,11 +51,10 @@ export const FeedPost = async (props: { postId: string }) => {
 						•
 					</span>
 					<span className={'text-sm text-muted-foreground'}>
-						Created by {message.author.name} on{' '}
-						{getSnowflakeUTCDate(message.id)} in{' '}
+						Created by {root.author.name} on {getSnowflakeUTCDate(root.id)} in{' '}
 						<Link
 							className={'hover:underline'}
-							href={`/c/${channel.serverId}/${parent.id}`}
+							href={`/c/${server.id}/${parent.id}`}
 						>
 							#{parent.name}
 						</Link>
@@ -43,7 +62,7 @@ export const FeedPost = async (props: { postId: string }) => {
 				</div>
 			</div>
 			<div className={'pb-2 font-semibold'}>
-				<span className={'text-lg'}>{channel.name}</span>
+				<span className={'text-lg'}>{thread.name}</span>
 			</div>
 			<div
 				className={
@@ -71,7 +90,7 @@ export const FeedPost = async (props: { postId: string }) => {
 				'outer rounded-md border-2 bg-card p-2 hover:border-muted-foreground'
 			}
 		>
-			<Link href={`/m/${channel.id}`} />
+			<Link href={`/m/${thread.id}`} />
 			<MainContent />
 		</div>
 	);
