@@ -6,6 +6,7 @@ import {
 	upsertChannel,
 	upsertManyDiscordAccounts,
 	upsertManyMessages,
+	upsertUserServerSettingsWithDeps,
 } from '@answeroverflow/db';
 import {
 	type AnyThreadChannel,
@@ -32,6 +33,7 @@ import {
 	extractUsersSetFromMessages,
 	messagesToAOMessagesSet,
 	toAOChannel,
+	toAODiscordAccount,
 } from '../utils/conversions';
 
 export async function indexServers(client: Client) {
@@ -331,6 +333,20 @@ async function storeIndexData(
 		`Upserting ${convertedUsers.length} discord accounts `,
 	);
 	await upsertManyDiscordAccounts(convertedUsers);
+	const bots = filteredMessages.filter((x) => x.author.bot);
+	if (bots.length > 0) {
+		await Promise.all(
+			bots.map(async (bot) => {
+				return upsertUserServerSettingsWithDeps({
+					serverId: channel.guildId,
+					user: toAODiscordAccount(bot.author),
+					flags: {
+						canPubliclyDisplayMessages: true,
+					},
+				});
+			}),
+		);
+	}
 	container.logger.debug(`Upserting channel: ${channel.id}`);
 	const lastIndexedSnowflake =
 		messages.sort((a, b) => (BigInt(b.id) > BigInt(a.id) ? 1 : -1)).at(0)?.id ??

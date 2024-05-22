@@ -2,7 +2,7 @@ import type { ChannelPublicWithFlags, MessageFull } from '@answeroverflow/db';
 import type { ServerPublic } from '@answeroverflow/api';
 import type { DiscussionForumPosting, WithContext } from 'schema-dts';
 import { ServerInviteJoinButton } from '../server-invite';
-import { MessageBody, MessageContentWithSolution } from '../message/Message';
+import { MessageBlurrer, MessageBody } from '../message/Message';
 import Link from '../ui/link';
 import { TrackLoad } from '../ui/track-load';
 import {
@@ -26,6 +26,7 @@ import { isImageAttachment } from '../message/attachments';
 import { TimeAgo } from '../ui/time-ago';
 import { DiscordAvatar } from '../discord-avatar';
 import { FaRegMessage } from 'react-icons/fa6';
+import { BlueLink } from '../ui/blue-link';
 
 export type MessageResultPageProps = {
 	messages: MessageFull[];
@@ -130,7 +131,6 @@ export function MessageResultPage({
 	});
 
 	const messageStack = messagesToDisplay
-
 		.map((message) => {
 			if (message.id === solutionMessageId) {
 				return (
@@ -242,19 +242,22 @@ export function MessageResultPage({
 				)}
 				<h1 className="text-2xl font-semibold">{title}</h1>
 				<div>
-					<MessageBody
-						message={firstMessage}
-						content={
-							solution &&
-							messageStack.length > 2 && (
-								<MessageContentWithSolution
-									message={firstMessage}
-									solution={solution}
-								/>
-							)
-						}
-						loadingStyle="eager"
-					/>
+					<MessageBody message={firstMessage} loadingStyle="eager" />
+					{solution && (
+						<div className="mt-4 w-full rounded-lg  border-2 border-green-500 p-2 dark:border-green-400">
+							<span className="text-green-800 dark:text-green-400">
+								Solution:
+							</span>
+
+							<MessageBlurrer message={solution}>
+								<MessageBody message={solution} collapseContent={true} />
+							</MessageBlurrer>
+
+							<BlueLink href={`#solution-${solution.id}`}>
+								Jump to solution
+							</BlueLink>
+						</div>
+					)}
 				</div>
 			</div>
 			<div className="flex flex-row gap-4 border-b-2 border-muted py-4 pl-2">
@@ -359,7 +362,7 @@ export function MessageResultPage({
 				type="application/ld+json"
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}
 			/>
-			<div className="flex flex-col gap-4 md:flex-row justify-center w-full">
+			<div className="flex w-full flex-col justify-center gap-4 md:flex-row">
 				<Main />
 				<Sidebar />
 				<TrackLoad
