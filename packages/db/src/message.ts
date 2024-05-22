@@ -602,7 +602,7 @@ export async function findManyMessageWithRelations(ids: readonly string[]) {
 	console.log(`findManyMessageWithRelations took ${end - start}ms`);
 	const lookUp = new Map(
 		messages.map((msg) => {
-			const parent = msg.channel.parent;
+			const parent = msg?.channel?.parent;
 			if (!parent || !addFlagsToChannel(parent).flags.indexingEnabled)
 				return [msg.id, undefined];
 			return [
