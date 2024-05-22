@@ -66,8 +66,18 @@ const config = {
 				destination:
 					'https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap:path',
 			},
+			{
+				source: '/ingest/static/:path*',
+				destination: 'https://us-assets.i.posthog.com/static/:path*',
+			},
+			{
+				source: '/ingest/:path*',
+				destination: 'https://us.i.posthog.com/:path*',
+			},
 		];
 	},
+	skipTrailingSlashRedirect: true,
+
 	redirects: async () => {
 		return [
 			{
