@@ -31,7 +31,7 @@ export function middleware(req: NextRequest) {
 		return dataUnlockerRouteHandler(req);
 	}
 	const host = req.headers.get('host')!;
-	if (path.startsWith('/og')) {
+	if (path.startsWith('/og') || path.startsWith('/ingest')) {
 		return NextResponse.next();
 	}
 
