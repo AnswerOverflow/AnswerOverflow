@@ -9,6 +9,7 @@ const s3bucket = new S3({
 		accessKeyId: sharedEnvs.IAM_USER_KEY as string,
 		secretAccessKey: sharedEnvs.IAM_USER_SECRET as string,
 	},
+	region: 'us-east-1',
 });
 
 export async function uploadFileFromUrl(file: {
@@ -25,6 +26,7 @@ export async function uploadFileFromUrl(file: {
 		client: s3bucket,
 		params: {
 			Bucket: sharedEnvs.BUCKET_NAME as string,
+
 			Key: `${file.id}/${file.filename}`,
 			Body: stream,
 			ContentDisposition: 'inline',

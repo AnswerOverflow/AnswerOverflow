@@ -13,6 +13,7 @@ import { MessageAttachments } from './attachments';
 import { TrackLinkButton } from '../ui/track-link-button';
 import { parse } from './markdown/render';
 import { Embed } from './Embed';
+import { BlueLink } from '../ui/blue-link';
 
 export const MessageAuthorArea = (props: Pick<MessageProps, 'message'>) => {
 	const { message } = props;
@@ -107,7 +108,9 @@ export const MessageContentWithSolution = (
 					<MessageContents message={props.solution} collapseContent={true} />
 				</MessageBlurrer>
 				{props.showJumpToSolutionCTA && (
-					<Link href={`#solution-${props.solution.id}`}>Jump to solution</Link>
+					<BlueLink href={`#solution-${props.solution.id}`}>
+						Jump to solution
+					</BlueLink>
 				)}
 			</div>
 		</div>
