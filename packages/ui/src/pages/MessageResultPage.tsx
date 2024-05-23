@@ -299,7 +299,7 @@ export function MessageResultPage({
 			>
 				<div className="flex flex-col items-start gap-4 p-4">
 					<div className="flex w-full flex-row items-center justify-between truncate font-bold">
-						<Link href={`/c/${server.id}`}>{server.name}</Link>
+						<Link href={tenant ? '/' : `/c/${server.id}`}>{server.name}</Link>
 						<ServerInviteJoinButton
 							server={server}
 							channel={channel}
