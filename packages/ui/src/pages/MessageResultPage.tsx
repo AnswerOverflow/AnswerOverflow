@@ -1,6 +1,6 @@
 import type { ChannelPublicWithFlags, MessageFull } from '@answeroverflow/db';
 import type { ServerPublic } from '@answeroverflow/api';
-import type { DiscussionForumPosting, WithContext } from 'schema-dts';
+import type { DiscussionForumPosting } from 'schema-dts';
 import { ServerInviteJoinButton } from '../server-invite';
 import { MessageBlurrer, MessageBody } from '../message/Message';
 import Link from '../ui/link';
@@ -27,6 +27,7 @@ import { TimeAgo } from '../ui/time-ago';
 import { DiscordAvatar } from '../discord-avatar';
 import { FaRegMessage } from 'react-icons/fa6';
 import { BlueLink } from '../ui/blue-link';
+import { JsonLd } from 'react-schemaorg';
 
 export type MessageResultPageProps = {
 	messages: MessageFull[];
@@ -163,42 +164,6 @@ export function MessageResultPage({
 		.filter((attachment) => isImageAttachment(attachment))
 		.at(0);
 
-	const qaHeader: WithContext<DiscussionForumPosting> = {
-		'@context': 'https://schema.org',
-		'@type': 'DiscussionForumPosting',
-		url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
-			thread?.id ?? firstMessage.id
-		}`,
-		author: {
-			'@type': 'Person',
-			name: stripMarkdownAndHTML(firstMessage.author.name),
-			identifier: firstMessage.author.id,
-			url: `/u/${firstMessage.author.id}`,
-		},
-		image:
-			firstMessageMedia && stripMarkdownAndHTML(firstMessageMedia.proxyUrl),
-		headline: stripMarkdownAndHTML(title),
-		articleBody: stripMarkdownAndHTML(firstMessage.content),
-		datePublished: getDate(firstMessage.id).toISOString(),
-		dateModified: thread?.archivedTimestamp
-			? new Date(Number(thread.archivedTimestamp)).toISOString()
-			: undefined,
-		identifier: thread?.id ?? firstMessage.id,
-		commentCount: messagesToDisplay.length,
-		comment: messagesToDisplay.map((message, index) => ({
-			'@type': message.id === solutionMessageId ? 'Answer' : 'Comment',
-			text: stripMarkdownAndHTML(message.content),
-			identifier: message.id,
-			datePublished: getDate(message.id).toISOString(),
-			position: index + 1,
-			author: {
-				'@type': 'Person',
-				name: stripMarkdownAndHTML(message.author.name),
-				identifier: message.author.id,
-				url: `/u/${message.author.id}`,
-			},
-		})),
-	};
 	const Main = () => (
 		<main className={'flex w-full max-w-3xl grow flex-col gap-4'}>
 			<div className="flex flex-col gap-2 pl-2">
@@ -358,10 +323,44 @@ export function MessageResultPage({
 	);
 	const rendered = (
 		<div className="mx-auto pt-2">
-			<script
-				type="application/ld+json"
-				dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}
+			<JsonLd<DiscussionForumPosting>
+				item={{
+					'@context': 'https://schema.org',
+					'@type': 'DiscussionForumPosting',
+					url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
+						thread?.id ?? firstMessage.id
+					}`,
+					author: {
+						'@type': 'Person',
+						name: firstMessage.author.name,
+						identifier: firstMessage.author.id,
+						url: `/u/${firstMessage.author.id}`,
+					},
+					image: firstMessageMedia && firstMessageMedia.proxyUrl,
+					headline: title,
+					articleBody: firstMessage.content,
+					datePublished: getDate(firstMessage.id).toISOString(),
+					dateModified: thread?.archivedTimestamp
+						? new Date(Number(thread.archivedTimestamp)).toISOString()
+						: undefined,
+					identifier: thread?.id ?? firstMessage.id,
+					commentCount: messagesToDisplay.length,
+					comment: messagesToDisplay.map((message, index) => ({
+						'@type': message.id === solutionMessageId ? 'Answer' : 'Comment',
+						text: message.content,
+						identifier: message.id,
+						datePublished: getDate(message.id).toISOString(),
+						position: index + 1,
+						author: {
+							'@type': 'Person',
+							name: message.author.name,
+							identifier: message.author.id,
+							url: `/u/${message.author.id}`,
+						},
+					})),
+				}}
 			/>
+
 			<div className="flex w-full flex-col justify-center gap-4 md:flex-row">
 				<Main />
 				<Sidebar />
