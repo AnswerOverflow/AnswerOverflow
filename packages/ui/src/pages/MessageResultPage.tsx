@@ -11,7 +11,6 @@ import {
 	threadToAnalyticsData,
 } from '@answeroverflow/constants/src/analytics';
 import { messageWithDiscordAccountToAnalyticsData } from '@answeroverflow/hooks';
-import { stripMarkdownAndHTML } from '../message/markdown/strip';
 import { TrackLinkButton } from '../ui/track-link-button';
 import { LazyInviteToAnswerOverflowPopover } from './message-result-page/lazy-invite-to-answer-overflow-popover';
 import { ServerIcon } from '../server-icon';
