@@ -74,7 +74,7 @@ export const ChannelName = ({
 	channel: ChannelPublicWithFlags;
 }) => {
 	return (
-		<div className="mr-auto flex flex-row items-center justify-start gap-1 pl-4">
+		<div className="mr-auto flex flex-row items-center justify-start gap-1">
 			<ChannelIcon
 				channelType={channel.type}
 				className={'text-left font-bold'}
