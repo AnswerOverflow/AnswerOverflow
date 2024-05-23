@@ -73,7 +73,6 @@ function ChannelSelectRow(props: ChannelSelectProps) {
       }
     `}
 			</style>
-			<ChannelSelect channel={props.selectedChannel} />
 			{props.channels.map((channel) => (
 				<ChannelSelect channel={channel} key={channel.id} />
 			))}
