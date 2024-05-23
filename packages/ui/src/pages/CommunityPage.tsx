@@ -5,12 +5,7 @@ import type {
 import { NUMBER_OF_THREADS_TO_LOAD } from '@answeroverflow/constants/src/api';
 import { getServerDescription } from '../utils/server';
 import { Button } from '../ui/button';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+
 import { Heading } from '../ui/heading';
 import { ChannelName, ServerInviteJoinButton } from '../server-invite';
 import { ServerIcon } from '../server-icon';
@@ -18,7 +13,6 @@ import { LinkMessage } from '../message/link-message';
 import { Navbar } from '../navbar';
 import { Footer } from '../footer';
 import { LinkButton } from '../ui/link-button';
-import Link from '../ui/link';
 import { MessagesSearchBar } from '../messages-search-bar';
 import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
 import { LuArrowLeft, LuArrowRight } from 'react-icons/lu';
@@ -31,13 +25,13 @@ type ChannelSelectProps = {
 	tenant: ServerPublic | undefined;
 };
 
-function ChannelSidebar(props: ChannelSelectProps) {
+function ChannelSelectRow(props: ChannelSelectProps) {
 	const ChannelSelect = ({ channel }: { channel: ChannelPublicWithFlags }) => {
 		const selected = props.selectedChannel.id === channel.id;
 		return (
 			<LinkButton
-				variant={selected ? 'secondary' : 'ghost'}
-				className="px-0"
+				variant={selected ? 'secondary' : 'outline'}
+				className="max-w-[200px] flex-shrink-0"
 				href={
 					props.tenant
 						? `/c/${channel.id}`
@@ -49,45 +43,42 @@ function ChannelSidebar(props: ChannelSelectProps) {
 		);
 	};
 
-	const channels = props.channels;
+  if(props.channels.length == 1){
+    return null;
+  }
+	const channels = props.channels.filter(
+    channel => channel.id !==props.selectedChannel.id
+  );
 	return (
-		<div className="mr-4 max-w-[250px]">
-			<Heading.H4 className="px-4 text-center">Channels</Heading.H4>
-			<div className="flex shrink-0 flex-col gap-2 text-left">
+			<div className={cn("channel-row flex shrink-0 w-full overflow-x-scroll flex-row gap-2 text-left", channels.length > 6 ?  "pb-2" : null)}
+      style={{
+        scrollbarWidth: 'auto', // For Firefox
+        WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+      }}>
+          <style>
+    {`
+      .channel-row::-webkit-scrollbar {
+        height: 6px;  /* Adjust height if necessary */
+      }
+
+      .channel-row::-webkit-scrollbar-thumb {
+        background-color: #888;  /* Customize scrollbar thumb color */
+        border-radius: 4px;  /* Optional: For rounded corners */
+      }
+
+      .channel-row::-webkit-scrollbar-thumb:hover {
+        background-color: #555;  /* Customize hover state */
+      }
+    `}
+  </style>
+        <ChannelSelect channel={props.selectedChannel} />
 				{channels.map((channel) => (
 					<ChannelSelect channel={channel} key={channel.id} />
 				))}
 			</div>
-		</div>
 	);
 }
 
-function ChannelDropdown(props: ChannelSelectProps) {
-	return (
-		<DropdownMenu modal={false}>
-			<DropdownMenuTrigger asChild>
-				<Button variant="outline" className="w-full">
-					<ChannelName channel={props.selectedChannel} />
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent className="max-h-vh30 w-vw80">
-				{props.channels.map((channel) => (
-					<DropdownMenuItem key={channel.id} asChild>
-						<Link
-							href={
-								props.tenant
-									? `/c/${channel.id}`
-									: `/c/${channel.serverId}/${channel.id}`
-							}
-						>
-							<ChannelName channel={channel} />
-						</Link>
-					</DropdownMenuItem>
-				))}
-			</DropdownMenuContent>
-		</DropdownMenu>
-	);
-}
 
 const PageSwitcher = (props: {
 	numQuestions: number;
@@ -276,25 +267,15 @@ export const CommunityPage = (
 					serverId={server.id}
 				/>
 			</Suspense>
-			<div className="flex w-full justify-center py-2 md:hidden">
-				{selectedChannel && (
-					<ChannelDropdown
-						channels={channels}
-						selectedChannel={selectedChannel}
-						tenant={tenant}
-					/>
-				)}
-			</div>
-			<div className="flex flex-row pt-4">
-				<div className="hidden md:block">
-					{selectedChannel && (
-						<ChannelSidebar
+
+      {selectedChannel && (
+						<ChannelSelectRow
 							channels={channels}
 							tenant={tenant}
 							selectedChannel={selectedChannel}
 						/>
 					)}
-				</div>
+			<div className="flex flex-row pt-4">
 				<MessagesSection />
 			</div>
 		</>
