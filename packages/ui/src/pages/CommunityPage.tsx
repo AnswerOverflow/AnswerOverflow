@@ -46,14 +46,11 @@ function ChannelSelectRow(props: ChannelSelectProps) {
 	if (props.channels.length == 1) {
 		return null;
 	}
-	const channels = props.channels.filter(
-		(channel) => channel.id !== props.selectedChannel.id,
-	);
 	return (
 		<div
 			className={cn(
 				'channel-row flex w-full shrink-0 flex-row gap-2 overflow-x-scroll text-left',
-				channels.length > 6 ? 'pb-2' : null,
+				props.channels.length > 6 ? 'pb-2' : null,
 			)}
 			style={{
 				scrollbarWidth: 'auto', // For Firefox
@@ -77,7 +74,7 @@ function ChannelSelectRow(props: ChannelSelectProps) {
     `}
 			</style>
 			<ChannelSelect channel={props.selectedChannel} />
-			{channels.map((channel) => (
+			{props.channels.map((channel) => (
 				<ChannelSelect channel={channel} key={channel.id} />
 			))}
 		</div>
