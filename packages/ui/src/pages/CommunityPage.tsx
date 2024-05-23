@@ -43,20 +43,25 @@ function ChannelSelectRow(props: ChannelSelectProps) {
 		);
 	};
 
-  if(props.channels.length == 1){
-    return null;
-  }
+	if (props.channels.length == 1) {
+		return null;
+	}
 	const channels = props.channels.filter(
-    channel => channel.id !==props.selectedChannel.id
-  );
+		(channel) => channel.id !== props.selectedChannel.id,
+	);
 	return (
-			<div className={cn("channel-row flex shrink-0 w-full overflow-x-scroll flex-row gap-2 text-left", channels.length > 6 ?  "pb-2" : null)}
-      style={{
-        scrollbarWidth: 'auto', // For Firefox
-        WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
-      }}>
-          <style>
-    {`
+		<div
+			className={cn(
+				'channel-row flex w-full shrink-0 flex-row gap-2 overflow-x-scroll text-left',
+				channels.length > 6 ? 'pb-2' : null,
+			)}
+			style={{
+				scrollbarWidth: 'auto', // For Firefox
+				WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+			}}
+		>
+			<style>
+				{`
       .channel-row::-webkit-scrollbar {
         height: 6px;  /* Adjust height if necessary */
       }
@@ -70,15 +75,14 @@ function ChannelSelectRow(props: ChannelSelectProps) {
         background-color: #555;  /* Customize hover state */
       }
     `}
-  </style>
-        <ChannelSelect channel={props.selectedChannel} />
-				{channels.map((channel) => (
-					<ChannelSelect channel={channel} key={channel.id} />
-				))}
-			</div>
+			</style>
+			<ChannelSelect channel={props.selectedChannel} />
+			{channels.map((channel) => (
+				<ChannelSelect channel={channel} key={channel.id} />
+			))}
+		</div>
 	);
 }
-
 
 const PageSwitcher = (props: {
 	numQuestions: number;
@@ -268,13 +272,13 @@ export const CommunityPage = (
 				/>
 			</Suspense>
 
-      {selectedChannel && (
-						<ChannelSelectRow
-							channels={channels}
-							tenant={tenant}
-							selectedChannel={selectedChannel}
-						/>
-					)}
+			{selectedChannel && (
+				<ChannelSelectRow
+					channels={channels}
+					tenant={tenant}
+					selectedChannel={selectedChannel}
+				/>
+			)}
 			<div className="flex flex-row pt-4">
 				<MessagesSection />
 			</div>

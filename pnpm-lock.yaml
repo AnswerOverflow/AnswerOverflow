@@ -1657,6 +1657,9 @@ importers:
       react-icons:
         specifier: ^4.12.0
         version: 4.12.0(react@18.2.0)
+      react-schemaorg:
+        specifier: ^2.0.0
+        version: 2.0.0(react@18.2.0)(schema-dts@1.1.2(typescript@5.4.5))(typescript@5.4.5)
       react-spring:
         specifier: ^9.7.2
         version: 9.7.3(@react-three/fiber@8.16.6(react-dom@18.2.0(react@18.2.0))(react-native@0.74.1(@babel/core@7.24.5)(@babel/preset-env@7.24.5(@babel/core@7.24.5))(@types/react@18.3.2)(react@18.2.0))(react@18.2.0)(three@0.164.1))(konva@9.3.8)(react-dom@18.2.0(react@18.2.0))(react-konva@18.2.10(konva@9.3.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-native@0.74.1(@babel/core@7.24.5)(@babel/preset-env@7.24.5(@babel/core@7.24.5))(@types/react@18.3.2)(react@18.2.0))(react-zdog@1.2.2)(react@18.2.0)(three@0.164.1)(zdog@1.1.3)
@@ -9963,6 +9966,14 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  react-schemaorg@2.0.0:
+    resolution: {integrity: sha512-UqciFKA203ewNjn0zC09uYKuJSvMD8L75L1s/cW4rc7cS64w8l7vaI3SYkuoI/nwCBkJRmOkSJedWDUZBlYZwg==}
+    engines: {node: '>=12.0.0'}
+    peerDependencies:
+      react: '>=16.3.0'
+      schema-dts: '>=0.7.4'
+      typescript: '>=3.1.6'
 
   react-shallow-renderer@16.15.0:
     resolution: {integrity: sha512-oScf2FqQ9LFVQgA73vr86xl2NaOIX73rh+YFqcOp68CWj56tSfgtGKrEbyhCj0rSijyG9M1CYprTh39fBi5hzA==}
@@ -22079,6 +22090,12 @@ snapshots:
       use-sidecar: 1.1.2(@types/react@18.3.2)(react@18.2.0)
     optionalDependencies:
       '@types/react': 18.3.2
+
+  react-schemaorg@2.0.0(react@18.2.0)(schema-dts@1.1.2(typescript@5.4.5))(typescript@5.4.5):
+    dependencies:
+      react: 18.2.0
+      schema-dts: 1.1.2(typescript@5.4.5)
+      typescript: 5.4.5
 
   react-shallow-renderer@16.15.0(react@18.2.0):
     dependencies:
