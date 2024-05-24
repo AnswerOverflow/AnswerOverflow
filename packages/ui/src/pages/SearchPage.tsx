@@ -1,6 +1,8 @@
 import type { APISearchResult, ServerPublic } from '@answeroverflow/api';
 import { Heading } from '../ui/heading';
 import { SearchResult } from '../message/SearchResult';
+import { Suspense } from 'react';
+import { MessagesSearchBar } from '../messages-search-bar';
 
 interface SearchResultProps {
 	results: APISearchResult[number][];
@@ -27,7 +29,12 @@ export const SearchPage = ({ results, tenant }: SearchResultProps) => {
 	return (
 		<main className="w-full">
 			<Heading.H1 className="py-4 text-xl">Search Results</Heading.H1>
-			{!noResults && (
+			<Suspense>
+				<MessagesSearchBar className={'mx-auto mb-4'} />
+			</Suspense>
+			{noResults ? (
+				<div className="text-center text-primary/75">No results found</div>
+			) : (
 				<div className={'mb-4'}>
 					<span className="text-base text-primary/[.6]">{resultsText}</span>
 				</div>
