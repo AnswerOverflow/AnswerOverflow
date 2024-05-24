@@ -1,6 +1,7 @@
 import { SearchPage } from '@answeroverflow/ui/src/pages/SearchPage';
 import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
 import { Metadata } from 'next';
+import { ZeroState } from './zero-state';
 type Props = {
 	searchParams: {
 		q?: string | string[];
@@ -25,8 +26,8 @@ export function generateMetadata({ searchParams }: Props): Metadata {
 }
 
 export default async function Search(props: Props) {
-	if (!props.searchParams.q && !props.searchParams.s) {
-		return <SearchPage results={[]} tenant={undefined} />;
+	if (!props.searchParams.q || props.searchParams.q.length === 0) {
+		return <ZeroState />;
 	}
 
 	const results = await callAPI({
