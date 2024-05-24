@@ -38,6 +38,17 @@ export const openSourceContributors: ContributorData[] = [
 		avatar: 'https://avatars.githubusercontent.com/u/123331535',
 		links: ['https://github.com/Cole-Heigis'],
 	},
+	{
+		name: 'Ellie Sage',
+		description:
+			'Answer Overflow logo (the one you see in the top left corner!)',
+		avatar: './ellie-sage.png',
+		links: [
+			'https://www.linkedin.com/in/ellie-sage-3051ab219/',
+			'https://www.instagram.com/helloelliesage/',
+			'https://elliesage.co.uk',
+		],
+	},
 	// {
 	// 	name: 'Orion Tether',
 	// 	description: 'Icon creation',
