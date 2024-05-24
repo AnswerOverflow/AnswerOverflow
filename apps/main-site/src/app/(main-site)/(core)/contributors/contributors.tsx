@@ -31,7 +31,7 @@ export const Contributor = ({
 				<SocialIcon
 					url={value}
 					key={`${name}-${key}-${value}`}
-					className="fill-black dark:fill-white"
+					className="dark:invert"
 					style={{
 						height: '32px',
 						width: '32px',
