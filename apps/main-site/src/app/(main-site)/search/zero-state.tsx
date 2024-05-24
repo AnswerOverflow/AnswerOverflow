@@ -1,14 +1,14 @@
-import { fetchBrowseServers } from '../../../../data/browse';
+import { fetchBrowseServers } from '../../../data/browse';
 import { FollowCursor } from '@answeroverflow/ui/src/ui/follow';
 import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
 import { MessagesSearchBar } from '@answeroverflow/ui/src/messages-search-bar';
 import { ServerIcon } from '@answeroverflow/ui/src/server-icon';
 import Link from '@answeroverflow/ui/src/ui/link';
-import { Footer } from '@answeroverflow/ui/src/footer';
-import { Navbar } from '@answeroverflow/ui/src/navbar';
 import Marquee from 'react-fast-marquee';
 import { Suspense } from 'react';
 import type { ServerPublic } from '@answeroverflow/api';
+import { Navbar } from '@answeroverflow/ui/src/navbar';
+import { Footer } from '@answeroverflow/ui/src/footer';
 
 const HeroAreaText = () => {
 	return (
@@ -104,10 +104,8 @@ const HeroArea = (props: {
 export async function ZeroState() {
 	const data = await fetchBrowseServers();
 	return (
-		<div className="flex w-full flex-col items-center bg-background font-body">
-			<div className={'w-full max-w-screen-3xl'}>
-				<Navbar tenant={undefined} />
-			</div>
+		<div className="flex w-full   flex-col items-center bg-background font-body">
+			<Navbar tenant={undefined} />
 			<HeroArea servers={data} />
 			<div
 				className={
