@@ -2,6 +2,8 @@ import { SearchPage } from '@answeroverflow/ui/src/pages/SearchPage';
 import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
 import { Metadata } from 'next';
 import { ZeroState } from './zero-state';
+import { Footer } from '@answeroverflow/ui/src/footer';
+import { Navbar } from '@answeroverflow/ui/src/navbar';
 type Props = {
 	searchParams: {
 		q?: string | string[];
@@ -39,5 +41,15 @@ export default async function Search(props: Props) {
 					: undefined,
 			}),
 	});
-	return <SearchPage results={results} tenant={undefined} />;
+	return (
+		<div className="mx-auto flex w-full flex-col items-center bg-background font-body">
+			<div className="w-full max-w-screen-2xl justify-center">
+				<Navbar tenant={undefined} />
+				<div className="mt-16 px-4 sm:px-[4rem] 2xl:px-[6rem]">
+					<SearchPage results={results} tenant={undefined} />
+				</div>
+				<Footer tenant={undefined} />
+			</div>
+		</div>
+	);
 }
