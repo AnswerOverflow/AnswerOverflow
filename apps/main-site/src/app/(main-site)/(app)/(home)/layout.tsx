@@ -41,7 +41,9 @@ export default async function HomePage(props: { children: React.ReactNode }) {
 					Answer Overflow is the best way to discover Discord content. Browse
 					trending forum posts, explore popular servers, or view new content.
 					Know of a Discord server that should show up on the site?{' '}
-					<BlueLink href={'/about'}>Learn more about adding a server!</BlueLink>
+					<BlueLink href={'/about'} prefetch={false}>
+						Learn more about adding a server!
+					</BlueLink>
 				</span>
 			</div>
 			<div className={' flex w-[95vw] max-w-[650px] flex-col gap-4 md:px-4'}>

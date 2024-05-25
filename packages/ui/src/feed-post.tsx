@@ -90,7 +90,10 @@ export const FeedPost = async (props: { postId: string }) => {
 				'outer rounded-md border-2 bg-card p-2 hover:border-muted-foreground'
 			}
 		>
-			<Link href={`/m/${thread.id}`} />
+			<Link
+				href={`/m/${thread.id}`}
+				aria-label={`View thread ${thread.name}`}
+			/>
 			<MainContent />
 		</div>
 	);
