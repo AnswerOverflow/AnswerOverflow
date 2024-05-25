@@ -116,6 +116,7 @@ const MainSiteFooter = () => (
 										href={item.href}
 										key={`link-${item.name}-${item.href}`}
 										className="my-1 font-body text-primary/75  hover:text-primary"
+										prefetch={false}
 									>
 										{item.name}
 									</Link>
@@ -134,6 +135,7 @@ const MainSiteFooter = () => (
 					className="text-gray-400 hover:text-gray-500 dark:text-neutral-300 dark:hover:text-neutral-600"
 					target="_blank"
 					referrerPolicy="no-referrer"
+					prefetch={false}
 				>
 					<span className="sr-only">{item.name}</span>
 					<item.icon className="h-6 w-6" aria-hidden="true" />
@@ -150,6 +152,7 @@ const PoweredByAnswerOverflowFooter = () => (
 	<div className="flex flex-col items-center justify-center">
 		<Link
 			href="https://www.answeroverflow.com"
+			prefetch={false}
 			className="flex flex-col items-center justify-center gap-2 fill-black stroke-black  py-8 font-bold hover:fill-blue-500 hover:stroke-blue-500 hover:text-blue-500 dark:fill-white dark:stroke-white hover:dark:fill-blue-500 hover:dark:stroke-blue-500"
 		>
 			<span>Powered by</span>

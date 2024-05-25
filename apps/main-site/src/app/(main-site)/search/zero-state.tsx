@@ -143,7 +143,11 @@ export async function ZeroState() {
 							Answer Overflow is free to use and setup for your community to
 							start getting your Discord discussions indexed.
 						</span>
-						<LinkButton href={'/about'} className={'mx-auto mt-8'}>
+						<LinkButton
+							href={'/about'}
+							className={'mx-auto mt-8'}
+							prefetch={false}
+						>
 							Learn More
 						</LinkButton>
 					</div>
