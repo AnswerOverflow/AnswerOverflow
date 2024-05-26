@@ -1,22 +1,11 @@
 'use client';
-import { DatePickerWithPresets } from '@answeroverflow/ui/src/ui/date-picker';
-import {
-	PageViewsLineChart,
-	PageViewsTotalCard,
-	ServerInvitesClickedTotalCard,
-} from './components/home';
+
+import dynamic from 'next/dynamic';
+
+// Dynamic import since we have no need to SSR and it causes hydration errors
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const ClientOnlyComponent = dynamic(() => import('./client'), { ssr: false });
 
 export default function Dashboard() {
-	return (
-		<div>
-			<DatePickerWithPresets />
-			<div>
-				<div className="flex flex-row justify-start" suppressHydrationWarning>
-					<PageViewsTotalCard />
-					<ServerInvitesClickedTotalCard />
-				</div>
-				<PageViewsLineChart />
-			</div>
-		</div>
-	);
+	return <ClientOnlyComponent />;
 }

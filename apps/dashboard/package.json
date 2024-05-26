@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"with-env": "dotenv -e ../../.env --",
-		"dev": "pnpm with-env next dev --port 3002 --turbo",
+		"dev": "pnpm with-env next dev --port 3002",
 		"build": "pnpm with-env next build",
 		"clean": "rm -rf .next .turbo node_modules",
 		"start": "pnpm with-env next start --port 3002",

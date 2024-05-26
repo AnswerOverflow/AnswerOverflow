@@ -129,5 +129,5 @@ export function getServerInvitesClicked(opts: {
 			label: 'Invite Clicked',
 			sampling: 'total',
 		})
-		.execute({ type: 'number' });
+		.execute({ type: 'line' });
 }

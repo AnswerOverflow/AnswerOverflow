@@ -11,11 +11,6 @@ type ChartData = {
 	label: string;
 };
 
-function randomSeeded(seed: number = 1) {
-	const x = Math.sin(seed++) * 10000;
-	return x - Math.floor(x);
-}
-
 function getFakeData(opts: {
 	min: number;
 	max: number;
@@ -34,8 +29,8 @@ function getFakeData(opts: {
 			i, // get in format of Day name, Month name abrv. Day number
 		) => new Date(opts.from.getTime() + i * 1000 * 60 * 60 * 24),
 	);
-	const data = days.map((day) =>
-		Math.floor(randomSeeded(day.getTime()) * (opts.max - opts.min) + opts.min),
+	const data = days.map(() =>
+		Math.floor(Math.random() * (opts.max - opts.min) + opts.min),
 	);
 	return {
 		aggregated_value: data.reduce((acc, curr) => acc + curr, 0),
@@ -75,16 +70,18 @@ function usePageViews() {
 export function PageViewsLineChart() {
 	const { data } = usePageViews();
 	if (!data) return null;
-	return <Chart {...data} />;
+	return (
+		<div className="flex w-full flex-col gap-2 rounded-lg border-1 py-4">
+			<span className="px-16 text-lg text-muted-foreground">Page Views</span>
+			<span className="px-16 text-4xl">
+				{data.results['Page Views'].aggregated_value.toLocaleString()}
+			</span>
+			<Chart {...data} showLegend={false} showGridLines={false} />
+		</div>
+	);
 }
 
-export function PageViewsTotalCard() {
-	const { data } = usePageViews();
-	if (!data) return null;
-	return <Chart type={'number'} results={data.results} />;
-}
-
-export function ServerInvitesClickedTotalCard() {
+export function ServerInvitesUsedLineChart() {
 	const { options } = useDashboardContext();
 	const { data } = trpc.dashboard.serverInvitesClicked.useQuery(options, {
 		refetchOnReconnect: false,
@@ -102,7 +99,7 @@ export function ServerInvitesClickedTotalCard() {
 								label: 'Invite Clicked',
 							}),
 						},
-						type: 'number',
+						type: 'line',
 				  }
 				: undefined,
 	});

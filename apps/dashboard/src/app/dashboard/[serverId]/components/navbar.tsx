@@ -47,7 +47,7 @@ export function ServerSelectDropdown() {
 				<DropdownMenuTrigger asChild>
 					{selectedServer ? (
 						<Button
-							className="flex items-center space-x-2 px-4 py-7"
+							className="flex items-center space-x-2 rounded-none px-4 py-7"
 							variant={'ghost'}
 						>
 							<ServerSelectRow server={selectedServer} />
@@ -71,7 +71,7 @@ export function ServerSelectDropdown() {
 					<DropdownMenuItem>
 						<Link
 							href={'/onboarding'}
-							className={'flex items-center gap-2 text-left'}
+							className={'flex w-full items-center gap-2 text-left'}
 						>
 							<LiaPlusCircleSolid className={'h-[40px] w-[40px]'} />
 							Add new
