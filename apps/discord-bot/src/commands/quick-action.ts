@@ -11,12 +11,9 @@ import {
 	ContextMenuCommandInteraction,
 	StringSelectMenuOptionBuilder,
 } from 'discord.js';
-import {
-	memberToAnalyticsUser,
-	trackDiscordEvent,
-} from '~discord-bot/utils/analytics';
 import { findAllChannelsByServerId } from '@answeroverflow/db';
-import { makeDismissButton } from '~discord-bot/domains/dismiss-button';
+import { makeDismissButton } from '../domains/dismiss-button';
+import { memberToAnalyticsUser, trackDiscordEvent } from '../utils/analytics';
 
 // credit to https://github.com/rafaelalmeidatk/nextjs-forum for the inspiration
 @ApplyOptions<Command.Options>({

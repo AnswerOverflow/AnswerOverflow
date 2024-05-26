@@ -101,6 +101,9 @@ export function applyPublicFlagsToMessages<
 			authorServerSettings?.flags.canPubliclyDisplayMessages ?? false;
 		const isMessagePublic = areAllServerMessagesPublic || hasUserGrantedConsent;
 		const publicAccount = zDiscordAccountPublic.parse(author);
+		const isAnonymous =
+			serverWithFlags.flags.anonymizeMessages &&
+			!authorServerSettings?.flags.canPubliclyDisplayMessages;
 		return {
 			...pick(
 				msg,
@@ -118,11 +121,10 @@ export function applyPublicFlagsToMessages<
 				'parentChannelId',
 				'questionId',
 			),
-			author:
-				serverWithFlags.flags.anonymizeMessages &&
-				!authorServerSettings?.flags.canPubliclyDisplayMessages
-					? anonymizeDiscordAccount(publicAccount, seed)
-					: publicAccount,
+			author: isAnonymous
+				? anonymizeDiscordAccount(publicAccount, seed)
+				: publicAccount,
+			isAnonymous,
 			public: isMessagePublic,
 		};
 	};
@@ -600,8 +602,9 @@ export async function findManyMessageWithRelations(ids: readonly string[]) {
 	console.log(`findManyMessageWithRelations took ${end - start}ms`);
 	const lookUp = new Map(
 		messages.map((msg) => {
-			const parent = msg.channel.parent;
-			if (!parent) return [msg.id, undefined];
+			const parent = msg?.channel?.parent;
+			if (!parent || !addFlagsToChannel(parent).flags.indexingEnabled)
+				return [msg.id, undefined];
 			return [
 				msg.id,
 				{

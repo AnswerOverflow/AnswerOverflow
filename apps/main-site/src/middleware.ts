@@ -31,11 +31,11 @@ export function middleware(req: NextRequest) {
 		return dataUnlockerRouteHandler(req);
 	}
 	const host = req.headers.get('host')!;
-	if (path.startsWith('/og')) {
+	if (path.startsWith('/og') || path.startsWith('/ingest')) {
 		return NextResponse.next();
 	}
 
-	if (isOnMainSite(host)) {
+	if (isOnMainSite(host) || path.includes('/discord')) {
 		const authedRoutes = ['/dashboard'];
 		const authToken = req.cookies.get(getNextAuthCookieName());
 		if (authedRoutes.some((route) => path.startsWith(route))) {

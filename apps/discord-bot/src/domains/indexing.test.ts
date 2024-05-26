@@ -18,11 +18,7 @@ import {
 	findManyMessages,
 	upsertChannel,
 } from '@answeroverflow/db';
-import {
-	toAOChannel,
-	toAODiscordAccount,
-	toAOServer,
-} from '~discord-bot/utils/conversions';
+
 import { fetchAllMessages, filterMessages, indexRootChannel } from './indexing';
 import {
 	mockTextChannel,
@@ -34,7 +30,12 @@ import {
 	mockPublicThread,
 	mockGuildMember,
 } from '@answeroverflow/discordjs-mock';
-import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
+import { setupAnswerOverflowBot } from '../../test/sapphire-mock';
+import {
+	toAOServer,
+	toAOChannel,
+	toAODiscordAccount,
+} from '../utils/conversions';
 
 let client: Client;
 let textChannel: TextChannel;

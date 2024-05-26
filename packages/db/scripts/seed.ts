@@ -30,6 +30,7 @@ async function seedOne() {
 			markSolutionEnabled: true,
 			sendMarkSolutionInstructionsInNewThreads: true,
 		},
+		inviteCode: 'invite-code',
 		type: ChannelType.GuildForum,
 	});
 	const thread = mockThread(channel, {
@@ -88,6 +89,14 @@ async function seedTwo() {
 		mockMessage(server, thread, account, {
 			id: (BigInt(thread.id) + BigInt(i)).toString(),
 			parentChannelId: channel.id,
+		}),
+	);
+	messages.push(
+		mockMessage(server, thread, account, {
+			id: '100',
+			parentChannelId: channel.id,
+			content:
+				'Can you make sure that your internal address is compossed of http://ip:port, ',
 		}),
 	);
 	await upsertServer({

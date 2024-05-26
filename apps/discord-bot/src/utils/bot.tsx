@@ -5,12 +5,12 @@ import {
 	SapphireClient,
 } from '@sapphire/framework';
 
-import '~discord-bot/utils/setup';
+import '../utils/setup';
 import {
 	DiscordJSReact,
 	TestDiscordJSReact,
 } from '@answeroverflow/discordjs-react';
-import { Router } from '~discord-bot/components/primitives';
+import { Router } from '../components/primitives';
 import React from 'react';
 import LRUCache from 'lru-cache';
 import type { AOEventSubject } from './events';

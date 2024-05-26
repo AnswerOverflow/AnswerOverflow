@@ -10,12 +10,12 @@ import {
 	findDiscordOauthByProviderAccountId,
 	findServerById,
 } from '@answeroverflow/db';
-import { toDiscordAPIServer } from '~discord-bot/utils/conversions';
 import {
-	memberToAnalyticsUser,
-	serverWithDiscordInfoToAnalyticsData,
 	trackDiscordEvent,
-} from '~discord-bot/utils/analytics';
+	serverWithDiscordInfoToAnalyticsData,
+	memberToAnalyticsUser,
+} from '../../utils/analytics';
+import { toDiscordAPIServer } from '../../utils/conversions';
 
 @ApplyOptions<Listener.Options>({
 	event: Events.GuildMemberAdd,

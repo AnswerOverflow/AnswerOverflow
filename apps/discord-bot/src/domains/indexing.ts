@@ -6,6 +6,7 @@ import {
 	upsertChannel,
 	upsertManyDiscordAccounts,
 	upsertManyMessages,
+	upsertUserServerSettingsWithDeps,
 } from '@answeroverflow/db';
 import {
 	type AnyThreadChannel,
@@ -21,17 +22,19 @@ import {
 	type TextBasedChannel,
 	TextChannel,
 } from 'discord.js';
-import {
-	extractUsersSetFromMessages,
-	messagesToAOMessagesSet,
-	toAOChannel,
-} from '~discord-bot/utils/conversions';
+
 import { container } from '@sapphire/framework';
 import { sortMessagesById } from '@answeroverflow/discordjs-utils';
 import * as Sentry from '@sentry/node';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { botEnv } from '@answeroverflow/env/bot';
 import { indexMessageForSearch } from '@answeroverflow/search/src';
+import {
+	extractUsersSetFromMessages,
+	messagesToAOMessagesSet,
+	toAOChannel,
+	toAODiscordAccount,
+} from '../utils/conversions';
 
 export async function indexServers(client: Client) {
 	const indexingStartTime = Date.now();
@@ -330,6 +333,20 @@ async function storeIndexData(
 		`Upserting ${convertedUsers.length} discord accounts `,
 	);
 	await upsertManyDiscordAccounts(convertedUsers);
+	const bots = filteredMessages.filter((x) => x.author.bot);
+	if (bots.length > 0) {
+		await Promise.all(
+			bots.map(async (bot) => {
+				return upsertUserServerSettingsWithDeps({
+					serverId: channel.guildId,
+					user: toAODiscordAccount(bot.author),
+					flags: {
+						canPubliclyDisplayMessages: true,
+					},
+				});
+			}),
+		);
+	}
 	container.logger.debug(`Upserting channel: ${channel.id}`);
 	const lastIndexedSnowflake =
 		messages.sort((a, b) => (BigInt(b.id) > BigInt(a.id) ? 1 : -1)).at(0)?.id ??

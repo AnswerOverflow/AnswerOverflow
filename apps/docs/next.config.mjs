@@ -9,7 +9,6 @@ import nextra from 'nextra';
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
-	swcMinify: true,
 	transpilePackages: [
 		'@answeroverflow/api',
 		'@answeroverflow/auth',
@@ -21,13 +20,24 @@ const config = {
 	images: {
 		domains: ['cdn.discordapp.com'],
 	},
-	experimental: {
-		outputFileTracingIgnores: ['**swc/core**'],
-	},
 	// We already do linting on GH actions
 	eslint: {
 		ignoreDuringBuilds: !!process.env.CI,
 	},
+	async rewrites() {
+		return [
+			{
+				source: '/ingest/static/:path*',
+				destination: 'https://us-assets.i.posthog.com/static/:path*',
+			},
+			{
+				source: '/ingest/:path*',
+				destination: 'https://us.i.posthog.com/:path*',
+			},
+		];
+	},
+	// This is required to support PostHog trailing slash API requests
+	skipTrailingSlashRedirect: true,
 };
 const withNextra = nextra({
 	theme: 'nextra-theme-docs',

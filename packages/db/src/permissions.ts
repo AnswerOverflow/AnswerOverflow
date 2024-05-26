@@ -40,6 +40,7 @@ export function stripPrivatePartialMessageData(
 
 	return {
 		...defaultMessage,
+		isAnonymous: message.isAnonymous,
 		author: defaultAuthor,
 		attachments: [],
 		embeds: [],
@@ -86,6 +87,7 @@ export function stripPrivateFullMessageData(
 		embeds: [],
 		reference: reply,
 		solutions: solutions,
+		isAnonymous: message.isAnonymous,
 	};
 }
 

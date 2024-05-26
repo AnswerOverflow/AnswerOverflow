@@ -1,23 +1,23 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command, type ChatInputCommand } from '@sapphire/framework';
 import {
-	callAPI,
-	callWithAllowedErrors,
-	oneTimeStatusHandler,
-} from '~discord-bot/utils/trpc';
-import {
 	SlashCommandBuilder,
 	type ChatInputCommandInteraction,
 	PermissionsBitField,
 } from 'discord.js';
 import React from 'react';
-import { ephemeralReply, getCommandIds } from '~discord-bot/utils/utils';
-import { getDefaultServerWithFlags } from '@answeroverflow/db';
-import { createMemberCtx } from '~discord-bot/utils/context';
 
-import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
-import { ServerSettingsMenu } from '~discord-bot/components/settings';
-import { toAOServer } from '~discord-bot/utils/conversions';
+import { getDefaultServerWithFlags } from '@answeroverflow/db';
+import { ServerSettingsMenu } from '../../components/settings';
+import { guildTextChannelOnlyInteraction } from '../../utils/conditions';
+import { createMemberCtx } from '../../utils/context';
+import { toAOServer } from '../../utils/conversions';
+import {
+	callAPI,
+	callWithAllowedErrors,
+	oneTimeStatusHandler,
+} from '../../utils/trpc';
+import { getCommandIds, ephemeralReply } from '../../utils/utils';
 
 @ApplyOptions<Command.Options>({
 	name: 'server-settings',

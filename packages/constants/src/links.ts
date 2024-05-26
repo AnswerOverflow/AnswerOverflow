@@ -25,9 +25,11 @@ export const WAITLIST_URL = 'https://forms.gle/6YLPPGi8X2DCr29T7';
 export const getBaseUrl = () => {
 	const base =
 		// eslint-disable-next-line n/no-process-env
-		process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NODE_ENV === 'development'
-			? 'http://localhost:3000'
-			: 'https://www.answeroverflow.com';
+		process.env.NEXT_PUBLIC_SITE_URL ??
+		// eslint-disable-next-line n/no-process-env
+		(process.env.NODE_ENV !== 'development'
+			? 'https://www.answeroverflow.com'
+			: 'http://localhost:3000');
 	return base.endsWith('/') ? base.slice(0, -1) : base;
 };
 
@@ -37,7 +39,12 @@ export const getMainSiteHostname = () => {
 };
 
 export const isOnMainSite = (host: string) => {
-	return host === getMainSiteHostname() || host.endsWith('.vercel.app');
+	// TODO: Do we even need getMainSiteHostname()?
+	return (
+		host === getMainSiteHostname() ||
+		host.endsWith('.vercel.app') ||
+		host === 'https://www.answeroverflow.com'
+	);
 };
 
 export const makeMainSiteLink = (path: string) => {

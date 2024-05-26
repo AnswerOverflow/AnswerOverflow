@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
+		"dev:dbs": "docker-compose -f \"docker-compose.yml\" -f \"docker-compose-extras.yml\" up",
 		"init": "turbo run init",
 		"build": "turbo run build",
 		"format": "turbo run format",
@@ -13,8 +14,8 @@
 		"test": "pnpm db:push && pnpm db:wipe && turbo run test",
 		"generate": "pnpm i && cd packages/db && pnpm generate",
 		"dev": "turbo run dev --parallel --no-cache",
-    "dev:lite": "turbo run dev --filter=main-site --filter=discord-bot --parallel --no-cache",
-    "dev:site": "turbo run dev --filter=main-site --no-cache",
+		"dev:lite": "turbo run dev --filter=main-site --filter=discord-bot --parallel --no-cache",
+		"dev:site": "turbo run dev --filter=main-site --no-cache",
 		"migrate": "turbo run migrate",
 		"db:wipe": "turbo db:wipe",
 		"db:push": "turbo db:push",
@@ -60,15 +61,15 @@
 		"vitest": "^0.29.8"
 	},
 	"engines": {
-		"node": ">=18.15.0",
-		"pnpm": ">=8.6.0"
-	},
-	"pnpm": {
-		"patchedDependencies": {
-			"mysql2@3.6.0": "patches/mysql2@3.6.0.patch"
-		}
+		"node": ">=20.0.0",
+		"pnpm": ">=9.0.0"
 	},
 	"dependencies": {
 		"contentlayer": "^0.3.4"
+	},
+	"pnpm": {
+		"patchedDependencies": {
+			"@contentlayer/core@0.3.4": "patches/@contentlayer__core@0.3.4.patch"
+		}
 	}
 }

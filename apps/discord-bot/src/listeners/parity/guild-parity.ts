@@ -8,19 +8,19 @@ import {
 	findAllServers,
 	updateServer,
 } from '@answeroverflow/db';
-import {
-	getMemberCount,
-	toAOChannel,
-	toAOServer,
-} from '~discord-bot/utils/conversions';
 import { delay } from '@answeroverflow/discordjs-mock';
 import { registerServerGroup } from '@answeroverflow/analytics';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 import {
 	serverWithDiscordInfoToAnalyticsData,
 	trackDiscordEvent,
-} from '~discord-bot/utils/analytics';
-import { sharedEnvs } from '@answeroverflow/env/shared';
-import { leaveServerIfNecessary } from '~discord-bot/utils/denylist';
+} from '../../utils/analytics';
+import {
+	toAOServer,
+	getMemberCount,
+	toAOChannel,
+} from '../../utils/conversions';
+import { leaveServerIfNecessary } from '../../utils/denylist';
 
 /*
   Guild related events are tracked here, this may make sense to split into multiple files as the complexity grows.

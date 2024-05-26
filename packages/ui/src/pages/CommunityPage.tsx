@@ -5,12 +5,7 @@ import type {
 import { NUMBER_OF_THREADS_TO_LOAD } from '@answeroverflow/constants/src/api';
 import { getServerDescription } from '../utils/server';
 import { Button } from '../ui/button';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+
 import { Heading } from '../ui/heading';
 import { ChannelName, ServerInviteJoinButton } from '../server-invite';
 import { ServerIcon } from '../server-icon';
@@ -18,7 +13,6 @@ import { LinkMessage } from '../message/link-message';
 import { Navbar } from '../navbar';
 import { Footer } from '../footer';
 import { LinkButton } from '../ui/link-button';
-import Link from '../ui/link';
 import { MessagesSearchBar } from '../messages-search-bar';
 import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
 import { LuArrowLeft, LuArrowRight } from 'react-icons/lu';
@@ -31,13 +25,13 @@ type ChannelSelectProps = {
 	tenant: ServerPublic | undefined;
 };
 
-function ChannelSidebar(props: ChannelSelectProps) {
+function ChannelSelectRow(props: ChannelSelectProps) {
 	const ChannelSelect = ({ channel }: { channel: ChannelPublicWithFlags }) => {
 		const selected = props.selectedChannel.id === channel.id;
 		return (
 			<LinkButton
-				variant={selected ? 'secondary' : 'ghost'}
-				className="px-0"
+				variant={selected ? 'secondary' : 'outline'}
+				className="max-w-[200px] flex-shrink-0"
 				href={
 					props.tenant
 						? `/c/${channel.id}`
@@ -49,43 +43,40 @@ function ChannelSidebar(props: ChannelSelectProps) {
 		);
 	};
 
-	const channels = props.channels;
+	if (props.channels.length == 1) {
+		return null;
+	}
 	return (
-		<div className="mr-4 max-w-[250px]">
-			<Heading.H4 className="px-4 text-center">Channels</Heading.H4>
-			<div className="flex shrink-0 flex-col gap-2 text-left">
-				{channels.map((channel) => (
-					<ChannelSelect channel={channel} key={channel.id} />
-				))}
-			</div>
-		</div>
-	);
-}
+		<div
+			className={cn(
+				'channel-row flex w-full shrink-0 flex-row gap-2 overflow-x-scroll text-left',
+				props.channels.length > 6 ? 'pb-2' : null,
+			)}
+			style={{
+				scrollbarWidth: 'auto', // For Firefox
+				WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+			}}
+		>
+			<style>
+				{`
+      .channel-row::-webkit-scrollbar {
+        height: 6px;  /* Adjust height if necessary */
+      }
 
-function ChannelDropdown(props: ChannelSelectProps) {
-	return (
-		<DropdownMenu modal={false}>
-			<DropdownMenuTrigger asChild>
-				<Button variant="outline" className="w-full">
-					<ChannelName channel={props.selectedChannel} />
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent className="max-h-vh30 w-vw80">
-				{props.channels.map((channel) => (
-					<DropdownMenuItem key={channel.id} asChild>
-						<Link
-							href={
-								props.tenant
-									? `/c/${channel.id}`
-									: `/c/${channel.serverId}/${channel.id}`
-							}
-						>
-							<ChannelName channel={channel} />
-						</Link>
-					</DropdownMenuItem>
-				))}
-			</DropdownMenuContent>
-		</DropdownMenu>
+      .channel-row::-webkit-scrollbar-thumb {
+        background-color: #888;  /* Customize scrollbar thumb color */
+        border-radius: 4px;  /* Optional: For rounded corners */
+      }
+
+      .channel-row::-webkit-scrollbar-thumb:hover {
+        background-color: #555;  /* Customize hover state */
+      }
+    `}
+			</style>
+			{props.channels.map((channel) => (
+				<ChannelSelect channel={channel} key={channel.id} />
+			))}
+		</div>
 	);
 }
 
@@ -138,7 +129,8 @@ const PageSwitcher = (props: {
 		)}
 	</div>
 );
-
+import Image from 'next/image';
+import { cn } from '../utils/utils';
 export const CommunityPage = (
 	props: CommunityPageData & {
 		tenant: ServerPublic | undefined;
@@ -146,17 +138,34 @@ export const CommunityPage = (
 			| Pick<CommunityPageData, 'channels'>['channels'][number]
 			| undefined;
 		page: number | undefined;
+		uwu?: boolean;
 	},
 ) => {
 	const { server, channels, selectedChannel, tenant, posts: questions } = props;
 	// useTrackEvent('Community Page View', serverToAnalyticsData(server));
 	const { page = 0 } = props;
+	const isNuxtUwu = server.id === '473401852243869706' && props.uwu;
 	const HeroArea = () => {
 		return (
 			<div className="flex flex-col">
-				<div className="m-auto flex w-full flex-row bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
+				<div className="m-auto flex w-full flex-row rounded-sm bg-gradient-to-r from-[#7196CD] to-[#82adbe] px-4 py-8 dark:to-[#113360] sm:px-8 xl:px-[7rem] xl:py-16 2xl:py-20">
 					<div className={'mx-auto flex flex-row gap-4'}>
-						<ServerIcon server={server} size={128} className="hidden sm:flex" />
+						{isNuxtUwu ? (
+							<Image
+								src="/uwu/nuxt.png"
+								width={300}
+								height={168}
+								alt="Uwuified Nuxt Logo"
+								className="hidden sm:flex"
+							/>
+						) : (
+							<ServerIcon
+								server={server}
+								size={128}
+								className="hidden sm:flex"
+							/>
+						)}
+
 						<div>
 							<Heading.H1 className="hidden pt-0 md:block">
 								{server.name}
@@ -174,13 +183,28 @@ export const CommunityPage = (
 							</div>
 						</div>
 						<div className="flex w-full flex-col items-center text-center md:hidden">
-							<div className="flex flex-row items-center justify-center gap-2">
-								<ServerIcon
-									server={server}
-									size={64}
+							{isNuxtUwu && (
+								<Image
+									src="/uwu/nuxt.png"
+									width={300 / 1.5}
+									height={168 / 1.5}
+									alt="Uwuified Nuxt Logo"
 									className="flex sm:hidden"
 								/>
-								<Heading.H1 className="pt-0 text-3xl">{server.name}</Heading.H1>
+							)}
+							<div className="flex flex-row items-center justify-center gap-2">
+								{!isNuxtUwu && (
+									<>
+										<ServerIcon
+											server={server}
+											size={64}
+											className="flex sm:hidden"
+										/>
+										<Heading.H1 className="pt-0 text-3xl">
+											{server.name}
+										</Heading.H1>
+									</>
+								)}
 							</div>
 							<Heading.H2 className="text-base font-normal">
 								{server.description ??
@@ -243,25 +267,15 @@ export const CommunityPage = (
 					serverId={server.id}
 				/>
 			</Suspense>
-			<div className="flex w-full justify-center py-2 md:hidden">
-				{selectedChannel && (
-					<ChannelDropdown
-						channels={channels}
-						selectedChannel={selectedChannel}
-						tenant={tenant}
-					/>
-				)}
-			</div>
+
+			{selectedChannel && (
+				<ChannelSelectRow
+					channels={channels}
+					tenant={tenant}
+					selectedChannel={selectedChannel}
+				/>
+			)}
 			<div className="flex flex-row pt-4">
-				<div className="hidden md:block">
-					{selectedChannel && (
-						<ChannelSidebar
-							channels={channels}
-							tenant={tenant}
-							selectedChannel={selectedChannel}
-						/>
-					)}
-				</div>
 				<MessagesSection />
 			</div>
 		</>
@@ -269,12 +283,12 @@ export const CommunityPage = (
 
 	return (
 		<div className="mx-auto w-full overflow-y-auto overflow-x-hidden bg-background">
-			<Navbar tenant={tenant} hideIcon={!!tenant} />
+			{tenant && <Navbar tenant={tenant} hideIcon={!!tenant} />}
 			<TrackLoad
 				eventName={'Community Page View'}
 				eventData={serverToAnalyticsData(server)}
 			/>
-			<main className="bg-background">
+			<main className={cn('bg-background', tenant ? 'mt-8' : 'pt-2')}>
 				<HeroArea />
 				<div className="py-8">
 					<div className="px-4 2xl:px-[6rem]">
@@ -282,7 +296,7 @@ export const CommunityPage = (
 					</div>
 				</div>
 			</main>
-			<Footer tenant={tenant} />
+			{tenant && <Footer tenant={tenant} />}
 		</div>
 	);
 };

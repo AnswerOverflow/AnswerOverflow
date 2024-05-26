@@ -4,7 +4,7 @@ import { Events } from 'discord.js';
 import {
 	SendMarkSolutionInstructionsError,
 	sendMarkSolutionInstructionsInThread,
-} from '~discord-bot/domains/send-mark-solution-instructions';
+} from '../../domains/send-mark-solution-instructions';
 
 @ApplyOptions<Listener.Options>({ event: Events.ClientReady })
 export class SendMarkSolutionInstructionsOnThreadCreate extends Listener<Events.ClientReady> {

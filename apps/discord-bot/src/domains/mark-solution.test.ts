@@ -16,12 +16,6 @@ import {
 	checkIfCanMarkSolution,
 	makeMarkSolutionResponse,
 } from './mark-solution';
-import {
-	toAOChannel,
-	toAOChannelWithServer,
-	toAOMessage,
-	toAOServer,
-} from '~discord-bot/utils/conversions';
 
 import type { ChannelWithFlags } from '@answeroverflow/db';
 import { makeConsentButtonData } from './manage-account';
@@ -36,7 +30,7 @@ import {
 	mockReaction,
 	testAllPermissions,
 } from '@answeroverflow/discordjs-mock';
-import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
+
 import { randomSnowflake } from '@answeroverflow/discordjs-utils';
 import {
 	createChannel,
@@ -46,6 +40,13 @@ import {
 } from '@answeroverflow/db';
 import { PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED } from '@answeroverflow/constants';
 import { getRandomId } from '@answeroverflow/utils';
+import { setupAnswerOverflowBot } from '../../test/sapphire-mock';
+import {
+	toAOServer,
+	toAOChannel,
+	toAOMessage,
+	toAOChannelWithServer,
+} from '../utils/conversions';
 
 let client: Client;
 let guild: Guild;

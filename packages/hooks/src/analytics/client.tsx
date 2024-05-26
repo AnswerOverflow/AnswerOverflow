@@ -11,6 +11,8 @@ if (typeof window !== 'undefined') {
 		disable_session_recording: true,
 		persistence: 'memory',
 		capture_pageview: false,
+		api_host: '/ingest',
+		ui_host: 'https://us.i.posthog.com', // or 'https://eu.i.posthog.com' if your PostHog is hosted in Europe
 	});
 }
 

@@ -27,7 +27,7 @@ const client = new Client({
 		if (field.type === 'JSON') {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 			if (value === null) return null;
-			return JSONParse(decoder.decode(Uint8Array.from(bytes(value))));
+			return JSONParse(decoder.decode(Uint8Array.from(bytes(value as string))));
 		}
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 		return cast(field, value);
@@ -46,7 +46,7 @@ const clientReplica = new Client({
 		if (field.type === 'JSON') {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 			if (value === null) return null;
-			return JSONParse(decoder.decode(Uint8Array.from(bytes(value))));
+			return JSONParse(decoder.decode(Uint8Array.from(bytes(value as string))));
 		}
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 		return cast(field, value);

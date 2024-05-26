@@ -7,10 +7,10 @@ import {
 	type PermissionResolvable,
 } from 'discord.js';
 import {
+	trackDiscordEvent,
 	memberToAnalyticsUser,
 	messageToAnalyticsMessage,
-	trackDiscordEvent,
-} from '~discord-bot/utils/analytics';
+} from '../utils/analytics';
 
 export const DISMISS_BUTTON_LABEL = 'Dismiss';
 export const DISMISS_ACTION_PREFIX = 'dismiss';

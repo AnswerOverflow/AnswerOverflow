@@ -1,22 +1,19 @@
 import { Collection, Events, Message, TextChannel } from 'discord.js';
 import type { SapphireClient } from '@sapphire/framework';
 import {
-	toAODiscordAccount,
-	toAOMessage,
-} from '~discord-bot/utils/conversions';
-import {
 	mockTextChannel,
 	mockMessage,
 	emitEvent,
 	copyClass,
 } from '@answeroverflow/discordjs-mock';
-import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
+import { setupAnswerOverflowBot } from '../../../test/sapphire-mock';
 import {
 	createDiscordAccount,
 	findFullMessageById,
 	findMessageById,
 	upsertMessage,
 } from '@answeroverflow/db';
+import { toAODiscordAccount, toAOMessage } from '../../utils/conversions';
 
 let client: SapphireClient;
 let message: Message;

@@ -4,8 +4,8 @@
 	"compileOnSave": true,
 	"compilerOptions": {
 		"composite": false,
-    "declaration": false,
-    "declarationMap": false,
+		"declaration": false,
+		"declarationMap": false,
 		"inlineSources": false,
 		"isolatedModules": true,
 		"preserveWatchOutput": true,
@@ -48,21 +48,7 @@
 		"exactOptionalPropertyTypes": false,
 		"noImplicitOverride": true,
 		"outDir": "dist",
-		"baseUrl": ".",
-		"paths": {
-			"~discord-bot/utils/*": ["./apps/discord-bot/src/utils/*"],
-			"~discord-bot/domains/*": ["./apps/discord-bot/src/domains/*"],
-			"~discord-bot/listeners": ["./apps/discord-bot/src/listeners/*"],
-			"~discord-bot/primitives/*": ["./apps/discord-bot/src/primitives/*"],
-			"~discord-bot/interaction-handlers/*": [
-				"./apps/discord-bot/src/interaction-handlers/*"
-			],
-			"~discord-bot/components/*": ["./apps/discord-bot/src/components/*"],
-			"~discord-bot/test/*": ["./apps/discord-bot/test/*"],
-			"~api/router/*": ["./packages/api/src/router/*"],
-			"~api/test/*": ["./packages/api/test/*"],
-			"~api/utils/*": ["./packages/api/src/utils/*"]
-		}
+		"baseUrl": "."
 	},
 	"exclude": ["dist", "node_modules"]
 }

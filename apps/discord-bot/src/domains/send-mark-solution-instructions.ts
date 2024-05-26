@@ -7,15 +7,16 @@ import {
 	type MessageActionRowComponentBuilder,
 	ThreadChannel,
 } from 'discord.js';
+
+import { makeDismissButton } from './dismiss-button';
 import {
-	channelWithDiscordInfoToAnalyticsData,
+	trackDiscordEvent,
 	memberToAnalyticsUser,
 	messageToAnalyticsMessage,
-	serverWithDiscordInfoToAnalyticsData,
 	threadWithDiscordInfoToAnalyticsData,
-	trackDiscordEvent,
-} from '~discord-bot/utils/analytics';
-import { makeDismissButton } from './dismiss-button';
+	channelWithDiscordInfoToAnalyticsData,
+	serverWithDiscordInfoToAnalyticsData,
+} from '../utils/analytics';
 
 const sendMarkSolutionInstructionsErrorReasons = [
 	'Thread was not newly created',

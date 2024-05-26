@@ -66,7 +66,7 @@ export const Embed = (props: EmbedProps) => {
 
 	return (
 		<div
-			className="flex w-auto flex-col gap-1 rounded-standard bg-black/5 py-2 pl-4 pr-6 dark:bg-white/10"
+			className="flex w-auto flex-col gap-1 break-words rounded-standard bg-black/5 py-2 pl-4 pr-6 dark:bg-white/10"
 			style={{
 				borderLeftColor: `#${numberToHex(props.embed.color)}` ?? '#FFFFFF',
 				borderLeftStyle: 'solid',
@@ -74,7 +74,11 @@ export const Embed = (props: EmbedProps) => {
 			}}
 		>
 			{embed.author?.url ? (
-				<BlueLink href={embed.author.url}>
+				<BlueLink
+					href={embed.author.url}
+					prefetch={false}
+					rel="noopener ugc nofollow"
+				>
 					<EmbedText text={embed.author?.name} />
 				</BlueLink>
 			) : (
@@ -82,7 +86,7 @@ export const Embed = (props: EmbedProps) => {
 			)}
 			<EmbedText text={embed.provider?.name} />
 			{embed.url ? (
-				<BlueLink href={embed.url}>
+				<BlueLink href={embed.url} prefetch={false} rel="noopener ugc nofollow">
 					<EmbedText
 						className="text-lg font-bold text-blue-600 hover:underline dark:text-blue-400"
 						text={embed.title}

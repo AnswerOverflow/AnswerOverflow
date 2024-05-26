@@ -8,10 +8,6 @@ import {
 	type Server,
 } from '@answeroverflow/db';
 import {
-	mockAccountWithServersCallerCtx,
-	testAllSourceAndPermissionVariantsThatThrowErrors,
-} from '~api/test/utils';
-import {
 	AUTO_THREAD_ALREADY_DISABLED_ERROR_MESSAGE,
 	AUTO_THREAD_ALREADY_ENABLED_ERROR_MESSAGE,
 	channelRouter,
@@ -31,6 +27,10 @@ import { mockChannel, mockServer } from '@answeroverflow/db-mock';
 import type { z } from 'zod';
 import { getRandomId } from '@answeroverflow/utils';
 import { ChannelType } from 'discord-api-types/v10';
+import {
+	mockAccountWithServersCallerCtx,
+	testAllSourceAndPermissionVariantsThatThrowErrors,
+} from '../../../test/utils';
 let server: Server;
 let channel: Channel;
 let router: ReturnType<typeof channelRouter.createCaller>;

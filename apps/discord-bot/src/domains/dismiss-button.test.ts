@@ -18,7 +18,7 @@ import {
 	mockMessage,
 	mockTextChannel,
 } from '@answeroverflow/discordjs-mock';
-import { setupAnswerOverflowBot } from '~discord-bot/test/sapphire-mock';
+import { setupAnswerOverflowBot } from '../../test/sapphire-mock';
 
 describe('Dismiss Button', () => {
 	describe('Interaction Parser', () => {

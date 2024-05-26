@@ -19,8 +19,9 @@ import {
 	trackServerSideEvent,
 } from '@answeroverflow/analytics';
 import { sentryLogger } from './sentry';
-import type { MarkSolutionErrorReason } from '~discord-bot/domains/mark-solution';
+
 import type { ConsentSource } from '@answeroverflow/api';
+import { MarkSolutionErrorReason } from '../domains/mark-solution';
 
 export type ServerPropsWithDiscordData = ServerPropsWithSettings & {
 	'Bot Time In Server In Ms': number;

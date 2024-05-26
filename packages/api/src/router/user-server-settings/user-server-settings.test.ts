@@ -1,7 +1,7 @@
 import {
 	mockAccountWithServersCallerCtx,
 	testAllSources,
-} from '~api/test/utils';
+} from '../../../test/utils';
 import {
 	type Server,
 	type DiscordAccount,
@@ -12,7 +12,7 @@ import {
 } from '@answeroverflow/db';
 import { userServerSettingsRouter } from './user-server-settings';
 import { mockDiscordAccount, mockServer } from '@answeroverflow/db-mock';
-import { NOT_AUTHORIZED_MESSAGE } from '~api/utils/permissions';
+import { NOT_AUTHORIZED_MESSAGE } from '../../utils/permissions';
 import {
 	AUTOMATED_CONSENT_SOURCES,
 	type ConsentSource,

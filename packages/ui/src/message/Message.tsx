@@ -13,6 +13,7 @@ import { MessageAttachments } from './attachments';
 import { TrackLinkButton } from '../ui/track-link-button';
 import { parse } from './markdown/render';
 import { Embed } from './Embed';
+import { BlueLink } from '../ui/blue-link';
 
 export const MessageAuthorArea = (props: Pick<MessageProps, 'message'>) => {
 	const { message } = props;
@@ -21,7 +22,11 @@ export const MessageAuthorArea = (props: Pick<MessageProps, 'message'>) => {
 			{/* TODO: sort out responsive styling */}
 			<div className="flex w-full flex-row items-center gap-2 font-body text-lg text-black/[.7] dark:text-white/[.47]">
 				<DiscordAvatar user={message.author} size={40} />
-				<span className="mr-1">{message.author.name}</span>
+				<Link className="mr-1" href={`/u/${message.author.id}`}>
+					<span className="text-black/[.7] hover:underline dark:text-white/[.47]">
+						{message.author.name}
+					</span>
+				</Link>
 				<div className="ml-auto mr-4 flex flex-row gap-2">
 					<TrackLinkButton
 						href={getDiscordURLForMessage(message)}
@@ -103,7 +108,9 @@ export const MessageContentWithSolution = (
 					<MessageContents message={props.solution} collapseContent={true} />
 				</MessageBlurrer>
 				{props.showJumpToSolutionCTA && (
-					<Link href={`#solution-${props.solution.id}`}>Jump to solution</Link>
+					<BlueLink href={`#solution-${props.solution.id}`}>
+						Jump to solution
+					</BlueLink>
 				)}
 			</div>
 		</div>

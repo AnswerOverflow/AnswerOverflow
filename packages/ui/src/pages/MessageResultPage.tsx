@@ -1,9 +1,8 @@
 import type { ChannelPublicWithFlags, MessageFull } from '@answeroverflow/db';
 import type { ServerPublic } from '@answeroverflow/api';
-import type { QAPage, WithContext } from 'schema-dts';
-import { getMainSiteHostname } from '@answeroverflow/constants/src/links';
+import type { DiscussionForumPosting } from 'schema-dts';
 import { ServerInviteJoinButton } from '../server-invite';
-import { MessageBody, MessageContentWithSolution } from '../message/Message';
+import { MessageBlurrer, MessageBody } from '../message/Message';
 import Link from '../ui/link';
 import { TrackLoad } from '../ui/track-load';
 import {
@@ -12,7 +11,6 @@ import {
 	threadToAnalyticsData,
 } from '@answeroverflow/constants/src/analytics';
 import { messageWithDiscordAccountToAnalyticsData } from '@answeroverflow/hooks';
-import { stripMarkdownAndHTML } from '../message/markdown/strip';
 import { TrackLinkButton } from '../ui/track-link-button';
 import { LazyInviteToAnswerOverflowPopover } from './message-result-page/lazy-invite-to-answer-overflow-popover';
 import { ServerIcon } from '../server-icon';
@@ -21,6 +19,14 @@ import { FormattedNumber } from '../ui/numbers';
 import { ThinMessage } from '../message/thin-message';
 import { getDiscordURLForMessage } from '../utils/discord';
 import { ExternalLink } from 'lucide-react';
+import { getDate } from '../utils/snowflake';
+import { getMainSiteHostname } from '@answeroverflow/constants';
+import { isImageAttachment } from '../message/attachments';
+import { TimeAgo } from '../ui/time-ago';
+import { DiscordAvatar } from '../discord-avatar';
+import { FaRegMessage } from 'react-icons/fa6';
+import { BlueLink } from '../ui/blue-link';
+import { JsonLd } from 'react-schemaorg';
 
 export type MessageResultPageProps = {
 	messages: MessageFull[];
@@ -110,21 +116,22 @@ export function MessageResultPage({
 		};
 	});
 
-	const messagesToDisplay = messagesWithMergedContent.filter(Boolean);
+	// yes this could be done in one filter but i want the types to be right todo: refactor
+	const nonNull = messagesWithMergedContent.filter(Boolean);
+	const messagesToDisplay = nonNull.filter((message, index) => {
+		if (message.id === firstMessage.id) return false;
+		const nextMessage = nonNull.at(index + 1);
+		if (!message.public && isUserInServer !== 'in_server') {
+			if (nextMessage && !nextMessage.public) {
+				return false;
+			}
+		}
+		if (message.author.id === '958907348389339146') return false;
+		return true;
+	});
 
 	const messageStack = messagesToDisplay
-		.map((message, index) => {
-			if (message.id === firstMessage.id) {
-				return;
-			}
-			const nextMessage = messagesToDisplay.at(index + 1);
-			if (!message.public && isUserInServer !== 'in_server') {
-				if (nextMessage && !nextMessage.public) {
-					return;
-				}
-			}
-			if (message.author.id === '958907348389339146') return null;
-
+		.map((message) => {
 			if (message.id === solutionMessageId) {
 				return (
 					<div
@@ -152,62 +159,97 @@ export function MessageResultPage({
 		.filter(Boolean);
 
 	const title = thread?.name ?? firstMessage.content?.slice(0, 100);
-	const isFirstMessageSolution = solution && solution.id !== firstMessage.id;
-	const qaHeader: WithContext<QAPage> = {
-		'@context': 'https://schema.org',
-		'@type': 'QAPage',
-		mainEntity: {
-			'@type': 'Question',
-			name: stripMarkdownAndHTML(title),
-			text: stripMarkdownAndHTML(firstMessage.content),
-			answerCount: solution && !isFirstMessageSolution ? 1 : 0,
-			acceptedAnswer:
-				solution && !isFirstMessageSolution
-					? {
-							'@type': 'Answer',
-							text: stripMarkdownAndHTML(solution.content),
-							url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
-								solution.id
-							}#solution-${solution.id}`,
-					  }
-					: undefined,
-		},
-	};
+	const firstMessageMedia = firstMessage.attachments
+		.filter((attachment) => isImageAttachment(attachment))
+		.at(0);
+
 	const Main = () => (
-		<div className={'flex w-full grow flex-col gap-4 '}>
-			<div className="flex flex-col gap-2">
-				{!tenant && (
+		<main className={'flex w-full max-w-3xl grow flex-col gap-4'}>
+			<div className="flex flex-col gap-2 pl-2">
+				{tenant ? (
+					<div className="flex flex-row items-center gap-2">
+						<DiscordAvatar user={firstMessage.author} size={48} />
+						<div className="flex flex-col">
+							<div className="flex flex-row items-center gap-2">
+								<Link
+									href={`/u/${firstMessage.author.id}`}
+									className="hover:underline"
+								>
+									{firstMessage.author.name}
+								</Link>
+								<span className="text-sm text-muted-foreground">•</span>
+								<TimeAgo snowflake={firstMessage.id} />
+							</div>
+						</div>
+					</div>
+				) : (
 					<div className="flex flex-row items-center gap-2">
 						<Link href={`/c/${server.id}`}>
 							<ServerIcon server={server} size={48} />
 						</Link>
 						<div className="flex flex-col">
-							<Link href={`/c/${server.id}`}>{server.name}</Link>
-							{firstMessage.author.name}
+							<div className="flex flex-row items-center gap-2">
+								<Link href={`/c/${server.id}`} className="hover:underline">
+									{server.name}
+								</Link>
+								<span className="text-sm text-muted-foreground">•</span>
+								<TimeAgo snowflake={firstMessage.id} />
+							</div>
+							<Link
+								href={`/u/${firstMessage.author.id}`}
+								className="text-foreground/70 hover:underline"
+							>
+								{firstMessage.author.name}
+							</Link>
 						</div>
 					</div>
 				)}
 				<h1 className="text-2xl font-semibold">{title}</h1>
 				<div>
-					<MessageBody
-						message={firstMessage}
-						content={
-							solution &&
-							messageStack.length > 2 && (
-								<MessageContentWithSolution
-									message={firstMessage}
-									solution={solution}
-								/>
-							)
-						}
-						loadingStyle="eager"
-					/>
+					<MessageBody message={firstMessage} loadingStyle="eager" />
+					{solution && (
+						<div className="mt-4 w-full rounded-lg  border-2 border-green-500 p-2 dark:border-green-400">
+							<span className="text-green-800 dark:text-green-400">
+								Solution:
+							</span>
+
+							<MessageBlurrer message={solution}>
+								<MessageBody message={solution} collapseContent={true} />
+							</MessageBlurrer>
+
+							<BlueLink href={`#solution-${solution.id}`}>
+								Jump to solution
+							</BlueLink>
+						</div>
+					)}
+				</div>
+			</div>
+			<div className="flex flex-row gap-4 border-b-2 border-muted py-4 pl-2">
+				<div className={'flex items-center gap-2'}>
+					<FaRegMessage className={'size-4'} />
+					<span>
+						{messagesToDisplay.length}{' '}
+						{messagesToDisplay.length === 1 ? 'Reply' : 'Replies'}
+					</span>
 				</div>
 			</div>
 			<div className="rounded-md">
 				<div className="flex flex-col gap-4">{messageStack}</div>
 			</div>
-		</div>
+			{messagesToDisplay.length === 0 && (
+				<div className="flex flex-col gap-4 rounded-md border-2 border-solid border-secondary p-4">
+					<span className="text-lg font-semibold">No replies yet</span>
+					<span className="text-muted-foreground">
+						Be the first to reply to this message
+					</span>
+					<ServerInviteJoinButton
+						server={server}
+						channel={channel}
+						location="Message Result Page"
+					/>
+				</div>
+			)}
+		</main>
 	);
 
 	const adsEnabled = !tenant;
@@ -215,11 +257,13 @@ export function MessageResultPage({
 	const Sidebar = () => (
 		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center  md:w-[400px]">
 			<div
-				className={'hidden w-full  border-2 bg-card drop-shadow-md md:block'}
+				className={
+					'hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block'
+				}
 			>
 				<div className="flex flex-col items-start gap-4 p-4">
 					<div className="flex w-full flex-row items-center justify-between truncate font-bold">
-						<Link href={`/c/${server.id}`}>{server.name}</Link>
+						<Link href={tenant ? '/' : `/c/${server.id}`}>{server.name}</Link>
 						<ServerInviteJoinButton
 							server={server}
 							channel={channel}
@@ -254,20 +298,22 @@ export function MessageResultPage({
 					<>
 						<span className="text-lg font-semibold">More Posts</span>
 						<div className="flex flex-col gap-4">
-							{relatedPosts.slice(0, messages.length * 2).map((post) => (
-								<Link
-									className="flex flex-col gap-2 rounded-md border-2 border-solid border-secondary p-4 text-left transition-colors duration-700 ease-out hover:border-primary hover:text-primary"
-									href={`/m/${post.message.id}`}
-									key={post.thread.id}
-								>
-									<span className="truncate text-lg font-semibold">
-										{post.thread.name}
-									</span>
-									<span className="truncate text-sm">
-										{post.message.content.slice(0, 100)}
-									</span>
-								</Link>
-							))}
+							{relatedPosts
+								.slice(0, Math.min(messages.length * 2, 10))
+								.map((post) => (
+									<Link
+										className="flex flex-col gap-2 rounded-md border-2 border-solid border-secondary p-4 text-left transition-colors duration-700 ease-out hover:border-primary hover:text-primary"
+										href={`/m/${post.message.id}`}
+										key={post.thread.id}
+									>
+										<span className="truncate text-lg font-semibold">
+											{post.thread.name}
+										</span>
+										<span className="truncate text-sm">
+											{post.message.content.slice(0, 100)}
+										</span>
+									</Link>
+								))}
 						</div>
 					</>
 				)}
@@ -275,12 +321,46 @@ export function MessageResultPage({
 		</div>
 	);
 	const rendered = (
-		<div className="mx-auto">
-			<script
-				type="application/ld+json"
-				dangerouslySetInnerHTML={{ __html: JSON.stringify(qaHeader) }}
+		<div className="mx-auto pt-2">
+			<JsonLd<DiscussionForumPosting>
+				item={{
+					'@context': 'https://schema.org',
+					'@type': 'DiscussionForumPosting',
+					url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
+						thread?.id ?? firstMessage.id
+					}`,
+					author: {
+						'@type': 'Person',
+						name: firstMessage.author.name,
+						identifier: firstMessage.author.id,
+						url: `/u/${firstMessage.author.id}`,
+					},
+					image: firstMessageMedia && firstMessageMedia.proxyUrl,
+					headline: title,
+					articleBody: firstMessage.content,
+					datePublished: getDate(firstMessage.id).toISOString(),
+					dateModified: thread?.archivedTimestamp
+						? new Date(Number(thread.archivedTimestamp)).toISOString()
+						: undefined,
+					identifier: thread?.id ?? firstMessage.id,
+					commentCount: messagesToDisplay.length,
+					comment: messagesToDisplay.map((message, index) => ({
+						'@type': message.id === solutionMessageId ? 'Answer' : 'Comment',
+						text: message.content,
+						identifier: message.id,
+						datePublished: getDate(message.id).toISOString(),
+						position: index + 1,
+						author: {
+							'@type': 'Person',
+							name: message.author.name,
+							identifier: message.author.id,
+							url: `/u/${message.author.id}`,
+						},
+					})),
+				}}
 			/>
-			<div className="flex flex-col gap-4 md:flex-row">
+
+			<div className="flex w-full flex-col justify-center gap-4 md:flex-row">
 				<Main />
 				<Sidebar />
 				<TrackLoad

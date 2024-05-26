@@ -9,29 +9,29 @@ import {
 } from '@answeroverflow/db';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import type { Context } from '~api/router/context';
-import { router, withUserServersProcedure } from '~api/router/trpc';
+import { Context } from '../context';
+import { router } from '../trpc';
 import {
 	addDomainToVercel,
-	DomainVerificationStatusProps,
-	getConfigResponse,
-	getDomainResponse,
 	removeDomainFromVercelProject,
+	DomainVerificationStatusProps,
+	getDomainResponse,
+	getConfigResponse,
 	verifyDomain,
-} from '~api/utils/domains';
+} from '../../utils/domains';
 import {
-	assertBoolsAreNotEqual,
-	assertCanEditServer,
 	assertCanEditServerBotOnly,
+	assertCanEditServer,
+	assertBoolsAreNotEqual,
 	assertIsAdminOrOwnerOfServer,
 	assertIsOnPlan,
-} from '~api/utils/permissions';
+} from '../../utils/permissions';
 import {
 	protectedMutation,
 	protectedFetch,
 	protectedMutationFetchFirst,
-} from '~api/utils/protected-procedures';
-import { mockServer } from '@answeroverflow/db-mock';
+} from '../../utils/protected-procedures';
+import { withUserServersProcedure } from '../trpc';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
 	'Read the rules consent already enabled';

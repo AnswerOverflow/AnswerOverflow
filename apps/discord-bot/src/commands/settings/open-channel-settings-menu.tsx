@@ -1,11 +1,6 @@
-import { ChannelSettingsMenu } from '~discord-bot/components/settings';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command, type ChatInputCommand } from '@sapphire/framework';
-import {
-	callAPI,
-	callWithAllowedErrors,
-	oneTimeStatusHandler,
-} from '~discord-bot/utils/trpc';
+
 import {
 	SlashCommandBuilder,
 	PermissionsBitField,
@@ -14,16 +9,23 @@ import {
 	type GuildTextBasedChannel,
 } from 'discord.js';
 import React from 'react';
+
+import { getDefaultChannelWithFlags } from '@answeroverflow/db';
+import { ChannelSettingsMenu } from '../../components/settings';
+import { guildTextChannelOnlyInteraction } from '../../utils/conditions';
+import { createMemberCtx } from '../../utils/context';
+import { toAOChannel } from '../../utils/conversions';
 import {
-	ephemeralReply,
+	oneTimeStatusHandler,
+	callAPI,
+	callWithAllowedErrors,
+} from '../../utils/trpc';
+import {
 	getCommandIds,
 	getRootChannel,
-	type RootChannel,
-} from '~discord-bot/utils/utils';
-import { getDefaultChannelWithFlags } from '@answeroverflow/db';
-import { createMemberCtx } from '~discord-bot/utils/context';
-import { toAOChannel } from '~discord-bot/utils/conversions';
-import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
+	RootChannel,
+	ephemeralReply,
+} from '../../utils/utils';
 
 const allowedTypes = [
 	ChannelType.GuildForum,
