@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { router, withUserServersProcedure } from '~api/router/trpc';
-import { assertCanEditServer } from '~api/utils/permissions';
-import { protectedFetch } from '~api/utils/protected-procedures';
 import {
 	getPageViewsForServer,
 	getServerInvitesClicked,
 } from '@answeroverflow/analytics/src/query';
+import { assertCanEditServer } from '../utils/permissions';
+import { protectedFetch } from '../utils/protected-procedures';
+import { router, withUserServersProcedure } from './trpc';
 
 const input = z.object({
 	serverId: z.string(),
