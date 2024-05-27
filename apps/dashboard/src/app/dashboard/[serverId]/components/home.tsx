@@ -60,24 +60,43 @@ function usePageViews() {
 								label: 'Page Views',
 							}),
 						},
-						type: 'line',
+						type: 'area',
 				  }
 				: undefined,
 		keepPreviousData: true,
 	});
 }
 
+function ChartWithLabelAndTotal(props: {
+	label: React.ReactNode;
+	description?: React.ReactNode;
+	chart: React.ReactNode;
+}) {
+	return (
+		<div className="flex w-full flex-col gap-4 rounded-lg border-1 py-4">
+			<span className="pl-6 text-start font-semibold">{props.label}</span>
+			{props.chart}
+		</div>
+	);
+}
+
 export function PageViewsLineChart() {
 	const { data } = usePageViews();
 	if (!data) return null;
 	return (
-		<div className="flex w-full flex-col gap-2 rounded-lg border-1 py-4">
-			<span className="px-16 text-lg text-muted-foreground">Page Views</span>
-			<span className="px-16 text-4xl">
-				{data.results['Page Views'].aggregated_value.toLocaleString()}
-			</span>
-			<Chart {...data} showLegend={false} showGridLines={false} />
-		</div>
+		<ChartWithLabelAndTotal
+			label={`Page Views: ${data.results[
+				'Page Views'
+			].aggregated_value.toLocaleString()}`}
+			chart={
+				<Chart
+					{...data}
+					showLegend={false}
+					className="text-muted-foreground"
+					valueFormatter={(value) => value.toLocaleString()}
+				/>
+			}
+		/>
 	);
 }
 
@@ -99,10 +118,72 @@ export function ServerInvitesUsedLineChart() {
 								label: 'Invite Clicked',
 							}),
 						},
-						type: 'line',
+						type: 'bar',
 				  }
 				: undefined,
 	});
 	if (!data) return null;
-	return <Chart {...data} />;
+	return (
+		<ChartWithLabelAndTotal
+			label={`Server Invites Used: ${data.results[
+				'Invite Clicked'
+			].aggregated_value.toLocaleString()}`}
+			chart={
+				<Chart
+					{...data}
+					showLegend={false}
+					className="text-muted-foreground"
+					valueFormatter={(value) => value.toLocaleString()}
+				/>
+			}
+		/>
+	);
+}
+
+export function QuestionsAndAnswersLineChart() {
+	const { options } = useDashboardContext();
+	const { data } = trpc.dashboard.questionsAndAnswers.useQuery(options, {
+		refetchOnWindowFocus: true,
+	});
+	if (!data) return null;
+	return (
+		<ChartWithLabelAndTotal
+			label={`Questions & Answers`}
+			description={`${data.results['Questions Asked'].aggregated_value} Questions & ${data.results['Questions Solved'].aggregated_value} Answers`}
+			chart={<Chart {...data} colors={['blue', 'green']} />}
+		/>
+	);
+}
+
+export function TopQuestionSolversTable() {
+	const { options } = useDashboardContext();
+	const { data } = trpc.dashboard.topQuestionSolvers.useQuery(options, {
+		refetchOnWindowFocus: true,
+	});
+	if (!data) return null;
+	return (
+		<ChartWithLabelAndTotal
+			label={`Top Question Solvers`}
+			chart={
+				<div className="max-h-[400px] overflow-x-auto">
+					<table className="w-full">
+						<thead>
+							<tr>
+								<th>Discord Account</th>
+								<th>Questions Solved</th>
+							</tr>
+						</thead>
+						<tbody>
+							{data.map((row) => (
+								<tr key={row.id}>
+									<td>{row.name}</td>
+									<td>{row.questionsSolved}</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+			}
+		/>
+	);
 }
