@@ -2,6 +2,7 @@
 import { DatePickerWithPresets } from '@answeroverflow/ui/src/ui/date-picker';
 import {
 	PageViewsLineChart,
+	PopularPagesTable,
 	QuestionsAndAnswersLineChart,
 	ServerInvitesUsedLineChart,
 	TopQuestionSolversTable,
@@ -13,9 +14,10 @@ export default function Client() {
 			<DatePickerWithPresets />
 			<div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
 				<PageViewsLineChart />
-				<ServerInvitesUsedLineChart />
+				<PopularPagesTable />
 				<QuestionsAndAnswersLineChart />
 				<TopQuestionSolversTable />
+				<ServerInvitesUsedLineChart />
 			</div>
 		</div>
 	);

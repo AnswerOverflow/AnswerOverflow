@@ -47,11 +47,26 @@ export function getTopQuestionSolversForServer(opts: Options) {
 		})
 		.execute({
 			type: 'table',
-			date_from: 'All time',
+			date_from: opts.from && 'All time',
 			breakdown_hide_other_aggregation: true,
 			breakdown: 'Question Solver Id',
 		})
 		.then((x) => x.results['Solved Question']);
+}
+
+export function getTopPages(opts: Options) {
+	return getPosthogQueryClientForDashboard(opts)
+		.query()
+		.addSeries('Message Page View', {
+			sampling: 'total',
+		})
+		.execute({
+			type: 'table',
+			breakdown_hide_other_aggregation: true,
+			refresh: true,
+			breakdown: 'Message Id',
+		})
+		.then((x) => x.results['Message Page View']);
 }
 
 export function getPopularPostPages() {

@@ -2,7 +2,15 @@
 import { trpc } from '@answeroverflow/ui/src/utils/client';
 import { useDashboardContext } from './dashboard-context';
 import { Chart } from '@typelytics/tremor';
-
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@answeroverflow/ui/src/ui/table';
+import { DiscordAvatar } from '@answeroverflow/ui/src/discord-avatar';
 type ChartData = {
 	data: number[];
 	aggregated_value: number;
@@ -125,7 +133,7 @@ export function ServerInvitesUsedLineChart() {
 	if (!data) return null;
 	return (
 		<ChartWithLabelAndTotal
-			label={`Server Invites Used: ${data.results[
+			label={`Server Invite Clicks: ${data.results[
 				'Invite Clicked'
 			].aggregated_value.toLocaleString()}`}
 			chart={
@@ -142,9 +150,7 @@ export function ServerInvitesUsedLineChart() {
 
 export function QuestionsAndAnswersLineChart() {
 	const { options } = useDashboardContext();
-	const { data } = trpc.dashboard.questionsAndAnswers.useQuery(options, {
-		refetchOnWindowFocus: true,
-	});
+	const { data } = trpc.dashboard.questionsAndAnswers.useQuery(options);
 	if (!data) return null;
 	return (
 		<ChartWithLabelAndTotal
@@ -154,35 +160,96 @@ export function QuestionsAndAnswersLineChart() {
 		/>
 	);
 }
+import { GoLinkExternal } from 'react-icons/go';
+import Link from '@answeroverflow/ui/src/ui/link';
+
+function ExternalLink({
+	href,
+	children,
+}: {
+	href: string;
+	children: React.ReactNode;
+}) {
+	return (
+		<Link
+			href={href}
+			className=" group flex flex-row items-center gap-2 hover:underline"
+			target="_blank"
+		>
+			{children}
+			<GoLinkExternal className="hidden group-hover:block" />
+		</Link>
+	);
+}
 
 export function TopQuestionSolversTable() {
 	const { options } = useDashboardContext();
-	const { data } = trpc.dashboard.topQuestionSolvers.useQuery(options, {
-		refetchOnWindowFocus: true,
-	});
+	const { data } = trpc.dashboard.topQuestionSolvers.useQuery(options);
 	if (!data) return null;
 	return (
 		<ChartWithLabelAndTotal
 			label={`Top Question Solvers`}
 			chart={
-				<div className="max-h-[400px] overflow-x-auto">
-					<table className="w-full">
-						<thead>
-							<tr>
-								<th>Discord Account</th>
-								<th>Questions Solved</th>
-							</tr>
-						</thead>
-						<tbody>
-							{data.map((row) => (
-								<tr key={row.id}>
-									<td>{row.name}</td>
-									<td>{row.questionsSolved}</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
+				<Table divClassName="max-h-[400px] px-4">
+					<TableHeader>
+						<TableRow>
+							<TableHead>User</TableHead>
+							<TableHead className="text-right">Solved</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{data.map((user) => (
+							<TableRow key={user.avatar}>
+								<TableCell className=" flex flex-row gap-2">
+									<ExternalLink
+										href={`https://www.answeroverflow.com/u/${user.id}`}
+									>
+										<DiscordAvatar user={user} size={24} />
+										{user.name}
+									</ExternalLink>
+								</TableCell>
+								<TableCell className="text-right">
+									{user.questionsSolved}
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			}
+		/>
+	);
+}
+
+export function PopularPagesTable() {
+	const { options } = useDashboardContext();
+	const { data } = trpc.dashboard.topPages.useQuery(options);
+	if (!data) return null;
+	return (
+		<ChartWithLabelAndTotal
+			label={`Popular Pages`}
+			chart={
+				<Table divClassName="max-h-[400px] px-4">
+					<TableHeader>
+						<TableRow>
+							<TableHead>Page</TableHead>
+							<TableHead className="text-right">Views</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{data.map((page) => (
+							<TableRow key={page.id}>
+								<TableCell>
+									<ExternalLink
+										href={`https://www.answeroverflow.com/m/${page.id}`}
+									>
+										{page.name}
+									</ExternalLink>
+								</TableCell>
+								<TableCell className="text-right">{page.views}</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
 			}
 		/>
 	);
