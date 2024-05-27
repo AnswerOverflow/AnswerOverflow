@@ -1,4 +1,6 @@
-export const demoServerData = {
+import { ServerDashboard } from '@answeroverflow/api/src/router/dashboard';
+
+export const demoServerData: ServerDashboard = {
 	approximateMemberCount: 10000,
 	bitfield: 0,
 	customDomain: null,
@@ -17,4 +19,12 @@ export const demoServerData = {
 	stripeSubscriptionId: null,
 	vanityInviteCode: null,
 	vanityUrl: null,
+	dateCancelationTakesEffect: null,
+	dateSubscriptionRenews: null,
+	dateTrialEnds: null,
+	enterprisePlanCheckoutUrl: null,
+	hasSubscribedBefore: false,
+	proPlanCheckoutUrl: null,
+	status: 'inactive',
+	stripeCheckoutUrl: undefined,
 } as const;
