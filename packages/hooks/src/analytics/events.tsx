@@ -60,6 +60,11 @@ export type EventMap = {
 		email?: string;
 		feedback: string;
 	};
+	Feedback: {
+		area: 'Dashboard - Insights';
+		feedback: string;
+		email?: string | null;
+	};
 	'Join Answer Overflow From Message Result Page': {};
 	'Invite to Join Answer Overflow From Message Result Page': {};
 } & ServerInviteEvent &

@@ -4,6 +4,7 @@ import {
 	PageViewsLineChart,
 	PopularPagesTable,
 	QuestionsAndAnswersLineChart,
+	RequestAnInsight,
 	ServerInvitesUsedLineChart,
 	TopQuestionSolversTable,
 } from './components/home';
@@ -18,6 +19,7 @@ export default function Client() {
 				<QuestionsAndAnswersLineChart />
 				<TopQuestionSolversTable />
 				<ServerInvitesUsedLineChart />
+				<RequestAnInsight />
 			</div>
 		</div>
 	);

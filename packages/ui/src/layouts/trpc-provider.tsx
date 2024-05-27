@@ -6,6 +6,7 @@ import { trpc } from '../utils/client';
 
 import { transformer } from '@answeroverflow/api/transformer';
 import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const getBaseUrl = () => {
 	if (typeof window !== 'undefined') return ''; // browser should use relative url

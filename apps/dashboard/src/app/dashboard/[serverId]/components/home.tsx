@@ -162,6 +162,10 @@ export function QuestionsAndAnswersLineChart() {
 }
 import { GoLinkExternal } from 'react-icons/go';
 import Link from '@answeroverflow/ui/src/ui/link';
+import { trackEvent } from '@answeroverflow/hooks';
+import { toast } from 'react-toastify';
+import { Textarea } from '@answeroverflow/ui/src/ui/textarea';
+import { Button } from '@answeroverflow/ui/src/ui/button';
 
 function ExternalLink({
 	href,
@@ -250,6 +254,46 @@ export function PopularPagesTable() {
 						))}
 					</TableBody>
 				</Table>
+			}
+		/>
+	);
+}
+
+export function RequestAnInsight() {
+	const { data } = trpc.auth.getSession.useQuery();
+
+	return (
+		<ChartWithLabelAndTotal
+			label={`Request an Insight`}
+			chart={
+				<div className="px-8">
+					<form
+						className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center gap-4"
+						onSubmit={(e) => {
+							e.preventDefault();
+							// @ts-ignore
+							const [feedbackElement] = e.target;
+							const feedback = (feedbackElement as HTMLTextAreaElement).value;
+							trackEvent('Feedback', {
+								email: data?.user?.email,
+								feedback,
+								area: 'Dashboard - Insights',
+							});
+							toast.success('Feedback submitted thanks!');
+						}}
+					>
+						<Textarea
+							className="h-32"
+							placeholder={
+								'What insights would you like to see? Any feedback on the current insights?'
+							}
+							minLength={1}
+							required
+							inputMode={'text'}
+						/>
+						<Button>Submit</Button>
+					</form>
+				</div>
 			}
 		/>
 	);
