@@ -14,6 +14,7 @@ import { ServerSelectDropdown } from './components/navbar';
 import { DashboardProvider } from './components/dashboard-context';
 import { trpc } from '@answeroverflow/ui/src/utils/client';
 import { demoServerData } from './components/mock';
+import { LinkButton } from 'packages/ui/src/ui/link-button';
 
 export default function Layout(props: {
 	children?: React.ReactNode;
@@ -31,9 +32,13 @@ export default function Layout(props: {
 			icon: <FaGear className="size-5" />,
 		},
 	];
-	const { data } = trpc.servers.byId.useQuery(props.params.serverId, {
-		initialData: props.params.serverId === '1000' ? demoServerData : undefined,
-	});
+	const { data } = trpc.dashboard.fetchDashboardById.useQuery(
+		props.params.serverId,
+		{
+			initialData:
+				props.params.serverId === '1000' ? demoServerData : undefined,
+		},
+	);
 	if (!data) return null;
 	return (
 		<DashboardProvider
@@ -55,17 +60,19 @@ export default function Layout(props: {
 							</Link>
 						</div>
 						<div className="flex-1">
-							<nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+							<nav className="grid items-start gap-2 px-2 text-sm font-medium lg:px-4">
 								{dashboardPaths.map((path) => {
 									return (
-										<Link
+										<LinkButton
 											href={path.path}
 											key={path.path}
-											className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+											variant={'ghost'}
+											selectedVariant={'secondary'}
+											className="flex justify-start gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
 										>
 											{path.icon}
 											{path.label}
-										</Link>
+										</LinkButton>
 									);
 								})}
 							</nav>

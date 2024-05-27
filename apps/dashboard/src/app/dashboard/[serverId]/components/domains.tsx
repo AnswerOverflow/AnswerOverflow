@@ -151,12 +151,13 @@ export function ConfigureDomainCardRenderer(props: {
 
 export function ConfigureDomainCard() {
 	const { enabled } = useTierAccess();
-	const { id, customDomain: currentDomain } = useDashboardContext();
+	const { server } = useDashboardContext();
+	const { id, customDomain: currentDomain } = server;
 	const util = trpc.useContext();
 	const mutation = trpc.servers.setCustomDomain.useMutation({
 		onSuccess: () => {
 			toast.success('Custom domain updated!');
-			void util.servers.fetchDashboardById.invalidate(id);
+			// void util.servers.fetchDashboardById.invalidate(id);
 		},
 		onError: (err) => {
 			toast.error(err.message);
