@@ -9,6 +9,7 @@ const DashboardContext = createContext<
 				serverId: string;
 				from: Date;
 				to: Date;
+				setRange: (opts: { from: Date; to: Date }) => void;
 			};
 	  }
 	| undefined

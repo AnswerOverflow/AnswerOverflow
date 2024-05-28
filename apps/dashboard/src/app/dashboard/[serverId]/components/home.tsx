@@ -71,7 +71,6 @@ function usePageViews() {
 						type: 'area',
 				  }
 				: undefined,
-		keepPreviousData: true,
 	});
 }
 
@@ -88,21 +87,50 @@ function ChartWithLabelAndTotal(props: {
 	);
 }
 
+function LoadingErrorChart<T>(props: {
+	isError: boolean;
+	isLoading: boolean;
+	data: T | null;
+	children: (data: NonNullable<T>) => React.ReactNode;
+}) {
+	if (props.isError)
+		return (
+			<div className="flex h-40 items-center justify-center px-6">
+				Sorry we encountered an error loading the data. {"We've"} tracked the
+				error and will look into it. If the issue persists, please join the
+				Discord.
+			</div>
+		);
+	if (props.isLoading)
+		return (
+			<div className="flex h-40 items-center justify-center">
+				<LoadingSpinner />
+			</div>
+		);
+	if (!props.data) return 'No data';
+	return props.children(props.data);
+}
+
 export function PageViewsLineChart() {
-	const { data } = usePageViews();
-	if (!data) return null;
+	const { data, isError, isLoading } = usePageViews();
 	return (
 		<ChartWithLabelAndTotal
-			label={`Page Views: ${data.results[
-				'Page Views'
-			].aggregated_value.toLocaleString()}`}
+			label={`Page Views: ${
+				!data
+					? ''
+					: data.results['Page Views'].aggregated_value.toLocaleString()
+			}`}
 			chart={
-				<Chart
-					{...data}
-					showLegend={false}
-					className="text-muted-foreground"
-					valueFormatter={(value) => value.toLocaleString()}
-				/>
+				<LoadingErrorChart isError={isError} isLoading={isLoading} data={data}>
+					{(data) => (
+						<Chart
+							{...data}
+							showLegend={false}
+							className="text-muted-foreground"
+							valueFormatter={(value) => value.toLocaleString()}
+						/>
+					)}
+				</LoadingErrorChart>
 			}
 		/>
 	);
@@ -110,39 +138,42 @@ export function PageViewsLineChart() {
 
 export function ServerInvitesUsedLineChart() {
 	const { options } = useDashboardContext();
-	const { data } = trpc.dashboard.serverInvitesClicked.useQuery(options, {
-		refetchOnReconnect: false,
-		refetchOnMount: false,
-		refetchOnWindowFocus: false,
-		initialData:
-			options.serverId === '1000'
-				? {
-						results: {
-							'Invite Clicked': getFakeData({
-								min: 100,
-								max: 400,
-								to: options.to,
-								from: options.from,
-								label: 'Invite Clicked',
-							}),
-						},
-						type: 'bar',
-				  }
-				: undefined,
-	});
-	if (!data) return null;
+	const { data, isError, isLoading } =
+		trpc.dashboard.serverInvitesClicked.useQuery(options, {
+			initialData:
+				options.serverId === '1000'
+					? {
+							results: {
+								'Invite Clicked': getFakeData({
+									min: 100,
+									max: 400,
+									to: options.to,
+									from: options.from,
+									label: 'Invite Clicked',
+								}),
+							},
+							type: 'bar',
+					  }
+					: undefined,
+		});
 	return (
 		<ChartWithLabelAndTotal
-			label={`Server Invite Clicks: ${data.results[
-				'Invite Clicked'
-			].aggregated_value.toLocaleString()}`}
+			label={`Server Invite Clicks: ${
+				!data
+					? ''
+					: data.results['Invite Clicked'].aggregated_value.toLocaleString()
+			}`}
 			chart={
-				<Chart
-					{...data}
-					showLegend={false}
-					className="text-muted-foreground"
-					valueFormatter={(value) => value.toLocaleString()}
-				/>
+				<LoadingErrorChart isError={isError} isLoading={isLoading} data={data}>
+					{(data) => (
+						<Chart
+							{...data}
+							showLegend={false}
+							className="text-muted-foreground"
+							valueFormatter={(value) => value.toLocaleString()}
+						/>
+					)}
+				</LoadingErrorChart>
 			}
 		/>
 	);
@@ -150,13 +181,16 @@ export function ServerInvitesUsedLineChart() {
 
 export function QuestionsAndAnswersLineChart() {
 	const { options } = useDashboardContext();
-	const { data } = trpc.dashboard.questionsAndAnswers.useQuery(options);
-	if (!data) return null;
+	const { data, isError, isLoading } =
+		trpc.dashboard.questionsAndAnswers.useQuery(options);
 	return (
 		<ChartWithLabelAndTotal
 			label={`Questions & Answers`}
-			description={`${data.results['Questions Asked'].aggregated_value} Questions & ${data.results['Questions Solved'].aggregated_value} Answers`}
-			chart={<Chart {...data} colors={['blue', 'green']} />}
+			chart={
+				<LoadingErrorChart isError={isError} isLoading={isLoading} data={data}>
+					{(data) => <Chart {...data} colors={['blue', 'green']} />}
+				</LoadingErrorChart>
+			}
 		/>
 	);
 }
@@ -189,71 +223,95 @@ function ExternalLink({
 export function TopQuestionSolversTable() {
 	const { options } = useDashboardContext();
 	const { data } = trpc.dashboard.topQuestionSolvers.useQuery(options);
-	if (!data) return null;
 	return (
 		<ChartWithLabelAndTotal
 			label={`Top Question Solvers`}
 			chart={
-				<Table divClassName="max-h-[400px] px-4">
-					<TableHeader>
-						<TableRow>
-							<TableHead>User</TableHead>
-							<TableHead className="text-right">Solved</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{data.map((user) => (
-							<TableRow key={user.avatar}>
-								<TableCell className=" flex flex-row gap-2">
-									<ExternalLink
-										href={`https://www.answeroverflow.com/u/${user.id}`}
-									>
-										<DiscordAvatar user={user} size={24} />
-										{user.name}
-									</ExternalLink>
-								</TableCell>
-								<TableCell className="text-right">
-									{user.questionsSolved}
-								</TableCell>
-							</TableRow>
-						))}
-					</TableBody>
-				</Table>
+				<LoadingErrorChart isError={false} isLoading={false} data={data}>
+					{(data) => (
+						<Table divClassName="max-h-[400px] px-4">
+							<TableHeader>
+								<TableRow>
+									<TableHead>User</TableHead>
+									<TableHead className="text-right">Solved</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{data.map((user) => (
+									<TableRow key={user.avatar}>
+										<TableCell className=" flex flex-row gap-2">
+											<ExternalLink
+												href={`https://www.answeroverflow.com/u/${user.id}`}
+											>
+												<DiscordAvatar user={user} size={24} />
+												{user.name}
+											</ExternalLink>
+										</TableCell>
+										<TableCell className="text-right">
+											{user.questionsSolved}
+										</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					)}
+				</LoadingErrorChart>
 			}
 		/>
 	);
 }
 
+function LoadingSpinner() {
+	return (
+		<div
+			// eslint-disable-next-line tailwindcss/no-custom-classname
+			className="spinner-border inline-block h-12 w-12 animate-spin rounded-full border-4"
+			role="status"
+		></div>
+	);
+}
+
 export function PopularPagesTable() {
 	const { options } = useDashboardContext();
-	const { data } = trpc.dashboard.topPages.useQuery(options);
-	if (!data) return null;
+	const {
+		data: loadingData,
+		isError,
+		isLoading,
+	} = trpc.dashboard.topPages.useQuery(options);
 	return (
 		<ChartWithLabelAndTotal
 			label={`Popular Pages`}
 			chart={
-				<Table divClassName="max-h-[400px] px-4">
-					<TableHeader>
-						<TableRow>
-							<TableHead>Page</TableHead>
-							<TableHead className="text-right">Views</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{data.map((page) => (
-							<TableRow key={page.id}>
-								<TableCell>
-									<ExternalLink
-										href={`https://www.answeroverflow.com/m/${page.id}`}
-									>
-										{page.name}
-									</ExternalLink>
-								</TableCell>
-								<TableCell className="text-right">{page.views}</TableCell>
-							</TableRow>
-						))}
-					</TableBody>
-				</Table>
+				<LoadingErrorChart
+					isError={isError}
+					isLoading={isLoading}
+					data={loadingData}
+				>
+					{(data) => (
+						<Table divClassName="max-h-[400px] px-4">
+							<TableHeader>
+								<TableRow>
+									<TableHead>Page</TableHead>
+									<TableHead className="text-right">Views</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{data.map((page) => (
+									<TableRow key={page.id}>
+										<TableCell>
+											<ExternalLink
+												href={`https://www.answeroverflow.com/m/${page.id}`}
+											>
+												{page.name}
+											</ExternalLink>
+										</TableCell>
+										<TableCell className="text-right">{page.views}</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					)}
+				</LoadingErrorChart>
 			}
 		/>
 	);

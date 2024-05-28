@@ -15,11 +15,20 @@ import { DashboardProvider } from './components/dashboard-context';
 import { trpc } from '@answeroverflow/ui/src/utils/client';
 import { demoServerData } from './components/mock';
 import { LinkButton } from 'packages/ui/src/ui/link-button';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Layout(props: {
 	children?: React.ReactNode;
 	params: { serverId: string };
 }) {
+	const [toFrom, setToFrom] = useState<{
+		from: Date;
+		to: Date;
+	}>({
+		from: new Date(new Date().setDate(new Date().getDate() - 7)),
+		to: new Date(),
+	});
 	const dashboardPaths = [
 		{
 			path: `/dashboard/${props.params.serverId}`,
@@ -32,21 +41,26 @@ export default function Layout(props: {
 			icon: <FaGear className="size-5" />,
 		},
 	];
-	const { data } = trpc.dashboard.fetchDashboardById.useQuery(
+	const router = useRouter();
+	const { data, isLoading } = trpc.dashboard.fetchDashboardById.useQuery(
 		props.params.serverId,
 		{
 			initialData:
 				props.params.serverId === '1000' ? demoServerData : undefined,
 		},
 	);
-	if (!data) return null;
+	if (!data) {
+		if (!isLoading) router.push('/');
+		return null;
+	}
 	return (
 		<DashboardProvider
 			value={{
 				options: {
 					serverId: data.id,
-					from: new Date(new Date().setDate(new Date().getDate() - 7)),
-					to: new Date(),
+					from: toFrom.from,
+					to: toFrom.to,
+					setRange: (opts) => setToFrom(opts),
 				},
 				server: data,
 			}}
