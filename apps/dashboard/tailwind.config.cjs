@@ -57,7 +57,7 @@ module.exports = {
 					},
 					background: {
 						muted: 'hsl(var(--muted))',
-						subtle: 'hsl(var(--foreground))',
+						subtle: 'hsl(var(--muted-foreground))',
 						DEFAULT: 'hsl(var(--background))',
 						emphasis: '#d1d5db', // gray-300
 					},

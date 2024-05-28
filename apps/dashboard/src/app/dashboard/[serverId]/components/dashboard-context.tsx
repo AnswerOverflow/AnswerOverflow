@@ -1,8 +1,19 @@
-import type { ServerDashboard } from '@answeroverflow/api';
+import type { ServerDashboard } from '@answeroverflow/api/src/router/dashboard';
 import { createContext, useContext } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-const DashboardContext = createContext<ServerDashboard | undefined>(undefined);
+const DashboardContext = createContext<
+	| {
+			server: ServerDashboard;
+			options: {
+				serverId: string;
+				from: Date;
+				to: Date;
+				setRange: (opts: { from: Date; to: Date }) => void;
+			};
+	  }
+	| undefined
+>(undefined);
 
 export const DashboardProvider = DashboardContext.Provider;
 

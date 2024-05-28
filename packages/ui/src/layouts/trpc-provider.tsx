@@ -6,6 +6,7 @@ import { trpc } from '../utils/client';
 
 import { transformer } from '@answeroverflow/api/transformer';
 import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const getBaseUrl = () => {
 	if (typeof window !== 'undefined') return ''; // browser should use relative url
@@ -24,6 +25,9 @@ export function TRPCProvider(props: { children?: React.ReactNode } | null) {
 				defaultOptions: {
 					queries: {
 						cacheTime: 1000 * 60 * 60 * 24, // 24 hours
+						refetchOnReconnect: false,
+						refetchOnMount: false,
+						refetchOnWindowFocus: false,
 					},
 				},
 			}),
@@ -33,10 +37,11 @@ export function TRPCProvider(props: { children?: React.ReactNode } | null) {
 			transformer,
 			links: [
 				loggerLink({
-					enabled: (opts) =>
+					enabled: () =>
 						// eslint-disable-next-line n/no-process-env,turbo/no-undeclared-env-vars
-						process.env.NODE_ENV === 'development' ||
-						(opts.direction === 'down' && opts.result instanceof Error),
+						// process.env.NODE_ENV === 'development' ||
+						// (opts.direction === 'down' && opts.result instanceof Error),
+						false,
 				}),
 				httpBatchLink({
 					url: `${getBaseUrl()}/api/trpc`,

@@ -9,7 +9,6 @@ import { JSONStringify } from '@answeroverflow/db/src/utils/json-big';
 export function getApiKey() {
 	const headersList = headers();
 	const bearer = headersList.get('authorization');
-	console.log(bearer);
 	return bearer?.replace('Bearer ', '');
 }
 

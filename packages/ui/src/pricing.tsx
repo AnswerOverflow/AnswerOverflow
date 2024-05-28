@@ -7,7 +7,7 @@ import {
 } from './ui/accordion';
 import { Check } from 'lucide-react';
 import { trackEvent } from '@answeroverflow/hooks/src/analytics/events';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import React from 'react';
 import { classNames } from './utils/utils';
 import {
@@ -392,7 +392,6 @@ export const Pricing = () => {
 		<div className="my-6 max-w-6xl sm:mx-3 md:mx-auto">
 			<Heading.H1 className={'text-center'}>Plans</Heading.H1>
 			<PricingOptions showFaqs={true} />
-			<ToastContainer />
 			<form
 				className="mx-auto my-16 flex max-w-2xl flex-col gap-4"
 				onSubmit={(e) => {
