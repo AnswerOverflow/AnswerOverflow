@@ -43,15 +43,18 @@ export default function Layout(props: {
 		},
 	];
 	const router = useRouter();
-	const { data, isLoading } = trpc.dashboard.fetchDashboardById.useQuery(
+	const { data } = trpc.dashboard.fetchDashboardById.useQuery(
 		props.params.serverId,
 		{
 			initialData:
 				props.params.serverId === '1000' ? demoServerData : undefined,
+			onError: (err) => {
+				console.error(err);
+				router.push('/');
+			},
 		},
 	);
 	if (!data) {
-		if (!isLoading) router.push('/');
 		return null;
 	}
 	return (
