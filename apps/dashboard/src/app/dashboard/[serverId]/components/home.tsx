@@ -95,7 +95,7 @@ function LoadingErrorChart<T>(props: {
 }) {
 	if (props.isError)
 		return (
-			<div className="flex h-40 items-center justify-center px-6">
+			<div className="flex h-80 items-center justify-center px-6">
 				Sorry we encountered an error loading the data. {"We've"} tracked the
 				error and will look into it. If the issue persists, please join the
 				Discord.
@@ -103,7 +103,7 @@ function LoadingErrorChart<T>(props: {
 		);
 	if (props.isLoading)
 		return (
-			<div className="flex h-40 items-center justify-center">
+			<div className="flex h-80 items-center justify-center">
 				<LoadingSpinner />
 			</div>
 		);
@@ -222,12 +222,13 @@ function ExternalLink({
 
 export function TopQuestionSolversTable() {
 	const { options } = useDashboardContext();
-	const { data } = trpc.dashboard.topQuestionSolvers.useQuery(options);
+	const { data, isError, isLoading } =
+		trpc.dashboard.topQuestionSolvers.useQuery(options);
 	return (
 		<ChartWithLabelAndTotal
 			label={`Top Question Solvers`}
 			chart={
-				<LoadingErrorChart isError={false} isLoading={false} data={data}>
+				<LoadingErrorChart isError={isError} isLoading={isLoading} data={data}>
 					{(data) => (
 						<Table divClassName="max-h-[400px] px-4">
 							<TableHeader>

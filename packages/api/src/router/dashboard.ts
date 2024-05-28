@@ -100,10 +100,15 @@ export const dashboardRouter = router({
 					const threadIds = Object.keys(metadata);
 					const threads = await findManyChannelsById(threadIds);
 					const map = new Map(threads.map((thread) => [thread.id, thread]));
-					return threadIds.map((id) => ({
-						...map.get(id)!,
-						views: metadata[id]?.aggregated_value ?? 0,
-					}));
+					return threadIds
+						.map(
+							(id) =>
+								map.get(id) && {
+									...map.get(id),
+									views: metadata[id]?.aggregated_value ?? 0,
+								},
+						)
+						.filter(Boolean);
 				},
 				permissions: () => assertCanEditServer(ctx, input.serverId),
 				notFoundMessage: 'Server not found',

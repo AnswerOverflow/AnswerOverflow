@@ -65,6 +65,8 @@ export function DatePickerWithPresets(props: {
 						mode="range"
 						defaultMonth={date?.from}
 						selected={date}
+						// limit to end of today
+						toDate={new Date()}
 						onSelect={(range) => {
 							setDate(range);
 							if (range) {
