@@ -14,9 +14,10 @@ import { ServerSelectDropdown } from './components/navbar';
 import { DashboardProvider } from './components/dashboard-context';
 import { trpc } from '@answeroverflow/ui/src/utils/client';
 import { demoServerData } from './components/mock';
-import { LinkButton } from 'packages/ui/src/ui/link-button';
+import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { RxHamburgerMenu } from 'react-icons/rx';
 
 export default function Layout(props: {
 	children?: React.ReactNode;
@@ -94,7 +95,7 @@ export default function Layout(props: {
 					</div>
 				</div>
 				<div className="flex flex-col">
-					<header className="flex h-14 items-center gap-4 border-b pr-4 lg:h-[60px]">
+					<header className="flex h-14  items-center gap-4 border-b p-4 lg:h-[60px]">
 						<Sheet>
 							<SheetTrigger asChild>
 								<Button
@@ -102,6 +103,7 @@ export default function Layout(props: {
 									size="icon"
 									className="shrink-0 md:hidden"
 								>
+									<RxHamburgerMenu className="h-6 w-6" />
 									<span className="sr-only">Toggle navigation menu</span>
 								</Button>
 							</SheetTrigger>
