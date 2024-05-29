@@ -6,7 +6,7 @@ export interface DiscordAvatarProps extends Omit<AvatarProps, 'alt' | 'url'> {
 	user: DiscordAccountPublic;
 }
 
-const makeUserIconLink = (
+export const makeUserIconLink = (
 	user: Pick<DiscordAccountPublic, 'id' | 'avatar'>,
 	size: number = 64,
 ) => {
