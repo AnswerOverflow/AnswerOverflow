@@ -100,7 +100,6 @@ export const ServerInviteJoinButton = (
 		<TrackLinkButton
 			href={`https://discord.gg/${inviteCode}`}
 			variant="default"
-			referrerPolicy="no-referrer"
 			className={cn('text-center font-header font-bold', className)}
 			size={props.size}
 			eventName={'Server Invite Click'}
