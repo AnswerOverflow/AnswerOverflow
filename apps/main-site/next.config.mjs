@@ -62,14 +62,14 @@ const config = {
 	rewrites: async () => {
 		return [
 			{
-				source: '/sitemap_:path',
+				source: '/sitemap-:path',
 				destination:
 					'https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap-:path',
 			},
 			{
 				source: '/sitemap:path',
 				destination:
-					'https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap:path',
+					'https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap-:path',
 			},
 			{
 				source: '/ingest/static/:path*',
