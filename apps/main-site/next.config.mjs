@@ -62,6 +62,11 @@ const config = {
 	rewrites: async () => {
 		return [
 			{
+				source: '/sitemap_:path',
+				destination:
+					'https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap-:path',
+			},
+			{
 				source: '/sitemap:path',
 				destination:
 					'https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap:path',
