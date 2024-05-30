@@ -67,6 +67,11 @@ const config = {
 					'https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap-:path',
 			},
 			{
+				source: '/sitemap.xml',
+				destination:
+					'https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap.xml',
+			},
+			{
 				source: '/sitemap:path',
 				destination:
 					'https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap-:path',
