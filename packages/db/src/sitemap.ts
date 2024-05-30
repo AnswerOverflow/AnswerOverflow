@@ -109,18 +109,18 @@ export async function generateSitemap() {
 		);
 		await uploadFile({
 			contentType: 'text/xml',
-			filename: `sitemaps/sitemap_${i}.xml`,
+			filename: `sitemaps/sitemap-${i}.xml`,
 			stream: sitemap.toXml(),
 		});
 		console.log(
-			`Uploaded sitemaps/sitemap_${i}.xml with ${chunk.length} entries`,
+			`Uploaded sitemaps/sitemap-${i}.xml with ${chunk.length} entries`,
 		);
 		i++;
 	}
 	const sitemapIndex = new Sitemap('https://www.answeroverflow.com', 'sitemap');
 	for (let j = 0; j < i; j++) {
 		sitemapIndex.add({
-			loc: `/sitemap_${j}.xml`,
+			loc: `/sitemap${j}.xml`,
 		});
 	}
 	await uploadFile({
