@@ -14,7 +14,7 @@ ENV PNPM_HOME="/root/.local/share/pnpm"
 ENV PATH="${PATH}:${PNPM_HOME}"
 
 RUN npm install --global pnpm@9.1.2
-RUN pnpm add -g turbo
+RUN pnpm add -g turbo@1.13.3
 COPY . .
 RUN turbo prune --scope=@answeroverflow/discord-bot --docker
 
