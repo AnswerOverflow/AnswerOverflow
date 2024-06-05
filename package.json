@@ -35,6 +35,7 @@
 		"with-env": "dotenv -e .env --",
 		"docker:build:discord-bot": "docker build -f ./apps/discord-bot/Dockerfile ."
 	},
+	"packageManager": "pnpm@9.1.2",
 	"devDependencies": {
 		"@answeroverflow/eslint-config-custom": "workspace:^",
 		"@answeroverflow/prettier-config": "workspace:^",
