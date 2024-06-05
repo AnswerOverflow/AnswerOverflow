@@ -99,6 +99,14 @@ const config = {
 				permanent: process.env.NODE_ENV === 'production',
 			},
 			{
+				source: '/dashboard',
+				destination:
+					process.env.NODE_ENV === 'development'
+						? 'http://localhost:3002/'
+						: 'https://app.answeroverflow.com/',
+				permanent: process.env.NODE_ENV === 'production',
+			},
+			{
 				source: '/dashboard:slug*',
 				destination:
 					process.env.NODE_ENV === 'development'
