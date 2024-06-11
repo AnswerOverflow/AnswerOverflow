@@ -264,8 +264,8 @@ importers:
         specifier: 6.0.4
         version: 6.0.4
       '@sapphire/discord-utilities':
-        specifier: 3.0.3
-        version: 3.0.3
+        specifier: 3.3.0
+        version: 3.3.0
       '@sapphire/fetch':
         specifier: ^2.4.1
         version: 2.4.2
@@ -4477,10 +4477,6 @@ packages:
 
   '@sapphire/decorators@6.0.4':
     resolution: {integrity: sha512-FZJ3ajnJ6yIj42Z4u4vBli5CZ4nz80WKj8STfhrVfzZ2lzZuJBFOIH+pU9VzWaTfIXKrK/OaK9gj4mfABERJnw==}
-    engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-
-  '@sapphire/discord-utilities@3.0.3':
-    resolution: {integrity: sha512-1FN1JKU0jaMc1iq7u0SJ0G7QALZ2IC/Z8Pn0Q7ekjbYeB4AE7xyuBG09dZS5C1Dap0/gkThU2yUAsgn9esh4dQ==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
   '@sapphire/discord-utilities@3.3.0':
@@ -15007,10 +15003,6 @@ snapshots:
   '@sapphire/decorators@6.0.4':
     dependencies:
       tslib: 2.6.3
-
-  '@sapphire/discord-utilities@3.0.3':
-    dependencies:
-      discord-api-types: 0.37.88
 
   '@sapphire/discord-utilities@3.3.0':
     dependencies:
