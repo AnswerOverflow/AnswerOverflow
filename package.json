@@ -56,7 +56,7 @@
 		"eslint-plugin-tailwindcss": "^3.13.0",
 		"eslint-plugin-turbo": "^1.10.12",
 		"tslib": "^2.6.2",
-		"turbo": "latest",
+		"turbo": "1.13.3",
 		"typescript": "^5.1.6",
 		"vite": "^5.0.13",
 		"vitest": "^0.29.8"
@@ -65,12 +65,9 @@
 		"node": ">=20.0.0",
 		"pnpm": ">=9.0.0"
 	},
-	"dependencies": {
-		"contentlayer": "^0.3.4"
-	},
 	"pnpm": {
 		"patchedDependencies": {
-			"@contentlayer/core@0.3.4": "patches/@contentlayer__core@0.3.4.patch"
+			"simple-markdown@0.7.3": "patches/simple-markdown@0.7.3.patch"
 		}
 	}
 }
