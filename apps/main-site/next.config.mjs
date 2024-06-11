@@ -114,9 +114,20 @@ const config = {
 						: 'https://app.answeroverflow.com/dashboard',
 				permanent: process.env.NODE_ENV === 'production',
 			},
+      {
+        source: '/changelog',
+        destination: 'https://docs.answeroverflow.com/changelog',
+        permanent: false,
+      },
+      {
+        source: '/changelog:slug*',
+        destination: 'https://docs.answeroverflow.com/changelog:slug',
+        permanent: false,
+      }
 		];
 	},
 };
 
 // With content layer breaks things for us for some reason
+
 export default withMDX(config);

@@ -12,7 +12,6 @@ export default function Link(
 		return (
 			<NextLink
 				{...rest}
-				prefetch={false}
 				className={cn('flex flex-row items-center gap-2', className)}
 			>
 				{props.icon}
