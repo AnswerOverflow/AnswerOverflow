@@ -12,5 +12,5 @@ export default function AnnouncementBannerLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	return children
+	return children;
 }
