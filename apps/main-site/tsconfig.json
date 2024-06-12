@@ -32,6 +32,7 @@
     "../../reset.d.ts",
     "vitest.config.ts",
     ".prettierrc.cjs",
+    "instrumentation.ts",
     "__tests__",
     ".next/types/**/*.ts",
   ]
