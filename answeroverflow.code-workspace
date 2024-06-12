@@ -7,6 +7,11 @@
       "path": "apps/main-site"
     },
     {
+      //
+      "name": "main-site-astro",
+      "path": "apps/main-site-astro"
+    },
+    {
       "name": "dashboard",
       "path": "apps/dashboard"
     },
