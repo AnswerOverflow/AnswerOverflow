@@ -37,6 +37,7 @@ const config = {
 	],
 	experimental: {
 		ppr: true,
+		instrumentationHook: true,
 	},
 	images: {
 		domains: [
@@ -87,7 +88,6 @@ const config = {
 		];
 	},
 	skipTrailingSlashRedirect: true,
-
 	redirects: async () => {
 		return [
 			{
@@ -114,20 +114,22 @@ const config = {
 						: 'https://app.answeroverflow.com/dashboard',
 				permanent: process.env.NODE_ENV === 'production',
 			},
-      {
-        source: '/changelog',
-        destination: 'https://docs.answeroverflow.com/changelog',
-        permanent: false,
-      },
-      {
-        source: '/changelog:slug*',
-        destination: 'https://docs.answeroverflow.com/changelog:slug',
-        permanent: false,
-      }
+			{
+				source: '/changelog',
+				destination: 'https://docs.answeroverflow.com/changelog',
+				permanent: false,
+			},
+			{
+				source: '/changelog:slug*',
+				destination: 'https://docs.answeroverflow.com/changelog:slug',
+				permanent: false,
+			},
 		];
 	},
 };
-
+import { withAxiom } from 'next-axiom';
 // With content layer breaks things for us for some reason
+const withAxiomConfig = withAxiom(config);
+
 // @ts-ignore ignore
-export default withMDX(config);
+export default withMDX(withAxiomConfig);
