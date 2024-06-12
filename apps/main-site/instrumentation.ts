@@ -6,14 +6,14 @@ import { sharedEnvs } from '@answeroverflow/env/shared';
 export function register() {
 	if (sharedEnvs.NODE_ENV === 'production') {
 		registerOTel({
-			serviceName: 'main-site-otl',
+			serviceName: 'answer-overflow',
 			spanProcessors: [
 				new SimpleSpanProcessor(
 					new OTLPTraceExporter({
 						url: 'https://api.axiom.co/v1/traces',
 						headers: {
 							Authorization: `Bearer ${sharedEnvs.AXIOM_API_KEY}`,
-							'X-Axiom-Dataset': 'main-site-otl',
+							'X-Axiom-Dataset': 'vercel',
 						},
 					}),
 				),

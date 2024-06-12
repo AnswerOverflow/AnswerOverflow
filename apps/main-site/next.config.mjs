@@ -49,12 +49,6 @@ const config = {
 			'answer-overflow-discord-attachments.s3.amazonaws.com',
 		],
 	},
-	// https://github.com/kkomelin/isomorphic-dompurify/issues/54
-	webpack: (config, { webpack }) => {
-		config.externals = [...config.externals, 'canvas', 'jsdom'];
-
-		return config;
-	},
 	// We already do linting on GH actions
 	eslint: {
 		ignoreDuringBuilds: !!process.env.CI,
