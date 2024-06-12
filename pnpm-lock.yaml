@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
+  server-only@0.0.1:
+    hash: bosfhrs7kiuju3mqrbzoh2nfvq
+    path: patches/server-only@0.0.1.patch
   simple-markdown@0.7.3:
     hash: a72smj7lfngku2pn3rcuhs2cvu
     path: patches/simple-markdown@0.7.3.patch
@@ -767,12 +770,19 @@ importers:
       react-dom:
         specifier: 19.0.0-rc-a26e3f403e-20240611
         version: 19.0.0-rc-a26e3f403e-20240611(react@19.0.0-rc-a26e3f403e-20240611)
+      server-only:
+        specifier: ^0.0.1
+        version: 0.0.1(patch_hash=bosfhrs7kiuju3mqrbzoh2nfvq)
       tailwindcss:
         specifier: ^3.4.4
         version: 3.4.4(ts-node@10.9.2(@swc/core@1.5.27)(@types/node@20.14.2)(typescript@5.4.5))
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
+    devDependencies:
+      dotenv-cli:
+        specifier: ^7.4.1
+        version: 7.4.2
 
   packages/analytics:
     dependencies:
@@ -18661,7 +18671,7 @@ snapshots:
     dependencies:
       '@code-hike/lighter': 0.8.1
       react: 19.0.0-rc-6230622a1a-20240610
-      server-only: 0.0.1
+      server-only: 0.0.1(patch_hash=bosfhrs7kiuju3mqrbzoh2nfvq)
 
   browserslist@4.23.1:
     dependencies:
@@ -25267,7 +25277,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  server-only@0.0.1: {}
+  server-only@0.0.1(patch_hash=bosfhrs7kiuju3mqrbzoh2nfvq): {}
 
   set-blocking@2.0.0: {}
 

@@ -43,7 +43,7 @@ export const FeedPost = async (props: { postId: string }) => {
 					href={`/c/${server.id}`}
 					className={'flex items-center gap-2 hover:underline'}
 				>
-					<ServerIcon server={server} size={24} />
+					{/* <ServerIcon server={server} size={24} /> */}
 					<span>{server.name}</span>
 				</Link>
 				<div className={'flex flex-col gap-2 md:flex-row'}>

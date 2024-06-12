@@ -1,5 +1,8 @@
 ---
 const { messageId } = Astro.params;
 export const prerender = false;
+import {FeedPost} from  "@answeroverflow/ui/src/feed-post"
 ---
+
+<FeedPost postId={messageId} />
 <h1>{messageId}</h1>
