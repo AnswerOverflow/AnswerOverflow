@@ -713,12 +713,45 @@ importers:
 
   apps/main-site-astro:
     dependencies:
+      '@answeroverflow/analytics':
+        specifier: workspace:^
+        version: link:../../packages/analytics
+      '@answeroverflow/api':
+        specifier: workspace:^
+        version: link:../../packages/api
+      '@answeroverflow/auth':
+        specifier: workspace:^
+        version: link:../../packages/auth
+      '@answeroverflow/cache':
+        specifier: workspace:^
+        version: link:../../packages/cache
+      '@answeroverflow/constants':
+        specifier: workspace:^
+        version: link:../../packages/constants
+      '@answeroverflow/db':
+        specifier: workspace:^
+        version: link:../../packages/db
+      '@answeroverflow/env':
+        specifier: workspace:^
+        version: link:../../packages/env
+      '@answeroverflow/tailwind-config':
+        specifier: workspace:^
+        version: link:../../packages/config/tailwind
+      '@answeroverflow/ui':
+        specifier: workspace:^
+        version: link:../../packages/ui
+      '@answeroverflow/utils':
+        specifier: workspace:^
+        version: link:../../packages/utils
       '@astrojs/check':
         specifier: ^0.7.0
         version: 0.7.0(prettier@2.8.8)(typescript@5.4.5)
       '@astrojs/react':
         specifier: ^3.5.0
         version: 3.5.0(react-dom@19.0.0-rc-a26e3f403e-20240611(react@19.0.0-rc-a26e3f403e-20240611))(react@19.0.0-rc-a26e3f403e-20240611)(types-react-dom@19.0.0-rc.1)(types-react@19.0.0-rc.1)(vite@5.2.13(@types/node@20.14.2)(sass@1.77.4)(terser@5.31.1))
+      '@astrojs/tailwind':
+        specifier: ^5.1.0
+        version: 5.1.0(astro@4.10.2(@types/node@20.14.2)(sass@1.77.4)(terser@5.31.1)(typescript@5.4.5))(tailwindcss@3.4.4(ts-node@10.9.2(@types/node@20.14.2)(typescript@5.4.5)))(ts-node@10.9.2(@types/node@20.14.2)(typescript@5.4.5))
       '@types/react':
         specifier: npm:types-react@rc
         version: types-react@19.0.0-rc.1
@@ -734,6 +767,9 @@ importers:
       react-dom:
         specifier: 19.0.0-rc-a26e3f403e-20240611
         version: 19.0.0-rc-a26e3f403e-20240611(react@19.0.0-rc-a26e3f403e-20240611)
+      tailwindcss:
+        specifier: ^3.4.4
+        version: 3.4.4(ts-node@10.9.2(@swc/core@1.5.27)(@types/node@20.14.2)(typescript@5.4.5))
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
@@ -1865,6 +1901,12 @@ packages:
       '@types/react-dom': ^17.0.17 || ^18.0.6
       react: ^17.0.2 || ^18.0.0 || ^19.0.0-beta
       react-dom: ^17.0.2 || ^18.0.0 || ^19.0.0-beta
+
+  '@astrojs/tailwind@5.1.0':
+    resolution: {integrity: sha512-BJoCDKuWhU9FT2qYg+fr6Nfb3qP4ShtyjXGHKA/4mHN94z7BGcmauQK23iy+YH5qWvTnhqkd6mQPQ1yTZTe9Ig==}
+    peerDependencies:
+      astro: ^3.0.0 || ^4.0.0
+      tailwindcss: ^3.0.24
 
   '@astrojs/telemetry@3.1.0':
     resolution: {integrity: sha512-/ca/+D8MIKEC8/A9cSaPUqQNZm+Es/ZinRv0ZAzvu2ios7POQSsVD+VOj7/hypWNsNM3T7RpfgNq7H2TU1KEHA==}
@@ -12853,6 +12895,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
       - vite
+
+  '@astrojs/tailwind@5.1.0(astro@4.10.2(@types/node@20.14.2)(sass@1.77.4)(terser@5.31.1)(typescript@5.4.5))(tailwindcss@3.4.4(ts-node@10.9.2(@types/node@20.14.2)(typescript@5.4.5)))(ts-node@10.9.2(@types/node@20.14.2)(typescript@5.4.5))':
+    dependencies:
+      astro: 4.10.2(@types/node@20.14.2)(sass@1.77.4)(terser@5.31.1)(typescript@5.4.5)
+      autoprefixer: 10.4.19(postcss@8.4.38)
+      postcss: 8.4.38
+      postcss-load-config: 4.0.2(postcss@8.4.38)(ts-node@10.9.2(@swc/core@1.5.27)(@types/node@20.14.2)(typescript@5.4.5))
+      tailwindcss: 3.4.4(ts-node@10.9.2(@swc/core@1.5.27)(@types/node@20.14.2)(typescript@5.4.5))
+    transitivePeerDependencies:
+      - ts-node
 
   '@astrojs/telemetry@3.1.0':
     dependencies:

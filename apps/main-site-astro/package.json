@@ -12,12 +12,24 @@
   "dependencies": {
     "@astrojs/check": "^0.7.0",
     "@astrojs/react": "^3.5.0",
+    "@astrojs/tailwind": "^5.1.0",
     "@types/react": "npm:types-react@rc",
     "@types/react-dom": "npm:types-react-dom@rc",
     "astro": "^4.10.2",
     "react": "19.0.0-rc-a26e3f403e-20240611",
     "react-dom": "19.0.0-rc-a26e3f403e-20240611",
-    "typescript": "^5.4.5"
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.4.5",
+    "@answeroverflow/analytics": "workspace:^",
+		"@answeroverflow/api": "workspace:^",
+		"@answeroverflow/auth": "workspace:^",
+		"@answeroverflow/cache": "workspace:^",
+		"@answeroverflow/constants": "workspace:^",
+		"@answeroverflow/db": "workspace:^",
+		"@answeroverflow/env": "workspace:^",
+		"@answeroverflow/tailwind-config": "workspace:^",
+		"@answeroverflow/ui": "workspace:^",
+		"@answeroverflow/utils": "workspace:^"
   },
   "overrides": {
     "@types/react": "npm:types-react@rc",
