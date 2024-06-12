@@ -13,7 +13,7 @@ export function register() {
 						url: 'https://api.axiom.co/v1/traces',
 						headers: {
 							Authorization: `Bearer ${sharedEnvs.AXIOM_API_KEY}`,
-							'X-Axiom-Dataset': 'vercel',
+							'X-Axiom-Dataset': 'main-site-otl',
 						},
 					}),
 				),
