@@ -129,5 +129,5 @@ const config = {
 };
 
 // With content layer breaks things for us for some reason
-
+// @ts-ignore ignore
 export default withMDX(config);
