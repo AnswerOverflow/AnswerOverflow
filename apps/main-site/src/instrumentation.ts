@@ -6,7 +6,7 @@ import { sharedEnvs } from '@answeroverflow/env/shared';
 export function register() {
 	if (sharedEnvs.NODE_ENV === 'production') {
 		registerOTel({
-			serviceName: 'answer-overflow',
+			serviceName: 'main-site',
 			spanProcessors: [
 				new SimpleSpanProcessor(
 					new OTLPTraceExporter({
