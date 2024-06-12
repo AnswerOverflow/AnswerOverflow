@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 type Props = {
 	params: { messageId: string };
 };
-export const revalidate = 600;
+export const revalidate = 3600;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	const data = await callAPI({

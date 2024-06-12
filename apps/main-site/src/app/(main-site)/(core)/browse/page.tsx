@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 	},
 };
 
-export const revalidate = 600;
+export const revalidate = 3600;
 export default async function BrowseCommunitiesPage() {
 	const data = await fetchBrowseServers();
 	return (
