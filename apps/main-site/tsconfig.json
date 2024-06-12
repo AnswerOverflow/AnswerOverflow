@@ -2,7 +2,10 @@
 	"extends": "@answeroverflow/tsconfig/nextjs.json",
 	"compilerOptions": {
 		"baseUrl": "../../",
-		"types": ["vitest/globals", "node"],
+		"types": [
+			"vitest/globals",
+			"node"
+		],
 		"plugins": [
 			{
 				"name": "next"
@@ -29,7 +32,7 @@
 		"../../reset.d.ts",
 		"vitest.config.ts",
 		".prettierrc.cjs",
-		"instrumentation.ts",
+		"src/instrumentation.ts",
 		"__tests__",
 		".next/types/**/*.ts"
 	]
