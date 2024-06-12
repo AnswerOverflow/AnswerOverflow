@@ -1,6 +1,5 @@
 packages:
   - "apps/main-site"
-  - "apps/main-site-astro"
   - "apps/dashboard"
   - "apps/discord-bot"
   - "apps/docs"
