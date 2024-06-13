@@ -58,7 +58,7 @@
 		"@answeroverflow/eslint-config-custom": "workspace:^",
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
-		"@edge-runtime/vm": "^2.1.2",
+		"@edge-runtime/vm": "^3.2.0",
 		"@types/http-proxy": "^1.17.11",
 		"@types/mdx": "^2.0.13",
 		"@types/node": "^20.11.20",
