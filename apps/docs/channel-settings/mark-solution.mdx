@@ -1,0 +1,44 @@
+## Demo
+
+<iframe
+  width="560"
+  height="315"
+  src="https://www.youtube.com/embed/3pGDHWke6Wg?si=LebqYaneEoALgPe5"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowfullscreen
+>
+</iframe>
+
+
+## What it does
+
+Allows users to mark their forum post or thread as solved. The following people are able to mark a post as solved:
+
+- The original poster
+- Administrator
+- ManageChannels
+- ManageThreads
+- ManageGuild
+
+When a post is marked as solved:
+
+- A solved indicator is added to the post, either a specific tag if selected or a ✅ emoji
+- The Answer Overflow bot sends a message to the thread with a message containing a jump to the solution link
+- The message resolving the thread is reacted to with a ✅ emoji
+
+![Automatic message sent by the Answer Overflow bot with a button to jump to the solution](/images/mark-solution-response-w-forum-post-guidelines.png)
+
+## Why you might want it
+
+- Allows supporters to find questions that have not been answered yet
+- Solution message on Answer Overflow gets highlighted to make it easier to find
+
+## Enabling
+
+Use `/channel-settings` in the channel you want to enable mark solution in. Click the **Help channel utilities** menu and then click **Enable mark as solution**
+
+## Disabling
+
+Use `/channel-settings` in the channel you want to disable mark solution in. Click the **Help channel utilities** menu and then click **Disable mark as solution**
