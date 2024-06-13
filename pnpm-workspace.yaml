@@ -3,6 +3,6 @@ packages:
   # - "apps/main-site-astro"
   - "apps/dashboard"
   - "apps/discord-bot"
-  - "apps/docs"
+  # - "apps/docs"
   - "apps/proxy"
   - "packages/**"
