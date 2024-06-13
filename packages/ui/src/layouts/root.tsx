@@ -3,6 +3,7 @@ import React from 'react';
 import { Providers } from './providers';
 import { CommitBanner } from '../commit-banner';
 import { Montserrat, Source_Sans_3 } from 'next/font/google';
+/* eslint-disable n/no-extraneous-import */
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import { DATA_UNBLOCKER } from './data-unblocker';
