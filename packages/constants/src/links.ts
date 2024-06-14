@@ -44,7 +44,7 @@ export const isOnMainSite = (host: string) => {
 		host === getMainSiteHostname() ||
 		host.endsWith('.vercel.app') ||
 		host === 'https://www.answeroverflow.com' ||
-		host.endsWith('rhyssul.com')
+		host.endsWith('.rhyssul.com')
 	);
 };
 
