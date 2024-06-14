@@ -4,4 +4,4 @@ export {
 	metadata,
 } from '@answeroverflow/ui/src/layouts/root';
 
-export const revalidate = 3600;
+export const revalidate = 86400;
