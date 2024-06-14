@@ -145,7 +145,7 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 # Copy the entire directory structure from installer stage to retain files
-COPY --from=installer /app/ /app/
+COPY --from=installer --chown=nextjs:nodejs /app/ /app/
 
 # Set correct permissions for prerender cache
 RUN mkdir .next && \
