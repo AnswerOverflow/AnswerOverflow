@@ -165,4 +165,4 @@ EXPOSE 3000
 ENV PORT 3000
 
 # Start the server
-CMD HOSTNAME="0.0.0.0" (cd apps/main-site && pnpm start)
+CMD HOSTNAME="0.0.0.0" cd apps/main-site && pnpm start
