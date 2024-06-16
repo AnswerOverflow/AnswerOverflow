@@ -34,7 +34,8 @@
 		"stripe:forward": "stripe listen --forward-to localhost:3002/api/v1/stripe/webhook",
 		"with-env": "dotenv -e .env --",
 		"docker:build:discord-bot": "pnpm with-env docker build -f ./apps/discord-bot/Dockerfile .",
-		"docker:build:main-site": "pnpm with-env docker build -f ./apps/main-site/Dockerfile ."
+		"docker:build:main-site": "pnpm with-env docker build -t \"main-site\" -f ./apps/main-site/Dockerfile .",
+		"docker:kill-all": "docker stop $(docker ps -a -q)"
 	},
 	"packageManager": "pnpm@9.1.2",
 	"devDependencies": {
@@ -70,5 +71,8 @@
 		"patchedDependencies": {
 			"simple-markdown@0.7.3": "patches/simple-markdown@0.7.3.patch"
 		}
+	},
+	"dependencies": {
+		"dotenv": "^16.4.5"
 	}
 }

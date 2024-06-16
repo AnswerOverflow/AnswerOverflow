@@ -12,6 +12,10 @@ patchedDependencies:
 importers:
 
   .:
+    dependencies:
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.4.5
     devDependencies:
       '@answeroverflow/eslint-config-custom':
         specifier: workspace:^
@@ -477,6 +481,9 @@ importers:
       bright:
         specifier: ^0.8.4
         version: 0.8.5(react@19.0.0-rc-6230622a1a-20240610)
+      dotenv-cli:
+        specifier: ^7.4.1
+        version: 7.4.2
       mdx:
         specifier: ^0.3.1
         version: 0.3.1
@@ -562,9 +569,6 @@ importers:
       concurrently:
         specifier: ^8.2.2
         version: 8.2.2
-      dotenv-cli:
-        specifier: ^7.4.1
-        version: 7.4.2
       eslint:
         specifier: ^8.57.0
         version: 8.57.0

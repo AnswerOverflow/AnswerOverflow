@@ -36,19 +36,13 @@ RUN npm install --global pnpm@9.1.2
 # Set working directory
 WORKDIR /app
 
-# Copy lockfile and package.json's of isolated subworkspace from builder stage
+# Copy necessary files from builder stage
 COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-COPY turbo.json turbo.json
-
-# Install dependencies
-RUN pnpm install
-
-# Copy the rest of the files from the builder stage
 COPY --from=builder /app/out/full/ .
 
-# Copy remaining files and directories from the builder stage to retain the structure
-COPY --from=builder /app/ /app/
+# Ensure the root files are available for the monorepo
+COPY --from=builder /app/ ./
 
 # Set build arguments and environment variables
 ARG TURBO_TEAM
@@ -56,6 +50,8 @@ ENV TURBO_TEAM=$TURBO_TEAM
 
 ARG TURBO_TOKEN
 ENV TURBO_TOKEN=$TURBO_TOKEN
+ENV CI=true
+
 # Validate vars
 ARG ENVIRONMENT
 ENV ENVIRONMENT=$ENVIRONMENT
@@ -117,14 +113,17 @@ ARG NEXT_PUBLIC_VERCEL_URL
 ENV NEXT_PUBLIC_VERCEL_URL=$NEXT_PUBLIC_VERCEL_URL
 ARG NEXT_PUBLIC_GA_MEASUREMENT_ID
 ENV NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
-###
+
 # optional arg of SKIP_ENV_CHECK, default to false
 ARG SKIP_ENV_CHECK
 ENV SKIP_ENV_CHECK=${SKIP_ENV_CHECK:-false}
 
+# Install dependencies
+RUN pnpm i
 
 # Build the application
 RUN (cd apps/main-site && pnpm build)
+
 
 # Stage 3: Runner
 FROM node:lts-alpine AS runner
@@ -144,7 +143,7 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copy the entire directory structure from installer stage to retain files
+# Copy necessary files from installer stage
 COPY --from=installer --chown=nextjs:nodejs /app/ /app/
 
 # Set correct permissions for prerender cache
