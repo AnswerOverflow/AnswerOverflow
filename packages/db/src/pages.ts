@@ -234,7 +234,7 @@ export async function findMessageResultPage(
 	if (!targetMessage) {
 		return null;
 	}
-	// Declare as const to make Typescript not yell at us when used in arrow functions
+	// Declare as const to make TypeScript not yell at us when used in arrow functions
 	const threadId = getThreadIdOfMessage(targetMessage);
 	// TODO: These should maybe be a different error code
 	const parentId = getParentChannelOfMessage(targetMessage);
