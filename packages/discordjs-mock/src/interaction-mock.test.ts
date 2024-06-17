@@ -112,7 +112,7 @@ describe('Interaction Mock', () => {
 			expect(interaction.message.content).toBe('test');
 			expect(interaction.replied).toBe(true);
 		});
-		it('should deffer the button interaction', async () => {
+		it('should defer the button interaction', async () => {
 			const expectedId = 'test';
 			const interaction = mockButtonInteraction({
 				caller: caller.user,
