@@ -9,7 +9,7 @@ import {
 import { UserSection } from '@answeroverflow/ui/src/navbar/client';
 import { AnswerOverflowLogo } from '@answeroverflow/ui/src/icons/answer-overflow-logo';
 import { FaHome } from 'react-icons/fa';
-import { FaGear } from 'react-icons/fa6';
+import { FaGear, FaPuzzlePiece } from 'react-icons/fa6';
 import { ServerSelectDropdown } from './components/navbar';
 import { DashboardProvider } from './components/dashboard-context';
 import { trpc } from '@answeroverflow/ui/src/utils/client';
@@ -35,6 +35,11 @@ export default function Layout(props: {
 			path: `/dashboard/${props.params.serverId}`,
 			label: 'Home',
 			icon: <FaHome className="size-5" />,
+		},
+		{
+			path: `/dashboard/${props.params.serverId}/integrations`,
+			label: 'Integrations',
+			icon: <FaPuzzlePiece className="size-5" />,
 		},
 		{
 			path: `/dashboard/${props.params.serverId}/settings`,

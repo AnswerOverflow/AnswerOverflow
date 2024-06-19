@@ -122,8 +122,9 @@ ENV SKIP_ENV_CHECK=${SKIP_ENV_CHECK:-false}
 RUN pnpm i
 
 # Build the application
-RUN (cd apps/main-site && pnpm build)
+RUN pnpm turbo run build --filter=main-site...
 
+RUN pnpm i --prod
 
 # Stage 3: Runner
 FROM node:lts-alpine AS runner
@@ -145,14 +146,6 @@ RUN addgroup --system --gid 1001 nodejs && \
 
 # Copy necessary files from installer stage
 COPY --from=installer --chown=nextjs:nodejs /app/ /app/
-
-# Set correct permissions for prerender cache
-RUN mkdir .next && \
-    chown nextjs:nodejs .next
-
-# Uncomment the following lines to leverage output traces and reduce image size
-# COPY --from=installer --chown=nextjs:nodejs /app/.next/standalone ./
-# COPY --from=installer --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Use non-root user
 USER nextjs
