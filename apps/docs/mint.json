@@ -63,6 +63,12 @@
       ]
     },
     {
+      "group": "Integrations",
+      "pages": [
+        "integrations/inkeep"
+      ]
+    },
+    {
       "group": "Changelog",
       "pages": [
         "changelog/solved-posts-now-auto-archive",
