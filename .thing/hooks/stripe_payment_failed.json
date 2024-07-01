@@ -289,7 +289,7 @@
           "amount": 1200,
           "amount_excluding_tax": 1200,
           "currency": "usd",
-          "description": "descroipion goes here",
+          "description": "description goes here",
           "discount_amounts": [],
           "discountable": true,
           "discounts": [],

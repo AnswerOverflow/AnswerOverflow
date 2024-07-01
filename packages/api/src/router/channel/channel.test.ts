@@ -130,7 +130,7 @@ describe('Channel Operations', () => {
 					'ManageGuild',
 				);
 				const router = channelRouter.createCaller(account.ctx);
-				await expect(router.byId('non-existent-channel')).rejects.toThrow(
+				await expect(router.byId('nonexistent-channel')).rejects.toThrow(
 					'Channel does not exist',
 				);
 			});
