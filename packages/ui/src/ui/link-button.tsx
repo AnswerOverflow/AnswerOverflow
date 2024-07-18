@@ -5,6 +5,7 @@ import type { SetRequired } from 'type-fest';
 import { cn } from '../utils/utils';
 // TODO: Check if this results in the JS for button being pulled in
 import { buttonVariants } from './button';
+import { usePathname } from 'next/navigation';
 
 export interface LinkButtonProps
 	extends SetRequired<
@@ -25,7 +26,7 @@ export const LinkButton = ({
 	selectedVariant?: LinkButtonProps['variant'];
 }) => {
 	const { selectedVariant, ...rest } = props;
-	const pathname = '';
+	const pathname = usePathname();
 	return (
 		<Link
 			href={href}
