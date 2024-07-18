@@ -67,8 +67,7 @@
 	},
 	"pnpm": {
 		"patchedDependencies": {
-			"simple-markdown@0.7.3": "patches/simple-markdown@0.7.3.patch",
-			"server-only@0.0.1": "patches/server-only@0.0.1.patch"
+			"simple-markdown@0.7.3": "patches/simple-markdown@0.7.3.patch"
 		}
 	}
 }
