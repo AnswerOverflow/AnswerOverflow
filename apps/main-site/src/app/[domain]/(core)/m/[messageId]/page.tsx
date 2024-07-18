@@ -1,17 +1,14 @@
 import { MessageResultPage } from '@answeroverflow/ui/src/pages/MessageResultPage';
 import { notFound } from 'next/navigation';
-import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
 import type { Metadata } from 'next';
+import { makeMessageResultPage } from '@answeroverflow/db';
 type Props = {
 	params: { messageId: string };
 };
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-	const data = await callAPI({
-		apiCall: (api) => api.messages.threadFromMessageId(params.messageId),
-		allowedErrors: 'NOT_FOUND',
-	});
+	const data = await makeMessageResultPage(params.messageId, []);
 
 	if (!data) return {};
 	const firstMessage = data.messages.at(0);
@@ -37,10 +34,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function MessageResult({ params }: Props) {
-	const data = await callAPI({
-		apiCall: (api) => api.messages.threadFromMessageId(params.messageId),
-		allowedErrors: 'NOT_FOUND',
-	});
+	const data = await makeMessageResultPage(params.messageId, []);
+
 	if (!data) {
 		return notFound();
 	}

@@ -152,7 +152,7 @@
     "files.exclude": {
       // "**/node_modules": true,
       "**/coverage/": true,
-      "**/.next": true,
+      // "**/.next": true,
       "**/.turbo": true
       // "**/dist": true,
     },

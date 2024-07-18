@@ -1,8 +1,8 @@
 packages:
   - "apps/main-site"
-  - "apps/main-site-astro"
+  # - "apps/main-site-astro"
   - "apps/dashboard"
   - "apps/discord-bot"
-  - "apps/docs"
+  # - "apps/docs"
   - "apps/proxy"
   - "packages/**"

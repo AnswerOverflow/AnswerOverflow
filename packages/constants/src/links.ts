@@ -43,7 +43,8 @@ export const isOnMainSite = (host: string) => {
 	return (
 		host === getMainSiteHostname() ||
 		host.endsWith('.vercel.app') ||
-		host === 'https://www.answeroverflow.com'
+		host === 'https://www.answeroverflow.com' ||
+		host.endsWith('.rhyssul.com')
 	);
 };
 
