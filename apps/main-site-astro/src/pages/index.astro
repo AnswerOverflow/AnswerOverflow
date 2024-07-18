@@ -1,10 +1,8 @@
 ---
-import { Client } from "../components/client";
-import { First10Pokemon } from "../components/test";
-import RootLayout from "../layouts/root.astro"
+import { Client } from '../components/client';
+import RootLayout from '../layouts/root.astro';
 ---
 
 <RootLayout>
-  <First10Pokemon client:load />
-  <Client client:load/>
+	<Client client:load />
 </RootLayout>
