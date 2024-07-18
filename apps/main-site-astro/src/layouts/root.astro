@@ -1,26 +1,29 @@
 ---
-
-import { DATA_UNBLOCKER } from "@answeroverflow/ui/src/layouts/data-unblocker";
+import { DATA_UNBLOCKER } from '@answeroverflow/ui/src/layouts/data-unblocker';
 const unpacked = Buffer.from(DATA_UNBLOCKER, 'base64').toString();
-
 ---
 
-
-      		<html
-			lang="en"
-			class={'dark'}
-			style={{
-				colorScheme: 'dark',
-			}}
+<html
+	lang="en"
+	class={'dark'}
+	style={{
+		colorScheme: 'dark',
+	}}
+>
+	<head>
+		<link rel={'preconnect'} href={'https://cdn.discordapp.com'} />
+		<link rel={'dns-prefetch'} href={'https://cdn.discordapp.com'} />
+		<script
+			id="data-unblocker"
+			type="text/javascript"
+			define:vars={{ unpacked }}
 		>
-			<head>
-        <link rel={'preconnect'} href={'https://cdn.discordapp.com'} />
-				<link rel={'dns-prefetch'} href={'https://cdn.discordapp.com'} />
-				<script id="data-unblocker" type="text/javascript" define:vars={{unpacked}}>
-        {unpacked}
-				</script>
-			</head>
-			<body>
-          <slot />
-			</body>
-		</html>
+			{
+				unpacked;
+			}
+		</script>
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
