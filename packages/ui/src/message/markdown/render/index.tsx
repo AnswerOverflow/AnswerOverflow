@@ -8,13 +8,21 @@ import memoize from 'memoizee';
 import * as R from 'ramda';
 import baseRules from './ast';
 import { astToString, flattenAst, recurse } from './util';
-import SimpleMarkdown, { defaultRules } from 'simple-markdown';
+import pkg from 'simple-markdown';
+const {
+	defaultRules,
+	inlineRegex,
+	parserFor: simpleMarkdownParserFor,
+	sanitizeUrl,
+	outputFor,
+} = pkg;
+
 import { Code } from 'bright';
 import { BlueLink } from '../../../ui/blue-link';
 
 function parserFor(rules: SimpleMarkdown.ReactRules, returnAst?: boolean) {
-	const parser = SimpleMarkdown.parserFor(rules);
-	const renderer = SimpleMarkdown.outputFor(rules, 'react');
+	const parser = simpleMarkdownParserFor(rules);
+	const renderer = outputFor(rules, 'react');
 	return memoize(
 		(input = '', inline = true, state = {}, transform = null) => {
 			if (!inline) {
@@ -92,7 +100,7 @@ function createRules(rule: { [key: string]: any }) {
 		},
 		s: {
 			order: rule.u.order,
-			match: SimpleMarkdown.inlineRegex(/^~~([\s\S]+?)~~(?!_)/),
+			match: inlineRegex(/^~~([\s\S]+?)~~(?!_)/),
 			parse: rule.u.parse,
 			react: (
 				node: {
@@ -120,9 +128,7 @@ function createRules(rule: { [key: string]: any }) {
 		},
 		url: {
 			...url,
-			match: SimpleMarkdown.inlineRegex(
-				/^((https?|steam):\/\/[^\s<]+[^<.,:;"')\]\s])/,
-			),
+			match: inlineRegex(/^((https?|steam):\/\/[^\s<]+[^<.,:;"')\]\s])/),
 		},
 		link: {
 			...link,
@@ -135,17 +141,16 @@ function createRules(rule: { [key: string]: any }) {
 				recurseOutput: (node: any, state: any) => any,
 				state: any,
 			) {
-				const url = SimpleMarkdown.sanitizeUrl(node.target) ?? '';
+				const url = sanitizeUrl(node.target) ?? '';
 				const content = astToString(node.content);
 				const masked = url !== content;
 
 				return (
 					<BlueLink
 						title={masked ? `${node.title || content}\n(${url})` : url}
-						href={SimpleMarkdown.sanitizeUrl(node.target) ?? ''}
+						href={sanitizeUrl(node.target) ?? ''}
 						target="_blank"
 						rel="noopener ugc nofollow"
-						prefetch={false}
 						key={state.key}
 					>
 						{recurseOutput(node.content, state)}
