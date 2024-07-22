@@ -1,6 +1,7 @@
 ---
 import { DATA_UNBLOCKER } from '@answeroverflow/ui/src/layouts/data-unblocker';
 const unpacked = Buffer.from(DATA_UNBLOCKER, 'base64').toString();
+import DefaultLayout from './default.astro';
 ---
 
 <html
@@ -23,7 +24,7 @@ const unpacked = Buffer.from(DATA_UNBLOCKER, 'base64').toString();
 			}
 		</script>
 	</head>
-	<body>
+	<DefaultLayout>
 		<slot />
-	</body>
+	</DefaultLayout>
 </html>
