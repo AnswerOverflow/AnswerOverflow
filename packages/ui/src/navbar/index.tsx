@@ -42,7 +42,7 @@ export const Navbar = (props: {
 						)}
 					</Link>
 				</div>
-				{/*align search bar to absolutle middle horizontally, top vertically*/}
+				{/*align search bar to absolute middle horizontally, top vertically*/}
 				<Suspense>
 					<MessagesSearchBar
 						className={

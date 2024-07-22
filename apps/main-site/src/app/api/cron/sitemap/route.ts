@@ -6,5 +6,5 @@ export async function GET() {
 		await generateSitemap();
 		return new Response('Sitemap generated');
 	}
-	return new Response('Sitemap generation is only avaliable in dev');
+	return new Response('Sitemap generation is only available in dev');
 }

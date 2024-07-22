@@ -203,7 +203,7 @@ export async function assertMessageIsUnsolved(
 
 	// 3. Look at the message history to see if it contains the solution message from the Answer Overflow Bot
 
-	// This is more of a backup, so we only do the cached falues
+	// This is more of a backup, so we only do the cached values
 	const existingMessage = await findFullMessageById(questionMessage.id);
 
 	const isAlreadySolved = existingMessage
