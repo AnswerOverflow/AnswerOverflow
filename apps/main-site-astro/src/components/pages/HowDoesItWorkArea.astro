@@ -2,6 +2,7 @@
 // import { QuestionAnswerArea } from './QuestionAnswerArea';
 // import { messageData } from './HomeMessages';
 // import { GetStarted } from '@answeroverflow/ui/src/callouts';
+import Button from '@answeroverflow/ui/src/astro/primitives/button.astro';
 ---
 
 <div
@@ -28,11 +29,12 @@
 			<div
 				class="mb-8 flex w-full flex-col items-center justify-center gap-4 sm:w-fit sm:flex-row lg:mb-0"
 			>
-				<!-- <GetStarted
-					variant={'blue'}
-					location="Hero"
+				<Button
+					variant={'outline'}
 					class="mx-auto w-auto px-6 text-lg shadow-[0px_0px_40px_rgba(255,_255,_255,_0.2)] duration-200 hover:shadow-[0px_0px_40px_rgba(255,_255,_255,_0.4)] xl:mx-0"
-				/> -->
+				>
+					Get Started
+				</Button>
 			</div>
 		</div>
 		<div class="hidden items-center justify-center sm:flex 2xl:grow">
