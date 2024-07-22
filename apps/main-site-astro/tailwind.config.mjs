@@ -5,7 +5,7 @@ module.exports = {
 	...data,
 	content: [
 		...data.content,
-		'../../packages/ui/src/**/*.{js,ts,jsx,tsx}', // Transpile breaks without this for tailwind styles
+		// '../../packages/ui/src/**/*.{js,ts,jsx,tsx}', // Transpile breaks without this for tailwind styles
 		'./content/**/*.mdx',
 		'./**/*.astro',
 	],

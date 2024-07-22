@@ -27,6 +27,7 @@
     "@tailwindcss/typography": "^0.5.10",
     "@types/react": "npm:types-react@rc",
     "@types/react-dom": "npm:types-react-dom@rc",
+    "@unocss/reset": "^0.61.5",
     "astro": "^4.10.2",
     "react": "19.0.0-rc-a26e3f403e-20240611",
     "react-dom": "19.0.0-rc-a26e3f403e-20240611",
@@ -37,7 +38,8 @@
   "devDependencies": {
     "@answeroverflow/prettier-config": "workspace:^",
     "dotenv-cli": "^7.4.1",
-    "prettier-plugin-astro": "^0.14.1"
+    "prettier-plugin-astro": "^0.14.1",
+    "unocss": "^0.61.5"
   },
   "overrides": {
     "@types/react": "npm:types-react@rc",
