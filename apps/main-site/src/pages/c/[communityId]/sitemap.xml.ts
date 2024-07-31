@@ -22,7 +22,7 @@ export async function getServerSideProps({
 		};
 	}
 	await generateCommunityPageSitemap({
-		baseUrl: `https://${id}`,
+		baseUrl: `https://www.answeroverflow.com`,
 		communityId: server.id,
 		res,
 	});
