@@ -64,7 +64,6 @@ const MessageImages = (
 					<MessageImage
 						attachment={x}
 						loading={props.loadingStyle === 'eager' ? 'eager' : 'lazy'}
-						priority={props.loadingStyle === 'eager'}
 						fetchPriority={props.loadingStyle === 'eager' ? 'high' : undefined}
 						alt={x.description ?? 'No description'}
 					/>

@@ -61,7 +61,6 @@ const text = {
 						}`}
 						className={'inline-block h-[22px] w-[22px]'}
 						key={index}
-						fetchPriority={'high'}
 						loading={'eager'}
 						alt={content.name ?? 'Emoji'}
 					/>
