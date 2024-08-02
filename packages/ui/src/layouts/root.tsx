@@ -7,7 +7,6 @@ import { Montserrat, Source_Sans_3 } from 'next/font/google';
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import { DATA_UNBLOCKER } from './data-unblocker';
-import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
 	title: 'Answer Overflow - Discord Content Discovery',
@@ -74,7 +73,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 					}}
 				/>
 				<CommitBanner />
-				<SpeedInsights sampleRate={0.1} />
 				<Providers>{children}</Providers>
 			</body>
 		</html>
