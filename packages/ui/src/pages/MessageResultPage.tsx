@@ -27,7 +27,7 @@ import { DiscordAvatar } from '../discord-avatar';
 import { FaRegMessage } from 'react-icons/fa6';
 import { BlueLink } from '../ui/blue-link';
 import { JsonLd } from 'react-schemaorg';
-
+import { InKeepWidget } from './inkeep';
 export type MessageResultPageProps = {
 	messages: MessageFull[];
 	server: ServerPublic;
@@ -40,6 +40,7 @@ export type MessageResultPageProps = {
 		message: MessageFull;
 		thread: ChannelPublicWithFlags;
 	}[];
+	showAIChat?: boolean;
 };
 
 const JoinAnswerOverflowCard = () => (
@@ -80,6 +81,7 @@ export function MessageResultPage({
 	tenant,
 	relatedPosts,
 	isUserInServer,
+	showAIChat,
 }: MessageResultPageProps) {
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
@@ -248,6 +250,9 @@ export function MessageResultPage({
 						location="Message Result Page"
 					/>
 				</div>
+			)}
+			{server.id === '1043890932593987624' && showAIChat && (
+				<InKeepWidget server={server} />
 			)}
 		</main>
 	);
