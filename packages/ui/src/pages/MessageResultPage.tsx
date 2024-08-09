@@ -83,7 +83,6 @@ export function MessageResultPage({
 	thread,
 	tenant,
 	isUserInServer,
-	showAIChat,
 }: MessageResultPageProps) {
 	const firstMessage = messages.at(0);
 	if (!firstMessage) throw new Error('No message found'); // TODO: Handle this better
@@ -253,9 +252,7 @@ export function MessageResultPage({
 					/>
 				</div>
 			)}
-			{server.id === '1043890932593987624' && showAIChat && (
-				<InKeepWidget server={server} />
-			)}
+			{server.id === '1043890932593987624' && <InKeepWidget server={server} />}
 		</main>
 	);
 
