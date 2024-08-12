@@ -31,7 +31,7 @@ function ChannelSelectRow(props: ChannelSelectProps) {
 		return (
 			<LinkButton
 				variant={selected ? 'secondary' : 'outline'}
-				className="max-w-[300px] flex-shrink-0"
+				className="max-w-[200px] lg:max-w-[300px] flex-shrink-0"
 				href={
 					props.tenant
 						? `/c/${channel.id}`
