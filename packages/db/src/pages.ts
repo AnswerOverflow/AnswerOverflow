@@ -27,7 +27,6 @@ import {
 } from './zodSchemas/channelSchemas';
 import { ChannelType } from 'discord-api-types/v10';
 import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
-import { findChannelsBeforeId } from './channel';
 import {
 	DiscordAPIServer,
 	stripPrivateChannelData,
@@ -399,40 +398,12 @@ export async function makeMessageResultPage(
 			endPageGeneration - startPageGeneration
 		}ms`,
 	);
-	const startRecommendedPosts = performance.now();
-	const recommendedChannels = thread
-		? await findChannelsBeforeId({
-				take: 100,
-				id: thread.id,
-				serverId: server.id,
-		  })
-		: [];
-	const recommendedChannelLookup = new Map(
-		recommendedChannels.map((c) => [c.id, c]),
-	);
-	const recommendedPosts = await findManyMessagesWithAuthors(
-		recommendedChannels.map((c) => c.id),
-	).then((posts) =>
-		posts
-			.filter((p) => p.public && recommendedChannelLookup.has(p.id))
-			.map((p) => ({
-				message: stripPrivateFullMessageData(p, userServers),
-				thread: stripPrivateChannelData(recommendedChannelLookup.get(p.id)!),
-			}))
-			.slice(0, 20),
-	);
-	const endRecommendedPosts = performance.now();
-	console.log(
-		`Recommended posts for ${messageId} took ${
-			endRecommendedPosts - startRecommendedPosts
-		}ms`,
-	);
 
 	return {
 		messages,
 		parentChannel: channel,
 		server,
 		thread,
-		recommendedPosts,
+		recommendedPosts:[],
 	};
 }
