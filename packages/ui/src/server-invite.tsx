@@ -41,7 +41,7 @@ export const ServerInviteTitle = (
 				...serverToAnalyticsData(props.server),
 				...(props.channel && channelToAnalyticsData(props.channel)),
 			}}
-			className="text-left font-header text-lg font-bold  hover:text-primary/75  hover:underline"
+			className="text-left font-header text-lg font-bold hover:text-primary/75 hover:underline"
 		>
 			{props.server.name}
 		</TrackLink>

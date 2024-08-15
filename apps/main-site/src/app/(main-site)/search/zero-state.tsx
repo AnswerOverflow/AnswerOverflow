@@ -30,7 +30,7 @@ const HeroAreaText = () => {
 					<MessagesSearchBar />
 				</Suspense>
 			</div>
-			<div className="grid w-full grid-cols-1 grid-rows-2 gap-4 sm:w-auto sm:grid-cols-2 sm:grid-rows-1  sm:gap-8">
+			<div className="grid w-full grid-cols-1 grid-rows-2 gap-4 sm:w-auto sm:grid-cols-2 sm:grid-rows-1 sm:gap-8">
 				<LinkButton
 					size={'lg'}
 					className={'w-full text-xl'}
@@ -42,7 +42,7 @@ const HeroAreaText = () => {
 					size={'lg'}
 					variant={'outline'}
 					href={'/onboarding'}
-					className={'w-full  text-xl'}
+					className={'w-full text-xl'}
 				>
 					Add your server
 				</LinkButton>
@@ -104,7 +104,7 @@ const HeroArea = (props: {
 export async function ZeroState() {
 	const data = await fetchBrowseServers();
 	return (
-		<div className="flex w-full   flex-col items-center bg-background font-body">
+		<div className="flex w-full flex-col items-center bg-background font-body">
 			<Navbar tenant={undefined} />
 			<HeroArea servers={data} />
 			<div
@@ -135,7 +135,7 @@ export async function ZeroState() {
 				<FollowCursor intensity={40}>
 					<div
 						className={
-							'flex   h-full flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
+							'flex h-full flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
 						}
 					>
 						<h2 className={'mb-8 text-2xl'}>Setup for free</h2>
@@ -155,7 +155,7 @@ export async function ZeroState() {
 				<FollowCursor intensity={40}>
 					<div
 						className={
-							'flex  h-full flex-col  justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
+							'flex h-full flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
 						}
 					>
 						<h2 className={'mb-8 text-2xl'}>Open Source</h2>

@@ -77,7 +77,7 @@ export async function findQuestionsForSitemap(serverId: string) {
 							},
 						},
 					},
-			  })
+				})
 			: [];
 
 	const questionLookup = new Map(questions.map((m) => [m.id, m]));
@@ -157,7 +157,7 @@ export async function findServerWithCommunityPageData(opts: {
 					orderBy: desc(dbChannels.id),
 					offset,
 					limit: limit * 10, // Allow buffer room if some threads are private
-			  })
+				})
 			: [],
 	]);
 	if (!found || found.kickedTime != null) return null;
@@ -404,6 +404,6 @@ export async function makeMessageResultPage(
 		parentChannel: channel,
 		server,
 		thread,
-		recommendedPosts:[],
+		recommendedPosts: [],
 	};
 }

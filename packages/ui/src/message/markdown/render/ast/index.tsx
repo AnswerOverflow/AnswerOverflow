@@ -33,7 +33,7 @@ const baseRules = {
 			/^$|\n *$/.test(prevCapture ?? '')
 				? /^( *>>> +([\s\S]*))|^( *>(?!>>) +[^\n]*(\n *>(?!>>) +[^\n]*)*\n?)/.exec(
 						source,
-				  )
+					)
 				: null,
 		parse: (
 			capture: string[],

@@ -125,7 +125,7 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 
 		const Contents = (props: { alt: string; src: string }) => (
 			<div className="flex w-full flex-col items-start justify-center">
-				<div className="group relative flex w-full break-words rounded-xl p-1 ">
+				<div className="group relative flex w-full break-words rounded-xl p-1">
 					<div className="mr-4 hidden shrink-0 sm:block">
 						<Avatar>
 							<AvatarImage alt={props.alt} src={props.src} />
@@ -133,7 +133,7 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 						</Avatar>
 					</div>
 					<div className="w-full">
-						<div className="flex w-full min-w-0  justify-between">
+						<div className="flex w-full min-w-0 justify-between">
 							<div className="flex min-w-0 gap-2">
 								<div className="shrink-0 sm:hidden">
 									<Avatar>
@@ -203,7 +203,7 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 
 		return (
 			<div
-				className={`relative h-full w-full  p-2 ${
+				className={`relative h-full w-full p-2 ${
 					additionalMessageBoxClassNames ?? ''
 				} ${forceDarkMode ? 'bg-[#36393F]' : 'dark:bg-[#36393F]'}`}
 				ref={ref}
@@ -222,14 +222,14 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 							<Contents alt={alt} src={src} />
 						</div>
 						<div>
-							<div className="absolute inset-0 " />
-							<div className="absolute inset-0 flex items-center justify-center ">
+							<div className="absolute inset-0" />
+							<div className="absolute inset-0 flex items-center justify-center">
 								<div
 									className={`flex flex-col items-center justify-center text-center text-black ${
 										forceDarkMode ? 'text-white' : 'dark:text-white'
 									}`}
 								>
-									<div className="text-2xl ">{notPublicTitle}</div>
+									<div className="text-2xl">{notPublicTitle}</div>
 									<div>Sign In & Join Server To View</div>
 								</div>
 							</div>

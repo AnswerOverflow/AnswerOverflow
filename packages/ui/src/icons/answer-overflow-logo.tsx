@@ -18,10 +18,10 @@ export const AnswerOverflowLogo = (props: {
 					? {
 							width: props.width || 230,
 							height: (props.width || 230) / ratio,
-					  }
+						}
 					: {
 							width: '100%',
-					  }),
+						}),
 				...props.style,
 			}}
 			className={cn(

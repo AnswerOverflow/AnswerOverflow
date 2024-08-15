@@ -38,8 +38,8 @@ export function ServerSelectDropdown() {
 	const selectedServer =
 		serverId === '1000'
 			? demoServerData
-			: serversWithDashboard?.find((x) => x.id === serverId) ??
-			  serversWithDashboard?.[0];
+			: (serversWithDashboard?.find((x) => x.id === serverId) ??
+				serversWithDashboard?.[0]);
 
 	return (
 		<div>
@@ -51,7 +51,7 @@ export function ServerSelectDropdown() {
 							variant={'ghost'}
 						>
 							<ServerSelectRow server={selectedServer} />
-							<div className=" grid grid-cols-1 grid-rows-2">
+							<div className="grid grid-cols-1 grid-rows-2">
 								<HiChevronUp className="h-4 w-4" />
 								<HiChevronDown className="h-4 w-4" />
 							</div>

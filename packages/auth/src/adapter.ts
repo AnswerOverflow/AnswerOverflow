@@ -42,7 +42,7 @@ export const extendedAdapter: Adapter = {
 			? {
 					...thing,
 					email: thing.email ?? '',
-			  }
+				}
 			: null;
 	},
 	async getUserByEmail(data) {

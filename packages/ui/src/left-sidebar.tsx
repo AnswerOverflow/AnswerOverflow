@@ -82,7 +82,7 @@ const categories = [
 ] as const satisfies Category[];
 
 export const LeftSidebar = () => (
-	<div className="hidden h-auto  min-w-[250px] max-w-[250px] shrink-0 grow border-r-2 p-4 xl:block">
+	<div className="hidden h-auto min-w-[250px] max-w-[250px] shrink-0 grow border-r-2 p-4 xl:block">
 		<div className="sticky left-0 top-[4rem]">
 			<LinkButton
 				href="/new"

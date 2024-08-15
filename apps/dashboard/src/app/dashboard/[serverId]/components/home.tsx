@@ -69,7 +69,7 @@ function usePageViews() {
 							}),
 						},
 						type: 'area',
-				  }
+					}
 				: undefined,
 	});
 }
@@ -153,7 +153,7 @@ export function ServerInvitesUsedLineChart() {
 								}),
 							},
 							type: 'bar',
-					  }
+						}
 					: undefined,
 		});
 	return (
@@ -211,7 +211,7 @@ function ExternalLink({
 	return (
 		<Link
 			href={href}
-			className=" group flex flex-row items-center gap-2 hover:underline"
+			className="group flex flex-row items-center gap-2 hover:underline"
 			target="_blank"
 		>
 			{children}
@@ -240,7 +240,7 @@ export function TopQuestionSolversTable() {
 							<TableBody>
 								{data.map((user) => (
 									<TableRow key={user.avatar}>
-										<TableCell className=" flex flex-row gap-2">
+										<TableCell className="flex flex-row gap-2">
 											<ExternalLink
 												href={`https://www.answeroverflow.com/u/${user.id}`}
 											>

@@ -103,7 +103,7 @@ export default function Layout(props: {
 					</div>
 				</div>
 				<div className="flex flex-col">
-					<header className="flex h-14  items-center gap-4 border-b p-4 lg:h-[60px]">
+					<header className="flex h-14 items-center gap-4 border-b p-4 lg:h-[60px]">
 						<Sheet>
 							<SheetTrigger asChild>
 								<Button

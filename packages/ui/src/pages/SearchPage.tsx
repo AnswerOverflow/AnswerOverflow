@@ -24,7 +24,7 @@ export const SearchPage = ({ results, tenant }: SearchResultProps) => {
 			? ''
 			: `from ${uniqueServers.size} ${
 					uniqueServers.size === 1 ? 'community' : 'communities'
-			  }`,
+				}`,
 	].join(' ');
 	return (
 		<main className="w-full">

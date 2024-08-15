@@ -75,9 +75,8 @@ export const dashboardRouter = router({
 				fetch: async () => {
 					const topSolvers = await getTopQuestionSolversForServer(input);
 					const topSolverIds = Object.keys(topSolvers);
-					const discordAccounts = await findManyDiscordAccountsById(
-						topSolverIds,
-					);
+					const discordAccounts =
+						await findManyDiscordAccountsById(topSolverIds);
 					const map = new Map(
 						discordAccounts.map((account) => [account.id, account]),
 					);

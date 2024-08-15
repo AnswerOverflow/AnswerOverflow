@@ -4,7 +4,7 @@ export function CarbonAds() {
 	return (
 		// TODO: Maybe have a "hey disable ad blocker" message here?
 		<div
-			className={' w-full text-white'}
+			className={'w-full text-white'}
 			// NextJS is dumb and lifts script tags to <head/> so we have to use dangerouslySetInnerHTML
 			dangerouslySetInnerHTML={{
 				__html:

@@ -1,22 +1,23 @@
 {
-	"name": "@answeroverflow/prettier-config",
-	"version": "0.0.0",
-	"main": "index.js",
-	"files": [
-		"next.js"
-	],
-	"license": "MIT",
-	"scripts": {
-		"clean": "rm -rf node_modules"
-	},
-	"dependencies": {
-		"prettier": "^2.8.8",
-		"prettier-plugin-tailwindcss": "^0.3.0"
-	},
-	"devDependencies": {
-		"@answeroverflow/tsconfig": "workspace:^"
-	},
-	"publishConfig": {
-		"access": "public"
-	}
+  "name": "@answeroverflow/prettier-config",
+  "version": "0.0.0",
+  "main": "index.js",
+  "type": "module",
+  "files": [
+    "next.js"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf node_modules"
+  },
+  "dependencies": {
+    "prettier": "^3.3.3",
+    "prettier-plugin-tailwindcss": "^0.6.6"
+  },
+  "devDependencies": {
+    "@answeroverflow/tsconfig": "workspace:^"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }
