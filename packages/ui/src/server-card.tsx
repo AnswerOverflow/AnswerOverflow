@@ -36,7 +36,7 @@ const ServerHero = ({ server }: Pick<ServerCardProps, 'server'>) => {
 					className="h-full w-full overflow-hidden rounded-lg object-cover opacity-25"
 				/>
 			)}
-			<div className="relative z-10 h-full w-full rounded-lg bg-black/5 shadow-md backdrop-blur-md " />
+			<div className="relative z-10 h-full w-full rounded-lg bg-black/5 shadow-md backdrop-blur-md" />
 			<div className="absolute inset-0 z-20 flex items-center justify-center">
 				{server && <ServerIcon server={server} size={64} />}
 			</div>

@@ -30,7 +30,7 @@ export function ThinMessage(
 						) : (
 							<span className="mr-1">{message.author.name}</span>
 						)}
-						<span className="text-sm ">•</span>
+						<span className="text-sm">•</span>
 						<TimeAgo snowflake={message.id} />
 					</div>
 					<div>

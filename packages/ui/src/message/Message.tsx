@@ -64,7 +64,7 @@ export const MessageContents = async (
 		(message.content.length > collapseBy ||
 			(message.content.match(/\n/g)?.length ?? 0 > 5));
 	const trimmedText = shouldCollapse
-		? message.content.match(/\n/g)?.length ?? 0 > 5
+		? (message.content.match(/\n/g)?.length ?? 0 > 5)
 			? message.content.split('\n').slice(0, 5).join('\n') + '...'
 			: `${message.content.slice(0, collapseBy).trim()}...`
 		: message.content;
@@ -102,7 +102,7 @@ export const MessageContentWithSolution = (
 	return (
 		<div>
 			<MessageContents {...props} />
-			<div className="mt-4 w-full rounded-lg  border-2 border-green-500 p-2 dark:border-green-400">
+			<div className="mt-4 w-full rounded-lg border-2 border-green-500 p-2 dark:border-green-400">
 				<span className="text-green-800 dark:text-green-400">Solution:</span>
 				<MessageBlurrer message={props.solution}>
 					<MessageContents message={props.solution} collapseContent={true} />
@@ -232,8 +232,8 @@ export const ContentBlurrer = ({
 				{children}
 			</div>
 			<div>
-				<div className="absolute inset-0 " />
-				<div className="absolute inset-0 flex items-center justify-center ">
+				<div className="absolute inset-0" />
+				<div className="absolute inset-0 flex items-center justify-center">
 					<div
 						className={`flex flex-col items-center justify-center rounded-standard text-center backdrop-blur-sm`}
 					>

@@ -32,7 +32,7 @@ export async function generateMetadata({
 				? {
 						'google-site-verification':
 							'oljHAdgYTW0OIkYe1hFIrUFg1ZnhCeIh9fDnXwDDYMo',
-				  }
+					}
 				: undefined,
 		icons: icon ? [icon] : undefined,
 		alternates: {

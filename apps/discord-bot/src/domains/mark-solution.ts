@@ -272,7 +272,7 @@ export function makeMarkSolutionResponse({
 							name: 'Learn more',
 							value: 'https://answeroverflow.com',
 						},
-				  ],
+					],
 		)
 		.setColor(ANSWER_OVERFLOW_BLUE_HEX);
 
@@ -365,16 +365,19 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 		}
 		// wait 5 minutes then set the thread to archived
 		// TODO: Move this to a remote queue so it survives restarts
-		setTimeout(() => {
-			if (
-				thread?.permissionsFor(thread.client.id!)?.has('ManageThreads') &&
-				thread.guildId !== PUBG_MOBILE_SERVER_ID
-			) {
-				void thread.setArchived(true);
-			} else {
-				console.log('Could not archive thread, missing permissions');
-			}
-		}, 5 * 60 * 1000);
+		setTimeout(
+			() => {
+				if (
+					thread?.permissionsFor(thread.client.id!)?.has('ManageThreads') &&
+					thread.guildId !== PUBG_MOBILE_SERVER_ID
+				) {
+					void thread.setArchived(true);
+				} else {
+					console.log('Could not archive thread, missing permissions');
+				}
+			},
+			5 * 60 * 1000,
+		);
 	};
 	void nonBlockingUpdates();
 	const { embed, components } = makeMarkSolutionResponse({

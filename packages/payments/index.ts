@@ -5,7 +5,7 @@ const stripe = sharedEnvs.STRIPE_SECRET_KEY
 	? new Stripe(sharedEnvs.STRIPE_SECRET_KEY, {
 			apiVersion: '2022-11-15',
 			typescript: true,
-	  })
+		})
 	: undefined;
 
 export async function fetchSubscriptionInfo(subscriptionId: string) {

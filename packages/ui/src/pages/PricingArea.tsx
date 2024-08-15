@@ -81,7 +81,7 @@ export const PricingArea = (props: { className?: string }) => {
 										)}
 										aria-hidden="true"
 									/>
-									<label className="ml-3  text-neutral-600 dark:text-neutral-300">
+									<label className="ml-3 text-neutral-600 dark:text-neutral-300">
 										Implemented
 									</label>
 								</div>
@@ -118,7 +118,7 @@ export const PricingArea = (props: { className?: string }) => {
 											className={cn(
 												'ml-3',
 												feature.implemented
-													? 'text-neutral-600 dark:text-neutral-300 '
+													? 'text-neutral-600 dark:text-neutral-300'
 													: 'text-gray-600 dark:text-gray-300',
 											)}
 										>
@@ -134,12 +134,7 @@ export const PricingArea = (props: { className?: string }) => {
 					</div>
 				))}
 			</div>
-			<div
-				className="
-        pt-10
-        text-center
-        text-neutral-600 dark:text-neutral-400"
-			>
+			<div className="pt-10 text-center text-neutral-600 dark:text-neutral-400">
 				*You can start hosting content on answeroverflow.com today and upgrade
 				at any time, all of the existing content will be redirected to your own
 				domain.

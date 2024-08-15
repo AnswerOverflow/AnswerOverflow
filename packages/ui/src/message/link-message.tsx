@@ -43,7 +43,7 @@ export const LinkMessage = (
 							<MessageAuthorArea {...props} />
 						</div>
 						<>
-							<Link href={`/m/${message.id}`} className="block w-fit ">
+							<Link href={`/m/${message.id}`} className="block w-fit">
 								<Paragraph className="py-2 pt-4 font-header text-xl text-blue-700 decoration-2 hover:text-blue-600 hover:underline dark:text-blue-400 hover:dark:text-blue-500">
 									{thread?.name ?? message.content.slice(0, 20).trim() + '...'}
 								</Paragraph>

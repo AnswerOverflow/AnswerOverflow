@@ -31,7 +31,7 @@ export default async function HomePage(props: { children: React.ReactNode }) {
 		>
 			<div
 				className={
-					'hidden h-fit max-w-[650px] flex-col gap-4 p-4 text-center md:flex 2xl:mr-4  2xl:w-[400px] 2xl:text-left'
+					'hidden h-fit max-w-[650px] flex-col gap-4 p-4 text-center md:flex 2xl:mr-4 2xl:w-[400px] 2xl:text-left'
 				}
 			>
 				<div className={'text-sm font-bold text-primary'}>
@@ -46,7 +46,7 @@ export default async function HomePage(props: { children: React.ReactNode }) {
 					</BlueLink>
 				</span>
 			</div>
-			<div className={' flex w-[95vw] max-w-[650px] flex-col gap-4 md:px-4'}>
+			<div className={'flex w-[95vw] max-w-[650px] flex-col gap-4 md:px-4'}>
 				<div className={'flex gap-4'}>
 					<LinkButton
 						className={'flex items-center gap-4'}

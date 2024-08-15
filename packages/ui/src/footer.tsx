@@ -97,7 +97,7 @@ const navigation: NavigationData = {
 const MainSiteFooter = () => (
 	<div className="mx-auto max-w-7xl overflow-hidden px-6 py-10 sm:py-14 lg:px-8">
 		<nav
-			className="-mb-6 columns-1 text-center sm:flex sm:columns-2  sm:justify-center sm:space-x-12"
+			className="-mb-6 columns-1 text-center sm:flex sm:columns-2 sm:justify-center sm:space-x-12"
 			aria-label="Footer"
 		>
 			<div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-24">
@@ -115,7 +115,7 @@ const MainSiteFooter = () => (
 									<Link
 										href={item.href}
 										key={`link-${item.name}-${item.href}`}
-										className="my-1 font-body text-primary/75  hover:text-primary"
+										className="my-1 font-body text-primary/75 hover:text-primary"
 										prefetch={false}
 									>
 										{item.name}
@@ -153,7 +153,7 @@ const PoweredByAnswerOverflowFooter = () => (
 		<Link
 			href="https://www.answeroverflow.com"
 			prefetch={false}
-			className="flex flex-col items-center justify-center gap-2 fill-black stroke-black  py-8 font-bold hover:fill-blue-500 hover:stroke-blue-500 hover:text-blue-500 dark:fill-white dark:stroke-white hover:dark:fill-blue-500 hover:dark:stroke-blue-500"
+			className="flex flex-col items-center justify-center gap-2 fill-black stroke-black py-8 font-bold hover:fill-blue-500 hover:stroke-blue-500 hover:text-blue-500 dark:fill-white dark:stroke-white hover:dark:fill-blue-500 hover:dark:stroke-blue-500"
 		>
 			<span>Powered by</span>
 			<div className={'w-36'}>

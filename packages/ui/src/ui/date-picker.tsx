@@ -51,7 +51,7 @@ export function DatePickerWithPresets(props: {
 				)}{' '}
 			</SelectTrigger>
 			<SelectContent position="popper">
-				<div className="flex flex-row gap-4 rounded-md ">
+				<div className="flex flex-row gap-4 rounded-md">
 					<div className="flex flex-col border-r pr-2">
 						<SelectItem value="0">Today</SelectItem>
 						<SelectItem value="1">Yesterday</SelectItem>

@@ -42,7 +42,7 @@ const InKeep = () => (
 export default function Page() {
 	return (
 		// center align
-		<div className="flex  items-center justify-center">
+		<div className="flex items-center justify-center">
 			<div className="max-w-4xl">
 				<div className="flex flex-col gap-4 rounded-md border-2 p-4 text-left">
 					<div className="flex flex-row justify-between">
@@ -63,13 +63,8 @@ export default function Page() {
 					<span>
 						The InKeep AI chat widget can also be embedded on your Answer
 						Overflow pages, please get in contact with{' '}
-						<span
-							className="font-semibold
-            "
-						>
-							rhyssul
-						</span>{' '}
-						on Discord to set this up
+						<span className="font-semibold">rhyssul</span> on Discord to set
+						this up
 					</span>
 				</div>
 			</div>

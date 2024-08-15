@@ -53,7 +53,7 @@ const JoinAnswerOverflowCard = () => (
 		}
 	>
 		<span
-			className={'text-lg font-semibold '}
+			className={'text-lg font-semibold'}
 			style={{
 				textWrap: 'balance',
 			}}
@@ -144,7 +144,7 @@ export function MessageResultPage({
 					>
 						Solution
 						<div
-							className="rounded-lg border-2 border-green-500  p-2 dark:border-green-400"
+							className="rounded-lg border-2 border-green-500 p-2 dark:border-green-400"
 							key={message.id}
 						>
 							<ThinMessage message={message} />
@@ -211,7 +211,7 @@ export function MessageResultPage({
 				<div>
 					<MessageBody message={firstMessage} loadingStyle="eager" />
 					{solution && (
-						<div className="mt-4 w-full rounded-lg  border-2 border-green-500 p-2 dark:border-green-400">
+						<div className="mt-4 w-full rounded-lg border-2 border-green-500 p-2 dark:border-green-400">
 							<span className="text-green-800 dark:text-green-400">
 								Solution:
 							</span>
@@ -259,7 +259,7 @@ export function MessageResultPage({
 	const adsEnabled = !tenant;
 
 	const Sidebar = () => (
-		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center  md:w-[400px]">
+		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center md:w-[400px]">
 			<div
 				className={
 					'hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block'
@@ -279,7 +279,7 @@ export function MessageResultPage({
 					</div>
 					<span className="text-left text-sm">{server.description}</span>
 					<div className="flex w-full flex-row items-center justify-between">
-						<div className="flex flex-col items-start ">
+						<div className="flex flex-col items-start">
 							<span className="text-sm font-semibold">
 								<FormattedNumber value={server.approximateMemberCount} />
 							</span>
@@ -295,7 +295,7 @@ export function MessageResultPage({
 					</div>
 				</div>
 			</div>
-			<div className="flex w-full flex-col justify-center gap-2 text-center xl:mt-6 ">
+			<div className="flex w-full flex-col justify-center gap-2 text-center xl:mt-6">
 				{adsEnabled && <CarbonAds />}
 				{!tenant && <JoinAnswerOverflowCard />}
 			</div>

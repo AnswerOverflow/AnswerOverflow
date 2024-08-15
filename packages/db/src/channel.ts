@@ -386,7 +386,7 @@ export function findChannelMessagesById(
 			? and(
 					eq(dbMessages.channelId, channelId),
 					eq(dbMessages.authorId, authorId),
-			  )
+				)
 			: eq(dbMessages.channelId, channelId),
 		orderBy: desc(dbMessages.id),
 	});

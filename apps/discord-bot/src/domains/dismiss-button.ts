@@ -52,7 +52,10 @@ export function parseDismissButtonId(customId: string) {
 const dismissErrors = ['no-permissions', 'not-allowed-to-dismiss'];
 export type DismissError = (typeof dismissErrors)[number];
 export class DismissErrorError extends Error {
-	public constructor(message: string, public readonly reason: DismissError) {
+	public constructor(
+		message: string,
+		public readonly reason: DismissError,
+	) {
 		super(message);
 	}
 }

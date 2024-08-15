@@ -11,7 +11,7 @@ const text = {
 			: recurseParse(content, {
 					...state,
 					nested: true,
-			  }),
+				}),
 
 	react: (
 		node: {

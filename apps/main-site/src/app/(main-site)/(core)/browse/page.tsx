@@ -26,7 +26,7 @@ export default async function BrowseCommunitiesPage() {
 					return (
 						<div
 							key={`server-${server.id}-area`}
-							className="w-full max-w-md rounded-md  p-4 transition-all"
+							className="w-full max-w-md rounded-md p-4 transition-all"
 						>
 							<ViewServerCard server={server} />
 						</div>

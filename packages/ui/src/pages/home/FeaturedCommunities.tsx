@@ -102,12 +102,7 @@ const FeaturedCommunity = (props: FeaturedCommunityProps) => {
 				...serverToAnalyticsData(props),
 			}}
 		>
-			<div
-				className="flex
-      flex-col items-center transition-all duration-200
-      hover:z-10 hover:scale-110 hover:shadow-lg
-      "
-			>
+			<div className="flex flex-col items-center transition-all duration-200 hover:z-10 hover:scale-110 hover:shadow-lg">
 				<Image
 					src={props.iconUrl}
 					width={92}
