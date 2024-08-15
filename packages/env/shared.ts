@@ -125,6 +125,7 @@ export const sharedEnvs = createEnv({
      */
 		POSTHOG_PROJECT_ID: zNumberRequiredInProduction,
 		POSTHOG_PERSONAL_API_KEY: zStringRequiredInProduction,
+		AXIOM_API_KEY: zStringRequiredInProduction,
 		/*
       Payments
      */

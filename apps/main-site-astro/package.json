@@ -1,0 +1,48 @@
+{
+  "name": "main-site-astro",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "with-env": "dotenv -e ../../.env --",
+    "dev": "pnpm with-env astro dev",
+    "start": "pnpm with-env astro dev",
+    "build": "pnpm with-env astro check && astro build",
+    "preview": "pnpm with-env astro preview",
+    "astro": "pnpm with-env astro"
+  },
+  "dependencies": {
+    "@answeroverflow/analytics": "workspace:^",
+    "@answeroverflow/api": "workspace:^",
+    "@answeroverflow/auth": "workspace:^",
+    "@answeroverflow/cache": "workspace:^",
+    "@answeroverflow/constants": "workspace:^",
+    "@answeroverflow/db": "workspace:^",
+    "@answeroverflow/env": "workspace:^",
+    "@answeroverflow/tailwind-config": "workspace:^",
+    "@answeroverflow/ui": "workspace:^",
+    "@answeroverflow/utils": "workspace:^",
+    "@astrojs/check": "^0.7.0",
+    "@astrojs/react": "^3.5.0",
+    "@astrojs/tailwind": "^5.1.0",
+    "@tailwindcss/typography": "^0.5.10",
+    "@types/react": "npm:types-react@rc",
+    "@types/react-dom": "npm:types-react-dom@rc",
+    "@unocss/reset": "^0.61.5",
+    "astro": "^4.10.2",
+    "react": "19.0.0-rc-a26e3f403e-20240611",
+    "react-dom": "19.0.0-rc-a26e3f403e-20240611",
+    "server-only": "^0.0.1",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.4.5"
+  },
+  "devDependencies": {
+    "@answeroverflow/prettier-config": "workspace:^",
+    "dotenv-cli": "^7.4.1",
+    "prettier-plugin-astro": "^0.14.1",
+    "unocss": "^0.61.5"
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@rc",
+    "@types/react-dom": "npm:types-react-dom@rc"
+  }
+}

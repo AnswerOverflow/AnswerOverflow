@@ -4,9 +4,10 @@ import type { Metadata } from 'next';
 import { makeMessageResultPage } from '@answeroverflow/db';
 type Props = {
 	params: { messageId: string };
+	searchParams?: { showAiChat?: boolean };
 };
 
-export const revalidate = 600;
+export const revalidate = 86400;
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	const data = await makeMessageResultPage(params.messageId, []);
 
@@ -33,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	};
 }
 
-export default async function MessageResult({ params }: Props) {
+export default async function MessageResult({ params, searchParams }: Props) {
 	const data = await makeMessageResultPage(params.messageId, []);
 	if (!data) {
 		return notFound();
@@ -46,6 +47,7 @@ export default async function MessageResult({ params }: Props) {
 	return (
 		<MessageResultPage
 			messages={data.messages}
+			showAIChat={searchParams?.showAiChat}
 			channel={data.parentChannel}
 			server={data.server}
 			tenant={undefined}

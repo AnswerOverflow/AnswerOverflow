@@ -9,6 +9,7 @@ module.exports = {
 	printWidth: 80,
 	trailingComma: 'all',
 	useTabs: true,
+	plugins: ['prettier-plugin-astro'],
 	overrides: [
 		{
 			files: '.all-contributorsrc',
@@ -28,6 +29,12 @@ module.exports = {
 			options: {
 				parser: 'json',
 				trailingComma: 'none',
+			},
+		},
+		{
+			files: '*.astro',
+			options: {
+				parser: 'astro',
 			},
 		},
 	],

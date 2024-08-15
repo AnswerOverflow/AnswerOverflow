@@ -25,9 +25,12 @@ import { isImageAttachment } from '../message/attachments';
 import { TimeAgo } from '../ui/time-ago';
 import { DiscordAvatar } from '../discord-avatar';
 import { FaRegMessage } from 'react-icons/fa6';
-import { BlueLink } from '../ui/blue-link';
-import { JsonLd } from 'react-schemaorg';
 
+import { JsonLd } from 'react-schemaorg';
+import { InKeepWidget } from './inkeep';
+import { LoadMoreMessages } from './load-more-messages';
+import { MessageResultPageProvider } from './message-result-page-context';
+import { JumpToSolution } from './jump-to-solution';
 export type MessageResultPageProps = {
 	messages: MessageFull[];
 	server: ServerPublic;
@@ -40,6 +43,7 @@ export type MessageResultPageProps = {
 		message: MessageFull;
 		thread: ChannelPublicWithFlags;
 	}[];
+	showAIChat?: boolean;
 };
 
 const JoinAnswerOverflowCard = () => (
@@ -78,7 +82,6 @@ export function MessageResultPage({
 	channel,
 	thread,
 	tenant,
-	relatedPosts,
 	isUserInServer,
 }: MessageResultPageProps) {
 	const firstMessage = messages.at(0);
@@ -217,9 +220,7 @@ export function MessageResultPage({
 								<MessageBody message={solution} collapseContent={true} />
 							</MessageBlurrer>
 
-							<BlueLink href={`#solution-${solution.id}`}>
-								Jump to solution
-							</BlueLink>
+							<JumpToSolution id={solution.id} />
 						</div>
 					)}
 				</div>
@@ -234,7 +235,9 @@ export function MessageResultPage({
 				</div>
 			</div>
 			<div className="rounded-md">
-				<div className="flex flex-col gap-4">{messageStack}</div>
+				<div className="flex flex-col gap-4">
+					<LoadMoreMessages messages={messageStack} />
+				</div>
 			</div>
 			{messagesToDisplay.length === 0 && (
 				<div className="flex flex-col gap-4 rounded-md border-2 border-solid border-secondary p-4">
@@ -249,6 +252,7 @@ export function MessageResultPage({
 					/>
 				</div>
 			)}
+			{server.id === '1043890932593987624' && <InKeepWidget server={server} />}
 		</main>
 	);
 
@@ -294,91 +298,69 @@ export function MessageResultPage({
 			<div className="flex w-full flex-col justify-center gap-2 text-center xl:mt-6 ">
 				{adsEnabled && <CarbonAds />}
 				{!tenant && <JoinAnswerOverflowCard />}
-				{relatedPosts.length > 0 && (
-					<>
-						<span className="text-lg font-semibold">More Posts</span>
-						<div className="flex flex-col gap-4">
-							{relatedPosts
-								.slice(0, Math.min(messages.length * 2, 10))
-								.map((post) => (
-									<Link
-										className="flex flex-col gap-2 rounded-md border-2 border-solid border-secondary p-4 text-left transition-colors duration-700 ease-out hover:border-primary hover:text-primary"
-										href={`/m/${post.message.id}`}
-										key={post.thread.id}
-									>
-										<span className="truncate text-lg font-semibold">
-											{post.thread.name}
-										</span>
-										<span className="truncate text-sm">
-											{post.message.content.slice(0, 100)}
-										</span>
-									</Link>
-								))}
-						</div>
-					</>
-				)}
 			</div>
 		</div>
 	);
-	const rendered = (
-		<div className="mx-auto pt-2">
-			<JsonLd<DiscussionForumPosting>
-				item={{
-					'@context': 'https://schema.org',
-					'@type': 'DiscussionForumPosting',
-					url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
-						thread?.id ?? firstMessage.id
-					}`,
-					author: {
-						'@type': 'Person',
-						name: firstMessage.author.name,
-						identifier: firstMessage.author.id,
-						url: `/u/${firstMessage.author.id}`,
-					},
-					image: firstMessageMedia && firstMessageMedia.proxyUrl,
-					headline: title,
-					articleBody: firstMessage.content,
-					datePublished: getDate(firstMessage.id).toISOString(),
-					dateModified: thread?.archivedTimestamp
-						? new Date(Number(thread.archivedTimestamp)).toISOString()
-						: undefined,
-					identifier: thread?.id ?? firstMessage.id,
-					commentCount: messagesToDisplay.length,
-					comment: messagesToDisplay.map((message, index) => ({
-						'@type': message.id === solutionMessageId ? 'Answer' : 'Comment',
-						text: message.content,
-						identifier: message.id,
-						datePublished: getDate(message.id).toISOString(),
-						position: index + 1,
+	return (
+		<MessageResultPageProvider>
+			<div className="mx-auto pt-2">
+				<JsonLd<DiscussionForumPosting>
+					item={{
+						'@context': 'https://schema.org',
+						'@type': 'DiscussionForumPosting',
+						url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
+							thread?.id ?? firstMessage.id
+						}`,
 						author: {
 							'@type': 'Person',
-							name: message.author.name,
-							identifier: message.author.id,
-							url: `/u/${message.author.id}`,
+							name: firstMessage.author.name,
+							identifier: firstMessage.author.id,
+							url: `/u/${firstMessage.author.id}`,
 						},
-					})),
-				}}
-			/>
-
-			<div className="flex w-full flex-col justify-center gap-4 md:flex-row">
-				<Main />
-				<Sidebar />
-				<TrackLoad
-					eventName={'Message Page View'}
-					eventData={{
-						...channelToAnalyticsData(channel),
-						...serverToAnalyticsData(server),
-						...(thread && {
-							...threadToAnalyticsData(thread),
-							'Number of Messages': messages.length,
-						}),
-						...messageWithDiscordAccountToAnalyticsData(firstMessage),
+						image: firstMessageMedia && firstMessageMedia.proxyUrl,
+						headline: title,
+						articleBody: firstMessage.content,
+						datePublished: getDate(firstMessage.id).toISOString(),
+						dateModified: thread?.archivedTimestamp
+							? new Date(Number(thread.archivedTimestamp)).toISOString()
+							: undefined,
+						identifier: thread?.id ?? firstMessage.id,
+						commentCount: messagesToDisplay.length,
+						comment: messagesToDisplay.map((message, index) => ({
+							'@type': message.id === solutionMessageId ? 'Answer' : 'Comment',
+							text: message.content,
+							identifier: message.id,
+							datePublished: getDate(message.id).toISOString(),
+							position: index + 1,
+							author: {
+								'@type': 'Person',
+								name: message.author.name,
+								identifier: message.author.id,
+								url: `/u/${message.author.id}`,
+							},
+						})),
 					}}
 				/>
+
+				<div className="flex w-full flex-col justify-center gap-4 md:flex-row">
+					<Main />
+					<Sidebar />
+					<TrackLoad
+						eventName={'Message Page View'}
+						eventData={{
+							...channelToAnalyticsData(channel),
+							...serverToAnalyticsData(server),
+							...(thread && {
+								...threadToAnalyticsData(thread),
+								'Number of Messages': messages.length,
+							}),
+							...messageWithDiscordAccountToAnalyticsData(firstMessage),
+						}}
+					/>
+				</div>
 			</div>
-		</div>
+		</MessageResultPageProvider>
 	);
-	return rendered;
 }
 
 export default MessageResultPage;

@@ -7,6 +7,11 @@
       "path": "apps/main-site"
     },
     {
+      //
+      "name": "main-site-astro",
+      "path": "apps/main-site-astro"
+    },
+    {
       "name": "dashboard",
       "path": "apps/dashboard"
     },
@@ -110,7 +115,8 @@
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "tailwindCSS.includeLanguages": {
-      "plaintext": "html"
+      "plaintext": "html",
+      "astro": "html"
     },
     "files.associations": {
       "*.css": "tailwindcss"
@@ -146,7 +152,7 @@
     "files.exclude": {
       // "**/node_modules": true,
       "**/coverage/": true,
-      "**/.next": true,
+      // "**/.next": true,
       "**/.turbo": true
       // "**/dist": true,
     },
@@ -231,6 +237,7 @@
   "extensions": {
     "recommendations": [
       "vscode-icons-team.vscode-icons",
+      "astro-build.astro-vscode",
       "ms-vscode-remote.vscode-remote-extensionpack",
       "orta.vscode-twoslash-queries",
       "dbaeumer.vscode-eslint",

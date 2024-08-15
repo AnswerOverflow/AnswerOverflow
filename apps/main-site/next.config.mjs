@@ -37,6 +37,7 @@ const config = {
 	],
 	experimental: {
 		ppr: true,
+		instrumentationHook: true,
 	},
 	images: {
 		domains: [
@@ -47,12 +48,6 @@ const config = {
 			'images-ext-2.discordapp.net',
 			'answer-overflow-discord-attachments.s3.amazonaws.com',
 		],
-	},
-	// https://github.com/kkomelin/isomorphic-dompurify/issues/54
-	webpack: (config, { webpack }) => {
-		config.externals = [...config.externals, 'canvas', 'jsdom'];
-
-		return config;
 	},
 	// We already do linting on GH actions
 	eslint: {
@@ -87,7 +82,6 @@ const config = {
 		];
 	},
 	skipTrailingSlashRedirect: true,
-
 	redirects: async () => {
 		return [
 			{
@@ -114,20 +108,22 @@ const config = {
 						: 'https://app.answeroverflow.com/dashboard',
 				permanent: process.env.NODE_ENV === 'production',
 			},
-      {
-        source: '/changelog',
-        destination: 'https://docs.answeroverflow.com/changelog',
-        permanent: false,
-      },
-      {
-        source: '/changelog:slug*',
-        destination: 'https://docs.answeroverflow.com/changelog:slug',
-        permanent: false,
-      }
+			{
+				source: '/changelog',
+				destination: 'https://docs.answeroverflow.com/changelog',
+				permanent: false,
+			},
+			{
+				source: '/changelog:slug*',
+				destination: 'https://docs.answeroverflow.com/changelog:slug',
+				permanent: false,
+			},
 		];
 	},
 };
-
+import { withAxiom } from 'next-axiom';
 // With content layer breaks things for us for some reason
+const withAxiomConfig = withAxiom(config);
 
-export default withMDX(config);
+// @ts-ignore ignore
+export default withMDX(withAxiomConfig);

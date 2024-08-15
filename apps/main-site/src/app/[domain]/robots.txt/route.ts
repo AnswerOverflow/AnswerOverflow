@@ -11,7 +11,41 @@ export function GET(
 ) {
 	const domain = params.domain;
 	return new Response(
-		`User-agent: *
+		`User-agent: 008
+Disallow: /
+
+User-agent: voltron
+Disallow: /
+
+User-Agent: bender
+Disallow: /my_shiny_metal_ass
+
+User-Agent: Gort
+Disallow: /earth
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: PiplBot
+Disallow: /
+
+User-agent: mauibot
+Disallow: /
+
+User-agent: semrushbot
+Disallow: /
+
+User-agent: ahrefsbot
+Disallow: /
+
+
+User-agent: blexbot
+Disallow: /
+
+User-agent: seo spider
+Disallow: /
+
+User-agent: *
 Allow: /
 Allow: /api/og/
 Disallow: /api/
