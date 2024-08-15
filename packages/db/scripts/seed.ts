@@ -96,7 +96,7 @@ async function seedTwo() {
 			id: '100',
 			parentChannelId: channel.id,
 			content:
-				'Can you make sure that your internal address is compossed of http://ip:port, ',
+				'Can you make sure that your internal address is composed of http://ip:port, ',
 		}),
 	);
 	await upsertServer({

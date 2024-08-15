@@ -23,7 +23,7 @@ export function mockClient(
 	return client;
 }
 
-/* Seperate this out into its own function to be reused with custom clients */
+/* Separate this out into its own function to be reused with custom clients */
 export function applyClientMocks(client: Client) {
 	Client.prototype.login = async () => Promise.resolve('');
 
