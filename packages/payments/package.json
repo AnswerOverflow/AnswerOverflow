@@ -1,28 +1,28 @@
 {
-	"name": "@answeroverflow/payments",
-	"version": "0.1.0",
-	"main": "./index.ts",
-	"types": "./index.ts",
-	"license": "MIT",
-	"private": true,
-	"scripts": {
-		"clean": "rm -rf .turbo node_modules coverage",
-		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --check .",
-		"lint": "eslint . && tsc --noEmit",
-		"lint:fix": "eslint . --fix"
-	},
-	"dependencies": {
-		"@answeroverflow/env": "workspace:^",
-		"dotenv-cra": "^3.0.3",
-		"stripe": "^12.18.0"
-	},
-	"devDependencies": {
-		"@answeroverflow/prettier-config": "workspace:^",
-		"@answeroverflow/tsconfig": "workspace:^",
-		"@vitest/coverage-c8": "^0.28.5",
-		"eslint": "^8.57.0",
-		"prettier": "^3.3.3",
-		"vitest": "^0.29.8"
-	}
+  "name": "@answeroverflow/payments",
+  "version": "0.1.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules coverage",
+    "format": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --write .",
+    "format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --check .",
+    "lint": "eslint . && tsc --noEmit",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@answeroverflow/env": "workspace:^",
+    "dotenv-cra": "^3.0.3",
+    "stripe": "^12.18.0"
+  },
+  "devDependencies": {
+    "@answeroverflow/prettier-config": "workspace:^",
+    "@answeroverflow/tsconfig": "workspace:^",
+    "@vitest/coverage-v8": "^2.0.5",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "vitest": "^2.0.5"
+  }
 }
