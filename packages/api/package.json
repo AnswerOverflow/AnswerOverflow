@@ -12,7 +12,7 @@
     "format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --check .",
     "lint": "eslint . && tsc --noEmit",
     "lint:fix": "eslint . --fix",
-    "test": "pnpm with-env vitest run",
+    "test": "pnpm with-env vitest run --coverage",
     "test:watch": "pnpm with-env vitest",
     "type-check": "tsc --noEmit"
   },
