@@ -7,8 +7,8 @@
 	"private": true,
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules coverage",
-		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --check .",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix"
 	},
@@ -20,9 +20,9 @@
 	"devDependencies": {
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
-		"@vitest/coverage-c8": "^0.28.5",
+		"@vitest/coverage-v8": "^2.0.5",
 		"eslint": "^8.57.0",
-		"prettier": "^2.8.8",
-		"vitest": "^0.29.8"
+		"prettier": "^3.3.3",
+		"vitest": "^2.0.5"
 	}
 }

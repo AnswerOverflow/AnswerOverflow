@@ -38,7 +38,7 @@ export async function listPublicThreads(opts: {
 		questionIds.length > 0
 			? await findManyMessagesWithAuthors(questionIds, {
 					excludePrivateMessages: true,
-			  })
+				})
 			: [];
 	const questionLookup = new Map(questions.map((q) => [q.id, q]));
 

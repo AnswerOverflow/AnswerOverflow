@@ -5,8 +5,8 @@
 	"main": "./index.ts",
 	"types": "./index.ts",
 	"scripts": {
-		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --check .",
 		"lint": "tsc --noEmit",
 		"clean": "rm -rf node_modules"
 	},
@@ -29,7 +29,7 @@
 		"@types/react": "^18.2.20",
 		"@types/react-dom": "^18.2.7",
 		"eslint": "^8.57.0",
-		"prettier": "^2.8.8",
+		"prettier": "^3.3.3",
 		"type-fest": "^4.12.0"
 	}
 }

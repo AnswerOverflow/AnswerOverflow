@@ -168,9 +168,8 @@ export class SyncOnJoin extends Listener {
 			'Answer Overflow Account Id': guild.ownerId, // <---TODO: Not a great id to track with but best we've got
 		});
 		if (sharedEnvs.NODE_ENV !== 'test') {
-			const rhysUser = await this.container.client.users.fetch(
-				'523949187663134754',
-			);
+			const rhysUser =
+				await this.container.client.users.fetch('523949187663134754');
 			await rhysUser.send({
 				embeds: [makeGuildEmbed(guild, true)],
 			});
@@ -204,9 +203,8 @@ export class SyncOnDelete extends Listener {
 			}),
 		});
 		if (sharedEnvs.NODE_ENV !== 'test') {
-			const rhysUser = await this.container.client.users.fetch(
-				'523949187663134754',
-			);
+			const rhysUser =
+				await this.container.client.users.fetch('523949187663134754');
 			await rhysUser.send({
 				embeds: [makeGuildEmbed(guild, false)],
 			});

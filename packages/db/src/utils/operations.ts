@@ -23,10 +23,13 @@ export async function upsertMany<T, F, Data>(calls: {
 	const { find, create, getInputId, getFetchedDataId, input, update } = calls;
 	const existing = await find();
 	// map existing to id
-	const existingMap = existing.reduce((acc, cur) => {
-		acc[getFetchedDataId(cur)] = cur;
-		return acc;
-	}, {} as Record<string, T>);
+	const existingMap = existing.reduce(
+		(acc, cur) => {
+			acc[getFetchedDataId(cur)] = cur;
+			return acc;
+		},
+		{} as Record<string, T>,
+	);
 
 	const toCreate = input
 		.filter((c) => !existingMap[getInputId(c)])

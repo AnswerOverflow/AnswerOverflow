@@ -25,9 +25,12 @@ import { isImageAttachment } from '../message/attachments';
 import { TimeAgo } from '../ui/time-ago';
 import { DiscordAvatar } from '../discord-avatar';
 import { FaRegMessage } from 'react-icons/fa6';
-import { BlueLink } from '../ui/blue-link';
-import { JsonLd } from 'react-schemaorg';
 
+import { JsonLd } from 'react-schemaorg';
+import { InKeepWidget } from './inkeep';
+import { LoadMoreMessages } from './load-more-messages';
+import { MessageResultPageProvider } from './message-result-page-context';
+import { JumpToSolution } from './jump-to-solution';
 export type MessageResultPageProps = {
 	messages: MessageFull[];
 	server: ServerPublic;
@@ -40,6 +43,7 @@ export type MessageResultPageProps = {
 		message: MessageFull;
 		thread: ChannelPublicWithFlags;
 	}[];
+	showAIChat?: boolean;
 };
 
 const JoinAnswerOverflowCard = () => (
@@ -49,7 +53,7 @@ const JoinAnswerOverflowCard = () => (
 		}
 	>
 		<span
-			className={'text-lg font-semibold '}
+			className={'text-lg font-semibold'}
 			style={{
 				textWrap: 'balance',
 			}}
@@ -78,7 +82,6 @@ export function MessageResultPage({
 	channel,
 	thread,
 	tenant,
-	relatedPosts,
 	isUserInServer,
 }: MessageResultPageProps) {
 	const firstMessage = messages.at(0);
@@ -141,7 +144,7 @@ export function MessageResultPage({
 					>
 						Solution
 						<div
-							className="rounded-lg border-2 border-green-500  p-2 dark:border-green-400"
+							className="rounded-lg border-2 border-green-500 p-2 dark:border-green-400"
 							key={message.id}
 						>
 							<ThinMessage message={message} />
@@ -208,7 +211,7 @@ export function MessageResultPage({
 				<div>
 					<MessageBody message={firstMessage} loadingStyle="eager" />
 					{solution && (
-						<div className="mt-4 w-full rounded-lg  border-2 border-green-500 p-2 dark:border-green-400">
+						<div className="mt-4 w-full rounded-lg border-2 border-green-500 p-2 dark:border-green-400">
 							<span className="text-green-800 dark:text-green-400">
 								Solution:
 							</span>
@@ -217,9 +220,7 @@ export function MessageResultPage({
 								<MessageBody message={solution} collapseContent={true} />
 							</MessageBlurrer>
 
-							<BlueLink href={`#solution-${solution.id}`}>
-								Jump to solution
-							</BlueLink>
+							<JumpToSolution id={solution.id} />
 						</div>
 					)}
 				</div>
@@ -234,7 +235,9 @@ export function MessageResultPage({
 				</div>
 			</div>
 			<div className="rounded-md">
-				<div className="flex flex-col gap-4">{messageStack}</div>
+				<div className="flex flex-col gap-4">
+					<LoadMoreMessages messages={messageStack} />
+				</div>
 			</div>
 			{messagesToDisplay.length === 0 && (
 				<div className="flex flex-col gap-4 rounded-md border-2 border-solid border-secondary p-4">
@@ -249,13 +252,14 @@ export function MessageResultPage({
 					/>
 				</div>
 			)}
+			{server.id === '1043890932593987624' && <InKeepWidget server={server} />}
 		</main>
 	);
 
 	const adsEnabled = !tenant;
 
 	const Sidebar = () => (
-		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center  md:w-[400px]">
+		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center md:w-[400px]">
 			<div
 				className={
 					'hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block'
@@ -275,7 +279,7 @@ export function MessageResultPage({
 					</div>
 					<span className="text-left text-sm">{server.description}</span>
 					<div className="flex w-full flex-row items-center justify-between">
-						<div className="flex flex-col items-start ">
+						<div className="flex flex-col items-start">
 							<span className="text-sm font-semibold">
 								<FormattedNumber value={server.approximateMemberCount} />
 							</span>
@@ -291,94 +295,72 @@ export function MessageResultPage({
 					</div>
 				</div>
 			</div>
-			<div className="flex w-full flex-col justify-center gap-2 text-center xl:mt-6 ">
+			<div className="flex w-full flex-col justify-center gap-2 text-center xl:mt-6">
 				{adsEnabled && <CarbonAds />}
 				{!tenant && <JoinAnswerOverflowCard />}
-				{relatedPosts.length > 0 && (
-					<>
-						<span className="text-lg font-semibold">More Posts</span>
-						<div className="flex flex-col gap-4">
-							{relatedPosts
-								.slice(0, Math.min(messages.length * 2, 10))
-								.map((post) => (
-									<Link
-										className="flex flex-col gap-2 rounded-md border-2 border-solid border-secondary p-4 text-left transition-colors duration-700 ease-out hover:border-primary hover:text-primary"
-										href={`/m/${post.message.id}`}
-										key={post.thread.id}
-									>
-										<span className="truncate text-lg font-semibold">
-											{post.thread.name}
-										</span>
-										<span className="truncate text-sm">
-											{post.message.content.slice(0, 100)}
-										</span>
-									</Link>
-								))}
-						</div>
-					</>
-				)}
 			</div>
 		</div>
 	);
-	const rendered = (
-		<div className="mx-auto pt-2">
-			<JsonLd<DiscussionForumPosting>
-				item={{
-					'@context': 'https://schema.org',
-					'@type': 'DiscussionForumPosting',
-					url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
-						thread?.id ?? firstMessage.id
-					}`,
-					author: {
-						'@type': 'Person',
-						name: firstMessage.author.name,
-						identifier: firstMessage.author.id,
-						url: `/u/${firstMessage.author.id}`,
-					},
-					image: firstMessageMedia && firstMessageMedia.proxyUrl,
-					headline: title,
-					articleBody: firstMessage.content,
-					datePublished: getDate(firstMessage.id).toISOString(),
-					dateModified: thread?.archivedTimestamp
-						? new Date(Number(thread.archivedTimestamp)).toISOString()
-						: undefined,
-					identifier: thread?.id ?? firstMessage.id,
-					commentCount: messagesToDisplay.length,
-					comment: messagesToDisplay.map((message, index) => ({
-						'@type': message.id === solutionMessageId ? 'Answer' : 'Comment',
-						text: message.content,
-						identifier: message.id,
-						datePublished: getDate(message.id).toISOString(),
-						position: index + 1,
+	return (
+		<MessageResultPageProvider>
+			<div className="mx-auto pt-2">
+				<JsonLd<DiscussionForumPosting>
+					item={{
+						'@context': 'https://schema.org',
+						'@type': 'DiscussionForumPosting',
+						url: `https://${server.customDomain ?? getMainSiteHostname()}/m/${
+							thread?.id ?? firstMessage.id
+						}`,
 						author: {
 							'@type': 'Person',
-							name: message.author.name,
-							identifier: message.author.id,
-							url: `/u/${message.author.id}`,
+							name: firstMessage.author.name,
+							identifier: firstMessage.author.id,
+							url: `/u/${firstMessage.author.id}`,
 						},
-					})),
-				}}
-			/>
-
-			<div className="flex w-full flex-col justify-center gap-4 md:flex-row">
-				<Main />
-				<Sidebar />
-				<TrackLoad
-					eventName={'Message Page View'}
-					eventData={{
-						...channelToAnalyticsData(channel),
-						...serverToAnalyticsData(server),
-						...(thread && {
-							...threadToAnalyticsData(thread),
-							'Number of Messages': messages.length,
-						}),
-						...messageWithDiscordAccountToAnalyticsData(firstMessage),
+						image: firstMessageMedia && firstMessageMedia.proxyUrl,
+						headline: title,
+						articleBody: firstMessage.content,
+						datePublished: getDate(firstMessage.id).toISOString(),
+						dateModified: thread?.archivedTimestamp
+							? new Date(Number(thread.archivedTimestamp)).toISOString()
+							: undefined,
+						identifier: thread?.id ?? firstMessage.id,
+						commentCount: messagesToDisplay.length,
+						comment: messagesToDisplay.map((message, index) => ({
+							'@type': message.id === solutionMessageId ? 'Answer' : 'Comment',
+							text: message.content,
+							identifier: message.id,
+							datePublished: getDate(message.id).toISOString(),
+							position: index + 1,
+							author: {
+								'@type': 'Person',
+								name: message.author.name,
+								identifier: message.author.id,
+								url: `/u/${message.author.id}`,
+							},
+						})),
 					}}
 				/>
+
+				<div className="flex w-full flex-col justify-center gap-4 md:flex-row">
+					<Main />
+					<Sidebar />
+					<TrackLoad
+						eventName={'Message Page View'}
+						eventData={{
+							...channelToAnalyticsData(channel),
+							...serverToAnalyticsData(server),
+							...(thread && {
+								...threadToAnalyticsData(thread),
+								'Number of Messages': messages.length,
+							}),
+							...messageWithDiscordAccountToAnalyticsData(firstMessage),
+						}}
+					/>
+				</div>
 			</div>
-		</div>
+		</MessageResultPageProvider>
 	);
-	return rendered;
 }
 
 export default MessageResultPage;

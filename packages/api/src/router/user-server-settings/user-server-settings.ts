@@ -84,7 +84,7 @@ const userServerSettingsCrudRouter = router({
 						? findUserServerSettingsById({
 								userId,
 								serverId: input,
-						  })
+							})
 						: undefined,
 				'Server settings not found',
 			);
@@ -187,7 +187,7 @@ const userServerSettingsCrudRouter = router({
 											expectedToNotBeValue: true,
 											errorMessage:
 												CONSENT_PREVENTED_BY_DISABLED_INDEXING_MESSAGE,
-									  })
+										})
 									: undefined,
 							() =>
 								isAutomatedConsent
@@ -195,13 +195,13 @@ const userServerSettingsCrudRouter = router({
 											actualValue: doSettingsExistAlready,
 											expectedToNotBeValue: true,
 											errorMessage: CONSENT_EXPLICITLY_SET_MESSAGE,
-									  })
+										})
 									: assertBoolsAreNotEqual({
 											messageIfBothFalse: CONSENT_ALREADY_DENIED_MESSAGE,
 											messageIfBothTrue: CONSENT_ALREADY_GRANTED_MESSAGE,
 											newValue: input.data.flags.canPubliclyDisplayMessages,
 											oldValue: oldSettings.flags.canPubliclyDisplayMessages,
-									  }),
+										}),
 						],
 						operation: () => upsertUserServerSettingsWithDeps(input.data),
 					}),

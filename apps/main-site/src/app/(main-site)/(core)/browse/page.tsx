@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 	},
 };
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 export default async function BrowseCommunitiesPage() {
 	const data = await fetchBrowseServers();
 	return (
@@ -26,7 +26,7 @@ export default async function BrowseCommunitiesPage() {
 					return (
 						<div
 							key={`server-${server.id}-area`}
-							className="w-full max-w-md rounded-md  p-4 transition-all"
+							className="w-full max-w-md rounded-md p-4 transition-all"
 						>
 							<ViewServerCard server={server} />
 						</div>

@@ -38,10 +38,10 @@ export function CurrentPlanCard() {
 	const label = dateCancelationTakesEffect
 		? 'Cancelation Takes Effect'
 		: dateTrialEnds
-		? 'Trial Ends'
-		: dateSubscriptionRenews
-		? 'Renews'
-		: '';
+			? 'Trial Ends'
+			: dateSubscriptionRenews
+				? 'Renews'
+				: '';
 
 	const CTA = () => {
 		if (status === 'inactive') {

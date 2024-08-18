@@ -102,7 +102,7 @@ export class LeaderboardCommand extends Command {
 					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 						makeDismissButton(interaction.user.id),
 					),
-			  ];
+				];
 		const user = interaction.guild?.members.cache.get(interaction.user.id);
 		if (user) {
 			trackDiscordEvent('Leaderboard Viewed', {

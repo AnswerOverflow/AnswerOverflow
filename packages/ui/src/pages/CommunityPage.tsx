@@ -31,7 +31,7 @@ function ChannelSelectRow(props: ChannelSelectProps) {
 		return (
 			<LinkButton
 				variant={selected ? 'secondary' : 'outline'}
-				className="max-w-[200px] flex-shrink-0"
+				className="max-w-[200px] flex-shrink-0 lg:max-w-[300px]"
 				href={
 					props.tenant
 						? `/c/${channel.id}`
@@ -94,8 +94,8 @@ const PageSwitcher = (props: {
 					props.page > 1
 						? `?page=${props.page - 1}`
 						: props.tenant
-						? `/c/${props.selectedChannel.id}`
-						: `/c/${props.selectedChannel.serverId}/${props.selectedChannel.id}`
+							? `/c/${props.selectedChannel.id}`
+							: `/c/${props.selectedChannel.serverId}/${props.selectedChannel.id}`
 				}
 			>
 				<LuArrowLeft className={'mr-2'} />
@@ -115,7 +115,7 @@ const PageSwitcher = (props: {
 						? `/c/${props.selectedChannel.id}?page=${props.page + 1}`
 						: `/c/${props.selectedChannel.serverId}/${
 								props.selectedChannel.id
-						  }?page=${props.page + 1}`
+							}?page=${props.page + 1}`
 				}
 			>
 				Next

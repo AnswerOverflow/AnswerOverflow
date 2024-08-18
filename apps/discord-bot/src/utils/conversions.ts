@@ -95,7 +95,7 @@ export async function toAOMessage(message: Message): Promise<AOMessage> {
 						text: embed.footer.text,
 						iconUrl: embed.footer.iconURL ?? undefined,
 						proxyIconUrl: embed.footer.proxyIconURL ?? undefined,
-				  }
+					}
 				: undefined,
 			image: embed.image
 				? {
@@ -103,7 +103,7 @@ export async function toAOMessage(message: Message): Promise<AOMessage> {
 						proxyUrl: embed.image.proxyURL ?? undefined,
 						height: embed.image.height ?? undefined,
 						width: embed.image.width ?? undefined,
-				  }
+					}
 				: undefined,
 			video: embed.video
 				? {
@@ -111,13 +111,13 @@ export async function toAOMessage(message: Message): Promise<AOMessage> {
 						width: embed.video.width ?? undefined,
 						url: embed.video.url,
 						proxyUrl: embed.video.proxyURL ?? undefined,
-				  }
+					}
 				: undefined,
 			provider: embed.provider
 				? {
 						name: embed.provider.name ?? undefined,
 						url: embed.provider.url ?? undefined,
-				  }
+					}
 				: undefined,
 			thumbnail: embed.thumbnail
 				? {
@@ -125,7 +125,7 @@ export async function toAOMessage(message: Message): Promise<AOMessage> {
 						proxyUrl: embed.thumbnail.proxyURL ?? undefined,
 						height: embed.thumbnail.height ?? undefined,
 						width: embed.thumbnail.width ?? undefined,
-				  }
+					}
 				: undefined,
 			author: embed.author
 				? {
@@ -133,7 +133,7 @@ export async function toAOMessage(message: Message): Promise<AOMessage> {
 						url: embed.author.url ?? undefined,
 						iconUrl: embed.author.iconURL ?? undefined,
 						proxyIconUrl: embed.author.proxyIconURL ?? undefined,
-				  }
+					}
 				: undefined,
 			fields: embed.fields.map((field) => ({
 				name: field.name,

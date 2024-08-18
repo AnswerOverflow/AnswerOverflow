@@ -43,7 +43,7 @@ export class UserEvent extends Listener {
 				dev
 					? ` ${pad}${blc('<')}${llc('/')}${blc('>')} ${llc(
 							'DEVELOPMENT MODE',
-					  )}`
+						)}`
 					: ''
 			}
 		`.trim(),

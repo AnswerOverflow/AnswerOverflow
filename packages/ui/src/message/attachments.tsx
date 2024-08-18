@@ -1,5 +1,3 @@
-import Image from 'next/image';
-
 import type { MessageProps } from './props';
 import { AttachmentDownloader } from './AttachmentDownloader';
 
@@ -18,16 +16,15 @@ export const MessageImage = (
 	props: {
 		attachment: Pick<MessageProps, 'message'>['message']['attachments'][number];
 		className?: string;
-	} & Partial<Parameters<typeof Image>[0]>,
+	} & React.ImgHTMLAttributes<HTMLImageElement>,
 ) => {
 	const { attachment } = props;
 	return (
 		<div className={`max-w-sm lg:max-w-md ${props.className ?? ''}`}>
-			<Image
+			<img
 				src={attachment.proxyUrl}
 				width={attachment.width ?? undefined}
 				height={attachment.height ?? undefined}
-				unoptimized
 				alt={attachment.description ?? 'No description'}
 			/>
 		</div>
@@ -67,7 +64,6 @@ const MessageImages = (
 					<MessageImage
 						attachment={x}
 						loading={props.loadingStyle === 'eager' ? 'eager' : 'lazy'}
-						priority={props.loadingStyle === 'eager'}
 						fetchPriority={props.loadingStyle === 'eager' ? 'high' : undefined}
 						alt={x.description ?? 'No description'}
 					/>

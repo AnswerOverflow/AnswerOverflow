@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import SimpleMarkdown from 'simple-markdown';
+import pkg from 'simple-markdown';
+const { defaultRules } = pkg;
 
 const text = {
-	...SimpleMarkdown.defaultRules.text,
+	...defaultRules.text,
 	parse: ([content]: string[], recurseParse: any, state: any) =>
 		state.nested
 			? { content }
 			: recurseParse(content, {
 					...state,
 					nested: true,
-			  }),
+				}),
 
 	react: (
 		node: {
@@ -60,7 +61,6 @@ const text = {
 						}`}
 						className={'inline-block h-[22px] w-[22px]'}
 						key={index}
-						fetchPriority={'high'}
 						loading={'eager'}
 						alt={content.name ?? 'Emoji'}
 					/>

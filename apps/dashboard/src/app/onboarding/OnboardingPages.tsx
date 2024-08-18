@@ -375,8 +375,8 @@ export function WelcomePage() {
 				session.isLoading
 					? 'loading'
 					: session.data
-					? 'authenticated'
-					: 'unauthenticated'
+						? 'authenticated'
+						: 'unauthenticated'
 			}
 			servers={servers}
 		/>
@@ -408,7 +408,7 @@ export function WelcomePageRenderer(props: {
 					<Heading.H1 className="py-8 text-4xl">
 						Select a server to get started
 					</Heading.H1>
-					<div className="grid max-h-vh60 max-w-4xl grid-cols-1 gap-16 overflow-y-scroll p-8 md:grid-cols-3 ">
+					<div className="grid max-h-vh60 max-w-4xl grid-cols-1 gap-16 overflow-y-scroll p-8 md:grid-cols-3">
 						{props.servers?.map((server) => (
 							<div key={server.id}>
 								<ManageServerCard
@@ -448,7 +448,7 @@ export function WelcomePageRenderer(props: {
 						{"Let's"} get you signed in
 					</Heading.H2>
 					<LinkButton
-						className="w-64 "
+						className="w-64"
 						href={
 							// eslint-disable-next-line n/no-process-env
 							(process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local'

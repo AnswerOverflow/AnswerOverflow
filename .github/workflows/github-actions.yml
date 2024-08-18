@@ -73,7 +73,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Start containers # TODO: Use dev container docker-compose instead if possible
-        run: docker-compose -f "docker-compose.yml" -f "docker-compose-extras.yml" up -d --build
+        run: docker compose -f "docker-compose.yml" -f "docker-compose-extras.yml" up -d --build
 
       - name: Install dependencies
         # Playright is used for storybook, possible move that into package.json instead?
@@ -98,4 +98,4 @@ jobs:
 
       - name: Stop containers
         if: always()
-        run: docker-compose -f "docker-compose.yml" -f "docker-compose-extras.yml" down
+        run: docker compose -f "docker-compose.yml" -f "docker-compose-extras.yml" down

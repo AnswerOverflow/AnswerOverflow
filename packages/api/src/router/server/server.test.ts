@@ -41,7 +41,7 @@ describe('Server Operations', () => {
 					'ManageGuild',
 				);
 				const router = serverRouter.createCaller(account.ctx);
-				await expect(router.byId('non-existent-server')).rejects.toThrow(
+				await expect(router.byId('nonexistent-server')).rejects.toThrow(
 					'Server not found',
 				);
 			});

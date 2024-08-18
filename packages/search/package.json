@@ -8,8 +8,8 @@
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules coverage",
 		"with-env": "dotenv -e ../../.env --",
-		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --check .",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix",
 		"test": "pnpm with-env vitest run  --coverage",
@@ -33,13 +33,13 @@
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
 		"@types/node": "^20.11.20",
-		"@vitest/coverage-c8": "^0.28.5",
+		"@vitest/coverage-v8": "^2.0.5",
 		"cross-env": "^7.0.3",
 		"dotenv-cli": "^7.4.1",
 		"eslint": "^8.57.0",
-		"prettier": "^2.8.8",
+		"prettier": "^3.3.3",
 		"ts-node": "^10.9.1",
 		"type-fest": "^4.12.0",
-		"vitest": "^0.29.8"
+		"vitest": "^2.0.5"
 	}
 }

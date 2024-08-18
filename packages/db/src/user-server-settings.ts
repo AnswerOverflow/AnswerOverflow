@@ -36,7 +36,7 @@ export async function applyUserServerSettingsChangesSideEffects<
 		: getDefaultUserServerSettingsWithFlags({
 				userId: old.userId,
 				serverId: old.serverId,
-		  }).flags;
+			}).flags;
 
 	// Flags to update is what is being passed in from the update data
 	const flagsToUpdate = updated?.flags ? updated.flags : {};

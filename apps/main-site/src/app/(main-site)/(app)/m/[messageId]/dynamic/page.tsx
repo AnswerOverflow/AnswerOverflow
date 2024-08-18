@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { fetchIsUserInServer } from '@answeroverflow/ui/src/utils/fetch-is-user-in-server';
 type Props = {
 	params: { messageId: string };
+	searchParams?: { showAiChat?: boolean };
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -35,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 		},
 	};
 }
-export default async function MessageResult({ params }: Props) {
+export default async function MessageResult({ params, searchParams }: Props) {
 	const data = await callAPI({
 		apiCall: (api) => api.messages.threadFromMessageId(params.messageId),
 		allowedErrors: 'NOT_FOUND',
@@ -52,6 +53,7 @@ export default async function MessageResult({ params }: Props) {
 	return (
 		<MessageResultPage
 			messages={data.messages}
+			showAIChat={searchParams?.showAiChat}
 			channel={data.parentChannel}
 			server={data.server}
 			tenant={undefined}

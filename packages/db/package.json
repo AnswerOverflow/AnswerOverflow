@@ -8,8 +8,8 @@
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules coverage",
 		"with-env": "dotenv -e ../../.env --",
-		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --check .",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix",
 		"db:push": "cross-env drizzle-kit push:mysql",
@@ -31,7 +31,7 @@
 		"@aws-sdk/lib-storage": "^3.578.0",
 		"@planetscale/database": "^1.11.0",
 		"@sapphire/bitfield": "^1.2.0",
-		"@vitest/coverage-c8": "^0.28.5",
+		"@vitest/coverage-v8": "^2.0.5",
 		"dataloader": "^2.2.2",
 		"discord-api-types": "^0.37.67",
 		"dotenv": "^16.4.5",
@@ -55,8 +55,8 @@
 		"dotenv-cli": "^7.4.1",
 		"drizzle-kit": "^0.19.13",
 		"eslint": "^8.57.0",
-		"prettier": "^2.8.8",
+		"prettier": "^3.3.3",
 		"ts-node": "^10.9.1",
-		"vitest": "^0.29.8"
+		"vitest": "^2.0.5"
 	}
 }

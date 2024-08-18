@@ -102,7 +102,7 @@ function setupMockedInteractionAPIData<Type extends InteractionType>({
 						global_name: caller.username,
 					},
 					avatar: caller.avatar,
-			  }
+				}
 			: undefined,
 		data: {},
 		guild_locale: 'en-US',

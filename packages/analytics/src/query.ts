@@ -9,7 +9,7 @@ const posthog =
 				host: 'us.posthog.com',
 				apiKey: sharedEnvs.POSTHOG_PERSONAL_API_KEY,
 				projectId: sharedEnvs.POSTHOG_PROJECT_ID.toString(),
-		  })
+			})
 		: undefined;
 
 type Options = {

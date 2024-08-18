@@ -130,7 +130,7 @@ describe('Channel Operations', () => {
 					'ManageGuild',
 				);
 				const router = channelRouter.createCaller(account.ctx);
-				await expect(router.byId('non-existent-channel')).rejects.toThrow(
+				await expect(router.byId('nonexistent-channel')).rejects.toThrow(
 					'Channel does not exist',
 				);
 			});
@@ -215,6 +215,7 @@ describe('Channel Operations', () => {
 			await createServer(server);
 			await createChannel({
 				...chnl,
+				type: ChannelType.GuildForum,
 				flags: {
 					indexingEnabled: false,
 				},
@@ -269,44 +270,45 @@ describe('Channel Operations', () => {
 				assert: (updated) =>
 					expect(updated.flags.forumGuidelinesConsentEnabled).toBeFalsy(),
 			});
-			it('should throw the correct error when setting forum post guidelines enabled on a channel with forum post guidelines already enabled', async () => {
-				await createChannel({
-					...channel,
-					flags: {
-						forumGuidelinesConsentEnabled: true,
-					},
-				});
-				await expect(
-					router.setForumGuidelinesConsentEnabled({
-						channel: {
-							server,
-							...channel,
-						},
-						enabled: true,
-					}),
-				).rejects.toThrowError(
-					FORUM_GUIDELINES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE,
-				);
+		});
+		it('should throw the correct error when setting forum post guidelines enabled on a channel with forum post guidelines already enabled', async () => {
+			await createChannel({
+				...channel,
+				type: ChannelType.GuildForum,
+				flags: {
+					forumGuidelinesConsentEnabled: true,
+				},
 			});
-			it('should throw the correct error when setting forum post guidelines disabled on a channel with forum post guidelines already disabled', async () => {
-				await createChannel({
-					...channel,
-					flags: {
-						forumGuidelinesConsentEnabled: false,
+			await expect(
+				router.setForumGuidelinesConsentEnabled({
+					channel: {
+						server,
+						...channel,
 					},
-				});
-				await expect(
-					router.setForumGuidelinesConsentEnabled({
-						channel: {
-							server,
-							...channel,
-						},
-						enabled: false,
-					}),
-				).rejects.toThrowError(
-					FORUM_GUIDELINES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE,
-				);
+					enabled: true,
+				}),
+			).rejects.toThrowError(
+				FORUM_GUIDELINES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE,
+			);
+		});
+		it('should throw the correct error when setting forum post guidelines disabled on a channel with forum post guidelines already disabled', async () => {
+			await createChannel({
+				...channel,
+				flags: {
+					forumGuidelinesConsentEnabled: false,
+				},
 			});
+			await expect(
+				router.setForumGuidelinesConsentEnabled({
+					channel: {
+						server,
+						...channel,
+					},
+					enabled: false,
+				}),
+			).rejects.toThrowError(
+				FORUM_GUIDELINES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE,
+			);
 		});
 	});
 	describe('set mark solution enabled', () => {

@@ -8,8 +8,8 @@
 		"build": "pnpm with-env next build",
 		"clean": "rm -rf .next .turbo node_modules",
 		"start": "pnpm with-env next start --port 3002",
-		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --check .",
 		"lint": "pnpm with-env next lint && tsc --noEmit",
 		"lint:fix": "pnpm with-env next lint --fix",
 		"type-check": "tsc --noEmit"
@@ -51,15 +51,15 @@
 		"@types/node": "^20.11.20",
 		"@types/react": "^18.2.20",
 		"@types/react-dom": "^18.2.7",
-		"@vitest/coverage-c8": "^0.30.1",
+		"@vitest/coverage-v8": "^2.0.5",
 		"autoprefixer": "^10.4.15",
 		"dotenv-cli": "^7.4.1",
 		"eslint": "^8.57.0",
 		"eslint-config-next": "14.1.3",
 		"postcss": "^8.4.28",
-		"prettier": "^2.8.8",
+		"prettier": "^3.3.3",
 		"sass": "^1.66.1",
 		"tailwindcss": "^3.3.3",
-		"vitest": "^0.30.1"
+		"vitest": "^2.0.5"
 	}
 }

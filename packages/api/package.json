@@ -8,8 +8,8 @@
 	"scripts": {
 		"with-env": "dotenv -e ../../.env --",
 		"clean": "rm -rf .turbo node_modules coverage",
-		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
+		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --check .",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix",
 		"test": "pnpm with-env vitest run --coverage",
@@ -34,7 +34,7 @@
 		"discord-api-types": "^0.37.67",
 		"dotenv-cra": "^3.0.3",
 		"next": "14.3.0-canary.9",
-		"prettier": "^2.8.8",
+		"prettier": "3.3.3",
 		"qs": "^6.11.2",
 		"stripe": "^12.18.0",
 		"superjson": "^1.13.1",
@@ -45,10 +45,10 @@
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
 		"@types/node": "^20.11.20",
-		"@vitest/coverage-c8": "^0.28.5",
+		"@vitest/coverage-v8": "^2.0.5",
 		"dotenv-cli": "^7.4.1",
 		"eslint": "^8.57.0",
 		"tslib": "^2.6.2",
-		"vitest": "^0.29.8"
+		"vitest": "^2.0.5"
 	}
 }

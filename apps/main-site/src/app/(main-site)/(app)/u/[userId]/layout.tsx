@@ -30,7 +30,7 @@ export default async function Layout(
 ) {
 	const { userInfo } = await getUserPageData(props);
 	return (
-		<main className=" flex w-full justify-center pt-4">
+		<main className="flex w-full justify-center pt-4">
 			<JsonLd<ProfilePage>
 				item={{
 					'@context': 'https://schema.org',

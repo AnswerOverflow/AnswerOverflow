@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import text from './text';
-import { defaultRules, inlineRegex } from 'simple-markdown';
+import pkg from 'simple-markdown';
+const { defaultRules, inlineRegex } = pkg;
 
 const baseRules = {
 	newline: defaultRules.newline,
@@ -32,7 +33,7 @@ const baseRules = {
 			/^$|\n *$/.test(prevCapture ?? '')
 				? /^( *>>> +([\s\S]*))|^( *>(?!>>) +[^\n]*(\n *>(?!>>) +[^\n]*)*\n?)/.exec(
 						source,
-				  )
+					)
 				: null,
 		parse: (
 			capture: string[],

@@ -11,7 +11,7 @@ export async function delay(timeInMs?: number) {
 		// eslint-disable-next-line n/no-process-env
 		timeInMs = process.env.DEFAULT_DELAY_IN_MS
 			? // eslint-disable-next-line n/no-process-env
-			  parseInt(process.env.DEFAULT_DELAY_IN_MS)
+				parseInt(process.env.DEFAULT_DELAY_IN_MS)
 			: 500;
 	await new Promise((resolve) => setTimeout(resolve, timeInMs));
 }

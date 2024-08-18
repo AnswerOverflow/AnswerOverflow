@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 	},
 };
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 export default async function TenantHome({
 	params,
 }: {
