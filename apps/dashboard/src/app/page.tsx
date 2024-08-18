@@ -1,40 +1,20 @@
 'use client';
-import React, { useState } from 'react';
-import {
-	OnboardingContext,
-	OnboardingPage,
-	pageLookup,
-	SubmittedData,
-} from './onboarding/OnboardingPages';
-import { trackEvent } from '@answeroverflow/hooks/src/analytics/events';
+import { useEffect } from 'react';
+import { trpc } from 'packages/ui/src/utils/client';
+import { useRouter } from 'next/navigation';
 
 export default function Onboarding() {
 	// Eventually move this into the url
-	const [currentPage, setCurrentPage] = useState<OnboardingPage>('start');
-	const [data, setData] = useState<SubmittedData>({});
-	const Page = pageLookup[currentPage];
-	return (
-		<>
-			<div className="flex min-h-screen flex-col items-center justify-center text-center">
-				<OnboardingContext.Provider
-					value={{
-						goToPage: (page) => {
-							trackEvent(`Onboarding Page View - ${page}`, {
-								'Page Name': page,
-								'Server Id': data.server?.id ?? '',
-								'Server Name': data.server?.name ?? '',
-								'Community Topic': data.communityTopic,
-								'Community Type': data.communityType,
-							});
-							setCurrentPage(page);
-						},
-						data,
-						setData,
-					}}
-				>
-					<Page />
-				</OnboardingContext.Provider>
-			</div>
-		</>
-	);
+	const router = useRouter();
+	const { data: servers } =
+		trpc.auth.getServersForOnboarding.useQuery(undefined);
+
+	useEffect(() => {
+		if (servers && servers.length === 1 && servers[0]) {
+			return router.push(`/${servers[0].id}`);
+		}
+		return router.push('/onboarding');
+	}, [servers, router]);
+
+	return null;
 }

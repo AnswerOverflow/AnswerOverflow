@@ -48,11 +48,11 @@ const config = {
 	skipTrailingSlashRedirect: true,
 	redirects: async () => {
 		return [
-			{
-				source: '/',
-				destination: '/onboarding',
-				permanent: false,
-			},
+			// {
+			// 	source: '/',
+			// 	destination: '/onboarding',
+			// 	permanent: false,
+			// },
 		];
 	},
 };
