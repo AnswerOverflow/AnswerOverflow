@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
+  '@opentelemetry/otlp-exporter-base@0.52.0':
+    hash: cuc5xzs55ftuqrt3fdpedklf4a
+    path: patches/@opentelemetry__otlp-exporter-base@0.52.0.patch
   simple-markdown@0.7.3:
     hash: a72smj7lfngku2pn3rcuhs2cvu
     path: patches/simple-markdown@0.7.3.patch
@@ -14595,7 +14598,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.25.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/otlp-exporter-base': 0.52.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/otlp-exporter-base': 0.52.0(patch_hash=cuc5xzs55ftuqrt3fdpedklf4a)(@opentelemetry/api@1.9.0)
       '@opentelemetry/otlp-transformer': 0.52.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 1.25.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 1.25.0(@opentelemetry/api@1.9.0)
@@ -14611,7 +14614,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opentelemetry/otlp-exporter-base@0.52.0(@opentelemetry/api@1.9.0)':
+  '@opentelemetry/otlp-exporter-base@0.52.0(patch_hash=cuc5xzs55ftuqrt3fdpedklf4a)(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.25.0(@opentelemetry/api@1.9.0)

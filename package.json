@@ -69,7 +69,8 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "simple-markdown@0.7.3": "patches/simple-markdown@0.7.3.patch"
+      "simple-markdown@0.7.3": "patches/simple-markdown@0.7.3.patch",
+      "@opentelemetry/otlp-exporter-base@0.52.0": "patches/@opentelemetry__otlp-exporter-base@0.52.0.patch"
     }
   },
   "dependencies": {
