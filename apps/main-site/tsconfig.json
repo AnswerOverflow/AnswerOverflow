@@ -8,7 +8,8 @@
 				"name": "next"
 			}
 		],
-		"strictNullChecks": true
+		"strictNullChecks": true,
+		"esModuleInterop": true
 	},
 	"ts-node": {
 		// these options are overrides used only by ts-node
@@ -21,7 +22,7 @@
 	},
 	"include": [
 		"src",
-		"next.config.mjs",
+		"next.config.ts",
 		"next-env.d.ts",
 		"postcss.config.cjs",
 		"tailwind.config.cjs",

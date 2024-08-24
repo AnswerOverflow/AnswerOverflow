@@ -12,7 +12,7 @@
 	"include": [
 		"next-env.d.ts",
 		"test",
-		"next.config.mjs",
+		"next.config.ts",
 		"../../reset.d.ts",
 		"postcss.config.cjs",
 		"tailwind.config.cjs",

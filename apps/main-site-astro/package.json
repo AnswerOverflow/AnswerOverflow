@@ -30,7 +30,7 @@
     "@unocss/reset": "^0.61.5",
     "astro": "^4.10.2",
     "react": "19.0.0-rc-a26e3f403e-20240611",
-    "react-dom": "19.0.0-rc-a26e3f403e-20240611",
+		"react-dom": "19.0.0-rc-6230622a1a-20240610",
     "server-only": "^0.0.1",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.4.5"
