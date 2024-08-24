@@ -16,6 +16,7 @@
 		"@answeroverflow/auth": "workspace:^",
 		"@answeroverflow/constants": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
+		"@answeroverflow/feature-flags": "workspace:^",
 		"@answeroverflow/hooks": "workspace:^",
 		"@heroicons/react": "^2.0.18",
 		"@radix-ui/react-accordion": "1.2.0-rc.6",
@@ -47,7 +48,7 @@
 		"date-fns": "^3.6.0",
 		"lucide-react": "^0.263.1",
 		"memoizee": "^0.4.15",
-		"next": "15.0.0-canary.128",
+		"next": "15.0.0-rc.0",
 		"next-auth": "^4.23.1",
 		"next-themes": "^0.2.1",
 		"posthog-js": "^1.83.0",
@@ -72,8 +73,8 @@
 		"@answeroverflow/tailwind-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
 		"@types/node": "^20.11.20",
-		"@types/react": "npm:types-react@rc",
-		"@types/react-dom": "npm:types-react-dom@rc",
+		"@types/react": "^18.2.20",
+		"@types/react-dom": "^18.2.7",
 		"astro": "^4.12.2",
 		"eslint": "^8.57.0",
 		"jest": "^29.6.2",
@@ -82,9 +83,5 @@
 		"react-dom": "19.0.0-rc-6230622a1a-20240610",
 		"tailwindcss": "^3.3.3",
 		"type-fest": "^4.12.0"
-	},
-	"overrides": {
-		"@types/react": "npm:types-react@rc",
-		"@types/react-dom": "npm:types-react-dom@rc"
 	}
 }
