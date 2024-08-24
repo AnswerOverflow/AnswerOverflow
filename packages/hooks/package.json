@@ -14,7 +14,7 @@
 		"@answeroverflow/api": "workspace:^",
 		"@answeroverflow/constants": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
-		"next": "14.3.0-canary.9",
+		"next": "15.0.0-canary.128",
 		"next-auth": "^4.23.1",
 		"posthog-js": "^1.83.0",
 		"react": "19.0.0-rc-6230622a1a-20240610",
@@ -26,10 +26,14 @@
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
 		"@types/node": "^20.11.20",
-		"@types/react": "^18.2.20",
-		"@types/react-dom": "^18.2.7",
+		"@types/react": "npm:types-react@rc",
+		"@types/react-dom": "npm:types-react-dom@rc",
 		"eslint": "^8.57.0",
 		"prettier": "^3.3.3",
 		"type-fest": "^4.12.0"
+	},
+	"overrides": {
+		"@types/react": "npm:types-react@rc",
+		"@types/react-dom": "npm:types-react-dom@rc"
 	}
 }

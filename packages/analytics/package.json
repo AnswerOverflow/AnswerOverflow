@@ -15,11 +15,15 @@
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
 		"@types/node": "^20.11.20",
-		"@types/react": "^18.2.20",
-		"@types/react-dom": "^18.2.7",
+		"@types/react": "npm:types-react@rc",
+		"@types/react-dom": "npm:types-react-dom@rc",
 		"eslint": "^8.57.0",
 		"prettier": "^3.3.3",
 		"type-fest": "^4.12.0"
+	},
+	"overrides": {
+		"@types/react": "npm:types-react@rc",
+		"@types/react-dom": "npm:types-react-dom@rc"
 	},
 	"dependencies": {
 		"@answeroverflow/constants": "workspace:^",
