@@ -1,6 +1,7 @@
 'use client';
 import { useTheme } from 'next-themes';
 import { Button } from './ui/button';
+import { SunMoonIcon } from 'lucide-react';
 
 function SunIcon<T extends object>(props: T) {
 	return (
@@ -22,30 +23,32 @@ function MoonIcon<T extends object>(props: T) {
 	);
 }
 
+const possibleThemes = ['light', 'dark', 'system'];
+
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export function ThemeSwitcher({
-	Switcher,
-}: {
-	Switcher?: React.FC<{
-		toggleTheme: () => void;
-	}>;
-}) {
+export function ThemeSwitcher() {
 	const { theme, setTheme } = useTheme();
-	if (!Switcher)
-		return (
-			<Button
-				onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-				variant={'ghost'}
-				size={'icon'}
-			>
-				<SunIcon className="h-9 w-9 stroke-zinc-900 dark:hidden" />
-				<MoonIcon className="hidden h-9 w-9 stroke-white dark:block" />
-				<span className="sr-only">Change Theme</span>
-			</Button>
-		);
+	const currentTheme = theme ?? 'system';
+	const currentIndex = possibleThemes.indexOf(currentTheme);
+
 	return (
-		<Switcher
-			toggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-		/>
+		<Button
+			onClick={() => {
+				const nextIndex = (currentIndex + 1) % possibleThemes.length;
+				const nextTheme = possibleThemes[nextIndex]!;
+				setTheme(nextTheme);
+			}}
+			variant={'ghost'}
+			size={'icon'}
+		>
+			{currentTheme === 'system' ? (
+				<SunMoonIcon className="h-6 w-6 text-zinc-900 dark:text-white" />
+			) : currentTheme === 'dark' ? (
+				<MoonIcon className="h-9 w-9 stroke-white" />
+			) : (
+				<SunIcon className="h-9 w-9 stroke-zinc-900" />
+			)}
+			<span className="sr-only">Change Theme</span>
+		</Button>
 	);
 }
