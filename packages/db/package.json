@@ -16,6 +16,7 @@
 		"db:wipe": "cross-env pnpm with-env npx ts-node ./scripts/wipe.ts",
 		"db:seed": "pnpm db:push && cross-env pnpm with-env npx ts-node ./scripts/seed.ts",
 		"db:apply-last-indexed": "cross-env pnpm with-env npx ts-node ./scripts/apply-last-indexed.ts",
+		"db:update-attachments-domain": "cross-env pnpm with-env npx ts-node ./scripts/update-attachments-domain.ts",
 		"db:migrate-attachments": "cross-env pnpm with-env npx ts-node ./scripts/migrate-attachments.ts",
 		"db:introspect": "drizzle-kit introspect:mysql",
 		"test": "pnpm with-env vitest run --coverage",
