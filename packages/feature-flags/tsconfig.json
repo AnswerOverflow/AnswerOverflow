@@ -1,7 +1,0 @@
-{
-	"extends": "@answeroverflow/tsconfig/nextjs.json",
-	"compilerOptions": {
-		"baseUrl": "../../"
-	},
-	"include": ["src", "../../reset.d.ts", "index.ts"]
-}

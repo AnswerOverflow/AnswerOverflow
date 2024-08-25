@@ -13,7 +13,7 @@
     "lint:fix": "turbo run lint:fix",
     "test": "pnpm db:push && pnpm db:wipe && turbo run test",
     "generate": "pnpm i && cd packages/db && pnpm generate",
-    "dev": "turbo run dev --parallel --no-cache",
+    "dev": "turbo dev --parallel --no-cache",
     "dev:lite": "turbo run dev --filter=main-site --filter=discord-bot --parallel --no-cache",
     "dev:site": "turbo run dev --filter=main-site --no-cache",
     "migrate": "turbo run migrate",
@@ -58,7 +58,7 @@
     "eslint-plugin-tailwindcss": "^3.13.0",
     "eslint-plugin-turbo": "^1.10.12",
     "tslib": "^2.6.2",
-    "turbo": "1.13.3",
+    "turbo": "2.0.14",
     "typescript": "^5.1.6",
     "vite": "^5.0.13",
     "vitest": "^2.0.5"

@@ -2,7 +2,6 @@
 // eslint-disable-next-line no-undef
 module.exports = {
 	extends: [
-		'turbo',
 		'eslint:recommended',
 		'plugin:@typescript-eslint/recommended-requiring-type-checking',
 		'prettier',

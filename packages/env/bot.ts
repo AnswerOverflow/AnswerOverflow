@@ -97,7 +97,7 @@ export const botEnv = {
 				.pipe(z.number()),
 		},
 		experimental__runtimeEnv: process.env,
-		// eslint-disable-next-line turbo/no-undeclared-env-vars
+
 		skipValidation: process.env.SKIP_ENV_CHECK === 'true',
 	}),
 };

@@ -46,6 +46,6 @@ export const webClientEnv = createEnv({
 		NEXT_PUBLIC_VERCEL_URL: process.env.VERCEL_URL,
 		NEXT_PUBLIC_PORT: process.env.PORT,
 	},
-	// eslint-disable-next-line turbo/no-undeclared-env-vars
+
 	skipValidation: process.env.SKIP_ENV_CHECK === 'true',
 });
