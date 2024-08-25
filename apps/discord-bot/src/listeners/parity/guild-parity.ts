@@ -46,7 +46,7 @@ async function autoUpdateServerInfo(guild: Guild) {
 	if (upserted.customDomain && upserted.icon) {
 		await uploadFileFromUrl({
 			id: upserted.id,
-			filename: 'icon.png',
+			filename: `${upserted.icon}/icon.png`,
 			url: `https://cdn.discordapp.com/icons/${upserted.id}/${upserted.icon}.png?size=${48}`,
 		});
 	}

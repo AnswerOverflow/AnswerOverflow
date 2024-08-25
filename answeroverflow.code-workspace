@@ -104,7 +104,7 @@
     },
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "prettier.requireConfig": true,
-    "prettier.configPath": ".prettierrc.cjs",
+    "prettier.configPath": ".prettierrc.mjs",
     "javascript.suggest.autoImports": true,
     "javascript.updateImportsOnFileMove.enabled": "always",
     "typescript.tsserver.experimental.enableProjectDiagnostics": true,

@@ -15,14 +15,17 @@ export async function generateMetadata({
 	if (!tenant) {
 		return notFound();
 	}
-	const serverIconImage = makeServerIconLink(tenant, 256);
+
 	const image =
-		serverIconImage ??
+		makeServerIconLink(tenant, 256) ??
 		'https://www.answeroverflow.com/answer_overflow_icon_256.png';
+
 	const description =
 		tenant.description ??
 		`View the ${tenant.name} Discord server on the web. Browse questions asked by the community and find answers.`;
-	const icon = makeServerIconLink(tenant, 48);
+	const icon = tenant.icon
+		? `https://cdn.answeroverflow.com/${tenant.id}/${tenant.icon}/icon.png`
+		: makeServerIconLink(tenant, 48);
 	return {
 		title: `${tenant.name} Community`,
 		description,
