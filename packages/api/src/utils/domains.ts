@@ -1,6 +1,5 @@
 import { sharedEnvs } from '@answeroverflow/env/shared';
 
-/* eslint-disable turbo/no-undeclared-env-vars */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 // TODO: Move these to zod validation
 export type DomainVerificationStatusProps =
