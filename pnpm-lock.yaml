@@ -1263,31 +1263,6 @@ importers:
         specifier: ^3.3.3
         version: 3.3.3
 
-  packages/feature-flags:
-    dependencies:
-      '@answeroverflow/auth':
-        specifier: workspace:^
-        version: link:../auth
-      '@answeroverflow/constants':
-        specifier: workspace:^
-        version: link:../constants
-      '@answeroverflow/env':
-        specifier: workspace:^
-        version: link:../env
-      posthog-node:
-        specifier: ^3.1.2
-        version: 3.6.3
-    devDependencies:
-      '@types/node':
-        specifier: ^20.11.20
-        version: 20.14.2
-      '@types/react':
-        specifier: ^18.2.20
-        version: 18.3.3
-      '@types/react-dom':
-        specifier: ^18.2.7
-        version: 18.3.0
-
   packages/hooks:
     dependencies:
       '@answeroverflow/api':
@@ -1452,9 +1427,6 @@ importers:
       '@answeroverflow/env':
         specifier: workspace:^
         version: link:../env
-      '@answeroverflow/feature-flags':
-        specifier: workspace:^
-        version: link:../feature-flags
       '@answeroverflow/hooks':
         specifier: workspace:^
         version: link:../hooks
