@@ -37,7 +37,7 @@ declare module '@sapphire/pieces' {
 
 function getLogLevel() {
 	if (sharedEnvs.NODE_ENV === 'test') return LogLevel.None;
-	return LogLevel.Debug;
+	return LogLevel.Info;
 }
 
 export function createClient(override: Partial<ClientOptions> = {}) {
