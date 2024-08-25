@@ -225,7 +225,10 @@ export async function fastUpsertManyMessages(data: BaseMessageWithRelations[]) {
 							await db.insert(dbAttachments).values(
 								attachmentSchema.parse({
 									...attachment,
-									proxyUrl: uploaded.Location,
+									proxyUrl: uploaded.Location?.replace(
+										'answer-overflow-discord-attachments.s3.us-east-1.amazonaws.com',
+										'cdn.answeroverflow.com',
+									),
 								}),
 							);
 						});
