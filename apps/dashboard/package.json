@@ -60,6 +60,7 @@
 		"prettier": "^3.3.3",
 		"sass": "^1.66.1",
 		"tailwindcss": "^3.3.3",
+		"unocss": "^0.62.3",
 		"vitest": "^2.0.5"
 	}
 }

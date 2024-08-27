@@ -1,7 +1,8 @@
-// eslint-disable-next-line no-undef
+// @filename postcss.config.js
 module.exports = {
   plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
+    '@unocss/postcss': {
+      content: ['**/*.{html,js,ts,jsx,tsx}'],
+    }
   },
-};
+}

@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@answeroverflow/tsconfig": "workspace:^",
+    "@unocss/postcss": "^0.62.3",
     "autoprefixer": "^10.4.15",
     "postcss": "^8.4.28",
     "tailwindcss": "^3.3.3"
