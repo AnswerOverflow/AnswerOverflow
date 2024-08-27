@@ -46,7 +46,7 @@
 		"@answeroverflow/eslint-config-custom": "workspace:^",
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
-		"@edge-runtime/vm": "^2.1.2",
+		"@edge-runtime/vm": "^4.0.2",
 		"@headlessui/tailwindcss": "^0.2.0",
 		"@types/node": "^20.11.20",
 		"@types/react": "^18.2.20",
