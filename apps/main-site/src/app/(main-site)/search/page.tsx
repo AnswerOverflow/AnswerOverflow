@@ -42,7 +42,7 @@ export default async function Search(props: Props) {
 			}),
 	});
 	return (
-		<div className="mx-auto flex w-full flex-col items-center bg-background font-body">
+		<div className="bg-background font-body mx-auto flex w-full flex-col items-center">
 			<div className="w-full max-w-screen-2xl justify-center">
 				<Navbar tenant={undefined} />
 				<div className="mt-16 px-4 sm:px-[4rem] 2xl:px-[6rem]">

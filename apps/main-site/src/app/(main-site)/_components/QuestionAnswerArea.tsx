@@ -23,7 +23,7 @@ export const QuestionAnswerArea = ({
 
 	return (
 		<>
-			<div className="flex flex-col gap-10 rounded-lg border-1 border-[#C5C5C5] bg-gradient-to-br-light-glass py-20 pl-16 pr-8 shadow-[0px_0px_111px_20px_rgba(57,_111,_248,_0.39)] backdrop-blur-md dark:border-[#343434] dark:bg-gradient-to-br-dark-glass lg:shadow-[0px_0px_222px_41px_rgba(57,_111,_248,_0.39)] xl:py-10 2xl:py-12">
+			<div className="border-1 bg-gradient-to-br-light-glass dark:bg-gradient-to-br-dark-glass flex flex-col gap-10 rounded-lg border-[#C5C5C5] py-20 pl-16 pr-8 shadow-[0px_0px_111px_20px_rgba(57,_111,_248,_0.39)] backdrop-blur-md lg:shadow-[0px_0px_222px_41px_rgba(57,_111,_248,_0.39)] xl:py-10 2xl:py-12 dark:border-[#343434]">
 				{/* Discord */}
 				<div className="rounded-md bg-[#36393F]" ref={discordPageRef}>
 					{/* Channel name */}

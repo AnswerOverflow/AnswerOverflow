@@ -138,7 +138,7 @@ export function WaitingToBeAddedRenderer(props: {
 	return (
 		<div className="flex flex-col items-center justify-center gap-8 text-center">
 			<Heading.H1>Waiting to join {props.server.name}</Heading.H1>
-			<div className="h-32 w-32 animate-spin rounded-full border-b-4 border-highlight" />
+			<div className="border-highlight h-32 w-32 animate-spin rounded-full border-b-4" />
 			<span>
 				Last checked {props.timeSinceLastCheckInSeconds} second
 				{props.timeSinceLastCheckInSeconds === 1 ? '' : 's'} ago.
@@ -408,7 +408,7 @@ export function WelcomePageRenderer(props: {
 					<Heading.H1 className="py-8 text-4xl">
 						Select a server to get started
 					</Heading.H1>
-					<div className="grid max-h-vh60 max-w-4xl grid-cols-1 gap-16 overflow-y-scroll p-8 md:grid-cols-3">
+					<div className="max-h-vh60 grid max-w-4xl grid-cols-1 gap-16 overflow-y-scroll p-8 md:grid-cols-3">
 						{props.servers?.map((server) => (
 							<div key={server.id}>
 								<ManageServerCard

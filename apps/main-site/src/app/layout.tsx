@@ -1,4 +1,6 @@
 import '../styles/globals.css';
+import '@unocss/reset/tailwind.css';
+import 'uno.css';
 export {
 	Layout as default,
 	metadata,

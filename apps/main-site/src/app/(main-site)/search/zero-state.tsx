@@ -12,8 +12,8 @@ import { Footer } from '@answeroverflow/ui/src/footer';
 
 const HeroAreaText = () => {
 	return (
-		<div className="flex h-full w-[calc(100vw-2rem)] max-w-screen-lg flex-col items-center justify-center gap-6 rounded-3xl border-2 border-solid border-primary/[.6] bg-background/[.4] bg-clip-padding px-4 py-8 backdrop-blur-3xl sm:w-[80vw] sm:p-8 md:p-16">
-			<h1 className="text-center font-header text-5xl font-bold leading-[114.5%] text-primary md:text-7xl">
+		<div className="border-primary/[.6] bg-background/[.4] flex h-full w-[calc(100vw-2rem)] max-w-screen-lg flex-col items-center justify-center gap-6 rounded-3xl border-2 border-solid bg-clip-padding px-4 py-8 backdrop-blur-3xl sm:w-[80vw] sm:p-8 md:p-16">
+			<h1 className="font-header text-primary text-center text-5xl font-bold leading-[114.5%] md:text-7xl">
 				Search all of Discord
 			</h1>
 			<div className="flex w-full flex-col items-center justify-center gap-8 sm:hidden sm:flex-row">
@@ -21,7 +21,7 @@ const HeroAreaText = () => {
 					<MessagesSearchBar />
 				</Suspense>
 			</div>
-			<h2 className="text-center font-body text-lg text-primary/[.95] sm:w-4/5 md:text-2xl">
+			<h2 className="font-body text-primary/[.95] text-center text-lg sm:w-4/5 md:text-2xl">
 				Answer Overflow is a Discord search engine. Find results from indexed
 				content or a community to join.
 			</h2>
@@ -92,8 +92,8 @@ const HeroArea = (props: {
 	return (
 		<div className="relative min-h-[calc(100vh-5rem)] w-full">
 			<ServerGrid servers={props.servers} />
-			<div className="pointer-events-none absolute right-0 top-0 z-10 hidden h-full w-52 bg-gradient-to-l from-[rgba(245,248,255,.5)] to-[rgba(245,248,255,0)] dark:from-[rgba(6,6,7,1)] dark:to-[rgba(6_,6_,7_,0_)] sm:block" />
-			<div className="pointer-events-none absolute left-0 top-0 z-10 hidden h-full w-52 bg-gradient-to-r from-[rgba(245,248,255,.5)] to-[rgba(245,248,255,0)] dark:from-[rgba(6,6,7,1)] dark:to-[rgba(6_,6_,7_,0_)] sm:block" />
+			<div className="pointer-events-none absolute right-0 top-0 z-10 hidden h-full w-52 bg-gradient-to-l from-[rgba(245,248,255,.5)] to-[rgba(245,248,255,0)] sm:block dark:from-[rgba(6,6,7,1)] dark:to-[rgba(6_,6_,7_,0_)]" />
+			<div className="pointer-events-none absolute left-0 top-0 z-10 hidden h-full w-52 bg-gradient-to-r from-[rgba(245,248,255,.5)] to-[rgba(245,248,255,0)] sm:block dark:from-[rgba(6,6,7,1)] dark:to-[rgba(6_,6_,7_,0_)]" />
 			<div className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2">
 				<HeroAreaText />
 			</div>
@@ -104,18 +104,18 @@ const HeroArea = (props: {
 export async function ZeroState() {
 	const data = await fetchBrowseServers();
 	return (
-		<div className="flex w-full flex-col items-center bg-background font-body">
+		<div className="bg-background font-body flex w-full flex-col items-center">
 			<Navbar tenant={undefined} />
 			<HeroArea servers={data} />
 			<div
 				className={
-					'grid w-full max-w-screen-3xl grid-cols-1 grid-rows-1 gap-8 p-8 text-center md:grid-cols-3'
+					'max-w-screen-3xl grid w-full grid-cols-1 grid-rows-1 gap-8 p-8 text-center md:grid-cols-3'
 				}
 			>
 				<FollowCursor intensity={40}>
 					<div
 						className={
-							'flex h-full flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
+							'border-primary/[.1] flex h-full flex-col justify-between rounded-2xl border-2 p-8 text-center drop-shadow-xl'
 						}
 					>
 						<h2 className={'mb-8 text-2xl'}>Browse All Communities</h2>
@@ -135,7 +135,7 @@ export async function ZeroState() {
 				<FollowCursor intensity={40}>
 					<div
 						className={
-							'flex h-full flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
+							'border-primary/[.1] flex h-full flex-col justify-between rounded-2xl border-2 p-8 text-center drop-shadow-xl'
 						}
 					>
 						<h2 className={'mb-8 text-2xl'}>Setup for free</h2>
@@ -155,7 +155,7 @@ export async function ZeroState() {
 				<FollowCursor intensity={40}>
 					<div
 						className={
-							'flex h-full flex-col justify-between rounded-2xl border-2 border-primary/[.1] p-8 text-center drop-shadow-xl'
+							'border-primary/[.1] flex h-full flex-col justify-between rounded-2xl border-2 p-8 text-center drop-shadow-xl'
 						}
 					>
 						<h2 className={'mb-8 text-2xl'}>Open Source</h2>

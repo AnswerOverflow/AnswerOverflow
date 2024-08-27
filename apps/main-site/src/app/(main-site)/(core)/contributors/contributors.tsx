@@ -13,15 +13,15 @@ export const Contributor = ({
 	avatar,
 	links,
 }: ContributorData) => (
-	<div className="flex h-full w-64 flex-col items-center justify-start rounded-standard border-2 px-8 py-16">
+	<div className="rounded-standard flex h-full w-64 flex-col items-center justify-start border-2 px-8 py-16">
 		<Avatar className={'h-20 w-20'}>
 			<AvatarImage alt={`The profile picture of ${name}`} src={avatar} />
 			<AvatarFallback>{name}</AvatarFallback>
 		</Avatar>
 		<div className="grow">
 			<div className="flex flex-col items-center justify-between text-black dark:text-white">
-				<h3 className="mt-2 font-header text-2xl font-semibold">{name}</h3>
-				<p className="mb-2 text-center font-body text-black/90 dark:text-white/75">
+				<h3 className="font-header mt-2 text-2xl font-semibold">{name}</h3>
+				<p className="font-body mb-2 text-center text-black/90 dark:text-white/75">
 					{description}
 				</p>
 			</div>

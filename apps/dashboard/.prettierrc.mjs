@@ -7,5 +7,4 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default {
 	...prettierConfig,
 	plugins: ['prettier-plugin-tailwindcss'],
-	tailwindConfig: __dirname + '/tailwind.config.cjs',
 };

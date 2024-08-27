@@ -9,7 +9,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="mx-auto flex w-full flex-col items-center bg-background font-body">
+		<div className="bg-background font-body mx-auto flex w-full flex-col items-center">
 			<div className="relative w-full">
 				<Navbar tenant={undefined} />
 				<div className="mt-16 flex flex-row">

@@ -34,7 +34,7 @@ export default async function HomePage(props: { children: React.ReactNode }) {
 					'hidden h-fit max-w-[650px] flex-col gap-4 p-4 text-center md:flex 2xl:mr-4 2xl:w-[400px] 2xl:text-left'
 				}
 			>
-				<div className={'text-sm font-bold text-primary'}>
+				<div className={'text-primary text-sm font-bold'}>
 					Welcome to Answer Overflow!
 				</div>
 				<span>
@@ -79,7 +79,7 @@ export default async function HomePage(props: { children: React.ReactNode }) {
 				<LinkButton
 					href={`/browse`}
 					variant={'outline'}
-					className={'flex w-full flex-row justify-between gap-2 bg-card'}
+					className={'bg-card flex w-full flex-row justify-between gap-2'}
 				>
 					<div className={'flex items-center gap-2'}>
 						<MdOutlineExplore className={'size-6'} />
