@@ -35,10 +35,8 @@
 		"@opentelemetry/sdk-trace-node": "^1.25.0",
 		"@tailwindcss/typography": "^0.5.10",
 		"@trpc/server": "^10.45.2",
-		"@unocss/transformer-directives": "^0.62.3",
 		"@vercel/otel": "^1.8.3",
 		"bright": "^0.8.4",
-		"dotenv-cli": "^7.4.1",
 		"mdx": "^0.3.1",
 		"next": "15.0.0-rc.0",
 		"next-auth": "^4.23.1",
@@ -54,7 +52,8 @@
 		"react-xarrows": "^2.0.2",
 		"schema-dts": "^1.1.2",
 		"sharp": "^0.32.5",
-		"zod": "^3.22.2"
+		"zod": "^3.22.2",
+		"dotenv-cli": "^7.4.1"
 	},
 	"devDependencies": {
 		"@answeroverflow/eslint-config-custom": "workspace:^",
@@ -66,7 +65,6 @@
 		"@types/node": "^20.11.20",
 		"@types/react": "^18.2.20",
 		"@types/react-dom": "^18.2.7",
-		"@unocss/webpack": "^0.62.3",
 		"@vitest/coverage-v8": "^2.0.5",
 		"autoprefixer": "^10.4.15",
 		"concurrently": "^8.2.2",
@@ -78,7 +76,6 @@
 		"sass": "^1.66.1",
 		"tailwindcss": "^3.3.3",
 		"ts-node": "^10.9.1",
-		"unocss": "^0.62.3",
 		"vitest": "^2.0.5"
 	}
 }

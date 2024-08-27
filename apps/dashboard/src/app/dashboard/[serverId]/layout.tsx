@@ -91,7 +91,7 @@ export default function Layout(props: {
 											key={path.path}
 											variant={'ghost'}
 											selectedVariant={'secondary'}
-											className="text-muted-foreground hover:text-primary flex justify-start gap-3 rounded-lg px-3 py-2 transition-all"
+											className="flex justify-start gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
 										>
 											{path.icon}
 											{path.label}
@@ -122,7 +122,7 @@ export default function Layout(props: {
 											<Link
 												href={path.path}
 												key={path.path}
-												className="text-muted-foreground hover:text-primary flex items-center gap-3 rounded-lg px-3 py-2 transition-all"
+												className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
 											>
 												{path.icon}
 												{path.label}

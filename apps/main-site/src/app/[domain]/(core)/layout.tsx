@@ -18,7 +18,7 @@ export default async function RootLayout({
 		return notFound();
 	}
 	return (
-		<div className="bg-background font-body mx-auto flex w-full flex-col items-center">
+		<div className="mx-auto flex w-full flex-col items-center bg-background font-body">
 			<div className="w-full justify-center">
 				<Navbar tenant={server} />
 				<div className="mt-16 flex flex-row">

@@ -5,10 +5,10 @@ import { GetStarted } from '@answeroverflow/ui/src/callouts';
 const HowDoesItWorkAreaText = () => {
 	return (
 		<div className="flex w-full flex-col items-start justify-center gap-6 xl:w-[60%]">
-			<h1 className="font-header text-center text-4xl font-black leading-[114.5%] md:text-start md:text-6xl">
+			<h1 className="text-center font-header text-4xl font-black leading-[114.5%] md:text-start md:text-6xl">
 				Bringing Discord To The Web
 			</h1>
-			<p className="font-body text-primary/[.95] text-center md:text-start md:text-xl">
+			<p className="text-center font-body text-primary/[.95] md:text-start md:text-xl">
 				Answer Overflow is an open source project designed to bring discord
 				channels to your favorite search engine, enabling users to easily find
 				the info they need, fast.

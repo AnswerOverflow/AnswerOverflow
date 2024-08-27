@@ -7,7 +7,6 @@
 !process.env.SKIP_ENV_VALIDATION &&
 	(await import('@answeroverflow/env/web-schema.mjs'));
 const nextJSMDX = await import('@next/mdx');
-import UnoCSS from '@unocss/webpack';
 // import remarkGfm from 'remark-gfm';
 
 const withMDX = nextJSMDX.default({
@@ -39,11 +38,6 @@ const config = {
 	experimental: {
 		ppr: true,
 		instrumentationHook: true,
-	},
-	webpack: (config) => {
-		config.cache = false;
-		config.plugins.push(UnoCSS());
-		return config;
 	},
 	images: {
 		domains: [

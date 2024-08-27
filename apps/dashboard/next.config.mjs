@@ -6,7 +6,6 @@
 
 !process.env.SKIP_ENV_VALIDATION &&
 	(await import('@answeroverflow/env/web-schema.mjs'));
-import UnoCSS from '@unocss/webpack';
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -33,11 +32,6 @@ const config = {
 		ignoreDuringBuilds: !!process.env.CI,
 	},
 	productionBrowserSourceMaps: true, // we're open source so why not
-	webpack: (config) => {
-		config.cache = false;
-		config.plugins.push(UnoCSS());
-		return config;
-	},
 	async rewrites() {
 		return [
 			{

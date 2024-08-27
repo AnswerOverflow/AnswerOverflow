@@ -140,8 +140,8 @@ export function ConfigureDomainCardRenderer(props: {
 				)}
 
 				{props.status !== 'Valid Configuration' && (
-					<div className="bg-muted/20 flex flex-col items-center justify-center space-y-2 rounded-b-lg border-t border-stone-200 p-3 sm:flex-row sm:justify-between sm:space-y-0 sm:px-6">
-						<p className="text-primary text-sm">Please enter a valid domain.</p>
+					<div className="flex flex-col items-center justify-center space-y-2 rounded-b-lg border-t border-stone-200 bg-muted/20 p-3 sm:flex-row sm:justify-between sm:space-y-0 sm:px-6">
+						<p className="text-sm text-primary">Please enter a valid domain.</p>
 					</div>
 				)}
 			</form>

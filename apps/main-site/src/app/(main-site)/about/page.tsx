@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
 	return (
-		<div className={'max-w-screen-3xl mx-auto'}>
+		<div className={'mx-auto max-w-screen-3xl'}>
 			<Navbar tenant={undefined} />
 
 			<HowDoesItWorkArea />

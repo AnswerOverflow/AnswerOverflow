@@ -80,7 +80,7 @@ function ChartWithLabelAndTotal(props: {
 	chart: React.ReactNode;
 }) {
 	return (
-		<div className="border-1 flex w-full flex-col gap-4 rounded-lg py-4">
+		<div className="flex w-full flex-col gap-4 rounded-lg border-1 py-4">
 			<span className="pl-6 text-start font-semibold">{props.label}</span>
 			{props.chart}
 		</div>
