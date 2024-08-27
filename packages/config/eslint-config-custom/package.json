@@ -23,13 +23,13 @@
     "eslint-plugin-no-only-tests": "^3.1.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "7.32.2",
-    "eslint-plugin-tailwindcss": "^3.13.0",
     "eslint-plugin-turbo": "^1.10.12",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.6"
   },
   "devDependencies": {
-    "@answeroverflow/tsconfig": "workspace:^"
+    "@answeroverflow/tsconfig": "workspace:^",
+    "@unocss/eslint-config": "^0.62.3"
   },
   "publishConfig": {
     "access": "public"
