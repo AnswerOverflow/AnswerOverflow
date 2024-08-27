@@ -49,7 +49,7 @@ export type MessageResultPageProps = {
 const JoinAnswerOverflowCard = () => (
 	<div
 		className={
-			'flex flex-col gap-4 rounded-md border-2 border-solid border-secondary p-4'
+			'border-secondary flex flex-col gap-4 rounded-md border-2 border-solid p-4'
 		}
 	>
 		<span
@@ -180,7 +180,7 @@ export function MessageResultPage({
 								>
 									{firstMessage.author.name}
 								</Link>
-								<span className="text-sm text-muted-foreground">•</span>
+								<span className="text-muted-foreground text-sm">•</span>
 								<TimeAgo snowflake={firstMessage.id} />
 							</div>
 						</div>
@@ -195,7 +195,7 @@ export function MessageResultPage({
 								<Link href={`/c/${server.id}`} className="hover:underline">
 									{server.name}
 								</Link>
-								<span className="text-sm text-muted-foreground">•</span>
+								<span className="text-muted-foreground text-sm">•</span>
 								<TimeAgo snowflake={firstMessage.id} />
 							</div>
 							<Link
@@ -225,7 +225,7 @@ export function MessageResultPage({
 					)}
 				</div>
 			</div>
-			<div className="flex flex-row gap-4 border-b-2 border-muted py-4 pl-2">
+			<div className="border-muted flex flex-row gap-4 border-b-2 py-4 pl-2">
 				<div className={'flex items-center gap-2'}>
 					<FaRegMessage className={'size-4'} />
 					<span>
@@ -240,7 +240,7 @@ export function MessageResultPage({
 				</div>
 			</div>
 			{messagesToDisplay.length === 0 && (
-				<div className="flex flex-col gap-4 rounded-md border-2 border-solid border-secondary p-4">
+				<div className="border-secondary flex flex-col gap-4 rounded-md border-2 border-solid p-4">
 					<span className="text-lg font-semibold">No replies yet</span>
 					<span className="text-muted-foreground">
 						Be the first to reply to this message
@@ -262,7 +262,7 @@ export function MessageResultPage({
 		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center md:w-[400px]">
 			<div
 				className={
-					'hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block'
+					'bg-card hidden w-full rounded-md border-2 drop-shadow-md md:block'
 				}
 			>
 				<div className="flex flex-col items-start gap-4 p-4">

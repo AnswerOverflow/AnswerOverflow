@@ -9,11 +9,7 @@ export default defineConfig({
 		}),
 	],
 	content: {
-		filesystem: [
-			'./src/**/*.{ts,tsx}',
-			'../../packages/ui/src/**/*.{js,ts,jsx,tsx}', // Transpile breaks without this for tailwind styles
-			'./node_modules/@tremor/**/*.{js,ts,jsx,tsx}', // Tremor module,
-		],
+		filesystem: ['./src/**/*.{ts,tsx}'],
 	},
 	theme: {
 		fontFamily: {
@@ -70,21 +66,21 @@ export default defineConfig({
 		},
 		animation: {
 			keyframes: {
-				'accordion-down': `{
+				'accordion-down': `
           0% {
           height: 0;
           },
           100% {
           height: var(--radix-accordion-content-height);
-          }}
+          }
         `,
-				'accordion-up': `{
+				'accordion-up': `
         0% {
         height: var(--radix-accordion-content-height);
         },
         100% {
         height: 0;
-        }}
+        }
         `,
 			},
 			durations: {

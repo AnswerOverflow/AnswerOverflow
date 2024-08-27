@@ -331,7 +331,7 @@ export const PricingOptions = (props: { showFaqs?: boolean }) => {
 				>
 					<div
 						className={
-							'flex max-w-full flex-row items-center gap-4 text-primary'
+							'text-primary flex max-w-full flex-row items-center gap-4'
 						}
 					>
 						<IoMdGlobe className={'hidden h-16 w-16 shrink-0 md:block'} />
@@ -361,7 +361,7 @@ export const PricingOptions = (props: { showFaqs?: boolean }) => {
 				>
 					<div
 						className={
-							'flex max-w-full flex-row items-center gap-4 text-primary'
+							'text-primary flex max-w-full flex-row items-center gap-4'
 						}
 					>
 						<IoBusiness className={'hidden h-16 w-16 shrink-0 md:block'} />

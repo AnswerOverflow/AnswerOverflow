@@ -37,7 +37,7 @@ export function TimeAgo(props: { snowflake: string; className?: string }) {
 	return (
 		<span
 			suppressHydrationWarning
-			className={cn('text-sm text-muted-foreground', props.className)}
+			className={cn('text-muted-foreground text-sm', props.className)}
 		>
 			{formatRelativeTime(getDate(props.snowflake))}
 		</span>

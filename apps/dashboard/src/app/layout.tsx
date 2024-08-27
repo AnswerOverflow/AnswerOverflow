@@ -1,3 +1,4 @@
+import '@unocss/reset/tailwind.css';
 import '../styles/globals.css';
 import {
 	Layout,

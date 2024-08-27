@@ -10,7 +10,7 @@ const ThreadIcon = () => {
 			viewBox="0 0 24 24"
 			strokeWidth={1.5}
 			stroke="currentColor"
-			className="h-6 w-6 text-primary/75"
+			className="text-primary/75 h-6 w-6"
 		>
 			<path
 				strokeLinecap="round"
@@ -61,7 +61,7 @@ const SearchResultMetaData = (props: Pick<SearchResultProps, 'thread'>) => {
 	return (
 		<div className="mt-8 flex flex-row items-center justify-center">
 			{/* Thread count */}
-			<span className="flex items-center justify-center px-1 text-primary/75">
+			<span className="text-primary/75 flex items-center justify-center px-1">
 				{props.thread?.messageCount ?? 20}
 			</span>
 			<ThreadIcon />
@@ -86,13 +86,13 @@ const SearchResultSidebar = (
 
 export const SearchResult = ({ result }: { result: SearchResultProps }) => {
 	return (
-		<div className="flex h-full w-full flex-col-reverse rounded-standard lg:flex-row">
+		<div className="rounded-standard flex h-full w-full flex-col-reverse lg:flex-row">
 			<LinkMessage
 				message={result.message}
 				thread={result.thread}
 				showNoSolutionCTA
 			/>
-			<div className="w-full shrink-0 flex-col items-center justify-center rounded-t-standard border-x-2 border-t-2 border-black/[.13] px-5 pb-2 pt-6 dark:border-white/[.13] lg:flex lg:w-64 lg:rounded-br-standard lg:rounded-tl-none lg:border-y-2 lg:border-l-0 lg:border-r-2">
+			<div className="rounded-t-standard lg:rounded-br-standard w-full shrink-0 flex-col items-center justify-center border-x-2 border-t-2 border-black/[.13] px-5 pb-2 pt-6 lg:flex lg:w-64 lg:rounded-tl-none lg:border-y-2 lg:border-l-0 lg:border-r-2 dark:border-white/[.13]">
 				<SearchResultSidebar {...result} />
 			</div>
 		</div>

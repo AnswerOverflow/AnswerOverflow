@@ -34,7 +34,7 @@ export const LinkMessage = (
 			<MessageBlurrer message={message}>
 				<div
 					className={cn(
-						`discord-message w-full border-2 border-black/[.13] dark:border-white/[.13] lg:rounded-tl-standard`,
+						`discord-message lg:rounded-tl-standard w-full border-2 border-black/[.13] dark:border-white/[.13]`,
 						props.className,
 					)}
 				>
@@ -44,7 +44,7 @@ export const LinkMessage = (
 						</div>
 						<>
 							<Link href={`/m/${message.id}`} className="block w-fit">
-								<Paragraph className="py-2 pt-4 font-header text-xl text-blue-700 decoration-2 hover:text-blue-600 hover:underline dark:text-blue-400 hover:dark:text-blue-500">
+								<Paragraph className="font-header py-2 pt-4 text-xl text-blue-700 decoration-2 hover:text-blue-600 hover:underline dark:text-blue-400 hover:dark:text-blue-500">
 									{thread?.name ?? message.content.slice(0, 20).trim() + '...'}
 								</Paragraph>
 							</Link>
@@ -63,12 +63,12 @@ export const LinkMessage = (
 				</div>
 			</MessageBlurrer>
 			{!solution && showNoSolutionCTA && (
-				<div className="w-full rounded-b-standard border-2 border-t-0 border-black/[.13] bg-white/[.01] dark:border-white/[.13] lg:rounded-br-none">
-					<Paragraph className="p-6 font-body text-primary/75">
+				<div className="rounded-b-standard w-full border-2 border-t-0 border-black/[.13] bg-white/[.01] lg:rounded-br-none dark:border-white/[.13]">
+					<Paragraph className="font-body text-primary/75 p-6">
 						No replies marked as solution...{' '}
 						<Link
 							href={`/m/${message.id}`}
-							className="font-bold text-primary underline"
+							className="text-primary font-bold underline"
 						>
 							View thread
 						</Link>

@@ -16,10 +16,10 @@ export function ThinMessage(
 			<div className="flex flex-row">
 				<div className="mb-8 w-[40px] flex-shrink-0">
 					<DiscordAvatar user={message.author} size={40} />
-					<div className={cn('mx-auto h-full w-0 rounded-full border-1')} />
+					<div className={cn('border-1 mx-auto h-full w-0 rounded-full')} />
 				</div>
 				<div className="flex flex-col pl-2 pt-2">
-					<div className="flex flex-row items-center gap-2 text-muted-foreground">
+					<div className="text-muted-foreground flex flex-row items-center gap-2">
 						{message.public && !message.isAnonymous ? (
 							<Link
 								className="mr-1 hover:underline"

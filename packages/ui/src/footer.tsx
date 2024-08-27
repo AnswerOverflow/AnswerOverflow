@@ -115,7 +115,7 @@ const MainSiteFooter = () => (
 									<Link
 										href={item.href}
 										key={`link-${item.name}-${item.href}`}
-										className="my-1 font-body text-primary/75 hover:text-primary"
+										className="font-body text-primary/75 hover:text-primary my-1"
 										prefetch={false}
 									>
 										{item.name}
@@ -142,7 +142,7 @@ const MainSiteFooter = () => (
 				</Link>
 			))}
 		</div>
-		<p className="mt-10 text-center font-body text-xs leading-5 text-gray-500 dark:text-neutral-400">
+		<p className="font-body mt-10 text-center text-xs leading-5 text-gray-500 dark:text-neutral-400">
 			&copy; 2024 Hedgehog Software, LLC. All rights reserved.
 		</p>
 	</div>

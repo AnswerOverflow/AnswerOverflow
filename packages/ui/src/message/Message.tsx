@@ -20,7 +20,7 @@ export const MessageAuthorArea = (props: Pick<MessageProps, 'message'>) => {
 	return (
 		<div className="flex w-full min-w-0 gap-2">
 			{/* TODO: sort out responsive styling */}
-			<div className="flex w-full flex-row items-center gap-2 font-body text-lg text-black/[.7] dark:text-white/[.47]">
+			<div className="font-body flex w-full flex-row items-center gap-2 text-lg text-black/[.7] dark:text-white/[.47]">
 				<DiscordAvatar user={message.author} size={40} />
 				<Link className="mr-1" href={`/u/${message.author.id}`}>
 					<span className="text-black/[.7] hover:underline dark:text-white/[.47]">
@@ -72,7 +72,7 @@ export const MessageContents = async (
 	return (
 		<div
 			className={cn(
-				'max-w-4xl whitespace-break-spaces pt-2 font-body text-primary [overflow-wrap:_anywhere]',
+				'font-body text-primary max-w-4xl whitespace-break-spaces pt-2 [overflow-wrap:_anywhere]',
 				props.className,
 			)}
 		>
@@ -141,7 +141,7 @@ export const Message = (
 			<div
 				className={cn(
 					`discord-message w-full ${
-						props.showBorders ? 'border-2 border-foreground' : ''
+						props.showBorders ? 'border-foreground border-2' : ''
 					} border-black/[.13] dark:border-white/[.13] ${
 						props.fullRounded ? 'rounded-standard' : 'lg:rounded-tl-standard'
 					}`,
@@ -215,7 +215,7 @@ export const ContentBlurrer = ({
 	}
 
 	return (
-		<div className="relative w-full text-primary">
+		<div className="text-primary relative w-full">
 			<div
 				style={{
 					filter: `blur(${blurAmount})`,
@@ -235,7 +235,7 @@ export const ContentBlurrer = ({
 				<div className="absolute inset-0" />
 				<div className="absolute inset-0 flex items-center justify-center">
 					<div
-						className={`flex flex-col items-center justify-center rounded-standard text-center backdrop-blur-sm`}
+						className={`rounded-standard flex flex-col items-center justify-center text-center backdrop-blur-sm`}
 					>
 						<div className="text-2xl">{notPublicTitle}</div>
 						<div>{notPublicInstructions}</div>

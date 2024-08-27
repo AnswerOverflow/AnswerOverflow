@@ -19,6 +19,7 @@
 		"tailwind.config.cjs",
 		"next-env.d.ts",
 		"../../reset.d.ts",
+		"../../../../global.css",
 		"vitest.config.ts",
 		".prettierrc.cjs",
 		"__tests__",

@@ -15,14 +15,14 @@ export const CommitBanner = () => {
 
 export const CommitBannerRenderer = ({ commitSha }: { commitSha: string }) => {
 	return (
-		<div className="flex w-full flex-row justify-between bg-white px-4 dark:bg-black md:px-10">
+		<div className="flex w-full flex-row justify-between bg-white px-4 md:px-10 dark:bg-black">
 			<Heading.H2 className="font-body text-sm md:text-lg">
 				<span className="align-middle text-black dark:text-white">
 					Commit:{' '}
 				</span>
-				<span className="align-middle text-primary/75">{commitSha}</span>
+				<span className="text-primary/75 align-middle">{commitSha}</span>
 			</Heading.H2>
-			<Heading.H3 className="hidden font-body text-lg md:block">
+			<Heading.H3 className="font-body hidden text-lg md:block">
 				<Link href="https://vercel.com">
 					Currently running on Vercel Preview
 				</Link>

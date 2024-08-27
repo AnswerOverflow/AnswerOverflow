@@ -13,7 +13,7 @@ const EmbedText = async (props: {
 	const textToHTML = await parse(props.text);
 
 	return (
-		<div className={cn(`font-light text-primary`, props.className)}>
+		<div className={cn(`text-primary font-light`, props.className)}>
 			{textToHTML}
 		</div>
 	);
@@ -40,7 +40,7 @@ const EmbedImage = (props: {
 			<Image
 				src={props.url}
 				unoptimized
-				className="h-96 w-auto rounded-standard object-contain"
+				className="rounded-standard h-96 w-auto object-contain"
 				width={props.width}
 				height={props.height}
 				// Would be nice to have proper alt text here in the future / AI generated alt text
@@ -66,7 +66,7 @@ export const Embed = (props: EmbedProps) => {
 
 	return (
 		<div
-			className="flex w-auto flex-col gap-1 break-words rounded-standard bg-black/5 py-2 pl-4 pr-6 dark:bg-white/10"
+			className="rounded-standard flex w-auto flex-col gap-1 break-words bg-black/5 py-2 pl-4 pr-6 dark:bg-white/10"
 			style={{
 				borderLeftColor: `#${numberToHex(props.embed.color)}` ?? '#FFFFFF',
 				borderLeftStyle: 'solid',

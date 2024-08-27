@@ -7,7 +7,7 @@ export const Paragraph = (
 
 	return (
 		<p
-			className={cn('py-4 font-body text-lg text-primary', className)}
+			className={cn('font-body text-primary py-4 text-lg', className)}
 			{...otherProps}
 		>
 			{children}

@@ -47,10 +47,10 @@ export const FeedPost = async (props: { postId: string }) => {
 					<span>{server.name}</span>
 				</Link>
 				<div className={'flex flex-col gap-2 md:flex-row'}>
-					<span className={'hidden text-sm text-muted-foreground md:block'}>
+					<span className={'text-muted-foreground hidden text-sm md:block'}>
 						•
 					</span>
-					<span className={'text-sm text-muted-foreground'}>
+					<span className={'text-muted-foreground text-sm'}>
 						Created by {root.author.name} on {getSnowflakeUTCDate(root.id)} in{' '}
 						<Link
 							className={'hover:underline'}
@@ -66,7 +66,7 @@ export const FeedPost = async (props: { postId: string }) => {
 			</div>
 			<div
 				className={
-					'max-h-[300px] overflow-hidden whitespace-break-spaces font-body text-primary'
+					'font-body text-primary max-h-[300px] overflow-hidden whitespace-break-spaces'
 				}
 			>
 				{firstImage ? (
@@ -87,7 +87,7 @@ export const FeedPost = async (props: { postId: string }) => {
 	return (
 		<div
 			className={
-				'outer rounded-md border-2 bg-card p-2 hover:border-muted-foreground'
+				'outer bg-card hover:border-muted-foreground rounded-md border-2 p-2'
 			}
 		>
 			<Link

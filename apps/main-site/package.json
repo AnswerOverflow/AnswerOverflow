@@ -35,6 +35,7 @@
 		"@opentelemetry/sdk-trace-node": "^1.25.0",
 		"@tailwindcss/typography": "^0.5.10",
 		"@trpc/server": "^10.45.2",
+		"@unocss/reset": "^0.62.3",
 		"@vercel/otel": "^1.8.3",
 		"bright": "^0.8.4",
 		"dotenv-cli": "^7.4.1",

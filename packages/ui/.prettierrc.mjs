@@ -15,5 +15,4 @@ export default {
 			},
 		},
 	],
-	tailwindConfig: __dirname + '/tailwind.config.cjs',
 };

@@ -33,10 +33,10 @@ export const SearchPage = ({ results, tenant }: SearchResultProps) => {
 				<MessagesSearchBar className={'mx-auto mb-4'} />
 			</Suspense>
 			{noResults ? (
-				<div className="text-center text-primary/75">No results found</div>
+				<div className="text-primary/75 text-center">No results found</div>
 			) : (
 				<div className={'mb-4'}>
-					<span className="text-base text-primary/[.6]">{resultsText}</span>
+					<span className="text-primary/[.6] text-base">{resultsText}</span>
 				</div>
 			)}
 			{resultsSection}

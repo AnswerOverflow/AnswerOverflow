@@ -101,7 +101,7 @@ export const LeftSidebar = () => (
 				Popular
 			</LinkButton>
 			<Separator className="my-2" />
-			<span className="px-4 font-semibold text-accent-foreground">Topics</span>
+			<span className="text-accent-foreground px-4 font-semibold">Topics</span>
 			<Accordion type="multiple" className="py-2">
 				{categories.map((category) => (
 					<>
@@ -110,7 +110,7 @@ export const LeftSidebar = () => (
 							className="border-0"
 							key={category.name}
 						>
-							<AccordionTrigger className="flex flex-row items-center justify-between gap-3 rounded-md px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+							<AccordionTrigger className="ring-offset-background hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex flex-row items-center justify-between gap-3 rounded-md px-4 py-2 text-sm font-medium transition-colors hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
 								<div className="flex flex-row items-center justify-start gap-3">
 									{category.icon}
 									{category.name}
