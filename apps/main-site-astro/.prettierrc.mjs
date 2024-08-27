@@ -4,5 +4,4 @@ import prettierConfig from "@answeroverflow/prettier-config"
 export default {
   ...prettierConfig,
   plugins: ['prettier-plugin-tailwindcss'],
-  tailwindConfig: __dirname + '/tailwind.config.cjs',
 };

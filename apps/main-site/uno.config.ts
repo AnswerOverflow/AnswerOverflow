@@ -1,20 +1,8 @@
 // uno.config.ts
-import {
-	defineConfig,
-	presetMini,
-	presetUno,
-	presetWind,
-	transformerDirectives,
-} from 'unocss';
+import { defineConfig, presetWind, transformerDirectives } from 'unocss';
 
 export default defineConfig({
-	presets: [
-		presetWind({
-			dark: 'class',
-		}),
-		presetUno(),
-		presetMini(),
-	],
+	presets: [presetWind()],
 	transformers: [
 		transformerDirectives({
 			applyVariable: ['--at-apply', '--uno-apply', '--uno'],
@@ -22,7 +10,7 @@ export default defineConfig({
 	],
 	content: {
 		filesystem: [
-			'./src/**/*.{html,js,ts,jsx,tsx}',
+			'./src/**/*.{ts,tsx}',
 			'../../packages/ui/src/**/*.{js,ts,jsx,tsx}', // Transpile breaks without this for tailwind styles
 			'./node_modules/@tremor/**/*.{js,ts,jsx,tsx}', // Tremor module,
 		],

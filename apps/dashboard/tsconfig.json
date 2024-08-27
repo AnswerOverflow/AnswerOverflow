@@ -15,6 +15,7 @@
 		"next.config.mjs",
 		"next-env.d.ts",
 		"postcss.config.cjs",
+		"uno.config.ts",
 		"tailwind.config.cjs",
 		"next-env.d.ts",
 		"../../reset.d.ts",

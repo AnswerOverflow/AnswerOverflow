@@ -19,7 +19,7 @@ export const TrendingServer = async (props: { serverId: string }) => {
 		<LinkButton
 			href={`/c/${server.id}`}
 			variant={'outline'}
-			className={'flex w-full flex-row justify-between gap-2 bg-card'}
+			className={'bg-card flex w-full flex-row justify-between gap-2'}
 		>
 			<div className={'flex items-center gap-2'}>
 				<ServerIcon server={server} size={24} />
