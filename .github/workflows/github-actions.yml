@@ -49,7 +49,7 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
         with:
-          node-version: 20.4.0
+          node-version: 20.17.0
 
       - uses: pnpm/action-setup@v2
         name: Install pnpm
