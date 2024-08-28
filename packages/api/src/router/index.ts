@@ -6,13 +6,7 @@ import { discordAccountRouter } from './users/accounts/discord-accounts';
 import { userServerSettingsRouter } from './user-server-settings/user-server-settings';
 import { messagesRouter } from './messages/messages';
 import { dashboardRouter } from './dashboard';
-export const botRouter = router({
-	// Discord:
-	servers: serverRouter,
-	channels: channelRouter,
-	discordAccounts: discordAccountRouter,
-	userServerSettings: userServerSettingsRouter,
-});
+
 export const appRouter = router({
 	servers: serverRouter,
 	channels: channelRouter,

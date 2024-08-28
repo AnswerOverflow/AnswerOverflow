@@ -32,6 +32,7 @@ import {
 	protectedMutationFetchFirst,
 } from '../../utils/protected-procedures';
 import { withUserServersProcedure } from '../trpc';
+import { botClient } from '../../bot/caller';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
 	'Read the rules consent already enabled';
@@ -343,4 +344,7 @@ export const serverRouter = router({
 				domainJson,
 			};
 		}),
+	callBot: withUserServersProcedure.query(async () => {
+		return botClient.hello.query();
+	}),
 });

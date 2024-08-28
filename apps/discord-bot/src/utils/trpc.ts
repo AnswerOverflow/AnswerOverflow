@@ -1,7 +1,7 @@
 import {
-	type BotContextCreate,
-	botRouter,
-	type BotRouterCaller,
+	type AppRouterCreate,
+	appRouter,
+	type AppRouterCaller,
 	createBotContext,
 } from '@answeroverflow/api';
 import { container } from '@sapphire/framework';
@@ -17,8 +17,8 @@ export type TRPCStatusHandler<T> = {
 };
 
 export type TRPCCall<T> = {
-	getCtx: () => Promise<BotContextCreate>;
-	apiCall: (router: BotRouterCaller) => Promise<T>;
+	getCtx: () => Promise<AppRouterCreate>;
+	apiCall: (router: AppRouterCaller) => Promise<T>;
 } & TRPCStatusHandler<T>;
 
 export async function callWithAllowedErrors<T>({
@@ -50,7 +50,7 @@ export async function callAPI<T>({
 }: TRPCCall<T>) {
 	try {
 		const convertedCtx = await createBotContext(await getCtx());
-		const caller = botRouter.createCaller(convertedCtx);
+		const caller = appRouter.createCaller(convertedCtx);
 		const data = await apiCall(caller);
 		await Ok(data);
 		return data;

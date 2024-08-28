@@ -282,9 +282,6 @@ importers:
       '@sapphire/pieces':
         specifier: ^3.7.0
         version: 3.10.0
-      '@sapphire/plugin-api':
-        specifier: 5.1.0
-        version: 5.1.0
       '@sapphire/plugin-editable-commands':
         specifier: 3.0.0
         version: 3.0.0
@@ -684,6 +681,9 @@ importers:
       '@sapphire/bitfield':
         specifier: ^1.2.0
         version: 1.2.2
+      '@trpc/client':
+        specifier: ^10.45.2
+        version: 10.45.2(@trpc/server@10.45.2)
       '@trpc/server':
         specifier: ^10.45.2
         version: 10.45.2
@@ -4722,10 +4722,6 @@ packages:
 
   '@sapphire/pieces@3.10.0':
     resolution: {integrity: sha512-iBaux50dA+VYjtBqmaceWcskdmw7ua51ojEPkyaSJyg2t9ln/Wc9NqYoQheRCWltZeDTERCUBIYYMqDuCs1Okw==}
-    engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-
-  '@sapphire/plugin-api@5.1.0':
-    resolution: {integrity: sha512-Yy9JdyT1ZTkIpa0+iaxOsQwwWfM4KGWt3y0xqtVVmtGpQYfj2cszVLX1y30uo3sEnuOLb8NrFUSDCQqntqskng==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
   '@sapphire/plugin-editable-commands@3.0.0':
@@ -10942,13 +10938,6 @@ packages:
     resolution: {integrity: sha512-q5nmENpTHgiPVd1cJDDc9cVoYN5x4vCvwT3FMilvKPKneCBZAxn2YWQjDF0UMcE9k0Cay1gBiDfTMU0g+mPMQA==}
     engines: {node: '>=14.0.0'}
 
-  tldts-core@6.1.25:
-    resolution: {integrity: sha512-hbSsjJOeDMV91JiqcrrFQ46D7EepH880zVmPjnBDmt3P+h0Aowz8Nh1adIcqkdhJbgpzZYQr6aM8/N3tZC6JyA==}
-
-  tldts@6.1.25:
-    resolution: {integrity: sha512-UmjB1dVArio9hny1D84VFeEvE37nCyfW5sWHr7AUV2MxJgxD8NR/kdmEMyjx5o/kRuOOBbaaXStce2R5C6I1Gg==}
-    hasBin: true
-
   tmpl@1.0.5:
     resolution: {integrity: sha512-3f0uOEAQwIqGuWW2MVzYg8fV/QNnc/IpuJNG837rLuczAaLVHslWHZQj4IGiEl5Hs3kkbhwL9Ab7Hrsmuj+Smw==}
 
@@ -15801,13 +15790,6 @@ snapshots:
       '@discordjs/collection': 1.5.3
       '@sapphire/utilities': 3.16.2
       tslib: 2.6.3
-
-  '@sapphire/plugin-api@5.1.0':
-    dependencies:
-      '@types/ws': 8.5.10
-      tldts: 6.1.25
-      tslib: 2.6.3
-      undici: 5.28.4
 
   '@sapphire/plugin-editable-commands@3.0.0':
     dependencies:
@@ -24428,12 +24410,6 @@ snapshots:
   tinyspy@2.2.1: {}
 
   tinyspy@3.0.0: {}
-
-  tldts-core@6.1.25: {}
-
-  tldts@6.1.25:
-    dependencies:
-      tldts-core: 6.1.25
 
   tmpl@1.0.5: {}
 

@@ -23,7 +23,6 @@
 		"@sapphire/fetch": "^2.4.1",
 		"@sapphire/framework": "^4.5.1",
 		"@sapphire/pieces": "^3.7.0",
-		"@sapphire/plugin-api": "5.1.0",
 		"@sapphire/plugin-editable-commands": "3.0.0",
 		"@sapphire/plugin-hmr": "^2.0.1",
 		"@sapphire/plugin-logger": "^3.0.5",
