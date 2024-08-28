@@ -1,4 +1,4 @@
-import { botRouter, createBotContext } from '@answeroverflow/api';
+import { appRouter, createBotContext } from '@answeroverflow/api';
 import type { GuildMember } from 'discord.js';
 
 export async function createUnauthenticatedCtx() {
@@ -6,7 +6,7 @@ export async function createUnauthenticatedCtx() {
 		session: null,
 		userServers: undefined,
 	});
-	return botRouter.createCaller(ctx);
+	return appRouter.createCaller(ctx);
 }
 
 export async function createMemberCtx(member: GuildMember) {

@@ -8,6 +8,7 @@ import { getDefaultServerWithFlags } from '@answeroverflow/core/utils/serverUtil
 import { ServerWithFlags, zServerCreate } from '@answeroverflow/core/zod';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { botClient } from '../bot/caller';
 import {
 	DomainVerificationStatusProps,
 	addDomainToVercel,
@@ -341,4 +342,7 @@ export const serverRouter = router({
 				domainJson,
 			};
 		}),
+	callBot: withUserServersProcedure.query(async () => {
+		return botClient.hello.query();
+	}),
 });

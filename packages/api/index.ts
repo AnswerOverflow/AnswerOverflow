@@ -1,11 +1,10 @@
 export type { AppRouter } from './src/router';
-export { appRouter as appRouter, botRouter as botRouter } from './src/router';
-
+export { appRouter as appRouter } from './src/router';
 export {
 	createContext as createContext,
 	createBotContext as createBotContext,
 } from './src/router/context';
-export type { Context, BotContextCreate } from './src/router/context';
+export type { Context, AppRouterCreate } from './src/router/context';
 
 export * from './src/utils/types';
 export * from './src/router/types';

@@ -62,9 +62,6 @@ export function createClient(override: Partial<ClientOptions> = {}) {
 		hmr: {
 			enabled: botEnv.NODE_ENV === 'development',
 		},
-		api: {
-			automaticallyConnect: botEnv.NODE_ENV !== 'test', // TODO: Bit of a hack? No point starting API during testing but would be good to verify it
-		},
 		...override,
 	});
 }

@@ -16,7 +16,6 @@
 		"@sapphire/framework": "^5.2.1",
 		"@sapphire/plugin-logger": "^4.0.2",
 		"@sapphire/pieces": "^3.7.0",
-		"@sapphire/plugin-api": "5.1.0",
 		"@sapphire/plugin-editable-commands": "3.0.0",
 		"@sapphire/plugin-hmr": "^2.0.1",
 		"@sapphire/plugin-subcommands": "^4.0.2",

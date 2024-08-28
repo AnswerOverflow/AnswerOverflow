@@ -36,9 +36,9 @@ export const createSSGContext = async () => {
 	return await createContextInner({ source: 'web-client', session: null });
 };
 
-export type BotContextCreate = Omit<CreateContextOptions, 'source'>;
+export type AppRouterCreate = Omit<CreateContextOptions, 'source'>;
 
-export const createBotContext = async (opts: BotContextCreate) => {
+export const createBotContext = async (opts: AppRouterCreate) => {
 	return await createContextInner({ ...opts, source: 'discord-bot' });
 };
 
