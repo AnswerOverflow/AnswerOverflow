@@ -9,7 +9,6 @@ import {
 	TopQuestionSolversTable,
 } from './components/home';
 import { useDashboardContext } from './components/dashboard-context';
-import { makeMainSiteLink } from '@answeroverflow/constants';
 import { ExternalLinkIcon } from '@answeroverflow/ui/src/icons';
 import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
 
@@ -24,7 +23,7 @@ export default function Client() {
 					onValueChange={(range) => options.setRange(range)}
 				/>
 				<LinkButton
-					href={makeMainSiteLink(`/c/${options.serverId}`)}
+					href={`https://www.answeroverflow.com/c/${options.serverId}`}
 					target="_blank"
 					variant={'outline'}
 					className="flex flex-row items-center gap-2 rounded-md border px-4 py-2"
