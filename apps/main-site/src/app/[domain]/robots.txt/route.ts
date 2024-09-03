@@ -52,7 +52,6 @@ Disallow: /api/
 Disallow: /dashboard/
 Disallow: /oemf7z50uh7w/
 Disallow: /ingest/
-Disallow: /u/
 Sitemap: https://${domain}/sitemap.xml
 `,
 		{
