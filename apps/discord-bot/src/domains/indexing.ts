@@ -333,10 +333,13 @@ async function storeIndexData(
 		`Upserting ${convertedUsers.length} discord accounts `,
 	);
 	await upsertManyDiscordAccounts(convertedUsers);
-	const bots = filteredMessages.filter((x) => x.author.bot);
+  const botMessages = filteredMessages.filter((x) => x.author.bot);
+	const bots = [
+		...new Map(botMessages.map((x) => [x.author.id, x.author])).values(),
+	];
 	if (bots.length > 0) {
 		await Promise.all(
-			bots.map(async (bot) => {
+			botMessages.map(async (bot) => {
 				return upsertUserServerSettingsWithDeps({
 					serverId: channel.guildId,
 					user: toAODiscordAccount(bot.author),
