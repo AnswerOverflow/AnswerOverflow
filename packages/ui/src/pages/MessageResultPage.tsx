@@ -28,7 +28,7 @@ import { FaRegMessage } from 'react-icons/fa6';
 
 import { JsonLd } from 'react-schemaorg';
 import { InKeepWidget } from './inkeep';
-import { LoadMoreMessages } from './load-more-messages';
+
 import { MessageResultPageProvider } from './message-result-page-context';
 import { JumpToSolution } from './jump-to-solution';
 export type MessageResultPageProps = {
@@ -235,9 +235,7 @@ export function MessageResultPage({
 				</div>
 			</div>
 			<div className="rounded-md">
-				<div className="flex flex-col gap-4">
-					<LoadMoreMessages messages={messageStack} />
-				</div>
+				<div className="flex flex-col gap-4">{messageStack}</div>
 			</div>
 			{messagesToDisplay.length === 0 && (
 				<div className="flex flex-col gap-4 rounded-md border-2 border-solid border-secondary p-4">
