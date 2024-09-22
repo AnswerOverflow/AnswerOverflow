@@ -20,7 +20,6 @@ import {
 	verifyDomain,
 } from '../../utils/domains';
 import {
-	assertCanEditServerBotOnly,
 	assertCanEditServer,
 	assertBoolsAreNotEqual,
 	assertIsAdminOrOwnerOfServer,
@@ -59,7 +58,7 @@ async function mutateServer({
 	ctx: Context;
 }) {
 	return protectedMutation({
-		permissions: () => assertCanEditServerBotOnly(ctx, server.id),
+		permissions: () => assertCanEditServer(ctx, server.id),
 		operation: async () => {
 			let oldSettings = await findServerById(server.id);
 			let doSettingsExistAlready = true;
@@ -142,16 +141,21 @@ export const serverRouter = router({
 	setConsiderAllMessagesPublic: withUserServersProcedure
 		.input(
 			z.object({
-				server: zServerCreate.omit({
-					flags: true,
-				}),
+				serverId: z.string(),
 				enabled: z.boolean(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			const server = await findServerById(input.serverId);
+			if (!server) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Server not found',
+				});
+			}
 			return mutateServer({
 				ctx,
-				server: input.server,
+				server: server,
 				operation: async ({ oldSettings }) => {
 					return protectedMutation({
 						permissions: () =>
@@ -166,7 +170,7 @@ export const serverRouter = router({
 						operation: () =>
 							upsertServer({
 								create: {
-									...input.server,
+									...server,
 									flags: {
 										considerAllMessagesPublic: input.enabled,
 									},

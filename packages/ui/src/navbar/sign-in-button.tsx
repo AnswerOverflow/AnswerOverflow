@@ -7,6 +7,7 @@ import type { ServerPublic } from '@answeroverflow/api';
 export function SignInButton(
 	props: ButtonProps & {
 		tenant: ServerPublic | undefined;
+		dashboard?: boolean;
 	},
 ) {
 	const { tenant } = props;
@@ -23,6 +24,21 @@ export function SignInButton(
 				href={`${link}?redirect=${encodeURIComponent(redirect)}`}
 			>
 				Login
+			</LinkButton>
+		);
+	}
+	if (props.dashboard) {
+		return (
+			<LinkButton
+				variant="outline"
+				href={
+					// eslint-disable-next-line n/no-process-env
+					(process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local'
+						? 'http://localhost:3000/'
+						: 'https://www.answeroverflow.com/') + `app-auth`
+				}
+			>
+				Sign In
 			</LinkButton>
 		);
 	}

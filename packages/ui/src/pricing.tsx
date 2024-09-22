@@ -438,7 +438,7 @@ export const PricingDialog = (props: {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button variant="outline">
+				<Button variant="outline" className="max-w-32">
 					{props.hasSubscribedBefore ? 'Resubscribe' : 'Start free trial'}
 				</Button>
 			</DialogTrigger>

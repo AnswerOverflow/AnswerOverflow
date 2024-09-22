@@ -68,7 +68,7 @@ export function CurrentPlanCard() {
 	};
 
 	return (
-		<div className="flex h-full w-full flex-col justify-between gap-2 rounded-md border-1 p-4 pb-10">
+		<div className="flex h-full w-full flex-col justify-between gap-2 rounded-md border-1 p-8">
 			<div className="flex flex-col gap-1">
 				<span className="text-lg font-semibold">Current plan</span>
 				<span className="text-2xl font-semibold">{planToPrettyText(plan)}</span>
