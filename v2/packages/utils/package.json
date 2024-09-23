@@ -1,0 +1,19 @@
+{
+	"name": "@answeroverflow/utils",
+	"version": "0.0.0",
+	"type": "module",
+	"sideEffects": false,
+	"exports": {
+		"./*": "./src/*.ts"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@tsconfig/node20": "20.1.4",
+		"lorem-ipsum": "^2.0.8"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.1.10"
+	}
+}

@@ -1,0 +1,12 @@
+{
+    "name": "answer-overflow",
+    "version": "1.0.0",
+    "sideEffects": false,
+    "scripts": {
+        "dev": "sst dev",
+        "typecheck": "bun --filter=* typecheck"
+    },
+    "workspaces": [
+        "packages/*"
+    ]    
+}
