@@ -9,9 +9,5 @@
 		},
 		"transpileOnly": true
 	},
-	"compilerOptions": {
-		"types": [
-			"@types/bun",
-		]
-	}
+	"include": ["src", "../../reset.d.ts"]
 }

@@ -4,9 +4,15 @@
     "sideEffects": false,
     "scripts": {
         "dev": "sst dev",
-        "typecheck": "bun --filter=* typecheck"
+        "typecheck": "bun --filter=* typecheck",
+        "dev:dbs": "docker-compose -f \"docker-compose.yml\" -f \"docker-compose-extras.yml\" up"
+    },
+    "dependencies": {
+        "@total-typescript/ts-reset": "^0.4.2",
+        "typescript": "^5.1.6"
     },
     "workspaces": [
-        "packages/*"
+        "packages/*",
+        "apps/*"
     ]    
 }

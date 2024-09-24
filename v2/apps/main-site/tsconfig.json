@@ -1,4 +1,4 @@
 {
 	"extends": "@answeroverflow/tsconfig/base.json",
-	"include": ["src", "../../reset.d.ts"]
+  "include": ["src", "../../reset.d.ts"]
 }

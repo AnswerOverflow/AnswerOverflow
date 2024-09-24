@@ -14,6 +14,7 @@
 		"lorem-ipsum": "^2.0.8"
 	},
 	"devDependencies": {
-		"@types/bun": "^1.1.10"
+		"@types/bun": "^1.1.10",
+		"@answeroverflow/tsconfig": "workspace:*"
 	}
 }

@@ -1,10 +1,11 @@
 {
 	"name": "@answeroverflow/constants",
-	"version": "0.1.0",
-	"main": "./index.ts",
-	"types": "./index.ts",
-	"license": "MIT",
-	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"sideEffects": false,
+	"exports": {
+		"./*": "./src/*.ts"
+	},
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules coverage",
 		"with-env": "dotenv -e ../../.env --",
@@ -19,7 +20,6 @@
 		"zod": "^3.22.2"
 	},
 	"devDependencies": {
-		
 		"@answeroverflow/tsconfig": "workspace:*",
 		"@types/node": "^20.11.20",
 		"dotenv-cli": "^7.4.1",

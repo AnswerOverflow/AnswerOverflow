@@ -4,7 +4,8 @@
 	"type": "module",
 	"sideEffects": false,
 	"exports": {
-		"./*": "./src/*.ts"
+		"./*": "./src/*.ts",
+		"./mock": "./mock.ts"
 	},
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules coverage",
@@ -13,18 +14,14 @@
 		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --check .",
 		"lint": "eslint . && tsc --noEmit",
 		"lint:fix": "eslint . --fix",
-		"db:push": "cross-env drizzle-kit push:mysql",
-		"db:wipe": "cross-env pnpm with-env npx ts-node ./scripts/wipe.ts",
-		"db:seed": "pnpm db:push && cross-env pnpm with-env npx ts-node ./scripts/seed.ts",
-		"db:apply-last-indexed": "cross-env pnpm with-env npx ts-node ./scripts/apply-last-indexed.ts",
-		"db:update-attachments-domain": "cross-env pnpm with-env npx ts-node ./scripts/update-attachments-domain.ts",
-		"db:migrate-attachments": "cross-env pnpm with-env npx ts-node ./scripts/migrate-attachments.ts",
+		"db:push": "drizzle-kit push:mysql",
+		"db:wipe": "npx ts-node ./scripts/wipe.ts",
+		"db:seed": "bun db:push && npx ts-node ./scripts/seed.ts",
 		"db:introspect": "drizzle-kit introspect:mysql",		
-		"dev": "echo http://localhost:4983 && pnpm drizzle-kit studio"
+		"dev": "echo http://localhost:4983 && bun drizzle-kit studio"
 	},
 	"dependencies": {
 		"@answeroverflow/constants": "workspace:*",
-		"@answeroverflow/db-mock": "workspace:*",
 		"@answeroverflow/utils": "workspace:*",
 		"@aws-sdk/client-s3": "^3.577.0",
 		"@aws-sdk/lib-storage": "^3.578.0",
@@ -48,7 +45,6 @@
 		"@types/json-bigint": "^1.0.3",
 		"@types/lodash": "^4.14.202",
 		"@types/node": "^20.11.20",
-		"cross-env": "^7.0.3",
 		"dotenv-cli": "^7.4.1",
 		"drizzle-kit": "^0.19.13",
 		"ts-node": "^10.9.1"
