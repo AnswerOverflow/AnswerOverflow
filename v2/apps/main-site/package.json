@@ -10,7 +10,7 @@
     "astro": "bunx --bun astro"
   },
   "dependencies": {
-    "@answeroverflow/db": "workspace:*",
+    "@answeroverflow/core": "workspace:*",
     "@answeroverflow/tsconfig": "workspace:*",
     "@astrojs/check": "^0.9.3",
     "@astrojs/cloudflare": "^11.1.0",

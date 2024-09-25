@@ -1,5 +1,5 @@
 ---
-import { findMessageResultPage } from "@answeroverflow/db/pages";
+import { findMessageResultPage } from "@answeroverflow/core/pages";
 const { id } = Astro.params;
 
 const messages = await findMessageResultPage("", []);
@@ -14,8 +14,7 @@ const messages = await findMessageResultPage("", []);
     <title>Astro</title>
   </head>
   <body>
-    <h1 >Astro {id}</h1>
-    <!-- id -->
+    <h1>Astro {messages}</h1>
      {id}
   </body>
 </html>

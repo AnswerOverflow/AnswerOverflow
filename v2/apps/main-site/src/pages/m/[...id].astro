@@ -1,8 +1,10 @@
 ---
-import { findMessageResultPage } from "@answeroverflow/db/pages";
+import { findMessageResultPage } from "@answeroverflow/core/pages";
 const { id } = Astro.params;
 
-const messages = await findMessageResultPage("", []);
+
+const data = await findMessageResultPage(id!, []);
+
 ---
 
 <html lang="en">
@@ -15,5 +17,10 @@ const messages = await findMessageResultPage("", []);
   </head>
   <body class="bg-black text-white">
     <h1>Astro {id}</h1>
+    {data?.messages.map(m => (
+      <div>
+        <p>{m.content}</p>
+      </div>
+    ))}
   </body>
 </html>
