@@ -1,0 +1,10 @@
+{
+	"extends": "@answeroverflow/tsconfig/base.json",
+	"include": [
+		"src",
+		"index.ts",
+		"transformer.ts",
+		"test",
+		"../../reset.d.ts",
+	]
+}

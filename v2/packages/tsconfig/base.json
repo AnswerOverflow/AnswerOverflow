@@ -13,7 +13,6 @@
 		"preserveWatchOutput": true,
 		"allowJs": true,
 		"noEmit": true,
-		"types": ["node"],
 		"noUncheckedIndexedAccess": true,
 		"allowSyntheticDefaultImports": true,
 		"alwaysStrict": true,

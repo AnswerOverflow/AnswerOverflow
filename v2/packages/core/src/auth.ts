@@ -13,51 +13,6 @@ import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { Cache } from "./cache";
 
-export async function findAccountByProviderAccountId(input: {
-  provider: string;
-  providerAccountId: string;
-}) {
-  return db
-    .select()
-    .from(dbAccounts)
-    .where(
-      and(
-        eq(dbAccounts.provider, input.provider),
-        eq(dbAccounts.providerAccountId, input.providerAccountId)
-      )
-    )
-    .then((x) => x.at(0));
-}
-
-export function findTenantSessionByToken(token: string) {
-  return db
-    .select()
-    .from(dbTenantSessions)
-    .where(eq(dbTenantSessions.id, token))
-    .then((x) => x.at(0));
-}
-
-export function deleteTenantSessionByToken(token: string) {
-  return db.delete(dbTenantSessions).where(eq(dbTenantSessions.id, token));
-}
-
-export function findDiscordOauthByProviderAccountId(discordId: string) {
-  return findAccountByProviderAccountId({
-    provider: "discord",
-    providerAccountId: discordId,
-  });
-}
-
-export async function findDiscordOauthByUserId(userId: string) {
-  const account = await db.query.dbAccounts.findFirst({
-    where: and(
-      eq(dbAccounts.userId, userId),
-      eq(dbAccounts.provider, "discord")
-    ),
-  });
-  return account ?? null;
-}
-
 export async function updateProviderAuthToken(
   input: Pick<Account, "provider" | "providerAccountId"> & {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -165,6 +120,53 @@ const hostname =
 const useSecureCookies = process.env.NODE_ENV === "production";
 
 export module Auth {
+  export type Session = Awaited<ReturnType<typeof getServerSession>>;
+
+  export async function findAccountByProviderAccountId(input: {
+    provider: string;
+    providerAccountId: string;
+  }) {
+    return db
+      .select()
+      .from(dbAccounts)
+      .where(
+        and(
+          eq(dbAccounts.provider, input.provider),
+          eq(dbAccounts.providerAccountId, input.providerAccountId)
+        )
+      )
+      .then((x) => x.at(0));
+  }
+
+  export function findTenantSessionByToken(token: string) {
+    return db
+      .select()
+      .from(dbTenantSessions)
+      .where(eq(dbTenantSessions.id, token))
+      .then((x) => x.at(0));
+  }
+
+  export function deleteTenantSessionByToken(token: string) {
+    return db.delete(dbTenantSessions).where(eq(dbTenantSessions.id, token));
+  }
+
+  export function findDiscordOauthByProviderAccountId(discordId: string) {
+    return findAccountByProviderAccountId({
+      provider: "discord",
+      providerAccountId: discordId,
+    });
+  }
+
+  export async function findDiscordOauthByUserId(userId: string) {
+    const account = await db.query.dbAccounts.findFirst({
+      where: and(
+        eq(dbAccounts.userId, userId),
+        eq(dbAccounts.provider, "discord")
+      ),
+    });
+    return account ?? null;
+  }
+
   export const extendedAdapter: Adapter = {
     async createUser(data) {
       const id = randomUUID();

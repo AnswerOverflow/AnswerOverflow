@@ -11,6 +11,7 @@
     "./mock": "./mock.ts"
   },
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "clean": "rm -rf .turbo node_modules coverage",
     "with-env": "dotenv -e ../../.env --",
     "format": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --write .",

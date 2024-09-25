@@ -1,0 +1,34 @@
+{
+	"name": "@answeroverflow/api",
+	"version": "0.1.0",
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"license": "MIT",
+	"private": true,
+	"scripts": {
+		"typecheck": "tsc --noEmit",
+		"with-env": "dotenv -e ../../.env --",
+		"clean": "rm -rf .turbo node_modules coverage",
+		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --write .",
+		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --check .",
+		"lint": "eslint . && tsc --noEmit",
+		"lint:fix": "eslint . --fix",
+		"test": "pnpm with-env vitest run --coverage",
+		"test:watch": "pnpm with-env vitest",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@answeroverflow/constants": "workspace:^",
+		"@answeroverflow/core": "workspace:^",
+		"@answeroverflow/utils": "workspace:^",
+		"@sapphire/bitfield": "^1.2.0",
+		"@trpc/server": "^10.45.2",
+		"discord-api-types": "^0.37.67",
+		"next": "14.3.0-canary.9",
+		"superjson": "^1.13.1",
+		"zod": "^3.22.2"
+	},
+	"devDependencies": {
+		"@answeroverflow/tsconfig": "workspace:^"
+	}
+}
