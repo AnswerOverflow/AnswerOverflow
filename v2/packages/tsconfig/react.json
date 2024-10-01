@@ -18,6 +18,7 @@
 		"esModuleInterop": true,
 		"module": "esnext",
 		"resolveJsonModule": true,
+		"moduleResolution": "bundler",
 		"isolatedModules": true,
 		"jsx": "preserve"
 	},

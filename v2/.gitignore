@@ -82,3 +82,11 @@ pnpm-debug.log*
 
 # sst
 .sst
+
+
+# Sentry
+.sentryclirc
+
+
+# Contentlayer
+.contentlayer

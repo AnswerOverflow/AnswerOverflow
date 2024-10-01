@@ -1,0 +1,525 @@
+diff --git a/build/esm/platform/browser/OTLPExporterBrowserBase.js b/build/esm/platform/browser/OTLPExporterBrowserBase.js
+index 3ee646e3a7ca66c74c1244597233ed17b7a3fa79..fba879dcb0cb150b19655ddd8c3ed622739c5065 100644
+--- a/build/esm/platform/browser/OTLPExporterBrowserBase.js
++++ b/build/esm/platform/browser/OTLPExporterBrowserBase.js
+@@ -13,89 +13,139 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-var __extends = (this && this.__extends) || (function () {
++var __extends =
++  (this && this.__extends) ||
++  (function () {
+     var extendStatics = function (d, b) {
+-        extendStatics = Object.setPrototypeOf ||
+-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+-        return extendStatics(d, b);
++      extendStatics =
++        Object.setPrototypeOf ||
++        ({ __proto__: [] } instanceof Array &&
++          function (d, b) {
++            d.__proto__ = b;
++          }) ||
++        function (d, b) {
++          for (var p in b)
++            if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p];
++        };
++      return extendStatics(d, b);
+     };
+     return function (d, b) {
+-        if (typeof b !== "function" && b !== null)
+-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+-        extendStatics(d, b);
+-        function __() { this.constructor = d; }
+-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
++      if (typeof b !== "function" && b !== null)
++        throw new TypeError(
++          "Class extends value " + String(b) + " is not a constructor or null"
++        );
++      extendStatics(d, b);
++      function __() {
++        this.constructor = d;
++      }
++      d.prototype =
++        b === null
++          ? Object.create(b)
++          : ((__.prototype = b.prototype), new __());
+     };
+-})();
+-var __assign = (this && this.__assign) || function () {
+-    __assign = Object.assign || function(t) {
++  })();
++var __assign =
++  (this && this.__assign) ||
++  function () {
++    __assign =
++      Object.assign ||
++      function (t) {
+         for (var s, i = 1, n = arguments.length; i < n; i++) {
+-            s = arguments[i];
+-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+-                t[p] = s[p];
++          s = arguments[i];
++          for (var p in s)
++            if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+         }
+         return t;
+-    };
++      };
+     return __assign.apply(this, arguments);
+-};
+-import { OTLPExporterBase } from '../../OTLPExporterBase';
+-import { parseHeaders } from '../../util';
+-import { sendWithBeacon, sendWithXhr } from './util';
+-import { diag } from '@opentelemetry/api';
+-import { getEnv, baggageUtils } from '@opentelemetry/core';
++  };
++import { OTLPExporterBase } from "../../OTLPExporterBase";
++import { parseHeaders } from "../../util";
++import { sendWithBeacon, sendWithXhr } from "./util";
++import { diag } from "@opentelemetry/api";
++import { getEnv, baggageUtils } from "@opentelemetry/core";
+ /**
+  * Collector Metric Exporter abstract base class
+  */
+ var OTLPExporterBrowserBase = /** @class */ (function (_super) {
+-    __extends(OTLPExporterBrowserBase, _super);
+-    /**
+-     * @param config
+-     * @param serializer
+-     * @param contentType
+-     */
+-    function OTLPExporterBrowserBase(config, serializer, contentType) {
+-        if (config === void 0) { config = {}; }
+-        var _this = _super.call(this, config) || this;
+-        _this._useXHR = false;
+-        _this._serializer = serializer;
+-        _this._contentType = contentType;
+-        _this._useXHR =
+-            !!config.headers || typeof navigator.sendBeacon !== 'function';
+-        if (_this._useXHR) {
+-            _this._headers = Object.assign({}, parseHeaders(config.headers), baggageUtils.parseKeyPairsIntoRecord(getEnv().OTEL_EXPORTER_OTLP_HEADERS));
+-        }
+-        else {
+-            _this._headers = {};
+-        }
+-        return _this;
++  __extends(OTLPExporterBrowserBase, _super);
++  /**
++   * @param config
++   * @param serializer
++   * @param contentType
++   */
++  function OTLPExporterBrowserBase(config, serializer, contentType) {
++    if (config === void 0) {
++      config = {};
+     }
+-    OTLPExporterBrowserBase.prototype.onInit = function () { };
+-    OTLPExporterBrowserBase.prototype.onShutdown = function () { };
+-    OTLPExporterBrowserBase.prototype.send = function (items, onSuccess, onError) {
+-        var _this = this;
+-        var _a;
+-        if (this._shutdownOnce.isCalled) {
+-            diag.debug('Shutdown already started. Cannot send objects');
+-            return;
+-        }
+-        var body = (_a = this._serializer.serializeRequest(items)) !== null && _a !== void 0 ? _a : new Uint8Array();
+-        var promise = new Promise(function (resolve, reject) {
+-            if (_this._useXHR) {
+-                sendWithXhr(body, _this.url, __assign(__assign({}, _this._headers), { 'Content-Type': _this._contentType }), _this.timeoutMillis, resolve, reject);
+-            }
+-            else {
+-                sendWithBeacon(body, _this.url, { type: _this._contentType }, resolve, reject);
+-            }
+-        }).then(onSuccess, onError);
+-        this._sendingPromises.push(promise);
+-        var popPromise = function () {
+-            var index = _this._sendingPromises.indexOf(promise);
+-            _this._sendingPromises.splice(index, 1);
+-        };
+-        promise.then(popPromise, popPromise);
++    var _this = _super.call(this, config) || this;
++    _this._useXHR = false;
++    _this._serializer = serializer;
++    _this._contentType = contentType;
++    _this._useXHR =
++      !!config.headers ||
++      (typeof navigator != "undefined" &&
++        typeof navigator.sendBeacon !== "function");
++    if (_this._useXHR) {
++      _this._headers = Object.assign(
++        {},
++        parseHeaders(config.headers),
++        baggageUtils.parseKeyPairsIntoRecord(
++          getEnv().OTEL_EXPORTER_OTLP_HEADERS
++        )
++      );
++    } else {
++      _this._headers = {};
++    }
++    return _this;
++  }
++  OTLPExporterBrowserBase.prototype.onInit = function () {};
++  OTLPExporterBrowserBase.prototype.onShutdown = function () {};
++  OTLPExporterBrowserBase.prototype.send = function (
++    items,
++    onSuccess,
++    onError
++  ) {
++    var _this = this;
++    var _a;
++    if (this._shutdownOnce.isCalled) {
++      diag.debug("Shutdown already started. Cannot send objects");
++      return;
++    }
++    var body =
++      (_a = this._serializer.serializeRequest(items)) !== null && _a !== void 0
++        ? _a
++        : new Uint8Array();
++    var promise = new Promise(function (resolve, reject) {
++      if (_this._useXHR) {
++        sendWithXhr(
++          body,
++          _this.url,
++          __assign(__assign({}, _this._headers), {
++            "Content-Type": _this._contentType,
++          }),
++          _this.timeoutMillis,
++          resolve,
++          reject
++        );
++      } else {
++        sendWithBeacon(
++          body,
++          _this.url,
++          { type: _this._contentType },
++          resolve,
++          reject
++        );
++      }
++    }).then(onSuccess, onError);
++    this._sendingPromises.push(promise);
++    var popPromise = function () {
++      var index = _this._sendingPromises.indexOf(promise);
++      _this._sendingPromises.splice(index, 1);
+     };
+-    return OTLPExporterBrowserBase;
+-}(OTLPExporterBase));
++    promise.then(popPromise, popPromise);
++  };
++  return OTLPExporterBrowserBase;
++})(OTLPExporterBase);
+ export { OTLPExporterBrowserBase };
+ //# sourceMappingURL=OTLPExporterBrowserBase.js.map
+diff --git a/build/esm/platform/browser/OTLPExporterBrowserBase.js.map b/build/esm/platform/browser/OTLPExporterBrowserBase.js.map
+index 81145d765c90c7fd90b4e1dab7ae532e5094af0a..3f7d81064048cdfc85755b9d9d27e7834d756189 100644
+--- a/build/esm/platform/browser/OTLPExporterBrowserBase.js.map
++++ b/build/esm/platform/browser/OTLPExporterBrowserBase.js.map
+@@ -1 +1,13 @@
+-{"version":3,"file":"OTLPExporterBrowserBase.js","sourceRoot":"","sources":["../../../../src/platform/browser/OTLPExporterBrowserBase.ts"],"names":[],"mappings":"AAAA;;;;;;;;;;;;;;GAcG;;;;;;;;;;;;;;;;;;;;;;;;;;;AAEH,OAAO,EAAE,gBAAgB,EAAE,MAAM,wBAAwB,CAAC;AAG1D,OAAO,EAAE,YAAY,EAAE,MAAM,YAAY,CAAC;AAC1C,OAAO,EAAE,cAAc,EAAE,WAAW,EAAE,MAAM,QAAQ,CAAC;AACrD,OAAO,EAAE,IAAI,EAAE,MAAM,oBAAoB,CAAC;AAC1C,OAAO,EAAE,MAAM,EAAE,YAAY,EAAE,MAAM,qBAAqB,CAAC;AAG3D;;GAEG;AACH;IAGU,2CAAoD;IAM5D;;;;OAIG;IACH,iCACE,MAAmC,EACnC,UAAsD,EACtD,WAAmB;QAFnB,uBAAA,EAAA,WAAmC;QADrC,YAKE,kBAAM,MAAM,CAAC,SAgBd;QA9BO,aAAO,GAAY,KAAK,CAAC;QAe/B,KAAI,CAAC,WAAW,GAAG,UAAU,CAAC;QAC9B,KAAI,CAAC,YAAY,GAAG,WAAW,CAAC;QAChC,KAAI,CAAC,OAAO;YACV,CAAC,CAAC,MAAM,CAAC,OAAO,IAAI,OAAO,SAAS,CAAC,UAAU,KAAK,UAAU,CAAC;QACjE,IAAI,KAAI,CAAC,OAAO,EAAE;YAChB,KAAI,CAAC,QAAQ,GAAG,MAAM,CAAC,MAAM,CAC3B,EAAE,EACF,YAAY,CAAC,MAAM,CAAC,OAAO,CAAC,EAC5B,YAAY,CAAC,uBAAuB,CAClC,MAAM,EAAE,CAAC,0BAA0B,CACpC,CACF,CAAC;SACH;aAAM;YACL,KAAI,CAAC,QAAQ,GAAG,EAAE,CAAC;SACpB;;IACH,CAAC;IAED,wCAAM,GAAN,cAAgB,CAAC;IAEjB,4CAAU,GAAV,cAAoB,CAAC;IAErB,sCAAI,GAAJ,UACE,KAAmB,EACnB,SAAqB,EACrB,OAAqD;QAHvD,iBAyCC;;QApCC,IAAI,IAAI,CAAC,aAAa,CAAC,QAAQ,EAAE;YAC/B,IAAI,CAAC,KAAK,CAAC,+CAA+C,CAAC,CAAC;YAC5D,OAAO;SACR;QACD,IAAM,IAAI,GAAG,MAAA,IAAI,CAAC,WAAW,CAAC,gBAAgB,CAAC,KAAK,CAAC,mCAAI,IAAI,UAAU,EAAE,CAAC;QAE1E,IAAM,OAAO,GAAG,IAAI,OAAO,CAAO,UAAC,OAAO,EAAE,MAAM;YAChD,IAAI,KAAI,CAAC,OAAO,EAAE;gBAChB,WAAW,CACT,IAAI,EACJ,KAAI,CAAC,GAAG,wBAEH,KAAI,CAAC,QAAQ,KAChB,cAAc,EAAE,KAAI,CAAC,YAAY,KAEnC,KAAI,CAAC,aAAa,EAClB,OAAO,EACP,MAAM,CACP,CAAC;aACH;iBAAM;gBACL,cAAc,CACZ,IAAI,EACJ,KAAI,CAAC,GAAG,EACR,EAAE,IAAI,EAAE,KAAI,CAAC,YAAY,EAAE,EAC3B,OAAO,EACP,MAAM,CACP,CAAC;aACH;QACH,CAAC,CAAC,CAAC,IAAI,CAAC,SAAS,EAAE,OAAO,CAAC,CAAC;QAE5B,IAAI,CAAC,gBAAgB,CAAC,IAAI,CAAC,OAAO,CAAC,CAAC;QACpC,IAAM,UAAU,GAAG;YACjB,IAAM,KAAK,GAAG,KAAI,CAAC,gBAAgB,CAAC,OAAO,CAAC,OAAO,CAAC,CAAC;YACrD,KAAI,CAAC,gBAAgB,CAAC,MAAM,CAAC,KAAK,EAAE,CAAC,CAAC,CAAC;QACzC,CAAC,CAAC;QACF,OAAO,CAAC,IAAI,CAAC,UAAU,EAAE,UAAU,CAAC,CAAC;IACvC,CAAC;IACH,8BAAC;AAAD,CAAC,AAnFD,CAGU,gBAAgB,GAgFzB","sourcesContent":["/*\n * Copyright The OpenTelemetry Authors\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      https://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\nimport { OTLPExporterBase } from '../../OTLPExporterBase';\nimport { OTLPExporterConfigBase } from '../../types';\nimport * as otlpTypes from '../../types';\nimport { parseHeaders } from '../../util';\nimport { sendWithBeacon, sendWithXhr } from './util';\nimport { diag } from '@opentelemetry/api';\nimport { getEnv, baggageUtils } from '@opentelemetry/core';\nimport { ISerializer } from '@opentelemetry/otlp-transformer';\n\n/**\n * Collector Metric Exporter abstract base class\n */\nexport abstract class OTLPExporterBrowserBase<\n  ExportItem,\n  ServiceResponse,\n> extends OTLPExporterBase<OTLPExporterConfigBase, ExportItem> {\n  protected _headers: Record<string, string>;\n  private _useXHR: boolean = false;\n  private _contentType: string;\n  private _serializer: ISerializer<ExportItem[], ServiceResponse>;\n\n  /**\n   * @param config\n   * @param serializer\n   * @param contentType\n   */\n  constructor(\n    config: OTLPExporterConfigBase = {},\n    serializer: ISerializer<ExportItem[], ServiceResponse>,\n    contentType: string\n  ) {\n    super(config);\n    this._serializer = serializer;\n    this._contentType = contentType;\n    this._useXHR =\n      !!config.headers || typeof navigator.sendBeacon !== 'function';\n    if (this._useXHR) {\n      this._headers = Object.assign(\n        {},\n        parseHeaders(config.headers),\n        baggageUtils.parseKeyPairsIntoRecord(\n          getEnv().OTEL_EXPORTER_OTLP_HEADERS\n        )\n      );\n    } else {\n      this._headers = {};\n    }\n  }\n\n  onInit(): void {}\n\n  onShutdown(): void {}\n\n  send(\n    items: ExportItem[],\n    onSuccess: () => void,\n    onError: (error: otlpTypes.OTLPExporterError) => void\n  ): void {\n    if (this._shutdownOnce.isCalled) {\n      diag.debug('Shutdown already started. Cannot send objects');\n      return;\n    }\n    const body = this._serializer.serializeRequest(items) ?? new Uint8Array();\n\n    const promise = new Promise<void>((resolve, reject) => {\n      if (this._useXHR) {\n        sendWithXhr(\n          body,\n          this.url,\n          {\n            ...this._headers,\n            'Content-Type': this._contentType,\n          },\n          this.timeoutMillis,\n          resolve,\n          reject\n        );\n      } else {\n        sendWithBeacon(\n          body,\n          this.url,\n          { type: this._contentType },\n          resolve,\n          reject\n        );\n      }\n    }).then(onSuccess, onError);\n\n    this._sendingPromises.push(promise);\n    const popPromise = () => {\n      const index = this._sendingPromises.indexOf(promise);\n      this._sendingPromises.splice(index, 1);\n    };\n    promise.then(popPromise, popPromise);\n  }\n}\n"]}
+\ No newline at end of file
++{
++  "version": 3,
++  "file": "OTLPExporterBrowserBase.js",
++  "sourceRoot": "",
++  "sources": [
++    "../../../../src/platform/browser/OTLPExporterBrowserBase.ts"
++  ],
++  "names": [],
++  "mappings": "AAAA;;;;;;;;;;;;;;GAcG;;;;;;;;;;;;;;;;;;;;;;;;;;;AAEH,OAAO,EAAE,gBAAgB,EAAE,MAAM,wBAAwB,CAAC;AAG1D,OAAO,EAAE,YAAY,EAAE,MAAM,YAAY,CAAC;AAC1C,OAAO,EAAE,cAAc,EAAE,WAAW,EAAE,MAAM,QAAQ,CAAC;AACrD,OAAO,EAAE,IAAI,EAAE,MAAM,oBAAoB,CAAC;AAC1C,OAAO,EAAE,MAAM,EAAE,YAAY,EAAE,MAAM,qBAAqB,CAAC;AAG3D;;GAEG;AACH;IAGU,2CAAoD;IAM5D;;;;OAIG;IACH,iCACE,MAAmC,EACnC,UAAsD,EACtD,WAAmB;QAFnB,uBAAA,EAAA,WAAmC;QADrC,YAKE,kBAAM,MAAM,CAAC,SAgBd;QA9BO,aAAO,GAAY,KAAK,CAAC;QAe/B,KAAI,CAAC,WAAW,GAAG,UAAU,CAAC;QAC9B,KAAI,CAAC,YAAY,GAAG,WAAW,CAAC;QAChC,KAAI,CAAC,OAAO;YACV,CAAC,CAAC,MAAM,CAAC,OAAO,IAAI,OAAO,SAAS,CAAC,UAAU,KAAK,UAAU,CAAC;QACjE,IAAI,KAAI,CAAC,OAAO,EAAE;YAChB,KAAI,CAAC,QAAQ,GAAG,MAAM,CAAC,MAAM,CAC3B,EAAE,EACF,YAAY,CAAC,MAAM,CAAC,OAAO,CAAC,EAC5B,YAAY,CAAC,uBAAuB,CAClC,MAAM,EAAE,CAAC,0BAA0B,CACpC,CACF,CAAC;SACH;aAAM;YACL,KAAI,CAAC,QAAQ,GAAG,EAAE,CAAC;SACpB;;IACH,CAAC;IAED,wCAAM,GAAN,cAAgB,CAAC;IAEjB,4CAAU,GAAV,cAAoB,CAAC;IAErB,sCAAI,GAAJ,UACE,KAAmB,EACnB,SAAqB,EACrB,OAAqD;QAHvD,iBAyCC;;QApCC,IAAI,IAAI,CAAC,aAAa,CAAC,QAAQ,EAAE;YAC/B,IAAI,CAAC,KAAK,CAAC,+CAA+C,CAAC,CAAC;YAC5D,OAAO;SACR;QACD,IAAM,IAAI,GAAG,MAAA,IAAI,CAAC,WAAW,CAAC,gBAAgB,CAAC,KAAK,CAAC,mCAAI,IAAI,UAAU,EAAE,CAAC;QAE1E,IAAM,OAAO,GAAG,IAAI,OAAO,CAAO,UAAC,OAAO,EAAE,MAAM;YAChD,IAAI,KAAI,CAAC,OAAO,EAAE;gBAChB,WAAW,CACT,IAAI,EACJ,KAAI,CAAC,GAAG,wBAEH,KAAI,CAAC,QAAQ,KAChB,cAAc,EAAE,KAAI,CAAC,YAAY,KAEnC,KAAI,CAAC,aAAa,EAClB,OAAO,EACP,MAAM,CACP,CAAC;aACH;iBAAM;gBACL,cAAc,CACZ,IAAI,EACJ,KAAI,CAAC,GAAG,EACR,EAAE,IAAI,EAAE,KAAI,CAAC,YAAY,EAAE,EAC3B,OAAO,EACP,MAAM,CACP,CAAC;aACH;QACH,CAAC,CAAC,CAAC,IAAI,CAAC,SAAS,EAAE,OAAO,CAAC,CAAC;QAE5B,IAAI,CAAC,gBAAgB,CAAC,IAAI,CAAC,OAAO,CAAC,CAAC;QACpC,IAAM,UAAU,GAAG;YACjB,IAAM,KAAK,GAAG,KAAI,CAAC,gBAAgB,CAAC,OAAO,CAAC,OAAO,CAAC,CAAC;YACrD,KAAI,CAAC,gBAAgB,CAAC,MAAM,CAAC,KAAK,EAAE,CAAC,CAAC,CAAC;QACzC,CAAC,CAAC;QACF,OAAO,CAAC,IAAI,CAAC,UAAU,EAAE,UAAU,CAAC,CAAC;IACvC,CAAC;IACH,8BAAC;AAAD,CAAC,AAnFD,CAGU,gBAAgB,GAgFzB",
++  "sourcesContent": [
++    "/*\n * Copyright The OpenTelemetry Authors\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      https://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\nimport { OTLPExporterBase } from '../../OTLPExporterBase';\nimport { OTLPExporterConfigBase } from '../../types';\nimport * as otlpTypes from '../../types';\nimport { parseHeaders } from '../../util';\nimport { sendWithBeacon, sendWithXhr } from './util';\nimport { diag } from '@opentelemetry/api';\nimport { getEnv, baggageUtils } from '@opentelemetry/core';\nimport { ISerializer } from '@opentelemetry/otlp-transformer';\n\n/**\n * Collector Metric Exporter abstract base class\n */\nexport abstract class OTLPExporterBrowserBase<\n  ExportItem,\n  ServiceResponse,\n> extends OTLPExporterBase<OTLPExporterConfigBase, ExportItem> {\n  protected _headers: Record<string, string>;\n  private _useXHR: boolean = false;\n  private _contentType: string;\n  private _serializer: ISerializer<ExportItem[], ServiceResponse>;\n\n  /**\n   * @param config\n   * @param serializer\n   * @param contentType\n   */\n  constructor(\n    config: OTLPExporterConfigBase = {},\n    serializer: ISerializer<ExportItem[], ServiceResponse>,\n    contentType: string\n  ) {\n    super(config);\n    this._serializer = serializer;\n    this._contentType = contentType;\n    this._useXHR =\n      !!config.headers || (typeof navigator != 'undefined' && typeof navigator.sendBeacon !== 'function');\n    if (this._useXHR) {\n      this._headers = Object.assign(\n        {},\n        parseHeaders(config.headers),\n        baggageUtils.parseKeyPairsIntoRecord(\n          getEnv().OTEL_EXPORTER_OTLP_HEADERS\n        )\n      );\n    } else {\n      this._headers = {};\n    }\n  }\n\n  onInit(): void {}\n\n  onShutdown(): void {}\n\n  send(\n    items: ExportItem[],\n    onSuccess: () => void,\n    onError: (error: otlpTypes.OTLPExporterError) => void\n  ): void {\n    if (this._shutdownOnce.isCalled) {\n      diag.debug('Shutdown already started. Cannot send objects');\n      return;\n    }\n    const body = this._serializer.serializeRequest(items) ?? new Uint8Array();\n\n    const promise = new Promise<void>((resolve, reject) => {\n      if (this._useXHR) {\n        sendWithXhr(\n          body,\n          this.url,\n          {\n            ...this._headers,\n            'Content-Type': this._contentType,\n          },\n          this.timeoutMillis,\n          resolve,\n          reject\n        );\n      } else {\n        sendWithBeacon(\n          body,\n          this.url,\n          { type: this._contentType },\n          resolve,\n          reject\n        );\n      }\n    }).then(onSuccess, onError);\n\n    this._sendingPromises.push(promise);\n    const popPromise = () => {\n      const index = this._sendingPromises.indexOf(promise);\n      this._sendingPromises.splice(index, 1);\n    };\n    promise.then(popPromise, popPromise);\n  }\n}\n"
++  ]
++}
+diff --git a/build/esnext/platform/browser/OTLPExporterBrowserBase.js b/build/esnext/platform/browser/OTLPExporterBrowserBase.js
+index b593b7825a4380adfd2d2aedb3eba1cc56ae32fb..c26ca9c4abbb7c10140420e384ab025e75ed5e83 100644
+--- a/build/esnext/platform/browser/OTLPExporterBrowserBase.js
++++ b/build/esnext/platform/browser/OTLPExporterBrowserBase.js
+@@ -13,57 +13,81 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-import { OTLPExporterBase } from '../../OTLPExporterBase';
+-import { parseHeaders } from '../../util';
+-import { sendWithBeacon, sendWithXhr } from './util';
+-import { diag } from '@opentelemetry/api';
+-import { getEnv, baggageUtils } from '@opentelemetry/core';
++import { OTLPExporterBase } from "../../OTLPExporterBase";
++import { parseHeaders } from "../../util";
++import { sendWithBeacon, sendWithXhr } from "./util";
++import { diag } from "@opentelemetry/api";
++import { getEnv, baggageUtils } from "@opentelemetry/core";
+ /**
+  * Collector Metric Exporter abstract base class
+  */
+ export class OTLPExporterBrowserBase extends OTLPExporterBase {
+-    /**
+-     * @param config
+-     * @param serializer
+-     * @param contentType
+-     */
+-    constructor(config = {}, serializer, contentType) {
+-        super(config);
+-        this._useXHR = false;
+-        this._serializer = serializer;
+-        this._contentType = contentType;
+-        this._useXHR =
+-            !!config.headers || typeof navigator.sendBeacon !== 'function';
+-        if (this._useXHR) {
+-            this._headers = Object.assign({}, parseHeaders(config.headers), baggageUtils.parseKeyPairsIntoRecord(getEnv().OTEL_EXPORTER_OTLP_HEADERS));
+-        }
+-        else {
+-            this._headers = {};
+-        }
++  /**
++   * @param config
++   * @param serializer
++   * @param contentType
++   */
++  constructor(config = {}, serializer, contentType) {
++    super(config);
++    this._useXHR = false;
++    this._serializer = serializer;
++    this._contentType = contentType;
++    this._useXHR =
++      !!config.headers ||
++      (typeof navigator != "undefined" &&
++        typeof navigator.sendBeacon !== "function");
++    if (this._useXHR) {
++      this._headers = Object.assign(
++        {},
++        parseHeaders(config.headers),
++        baggageUtils.parseKeyPairsIntoRecord(
++          getEnv().OTEL_EXPORTER_OTLP_HEADERS
++        )
++      );
++    } else {
++      this._headers = {};
+     }
+-    onInit() { }
+-    onShutdown() { }
+-    send(items, onSuccess, onError) {
+-        var _a;
+-        if (this._shutdownOnce.isCalled) {
+-            diag.debug('Shutdown already started. Cannot send objects');
+-            return;
+-        }
+-        const body = (_a = this._serializer.serializeRequest(items)) !== null && _a !== void 0 ? _a : new Uint8Array();
+-        const promise = new Promise((resolve, reject) => {
+-            if (this._useXHR) {
+-                sendWithXhr(body, this.url, Object.assign(Object.assign({}, this._headers), { 'Content-Type': this._contentType }), this.timeoutMillis, resolve, reject);
+-            }
+-            else {
+-                sendWithBeacon(body, this.url, { type: this._contentType }, resolve, reject);
+-            }
+-        }).then(onSuccess, onError);
+-        this._sendingPromises.push(promise);
+-        const popPromise = () => {
+-            const index = this._sendingPromises.indexOf(promise);
+-            this._sendingPromises.splice(index, 1);
+-        };
+-        promise.then(popPromise, popPromise);
++  }
++  onInit() {}
++  onShutdown() {}
++  send(items, onSuccess, onError) {
++    var _a;
++    if (this._shutdownOnce.isCalled) {
++      diag.debug("Shutdown already started. Cannot send objects");
++      return;
+     }
++    const body =
++      (_a = this._serializer.serializeRequest(items)) !== null && _a !== void 0
++        ? _a
++        : new Uint8Array();
++    const promise = new Promise((resolve, reject) => {
++      if (this._useXHR) {
++        sendWithXhr(
++          body,
++          this.url,
++          Object.assign(Object.assign({}, this._headers), {
++            "Content-Type": this._contentType,
++          }),
++          this.timeoutMillis,
++          resolve,
++          reject
++        );
++      } else {
++        sendWithBeacon(
++          body,
++          this.url,
++          { type: this._contentType },
++          resolve,
++          reject
++        );
++      }
++    }).then(onSuccess, onError);
++    this._sendingPromises.push(promise);
++    const popPromise = () => {
++      const index = this._sendingPromises.indexOf(promise);
++      this._sendingPromises.splice(index, 1);
++    };
++    promise.then(popPromise, popPromise);
++  }
+ }
+ //# sourceMappingURL=OTLPExporterBrowserBase.js.map
+diff --git a/build/esnext/platform/browser/OTLPExporterBrowserBase.js.map b/build/esnext/platform/browser/OTLPExporterBrowserBase.js.map
+index 659ee925b41a81e6326bebd5abd550aced34a74a..44fef4a84c838e03cf5e185379ceb13a14385436 100644
+--- a/build/esnext/platform/browser/OTLPExporterBrowserBase.js.map
++++ b/build/esnext/platform/browser/OTLPExporterBrowserBase.js.map
+@@ -1 +1,13 @@
+-{"version":3,"file":"OTLPExporterBrowserBase.js","sourceRoot":"","sources":["../../../../src/platform/browser/OTLPExporterBrowserBase.ts"],"names":[],"mappings":"AAAA;;;;;;;;;;;;;;GAcG;AAEH,OAAO,EAAE,gBAAgB,EAAE,MAAM,wBAAwB,CAAC;AAG1D,OAAO,EAAE,YAAY,EAAE,MAAM,YAAY,CAAC;AAC1C,OAAO,EAAE,cAAc,EAAE,WAAW,EAAE,MAAM,QAAQ,CAAC;AACrD,OAAO,EAAE,IAAI,EAAE,MAAM,oBAAoB,CAAC;AAC1C,OAAO,EAAE,MAAM,EAAE,YAAY,EAAE,MAAM,qBAAqB,CAAC;AAG3D;;GAEG;AACH,MAAM,OAAgB,uBAGpB,SAAQ,gBAAoD;IAM5D;;;;OAIG;IACH,YACE,SAAiC,EAAE,EACnC,UAAsD,EACtD,WAAmB;QAEnB,KAAK,CAAC,MAAM,CAAC,CAAC;QAdR,YAAO,GAAY,KAAK,CAAC;QAe/B,IAAI,CAAC,WAAW,GAAG,UAAU,CAAC;QAC9B,IAAI,CAAC,YAAY,GAAG,WAAW,CAAC;QAChC,IAAI,CAAC,OAAO;YACV,CAAC,CAAC,MAAM,CAAC,OAAO,IAAI,OAAO,SAAS,CAAC,UAAU,KAAK,UAAU,CAAC;QACjE,IAAI,IAAI,CAAC,OAAO,EAAE;YAChB,IAAI,CAAC,QAAQ,GAAG,MAAM,CAAC,MAAM,CAC3B,EAAE,EACF,YAAY,CAAC,MAAM,CAAC,OAAO,CAAC,EAC5B,YAAY,CAAC,uBAAuB,CAClC,MAAM,EAAE,CAAC,0BAA0B,CACpC,CACF,CAAC;SACH;aAAM;YACL,IAAI,CAAC,QAAQ,GAAG,EAAE,CAAC;SACpB;IACH,CAAC;IAED,MAAM,KAAU,CAAC;IAEjB,UAAU,KAAU,CAAC;IAErB,IAAI,CACF,KAAmB,EACnB,SAAqB,EACrB,OAAqD;;QAErD,IAAI,IAAI,CAAC,aAAa,CAAC,QAAQ,EAAE;YAC/B,IAAI,CAAC,KAAK,CAAC,+CAA+C,CAAC,CAAC;YAC5D,OAAO;SACR;QACD,MAAM,IAAI,GAAG,MAAA,IAAI,CAAC,WAAW,CAAC,gBAAgB,CAAC,KAAK,CAAC,mCAAI,IAAI,UAAU,EAAE,CAAC;QAE1E,MAAM,OAAO,GAAG,IAAI,OAAO,CAAO,CAAC,OAAO,EAAE,MAAM,EAAE,EAAE;YACpD,IAAI,IAAI,CAAC,OAAO,EAAE;gBAChB,WAAW,CACT,IAAI,EACJ,IAAI,CAAC,GAAG,kCAEH,IAAI,CAAC,QAAQ,KAChB,cAAc,EAAE,IAAI,CAAC,YAAY,KAEnC,IAAI,CAAC,aAAa,EAClB,OAAO,EACP,MAAM,CACP,CAAC;aACH;iBAAM;gBACL,cAAc,CACZ,IAAI,EACJ,IAAI,CAAC,GAAG,EACR,EAAE,IAAI,EAAE,IAAI,CAAC,YAAY,EAAE,EAC3B,OAAO,EACP,MAAM,CACP,CAAC;aACH;QACH,CAAC,CAAC,CAAC,IAAI,CAAC,SAAS,EAAE,OAAO,CAAC,CAAC;QAE5B,IAAI,CAAC,gBAAgB,CAAC,IAAI,CAAC,OAAO,CAAC,CAAC;QACpC,MAAM,UAAU,GAAG,GAAG,EAAE;YACtB,MAAM,KAAK,GAAG,IAAI,CAAC,gBAAgB,CAAC,OAAO,CAAC,OAAO,CAAC,CAAC;YACrD,IAAI,CAAC,gBAAgB,CAAC,MAAM,CAAC,KAAK,EAAE,CAAC,CAAC,CAAC;QACzC,CAAC,CAAC;QACF,OAAO,CAAC,IAAI,CAAC,UAAU,EAAE,UAAU,CAAC,CAAC;IACvC,CAAC;CACF","sourcesContent":["/*\n * Copyright The OpenTelemetry Authors\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      https://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\nimport { OTLPExporterBase } from '../../OTLPExporterBase';\nimport { OTLPExporterConfigBase } from '../../types';\nimport * as otlpTypes from '../../types';\nimport { parseHeaders } from '../../util';\nimport { sendWithBeacon, sendWithXhr } from './util';\nimport { diag } from '@opentelemetry/api';\nimport { getEnv, baggageUtils } from '@opentelemetry/core';\nimport { ISerializer } from '@opentelemetry/otlp-transformer';\n\n/**\n * Collector Metric Exporter abstract base class\n */\nexport abstract class OTLPExporterBrowserBase<\n  ExportItem,\n  ServiceResponse,\n> extends OTLPExporterBase<OTLPExporterConfigBase, ExportItem> {\n  protected _headers: Record<string, string>;\n  private _useXHR: boolean = false;\n  private _contentType: string;\n  private _serializer: ISerializer<ExportItem[], ServiceResponse>;\n\n  /**\n   * @param config\n   * @param serializer\n   * @param contentType\n   */\n  constructor(\n    config: OTLPExporterConfigBase = {},\n    serializer: ISerializer<ExportItem[], ServiceResponse>,\n    contentType: string\n  ) {\n    super(config);\n    this._serializer = serializer;\n    this._contentType = contentType;\n    this._useXHR =\n      !!config.headers || typeof navigator.sendBeacon !== 'function';\n    if (this._useXHR) {\n      this._headers = Object.assign(\n        {},\n        parseHeaders(config.headers),\n        baggageUtils.parseKeyPairsIntoRecord(\n          getEnv().OTEL_EXPORTER_OTLP_HEADERS\n        )\n      );\n    } else {\n      this._headers = {};\n    }\n  }\n\n  onInit(): void {}\n\n  onShutdown(): void {}\n\n  send(\n    items: ExportItem[],\n    onSuccess: () => void,\n    onError: (error: otlpTypes.OTLPExporterError) => void\n  ): void {\n    if (this._shutdownOnce.isCalled) {\n      diag.debug('Shutdown already started. Cannot send objects');\n      return;\n    }\n    const body = this._serializer.serializeRequest(items) ?? new Uint8Array();\n\n    const promise = new Promise<void>((resolve, reject) => {\n      if (this._useXHR) {\n        sendWithXhr(\n          body,\n          this.url,\n          {\n            ...this._headers,\n            'Content-Type': this._contentType,\n          },\n          this.timeoutMillis,\n          resolve,\n          reject\n        );\n      } else {\n        sendWithBeacon(\n          body,\n          this.url,\n          { type: this._contentType },\n          resolve,\n          reject\n        );\n      }\n    }).then(onSuccess, onError);\n\n    this._sendingPromises.push(promise);\n    const popPromise = () => {\n      const index = this._sendingPromises.indexOf(promise);\n      this._sendingPromises.splice(index, 1);\n    };\n    promise.then(popPromise, popPromise);\n  }\n}\n"]}
+\ No newline at end of file
++{
++  "version": 3,
++  "file": "OTLPExporterBrowserBase.js",
++  "sourceRoot": "",
++  "sources": [
++    "../../../../src/platform/browser/OTLPExporterBrowserBase.ts"
++  ],
++  "names": [],
++  "mappings": "AAAA;;;;;;;;;;;;;;GAcG;AAEH,OAAO,EAAE,gBAAgB,EAAE,MAAM,wBAAwB,CAAC;AAG1D,OAAO,EAAE,YAAY,EAAE,MAAM,YAAY,CAAC;AAC1C,OAAO,EAAE,cAAc,EAAE,WAAW,EAAE,MAAM,QAAQ,CAAC;AACrD,OAAO,EAAE,IAAI,EAAE,MAAM,oBAAoB,CAAC;AAC1C,OAAO,EAAE,MAAM,EAAE,YAAY,EAAE,MAAM,qBAAqB,CAAC;AAG3D;;GAEG;AACH,MAAM,OAAgB,uBAGpB,SAAQ,gBAAoD;IAM5D;;;;OAIG;IACH,YACE,SAAiC,EAAE,EACnC,UAAsD,EACtD,WAAmB;QAEnB,KAAK,CAAC,MAAM,CAAC,CAAC;QAdR,YAAO,GAAY,KAAK,CAAC;QAe/B,IAAI,CAAC,WAAW,GAAG,UAAU,CAAC;QAC9B,IAAI,CAAC,YAAY,GAAG,WAAW,CAAC;QAChC,IAAI,CAAC,OAAO;YACV,CAAC,CAAC,MAAM,CAAC,OAAO,IAAI,OAAO,SAAS,CAAC,UAAU,KAAK,UAAU,CAAC;QACjE,IAAI,IAAI,CAAC,OAAO,EAAE;YAChB,IAAI,CAAC,QAAQ,GAAG,MAAM,CAAC,MAAM,CAC3B,EAAE,EACF,YAAY,CAAC,MAAM,CAAC,OAAO,CAAC,EAC5B,YAAY,CAAC,uBAAuB,CAClC,MAAM,EAAE,CAAC,0BAA0B,CACpC,CACF,CAAC;SACH;aAAM;YACL,IAAI,CAAC,QAAQ,GAAG,EAAE,CAAC;SACpB;IACH,CAAC;IAED,MAAM,KAAU,CAAC;IAEjB,UAAU,KAAU,CAAC;IAErB,IAAI,CACF,KAAmB,EACnB,SAAqB,EACrB,OAAqD;;QAErD,IAAI,IAAI,CAAC,aAAa,CAAC,QAAQ,EAAE;YAC/B,IAAI,CAAC,KAAK,CAAC,+CAA+C,CAAC,CAAC;YAC5D,OAAO;SACR;QACD,MAAM,IAAI,GAAG,MAAA,IAAI,CAAC,WAAW,CAAC,gBAAgB,CAAC,KAAK,CAAC,mCAAI,IAAI,UAAU,EAAE,CAAC;QAE1E,MAAM,OAAO,GAAG,IAAI,OAAO,CAAO,CAAC,OAAO,EAAE,MAAM,EAAE,EAAE;YACpD,IAAI,IAAI,CAAC,OAAO,EAAE;gBAChB,WAAW,CACT,IAAI,EACJ,IAAI,CAAC,GAAG,kCAEH,IAAI,CAAC,QAAQ,KAChB,cAAc,EAAE,IAAI,CAAC,YAAY,KAEnC,IAAI,CAAC,aAAa,EAClB,OAAO,EACP,MAAM,CACP,CAAC;aACH;iBAAM;gBACL,cAAc,CACZ,IAAI,EACJ,IAAI,CAAC,GAAG,EACR,EAAE,IAAI,EAAE,IAAI,CAAC,YAAY,EAAE,EAC3B,OAAO,EACP,MAAM,CACP,CAAC;aACH;QACH,CAAC,CAAC,CAAC,IAAI,CAAC,SAAS,EAAE,OAAO,CAAC,CAAC;QAE5B,IAAI,CAAC,gBAAgB,CAAC,IAAI,CAAC,OAAO,CAAC,CAAC;QACpC,MAAM,UAAU,GAAG,GAAG,EAAE;YACtB,MAAM,KAAK,GAAG,IAAI,CAAC,gBAAgB,CAAC,OAAO,CAAC,OAAO,CAAC,CAAC;YACrD,IAAI,CAAC,gBAAgB,CAAC,MAAM,CAAC,KAAK,EAAE,CAAC,CAAC,CAAC;QACzC,CAAC,CAAC;QACF,OAAO,CAAC,IAAI,CAAC,UAAU,EAAE,UAAU,CAAC,CAAC;IACvC,CAAC;CACF",
++  "sourcesContent": [
++    "/*\n * Copyright The OpenTelemetry Authors\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      https://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\nimport { OTLPExporterBase } from '../../OTLPExporterBase';\nimport { OTLPExporterConfigBase } from '../../types';\nimport * as otlpTypes from '../../types';\nimport { parseHeaders } from '../../util';\nimport { sendWithBeacon, sendWithXhr } from './util';\nimport { diag } from '@opentelemetry/api';\nimport { getEnv, baggageUtils } from '@opentelemetry/core';\nimport { ISerializer } from '@opentelemetry/otlp-transformer';\n\n/**\n * Collector Metric Exporter abstract base class\n */\nexport abstract class OTLPExporterBrowserBase<\n  ExportItem,\n  ServiceResponse,\n> extends OTLPExporterBase<OTLPExporterConfigBase, ExportItem> {\n  protected _headers: Record<string, string>;\n  private _useXHR: boolean = false;\n  private _contentType: string;\n  private _serializer: ISerializer<ExportItem[], ServiceResponse>;\n\n  /**\n   * @param config\n   * @param serializer\n   * @param contentType\n   */\n  constructor(\n    config: OTLPExporterConfigBase = {},\n    serializer: ISerializer<ExportItem[], ServiceResponse>,\n    contentType: string\n  ) {\n    super(config);\n    this._serializer = serializer;\n    this._contentType = contentType;\n    this._useXHR =\n      !!config.headers || (typeof navigator != 'undefined' && typeof navigator.sendBeacon !== 'function');\n    if (this._useXHR) {\n      this._headers = Object.assign(\n        {},\n        parseHeaders(config.headers),\n        baggageUtils.parseKeyPairsIntoRecord(\n          getEnv().OTEL_EXPORTER_OTLP_HEADERS\n        )\n      );\n    } else {\n      this._headers = {};\n    }\n  }\n\n  onInit(): void {}\n\n  onShutdown(): void {}\n\n  send(\n    items: ExportItem[],\n    onSuccess: () => void,\n    onError: (error: otlpTypes.OTLPExporterError) => void\n  ): void {\n    if (this._shutdownOnce.isCalled) {\n      diag.debug('Shutdown already started. Cannot send objects');\n      return;\n    }\n    const body = this._serializer.serializeRequest(items) ?? new Uint8Array();\n\n    const promise = new Promise<void>((resolve, reject) => {\n      if (this._useXHR) {\n        sendWithXhr(\n          body,\n          this.url,\n          {\n            ...this._headers,\n            'Content-Type': this._contentType,\n          },\n          this.timeoutMillis,\n          resolve,\n          reject\n        );\n      } else {\n        sendWithBeacon(\n          body,\n          this.url,\n          { type: this._contentType },\n          resolve,\n          reject\n        );\n      }\n    }).then(onSuccess, onError);\n\n    this._sendingPromises.push(promise);\n    const popPromise = () => {\n      const index = this._sendingPromises.indexOf(promise);\n      this._sendingPromises.splice(index, 1);\n    };\n    promise.then(popPromise, popPromise);\n  }\n}\n"
++  ]
++}
+diff --git a/build/src/platform/browser/OTLPExporterBrowserBase.js b/build/src/platform/browser/OTLPExporterBrowserBase.js
+index c705de3aa000a4fa7bcfe4c58c69df37b334b317..1ea43725fa8194f89ff6c3b786d94e2862f65ee6 100644
+--- a/build/src/platform/browser/OTLPExporterBrowserBase.js
++++ b/build/src/platform/browser/OTLPExporterBrowserBase.js
+@@ -25,49 +25,73 @@ const core_1 = require("@opentelemetry/core");
+  * Collector Metric Exporter abstract base class
+  */
+ class OTLPExporterBrowserBase extends OTLPExporterBase_1.OTLPExporterBase {
+-    /**
+-     * @param config
+-     * @param serializer
+-     * @param contentType
+-     */
+-    constructor(config = {}, serializer, contentType) {
+-        super(config);
+-        this._useXHR = false;
+-        this._serializer = serializer;
+-        this._contentType = contentType;
+-        this._useXHR =
+-            !!config.headers || typeof navigator.sendBeacon !== 'function';
+-        if (this._useXHR) {
+-            this._headers = Object.assign({}, (0, util_1.parseHeaders)(config.headers), core_1.baggageUtils.parseKeyPairsIntoRecord((0, core_1.getEnv)().OTEL_EXPORTER_OTLP_HEADERS));
+-        }
+-        else {
+-            this._headers = {};
+-        }
++  /**
++   * @param config
++   * @param serializer
++   * @param contentType
++   */
++  constructor(config = {}, serializer, contentType) {
++    super(config);
++    this._useXHR = false;
++    this._serializer = serializer;
++    this._contentType = contentType;
++    this._useXHR =
++      !!config.headers ||
++      (typeof navigator != "undefined" &&
++        typeof navigator.sendBeacon !== "function");
++    if (this._useXHR) {
++      this._headers = Object.assign(
++        {},
++        (0, util_1.parseHeaders)(config.headers),
++        core_1.baggageUtils.parseKeyPairsIntoRecord(
++          (0, core_1.getEnv)().OTEL_EXPORTER_OTLP_HEADERS
++        )
++      );
++    } else {
++      this._headers = {};
+     }
+-    onInit() { }
+-    onShutdown() { }
+-    send(items, onSuccess, onError) {
+-        var _a;
+-        if (this._shutdownOnce.isCalled) {
+-            api_1.diag.debug('Shutdown already started. Cannot send objects');
+-            return;
+-        }
+-        const body = (_a = this._serializer.serializeRequest(items)) !== null && _a !== void 0 ? _a : new Uint8Array();
+-        const promise = new Promise((resolve, reject) => {
+-            if (this._useXHR) {
+-                (0, util_2.sendWithXhr)(body, this.url, Object.assign(Object.assign({}, this._headers), { 'Content-Type': this._contentType }), this.timeoutMillis, resolve, reject);
+-            }
+-            else {
+-                (0, util_2.sendWithBeacon)(body, this.url, { type: this._contentType }, resolve, reject);
+-            }
+-        }).then(onSuccess, onError);
+-        this._sendingPromises.push(promise);
+-        const popPromise = () => {
+-            const index = this._sendingPromises.indexOf(promise);
+-            this._sendingPromises.splice(index, 1);
+-        };
+-        promise.then(popPromise, popPromise);
++  }
++  onInit() {}
++  onShutdown() {}
++  send(items, onSuccess, onError) {
++    var _a;
++    if (this._shutdownOnce.isCalled) {
++      api_1.diag.debug("Shutdown already started. Cannot send objects");
++      return;
+     }
++    const body =
++      (_a = this._serializer.serializeRequest(items)) !== null && _a !== void 0
++        ? _a
++        : new Uint8Array();
++    const promise = new Promise((resolve, reject) => {
++      if (this._useXHR) {
++        (0, util_2.sendWithXhr)(
++          body,
++          this.url,
++          Object.assign(Object.assign({}, this._headers), {
++            "Content-Type": this._contentType,
++          }),
++          this.timeoutMillis,
++          resolve,
++          reject
++        );
++      } else {
++        (0, util_2.sendWithBeacon)(
++          body,
++          this.url,
++          { type: this._contentType },
++          resolve,
++          reject
++        );
++      }
++    }).then(onSuccess, onError);
++    this._sendingPromises.push(promise);
++    const popPromise = () => {
++      const index = this._sendingPromises.indexOf(promise);
++      this._sendingPromises.splice(index, 1);
++    };
++    promise.then(popPromise, popPromise);
++  }
+ }
+ exports.OTLPExporterBrowserBase = OTLPExporterBrowserBase;
+ //# sourceMappingURL=OTLPExporterBrowserBase.js.map
+diff --git a/build/src/platform/browser/OTLPExporterBrowserBase.js.map b/build/src/platform/browser/OTLPExporterBrowserBase.js.map
+index 69fe1a6dfb2228b77dae4a4975d70c04041c6321..c0887c7b0c3214ef5d3ca7f3bb01032cebfccdb6 100644
+--- a/build/src/platform/browser/OTLPExporterBrowserBase.js.map
++++ b/build/src/platform/browser/OTLPExporterBrowserBase.js.map
+@@ -1 +1,13 @@
+-{"version":3,"file":"OTLPExporterBrowserBase.js","sourceRoot":"","sources":["../../../../src/platform/browser/OTLPExporterBrowserBase.ts"],"names":[],"mappings":";AAAA;;;;;;;;;;;;;;GAcG;;;AAEH,6DAA0D;AAG1D,qCAA0C;AAC1C,iCAAqD;AACrD,4CAA0C;AAC1C,8CAA2D;AAG3D;;GAEG;AACH,MAAsB,uBAGpB,SAAQ,mCAAoD;IAM5D;;;;OAIG;IACH,YACE,SAAiC,EAAE,EACnC,UAAsD,EACtD,WAAmB;QAEnB,KAAK,CAAC,MAAM,CAAC,CAAC;QAdR,YAAO,GAAY,KAAK,CAAC;QAe/B,IAAI,CAAC,WAAW,GAAG,UAAU,CAAC;QAC9B,IAAI,CAAC,YAAY,GAAG,WAAW,CAAC;QAChC,IAAI,CAAC,OAAO;YACV,CAAC,CAAC,MAAM,CAAC,OAAO,IAAI,OAAO,SAAS,CAAC,UAAU,KAAK,UAAU,CAAC;QACjE,IAAI,IAAI,CAAC,OAAO,EAAE;YAChB,IAAI,CAAC,QAAQ,GAAG,MAAM,CAAC,MAAM,CAC3B,EAAE,EACF,IAAA,mBAAY,EAAC,MAAM,CAAC,OAAO,CAAC,EAC5B,mBAAY,CAAC,uBAAuB,CAClC,IAAA,aAAM,GAAE,CAAC,0BAA0B,CACpC,CACF,CAAC;SACH;aAAM;YACL,IAAI,CAAC,QAAQ,GAAG,EAAE,CAAC;SACpB;IACH,CAAC;IAED,MAAM,KAAU,CAAC;IAEjB,UAAU,KAAU,CAAC;IAErB,IAAI,CACF,KAAmB,EACnB,SAAqB,EACrB,OAAqD;;QAErD,IAAI,IAAI,CAAC,aAAa,CAAC,QAAQ,EAAE;YAC/B,UAAI,CAAC,KAAK,CAAC,+CAA+C,CAAC,CAAC;YAC5D,OAAO;SACR;QACD,MAAM,IAAI,GAAG,MAAA,IAAI,CAAC,WAAW,CAAC,gBAAgB,CAAC,KAAK,CAAC,mCAAI,IAAI,UAAU,EAAE,CAAC;QAE1E,MAAM,OAAO,GAAG,IAAI,OAAO,CAAO,CAAC,OAAO,EAAE,MAAM,EAAE,EAAE;YACpD,IAAI,IAAI,CAAC,OAAO,EAAE;gBAChB,IAAA,kBAAW,EACT,IAAI,EACJ,IAAI,CAAC,GAAG,kCAEH,IAAI,CAAC,QAAQ,KAChB,cAAc,EAAE,IAAI,CAAC,YAAY,KAEnC,IAAI,CAAC,aAAa,EAClB,OAAO,EACP,MAAM,CACP,CAAC;aACH;iBAAM;gBACL,IAAA,qBAAc,EACZ,IAAI,EACJ,IAAI,CAAC,GAAG,EACR,EAAE,IAAI,EAAE,IAAI,CAAC,YAAY,EAAE,EAC3B,OAAO,EACP,MAAM,CACP,CAAC;aACH;QACH,CAAC,CAAC,CAAC,IAAI,CAAC,SAAS,EAAE,OAAO,CAAC,CAAC;QAE5B,IAAI,CAAC,gBAAgB,CAAC,IAAI,CAAC,OAAO,CAAC,CAAC;QACpC,MAAM,UAAU,GAAG,GAAG,EAAE;YACtB,MAAM,KAAK,GAAG,IAAI,CAAC,gBAAgB,CAAC,OAAO,CAAC,OAAO,CAAC,CAAC;YACrD,IAAI,CAAC,gBAAgB,CAAC,MAAM,CAAC,KAAK,EAAE,CAAC,CAAC,CAAC;QACzC,CAAC,CAAC;QACF,OAAO,CAAC,IAAI,CAAC,UAAU,EAAE,UAAU,CAAC,CAAC;IACvC,CAAC;CACF;AAnFD,0DAmFC","sourcesContent":["/*\n * Copyright The OpenTelemetry Authors\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      https://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\nimport { OTLPExporterBase } from '../../OTLPExporterBase';\nimport { OTLPExporterConfigBase } from '../../types';\nimport * as otlpTypes from '../../types';\nimport { parseHeaders } from '../../util';\nimport { sendWithBeacon, sendWithXhr } from './util';\nimport { diag } from '@opentelemetry/api';\nimport { getEnv, baggageUtils } from '@opentelemetry/core';\nimport { ISerializer } from '@opentelemetry/otlp-transformer';\n\n/**\n * Collector Metric Exporter abstract base class\n */\nexport abstract class OTLPExporterBrowserBase<\n  ExportItem,\n  ServiceResponse,\n> extends OTLPExporterBase<OTLPExporterConfigBase, ExportItem> {\n  protected _headers: Record<string, string>;\n  private _useXHR: boolean = false;\n  private _contentType: string;\n  private _serializer: ISerializer<ExportItem[], ServiceResponse>;\n\n  /**\n   * @param config\n   * @param serializer\n   * @param contentType\n   */\n  constructor(\n    config: OTLPExporterConfigBase = {},\n    serializer: ISerializer<ExportItem[], ServiceResponse>,\n    contentType: string\n  ) {\n    super(config);\n    this._serializer = serializer;\n    this._contentType = contentType;\n    this._useXHR =\n      !!config.headers || typeof navigator.sendBeacon !== 'function';\n    if (this._useXHR) {\n      this._headers = Object.assign(\n        {},\n        parseHeaders(config.headers),\n        baggageUtils.parseKeyPairsIntoRecord(\n          getEnv().OTEL_EXPORTER_OTLP_HEADERS\n        )\n      );\n    } else {\n      this._headers = {};\n    }\n  }\n\n  onInit(): void {}\n\n  onShutdown(): void {}\n\n  send(\n    items: ExportItem[],\n    onSuccess: () => void,\n    onError: (error: otlpTypes.OTLPExporterError) => void\n  ): void {\n    if (this._shutdownOnce.isCalled) {\n      diag.debug('Shutdown already started. Cannot send objects');\n      return;\n    }\n    const body = this._serializer.serializeRequest(items) ?? new Uint8Array();\n\n    const promise = new Promise<void>((resolve, reject) => {\n      if (this._useXHR) {\n        sendWithXhr(\n          body,\n          this.url,\n          {\n            ...this._headers,\n            'Content-Type': this._contentType,\n          },\n          this.timeoutMillis,\n          resolve,\n          reject\n        );\n      } else {\n        sendWithBeacon(\n          body,\n          this.url,\n          { type: this._contentType },\n          resolve,\n          reject\n        );\n      }\n    }).then(onSuccess, onError);\n\n    this._sendingPromises.push(promise);\n    const popPromise = () => {\n      const index = this._sendingPromises.indexOf(promise);\n      this._sendingPromises.splice(index, 1);\n    };\n    promise.then(popPromise, popPromise);\n  }\n}\n"]}
+\ No newline at end of file
++{
++  "version": 3,
++  "file": "OTLPExporterBrowserBase.js",
++  "sourceRoot": "",
++  "sources": [
++    "../../../../src/platform/browser/OTLPExporterBrowserBase.ts"
++  ],
++  "names": [],
++  "mappings": ";AAAA;;;;;;;;;;;;;;GAcG;;;AAEH,6DAA0D;AAG1D,qCAA0C;AAC1C,iCAAqD;AACrD,4CAA0C;AAC1C,8CAA2D;AAG3D;;GAEG;AACH,MAAsB,uBAGpB,SAAQ,mCAAoD;IAM5D;;;;OAIG;IACH,YACE,SAAiC,EAAE,EACnC,UAAsD,EACtD,WAAmB;QAEnB,KAAK,CAAC,MAAM,CAAC,CAAC;QAdR,YAAO,GAAY,KAAK,CAAC;QAe/B,IAAI,CAAC,WAAW,GAAG,UAAU,CAAC;QAC9B,IAAI,CAAC,YAAY,GAAG,WAAW,CAAC;QAChC,IAAI,CAAC,OAAO;YACV,CAAC,CAAC,MAAM,CAAC,OAAO,IAAI,OAAO,SAAS,CAAC,UAAU,KAAK,UAAU,CAAC;QACjE,IAAI,IAAI,CAAC,OAAO,EAAE;YAChB,IAAI,CAAC,QAAQ,GAAG,MAAM,CAAC,MAAM,CAC3B,EAAE,EACF,IAAA,mBAAY,EAAC,MAAM,CAAC,OAAO,CAAC,EAC5B,mBAAY,CAAC,uBAAuB,CAClC,IAAA,aAAM,GAAE,CAAC,0BAA0B,CACpC,CACF,CAAC;SACH;aAAM;YACL,IAAI,CAAC,QAAQ,GAAG,EAAE,CAAC;SACpB;IACH,CAAC;IAED,MAAM,KAAU,CAAC;IAEjB,UAAU,KAAU,CAAC;IAErB,IAAI,CACF,KAAmB,EACnB,SAAqB,EACrB,OAAqD;;QAErD,IAAI,IAAI,CAAC,aAAa,CAAC,QAAQ,EAAE;YAC/B,UAAI,CAAC,KAAK,CAAC,+CAA+C,CAAC,CAAC;YAC5D,OAAO;SACR;QACD,MAAM,IAAI,GAAG,MAAA,IAAI,CAAC,WAAW,CAAC,gBAAgB,CAAC,KAAK,CAAC,mCAAI,IAAI,UAAU,EAAE,CAAC;QAE1E,MAAM,OAAO,GAAG,IAAI,OAAO,CAAO,CAAC,OAAO,EAAE,MAAM,EAAE,EAAE;YACpD,IAAI,IAAI,CAAC,OAAO,EAAE;gBAChB,IAAA,kBAAW,EACT,IAAI,EACJ,IAAI,CAAC,GAAG,kCAEH,IAAI,CAAC,QAAQ,KAChB,cAAc,EAAE,IAAI,CAAC,YAAY,KAEnC,IAAI,CAAC,aAAa,EAClB,OAAO,EACP,MAAM,CACP,CAAC;aACH;iBAAM;gBACL,IAAA,qBAAc,EACZ,IAAI,EACJ,IAAI,CAAC,GAAG,EACR,EAAE,IAAI,EAAE,IAAI,CAAC,YAAY,EAAE,EAC3B,OAAO,EACP,MAAM,CACP,CAAC;aACH;QACH,CAAC,CAAC,CAAC,IAAI,CAAC,SAAS,EAAE,OAAO,CAAC,CAAC;QAE5B,IAAI,CAAC,gBAAgB,CAAC,IAAI,CAAC,OAAO,CAAC,CAAC;QACpC,MAAM,UAAU,GAAG,GAAG,EAAE;YACtB,MAAM,KAAK,GAAG,IAAI,CAAC,gBAAgB,CAAC,OAAO,CAAC,OAAO,CAAC,CAAC;YACrD,IAAI,CAAC,gBAAgB,CAAC,MAAM,CAAC,KAAK,EAAE,CAAC,CAAC,CAAC;QACzC,CAAC,CAAC;QACF,OAAO,CAAC,IAAI,CAAC,UAAU,EAAE,UAAU,CAAC,CAAC;IACvC,CAAC;CACF;AAnFD,0DAmFC",
++  "sourcesContent": [
++    "/*\n * Copyright The OpenTelemetry Authors\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      https://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\nimport { OTLPExporterBase } from '../../OTLPExporterBase';\nimport { OTLPExporterConfigBase } from '../../types';\nimport * as otlpTypes from '../../types';\nimport { parseHeaders } from '../../util';\nimport { sendWithBeacon, sendWithXhr } from './util';\nimport { diag } from '@opentelemetry/api';\nimport { getEnv, baggageUtils } from '@opentelemetry/core';\nimport { ISerializer } from '@opentelemetry/otlp-transformer';\n\n/**\n * Collector Metric Exporter abstract base class\n */\nexport abstract class OTLPExporterBrowserBase<\n  ExportItem,\n  ServiceResponse,\n> extends OTLPExporterBase<OTLPExporterConfigBase, ExportItem> {\n  protected _headers: Record<string, string>;\n  private _useXHR: boolean = false;\n  private _contentType: string;\n  private _serializer: ISerializer<ExportItem[], ServiceResponse>;\n\n  /**\n   * @param config\n   * @param serializer\n   * @param contentType\n   */\n  constructor(\n    config: OTLPExporterConfigBase = {},\n    serializer: ISerializer<ExportItem[], ServiceResponse>,\n    contentType: string\n  ) {\n    super(config);\n    this._serializer = serializer;\n    this._contentType = contentType;\n    this._useXHR =\n      !!config.headers || (typeof navigator != 'undefined' && typeof navigator.sendBeacon !== 'function');\n    if (this._useXHR) {\n      this._headers = Object.assign(\n        {},\n        parseHeaders(config.headers),\n        baggageUtils.parseKeyPairsIntoRecord(\n          getEnv().OTEL_EXPORTER_OTLP_HEADERS\n        )\n      );\n    } else {\n      this._headers = {};\n    }\n  }\n\n  onInit(): void {}\n\n  onShutdown(): void {}\n\n  send(\n    items: ExportItem[],\n    onSuccess: () => void,\n    onError: (error: otlpTypes.OTLPExporterError) => void\n  ): void {\n    if (this._shutdownOnce.isCalled) {\n      diag.debug('Shutdown already started. Cannot send objects');\n      return;\n    }\n    const body = this._serializer.serializeRequest(items) ?? new Uint8Array();\n\n    const promise = new Promise<void>((resolve, reject) => {\n      if (this._useXHR) {\n        sendWithXhr(\n          body,\n          this.url,\n          {\n            ...this._headers,\n            'Content-Type': this._contentType,\n          },\n          this.timeoutMillis,\n          resolve,\n          reject\n        );\n      } else {\n        sendWithBeacon(\n          body,\n          this.url,\n          { type: this._contentType },\n          resolve,\n          reject\n        );\n      }\n    }).then(onSuccess, onError);\n\n    this._sendingPromises.push(promise);\n    const popPromise = () => {\n      const index = this._sendingPromises.indexOf(promise);\n      this._sendingPromises.splice(index, 1);\n    };\n    promise.then(popPromise, popPromise);\n  }\n}\n"
++  ]
++}

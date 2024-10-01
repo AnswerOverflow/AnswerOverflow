@@ -5,8 +5,12 @@
 	"sideEffects": false,
 	"exports": {
 	  "./*": [
-		"./src/*.ts"
+		"./src/*.ts",
+		"./src/*.mjs"
 	  ]
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@t3-oss/env-nextjs": "^0.6.1",

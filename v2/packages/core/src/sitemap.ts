@@ -70,7 +70,7 @@ const EPOCH = BigInt(1420070400000);
 function getTimestamp(snowflake: Snowflake) {
   return Number((BigInt(snowflake) >> BigInt(22)) + EPOCH);
 }
-function getDate(snowflake: Snowflake) {
+export function getDate(snowflake: Snowflake) {
   return new Date(getTimestamp(snowflake));
 }
 export async function generateSitemap() {

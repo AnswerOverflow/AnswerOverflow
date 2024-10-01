@@ -5,9 +5,12 @@
 	"sideEffects": false,
 	"exports": {
 	  "./*": [
-		"./src/*.ts"
-	  ],
-	  "./mock": "./mock.ts"
+		"./src/*.ts",
+		"./src/*.tsx"
+	  ]
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@answeroverflow/api": "workspace:^",

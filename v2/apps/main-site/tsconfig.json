@@ -1,0 +1,27 @@
+{
+	"extends": "@answeroverflow/tsconfig/react.json",
+	"compilerOptions": {
+		"baseUrl": "../../",
+		"types": ["vitest/globals", "node"],
+		"plugins": [
+			{
+				"name": "next"
+			}
+		],
+		"strictNullChecks": true
+	},
+	"include": [
+		"src",
+		"next.config.mjs",
+		"next-env.d.ts",
+		"postcss.config.cjs",
+		"tailwind.config.cjs",
+		"next-env.d.ts",
+		"../../reset.d.ts",
+		"vitest.config.ts",
+		".prettierrc.cjs",
+		"src/instrumentation.ts",
+		"__tests__",
+		".next/types/**/*.ts"
+	]
+}
