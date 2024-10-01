@@ -1,24 +1,28 @@
 {
-    "name": "answer-overflow",
-    "version": "1.0.0",
-    "sideEffects": false,
-    "scripts": {
-        "dev": "sst dev",
-        "typecheck": "bun --filter=* typecheck",
-        "dev:dbs": "docker-compose -f \"docker-compose.yml\" -f \"docker-compose-extras.yml\" up"
-    },
-    "dependencies": {
-        "@auth/core": "^0.35.0",
-        "@total-typescript/ts-reset": "^0.4.2",
-        "@typelytics/posthog": "^0.1.5",
-        "next": "^14.2.13",
-        "next-auth": "^4.24.7",
-        "posthog-node": "^4.2.0",
-        "redis": "^4.7.0",
-        "typescript": "^5.1.6"
-    },
-    "workspaces": [
-        "packages/*",
-        "apps/*"
-    ]
+  "name": "answer-overflow",
+  "version": "1.0.0",
+  "sideEffects": false,
+  "scripts": {
+    "dev": "bun --filter=* dev",
+    "dev:dbs": "docker-compose -f \"docker-compose.yml\" -f \"docker-compose-extras.yml\" up",
+    "typecheck": "bun --filter=* typecheck"
+  },
+  "dependencies": {
+    "@auth/core": "^0.35.0",
+    "@total-typescript/ts-reset": "^0.4.2",
+    "@typelytics/posthog": "^0.1.5",
+    "next": "^14.2.13",
+    "next-auth": "^4.24.7",
+    "posthog-node": "^4.2.0",
+    "redis": "^4.7.0",
+    "sst": "^3.1.43",
+    "typescript": "^5.1.6"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20240924.0"
+  }
 }

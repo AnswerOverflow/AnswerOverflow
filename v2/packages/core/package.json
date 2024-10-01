@@ -5,7 +5,6 @@
   "sideEffects": false,
   "exports": {
     "./*": [
-      "./src/*/index.ts",
       "./src/*.ts"
     ],
     "./mock": "./mock.ts"
@@ -27,6 +26,7 @@
   "dependencies": {
     "@answeroverflow/constants": "workspace:*",
     "@answeroverflow/utils": "workspace:*",
+    "@answeroverflow/env": "workspace:*",
     "@aws-sdk/client-s3": "^3.577.0",
     "@aws-sdk/lib-storage": "^3.578.0",
     "@elastic/elasticsearch": "^8.15.0",

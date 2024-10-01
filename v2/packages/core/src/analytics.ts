@@ -2,20 +2,20 @@ import { PostHog as PostHogQueryClient } from "@typelytics/posthog";
 import { events } from "./analytics.events";
 
 const posthogQueryClient =
-  process.env.POSTHOG_PERSONAL_API_KEY && process.env.POSTHOG_PROJECT_ID
+  sharedEnvs.POSTHOG_PERSONAL_API_KEY && sharedEnvs.POSTHOG_PROJECT_ID
     ? new PostHogQueryClient({
         events: events,
         host: "us.posthog.com",
-        apiKey: process.env.POSTHOG_PERSONAL_API_KEY,
-        projectId: process.env.POSTHOG_PROJECT_ID.toString(),
+        apiKey: sharedEnvs.POSTHOG_PERSONAL_API_KEY,
+        projectId: sharedEnvs.POSTHOG_PROJECT_ID.toString(),
       })
     : undefined;
 
 function getPosthogQueryClientForDashboard(opts: Options) {
   return new PostHogQueryClient({
     events,
-    apiKey: process.env.POSTHOG_PERSONAL_API_KEY!,
-    projectId: process.env.POSTHOG_PROJECT_ID!.toString(),
+    apiKey: sharedEnvs.POSTHOG_PERSONAL_API_KEY!,
+    projectId: sharedEnvs.POSTHOG_PROJECT_ID!.toString(),
     globalFilters: {
       filters: {
         compare: "exact",
@@ -42,10 +42,11 @@ type Options = {
 import type { DefaultSession } from "next-auth";
 import { PostHog as PostHogCaptureClient } from "posthog-node";
 import type { ServerProps } from "@answeroverflow/constants/analytics";
+import { sharedEnvs } from "@answeroverflow/env/shared";
 
-const apiKey = process.env.NEXT_PUBLIC_POSTHOG_TOKEN;
+const apiKey = sharedEnvs.NEXT_PUBLIC_POSTHOG_TOKEN;
 const shouldCollectAnalytics =
-  apiKey !== undefined && process.env.NODE_ENV !== "test";
+  apiKey !== undefined && sharedEnvs.NODE_ENV !== "test";
 
 const posthogCaptureClient = shouldCollectAnalytics
   ? new PostHogCaptureClient(apiKey)

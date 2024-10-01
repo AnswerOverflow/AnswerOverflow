@@ -1,6 +1,6 @@
 import type { Config } from "drizzle-kit";
 import dotenv from "dotenv";
-
+import { sharedEnvs } from "@answeroverflow/env/shared";
 dotenv.config({
   path: "../../.env",
 });
@@ -8,7 +8,7 @@ dotenv.config({
 // ps proxy has some issues w/ db push, so here's a workaround
 let dbUrl =
   // eslint-disable-next-line n/no-process-env
-  process.env.DATABASE_URL ?? "http://root:nonNullPassword@localhost:3900";
+  sharedEnvs.DATABASE_URL ?? "http://root:nonNullPassword@localhost:3900";
 if (dbUrl.includes("http") && dbUrl.includes("localhost")) {
   dbUrl = dbUrl.replace("http", "mysql");
   // remove from second : to @

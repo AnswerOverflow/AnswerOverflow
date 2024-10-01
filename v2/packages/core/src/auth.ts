@@ -111,13 +111,14 @@ import { getServerSession as getNextAuthSession } from "next-auth";
 import { CookieSerializeOptions } from "cookie";
 import { NextApiResponse } from "next";
 import { upsertDiscordAccount } from "./discord-account";
+import { sharedEnvs } from "@answeroverflow/env/shared";
 
 const hostname =
-  process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === "local"
+  sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV === "local"
     ? "localhost"
     : "answeroverflow.com";
 
-const useSecureCookies = process.env.NODE_ENV === "production";
+const useSecureCookies = sharedEnvs.NODE_ENV === "production";
 
 export module Auth {
   export type Session = Awaited<ReturnType<typeof getServerSession>>;
@@ -399,8 +400,8 @@ export module Auth {
     adapter: extendedAdapter as NextAuthOptions["adapter"],
     providers: [
       DiscordProvider({
-        clientId: process.env.DISCORD_CLIENT_ID!,
-        clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+        clientId: sharedEnvs.DISCORD_CLIENT_ID!,
+        clientSecret: sharedEnvs.DISCORD_CLIENT_SECRET!,
         authorization:
           "https://discord.com/api/oauth2/authorize?scope=identify+email+guilds",
       }),
@@ -516,7 +517,7 @@ export module Auth {
 
   export function getTenantCookieName() {
     return `${
-      process.env.NODE_ENV === "production" ? "__Host-" : "!"
+      sharedEnvs.NODE_ENV === "production" ? "__Host-" : "!"
     }answeroverflow.tenant-token`;
   }
 
@@ -526,7 +527,7 @@ export module Auth {
     return {
       httpOnly: true,
       sameSite: "strict",
-      secure: process.env.NODE_ENV === "production"!,
+      secure: sharedEnvs.NODE_ENV === "production"!,
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 1 month
       domain: "",
       path: "/",
@@ -536,7 +537,7 @@ export module Auth {
 
   export function getNextAuthCookieName() {
     const cookiePrefix =
-      process.env.NODE_ENV === "production" ? "__Secure-" : ""!;
+      sharedEnvs.NODE_ENV === "production" ? "__Secure-" : ""!;
     return `${cookiePrefix}next-auth.session-token`;
   }
 
@@ -750,8 +751,8 @@ export module Auth {
       throw new Error("No refresh token");
     }
     const params = new URLSearchParams();
-    params.append("client_id", process.env.DISCORD_CLIENT_ID!);
-    params.append("client_secret", process.env.DISCORD_CLIENT_SECRET!);
+    params.append("client_id", sharedEnvs.DISCORD_CLIENT_ID!);
+    params.append("client_secret", sharedEnvs.DISCORD_CLIENT_SECRET!);
     params.append("grant_type", "refresh_token");
     params.append("refresh_token", discord.refresh_token ?? "");
     try {
@@ -763,8 +764,8 @@ export module Auth {
       }
       await setRefreshTokenBeingUsed(discord.refresh_token, true);
       const body = {
-        client_id: process.env.DISCORD_CLIENT_ID!,
-        client_secret: process.env.DISCORD_CLIENT_SECRET!,
+        client_id: sharedEnvs.DISCORD_CLIENT_ID!,
+        client_secret: sharedEnvs.DISCORD_CLIENT_SECRET!,
         grant_type: "refresh_token",
         refresh_token: discord.refresh_token ?? "",
       };

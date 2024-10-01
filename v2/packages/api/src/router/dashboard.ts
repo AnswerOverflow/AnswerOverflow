@@ -8,6 +8,7 @@ import { Stripe } from "@answeroverflow/core/stripe";
 import { findManyDiscordAccountsById } from "@answeroverflow/core/discord-account";
 import { findManyChannelsById } from "@answeroverflow/core/channel";
 import { findServerById, updateServer } from "@answeroverflow/core/server";
+import { sharedEnvs } from "@answeroverflow/env/shared";
 const input = z.object({
   serverId: z.string(),
   from: z.date(),
@@ -136,7 +137,7 @@ export const dashboardRouter = router({
             return {
               ...server,
               status: "active",
-              stripeCheckoutUrl: process.env.STRIPE_CHECKOUT_URL ?? null,
+              stripeCheckoutUrl: sharedEnvs.STRIPE_CHECKOUT_URL ?? null,
               dateCancelationTakesEffect: cancelAt,
               dateSubscriptionRenews: currentPeriodEnd,
               dateTrialEnds: trialEnd,

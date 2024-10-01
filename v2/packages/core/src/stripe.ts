@@ -1,7 +1,8 @@
+import { sharedEnvs } from "@answeroverflow/env/shared";
 import { Stripe as StripeClient } from "stripe";
 
-const stripe = process.env.STRIPE_SECRET_KEY
-  ? new StripeClient(process.env.STRIPE_SECRET_KEY, {
+const stripe = sharedEnvs.STRIPE_SECRET_KEY
+  ? new StripeClient(sharedEnvs.STRIPE_SECRET_KEY, {
       apiVersion: "2024-06-20",
       typescript: true,
     })
@@ -52,7 +53,7 @@ export module Stripe {
   }) {
     return createPlanCheckoutSession({
       ...input,
-      planId: process.env.STRIPE_PRO_PLAN_PRICE_ID!,
+      planId: sharedEnvs.STRIPE_PRO_PLAN_PRICE_ID!,
     });
   }
 
@@ -63,7 +64,7 @@ export module Stripe {
   }) {
     return createPlanCheckoutSession({
       ...input,
-      planId: process.env.STRIPE_ENTERPRISE_PLAN_PRICE_ID!,
+      planId: sharedEnvs.STRIPE_ENTERPRISE_PLAN_PRICE_ID!,
     });
   }
 

@@ -1,3 +1,4 @@
+import { sharedEnvs } from "@answeroverflow/env/shared";
 import { createClient } from "redis";
 
 type RedisClientType = ReturnType<typeof createClient>;
@@ -11,7 +12,7 @@ export module Cache {
       return redisClient;
     }
     const cacheInstance = createClient({
-      url: process.env.REDIS_URL,
+      url: sharedEnvs.REDIS_URL,
     });
     process.on("exit", () => cleanupRedis);
 

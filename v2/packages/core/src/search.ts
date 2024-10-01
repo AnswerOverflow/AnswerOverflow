@@ -222,6 +222,7 @@ import { ChannelWithFlags, ServerWithFlags } from "./zod";
 import { findManyServersById } from "./server";
 import { findManyChannelsById } from "./channel";
 import { BaseMessageWithRelations } from "./schema";
+import { sharedEnvs } from "@answeroverflow/env/shared";
 
 declare global {
   // eslint-disable-next-line no-var, no-unused-vars
@@ -229,35 +230,32 @@ declare global {
 }
 
 function getElasticClient(): Elastic {
-  if (
-    process.env.NODE_ENV === "development" ||
-    process.env.NODE_ENV === "test"
-  ) {
+  if (sharedEnvs.NODE_ENV === "development" || sharedEnvs.NODE_ENV === "test") {
     return new Elastic({
-      node: process.env.ELASTICSEARCH_URL,
+      node: sharedEnvs.ELASTICSEARCH_URL,
       auth: {
-        password: process.env.ELASTICSEARCH_PASSWORD!,
-        username: process.env.ELASTICSEARCH_USERNAME!,
+        password: sharedEnvs.ELASTICSEARCH_PASSWORD!,
+        username: sharedEnvs.ELASTICSEARCH_USERNAME!,
       },
     });
-  } else if (process.env.NODE_ENV === "production") {
+  } else if (sharedEnvs.NODE_ENV === "production") {
     // Allow for building locally
-    if (!process.env.ELASTICSEARCH_CLOUD_ID) {
+    if (!sharedEnvs.ELASTICSEARCH_CLOUD_ID) {
       return new Elastic({
-        node: process.env.ELASTICSEARCH_URL,
+        node: sharedEnvs.ELASTICSEARCH_URL,
         auth: {
-          password: process.env.ELASTICSEARCH_PASSWORD!,
-          username: process.env.ELASTICSEARCH_USERNAME!,
+          password: sharedEnvs.ELASTICSEARCH_PASSWORD!,
+          username: sharedEnvs.ELASTICSEARCH_USERNAME!,
         },
       });
     } else {
       return new Elastic({
         cloud: {
-          id: process.env.ELASTICSEARCH_CLOUD_ID,
+          id: sharedEnvs.ELASTICSEARCH_CLOUD_ID,
         },
         auth: {
-          password: process.env.ELASTICSEARCH_PASSWORD!,
-          username: process.env.ELASTICSEARCH_USERNAME!,
+          password: sharedEnvs.ELASTICSEARCH_PASSWORD!,
+          username: sharedEnvs.ELASTICSEARCH_USERNAME!,
         },
       });
     }
@@ -271,7 +269,7 @@ export class Elastic extends Client {
 
   constructor(opts: ClientOptions) {
     super(opts);
-    this.messagesIndex = process.env.ELASTICSEARCH_MESSAGE_INDEX!;
+    this.messagesIndex = sharedEnvs.ELASTICSEARCH_MESSAGE_INDEX!;
   }
 
   public destroyMessagesIndex() {
@@ -342,7 +340,7 @@ export class Elastic extends Client {
       index: this.messagesIndex,
     });
     if (exists) {
-      if (process.env.NODE_ENV === "production") {
+      if (sharedEnvs.NODE_ENV === "production") {
         throw new Error("Messages index already exists. Cannot overwrite");
       } else {
         await this.destroyMessagesIndex();
@@ -366,7 +364,7 @@ export class Elastic extends Client {
         { update: { _index: this.messagesIndex, _id: message.id } },
         { doc: message, doc_as_upsert: true },
       ]),
-      refresh: process.env.NODE_ENV !== "production",
+      refresh: sharedEnvs.NODE_ENV !== "production",
     });
     if (result.errors) {
       console.error(
@@ -382,10 +380,10 @@ export class Elastic extends Client {
 
 export const elastic = global.elastic || getElasticClient();
 
-if (process.env.NODE_ENV !== "production") {
+if (sharedEnvs.NODE_ENV !== "production") {
   global.elastic = elastic;
 } else {
-  if (process.env.ENVIRONMENT === "discord-bot") {
+  if (sharedEnvs.ENVIRONMENT === "discord-bot") {
     global.elastic = elastic;
   }
 }

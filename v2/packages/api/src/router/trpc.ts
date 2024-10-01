@@ -2,6 +2,7 @@ import { TRPCError, initTRPC } from "@trpc/server";
 import type { Context } from "./context";
 import superjson from "superjson";
 import { Auth } from "@answeroverflow/core/auth";
+import { sharedEnvs } from "@answeroverflow/env/shared";
 
 export interface Meta {
   tenantAuthAccessible: boolean; // Whether this endpoint is accessible by tenant auth
@@ -64,7 +65,7 @@ export const getUserServersFromCtx = async (ctx: Context) => {
 
 const addUserServers = t.middleware(async ({ ctx, next }) => {
   // In a test environment, we manually populate it
-  if (ctx.caller === "web-client" && process.env.NODE_ENV !== "test") {
+  if (ctx.caller === "web-client" && sharedEnvs.NODE_ENV !== "test") {
     try {
       ctx.userServers = await getUserServersFromCtx(ctx);
     } catch (e) {

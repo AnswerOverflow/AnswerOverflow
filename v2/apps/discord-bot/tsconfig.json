@@ -1,0 +1,16 @@
+{
+	"extends": "@answeroverflow/tsconfig/base.json",
+	"compilerOptions": {
+		"jsx": "react",
+		"types": ["jest", "node", "@types/jest"],
+		"baseUrl": "../../",
+		"noEmitOnError": false
+	},
+	"include": [
+		"src",
+		"test",
+		"jest.config.ts",
+		"tsup.config.ts",
+		"../../reset.d.ts"
+	]
+}
