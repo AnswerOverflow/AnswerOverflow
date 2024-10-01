@@ -7,7 +7,6 @@
 		"@answeroverflow/api": "workspace:*",
 		"@answeroverflow/constants": "workspace:*",
 		"@answeroverflow/core": "workspace:*",
-		"@answeroverflow/discordjs-utils": "workspace:*",
 		"@answeroverflow/utils": "workspace:*",
 		"@answeroverflow/env": "workspace:*",
 		"@discordjs/builders": "^1.6.5",

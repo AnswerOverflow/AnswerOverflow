@@ -14,7 +14,6 @@ import {
 } from "discord.js";
 
 import { container } from "@sapphire/framework";
-import { sortMessagesById } from "@answeroverflow/discordjs-utils";
 import * as Sentry from "@sentry/node";
 import { Search } from "@answeroverflow/core/search";
 import {
@@ -36,6 +35,12 @@ import {
 } from "@answeroverflow/core/user-server-settings";
 import { upsertManyMessages } from "@answeroverflow/core/message-node";
 import { botEnv } from "@answeroverflow/env/bot";
+import { isSnowflakeLargerAsInt } from "../utils/snowflake";
+
+export function sortMessagesById<T extends Message>(messages: T[]) {
+  return messages.sort((a, b) => isSnowflakeLargerAsInt(a.id, b.id));
+}
+
 export async function indexServers(client: Client) {
   const indexingStartTime = Date.now();
   container.logger.info(`Indexing ${client.guilds.cache.size} servers`);

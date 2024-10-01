@@ -1,0 +1,10 @@
+{
+	"extends": "@answeroverflow/tsconfig/react.json",
+	"include": [
+		"../../reset.d.ts",
+		"postcss.config.cjs",
+		"tailwind.config.cjs",
+		"src",
+	],
+	"exclude": ["node_modules", "../../node_modules"]
+}
