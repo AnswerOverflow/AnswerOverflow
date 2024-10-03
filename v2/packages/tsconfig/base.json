@@ -16,6 +16,7 @@
 		"noUncheckedIndexedAccess": true,
 		"allowSyntheticDefaultImports": true,
 		"alwaysStrict": true,
+		"strictNullChecks": true,
 		"emitDecoratorMetadata": true,
 		"esModuleInterop": true,
 		"experimentalDecorators": true,
