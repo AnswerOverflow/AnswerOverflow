@@ -7,7 +7,7 @@
 		"dev": "bun with-env next dev --port 3002 --turbo",
 		"build": "bun with-env next build",
 		"start": "bun with-env next start --port 3002",
-		"type-check": "tsc --noEmit"
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@answeroverflow/core": "workspace:*",
