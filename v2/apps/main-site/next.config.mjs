@@ -39,10 +39,6 @@ const config = {
       "answer-overflow-discord-attachments.s3.amazonaws.com",
     ],
   },
-  // We already do linting on GH actions
-  eslint: {
-    ignoreDuringBuilds: !!process.env.CI,
-  },
   productionBrowserSourceMaps: true, // we're open source so why not
   rewrites: async () => {
     return [

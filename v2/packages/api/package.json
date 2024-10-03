@@ -8,14 +8,7 @@
 	"scripts": {
 		"typecheck": "tsc --noEmit",
 		"with-env": "dotenv -e ../../.env --",
-		"clean": "rm -rf .turbo node_modules coverage",
-		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --check .",
-		"lint": "eslint . && tsc --noEmit",
-		"lint:fix": "eslint . --fix",
-		"test": "pnpm with-env vitest run --coverage",
-		"test:watch": "pnpm with-env vitest",
-		"type-check": "tsc --noEmit"
+		"clean": "rm -rf .turbo node_modules coverage"
 	},
 	"dependencies": {
 		"@answeroverflow/constants": "workspace:*",

@@ -5,7 +5,8 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "strictNullChecks": true
   },
   "include": [
     "src",
@@ -15,9 +16,6 @@
     "tailwind.config.cjs",
     "next-env.d.ts",
     "../../reset.d.ts",
-    "vitest.config.ts",
-    ".prettierrc.cjs",
-    "__tests__",
     ".next/types/**/*.ts"
   ]
 }
