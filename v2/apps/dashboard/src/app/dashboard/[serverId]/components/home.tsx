@@ -195,11 +195,12 @@ export function QuestionsAndAnswersLineChart() {
   );
 }
 import { GoLinkExternal } from "react-icons/go";
-import Link from "@answeroverflow/ui/ui/link";
-import { trackEvent } from "@answeroverflow/hooks";
+import { Link } from "@answeroverflow/ui/ui/link";
+
 import { toast } from "react-toastify";
 import { Textarea } from "@answeroverflow/ui/ui/textarea";
 import { Button } from "@answeroverflow/ui/ui/button";
+import { trackEvent } from "@answeroverflow/ui/hooks/events";
 
 function ExternalLink({
   href,
