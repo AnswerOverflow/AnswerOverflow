@@ -1,2 +1,0 @@
-export const NUMBER_OF_CHANNEL_MESSAGES_TO_LOAD = 20;
-export const NUMBER_OF_THREADS_TO_LOAD = 20;
