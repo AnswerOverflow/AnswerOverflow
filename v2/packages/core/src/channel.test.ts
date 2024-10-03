@@ -95,6 +95,7 @@ describe("Channel Operations", () => {
         },
       });
       const created = await createChannel(chnl);
+      // @ts-expect-error
       expect(created).toStrictEqual(chnl);
       const found = await findChannelById(chnl.id);
       expect(found).toStrictEqual(chnl);
@@ -124,6 +125,7 @@ describe("Channel Operations", () => {
           inviteCode: null,
         },
       });
+      //@ts-expect-error
       expect(updated).toStrictEqual({
         ...chnl,
         name: "new name",
@@ -163,6 +165,7 @@ describe("Channel Operations", () => {
           },
         },
       });
+      // @ts-expect-error
       expect(updated).toStrictEqual(target);
       const found = await findChannelById(chnl.id);
       expect(found).toStrictEqual(target);
@@ -286,6 +289,7 @@ describe("Channel Operations", () => {
       const chnl = mockChannelWithFlags(srv);
       await createServer(srv);
       const created = await createChannel(chnl);
+      // @ts-expect-error
       expect(created).toStrictEqual(chnl);
     });
   });

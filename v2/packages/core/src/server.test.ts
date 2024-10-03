@@ -10,6 +10,7 @@ import { Server } from "./schema";
 import { addFlagsToServer, bitfieldToServerFlags } from "./utils/serverUtils";
 import { describe, expect, beforeEach, it } from "bun:test";
 import { mockServer } from "../mock";
+import { ServerWithFlags } from "./zod";
 let server: Server;
 
 beforeEach(() => {
@@ -57,9 +58,11 @@ describe("Server", () => {
     });
   });
   describe("Find Server By Id", () => {
-    let existing: Server;
+    let existing: ServerWithFlags & {
+      bitfield: number;
+    };
     beforeEach(async () => {
-      existing = await createServer(server);
+      existing = addFlagsToServer(await createServer(server));
     });
     it("should find server by id", async () => {
       const found = await findServerById(server.id);

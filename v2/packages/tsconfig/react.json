@@ -20,7 +20,7 @@
 		"resolveJsonModule": true,
 		"moduleResolution": "bundler",
 		"isolatedModules": true,
-		"jsx": "preserve"
+		"jsx": "react-jsx",
 	},
 	"include": [
 		"src",

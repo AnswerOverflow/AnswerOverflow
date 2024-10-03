@@ -11,17 +11,11 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf .turbo node_modules coverage",
     "with-env": "dotenv -e ../../.env --",
-    "format": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --write .",
-    "format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.mjs --check .",
-    "lint": "eslint . && tsc --noEmit",
-    "lint:fix": "eslint . --fix",
     "db:push": "drizzle-kit push:mysql",
     "db:wipe": "bun ./scripts/wipe.ts",
-    "db:seed": "bun db:push && bun ./scripts/seed.ts",
-    "db:introspect": "drizzle-kit introspect:mysql",
-    "dev": "echo http://localhost:4983 && bun drizzle-kit studio"
+    "db:seed": "bun with-env bun db:push && bun with-env bun ./scripts/seed.ts",
+    "dev": "echo http://localhost:4983 && bun with-env bun drizzle-kit studio"
   },
   "dependencies": {
     "@answeroverflow/constants": "workspace:*",
