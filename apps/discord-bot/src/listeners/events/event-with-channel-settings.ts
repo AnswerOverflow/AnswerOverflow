@@ -18,6 +18,7 @@ export class OnMessageInChannelWithSettings extends Listener<Events.MessageCreat
 		if (!rootChannel) return;
 		const channel = await findChannelById(rootChannel.id);
 		if (!channel) return;
+		// @ts-expect-error todo: revisit
 		this.container.events.next({
 			action: 'messageCreate',
 			data: {

@@ -40,7 +40,6 @@ export function getCommandIds(ids: {
 		case 'ci':
 			return [];
 	}
-	return [];
 }
 
 /**

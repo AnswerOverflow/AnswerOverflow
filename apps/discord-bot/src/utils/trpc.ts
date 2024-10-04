@@ -4,8 +4,6 @@ import {
 	botRouter,
 	createBotContext,
 } from '@answeroverflow/api';
-import type { RendererableInteractions } from '@answeroverflow/discordjs-react';
-import { container } from '@sapphire/framework';
 import { TRPCError } from '@trpc/server';
 import {
 	ChatInputCommandInteraction,

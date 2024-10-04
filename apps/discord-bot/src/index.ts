@@ -12,8 +12,6 @@ Sentry.init({
 	tracesSampleRate: 0.1,
 });
 
-console.log('Hello, world!');
-
 import { createClient, login } from './utils/bot';
 
 const client = createClient();
