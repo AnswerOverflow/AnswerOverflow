@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"with-env": "dotenv -e ../../.env --",
-		"dev-next": "pnpm with-env next dev",
+		"dev-next": "bun with-env next dev",
 		"dev-proxy": "bun run scripts/proxy.ts",
 		"dev": "bun concurrently \"bun dev-next\" \"bun dev-proxy\"",
 		"build:prod": "bun with-env next build",

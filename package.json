@@ -7,7 +7,8 @@
 		"dev:dbs": "docker-compose -f \"docker-compose.yml\" -f \"docker-compose-extras.yml\" up",
 		"typecheck": "bun --filter=* typecheck",
 		"clean": "bun --filter=* clean && rm -rf node_modules",
-		"format": "biome check . --write"
+		"format": "biome check . --write",
+		"format:check": "biome check ."
 	},
 	"dependencies": {
 		"@total-typescript/ts-reset": "^0.4.2",
