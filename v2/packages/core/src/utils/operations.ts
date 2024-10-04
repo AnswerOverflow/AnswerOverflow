@@ -1,4 +1,4 @@
-import { type DBErrorCode, DBError } from './error';
+import { DBError, type DBErrorCode } from './error';
 
 interface UpsertOptions<T> {
 	find: () => Promise<T | null>;

@@ -1,11 +1,8 @@
 {
-  "extends": "@answeroverflow/tsconfig/base.json",
-  "compilerOptions": {
-    "allowJs": true,
-    "baseUrl": "../../../"
-  },
-  "include": [
-    "index.js",
-    "postcss.js"
-  ]
+	"extends": "@answeroverflow/tsconfig/base.json",
+	"compilerOptions": {
+		"allowJs": true,
+		"baseUrl": "../../../"
+	},
+	"include": ["index.js", "postcss.js"]
 }

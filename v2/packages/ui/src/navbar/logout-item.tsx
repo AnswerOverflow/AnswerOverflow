@@ -1,9 +1,9 @@
 'use client';
-import { DropdownMenuItem } from '../ui/dropdown-menu';
-import { LuLogOut } from 'react-icons/lu';
-import React from 'react';
-import { useRouter } from 'next/navigation';
 import type { ServerPublic } from '@answeroverflow/api';
+import { useRouter } from 'next/navigation';
+import React from 'react';
+import { LuLogOut } from 'react-icons/lu';
+import { DropdownMenuItem } from '../ui/dropdown-menu';
 
 export function LogoutItem(props: { tenant: ServerPublic | undefined }) {
 	const router = useRouter();

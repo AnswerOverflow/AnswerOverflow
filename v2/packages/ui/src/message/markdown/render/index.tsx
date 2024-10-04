@@ -6,9 +6,9 @@
 
 import memoize from 'memoizee';
 import * as R from 'ramda';
+import pkg from 'simple-markdown';
 import baseRules from './ast';
 import { astToString, flattenAst, recurse } from './util';
-import pkg from 'simple-markdown';
 const {
 	defaultRules,
 	inlineRegex,

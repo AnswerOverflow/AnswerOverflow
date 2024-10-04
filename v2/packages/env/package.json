@@ -4,10 +4,7 @@
 	"type": "module",
 	"sideEffects": false,
 	"exports": {
-	  "./*": [
-		"./src/*.ts",
-		"./src/*.mjs"
-	  ]
+		"./*": ["./src/*.ts", "./src/*.mjs"]
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",

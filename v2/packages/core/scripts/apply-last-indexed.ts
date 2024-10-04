@@ -6,15 +6,15 @@ The default for last indexed message will be 0 so this is needed to not reindex 
 Threads will be skipped as they are pretty cheap to index
 */
 
+import { ChannelType } from 'discord-api-types/v10';
+import { and, eq, or, sql } from 'drizzle-orm';
+import { updateChannel } from '../src/channel';
 import { db } from '../src/db';
 import { dbChannels, dbMessages } from '../src/schema';
-import { ChannelType } from 'discord-api-types/v10';
 import {
 	addFlagsToChannel,
 	channelBitfieldValues,
 } from '../src/zodSchemas/channelSchemas';
-import { and, eq, or, sql } from 'drizzle-orm';
-import { updateChannel } from '../src/channel';
 
 const applyLastIndexed = async () => {
 	const channelsWithIndexingEnabled = await db.query.dbChannels.findMany({

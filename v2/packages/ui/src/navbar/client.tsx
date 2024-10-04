@@ -10,9 +10,9 @@ export const ClientUserAvatar = dynamic(
 	},
 );
 
-import { SignInButton } from './sign-in-button';
-import { trpc } from '../utils/client';
 import type { ServerPublic } from '@answeroverflow/api';
+import { trpc } from '../utils/client';
+import { SignInButton } from './sign-in-button';
 
 export function UserSection(props: { tenant: ServerPublic | undefined }) {
 	const { tenant } = props;

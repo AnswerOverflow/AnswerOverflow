@@ -46,6 +46,6 @@
 		"exactOptionalPropertyTypes": false,
 		"noImplicitOverride": true,
 		"outDir": "dist",
-		"baseUrl": "."	
+		"baseUrl": "."
 	}
 }

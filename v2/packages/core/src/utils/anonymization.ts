@@ -1,8 +1,8 @@
 import {
-	uniqueNamesGenerator,
 	adjectives,
-	colors,
 	animals,
+	colors,
+	uniqueNamesGenerator,
 } from 'unique-names-generator';
 import { DiscordAccountPublic } from '../zodSchemas/discordAccountSchemas';
 

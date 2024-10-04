@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useTrackEvent } from "../hooks/client";
-import { EventMap } from "../hooks/events";
+import { useTrackEvent } from '../hooks/client';
+import { EventMap } from '../hooks/events';
 
 export function TrackLoad<K extends keyof EventMap | string>(props: {
-  eventName: K;
-  eventData: K extends keyof EventMap ? EventMap[K] : Record<string, unknown>;
-  runOnce?: boolean;
+	eventName: K;
+	eventData: K extends keyof EventMap ? EventMap[K] : Record<string, unknown>;
+	runOnce?: boolean;
 }) {
-  useTrackEvent(props.eventName, props.eventData, {
-    runOnce: props.runOnce,
-  });
-  return <></>;
+	useTrackEvent(props.eventName, props.eventData, {
+		runOnce: props.runOnce,
+	});
+	return <></>;
 }

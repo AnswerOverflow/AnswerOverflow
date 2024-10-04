@@ -1,5 +1,5 @@
-import { serverSchema } from '../schema';
 import { z } from 'zod';
+import { serverSchema } from '../schema';
 import { toDict } from '../utils/bitfieldUtils';
 
 export const serverSettingsFlags = [

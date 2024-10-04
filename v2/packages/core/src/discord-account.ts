@@ -1,21 +1,21 @@
+import { eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
+import { db } from './db';
 import {
-	upsertIgnoredDiscordAccount,
 	findIgnoredDiscordAccountById,
 	findManyIgnoredDiscordAccountsById,
+	upsertIgnoredDiscordAccount,
 } from './ignored-discord-account';
+import { deleteManyMessagesByUserId } from './message';
+import { dbDiscordAccounts, discordAccountSchema } from './schema';
+import { getDefaultDiscordAccount } from './utils/discordAccountUtils';
 import { DBError } from './utils/error';
 import { upsert, upsertMany } from './utils/operations';
-import { deleteManyMessagesByUserId } from './message';
-import { db } from './db';
-import { eq, inArray } from 'drizzle-orm';
-import { dbDiscordAccounts, discordAccountSchema } from './schema';
 import {
 	zDiscordAccountCreate,
 	zDiscordAccountUpdate,
 	zDiscordAccountUpsert,
 } from './zodSchemas/discordAccountSchemas';
-import { getDefaultDiscordAccount } from './utils/discordAccountUtils';
 
 export async function findDiscordAccountById(id: string) {
 	return db.query.dbDiscordAccounts.findFirst({

@@ -1,27 +1,27 @@
-import { z } from 'zod';
-import { upsertDiscordAccount } from './discord-account';
-import {
-	addFlagsToUserServerSettings,
-	userServerSettingsFlags,
-	UserServerSettingsWithFlags,
-} from './utils/userServerSettingsUtils';
-import { upsert } from './utils/operations';
-import { DBError } from './utils/error';
-import { db, dbReplica } from './db';
 import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
+import { z } from 'zod';
+import { db, dbReplica } from './db';
+import { upsertDiscordAccount } from './discord-account';
 import {
 	dbMessages,
 	dbUserServerSettings,
 	userServerSettingsSchema,
 } from './schema';
+import { dictToBitfield } from './utils/bitfieldUtils';
+import { DBError } from './utils/error';
+import { upsert } from './utils/operations';
+import { getDefaultUserServerSettingsWithFlags } from './utils/serverUtils';
+import {
+	UserServerSettingsWithFlags,
+	addFlagsToUserServerSettings,
+	userServerSettingsFlags,
+} from './utils/userServerSettingsUtils';
 import {
 	zUserServerSettingsCreate,
 	zUserServerSettingsCreateWithDeps,
 	zUserServerSettingsMutable,
 	zUserServerSettingsUpdate,
 } from './zodSchemas/userServerSettingsSchemas';
-import { getDefaultUserServerSettingsWithFlags } from './utils/serverUtils';
-import { dictToBitfield } from './utils/bitfieldUtils';
 
 export const CANNOT_GRANT_CONSENT_TO_PUBLICLY_DISPLAY_MESSAGES_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE =
 	'You cannot grant consent to publicly display messages with message indexing disabled. Enable messaging indexing first';

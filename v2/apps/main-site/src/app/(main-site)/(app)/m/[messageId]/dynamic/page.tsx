@@ -1,66 +1,66 @@
-import { MessageResultPage } from "@answeroverflow/ui/pages/MessageResultPage";
-import { notFound, redirect } from "next/navigation";
-import { callAPI } from "@answeroverflow/ui/utils/trpc";
-import type { Metadata } from "next";
-import { fetchIsUserInServer } from "@answeroverflow/ui/utils/fetch-is-user-in-server";
+import { MessageResultPage } from '@answeroverflow/ui/pages/MessageResultPage';
+import { fetchIsUserInServer } from '@answeroverflow/ui/utils/fetch-is-user-in-server';
+import { callAPI } from '@answeroverflow/ui/utils/trpc';
+import type { Metadata } from 'next';
+import { notFound, redirect } from 'next/navigation';
 type Props = {
-  params: { messageId: string };
-  searchParams?: { showAiChat?: boolean };
+	params: { messageId: string };
+	searchParams?: { showAiChat?: boolean };
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const data = await callAPI({
-    apiCall: (api) => api.messages.threadFromMessageId(params.messageId),
-    allowedErrors: "NOT_FOUND",
-  });
+	const data = await callAPI({
+		apiCall: (api) => api.messages.threadFromMessageId(params.messageId),
+		allowedErrors: 'NOT_FOUND',
+	});
 
-  if (!data) return {};
-  const firstMessage = data.messages.at(0);
-  const channelName = data.thread?.name ?? data.parentChannel.name;
-  const server = data.server;
-  const description =
-    firstMessage && firstMessage.content?.length > 0
-      ? firstMessage.content
-      : `Questions related to ${channelName} in ${server.name}`;
-  const title = data.thread?.name ?? firstMessage?.content ?? channelName;
-  return {
-    title: `${title} - ${server.name}`,
-    description,
-    openGraph: {
-      images: [`/og/post?id=${params.messageId}`],
-      title: `${title} - ${server.name}`,
-      description,
-    },
-    alternates: {
-      canonical: `/m/${data.thread?.id ?? params.messageId}`,
-    },
-  };
+	if (!data) return {};
+	const firstMessage = data.messages.at(0);
+	const channelName = data.thread?.name ?? data.parentChannel.name;
+	const server = data.server;
+	const description =
+		firstMessage && firstMessage.content?.length > 0
+			? firstMessage.content
+			: `Questions related to ${channelName} in ${server.name}`;
+	const title = data.thread?.name ?? firstMessage?.content ?? channelName;
+	return {
+		title: `${title} - ${server.name}`,
+		description,
+		openGraph: {
+			images: [`/og/post?id=${params.messageId}`],
+			title: `${title} - ${server.name}`,
+			description,
+		},
+		alternates: {
+			canonical: `/m/${data.thread?.id ?? params.messageId}`,
+		},
+	};
 }
 export default async function MessageResult({ params, searchParams }: Props) {
-  const data = await callAPI({
-    apiCall: (api) => api.messages.threadFromMessageId(params.messageId),
-    allowedErrors: "NOT_FOUND",
-  });
-  if (!data) {
-    return notFound();
-  }
-  if (data.server.customDomain) {
-    return redirect(
-      `https://${data.server.customDomain}/m/${params.messageId}`
-    );
-  }
-  const isInServer = await fetchIsUserInServer(data.server.id);
-  return (
-    <MessageResultPage
-      messages={data.messages}
-      showAIChat={searchParams?.showAiChat}
-      channel={data.parentChannel}
-      server={data.server}
-      tenant={undefined}
-      isUserInServer={isInServer}
-      requestedId={params.messageId}
-      relatedPosts={data.recommendedPosts}
-      thread={data.thread ?? undefined}
-    />
-  );
+	const data = await callAPI({
+		apiCall: (api) => api.messages.threadFromMessageId(params.messageId),
+		allowedErrors: 'NOT_FOUND',
+	});
+	if (!data) {
+		return notFound();
+	}
+	if (data.server.customDomain) {
+		return redirect(
+			`https://${data.server.customDomain}/m/${params.messageId}`,
+		);
+	}
+	const isInServer = await fetchIsUserInServer(data.server.id);
+	return (
+		<MessageResultPage
+			messages={data.messages}
+			showAIChat={searchParams?.showAiChat}
+			channel={data.parentChannel}
+			server={data.server}
+			tenant={undefined}
+			isUserInServer={isInServer}
+			requestedId={params.messageId}
+			relatedPosts={data.recommendedPosts}
+			thread={data.thread ?? undefined}
+		/>
+	);
 }

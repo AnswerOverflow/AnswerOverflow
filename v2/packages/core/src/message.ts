@@ -3,26 +3,26 @@
  If you'd like to take a crack at it please do
 */
 
-import { z } from 'zod';
-import { findAllThreadsByParentId } from './channel';
-import { ServerWithFlags } from './zodSchemas/serverSchemas';
-import { db, dbReplica } from './db';
-import {
-	BaseMessage,
-	DiscordAccount,
-	dbMessages,
-	Server,
-	UserServerSettings,
-	Attachment,
-	dbChannels,
-} from './schema';
-import { and, eq, gte, inArray, or, sql } from 'drizzle-orm';
-import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
-import { addFlagsToServer } from './utils/serverUtils';
 import { getRandomId } from '@answeroverflow/utils/id';
 import { pick } from '@answeroverflow/utils/select';
-import { zDiscordAccountPublic } from './zodSchemas/discordAccountSchemas';
+import { and, eq, gte, inArray, or, sql } from 'drizzle-orm';
+import { z } from 'zod';
+import { findAllThreadsByParentId } from './channel';
+import { db, dbReplica } from './db';
+import {
+	Attachment,
+	BaseMessage,
+	DiscordAccount,
+	Server,
+	UserServerSettings,
+	dbChannels,
+	dbMessages,
+} from './schema';
 import { anonymizeDiscordAccount } from './utils/anonymization';
+import { addFlagsToServer } from './utils/serverUtils';
+import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
+import { zDiscordAccountPublic } from './zodSchemas/discordAccountSchemas';
+import { ServerWithFlags } from './zodSchemas/serverSchemas';
 
 export const zFindMessagesByChannelId = z.object({
 	channelId: z.string(),

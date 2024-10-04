@@ -1,6 +1,6 @@
 {
-  "compilerOptions": {
-    "lib": ["esnext"],
-    "types": ["@cloudflare/workers-types"]
-  }
+	"compilerOptions": {
+		"lib": ["esnext"],
+		"types": ["@cloudflare/workers-types"]
+	}
 }

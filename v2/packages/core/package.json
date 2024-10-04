@@ -1,60 +1,58 @@
 {
-  "name": "@answeroverflow/core",
-  "version": "0.0.0",
-  "type": "module",
-  "sideEffects": false,
-  "exports": {
-    "./*": [
-      "./src/*.ts"
-    ],
-    "./mock": "./mock.ts"
-  },
-  "scripts": {
-    "typecheck": "tsc --noEmit",
-    "with-env": "dotenv -e ../../.env --",
-    "db:push": "drizzle-kit push:mysql",
-    "db:wipe": "bun ./scripts/wipe.ts",
-    "db:seed": "bun with-env bun db:push && bun with-env bun ./scripts/seed.ts",
-    "dev": "echo http://localhost:4983 && bun with-env bun drizzle-kit studio",
-    "clean": "rm -rf node_modules"
-  },
-  "dependencies": {
-    "@answeroverflow/constants": "workspace:*",
-    "@answeroverflow/utils": "workspace:*",
-    "@answeroverflow/env": "workspace:*",
-    "@aws-sdk/client-s3": "^3.577.0",
-    "@auth/core": "^0.35.0",
-    "@aws-sdk/lib-storage": "^3.578.0",
-    "@elastic/elasticsearch": "^8.15.0",
-    "@planetscale/database": "^1.11.0",
-    "next": "^14.2.13",
-    "next-auth": "^4.24.7",
-    "posthog-node": "^4.2.0",
-    "redis": "^4.7.0",
-    "@typelytics/posthog": "^0.1.5",
-    "@sapphire/bitfield": "^1.2.0",
-    "dataloader": "^2.2.2",
-    "discord-api-types": "^0.37.67",
-    "dotenv": "^16.4.5",
-    "dotenv-cra": "^3.0.3",
-    "drizzle-orm": "^0.28.5",
-    "drizzle-zod": "^0.5.1",
-    "elastic-builder": "^2.29.0",
-    "json-bigint": "^1.0.0",
-    "lodash": "^4.17.21",
-    "mysql2": "3.9.8",
-    "stripe": "^16.12.0",
-    "unique-names-generator": "^4.7.1",
-    "uploadthing": "^6.1.0",
-    "zod": "^3.22.2"
-  },
-  "devDependencies": {
-    "@answeroverflow/tsconfig": "workspace:*",
-    "@types/json-bigint": "^1.0.3",
-    "@types/lodash": "^4.14.202",
-    "@types/node": "^20.11.20",
-    "dotenv-cli": "^7.4.1",
-    "drizzle-kit": "^0.19.13",
-    "type-fest": "^4.26.1"
-  }
+	"name": "@answeroverflow/core",
+	"version": "0.0.0",
+	"type": "module",
+	"sideEffects": false,
+	"exports": {
+		"./*": ["./src/*.ts"],
+		"./mock": "./mock.ts"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit",
+		"with-env": "dotenv -e ../../.env --",
+		"db:push": "drizzle-kit push:mysql",
+		"db:wipe": "bun ./scripts/wipe.ts",
+		"db:seed": "bun with-env bun db:push && bun with-env bun ./scripts/seed.ts",
+		"dev": "echo http://localhost:4983 && bun with-env bun drizzle-kit studio",
+		"clean": "rm -rf node_modules"
+	},
+	"dependencies": {
+		"@answeroverflow/constants": "workspace:*",
+		"@answeroverflow/utils": "workspace:*",
+		"@answeroverflow/env": "workspace:*",
+		"@aws-sdk/client-s3": "^3.577.0",
+		"@auth/core": "^0.35.0",
+		"@aws-sdk/lib-storage": "^3.578.0",
+		"@elastic/elasticsearch": "^8.15.0",
+		"@planetscale/database": "^1.11.0",
+		"next": "^14.2.13",
+		"next-auth": "^4.24.7",
+		"posthog-node": "^4.2.0",
+		"redis": "^4.7.0",
+		"@typelytics/posthog": "^0.1.5",
+		"@sapphire/bitfield": "^1.2.0",
+		"dataloader": "^2.2.2",
+		"discord-api-types": "^0.37.67",
+		"dotenv": "^16.4.5",
+		"dotenv-cra": "^3.0.3",
+		"drizzle-orm": "^0.28.5",
+		"drizzle-zod": "^0.5.1",
+		"elastic-builder": "^2.29.0",
+		"json-bigint": "^1.0.0",
+		"lodash": "^4.17.21",
+		"mysql2": "3.9.8",
+		"stripe": "^16.12.0",
+		"unique-names-generator": "^4.7.1",
+		"uploadthing": "^6.1.0",
+		"zod": "^3.22.2"
+	},
+	"devDependencies": {
+		"@answeroverflow/tsconfig": "workspace:*",
+		"@types/json-bigint": "^1.0.3",
+		"@types/lodash": "^4.14.202",
+		"@types/node": "^20.11.20",
+		"dotenv-cli": "^7.4.1",
+		"drizzle-kit": "^0.19.13",
+		"type-fest": "^4.26.1"
+	}
 }

@@ -1,27 +1,27 @@
 // edge has issues so this is a workaround
 
-import { DBError } from './utils/error';
+import { eq, inArray, sql } from 'drizzle-orm';
+import { db } from './db';
 import {
 	findIgnoredDiscordAccountById,
 	findManyIgnoredDiscordAccountsById,
 } from './ignored-discord-account';
 import {
+	BaseMessageWithRelations,
+	attachmentSchema,
+	dbAttachments,
+	dbEmojis,
+	dbMessages,
+	dbReactions,
+	emojiSchema,
+	messageSchema,
+	reactionSchema,
+} from './schema';
+import {
 	findManyUserServerSettings,
 	findUserServerSettingsById,
 } from './user-server-settings';
-import { db } from './db';
-import {
-	BaseMessageWithRelations,
-	dbMessages,
-	dbAttachments,
-	dbReactions,
-	dbEmojis,
-	messageSchema,
-	attachmentSchema,
-	emojiSchema,
-	reactionSchema,
-} from './schema';
-import { eq, inArray, sql } from 'drizzle-orm';
+import { DBError } from './utils/error';
 
 // yes the way file uploading is handled here is bad, i'll fix it later i promise, i was young dumb and needed to ship
 import { uploadFileFromUrl } from './files';

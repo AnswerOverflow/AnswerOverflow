@@ -1,12 +1,12 @@
 'use client';
 
-import * as React from 'react';
 import { addDays, format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
-import { Select, SelectTrigger, SelectContent, SelectItem } from './select';
-import { Calendar } from './calendar';
-import { DateRange } from 'react-day-picker';
+import * as React from 'react';
 import { useState } from 'react';
+import { DateRange } from 'react-day-picker';
+import { Calendar } from './calendar';
+import { Select, SelectContent, SelectItem, SelectTrigger } from './select';
 
 export function DatePickerWithPresets(props: {
 	onValueChange?: (range: { to: Date; from: Date }) => void;

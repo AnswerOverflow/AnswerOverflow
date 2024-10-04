@@ -1,8 +1,8 @@
-import type { Server, User, UserServerSettings } from '../schema';
-import { addFlagsToUserServerSettings } from './userServerSettingsUtils';
-import { bitfieldToDict, dictToBitfield, mergeFlags } from './bitfieldUtils';
-import { serverSettingsFlags } from '../zodSchemas/serverSchemas';
 import { getRandomId } from '@answeroverflow/utils/id';
+import type { Server, User, UserServerSettings } from '../schema';
+import { serverSettingsFlags } from '../zodSchemas/serverSchemas';
+import { bitfieldToDict, dictToBitfield, mergeFlags } from './bitfieldUtils';
+import { addFlagsToUserServerSettings } from './userServerSettingsUtils';
 
 export const bitfieldToServerFlags = (bitfield: number) =>
 	bitfieldToDict(bitfield, serverSettingsFlags);

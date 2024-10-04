@@ -1,9 +1,9 @@
 'use client';
-import React, { useEffect, useRef } from 'react';
-import { EventMap, trackEvent } from './events';
 import { usePathname, useSearchParams } from 'next/navigation';
 import posthog from 'posthog-js';
 import { PostHogProvider, usePostHog } from 'posthog-js/react';
+import React, { useEffect, useRef } from 'react';
+import { EventMap, trackEvent } from './events';
 
 if (typeof window !== 'undefined') {
 	// eslint-disable-next-line n/no-process-env

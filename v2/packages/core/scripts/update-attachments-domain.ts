@@ -1,6 +1,6 @@
+import { eq, inArray, sql } from 'drizzle-orm';
 import { db } from '../src/db';
 import { dbAttachments } from '../src/schema';
-import { eq, inArray, sql } from 'drizzle-orm';
 async function run() {
 	// const attachments = await db
 	// 	.select()

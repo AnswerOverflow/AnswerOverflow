@@ -1,6 +1,6 @@
-import { zDiscordAccountUpsert } from './discordAccountSchemas';
 import { z } from 'zod';
 import { userServerSettingsSchema } from '../schema';
+import { zDiscordAccountUpsert } from './discordAccountSchemas';
 
 export const zUserServerSettingsFlags = z.object({
 	canPubliclyDisplayMessages: z.boolean(),

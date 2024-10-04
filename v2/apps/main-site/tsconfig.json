@@ -1,23 +1,23 @@
 {
-  "extends": "@answeroverflow/tsconfig/react.json",
-  "compilerOptions": {
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
-  },
-  "include": [
-    "src",
-    "next.config.mjs",
-    "next-env.d.ts",
-    "postcss.config.cjs",
-    "tailwind.config.cjs",
-    "next-env.d.ts",
-    "../../reset.d.ts",
-    "vitest.config.ts",
-    "src/instrumentation.ts",
-    "__tests__",
-    ".next/types/**/*.ts"
-  ]
+	"extends": "@answeroverflow/tsconfig/react.json",
+	"compilerOptions": {
+		"plugins": [
+			{
+				"name": "next"
+			}
+		]
+	},
+	"include": [
+		"src",
+		"next.config.mjs",
+		"next-env.d.ts",
+		"postcss.config.cjs",
+		"tailwind.config.cjs",
+		"next-env.d.ts",
+		"../../reset.d.ts",
+		"vitest.config.ts",
+		"src/instrumentation.ts",
+		"__tests__",
+		".next/types/**/*.ts"
+	]
 }

@@ -1,8 +1,8 @@
-import { z } from 'zod';
 import { ChannelType } from 'discord-api-types/v10';
-import { zServerUpsert } from './serverSchemas';
-import { bitfieldToDict } from '../utils/bitfieldUtils';
+import { z } from 'zod';
 import { channelSchema } from '../schema';
+import { bitfieldToDict } from '../utils/bitfieldUtils';
+import { zServerUpsert } from './serverSchemas';
 
 export const ALLOWED_THREAD_TYPES = new Set([
 	ChannelType.PublicThread,

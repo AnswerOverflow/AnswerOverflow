@@ -1,6 +1,6 @@
+import { UTApi } from 'uploadthing/server';
 import { db } from '../src/db';
 import { dbAttachments } from '../src/schema';
-import { UTApi } from 'uploadthing/server';
 
 export const utapi = new UTApi();
 const applyLastIndexed = async () => {

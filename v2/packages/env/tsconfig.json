@@ -1,6 +1,4 @@
 {
 	"extends": "@answeroverflow/tsconfig/base.json",
-	"include": [
-		"src"
-	]
+	"include": ["src"]
 }

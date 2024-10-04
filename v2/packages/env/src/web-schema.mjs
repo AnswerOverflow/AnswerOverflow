@@ -1,8 +1,8 @@
 /* eslint-disable n/no-process-env */
 
-import { sharedEnvs, nodeEnv, sharedClientEnvs } from './shared-schema.mjs';
 import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod';
+import { nodeEnv, sharedClientEnvs, sharedEnvs } from './shared-schema.mjs';
 import { zStringRequiredInProduction } from './shared-schema.mjs';
 
 export const webServerEnv = sharedEnvs;

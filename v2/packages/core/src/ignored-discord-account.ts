@@ -1,8 +1,8 @@
-import { findDiscordAccountById } from './discord-account';
-import { DBError } from './utils/error';
-import { db } from './db';
-import { dbIgnoredDiscordAccounts } from './schema';
 import { eq, inArray } from 'drizzle-orm';
+import { db } from './db';
+import { findDiscordAccountById } from './discord-account';
+import { dbIgnoredDiscordAccounts } from './schema';
+import { DBError } from './utils/error';
 
 export function findIgnoredDiscordAccountById(id: string) {
 	return db.query.dbIgnoredDiscordAccounts.findFirst({

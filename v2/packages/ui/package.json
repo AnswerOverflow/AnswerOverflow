@@ -4,10 +4,7 @@
 	"type": "module",
 	"sideEffects": false,
 	"exports": {
-		"./*": [
-			"./src/*.ts",
-			"./src/*.tsx"
-		]
+		"./*": ["./src/*.ts", "./src/*.tsx"]
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",

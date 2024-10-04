@@ -1,31 +1,30 @@
 {
-  "name": "answer-overflow",
-  "version": "1.0.0",
-  "sideEffects": false,
-  "scripts": {
-    "dev": "bun --filter=* dev",
-    "dev:dbs": "docker-compose -f \"docker-compose.yml\" -f \"docker-compose-extras.yml\" up",
-    "typecheck": "bun --filter=* typecheck",
-    "clean": "bun --filter=* clean && rm -rf node_modules"
-  },
-  "dependencies": {
-    "@total-typescript/ts-reset": "^0.4.2",
-    "sst": "^3.1.43",
-    "typescript": "^5.1.6"
-  },
-  "workspaces": [
-    "packages/*",
-    "apps/*"
-  ],
-  "patchedDependencies": {
-    "simple-markdown@0.7.3": "patches/simple-markdown@0.7.3.patch",
-    "@opentelemetry/otlp-exporter-base@0.52.0": "patches/@opentelemetry__otlp-exporter-base@0.52.0.patch"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "4.20240924.0"
-},
-"overrides": {
-  "@types/react": "npm:types-react@rc",
-  "@types/react-dom": "npm:types-react-dom@rc"
-}
+	"name": "answer-overflow",
+	"version": "1.0.0",
+	"sideEffects": false,
+	"scripts": {
+		"dev": "bun --filter=* dev",
+		"dev:dbs": "docker-compose -f \"docker-compose.yml\" -f \"docker-compose-extras.yml\" up",
+		"typecheck": "bun --filter=* typecheck",
+		"clean": "bun --filter=* clean && rm -rf node_modules",
+		"format": "biome check . --write"
+	},
+	"dependencies": {
+		"@total-typescript/ts-reset": "^0.4.2",
+		"sst": "^3.1.43",
+		"typescript": "^5.1.6"
+	},
+	"workspaces": ["packages/*", "apps/*"],
+	"patchedDependencies": {
+		"simple-markdown@0.7.3": "patches/simple-markdown@0.7.3.patch",
+		"@opentelemetry/otlp-exporter-base@0.52.0": "patches/@opentelemetry__otlp-exporter-base@0.52.0.patch"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.3",
+		"@cloudflare/workers-types": "4.20240924.0"
+	},
+	"overrides": {
+		"@types/react": "npm:types-react@rc",
+		"@types/react-dom": "npm:types-react-dom@rc"
+	}
 }

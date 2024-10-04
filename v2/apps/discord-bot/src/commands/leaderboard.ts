@@ -10,7 +10,7 @@ import {
 
 import { Analytics } from '@answeroverflow/core/analytics';
 import { makeDismissButton } from '../domains/dismiss-button';
-import { trackDiscordEvent, memberToAnalyticsUser } from '../utils/analytics';
+import { memberToAnalyticsUser, trackDiscordEvent } from '../utils/analytics';
 import { getCommandIds } from '../utils/utils';
 
 const medalMap = new Map<number, string>([
