@@ -56,9 +56,5 @@
     "dotenv-cli": "^7.4.1",
     "drizzle-kit": "^0.19.13",
     "type-fest": "^4.26.1"
-  },
-  "overrides": {
-    "@types/react": "npm:types-react@rc",
-    "@types/react-dom": "npm:types-react-dom@rc"
   }
 }
