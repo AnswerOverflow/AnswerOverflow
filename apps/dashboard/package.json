@@ -6,7 +6,7 @@
 	"scripts": {
 		"with-env": "dotenv -e ../../.env --",
 		"dev": "bun with-env next dev --port 3002 --turbo",
-		"build": "bun with-env next build",
+		"build:prod": "bun with-env next build",
 		"start": "bun with-env next start --port 3002",
 		"typecheck": "tsc --noEmit",
 		"clean": "rm -rf node_modules .next"

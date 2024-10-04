@@ -53,8 +53,8 @@
 	"scripts": {
 		"with-env": "dotenv -e ../../.env --",
 		"start": "bun with-env bun run .",
-		"test": "bun build-deps && bun with-env jest --coverage",
-		"test:watch": "bun with-env jest --watch",
-		"clean": "rm -rf node_modules"
+		"clean": "rm -rf node_modules",
+		"typecheck": "tsc --noEmit",
+		"dev": "bun with-env tsc-watch --onSuccess \"bun run .\""
 	}
 }
