@@ -1,258 +1,250 @@
 // Reference: https://medium.com/rewrite-tech/visual-studio-code-tips-for-monorepo-development-with-multi-root-workspaces-and-extension-6b69420ecd12
 {
-  "folders": [
-    {
-      //
-      "name": "main-site",
-      "path": "apps/main-site"
-    },
-    {
-      //
-      "name": "main-site-astro",
-      "path": "apps/main-site-astro"
-    },
-    {
-      "name": "dashboard",
-      "path": "apps/dashboard"
-    },
-    {
-      "name": "docs",
-      "path": "apps/docs"
-    },
-    {
-      //
-      "name": "discord-bot",
-      "path": "apps/discord-bot"
-    },
-    {
-      "name": "discordjs-mock",
-      "path": "packages/discordjs-mock"
-    },
-    {
-      "name": "discordjs-utils",
-      "path": "packages/discordjs-utils"
-    },
-    {
-      "name": "ui",
-      "path": "packages/ui"
-    },
-    {
-      "name": "hooks",
-      "path": "packages/hooks"
-    },
-    {
-      "name": "constants",
-      "path": "packages/constants"
-    },
-    {
-      "name": "api",
-      "path": "packages/api"
-    },
-    {
-      "name": "auth",
-      "path": "packages/auth"
-    },
-    {
-      "analytics": "analytics",
-      "path": "packages/analytics"
-    },
-    {
-      "name": "db",
-      "path": "packages/db"
-    },
-    {
-      "name": "db-mock",
-      "path": "packages/db-mock"
-    },
-    {
-      "name": "cache",
-      "path": "packages/cache"
-    },
-    {
-      "name": "search",
-      "path": "packages/search"
-    },
-    {
-      "name": "utils",
-      "path": "packages/utils"
-    },
-    {
-      "name": "config",
-      "path": "packages/config"
-    },
-    {
-      "name": "root",
-      "path": "./"
-    }
-  ],
-  "settings": {
-    /*
+	"folders": [
+		{
+			//
+			"name": "main-site",
+			"path": "apps/main-site"
+		},
+		{
+			//
+			"name": "main-site-astro",
+			"path": "apps/main-site-astro"
+		},
+		{
+			"name": "dashboard",
+			"path": "apps/dashboard"
+		},
+		{
+			"name": "docs",
+			"path": "apps/docs"
+		},
+		{
+			//
+			"name": "discord-bot",
+			"path": "apps/discord-bot"
+		},
+		{
+			"name": "discordjs-mock",
+			"path": "packages/discordjs-mock"
+		},
+		{
+			"name": "discordjs-utils",
+			"path": "packages/discordjs-utils"
+		},
+		{
+			"name": "ui",
+			"path": "packages/ui"
+		},
+		{
+			"name": "hooks",
+			"path": "packages/hooks"
+		},
+		{
+			"name": "constants",
+			"path": "packages/constants"
+		},
+		{
+			"name": "api",
+			"path": "packages/api"
+		},
+		{
+			"name": "auth",
+			"path": "packages/auth"
+		},
+		{
+			"analytics": "analytics",
+			"path": "packages/analytics"
+		},
+		{
+			"name": "db",
+			"path": "packages/db"
+		},
+		{
+			"name": "db-mock",
+			"path": "packages/db-mock"
+		},
+		{
+			"name": "cache",
+			"path": "packages/cache"
+		},
+		{
+			"name": "search",
+			"path": "packages/search"
+		},
+		{
+			"name": "utils",
+			"path": "packages/utils"
+		},
+		{
+			"name": "config",
+			"path": "packages/config"
+		},
+		{
+			"name": "root",
+			"path": "./"
+		}
+	],
+	"settings": {
+		/*
     LINTING & FORMATTING
     */
-    "mdx.experimentalLanguageServer": true,
-    "editor.formatOnSave": true,
-    "eslint.format.enable": false,
-    "eslint.validate": [
-      "javascript",
-      "javascriptreact",
-      "html",
-      "typescriptreact",
-      "typescript"
-    ],
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "never"
-    },
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "prettier.requireConfig": true,
-    "prettier.configPath": ".prettierrc.mjs",
-    "javascript.suggest.autoImports": true,
-    "javascript.updateImportsOnFileMove.enabled": "always",
-    "typescript.tsserver.experimental.enableProjectDiagnostics": true,
-    "[typescript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[json]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "tailwindCSS.includeLanguages": {
-      "plaintext": "html",
-      "astro": "html"
-    },
-    "files.associations": {
-      "*.css": "tailwindcss"
-    },
-    "[markdown]": {
-      "editor.defaultFormatter": "unifiedjs.vscode-mdx"
-    },
-    "tailwindCSS.experimental.classRegex": [
-      [
-        "cva\\(([^)]*)\\)",
-        "[\"'`]([^\"'`]*).*?[\"'`]"
-      ]
-    ],
-    "typescript.autoClosingTags": true,
-    /*
+		"mdx.experimentalLanguageServer": true,
+		"editor.formatOnSave": true,
+		"eslint.format.enable": false,
+		"eslint.validate": [
+			"javascript",
+			"javascriptreact",
+			"html",
+			"typescriptreact",
+			"typescript"
+		],
+		"editor.codeActionsOnSave": {
+			"source.fixAll.eslint": "never"
+		},
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"prettier.requireConfig": true,
+		"prettier.configPath": ".prettierrc.mjs",
+		"javascript.suggest.autoImports": true,
+		"javascript.updateImportsOnFileMove.enabled": "always",
+		"typescript.tsserver.experimental.enableProjectDiagnostics": true,
+		"[typescript]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode"
+		},
+		"[json]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode"
+		},
+		"tailwindCSS.includeLanguages": {
+			"plaintext": "html",
+			"astro": "html"
+		},
+		"files.associations": {
+			"*.css": "tailwindcss"
+		},
+		"[markdown]": {
+			"editor.defaultFormatter": "unifiedjs.vscode-mdx"
+		},
+		"tailwindCSS.experimental.classRegex": [
+			["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+		],
+		"typescript.autoClosingTags": true,
+		/*
       EDITOR STYLE
     */
-    // "prettier.prettierPath": "./node_modules/prettier",
-    "editor.wordWrap": "on",
-    "editor.tabSize": 2,
-    "explorer.fileNesting.enabled": true,
-    "explorer.fileNesting.patterns": {
-      "*": "${basename}.*.${extname}",
-      "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml"
-    },
-    "explorer.fileNesting.expand": false,
-    "prettier.ignorePath": ".prettierignore",
-    "editor.bracketPairColorization.enabled": true,
-    "editor.guides.bracketPairs": "active",
-    "editor.quickSuggestions": {
-      "strings": true
-    },
-    "files.exclude": {
-      // "**/node_modules": true,
-      "**/coverage/": true,
-      // "**/.next": true,
-      "**/.turbo": true
-      // "**/dist": true,
-    },
-    "search.useParentIgnoreFiles": true,
-    /*
+		// "prettier.prettierPath": "./node_modules/prettier",
+		"editor.wordWrap": "on",
+		"editor.tabSize": 2,
+		"explorer.fileNesting.enabled": true,
+		"explorer.fileNesting.patterns": {
+			"*": "${basename}.*.${extname}",
+			"package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml"
+		},
+		"explorer.fileNesting.expand": false,
+		"prettier.ignorePath": ".prettierignore",
+		"editor.bracketPairColorization.enabled": true,
+		"editor.guides.bracketPairs": "active",
+		"editor.quickSuggestions": {
+			"strings": true
+		},
+		"files.exclude": {
+			// "**/node_modules": true,
+			"**/coverage/": true,
+			// "**/.next": true,
+			"**/.turbo": true
+			// "**/dist": true,
+		},
+		"search.useParentIgnoreFiles": true,
+		/*
       TESTING
     */
-    "jest.disabledWorkspaceFolders": [
-      "root",
-      "api",
-      "ui",
-      "main-site",
-      "db",
-      "auth",
-      "config",
-      "utils",
-      "redis",
-      "hooks",
-      "analytics",
-      "db-mock",
-      "constants",
-      "search",
-      "cache",
-      "docs"
-    ],
-    "jest.autoRevealOutput": "off",
-    "vitest.enable": true,
-    "vitest.disabledWorkspaceFolders": [
-      "root",
-      "discord-bot"
-    ],
-    "jest.autoRun": "off",
-    /*
+		"jest.disabledWorkspaceFolders": [
+			"root",
+			"api",
+			"ui",
+			"main-site",
+			"db",
+			"auth",
+			"config",
+			"utils",
+			"redis",
+			"hooks",
+			"analytics",
+			"db-mock",
+			"constants",
+			"search",
+			"cache",
+			"docs"
+		],
+		"jest.autoRevealOutput": "off",
+		"vitest.enable": true,
+		"vitest.disabledWorkspaceFolders": ["root", "discord-bot"],
+		"jest.autoRun": "off",
+		/*
       MISC
     */
-    "cSpell.words": [
-      "Anson",
-      "answeroverflow",
-      "AUTOTHREAD",
-      "Bitfield",
-      "Blurrer",
-      "Bools",
-      "chnl",
-      "Codespaces",
-      "dbaeumer",
-      "devcontainer",
-      "devcontainers",
-      "dismisser",
-      "extensionpack",
-      "nextjs",
-      "Nextra",
-      "orta",
-      "pageview",
-      "posthog",
-      "postpublish",
-      "reacord",
-      "Rendererable",
-      "Rhys",
-      "Roadmap",
-      "superjson",
-      "tagless",
-      "tailwindcss",
-      "threadable",
-      "trpc",
-      "tsup",
-      "Turborepo",
-      "twoslash",
-      "unauthed",
-      "undelete",
-      "unoptimized",
-      "upsert",
-      "upserted",
-      "upserting",
-      "upvote",
-      "WAITLIST"
-    ],
-    "cSpell.enableFiletypes": [
-      "mdx"
-    ],
-    "typescript.tsdk": "root/node_modules/typescript/lib",
-  },
-  "extensions": {
-    "recommendations": [
-      "vscode-icons-team.vscode-icons",
-      "astro-build.astro-vscode",
-      "ms-vscode-remote.vscode-remote-extensionpack",
-      "orta.vscode-twoslash-queries",
-      "dbaeumer.vscode-eslint",
-      "GitHub.copilot",
-      "eamodio.gitlens",
-      "aaron-bond.better-comments",
-      "ZixuanChen.vitest-explorer",
-      "EditorConfig.EditorConfig",
-      "bradlc.vscode-tailwindcss",
-      "DavidAnson.vscode-markdownlint",
-      "Orta.vscode-jest",
-      "unifiedjs.vscode-mdx",
-      "usernamehw.errorlens",
-      "esbenp.prettier-vscode",
-      "streetsidesoftware.code-spell-checker",
-    ]
-  }
+		"cSpell.words": [
+			"Anson",
+			"answeroverflow",
+			"AUTOTHREAD",
+			"Bitfield",
+			"Blurrer",
+			"Bools",
+			"chnl",
+			"Codespaces",
+			"dbaeumer",
+			"devcontainer",
+			"devcontainers",
+			"dismisser",
+			"extensionpack",
+			"nextjs",
+			"Nextra",
+			"orta",
+			"pageview",
+			"posthog",
+			"postpublish",
+			"reacord",
+			"Rendererable",
+			"Rhys",
+			"Roadmap",
+			"superjson",
+			"tagless",
+			"tailwindcss",
+			"threadable",
+			"trpc",
+			"tsup",
+			"Turborepo",
+			"twoslash",
+			"unauthed",
+			"undelete",
+			"unoptimized",
+			"upsert",
+			"upserted",
+			"upserting",
+			"upvote",
+			"WAITLIST"
+		],
+		"cSpell.enableFiletypes": ["mdx"],
+		"typescript.tsdk": "root/node_modules/typescript/lib"
+	},
+	"extensions": {
+		"recommendations": [
+			"vscode-icons-team.vscode-icons",
+			"astro-build.astro-vscode",
+			"ms-vscode-remote.vscode-remote-extensionpack",
+			"orta.vscode-twoslash-queries",
+			"dbaeumer.vscode-eslint",
+			"GitHub.copilot",
+			"eamodio.gitlens",
+			"aaron-bond.better-comments",
+			"ZixuanChen.vitest-explorer",
+			"EditorConfig.EditorConfig",
+			"bradlc.vscode-tailwindcss",
+			"DavidAnson.vscode-markdownlint",
+			"Orta.vscode-jest",
+			"unifiedjs.vscode-mdx",
+			"usernamehw.errorlens",
+			"esbenp.prettier-vscode",
+			"streetsidesoftware.code-spell-checker"
+		]
+	}
 }

@@ -1,16 +1,16 @@
 import {
 	type AnyThreadChannel,
 	ChannelType,
-	Client,
-	ForumChannel,
-	Guild,
+	type Client,
+	type ForumChannel,
+	type Guild,
 	type GuildBasedChannel,
 	type GuildTextBasedChannel,
-	Message,
-	NewsChannel,
+	type Message,
+	type NewsChannel,
 	type Snowflake,
 	type TextBasedChannel,
-	TextChannel,
+	type TextChannel,
 } from 'discord.js';
 
 import {
@@ -128,7 +128,7 @@ export async function indexRootChannel(
 			if (
 				!fetched.hasMore ||
 				!last ||
-				fetched.threads.size == 0 ||
+				fetched.threads.size === 0 ||
 				isLastThreadOlderThanCutoff
 			)
 				return;
@@ -338,10 +338,13 @@ async function storeIndexData(
 		`Upserting ${convertedUsers.length} discord accounts `,
 	);
 	await upsertManyDiscordAccounts(convertedUsers);
-	const bots = filteredMessages.filter((x) => x.author.bot);
+	const botMessages = filteredMessages.filter((x) => x.author.bot);
+	const bots = [
+		...new Map(botMessages.map((x) => [x.author.id, x.author])).values(),
+	];
 	if (bots.length > 0) {
 		await Promise.all(
-			bots.map(async (bot) => {
+			botMessages.map(async (bot) => {
 				return upsertUserServerSettingsWithDeps({
 					serverId: channel.guildId,
 					user: toAODiscordAccount(bot.author),

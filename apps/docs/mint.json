@@ -1,85 +1,77 @@
 {
-  "$schema": "https://mintlify.com/schema.json",
-  "name": "Answer Overflow",
-  "favicon": "/favicon-32x32.png",
-  "colors": {
-    "primary": "#88c7e4",
-    "light": "#7dabd2",
-    "dark": "#79a6cc",
-    "anchors": {
-      "from": "#79a6cc",
-      "to": "#98d0ff"
-    }
-  },
-  "topbarLinks": [
-    {
-      "name": "Support",
-      "url": "mailto:contact@answeroverflow.com"
-    }
-  ],
-  "topbarCtaButton": {
-    "name": "Dashboard",
-    "url": "https://app.answeroverflow.com"
-  },
-  "anchors": [
-    {
-      "name": "Community",
-      "icon": "discord",
-      "url": "https://discord.answeroverflow.com"
-    }
-  ],
-  "navigation": [
-    {
-      "group": "Essentials",
-      "pages": [
-        "overview",
-        "quick-start",
-        "recommended-setup"
-      ]
-    },
-    {
-      "group": "Channel Settings",
-      "pages": [
-        "channel-settings/auto-thread",
-        "channel-settings/forum-guidelines-consent",
-        "channel-settings/indexing",
-        "channel-settings/mark-solution",
-        "channel-settings/send-mark-solution-instructions",
-        "channel-settings/solved-tag"
-      ]
-    },
-    {
-      "group": "Server Settings",
-      "pages": [
-        "server-settings/read-the-rules-consent"
-      ]
-    },
-    {
-      "group": "User Settings",
-      "pages": [
-        "user-settings/displaying-messages",
-        "user-settings/globally-ignore-account",
-        "user-settings/ignore-account-in-server"
-      ]
-    },
-    {
-      "group": "Integrations",
-      "pages": [
-        "integrations/inkeep"
-      ]
-    },
-    {
-      "group": "Changelog",
-      "pages": [
-        "changelog/solved-posts-now-auto-archive",
-        "changelog/introducing-the-answer-overflow-public-platform",
-        "changelog/app-router",
-        "changelog/answeroverflow-now-has-a-changelog"
-      ]
-    }
-  ],
-  "footerSocials": {
-    "x": "https://x.com/rhyssullivan",
-    "github": "https://github.com/answeroverflow"
-  }
+	"$schema": "https://mintlify.com/schema.json",
+	"name": "Answer Overflow",
+	"favicon": "/favicon-32x32.png",
+	"colors": {
+		"primary": "#88c7e4",
+		"light": "#7dabd2",
+		"dark": "#79a6cc",
+		"anchors": {
+			"from": "#79a6cc",
+			"to": "#98d0ff"
+		}
+	},
+	"topbarLinks": [
+		{
+			"name": "Support",
+			"url": "mailto:contact@answeroverflow.com"
+		}
+	],
+	"topbarCtaButton": {
+		"name": "Dashboard",
+		"url": "https://app.answeroverflow.com"
+	},
+	"anchors": [
+		{
+			"name": "Community",
+			"icon": "discord",
+			"url": "https://discord.answeroverflow.com"
+		}
+	],
+	"navigation": [
+		{
+			"group": "Essentials",
+			"pages": ["overview", "quick-start", "recommended-setup"]
+		},
+		{
+			"group": "Channel Settings",
+			"pages": [
+				"channel-settings/auto-thread",
+				"channel-settings/forum-guidelines-consent",
+				"channel-settings/indexing",
+				"channel-settings/mark-solution",
+				"channel-settings/send-mark-solution-instructions",
+				"channel-settings/solved-tag"
+			]
+		},
+		{
+			"group": "Server Settings",
+			"pages": ["server-settings/read-the-rules-consent"]
+		},
+		{
+			"group": "User Settings",
+			"pages": [
+				"user-settings/displaying-messages",
+				"user-settings/globally-ignore-account",
+				"user-settings/ignore-account-in-server"
+			]
+		},
+		{
+			"group": "Integrations",
+			"pages": ["integrations/inkeep"]
+		},
+		{
+			"group": "Changelog",
+			"pages": [
+				"changelog/solved-posts-now-auto-archive",
+				"changelog/introducing-the-answer-overflow-public-platform",
+				"changelog/app-router",
+				"changelog/answeroverflow-now-has-a-changelog"
+			]
+		}
+	],
+	"footerSocials": {
+		"x": "https://x.com/rhyssullivan",
+		"github": "https://github.com/answeroverflow"
+	}
 }
