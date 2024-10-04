@@ -5,7 +5,7 @@ import { drizzle as psDrizzle } from 'drizzle-orm/planetscale-serverless';
 import * as schema from './schema';
 import { JSONParse } from './utils/json-big';
 
-const dbUrl = 'http://root:nonNullPassword@localhost:3900';
+const dbUrl = sharedEnvs.DATABASE_URL;
 
 const decoder = new TextDecoder('utf-8');
 function bytes(text: string): number[] {
