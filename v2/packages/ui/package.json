@@ -4,10 +4,10 @@
 	"type": "module",
 	"sideEffects": false,
 	"exports": {
-	  "./*": [
-		"./src/*.ts",
-		"./src/*.tsx"
-	  ]
+		"./*": [
+			"./src/*.ts",
+			"./src/*.tsx"
+		]
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit"
@@ -17,7 +17,7 @@
 		"@answeroverflow/constants": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
 		"@heroicons/react": "^2.0.18",
-		"@radix-ui/react-accordion": "1.2.0-rc.6",
+		"@radix-ui/react-accordion": "1.2.1",
 		"@radix-ui/react-avatar": "^1.0.4",
 		"@radix-ui/react-dialog": "^1.0.5",
 		"@radix-ui/react-dropdown-menu": "^2.0.5",
@@ -51,7 +51,9 @@
 		"next-themes": "^0.2.1",
 		"posthog-js": "^1.83.0",
 		"ramda": "^0.29.1",
+		"react": "19.0.0-rc-6230622a1a-20240610",
 		"react-day-picker": "^8.10.0",
+		"react-dom": "19.0.0-rc-6230622a1a-20240610",
 		"react-grid-gallery": "^1.0.0",
 		"react-icons": "^4.12.0",
 		"react-schemaorg": "^2.0.0",
@@ -67,11 +69,13 @@
 		"@answeroverflow/core": "workspace:^",
 		"@answeroverflow/tailwind-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
-		"@types/react": "^18.2.20",
-		"@types/react-dom": "^18.2.7",
-		"react": "19.0.0-rc-6230622a1a-20240610",
-		"react-dom": "19.0.0-rc-6230622a1a-20240610",
+		"@types/react": "npm:types-react@rc",
+		"@types/react-dom": "npm:types-react-dom@rc",
 		"tailwindcss": "^3.3.3",
 		"type-fest": "^4.12.0"
-	}
+	},
+	"overrides": {
+		"@types/react": "npm:types-react@rc",
+		"@types/react-dom": "npm:types-react-dom@rc"
+	  }
 }

@@ -1,6 +1,7 @@
 {
 	"name": "@answeroverflow/dashboard",
 	"version": "0.1.0",
+	"type": "module",
 	"private": true,
 	"scripts": {
 		"with-env": "dotenv -e ../../.env --",
@@ -26,7 +27,6 @@
 		"@tailwindcss/typography": "^0.5.10",
 		"@trpc/server": "^10.45.2",
 		"@vercel/otel": "^1.8.3",
-		"bright": "^0.8.4",
 		"mdx": "^0.3.1",
 		"next": "15.0.0-rc.0",
 		"next-auth": "^4.23.1",
@@ -35,7 +35,6 @@
 		"next-themes": "^0.2.1",
 		"react": "19.0.0-rc-6230622a1a-20240610",
 		"react-dom": "19.0.0-rc-6230622a1a-20240610",
-		"react-fast-marquee": "^1.6.0",
 		"react-icons": "^4.10.1",
 		"react-schemaorg": "^2.0.0",
 		"react-social-icons": "^6.14.0",

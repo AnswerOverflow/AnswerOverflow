@@ -22,9 +22,15 @@
     "@answeroverflow/utils": "workspace:*",
     "@answeroverflow/env": "workspace:*",
     "@aws-sdk/client-s3": "^3.577.0",
+    "@auth/core": "^0.35.0",
     "@aws-sdk/lib-storage": "^3.578.0",
     "@elastic/elasticsearch": "^8.15.0",
     "@planetscale/database": "^1.11.0",
+    "next": "^14.2.13",
+    "next-auth": "^4.24.7",
+    "posthog-node": "^4.2.0",
+    "redis": "^4.7.0",
+    "@typelytics/posthog": "^0.1.5",
     "@sapphire/bitfield": "^1.2.0",
     "dataloader": "^2.2.2",
     "discord-api-types": "^0.37.67",
@@ -49,5 +55,9 @@
     "dotenv-cli": "^7.4.1",
     "drizzle-kit": "^0.19.13",
     "type-fest": "^4.26.1"
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@rc",
+    "@types/react-dom": "npm:types-react-dom@rc"
   }
 }
