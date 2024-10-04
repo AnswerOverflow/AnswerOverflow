@@ -54,6 +54,7 @@
 		"with-env": "dotenv -e ../../.env --",
 		"start": "bun with-env bun run .",
 		"test": "bun build-deps && bun with-env jest --coverage",
-		"test:watch": "bun with-env jest --watch"
+		"test:watch": "bun with-env jest --watch",
+		"clean": "rm -rf node_modules"
 	}
 }

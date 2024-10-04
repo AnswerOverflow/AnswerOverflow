@@ -15,7 +15,8 @@
     "db:push": "drizzle-kit push:mysql",
     "db:wipe": "bun ./scripts/wipe.ts",
     "db:seed": "bun with-env bun db:push && bun with-env bun ./scripts/seed.ts",
-    "dev": "echo http://localhost:4983 && bun with-env bun drizzle-kit studio"
+    "dev": "echo http://localhost:4983 && bun with-env bun drizzle-kit studio",
+    "clean": "rm -rf node_modules"
   },
   "dependencies": {
     "@answeroverflow/constants": "workspace:*",

@@ -8,7 +8,7 @@
 	"scripts": {
 		"typecheck": "tsc --noEmit",
 		"with-env": "dotenv -e ../../.env --",
-		"clean": "rm -rf .turbo node_modules coverage"
+		"clean": "rm -rf node_modules"
 	},
 	"dependencies": {
 		"@answeroverflow/constants": "workspace:*",

@@ -10,7 +10,8 @@
 		]
 	},
 	"scripts": {
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf node_modules"
 	},
 	"dependencies": {
 		"@answeroverflow/api": "workspace:^",

@@ -10,7 +10,8 @@
     "dev": "bun concurrently \"bun dev-next\" \"bun dev-proxy\"",
     "build": "bun with-env next build",
     "start": "bun with-env next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf node_modules .next"
   },
   "dependencies": {
     "@answeroverflow/core": "workspace:*",

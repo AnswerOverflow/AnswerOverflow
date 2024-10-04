@@ -8,7 +8,8 @@
 		"dev": "bun with-env next dev --port 3002 --turbo",
 		"build": "bun with-env next build",
 		"start": "bun with-env next start --port 3002",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf node_modules .next"
 	},
 	"dependencies": {
 		"@answeroverflow/core": "workspace:*",
