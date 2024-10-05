@@ -339,6 +339,7 @@ async function storeIndexData(
 	);
 	await upsertManyDiscordAccounts(convertedUsers);
 	const botMessages = filteredMessages.filter((x) => x.author.bot);
+
 	const bots = [
 		...new Map(botMessages.map((x) => [x.author.id, x.author])).values(),
 	];
