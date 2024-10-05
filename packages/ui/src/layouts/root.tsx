@@ -1,7 +1,5 @@
-/* eslint-disable n/no-extraneous-import */
 import type { Metadata } from 'next';
 import { Montserrat, Source_Sans_3 } from 'next/font/google';
-/* eslint-disable n/no-process-env */
 import React from 'react';
 import { CommitBanner } from '../commit-banner';
 import { Providers } from './providers';

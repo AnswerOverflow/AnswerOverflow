@@ -15,9 +15,13 @@ export function toDict<T extends readonly string[], Result>(
 export function toBitfield<T extends readonly string[]>(
 	...keys: T
 ): Record<T[number], number> {
-	// It's removing the brackets on (1 << index)
-	// prettier-ignore
-	return toDict((_, index) => 1 << index, ...keys) as Record<T[number], number>;
+	return toDict(
+		(_, index) => {
+			const val = 1 << index;
+			return val;
+		},
+		...keys,
+	) as Record<T[number], number>;
 }
 
 export function bitfieldToDict<T extends readonly string[]>(

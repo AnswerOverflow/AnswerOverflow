@@ -55,6 +55,6 @@
 		"start": "bun with-env bun run .",
 		"clean": "rm -rf node_modules",
 		"typecheck": "tsc --noEmit",
-		"dev": "bun with-env tsc-watch --onSuccess \"bun run .\""
+		"dev": "bun start ."
 	}
 }
