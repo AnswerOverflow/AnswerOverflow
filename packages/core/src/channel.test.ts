@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
+import { beforeEach } from 'bun:test';
 import { getRandomId, getRandomIdGreaterThan } from '@answeroverflow/utils/id';
-import { beforeEach } from 'vitest';
 import {
 	mockChannel,
 	mockChannelWithFlags,

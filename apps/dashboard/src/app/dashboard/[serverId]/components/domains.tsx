@@ -4,24 +4,19 @@ import type {
 } from '@answeroverflow/api';
 import { Button } from '@answeroverflow/ui/ui/button';
 import { Input } from '@answeroverflow/ui/ui/input';
-import { trpc } from '@answeroverflow/ui/utils/client';
 import {
-	Card,
-	Subtitle,
-	Tab,
-	TabGroup,
-	TabList,
-	TabPanel,
-	TabPanels,
-	Text,
-	Title,
-} from '@tremor/react';
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from '@answeroverflow/ui/ui/tabs';
+import { trpc } from '@answeroverflow/ui/utils/client';
+import { Card, Subtitle, Text, Title } from '@tremor/react';
 import { LuAlertCircle, LuCheckCircle2, LuXCircle } from 'react-icons/lu';
 import { toast } from 'react-toastify';
 import { useDashboardContext } from './dashboard-context';
 import { LoadingSpinner } from './loading-spinner';
 import { useTierAccess } from './tier-access-only';
-
 function useDomainStatus({ domain }: { domain?: string }) {
 	const { data, isLoading, isFetching } =
 		trpc.servers.verifyCustomDomain.useQuery(domain ?? '', {
@@ -251,61 +246,62 @@ export function DomainConfigurationStatus(props: {
 		}
 		return (
 			<>
-				<TabGroup
+				<Tabs
 					key={`${domainJson.name}-${domainJson.apexName}`}
-					defaultIndex={subdomain ? 1 : 0}
+					defaultValue={subdomain ? 'cname-record' : 'a-record'}
 				>
-					<TabList>
-						<Tab>A Record{!subdomain && ' (recommended)'}</Tab>
-						<Tab>CNAME Record{subdomain && ' (recommended)'}</Tab>
-					</TabList>
-					{/* A record */}
-					<TabPanels>
-						<TabPanel>
-							<div className="flex items-center justify-start space-x-10 overflow-x-auto rounded-md bg-gray-50 p-2 dark:bg-gray-800">
-								<div>
-									<p className="text-sm font-bold">Type</p>
-									<p className="mt-2 font-mono text-sm">A</p>
-								</div>
-								<div>
-									<p className="text-sm font-bold">Name</p>
-									<p className="mt-2 font-mono text-sm">@</p>
-								</div>
-								<div>
-									<p className="text-sm font-bold">Value</p>
-									<p className="mt-2 font-mono text-sm">76.76.21.21</p>
-								</div>
-								<div>
-									<p className="text-sm font-bold">TTL</p>
-									<p className="mt-2 font-mono text-sm">86400</p>
-								</div>
+					<TabsList>
+						<TabsTrigger value="a-record">
+							A Record{!subdomain && ' (recommended)'}
+						</TabsTrigger>
+						<TabsTrigger value="cname-record">
+							CNAME Record{subdomain && ' (recommended)'}
+						</TabsTrigger>
+					</TabsList>
+					<TabsContent value="a-record">
+						<div className="flex items-center justify-start space-x-10 overflow-x-auto rounded-md bg-gray-50 p-2 dark:bg-gray-800">
+							<div>
+								<p className="text-sm font-bold">Type</p>
+								<p className="mt-2 font-mono text-sm">A</p>
 							</div>
-						</TabPanel>
-						{/* CNAME record */}
-						<TabPanel>
-							<div className="flex items-center justify-start space-x-10 overflow-x-auto rounded-md bg-gray-50 p-2 dark:bg-gray-800">
-								<div>
-									<p className="text-sm font-bold">Type</p>
-									<p className="mt-2 font-mono text-sm">CNAME</p>
-								</div>
-								<div>
-									<p className="text-sm font-bold">Name</p>
-									<p className="mt-2 font-mono text-sm">{subdomain ?? 'www'}</p>
-								</div>
-								<div>
-									<p className="text-sm font-bold">Value</p>
-									<p className="mt-2 font-mono text-sm">
-										cname.answeroverflow.com
-									</p>
-								</div>
-								<div>
-									<p className="text-sm font-bold">TTL</p>
-									<p className="mt-2 font-mono text-sm">86400</p>
-								</div>
+							<div>
+								<p className="text-sm font-bold">Name</p>
+								<p className="mt-2 font-mono text-sm">@</p>
 							</div>
-						</TabPanel>
-					</TabPanels>
-				</TabGroup>
+							<div>
+								<p className="text-sm font-bold">Value</p>
+								<p className="mt-2 font-mono text-sm">76.76.21.21</p>
+							</div>
+							<div>
+								<p className="text-sm font-bold">TTL</p>
+								<p className="mt-2 font-mono text-sm">86400</p>
+							</div>
+						</div>
+					</TabsContent>
+					{/* CNAME record */}
+					<TabsContent value="cname-record">
+						<div className="flex items-center justify-start space-x-10 overflow-x-auto rounded-md bg-gray-50 p-2 dark:bg-gray-800">
+							<div>
+								<p className="text-sm font-bold">Type</p>
+								<p className="mt-2 font-mono text-sm">CNAME</p>
+							</div>
+							<div>
+								<p className="text-sm font-bold">Name</p>
+								<p className="mt-2 font-mono text-sm">{subdomain ?? 'www'}</p>
+							</div>
+							<div>
+								<p className="text-sm font-bold">Value</p>
+								<p className="mt-2 font-mono text-sm">
+									cname.answeroverflow.com
+								</p>
+							</div>
+							<div>
+								<p className="text-sm font-bold">TTL</p>
+								<p className="mt-2 font-mono text-sm">86400</p>
+							</div>
+						</div>
+					</TabsContent>
+				</Tabs>
 				<div className="my-3 text-left">
 					<p className="my-5 text-sm">
 						To configure your {recordType === 'A' ? 'apex domain' : 'subdomain'}{' '}

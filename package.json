@@ -5,10 +5,12 @@
 	"scripts": {
 		"dev": "turbo dev --parallel --no-cache",
 		"dev:dbs": "docker-compose -f \"docker-compose.yml\" -f \"docker-compose-extras.yml\" up",
-		"typecheck": "bun --filter=* typecheck",
+		"typecheck": "turbo typecheck",
 		"clean": "bun --filter=* clean && rm -rf node_modules",
 		"format": "biome check . --write",
-		"format:check": "biome check ."
+		"format:check": "biome check .",
+		"start": "turbo start",
+		"build:prod": "turbo build:prod"
 	},
 	"dependencies": {
 		"@total-typescript/ts-reset": "^0.4.2",
