@@ -21,7 +21,8 @@
 	"workspaces": ["packages/*", "apps/*"],
 	"patchedDependencies": {
 		"simple-markdown@0.7.3": "patches/simple-markdown@0.7.3.patch",
-		"@opentelemetry/otlp-exporter-base@0.52.0": "patches/@opentelemetry__otlp-exporter-base@0.52.0.patch"
+		"@opentelemetry/otlp-exporter-base@0.52.0": "patches/@opentelemetry__otlp-exporter-base@0.52.0.patch",
+		"@tremor/react@3.18.3": "patches/@tremor%2Freact@3.18.3.patch"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.3",
