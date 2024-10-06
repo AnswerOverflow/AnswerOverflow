@@ -479,7 +479,10 @@ export module Auth {
 					httpOnly: true,
 					sameSite: 'lax',
 					path: '/',
-					domain: '.' + hostname,
+					domain:
+						sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV === 'production'
+							? '.' + hostname
+							: undefined,
 					secure: useSecureCookies,
 				},
 			},
