@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Montserrat, Source_Sans_3 } from 'next/font/google';
 import React from 'react';
-import { CommitBanner } from '../commit-banner';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
@@ -60,7 +59,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<link rel={'dns-prefetch'} href={'https://cdn.discordapp.com'} />
 			</head>
 			<body className={`${montserrat.variable} ${sourceSans3.variable}`}>
-				<CommitBanner />
 				<Providers>{children}</Providers>
 			</body>
 		</html>
