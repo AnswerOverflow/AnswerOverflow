@@ -37,7 +37,7 @@
 		"discord-api-types": "^0.37.67",
 		"dotenv": "^16.4.5",
 		"dotenv-cra": "^3.0.3",
-		"drizzle-orm": "^0.28.5",
+		"drizzle-orm": "^0.33.0",
 		"drizzle-zod": "^0.5.1",
 		"json-bigint": "^1.0.0",
 		"lodash": "^4.17.21",
