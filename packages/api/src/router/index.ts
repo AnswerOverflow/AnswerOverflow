@@ -14,8 +14,6 @@ export const appRouter = router({
 	userServerSettings: userServerSettingsRouter,
 	messages: messagesRouter,
 	dashboard: dashboardRouter,
-
-	// Other:
 	auth: authRouter,
 });
 
