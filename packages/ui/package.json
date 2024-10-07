@@ -44,7 +44,7 @@
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^1.2.1",
 		"cva": "npm:class-variance-authority@^0.6.1",
-		"date-fns": "^3.6.0",
+		"date-fns": "^4.1.0",
 		"lucide-react": "^0.263.1",
 		"memoizee": "^0.4.15",
 		"next": "15.0.0-rc.0",
