@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-duplicate-enum-values */
 
+import {
+	MessageFull,
+	MessageWithDiscordAccount,
+} from '@answeroverflow/core/message';
+
 /*
   Redeclare discord types to not have to import discord-api-types as we only need a few types
 */
-
-import type {
-	MessageFull,
-	MessageWithDiscordAccount,
-} from '@answeroverflow/db';
 
 export enum ChannelType {
 	/**

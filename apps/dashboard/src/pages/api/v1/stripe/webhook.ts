@@ -1,13 +1,14 @@
+import { Readable } from 'node:stream';
 import { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
-import { Readable } from 'node:stream';
 import { z } from 'zod';
+
+import { Plan } from '@answeroverflow/core/schema';
 import {
 	findServerByStripeCustomerId,
-	updateServer,
-	Plan,
 	findServerByStripeSubscriptionId,
-} from '@answeroverflow/db';
+	updateServer,
+} from '@answeroverflow/core/server';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 
 // Stripe requires the raw body to construct the event.
@@ -49,7 +50,7 @@ export default async function webhookHandler(
 			throw new Error('Stripe env vars not set');
 		}
 		const stripe = new Stripe(sharedEnvs.STRIPE_SECRET_KEY, {
-			apiVersion: '2022-11-15',
+			apiVersion: '2024-06-20',
 			typescript: true,
 		});
 

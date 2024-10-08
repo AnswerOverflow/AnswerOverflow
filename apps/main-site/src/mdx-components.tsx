@@ -1,7 +1,7 @@
+import { Heading } from '@answeroverflow/ui/ui/heading';
+import { Link } from '@answeroverflow/ui/ui/link';
+import { Paragraph } from '@answeroverflow/ui/ui/paragraph';
 import type { MDXComponents } from 'mdx/types';
-import { Heading } from '@answeroverflow/ui/src/ui/heading';
-import { Paragraph } from '@answeroverflow/ui/src/ui/paragraph';
-import Link from '@answeroverflow/ui/src/ui/link';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
 	return {

@@ -4,8 +4,8 @@ import {
 } from '@sapphire/framework';
 import type { ButtonInteraction } from 'discord.js';
 import {
-	parseConsentButtonInteraction,
 	ConsentButtonInteractionParseError,
+	parseConsentButtonInteraction,
 	updateUserConsent,
 } from '../domains/manage-account';
 import { oneTimeStatusHandler } from '../utils/trpc';

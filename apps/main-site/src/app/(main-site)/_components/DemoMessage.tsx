@@ -1,16 +1,19 @@
-import { getSnowflakeUTCDate } from '@answeroverflow/ui/src/utils/snowflake';
+import { getSnowflakeUTCDate } from '@answeroverflow/ui/utils/snowflake';
 import Image from 'next/image';
-import type { MessageWithDiscordAccount } from '@answeroverflow/db';
+
 import {
 	Avatar,
-	AvatarImage,
 	AvatarFallback,
-} from '@answeroverflow/ui/src/ui/avatar';
-import Link from '@answeroverflow/ui/src/ui/link';
-import type { ChannelPublicWithFlags } from '@answeroverflow/db';
+	AvatarImage,
+} from '@answeroverflow/ui/ui/avatar';
+import { Link } from '@answeroverflow/ui/ui/link';
+
+import { MessageWithDiscordAccount } from '@answeroverflow/core/message';
+import { ChannelPublicWithFlags } from '@answeroverflow/core/zod';
+import { DiscordIcon } from '@answeroverflow/ui/icons/index';
+import { getInitials } from '@answeroverflow/ui/utils/avatars';
 import { forwardRef } from 'react';
-import { getInitials } from '@answeroverflow/ui/src/utils/avatars';
-import { DiscordIcon } from '@answeroverflow/ui/src/icons';
+
 export type MessageProps = {
 	message: MessageWithDiscordAccount;
 	thread?: ChannelPublicWithFlags;

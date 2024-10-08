@@ -1,7 +1,8 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
-import { Events, Message, type AnyThreadChannel } from 'discord.js';
-import { findChannelById } from '@answeroverflow/db';
+import { type AnyThreadChannel, Events, Message } from 'discord.js';
+
+import { findChannelById } from '@answeroverflow/core/channel';
 import { getRootChannel } from '../../utils/utils';
 
 @ApplyOptions<Listener.Options>({
@@ -17,6 +18,7 @@ export class OnMessageInChannelWithSettings extends Listener<Events.MessageCreat
 		if (!rootChannel) return;
 		const channel = await findChannelById(rootChannel.id);
 		if (!channel) return;
+		// @ts-expect-error todo: revisit
 		this.container.events.next({
 			action: 'messageCreate',
 			data: {

@@ -1,7 +1,8 @@
-import { MessageResultPage } from '@answeroverflow/ui/src/pages/MessageResultPage';
-import { notFound } from 'next/navigation';
+import { makeMessageResultPage } from '@answeroverflow/core/pages';
+import { MessageResultPage } from '@answeroverflow/ui/pages/MessageResultPage';
 import type { Metadata } from 'next';
-import { makeMessageResultPage } from '@answeroverflow/db';
+import { notFound } from 'next/navigation';
+
 type Props = {
 	params: { messageId: string };
 };

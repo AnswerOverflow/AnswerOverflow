@@ -1,12 +1,14 @@
 import {
-	type BotContextCreate,
-	botRouter,
-	type BotRouterCaller,
+	type AppRouterCaller,
+	type AppRouterCreate,
+	appRouter,
 	createBotContext,
 } from '@answeroverflow/api';
-import { container } from '@sapphire/framework';
 import { TRPCError } from '@trpc/server';
-import type { RendererableInteractions } from '@answeroverflow/discordjs-react';
+import {
+	ChatInputCommandInteraction,
+	MessageComponentInteraction,
+} from 'discord.js';
 
 export type TRPCStatusHandler<T> = {
 	Ok?: (result: T) => unknown | Promise<unknown>;
@@ -17,8 +19,8 @@ export type TRPCStatusHandler<T> = {
 };
 
 export type TRPCCall<T> = {
-	getCtx: () => Promise<BotContextCreate>;
-	apiCall: (router: BotRouterCaller) => Promise<T>;
+	getCtx: () => Promise<AppRouterCreate>;
+	apiCall: (router: AppRouterCaller) => Promise<T>;
 } & TRPCStatusHandler<T>;
 
 export async function callWithAllowedErrors<T>({
@@ -50,7 +52,7 @@ export async function callAPI<T>({
 }: TRPCCall<T>) {
 	try {
 		const convertedCtx = await createBotContext(await getCtx());
-		const caller = botRouter.createCaller(convertedCtx);
+		const caller = appRouter.createCaller(convertedCtx);
 		const data = await apiCall(caller);
 		await Ok(data);
 		return data;
@@ -71,18 +73,14 @@ export async function callAPI<T>({
 		return null;
 	}
 }
-
-export function discordJSReactEphemeralStatusHandler(
-	interaction: RendererableInteractions,
-	message: string,
-) {
-	return container.discordJSReact.ephemeralReply(interaction, message);
-}
-
 export function oneTimeStatusHandler(
-	interaction: RendererableInteractions,
+	interaction: MessageComponentInteraction | ChatInputCommandInteraction,
 	message: string,
 ) {
 	if (interaction.deferred) return interaction.editReply({ content: message });
-	else return container.discordJSReact.ephemeralReply(interaction, message);
+	else
+		return interaction.reply({
+			content: message,
+			ephemeral: true,
+		});
 }

@@ -1,7 +1,7 @@
 /* eslint-disable tailwindcss/no-custom-classname */
-import { cva, type VariantProps } from 'cva';
+import { type VariantProps, cva } from 'cva';
 
-export const GitHubIcon = (props: React.SVGProps<SVGSVGElement>) => (
+const GitHubIcon = (props: React.SVGProps<SVGSVGElement>) => (
 	<svg fill="currentColor" viewBox="0 0 24 24" {...props}>
 		<path
 			fillRule="evenodd"
@@ -24,7 +24,7 @@ const discordIconStyles = cva('', {
 		},
 	},
 });
-export function DiscordIcon(
+function DiscordIcon(
 	props: React.SVGProps<SVGSVGElement> & VariantProps<typeof discordIconStyles>,
 ) {
 	return (
@@ -45,7 +45,7 @@ export function DiscordIcon(
 }
 import * as React from 'react';
 
-export const ExternalLinkIcon = () => {
+const ExternalLinkIcon = () => {
 	return (
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
@@ -63,7 +63,7 @@ export const ExternalLinkIcon = () => {
 		</svg>
 	);
 };
-export const CloseIcon = () => {
+const CloseIcon = () => {
 	return (
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
@@ -81,3 +81,5 @@ export const CloseIcon = () => {
 		</svg>
 	);
 };
+
+export { CloseIcon, DiscordIcon, ExternalLinkIcon, GitHubIcon };

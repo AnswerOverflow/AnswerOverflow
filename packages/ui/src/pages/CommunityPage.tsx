@@ -1,24 +1,26 @@
-import type {
-	ChannelPublicWithFlags,
-	CommunityPageData,
-} from '@answeroverflow/db';
-import { NUMBER_OF_THREADS_TO_LOAD } from '@answeroverflow/constants/src/api';
-import { getServerDescription } from '../utils/server';
 import { Button } from '../ui/button';
+import { getServerDescription } from '../utils/server';
 
-import { Heading } from '../ui/heading';
-import { ChannelName, ServerInviteJoinButton } from '../server-invite';
-import { ServerIcon } from '../server-icon';
-import { LinkMessage } from '../message/link-message';
-import { Navbar } from '../navbar';
-import { Footer } from '../footer';
-import { LinkButton } from '../ui/link-button';
-import { MessagesSearchBar } from '../messages-search-bar';
-import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
 import { LuArrowLeft, LuArrowRight } from 'react-icons/lu';
+import { Footer } from '../footer';
+import { LinkMessage } from '../message/link-message';
+import { MessagesSearchBar } from '../messages-search-bar';
+import { Navbar } from '../navbar';
+import { ServerIcon } from '../server-icon';
+import { ChannelName, ServerInviteJoinButton } from '../server-invite';
+import { Heading } from '../ui/heading';
+import { LinkButton } from '../ui/link-button';
 import { TrackLoad } from '../ui/track-load';
-import { serverToAnalyticsData } from '@answeroverflow/constants';
+
+import { ServerPublic } from '@answeroverflow/api';
+import { serverToAnalyticsData } from '@answeroverflow/constants/analytics';
+import { NUMBER_OF_THREADS_TO_LOAD } from '@answeroverflow/constants/api';
+import { CommunityPageData } from '@answeroverflow/core/pages';
+import { ChannelPublicWithFlags } from '@answeroverflow/core/zod';
+import Image from 'next/image';
 import { Suspense } from 'react';
+import { cn } from '../utils/utils';
+
 type ChannelSelectProps = {
 	channels: ChannelPublicWithFlags[];
 	selectedChannel: ChannelPublicWithFlags;
@@ -129,8 +131,6 @@ const PageSwitcher = (props: {
 		)}
 	</div>
 );
-import Image from 'next/image';
-import { cn } from '../utils/utils';
 export const CommunityPage = (
 	props: CommunityPageData & {
 		tenant: ServerPublic | undefined;

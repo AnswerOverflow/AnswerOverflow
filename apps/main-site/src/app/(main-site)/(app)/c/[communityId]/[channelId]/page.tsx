@@ -1,7 +1,7 @@
-import { findServerWithCommunityPageData } from '@answeroverflow/db';
-import { notFound, redirect } from 'next/navigation';
+import { findServerWithCommunityPageData } from '@answeroverflow/core/pages';
 import { sharedEnvs } from '@answeroverflow/env/shared';
-import { CommunityPage } from '@answeroverflow/ui/src/pages/CommunityPage';
+import { CommunityPage } from '@answeroverflow/ui/pages/CommunityPage';
+import { notFound, redirect } from 'next/navigation';
 import { z } from 'zod';
 
 export { generateMetadata } from '../page';

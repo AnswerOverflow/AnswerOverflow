@@ -1,12 +1,12 @@
 import {
 	DiscordAvatar,
 	makeUserIconLink,
-} from '@answeroverflow/ui/src/discord-avatar';
+} from '@answeroverflow/ui/discord-avatar';
+import { getDate } from '@answeroverflow/ui/utils/snowflake';
 import { Metadata } from 'next';
-import { getUserPageData, Props } from './components';
 import { JsonLd } from 'react-schemaorg';
 import { ProfilePage } from 'schema-dts';
-import { getDate } from '@answeroverflow/ui/src/utils/snowflake';
+import { Props, getUserPageData } from './components';
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const { userInfo, server } = await getUserPageData(props);

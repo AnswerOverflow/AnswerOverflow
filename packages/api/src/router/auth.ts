@@ -1,11 +1,11 @@
-import { findManyServersById } from '@answeroverflow/db';
+import { findManyServersById } from '@answeroverflow/core/server';
+import { PermissionsBitField } from '../utils/types';
 import {
-	withDiscordAccountProcedure,
-	withUserServersProcedure,
 	publicProcedure,
 	router,
+	withDiscordAccountProcedure,
+	withUserServersProcedure,
 } from './trpc';
-import { PermissionsBitField } from '../utils/types';
 
 export const authRouter = router({
 	getSession: publicProcedure

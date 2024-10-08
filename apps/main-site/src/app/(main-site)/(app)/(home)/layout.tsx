@@ -1,11 +1,11 @@
+import { Analytics } from '@answeroverflow/core/analytics';
+import { BlueLink } from '@answeroverflow/ui/ui/blue-link';
+import { LinkButton } from '@answeroverflow/ui/ui/link-button';
 import { Metadata } from 'next';
-import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
 import { FaArrowTrendUp } from 'react-icons/fa6';
-import { PiPlant } from 'react-icons/pi';
-import { getPopularServers } from '@answeroverflow/analytics/src/query';
-import { TrendingServer } from './components';
-import { BlueLink } from '@answeroverflow/ui/src/ui/blue-link';
 import { MdOutlineExplore } from 'react-icons/md';
+import { PiPlant } from 'react-icons/pi';
+import { TrendingServer } from './components';
 
 export const metadata: Metadata = {
 	alternates: {
@@ -15,7 +15,9 @@ export const metadata: Metadata = {
 
 export default async function HomePage(props: { children: React.ReactNode }) {
 	const popularServers =
-		(await getPopularServers()?.then((res) => Object.keys(res ?? {}))) ?? [];
+		(await Analytics.getPopularServers()?.then((res) =>
+			Object.keys(res ?? {}),
+		)) ?? [];
 	const popularServersWithPubg = [
 		...new Set([
 			...popularServers.slice(0, 1),

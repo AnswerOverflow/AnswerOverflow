@@ -1,9 +1,8 @@
-import { TRPCError, initTRPC } from '@trpc/server';
-import type { Context } from './context';
-import superjson from 'superjson';
-import { getDiscordUser, getUserServers } from '@answeroverflow/cache';
+import { Auth } from '@answeroverflow/core/auth';
 import { sharedEnvs } from '@answeroverflow/env/shared';
-import { findDiscordOauthByUserId } from '@answeroverflow/db';
+import { TRPCError, initTRPC } from '@trpc/server';
+import superjson from 'superjson';
+import type { Context } from './context';
 
 export interface Meta {
 	tenantAuthAccessible: boolean; // Whether this endpoint is accessible by tenant auth
@@ -26,7 +25,7 @@ async function getDiscordOauth(ctx: Context) {
 	if (!ctx.session) {
 		return null;
 	}
-	const discordOauth = await findDiscordOauthByUserId(ctx.session.user.id);
+	const discordOauth = await Auth.findDiscordOauthByUserId(ctx.session.user.id);
 	return discordOauth;
 }
 
@@ -35,7 +34,7 @@ const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
 		const discordOauth = await getDiscordOauth(ctx);
 		if (discordOauth && discordOauth.access_token) {
 			try {
-				const discordAccount = await getDiscordUser({
+				const discordAccount = await Auth.getDiscordUser({
 					accessToken: discordOauth.access_token,
 				});
 				ctx.discordAccount = discordAccount;
@@ -54,7 +53,7 @@ const addDiscordAccount = t.middleware(async ({ ctx, next }) => {
 export const getUserServersFromCtx = async (ctx: Context) => {
 	const discordOauth = await getDiscordOauth(ctx);
 	if (discordOauth && discordOauth.access_token) {
-		const userServers = await getUserServers({
+		const userServers = await Auth.getUserServers({
 			accessToken: discordOauth.access_token,
 		});
 		ctx.userServers = userServers;

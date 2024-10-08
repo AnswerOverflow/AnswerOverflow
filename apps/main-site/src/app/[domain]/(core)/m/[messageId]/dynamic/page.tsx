@@ -1,7 +1,7 @@
-import { MessageResultPage } from '@answeroverflow/ui/src/pages/MessageResultPage';
+import { MessageResultPage } from '@answeroverflow/ui/pages/MessageResultPage';
+import { fetchIsUserInServer } from '@answeroverflow/ui/utils/fetch-is-user-in-server';
+import { callAPI } from '@answeroverflow/ui/utils/trpc';
 import { notFound } from 'next/navigation';
-import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
-import { fetchIsUserInServer } from '@answeroverflow/ui/src/utils/fetch-is-user-in-server';
 
 import type { Metadata } from 'next';
 type Props = {

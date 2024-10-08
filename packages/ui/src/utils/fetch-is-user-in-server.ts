@@ -1,11 +1,11 @@
 import { appRouter } from '@answeroverflow/api';
-import { getServerSession } from '@answeroverflow/auth';
 import { createContextInner } from '@answeroverflow/api/src/router/context';
+import { Auth } from '@answeroverflow/core/auth';
 
 export async function fetchIsUserInServer(
 	id: string,
 ): Promise<'in_server' | 'not_in_server'> {
-	const session = await getServerSession();
+	const session = await Auth.getServerSession();
 	const caller = appRouter.createCaller(
 		await createContextInner({
 			session: session,

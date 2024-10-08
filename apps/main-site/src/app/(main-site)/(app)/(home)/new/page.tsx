@@ -1,5 +1,5 @@
-import { FeedPost } from '@answeroverflow/ui/src/feed-post';
-import { findLatestThreads } from '@answeroverflow/db';
+import { findLatestThreads } from '@answeroverflow/core/channel';
+import { FeedPost } from '@answeroverflow/ui/feed-post';
 
 export default async function HomePage() {
 	const latestPages = await findLatestThreads({

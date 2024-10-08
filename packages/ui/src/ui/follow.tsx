@@ -1,6 +1,6 @@
 'use client';
 import * as React from 'react';
-import { useSpring, animated } from 'react-spring';
+import { animated, useSpring } from 'react-spring';
 
 export const FollowCursor = (props: {
 	className?: string;
@@ -24,8 +24,9 @@ export const FollowCursor = (props: {
 		];
 	};
 
+	const AnimatedDiv = animated('div');
 	return (
-		<animated.div
+		<AnimatedDiv
 			className={props.className}
 			ref={animatedRef}
 			onMouseMove={({ clientX: x, clientY: y }) => set({ xys: calc(x, y) })}
@@ -38,6 +39,6 @@ export const FollowCursor = (props: {
 			}}
 		>
 			{props.children}
-		</animated.div>
+		</AnimatedDiv>
 	);
 };

@@ -1,4 +1,4 @@
-import type { DiscordAccountPublic } from '@answeroverflow/db';
+import { DiscordAccountPublic } from '@answeroverflow/core/zod';
 import { AvatarProps } from './ui/avatar';
 import { cn } from './utils/utils';
 

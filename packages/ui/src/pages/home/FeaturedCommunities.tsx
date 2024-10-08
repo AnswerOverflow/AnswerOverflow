@@ -1,10 +1,10 @@
-import { Heading } from '../../ui/heading';
-import Balancer from 'react-wrap-balancer';
+import { serverToAnalyticsData } from '@answeroverflow/constants/analytics';
 import Image from 'next/image';
-import { serverToAnalyticsData } from '@answeroverflow/constants';
-import { TrackLink } from '../../ui/track-link';
-import { Paragraph } from '../../ui/paragraph';
+import Balancer from 'react-wrap-balancer';
+import { Heading } from '../../ui/heading';
 import { LinkButton } from '../../ui/link-button';
+import { Paragraph } from '../../ui/paragraph';
+import { TrackLink } from '../../ui/track-link';
 import { cn } from '../../utils/utils';
 
 type FeaturedCommunityProps = {

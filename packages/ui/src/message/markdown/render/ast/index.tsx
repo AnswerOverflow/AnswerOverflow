@@ -1,7 +1,7 @@
+import pkg from 'simple-markdown';
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import text from './text';
-import pkg from 'simple-markdown';
 const { defaultRules, inlineRegex } = pkg;
 
 const baseRules = {

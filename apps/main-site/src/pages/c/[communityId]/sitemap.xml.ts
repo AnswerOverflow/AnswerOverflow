@@ -1,7 +1,6 @@
+import { findServerById } from '@answeroverflow/core/server';
 import type { GetServerSidePropsContext } from 'next';
-import { findServerById } from '@answeroverflow/db';
 import { generateCommunityPageSitemap } from '../../../utils/community-page';
-// eslint-disable-next-line no-restricted-imports
 
 export async function getServerSideProps({
 	res,

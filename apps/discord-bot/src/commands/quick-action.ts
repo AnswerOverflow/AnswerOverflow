@@ -1,17 +1,17 @@
+import { findAllChannelsByServerId } from '@answeroverflow/core/channel';
+import { ApplyOptions } from '@sapphire/decorators';
+import { type ChatInputCommand, Command } from '@sapphire/framework';
 import {
 	ActionRowBuilder,
 	ComponentType,
 	MessageActionRowComponentBuilder,
 	StringSelectMenuBuilder,
 } from 'discord.js';
-import { ApplyOptions } from '@sapphire/decorators';
-import { type ChatInputCommand, Command } from '@sapphire/framework';
 import {
 	ApplicationCommandType,
 	ContextMenuCommandInteraction,
 	StringSelectMenuOptionBuilder,
 } from 'discord.js';
-import { findAllChannelsByServerId } from '@answeroverflow/db';
 import { makeDismissButton } from '../domains/dismiss-button';
 import { memberToAnalyticsUser, trackDiscordEvent } from '../utils/analytics';
 
@@ -107,9 +107,7 @@ export class QuickAction extends Command {
 			embeds: [
 				{
 					title: 'Post in another channel',
-					description: `Hey <@${
-						targetMessage.author.id
-					}>! It looks like this may not be the right channel for this, please copy your message into one of the following channels:\n
+					description: `Hey <@${targetMessage.author.id}>! It looks like this may not be the right channel for this, please copy your message into one of the following channels:\n
 					${channelsTargetAuthorCanSee
 						.map((channel) => `- <#${channel.id}>`)
 						.join(

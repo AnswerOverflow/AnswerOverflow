@@ -1,8 +1,8 @@
 'use client';
+import { useTheme } from 'next-themes';
+import React from 'react';
 import { LuMoon, LuSun } from 'react-icons/lu';
 import { DropdownMenuItem } from '../ui/dropdown-menu';
-import React from 'react';
-import { useTheme } from 'next-themes';
 
 export function ChangeThemeItem() {
 	const { theme, setTheme } = useTheme();

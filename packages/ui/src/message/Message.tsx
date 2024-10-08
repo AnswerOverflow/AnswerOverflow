@@ -1,19 +1,20 @@
-import type { MessageWithDiscordAccount } from '@answeroverflow/db';
 import React from 'react';
 import { DiscordAvatar } from '../discord-avatar';
 import { getSnowflakeUTCDate } from '../utils/snowflake';
 import { cn } from '../utils/utils';
-import { messageWithDiscordAccountToAnalyticsData } from '@answeroverflow/hooks/src/analytics/events';
-import { getDiscordURLForMessage } from '../utils/discord';
-import Link from '../ui/link';
+
+import { MessageWithDiscordAccount } from '@answeroverflow/core/message';
+import { messageWithDiscordAccountToAnalyticsData } from '../hooks/events';
 import { DiscordIcon } from '../icons';
-import { fetchIsUserInServer } from '../utils/fetch-is-user-in-server';
-import { MessageProps } from './props';
-import { MessageAttachments } from './attachments';
-import { TrackLinkButton } from '../ui/track-link-button';
-import { parse } from './markdown/render';
-import { Embed } from './Embed';
 import { BlueLink } from '../ui/blue-link';
+import { Link } from '../ui/link';
+import { TrackLinkButton } from '../ui/track-link-button';
+import { getDiscordURLForMessage } from '../utils/discord';
+import { fetchIsUserInServer } from '../utils/fetch-is-user-in-server';
+import { Embed } from './Embed';
+import { MessageAttachments } from './attachments';
+import { parse } from './markdown/render';
+import { MessageProps } from './props';
 
 export const MessageAuthorArea = (props: Pick<MessageProps, 'message'>) => {
 	const { message } = props;

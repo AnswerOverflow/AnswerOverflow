@@ -1,24 +1,20 @@
 'use client';
+import { AnswerOverflowLogo } from '@answeroverflow/ui/icons/answer-overflow-logo';
+import { UserSection } from '@answeroverflow/ui/navbar/client';
+import { Button } from '@answeroverflow/ui/ui/button';
+import { LinkButton } from '@answeroverflow/ui/ui/link-button';
+import { Sheet, SheetContent, SheetTrigger } from '@answeroverflow/ui/ui/sheet';
+import { trpc } from '@answeroverflow/ui/utils/client';
 import Link from 'next/link';
-import { Button } from '@answeroverflow/ui/src/ui/button';
-import {
-	Sheet,
-	SheetContent,
-	SheetTrigger,
-} from '@answeroverflow/ui/src/ui/sheet';
-import { UserSection } from '@answeroverflow/ui/src/navbar/client';
-import { AnswerOverflowLogo } from '@answeroverflow/ui/src/icons/answer-overflow-logo';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { FaHome } from 'react-icons/fa';
 import { FaGear, FaPuzzlePiece } from 'react-icons/fa6';
-import { ServerSelectDropdown } from './components/navbar';
-import { DashboardProvider } from './components/dashboard-context';
-import { trpc } from '@answeroverflow/ui/src/utils/client';
-import { demoServerData } from './components/mock';
-import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { RxHamburgerMenu } from 'react-icons/rx';
-
+import { DashboardProvider } from './components/dashboard-context';
+import { demoServerData } from './components/mock';
+import { ServerSelectDropdown } from './components/navbar';
+import { Footer } from '@answeroverflow/ui/footer';
 export default function Layout(props: {
 	children?: React.ReactNode;
 	params: { serverId: string };
@@ -135,11 +131,12 @@ export default function Layout(props: {
 						<div className="w-full flex-1">
 							<ServerSelectDropdown />
 						</div>
-						<UserSection tenant={undefined} />
+						<UserSection tenant={undefined} dashboard />
 					</header>
 					<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
 						{props.children}
 					</main>
+					<Footer tenant={undefined} />
 				</div>
 			</div>
 		</DashboardProvider>

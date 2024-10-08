@@ -1,9 +1,7 @@
-import {
-	findServerByCustomDomain,
-	findServerWithCommunityPageData,
-} from '@answeroverflow/db';
+import { findServerWithCommunityPageData } from '@answeroverflow/core/pages';
+import { findServerByCustomDomain } from '@answeroverflow/core/server';
+import { CommunityPage } from '@answeroverflow/ui/pages/CommunityPage';
 import { notFound, redirect } from 'next/navigation';
-import { CommunityPage } from '@answeroverflow/ui/src/pages/CommunityPage';
 import { z } from 'zod';
 export { generateMetadata } from '../../layout';
 

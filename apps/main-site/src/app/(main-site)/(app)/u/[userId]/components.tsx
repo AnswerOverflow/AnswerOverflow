@@ -1,17 +1,19 @@
 import { notFound } from 'next/navigation';
+
+import { ServerPublic } from '@answeroverflow/api';
 import {
-	findDiscordAccountById,
 	findLatestCommentsFromAuthor,
 	findLatestThreadsFromAuthor,
-	findManyMessagesWithAuthors,
-	findManyServersById,
 	findServersUserHasPostedIn,
+} from '@answeroverflow/core/channel';
+import { findDiscordAccountById } from '@answeroverflow/core/discord-account';
+import {
+	findManyMessagesWithAuthors,
 	messages,
-} from '@answeroverflow/db';
-
-import { ServerIcon } from '@answeroverflow/ui/src/server-icon';
-import { ServerPublic } from '@answeroverflow/api';
-import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
+} from '@answeroverflow/core/message';
+import { findManyServersById } from '@answeroverflow/core/server';
+import { ServerIcon } from '@answeroverflow/ui/server-icon';
+import { LinkButton } from '@answeroverflow/ui/ui/link-button';
 
 export type Props = {
 	params: { userId: string };

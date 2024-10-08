@@ -1,5 +1,5 @@
-import { findAllServers } from '@answeroverflow/db';
-import { BlueLink } from '@answeroverflow/ui/src/ui/blue-link';
+import { findAllServers } from '@answeroverflow/core/server';
+import { BlueLink } from '@answeroverflow/ui/ui/blue-link';
 
 export default async function AllPosts() {
 	const servers = await findAllServers({

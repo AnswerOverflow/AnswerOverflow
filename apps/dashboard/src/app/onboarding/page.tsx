@@ -1,12 +1,12 @@
 'use client';
+import { trackEvent } from '@answeroverflow/ui/hooks/events';
 import React, { useState } from 'react';
 import {
 	OnboardingContext,
 	OnboardingPage,
-	pageLookup,
 	SubmittedData,
+	pageLookup,
 } from './OnboardingPages';
-import { trackEvent } from '@answeroverflow/hooks/src/analytics/events';
 
 export default function Onboarding() {
 	// Eventually move this into the url

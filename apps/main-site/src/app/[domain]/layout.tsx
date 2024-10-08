@@ -1,7 +1,7 @@
-import { findServerByCustomDomain } from '@answeroverflow/db';
+import { findServerByCustomDomain } from '@answeroverflow/core/server';
+import { makeServerIconLink } from '@answeroverflow/ui/server-icon';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { makeServerIconLink } from '@answeroverflow/ui/src/server-icon';
 
 export async function generateMetadata({
 	params,

@@ -1,20 +1,20 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCsrfToken, getSession } from 'next-auth/react';
-import { db } from '@answeroverflow/db';
+
 import { z } from 'zod';
-// eslint-disable-next-line no-restricted-imports
-import { init } from '../../../../../node_modules/next-auth/core/init';
-// eslint-disable-next-line no-restricted-imports
-import getAuthorizationUrl from '../../../../../node_modules/next-auth/core/lib/oauth/authorization-url';
-// eslint-disable-next-line no-restricted-imports
-import { setCookie } from '../../../../../node_modules/next-auth/next/utils';
-import { authOptions, getNextAuthCookieName } from '@answeroverflow/auth';
+import { init } from '../../../../../../../node_modules/next-auth/core/init';
+import getAuthorizationUrl from '../../../../../../../node_modules/next-auth/core/lib/oauth/authorization-url';
+import { setCookie } from '../../../../../../../node_modules/next-auth/next/utils';
+
 import { IncomingMessage } from 'http';
 import { NextAuthOptions } from 'next-auth';
 import { NextApiRequestCookies } from 'next/dist/server/api-utils';
-import { findServerByCustomDomain } from '@answeroverflow/db/src/server';
-import { dbTenantSessions } from '@answeroverflow/db/src/schema';
+
 import { randomUUID } from 'node:crypto';
+import { Auth } from '@answeroverflow/core/auth';
+import { db } from '@answeroverflow/core/db';
+import { dbTenantSessions } from '@answeroverflow/core/schema';
+import { findServerByCustomDomain } from '@answeroverflow/core/server';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 
 async function getServerSignInUrl(
@@ -56,13 +56,13 @@ export default async function handler(
 	const redirectURL = new URL(redirect);
 
 	const session = await getSession({ req });
-	const token = req.cookies[getNextAuthCookieName()] as string;
+	const token = req.cookies[Auth.getNextAuthCookieName()] as string;
 
 	if (!session || !token) {
 		const redirect = await getServerSignInUrl(
 			req,
 			req.cookies,
-			authOptions, // your authOptions
+			Auth.authOptions, // your authOptions
 		);
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		redirect.cookies?.forEach((cookie) => setCookie(res, cookie));

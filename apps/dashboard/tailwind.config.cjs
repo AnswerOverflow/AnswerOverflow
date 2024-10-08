@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const data = require('@answeroverflow/tailwind-config');
 
 /** @type {import("tailwindcss").Config} */

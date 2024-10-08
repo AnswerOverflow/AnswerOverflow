@@ -11,27 +11,26 @@ import {
 	PermissionResolvable,
 	User,
 } from 'discord.js';
-import type { ChannelWithFlags } from '@answeroverflow/db';
+
 import { makeConsentButton } from './manage-account';
-import {
-	findChannelById,
-	findFullMessageById,
-	findServerById,
-	ServerWithFlags,
-	upsertMessage,
-} from '@answeroverflow/db';
+
 import {
 	ANSWER_OVERFLOW_BLUE_HEX,
 	PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED,
-} from '@answeroverflow/constants';
+} from '@answeroverflow/constants/discord';
+import { findChannelById } from '@answeroverflow/core/channel';
+import { findFullMessageById } from '@answeroverflow/core/message';
+import { upsertMessage } from '@answeroverflow/core/message-node';
+import { findServerById } from '@answeroverflow/core/server';
+import { ChannelWithFlags, ServerWithFlags } from '@answeroverflow/core/zod';
 import {
-	trackDiscordEvent,
 	QuestionSolvedProps,
-	serverWithDiscordInfoToAnalyticsData,
 	channelWithDiscordInfoToAnalyticsData,
-	threadWithDiscordInfoToAnalyticsData,
 	memberToAnalyticsUser,
 	messageToAnalyticsMessage,
+	serverWithDiscordInfoToAnalyticsData,
+	threadWithDiscordInfoToAnalyticsData,
+	trackDiscordEvent,
 } from '../utils/analytics';
 import { toAOMessage } from '../utils/conversions';
 import { RootChannel } from '../utils/utils';

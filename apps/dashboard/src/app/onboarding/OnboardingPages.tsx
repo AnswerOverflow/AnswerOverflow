@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { signOut } from 'next-auth/react';
+import { trpc } from '@answeroverflow/ui/utils/client';
 import {
 	AcademicCapIcon,
 	ChatBubbleLeftIcon,
@@ -7,18 +6,20 @@ import {
 	CodeBracketIcon,
 	MagnifyingGlassCircleIcon,
 } from '@heroicons/react/24/outline';
-import { IoGameControllerOutline } from 'react-icons/io5';
-import { MdMoneyOffCsred, MdAttachMoney } from 'react-icons/md';
+import { signOut } from 'next-auth/react';
+import React, { useEffect, useState } from 'react';
 import { CiCircleMore } from 'react-icons/ci';
-import { trpc } from '@answeroverflow/ui/src/utils/client';
-import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
-import { Command } from '@answeroverflow/ui/src/ui/command';
-import { Button } from '@answeroverflow/ui/src/ui/button';
-import { ServerIcon } from '@answeroverflow/ui/src/server-icon';
-import { Heading } from '@answeroverflow/ui/src/ui/heading';
-import { BlueLink } from '@answeroverflow/ui/src/ui/blue-link';
-import { ManageServerCard } from '@answeroverflow/ui/src/server-card';
-import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
+import { IoGameControllerOutline } from 'react-icons/io5';
+import { MdAttachMoney, MdMoneyOffCsred } from 'react-icons/md';
+
+import { ServerPublic } from '@answeroverflow/api/src/router/types';
+import { ManageServerCard } from '@answeroverflow/ui/server-card';
+import { ServerIcon } from '@answeroverflow/ui/server-icon';
+import { BlueLink } from '@answeroverflow/ui/ui/blue-link';
+import { Button } from '@answeroverflow/ui/ui/button';
+import { Command } from '@answeroverflow/ui/ui/command';
+import { Heading } from '@answeroverflow/ui/ui/heading';
+import { LinkButton } from '@answeroverflow/ui/ui/link-button';
 import posthog from 'posthog-js';
 
 export type SubmittedData = {

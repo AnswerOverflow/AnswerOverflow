@@ -85,7 +85,7 @@ body {
 
 /* Speculative fix for lacking of loading of images on mobile in a marquee */
 @supports (font: -apple-system-body) and (-webkit-appearance: none) {
-	img[loading='lazy'] {
+	img[loading="lazy"] {
 		clip-path: inset(0.6px);
 	}
 }
@@ -145,10 +145,10 @@ img:not([src]):is(:empty) {
 }
 
 @layer components {
-  .spinner-border {
-    border-top-color: transparent;
-    border-right-color: #3490dc; /* Change this color as needed */
-    border-bottom-color: #3490dc; /* Change this color as needed */
-    border-left-color: #3490dc; /* Change this color as needed */
-  }
+	.spinner-border {
+		border-top-color: transparent;
+		border-right-color: #3490dc; /* Change this color as needed */
+		border-bottom-color: #3490dc; /* Change this color as needed */
+		border-left-color: #3490dc; /* Change this color as needed */
+	}
 }

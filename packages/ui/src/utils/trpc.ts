@@ -1,6 +1,6 @@
-import { getServerSession } from '@answeroverflow/auth';
+import { AppRouterCaller, appRouter } from '@answeroverflow/api';
 import { createContextInner } from '@answeroverflow/api/src/router/context';
-import { appRouter, AppRouterCaller } from '@answeroverflow/api';
+import { Auth } from '@answeroverflow/core/auth';
 import { TRPCError } from '@trpc/server';
 
 export type TRPCCall<T, E extends TRPCError['code'] | undefined> = {
@@ -12,7 +12,7 @@ export async function callAPI<
 	T,
 	E extends TRPCError['code'] | undefined = undefined,
 >(args: TRPCCall<T, E>): Promise<E extends undefined ? T : T | null> {
-	const session = await getServerSession();
+	const session = await Auth.getServerSession();
 	const caller = appRouter.createCaller(
 		await createContextInner({
 			session: session,
