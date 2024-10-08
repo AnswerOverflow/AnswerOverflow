@@ -10,7 +10,7 @@
 
 <div align="center">
   <h3>Index your discord help channels to google<br /></h3>
-  <a href="https://github.com/AnswerOverflow/AnswerOverflow/blob/main/LICENSE">
+  <a href="https://github.com/AnswerOverflow/AnswerOverflow/blob/main/LICENSE.md">
     <img alt="AGPL License" src="https://img.shields.io/github/license/AnswerOverflow/AnswerOverflow" />
   </a>
   <a href="https://discord.gg/Wny38ap7Tx">
