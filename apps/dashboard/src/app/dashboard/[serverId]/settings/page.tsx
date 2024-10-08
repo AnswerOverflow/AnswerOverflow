@@ -14,45 +14,58 @@ import { useDashboardContext } from '../components/dashboard-context';
 import { ConfigureDomainCard } from '../components/domains';
 import { TierAccessOnly } from '../components/tier-access-only';
 import { CurrentPlanCard } from './components';
+import { ServerWithFlags } from '@answeroverflow/core/zod';
+import React from 'react';
 
-function ToggleConsiderAllMessagesPublic() {
+interface ToggleServerFlagProps {
+	title: React.ReactNode;
+	description: React.ReactNode;
+	flagKey: keyof ServerWithFlags['flags']; // Assuming ServerFlags is the type for data.flags
+	label: React.ReactNode;
+}
+
+function ToggleServerFlag({
+	title,
+	description,
+	flagKey,
+	label,
+}: ToggleServerFlagProps) {
 	const { server: data } = useDashboardContext();
-	const setConsiderAllMessagesPublic =
-		trpc.servers.setConsiderAllMessagesPublic.useMutation({
-			onError: (error) => {
-				toast.error(error.message);
-			},
-		});
+	const updateMutation = trpc.servers.update.useMutation({
+		onError: (error) => {
+			toast.error(error.message);
+		},
+	});
 	const utils = trpc.useUtils();
+
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Consider All Messages Public</CardTitle>
-				<CardDescription>
-					When enabled, all messages will be public.
-				</CardDescription>
+				<CardTitle>{title}</CardTitle>
+				<CardDescription>{description}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<div className="flex items-center gap-2 pt-0">
 					<Switch
-						// eslint-disable-next-line @typescript-eslint/no-misused-promises
 						onCheckedChange={async (checked) => {
 							utils.dashboard.fetchDashboardById.setData(data.id, {
 								...data,
 								flags: {
 									...data.flags,
-									considerAllMessagesPublic: checked,
+									[flagKey]: checked,
 								},
 							});
-							await setConsiderAllMessagesPublic.mutateAsync({
-								serverId: data.id,
-								enabled: checked,
+							await updateMutation.mutateAsync({
+								id: data.id,
+								flags: {
+									[flagKey]: checked,
+								},
 							});
 							await utils.dashboard.fetchDashboardById.invalidate();
 						}}
-						checked={data.flags.considerAllMessagesPublic}
+						checked={data.flags[flagKey]}
 					/>
-					<Label>Enabled</Label>
+					<Label>{label}</Label>
 				</div>
 			</CardContent>
 		</Card>
@@ -82,7 +95,24 @@ export default function Settings() {
 				>
 					<ConfigureDomainCard />
 				</TierAccessOnly>
-				<ToggleConsiderAllMessagesPublic />
+				<ToggleServerFlag
+					title="Consider All Messages Public"
+					description="When enabled, all messages will be public."
+					flagKey="considerAllMessagesPublic"
+					label="Enabled"
+				/>
+				<ToggleServerFlag
+					flagKey="anonymizeMessages"
+					title="Anonymize Messages"
+					description="When enabled, messages will be anonymized."
+					label="Enabled"
+				/>
+				<ToggleServerFlag
+					flagKey="readTheRulesConsentEnabled"
+					title="Read the Rules Consent"
+					description="When enabled, users will be required to consent to the rules before they can use the chat."
+					label="Enabled"
+				/>
 			</div>
 		</div>
 	);

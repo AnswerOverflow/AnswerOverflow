@@ -2,13 +2,16 @@ import {
 	findServerByAliasOrId,
 	findServerById,
 	updateServer,
-	upsertServer,
 } from '@answeroverflow/core/server';
 import { getDefaultServerWithFlags } from '@answeroverflow/core/utils/serverUtils';
-import { ServerWithFlags, zServerCreate } from '@answeroverflow/core/zod';
+import {
+	ServerWithFlags,
+	zServerCreate,
+	zServerMutable,
+	zServerUpdate,
+} from '@answeroverflow/core/zod';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { botClient } from '../bot/caller';
 import {
 	DomainVerificationStatusProps,
 	addDomainToVercel,
@@ -94,15 +97,16 @@ export const serverRouter = router({
 			}
 			return data;
 		}),
-	setConsiderAllMessagesPublic: withUserServersProcedure
+	update: withUserServersProcedure
 		.input(
-			z.object({
-				serverId: z.string(),
-				enabled: z.boolean(),
-			}),
+			z
+				.object({
+					id: z.string(),
+				})
+				.merge(zServerMutable.deepPartial()),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const server = await findServerById(input.serverId);
+			const server = await findServerById(input.id);
 			if (!server) {
 				throw new TRPCError({
 					code: 'NOT_FOUND',
@@ -113,30 +117,9 @@ export const serverRouter = router({
 				ctx,
 				server: server,
 				operation: async ({ oldSettings }) => {
-					return protectedMutation({
-						permissions: () =>
-							assertBoolsAreNotEqual({
-								oldValue: oldSettings.flags.considerAllMessagesPublic,
-								newValue: input.enabled,
-								messageIfBothFalse:
-									DISABLE_CONSENT_TO_DISPLAY_MESSAGES_ALREADY_DISABLED_ERROR_MESSAGE,
-								messageIfBothTrue:
-									DISABLE_CONSENT_TO_DISPLAY_MESSAGES_ALREADY_ENABLED_ERROR_MESSAGE,
-							}),
-						operation: () =>
-							upsertServer({
-								create: {
-									...server,
-									flags: {
-										considerAllMessagesPublic: input.enabled,
-									},
-								},
-								update: {
-									flags: {
-										considerAllMessagesPublic: input.enabled,
-									},
-								},
-							}),
+					return updateServer({
+						existing: server,
+						update: input,
 					});
 				},
 			});

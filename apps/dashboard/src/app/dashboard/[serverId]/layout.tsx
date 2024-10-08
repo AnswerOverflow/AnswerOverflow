@@ -14,7 +14,7 @@ import { RxHamburgerMenu } from 'react-icons/rx';
 import { DashboardProvider } from './components/dashboard-context';
 import { demoServerData } from './components/mock';
 import { ServerSelectDropdown } from './components/navbar';
-
+import { Footer } from '@answeroverflow/ui/footer';
 export default function Layout(props: {
 	children?: React.ReactNode;
 	params: { serverId: string };
@@ -136,6 +136,7 @@ export default function Layout(props: {
 					<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
 						{props.children}
 					</main>
+					<Footer tenant={undefined} />
 				</div>
 			</div>
 		</DashboardProvider>
