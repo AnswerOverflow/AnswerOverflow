@@ -14,10 +14,14 @@ import type { ServerPublic } from '@answeroverflow/api';
 import { trpc } from '../utils/client';
 import { SignInButton } from './sign-in-button';
 
-export function UserSection(props: { tenant: ServerPublic | undefined }) {
+export function UserSection(props: {
+	tenant: ServerPublic | undefined;
+	dashboard?: boolean;
+}) {
 	const { tenant } = props;
 	const { data } = trpc.auth.getSession.useQuery();
 
-	if (!data) return <SignInButton tenant={tenant} />;
+	if (!data)
+		return <SignInButton tenant={tenant} dashboard={props.dashboard} />;
 	return <ClientUserAvatar user={data.user} tenant={props.tenant} />;
 }
