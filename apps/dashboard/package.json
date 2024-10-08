@@ -47,7 +47,6 @@
 		"@heroicons/react": "^2.0.18",
 		"@tanstack/react-query": "^4.36.1",
 		"@tanstack/react-table": "^8.17.3",
-		"@tremor/react": "^3.6.1",
 		"@typelytics/tremor": "^0.1.6",
 		"posthog-js": "^1.83.0",
 		"react-toastify": "^10.0.5",

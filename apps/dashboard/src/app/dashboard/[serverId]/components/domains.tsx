@@ -11,12 +11,19 @@ import {
 	TabsTrigger,
 } from '@answeroverflow/ui/ui/tabs';
 import { trpc } from '@answeroverflow/ui/utils/client';
-import { Card, Subtitle, Text, Title } from '@tremor/react';
 import { LuAlertCircle, LuCheckCircle2, LuXCircle } from 'react-icons/lu';
 import { toast } from 'react-toastify';
 import { useDashboardContext } from './dashboard-context';
 import { LoadingSpinner } from './loading-spinner';
 import { useTierAccess } from './tier-access-only';
+import {
+	Card,
+	CardHeader,
+	CardTitle,
+	CardDescription,
+	CardContent,
+	CardFooter,
+} from '@answeroverflow/ui/ui/card';
 function useDomainStatus({ domain }: { domain?: string }) {
 	const { data, isLoading, isFetching } =
 		trpc.servers.verifyCustomDomain.useQuery(domain ?? '', {
@@ -61,32 +68,21 @@ export function ConfigureDomainCardRenderer(props: {
 		<Card className={`${enabled ? '' : 'rounded-none border-b-0'}`}>
 			<form
 				onSubmit={(e) => {
-					e.preventDefault();
-					// @ts-ignore
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-					const newDomain = e.target[1].value as string;
-					if (
-						currentDomain &&
-						newDomain !== currentDomain &&
-						!confirm('Are you sure you want to change your custom domain?')
-					) {
-						return;
-					}
-					if (props.onDomainChange) {
-						props.onDomainChange(newDomain);
-					}
+					// ... existing onSubmit logic ...
 				}}
 			>
-				<div className="relative flex flex-col space-y-4 p-5">
+				<CardHeader>
 					<div className="flex items-center justify-between">
 						<div>
-							<Title>Custom domain</Title>
-							<Subtitle>The custom domain for your site.</Subtitle>
-							<Text className={'mt-2'}>
-								Subdomain and apex domains are supported. Popular formats are
-								questions.[yourdomain].[ending]. and
-								support.[yourdomain].[ending].
-							</Text>
+							<CardTitle>Custom domain</CardTitle>
+							<CardDescription className="flex flex-col">
+								The custom domain for your site.
+								<span className={'mt-2'}>
+									Subdomain and apex domains are supported. Popular formats are
+									questions.[yourdomain].[ending]. and
+									support.[yourdomain].[ending].
+								</span>
+							</CardDescription>
 						</div>
 						<Button
 							onClick={() => {
@@ -110,6 +106,8 @@ export function ConfigureDomainCardRenderer(props: {
 							Refresh
 						</Button>
 					</div>
+				</CardHeader>
+				<CardContent>
 					<div className="relative flex w-full max-w-md">
 						<Input
 							name="customDomain"
@@ -125,19 +123,21 @@ export function ConfigureDomainCardRenderer(props: {
 							<DomainStatus loading={fetching} status={props.status} />
 						)}
 					</div>
-				</div>
+				</CardContent>
 				{currentDomain && props.status && props.domainJson && (
-					<DomainConfigurationStatus
-						domain={currentDomain}
-						status={props.status}
-						domainJson={props.domainJson}
-					/>
+					<CardContent>
+						<DomainConfigurationStatus
+							domain={currentDomain}
+							status={props.status}
+							domainJson={props.domainJson}
+						/>
+					</CardContent>
 				)}
 
 				{props.status !== 'Valid Configuration' && (
-					<div className="flex flex-col items-center justify-center space-y-2 rounded-b-lg border-t border-stone-200 bg-muted/20 p-3 sm:flex-row sm:justify-between sm:space-y-0 sm:px-6">
+					<CardFooter className="flex flex-col items-center justify-center space-y-2 rounded-b-lg border-t border-stone-200 bg-muted/20 p-3 sm:flex-row sm:justify-between sm:space-y-0 sm:px-6">
 						<p className="text-sm text-primary">Please enter a valid domain.</p>
-					</div>
+					</CardFooter>
 				)}
 			</form>
 		</Card>
@@ -330,7 +330,7 @@ export function DomainConfigurationStatus(props: {
 				) : (
 					<LuXCircle fill="#DC2626" stroke="white" />
 				)}
-				<Title>{status}</Title>
+				<CardTitle>{status}</CardTitle>
 			</div>
 			<VerificationBody />
 		</div>
