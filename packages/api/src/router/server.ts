@@ -94,48 +94,6 @@ export const serverRouter = router({
 			}
 			return data;
 		}),
-	setReadTheRulesConsentEnabled: withUserServersProcedure
-		.input(
-			z.object({
-				server: zServerCreate.omit({
-					flags: true,
-				}),
-				enabled: z.boolean(),
-			}),
-		)
-		.mutation(async ({ ctx, input }) => {
-			return mutateServer({
-				ctx,
-				server: input.server,
-				operation: async ({ oldSettings }) => {
-					return protectedMutation({
-						permissions: () =>
-							assertBoolsAreNotEqual({
-								oldValue: oldSettings.flags.readTheRulesConsentEnabled,
-								newValue: input.enabled,
-								messageIfBothFalse:
-									READ_THE_RULES_CONSENT_ALREADY_DISABLED_ERROR_MESSAGE,
-								messageIfBothTrue:
-									READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE,
-							}),
-						operation: () =>
-							upsertServer({
-								create: {
-									...input.server,
-									flags: {
-										readTheRulesConsentEnabled: input.enabled,
-									},
-								},
-								update: {
-									flags: {
-										readTheRulesConsentEnabled: input.enabled,
-									},
-								},
-							}),
-					});
-				},
-			});
-		}),
 	setConsiderAllMessagesPublic: withUserServersProcedure
 		.input(
 			z.object({
@@ -176,46 +134,6 @@ export const serverRouter = router({
 								update: {
 									flags: {
 										considerAllMessagesPublic: input.enabled,
-									},
-								},
-							}),
-					});
-				},
-			});
-		}),
-	setAnonymizeMessages: withUserServersProcedure
-		.input(
-			z.object({
-				server: zServerCreate.omit({
-					flags: true,
-				}),
-				enabled: z.boolean(),
-			}),
-		)
-		.mutation(async ({ ctx, input }) => {
-			return mutateServer({
-				ctx,
-				server: input.server,
-				operation: async ({ oldSettings }) => {
-					return protectedMutation({
-						permissions: () =>
-							assertBoolsAreNotEqual({
-								oldValue: oldSettings.flags.anonymizeMessages,
-								newValue: input.enabled,
-								messageIfBothFalse: 'Anonymize messages already disabled',
-								messageIfBothTrue: 'Anonymize messages already enabled',
-							}),
-						operation: () =>
-							upsertServer({
-								create: {
-									...input.server,
-									flags: {
-										anonymizeMessages: input.enabled,
-									},
-								},
-								update: {
-									flags: {
-										anonymizeMessages: input.enabled,
 									},
 								},
 							}),
@@ -346,7 +264,4 @@ export const serverRouter = router({
 				domainJson,
 			};
 		}),
-	callBot: withUserServersProcedure.query(async () => {
-		return botClient.hello.query();
-	}),
 });
