@@ -2,6 +2,13 @@ import { Plan } from '@answeroverflow/core/schema';
 import { PricingDialog } from '@answeroverflow/ui/pricing';
 import { BlueLink } from '@answeroverflow/ui/ui/blue-link';
 import { useDashboardContext } from '../components/dashboard-context';
+import {
+	Card,
+	CardHeader,
+	CardTitle,
+	CardContent,
+	CardFooter,
+} from '@answeroverflow/ui/ui/card';
 
 function planToPrettyText(plan: Plan) {
 	switch (plan) {
@@ -68,18 +75,19 @@ export function CurrentPlanCard() {
 	};
 
 	return (
-		<div className="flex h-full w-full flex-col justify-between gap-2 rounded-md border-1 p-8">
-			<div className="flex flex-col gap-1">
-				<span className="text-lg font-semibold">Current plan</span>
+		<Card className="h-full w-full">
+			<CardHeader>
+				<CardTitle>Current plan</CardTitle>
+			</CardHeader>
+			<CardContent className="flex flex-col gap-1">
 				<span className="text-2xl font-semibold">{planToPrettyText(plan)}</span>
-			</div>
-			<div className="flex flex-col gap-1">
 				<span>{`${label} ${
 					dateInMs ? new Date(dateInMs * 1000).toLocaleDateString() : ''
 				}`}</span>
-
+			</CardContent>
+			<CardFooter>
 				<CTA />
-			</div>
-		</div>
+			</CardFooter>
+		</Card>
 	);
 }
