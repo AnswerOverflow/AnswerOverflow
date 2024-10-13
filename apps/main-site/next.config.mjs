@@ -20,7 +20,6 @@ const config = {
   transpilePackages: [
     "@answeroverflow/api",
     "@answeroverflow/core",
-    "@answeroverflow/tailwind-config",
     "@answeroverflow/ui",
     "@answeroverflow/env",
   ],

@@ -1,1 +1,1 @@
-module.exports = require('@answeroverflow/tailwind-config/postcss');
+module.exports = require("@answeroverflow/ui/postcss-config");

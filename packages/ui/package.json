@@ -4,7 +4,9 @@
 	"type": "module",
 	"sideEffects": false,
 	"exports": {
-		"./*": ["./src/*.tsx"]
+		"./*": ["./src/*.tsx"],
+		"./tailwind-config": ["./tailwind.config.cjs"],
+		"./postcss-config": ["./postcss.config.cjs"]
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",
@@ -69,7 +71,6 @@
 	},
 	"devDependencies": {
 		"@answeroverflow/core": "workspace:^",
-		"@answeroverflow/tailwind-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
 		"@types/react": "npm:types-react@rc",
 		"@types/react-dom": "npm:types-react-dom@rc",
