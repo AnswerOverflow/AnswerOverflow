@@ -3,6 +3,14 @@ import type {
 	VercelDomainVerificationResponse,
 } from '@answeroverflow/api';
 import { Button } from '@answeroverflow/ui/ui/button';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@answeroverflow/ui/ui/card';
 import { Input } from '@answeroverflow/ui/ui/input';
 import {
 	Tabs,
@@ -16,14 +24,6 @@ import { toast } from 'react-toastify';
 import { useDashboardContext } from './dashboard-context';
 import { LoadingSpinner } from './loading-spinner';
 import { useTierAccess } from './tier-access-only';
-import {
-	Card,
-	CardHeader,
-	CardTitle,
-	CardDescription,
-	CardContent,
-	CardFooter,
-} from '@answeroverflow/ui/ui/card';
 function useDomainStatus({ domain }: { domain?: string }) {
 	const { data, isLoading, isFetching } =
 		trpc.servers.verifyCustomDomain.useQuery(domain ?? '', {

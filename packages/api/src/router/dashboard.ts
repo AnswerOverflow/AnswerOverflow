@@ -1,7 +1,11 @@
 import { Analytics } from '@answeroverflow/core/analytics';
 import { findManyChannelsById } from '@answeroverflow/core/channel';
 import { findManyDiscordAccountsById } from '@answeroverflow/core/discord-account';
-import { findServerById, updateServer } from '@answeroverflow/core/server';
+import {
+	findServerById,
+	findServerByIdWithChannels,
+	updateServer,
+} from '@answeroverflow/core/server';
 import { Stripe } from '@answeroverflow/core/stripe';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { TRPCError, inferProcedureOutput } from '@trpc/server';
@@ -104,7 +108,7 @@ export const dashboardRouter = router({
 		.query(async ({ input, ctx }) =>
 			protectedFetch({
 				fetch: async () => {
-					const server = await findServerById(input);
+					const server = await findServerByIdWithChannels(input);
 					if (!server) {
 						throw new TRPCError({
 							code: 'NOT_FOUND',

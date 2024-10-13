@@ -21,7 +21,7 @@
 		"@types/qs": "^6.9.7",
 		"dayjs": "^1.11.9",
 		"discord-api-types": "^0.37.67",
-		"next": "14.3.0-canary.9",
+		"next": "^15.0.0-canary.179",
 		"superjson": "^1.13.1",
 		"zod": "^3.22.2"
 	},

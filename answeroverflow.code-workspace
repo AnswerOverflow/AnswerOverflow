@@ -157,28 +157,8 @@
 		/*
       TESTING
     */
-		"jest.disabledWorkspaceFolders": [
-			"root",
-			"api",
-			"ui",
-			"main-site",
-			"db",
-			"auth",
-			"config",
-			"utils",
-			"redis",
-			"hooks",
-			"analytics",
-			"db-mock",
-			"constants",
-			"search",
-			"cache",
-			"docs"
-		],
-		"jest.autoRevealOutput": "off",
 		"vitest.enable": true,
 		"vitest.disabledWorkspaceFolders": ["root", "discord-bot"],
-		"jest.autoRun": "off",
 		/*
       MISC
     */
@@ -240,7 +220,6 @@
 			"EditorConfig.EditorConfig",
 			"bradlc.vscode-tailwindcss",
 			"DavidAnson.vscode-markdownlint",
-			"Orta.vscode-jest",
 			"unifiedjs.vscode-mdx",
 			"usernamehw.errorlens",
 			"esbenp.prettier-vscode",

@@ -50,7 +50,7 @@ jobs:
         with:
         bun-version: 1.1.29
 
-      - name: Start containers # TODO: Use dev container docker-compose instead if possible
+      - name: Start containers
         run: docker compose -f "docker-compose.yml" -f "docker-compose-extras.yml" up -d --build
 
       - name: Install dependencies

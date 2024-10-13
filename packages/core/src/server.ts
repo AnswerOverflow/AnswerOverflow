@@ -10,6 +10,7 @@ import {
 } from './utils/serverUtils';
 import {
 	ServerSettingsFlags,
+	addFlagsToChannel,
 	serverSettingsFlags,
 	zServerCreate,
 	zServerMutable,
@@ -116,6 +117,22 @@ export async function findServerById(id: string) {
 	if (!found) return null;
 	return addFlagsToServer(found);
 }
+
+export async function findServerByIdWithChannels(id: string) {
+	const found = await db.query.dbServers.findFirst({
+		where: eq(dbServers.id, id),
+		with: {
+			channels: true,
+		},
+	});
+	if (!found) return null;
+	return {
+		...addFlagsToServer(found),
+		channels: found.channels.map((c) => addFlagsToChannel(c)),
+	};
+}
+
+export type ServerWithChannels = ReturnType<typeof findServerByIdWithChannels>;
 
 export async function findServerByStripeCustomerId(stripeCustomerId: string) {
 	const found = await db.query.dbServers.findFirst({

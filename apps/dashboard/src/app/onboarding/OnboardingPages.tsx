@@ -17,7 +17,7 @@ import { ManageServerCard } from '@answeroverflow/ui/server-card';
 import { ServerIcon } from '@answeroverflow/ui/server-icon';
 import { BlueLink } from '@answeroverflow/ui/ui/blue-link';
 import { Button } from '@answeroverflow/ui/ui/button';
-import { Command } from '@answeroverflow/ui/ui/command';
+import { DiscordCommand } from '@answeroverflow/ui/ui/discord-command';
 import { Heading } from '@answeroverflow/ui/ui/heading';
 import { LinkButton } from '@answeroverflow/ui/ui/link-button';
 import posthog from 'posthog-js';
@@ -272,7 +272,7 @@ const SetupPage = (props: {
 						{props.title}
 					</Heading.H1>
 					<div className="mx-auto">
-						<Command command={props.command} />
+						<DiscordCommand command={props.command} />
 					</div>
 				</div>
 			</div>

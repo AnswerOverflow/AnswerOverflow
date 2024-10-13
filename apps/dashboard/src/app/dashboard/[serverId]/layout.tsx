@@ -1,20 +1,24 @@
 'use client';
+import { Footer } from '@answeroverflow/ui/footer';
 import { AnswerOverflowLogo } from '@answeroverflow/ui/icons/answer-overflow-logo';
 import { UserSection } from '@answeroverflow/ui/navbar/client';
 import { Button } from '@answeroverflow/ui/ui/button';
 import { LinkButton } from '@answeroverflow/ui/ui/link-button';
 import { Sheet, SheetContent, SheetTrigger } from '@answeroverflow/ui/ui/sheet';
 import { trpc } from '@answeroverflow/ui/utils/client';
+import {
+	CogIcon,
+	HashIcon,
+	HomeIcon,
+	MenuIcon,
+	PuzzleIcon,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { FaHome } from 'react-icons/fa';
-import { FaGear, FaPuzzlePiece } from 'react-icons/fa6';
-import { RxHamburgerMenu } from 'react-icons/rx';
 import { DashboardProvider } from './components/dashboard-context';
 import { demoServerData } from './components/mock';
 import { ServerSelectDropdown } from './components/navbar';
-import { Footer } from '@answeroverflow/ui/footer';
 export default function Layout(props: {
 	children?: React.ReactNode;
 	params: { serverId: string };
@@ -30,17 +34,22 @@ export default function Layout(props: {
 		{
 			path: `/dashboard/${props.params.serverId}`,
 			label: 'Home',
-			icon: <FaHome className="size-5" />,
+			icon: <HomeIcon className="size-5" />,
 		},
 		{
 			path: `/dashboard/${props.params.serverId}/integrations`,
 			label: 'Integrations',
-			icon: <FaPuzzlePiece className="size-5" />,
+			icon: <PuzzleIcon className="size-5" />,
 		},
 		{
 			path: `/dashboard/${props.params.serverId}/settings`,
 			label: 'Settings',
-			icon: <FaGear className="size-5" />,
+			icon: <CogIcon className="size-5" />,
+		},
+		{
+			path: `/dashboard/${props.params.serverId}/channels`,
+			label: 'Channels',
+			icon: <HashIcon className="size-5" />,
 		},
 	];
 	const router = useRouter();
@@ -107,7 +116,7 @@ export default function Layout(props: {
 									size="icon"
 									className="shrink-0 md:hidden"
 								>
-									<RxHamburgerMenu className="h-6 w-6" />
+									<MenuIcon className="h-6 w-6" />
 									<span className="sr-only">Toggle navigation menu</span>
 								</Button>
 							</SheetTrigger>
