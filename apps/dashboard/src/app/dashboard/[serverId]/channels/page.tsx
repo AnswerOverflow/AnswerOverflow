@@ -258,6 +258,13 @@ export default function ChannelsPage() {
 						selectedChannel={selectedChannel}
 					/>
 					<ToggleChannelFlag
+						flagKey="sendMarkSolutionInstructionsInNewThreads"
+						title="Send Mark Solution Instructions in New Threads"
+						description="Whether to send mark solution instructions in new threads"
+						label="Enabled"
+						selectedChannel={selectedChannel}
+					/>
+					<ToggleChannelFlag
 						flagKey="autoThreadEnabled"
 						title="Auto Thread Enabled"
 						description="Whether the channel allows auto-threading"

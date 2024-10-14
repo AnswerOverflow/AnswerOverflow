@@ -22,8 +22,7 @@
 		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
 		"importHelpers": true,
-		"incremental": true,
-		"tsBuildInfoFile": ".tsbuildinfo",
+
 		"lib": ["esnext"],
 		"skipLibCheck": true,
 		"newLine": "lf",
