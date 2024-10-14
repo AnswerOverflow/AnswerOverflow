@@ -9,7 +9,6 @@
 		"@answeroverflow/core": "workspace:*",
 		"@answeroverflow/utils": "workspace:*",
 		"@answeroverflow/env": "workspace:*",
-		"@discordjs/builders": "^1.6.5",
 		"@sapphire/discord-utilities": "3.0.3",
 		"@sapphire/fetch": "^2.4.1",
 		"@sapphire/decorators": "^6.1.0",
