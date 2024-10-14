@@ -4,7 +4,6 @@ import {
   ButtonStyle,
   ChannelType,
   ComponentType,
-  EmbedBuilder,
   GuildMember,
   Message,
 } from "discord.js";
@@ -21,13 +20,8 @@ import { ChannelWithFlags } from "@answeroverflow/core/zod";
 import { memberToAnalyticsUser, trackDiscordEvent } from "../utils/analytics";
 import { createMemberCtx } from "../utils/context";
 import { toAODiscordAccount } from "../utils/conversions";
-import {
-  TRPCStatusHandler,
-  callAPI,
-  oneTimeStatusHandler,
-} from "../utils/trpc";
+import { TRPCStatusHandler, callAPI } from "../utils/trpc";
 import { isHumanMessage } from "../utils/utils";
-import { makeRequestForConsentString } from "./mark-solution";
 
 export const CONSENT_ACTION_PREFIX = "consent";
 
