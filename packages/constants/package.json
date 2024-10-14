@@ -15,7 +15,7 @@
 	},
 	"dependencies": {
 		"@answeroverflow/env": "workspace:^",
-		"discord-api-types": "^0.37.54",
+		"discord-api-types": "^0.37.101",
 		"dotenv-cra": "^3.0.3",
 		"zod": "^3.22.2"
 	},

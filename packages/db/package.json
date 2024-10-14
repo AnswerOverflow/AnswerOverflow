@@ -34,7 +34,7 @@
 		"@sapphire/bitfield": "^1.2.0",
 		"@vitest/coverage-v8": "^2.0.5",
 		"dataloader": "^2.2.2",
-		"discord-api-types": "^0.37.67",
+		"discord-api-types": "^0.37.101",
 		"dotenv": "^16.4.5",
 		"dotenv-cra": "^3.0.3",
 		"drizzle-orm": "^0.28.5",

@@ -31,7 +31,7 @@
 		"@trpc/server": "^10.45.2",
 		"@types/qs": "^6.9.7",
 		"dayjs": "^1.11.9",
-		"discord-api-types": "^0.37.67",
+		"discord-api-types": "^0.37.101",
 		"dotenv-cra": "^3.0.3",
 		"next": "14.3.0-canary.9",
 		"prettier": "3.3.3",

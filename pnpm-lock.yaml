@@ -325,8 +325,8 @@ importers:
         specifier: ^3.1.7
         version: 3.1.7
       discord-api-types:
-        specifier: ^0.37.67
-        version: 0.37.88
+        specifier: ^0.37.101
+        version: 0.37.101
       discord.js:
         specifier: ^14.13.0
         version: 14.15.3
@@ -592,7 +592,7 @@ importers:
         version: 1.77.4
       tailwindcss:
         specifier: ^3.3.3
-        version: 3.4.4(ts-node@10.9.2(@swc/core@1.5.27)(@types/node@20.14.2)(typescript@5.4.5))
+        version: 3.4.4(ts-node@10.9.2(@types/node@20.14.2)(typescript@5.4.5))
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@swc/core@1.5.27)(@types/node@20.14.2)(typescript@5.4.5)
@@ -612,8 +612,8 @@ importers:
         specifier: ^0.1.3
         version: 0.1.5
       discord-api-types:
-        specifier: ^0.37.67
-        version: 0.37.88
+        specifier: ^0.37.101
+        version: 0.37.101
       next-auth:
         specifier: ^4.23.1
         version: 4.24.7(next@15.0.0-rc.0(@opentelemetry/api@1.9.0)(react-dom@19.0.0-rc-a26e3f403e-20240611(react@19.0.0-rc-a26e3f403e-20240611))(react@19.0.0-rc-a26e3f403e-20240611)(sass@1.77.4))(react-dom@19.0.0-rc-a26e3f403e-20240611(react@19.0.0-rc-a26e3f403e-20240611))(react@19.0.0-rc-a26e3f403e-20240611)
@@ -694,8 +694,8 @@ importers:
         specifier: ^1.11.9
         version: 1.11.11
       discord-api-types:
-        specifier: ^0.37.67
-        version: 0.37.88
+        specifier: ^0.37.101
+        version: 0.37.101
       dotenv-cra:
         specifier: ^3.0.3
         version: 3.0.3
@@ -969,8 +969,8 @@ importers:
         specifier: workspace:^
         version: link:../env
       discord-api-types:
-        specifier: ^0.37.54
-        version: 0.37.88
+        specifier: ^0.37.101
+        version: 0.37.101
       dotenv-cra:
         specifier: ^3.0.3
         version: 3.0.3
@@ -1030,8 +1030,8 @@ importers:
         specifier: ^2.2.2
         version: 2.2.2
       discord-api-types:
-        specifier: ^0.37.67
-        version: 0.37.88
+        specifier: ^0.37.101
+        version: 0.37.101
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -1112,8 +1112,8 @@ importers:
         specifier: ^1.2.0
         version: 1.2.2
       discord-api-types:
-        specifier: ^0.37.67
-        version: 0.37.88
+        specifier: ^0.37.101
+        version: 0.37.101
       type-fest:
         specifier: ^4.12.0
         version: 4.20.0
@@ -1367,8 +1367,8 @@ importers:
         specifier: ^8.13.1
         version: 8.13.1
       discord-api-types:
-        specifier: ^0.37.67
-        version: 0.37.88
+        specifier: ^0.37.101
+        version: 0.37.101
       dotenv-cra:
         specifier: ^3.0.3
         version: 3.0.3
@@ -2767,9 +2767,11 @@ packages:
 
   '@esbuild-kit/core-utils@3.3.2':
     resolution: {integrity: sha512-sPRAnw9CdSsRmEtnsl2WXWdyquogVpB3yZ3dgwJfe8zrOzTsV7cJvmwrKVa+0ma5BoiGJ+BoqkMvawbayKUsqQ==}
+    deprecated: 'Merged into tsx: https://tsx.is'
 
   '@esbuild-kit/esm-loader@2.6.5':
     resolution: {integrity: sha512-FxEMIkJKnodyA1OaCUoEvbYRkoZlLZ4d/eXFu9Fh8CbBBgP5EmZxrfTRyN0qpXZ4vOvqnE5YdRdcrmUUXuU+dA==}
+    deprecated: 'Merged into tsx: https://tsx.is'
 
   '@esbuild/aix-ppc64@0.20.2':
     resolution: {integrity: sha512-D+EBOJHXdNZcLJRBkhENNG8Wji2kgc9AZ9KiPr1JuZjsNtyHzrsfLRrY0tk2H2aoFu6RANO1y1iPPUCDYWkb5g==}
@@ -6691,11 +6693,11 @@ packages:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
 
+  discord-api-types@0.37.101:
+    resolution: {integrity: sha512-2wizd94t7G3A8U5Phr3AiuL4gSvhqistDwWnlk1VLTit8BI1jWUncFqFQNdPbHqS3661+Nx/iEyIwtVjPuBP3w==}
+
   discord-api-types@0.37.83:
     resolution: {integrity: sha512-urGGYeWtWNYMKnYlZnOnDHm8fVRffQs3U0SpE8RHeiuLKb/u92APS8HoQnPTFbnXmY1vVnXjXO4dOxcAn3J+DA==}
-
-  discord-api-types@0.37.88:
-    resolution: {integrity: sha512-Yrj5S3JXzouPc6WLA8svgXCw3Q7IkNdW/Y/IfkJF+CsgUBsgECQ8qVoOaseJJ8Atj2TEvabut4rGmzq6PRi1/Q==}
 
   discord.js@14.15.3:
     resolution: {integrity: sha512-/UJDQO10VuU6wQPglA4kz2bw2ngeeSbogiIPx/TsnctfzV/tNf+q+i1HlgtX1OGpeOBpJH9erZQNO5oRM2uAtQ==}
@@ -7153,6 +7155,7 @@ packages:
   eslint@8.57.0:
     resolution: {integrity: sha512-dZ6+mexnaTIbSBZWgou51U6OmzIhYM2VcNdtiTtI7qPNZm35Akpr0f6vtw3w1Kmn5PYo+tZVfh13WrhpS6oLqQ==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
 
   esniff@2.0.1:
@@ -11919,8 +11922,8 @@ snapshots:
       '@aws-crypto/sha1-browser': 3.0.0
       '@aws-crypto/sha256-browser': 3.0.0
       '@aws-crypto/sha256-js': 3.0.0
-      '@aws-sdk/client-sso-oidc': 3.592.0(@aws-sdk/client-sts@3.592.0)
-      '@aws-sdk/client-sts': 3.592.0
+      '@aws-sdk/client-sso-oidc': 3.592.0
+      '@aws-sdk/client-sts': 3.592.0(@aws-sdk/client-sso-oidc@3.592.0)
       '@aws-sdk/core': 3.592.0
       '@aws-sdk/credential-provider-node': 3.592.0(@aws-sdk/client-sso-oidc@3.592.0)(@aws-sdk/client-sts@3.592.0)
       '@aws-sdk/middleware-bucket-endpoint': 3.587.0
@@ -11977,11 +11980,11 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-sso-oidc@3.592.0(@aws-sdk/client-sts@3.592.0)':
+  '@aws-sdk/client-sso-oidc@3.592.0':
     dependencies:
       '@aws-crypto/sha256-browser': 3.0.0
       '@aws-crypto/sha256-js': 3.0.0
-      '@aws-sdk/client-sts': 3.592.0
+      '@aws-sdk/client-sts': 3.592.0(@aws-sdk/client-sso-oidc@3.592.0)
       '@aws-sdk/core': 3.592.0
       '@aws-sdk/credential-provider-node': 3.592.0(@aws-sdk/client-sso-oidc@3.592.0)(@aws-sdk/client-sts@3.592.0)
       '@aws-sdk/middleware-host-header': 3.577.0
@@ -12020,7 +12023,6 @@ snapshots:
       '@smithy/util-utf8': 3.0.0
       tslib: 2.6.3
     transitivePeerDependencies:
-      - '@aws-sdk/client-sts'
       - aws-crt
 
   '@aws-sdk/client-sso@3.592.0':
@@ -12066,11 +12068,11 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-sts@3.592.0':
+  '@aws-sdk/client-sts@3.592.0(@aws-sdk/client-sso-oidc@3.592.0)':
     dependencies:
       '@aws-crypto/sha256-browser': 3.0.0
       '@aws-crypto/sha256-js': 3.0.0
-      '@aws-sdk/client-sso-oidc': 3.592.0(@aws-sdk/client-sts@3.592.0)
+      '@aws-sdk/client-sso-oidc': 3.592.0
       '@aws-sdk/core': 3.592.0
       '@aws-sdk/credential-provider-node': 3.592.0(@aws-sdk/client-sso-oidc@3.592.0)(@aws-sdk/client-sts@3.592.0)
       '@aws-sdk/middleware-host-header': 3.577.0
@@ -12109,6 +12111,7 @@ snapshots:
       '@smithy/util-utf8': 3.0.0
       tslib: 2.6.3
     transitivePeerDependencies:
+      - '@aws-sdk/client-sso-oidc'
       - aws-crt
 
   '@aws-sdk/core@3.592.0':
@@ -12142,7 +12145,7 @@ snapshots:
 
   '@aws-sdk/credential-provider-ini@3.592.0(@aws-sdk/client-sso-oidc@3.592.0)(@aws-sdk/client-sts@3.592.0)':
     dependencies:
-      '@aws-sdk/client-sts': 3.592.0
+      '@aws-sdk/client-sts': 3.592.0(@aws-sdk/client-sso-oidc@3.592.0)
       '@aws-sdk/credential-provider-env': 3.587.0
       '@aws-sdk/credential-provider-http': 3.587.0
       '@aws-sdk/credential-provider-process': 3.587.0
@@ -12200,7 +12203,7 @@ snapshots:
 
   '@aws-sdk/credential-provider-web-identity@3.587.0(@aws-sdk/client-sts@3.592.0)':
     dependencies:
-      '@aws-sdk/client-sts': 3.592.0
+      '@aws-sdk/client-sts': 3.592.0(@aws-sdk/client-sso-oidc@3.592.0)
       '@aws-sdk/types': 3.577.0
       '@smithy/property-provider': 3.1.0
       '@smithy/types': 3.0.0
@@ -12327,7 +12330,7 @@ snapshots:
 
   '@aws-sdk/token-providers@3.587.0(@aws-sdk/client-sso-oidc@3.592.0)':
     dependencies:
-      '@aws-sdk/client-sso-oidc': 3.592.0(@aws-sdk/client-sts@3.592.0)
+      '@aws-sdk/client-sso-oidc': 3.592.0
       '@aws-sdk/types': 3.577.0
       '@smithy/property-provider': 3.1.0
       '@smithy/shared-ini-file-loader': 3.1.0
@@ -15747,11 +15750,11 @@ snapshots:
 
   '@sapphire/discord-utilities@3.0.3':
     dependencies:
-      discord-api-types: 0.37.88
+      discord-api-types: 0.37.101
 
   '@sapphire/discord-utilities@3.3.0':
     dependencies:
-      discord-api-types: 0.37.88
+      discord-api-types: 0.37.101
 
   '@sapphire/discord.js-utilities@7.3.0':
     dependencies:
@@ -16342,7 +16345,7 @@ snapshots:
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       postcss-selector-parser: 6.0.10
-      tailwindcss: 3.4.4(ts-node@10.9.2(@swc/core@1.5.27)(@types/node@20.14.2)(typescript@5.4.5))
+      tailwindcss: 3.4.4(ts-node@10.9.2(@types/node@20.14.2)(typescript@5.4.5))
 
   '@tanstack/query-core@4.36.1': {}
 
@@ -18200,9 +18203,9 @@ snapshots:
     dependencies:
       path-type: 4.0.0
 
-  discord-api-types@0.37.83: {}
+  discord-api-types@0.37.101: {}
 
-  discord-api-types@0.37.88: {}
+  discord-api-types@0.37.83: {}
 
   discord.js@14.15.3:
     dependencies:
@@ -22658,18 +22661,10 @@ snapshots:
       camelcase-css: 2.0.1
       postcss: 8.4.38
 
-  postcss-load-config@4.0.2(postcss@8.4.38)(ts-node@10.9.2(@swc/core@1.5.27)(@types/node@20.14.2)(typescript@5.4.5)):
-    dependencies:
-      lilconfig: 3.1.2
-      yaml: 2.5.0
-    optionalDependencies:
-      postcss: 8.4.38
-      ts-node: 10.9.2(@swc/core@1.5.27)(@types/node@20.14.2)(typescript@5.4.5)
-
   postcss-load-config@4.0.2(postcss@8.4.38)(ts-node@10.9.2(@types/node@20.14.15)(typescript@5.4.5)):
     dependencies:
       lilconfig: 3.1.2
-      yaml: 2.5.0
+      yaml: 2.4.5
     optionalDependencies:
       postcss: 8.4.38
       ts-node: 10.9.2(@types/node@20.14.15)(typescript@5.4.5)
@@ -22685,7 +22680,7 @@ snapshots:
   postcss-load-config@4.0.2(postcss@8.4.39)(ts-node@10.9.2(@swc/core@1.5.27(@swc/helpers@0.5.11))(@types/node@20.14.2)(typescript@5.4.5)):
     dependencies:
       lilconfig: 3.1.2
-      yaml: 2.5.0
+      yaml: 2.4.5
     optionalDependencies:
       postcss: 8.4.39
       ts-node: 10.9.2(@swc/core@1.5.27(@swc/helpers@0.5.11))(@types/node@20.14.2)(typescript@5.4.5)
@@ -24226,33 +24221,6 @@ snapshots:
     dependencies:
       tailwindcss: 3.4.4(ts-node@10.9.2(@types/node@20.14.15)(typescript@5.4.5))
 
-  tailwindcss@3.4.4(ts-node@10.9.2(@swc/core@1.5.27)(@types/node@20.14.2)(typescript@5.4.5)):
-    dependencies:
-      '@alloc/quick-lru': 5.2.0
-      arg: 5.0.2
-      chokidar: 3.6.0
-      didyoumean: 1.2.2
-      dlv: 1.1.3
-      fast-glob: 3.3.2
-      glob-parent: 6.0.2
-      is-glob: 4.0.3
-      jiti: 1.21.6
-      lilconfig: 2.1.0
-      micromatch: 4.0.7
-      normalize-path: 3.0.0
-      object-hash: 3.0.0
-      picocolors: 1.0.1
-      postcss: 8.4.38
-      postcss-import: 15.1.0(postcss@8.4.38)
-      postcss-js: 4.0.1(postcss@8.4.38)
-      postcss-load-config: 4.0.2(postcss@8.4.38)(ts-node@10.9.2(@swc/core@1.5.27)(@types/node@20.14.2)(typescript@5.4.5))
-      postcss-nested: 6.0.1(postcss@8.4.38)
-      postcss-selector-parser: 6.1.0
-      resolve: 1.22.8
-      sucrase: 3.35.0
-    transitivePeerDependencies:
-      - ts-node
-
   tailwindcss@3.4.4(ts-node@10.9.2(@types/node@20.14.15)(typescript@5.4.5)):
     dependencies:
       '@alloc/quick-lru': 5.2.0
@@ -24873,7 +24841,7 @@ snapshots:
       std-env: 3.7.0
     optionalDependencies:
       next: 14.2.4(@opentelemetry/api@1.9.0)(sass@1.77.4)
-      tailwindcss: 3.4.4(ts-node@10.9.2(@swc/core@1.5.27)(@types/node@20.14.2)(typescript@5.4.5))
+      tailwindcss: 3.4.4(ts-node@10.9.2(@types/node@20.14.2)(typescript@5.4.5))
 
   uri-js@4.4.1:
     dependencies:
