@@ -1,5 +1,6 @@
 import {
   type APIButtonComponent,
+  ButtonBuilder,
   ButtonStyle,
   ChannelType,
   ComponentType,
@@ -14,7 +15,6 @@ import {
   type ManageAccountSource,
 } from "@answeroverflow/api";
 import { CONSENT_BUTTON_LABEL } from "@answeroverflow/constants/discord";
-import { WEBSITE_URL } from "@answeroverflow/constants/links";
 import { findServerById } from "@answeroverflow/core/server";
 import { UserServerSettingsWithFlags } from "@answeroverflow/core/utils/userServerSettingsUtils";
 import { ChannelWithFlags } from "@answeroverflow/core/zod";
