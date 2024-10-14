@@ -23,7 +23,7 @@
 		"@answeroverflow/hooks": "workspace:^",
 		"@answeroverflow/tailwind-config": "workspace:^",
 		"@answeroverflow/ui": "workspace:^",
-		"@aws-sdk/client-s3": "^3.577.0",
+		"@aws-sdk/client-s3": "^3.670.0",
 		"@heroicons/react": "^2.0.18",
 		"@tanstack/react-query": "^4.36.1",
 		"@tanstack/react-table": "^8.17.3",

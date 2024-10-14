@@ -28,7 +28,7 @@
 		"@answeroverflow/db-mock": "workspace:^",
 		"@answeroverflow/env": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
-		"@aws-sdk/client-s3": "^3.577.0",
+		"@aws-sdk/client-s3": "^3.670.0",
 		"@aws-sdk/lib-storage": "^3.578.0",
 		"@planetscale/database": "^1.11.0",
 		"@sapphire/bitfield": "^1.2.0",

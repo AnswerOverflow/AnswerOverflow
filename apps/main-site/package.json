@@ -27,7 +27,7 @@
 		"@answeroverflow/tailwind-config": "workspace:^",
 		"@answeroverflow/ui": "workspace:^",
 		"@answeroverflow/utils": "workspace:^",
-		"@aws-sdk/client-s3": "^3.577.0",
+		"@aws-sdk/client-s3": "^3.670.0",
 		"@mdx-js/loader": "^2.3.0",
 		"@mdx-js/react": "^2.3.0",
 		"@next/mdx": "15.0.0-rc.0",
