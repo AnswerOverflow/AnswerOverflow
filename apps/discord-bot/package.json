@@ -17,7 +17,6 @@
 		"@sapphire/plugin-logger": "^4.0.2",
 		"@sapphire/pieces": "^3.7.0",
 		"@sapphire/plugin-editable-commands": "3.0.0",
-		"@sapphire/plugin-hmr": "^2.0.1",
 		"@sapphire/plugin-subcommands": "^4.0.2",
 		"@sapphire/time-utilities": "^1.7.10",
 		"@sapphire/type": "^2.4.0",
@@ -46,7 +45,6 @@
 		"start": "bun with-env bun run .",
 		"clean": "rm -rf node_modules",
 		"typecheck": "tsc --noEmit",
-		"watch": "tsc --watch",
 		"dev": "bun with-env bun --watch . "
 	}
 }

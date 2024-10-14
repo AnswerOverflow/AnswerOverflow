@@ -1,1 +1,1 @@
-module.exports = require("@answeroverflow/ui/postcss-config");
+module.exports = require('@answeroverflow/ui/postcss-config');
