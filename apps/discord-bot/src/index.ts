@@ -22,4 +22,6 @@ declare global {
 if (!global.client) {
   global.client = createClient();
   await login(global.client);
+} else {
+  console.log("Reloading client");
 }

@@ -44,7 +44,7 @@ import * as React from 'react';
 import { toast } from 'react-toastify';
 import { useDashboardContext } from '../components/dashboard-context';
 
-export function ChannelDropdown(props: {
+function ChannelDropdown(props: {
 	values: {
 		name: string;
 		id: string;
