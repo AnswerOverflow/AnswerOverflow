@@ -6,7 +6,8 @@
 	"exports": {
 		"./*": ["./src/*.tsx"],
 		"./tailwind-config": ["./tailwind.config.cjs"],
-		"./postcss-config": ["./postcss.config.cjs"]
+		"./postcss-config": ["./postcss.config.cjs"],
+		"./global.css": ["./global.css"]
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",
