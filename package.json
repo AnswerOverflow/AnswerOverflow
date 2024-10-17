@@ -10,7 +10,9 @@
 		"format": "biome check . --write",
 		"format:check": "biome check .",
 		"start": "turbo start",
-		"build:prod": "turbo build:prod"
+		"build:prod": "turbo build:prod",
+		"with-env": "dotenv -e .env --",
+		"docker:build:discord-bot": "bun with-env docker build -f ./apps/discord-bot/Dockerfile ."
 	},
 	"dependencies": {
 		"@total-typescript/ts-reset": "^0.4.2",
@@ -26,7 +28,8 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.3",
-		"@cloudflare/workers-types": "4.20240924.0"
+		"@cloudflare/workers-types": "4.20240924.0",
+		"dotenv": "^16.4.5"
 	},
 	"overrides": {
 		"@types/react": "npm:types-react@rc",
