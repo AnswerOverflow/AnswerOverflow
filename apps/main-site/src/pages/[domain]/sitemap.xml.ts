@@ -1,6 +1,5 @@
+import { findServerByCustomDomain } from '@answeroverflow/core/server';
 import type { GetServerSidePropsContext } from 'next';
-import { findServerByCustomDomain } from '@answeroverflow/db';
-// eslint-disable-next-line no-restricted-imports
 import { generateCommunityPageSitemap } from '../../utils/community-page';
 
 export async function getServerSideProps({

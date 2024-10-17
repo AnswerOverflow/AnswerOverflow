@@ -1,7 +1,5 @@
 'use client';
-import { trpc } from '@answeroverflow/ui/src/utils/client';
-import { useDashboardContext } from './dashboard-context';
-import { Chart } from '@typelytics/tremor';
+import { DiscordAvatar } from '@answeroverflow/ui/discord-avatar';
 import {
 	Table,
 	TableBody,
@@ -9,8 +7,10 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from '@answeroverflow/ui/src/ui/table';
-import { DiscordAvatar } from '@answeroverflow/ui/src/discord-avatar';
+} from '@answeroverflow/ui/ui/table';
+import { trpc } from '@answeroverflow/ui/utils/client';
+import { Chart } from '@typelytics/tremor';
+import { useDashboardContext } from './dashboard-context';
 type ChartData = {
 	data: number[];
 	aggregated_value: number;
@@ -194,12 +194,13 @@ export function QuestionsAndAnswersLineChart() {
 		/>
 	);
 }
+import { Link } from '@answeroverflow/ui/ui/link';
 import { GoLinkExternal } from 'react-icons/go';
-import Link from '@answeroverflow/ui/src/ui/link';
-import { trackEvent } from '@answeroverflow/hooks';
+
+import { trackEvent } from '@answeroverflow/ui/hooks/events';
+import { Button } from '@answeroverflow/ui/ui/button';
+import { Textarea } from '@answeroverflow/ui/ui/textarea';
 import { toast } from 'react-toastify';
-import { Textarea } from '@answeroverflow/ui/src/ui/textarea';
-import { Button } from '@answeroverflow/ui/src/ui/button';
 
 function ExternalLink({
 	href,

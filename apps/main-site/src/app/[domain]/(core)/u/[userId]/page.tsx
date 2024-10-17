@@ -1,6 +1,6 @@
-import { FeedPost } from '@answeroverflow/ui/src/feed-post';
-import { ActualLayout, getUserPageData } from './components';
+import { FeedPost } from '@answeroverflow/ui/feed-post';
 import { GiSpiderWeb } from 'react-icons/gi';
+import { ActualLayout, getUserPageData } from './components';
 
 type Props = {
 	params: { userId: string; domain: string };

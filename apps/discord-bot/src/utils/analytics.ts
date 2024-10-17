@@ -1,11 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-import {
-	type ChannelPropsWithSettings,
-	type ServerPropsWithSettings,
-	type ThreadProps,
-	channelWithSettingsToAnalyticsData,
-	serverWithSettingsToAnalyticsData,
-} from '@answeroverflow/constants';
 import type {
 	Channel,
 	Guild,
@@ -13,14 +5,18 @@ import type {
 	Message,
 	ThreadChannel,
 } from 'discord.js';
-import type { ChannelWithFlags, ServerWithFlags } from '@answeroverflow/db';
-import {
-	type BaseProps,
-	trackServerSideEvent,
-} from '@answeroverflow/analytics';
 import { sentryLogger } from './sentry';
 
 import type { ConsentSource } from '@answeroverflow/api';
+import {
+	ChannelPropsWithSettings,
+	ServerPropsWithSettings,
+	ThreadProps,
+	channelWithSettingsToAnalyticsData,
+	serverWithSettingsToAnalyticsData,
+} from '@answeroverflow/constants/analytics';
+import { Analytics, BaseProps } from '@answeroverflow/core/analytics';
+import { ChannelWithFlags, ServerWithFlags } from '@answeroverflow/core/zod';
 import { MarkSolutionErrorReason } from '../domains/mark-solution';
 
 export type ServerPropsWithDiscordData = ServerPropsWithSettings & {
@@ -173,7 +169,7 @@ export function trackDiscordEvent<K extends keyof EventMap>(
 ) {
 	if (props instanceof Function) {
 		void props()
-			.then((props) => trackServerSideEvent(event, props))
+			.then((props) => Analytics.trackServerSideEvent(event, props))
 			.catch((error) => {
 				if (error instanceof Error) {
 					sentryLogger(error.message, {
@@ -183,5 +179,5 @@ export function trackDiscordEvent<K extends keyof EventMap>(
 			});
 		return;
 	}
-	trackServerSideEvent(event, props);
+	Analytics.trackServerSideEvent(event, props);
 }

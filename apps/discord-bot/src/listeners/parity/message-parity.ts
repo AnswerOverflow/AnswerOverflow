@@ -1,12 +1,13 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
-import { Message, Events, Collection, type Snowflake } from 'discord.js';
+import { Collection, Events, Message, type Snowflake } from 'discord.js';
+
 import {
 	deleteManyMessages,
 	deleteMessage,
 	findMessageById,
-	upsertMessage,
-} from '@answeroverflow/db';
+} from '@answeroverflow/core/message';
+import { upsertMessage } from '@answeroverflow/core/message-node';
 import { toAOMessage } from '../../utils/conversions';
 
 @ApplyOptions<Listener.Options>({

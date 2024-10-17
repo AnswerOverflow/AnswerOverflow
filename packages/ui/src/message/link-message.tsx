@@ -1,19 +1,19 @@
 import {
-	ChannelPublicWithFlags,
 	MessageFull,
 	MessageWithDiscordAccount,
-} from '@answeroverflow/db';
+} from '@answeroverflow/core/message';
+import { ChannelPublicWithFlags } from '@answeroverflow/core/zod';
+import React from 'react';
+import { Link } from '../ui/link';
+import { Paragraph } from '../ui/paragraph';
+import { cn } from '../utils/utils';
 import {
 	MessageAuthorArea,
 	MessageBlurrer,
-	MessageContents,
 	MessageContentWithSolution,
+	MessageContents,
 } from './Message';
-import Link from '../ui/link';
-import { Paragraph } from '../ui/paragraph';
-import { cn } from '../utils/utils';
 import { MessageAttachments } from './attachments';
-import React from 'react';
 
 export const LinkMessage = (
 	props: {

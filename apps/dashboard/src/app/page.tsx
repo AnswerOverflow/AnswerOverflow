@@ -1,4 +1,4 @@
-import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
+import { callAPI } from '@answeroverflow/ui/utils/trpc';
 import { redirect } from 'next/navigation';
 
 export default async function Onboarding() {

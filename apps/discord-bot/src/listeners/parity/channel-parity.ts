@@ -1,3 +1,9 @@
+import {
+	deleteChannel,
+	findChannelById,
+	findChannelByInviteCode,
+	updateChannel,
+} from '@answeroverflow/core/channel';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
 import {
@@ -9,12 +15,6 @@ import {
 	Invite,
 	ThreadChannel,
 } from 'discord.js';
-import {
-	deleteChannel,
-	findChannelById,
-	findChannelByInviteCode,
-	updateChannel,
-} from '@answeroverflow/db';
 
 @ApplyOptions<Listener.Options>({
 	event: Events.ChannelUpdate,

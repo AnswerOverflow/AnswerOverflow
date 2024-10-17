@@ -1,8 +1,8 @@
 import type { APISearchResult, ServerPublic } from '@answeroverflow/api';
-import { Heading } from '../ui/heading';
-import { SearchResult } from '../message/SearchResult';
 import { Suspense } from 'react';
+import { SearchResult } from '../message/SearchResult';
 import { MessagesSearchBar } from '../messages-search-bar';
+import { Heading } from '../ui/heading';
 
 interface SearchResultProps {
 	results: APISearchResult[number][];

@@ -1,23 +1,24 @@
 import type { ServerPublic } from '@answeroverflow/api';
-import type { ChannelPublicWithFlags } from '@answeroverflow/db';
 import {
 	ChatBubbleLeftRightIcon,
 	HashtagIcon,
 } from '@heroicons/react/24/outline';
 import React from 'react';
-import { ChannelType } from './utils/discord';
 import { ServerIcon } from './server-icon';
+import { ChannelType } from './utils/discord';
 import { classNames, cn } from './utils/utils';
-import {
-	type ServerInviteClickProps,
-	channelToAnalyticsData,
-	serverToAnalyticsData,
-} from '@answeroverflow/constants/src/analytics';
-import { getServerHomepageUrl } from './utils/server';
+
 import { ButtonProps } from './ui/button';
 import { TrackLink } from './ui/track-link';
 import { TrackLinkButton } from './ui/track-link-button';
+import { getServerHomepageUrl } from './utils/server';
 
+import {
+	ServerInviteClickProps,
+	channelToAnalyticsData,
+	serverToAnalyticsData,
+} from '@answeroverflow/constants/analytics';
+import { ChannelPublicWithFlags } from '@answeroverflow/core/zod';
 import { ServerInviteJoinText } from './server-invite.client';
 import { LinkButton } from './ui/link-button';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '../utils/utils';
-import Link from './link';
+import { Link } from './link';
 
 export const BlueLink = (
 	props: React.ComponentPropsWithoutRef<typeof Link> & {

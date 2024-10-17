@@ -1,7 +1,7 @@
-import { cn } from '../../utils/utils';
-import { Heading } from '../../ui/heading';
 import Balancer from 'react-wrap-balancer';
+import { Heading } from '../../ui/heading';
 import { Paragraph } from '../../ui/paragraph';
+import { cn } from '../../utils/utils';
 
 // TODO: Link to docs for feature?
 const HomeFeature = (props: {

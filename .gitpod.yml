@@ -1,5 +1,0 @@
-tasks:
-  - init: pnpm i && npx playwright install && npx playwright install-deps && docker-compose up -d
-    command: pnpm dev
-
-

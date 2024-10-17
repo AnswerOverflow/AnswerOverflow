@@ -1,9 +1,9 @@
-import React from 'react';
-import { MessageProps } from './props';
-import { cn } from '../utils/utils';
-import { BlueLink } from '../ui/blue-link';
-import { parse } from './markdown/render';
 import Image from 'next/image';
+import React from 'react';
+import { BlueLink } from '../ui/blue-link';
+import { cn } from '../utils/utils';
+import { parse } from './markdown/render';
+import { MessageProps } from './props';
 
 const EmbedText = async (props: {
 	text: string | undefined;
@@ -68,7 +68,7 @@ export const Embed = (props: EmbedProps) => {
 		<div
 			className="flex w-auto flex-col gap-1 break-words rounded-standard bg-black/5 py-2 pl-4 pr-6 dark:bg-white/10"
 			style={{
-				borderLeftColor: `#${numberToHex(props.embed.color)}` ?? '#FFFFFF',
+				borderLeftColor: `#${numberToHex(props.embed.color)}`,
 				borderLeftStyle: 'solid',
 				borderLeftWidth: '0.3rem',
 			}}

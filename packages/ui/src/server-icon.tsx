@@ -1,7 +1,7 @@
 import type { ServerPublic } from '@answeroverflow/api';
 import { Avatar, AvatarFallback, AvatarImage, AvatarProps } from './ui/avatar';
-import { cn } from './utils/utils';
 import { getInitials } from './utils/avatars';
+import { cn } from './utils/utils';
 
 export interface ServerIconProps extends Omit<AvatarProps, 'url' | 'alt'> {
 	server: Pick<ServerPublic, 'id' | 'name' | 'icon'>;

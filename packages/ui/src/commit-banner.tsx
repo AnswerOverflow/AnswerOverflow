@@ -1,5 +1,5 @@
-import Link from './ui/link';
 import { Heading } from './ui/heading';
+import { Link } from './ui/link';
 
 export const CommitBanner = () => {
 	// eslint-disable-next-line n/no-process-env

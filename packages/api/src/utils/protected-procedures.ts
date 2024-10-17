@@ -1,6 +1,6 @@
-import { findOrThrowNotFound } from './operations';
+import type { DeepPartial } from '@answeroverflow/utils/types';
 import { TRPCError } from '@trpc/server';
-import type { DeepPartial } from '@answeroverflow/utils';
+import { findOrThrowNotFound } from './operations';
 
 type PermissionCheckResult = Promise<TRPCError | void> | (TRPCError | void);
 

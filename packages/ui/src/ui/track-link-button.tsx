@@ -1,8 +1,7 @@
 'use client';
-import {
-	EventMap,
-	trackEvent,
-} from '@answeroverflow/hooks/src/analytics/events';
+
+import { trackEvent } from '../hooks/events';
+import { EventMap } from '../hooks/events';
 import { LinkButton } from './link-button';
 
 export function TrackLinkButton<K extends keyof EventMap | string>(

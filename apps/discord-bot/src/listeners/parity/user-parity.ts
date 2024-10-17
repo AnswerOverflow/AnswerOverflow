@@ -1,10 +1,10 @@
-import { ApplyOptions } from '@sapphire/decorators';
-import { Listener } from '@sapphire/framework';
-import { Events, User } from 'discord.js';
 import {
 	findDiscordAccountById,
 	updateDiscordAccount,
-} from '@answeroverflow/db';
+} from '@answeroverflow/core/discord-account';
+import { ApplyOptions } from '@sapphire/decorators';
+import { Listener } from '@sapphire/framework';
+import { Events, User } from 'discord.js';
 
 @ApplyOptions<Listener.Options>({
 	event: Events.UserUpdate,

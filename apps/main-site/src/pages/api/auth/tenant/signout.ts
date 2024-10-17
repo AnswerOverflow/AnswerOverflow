@@ -1,12 +1,7 @@
+import { Auth } from '@answeroverflow/core/auth';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { deleteTenantSessionByToken } from '@answeroverflow/db';
-// eslint-disable-next-line no-restricted-imports
-import { setCookie } from '../../../../../node_modules/next-auth/next/utils';
-import {
-	getTenantCookieName,
-	getTenantCookieOptions,
-} from '@answeroverflow/auth';
 import { z } from 'zod';
+import { setCookie } from '../../../../../../../node_modules/next-auth/next/utils';
 
 export default async function handler(
 	req: NextApiRequest,
@@ -16,17 +11,17 @@ export default async function handler(
 		.string()
 		.url()
 		.parse(decodeURIComponent(req.query.redirect as string));
-	const authCookie = req.cookies[getTenantCookieName()];
+	const authCookie = req.cookies[Auth.getTenantCookieName()];
 	if (!authCookie) {
 		res.status(201);
 		res.end();
 		return;
 	}
-	await deleteTenantSessionByToken(authCookie);
+	await Auth.deleteTenantSessionByToken(authCookie);
 	setCookie(res, {
-		name: getTenantCookieName(),
+		name: Auth.getTenantCookieName(),
 		value: '',
-		options: getTenantCookieOptions({
+		options: Auth.getTenantCookieOptions({
 			expires: new Date(0),
 		}),
 	});

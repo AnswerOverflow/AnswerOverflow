@@ -1,7 +1,7 @@
 'use client';
 import type { Session } from 'next-auth';
-import { LuGithub, LuPlus, LuLayoutDashboard, LuTwitter } from 'react-icons/lu';
-import { getInitials } from '../utils/avatars';
+import { LuGithub, LuLayoutDashboard, LuPlus, LuTwitter } from 'react-icons/lu';
+import { DiscordIcon } from '../icons';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import {
 	DropdownMenu,
@@ -12,9 +12,10 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { DiscordIcon } from '../icons';
-import Link from '../ui/link';
-import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
+import { Link } from '../ui/link';
+import { getInitials } from '../utils/avatars';
+
+import { ServerPublic } from '@answeroverflow/api';
 import { ChangeThemeItem } from './change-theme-item';
 import { LogoutItem } from './logout-item';
 

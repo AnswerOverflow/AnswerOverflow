@@ -1,9 +1,9 @@
-import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
 import { Button } from '../../ui/button';
 import { CopyButton } from '../../ui/copy-button';
+import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
 
-import { Textarea } from '../../ui/textarea';
 import React from 'react';
+import { Textarea } from '../../ui/textarea';
 
 export function PopoverDemo(props: { defaultOpen?: boolean }) {
 	const [inviteText, setInviteText] = React.useState(

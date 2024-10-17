@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 'use client';
 import { ServerPublic } from '@answeroverflow/api';
+import { useTheme } from 'next-themes';
 import { useEffect, useRef, useState } from 'react';
 import { makeServerIconLink } from '../server-icon';
-import { useTheme } from 'next-themes';
 
 export const InKeepWidget = (props: { server: ServerPublic }) => {
 	const widgetRef = useRef<HTMLDivElement>(null);

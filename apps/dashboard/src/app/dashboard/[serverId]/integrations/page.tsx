@@ -1,5 +1,5 @@
-import { BlueLink } from '@answeroverflow/ui/src/ui/blue-link';
-import Link from '@answeroverflow/ui/src/ui/link';
+import { BlueLink } from '@answeroverflow/ui/ui/blue-link';
+import { Link } from '@answeroverflow/ui/ui/link';
 
 const InKeep = () => (
 	<svg

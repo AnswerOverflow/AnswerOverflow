@@ -1,15 +1,15 @@
+import { MessageImage, isImageAttachment } from './message/attachments';
+import { parse } from './message/markdown/render';
+import { getSnowflakeUTCDate } from './utils/snowflake';
+import './feed-post.css';
+import { channelCountsLoader } from '@answeroverflow/core/channel';
 import {
-	channelCountsLoader,
 	findMessageByIdWithDiscordAccount,
 	messages,
-} from '@answeroverflow/db';
-import { isImageAttachment, MessageImage } from './message/attachments';
-import { getSnowflakeUTCDate } from './utils/snowflake';
-import { parse } from './message/markdown/render';
-import './feed-post.css';
-import Link from './ui/link';
-import { ServerIcon } from './server-icon';
+} from '@answeroverflow/core/message';
 import { FaRegMessage } from 'react-icons/fa6';
+import { ServerIcon } from './server-icon';
+import { Link } from './ui/link';
 
 export const FeedPost = async (props: { postId: string }) => {
 	const result = await messages.load(props.postId);

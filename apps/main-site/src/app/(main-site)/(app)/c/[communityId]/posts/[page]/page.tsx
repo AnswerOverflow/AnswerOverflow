@@ -1,5 +1,5 @@
-import { findQuestionsForSitemapCached } from '@answeroverflow/cache';
-import { BlueLink } from '@answeroverflow/ui/src/ui/blue-link';
+import { findQuestionsForSitemapCached } from '@answeroverflow/core/sitemap';
+import { BlueLink } from '@answeroverflow/ui/ui/blue-link';
 
 type Props = {
 	params: { communityId: string; page: string };

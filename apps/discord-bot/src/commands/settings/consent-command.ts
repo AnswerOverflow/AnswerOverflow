@@ -40,6 +40,7 @@ export class ConsentCommand extends Command {
 	}
 	public override async chatInputRun(interaction: ChatInputCommandInteraction) {
 		const consented = interaction.options.getBoolean('consent') ?? true;
+
 		await guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
 			updateUserConsent({
 				member,

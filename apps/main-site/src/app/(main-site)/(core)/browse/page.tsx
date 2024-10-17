@@ -1,8 +1,8 @@
-import { fetchBrowseServers } from '../../../../data/browse';
+import { ViewServerCard } from '@answeroverflow/ui/server-card';
+import { Heading } from '@answeroverflow/ui/ui/heading';
 import { Metadata } from 'next';
+import { fetchBrowseServers } from '../../../../data/browse';
 import { metadata as baseMetadata } from '../../../layout';
-import { Heading } from '@answeroverflow/ui/src/ui/heading';
-import { ViewServerCard } from '@answeroverflow/ui/src/server-card';
 export const metadata: Metadata = {
 	title: 'Browse All Communities - Answer Overflow',
 	description:

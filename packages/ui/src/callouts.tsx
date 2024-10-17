@@ -1,4 +1,4 @@
-import { type GettingStartedClickProps } from '@answeroverflow/hooks/src/analytics/events';
+import { GettingStartedClickProps } from './hooks/events';
 import { LinkButton, LinkButtonProps } from './ui/link-button';
 
 export function GetStarted(

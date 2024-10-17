@@ -1,13 +1,13 @@
 import { BsArrowUpRightCircle, BsHouse } from 'react-icons/bs';
 import { IoCodeOutline, IoGameControllerOutline } from 'react-icons/io5';
-import { LinkButton } from './ui/link-button';
-import { Separator } from './ui/separator';
 import {
 	Accordion,
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
 } from './ui/accordion';
+import { LinkButton } from './ui/link-button';
+import { Separator } from './ui/separator';
 
 type Category = {
 	name: string;

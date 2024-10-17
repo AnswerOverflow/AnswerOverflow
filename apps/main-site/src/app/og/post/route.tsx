@@ -1,9 +1,9 @@
+import { findMessageResultPage } from '@answeroverflow/core/pages';
+import { Server } from '@answeroverflow/core/schema';
+import { AnswerOverflowLogo } from '@answeroverflow/ui/icons/answer-overflow-logo';
+import { getSnowflakeUTCDate } from '@answeroverflow/ui/utils/snowflake';
 import { ImageResponse } from 'next/og';
 import { z } from 'zod';
-import { Server } from '@answeroverflow/db/src/schema';
-import { findMessageResultPage } from '@answeroverflow/db/src/pages';
-import { getSnowflakeUTCDate } from '@answeroverflow/ui/src/utils/snowflake';
-import { AnswerOverflowLogo } from '@answeroverflow/ui/src/icons/answer-overflow-logo';
 
 export const runtime = 'edge';
 export const preferredRegion = 'iad1';
@@ -285,51 +285,49 @@ export async function GET(req: Request) {
 		</div>
 	);
 	return new ImageResponse(
-		(
+		<div
+			style={{
+				height: '100%',
+				width: '100%',
+				fontFamily: 'Satoshi Black',
+				position: 'relative',
+				display: 'flex',
+				flexDirection: 'column',
+				alignItems: 'center',
+				padding: '60px',
+				backgroundColor: 'white',
+				gap: '20px',
+			}}
+		>
+			{/* Header */}
+			<Header />
+			<Body />
+			<div
+				style={{
+					position: 'absolute',
+					display: 'flex',
+					right: '80px',
+					bottom: '40px',
+					gap: '20px',
+					alignItems: 'center',
+				}}
+			>
+				<AnswerOverflowLogo
+					style={{
+						fill: 'none',
+						stroke: '#000',
+						strokeWidth: 13,
+						strokeMiterlimit: 10,
+					}}
+				/>
+			</div>
 			<div
 				style={{
 					height: '100%',
-					width: '100%',
-					fontFamily: 'Satoshi Black',
-					position: 'relative',
-					display: 'flex',
-					flexDirection: 'column',
-					alignItems: 'center',
-					padding: '60px',
-					backgroundColor: 'white',
-					gap: '20px',
+					backgroundColor: 'red',
 				}}
-			>
-				{/* Header */}
-				<Header />
-				<Body />
-				<div
-					style={{
-						position: 'absolute',
-						display: 'flex',
-						right: '80px',
-						bottom: '40px',
-						gap: '20px',
-						alignItems: 'center',
-					}}
-				>
-					<AnswerOverflowLogo
-						style={{
-							fill: 'none',
-							stroke: '#000',
-							strokeWidth: 13,
-							strokeMiterlimit: 10,
-						}}
-					/>
-				</div>
-				<div
-					style={{
-						height: '100%',
-						backgroundColor: 'red',
-					}}
-				></div>
-			</div>
-		),
+			></div>
+		</div>,
 		{
 			width: 1200,
 			height: 630,

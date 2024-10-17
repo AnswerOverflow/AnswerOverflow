@@ -1,19 +1,12 @@
+import { Auth } from '@answeroverflow/core/auth';
+import { findServerById } from '@answeroverflow/core/server';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
 import { Events, GuildMember, User } from 'discord.js';
 import {
-	addServerToUserServerCache,
-	removeServerFromUserCache,
-	updateCachedDiscordUser,
-} from '@answeroverflow/cache';
-import {
-	findDiscordOauthByProviderAccountId,
-	findServerById,
-} from '@answeroverflow/db';
-import {
-	trackDiscordEvent,
-	serverWithDiscordInfoToAnalyticsData,
 	memberToAnalyticsUser,
+	serverWithDiscordInfoToAnalyticsData,
+	trackDiscordEvent,
 } from '../../utils/analytics';
 import { toDiscordAPIServer } from '../../utils/conversions';
 
@@ -23,9 +16,11 @@ import { toDiscordAPIServer } from '../../utils/conversions';
 })
 export class SyncOnAdd extends Listener {
 	public async run(member: GuildMember) {
-		const account = await findDiscordOauthByProviderAccountId(member.user.id);
+		const account = await Auth.findDiscordOauthByProviderAccountId(
+			member.user.id,
+		);
 		if (!account || !account.access_token) return;
-		await addServerToUserServerCache({
+		await Auth.addServerToUserServerCache({
 			accessToken: account.access_token,
 			server: toDiscordAPIServer(member),
 		});
@@ -48,10 +43,12 @@ export class SyncOnAdd extends Listener {
 })
 export class SyncOnRemove extends Listener {
 	public async run(member: GuildMember) {
-		const account = await findDiscordOauthByProviderAccountId(member.user.id);
+		const account = await Auth.findDiscordOauthByProviderAccountId(
+			member.user.id,
+		);
 		if (!account || !account.access_token) return;
 		const guild = member.guild;
-		await removeServerFromUserCache({
+		await Auth.removeServerFromUserCache({
 			accessToken: account.access_token,
 			serverId: guild.id,
 		});
@@ -74,9 +71,9 @@ export class SyncOnRemove extends Listener {
 })
 export class SyncOnUpdate extends Listener {
 	public async run(_: User, newUser: User) {
-		const account = await findDiscordOauthByProviderAccountId(newUser.id);
+		const account = await Auth.findDiscordOauthByProviderAccountId(newUser.id);
 		if (!account || !account.access_token) return;
-		await updateCachedDiscordUser(account.access_token, {
+		await Auth.updateCachedDiscordUser(account.access_token, {
 			...account,
 			// We only need to update the avatar, username, and discriminator
 			avatar: newUser.avatar,

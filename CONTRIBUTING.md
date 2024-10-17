@@ -8,42 +8,6 @@ There is a workspace file called answeroverflow.code-workspace, VSCode lets you 
 
 ! The workspace is set to hide all "useless" files (i.e node_modules) if you for some reason need to access them, comment out the line hiding them in the workspace file !
 
-### Get it running
-
-Copy the .env.example file in the root directory and create a new file titled .env
-
-Follow the steps listed in .env.example to properly configure your environment variables
-
-```bash
-# in project root directory
-pnpm install
-pnpm db:push
-pnpm db:wipe
-pnpm dev
-```
-
-### Testing
-
-```bash
-# in project root directory
-pnpm test
-
-# to test an individual package:
-cd [apps|packages]/[package_name] pnpm test:watch
-```
-
-### Linting
-
-```bash
-pnpm lint:fix
-```
-
-### Building
-
-```bash
-pnpm build
-```
-
 ## Setting up your Developer Bot
 
 Head to the [Discord Developer Portal](https://discord.com/developers/applications), and create a new application (call it something like "AO Dev Test"), and optionally a testing server in Discord.
@@ -98,3 +62,34 @@ Replace your ID in this link: `https://discord.com/oauth2/authorize?client_id=YO
 Or use the [Discord Permissions Calculator](https://discordapi.com/permissions.html).
 
 Add your bot to the server with the link and begin testing from your development machine.
+
+### Get it running
+
+Copy the .env.example file in the root directory and create a new file titled .env
+
+Follow the steps listed in .env.example to properly configure your environment variables
+
+```bash
+# in project root directory
+bun i
+cd packages/core && bun db:push
+cd packages/core && db:wipe
+bun dev
+```
+
+### Testing
+
+```bash
+# in project root directory
+bun test
+
+# to test an individual package:
+cd [apps|packages]/[package_name] bun test:watch
+```
+
+### Building
+
+```bash
+bun build:prod
+```
+

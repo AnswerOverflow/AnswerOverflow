@@ -1,8 +1,8 @@
-import { MessageResultPage } from '@answeroverflow/ui/src/pages/MessageResultPage';
-import { notFound, redirect } from 'next/navigation';
-import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
+import { MessageResultPage } from '@answeroverflow/ui/pages/MessageResultPage';
+import { fetchIsUserInServer } from '@answeroverflow/ui/utils/fetch-is-user-in-server';
+import { callAPI } from '@answeroverflow/ui/utils/trpc';
 import type { Metadata } from 'next';
-import { fetchIsUserInServer } from '@answeroverflow/ui/src/utils/fetch-is-user-in-server';
+import { notFound, redirect } from 'next/navigation';
 type Props = {
 	params: { messageId: string };
 	searchParams?: { showAiChat?: boolean };

@@ -1,8 +1,7 @@
-import type { Plan } from '@answeroverflow/db';
+import { Plan } from '@answeroverflow/core/schema';
+import { PricingDialog } from '@answeroverflow/ui/pricing';
 import React from 'react';
-import { PricingDialog } from '@answeroverflow/ui/src/pricing';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 const TierAccessContext = React.createContext<{
 	currentPlan: Plan;
 	enabledFor: Plan[];
