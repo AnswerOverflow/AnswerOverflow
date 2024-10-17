@@ -62,6 +62,9 @@ jobs:
       - name: Format
         run: bun format:check
 
+      - name: Typecheck
+        run: bun typecheck
+
       - name: Test
         run: bun test
 
