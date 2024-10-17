@@ -10,11 +10,12 @@
 	"scripts": {
 		"typecheck": "tsc --noEmit",
 		"with-env": "dotenv -e ../../.env --",
-		"db:push": "drizzle-kit push:mysql",
+		"db:push": "bun with-env drizzle-kit push:mysql",
 		"db:wipe": "bun with-env bun ./scripts/wipe.ts",
 		"db:seed": "bun with-env bun db:push && bun with-env bun ./scripts/seed.ts",
 		"dev": "echo http://localhost:4983 && bun with-env bun drizzle-kit studio",
-		"clean": "rm -rf node_modules"
+		"clean": "rm -rf node_modules",
+		"test:dev": "bun with-env bun test"
 	},
 	"dependencies": {
 		"@answeroverflow/constants": "workspace:*",

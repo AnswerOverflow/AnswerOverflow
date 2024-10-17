@@ -57,7 +57,7 @@ jobs:
         run: bun i
 
       - name: Setup Database
-        run: bun db:push
+        run: (cd packages/core && bun db:push)
 
       - name: Format
         run: bun format:check
