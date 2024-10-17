@@ -12,7 +12,8 @@
 		"start": "turbo start",
 		"build:prod": "turbo build:prod",
 		"with-env": "dotenv -e .env --",
-		"docker:build:discord-bot": "bun with-env docker build -f ./apps/discord-bot/Dockerfile ."
+		"docker:build:discord-bot": "bun with-env docker build -f ./apps/discord-bot/Dockerfile -t discord-bot:latest .",
+		"docker:run:discord-bot": "bun with-env docker run -it --name discord-bot discord-bot:latest"
 	},
 	"dependencies": {
 		"@total-typescript/ts-reset": "^0.4.2",
