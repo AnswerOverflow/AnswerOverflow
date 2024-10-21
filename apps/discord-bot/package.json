@@ -38,7 +38,7 @@
 		"colorette": "^2.0.20",
 		"cron": "^3.1.7",
 		"discord-api-types": "^0.37.67",
-		"discord.js": "^14.13.0",
+		"discord.js": "^14.16.3",
 		"dotenv-cra": "^3.0.3",
 		"fast-xml-parser": "^4.3.6",
 		"lru-cache": "^8.0.5",

@@ -55,6 +55,6 @@
 		"discord.js": "^14.7.1"
 	},
 	"dependencies": {
-		"discord.js": "^14.13.0"
+		"discord.js": "^14.16.3"
 	}
 }
