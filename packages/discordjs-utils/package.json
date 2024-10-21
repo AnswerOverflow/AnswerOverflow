@@ -7,7 +7,7 @@
 	"license": "UNLICENSE",
 	"dependencies": {
 		"@answeroverflow/env": "workspace:^",
-		"discord.js": "^14.13.0"
+		"discord.js": "^14.16.3"
 	},
 	"devDependencies": {
 		"@answeroverflow/prettier-config": "workspace:^",
