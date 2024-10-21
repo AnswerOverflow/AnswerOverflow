@@ -62,7 +62,7 @@
 		"@edge-runtime/vm": "^2.1.2",
 		"@types/http-proxy": "^1.17.11",
 		"@types/mdx": "^2.0.13",
-		"@types/node": "^20.11.20",
+		"@types/node": "^22.7.7",
 		"@types/react": "^18.2.20",
 		"@types/react-dom": "^18.2.7",
 		"@vitest/coverage-v8": "^2.0.5",

@@ -44,7 +44,7 @@
 		"@answeroverflow/db-mock": "workspace:^",
 		"@answeroverflow/prettier-config": "workspace:^",
 		"@answeroverflow/tsconfig": "workspace:^",
-		"@types/node": "^20.11.20",
+		"@types/node": "^22.7.7",
 		"@vitest/coverage-v8": "^2.0.5",
 		"dotenv-cli": "^7.4.1",
 		"eslint": "^8.57.0",

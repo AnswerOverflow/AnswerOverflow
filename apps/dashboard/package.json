@@ -48,7 +48,7 @@
 		"@answeroverflow/tsconfig": "workspace:^",
 		"@edge-runtime/vm": "^2.1.2",
 		"@headlessui/tailwindcss": "^0.2.0",
-		"@types/node": "^20.11.20",
+		"@types/node": "^22.7.7",
 		"@types/react": "^18.2.20",
 		"@types/react-dom": "^18.2.7",
 		"@vitest/coverage-v8": "^2.0.5",

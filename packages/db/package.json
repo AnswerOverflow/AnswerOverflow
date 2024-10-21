@@ -51,7 +51,7 @@
 		"@answeroverflow/tsconfig": "workspace:^",
 		"@types/json-bigint": "^1.0.3",
 		"@types/lodash": "^4.14.202",
-		"@types/node": "^20.11.20",
+		"@types/node": "^22.7.7",
 		"cross-env": "^7.0.3",
 		"dotenv-cli": "^7.4.1",
 		"drizzle-kit": "^0.19.13",
