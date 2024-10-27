@@ -5,13 +5,11 @@ FROM oven/bun:1.1.29 AS builder
 WORKDIR /usr/src/app
 
 # Copy package.json and bun.lockb (if it exists)
-COPY package.json bun.lockb* ./
-COPY patches ./patches
-# Install dependencies
-RUN bun install --frozen-lockfile
-
-# Copy the rest of the application code
 COPY . .
+# Install dependencies
+# print the bun version
+RUN bun --version
+RUN bun install --frozen-lockfile
 
 # Start a new stage for a smaller final image
 FROM oven/bun:1.1.29-slim
