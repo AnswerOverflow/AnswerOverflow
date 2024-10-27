@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY package.json bun.lockb* ./
 COPY patches ./patches
 # Install dependencies
-RUN bun install
+RUN bun install --frozen-lockfile
 
 # Copy the rest of the application code
 COPY . .
@@ -24,8 +24,7 @@ WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app .
 
 # Make starting work
-RUN bun add -g dotenv-cli
-RUN bun install
+RUN bun install --frozen-lockfile
 
 # Set environment variable
 ENV NODE_ENV=production
