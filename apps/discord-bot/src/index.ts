@@ -1,11 +1,3 @@
-import * as Sentry from '@sentry/node';
-import '@sentry/tracing';
-
-Sentry.init({
-	dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-	tracesSampleRate: 0.1,
-});
-
 import { botRouter } from '@answeroverflow/api/src/bot';
 import { SapphireClient } from '@sapphire/framework';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';

@@ -105,7 +105,6 @@ export const channelRouter = router({
 					if (!channel) {
 						return null;
 					}
-					console.log('getTags', channel.name);
 					return {
 						channel: channel,
 						tags: await botClient.getTags.query(channel.id),

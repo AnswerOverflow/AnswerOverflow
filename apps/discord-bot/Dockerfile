@@ -22,6 +22,7 @@ WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app .
 
 # Make starting work
+RUN bun add -g dotenv-cli
 RUN bun install --frozen-lockfile
 
 # Set environment variable
