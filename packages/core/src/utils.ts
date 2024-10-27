@@ -41,7 +41,4 @@ export async function clearDatabase() {
 	await db.delete(dbUsers);
 	await db.delete(dbIgnoredDiscordAccounts);
 	console.log('MySQL Database wiped successfully');
-	// quit the process
-	// eslint-disable-next-line n/no-process-exit
-	process.exit(0);
 }
