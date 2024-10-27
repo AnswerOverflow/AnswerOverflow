@@ -74,10 +74,6 @@ Answer Overflow lets you index your Discord help channels into Google so that yo
 - 💖&nbsp; Link the GitHub sponsors page of a person who solves the question
 - 📋&nbsp; Question templates
 
-## Quickstart
-
-Go to [Answer Overflow](https://www.answeroverflow.com/), add the bot your server, and use /channel-settings to get started
-
 ## Star History
 
 <a href="https://star-history.com/#AnswerOverflow/AnswerOverflow"><img src="https://api.star-history.com/svg?repos=AnswerOverflow/AnswerOverflow&type=Date" alt="Star History Chart" width="600" /></a>
