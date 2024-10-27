@@ -6,6 +6,7 @@ import {
 	Card,
 	CardContent,
 	CardDescription,
+	CardFooter,
 	CardHeader,
 	CardTitle,
 } from '@answeroverflow/ui/ui/card';
@@ -30,24 +31,38 @@ import {
 	TabsList,
 	TabsTrigger,
 } from '@answeroverflow/ui/ui/tabs';
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from '@answeroverflow/ui/ui/tooltip';
 import { trpc } from '@answeroverflow/ui/utils/client';
 import { cn } from '@answeroverflow/ui/utils/utils';
 import { ChannelType } from 'discord-api-types/v10';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import {
+	Check,
+	ChevronsUpDown,
+	MessageSquare,
+	HashIcon,
+	Megaphone,
+} from 'lucide-react';
 import * as React from 'react';
 import { toast } from 'react-toastify';
 import { useDashboardContext } from '../components/dashboard-context';
+
+function ChannelIcon({
+	type,
+	className,
+}: { type: ChannelType; className?: string }) {
+	if (type === ChannelType.GuildForum) {
+		return <MessageSquare className={className} />;
+	}
+	if (type === ChannelType.GuildAnnouncement) {
+		return <Megaphone className={className} />;
+	}
+	return <HashIcon className={className} />;
+}
 
 function ChannelDropdown(props: {
 	values: {
 		name: string;
 		id: string;
+		type: ChannelType;
 	}[];
 	onChange: (channel: {
 		name: string;
@@ -56,9 +71,11 @@ function ChannelDropdown(props: {
 	selectedChannel: {
 		name: string;
 		id: string;
+		type: ChannelType;
 	};
 }) {
 	const [open, setOpen] = React.useState(false);
+	// first forums, then announcements, then text
 	const value = props.selectedChannel;
 
 	function getValue(channel: {
@@ -77,11 +94,17 @@ function ChannelDropdown(props: {
 					aria-expanded={open}
 					className="w-[200px] justify-between"
 				>
-					{value
-						? props.values.find(
-								(channel) => getValue(channel) === getValue(value),
-							)?.name
-						: 'Select channel...'}
+					{props.selectedChannel ? (
+						<div className="flex items-center gap-2">
+							<ChannelIcon
+								className="size-4"
+								type={props.selectedChannel.type}
+							/>
+							{props.selectedChannel.name}
+						</div>
+					) : (
+						'Select channel...'
+					)}
 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 				</Button>
 			</PopoverTrigger>
@@ -109,6 +132,7 @@ function ChannelDropdown(props: {
 												: 'opacity-0',
 										)}
 									/>
+									<ChannelIcon className="size-4 mr-2" type={channel.type} />
 									{channel.name}
 								</CommandItem>
 							))}
@@ -146,59 +170,67 @@ function ToggleChannelFlag({
 	});
 	const utils = trpc.useUtils();
 
-	const toggleSwitch = (
-		<div className="flex items-center gap-2 pt-0">
-			<Switch
-				onCheckedChange={async (checked) => {
-					if (disabled) return;
-					await updateMutation.mutateAsync({
-						id: selectedChannel.id,
-						flags: {
-							[flagKey]: checked,
-						},
-					});
-					await utils.dashboard.fetchDashboardById.invalidate();
-				}}
-				checked={selectedChannel.flags[flagKey]}
-				disabled={disabled}
-			/>
-			<Label>{label}</Label>
-		</div>
-	);
-
 	return (
 		<Card>
 			<CardHeader>
 				<CardTitle>{title}</CardTitle>
 				<CardDescription>{description}</CardDescription>
 			</CardHeader>
-			<CardContent>
-				{disabled ? (
-					<TooltipProvider>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<div className="flex items-center gap-2 pt-0 relative">
-									{toggleSwitch}
-								</div>
-							</TooltipTrigger>
-							<TooltipContent>
-								<p>{disabledReason}</p>
-							</TooltipContent>
-						</Tooltip>
-					</TooltipProvider>
-				) : (
-					toggleSwitch
-				)}
+			<CardContent className={cn(disabled && 'cursor-not-allowed opacity-50')}>
+				<div className="flex items-center gap-2 pt-0">
+					<Switch
+						onCheckedChange={async (checked) => {
+							if (disabled) return;
+							const existing = utils.dashboard.fetchDashboardById.getData(
+								selectedChannel.serverId,
+							);
+							if (existing) {
+								const updated = {
+									...existing,
+									channels: existing.channels.map((c) =>
+										c.id === selectedChannel.id
+											? {
+													...c,
+													flags: {
+														...c.flags,
+														[flagKey]: checked,
+													},
+												}
+											: c,
+									),
+								};
+								utils.dashboard.fetchDashboardById.setData(
+									selectedChannel.serverId,
+									updated,
+								);
+							}
+							await updateMutation.mutateAsync({
+								id: selectedChannel.id,
+								flags: {
+									[flagKey]: checked,
+								},
+							});
+							await utils.dashboard.fetchDashboardById.invalidate();
+						}}
+						checked={selectedChannel.flags[flagKey]}
+						disabled={disabled}
+					/>
+					<Label>{label}</Label>
+				</div>
 			</CardContent>
+			{disabled && (
+				<CardFooter className="text-muted-foreground">
+					{disabledReason}
+				</CardFooter>
+			)}
 		</Card>
 	);
 }
 
 export default function ChannelsPage() {
 	const { server } = useDashboardContext();
-	const [selectedChannel, setSelectedChannel] = React.useState(
-		server.channels[0],
-	);
+	const [selectedChannelIndex, setSelectedChannelIndex] = React.useState(0);
+	const selectedChannel = server.channels[selectedChannelIndex];
 	if (!selectedChannel) {
 		return null;
 	}
@@ -211,8 +243,8 @@ export default function ChannelsPage() {
 							values={server.channels}
 							selectedChannel={selectedChannel}
 							onChange={(channel) =>
-								setSelectedChannel(
-									server.channels.find((c) => c.id === channel.id)!,
+								setSelectedChannelIndex(
+									server.channels.findIndex((c) => c.id === channel.id),
 								)
 							}
 						/>
@@ -262,6 +294,8 @@ export default function ChannelsPage() {
 						title="Send Mark Solution Instructions in New Threads"
 						description="Whether to send mark solution instructions in new threads"
 						label="Enabled"
+						disabled={!selectedChannel.flags.markSolutionEnabled}
+						disabledReason="This option is only available if mark solution is enabled."
 						selectedChannel={selectedChannel}
 					/>
 					<ToggleChannelFlag
@@ -269,6 +303,8 @@ export default function ChannelsPage() {
 						title="Auto Thread Enabled"
 						description="Whether the channel allows auto-threading"
 						label="Enabled"
+						disabled={selectedChannel?.type !== ChannelType.GuildText}
+						disabledReason="This option is only available for text channels."
 						selectedChannel={selectedChannel}
 					/>
 				</TabsContent>

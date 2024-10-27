@@ -31,6 +31,7 @@
 		"@vercel/otel": "^1.8.3",
 		"discord-api-types": "^0.37.101",
 		"dotenv-cli": "^7.4.1",
+		"lucide-react": "^0.453.0",
 		"mdx": "^0.3.1",
 		"next": "^15.0.0-canary.179",
 		"next-auth": "^4.23.1",
