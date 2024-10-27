@@ -40,5 +40,5 @@ EXPOSE 3000
 WORKDIR /usr/src/app/apps/discord-bot
 
 # Specify the command to run the Discord bot
-RUN tree
+
 CMD ["bun", "start"]
