@@ -1,5 +1,5 @@
 # Start a new stage for a smaller final image
-FROM oven/bun:1.1.29-slim
+FROM oven/bun:1.1.29
 
 # Set working directory
 WORKDIR /usr/src/app
