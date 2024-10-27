@@ -10,12 +10,14 @@ COPY patches ./patches
 # Install dependencies
 RUN bun install
 
-RUN bun add -g dotenv-cli
 # Copy the rest of the application code
 COPY . .
 
 # Start a new stage for a smaller final image
 FROM oven/bun:1.1.29-slim
+
+# Make starting work
+RUN bun add -g dotenv-cli
 
 # Set working directory
 WORKDIR /usr/src/app
