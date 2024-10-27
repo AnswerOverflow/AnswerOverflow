@@ -201,9 +201,6 @@ const ProPlan = (props: { ctaLink: string; hasSubscribedBefore?: boolean }) => (
 			{
 				name: 'Up to 100,000 monthly page views',
 			},
-			{
-				name: 'Basic analytics (coming soon)',
-			},
 		]}
 		ctaLink={props.ctaLink}
 	/>
@@ -226,9 +223,6 @@ const EnterprisePlan = (props: {
 			},
 			{
 				name: 'Up to 500,000 monthly page views',
-			},
-			{
-				name: 'Advanced analytics (coming soon)',
 			},
 			{
 				name: 'Priority support',
@@ -288,9 +282,6 @@ const PublicPlatformPricing = (props: { showFaqs?: boolean }) => (
 					},
 					{
 						name: 'Ad supported',
-					},
-					{
-						name: 'Revenue share (coming soon)',
 					},
 				]}
 				clarifications={[

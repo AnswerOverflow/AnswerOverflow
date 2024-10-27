@@ -25,6 +25,7 @@ import {
 } from "../utils/protected-procedures";
 import { Context } from "./context";
 import { publicProcedure, router, withUserServersProcedure } from "./trpc";
+import { botClient } from "../bot/caller";
 
 export const CHANNEL_NOT_FOUND_MESSAGES = "Channel does not exist";
 
@@ -95,7 +96,25 @@ export const channelRouter = router({
       notFoundMessage: CHANNEL_NOT_FOUND_MESSAGES,
     });
   }),
-
+  getTags: withUserServersProcedure
+    .input(z.string())
+    .query(async ({ ctx, input }) => {
+      return protectedFetch({
+        fetch: async () => {
+          const channel = await findChannelById(input);
+          if (!channel) {
+            return null;
+          }
+          console.log("getTags", channel.name);
+          return {
+            channel: channel,
+            tags: await botClient.getTags.query(channel.id),
+          };
+        },
+        permissions: (data) => assertCanEditServer(ctx, data.channel.serverId),
+        notFoundMessage: CHANNEL_NOT_FOUND_MESSAGES,
+      });
+    }),
   update: withUserServersProcedure
     .input(
       z

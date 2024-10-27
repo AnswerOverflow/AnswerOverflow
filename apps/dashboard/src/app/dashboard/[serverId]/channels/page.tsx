@@ -44,6 +44,13 @@ import {
 import * as React from 'react';
 import { toast } from 'react-toastify';
 import { useDashboardContext } from '../components/dashboard-context';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@answeroverflow/ui/ui/select';
 
 function ChannelIcon({
 	type,
@@ -154,6 +161,37 @@ interface ToggleChannelFlagProps {
 	selectedChannel: ChannelWithFlags;
 }
 
+function SettingsCard({
+	children,
+	title,
+	description,
+	disabled,
+	disabledReason,
+}: {
+	children: React.ReactNode;
+	title: React.ReactNode;
+	description: React.ReactNode;
+	disabled?: boolean;
+	disabledReason?: React.ReactNode;
+}) {
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>{title}</CardTitle>
+				<CardDescription>{description}</CardDescription>
+			</CardHeader>
+			<CardContent className={cn(disabled && 'cursor-not-allowed opacity-50')}>
+				{children}
+			</CardContent>
+			{disabled && (
+				<CardFooter className="text-muted-foreground border-t-2 pt-2">
+					{disabledReason}
+				</CardFooter>
+			)}
+		</Card>
+	);
+}
+
 function ToggleChannelFlag({
 	title,
 	description,
@@ -171,59 +209,147 @@ function ToggleChannelFlag({
 	const utils = trpc.useUtils();
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>{title}</CardTitle>
-				<CardDescription>{description}</CardDescription>
-			</CardHeader>
-			<CardContent className={cn(disabled && 'cursor-not-allowed opacity-50')}>
-				<div className="flex items-center gap-2 pt-0">
-					<Switch
-						onCheckedChange={async (checked) => {
-							if (disabled) return;
-							const existing = utils.dashboard.fetchDashboardById.getData(
+		<SettingsCard
+			title={title}
+			description={description}
+			disabled={disabled}
+			disabledReason={disabledReason}
+		>
+			<div className="flex items-center gap-2 pt-0">
+				<Switch
+					onCheckedChange={async (checked) => {
+						if (disabled) return;
+						const existing = utils.dashboard.fetchDashboardById.getData(
+							selectedChannel.serverId,
+						);
+						if (existing) {
+							const updated = {
+								...existing,
+								channels: existing.channels.map((c) =>
+									c.id === selectedChannel.id
+										? {
+												...c,
+												flags: {
+													...c.flags,
+													[flagKey]: checked,
+												},
+											}
+										: c,
+								),
+							};
+							utils.dashboard.fetchDashboardById.setData(
 								selectedChannel.serverId,
+								updated,
 							);
-							if (existing) {
-								const updated = {
+						}
+						await updateMutation.mutateAsync({
+							id: selectedChannel.id,
+							flags: {
+								[flagKey]: checked,
+							},
+						});
+						await utils.dashboard.fetchDashboardById.invalidate();
+					}}
+					checked={selectedChannel.flags[flagKey]}
+					disabled={disabled}
+				/>
+				<Label>{label}</Label>
+			</div>
+		</SettingsCard>
+	);
+}
+
+function ChooseSolvedTagCard(props: { selectedChannel: ChannelWithFlags }) {
+	const { data: tags } = trpc.channels.getTags.useQuery(
+		props.selectedChannel.id,
+	);
+	const mutation = trpc.channels.update.useMutation({
+		onError: (error) => {
+			toast.error(error.message);
+		},
+	});
+	const utils = trpc.useUtils();
+
+	return (
+		<SettingsCard
+			title="Choose Solved Tag"
+			description="Choose the tag that will be used to mark solutions"
+			disabled={props.selectedChannel.type !== ChannelType.GuildForum}
+			disabledReason="This option is only available for forum channels."
+		>
+			<div>
+				<Select
+					// setting key is a hack? to get it to rerender when clear is selected
+					key={props.selectedChannel.solutionTagId}
+					value={props.selectedChannel.solutionTagId ?? undefined}
+					disabled={props.selectedChannel.type !== ChannelType.GuildForum}
+					onValueChange={async (value) => {
+						if (value === 'noop') {
+							return;
+						}
+						const parsed = value === 'clear' ? null : value;
+						const existing = utils.dashboard.fetchDashboardById.getData(
+							props.selectedChannel.serverId,
+						);
+						if (existing) {
+							utils.dashboard.fetchDashboardById.setData(
+								props.selectedChannel.serverId,
+								{
 									...existing,
 									channels: existing.channels.map((c) =>
-										c.id === selectedChannel.id
+										c.id === props.selectedChannel.id
 											? {
 													...c,
-													flags: {
-														...c.flags,
-														[flagKey]: checked,
-													},
+													solutionTagId: parsed,
 												}
 											: c,
 									),
-								};
-								utils.dashboard.fetchDashboardById.setData(
-									selectedChannel.serverId,
-									updated,
-								);
-							}
-							await updateMutation.mutateAsync({
-								id: selectedChannel.id,
-								flags: {
-									[flagKey]: checked,
 								},
-							});
-							await utils.dashboard.fetchDashboardById.invalidate();
-						}}
-						checked={selectedChannel.flags[flagKey]}
-						disabled={disabled}
-					/>
-					<Label>{label}</Label>
-				</div>
-			</CardContent>
-			{disabled && (
-				<CardFooter className="text-muted-foreground">
-					{disabledReason}
-				</CardFooter>
-			)}
-		</Card>
+							);
+						}
+						await mutation.mutateAsync({
+							id: props.selectedChannel.id,
+							solutionTagId: parsed,
+						});
+						await utils.dashboard.fetchDashboardById.invalidate();
+					}}
+				>
+					<SelectTrigger className="max-w-[250px]">
+						<SelectValue placeholder="Select a tag" />
+					</SelectTrigger>
+					<SelectContent>
+						{tags?.tags?.length === 0 && (
+							<SelectItem value="noop">(No tags found)</SelectItem>
+						)}
+						{props.selectedChannel.solutionTagId && (
+							<SelectItem value="clear">(Clear)</SelectItem>
+						)}
+						{tags?.tags?.map((tag) => {
+							let emoji: React.ReactNode | null = null;
+							if (tag.emoji) {
+								if (tag.emoji.id) {
+									emoji = (
+										<img
+											className="size-4"
+											src={`https://cdn.discordapp.com/emojis/${tag.emoji.id}.png`}
+										/>
+									);
+								} else {
+									emoji = tag.emoji.name;
+								}
+							}
+							return (
+								<SelectItem key={tag.id} value={tag.id}>
+									<div className="flex items-center flex-row gap-2">
+										{emoji} {tag.name}
+									</div>
+								</SelectItem>
+							);
+						})}
+					</SelectContent>
+				</Select>
+			</div>
+		</SettingsCard>
 	);
 }
 
@@ -252,19 +378,7 @@ export default function ChannelsPage() {
 					<TabsTrigger value="settings" asChild>
 						<Button variant="ghost">Settings</Button>
 					</TabsTrigger>
-					{/* <TabsTrigger value="threads" disabled>
-						<Button variant="ghost" className="cursor-not-allowed">
-							Threads
-						</Button>
-					</TabsTrigger>
-					<TabsTrigger value="analytics" disabled>
-						<Button variant="ghost" className="cursor-not-allowed">
-							Analytics
-						</Button>
-					</TabsTrigger> */}
 				</TabsList>
-
-				{/* Settings Tab */}
 				<TabsContent value="settings" className="space-y-4">
 					<ToggleChannelFlag
 						flagKey="indexingEnabled"
@@ -307,12 +421,9 @@ export default function ChannelsPage() {
 						disabledReason="This option is only available for text channels."
 						selectedChannel={selectedChannel}
 					/>
+					<ChooseSolvedTagCard selectedChannel={selectedChannel} />
 				</TabsContent>
-
-				{/* Threads Tab */}
 				<TabsContent value="threads"></TabsContent>
-
-				{/* Analytics Tab */}
 				<TabsContent value="analytics"></TabsContent>
 			</Tabs>
 		</div>
