@@ -15,6 +15,8 @@ declare global {
 	var client: SapphireClient;
 }
 
+const port = parseInt(process.env.PORT ?? '2022');
+
 if (!global.client) {
 	global.client = createClient();
 	await login(global.client);
@@ -34,7 +36,7 @@ if (!global.client) {
 				client: global.client,
 			};
 		},
-	}).listen(2022);
+	}).listen(port);
 } else {
 	console.log('Reloading client');
 }

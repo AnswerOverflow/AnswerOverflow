@@ -10,6 +10,7 @@ COPY patches ./patches
 # Install dependencies
 RUN bun install
 
+RUN bun add -g dotenv-cli
 # Copy the rest of the application code
 COPY . .
 
