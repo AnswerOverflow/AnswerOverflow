@@ -24,6 +24,13 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@answeroverflow/ui/ui/popover';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@answeroverflow/ui/ui/select';
 import { Switch } from '@answeroverflow/ui/ui/switch';
 import {
 	Tabs,
@@ -37,20 +44,13 @@ import { ChannelType } from 'discord-api-types/v10';
 import {
 	Check,
 	ChevronsUpDown,
-	MessageSquare,
 	HashIcon,
 	Megaphone,
+	MessageSquare,
 } from 'lucide-react';
 import * as React from 'react';
 import { toast } from 'react-toastify';
 import { useDashboardContext } from '../components/dashboard-context';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@answeroverflow/ui/ui/select';
 
 function ChannelIcon({
 	type,

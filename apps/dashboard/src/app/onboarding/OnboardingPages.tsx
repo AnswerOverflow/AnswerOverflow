@@ -1,6 +1,3 @@
-import { trpc } from '@answeroverflow/ui/utils/client';
-import { signOut } from 'next-auth/react';
-import React, { useEffect, useState } from 'react';
 import { ServerPublic } from '@answeroverflow/api/src/router/types';
 import { ManageServerCard } from '@answeroverflow/ui/server-card';
 import { ServerIcon } from '@answeroverflow/ui/server-icon';
@@ -9,7 +6,10 @@ import { Button } from '@answeroverflow/ui/ui/button';
 import { DiscordCommand } from '@answeroverflow/ui/ui/discord-command';
 import { Heading } from '@answeroverflow/ui/ui/heading';
 import { LinkButton } from '@answeroverflow/ui/ui/link-button';
+import { trpc } from '@answeroverflow/ui/utils/client';
+import { signOut } from 'next-auth/react';
 import posthog from 'posthog-js';
+import React, { useEffect, useState } from 'react';
 
 export type SubmittedData = {
 	server?: ServerPublic & {
