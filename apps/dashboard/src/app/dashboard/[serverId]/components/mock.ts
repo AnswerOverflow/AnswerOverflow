@@ -4,6 +4,7 @@ export const demoServerData: ServerDashboard = {
 	approximateMemberCount: 10000,
 	bitfield: 0,
 	customDomain: null,
+	channels: [],
 	description: null,
 	flags: {
 		anonymizeMessages: false,

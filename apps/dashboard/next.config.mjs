@@ -5,7 +5,7 @@
  */
 
 !process.env.SKIP_ENV_VALIDATION &&
-	(await import('@answeroverflow/env/web-schema.mjs'));
+	(await import('../../packages/env/src/web-schema.mjs'));
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -13,9 +13,7 @@ const config = {
 	pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
 	transpilePackages: [
 		'@answeroverflow/api',
-		'@answeroverflow/auth',
-		'@answeroverflow/db',
-		'@answeroverflow/tailwind-config',
+		'@answeroverflow/core',
 		'@answeroverflow/ui',
 		'@answeroverflow/env',
 	],
@@ -26,10 +24,6 @@ const config = {
 			'media.discordapp.net',
 			'utfs.io',
 		],
-	},
-	// We already do linting on GH actions
-	eslint: {
-		ignoreDuringBuilds: !!process.env.CI,
 	},
 	productionBrowserSourceMaps: true, // we're open source so why not
 	async rewrites() {

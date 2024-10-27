@@ -1,27 +1,26 @@
+import { Analytics } from '@answeroverflow/core/analytics';
+import { upsertManyChannels } from '@answeroverflow/core/channel';
+import { uploadFileFromUrl } from '@answeroverflow/core/files';
+import {
+	findAllServers,
+	updateServer,
+	upsertServer,
+} from '@answeroverflow/core/server';
+import { ALLOWED_ROOT_CHANNEL_TYPES } from '@answeroverflow/core/zod';
+import { botEnv } from '@answeroverflow/env/bot';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
 import { ChannelType, EmbedBuilder, Events, Guild } from 'discord.js';
-import {
-	ALLOWED_ROOT_CHANNEL_TYPES,
-	upsertServer,
-	upsertManyChannels,
-	findAllServers,
-	updateServer,
-} from '@answeroverflow/db';
-import { delay } from '@answeroverflow/discordjs-mock';
-import { registerServerGroup } from '@answeroverflow/analytics';
-import { sharedEnvs } from '@answeroverflow/env/shared';
 import {
 	serverWithDiscordInfoToAnalyticsData,
 	trackDiscordEvent,
 } from '../../utils/analytics';
 import {
-	toAOServer,
 	getMemberCount,
 	toAOChannel,
+	toAOServer,
 } from '../../utils/conversions';
 import { leaveServerIfNecessary } from '../../utils/denylist';
-import { uploadFileFromUrl } from '@answeroverflow/db/src/files';
 
 /*
   Guild related events are tracked here, this may make sense to split into multiple files as the complexity grows.
@@ -50,7 +49,7 @@ async function autoUpdateServerInfo(guild: Guild) {
 			url: `https://cdn.discordapp.com/icons/${upserted.id}/${upserted.icon}.png?size=${48}`,
 		});
 	}
-	registerServerGroup(
+	Analytics.registerServerGroup(
 		serverWithDiscordInfoToAnalyticsData({
 			guild,
 			serverWithSettings: upserted,
@@ -116,7 +115,8 @@ function makeGuildEmbed(guild: Guild, joined: boolean) {
 @ApplyOptions<Listener.Options>({ once: true, event: Events.ClientReady })
 export class SyncOnReady extends Listener {
 	public async run() {
-		if (sharedEnvs.NODE_ENV === 'production') await delay(600 * 1000); // give time for dbs to start up
+		if (botEnv.NODE_ENV === 'production')
+			await new Promise((resolve) => setTimeout(resolve, 600 * 1000)); // give time for dbs to start up
 		// 1. Sync all of the servers to have the most up to date data
 		const guilds = this.container.client.guilds.cache.sort(
 			// sort by member count to give priority to larger servers
@@ -138,8 +138,7 @@ export class SyncOnReady extends Listener {
 			activeServerIds.add(guild.id);
 		}
 		// 2. For any servers that are in the database and not in the guilds the bot is in, mark them as kicked
-		const servers =
-			sharedEnvs.NODE_ENV === 'test' ? [] : await findAllServers();
+		const servers = botEnv.NODE_ENV === 'test' ? [] : await findAllServers();
 		const serversToMarkAsKicked = servers.filter(
 			(server) => !activeServerIds.has(server.id) && !server.kickedTime,
 		);
@@ -176,7 +175,7 @@ export class SyncOnJoin extends Listener {
 			}),
 			'Answer Overflow Account Id': guild.ownerId, // <---TODO: Not a great id to track with but best we've got
 		});
-		if (sharedEnvs.NODE_ENV !== 'test') {
+		if (botEnv.NODE_ENV !== 'test') {
 			const rhysUser =
 				await this.container.client.users.fetch('523949187663134754');
 			await rhysUser.send({
@@ -211,7 +210,7 @@ export class SyncOnDelete extends Listener {
 				serverWithSettings: upserted,
 			}),
 		});
-		if (sharedEnvs.NODE_ENV !== 'test') {
+		if (botEnv.NODE_ENV !== 'test') {
 			const rhysUser =
 				await this.container.client.users.fetch('523949187663134754');
 			await rhysUser.send({

@@ -1,16 +1,4 @@
 {
 	"extends": "@answeroverflow/tsconfig/base.json",
-	"compilerOptions": {
-		"types": ["vitest/globals", "node"],
-		"baseUrl": "../../"
-	},
-	"include": [
-		"src",
-		"index.ts",
-		"transformer.ts",
-		"vitest.config.ts",
-		"test",
-		"../../reset.d.ts",
-		".prettierrc.cjs"
-	]
+	"include": ["src", "index.ts", "transformer.ts", "test", "../../reset.d.ts"]
 }

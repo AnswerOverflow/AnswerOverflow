@@ -1,18 +1,18 @@
-import Link from '../ui/link';
+import { ServerPublic } from '@answeroverflow/api';
+import { GITHUB_LINK } from '@answeroverflow/constants/links';
 import React, { Suspense } from 'react';
-import { GetStarted } from '../callouts';
-import { ThemeSwitcher } from '../theme-switcher';
-import { GitHubIcon } from '../icons';
-import { GITHUB_LINK } from '@answeroverflow/constants/src/links';
-import { ServerIcon } from '../server-icon';
-import { AnswerOverflowLogo } from '../icons/answer-overflow-logo';
-import type { ServerPublic } from '@answeroverflow/api/src/router/server/types';
-import { LinkButton } from '../ui/link-button';
 import { LiaSearchSolid } from 'react-icons/lia';
+import { GetStarted } from '../callouts';
+import { GitHubIcon } from '../icons';
+import { AnswerOverflowLogo } from '../icons/answer-overflow-logo';
 import { MessagesSearchBar } from '../messages-search-bar';
+import { ServerIcon } from '../server-icon';
+import { ThemeSwitcher } from '../theme-switcher';
+import { Link } from '../ui/link';
+import { LinkButton } from '../ui/link-button';
 import { UserSection } from './client';
 
-export const Navbar = (props: {
+const Navbar = (props: {
 	tenant: ServerPublic | undefined;
 	hideIcon?: boolean;
 }) => {
@@ -83,3 +83,5 @@ export const Navbar = (props: {
 		</header>
 	);
 };
+
+export { Navbar };

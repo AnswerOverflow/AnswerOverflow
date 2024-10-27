@@ -1,8 +1,6 @@
-import {
-	countConsentingUsersInManyServers,
-	findAllServers,
-	zServerPublic,
-} from '@answeroverflow/db';
+import { findAllServers } from '@answeroverflow/core/server';
+import { countConsentingUsersInManyServers } from '@answeroverflow/core/user-server-settings';
+import { zServerPublic } from '@answeroverflow/core/zod';
 
 export async function fetchBrowseServers() {
 	const servers = await findAllServers();

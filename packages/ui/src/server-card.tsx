@@ -1,7 +1,7 @@
 import { type ServerPublic } from '@answeroverflow/api';
-import { LinkButton } from './ui/link-button';
-import { ServerIcon } from './server-icon';
 import Image from 'next/image';
+import { ServerIcon } from './server-icon';
+import { LinkButton } from './ui/link-button';
 import { getServerDescription, getServerHomepageUrl } from './utils/server';
 
 export type ServerCardProps = {

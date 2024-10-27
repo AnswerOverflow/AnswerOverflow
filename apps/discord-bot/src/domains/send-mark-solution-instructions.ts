@@ -1,4 +1,3 @@
-import { type ChannelWithFlags, findServerById } from '@answeroverflow/db';
 import {
 	ActionRowBuilder,
 	EmbedBuilder,
@@ -8,15 +7,17 @@ import {
 	ThreadChannel,
 } from 'discord.js';
 
-import { makeDismissButton } from './dismiss-button';
+import { findServerById } from '@answeroverflow/core/server';
+import { ChannelWithFlags } from '@answeroverflow/core/zod';
 import {
-	trackDiscordEvent,
+	channelWithDiscordInfoToAnalyticsData,
 	memberToAnalyticsUser,
 	messageToAnalyticsMessage,
-	threadWithDiscordInfoToAnalyticsData,
-	channelWithDiscordInfoToAnalyticsData,
 	serverWithDiscordInfoToAnalyticsData,
+	threadWithDiscordInfoToAnalyticsData,
+	trackDiscordEvent,
 } from '../utils/analytics';
+import { makeDismissButton } from './dismiss-button';
 
 const sendMarkSolutionInstructionsErrorReasons = [
 	'Thread was not newly created',

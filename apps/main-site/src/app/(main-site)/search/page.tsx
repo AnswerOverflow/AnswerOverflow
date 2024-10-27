@@ -1,9 +1,10 @@
-import { SearchPage } from '@answeroverflow/ui/src/pages/SearchPage';
-import { callAPI } from '@answeroverflow/ui/src/utils/trpc';
+import { Footer } from '@answeroverflow/ui/footer';
+import { Navbar } from '@answeroverflow/ui/navbar/index';
+import { SearchPage } from '@answeroverflow/ui/pages/SearchPage';
+import { callAPI } from '@answeroverflow/ui/utils/trpc';
 import { Metadata } from 'next';
 import { ZeroState } from './zero-state';
-import { Footer } from '@answeroverflow/ui/src/footer';
-import { Navbar } from '@answeroverflow/ui/src/navbar';
+
 type Props = {
 	searchParams: {
 		q?: string | string[];

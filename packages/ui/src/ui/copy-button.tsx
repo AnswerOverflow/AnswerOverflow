@@ -1,10 +1,10 @@
 import { useCopyToClipboard } from 'react-use';
 import 'react-toastify/dist/ReactToastify.css';
 import './copy-button-toast-styles.css';
-import { Button } from './button';
 import { ClipboardIcon } from '@heroicons/react/24/outline';
 import { ClipboardCheckIcon } from 'lucide-react';
 import React from 'react';
+import { Button } from './button';
 
 export const CopyButton = ({ textToCopy }: { textToCopy: string }) => {
 	const [, copy] = useCopyToClipboard();

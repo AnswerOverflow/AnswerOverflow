@@ -1,6 +1,6 @@
+import { Footer } from '@answeroverflow/ui/footer';
+import { Navbar } from '@answeroverflow/ui/navbar/index';
 import React from 'react';
-import { Footer } from '@answeroverflow/ui/src/footer';
-import { Navbar } from '@answeroverflow/ui/src/navbar';
 
 export default function RootLayout({
 	children,

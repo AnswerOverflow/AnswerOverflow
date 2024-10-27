@@ -1,4 +1,4 @@
-import { generateSitemap } from '@answeroverflow/db/src/sitemap';
+import { generateSitemap } from '@answeroverflow/core/sitemap';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export async function GET() {

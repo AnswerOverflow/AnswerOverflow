@@ -1,5 +1,5 @@
 import { DiscordAvatar } from '../discord-avatar';
-import Link from '../ui/link';
+import { Link } from '../ui/link';
 import { TimeAgo } from '../ui/time-ago';
 import { cn } from '../utils/utils';
 import { MessageBlurrer, MessageBody } from './Message';

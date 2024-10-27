@@ -1,7 +1,7 @@
+import { Footer } from '@answeroverflow/ui/footer';
+import { LeftSidebar } from '@answeroverflow/ui/left-sidebar';
+import { Navbar } from '@answeroverflow/ui/navbar/index';
 import React from 'react';
-import { Footer } from '@answeroverflow/ui/src/footer';
-import { Navbar } from '@answeroverflow/ui/src/navbar';
-import { LeftSidebar } from '@answeroverflow/ui/src/left-sidebar';
 
 export default function RootLayout({
 	children,

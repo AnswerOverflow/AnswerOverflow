@@ -1,3 +1,13 @@
+import { Auth } from '@answeroverflow/core/auth';
+import { ReactionWithRelations } from '@answeroverflow/core/schema';
+import { BaseMessageWithRelations as AOMessage } from '@answeroverflow/core/schema';
+import {
+	Channel as AOChannel,
+	DiscordAccount as AODiscordAccount,
+	Server as AOServer,
+} from '@answeroverflow/core/schema';
+import { getDefaultChannelWithFlags } from '@answeroverflow/core/utils/channelUtils';
+import { getDefaultServer } from '@answeroverflow/core/utils/serverUtils';
 import {
 	type AnyThreadChannel,
 	Guild,
@@ -7,20 +17,10 @@ import {
 	Message,
 	User,
 } from 'discord.js';
-import {
-	type Server as AOServer,
-	type Channel as AOChannel,
-	type DiscordAccount as AODiscordAccount,
-	ReactionWithRelations,
-} from '@answeroverflow/db/src/schema';
-import { type BaseMessageWithRelations as AOMessage } from '@answeroverflow/db';
-import type { DiscordAPIServerSchema } from '@answeroverflow/cache';
-import { getDefaultServer } from '@answeroverflow/db/src/utils/serverUtils';
-import { getDefaultChannelWithFlags } from '@answeroverflow/db/src/utils/channelUtils';
 
 export function toDiscordAPIServer(
 	member: GuildMember,
-): DiscordAPIServerSchema {
+): Auth.DiscordAPIServerSchema {
 	const guild = member.guild;
 	return {
 		id: guild.id,

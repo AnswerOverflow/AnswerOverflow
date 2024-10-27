@@ -1,5 +1,5 @@
-import { Guild } from 'discord.js';
 import { container } from '@sapphire/framework';
+import { Guild } from 'discord.js';
 
 export const DENYLIST = {
 	SERVER_IDS: new Set([

@@ -1,4 +1,4 @@
-import type { ChannelWithFlags } from '@answeroverflow/db';
+import { ChannelWithFlags } from '@answeroverflow/core/zod';
 import type { ClientEvents, GuildMember, Message } from 'discord.js';
 import type { Subject } from 'rxjs';
 

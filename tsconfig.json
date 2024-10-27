@@ -1,7 +1,6 @@
 {
-  "extends": "@answeroverflow/tsconfig/base.json",
-  "include": [],
-  "exclude": [
-    "node_modules"
-  ]
+	"compilerOptions": {
+		"lib": ["esnext"],
+		"types": ["@cloudflare/workers-types"]
+	}
 }

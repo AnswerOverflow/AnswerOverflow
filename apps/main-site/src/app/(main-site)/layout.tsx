@@ -1,5 +1,5 @@
+import { metadata as baseMetadata } from '@answeroverflow/ui/layouts/root';
 import { Metadata } from 'next';
-import { metadata as baseMetadata } from '@answeroverflow/ui/src/layouts/root';
 export const metadata: Metadata = {
 	...baseMetadata,
 	other: {

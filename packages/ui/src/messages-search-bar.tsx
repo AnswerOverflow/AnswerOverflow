@@ -1,9 +1,9 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { useRouterQuery, useRouterServerId } from './utils/hooks';
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Input } from './ui/input';
+import { useRouterQuery, useRouterServerId } from './utils/hooks';
 
 export const MessagesSearchBar = (props: {
 	placeholder?: string;

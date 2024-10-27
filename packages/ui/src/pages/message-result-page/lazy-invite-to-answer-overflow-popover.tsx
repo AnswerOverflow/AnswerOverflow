@@ -1,8 +1,8 @@
 'use client';
 import dynamic from 'next/dynamic';
-import { Button } from '../../ui/button';
 import React from 'react';
-import { trackEvent } from '@answeroverflow/hooks';
+import { trackEvent } from '../../hooks/events';
+import { Button } from '../../ui/button';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const InviteToAnswerOverflowPopover = dynamic(

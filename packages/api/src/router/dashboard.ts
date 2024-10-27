@@ -1,30 +1,18 @@
-import { z } from 'zod';
+import { Analytics } from '@answeroverflow/core/analytics';
+import { findManyChannelsById } from '@answeroverflow/core/channel';
+import { findManyDiscordAccountsById } from '@answeroverflow/core/discord-account';
 import {
-	getPageViewsForServer,
-	getQuestionsAndAnswers,
-	getServerInvitesClicked,
-	getTopPages,
-	getTopQuestionSolversForServer,
-} from '@answeroverflow/analytics/src/query';
+	findServerById,
+	findServerByIdWithChannels,
+	updateServer,
+} from '@answeroverflow/core/server';
+import { Stripe } from '@answeroverflow/core/stripe';
+import { sharedEnvs } from '@answeroverflow/env/shared';
+import { TRPCError, inferProcedureOutput } from '@trpc/server';
+import { z } from 'zod';
 import { assertCanEditServer } from '../utils/permissions';
 import { protectedFetch } from '../utils/protected-procedures';
 import { router, withUserServersProcedure } from './trpc';
-import {
-	findManyChannelsById,
-	findManyDiscordAccountsById,
-	findServerById,
-	updateServer,
-} from '@answeroverflow/db';
-import { TRPCError, inferProcedureOutput } from '@trpc/server';
-import { sharedEnvs } from '@answeroverflow/env/shared';
-import {
-	updateServerCustomerName,
-	fetchSubscriptionInfo,
-	createNewCustomer,
-	createProPlanCheckoutSession,
-	createEnterprisePlanCheckoutSession,
-} from '@answeroverflow/payments';
-
 const input = z.object({
 	serverId: z.string(),
 	from: z.date(),
@@ -37,7 +25,7 @@ export const dashboardRouter = router({
 		.query(async ({ ctx, input }) => {
 			const data = await protectedFetch({
 				fetch: () => {
-					return getPageViewsForServer(input);
+					return Analytics.getPageViewsForServer(input);
 				},
 				permissions: () => assertCanEditServer(ctx, input.serverId),
 				notFoundMessage: 'Server not found',
@@ -49,7 +37,7 @@ export const dashboardRouter = router({
 		.query(async ({ ctx, input }) => {
 			const data = await protectedFetch({
 				fetch: () => {
-					return getServerInvitesClicked(input);
+					return Analytics.getServerInvitesClicked(input);
 				},
 				permissions: () => assertCanEditServer(ctx, input.serverId),
 				notFoundMessage: 'Server not found',
@@ -61,7 +49,7 @@ export const dashboardRouter = router({
 		.query(async ({ ctx, input }) => {
 			const data = await protectedFetch({
 				fetch: () => {
-					return getQuestionsAndAnswers(input);
+					return Analytics.getQuestionsAndAnswers(input);
 				},
 				permissions: () => assertCanEditServer(ctx, input.serverId),
 				notFoundMessage: 'Server not found',
@@ -73,7 +61,8 @@ export const dashboardRouter = router({
 		.query(async ({ ctx, input }) => {
 			const data = await protectedFetch({
 				fetch: async () => {
-					const topSolvers = await getTopQuestionSolversForServer(input);
+					const topSolvers =
+						await Analytics.getTopQuestionSolversForServer(input);
 					const topSolverIds = Object.keys(topSolvers);
 					const discordAccounts =
 						await findManyDiscordAccountsById(topSolverIds);
@@ -95,7 +84,7 @@ export const dashboardRouter = router({
 		.query(async ({ ctx, input }) => {
 			const data = await protectedFetch({
 				fetch: async () => {
-					const metadata = await getTopPages(input);
+					const metadata = await Analytics.getTopPages(input);
 					const threadIds = Object.keys(metadata);
 					const threads = await findManyChannelsById(threadIds);
 					const map = new Map(threads.map((thread) => [thread.id, thread]));
@@ -119,7 +108,7 @@ export const dashboardRouter = router({
 		.query(async ({ input, ctx }) =>
 			protectedFetch({
 				fetch: async () => {
-					const server = await findServerById(input);
+					const server = await findServerByIdWithChannels(input);
 					if (!server) {
 						throw new TRPCError({
 							code: 'NOT_FOUND',
@@ -130,7 +119,7 @@ export const dashboardRouter = router({
 					if (server.stripeCustomerId) {
 						// Update the customer's name and description
 						// We can just let this run in the background and not await it
-						void updateServerCustomerName({
+						void Stripe.updateServerCustomerName({
 							serverId: server.id,
 							name: server.name,
 							customerId: server.stripeCustomerId,
@@ -139,7 +128,7 @@ export const dashboardRouter = router({
 
 					// If they have a subscription already, we display the portal
 					if (server.stripeCustomerId && server.stripeSubscriptionId) {
-						const sub = await fetchSubscriptionInfo(
+						const sub = await Stripe.fetchSubscriptionInfo(
 							server.stripeSubscriptionId,
 						);
 						const {
@@ -165,7 +154,7 @@ export const dashboardRouter = router({
 					// else we upsert them and then display checkout
 
 					if (!server.stripeCustomerId) {
-						const customer = await createNewCustomer({
+						const customer = await Stripe.createNewCustomer({
 							name: server.name,
 							serverId: server.id,
 						});
@@ -182,12 +171,12 @@ export const dashboardRouter = router({
 					const returnUrl = `https://app.answeroverflow.com/dashboard/${server.id}`;
 
 					const [proPlanCheckout, enterprisePlanCheckout] = await Promise.all([
-						createProPlanCheckoutSession({
+						Stripe.createProPlanCheckoutSession({
 							customerId: server.stripeCustomerId,
 							successUrl: returnUrl,
 							cancelUrl: returnUrl,
 						}),
-						createEnterprisePlanCheckoutSession({
+						Stripe.createEnterprisePlanCheckoutSession({
 							customerId: server.stripeCustomerId,
 							successUrl: returnUrl,
 							cancelUrl: returnUrl,

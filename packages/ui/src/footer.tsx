@@ -1,13 +1,13 @@
-import Link from './ui/link';
+import type { ServerPublic } from '@answeroverflow/api';
 import {
 	DISCORD_LINK,
 	GITHUB_LINK,
 	TWITTER_LINK,
-} from '@answeroverflow/constants/src/links';
+} from '@answeroverflow/constants/links';
 import { DiscordIcon, GitHubIcon } from './icons';
-import { Heading } from './ui/heading';
 import { AnswerOverflowLogo } from './icons/answer-overflow-logo';
-import type { ServerPublic } from '@answeroverflow/api';
+import { Heading } from './ui/heading';
+import { Link } from './ui/link';
 
 type SocialItem = {
 	name: string;

@@ -9,23 +9,21 @@ import {
 	ContextMenuCommandInteraction,
 	MessageActionRowComponentBuilder,
 } from 'discord.js';
-import { upsertMessage } from '@answeroverflow/db/src/message-node';
 
-import {
-	findChannelMessagesById,
-	findFullMessageById,
-	findServerById,
-} from '@answeroverflow/db';
+import { findChannelMessagesById } from '@answeroverflow/core/channel';
+import { findFullMessageById } from '@answeroverflow/core/message';
+import { upsertMessage } from '@answeroverflow/core/message-node';
+import { findServerById } from '@answeroverflow/core/server';
 import { indexTextBasedChannel } from '../../domains/indexing';
 import {
-	markAsSolved,
 	MarkSolutionError,
 	checkIfCanMarkSolution,
 	makeMarkSolutionResponse,
+	markAsSolved,
 } from '../../domains/mark-solution';
 import {
-	trackDiscordEvent,
 	memberToAnalyticsUser,
+	trackDiscordEvent,
 } from '../../utils/analytics';
 import { toAOMessage } from '../../utils/conversions';
 import { getCommandIds } from '../../utils/utils';
@@ -168,6 +166,9 @@ export class MarkSolution extends Command {
 						server: aoServer!,
 						settings: channelSettings,
 					});
+					if (interaction.channel.isDMBased()) {
+						throw new Error('Cannot send message in DM');
+					}
 					await interaction.channel?.send({
 						embeds: [embed],
 						components: components ? [components] : undefined,

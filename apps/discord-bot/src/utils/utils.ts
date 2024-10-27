@@ -1,4 +1,4 @@
-import type { RendererableInteractions } from '@answeroverflow/discordjs-react';
+import { botEnv } from '@answeroverflow/env/bot';
 import type {
 	ChatInputCommandSuccessPayload,
 	Command,
@@ -10,16 +10,15 @@ import { send } from '@sapphire/plugin-editable-commands';
 import { cyan } from 'colorette';
 import type { APIUser } from 'discord-api-types/v9';
 import {
-	Guild,
-	Message,
-	EmbedBuilder,
-	User,
-	type GuildTextBasedChannel,
 	Client,
+	EmbedBuilder,
+	Guild,
+	type GuildTextBasedChannel,
+	Message,
+	User,
 } from 'discord.js';
 import type { ReactNode } from 'react';
 import { LOADING_MESSAGES } from './constants';
-import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export function getCommandIds(ids: {
 	local?: string | string[];
@@ -28,7 +27,7 @@ export function getCommandIds(ids: {
 }): string[] {
 	const { local, production, staging } = ids;
 
-	switch (sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV) {
+	switch (botEnv.NEXT_PUBLIC_DEPLOYMENT_ENV) {
 		case 'production':
 			if (!production) return [];
 			return Array.isArray(production) ? production : [production];
@@ -123,13 +122,6 @@ function getAuthorInfo(author: User | APIUser) {
 function getGuildInfo(guild: Guild | null) {
 	if (guild === null) return 'Direct Messages';
 	return `${guild.name}[${cyan(guild.id)}]`;
-}
-
-export function ephemeralReply(
-	content: ReactNode,
-	interaction: RendererableInteractions,
-) {
-	return container.discordJSReact.ephemeralReply(interaction, content);
 }
 
 export type RootChannel = NonNullable<ReturnType<typeof getRootChannel>>;

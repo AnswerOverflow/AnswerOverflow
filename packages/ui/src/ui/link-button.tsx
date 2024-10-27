@@ -1,11 +1,11 @@
 'use client';
+// TODO: Check if this results in the JS for button being pulled in
 import type { VariantProps } from 'cva';
-import Link from './link';
+import { usePathname } from 'next/navigation';
 import type { SetRequired } from 'type-fest';
 import { cn } from '../utils/utils';
-// TODO: Check if this results in the JS for button being pulled in
 import { buttonVariants } from './button';
-import { usePathname } from 'next/navigation';
+import { Link } from './link';
 
 export interface LinkButtonProps
 	extends SetRequired<

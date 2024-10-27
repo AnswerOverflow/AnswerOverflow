@@ -1,8 +1,9 @@
+import { Navbar } from '@answeroverflow/ui/navbar/index';
 import React from 'react';
-import { Navbar } from '@answeroverflow/ui/src/navbar';
-import { Footer } from '@answeroverflow/ui/src/footer';
+
+import { findServerByCustomDomain } from '@answeroverflow/core/server';
+import { Footer } from '@answeroverflow/ui/footer';
 import { notFound } from 'next/navigation';
-import { findServerByCustomDomain } from '@answeroverflow/db';
 
 export default async function RootLayout({
 	children,

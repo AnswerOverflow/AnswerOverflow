@@ -1,36 +1,36 @@
-import type { ChannelPublicWithFlags, MessageFull } from '@answeroverflow/db';
 import type { ServerPublic } from '@answeroverflow/api';
+import { getMainSiteHostname } from '@answeroverflow/constants/links';
+import { ExternalLink } from 'lucide-react';
+import { FaRegMessage } from 'react-icons/fa6';
+import { JsonLd } from 'react-schemaorg';
 import type { DiscussionForumPosting } from 'schema-dts';
-import { ServerInviteJoinButton } from '../server-invite';
+import { DiscordAvatar } from '../discord-avatar';
 import { MessageBlurrer, MessageBody } from '../message/Message';
-import Link from '../ui/link';
+import { isImageAttachment } from '../message/attachments';
+import { ThinMessage } from '../message/thin-message';
+import { ServerIcon } from '../server-icon';
+import { ServerInviteJoinButton } from '../server-invite';
+import { CarbonAds } from '../ui/ads';
+import { Link } from '../ui/link';
+import { FormattedNumber } from '../ui/numbers';
+import { TimeAgo } from '../ui/time-ago';
+import { TrackLinkButton } from '../ui/track-link-button';
 import { TrackLoad } from '../ui/track-load';
+import { getDiscordURLForMessage } from '../utils/discord';
+import { getDate } from '../utils/snowflake';
+import { InKeepWidget } from './inkeep';
+import { LazyInviteToAnswerOverflowPopover } from './message-result-page/lazy-invite-to-answer-overflow-popover';
+
 import {
 	channelToAnalyticsData,
 	serverToAnalyticsData,
 	threadToAnalyticsData,
-} from '@answeroverflow/constants/src/analytics';
-import { messageWithDiscordAccountToAnalyticsData } from '@answeroverflow/hooks';
-import { TrackLinkButton } from '../ui/track-link-button';
-import { LazyInviteToAnswerOverflowPopover } from './message-result-page/lazy-invite-to-answer-overflow-popover';
-import { ServerIcon } from '../server-icon';
-import { CarbonAds } from '../ui/ads';
-import { FormattedNumber } from '../ui/numbers';
-import { ThinMessage } from '../message/thin-message';
-import { getDiscordURLForMessage } from '../utils/discord';
-import { ExternalLink } from 'lucide-react';
-import { getDate } from '../utils/snowflake';
-import { getMainSiteHostname } from '@answeroverflow/constants';
-import { isImageAttachment } from '../message/attachments';
-import { TimeAgo } from '../ui/time-ago';
-import { DiscordAvatar } from '../discord-avatar';
-import { FaRegMessage } from 'react-icons/fa6';
-
-import { JsonLd } from 'react-schemaorg';
-import { InKeepWidget } from './inkeep';
-
-import { MessageResultPageProvider } from './message-result-page-context';
+} from '@answeroverflow/constants/analytics';
+import { MessageFull } from '@answeroverflow/core/message';
+import { ChannelPublicWithFlags } from '@answeroverflow/core/zod';
+import { messageWithDiscordAccountToAnalyticsData } from '../hooks/events';
 import { JumpToSolution } from './jump-to-solution';
+import { MessageResultPageProvider } from './message-result-page-context';
 export type MessageResultPageProps = {
 	messages: MessageFull[];
 	server: ServerPublic;
