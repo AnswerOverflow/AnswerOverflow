@@ -40,7 +40,7 @@
 		"type-fest": "^4.12.0"
 	},
 	"scripts": {
-		"with-env": "bun dotenv -e ../../.env --",
+		"with-env": "bun run dotenv -e ../../.env --",
 		"start": "bun with-env bun run .",
 		"clean": "rm -rf node_modules",
 		"typecheck": "tsc --noEmit",
