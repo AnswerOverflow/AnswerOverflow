@@ -23,7 +23,6 @@ export const publicProcedure = t.procedure;
 
 export const botRouter = router({
 	getTags: publicProcedure.input(z.string()).query(async ({ input, ctx }) => {
-		console.log('getTags', input);
 		const channel = await ctx.client.channels.fetch(input);
 		if (!channel || channel.type !== ChannelType.GuildForum) {
 			return null;
