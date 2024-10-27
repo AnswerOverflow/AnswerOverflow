@@ -5,22 +5,12 @@
  */
 
 !process.env.SKIP_ENV_VALIDATION &&
-	(await import('@answeroverflow/env/web-schema.mjs'));
+	(await import('../../packages/env/src/web-schema.mjs'));
 const nextJSMDX = await import('@next/mdx');
-// import remarkGfm from 'remark-gfm';
 
 const withMDX = nextJSMDX.default({
 	extension: /\.mdx?$/,
 	options: {},
-	// options: {
-	// 	// If you use remark-gfm, you'll need to use next.config.mjs
-	// 	// as the package is ESM only
-	// 	// https://github.com/remarkjs/remark-gfm#install
-	// 	remarkPlugins: [remarkGfm],
-	// 	rehypePlugins: [],
-	// 	// If you use `MDXProvider`, uncomment the following line.
-	// 	providerImportSource: '@mdx-js/react',
-	// },
 });
 
 /** @type {import("next").NextConfig} */
@@ -29,9 +19,7 @@ const config = {
 	pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
 	transpilePackages: [
 		'@answeroverflow/api',
-		'@answeroverflow/auth',
-		'@answeroverflow/db',
-		'@answeroverflow/tailwind-config',
+		'@answeroverflow/core',
 		'@answeroverflow/ui',
 		'@answeroverflow/env',
 	],
@@ -48,10 +36,6 @@ const config = {
 			'images-ext-2.discordapp.net',
 			'answer-overflow-discord-attachments.s3.amazonaws.com',
 		],
-	},
-	// We already do linting on GH actions
-	eslint: {
-		ignoreDuringBuilds: !!process.env.CI,
 	},
 	productionBrowserSourceMaps: true, // we're open source so why not
 	rewrites: async () => {
@@ -121,9 +105,5 @@ const config = {
 		];
 	},
 };
-import { withAxiom } from 'next-axiom';
-// With content layer breaks things for us for some reason
-const withAxiomConfig = withAxiom(config);
 
-// @ts-ignore ignore
-export default withMDX(withAxiomConfig);
+export default withMDX(config);

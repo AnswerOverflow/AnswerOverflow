@@ -1,9 +1,9 @@
-import { ClientAutoSignIn } from './client-auto-sign-in';
-import { getServerSession } from '@answeroverflow/auth';
+import { Auth } from '@answeroverflow/core/auth';
 import { redirect } from 'next/navigation';
+import { ClientAutoSignIn } from './client-auto-sign-in';
 
 export default async function DashboardAuth() {
-	const session = await getServerSession();
+	const session = await Auth.getServerSession();
 	if (session) {
 		redirect(
 			// eslint-disable-next-line n/no-process-env

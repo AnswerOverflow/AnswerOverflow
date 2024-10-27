@@ -1,5 +1,5 @@
-import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 import { appRouter, createContext } from '@answeroverflow/api';
+import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 
 const handler = (req: Request) =>
 	fetchRequestHandler({

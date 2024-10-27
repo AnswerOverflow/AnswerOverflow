@@ -1,18 +1,18 @@
 'use client';
-import Link from '@answeroverflow/ui/src/ui/link';
 import type { ServerPublic } from '@answeroverflow/api';
-import { trpc } from '@answeroverflow/ui/src/utils/client';
-import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
-import { Button } from '@answeroverflow/ui/src/ui/button';
+import { ServerIcon } from '@answeroverflow/ui/server-icon';
+import { Button } from '@answeroverflow/ui/ui/button';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from '@answeroverflow/ui/src/ui/dropdown-menu';
-import { ServerIcon } from '@answeroverflow/ui/src/server-icon';
-import React from 'react';
+} from '@answeroverflow/ui/ui/dropdown-menu';
+import { Link } from '@answeroverflow/ui/ui/link';
+import { trpc } from '@answeroverflow/ui/utils/client';
 import { useParams } from 'next/navigation';
+import React from 'react';
+import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
 import { LiaPlusCircleSolid } from 'react-icons/lia';
 import { demoServerData } from './mock';
 

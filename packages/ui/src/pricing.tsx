@@ -1,15 +1,15 @@
 'use client';
+import { Check } from 'lucide-react';
+import React from 'react';
+import { toast } from 'react-toastify';
 import {
 	Accordion,
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
 } from './ui/accordion';
-import { Check } from 'lucide-react';
-import { trackEvent } from '@answeroverflow/hooks/src/analytics/events';
-import { toast } from 'react-toastify';
-import React from 'react';
-import { classNames } from './utils/utils';
+import { BlueLink } from './ui/blue-link';
+import { Button } from './ui/button';
 import {
 	Dialog,
 	DialogContent,
@@ -18,16 +18,16 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from './ui/dialog';
-import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { BlueLink } from './ui/blue-link';
+import { classNames } from './utils/utils';
 
-import { LinkButton } from './ui/link-button';
-import { Heading } from './ui/heading';
-import { IoBusiness } from 'react-icons/io5';
-import { IoMdGlobe } from 'react-icons/io';
 import { usePathname } from 'next/navigation';
+import { IoMdGlobe } from 'react-icons/io';
+import { IoBusiness } from 'react-icons/io5';
+import { trackEvent } from './hooks/events';
+import { Heading } from './ui/heading';
+import { LinkButton } from './ui/link-button';
 const enterpriseFAQs: {
 	question: React.ReactNode;
 	answer: React.ReactNode;
@@ -201,9 +201,6 @@ const ProPlan = (props: { ctaLink: string; hasSubscribedBefore?: boolean }) => (
 			{
 				name: 'Up to 100,000 monthly page views',
 			},
-			{
-				name: 'Basic analytics (coming soon)',
-			},
 		]}
 		ctaLink={props.ctaLink}
 	/>
@@ -226,9 +223,6 @@ const EnterprisePlan = (props: {
 			},
 			{
 				name: 'Up to 500,000 monthly page views',
-			},
-			{
-				name: 'Advanced analytics (coming soon)',
 			},
 			{
 				name: 'Priority support',
@@ -288,9 +282,6 @@ const PublicPlatformPricing = (props: { showFaqs?: boolean }) => (
 					},
 					{
 						name: 'Ad supported',
-					},
-					{
-						name: 'Revenue share (coming soon)',
 					},
 				]}
 				clarifications={[
@@ -438,7 +429,7 @@ export const PricingDialog = (props: {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button variant="outline">
+				<Button variant="outline" className="max-w-32">
 					{props.hasSubscribedBefore ? 'Resubscribe' : 'Start free trial'}
 				</Button>
 			</DialogTrigger>

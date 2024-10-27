@@ -1,12 +1,7 @@
-/* eslint-disable n/no-process-env */
+import type { Metadata } from 'next';
+import { Montserrat, Source_Sans_3 } from 'next/font/google';
 import React from 'react';
 import { Providers } from './providers';
-import { CommitBanner } from '../commit-banner';
-import { Montserrat, Source_Sans_3 } from 'next/font/google';
-/* eslint-disable n/no-extraneous-import */
-import type { Metadata } from 'next';
-import Script from 'next/script';
-import { DATA_UNBLOCKER } from './data-unblocker';
 
 export const metadata: Metadata = {
 	title: 'Answer Overflow - Discord Content Discovery',
@@ -64,15 +59,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<link rel={'dns-prefetch'} href={'https://cdn.discordapp.com'} />
 			</head>
 			<body className={`${montserrat.variable} ${sourceSans3.variable}`}>
-				<Script
-					async
-					id="data-unblocker"
-					strategy={'lazyOnload'}
-					dangerouslySetInnerHTML={{
-						__html: Buffer.from(DATA_UNBLOCKER, 'base64').toString(),
-					}}
-				/>
-				<CommitBanner />
 				<Providers>{children}</Providers>
 			</body>
 		</html>

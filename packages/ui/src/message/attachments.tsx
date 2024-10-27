@@ -1,5 +1,5 @@
-import type { MessageProps } from './props';
 import { AttachmentDownloader } from './AttachmentDownloader';
+import type { MessageProps } from './props';
 
 const regexes = [
 	{

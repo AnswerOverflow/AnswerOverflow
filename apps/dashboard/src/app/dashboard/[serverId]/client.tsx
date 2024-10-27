@@ -1,5 +1,8 @@
 'use client';
-import { DatePickerWithPresets } from '@answeroverflow/ui/src/ui/date-picker';
+import { ExternalLinkIcon } from '@answeroverflow/ui/icons/index';
+import { DatePickerWithPresets } from '@answeroverflow/ui/ui/date-picker';
+import { LinkButton } from '@answeroverflow/ui/ui/link-button';
+import { useDashboardContext } from './components/dashboard-context';
 import {
 	PageViewsLineChart,
 	PopularPagesTable,
@@ -8,9 +11,6 @@ import {
 	ServerInvitesUsedLineChart,
 	TopQuestionSolversTable,
 } from './components/home';
-import { useDashboardContext } from './components/dashboard-context';
-import { ExternalLinkIcon } from '@answeroverflow/ui/src/icons';
-import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
 
 export default function Client() {
 	const { options } = useDashboardContext();

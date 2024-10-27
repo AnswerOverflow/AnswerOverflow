@@ -1,7 +1,7 @@
 import NextLink from 'next/link';
 import React from 'react';
 import { cn } from '../utils/utils';
-export default function Link(
+export function Link(
 	props: React.ComponentPropsWithoutRef<typeof NextLink> & {
 		href: string;
 		icon?: React.ReactNode;

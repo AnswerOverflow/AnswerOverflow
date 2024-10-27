@@ -1,8 +1,8 @@
-import { findServerWithCommunityPageData } from '@answeroverflow/db';
-import { CommunityPage } from '@answeroverflow/ui/src/pages/CommunityPage';
+import { findServerWithCommunityPageData } from '@answeroverflow/core/pages';
 import { sharedEnvs } from '@answeroverflow/env/shared';
-import { notFound, redirect } from 'next/navigation';
+import { CommunityPage } from '@answeroverflow/ui/pages/CommunityPage';
 import { Metadata } from 'next';
+import { notFound, redirect } from 'next/navigation';
 type Props = {
 	params: { communityId: string };
 	searchParams: {

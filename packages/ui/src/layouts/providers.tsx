@@ -1,13 +1,11 @@
 'use client';
 import { ThemeProvider } from 'next-themes';
 import React, { Suspense } from 'react';
-import {
-	AnalyticsProvider,
-	PostHogPageview,
-} from '@answeroverflow/hooks/src/analytics/client';
-import { TRPCProvider } from './trpc-provider';
-import { trpc } from '../utils/client';
+
 import { usePostHog } from 'posthog-js/react';
+import { AnalyticsProvider, PostHogPageview } from '../hooks/client';
+import { trpc } from '../utils/client';
+import { TRPCProvider } from './trpc-provider';
 
 function IdentifyUser() {
 	const { data } = trpc.auth.getSession.useQuery();

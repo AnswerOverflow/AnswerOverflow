@@ -1,11 +1,9 @@
 import { TRPCError } from '@trpc/server';
-import {
-	findIgnoredDiscordAccountById,
-	type ServerWithFlags,
-	Plan,
-} from '@answeroverflow/db';
-import type { Source, Context } from '../router/context';
+import type { Context, Source } from '../router/context';
 
+import { findIgnoredDiscordAccountById } from '@answeroverflow/core/ignored-discord-account';
+import { Plan } from '@answeroverflow/core/schema';
+import { ServerWithFlags } from '@answeroverflow/core/zod';
 import { PermissionsBitField } from './types';
 
 export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =

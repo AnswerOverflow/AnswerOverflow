@@ -2,9 +2,9 @@ import '../styles/globals.css';
 import {
 	Layout,
 	metadata as baseMetadata,
-} from '@answeroverflow/ui/src/layouts/root';
-import React from 'react';
+} from '@answeroverflow/ui/layouts/root';
 import { Metadata } from 'next';
+import React from 'react';
 export const metadata: Metadata = {
 	...baseMetadata,
 	robots: {

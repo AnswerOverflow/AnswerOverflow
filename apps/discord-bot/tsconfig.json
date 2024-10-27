@@ -1,19 +1,9 @@
 {
 	"extends": "@answeroverflow/tsconfig/base.json",
+	"include": ["src", "../../reset.d.ts"],
 	"compilerOptions": {
-		"jsx": "react",
-		"types": ["jest", "node", "@types/jest"],
-		"baseUrl": "../../",
-		"noEmitOnError": false
-	},
-	"ts-node": {
-		"transpileOnly": true
-	},
-	"include": [
-		"src",
-		"test",
-		"jest.config.ts",
-		"tsup.config.ts",
-		"../../reset.d.ts"
-	]
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"noEmit": false
+	}
 }

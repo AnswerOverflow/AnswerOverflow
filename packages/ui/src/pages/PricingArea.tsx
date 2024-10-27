@@ -1,7 +1,7 @@
 import { CheckIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
+import { GetStarted } from '../callouts';
 import { Heading } from '../ui/heading';
 import { cn } from '../utils/utils';
-import { GetStarted } from '../callouts';
 const pricing = {
 	tiers: [
 		{

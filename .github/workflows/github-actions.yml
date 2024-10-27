@@ -3,12 +3,12 @@ name: CI
 on:
   push:
     branches:
-    - main
+      - main
   pull_request:
 
 concurrency:
-    group: deploy-preview-${{ github.head_ref }}
-    cancel-in-progress: true
+  group: deploy-preview-${{ github.head_ref }}
+  cancel-in-progress: true
 
 env:
   # None of these are real secrets although this should probably be updated
@@ -25,7 +25,7 @@ env:
   DISCORD_CLIENT_ID: "123"
   DISCORD_CLIENT_SECRET: "123"
   DISCORD_TOKEN: "123"
-  ENVIRONMENT: 'discord-bot' # todo: needs to be set on a per proj level
+  ENVIRONMENT: "discord-bot" # todo: needs to be set on a per proj level
   NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
 
   # Long delay to give tests best chance at succeeding
@@ -37,64 +37,36 @@ env:
 
 jobs:
   build:
-      name: Build and Test
-      timeout-minutes: 90
-      runs-on: ubuntu-latest
+    name: Build and Test
+    timeout-minutes: 90
+    runs-on: ubuntu-latest
 
-
-      steps:
+    steps:
       - name: Checkout (GitHub)
         uses: actions/checkout@v3
 
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v3
+      - name: Setup Bun environment
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 20.4.0
+        bun-version: 1.1.29
 
-      - uses: pnpm/action-setup@v2
-        name: Install pnpm
-        id: pnpm-install
-        with:
-          version: 9.1.2
-          run_install: false
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v3
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Start containers # TODO: Use dev container docker-compose instead if possible
+      - name: Start containers
         run: docker compose -f "docker-compose.yml" -f "docker-compose-extras.yml" up -d --build
 
       - name: Install dependencies
-        # Playright is used for storybook, possible move that into package.json instead?
-        run: pnpm i && npx playwright install-deps
+        run: bun i
 
       - name: Setup Database
-        run: pnpm db:push
+        run: (cd packages/core && bun db:push)
 
       - name: Format
-        run: pnpm format:check
+        run: bun format:check
 
-      - name: Lint
-        run: pnpm lint
-
-      # Build is disabled for now, edge dbs don't work with it
+      - name: Typecheck
+        run: bun typecheck
 
       - name: Test
-        run: pnpm test
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+        run: bun test
 
       - name: Stop containers
         if: always()

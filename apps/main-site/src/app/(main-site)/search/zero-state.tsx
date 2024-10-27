@@ -1,14 +1,14 @@
-import { fetchBrowseServers } from '../../../data/browse';
-import { FollowCursor } from '@answeroverflow/ui/src/ui/follow';
-import { LinkButton } from '@answeroverflow/ui/src/ui/link-button';
-import { MessagesSearchBar } from '@answeroverflow/ui/src/messages-search-bar';
-import { ServerIcon } from '@answeroverflow/ui/src/server-icon';
-import Link from '@answeroverflow/ui/src/ui/link';
-import Marquee from 'react-fast-marquee';
-import { Suspense } from 'react';
 import type { ServerPublic } from '@answeroverflow/api';
-import { Navbar } from '@answeroverflow/ui/src/navbar';
-import { Footer } from '@answeroverflow/ui/src/footer';
+import { Footer } from '@answeroverflow/ui/footer';
+import { MessagesSearchBar } from '@answeroverflow/ui/messages-search-bar';
+import { Navbar } from '@answeroverflow/ui/navbar/index';
+import { ServerIcon } from '@answeroverflow/ui/server-icon';
+import { FollowCursor } from '@answeroverflow/ui/ui/follow';
+import { Link } from '@answeroverflow/ui/ui/link';
+import { LinkButton } from '@answeroverflow/ui/ui/link-button';
+import { Suspense } from 'react';
+import Marquee from 'react-fast-marquee';
+import { fetchBrowseServers } from '../../../data/browse';
 
 const HeroAreaText = () => {
 	return (
