@@ -41,7 +41,7 @@
 	},
 	"scripts": {
 		"with-env": "bun run dotenv -e ../../.env --",
-		"start": "bun run .",
+		"start": "bun with-env bun run .",
 		"clean": "rm -rf node_modules",
 		"typecheck": "tsc --noEmit",
 		"dev": "bun with-env bun --hot . "
