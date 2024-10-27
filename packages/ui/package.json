@@ -68,7 +68,8 @@
 		"react-wrap-balancer": "^0.4.1",
 		"schema-dts": "^1.1.2",
 		"simple-markdown": "^0.7.3",
-		"tailwind-merge": "^1.14.0"
+		"tailwind-merge": "^1.14.0",
+		"tailwindcss-animate": "^1.0.7"
 	},
 	"devDependencies": {
 		"@answeroverflow/core": "workspace:^",
