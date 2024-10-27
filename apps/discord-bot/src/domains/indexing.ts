@@ -28,7 +28,6 @@ import {
 } from '@answeroverflow/core/user-server-settings';
 import { botEnv } from '@answeroverflow/env/bot';
 import { container } from '@sapphire/framework';
-import * as Sentry from '@sentry/node';
 import {
 	extractUsersSetFromMessages,
 	messagesToAOMessagesSet,
@@ -52,10 +51,6 @@ export async function indexServers(client: Client) {
 				`Error indexing server ${guild.id} | ${guild.name}`,
 				error,
 			);
-			Sentry.withScope((scope) => {
-				scope.setExtra('guild', guild);
-				Sentry.captureException(error);
-			});
 		}
 	}
 	const indexingEndTime = Date.now();
@@ -212,10 +207,6 @@ Server: ${channel.guildId} | ${channel.guild.name}`,
 					`Error indexing thread ${thread.id} | ${thread.name}`,
 					error,
 				);
-				Sentry.withScope((scope) => {
-					scope.setExtra('thread', thread);
-					Sentry.captureException(error);
-				});
 			}
 		}
 		const lastIndexedSnowflake =
