@@ -16,17 +16,16 @@ COPY . .
 # Start a new stage for a smaller final image
 FROM oven/bun:1.1.29-slim
 
-RUN bun install
-
-
-# Make starting work
-RUN bun add -g dotenv-cli
 
 # Set working directory
 WORKDIR /usr/src/app
 
 # Copy built artifacts from builder stage
 COPY --from=builder /usr/src/app .
+
+# Make starting work
+RUN bun add -g dotenv-cli
+RUN bun install
 
 # Set environment variable
 ENV NODE_ENV=production
