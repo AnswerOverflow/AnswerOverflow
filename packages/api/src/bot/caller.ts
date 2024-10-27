@@ -4,7 +4,7 @@ import { BotRouter } from './index';
 export const botClient = createTRPCProxyClient<BotRouter>({
 	links: [
 		httpBatchLink({
-			url: 'http://localhost:2022/',
+			url: process.env.BOT_URL ?? 'http://localhost:2022/',
 		}),
 	],
 	transformer: superjson,
