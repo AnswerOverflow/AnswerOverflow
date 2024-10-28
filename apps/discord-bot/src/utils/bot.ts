@@ -74,7 +74,7 @@ export const login = async (client: SapphireClient) => {
 		);
 	} catch (error) {
 		client.logger.fatal(error);
-		await client.destroy();
-		throw error;
+		// await client.destroy();
+		// throw error;
 	}
 };
