@@ -17,7 +17,7 @@ const cachedFetch = (input: any, init?: any) =>
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-argument
 	fetch(input, {
 		...init,
-		cache: 'no-store',
+		cache: sharedEnvs.ENVIRONMENT === 'main-site' ? 'force-cache' : 'no-store',
 	});
 
 const client = new Client({
