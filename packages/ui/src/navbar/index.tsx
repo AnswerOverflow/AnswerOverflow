@@ -1,4 +1,4 @@
-import { ServerPublic } from '@answeroverflow/api';
+import { ServerPublic } from '@answeroverflow/api/router/types';
 import { GITHUB_LINK } from '@answeroverflow/constants/links';
 import React, { Suspense } from 'react';
 import { LiaSearchSolid } from 'react-icons/lia';

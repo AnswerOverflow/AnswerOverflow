@@ -46,3 +46,4 @@ dist/
 
 # Contentlayer
 .contentlayer
+.cache

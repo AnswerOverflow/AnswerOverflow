@@ -1,4 +1,4 @@
-import type { ServerPublic } from '@answeroverflow/api';
+import { ServerPublic } from '@answeroverflow/api/router/types';
 import { getMainSiteHostname } from '@answeroverflow/constants/links';
 import { ExternalLink } from 'lucide-react';
 import { FaRegMessage } from 'react-icons/fa6';

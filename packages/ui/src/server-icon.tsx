@@ -1,4 +1,4 @@
-import type { ServerPublic } from '@answeroverflow/api';
+import type { ServerPublic } from '@answeroverflow/api/router/types';
 import { Avatar, AvatarFallback, AvatarImage, AvatarProps } from './ui/avatar';
 import { getInitials } from './utils/avatars';
 import { cn } from './utils/utils';

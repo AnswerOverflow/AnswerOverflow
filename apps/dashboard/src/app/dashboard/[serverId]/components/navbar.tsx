@@ -1,5 +1,5 @@
 'use client';
-import type { ServerPublic } from '@answeroverflow/api';
+import type { ServerPublic } from '@answeroverflow/api/index';
 import { ServerIcon } from '@answeroverflow/ui/server-icon';
 import { Button } from '@answeroverflow/ui/ui/button';
 import {

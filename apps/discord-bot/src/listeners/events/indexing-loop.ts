@@ -15,10 +15,6 @@ export class Indexing extends Listener {
 		if (botEnv.INDEXING_DISABLED) {
 			return;
 		}
-		// set timeout, 3 seconds, throw error
-		setTimeout(() => {
-			throw new Error('Test error');
-		}, 3000);
 		CronJob.from({
 			// every 6 hours
 			cronTime: '0 */6 * * *',

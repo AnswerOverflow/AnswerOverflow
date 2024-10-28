@@ -1,4 +1,5 @@
 {
-	"extends": "@answeroverflow/tsconfig/base.json",
-	"include": ["src", "index.ts", "transformer.ts", "test", "../../reset.d.ts"]
+	"extends": "@answeroverflow/tsconfig/internal-package.json",
+	"include": ["src", "../../reset.d.ts"],
+	"exclude": ["node_modules"]
 }

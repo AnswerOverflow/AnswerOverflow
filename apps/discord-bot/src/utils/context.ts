@@ -1,4 +1,4 @@
-import { createBotContext } from '@answeroverflow/api';
+import { createBotContext } from '@answeroverflow/api/index';
 import type { GuildMember } from 'discord.js';
 
 export async function createMemberCtx(member: GuildMember) {

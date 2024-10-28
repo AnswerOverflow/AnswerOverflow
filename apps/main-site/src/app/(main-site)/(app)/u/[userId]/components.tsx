@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { ServerPublic } from '@answeroverflow/api';
+import { ServerPublic } from '@answeroverflow/api/router/types';
 import {
 	findLatestCommentsFromAuthor,
 	findLatestThreadsFromAuthor,

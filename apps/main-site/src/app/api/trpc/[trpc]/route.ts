@@ -1,4 +1,4 @@
-import { appRouter, createContext } from '@answeroverflow/api';
+import { appRouter, createContext } from '@answeroverflow/api/index';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 
 const handler = (req: Request) =>

@@ -1,4 +1,5 @@
-import type { APISearchResult, ServerPublic } from '@answeroverflow/api';
+import { ServerPublic } from '@answeroverflow/api/router/types';
+import { APISearchResult } from '@answeroverflow/api/utils/types';
 import { Suspense } from 'react';
 import { SearchResult } from '../message/SearchResult';
 import { MessagesSearchBar } from '../messages-search-bar';

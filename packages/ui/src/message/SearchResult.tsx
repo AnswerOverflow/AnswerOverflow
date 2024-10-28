@@ -1,4 +1,4 @@
-import type { APISearchResult } from '@answeroverflow/api';
+import type { APISearchResult } from '@answeroverflow/api/index';
 import { ServerInvite } from '../server-invite';
 import { LinkMessage } from './link-message';
 type SearchResultProps = APISearchResult[number];

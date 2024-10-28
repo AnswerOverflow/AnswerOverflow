@@ -1,4 +1,4 @@
-import type { ServerPublic } from '@answeroverflow/api';
+import type { ServerPublic } from '@answeroverflow/api/router/types';
 export function getServerHomepageUrl(server: ServerPublic) {
 	if (
 		// eslint-disable-next-line n/no-process-env

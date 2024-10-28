@@ -1,4 +1,4 @@
-import { AppRouterCaller, appRouter } from '@answeroverflow/api';
+import { AppRouterCaller, appRouter } from '@answeroverflow/api/index';
 import { createContextInner } from '@answeroverflow/api/src/router/context';
 import { Auth } from '@answeroverflow/core/auth';
 import { TRPCError } from '@trpc/server';

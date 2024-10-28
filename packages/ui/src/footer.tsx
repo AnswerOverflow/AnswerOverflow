@@ -1,4 +1,4 @@
-import type { ServerPublic } from '@answeroverflow/api';
+import type { ServerPublic } from '@answeroverflow/api/router/types';
 import {
 	DISCORD_LINK,
 	GITHUB_LINK,

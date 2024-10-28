@@ -45,6 +45,10 @@
 		"exactOptionalPropertyTypes": false,
 		"noImplicitOverride": true,
 		"outDir": "dist",
-		"baseUrl": "."
+		"baseUrl": ".",
+
+		"incremental": true,
+		"disableSourceOfProjectReferenceRedirect": true,
+		"tsBuildInfoFile": "${configDir}/.cache/tsbuildinfo.json"
 	}
 }

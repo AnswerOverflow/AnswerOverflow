@@ -10,7 +10,7 @@ export const ClientUserAvatar = dynamic(
 	},
 );
 
-import type { ServerPublic } from '@answeroverflow/api';
+import { ServerPublic } from '@answeroverflow/api/router/types';
 import { trpc } from '../utils/client';
 import { SignInButton } from './sign-in-button';
 

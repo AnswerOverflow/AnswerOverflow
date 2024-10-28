@@ -1,4 +1,4 @@
-import { type ServerPublic } from '@answeroverflow/api';
+import { type ServerPublic } from '@answeroverflow/api/router/types';
 import Image from 'next/image';
 import { ServerIcon } from './server-icon';
 import { LinkButton } from './ui/link-button';

@@ -1,5 +1,5 @@
 'use client';
-import type { ServerPublic } from '@answeroverflow/api';
+import { ServerPublic } from '@answeroverflow/api/router/types';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { LuLogOut } from 'react-icons/lu';

@@ -3,7 +3,7 @@ import {
 	type AppRouterCreate,
 	appRouter,
 	createBotContext,
-} from '@answeroverflow/api';
+} from '@answeroverflow/api/index';
 import { TRPCError } from '@trpc/server';
 import {
 	ChatInputCommandInteraction,
