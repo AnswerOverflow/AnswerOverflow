@@ -1,10 +1,5 @@
 {
 	"name": "@answeroverflow/docs",
 	"version": "0.0.1",
-	"private": true,
-	"scripts": {
-		"postinstall": "bun add -g mintlify",
-		"dev": "bun run mintlify dev",
-		"build": "bun run mintlify build"
-	}
+	"private": true
 }

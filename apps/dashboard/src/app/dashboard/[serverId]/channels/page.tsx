@@ -51,6 +51,7 @@ import {
 import * as React from 'react';
 import { toast } from 'react-toastify';
 import { useDashboardContext } from '../components/dashboard-context';
+import { Separator } from '@answeroverflow/ui/ui/separator';
 
 function ChannelIcon({
 	type,
@@ -273,7 +274,7 @@ function ChooseSolvedTagCard(props: { selectedChannel: ChannelWithFlags }) {
 	return (
 		<SettingsCard
 			title="Choose Solved Tag"
-			description="Choose the tag that will be used to mark solutions"
+			description="Pick the tag that will be applied when a message is marked as a solution"
 			disabled={props.selectedChannel.type !== ChannelType.GuildForum}
 			disabledReason="This option is only available for forum channels."
 		>
@@ -361,7 +362,7 @@ export default function ChannelsPage() {
 		return null;
 	}
 	return (
-		<div className="flex flex-col gap-8">
+		<div className="flex flex-col gap-8 max-w-[800px] mx-auto">
 			<Tabs value={'settings'} className="space-y-6 bg-background">
 				<TabsList className="w-full justify-start overflow-x-auto px-0 bg-background">
 					<div className="mr-4">
@@ -380,10 +381,12 @@ export default function ChannelsPage() {
 					</TabsTrigger>
 				</TabsList>
 				<TabsContent value="settings" className="space-y-4">
+					<Separator className="mb-4" />
+					<span className="text-base text-primary">Indexing</span>
 					<ToggleChannelFlag
 						flagKey="indexingEnabled"
 						title="Indexing Enabled"
-						description="Whether the channel is indexed"
+						description="Enable indexing of a channel, indexing can take up to 24 hours to collect initial data depending on the channel volume."
 						label="Indexing Enabled"
 						selectedChannel={selectedChannel}
 					/>
@@ -392,36 +395,40 @@ export default function ChannelsPage() {
 						title="Forum Guidelines Consent Enabled"
 						disabled={selectedChannel?.type !== ChannelType.GuildForum}
 						disabledReason="This option is only available for forum channels."
-						description="Whether the channel requires consent to post"
+						description="Mark users making posts as consenting to display their messages. If enabling, put a disclaimer in the forum guidelines that their messages will be displayed publicly."
 						label="Enabled"
 						selectedChannel={selectedChannel}
 					/>
+					<Separator className="mb-4" />
+					<div className="text-base text-primary mt-4">Mark Solution</div>
 					<ToggleChannelFlag
 						flagKey="markSolutionEnabled"
 						title="Mark Solution Enabled"
-						description="Whether the channel allows marking solutions"
+						description="Enable marking solutions to threads."
 						label="Enabled"
 						selectedChannel={selectedChannel}
 					/>
 					<ToggleChannelFlag
 						flagKey="sendMarkSolutionInstructionsInNewThreads"
 						title="Send Mark Solution Instructions in New Threads"
-						description="Whether to send mark solution instructions in new threads"
+						description="Send instructions to users on how to mark a solution in new threads."
 						label="Enabled"
 						disabled={!selectedChannel.flags.markSolutionEnabled}
 						disabledReason="This option is only available if mark solution is enabled."
 						selectedChannel={selectedChannel}
 					/>
+					<ChooseSolvedTagCard selectedChannel={selectedChannel} />{' '}
+					<Separator className="my-4" />
+					<div className="text-base text-primary">Utils</div>
 					<ToggleChannelFlag
 						flagKey="autoThreadEnabled"
 						title="Auto Thread Enabled"
-						description="Whether the channel allows auto-threading"
+						description="Automatically create threads for new messages."
 						label="Enabled"
 						disabled={selectedChannel?.type !== ChannelType.GuildText}
 						disabledReason="This option is only available for text channels."
 						selectedChannel={selectedChannel}
 					/>
-					<ChooseSolvedTagCard selectedChannel={selectedChannel} />
 				</TabsContent>
 				<TabsContent value="threads"></TabsContent>
 				<TabsContent value="analytics"></TabsContent>

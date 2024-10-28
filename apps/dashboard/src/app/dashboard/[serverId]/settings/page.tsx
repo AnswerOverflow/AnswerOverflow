@@ -16,6 +16,7 @@ import { useDashboardContext } from '../components/dashboard-context';
 import { ConfigureDomainCard } from '../components/domains';
 import { TierAccessOnly } from '../components/tier-access-only';
 import { CurrentPlanCard } from './components';
+import { BlueLink } from '@answeroverflow/ui/ui/blue-link';
 
 interface ToggleServerFlagProps {
 	title: React.ReactNode;
@@ -97,20 +98,43 @@ export default function Settings() {
 				</TierAccessOnly>
 				<ToggleServerFlag
 					title="Consider All Messages Public"
-					description="When enabled, all messages will be public."
+					description={
+						<>
+							All messages in the server will be considered public and displayed
+							on the web. Learn more about{' '}
+							<BlueLink
+								href="https://docs.answeroverflow.com/user-settings/displaying-messages"
+								target="_blank"
+							>
+								displaying messages
+							</BlueLink>
+							.
+						</>
+					}
 					flagKey="considerAllMessagesPublic"
 					label="Enabled"
 				/>
 				<ToggleServerFlag
 					flagKey="anonymizeMessages"
 					title="Anonymize Messages"
-					description="When enabled, messages will be anonymized."
+					description={
+						<>
+							Replace user names with a random name. This is closer to
+							pseudonymous as users can still join the server and search for the
+							message content.
+						</>
+					}
 					label="Enabled"
 				/>
 				<ToggleServerFlag
 					flagKey="readTheRulesConsentEnabled"
 					title="Read the Rules Consent"
-					description="When enabled, users will be required to consent to the rules before they can use the chat."
+					description={
+						<>
+							Add a consent prompt to the server rules to mark new users as
+							consenting to display their messages.
+						</>
+					}
 					label="Enabled"
 				/>
 			</div>
