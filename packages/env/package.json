@@ -1,31 +1,20 @@
 {
 	"name": "@answeroverflow/env",
-	"version": "0.1.0",
-	"files": [
-		"bot.ts",
-		"web-schema.mjs",
-		"web.ts",
-		"shared.ts",
-		"shared-schema.mjs"
-	],
-	"license": "MIT",
-	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"sideEffects": false,
+	"exports": {
+		"./*": ["./src/*.ts"]
+	},
 	"scripts": {
-		"clean": "rm -rf .turbo node_modules coverage",
-		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
-		"lint": "eslint . && tsc --noEmit",
-		"lint:fix": "eslint . --fix"
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf node_modules"
 	},
 	"dependencies": {
 		"@t3-oss/env-nextjs": "^0.6.1",
 		"zod": "^3.22.2"
 	},
 	"devDependencies": {
-		"@answeroverflow/prettier-config": "workspace:^",
-		"@answeroverflow/tsconfig": "workspace:^",
-		"@types/node": "^20.5.1",
-		"eslint": "^8.47.0",
-		"prettier": "^2.8.8"
+		"@answeroverflow/tsconfig": "workspace:*"
 	}
 }

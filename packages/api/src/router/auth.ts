@@ -1,11 +1,11 @@
-import { findManyServersById } from '@answeroverflow/db';
+import { findManyServersById } from '@answeroverflow/core/server';
+import { PermissionsBitField } from '../utils/types';
 import {
-	withDiscordAccountProcedure,
-	withUserServersProcedure,
 	publicProcedure,
 	router,
+	withDiscordAccountProcedure,
+	withUserServersProcedure,
 } from './trpc';
-import { PermissionsBitField } from '~api/utils/types';
 
 export const authRouter = router({
 	getSession: publicProcedure
@@ -71,12 +71,12 @@ export const authRouter = router({
 			const score = PermissionsBitField.has(aPermissions, 'Administrator')
 				? -1
 				: PermissionsBitField.has(bPermissions, 'Administrator')
-				? 1
-				: PermissionsBitField.has(aPermissions, 'ManageGuild')
-				? -1
-				: PermissionsBitField.has(bPermissions, 'ManageGuild')
-				? 1
-				: 0;
+					? 1
+					: PermissionsBitField.has(aPermissions, 'ManageGuild')
+						? -1
+						: PermissionsBitField.has(bPermissions, 'ManageGuild')
+							? 1
+							: 0;
 
 			if (aHasBot && bHasBot) {
 				return score;

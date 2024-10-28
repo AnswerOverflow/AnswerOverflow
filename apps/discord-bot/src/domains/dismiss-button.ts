@@ -10,7 +10,7 @@ import {
 	memberToAnalyticsUser,
 	messageToAnalyticsMessage,
 	trackDiscordEvent,
-} from '~discord-bot/utils/analytics';
+} from '../utils/analytics';
 
 export const DISMISS_BUTTON_LABEL = 'Dismiss';
 export const DISMISS_ACTION_PREFIX = 'dismiss';
@@ -52,7 +52,10 @@ export function parseDismissButtonId(customId: string) {
 const dismissErrors = ['no-permissions', 'not-allowed-to-dismiss'];
 export type DismissError = (typeof dismissErrors)[number];
 export class DismissErrorError extends Error {
-	public constructor(message: string, public readonly reason: DismissError) {
+	public constructor(
+		message: string,
+		public readonly reason: DismissError,
+	) {
 		super(message);
 	}
 }

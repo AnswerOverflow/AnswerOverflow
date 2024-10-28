@@ -1,10 +1,10 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { type ChatInputCommand, Command } from '@sapphire/framework';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { updateUserConsent } from '~discord-bot/domains/manage-account';
-import { guildTextChannelOnlyInteraction } from '~discord-bot/utils/conditions';
-import { oneTimeStatusHandler } from '~discord-bot/utils/trpc';
-import { getCommandIds } from '~discord-bot/utils/utils';
+import { updateUserConsent } from '../../domains/manage-account';
+import { guildTextChannelOnlyInteraction } from '../../utils/conditions';
+import { oneTimeStatusHandler } from '../../utils/trpc';
+import { getCommandIds } from '../../utils/utils';
 
 @ApplyOptions<Command.Options>({
 	name: 'consent',
@@ -40,6 +40,7 @@ export class ConsentCommand extends Command {
 	}
 	public override async chatInputRun(interaction: ChatInputCommandInteraction) {
 		const consented = interaction.options.getBoolean('consent') ?? true;
+
 		await guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
 			updateUserConsent({
 				member,

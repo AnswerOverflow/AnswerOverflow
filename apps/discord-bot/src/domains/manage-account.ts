@@ -1,41 +1,27 @@
-import { ButtonBuilder } from '@discordjs/builders';
 import {
 	type APIButtonComponent,
-	ActionRowBuilder,
+	ButtonBuilder,
 	ButtonStyle,
 	ChannelType,
 	ComponentType,
-	EmbedBuilder,
 	GuildMember,
-	type GuildTextBasedChannel,
 	Message,
-	type MessageActionRowComponentBuilder,
 } from 'discord.js';
+
 import {
-	type ChannelWithFlags,
-	findServerById,
-	type UserServerSettingsWithFlags,
-} from '@answeroverflow/db';
-import {
-	callAPI,
-	oneTimeStatusHandler,
-	type TRPCStatusHandler,
-} from '~discord-bot/utils/trpc';
-import { toAODiscordAccount } from '~discord-bot/utils/conversions';
-import { createMemberCtx } from '~discord-bot/utils/context';
-import {
-	type ConsentSource,
 	CONSENT_SOURCES,
+	type ConsentSource,
 	type ManageAccountSource,
 } from '@answeroverflow/api';
-import { CONSENT_BUTTON_LABEL, WEBSITE_URL } from '@answeroverflow/constants';
-import { makeRequestForConsentString } from './mark-solution';
-import type { RendererableInteractions } from '@answeroverflow/discordjs-react';
-import { isHumanMessage } from '~discord-bot/utils/utils';
-import {
-	memberToAnalyticsUser,
-	trackDiscordEvent,
-} from '~discord-bot/utils/analytics';
+import { CONSENT_BUTTON_LABEL } from '@answeroverflow/constants/discord';
+import { findServerById } from '@answeroverflow/core/server';
+import { UserServerSettingsWithFlags } from '@answeroverflow/core/utils/userServerSettingsUtils';
+import { ChannelWithFlags } from '@answeroverflow/core/zod';
+import { memberToAnalyticsUser, trackDiscordEvent } from '../utils/analytics';
+import { createMemberCtx } from '../utils/context';
+import { toAODiscordAccount } from '../utils/conversions';
+import { TRPCStatusHandler, callAPI } from '../utils/trpc';
+import { isHumanMessage } from '../utils/utils';
 
 export const CONSENT_ACTION_PREFIX = 'consent';
 
@@ -202,41 +188,4 @@ export async function updateUserServerIndexingEnabled({
 		getCtx: () => createMemberCtx(member),
 		...statusHandlers,
 	});
-}
-
-export async function sendConsentPrompt(input: {
-	channel: GuildTextBasedChannel;
-	interaction: RendererableInteractions;
-}) {
-	const { channel, interaction } = input;
-	if (!interaction.memberPermissions?.has('ManageGuild')) {
-		await oneTimeStatusHandler(
-			interaction,
-			'You are missing permissions to send a consent prompt. You need the `Manage Server` permission.',
-		);
-		return;
-	}
-	if (
-		!interaction.appPermissions?.has('SendMessages') ||
-		!interaction.appPermissions?.has('EmbedLinks')
-	) {
-		await oneTimeStatusHandler(
-			interaction,
-			'I am missing permissions to send a consent prompt. I need the `Send Messages` and `Embed Links` permissions.',
-		);
-		return;
-	}
-	const consentEmbed = new EmbedBuilder();
-	consentEmbed.setDescription(makeRequestForConsentString(channel.guild.name));
-	consentEmbed.addFields({
-		name: 'Learn more',
-		value: WEBSITE_URL,
-	});
-	const components = new ActionRowBuilder<MessageActionRowComponentBuilder>();
-	components.addComponents(makeConsentButton('manually-posted-prompt'));
-	await channel.send({
-		embeds: [consentEmbed],
-		components: [components],
-	});
-	await oneTimeStatusHandler(interaction, 'Consent prompt sent!');
 }

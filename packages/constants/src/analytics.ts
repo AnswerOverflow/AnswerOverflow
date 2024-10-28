@@ -1,9 +1,9 @@
 // eslint-disable-next-line no-restricted-imports
-import type { Channel, Server, BaseMessage } from '../../db/src/schema';
+import type { BaseMessage, Channel, Server } from '../../core/src/schema';
 // eslint-disable-next-line no-restricted-imports
-import { ServerWithFlags } from '../../db/src/zodSchemas/serverSchemas';
+import type { ChannelWithFlags } from '../../core/src/zodSchemas/channelSchemas';
 // eslint-disable-next-line no-restricted-imports
-import { ChannelWithFlags } from '../../db/src/zodSchemas/channelSchemas';
+import type { ServerWithFlags } from '../../core/src/zodSchemas/serverSchemas';
 export const NUMBER_OF_MESSAGES_FIELD_NAME = 'Number of Messages';
 export type Snowflake = string;
 

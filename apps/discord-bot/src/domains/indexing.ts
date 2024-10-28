@@ -1,38 +1,44 @@
 import {
-	bulkFindLatestMessageInChannel,
-	findChannelById,
-	findLatestArchivedTimestampByChannelId,
-	findLatestMessageIdInChannel,
-	findManyUserServerSettings,
-	upsertChannel,
-	upsertManyDiscordAccounts,
-	upsertManyMessages,
-} from '@answeroverflow/db';
-import {
 	type AnyThreadChannel,
 	ChannelType,
-	Client,
-	ForumChannel,
-	Guild,
+	type Client,
+	type ForumChannel,
+	type Guild,
 	type GuildBasedChannel,
 	type GuildTextBasedChannel,
-	Message,
-	NewsChannel,
+	type Message,
+	type NewsChannel,
 	type Snowflake,
 	type TextBasedChannel,
-	TextChannel,
+	type TextChannel,
 } from 'discord.js';
+
+import {
+	findChannelById,
+	updateChannel,
+	upsertChannel,
+} from '@answeroverflow/core/channel';
+import { upsertManyDiscordAccounts } from '@answeroverflow/core/discord-account';
+import { bulkFindLatestMessageInChannel } from '@answeroverflow/core/message';
+import { upsertManyMessages } from '@answeroverflow/core/message-node';
+import { Search } from '@answeroverflow/core/search';
+import {
+	findManyUserServerSettings,
+	upsertUserServerSettingsWithDeps,
+} from '@answeroverflow/core/user-server-settings';
+import { botEnv } from '@answeroverflow/env/bot';
+import { container } from '@sapphire/framework';
 import {
 	extractUsersSetFromMessages,
 	messagesToAOMessagesSet,
 	toAOChannel,
-} from '~discord-bot/utils/conversions';
-import { container } from '@sapphire/framework';
-import { sortMessagesById } from '@answeroverflow/discordjs-utils';
-import * as Sentry from '@sentry/node';
-import { sharedEnvs } from '@answeroverflow/env/shared';
-import { botEnv } from '@answeroverflow/env/bot';
-import { indexMessageForSearch } from '@answeroverflow/search/src';
+	toAODiscordAccount,
+} from '../utils/conversions';
+import { isSnowflakeLargerAsInt } from '../utils/snowflake';
+
+export function sortMessagesById<T extends Message>(messages: T[]) {
+	return messages.sort((a, b) => isSnowflakeLargerAsInt(a.id, b.id));
+}
 
 export async function indexServers(client: Client) {
 	const indexingStartTime = Date.now();
@@ -45,10 +51,6 @@ export async function indexServers(client: Client) {
 				`Error indexing server ${guild.id} | ${guild.name}`,
 				error,
 			);
-			Sentry.withScope((scope) => {
-				scope.setExtra('guild', guild);
-				Sentry.captureException(error);
-			});
 		}
 	}
 	const indexingEndTime = Date.now();
@@ -96,11 +98,12 @@ export async function indexRootChannel(
 	container.logger.debug(`Indexing channel ${channel.id} | ${channel.name}`);
 	if (channel.type === ChannelType.GuildForum) {
 		const maxNumberOfThreadsToCollect = botEnv.MAX_NUMBER_OF_THREADS_TO_COLLECT;
-		let threadCutoffTimestamp = await findLatestArchivedTimestampByChannelId(
-			channel.id,
-		);
-		if (sharedEnvs.NODE_ENV === 'test') {
-			threadCutoffTimestamp = null;
+		let threadCutoffId =
+			settings.lastIndexedSnowflake === '0'
+				? null
+				: settings.lastIndexedSnowflake;
+		if (botEnv.NODE_ENV === 'test') {
+			threadCutoffId = null;
 		}
 		const archivedThreads: AnyThreadChannel[] = [];
 		container.logger.debug(
@@ -114,23 +117,21 @@ export async function indexRootChannel(
 
 			const last = fetched.threads.last();
 			const isLastThreadOlderThanCutoff =
-				last?.archiveTimestamp &&
-				threadCutoffTimestamp &&
-				last.archiveTimestamp < threadCutoffTimestamp;
+				last && threadCutoffId && BigInt(last.id) < BigInt(threadCutoffId);
 			archivedThreads.push(...fetched.threads.values());
 
 			if (
 				!fetched.hasMore ||
 				!last ||
-				fetched.threads.size == 0 ||
+				fetched.threads.size === 0 ||
 				isLastThreadOlderThanCutoff
 			)
 				return;
-			await fetchAllArchivedThreads(last.archiveTimestamp ?? last.id);
+			await fetchAllArchivedThreads(last.id);
 		};
 
 		// Fetching all archived threads is very expensive, so only do it on the very first indexing pass
-		if (sharedEnvs.NODE_ENV === 'test') {
+		if (botEnv.NODE_ENV === 'test') {
 			const data = await channel.threads.fetchArchived({
 				type: 'public',
 				fetchAll: true,
@@ -161,7 +162,7 @@ export async function indexRootChannel(
 			.filter(
 				(x) => x.type === ChannelType.PublicThread && x.parentId === channel.id,
 			)
-			.slice(0, maxNumberOfThreadsToCollect);
+			.slice(0, Number(maxNumberOfThreadsToCollect) ?? 5000);
 		container.logger.debug(
 			`Pruned threads to index from ${
 				activeThreads.threads.size + archivedThreads.length
@@ -172,12 +173,16 @@ export async function indexRootChannel(
 		const mostRecentlyIndexedMessages = await bulkFindLatestMessageInChannel(
 			threadsToIndex.map((x) => x.id),
 		);
-		const threadMessageLookup = new Map<string, string>(
+		const threadMessageLookup = new Map<string, string | null>(
 			mostRecentlyIndexedMessages.map((x) => [x.channelId, x.latestMessageId]),
 		);
-		const outOfDateThreads = threadsToIndex.filter(
-			(x) => threadMessageLookup.get(x.id) !== x.lastMessageId,
-		);
+		const outOfDateThreads = threadsToIndex.filter((x) => {
+			const lookup = threadMessageLookup.get(x.id);
+			if (!lookup) {
+				return true; // either undefined or null, either way we need to index
+			}
+			return BigInt(lookup) < BigInt(x.lastMessageId ?? x.id);
+		});
 		container.logger.debug(
 			`Truncated threads to index from ${threadsToIndex.length} to ${
 				outOfDateThreads.length
@@ -193,8 +198,28 @@ Thread: ${thread.id} | ${thread.name}
 Channel: ${channel.id} | ${channel.name}
 Server: ${channel.guildId} | ${channel.guild.name}`,
 			);
-			await indexTextBasedChannel(thread, {
-				fromMessageId: threadMessageLookup.get(thread.id),
+			try {
+				await indexTextBasedChannel(thread, {
+					fromMessageId: threadMessageLookup.get(thread.id)?.toString(),
+				});
+			} catch (error) {
+				container.logger.error(
+					`Error indexing thread ${thread.id} | ${thread.name}`,
+					error,
+				);
+			}
+		}
+		const lastIndexedSnowflake =
+			outOfDateThreads
+				.sort((a, b) => (BigInt(b.id) > BigInt(a.id) ? 1 : -1))
+				.at(0)?.id ?? null;
+		if (lastIndexedSnowflake != null) {
+			await updateChannel({
+				old: null, // Indexing takes a while so we don't want to overwrite any changes made to the channel while indexing
+				update: {
+					id: channel.id,
+					lastIndexedSnowflake: lastIndexedSnowflake,
+				},
 			});
 		}
 	} else {
@@ -218,6 +243,7 @@ export async function indexTextBasedChannel(
 		skipIndexingEnabledCheck?: boolean;
 	},
 ) {
+	let start = opts?.fromMessageId;
 	if (!opts?.skipIndexingEnabledCheck) {
 		const settings = await findChannelById(
 			channel.isThread() ? channel.parentId! : channel.id,
@@ -225,13 +251,14 @@ export async function indexTextBasedChannel(
 		if (!settings?.flags?.indexingEnabled) {
 			return;
 		}
+		start = settings?.lastIndexedSnowflake?.toString();
 	}
 	if (!channel.viewable) {
 		return;
 	}
-	const start =
+	start =
 		opts?.fromMessageId ??
-		(await findLatestMessageIdInChannel(channel.id).then((x) => x));
+		(await findChannelById(channel.id))?.lastIndexedSnowflake?.toString();
 	container.logger.debug(
 		`Indexing channel ${channel.id} | ${channel.name} from message id ${
 			start ?? 'beginning'
@@ -302,18 +329,41 @@ async function storeIndexData(
 		`Upserting ${convertedUsers.length} discord accounts `,
 	);
 	await upsertManyDiscordAccounts(convertedUsers);
+	const botMessages = filteredMessages.filter((x) => x.author.bot);
+
+	const bots = [
+		...new Map(botMessages.map((x) => [x.author.id, x.author])).values(),
+	];
+	if (bots.length > 0) {
+		await Promise.all(
+			botMessages.map(async (bot) => {
+				return upsertUserServerSettingsWithDeps({
+					serverId: channel.guildId,
+					user: toAODiscordAccount(bot.author),
+					flags: {
+						canPubliclyDisplayMessages: true,
+					},
+				});
+			}),
+		);
+	}
 	container.logger.debug(`Upserting channel: ${channel.id}`);
+	const lastIndexedSnowflake =
+		messages.sort((a, b) => (BigInt(b.id) > BigInt(a.id) ? 1 : -1)).at(0)?.id ??
+		'0';
+
 	await upsertChannel({
 		create: {
 			...toAOChannel(channel),
 		},
 		update: {
 			archivedTimestamp: toAOChannel(channel).archivedTimestamp,
+			lastIndexedSnowflake,
 		},
 	});
 	container.logger.debug(`Upserting ${convertedMessages.length} messages`);
 	const upserted = await upsertManyMessages(convertedMessages);
-	await indexMessageForSearch(upserted);
+	await Search.indexMessageForSearch(upserted);
 }
 
 type MessageFetchOptions = {
@@ -355,6 +405,9 @@ export async function fetchAllMessages(
 	channel: TextBasedChannel,
 	opts: MessageFetchOptions = {},
 ) {
+	if (channel.isDMBased()) {
+		throw new Error('Cannot fetch messages from a DM channel');
+	}
 	const { start, limit = botEnv.MAX_NUMBER_OF_MESSAGES_TO_COLLECT } = opts;
 	const messages: Message[] = [];
 	if (channel.lastMessageId && start == channel.lastMessageId) {
@@ -378,12 +431,12 @@ export async function fetchAllMessages(
 		if (
 			message &&
 			(limit === undefined ||
-				messages.length + approximateThreadMessageCount < limit)
+				messages.length + approximateThreadMessageCount < Number(limit))
 		) {
 			await asyncMessageFetch(message.id);
 		}
 	};
 
 	await asyncMessageFetch(start ?? '0');
-	return messages.slice(0, limit);
+	return messages.slice(0, Number(limit));
 }

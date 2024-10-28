@@ -1,20 +1,34 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-import * as Sentry from '@sentry/node';
-
-// Importing @sentry/tracing patches the global hub for tracing to work.
-import '@sentry/tracing';
-import { sharedEnvs } from '@answeroverflow/env/shared';
-
-Sentry.init({
-	dsn: sharedEnvs.NEXT_PUBLIC_SENTRY_DSN,
-
-	// Set tracesSampleRate to 1.0 to capture 100%
-	// of transactions for performance monitoring.
-	// We recommend adjusting this value in production
-	tracesSampleRate: 0.1,
-});
-
+import { botRouter } from '@answeroverflow/api/src/bot';
+import { SapphireClient } from '@sapphire/framework';
+import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { createClient, login } from './utils/bot';
+// make TypeScript happy
+declare global {
+	var client: SapphireClient;
+}
 
-const client = createClient();
-void login(client);
+const port = parseInt(process.env.PORT ?? '2022');
+
+if (!global.client) {
+	global.client = createClient();
+	await login(global.client);
+
+	createHTTPServer({
+		router: botRouter,
+		onError:
+			process.env.NODE_ENV === 'development'
+				? ({ path, error }) => {
+						console.error(
+							`❌ tRPC failed on ${path ?? '<no-path>'}: ${error.message}`,
+						);
+					}
+				: undefined,
+		createContext() {
+			return {
+				client: global.client,
+			};
+		},
+	}).listen(port);
+} else {
+	console.log('Reloading client');
+}

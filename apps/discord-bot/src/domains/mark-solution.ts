@@ -6,37 +6,36 @@ import {
 	ChannelType,
 	DiscordAPIError,
 	EmbedBuilder,
-	ForumChannel,
 	Message,
 	type MessageActionRowComponentBuilder,
-	NewsChannel,
-	TextChannel,
+	PermissionResolvable,
 	User,
 } from 'discord.js';
-import type { ChannelWithFlags } from '@answeroverflow/db';
+
 import { makeConsentButton } from './manage-account';
-import {
-	findChannelById,
-	findFullMessageById,
-	findServerById,
-	ServerWithFlags,
-	upsertMessage,
-} from '@answeroverflow/db';
+
 import {
 	ANSWER_OVERFLOW_BLUE_HEX,
 	PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED,
-} from '@answeroverflow/constants';
+} from '@answeroverflow/constants/discord';
+import { findChannelById } from '@answeroverflow/core/channel';
+import { findFullMessageById } from '@answeroverflow/core/message';
+import { upsertMessage } from '@answeroverflow/core/message-node';
+import { findServerById } from '@answeroverflow/core/server';
+import { ChannelWithFlags, ServerWithFlags } from '@answeroverflow/core/zod';
 import {
-	type QuestionSolvedProps,
+	QuestionSolvedProps,
 	channelWithDiscordInfoToAnalyticsData,
 	memberToAnalyticsUser,
 	messageToAnalyticsMessage,
 	serverWithDiscordInfoToAnalyticsData,
 	threadWithDiscordInfoToAnalyticsData,
 	trackDiscordEvent,
-} from '~discord-bot/utils/analytics';
-import { toAOMessage } from '~discord-bot/utils/conversions';
-import { indexTextBasedChannel } from '~discord-bot/domains/indexing';
+} from '../utils/analytics';
+import { toAOMessage } from '../utils/conversions';
+import { RootChannel } from '../utils/utils';
+import { indexTextBasedChannel } from './indexing';
+
 const markSolutionErrorReasons = [
 	'NOT_IN_GUILD',
 	'NOT_IN_THREAD',
@@ -50,6 +49,9 @@ const markSolutionErrorReasons = [
 	'ALREADY_SOLVED_VIA_TAG',
 	'ALREADY_SOLVED_VIA_EMOJI',
 ] as const;
+
+const PUBG_MOBILE_SERVER_ID = '393088095840370689';
+
 export type MarkSolutionErrorReason = (typeof markSolutionErrorReasons)[number];
 export class MarkSolutionError extends Error {
 	constructor(
@@ -63,6 +65,7 @@ export class MarkSolutionError extends Error {
 export async function checkIfCanMarkSolution(
 	possibleSolution: Message,
 	userMarkingAsSolved: User,
+	isChangingSolution: boolean = false,
 ) {
 	const guild = possibleSolution.guild;
 	if (!guild)
@@ -135,10 +138,19 @@ export async function checkIfCanMarkSolution(
 	const guildMember = await guild.members.fetch(userMarkingAsSolved.id);
 	if (questionMessage.author.id !== userMarkingAsSolved.id) {
 		const doesUserHavePerms = PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.some(
-			(permission) => threadParent.permissionsFor(guildMember).has(permission),
+			(permission) =>
+				threadParent
+					.permissionsFor(guildMember)
+					?.has(permission as PermissionResolvable),
 		);
 
-		if (!doesUserHavePerms) {
+		// temp code for valorant server
+		const roleIdAllowedToMarkAsSolved = '684140826762149923';
+		const isUserInRole = guildMember.roles.cache.has(
+			roleIdAllowedToMarkAsSolved,
+		);
+
+		if (!doesUserHavePerms && !isUserInRole) {
 			throw new MarkSolutionError(
 				'NO_PERMISSION',
 				`You don't have permission to mark this question as solved. Only the thread author or users with the permissions ${PERMISSIONS_ALLOWED_TO_MARK_AS_SOLVED.join(
@@ -148,12 +160,14 @@ export async function checkIfCanMarkSolution(
 		}
 	}
 
-	// Check if the question is already solved
-	await assertMessageIsUnsolved(
-		thread,
-		questionMessage,
-		channelSettings.solutionTagId,
-	);
+	if (!isChangingSolution) {
+		// Check if the question is already solved
+		await assertMessageIsUnsolved(
+			thread,
+			questionMessage,
+			channelSettings.solutionTagId,
+		);
+	}
 	return {
 		question: questionMessage,
 		solution: possibleSolution,
@@ -188,7 +202,7 @@ export async function assertMessageIsUnsolved(
 
 	// 3. Look at the message history to see if it contains the solution message from the Answer Overflow Bot
 
-	// This is more of a backup, so we only do the cached falues
+	// This is more of a backup, so we only do the cached values
 	const existingMessage = await findFullMessageById(questionMessage.id);
 
 	const isAlreadySolved = existingMessage
@@ -205,10 +219,18 @@ export async function assertMessageIsUnsolved(
 
 export async function addSolvedIndicatorToThread(
 	thread: AnyThreadChannel,
-	parentChannel: TextChannel | ForumChannel | NewsChannel,
+	parentChannel: RootChannel,
 	questionMessage: Message,
 	solvedTagId: string | null,
 ) {
+	// special override for PUBG Mobile server
+	if (thread.guildId === PUBG_MOBILE_SERVER_ID && solvedTagId) {
+		await thread.setAppliedTags(
+			[solvedTagId],
+			'Question Solved, clearing all existing tags & setting solved tag.',
+		);
+		return;
+	}
 	// Apply the solved tag if it exists and it is a forum channel, otherwise add a checkmark reaction as a fallback
 	if (
 		parentChannel.type == ChannelType.GuildForum &&
@@ -241,10 +263,16 @@ export function makeMarkSolutionResponse({
 }) {
 	const components = new ActionRowBuilder<MessageActionRowComponentBuilder>();
 	const embed = new EmbedBuilder()
-		.addFields({
-			name: 'Learn more',
-			value: 'https://answeroverflow.com',
-		})
+		.addFields(
+			server.customDomain
+				? []
+				: [
+						{
+							name: 'Learn more',
+							value: 'https://answeroverflow.com',
+						},
+					],
+		)
 		.setColor(ANSWER_OVERFLOW_BLUE_HEX);
 
 	if (
@@ -331,7 +359,26 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 				'Answer Overflow Account Id': solver.id,
 			};
 		});
-		await solution.react('✅');
+		try {
+			await solution.react('✅');
+		} catch {
+			console.log('Could not react to solution message');
+		}
+		// wait 5 minutes then set the thread to archived
+		// TODO: Move this to a remote queue so it survives restarts
+		setTimeout(
+			() => {
+				if (
+					thread?.permissionsFor(thread.client.id!)?.has('ManageThreads') &&
+					thread.guildId !== PUBG_MOBILE_SERVER_ID
+				) {
+					void thread.setArchived(true);
+				} else {
+					console.log('Could not archive thread, missing permissions');
+				}
+			},
+			5 * 60 * 1000,
+		);
 	};
 	void nonBlockingUpdates();
 	const { embed, components } = makeMarkSolutionResponse({

@@ -32,11 +32,6 @@ tsbuildinfo
 .DS_Store
 *.pem
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
 dist/
 # local env files
 !.env.example
@@ -49,4 +44,5 @@ dist/
 # turbo
 .turbo
 
-.pnpm-store/
+# Contentlayer
+.contentlayer

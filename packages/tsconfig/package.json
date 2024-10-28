@@ -1,0 +1,12 @@
+{
+	"name": "@answeroverflow/tsconfig",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"clean": "rm -rf node_modules"
+	},
+	"dependencies": {
+		"@tsconfig/node20": "20.1.4"
+	},
+	"files": ["base.json", "nextjs.json", "react-library.json"]
+}

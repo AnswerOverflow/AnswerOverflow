@@ -1,7 +1,8 @@
+import { findServerById } from '@answeroverflow/core/server';
+import { botEnv } from '@answeroverflow/env/bot';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
 import { ChannelType, DiscordAPIError, Events } from 'discord.js';
-import { findServerById, getDefaultServerWithFlags } from '@answeroverflow/db';
 import {
 	channelWithDiscordInfoToAnalyticsData,
 	memberToAnalyticsUser,
@@ -9,9 +10,7 @@ import {
 	serverWithDiscordInfoToAnalyticsData,
 	threadWithDiscordInfoToAnalyticsData,
 	trackDiscordEvent,
-} from '~discord-bot/utils/analytics';
-import { delay } from '@answeroverflow/discordjs-mock';
-import { botEnv } from '@answeroverflow/env/bot';
+} from '../../utils/analytics';
 
 @ApplyOptions<Listener.Options>({ event: Events.ClientReady })
 export class QuestionAskedListener extends Listener<Events.ClientReady> {
@@ -31,7 +30,8 @@ export class QuestionAskedListener extends Listener<Events.ClientReady> {
        */
 			const fetchAfterDelay = async (time: number) => {
 				try {
-					if (botEnv.NODE_ENV !== 'test') await delay(time);
+					if (botEnv.NODE_ENV !== 'test')
+						await new Promise((resolve) => setTimeout(resolve, time));
 					return await thread.fetchStarterMessage();
 				} catch (error) {
 					if (!(error instanceof DiscordAPIError && error.status === 404))
@@ -66,8 +66,7 @@ export class QuestionAskedListener extends Listener<Events.ClientReady> {
 						'Answer Overflow Account Id': questionAsker.id,
 						...serverWithDiscordInfoToAnalyticsData({
 							guild: thread.guild,
-							serverWithSettings:
-								server || getDefaultServerWithFlags(thread.guild),
+							serverWithSettings: server!,
 						}),
 						...channelWithDiscordInfoToAnalyticsData({
 							answerOverflowChannel: channelSettings,

@@ -1,3 +1,13 @@
+import { Auth } from '@answeroverflow/core/auth';
+import { ReactionWithRelations } from '@answeroverflow/core/schema';
+import { BaseMessageWithRelations as AOMessage } from '@answeroverflow/core/schema';
+import {
+	Channel as AOChannel,
+	DiscordAccount as AODiscordAccount,
+	Server as AOServer,
+} from '@answeroverflow/core/schema';
+import { getDefaultChannelWithFlags } from '@answeroverflow/core/utils/channelUtils';
+import { getDefaultServer } from '@answeroverflow/core/utils/serverUtils';
 import {
 	type AnyThreadChannel,
 	Guild,
@@ -7,20 +17,10 @@ import {
 	Message,
 	User,
 } from 'discord.js';
-import {
-	type Server as AOServer,
-	type Channel as AOChannel,
-	type DiscordAccount as AODiscordAccount,
-	ReactionWithRelations,
-} from '@answeroverflow/db/src/schema';
-import { type BaseMessageWithRelations as AOMessage } from '@answeroverflow/db';
-import type { DiscordAPIServerSchema } from '@answeroverflow/cache';
-import { getDefaultServer } from '@answeroverflow/db/src/utils/serverUtils';
-import { getDefaultChannelWithFlags } from '@answeroverflow/db/src/utils/channelUtils';
 
 export function toDiscordAPIServer(
 	member: GuildMember,
-): DiscordAPIServerSchema {
+): Auth.DiscordAPIServerSchema {
 	const guild = member.guild;
 	return {
 		id: guild.id,
@@ -95,7 +95,7 @@ export async function toAOMessage(message: Message): Promise<AOMessage> {
 						text: embed.footer.text,
 						iconUrl: embed.footer.iconURL ?? undefined,
 						proxyIconUrl: embed.footer.proxyIconURL ?? undefined,
-				  }
+					}
 				: undefined,
 			image: embed.image
 				? {
@@ -103,7 +103,7 @@ export async function toAOMessage(message: Message): Promise<AOMessage> {
 						proxyUrl: embed.image.proxyURL ?? undefined,
 						height: embed.image.height ?? undefined,
 						width: embed.image.width ?? undefined,
-				  }
+					}
 				: undefined,
 			video: embed.video
 				? {
@@ -111,13 +111,13 @@ export async function toAOMessage(message: Message): Promise<AOMessage> {
 						width: embed.video.width ?? undefined,
 						url: embed.video.url,
 						proxyUrl: embed.video.proxyURL ?? undefined,
-				  }
+					}
 				: undefined,
 			provider: embed.provider
 				? {
 						name: embed.provider.name ?? undefined,
 						url: embed.provider.url ?? undefined,
-				  }
+					}
 				: undefined,
 			thumbnail: embed.thumbnail
 				? {
@@ -125,7 +125,7 @@ export async function toAOMessage(message: Message): Promise<AOMessage> {
 						proxyUrl: embed.thumbnail.proxyURL ?? undefined,
 						height: embed.thumbnail.height ?? undefined,
 						width: embed.thumbnail.width ?? undefined,
-				  }
+					}
 				: undefined,
 			author: embed.author
 				? {
@@ -133,7 +133,7 @@ export async function toAOMessage(message: Message): Promise<AOMessage> {
 						url: embed.author.url ?? undefined,
 						iconUrl: embed.author.iconURL ?? undefined,
 						proxyIconUrl: embed.author.proxyIconURL ?? undefined,
-				  }
+					}
 				: undefined,
 			fields: embed.fields.map((field) => ({
 				name: field.name,
@@ -158,9 +158,16 @@ export function toAODiscordAccount(user: User): AODiscordAccount {
 	const convertedUser: AODiscordAccount = {
 		id: user.id,
 		avatar: user.avatar,
-		name: user.username,
+		name: user.displayName,
 	};
 	return convertedUser;
+}
+
+export function getMemberCount(guild: Guild) {
+	const aprox = guild.approximateMemberCount;
+	const actual = guild.memberCount;
+	if (aprox && aprox > actual) return aprox;
+	return actual;
 }
 
 export function toAOServer(guild: Guild) {
@@ -170,6 +177,8 @@ export function toAOServer(guild: Guild) {
 		icon: guild.icon,
 		description: guild.description,
 		vanityInviteCode: guild.vanityURLCode,
+		approximateMemberCount:
+			getMemberCount(guild) > 0 ? getMemberCount(guild) : undefined,
 	});
 }
 

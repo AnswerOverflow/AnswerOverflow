@@ -1,16 +1,15 @@
 export type { AppRouter } from './src/router';
-export { appRouter as appRouter, botRouter as botRouter } from './src/router';
-
+export { appRouter as appRouter } from './src/router';
 export {
 	createContext as createContext,
 	createBotContext as createBotContext,
-} from '~api/router/context';
-export type { Context, BotContextCreate } from '~api/router/context';
+} from './src/router/context';
+export type { Context, AppRouterCreate } from './src/router/context';
 
 export * from './src/utils/types';
-export * from './src/router/server/types';
-export * from './src/router/user-server-settings/types';
-export type { User } from '@answeroverflow/db';
+export * from './src/router/types';
+export * from './src/router/user-server-settings-types';
+export type { User } from '@answeroverflow/core/schema';
 export type {
 	VercelDomainVerificationResponse,
 	DomainVerificationStatusProps,

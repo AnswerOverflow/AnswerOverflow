@@ -1,19 +1,10 @@
 import { TRPCError } from '@trpc/server';
-import {
-	type ChannelWithFlags,
-	findIgnoredDiscordAccountById,
-	getDefaultDiscordAccount,
-	type MessageFull,
-	type MessageWithDiscordAccount,
-	type ServerWithFlags,
-	zChannelPublic,
-	zServerPublic,
-	Plan,
-} from '@answeroverflow/db';
-import type { Source, Context } from '~api/router/context';
-import type { DiscordAPIServerSchema } from '@answeroverflow/cache';
+import type { Context, Source } from '../router/context';
+
+import { findIgnoredDiscordAccountById } from '@answeroverflow/core/ignored-discord-account';
+import { Plan } from '@answeroverflow/core/schema';
+import { ServerWithFlags } from '@answeroverflow/core/zod';
 import { PermissionsBitField } from './types';
-import { getDefaultMessage } from '@answeroverflow/db/src/utils/message-default';
 
 export const MISSING_PERMISSIONS_TO_EDIT_SERVER_MESSAGE =
 	'You are missing the required permissions to do this';
@@ -146,7 +137,9 @@ export function assertIsOnPlan(server: ServerWithFlags, plans: Plan[]) {
 	if (!plans.some((plan) => plan === server.plan)) {
 		return new TRPCError({
 			code: 'FORBIDDEN',
-			message: 'You are not on the correct plan to do this',
+			message: `You are not on the correct plan to do this. You are on the ${
+				server.plan
+			} plan, but you need to be on the ${plans.join(' or ')} plan`,
 		});
 	}
 	return;
@@ -269,89 +262,4 @@ export function isCtxSourceDiscordBot(ctx: Context) {
 
 export function assertCanEditServerBotOnly(ctx: Context, serverId: string) {
 	return [assertCanEditServer(ctx, serverId), isCtxSourceDiscordBot(ctx)];
-}
-
-export const canUserViewPrivateMessage = (
-	userServers: DiscordAPIServerSchema[] | null,
-	message: MessageFull | MessageWithDiscordAccount,
-) => userServers?.find((s) => s.id === message.serverId);
-
-export function stripPrivatePartialMessageData(
-	message: MessageWithDiscordAccount,
-	userServers: DiscordAPIServerSchema[] | null,
-): MessageFull | MessageWithDiscordAccount {
-	if (canUserViewPrivateMessage(userServers, message)) {
-		return message;
-	}
-	const defaultAuthor = getDefaultDiscordAccount({
-		id: '0',
-		name: 'Unknown User',
-	});
-	const defaultMessage = getDefaultMessage({
-		channelId: message.channelId,
-		serverId: message.serverId,
-		authorId: defaultAuthor.id,
-		parentChannelId: message.parentChannelId,
-		id: message.id,
-		childThreadId: null,
-	});
-
-	return {
-		...defaultMessage,
-		author: defaultAuthor,
-		attachments: [],
-		embeds: [],
-		public: false,
-	};
-}
-
-// Kind of ugly having it take in two different types, but it's the easiest way to do it
-export function stripPrivateFullMessageData(
-	message: MessageFull,
-	userServers: DiscordAPIServerSchema[] | null,
-): MessageFull {
-	const defaultAuthor = getDefaultDiscordAccount({
-		id: '0',
-		name: 'Unknown User',
-	});
-	const defaultMessage = getDefaultMessage({
-		channelId: message.channelId,
-		serverId: message.serverId,
-		authorId: defaultAuthor.id,
-		parentChannelId: message.parentChannelId,
-		id: message.id,
-		childThreadId: null,
-	});
-
-	const reply = message.reference
-		? stripPrivatePartialMessageData(message.reference, userServers)
-		: null;
-
-	const solutions = message.solutions.map((solution) =>
-		stripPrivatePartialMessageData(solution, userServers),
-	);
-	if (message.public || canUserViewPrivateMessage(userServers, message)) {
-		return {
-			...message,
-			reference: reply,
-			solutions,
-		};
-	}
-	return {
-		...defaultMessage,
-		author: defaultAuthor,
-		public: false,
-		attachments: [],
-		embeds: [],
-		reference: reply,
-		solutions: solutions,
-	};
-}
-
-export function stripPrivateChannelData(channel: ChannelWithFlags) {
-	return zChannelPublic.parse(channel);
-}
-
-export function stripPrivateServerData(server: ServerWithFlags) {
-	return zServerPublic.parse(server);
 }

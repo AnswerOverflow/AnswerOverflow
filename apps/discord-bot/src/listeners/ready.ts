@@ -1,3 +1,4 @@
+import { botEnv } from '@answeroverflow/env/bot';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener, Store } from '@sapphire/framework';
 import {
@@ -9,9 +10,8 @@ import {
 	white,
 	yellow,
 } from 'colorette';
-import { sharedEnvs } from '@answeroverflow/env/shared';
 
-const dev = sharedEnvs.NODE_ENV !== 'production';
+const dev = botEnv.NODE_ENV !== 'production';
 
 @ApplyOptions<Listener.Options>({ once: true })
 export class UserEvent extends Listener {
@@ -43,7 +43,7 @@ export class UserEvent extends Listener {
 				dev
 					? ` ${pad}${blc('<')}${llc('/')}${blc('>')} ${llc(
 							'DEVELOPMENT MODE',
-					  )}`
+						)}`
 					: ''
 			}
 		`.trim(),

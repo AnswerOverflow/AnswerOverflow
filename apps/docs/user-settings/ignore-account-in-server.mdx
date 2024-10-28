@@ -1,0 +1,15 @@
+It's important to provide flexibility for users who want to opt out of indexing their account in the server, in order to do this, they are able to from discord use the `/manage-account` slash command and click on the **Ignore account in server** button to disable indexing of their account in the server.
+
+
+<Warning>
+	This is a destructive action, it will:
+  - Remove all stored messages of your
+	account in the server
+  - Not index future messages of your account in the
+	server
+  - Not track analytics events of your account in the server
+</Warning>
+
+## Restoring account in server
+
+If a user wants to restore their account, they can use the `/manage-account` slash command and click on the **Stop ignoring account in server** button again to re-enable indexing of their account in the server. It will take some time for your messages to be re-indexed in the server and for analytics events to start being tracked again.

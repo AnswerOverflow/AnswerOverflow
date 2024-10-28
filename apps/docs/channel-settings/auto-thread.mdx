@@ -1,0 +1,39 @@
+
+## Demo
+
+
+<iframe
+  width="560"
+  height="315"
+  src="https://www.youtube.com/embed/3pGDHWke6Wg?si=LebqYaneEoALgPe5"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowfullscreen
+>
+</iframe>
+
+<TryLiveDemo />
+
+## Why auto thread is useful
+
+It's extremely hard to index content in a regular text channel with no threads as it lacks an indication of where the conversation starts and ends. Auto Thread creates a thread for every message in a channel, making it easier to keep discussions on track. You may want to use this in a channel where you want a lighter weight version of a forum channel.
+
+
+<Note>
+	While Answer Overflow supports indexing threaded channels, we recommend using
+	[forum
+	channels](https://support.discord.com/hc/en-us/articles/6208479917079-Forum-Channels-FAQ)
+	instead as they are better suited for indexing.
+</Note>
+
+## How it works:
+
+- When a user posts a message, the bot will automatically create a thread for that message
+- The thread name will be in the format of `[Nickname]-[Message Content...]` to a length of 50 characters for the title
+
+## Recommendations:
+
+To get the most out of this feature, we recommend:
+
+- Set [slow mode](https://support.discord.com/hc/en-us/articles/360016150952-Slowmode-Slllooowwwiiinng-down-your-channel) to at least 1 minute to prevent users from spamming threads

@@ -1,13 +1,5 @@
-import { createBotContext, botRouter } from '@answeroverflow/api';
+import { createBotContext } from '@answeroverflow/api';
 import type { GuildMember } from 'discord.js';
-
-export async function createUnauthenticatedCtx() {
-	const ctx = await createBotContext({
-		session: null,
-		userServers: undefined,
-	});
-	return botRouter.createCaller(ctx);
-}
 
 export async function createMemberCtx(member: GuildMember) {
 	const guild = member.guild;
@@ -16,7 +8,7 @@ export async function createMemberCtx(member: GuildMember) {
 		discordAccount: {
 			avatar: member.displayAvatarURL(),
 			discriminator: member.user.discriminator,
-			username: member.user.username,
+			username: member.user.displayName,
 			id: member.id,
 		},
 		// The only server that we care about is the one we are currently interacting with, so only having 1 server makes sense here

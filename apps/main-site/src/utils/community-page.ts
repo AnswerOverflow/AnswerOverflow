@@ -1,27 +1,42 @@
-import { findQuestionsForSitemap } from '@answeroverflow/db';
-import { Sitemap } from './sitemap';
 import { ServerResponse } from 'http';
+import {
+	findQuestionsForSitemapCached,
+	getDate,
+} from '@answeroverflow/core/sitemap';
+import { Sitemap } from '@answeroverflow/utils/sitemap';
 
 export async function addCommunityQuestionsToSitemap(input: {
 	communityId: string;
 	sitemap: Sitemap;
 }) {
 	console.log(`Generating sitemap for community ${input.communityId}`);
-	const lookup = await findQuestionsForSitemap(input.communityId);
+	const lookup = await findQuestionsForSitemapCached(input.communityId);
 	if (!lookup) return;
 	const { questions, server } = lookup;
 
+	let largestTimestamp = -1;
 	input.sitemap.addMany(
-		questions.map(({ thread }) => ({
-			loc: `/m/${thread.id}`,
-			changefreq: thread.archivedTimestamp ? 'weekly' : 'daily',
-			priority: 0.9,
-		})),
+		questions.map(({ thread }) => {
+			if (
+				thread.archivedTimestamp &&
+				thread.archivedTimestamp > largestTimestamp
+			)
+				largestTimestamp = Number(thread.archivedTimestamp);
+			return {
+				loc: `/m/${thread.id}`,
+				// We really don't expect archived threads to be updated
+				priority: 0.9,
+				lastmod: thread.archivedTimestamp
+					? new Date(Number(thread.archivedTimestamp))
+					: getDate(thread.id),
+			};
+		}),
 	);
+
 	if (!server.customDomain) {
 		input.sitemap.add({
 			loc: `/c/${input.communityId}`, // Community page
-			changefreq: 'weekly',
+			lastmod: largestTimestamp === -1 ? undefined : new Date(largestTimestamp),
 			priority: 1,
 		});
 	}

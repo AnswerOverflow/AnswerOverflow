@@ -1,10 +1,7 @@
+import { Auth } from '@answeroverflow/core/auth';
 import type { NextApiRequest, NextApiResponse } from 'next';
 // eslint-disable-next-line no-restricted-imports
-import { setCookie } from '../../../../../node_modules/next-auth/next/utils';
-import {
-	getTenantCookieName,
-	getTenantCookieOptions,
-} from '@answeroverflow/auth';
+import { setCookie } from '../../../../../../../node_modules/next-auth/next/utils';
 
 export default function handler(
 	req: NextApiRequest,
@@ -19,8 +16,8 @@ export default function handler(
 	}
 	// set the answeroverflow.tenant.token cookie
 	setCookie(res, {
-		name: getTenantCookieName(),
-		options: getTenantCookieOptions(),
+		name: Auth.getTenantCookieName(),
+		options: Auth.getTenantCookieOptions(),
 		value: token as string,
 	});
 	// redirect to the original redirect

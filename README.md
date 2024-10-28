@@ -10,7 +10,7 @@
 
 <div align="center">
   <h3>Index your discord help channels to google<br /></h3>
-  <a href="https://github.com/AnswerOverflow/AnswerOverflow/blob/main/LICENSE">
+  <a href="https://github.com/AnswerOverflow/AnswerOverflow/blob/main/LICENSE.md">
     <img alt="AGPL License" src="https://img.shields.io/github/license/AnswerOverflow/AnswerOverflow" />
   </a>
   <a href="https://discord.gg/Wny38ap7Tx">
@@ -73,10 +73,6 @@ Answer Overflow lets you index your Discord help channels into Google so that yo
 - 📥&nbsp; Automatically redirecting people to correct help channels
 - 💖&nbsp; Link the GitHub sponsors page of a person who solves the question
 - 📋&nbsp; Question templates
-
-## Quickstart
-
-Go to [Answer Overflow](https://www.answeroverflow.com/), add the bot your server, and use /channel-settings to get started
 
 ## Star History
 

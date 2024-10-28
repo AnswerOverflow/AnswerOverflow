@@ -1,66 +1,7 @@
 {
 	"$schema": "https://turborepo.org/schema.json",
-	"pipeline": {
-		"init": {},
-		"migrate": {},
-		"build": {
-			"outputs": ["dist/**", ".next/**"],
-			"cache": true,
-			"inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts"]
-		},
-		"format": {
-			"inputs": [
-				"./packages/config/prettier/**/*",
-				"src/**/*.tsx",
-				"src/**/*.ts",
-				"test/**/*.ts"
-			],
-			"outputs": [],
-			"cache": false
-		},
-		"format:check": {
-			"outputs": [],
-			"cache": true
-		},
-		"lint": {
-			"inputs": [
-				"./packages/config/eslint-config-custom/**/*",
-				"src/**/*.tsx",
-				"src/**/*.ts",
-				"test/**/*.ts"
-			],
-			"outputs": [],
-			"cache": true
-		},
-		"lint:fix": {
-			"outputs": [],
-			"cache": false
-		},
-		"test": {
-			"outputs": ["coverage/**"],
-			"cache": false,
-			"inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts"]
-		},
-		"dev": {
-			"cache": false
-		},
-		"clean": {
-			"cache": false
-		},
-		"db:wipe": {
-			"cache": false
-		},
-		"db:push": {
-			"cache": false
-		},
-		"db:push:staging": {
-			"cache": false
-		},
-		"db:introspect": {
-			"cache": false
-		}
-	},
 	"globalDependencies": [".env.local"],
+	"ui": "tui",
 	"globalEnv": [
 		"PORT",
 		"VERCEL_URL",
@@ -75,7 +16,7 @@
 		"ELASTICSEARCH_MESSAGE_INDEX",
 		"REDIS_URL",
 		"ELASTICSEARCH_CLOUD_ID",
-    "NEXT_PUBLIC_GA_MEASUREMENT_ID",
+		"NEXT_PUBLIC_GA_MEASUREMENT_ID",
 		"DISCORD_CLIENT_ID",
 		"DISCORD_CLIENT_SECRET",
 		"SKIP_ENV_VALIDATION",
@@ -98,11 +39,34 @@
 		"POSTHOG_PERSONAL_API_KEY",
 		"POSTHOG_PROJECT_ID",
 		"LADLE",
-    "ENVIRONMENT",
-    "NEXT_PUBLIC_SENTRY_DSN",
-    "STRIPE_CHECKOUT_URL",
-    "STRIPE_ENTERPRISE_PLAN_PRICE_ID",
-    "NEXT_PUBLIC_SENTRY_DSN",
-    "VERCEL_GIT_COMMIT_SHA"
-	]
+		"ENVIRONMENT",
+		"NEXT_PUBLIC_SENTRY_DSN",
+		"STRIPE_CHECKOUT_URL",
+		"STRIPE_ENTERPRISE_PLAN_PRICE_ID",
+		"NEXT_PUBLIC_SENTRY_DSN",
+		"VERCEL_GIT_COMMIT_SHA",
+		"AXIOM_API_KEY",
+		"PROJECT_ID_VERCEL",
+		"AUTH_BEARER_TOKEN_VERCEL",
+		"TEAM_ID_VERCEL",
+		"BUCKET_NAME",
+		"IAM_USER_KEY",
+		"IAM_USER_SECRET"
+	],
+	"tasks": {
+		"init": {},
+		"migrate": {},
+		"dev": {
+			"cache": false
+		},
+		"build:prod": {
+			"cache": true
+		},
+		"start": {
+			"cache": false
+		},
+		"typecheck": {
+			"cache": true
+		}
+	}
 }

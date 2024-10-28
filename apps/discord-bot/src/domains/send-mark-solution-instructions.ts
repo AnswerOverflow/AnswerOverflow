@@ -1,4 +1,3 @@
-import { type ChannelWithFlags, findServerById } from '@answeroverflow/db';
 import {
 	ActionRowBuilder,
 	EmbedBuilder,
@@ -7,6 +6,9 @@ import {
 	type MessageActionRowComponentBuilder,
 	ThreadChannel,
 } from 'discord.js';
+
+import { findServerById } from '@answeroverflow/core/server';
+import { ChannelWithFlags } from '@answeroverflow/core/zod';
 import {
 	channelWithDiscordInfoToAnalyticsData,
 	memberToAnalyticsUser,
@@ -14,7 +16,7 @@ import {
 	serverWithDiscordInfoToAnalyticsData,
 	threadWithDiscordInfoToAnalyticsData,
 	trackDiscordEvent,
-} from '~discord-bot/utils/analytics';
+} from '../utils/analytics';
 import { makeDismissButton } from './dismiss-button';
 
 const sendMarkSolutionInstructionsErrorReasons = [

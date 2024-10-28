@@ -1,12 +1,9 @@
+import { ALLOWED_AUTO_THREAD_CHANNEL_TYPES } from '@answeroverflow/constants/discord';
+import { ChannelWithFlags } from '@answeroverflow/core/zod';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
 import { Events, Message, MessageType } from 'discord.js';
-import {
-	isHumanMessage,
-	removeDiscordMarkdown,
-} from '~discord-bot/utils/utils';
-import { ALLOWED_AUTO_THREAD_CHANNEL_TYPES } from '@answeroverflow/constants';
-import type { ChannelWithFlags } from '@answeroverflow/db';
+import { isHumanMessage, removeDiscordMarkdown } from '../../utils/utils';
 
 async function autoThread(channelSettings: ChannelWithFlags, message: Message) {
 	if (!channelSettings?.flags.autoThreadEnabled) return;
@@ -17,7 +14,7 @@ async function autoThread(channelSettings: ChannelWithFlags, message: Message) {
 	if (!isHumanMessage(message)) return;
 	if (message.type !== MessageType.Default) return;
 	if (message.thread) return;
-	const authorName = message.member?.nickname ?? message.author.username;
+	const authorName = message.member?.nickname ?? message.author.displayName;
 	let threadTitleContent = message.cleanContent;
 
 	if (message.attachments.size > 0 && message.content.length === 0) {

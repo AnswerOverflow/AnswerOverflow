@@ -1,9 +1,9 @@
+import { getTotalNumberOfMessages } from '@answeroverflow/core/message';
+import { botEnv } from '@answeroverflow/env/bot';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener, SapphireClient } from '@sapphire/framework';
 import { type ActivityOptions, ActivityType, Events } from 'discord.js';
-import { getTotalNumberOfMessages } from '@answeroverflow/db';
-import { hoursToMs } from '~discord-bot/utils/utils';
-import { botEnv } from '@answeroverflow/env/bot';
+import { hoursToMs } from '../../utils/utils';
 
 const timeBetweenStatusChangesInHours = botEnv.STATUS_UPDATE_INTERVAL_IN_HOURS;
 
@@ -52,24 +52,30 @@ export class LoopStatus extends Listener {
 	public run() {
 		let statusIndex = 0;
 		// eslint-disable-next-line @typescript-eslint/no-misused-promises
-		setInterval(async () => {
-			const statuses = getStatuses(this.container.client);
-			const status = statuses[statusIndex++];
-			if (!status) {
-				this.container.logger.error('No status found for index ', statusIndex);
-				return;
-			}
-			if (statusIndex >= statuses.length) {
-				statusIndex = 0; // instead of using modulo, we just reset the index to avoid overflow
-			}
-			const statusText =
-				typeof status.getStatus === 'string'
-					? status.getStatus
-					: await status.getStatus();
-			this.container.client.user?.setActivity(statusText, {
-				type: status.type,
-			});
-			this.container.logger.debug('Setting status to ' + statusText);
-		}, hoursToMs(timeBetweenStatusChangesInHours));
+		setInterval(
+			async () => {
+				const statuses = getStatuses(this.container.client);
+				const status = statuses[statusIndex++];
+				if (!status) {
+					this.container.logger.error(
+						'No status found for index ',
+						statusIndex,
+					);
+					return;
+				}
+				if (statusIndex >= statuses.length) {
+					statusIndex = 0; // instead of using modulo, we just reset the index to avoid overflow
+				}
+				const statusText =
+					typeof status.getStatus === 'string'
+						? status.getStatus
+						: await status.getStatus();
+				this.container.client.user?.setActivity(statusText, {
+					type: status.type,
+				});
+				this.container.logger.debug('Setting status to ' + statusText);
+			},
+			hoursToMs(Number(timeBetweenStatusChangesInHours)),
+		);
 	}
 }

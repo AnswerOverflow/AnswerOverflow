@@ -5,79 +5,105 @@
  */
 
 !process.env.SKIP_ENV_VALIDATION &&
-	// @ts-expect-error
-	(await import('@answeroverflow/env/web-schema.mjs'));
+	(await import('../../packages/env/src/web-schema.mjs'));
 const nextJSMDX = await import('@next/mdx');
-import remarkGfm from 'remark-gfm';
 
 const withMDX = nextJSMDX.default({
 	extension: /\.mdx?$/,
-	options: {
-		// If you use remark-gfm, you'll need to use next.config.mjs
-		// as the package is ESM only
-		// https://github.com/remarkjs/remark-gfm#install
-		remarkPlugins: [remarkGfm],
-		rehypePlugins: [],
-		// If you use `MDXProvider`, uncomment the following line.
-		providerImportSource: '@mdx-js/react',
-	},
+	options: {},
 });
 
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
-	swcMinify: true,
-	compress: true,
 	pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
 	transpilePackages: [
 		'@answeroverflow/api',
-		'@answeroverflow/auth',
-		'@answeroverflow/db',
-		'@answeroverflow/tailwind-config',
+		'@answeroverflow/core',
 		'@answeroverflow/ui',
 		'@answeroverflow/env',
 	],
 	experimental: {
-		outputFileTracingIgnores: ['**swc/core**'],
-		serverComponentsExternalPackages: ['mysql2'],
+		ppr: true,
+		instrumentationHook: true,
 	},
 	images: {
 		domains: [
 			'cdn.discordapp.com',
 			'avatars.githubusercontent.com',
 			'media.discordapp.net',
+			'utfs.io',
+			'images-ext-2.discordapp.net',
+			'answer-overflow-discord-attachments.s3.amazonaws.com',
 		],
 	},
-	// We already do linting on GH actions
-	eslint: {
-		ignoreDuringBuilds: !!process.env.CI,
-	},
 	productionBrowserSourceMaps: true, // we're open source so why not
-	sentry: {
-		hideSourceMaps: false,
-	},
-	async rewrites() {
+	rewrites: async () => {
 		return [
 			{
-				source: '/og/:path*',
-				destination: '/api/og/:path*',
+				source: '/sitemap-:path',
+				destination:
+					'https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap-:path',
+			},
+			{
+				source: '/sitemap.xml',
+				destination:
+					'https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap.xml',
+			},
+			{
+				source: '/sitemap:path',
+				destination:
+					'https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap-:path',
+			},
+			{
+				source: '/ingest/static/:path*',
+				destination: 'https://us-assets.i.posthog.com/static/:path*',
+			},
+			{
+				source: '/ingest/:path*',
+				destination: 'https://us.i.posthog.com/:path*',
+			},
+		];
+	},
+	skipTrailingSlashRedirect: true,
+	redirects: async () => {
+		return [
+			{
+				source: '/onboarding:slug*',
+				destination:
+					process.env.NODE_ENV === 'development'
+						? 'http://localhost:3002/onboarding'
+						: 'https://app.answeroverflow.com/onboarding',
+				permanent: process.env.NODE_ENV === 'production',
+			},
+			{
+				source: '/dashboard',
+				destination:
+					process.env.NODE_ENV === 'development'
+						? 'http://localhost:3002/'
+						: 'https://app.answeroverflow.com/',
+				permanent: process.env.NODE_ENV === 'production',
+			},
+			{
+				source: '/dashboard:slug*',
+				destination:
+					process.env.NODE_ENV === 'development'
+						? 'http://localhost:3002/dashboard'
+						: 'https://app.answeroverflow.com/dashboard',
+				permanent: process.env.NODE_ENV === 'production',
+			},
+			{
+				source: '/changelog',
+				destination: 'https://docs.answeroverflow.com/changelog',
+				permanent: false,
+			},
+			{
+				source: '/changelog:slug*',
+				destination: 'https://docs.answeroverflow.com/changelog:slug',
+				permanent: false,
 			},
 		];
 	},
 };
 
-const sentryWebpackPluginOptions = {
-	// Additional config options for the Sentry Webpack plugin. Keep in mind that
-	// the following options are set automatically, and overriding them is not
-	// recommended:
-	//   release, url, org, project, authToken, configFile, stripPrefix,
-	//   urlPrefix, include, ignore
-
-	silent: true, // Suppresses all logs
-	// For all available options, see:
-	// https://github.com/getsentry/sentry-webpack-plugin#options.
-};
-
-import { withSentryConfig } from '@sentry/nextjs';
-
-export default withSentryConfig(withMDX(config), sentryWebpackPluginOptions);
+export default withMDX(config);

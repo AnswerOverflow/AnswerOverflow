@@ -1,18 +1,20 @@
 import {
 	InteractionHandler,
 	InteractionHandlerTypes,
-	type PieceContext,
 } from '@sapphire/framework';
 import type { ButtonInteraction } from 'discord.js';
 import {
 	ConsentButtonInteractionParseError,
 	parseConsentButtonInteraction,
 	updateUserConsent,
-} from '~discord-bot/domains/manage-account';
-import { oneTimeStatusHandler } from '~discord-bot/utils/trpc';
+} from '../domains/manage-account';
+import { oneTimeStatusHandler } from '../utils/trpc';
 
 export class ButtonHandler extends InteractionHandler {
-	public constructor(ctx: PieceContext, options: InteractionHandler.Options) {
+	public constructor(
+		ctx: InteractionHandler.LoaderContext,
+		options: InteractionHandler.Options,
+	) {
 		super(ctx, {
 			...options,
 			interactionHandlerType: InteractionHandlerTypes.Button,

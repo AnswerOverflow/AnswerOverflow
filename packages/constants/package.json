@@ -1,30 +1,23 @@
 {
 	"name": "@answeroverflow/constants",
-	"version": "0.1.0",
-	"main": "./index.ts",
-	"types": "./index.ts",
-	"license": "MIT",
-	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"sideEffects": false,
+	"exports": {
+		"./*": "./src/*.ts"
+	},
 	"scripts": {
-		"clean": "rm -rf .turbo node_modules coverage",
-		"with-env": "dotenv -e ../../.env --",
-		"format": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --write .",
-		"format:check": "prettier --ignore-path ../../.gitignore --config .prettierrc.cjs --check .",
-		"lint": "eslint . && tsc --noEmit",
-		"lint:fix": "eslint . --fix"
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf node_modules",
+		"with-env": "dotenv -e ../../.env --"
 	},
 	"dependencies": {
-		"@answeroverflow/env": "workspace:^",
 		"discord-api-types": "^0.37.54",
 		"dotenv-cra": "^3.0.3",
 		"zod": "^3.22.2"
 	},
 	"devDependencies": {
-		"@answeroverflow/prettier-config": "workspace:^",
-		"@answeroverflow/tsconfig": "workspace:^",
-		"@types/node": "^20.5.1",
-		"dotenv-cli": "^7.3.0",
-		"eslint": "^8.47.0",
-		"prettier": "^2.8.8"
+		"@answeroverflow/tsconfig": "workspace:*",
+		"dotenv-cli": "^7.4.1"
 	}
 }
