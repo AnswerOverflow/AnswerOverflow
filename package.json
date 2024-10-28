@@ -34,7 +34,9 @@
 	},
 	"overrides": {
 		"@types/react": "npm:types-react@rc",
-		"@types/react-dom": "npm:types-react-dom@rc"
+		"@types/react-dom": "npm:types-react-dom@rc",
+		"recharts": "2.13.0",
+		"react-is": "19.0.0-rc-6f23540c7d-20240528"
 	},
 	"packageManager": "bun@1.1.29"
 }
