@@ -1,5 +1,5 @@
 import { sharedEnvs } from '@answeroverflow/env/shared';
-import { initTRPC, TRPCError } from '@trpc/server';
+import { TRPCError, initTRPC } from '@trpc/server';
 import { ChannelType } from 'discord-api-types/v10';
 import { Client } from 'discord.js';
 import superjson from 'superjson';
