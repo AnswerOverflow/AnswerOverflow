@@ -13,6 +13,7 @@ import {
 } from 'discord.js';
 
 import { makeConsentButton } from './manage-account';
+import { makeMainSiteLink } from '@answeroverflow/constants/links';
 
 import {
 	ANSWER_OVERFLOW_BLUE_HEX,
@@ -298,7 +299,14 @@ export function makeMarkSolutionResponse({
 			.setStyle(ButtonStyle.Link),
 	);
 
-	// TODO: Add view on Answer Overflow
+	if (settings.flags.indexingEnabled) {
+		components.addComponents(
+			new ButtonBuilder()
+				.setLabel('View on Answer Overflow')
+				.setURL(makeMainSiteLink(`/m/${solution.channelId}`))
+				.setStyle(ButtonStyle.Link),
+		);
+	}
 
 	return {
 		embed,
