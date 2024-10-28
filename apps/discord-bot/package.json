@@ -10,7 +10,7 @@
 		"@answeroverflow/env": "workspace:*",
 		"@answeroverflow/utils": "workspace:*",
 		"@sapphire/decorators": "^6.1.0",
-		"@sapphire/discord-utilities": "3.0.3",
+		"@sapphire/discord-utilities": "3.4.1",
 		"@sapphire/fetch": "^2.4.1",
 		"@sapphire/framework": "^5.2.1",
 		"@sapphire/pieces": "^3.7.0",
