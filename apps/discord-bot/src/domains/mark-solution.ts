@@ -12,8 +12,8 @@ import {
 	User,
 } from 'discord.js';
 
-import { makeConsentButton } from './manage-account';
 import { makeMainSiteLink } from '@answeroverflow/constants/links';
+import { makeConsentButton } from './manage-account';
 
 import {
 	ANSWER_OVERFLOW_BLUE_HEX,
