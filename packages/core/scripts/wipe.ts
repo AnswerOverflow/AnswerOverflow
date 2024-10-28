@@ -1,6 +1,6 @@
-import { clearDatabase } from '../src/utils';
 import { Cache } from '../src/cache';
 import * as Search from '../src/search';
+import { clearDatabase } from '../src/utils';
 void (async () => {
 	await clearDatabase();
 	console.log('Wiping Redis...');

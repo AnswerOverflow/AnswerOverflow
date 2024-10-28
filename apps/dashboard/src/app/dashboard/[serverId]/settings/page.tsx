@@ -1,5 +1,6 @@
 'use client';
 import { ServerWithFlags } from '@answeroverflow/core/zod';
+import { BlueLink } from '@answeroverflow/ui/ui/blue-link';
 import {
 	Card,
 	CardContent,
@@ -16,7 +17,6 @@ import { useDashboardContext } from '../components/dashboard-context';
 import { ConfigureDomainCard } from '../components/domains';
 import { TierAccessOnly } from '../components/tier-access-only';
 import { CurrentPlanCard } from './components';
-import { BlueLink } from '@answeroverflow/ui/ui/blue-link';
 
 interface ToggleServerFlagProps {
 	title: React.ReactNode;

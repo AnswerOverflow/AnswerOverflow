@@ -31,6 +31,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@answeroverflow/ui/ui/select';
+import { Separator } from '@answeroverflow/ui/ui/separator';
 import { Switch } from '@answeroverflow/ui/ui/switch';
 import {
 	Tabs,
@@ -51,7 +52,6 @@ import {
 import * as React from 'react';
 import { toast } from 'react-toastify';
 import { useDashboardContext } from '../components/dashboard-context';
-import { Separator } from '@answeroverflow/ui/ui/separator';
 
 function ChannelIcon({
 	type,
