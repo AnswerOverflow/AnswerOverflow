@@ -1,5 +1,5 @@
 'use client';
-import type { ServerPublic } from '@answeroverflow/api';
+import { ServerPublic } from '@answeroverflow/api/router/types';
 import { makeMainSiteLink } from '@answeroverflow/constants/links';
 import { Button, ButtonProps } from '../ui/button';
 import { LinkButton } from '../ui/link-button';

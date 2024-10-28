@@ -1,7 +1,7 @@
 import type {
 	DomainVerificationStatusProps,
 	VercelDomainVerificationResponse,
-} from '@answeroverflow/api';
+} from '@answeroverflow/api/index';
 import { Button } from '@answeroverflow/ui/ui/button';
 import {
 	Card,

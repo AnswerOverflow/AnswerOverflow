@@ -15,7 +15,7 @@ import {
 import { Link } from '../ui/link';
 import { getInitials } from '../utils/avatars';
 
-import { ServerPublic } from '@answeroverflow/api';
+import { ServerPublic } from '@answeroverflow/api/src/router/types';
 import { ChangeThemeItem } from './change-theme-item';
 import { LogoutItem } from './logout-item';
 

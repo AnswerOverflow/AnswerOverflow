@@ -12,7 +12,7 @@ import {
 	CONSENT_SOURCES,
 	type ConsentSource,
 	type ManageAccountSource,
-} from '@answeroverflow/api';
+} from '@answeroverflow/api/router/user-server-settings-types';
 import { CONSENT_BUTTON_LABEL } from '@answeroverflow/constants/discord';
 import { findServerById } from '@answeroverflow/core/server';
 import { UserServerSettingsWithFlags } from '@answeroverflow/core/utils/userServerSettingsUtils';

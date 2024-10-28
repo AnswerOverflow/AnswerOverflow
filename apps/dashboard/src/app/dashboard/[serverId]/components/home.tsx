@@ -138,6 +138,7 @@ export function PageViewsLineChart() {
 
 export function ServerInvitesUsedLineChart() {
 	const { options } = useDashboardContext();
+
 	const { data, isError, isLoading } =
 		trpc.dashboard.serverInvitesClicked.useQuery(options, {
 			initialData:

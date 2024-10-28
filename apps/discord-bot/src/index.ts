@@ -1,4 +1,4 @@
-import { botRouter } from '@answeroverflow/api/src/bot';
+import { botRouter } from '@answeroverflow/api/bot/index';
 import { SapphireClient } from '@sapphire/framework';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { createClient, login } from './utils/bot';
@@ -6,6 +6,11 @@ import { createClient, login } from './utils/bot';
 declare global {
 	var client: SapphireClient;
 }
+
+// keep the bot running
+process.on('uncaughtException', (error) => {
+	console.error('Uncaught Exception:', error);
+});
 
 const port = parseInt(process.env.PORT ?? '2022');
 

@@ -1,13 +1,4 @@
-import type {
-	Channel,
-	Guild,
-	GuildMember,
-	Message,
-	ThreadChannel,
-} from 'discord.js';
-import { sentryLogger } from './sentry';
-
-import type { ConsentSource } from '@answeroverflow/api';
+import { ConsentSource } from '@answeroverflow/api/router/user-server-settings-types';
 import {
 	ChannelPropsWithSettings,
 	ServerPropsWithSettings,
@@ -17,7 +8,15 @@ import {
 } from '@answeroverflow/constants/analytics';
 import { Analytics, BaseProps } from '@answeroverflow/core/analytics';
 import { ChannelWithFlags, ServerWithFlags } from '@answeroverflow/core/zod';
+import type {
+	Channel,
+	Guild,
+	GuildMember,
+	Message,
+	ThreadChannel,
+} from 'discord.js';
 import { MarkSolutionErrorReason } from '../domains/mark-solution';
+import { sentryLogger } from './sentry';
 
 export type ServerPropsWithDiscordData = ServerPropsWithSettings & {
 	'Bot Time In Server In Ms': number;
