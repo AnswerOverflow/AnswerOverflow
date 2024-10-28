@@ -567,10 +567,9 @@ export module Auth {
 			headers: {
 				Authorization: `Bearer ${callOpts.accessToken}`,
 			},
-			// @ts-ignore
-			cache: 'force-cache',
-			// @ts-ignore
-			revalidate: 600,
+			next: {
+				revalidate: 600,
+			},
 		});
 		if (data.status === 401) {
 			const account = await db.query.dbAccounts.findFirst({
