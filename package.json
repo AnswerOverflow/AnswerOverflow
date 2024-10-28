@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"sideEffects": false,
 	"scripts": {
-		"dev": "turbo dev --parallel --no-cache",
+		"dev": "bun run ./setup.ts && turbo dev --parallel --no-cache",
 		"dev:dbs": "docker-compose -f \"docker-compose.yml\" -f \"docker-compose-extras.yml\" up",
 		"typecheck": "turbo typecheck",
 		"clean": "bun --filter=* clean && rm -rf node_modules",
