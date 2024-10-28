@@ -12,7 +12,7 @@ import { Heading } from '../ui/heading';
 import { LinkButton } from '../ui/link-button';
 import { TrackLoad } from '../ui/track-load';
 
-import { ServerPublic } from '@answeroverflow/api';
+import { ServerPublic } from '@answeroverflow/api/router/types';
 import { serverToAnalyticsData } from '@answeroverflow/constants/analytics';
 import { NUMBER_OF_THREADS_TO_LOAD } from '@answeroverflow/constants/api';
 import { CommunityPageData } from '@answeroverflow/core/pages';

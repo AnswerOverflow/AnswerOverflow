@@ -57,7 +57,8 @@
 		"init": {},
 		"migrate": {},
 		"dev": {
-			"cache": false
+			"cache": false,
+			"persistent": false
 		},
 		"build:prod": {
 			"cache": true
