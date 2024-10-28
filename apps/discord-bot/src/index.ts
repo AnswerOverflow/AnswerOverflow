@@ -23,9 +23,10 @@ if (!global.client) {
 						);
 					}
 				: undefined,
-		createContext() {
+		createContext(ctx) {
 			return {
 				client: global.client,
+				token: ctx.req.headers.authorization?.split(' ')[1],
 			};
 		},
 	}).listen(port);
