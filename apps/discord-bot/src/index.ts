@@ -7,6 +7,11 @@ declare global {
 	var client: SapphireClient;
 }
 
+// keep the bot running
+process.on('uncaughtException', (error) => {
+	console.error('Uncaught Exception:', error);
+});
+
 const port = parseInt(process.env.PORT ?? '2022');
 
 if (!global.client) {
