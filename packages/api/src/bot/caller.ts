@@ -1,7 +1,7 @@
+import { sharedEnvs } from '@answeroverflow/env/shared';
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 import superjson from 'superjson';
 import { BotRouter } from './index';
-import { sharedEnvs } from '@answeroverflow/env/shared';
 export const botClient = createTRPCProxyClient<BotRouter>({
 	links: [
 		httpBatchLink({
