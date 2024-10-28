@@ -13,6 +13,7 @@ import {
 } from 'discord.js';
 
 import { makeConsentButton } from './manage-account';
+import { makeMainSiteLink } from '@answeroverflow/constants/links';
 
 import {
 	ANSWER_OVERFLOW_BLUE_HEX,
@@ -296,11 +297,16 @@ export function makeMarkSolutionResponse({
 			.setLabel('Jump To Solution')
 			.setURL(solution.url)
 			.setStyle(ButtonStyle.Link),
-		new ButtonBuilder()
-			.setLabel('View on Answer Overflow')
-			.setURL(`https://answeroverflow.com/m/${solution.channelId}`)
-			.setStyle(ButtonStyle.Link),
 	);
+
+	if (settings.flags.indexingEnabled) {
+		components.addComponents(
+			new ButtonBuilder()
+				.setLabel('View on Answer Overflow')
+				.setURL(makeMainSiteLink(`/m/${solution.channelId}`))
+				.setStyle(ButtonStyle.Link),
+		);
+	}
 
 	return {
 		embed,
