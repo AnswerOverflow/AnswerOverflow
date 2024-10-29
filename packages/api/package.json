@@ -11,7 +11,7 @@
 	"private": true,
 	"scripts": {
 		"typecheck": "tsc --noEmit",
-		"with-env": "dotenv -e ../../.env --",
+		"with-env": "bun run --env-file=../../.env --",
 		"clean": "rm -rf node_modules dist .cache",
 		"build": "tsc",
 		"dev": "tsc --watch"

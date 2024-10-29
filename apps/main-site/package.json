@@ -4,7 +4,7 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
-		"with-env": "dotenv -e ../../.env --",
+	  "with-env": "bun run --env-file=../../.env --",
 		"dev-next": "bun with-env next dev --turbo",
 		"dev-proxy": "bun run scripts/proxy.ts",
 		"dev": "bun run dev-next & bun run dev-proxy; wait",

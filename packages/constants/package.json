@@ -9,7 +9,7 @@
 	"scripts": {
 		"typecheck": "tsc --noEmit",
 		"clean": "rm -rf node_modules",
-		"with-env": "dotenv -e ../../.env --"
+		"with-env": "bun run --env-file=../../.env --"
 	},
 	"dependencies": {
 		"discord-api-types": "^0.37.54",
