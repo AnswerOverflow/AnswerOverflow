@@ -9,7 +9,7 @@
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",
-		"with-env": "dotenv -e ../../.env --",
+		"with-env": "bun run --env-file=../../.env --",
 		"db:push": "bun with-env drizzle-kit push:mysql",
 		"db:wipe": "bun with-env bun ./scripts/wipe.ts",
 		"db:seed": "bun with-env bun db:push && bun with-env bun ./scripts/seed.ts",
