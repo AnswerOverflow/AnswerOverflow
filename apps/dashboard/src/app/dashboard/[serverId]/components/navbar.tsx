@@ -1,5 +1,5 @@
 'use client';
-import type { ServerPublic } from '@answeroverflow/api/index';
+
 import { ServerIcon } from '@answeroverflow/ui/server-icon';
 import { Button } from '@answeroverflow/ui/ui/button';
 import {
@@ -15,6 +15,7 @@ import React from 'react';
 import { HiChevronDown, HiChevronUp } from 'react-icons/hi';
 import { LiaPlusCircleSolid } from 'react-icons/lia';
 import { demoServerData } from './mock';
+import { ServerPublic } from '@answeroverflow/api/router/types';
 
 const ServerSelectRow = (props: {
 	server: Pick<ServerPublic, 'id' | 'name' | 'icon'>;

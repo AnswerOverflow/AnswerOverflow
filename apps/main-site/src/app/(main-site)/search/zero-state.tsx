@@ -1,4 +1,4 @@
-import { ServerPublic } from '@answeroverflow/api/src/router/types';
+import { ServerPublic } from '@answeroverflow/api/router/types';
 import { Footer } from '@answeroverflow/ui/footer';
 import { MessagesSearchBar } from '@answeroverflow/ui/messages-search-bar';
 import { Navbar } from '@answeroverflow/ui/navbar/index';

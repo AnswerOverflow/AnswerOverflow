@@ -1,4 +1,4 @@
-import { ServerDashboard } from '@answeroverflow/api/src/router/dashboard';
+import { ServerDashboard } from '@answeroverflow/api/router/dashboard';
 
 export const demoServerData: ServerDashboard = {
 	approximateMemberCount: 10000,

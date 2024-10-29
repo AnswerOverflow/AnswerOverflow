@@ -1,7 +1,3 @@
-import type {
-	DomainVerificationStatusProps,
-	VercelDomainVerificationResponse,
-} from '@answeroverflow/api/index';
 import { Button } from '@answeroverflow/ui/ui/button';
 import {
 	Card,
@@ -24,6 +20,10 @@ import { toast } from 'react-toastify';
 import { useDashboardContext } from './dashboard-context';
 import { LoadingSpinner } from './loading-spinner';
 import { useTierAccess } from './tier-access-only';
+import {
+	DomainVerificationStatusProps,
+	VercelDomainVerificationResponse,
+} from '@answeroverflow/api/utils/domains';
 function useDomainStatus({ domain }: { domain?: string }) {
 	const { data, isLoading, isFetching } =
 		trpc.servers.verifyCustomDomain.useQuery(domain ?? '', {
