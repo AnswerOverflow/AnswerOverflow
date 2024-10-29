@@ -50,7 +50,8 @@ export default async function webhookHandler(
 			throw new Error('Stripe env vars not set');
 		}
 		const stripe = new Stripe(sharedEnvs.STRIPE_SECRET_KEY, {
-			apiVersion: '2022-11-15',
+		  // @ts-expect-error holding version, remove when package bumped
+			apiVersion: '2024-06-20',
 			typescript: true,
 		});
 
