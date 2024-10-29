@@ -26,6 +26,7 @@ const config = {
 	experimental: {
 		ppr: true,
 		instrumentationHook: true,
+		mdxRs: true
 	},
 	images: {
 		domains: [
