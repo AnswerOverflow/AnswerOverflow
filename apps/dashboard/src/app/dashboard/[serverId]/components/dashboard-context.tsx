@@ -1,4 +1,4 @@
-import type { ServerDashboard } from '@answeroverflow/api/src/router/dashboard';
+import type { ServerDashboard } from '@answeroverflow/api/router/dashboard';
 import { createContext, useContext } from 'react';
 
 const DashboardContext = createContext<
