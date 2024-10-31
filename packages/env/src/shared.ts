@@ -75,6 +75,7 @@ export function zStringDefaultInDev(defaultValue: string) {
 }
 
 export const sharedClientEnvs = {
+	NEXT_PUBLIC_DISCORD_CLIENT_ID: z.string(),
 	NEXT_PUBLIC_POSTHOG_TOKEN: zStringRequiredInProduction,
 	NEXT_PUBLIC_SENTRY_DSN: zStringRequiredInProduction,
 	NEXT_PUBLIC_DEPLOYMENT_ENV: zStringDefaultInDev('local').pipe(
@@ -118,7 +119,6 @@ export const sharedEnvs = createEnv({
 		/*
       Discord
      */
-		DISCORD_CLIENT_ID: z.string(),
 		DISCORD_CLIENT_SECRET: z.string(),
 		/*
       Analytics
@@ -147,6 +147,7 @@ export const sharedEnvs = createEnv({
 	},
 	client: sharedClientEnvs,
 	experimental__runtimeEnv: {
+	  NEXT_PUBLIC_DISCORD_CLIENT_ID: process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID,
 		NEXT_PUBLIC_DEPLOYMENT_ENV: process.env.NEXT_PUBLIC_DEPLOYMENT_ENV,
 		NEXT_PUBLIC_POSTHOG_TOKEN: process.env.NEXT_PUBLIC_POSTHOG_TOKEN,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,

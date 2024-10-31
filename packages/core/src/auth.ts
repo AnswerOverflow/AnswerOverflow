@@ -400,7 +400,7 @@ export module Auth {
 		adapter: extendedAdapter as NextAuthOptions['adapter'],
 		providers: [
 			DiscordProvider({
-				clientId: sharedEnvs.DISCORD_CLIENT_ID!,
+				clientId: sharedEnvs.NEXT_PUBLIC_DISCORD_CLIENT_ID!,
 				clientSecret: sharedEnvs.DISCORD_CLIENT_SECRET!,
 				authorization:
 					'https://discord.com/api/oauth2/authorize?scope=identify+email+guilds',
@@ -753,7 +753,7 @@ export module Auth {
 			throw new Error('No refresh token');
 		}
 		const params = new URLSearchParams();
-		params.append('client_id', sharedEnvs.DISCORD_CLIENT_ID!);
+		params.append('client_id', sharedEnvs.NEXT_PUBLIC_DISCORD_CLIENT_ID!);
 		params.append('client_secret', sharedEnvs.DISCORD_CLIENT_SECRET!);
 		params.append('grant_type', 'refresh_token');
 		params.append('refresh_token', discord.refresh_token ?? '');
@@ -766,7 +766,7 @@ export module Auth {
 			}
 			await setRefreshTokenBeingUsed(discord.refresh_token, true);
 			const body = {
-				client_id: sharedEnvs.DISCORD_CLIENT_ID!,
+				client_id: sharedEnvs.NEXT_PUBLIC_DISCORD_CLIENT_ID!,
 				client_secret: sharedEnvs.DISCORD_CLIENT_SECRET!,
 				grant_type: 'refresh_token',
 				refresh_token: discord.refresh_token ?? '',
