@@ -156,7 +156,7 @@ export function MessageResultPage({
 
 			return (
 				<div className="p-2" key={message.id}>
-					<ThinMessage message={message} />
+					<ThinMessage message={message} op={message.author.id === firstMessage.author.id} />
 				</div>
 			);
 		})

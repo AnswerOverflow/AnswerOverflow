@@ -12,4 +12,5 @@ export type MessageProps = {
 	 */
 	collapseContent?: boolean | number;
 	loadingStyle?: 'lazy' | 'eager';
+	op?: boolean;
 };
