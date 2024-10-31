@@ -123,7 +123,7 @@ export const sharedEnvs = createEnv({
 		/*
       Discord
      */
-		DISCORD_CLIENT_ID: z.string(),
+		NEXT_PUBLIC_DISCORD_CLIENT_ID: z.string(),
 		DISCORD_CLIENT_SECRET: z.string(),
 		/*
       Analytics

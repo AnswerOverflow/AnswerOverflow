@@ -1,3 +1,4 @@
+import { sharedEnvs } from '@answeroverflow/env/shared';
 import { GettingStartedClickProps } from './hooks/events';
 import { LinkButton, LinkButtonProps } from './ui/link-button';
 
@@ -19,8 +20,8 @@ export function GetStarted(
 }
 
 export function AddToServerButton() {
-	return (
-		<LinkButton href="https://discord.com/oauth2/authorize?client_id=958907348389339146&permissions=328565083201&scope=bot+applications.commands">
+  return (
+    <LinkButton href={`https://discord.com/oauth2/authorize?client_id=${sharedEnvs.NEXT_PUBLIC_DISCORD_CLIENT_ID}&permissions=328565083201&scope=bot+applications.commands`}>
 			Add To Server
 		</LinkButton>
 	);

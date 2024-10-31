@@ -60,7 +60,7 @@ export const login = async (client: SapphireClient) => {
 		client.logger.info('LOGGING IN');
 		client.logger.info(`NODE_ENV: ${botEnv.NODE_ENV}`);
 		client.logger.info(`DEPLOYMENT ENV: ${botEnv.NEXT_PUBLIC_DEPLOYMENT_ENV}`);
-		client.logger.info(`DISCORD_ID: ${botEnv.DISCORD_CLIENT_ID}`);
+		client.logger.info(`DISCORD_ID: ${botEnv.NEXT_PUBLIC_DISCORD_CLIENT_ID}`);
 
 		await client.login(botEnv.DISCORD_TOKEN);
 		client.addListener(Events.ClientReady, () => {

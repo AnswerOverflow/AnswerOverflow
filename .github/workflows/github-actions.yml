@@ -22,7 +22,7 @@ env:
   NEXT_PUBLIC_POSTHOG_TOKEN: "123" # Fake API key to make CI not fail
   REDIS_URL: redis://:redis@localhost:6379
   NEXT_PUBLIC_DEPLOYMENT_ENV: "ci"
-  DISCORD_CLIENT_ID: "123"
+  NEXT_PUBLIC_DISCORD_CLIENT_ID: "123"
   DISCORD_CLIENT_SECRET: "123"
   DISCORD_TOKEN: "123"
   ENVIRONMENT: "discord-bot" # todo: needs to be set on a per proj level
