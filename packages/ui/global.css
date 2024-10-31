@@ -60,6 +60,9 @@
 	* {
 		@apply border-border;
 	}
+	a {
+		@apply hover:underline
+	}
 	body {
 		@apply bg-background text-foreground;
 	}
