@@ -31,6 +31,7 @@ import { ChannelPublicWithFlags } from '@answeroverflow/core/zod';
 import { messageWithDiscordAccountToAnalyticsData } from '../hooks/events';
 import { JumpToSolution } from './jump-to-solution';
 import { MessageResultPageProvider } from './message-result-page-context';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 export type MessageResultPageProps = {
 	messages: MessageFull[];
 	server: ServerPublic;
@@ -129,7 +130,7 @@ export function MessageResultPage({
 				return false;
 			}
 		}
-		if (message.author.id === '958907348389339146') return false;
+		if (message.author.id === sharedEnvs.DISCORD_CLIENT_ID) return false;
 		return true;
 	});
 

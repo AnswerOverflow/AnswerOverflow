@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { ServerIcon } from './server-icon';
 import { LinkButton } from './ui/link-button';
 import { getServerDescription, getServerHomepageUrl } from './utils/server';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export type ServerCardProps = {
 	server: ServerPublic;
@@ -129,7 +130,7 @@ export const ManageServerCard = (props: {
 					<LinkButton href={`/dashboard/${props.server.id}`}>View</LinkButton>
 				) : (
 					<LinkButton
-						href={`https://discord.com/oauth2/authorize?client_id=958907348389339146&permissions=328565083201&scope=bot+applications.commands&guild_id=${props.server.id}&disable_guild_select=true`}
+						href={`https://discord.com/oauth2/authorize?client_id=${sharedEnvs.DISCORD_CLIENT_ID}&permissions=328565083201&scope=bot+applications.commands&guild_id=${props.server.id}&disable_guild_select=true`}
 						target={'Blank'}
 						referrerPolicy="no-referrer"
 						variant={'outline'}
