@@ -130,7 +130,7 @@ export function MessageResultPage({
 				return false;
 			}
 		}
-		if (message.author.id === sharedEnvs.DISCORD_CLIENT_ID) return false;
+		if (message.author.id === sharedEnvs.NEXT_PUBLIC_DISCORD_CLIENT_ID) return false;
 		return true;
 	});
 
