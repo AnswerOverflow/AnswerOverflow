@@ -2,11 +2,11 @@ import { DiscordAvatar } from '../discord-avatar';
 import { Link } from '../ui/link';
 import { TimeAgo } from '../ui/time-ago';
 import { cn } from '../utils/utils';
-import { MessageBlurrer, MessageBody } from './Message';
+import { MessageBlurrer, MessageBody, MessageOPTag } from './Message';
 import { MessageProps } from './props';
 
 export function ThinMessage(
-	props: Pick<MessageProps, 'message'> & {
+  props: Pick<MessageProps, ('message' | 'op')> & {
 		isSolution?: boolean;
 	},
 ) {
@@ -22,14 +22,17 @@ export function ThinMessage(
 					<div className="flex flex-row items-center gap-2 text-muted-foreground">
 						{message.public && !message.isAnonymous ? (
 							<Link
-								className="mr-1 hover:underline"
+								className="hover:underline"
 								href={`/u/${message.author.id}`}
 							>
 								{message.author.name}
 							</Link>
 						) : (
-							<span className="mr-1">{message.author.name}</span>
+							<span>{message.author.name}</span>
 						)}
+						{
+  						props.op && <MessageOPTag />
+						}
 						<span className="text-sm">•</span>
 						<TimeAgo snowflake={message.id} />
 					</div>
