@@ -16,7 +16,11 @@ import { MessageAttachments } from './attachments';
 import { parse } from './markdown/render';
 import { MessageProps } from './props';
 
-export const MessageOPTag = () => <span className="text-muted-foreground border-2 border-muted-foreground px-1 rounded-md">OP</span>;
+export const MessageOPTag = () => (
+	<span className="text-muted-foreground border-[1.5px] text-sm border-muted-foreground px-1 rounded-md">
+		OP
+	</span>
+);
 
 export const MessageAuthorArea = (props: Pick<MessageProps, 'message'>) => {
 	const { message } = props;
