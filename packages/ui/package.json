@@ -45,7 +45,7 @@
 		"@yaireo/relative-time": "^1.0.4",
 		"bright": "^0.8.4",
 		"class-variance-authority": "^0.7.0",
-		"clsx": "^1.2.1",
+		"clsx": "^2.1.1",
 		"cmdk": "^1.0.0",
 		"cva": "npm:class-variance-authority@^0.6.1",
 		"date-fns": "^3.6.0",
