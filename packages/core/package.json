@@ -44,7 +44,7 @@
 		"mysql2": "3.9.8",
 		"stripe": "^16.12.0",
 		"unique-names-generator": "^4.7.1",
-		"uploadthing": "^6.1.0",
+		"uploadthing": "^7.2.0",
 		"zod": "^3.22.2"
 	},
 	"devDependencies": {
