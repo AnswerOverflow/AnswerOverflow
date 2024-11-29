@@ -11,6 +11,7 @@ import {
 import {
 	ALLOWED_ROOT_CHANNEL_TYPES,
 	ServerSettingsFlags,
+	ServerWithFlags,
 	addFlagsToChannel,
 	serverSettingsFlags,
 	zServerCreate,
@@ -195,9 +196,15 @@ export async function findManyServersById(
 	});
 }
 
-export function upsertServer(input: z.infer<typeof zServerUpsert>) {
+export function upsertServer(
+	input: z.infer<typeof zServerUpsert>,
+	existing?: (ServerWithFlags & { bitfield: number }) | null,
+) {
 	return upsert({
-		find: () => findServerById(input.create.id),
+		find: () => {
+			if (existing) return Promise.resolve(existing);
+			return findServerById(input.create.id);
+		},
 		create: () => createServer(input.create),
 		update: (old) => {
 			if (!input.update) return old;
