@@ -3,6 +3,7 @@ import { upsertManyChannels } from '@answeroverflow/core/channel';
 import { uploadFileFromUrl } from '@answeroverflow/core/files';
 import {
 	findAllServers,
+	findServerById,
 	updateServer,
 	upsertServer,
 } from '@answeroverflow/core/server';
@@ -29,18 +30,22 @@ import { leaveServerIfNecessary } from '../../utils/denylist';
 // Sync server properties that aren't set by the user
 async function autoUpdateServerInfo(guild: Guild) {
 	const convertedServer = toAOServer(guild);
-	const upserted = await upsertServer({
-		create: convertedServer,
-		update: {
-			icon: convertedServer.icon,
-			name: convertedServer.name,
-			description: convertedServer.description,
-			kickedTime: null,
-			vanityInviteCode: convertedServer.vanityInviteCode,
-			approximateMemberCount:
-				getMemberCount(guild) > 0 ? getMemberCount(guild) : undefined,
+	const existing = await findServerById(guild.id);
+	const upserted = await upsertServer(
+		{
+			create: convertedServer,
+			update: {
+				icon: convertedServer.icon,
+				name: convertedServer.name,
+				description: convertedServer.description,
+				kickedTime: null,
+				vanityInviteCode: convertedServer.vanityInviteCode,
+				approximateMemberCount:
+					getMemberCount(guild) > 0 ? getMemberCount(guild) : undefined,
+			},
 		},
-	});
+		existing,
+	);
 	// if it has a custom domain, upload their server icon to s3
 	if (upserted.customDomain && upserted.icon) {
 		await uploadFileFromUrl({
@@ -49,12 +54,14 @@ async function autoUpdateServerInfo(guild: Guild) {
 			url: `https://cdn.discordapp.com/icons/${upserted.id}/${upserted.icon}.png?size=${48}`,
 		});
 	}
-	Analytics.registerServerGroup(
-		serverWithDiscordInfoToAnalyticsData({
-			guild,
-			serverWithSettings: upserted,
-		}),
-	);
+	if (!existing) {
+		Analytics.registerServerGroup(
+			serverWithDiscordInfoToAnalyticsData({
+				guild,
+				serverWithSettings: upserted,
+			}),
+		);
+	}
 	return upserted;
 }
 
