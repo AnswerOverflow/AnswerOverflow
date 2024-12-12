@@ -24,9 +24,9 @@ const config = {
 		'@answeroverflow/env',
 	],
 	experimental: {
-		ppr: true,
+		ppr: false,
 		instrumentationHook: true,
-		mdxRs: true
+		mdxRs: true,
 	},
 	images: {
 		domains: [
