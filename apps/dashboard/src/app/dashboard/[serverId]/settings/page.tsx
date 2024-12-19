@@ -14,7 +14,7 @@ import { trpc } from '@answeroverflow/ui/utils/client';
 import React from 'react';
 import { toast } from 'react-toastify';
 import { useDashboardContext } from '../components/dashboard-context';
-import { ConfigureDomainCard } from '../components/domains';
+import { CustomDomainConfigurator } from '../components/domain';
 import { TierAccessOnly } from '../components/tier-access-only';
 import { CurrentPlanCard } from './components';
 
@@ -94,7 +94,7 @@ export default function Settings() {
 						data.status === 'inactive' ? data.enterprisePlanCheckoutUrl : null
 					}
 				>
-					<ConfigureDomainCard />
+					<CustomDomainConfigurator />
 				</TierAccessOnly>
 				<ToggleServerFlag
 					title="Consider All Messages Public"

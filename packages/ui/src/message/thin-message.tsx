@@ -6,7 +6,7 @@ import { MessageBlurrer, MessageBody, MessageOPTag } from './Message';
 import { MessageProps } from './props';
 
 export function ThinMessage(
-  props: Pick<MessageProps, ('message' | 'op')> & {
+	props: Pick<MessageProps, 'message' | 'op'> & {
 		isSolution?: boolean;
 	},
 ) {
@@ -30,9 +30,7 @@ export function ThinMessage(
 						) : (
 							<span>{message.author.name}</span>
 						)}
-						{
-  						props.op && <MessageOPTag />
-						}
+						{props.op && <MessageOPTag />}
 						<span className="text-sm">•</span>
 						<TimeAgo snowflake={message.id} />
 					</div>
