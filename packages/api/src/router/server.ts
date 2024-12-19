@@ -8,20 +8,10 @@ import {
 	ServerWithFlags,
 	zServerCreate,
 	zServerMutable,
-	zServerUpdate,
 } from '@answeroverflow/core/zod';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import {
-	DomainVerificationStatusProps,
-	addDomainToVercel,
-	getConfigResponse,
-	getDomainResponse,
-	removeDomainFromVercelProject,
-	verifyDomain,
-} from '../utils/domains';
-import {
-	assertBoolsAreNotEqual,
 	assertCanEditServer,
 	assertIsAdminOrOwnerOfServer,
 	assertIsOnPlan,
@@ -33,6 +23,7 @@ import {
 } from '../utils/protected-procedures';
 import { Context } from './context';
 import { router, withUserServersProcedure } from './trpc';
+import { addDomain, getDomainStatus } from './vercel-domains';
 
 export const READ_THE_RULES_CONSENT_ALREADY_ENABLED_ERROR_MESSAGE =
 	'Read the rules consent already enabled';
@@ -168,18 +159,7 @@ export const serverRouter = router({
 								id: serverId,
 							},
 						});
-						await addDomainToVercel(newCustomDomain);
-
-						// if the site had a different customDomain before, we need to remove it from Vercel
-						if (
-							oldServerInfo.customDomain &&
-							oldServerInfo.customDomain !== newCustomDomain
-						) {
-							await removeDomainFromVercelProject(oldServerInfo.customDomain);
-						}
-
-						// TODO: Update cache?
-
+						await addDomain(newCustomDomain);
 						return response;
 					} catch (error: any) {
 						if (
@@ -209,42 +189,9 @@ export const serverRouter = router({
 				],
 			}),
 		),
-	verifyCustomDomain: withUserServersProcedure
+	getDomainStatus: withUserServersProcedure
 		.input(z.string())
 		.query(async ({ input }) => {
-			const domain = input;
-			let status: DomainVerificationStatusProps = 'Valid Configuration';
-
-			const [domainJson, configJson] = await Promise.all([
-				getDomainResponse(domain),
-				getConfigResponse({ domain }),
-			]);
-
-			if (domainJson?.error?.code === 'not_found') {
-				// domain not found on Vercel project
-				status = 'Domain Not Found';
-
-				// unknown error
-			} else if (domainJson.error) {
-				status = 'Unknown Error';
-
-				// if domain is not verified, we try to verify now
-			} else if (!domainJson.verified) {
-				status = 'Pending Verification';
-				const verificationJson = await verifyDomain(domain);
-
-				// domain was just verified
-				if (verificationJson && verificationJson.verified) {
-					status = 'Valid Configuration';
-				}
-			} else if (configJson.misconfigured) {
-				status = 'Invalid Configuration';
-			} else {
-				status = 'Valid Configuration';
-			}
-			return {
-				status,
-				domainJson,
-			};
+			return getDomainStatus(input);
 		}),
 });

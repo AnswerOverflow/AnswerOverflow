@@ -490,16 +490,19 @@ export module Auth {
 	};
 
 	export async function getServerSession() {
-		const tenantToken = cookies().get(getTenantCookieName());
+		const tenantToken = (await cookies()).get(getTenantCookieName());
 		if (tenantToken) {
 			const nextAuthSession = await db.query.dbTenantSessions.findFirst({
 				where: eq(dbTenantSessions.id, tenantToken.value),
 			});
 
 			if (!nextAuthSession) return null;
-			const oldCookies = cookies().getAll();
+			const oldCookies = (await cookies()).getAll();
 			// hacky
-			cookies().getAll = () => {
+			(
+				await // hacky
+				cookies()
+			).getAll = () => {
 				return [
 					...oldCookies,
 					{

@@ -28,10 +28,10 @@ import {
 } from '@answeroverflow/constants/analytics';
 import { MessageFull } from '@answeroverflow/core/message';
 import { ChannelPublicWithFlags } from '@answeroverflow/core/zod';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 import { messageWithDiscordAccountToAnalyticsData } from '../hooks/events';
 import { JumpToSolution } from './jump-to-solution';
 import { MessageResultPageProvider } from './message-result-page-context';
-import { sharedEnvs } from '@answeroverflow/env/shared';
 export type MessageResultPageProps = {
 	messages: MessageFull[];
 	server: ServerPublic;
@@ -130,7 +130,8 @@ export function MessageResultPage({
 				return false;
 			}
 		}
-		if (message.author.id === sharedEnvs.NEXT_PUBLIC_DISCORD_CLIENT_ID) return false;
+		if (message.author.id === sharedEnvs.NEXT_PUBLIC_DISCORD_CLIENT_ID)
+			return false;
 		return true;
 	});
 
@@ -156,7 +157,10 @@ export function MessageResultPage({
 
 			return (
 				<div className="p-2" key={message.id}>
-					<ThinMessage message={message} op={message.author.id === firstMessage.author.id} />
+					<ThinMessage
+						message={message}
+						op={message.author.id === firstMessage.author.id}
+					/>
 				</div>
 			);
 		})

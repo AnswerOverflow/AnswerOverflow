@@ -25,7 +25,6 @@ const config = {
 	],
 	experimental: {
 		ppr: false,
-		instrumentationHook: true,
 		mdxRs: true,
 	},
 	images: {

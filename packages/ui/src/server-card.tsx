@@ -1,9 +1,9 @@
 import { type ServerPublic } from '@answeroverflow/api/router/types';
+import { sharedEnvs } from '@answeroverflow/env/shared';
 import Image from 'next/image';
 import { ServerIcon } from './server-icon';
 import { LinkButton } from './ui/link-button';
 import { getServerDescription, getServerHomepageUrl } from './utils/server';
-import { sharedEnvs } from '@answeroverflow/env/shared';
 
 export type ServerCardProps = {
 	server: ServerPublic;

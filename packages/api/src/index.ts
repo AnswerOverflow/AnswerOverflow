@@ -10,7 +10,3 @@ export * from './utils/types';
 export * from './router/types';
 export * from './router/user-server-settings-types';
 export type { User } from '@answeroverflow/core/schema';
-export type {
-	VercelDomainVerificationResponse,
-	DomainVerificationStatusProps,
-} from './utils/domains';

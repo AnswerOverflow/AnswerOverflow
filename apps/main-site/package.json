@@ -4,7 +4,7 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
-	  "with-env": "bun run --env-file=../../.env --",
+		"with-env": "bun run --env-file=../../.env --",
 		"dev-next": "bun with-env next dev --turbo",
 		"dev-proxy": "bun run scripts/proxy.ts",
 		"dev": "bun run dev-next & bun run dev-proxy; wait",
@@ -34,7 +34,7 @@
 		"http-proxy": "^1.18.1",
 		"mdx": "^0.3.1",
 		"next": "^15.0.0-canary.179",
-		"next-auth": "^4.23.1",
+		"next-auth": "4.23.1",
 		"next-themes": "^0.2.1",
 		"react": "19.0.0-rc-6230622a1a-20240610",
 		"react-dom": "19.0.0-rc-6230622a1a-20240610",
