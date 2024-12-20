@@ -3,7 +3,7 @@ import { Stripe as StripeClient } from 'stripe';
 
 const stripe = sharedEnvs.STRIPE_SECRET_KEY
 	? new StripeClient(sharedEnvs.STRIPE_SECRET_KEY, {
-			apiVersion: '2024-06-20',
+			apiVersion: '2022-11-15',
 			typescript: true,
 		})
 	: undefined;
