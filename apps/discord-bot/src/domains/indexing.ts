@@ -251,6 +251,7 @@ export async function indexTextBasedChannel(
 	},
 ) {
 	let start = opts?.fromMessageId;
+
 	if (!opts?.skipIndexingEnabledCheck) {
 		const settings = await findChannelById(
 			channel.isThread() ? channel.parentId! : channel.id,
@@ -303,7 +304,14 @@ Thread: ${thread.id} | ${thread.name}
 Channel: ${channel.id} | ${channel.name}
 Server: ${channel.guildId} | ${channel.guild.name}`,
 			);
-			await indexTextBasedChannel(thread);
+			try {
+				await indexTextBasedChannel(thread);
+			} catch (error) {
+				container.logger.error(
+					`Error indexing thread ${thread.id} | ${thread.name}`,
+					error,
+				);
+			}
 		}
 	}
 	await storeIndexData(messages, channel);

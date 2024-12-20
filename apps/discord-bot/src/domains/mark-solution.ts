@@ -326,7 +326,11 @@ export async function markAsSolved(targetMessage: Message, user: User) {
 			question,
 			channelSettings.solutionTagId,
 		);
-		await indexTextBasedChannel(thread);
+		try {
+			await indexTextBasedChannel(thread);
+		} catch (error) {
+			console.log('Error indexing thread', error);
+		}
 
 		// TODO: This bottom part is a bit redundant but we want to make sure both exist in db
 		await upsertMessage(await toAOMessage(question));
