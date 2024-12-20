@@ -21,7 +21,7 @@ declare module '@sapphire/framework' {
 function getLogLevel() {
 	if (botEnv.NODE_ENV === 'test') return LogLevel.None;
 	if (botEnv.NODE_ENV === 'development') return LogLevel.Debug;
-	return LogLevel.Info;
+	return LogLevel.Debug;
 }
 
 export function createClient(override: Partial<ClientOptions> = {}) {
