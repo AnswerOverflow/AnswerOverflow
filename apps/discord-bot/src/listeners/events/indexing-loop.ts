@@ -28,9 +28,9 @@ export class Indexing extends Listener {
 			await indexServers(client);
 		} else {
 			// wait 1 minute then index servers
-			setTimeout(async () => {
-				await indexServers(client);
-			}, 60000);
+			// setTimeout(async () => {
+			// 	await indexServers(client);
+			// }, 60000)
 		}
 	}
 }
