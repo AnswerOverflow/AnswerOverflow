@@ -1,8 +1,10 @@
+import { sharedEnvs } from '@answeroverflow/env/shared';
+
 // Vercel API is wrapped in a namespace to keep this file focused on addDomain and getDomainStatus
 namespace VercelAPI {
-	const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID;
-	const VERCEL_TEAM_ID = process.env.VERCEL_TEAM_ID;
-	const VERCEL_AUTH_TOKEN = process.env.VERCEL_AUTH_TOKEN;
+	const VERCEL_PROJECT_ID = sharedEnvs.PROJECT_ID_VERCEL;
+	const VERCEL_TEAM_ID = sharedEnvs.TEAM_ID_VERCEL;
+	const VERCEL_AUTH_TOKEN = sharedEnvs.AUTH_BEARER_TOKEN_VERCEL;
 
 	type DomainResponse = {
 		name: string;
