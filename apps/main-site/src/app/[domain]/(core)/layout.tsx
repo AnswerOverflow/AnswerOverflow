@@ -5,13 +5,14 @@ import { findServerByCustomDomain } from '@answeroverflow/core/server';
 import { Footer } from '@answeroverflow/ui/footer';
 import { notFound } from 'next/navigation';
 
-export default async function RootLayout({
-	children,
-	params,
-}: {
+export default async function RootLayout(props: {
 	children: React.ReactNode;
-	params: { domain: string };
+	params: Promise<{ domain: string }>;
 }) {
+	const params = await props.params;
+
+	const { children } = props;
+
 	const server = await findServerByCustomDomain(
 		decodeURIComponent(params.domain),
 	);

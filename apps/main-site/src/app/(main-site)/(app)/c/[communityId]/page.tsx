@@ -4,13 +4,14 @@ import { CommunityPage } from '@answeroverflow/ui/pages/CommunityPage';
 import { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 type Props = {
-	params: { communityId: string };
-	searchParams: {
+	params: Promise<{ communityId: string }>;
+	searchParams: Promise<{
 		uwu?: string;
-	};
+	}>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+	const params = await props.params;
 	const communityPageData = await findServerWithCommunityPageData({
 		idOrVanityUrl: params.communityId,
 		selectedChannel: undefined,
@@ -42,10 +43,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 		},
 	};
 }
-export default async function CommunityPageContainer({
-	params,
-	searchParams,
-}: Props) {
+export default async function CommunityPageContainer(props: Props) {
+	const searchParams = await props.searchParams;
+	const params = await props.params;
 	const communityPageData = await findServerWithCommunityPageData({
 		idOrVanityUrl: params.communityId,
 		selectedChannel: undefined,

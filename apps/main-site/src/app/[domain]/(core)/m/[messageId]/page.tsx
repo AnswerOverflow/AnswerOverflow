@@ -4,11 +4,12 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 type Props = {
-	params: { messageId: string };
+	params: Promise<{ messageId: string }>;
 };
 export const revalidate = 86400;
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+	const params = await props.params;
 	const data = await makeMessageResultPage(params.messageId, []);
 
 	if (!data) return {};
@@ -34,7 +35,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	};
 }
 
-export default async function MessageResult({ params }: Props) {
+export default async function MessageResult(props: Props) {
+	const params = await props.params;
 	const data = await makeMessageResultPage(params.messageId, []);
 
 	if (!data) {

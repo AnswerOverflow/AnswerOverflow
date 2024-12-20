@@ -3,8 +3,8 @@ import { GiSpiderWeb } from 'react-icons/gi';
 import { ActualLayout, getUserPageData } from './components';
 
 type Props = {
-	params: { userId: string };
-	searchParams: { s?: string };
+	params: Promise<{ userId: string }>;
+	searchParams: Promise<{ s?: string }>;
 };
 
 export default async function UserPage(props: Props) {

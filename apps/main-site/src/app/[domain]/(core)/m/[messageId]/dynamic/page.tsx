@@ -5,10 +5,11 @@ import { notFound } from 'next/navigation';
 
 import type { Metadata } from 'next';
 type Props = {
-	params: { messageId: string };
+	params: Promise<{ messageId: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+	const params = await props.params;
 	const data = await callAPI({
 		apiCall: (api) => api.messages.threadFromMessageId(params.messageId),
 		allowedErrors: 'NOT_FOUND',
@@ -37,7 +38,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	};
 }
 
-export default async function MessageResult({ params }: Props) {
+export default async function MessageResult(props: Props) {
+	const params = await props.params;
 	const data = await callAPI({
 		apiCall: (api) => api.messages.threadFromMessageId(params.messageId),
 		allowedErrors: 'NOT_FOUND',

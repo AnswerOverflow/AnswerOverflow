@@ -6,16 +6,15 @@ import { z } from 'zod';
 
 export { generateMetadata } from '../page';
 
-export default async function CommunityChannelPage({
-	params,
-	searchParams,
-}: {
-	params: { communityId: string; channelId: string };
-	searchParams: {
+export default async function CommunityChannelPage(props: {
+	params: Promise<{ communityId: string; channelId: string }>;
+	searchParams: Promise<{
 		page: string | undefined;
 		uwu?: string | undefined;
-	};
+	}>;
 }) {
+	const searchParams = await props.searchParams;
+	const params = await props.params;
 	const page = z.coerce.number().parse(searchParams.page ?? '0');
 	if (searchParams.page && page === 0) {
 		return redirect(`/c/${params.communityId}/${params.channelId}`);

@@ -104,32 +104,30 @@ export const LeftSidebar = () => (
 			<span className="px-4 font-semibold text-accent-foreground">Topics</span>
 			<Accordion type="multiple" className="py-2">
 				{categories.map((category) => (
-					<>
-						<AccordionItem
-							value={category.name}
-							className="border-0"
-							key={category.name}
-						>
-							<AccordionTrigger className="flex flex-row items-center justify-between gap-3 rounded-md px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-								<div className="flex flex-row items-center justify-start gap-3">
-									{category.icon}
-									{category.name}
-								</div>
-							</AccordionTrigger>
-							<AccordionContent className="flex flex-col">
-								{category.servers.map((server) => (
-									<LinkButton
-										href={`/c/${server.id}`}
-										key={server.id}
-										variant="ghost"
-										className="ml-7 w-full justify-start rounded-none border-l-2"
-									>
-										{server.name}
-									</LinkButton>
-								))}
-							</AccordionContent>
-						</AccordionItem>
-					</>
+					<AccordionItem
+						value={category.name}
+						className="border-0"
+						key={category.name}
+					>
+						<AccordionTrigger className="flex flex-row items-center justify-between gap-3 rounded-md px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+							<div className="flex flex-row items-center justify-start gap-3">
+								{category.icon}
+								{category.name}
+							</div>
+						</AccordionTrigger>
+						<AccordionContent className="flex flex-col">
+							{category.servers.map((server) => (
+								<LinkButton
+									href={`/c/${server.id}`}
+									key={server.id}
+									variant="ghost"
+									className="ml-7 w-full justify-start rounded-none border-l-2"
+								>
+									{server.name}
+								</LinkButton>
+							))}
+						</AccordionContent>
+					</AccordionItem>
 				))}
 			</Accordion>
 		</div>

@@ -4,8 +4,8 @@ import { GiSpiderWeb } from 'react-icons/gi';
 import { ActualLayout, getUserPageData } from '../components';
 
 type Props = {
-	params: { userId: string; domain: string };
-	searchParams: { s?: string };
+	params: Promise<{ userId: string; domain: string }>;
+	searchParams: Promise<{ s?: string }>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {

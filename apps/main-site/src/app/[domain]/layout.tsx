@@ -3,11 +3,10 @@ import { makeServerIconLink } from '@answeroverflow/ui/server-icon';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
-export async function generateMetadata({
-	params,
-}: {
-	params: { domain: string };
+export async function generateMetadata(props: {
+	params: Promise<{ domain: string }>;
 }): Promise<Metadata> {
+	const params = await props.params;
 	// read route params
 	const tenant = await findServerByCustomDomain(
 		decodeURIComponent(params.domain),
@@ -48,13 +47,14 @@ export async function generateMetadata({
 	};
 }
 
-export default function Layout({
-	children,
-	params,
-}: {
+export default async function Layout(props: {
 	children: React.ReactNode;
-	params: { domain: string };
+	params: Promise<{ domain: string }>;
 }) {
+	const params = await props.params;
+
+	const { children } = props;
+
 	void findServerByCustomDomain(decodeURIComponent(params.domain));
 	return <>{children}</>;
 }

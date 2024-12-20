@@ -6,18 +6,17 @@ import { z } from 'zod';
 export { generateMetadata } from '../../layout';
 
 type Props = {
-	params: { domain: string; channelId: string };
-	searchParams: {
+	params: Promise<{ domain: string; channelId: string }>;
+	searchParams: Promise<{
 		page: string | undefined;
-	};
+	}>;
 };
 
 export const revalidate = 86400;
 
-export default async function TenantChannelPage({
-	params,
-	searchParams,
-}: Props) {
+export default async function TenantChannelPage(props: Props) {
+	const searchParams = await props.searchParams;
+	const params = await props.params;
 	const page = z.coerce.number().parse(searchParams.page ?? '0');
 	if (searchParams.page && page === 0) {
 		return redirect(`/c/${params.channelId}`);

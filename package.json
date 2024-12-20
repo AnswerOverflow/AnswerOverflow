@@ -25,7 +25,8 @@
 	"patchedDependencies": {
 		"simple-markdown@0.7.3": "patches/simple-markdown@0.7.3.patch",
 		"@opentelemetry/otlp-exporter-base@0.52.0": "patches/@opentelemetry__otlp-exporter-base@0.52.0.patch",
-		"@tremor/react@3.18.3": "patches/@tremor%2Freact@3.18.3.patch"
+		"@tremor/react@3.18.3": "patches/@tremor%2Freact@3.18.3.patch",
+		"next-auth@4.23.1": "patches/next-auth@4.23.1.patch"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.3",
@@ -33,11 +34,8 @@
 		"dotenv": "^16.4.5"
 	},
 	"overrides": {
-		"@types/react": "npm:types-react@rc",
-		"@types/react-dom": "npm:types-react-dom@rc",
 		"recharts": "2.13.0",
-		"react-is": "19.0.0-rc-6f23540c7d-20240528",
-		"next": "15.0.0-canary.179"
+		"react-is": "19.0.0-rc-6f23540c7d-20240528"
 	},
 	"packageManager": "bun@1.1.40"
 }
