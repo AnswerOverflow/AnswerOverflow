@@ -26,6 +26,11 @@ export class Indexing extends Listener {
 		});
 		if (botEnv.NODE_ENV !== 'production') {
 			await indexServers(client);
+		} else {
+			// wait 1 minute then index servers
+			setTimeout(async () => {
+				await indexServers(client);
+			}, 60000);
 		}
 	}
 }
