@@ -36,7 +36,7 @@ export async function createDiscordAccount(
 ) {
 	const deletedAccount = await findIgnoredDiscordAccountById(data.id);
 	if (deletedAccount)
-		throw new DBError('Account is ignored', 'IGNORED_ACCOUNT');
+		return getDefaultDiscordAccount({ id: data.id, name: data.name });
 	await db.insert(dbDiscordAccounts).values(discordAccountSchema.parse(data));
 	const createdAccount = await findDiscordAccountById(data.id);
 	if (!createdAccount) throw new Error('Failed to create account');

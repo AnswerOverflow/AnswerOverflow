@@ -78,7 +78,14 @@ async function indexServer(guild: Guild) {
 			channel.type === ChannelType.GuildAnnouncement ||
 			channel.type === ChannelType.GuildForum;
 		if (isIndexableChannelType) {
-			await indexRootChannel(channel);
+			try {
+				await indexRootChannel(channel);
+			} catch (error) {
+				container.logger.error(
+					`Error indexing channel ${channel.id} | ${channel.name}`,
+					error,
+				);
+			}
 		}
 	}
 }

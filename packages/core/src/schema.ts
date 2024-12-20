@@ -280,7 +280,7 @@ export const dbServers = mysqlTable(
 		return {
 			serverId: primaryKey(table.id),
 			serverIdKey: unique('Server_id_key').on(table.id),
-			serverVanityInviteCodeKey: unique('Server_vanityInviteCode_key').on(
+			serverVanityInviteCodeKey: index('Server_vanityInviteCode_idx').on(
 				table.vanityInviteCode,
 			),
 			serverVanityUrlKey: unique('Server_vanityUrl_key').on(table.vanityUrl),
