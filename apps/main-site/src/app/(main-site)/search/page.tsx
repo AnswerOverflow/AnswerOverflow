@@ -6,13 +6,14 @@ import { Metadata } from 'next';
 import { ZeroState } from './zero-state';
 
 type Props = {
-	searchParams: {
+	searchParams: Promise<{
 		q?: string | string[];
 		s?: string | string[];
-	};
+	}>;
 };
 
-export function generateMetadata({ searchParams }: Props): Metadata {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+	const searchParams = await props.searchParams;
 	const query = searchParams.q ? (searchParams.q as string) : undefined;
 	return {
 		title: query
@@ -29,17 +30,16 @@ export function generateMetadata({ searchParams }: Props): Metadata {
 }
 
 export default async function Search(props: Props) {
-	if (!props.searchParams.q || props.searchParams.q.length === 0) {
+	const searchParams = await props.searchParams;
+	if (!searchParams.q || searchParams.q.length === 0) {
 		return <ZeroState />;
 	}
 
 	const results = await callAPI({
 		apiCall: (api) =>
 			api.messages.search({
-				query: props.searchParams.q ? (props.searchParams.q as string) : '',
-				serverId: props.searchParams.s
-					? (props.searchParams.s as string)
-					: undefined,
+				query: searchParams.q ? (searchParams.q as string) : '',
+				serverId: searchParams.s ? (searchParams.s as string) : undefined,
 			}),
 	});
 	return (

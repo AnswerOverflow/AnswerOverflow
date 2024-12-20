@@ -1,0 +1,56 @@
+diff --git a/next/index.js b/next/index.js
+index b17feef40cfd15e9c7d554f9feaa4cf4f2ed1d15..fef941697b790c0f4edcc749c6b878bc46f84a2d 100644
+--- a/next/index.js
++++ b/next/index.js
+@@ -70,8 +70,8 @@ async function NextAuthRouteHandler(req, context, options) {
+     req: {
+       body,
+       query,
+-      cookies: Object.fromEntries(cookies().getAll().map(c => [c.name, c.value])),
+-      headers: Object.fromEntries(headers()),
++      cookies: Object.fromEntries((await cookies()).getAll().map(c => [c.name, c.value])),
++      headers: Object.fromEntries(await headers()),
+       method: req.method,
+       action: nextauth === null || nextauth === void 0 ? void 0 : nextauth[0],
+       providerId: nextauth === null || nextauth === void 0 ? void 0 : nextauth[1],
+@@ -135,8 +135,8 @@ async function getServerSession(...args) {
+     } = require("next/headers");
+ 
+     req = {
+-      headers: Object.fromEntries(headers()),
+-      cookies: Object.fromEntries(cookies().getAll().map(c => [c.name, c.value]))
++      headers: Object.fromEntries(await headers()),
++      cookies: Object.fromEntries((await cookies()).getAll().map(c => [c.name, c.value]))
+     };
+     res = {
+       getHeader() {},
+diff --git a/src/next/index.ts b/src/next/index.ts
+index 79a76ca12c7fd6db537ad4abc71705253a6f16e6..34cbceabe09b9b581363a73af66b9658c0dfce7f 100644
+--- a/src/next/index.ts
++++ b/src/next/index.ts
+@@ -82,11 +82,11 @@ async function NextAuthRouteHandler(
+       body,
+       query,
+       cookies: Object.fromEntries(
+-        cookies()
++        (await cookies())
+           .getAll()
+           .map((c) => [c.name, c.value])
+       ),
+-      headers: Object.fromEntries(headers() as Headers),
++      headers: Object.fromEntries(await headers() as Headers),
+       method: req.method,
+       action: nextauth?.[0] as AuthAction,
+       providerId: nextauth?.[1],
+@@ -186,9 +186,9 @@ export async function getServerSession<
+     // eslint-disable-next-line @typescript-eslint/no-var-requires
+     const { headers, cookies } = require("next/headers")
+     req = {
+-      headers: Object.fromEntries(headers() as Headers),
++      headers: Object.fromEntries(await headers() as Headers),
+       cookies: Object.fromEntries(
+-        cookies()
++        (await cookies())
+           .getAll()
+           .map((c) => [c.name, c.value])
+       ),

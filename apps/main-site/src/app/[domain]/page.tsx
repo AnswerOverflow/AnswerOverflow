@@ -10,11 +10,10 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 86400;
-export default async function TenantHome({
-	params,
-}: {
-	params: { domain: string };
+export default async function TenantHome(props: {
+	params: Promise<{ domain: string }>;
 }) {
+	const params = await props.params;
 	const domain = decodeURIComponent(params.domain);
 	const server = await findServerByCustomDomain(domain);
 	if (!server) {

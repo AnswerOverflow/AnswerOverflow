@@ -12,20 +12,21 @@ import { LinkButton } from '@answeroverflow/ui/ui/link-button';
 import { notFound } from 'next/navigation';
 
 export type Props = {
-	params: { userId: string; domain: string };
+	params: Promise<{ userId: string; domain: string }>;
 };
 
 export async function getUserPageData(props: Props) {
+	const params = await props.params;
 	const server = await findServerByCustomDomain(
-		decodeURIComponent(props.params.domain),
+		decodeURIComponent(params.domain),
 	);
-	const userInfo = await findDiscordAccountById(props.params.userId);
+	const userInfo = await findDiscordAccountById(params.userId);
 	if (!userInfo || !server || !server.customDomain) return notFound();
 	const [threads, comments] = await Promise.all([
-		findLatestThreadsFromAuthor(props.params.userId, {
+		findLatestThreadsFromAuthor(params.userId, {
 			serverId: server.id,
 		}),
-		findLatestCommentsFromAuthor(props.params.userId, {
+		findLatestCommentsFromAuthor(params.userId, {
 			serverId: server.id,
 		}),
 	]);

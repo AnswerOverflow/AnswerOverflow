@@ -16,21 +16,25 @@ import { ServerIcon } from '@answeroverflow/ui/server-icon';
 import { LinkButton } from '@answeroverflow/ui/ui/link-button';
 
 export type Props = {
-	params: { userId: string };
-	searchParams?: { s?: string };
+	params: Promise<{ userId: string }>;
+	searchParams: Promise<{ s?: string }>;
 };
 
 export async function getUserPageData(props: Props) {
-	const userInfo = await findDiscordAccountById(props.params.userId);
+	const params = await props.params;
+	const searchParams = await props.searchParams;
+	const { userId } = params;
+	const userInfo = await findDiscordAccountById(userId);
 	if (!userInfo) return notFound();
+	const { s } = searchParams;
 	const [threads, comments, serverIds] = await Promise.all([
-		findLatestThreadsFromAuthor(props.params.userId, {
-			serverId: props.searchParams?.s,
+		findLatestThreadsFromAuthor(userId, {
+			serverId: s,
 		}),
-		findLatestCommentsFromAuthor(props.params.userId, {
-			serverId: props.searchParams?.s,
+		findLatestCommentsFromAuthor(userId, {
+			serverId: s,
 		}),
-		findServersUserHasPostedIn(props.params.userId),
+		findServersUserHasPostedIn(userId),
 	]);
 	const servers = await findManyServersById(serverIds, {
 		includeKicked: false,
@@ -71,6 +75,8 @@ export async function ActualLayout(
 	} & Props,
 ) {
 	const { userInfo, servers } = await getUserPageData(props);
+	const { userId } = await props.params;
+	const { s } = await props.searchParams;
 	return (
 		<>
 			{servers.length > 1 && (
@@ -81,8 +87,8 @@ export async function ActualLayout(
 							<ServerSelect
 								server={x}
 								key={x.id}
-								userId={props.params.userId}
-								selected={x.id === props.searchParams?.s}
+								userId={userId}
+								selected={x.id === s}
 							/>
 						))}
 					</div>

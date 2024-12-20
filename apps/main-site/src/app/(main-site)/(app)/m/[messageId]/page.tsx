@@ -4,12 +4,13 @@ import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 
 type Props = {
-	params: { messageId: string };
-	searchParams?: { showAiChat?: boolean };
+	params: Promise<{ messageId: string }>;
+	searchParams?: Promise<{ showAiChat?: boolean }>;
 };
 
 export const revalidate = 86400;
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+	const params = await props.params;
 	const data = await makeMessageResultPage(params.messageId, []);
 
 	if (!data) return {};
@@ -35,7 +36,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	};
 }
 
-export default async function MessageResult({ params, searchParams }: Props) {
+export default async function MessageResult(props: Props) {
+	const searchParams = await props.searchParams;
+	const params = await props.params;
 	const data = await makeMessageResultPage(params.messageId, []);
 	if (!data) {
 		return notFound();

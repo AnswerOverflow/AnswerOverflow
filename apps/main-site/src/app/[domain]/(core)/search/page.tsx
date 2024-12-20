@@ -4,12 +4,13 @@ import { callAPI } from '@answeroverflow/ui/utils/trpc';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 type Props = {
-	searchParams: {
+	searchParams: Promise<{
 		q?: string | string[];
-	};
+	}>;
 };
 
-export function generateMetadata({ searchParams }: Props): Metadata {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+	const searchParams = await props.searchParams;
 	const query = searchParams.q ? (searchParams.q as string) : undefined;
 	return {
 		title: query ? `Search Results for "${query}"` : 'Search - Answer Overflow',
@@ -22,20 +23,21 @@ export function generateMetadata({ searchParams }: Props): Metadata {
 }
 
 export default async function Search(props: {
-	searchParams: {
+	searchParams: Promise<{
 		q?: string | string[];
-	};
-	params: {
+	}>;
+	params: Promise<{
 		domain: string;
-	};
+	}>;
 }) {
+	const searchParams = await props.searchParams;
 	const server = await findServerByCustomDomain(
-		decodeURIComponent(props.params.domain),
+		decodeURIComponent((await props.params).domain),
 	);
 	if (!server) {
 		return notFound();
 	}
-	if (!props.searchParams.q) {
+	if (!searchParams.q) {
 		return <SearchPage results={[]} tenant={server} />;
 	}
 
@@ -43,7 +45,7 @@ export default async function Search(props: {
 		apiCall: (api) =>
 			api.messages.search({
 				serverId: server.id,
-				query: props.searchParams.q ? (props.searchParams.q as string) : '',
+				query: searchParams.q ? (searchParams.q as string) : '',
 			}),
 	});
 	return <SearchPage results={results} tenant={server} />;

@@ -8,9 +8,7 @@ import { JsonLd } from 'react-schemaorg';
 import type { ProfilePage } from 'schema-dts';
 import { Props, getUserPageData } from './components';
 
-export async function generateMetadata(
-	props: Omit<Props, 'searchParams'>,
-): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
 	const { userInfo } = await getUserPageData(props);
 	return {
 		title: `${userInfo.name} Posts - Answer Overflow`,
@@ -25,10 +23,15 @@ export async function generateMetadata(
 	};
 }
 
-export default async function Layout(
-	props: { children: React.ReactNode } & Omit<Props, 'searchParams'>,
-) {
-	const { userInfo } = await getUserPageData(props);
+export default async function Layout(props: {
+	children: React.ReactNode;
+	params: { userId: string };
+	searchParams: { s?: string };
+}) {
+	const { userInfo } = await getUserPageData({
+		params: new Promise((resolve) => resolve({ userId: props.params.userId })),
+		searchParams: new Promise((resolve) => resolve(props.searchParams)),
+	});
 	return (
 		<main className="flex w-full justify-center pt-4">
 			<JsonLd<ProfilePage>

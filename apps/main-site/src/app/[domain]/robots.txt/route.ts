@@ -1,14 +1,13 @@
 export const runtime = 'edge';
-export function GET(
+export async function GET(
 	_req: Request,
-	{
-		params,
-	}: {
-		params: {
+	props: {
+		params: Promise<{
 			domain: string;
-		};
+		}>;
 	},
 ) {
+	const params = await props.params;
 	const domain = params.domain;
 	return new Response(
 		`User-agent: 008

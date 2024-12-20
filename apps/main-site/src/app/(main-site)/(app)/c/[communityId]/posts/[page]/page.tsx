@@ -2,10 +2,11 @@ import { findQuestionsForSitemapCached } from '@answeroverflow/core/sitemap';
 import { BlueLink } from '@answeroverflow/ui/ui/blue-link';
 
 type Props = {
-	params: { communityId: string; page: string };
+	params: Promise<{ communityId: string; page: string }>;
 };
 
-export default async function CommunityPosts({ params }: Props) {
+export default async function CommunityPosts(props: Props) {
+	const params = await props.params;
 	const lookup = await findQuestionsForSitemapCached(params.communityId);
 
 	if (!lookup) return <div>Community not found</div>;
