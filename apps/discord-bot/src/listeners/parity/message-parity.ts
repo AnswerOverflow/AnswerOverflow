@@ -16,8 +16,12 @@ import { toAOMessage } from '../../utils/conversions';
 })
 export class OnMessageDelete extends Listener {
 	public async run(message: Message) {
-		const msg = await findMessageById(message.id);
-		if (msg) await deleteMessage(message.id);
+		try {
+			const msg = await findMessageById(message.id);
+			if (msg) await deleteMessage(message.id);
+		} catch (error) {
+			console.error('Error in Message Delete Watcher:', error);
+		}
 	}
 }
 
@@ -27,7 +31,11 @@ export class OnMessageDelete extends Listener {
 })
 export class OnMessageBulkDelete extends Listener {
 	public async run(messages: Collection<Snowflake, Message>) {
-		await deleteManyMessages(messages.map((message) => message.id));
+		try {
+			await deleteManyMessages(messages.map((message) => message.id));
+		} catch (error) {
+			console.error('Error in Message Delete Bulk Watcher:', error);
+		}
 	}
 }
 
@@ -37,12 +45,16 @@ export class OnMessageBulkDelete extends Listener {
 })
 export class OnMessageUpdate extends Listener {
 	public async run(_: Message, newMessage: Message) {
-		const existing = await findMessageById(newMessage.id);
-		if (!existing) return;
-		const converted = await toAOMessage(newMessage);
-		await upsertMessage({
-			...converted,
-			questionId: existing.questionId,
-		});
+		try {
+			const existing = await findMessageById(newMessage.id);
+			if (!existing) return;
+			const converted = await toAOMessage(newMessage);
+			await upsertMessage({
+				...converted,
+				questionId: existing.questionId,
+			});
+		} catch (error) {
+			console.error('Error in Message Update Watcher:', error);
+		}
 	}
 }

@@ -32,7 +32,7 @@ export class ButtonHandler extends InteractionHandler {
 			if (error instanceof ConsentButtonInteractionParseError) {
 				return this.none();
 			}
-			throw error;
+			return this.none();
 		}
 	}
 
@@ -40,18 +40,36 @@ export class ButtonHandler extends InteractionHandler {
 		interaction: ButtonInteraction,
 		data: InteractionHandler.ParseResult<this>,
 	) {
-		const member = await interaction.guild?.members.fetch(interaction.user.id);
-		if (!member) return;
-		await updateUserConsent({
-			canPubliclyDisplayMessages: true,
-			consentSource: data.source,
-			member,
-			Error: (_, msg) => oneTimeStatusHandler(interaction, msg),
-			Ok: () =>
-				oneTimeStatusHandler(
-					interaction,
-					'You have provided consent to display your messages publicly.',
-				),
-		});
+		try {
+			const member = await interaction.guild?.members.fetch(
+				interaction.user.id,
+			);
+			if (!member) {
+				this.container.logger.error(
+					'Member not found in consent button interaction',
+				);
+				return;
+			}
+
+			await updateUserConsent({
+				canPubliclyDisplayMessages: true,
+				consentSource: data.source,
+				member,
+				Error: (_, msg) => oneTimeStatusHandler(interaction, msg),
+				Ok: () =>
+					oneTimeStatusHandler(
+						interaction,
+						'You have provided consent to display your messages publicly.',
+					),
+			});
+		} catch (error) {
+			this.container.logger.error('Error in consent button handler:', error);
+			await oneTimeStatusHandler(
+				interaction,
+				'An error occurred while processing your consent. Please try again later.',
+			).catch((e) =>
+				this.container.logger.error('Failed to send error message to user:', e),
+			);
+		}
 	}
 }

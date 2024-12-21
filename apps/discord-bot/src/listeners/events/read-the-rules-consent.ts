@@ -12,9 +12,13 @@ export class ReadTheRulesConsent extends Listener {
 		});
 	}
 	public async run(oldMember: GuildMember, newMember: GuildMember) {
-		await provideConsentOnReadTheRules({
-			oldMember,
-			newMember,
-		});
+		try {
+			await provideConsentOnReadTheRules({
+				oldMember,
+				newMember,
+			});
+		} catch (error) {
+			console.error('Error in ReadTheRulesConsent listener:', error);
+		}
 	}
 }

@@ -50,69 +50,88 @@ export class LeaderboardCommand extends Command {
 		);
 	}
 	public override async chatInputRun(interaction: ChatInputCommandInteraction) {
-		const isEphemeral = interaction.options.getBoolean('ephemeral') ?? false;
-		await interaction.deferReply({
-			ephemeral: isEphemeral,
-		});
-		const topUsers =
-			(await Analytics.getTopQuestionSolversForServer({
-				serverId: interaction.guildId!,
-			})) ?? {};
-
-		const keys = Object.keys(topUsers);
-		const toDisplay = await Promise.all(
-			keys.map((key) => {
-				const entry = topUsers[key];
-				if (!entry) {
-					return null;
-				}
-				return {
-					user: key,
-					questionsSolved: entry.aggregated_value,
-				};
-			}),
-		);
-
-		const embedDescription = toDisplay
-			.filter((x) => x !== null)
-			.slice(0, 10)
-			.sort((a, b) => b!.questionsSolved - a!.questionsSolved)
-			.map((x, i) => {
-				const user = x!.user;
-				const questionsSolved = x!.questionsSolved;
-				const medal = medalMap.get(i);
-				const msg = `<@${user}> - ${questionsSolved} solved`;
-				const position = i + 1;
-				const spacer = position < 10 ? '\u200B \u200B \u200B' : '\u200B ';
-				return medal
-					? `${medal}: ${msg}`
-					: ` ${spacer} ${position}\u200B: ${msg}`;
-			})
-			.join('\n');
-
-		const embed = new EmbedBuilder()
-			.setTitle('Leaderboard - Questions Solved')
-			.setDescription(embedDescription)
-			.setColor('#89D3F8')
-			.setTimestamp();
-
-		const components = isEphemeral
-			? []
-			: [
-					new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
-						makeDismissButton(interaction.user.id),
-					),
-				];
-		const user = interaction.guild?.members.cache.get(interaction.user.id);
-		if (user) {
-			trackDiscordEvent('Leaderboard Viewed', {
-				'Answer Overflow Account Id': interaction.user.id,
-				...memberToAnalyticsUser('User', user),
+		try {
+			const isEphemeral = interaction.options.getBoolean('ephemeral') ?? false;
+			await interaction.deferReply({
+				ephemeral: isEphemeral,
 			});
+			const topUsers =
+				(await Analytics.getTopQuestionSolversForServer({
+					serverId: interaction.guildId!,
+				})) ?? {};
+
+			const keys = Object.keys(topUsers);
+			const toDisplay = await Promise.all(
+				keys.map((key) => {
+					const entry = topUsers[key];
+					if (!entry) {
+						return null;
+					}
+					return {
+						user: key,
+						questionsSolved: entry.aggregated_value,
+					};
+				}),
+			);
+
+			const embedDescription = toDisplay
+				.filter((x) => x !== null)
+				.slice(0, 10)
+				.sort((a, b) => b!.questionsSolved - a!.questionsSolved)
+				.map((x, i) => {
+					const user = x!.user;
+					const questionsSolved = x!.questionsSolved;
+					const medal = medalMap.get(i);
+					const msg = `<@${user}> - ${questionsSolved} solved`;
+					const position = i + 1;
+					const spacer = position < 10 ? '\u200B \u200B \u200B' : '\u200B ';
+					return medal
+						? `${medal}: ${msg}`
+						: ` ${spacer} ${position}\u200B: ${msg}`;
+				})
+				.join('\n');
+
+			const embed = new EmbedBuilder()
+				.setTitle('Leaderboard - Questions Solved')
+				.setDescription(embedDescription)
+				.setColor('#89D3F8')
+				.setTimestamp();
+
+			const components = isEphemeral
+				? []
+				: [
+						new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+							makeDismissButton(interaction.user.id),
+						),
+					];
+			const user = interaction.guild?.members.cache.get(interaction.user.id);
+			if (user) {
+				trackDiscordEvent('Leaderboard Viewed', {
+					'Answer Overflow Account Id': interaction.user.id,
+					...memberToAnalyticsUser('User', user),
+				});
+			}
+			await interaction.editReply({
+				embeds: [embed],
+				components,
+			});
+		} catch (error) {
+			console.error('Error in leaderboard command:', error);
+
+			// If we haven't replied yet, send an error message
+			if (!interaction.replied && !interaction.deferred) {
+				await interaction.reply({
+					content: 'An error occurred while fetching the leaderboard.',
+					ephemeral: true,
+				});
+			} else {
+				// If we already deferred, edit the reply with error message
+				await interaction.editReply({
+					content: 'An error occurred while fetching the leaderboard.',
+					embeds: [],
+					components: [],
+				});
+			}
 		}
-		await interaction.editReply({
-			embeds: [embed],
-			components,
-		});
 	}
 }

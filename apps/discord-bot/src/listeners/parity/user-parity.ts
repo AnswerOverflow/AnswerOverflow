@@ -12,12 +12,16 @@ import { Events, User } from 'discord.js';
 })
 export class SyncOnUserUpdate extends Listener<typeof Events.UserUpdate> {
 	public async run(_: User, updated: User) {
-		const existing = await findDiscordAccountById(updated.id);
-		if (!existing) return;
-		await updateDiscordAccount({
-			id: updated.id,
-			avatar: updated.avatar,
-			name: updated.displayName,
-		});
+		try {
+			const existing = await findDiscordAccountById(updated.id);
+			if (!existing) return;
+			await updateDiscordAccount({
+				id: updated.id,
+				avatar: updated.avatar,
+				name: updated.displayName,
+			});
+		} catch (error) {
+			console.error('Error in SyncOnUserUpdate:', error);
+		}
 	}
 }

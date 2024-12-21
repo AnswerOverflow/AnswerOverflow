@@ -54,26 +54,31 @@ export class LoopStatus extends Listener {
 		// eslint-disable-next-line @typescript-eslint/no-misused-promises
 		setInterval(
 			async () => {
-				const statuses = getStatuses(this.container.client);
-				const status = statuses[statusIndex++];
-				if (!status) {
-					this.container.logger.error(
-						'No status found for index ',
-						statusIndex,
-					);
-					return;
+				try {
+					const statuses = getStatuses(this.container.client);
+					const status = statuses[statusIndex++];
+					if (!status) {
+						this.container.logger.error(
+							'No status found for index ',
+							statusIndex,
+						);
+						return;
+					}
+					if (statusIndex >= statuses.length) {
+						statusIndex = 0;
+					}
+					const statusText =
+						typeof status.getStatus === 'string'
+							? status.getStatus
+							: await status.getStatus();
+					await this.container.client.user?.setActivity(statusText, {
+						type: status.type,
+					});
+					this.container.logger.debug('Setting status to ' + statusText);
+				} catch (error) {
+					console.error('Error updating status:', error);
+					this.container.logger.error('Failed to update status:', error);
 				}
-				if (statusIndex >= statuses.length) {
-					statusIndex = 0; // instead of using modulo, we just reset the index to avoid overflow
-				}
-				const statusText =
-					typeof status.getStatus === 'string'
-						? status.getStatus
-						: await status.getStatus();
-				this.container.client.user?.setActivity(statusText, {
-					type: status.type,
-				});
-				this.container.logger.debug('Setting status to ' + statusText);
 			},
 			hoursToMs(Number(timeBetweenStatusChangesInHours)),
 		);

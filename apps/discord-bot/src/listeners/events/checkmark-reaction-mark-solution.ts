@@ -39,7 +39,7 @@ export class CheckmarkReactionMarkSolution extends Listener {
 					`Checkmark MarkSolutionError: ${error.message}`,
 				);
 			} else {
-				throw error;
+				console.error('Error in CheckmarkReactionMarkSolution:', error);
 			}
 		}
 	}
