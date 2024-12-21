@@ -55,10 +55,21 @@ export class MarkSolution extends Command {
 		interaction: ContextMenuCommandInteraction,
 	) {
 		if (!interaction.channel) return;
-		const targetMessage = await interaction.channel.messages.fetch(
-			interaction.targetId,
-		);
-		if (!targetMessage) return;
+		const targetMessage = await interaction.channel.messages
+			.fetch(interaction.targetId)
+			.catch((error) => {
+				console.error('Failed to fetch target message:', error);
+				return null;
+			});
+		if (!targetMessage) {
+			await interaction
+				.reply({
+					content: 'Failed to fetch the target message',
+					ephemeral: true,
+				})
+				.catch(console.error);
+			return;
+		}
 		if (!interaction.member) return;
 		const member = interaction.guild?.members.cache.get(interaction.user.id);
 		let errorStatus = undefined;
@@ -73,6 +84,7 @@ export class MarkSolution extends Command {
 				ephemeral: false,
 			});
 		} catch (error) {
+			console.error('Error in mark solution command:', error);
 			if (error instanceof MarkSolutionError) {
 				if (
 					error.reason === 'ALREADY_SOLVED_VIA_EMBED' ||
@@ -167,7 +179,7 @@ export class MarkSolution extends Command {
 						settings: channelSettings,
 					});
 					if (interaction.channel.isDMBased()) {
-						throw new Error('Cannot send message in DM');
+						return;
 					}
 					await interaction.channel?.send({
 						embeds: [embed],
@@ -179,7 +191,15 @@ export class MarkSolution extends Command {
 					await interaction.reply({ content: error.message, ephemeral: true });
 					errorStatus = error.reason;
 				}
-			} else throw error;
+			} else {
+				await interaction
+					.reply({
+						content: 'An unexpected error occurred',
+						ephemeral: true,
+					})
+					.catch(console.error);
+				return;
+			}
 		}
 		trackDiscordEvent('Mark Solution Application Command Used', {
 			Status: errorStatus ?? 'Success',

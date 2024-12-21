@@ -41,24 +41,31 @@ export class ConsentCommand extends Command {
 	public override async chatInputRun(interaction: ChatInputCommandInteraction) {
 		const consented = interaction.options.getBoolean('consent') ?? true;
 
-		await guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
-			updateUserConsent({
-				member,
-				consentSource: 'slash-command',
-				canPubliclyDisplayMessages: consented,
-				async Error(error) {
-					await oneTimeStatusHandler(interaction, error.message);
-				},
-				async Ok(result) {
-					// TODO: Better messages
-					await oneTimeStatusHandler(
-						interaction,
-						result.flags.canPubliclyDisplayMessages
-							? `You have consented to publicly display your messages from indexed channels in ${member.guild.name} on Answer Overflow.`
-							: `You have revoked your consent to publicly display your messages from indexed channels in ${member.guild.name} on Answer Overflow.`,
-					);
-				},
-			}),
-		);
+		try {
+			await guildTextChannelOnlyInteraction(interaction, async ({ member }) =>
+				updateUserConsent({
+					member,
+					consentSource: 'slash-command',
+					canPubliclyDisplayMessages: consented,
+					async Error(error) {
+						await oneTimeStatusHandler(interaction, error.message);
+					},
+					async Ok(result) {
+						await oneTimeStatusHandler(
+							interaction,
+							result.flags.canPubliclyDisplayMessages
+								? `You have consented to publicly display your messages from indexed channels in ${member.guild.name} on Answer Overflow.`
+								: `You have revoked your consent to publicly display your messages from indexed channels in ${member.guild.name} on Answer Overflow.`,
+						);
+					},
+				}),
+			);
+		} catch (error) {
+			this.container.logger.error(error);
+			await oneTimeStatusHandler(
+				interaction,
+				'An error occurred while processing your request. Please try again later.',
+			);
+		}
 	}
 }

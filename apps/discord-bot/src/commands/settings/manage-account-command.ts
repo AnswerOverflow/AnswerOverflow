@@ -228,42 +228,47 @@ export class OpenManageAccountMenuCommand extends Command {
 			isIgnoredAccount: boolean;
 		},
 	) {
-		switch (customId) {
-			case menuButtonIds.consentButton:
-			case menuButtonIds.revokeConsentButton:
-				await updateUserConsent({
-					member,
-					consentSource: 'manage-account-menu',
-					canPubliclyDisplayMessages: customId === menuButtonIds.consentButton,
-				});
-				state.userServerSettings.flags.canPubliclyDisplayMessages =
-					customId === menuButtonIds.consentButton;
-				break;
-			case menuButtonIds.enableMessageIndexingButton:
-			case menuButtonIds.disableMessageIndexingButton:
-				await updateUserServerIndexingEnabled({
-					member,
-					messageIndexingDisabled:
-						customId === menuButtonIds.disableMessageIndexingButton,
-					source: 'manage-account-menu',
-				});
-				state.userServerSettings.flags.messageIndexingDisabled =
-					customId === menuButtonIds.disableMessageIndexingButton;
-				break;
-			case menuButtonIds.ignoreGloballyButton:
-			case menuButtonIds.unignoreGloballyButton:
-				await callAPI({
-					apiCall: (router) =>
-						customId === menuButtonIds.ignoreGloballyButton
-							? router.discordAccounts.delete(member.id)
-							: router.discordAccounts.undelete(member.id),
-					getCtx: () => createMemberCtx(member),
-					Error: (error) => console.error(error.message),
-					Ok: () => {},
-				});
-				state.isIgnoredAccount =
-					customId === menuButtonIds.ignoreGloballyButton;
-				break;
+		try {
+			switch (customId) {
+				case menuButtonIds.consentButton:
+				case menuButtonIds.revokeConsentButton:
+					await updateUserConsent({
+						member,
+						consentSource: 'manage-account-menu',
+						canPubliclyDisplayMessages:
+							customId === menuButtonIds.consentButton,
+					});
+					state.userServerSettings.flags.canPubliclyDisplayMessages =
+						customId === menuButtonIds.consentButton;
+					break;
+				case menuButtonIds.enableMessageIndexingButton:
+				case menuButtonIds.disableMessageIndexingButton:
+					await updateUserServerIndexingEnabled({
+						member,
+						messageIndexingDisabled:
+							customId === menuButtonIds.disableMessageIndexingButton,
+						source: 'manage-account-menu',
+					});
+					state.userServerSettings.flags.messageIndexingDisabled =
+						customId === menuButtonIds.disableMessageIndexingButton;
+					break;
+				case menuButtonIds.ignoreGloballyButton:
+				case menuButtonIds.unignoreGloballyButton:
+					await callAPI({
+						apiCall: (router) =>
+							customId === menuButtonIds.ignoreGloballyButton
+								? router.discordAccounts.delete(member.id)
+								: router.discordAccounts.undelete(member.id),
+						getCtx: () => createMemberCtx(member),
+						Error: (error) => console.error(error.message),
+						Ok: () => {},
+					});
+					state.isIgnoredAccount =
+						customId === menuButtonIds.ignoreGloballyButton;
+					break;
+			}
+		} catch (error) {
+			console.error('Error handling button press:', error);
 		}
 	}
 }

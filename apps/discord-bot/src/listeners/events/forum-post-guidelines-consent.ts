@@ -8,10 +8,14 @@ export class ForumPostGuidelinesConsent extends Listener {
 	public run() {
 		this.container.events.subscribe((event) => {
 			if (event.action !== 'messageCreate') return;
-			void provideConsentOnForumChannelMessage(
-				event.data.raw[0],
-				event.data.channelSettings,
-			);
+			try {
+				void provideConsentOnForumChannelMessage(
+					event.data.raw[0],
+					event.data.channelSettings,
+				);
+			} catch (error) {
+				console.error('Error processing forum post guidelines consent:', error);
+			}
 		});
 	}
 }
