@@ -9,12 +9,12 @@ import {
 @ApplyOptions<Listener.Options>({ event: Events.ClientReady })
 export class SendMarkSolutionInstructionsOnThreadCreate extends Listener<Events.ClientReady> {
 	public run() {
-		this.container.events.subscribe((event) => {
+		this.container.events.subscribe(async (event) => {
 			if (event.action !== 'questionAsked') {
 				return;
 			}
 			try {
-				void sendMarkSolutionInstructionsInThread(
+				await sendMarkSolutionInstructionsInThread(
 					event.data.raw[0],
 					event.data.raw[1],
 					event.data.channelSettings,
@@ -33,7 +33,7 @@ export class SendMarkSolutionInstructionsOnThreadCreate extends Listener<Events.
 					'Unexpected error in SendMarkSolutionInstructions:',
 					error,
 				);
-				throw error;
+				return;
 			}
 		});
 	}

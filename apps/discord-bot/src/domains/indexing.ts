@@ -43,7 +43,14 @@ export function sortMessagesById<T extends Message>(messages: T[]) {
 export async function indexServers(client: Client) {
 	const indexingStartTime = Date.now();
 	container.logger.info(`Indexing ${client.guilds.cache.size} servers`);
-	for await (const guild of client.guilds.cache.values()) {
+	const guilds = [...client.guilds.cache.values()];
+	// sort so 1019350475847499849 is first
+	const convex = guilds.find((x) => x.id === '1019350475847499849');
+	const convexFirst = [
+		convex,
+		...guilds.filter((x) => x.id !== convex?.id),
+	].filter(Boolean);
+	for await (const guild of convexFirst) {
 		try {
 			await indexServer(guild);
 		} catch (error) {
