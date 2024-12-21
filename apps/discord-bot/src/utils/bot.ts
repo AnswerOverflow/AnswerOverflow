@@ -73,7 +73,7 @@ export const login = async (client: SapphireClient) => {
 			`LOGGED IN AS: ${client.user?.displayName ?? 'UNKNOWN'}`,
 		);
 	} catch (error) {
-		client.logger.fatal(error);
+		client.logger.error(error);
 		// await client.destroy();
 		// throw error;
 	}
