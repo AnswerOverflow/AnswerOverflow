@@ -23,15 +23,19 @@ export class LoopSitemap extends Listener {
 			// every morning at 1 am pst
 			cronTime: '0 1 * * *',
 			onTick: async () => {
-				await generateSitemap();
-				const servers = await findAllServers({
-					includeCustomDomain: true,
-					includeKicked: false,
-				});
-				for await (const server of servers) {
-					await cacheQuestionsForSitemap(server.id);
-					// wait for 1 second
-					await new Promise((resolve) => setTimeout(resolve, 1000));
+				try {
+					await generateSitemap();
+					const servers = await findAllServers({
+						includeCustomDomain: true,
+						includeKicked: false,
+					});
+					for await (const server of servers) {
+						await cacheQuestionsForSitemap(server.id);
+						// wait for 1 second
+						await new Promise((resolve) => setTimeout(resolve, 1000));
+					}
+				} catch (error) {
+					console.error('Error in sitemap generation cron job:', error);
 				}
 			},
 			start: true,

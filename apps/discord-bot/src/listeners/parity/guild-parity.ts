@@ -122,48 +122,51 @@ function makeGuildEmbed(guild: Guild, joined: boolean) {
 @ApplyOptions<Listener.Options>({ once: true, event: Events.ClientReady })
 export class SyncOnReady extends Listener {
 	public async run() {
-		if (botEnv.NODE_ENV === 'production')
-			await new Promise((resolve) => setTimeout(resolve, 600 * 1000)); // give time for dbs to start up
-		// 1. Sync all of the servers to have the most up to date data
-		const guilds = this.container.client.guilds.cache.sort(
-			// sort by member count to give priority to larger servers
-			(a, b) => b.memberCount - a.memberCount,
-		);
-		// default values are dev servers
-		const activeServerIds = new Set(['300', '402']);
-		for await (const guild of guilds.values()) {
-			// eslint-disable-next-line no-await-in-loop
-			try {
-				this.container.logger.info(`Syncing guild ${guild.name}`);
-				await syncServer(guild);
-			} catch (error) {
-				this.container.logger.error(
-					`Error syncing guild ${guild.name}: ${error as string}`,
-				);
+		try {
+			if (botEnv.NODE_ENV === 'production')
+				await new Promise((resolve) => setTimeout(resolve, 600 * 1000));
+
+			const guilds = this.container.client.guilds.cache.sort(
+				(a, b) => b.memberCount - a.memberCount,
+			);
+			const activeServerIds = new Set(['300', '402']);
+			// 1. Sync all of the servers to have the most up to date data
+			for await (const guild of guilds.values()) {
+				// eslint-disable-next-line no-await-in-loop
+				try {
+					this.container.logger.info(`Syncing guild ${guild.name}`);
+					await syncServer(guild);
+				} catch (error) {
+					this.container.logger.error(
+						`Error syncing guild ${guild.name}: ${error as string}`,
+					);
+				}
+				// dont kick in error
+				activeServerIds.add(guild.id);
 			}
-			// dont kick in error
-			activeServerIds.add(guild.id);
-		}
-		// 2. For any servers that are in the database and not in the guilds the bot is in, mark them as kicked
-		const servers = botEnv.NODE_ENV === 'test' ? [] : await findAllServers();
-		const serversToMarkAsKicked = servers.filter(
-			(server) => !activeServerIds.has(server.id) && !server.kickedTime,
-		);
+			// 2. For any servers that are in the database and not in the guilds the bot is in, mark them as kicked
+			const servers = botEnv.NODE_ENV === 'test' ? [] : await findAllServers();
+			const serversToMarkAsKicked = servers.filter(
+				(server) => !activeServerIds.has(server.id) && !server.kickedTime,
+			);
 
-		for await (const server of serversToMarkAsKicked.values()) {
-			// eslint-disable-next-line no-await-in-loop
-			this.container.logger.info(`Marking server ${server.name} as kicked`);
-			await updateServer({
-				existing: server,
-				update: {
-					id: server.id,
-					kickedTime: new Date(),
-				},
-			});
-		}
+			for await (const server of serversToMarkAsKicked.values()) {
+				// eslint-disable-next-line no-await-in-loop
+				this.container.logger.info(`Marking server ${server.name} as kicked`);
+				await updateServer({
+					existing: server,
+					update: {
+						id: server.id,
+						kickedTime: new Date(),
+					},
+				});
+			}
 
-		for await (const server of guilds.values())
-			await leaveServerIfNecessary(server);
+			for await (const server of guilds.values())
+				await leaveServerIfNecessary(server);
+		} catch (error) {
+			console.error('Error in SyncOnReady:', error);
+		}
 	}
 }
 @ApplyOptions<Listener.Options>({
@@ -172,22 +175,26 @@ export class SyncOnReady extends Listener {
 })
 export class SyncOnJoin extends Listener {
 	public async run(guild: Guild) {
-		const leftServer = await leaveServerIfNecessary(guild);
-		if (leftServer) return;
-		const synced = await syncServer(guild);
-		trackDiscordEvent('Server Join', {
-			...serverWithDiscordInfoToAnalyticsData({
-				guild,
-				serverWithSettings: synced,
-			}),
-			'Answer Overflow Account Id': guild.ownerId, // <---TODO: Not a great id to track with but best we've got
-		});
-		if (botEnv.NODE_ENV !== 'test') {
-			const rhysUser =
-				await this.container.client.users.fetch('523949187663134754');
-			await rhysUser.send({
-				embeds: [makeGuildEmbed(guild, true)],
+		try {
+			const leftServer = await leaveServerIfNecessary(guild);
+			if (leftServer) return;
+			const synced = await syncServer(guild);
+			trackDiscordEvent('Server Join', {
+				...serverWithDiscordInfoToAnalyticsData({
+					guild,
+					serverWithSettings: synced,
+				}),
+				'Answer Overflow Account Id': guild.ownerId, // <---TODO: Not a great id to track with but best we've got
 			});
+			if (botEnv.NODE_ENV !== 'test') {
+				const rhysUser =
+					await this.container.client.users.fetch('523949187663134754');
+				await rhysUser.send({
+					embeds: [makeGuildEmbed(guild, true)],
+				});
+			}
+		} catch (error) {
+			console.error('Error in SyncOnJoin:', error);
 		}
 	}
 }
@@ -203,26 +210,30 @@ export class SyncOnJoin extends Listener {
 })
 export class SyncOnDelete extends Listener {
 	public async run(guild: Guild) {
-		const upserted = await upsertServer({
-			create: {
-				...toAOServer(guild),
-				kickedTime: new Date(),
-			},
-			update: { kickedTime: new Date() },
-		});
-		trackDiscordEvent('Server Leave', {
-			'Answer Overflow Account Id': guild.ownerId, // <---TODO: Not a great id to track with but best we've got
-			...serverWithDiscordInfoToAnalyticsData({
-				guild,
-				serverWithSettings: upserted,
-			}),
-		});
-		if (botEnv.NODE_ENV !== 'test') {
-			const rhysUser =
-				await this.container.client.users.fetch('523949187663134754');
-			await rhysUser.send({
-				embeds: [makeGuildEmbed(guild, false)],
+		try {
+			const upserted = await upsertServer({
+				create: {
+					...toAOServer(guild),
+					kickedTime: new Date(),
+				},
+				update: { kickedTime: new Date() },
 			});
+			trackDiscordEvent('Server Leave', {
+				'Answer Overflow Account Id': guild.ownerId, // <---TODO: Not a great id to track with but best we've got
+				...serverWithDiscordInfoToAnalyticsData({
+					guild,
+					serverWithSettings: upserted,
+				}),
+			});
+			if (botEnv.NODE_ENV !== 'test') {
+				const rhysUser =
+					await this.container.client.users.fetch('523949187663134754');
+				await rhysUser.send({
+					embeds: [makeGuildEmbed(guild, false)],
+				});
+			}
+		} catch (error) {
+			console.error('Error in SyncOnDelete:', error);
 		}
 	}
 }
@@ -233,6 +244,10 @@ export class SyncOnDelete extends Listener {
 })
 export class SyncOnUpdate extends Listener {
 	public async run(_: Guild, newGuild: Guild) {
-		await autoUpdateServerInfo(newGuild);
+		try {
+			await autoUpdateServerInfo(newGuild);
+		} catch (error) {
+			console.error('Error in SyncOnUpdate:', error);
+		}
 	}
 }

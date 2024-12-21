@@ -12,9 +12,16 @@ import { sentryLogger } from '../../utils/sentry';
 })
 export class ListenerErrorEvent extends Listener<typeof Events.ListenerError> {
 	public run(error: Error, payload: ListenerErrorPayload) {
-		sentryLogger('Listener error', {
-			error,
-			payload,
-		});
+		try {
+			console.error('Listener Error:', error);
+			console.error('Payload:', payload);
+
+			sentryLogger('Listener error', {
+				error,
+				payload,
+			});
+		} catch (e) {
+			console.error('Failed to handle listener error:', e);
+		}
 	}
 }

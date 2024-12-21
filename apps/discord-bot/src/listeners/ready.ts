@@ -18,8 +18,12 @@ export class UserEvent extends Listener {
 	private readonly style = dev ? yellow : blue;
 
 	public run() {
-		this.printBanner();
-		this.printStoreDebugInformation();
+		try {
+			this.printBanner();
+			this.printStoreDebugInformation();
+		} catch (error) {
+			this.container.logger.error('Error in ready listener:', error);
+		}
 	}
 
 	private printBanner() {
@@ -51,12 +55,16 @@ export class UserEvent extends Listener {
 	}
 
 	private printStoreDebugInformation() {
-		const { client, logger } = this.container;
-		const stores = [...client.stores.values()];
-		const last = stores.pop()!;
+		try {
+			const { client, logger } = this.container;
+			const stores = [...client.stores.values()];
+			const last = stores.pop()!;
 
-		for (const store of stores) logger.info(this.styleStore(store, false));
-		logger.info(this.styleStore(last, true));
+			for (const store of stores) logger.info(this.styleStore(store, false));
+			logger.info(this.styleStore(last, true));
+		} catch (error) {
+			this.container.logger.error('Error printing store information:', error);
+		}
 	}
 
 	private styleStore(store: Store<any>, last: boolean) {

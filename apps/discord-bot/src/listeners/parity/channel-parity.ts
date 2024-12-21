@@ -25,14 +25,18 @@ export class SyncOnUpdate extends Listener {
 		_: DMChannel | GuildChannel,
 		newChannel: DMChannel | GuildChannel,
 	) {
-		if (newChannel.type === ChannelType.DM) return;
-		const chnl = await findChannelById(newChannel.id);
-		if (!chnl) return;
+		try {
+			if (newChannel.type === ChannelType.DM) return;
+			const chnl = await findChannelById(newChannel.id);
+			if (!chnl) return;
 
-		await updateChannel({
-			old: chnl,
-			update: { id: newChannel.id, name: newChannel.name },
-		});
+			await updateChannel({
+				old: chnl,
+				update: { id: newChannel.id, name: newChannel.name },
+			});
+		} catch (error) {
+			console.error('Error in Channel Sync On Update:', error);
+		}
 	}
 }
 
@@ -42,9 +46,13 @@ export class SyncOnUpdate extends Listener {
 })
 export class ChannelSyncOnDelete extends Listener {
 	public async run(channel: Channel) {
-		const chnl = await findChannelById(channel.id);
-		if (!chnl) return;
-		await deleteChannel(channel.id);
+		try {
+			const chnl = await findChannelById(channel.id);
+			if (!chnl) return;
+			await deleteChannel(channel.id);
+		} catch (error) {
+			console.error('Error in Channel Sync On Delete:', error);
+		}
 	}
 }
 
@@ -54,9 +62,13 @@ export class ChannelSyncOnDelete extends Listener {
 })
 export class ThreadSyncOnDelete extends Listener {
 	public async run(thread: ThreadChannel) {
-		const chnl = await findChannelById(thread.id);
-		if (!chnl) return;
-		await deleteChannel(thread.id);
+		try {
+			const chnl = await findChannelById(thread.id);
+			if (!chnl) return;
+			await deleteChannel(thread.id);
+		} catch (error) {
+			console.error('Error in Thread Sync On Delete:', error);
+		}
 	}
 }
 
@@ -66,12 +78,16 @@ export class ThreadSyncOnDelete extends Listener {
 })
 export class ThreadSyncOnUpdate extends Listener {
 	public async run(_: ThreadChannel, newThread: ThreadChannel) {
-		const chnl = await findChannelById(newThread.id);
-		if (!chnl) return;
-		await updateChannel({
-			old: chnl,
-			update: { id: newThread.id, name: newThread.name },
-		});
+		try {
+			const chnl = await findChannelById(newThread.id);
+			if (!chnl) return;
+			await updateChannel({
+				old: chnl,
+				update: { id: newThread.id, name: newThread.name },
+			});
+		} catch (error) {
+			console.error('Error in Thread Sync On Update:', error);
+		}
 	}
 }
 
@@ -81,12 +97,16 @@ export class ThreadSyncOnUpdate extends Listener {
 })
 export class InviteSyncOnDelete extends Listener {
 	public async run(invite: Invite) {
-		const settings = await findChannelByInviteCode(invite.code);
-		if (!settings) return;
+		try {
+			const settings = await findChannelByInviteCode(invite.code);
+			if (!settings) return;
 
-		await updateChannel({
-			old: settings,
-			update: { id: settings.id, inviteCode: null },
-		});
+			await updateChannel({
+				old: settings,
+				update: { id: settings.id, inviteCode: null },
+			});
+		} catch (error) {
+			console.error('Error in Invite Sync On Delete:', error);
+		}
 	}
 }
