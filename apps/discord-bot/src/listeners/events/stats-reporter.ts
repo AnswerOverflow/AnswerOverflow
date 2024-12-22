@@ -165,6 +165,5 @@ export class StatsReporter extends Listener {
 			start: true,
 			timeZone: 'America/Los_Angeles',
 		});
-		await reportStats();
 	}
 }
