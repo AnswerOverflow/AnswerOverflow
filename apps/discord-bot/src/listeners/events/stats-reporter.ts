@@ -15,6 +15,21 @@ async function reportStats() {
 			type: 'number',
 			date_from: 'Last 24 hours',
 		});
+	const pageViewsFromGooglePromise = Analytics.queryClient!.query()
+		.addSeries('$pageview', {
+			sampling: 'total',
+			where: {
+				filters: {
+					compare: 'icontains',
+					property: '$referrer',
+					value: 'google',
+				},
+			},
+		})
+		.execute({
+			type: 'number',
+			date_from: 'Last 24 hours',
+		});
 	const newServersPromise = Analytics.queryClient!.query()
 		.addSeries('Server Join', {
 			sampling: 'total',
@@ -41,14 +56,19 @@ async function reportStats() {
 			type: 'number',
 			date_from: 'Last 24 hours',
 		});
-	const [totalPageViews, newServers, questionsAsked, serverInviteClicks] =
-		await Promise.all([
-			totalPageViewsPromise,
-			newServersPromise,
-			questionsAskedPromise,
-			serverInviteClicksPromise,
-		]);
-
+	const [
+		totalPageViews,
+		newServers,
+		questionsAsked,
+		serverInviteClicks,
+		pageViewsFromGoogle,
+	] = await Promise.all([
+		totalPageViewsPromise,
+		newServersPromise,
+		questionsAskedPromise,
+		serverInviteClicksPromise,
+		pageViewsFromGooglePromise,
+	]);
 	function prettyNumber(value: number) {
 		return value.toLocaleString();
 	}
@@ -65,9 +85,13 @@ async function reportStats() {
 	const serverInviteClicksRounded = prettyNumber(
 		serverInviteClicks.results['Server Invite Click'].aggregated_value,
 	);
+	const pageViewsFromGoogleRounded = prettyNumber(
+		pageViewsFromGoogle.results.$pageview.aggregated_value,
+	);
 	const wrapped = `
 Daily AO Stats
 Page Views  :${totalPageViewsRounded}
+From Google :${pageViewsFromGoogleRounded}
 New Servers :${newServersRounded}
 Questions   :${questionsAskedRounded}
 Invites Used:${serverInviteClicksRounded}`;
@@ -83,8 +107,8 @@ Invites Used:${serverInviteClicksRounded}`;
 
 	const response = (await content.json()) as number[][];
 	// add a row of 0s in between the header and the stats, remove the last row
-	response.splice(1, 0, Array(22).fill(0));
-	response.pop();
+	// response.splice(1, 0, Array(22).fill(0));
+	// response.pop();
 	const writeStatus = await fetch('https://rw.vestaboard.com/', {
 		body: JSON.stringify(response),
 		headers: {

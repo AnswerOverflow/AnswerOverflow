@@ -30,9 +30,9 @@ import { MessageFull } from '@answeroverflow/core/message';
 import { ChannelPublicWithFlags } from '@answeroverflow/core/zod';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { messageWithDiscordAccountToAnalyticsData } from '../hooks/events';
+import { HelpfulFeedback } from './helpful-feedback';
 import { JumpToSolution } from './jump-to-solution';
 import { MessageResultPageProvider } from './message-result-page-context';
-import { HelpfulFeedback } from './helpful-feedback';
 export type MessageResultPageProps = {
 	messages: MessageFull[];
 	server: ServerPublic;

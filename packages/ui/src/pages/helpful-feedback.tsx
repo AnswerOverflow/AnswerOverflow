@@ -1,10 +1,10 @@
 'use client';
 
-import * as React from 'react';
 import { ThumbsDown, ThumbsUp } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
+import * as React from 'react';
 import { MessagePageViewProps, trackEvent } from '../hooks/events';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 export function HelpfulFeedback(props: {
 	page: MessagePageViewProps;
