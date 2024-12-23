@@ -49,6 +49,9 @@ export type ViewOnDiscordClickProps = Pick<ServerProps, 'Server Id'> &
 
 export type EventMap = {
 	'Message Page View': MessagePageViewProps;
+	'Helpful Feedback Click': {
+		feedback: 'Yes' | 'No';
+	} & MessagePageViewProps;
 	'View On Discord Click': ViewOnDiscordClickProps;
 	'Getting Started Click': GettingStartedClickProps;
 	'Add To Server Click': AddToServerClickProps;

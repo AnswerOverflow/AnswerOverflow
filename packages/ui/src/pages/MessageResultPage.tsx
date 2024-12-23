@@ -32,6 +32,7 @@ import { sharedEnvs } from '@answeroverflow/env/shared';
 import { messageWithDiscordAccountToAnalyticsData } from '../hooks/events';
 import { JumpToSolution } from './jump-to-solution';
 import { MessageResultPageProvider } from './message-result-page-context';
+import { HelpfulFeedback } from './helpful-feedback';
 export type MessageResultPageProps = {
 	messages: MessageFull[];
 	server: ServerPublic;
@@ -50,7 +51,7 @@ export type MessageResultPageProps = {
 const JoinAnswerOverflowCard = () => (
 	<div
 		className={
-			'flex flex-col gap-4 rounded-md border-2 border-solid border-secondary p-4'
+			'flex flex-col gap-4 rounded-md border border-solid border-secondary p-4'
 		}
 	>
 		<span
@@ -298,9 +299,19 @@ export function MessageResultPage({
 					</div>
 				</div>
 			</div>
-			<div className="flex w-full flex-col justify-center gap-2 text-center xl:mt-6">
+			<div className="flex w-full flex-col justify-center gap-2 text-center ">
 				{adsEnabled && <CarbonAds />}
-				{!tenant && <JoinAnswerOverflowCard />}
+				<HelpfulFeedback
+					page={{
+						...channelToAnalyticsData(channel),
+						...serverToAnalyticsData(server),
+						...(thread && {
+							...threadToAnalyticsData(thread),
+							'Number of Messages': messages.length,
+						}),
+						...messageWithDiscordAccountToAnalyticsData(firstMessage),
+					}}
+				/>
 			</div>
 		</div>
 	);
