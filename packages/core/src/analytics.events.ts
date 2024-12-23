@@ -2,6 +2,1198 @@
 // While it's not recommended, you are free to modify it however you may need
 // Along with that, this file should be safe to commit to your source control and will contain no secrets
 export const events = {
+	'User Grant Consent': {
+		name: 'User Grant Consent',
+		properties: [
+			{
+				name: 'Answer Overflow Account Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Consent Source',
+				type: 'String',
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_disable',
+				type: 'Boolean',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'User Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'User Joined At',
+				type: 'Numeric',
+			},
+			{
+				name: 'User Time In Server In Ms',
+				type: 'DateTime',
+			},
+		],
+	},
+	'Helpful Feedback Click': {
+		name: 'Helpful Feedback Click',
+		properties: [
+			{
+				name: 'feedback',
+				type: 'String',
+			},
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_language_prefix',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: 'Channel Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Channel Invite Code',
+				type: 'String',
+			},
+			{
+				name: 'Channel Name',
+				type: 'String',
+			},
+			{
+				name: 'Channel Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Channel Type',
+				type: 'Numeric',
+			},
+			{
+				name: '$configured_session_timeout_ms',
+				type: 'DateTime',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$dead_clicks_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: 'Is Server',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: 'Message Author Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Message Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Number of Messages',
+				type: 'Numeric',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$recording_status',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$replay_script_config',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Server Name',
+				type: 'String',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: 'Thread Archived Timestamp',
+				type: 'DateTime',
+			},
+			{
+				name: 'Thread Name',
+				type: 'String',
+			},
+			{
+				name: 'Thread Parent Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Thread Type',
+				type: 'Numeric',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: '$timezone',
+				type: 'String',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	$identify: {
+		name: '$identify',
+		properties: [
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$anon_distinct_id',
+				type: 'String',
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_language_prefix',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$configured_session_timeout_ms',
+				type: 'DateTime',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$dead_clicks_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_disable',
+				type: 'Boolean',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$pageview_id',
+				type: 'String',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: 'ph_keyword',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$recording_status',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$replay_script_config',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_start_reason',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: '$timezone',
+				type: 'String',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	'Community Page View': {
+		name: 'Community Page View',
+		properties: [
+			{
+				name: 'fbclid',
+				type: 'String',
+			},
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_language_prefix',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$configured_session_timeout_ms',
+				type: 'DateTime',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: 'dclid',
+				type: null,
+			},
+			{
+				name: '$dead_clicks_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: 'gad_source',
+				type: null,
+			},
+			{
+				name: 'gbraid',
+				type: null,
+			},
+			{
+				name: 'gclid',
+				type: 'String',
+			},
+			{
+				name: 'gclsrc',
+				type: null,
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: 'igshid',
+				type: null,
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: 'Is Server',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: 'li_fat_id',
+				type: null,
+			},
+			{
+				name: 'mc_cid',
+				type: null,
+			},
+			{
+				name: 'msclkid',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$pageview_id',
+				type: 'String',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: 'ph_keyword',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$process_person_profile',
+				type: 'Boolean',
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: 'rdt_cid',
+				type: null,
+			},
+			{
+				name: '$recording_status',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$replay_script_config',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Server Name',
+				type: 'String',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: '$timezone',
+				type: 'String',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: 'ttclid',
+				type: null,
+			},
+			{
+				name: 'twclid',
+				type: null,
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_campaign',
+				type: 'String',
+			},
+			{
+				name: 'utm_content',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: 'utm_term',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: 'wbraid',
+				type: null,
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
 	'Asked Question': {
 		name: 'Asked Question',
 		properties: [
@@ -14,12 +1206,8 @@ export const events = {
 				type: 'Boolean',
 			},
 			{
-				name: 'Bot Time In Server',
-				type: 'DateTime',
-			},
-			{
 				name: 'Bot Time In Server In Ms',
-				type: 'DateTime',
+				type: 'Numeric',
 			},
 			{
 				name: 'Channel Id',
@@ -102,10 +1290,6 @@ export const events = {
 				type: 'Boolean',
 			},
 			{
-				name: 'Invite Code',
-				type: 'String',
-			},
-			{
 				name: '$ip',
 				type: 'String',
 			},
@@ -147,7 +1331,7 @@ export const events = {
 			},
 			{
 				name: 'Question Asker Time In Server In Ms',
-				type: 'Numeric',
+				type: 'DateTime',
 			},
 			{
 				name: 'Question Channel Id',
@@ -223,8 +1407,8 @@ export const events = {
 			},
 		],
 	},
-	'Solved Question': {
-		name: 'Solved Question',
+	'Mark Solution Instructions Sent': {
+		name: 'Mark Solution Instructions Sent',
 		properties: [
 			{
 				name: 'Answer Overflow Account Id',
@@ -235,12 +1419,8 @@ export const events = {
 				type: 'Boolean',
 			},
 			{
-				name: 'Bot Time In Server',
-				type: 'DateTime',
-			},
-			{
 				name: 'Bot Time In Server In Ms',
-				type: 'DateTime',
+				type: 'Numeric',
 			},
 			{
 				name: 'Channel Id',
@@ -323,10 +1503,6 @@ export const events = {
 				type: 'Boolean',
 			},
 			{
-				name: 'Invite Code',
-				type: 'String',
-			},
-			{
 				name: '$ip',
 				type: 'String',
 			},
@@ -337,18 +1513,6 @@ export const events = {
 			{
 				name: '$lib_version',
 				type: 'String',
-			},
-			{
-				name: 'Mark As Solver Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Mark As Solver Joined At',
-				type: 'Numeric',
-			},
-			{
-				name: 'Mark As Solver Time In Server In Ms',
-				type: 'Numeric',
 			},
 			{
 				name: 'Mark Solution Enabled',
@@ -380,7 +1544,2170 @@ export const events = {
 			},
 			{
 				name: 'Question Asker Time In Server In Ms',
+				type: 'DateTime',
+			},
+			{
+				name: 'Question Channel Id',
 				type: 'Numeric',
+			},
+			{
+				name: 'Question Content Length',
+				type: 'Numeric',
+			},
+			{
+				name: 'Question Created At',
+				type: 'Numeric',
+			},
+			{
+				name: 'Question Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Question Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Question Thread Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Read the Rules Consent Enabled',
+				type: 'Boolean',
+			},
+			{
+				name: 'Send Mark Solution Instructions In New Threads Enabled',
+				type: 'Boolean',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Server Name',
+				type: 'String',
+			},
+			{
+				name: 'Thread Archived Timestamp',
+				type: 'DateTime',
+			},
+			{
+				name: 'Thread Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Thread Name',
+				type: 'String',
+			},
+			{
+				name: 'Thread Parent Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Thread Parent Name',
+				type: 'String',
+			},
+			{
+				name: 'Thread Parent Type',
+				type: 'Numeric',
+			},
+			{
+				name: 'Thread Type',
+				type: 'Numeric',
+			},
+		],
+	},
+	$autocapture: {
+		name: '$autocapture',
+		properties: [
+			{
+				name: 'fbclid',
+				type: 'String',
+			},
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_language_prefix',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$ce_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$configured_session_timeout_ms',
+				type: 'DateTime',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: 'dclid',
+				type: null,
+			},
+			{
+				name: '$dead_clicks_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$elements',
+				type: null,
+			},
+			{
+				name: '$elements_chain',
+				type: 'String',
+			},
+			{
+				name: '$el_text',
+				type: 'String',
+			},
+			{
+				name: '$event_type',
+				type: 'String',
+			},
+			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$external_click_url',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: 'gad_source',
+				type: null,
+			},
+			{
+				name: 'gbraid',
+				type: null,
+			},
+			{
+				name: 'gclid',
+				type: 'String',
+			},
+			{
+				name: 'gclsrc',
+				type: null,
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: 'igshid',
+				type: null,
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: 'li_fat_id',
+				type: null,
+			},
+			{
+				name: 'mc_cid',
+				type: null,
+			},
+			{
+				name: 'msclkid',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$pageview_id',
+				type: 'String',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: 'ph_keyword',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$process_person_profile',
+				type: 'Boolean',
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: 'rdt_cid',
+				type: null,
+			},
+			{
+				name: '$recording_status',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$replay_script_config',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_start_reason',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: '$timezone',
+				type: 'String',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: 'ttclid',
+				type: null,
+			},
+			{
+				name: 'twclid',
+				type: null,
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_campaign',
+				type: 'String',
+			},
+			{
+				name: 'utm_content',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: 'utm_term',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: 'wbraid',
+				type: null,
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	'Message Page View': {
+		name: 'Message Page View',
+		properties: [
+			{
+				name: 'fbclid',
+				type: 'String',
+			},
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_language_prefix',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: 'Channel Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Channel Invite Code',
+				type: 'String',
+			},
+			{
+				name: 'Channel Name',
+				type: 'String',
+			},
+			{
+				name: 'Channel Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Channel Type',
+				type: 'Numeric',
+			},
+			{
+				name: '$configured_session_timeout_ms',
+				type: 'DateTime',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: 'dclid',
+				type: null,
+			},
+			{
+				name: '$dead_clicks_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: 'gad_source',
+				type: null,
+			},
+			{
+				name: 'gbraid',
+				type: null,
+			},
+			{
+				name: 'gclid',
+				type: 'String',
+			},
+			{
+				name: 'gclsrc',
+				type: null,
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: 'igshid',
+				type: null,
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: 'Is Server',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: 'li_fat_id',
+				type: null,
+			},
+			{
+				name: 'mc_cid',
+				type: null,
+			},
+			{
+				name: 'Message Author Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Message Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'msclkid',
+				type: 'String',
+			},
+			{
+				name: 'Number of Messages',
+				type: 'Numeric',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$pageview_id',
+				type: 'String',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: 'ph_keyword',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$process_person_profile',
+				type: 'Boolean',
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: 'rdt_cid',
+				type: null,
+			},
+			{
+				name: '$recording_status',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$replay_script_config',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Server Name',
+				type: 'String',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: 'Solution Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Thread Archived Timestamp',
+				type: 'DateTime',
+			},
+			{
+				name: 'Thread Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Thread Name',
+				type: 'String',
+			},
+			{
+				name: 'Thread Parent Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Thread Type',
+				type: 'Numeric',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: '$timezone',
+				type: 'String',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: 'ttclid',
+				type: null,
+			},
+			{
+				name: 'twclid',
+				type: null,
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_campaign',
+				type: 'String',
+			},
+			{
+				name: 'utm_content',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: 'utm_term',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: 'wbraid',
+				type: null,
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	$pageview: {
+		name: '$pageview',
+		properties: [
+			{
+				name: 'fbclid',
+				type: 'String',
+			},
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_language_prefix',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$configured_session_timeout_ms',
+				type: 'DateTime',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: 'dclid',
+				type: null,
+			},
+			{
+				name: '$dead_clicks_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: 'gad_source',
+				type: null,
+			},
+			{
+				name: 'gbraid',
+				type: null,
+			},
+			{
+				name: 'gclid',
+				type: 'String',
+			},
+			{
+				name: 'gclsrc',
+				type: null,
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: 'igshid',
+				type: null,
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: 'li_fat_id',
+				type: null,
+			},
+			{
+				name: 'mc_cid',
+				type: null,
+			},
+			{
+				name: 'msclkid',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$pageview_id',
+				type: 'String',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: 'ph_keyword',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$prev_pageview_duration',
+				type: 'Numeric',
+			},
+			{
+				name: '$prev_pageview_last_content',
+				type: 'Numeric',
+			},
+			{
+				name: '$prev_pageview_last_content_percentage',
+				type: 'Numeric',
+			},
+			{
+				name: '$prev_pageview_last_scroll',
+				type: 'Numeric',
+			},
+			{
+				name: '$prev_pageview_last_scroll_percentage',
+				type: 'Numeric',
+			},
+			{
+				name: '$prev_pageview_max_content',
+				type: 'Numeric',
+			},
+			{
+				name: '$prev_pageview_max_content_percentage',
+				type: 'Numeric',
+			},
+			{
+				name: '$prev_pageview_max_scroll',
+				type: 'Numeric',
+			},
+			{
+				name: '$prev_pageview_max_scroll_percentage',
+				type: 'Numeric',
+			},
+			{
+				name: '$prev_pageview_pathname',
+				type: 'String',
+			},
+			{
+				name: '$process_person_profile',
+				type: 'Boolean',
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: 'rdt_cid',
+				type: null,
+			},
+			{
+				name: '$recording_status',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$replay_script_config',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_start_reason',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: '$timezone',
+				type: 'String',
+			},
+			{
+				name: 'title',
+				type: 'String',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: 'ttclid',
+				type: null,
+			},
+			{
+				name: 'twclid',
+				type: null,
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_campaign',
+				type: 'String',
+			},
+			{
+				name: 'utm_content',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: 'utm_term',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: 'wbraid',
+				type: null,
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	'Server Invite Click': {
+		name: 'Server Invite Click',
+		properties: [
+			{
+				name: 'fbclid',
+				type: 'String',
+			},
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_language_prefix',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: 'Button Location',
+				type: 'String',
+			},
+			{
+				name: 'Channel Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Channel Invite Code',
+				type: 'String',
+			},
+			{
+				name: 'Channel Name',
+				type: 'String',
+			},
+			{
+				name: 'Channel Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Channel Type',
+				type: 'Numeric',
+			},
+			{
+				name: '$configured_session_timeout_ms',
+				type: 'DateTime',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$dead_clicks_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: 'Invite Code',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: 'Is Server',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$pageview_id',
+				type: 'String',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: 'ph_keyword',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$process_person_profile',
+				type: 'Boolean',
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$recording_status',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$replay_script_config',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Server Name',
+				type: 'String',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: '$timezone',
+				type: 'String',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: 'utm_term',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	'Mark Solution Application Command Used': {
+		name: 'Mark Solution Application Command Used',
+		properties: [
+			{
+				name: 'Answer Overflow Account Id',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_disable',
+				type: 'Boolean',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'Status',
+				type: 'String',
+			},
+			{
+				name: 'User Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'User Joined At',
+				type: 'Numeric',
+			},
+			{
+				name: 'User Time In Server In Ms',
+				type: 'DateTime',
+			},
+		],
+	},
+	'Dismiss Button Clicked': {
+		name: 'Dismiss Button Clicked',
+		properties: [
+			{
+				name: 'Answer Overflow Account Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Dismissed Message Type',
+				type: 'String',
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_disable',
+				type: 'Boolean',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: 'Message Channel Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Message Content Length',
+				type: 'Numeric',
+			},
+			{
+				name: 'Message Created At',
+				type: 'Numeric',
+			},
+			{
+				name: 'Message Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Message Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Message Thread Id',
+				type: 'Numeric',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'User Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'User Joined At',
+				type: 'Numeric',
+			},
+			{
+				name: 'User Time In Server In Ms',
+				type: 'DateTime',
+			},
+		],
+	},
+	'Solved Question': {
+		name: 'Solved Question',
+		properties: [
+			{
+				name: 'Answer Overflow Account Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Auto Thread Enabled',
+				type: 'Boolean',
+			},
+			{
+				name: 'Bot Time In Server In Ms',
+				type: 'Numeric',
+			},
+			{
+				name: 'Channel Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Channel Invite Code',
+				type: 'String',
+			},
+			{
+				name: 'Channel Name',
+				type: 'String',
+			},
+			{
+				name: 'Channel Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Channel Solution Tag Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Channel Type',
+				type: 'Numeric',
+			},
+			{
+				name: 'Forum Guidelines Consent Enabled',
+				type: 'Boolean',
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_disable',
+				type: 'Boolean',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: 'Indexing Enabled',
+				type: 'Boolean',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: 'Mark As Solver Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Mark As Solver Joined At',
+				type: 'Numeric',
+			},
+			{
+				name: 'Mark As Solver Time In Server In Ms',
+				type: 'DateTime',
+			},
+			{
+				name: 'Mark Solution Enabled',
+				type: 'Boolean',
+			},
+			{
+				name: 'Number of Messages',
+				type: 'Numeric',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: 'Question Asker Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Question Asker Joined At',
+				type: 'Numeric',
+			},
+			{
+				name: 'Question Asker Time In Server In Ms',
+				type: 'DateTime',
 			},
 			{
 				name: 'Question Channel Id',
@@ -496,190 +3823,8 @@ export const events = {
 			},
 		],
 	},
-	'Mark Solution Application Command Used': {
-		name: 'Mark Solution Application Command Used',
-		properties: [
-			{
-				name: 'Answer Overflow Account Id',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_disable',
-				type: 'Boolean',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-			{
-				name: 'Status',
-				type: 'String',
-			},
-			{
-				name: 'User Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'User Joined At',
-				type: 'Numeric',
-			},
-			{
-				name: 'User Time In Server In Ms',
-				type: 'Numeric',
-			},
-		],
-	},
-	$groupidentify: {
-		name: '$groupidentify',
-		properties: [
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_disable',
-				type: 'Boolean',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-		],
-	},
-	$pageview: {
-		name: '$pageview',
+	'Join Answer Overflow From Message Result Page': {
+		name: 'Join Answer Overflow From Message Result Page',
 		properties: [
 			{
 				name: '$active_feature_flags',
@@ -698,8 +3843,16 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$browser_language_prefix',
+				type: 'String',
+			},
+			{
 				name: '$browser_version',
 				type: 'Numeric',
+			},
+			{
+				name: '$configured_session_timeout_ms',
+				type: 'DateTime',
 			},
 			{
 				name: '$console_log_recording_enabled_server_side',
@@ -708,6 +3861,10 @@ export const events = {
 			{
 				name: '$current_url',
 				type: 'String',
+			},
+			{
+				name: '$dead_clicks_enabled_server_side',
+				type: 'Boolean',
 			},
 			{
 				name: '$device',
@@ -722,11 +3879,31 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
 				name: '$feature/enable-ads-on-post-page',
 				type: 'String',
 			},
 			{
 				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
 				type: null,
 			},
 			{
@@ -746,6 +3923,10 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
 				name: '$geoip_country_name',
 				type: 'String',
 			},
@@ -762,11 +3943,31 @@ export const events = {
 				type: 'Numeric',
 			},
 			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
 				name: '$geoip_subdivision_1_code',
 				type: 'String',
 			},
 			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
 				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
 				type: 'String',
 			},
 			{
@@ -778,6 +3979,10 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
 				name: '$insert_id',
 				type: 'String',
 			},
@@ -786,8 +3991,24 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: 'Is Server',
+				type: 'Boolean',
+			},
+			{
 				name: '$lib',
 				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
 			},
 			{
 				name: '$lib_version',
@@ -800,10 +4021,6 @@ export const events = {
 			{
 				name: '$os_version',
 				type: 'Numeric',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
 			},
 			{
 				name: '$pathname',
@@ -822,43 +4039,15 @@ export const events = {
 				type: null,
 			},
 			{
-				name: '$prev_pageview_last_content',
-				type: 'Numeric',
-			},
-			{
-				name: '$prev_pageview_last_content_percentage',
-				type: 'Numeric',
-			},
-			{
-				name: '$prev_pageview_last_scroll',
-				type: 'Numeric',
-			},
-			{
-				name: '$prev_pageview_last_scroll_percentage',
-				type: 'Numeric',
-			},
-			{
-				name: '$prev_pageview_max_content',
-				type: 'Numeric',
-			},
-			{
-				name: '$prev_pageview_max_content_percentage',
-				type: 'Numeric',
-			},
-			{
-				name: '$prev_pageview_max_scroll',
-				type: 'Numeric',
-			},
-			{
-				name: '$prev_pageview_max_scroll_percentage',
-				type: 'Numeric',
-			},
-			{
-				name: '$prev_pageview_pathname',
-				type: 'String',
+				name: '$process_person_profile',
+				type: 'Boolean',
 			},
 			{
 				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$recording_status',
 				type: 'String',
 			},
 			{
@@ -870,6 +4059,18 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$replay_script_config',
+				type: null,
+			},
+			{
 				name: '$screen_height',
 				type: 'Numeric',
 			},
@@ -878,12 +4079,20 @@ export const events = {
 				type: 'Numeric',
 			},
 			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
 				name: '$sent_at',
 				type: 'DateTime',
 			},
 			{
 				name: '$session_id',
 				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
 			},
 			{
 				name: '$session_recording_network_payload_capture',
@@ -898,7 +4107,7 @@ export const events = {
 				type: 'DateTime',
 			},
 			{
-				name: 'title',
+				name: '$timezone',
 				type: 'String',
 			},
 			{
@@ -918,14 +4127,26 @@ export const events = {
 				type: 'Numeric',
 			},
 			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
 				name: '$window_id',
 				type: 'String',
 			},
 		],
 	},
-	$autocapture: {
-		name: '$autocapture',
+	$rageclick: {
+		name: '$rageclick',
 		properties: [
+			{
+				name: 'fbclid',
+				type: 'String',
+			},
 			{
 				name: '$active_feature_flags',
 				type: null,
@@ -943,6 +4164,10 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$browser_language_prefix',
+				type: 'String',
+			},
+			{
 				name: '$browser_version',
 				type: 'Numeric',
 			},
@@ -951,12 +4176,20 @@ export const events = {
 				type: 'Numeric',
 			},
 			{
+				name: '$configured_session_timeout_ms',
+				type: 'DateTime',
+			},
+			{
 				name: '$console_log_recording_enabled_server_side',
 				type: 'Boolean',
 			},
 			{
 				name: '$current_url',
 				type: 'String',
+			},
+			{
+				name: '$dead_clicks_enabled_server_side',
+				type: 'Boolean',
 			},
 			{
 				name: '$device',
@@ -987,11 +4220,35 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$external_click_url',
+				type: 'String',
+			},
+			{
 				name: '$feature/enable-ads-on-post-page',
 				type: 'String',
 			},
 			{
 				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
 				type: null,
 			},
 			{
@@ -1011,6 +4268,10 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
 				name: '$geoip_country_name',
 				type: 'String',
 			},
@@ -1027,11 +4288,31 @@ export const events = {
 				type: 'Numeric',
 			},
 			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
 				name: '$geoip_subdivision_1_code',
 				type: 'String',
 			},
 			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
 				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
 				type: 'String',
 			},
 			{
@@ -1043,6 +4324,10 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
 				name: '$insert_id',
 				type: 'String',
 			},
@@ -1051,8 +4336,20 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
 				name: '$lib',
 				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
 			},
 			{
 				name: '$lib_version',
@@ -1087,7 +4384,15 @@ export const events = {
 				type: null,
 			},
 			{
+				name: '$process_person_profile',
+				type: 'Boolean',
+			},
+			{
 				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$recording_status',
 				type: 'String',
 			},
 			{
@@ -1099,6 +4404,18 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$replay_script_config',
+				type: null,
+			},
+			{
 				name: '$screen_height',
 				type: 'Numeric',
 			},
@@ -1107,12 +4424,20 @@ export const events = {
 				type: 'Numeric',
 			},
 			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
 				name: '$sent_at',
 				type: 'DateTime',
 			},
 			{
 				name: '$session_id',
 				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
 			},
 			{
 				name: '$session_recording_network_payload_capture',
@@ -1127,11 +4452,27 @@ export const events = {
 				type: 'DateTime',
 			},
 			{
+				name: '$timezone',
+				type: 'String',
+			},
+			{
 				name: 'token',
 				type: 'String',
 			},
 			{
 				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_campaign',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
 				type: 'String',
 			},
 			{
@@ -1143,213 +4484,12 @@ export const events = {
 				type: 'Numeric',
 			},
 			{
-				name: '$window_id',
-				type: 'String',
-			},
-		],
-	},
-	$identify: {
-		name: '$identify',
-		properties: [
-			{
-				name: '$active_feature_flags',
+				name: '$web_vitals_allowed_metrics',
 				type: null,
 			},
 			{
-				name: '$anon_distinct_id',
-				type: 'String',
-			},
-			{
-				name: '$autocapture_disabled_server_side',
+				name: '$web_vitals_enabled_server_side',
 				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$console_log_recording_enabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_disable',
-				type: 'Boolean',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$os_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$raw_user_agent',
-				type: 'String',
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: '$session_recording_network_payload_capture',
-				type: null,
-			},
-			{
-				name: '$session_recording_recorder_version_server_side',
-				type: 'String',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$user_id',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
 			},
 			{
 				name: '$window_id',
@@ -1357,11 +4497,15 @@ export const events = {
 			},
 		],
 	},
-	$create_alias: {
-		name: '$create_alias',
+	'User Joined Server': {
+		name: 'User Joined Server',
 		properties: [
 			{
-				name: 'alias',
+				name: 'Answer Overflow Account Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Bot Time In Server In Ms',
 				type: 'Numeric',
 			},
 			{
@@ -1437,209 +4581,8 @@ export const events = {
 				type: null,
 			},
 			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-		],
-	},
-	'Message Page View': {
-		name: 'Message Page View',
-		properties: [
-			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
+				name: 'Read the Rules Consent Enabled',
 				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: 'Channel Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Channel Invite Code',
-				type: 'String',
-			},
-			{
-				name: 'Channel Name',
-				type: 'String',
-			},
-			{
-				name: 'Channel Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Channel Type',
-				type: 'Numeric',
-			},
-			{
-				name: '$console_log_recording_enabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature/enable-ads-on-post-page',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: 'Is Server',
-				type: 'Boolean',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: 'Message Author Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Message Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Number of Messages',
-				type: 'Numeric',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$os_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$raw_user_agent',
-				type: 'String',
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
 			},
 			{
 				name: '$sent_at',
@@ -1654,1142 +4597,16 @@ export const events = {
 				type: 'String',
 			},
 			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: '$session_recording_recorder_version_server_side',
-				type: 'String',
-			},
-			{
-				name: 'Solution Id',
+				name: 'User Id',
 				type: 'Numeric',
 			},
 			{
-				name: 'Thread Archived Timestamp',
+				name: 'User Joined At',
+				type: 'Numeric',
+			},
+			{
+				name: 'User Time In Server In Ms',
 				type: 'DateTime',
-			},
-			{
-				name: 'Thread Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Thread Name',
-				type: 'String',
-			},
-			{
-				name: 'Thread Parent Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Thread Type',
-				type: 'Numeric',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$user_id',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
-				type: 'String',
-			},
-		],
-	},
-	'Community Page View': {
-		name: 'Community Page View',
-		properties: [
-			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$console_log_recording_enabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature/enable-ads-on-post-page',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: 'isServer',
-				type: 'Boolean',
-			},
-			{
-				name: 'Is Server',
-				type: 'Boolean',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$os_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-			{
-				name: 'Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Server Name',
-				type: 'String',
-			},
-			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: '$session_recording_recorder_version_server_side',
-				type: 'String',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$user_id',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
-				type: 'String',
-			},
-		],
-	},
-	$feature_flag_called: {
-		name: '$feature_flag_called',
-		properties: [
-			{
-				name: '$feature/ads',
-				type: 'String',
-			},
-			{
-				name: '$feature/enable-ads-on-post-page',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_response',
-				type: 'String',
-			},
-			{
-				name: '$geoip_disable',
-				type: 'Boolean',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: 'locally_evaluated',
-				type: 'Boolean',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-		],
-	},
-	'Invite to Join Answer Overflow From Message Result Page': {
-		name: 'Invite to Join Answer Overflow From Message Result Page',
-		properties: [
-			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$console_log_recording_enabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature/enable-ads-on-post-page',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: 'Is Server',
-				type: 'Boolean',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$os_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: '$session_recording_recorder_version_server_side',
-				type: 'String',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$user_id',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
-				type: 'String',
-			},
-		],
-	},
-	'Join Answer Overflow From Message Result Page': {
-		name: 'Join Answer Overflow From Message Result Page',
-		properties: [
-			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$console_log_recording_enabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature/enable-ads-on-post-page',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: 'Is Server',
-				type: 'Boolean',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$os_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: '$session_recording_recorder_version_server_side',
-				type: 'String',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$user_id',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
-				type: 'String',
-			},
-		],
-	},
-	$rageclick: {
-		name: '$rageclick',
-		properties: [
-			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$ce_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$console_log_recording_enabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$elements',
-				type: null,
-			},
-			{
-				name: '$el_text',
-				type: 'String',
-			},
-			{
-				name: '$event_type',
-				type: 'String',
-			},
-			{
-				name: '$feature/enable-ads-on-post-page',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$os_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: '$session_recording_recorder_version_server_side',
-				type: 'String',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$user_id',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
-				type: 'String',
-			},
-		],
-	},
-	'View On Discord Click': {
-		name: 'View On Discord Click',
-		properties: [
-			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: 'Channel Id',
-				type: 'Numeric',
-			},
-			{
-				name: '$console_log_recording_enabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: 'Is Server',
-				type: 'Boolean',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: 'Message Author Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Message Id',
-				type: 'Numeric',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$os_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-			{
-				name: 'Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: '$session_recording_recorder_version_server_side',
-				type: 'String',
-			},
-			{
-				name: 'Thread Id',
-				type: 'Numeric',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
-				type: 'String',
 			},
 		],
 	},
@@ -2813,6 +4630,10 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$browser_language_prefix',
+				type: 'String',
+			},
+			{
 				name: '$browser_version',
 				type: 'Numeric',
 			},
@@ -2837,11 +4658,23 @@ export const events = {
 				type: 'Numeric',
 			},
 			{
+				name: '$configured_session_timeout_ms',
+				type: 'DateTime',
+			},
+			{
 				name: '$console_log_recording_enabled_server_side',
 				type: 'Boolean',
 			},
 			{
 				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$dead_clicks_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$device',
 				type: 'String',
 			},
 			{
@@ -2853,7 +4686,31 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
 				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
 				type: null,
 			},
 			{
@@ -2873,6 +4730,10 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
 				name: '$geoip_country_name',
 				type: 'String',
 			},
@@ -2889,11 +4750,31 @@ export const events = {
 				type: 'Numeric',
 			},
 			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
 				name: '$geoip_subdivision_1_code',
 				type: 'String',
 			},
 			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
 				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
 				type: 'String',
 			},
 			{
@@ -2905,6 +4786,10 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
 				name: '$insert_id',
 				type: 'String',
 			},
@@ -2913,7 +4798,7 @@ export const events = {
 				type: 'String',
 			},
 			{
-				name: 'isServer',
+				name: '$is_identified',
 				type: 'Boolean',
 			},
 			{
@@ -2923,6 +4808,14 @@ export const events = {
 			{
 				name: '$lib',
 				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
 			},
 			{
 				name: '$lib_version',
@@ -2949,6 +4842,10 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: 'ph_keyword',
+				type: 'String',
+			},
+			{
 				name: '$plugins_deferred',
 				type: null,
 			},
@@ -2961,6 +4858,18 @@ export const events = {
 				type: null,
 			},
 			{
+				name: '$process_person_profile',
+				type: 'Boolean',
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$recording_status',
+				type: 'String',
+			},
+			{
 				name: '$referrer',
 				type: 'String',
 			},
@@ -2969,12 +4878,28 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$replay_script_config',
+				type: null,
+			},
+			{
 				name: '$screen_height',
 				type: 'Numeric',
 			},
 			{
 				name: '$screen_width',
 				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
 			},
 			{
 				name: '$sent_at',
@@ -2993,12 +4918,24 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
 				name: '$session_recording_recorder_version_server_side',
 				type: 'String',
 			},
 			{
 				name: '$time',
 				type: 'DateTime',
+			},
+			{
+				name: '$timezone',
+				type: 'String',
 			},
 			{
 				name: 'token',
@@ -3009,6 +4946,22 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: 'utm_campaign',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: 'utm_term',
+				type: 'String',
+			},
+			{
 				name: '$viewport_height',
 				type: 'Numeric',
 			},
@@ -3017,61 +4970,25 @@ export const events = {
 				type: 'Numeric',
 			},
 			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
 				name: '$window_id',
 				type: 'String',
 			},
 		],
 	},
-	'Onboarding Page View - final-checklist': {
-		name: 'Onboarding Page View - final-checklist',
+	$groupidentify: {
+		name: '$groupidentify',
 		properties: [
 			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
+				name: 'Bot Time In Server In Ms',
 				type: 'Numeric',
-			},
-			{
-				name: 'Community Topic',
-				type: 'String',
-			},
-			{
-				name: 'Community Type',
-				type: 'String',
-			},
-			{
-				name: '$console_log_recording_enabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
 			},
 			{
 				name: '$geoip_city_name',
@@ -3092,6 +5009,10 @@ export const events = {
 			{
 				name: '$geoip_country_name',
 				type: 'String',
+			},
+			{
+				name: '$geoip_disable',
+				type: 'Boolean',
 			},
 			{
 				name: '$geoip_latitude',
@@ -3118,20 +5039,8 @@ export const events = {
 				type: 'String',
 			},
 			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
 				name: '$ip',
 				type: 'String',
-			},
-			{
-				name: 'Is Server',
-				type: 'Boolean',
 			},
 			{
 				name: '$lib',
@@ -3139,26 +5048,6 @@ export const events = {
 			},
 			{
 				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$os_version',
-				type: 'Numeric',
-			},
-			{
-				name: 'Page Name',
-				type: 'String',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
-			},
-			{
-				name: '$pathname',
 				type: 'String',
 			},
 			{
@@ -3174,20 +5063,8 @@ export const events = {
 				type: null,
 			},
 			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
+				name: 'Read the Rules Consent Enabled',
+				type: 'Boolean',
 			},
 			{
 				name: '$sent_at',
@@ -3199,1059 +5076,6 @@ export const events = {
 			},
 			{
 				name: 'Server Name',
-				type: 'String',
-			},
-			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: '$session_recording_recorder_version_server_side',
-				type: 'String',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
-				type: 'String',
-			},
-		],
-	},
-	'Onboarding Page View - enable-mark-solution': {
-		name: 'Onboarding Page View - enable-mark-solution',
-		properties: [
-			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: 'Community Topic',
-				type: 'String',
-			},
-			{
-				name: 'Community Type',
-				type: 'String',
-			},
-			{
-				name: '$console_log_recording_enabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: 'Is Server',
-				type: 'Boolean',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$os_version',
-				type: 'Numeric',
-			},
-			{
-				name: 'Page Name',
-				type: 'String',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-			{
-				name: 'Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Server Name',
-				type: 'String',
-			},
-			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: '$session_recording_recorder_version_server_side',
-				type: 'String',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
-				type: 'String',
-			},
-		],
-	},
-	'Onboarding Page View - enable-read-the-rules-consent': {
-		name: 'Onboarding Page View - enable-read-the-rules-consent',
-		properties: [
-			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: 'Community Topic',
-				type: 'String',
-			},
-			{
-				name: 'Community Type',
-				type: 'String',
-			},
-			{
-				name: '$console_log_recording_enabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: 'Is Server',
-				type: 'Boolean',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$os_version',
-				type: 'Numeric',
-			},
-			{
-				name: 'Page Name',
-				type: 'String',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-			{
-				name: 'Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Server Name',
-				type: 'String',
-			},
-			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: '$session_recording_recorder_version_server_side',
-				type: 'String',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
-				type: 'String',
-			},
-		],
-	},
-	'Onboarding Page View - enable-indexing': {
-		name: 'Onboarding Page View - enable-indexing',
-		properties: [
-			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: 'Community Topic',
-				type: 'String',
-			},
-			{
-				name: '$console_log_recording_enabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: 'Is Server',
-				type: 'Boolean',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$os_version',
-				type: 'Numeric',
-			},
-			{
-				name: 'Page Name',
-				type: 'String',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-			{
-				name: 'Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Server Name',
-				type: 'String',
-			},
-			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: '$session_recording_recorder_version_server_side',
-				type: 'String',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
-				type: 'String',
-			},
-		],
-	},
-	'Onboarding Page View - what-type-of-community': {
-		name: 'Onboarding Page View - what-type-of-community',
-		properties: [
-			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$console_log_recording_enabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: 'Is Server',
-				type: 'Boolean',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$os_version',
-				type: 'Numeric',
-			},
-			{
-				name: 'Page Name',
-				type: 'String',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-			{
-				name: 'Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Server Name',
-				type: 'String',
-			},
-			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: '$session_recording_recorder_version_server_side',
-				type: 'String',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
-				type: 'String',
-			},
-		],
-	},
-	'Onboarding Page View - what-topic': {
-		name: 'Onboarding Page View - what-topic',
-		properties: [
-			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$console_log_recording_enabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: 'Is Server',
-				type: 'Boolean',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$os_version',
-				type: 'Numeric',
-			},
-			{
-				name: 'Page Name',
-				type: 'String',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-			{
-				name: 'Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Server Name',
-				type: 'String',
-			},
-			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: '$session_recording_recorder_version_server_side',
-				type: 'String',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
 				type: 'String',
 			},
 		],
@@ -4265,7 +5089,7 @@ export const events = {
 			},
 			{
 				name: 'Bot Time In Server In Ms',
-				type: 'DateTime',
+				type: 'Numeric',
 			},
 			{
 				name: '$geoip_city_name',
@@ -4377,8 +5201,16 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$browser_language_prefix',
+				type: 'String',
+			},
+			{
 				name: '$browser_version',
 				type: 'Numeric',
+			},
+			{
+				name: '$configured_session_timeout_ms',
+				type: 'DateTime',
 			},
 			{
 				name: '$console_log_recording_enabled_server_side',
@@ -4386,6 +5218,14 @@ export const events = {
 			},
 			{
 				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$dead_clicks_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$device',
 				type: 'String',
 			},
 			{
@@ -4397,7 +5237,31 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
 				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
 				type: null,
 			},
 			{
@@ -4417,6 +5281,10 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
 				name: '$geoip_country_name',
 				type: 'String',
 			},
@@ -4433,11 +5301,31 @@ export const events = {
 				type: 'Numeric',
 			},
 			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
 				name: '$geoip_subdivision_1_code',
 				type: 'String',
 			},
 			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
 				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
 				type: 'String',
 			},
 			{
@@ -4449,6 +5337,10 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
 				name: '$insert_id',
 				type: 'String',
 			},
@@ -4457,12 +5349,24 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
 				name: 'Is Server',
 				type: 'Boolean',
 			},
 			{
 				name: '$lib',
 				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
 			},
 			{
 				name: '$lib_version',
@@ -4501,6 +5405,14 @@ export const events = {
 				type: null,
 			},
 			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$recording_status',
+				type: 'String',
+			},
+			{
 				name: '$referrer',
 				type: 'String',
 			},
@@ -4509,12 +5421,28 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$replay_script_config',
+				type: null,
+			},
+			{
 				name: '$screen_height',
 				type: 'Numeric',
 			},
 			{
 				name: '$screen_width',
 				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
 			},
 			{
 				name: '$sent_at',
@@ -4533,7 +5461,19 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
 				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_start_reason',
 				type: 'String',
 			},
 			{
@@ -4541,7 +5481,27 @@ export const events = {
 				type: 'DateTime',
 			},
 			{
+				name: '$timezone',
+				type: 'String',
+			},
+			{
 				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_campaign',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
 				type: 'String',
 			},
 			{
@@ -4551,6 +5511,416 @@ export const events = {
 			{
 				name: '$viewport_width',
 				type: 'Numeric',
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	$create_alias: {
+		name: '$create_alias',
+		properties: [
+			{
+				name: 'alias',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_disable',
+				type: 'Boolean',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+		],
+	},
+	'Invite to Join Answer Overflow From Message Result Page': {
+		name: 'Invite to Join Answer Overflow From Message Result Page',
+		properties: [
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_language_prefix',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$configured_session_timeout_ms',
+				type: 'DateTime',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$dead_clicks_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: 'Is Server',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$process_person_profile',
+				type: 'Boolean',
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$recording_status',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$replay_script_config',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: '$timezone',
+				type: 'String',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
 			},
 			{
 				name: '$window_id',
@@ -4567,7 +5937,535 @@ export const events = {
 			},
 			{
 				name: 'Bot Time In Server In Ms',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_disable',
+				type: 'Boolean',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: 'Read the Rules Consent Enabled',
+				type: 'Boolean',
+			},
+			{
+				name: '$sent_at',
 				type: 'DateTime',
+			},
+			{
+				name: 'Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Server Name',
+				type: 'String',
+			},
+		],
+	},
+	'View On Discord Click': {
+		name: 'View On Discord Click',
+		properties: [
+			{
+				name: 'fbclid',
+				type: 'String',
+			},
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: 'Channel Id',
+				type: 'Numeric',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: 'Is Server',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: 'Message Author Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Message Id',
+				type: 'Numeric',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$pageview_id',
+				type: 'String',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: 'Solution Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Thread Id',
+				type: 'Numeric',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	'Quick Action Command Sent': {
+		name: 'Quick Action Command Sent',
+		properties: [
+			{
+				name: 'Answer Overflow Account Id',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_disable',
+				type: 'Boolean',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'User Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'User Joined At',
+				type: 'Numeric',
+			},
+			{
+				name: 'User Time In Server In Ms',
+				type: 'DateTime',
+			},
+		],
+	},
+	'Leaderboard Viewed': {
+		name: 'Leaderboard Viewed',
+		properties: [
+			{
+				name: 'Answer Overflow Account Id',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_disable',
+				type: 'Boolean',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'User Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'User Joined At',
+				type: 'Numeric',
+			},
+			{
+				name: 'User Time In Server In Ms',
+				type: 'DateTime',
+			},
+		],
+	},
+	'User Left Server': {
+		name: 'User Left Server',
+		properties: [
+			{
+				name: 'Answer Overflow Account Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Bot Time In Server In Ms',
+				type: 'Numeric',
 			},
 			{
 				name: '$geoip_city_name',
@@ -4658,14 +6556,3674 @@ export const events = {
 				type: 'String',
 			},
 			{
-				name: 'Time In Server',
+				name: 'User Id',
 				type: 'Numeric',
+			},
+			{
+				name: 'User Joined At',
+				type: 'Numeric',
+			},
+			{
+				name: 'User Time In Server In Ms',
+				type: 'DateTime',
+			},
+		],
+	},
+	Feedback: {
+		name: 'Feedback',
+		properties: [
+			{
+				name: 'feedback',
+				type: 'String',
+			},
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: 'area',
+				type: 'String',
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: 'email',
+				type: 'String',
+			},
+			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: 'Is Server',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	'survey dismissed': {
+		name: 'survey dismissed',
+		properties: [
+			{
+				name: 'fbclid',
+				type: 'String',
+			},
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: 'ph_keyword',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: 'sessionRecordingUrl',
+				type: 'String',
+			},
+			{
+				name: '$survey_id',
+				type: 'String',
+			},
+			{
+				name: '$survey_iteration',
+				type: null,
+			},
+			{
+				name: '$survey_iteration_start_date',
+				type: null,
+			},
+			{
+				name: '$survey_name',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	$feature_flag_called: {
+		name: '$feature_flag_called',
+		properties: [
+			{
+				name: 'fbclid',
+				type: 'String',
+			},
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature_flag_response',
+				type: 'String',
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_disable',
+				type: 'Boolean',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: 'locally_evaluated',
+				type: 'Boolean',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: 'ph_keyword',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	'survey shown': {
+		name: 'survey shown',
+		properties: [
+			{
+				name: 'fbclid',
+				type: 'String',
+			},
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: 'ph_keyword',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: 'sessionRecordingUrl',
+				type: 'String',
+			},
+			{
+				name: '$survey_id',
+				type: 'String',
+			},
+			{
+				name: '$survey_iteration',
+				type: null,
+			},
+			{
+				name: '$survey_iteration_start_date',
+				type: null,
+			},
+			{
+				name: '$survey_name',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	'survey sent': {
+		name: 'survey sent',
+		properties: [
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: 'sessionRecordingUrl',
+				type: 'String',
+			},
+			{
+				name: '$survey_id',
+				type: 'String',
+			},
+			{
+				name: '$survey_iteration',
+				type: null,
+			},
+			{
+				name: '$survey_iteration_start_date',
+				type: null,
+			},
+			{
+				name: '$survey_name',
+				type: 'String',
+			},
+			{
+				name: '$survey_questions',
+				type: null,
+			},
+			{
+				name: '$survey_response',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	'Pricing Feedback': {
+		name: 'Pricing Feedback',
+		properties: [
+			{
+				name: 'feedback',
+				type: 'String',
+			},
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: 'email',
+				type: 'String',
+			},
+			{
+				name: '$exception_capture_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$exception_capture_endpoint_suffix',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$feature/survey-targeting-43e9b38b35-custom',
+				type: 'String',
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: 'Is Server',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$pageview_id',
+				type: 'String',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$web_vitals_allowed_metrics',
+				type: null,
+			},
+			{
+				name: '$web_vitals_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	'Onboarding Page View - final-checklist': {
+		name: 'Onboarding Page View - final-checklist',
+		properties: [
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: 'Community Topic',
+				type: 'String',
+			},
+			{
+				name: 'Community Type',
+				type: 'String',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: 'Is Server',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: 'Page Name',
+				type: 'String',
+			},
+			{
+				name: '$pageview_id',
+				type: 'String',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Server Name',
+				type: 'String',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_campaign',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	'Onboarding Page View - enable-read-the-rules-consent': {
+		name: 'Onboarding Page View - enable-read-the-rules-consent',
+		properties: [
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: 'Community Topic',
+				type: 'String',
+			},
+			{
+				name: 'Community Type',
+				type: 'String',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: 'Is Server',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: 'Page Name',
+				type: 'String',
+			},
+			{
+				name: '$pageview_id',
+				type: 'String',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Server Name',
+				type: 'String',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_campaign',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	'Onboarding Page View - enable-mark-solution': {
+		name: 'Onboarding Page View - enable-mark-solution',
+		properties: [
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: 'Community Topic',
+				type: 'String',
+			},
+			{
+				name: 'Community Type',
+				type: 'String',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: 'Is Server',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: 'Page Name',
+				type: 'String',
+			},
+			{
+				name: '$pageview_id',
+				type: 'String',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Server Name',
+				type: 'String',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_campaign',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	'Onboarding Page View - what-topic': {
+		name: 'Onboarding Page View - what-topic',
+		properties: [
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: 'Is Server',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: 'Page Name',
+				type: 'String',
+			},
+			{
+				name: '$pageview_id',
+				type: 'String',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Server Name',
+				type: 'String',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_campaign',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	'Onboarding Page View - enable-indexing': {
+		name: 'Onboarding Page View - enable-indexing',
+		properties: [
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: 'Community Topic',
+				type: 'String',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: 'Is Server',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: 'Page Name',
+				type: 'String',
+			},
+			{
+				name: '$pageview_id',
+				type: 'String',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Server Name',
+				type: 'String',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_campaign',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
+			},
+		],
+	},
+	'Onboarding Page View - what-type-of-community': {
+		name: 'Onboarding Page View - what-type-of-community',
+		properties: [
+			{
+				name: '$active_feature_flags',
+				type: null,
+			},
+			{
+				name: '$autocapture_disabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$browser',
+				type: 'String',
+			},
+			{
+				name: '$browser_language',
+				type: 'String',
+			},
+			{
+				name: '$browser_version',
+				type: 'Numeric',
+			},
+			{
+				name: '$console_log_recording_enabled_server_side',
+				type: 'Boolean',
+			},
+			{
+				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$device',
+				type: 'String',
+			},
+			{
+				name: '$device_id',
+				type: 'String',
+			},
+			{
+				name: '$device_type',
+				type: 'String',
+			},
+			{
+				name: '$feature/enable-ads-on-post-page',
+				type: 'String',
+			},
+			{
+				name: '$feature_flag_payloads',
+				type: null,
+			},
+			{
+				name: '$geoip_accuracy_radius',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_city_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_city_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_continent_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_country_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_country_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_latitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_longitude',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_postal_code_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_code',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_1_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_confidence',
+				type: null,
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_time_zone',
+				type: 'String',
+			},
+			{
+				name: '$host',
+				type: 'String',
+			},
+			{
+				name: '$initial_person_info',
+				type: null,
+			},
+			{
+				name: '$insert_id',
+				type: 'String',
+			},
+			{
+				name: '$ip',
+				type: 'String',
+			},
+			{
+				name: '$is_identified',
+				type: 'Boolean',
+			},
+			{
+				name: 'Is Server',
+				type: 'Boolean',
+			},
+			{
+				name: '$lib',
+				type: 'String',
+			},
+			{
+				name: '$lib_custom_api_host',
+				type: 'String',
+			},
+			{
+				name: '$lib_rate_limit_remaining_tokens',
+				type: 'Numeric',
+			},
+			{
+				name: '$lib_version',
+				type: 'String',
+			},
+			{
+				name: '$os',
+				type: 'String',
+			},
+			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
+				name: 'Page Name',
+				type: 'String',
+			},
+			{
+				name: '$pageview_id',
+				type: 'String',
+			},
+			{
+				name: '$pathname',
+				type: 'String',
+			},
+			{
+				name: '$plugins_deferred',
+				type: null,
+			},
+			{
+				name: '$plugins_failed',
+				type: null,
+			},
+			{
+				name: '$plugins_succeeded',
+				type: null,
+			},
+			{
+				name: '$raw_user_agent',
+				type: 'String',
+			},
+			{
+				name: '$referrer',
+				type: 'String',
+			},
+			{
+				name: '$referring_domain',
+				type: 'String',
+			},
+			{
+				name: '$replay_minimum_duration',
+				type: null,
+			},
+			{
+				name: '$replay_sample_rate',
+				type: null,
+			},
+			{
+				name: '$screen_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$screen_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
+				name: '$sent_at',
+				type: 'DateTime',
+			},
+			{
+				name: 'Server Id',
+				type: 'Numeric',
+			},
+			{
+				name: 'Server Name',
+				type: 'String',
+			},
+			{
+				name: '$session_id',
+				type: 'String',
+			},
+			{
+				name: '$session_recording_canvas_recording',
+				type: null,
+			},
+			{
+				name: '$session_recording_network_payload_capture',
+				type: null,
+			},
+			{
+				name: '$session_recording_recorder_version_server_side',
+				type: 'String',
+			},
+			{
+				name: '$time',
+				type: 'DateTime',
+			},
+			{
+				name: 'token',
+				type: 'String',
+			},
+			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_campaign',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: '$viewport_height',
+				type: 'Numeric',
+			},
+			{
+				name: '$viewport_width',
+				type: 'Numeric',
+			},
+			{
+				name: '$window_id',
+				type: 'String',
 			},
 		],
 	},
 	$pageleave: {
 		name: '$pageleave',
 		properties: [
+			{
+				name: 'fbclid',
+				type: 'String',
+			},
 			{
 				name: '$active_feature_flags',
 				type: null,
@@ -4751,6 +10309,14 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
 				name: '$geoip_time_zone',
 				type: 'String',
 			},
@@ -4791,6 +10357,10 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: 'ph_keyword',
+				type: 'String',
+			},
+			{
 				name: '$plugins_deferred',
 				type: null,
 			},
@@ -4817,6 +10387,10 @@ export const events = {
 			{
 				name: '$screen_width',
 				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
 			},
 			{
 				name: '$sent_at',
@@ -4843,325 +10417,19 @@ export const events = {
 				type: 'String',
 			},
 			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
-				type: 'String',
-			},
-		],
-	},
-	'User Grant Consent': {
-		name: 'User Grant Consent',
-		properties: [
-			{
-				name: 'Answer Overflow Account Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Consent Source',
+				name: 'utm_campaign',
 				type: 'String',
 			},
 			{
-				name: '$geoip_city_name',
+				name: 'utm_medium',
 				type: 'String',
 			},
 			{
-				name: '$geoip_continent_code',
+				name: 'utm_source',
 				type: 'String',
 			},
 			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_disable',
-				type: 'Boolean',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-			{
-				name: 'User Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'User Joined At',
-				type: 'Numeric',
-			},
-			{
-				name: 'User Time In Server In Ms',
-				type: 'Numeric',
-			},
-		],
-	},
-	'Server Invite Click': {
-		name: 'Server Invite Click',
-		properties: [
-			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: 'Button Location',
-				type: 'String',
-			},
-			{
-				name: 'Channel Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Channel Invite Code',
-				type: 'String',
-			},
-			{
-				name: 'Channel Name',
-				type: 'String',
-			},
-			{
-				name: 'Channel Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Channel Type',
-				type: 'Numeric',
-			},
-			{
-				name: '$console_log_recording_enabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: 'Is Server',
-				type: 'Boolean',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$os_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-			{
-				name: 'Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Server Name',
-				type: 'String',
-			},
-			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: '$session_recording_recorder_version_server_side',
-				type: 'String',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
+				name: 'utm_term',
 				type: 'String',
 			},
 			{
@@ -5214,6 +10482,10 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$device',
+				type: 'String',
+			},
+			{
 				name: '$device_id',
 				type: 'String',
 			},
@@ -5266,6 +10538,14 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
 				name: '$geoip_time_zone',
 				type: 'String',
 			},
@@ -5280,10 +10560,6 @@ export const events = {
 			{
 				name: '$ip',
 				type: 'String',
-			},
-			{
-				name: 'isServer',
-				type: 'Boolean',
 			},
 			{
 				name: 'Is Server',
@@ -5342,6 +10618,10 @@ export const events = {
 				type: 'Numeric',
 			},
 			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
 				name: '$sent_at',
 				type: 'DateTime',
 			},
@@ -5363,6 +10643,22 @@ export const events = {
 			},
 			{
 				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_campaign',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: 'utm_term',
 				type: 'String',
 			},
 			{
@@ -5472,217 +10768,8 @@ export const events = {
 			},
 		],
 	},
-	'Mark Solution Instructions Sent': {
-		name: 'Mark Solution Instructions Sent',
-		properties: [
-			{
-				name: 'Answer Overflow Account Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Auto Thread Enabled',
-				type: 'Boolean',
-			},
-			{
-				name: 'Bot Time In Server In Ms',
-				type: 'DateTime',
-			},
-			{
-				name: 'Channel Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Channel Invite Code',
-				type: 'String',
-			},
-			{
-				name: 'Channel Name',
-				type: 'String',
-			},
-			{
-				name: 'Channel Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Channel Solution Tag Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Channel Type',
-				type: 'Numeric',
-			},
-			{
-				name: 'Forum Guidelines Consent Enabled',
-				type: 'Boolean',
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: 'Indexing Enabled',
-				type: 'Boolean',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: 'Mark Solution Enabled',
-				type: 'Boolean',
-			},
-			{
-				name: 'Number of Messages',
-				type: 'Numeric',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: 'Question Asker Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Question Asker Joined At',
-				type: 'Numeric',
-			},
-			{
-				name: 'Question Asker Time In Server In Ms',
-				type: 'Numeric',
-			},
-			{
-				name: 'Question Channel Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Question Content Length',
-				type: 'Numeric',
-			},
-			{
-				name: 'Question Created At',
-				type: 'Numeric',
-			},
-			{
-				name: 'Question Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Question Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Question Thread Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Read the Rules Consent Enabled',
-				type: 'Boolean',
-			},
-			{
-				name: 'Send Mark Solution Instructions In New Threads Enabled',
-				type: 'Boolean',
-			},
-			{
-				name: '$sent_at',
-				type: 'DateTime',
-			},
-			{
-				name: 'Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Server Name',
-				type: 'String',
-			},
-			{
-				name: 'Thread Archived Timestamp',
-				type: 'DateTime',
-			},
-			{
-				name: 'Thread Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Thread Name',
-				type: 'String',
-			},
-			{
-				name: 'Thread Parent Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Thread Parent Name',
-				type: 'String',
-			},
-			{
-				name: 'Thread Parent Type',
-				type: 'Numeric',
-			},
-			{
-				name: 'Thread Type',
-				type: 'Numeric',
-			},
-		],
-	},
-	'Onboarding Page View': {
-		name: 'Onboarding Page View',
+	'Join Waitlist Click': {
+		name: 'Join Waitlist Click',
 		properties: [
 			{
 				name: '$active_feature_flags',
@@ -5705,11 +10792,7 @@ export const events = {
 				type: 'Numeric',
 			},
 			{
-				name: 'Community Topic',
-				type: 'String',
-			},
-			{
-				name: 'Community Type',
+				name: 'Button Location',
 				type: 'String',
 			},
 			{
@@ -5718,6 +10801,10 @@ export const events = {
 			},
 			{
 				name: '$current_url',
+				type: 'String',
+			},
+			{
+				name: '$device',
 				type: 'String',
 			},
 			{
@@ -5770,6 +10857,14 @@ export const events = {
 			},
 			{
 				name: '$geoip_subdivision_1_name',
+				type: 'String',
+			},
+			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_name',
 				type: 'String',
 			},
 			{
@@ -5809,10 +10904,6 @@ export const events = {
 				type: 'Numeric',
 			},
 			{
-				name: 'Page Name',
-				type: 'String',
-			},
-			{
 				name: '$pageview_id',
 				type: 'String',
 			},
@@ -5849,16 +10940,12 @@ export const events = {
 				type: 'Numeric',
 			},
 			{
+				name: '$search_engine',
+				type: 'String',
+			},
+			{
 				name: '$sent_at',
 				type: 'DateTime',
-			},
-			{
-				name: 'Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Server Name',
-				type: 'String',
 			},
 			{
 				name: '$session_id',
@@ -5877,6 +10964,22 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$user_id',
+				type: 'String',
+			},
+			{
+				name: 'utm_medium',
+				type: 'String',
+			},
+			{
+				name: 'utm_source',
+				type: 'String',
+			},
+			{
+				name: 'utm_term',
+				type: 'String',
+			},
+			{
 				name: '$viewport_height',
 				type: 'Numeric',
 			},
@@ -5890,8 +10993,8 @@ export const events = {
 			},
 		],
 	},
-	'Join Waitlist Click': {
-		name: 'Join Waitlist Click',
+	'Add To Server Click': {
+		name: 'Add To Server Click',
 		properties: [
 			{
 				name: '$active_feature_flags',
@@ -5926,6 +11029,10 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$device',
+				type: 'String',
+			},
+			{
 				name: '$device_id',
 				type: 'String',
 			},
@@ -5978,6 +11085,14 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$geoip_subdivision_2_code',
+				type: 'Numeric',
+			},
+			{
+				name: '$geoip_subdivision_2_name',
+				type: 'String',
+			},
+			{
 				name: '$geoip_time_zone',
 				type: 'String',
 			},
@@ -5992,10 +11107,6 @@ export const events = {
 			{
 				name: '$ip',
 				type: 'String',
-			},
-			{
-				name: 'isServer',
-				type: 'Boolean',
 			},
 			{
 				name: 'Is Server',
@@ -6014,6 +11125,10 @@ export const events = {
 				type: 'String',
 			},
 			{
+				name: '$os_version',
+				type: 'Numeric',
+			},
+			{
 				name: '$pageview_id',
 				type: 'String',
 			},
@@ -6048,6 +11163,10 @@ export const events = {
 			{
 				name: '$screen_width',
 				type: 'Numeric',
+			},
+			{
+				name: '$search_engine',
+				type: 'String',
 			},
 			{
 				name: '$sent_at',
@@ -6059,847 +11178,6 @@ export const events = {
 			},
 			{
 				name: '$session_recording_recorder_version_server_side',
-				type: 'String',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$user_id',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
-				type: 'String',
-			},
-		],
-	},
-	'Dismiss Button Clicked': {
-		name: 'Dismiss Button Clicked',
-		properties: [
-			{
-				name: 'Answer Overflow Account Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Dismissed Message Type',
-				type: 'String',
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: 'Message Channel Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Message Content Length',
-				type: 'Numeric',
-			},
-			{
-				name: 'Message Created At',
-				type: 'Numeric',
-			},
-			{
-				name: 'Message Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Message Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Message Thread Id',
-				type: 'Numeric',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: 'User Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'User Joined At',
-				type: 'Numeric',
-			},
-			{
-				name: 'User Time In Server In Ms',
-				type: 'Numeric',
-			},
-		],
-	},
-	'Question Asked': {
-		name: 'Question Asked',
-		properties: [
-			{
-				name: 'Channel Flags',
-				type: null,
-			},
-			{
-				name: 'Channel Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Channel Name',
-				type: 'String',
-			},
-			{
-				name: 'Channel Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Channel Type',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: 'Server Flags',
-				type: null,
-			},
-			{
-				name: 'Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Server Name',
-				type: 'String',
-			},
-			{
-				name: 'Thread Archived At',
-				type: 'Numeric',
-			},
-			{
-				name: 'Thread Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Thread Name',
-				type: 'String',
-			},
-			{
-				name: 'Thread Parent Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Thread Parent Name',
-				type: 'String',
-			},
-			{
-				name: 'Thread Parent Type',
-				type: 'Numeric',
-			},
-			{
-				name: 'Thread Type',
-				type: 'Numeric',
-			},
-			{
-				name: 'Time In Server',
-				type: 'Numeric',
-			},
-		],
-	},
-	'Add To Server Click': {
-		name: 'Add To Server Click',
-		properties: [
-			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: 'Button Location',
-				type: 'String',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: 'isServer',
-				type: 'Boolean',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$user_id',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
-				type: 'String',
-			},
-		],
-	},
-	MessagePageView: {
-		name: 'MessagePageView',
-		properties: [
-			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: 'Channel Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Channel Name',
-				type: 'String',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: 'isServer',
-				type: 'Boolean',
-			},
-			{
-				name: 'isUserInServer',
-				type: 'Boolean',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: 'Message Author Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'messageId',
-				type: 'Numeric',
-			},
-			{
-				name: 'Message Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Number of Messages',
-				type: 'Numeric',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
-			},
-			{
-				name: 'Server Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Server Name',
-				type: 'String',
-			},
-			{
-				name: '$session_id',
-				type: 'String',
-			},
-			{
-				name: 'Thread Id',
-				type: 'Numeric',
-			},
-			{
-				name: 'Thread Name',
-				type: 'String',
-			},
-			{
-				name: '$time',
-				type: 'DateTime',
-			},
-			{
-				name: 'token',
-				type: 'String',
-			},
-			{
-				name: '$user_id',
-				type: 'String',
-			},
-			{
-				name: '$viewport_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$viewport_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$window_id',
-				type: 'String',
-			},
-		],
-	},
-	messagePageView: {
-		name: 'messagePageView',
-		properties: [
-			{
-				name: '$active_feature_flags',
-				type: null,
-			},
-			{
-				name: '$autocapture_disabled_server_side',
-				type: 'Boolean',
-			},
-			{
-				name: '$browser',
-				type: 'String',
-			},
-			{
-				name: '$browser_language',
-				type: 'String',
-			},
-			{
-				name: '$browser_version',
-				type: 'Numeric',
-			},
-			{
-				name: '$current_url',
-				type: 'String',
-			},
-			{
-				name: '$device_id',
-				type: 'String',
-			},
-			{
-				name: '$device_type',
-				type: 'String',
-			},
-			{
-				name: '$feature_flag_payloads',
-				type: null,
-			},
-			{
-				name: '$geoip_city_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_continent_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_country_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_latitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_longitude',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_postal_code',
-				type: 'Numeric',
-			},
-			{
-				name: '$geoip_subdivision_1_code',
-				type: 'String',
-			},
-			{
-				name: '$geoip_subdivision_1_name',
-				type: 'String',
-			},
-			{
-				name: '$geoip_time_zone',
-				type: 'String',
-			},
-			{
-				name: '$host',
-				type: 'String',
-			},
-			{
-				name: '$insert_id',
-				type: 'String',
-			},
-			{
-				name: '$ip',
-				type: 'String',
-			},
-			{
-				name: 'isServer',
-				type: 'Boolean',
-			},
-			{
-				name: 'isUserInServer',
-				type: 'Boolean',
-			},
-			{
-				name: '$lib',
-				type: 'String',
-			},
-			{
-				name: '$lib_version',
-				type: 'String',
-			},
-			{
-				name: 'messageId',
-				type: 'Numeric',
-			},
-			{
-				name: '$os',
-				type: 'String',
-			},
-			{
-				name: '$pageview_id',
-				type: 'String',
-			},
-			{
-				name: '$pathname',
-				type: 'String',
-			},
-			{
-				name: '$plugins_deferred',
-				type: null,
-			},
-			{
-				name: '$plugins_failed',
-				type: null,
-			},
-			{
-				name: '$plugins_succeeded',
-				type: null,
-			},
-			{
-				name: '$referrer',
-				type: 'String',
-			},
-			{
-				name: '$referring_domain',
-				type: 'String',
-			},
-			{
-				name: '$screen_height',
-				type: 'Numeric',
-			},
-			{
-				name: '$screen_width',
-				type: 'Numeric',
-			},
-			{
-				name: '$session_id',
 				type: 'String',
 			},
 			{
