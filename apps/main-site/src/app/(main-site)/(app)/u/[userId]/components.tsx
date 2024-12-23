@@ -17,7 +17,7 @@ import { LinkButton } from '@answeroverflow/ui/ui/link-button';
 
 export type Props = {
 	params: Promise<{ userId: string }>;
-	searchParams: Promise<{ s?: string }>;
+	searchParams?: Promise<{ s?: string }>;
 };
 
 export async function getUserPageData(props: Props) {
@@ -26,7 +26,7 @@ export async function getUserPageData(props: Props) {
 	const { userId } = params;
 	const userInfo = await findDiscordAccountById(userId);
 	if (!userInfo) return notFound();
-	const { s } = searchParams;
+	const { s } = searchParams ?? {};
 	const [threads, comments, serverIds] = await Promise.all([
 		findLatestThreadsFromAuthor(userId, {
 			serverId: s,
@@ -76,7 +76,7 @@ export async function ActualLayout(
 ) {
 	const { userInfo, servers } = await getUserPageData(props);
 	const { userId } = await props.params;
-	const { s } = await props.searchParams;
+	const { s } = (await props.searchParams) ?? {};
 	return (
 		<>
 			{servers.length > 1 && (
