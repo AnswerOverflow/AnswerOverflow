@@ -50,7 +50,7 @@
 		"@types/react": "^19.0.2",
 		"@types/react-dom": "^19.0.2",
 		"autoprefixer": "^10.4.15",
-		"concurrently": "^8.2.2",
+		"concurrently": "^9.1.1",
 		"postcss": "^8.4.28",
 		"sass": "^1.66.1",
 		"tailwindcss": "^3.3.3",
