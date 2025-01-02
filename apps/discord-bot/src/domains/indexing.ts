@@ -45,7 +45,7 @@ export async function indexServers(client: Client) {
 	container.logger.info(`Indexing ${client.guilds.cache.size} servers`);
 	const guilds = [...client.guilds.cache.values()];
 	// sort so 1019350475847499849 is first
-	const convex = guilds.find((x) => x.id === '1019350475847499849');
+	const convex = guilds.find((x) => x.id === '1170941416516620306');
 	const convexFirst = [
 		convex,
 		...guilds.filter((x) => x.id !== convex?.id),
@@ -106,6 +106,11 @@ export async function indexRootChannel(
 		.permissionsFor(channel.client.user)
 		?.has(['ViewChannel', 'ReadMessageHistory']);
 	if (!settings || !settings.flags.indexingEnabled || !botCanViewChannel) {
+		if (!botCanViewChannel) {
+			container.logger.debug(
+				`Bot cannot view channel ${channel.id} | ${channel.name} in server ${channel.guildId} | ${channel.guild.name}`,
+			);
+		}
 		return;
 	}
 
