@@ -95,7 +95,11 @@ export const ServerInviteJoinButton = (
 		Omit<React.ComponentPropsWithoutRef<typeof LinkButton>, 'href'>,
 ) => {
 	const { server, channel, location, className, ...rest } = props;
-	const inviteCode = channel?.inviteCode || server.vanityInviteCode;
+	const inviteCode =
+		server.id === '864766766932426772'
+			? 'pokemongocoordinates'
+			: channel?.inviteCode || server.vanityInviteCode;
+	channel?.inviteCode || server.vanityInviteCode;
 	if (!inviteCode) return <></>;
 	return (
 		<TrackLinkButton
