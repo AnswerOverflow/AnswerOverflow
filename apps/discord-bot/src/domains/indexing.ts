@@ -253,6 +253,34 @@ Server: ${channel.guildId} | ${channel.guild.name}`,
 			skipIndexingEnabledCheck: true,
 		});
 	}
+
+	if (
+		!settings?.inviteCode &&
+		channel.permissionsFor(channel.client.user)?.has('CreateInstantInvite') &&
+		!channel.isThread()
+	) {
+		try {
+			const invite = await channel.createInvite({
+				maxAge: 0,
+				maxUses: 0,
+				reason: 'Channel indexing enabled invite',
+				unique: false,
+				temporary: false,
+			});
+			await updateChannel({
+				old: null,
+				update: {
+					id: channel.id,
+					inviteCode: invite.code,
+				},
+			});
+		} catch (error) {
+			container.logger.error(
+				`Error creating invite for channel ${channel.id} | ${channel.name}`,
+				error,
+			);
+		}
+	}
 }
 
 export async function indexTextBasedChannel(
@@ -378,7 +406,6 @@ async function storeIndexData(
 	const lastIndexedSnowflake =
 		messages.sort((a, b) => (BigInt(b.id) > BigInt(a.id) ? 1 : -1)).at(0)?.id ??
 		'0';
-
 	await upsertChannel({
 		create: {
 			...toAOChannel(channel),

@@ -136,6 +136,11 @@ export const channelRouter = router({
 							message: 'Channel not found',
 						});
 					}
+					if (!existing.flags.indexingEnabled && input.flags?.indexingEnabled) {
+						const data = await botClient.enableIndexing.mutate(input.id);
+						input.inviteCode = data.invite;
+					}
+
 					return updateChannel({
 						old: existing,
 						update: input,
