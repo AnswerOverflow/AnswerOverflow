@@ -254,24 +254,32 @@ Server: ${channel.guildId} | ${channel.guild.name}`,
 		});
 	}
 
+	const canMakeInvites = channel
+		.permissionsFor(channel.client.user)
+		?.has('CreateInstantInvite');
+	const vanityURLCode = channel.guild.vanityURLCode;
 	if (
 		!settings?.inviteCode &&
-		channel.permissionsFor(channel.client.user)?.has('CreateInstantInvite') &&
+		(canMakeInvites || vanityURLCode) &&
 		!channel.isThread()
 	) {
 		try {
-			const invite = await channel.createInvite({
-				maxAge: 0,
-				maxUses: 0,
-				reason: 'Channel indexing enabled invite',
-				unique: false,
-				temporary: false,
-			});
+			const invite = canMakeInvites
+				? await channel
+						.createInvite({
+							maxAge: 0,
+							maxUses: 0,
+							reason: 'Channel indexing enabled invite',
+							unique: false,
+							temporary: false,
+						})
+						.then((inv) => inv.code)
+				: vanityURLCode;
 			await updateChannel({
 				old: null,
 				update: {
 					id: channel.id,
-					inviteCode: invite.code,
+					inviteCode: invite,
 				},
 			});
 		} catch (error) {
