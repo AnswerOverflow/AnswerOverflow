@@ -104,14 +104,6 @@ export module Analytics {
 			.query()
 			.addSeries('Message Page View', {
 				sampling: 'total',
-				where: {
-					filters: {
-						compare: 'not_icontains',
-						property: 'Server Id',
-						value: '743801649377574924',
-					},
-					match: 'AND',
-				},
 			})
 			.execute({
 				type: 'table',
