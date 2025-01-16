@@ -11,7 +11,10 @@ import { FaRegMessage } from 'react-icons/fa6';
 import { ServerIcon } from './server-icon';
 import { Link } from './ui/link';
 
-export const FeedPost = async (props: { postId: string }) => {
+export const FeedPost = async (props: {
+	postId: string;
+	onTenant?: boolean;
+}) => {
 	const result = await messages.load(props.postId);
 	if (!result) return null;
 	const { message: rootOrComment, channel: thread, parent, server } = result;
@@ -40,7 +43,7 @@ export const FeedPost = async (props: { postId: string }) => {
 		<div className={'inner'}>
 			<div className="flex flex-col items-start gap-2 pb-2 text-xs sm:flex-row sm:items-center md:text-base">
 				<Link
-					href={`/c/${server.id}`}
+					href={props.onTenant ? `/` : `/c/${server.id}`}
 					className={'flex items-center gap-2 hover:underline'}
 				>
 					<ServerIcon server={server} size={24} />
@@ -54,7 +57,7 @@ export const FeedPost = async (props: { postId: string }) => {
 						Created by {root.author.name} on {getSnowflakeUTCDate(root.id)} in{' '}
 						<Link
 							className={'hover:underline'}
-							href={`/c/${server.id}/${parent.id}`}
+							href={props.onTenant ? `/` : `/c/${server.id}/${parent.id}`}
 						>
 							#{parent.name}
 						</Link>

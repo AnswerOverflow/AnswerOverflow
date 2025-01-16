@@ -29,7 +29,9 @@ export default async function UserPage(props: Props) {
 		<ActualLayout {...props}>
 			<div className={'flex flex-col gap-4'}>
 				{comments.length > 0 ? (
-					comments.map((x) => <FeedPost postId={x.id} key={x.id} />)
+					comments.map((x) => (
+						<FeedPost postId={x.id} key={x.id} onTenant={true} />
+					))
 				) : (
 					<div className={'flex flex-row items-center justify-start gap-4'}>
 						<GiSpiderWeb size={64} className="text-muted-foreground" />
