@@ -22,7 +22,7 @@
 		"@heroicons/react": "^2.0.18",
 		"@mdx-js/loader": "^2.3.0",
 		"@mdx-js/react": "^2.3.0",
-		"@next/mdx": "15.0.0-rc.0",
+		"@next/mdx": "15.1.5",
 		"@opentelemetry/exporter-trace-otlp-http": "^0.52.0",
 		"@opentelemetry/sdk-trace-node": "^1.25.0",
 		"@tailwindcss/typography": "^0.5.10",
