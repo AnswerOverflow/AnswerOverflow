@@ -1,3 +1,4 @@
+import { Server } from '@answeroverflow/core/schema';
 import { findServerById } from '@answeroverflow/core/server';
 import { ServerIcon } from '@answeroverflow/ui/server-icon';
 import { LinkButton } from '@answeroverflow/ui/ui/link-button';
@@ -11,9 +12,8 @@ function shortenNumber(num: number) {
 		return num.toString();
 	}
 }
-export const TrendingServer = async (props: { serverId: string }) => {
-	const server = await findServerById(props.serverId);
-	if (!server) return null;
+export const TrendingServer = async (props: { server: Server }) => {
+	const { server } = props;
 	const approximateMemberCount = server.approximateMemberCount;
 	return (
 		<LinkButton

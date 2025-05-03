@@ -1,4 +1,4 @@
-import { eq, inArray, or } from 'drizzle-orm';
+import { desc, eq, inArray, or } from 'drizzle-orm';
 import type { z } from 'zod';
 import { db, dbReplica } from './db';
 import { Server, dbChannels, dbServers } from './schema';
@@ -233,4 +233,14 @@ import { dictToBitfield } from './utils/bitfieldUtils';
 
 export function serverFlagsToBitfield(newFlags: ServerSettingsFlags) {
 	return dictToBitfield(newFlags, serverSettingsFlags);
+}
+
+export async function getBiggestServers(opts: {
+	take: number;
+}) {
+	const found = await dbReplica.query.dbServers.findMany({
+		orderBy: desc(dbServers.approximateMemberCount),
+		limit: opts.take,
+	});
+	return found.map(addFlagsToServer);
 }
