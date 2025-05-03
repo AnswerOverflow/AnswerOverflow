@@ -6,6 +6,7 @@ import { FaArrowTrendUp } from 'react-icons/fa6';
 import { MdOutlineExplore } from 'react-icons/md';
 import { PiPlant } from 'react-icons/pi';
 import { TrendingServer } from './components';
+import { getBiggestServers } from '@answeroverflow/core/server';
 
 export const metadata: Metadata = {
 	alternates: {
@@ -14,17 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage(props: { children: React.ReactNode }) {
-	const popularServers =
-		(await Analytics.getPopularServers()?.then((res) =>
-			Object.keys(res ?? {}),
-		)) ?? [];
-	const popularServersWithPubg = [
-		...new Set([
-			...popularServers.slice(0, 1),
-			'393088095840370689',
-			...popularServers.slice(1, 10),
-		]),
-	];
+	const popularServers = await getBiggestServers({ take: 10 });
 	return (
 		<div
 			className={
@@ -50,7 +41,7 @@ export default async function HomePage(props: { children: React.ReactNode }) {
 			</div>
 			<div className={'flex w-[95vw] max-w-[650px] flex-col gap-4 md:px-4'}>
 				<div className={'flex gap-4'}>
-					<LinkButton
+					{/* <LinkButton
 						className={'flex items-center gap-4'}
 						href={'/'}
 						selectedVariant={'secondary'}
@@ -67,7 +58,7 @@ export default async function HomePage(props: { children: React.ReactNode }) {
 					>
 						<PiPlant className={'size-4'} />
 						<span className={'text-sm'}>New</span>
-					</LinkButton>
+					</LinkButton> */}
 				</div>
 				{props.children}
 			</div>
@@ -75,8 +66,8 @@ export default async function HomePage(props: { children: React.ReactNode }) {
 				className={'mr-4 hidden h-fit w-[400px] flex-col gap-4 p-4 2xl:flex'}
 			>
 				<div className={'text-sm font-bold text-white'}>Popular Servers</div>
-				{popularServersWithPubg.map((x) => (
-					<TrendingServer serverId={x} key={x} />
+				{popularServers.map((x) => (
+					<TrendingServer server={x} key={x.id} />
 				))}
 				<LinkButton
 					href={`/browse`}
