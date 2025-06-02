@@ -172,6 +172,16 @@ export function MessageResultPage({
 		.filter((attachment) => isImageAttachment(attachment))
 		.at(0);
 
+	const UserLink = () => firstMessage.isAnonymous ? (
+		<span className="text-muted-foreground">
+			{firstMessage.author.name}
+		</span>
+	) : (
+		<Link href={`/u/${firstMessage.author.id}`} className="hover:underline">
+			{firstMessage.author.name}
+		</Link>
+	);
+
 	const Main = () => (
 		<main className={'flex w-full max-w-3xl grow flex-col gap-4'}>
 			<div className="flex flex-col gap-2 pl-2">
@@ -180,12 +190,7 @@ export function MessageResultPage({
 						<DiscordAvatar user={firstMessage.author} size={48} />
 						<div className="flex flex-col">
 							<div className="flex flex-row items-center gap-2">
-								<Link
-									href={`/u/${firstMessage.author.id}`}
-									className="hover:underline"
-								>
-									{firstMessage.author.name}
-								</Link>
+								<UserLink />
 								<span className="text-sm text-muted-foreground">•</span>
 								<TimeAgo snowflake={firstMessage.id} />
 							</div>
@@ -204,12 +209,7 @@ export function MessageResultPage({
 								<span className="text-sm text-muted-foreground">•</span>
 								<TimeAgo snowflake={firstMessage.id} />
 							</div>
-							<Link
-								href={`/u/${firstMessage.author.id}`}
-								className="text-foreground/70 hover:underline"
-							>
-								{firstMessage.author.name}
-							</Link>
+							<UserLink />
 						</div>
 					</div>
 				)}
