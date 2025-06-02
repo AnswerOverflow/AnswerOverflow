@@ -24,7 +24,7 @@ export function HelpfulFeedback(props: {
 	return (
 		<Card className="">
 			<CardHeader className="pb-3">
-				<CardTitle className="  text-zinc-200">
+				<CardTitle className="  text-foreground">
 					Did you find this page helpful?
 				</CardTitle>
 			</CardHeader>
@@ -33,7 +33,7 @@ export function HelpfulFeedback(props: {
 					<Button
 						variant="ghost"
 						size="sm"
-						className={`group disabled:opacity-100 ${voted === 'Yes' ? 'text-green-500' : 'text-zinc-400'}`}
+						className={`group disabled:opacity-100 ${voted === 'Yes' ? 'text-green-500' : 'text-foreground'}`}
 						onClick={() => handleVote('Yes')}
 						disabled={voted !== null}
 					>
@@ -43,7 +43,7 @@ export function HelpfulFeedback(props: {
 					<Button
 						variant="ghost"
 						size="sm"
-						className={`group disabled:opacity-100 ${voted === 'No' ? 'text-red-500' : 'text-zinc-400'}`}
+						className={`group disabled:opacity-100 ${voted === 'No' ? 'text-red-500' : 'text-foreground'}`}
 						onClick={() => handleVote('No')}
 						disabled={voted !== null}
 					>
