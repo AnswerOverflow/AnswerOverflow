@@ -1,4 +1,5 @@
 import { findServerByCustomDomain } from '@answeroverflow/core/server';
+import { GlobalThisEmbedder } from '@answeroverflow/ui/global-this-embedder';
 import { makeServerIconLink } from '@answeroverflow/ui/server-icon';
 import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 import { Metadata } from 'next';
@@ -62,6 +63,14 @@ export default async function Layout(props: {
 
 	const { children } = props;
 
-	void findServerByCustomDomain(decodeURIComponent(params.domain));
-	return <>{children}</>;
+	const server = await findServerByCustomDomain(
+		decodeURIComponent(params.domain),
+	);
+
+	return (
+		<>
+			<GlobalThisEmbedder embedOnServer={{ subpath: server?.subpath }} />
+			{children}
+		</>
+	);
 }
