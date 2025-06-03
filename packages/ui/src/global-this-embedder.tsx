@@ -8,6 +8,7 @@ export type GlobalThisEmbed = {
 
 export function GlobalThisEmbedder(props: {
 	embedOnServer: GlobalThisEmbed;
+	children: React.ReactNode;
 }) {
 	const id = useId();
 	// @ts-expect-error - globalThis is not typed
@@ -21,7 +22,7 @@ export function GlobalThisEmbedder(props: {
 			<script key={id} dangerouslySetInnerHTML={{ __html: html.join('') }} />
 		);
 	});
-	return null;
+	return props.children;
 }
 
 export function getGlobalThisValue(): GlobalThisEmbed | undefined {
