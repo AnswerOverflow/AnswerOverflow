@@ -32,6 +32,7 @@ export function getDefaultServer(
 		description: null,
 		vanityUrl: null,
 		customDomain: null,
+		subpath: null,
 		stripeCustomerId: null,
 		stripeSubscriptionId: null,
 		plan: 'FREE',

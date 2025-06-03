@@ -3,6 +3,7 @@ import { ServerPublic } from '@answeroverflow/api/router/types';
 import { makeMainSiteLink } from '@answeroverflow/constants/links';
 import { Button, ButtonProps } from '../ui/button';
 import { LinkButton } from '../ui/link-button';
+import { getServerCustomUrl } from '../utils/server';
 
 export function SignInButton(
 	props: ButtonProps & {
@@ -16,7 +17,7 @@ export function SignInButton(
 		const redirect =
 			typeof window !== 'undefined'
 				? window.location.href
-				: `http://${tenant.customDomain!}`;
+				: getServerCustomUrl(tenant) || `http://${tenant.customDomain!}`;
 
 		return (
 			<LinkButton

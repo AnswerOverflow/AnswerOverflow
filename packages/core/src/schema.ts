@@ -271,6 +271,7 @@ export const dbServers = mysqlTable(
 		kickedTime: datetime('kickedTime', { mode: 'date', fsp: 3 }),
 		vanityUrl: varchar('vanityUrl', { length: 191 }),
 		customDomain: varchar('customDomain', { length: 191 }),
+		subpath: varchar('subpath', { length: 191 }),
 		stripeCustomerId: varchar('stripeCustomerId', { length: 191 }),
 		stripeSubscriptionId: varchar('stripeSubscriptionId', { length: 191 }),
 		plan: mysqlEnum('plan', plans).default('FREE').notNull(),
