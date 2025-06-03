@@ -7,14 +7,17 @@ import { Metadata } from 'next';
 import { JsonLd } from 'react-schemaorg';
 import { ProfilePage } from 'schema-dts';
 import { Props, getUserPageData } from './components';
+import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const { userInfo, server } = await getUserPageData(props);
+	const customUrl = getServerCustomUrl(server);
+	const baseUrl = customUrl || `https://${server.customDomain}`;
 	return {
 		title: `${userInfo.name} Posts - ${server.name}`,
 		description: `See posts from ${userInfo.name} in the ${server.name} Discord`,
 		alternates: {
-			canonical: `https://${server.customDomain}/u/${userInfo.id}`,
+			canonical: `${baseUrl}/u/${userInfo.id}`,
 		},
 		openGraph: {
 			title: `${userInfo.name} Posts - ${server.name}`,
@@ -26,6 +29,8 @@ export default async function Layout(
 	props: { children: React.ReactNode } & Props,
 ) {
 	const { userInfo, server } = await getUserPageData(props);
+	const customUrl = getServerCustomUrl(server);
+	const baseUrl = customUrl || `https://${server.customDomain}`;
 	return (
 		<main className="flex w-full justify-center pt-4">
 			<JsonLd<ProfilePage>
@@ -47,12 +52,12 @@ export default async function Layout(
 						},
 					},
 					name: userInfo.name,
-					url: `https://${server.customDomain}{/u/${userInfo.id}`,
+					url: `${baseUrl}/u/${userInfo.id}`,
 					mainEntity: {
 						'@type': 'Person',
 						identifier: userInfo.id,
 						name: userInfo.name,
-						url: `https://${server.customDomain}{/u/${userInfo.id}`,
+						url: `${baseUrl}/u/${userInfo.id}`,
 					},
 				}}
 			/>

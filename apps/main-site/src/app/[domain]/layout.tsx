@@ -2,6 +2,7 @@ import { findServerByCustomDomain } from '@answeroverflow/core/server';
 import { makeServerIconLink } from '@answeroverflow/ui/server-icon';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 
 export async function generateMetadata(props: {
 	params: Promise<{ domain: string }>;
@@ -25,10 +26,14 @@ export async function generateMetadata(props: {
 	const icon = tenant.icon
 		? `https://cdn.answeroverflow.com/${tenant.id}/${tenant.icon}/icon.png`
 		: makeServerIconLink(tenant, 48);
+	
+	const customUrl = getServerCustomUrl(tenant);
+	const metadataBaseUrl = customUrl ? new URL(customUrl) : new URL(`https://${tenant.customDomain!}`);
+	
 	return {
 		title: `${tenant.name} Community`,
 		description,
-		metadataBase: new URL(`https://${tenant.customDomain!}`),
+		metadataBase: metadataBaseUrl,
 		other:
 			tenant.id == '864296203746803753'
 				? {
@@ -38,7 +43,7 @@ export async function generateMetadata(props: {
 				: undefined,
 		icons: icon ? [icon] : undefined,
 		alternates: {
-			canonical: `https://${tenant.customDomain!}`,
+			canonical: customUrl || `https://${tenant.customDomain!}`,
 		},
 		openGraph: {
 			images: [image],

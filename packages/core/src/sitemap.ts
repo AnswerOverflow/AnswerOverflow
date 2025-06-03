@@ -57,6 +57,7 @@ export async function listPublicThreads(opts: {
 			(t) =>
 				questionLookup.has(t.id) &&
 				!serverLookup.get(t.serverId)?.customDomain &&
+				!serverLookup.get(t.serverId)?.subpath &&
 				!serverLookup.get(t.serverId)?.kickedTime,
 		),
 		hasMore: threads.length === limit,
