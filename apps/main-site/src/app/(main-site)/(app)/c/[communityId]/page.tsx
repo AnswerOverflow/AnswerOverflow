@@ -1,9 +1,9 @@
 import { findServerWithCommunityPageData } from '@answeroverflow/core/pages';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { CommunityPage } from '@answeroverflow/ui/pages/CommunityPage';
+import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 import { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 
 type Props = {
 	params: Promise<{ communityId: string }>;
@@ -58,7 +58,7 @@ export default async function CommunityPageContainer(props: Props) {
 	if (communityPageData.server.customDomain) {
 		const customUrl = getServerCustomUrl(communityPageData.server);
 		if (customUrl) {
-			return redirect(customUrl);	
+			return redirect(customUrl);
 		}
 	}
 	const selectedChannel = communityPageData.channels[0];

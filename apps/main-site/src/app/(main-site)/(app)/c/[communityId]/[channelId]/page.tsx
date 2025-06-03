@@ -1,9 +1,9 @@
 import { findServerWithCommunityPageData } from '@answeroverflow/core/pages';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { CommunityPage } from '@answeroverflow/ui/pages/CommunityPage';
+import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 import { notFound, redirect } from 'next/navigation';
 import { z } from 'zod';
-import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 
 export { generateMetadata } from '../page';
 
