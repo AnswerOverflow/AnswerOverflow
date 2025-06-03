@@ -11,7 +11,7 @@ import { ThemeSwitcher } from '../theme-switcher';
 import { Link } from '../ui/link';
 import { LinkButton } from '../ui/link-button';
 import { UserSection } from './client';
-import { getGlobalThisValue } from '../global-this-embedder';
+import { getGlobalThisValueServer } from '../global-this-embed';
 
 const Navbar = (props: {
 	tenant: ServerPublic | undefined;
@@ -30,7 +30,7 @@ const Navbar = (props: {
 					<Link
 						href="/"
 						className={props.hideIcon ? 'hidden' : ''}
-						data-tid={`subpath-${getGlobalThisValue()?.subpath ?? 'undefined'}`}
+						data-tid={`subpath-${getGlobalThisValueServer()?.subpath ?? 'undefined'}`}
 					>
 						{tenant ? (
 							<div className="flex items-center space-x-2">
