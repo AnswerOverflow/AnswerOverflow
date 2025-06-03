@@ -9,7 +9,7 @@ export function GlobalThisEmbedder(props: {
 	embedOnServer: GlobalThisEmbed;
 }) {
 	// @ts-expect-error - globalThis is not typed
-	globalThis.__SERVER_CONTENT ??= props.embedOnServer;
+	globalThis.__SERVER_CONTENT = props.embedOnServer;
 
 	useServerInsertedHTML(() => {
 		const html = [
