@@ -1,10 +1,7 @@
 'use client';
 import { useServerInsertedHTML } from 'next/navigation';
 import { useId } from 'react';
-
-export type GlobalThisEmbed = {
-	subpath?: string | null;
-};
+import { GlobalThisEmbed } from './global-this-embed';
 
 export function GlobalThisEmbedder(props: {
 	embedOnServer: GlobalThisEmbed;
@@ -23,9 +20,4 @@ export function GlobalThisEmbedder(props: {
 		);
 	});
 	return props.children;
-}
-
-export function getGlobalThisValue(): GlobalThisEmbed | undefined {
-	// @ts-expect-error - globalThis is not typed
-	return globalThis.__SERVER_CONTENT;
 }
