@@ -63,7 +63,7 @@ export function middleware(req: NextRequest) {
 		if (!bypass) {
 			return NextResponse.redirect(
 				new URL(
-					`/${subpathCustomer.rewriteDomain}/${subpathCustomer.subpath}${path}`,
+					`https://${subpathCustomer.rewriteDomain}/${subpathCustomer.subpath}${path}`,
 					req.url,
 				),
 			);
