@@ -2,6 +2,7 @@ import { makeMessageResultPage } from '@answeroverflow/core/pages';
 import { MessageResultPage } from '@answeroverflow/ui/pages/MessageResultPage';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
+import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 
 type Props = {
 	params: Promise<{ messageId: string }>;
@@ -44,9 +45,10 @@ export default async function MessageResult(props: Props) {
 		return notFound();
 	}
 	if (data.server.customDomain) {
-		return redirect(
-			`https://${data.server.customDomain}/m/${params.messageId}`,
-		);
+		const customUrl = getServerCustomUrl(data.server, `/m/${params.messageId}`);
+		if (customUrl) {
+			return redirect(customUrl);
+		}
 	}
 	return (
 		<MessageResultPage

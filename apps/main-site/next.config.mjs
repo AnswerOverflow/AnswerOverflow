@@ -106,4 +106,5 @@ const config = {
 	},
 };
 
+// @ts-ignore - Temporary fix for type incompatibility between Next.js and MDX package versions
 export default withMDX(config);

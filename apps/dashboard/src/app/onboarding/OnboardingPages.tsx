@@ -173,6 +173,7 @@ export function WelcomePageRenderer(props: {
 										...server,
 										description: null,
 										vanityUrl: null,
+										subpath: null,
 										vanityInviteCode: null,
 										kickedTime: null,
 										customDomain: null,

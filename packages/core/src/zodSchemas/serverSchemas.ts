@@ -60,5 +60,6 @@ export const zServerPublic = zServerSchema.pick({
 	description: true,
 	kickedTime: true,
 	customDomain: true,
+	subpath: true,
 	approximateMemberCount: true,
 });
