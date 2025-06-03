@@ -7,9 +7,17 @@ import { trpc } from '../utils/client';
 import { transformer } from '@answeroverflow/api/transformer';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { getGlobalThisValue } from '../global-this-embedder';
 
 const getBaseUrl = () => {
-	if (typeof window !== 'undefined') return ''; // browser should use relative url
+	const serverContent = getGlobalThisValue();
+	if (typeof window !== 'undefined') {
+		// use relative url
+		if (serverContent?.subpath) {
+			return `/${serverContent.subpath}`;
+		}
+		return ''; // default to relative url
+	}
 	// eslint-disable-next-line n/no-process-env
 	if (process.env.NEXT_PUBLIC_VERCEL_URL)
 		// eslint-disable-next-line n/no-process-env
