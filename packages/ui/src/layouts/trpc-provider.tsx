@@ -7,7 +7,7 @@ import { trpc } from '../utils/client';
 import { transformer } from '@answeroverflow/api/transformer';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { getGlobalThisValue } from '../global-this-embedder';
+import { getGlobalThisValue } from '../global-this-embed';
 
 const getBaseUrl = () => {
 	const serverContent = getGlobalThisValue();

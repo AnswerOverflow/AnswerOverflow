@@ -4,7 +4,7 @@ import posthog from 'posthog-js';
 import { PostHogProvider, usePostHog } from 'posthog-js/react';
 import React, { useEffect, useRef } from 'react';
 import { EventMap, trackEvent } from './events';
-import { getGlobalThisValue } from '../global-this-embedder';
+import { getGlobalThisValue } from '../global-this-embed';
 
 if (typeof window !== 'undefined') {
 	const serverContent = getGlobalThisValue();

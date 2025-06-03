@@ -1,7 +1,7 @@
 import NextLink from 'next/link';
 import React from 'react';
 import { cn } from '../utils/utils';
-import { getGlobalThisValueServer } from '../global-this-embed';
+import { getGlobalThisValue } from '../global-this-embed';
 export function Link(
 	props: React.ComponentPropsWithoutRef<typeof NextLink> & {
 		href: string;
@@ -9,7 +9,7 @@ export function Link(
 	},
 ) {
 	const { icon, className, ...rest } = props;
-	const serverContent = getGlobalThisValueServer();
+	const serverContent = getGlobalThisValue();
 	const isRelative = rest.href.startsWith('/');
 	const finalHref =
 		serverContent?.subpath && isRelative
