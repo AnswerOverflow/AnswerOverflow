@@ -19,7 +19,7 @@ const subpathCustomers = [
 	{
 		contentDomain: 'testing.rhys.ltd',
 		rewriteDomain: 'rhys.ltd',
-		subpath: 'testing',
+		subpath: 'idk',
 	},
 ];
 
