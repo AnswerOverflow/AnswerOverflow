@@ -65,6 +65,10 @@ const config = {
 			},
 		];
 	},
+	assetPrefix:
+		process.env.NODE_ENV === 'development'
+			? undefined
+			: 'https://www.answeroverflow.com/',
 	skipTrailingSlashRedirect: true,
 	redirects: async () => {
 		return [
