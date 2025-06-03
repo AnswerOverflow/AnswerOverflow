@@ -1,9 +1,9 @@
 import { MessageResultPage } from '@answeroverflow/ui/pages/MessageResultPage';
 import { fetchIsUserInServer } from '@answeroverflow/ui/utils/fetch-is-user-in-server';
+import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 import { callAPI } from '@answeroverflow/ui/utils/trpc';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 
 type Props = {
 	params: Promise<{ messageId: string }>;

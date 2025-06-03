@@ -1,8 +1,8 @@
 import { makeMessageResultPage } from '@answeroverflow/core/pages';
 import { MessageResultPage } from '@answeroverflow/ui/pages/MessageResultPage';
+import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 
 type Props = {
 	params: Promise<{ messageId: string }>;

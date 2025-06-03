@@ -1,4 +1,5 @@
 import { Analytics } from '@answeroverflow/core/analytics';
+import { getBiggestServers } from '@answeroverflow/core/server';
 import { BlueLink } from '@answeroverflow/ui/ui/blue-link';
 import { LinkButton } from '@answeroverflow/ui/ui/link-button';
 import { Metadata } from 'next';
@@ -6,7 +7,6 @@ import { FaArrowTrendUp } from 'react-icons/fa6';
 import { MdOutlineExplore } from 'react-icons/md';
 import { PiPlant } from 'react-icons/pi';
 import { TrendingServer } from './components';
-import { getBiggestServers } from '@answeroverflow/core/server';
 
 export const metadata: Metadata = {
 	alternates: {

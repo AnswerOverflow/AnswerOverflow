@@ -1,8 +1,8 @@
 import { FeedPost } from '@answeroverflow/ui/feed-post';
+import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 import { Metadata } from 'next';
 import { GiSpiderWeb } from 'react-icons/gi';
 import { ActualLayout, getUserPageData } from '../components';
-import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 
 type Props = {
 	params: Promise<{ userId: string; domain: string }>;

@@ -11,7 +11,7 @@ export function getServerHomepageUrl(server: ServerPublic) {
 	if (!server.customDomain) {
 		return `https://www.answeroverflow.com/c/${server.id}`;
 	}
-	const protocol = 
+	const protocol =
 		// eslint-disable-next-line n/no-process-env
 		process.env.NODE_ENV === 'production' ? 'https' : 'http';
 	const subpath = server.subpath ? `/${server.subpath}` : '';
@@ -22,7 +22,7 @@ export function getServerCustomUrl(server: ServerPublic, path: string = '') {
 	if (!server.customDomain) {
 		return null;
 	}
-	const protocol = 
+	const protocol =
 		// eslint-disable-next-line n/no-process-env
 		process.env.NODE_ENV === 'production' ? 'https' : 'http';
 	const subpath = server.subpath ? `/${server.subpath}` : '';

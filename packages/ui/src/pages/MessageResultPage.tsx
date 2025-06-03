@@ -17,8 +17,8 @@ import { TimeAgo } from '../ui/time-ago';
 import { TrackLinkButton } from '../ui/track-link-button';
 import { TrackLoad } from '../ui/track-load';
 import { getDiscordURLForMessage } from '../utils/discord';
-import { getDate } from '../utils/snowflake';
 import { getServerCustomUrl, getServerHomepageUrl } from '../utils/server';
+import { getDate } from '../utils/snowflake';
 import { InKeepWidget } from './inkeep';
 import { LazyInviteToAnswerOverflowPopover } from './message-result-page/lazy-invite-to-answer-overflow-popover';
 
@@ -173,15 +173,14 @@ export function MessageResultPage({
 		.filter((attachment) => isImageAttachment(attachment))
 		.at(0);
 
-	const UserLink = () => firstMessage.isAnonymous ? (
-		<span className="text-muted-foreground">
-			{firstMessage.author.name}
-		</span>
-	) : (
-		<Link href={`/u/${firstMessage.author.id}`} className="hover:underline">
-			{firstMessage.author.name}
-		</Link>
-	);
+	const UserLink = () =>
+		firstMessage.isAnonymous ? (
+			<span className="text-muted-foreground">{firstMessage.author.name}</span>
+		) : (
+			<Link href={`/u/${firstMessage.author.id}`} className="hover:underline">
+				{firstMessage.author.name}
+			</Link>
+		);
 
 	const Main = () => (
 		<main className={'flex w-full max-w-3xl grow flex-col gap-4'}>
@@ -272,7 +271,9 @@ export function MessageResultPage({
 			>
 				<div className="flex flex-col items-start gap-4 p-4">
 					<div className="flex w-full flex-row items-center justify-between truncate font-bold">
-						<Link href={tenant ? '/' : getServerHomepageUrl(server)}>{server.name}</Link>
+						<Link href={tenant ? '/' : getServerHomepageUrl(server)}>
+							{server.name}
+						</Link>
 						<ServerInviteJoinButton
 							server={server}
 							channel={channel}
@@ -320,7 +321,10 @@ export function MessageResultPage({
 	// Generate the appropriate URL for schema markup
 	const getSchemaUrl = () => {
 		if (server.customDomain) {
-			const customUrl = getServerCustomUrl(server, `/m/${thread?.id ?? firstMessage.id}`);
+			const customUrl = getServerCustomUrl(
+				server,
+				`/m/${thread?.id ?? firstMessage.id}`,
+			);
 			if (customUrl) return customUrl;
 		}
 		return `https://${getMainSiteHostname()}/m/${thread?.id ?? firstMessage.id}`;
