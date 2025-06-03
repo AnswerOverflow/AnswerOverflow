@@ -70,7 +70,9 @@ export function middleware(req: NextRequest) {
 		// }
 	}
 
-	const newUrl = new URL(`/${host}${path}${pathPostFix}`, req.url);
+	const actualHost = subpathCustomer?.rewriteDomain || host;
+
+	const newUrl = new URL(`/${actualHost}${path}${pathPostFix}`, req.url);
 	return NextResponse.rewrite(newUrl);
 }
 // See "Matching Paths" below to learn more
