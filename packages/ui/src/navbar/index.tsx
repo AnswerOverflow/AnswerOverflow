@@ -28,9 +28,8 @@ const Navbar = (props: {
 			>
 				<div>
 					<Link
-						href="/"
+						href={tenant?.subpath ? `/${tenant.subpath}` : '/'}
 						className={props.hideIcon ? 'hidden' : ''}
-						data-tid={`subpath-${getGlobalThisValue()?.subpath ?? 'undefined'}`}
 					>
 						{tenant ? (
 							<div className="flex items-center space-x-2">

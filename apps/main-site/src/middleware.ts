@@ -11,11 +11,11 @@ import type { NextRequest } from 'next/server';
 // if the 'X-AnswerOverflow-Skip-Subpath-Redirect' header is set, just pass on the request
 // otherwise, redirect them to the rewrite domain
 const subpathCustomers = [
-	// {
-	//   contentDomain: "migaku.com",
-	//   rewriteDomain: "community.migaku.com",
-	//   subpath: "community",
-	// },
+	{
+		contentDomain: 'migaku.com',
+		rewriteDomain: 'community.migaku.com',
+		subpath: 'community',
+	},
 	{
 		contentDomain: 'testing.rhys.ltd',
 		rewriteDomain: 'rhys.ltd',
