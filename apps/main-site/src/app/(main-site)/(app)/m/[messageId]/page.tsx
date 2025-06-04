@@ -9,7 +9,7 @@ type Props = {
 	searchParams?: Promise<{ showAiChat?: boolean }>;
 };
 
-export const revalidate = 86400;
+export const revalidate = 3600;
 export const dynamic = 'force-static';
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
