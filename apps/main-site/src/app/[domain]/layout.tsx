@@ -66,6 +66,7 @@ export default async function Layout(props: {
 	const server = await findServerByCustomDomain(
 		decodeURIComponent(params.domain),
 	);
+	console.log('subpath', server?.subpath);
 	return (
 		<GlobalThisEmbedder embedOnServer={{ subpath: server?.subpath }}>
 			{children}
