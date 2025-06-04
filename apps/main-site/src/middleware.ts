@@ -12,8 +12,8 @@ import type { NextRequest } from 'next/server';
 // otherwise, redirect them to the rewrite domain
 const subpathCustomers = [
 	{
-		contentDomain: 'migaku.com',
-		rewriteDomain: 'community.migaku.com',
+		contentDomain: 'community.migaku.com',
+		rewriteDomain: 'migaku.com',
 		subpath: 'community',
 	},
 	{
