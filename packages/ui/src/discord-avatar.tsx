@@ -11,9 +11,10 @@ export const makeUserIconLink = (
 	user: Pick<DiscordAccountPublic, 'id' | 'avatar'>,
 	size: number = 64,
 ) => {
+	const subpath = getGlobalThisValue()?.subpath;
 	if (user.avatar)
 		return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=${size}`;
-	return `/discord/${parseInt(user.id) % 5}.png`;
+	return `${subpath ? `/${subpath}` : ''}/discord/${parseInt(user.id) % 5}.png`;
 };
 
 export function DiscordAvatar(props: DiscordAvatarProps) {
@@ -22,7 +23,6 @@ export function DiscordAvatar(props: DiscordAvatarProps) {
 	const fallback = `${subpath ? `/${subpath}` : ''}/discord/${parseInt(props.user.id) % 5}.png`;
 	return (
 		<div
-			data-tid={`subpath-${subpath}`}
 			style={{
 				height: props.size,
 				width: props.size,
