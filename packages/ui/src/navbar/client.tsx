@@ -29,6 +29,10 @@ export function UserSection(props: {
 	const { tenant } = props;
 	const { data } = trpc.auth.getSession.useQuery();
 
+	if (tenant?.subpath) {
+		return null;
+	}
+
 	if (!data)
 		return <ClientSignInButton tenant={tenant} dashboard={props.dashboard} />;
 	return <ClientUserAvatar user={data.user} tenant={props.tenant} />;
