@@ -1,7 +1,8 @@
+'use client';
 import NextLink from 'next/link';
 import React from 'react';
 import { cn } from '../utils/utils';
-import { getGlobalThisValue } from '../global-this-embed';
+import { useTenant } from '../context/tenant-context';
 export function Link(
 	props: React.ComponentPropsWithoutRef<typeof NextLink> & {
 		href: string;
@@ -9,14 +10,14 @@ export function Link(
 	},
 ) {
 	const { icon, className, ...rest } = props;
-	const serverContent = getGlobalThisValue();
+	const tenant = useTenant();
 	const isRelative = rest.href.startsWith('/');
 	const doesStartWithSubpathAlready =
-		rest.href.startsWith(serverContent?.subpath ?? '') ||
-		rest.href.startsWith(`/${serverContent?.subpath}`);
+		rest.href.startsWith(tenant?.subpath ?? '') ||
+		rest.href.startsWith(`/${tenant?.subpath}`);
 	const finalHref =
-		serverContent?.subpath && isRelative && !doesStartWithSubpathAlready
-			? `/${serverContent.subpath}${rest.href}`
+		tenant?.subpath && isRelative && !doesStartWithSubpathAlready
+			? `/${tenant.subpath}${rest.href}`
 			: rest.href;
 
 	if (finalHref !== rest.href) {

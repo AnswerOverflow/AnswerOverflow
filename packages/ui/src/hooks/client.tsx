@@ -4,26 +4,27 @@ import posthog from 'posthog-js';
 import { PostHogProvider, usePostHog } from 'posthog-js/react';
 import React, { useEffect, useRef } from 'react';
 import { EventMap, trackEvent } from './events';
-import { getGlobalThisValue } from '../global-this-embed';
+import { useTenant } from '../context/tenant-context';
 
 if (typeof window !== 'undefined') {
-	const serverContent = getGlobalThisValue();
 	// eslint-disable-next-line n/no-process-env
 	posthog.init(process.env.NEXT_PUBLIC_POSTHOG_TOKEN!, {
 		disable_session_recording: true,
 		persistence: 'memory',
 		capture_pageview: false,
-		api_host: serverContent?.subpath
-			? `/${serverContent.subpath}/ingest`
-			: '/ingest',
+		api_host: '/ingest',
 		ui_host: 'https://us.i.posthog.com', // or 'https://eu.i.posthog.com' if your PostHog is hosted in Europe
 	});
 }
 
 export function PostHogPageview() {
 	const pathname = usePathname();
+	const tenant = useTenant();
 	const searchParams = useSearchParams();
 	const posthog = usePostHog();
+	posthog.set_config({
+		api_host: tenant?.subpath ? `/${tenant.subpath}/ingest` : '/ingest',
+	});
 	// Track pageviews
 	useEffect(() => {
 		if (pathname && posthog) {

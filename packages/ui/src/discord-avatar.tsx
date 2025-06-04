@@ -1,7 +1,8 @@
+'use client';
 import { DiscordAccountPublic } from '@answeroverflow/core/zod';
 import { AvatarProps } from './ui/avatar';
 import { cn } from './utils/utils';
-import { getGlobalThisValue } from './global-this-embed';
+import { useTenant } from './context/tenant-context';
 
 export interface DiscordAvatarProps extends Omit<AvatarProps, 'alt' | 'url'> {
 	user: DiscordAccountPublic;
@@ -10,16 +11,17 @@ export interface DiscordAvatarProps extends Omit<AvatarProps, 'alt' | 'url'> {
 export const makeUserIconLink = (
 	user: Pick<DiscordAccountPublic, 'id' | 'avatar'>,
 	size: number = 64,
+	subpath: string | null | undefined,
 ) => {
-	const subpath = getGlobalThisValue()?.subpath;
 	if (user.avatar)
 		return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=${size}`;
 	return `${subpath ? `/${subpath}` : ''}/discord/${parseInt(user.id) % 5}.png`;
 };
 
 export function DiscordAvatar(props: DiscordAvatarProps) {
-	const url = makeUserIconLink(props.user, props.size);
-	const subpath = getGlobalThisValue()?.subpath;
+	const tenant = useTenant();
+	const subpath = tenant?.subpath;
+	const url = makeUserIconLink(props.user, props.size, subpath);
 	const fallback = `${subpath ? `/${subpath}` : ''}/discord/${parseInt(props.user.id) % 5}.png`;
 	return (
 		<div

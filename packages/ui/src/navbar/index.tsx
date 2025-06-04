@@ -11,7 +11,6 @@ import { ThemeSwitcher } from '../theme-switcher';
 import { Link } from '../ui/link';
 import { LinkButton } from '../ui/link-button';
 import { UserSection } from './client';
-import { getGlobalThisValue } from '../global-this-embed';
 
 const Navbar = (props: {
 	tenant: ServerPublic | undefined;
