@@ -3,20 +3,11 @@ import { DiscordAccountPublic } from '@answeroverflow/core/zod';
 import { AvatarProps } from './ui/avatar';
 import { cn } from './utils/utils';
 import { useTenant } from './context/tenant-context';
+import { makeUserIconLink } from './discord-avatar-utils';
 
 export interface DiscordAvatarProps extends Omit<AvatarProps, 'alt' | 'url'> {
 	user: DiscordAccountPublic;
 }
-
-export const makeUserIconLink = (
-	user: Pick<DiscordAccountPublic, 'id' | 'avatar'>,
-	size: number = 64,
-	subpath: string | null | undefined,
-) => {
-	if (user.avatar)
-		return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=${size}`;
-	return `${subpath ? `/${subpath}` : ''}/discord/${parseInt(user.id) % 5}.png`;
-};
 
 export function DiscordAvatar(props: DiscordAvatarProps) {
 	const tenant = useTenant();

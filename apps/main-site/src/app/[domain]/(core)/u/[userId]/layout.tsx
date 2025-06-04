@@ -1,7 +1,5 @@
-import {
-	DiscordAvatar,
-	makeUserIconLink,
-} from '@answeroverflow/ui/discord-avatar';
+import { DiscordAvatar } from '@answeroverflow/ui/discord-avatar';
+import { makeUserIconLink } from '@answeroverflow/ui/discord-avatar-utils';
 import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 import { getDate } from '@answeroverflow/ui/utils/snowflake';
 import { Metadata } from 'next';
