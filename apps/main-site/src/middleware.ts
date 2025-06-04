@@ -28,6 +28,7 @@ export function middleware(req: NextRequest) {
 	const path = url.pathname + url.search;
 
 	const host = req.headers.get('host')!;
+	const forwardedHost = req.headers.get('x-forwarded-host');
 	if (path.startsWith('/og') || path.startsWith('/ingest')) {
 		return NextResponse.next();
 	}
@@ -56,7 +57,7 @@ export function middleware(req: NextRequest) {
 		}
 	}
 	const subpathCustomer = subpathCustomers.find((customer) =>
-		host.includes(customer.contentDomain),
+		(forwardedHost || host).includes(customer.contentDomain),
 	);
 	if (subpathCustomer) {
 		const bypass = req.headers.get('X-AnswerOverflow-Skip-Subpath-Redirect');
