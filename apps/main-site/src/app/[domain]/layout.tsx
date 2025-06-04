@@ -55,6 +55,7 @@ export async function generateMetadata(props: {
 	};
 }
 
+let counter = 0;
 export default async function Layout(props: {
 	children: React.ReactNode;
 	params: Promise<{ domain: string }>;
@@ -67,7 +68,9 @@ export default async function Layout(props: {
 		decodeURIComponent(params.domain),
 	);
 	return (
-		<GlobalThisEmbedder embedOnServer={{ subpath: server?.subpath }}>
+		<GlobalThisEmbedder
+			embedOnServer={{ subpath: server?.subpath, counter: counter++ }}
+		>
 			{children}
 		</GlobalThisEmbedder>
 	);
