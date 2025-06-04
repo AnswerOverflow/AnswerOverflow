@@ -18,6 +18,21 @@ export function Link(
 			? `/${serverContent.subpath}${rest.href}`
 			: rest.href;
 
+	if (finalHref !== rest.href) {
+		if (icon)
+			return (
+				<a
+					prefetch={false}
+					{...rest}
+					href={finalHref}
+					className={cn('flex flex-row items-center gap-2', className)}
+				>
+					{props.icon}
+					{props.children}
+				</a>
+			);
+		return <a prefetch={false} {...props} href={finalHref} />;
+	}
 	if (icon)
 		return (
 			<NextLink
