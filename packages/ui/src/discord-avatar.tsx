@@ -22,6 +22,7 @@ export function DiscordAvatar(props: DiscordAvatarProps) {
 	const fallback = `${subpath ? `/${subpath}` : ''}/discord/${parseInt(props.user.id) % 5}.png`;
 	return (
 		<div
+			data-tid={`subpath-${subpath}`}
 			style={{
 				height: props.size,
 				width: props.size,
