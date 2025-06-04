@@ -4,7 +4,8 @@ import { BlueLink } from '@answeroverflow/ui/ui/blue-link';
 type Props = {
 	params: Promise<{ communityId: string; page: string }>;
 };
-
+export const dynamic = 'force-static';
+export const revalidate = 3600;
 export default async function CommunityPosts(props: Props) {
 	const params = await props.params;
 	const lookup = await findQuestionsForSitemapCached(params.communityId);
