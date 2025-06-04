@@ -1,7 +1,5 @@
-import {
-	DiscordAvatar,
-	makeUserIconLink,
-} from '@answeroverflow/ui/discord-avatar';
+import { DiscordAvatar } from '@answeroverflow/ui/discord-avatar';
+import { makeUserIconLink } from '@answeroverflow/ui/discord-avatar-utils';
 import { getDate } from '@answeroverflow/ui/utils/snowflake';
 import { Metadata } from 'next';
 import { JsonLd } from 'react-schemaorg';
