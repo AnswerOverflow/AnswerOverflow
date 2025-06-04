@@ -42,7 +42,7 @@ export default async function Layout(props: {
 					dateCreated: getDate(userInfo.id).toISOString(),
 					image: {
 						'@type': 'ImageObject',
-						url: makeUserIconLink(userInfo, 256),
+						url: makeUserIconLink(userInfo, 256, null),
 						height: {
 							'@type': 'QuantitativeValue',
 							value: 256,

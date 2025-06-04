@@ -7,14 +7,14 @@ import { trpc } from '../utils/client';
 import { transformer } from '@answeroverflow/api/transformer';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { getGlobalThisValue } from '../global-this-embed';
+import { useTenant } from '../context/tenant-context';
 
-const getBaseUrl = () => {
-	const serverContent = getGlobalThisValue();
+const useBaseUrl = () => {
+	const tenant = useTenant();
 	if (typeof window !== 'undefined') {
 		// use relative url
-		if (serverContent?.subpath) {
-			return `/${serverContent.subpath}`;
+		if (tenant?.subpath) {
+			return `/${tenant.subpath}`;
 		}
 		return ''; // default to relative url
 	}
@@ -27,6 +27,7 @@ const getBaseUrl = () => {
 };
 
 export function TRPCProvider(props: { children?: React.ReactNode } | null) {
+	const baseUrl = useBaseUrl();
 	const [queryClient] = useState(
 		() =>
 			new QueryClient({
@@ -51,7 +52,7 @@ export function TRPCProvider(props: { children?: React.ReactNode } | null) {
 						false,
 				}),
 				httpBatchLink({
-					url: `${getBaseUrl()}/api/trpc`,
+					url: `${baseUrl}/api/trpc`,
 				}),
 			],
 		}),

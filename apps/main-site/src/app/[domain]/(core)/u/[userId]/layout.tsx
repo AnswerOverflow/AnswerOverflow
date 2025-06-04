@@ -41,7 +41,7 @@ export default async function Layout(
 					dateCreated: getDate(userInfo.id).toISOString(),
 					image: {
 						'@type': 'ImageObject',
-						url: makeUserIconLink(userInfo, 512),
+						url: makeUserIconLink(userInfo, 512, server.subpath),
 						height: {
 							'@type': 'QuantitativeValue',
 							value: 512,

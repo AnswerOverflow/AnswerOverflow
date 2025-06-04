@@ -1,3 +1,4 @@
+import { Providers } from '@answeroverflow/ui/layouts/providers';
 import '../styles/globals.css';
 import {
 	Layout,
@@ -13,5 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout(props: { children?: React.ReactNode }) {
-	return <Layout>{props && props.children ? props.children : null}</Layout>;
+	return (
+		<Layout>
+			<Providers>{props && props.children ? props.children : null}</Providers>
+		</Layout>
+	);
 }

@@ -1,5 +1,6 @@
 import { findServerByCustomDomain } from '@answeroverflow/core/server';
-import { GlobalThisEmbedder } from '@answeroverflow/ui/global-this-embedder';
+import { zServerPublic } from '@answeroverflow/core/zod';
+import { Providers } from '@answeroverflow/ui/layouts/providers';
 import { makeServerIconLink } from '@answeroverflow/ui/server-icon';
 import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 import { Metadata } from 'next';
@@ -66,10 +67,6 @@ export default async function Layout(props: {
 	const server = await findServerByCustomDomain(
 		decodeURIComponent(params.domain),
 	);
-	console.log('subpath', server?.subpath);
-	return (
-		<GlobalThisEmbedder embedOnServer={{ subpath: server?.subpath }}>
-			{children}
-		</GlobalThisEmbedder>
-	);
+	const parsed = zServerPublic.parse(server);
+	return <Providers tenant={parsed}>{children}</Providers>;
 }
