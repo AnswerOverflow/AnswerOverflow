@@ -66,6 +66,7 @@ export function middleware(req: NextRequest) {
 					`https://${subpathCustomer.rewriteDomain}/${subpathCustomer.subpath}${path}`,
 					req.url,
 				),
+				308,
 			);
 		}
 	}
