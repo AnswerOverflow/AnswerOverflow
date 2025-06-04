@@ -1,6 +1,7 @@
 import { DiscordAccountPublic } from '@answeroverflow/core/zod';
 import { AvatarProps } from './ui/avatar';
 import { cn } from './utils/utils';
+import { getGlobalThisValue } from './global-this-embed';
 
 export interface DiscordAvatarProps extends Omit<AvatarProps, 'alt' | 'url'> {
 	user: DiscordAccountPublic;
@@ -17,7 +18,8 @@ export const makeUserIconLink = (
 
 export function DiscordAvatar(props: DiscordAvatarProps) {
 	const url = makeUserIconLink(props.user, props.size);
-	const fallback = `/discord/${parseInt(props.user.id) % 5}.png`;
+	const subpath = getGlobalThisValue()?.subpath;
+	const fallback = `${subpath ? `/${subpath}` : ''}/discord/${parseInt(props.user.id) % 5}.png`;
 	return (
 		<div
 			style={{
