@@ -12,7 +12,9 @@ export function Link(
 	const serverContent = getGlobalThisValue();
 	const isRelative = rest.href.startsWith('/');
 	const finalHref =
-		serverContent?.subpath && isRelative
+		serverContent?.subpath &&
+		isRelative &&
+		!rest.href.startsWith(serverContent.subpath)
 			? `/${serverContent.subpath}${rest.href}`
 			: rest.href;
 
