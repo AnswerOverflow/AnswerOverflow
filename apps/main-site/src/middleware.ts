@@ -17,9 +17,9 @@ const subpathCustomers = [
 		subpath: 'community',
 	},
 	{
-		contentDomain: 'testing.rhys.ltd',
+		contentDomain: 'community.migaku.com',
 		rewriteDomain: 'rhys.ltd',
-		subpath: 'idk',
+		subpath: 'community',
 	},
 ];
 
