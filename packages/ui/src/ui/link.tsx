@@ -11,10 +11,11 @@ export function Link(
 	const { icon, className, ...rest } = props;
 	const serverContent = getGlobalThisValue();
 	const isRelative = rest.href.startsWith('/');
+	const doesStartWithSubpathAlready =
+		rest.href.startsWith(serverContent?.subpath ?? '') ||
+		rest.href.startsWith(`/${serverContent?.subpath}`);
 	const finalHref =
-		serverContent?.subpath &&
-		isRelative &&
-		!rest.href.startsWith(serverContent.subpath)
+		serverContent?.subpath && isRelative && !doesStartWithSubpathAlready
 			? `/${serverContent.subpath}${rest.href}`
 			: rest.href;
 
