@@ -30,7 +30,7 @@ export const MessageAuthorArea = (props: Pick<MessageProps, 'message'>) => {
 			<div className="flex w-full flex-row items-center gap-2 font-body text-lg text-black/[.7] dark:text-white/[.47]">
 				<DiscordAvatar user={message.author} size={40} />
 				{message.isAnonymous ? (
-					<span className="mr-1 text-black/[.7] hover:underline dark:text-white/[.47]">
+					<span className="mr-1 text-black/[.7]  dark:text-white/[.47]">
 						{message.author.name}
 					</span>
 				) : (
