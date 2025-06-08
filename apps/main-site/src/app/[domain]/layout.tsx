@@ -1,5 +1,8 @@
 import { findServerByCustomDomain } from '@answeroverflow/core/server';
+import { zServerPublic } from '@answeroverflow/core/zod';
+import { Providers } from '@answeroverflow/ui/layouts/providers';
 import { makeServerIconLink } from '@answeroverflow/ui/server-icon';
+import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
@@ -25,10 +28,16 @@ export async function generateMetadata(props: {
 	const icon = tenant.icon
 		? `https://cdn.answeroverflow.com/${tenant.id}/${tenant.icon}/icon.png`
 		: makeServerIconLink(tenant, 48);
+
+	const customUrl = getServerCustomUrl(tenant);
+	const metadataBaseUrl = customUrl
+		? new URL(customUrl)
+		: new URL(`https://${tenant.customDomain!}`);
+
 	return {
 		title: `${tenant.name} Community`,
 		description,
-		metadataBase: new URL(`https://${tenant.customDomain!}`),
+		metadataBase: metadataBaseUrl,
 		other:
 			tenant.id == '864296203746803753'
 				? {
@@ -38,7 +47,7 @@ export async function generateMetadata(props: {
 				: undefined,
 		icons: icon ? [icon] : undefined,
 		alternates: {
-			canonical: `https://${tenant.customDomain!}`,
+			canonical: customUrl || `https://${tenant.customDomain!}`,
 		},
 		openGraph: {
 			images: [image],
@@ -55,6 +64,9 @@ export default async function Layout(props: {
 
 	const { children } = props;
 
-	void findServerByCustomDomain(decodeURIComponent(params.domain));
-	return <>{children}</>;
+	const server = await findServerByCustomDomain(
+		decodeURIComponent(params.domain),
+	);
+	const parsed = zServerPublic.parse(server);
+	return <Providers tenant={parsed}>{children}</Providers>;
 }

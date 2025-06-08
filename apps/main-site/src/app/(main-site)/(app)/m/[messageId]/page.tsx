@@ -1,5 +1,6 @@
 import { makeMessageResultPage } from '@answeroverflow/core/pages';
 import { MessageResultPage } from '@answeroverflow/ui/pages/MessageResultPage';
+import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 
@@ -8,7 +9,8 @@ type Props = {
 	searchParams?: Promise<{ showAiChat?: boolean }>;
 };
 
-export const revalidate = 86400;
+export const revalidate = 3600;
+export const dynamic = 'force-static';
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
 	const data = await makeMessageResultPage(params.messageId, []);
@@ -44,9 +46,10 @@ export default async function MessageResult(props: Props) {
 		return notFound();
 	}
 	if (data.server.customDomain) {
-		return redirect(
-			`https://${data.server.customDomain}/m/${params.messageId}`,
-		);
+		const customUrl = getServerCustomUrl(data.server, `/m/${params.messageId}`);
+		if (customUrl) {
+			return redirect(customUrl);
+		}
 	}
 	return (
 		<MessageResultPage

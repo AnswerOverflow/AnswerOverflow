@@ -1,8 +1,10 @@
 import { MessageResultPage } from '@answeroverflow/ui/pages/MessageResultPage';
 import { fetchIsUserInServer } from '@answeroverflow/ui/utils/fetch-is-user-in-server';
+import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 import { callAPI } from '@answeroverflow/ui/utils/trpc';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
+
 type Props = {
 	params: Promise<{ messageId: string }>;
 	searchParams?: Promise<{ showAiChat?: boolean }>;
@@ -48,9 +50,10 @@ export default async function MessageResult(props: Props) {
 		return notFound();
 	}
 	if (data.server.customDomain) {
-		return redirect(
-			`https://${data.server.customDomain}/m/${params.messageId}`,
-		);
+		const customUrl = getServerCustomUrl(data.server, `/m/${params.messageId}`);
+		if (customUrl) {
+			return redirect(customUrl);
+		}
 	}
 	const isInServer = await fetchIsUserInServer(data.server.id);
 	return (

@@ -1,6 +1,7 @@
 import { findServerWithCommunityPageData } from '@answeroverflow/core/pages';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { CommunityPage } from '@answeroverflow/ui/pages/CommunityPage';
+import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 import { notFound, redirect } from 'next/navigation';
 import { z } from 'zod';
 
@@ -28,11 +29,10 @@ export default async function CommunityChannelPage(props: {
 		return notFound();
 	}
 	if (communityPageData.server.customDomain) {
-		return redirect(
-			`http${sharedEnvs.NODE_ENV === 'production' ? 's' : ''}://${
-				communityPageData.server.customDomain
-			}`,
-		);
+		const customUrl = getServerCustomUrl(communityPageData.server);
+		if (customUrl) {
+			return redirect(customUrl);
+		}
 	}
 	const selectedChannel = communityPageData.channels.find(
 		(channel) => channel.id === params.channelId,

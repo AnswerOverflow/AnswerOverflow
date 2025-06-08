@@ -1,3 +1,4 @@
+import { Providers } from '@answeroverflow/ui/layouts/providers';
 import { metadata as baseMetadata } from '@answeroverflow/ui/layouts/root';
 import { Metadata } from 'next';
 export const metadata: Metadata = {
@@ -12,5 +13,5 @@ export default function AnnouncementBannerLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	return children;
+	return <Providers tenant={null}>{children}</Providers>;
 }

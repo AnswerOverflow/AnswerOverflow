@@ -7,6 +7,22 @@ import { AuthEdge } from '@answeroverflow/core/auth-edge';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// for supporting subpaths, they are coming in from the content domain
+// if the 'X-AnswerOverflow-Skip-Subpath-Redirect' header is set, just pass on the request
+// otherwise, redirect them to the rewrite domain
+const subpathCustomers = [
+	{
+		contentDomain: 'community.migaku.com',
+		rewriteDomain: 'migaku.com',
+		subpath: 'community',
+	},
+	{
+		contentDomain: 'testing.rhys.ltd',
+		rewriteDomain: 'rhys.ltd',
+		subpath: 'idk',
+	},
+];
+
 export function middleware(req: NextRequest) {
 	const url = req.nextUrl;
 	const path = url.pathname + url.search;
@@ -39,7 +55,25 @@ export function middleware(req: NextRequest) {
 			pathPostFix += '/dynamic';
 		}
 	}
-	const newUrl = new URL(`/${host}${path}${pathPostFix}`, req.url);
+	const subpathCustomer = subpathCustomers.find((customer) =>
+		host.includes(customer.contentDomain),
+	);
+	if (subpathCustomer) {
+		const bypass = req.headers.get('X-AnswerOverflow-Skip-Subpath-Redirect');
+		if (!bypass) {
+			return NextResponse.redirect(
+				new URL(
+					`https://${subpathCustomer.rewriteDomain}/${subpathCustomer.subpath}${path}`,
+					req.url,
+				),
+				308,
+			);
+		}
+	}
+
+	const actualHost = subpathCustomer?.rewriteDomain || host;
+
+	const newUrl = new URL(`/${actualHost}${path}${pathPostFix}`, req.url);
 	return NextResponse.rewrite(newUrl);
 }
 // See "Matching Paths" below to learn more

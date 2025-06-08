@@ -1,7 +1,6 @@
-import {
-	DiscordAvatar,
-	makeUserIconLink,
-} from '@answeroverflow/ui/discord-avatar';
+import { DiscordAvatar } from '@answeroverflow/ui/discord-avatar';
+import { makeUserIconLink } from '@answeroverflow/ui/discord-avatar-utils';
+import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 import { getDate } from '@answeroverflow/ui/utils/snowflake';
 import { Metadata } from 'next';
 import { JsonLd } from 'react-schemaorg';
@@ -10,11 +9,13 @@ import { Props, getUserPageData } from './components';
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const { userInfo, server } = await getUserPageData(props);
+	const customUrl = getServerCustomUrl(server);
+	const baseUrl = customUrl || `https://${server.customDomain}`;
 	return {
 		title: `${userInfo.name} Posts - ${server.name}`,
 		description: `See posts from ${userInfo.name} in the ${server.name} Discord`,
 		alternates: {
-			canonical: `https://${server.customDomain}/u/${userInfo.id}`,
+			canonical: `${baseUrl}/u/${userInfo.id}`,
 		},
 		openGraph: {
 			title: `${userInfo.name} Posts - ${server.name}`,
@@ -26,6 +27,8 @@ export default async function Layout(
 	props: { children: React.ReactNode } & Props,
 ) {
 	const { userInfo, server } = await getUserPageData(props);
+	const customUrl = getServerCustomUrl(server);
+	const baseUrl = customUrl || `https://${server.customDomain}`;
 	return (
 		<main className="flex w-full justify-center pt-4">
 			<JsonLd<ProfilePage>
@@ -36,7 +39,7 @@ export default async function Layout(
 					dateCreated: getDate(userInfo.id).toISOString(),
 					image: {
 						'@type': 'ImageObject',
-						url: makeUserIconLink(userInfo, 512),
+						url: makeUserIconLink(userInfo, 512, server.subpath),
 						height: {
 							'@type': 'QuantitativeValue',
 							value: 512,
@@ -47,12 +50,12 @@ export default async function Layout(
 						},
 					},
 					name: userInfo.name,
-					url: `https://${server.customDomain}{/u/${userInfo.id}`,
+					url: `${baseUrl}/u/${userInfo.id}`,
 					mainEntity: {
 						'@type': 'Person',
 						identifier: userInfo.id,
 						name: userInfo.name,
-						url: `https://${server.customDomain}{/u/${userInfo.id}`,
+						url: `${baseUrl}/u/${userInfo.id}`,
 					},
 				}}
 			/>

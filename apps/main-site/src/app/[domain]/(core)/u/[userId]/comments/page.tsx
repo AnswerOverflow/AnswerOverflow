@@ -1,4 +1,5 @@
 import { FeedPost } from '@answeroverflow/ui/feed-post';
+import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 import { Metadata } from 'next';
 import { GiSpiderWeb } from 'react-icons/gi';
 import { ActualLayout, getUserPageData } from '../components';
@@ -10,11 +11,13 @@ type Props = {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const { userInfo, server } = await getUserPageData(props);
+	const customUrl = getServerCustomUrl(server);
+	const baseUrl = customUrl || `https://${server.customDomain}`;
 	return {
 		title: `${userInfo.name} Comments - ${server.name}`,
 		description: `See comments from ${userInfo.name} in the ${server.name} Discord`,
 		alternates: {
-			canonical: `https://${server.customDomain}/u/${userInfo.id}`,
+			canonical: `${baseUrl}/u/${userInfo.id}/comments`,
 		},
 		openGraph: {
 			title: `${userInfo.name} Comments - ${server.name}`,

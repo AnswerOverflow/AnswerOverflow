@@ -1,7 +1,7 @@
 import { sharedEnvs } from '@answeroverflow/env/shared';
+import { SapphireClient } from '@sapphire/framework';
 import { TRPCError, initTRPC } from '@trpc/server';
 import { ChannelType } from 'discord-api-types/v10';
-import { SapphireClient } from '@sapphire/framework';
 import superjson from 'superjson';
 import { z } from 'zod';
 

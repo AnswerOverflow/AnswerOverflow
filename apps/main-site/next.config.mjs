@@ -65,6 +65,10 @@ const config = {
 			},
 		];
 	},
+	assetPrefix:
+		process.env.NODE_ENV === 'development'
+			? undefined
+			: 'https://www.answeroverflow.com/',
 	skipTrailingSlashRedirect: true,
 	redirects: async () => {
 		return [
@@ -106,4 +110,5 @@ const config = {
 	},
 };
 
+// @ts-ignore - Temporary fix for type incompatibility between Next.js and MDX package versions
 export default withMDX(config);

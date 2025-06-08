@@ -1,15 +1,18 @@
 import { findServerWithCommunityPageData } from '@answeroverflow/core/pages';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { CommunityPage } from '@answeroverflow/ui/pages/CommunityPage';
+import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
 import { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
+
 type Props = {
 	params: Promise<{ communityId: string }>;
 	searchParams: Promise<{
 		uwu?: string;
 	}>;
 };
-
+export const dynamic = 'force-static';
+export const revalidate = 3600;
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
 	const communityPageData = await findServerWithCommunityPageData({
@@ -21,11 +24,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		return notFound();
 	}
 	if (communityPageData.server.customDomain) {
-		return redirect(
-			`http${sharedEnvs.NODE_ENV === 'production' ? 's' : ''}://${
-				communityPageData.server.customDomain
-			}`,
-		);
+		const customUrl = getServerCustomUrl(communityPageData.server);
+		if (customUrl) {
+			return redirect(customUrl);
+		}
 	}
 	return {
 		title: `${communityPageData.server.name} Community - Answer Overflow`,
@@ -55,11 +57,10 @@ export default async function CommunityPageContainer(props: Props) {
 		return notFound();
 	}
 	if (communityPageData.server.customDomain) {
-		return redirect(
-			`http${sharedEnvs.NODE_ENV === 'production' ? 's' : ''}://${
-				communityPageData.server.customDomain
-			}`,
-		);
+		const customUrl = getServerCustomUrl(communityPageData.server);
+		if (customUrl) {
+			return redirect(customUrl);
+		}
 	}
 	const selectedChannel = communityPageData.channels[0];
 	return (

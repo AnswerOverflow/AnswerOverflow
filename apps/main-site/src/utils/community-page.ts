@@ -33,7 +33,8 @@ export async function addCommunityQuestionsToSitemap(input: {
 		}),
 	);
 
-	if (!server.customDomain) {
+	// Only add community page to main sitemap if it doesn't have custom domain or subpath
+	if (!server.customDomain && !server.subpath) {
 		input.sitemap.add({
 			loc: `/c/${input.communityId}`, // Community page
 			lastmod: largestTimestamp === -1 ? undefined : new Date(largestTimestamp),

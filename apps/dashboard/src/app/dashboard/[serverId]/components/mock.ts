@@ -13,6 +13,7 @@ export const demoServerData: ServerDashboard = {
 	},
 	icon: null,
 	id: '1000',
+	subpath: null,
 	kickedTime: null,
 	name: 'Demo Server',
 	plan: 'FREE',

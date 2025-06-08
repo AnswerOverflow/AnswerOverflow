@@ -10,9 +10,17 @@ export const ClientUserAvatar = dynamic(
 	},
 );
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const ClientSignInButton = dynamic(
+	() => import('./sign-in-button').then((mod) => mod.SignInButton),
+	{
+		ssr: false,
+		loading: () => <Skeleton className="h-10 w-20 rounded" />,
+	},
+);
+
 import { ServerPublic } from '@answeroverflow/api/router/types';
 import { trpc } from '../utils/client';
-import { SignInButton } from './sign-in-button';
 
 export function UserSection(props: {
 	tenant: ServerPublic | undefined;
@@ -21,7 +29,11 @@ export function UserSection(props: {
 	const { tenant } = props;
 	const { data } = trpc.auth.getSession.useQuery();
 
+	if (tenant?.subpath) {
+		return null;
+	}
+
 	if (!data)
-		return <SignInButton tenant={tenant} dashboard={props.dashboard} />;
+		return <ClientSignInButton tenant={tenant} dashboard={props.dashboard} />;
 	return <ClientUserAvatar user={data.user} tenant={props.tenant} />;
 }

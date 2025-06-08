@@ -45,10 +45,12 @@ export async function indexServers(client: Client) {
 	container.logger.info(`Indexing ${client.guilds.cache.size} servers`);
 	const guilds = [...client.guilds.cache.values()];
 	// sort so 1019350475847499849 is first
+	const migaku = guilds.find((x) => x.id === '752293144917180496');
 	const convex = guilds.find((x) => x.id === '1170941416516620306');
 	const convexFirst = [
+		migaku,
 		convex,
-		...guilds.filter((x) => x.id !== convex?.id),
+		...guilds.filter((x) => x.id !== convex?.id && x.id !== migaku?.id),
 	].filter(Boolean);
 	for await (const guild of convexFirst) {
 		try {
