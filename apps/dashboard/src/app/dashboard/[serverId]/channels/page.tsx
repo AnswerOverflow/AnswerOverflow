@@ -274,7 +274,7 @@ function ChooseSolvedTagCard(props: { selectedChannel: ChannelWithFlags }) {
 	return (
 		<SettingsCard
 			title="Choose Solved Tag"
-			description="Pick the tag that will be applied when a message is marked as a solution"
+			description="Pick the tag that will be applied when a message is marked by a user as the solution."
 			disabled={props.selectedChannel.type !== ChannelType.GuildForum}
 			disabledReason="This option is only available for forum channels."
 		>
@@ -386,8 +386,8 @@ export default function ChannelsPage() {
 					<ToggleChannelFlag
 						flagKey="indexingEnabled"
 						title="Indexing Enabled"
-						description="Enable indexing of a channel, indexing can take up to 24 hours to collect initial data depending on the channel volume."
-						label="Indexing Enabled"
+						description="Enable indexing of a channel. Indexing can take up to 24 hours to collect initial data depending on the channel volume."
+						label="Enabled"
 						selectedChannel={selectedChannel}
 					/>
 					<ToggleChannelFlag
@@ -395,7 +395,7 @@ export default function ChannelsPage() {
 						title="Forum Guidelines Consent Enabled"
 						disabled={selectedChannel?.type !== ChannelType.GuildForum}
 						disabledReason="This option is only available for forum channels."
-						description="Mark users making posts as consenting to display their messages. If enabling, put a disclaimer in the forum guidelines that their messages will be displayed publicly."
+						description="Marks all posts as public, and disables Username Anonymization for the selected channel. If enabled, add a public message disclaimer to your forum guidelines."
 						label="Enabled"
 						selectedChannel={selectedChannel}
 					/>
@@ -404,14 +404,14 @@ export default function ChannelsPage() {
 					<ToggleChannelFlag
 						flagKey="markSolutionEnabled"
 						title="Mark Solution Enabled"
-						description="Enable marking solutions to threads."
+						description="Highlights the marked solution under the user's question."
 						label="Enabled"
 						selectedChannel={selectedChannel}
 					/>
 					<ToggleChannelFlag
 						flagKey="sendMarkSolutionInstructionsInNewThreads"
 						title="Send Mark Solution Instructions in New Threads"
-						description="Send instructions to users on how to mark a solution in new threads."
+						description="Enables the bot to provide instructions to users on how to mark a solution in new threads."
 						label="Enabled"
 						disabled={!selectedChannel.flags.markSolutionEnabled}
 						disabledReason="This option is only available if mark solution is enabled."
@@ -423,7 +423,7 @@ export default function ChannelsPage() {
 					<ToggleChannelFlag
 						flagKey="autoThreadEnabled"
 						title="Auto Thread Enabled"
-						description="Automatically create threads for new messages."
+						description="Automatically create threads for new messages. Alternatively consider instead changing the channel type to 'forum' in Discord."
 						label="Enabled"
 						disabled={selectedChannel?.type !== ChannelType.GuildText}
 						disabledReason="This option is only available for text channels."
