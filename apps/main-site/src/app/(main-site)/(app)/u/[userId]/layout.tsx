@@ -14,6 +14,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		alternates: {
 			canonical: `/u/${userInfo.id}`,
 		},
+		robots: {
+			index: false,
+		},
 		openGraph: {
 			title: `${userInfo.name} Posts - Answer Overflow`,
 			description: `See posts from ${userInfo.name} on Answer Overflow`,
