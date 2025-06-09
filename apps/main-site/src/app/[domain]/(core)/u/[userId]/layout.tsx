@@ -17,6 +17,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		alternates: {
 			canonical: `${baseUrl}/u/${userInfo.id}`,
 		},
+		robots: {
+			index: false,
+		},
 		openGraph: {
 			title: `${userInfo.name} Posts - ${server.name}`,
 			description: `See posts from ${userInfo.name} in the ${server.name} Discord`,

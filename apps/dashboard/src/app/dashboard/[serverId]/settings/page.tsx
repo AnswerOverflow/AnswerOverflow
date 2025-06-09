@@ -119,9 +119,9 @@ export default function Settings() {
 					title="Anonymize Messages"
 					description={
 						<>
-							Replace user names with a random name. This is closer to
-							pseudonymous as users can still join the server and search for the
-							message content.
+							Replace Discord usernames with pseudonyms. Names will randomize
+							on page refresh. Can be disabled per-channel with "Forum
+							Guidelines Consent Enabled" option.
 						</>
 					}
 					label="Enabled"
@@ -132,7 +132,7 @@ export default function Settings() {
 					description={
 						<>
 							Add a consent prompt to the server rules to mark new users as
-							consenting to display their messages.
+							consenting to publicly display their messages.
 						</>
 					}
 					label="Enabled"
