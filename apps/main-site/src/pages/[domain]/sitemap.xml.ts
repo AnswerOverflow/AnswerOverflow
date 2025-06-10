@@ -20,7 +20,7 @@ export async function getServerSideProps({
 		};
 	}
 	await generateCommunityPageSitemap({
-		baseUrl: `https://${domain}`,
+		baseUrl: `https://${domain}` + (server.subpath ? `/${server.subpath}` : ''),
 		communityId: server.id,
 		res,
 	});
