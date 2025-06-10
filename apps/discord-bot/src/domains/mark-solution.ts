@@ -302,7 +302,11 @@ export function makeMarkSolutionResponse({
 	if (settings.flags.indexingEnabled) {
 		components.addComponents(
 			new ButtonBuilder()
-				.setLabel('View on Answer Overflow')
+				.setLabel(
+					server.customDomain
+						? `View on ${server.name}`
+						: 'View on Answer Overflow',
+				)
 				.setURL(makeMainSiteLink(`/m/${solution.channelId}`))
 				.setStyle(ButtonStyle.Link),
 		);
