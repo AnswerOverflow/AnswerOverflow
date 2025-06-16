@@ -20,6 +20,7 @@ import {
 	stripPrivateServerData,
 } from './permissions';
 import {
+	Channel,
 	dbChannels,
 	dbMessages,
 	dbServers,
@@ -133,6 +134,12 @@ export async function findServerWithCommunityPageData(opts: {
 		serverId = found.id;
 	}
 
+	const channel = opts.selectedChannel
+		? await db.query.dbChannels.findFirst({
+				where: eq(dbChannels.id, opts.selectedChannel),
+			})
+		: undefined;
+
 	const offset = (opts.page > 0 ? opts.page - 1 : opts.page) * limit;
 	// eslint-disable-next-line prefer-const
 	let [found, questions] = await Promise.all([
@@ -202,16 +209,54 @@ export async function findServerWithCommunityPageData(opts: {
 		},
 	);
 	const msgLookup = new Map(msgs.map((m) => [m.id, m]));
-	const posts = questions
-		.map((q) => {
-			const msg = msgLookup.get(q.id);
-			if (!msg) return null;
-			return {
-				message: msg,
-				thread: q,
-			};
-		})
-		.filter(Boolean);
+
+	const recentAnnouncements =
+		channel?.type === ChannelType.GuildAnnouncement
+			? await db.query.dbMessages.findMany({
+					where: and(eq(dbMessages.channelId, channel.id)),
+					orderBy: desc(dbMessages.id),
+				})
+			: [];
+
+	const announcements =
+		recentAnnouncements.length > 0
+			? await findManyMessagesWithAuthors(
+					recentAnnouncements.map((a) => a.id),
+					{ excludePrivateMessages: true },
+				)
+			: [];
+
+	const posts =
+		announcements.length > 0
+			? announcements.map((a) => {
+					return {
+						message: a,
+						thread: {
+							id: a.channelId,
+							name:
+								a.content.split('\n')[0]?.slice(0, 100) ??
+								a.content.slice(0, 100),
+							type: ChannelType.GuildAnnouncement,
+							serverId: a.serverId,
+							bitfield: channelBitfieldValues.indexingEnabled,
+							parentId: null,
+							inviteCode: channel?.inviteCode ?? null,
+							archivedTimestamp: null,
+							lastIndexedSnowflake: null,
+							solutionTagId: null,
+						} satisfies Channel,
+					};
+				})
+			: questions
+					.map((q) => {
+						const msg = msgLookup.get(q.id);
+						if (!msg) return null;
+						return {
+							message: msg,
+							thread: q,
+						};
+					})
+					.filter(Boolean);
 
 	return {
 		server: zServerPublic.parse(found),

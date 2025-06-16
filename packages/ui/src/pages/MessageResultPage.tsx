@@ -16,7 +16,7 @@ import { FormattedNumber } from '../ui/numbers';
 import { TimeAgo } from '../ui/time-ago';
 import { TrackLinkButton } from '../ui/track-link-button';
 import { TrackLoad } from '../ui/track-load';
-import { getDiscordURLForMessage } from '../utils/discord';
+import { ChannelType, getDiscordURLForMessage } from '../utils/discord';
 import { getServerCustomUrl, getServerHomepageUrl } from '../utils/server';
 import { getDate } from '../utils/snowflake';
 import { InKeepWidget } from './inkeep';
@@ -132,6 +132,7 @@ export function MessageResultPage({
 				return false;
 			}
 		}
+		if (message.parentChannelId !== channel.id) return false;
 		if (message.author.id === sharedEnvs.NEXT_PUBLIC_DISCORD_CLIENT_ID)
 			return false;
 		return true;
@@ -213,7 +214,9 @@ export function MessageResultPage({
 						</div>
 					</div>
 				)}
-				<h1 className="text-2xl font-semibold">{title}</h1>
+				{channel.type !== ChannelType.GuildAnnouncement && (
+					<h1 className="text-2xl font-semibold">{title}</h1>
+				)}
 				<div>
 					<MessageBody message={firstMessage} loadingStyle="eager" />
 					{solution && (
