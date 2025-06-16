@@ -47,10 +47,14 @@ export async function indexServers(client: Client) {
 	// sort so 1019350475847499849 is first
 	const migaku = guilds.find((x) => x.id === '752293144917180496');
 	const convex = guilds.find((x) => x.id === '1170941416516620306');
+	const vapi = guilds.find((x) => x.id === '1211482211119796234');
 	const convexFirst = [
+		vapi,
 		migaku,
 		convex,
-		...guilds.filter((x) => x.id !== convex?.id && x.id !== migaku?.id),
+		...guilds.filter(
+			(x) => x.id !== convex?.id && x.id !== migaku?.id && x.id !== vapi?.id,
+		),
 	].filter(Boolean);
 	for await (const guild of convexFirst) {
 		try {
