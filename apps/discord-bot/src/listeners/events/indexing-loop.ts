@@ -33,14 +33,6 @@ export class Indexing extends Listener {
 			} catch (error) {
 				console.error('Error in development mode indexing:', error);
 			}
-		} else {
-			setTimeout(async () => {
-				try {
-					await indexServers(client);
-				} catch (error) {
-					console.error('Error in production initial indexing:', error);
-				}
-			}, 60000);
 		}
 	}
 }
