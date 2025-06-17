@@ -170,9 +170,9 @@ export async function indexRootChannel(
 			`Fetched ${archivedThreads.length} archived threads for channel ${channel.id} ${channel.name} in server ${channel.guildId} ${channel.guild.name}`,
 		);
 
-		const activeThreads = await channel.threads.fetchActive().catch(() => {
+		const activeThreads = await channel.threads.fetchActive().catch((er) => {
 			container.logger.error(
-				`Error fetching active threads for channel ${channel.id} ${channel.name} in server ${channel.guildId} ${channel.guild.name}`,
+				`Error fetching active threads for channel ${channel.id} ${channel.name} in server ${channel.guildId} ${channel.guild.name} ${er}`,
 			);
 			return {
 				threads: new Map(),
