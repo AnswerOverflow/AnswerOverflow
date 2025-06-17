@@ -38,8 +38,6 @@ export class CheckmarkReactionMarkSolution extends Listener {
 				this.container.logger.info(
 					`Checkmark MarkSolutionError: ${error.message}`,
 				);
-			} else {
-				console.error('Error in CheckmarkReactionMarkSolution:', error);
 			}
 		}
 	}
