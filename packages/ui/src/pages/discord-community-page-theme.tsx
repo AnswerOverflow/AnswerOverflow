@@ -1,5 +1,10 @@
 import { ServerPublic } from "@answeroverflow/api/router/types";
 import { CommunityPageData } from "@answeroverflow/core/pages";
+import { MessagesSearchBar } from '../messages-search-bar';
+import { ThinMessage } from '../message/thin-message';
+import { ServerInvite } from '../server-invite';
+import { DiscordAvatar } from '../discord-avatar';
+
 
 export const DiscordCommunityPageTheme = (
   props: CommunityPageData & {
@@ -20,7 +25,9 @@ export const DiscordCommunityPageTheme = (
   } = props;
   const selected = maybeSelectedChannel ?? channels[0];
 
-  // Example servers data
+  // TO BE REPLACED BY ACTUAL CHANNELS FROM THE SERVER
+  // Generate example Discord channels
+  // just to test the theme behaviour locally
   const exampleServers = [
     { id: "1", name: "General Discussion" },
     { id: "2", name: "Tech Support" },
@@ -35,7 +42,9 @@ export const DiscordCommunityPageTheme = (
     { id: "4", name: "Channel Rules" },
   ];
 
+  // TO BE REPLACED BY ACTUAL MESSAGES FROM THE SERVER
   // Generate random Discord users with profile images
+  // just to test the theme behaviour locally
   const generateDiscordUsers = () => {
     const usernames = [
       "CodeMaster2024",
@@ -73,7 +82,9 @@ export const DiscordCommunityPageTheme = (
 
   const discordUsers = generateDiscordUsers();
 
-  // Create example messages with date cutoffs
+  // TO BE REPLACED BY ACTUAL DATE CUTOFFS
+  // Generate example date cutoffs between messages
+  // just to test the theme behaviour locally
   const createExampleMessages = () => {
     const messages = [];
     const today = new Date();
@@ -82,7 +93,7 @@ export const DiscordCommunityPageTheme = (
     const twoDaysAgo = new Date(today);
     twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
 
-    // Add messages from two days ago
+    // Test date cutoff messages from 'two days ago'
     messages.push({
       id: "msg_1",
       user: discordUsers[0],
@@ -98,7 +109,6 @@ export const DiscordCommunityPageTheme = (
       }),
     });
 
-    // Continuing from previous code block
     messages.push({
       id: "msg_2",
       user: discordUsers[1],
@@ -108,7 +118,7 @@ export const DiscordCommunityPageTheme = (
       showDateCutoff: false,
     });
 
-    // Add messages from yesterday with date cutoff
+    // Test date cutoff messages from 'yesterday'
     messages.push({
       id: "msg_3",
       user: discordUsers[2],
@@ -142,7 +152,7 @@ export const DiscordCommunityPageTheme = (
       showDateCutoff: false,
     });
 
-    // Add today's messages with date cutoff
+    // Test date cutoff messages from 'today'
     messages.push({
       id: "msg_6",
       user: discordUsers[5],
@@ -169,14 +179,15 @@ export const DiscordCommunityPageTheme = (
 
   return (
     <div className="flex flex-col min-h-screen bg-[#36393f]">
-      {/* Header with Logo and Search - Migaku-inspired frosted glass style */}
+      {/* Header with Logo and Search - TO-DO: Use partial transparency 'frosted-glass'
+      effect to carry through from the page background gradient */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-opacity-70 backdrop-blur-md bg-gradient-to-r from-[#6a5acd] via-[#8a4fff] to-[#9932cc] shadow-lg border-b border-purple-700/30">
         <div className="relative max-w-none w-full px-4 py-3">
           <div className="relative flex items-center justify-between w-full">
             {/* Left side - Logo */}
             <div className="flex items-center flex-shrink-0">
               <img
-                src="/server-logo.png" // Replace with your actual server logo URL
+                src="/server-logo.png" // Replace with your customer's server logo URL
                 alt="Server Logo"
                 className="h-8 w-auto object-contain"
               />
@@ -184,45 +195,18 @@ export const DiscordCommunityPageTheme = (
 
             {/* Center - Search Bar */}
             <div className="flex-1 max-w-2xl mx-8 min-w-0">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search channels, questions..."
-                  className="w-full px-4 py-2 
-									bg-white/10 
-									text-white 
-									placeholder-purple-200/70 
-									border border-purple-500/30 
-									rounded-full 
-									focus:outline-none 
-									focus:ring-2 
-									focus:ring-purple-300/50 
-									backdrop-blur-md 
-									transition-all 
-									duration-300 
-									ease-in-out"
-                />
-                <svg
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-200/70"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
+              <MessagesSearchBar 
+                placeholder="Search channels, questions..."
+                className="flex-1 max-w-2xl mx-8 min-w-0"
+                serverId={server.id}
+              />
             </div>
 
             {/* Right side - User Actions */}
             <div className="flex items-center space-x-4 flex-shrink-0">
-              {/* Try Migaku Button - Opens in new tab */}
+              {/* Try <Server_Name> Button - Opens in new tab */}
               <a
-                href="https://migaku.com"
+                href="https://migaku.com" // Change to customer's desired homepage URL
                 target="_blank"
                 rel="noopener noreferrer"
                 className="
@@ -246,31 +230,6 @@ export const DiscordCommunityPageTheme = (
                 "
               >
                 <span>Try Migaku</span>
-              </a>
-
-              {/* Join Community Button - Opens in same tab */}
-              <a
-                href="https://discord.gg/HtRtNJgc7Q"
-                className="
-                  inline-block
-                  bg-white/20 
-                  hover:bg-white/30 
-                  text-white 
-                  px-4 
-                  py-2 
-                  rounded-full 
-                  transition-all 
-                  duration-300 
-                  ease-in-out 
-                  flex 
-                  items-center 
-                  space-x-2
-                  backdrop-blur-md
-                  border 
-                  border-purple-500/30
-                "
-              >
-                <span>Join Community</span>
               </a>
             </div>
           </div>
@@ -308,7 +267,7 @@ export const DiscordCommunityPageTheme = (
                 </a>
               </div>
 
-              {/* Server Dropdown - Discord style */}
+              {/* Server Category Dropdown Example 1 - Discord style TO-DO: Replace with server's actual categories */}
               <details className="mb-3" open>
                 <summary className="w-full flex items-center justify-between p-2 text-[#dcddde] hover:bg-[#36393f] rounded cursor-pointer list-none text-sm font-medium">
                   <span className="text-[#8e9297] uppercase text-xs font-semibold tracking-wide">
@@ -341,7 +300,7 @@ export const DiscordCommunityPageTheme = (
                 </div>
               </details>
 
-              {/* Rules Dropdown - Discord style */}
+              {/* Server Category Dropdown Example 2 (Rules) - Discord style TO-DO: Replace with server's actual categories */}
               <details className="mb-4" open>
                 <summary className="w-full flex items-center justify-between p-2 text-[#dcddde] hover:bg-[#36393f] rounded cursor-pointer list-none text-sm font-medium">
                   <span className="text-[#8e9297] uppercase text-xs font-semibold tracking-wide">
@@ -374,7 +333,9 @@ export const DiscordCommunityPageTheme = (
                 </div>
               </details>
 
-              {/* Channels Section - Discord style */}
+              {/* Server Category Dropdown Example 3 (Text Channels) - Discord style TO-DO: Replace with server's actual categories */}
+              {/* !!!!!!!!!!! This was Rhys' implementation I started with !!!!!!!!!!!
+              I have no idea how this works in practice but I'll leave it */}
               <div className="flex-1 overflow-y-auto">
                 <div className="flex items-center justify-between mb-2 px-2">
                   <span className="text-[#8e9297] uppercase text-xs font-semibold tracking-wide">
@@ -419,7 +380,8 @@ export const DiscordCommunityPageTheme = (
               <div className="flex flex-col gap-4">
                 {/* Questions - Discord message style */}
                 <div className="flex flex-col gap-3 relative">
-                  {/* Fade overlay for bottom 25% of messages */}
+                  {/* Fade overlay for bottom 25% of messages (save bandwidth/API calls
+                  and encourage the user to just join the Discord server) */}
                   <div className="absolute inset-0 pointer-events-none">
                     <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-gradient-to-t from-[#36393f] via-[#36393f]/50 to-transparent z-10"></div>
                   </div>
@@ -477,14 +439,15 @@ export const DiscordCommunityPageTheme = (
                 </div>
               </div>
 
-              {/* Join Conversation Overlay - positioned to sit on top of faded messages */}
+              {/* Join Conversation Overlay - positioned to sit on top of faded messages
+              TO-DO: Have it extend all the way across the screen */}
               <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col items-center justify-center text-center z-20">
                 <div className="bg-[#2f3136] rounded-lg p-6 shadow-xl border border-purple-900/30 w-full max-w-md">
                   <h3 className="text-white text-xl font-semibold mb-4">
                     Don't wait to join the conversation!
                   </h3>
                   <a
-                    href="https://discord.gg/HtRtNJgc7Q" // Server's Discord invite link
+                    href="https://discord.gg/HtRtNJgc7Q" // Change to customer's desired invite link
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full inline-block bg-gradient-to-r from-[#6a5acd] via-[#483d8b] to-[#4b0082] text-white font-medium py-3 px-4 rounded text-sm transition-colors duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg text-center"
