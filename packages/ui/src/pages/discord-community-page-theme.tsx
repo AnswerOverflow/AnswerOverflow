@@ -439,10 +439,9 @@ export const DiscordCommunityPageTheme = (
                 </div>
               </div>
 
-              {/* Join Conversation Overlay - positioned to sit on top of faded messages
-              TO-DO: Have it extend all the way across the screen */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col items-center justify-center text-center z-20">
-                <div className="bg-[#2f3136] rounded-lg p-6 shadow-xl border border-purple-900/30 w-full max-w-md">
+              {/* Join Conversation Overlay - positioned to sit on top of faded messages */}
+              <div className="fixed bottom-0 left-60 right-0 top-auto p-0 flex flex-col items-center justify-center text-center z-20">
+                <div className="bg-gradient-to-t from-[#36393f] to-transparent p-6 shadow-xl w-full h-full flex flex-col items-center justify-center">
                   <h3 className="text-white text-xl font-semibold mb-4">
                     Don't wait to join the conversation!
                   </h3>
@@ -450,7 +449,7 @@ export const DiscordCommunityPageTheme = (
                     href="https://discord.gg/HtRtNJgc7Q" // Change to customer's desired invite link
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full inline-block bg-gradient-to-r from-[#6a5acd] via-[#483d8b] to-[#4b0082] text-white font-medium py-3 px-4 rounded text-sm transition-colors duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg text-center"
+                    className="w-full inline-block bg-gradient-to-r from-[#6a5acd] via-[#483d8b] to-[#4b0082] text-white font-medium py-3 px-4 rounded text-sm transition-colors duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg text-center max-w-md mx-auto"
                   >
                     Join Migaku's Discord
                   </a>
