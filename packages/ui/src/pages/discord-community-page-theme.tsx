@@ -194,10 +194,10 @@ export const DiscordCommunityPageTheme = (
             </div>
 
             {/* Center - Search Bar */}
-            <div className="flex-1 max-w-2xl mx-8 min-w-0">
+            <div className="flex items-center flex-1 max-w-2xl mx-8 min-w-0 translate-y-2">
               <MessagesSearchBar 
                 placeholder="Search channels, questions..."
-                className="flex-1 max-w-2xl mx-8 min-w-0"
+                className="w-full"
                 serverId={server.id}
               />
             </div>
@@ -210,7 +210,9 @@ export const DiscordCommunityPageTheme = (
                 target="_blank"
                 rel="noopener noreferrer"
                 className="
-                  inline-block
+                  inline-flex
+                  items-center
+                  justify-center
                   bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700
                   hover:from-orange-600 hover:via-orange-700 hover:to-orange-800
                   text-white 
@@ -220,9 +222,6 @@ export const DiscordCommunityPageTheme = (
                   transition-all 
                   duration-300 
                   ease-in-out 
-                  flex 
-                  items-center 
-                  space-x-2
                   backdrop-blur-md
                   border 
                   border-orange-500/30
