@@ -439,9 +439,10 @@ export const DiscordCommunityPageTheme = (
                 </div>
               </div>
 
-              {/* Join Conversation Overlay - positioned to sit on top of faded messages */}
+              {/* Join Conversation Overlay - positioned to sit on top of faded messages
+              TO-DO: Have it extend all the way across the screen */}
               <div className="fixed bottom-0 left-60 right-0 top-auto p-0 flex flex-col items-center justify-center text-center z-20">
-                <div className="bg-gradient-to-t from-[#36393f] to-transparent p-6 shadow-xl w-full h-full flex flex-col items-center justify-center">
+                <div className="bg-gradient-to-t from-[#36393f] via-[#36393f]/80 via-[#36393f]/40 to-[#36393f]/0 p-6 shadow-xl w-full h-full flex flex-col items-center justify-center">
                   <h3 className="text-white text-xl font-semibold mb-4">
                     Don't wait to join the conversation!
                   </h3>
