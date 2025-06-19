@@ -12,7 +12,7 @@ type Props = {
 	}>;
 };
 export const dynamic = 'force-static';
-export const revalidate = 3600;
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
 	const communityPageData = await findServerWithCommunityPageData({

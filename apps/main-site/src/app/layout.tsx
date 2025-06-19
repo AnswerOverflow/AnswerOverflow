@@ -3,5 +3,3 @@ export {
 	Layout as default,
 	metadata,
 } from '@answeroverflow/ui/layouts/root';
-
-export const revalidate = 3600;

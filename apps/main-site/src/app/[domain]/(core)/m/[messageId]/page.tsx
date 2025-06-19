@@ -34,7 +34,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	};
 }
 export const dynamic = 'force-static';
-export const revalidate = 3600;
+
 export default async function MessageResult(props: Props) {
 	const params = await props.params;
 	const data = await makeMessageResultPage(params.messageId, []);
