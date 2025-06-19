@@ -12,8 +12,6 @@ type Props = {
 	}>;
 };
 
-export const revalidate = 86400;
-
 export default async function TenantChannelPage(props: Props) {
 	const searchParams = await props.searchParams;
 	const params = await props.params;

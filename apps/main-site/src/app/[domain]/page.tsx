@@ -9,7 +9,6 @@ export const metadata: Metadata = {
 	},
 };
 
-export const revalidate = 86400;
 export default async function TenantHome(props: {
 	params: Promise<{ domain: string }>;
 }) {
