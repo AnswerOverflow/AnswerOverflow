@@ -1,8 +1,9 @@
 import { findServerWithCommunityPageData } from '@answeroverflow/core/pages';
 import { findServerByCustomDomain } from '@answeroverflow/core/server';
-import { CommunityPage } from '@answeroverflow/ui/pages/CommunityPage';
+import { DiscordCommunityPageTheme } from '@answeroverflow/ui/pages/discord-community-page-theme';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+
 export const metadata: Metadata = {
 	alternates: {
 		canonical: '/',
@@ -28,7 +29,7 @@ export default async function TenantHome(props: {
 	}
 	const selectedChannel = communityPageData.channels[0];
 	return (
-		<CommunityPage
+		<DiscordCommunityPageTheme
 			{...communityPageData}
 			selectedChannel={selectedChannel}
 			tenant={server}
