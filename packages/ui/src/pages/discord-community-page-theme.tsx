@@ -187,9 +187,9 @@ export const DiscordCommunityPageTheme = (
             {/* Left side - Logo */}
             <div className="flex items-center flex-shrink-0">
               <img
-                src="/server-logo.png" // Replace with your customer's server logo URL
+                src="/AnswerOverflowLogoLight.png" // Replace with your customer's server logo URL
                 alt="Server Logo"
-                className="h-8 w-auto object-contain"
+                className="h-12 w-auto object-contain"
               />
             </div>
 
