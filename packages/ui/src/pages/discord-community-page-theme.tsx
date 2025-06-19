@@ -181,7 +181,7 @@ export const DiscordCommunityPageTheme = (
     <div className="flex flex-col min-h-screen bg-[#36393f]">
       {/* Header with Logo and Search - TO-DO: Use partial transparency 'frosted-glass'
       effect to carry through from the page background gradient */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-opacity-70 backdrop-blur-md bg-gradient-to-r from-[#6a5acd] via-[#8a4fff] to-[#9932cc] shadow-lg border-b border-purple-700/30">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-[#2f3136] shadow-lg border-b border-[#202225]">
         <div className="relative max-w-none w-full px-4 py-3">
           <div className="relative flex items-center justify-between w-full">
             {/* Left side - Logo */}
@@ -206,29 +206,31 @@ export const DiscordCommunityPageTheme = (
             <div className="flex items-center space-x-4 flex-shrink-0">
               {/* Try <Server_Name> Button - Opens in new tab */}
               <a
-                href="https://migaku.com" // Change to customer's desired homepage URL
+                href="https://mysite.com" // Change to customer's desired homepage URL
                 target="_blank"
                 rel="noopener noreferrer"
                 className="
-                  inline-flex
-                  items-center
-                  justify-center
                   bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700
                   hover:from-orange-600 hover:via-orange-700 hover:to-orange-800
                   text-white 
-                  px-4 
-                  py-2 
+                  font-medium
+                  px-6 
+                  py-3 
                   rounded-full 
-                  transition-all 
-                  duration-300 
-                  ease-in-out 
-                  backdrop-blur-md
+                  text-base
+                  transition-colors 
+                  duration-200 
+                  transform 
+                  hover:scale-[1.02] 
+                  active:scale-[0.98] 
+                  shadow-md
+                  hover:shadow-lg
                   border 
                   border-orange-500/30
                   mr-2
                 "
               >
-                <span>Try Migaku</span>
+                <span>Try "Server_Name"</span> 
               </a>
             </div>
           </div>
@@ -249,18 +251,20 @@ export const DiscordCommunityPageTheme = (
               <div className="bg-gradient-to-r from-[#1a1a2e] via-[#16213e] to-[#0f0f1b] border border-purple-900/30 rounded-lg p-4 shadow-sm mb-4">
                 <div className="text-[#dcddde]">
                   <div className="font-semibold text-base mb-1 text-white">
-                    Migaku on Discord
+                    "Server_Name" on Discord
                   </div>
                   <div className="text-sm text-purple-300 mb-2">
-                    Jump into the Migaku universe now
+                    Jump into the Server_Name's Discord now
                   </div>
                   <div className="font-bold text-sm mb-3 text-green-400">
                     420,000 members
                   </div>
                 </div>
                 <a
-                  href="https://discord.gg/HtRtNJgc7Q"
-                  className="w-full bg-gradient-to-r from-[#6a5acd] via-[#483d8b] to-[#4b0082] text-white font-medium py-2 px-3 rounded text-sm transition-colors duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg"
+                  href="https://discord.gg/invitelink"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-gradient-to-r from-[#6a5acd] via-[#483d8b] to-[#4b0082] text-white font-medium py-2 px-3 rounded text-sm transition-colors duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg text-center block"
                 >
                   Join the Conversation
                 </a>
@@ -446,12 +450,12 @@ export const DiscordCommunityPageTheme = (
                     Don't wait to join the conversation!
                   </h3>
                   <a
-                    href="https://discord.gg/HtRtNJgc7Q" // Change to customer's desired invite link
+                    href="https://discord.gg/invitelink" // Change to customer's desired invite link
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full inline-block bg-gradient-to-r from-[#6a5acd] via-[#483d8b] to-[#4b0082] text-white font-medium py-3 px-4 rounded text-sm transition-colors duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg text-center max-w-md mx-auto"
                   >
-                    Join Migaku's Discord
+                    Join Server_Name's Discord
                   </a>
                 </div>
               </div>
