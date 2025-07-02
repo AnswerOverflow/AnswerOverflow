@@ -103,7 +103,13 @@ const userServerSettingsCrudRouter = router({
 					return findServerById(input);
 				},
 				permissions: [
-					(server) => assertIsOnPlan(server, ['PRO', 'ENTERPRISE']),
+					(server) =>
+						assertIsOnPlan(server, [
+							'PRO_LEGACY',
+							'ENTERPRISE_LEGACY',
+							'ADVANCED',
+							'STARTER',
+						]),
 					() => assertIsAdminOrOwnerOfServer(ctx, input),
 				],
 				notFoundMessage: SERVER_NOT_SETUP_MESSAGE,

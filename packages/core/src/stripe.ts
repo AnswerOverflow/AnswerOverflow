@@ -53,7 +53,7 @@ export module Stripe {
 	}) {
 		return createPlanCheckoutSession({
 			...input,
-			planId: sharedEnvs.STRIPE_PRO_PLAN_PRICE_ID!,
+			planId: sharedEnvs.STRIPE_STARTER_PLAN_PRICE_ID!,
 		});
 	}
 
@@ -64,7 +64,7 @@ export module Stripe {
 	}) {
 		return createPlanCheckoutSession({
 			...input,
-			planId: sharedEnvs.STRIPE_ENTERPRISE_PLAN_PRICE_ID!,
+			planId: sharedEnvs.STRIPE_ADVANCED_PLAN_PRICE_ID!,
 		});
 	}
 

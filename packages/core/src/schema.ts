@@ -257,7 +257,14 @@ export const dbIgnoredDiscordAccounts = mysqlTable(
 		};
 	},
 );
-const plans = ['FREE', 'PRO', 'ENTERPRISE', 'OPEN_SOURCE'] as const;
+const plans = [
+	'FREE',
+	'STARTER',
+	'ADVANCED',
+	'PRO_LEGACY',
+	'ENTERPRISE_LEGACY',
+	'OPEN_SOURCE',
+] as const;
 export type Plan = (typeof plans)[number];
 export const dbServers = mysqlTable(
 	'Server',

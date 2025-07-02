@@ -185,7 +185,13 @@ export const serverRouter = router({
 				permissions: [
 					() => assertIsAdminOrOwnerOfServer(ctx, input.serverId),
 					(server) =>
-						assertIsOnPlan(server, ['PRO', 'OPEN_SOURCE', 'ENTERPRISE']),
+						assertIsOnPlan(server, [
+							'PRO_LEGACY',
+							'OPEN_SOURCE',
+							'ENTERPRISE_LEGACY',
+							'ADVANCED',
+							'STARTER',
+						]),
 				],
 			}),
 		),
