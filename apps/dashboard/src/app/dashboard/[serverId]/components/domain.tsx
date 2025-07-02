@@ -279,11 +279,11 @@ export function CustomDomainConfigurator(props: {
 					event.preventDefault(); // Prevent form from reloading the page
 					const data = new FormData(event.currentTarget);
 					const domain = data.get('customDomain') as string;
-					setDomain(domain);
 					await setCustomDomainMutation.mutateAsync({
 						customDomain: domain,
 						serverId: server.id,
 					});
+					setDomain(domain);
 				}}
 			>
 				<CardHeader>

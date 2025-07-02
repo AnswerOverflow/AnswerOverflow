@@ -16,7 +16,9 @@ export const metadata: Metadata = {
 export default function RootLayout(props: { children?: React.ReactNode }) {
 	return (
 		<Layout>
-			<Providers>{props && props.children ? props.children : null}</Providers>
+			<Providers tenant={null}>
+				{props && props.children ? props.children : null}
+			</Providers>
 		</Layout>
 	);
 }

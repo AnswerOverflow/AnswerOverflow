@@ -82,7 +82,13 @@ export default function Settings() {
 			<div className="flex max-w-[800px] flex-col gap-4">
 				<CurrentPlanCard />
 				<TierAccessOnly
-					enabledFor={['PRO', 'OPEN_SOURCE', 'ENTERPRISE']}
+					enabledFor={[
+						'PRO_LEGACY',
+						'ENTERPRISE_LEGACY',
+						'ADVANCED',
+						'STARTER',
+						'OPEN_SOURCE',
+					]}
 					currentPlan={data.plan}
 					proPlanCheckoutUrl={
 						data.status === 'inactive' ? data.proPlanCheckoutUrl : null
@@ -94,7 +100,9 @@ export default function Settings() {
 						data.status === 'inactive' ? data.enterprisePlanCheckoutUrl : null
 					}
 				>
-					<CustomDomainConfigurator />
+					<CustomDomainConfigurator
+						defaultDomain={data.customDomain ?? undefined}
+					/>
 				</TierAccessOnly>
 				<ToggleServerFlag
 					title="Consider All Messages Public"
@@ -119,9 +127,9 @@ export default function Settings() {
 					title="Anonymize Messages"
 					description={
 						<>
-							Replace Discord usernames with pseudonyms. Names will randomize
-							on page refresh. Can be disabled per-channel with "Forum
-							Guidelines Consent Enabled" option.
+							Replace Discord usernames with pseudonyms. Names will randomize on
+							page refresh. Can be disabled per-channel with "Forum Guidelines
+							Consent Enabled" option.
 						</>
 					}
 					label="Enabled"
