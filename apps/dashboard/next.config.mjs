@@ -7,6 +7,7 @@
 !process.env.SKIP_ENV_VALIDATION &&
 	(await import('../../packages/env/src/web-schema.mjs'));
 
+//redeploy
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
