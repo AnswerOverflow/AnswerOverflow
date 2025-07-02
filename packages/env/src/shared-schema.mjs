@@ -136,7 +136,7 @@ export const sharedEnvs = createEnv({
      */
 
 		STRIPE_PRO_PLAN_LEGACY_PRICE_ID: zStringRequiredInProduction,
-		STRIPE_ENTERPRISE_LEGACY_PLAN_PRICE_ID: zStringRequiredInProduction,
+		STRIPE_ENTERPRISE_PLAN_LEGACY_PRICE_ID: zStringRequiredInProduction,
 		STRIPE_SECRET_KEY: zStringRequiredInProduction,
 		STRIPE_WEBHOOK_SECRET: zStringRequiredInProduction,
 		STRIPE_CHECKOUT_URL: zStringRequiredInProduction,
