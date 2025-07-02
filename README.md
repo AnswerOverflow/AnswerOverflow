@@ -1,4 +1,3 @@
-
 <p align='center'>
 <a href='https://answeroverflow.com/' target="_blank" rel="noopener">
   <picture>
@@ -28,10 +27,8 @@
     <img alt="codecov" src="https://codecov.io/gh/AnswerOverflow/AnswerOverflow/branch/main/graph/badge.svg?token=8J0AQ77SOG">
   </a>
 
-
-  <a href="https://www.producthunt.com/posts/answer-overflow?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-answer&#0045;overflow" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=386188&theme=light" alt="Answer&#0032;Overflow - Indexing&#0032;Discord&#0032;channels&#0032;into&#0032;Google | Product Hunt" style="width: 180px; height: 39px;" width="180" height="39" /></a>
-  [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app?referralCode=Q3ROGt)
-
+<a href="https://www.producthunt.com/posts/answer-overflow?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-answer&#0045;overflow" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=386188&theme=light" alt="Answer&#0032;Overflow - Indexing&#0032;Discord&#0032;channels&#0032;into&#0032;Google | Product Hunt" style="width: 180px; height: 39px;" width="180" height="39" /></a>
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app?referralCode=Q3ROGt)
 
   <br />
   <br />
@@ -109,3 +106,5 @@ For designing user interfaces, check out our [design guidelines](./DESIGN_GUIDEL
     <img src="https://contrib.rocks/image?repo=AnswerOverflow/AnswerOverflow" alt="A table of avatars from the project's contributors" />
   </p>
 </a>
+
+bump
