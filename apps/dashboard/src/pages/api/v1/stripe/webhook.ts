@@ -97,7 +97,7 @@ export default async function webhookHandler(
 				}
 				let plan: Plan;
 				switch (subscriptionPlanId) {
-					case sharedEnvs.STRIPE_ENTERPRISE_LEGACY_PLAN_PRICE_ID:
+					case sharedEnvs.STRIPE_ENTERPRISE_PLAN_LEGACY_PRICE_ID:
 						plan = 'ENTERPRISE_LEGACY';
 						break;
 					case sharedEnvs.STRIPE_PRO_PLAN_LEGACY_PRICE_ID:
