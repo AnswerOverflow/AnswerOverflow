@@ -21,6 +21,11 @@ const subpathCustomers = [
 		rewriteDomain: 'rhys.ltd',
 		subpath: 'idk',
 	},
+	{
+		contentDomain: 'discord.vapi.ai',
+		rewriteDomain: 'vapi.ai',
+		subpath: 'community',
+	},
 ];
 
 export function middleware(req: NextRequest) {
@@ -60,7 +65,7 @@ export function middleware(req: NextRequest) {
 	);
 	if (subpathCustomer) {
 		const bypass = req.headers.get('X-AnswerOverflow-Skip-Subpath-Redirect');
-		if (!bypass) {
+		if (!bypass && !subpathCustomer.contentDomain.includes('vapi.ai')) {
 			return NextResponse.redirect(
 				new URL(
 					`https://${subpathCustomer.rewriteDomain}/${subpathCustomer.subpath}${path}`,
