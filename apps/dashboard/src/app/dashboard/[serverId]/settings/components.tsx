@@ -14,12 +14,12 @@ function planToPrettyText(plan: Plan) {
 	switch (plan) {
 		case 'FREE':
 			return 'Free';
-		case 'PRO_LEGACY':
-			return 'Pro (Legacy)';
+		case 'PRO':
+			return 'Pro';
 		case 'OPEN_SOURCE':
 			return 'Open Source';
-		case 'ENTERPRISE_LEGACY':
-			return 'Enterprise (Legacy)';
+		case 'ENTERPRISE':
+			return 'Enterprise';
 		case 'STARTER':
 			return 'Starter';
 		case 'ADVANCED':

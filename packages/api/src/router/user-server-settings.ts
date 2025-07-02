@@ -105,8 +105,8 @@ const userServerSettingsCrudRouter = router({
 				permissions: [
 					(server) =>
 						assertIsOnPlan(server, [
-							'PRO_LEGACY',
-							'ENTERPRISE_LEGACY',
+							'PRO',
+							'ENTERPRISE',
 							'ADVANCED',
 							'STARTER',
 						]),
