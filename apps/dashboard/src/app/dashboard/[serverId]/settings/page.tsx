@@ -83,8 +83,8 @@ export default function Settings() {
 				<CurrentPlanCard />
 				<TierAccessOnly
 					enabledFor={[
-						'PRO_LEGACY',
-						'ENTERPRISE_LEGACY',
+						'PRO',
+						'ENTERPRISE',
 						'ADVANCED',
 						'STARTER',
 						'OPEN_SOURCE',

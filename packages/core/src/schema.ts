@@ -261,8 +261,8 @@ const plans = [
 	'FREE',
 	'STARTER',
 	'ADVANCED',
-	'PRO_LEGACY',
-	'ENTERPRISE_LEGACY',
+	'PRO',
+	'ENTERPRISE',
 	'OPEN_SOURCE',
 ] as const;
 export type Plan = (typeof plans)[number];
