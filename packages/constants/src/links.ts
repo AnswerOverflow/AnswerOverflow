@@ -33,6 +33,38 @@ export const getBaseUrl = () => {
 	return base.endsWith('/') ? base.slice(0, -1) : base;
 };
 
+export const getDashboardUrl = () => {
+	const deploymentEnv = 
+		// eslint-disable-next-line n/no-process-env
+		process.env.NEXT_PUBLIC_DEPLOYMENT_ENV;
+	const nodeEnv = 
+		// eslint-disable-next-line n/no-process-env
+		process.env.NODE_ENV;
+	
+	// Local development
+	if (deploymentEnv === 'local' || nodeEnv === 'development') {
+		return 'http://localhost:3002';
+	}
+	
+	// Production
+	if (deploymentEnv === 'production') {
+		return 'https://app.answeroverflow.com';
+	}
+	
+	// For preview deployments, try to use VERCEL_URL
+	const vercelUrl = 
+		// eslint-disable-next-line n/no-process-env
+		process.env.NEXT_PUBLIC_VERCEL_URL || 
+		// eslint-disable-next-line n/no-process-env
+		process.env.VERCEL_URL;
+	if (vercelUrl) {
+		return `https://${vercelUrl}`;
+	}
+	
+	// Fallback to production for other cases
+	return 'https://app.answeroverflow.com';
+};
+
 export const getMainSiteHostname = () => {
 	const url = new URL(getBaseUrl());
 	return url.host;
@@ -50,4 +82,8 @@ export const isOnMainSite = (host: string) => {
 
 export const makeMainSiteLink = (path: string) => {
 	return `${getBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`;
+};
+
+export const makeDashboardLink = (path: string) => {
+	return `${getDashboardUrl()}${path.startsWith('/') ? path : `/${path}`}`;
 };

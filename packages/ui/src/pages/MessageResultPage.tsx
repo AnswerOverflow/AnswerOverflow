@@ -69,7 +69,16 @@ const JoinAnswerOverflowCard = () => (
 				eventData={{}}
 				variant={'default'}
 				target={'_blank'}
-				href={'https://app.answeroverflow.com/onboarding'}
+										href={
+							// eslint-disable-next-line n/no-process-env
+							process.env.NEXT_PUBLIC_VERCEL_URL
+								// eslint-disable-next-line n/no-process-env
+								? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/onboarding`
+								// eslint-disable-next-line n/no-process-env
+								: process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === 'local'
+								? 'http://localhost:3002/onboarding'
+								: 'https://app.answeroverflow.com/onboarding'
+						}
 			>
 				Add your server
 			</TrackLinkButton>

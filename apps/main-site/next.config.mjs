@@ -71,29 +71,47 @@ const config = {
 			: 'https://www.answeroverflow.com/',
 	skipTrailingSlashRedirect: true,
 	redirects: async () => {
+		// We need to dynamically get the dashboard URL
+		const getDashboardUrl = () => {
+			const deploymentEnv = process.env.NEXT_PUBLIC_DEPLOYMENT_ENV;
+			const nodeEnv = process.env.NODE_ENV;
+			
+			// Local development
+			if (deploymentEnv === 'local' || nodeEnv === 'development') {
+				return 'http://localhost:3002';
+			}
+			
+			// Production
+			if (deploymentEnv === 'production') {
+				return 'https://app.answeroverflow.com';
+			}
+			
+			// For preview deployments, try to use VERCEL_URL
+			if (process.env.NEXT_PUBLIC_VERCEL_URL || process.env.VERCEL_URL) {
+				const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_URL || process.env.VERCEL_URL;
+				return `https://${vercelUrl}`;
+			}
+			
+			// Fallback to production for other cases
+			return 'https://app.answeroverflow.com';
+		};
+
+		const dashboardUrl = getDashboardUrl();
+
 		return [
 			{
 				source: '/onboarding:slug*',
-				destination:
-					process.env.NODE_ENV === 'development'
-						? 'http://localhost:3002/onboarding'
-						: 'https://app.answeroverflow.com/onboarding',
+				destination: `${dashboardUrl}/onboarding`,
 				permanent: process.env.NODE_ENV === 'production',
 			},
 			{
 				source: '/dashboard',
-				destination:
-					process.env.NODE_ENV === 'development'
-						? 'http://localhost:3002/'
-						: 'https://app.answeroverflow.com/',
+				destination: dashboardUrl,
 				permanent: process.env.NODE_ENV === 'production',
 			},
 			{
 				source: '/dashboard:slug*',
-				destination:
-					process.env.NODE_ENV === 'development'
-						? 'http://localhost:3002/dashboard'
-						: 'https://app.answeroverflow.com/dashboard',
+				destination: `${dashboardUrl}/dashboard`,
 				permanent: process.env.NODE_ENV === 'production',
 			},
 			{

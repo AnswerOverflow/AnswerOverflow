@@ -168,7 +168,32 @@ export const dashboardRouter = router({
 						});
 					}
 
-					const returnUrl = `https://app.answeroverflow.com/dashboard/${server.id}`;
+					// Dynamic dashboard URL for different deployment environments
+					const getDashboardUrl = () => {
+						const deploymentEnv = sharedEnvs.NEXT_PUBLIC_DEPLOYMENT_ENV;
+						
+						// Local development
+						if (deploymentEnv === 'local') {
+							return 'http://localhost:3002';
+						}
+						
+						// Production
+						if (deploymentEnv === 'production') {
+							return 'https://app.answeroverflow.com';
+						}
+						
+						// For preview deployments and other cases, try to use VERCEL_URL
+						// eslint-disable-next-line n/no-process-env
+						const vercelUrl = process.env.VERCEL_URL || process.env.NEXT_PUBLIC_VERCEL_URL;
+						if (vercelUrl) {
+							return `https://${vercelUrl}`;
+						}
+						
+						// Fallback to production
+						return 'https://app.answeroverflow.com';
+					};
+
+					const returnUrl = `${getDashboardUrl()}/dashboard/${server.id}`;
 
 					const [proPlanCheckout, enterprisePlanCheckout] = await Promise.all([
 						Stripe.createProPlanCheckoutSession({
