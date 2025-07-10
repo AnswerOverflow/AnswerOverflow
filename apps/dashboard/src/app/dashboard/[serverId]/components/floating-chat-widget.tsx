@@ -21,18 +21,18 @@ export function FloatingChatWidget() {
 	return (
 		<>
 			{/* Floating Button */}
-			<div className="fixed bottom-6 right-6 z-50">
+			<div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9999]">
 				<Dialog open={isOpen} onOpenChange={setIsOpen}>
 					<DialogTrigger asChild>
 						<Button
 							size="lg"
-							className="rounded-full h-14 w-14 shadow-lg hover:shadow-xl transition-all duration-300 bg-blue-600 hover:bg-blue-700"
+							className="rounded-full h-12 w-12 sm:h-14 sm:w-14 shadow-lg hover:shadow-xl transition-all duration-300 bg-blue-600 hover:bg-blue-700 border-2 border-white"
 						>
-							<MessageCircleIcon className="h-6 w-6" />
+							<MessageCircleIcon className="h-5 w-5 sm:h-6 sm:w-6" />
 							<span className="sr-only">Get Support</span>
 						</Button>
 					</DialogTrigger>
-					<DialogContent className="sm:max-w-md">
+					<DialogContent className="mx-4 sm:max-w-md">
 						<DialogHeader>
 							<DialogTitle className="flex items-center gap-2">
 								<MessageCircleIcon className="h-5 w-5" />
