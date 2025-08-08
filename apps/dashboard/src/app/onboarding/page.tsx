@@ -7,11 +7,13 @@ import {
 	SubmittedData,
 	pageLookup,
 } from './OnboardingPages';
+import { usePostHog } from '@answeroverflow/ui/hooks/use-posthog';
 
 export default function Onboarding() {
 	// Eventually move this into the url
 	const [currentPage, setCurrentPage] = useState<OnboardingPage>('start');
 	const [data, setData] = useState<SubmittedData>({});
+	const posthog = usePostHog();
 	const Page = pageLookup[currentPage];
 	return (
 		<>
@@ -19,13 +21,17 @@ export default function Onboarding() {
 				<OnboardingContext.Provider
 					value={{
 						goToPage: (page) => {
-							trackEvent(`Onboarding Page View - ${page}`, {
-								'Page Name': page,
-								'Server Id': data.server?.id ?? '',
-								'Server Name': data.server?.name ?? '',
-								'Community Topic': data.communityTopic,
-								'Community Type': data.communityType,
-							});
+							trackEvent(
+								`Onboarding Page View - ${page}`,
+								{
+									'Page Name': page,
+									'Server Id': data.server?.id ?? '',
+									'Server Name': data.server?.name ?? '',
+									'Community Topic': data.communityTopic,
+									'Community Type': data.communityType,
+								},
+								posthog,
+							);
 							setCurrentPage(page);
 						},
 						data,

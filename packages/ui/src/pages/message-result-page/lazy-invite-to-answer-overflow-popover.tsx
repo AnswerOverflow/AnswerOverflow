@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import React from 'react';
 import { trackEvent } from '../../hooks/events';
 import { Button } from '../../ui/button';
+import { usePostHog } from '../../hooks/use-posthog';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const InviteToAnswerOverflowPopover = dynamic(
@@ -22,6 +23,7 @@ const InviteToAnswerOverflowPopover = dynamic(
 
 export function LazyInviteToAnswerOverflowPopover() {
 	const [shouldShow, setShouldShow] = React.useState(false);
+	const posthog = usePostHog();
 	if (shouldShow) return <InviteToAnswerOverflowPopover defaultOpen={true} />;
 	return (
 		<Button
@@ -29,6 +31,7 @@ export function LazyInviteToAnswerOverflowPopover() {
 				trackEvent(
 					'Invite to Join Answer Overflow From Message Result Page',
 					{},
+					posthog,
 				);
 				setShouldShow(true);
 			}}

@@ -13,6 +13,7 @@ import {
 	MessageWithDiscordAccount,
 } from '@answeroverflow/core/message';
 import type { DefaultSession } from 'next-auth';
+import { CustomHog } from './use-posthog';
 
 // TODO: This type should be inferred from the auth package
 declare module 'next-auth' {
@@ -70,11 +71,11 @@ export type EventMap = {
 	'Invite to Join Answer Overflow From Message Result Page': {};
 } & ServerInviteEvent &
 	CommunityPageLinkEvent;
-import posthog from 'posthog-js';
 
 export function trackEvent<K extends keyof EventMap | string>(
 	eventName: K,
 	props: K extends keyof EventMap ? EventMap[K] : Record<string, unknown>,
+	posthog: CustomHog,
 ): void {
 	const isServer = typeof window === 'undefined';
 	posthog.capture(eventName as string, {
