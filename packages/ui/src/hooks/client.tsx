@@ -1,10 +1,10 @@
 'use client';
 import { usePathname, useSearchParams } from 'next/navigation';
 import posthog from 'posthog-js';
-import { PostHogProvider, usePostHog } from 'posthog-js/react';
+import { PostHogProvider } from 'posthog-js/react';
 import React, { useEffect, useRef } from 'react';
 import { EventMap, trackEvent } from './events';
-import { useTenant } from '../context/tenant-context';
+import { usePostHog } from './use-posthog';
 
 if (typeof window !== 'undefined') {
 	// eslint-disable-next-line n/no-process-env
@@ -19,12 +19,8 @@ if (typeof window !== 'undefined') {
 
 export function PostHogPageview() {
 	const pathname = usePathname();
-	const tenant = useTenant();
 	const searchParams = useSearchParams();
 	const posthog = usePostHog();
-	posthog.set_config({
-		api_host: tenant?.subpath ? `/${tenant.subpath}/ingest` : '/ingest',
-	});
 	// Track pageviews
 	useEffect(() => {
 		if (pathname && posthog) {
@@ -59,12 +55,13 @@ export function useTrackEvent<K extends keyof EventMap | string>(
 	},
 ): void {
 	const hasSentAnalyticsEvent = useRef(false);
+	const posthog = usePostHog();
 	useEffect(() => {
 		const enabled = opts?.enabled ?? true;
 		const runOnce = opts?.runOnce ?? true;
 		if (!enabled) return;
 		if (!hasSentAnalyticsEvent.current) {
-			trackEvent(eventName, props);
+			trackEvent(eventName, props, posthog);
 			if (runOnce) {
 				hasSentAnalyticsEvent.current = true;
 			}

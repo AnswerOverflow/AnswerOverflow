@@ -5,19 +5,24 @@ import * as React from 'react';
 import { MessagePageViewProps, trackEvent } from '../hooks/events';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { usePostHog } from '../hooks/use-posthog';
 
 export function HelpfulFeedback(props: {
 	page: MessagePageViewProps;
 }) {
 	const [voted, setVoted] = React.useState<'Yes' | 'No' | null>(null);
-
+	const posthog = usePostHog();
 	const handleVote = (value: 'Yes' | 'No') => {
 		if (!voted) {
 			setVoted(value);
-			trackEvent('Helpful Feedback Click', {
-				feedback: value,
-				...props.page,
-			});
+			trackEvent(
+				'Helpful Feedback Click',
+				{
+					feedback: value,
+					...props.page,
+				},
+				posthog,
+			);
 		}
 	};
 

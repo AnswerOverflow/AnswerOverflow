@@ -1,6 +1,7 @@
 'use client';
 import { trackEvent } from '../hooks/events';
 import { EventMap } from '../hooks/events';
+import { usePostHog } from '../hooks/use-posthog';
 import { Link } from './link';
 
 export function TrackLink<K extends keyof EventMap | string>(
@@ -10,10 +11,11 @@ export function TrackLink<K extends keyof EventMap | string>(
 	},
 ) {
 	const { eventName, eventData, ...rest } = props;
+	const posthog = usePostHog();
 	return (
 		<Link
 			onMouseUp={() => {
-				trackEvent(eventName, eventData);
+				trackEvent(eventName, eventData, posthog);
 			}}
 			{...rest}
 		/>

@@ -202,6 +202,7 @@ import { trackEvent } from '@answeroverflow/ui/hooks/events';
 import { Button } from '@answeroverflow/ui/ui/button';
 import { Textarea } from '@answeroverflow/ui/ui/textarea';
 import { toast } from 'react-toastify';
+import { usePostHog } from '@answeroverflow/ui/hooks/use-posthog';
 
 function ExternalLink({
 	href,
@@ -322,7 +323,7 @@ export function PopularPagesTable() {
 
 export function RequestAnInsight() {
 	const { data } = trpc.auth.getSession.useQuery();
-
+	const posthog = usePostHog();
 	return (
 		<ChartWithLabelAndTotal
 			label={`Request an Insight`}
@@ -335,11 +336,15 @@ export function RequestAnInsight() {
 							// @ts-ignore
 							const [feedbackElement] = e.target;
 							const feedback = (feedbackElement as HTMLTextAreaElement).value;
-							trackEvent('Feedback', {
-								email: data?.user?.email,
-								feedback,
-								area: 'Dashboard - Insights',
-							});
+							trackEvent(
+								'Feedback',
+								{
+									email: data?.user?.email,
+									feedback,
+									area: 'Dashboard - Insights',
+								},
+								posthog,
+							);
 							toast.success('Feedback submitted thanks!');
 						}}
 					>

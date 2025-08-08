@@ -1,11 +1,12 @@
 import { ServerPublic } from '@answeroverflow/api/router/types';
+import { usePostHog } from '@answeroverflow/ui/hooks/use-posthog';
 import { ManageServerCard } from '@answeroverflow/ui/server-card';
 import { ServerIcon } from '@answeroverflow/ui/server-icon';
 import { Heading } from '@answeroverflow/ui/ui/heading';
 import { LinkButton } from '@answeroverflow/ui/ui/link-button';
 import { trpc } from '@answeroverflow/ui/utils/client';
 import { signOut } from 'next-auth/react';
-import posthog from 'posthog-js';
+
 import React, { useEffect, useState } from 'react';
 
 export type SubmittedData = {
@@ -154,6 +155,7 @@ export function WelcomePageRenderer(props: {
 	}[];
 }) {
 	const { goToPage, setData } = useOnboardingContext();
+	const posthog = usePostHog();
 	useEffect(() => {
 		posthog.startSessionRecording();
 	}, []);
