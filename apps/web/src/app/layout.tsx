@@ -3,10 +3,6 @@ import "@packages/ui/globals.css"
 import ConvexClientProvider from "./ConvexClientProvider";
 import { Providers } from "@packages/ui/components/providers";
 
-export const metadata: Metadata = {
-  title: "Notes App",
-  description: "This is an app to take notes.",
-};
 
 export default function RootLayout({
   children,
