@@ -1,190 +1,149 @@
-# Fullstack monorepo template feat. Expo, Turbo, Next.js, Convex, Clerk
+## Cross‑platform realtime monorepo
 
-This is a modern TypeScript monorepo template with AI web and native apps
-featuring:
+this readme was auto generated
 
-- Turborepo: Monorepo management
-- React 19: Latest React with concurrent features
-- Next.js 15: Web app & marketing page with App Router
-- Tailwind CSS v4: Modern CSS-first configuration
-- React Native [Expo](https://expo.dev/): Mobile/native app with New Architecture
-- [Convex](https://convex.dev): Backend, database, server functions
-- [Clerk](https://clerk.dev): User authentication
-- OpenAI: Text summarization (optional)
+This repository demonstrates how to use Next.js, Convex, Effect, and shadcn/ui together in a single monorepo to power realtime, cross‑platform experiences (web + a Discord bot) with a shared backend.
 
-The example app is a note taking app that can summarize notes using AI. Features
-include:
+### Highlights
 
-- Marketing page
-- Dashboard page (web & native)
-- Note taking page (web & native)
-- Backend API that serves web & native with the same API
-- Relational database
-- End to end type safety (schema definition to frontend API clients)
-- User authentication
-- Asynchronous call to an OpenAI
-- Everything is realtime by default
+- **Next.js 15 + React 19**: App Router, Tailwind v4 UI.
+- **Convex**: Realtime database, server functions, and generated clients.
+- **Effect + DFX**: Reliable, typed Discord bot on Bun runtime.
+- **shadcn/ui**: Reusable UI kit published as a local package.
+- **Clerk**: Authentication for the web app.
+- **Turborepo**: Orchestrates concurrent dev for web, backend, and bot.
 
-## Using this example
+### Monorepo structure
 
-### 1. Install dependencies
+- `apps/web`: Next.js app using Clerk + Convex React client and shadcn/ui.
+- `apps/discord-bot`: Effect + DFX Discord bot on Bun, consuming the Convex HTTP and realtime clients.
+- `packages/convex`: Convex schema, functions, and a tiny shared client wrapper.
+- `packages/ui`: shadcn/ui components, styles, and theming consumed by the web app.
+- `packages/typescript-config`: Shared tsconfig presets.
 
-If you don't have `yarn` installed, run `npm install --global yarn`.
+## How realtime sync works
 
-Run `yarn`.
+The shared `entries` model is defined in Convex. The web app reads/writes via Convex React hooks; the Discord bot uses an HTTP client plus a subscription for realtime updates.
 
-### 2. Configure Convex
+```mermaid
+sequenceDiagram
+  participant Web as Web (Next.js)
+  participant Bot as Discord Bot (Effect)
+  participant Convex as Convex (DB + Functions)
 
-> Note: The following command will print an error and ask you to add the
-> appropriate environment variable to proceed. Continue reading on for how to do
-> that.
-
-```sh
-npm run setup --workspace packages/backend
+  Web->>Convex: mutation functions.createEntry
+  Convex-->>Web: query functions.getEntries (subscribed)
+  Convex-->>Bot: onUpdate(functions.getEntries)
+  Bot->>Discord: updateOriginalWebhookMessage(entries)
 ```
 
-The script will log you into Convex if you aren't already and prompt you to
-create a project (free). It will then wait to deploy your code until you set the
-environment variables in the dashboard.
+Key pieces:
 
-Configure Clerk with [this guide](https://docs.convex.dev/auth/clerk). Then add
-the `CLERK_ISSUER_URL` found in the "convex" template
-[here](https://dashboard.clerk.com/last-active?path=jwt-templates), to your
-Convex environment variables
-[here](https://dashboard.convex.dev/deployment/settings/environment-variables&var=CLERK_ISSUER_URL).
+- Web uses `useQuery(api.functions.getEntries)` and `useMutation(api.functions.createEntry)` to render and mutate data.
+- Bot imports `@packages/convex/client` to call `getEntries()` over HTTP and `onEntriesUpdated(...)` for push updates.
+- Convex functions and schema live in `packages/convex/convex/` and are shared across all apps.
 
-Make sure to enable **Google and Apple** as possible Social Connection
-providers, as these are used by the React Native login implementation.
+## Getting started
 
-After that, optionally add the `OPENAI_API_KEY` env var from
-[OpenAI](https://platform.openai.com/account/api-keys) to your Convex
-environment variables to get AI summaries.
+### Prerequisites
 
-The `setup` command should now finish successfully.
+- Bun ≥ 1.2 (repo uses `packageManager: bun`)
+- Node ≥ 18.8
+- A Convex account and project
+- A Clerk application (for web auth)
+- A Discord Bot token (for the bot)
 
-### 3. Configure both apps
-
-In each app directory (`apps/web`, `apps/native`) create a `.env.local` file
-using the `.example.env` as a template and fill out your Convex and Clerk
-environment variables.
-
-- Use the `CONVEX_URL` from `packages/backend/.env.local` for
-  `{NEXT,EXPO}_PUBLIC_CONVEX_URL`.
-- The Clerk publishable & secret keys can be found
-  [here](https://dashboard.clerk.com/last-active?path=api-keys).
-
-### 4. Run both apps
-
-Run the following command to run both the web and mobile apps:
+### 1) Install dependencies
 
 ```sh
-npm run dev
+bun install
 ```
 
-This will allow you to use the ⬆ and ⬇ keyboard keys to see logs for each
-of the Convex backend, web app, and mobile app separately.
-If you'd rather see all of the logs in one place, delete the
-`"ui": "tui",` line in [turbo.json](./turbo.json).
+### 2) Configure Convex
 
-## Deploying
+1. Start Convex locally (first run will guide you through auth/project creation):
+   ```sh
+   bun run --filter @packages/convex dev
+   ```
+2. In the Convex dashboard, set the environment variable `CLERK_ISSUER_URL` (from Clerk JWT Templates → "convex").
 
-In order to both deploy the frontend and Convex, run this as the build command from the apps/web directory:
+### 3) Create a root .env
+
+Both the web and the bot load from the root `.env`.
+
+```env
+# Convex
+CONVEX_URL=https://YOUR-CONVEX-DEPLOYMENT.convex.cloud
+NEXT_PUBLIC_CONVEX_URL=${CONVEX_URL}
+
+# Clerk (Web)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
+CLERK_SECRET_KEY=sk_test_xxx
+
+# Discord Bot
+DISCORD_BOT_TOKEN=your_discord_bot_token
+```
+
+Notes:
+
+- `CLERK_ISSUER_URL` is configured in Convex (dashboard), not in this file.
+- During local development, `CONVEX_URL` should match your dev URL from the Convex CLI output.
+
+### 4) Run everything
 
 ```sh
-cd ../../packages/backend && npx convex deploy --cmd 'cd ../../apps/web && turbo run build' --cmd-url-env-var-name NEXT_PUBLIC_CONVEX_URL
+bun run dev
 ```
 
-There is a vercel.json file in the apps/web directory with this configuration for Vercel.
+This launches the web app, the Convex dev server, and the Discord bot together using Turborepo's TUI (use ↑/↓ to switch logs). You can change the TUI in `turbo.json`.
 
-## What's inside?
+## Deploy
 
-This monorepo template includes the following packages/apps:
+The web app is configured to deploy together with Convex. The build command used by Vercel (see `apps/web/vercel.json`) is:
 
-### Apps and Packages
+```sh
+cd ../../packages/convex && npx convex deploy --cmd 'cd ../../apps/web && turbo run build' --cmd-url-env-var-name NEXT_PUBLIC_CONVEX_URL
+```
 
-- `web`: a [Next.js 15](https://nextjs.org/) app with Tailwind CSS and Clerk
-- `native`: a [React Native](https://reactnative.dev/) app built with
-  [expo](https://docs.expo.dev/)
-- `packages/backend`: a [Convex](https://www.convex.dev/) folder with the
-  database schema and shared functions
+This ensures Convex is deployed first and the web app is built with the correct `NEXT_PUBLIC_CONVEX_URL`.
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## Working with the stack
 
-To install a new package, `cd` into that directory, such as [packages/backend](./packages/backend/), and then run `yarn add mypackage@latest`
+### shadcn/ui (in `packages/ui`)
 
-### Utilities
+- Components live in `packages/ui/src/components/*` with styles in `packages/ui/src/styles/globals.css`.
+- Add new components using the shadcn CLI targeting the package:
+  ```sh
+  npx shadcn@latest add button --cwd packages/ui
+  ```
+- Import components in web as `@packages/ui/components/button`.
 
-This Turborepo has some additional tools already setup for you:
+### Convex (in `packages/convex`)
 
-- [Expo](https://docs.expo.dev/) for native development
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [Prettier](https://prettier.io) for code formatting
+- Schema: `convex/schema.ts` defines the `entries` table.
+- Functions: `convex/functions.ts` exposes `createEntry`, `getEntries`, `removeEntry`.
+- React client (web): `convex/react` via `ConvexProviderWithClerk`.
+- Shared client (bot): see `packages/convex/client.ts` for HTTP + subscription helpers.
 
-# What is Convex?
+### Effect + DFX Discord bot (in `apps/discord-bot`)
 
-[Convex](https://convex.dev) is a hosted backend platform with a built-in
-reactive database that lets you write your
-[database schema](https://docs.convex.dev/database/schemas) and
-[server functions](https://docs.convex.dev/functions) in
-[TypeScript](https://docs.convex.dev/typescript). Server-side database
-[queries](https://docs.convex.dev/functions/query-functions) automatically
-[cache](https://docs.convex.dev/functions/query-functions#caching--reactivity)
-and [subscribe](https://docs.convex.dev/client/react#reactivity) to data,
-powering a
-[realtime `useQuery` hook](https://docs.convex.dev/client/react#fetching-data)
-in our [React client](https://docs.convex.dev/client/react). There are also
-clients for [Python](https://docs.convex.dev/client/python),
-[Rust](https://docs.convex.dev/client/rust),
-[ReactNative](https://docs.convex.dev/client/react-native), and
-[Node](https://docs.convex.dev/client/javascript), as well as a straightforward
-[HTTP API](https://github.com/get-convex/convex-js/blob/main/src/browser/http_client.ts#L40).
+- Bootstrapped with `BunRuntime.runMain` and Effect Layers.
+- Reads entries via `getEntries()` and subscribes via `onEntriesUpdated(...)` to edit messages in place.
+- Configure `DISCORD_BOT_TOKEN` and keep `CONVEX_URL` in your `.env`.
 
-The database supports
-[NoSQL-style documents](https://docs.convex.dev/database/document-storage) with
-[relationships](https://docs.convex.dev/database/document-ids) and
-[custom indexes](https://docs.convex.dev/database/indexes/) (including on fields
-in nested objects).
+## Commands
 
-The [`query`](https://docs.convex.dev/functions/query-functions) and
-[`mutation`](https://docs.convex.dev/functions/mutation-functions) server
-functions have transactional, low latency access to the database and leverage
-our [`v8` runtime](https://docs.convex.dev/functions/runtimes) with
-[determinism guardrails](https://docs.convex.dev/functions/runtimes#using-randomness-and-time-in-queries-and-mutations)
-to provide the strongest ACID guarantees on the market: immediate consistency,
-serializable isolation, and automatic conflict resolution via
-[optimistic multi-version concurrency control](https://docs.convex.dev/database/advanced/occ)
-(OCC / MVCC).
+- Root dev (all apps): `bun run dev`
+- Web only: `bunx turbo run dev --filter web-app` (or `bun run dev -- --filter web-app`)
+- Convex only: `bunx turbo run dev --filter @packages/convex` (or `bun run dev -- --filter @packages/convex`)
+- Discord bot only: `bunx turbo run dev --filter discord-bot` (or `bun run dev -- --filter discord-bot`)
 
-The [`action` server functions](https://docs.convex.dev/functions/actions) have
-access to external APIs and enable other side-effects and non-determinism in
-either our [optimized `v8` runtime](https://docs.convex.dev/functions/runtimes)
-or a more
-[flexible `node` runtime](https://docs.convex.dev/functions/runtimes#nodejs-runtime).
+## FAQ
 
-Functions can run in the background via
-[scheduling](https://docs.convex.dev/scheduling/scheduled-functions) and
-[cron jobs](https://docs.convex.dev/scheduling/cron-jobs).
+- Why Convex? Built‑in realtime, transactions, and generated types across server and client.
+- Why Effect for the bot? Composable layers, typed effects, and resiliency (retries, schedules, structured logs).
+- Why shadcn/ui in a package? Keeps UI primitives versioned, themed, and shareable across apps.
 
-Development is cloud-first, with
-[hot reloads for server function](https://docs.convex.dev/cli#run-the-convex-dev-server)
-editing via the [CLI](https://docs.convex.dev/cli). There is a
-[dashboard UI](https://docs.convex.dev/dashboard) to
-[browse and edit data](https://docs.convex.dev/dashboard/deployments/data),
-[edit environment variables](https://docs.convex.dev/production/environment-variables),
-[view logs](https://docs.convex.dev/dashboard/deployments/logs),
-[run server functions](https://docs.convex.dev/dashboard/deployments/functions),
-and more.
+## License
 
-There are built-in features for
-[reactive pagination](https://docs.convex.dev/database/pagination),
-[file storage](https://docs.convex.dev/file-storage),
-[reactive search](https://docs.convex.dev/text-search),
-[https endpoints](https://docs.convex.dev/functions/http-actions) (for
-webhooks),
-[streaming import/export](https://docs.convex.dev/database/import-export/), and
-[runtime data validation](https://docs.convex.dev/database/schemas#validators)
-for [function arguments](https://docs.convex.dev/functions/args-validation) and
-[database data](https://docs.convex.dev/database/schemas#schema-validation).
-
-Everything scales automatically, and it’s
-[free to start](https://www.convex.dev/plans).
+MIT
