@@ -3,7 +3,6 @@ import { InteractionsRegistry } from "dfx/gateway";
 import { Cause, Effect, Layer, pipe } from "effect";
 import { DiscordGatewayLayer } from "./framework/discord-gateway";
 import {
-	createEntry,
 	getEntries,
 	onEntriesUpdated,
 	type Entry,

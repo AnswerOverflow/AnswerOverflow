@@ -1,8 +1,24 @@
 import { defineSchema, defineTable } from "convex/server";
-import { v } from "convex/values";
+import { Infer, v } from "convex/values";
+
+export const serverSchema = v.object({
+	discordId: v.string(),
+	name: v.string(),
+	icon: v.optional(v.string()),
+	description: v.optional(v.string()),
+	vanityInviteCode: v.optional(v.string()),
+	bitfield: v.number(),
+	kickedTime: v.optional(v.number()),
+	vanityUrl: v.optional(v.string()),
+	customDomain: v.optional(v.string()),
+	subpath: v.optional(v.string()),
+	stripeCustomerId: v.optional(v.string()),
+	stripeSubscriptionId: v.optional(v.string()),
+	plan: v.string(),
+	approximateMemberCount: v.number(),
+});
+export type Server = Infer<typeof serverSchema>;
 
 export default defineSchema({
-  entries: defineTable({
-    content: v.string(),
-  }),
+	servers: defineTable(serverSchema),
 });

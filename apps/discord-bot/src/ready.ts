@@ -13,7 +13,7 @@ const make = Effect.gen(function* () {
 	yield* gateway
 		.handleDispatch("READY", (readyData) =>
 			Effect.log(
-				`\nLogged in as ${readyData.user.username}\nID: ${readyData.user.id}\nGuilds: ${readyData.guilds.length}`,
+				`\n	Logged in as ${readyData.user.username}\nID: ${readyData.user.id}\nGuilds: ${readyData.guilds.length}`,
 			),
 		)
 		.pipe(Effect.retry(Schedule.spaced("1 seconds")), Effect.forkScoped);
