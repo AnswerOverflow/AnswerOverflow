@@ -18,5 +18,5 @@
     "apps/*",
     "packages/*"
   ],
-  "packageManager": "yarn@1.22.19"
+  "packageManager": "bun@1.2.19"
 }
