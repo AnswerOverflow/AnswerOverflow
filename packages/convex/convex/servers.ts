@@ -1,21 +1,27 @@
-import { internalMutation, query } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { Auth } from "convex/server";
 import { serverSchema } from "./schema";
-import { api } from "./_generated/api";
+import { customMutation } from "convex-helpers/server/customFunctions";
+import { Schema } from "effect";
+const apiMutation = customMutation(mutation, {
+	args: { apiKey: v.string() },
+	input: async (ctx, args) => {
+		const configuredSecret = process.env.EXTERNAL_WRITE_SECRET;
+		if (!configuredSecret || args.apiKey !== configuredSecret) {
+			throw new Error("Unauthorized");
+		}
+		return { ctx, args };
+	},
+});
 
-export const getUserId = async (ctx: { auth: Auth }) => {
-	return (await ctx.auth.getUserIdentity())?.subject;
-};
-
-export const getServers = query({
+export const publicGetServers = query({
 	args: {},
 	handler: async (ctx) => {
 		return await ctx.db.query("servers").collect();
 	},
 });
 
-export const getServerByDiscordId = query({
+export const publicGetServerByDiscordId = query({
 	args: {
 		discordId: v.string(),
 	},
@@ -27,15 +33,18 @@ export const getServerByDiscordId = query({
 	},
 });
 
-export const upsertServer = internalMutation({
-	args: serverSchema,
-	handler: async (ctx, args) => {
-		const existing = await ctx.runQuery(api.servers.getServerByDiscordId, {
-			discordId: args.discordId,
-		});
+export const upsertServerExternal = apiMutation({
+	args: {
+		data: serverSchema,
+	},
+	handler: async (ctx, { data }) => {
+		const existing = await ctx.db
+			.query("servers")
+			.filter((q) => q.eq(q.field("discordId"), data.discordId))
+			.first();
 		if (existing) {
-			return await ctx.db.patch(existing._id, args);
+			return await ctx.db.patch(existing._id, data);
 		}
-		return await ctx.db.insert("servers", args);
+		return await ctx.db.insert("servers", data);
 	},
 });

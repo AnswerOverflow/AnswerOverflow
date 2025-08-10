@@ -14,7 +14,14 @@ export const serverSchema = v.object({
 	subpath: v.optional(v.string()),
 	stripeCustomerId: v.optional(v.string()),
 	stripeSubscriptionId: v.optional(v.string()),
-	plan: v.string(),
+	plan: v.union(
+		v.literal("FREE"),
+		v.literal("STARTER"),
+		v.literal("ADVANCED"),
+		v.literal("PRO"),
+		v.literal("ENTERPRISE"),
+		v.literal("OPEN_SOURCE"),
+	),
 	approximateMemberCount: v.number(),
 });
 export type Server = Infer<typeof serverSchema>;
