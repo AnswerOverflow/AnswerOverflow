@@ -1,0 +1,22 @@
+{
+  "name": "discord-bot",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run --env-file=../../.env --watch index.ts"
+  },
+  "dependencies": {
+    "@effect/platform": "^0.90.1",
+    "@effect/platform-bun": "^0.78.0",
+    "dfx": "^0.124.0",
+    "@packages/convex": "workspace:*"
+  },
+  "devDependencies": {
+    "@effect/language-service": "^0.35.2",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

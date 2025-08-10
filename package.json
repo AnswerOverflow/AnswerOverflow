@@ -8,6 +8,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.1.4",
     "prettier": "3.5.3",
     "turbo": "2.5.2"
   },
