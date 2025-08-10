@@ -7,7 +7,7 @@ import { trpc } from '../utils/client';
 import { TRPCProvider } from './trpc-provider';
 import { TenantContext } from '../context/tenant-context';
 import { ServerPublic } from '@answeroverflow/api/router/types';
-import { usePostHog } from 'posthog-js/react/dist/types/hooks';
+import { usePostHog } from '../hooks/use-posthog';
 
 function IdentifyUser() {
 	const { data } = trpc.auth.getSession.useQuery();
