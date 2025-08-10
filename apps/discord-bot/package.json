@@ -1,24 +1,24 @@
 {
-  "name": "discord-bot",
-  "module": "index.ts",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "dev": "bun run --env-file=../../.env --watch index.ts",
-    "clean": "rm -rf node_modules"
-  },
-  "dependencies": {
-    "@effect/platform": "^0.90.1",
-    "@effect/platform-bun": "^0.78.0",
-    "@packages/convex": "workspace:*",
-    "dfx": "^0.124.0",
-    "effect": "^3.17.7"
-  },
-  "devDependencies": {
-    "@effect/language-service": "^0.35.2",
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  }
+	"name": "discord-bot",
+	"module": "index.ts",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"dev": "bun run --env-file=../../.env --watch index.ts",
+		"clean": "rm -rf node_modules"
+	},
+	"dependencies": {
+		"@effect/platform": "^0.90.1",
+		"@effect/platform-bun": "^0.78.0",
+		"@packages/convex": "workspace:*",
+		"dfx": "^0.124.0",
+		"effect": "^3.17.7"
+	},
+	"devDependencies": {
+		"@effect/language-service": "^0.35.2",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	}
 }

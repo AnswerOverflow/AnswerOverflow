@@ -1,17 +1,17 @@
 {
-  "name": "@packages/convex",
-  "version": "1.0.0",
-  "scripts": {
-    "dev": "convex dev",
-    "clean": "rm -rf node_modules"
-  },
-  "dependencies": {
-    "convex": "^1.25.0",
-    "convex-helpers": "^0.1.101",
-    "effect": "^3.17.7",
-    "openai": "^4.45.0"
-  },
-  "devDependencies": {
-    "typescript": "5.8.3"
-  }
+	"name": "@packages/convex",
+	"version": "1.0.0",
+	"scripts": {
+		"dev": "convex dev",
+		"clean": "rm -rf node_modules"
+	},
+	"dependencies": {
+		"convex": "^1.25.0",
+		"convex-helpers": "^0.1.101",
+		"effect": "^3.17.7",
+		"openai": "^4.45.0"
+	},
+	"devDependencies": {
+		"typescript": "5.8.3"
+	}
 }

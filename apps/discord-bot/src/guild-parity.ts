@@ -1,13 +1,14 @@
+import { api } from "@packages/convex/convex/_generated/api.js";
+import { ConvexHttpClient } from "convex/browser";
+import { DiscordREST } from "dfx/DiscordREST";
 import { DiscordGateway } from "dfx/gateway";
 import { Config, Effect, Layer } from "effect";
 import { DiscordGatewayLayer } from "./framework/discord-gateway";
-import { DiscordREST } from "dfx/DiscordREST";
-import { ConvexHttpClient } from "convex/browser";
-import { api } from "@packages/convex/convex/_generated/api.js";
 
 const upsertServer = (guildId: string) =>
 	Effect.gen(function* () {
 		const rest = yield* DiscordREST;
+		// biome-ignore lint/style/noNonNullAssertion: Setup
 		const httpClient = new ConvexHttpClient(process.env.CONVEX_URL!);
 		const externalSecret = yield* Config.string("EXTERNAL_WRITE_SECRET");
 		const guild = yield* rest.getGuild(guildId, {});

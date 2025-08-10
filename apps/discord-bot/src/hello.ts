@@ -1,15 +1,14 @@
-import { Discord, DiscordREST, Ix } from "dfx";
+import { DiscordREST, Ix } from "dfx";
 import { InteractionsRegistry } from "dfx/gateway";
-import { Cause, Effect, Layer, pipe } from "effect";
+import { Effect, Layer } from "effect";
 import { DiscordGatewayLayer } from "./framework/discord-gateway";
 import { DiscordApplication } from "./framework/discord-rest";
-import type { DiscordRestService } from "dfx/DiscordREST";
 
 export const HelloLayer = Layer.effectDiscard(
 	Effect.gen(function* () {
 		const registry = yield* InteractionsRegistry;
-		const rest = yield* DiscordREST;
-		const application = yield* DiscordApplication;
+		const _rest = yield* DiscordREST;
+		const _application = yield* DiscordApplication;
 
 		const hello = Ix.global(
 			{
@@ -17,7 +16,7 @@ export const HelloLayer = Layer.effectDiscard(
 				description: "A basic command",
 			},
 			Effect.gen(function* () {
-				const context = yield* Ix.Interaction;
+				const _context = yield* Ix.Interaction;
 
 				return {
 					type: 4,

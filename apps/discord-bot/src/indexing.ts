@@ -1,10 +1,10 @@
-import { Duration, Effect, Layer, Schedule } from "effect";
+import { DiscordREST } from "dfx/DiscordREST";
+import { Effect, Layer } from "effect";
 import { DiscordGatewayLayer } from "./framework/discord-gateway";
 import { Guilds } from "./framework/guilds";
-import { DiscordREST } from "dfx/DiscordREST";
 
 const make = Effect.gen(function* () {
-	const api = yield* DiscordREST;
+	const _api = yield* DiscordREST;
 });
 
 export const IndexingLive = Layer.scopedDiscard(make).pipe(

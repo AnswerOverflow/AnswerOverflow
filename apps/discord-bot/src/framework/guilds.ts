@@ -1,10 +1,9 @@
-import { Chunk, Effect, Option, RateLimiter, Stream } from "effect";
 import type { Discord } from "dfx";
 import { Cache } from "dfx";
-import { CachePrelude } from "dfx/gateway";
 import { DiscordREST } from "dfx/DiscordREST";
-import type { ListMyGuildsParams, MyGuildResponse } from "dfx/types";
-import { Duration } from "effect";
+import { CachePrelude } from "dfx/gateway";
+import type { ListMyGuildsParams } from "dfx/types";
+import { Chunk, Duration, Effect, Option, RateLimiter, Stream } from "effect";
 import { DiscordGatewayLayer } from "./discord-gateway";
 import { DiscordRestLayer } from "./discord-rest.ts";
 
@@ -50,7 +49,7 @@ export class Guilds extends Effect.Service<Guilds>()("app/Guilds", {
 										page.length > 0
 											? Option.some({
 													...state,
-													after: page[page.length - 1]!.id,
+													after: page[page.length - 1]?.id,
 												})
 											: Option.none<ListMyGuildsParams>();
 									return [Chunk.fromIterable(page), next] as const;

@@ -1,21 +1,19 @@
-import type { Metadata } from "next";
-import "@packages/ui/globals.css"
-import ConvexClientProvider from "./ConvexClientProvider";
+import "@packages/ui/globals.css";
 import { Providers } from "@packages/ui/components/providers";
-
+import ConvexClientProvider from "./ConvexClientProvider";
 
 export default function RootLayout({
-  children,
+	children,
 }: {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <ConvexClientProvider>
-          <Providers>{children}</Providers>
-        </ConvexClientProvider>
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en" suppressHydrationWarning>
+			<body>
+				<ConvexClientProvider>
+					<Providers>{children}</Providers>
+				</ConvexClientProvider>
+			</body>
+		</html>
+	);
 }

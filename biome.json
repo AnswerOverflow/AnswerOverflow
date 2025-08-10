@@ -1,21 +1,21 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.1.4/schema.json",
 	"vcs": {
-		"enabled": false,
+		"enabled": true,
 		"clientKind": "git",
-		"useIgnoreFile": false
+		"useIgnoreFile": true
 	},
 	"files": {
-		"ignoreUnknown": false
+		"includes": ["**", "!**/convex/_generated/**", "!**/*.css"]
 	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab"
 	},
 	"linter": {
-		"enabled": false,
+		"enabled": true,
 		"rules": {
-			"recommended": false
+			"recommended": true
 		}
 	},
 	"javascript": {
@@ -24,7 +24,7 @@
 		}
 	},
 	"assist": {
-		"enabled": false,
+		"enabled": true,
 		"actions": {
 			"source": {
 				"organizeImports": "on"

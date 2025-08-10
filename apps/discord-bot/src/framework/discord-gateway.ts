@@ -1,10 +1,9 @@
-import { BunSocket } from "@effect/platform-bun";
 import { FetchHttpClient } from "@effect/platform";
+import { BunSocket } from "@effect/platform-bun";
 import { DiscordIxLive } from "dfx/gateway";
 import { Layer } from "effect";
 import { DiscordConfigLayer } from "./discord-config.ts";
 import { DiscordApplication } from "./discord-rest.ts";
-import { Guilds } from "./guilds.ts";
 
 const DiscordLayer = DiscordIxLive.pipe(
 	Layer.provideMerge(FetchHttpClient.layer),
