@@ -1,0 +1,76 @@
+@import 'tailwindcss';
+
+@theme {
+  --breakpoint-*: initial;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1440px;
+
+  --color-primary: #0d87e1;
+
+  --font-inter: Inter, sans-serif;
+  --font-lato: Lato, sans-serif;
+  --font-montserrat: Montserrat, sans-serif;
+
+  --background-image-gradient-radial: radial-gradient(var(--tw-gradient-stops));
+  --background-image-gradient-conic: conic-gradient(
+    from 180deg at 50% 50%,
+    var(--tw-gradient-stops)
+  );
+}
+
+@utility container {
+  margin-inline: auto;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+.linear_gradient {
+  background: linear-gradient(
+    267deg,
+    #fff -9.43%,
+    #040218 -9.42%,
+    #fff 4.63%,
+    #d2e4f2 127.55%
+  );
+}
+
+.bg_image {
+  background:
+    linear-gradient(
+      181deg,
+      rgba(255, 255, 255, 0) 57.92%,
+      #fff 97.09%,
+      rgba(255, 255, 255, 0) 127.09%
+    ),
+    url("/images/background.png"),
+    lightgray 0% 0% / 261.2499952316284px 261.2499952316284px repeat;
+}
+.button {
+  border-radius: 8px;
+  background: linear-gradient(
+    267deg,
+    #0983df -9.43%,
+    #040218 -9.42%,
+    #0d87e1 4.63%,
+    #0983df 127.55%
+  );
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
