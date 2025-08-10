@@ -6,6 +6,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "scripts": {
+    "clean": "rm -rf node_modules"
+  },
   "devDependencies": {
     "@effect/language-service": "^0.35.2"
   }

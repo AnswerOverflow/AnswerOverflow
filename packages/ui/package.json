@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "lint": "eslint . --max-warnings 0"
+    "clean": "rm -rf node_modules dist build .turbo"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",

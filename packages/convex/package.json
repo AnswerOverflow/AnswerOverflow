@@ -2,7 +2,8 @@
   "name": "@packages/convex",
   "version": "1.0.0",
   "scripts": {
-    "dev": "convex dev"
+    "dev": "convex dev",
+    "clean": "rm -rf node_modules"
   },
   "dependencies": {
     "convex": "^1.25.0",
