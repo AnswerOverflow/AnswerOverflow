@@ -6,7 +6,6 @@
 	"scripts": {
 		"dev": "bun run --env-file=../../.env --watch index.ts",
 		"typecheck": "tsc -p tsconfig.json --noEmit",
-		"typecheck:go": "tsgo -p tsconfig.json --noEmit",
 		"clean": "rm -rf node_modules"
 	},
 	"dependencies": {
@@ -19,8 +18,5 @@
 	"devDependencies": {
 		"@effect/language-service": "^0.35.2",
 		"@types/bun": "latest"
-	},
-	"peerDependencies": {
-		"typescript": "^5"
 	}
 }
