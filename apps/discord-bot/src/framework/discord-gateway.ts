@@ -6,7 +6,7 @@ import { DiscordConfigLayer } from "./discord-config.ts";
 import { DiscordApplication } from "./discord-rest.ts";
 
 const DiscordLayer = DiscordIxLive.pipe(
-	Layer.provideMerge(FetchHttpClient.layer),
+	Layer.provide(FetchHttpClient.layer),
 	Layer.provide(BunSocket.layerWebSocketConstructor),
 	Layer.provide(DiscordConfigLayer),
 );

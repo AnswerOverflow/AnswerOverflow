@@ -13,7 +13,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.1.4",
 		"prettier": "3.5.3",
-		"turbo": "2.5.2"
+		"turbo": "^2.5.5"
 	},
 	"engines": {
 		"node": ">=18.8.0"
@@ -22,5 +22,8 @@
 		"apps/*",
 		"packages/*"
 	],
-	"packageManager": "bun@1.2.19"
+	"packageManager": "bun@1.2.19",
+	"dependencies": {
+		"@typescript/native-preview": "^7.0.0-dev.20250810.1"
+	}
 }
