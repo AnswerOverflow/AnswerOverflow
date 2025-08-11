@@ -1,6 +1,10 @@
 {
 	"name": "@packages/convex",
 	"version": "1.0.0",
+	"exports": {
+		"./*": ["./src/*.ts"],
+		"./convex/*": ["./convex/*"]
+	},
 	"scripts": {
 		"dev": "convex dev",
 		"clean": "rm -rf node_modules"

@@ -15,6 +15,6 @@
 		"skipLibCheck": true,
 		"noEmit": true
 	},
-	"include": ["./**/*"],
+	"include": ["./**/*", "../src/client.ts"],
 	"exclude": ["./_generated"]
 }
