@@ -2,11 +2,15 @@
 	"name": "@packages/convex",
 	"version": "1.0.0",
 	"exports": {
-		"./*": ["./src/*.ts"],
-		"./convex/*": ["./convex/*"]
+		"./*": "./src/*.ts",
+		"./convex/*": {
+			"types": "./convex/*.d.ts",
+			"default": "./convex/*.ts"
+		}
 	},
 	"scripts": {
 		"dev": "convex dev",
+		"typecheck": "tsc -p convex/tsconfig.json --noEmit",
 		"clean": "rm -rf node_modules"
 	},
 	"dependencies": {

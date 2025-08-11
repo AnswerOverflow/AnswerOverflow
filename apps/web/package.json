@@ -1,10 +1,11 @@
 {
-	"name": "web-app",
+	"name": "main-site",
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
 		"dev": "bun run --env-file=../../.env next dev --turbo",
 		"build": "next build",
+		"typecheck": "tsc -p tsconfig.json --noEmit",
 		"start": "next start",
 		"clean": "rm -rf .next .turbo node_modules"
 	},

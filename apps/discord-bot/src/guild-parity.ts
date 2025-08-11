@@ -1,4 +1,4 @@
-import { Convex } from "@packages/convex/client";
+import { Convex, ConvexLayer } from "@packages/convex/client";
 import { DiscordREST } from "dfx/DiscordREST";
 import { DiscordGateway } from "dfx/gateway";
 import { Effect, Layer } from "effect";
@@ -28,7 +28,6 @@ const upsertGuild = (guildId: string) =>
 
 const make = Effect.gen(function* () {
 	const gateway = yield* DiscordGateway;
-
 	yield* gateway
 		.handleDispatch("READY", (readyData) =>
 			Effect.gen(function* () {
@@ -43,4 +42,5 @@ const make = Effect.gen(function* () {
 
 export const GuildParityLive = Layer.scopedDiscard(make).pipe(
 	Layer.provide(DiscordGatewayLayer),
+	Layer.provide(ConvexLayer),
 );

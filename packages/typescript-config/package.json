@@ -7,7 +7,8 @@
 		"access": "public"
 	},
 	"scripts": {
-		"clean": "rm -rf node_modules"
+		"clean": "rm -rf node_modules",
+		"typecheck": "echo \"No types to check\""
 	},
 	"devDependencies": {
 		"@effect/language-service": "^0.35.2"

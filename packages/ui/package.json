@@ -4,7 +4,8 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
-		"clean": "rm -rf node_modules dist build .turbo"
+		"clean": "rm -rf node_modules dist build .turbo",
+		"typecheck": "tsc -p tsconfig.json --noEmit"
 	},
 	"dependencies": {
 		"@radix-ui/react-slot": "^1.2.3",
