@@ -1,14 +1,15 @@
 import { Context, Effect, Layer } from "effect";
 import type { Server } from "../convex/schema.js";
+import { ConvexClientHttpUnifiedLayer } from "./convex-client-http.js";
 import {
-	ConvexClient,
-	ConvexClientHttpLayer,
 	ConvexClientTestLayer,
-} from "./convex-client.js";
+	ConvexClientTestUnifiedLayer,
+} from "./convex-client-test.js";
+import { ConvexClientUnified } from "./convex-unified-client.js";
 
 const service = Effect.gen(function* () {
 	const externalSecret = "hello"; //yield* Config.string("EXTERNAL_WRITE_SECRET");
-	const convexClient = yield* ConvexClient;
+	const convexClient = yield* ConvexClientUnified;
 
 	const upsertServer = (data: Server) =>
 		convexClient.use((client, { api }) =>
@@ -37,9 +38,12 @@ export class Convex extends Context.Tag("Convex")<
 >() {}
 
 export const ConvexLayer = Layer.effect(Convex, service).pipe(
-	Layer.provide(ConvexClientHttpLayer),
+	Layer.provide(ConvexClientHttpUnifiedLayer),
 );
 
-export const ConvexTestLayer = Layer.effect(Convex, service).pipe(
-	Layer.provide(ConvexClientTestLayer),
+export const ConvexTestLayer = Layer.merge(
+	Layer.effect(Convex, service).pipe(
+		Layer.provide(ConvexClientTestUnifiedLayer),
+	),
+	ConvexClientTestLayer,
 );
