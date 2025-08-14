@@ -1,6 +1,6 @@
 import { expect, it } from "@effect/vitest";
 import { Effect } from "effect";
-import { modules } from "../convex/test.setup";
+import { Convex, ConvexTestLayer } from "./client";
 
 // A simple divide function that returns an Effect, failing when dividing by zero
 function divide(a: number, b: number) {
@@ -16,28 +16,21 @@ it.effect("test success", () =>
 	}),
 );
 
-import { convexTest } from "convex-test";
-import { test } from "vitest";
-import { api } from "../convex/_generated/api";
-import schema from "../convex/schema";
-
-test("sending messages", async () => {
-	const t = convexTest(schema, modules);
-
-	const result = await t.mutation(api.servers.upsertServerExternal, {
-		apiKey: "hello",
-		data: {
+it.effect("sending messages", () =>
+	Effect.gen(function* () {
+		const client = yield* Convex;
+		yield* client.upsertServer({
 			name: "Test Server",
 			description: "Test Description",
 			icon: "https://example.com/icon.png",
 			vanityInviteCode: "test",
 			vanityUrl: "test",
-			discordId: "",
+			discordId: "123",
 			bitfield: 0,
 			plan: "FREE",
 			approximateMemberCount: 0,
-		},
-	});
-
-	console.log(result);
-});
+		});
+		const server = yield* client.getServerById("123");
+		expect(server?.discordId).toBe("123");
+	}).pipe(Effect.provide(ConvexTestLayer)),
+);

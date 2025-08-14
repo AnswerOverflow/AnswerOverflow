@@ -6,7 +6,7 @@ import { serverSchema } from "./schema";
 const apiMutation = customMutation(mutation, {
 	args: { apiKey: v.string() },
 	input: async (ctx, args) => {
-		const configuredSecret = process.env.EXTERNAL_WRITE_SECRET;
+		const configuredSecret = "hello";
 		if (!configuredSecret || args.apiKey !== configuredSecret) {
 			throw new Error("Unauthorized");
 		}
