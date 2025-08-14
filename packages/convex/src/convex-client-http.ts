@@ -1,6 +1,6 @@
 import { ConvexHttpClient } from "convex/browser";
 import { Config, Context, Data, Effect, Layer } from "effect";
-import { api, fullApi, internal } from "../convex/_generated/api.js";
+import { api, internal } from "../convex/_generated/api.js";
 
 export class ConvexError extends Data.TaggedError("ConvexError")<{
 	cause: unknown;
@@ -17,14 +17,13 @@ export const createService = () =>
 				client: ConvexHttpClient,
 				convexApi: {
 					api: typeof api;
-					fullApi: typeof fullApi;
 					internal: typeof internal;
 				},
 			) => Promise<T>,
 		) =>
 			Effect.tryPromise({
 				try() {
-					return fn(client, { api, fullApi, internal });
+					return fn(client, { api, internal });
 				},
 				catch(cause) {
 					return new ConvexError({ cause });

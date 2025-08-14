@@ -7,10 +7,10 @@ import {
 
 const service = Effect.gen(function* () {
 	const externalSecret = yield* Config.string("EXTERNAL_WRITE_SECRET");
-	const httpClient = yield* ConvexClientHttp;
+	const convexClient = yield* ConvexClientHttp;
 
 	const upsertServer = (data: Server) =>
-		httpClient.use((client, { api }) =>
+		convexClient.use((client, { api }) =>
 			client.mutation(api.servers.upsertServerExternal, {
 				data,
 				apiKey: externalSecret,
@@ -22,7 +22,7 @@ const service = Effect.gen(function* () {
 	};
 });
 
-export class Convex extends Context.Tag("ConvexService")<
+export class Convex extends Context.Tag("Convex")<
 	Convex,
 	Effect.Effect.Success<typeof service>
 >() {}

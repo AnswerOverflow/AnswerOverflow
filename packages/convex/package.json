@@ -11,12 +11,19 @@
 	"scripts": {
 		"dev": "convex dev",
 		"typecheck": "tsc -p convex/tsconfig.json --noEmit",
-		"clean": "rm -rf node_modules"
+		"clean": "rm -rf node_modules",
+		"test": "vitest"
 	},
 	"dependencies": {
 		"convex": "^1.25.0",
 		"convex-helpers": "^0.1.101",
 		"effect": "^3.17.7",
 		"openai": "^4.45.0"
+	},
+	"devDependencies": {
+		"@edge-runtime/vm": "^5.0.0",
+		"@effect/vitest": "^0.25.0",
+		"convex-test": "^0.0.38",
+		"vitest": "^3.2.4"
 	}
 }
