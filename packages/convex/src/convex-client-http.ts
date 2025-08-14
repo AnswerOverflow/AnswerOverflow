@@ -9,7 +9,7 @@ import {
 
 type HttpConvexClient = ConvexClientShared & ConvexHttpClient;
 
-export const createHttpService = Effect.gen(function* () {
+const createHttpService = Effect.gen(function* () {
 	const convexUrl = yield* Config.string("CONVEX_URL");
 
 	const client = new ConvexHttpClient(convexUrl);
@@ -40,12 +40,19 @@ export class ConvexClientHttp extends Context.Tag("ConvexClientHttp")<
 	Effect.Effect.Success<typeof createHttpService>
 >() {}
 
-export const ConvexClientHttpLayer = Layer.effect(
-	ConvexClientHttp,
-	createHttpService,
+const ConvexClientHttpSharedLayer = Layer.effectContext(
+	Effect.gen(function* () {
+		const service = yield* createHttpService;
+		return Context.make(ConvexClientHttp, service).pipe(
+			Context.add(ConvexClientUnified, service),
+		);
+	}),
 );
 
-export const ConvexClientHttpUnifiedLayer = Layer.effect(
-	ConvexClientUnified,
-	createHttpService,
+export const ConvexClientHttpLayer = Layer.service(ConvexClientHttp).pipe(
+	Layer.provide(ConvexClientHttpSharedLayer),
 );
+
+export const ConvexClientHttpUnifiedLayer = Layer.service(
+	ConvexClientUnified,
+).pipe(Layer.provide(ConvexClientHttpSharedLayer));

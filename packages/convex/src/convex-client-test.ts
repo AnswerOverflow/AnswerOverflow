@@ -11,7 +11,7 @@ import {
 
 type TestConvexClient = ConvexClientShared & TestConvex<typeof schema>;
 
-export const createTestService = Effect.gen(function* () {
+const createTestService = Effect.gen(function* () {
 	const client = convexTest(schema, modules);
 
 	const use = <T>(
@@ -40,12 +40,19 @@ export class ConvexClientTest extends Context.Tag("ConvexClientTest")<
 	Effect.Effect.Success<typeof createTestService>
 >() {}
 
-export const ConvexClientTestLayer = Layer.effect(
-	ConvexClientTest,
-	createTestService,
+const ConvexClientTestSharedLayer = Layer.effectContext(
+	Effect.gen(function* () {
+		const service = yield* createTestService;
+		return Context.make(ConvexClientTest, service).pipe(
+			Context.add(ConvexClientUnified, service),
+		);
+	}),
 );
 
-export const ConvexClientTestUnifiedLayer = Layer.effect(
-	ConvexClientUnified,
-	createTestService,
+export const ConvexClientTestLayer = Layer.service(ConvexClientTest).pipe(
+	Layer.provide(ConvexClientTestSharedLayer),
 );
+
+export const ConvexClientTestUnifiedLayer = Layer.service(
+	ConvexClientUnified,
+).pipe(Layer.provide(ConvexClientTestSharedLayer));

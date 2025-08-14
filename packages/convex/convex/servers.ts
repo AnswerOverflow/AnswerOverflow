@@ -42,6 +42,7 @@ export const upsertServerExternal = apiMutation({
 			.query("servers")
 			.filter((q) => q.eq(q.field("discordId"), data.discordId))
 			.first();
+
 		if (existing) {
 			return await ctx.db.patch(existing._id, data);
 		}
