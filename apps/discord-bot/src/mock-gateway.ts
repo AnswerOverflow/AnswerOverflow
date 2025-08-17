@@ -2,12 +2,7 @@ import type { DiscordGateway as DiscordGatewayService } from "dfx/DiscordGateway
 import { DiscordGateway, TypeId } from "dfx/DiscordGateway";
 import type { RunningShard } from "dfx/DiscordGateway/Shard";
 import type * as Discord from "dfx/types";
-import { Context } from "effect";
-import * as Deferred from "effect/Deferred";
-import * as Effect from "effect/Effect";
-import * as HashSet from "effect/HashSet";
-import * as Layer from "effect/Layer";
-import * as Stream from "effect/Stream";
+import { Context, Effect, HashSet, Layer, Stream } from "effect";
 
 type AnyEffect = Effect.Effect<unknown, unknown, unknown>;
 
@@ -25,13 +20,13 @@ const gateway: Effect.Effect<MockGateway, never, never> = Effect.gen(
 	function* () {
 		const handlers = new Map<string, Array<(data: unknown) => AnyEffect>>();
 		// Track per-event readiness so emits wait for at least one handler registration
-		const eventReady = new Map<string, Deferred.Deferred<void, never>>();
+		const eventReady = new Map<string, Effect.Latch>();
 
 		const getOrCreateDeferred = (event: string) =>
 			Effect.gen(function* () {
 				const existing = eventReady.get(event);
 				if (existing) return existing;
-				const created = yield* Deferred.make<void, never>();
+				const created = yield* Effect.makeLatch();
 				eventReady.set(event, created);
 				return created;
 			});
@@ -46,7 +41,7 @@ const gateway: Effect.Effect<MockGateway, never, never> = Effect.gen(
 					list.push(handle as (data: unknown) => AnyEffect);
 					handlers.set(event, list);
 					const ready = yield* getOrCreateDeferred(event);
-					yield* Deferred.succeed(ready, undefined);
+					yield* ready.release;
 					return yield* Effect.never;
 				}),
 			send: (_payload: Discord.GatewaySendPayload) => Effect.succeed(true),
@@ -63,7 +58,7 @@ const gateway: Effect.Effect<MockGateway, never, never> = Effect.gen(
 			Effect.gen(function* () {
 				// Wait until at least one handler has registered for this event
 				const ready = yield* getOrCreateDeferred(event);
-				yield* Deferred.await(ready);
+				yield* ready.await;
 				yield* Effect.forEach(
 					handlers.get(event) ?? [],
 					(handler) => handler(data),
