@@ -7,7 +7,7 @@ import {
 } from "../../../packages/database/src/database";
 import { DiscordGatewayLayer } from "./framework/discord-gateway";
 
-export const upsertGuild = (guildId: string) =>
+export const syncGuild = (guildId: string) =>
 	Effect.gen(function* () {
 		const rest = yield* DiscordREST;
 		const database = yield* Database;
@@ -30,8 +30,17 @@ export const make = Effect.gen(function* () {
 			Effect.gen(function* () {
 				const guildIds = readyData.guilds.map((g) => g.id);
 				yield* Effect.forEach(guildIds, (guildId) =>
-					upsertGuild(guildId).pipe(Effect.delay(1000)),
+					syncGuild(guildId).pipe(Effect.delay(1000)),
 				);
+			}),
+		)
+		.pipe(Effect.forkScoped);
+
+	yield* gateway
+		.handleDispatch("GUILD_UPDATE", (guildUpdateData) =>
+			Effect.gen(function* () {
+				const guildId = guildUpdateData.id;
+				yield* syncGuild(guildId);
 			}),
 		)
 		.pipe(Effect.forkScoped);

@@ -1,6 +1,6 @@
 import { Database, DatabaseLayer } from "@packages/database/database";
 import { Effect } from "effect";
-import { ServerCard } from "./client";
+import { ServerGrid } from "./client";
 
 export default async function BrowsePage() {
 	const servers = await Effect.gen(function* () {
@@ -13,18 +13,7 @@ export default async function BrowsePage() {
 	return (
 		<div>
 			Browse
-			<div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-				{servers.map((server) => {
-					return (
-						<div
-							key={`server-${server.discordId}-area`}
-							className="w-full max-w-md rounded-md p-4 transition-all"
-						>
-							<ServerCard server={server} />
-						</div>
-					);
-				})}
-			</div>
+			<ServerGrid servers={servers} />
 		</div>
 	);
 }
