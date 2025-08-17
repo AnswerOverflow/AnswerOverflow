@@ -1,5 +1,5 @@
 {
-	"name": "@packages/convex",
+	"name": "@packages/database",
 	"version": "1.0.0",
 	"exports": {
 		"./*": "./src/*.ts",

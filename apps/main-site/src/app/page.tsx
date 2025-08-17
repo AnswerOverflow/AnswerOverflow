@@ -1,6 +1,6 @@
 "use client";
 
-import { api } from "@packages/convex/convex/_generated/api";
+import { api } from "@packages/database/convex/_generated/api";
 import { useQuery } from "convex/react";
 
 export default function Home() {

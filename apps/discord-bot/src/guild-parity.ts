@@ -1,7 +1,10 @@
-import { Database, DatabaseLayer } from "@packages/convex/database";
 import { DiscordREST } from "dfx/DiscordREST";
 import { DiscordGateway } from "dfx/gateway";
 import { Effect, Layer } from "effect";
+import {
+  Database,
+  DatabaseLayer,
+} from "../../../packages/database/src/database";
 import { DiscordGatewayLayer } from "./framework/discord-gateway";
 
 const upsertGuild = (guildId: string) =>
