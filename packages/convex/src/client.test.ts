@@ -1,31 +1,32 @@
-import { expect, it, vi } from "@effect/vitest";
+import { expect, it } from "@effect/vitest";
 import { Effect } from "effect";
-import { Convex, ConvexTestLayer } from "./client";
+import type { Server } from "../convex/schema";
 import { ConvexClientTest } from "./convex-client-test";
+import { Database, DatabaseTestLayer } from "./database";
 
-const test = Effect.gen(function* () {
-	vi.useFakeTimers();
-	const client = yield* Convex;
-	const test = yield* ConvexClientTest;
+const server: Server = {
+  name: "Test Server",
+  description: "Test Description",
+  icon: "https://example.com/icon.png",
+  vanityInviteCode: "test",
+  vanityUrl: "test",
+  discordId: "123",
+  bitfield: 0,
+  plan: "FREE",
+  approximateMemberCount: 0,
+};
 
-	yield* client.upsertServer({
-		name: "Test Server",
-		description: "Test Description",
-		icon: "https://example.com/icon.png",
-		vanityInviteCode: "test",
-		vanityUrl: "test",
-		discordId: "123",
-		bitfield: 0,
-		plan: "FREE",
-		approximateMemberCount: 0,
-	});
+it.effect("upserting server", () =>
+  Effect.gen(function* () {
+    const database = yield* Database;
+    const testClient = yield* ConvexClientTest;
 
-	vi.runAllTimers();
+    yield* database.servers.upsertServer(server);
 
-	yield* test.use((client) => client.finishInProgressScheduledFunctions());
-
-	const server = yield* client.getServerById("123");
-	expect(server?.discordId).toBe("123");
-}).pipe(Effect.provide(ConvexTestLayer));
-
-it.effect("sending messages", () => test);
+    const created = yield* database.servers.getServerById("123");
+    yield* testClient.use((client) => {
+      client.finishInProgressScheduledFunctions();
+    });
+    expect(created?.discordId).toBe("123");
+  }).pipe(Effect.provide(DatabaseTestLayer))
+);

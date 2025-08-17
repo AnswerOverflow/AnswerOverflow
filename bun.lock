@@ -21,7 +21,9 @@
       },
       "devDependencies": {
         "@effect/language-service": "^0.35.2",
+        "@effect/vitest": "^0.25.0",
         "@types/bun": "latest",
+        "vitest": "^3.2.4",
       },
     },
     "apps/main-site": {

@@ -6,7 +6,8 @@
 	"scripts": {
 		"dev": "bun run --env-file=../../.env --watch index.ts",
 		"typecheck": "tsc -p tsconfig.json --noEmit",
-		"clean": "rm -rf node_modules"
+		"clean": "rm -rf node_modules",
+		"test": "vitest"
 	},
 	"dependencies": {
 		"@effect/platform": "^0.90.1",
@@ -17,6 +18,8 @@
 	},
 	"devDependencies": {
 		"@effect/language-service": "^0.35.2",
-		"@types/bun": "latest"
+		"@effect/vitest": "^0.25.0",
+		"@types/bun": "latest",
+		"vitest": "^3.2.4"
 	}
 }
