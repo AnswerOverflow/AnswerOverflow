@@ -1,0 +1,12 @@
+---
+alwaysApply: true
+---
+
+
+Never use the `as any` type assertion.
+
+This is a code smell and should be avoided.
+
+Types should be correct
+
+Try to avoid using `as` to cast types.

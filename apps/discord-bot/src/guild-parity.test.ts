@@ -1,73 +1,57 @@
-/** biome-ignore-all lint/suspicious/noExplicitAny: <explanation> */
-import type * as HttpClient from "@effect/platform/HttpClient";
+/** biome-ignore-all lint/suspicious/noExplicitAny: needed for mocks */
 import { it } from "@effect/vitest";
-import { ConvexTestLayer } from "@packages/database/client";
-import {
-  DiscordGateway,
-  TypeId as DiscordGatewayTypeId,
-} from "dfx/DiscordGateway";
+import { Database, DatabaseTestLayer } from "@packages/database/database";
 import { DiscordREST } from "dfx/DiscordREST";
-import type * as Discord from "dfx/types";
-import { GatewayOpcodes, type GatewayReadyDispatchData } from "dfx/types";
-import * as EffectUtils from "dfx/utils/Effect";
-import { Context, Effect, Layer, PubSub, Stream } from "effect";
+import { DiscordGateway } from "dfx/gateway";
+import { Effect, Layer, TestClock } from "effect";
+import { expect } from "vitest";
 import { make } from "./guild-parity";
+import { MockDiscordGateway } from "./mock-gateway";
 
-const mockEventHub = Effect.gen(function* () {
-  const hub = yield* Effect.acquireRelease(
-    PubSub.unbounded<Discord.GatewayDispatchPayload>(),
-    PubSub.shutdown
-  );
-  return hub;
-});
+const GUILD_ID = "123";
 
-class MockEventHub extends Context.Tag("MockEventHub")<
-  MockEventHub,
-  Effect.Effect.Success<typeof mockEventHub>
->() {}
-
-const test = Effect.gen(function* () {
-  const hub = yield* Effect.acquireRelease(
-    PubSub.unbounded<Discord.GatewayDispatchPayload>(),
-    PubSub.shutdown
-  );
-  const handleDispatch = handleDispatchFactory(hub);
-
-  // yield* hub.publish({
-  // 	op: GatewayOpcodes.Dispatch,
-  // 	t: Discord.GatewayDispatchEvents.Ready,
-  // 	d: {} as GatewayReadyDispatchData,
-  // 	s: 0,
-  // });
-});
-
-const handleDispatch = Effect.gen(function* () {
-  return yield* Effect.never;
-});
-
-const b = Effect.gen(function* () {
-  const hub = yield* MockEventHub;
-}).pipe(Effect.provide(Layer.effect(MockEventHub, mockEventHub)));
-
-const MockDiscordGateway = Layer.mock(DiscordGateway, {
-  [DiscordGatewayTypeId]: DiscordGatewayTypeId,
-  dispatch: Stream.empty,
-  handleDispatch: (event, handle) =>
-    Effect.gen(function* () {
-      return yield* Effect.never;
-    }),
-});
+const fakeGuild = {
+	id: GUILD_ID,
+	name: "Test Guild",
+	icon: "icon_hash",
+	description: "A cool guild",
+	vanity_url_code: "invite123",
+	approximate_member_count: 1337,
+} as any;
 
 const MockDiscordRest = Layer.mock(DiscordREST, {
-  withFormData: () => (eff) => eff,
-  withFiles: () => (eff) => eff,
-  httpClient: {} as unknown as HttpClient.HttpClient,
+	withFormData: () => (eff: any) => eff,
+	withFiles: () => (eff: any) => eff,
+	httpClient: {} as any,
+	getGuild: (_id: string) => Effect.succeed(fakeGuild),
 });
 
-it.scoped("emits READY", () =>
-  make.pipe(
-    Effect.provide(
-      Layer.mergeAll(ConvexTestLayer, MockDiscordGateway, MockDiscordRest)
-    )
-  )
+it.layer(
+	Layer.mergeAll(DatabaseTestLayer, MockDiscordRest, MockDiscordGateway),
+)((it) =>
+	it.effect("upserts guild via READY dispatch", () =>
+		Effect.scoped(
+			Effect.gen(function* () {
+				const gateway = yield* DiscordGateway;
+				yield* make;
+				// wait 1 second
+				yield* TestClock.adjust(1000);
+				yield* (gateway as any).emit("READY", {
+					v: 10,
+					user: { id: "user", username: "tester" } as any,
+					guilds: [{ id: GUILD_ID, unavailable: false }],
+					session_id: "session",
+					resume_gateway_url: "wss://gateway",
+					application: { id: "app", flags: 0 },
+				} as any) as Effect.Effect<void>;
+				yield* TestClock.adjust(1000);
+
+				// Assert DB
+				const db = yield* Database;
+				const server = yield* db.servers.getServerById(GUILD_ID);
+				expect(server).toBeTruthy();
+				expect(server?.discordId).toBe(GUILD_ID);
+			}),
+		),
+	),
 );
