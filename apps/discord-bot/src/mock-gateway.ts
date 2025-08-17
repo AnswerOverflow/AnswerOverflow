@@ -6,6 +6,14 @@ import { Context, Effect, HashSet, Layer, Stream } from "effect";
 
 type AnyEffect = Effect.Effect<unknown, unknown, unknown>;
 
+type DeepPartial<T> = T extends Function
+	? T
+	: T extends object
+		? T extends unknown[]
+			? DeepPartial<T[number]>[]
+			: { [P in keyof T]?: DeepPartial<T[P]> }
+		: T;
+
 export type MockGateway = DiscordGatewayService & {
 	emit: <K extends `${Discord.GatewayDispatchEvents}`>(
 		event: K,
@@ -13,6 +21,12 @@ export type MockGateway = DiscordGatewayService & {
 			Discord.DistributedGatewayDispatchPayload,
 			{ readonly t: K }
 		>["d"],
+	) => Effect.Effect<void>;
+	emitPartial: <K extends `${Discord.GatewayDispatchEvents}`>(
+		event: K,
+		data: DeepPartial<
+			Extract<Discord.DistributedGatewayDispatchPayload, { readonly t: K }>["d"]
+		>,
 	) => Effect.Effect<void>;
 };
 
@@ -56,7 +70,6 @@ const gateway: Effect.Effect<MockGateway, never, never> = Effect.gen(
 			>["d"],
 		) =>
 			Effect.gen(function* () {
-				// Wait until at least one handler has registered for this event
 				const ready = yield* getOrCreateDeferred(event);
 				yield* ready.await;
 				yield* Effect.forEach(
@@ -66,9 +79,21 @@ const gateway: Effect.Effect<MockGateway, never, never> = Effect.gen(
 				);
 			});
 
+		const emitPartial = <K extends `${Discord.GatewayDispatchEvents}`>(
+			event: K,
+			data: DeepPartial<
+				Extract<
+					Discord.DistributedGatewayDispatchPayload,
+					{ readonly t: K }
+				>["d"]
+			>,
+			// biome-ignore lint/suspicious/noExplicitAny: is fine to cast to any as it's just for testing
+		) => emit(event, data as any);
+
 		return {
 			...gateway,
 			emit,
+			emitPartial,
 		} as MockGateway;
 	},
 );
@@ -78,7 +103,7 @@ export class DiscordGatewayMock extends Context.Tag("DiscordGatewayMock")<
 	Effect.Effect.Success<typeof gateway>
 >() {}
 
-export const MockDiscordGatewaySharedLayer = Layer.effectContext(
+export const MockDiscordGateway = Layer.effectContext(
 	Effect.gen(function* () {
 		const service = yield* gateway;
 		return Context.make(DiscordGatewayMock, service).pipe(

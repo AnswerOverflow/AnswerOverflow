@@ -5,10 +5,7 @@ import { DiscordREST } from "dfx/DiscordREST";
 import { Effect, Layer } from "effect";
 import { expect } from "vitest";
 import { make } from "./guild-parity";
-import {
-	DiscordGatewayMock,
-	MockDiscordGatewaySharedLayer,
-} from "./mock-gateway";
+import { DiscordGatewayMock, MockDiscordGateway } from "./mock-gateway";
 
 const GUILD_ID = "123";
 
@@ -30,30 +27,20 @@ const MockDiscordRest = Layer.mock(DiscordREST, {
 
 it.scopedLive("upserts guild via READY dispatch", () =>
 	Effect.gen(function* () {
-		const gateway = yield* DiscordGatewayMock;
 		yield* make;
 
-		yield* gateway.emit("READY", {
-			v: 10,
-			user: { id: "user", username: "tester" } as any,
+		const gateway = yield* DiscordGatewayMock;
+		yield* gateway.emitPartial("READY", {
 			guilds: [{ id: GUILD_ID, unavailable: false }],
-			session_id: "session",
-			resume_gateway_url: "wss://gateway",
-			application: { id: "app", flags: 0 },
 		});
 
-		// Assert DB
 		const db = yield* Database;
 		const server = yield* db.servers.getServerById(GUILD_ID);
 		expect(server).toBeTruthy();
 		expect(server?.discordId).toBe(GUILD_ID);
 	}).pipe(
 		Effect.provide(
-			Layer.mergeAll(
-				DatabaseTestLayer,
-				MockDiscordRest,
-				MockDiscordGatewaySharedLayer,
-			),
+			Layer.mergeAll(DatabaseTestLayer, MockDiscordRest, MockDiscordGateway),
 		),
 	),
 );
