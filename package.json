@@ -5,6 +5,7 @@
 		"dev": "turbo run dev",
 		"build": "turbo run build",
 		"typecheck": "turbo run typecheck",
+		"test": "turbo run test",
 		"lint": "biome check .",
 		"lint:fix": "biome check . --write",
 		"clean": "turbo run clean && rm -rf node_modules",

@@ -1,5 +1,5 @@
 {
-	"name": "discord-bot",
+	"name": "@packages/discord-bot",
 	"module": "index.ts",
 	"type": "module",
 	"private": true,

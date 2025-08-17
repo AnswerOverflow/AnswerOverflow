@@ -15,7 +15,10 @@
 			"cache": false
 		},
 		"typecheck": {
-			"cache": false
+			"cache": true
+		},
+		"test": {
+			"cache": true
 		}
 	}
 }
