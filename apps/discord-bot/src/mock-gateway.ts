@@ -6,7 +6,7 @@ import { Context, Effect, HashSet, Layer, Stream } from "effect";
 
 type AnyEffect = Effect.Effect<unknown, unknown, unknown>;
 
-type DeepPartial<T> = T extends Function
+type DeepPartial<T> = T extends (...args: unknown[]) => unknown
 	? T
 	: T extends object
 		? T extends unknown[]
