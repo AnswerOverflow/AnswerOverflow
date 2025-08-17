@@ -19,12 +19,7 @@ export const upsertGuild = (guildId: string) =>
 			description: guild.description ?? undefined,
 			vanityInviteCode: guild.vanity_url_code ?? undefined,
 			approximateMemberCount: guild.approximate_member_count ?? 0,
-			bitfield: 0,
 			plan: "FREE",
-			vanityUrl: undefined,
-			customDomain: undefined,
-			subpath: undefined,
-			stripeCustomerId: undefined,
 		});
 	});
 

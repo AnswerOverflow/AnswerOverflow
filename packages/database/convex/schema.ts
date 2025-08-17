@@ -1,17 +1,23 @@
 import { defineSchema, defineTable } from "convex/server";
 import { type Infer, v } from "convex/values";
 
+const serverPreferencesSchema = v.object({
+	serverId: v.id("servers"),
+	readTheRulesConsentEnabled: v.optional(v.boolean()),
+	considerAllMessagesPublicEnabled: v.optional(v.boolean()),
+	anonymizeMessagesEnabled: v.optional(v.boolean()),
+	customDomain: v.optional(v.string()),
+	subpath: v.optional(v.string()),
+});
+
 export const serverSchema = v.object({
 	discordId: v.string(),
 	name: v.string(),
 	icon: v.optional(v.string()),
 	description: v.optional(v.string()),
 	vanityInviteCode: v.optional(v.string()),
-	bitfield: v.number(),
 	kickedTime: v.optional(v.number()),
 	vanityUrl: v.optional(v.string()),
-	customDomain: v.optional(v.string()),
-	subpath: v.optional(v.string()),
 	stripeCustomerId: v.optional(v.string()),
 	stripeSubscriptionId: v.optional(v.string()),
 	plan: v.union(
@@ -23,9 +29,12 @@ export const serverSchema = v.object({
 		v.literal("OPEN_SOURCE"),
 	),
 	approximateMemberCount: v.number(),
+	preferencesId: v.optional(v.id("serverPreferences")),
 });
+
 export type Server = Infer<typeof serverSchema>;
 
 export default defineSchema({
 	servers: defineTable(serverSchema),
+	serverPreferences: defineTable(serverPreferencesSchema),
 });

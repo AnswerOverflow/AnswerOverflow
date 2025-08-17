@@ -11,7 +11,6 @@ const server: Server = {
 	vanityInviteCode: "test",
 	vanityUrl: "test",
 	discordId: "123",
-	bitfield: 0,
 	plan: "FREE",
 	approximateMemberCount: 0,
 };

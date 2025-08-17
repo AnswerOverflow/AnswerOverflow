@@ -1,6 +1,7 @@
 {
-	"name": "main-site",
+	"name": "@packages/main-site",
 	"version": "0.1.0",
+	"type": "module",
 	"private": true,
 	"scripts": {
 		"dev": "bun run --env-file=../../.env next dev --turbo",

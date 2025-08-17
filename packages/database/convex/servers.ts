@@ -44,7 +44,7 @@ export const upsertServerExternal = apiMutation({
 			.first();
 
 		if (existing) {
-			return await ctx.db.patch(existing._id, data);
+			await ctx.db.patch(existing._id, data);
 		}
 		return await ctx.db.insert("servers", data);
 	},

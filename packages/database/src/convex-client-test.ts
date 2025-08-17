@@ -2,7 +2,6 @@ import { convexTest, type TestConvex } from "convex-test";
 import { Context, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api.js";
 import schema from "../convex/schema.js";
-import { modules } from "../convex/test.setup.js";
 import {
 	type ConvexClientShared,
 	ConvexClientUnified,
@@ -12,6 +11,8 @@ import {
 type TestConvexClient = ConvexClientShared & TestConvex<typeof schema>;
 
 const createTestService = Effect.gen(function* () {
+	// making the test client work, .glob is a vite thing i think
+	const modules = (import.meta as any).glob("../convex/**/!(*.*.*)*.*s");
 	const client = convexTest(schema, modules);
 
 	const use = <T>(
