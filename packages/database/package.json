@@ -11,7 +11,7 @@
 	"scripts": {
 		"dev": "convex dev",
 		"typecheck": "tsc -p convex/tsconfig.json --noEmit",
-		"clean": "rm -rf node_modules",
+		"clean": "rm -rf node_modules .turbo",
 		"test": "vitest"
 	},
 	"dependencies": {

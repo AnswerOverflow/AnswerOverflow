@@ -1,12 +1,12 @@
 import { convexTest, type TestConvex } from "convex-test";
 import { Context, Effect, Layer } from "effect";
-import { api, internal } from "../convex/_generated/api.js";
-import schema from "../convex/schema.js";
+import { api, internal } from "../convex/_generated/api";
+import schema from "../convex/schema";
 import {
 	type ConvexClientShared,
 	ConvexClientUnified,
 	ConvexError,
-} from "./convex-unified-client.js";
+} from "./convex-unified-client";
 
 type TestConvexClient = ConvexClientShared & TestConvex<typeof schema>;
 

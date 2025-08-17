@@ -14,7 +14,7 @@ const apiMutation = customMutation(mutation, {
 	},
 });
 
-export const publicGetServers = query({
+export const publicGetAllServers = query({
 	args: {},
 	handler: async (ctx) => {
 		return await ctx.db.query("servers").collect();
@@ -45,6 +45,7 @@ export const upsertServerExternal = apiMutation({
 
 		if (existing) {
 			await ctx.db.patch(existing._id, data);
+			return existing._id;
 		}
 		return await ctx.db.insert("servers", data);
 	},

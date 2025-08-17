@@ -4,7 +4,7 @@ import { api } from "../../../../packages/database/convex/_generated/api";
 import { useQuery } from "convex/react";
 
 export default function Home() {
-	const servers = useQuery(api.servers.publicGetServers);
+	const servers = useQuery(api.servers.publicGetAllServers);
 	return (
 		<main className="max-w-4xl mx-auto p-8">
 			servers:

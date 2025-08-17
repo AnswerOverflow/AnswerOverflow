@@ -1,11 +1,11 @@
 import { ConvexHttpClient } from "convex/browser";
 import { Config, Context, Effect, Layer } from "effect";
-import { api, internal } from "../convex/_generated/api.js";
+import { api, internal } from "../convex/_generated/api";
 import {
 	type ConvexClientShared,
 	ConvexClientUnified,
 	ConvexError,
-} from "./convex-unified-client.js";
+} from "./convex-unified-client";
 
 type HttpConvexClient = ConvexClientShared & ConvexHttpClient;
 

@@ -1,11 +1,11 @@
 import { Context, Effect, Layer } from "effect";
-import type { Server } from "../convex/schema.js";
-import { ConvexClientHttpUnifiedLayer } from "./convex-client-http.js";
+import type { Server } from "../convex/schema";
+import { ConvexClientHttpUnifiedLayer } from "./convex-client-http";
 import {
 	ConvexClientTestLayer,
 	ConvexClientTestUnifiedLayer,
-} from "./convex-client-test.js";
-import { ConvexClientUnified } from "./convex-unified-client.js";
+} from "./convex-client-test";
+import { ConvexClientUnified } from "./convex-unified-client";
 
 const service = Effect.gen(function* () {
 	const externalSecret = "hello"; //yield* Config.string("EXTERNAL_WRITE_SECRET");
@@ -26,10 +26,16 @@ const service = Effect.gen(function* () {
 			}),
 		);
 
+	const publicGetAllServers = () =>
+		convexClient.use((client, { api }) =>
+			client.query(api.servers.publicGetAllServers),
+		);
+
 	return {
 		servers: {
 			upsertServer,
 			getServerById,
+			publicGetAllServers,
 		},
 	};
 });
