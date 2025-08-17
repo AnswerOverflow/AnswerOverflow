@@ -3,10 +3,13 @@ import { it } from "@effect/vitest";
 import { Database, DatabaseTestLayer } from "@packages/database/database";
 import { DiscordREST } from "dfx/DiscordREST";
 import { DiscordGateway } from "dfx/gateway";
-import { Effect, Layer, TestClock } from "effect";
+import { Effect, Layer } from "effect";
 import { expect } from "vitest";
 import { make } from "./guild-parity";
-import { MockDiscordGateway } from "./mock-gateway";
+import {
+	DiscordGatewayMock,
+	MockDiscordGatewaySharedLayer,
+} from "./mock-gateway";
 
 const GUILD_ID = "123";
 
@@ -26,32 +29,33 @@ const MockDiscordRest = Layer.mock(DiscordREST, {
 	getGuild: (_id: string) => Effect.succeed(fakeGuild),
 });
 
-it.layer(
-	Layer.mergeAll(DatabaseTestLayer, MockDiscordRest, MockDiscordGateway),
-)((it) =>
-	it.effect("upserts guild via READY dispatch", () =>
-		Effect.scoped(
-			Effect.gen(function* () {
-				const gateway = yield* DiscordGateway;
-				yield* make;
-				// wait 1 second
-				yield* TestClock.adjust(1000);
-				yield* (gateway as any).emit("READY", {
-					v: 10,
-					user: { id: "user", username: "tester" } as any,
-					guilds: [{ id: GUILD_ID, unavailable: false }],
-					session_id: "session",
-					resume_gateway_url: "wss://gateway",
-					application: { id: "app", flags: 0 },
-				} as any) as Effect.Effect<void>;
-				yield* TestClock.adjust(1000);
+it.scopedLive("upserts guild via READY dispatch", () =>
+	Effect.gen(function* () {
+		const gateway = yield* DiscordGatewayMock;
+		yield* make;
+		yield* Effect.sleep(1000);
 
-				// Assert DB
-				const db = yield* Database;
-				const server = yield* db.servers.getServerById(GUILD_ID);
-				expect(server).toBeTruthy();
-				expect(server?.discordId).toBe(GUILD_ID);
-			}),
+		yield* gateway.emit("READY", {
+			v: 10,
+			user: { id: "user", username: "tester" } as any,
+			guilds: [{ id: GUILD_ID, unavailable: false }],
+			session_id: "session",
+			resume_gateway_url: "wss://gateway",
+			application: { id: "app", flags: 0 },
+		});
+
+		// Assert DB
+		const db = yield* Database;
+		const server = yield* db.servers.getServerById(GUILD_ID);
+		expect(server).toBeTruthy();
+		expect(server?.discordId).toBe(GUILD_ID);
+	}).pipe(
+		Effect.provide(
+			Layer.mergeAll(
+				DatabaseTestLayer,
+				MockDiscordRest,
+				MockDiscordGatewaySharedLayer,
+			),
 		),
 	),
 );
