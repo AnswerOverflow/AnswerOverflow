@@ -2,7 +2,6 @@
 import { it } from "@effect/vitest";
 import { Database, DatabaseTestLayer } from "@packages/database/database";
 import { DiscordREST } from "dfx/DiscordREST";
-import { DiscordGateway } from "dfx/gateway";
 import { Effect, Layer } from "effect";
 import { expect } from "vitest";
 import { make } from "./guild-parity";
@@ -33,7 +32,6 @@ it.scopedLive("upserts guild via READY dispatch", () =>
 	Effect.gen(function* () {
 		const gateway = yield* DiscordGatewayMock;
 		yield* make;
-		yield* Effect.sleep(1000);
 
 		yield* gateway.emit("READY", {
 			v: 10,

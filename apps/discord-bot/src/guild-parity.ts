@@ -33,7 +33,6 @@ export const make = Effect.gen(function* () {
 	yield* gateway
 		.handleDispatch("READY", (readyData) =>
 			Effect.gen(function* () {
-				console.log("GuildParity: READY", readyData);
 				const guildIds = readyData.guilds.map((g) => g.id);
 				yield* Effect.forEach(guildIds, (guildId) =>
 					upsertGuild(guildId).pipe(Effect.delay(1000)),
