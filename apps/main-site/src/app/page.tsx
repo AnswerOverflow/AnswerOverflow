@@ -1,7 +1,7 @@
 "use client";
 
-import { api } from "../../../../packages/database/convex/_generated/api";
 import { useQuery } from "convex/react";
+import { api } from "../../../../packages/database/convex/_generated/api";
 
 export default function Home() {
 	const servers = useQuery(api.servers.publicGetAllServers);

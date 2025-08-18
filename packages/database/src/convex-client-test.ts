@@ -11,7 +11,7 @@ import {
 type TestConvexClient = ConvexClientShared & TestConvex<typeof schema>;
 
 const createTestService = Effect.gen(function* () {
-	// making the test client work, .glob is a vite thing i think
+	// biome-ignore lint/suspicious/noExplicitAny: making the test client work, .glob is a vite thing i think
 	const modules = (import.meta as any).glob("../convex/**/!(*.*.*)*.*s");
 	const client = convexTest(schema, modules);
 
