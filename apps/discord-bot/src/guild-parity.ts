@@ -11,7 +11,7 @@ export const syncGuild = (guildId: string) =>
 	Effect.gen(function* () {
 		const rest = yield* DiscordREST;
 		const database = yield* Database;
-		const guild = yield* rest.getGuild(guildId);
+		const guild = yield* rest.getGuild(guildId, { with_counts: true });
 		yield* database.servers.upsertServer({
 			discordId: guild.id,
 			name: guild.name ?? guild.id,
