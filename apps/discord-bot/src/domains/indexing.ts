@@ -48,15 +48,21 @@ export async function indexServers(client: Client) {
 	const migaku = guilds.find((x) => x.id === '752293144917180496');
 	const convex = guilds.find((x) => x.id === '1170941416516620306');
 	const vapi = guilds.find((x) => x.id === '1211482211119796234');
-	const convexFirst = [
+	const tanstack = guilds.find((x) => x.id === '719702312431386674');
+	const tanstackFirst = [
+		tanstack,
 		vapi,
 		migaku,
 		convex,
 		...guilds.filter(
-			(x) => x.id !== convex?.id && x.id !== migaku?.id && x.id !== vapi?.id,
+			(x) =>
+				x.id !== convex?.id &&
+				x.id !== migaku?.id &&
+				x.id !== vapi?.id &&
+				x.id !== tanstack?.id,
 		),
 	].filter(Boolean);
-	for await (const guild of convexFirst) {
+	for await (const guild of tanstackFirst) {
 		try {
 			await indexServer(guild);
 		} catch (error) {
