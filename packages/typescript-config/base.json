@@ -9,8 +9,6 @@
 		"isolatedModules": true,
 		"lib": ["es2022", "DOM", "DOM.Iterable"],
 		"module": "NodeNext",
-		"moduleDetection": "force",
-		"moduleResolution": "node",
 		"noUncheckedIndexedAccess": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
