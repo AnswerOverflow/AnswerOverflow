@@ -13,7 +13,16 @@ export const DENYLIST = {
 export async function leaveServerIfNecessary(server: Guild) {
 	const isServerInDenylist = DENYLIST.SERVER_IDS.has(server.id);
 	const isServerOwnerInDenylist = DENYLIST.USER_IDS.has(server.ownerId);
-	if (isServerInDenylist || isServerOwnerInDenylist) {
+	const doesNameHaveGrowAGarden = server.name
+		.toLowerCase()
+		.includes('grow a garden');
+	const isMemberCountTooLow = server.memberCount < 10 && server.memberCount > 0;
+	if (
+		isServerInDenylist ||
+		isServerOwnerInDenylist ||
+		doesNameHaveGrowAGarden ||
+		isMemberCountTooLow
+	) {
 		await server.leave();
 		container.logger.info(
 			`Left server ${server.name} (${server.id}) because the ${
