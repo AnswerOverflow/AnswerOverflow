@@ -1,5 +1,5 @@
 import { container } from '@sapphire/framework';
-import { Guild } from 'discord.js';
+import type { Guild } from 'discord.js';
 
 export const DENYLIST = {
 	SERVER_IDS: new Set([
@@ -7,7 +7,7 @@ export const DENYLIST = {
 		'1133132039466528818',
 		'1154298795182526484',
 	]),
-	USER_IDS: new Set(['1073171830216589352']),
+	USER_IDS: new Set(['1073171830216589352', '1405204138203283527']),
 } as const;
 
 export async function leaveServerIfNecessary(server: Guild) {
