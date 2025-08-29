@@ -1,0 +1,18 @@
+{
+	"extends": "@packages/typescript-config/nextjs.json",
+	"compilerOptions": {
+		"plugins": [
+			{
+				"name": "next"
+			},
+			{
+				"name": "@effect/language-service"
+			}
+		],
+		"paths": {
+			"@/*": ["./src/*"]
+		}
+	},
+	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "../../packages/ui/src/components/ConvexClientProvider.tsx"],
+	"exclude": ["node_modules"]
+}

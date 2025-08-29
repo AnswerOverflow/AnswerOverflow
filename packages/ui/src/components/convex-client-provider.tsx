@@ -21,11 +21,7 @@ const queryClient = new QueryClient({
 
 convexQueryClient.connect(queryClient);
 
-export default function ConvexClientProvider({
-	children,
-}: {
-	children: ReactNode;
-}) {
+export function ConvexClientProvider({ children }: { children: ReactNode }) {
 	return (
 		<ClerkProvider
 			// biome-ignore lint/style/noNonNullAssertion: Setup

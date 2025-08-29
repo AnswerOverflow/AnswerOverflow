@@ -1,0 +1,3 @@
+{
+	"buildCommand": "cd ../../packages/database && npx convex deploy --cmd 'cd ../../apps/dashboard && turbo run build' --cmd-url-env-var-name NEXT_PUBLIC_CONVEX_URL"
+}
