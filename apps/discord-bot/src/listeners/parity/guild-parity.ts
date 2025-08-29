@@ -11,7 +11,14 @@ import { ALLOWED_ROOT_CHANNEL_TYPES } from '@answeroverflow/core/zod';
 import { botEnv } from '@answeroverflow/env/bot';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Listener } from '@sapphire/framework';
-import { ChannelType, EmbedBuilder, Events, Guild } from 'discord.js';
+import {
+	ChannelType,
+	EmbedBuilder,
+	Events,
+	type Guild,
+	ActionRowBuilder,
+	type MessageActionRowComponentBuilder,
+} from 'discord.js';
 import {
 	serverWithDiscordInfoToAnalyticsData,
 	trackDiscordEvent,
@@ -21,6 +28,7 @@ import {
 	toAOChannel,
 	toAOServer,
 } from '../../utils/conversions';
+import { makeLeaveButton } from '../../domains/leave-server-button';
 import { leaveServerIfNecessary } from '../../utils/denylist';
 
 /*
@@ -191,6 +199,11 @@ export class SyncOnJoin extends Listener {
 					await this.container.client.users.fetch('523949187663134754');
 				await rhysUser.send({
 					embeds: [makeGuildEmbed(guild, true)],
+					components: [
+						new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+							makeLeaveButton('523949187663134754'),
+						),
+					],
 				});
 			}
 		} catch (error) {
@@ -230,6 +243,11 @@ export class SyncOnDelete extends Listener {
 					await this.container.client.users.fetch('523949187663134754');
 				await rhysUser.send({
 					embeds: [makeGuildEmbed(guild, false)],
+					components: [
+						new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+							makeLeaveButton('523949187663134754'),
+						),
+					],
 				});
 			}
 		} catch (error) {
