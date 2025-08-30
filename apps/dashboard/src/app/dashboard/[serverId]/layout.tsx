@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { DashboardProvider } from './components/dashboard-context';
+import { FloatingChatWidget } from './components/floating-chat-widget';
 import { demoServerData } from './components/mock';
 import { ServerSelectDropdown } from './components/navbar';
 export default function Layout(props: {
@@ -148,6 +149,7 @@ export default function Layout(props: {
 					<Footer tenant={undefined} />
 				</div>
 			</div>
+			<FloatingChatWidget />
 		</DashboardProvider>
 	);
 }
