@@ -4,8 +4,8 @@
 	"exports": {
 		"./*": "./src/*.ts",
 		"./convex/*": {
-			"types": "./convex/*.d.ts",
-			"default": "./convex/*.ts"
+			"types": "./convex/*.d.js",
+			"default": "./convex/*.js"
 		}
 	},
 	"scripts": {

@@ -13,6 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as dashboard from "../dashboard.js";
 import type * as servers from "../servers.js";
 
 /**
@@ -24,6 +25,7 @@ import type * as servers from "../servers.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  dashboard: typeof dashboard;
   servers: typeof servers;
 }>;
 export declare const api: FilterApi<

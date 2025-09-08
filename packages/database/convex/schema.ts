@@ -32,6 +32,14 @@ export const serverSchema = v.object({
 	preferencesId: v.optional(v.id("serverPreferences")),
 });
 
+export const userServerSettings = v.object({
+	serverId: v.id("servers"),
+	userId: v.id("users"),
+	permissions: v.number(),
+	canPubliclyDisplayMessages: v.boolean(),
+	messageIndexingDisabled: v.boolean(),
+});
+
 export type Server = Infer<typeof serverSchema>;
 
 export default defineSchema({
