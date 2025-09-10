@@ -25,12 +25,11 @@ export async function leaveServerIfNecessary(server: Guild) {
 	const doesNameHaveGrowAGarden = server.name
 		.toLowerCase()
 		.includes('grow a garden');
-	const isMemberCountTooLow = server.memberCount < 10 && server.memberCount > 0;
+
 	if (
 		isServerInDenylist ||
 		isServerOwnerInDenylist ||
-		doesNameHaveGrowAGarden ||
-		isMemberCountTooLow
+		doesNameHaveGrowAGarden
 	) {
 		await server.leave();
 		container.logger.info(
