@@ -78,7 +78,14 @@ export function middleware(req: NextRequest) {
 
 	const actualHost = subpathCustomer?.rewriteDomain || host;
 
-	const newUrl = new URL(`/${actualHost}${path}${pathPostFix}`, req.url);
+	const pathWithoutHost = path.startsWith(`/${actualHost}`)
+		? path.slice(actualHost.length + 1)
+		: path;
+
+	const newUrl = new URL(
+		`/${actualHost}${pathWithoutHost}${pathPostFix}`,
+		req.url,
+	);
 	return NextResponse.rewrite(newUrl);
 }
 // See "Matching Paths" below to learn more
