@@ -37,7 +37,7 @@ export function middleware(req: NextRequest) {
 		return NextResponse.next();
 	}
 
-	if (isOnMainSite(host) || path.includes('/discord/')) {
+	if (isOnMainSite(host) || path.includes('/discord')) {
 		const authedRoutes = ['/dashboard'];
 		const authToken = req.cookies.get(AuthEdge.getNextAuthCookieName());
 		if (authedRoutes.some((route) => path.startsWith(route))) {
