@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+
+Do not create summary documents or markdown documents unless instructed
+
+Run commands with a timeout of 60 seconds unless instructed otherwise---
+alwaysApply: true
+
+---
