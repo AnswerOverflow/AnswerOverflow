@@ -25,6 +25,7 @@ export const syncGuild = (guildId: string) =>
 
 export const make = Effect.gen(function* () {
 	const gateway = yield* DiscordGateway;
+
 	yield* gateway
 		.handleDispatch("READY", (readyData) =>
 			Effect.gen(function* () {

@@ -1,6 +1,8 @@
 "use node";
 
 import { createClerkClient } from "@clerk/backend";
+import { Effect } from "effect";
+import { discordApi } from "../src/discord";
 import { action } from "./_generated/server";
 
 const clerkClient = createClerkClient({
@@ -28,6 +30,20 @@ export const getForCurrentUser = action({
 			user.id,
 			"discord",
 		);
-		return JSON.stringify(response.data.at(0)?.token);
+
+		const token = response.data.at(0)?.token;
+
+		if (!token) {
+			throw new Error("Discord token not found");
+		}
+
+		const getServers = Effect.gen(function* () {
+			const rest = yield* discordApi(token);
+			return yield* rest.listMyGuilds({});
+		});
+
+		const result = await Effect.runPromiseExit(getServers);
+		console.log("result", result);
+		return JSON.stringify(result);
 	},
 });

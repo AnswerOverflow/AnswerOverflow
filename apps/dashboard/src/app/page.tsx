@@ -6,7 +6,7 @@ import { useState } from "react";
 
 export default function Home() {
 	const identity = useAction(api.dashboard.getForCurrentUser);
-	const [discordToken, setDiscordToken] = useState<string | null>(null);
+	const [discordToken, setDiscordToken] = useState<any | null>(null);
 	return (
 		<main className="max-w-4xl mx-auto p-8">
 			Dashboard

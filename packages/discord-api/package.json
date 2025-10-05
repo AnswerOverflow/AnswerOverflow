@@ -1,0 +1,19 @@
+{
+    "name": "@packages/discord-api",
+    "version": "0.1.0",
+    "type": "module",
+    "private": true,
+    "exports": {
+        "./generated": "./src/generated.ts"
+    },
+    "scripts": {
+        "clean": "rm -rf node_modules .turbo",
+        "typecheck": "tsc -p tsconfig.json --noEmit",
+        "gen": "mkdir -p src && openapi-gen --spec ./open-api.json > ./src/generated.ts"
+    },
+    "dependencies": {
+        "@tim-smart/openapi-gen": "^0.4.13",
+        "dfx": "^0.124.1",
+        "effect": "^3.17.7"
+    }
+}

@@ -100,8 +100,10 @@
       "name": "@packages/database",
       "version": "1.0.0",
       "dependencies": {
+        "@packages/discord-api": "workspace:*",
         "convex": "^1.25.0",
         "convex-helpers": "^0.1.101",
+        "dfx": "^0.124.1",
         "effect": "^3.17.7",
         "openai": "^4.45.0",
       },
@@ -110,6 +112,15 @@
         "@effect/vitest": "^0.25.0",
         "convex-test": "^0.0.38",
         "vitest": "^3.2.4",
+      },
+    },
+    "packages/discord-api": {
+      "name": "@packages/discord-api",
+      "version": "0.1.0",
+      "dependencies": {
+        "@tim-smart/openapi-gen": "^0.4.13",
+        "dfx": "^0.124.1",
+        "effect": "^3.17.7",
       },
     },
     "packages/typescript-config": {
@@ -456,6 +467,8 @@
 
     "@packages/database": ["@packages/database@workspace:packages/database"],
 
+    "@packages/discord-api": ["@packages/discord-api@workspace:packages/discord-api"],
+
     "@packages/discord-bot": ["@packages/discord-bot@workspace:apps/discord-bot"],
 
     "@packages/main-site": ["@packages/main-site@workspace:apps/main-site"],
@@ -649,6 +662,8 @@
     "@tanstack/react-virtual": ["@tanstack/react-virtual@3.13.12", "", { "dependencies": { "@tanstack/virtual-core": "3.13.12" }, "peerDependencies": { "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-Gd13QdxPSukP8ZrkbgS2RwoZseTTbQPLnQEn7HY/rqtM+8Zt95f7xKC7N0EsKs7aoz0WzZ+fditZux+F8EzYxA=="],
 
     "@tanstack/virtual-core": ["@tanstack/virtual-core@3.13.12", "", {}, "sha512-1YBOJfRHV4sXUmWsFSf5rQor4Ss82G8dQWLRbnk3GA4jeP8hQt1hxXh0tmflpC0dz3VgEv/1+qwPyLeWkQuPFA=="],
+
+    "@tim-smart/openapi-gen": ["@tim-smart/openapi-gen@0.4.13", "", { "dependencies": { "yaml": "^2.8.0" }, "bin": { "openapi-gen": "main.js" } }, "sha512-yn/4Tp6Or5JA2/VNPLKtm9ib17PZxmJGyEq+vtcmAch5qG2PAJLvuzuoAwYRBMN9GR8Cb/W5qO6eIHg0AdYL0Q=="],
 
     "@tootallnate/quickjs-emscripten": ["@tootallnate/quickjs-emscripten@0.23.0", "", {}, "sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA=="],
 
@@ -1439,6 +1454,8 @@
     "ws": ["ws@8.18.3", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": ">=5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, "sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg=="],
 
     "yallist": ["yallist@5.0.0", "", {}, "sha512-YgvUTfwqyc7UXVMrB+SImsVYSmTS8X/tSrtdNZMImM+n7+QTriRXyXim0mBrTXNeqzVF0KWGgHPeiyViFFrNDw=="],
+
+    "yaml": ["yaml@2.8.1", "", { "bin": { "yaml": "bin.mjs" } }, "sha512-lcYcMxX2PO9XMGvAJkJ3OsNMw+/7FKes7/hgerGUYWIoWu5j/+YQqcZr5JnPZWzOsEBgMbSbiSTn/dv/69Mkpw=="],
 
     "yn": ["yn@3.1.1", "", {}, "sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q=="],
 
