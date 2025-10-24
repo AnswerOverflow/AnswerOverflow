@@ -19,6 +19,7 @@ import {
 	dbMessages,
 } from './schema';
 import { anonymizeDiscordAccount } from './utils/anonymization';
+import { hideMentionsForPrivacy, extractMentionedUsers } from './utils/mention-privacy';
 import { addFlagsToServer } from './utils/serverUtils';
 import { addFlagsToUserServerSettings } from './utils/userServerSettingsUtils';
 import { zDiscordAccountPublic } from './zodSchemas/discordAccountSchemas';
@@ -80,6 +81,32 @@ export function applyPublicFlagsToMessages<
 	);
 	const seedLookup = new Map(messages.map((a) => [a.authorId, getRandomId()]));
 
+	// Build a map of all users in the server for mention processing
+	const allUsersMap = new Map<string, {
+		account: DiscordAccountPublic;
+		canPubliclyDisplayMessages: boolean;
+		seed: string;
+	}>();
+	
+	// Add all authors and their privacy settings to the map
+	messages.forEach((msg) => {
+		if (msg.author) {
+			const seed = seedLookup.get(msg.author.id) ?? getRandomId();
+			const authorServerSettings = authorServerSettingsLookup.get(
+				getLookupKey({
+					serverId: msg.serverId,
+					userId: msg.author.id,
+				}),
+			);
+			
+			allUsersMap.set(msg.author.id, {
+				account: zDiscordAccountPublic.parse(msg.author),
+				canPubliclyDisplayMessages: authorServerSettings?.flags.canPubliclyDisplayMessages ?? false,
+				seed,
+			});
+		}
+	});
+
 	const makeMessageWithAuthor = (
 		msg: MessageWithAuthorServerSettings,
 		serverWithFlags: Pick<ServerWithFlags, 'flags'>,
@@ -105,10 +132,17 @@ export function applyPublicFlagsToMessages<
 		const isAnonymous =
 			serverWithFlags.flags.anonymizeMessages &&
 			!authorServerSettings?.flags.canPubliclyDisplayMessages;
+		
+		// Process message content to hide mentions of users who have opted out
+		const processedContent = hideMentionsForPrivacy(
+			msg.content,
+			allUsersMap,
+			msg.serverId,
+		);
+		
 		return {
 			...pick(
 				msg,
-				'content',
 				'id',
 				'channelId',
 				'serverId',
@@ -122,6 +156,7 @@ export function applyPublicFlagsToMessages<
 				'parentChannelId',
 				'questionId',
 			),
+			content: processedContent,
 			author: isAnonymous
 				? anonymizeDiscordAccount(publicAccount, seed)
 				: publicAccount,

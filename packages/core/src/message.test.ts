@@ -9,6 +9,7 @@ import {
 import { createChannel } from './channel';
 import { createDiscordAccount, deleteDiscordAccount } from './discord-account';
 import {
+	applyPublicFlagsToMessages,
 	CANNOT_UPSERT_MESSAGE_FOR_IGNORED_ACCOUNT_MESSAGE,
 	CANNOT_UPSERT_MESSAGE_FOR_USER_WITH_MESSAGE_INDEXING_DISABLED_MESSAGE,
 	bulkFindLatestMessageInChannel,
@@ -344,5 +345,172 @@ describe('Message Ops', () => {
 		const found = await findFullMessageById(bigId.id);
 		expect(found?.id).toBe('115533696646902222');
 		expect(found?.solutions[0]!.id).toBe('115533696647908888');
+	});
+});
+
+describe('Mention Privacy', () => {
+	let server: Server;
+	let channel: ChannelWithFlags;
+	let author1: DiscordAccount;
+	let author2: DiscordAccount;
+	let author3: DiscordAccount;
+
+	beforeEach(async () => {
+		server = mockServer();
+		channel = mockChannelWithFlags(server, {
+			flags: {
+				indexingEnabled: true,
+			},
+		});
+		author1 = mockDiscordAccount({ name: 'User1' });
+		author2 = mockDiscordAccount({ name: 'User2' });
+		author3 = mockDiscordAccount({ name: 'User3' });
+		
+		await createServer(server);
+		await createChannel(channel);
+		await createDiscordAccount(author1);
+		await createDiscordAccount(author2);
+		await createDiscordAccount(author3);
+	});
+
+	it('should hide mentions of users who have not consented to public display', async () => {
+		// User1 has consented to public display
+		await createUserServerSettings({
+			userId: author1.id,
+			serverId: server.id,
+			flags: {
+				canPubliclyDisplayMessages: true,
+			},
+		});
+
+		// User2 has NOT consented to public display
+		await createUserServerSettings({
+			userId: author2.id,
+			serverId: server.id,
+			flags: {
+				canPubliclyDisplayMessages: false,
+			},
+		});
+
+		// User3 has NOT consented to public display
+		await createUserServerSettings({
+			userId: author3.id,
+			serverId: server.id,
+			flags: {
+				canPubliclyDisplayMessages: false,
+			},
+		});
+
+		// Create a message that mentions all three users
+		const message = mockMessage(server, channel, author1, {
+			content: 'Hey @User1, @User2, and @User3, check this out!',
+		});
+
+		// Apply public flags to messages
+		const processedMessages = applyPublicFlagsToMessages([{
+			...message,
+			author: {
+				...author1,
+				userServerSettings: [{
+					userId: author1.id,
+					serverId: server.id,
+					bitfield: 1, // canPubliclyDisplayMessages = true
+					apiKey: null,
+				}],
+			},
+			solutions: [],
+			reference: null,
+			server: server,
+		}]);
+
+		expect(processedMessages).toHaveLength(1);
+		const processedMessage = processedMessages[0]!;
+		
+		// User1's mention should remain unchanged (they consented)
+		expect(processedMessage.content).toContain('@User1');
+		
+		// User2 and User3's mentions should be replaced with anonymized names
+		expect(processedMessage.content).not.toContain('@User2');
+		expect(processedMessage.content).not.toContain('@User3');
+		
+		// The content should still contain anonymized versions
+		expect(processedMessage.content).toMatch(/@[a-z]+-[a-z]+/); // Should match anonymized pattern
+	});
+
+	it('should not hide mentions when all users have consented', async () => {
+		// All users have consented to public display
+		await createUserServerSettings({
+			userId: author1.id,
+			serverId: server.id,
+			flags: {
+				canPubliclyDisplayMessages: true,
+			},
+		});
+
+		await createUserServerSettings({
+			userId: author2.id,
+			serverId: server.id,
+			flags: {
+				canPubliclyDisplayMessages: true,
+			},
+		});
+
+		// Create a message that mentions users
+		const message = mockMessage(server, channel, author1, {
+			content: 'Hey @User1 and @User2, check this out!',
+		});
+
+		// Apply public flags to messages
+		const processedMessages = applyPublicFlagsToMessages([{
+			...message,
+			author: {
+				...author1,
+				userServerSettings: [{
+					userId: author1.id,
+					serverId: server.id,
+					bitfield: 1, // canPubliclyDisplayMessages = true
+					apiKey: null,
+				}],
+			},
+			solutions: [],
+			reference: null,
+			server: server,
+		}]);
+
+		expect(processedMessages).toHaveLength(1);
+		const processedMessage = processedMessages[0]!;
+		
+		// All mentions should remain unchanged
+		expect(processedMessage.content).toBe('Hey @User1 and @User2, check this out!');
+	});
+
+	it('should handle messages without mentions', async () => {
+		// Create a message without any mentions
+		const message = mockMessage(server, channel, author1, {
+			content: 'This is a regular message without any mentions.',
+		});
+
+		// Apply public flags to messages
+		const processedMessages = applyPublicFlagsToMessages([{
+			...message,
+			author: {
+				...author1,
+				userServerSettings: [{
+					userId: author1.id,
+					serverId: server.id,
+					bitfield: 1, // canPubliclyDisplayMessages = true
+					apiKey: null,
+				}],
+			},
+			solutions: [],
+			reference: null,
+			server: server,
+		}]);
+
+		expect(processedMessages).toHaveLength(1);
+		const processedMessage = processedMessages[0]!;
+		
+		// Content should remain unchanged
+		expect(processedMessage.content).toBe('This is a regular message without any mentions.');
 	});
 });
