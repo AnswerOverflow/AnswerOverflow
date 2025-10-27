@@ -31,7 +31,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.9.3",
 		"@cloudflare/workers-types": "4.20240924.0",
-		"dotenv": "^16.4.5"
+		"dotenv": "^17.2.3"
 	},
 	"overrides": {
 		"recharts": "2.13.0",
