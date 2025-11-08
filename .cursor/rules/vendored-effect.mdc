@@ -1,4 +1,6 @@
-### Agents
+---
+alwaysApply: false
+---
 
 We vendor the `Effect` repository as a git subtree under `.context/effect/`.
 
