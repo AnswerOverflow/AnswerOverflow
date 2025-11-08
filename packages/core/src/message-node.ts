@@ -11,9 +11,11 @@ import {
 	attachmentSchema,
 	dbAttachments,
 	dbEmojis,
+	dbMessageMentions,
 	dbMessages,
 	dbReactions,
 	emojiSchema,
+	messageMentionSchema,
 	messageSchema,
 	reactionSchema,
 } from './schema';
@@ -57,7 +59,7 @@ export async function upsertMessage(
 			);
 		}
 	}
-	const { attachments, reactions, embeds, ...msg } = data;
+	const { attachments, reactions, embeds, mentions, ...msg } = data;
 	const parsed = {
 		...messageSchema.parse(msg),
 		embeds,
@@ -66,6 +68,16 @@ export async function upsertMessage(
 	await db.insert(dbMessages).values(parsed).onDuplicateKeyUpdate({
 		set: parsed,
 	});
+	const updateMentions = async () => {
+		await db.delete(dbMessageMentions).where(eq(dbMessageMentions.messageId, msg.id));
+		if (!mentions) return;
+		for await (const mention of mentions) {
+			const p = messageMentionSchema.parse(mention);
+			await db.insert(dbMessageMentions).values(p).onDuplicateKeyUpdate({
+				set: p,
+			});
+		}
+	};
 	const updateAttachments = async () => {
 		const existingAttachments = await db
 			.select()
@@ -114,6 +126,7 @@ export async function upsertMessage(
 		}
 	};
 	await updateReactions();
+	await updateMentions();
 	void updateAttachments();
 }
 
@@ -170,11 +183,12 @@ export async function fastUpsertManyMessages(data: BaseMessageWithRelations[]) {
 	const attachments = new Set<typeof dbAttachments.$inferInsert>();
 	const emojis = new Set<typeof dbEmojis.$inferInsert>();
 	const reactions = new Set<typeof dbReactions.$inferInsert>();
+	const mentions = new Set<typeof dbMessageMentions.$inferInsert>();
 	const msgs = new Set<typeof dbMessages.$inferInsert>();
 	for (const msg of data) {
-		const { attachments: a, reactions: r, embeds: e, ...m } = msg;
+		const { attachments: a, reactions: r, embeds: e, mentions: m, ...messageData } = msg;
 		msgs.add({
-			...messageSchema.parse(m),
+			...messageSchema.parse(messageData),
 			embeds: e,
 		});
 		if (a) {
@@ -187,6 +201,11 @@ export async function fastUpsertManyMessages(data: BaseMessageWithRelations[]) {
 				if (!reaction.emoji.id || !reaction.emoji.name) continue;
 				emojis.add(emojiSchema.parse(reaction.emoji));
 				reactions.add(reactionSchema.parse(reaction));
+			}
+		}
+		if (m) {
+			for (const mention of m) {
+				mentions.add(messageMentionSchema.parse(mention));
 			}
 		}
 	}
@@ -239,5 +258,10 @@ export async function fastUpsertManyMessages(data: BaseMessageWithRelations[]) {
 		await db
 			.insert(dbReactions)
 			.values(Array.from(reactions))
+			.onDuplicateKeyUpdate({ set: { messageId: sql.raw('messageId') } });
+	if (mentions.size > 0)
+		await db
+			.insert(dbMessageMentions)
+			.values(Array.from(mentions))
 			.onDuplicateKeyUpdate({ set: { messageId: sql.raw('messageId') } });
 }

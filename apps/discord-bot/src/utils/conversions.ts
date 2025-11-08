@@ -1,5 +1,8 @@
 import { Auth } from '@answeroverflow/core/auth';
-import { ReactionWithRelations } from '@answeroverflow/core/schema';
+import {
+	MessageMention,
+	ReactionWithRelations,
+} from '@answeroverflow/core/schema';
 import { BaseMessageWithRelations as AOMessage } from '@answeroverflow/core/schema';
 import {
 	Channel as AOChannel,
@@ -32,6 +35,35 @@ export function toDiscordAPIServer(
 	};
 }
 
+// Parse mentions from message content
+// Discord mentions are in the format <@userId> or <@!userId>
+function parseMentions(
+	content: string,
+	mentionedUsers: Map<string, User>,
+): MessageMention[] {
+	const mentions: MessageMention[] = [];
+	// Match <@userId> or <@!userId> patterns
+	const mentionRegex = /<@!?(\d+)>/g;
+	let match;
+	let position = 0;
+
+	while ((match = mentionRegex.exec(content)) !== null) {
+		const userId = match[1]!;
+		const user = mentionedUsers.get(userId);
+		if (user) {
+			mentions.push({
+				messageId: '', // Will be set later
+				mentionedUserId: userId,
+				mentionedUsername: user.displayName || user.username,
+				position: match.index!,
+			});
+		}
+		position++;
+	}
+
+	return mentions;
+}
+
 // top 10 ugliest functions in this codebase
 export async function toAOMessage(message: Message): Promise<AOMessage> {
 	if (message.partial) {
@@ -55,6 +87,18 @@ export async function toAOMessage(message: Message): Promise<AOMessage> {
 			});
 		}
 	}
+
+	// Parse mentions from the original content (before cleanContent)
+	const mentionedUsersMap = new Map<string, User>();
+	for (const user of message.mentions.users.values()) {
+		mentionedUsersMap.set(user.id, user);
+	}
+	const mentions = parseMentions(message.content, mentionedUsersMap).map(
+		(mention) => ({
+			...mention,
+			messageId: message.id,
+		}),
+	);
 
 	const convertedMessage: AOMessage = {
 		id: message.id,
@@ -150,6 +194,7 @@ export async function toAOMessage(message: Message): Promise<AOMessage> {
 		serverId: message.guildId,
 		questionId: null,
 		childThreadId: message.thread?.id ?? null,
+		mentions,
 	};
 	return convertedMessage;
 }
