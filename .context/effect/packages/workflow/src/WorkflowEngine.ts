@@ -1,0 +1,168 @@
+/**
+ * @since 1.0.0
+ */
+import type * as Cause from "effect/Cause"
+import * as Context from "effect/Context"
+import * as Effect from "effect/Effect"
+import type * as Option from "effect/Option"
+import type * as Schema from "effect/Schema"
+import type * as Scope from "effect/Scope"
+import type * as Activity from "./Activity.js"
+import type { DurableClock } from "./DurableClock.js"
+import type * as DurableDeferred from "./DurableDeferred.js"
+import type * as Workflow from "./Workflow.js"
+
+/**
+ * @since 1.0.0
+ * @category Services
+ */
+export class WorkflowEngine extends Context.Tag("@effect/workflow/WorkflowEngine")<
+  WorkflowEngine,
+  {
+    /**
+     * Register a workflow with the engine.
+     */
+    readonly register: (
+      workflow: Workflow.Any,
+      execute: (
+        payload: object,
+        executionId: string
+      ) => Effect.Effect<unknown, unknown, WorkflowInstance | WorkflowEngine>
+    ) => Effect.Effect<void, never, Scope.Scope>
+
+    /**
+     * Execute a registered workflow.
+     */
+    readonly execute: <const Discard extends boolean>(
+      options: {
+        readonly workflow: Workflow.Any
+        readonly executionId: string
+        readonly payload: object
+        readonly discard: Discard
+        readonly parent?: WorkflowInstance["Type"] | undefined
+      }
+    ) => Effect.Effect<Discard extends true ? void : Workflow.Result<unknown, unknown>>
+
+    /**
+     * Poll a registered workflow for its current status.
+     *
+     * If the workflow has not run yet, it will return `undefined`, otherwise it
+     * will return the current `Workflow.Result`.
+     */
+    readonly poll: (
+      options: {
+        readonly workflow: Workflow.Any
+        readonly executionId: string
+      }
+    ) => Effect.Effect<Workflow.Result<unknown, unknown> | undefined>
+
+    /**
+     * Interrupt a registered workflow.
+     */
+    readonly interrupt: (
+      workflow: Workflow.Any,
+      executionId: string
+    ) => Effect.Effect<void>
+
+    /**
+     * Resume a registered workflow.
+     */
+    readonly resume: (
+      workflow: Workflow.Any,
+      executionId: string
+    ) => Effect.Effect<void>
+
+    /**
+     * Execute an activity from a workflow.
+     */
+    readonly activityExecute: (
+      options: {
+        readonly activity: Activity.Any
+        readonly attempt: number
+      }
+    ) => Effect.Effect<Workflow.Result<unknown, unknown>, never, WorkflowInstance>
+
+    /**
+     * Try to retrieve the result of an DurableDeferred
+     */
+    readonly deferredResult: (
+      deferred: DurableDeferred.Any
+    ) => Effect.Effect<Option.Option<Schema.ExitEncoded<unknown, unknown, unknown>>, never, WorkflowInstance>
+
+    /**
+     * Set the result of a DurableDeferred, and then resume any waiting
+     * workflows.
+     */
+    readonly deferredDone: (
+      options: {
+        readonly workflowName: string
+        readonly executionId: string
+        readonly deferredName: string
+        readonly exit: Schema.ExitEncoded<unknown, unknown, unknown>
+      }
+    ) => Effect.Effect<void>
+
+    /**
+     * Schedule a wake up for a DurableClock
+     */
+    readonly scheduleClock: (options: {
+      readonly workflow: Workflow.Any
+      readonly executionId: string
+      readonly clock: DurableClock
+    }) => Effect.Effect<void>
+  }
+>() {}
+
+/**
+ * @since 1.0.0
+ * @category Services
+ */
+export class WorkflowInstance extends Context.Tag("@effect/workflow/WorkflowEngine/WorkflowInstance")<
+  WorkflowInstance,
+  {
+    /**
+     * The workflow execution ID.
+     */
+    readonly executionId: string
+
+    /**
+     * The workflow definition.
+     */
+    readonly workflow: Workflow.Any
+
+    /**
+     * Whether the workflow has requested to be suspended.
+     */
+    suspended: boolean
+
+    /**
+     * Whether the workflow has requested to be interrupted.
+     */
+    interrupted: boolean
+
+    /**
+     * When SuspendOnFailure is triggered, the cause of the failure is stored
+     * here.
+     */
+    cause: Cause.Cause<never> | undefined
+
+    readonly activityState: {
+      count: number
+      readonly latch: Effect.Latch
+    }
+  }
+>() {
+  static initial(workflow: Workflow.Any, executionId: string): WorkflowInstance["Type"] {
+    return WorkflowInstance.of({
+      executionId,
+      workflow,
+      suspended: false,
+      interrupted: false,
+      cause: undefined,
+      activityState: {
+        count: 0,
+        latch: Effect.unsafeMakeLatch()
+      }
+    })
+  }
+}
