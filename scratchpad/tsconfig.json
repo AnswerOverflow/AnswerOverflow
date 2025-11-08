@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "composite": false,
+    "incremental": false,
+    "plugins": [
+      {
+        "name": "@effect/language-service",
+        "namespaceImportPackages": []
+      }
+    ]
+  }
+}
