@@ -13,7 +13,7 @@
 		"@effect/platform": "^0.90.1",
 		"@effect/platform-bun": "^0.78.0",
 		"@packages/database": "workspace:*",
-		"dfx": "^0.124.0",
+		"discord.js": "^14.22.1",
 		"effect": "^3.17.7"
 	},
 	"devDependencies": {

@@ -3,8 +3,6 @@
 We vendor the `Effect` repository as a git subtree under `.context/effect/`.
 
 - **Patterns and APIs**: Look in `.context/effect/` for canonical patterns, implementations, and best practices to follow when building agents and related workflows.
-- **Updating the subtree**: 
+- **Updating the subtree**:
   - `git fetch effect-upstream`
   - `git subtree pull --prefix=.context/effect effect-upstream main --squash`
-
-

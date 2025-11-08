@@ -17,7 +17,6 @@
 	"dependencies": {
 		"convex": "^1.25.0",
 		"convex-helpers": "^0.1.101",
-		"dfx": "^0.124.1",
 		"effect": "^3.17.7",
 		"openai": "^4.45.0",
 		"@packages/discord-api": "workspace:*"

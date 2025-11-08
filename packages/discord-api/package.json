@@ -13,7 +13,6 @@
     },
     "dependencies": {
         "@tim-smart/openapi-gen": "^0.4.13",
-        "dfx": "^0.124.1",
         "effect": "^3.17.7"
     }
 }

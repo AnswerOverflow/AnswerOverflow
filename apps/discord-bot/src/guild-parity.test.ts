@@ -1,11 +1,10 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: needed for mocks */
 import { it } from "@effect/vitest";
 import { Database, DatabaseTestLayer } from "@packages/database/database";
-import { DiscordREST } from "dfx/DiscordREST";
 import { Effect, Layer } from "effect";
 import { expect } from "vitest";
 import { make } from "./guild-parity";
-import { DiscordGatewayMock, MockDiscordGateway } from "./mock-gateway";
+import { DiscordClient, DiscordClientLayer } from "./services/discord";
 
 const GUILD_ID = "123";
 
@@ -18,29 +17,22 @@ const fakeGuild = {
 	approximate_member_count: 1337,
 } as any;
 
-const MockDiscordRest = Layer.mock(DiscordREST, {
-	withFormData: () => (eff: any) => eff,
-	withFiles: () => (eff: any) => eff,
-	httpClient: {} as any,
-	getGuild: (_id: string) => Effect.succeed(fakeGuild),
-});
-
 it.scopedLive("upserts guild via READY dispatch", () =>
 	Effect.gen(function* () {
 		yield* make;
+		const client = yield* DiscordClient;
+		client.client.guilds.cache.set(GUILD_ID, fakeGuild);
 
-		const gateway = yield* DiscordGatewayMock;
-		yield* gateway.emitPartial("READY", {
-			guilds: [{ id: GUILD_ID, unavailable: false }],
-		});
-
+		client.client.emit("ready", client.client as any);
 		const db = yield* Database;
+		// sleep for 1 second
+		yield* Effect.sleep("1  millis");
 		const server = yield* db.servers.getServerById(GUILD_ID);
+		const allServers = yield* db.servers.publicGetAllServers();
+		console.log("allServers", allServers, server, GUILD_ID);
 		expect(server).toBeTruthy();
 		expect(server?.discordId).toBe(GUILD_ID);
 	}).pipe(
-		Effect.provide(
-			Layer.mergeAll(DatabaseTestLayer, MockDiscordRest, MockDiscordGateway),
-		),
+		Effect.provide(Layer.mergeAll(DatabaseTestLayer, DiscordClientLayer)),
 	),
 );

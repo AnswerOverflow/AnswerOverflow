@@ -1,50 +1,46 @@
-import { DiscordREST } from "dfx/DiscordREST";
-import { DiscordGateway } from "dfx/gateway";
 import { Effect, Layer } from "effect";
 import {
 	Database,
 	DatabaseLayer,
 } from "../../../packages/database/src/database";
 import { DiscordGatewayLayer } from "./framework/discord-gateway";
+import { DiscordClient } from "./services/discord";
 
 export const syncGuild = (guildId: string) =>
 	Effect.gen(function* () {
-		const rest = yield* DiscordREST;
+		console.log("syncing guild", guildId);
+		const client = yield* DiscordClient;
 		const database = yield* Database;
-		const guild = yield* rest.getGuild(guildId, { with_counts: true });
+		const guild = yield* client.getGuild(guildId);
 		yield* database.servers.upsertServer({
 			discordId: guild.id,
 			name: guild.name ?? guild.id,
 			icon: guild.icon ?? undefined,
 			description: guild.description ?? undefined,
-			vanityInviteCode: guild.vanity_url_code ?? undefined,
-			approximateMemberCount: guild.approximate_member_count ?? 0,
+			vanityInviteCode: guild.vanityURLCode ?? undefined,
+			approximateMemberCount: guild.approximateMemberCount ?? 0,
 			plan: "FREE",
 		});
+		const created = yield* database.servers.getServerById(guild.id);
+		console.log("created", created);
 	});
 
 export const make = Effect.gen(function* () {
-	const gateway = yield* DiscordGateway;
+	const client = yield* DiscordClient;
 
-	yield* gateway
-		.handleDispatch("READY", (readyData) =>
-			Effect.gen(function* () {
-				const guildIds = readyData.guilds.map((g) => g.id);
-				yield* Effect.forEach(guildIds, (guildId) =>
-					syncGuild(guildId).pipe(Effect.delay(1000)),
-				);
-			}),
-		)
-		.pipe(Effect.forkScoped);
+	client.effectOn("ready", (readyData) =>
+		Effect.gen(function* () {
+			const guildIds = readyData.guilds.cache.map((g) => g.id);
+			yield* Effect.forEach(guildIds, (guildId) => syncGuild(guildId));
+		}),
+	);
 
-	yield* gateway
-		.handleDispatch("GUILD_UPDATE", (guildUpdateData) =>
-			Effect.gen(function* () {
-				const guildId = guildUpdateData.id;
-				yield* syncGuild(guildId);
-			}),
-		)
-		.pipe(Effect.forkScoped);
+	client.effectOn("guildUpdate", (guildUpdateData) =>
+		Effect.gen(function* () {
+			const guildId = guildUpdateData.id;
+			yield* syncGuild(guildId);
+		}),
+	);
 }).pipe(Effect.annotateLogs({ service: "GuildParity" }));
 
 export const GuildParityLive = Layer.scopedDiscard(make).pipe(
