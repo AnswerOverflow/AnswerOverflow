@@ -9,7 +9,8 @@ import type {
 import { convexTest, type TestConvex } from "convex-test";
 import { Context, Effect, Layer } from "effect";
 import { readdir } from "fs/promises";
-import { join, resolve } from "path";
+import { fileURLToPath } from "url";
+import { dirname, join, resolve } from "path";
 import { api, internal } from "../convex/_generated/api";
 import schema from "../convex/schema";
 import {
@@ -21,7 +22,9 @@ import {
 
 type TestConvexClient = ConvexClientShared & TestConvex<typeof schema>;
 
-const projectRoot = resolve(import.meta.dir, "..");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const projectRoot = resolve(__dirname, "..");
 const convexDir = join(projectRoot, "convex");
 
 // Recursively find all .ts and .js files in convex directory
