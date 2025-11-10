@@ -1,15 +1,58 @@
-import { BunRuntime } from "@effect/platform-bun";
-import { Layer } from "effect";
-import { GuildParityLive } from "./src/guild-parity";
-import { HelloLayer } from "./src/hello";
-import { IndexingLive } from "./src/indexing";
-import { ReadyLive } from "./src/ready";
+import { Database, DatabaseLayer } from "@packages/database/database";
+import { Effect, Layer } from "effect";
+import { DiscordClient } from "./src/discord-client";
+import { DiscordClientRealLayer } from "./src/discord-client-real";
 
-const MainLive = Layer.mergeAll(
-	HelloLayer,
-	ReadyLive,
-	IndexingLive,
-	GuildParityLive,
-);
+const program = Effect.gen(function* () {
+	const discord = yield* DiscordClient;
+	const database = yield* Database;
 
-BunRuntime.runMain(Layer.launch(MainLive));
+	// Subscribe to ready event
+	yield* discord.on("clientReady", (client) =>
+		Effect.scoped(
+			Effect.gen(function* () {
+				const servers = yield* database.servers.publicGetAllServers();
+				console.log(
+					`Logged in as ${client.user.tag}! ${servers?.data?.length} servers`,
+				);
+			}).pipe(Effect.catchAll(Effect.orDie)),
+		),
+	);
+
+	yield* discord.on("clientReady", (_client) =>
+		Effect.gen(function* () {
+			console.log("Normal client ready event");
+			yield* Effect.void;
+			return;
+		}),
+	);
+
+	// Subscribe to messageCreate event
+	yield* discord.on("messageCreate", (message) =>
+		Effect.sync(() => {
+			if (message.content === "!ping") {
+				console.log("Received ping command!");
+			}
+		}),
+	);
+
+	// Login to Discord and wait for ready
+	yield* discord.login();
+
+	// Get and log guild count
+	const guilds = yield* discord.getGuilds();
+	console.log(`Bot is in ${guilds.length} guilds`);
+
+	// Keep the bot running
+	return yield* Effect.never;
+});
+
+// Run the program with the DiscordClientRealLayer
+Effect.runPromise(
+	program.pipe(
+		Effect.provide(Layer.mergeAll(DiscordClientRealLayer, DatabaseLayer)),
+	),
+).catch((error) => {
+	console.error("Fatal error:", error);
+	process.exit(1);
+});
