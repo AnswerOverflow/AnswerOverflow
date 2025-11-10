@@ -8,3 +8,12 @@ We vendor the `Effect` repository as a git subtree under `.context/effect/`.
 - **Updating the subtree**:
   - `git fetch effect-upstream`
   - `git subtree pull --prefix=.context/effect effect-upstream main --squash`
+
+## AnswerOverflow Production Codebase
+
+We also include the AnswerOverflow production codebase as a git submodule under `.context/AnswerOverflow/`.
+
+- **Context**: This is the current production codebase that we're rewriting. Use it as a reference for understanding existing functionality, business logic, and patterns that need to be preserved or improved in the rewrite.
+- **Updating the submodule**:
+  - `git submodule update --remote .context/AnswerOverflow`
+  - Or navigate to `.context/AnswerOverflow` and pull changes: `cd .context/AnswerOverflow && git pull`

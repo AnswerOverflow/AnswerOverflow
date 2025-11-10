@@ -1,1 +1,0 @@
-../../../platform-node/test/fixtures/rpc-schemas.ts

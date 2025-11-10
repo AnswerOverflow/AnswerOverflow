@@ -1,4 +1,0 @@
-packages:
-  - scratchpad
-  - packages/*
-  - packages/ai/*

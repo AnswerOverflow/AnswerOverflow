@@ -26,7 +26,7 @@ const createHttpService = Effect.gen(function* () {
     query: client.query.bind(client),
     mutation: client.mutation.bind(client),
     action: client.action.bind(client),
-    watchQuery: <Query extends FunctionReference<"query">>(
+    watchQuery: async <Query extends FunctionReference<"query">>(
       query: Query,
       ...args: OptionalRestArgs<Query>
     ) => {
@@ -37,10 +37,25 @@ const createHttpService = Effect.gen(function* () {
       let currentValue: FunctionReturnType<Query> | undefined;
       const callbacks = new Set<() => void>();
 
+      // Create deferred to wait for first update
+      let resolveDeferred: (() => void) | undefined;
+      const deferred = new Promise<void>((resolve) => {
+        resolveDeferred = resolve;
+      });
+
+      let firstUpdate = true;
       const unsubscribe = client.onUpdate(query, queryArgs, (result) => {
         currentValue = result;
+        // Resolve deferred on first update
+        if (firstUpdate) {
+          firstUpdate = false;
+          resolveDeferred?.();
+        }
         callbacks.forEach((cb) => cb());
       });
+
+      // Wait for first update before returning watch
+      await deferred;
 
       const watch: Watch<FunctionReturnType<Query>> = {
         onUpdate: (callback: () => void) => {
@@ -67,7 +82,7 @@ const createHttpService = Effect.gen(function* () {
         api: typeof api;
         internal: typeof internal;
       }
-    ) => T
+    ) => T | Promise<T>
   ) =>
     Effect.tryPromise({
       async try() {
@@ -76,7 +91,7 @@ const createHttpService = Effect.gen(function* () {
           client,
           sharedClient
         ) as HttpConvexClient;
-        return fn(mergedClient, { api, internal });
+        return await fn(mergedClient, { api, internal });
       },
       catch(cause) {
         return new ConvexError({ cause });

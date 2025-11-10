@@ -9,8 +9,8 @@ import type {
 import { convexTest, type TestConvex } from "convex-test";
 import { Context, Effect, Layer } from "effect";
 import { readdir } from "fs/promises";
-import { fileURLToPath } from "url";
 import { dirname, join, resolve } from "path";
+import { fileURLToPath } from "url";
 import { api, internal } from "../convex/_generated/api";
 import schema from "../convex/schema";
 import {
@@ -90,7 +90,7 @@ const createTestService = Effect.gen(function* () {
     query: testClient.query.bind(testClient),
     mutation: wrappedMutation,
     action: testClient.action.bind(testClient),
-    watchQuery: <Query extends FunctionReference<"query">>(
+    watchQuery: async <Query extends FunctionReference<"query">>(
       query: Query,
       ...args: OptionalRestArgs<Query>
     ) => {
@@ -101,6 +101,13 @@ const createTestService = Effect.gen(function* () {
       let currentValue: FunctionReturnType<Query> | undefined;
       const callbacks = new Set<() => void>();
 
+      // Create deferred to wait for first update
+      let resolveDeferred: (() => void) | undefined;
+      const deferred = new Promise<void>((resolve) => {
+        resolveDeferred = resolve;
+      });
+
+      let firstUpdate = true;
       // Refresh function that always triggers callbacks (like Convex does)
       const refreshValue = async () => {
         try {
@@ -110,11 +117,20 @@ const createTestService = Effect.gen(function* () {
           callbacks.forEach((cb) => cb());
         } catch {
           // Ignore errors for now - could be enhanced to handle errors
+        } finally {
+          // Resolve deferred on first update (even if there was an error)
+          if (firstUpdate) {
+            firstUpdate = false;
+            resolveDeferred?.();
+          }
         }
       };
 
-      // Run initial query
+      // Run initial query (async, don't await yet)
       refreshValue();
+
+      // Wait for first update before returning watch
+      await deferred;
 
       const watch: Watch<FunctionReturnType<Query>> = {
         onUpdate: (callback: () => void) => {
@@ -150,12 +166,12 @@ const createTestService = Effect.gen(function* () {
         api: typeof api;
         internal: typeof internal;
       }
-    ) => T
+    ) => T | Promise<T>
   ) =>
     Effect.tryPromise({
       async try() {
         // Merge sharedClient methods with the original test client
-        return fn({ ...testClient, ...sharedClient }, { api, internal });
+        return await fn({ ...testClient, ...sharedClient }, { api, internal });
       },
       catch(cause) {
         return new ConvexError({ cause });

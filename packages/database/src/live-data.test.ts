@@ -1,7 +1,6 @@
 import { expect, it } from "@effect/vitest";
-import { Effect, Schedule, TestClock } from "effect";
+import { Effect, TestClock } from "effect";
 import type { Server } from "../convex/schema";
-import { ConvexClientTest } from "./convex-client-test";
 import { Database, DatabaseTestLayer } from "./database";
 
 const server: Server = {
@@ -15,41 +14,20 @@ const server: Server = {
   approximateMemberCount: 0,
 };
 
-it.effect("live data updates when server is modified", () =>
+it.scoped("live data updates when server is modified", () =>
   Effect.gen(function* () {
     const database = yield* Database;
-    const testClient = yield* ConvexClientTest;
 
     // Initial upsert
     yield* database.servers.upsertServer(server);
-    yield* testClient.use((client) => {
-      client.finishInProgressScheduledFunctions();
-    });
 
     // Get live data
     const liveData = yield* database.servers.getServerById("123");
 
-    // Ensure any pending queries complete
-    yield* testClient.use((client) => {
-      client.finishInProgressScheduledFunctions();
-    });
-
     // Advance time to allow setTimeout callbacks to fire
     yield* TestClock.adjust("10 millis");
 
-    // Wait for initial data to load (the query runs asynchronously)
-    yield* Effect.retry(
-      Effect.sync(() => {
-        if (liveData?.data === undefined) {
-          throw new Error("Data not loaded yet");
-        }
-      }),
-      {
-        times: 20,
-        schedule: Schedule.spaced("100 millis"),
-      }
-    );
-
+    // Data should already be loaded due to defer mechanism
     expect(liveData?.data?.discordId).toBe("123");
     expect(liveData?.data?.description).toBe("Test Description");
 
@@ -59,31 +37,12 @@ it.effect("live data updates when server is modified", () =>
       ...server,
       description: updatedDescription,
     });
-    yield* testClient.use((client) => {
-      client.finishInProgressScheduledFunctions();
-    });
 
     // Advance time to allow setTimeout callbacks to fire
     yield* TestClock.adjust("10 millis");
 
-    // Wait for update to propagate
-    yield* Effect.retry(
-      Effect.sync(() => {
-        if (liveData?.data?.description !== updatedDescription) {
-          throw new Error("Update not propagated yet");
-        }
-      }),
-      {
-        times: 10,
-        schedule: Schedule.spaced("50 millis"),
-      }
-    );
-
     // Verify live data has updated
     expect(liveData?.data?.description).toBe(updatedDescription);
     expect(liveData?.data?.discordId).toBe("123");
-
-    // Clean up
-    liveData?.destroy();
   }).pipe(Effect.provide(DatabaseTestLayer))
 );

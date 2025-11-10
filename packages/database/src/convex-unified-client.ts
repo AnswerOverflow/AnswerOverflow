@@ -41,8 +41,8 @@ type WrappedUnifiedClient = Readonly<{
     fn: (
       client: ConvexClientShared,
       convexApi: { api: typeof api; internal: typeof internal }
-    ) => A
-  ) => Effect.Effect<A, ConvexError>;
+    ) => A | Promise<A>
+  ) => Effect.Effect<Awaited<A>, ConvexError>;
 }>;
 
 export class ConvexClientUnified extends Context.Tag("ConvexClient")<
