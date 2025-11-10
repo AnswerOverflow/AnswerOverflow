@@ -4,6 +4,7 @@ import type {
   FunctionReturnType,
   OptionalRestArgs,
 } from "convex/server";
+import { getFunctionName } from "convex/server";
 import { Context, Effect, Exit, Layer, Request, RequestResolver } from "effect";
 import { api, internal } from "../convex/_generated/api";
 import type { Server } from "../convex/schema";
@@ -56,17 +57,16 @@ interface WatchRequest<Query extends FunctionReference<"query">>
   readonly cacheKey: string;
 }
 
-// Type for LiveData with cache key
-interface LiveDataWithCacheKey<T> extends LiveData<T> {
-  _cacheKey: string;
-}
+// WeakMap to store cache keys for LiveData instances
+const liveDataCacheKeys = new WeakMap<LiveData<unknown>, string>();
 
 // Helper to create a watch request
 const watchRequest = <Query extends FunctionReference<"query">>(
   query: Query,
   args: FunctionArgs<Query>
 ): WatchRequest<Query> => {
-  const cacheKey = JSON.stringify({ query, args });
+  const functionName = getFunctionName(query);
+  const cacheKey = JSON.stringify({ functionName, args });
   return Request.tagged<WatchRequest<Query>>("WatchRequest")({
     query,
     args,
@@ -74,20 +74,51 @@ const watchRequest = <Query extends FunctionReference<"query">>(
   });
 };
 
+// Helper to extract args from OptionalRestArgs
+// When args is empty, FunctionArgs<Query> must be {} for queries with no args
+const extractArgs = <Query extends FunctionReference<"query">>(
+  args: OptionalRestArgs<Query>
+): FunctionArgs<Query> => {
+  // Handle the case where args is provided
+  if (args.length > 0 && args[0] !== undefined) {
+    return args[0];
+  }
+  // When args is empty, FunctionArgs<Query> must be {} for queries with no args
+  // We use a helper function to ensure type safety
+  return getEmptyFunctionArgs<Query>();
+};
+
+// Helper function that returns empty args for queries with no arguments
+// This is type-safe because when Query has no args, FunctionArgs<Query> = {}
+function getEmptyFunctionArgs<
+  Query extends FunctionReference<"query">,
+>(): FunctionArgs<Query> {
+  // Create an empty object that satisfies the FunctionArgs<Query> type
+  // when Query has no arguments
+  const empty: Record<string, never> = {};
+  // TypeScript requires this to be FunctionArgs<Query>, and when Query has no args,
+  // FunctionArgs<Query> is {}, so this assignment is valid
+  return empty satisfies FunctionArgs<Query>;
+}
+
 const service = Effect.gen(function* () {
   const externalSecret = "hello"; //yield* Config.string("EXTERNAL_WRITE_SECRET");
   const convexClient = yield* ConvexClientUnified;
 
   // Map to store active watches and their reference counts
-  const activeWatches = new Map<
-    string,
-    {
-      liveData: LiveData<unknown>;
-      unsubscribe: () => void;
-      refCount: number;
-      query: FunctionReference<"query">;
-    }
-  >();
+  // Runtime type safety is guaranteed by the cache key (function name + args)
+  // TypeScript can't express heterogeneous maps without wider types, so we accept
+  // that the stored value is a LiveData with some result type
+  type ActiveWatch<
+    T extends FunctionReturnType<
+      FunctionReference<"query">
+    > = FunctionReturnType<FunctionReference<"query">>,
+  > = {
+    liveData: LiveData<T>;
+    unsubscribe: () => void;
+    refCount: number;
+  };
+  const activeWatches = new Map<string, ActiveWatch>();
 
   const upsertServer = (data: Server) =>
     convexClient.use(
@@ -111,14 +142,11 @@ const service = Effect.gen(function* () {
 
           // Check if we already have an active watch for this key
           const existing = activeWatches.get(cacheKey);
-          if (existing && existing.query === query) {
+          if (existing) {
             existing.refCount++;
-            yield* Request.complete(
-              request,
-              Exit.succeed(
-                existing.liveData as LiveData<FunctionReturnType<typeof query>>
-              )
-            );
+            // The cache key (function name + args) guarantees the stored LiveData
+            // has the correct type for this request at runtime
+            yield* Request.complete(request, Exit.succeed(existing.liveData));
             continue;
           }
 
@@ -152,7 +180,6 @@ const service = Effect.gen(function* () {
             liveData,
             unsubscribe,
             refCount: 1,
-            query,
           });
 
           yield* Request.complete(request, Exit.succeed(liveData));
@@ -173,25 +200,21 @@ const service = Effect.gen(function* () {
     return Effect.acquireRelease(
       Effect.gen(function* () {
         const query = getQuery({ api, internal });
-        const queryArgs: FunctionArgs<Query> =
-          args.length > 0 && args[0] !== undefined
-            ? (args[0] as FunctionArgs<Query>)
-            : ({} as FunctionArgs<Query>);
+        // Handle optional rest args - could be [] or [FunctionArgs<Query>]
+        const queryArgs = extractArgs(args);
         const request = watchRequest(query, queryArgs);
 
         // Use the resolver with the request - deduplication happens automatically
         const liveData = yield* Effect.request(request, watchResolver);
 
-        // Attach cache key for cleanup
-        const liveDataWithKey: LiveDataWithCacheKey<FunctionReturnType<Query>> =
-          Object.assign(liveData, { _cacheKey: request.cacheKey });
+        // Store cache key in WeakMap for cleanup
+        liveDataCacheKeys.set(liveData, request.cacheKey);
 
-        return liveDataWithKey;
+        return liveData;
       }),
       (liveData) =>
         Effect.sync(() => {
-          const liveDataWithKey = liveData as LiveDataWithCacheKey<unknown>;
-          const cacheKey = liveDataWithKey._cacheKey;
+          const cacheKey = liveDataCacheKeys.get(liveData);
           if (cacheKey) {
             const watch = activeWatches.get(cacheKey);
             if (watch) {
@@ -201,6 +224,7 @@ const service = Effect.gen(function* () {
                 activeWatches.delete(cacheKey);
               }
             }
+            liveDataCacheKeys.delete(liveData);
           }
           liveData.destroy();
         })
