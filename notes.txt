@@ -1,0 +1,1 @@
+- there's probably a bug in our onUpdate implementation where null should be part of live data, depends how convex handles onUpdate when the first value is null

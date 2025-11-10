@@ -22,7 +22,7 @@ import {
   ConvexClientTestUnifiedLayer,
 } from "./convex-client-test";
 import type { ConvexClientShared } from "./convex-unified-client";
-import { ConvexClientUnified } from "./convex-unified-client";
+import { ConvexClientUnified, ConvexError } from "./convex-unified-client";
 
 export class LiveData<T> {
   private _data: T | undefined;
@@ -58,7 +58,7 @@ export class LiveData<T> {
 
 // Request type for watch subscriptions
 interface WatchRequest<Query extends FunctionReference<"query">>
-  extends Request.Request<LiveData<FunctionReturnType<Query>>, never> {
+  extends Request.Request<LiveData<FunctionReturnType<Query>>, ConvexError> {
   readonly _tag: "WatchRequest";
   readonly query: Query;
   readonly args: FunctionArgs<Query>;
@@ -88,7 +88,7 @@ const extractArgs = <Query extends FunctionReference<"query">>(
   args: OptionalRestArgs<Query>
 ): FunctionArgs<Query> => (args[0] ?? {}) as FunctionArgs<Query>;
 
-const service = Effect.gen(function* () {
+export const service = Effect.gen(function* () {
   const externalSecret = "hello"; //yield* Config.string("EXTERNAL_WRITE_SECRET");
   const convexClient = yield* ConvexClientUnified;
 
@@ -119,41 +119,42 @@ const service = Effect.gen(function* () {
             continue;
           }
 
-          // Create new watch
-          const callbacks = new Set<() => void>();
-          let currentValue: FunctionReturnType<typeof query> | undefined;
+          // Create new watch - handle errors at the request level
+          const result = yield* Effect.gen(function* () {
+            const callbacks = new Set<() => void>();
+            let currentValue: FunctionReturnType<typeof query> | undefined;
 
-          const unsubscribe = yield* convexClient
-            .use((client: ConvexClientShared) => {
-              return client.onUpdate(query, args, (result) => {
-                currentValue = result;
-                callbacks.forEach((cb) => cb());
-              });
-            })
-            .pipe(
-              // todo: handle this better
-              Effect.catchTag("ConvexError", () => Effect.succeed(() => {}))
+            const unsubscribe = yield* convexClient.use(
+              (client: ConvexClientShared) => {
+                return client.onUpdate(query, args, (result) => {
+                  currentValue = result;
+                  callbacks.forEach((cb) => cb());
+                });
+              }
             );
 
-          const liveData = new LiveData<FunctionReturnType<typeof query>>(
-            () => currentValue,
-            (callback) => {
-              callbacks.add(callback);
-              return () => {
-                callbacks.delete(callback);
-              };
-            },
-            currentValue
-          );
+            const liveData = new LiveData<FunctionReturnType<typeof query>>(
+              () => currentValue,
+              (callback) => {
+                callbacks.add(callback);
+                return () => {
+                  callbacks.delete(callback);
+                };
+              },
+              currentValue
+            );
 
-          // Store in active watches
-          activeWatches.set(cacheKey, {
-            liveData,
-            unsubscribe,
-            refCount: 1,
-          });
+            // Store in active watches
+            activeWatches.set(cacheKey, {
+              liveData,
+              unsubscribe,
+              refCount: 1,
+            });
 
-          yield* Request.complete(request, Exit.succeed(liveData));
+            return liveData;
+          }).pipe(Effect.exit);
+
+          yield* Request.complete(request, result);
         }
       })
   ).pipe(
