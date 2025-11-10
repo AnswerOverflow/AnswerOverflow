@@ -1,11 +1,10 @@
 {
-  "extends": "../typescript-config/base.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "module": "ESNext",
-    "moduleResolution": "bundler"
-  },
-  "include": ["src/**/*", "convex/**/*"],
-  "exclude": ["node_modules", "dist", "convex/_generated"]
+	"extends": "../typescript-config/base.json",
+	"compilerOptions": {
+		"outDir": "./dist",
+		"module": "ESNext",
+		"moduleResolution": "bundler"
+	},
+	"include": ["src/**/*", "convex/**/*"],
+	"exclude": ["node_modules", "dist", "convex/_generated"]
 }
-

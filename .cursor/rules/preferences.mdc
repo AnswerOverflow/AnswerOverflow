@@ -2,9 +2,45 @@
 alwaysApply: true
 ---
 
+# Code Style & Architecture Preferences
+
+## Type Safety
+
+- Never use `any`, `unknown`, or TypeScript type casting (`as` or angle bracket syntax)
+- Use proper types and type inference instead
+- Access data through proper type-safe methods (e.g., `liveData?.data?.property`)
+
+## Database Design
+
+- Use regular boolean fields instead of bitfield encoding/decoding
+- Store settings in separate tables rather than embedding flags in main entities
+- All database operations should flow through the database service layer
+- Avoid direct Convex client access in tests or application code
+
+## Testing
+
+- Tests should work without `TestClock.adjust()` - LiveData should be available immediately after mutations
+- **Never use `TestClock.adjust()` after writing data and then reading it** - data should be available instantly, no waiting needed
+- **Only use `TestClock.adjust()` when testing functionality specifically related to time** (e.g., timeouts, delays, scheduled tasks)
+- Use LiveData properly: access data via `liveData?.data?.property` rather than casting or workarounds
+- Tests should use the same patterns as production code (database service layer)
+- Include tests in implementation plans and run them during development (`bun run test`)
+
+## Code Quality
+
+- Prefer explicit types and clear separation of concerns
+- Avoid test-specific workarounds or shortcuts
+- Keep test code clean and straightforward
+
 Do not create summary documents or markdown documents unless instructed
 
-Run commands with a timeout of 60 seconds unless instructed otherwise---
-alwaysApply: true
+Run commands with a timeout of 60 seconds unless instructed otherwise
 
----
+### DISCORD IDS VS CONVEX IDS
+
+WHEN WE REFER TO AN ID, WE ARE REFERRING TO THE CONVEX ID
+
+WHEN REFERRING TO A DISCORD ID, WE ARE REFERRING TO THE DISCORD ID
+
+IF YOU HAVE A FUNCTION THAT IS GET BY ID, IT WILL LOOK UP ON THE CONVEX ID
+A FUNCTION THAT LOOKS UP BY DISCORD ID SHOULD HAVE THAT IN THE NAME

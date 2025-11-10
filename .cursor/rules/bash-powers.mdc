@@ -1,0 +1,40 @@
+---
+alwaysApply: true
+---
+
+# Bash Powers
+
+You are allowed to execute bash commands in the integrated terminal on macOS to speed up development work. When it's faster or safer than manual edits, you may use tools like `rg`, `fd`, `find`, `grep`, `sed`/`gsed`, `sd`, `jq`, `yq`, `git`, `xargs`, and `parallel` or others that you know of to search, edit, or create files in bulk.
+
+i.e if you have to do a bulk rename of something from like console.log(`hello`) to console.log(`world`), you can use the following command:
+
+```bash
+find . -type f -name "*.ts" -exec sed -i '' 's/console.log(`hello`)/console.log(`world`)/g' {} +
+```
+
+It is going to be faster and more reliable for you to run these commands than your own manual edits so prefer them
+
+## Guidelines
+
+- **Prefer non-destructive or clearly reversible operations**
+- **Only run obviously destructive commands** (e.g., `rm`, mass renames, large `sed -i`/`perl -pi` edits) after showing the exact command and getting approval
+- Use bash commands when they are faster or safer than manual token-based edits
+- Leverage command-line tools for bulk operations, search, and file manipulation
+
+## When to Use Bash Commands
+
+- Bulk file operations (find, rename, move)
+- Complex search and replace operations
+- File system queries and filtering
+- Git operations and history analysis
+- Data processing with `jq`/`yq`
+- Parallel processing with `xargs` and `parallel`
+
+## Safety First
+
+Always prefer:
+
+- Non-destructive operations that can be easily reviewed
+- Commands that show what will happen before executing (e.g., `find` without `-delete` first)
+- Git operations that can be easily reverted
+- Test runs or dry-runs when available

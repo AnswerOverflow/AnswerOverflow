@@ -17,3 +17,5 @@ We also include the AnswerOverflow production codebase as a git submodule under 
 - **Updating the submodule**:
   - `git submodule update --remote .context/AnswerOverflow`
   - Or navigate to `.context/AnswerOverflow` and pull changes: `cd .context/AnswerOverflow && git pull`
+
+When I say 'the old answer overflow' i am referring to this codebase

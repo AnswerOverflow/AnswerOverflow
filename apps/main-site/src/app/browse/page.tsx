@@ -3,13 +3,18 @@ import { Effect } from "effect";
 import { ServerGrid } from "./client";
 
 export default async function BrowsePage() {
-	const servers = await Effect.gen(function* () {
+	const serversLiveData = await Effect.gen(function* () {
 		const database = yield* Database;
-		const servers = yield* database.servers.publicGetAllServers();
-		return servers;
+		const liveData = yield* Effect.scoped(
+			database.servers.publicGetAllServers(),
+		);
+		return liveData;
 	})
 		.pipe(Effect.provide(DatabaseLayer))
 		.pipe(Effect.runPromise);
+
+	const servers = serversLiveData.data ?? [];
+
 	return (
 		<div>
 			Browse

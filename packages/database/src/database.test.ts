@@ -1,5 +1,5 @@
 import { expect, it } from "@effect/vitest";
-import { Cause, Chunk, Effect, Exit, Layer, Scope, TestClock } from "effect";
+import { Cause, Chunk, Effect, Exit, Layer, Scope } from "effect";
 import type { Server } from "../convex/schema";
 import { ConvexClientTest } from "./convex-client-test";
 import {
@@ -7,7 +7,8 @@ import {
 	ConvexError,
 	type WrappedUnifiedClient,
 } from "./convex-unified-client";
-import { Database, DatabaseTestLayer, service } from "./database";
+import { Database, service } from "./database";
+import { DatabaseTestLayer } from "./database-test";
 
 const server: Server = {
 	name: "Test Server",
@@ -39,10 +40,7 @@ it.scoped("live data updates when server is modified", () =>
 		yield* database.servers.upsertServer(server);
 
 		// Get live data
-		const liveData = yield* database.servers.getServerById("123");
-
-		// Advance time to allow setTimeout callbacks to fire
-		yield* TestClock.adjust("10 millis");
+		const liveData = yield* database.servers.getServerByDiscordId("123");
 
 		// Data should already be loaded due to defer mechanism
 		expect(liveData?.data?.discordId).toBe("123");
@@ -54,9 +52,6 @@ it.scoped("live data updates when server is modified", () =>
 			...server,
 			description: updatedDescription,
 		});
-
-		// Advance time to allow setTimeout callbacks to fire
-		yield* TestClock.adjust("10 millis");
 
 		// Verify live data has updated
 		expect(liveData?.data?.description).toBe(updatedDescription);
@@ -78,12 +73,9 @@ it.scoped(
 			yield* database.servers.upsertServer(server);
 
 			// Get live data multiple times with same args
-			const liveData1 = yield* database.servers.getServerById("123");
-			const liveData2 = yield* database.servers.getServerById("123");
-			const liveData3 = yield* database.servers.getServerById("123");
-
-			// Advance time to allow callbacks to fire
-			yield* TestClock.adjust("10 millis");
+			const liveData1 = yield* database.servers.getServerByDiscordId("123");
+			const liveData2 = yield* database.servers.getServerByDiscordId("123");
+			const liveData3 = yield* database.servers.getServerByDiscordId("123");
 
 			// All should be the same instance (deduplication)
 			expect(liveData1).toBe(liveData2);
@@ -109,11 +101,8 @@ it.scoped("different args create different LiveData instances", () =>
 		yield* database.servers.upsertServer(server2);
 
 		// Get live data for different servers
-		const liveData1 = yield* database.servers.getServerById("123");
-		const liveData2 = yield* database.servers.getServerById("456");
-
-		// Advance time to allow callbacks to fire
-		yield* TestClock.adjust("10 millis");
+		const liveData1 = yield* database.servers.getServerByDiscordId("123");
+		const liveData2 = yield* database.servers.getServerByDiscordId("456");
 
 		// Should be different instances
 		expect(liveData1).not.toBe(liveData2);
@@ -132,11 +121,8 @@ it.scoped("different queries create different LiveData instances", () =>
 		yield* database.servers.upsertServer(server);
 
 		// Get live data from different queries
-		const liveData1 = yield* database.servers.getServerById("123");
+		const liveData1 = yield* database.servers.getServerByDiscordId("123");
 		const liveData2 = yield* database.servers.publicGetAllServers();
-
-		// Advance time to allow callbacks to fire
-		yield* TestClock.adjust("10 millis");
 
 		// Should be different instances
 		expect(liveData1).not.toBe(liveData2);
@@ -162,20 +148,17 @@ it.scoped("reference counting: multiple acquisitions increment refCount", () =>
 
 		// Acquire multiple times in separate scopes
 		const liveData1 = yield* Scope.extend(
-			database.servers.getServerById("123"),
+			database.servers.getServerByDiscordId("123"),
 			scope1,
 		);
 		const liveData2 = yield* Scope.extend(
-			database.servers.getServerById("123"),
+			database.servers.getServerByDiscordId("123"),
 			scope2,
 		);
 		const liveData3 = yield* Scope.extend(
-			database.servers.getServerById("123"),
+			database.servers.getServerByDiscordId("123"),
 			scope3,
 		);
-
-		// Advance time to allow callbacks to fire
-		yield* TestClock.adjust("10 millis");
 
 		// All should be the same instance (deduplication)
 		expect(liveData1).toBe(liveData2);
@@ -184,9 +167,6 @@ it.scoped("reference counting: multiple acquisitions increment refCount", () =>
 		// Release one reference - watch should still be active
 		yield* Scope.close(scope1, Exit.succeed(undefined));
 
-		// Advance time
-		yield* TestClock.adjust("10 millis");
-
 		// Remaining instances should still work
 		expect(liveData2?.data?.discordId).toBe("123");
 		expect(liveData3?.data?.discordId).toBe("123");
@@ -194,17 +174,11 @@ it.scoped("reference counting: multiple acquisitions increment refCount", () =>
 		// Release another reference - watch should still be active
 		yield* Scope.close(scope2, Exit.succeed(undefined));
 
-		// Advance time
-		yield* TestClock.adjust("10 millis");
-
 		// Last instance should still work
 		expect(liveData3?.data?.discordId).toBe("123");
 
 		// Release last reference - watch should be cleaned up
 		yield* Scope.close(scope3, Exit.succeed(undefined));
-
-		// Advance time
-		yield* TestClock.adjust("10 millis");
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -218,12 +192,9 @@ it.scoped(
 			yield* database.servers.upsertServer(server);
 
 			// Get multiple LiveData instances for the same query+args
-			const liveData1 = yield* database.servers.getServerById("123");
-			const liveData2 = yield* database.servers.getServerById("123");
-			const liveData3 = yield* database.servers.getServerById("123");
-
-			// Advance time to allow callbacks to fire
-			yield* TestClock.adjust("10 millis");
+			const liveData1 = yield* database.servers.getServerByDiscordId("123");
+			const liveData2 = yield* database.servers.getServerByDiscordId("123");
+			const liveData3 = yield* database.servers.getServerByDiscordId("123");
 
 			// All should have initial data
 			expect(liveData1?.data?.description).toBe("Test Description");
@@ -236,9 +207,6 @@ it.scoped(
 				...server,
 				description: updatedDescription,
 			});
-
-			// Advance time to allow callbacks to fire
-			yield* TestClock.adjust("10 millis");
 
 			// All instances should have updated data
 			expect(liveData1?.data?.description).toBe(updatedDescription);
@@ -258,11 +226,8 @@ it.scoped(
 			yield* database.servers.upsertServer(server2);
 
 			// Get LiveData instances for different servers
-			const liveData1 = yield* database.servers.getServerById("123");
-			const liveData2 = yield* database.servers.getServerById("456");
-
-			// Advance time to allow callbacks to fire
-			yield* TestClock.adjust("10 millis");
+			const liveData1 = yield* database.servers.getServerByDiscordId("123");
+			const liveData2 = yield* database.servers.getServerByDiscordId("456");
 
 			// Both should have their initial data
 			expect(liveData1?.data?.discordId).toBe("123");
@@ -274,9 +239,6 @@ it.scoped(
 				...server,
 				description: updatedDescription,
 			});
-
-			// Advance time to allow callbacks to fire
-			yield* TestClock.adjust("10 millis");
 
 			// Only liveData1 should be updated
 			expect(liveData1?.data?.description).toBe(updatedDescription);
@@ -297,23 +259,20 @@ it.scoped("LiveData can be reacquired after cleanup", () =>
 
 		// Acquire in first scope
 		const liveData1 = yield* Scope.extend(
-			database.servers.getServerById("123"),
+			database.servers.getServerByDiscordId("123"),
 			scope1,
 		);
-		yield* TestClock.adjust("10 millis");
 		expect(liveData1?.data?.discordId).toBe("123");
 
 		// Release first scope
 		yield* Scope.close(scope1, Exit.succeed(undefined));
-		yield* TestClock.adjust("10 millis");
 
 		// Reacquire in new scope - should create a new watch
 		const scope2 = yield* Scope.make();
 		const liveData2 = yield* Scope.extend(
-			database.servers.getServerById("123"),
+			database.servers.getServerByDiscordId("123"),
 			scope2,
 		);
-		yield* TestClock.adjust("10 millis");
 
 		// Should still work
 		expect(liveData2?.data?.discordId).toBe("123");
@@ -336,18 +295,12 @@ it.scoped("publicGetAllServers updates when any server changes", () =>
 		// Get live data for all servers
 		const liveData = yield* database.servers.publicGetAllServers();
 
-		// Advance time to allow callbacks to fire
-		yield* TestClock.adjust("10 millis");
-
 		// Should have one server
 		expect(liveData?.data?.length).toBe(1);
 		expect(liveData?.data?.[0]?.discordId).toBe("123");
 
 		// Add another server
 		yield* database.servers.upsertServer(server2);
-
-		// Advance time to allow callbacks to fire
-		yield* TestClock.adjust("10 millis");
 
 		// Should have two servers
 		expect(liveData?.data?.length).toBe(2);
@@ -360,9 +313,6 @@ it.scoped("publicGetAllServers updates when any server changes", () =>
 			...server,
 			description: updatedDescription,
 		});
-
-		// Advance time to allow callbacks to fire
-		yield* TestClock.adjust("10 millis");
 
 		// Should still have two servers, but first one updated
 		expect(liveData?.data?.length).toBe(2);
@@ -382,9 +332,6 @@ it.scoped("LiveData handles queries with no args", () =>
 		const liveData1 = yield* database.servers.publicGetAllServers();
 		const liveData2 = yield* database.servers.publicGetAllServers();
 
-		// Advance time to allow callbacks to fire
-		yield* TestClock.adjust("10 millis");
-
 		// Should be the same instance (deduplication)
 		expect(liveData1).toBe(liveData2);
 
@@ -398,10 +345,8 @@ it.scoped("LiveData handles null query results", () =>
 		const database = yield* Database;
 
 		// Get live data for non-existent server
-		const liveData = yield* database.servers.getServerById("nonexistent");
-
-		// Advance time to allow callbacks to fire
-		yield* TestClock.adjust("10 millis");
+		const liveData =
+			yield* database.servers.getServerByDiscordId("nonexistent");
 
 		// Should return null
 		expect(liveData?.data).toBeNull();
@@ -413,10 +358,7 @@ it.scoped("LiveData updates when null result becomes non-null", () =>
 		const database = yield* Database;
 
 		// Get live data for non-existent server
-		const liveData = yield* database.servers.getServerById("789");
-
-		// Advance time to allow callbacks to fire
-		yield* TestClock.adjust("10 millis");
+		const liveData = yield* database.servers.getServerByDiscordId("789");
 
 		// Should return null
 		expect(liveData?.data).toBeNull();
@@ -428,9 +370,6 @@ it.scoped("LiveData updates when null result becomes non-null", () =>
 			name: "New Server",
 		};
 		yield* database.servers.upsertServer(newServer);
-
-		// Advance time to allow callbacks to fire
-		yield* TestClock.adjust("10 millis");
 
 		// Should now have data
 		expect(liveData?.data?.discordId).toBe("789");
@@ -460,7 +399,7 @@ it("LiveData propagates ConvexError from .use()", () =>
 
 		// Try to get live data - should fail with ConvexError
 		const result = yield* Effect.scoped(
-			database.servers.getServerById("123"),
+			database.servers.getServerByDiscordId("123"),
 		).pipe(Effect.exit);
 
 		// Verify that the Effect failed with a ConvexError

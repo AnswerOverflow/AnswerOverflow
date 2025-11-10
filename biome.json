@@ -1,34 +1,43 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.1.4/schema.json",
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  },
-  "files": {
-    "includes": ["**", "!**/convex/_generated/**", "!**/*.css"]
-  },
-  "formatter": {
-    "enabled": true,
-    "indentStyle": "tab"
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true
-    }
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "double"
-    }
-  },
-  "assist": {
-    "enabled": true,
-    "actions": {
-      "source": {
-        "organizeImports": "on"
-      }
-    }
-  }
+	"$schema": "https://biomejs.dev/schemas/2.1.4/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"includes": [
+			"**",
+			"!**/convex/_generated/**",
+			"!**/*.css",
+			"!**/.context/**"
+		]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab"
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"suspicious": {
+				"noShadowRestrictedNames": "error",
+				"noExplicitAny": "error"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double"
+		}
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	}
 }

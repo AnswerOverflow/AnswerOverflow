@@ -26,9 +26,10 @@ const nextConfig: NextConfig = {
 			},
 		],
 	},
+	cacheComponents: true,
+	reactCompiler: true,
 	experimental: {
-		useCache: true,
-		reactCompiler: true,
+		fileSystemCache: true,
 	},
 };
 

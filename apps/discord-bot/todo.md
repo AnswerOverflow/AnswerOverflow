@@ -9,7 +9,7 @@ Features to implement:
 
 ## Jobs:
 
-- [ ] Indexing job
+- [x] Indexing job
 - [ ] Generate sitemap
 - [ ] Report status to Vestaboard
 - [ ] Update discord status
