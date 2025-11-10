@@ -2,8 +2,8 @@
 
 import { trackEvent } from '../hooks/events';
 import { EventMap } from '../hooks/events';
-import { LinkButton } from './link-button';
 import { usePostHog } from '../hooks/use-posthog';
+import { LinkButton } from './link-button';
 
 export function TrackLinkButton<K extends keyof EventMap | string>(
 	props: React.ComponentPropsWithoutRef<typeof LinkButton> & {

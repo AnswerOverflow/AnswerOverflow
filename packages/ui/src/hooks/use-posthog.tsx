@@ -1,7 +1,7 @@
 // straight up postin' my hog
 
-import { useTenant } from '../context/tenant-context';
 import { usePostHog as usePostHogInternal } from 'posthog-js/react';
+import { useTenant } from '../context/tenant-context';
 
 export type CustomHog = ReturnType<typeof usePostHogInternal> & {
 	__brand: 'CustomHog';

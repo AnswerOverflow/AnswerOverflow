@@ -2,7 +2,7 @@ import { findServerWithCommunityPageData } from '@answeroverflow/core/pages';
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import { CommunityPage } from '@answeroverflow/ui/pages/CommunityPage';
 import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 
 type Props = {
@@ -11,7 +11,6 @@ type Props = {
 		uwu?: string;
 	}>;
 };
-export const dynamic = 'force-static';
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;

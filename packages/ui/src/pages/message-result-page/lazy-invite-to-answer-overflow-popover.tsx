@@ -2,8 +2,8 @@
 import dynamic from 'next/dynamic';
 import React from 'react';
 import { trackEvent } from '../../hooks/events';
-import { Button } from '../../ui/button';
 import { usePostHog } from '../../hooks/use-posthog';
+import { Button } from '../../ui/button';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const InviteToAnswerOverflowPopover = dynamic(

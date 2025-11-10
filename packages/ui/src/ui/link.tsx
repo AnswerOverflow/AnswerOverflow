@@ -1,8 +1,8 @@
 'use client';
 import NextLink from 'next/link';
 import React from 'react';
-import { cn } from '../utils/utils';
 import { useTenant } from '../context/tenant-context';
+import { cn } from '../utils/utils';
 export function Link(
 	props: React.ComponentPropsWithoutRef<typeof NextLink> & {
 		href: string;

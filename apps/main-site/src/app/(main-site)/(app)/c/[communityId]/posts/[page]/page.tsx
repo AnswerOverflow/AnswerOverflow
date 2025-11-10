@@ -4,7 +4,6 @@ import { BlueLink } from '@answeroverflow/ui/ui/blue-link';
 type Props = {
 	params: Promise<{ communityId: string; page: string }>;
 };
-export const dynamic = 'force-static';
 
 export default async function CommunityPosts(props: Props) {
 	const params = await props.params;
@@ -12,7 +11,7 @@ export default async function CommunityPosts(props: Props) {
 
 	if (!lookup) return <div>Community not found</div>;
 	const pageSize = 5000;
-	const currentPage = parseInt(params.page ?? '0');
+	const currentPage = Number.parseInt(params.page ?? '0');
 
 	const { questions: allQuestion, server } = lookup;
 	const questions = allQuestion.slice(

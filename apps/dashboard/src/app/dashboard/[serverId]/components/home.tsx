@@ -199,10 +199,10 @@ import { Link } from '@answeroverflow/ui/ui/link';
 import { GoLinkExternal } from 'react-icons/go';
 
 import { trackEvent } from '@answeroverflow/ui/hooks/events';
+import { usePostHog } from '@answeroverflow/ui/hooks/use-posthog';
 import { Button } from '@answeroverflow/ui/ui/button';
 import { Textarea } from '@answeroverflow/ui/ui/textarea';
 import { toast } from 'react-toastify';
-import { usePostHog } from '@answeroverflow/ui/hooks/use-posthog';
 
 function ExternalLink({
 	href,

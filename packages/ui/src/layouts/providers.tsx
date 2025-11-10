@@ -2,12 +2,12 @@
 import { ThemeProvider } from 'next-themes';
 import React, { Suspense } from 'react';
 
+import { ServerPublic } from '@answeroverflow/api/router/types';
+import { TenantContext } from '../context/tenant-context';
 import { AnalyticsProvider, PostHogPageview } from '../hooks/client';
+import { usePostHog } from '../hooks/use-posthog';
 import { trpc } from '../utils/client';
 import { TRPCProvider } from './trpc-provider';
-import { TenantContext } from '../context/tenant-context';
-import { ServerPublic } from '@answeroverflow/api/router/types';
-import { usePostHog } from '../hooks/use-posthog';
 
 function IdentifyUser() {
 	const { data } = trpc.auth.getSession.useQuery();
