@@ -31,7 +31,7 @@ it.scopedLive("upserts guild via READY dispatch", () =>
 		const allServers = yield* db.servers.publicGetAllServers();
 		console.log("allServers", allServers, server, GUILD_ID);
 		expect(server).toBeTruthy();
-		expect(server?.discordId).toBe(GUILD_ID);
+		expect(server?.data?.discordId).toBe(GUILD_ID);
 	}).pipe(
 		Effect.provide(Layer.mergeAll(DatabaseTestLayer, DiscordClientLayer)),
 	),
