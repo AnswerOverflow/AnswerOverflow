@@ -35,7 +35,10 @@ const createHttpService = Effect.gen(function* () {
       ...args: OptionalRestArgs<Mutation>
     ) => {
       const mutationArgs = (args[0] ?? {}) as FunctionArgs<Mutation>;
-      return client.mutation(mutation, mutationArgs) as FunctionReturnType<Mutation>;
+      return client.mutation(
+        mutation,
+        mutationArgs
+      ) as FunctionReturnType<Mutation>;
     },
     action: <Action extends FunctionReference<"action">>(
       action: Action,
@@ -75,7 +78,10 @@ const createHttpService = Effect.gen(function* () {
       catch(cause) {
         return new ConvexError({ cause });
       },
-    }).pipe(Effect.withSpan("use_convex_http_client")) as Effect.Effect<Awaited<A>, ConvexError>;
+    }).pipe(Effect.withSpan("use_convex_http_client")) as Effect.Effect<
+      Awaited<A>,
+      ConvexError
+    >;
   };
 
   return { use, client: sharedClient };

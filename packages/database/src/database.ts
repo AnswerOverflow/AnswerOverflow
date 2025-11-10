@@ -5,7 +5,15 @@ import type {
   OptionalRestArgs,
 } from "convex/server";
 import { getFunctionName } from "convex/server";
-import { Context, Effect, Exit, Layer, Request, RequestResolver } from "effect";
+import {
+  Config,
+  Context,
+  Effect,
+  Exit,
+  Layer,
+  Request,
+  RequestResolver,
+} from "effect";
 import { api, internal } from "../convex/_generated/api";
 import type { Server } from "../convex/schema";
 import { ConvexClientHttpUnifiedLayer } from "./convex-client-http";
@@ -75,62 +83,23 @@ const watchRequest = <Query extends FunctionReference<"query">>(
 };
 
 // Helper to extract args from OptionalRestArgs
-// When args is empty, FunctionArgs<Query> must be {} for queries with no args
+// When args is empty, returns {} for queries with no args
 const extractArgs = <Query extends FunctionReference<"query">>(
   args: OptionalRestArgs<Query>
-): FunctionArgs<Query> => {
-  // Handle the case where args is provided
-  if (args.length > 0 && args[0] !== undefined) {
-    return args[0];
-  }
-  // When args is empty, FunctionArgs<Query> must be {} for queries with no args
-  // We use a helper function to ensure type safety
-  return getEmptyFunctionArgs<Query>();
-};
-
-// Helper function that returns empty args for queries with no arguments
-// This is type-safe because when Query has no args, FunctionArgs<Query> = {}
-function getEmptyFunctionArgs<
-  Query extends FunctionReference<"query">,
->(): FunctionArgs<Query> {
-  // Create an empty object that satisfies the FunctionArgs<Query> type
-  // when Query has no arguments
-  const empty: Record<string, never> = {};
-  // TypeScript requires this to be FunctionArgs<Query>, and when Query has no args,
-  // FunctionArgs<Query> is {}, so this assignment is valid
-  return empty satisfies FunctionArgs<Query>;
-}
+): FunctionArgs<Query> => (args[0] ?? {}) as FunctionArgs<Query>;
 
 const service = Effect.gen(function* () {
   const externalSecret = "hello"; //yield* Config.string("EXTERNAL_WRITE_SECRET");
   const convexClient = yield* ConvexClientUnified;
 
   // Map to store active watches and their reference counts
-  // Runtime type safety is guaranteed by the cache key (function name + args)
-  // TypeScript can't express heterogeneous maps without wider types, so we accept
-  // that the stored value is a LiveData with some result type
-  type ActiveWatch<
-    T extends FunctionReturnType<
-      FunctionReference<"query">
-    > = FunctionReturnType<FunctionReference<"query">>,
-  > = {
-    liveData: LiveData<T>;
+  // Cache key (function name + args) guarantees type safety at runtime
+  type ActiveWatch = {
+    liveData: LiveData<FunctionReturnType<FunctionReference<"query">>>;
     unsubscribe: () => void;
     refCount: number;
   };
   const activeWatches = new Map<string, ActiveWatch>();
-
-  const upsertServer = (data: Server) =>
-    convexClient.use(
-      (
-        client: ConvexClientShared,
-        convexApi: { api: typeof api; internal: typeof internal }
-      ) =>
-        client.mutation(convexApi.api.servers.upsertServerExternal, {
-          data,
-          apiKey: externalSecret,
-        })
-    );
 
   // Create a resolver for watch requests
   const watchResolver = RequestResolver.makeBatched(
@@ -154,7 +123,6 @@ const service = Effect.gen(function* () {
           const callbacks = new Set<() => void>();
           let currentValue: FunctionReturnType<typeof query> | undefined;
 
-          // Use orDie to convert errors to defects since the resolver doesn't support typed errors
           const unsubscribe = yield* convexClient
             .use((client: ConvexClientShared) => {
               return client.onUpdate(query, args, (result) => {
@@ -162,7 +130,10 @@ const service = Effect.gen(function* () {
                 callbacks.forEach((cb) => cb());
               });
             })
-            .pipe(Effect.orDie);
+            .pipe(
+              // todo: handle this better
+              Effect.catchTag("ConvexError", () => Effect.succeed(() => {}))
+            );
 
           const liveData = new LiveData<FunctionReturnType<typeof query>>(
             () => currentValue,
@@ -230,6 +201,18 @@ const service = Effect.gen(function* () {
         })
     );
   };
+
+  const upsertServer = (data: Server) =>
+    convexClient.use(
+      (
+        client: ConvexClientShared,
+        convexApi: { api: typeof api; internal: typeof internal }
+      ) =>
+        client.mutation(convexApi.api.servers.upsertServerExternal, {
+          data,
+          apiKey: externalSecret,
+        })
+    );
 
   const getServerById = (discordId: string) =>
     watchQueryToLiveData(({ api }) => api.servers.publicGetServerByDiscordId, {
