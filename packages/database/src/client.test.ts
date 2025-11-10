@@ -1,6 +1,8 @@
 import { expect, it } from "@effect/vitest";
 import { Effect, TestClock } from "effect";
+import { api } from "../convex/_generated/api";
 import type { Server } from "../convex/schema";
+import { ConvexClientTest } from "./convex-client-test";
 import { Database, DatabaseTestLayer } from "./database";
 
 const server: Server = {
@@ -35,6 +37,7 @@ it.scoped(
   () =>
     Effect.gen(function* () {
       const database = yield* Database;
+      const convexClientTest = yield* ConvexClientTest;
 
       // Set up server data
       yield* database.servers.upsertServer(server);
@@ -46,6 +49,13 @@ it.scoped(
 
       // Advance time to allow setTimeout callbacks to fire
       yield* TestClock.adjust("10 millis");
+
+      // Verify that only 1 query was made despite 5 calls to getServerById
+      const queryCallCount = convexClientTest.getQueryCallCount(
+        api.servers.publicGetServerByDiscordId,
+        { discordId: "123" }
+      );
+      expect(queryCallCount).toBe(1);
 
       // Data should already be loaded due to defer mechanism
       // Verify all results are correct

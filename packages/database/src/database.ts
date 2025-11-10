@@ -1,24 +1,34 @@
-import type { FunctionReference, FunctionReturnType, OptionalRestArgs } from "convex/server";
-import { Context, Effect, Layer } from "effect";
-import type { api, internal } from "../convex/_generated/api";
+import type {
+  FunctionArgs,
+  FunctionReference,
+  FunctionReturnType,
+  OptionalRestArgs,
+} from "convex/server";
+import { Context, Effect, Exit, Layer, Request, RequestResolver } from "effect";
+import { api, internal } from "../convex/_generated/api";
 import type { Server } from "../convex/schema";
 import { ConvexClientHttpUnifiedLayer } from "./convex-client-http";
 import {
   ConvexClientTestLayer,
   ConvexClientTestUnifiedLayer,
 } from "./convex-client-test";
-import { ConvexClientUnified, type Watch } from "./convex-unified-client";
+import type { ConvexClientShared } from "./convex-unified-client";
+import { ConvexClientUnified } from "./convex-unified-client";
 
 export class LiveData<T> {
   private _data: T | undefined;
   private unsubscribe: (() => void) | undefined;
 
-  constructor(watch: Watch<T>, initialData?: T) {
-    this._data = initialData ?? watch.localQueryResult();
+  constructor(
+    getCurrentValue: () => T | undefined,
+    onUpdate: (callback: () => void) => () => void,
+    initialData?: T
+  ) {
+    this._data = initialData ?? getCurrentValue();
 
     // Set up automatic updates
-    this.unsubscribe = watch.onUpdate(() => {
-      const newData = watch.localQueryResult();
+    this.unsubscribe = onUpdate(() => {
+      const newData = getCurrentValue();
       if (newData !== undefined) {
         this._data = newData;
       }
@@ -37,47 +47,121 @@ export class LiveData<T> {
   }
 }
 
-// Cached watch entry with reference count
-type CachedWatch<T> = {
-  watch: Watch<T>;
-  refCount: number;
+// Request type for watch subscriptions
+interface WatchRequest<Query extends FunctionReference<"query">>
+  extends Request.Request<LiveData<FunctionReturnType<Query>>, never> {
+  readonly _tag: "WatchRequest";
+  readonly query: Query;
+  readonly args: FunctionArgs<Query>;
+  readonly cacheKey: string;
+}
+
+// Helper to create a watch request
+const WatchRequest = <Query extends FunctionReference<"query">>(
+  query: Query,
+  args: FunctionArgs<Query>
+): WatchRequest<Query> => {
+  const cacheKey = JSON.stringify({ query, args });
+  return Request.tagged<WatchRequest<Query>>("WatchRequest")({
+    query,
+    args,
+    cacheKey,
+  });
 };
 
 const service = Effect.gen(function* () {
   const externalSecret = "hello"; //yield* Config.string("EXTERNAL_WRITE_SECRET");
   const convexClient = yield* ConvexClientUnified;
 
-  // Watch cache: maps query function + serialized args to cached watch
-  // Using a composite key: query function reference object + JSON stringified args
-  // We use a Map with a composite key object
-  type CacheKey = {
-    query: FunctionReference<"query">;
-    argsKey: string;
-  };
-  const watchCache = new Map<CacheKey, CachedWatch<unknown>>();
-
-  // Helper to create a cache key from query and args
-  const createCacheKey = <Query extends FunctionReference<"query">>(
-    query: Query,
-    args: OptionalRestArgs<Query>
-  ): CacheKey => {
-    // Use the query function reference object itself + serialized args
-    // Function references are stable objects, so we can use them directly as keys
-    const argsKey = JSON.stringify(args[0] ?? {});
-    return { query, argsKey };
-  };
+  // Map to store active watches and their reference counts
+  const activeWatches = new Map<
+    string,
+    {
+      liveData: LiveData<unknown>;
+      unsubscribe: () => void;
+      refCount: number;
+    }
+  >();
 
   const upsertServer = (data: Server) =>
-    convexClient.use((client, { api }) =>
-      client.mutation(
-        (api.servers as { upsertServerExternal: FunctionReference<"mutation"> })
-          .upsertServerExternal,
-        {
-          data,
-          apiKey: externalSecret,
-        }
-      )
+    convexClient.use(
+      (
+        client: ConvexClientShared,
+        convexApi: { api: typeof api; internal: typeof internal }
+      ) =>
+        client.mutation(
+          (
+            convexApi.api.servers as unknown as {
+              upsertServerExternal: FunctionReference<"mutation">;
+            }
+          ).upsertServerExternal,
+          {
+            data,
+            apiKey: externalSecret,
+          }
+        )
     );
+
+  // Create a resolver for watch requests
+  const WatchResolver = RequestResolver.makeBatched(
+    (requests: ReadonlyArray<WatchRequest<FunctionReference<"query">>>) =>
+      Effect.gen(function* () {
+        // Process each request
+        for (const request of requests) {
+          const { query, args, cacheKey } = request;
+
+          // Check if we already have an active watch for this key
+          const existing = activeWatches.get(cacheKey);
+          if (existing) {
+            existing.refCount++;
+            yield* Request.complete(
+              request,
+              Exit.succeed(
+                existing.liveData as LiveData<FunctionReturnType<typeof query>>
+              )
+            );
+            continue;
+          }
+
+          // Create new watch
+          const callbacks = new Set<() => void>();
+          let currentValue: FunctionReturnType<typeof query> | undefined;
+
+          // Use orDie to convert errors to defects since the resolver doesn't support typed errors
+          const unsubscribe = yield* convexClient
+            .use((client: ConvexClientShared) => {
+              return client.onUpdate(query, args, (result) => {
+                currentValue = result;
+                callbacks.forEach((cb) => cb());
+              });
+            })
+            .pipe(Effect.orDie);
+
+          const liveData = new LiveData<FunctionReturnType<typeof query>>(
+            () => currentValue,
+            (callback) => {
+              callbacks.add(callback);
+              return () => {
+                callbacks.delete(callback);
+              };
+            },
+            currentValue
+          );
+
+          // Store in active watches
+          activeWatches.set(cacheKey, {
+            liveData,
+            unsubscribe,
+            refCount: 1,
+          });
+
+          yield* Request.complete(request, Exit.succeed(liveData));
+        }
+      })
+  ).pipe(
+    // Enable caching and deduplication
+    RequestResolver.contextFromServices(ConvexClientUnified)
+  );
 
   const watchQueryToLiveData = <Query extends FunctionReference<"query">>(
     getQuery: (convexApi: {
@@ -86,54 +170,36 @@ const service = Effect.gen(function* () {
     }) => Query,
     ...args: OptionalRestArgs<Query>
   ) => {
-    // Capture cache key creation parameters in closure
-    const getCacheKey = (convexApi: {
-      api: typeof api;
-      internal: typeof internal;
-    }): CacheKey => {
-      const query = getQuery(convexApi);
-      return createCacheKey(query, args);
-    };
-
     return Effect.acquireRelease(
-      convexClient.use(async (client, convexApi): Promise<LiveData<FunctionReturnType<Query>>> => {
-        const cacheKey = getCacheKey(convexApi);
+      Effect.gen(function* () {
+        const query = getQuery({ api, internal });
+        const queryArgs = (args[0] ?? {}) as FunctionArgs<Query>;
+        const request = WatchRequest(query, queryArgs);
 
-        // Check if watch is already cached
-        const cached = watchCache.get(cacheKey) as
-          | CachedWatch<FunctionReturnType<Query>>
-          | undefined;
+        // Use the resolver with the request - deduplication happens automatically
+        const liveData = yield* Effect.request(request, WatchResolver);
 
-        let watch: Watch<FunctionReturnType<Query>>;
-        if (cached) {
-          // Reuse existing watch and increment ref count
-          cached.refCount++;
-          watch = cached.watch as Watch<FunctionReturnType<Query>>;
-        } else {
-          // Create new watch and cache it
-          const query = getQuery(convexApi);
-          watch = await client.watchQuery(query, ...args);
-          watchCache.set(cacheKey, {
-            watch: watch as Watch<unknown>,
-            refCount: 1,
-          });
-        }
+        // Attach cache key for cleanup
+        (
+          liveData as LiveData<FunctionReturnType<Query>> & {
+            _cacheKey: string;
+          }
+        )._cacheKey = request.cacheKey;
 
-        // Store cache key with LiveData for cleanup
-        const liveData = new LiveData(watch);
-        (liveData as LiveData<FunctionReturnType<Query>> & { _cacheKey: CacheKey })._cacheKey = cacheKey;
         return liveData;
       }),
       (liveData) =>
         Effect.sync(() => {
-          // Decrement ref count and cleanup if no longer needed
-          const cacheKey = (liveData as LiveData<unknown> & { _cacheKey?: CacheKey })._cacheKey;
+          const cacheKey = (
+            liveData as LiveData<unknown> & { _cacheKey?: string }
+          )._cacheKey;
           if (cacheKey) {
-            const cached = watchCache.get(cacheKey);
-            if (cached) {
-              cached.refCount--;
-              if (cached.refCount === 0) {
-                watchCache.delete(cacheKey);
+            const watch = activeWatches.get(cacheKey);
+            if (watch) {
+              watch.refCount--;
+              if (watch.refCount === 0) {
+                watch.unsubscribe();
+                activeWatches.delete(cacheKey);
               }
             }
           }
@@ -168,7 +234,7 @@ export const DatabaseLayer = Layer.effect(Database, service).pipe(
   Layer.provide(ConvexClientHttpUnifiedLayer)
 );
 
-export const DatabaseTestLayer = Layer.merge(
+export const DatabaseTestLayer = Layer.mergeAll(
   Layer.effect(Database, service).pipe(
     Layer.provide(ConvexClientTestUnifiedLayer)
   ),

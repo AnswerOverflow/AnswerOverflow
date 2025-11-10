@@ -1,0 +1,6 @@
+[submodule ".context/effect"]
+	path = .context/effect
+	url = https://github.com/Effect-TS/effect.git
+[submodule ".context/AnswerOverflow"]
+	path = .context/AnswerOverflow
+	url = https://github.com/AnswerOverflow/AnswerOverflow.git

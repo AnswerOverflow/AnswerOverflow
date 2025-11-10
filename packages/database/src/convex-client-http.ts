@@ -11,7 +11,7 @@ import {
   type ConvexClientShared,
   ConvexClientUnified,
   ConvexError,
-  type Watch,
+  type WrappedUnifiedClient,
 } from "./convex-unified-client";
 
 type HttpConvexClient = ConvexClientShared & ConvexClient;
@@ -23,80 +23,60 @@ const createHttpService = Effect.gen(function* () {
 
   // Create a wrapper that implements ConvexClientShared
   const sharedClient: ConvexClientShared = {
-    query: client.query.bind(client),
-    mutation: client.mutation.bind(client),
-    action: client.action.bind(client),
-    watchQuery: async <Query extends FunctionReference<"query">>(
+    query: <Query extends FunctionReference<"query">>(
       query: Query,
       ...args: OptionalRestArgs<Query>
     ) => {
-      // Extract args - ConvexClient.onUpdate expects args as an object
       const queryArgs = (args[0] ?? {}) as FunctionArgs<Query>;
-
-      // Create a Watch-like object using onUpdate
-      let currentValue: FunctionReturnType<Query> | undefined;
-      const callbacks = new Set<() => void>();
-
-      // Create deferred to wait for first update
-      let resolveDeferred: (() => void) | undefined;
-      const deferred = new Promise<void>((resolve) => {
-        resolveDeferred = resolve;
-      });
-
-      let firstUpdate = true;
-      const unsubscribe = client.onUpdate(query, queryArgs, (result) => {
-        currentValue = result;
-        // Resolve deferred on first update
-        if (firstUpdate) {
-          firstUpdate = false;
-          resolveDeferred?.();
-        }
-        callbacks.forEach((cb) => cb());
-      });
-
-      // Wait for first update before returning watch
-      await deferred;
-
-      const watch: Watch<FunctionReturnType<Query>> = {
-        onUpdate: (callback: () => void) => {
-          callbacks.add(callback);
-          return () => {
-            callbacks.delete(callback);
-            // If no more callbacks, unsubscribe
-            if (callbacks.size === 0) {
-              unsubscribe();
-            }
-          };
-        },
-        localQueryResult: () => currentValue ?? unsubscribe.getCurrentValue(),
-      };
-
-      return watch;
+      return client.query(query, queryArgs) as FunctionReturnType<Query>;
+    },
+    mutation: <Mutation extends FunctionReference<"mutation">>(
+      mutation: Mutation,
+      ...args: OptionalRestArgs<Mutation>
+    ) => {
+      const mutationArgs = (args[0] ?? {}) as FunctionArgs<Mutation>;
+      return client.mutation(mutation, mutationArgs) as FunctionReturnType<Mutation>;
+    },
+    action: <Action extends FunctionReference<"action">>(
+      action: Action,
+      ...args: OptionalRestArgs<Action>
+    ) => {
+      const actionArgs = (args[0] ?? {}) as FunctionArgs<Action>;
+      return client.action(action, actionArgs) as FunctionReturnType<Action>;
+    },
+    onUpdate: <Query extends FunctionReference<"query">>(
+      query: Query,
+      args: FunctionArgs<Query>,
+      callback: (result: FunctionReturnType<Query>) => void
+    ) => {
+      return client.onUpdate(query, args, callback);
     },
   };
 
-  const use = <T>(
+  const use = <A>(
     fn: (
       client: HttpConvexClient,
       convexApi: {
         api: typeof api;
         internal: typeof internal;
       }
-    ) => T | Promise<T>
-  ) =>
-    Effect.tryPromise({
-      async try() {
+    ) => A | Promise<A>
+  ) => {
+    return Effect.tryPromise({
+      async try(): Promise<Awaited<A>> {
         // Merge sharedClient methods with the original client
         const mergedClient = Object.assign(
           client,
           sharedClient
         ) as HttpConvexClient;
-        return await fn(mergedClient, { api, internal });
+        const result = await fn(mergedClient, { api, internal });
+        return result as Awaited<A>;
       },
       catch(cause) {
         return new ConvexError({ cause });
       },
-    }).pipe(Effect.withSpan("use_convex_http_client"));
+    }).pipe(Effect.withSpan("use_convex_http_client")) as Effect.Effect<Awaited<A>, ConvexError>;
+  };
 
   return { use, client: sharedClient };
 });
@@ -109,8 +89,13 @@ export class ConvexClientHttp extends Context.Tag("ConvexClientHttp")<
 const ConvexClientHttpSharedLayer = Layer.effectContext(
   Effect.gen(function* () {
     const service = yield* createHttpService;
+    // Ensure the service matches WrappedUnifiedClient type
+    const unifiedService: WrappedUnifiedClient = {
+      client: service.client,
+      use: service.use,
+    };
     return Context.make(ConvexClientHttp, service).pipe(
-      Context.add(ConvexClientUnified, service)
+      Context.add(ConvexClientUnified, unifiedService)
     );
   })
 );

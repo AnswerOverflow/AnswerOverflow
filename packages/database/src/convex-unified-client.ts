@@ -1,5 +1,6 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: needed for convex */
 import type {
+  FunctionArgs,
   FunctionReference,
   FunctionReturnType,
   OptionalRestArgs,
@@ -10,11 +11,6 @@ import type { api, internal } from "../convex/_generated/api";
 export class ConvexError extends Data.TaggedError("ConvexError")<{
   cause: unknown;
 }> {}
-
-export interface Watch<T> {
-  onUpdate(callback: () => void): () => void;
-  localQueryResult(): T | undefined;
-}
 
 export type ConvexClientShared = {
   query: <Query extends FunctionReference<"query">>(
@@ -29,13 +25,14 @@ export type ConvexClientShared = {
     action: Action,
     ...args: OptionalRestArgs<Action>
   ) => FunctionReturnType<Action>;
-  watchQuery: <Query extends FunctionReference<"query">>(
+  onUpdate: <Query extends FunctionReference<"query">>(
     query: Query,
-    ...args: OptionalRestArgs<Query>
-  ) => Watch<FunctionReturnType<Query>>;
+    args: FunctionArgs<Query>,
+    callback: (result: FunctionReturnType<Query>) => void
+  ) => () => void;
 };
 
-type WrappedUnifiedClient = Readonly<{
+export type WrappedUnifiedClient = Readonly<{
   client: ConvexClientShared;
   use: <A>(
     fn: (

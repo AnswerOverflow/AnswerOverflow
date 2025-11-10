@@ -12,6 +12,7 @@
         "gen": "mkdir -p src && openapi-gen --spec ./open-api.json > ./src/generated.ts"
     },
     "dependencies": {
+        "@effect/platform": "^0.93.0",
         "@tim-smart/openapi-gen": "^0.4.13",
         "effect": "^3.17.7"
     }

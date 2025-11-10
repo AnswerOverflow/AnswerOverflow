@@ -17,7 +17,7 @@ import {
   type ConvexClientShared,
   ConvexClientUnified,
   ConvexError,
-  type Watch,
+  type WrappedUnifiedClient,
 } from "./convex-unified-client";
 
 type TestConvexClient = ConvexClientShared & TestConvex<typeof schema>;
@@ -69,6 +69,26 @@ const createTestService = Effect.gen(function* () {
   const modules = yield* Effect.promise(buildModules);
   const testClient = convexTest(schema, modules);
 
+  // Track query calls for testing
+  // Use a string-based key since Map object keys use reference equality
+  // which might not work if query references are different instances
+  const queryCallCounts = new Map<string, number>();
+  const getQueryCallCount = (
+    query: FunctionReference<"query">,
+    args: unknown
+  ) => {
+    const argsKey = JSON.stringify(args);
+    // Create a string key - function references should be stable, so we'll use
+    // the query object itself converted to string (it should have some identifier)
+    // If that doesn't work, we'll need to iterate and match by argsKey
+    const queryStr = JSON.stringify(query);
+    const key = `${queryStr}:${argsKey}`;
+    return queryCallCounts.get(key) ?? 0;
+  };
+  const resetQueryCallCounts = () => {
+    queryCallCounts.clear();
+  };
+
   // Track all active watch queries so we can refresh them after mutations
   const activeWatches = new Set<() => Promise<void>>();
 
@@ -79,106 +99,97 @@ const createTestService = Effect.gen(function* () {
     mutation: Mutation,
     ...args: OptionalRestArgs<Mutation>
   ) => {
-    const result = await testClient.mutation(mutation, ...args);
+    const mutationArgs = (args[0] ?? {}) as FunctionArgs<Mutation>;
+    const result = await testClient.mutation(mutation, mutationArgs);
     // After mutation completes, refresh all active watches
     await Promise.all(Array.from(activeWatches).map((refresh) => refresh()));
-    return result;
+    return result as FunctionReturnType<Mutation>;
   };
 
   // Create a wrapper that implements ConvexClientShared
   const sharedClient: ConvexClientShared = {
-    query: testClient.query.bind(testClient),
-    mutation: wrappedMutation,
-    action: testClient.action.bind(testClient),
-    watchQuery: async <Query extends FunctionReference<"query">>(
+    query: <Query extends FunctionReference<"query">>(
       query: Query,
       ...args: OptionalRestArgs<Query>
     ) => {
-      // Extract args
       const queryArgs = (args[0] ?? {}) as FunctionArgs<Query>;
+      return testClient.query(query, queryArgs) as FunctionReturnType<Query>;
+    },
+    mutation: wrappedMutation,
+    action: <Action extends FunctionReference<"action">>(
+      action: Action,
+      ...args: OptionalRestArgs<Action>
+    ) => {
+      const actionArgs = (args[0] ?? {}) as FunctionArgs<Action>;
+      return testClient.action(
+        action,
+        actionArgs
+      ) as FunctionReturnType<Action>;
+    },
+    onUpdate: <Query extends FunctionReference<"query">>(
+      query: Query,
+      args: FunctionArgs<Query>,
+      callback: (result: FunctionReturnType<Query>) => void
+    ) => {
+      // Track query call - use string key matching getQueryCallCount
+      const argsKey = JSON.stringify(args);
+      const queryStr = JSON.stringify(query);
+      const queryKey = `${queryStr}:${argsKey}`;
+      queryCallCounts.set(queryKey, (queryCallCounts.get(queryKey) ?? 0) + 1);
 
-      // For test client, create a Watch implementation that refreshes on mutations
+      // For test client, create a refresh function that queries and calls callback
       let currentValue: FunctionReturnType<Query> | undefined;
-      const callbacks = new Set<() => void>();
-
-      // Create deferred to wait for first update
-      let resolveDeferred: (() => void) | undefined;
-      const deferred = new Promise<void>((resolve) => {
-        resolveDeferred = resolve;
-      });
-
-      let firstUpdate = true;
-      // Refresh function that always triggers callbacks (like Convex does)
       const refreshValue = async () => {
         try {
-          const newValue = await testClient.query(query, queryArgs);
+          const newValue = await testClient.query(query, args);
           currentValue = newValue;
-          // Always call callbacks, regardless of whether value changed
-          callbacks.forEach((cb) => cb());
+          callback(newValue);
         } catch {
           // Ignore errors for now - could be enhanced to handle errors
-        } finally {
-          // Resolve deferred on first update (even if there was an error)
-          if (firstUpdate) {
-            firstUpdate = false;
-            resolveDeferred?.();
-          }
         }
       };
 
-      // Run initial query (async, don't await yet)
+      // Register this watch to be refreshed after mutations
+      activeWatches.add(refreshValue);
+
+      // Run initial query (async, don't await)
       refreshValue();
 
-      // Wait for first update before returning watch
-      await deferred;
-
-      const watch: Watch<FunctionReturnType<Query>> = {
-        onUpdate: (callback: () => void) => {
-          callbacks.add(callback);
-          // Register this watch to be refreshed after mutations
-          if (callbacks.size === 1) {
-            activeWatches.add(refreshValue);
-          }
-          // Call the callback immediately if we have a value
-          if (currentValue !== undefined) {
-            // Use setTimeout to avoid calling synchronously
-            setTimeout(() => callback(), 0);
-          }
-          return () => {
-            callbacks.delete(callback);
-            // Unregister when no more callbacks
-            if (callbacks.size === 0) {
-              activeWatches.delete(refreshValue);
-            }
-          };
-        },
-        localQueryResult: () => currentValue,
+      // Return unsubscribe function
+      return () => {
+        activeWatches.delete(refreshValue);
       };
-
-      return watch;
     },
   };
 
-  const use = <T>(
+  const use = <A>(
     fn: (
       client: TestConvexClient,
       convexApi: {
         api: typeof api;
         internal: typeof internal;
       }
-    ) => T | Promise<T>
-  ) =>
-    Effect.tryPromise({
-      async try() {
+    ) => A | Promise<A>
+  ) => {
+    return Effect.tryPromise({
+      async try(): Promise<Awaited<A>> {
         // Merge sharedClient methods with the original test client
-        return await fn({ ...testClient, ...sharedClient }, { api, internal });
+        const result = await fn(
+          { ...testClient, ...sharedClient },
+          { api, internal }
+        );
+        return result as Awaited<A>;
       },
       catch(cause) {
         return new ConvexError({ cause });
       },
-    }).pipe(Effect.withSpan("use_convex_test_client"));
+    }).pipe(Effect.withSpan("use_convex_test_client")) as Effect.Effect<
+      Awaited<A>,
+      ConvexError
+    >;
+  };
 
-  return { use, client: sharedClient };
+  return { use, client: sharedClient, getQueryCallCount, resetQueryCallCounts };
 });
 
 export class ConvexClientTest extends Context.Tag("ConvexClientTest")<
@@ -189,16 +200,17 @@ export class ConvexClientTest extends Context.Tag("ConvexClientTest")<
 const ConvexClientTestSharedLayer = Layer.effectContext(
   Effect.gen(function* () {
     const service = yield* createTestService;
+    // Ensure the service matches WrappedUnifiedClient type
+    const unifiedService: WrappedUnifiedClient = {
+      client: service.client,
+      use: service.use,
+    };
     return Context.make(ConvexClientTest, service).pipe(
-      Context.add(ConvexClientUnified, service)
+      Context.add(ConvexClientUnified, unifiedService)
     );
   })
 );
 
-export const ConvexClientTestLayer = Layer.service(ConvexClientTest).pipe(
-  Layer.provide(ConvexClientTestSharedLayer)
-);
+export const ConvexClientTestLayer = ConvexClientTestSharedLayer;
 
-export const ConvexClientTestUnifiedLayer = Layer.service(
-  ConvexClientUnified
-).pipe(Layer.provide(ConvexClientTestSharedLayer));
+export const ConvexClientTestUnifiedLayer = ConvexClientTestSharedLayer;
