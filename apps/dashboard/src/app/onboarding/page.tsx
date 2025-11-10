@@ -1,5 +1,6 @@
 'use client';
 import { trackEvent } from '@answeroverflow/ui/hooks/events';
+import { usePostHog } from '@answeroverflow/ui/hooks/use-posthog';
 import React, { useState } from 'react';
 import {
 	OnboardingContext,
@@ -7,7 +8,6 @@ import {
 	SubmittedData,
 	pageLookup,
 } from './OnboardingPages';
-import { usePostHog } from '@answeroverflow/ui/hooks/use-posthog';
 
 export default function Onboarding() {
 	// Eventually move this into the url

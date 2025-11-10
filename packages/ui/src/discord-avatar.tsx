@@ -1,9 +1,9 @@
 'use client';
 import { DiscordAccountPublic } from '@answeroverflow/core/zod';
-import { AvatarProps } from './ui/avatar';
-import { cn } from './utils/utils';
 import { useTenant } from './context/tenant-context';
 import { makeUserIconLink } from './discord-avatar-utils';
+import { AvatarProps } from './ui/avatar';
+import { cn } from './utils/utils';
 
 export interface DiscordAvatarProps extends Omit<AvatarProps, 'alt' | 'url'> {
 	user: DiscordAccountPublic;

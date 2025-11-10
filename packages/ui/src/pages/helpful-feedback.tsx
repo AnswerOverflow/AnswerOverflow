@@ -3,9 +3,9 @@
 import { ThumbsDown, ThumbsUp } from 'lucide-react';
 import * as React from 'react';
 import { MessagePageViewProps, trackEvent } from '../hooks/events';
+import { usePostHog } from '../hooks/use-posthog';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { usePostHog } from '../hooks/use-posthog';
 
 export function HelpfulFeedback(props: {
 	page: MessagePageViewProps;
