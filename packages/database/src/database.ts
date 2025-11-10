@@ -112,39 +112,49 @@ export const service = Effect.gen(function* () {
 					}
 
 					// Create new watch - handle errors at the request level
-					const result = yield* Effect.gen(function* () {
-						const callbacks = new Set<() => void>();
-						let currentValue: FunctionReturnType<typeof query> | undefined;
+					const result = yield* Effect.suspend(() =>
+						Effect.gen(function* () {
+							const callbacks = new Set<() => void>();
+							let currentValue: FunctionReturnType<typeof query> | undefined;
 
-						const unsubscribe = yield* convexClient.use(
-							(client: ConvexClientShared) => {
-								return client.onUpdate(query, args, (result) => {
-									currentValue = result;
-									callbacks.forEach((cb) => cb());
-								});
-							},
-						);
+							// Get initial value synchronously
+							currentValue = yield* convexClient.use(
+								(client: ConvexClientShared) => {
+									return client.query(query, args);
+								},
+							);
 
-						const liveData = new LiveData<FunctionReturnType<typeof query>>(
-							() => currentValue,
-							(callback) => {
-								callbacks.add(callback);
-								return () => {
-									callbacks.delete(callback);
-								};
-							},
-							currentValue,
-						);
+							// Set up watch for future updates
+							const unsubscribe = yield* convexClient.use(
+								(client: ConvexClientShared) => {
+									return client.onUpdate(query, args, (result) => {
+										currentValue = result;
+										callbacks.forEach((cb) => cb());
+									});
+								},
+							);
 
-						// Store in active watches
-						activeWatches.set(cacheKey, {
-							liveData,
-							unsubscribe,
-							refCount: 1,
-						});
+							const liveData = new LiveData<FunctionReturnType<typeof query>>(
+								() => currentValue,
+								(callback) => {
+									callbacks.add(callback);
+									return () => {
+										callbacks.delete(callback);
+									};
+								},
+								currentValue,
+							);
 
-						return liveData;
-					}).pipe(Effect.exit);
+							// Store in active watches
+							activeWatches.set(cacheKey, {
+								liveData,
+								unsubscribe,
+								refCount: 1,
+							});
+
+							return liveData;
+						}),
+					).pipe(Effect.exit);
 
 					yield* Request.complete(request, result);
 				}
