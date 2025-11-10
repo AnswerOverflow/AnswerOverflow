@@ -56,8 +56,13 @@ interface WatchRequest<Query extends FunctionReference<"query">>
   readonly cacheKey: string;
 }
 
+// Type for LiveData with cache key
+interface LiveDataWithCacheKey<T> extends LiveData<T> {
+  _cacheKey: string;
+}
+
 // Helper to create a watch request
-const WatchRequest = <Query extends FunctionReference<"query">>(
+const watchRequest = <Query extends FunctionReference<"query">>(
   query: Query,
   args: FunctionArgs<Query>
 ): WatchRequest<Query> => {
@@ -80,6 +85,7 @@ const service = Effect.gen(function* () {
       liveData: LiveData<unknown>;
       unsubscribe: () => void;
       refCount: number;
+      query: FunctionReference<"query">;
     }
   >();
 
@@ -89,21 +95,14 @@ const service = Effect.gen(function* () {
         client: ConvexClientShared,
         convexApi: { api: typeof api; internal: typeof internal }
       ) =>
-        client.mutation(
-          (
-            convexApi.api.servers as unknown as {
-              upsertServerExternal: FunctionReference<"mutation">;
-            }
-          ).upsertServerExternal,
-          {
-            data,
-            apiKey: externalSecret,
-          }
-        )
+        client.mutation(convexApi.api.servers.upsertServerExternal, {
+          data,
+          apiKey: externalSecret,
+        })
     );
 
   // Create a resolver for watch requests
-  const WatchResolver = RequestResolver.makeBatched(
+  const watchResolver = RequestResolver.makeBatched(
     (requests: ReadonlyArray<WatchRequest<FunctionReference<"query">>>) =>
       Effect.gen(function* () {
         // Process each request
@@ -112,7 +111,7 @@ const service = Effect.gen(function* () {
 
           // Check if we already have an active watch for this key
           const existing = activeWatches.get(cacheKey);
-          if (existing) {
+          if (existing && existing.query === query) {
             existing.refCount++;
             yield* Request.complete(
               request,
@@ -153,6 +152,7 @@ const service = Effect.gen(function* () {
             liveData,
             unsubscribe,
             refCount: 1,
+            query,
           });
 
           yield* Request.complete(request, Exit.succeed(liveData));
@@ -173,26 +173,25 @@ const service = Effect.gen(function* () {
     return Effect.acquireRelease(
       Effect.gen(function* () {
         const query = getQuery({ api, internal });
-        const queryArgs = (args[0] ?? {}) as FunctionArgs<Query>;
-        const request = WatchRequest(query, queryArgs);
+        const queryArgs: FunctionArgs<Query> =
+          args.length > 0 && args[0] !== undefined
+            ? (args[0] as FunctionArgs<Query>)
+            : ({} as FunctionArgs<Query>);
+        const request = watchRequest(query, queryArgs);
 
         // Use the resolver with the request - deduplication happens automatically
-        const liveData = yield* Effect.request(request, WatchResolver);
+        const liveData = yield* Effect.request(request, watchResolver);
 
         // Attach cache key for cleanup
-        (
-          liveData as LiveData<FunctionReturnType<Query>> & {
-            _cacheKey: string;
-          }
-        )._cacheKey = request.cacheKey;
+        const liveDataWithKey: LiveDataWithCacheKey<FunctionReturnType<Query>> =
+          Object.assign(liveData, { _cacheKey: request.cacheKey });
 
-        return liveData;
+        return liveDataWithKey;
       }),
       (liveData) =>
         Effect.sync(() => {
-          const cacheKey = (
-            liveData as LiveData<unknown> & { _cacheKey?: string }
-          )._cacheKey;
+          const liveDataWithKey = liveData as LiveDataWithCacheKey<unknown>;
+          const cacheKey = liveDataWithKey._cacheKey;
           if (cacheKey) {
             const watch = activeWatches.get(cacheKey);
             if (watch) {
