@@ -2,7 +2,7 @@ import { botEnv } from '@answeroverflow/env/bot';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
 import { CronJob } from 'cron';
-import { Client } from 'discord.js';
+import type { Client } from 'discord.js';
 import { indexServers } from '../../domains/indexing';
 
 @ApplyOptions<Listener.Options>({
@@ -27,12 +27,6 @@ export class Indexing extends Listener {
 			start: true,
 			timeZone: 'America/Los_Angeles',
 		});
-		if (botEnv.NODE_ENV !== 'production') {
-			try {
-				await indexServers(client);
-			} catch (error) {
-				console.error('Error in development mode indexing:', error);
-			}
-		}
+		await indexServers(client);
 	}
 }
