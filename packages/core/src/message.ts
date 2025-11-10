@@ -51,6 +51,14 @@ type MessageWithAuthorServerSettings = Pick<
 		userServerSettings: UserServerSettings[];
 	};
 	attachments: Attachment[];
+	mentions?: Array<{
+		mentionedUserId: string;
+		mentionedUsername: string;
+		position: number;
+		mentionedUser?: DiscordAccount & {
+			userServerSettings: UserServerSettings[];
+		};
+	}>;
 };
 
 export function applyPublicFlagsToMessages<
@@ -75,10 +83,59 @@ export function applyPublicFlagsToMessages<
 				...msg.author.userServerSettings,
 				...msg.solutions.flatMap((s) => s.author.userServerSettings),
 				...(msg?.reference?.author.userServerSettings ?? []),
+				// Include mentioned users' server settings
+				...(msg.mentions?.flatMap((m) =>
+					m.mentionedUser?.userServerSettings ?? [],
+				) ?? []),
 			])
 			.map((uss) => [getLookupKey(uss), addFlagsToUserServerSettings(uss)]),
 	);
 	const seedLookup = new Map(messages.map((a) => [a.authorId, getRandomId()]));
+
+	// Process mentions and replace them in content if users have opted out
+	const processMentionsInContent = (
+		content: string,
+		mentions: MessageWithAuthorServerSettings['mentions'],
+		serverId: string,
+		serverWithFlags: Pick<ServerWithFlags, 'flags'>,
+	): string => {
+		if (!mentions || mentions.length === 0) return content;
+
+		// Sort mentions by position in reverse order to replace from end to start
+		const sortedMentions = [...mentions].sort((a, b) => b.position - a.position);
+
+		let processedContent = content;
+		for (const mention of sortedMentions) {
+			if (!mention.mentionedUser?.userServerSettings) continue;
+
+			const mentionedUserServerSettings = authorServerSettingsLookup.get(
+				getLookupKey({
+					serverId,
+					userId: mention.mentionedUserId,
+				}),
+			);
+
+			// Check if the mentioned user has opted out
+			const hasMentionedUserOptedOut =
+				!serverWithFlags.flags.considerAllMessagesPublic &&
+				!mentionedUserServerSettings?.flags.canPubliclyDisplayMessages;
+
+			if (hasMentionedUserOptedOut) {
+				// Replace the mention with a dummy name
+				// The mention in cleanContent is already the username, so we replace it
+				const mentionPattern = new RegExp(
+					`@${mention.mentionedUsername.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`,
+					'g',
+				);
+				processedContent = processedContent.replace(
+					mentionPattern,
+					'@Hidden User',
+				);
+			}
+		}
+
+		return processedContent;
+	};
 
 	const makeMessageWithAuthor = (
 		msg: MessageWithAuthorServerSettings,
@@ -105,10 +162,18 @@ export function applyPublicFlagsToMessages<
 		const isAnonymous =
 			serverWithFlags.flags.anonymizeMessages &&
 			!authorServerSettings?.flags.canPubliclyDisplayMessages;
+
+		// Process mentions in content
+		const processedContent = processMentionsInContent(
+			msg.content,
+			msg.mentions,
+			msg.serverId,
+			serverWithFlags,
+		);
+
 		return {
 			...pick(
 				msg,
-				'content',
 				'id',
 				'channelId',
 				'serverId',
@@ -122,6 +187,7 @@ export function applyPublicFlagsToMessages<
 				'parentChannelId',
 				'questionId',
 			),
+			content: processedContent,
 			author: isAnonymous
 				? anonymizeDiscordAccount(publicAccount, seed)
 				: publicAccount,
@@ -376,6 +442,15 @@ export async function findManyMessagesWithAuthors(
 					},
 				},
 				attachments: true,
+				mentions: {
+					with: {
+						mentionedUser: {
+							with: {
+								userServerSettings: true,
+							},
+						},
+					},
+				},
 				solutions: {
 					with: {
 						author: {
@@ -384,6 +459,15 @@ export async function findManyMessagesWithAuthors(
 							},
 						},
 						attachments: true,
+						mentions: {
+							with: {
+								mentionedUser: {
+									with: {
+										userServerSettings: true,
+									},
+								},
+							},
+						},
 					},
 				},
 				reference: {
@@ -394,6 +478,15 @@ export async function findManyMessagesWithAuthors(
 							},
 						},
 						attachments: true,
+						mentions: {
+							with: {
+								mentionedUser: {
+									with: {
+										userServerSettings: true,
+									},
+								},
+							},
+						},
 					},
 				},
 				server: true,
@@ -549,6 +642,15 @@ export async function findManyMessageWithRelations(ids: readonly string[]) {
 				},
 			},
 			attachments: true,
+			mentions: {
+				with: {
+					mentionedUser: {
+						with: {
+							userServerSettings: true,
+						},
+					},
+				},
+			},
 			solutions: {
 				with: {
 					author: {
@@ -557,6 +659,15 @@ export async function findManyMessageWithRelations(ids: readonly string[]) {
 						},
 					},
 					attachments: true,
+					mentions: {
+						with: {
+							mentionedUser: {
+								with: {
+									userServerSettings: true,
+								},
+							},
+						},
+					},
 				},
 				columns: {
 					id: true,
@@ -578,6 +689,15 @@ export async function findManyMessageWithRelations(ids: readonly string[]) {
 						},
 					},
 					attachments: true,
+					mentions: {
+						with: {
+							mentionedUser: {
+								with: {
+									userServerSettings: true,
+								},
+							},
+						},
+					},
 				},
 				columns: {
 					id: true,

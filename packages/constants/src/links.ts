@@ -22,13 +22,13 @@ export const WEBSITE_URL = 'https://answeroverflow.com';
 export const DOCS_URL = 'https://docs.answeroverflow.com';
 export const WAITLIST_URL = 'https://forms.gle/6YLPPGi8X2DCr29T7';
 
-export const getBaseUrl = () => {
+export const getBaseUrl = (hostOverride?: string) => {
 	const base =
 		// eslint-disable-next-line n/no-process-env
 		process.env.NEXT_PUBLIC_SITE_URL ??
 		// eslint-disable-next-line n/no-process-env
 		(process.env.NODE_ENV !== 'development'
-			? 'https://www.answeroverflow.com'
+			? `https://${hostOverride ?? 'www.answeroverflow.com'}`
 			: 'http://localhost:3000');
 	return base.endsWith('/') ? base.slice(0, -1) : base;
 };
@@ -48,6 +48,6 @@ export const isOnMainSite = (host: string) => {
 	);
 };
 
-export const makeMainSiteLink = (path: string) => {
-	return `${getBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`;
+export const makeMainSiteLink = (path: string, hostOverride?: string) => {
+	return `${getBaseUrl(hostOverride)}${path.startsWith('/') ? path : `/${path}`}`;
 };

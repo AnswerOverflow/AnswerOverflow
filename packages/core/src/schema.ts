@@ -544,6 +544,7 @@ export const messageRelations = relations(dbMessages, ({ one, many }) => ({
 	reactions: many(dbReactions, {
 		relationName: 'message-reactions',
 	}),
+	mentions: many(dbMessageMentions),
 	author: one(dbDiscordAccounts, {
 		fields: [dbMessages.authorId],
 		references: [dbDiscordAccounts.id],
@@ -610,6 +611,45 @@ export type ReactionWithRelations = typeof dbReactions.$inferSelect & {
 export type BaseMessageWithRelations = BaseMessage & {
 	attachments?: (typeof dbAttachments.$inferSelect)[];
 	reactions?: ReactionWithRelations[];
+	mentions?: MessageMention[];
 };
 
 export type Attachment = typeof dbAttachments.$inferSelect;
+
+export const dbMessageMentions = mysqlTable(
+	'MessageMention',
+	{
+		messageId: snowflake('messageId').notNull(),
+		mentionedUserId: snowflake('mentionedUserId').notNull(),
+		mentionedUsername: varchar('mentionedUsername', { length: 191 }).notNull(),
+		position: int('position').notNull(), // Position in the message content where the mention appears
+	},
+	(table) => {
+		return {
+			messageMentionId: primaryKey(table.messageId, table.mentionedUserId, table.position),
+			messageIdIdx: index('MessageMention_messageId_idx').on(table.messageId),
+			mentionedUserIdIdx: index('MessageMention_mentionedUserId_idx').on(
+				table.mentionedUserId,
+			),
+		};
+	},
+);
+
+export const messageMentionSchema = createInsertSchema(dbMessageMentions).extend({
+	messageId: z.string(),
+	mentionedUserId: z.string(),
+	position: z.number(),
+});
+
+export type MessageMention = typeof dbMessageMentions.$inferSelect;
+
+export const messageMentionRelations = relations(dbMessageMentions, ({ one }) => ({
+	message: one(dbMessages, {
+		fields: [dbMessageMentions.messageId],
+		references: [dbMessages.id],
+	}),
+	mentionedUser: one(dbDiscordAccounts, {
+		fields: [dbMessageMentions.mentionedUserId],
+		references: [dbDiscordAccounts.id],
+	}),
+}));

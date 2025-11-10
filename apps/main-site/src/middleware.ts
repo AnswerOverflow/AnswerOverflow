@@ -42,12 +42,16 @@ export function middleware(req: NextRequest) {
 		const authToken = req.cookies.get(AuthEdge.getNextAuthCookieName());
 		if (authedRoutes.some((route) => path.startsWith(route))) {
 			if (!authToken) {
-				return NextResponse.redirect(makeMainSiteLink('/api/auth/signin'));
+				return NextResponse.redirect(
+					makeMainSiteLink('/api/auth/signin', 'ao-main-site.vercel.app'),
+				);
 			}
 		}
 		if (path.startsWith('/m/')) {
 			if (authToken) {
-				return NextResponse.rewrite(makeMainSiteLink(`${path}/dynamic`));
+				return NextResponse.rewrite(
+					makeMainSiteLink(`${path}/dynamic`, 'ao-main-site.vercel.app'),
+				);
 			}
 		}
 		return NextResponse.next();
@@ -78,7 +82,14 @@ export function middleware(req: NextRequest) {
 
 	const actualHost = subpathCustomer?.rewriteDomain || host;
 
-	const newUrl = new URL(`/${actualHost}${path}${pathPostFix}`, req.url);
+	const pathWithoutHost = path.startsWith(`/${actualHost}`)
+		? path.slice(actualHost.length + 1)
+		: path;
+
+	const newUrl = new URL(
+		`/${actualHost}${pathWithoutHost}${pathPostFix}`,
+		req.url,
+	);
 	return NextResponse.rewrite(newUrl);
 }
 // See "Matching Paths" below to learn more
