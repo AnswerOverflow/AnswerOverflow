@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@clerk/backend": "^1.27.0",
-    "@effect/opentelemetry": "^0.59.0",
     "@effect/platform": "^0.90.1",
     "convex": "^1.25.0",
     "convex-helpers": "^0.1.101",

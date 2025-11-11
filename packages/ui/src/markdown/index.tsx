@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: TODO: Fix the any */
 "use client";
 
 import React from "react";
@@ -8,6 +9,7 @@ import { parse } from "./render";
  * This fixes compatibility issues with simple-markdown creating elements
  * using an older React API
  */
+
 function recreateElement(element: any, key?: string | number): React.ReactNode {
   if (element === null || element === undefined) {
     return element;

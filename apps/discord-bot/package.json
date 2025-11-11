@@ -10,13 +10,8 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@effect/opentelemetry": "^0.59.0",
     "@effect/platform": "^0.90.1",
     "@effect/platform-bun": "^0.78.0",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
-    "@opentelemetry/sdk-trace-base": "^2.2.0",
-    "@opentelemetry/sdk-trace-node": "^2.2.0",
-    "@opentelemetry/sdk-trace-web": "^2.2.0",
     "@packages/database": "workspace:*",
     "@packages/observability": "workspace:*",
     "discord.js": "^14.22.1",

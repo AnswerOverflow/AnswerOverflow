@@ -5,7 +5,7 @@ import {
 } from "@packages/database/database";
 import { createOtelLayer } from "@packages/observability/otel";
 import type { GuildChannel } from "discord.js";
-import { Console, Effect, Layer } from "effect";
+import { Console, Effect, Layer, Logger, LogLevel } from "effect";
 import { registerCommands } from "./src/commands/register";
 import { Discord, DiscordLayer } from "./src/discord-client-real";
 import { handleAutoThread } from "./src/handlers/auto-thread";
@@ -550,10 +550,19 @@ const program = Effect.gen(function* () {
 
 // Run the program with the DiscordClientLayer and OpenTelemetry tracing
 const OtelLayer = createOtelLayer("discord-bot");
+// Set minimum log level to Info to filter out Debug logs
+const LoggerLayer = Logger.minimumLogLevel(LogLevel.Info);
 Effect.runPromise(
 	Effect.scoped(
 		program.pipe(
-			Effect.provide(Layer.mergeAll(DiscordLayer, DatabaseLayer, OtelLayer)),
+			Effect.provide(
+				Layer.mergeAll(
+					DiscordLayer,
+					DatabaseLayer,
+					OtelLayer,
+					LoggerLayer,
+				),
+			),
 		),
 	),
 ).catch((error) => {

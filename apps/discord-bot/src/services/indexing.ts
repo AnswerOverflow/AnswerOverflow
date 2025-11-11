@@ -94,7 +94,7 @@ function fetchChannelMessages(
 			}
 		}
 
-		yield* Console.log(
+		yield* Effect.logDebug(
 			`Fetched ${messages.length} messages from channel ${channelName} (${channelId})`,
 		);
 		return messages;
@@ -134,7 +134,7 @@ function fetchForumThreads(forumChannelId: string, forumChannelName: string) {
 			}
 		}
 
-		yield* Console.log(
+		yield* Effect.logDebug(
 			`Found ${threads.length} threads in forum ${forumChannelName} (${forumChannelId})`,
 		);
 		return threads;
@@ -153,14 +153,14 @@ function storeMessages(
 		const database = yield* Database;
 
 		if (messages.length === 0) {
-			yield* Console.log(`No messages to store for channel ${channelId}`);
+			yield* Effect.logDebug(`No messages to store for channel ${channelId}`);
 			return;
 		}
 
 		// Filter to only human messages
 		const humanMessages = Arr.filter(messages, (msg) => isHumanMessage(msg));
 
-		yield* Console.log(
+		yield* Effect.logDebug(
 			`Storing ${humanMessages.length} human messages (filtered from ${messages.length} total)`,
 		);
 
@@ -203,7 +203,7 @@ function storeMessages(
 		);
 
 		if (allAttachments.length > 0) {
-			yield* Console.log(`Uploading ${allAttachments.length} attachments...`);
+			yield* Effect.logDebug(`Uploading ${allAttachments.length} attachments...`);
 
 			// Upload attachments in batches to avoid overwhelming the system
 			const batchSize = 5;
@@ -227,7 +227,7 @@ function storeMessages(
 				}
 			}
 
-			yield* Console.log(
+			yield* Effect.logDebug(
 				`Successfully uploaded ${allAttachments.length} attachments`,
 			);
 		}
@@ -270,7 +270,7 @@ function storeMessages(
 			}
 		}
 
-		yield* Console.log(`Successfully stored ${aoMessages.length} messages`);
+		yield* Effect.logDebug(`Successfully stored ${aoMessages.length} messages`);
 	});
 }
 
@@ -292,13 +292,13 @@ function indexTextChannel(
 		const channelSettings = channelLiveData?.data;
 
 		if (!channelSettings?.flags.indexingEnabled) {
-			yield* Console.log(
+			yield* Effect.logDebug(
 				`Skipping channel ${channel.name} (${channel.id}) - indexing disabled`,
 			);
 			return;
 		}
 
-		yield* Console.log(
+		yield* Effect.logDebug(
 			`Indexing text channel ${channel.name} (${channel.id}) from message ${channelSettings.lastIndexedSnowflake ?? "beginning"}`,
 		);
 
@@ -323,7 +323,7 @@ function indexTextChannel(
 		);
 
 		if (threadsToIndex.length > 0) {
-			yield* Console.log(
+			yield* Effect.logDebug(
 				`Found ${threadsToIndex.length} threads to index in channel ${channel.name}`,
 			);
 
@@ -379,13 +379,13 @@ function indexForumChannel(
 		const channelSettings = channelLiveData?.data;
 
 		if (!channelSettings?.flags.indexingEnabled) {
-			yield* Console.log(
+			yield* Effect.logDebug(
 				`Skipping forum ${channel.name} (${channel.id}) - indexing disabled`,
 			);
 			return;
 		}
 
-		yield* Console.log(`Indexing forum ${channel.name} (${channel.id})`);
+		yield* Effect.logDebug(`Indexing forum ${channel.name} (${channel.id})`);
 
 		// Fetch all threads
 		const threads = yield* fetchForumThreads(channel.id, channel.name);
@@ -472,7 +472,7 @@ function indexForumChannel(
 function indexGuild(guild: Guild) {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
-		yield* Console.log(
+		yield* Effect.logDebug(
 			`Starting indexing for guild: ${guild.name} (${guild.id})`,
 		);
 
@@ -503,7 +503,7 @@ function indexGuild(guild: Guild) {
 					channel.type === ChannelType.GuildForum),
 		);
 
-		yield* Console.log(
+		yield* Effect.logDebug(
 			`Found ${indexableChannels.length} indexable channels in ${guild.name}`,
 		);
 
@@ -539,7 +539,7 @@ function indexGuild(guild: Guild) {
 			{ concurrency: 2 },
 		);
 
-		yield* Console.log(`Completed indexing for guild: ${guild.name}`);
+		yield* Effect.logDebug(`Completed indexing for guild: ${guild.name}`);
 	});
 }
 
@@ -550,11 +550,11 @@ export function runIndexing() {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
 		const startTime = yield* Clock.currentTimeMillis;
-		yield* Console.log("=== Starting indexing run ===");
+		yield* Effect.logDebug("=== Starting indexing run ===");
 
 		// Get all guilds
 		const guilds = yield* discord.getGuilds();
-		yield* Console.log(`Found ${guilds.length} guilds to index`);
+		yield* Effect.logDebug(`Found ${guilds.length} guilds to index`);
 
 		// Process each guild sequentially to avoid overwhelming the API
 		yield* Effect.forEach(
@@ -577,7 +577,7 @@ export function runIndexing() {
 		const minutes = Math.floor((duration / 1000 / 60) % 60);
 		const seconds = Math.floor((duration / 1000) % 60);
 
-		yield* Console.log(
+		yield* Effect.logDebug(
 			`=== Indexing complete - took ${hours}h ${minutes}m ${seconds}s ===`,
 		);
 	}).pipe(
@@ -592,13 +592,13 @@ export function runIndexing() {
  */
 export function startIndexingLoop(runImmediately = true) {
 	return Effect.gen(function* () {
-		yield* Console.log(
+		yield* Effect.logDebug(
 			`Starting indexing loop - will run every ${INDEXING_CONFIG.scheduleInterval}`,
 		);
 
 		// Run immediately if requested
 		if (runImmediately) {
-			yield* Console.log("Running initial indexing...");
+			yield* Effect.logDebug("Running initial indexing...");
 			yield* runIndexing();
 		}
 
@@ -608,6 +608,6 @@ export function startIndexingLoop(runImmediately = true) {
 		// Fork a fiber that runs the indexing on schedule
 		yield* Effect.fork(Effect.repeat(runIndexing(), schedule));
 
-		yield* Console.log("Indexing loop started successfully");
+		yield* Effect.logDebug("Indexing loop started successfully");
 	});
 }
