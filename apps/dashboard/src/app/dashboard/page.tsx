@@ -11,12 +11,14 @@ import {
 } from "@packages/ui/components/card";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
+import { useState } from "react";
 import { ServerCard } from "../../components/server-card";
 import { authClient } from "../../lib/auth-client";
 
 export default function DashboardHome() {
   const { data: session, isPending } = authClient.useSession();
   const getUserServers = useAction(api.dashboard.getUserServers);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const {
     data: servers,
@@ -32,6 +34,11 @@ export default function DashboardHome() {
     },
     enabled: !isPending && !!session?.user,
   });
+
+  const filteredServers =
+    servers?.filter((server) =>
+      server.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ) ?? [];
 
   if (isPending || isLoading) {
     return (
@@ -101,22 +108,39 @@ export default function DashboardHome() {
 
   return (
     <main className="max-w-6xl mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-6">Your Servers</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {servers.map((server) => (
-          <ServerCard
-            key={server.discordId}
-            server={{
-              discordId: server.discordId,
-              name: server.name,
-              icon: server.icon,
-              highestRole: server.highestRole,
-              hasBot: server.hasBot,
-              aoServerId: server.aoServerId,
-            }}
-          />
-        ))}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Your Servers</h1>
       </div>
+      <div className="mb-6">
+        <input
+          type="search"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search servers..."
+          className="w-full max-w-md px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-500 dark:placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-400 dark:focus:ring-neutral-600 focus:border-neutral-400 dark:focus:border-neutral-600"
+        />
+      </div>
+      {filteredServers.length === 0 && servers && servers.length > 0 ? (
+        <div className="text-muted-foreground">
+          No servers found matching &quot;{searchQuery}&quot;
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredServers.map((server) => (
+            <ServerCard
+              key={server.discordId}
+              server={{
+                discordId: server.discordId,
+                name: server.name,
+                icon: server.icon,
+                highestRole: server.highestRole,
+                hasBot: server.hasBot,
+                aoServerId: server.aoServerId,
+              }}
+            />
+          ))}
+        </div>
+      )}
     </main>
   );
 }
