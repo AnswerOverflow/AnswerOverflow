@@ -28,9 +28,6 @@ const nextConfig: NextConfig = {
 	},
 	cacheComponents: true,
 	reactCompiler: true,
-	experimental: {
-		fileSystemCache: true,
-	},
 };
 
 export default nextConfig;

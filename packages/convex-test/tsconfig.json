@@ -21,6 +21,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["./*.ts", "./counter/component/**/*.ts"],
+  "include": ["./*.ts", "./*.d.ts", "./counter/component/**/*.ts"],
   "exclude": ["convex"]
 }

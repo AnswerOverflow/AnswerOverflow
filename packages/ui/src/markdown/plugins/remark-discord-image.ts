@@ -7,6 +7,7 @@ import { visit } from "unist-util-visit";
  */
 export function remarkDiscordImage() {
 	return (tree: Root) => {
+		// @ts-expect-error TODO: Fix this
 		visit(tree, "image", (node: Image, index: number, parent: Parent) => {
 			if (!parent || typeof index !== "number") return;
 

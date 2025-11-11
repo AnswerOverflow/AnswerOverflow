@@ -79,7 +79,7 @@ export default function DashboardHome() {
 							<div className="flex items-center gap-4">
 								<ServerIcon
 									server={{
-										id: server.discordId,
+										discordId: server.discordId,
 										name: server.name,
 										icon: server.icon ?? undefined,
 									}}
