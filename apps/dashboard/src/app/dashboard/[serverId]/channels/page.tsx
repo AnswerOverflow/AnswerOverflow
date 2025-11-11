@@ -10,11 +10,26 @@ import {
 	CardTitle,
 } from "@packages/ui/components/card";
 import { Checkbox } from "@packages/ui/components/checkbox";
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@packages/ui/components/dropdown-menu";
 import { Input } from "@packages/ui/components/input";
 import { Label } from "@packages/ui/components/label";
 import { Switch } from "@packages/ui/components/switch";
+import { Button } from "@packages/ui/components/button";
 import { useMutation, useQuery } from "convex/react";
-import { Hash, Layers, Megaphone, MessageSquare, Search } from "lucide-react";
+import {
+	Hash,
+	Layers,
+	Megaphone,
+	MessageSquare,
+	Search,
+	ChevronDown,
+} from "lucide-react";
 import { useParams } from "next/navigation";
 import { useQueryState } from "nuqs";
 import React from "react";
@@ -449,12 +464,145 @@ export default function ChannelsPage() {
 						{/* Main content area with settings */}
 						<div className="flex-1 min-w-0">
 							<div className="max-w-[800px] w-full">
+								{/* Mobile Channel Selector - Only visible on mobile */}
+								<div className="lg:hidden mb-6">
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button
+												variant="outline"
+												className="w-full justify-between"
+											>
+												<span className="flex items-center gap-2">
+													{selectedChannels.length === 0 ? (
+														<>Select channels</>
+													) : selectedChannels.length === 1 ? (
+														<>
+															{(() => {
+																const { Icon } = getChannelInfo(
+																	selectedChannels[0].type,
+																);
+																return (
+																	<Icon className="size-4 text-muted-foreground" />
+																);
+															})()}
+															{selectedChannels[0].name}
+														</>
+													) : (
+														<>
+															<Layers className="size-4 text-muted-foreground" />
+															{selectedChannels.length} channels selected
+														</>
+													)}
+												</span>
+												<ChevronDown className="size-4 opacity-50" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent
+											className="w-[calc(100vw-2rem)] max-w-[400px] max-h-[60vh] overflow-y-auto"
+											align="start"
+										>
+											{/* Search input */}
+											<div className="px-2 py-1.5">
+												<div className="relative">
+													<Search className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+													<Input
+														type="search"
+														placeholder="Search channels..."
+														value={channelSearchQuery ?? ""}
+														onChange={(e) =>
+															setChannelSearchQuery(e.target.value || null)
+														}
+														className="pl-8 h-8"
+														onClick={(e) => e.stopPropagation()}
+													/>
+												</div>
+											</div>
+											{/* Channel type filter */}
+											<div className="px-2 py-1.5 border-t flex items-center gap-2">
+												<span className="text-xs text-muted-foreground shrink-0">
+													Type:
+												</span>
+												<div className="flex items-center gap-2 flex-1">
+													{channelTypeOptions.map(({ type, label, Icon }) => (
+														<label
+															key={type}
+															className="flex items-center gap-1.5 px-1.5 py-0.5 rounded hover:bg-accent cursor-pointer transition-colors"
+															title={label}
+														>
+															<Checkbox
+																checked={channelTypeFilter?.has(type) ?? false}
+																onCheckedChange={() =>
+																	toggleChannelTypeFilter(type)
+																}
+																className="size-3.5"
+															/>
+															<Icon className="size-3 shrink-0 text-muted-foreground" />
+														</label>
+													))}
+												</div>
+											</div>
+											<DropdownMenuSeparator />
+											{/* Channel list */}
+											{filteredChannels.length === 0 ? (
+												<div className="px-2 py-4 text-center text-sm text-muted-foreground">
+													{channelSearchQuery || channelTypeFilter?.size
+														? `No channels found${
+																channelSearchQuery
+																	? ` matching "${channelSearchQuery}"`
+																	: ""
+															}${
+																channelTypeFilter?.size
+																	? ` with selected type${channelTypeFilter.size > 1 ? "s" : ""}`
+																	: ""
+															}`
+														: "No channels available"}
+												</div>
+											) : (
+												filteredChannels.map(
+													(channel: {
+														id: string;
+														name: string;
+														type: number;
+													}) => {
+														const { Icon, typeName } = getChannelInfo(
+															channel.type,
+														);
+														const isSelected = selectedChannelIds.has(
+															channel.id,
+														);
+														return (
+															<DropdownMenuCheckboxItem
+																key={channel.id}
+																checked={isSelected}
+																onCheckedChange={() =>
+																	toggleChannelSelection(channel.id)
+																}
+																onSelect={(e) => e.preventDefault()}
+															>
+																<div className="flex items-center gap-2 flex-1 min-w-0">
+																	<Icon className="size-4 shrink-0 text-muted-foreground" />
+																	<span className="truncate font-medium">
+																		{channel.name}
+																	</span>
+																	<span className="text-xs text-muted-foreground shrink-0 ml-auto">
+																		{typeName}
+																	</span>
+																</div>
+															</DropdownMenuCheckboxItem>
+														);
+													},
+												)
+											)}
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</div>
+
 								{selectedChannels.length === 0 ? (
 									<Card>
 										<CardHeader>
 											<CardTitle>No channels selected</CardTitle>
 											<CardDescription>
-												Select one or more channels from the sidebar to
+												Select one or more channels from the dropdown above to
 												configure their settings.
 											</CardDescription>
 										</CardHeader>
