@@ -9,10 +9,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@packages/ui/components/card";
-import { ServerIcon } from "@packages/ui/components/server-icon";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
-import Link from "next/link";
+import { ServerCard } from "../../components/server-card";
 import { authClient } from "../../lib/auth-client";
 
 export default function DashboardHome() {
@@ -103,53 +102,19 @@ export default function DashboardHome() {
   return (
     <main className="max-w-6xl mx-auto p-8">
       <h1 className="text-3xl font-bold mb-6">Your Servers</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {servers.map((server) => (
-          <Card
+          <ServerCard
             key={server.discordId}
-            className="hover:shadow-lg transition-shadow"
-          >
-            <CardHeader>
-              <div className="flex items-center gap-4">
-                <ServerIcon
-                  server={{
-                    discordId: server.discordId,
-                    name: server.name,
-                    icon: server.icon ?? undefined,
-                  }}
-                  size={48}
-                />
-                <div className="flex-1 min-w-0">
-                  <CardTitle className="truncate">{server.name}</CardTitle>
-                  <CardDescription>
-                    {server.highestRole} •{" "}
-                    {server.hasBot ? "Bot installed" : "No bot"}
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {server.aoServerId ? (
-                <div className="flex gap-2">
-                  <Button asChild className="flex-1">
-                    <Link href={`/dashboard/${server.aoServerId}`}>
-                      Manage Server
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline">
-                    <Link href={`/c/${server.aoServerId}`} target="_blank">
-                      View
-                    </Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-sm text-muted-foreground">
-                  Server not indexed yet. Add the bot to your server to get
-                  started.
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            server={{
+              discordId: server.discordId,
+              name: server.name,
+              icon: server.icon,
+              highestRole: server.highestRole,
+              hasBot: server.hasBot,
+              aoServerId: server.aoServerId,
+            }}
+          />
         ))}
       </div>
     </main>
