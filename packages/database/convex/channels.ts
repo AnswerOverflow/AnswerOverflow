@@ -2,7 +2,6 @@ import { type Infer, v } from "convex/values";
 import {
 	internalMutation,
 	type MutationCtx,
-	mutation,
 	type QueryCtx,
 	query,
 } from "./_generated/server";
@@ -10,10 +9,9 @@ import { publicInternalMutation, publicInternalQuery } from "./publicInternal";
 import { channelSchema, channelSettingsSchema } from "./schema";
 import {
 	CHANNEL_TYPE,
-	isThreadType,
-	ROOT_CHANNEL_TYPES,
 	deleteChannelInternalLogic,
 	getChannelWithSettings,
+	isThreadType,
 } from "./shared";
 
 type Channel = Infer<typeof channelSchema>;
@@ -247,7 +245,7 @@ export const createManyChannels = publicInternalMutation({
 	},
 });
 
-export const updateChannel = mutation({
+export const updateChannel = publicInternalMutation({
 	args: {
 		id: v.string(),
 		channel: channelSchema,

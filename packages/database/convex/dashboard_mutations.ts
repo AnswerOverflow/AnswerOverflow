@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
-import { assertCanEditServer, getDiscordAccountIdFromAuth } from "./auth";
+import { authenticatedMutation } from "./auth";
+import { assertCanEditServer } from "./auth";
 import type { AuthorizedUser, CanEditServer } from "./permissions";
 import { validateCustomDomain } from "./shared";
 
@@ -8,7 +8,7 @@ import { validateCustomDomain } from "./shared";
  * Update server preferences flags (for dashboard)
  * Only updates the flags, not other preferences fields
  */
-export const updateServerPreferencesFlags = mutation({
+export const updateServerPreferencesFlags = authenticatedMutation({
 	args: {
 		serverId: v.id("servers"),
 		flags: v.object({
@@ -18,7 +18,7 @@ export const updateServerPreferencesFlags = mutation({
 		}),
 	},
 	handler: async (ctx, args) => {
-		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
+		const { discordAccountId } = args;
 
 		const server = await ctx.db.get(args.serverId);
 		if (!server) {
@@ -93,7 +93,7 @@ export const updateServerPreferencesFlags = mutation({
  * Update channel settings flags (for dashboard)
  * Only updates the flags, not other channel fields
  */
-export const updateChannelSettingsFlags = mutation({
+export const updateChannelSettingsFlags = authenticatedMutation({
 	args: {
 		channelId: v.string(),
 		flags: v.object({
@@ -105,7 +105,7 @@ export const updateChannelSettingsFlags = mutation({
 		}),
 	},
 	handler: async (ctx, args) => {
-		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
+		const { discordAccountId } = args;
 
 		// Get channel to get server ID
 		const channel = await ctx.db
@@ -192,13 +192,13 @@ export const updateChannelSettingsFlags = mutation({
 /**
  * Update custom domain for a server (for dashboard)
  */
-export const updateCustomDomain = mutation({
+export const updateCustomDomain = authenticatedMutation({
 	args: {
 		serverId: v.id("servers"),
 		customDomain: v.union(v.string(), v.null()),
 	},
 	handler: async (ctx, args) => {
-		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
+		const { discordAccountId } = args;
 
 		const server = await ctx.db.get(args.serverId);
 		if (!server) {

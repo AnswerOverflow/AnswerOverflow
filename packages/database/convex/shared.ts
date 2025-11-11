@@ -1,6 +1,6 @@
+import type { Infer } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import type { ActionCtx, MutationCtx, QueryCtx } from "./_generated/server";
-import type { Infer } from "convex/values";
 import type {
 	attachmentSchema,
 	emojiSchema,

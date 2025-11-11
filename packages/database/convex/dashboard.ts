@@ -9,8 +9,7 @@ import { make } from "@packages/discord-api/generated";
 import { Effect } from "effect";
 import { api, components } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import { action } from "./_generated/server";
-import { authComponent } from "./betterAuth";
+import { authenticatedAction } from "./auth";
 import { getOrSetCache } from "./cache";
 import {
 	DISCORD_PERMISSIONS,
@@ -53,20 +52,14 @@ type ServerWithMetadata = {
 	aoServerId: Id<"servers"> | undefined;
 };
 
-export const getUserServers = action({
+export const getUserServers = authenticatedAction({
 	args: {},
-	handler: async (ctx): Promise<ServerWithMetadata[]> => {
-		// Check if user is authenticated
-		// Note: getAuthUser doesn't require crypto.subtle, unlike getSession
-		const user = await authComponent.getAuthUser(ctx);
-		if (!user) {
-			throw new Error("Not authenticated");
-		}
+	handler: async (ctx, args): Promise<ServerWithMetadata[]> => {
+		const { discordAccountId } = args;
 
-		// getAuthUser returns user object but without id field
-		// Query user table by email to get the userId
-		// This avoids needing crypto.subtle which isn't available in actions
-		if (typeof user !== "object" || user === null) {
+		// Get user from auth to get userId for querying accounts
+		const user = await authComponent.getAuthUser(ctx);
+		if (!user || typeof user !== "object" || user === null) {
 			throw new Error("Invalid user object");
 		}
 
@@ -147,6 +140,15 @@ export const getUserServers = action({
 			throw new Error("Discord account not linked");
 		}
 
+		// Verify the accountId matches what we got from the wrapper
+		if (
+			!("accountId" in discordAccount) ||
+			typeof discordAccount.accountId !== "string" ||
+			discordAccount.accountId !== discordAccountId
+		) {
+			throw new Error("Discord account ID mismatch");
+		}
+
 		// Get Discord OAuth token from BetterAuth
 		// BetterAuth stores OAuth tokens in the account
 		if (!("accessToken" in discordAccount)) {
@@ -157,18 +159,9 @@ export const getUserServers = action({
 			throw new Error("Discord token not found");
 		}
 
-		// Get Discord account ID (user's Discord snowflake ID)
-		if (
-			!("accountId" in discordAccount) ||
-			typeof discordAccount.accountId !== "string"
-		) {
-			throw new Error("Discord account ID not found");
-		}
-		const discordAccountId = discordAccount.accountId;
-
 		// Fetch user's Discord servers using the API client
 		// Cache the result for 5 minutes to reduce API calls
-		const cacheKey = `discord:guilds:${sessionUserId}`;
+		const cacheKey = `discord:guilds:${discordAccountId}`;
 		const client = await Effect.runPromise(discordApi(token));
 		const cachedGuildsEffect = getOrSetCache(
 			cacheKey,
