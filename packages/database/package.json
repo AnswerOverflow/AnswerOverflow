@@ -25,7 +25,7 @@
 	"devDependencies": {
 		"@edge-runtime/vm": "^5.0.0",
 		"@effect/vitest": "^0.25.0",
-		"convex-test": "^0.0.38",
+		"@packages/convex-test": "workspace:*",
 		"vitest": "^3.2.4"
 	}
 }

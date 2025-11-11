@@ -312,6 +312,171 @@ export const deleteUserServerSettingsByUserIdInternal = internalMutation({
 	},
 });
 
+// Internal mutations for testing (bypass authentication)
+export const createUserServerSettingsInternal = internalMutation({
+	args: {
+		settings: userServerSettingsSchema,
+	},
+	handler: async (ctx, args) => {
+		const existing = await ctx.db
+			.query("userServerSettings")
+			.withIndex("by_userId", (q) => q.eq("userId", args.settings.userId))
+			.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
+			.first();
+
+		if (existing) {
+			throw new Error("UserServerSettings already exists");
+		}
+
+		await ctx.db.insert("userServerSettings", args.settings);
+
+		const created = await ctx.db
+			.query("userServerSettings")
+			.withIndex("by_userId", (q) => q.eq("userId", args.settings.userId))
+			.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
+			.first();
+
+		if (!created) {
+			throw new Error("Failed to create user server settings");
+		}
+
+		return created;
+	},
+});
+
+export const updateUserServerSettingsInternal = internalMutation({
+	args: {
+		settings: userServerSettingsSchema,
+	},
+	handler: async (ctx, args) => {
+		const existing = await ctx.db
+			.query("userServerSettings")
+			.withIndex("by_userId", (q) => q.eq("userId", args.settings.userId))
+			.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
+			.first();
+
+		if (!existing) {
+			throw new Error("UserServerSettings not found");
+		}
+
+		// Validate: Cannot grant consent to publicly display messages with message indexing disabled
+		if (
+			args.settings.canPubliclyDisplayMessages &&
+			args.settings.messageIndexingDisabled
+		) {
+			throw new Error(
+				"You cannot grant consent to publicly display messages with message indexing disabled. Enable messaging indexing first",
+			);
+		}
+
+		// If disabling message indexing, remove consent to publicly display messages
+		const updatedSettings = { ...args.settings };
+		if (updatedSettings.messageIndexingDisabled) {
+			updatedSettings.canPubliclyDisplayMessages = false;
+		}
+
+		// If we're disabling message indexing and it wasn't disabled before, delete all messages
+		if (
+			updatedSettings.messageIndexingDisabled &&
+			!existing.messageIndexingDisabled
+		) {
+			const messages = await ctx.db
+				.query("messages")
+				.withIndex("by_authorId", (q) => q.eq("authorId", args.settings.userId))
+				.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
+				.collect();
+
+			for (const message of messages) {
+				await ctx.runMutation(internal.messages.deleteMessageInternal, {
+					id: message.id,
+				});
+			}
+		}
+
+		await ctx.db.patch(existing._id, updatedSettings);
+
+		const updated = await ctx.db
+			.query("userServerSettings")
+			.withIndex("by_userId", (q) => q.eq("userId", args.settings.userId))
+			.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
+			.first();
+
+		if (!updated) {
+			throw new Error("Failed to update user server settings");
+		}
+
+		return updated;
+	},
+});
+
+export const upsertUserServerSettingsInternal = internalMutation({
+	args: {
+		settings: userServerSettingsSchema,
+	},
+	handler: async (ctx, args) => {
+		const existing = await ctx.db
+			.query("userServerSettings")
+			.withIndex("by_userId", (q) => q.eq("userId", args.settings.userId))
+			.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
+			.first();
+
+		if (existing) {
+			// Update existing
+			const updatedSettings = { ...args.settings };
+			if (updatedSettings.messageIndexingDisabled) {
+				updatedSettings.canPubliclyDisplayMessages = false;
+			}
+
+			if (
+				updatedSettings.messageIndexingDisabled &&
+				!existing.messageIndexingDisabled
+			) {
+				const messages = await ctx.db
+					.query("messages")
+					.withIndex("by_authorId", (q) =>
+						q.eq("authorId", args.settings.userId),
+					)
+					.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
+					.collect();
+
+				for (const message of messages) {
+					await ctx.runMutation(internal.messages.deleteMessageInternal, {
+						id: message.id,
+					});
+				}
+			}
+
+			await ctx.db.patch(existing._id, updatedSettings);
+			const updated = await ctx.db
+				.query("userServerSettings")
+				.withIndex("by_userId", (q) => q.eq("userId", args.settings.userId))
+				.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
+				.first();
+			if (!updated) {
+				throw new Error("Failed to update user server settings");
+			}
+			return updated;
+		} else {
+			// Create new
+			const newSettings = { ...args.settings };
+			if (newSettings.messageIndexingDisabled) {
+				newSettings.canPubliclyDisplayMessages = false;
+			}
+
+			await ctx.db.insert("userServerSettings", newSettings);
+			const created = await ctx.db
+				.query("userServerSettings")
+				.withIndex("by_userId", (q) => q.eq("userId", args.settings.userId))
+				.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
+				.first();
+			if (!created) {
+				throw new Error("Failed to create user server settings");
+			}
+			return created;
+		}
+	},
+});
+
 export const countConsentingUsersInServer = query({
 	args: {
 		serverId: v.id("servers"),

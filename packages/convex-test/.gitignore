@@ -1,0 +1,7 @@
+node_modules
+dist
+*.tsbuildinfo
+.npm
+coverage
+.env.local
+*.tgz

@@ -6,7 +6,7 @@ import type {
 	FunctionReturnType,
 	OptionalRestArgs,
 } from "convex/server";
-import { convexTest, type TestConvex } from "convex-test";
+import { convexTest, type TestConvex } from "@packages/convex-test";
 import { Context, Effect, Layer } from "effect";
 import { readdir } from "fs/promises";
 import { dirname, join, resolve } from "path";
@@ -94,7 +94,7 @@ const createTestService = Effect.gen(function* () {
 
 	// Wrap mutation to trigger watch updates after mutations complete
 	const wrappedMutation = async <
-		Mutation extends FunctionReference<"mutation">,
+		Mutation extends FunctionReference<"mutation" | "internalMutation">,
 	>(
 		mutation: Mutation,
 		...args: OptionalRestArgs<Mutation>
@@ -181,6 +181,12 @@ const createTestService = Effect.gen(function* () {
 				return result as Awaited<A>;
 			},
 			catch(cause) {
+				// Log the actual error for debugging
+				if (cause instanceof Error) {
+					console.error("ConvexError cause:", cause.message, cause.stack);
+				} else {
+					console.error("ConvexError cause:", cause);
+				}
 				return new ConvexError({ cause });
 			},
 		}).pipe(Effect.withSpan("use_convex_test_client")) as Effect.Effect<

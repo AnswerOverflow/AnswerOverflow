@@ -733,13 +733,17 @@ export const service = Effect.gen(function* () {
 			(
 				client: ConvexClientShared,
 				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(
-					convexApi.api.user_server_settings.createUserServerSettings,
+			) => {
+				// In test mode, use internal mutations to bypass authentication
+				// The test client supports calling internal mutations
+				return client.mutation(
+					convexApi.internal.user_server_settings
+						.createUserServerSettingsInternal,
 					{
 						settings,
 					},
-				),
+				);
+			},
 		);
 
 	const updateUserServerSettings = (settings: UserServerSettings) =>
@@ -749,7 +753,8 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(
-					convexApi.api.user_server_settings.updateUserServerSettings,
+					convexApi.internal.user_server_settings
+						.updateUserServerSettingsInternal,
 					{
 						settings,
 					},
@@ -763,7 +768,8 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(
-					convexApi.api.user_server_settings.upsertUserServerSettings,
+					convexApi.internal.user_server_settings
+						.upsertUserServerSettingsInternal,
 					{
 						settings,
 					},
@@ -815,7 +821,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(
-					convexApi.api.server_preferences.createServerPreferences,
+					convexApi.internal.server_preferences.createServerPreferencesInternal,
 					{
 						preferences,
 					},
@@ -829,7 +835,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(
-					convexApi.api.server_preferences.updateServerPreferences,
+					convexApi.internal.server_preferences.updateServerPreferencesInternal,
 					{
 						preferences,
 					},
@@ -843,7 +849,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(
-					convexApi.api.server_preferences.upsertServerPreferences,
+					convexApi.internal.server_preferences.upsertServerPreferencesInternal,
 					{
 						preferences,
 					},
@@ -857,7 +863,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(
-					convexApi.api.server_preferences.deleteServerPreferences,
+					convexApi.internal.server_preferences.deleteServerPreferencesInternal,
 					{
 						serverId,
 					},

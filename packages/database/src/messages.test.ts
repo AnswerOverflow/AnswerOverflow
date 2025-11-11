@@ -77,13 +77,12 @@ const createTestAttachment = (
 	id,
 	messageId,
 	filename: `file-${id}.txt`,
-	proxyUrl: `https://example.com/proxy/${id}`,
-	url: `https://example.com/${id}`,
 	size: 1000,
 	contentType: undefined,
 	width: undefined,
 	height: undefined,
 	description: undefined,
+	storageId: undefined,
 	...overrides,
 });
 
@@ -213,10 +212,8 @@ it.scoped("upsertMessage with attachments", () =>
 		const attachment2 = createTestAttachment("attach2", "message123");
 
 		yield* database.messages.upsertMessage({
-			message: {
-				...message,
-				attachments: [attachment1, attachment2],
-			},
+			message,
+			attachments: [attachment1, attachment2],
 			ignoreChecks: true,
 		});
 
@@ -258,13 +255,11 @@ it.scoped("upsertMessage with reactions", () =>
 		const emoji2 = createTestEmoji("emoji2", "❤️");
 
 		yield* database.messages.upsertMessage({
-			message: {
-				...message,
-				reactions: [
-					{ userId: "user1", emoji: emoji1 },
-					{ userId: "user2", emoji: emoji2 },
-				],
-			},
+			message,
+			reactions: [
+				{ userId: "user1", emoji: emoji1 },
+				{ userId: "user2", emoji: emoji2 },
+			],
 			ignoreChecks: true,
 		});
 
@@ -302,7 +297,7 @@ it.scoped("upsertManyMessages creates multiple messages", () =>
 		];
 
 		yield* database.messages.upsertManyMessages({
-			messages,
+			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
@@ -342,7 +337,7 @@ it.scoped("findMessagesByChannelId returns messages for a channel", () =>
 		];
 
 		yield* database.messages.upsertManyMessages({
-			messages,
+			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
@@ -385,7 +380,7 @@ it.scoped("findManyMessagesById returns messages by ids", () =>
 		];
 
 		yield* database.messages.upsertManyMessages({
-			messages,
+			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
@@ -473,7 +468,7 @@ it.scoped("deleteManyMessages removes multiple messages", () =>
 		];
 
 		yield* database.messages.upsertManyMessages({
-			messages,
+			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
@@ -517,7 +512,7 @@ it.scoped("findMessagesByAuthorId returns messages by author", () =>
 		];
 
 		yield* database.messages.upsertManyMessages({
-			messages,
+			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
@@ -558,7 +553,7 @@ it.scoped("findMessagesByServerId returns messages by server", () =>
 		];
 
 		yield* database.messages.upsertManyMessages({
-			messages,
+			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
@@ -613,7 +608,7 @@ it.scoped("findMessagesByParentChannelId returns thread messages", () =>
 		];
 
 		yield* database.messages.upsertManyMessages({
-			messages,
+			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
@@ -655,7 +650,7 @@ it.scoped("findLatestMessageInChannel returns latest message", () =>
 		];
 
 		yield* database.messages.upsertManyMessages({
-			messages,
+			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
@@ -767,10 +762,8 @@ it.scoped("findAttachmentsByMessageId returns attachments for a message", () =>
 		const attachment2 = createTestAttachment("attach2", "message123");
 
 		yield* database.messages.upsertMessage({
-			message: {
-				...message,
-				attachments: [attachment1, attachment2],
-			},
+			message,
+			attachments: [attachment1, attachment2],
 			ignoreChecks: true,
 		});
 
@@ -814,13 +807,11 @@ it.scoped("findReactionsByMessageId returns reactions for a message", () =>
 		const emoji2 = createTestEmoji("emoji2", "❤️");
 
 		yield* database.messages.upsertMessage({
-			message: {
-				...message,
-				reactions: [
-					{ userId: "user1", emoji: emoji1 },
-					{ userId: "user2", emoji: emoji2 },
-				],
-			},
+			message,
+			reactions: [
+				{ userId: "user1", emoji: emoji1 },
+				{ userId: "user2", emoji: emoji2 },
+			],
 			ignoreChecks: true,
 		});
 
@@ -862,10 +853,8 @@ it.scoped("findEmojiById returns emoji by ID", () =>
 		const emoji = createTestEmoji("emoji123", "👍");
 
 		yield* database.messages.upsertMessage({
-			message: {
-				...message,
-				reactions: [{ userId: "user1", emoji }],
-			},
+			message,
+			reactions: [{ userId: "user1", emoji }],
 			ignoreChecks: true,
 		});
 
@@ -904,7 +893,7 @@ it.scoped(
 			];
 
 			yield* database.messages.upsertManyMessages({
-				messages,
+				messages: messages.map((msg) => ({ message: msg })),
 				ignoreChecks: true,
 			});
 
@@ -944,7 +933,7 @@ it.scoped("deleteManyMessagesByUserId removes all messages by a user", () =>
 		];
 
 		yield* database.messages.upsertManyMessages({
-			messages,
+			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
