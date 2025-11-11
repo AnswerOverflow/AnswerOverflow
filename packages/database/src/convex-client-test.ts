@@ -3,12 +3,11 @@
 import { readdir } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { convexTest, type TestConvex } from "@packages/convex-test";
+import { convexTest } from "@packages/convex-test";
 import type {
 	FunctionArgs,
 	FunctionReference,
 	FunctionReturnType,
-	OptionalRestArgs,
 } from "convex/server";
 import { Context, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
@@ -19,8 +18,6 @@ import {
 	ConvexError,
 	type WrappedUnifiedClient,
 } from "./convex-unified-client";
-
-type TestConvexClient = ConvexClientShared & TestConvex<typeof schema>;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -69,52 +66,61 @@ const createTestService = Effect.gen(function* () {
 	const modules = yield* Effect.promise(buildModules);
 	const testClient = convexTest(schema, modules);
 
-	// Create a wrapper that implements ConvexClientShared
-	const sharedClient: ConvexClientShared = {
+	// Adapt TestConvex to match ConvexClientShared interface (which is based on ConvexClient)
+	// ConvexClient uses: query(query, args), mutation(mutation, args, options?), etc.
+	// TestConvex uses rest args: query(query, ...args), mutation(mutation, ...args), etc.
+	const adaptedClient: ConvexClientShared = {
 		query: <Query extends FunctionReference<"query">>(
 			query: Query,
-			...args: OptionalRestArgs<Query>
+			args: FunctionArgs<Query>,
 		) => {
-			const queryArgs = (args[0] ?? {}) as FunctionArgs<Query>;
-			return testClient.query(query, queryArgs) as FunctionReturnType<Query>;
+			return testClient.query(query, args) as FunctionReturnType<Query>;
 		},
-		mutation: <
-			Mutation extends
-				| FunctionReference<"mutation", "public">
-				| FunctionReference<"mutation", "internal">,
-		>(
+		mutation: <Mutation extends FunctionReference<"mutation">>(
 			mutation: Mutation,
-			...args: OptionalRestArgs<Mutation>
+			args: FunctionArgs<Mutation>,
 		) => {
-			const mutationArgs = (args[0] ?? {}) as FunctionArgs<Mutation>;
 			return testClient.mutation(
 				mutation,
-				mutationArgs,
+				args,
 			) as FunctionReturnType<Mutation>;
 		},
 		action: <Action extends FunctionReference<"action">>(
 			action: Action,
-			...args: OptionalRestArgs<Action>
+			args: FunctionArgs<Action>,
 		) => {
-			const actionArgs = (args[0] ?? {}) as FunctionArgs<Action>;
-			return testClient.action(
-				action,
-				actionArgs,
-			) as FunctionReturnType<Action>;
+			return testClient.action(action, args) as FunctionReturnType<Action>;
 		},
 		onUpdate: <Query extends FunctionReference<"query">>(
 			query: Query,
 			args: FunctionArgs<Query>,
 			callback: (result: FunctionReturnType<Query>) => void,
 		) => {
-			// Use the built-in onUpdate from convex-test
-			return testClient.onUpdate(query, args, callback);
+			const unsubscribeFn = testClient.onUpdate(query, args, callback);
+			// ConvexClient.onUpdate returns an Unsubscribe object (callable with unsubscribe() and getCurrentValue())
+			// TestConvex.onUpdate returns a simple function
+			// Create an adapter that matches the Unsubscribe interface
+			const unsubscribe = Object.assign(
+				() => {
+					unsubscribeFn();
+				},
+				{
+					unsubscribe: unsubscribeFn,
+					getCurrentValue: async () => {
+						return (await testClient.query(
+							query,
+							args,
+						)) as FunctionReturnType<Query>;
+					},
+				},
+			);
+			return unsubscribe;
 		},
 	};
 
 	const use = <A>(
 		fn: (
-			client: TestConvexClient,
+			client: ConvexClientShared,
 			convexApi: {
 				api: typeof api;
 				internal: typeof internal;
@@ -123,11 +129,7 @@ const createTestService = Effect.gen(function* () {
 	) => {
 		return Effect.tryPromise({
 			async try(): Promise<Awaited<A>> {
-				// Merge sharedClient methods with the original test client
-				const result = await fn(
-					{ ...testClient, ...sharedClient },
-					{ api, internal },
-				);
+				const result = await fn(adaptedClient, { api, internal });
 				return result as Awaited<A>;
 			},
 			catch(cause) {
@@ -147,7 +149,7 @@ const createTestService = Effect.gen(function* () {
 
 	return {
 		use,
-		client: sharedClient,
+		client: adaptedClient,
 		getQueryCallCount: testClient.getQueryCallCount,
 		resetQueryCallCounts: testClient.resetQueryCallCounts,
 	};

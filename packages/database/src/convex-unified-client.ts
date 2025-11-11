@@ -1,10 +1,5 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: needed for convex */
-import type {
-	FunctionArgs,
-	FunctionReference,
-	FunctionReturnType,
-	OptionalRestArgs,
-} from "convex/server";
+import type { ConvexClient } from "convex/browser";
 import { Context, Data, type Effect } from "effect";
 import type { api, internal } from "../convex/_generated/api";
 
@@ -12,29 +7,12 @@ export class ConvexError extends Data.TaggedError("ConvexError")<{
 	cause: unknown;
 }> {}
 
-export type ConvexClientShared = {
-	query: <Query extends FunctionReference<"query">>(
-		query: Query,
-		...args: OptionalRestArgs<Query>
-	) => FunctionReturnType<Query>;
-	mutation: <
-		Mutation extends
-			| FunctionReference<"mutation", "public">
-			| FunctionReference<"mutation", "internal">,
-	>(
-		mutation: Mutation,
-		...args: OptionalRestArgs<Mutation>
-	) => FunctionReturnType<Mutation>;
-	action: <Action extends FunctionReference<"action">>(
-		action: Action,
-		...args: OptionalRestArgs<Action>
-	) => FunctionReturnType<Action>;
-	onUpdate: <Query extends FunctionReference<"query">>(
-		query: Query,
-		args: FunctionArgs<Query>,
-		callback: (result: FunctionReturnType<Query>) => void,
-	) => () => void;
-};
+// Extract the shared interface from ConvexClient - this is the source of truth
+// We pick only the methods we need for our unified interface
+export type ConvexClientShared = Pick<
+	ConvexClient,
+	"query" | "mutation" | "action" | "onUpdate"
+>;
 
 export type WrappedUnifiedClient = Readonly<{
 	client: ConvexClientShared;

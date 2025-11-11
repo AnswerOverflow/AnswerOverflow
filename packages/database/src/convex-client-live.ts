@@ -1,10 +1,5 @@
 import { ConvexClient } from "convex/browser";
-import type {
-	FunctionArgs,
-	FunctionReference,
-	FunctionReturnType,
-	OptionalRestArgs,
-} from "convex/server";
+import type { FunctionReference } from "convex/server";
 import { Config, Context, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
 import {
@@ -14,68 +9,43 @@ import {
 	type WrappedUnifiedClient,
 } from "./convex-unified-client";
 
-type LiveConvexClient = ConvexClientShared & ConvexClient;
-
 const createLiveService = Effect.gen(function* () {
 	const convexUrl = yield* Config.string("CONVEX_URL");
 
 	const client = new ConvexClient(convexUrl);
 
-	// Create a wrapper that implements ConvexClientShared
-	const sharedClient: ConvexClientShared = {
-		query: <Query extends FunctionReference<"query">>(
-			query: Query,
-			...args: OptionalRestArgs<Query>
-		) => {
-			const queryArgs = (args[0] ?? {}) as FunctionArgs<Query>;
-			return client.query(query, queryArgs) as FunctionReturnType<Query>;
-		},
-		mutation: <
-			Mutation extends
-				| FunctionReference<"mutation", "public">
-				| FunctionReference<"mutation", "internal">,
-		>(
+	// Wrap mutation to prevent internal mutations from being called
+	// All other methods (query, action, onUpdate) are used directly from ConvexClient
+	const wrappedClient: ConvexClientShared = {
+		query: client.query.bind(client),
+		mutation: <Mutation extends FunctionReference<"mutation">>(
 			mutation: Mutation,
-			...args: OptionalRestArgs<Mutation>
+			args: Parameters<ConvexClient["mutation"]>[1],
+			options?: Parameters<ConvexClient["mutation"]>[2],
 		) => {
-			const mutationArgs = (args[0] ?? {}) as FunctionArgs<Mutation>;
 			// Live client can only call public mutations
 			// Internal mutations will fail at runtime with a clear error from Convex
 			// This is intentional - internal mutations should only be used in test mode
-			if ("_visibility" in mutation && mutation._visibility === "internal") {
+			// Check at runtime since TypeScript types don't distinguish internal vs public mutations
+			if (
+				typeof mutation === "object" &&
+				mutation !== null &&
+				"_visibility" in mutation &&
+				(mutation as { _visibility?: string })._visibility === "internal"
+			) {
 				throw new Error(
 					"Internal mutations cannot be called from live client. Use test client for internal mutations.",
 				);
 			}
-			// After the check, TypeScript knows it's a public mutation
-			const publicMutation = mutation as FunctionReference<
-				"mutation",
-				"public"
-			>;
-			return client.mutation(
-				publicMutation,
-				mutationArgs,
-			) as FunctionReturnType<Mutation>;
+			return client.mutation(mutation, args, options);
 		},
-		action: <Action extends FunctionReference<"action">>(
-			action: Action,
-			...args: OptionalRestArgs<Action>
-		) => {
-			const actionArgs = (args[0] ?? {}) as FunctionArgs<Action>;
-			return client.action(action, actionArgs) as FunctionReturnType<Action>;
-		},
-		onUpdate: <Query extends FunctionReference<"query">>(
-			query: Query,
-			args: FunctionArgs<Query>,
-			callback: (result: FunctionReturnType<Query>) => void,
-		) => {
-			return client.onUpdate(query, args, callback);
-		},
+		action: client.action.bind(client),
+		onUpdate: client.onUpdate.bind(client),
 	};
 
 	const use = <A>(
 		fn: (
-			client: LiveConvexClient,
+			client: ConvexClientShared,
 			convexApi: {
 				api: typeof api;
 				internal: typeof internal;
@@ -84,13 +54,7 @@ const createLiveService = Effect.gen(function* () {
 	) => {
 		return Effect.tryPromise({
 			async try(): Promise<Awaited<A>> {
-				// Merge sharedClient methods with the original client
-				// Use object spread to create a new object without mutating the original client
-				const mergedClient = {
-					...client,
-					...sharedClient,
-				} as LiveConvexClient;
-				const result = await fn(mergedClient, { api, internal });
+				const result = await fn(wrappedClient, { api, internal });
 				return result as Awaited<A>;
 			},
 			catch(cause) {
@@ -102,7 +66,7 @@ const createLiveService = Effect.gen(function* () {
 		>;
 	};
 
-	return { use, client: sharedClient };
+	return { use, client: wrappedClient };
 });
 
 export class ConvexClientLive extends Context.Tag("ConvexClientLive")<
