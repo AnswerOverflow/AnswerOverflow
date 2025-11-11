@@ -2,7 +2,9 @@
 	"name": "convex-monorepo",
 	"private": true,
 	"scripts": {
-		"dev": "turbo run dev",
+		"dev": "bun run dev:dbs && bun run dev:no-dbs",
+		"dev:dbs": "bun scripts/start-dbs.ts",
+		"dev:no-dbs": "turbo run dev",
 		"build": "turbo run build",
 		"typecheck": "turbo run typecheck",
 		"test": "turbo run test",

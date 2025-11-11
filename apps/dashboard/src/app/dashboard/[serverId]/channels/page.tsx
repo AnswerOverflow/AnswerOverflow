@@ -90,12 +90,29 @@ export default function ChannelsPage() {
 	const [channelSearchQuery, setChannelSearchQuery] = useQueryState("search", {
 		defaultValue: "",
 	});
+	const [channelTypeFilterParam, setChannelTypeFilterParam] = useQueryState(
+		"types",
+		{
+			defaultValue: "",
+		},
+	);
 
 	// Convert comma-separated string to/from Set
 	const selectedChannelIds = React.useMemo(() => {
 		if (!selectedChannelIdsParam) return new Set<string>();
 		return new Set(selectedChannelIdsParam.split(",").filter(Boolean));
 	}, [selectedChannelIdsParam]);
+
+	// Convert comma-separated string to/from Set for channel types
+	const channelTypeFilter = React.useMemo(() => {
+		if (!channelTypeFilterParam) return new Set<number>();
+		return new Set(
+			channelTypeFilterParam
+				.split(",")
+				.map(Number)
+				.filter((n) => !Number.isNaN(n)),
+		);
+	}, [channelTypeFilterParam]);
 
 	const setSelectedChannelIds = React.useCallback(
 		(updater: (prev: Set<string>) => Set<string>) => {
@@ -113,20 +130,31 @@ export default function ChannelsPage() {
 		serverId,
 	});
 
-	// Filter channels based on search query - must be before conditional return
+	// Filter channels based on search query and channel type - must be before conditional return
 	const filteredChannels = React.useMemo(() => {
 		if (!dashboardData?.channels) {
 			return [];
 		}
-		const searchQuery = channelSearchQuery ?? "";
-		if (!searchQuery.trim()) {
-			return dashboardData.channels;
+		let filtered = dashboardData.channels;
+
+		// Filter by channel type
+		if (channelTypeFilter && channelTypeFilter.size > 0) {
+			filtered = filtered.filter((channel: { type: number }) =>
+				channelTypeFilter.has(channel.type),
+			);
 		}
-		const query = searchQuery.toLowerCase();
-		return dashboardData.channels.filter((channel: { name: string }) =>
-			channel.name.toLowerCase().includes(query),
-		);
-	}, [dashboardData?.channels, channelSearchQuery]);
+
+		// Filter by search query
+		const searchQuery = channelSearchQuery ?? "";
+		if (searchQuery.trim()) {
+			const query = searchQuery.toLowerCase();
+			filtered = filtered.filter((channel: { name: string }) =>
+				channel.name.toLowerCase().includes(query),
+			);
+		}
+
+		return filtered;
+	}, [dashboardData?.channels, channelSearchQuery, channelTypeFilter]);
 
 	// Determine select all checkbox state - must be before conditional return
 	const selectAllState = React.useMemo(() => {
@@ -216,6 +244,27 @@ export default function ChannelsPage() {
 			return { Icon: Megaphone, typeName: "Announcement" };
 		}
 		return { Icon: Hash, typeName: "Text" };
+	};
+
+	// Channel type filter options
+	const channelTypeOptions = [
+		{ type: 0, label: "Text", Icon: Hash },
+		{ type: 5, label: "Announcement", Icon: Megaphone },
+		{ type: 15, label: "Forum", Icon: MessageSquare },
+	] as const;
+
+	const toggleChannelTypeFilter = (type: number) => {
+		const next = new Set(channelTypeFilter);
+		if (next.has(type)) {
+			next.delete(type);
+		} else {
+			next.add(type);
+		}
+		if (next.size === 0) {
+			setChannelTypeFilterParam(null);
+		} else {
+			setChannelTypeFilterParam(Array.from(next).join(","));
+		}
 	};
 
 	// Helper to check if all selected channels have the same value for a flag
@@ -330,9 +379,43 @@ export default function ChannelsPage() {
 												/>
 											</div>
 										</div>
+										{/* Channel type filter */}
+										<div className="px-2 py-1.5 border-t flex items-center gap-3">
+											<span className="text-xs text-muted-foreground shrink-0">
+												Type:
+											</span>
+											<div className="flex items-center gap-2 flex-1">
+												{channelTypeOptions.map(({ type, label, Icon }) => (
+													<label
+														key={type}
+														className="flex items-center gap-1.5 px-1.5 py-0.5 rounded hover:bg-accent cursor-pointer transition-colors"
+														title={label}
+													>
+														<Checkbox
+															checked={channelTypeFilter?.has(type) ?? false}
+															onCheckedChange={() =>
+																toggleChannelTypeFilter(type)
+															}
+															className="size-3.5"
+														/>
+														<Icon className="size-3 shrink-0 text-muted-foreground" />
+													</label>
+												))}
+											</div>
+										</div>
 										{filteredChannels.length === 0 ? (
 											<div className="text-center text-muted-foreground py-8 text-sm">
-												No channels found matching "{channelSearchQuery ?? ""}"
+												{channelSearchQuery || channelTypeFilter?.size
+													? `No channels found${
+															channelSearchQuery
+																? ` matching "${channelSearchQuery}"`
+																: ""
+														}${
+															channelTypeFilter?.size
+																? ` with selected type${channelTypeFilter.size > 1 ? "s" : ""}`
+																: ""
+														}`
+													: "No channels available"}
 											</div>
 										) : (
 											filteredChannels.map(
