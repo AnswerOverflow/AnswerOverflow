@@ -20,6 +20,7 @@ import {
 	TabsTrigger,
 } from "@packages/ui/components/tabs";
 import { useMutation, useQuery } from "convex/react";
+import { Hash, Megaphone, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import React, { use } from "react";
 
@@ -324,6 +325,15 @@ export default function ServerSettingsPage({
 														: channel.type === 5
 															? "Announcement"
 															: "Text";
+
+												// Discord-style icons for channel types
+												const ChannelIcon =
+													channel.type === 15
+														? MessageSquare
+														: channel.type === 5
+															? Megaphone
+															: Hash;
+
 												return (
 													<Button
 														key={channel.id}
@@ -334,7 +344,11 @@ export default function ServerSettingsPage({
 														}
 														onClick={() => setSelectedChannelId(channel.id)}
 													>
-														#{channel.name} ({channelTypeName})
+														<ChannelIcon className="size-4" />
+														{channel.name}
+														<span className="text-muted-foreground ml-1">
+															({channelTypeName})
+														</span>
 													</Button>
 												);
 											},

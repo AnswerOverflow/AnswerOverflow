@@ -1,6 +1,22 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
 
+// Channel types from Discord API
+const ChannelType = {
+	AnnouncementThread: 10,
+	PublicThread: 11,
+	PrivateThread: 12,
+} as const;
+
+// Helper function to check if a channel type is a thread
+function isThreadType(type: number): boolean {
+	return (
+		type === ChannelType.AnnouncementThread ||
+		type === ChannelType.PublicThread ||
+		type === ChannelType.PrivateThread
+	);
+}
+
 // Query to get dashboard data for a server
 // Returns server with preferences and channels with settings
 export const getDashboardData = query({
@@ -19,10 +35,15 @@ export const getDashboardData = query({
 			.first();
 
 		// Get channels for the server directly from database
-		const channels = await ctx.db
+		// Filter out threads (only show root channels: text, announcement, forum)
+		const allChannels = await ctx.db
 			.query("channels")
 			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
 			.collect();
+
+		const channels = allChannels.filter(
+			(channel) => !isThreadType(channel.type),
+		);
 
 		// Get channel settings for all channels
 		const channelSettings = await Promise.all(
