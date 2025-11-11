@@ -9,7 +9,9 @@
 	"scripts": {
 		"clean": "rm -rf node_modules .turbo",
 		"typecheck": "tsc -p tsconfig.json --noEmit",
-		"gen": "mkdir -p src && openapi-gen --spec ./open-api.json > ./src/generated.ts"
+		"sync": "bun run scripts/sync-openapi.ts",
+		"gen": "mkdir -p src && openapi-gen --spec ./open-api.json > ./src/generated.ts",
+		"update": "bun run sync && bun run gen"
 	},
 	"dependencies": {
 		"@effect/platform": "^0.93.0",
