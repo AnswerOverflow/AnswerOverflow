@@ -22,7 +22,7 @@ export async function getServerByDiscordId(
 ) {
 	return await ctx.db
 		.query("servers")
-		.filter((q) => q.eq(q.field("discordId"), discordId))
+		.withIndex("by_discordId", (q) => q.eq("discordId", discordId))
 		.first();
 }
 

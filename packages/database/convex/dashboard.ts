@@ -60,9 +60,17 @@ function hasPermission(permissions: bigint, permission: bigint): boolean {
 export const getUserServers = action({
 	args: {},
 	handler: async (ctx): Promise<ServerWithMetadata[]> => {
+		const startTime = performance.now();
+		console.log("[getUserServers] Starting getUserServers");
+
 		// Check if user is authenticated
 		// Note: getAuthUser doesn't require crypto.subtle, unlike getSession
+		const authStartTime = performance.now();
 		const user = await authComponent.getAuthUser(ctx);
+		const authEndTime = performance.now();
+		console.log(
+			`[getUserServers] getAuthUser took ${(authEndTime - authStartTime).toFixed(2)}ms`,
+		);
 		if (!user) {
 			throw new Error("Not authenticated");
 		}
@@ -81,6 +89,7 @@ export const getUserServers = action({
 			throw new Error("User email not found");
 		}
 
+		const findUserStartTime = performance.now();
 		const betterAuthUser = await ctx.runQuery(
 			components.betterAuth.adapter.findOne,
 			{
@@ -93,6 +102,10 @@ export const getUserServers = action({
 					},
 				],
 			},
+		);
+		const findUserEndTime = performance.now();
+		console.log(
+			`[getUserServers] findOne user query took ${(findUserEndTime - findUserStartTime).toFixed(2)}ms`,
 		);
 
 		if (!betterAuthUser || typeof betterAuthUser !== "object") {
@@ -111,6 +124,7 @@ export const getUserServers = action({
 
 		// Get Discord OAuth account from BetterAuth database
 		// Use the BetterAuth component's internal API to get accounts
+		const findAccountsStartTime = performance.now();
 		const accountsResult = await ctx.runQuery(
 			components.betterAuth.adapter.findMany,
 			{
@@ -127,6 +141,10 @@ export const getUserServers = action({
 					numItems: 100,
 				},
 			},
+		);
+		const findAccountsEndTime = performance.now();
+		console.log(
+			`[getUserServers] findMany accounts query took ${(findAccountsEndTime - findAccountsStartTime).toFixed(2)}ms`,
 		);
 
 		// Handle paginated result - check if it's an array or has a page property
@@ -163,15 +181,27 @@ export const getUserServers = action({
 		// Fetch user's Discord servers using the API client
 		// Cache the result for 5 minutes to reduce API calls
 		const cacheKey = `discord:guilds:${sessionUserId}`;
+		const clientStartTime = performance.now();
 		const client = await Effect.runPromise(discordApi(token));
+		const clientEndTime = performance.now();
+		console.log(
+			`[getUserServers] Creating Discord API client took ${(clientEndTime - clientStartTime).toFixed(2)}ms`,
+		);
+
+		const fetchGuildsStartTime = performance.now();
 		const cachedGuildsEffect = getOrSetCache(
 			cacheKey,
 			() => client.listMyGuilds(),
 			300, // 5 minutes TTL
 		);
 		const discordGuilds = await Effect.runPromise(cachedGuildsEffect);
+		const fetchGuildsEndTime = performance.now();
+		console.log(
+			`[getUserServers] Fetching Discord guilds (${discordGuilds.length} total) took ${(fetchGuildsEndTime - fetchGuildsStartTime).toFixed(2)}ms`,
+		);
 
 		// Filter to servers user can manage (ManageGuild, Administrator, or Owner)
+		const filterStartTime = performance.now();
 		const manageableServers = discordGuilds.filter((guild) => {
 			const permissions = BigInt(guild.permissions);
 			return (
@@ -180,19 +210,33 @@ export const getUserServers = action({
 				hasPermission(permissions, PERMISSIONS.Administrator)
 			);
 		});
+		const filterEndTime = performance.now();
+		console.log(
+			`[getUserServers] Filtering manageable servers (${manageableServers.length} manageable out of ${discordGuilds.length} total) took ${(filterEndTime - filterStartTime).toFixed(2)}ms`,
+		);
 
 		// Match with Answer Overflow servers
 		const serverDiscordIds = manageableServers.map((g) => g.id);
-		const aoServers = await Promise.all(
-			serverDiscordIds.map((discordId) =>
-				ctx.runQuery(api.servers.publicGetServerByDiscordId, { discordId }),
-			),
+		const fetchAoServersStartTime = performance.now();
+		const aoServersArray = await ctx.runQuery(
+			api.servers.publicFindManyServersByDiscordId,
+			{ discordIds: serverDiscordIds },
+		);
+		const fetchAoServersEndTime = performance.now();
+		console.log(
+			`[getUserServers] Fetching ${serverDiscordIds.length} AO servers took ${(fetchAoServersEndTime - fetchAoServersStartTime).toFixed(2)}ms`,
+		);
+
+		// Create a map from Discord ID to server for efficient lookup
+		const aoServersMap = new Map(
+			aoServersArray.map((server) => [server.discordId, server]),
 		);
 
 		// Combine Discord guild data with AO server data
+		const combineStartTime = performance.now();
 		const serversWithMetadata: ServerWithMetadata[] = manageableServers.map(
-			(guild, idx) => {
-				const aoServer = aoServers[idx];
+			(guild) => {
+				const aoServer = aoServersMap.get(guild.id);
 				const permissions = BigInt(guild.permissions);
 
 				let highestRole: "Manage Guild" | "Administrator" | "Owner" =
@@ -220,7 +264,7 @@ export const getUserServers = action({
 		);
 
 		// Sort: has bot + owner/admin/manage, then no bot + owner/admin/manage
-		return serversWithMetadata.sort(
+		const sorted = serversWithMetadata.sort(
 			(a: ServerWithMetadata, b: ServerWithMetadata) => {
 				if (a.hasBot && !b.hasBot) return -1;
 				if (!a.hasBot && b.hasBot) return 1;
@@ -236,5 +280,16 @@ export const getUserServers = action({
 				return roleOrder[a.highestRole] - roleOrder[b.highestRole];
 			},
 		);
+		const combineEndTime = performance.now();
+		console.log(
+			`[getUserServers] Combining and sorting servers took ${(combineEndTime - combineStartTime).toFixed(2)}ms`,
+		);
+
+		const totalTime = performance.now() - startTime;
+		console.log(
+			`[getUserServers] Total execution time: ${totalTime.toFixed(2)}ms`,
+		);
+
+		return sorted;
 	},
 });

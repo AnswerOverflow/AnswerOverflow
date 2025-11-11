@@ -66,7 +66,7 @@ export const publicFindServerByAliasOrId = query({
 		// Try as Discord ID
 		return await ctx.db
 			.query("servers")
-			.filter((q) => q.eq(q.field("discordId"), args.aliasOrId))
+			.withIndex("by_discordId", (q) => q.eq("discordId", args.aliasOrId))
 			.first();
 	},
 });
@@ -122,6 +122,30 @@ export const publicFindManyServersById = query({
 	handler: async (ctx, args) => {
 		if (args.ids.length === 0) return [];
 		const results = await Promise.all(args.ids.map((id) => ctx.db.get(id)));
+		return results.filter((server) => server !== null);
+	},
+});
+
+/**
+ * Public query: Find many servers by Discord IDs
+ * More efficient than calling publicGetServerByDiscordId multiple times
+ */
+export const publicFindManyServersByDiscordId = query({
+	args: {
+		discordIds: v.array(v.string()),
+	},
+	handler: async (ctx, args) => {
+		if (args.discordIds.length === 0) return [];
+		// Use the index to query each Discord ID efficiently
+		// This is still faster than multiple runQuery calls from an action
+		const results = await Promise.all(
+			args.discordIds.map((discordId) =>
+				ctx.db
+					.query("servers")
+					.withIndex("by_discordId", (q) => q.eq("discordId", discordId))
+					.first(),
+			),
+		);
 		return results.filter((server) => server !== null);
 	},
 });
@@ -187,7 +211,7 @@ export const createServerExternal = mutation({
 		// Check if server already exists
 		const existing = await ctx.db
 			.query("servers")
-			.filter((q) => q.eq(q.field("discordId"), data.discordId))
+			.withIndex("by_discordId", (q) => q.eq("discordId", data.discordId))
 			.first();
 
 		if (existing) {
@@ -233,7 +257,7 @@ export const upsertServerExternal = mutation({
 
 		const existing = await ctx.db
 			.query("servers")
-			.filter((q) => q.eq(q.field("discordId"), data.discordId))
+			.withIndex("by_discordId", (q) => q.eq("discordId", data.discordId))
 			.first();
 
 		if (existing) {
