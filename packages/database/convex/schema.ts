@@ -34,15 +34,6 @@ export const serverSchema = v.object({
 	preferencesId: v.optional(v.id("serverPreferences")),
 });
 
-// Users table for BetterAuth authentication
-export const userSchema = v.object({
-	clerkId: v.string(), // BetterAuth user ID (kept as clerkId for backward compatibility)
-	name: v.optional(v.string()),
-	email: v.optional(v.string()),
-	emailVerified: v.optional(v.number()),
-	image: v.optional(v.string()),
-});
-
 // Discord accounts (separate from BetterAuth users)
 export const discordAccountSchema = v.object({
 	id: v.string(), // Discord snowflake ID
@@ -195,7 +186,6 @@ export type ServerPreferences = Infer<typeof serverPreferencesSchema>;
 export type Server = Infer<typeof serverSchema>;
 export type Channel = Infer<typeof channelSchema>;
 export type ChannelSettings = Infer<typeof channelSettingsSchema>;
-export type User = Infer<typeof userSchema>;
 export type DiscordAccount = Infer<typeof discordAccountSchema>;
 export type UserServerSettings = Infer<typeof userServerSettingsSchema>;
 export type IgnoredDiscordAccount = Infer<typeof ignoredDiscordAccountSchema>;
@@ -210,7 +200,6 @@ export default defineSchema({
 	serverPreferences: defineTable(serverPreferencesSchema).index("by_serverId", [
 		"serverId",
 	]),
-	users: defineTable(userSchema).index("by_clerkId", ["clerkId"]),
 	discordAccounts: defineTable(discordAccountSchema).index(
 		"by_discordAccountId",
 		["id"],
