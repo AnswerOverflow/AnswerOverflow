@@ -12,7 +12,7 @@ import type {
 	ServerPreferences,
 	UserServerSettings,
 } from "../convex/schema";
-import { ConvexClientHttpUnifiedLayer } from "./convex-client-http";
+import { ConvexClientLiveUnifiedLayer } from "./convex-client-live";
 import type { ConvexClientShared } from "./convex-unified-client";
 import { ConvexClientUnified } from "./convex-unified-client";
 import { createWatchQueryToLiveData } from "./watch-query";
@@ -979,7 +979,7 @@ export class Database extends Context.Tag("Database")<
 >() {}
 
 export const DatabaseLayer = Layer.effect(Database, service).pipe(
-	Layer.provide(ConvexClientHttpUnifiedLayer),
+	Layer.provide(ConvexClientLiveUnifiedLayer),
 );
 
 /**

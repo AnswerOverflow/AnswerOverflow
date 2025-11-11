@@ -17,7 +17,11 @@ export type ConvexClientShared = {
 		query: Query,
 		...args: OptionalRestArgs<Query>
 	) => FunctionReturnType<Query>;
-	mutation: <Mutation extends FunctionReference<"mutation">>(
+	mutation: <
+		Mutation extends
+			| FunctionReference<"mutation", "public">
+			| FunctionReference<"mutation", "internal">,
+	>(
 		mutation: Mutation,
 		...args: OptionalRestArgs<Mutation>
 	) => FunctionReturnType<Mutation>;

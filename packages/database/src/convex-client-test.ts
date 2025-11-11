@@ -94,7 +94,9 @@ const createTestService = Effect.gen(function* () {
 
 	// Wrap mutation to trigger watch updates after mutations complete
 	const wrappedMutation = async <
-		Mutation extends FunctionReference<"mutation" | "internalMutation">,
+		Mutation extends
+			| FunctionReference<"mutation", "public">
+			| FunctionReference<"mutation", "internal">,
 	>(
 		mutation: Mutation,
 		...args: OptionalRestArgs<Mutation>

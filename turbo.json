@@ -2,22 +2,31 @@
 	"$schema": "https://turbo.build/schema.json",
 	"globalDependencies": ["**/.env.*local"],
 	"tasks": {
+		"codegen": {
+			"cache": true
+		},
 		"build": {
 			"outputs": ["dist/**", ".next/**", "!.next/cache/**"],
-			"dependsOn": ["^build"]
+			"dependsOn": ["^build", "codegen"]
 		},
 		"dev": {
 			"cache": false,
-			"persistent": true
+			"persistent": true,
+			"dependsOn": ["codegen"]
 		},
 		"clean": {
 			"cache": false
 		},
 		"typecheck": {
-			"cache": true
+			"cache": true,
+			"dependsOn": ["codegen"]
 		},
 		"test": {
-			"cache": true
+			"cache": true,
+			"dependsOn": ["codegen"]
+		},
+		"lint": {
+			"dependsOn": ["codegen"]
 		}
 	}
 }

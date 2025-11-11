@@ -21,6 +21,7 @@ import type * as messages from "../messages.js";
 import type * as permissions from "../permissions.js";
 import type * as server_preferences from "../server_preferences.js";
 import type * as servers from "../servers.js";
+import type * as shared from "../shared.js";
 import type * as user_server_settings from "../user_server_settings.js";
 
 import type {
@@ -51,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   permissions: typeof permissions;
   server_preferences: typeof server_preferences;
   servers: typeof servers;
+  shared: typeof shared;
   user_server_settings: typeof user_server_settings;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

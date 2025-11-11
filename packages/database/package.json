@@ -10,6 +10,7 @@
 	},
 	"scripts": {
 		"with-env": "bun run --env-file=../../.env",
+		"codegen": "bunx convex codegen",
 		"dev": "convex dev",
 		"typecheck": "tsc -p convex/tsconfig.json --noEmit & tsc -p tsconfig.json --noEmit & wait",
 		"clean": "rm -rf node_modules .turbo",
