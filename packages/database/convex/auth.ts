@@ -1,4 +1,6 @@
+import { components } from "./_generated/api";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
+import { authComponent } from "./betterAuth";
 import type {
 	AuthorizedUser,
 	CanEditServer,
@@ -10,46 +12,63 @@ import { findUserServerSettingsById, getServerByDiscordId } from "./shared";
 /**
  * Get the authenticated user's Discord account ID from their BetterAuth identity
  * Returns null if not authenticated or no Discord account linked
+ *
+ * BetterAuth account structure:
+ * - accountId: string (Discord user ID / provider account ID)
+ * - providerId: string (provider name, e.g., "discord")
+ * - userId: string (Convex user ID)
  */
 export async function getDiscordAccountIdFromAuth(
 	ctx: QueryCtx | MutationCtx,
 ): Promise<string | null> {
-	const identity = await ctx.auth.getUserIdentity();
-	if (!identity) {
-		return null;
-	}
+	const user = await authComponent.getAuthUser(ctx);
 
-	// BetterAuth stores OAuth provider accounts in identity.providerData
-	// Look for Discord provider
-	const providerData = identity.providerData;
-	if (!providerData || !Array.isArray(providerData)) {
-		return null;
-	}
+	// Use findOne with filters for both userId and providerId to get the Discord account directly
+	// This is cleaner than using findMany and filtering manually
+	const accountResult = await ctx.runQuery(
+		components.betterAuth.adapter.findOne,
+		{
+			model: "account",
+			where: [
+				{
+					field: "userId",
+					operator: "eq",
+					value: user._id,
+				},
+				{
+					field: "providerId",
+					operator: "eq",
+					value: "discord",
+				},
+			],
+		},
+	);
 
-	const discordProvider = providerData.find((provider) => {
-		if (typeof provider !== "object" || provider === null) {
-			return false;
-		}
-		const providerObj = provider as Record<string, unknown>;
-		return providerObj.provider === "discord";
-	});
-
+	// Type guard to ensure we have a valid account object with proper structure
 	if (
-		!discordProvider ||
-		typeof discordProvider !== "object" ||
-		discordProvider === null
+		!accountResult ||
+		typeof accountResult !== "object" ||
+		!("accountId" in accountResult) ||
+		!("providerId" in accountResult)
 	) {
 		return null;
 	}
 
-	const providerUserId = (discordProvider as Record<string, unknown>)
-		.providerUserId;
+	// Narrow the type by checking the structure
+	const accountId = accountResult.accountId;
+	const providerId = accountResult.providerId;
 
-	if (!providerUserId || typeof providerUserId !== "string") {
+	// Verify it's actually a Discord account (should be guaranteed by the filter, but double-check)
+	if (providerId !== "discord") {
 		return null;
 	}
 
-	return providerUserId;
+	// accountId is the Discord user ID (provider account ID)
+	if (typeof accountId !== "string") {
+		return null;
+	}
+
+	return accountId;
 }
 
 /**
@@ -97,7 +116,7 @@ export async function assertCanEditServer(
 	discordAccountId: string | null,
 ): Promise<AuthorizedUser<CanEditServer>> {
 	if (!discordAccountId) {
-		throw new Error("Not authenticated");
+		throw new Error("No discord id");
 	}
 
 	if (isSuperUser(discordAccountId)) {

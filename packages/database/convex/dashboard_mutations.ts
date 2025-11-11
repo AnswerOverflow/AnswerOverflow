@@ -18,6 +18,7 @@ export const updateServerPreferencesFlags = mutation({
 	},
 	handler: async (ctx, args) => {
 		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
+		console.log("discordAccountId", discordAccountId);
 
 		const server = await ctx.db.get(args.serverId);
 		if (!server) {
@@ -32,9 +33,9 @@ export const updateServerPreferencesFlags = mutation({
 		let preferences = server.preferencesId
 			? await ctx.db.get(server.preferencesId)
 			: null;
+		console.log("preferences", server.preferencesId);
 
 		if (!preferences) {
-			// Create new preferences
 			const preferencesId = await ctx.db.insert("serverPreferences", {
 				serverId: args.serverId,
 				...args.flags,
@@ -42,14 +43,19 @@ export const updateServerPreferencesFlags = mutation({
 			await ctx.db.patch(args.serverId, { preferencesId });
 			preferences = await ctx.db.get(preferencesId);
 		} else {
-			// Update existing preferences
-			await ctx.db.patch(preferences._id, args.flags);
+			console.log("patching preferences", preferences._id);
+			await ctx.db.replace(preferences._id, {
+				...preferences,
+				considerAllMessagesPublicEnabled: false,
+			});
 			preferences = await ctx.db.get(preferences._id);
 		}
 
 		if (!preferences) {
 			throw new Error("Failed to update server preferences");
 		}
+
+		console.log("preferences", preferences);
 
 		return preferences;
 	},
