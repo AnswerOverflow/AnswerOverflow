@@ -16,6 +16,7 @@ function getInitials(name: string) {
 
 export interface ServerIconProps extends Omit<AvatarProps, "url" | "alt"> {
 	server: Pick<Server, "discordId" | "name" | "icon">;
+	size?: number;
 }
 
 export const makeServerIconLink = (
@@ -27,11 +28,10 @@ export const makeServerIconLink = (
 };
 
 export function ServerIcon(props: ServerIconProps) {
-	const { className, size = 64, ...rest } = props;
-	const serverIconUrl = makeServerIconLink(props.server, size);
+	const { className, size = 64, server, ...rest } = props;
+	const serverIconUrl = makeServerIconLink(server, size);
 	return (
 		<Avatar
-			{...props}
 			className={className}
 			style={{
 				width: size,
@@ -43,11 +43,9 @@ export function ServerIcon(props: ServerIconProps) {
 				src={serverIconUrl}
 				width={size}
 				height={size}
-				alt={props.server.name}
-				{...props}
+				alt={server.name}
 			/>
 			<AvatarFallback
-				{...props}
 				className={cn(
 					"relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-50 text-center dark:bg-neutral-700",
 					size > 64 ? "text-4xl" : "text-xl",
@@ -58,7 +56,7 @@ export function ServerIcon(props: ServerIconProps) {
 					height: size,
 				}}
 			>
-				{getInitials(props.server.name)}
+				{getInitials(server.name)}
 			</AvatarFallback>
 		</Avatar>
 	);

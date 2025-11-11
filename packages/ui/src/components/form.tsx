@@ -16,7 +16,7 @@ import {
 import { cn } from "@packages/ui/lib/utils";
 import { Label } from "@packages/ui/components/label";
 
-const Form = FormProvider;
+const Form: typeof FormProvider = FormProvider;
 
 type FormFieldContextValue<
 	TFieldValues extends FieldValues = FieldValues,
