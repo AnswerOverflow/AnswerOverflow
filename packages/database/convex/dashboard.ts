@@ -12,6 +12,12 @@ import type { Id } from "./_generated/dataModel";
 import { action } from "./_generated/server";
 import { authComponent } from "./betterAuth";
 import { getOrSetCache } from "./cache";
+import {
+	DISCORD_PERMISSIONS,
+	getHighestRoleFromPermissions,
+	hasPermission,
+	sortServersByBotAndRole,
+} from "./shared";
 
 const discordApi = (token: string) =>
 	Effect.gen(function* () {
@@ -46,16 +52,6 @@ type ServerWithMetadata = {
 	hasBot: boolean;
 	aoServerId: Id<"servers"> | undefined;
 };
-
-// Permission flags
-const PERMISSIONS = {
-	Administrator: 0x8n,
-	ManageGuild: 0x20n,
-} as const;
-
-function hasPermission(permissions: bigint, permission: bigint): boolean {
-	return (permissions & permission) === permission;
-}
 
 export const getUserServers = action({
 	args: {},
@@ -186,8 +182,8 @@ export const getUserServers = action({
 			const permissions = BigInt(guild.permissions);
 			return (
 				guild.owner ||
-				hasPermission(permissions, PERMISSIONS.ManageGuild) ||
-				hasPermission(permissions, PERMISSIONS.Administrator)
+				hasPermission(permissions, DISCORD_PERMISSIONS.ManageGuild) ||
+				hasPermission(permissions, DISCORD_PERMISSIONS.Administrator)
 			);
 		});
 
@@ -252,13 +248,10 @@ export const getUserServers = action({
 				const aoServer = aoServers[idx];
 				const permissions = BigInt(guild.permissions);
 
-				let highestRole: "Manage Guild" | "Administrator" | "Owner" =
-					"Manage Guild";
-				if (guild.owner) {
-					highestRole = "Owner";
-				} else if (hasPermission(permissions, PERMISSIONS.Administrator)) {
-					highestRole = "Administrator";
-				}
+				const highestRole = getHighestRoleFromPermissions(
+					permissions,
+					guild.owner,
+				);
 
 				return {
 					discordId: guild.id,
@@ -277,21 +270,6 @@ export const getUserServers = action({
 		);
 
 		// Sort: has bot + owner/admin/manage, then no bot + owner/admin/manage
-		return serversWithMetadata.sort(
-			(a: ServerWithMetadata, b: ServerWithMetadata) => {
-				if (a.hasBot && !b.hasBot) return -1;
-				if (!a.hasBot && b.hasBot) return 1;
-
-				const roleOrder: Record<
-					"Owner" | "Administrator" | "Manage Guild",
-					number
-				> = {
-					Owner: 0,
-					Administrator: 1,
-					"Manage Guild": 2,
-				};
-				return roleOrder[a.highestRole] - roleOrder[b.highestRole];
-			},
-		);
+		return sortServersByBotAndRole(serversWithMetadata);
 	},
 });

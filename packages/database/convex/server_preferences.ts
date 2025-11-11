@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { internalMutation } from "./_generated/server";
 import { publicInternalMutation, publicInternalQuery } from "./publicInternal";
+import { validateCustomDomainUniqueness } from "./shared";
 
 const serverPreferencesSchema = v.object({
 	serverId: v.id("servers"),
@@ -49,21 +50,17 @@ export const createServerPreferences = publicInternalMutation({
 		}
 
 		// Validate custom domain uniqueness if provided
-		if (args.preferences.customDomain) {
-			const allServers = await ctx.db.query("servers").collect();
-			for (const s of allServers) {
-				if (s.preferencesId) {
-					const prefs = await ctx.db.get(s.preferencesId);
-					if (
-						prefs?.customDomain === args.preferences.customDomain &&
-						s._id !== args.preferences.serverId
-					) {
-						throw new Error(
-							`Server with custom domain ${args.preferences.customDomain} already exists`,
-						);
-					}
-				}
-			}
+
+		const domainError = await validateCustomDomainUniqueness(
+			ctx,
+
+			args.preferences.customDomain,
+
+			args.preferences.serverId,
+		);
+
+		if (domainError) {
+			throw new Error(domainError);
 		}
 
 		const preferencesId = await ctx.db.insert(
@@ -105,20 +102,23 @@ export const updateServerPreferences = publicInternalMutation({
 		}
 
 		// Validate custom domain uniqueness if being changed
+
 		if (
 			args.preferences.customDomain &&
 			args.preferences.customDomain !== existing.customDomain
 		) {
-			const allServers = await ctx.db.query("servers").collect();
-			for (const s of allServers) {
-				if (s.preferencesId && s.preferencesId !== existing._id) {
-					const prefs = await ctx.db.get(s.preferencesId);
-					if (prefs?.customDomain === args.preferences.customDomain) {
-						throw new Error(
-							`Server with custom domain ${args.preferences.customDomain} already exists`,
-						);
-					}
-				}
+			const domainError = await validateCustomDomainUniqueness(
+				ctx,
+
+				args.preferences.customDomain,
+
+				undefined,
+
+				existing._id,
+			);
+
+			if (domainError) {
+				throw new Error(domainError);
 			}
 		}
 
@@ -148,20 +148,23 @@ export const upsertServerPreferences = publicInternalMutation({
 		if (existing) {
 			// Update existing
 			// Validate custom domain uniqueness if being changed
+
 			if (
 				args.preferences.customDomain &&
 				args.preferences.customDomain !== existing.customDomain
 			) {
-				const allServers = await ctx.db.query("servers").collect();
-				for (const s of allServers) {
-					if (s.preferencesId && s.preferencesId !== existing._id) {
-						const prefs = await ctx.db.get(s.preferencesId);
-						if (prefs?.customDomain === args.preferences.customDomain) {
-							throw new Error(
-								`Server with custom domain ${args.preferences.customDomain} already exists`,
-							);
-						}
-					}
+				const domainError = await validateCustomDomainUniqueness(
+					ctx,
+
+					args.preferences.customDomain,
+
+					undefined,
+
+					existing._id,
+				);
+
+				if (domainError) {
+					throw new Error(domainError);
 				}
 			}
 
@@ -174,18 +177,17 @@ export const upsertServerPreferences = publicInternalMutation({
 		} else {
 			// Create new
 			// Validate custom domain uniqueness if provided
-			if (args.preferences.customDomain) {
-				const allServers = await ctx.db.query("servers").collect();
-				for (const s of allServers) {
-					if (s.preferencesId) {
-						const prefs = await ctx.db.get(s.preferencesId);
-						if (prefs?.customDomain === args.preferences.customDomain) {
-							throw new Error(
-								`Server with custom domain ${args.preferences.customDomain} already exists`,
-							);
-						}
-					}
-				}
+
+			const domainError = await validateCustomDomainUniqueness(
+				ctx,
+
+				args.preferences.customDomain,
+
+				args.preferences.serverId,
+			);
+
+			if (domainError) {
+				throw new Error(domainError);
 			}
 
 			const preferencesId = await ctx.db.insert(
@@ -262,21 +264,17 @@ export const createServerPreferencesInternal = internalMutation({
 		}
 
 		// Validate custom domain uniqueness if provided
-		if (args.preferences.customDomain) {
-			const allServers = await ctx.db.query("servers").collect();
-			for (const s of allServers) {
-				if (s.preferencesId) {
-					const prefs = await ctx.db.get(s.preferencesId);
-					if (
-						prefs?.customDomain === args.preferences.customDomain &&
-						s._id !== args.preferences.serverId
-					) {
-						throw new Error(
-							`Server with custom domain ${args.preferences.customDomain} already exists`,
-						);
-					}
-				}
-			}
+
+		const domainError = await validateCustomDomainUniqueness(
+			ctx,
+
+			args.preferences.customDomain,
+
+			args.preferences.serverId,
+		);
+
+		if (domainError) {
+			throw new Error(domainError);
 		}
 
 		const preferencesId = await ctx.db.insert(
@@ -324,20 +322,23 @@ export const updateServerPreferencesInternal = internalMutation({
 		}
 
 		// Validate custom domain uniqueness if being changed
+
 		if (
 			args.preferences.customDomain &&
 			args.preferences.customDomain !== existing.customDomain
 		) {
-			const allServers = await ctx.db.query("servers").collect();
-			for (const s of allServers) {
-				if (s.preferencesId && s.preferencesId !== existing._id) {
-					const prefs = await ctx.db.get(s.preferencesId);
-					if (prefs?.customDomain === args.preferences.customDomain) {
-						throw new Error(
-							`Server with custom domain ${args.preferences.customDomain} already exists`,
-						);
-					}
-				}
+			const domainError = await validateCustomDomainUniqueness(
+				ctx,
+
+				args.preferences.customDomain,
+
+				undefined,
+
+				existing._id,
+			);
+
+			if (domainError) {
+				throw new Error(domainError);
 			}
 		}
 
@@ -373,20 +374,23 @@ export const upsertServerPreferencesInternal = internalMutation({
 		if (existing) {
 			// Update existing
 			// Validate custom domain uniqueness if being changed
+
 			if (
 				args.preferences.customDomain &&
 				args.preferences.customDomain !== existing.customDomain
 			) {
-				const allServers = await ctx.db.query("servers").collect();
-				for (const s of allServers) {
-					if (s.preferencesId && s.preferencesId !== existing._id) {
-						const prefs = await ctx.db.get(s.preferencesId);
-						if (prefs?.customDomain === args.preferences.customDomain) {
-							throw new Error(
-								`Server with custom domain ${args.preferences.customDomain} already exists`,
-							);
-						}
-					}
+				const domainError = await validateCustomDomainUniqueness(
+					ctx,
+
+					args.preferences.customDomain,
+
+					undefined,
+
+					existing._id,
+				);
+
+				if (domainError) {
+					throw new Error(domainError);
 				}
 			}
 
@@ -399,18 +403,17 @@ export const upsertServerPreferencesInternal = internalMutation({
 		} else {
 			// Create new
 			// Validate custom domain uniqueness if provided
-			if (args.preferences.customDomain) {
-				const allServers = await ctx.db.query("servers").collect();
-				for (const s of allServers) {
-					if (s.preferencesId) {
-						const prefs = await ctx.db.get(s.preferencesId);
-						if (prefs?.customDomain === args.preferences.customDomain) {
-							throw new Error(
-								`Server with custom domain ${args.preferences.customDomain} already exists`,
-							);
-						}
-					}
-				}
+
+			const domainError = await validateCustomDomainUniqueness(
+				ctx,
+
+				args.preferences.customDomain,
+
+				args.preferences.serverId,
+			);
+
+			if (domainError) {
+				throw new Error(domainError);
 			}
 
 			const preferencesId = await ctx.db.insert(

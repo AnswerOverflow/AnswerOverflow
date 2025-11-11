@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation } from "./_generated/server";
 import { assertCanEditServer, getDiscordAccountIdFromAuth } from "./auth";
 import type { AuthorizedUser, CanEditServer } from "./permissions";
+import { validateCustomDomain } from "./shared";
 
 /**
  * Update server preferences flags (for dashboard)
@@ -209,19 +210,9 @@ export const updateCustomDomain = mutation({
 			await assertCanEditServer(ctx, server.discordId, discordAccountId);
 
 		// Validate domain format (basic validation)
-		if (args.customDomain !== null && args.customDomain !== "") {
-			// Basic domain validation - must not end with .answeroverflow.com
-			if (args.customDomain.toLowerCase().endsWith(".answeroverflow.com")) {
-				throw new Error(
-					"Domain cannot end with .answeroverflow.com. Please use a domain that you own",
-				);
-			}
-
-			// Basic domain format validation
-			const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i;
-			if (!domainRegex.test(args.customDomain)) {
-				throw new Error("Invalid domain format");
-			}
+		const domainError = validateCustomDomain(args.customDomain);
+		if (domainError) {
+			throw new Error(domainError);
 		}
 
 		// Get or create server preferences

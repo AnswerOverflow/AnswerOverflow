@@ -8,20 +8,16 @@ import {
 } from "./_generated/server";
 import { publicInternalMutation, publicInternalQuery } from "./publicInternal";
 import { channelSchema, channelSettingsSchema } from "./schema";
-import { deleteChannelInternalLogic, getChannelWithSettings } from "./shared";
+import {
+	CHANNEL_TYPE,
+	isThreadType,
+	ROOT_CHANNEL_TYPES,
+	deleteChannelInternalLogic,
+	getChannelWithSettings,
+} from "./shared";
 
 type Channel = Infer<typeof channelSchema>;
 type ChannelSettings = Infer<typeof channelSettingsSchema>;
-
-// Channel types from Discord API
-const ChannelType = {
-	GuildText: 0,
-	GuildAnnouncement: 5,
-	GuildForum: 15,
-	PublicThread: 11,
-	PrivateThread: 12,
-	AnnouncementThread: 10,
-} as const;
 
 const DEFAULT_CHANNEL_SETTINGS: ChannelSettings = {
 	channelId: "",
@@ -141,12 +137,6 @@ export const findManyChannelsById = query({
 		if (args.includeMessageCount) {
 			// Note: Message count functionality would require a messages table
 			// For now, we'll return undefined for messageCount
-			// Thread types: 11 (PublicThread), 12 (PrivateThread), 10 (AnnouncementThread)
-			const isThreadType = (type: number) =>
-				type === ChannelType.PublicThread ||
-				type === ChannelType.PrivateThread ||
-				type === ChannelType.AnnouncementThread;
-
 			return channelsWithFlags.map((c) => ({
 				...c,
 				messageCount: isThreadType(c.type) ? undefined : undefined, // TODO: Implement when messages table exists
@@ -164,7 +154,7 @@ export const findLatestThreads = publicInternalQuery({
 	handler: async (ctx, args) => {
 		const channels = await ctx.db
 			.query("channels")
-			.withIndex("by_type", (q) => q.eq("type", ChannelType.PublicThread))
+			.withIndex("by_type", (q) => q.eq("type", CHANNEL_TYPE.PublicThread))
 			.order("desc")
 			.take(args.take);
 

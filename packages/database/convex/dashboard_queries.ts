@@ -1,23 +1,13 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
-import { authComponent } from "./betterAuth";
-import { components } from "./_generated/api";
-
-// Channel types from Discord API
-const ChannelType = {
-	AnnouncementThread: 10,
-	PublicThread: 11,
-	PrivateThread: 12,
-} as const;
-
-// Helper function to check if a channel type is a thread
-function isThreadType(type: number): boolean {
-	return (
-		type === ChannelType.AnnouncementThread ||
-		type === ChannelType.PublicThread ||
-		type === ChannelType.PrivateThread
-	);
-}
+import { authenticatedQuery } from "./auth";
+import {
+	DISCORD_PERMISSIONS,
+	getHighestRoleFromPermissions,
+	hasPermission,
+	isThreadType,
+	sortServersByBotAndRole,
+} from "./shared";
 
 // Query to get dashboard data for a server
 // Returns server with preferences and channels with settings
@@ -97,87 +87,42 @@ export const getDashboardData = query({
 	},
 });
 
-// Permission flags from Discord API
-const PERMISSIONS = {
-	Administrator: 0x8,
-	ManageGuild: 0x20,
-} as const;
-
-function hasPermission(permissions: number, permission: number): boolean {
-	return (permissions & permission) === permission;
-}
-
 // Query to get user's servers based on user server settings and permissions
 // Returns servers where user has ManageGuild or Administrator permission
-export const getUserServersForDropdown = query({
+export const getUserServersForDropdown = authenticatedQuery({
 	args: {},
-	handler: async (ctx) => {
-		// Get authenticated user
-		const user = await authComponent.getAuthUser(ctx);
-		if (!user) {
-			return [];
-		}
+	returns: v.array(
+		v.object({
+			discordId: v.string(),
+			name: v.string(),
+			icon: v.union(v.string(), v.null()),
+			highestRole: v.union(v.string(), v.null()),
+			hasBot: v.boolean(),
+			aoServerId: v.id("servers"),
+		}),
+	),
+	handler: async (ctx, args) => {
+		const { discordAccountId } = args;
 
-		// Get Discord account ID from BetterAuth
-		// Component queries can be called with ctx.runQuery even from regular queries
-		const accountResult = await ctx.runQuery(
-			components.betterAuth.adapter.findOne,
-			{
-				model: "account",
-				where: [
-					{
-						field: "userId",
-						operator: "eq",
-						value: user._id,
-					},
-					{
-						field: "providerId",
-						operator: "eq",
-						value: "discord",
-					},
-				],
-			},
-		);
-
-		// Type guard to ensure we have a valid account object
-		if (
-			!accountResult ||
-			typeof accountResult !== "object" ||
-			!("accountId" in accountResult) ||
-			typeof accountResult.accountId !== "string"
-		) {
-			return [];
-		}
-
-		const discordAccountId = accountResult.accountId;
-
-		// Get all user server settings for this user
 		const userServerSettings = await ctx.db
 			.query("userServerSettings")
 			.withIndex("by_userId", (q) => q.eq("userId", discordAccountId))
 			.collect();
 
-		// Filter to only servers where user has ManageGuild or Administrator permission
 		const manageableSettings = userServerSettings.filter((setting) => {
 			const permissions = setting.permissions;
 			return (
-				hasPermission(permissions, PERMISSIONS.Administrator) ||
-				hasPermission(permissions, PERMISSIONS.ManageGuild)
+				hasPermission(permissions, DISCORD_PERMISSIONS.Administrator) ||
+				hasPermission(permissions, DISCORD_PERMISSIONS.ManageGuild)
 			);
 		});
 
-		// Get servers for these settings
 		const servers = await Promise.all(
 			manageableSettings.map(async (setting) => {
 				const server = await ctx.db.get(setting.serverId);
 				if (!server) return null;
 
-				const permissions = setting.permissions;
-				let highestRole: "Manage Guild" | "Administrator" | "Owner" =
-					"Manage Guild";
-				if (hasPermission(permissions, PERMISSIONS.Administrator)) {
-					highestRole = "Administrator";
-				}
+				const highestRole = getHighestRoleFromPermissions(setting.permissions);
 
 				return {
 					discordId: server.discordId,
@@ -190,24 +135,10 @@ export const getUserServersForDropdown = query({
 			}),
 		);
 
-		// Filter out nulls and sort: has bot + owner/admin/manage, then no bot + owner/admin/manage
 		const validServers = servers.filter(
 			(server): server is NonNullable<(typeof servers)[0]> => server !== null,
 		);
 
-		return validServers.sort((a, b) => {
-			if (a.hasBot && !b.hasBot) return -1;
-			if (!a.hasBot && b.hasBot) return 1;
-
-			const roleOrder: Record<
-				"Owner" | "Administrator" | "Manage Guild",
-				number
-			> = {
-				Owner: 0,
-				Administrator: 1,
-				"Manage Guild": 2,
-			};
-			return roleOrder[a.highestRole] - roleOrder[b.highestRole];
-		});
+		return sortServersByBotAndRole(validServers);
 	},
 });

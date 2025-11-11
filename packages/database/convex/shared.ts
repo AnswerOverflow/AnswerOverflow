@@ -13,6 +13,180 @@ type Attachment = Infer<typeof attachmentSchema>;
 type Reaction = Infer<typeof reactionSchema>;
 
 // ============================================================================
+// Discord Permissions
+// ============================================================================
+
+/**
+ * Discord permission flags from Discord API
+ * These can be used with both number and bigint permission values
+ */
+export const DISCORD_PERMISSIONS = {
+	Administrator: 0x8,
+	ManageGuild: 0x20,
+} as const;
+
+/**
+ * Check if permissions include a specific permission flag
+ * Works with both number and bigint permission values
+ */
+export function hasPermission(
+	permissions: number | bigint,
+	permission: number | bigint,
+): boolean {
+	if (typeof permissions === "bigint" || typeof permission === "bigint") {
+		const permsBigInt = BigInt(permissions);
+		const permBigInt = BigInt(permission);
+		return (permsBigInt & permBigInt) === permBigInt;
+	}
+	return (permissions & permission) === permission;
+}
+
+// ============================================================================
+// Discord Channel Types
+// ============================================================================
+
+/**
+ * Channel types from Discord API
+ */
+export const CHANNEL_TYPE = {
+	GuildText: 0,
+	GuildAnnouncement: 5,
+	GuildForum: 15,
+	AnnouncementThread: 10,
+	PublicThread: 11,
+	PrivateThread: 12,
+} as const;
+
+/**
+ * Check if a channel type is a thread
+ */
+export function isThreadType(type: number): boolean {
+	return (
+		type === CHANNEL_TYPE.AnnouncementThread ||
+		type === CHANNEL_TYPE.PublicThread ||
+		type === CHANNEL_TYPE.PrivateThread
+	);
+}
+
+/**
+ * Root channel types (forums, text, announcements) - excludes threads
+ */
+export const ROOT_CHANNEL_TYPES = [
+	CHANNEL_TYPE.GuildText,
+	CHANNEL_TYPE.GuildAnnouncement,
+	CHANNEL_TYPE.GuildForum,
+] as const;
+
+// ============================================================================
+// Server Sorting
+// ============================================================================
+
+type ServerWithMetadata = {
+	hasBot: boolean;
+	highestRole: "Owner" | "Administrator" | "Manage Guild";
+};
+
+/**
+ * Sort servers: has bot + owner/admin/manage, then no bot + owner/admin/manage
+ */
+export function sortServersByBotAndRole<T extends ServerWithMetadata>(
+	servers: T[],
+): T[] {
+	return servers.sort((a, b) => {
+		if (a.hasBot && !b.hasBot) return -1;
+		if (!a.hasBot && b.hasBot) return 1;
+
+		const roleOrder: Record<
+			"Owner" | "Administrator" | "Manage Guild",
+			number
+		> = {
+			Owner: 0,
+			Administrator: 1,
+			"Manage Guild": 2,
+		};
+		return roleOrder[a.highestRole] - roleOrder[b.highestRole];
+	});
+}
+
+/**
+ * Determine highest role from permissions
+ */
+export function getHighestRoleFromPermissions(
+	permissions: number | bigint,
+	isOwner: boolean = false,
+): "Owner" | "Administrator" | "Manage Guild" {
+	if (isOwner) {
+		return "Owner";
+	}
+	if (hasPermission(permissions, DISCORD_PERMISSIONS.Administrator)) {
+		return "Administrator";
+	}
+	return "Manage Guild";
+}
+
+// ============================================================================
+// Validation Utilities
+// ============================================================================
+
+/**
+ * Validate custom domain format
+ * Returns error message if invalid, null if valid
+ */
+export function validateCustomDomain(domain: string | null): string | null {
+	if (domain === null || domain === "") {
+		return null; // Empty is valid (means no custom domain)
+	}
+
+	// Basic domain validation - must not end with .answeroverflow.com
+	if (domain.toLowerCase().endsWith(".answeroverflow.com")) {
+		return "Domain cannot end with .answeroverflow.com. Please use a domain that you own";
+	}
+
+	// Basic domain format validation
+	const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i;
+	if (!domainRegex.test(domain)) {
+		return "Invalid domain format";
+	}
+
+	return null;
+}
+
+/**
+ * Check if a custom domain is already in use by another server
+ * Returns error message if in use, null if available
+ */
+export async function validateCustomDomainUniqueness(
+	ctx: QueryCtx | MutationCtx,
+	customDomain: string | null | undefined,
+	excludeServerId?: Id<"servers">,
+	excludePreferencesId?: Id<"serverPreferences">,
+): Promise<string | null> {
+	if (!customDomain) {
+		return null; // Empty is valid
+	}
+
+	const allServers = await ctx.db.query("servers").collect();
+	for (const server of allServers) {
+		// Skip the server we're updating if provided
+		if (excludeServerId && server._id === excludeServerId) {
+			continue;
+		}
+
+		if (server.preferencesId) {
+			const prefs = await ctx.db.get(server.preferencesId);
+			if (
+				prefs?.customDomain === customDomain &&
+				(!excludePreferencesId || prefs._id !== excludePreferencesId)
+			) {
+				return `Server with custom domain ${customDomain} already exists`;
+			}
+		}
+	}
+
+	return null;
+}
+
+// ============================================================================
 // Servers
 // ============================================================================
 

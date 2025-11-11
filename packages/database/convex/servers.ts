@@ -2,10 +2,11 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { publicInternalMutation } from "./publicInternal";
 import { serverSchema } from "./schema";
-import { getServerByDiscordId as getServerByDiscordIdShared } from "./shared";
-
-// Channel types for root channels (forums, text, announcements)
-const ALLOWED_ROOT_CHANNEL_TYPES = [0, 5, 15]; // GuildText, GuildAnnouncement, GuildForum
+import {
+	getServerByDiscordId as getServerByDiscordIdShared,
+	ROOT_CHANNEL_TYPES,
+	CHANNEL_TYPE,
+} from "./shared";
 
 /**
  * Public query: Get all servers
@@ -179,15 +180,17 @@ export const publicFindServerByIdWithChannels = query({
 
 		// Filter to only root channel types (forums, announcements, text)
 		const rootChannels = allChannels.filter((channel) =>
-			ALLOWED_ROOT_CHANNEL_TYPES.includes(channel.type),
+			ROOT_CHANNEL_TYPES.includes(
+				channel.type as (typeof ROOT_CHANNEL_TYPES)[number],
+			),
 		);
 
 		// Sort: forums first, then announcements, then text
 		const sortedChannels = rootChannels.sort((a, b) => {
-			if (a.type === 15) return -1; // GuildForum
-			if (b.type === 15) return 1;
-			if (a.type === 5) return -1; // GuildAnnouncement
-			if (b.type === 5) return 1;
+			if (a.type === CHANNEL_TYPE.GuildForum) return -1;
+			if (b.type === CHANNEL_TYPE.GuildForum) return 1;
+			if (a.type === CHANNEL_TYPE.GuildAnnouncement) return -1;
+			if (b.type === CHANNEL_TYPE.GuildAnnouncement) return 1;
 			return 0;
 		});
 
