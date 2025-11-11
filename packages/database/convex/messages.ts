@@ -7,6 +7,7 @@ import {
 	type QueryCtx,
 	query,
 } from "./_generated/server";
+import { publicInternalMutation, publicInternalQuery } from "./publicInternal";
 import {
 	attachmentSchema,
 	emojiSchema,
@@ -50,7 +51,7 @@ async function hasMessageIndexingDisabled(
 	return settings?.messageIndexingDisabled === true;
 }
 
-export const upsertMessage = mutation({
+export const upsertMessage = publicInternalMutation({
 	args: {
 		message: messageSchema,
 		attachments: v.optional(v.array(attachmentSchema)),
@@ -168,7 +169,7 @@ export const upsertMessage = mutation({
 	},
 });
 
-export const upsertManyMessages = mutation({
+export const upsertManyMessages = publicInternalMutation({
 	args: {
 		messages: v.array(
 			v.object({
@@ -299,7 +300,7 @@ export const findMessagesByChannelId = query({
 	},
 });
 
-export const findManyMessagesById = query({
+export const findManyMessagesById = publicInternalQuery({
 	args: {
 		ids: v.array(v.string()),
 	},
@@ -335,7 +336,7 @@ export const findMessagesByAuthorId = query({
 	},
 });
 
-export const findMessagesByServerId = query({
+export const findMessagesByServerId = publicInternalQuery({
 	args: {
 		serverId: v.id("servers"),
 		limit: v.optional(v.number()),
@@ -350,7 +351,7 @@ export const findMessagesByServerId = query({
 	},
 });
 
-export const findMessagesByParentChannelId = query({
+export const findMessagesByParentChannelId = publicInternalQuery({
 	args: {
 		parentChannelId: v.string(),
 		limit: v.optional(v.number()),
@@ -367,7 +368,7 @@ export const findMessagesByParentChannelId = query({
 	},
 });
 
-export const findLatestMessageInChannel = query({
+export const findLatestMessageInChannel = publicInternalQuery({
 	args: {
 		channelId: v.string(),
 	},
@@ -388,7 +389,7 @@ export const findLatestMessageInChannel = query({
 	},
 });
 
-export const findLatestMessageInChannelAndThreads = query({
+export const findLatestMessageInChannelAndThreads = publicInternalQuery({
 	args: {
 		channelId: v.string(),
 	},
@@ -420,7 +421,7 @@ export const findLatestMessageInChannelAndThreads = query({
 	},
 });
 
-export const findAttachmentsByMessageId = query({
+export const findAttachmentsByMessageId = publicInternalQuery({
 	args: {
 		messageId: v.string(),
 	},
@@ -429,7 +430,7 @@ export const findAttachmentsByMessageId = query({
 	},
 });
 
-export const findReactionsByMessageId = query({
+export const findReactionsByMessageId = publicInternalQuery({
 	args: {
 		messageId: v.string(),
 	},
@@ -438,7 +439,7 @@ export const findReactionsByMessageId = query({
 	},
 });
 
-export const findEmojiById = query({
+export const findEmojiById = publicInternalQuery({
 	args: {
 		id: v.string(),
 	},
@@ -450,7 +451,7 @@ export const findEmojiById = query({
 	},
 });
 
-export const countMessagesInChannel = query({
+export const countMessagesInChannel = publicInternalQuery({
 	args: {
 		channelId: v.string(),
 	},
@@ -464,7 +465,7 @@ export const countMessagesInChannel = query({
 	},
 });
 
-export const countMessagesInManyChannels = query({
+export const countMessagesInManyChannels = publicInternalQuery({
 	args: {
 		channelIds: v.array(v.string()),
 	},
@@ -486,7 +487,7 @@ export const countMessagesInManyChannels = query({
 	},
 });
 
-export const getTotalMessageCount = query({
+export const getTotalMessageCount = publicInternalQuery({
 	args: {},
 	handler: async (ctx) => {
 		const messages = await ctx.db.query("messages").collect();
@@ -494,7 +495,7 @@ export const getTotalMessageCount = query({
 	},
 });
 
-export const findSolutionsByQuestionId = query({
+export const findSolutionsByQuestionId = publicInternalQuery({
 	args: {
 		questionId: v.string(),
 		limit: v.optional(v.number()),
@@ -508,7 +509,7 @@ export const findSolutionsByQuestionId = query({
 	},
 });
 
-export const getTopQuestionSolversByServerId = query({
+export const getTopQuestionSolversByServerId = publicInternalQuery({
 	args: {
 		serverId: v.id("servers"),
 		limit: v.optional(v.number()),
@@ -540,7 +541,7 @@ export const getTopQuestionSolversByServerId = query({
 	},
 });
 
-export const deleteMessage = mutation({
+export const deleteMessage = publicInternalMutation({
 	args: {
 		id: v.string(),
 	},
@@ -550,7 +551,7 @@ export const deleteMessage = mutation({
 	},
 });
 
-export const deleteManyMessages = mutation({
+export const deleteManyMessages = publicInternalMutation({
 	args: {
 		ids: v.array(v.string()),
 	},
@@ -562,7 +563,7 @@ export const deleteManyMessages = mutation({
 	},
 });
 
-export const deleteManyMessagesByChannelId = mutation({
+export const deleteManyMessagesByChannelId = publicInternalMutation({
 	args: {
 		channelId: v.string(),
 	},
@@ -580,7 +581,7 @@ export const deleteManyMessagesByChannelId = mutation({
 	},
 });
 
-export const deleteManyMessagesByUserId = mutation({
+export const deleteManyMessagesByUserId = publicInternalMutation({
 	args: {
 		userId: v.string(),
 	},

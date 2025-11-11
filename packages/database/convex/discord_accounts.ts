@@ -1,5 +1,6 @@
 import { type Infer, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { publicInternalMutation, publicInternalQuery } from "./publicInternal";
 import { discordAccountSchema } from "./schema";
 import {
 	deleteMessageInternalLogic,
@@ -22,7 +23,7 @@ function getDefaultDiscordAccount(data: {
 	};
 }
 
-export const getDiscordAccountById = query({
+export const getDiscordAccountById = publicInternalQuery({
 	args: {
 		id: v.string(),
 	},
@@ -52,7 +53,7 @@ export const findManyDiscordAccountsById = query({
 	},
 });
 
-export const createDiscordAccount = mutation({
+export const createDiscordAccount = publicInternalMutation({
 	args: {
 		account: discordAccountSchema,
 	},
@@ -96,7 +97,7 @@ export const createDiscordAccount = mutation({
 	},
 });
 
-export const createManyDiscordAccounts = mutation({
+export const createManyDiscordAccounts = publicInternalMutation({
 	args: {
 		accounts: v.array(discordAccountSchema),
 	},
@@ -149,7 +150,7 @@ export const createManyDiscordAccounts = mutation({
 	},
 });
 
-export const updateDiscordAccount = mutation({
+export const updateDiscordAccount = publicInternalMutation({
 	args: {
 		account: discordAccountSchema,
 	},
@@ -178,7 +179,7 @@ export const updateDiscordAccount = mutation({
 	},
 });
 
-export const updateManyDiscordAccounts = mutation({
+export const updateManyDiscordAccounts = publicInternalMutation({
 	args: {
 		accounts: v.array(discordAccountSchema),
 	},
@@ -224,7 +225,7 @@ export const updateManyDiscordAccounts = mutation({
 	},
 });
 
-export const upsertDiscordAccount = mutation({
+export const upsertDiscordAccount = publicInternalMutation({
 	args: {
 		account: discordAccountSchema,
 	},
@@ -271,7 +272,7 @@ export const upsertDiscordAccount = mutation({
 	},
 });
 
-export const upsertManyDiscordAccounts = mutation({
+export const upsertManyDiscordAccounts = publicInternalMutation({
 	args: {
 		accounts: v.array(discordAccountSchema),
 	},
@@ -350,7 +351,7 @@ export const upsertManyDiscordAccounts = mutation({
 	},
 });
 
-export const deleteDiscordAccount = mutation({
+export const deleteDiscordAccount = publicInternalMutation({
 	args: {
 		id: v.string(),
 	},

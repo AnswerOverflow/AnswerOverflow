@@ -1,6 +1,7 @@
 import { type Infer, v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { internalMutation, mutation, query } from "./_generated/server";
+import { publicInternalMutation, publicInternalQuery } from "./publicInternal";
 import { assertIsUser, getDiscordAccountIdFromAuth } from "./auth";
 import type { AuthorizedUser, IsAuthenticated } from "./permissions";
 import { userServerSettingsSchema } from "./schema";
@@ -12,7 +13,7 @@ import {
 
 type UserServerSettings = Infer<typeof userServerSettingsSchema>;
 
-export const findUserServerSettingsById = query({
+export const findUserServerSettingsById = publicInternalQuery({
 	args: {
 		userId: v.string(),
 		serverId: v.id("servers"),
@@ -26,7 +27,7 @@ export const findUserServerSettingsById = query({
 	},
 });
 
-export const findManyUserServerSettings = query({
+export const findManyUserServerSettings = publicInternalQuery({
 	args: {
 		settings: v.array(
 			v.object({
@@ -53,7 +54,7 @@ export const findManyUserServerSettings = query({
 	},
 });
 
-export const findUserServerSettingsByApiKey = query({
+export const findUserServerSettingsByApiKey = publicInternalQuery({
 	args: {
 		apiKey: v.string(),
 	},
@@ -65,7 +66,7 @@ export const findUserServerSettingsByApiKey = query({
 	},
 });
 
-export const createUserServerSettings = mutation({
+export const createUserServerSettings = publicInternalMutation({
 	args: {
 		settings: userServerSettingsSchema,
 	},
@@ -105,7 +106,7 @@ export const createUserServerSettings = mutation({
 	},
 });
 
-export const updateUserServerSettings = mutation({
+export const updateUserServerSettings = publicInternalMutation({
 	args: {
 		settings: userServerSettingsSchema,
 	},
@@ -176,7 +177,7 @@ export const updateUserServerSettings = mutation({
 	},
 });
 
-export const upsertUserServerSettings = mutation({
+export const upsertUserServerSettings = publicInternalMutation({
 	args: {
 		settings: userServerSettingsSchema,
 	},
@@ -250,7 +251,7 @@ export const upsertUserServerSettings = mutation({
 	},
 });
 
-export const increaseApiKeyUsage = mutation({
+export const increaseApiKeyUsage = publicInternalMutation({
 	args: {
 		apiKey: v.string(),
 	},
@@ -268,7 +269,7 @@ export const increaseApiKeyUsage = mutation({
 	},
 });
 
-export const deleteUserServerSettingsByUserId = mutation({
+export const deleteUserServerSettingsByUserId = publicInternalMutation({
 	args: {
 		userId: v.string(),
 	},
@@ -465,7 +466,7 @@ export const upsertUserServerSettingsInternal = internalMutation({
 	},
 });
 
-export const countConsentingUsersInServer = query({
+export const countConsentingUsersInServer = publicInternalQuery({
 	args: {
 		serverId: v.id("servers"),
 	},
@@ -482,7 +483,7 @@ export const countConsentingUsersInServer = query({
 	},
 });
 
-export const countConsentingUsersInManyServers = query({
+export const countConsentingUsersInManyServers = publicInternalQuery({
 	args: {
 		serverIds: v.array(v.id("servers")),
 	},

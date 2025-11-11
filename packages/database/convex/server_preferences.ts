@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
+import { publicInternalMutation, publicInternalQuery } from "./publicInternal";
 import { assertCanEditServer, getDiscordAccountIdFromAuth } from "./auth";
 
 const serverPreferencesSchema = v.object({
@@ -11,7 +12,7 @@ const serverPreferencesSchema = v.object({
 	subpath: v.optional(v.string()),
 });
 
-export const getServerPreferencesByServerId = query({
+export const getServerPreferencesByServerId = publicInternalQuery({
 	args: {
 		serverId: v.id("servers"),
 	},
@@ -25,7 +26,7 @@ export const getServerPreferencesByServerId = query({
 	},
 });
 
-export const createServerPreferences = mutation({
+export const createServerPreferences = publicInternalMutation({
 	args: {
 		preferences: serverPreferencesSchema,
 	},
@@ -94,7 +95,7 @@ export const createServerPreferences = mutation({
 	},
 });
 
-export const updateServerPreferences = mutation({
+export const updateServerPreferences = publicInternalMutation({
 	args: {
 		preferences: serverPreferencesSchema,
 	},
@@ -151,7 +152,7 @@ export const updateServerPreferences = mutation({
 	},
 });
 
-export const upsertServerPreferences = mutation({
+export const upsertServerPreferences = publicInternalMutation({
 	args: {
 		preferences: serverPreferencesSchema,
 	},
@@ -240,7 +241,7 @@ export const upsertServerPreferences = mutation({
 	},
 });
 
-export const deleteServerPreferences = mutation({
+export const deleteServerPreferences = publicInternalMutation({
 	args: {
 		serverId: v.id("servers"),
 	},

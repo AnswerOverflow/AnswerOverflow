@@ -6,6 +6,7 @@ import {
 	type QueryCtx,
 	query,
 } from "./_generated/server";
+import { publicInternalMutation, publicInternalQuery } from "./publicInternal";
 import { channelSchema, channelSettingsSchema } from "./schema";
 import { deleteChannelInternalLogic, getChannelWithSettings } from "./shared";
 
@@ -66,7 +67,7 @@ export const getChannelByDiscordId = query({
 	},
 });
 
-export const findChannelByInviteCode = query({
+export const findChannelByInviteCode = publicInternalQuery({
 	args: {
 		inviteCode: v.string(),
 	},
@@ -84,7 +85,7 @@ export const findChannelByInviteCode = query({
 	},
 });
 
-export const findAllThreadsByParentId = query({
+export const findAllThreadsByParentId = publicInternalQuery({
 	args: {
 		parentId: v.string(),
 		limit: v.optional(v.number()),
@@ -102,7 +103,7 @@ export const findAllThreadsByParentId = query({
 	},
 });
 
-export const findAllChannelsByServerId = query({
+export const findAllChannelsByServerId = publicInternalQuery({
 	args: {
 		serverId: v.id("servers"),
 	},
@@ -156,7 +157,7 @@ export const findManyChannelsById = query({
 	},
 });
 
-export const findLatestThreads = query({
+export const findLatestThreads = publicInternalQuery({
 	args: {
 		take: v.number(),
 	},
@@ -171,7 +172,7 @@ export const findLatestThreads = query({
 	},
 });
 
-export const findChannelsBeforeId = query({
+export const findChannelsBeforeId = publicInternalQuery({
 	args: {
 		serverId: v.id("servers"),
 		id: v.string(),
@@ -196,7 +197,7 @@ export const findChannelsBeforeId = query({
 });
 
 // Mutation functions
-export const createChannel = mutation({
+export const createChannel = publicInternalMutation({
 	args: {
 		channel: channelSchema,
 		settings: v.optional(channelSettingsSchema),
@@ -223,7 +224,7 @@ export const createChannel = mutation({
 	},
 });
 
-export const createManyChannels = mutation({
+export const createManyChannels = publicInternalMutation({
 	args: {
 		channels: v.array(
 			v.object({
@@ -291,7 +292,7 @@ export const updateChannel = mutation({
 	},
 });
 
-export const updateManyChannels = mutation({
+export const updateManyChannels = publicInternalMutation({
 	args: {
 		channels: v.array(channelSchema),
 	},
@@ -314,7 +315,7 @@ export const updateManyChannels = mutation({
 	},
 });
 
-export const deleteChannel = mutation({
+export const deleteChannel = publicInternalMutation({
 	args: {
 		id: v.string(),
 	},
@@ -334,7 +335,7 @@ export const deleteChannelInternal = internalMutation({
 	},
 });
 
-export const upsertManyChannels = mutation({
+export const upsertManyChannels = publicInternalMutation({
 	args: {
 		channels: v.array(
 			v.object({
@@ -408,7 +409,7 @@ export const upsertManyChannels = mutation({
 });
 
 // Mutation for inserting/updating channel with settings
-export const upsertChannelWithSettings = mutation({
+export const upsertChannelWithSettings = publicInternalMutation({
 	args: {
 		channel: channelSchema,
 		settings: v.optional(channelSettingsSchema),

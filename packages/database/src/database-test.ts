@@ -1,11 +1,14 @@
 import { createOtelTestLayer } from "@packages/observability/otel";
-import { Clock, Layer } from "effect";
+import { Clock, ConfigProvider, Layer } from "effect";
 import * as Duration from "effect/Duration";
 import {
 	ConvexClientTestLayer,
 	ConvexClientTestUnifiedLayer,
 } from "./convex-client-test";
 import { Database, service } from "./database";
+
+// Set BACKEND_ACCESS_TOKEN in process.env for Convex functions that use process.env directly
+process.env.BACKEND_ACCESS_TOKEN = "test-backend-access-token";
 
 // Use SimpleSpanProcessor for tests - exports spans immediately when they end
 // This avoids TestClock timing issues since spans are exported synchronously
@@ -18,9 +21,17 @@ const OtelLayer = createOtelTestLayer(
 	Duration.seconds(5), // Shutdown timeout - uses real time now
 ).pipe(Layer.provide(RealClockLayer));
 
+// Provide BACKEND_ACCESS_TOKEN for Effect Config system
+const BackendAccessTokenLayer = Layer.setConfigProvider(
+	ConfigProvider.fromJson({
+		BACKEND_ACCESS_TOKEN: "test-backend-access-token",
+	}),
+);
+
 export const DatabaseTestLayer = Layer.mergeAll(
 	Layer.effect(Database, service).pipe(
 		Layer.provide(ConvexClientTestUnifiedLayer),
+		Layer.provide(BackendAccessTokenLayer),
 	),
 	ConvexClientTestLayer,
 	OtelLayer,

@@ -1,13 +1,14 @@
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { action, internalMutation } from "./_generated/server";
+import { publicInternalAction } from "./publicInternal";
 import { uploadAttachmentFromUrlLogic } from "./shared";
 
 /**
  * Downloads an attachment from a URL and uploads it to Convex storage
  * Returns the storage ID
  */
-export const uploadAttachmentFromUrl = action({
+export const uploadAttachmentFromUrl = publicInternalAction({
 	args: {
 		url: v.string(),
 		filename: v.string(),
@@ -52,7 +53,7 @@ export const updateAttachmentStorageId = internalMutation({
  * Batch uploads multiple attachments from URLs
  * Returns a map of attachment IDs to storage IDs
  */
-export const uploadManyAttachmentsFromUrls = action({
+export const uploadManyAttachmentsFromUrls = publicInternalAction({
 	args: {
 		attachments: v.array(
 			v.object({
@@ -95,7 +96,7 @@ export const uploadManyAttachmentsFromUrls = action({
 /**
  * Gets the storage URL for an attachment
  */
-export const getAttachmentUrl = action({
+export const getAttachmentUrl = publicInternalAction({
 	args: {
 		storageId: v.id("_storage"),
 	},

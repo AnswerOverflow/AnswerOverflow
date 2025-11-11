@@ -21,7 +21,7 @@
 		"@convex-dev/better-auth": "^0.9.7",
 		"@effect/platform": "^0.93.0",
 		"convex": "^1.29.0",
-		"convex-helpers": "^0.1.101",
+		"convex-helpers": "^0.1.104",
 		"effect": "^3.17.7",
 		"ioredis": "^5.8.2",
 		"openai": "^4.45.0"

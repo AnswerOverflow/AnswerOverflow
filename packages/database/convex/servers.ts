@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { publicInternalMutation } from "./publicInternal";
 import { serverSchema } from "./schema";
 import { getServerByDiscordId as getServerByDiscordIdShared } from "./shared";
 
@@ -197,73 +198,57 @@ export const publicFindServerByIdWithChannels = query({
 	},
 });
 
-export const createServerExternal = mutation({
+export const createServerExternal = publicInternalMutation({
 	args: {
-		apiKey: v.string(),
 		data: serverSchema,
 	},
-	handler: async (ctx, { apiKey, data }) => {
-		const configuredSecret = "hello";
-		if (!configuredSecret || apiKey !== configuredSecret) {
-			throw new Error("Unauthorized");
-		}
-
+	handler: async (ctx, args) => {
 		// Check if server already exists
 		const existing = await ctx.db
 			.query("servers")
-			.withIndex("by_discordId", (q) => q.eq("discordId", data.discordId))
+			.withIndex("by_discordId", (q) => q.eq("discordId", args.data.discordId))
 			.first();
 
 		if (existing) {
-			throw new Error(`Server with discordId ${data.discordId} already exists`);
+			throw new Error(
+				`Server with discordId ${args.data.discordId} already exists`,
+			);
 		}
 
-		return await ctx.db.insert("servers", data);
+		return await ctx.db.insert("servers", args.data);
 	},
 });
 
-export const updateServerExternal = mutation({
+export const updateServerExternal = publicInternalMutation({
 	args: {
-		apiKey: v.string(),
 		id: v.id("servers"),
 		data: serverSchema,
 	},
-	handler: async (ctx, { apiKey, id, data }) => {
-		const configuredSecret = "hello";
-		if (!configuredSecret || apiKey !== configuredSecret) {
-			throw new Error("Unauthorized");
-		}
-
-		const existing = await ctx.db.get(id);
+	handler: async (ctx, args) => {
+		const existing = await ctx.db.get(args.id);
 		if (!existing) {
-			throw new Error(`Server with id ${id} not found`);
+			throw new Error(`Server with id ${args.id} not found`);
 		}
 
-		await ctx.db.patch(id, data);
-		return id;
+		await ctx.db.patch(args.id, args.data);
+		return args.id;
 	},
 });
 
-export const upsertServerExternal = mutation({
+export const upsertServerExternal = publicInternalMutation({
 	args: {
-		apiKey: v.string(),
 		data: serverSchema,
 	},
-	handler: async (ctx, { apiKey, data }) => {
-		const configuredSecret = "hello";
-		if (!configuredSecret || apiKey !== configuredSecret) {
-			throw new Error("Unauthorized");
-		}
-
+	handler: async (ctx, args) => {
 		const existing = await ctx.db
 			.query("servers")
-			.withIndex("by_discordId", (q) => q.eq("discordId", data.discordId))
+			.withIndex("by_discordId", (q) => q.eq("discordId", args.data.discordId))
 			.first();
 
 		if (existing) {
-			await ctx.db.patch(existing._id, data);
+			await ctx.db.patch(existing._id, args.data);
 			return existing._id;
 		}
-		return await ctx.db.insert("servers", data);
+		return await ctx.db.insert("servers", args.data);
 	},
 });

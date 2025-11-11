@@ -1,4 +1,4 @@
-import { Context, Effect, Layer } from "effect";
+import { Config, Context, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
 import type { Id } from "../convex/_generated/dataModel";
 import type {
@@ -29,7 +29,7 @@ export type BaseMessageWithRelations = Message & {
 };
 
 export const service = Effect.gen(function* () {
-	const externalSecret = "hello"; //yield* Config.string("EXTERNAL_WRITE_SECRET");
+	const backendAccessToken = yield* Config.string("BACKEND_ACCESS_TOKEN");
 	const convexClient = yield* ConvexClientUnified;
 
 	const watchQueryToLiveData = createWatchQueryToLiveData(convexClient, {
@@ -44,8 +44,8 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.servers.upsertServerExternal, {
+					backendAccessToken,
 					data,
-					apiKey: externalSecret,
 				}),
 		);
 
@@ -56,8 +56,8 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.servers.createServerExternal, {
+					backendAccessToken,
 					data,
-					apiKey: externalSecret,
 				}),
 		);
 
@@ -68,9 +68,9 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.servers.updateServerExternal, {
+					backendAccessToken,
 					id,
 					data,
-					apiKey: externalSecret,
 				}),
 		);
 
@@ -146,17 +146,20 @@ export const service = Effect.gen(function* () {
 
 	const findChannelByInviteCode = (inviteCode: string) =>
 		watchQueryToLiveData(({ api }) => api.channels.findChannelByInviteCode, {
+			backendAccessToken,
 			inviteCode,
 		});
 
 	const findAllThreadsByParentId = (parentId: string, limit?: number) =>
 		watchQueryToLiveData(({ api }) => api.channels.findAllThreadsByParentId, {
+			backendAccessToken,
 			parentId,
 			limit,
 		});
 
 	const findAllChannelsByServerId = (serverId: Id<"servers">) =>
 		watchQueryToLiveData(({ api }) => api.channels.findAllChannelsByServerId, {
+			backendAccessToken,
 			serverId,
 		});
 
@@ -168,6 +171,7 @@ export const service = Effect.gen(function* () {
 
 	const findLatestThreads = (take: number) =>
 		watchQueryToLiveData(({ api }) => api.channels.findLatestThreads, {
+			backendAccessToken,
 			take,
 		});
 
@@ -177,6 +181,7 @@ export const service = Effect.gen(function* () {
 		take?: number,
 	) =>
 		watchQueryToLiveData(({ api }) => api.channels.findChannelsBeforeId, {
+			backendAccessToken,
 			serverId,
 			id,
 			take,
@@ -192,6 +197,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.channels.createChannel, {
+					backendAccessToken,
 					channel: data.channel,
 					settings: data.settings,
 				}),
@@ -206,6 +212,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.channels.createManyChannels, {
+					backendAccessToken,
 					channels: data.channels,
 				}),
 		);
@@ -234,6 +241,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.channels.updateManyChannels, {
+					backendAccessToken,
 					channels,
 				}),
 		);
@@ -245,6 +253,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.channels.deleteChannel, {
+					backendAccessToken,
 					id,
 				}),
 		);
@@ -262,6 +271,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.channels.upsertManyChannels, {
+					backendAccessToken,
 					channels: data.channels,
 				}),
 		);
@@ -276,6 +286,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.channels.upsertChannelWithSettings, {
+					backendAccessToken,
 					channel: data.channel,
 					settings: data.settings,
 				}),
@@ -296,6 +307,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.messages.upsertMessage, {
+					backendAccessToken,
 					message: data.message,
 					attachments: data.attachments,
 					reactions: data.reactions,
@@ -320,6 +332,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.messages.upsertManyMessages, {
+					backendAccessToken,
 					messages: data.messages,
 					ignoreChecks: data.ignoreChecks,
 				}),
@@ -342,6 +355,7 @@ export const service = Effect.gen(function* () {
 
 	const findManyMessagesById = (ids: string[]) =>
 		watchQueryToLiveData(({ api }) => api.messages.findManyMessagesById, {
+			backendAccessToken,
 			ids,
 		});
 
@@ -353,6 +367,7 @@ export const service = Effect.gen(function* () {
 
 	const findMessagesByServerId = (serverId: Id<"servers">, limit?: number) =>
 		watchQueryToLiveData(({ api }) => api.messages.findMessagesByServerId, {
+			backendAccessToken,
 			serverId,
 			limit,
 		});
@@ -364,6 +379,7 @@ export const service = Effect.gen(function* () {
 		watchQueryToLiveData(
 			({ api }) => api.messages.findMessagesByParentChannelId,
 			{
+				backendAccessToken,
 				parentChannelId,
 				limit,
 			},
@@ -371,6 +387,7 @@ export const service = Effect.gen(function* () {
 
 	const findLatestMessageInChannel = (channelId: string) =>
 		watchQueryToLiveData(({ api }) => api.messages.findLatestMessageInChannel, {
+			backendAccessToken,
 			channelId,
 		});
 
@@ -378,27 +395,32 @@ export const service = Effect.gen(function* () {
 		watchQueryToLiveData(
 			({ api }) => api.messages.findLatestMessageInChannelAndThreads,
 			{
+				backendAccessToken,
 				channelId,
 			},
 		);
 
 	const findAttachmentsByMessageId = (messageId: string) =>
 		watchQueryToLiveData(({ api }) => api.messages.findAttachmentsByMessageId, {
+			backendAccessToken,
 			messageId,
 		});
 
 	const findReactionsByMessageId = (messageId: string) =>
 		watchQueryToLiveData(({ api }) => api.messages.findReactionsByMessageId, {
+			backendAccessToken,
 			messageId,
 		});
 
 	const findEmojiById = (id: string) =>
 		watchQueryToLiveData(({ api }) => api.messages.findEmojiById, {
+			backendAccessToken,
 			id,
 		});
 
 	const countMessagesInChannel = (channelId: string) =>
 		watchQueryToLiveData(({ api }) => api.messages.countMessagesInChannel, {
+			backendAccessToken,
 			channelId,
 		});
 
@@ -406,15 +428,19 @@ export const service = Effect.gen(function* () {
 		watchQueryToLiveData(
 			({ api }) => api.messages.countMessagesInManyChannels,
 			{
+				backendAccessToken,
 				channelIds,
 			},
 		);
 
 	const getTotalMessageCount = () =>
-		watchQueryToLiveData(({ api }) => api.messages.getTotalMessageCount, {});
+		watchQueryToLiveData(({ api }) => api.messages.getTotalMessageCount, {
+			backendAccessToken,
+		});
 
 	const findSolutionsByQuestionId = (questionId: string, limit?: number) =>
 		watchQueryToLiveData(({ api }) => api.messages.findSolutionsByQuestionId, {
+			backendAccessToken,
 			questionId,
 			limit,
 		});
@@ -426,6 +452,7 @@ export const service = Effect.gen(function* () {
 		watchQueryToLiveData(
 			({ api }) => api.messages.getTopQuestionSolversByServerId,
 			{
+				backendAccessToken,
 				serverId,
 				limit,
 			},
@@ -456,6 +483,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.messages.deleteMessage, {
+					backendAccessToken,
 					id,
 				}),
 		);
@@ -467,6 +495,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.messages.deleteManyMessages, {
+					backendAccessToken,
 					ids,
 				}),
 		);
@@ -478,6 +507,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.messages.deleteManyMessagesByChannelId, {
+					backendAccessToken,
 					channelId,
 				}),
 		);
@@ -489,6 +519,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.messages.deleteManyMessagesByUserId, {
+					backendAccessToken,
 					userId,
 				}),
 		);
@@ -505,6 +536,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.action(convexApi.api.attachments.uploadAttachmentFromUrl, {
+					backendAccessToken,
 					url: options.url,
 					filename: options.filename,
 					contentType: options.contentType,
@@ -525,6 +557,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.action(convexApi.api.attachments.uploadManyAttachmentsFromUrls, {
+					backendAccessToken,
 					attachments,
 				}),
 		);
@@ -536,6 +569,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.action(convexApi.api.attachments.getAttachmentUrl, {
+					backendAccessToken,
 					storageId,
 				}),
 		);
@@ -544,6 +578,7 @@ export const service = Effect.gen(function* () {
 		watchQueryToLiveData(
 			({ api }) => api.discord_accounts.getDiscordAccountById,
 			{
+				backendAccessToken,
 				id,
 			},
 		);
@@ -563,6 +598,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.discord_accounts.createDiscordAccount, {
+					backendAccessToken,
 					account,
 				}),
 		);
@@ -576,6 +612,7 @@ export const service = Effect.gen(function* () {
 				client.mutation(
 					convexApi.api.discord_accounts.createManyDiscordAccounts,
 					{
+						backendAccessToken,
 						accounts,
 					},
 				),
@@ -588,6 +625,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.discord_accounts.updateDiscordAccount, {
+					backendAccessToken,
 					account,
 				}),
 		);
@@ -601,6 +639,7 @@ export const service = Effect.gen(function* () {
 				client.mutation(
 					convexApi.api.discord_accounts.updateManyDiscordAccounts,
 					{
+						backendAccessToken,
 						accounts,
 					},
 				),
@@ -613,6 +652,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.discord_accounts.upsertDiscordAccount, {
+					backendAccessToken,
 					account,
 				}),
 		);
@@ -626,6 +666,7 @@ export const service = Effect.gen(function* () {
 				client.mutation(
 					convexApi.api.discord_accounts.upsertManyDiscordAccounts,
 					{
+						backendAccessToken,
 						accounts,
 					},
 				),
@@ -638,6 +679,7 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(convexApi.api.discord_accounts.deleteDiscordAccount, {
+					backendAccessToken,
 					id,
 				}),
 		);
@@ -646,6 +688,7 @@ export const service = Effect.gen(function* () {
 		watchQueryToLiveData(
 			({ api }) => api.ignored_discord_accounts.findIgnoredDiscordAccountById,
 			{
+				backendAccessToken,
 				id,
 			},
 		);
@@ -655,6 +698,7 @@ export const service = Effect.gen(function* () {
 			({ api }) =>
 				api.ignored_discord_accounts.findManyIgnoredDiscordAccountsById,
 			{
+				backendAccessToken,
 				ids,
 			},
 		);
@@ -668,6 +712,7 @@ export const service = Effect.gen(function* () {
 				client.mutation(
 					convexApi.api.ignored_discord_accounts.upsertIgnoredDiscordAccount,
 					{
+						backendAccessToken,
 						id,
 					},
 				),
@@ -682,6 +727,7 @@ export const service = Effect.gen(function* () {
 				client.mutation(
 					convexApi.api.ignored_discord_accounts.deleteIgnoredDiscordAccount,
 					{
+						backendAccessToken,
 						id,
 					},
 				),
@@ -702,6 +748,7 @@ export const service = Effect.gen(function* () {
 		watchQueryToLiveData(
 			({ api }) => api.user_server_settings.findUserServerSettingsById,
 			{
+				backendAccessToken,
 				userId,
 				serverId,
 			},
@@ -716,6 +763,7 @@ export const service = Effect.gen(function* () {
 		watchQueryToLiveData(
 			({ api }) => api.user_server_settings.findManyUserServerSettings,
 			{
+				backendAccessToken,
 				settings,
 			},
 		);
@@ -724,6 +772,7 @@ export const service = Effect.gen(function* () {
 		watchQueryToLiveData(
 			({ api }) => api.user_server_settings.findUserServerSettingsByApiKey,
 			{
+				backendAccessToken,
 				apiKey,
 			},
 		);
@@ -785,6 +834,7 @@ export const service = Effect.gen(function* () {
 				client.mutation(
 					convexApi.api.user_server_settings.increaseApiKeyUsage,
 					{
+						backendAccessToken,
 						apiKey,
 					},
 				),
@@ -794,6 +844,7 @@ export const service = Effect.gen(function* () {
 		watchQueryToLiveData(
 			({ api }) => api.user_server_settings.countConsentingUsersInServer,
 			{
+				backendAccessToken,
 				serverId,
 			},
 		);
@@ -802,6 +853,7 @@ export const service = Effect.gen(function* () {
 		watchQueryToLiveData(
 			({ api }) => api.user_server_settings.countConsentingUsersInManyServers,
 			{
+				backendAccessToken,
 				serverIds,
 			},
 		);
@@ -810,6 +862,7 @@ export const service = Effect.gen(function* () {
 		watchQueryToLiveData(
 			({ api }) => api.server_preferences.getServerPreferencesByServerId,
 			{
+				backendAccessToken,
 				serverId,
 			},
 		);
