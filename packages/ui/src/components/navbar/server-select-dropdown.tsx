@@ -71,6 +71,7 @@ export function ServerSelectDropdown({
 	emptyMessage = "No servers with bot found",
 	isLoading = false,
 }: ServerSelectDropdownProps) {
+	const [open, setOpen] = React.useState(false);
 	const serversWithDashboard = servers.filter((server) => server.hasBot);
 	const selectedServer =
 		serversWithDashboard.find((x) => x.id === currentServerId) ??
@@ -81,7 +82,7 @@ export function ServerSelectDropdown({
 	}
 
 	return (
-		<DropdownMenu modal={false}>
+		<DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
 			<DropdownMenuTrigger asChild>
 				{selectedServer ? (
 					<Button
@@ -110,7 +111,13 @@ export function ServerSelectDropdown({
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="start" className="w-[240px]">
 				{serversWithDashboard.map((server) => (
-					<DropdownMenuItem key={server.id} asChild>
+					<DropdownMenuItem
+						key={server.id}
+						onSelect={() => {
+							setOpen(false);
+						}}
+						asChild
+					>
 						<Link
 							href={getServerHref(server.id)}
 							className="flex w-full items-center no-underline"
@@ -123,7 +130,12 @@ export function ServerSelectDropdown({
 					</DropdownMenuItem>
 				))}
 				{serversWithDashboard.length > 0 && <DropdownMenuSeparator />}
-				<DropdownMenuItem asChild>
+				<DropdownMenuItem
+					onSelect={() => {
+						setOpen(false);
+					}}
+					asChild
+				>
 					<Link
 						href={addNewHref}
 						className="flex w-full items-center gap-3 no-underline"

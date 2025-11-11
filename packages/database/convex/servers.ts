@@ -246,7 +246,27 @@ export const upsertServerExternal = publicInternalMutation({
 			.first();
 
 		if (existing) {
-			await ctx.db.patch(existing._id, args.data);
+			// Check if we need to clear kickedTime
+			// If kickedTime is explicitly undefined in args.data and existing server has it set, clear it
+			const shouldClearKickedTime =
+				args.data.kickedTime === undefined &&
+				existing.kickedTime !== undefined &&
+				existing.kickedTime !== null;
+
+			if (shouldClearKickedTime) {
+				// Use replace to clear optional fields
+				const { _id, _creationTime, ...existingData } = existing;
+				await ctx.db.replace(existing._id, {
+					...existingData,
+					...args.data,
+					kickedTime: undefined,
+					_id,
+					_creationTime,
+				});
+			} else {
+				// Use patch for normal updates
+				await ctx.db.patch(existing._id, args.data);
+			}
 			return existing._id;
 		}
 		return await ctx.db.insert("servers", args.data);

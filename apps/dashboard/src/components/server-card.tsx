@@ -64,7 +64,7 @@ export function ServerCard({ server }: ServerCardProps) {
 						</Button>
 					) : (
 						<Button asChild variant="outline">
-							<Link href={setupUrl} target="_blank" rel="noopener noreferrer">
+							<Link href={`/onboarding?serverId=${server.discordId}`}>
 								Setup
 							</Link>
 						</Button>

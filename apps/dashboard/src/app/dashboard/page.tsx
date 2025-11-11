@@ -14,6 +14,7 @@ import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { useQueryState } from "nuqs";
+import Link from "next/link";
 import { ServerCard } from "../../components/server-card";
 import { authClient } from "../../lib/auth-client";
 
@@ -136,15 +137,27 @@ export default function DashboardHome() {
 							haven't connected your Discord account.
 						</CardDescription>
 					</CardHeader>
+					<CardContent>
+						<Button asChild>
+							<Link href="/onboarding">Get Started</Link>
+						</Button>
+					</CardContent>
 				</Card>
 			</main>
 		);
 	}
 
+	const serversWithoutBot = servers.filter((server) => !server.hasBot);
+
 	return (
 		<main className="max-w-6xl mx-auto p-8">
 			<div className="flex items-center justify-between mb-6">
 				<h1 className="text-3xl font-bold">Your Servers</h1>
+				{serversWithoutBot.length > 0 && (
+					<Button asChild variant="outline">
+						<Link href="/onboarding">Add to Server</Link>
+					</Button>
+				)}
 			</div>
 			<div className="mb-6">
 				<Input
