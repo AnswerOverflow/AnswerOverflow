@@ -1,5 +1,4 @@
 import { type Infer, v } from "convex/values";
-import { internal } from "./_generated/api";
 import {
 	internalMutation,
 	type MutationCtx,
@@ -8,6 +7,7 @@ import {
 	query,
 } from "./_generated/server";
 import { channelSchema, channelSettingsSchema } from "./schema";
+import { deleteChannelInternalLogic, getChannelWithSettings } from "./shared";
 
 type Channel = Infer<typeof channelSchema>;
 type ChannelSettings = Infer<typeof channelSettingsSchema>;
@@ -30,31 +30,6 @@ const DEFAULT_CHANNEL_SETTINGS: ChannelSettings = {
 	autoThreadEnabled: false,
 	forumGuidelinesConsentEnabled: false,
 };
-
-// Helper function to get channel with settings
-async function getChannelWithSettings(
-	ctx: QueryCtx | MutationCtx,
-	channelId: string,
-): Promise<(Channel & { flags: ChannelSettings }) | null> {
-	const channel = await ctx.db
-		.query("channels")
-		.filter((q) => q.eq(q.field("id"), channelId))
-		.first();
-
-	if (!channel) {
-		return null;
-	}
-
-	const settings = await ctx.db
-		.query("channelSettings")
-		.withIndex("by_channelId", (q) => q.eq("channelId", channelId))
-		.first();
-
-	return {
-		...channel,
-		flags: settings ?? { ...DEFAULT_CHANNEL_SETTINGS, channelId },
-	};
-}
 
 // Helper function to add settings to multiple channels
 async function addSettingsToChannels(
@@ -82,10 +57,6 @@ async function addSettingsToChannels(
 	}));
 }
 
-/**
- * Public query: Get channel by Discord ID
- * No authentication required - returns public channel data
- */
 export const getChannelByDiscordId = query({
 	args: {
 		discordId: v.string(),
@@ -326,42 +297,7 @@ export const deleteChannel = mutation({
 		id: v.string(),
 	},
 	handler: async (ctx, args) => {
-		// Delete all threads first
-		const threads = await ctx.db
-			.query("channels")
-			.filter((q) => q.eq(q.field("parentId"), args.id))
-			.collect();
-
-		for (const thread of threads) {
-			// Recursively delete threads using internal mutation
-			await ctx.runMutation(internal.channels.deleteChannelInternal, {
-				id: thread.id,
-			});
-		}
-
-		// Delete channel settings
-		const settings = await ctx.db
-			.query("channelSettings")
-			.withIndex("by_channelId", (q) => q.eq("channelId", args.id))
-			.collect();
-
-		for (const setting of settings) {
-			await ctx.db.delete(setting._id);
-		}
-
-		// Delete the channel itself
-		const channel = await ctx.db
-			.query("channels")
-			.filter((q) => q.eq(q.field("id"), args.id))
-			.first();
-
-		if (channel) {
-			await ctx.db.delete(channel._id);
-		}
-
-		// TODO: Delete messages when messages table exists
-		// await deleteManyMessagesByChannelId(args.id);
-
+		await deleteChannelInternalLogic(ctx, args.id);
 		return null;
 	},
 });
@@ -371,42 +307,7 @@ export const deleteChannelInternal = internalMutation({
 		id: v.string(),
 	},
 	handler: async (ctx, args) => {
-		// Delete all threads first
-		const threads = await ctx.db
-			.query("channels")
-			.filter((q) => q.eq(q.field("parentId"), args.id))
-			.collect();
-
-		for (const thread of threads) {
-			// Recursively delete threads
-			await ctx.runMutation(internal.channels.deleteChannelInternal, {
-				id: thread.id,
-			});
-		}
-
-		// Delete channel settings
-		const settings = await ctx.db
-			.query("channelSettings")
-			.withIndex("by_channelId", (q) => q.eq("channelId", args.id))
-			.collect();
-
-		for (const setting of settings) {
-			await ctx.db.delete(setting._id);
-		}
-
-		// Delete the channel itself
-		const channel = await ctx.db
-			.query("channels")
-			.filter((q) => q.eq(q.field("id"), args.id))
-			.first();
-
-		if (channel) {
-			await ctx.db.delete(channel._id);
-		}
-
-		// TODO: Delete messages when messages table exists
-		// await deleteManyMessagesByChannelId(args.id);
-
+		await deleteChannelInternalLogic(ctx, args.id);
 		return null;
 	},
 });

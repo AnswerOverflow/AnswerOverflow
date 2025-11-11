@@ -1,10 +1,14 @@
 import { type Infer, v } from "convex/values";
-import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { assertIsUser, getDiscordAccountIdFromAuth } from "./auth";
 import type { AuthorizedUser, IsAuthenticated } from "./permissions";
 import { userServerSettingsSchema } from "./schema";
+import {
+	deleteMessageInternalLogic,
+	deleteUserServerSettingsByUserIdLogic,
+	findUserServerSettingsById as findUserServerSettingsByIdShared,
+} from "./shared";
 
 type UserServerSettings = Infer<typeof userServerSettingsSchema>;
 
@@ -14,13 +18,7 @@ export const findUserServerSettingsById = query({
 		serverId: v.id("servers"),
 	},
 	handler: async (ctx, args) => {
-		const settings = await ctx.db
-			.query("userServerSettings")
-			.withIndex("by_userId", (q) => q.eq("userId", args.userId))
-			.filter((q) => q.eq(q.field("serverId"), args.serverId))
-			.first();
-
-		return settings ?? null;
+		return await findUserServerSettingsByIdShared(ctx, args.userId, args.serverId);
 	},
 });
 
@@ -154,9 +152,7 @@ export const updateUserServerSettings = mutation({
 				.collect();
 
 			for (const message of messages) {
-				await ctx.runMutation(internal.messages.deleteMessageInternal, {
-					id: message.id,
-				});
+				await deleteMessageInternalLogic(ctx, message.id);
 			}
 		}
 
@@ -215,9 +211,7 @@ export const upsertUserServerSettings = mutation({
 					.collect();
 
 				for (const message of messages) {
-					await ctx.runMutation(internal.messages.deleteMessageInternal, {
-						id: message.id,
-					});
+					await deleteMessageInternalLogic(ctx, message.id);
 				}
 			}
 
@@ -301,15 +295,7 @@ export const deleteUserServerSettingsByUserIdInternal = internalMutation({
 		userId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		const settings = await ctx.db
-			.query("userServerSettings")
-			.withIndex("by_userId", (q) => q.eq("userId", args.userId))
-			.collect();
-
-		for (const setting of settings) {
-			await ctx.db.delete(setting._id);
-		}
-
+		await deleteUserServerSettingsByUserIdLogic(ctx, args.userId);
 		return null;
 	},
 });
@@ -389,9 +375,7 @@ export const updateUserServerSettingsInternal = internalMutation({
 				.collect();
 
 			for (const message of messages) {
-				await ctx.runMutation(internal.messages.deleteMessageInternal, {
-					id: message.id,
-				});
+				await deleteMessageInternalLogic(ctx, message.id);
 			}
 		}
 
@@ -442,9 +426,7 @@ export const upsertUserServerSettingsInternal = internalMutation({
 					.collect();
 
 				for (const message of messages) {
-					await ctx.runMutation(internal.messages.deleteMessageInternal, {
-						id: message.id,
-					});
+					await deleteMessageInternalLogic(ctx, message.id);
 				}
 			}
 

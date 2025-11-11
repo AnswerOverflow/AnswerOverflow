@@ -1,6 +1,10 @@
 import { type Infer, v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
 import type { ignoredDiscordAccountSchema } from "./schema";
+import {
+	findIgnoredDiscordAccountById as findIgnoredDiscordAccountByIdShared,
+	upsertIgnoredDiscordAccountInternalLogic,
+} from "./shared";
 
 type IgnoredDiscordAccount = Infer<typeof ignoredDiscordAccountSchema>;
 
@@ -9,10 +13,7 @@ export const findIgnoredDiscordAccountById = query({
 		id: v.string(),
 	},
 	handler: async (ctx, args) => {
-		return await ctx.db
-			.query("ignoredDiscordAccounts")
-			.filter((q) => q.eq(q.field("id"), args.id))
-			.first();
+		return await findIgnoredDiscordAccountByIdShared(ctx, args.id);
 	},
 });
 
@@ -82,28 +83,7 @@ export const upsertIgnoredDiscordAccountInternal = internalMutation({
 		id: v.string(),
 	},
 	handler: async (ctx, args) => {
-		// Upsert ignored account (no check for existing account in internal version)
-		const existingIgnored = await ctx.db
-			.query("ignoredDiscordAccounts")
-			.filter((q) => q.eq(q.field("id"), args.id))
-			.first();
-
-		if (existingIgnored) {
-			return existingIgnored;
-		}
-
-		await ctx.db.insert("ignoredDiscordAccounts", { id: args.id });
-
-		const upserted = await ctx.db
-			.query("ignoredDiscordAccounts")
-			.filter((q) => q.eq(q.field("id"), args.id))
-			.first();
-
-		if (!upserted) {
-			throw new Error("Failed to upsert account");
-		}
-
-		return upserted;
+		return await upsertIgnoredDiscordAccountInternalLogic(ctx, args.id);
 	},
 });
 

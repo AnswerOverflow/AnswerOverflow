@@ -1,5 +1,4 @@
 import { type Infer, v } from "convex/values";
-import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
 	internalMutation,
@@ -14,6 +13,19 @@ import {
 	messageSchema,
 	type reactionSchema,
 } from "./schema";
+import {
+	deleteMessageInternalLogic,
+	findAttachmentsByMessageId as findAttachmentsByMessageIdShared,
+	findIgnoredDiscordAccountById,
+	findMessagesByChannelId as findMessagesByChannelIdShared,
+	findReactionsByMessageId as findReactionsByMessageIdShared,
+	findSolutionsByQuestionId as findSolutionsByQuestionIdShared,
+	findUserServerSettingsById,
+	getChannelWithSettings,
+	getDiscordAccountById,
+	getMessageById as getMessageByIdShared,
+	upsertMessageInternalLogic,
+} from "./shared";
 
 type Message = Infer<typeof messageSchema>;
 type Attachment = Infer<typeof attachmentSchema>;
@@ -24,10 +36,7 @@ async function isIgnoredAccount(
 	ctx: QueryCtx | MutationCtx,
 	authorId: string,
 ): Promise<boolean> {
-	const ignoredAccount = await ctx.runQuery(
-		api.ignored_discord_accounts.findIgnoredDiscordAccountById,
-		{ id: authorId },
-	);
+	const ignoredAccount = await findIgnoredDiscordAccountById(ctx, authorId);
 	return ignoredAccount !== null;
 }
 
@@ -37,13 +46,7 @@ async function hasMessageIndexingDisabled(
 	authorId: string,
 	serverId: Id<"servers">,
 ): Promise<boolean> {
-	const settings = await ctx.runQuery(
-		api.user_server_settings.findUserServerSettingsById,
-		{
-			userId: authorId,
-			serverId,
-		},
-	);
+	const settings = await findUserServerSettingsById(ctx, authorId, serverId);
 	return settings?.messageIndexingDisabled === true;
 }
 
@@ -217,7 +220,7 @@ export const upsertManyMessages = mutation({
 
 			// Process messages
 			for (const msgData of messagesToUpsert) {
-				await ctx.runMutation(internal.messages.upsertMessageInternal, {
+				await upsertMessageInternalLogic(ctx, {
 					message: msgData.message,
 					attachments: msgData.attachments,
 					reactions: msgData.reactions,
@@ -226,7 +229,7 @@ export const upsertManyMessages = mutation({
 		} else {
 			// Process all messages without checks
 			for (const msgData of args.messages) {
-				await ctx.runMutation(internal.messages.upsertMessageInternal, {
+				await upsertMessageInternalLogic(ctx, {
 					message: msgData.message,
 					attachments: msgData.attachments,
 					reactions: msgData.reactions,
@@ -252,82 +255,11 @@ export const upsertMessageInternal = internalMutation({
 		),
 	},
 	handler: async (ctx, args) => {
-		const { attachments, reactions } = args;
-		const messageData = args.message;
-
-		// Upsert message
-		const existing = await ctx.db
-			.query("messages")
-			.filter((q) => q.eq(q.field("id"), messageData.id))
-			.first();
-
-		if (existing) {
-			await ctx.db.patch(existing._id, messageData);
-		} else {
-			await ctx.db.insert("messages", messageData);
-		}
-
-		// Handle attachments
-		if (attachments !== undefined) {
-			// Delete existing attachments
-			const existingAttachments = await ctx.db
-				.query("attachments")
-				.withIndex("by_messageId", (q) => q.eq("messageId", messageData.id))
-				.collect();
-
-			for (const attachment of existingAttachments) {
-				await ctx.db.delete(attachment._id);
-			}
-
-			// Insert new attachments
-			if (attachments.length > 0) {
-				for (const attachment of attachments) {
-					await ctx.db.insert("attachments", attachment);
-				}
-			}
-		}
-
-		// Handle reactions
-		if (reactions !== undefined) {
-			// Delete existing reactions
-			const existingReactions = await ctx.db
-				.query("reactions")
-				.withIndex("by_messageId", (q) => q.eq("messageId", messageData.id))
-				.collect();
-
-			for (const reaction of existingReactions) {
-				await ctx.db.delete(reaction._id);
-			}
-
-			// Insert emojis and reactions
-			if (reactions.length > 0) {
-				// Upsert emojis
-				for (const reaction of reactions) {
-					const emojiId = reaction.emoji.id;
-					if (!emojiId) continue;
-
-					const existingEmoji = await ctx.db
-						.query("emojis")
-						.filter((q) => q.eq(q.field("id"), emojiId))
-						.first();
-
-					if (!existingEmoji) {
-						await ctx.db.insert("emojis", reaction.emoji);
-					}
-				}
-
-				// Insert reactions
-				for (const reaction of reactions) {
-					if (!reaction.emoji.id) continue;
-					await ctx.db.insert("reactions", {
-						messageId: messageData.id,
-						userId: reaction.userId,
-						emojiId: reaction.emoji.id,
-					});
-				}
-			}
-		}
-
+		await upsertMessageInternalLogic(ctx, {
+			message: args.message,
+			attachments: args.attachments,
+			reactions: args.reactions,
+		});
 		return null;
 	},
 });
@@ -342,10 +274,7 @@ export const getMessageById = query({
 		id: v.string(),
 	},
 	handler: async (ctx, args) => {
-		return await ctx.db
-			.query("messages")
-			.filter((q) => q.eq(q.field("id"), args.id))
-			.first();
+		return await getMessageByIdShared(ctx, args.id);
 	},
 });
 
@@ -361,16 +290,7 @@ export const findMessagesByChannelId = query({
 		after: v.optional(v.string()),
 	},
 	handler: async (ctx, args) => {
-		let query = ctx.db
-			.query("messages")
-			.withIndex("by_channelId", (q) => q.eq("channelId", args.channelId));
-
-		if (args.after) {
-			query = query.filter((q) => q.gt(q.field("id"), args.after));
-		}
-
-		const messages = await query.collect();
-		return messages.slice(0, args.limit ?? 100);
+		return await findMessagesByChannelIdShared(ctx, args.channelId, args.limit, args.after);
 	},
 });
 
@@ -500,10 +420,7 @@ export const findAttachmentsByMessageId = query({
 		messageId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		return await ctx.db
-			.query("attachments")
-			.withIndex("by_messageId", (q) => q.eq("messageId", args.messageId))
-			.collect();
+		return await findAttachmentsByMessageIdShared(ctx, args.messageId);
 	},
 });
 
@@ -512,10 +429,7 @@ export const findReactionsByMessageId = query({
 		messageId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		return await ctx.db
-			.query("reactions")
-			.withIndex("by_messageId", (q) => q.eq("messageId", args.messageId))
-			.collect();
+		return await findReactionsByMessageIdShared(ctx, args.messageId);
 	},
 });
 
@@ -581,12 +495,7 @@ export const findSolutionsByQuestionId = query({
 		limit: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
-		const messages = await ctx.db
-			.query("messages")
-			.withIndex("by_questionId", (q) => q.eq("questionId", args.questionId))
-			.collect();
-
-		return messages.slice(0, args.limit ?? 100);
+		return await findSolutionsByQuestionIdShared(ctx, args.questionId, args.limit);
 	},
 });
 
@@ -627,9 +536,7 @@ export const deleteMessage = mutation({
 		id: v.string(),
 	},
 	handler: async (ctx, args) => {
-		await ctx.runMutation(internal.messages.deleteMessageInternal, {
-			id: args.id,
-		});
+		await deleteMessageInternalLogic(ctx, args.id);
 		return null;
 	},
 });
@@ -640,9 +547,7 @@ export const deleteManyMessages = mutation({
 	},
 	handler: async (ctx, args) => {
 		for (const id of args.ids) {
-			await ctx.runMutation(internal.messages.deleteMessageInternal, {
-				id,
-			});
+			await deleteMessageInternalLogic(ctx, id);
 		}
 		return null;
 	},
@@ -659,9 +564,7 @@ export const deleteManyMessagesByChannelId = mutation({
 			.collect();
 
 		for (const message of messages) {
-			await ctx.runMutation(internal.messages.deleteMessageInternal, {
-				id: message.id,
-			});
+			await deleteMessageInternalLogic(ctx, message.id);
 		}
 
 		return null;
@@ -679,9 +582,7 @@ export const deleteManyMessagesByUserId = mutation({
 			.collect();
 
 		for (const message of messages) {
-			await ctx.runMutation(internal.messages.deleteMessageInternal, {
-				id: message.id,
-			});
+			await deleteMessageInternalLogic(ctx, message.id);
 		}
 
 		return null;
@@ -693,36 +594,7 @@ export const deleteMessageInternal = internalMutation({
 		id: v.string(),
 	},
 	handler: async (ctx, args) => {
-		// Delete attachments
-		const attachments = await ctx.db
-			.query("attachments")
-			.withIndex("by_messageId", (q) => q.eq("messageId", args.id))
-			.collect();
-
-		for (const attachment of attachments) {
-			await ctx.db.delete(attachment._id);
-		}
-
-		// Delete reactions
-		const reactions = await ctx.db
-			.query("reactions")
-			.withIndex("by_messageId", (q) => q.eq("messageId", args.id))
-			.collect();
-
-		for (const reaction of reactions) {
-			await ctx.db.delete(reaction._id);
-		}
-
-		// Delete message
-		const message = await ctx.db
-			.query("messages")
-			.filter((q) => q.eq(q.field("id"), args.id))
-			.first();
-
-		if (message) {
-			await ctx.db.delete(message._id);
-		}
-
+		await deleteMessageInternalLogic(ctx, args.id);
 		return null;
 	},
 });
@@ -780,9 +652,7 @@ export const getMessagePageData = query({
 		thread: { id: string; name: string; type: number } | null;
 	} | null> => {
 		// Get the target message
-		const targetMessage = await ctx.runQuery(api.messages.getMessageById, {
-			id: args.messageId,
-		});
+		const targetMessage = await getMessageByIdShared(ctx, args.messageId);
 
 		if (!targetMessage) {
 			return null;
@@ -800,9 +670,7 @@ export const getMessagePageData = query({
 
 		// Get channel info
 		const channelId = threadId ?? parentId;
-		const channel = await ctx.runQuery(api.channels.getChannelByDiscordId, {
-			discordId: channelId,
-		});
+		const channel = await getChannelWithSettings(ctx, channelId);
 
 		if (!channel) {
 			return null;
@@ -811,12 +679,7 @@ export const getMessagePageData = query({
 		// Get thread if it exists
 		let thread: { id: string; name: string; type: number } | null = null;
 		if (threadId && threadId !== channelId) {
-			const threadChannel = await ctx.runQuery(
-				api.channels.getChannelByDiscordId,
-				{
-					discordId: threadId,
-				},
-			);
+			const threadChannel = await getChannelWithSettings(ctx, threadId);
 			if (threadChannel) {
 				thread = {
 					id: threadChannel.id,
@@ -827,12 +690,10 @@ export const getMessagePageData = query({
 		}
 
 		// Get all messages in the thread/channel
-		const allMessages = await ctx.runQuery(
-			api.messages.findMessagesByChannelId,
-			{
-				channelId: threadId ?? parentId,
-				limit: threadId ? undefined : 50, // Limit for non-thread channels
-			},
+		const allMessages = await findMessagesByChannelIdShared(
+			ctx,
+			threadId ?? parentId,
+			threadId ? undefined : 50, // Limit for non-thread channels
 		);
 
 		// Filter messages - if not a thread, only get messages >= target message ID
@@ -845,9 +706,7 @@ export const getMessagePageData = query({
 
 		// Get all Discord accounts
 		const authors = await Promise.all(
-			Array.from(authorIds).map((id) =>
-				ctx.runQuery(api.discord_accounts.getDiscordAccountById, { id }),
-			),
+			Array.from(authorIds).map((id) => getDiscordAccountById(ctx, id)),
 		);
 
 		const authorMap = new Map(
@@ -860,16 +719,10 @@ export const getMessagePageData = query({
 		const messagesWithData = await Promise.all(
 			messagesToShow.map(async (message) => {
 				const [attachments, reactions, solutions] = await Promise.all([
-					ctx.runQuery(api.messages.findAttachmentsByMessageId, {
-						messageId: message.id,
-					}),
-					ctx.runQuery(api.messages.findReactionsByMessageId, {
-						messageId: message.id,
-					}),
+					findAttachmentsByMessageIdShared(ctx, message.id),
+					findReactionsByMessageIdShared(ctx, message.id),
 					message.questionId
-						? ctx.runQuery(api.messages.findSolutionsByQuestionId, {
-								questionId: message.questionId,
-							})
+						? findSolutionsByQuestionIdShared(ctx, message.questionId)
 						: [],
 				]);
 
@@ -952,9 +805,7 @@ export const searchMessages = query({
 			const isIgnored = await isIgnoredAccount(ctx, message.authorId);
 			if (!isIgnored) {
 				// Check if channel has indexing enabled
-				const channel = await ctx.runQuery(api.channels.getChannelByDiscordId, {
-					discordId: message.channelId,
-				});
+				const channel = await getChannelWithSettings(ctx, message.channelId);
 				if (channel?.flags.indexingEnabled) {
 					// For now, use a simple score based on position (Convex doesn't expose search scores directly)
 					// In a real implementation, you might want to use vector search for better scoring

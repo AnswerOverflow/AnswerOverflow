@@ -1,4 +1,3 @@
-import { api } from "./_generated/api";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type {
 	AuthorizedUser,
@@ -6,6 +5,10 @@ import type {
 	IsAdminOrOwner,
 	IsAuthenticated,
 } from "./permissions";
+import {
+	findUserServerSettingsById,
+	getServerByDiscordId,
+} from "./shared";
 
 /**
  * Get the authenticated user's Discord account ID from their Clerk identity
@@ -72,22 +75,14 @@ export async function getUserServerSettingsForServerByDiscordId(
 	discordServerId: string,
 ) {
 	// First, get the Convex server ID from Discord server ID
-	const server = await ctx.runQuery(api.servers.publicGetServerByDiscordId, {
-		discordId: discordServerId,
-	});
+	const server = await getServerByDiscordId(ctx, discordServerId);
 
 	if (!server) {
 		return null;
 	}
 
 	// Then get user server settings using Convex server ID
-	const settings = await ctx.runQuery(
-		api.user_server_settings.findUserServerSettingsById,
-		{
-			userId,
-			serverId: server._id,
-		},
-	);
+	const settings = await findUserServerSettingsById(ctx, userId, server._id);
 
 	return settings;
 }

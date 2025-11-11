@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { serverSchema } from "./schema";
+import { getServerByDiscordId as getServerByDiscordIdShared } from "./shared";
 
 // Channel types for root channels (forums, text, announcements)
 const ALLOWED_ROOT_CHANNEL_TYPES = [0, 5, 15]; // GuildText, GuildAnnouncement, GuildForum
@@ -25,10 +26,7 @@ export const publicGetServerByDiscordId = query({
 		discordId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		return await ctx.db
-			.query("servers")
-			.filter((q) => q.eq(q.field("discordId"), args.discordId))
-			.first();
+		return await getServerByDiscordIdShared(ctx, args.discordId);
 	},
 });
 

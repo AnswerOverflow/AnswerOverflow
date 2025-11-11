@@ -1,7 +1,12 @@
 import { type Infer, v } from "convex/values";
-import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { discordAccountSchema } from "./schema";
+import {
+	deleteMessageInternalLogic,
+	deleteUserServerSettingsByUserIdLogic,
+	getDiscordAccountById as getDiscordAccountByIdShared,
+	upsertIgnoredDiscordAccountInternalLogic,
+} from "./shared";
 
 type DiscordAccount = Infer<typeof discordAccountSchema>;
 
@@ -22,10 +27,7 @@ export const getDiscordAccountById = query({
 		id: v.string(),
 	},
 	handler: async (ctx, args) => {
-		return await ctx.db
-			.query("discordAccounts")
-			.filter((q) => q.eq(q.field("id"), args.id))
-			.first();
+		return await getDiscordAccountByIdShared(ctx, args.id);
 	},
 });
 
@@ -364,12 +366,7 @@ export const deleteDiscordAccount = mutation({
 		}
 
 		// Add to ignored accounts
-		await ctx.runMutation(
-			internal.ignored_discord_accounts.upsertIgnoredDiscordAccountInternal,
-			{
-				id: args.id,
-			},
-		);
+		await upsertIgnoredDiscordAccountInternalLogic(ctx, args.id);
 
 		// Delete messages by user id
 		const messages = await ctx.db
@@ -378,18 +375,11 @@ export const deleteDiscordAccount = mutation({
 			.collect();
 
 		for (const message of messages) {
-			await ctx.runMutation(internal.messages.deleteMessageInternal, {
-				id: message.id,
-			});
+			await deleteMessageInternalLogic(ctx, message.id);
 		}
 
 		// Delete user server settings
-		await ctx.runMutation(
-			internal.user_server_settings.deleteUserServerSettingsByUserIdInternal,
-			{
-				userId: args.id,
-			},
-		);
+		await deleteUserServerSettingsByUserIdLogic(ctx, args.id);
 
 		return true;
 	},
