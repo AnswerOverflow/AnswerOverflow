@@ -22,6 +22,9 @@
 		"test": {
 			"cache": true
 		},
+		"test:watch": {
+			"cache": true
+		},
 		"lint": {}
 	}
 }

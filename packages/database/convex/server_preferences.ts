@@ -1,6 +1,5 @@
 import { v } from "convex/values";
 import { internalMutation } from "./_generated/server";
-import { getDiscordAccountIdFromAuth } from "./auth";
 import { publicInternalMutation, publicInternalQuery } from "./publicInternal";
 
 const serverPreferencesSchema = v.object({

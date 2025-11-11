@@ -8,6 +8,7 @@
 		"build": "turbo run build",
 		"typecheck": "turbo run typecheck",
 		"test": "turbo run test",
+		"test:watch": "turbo run test:watch",
 		"lint": "biome check .",
 		"lint:fix": "biome check . --write",
 		"clean": "turbo run clean && rm -rf node_modules .turbo",
