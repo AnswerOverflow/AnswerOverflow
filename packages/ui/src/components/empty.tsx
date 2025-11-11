@@ -1,6 +1,13 @@
+import type * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@packages/ui/lib/utils";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardTitle,
+} from "@packages/ui/components/card";
 
 function Empty({ className, ...props }: React.ComponentProps<"div">) {
 	return (
@@ -94,6 +101,37 @@ function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
+function EmptyStateCard({
+	icon: Icon,
+	title,
+	description,
+	className,
+	...props
+}: {
+	icon: React.ComponentType<{ className?: string }>;
+	title: string;
+	description: string;
+	className?: string;
+} & React.ComponentProps<typeof Card>) {
+	return (
+		<Card
+			className={cn(
+				"flex flex-col items-center justify-center min-h-[400px] py-12",
+				className,
+			)}
+			{...props}
+		>
+			<CardContent className="flex flex-col items-center justify-center gap-4 text-center">
+				<div className="flex items-center justify-center mb-2">
+					<Icon className="size-12 text-muted-foreground" />
+				</div>
+				<CardTitle className="text-xl font-semibold">{title}</CardTitle>
+				<CardDescription className="text-base">{description}</CardDescription>
+			</CardContent>
+		</Card>
+	);
+}
+
 export {
 	Empty,
 	EmptyHeader,
@@ -101,4 +139,5 @@ export {
 	EmptyDescription,
 	EmptyContent,
 	EmptyMedia,
+	EmptyStateCard,
 };

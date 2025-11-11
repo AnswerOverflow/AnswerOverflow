@@ -9,6 +9,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@packages/ui/components/card";
+import { EmptyStateCard } from "@packages/ui/components/empty";
 import { Checkbox } from "@packages/ui/components/checkbox";
 import {
 	DropdownMenu,
@@ -597,45 +598,46 @@ export default function ChannelsPage() {
 									</DropdownMenu>
 								</div>
 
-								{selectedChannels.length === 0 ? (
-									<Card>
-										<CardHeader>
-											<CardTitle>No channels selected</CardTitle>
-											<CardDescription>
-												Select one or more channels from the dropdown above to
-												configure their settings.
-											</CardDescription>
-										</CardHeader>
-									</Card>
-								) : (
-									<div className="space-y-6">
-										<div>
-											<h2 className="font-semibold flex items-center gap-2">
-												{selectedChannels.length === 1 &&
+								<div className="space-y-6">
+									<div>
+										<h2 className="font-semibold flex items-center gap-2">
+											{selectedChannels.length === 0 ? (
+												<>
+													<Layers className="size-4 text-muted-foreground" />
+													Configure channels
+												</>
+											) : selectedChannels.length === 1 &&
 												selectedChannels[0] ? (
-													<>
-														{(() => {
-															const { Icon } = getChannelInfo(
-																selectedChannels[0].type,
-															);
-															return (
-																<Icon className="size-4 text-muted-foreground" />
-															);
-														})()}
-														Configure {selectedChannels[0].name}
-													</>
-												) : (
-													<>
-														<Layers className="size-4 text-muted-foreground" />
-														Configure {selectedChannels.length} Channels
-													</>
-												)}
-											</h2>
-											<p className="text-sm text-muted-foreground mt-1">
-												Settings will be applied to all selected channels
-											</p>
-										</div>
+												<>
+													{(() => {
+														const { Icon } = getChannelInfo(
+															selectedChannels[0].type,
+														);
+														return (
+															<Icon className="size-4 text-muted-foreground" />
+														);
+													})()}
+													Configure {selectedChannels[0].name}
+												</>
+											) : (
+												<>
+													<Layers className="size-4 text-muted-foreground" />
+													Configure {selectedChannels.length} Channels
+												</>
+											)}
+										</h2>
+										<p className="text-sm text-muted-foreground mt-1">
+											Settings will be applied to all selected channels
+										</p>
+									</div>
 
+									{selectedChannels.length === 0 ? (
+										<EmptyStateCard
+											icon={Hash}
+											title="No channels selected"
+											description="Select one or more channels from the dropdown above to configure their settings."
+										/>
+									) : (
 										<div className="space-y-6">
 											<ToggleChannelFlag
 												title="Indexing Enabled"
@@ -720,8 +722,8 @@ export default function ChannelsPage() {
 												/>
 											)}
 										</div>
-									</div>
-								)}
+									)}
+								</div>
 							</div>
 						</div>
 					</div>
