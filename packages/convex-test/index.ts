@@ -3,6 +3,7 @@ import {
 	type DataModelFromSchemaDefinition,
 	type DefaultFunctionArgs,
 	type DocumentByName,
+	type FunctionArgs,
 	type FunctionReference,
 	type FunctionReturnType,
 	type GenericActionCtx,
@@ -1562,6 +1563,40 @@ export type TestConvexForDataModel<DataModel extends GenericDataModel> = {
 	 *   with `finishInProgressScheduledFunctions()`.
 	 */
 	finishAllScheduledFunctions: (advanceTimers: () => void) => Promise<void>;
+
+	/**
+	 * Subscribe to updates for a query. The callback will be called
+	 * immediately with the current result, and then again whenever
+	 * mutations complete that might affect the query result.
+	 *
+	 * @param query A {@link FunctionReference} for the query.
+	 * @param args An arguments object for the query.
+	 * @param callback Function to call with the query result.
+	 * @returns A function to unsubscribe from updates.
+	 */
+	onUpdate: <Query extends FunctionReference<"query", any>>(
+		query: Query,
+		args: FunctionArgs<Query>,
+		callback: (result: FunctionReturnType<Query>) => void,
+	) => () => void;
+
+	/**
+	 * Get the number of times `onUpdate` has been called for a given query and args.
+	 * Useful for testing query deduplication and caching behavior.
+	 *
+	 * @param query A {@link FunctionReference} for the query.
+	 * @param args An arguments object for the query.
+	 * @returns The number of times `onUpdate` was called with these arguments.
+	 */
+	getQueryCallCount: <Query extends FunctionReference<"query", any>>(
+		query: Query,
+		args: FunctionArgs<Query>,
+	) => number;
+
+	/**
+	 * Reset all query call counts. Useful for resetting test state between test cases.
+	 */
+	resetQueryCallCounts: () => void;
 };
 
 export type TestConvexForDataModelAndIdentity<
@@ -1836,6 +1871,28 @@ export const convexTest = <Schema extends GenericSchema>(
 };
 
 function withAuth(auth: AuthFake = new AuthFake()) {
+	// Track all active watch queries so we can refresh them after mutations
+	const activeWatches = new Set<() => Promise<void>>();
+
+	// Track query call counts for testing
+	// Use a string-based key since Map object keys use reference equality
+	// which might not work if query references are different instances
+	const queryCallCounts = new Map<string, number>();
+
+	const getQueryCallCount = <Query extends FunctionReference<"query", any>>(
+		query: Query,
+		args: FunctionArgs<Query>,
+	) => {
+		const argsKey = JSON.stringify(args);
+		const queryStr = JSON.stringify(query);
+		const key = `${queryStr}:${argsKey}`;
+		return queryCallCounts.get(key) ?? 0;
+	};
+
+	const resetQueryCallCounts = () => {
+		queryCallCounts.clear();
+	};
+
 	const runTransaction = async <T>(
 		handler: (ctx: any, args: any) => T,
 		args: any,
@@ -1952,11 +2009,14 @@ function withAuth(auth: AuthFake = new AuthFake()) {
 		mutation: async (functionReference: any, args: any): Promise<Value> => {
 			const functionPath =
 				await getFunctionPathFromReference(functionReference);
-			return await byTypeWithPath.mutationFromPath(
+			const result = await byTypeWithPath.mutationFromPath(
 				functionPath,
 				/* isNested */ false,
 				args,
 			);
+			// After mutation completes, refresh all active watches
+			await Promise.all(Array.from(activeWatches).map((refresh) => refresh()));
+			return result;
 		},
 
 		action: async (functionReference: any, args: any) => {
@@ -2083,6 +2143,42 @@ function withAuth(auth: AuthFake = new AuthFake()) {
 					"or increase maxIterations.",
 			);
 		},
+
+		onUpdate: <Query extends FunctionReference<"query", any>>(
+			query: Query,
+			args: FunctionArgs<Query>,
+			callback: (result: FunctionReturnType<Query>) => void,
+		) => {
+			// Track query call - use string key matching getQueryCallCount
+			const argsKey = JSON.stringify(args);
+			const queryStr = JSON.stringify(query);
+			const queryKey = `${queryStr}:${argsKey}`;
+			queryCallCounts.set(queryKey, (queryCallCounts.get(queryKey) ?? 0) + 1);
+
+			// Create a refresh function that queries and calls callback
+			const refreshValue = async () => {
+				try {
+					const newValue = await byType.query(query, args);
+					callback(newValue);
+				} catch {
+					// Ignore errors for now - could be enhanced to handle errors
+				}
+			};
+
+			// Register this watch to be refreshed after mutations
+			activeWatches.add(refreshValue);
+
+			// Run initial query (async, don't await)
+			refreshValue();
+
+			// Return unsubscribe function
+			return () => {
+				activeWatches.delete(refreshValue);
+			};
+		},
+
+		getQueryCallCount,
+		resetQueryCallCounts,
 	};
 }
 

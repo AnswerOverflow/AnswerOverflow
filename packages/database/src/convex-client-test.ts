@@ -69,45 +69,6 @@ const createTestService = Effect.gen(function* () {
 	const modules = yield* Effect.promise(buildModules);
 	const testClient = convexTest(schema, modules);
 
-	// Track query calls for testing
-	// Use a string-based key since Map object keys use reference equality
-	// which might not work if query references are different instances
-	const queryCallCounts = new Map<string, number>();
-	const getQueryCallCount = (
-		query: FunctionReference<"query">,
-		args: unknown,
-	) => {
-		const argsKey = JSON.stringify(args);
-		// Create a string key - function references should be stable, so we'll use
-		// the query object itself converted to string (it should have some identifier)
-		// If that doesn't work, we'll need to iterate and match by argsKey
-		const queryStr = JSON.stringify(query);
-		const key = `${queryStr}:${argsKey}`;
-		return queryCallCounts.get(key) ?? 0;
-	};
-	const resetQueryCallCounts = () => {
-		queryCallCounts.clear();
-	};
-
-	// Track all active watch queries so we can refresh them after mutations
-	const activeWatches = new Set<() => Promise<void>>();
-
-	// Wrap mutation to trigger watch updates after mutations complete
-	const wrappedMutation = async <
-		Mutation extends
-			| FunctionReference<"mutation", "public">
-			| FunctionReference<"mutation", "internal">,
-	>(
-		mutation: Mutation,
-		...args: OptionalRestArgs<Mutation>
-	) => {
-		const mutationArgs = (args[0] ?? {}) as FunctionArgs<Mutation>;
-		const result = await testClient.mutation(mutation, mutationArgs);
-		// After mutation completes, refresh all active watches
-		await Promise.all(Array.from(activeWatches).map((refresh) => refresh()));
-		return result as FunctionReturnType<Mutation>;
-	};
-
 	// Create a wrapper that implements ConvexClientShared
 	const sharedClient: ConvexClientShared = {
 		query: <Query extends FunctionReference<"query">>(
@@ -117,7 +78,20 @@ const createTestService = Effect.gen(function* () {
 			const queryArgs = (args[0] ?? {}) as FunctionArgs<Query>;
 			return testClient.query(query, queryArgs) as FunctionReturnType<Query>;
 		},
-		mutation: wrappedMutation,
+		mutation: <
+			Mutation extends
+				| FunctionReference<"mutation", "public">
+				| FunctionReference<"mutation", "internal">,
+		>(
+			mutation: Mutation,
+			...args: OptionalRestArgs<Mutation>
+		) => {
+			const mutationArgs = (args[0] ?? {}) as FunctionArgs<Mutation>;
+			return testClient.mutation(
+				mutation,
+				mutationArgs,
+			) as FunctionReturnType<Mutation>;
+		},
 		action: <Action extends FunctionReference<"action">>(
 			action: Action,
 			...args: OptionalRestArgs<Action>
@@ -133,34 +107,8 @@ const createTestService = Effect.gen(function* () {
 			args: FunctionArgs<Query>,
 			callback: (result: FunctionReturnType<Query>) => void,
 		) => {
-			// Track query call - use string key matching getQueryCallCount
-			const argsKey = JSON.stringify(args);
-			const queryStr = JSON.stringify(query);
-			const queryKey = `${queryStr}:${argsKey}`;
-			queryCallCounts.set(queryKey, (queryCallCounts.get(queryKey) ?? 0) + 1);
-
-			// For test client, create a refresh function that queries and calls callback
-			let _currentValue: FunctionReturnType<Query> | undefined;
-			const refreshValue = async () => {
-				try {
-					const newValue = await testClient.query(query, args);
-					_currentValue = newValue;
-					callback(newValue);
-				} catch {
-					// Ignore errors for now - could be enhanced to handle errors
-				}
-			};
-
-			// Register this watch to be refreshed after mutations
-			activeWatches.add(refreshValue);
-
-			// Run initial query (async, don't await)
-			refreshValue();
-
-			// Return unsubscribe function
-			return () => {
-				activeWatches.delete(refreshValue);
-			};
+			// Use the built-in onUpdate from convex-test
+			return testClient.onUpdate(query, args, callback);
 		},
 	};
 
@@ -197,7 +145,12 @@ const createTestService = Effect.gen(function* () {
 		>;
 	};
 
-	return { use, client: sharedClient, getQueryCallCount, resetQueryCallCounts };
+	return {
+		use,
+		client: sharedClient,
+		getQueryCallCount: testClient.getQueryCallCount,
+		resetQueryCallCounts: testClient.resetQueryCallCounts,
+	};
 });
 
 export class ConvexClientTest extends Context.Tag("ConvexClientTest")<
