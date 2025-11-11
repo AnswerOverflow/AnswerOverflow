@@ -127,10 +127,57 @@ export default function ServerSettingsPage({
 
 	const updateServerPreferences = useMutation(
 		api.dashboard_mutations.updateServerPreferencesFlags,
-	);
+	).withOptimisticUpdate((localStore, args) => {
+		const currentData = localStore.getQuery(
+			api.dashboard_queries.getDashboardData,
+			{ serverId: args.serverId },
+		);
+		if (currentData !== undefined) {
+			localStore.setQuery(
+				api.dashboard_queries.getDashboardData,
+				{ serverId: args.serverId },
+				{
+					...currentData,
+					server: {
+						...currentData.server,
+						preferences: {
+							...currentData.server.preferences,
+							...args.flags,
+						},
+					},
+				},
+			);
+		}
+	});
+
 	const updateChannelSettings = useMutation(
 		api.dashboard_mutations.updateChannelSettingsFlags,
-	);
+	).withOptimisticUpdate((localStore, args) => {
+		const currentData = localStore.getQuery(
+			api.dashboard_queries.getDashboardData,
+			{ serverId },
+		);
+		if (currentData !== undefined) {
+			localStore.setQuery(
+				api.dashboard_queries.getDashboardData,
+				{ serverId },
+				{
+					...currentData,
+					channels: currentData.channels.map((channel) =>
+						channel.id === args.channelId
+							? {
+									...channel,
+									flags: {
+										...channel.flags,
+										...args.flags,
+									},
+								}
+							: channel,
+					),
+				},
+			);
+		}
+	});
 
 	if (!dashboardData) {
 		return (
