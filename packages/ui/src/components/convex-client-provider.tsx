@@ -25,7 +25,9 @@ const queryClient = new QueryClient({
 
 convexQueryClient.connect(queryClient);
 
-export const authClient = createAuthClient({
+export const authClient: Parameters<
+	typeof ConvexBetterAuthProvider
+>[0]["authClient"] = createAuthClient({
 	plugins: [convexClient()],
 });
 

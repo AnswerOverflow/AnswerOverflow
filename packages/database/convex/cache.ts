@@ -1,7 +1,7 @@
 "use node";
 
-import Redis from "ioredis";
 import { Effect, Option } from "effect";
+import Redis from "ioredis";
 
 let redisClient: Redis | null = null;
 
@@ -32,12 +32,13 @@ function getRedisClient(): Effect.Effect<Redis, Error> {
 
 export function getCached<T>(
 	key: string,
-): Effect.Effect<Option.Option<T>, Redis.CommandError | Error> {
+): Effect.Effect<Option.Option<T>, Error> {
 	return Effect.gen(function* () {
 		const client = yield* getRedisClient();
 		const cached = yield* Effect.tryPromise({
 			try: () => client.get(key),
-			catch: (error) => error as Redis.CommandError,
+			catch: (error) =>
+				error instanceof Error ? error : new Error(String(error)),
 		});
 
 		if (cached === null) {
@@ -58,13 +59,14 @@ export function setCached<T>(
 	key: string,
 	value: T,
 	ttlSeconds: number = 300,
-): Effect.Effect<void, Redis.CommandError | Error> {
+): Effect.Effect<void, Error> {
 	return Effect.gen(function* () {
 		const client = yield* getRedisClient();
 		const serialized = JSON.stringify(value);
 		yield* Effect.tryPromise({
 			try: () => client.setex(key, ttlSeconds, serialized),
-			catch: (error) => error as Redis.CommandError,
+			catch: (error) =>
+				error instanceof Error ? error : new Error(String(error)),
 		});
 	});
 }
