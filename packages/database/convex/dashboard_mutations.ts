@@ -187,3 +187,69 @@ export const updateChannelSettingsFlags = mutation({
 		return settings;
 	},
 });
+
+/**
+ * Update custom domain for a server (for dashboard)
+ */
+export const updateCustomDomain = mutation({
+	args: {
+		serverId: v.id("servers"),
+		customDomain: v.union(v.string(), v.null()),
+	},
+	handler: async (ctx, args) => {
+		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
+
+		const server = await ctx.db.get(args.serverId);
+		if (!server) {
+			throw new Error("Server not found");
+		}
+
+		// Permission check returns branded type - TypeScript enforces it's used
+		const _authorizedUser: AuthorizedUser<CanEditServer> =
+			await assertCanEditServer(ctx, server.discordId, discordAccountId);
+
+		// Validate domain format (basic validation)
+		if (args.customDomain !== null && args.customDomain !== "") {
+			// Basic domain validation - must not end with .answeroverflow.com
+			if (args.customDomain.toLowerCase().endsWith(".answeroverflow.com")) {
+				throw new Error(
+					"Domain cannot end with .answeroverflow.com. Please use a domain that you own",
+				);
+			}
+
+			// Basic domain format validation
+			const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i;
+			if (!domainRegex.test(args.customDomain)) {
+				throw new Error("Invalid domain format");
+			}
+		}
+
+		// Get or create server preferences
+		let preferences = await ctx.db
+			.query("serverPreferences")
+			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
+			.first();
+
+		if (!preferences) {
+			// Create new preferences with custom domain
+			const preferencesId = await ctx.db.insert("serverPreferences", {
+				serverId: args.serverId,
+				customDomain: args.customDomain ?? undefined,
+			});
+			await ctx.db.patch(args.serverId, { preferencesId });
+			preferences = await ctx.db.get(preferencesId);
+		} else {
+			// Update existing preferences
+			await ctx.db.patch(preferences._id, {
+				customDomain: args.customDomain ?? undefined,
+			});
+			preferences = await ctx.db.get(preferences._id);
+		}
+
+		if (!preferences) {
+			throw new Error("Failed to update custom domain");
+		}
+
+		return preferences;
+	},
+});

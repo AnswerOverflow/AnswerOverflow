@@ -27,6 +27,11 @@ export function DashboardSidebar({ children }: DashboardSidebarProps) {
 					href: `/dashboard/${serverId}/channels`,
 					icon: null,
 				},
+				{
+					label: "Settings",
+					href: `/dashboard/${serverId}/settings`,
+					icon: null,
+				},
 			]
 		: [];
 

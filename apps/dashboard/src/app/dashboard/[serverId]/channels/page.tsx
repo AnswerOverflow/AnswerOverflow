@@ -220,13 +220,7 @@ export default function ChannelsPage() {
 
 	if (!dashboardData) {
 		return (
-			<main className="p-6 lg:p-8 mx-auto">
-				<div className="max-w-[2000px] w-full">
-					<div className="text-muted-foreground">
-						Loading channel settings...
-					</div>
-				</div>
-			</main>
+			<div className="text-muted-foreground">Loading channel settings...</div>
 		);
 	}
 
@@ -343,258 +337,248 @@ export default function ChannelsPage() {
 	};
 
 	return (
-		<main className="p-6 lg:p-8 mx-auto">
-			<div className="max-w-[2000px] w-full">
-				{channels.length === 0 ? (
-					<Card>
-						<CardHeader>
-							<CardTitle>No channels found</CardTitle>
-							<CardDescription>
-								No channels are available for this server yet.
-							</CardDescription>
-						</CardHeader>
-					</Card>
-				) : (
-					<div className="mx-auto max-w-[1200px] w-full">
-						<div className="flex gap-6">
-							{/* Sidebar with channel selection */}
-							<div className="hidden lg:flex w-80 shrink-0 flex-col border rounded-lg sticky top-6 self-start max-h-[calc(100vh-8rem)]">
-								<div className="flex-1 overflow-y-auto p-2 min-h-0">
-									<div className="space-y-1">
-										<div className="flex items-center gap-2 pl-2 mb-1">
-											<Checkbox
-												checked={selectAllState}
-												onCheckedChange={toggleSelectAll}
+		<>
+			{channels.length === 0 ? (
+				<Card>
+					<CardHeader>
+						<CardTitle>No channels found</CardTitle>
+						<CardDescription>
+							No channels are available for this server yet.
+						</CardDescription>
+					</CardHeader>
+				</Card>
+			) : (
+				<div className="mx-auto max-w-[1200px] w-full">
+					<div className="flex gap-6">
+						{/* Sidebar with channel selection */}
+						<div className="hidden lg:flex w-80 shrink-0 flex-col border rounded-lg sticky top-6 self-start max-h-[calc(100vh-8rem)]">
+							<div className="flex-1 overflow-y-auto p-2 min-h-0">
+								<div className="space-y-1">
+									<div className="flex items-center gap-2 pl-2 mb-1">
+										<Checkbox
+											checked={selectAllState}
+											onCheckedChange={toggleSelectAll}
+										/>
+										<div className="relative flex-1">
+											<Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+											<Input
+												type="search"
+												placeholder="Search channels..."
+												value={channelSearchQuery ?? ""}
+												onChange={(e) =>
+													setChannelSearchQuery(e.target.value || null)
+												}
+												className="pl-9"
 											/>
-											<div className="relative flex-1">
-												<Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-												<Input
-													type="search"
-													placeholder="Search channels..."
-													value={channelSearchQuery ?? ""}
-													onChange={(e) =>
-														setChannelSearchQuery(e.target.value || null)
-													}
-													className="pl-9"
-												/>
-											</div>
 										</div>
-										{/* Channel type filter */}
-										<div className="px-2 py-1.5 border-t flex items-center gap-3">
-											<span className="text-xs text-muted-foreground shrink-0">
-												Type:
-											</span>
-											<div className="flex items-center gap-2 flex-1">
-												{channelTypeOptions.map(({ type, label, Icon }) => (
+									</div>
+									{/* Channel type filter */}
+									<div className="px-2 py-1.5 border-t flex items-center gap-3">
+										<span className="text-xs text-muted-foreground shrink-0">
+											Type:
+										</span>
+										<div className="flex items-center gap-2 flex-1">
+											{channelTypeOptions.map(({ type, label, Icon }) => (
+												<label
+													key={type}
+													className="flex items-center gap-1.5 px-1.5 py-0.5 rounded hover:bg-accent cursor-pointer transition-colors"
+													title={label}
+												>
+													<Checkbox
+														checked={channelTypeFilter?.has(type) ?? false}
+														onCheckedChange={() =>
+															toggleChannelTypeFilter(type)
+														}
+														className="size-3.5"
+													/>
+													<Icon className="size-3 shrink-0 text-muted-foreground" />
+												</label>
+											))}
+										</div>
+									</div>
+									{filteredChannels.length === 0 ? (
+										<div className="text-center text-muted-foreground py-8 text-sm">
+											{channelSearchQuery || channelTypeFilter?.size
+												? `No channels found${
+														channelSearchQuery
+															? ` matching "${channelSearchQuery}"`
+															: ""
+													}${
+														channelTypeFilter?.size
+															? ` with selected type${channelTypeFilter.size > 1 ? "s" : ""}`
+															: ""
+													}`
+												: "No channels available"}
+										</div>
+									) : (
+										filteredChannels.map(
+											(channel: { id: string; name: string; type: number }) => {
+												const { Icon, typeName } = getChannelInfo(channel.type);
+												const isSelected = selectedChannelIds.has(channel.id);
+												return (
 													<label
-														key={type}
-														className="flex items-center gap-1.5 px-1.5 py-0.5 rounded hover:bg-accent cursor-pointer transition-colors"
-														title={label}
+														key={channel.id}
+														className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer transition-colors"
 													>
 														<Checkbox
-															checked={channelTypeFilter?.has(type) ?? false}
+															checked={isSelected}
 															onCheckedChange={() =>
-																toggleChannelTypeFilter(type)
+																toggleChannelSelection(channel.id)
 															}
-															className="size-3.5"
 														/>
-														<Icon className="size-3 shrink-0 text-muted-foreground" />
-													</label>
-												))}
-											</div>
-										</div>
-										{filteredChannels.length === 0 ? (
-											<div className="text-center text-muted-foreground py-8 text-sm">
-												{channelSearchQuery || channelTypeFilter?.size
-													? `No channels found${
-															channelSearchQuery
-																? ` matching "${channelSearchQuery}"`
-																: ""
-														}${
-															channelTypeFilter?.size
-																? ` with selected type${channelTypeFilter.size > 1 ? "s" : ""}`
-																: ""
-														}`
-													: "No channels available"}
-											</div>
-										) : (
-											filteredChannels.map(
-												(channel: {
-													id: string;
-													name: string;
-													type: number;
-												}) => {
-													const { Icon, typeName } = getChannelInfo(
-														channel.type,
-													);
-													const isSelected = selectedChannelIds.has(channel.id);
-													return (
-														<label
-															key={channel.id}
-															className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer transition-colors"
-														>
-															<Checkbox
-																checked={isSelected}
-																onCheckedChange={() =>
-																	toggleChannelSelection(channel.id)
-																}
-															/>
-															<Icon className="size-4 shrink-0 text-muted-foreground" />
-															<div className="flex-1 min-w-0">
-																<div className="flex items-center gap-2">
-																	<span className="font-medium truncate text-sm">
-																		{channel.name}
-																	</span>
-																	<span className="text-xs text-muted-foreground shrink-0">
-																		{typeName}
-																	</span>
-																</div>
+														<Icon className="size-4 shrink-0 text-muted-foreground" />
+														<div className="flex-1 min-w-0">
+															<div className="flex items-center gap-2">
+																<span className="font-medium truncate text-sm">
+																	{channel.name}
+																</span>
+																<span className="text-xs text-muted-foreground shrink-0">
+																	{typeName}
+																</span>
 															</div>
-														</label>
-													);
-												},
-											)
-										)}
-									</div>
-								</div>
-							</div>
-
-							{/* Main content area with settings */}
-							<div className="flex-1 min-w-0">
-								<div className="max-w-[800px] w-full">
-									{selectedChannels.length === 0 ? (
-										<Card>
-											<CardHeader>
-												<CardTitle>No channels selected</CardTitle>
-												<CardDescription>
-													Select one or more channels from the sidebar to
-													configure their settings.
-												</CardDescription>
-											</CardHeader>
-										</Card>
-									) : (
-										<div className="space-y-6">
-											<div>
-												<h2 className="font-semibold flex items-center gap-2">
-													{selectedChannels.length === 1 &&
-													selectedChannels[0] ? (
-														<>
-															{(() => {
-																const { Icon } = getChannelInfo(
-																	selectedChannels[0].type,
-																);
-																return (
-																	<Icon className="size-4 text-muted-foreground" />
-																);
-															})()}
-															Configure {selectedChannels[0].name}
-														</>
-													) : (
-														<>
-															<Layers className="size-4 text-muted-foreground" />
-															Configure {selectedChannels.length} Channels
-														</>
-													)}
-												</h2>
-												<p className="text-sm text-muted-foreground mt-1">
-													Settings will be applied to all selected channels
-												</p>
-											</div>
-
-											<div className="space-y-6">
-												<ToggleChannelFlag
-													title="Indexing Enabled"
-													description="Enable indexing of a channel. Indexing can take up to 24 hours to collect initial data depending on the channel volume."
-													flagKey="indexingEnabled"
-													checked={getFlagValue("indexingEnabled") === true}
-													isMixed={getFlagValue("indexingEnabled") === "mixed"}
-													onChange={(checked) =>
-														handleChannelToggle("indexingEnabled", checked)
-													}
-												/>
-
-												<ToggleChannelFlag
-													title="Mark Solution Enabled"
-													description="Highlights the marked solution under the user's question."
-													flagKey="markSolutionEnabled"
-													checked={getFlagValue("markSolutionEnabled") === true}
-													isMixed={
-														getFlagValue("markSolutionEnabled") === "mixed"
-													}
-													onChange={(checked) =>
-														handleChannelToggle("markSolutionEnabled", checked)
-													}
-												/>
-
-												<ToggleChannelFlag
-													title="Auto Thread Enabled"
-													description="Automatically create threads for messages in this channel."
-													flagKey="autoThreadEnabled"
-													checked={getFlagValue("autoThreadEnabled") === true}
-													isMixed={
-														getFlagValue("autoThreadEnabled") === "mixed"
-													}
-													onChange={(checked) =>
-														handleChannelToggle("autoThreadEnabled", checked)
-													}
-												/>
-
-												<ToggleChannelFlag
-													title="Send Mark Solution Instructions in New Threads"
-													description="Enables the bot to provide instructions to users on how to mark a solution in new threads."
-													flagKey="sendMarkSolutionInstructionsInNewThreads"
-													checked={
-														getFlagValue(
-															"sendMarkSolutionInstructionsInNewThreads",
-														) === true
-													}
-													isMixed={
-														getFlagValue(
-															"sendMarkSolutionInstructionsInNewThreads",
-														) === "mixed"
-													}
-													onChange={(checked) =>
-														handleChannelToggle(
-															"sendMarkSolutionInstructionsInNewThreads",
-															checked,
-														)
-													}
-													disabled={isFlagDisabled(
-														"sendMarkSolutionInstructionsInNewThreads",
-													)}
-													disabledReason="This option is only available if mark solution is enabled for all selected channels."
-												/>
-
-												{selectedChannels.some((c) => c.type === 15) && (
-													<ToggleChannelFlag
-														title="Forum Guidelines Consent Enabled"
-														description="Marks all posts as public, and disables Username Anonymization for the selected channel. If enabled, add a public message disclaimer to your forum guidelines."
-														flagKey="forumGuidelinesConsentEnabled"
-														checked={
-															getFlagValue("forumGuidelinesConsentEnabled") ===
-															true
-														}
-														isMixed={
-															getFlagValue("forumGuidelinesConsentEnabled") ===
-															"mixed"
-														}
-														onChange={(checked) =>
-															handleChannelToggle(
-																"forumGuidelinesConsentEnabled",
-																checked,
-															)
-														}
-													/>
-												)}
-											</div>
-										</div>
+														</div>
+													</label>
+												);
+											},
+										)
 									)}
 								</div>
 							</div>
 						</div>
+
+						{/* Main content area with settings */}
+						<div className="flex-1 min-w-0">
+							<div className="max-w-[800px] w-full">
+								{selectedChannels.length === 0 ? (
+									<Card>
+										<CardHeader>
+											<CardTitle>No channels selected</CardTitle>
+											<CardDescription>
+												Select one or more channels from the sidebar to
+												configure their settings.
+											</CardDescription>
+										</CardHeader>
+									</Card>
+								) : (
+									<div className="space-y-6">
+										<div>
+											<h2 className="font-semibold flex items-center gap-2">
+												{selectedChannels.length === 1 &&
+												selectedChannels[0] ? (
+													<>
+														{(() => {
+															const { Icon } = getChannelInfo(
+																selectedChannels[0].type,
+															);
+															return (
+																<Icon className="size-4 text-muted-foreground" />
+															);
+														})()}
+														Configure {selectedChannels[0].name}
+													</>
+												) : (
+													<>
+														<Layers className="size-4 text-muted-foreground" />
+														Configure {selectedChannels.length} Channels
+													</>
+												)}
+											</h2>
+											<p className="text-sm text-muted-foreground mt-1">
+												Settings will be applied to all selected channels
+											</p>
+										</div>
+
+										<div className="space-y-6">
+											<ToggleChannelFlag
+												title="Indexing Enabled"
+												description="Enable indexing of a channel. Indexing can take up to 24 hours to collect initial data depending on the channel volume."
+												flagKey="indexingEnabled"
+												checked={getFlagValue("indexingEnabled") === true}
+												isMixed={getFlagValue("indexingEnabled") === "mixed"}
+												onChange={(checked) =>
+													handleChannelToggle("indexingEnabled", checked)
+												}
+											/>
+
+											<ToggleChannelFlag
+												title="Mark Solution Enabled"
+												description="Highlights the marked solution under the user's question."
+												flagKey="markSolutionEnabled"
+												checked={getFlagValue("markSolutionEnabled") === true}
+												isMixed={
+													getFlagValue("markSolutionEnabled") === "mixed"
+												}
+												onChange={(checked) =>
+													handleChannelToggle("markSolutionEnabled", checked)
+												}
+											/>
+
+											<ToggleChannelFlag
+												title="Auto Thread Enabled"
+												description="Automatically create threads for messages in this channel."
+												flagKey="autoThreadEnabled"
+												checked={getFlagValue("autoThreadEnabled") === true}
+												isMixed={getFlagValue("autoThreadEnabled") === "mixed"}
+												onChange={(checked) =>
+													handleChannelToggle("autoThreadEnabled", checked)
+												}
+											/>
+
+											<ToggleChannelFlag
+												title="Send Mark Solution Instructions in New Threads"
+												description="Enables the bot to provide instructions to users on how to mark a solution in new threads."
+												flagKey="sendMarkSolutionInstructionsInNewThreads"
+												checked={
+													getFlagValue(
+														"sendMarkSolutionInstructionsInNewThreads",
+													) === true
+												}
+												isMixed={
+													getFlagValue(
+														"sendMarkSolutionInstructionsInNewThreads",
+													) === "mixed"
+												}
+												onChange={(checked) =>
+													handleChannelToggle(
+														"sendMarkSolutionInstructionsInNewThreads",
+														checked,
+													)
+												}
+												disabled={isFlagDisabled(
+													"sendMarkSolutionInstructionsInNewThreads",
+												)}
+												disabledReason="This option is only available if mark solution is enabled for all selected channels."
+											/>
+
+											{selectedChannels.some((c) => c.type === 15) && (
+												<ToggleChannelFlag
+													title="Forum Guidelines Consent Enabled"
+													description="Marks all posts as public, and disables Username Anonymization for the selected channel. If enabled, add a public message disclaimer to your forum guidelines."
+													flagKey="forumGuidelinesConsentEnabled"
+													checked={
+														getFlagValue("forumGuidelinesConsentEnabled") ===
+														true
+													}
+													isMixed={
+														getFlagValue("forumGuidelinesConsentEnabled") ===
+														"mixed"
+													}
+													onChange={(checked) =>
+														handleChannelToggle(
+															"forumGuidelinesConsentEnabled",
+															checked,
+														)
+													}
+												/>
+											)}
+										</div>
+									</div>
+								)}
+							</div>
+						</div>
 					</div>
-				)}
-			</div>
-		</main>
+				</div>
+			)}
+		</>
 	);
 }

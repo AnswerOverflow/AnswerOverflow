@@ -18,6 +18,10 @@ export function SettingsNav() {
 			label: "Channels",
 			href: `/dashboard/${serverId}/channels`,
 		},
+		{
+			label: "Settings",
+			href: `/dashboard/${serverId}/settings`,
+		},
 	];
 
 	return (

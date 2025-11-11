@@ -79,6 +79,8 @@ export const getDashboardData = query({
 				discordId: server.discordId,
 				name: server.name,
 				icon: server.icon ?? null,
+				plan: server.plan,
+				customDomain: preferences?.customDomain ?? null,
 				preferences: {
 					readTheRulesConsentEnabled:
 						preferences?.readTheRulesConsentEnabled ?? false,

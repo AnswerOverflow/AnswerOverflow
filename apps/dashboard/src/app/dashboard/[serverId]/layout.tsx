@@ -72,7 +72,13 @@ export default function DashboardServerLayout({
 			userSection={userSectionProps}
 			homeHref="/dashboard"
 		>
-			<DashboardSidebar>{children}</DashboardSidebar>
+			<DashboardSidebar>
+				<main className="p-6 lg:p-8 mx-auto">
+					<div className="max-w-[2000px] w-full flex flex-col items-center">
+						{children}
+					</div>
+				</main>
+			</DashboardSidebar>
 		</DashboardNavbar>
 	);
 }
