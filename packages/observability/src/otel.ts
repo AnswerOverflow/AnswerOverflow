@@ -9,6 +9,12 @@ import type * as LayerType from "effect/Layer";
 import * as Layer from "effect/Layer";
 
 /**
+ * Strongly typed service names used for OpenTelemetry instrumentation.
+ * These correspond to the main applications and test suites in the codebase.
+ */
+type ServiceName = "discord-bot" | "main-site" | "dashboard" | "database-tests";
+
+/**
  * Creates an OpenTelemetry layer using Effect's native OTLP tracer that exports traces to Jaeger via OTLP/HTTP.
  * Uses batching for production workloads.
  * The HttpClient dependency is automatically provided using FetchHttpClient.
@@ -19,7 +25,7 @@ import * as Layer from "effect/Layer";
  * @param shutdownTimeout - How long to wait for spans to be exported on shutdown (defaults to 5 seconds)
  */
 export const createOtelLayer = (
-	serviceName: string,
+	serviceName: ServiceName,
 	otlpEndpoint = "http://localhost:4318/v1/traces",
 	exportInterval: Duration.DurationInput = Duration.seconds(5),
 	shutdownTimeout: Duration.DurationInput = Duration.seconds(5),
@@ -43,7 +49,7 @@ export const createOtelLayer = (
  * @param shutdownTimeout - How long to wait for spans to be exported on shutdown (defaults to 5 seconds)
  */
 export const createOtelTestLayer = (
-	serviceName: string,
+	serviceName: ServiceName,
 	otlpEndpoint = "http://localhost:4318/v1/traces",
 	shutdownTimeout: Duration.DurationInput = Duration.seconds(5),
 ): LayerType.Layer<Resource.Resource> =>

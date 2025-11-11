@@ -2,7 +2,6 @@
 - we need to figure out the right pattern for calling internal actions (i.e delete message, create, etc from the discord bot)
 - we need to bring in typelytics
 
-
 slop:
 
 ### Discord Bot (High Priority)
