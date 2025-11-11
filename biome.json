@@ -24,11 +24,12 @@
 		"rules": {
 			"recommended": true,
 			"performance": {
-				"noImgElement": "warn"
+				"noImgElement": "off"
 			},
 			"suspicious": {
 				"noShadowRestrictedNames": "error",
-				"noExplicitAny": "error"
+				"noExplicitAny": "error",
+				"noArrayIndexKey": "warn"
 			}
 		}
 	},

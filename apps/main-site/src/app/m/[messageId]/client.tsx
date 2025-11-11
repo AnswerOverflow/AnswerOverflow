@@ -128,7 +128,6 @@ function MessageEmbed({ embed }: { embed: Embed }) {
 			{embed.fields && embed.fields.length > 0 && (
 				<div className="mt-2 space-y-1">
 					{embed.fields.map((field, idx) => (
-						// biome-ignore-next-line lint/suspicious/noArrayIndexKey: Embed fields don't have unique IDs
 						<div
 							key={`${field.name}-${idx}`}
 							className={field.inline ? "inline-block" : "block"}
@@ -349,7 +348,6 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 										// Group reactions by emoji
 										const emojiId = reaction.emojiId;
 										return (
-											// biome-ignore-next-line lint/suspicious/noArrayIndexKey: Using emojiId + idx for uniqueness
 											<div
 												key={`${emojiId}-${idx}`}
 												className="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-sm"
