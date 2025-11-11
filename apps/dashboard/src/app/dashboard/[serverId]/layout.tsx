@@ -25,7 +25,7 @@ export default function DashboardServerLayout({
 	const getUserServers = useAction(api.dashboard.getUserServers);
 
 	// Fetch servers for dropdown
-	const { data: servers } = useReactQuery({
+	const { data: servers, isPending: isServersPending } = useReactQuery({
 		queryKey: ["dashboard-servers"],
 		queryFn: async () => {
 			if (!session?.user) {
@@ -51,6 +51,7 @@ export default function DashboardServerLayout({
 				servers: serversForDropdown,
 				getServerHref: (id: string) => `/dashboard/${id}`,
 				addNewHref: "/onboarding",
+				isLoading: isSessionPending || isServersPending,
 			}
 		: undefined;
 

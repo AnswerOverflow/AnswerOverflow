@@ -12,6 +12,7 @@ import {
 	DropdownMenuTrigger,
 } from "../dropdown-menu";
 import { ServerIcon } from "../server-icon";
+import { Skeleton } from "../skeleton";
 import { cn } from "../../lib/utils";
 
 export interface ServerSelectServer {
@@ -57,6 +58,8 @@ export interface ServerSelectDropdownProps {
 	addNewLabel?: string;
 	/** Custom empty state message */
 	emptyMessage?: string;
+	/** Whether the servers are currently loading */
+	isLoading?: boolean;
 }
 
 export function ServerSelectDropdown({
@@ -66,11 +69,16 @@ export function ServerSelectDropdown({
 	addNewHref = "/onboarding",
 	addNewLabel = "Add new",
 	emptyMessage = "No servers with bot found",
+	isLoading = false,
 }: ServerSelectDropdownProps) {
 	const serversWithDashboard = servers.filter((server) => server.hasBot);
 	const selectedServer =
 		serversWithDashboard.find((x) => x.id === currentServerId) ??
 		serversWithDashboard[0];
+
+	if (isLoading) {
+		return <Skeleton className="h-10 w-48" />;
+	}
 
 	return (
 		<DropdownMenu modal={false}>
