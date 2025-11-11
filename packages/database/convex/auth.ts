@@ -1,6 +1,13 @@
+import type { Brand } from "effect/Brand";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
+import type {
+	AuthorizedUser,
+	CanEditServer,
+	IsAdminOrOwner,
+	IsAuthenticated,
+} from "./permissions";
 
 /**
  * Get the authenticated user's Discord account ID from their Clerk identity
@@ -90,19 +97,31 @@ export async function getUserServerSettingsForServerByDiscordId(
 /**
  * Check if user has permission to edit a server
  * Requires Administrator or ManageGuild permission, or being the server owner
+ * Returns a branded type that proves the permission check was performed.
  * @param discordServerId - Discord server ID (snowflake string)
+ * @returns AuthorizedUser<CanEditServer> - Branded type proving permission was checked
  */
 export async function assertCanEditServer(
 	ctx: QueryCtx | MutationCtx,
 	discordServerId: string,
 	discordAccountId: string | null,
-): Promise<void> {
+): Promise<AuthorizedUser<CanEditServer>> {
 	if (!discordAccountId) {
 		throw new Error("Not authenticated");
 	}
 
 	if (isSuperUser(discordAccountId)) {
-		return;
+		// Super users bypass permission checks but still return branded type
+		// We need to get settings for the branded type, but skip the check
+		const settings = await getUserServerSettingsForServerByDiscordId(
+			ctx,
+			discordAccountId,
+			discordServerId,
+		);
+		return {
+			discordAccountId,
+			userServerSettings: settings,
+		} as unknown as AuthorizedUser<CanEditServer>;
 	}
 
 	// Get user server settings to check permissions
@@ -132,23 +151,40 @@ export async function assertCanEditServer(
 			"You are missing the required permissions to edit this server",
 		);
 	}
+
+	// Return branded type proving permission was checked
+	return {
+		discordAccountId,
+		userServerSettings: settings,
+	} as unknown as AuthorizedUser<CanEditServer>;
 }
 
 /**
  * Check if user is the owner or admin of a server
+ * Returns a branded type that proves the permission check was performed.
  * @param discordServerId - Discord server ID (snowflake string)
+ * @returns AuthorizedUser<IsAdminOrOwner> - Branded type proving permission was checked
  */
 export async function assertIsAdminOrOwnerOfServer(
 	ctx: QueryCtx | MutationCtx,
 	discordServerId: string,
 	discordAccountId: string | null,
-): Promise<void> {
+): Promise<AuthorizedUser<IsAdminOrOwner>> {
 	if (!discordAccountId) {
 		throw new Error("Not authenticated");
 	}
 
 	if (isSuperUser(discordAccountId)) {
-		return;
+		// Super users bypass permission checks but still return branded type
+		const settings = await getUserServerSettingsForServerByDiscordId(
+			ctx,
+			discordAccountId,
+			discordServerId,
+		);
+		return {
+			discordAccountId,
+			userServerSettings: settings,
+		} as unknown as AuthorizedUser<IsAdminOrOwner>;
 	}
 
 	const settings = await getUserServerSettingsForServerByDiscordId(
@@ -167,34 +203,53 @@ export async function assertIsAdminOrOwnerOfServer(
 	if (!hasAdmin) {
 		throw new Error("Only administrators or the server owner can do this");
 	}
+
+	// Return branded type proving permission was checked
+	return {
+		discordAccountId,
+		userServerSettings: settings,
+	} as unknown as AuthorizedUser<IsAdminOrOwner>;
 }
 
 /**
  * Check if the authenticated user matches the target user ID
+ * Returns a branded type that proves the user check was performed.
+ * @returns AuthorizedUser<IsAuthenticated> - Branded type proving user was verified
  */
 export function assertIsUser(
 	discordAccountId: string | null,
 	targetUserId: string,
-): void {
+): AuthorizedUser<IsAuthenticated> {
 	if (!discordAccountId) {
 		throw new Error("Not authenticated");
 	}
 
 	if (isSuperUser(discordAccountId)) {
-		return;
+		return {
+			discordAccountId,
+			userServerSettings: null,
+		} as unknown as AuthorizedUser<IsAuthenticated>;
 	}
 
 	if (discordAccountId !== targetUserId) {
 		throw new Error("You are not authorized to do this");
 	}
+
+	// Return branded type proving user was verified
+	return {
+		discordAccountId,
+		userServerSettings: null,
+	} as AuthorizedUser<IsAuthenticated>;
 }
 
 /**
  * Require authentication - throws if user is not authenticated
+ * Returns a branded type that proves authentication was checked.
+ * @returns AuthorizedUser<IsAuthenticated> - Branded type proving authentication
  */
 export async function requireAuth(
 	ctx: QueryCtx | MutationCtx,
-): Promise<string> {
+): Promise<AuthorizedUser<IsAuthenticated>> {
 	const identity = await ctx.auth.getUserIdentity();
 	if (!identity) {
 		throw new Error("Not authenticated");
@@ -205,5 +260,9 @@ export async function requireAuth(
 		throw new Error("Discord account not linked");
 	}
 
-	return discordAccountId;
+	// Return branded type proving authentication was checked
+	return {
+		discordAccountId,
+		userServerSettings: null,
+	} as AuthorizedUser<IsAuthenticated>;
 }

@@ -82,6 +82,10 @@ async function addSettingsToChannels(
 	}));
 }
 
+/**
+ * Public query: Get channel by Discord ID
+ * No authentication required - returns public channel data
+ */
 export const getChannelByDiscordId = query({
 	args: {
 		discordId: v.string(),

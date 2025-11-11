@@ -1,20 +1,42 @@
 import { v } from "convex/values";
 import { api } from "./_generated/api";
 import { query } from "./_generated/server";
+import {
+	getDiscordAccountIdFromAuth,
+	getUserServerSettingsForServerByDiscordId,
+} from "./auth";
 
 /**
  * Get dashboard data for a server (server + channels + preferences + settings)
  * Used by dashboard UI to display and manage server settings
+ * 
+ * Protected query: Requires user to be authenticated and a member of the server
  */
 export const getDashboardData = query({
 	args: {
 		serverId: v.id("servers"),
 	},
 	handler: async (ctx, args) => {
+		// Check authentication
+		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
+		if (!discordAccountId) {
+			return null; // Not authenticated
+		}
+
 		// Get server
 		const server = await ctx.db.get(args.serverId);
 		if (!server) {
 			return null;
+		}
+
+		// Verify user has access to this server
+		const settings = await getUserServerSettingsForServerByDiscordId(
+			ctx,
+			discordAccountId,
+			server.discordId,
+		);
+		if (!settings) {
+			return null; // User not a member of the server
 		}
 
 		// Get server preferences

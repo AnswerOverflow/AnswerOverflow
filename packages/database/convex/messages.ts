@@ -333,6 +333,11 @@ export const upsertMessageInternal = internalMutation({
 	},
 });
 
+/**
+ * Public query: Get message by ID
+ * No authentication required - returns public message data
+ * Note: Privacy filtering should be handled at the application level based on server settings
+ */
 export const getMessageById = query({
 	args: {
 		id: v.string(),
@@ -345,6 +350,11 @@ export const getMessageById = query({
 	},
 });
 
+/**
+ * Public query: Find messages by channel ID
+ * No authentication required - returns public message data
+ * Note: Privacy filtering should be handled at the application level based on server settings
+ */
 export const findMessagesByChannelId = query({
 	args: {
 		channelId: v.string(),

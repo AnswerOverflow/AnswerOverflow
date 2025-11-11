@@ -5,6 +5,10 @@ import { serverSchema } from "./schema";
 // Channel types for root channels (forums, text, announcements)
 const ALLOWED_ROOT_CHANNEL_TYPES = [0, 5, 15]; // GuildText, GuildAnnouncement, GuildForum
 
+/**
+ * Public query: Get all servers
+ * No authentication required - returns public server data
+ */
 export const publicGetAllServers = query({
 	args: {},
 	handler: async (ctx) => {
@@ -12,6 +16,10 @@ export const publicGetAllServers = query({
 	},
 });
 
+/**
+ * Public query: Get server by Discord ID
+ * No authentication required - returns public server data
+ */
 export const publicGetServerByDiscordId = query({
 	args: {
 		discordId: v.string(),

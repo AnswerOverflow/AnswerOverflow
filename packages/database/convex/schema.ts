@@ -53,7 +53,7 @@ export const discordAccountSchema = v.object({
 export const userServerSettingsSchema = v.object({
 	serverId: v.id("servers"),
 	userId: v.string(), // Discord account ID (snowflake), not Clerk user ID
-	permissions: v.number(),
+	permissions: v.number(), // Bitfield of permissions for the user in the server, this comes from Discord and is not allowed to be modified by the user
 	canPubliclyDisplayMessages: v.boolean(),
 	messageIndexingDisabled: v.boolean(),
 	apiKey: v.optional(v.string()),

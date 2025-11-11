@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { api } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { assertCanEditServer, getDiscordAccountIdFromAuth } from "./auth";
+import type { AuthorizedUser, CanEditServer } from "./permissions";
 
 /**
  * Update server preferences flags (for dashboard)
@@ -24,7 +25,9 @@ export const updateServerPreferencesFlags = mutation({
 			throw new Error("Server not found");
 		}
 
-		await assertCanEditServer(ctx, server.discordId, discordAccountId);
+		// Permission check returns branded type - TypeScript enforces it's used
+		const _authorizedUser: AuthorizedUser<CanEditServer> =
+			await assertCanEditServer(ctx, server.discordId, discordAccountId);
 
 		// Get or create preferences
 		let preferences = server.preferencesId
@@ -87,7 +90,9 @@ export const updateChannelSettingsFlags = mutation({
 			throw new Error("Server not found");
 		}
 
-		await assertCanEditServer(ctx, server.discordId, discordAccountId);
+		// Permission check returns branded type - TypeScript enforces it's used
+		const _authorizedUser: AuthorizedUser<CanEditServer> =
+			await assertCanEditServer(ctx, server.discordId, discordAccountId);
 
 		// Get or create settings
 		let settings = await ctx.db

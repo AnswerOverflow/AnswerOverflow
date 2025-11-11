@@ -9,6 +9,7 @@ import {
 	query,
 } from "./_generated/server";
 import { assertIsUser, getDiscordAccountIdFromAuth } from "./auth";
+import type { AuthorizedUser, IsAuthenticated } from "./permissions";
 import { userServerSettingsSchema } from "./schema";
 
 type UserServerSettings = Infer<typeof userServerSettingsSchema>;
@@ -75,7 +76,9 @@ export const createUserServerSettings = mutation({
 	handler: async (ctx, args) => {
 		// Check authentication and authorization
 		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-		assertIsUser(discordAccountId, args.settings.userId);
+		// Permission check returns branded type - TypeScript enforces it's used
+		const _authorizedUser: AuthorizedUser<IsAuthenticated> =
+			assertIsUser(discordAccountId, args.settings.userId);
 
 		// Check if already exists
 		const existing = await ctx.db
@@ -111,7 +114,9 @@ export const updateUserServerSettings = mutation({
 	handler: async (ctx, args) => {
 		// Check authentication and authorization
 		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-		assertIsUser(discordAccountId, args.settings.userId);
+		// Permission check returns branded type - TypeScript enforces it's used
+		const _authorizedUser: AuthorizedUser<IsAuthenticated> =
+			assertIsUser(discordAccountId, args.settings.userId);
 
 		const existing = await ctx.db
 			.query("userServerSettings")
@@ -180,7 +185,9 @@ export const upsertUserServerSettings = mutation({
 	handler: async (ctx, args) => {
 		// Check authentication and authorization
 		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-		assertIsUser(discordAccountId, args.settings.userId);
+		// Permission check returns branded type - TypeScript enforces it's used
+		const _authorizedUser: AuthorizedUser<IsAuthenticated> =
+			assertIsUser(discordAccountId, args.settings.userId);
 
 		const existing = await ctx.db
 			.query("userServerSettings")
@@ -270,7 +277,9 @@ export const deleteUserServerSettingsByUserId = mutation({
 	handler: async (ctx, args) => {
 		// Check authentication and authorization
 		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-		assertIsUser(discordAccountId, args.userId);
+		// Permission check returns branded type - TypeScript enforces it's used
+		const _authorizedUser: AuthorizedUser<IsAuthenticated> =
+			assertIsUser(discordAccountId, args.userId);
 
 		const settings = await ctx.db
 			.query("userServerSettings")
