@@ -4,3 +4,6 @@
 [submodule ".context/AnswerOverflow"]
 	path = .context/AnswerOverflow
 	url = https://github.com/AnswerOverflow/AnswerOverflow.git
+[submodule ".context/github-search-agent"]
+	path = .context/github-search-agent
+	url = https://github.com/RhysSullivan/github-search-agent.git

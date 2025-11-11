@@ -72,6 +72,7 @@
       "name": "@packages/main-site",
       "version": "0.1.0",
       "dependencies": {
+        "@convex-dev/better-auth": "^0.9.7",
         "@convex-dev/react-query": "^0.0.0-alpha.11",
         "@headlessui/react": "^2.0.3",
         "@heroicons/react": "^2.1.3",
@@ -83,6 +84,7 @@
         "@radix-ui/react-slot": "^1.0.2",
         "@tanstack/react-query": "^5.85.3",
         "babel-plugin-react-compiler": "^19.1.0-rc.2",
+        "better-auth": "1.3.27",
         "class-variance-authority": "^0.7.0",
         "convex": "^1.13.0",
         "effect": "^3.17.7",

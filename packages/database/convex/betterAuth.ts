@@ -7,6 +7,21 @@ import { betterAuth, type BetterAuthOptions } from "better-auth";
 
 const siteUrl = process.env.SITE_URL!;
 
+// Build trusted origins list - include site URL and optional dev URLs
+const getTrustedOrigins = (): string[] => {
+	const origins = [siteUrl];
+	
+	// Add development URLs if provided
+	if (process.env.DASHBOARD_URL) {
+		origins.push(process.env.DASHBOARD_URL);
+	}
+	if (process.env.MAIN_SITE_URL) {
+		origins.push(process.env.MAIN_SITE_URL);
+	}
+	
+	return origins;
+};
+
 // The component client has methods needed for integrating Convex with Better Auth,
 // as well as helper methods for general use.
 export const authComponent = createClient<DataModel>(components.betterAuth);
@@ -23,6 +38,8 @@ export const createAuth = (
 		},
 		baseURL: siteUrl,
 		database: authComponent.adapter(ctx),
+		secret: process.env.BETTER_AUTH_SECRET!,
+		trustedOrigins: getTrustedOrigins(),
 		// Configure Discord OAuth provider
 		socialProviders: {
 			discord: {

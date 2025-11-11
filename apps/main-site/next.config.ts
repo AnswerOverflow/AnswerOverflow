@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
 	reactCompiler: true,
 	experimental: {
 		// turbopackFileSystemCacheForBuild: true,
-		turbopackFileSystemCacheForDev: true,
+		// turbopackFileSystemCacheForDev: true,
 	},
 };
 

@@ -7,10 +7,10 @@ import {
 } from "@effect/platform";
 import { make } from "@packages/discord-api/generated";
 import { Effect } from "effect";
-import { api, components, internal } from "./_generated/api";
+import { api, components } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action } from "./_generated/server";
-import { authComponent, createAuth } from "./betterAuth";
+import { authComponent } from "./betterAuth";
 
 const discordApi = (token: string) =>
 	Effect.gen(function* () {
@@ -59,17 +59,58 @@ function hasPermission(permissions: bigint, permission: bigint): boolean {
 export const getUserServers = action({
 	args: {},
 	handler: async (ctx): Promise<ServerWithMetadata[]> => {
-		const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
-		const session = await auth.api.getSession({ headers });
-
-		if (!session?.user) {
+		// Check if user is authenticated
+		// Note: getAuthUser doesn't require crypto.subtle, unlike getSession
+		const user = await authComponent.getAuthUser(ctx);
+		if (!user) {
 			throw new Error("Not authenticated");
+		}
+
+		// getAuthUser returns user object but without id field
+		// Query user table by email to get the userId
+		// This avoids needing crypto.subtle which isn't available in actions
+		if (typeof user !== "object" || user === null) {
+			throw new Error("Invalid user object");
+		}
+
+		const userEmail =
+			"email" in user && typeof user.email === "string" ? user.email : null;
+
+		if (!userEmail) {
+			throw new Error("User email not found");
+		}
+
+		const betterAuthUser = await ctx.runQuery(
+			components.betterAuth.adapter.findOne,
+			{
+				model: "user",
+				where: [
+					{
+						field: "email",
+						operator: "eq",
+						value: userEmail,
+					},
+				],
+			},
+		);
+
+		if (!betterAuthUser || typeof betterAuthUser !== "object") {
+			throw new Error("User not found in database");
+		}
+
+		// Convex documents use _id as the ID field
+		const sessionUserId =
+			"_id" in betterAuthUser && typeof betterAuthUser._id === "string"
+				? betterAuthUser._id
+				: null;
+
+		if (!sessionUserId) {
+			throw new Error("User ID not found");
 		}
 
 		// Get Discord OAuth account from BetterAuth database
 		// Use the BetterAuth component's internal API to get accounts
-		// Component queries are internal, so we call them directly
-		const accounts = await ctx.runQuery(
+		const accountsResult = await ctx.runQuery(
 			components.betterAuth.adapter.findMany,
 			{
 				model: "account",
@@ -77,7 +118,7 @@ export const getUserServers = action({
 					{
 						field: "userId",
 						operator: "eq",
-						value: session.user.id,
+						value: sessionUserId,
 					},
 				],
 				paginationOpts: {
@@ -87,9 +128,21 @@ export const getUserServers = action({
 			},
 		);
 
+		// Handle paginated result - check if it's an array or has a page property
+		type AccountResult = {
+			providerId: string;
+			accessToken: string | null;
+			userId: string;
+		};
+
+		const accounts: AccountResult[] = Array.isArray(accountsResult)
+			? accountsResult
+			: "page" in accountsResult && Array.isArray(accountsResult.page)
+				? accountsResult.page
+				: [];
+
 		const discordAccount = accounts.find(
-			(account: { providerId: string; accessToken?: string | null }) =>
-				account.providerId === "discord",
+			(account) => account.providerId === "discord",
 		);
 
 		if (!discordAccount) {
@@ -98,6 +151,9 @@ export const getUserServers = action({
 
 		// Get Discord OAuth token from BetterAuth
 		// BetterAuth stores OAuth tokens in the account
+		if (!("accessToken" in discordAccount)) {
+			throw new Error("Discord account missing access token");
+		}
 		const token = discordAccount.accessToken;
 		if (!token) {
 			throw new Error("Discord token not found");
@@ -147,7 +203,9 @@ export const getUserServers = action({
 					permissions: guild.permissions,
 					highestRole,
 					hasBot:
-						aoServer?.kickedTime === null || aoServer?.kickedTime === undefined,
+						aoServer !== null &&
+						aoServer !== undefined &&
+						(aoServer.kickedTime === null || aoServer.kickedTime === undefined),
 					aoServerId: aoServer?._id,
 				};
 			},
