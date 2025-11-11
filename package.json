@@ -9,10 +9,13 @@
 		"lint": "biome check .",
 		"lint:fix": "biome check . --write",
 		"clean": "turbo run clean && rm -rf node_modules .turbo",
-		"format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore"
+		"format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
+		"prepare": "husky"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.1.4",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.2.6",
 		"prettier": "3.5.3",
 		"turbo": "^2.6.0",
 		"typescript": "^5.9.2"
@@ -30,5 +33,10 @@
 	},
 	"dependencies": {
 		"better-auth": "1.3.27"
+	},
+	"lint-staged": {
+		"*": [
+			"biome format --write"
+		]
 	}
 }
