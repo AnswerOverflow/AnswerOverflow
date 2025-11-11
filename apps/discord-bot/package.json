@@ -7,7 +7,7 @@
 		"dev": "bun run --env-file=../../.env --watch index.ts",
 		"typecheck": "tsc -p tsconfig.json --noEmit",
 		"clean": "rm -rf node_modules .turbo",
-		"test": "vitest run",
+		"test": "vitest run --no-watch",
 		"test:watch": "vitest"
 	},
 	"dependencies": {
