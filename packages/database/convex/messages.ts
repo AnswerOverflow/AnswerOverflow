@@ -86,14 +86,14 @@ export const upsertMessage = mutation({
 		const { attachments, reactions } = args;
 		const messageData = args.message;
 
-		// Upsert message
+		// Upsert message - use index for efficient lookup
 		const existing = await ctx.db
 			.query("messages")
-			.filter((q) => q.eq(q.field("id"), messageData.id))
+			.withIndex("by_messageId", (q) => q.eq("id", messageData.id))
 			.first();
 
 		if (existing) {
-			await ctx.db.patch(existing._id, messageData);
+			await ctx.db.replace(existing._id, messageData);
 		} else {
 			await ctx.db.insert("messages", messageData);
 		}

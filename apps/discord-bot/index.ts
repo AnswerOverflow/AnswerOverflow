@@ -58,8 +58,9 @@ const program = Effect.gen(function* () {
 			// Start indexing loop
 			yield* Console.log("Starting indexing loop...");
 			yield* startIndexingLoop(true).pipe(
-				Effect.catchAll((error) =>
-					Console.error("Error starting indexing loop:", error),
+				Effect.tap(() => Console.log("Indexing loop started")),
+				Effect.catchAllCause((cause) =>
+					Console.error("Error starting indexing loop:", cause),
 				),
 			);
 			const guilds = yield* discord.getGuilds();
@@ -551,7 +552,7 @@ const program = Effect.gen(function* () {
 // Run the program with the DiscordClientLayer and OpenTelemetry tracing
 const OtelLayer = createOtelLayer("discord-bot");
 // Set minimum log level to Info to filter out Debug logs
-const LoggerLayer = Logger.minimumLogLevel(LogLevel.Info);
+const LoggerLayer = Logger.minimumLogLevel(LogLevel.Debug);
 Effect.runPromise(
 	Effect.scoped(
 		program.pipe(

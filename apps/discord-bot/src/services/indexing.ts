@@ -60,11 +60,22 @@ function fetchChannelMessages(
 		let lastMessageId = startFromId ?? "0";
 		let hasMore = true;
 
+		if (startFromId) {
+			yield* Effect.logDebug(
+				`Fetching messages for ${channelName} (${channelId}) starting after message ${startFromId}`,
+			);
+		} else {
+			yield* Effect.logDebug(
+				`Fetching messages for ${channelName} (${channelId}) from beginning`,
+			);
+		}
+
 		while (hasMore && messages.length < INDEXING_CONFIG.maxMessagesPerChannel) {
 			// Fetch a page of messages
+			const fetchAfter = lastMessageId === "0" ? undefined : lastMessageId;
 			const fetchedMessages = yield* discord.fetchChannelMessages(channelId, {
 				limit: INDEXING_CONFIG.messagesPerPage,
-				after: lastMessageId === "0" ? undefined : lastMessageId,
+				after: fetchAfter,
 			});
 
 			if (fetchedMessages.size === 0) {
@@ -253,6 +264,13 @@ function storeMessages(
 				const currentChannel = channelLiveData?.data;
 
 				if (currentChannel) {
+					const oldLastIndexed = currentChannel.lastIndexedSnowflake;
+					const newLastIndexed = lastMessage.id;
+
+					yield* Effect.logDebug(
+						`Updating lastIndexedSnowflake for channel ${channelId}: ${oldLastIndexed ?? "null"} -> ${newLastIndexed}`,
+					);
+
 					// Only pass the channel data fields, not system fields like _id, _creationTime, flags
 					yield* database.channels.updateChannel({
 						id: channelId,
@@ -265,11 +283,23 @@ function storeMessages(
 							inviteCode: currentChannel.inviteCode,
 							archivedTimestamp: currentChannel.archivedTimestamp,
 							solutionTagId: currentChannel.solutionTagId,
-							lastIndexedSnowflake: lastMessage.id,
+							lastIndexedSnowflake: newLastIndexed,
 						},
 					});
+
+					yield* Effect.logDebug(
+						`Successfully updated lastIndexedSnowflake for channel ${channelId}`,
+					);
+				} else {
+					yield* Effect.logDebug(
+						`Warning: Could not update lastIndexedSnowflake for channel ${channelId} - channel not found in database`,
+					);
 				}
 			}
+		} else {
+			yield* Effect.logDebug(
+				`No messages to store, skipping lastIndexedSnowflake update for channel ${channelId}`,
+			);
 		}
 
 		yield* Effect.logDebug(`Successfully stored ${aoMessages.length} messages`);
@@ -294,22 +324,32 @@ function indexTextChannel(
 		const channelSettings = channelLiveData?.data;
 
 		if (!channelSettings?.flags.indexingEnabled) {
-			yield* Effect.logDebug(
-				`Skipping channel ${channel.name} (${channel.id}) - indexing disabled`,
-			);
 			return;
 		}
 
+		const lastIndexedSnowflake = channelSettings.lastIndexedSnowflake;
 		yield* Effect.logDebug(
-			`Indexing text channel ${channel.name} (${channel.id}) from message ${channelSettings.lastIndexedSnowflake ?? "beginning"}`,
+			`Indexing text channel ${channel.name} (${channel.id}) - lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null (starting from beginning)"}`,
 		);
 
 		// Fetch messages
 		const messages = yield* fetchChannelMessages(
 			channel.id,
 			channel.name,
-			channelSettings.lastIndexedSnowflake ?? undefined,
+			lastIndexedSnowflake ?? undefined,
 		);
+
+		if (messages.length > 0) {
+			const firstMessageId = messages[0]?.id;
+			const lastMessageId = messages[messages.length - 1]?.id;
+			yield* Effect.logDebug(
+				`Fetched messages range: ${firstMessageId} to ${lastMessageId} (${messages.length} total)`,
+			);
+		} else {
+			yield* Effect.logDebug(
+				`No new messages found after ${lastIndexedSnowflake ?? "beginning"}`,
+			);
+		}
 
 		// Store messages
 		yield* storeMessages(messages, serverConvexId, channel.id);
@@ -343,10 +383,18 @@ function indexTextChannel(
 							],
 						});
 
+						// Get thread's lastIndexedSnowflake if it exists
+						const threadChannelLiveData =
+							yield* database.channels.getChannelByDiscordId(thread.id);
+						yield* Effect.sleep(Duration.millis(10));
+						const threadChannel = threadChannelLiveData?.data;
+						const threadLastIndexed = threadChannel?.lastIndexedSnowflake;
+
 						// Fetch and store thread messages
 						const threadMessages = yield* fetchChannelMessages(
 							thread.id,
 							thread.name,
+							threadLastIndexed ?? undefined,
 						);
 						yield* storeMessages(threadMessages, serverConvexId, thread.id);
 					}).pipe(
@@ -381,20 +429,32 @@ function indexForumChannel(
 		const channelSettings = channelLiveData?.data;
 
 		if (!channelSettings?.flags.indexingEnabled) {
-			yield* Effect.logDebug(
-				`Skipping forum ${channel.name} (${channel.id}) - indexing disabled`,
-			);
 			return;
 		}
 
-		yield* Effect.logDebug(`Indexing forum ${channel.name} (${channel.id})`);
+		const lastIndexedSnowflake = channelSettings.lastIndexedSnowflake;
+		yield* Effect.logDebug(
+			`Indexing forum ${channel.name} (${channel.id}) - lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null"}`,
+		);
 
 		// Fetch all threads
 		const threads = yield* fetchForumThreads(channel.id, channel.name);
 
+		// Filter threads to only process ones newer than lastIndexedSnowflake
+		const threadsToIndex = lastIndexedSnowflake
+			? Arr.filter(
+					threads,
+					(thread) => BigInt(thread.id) > BigInt(lastIndexedSnowflake),
+				)
+			: threads;
+
+		yield* Effect.logDebug(
+			`Found ${threads.length} total threads, ${threadsToIndex.length} new threads to index (filtered by lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null"})`,
+		);
+
 		// Index each thread
 		yield* Effect.forEach(
-			threads,
+			threadsToIndex,
 			(thread) =>
 				Effect.gen(function* () {
 					// Upsert thread as a channel
@@ -407,10 +467,18 @@ function indexForumChannel(
 						],
 					});
 
+					// Get thread's lastIndexedSnowflake if it exists
+					const threadChannelLiveData =
+						yield* database.channels.getChannelByDiscordId(thread.id);
+					yield* Effect.sleep(Duration.millis(10));
+					const threadChannel = threadChannelLiveData?.data;
+					const threadLastIndexed = threadChannel?.lastIndexedSnowflake;
+
 					// Fetch and store thread messages
 					const threadMessages = yield* fetchChannelMessages(
 						thread.id,
 						thread.name,
+						threadLastIndexed ?? undefined,
 					);
 					yield* storeMessages(threadMessages, serverConvexId, thread.id);
 
@@ -447,6 +515,13 @@ function indexForumChannel(
 				const currentChannel = channelLiveData?.data;
 
 				if (currentChannel) {
+					const oldLastIndexed = currentChannel.lastIndexedSnowflake;
+					const newLastIndexed = latestThread.id;
+
+					yield* Effect.logDebug(
+						`Updating forum lastIndexedSnowflake for ${channel.name} (${channel.id}): ${oldLastIndexed ?? "null"} -> ${newLastIndexed} (latest thread: ${latestThread.name})`,
+					);
+
 					// Only pass the channel data fields, not system fields like _id, _creationTime, flags
 					yield* database.channels.updateChannel({
 						id: channel.id,
@@ -459,11 +534,23 @@ function indexForumChannel(
 							inviteCode: currentChannel.inviteCode,
 							archivedTimestamp: currentChannel.archivedTimestamp,
 							solutionTagId: currentChannel.solutionTagId,
-							lastIndexedSnowflake: latestThread.id,
+							lastIndexedSnowflake: newLastIndexed,
 						},
 					});
+
+					yield* Effect.logDebug(
+						`Successfully updated forum lastIndexedSnowflake for ${channel.name}`,
+					);
+				} else {
+					yield* Effect.logDebug(
+						`Warning: Could not update lastIndexedSnowflake for forum ${channel.id} - channel not found in database`,
+					);
 				}
 			}
+		} else {
+			yield* Effect.logDebug(
+				`No threads found, skipping lastIndexedSnowflake update for forum ${channel.name}`,
+			);
 		}
 	});
 }
@@ -552,10 +639,12 @@ export function runIndexing() {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
 		const startTime = yield* Clock.currentTimeMillis;
+		yield* Console.log("=== Starting indexing run ===");
 		yield* Effect.logDebug("=== Starting indexing run ===");
 
 		// Get all guilds
 		const guilds = yield* discord.getGuilds();
+		yield* Console.log(`Found ${guilds.length} guilds to index`);
 		yield* Effect.logDebug(`Found ${guilds.length} guilds to index`);
 
 		// Process each guild sequentially to avoid overwhelming the API
@@ -601,14 +690,24 @@ export function startIndexingLoop(runImmediately = true) {
 		// Run immediately if requested
 		if (runImmediately) {
 			yield* Effect.logDebug("Running initial indexing...");
-			yield* runIndexing();
+			yield* runIndexing().pipe(
+				Effect.catchAllCause((cause) =>
+					Console.error("Error during initial indexing run:", cause),
+				),
+			);
 		}
 
 		// Create repeating schedule
 		const schedule = Schedule.fixed(INDEXING_CONFIG.scheduleInterval);
 
 		// Fork a fiber that runs the indexing on schedule
-		yield* Effect.fork(Effect.repeat(runIndexing(), schedule));
+		yield* Effect.fork(
+			Effect.repeat(runIndexing(), schedule).pipe(
+				Effect.catchAllCause((cause) =>
+					Console.error("Error in scheduled indexing run:", cause),
+				),
+			),
+		);
 
 		yield* Effect.logDebug("Indexing loop started successfully");
 	});
