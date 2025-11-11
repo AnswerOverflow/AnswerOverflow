@@ -7,10 +7,10 @@ import {
 	DashboardSidebar,
 	type ServerSelectServer,
 } from "@packages/ui/components/navbar";
+import { useQuery as useReactQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { useParams } from "next/navigation";
 import { authClient } from "../../../lib/auth-client";
-import { useQuery as useReactQuery } from "@tanstack/react-query";
 
 export default function DashboardServerLayout({
 	children,
@@ -25,7 +25,7 @@ export default function DashboardServerLayout({
 	const getUserServers = useAction(api.dashboard.getUserServers);
 
 	// Fetch servers for dropdown
-	const { data: servers, isLoading: isServersLoading } = useReactQuery({
+	const { data: servers } = useReactQuery({
 		queryKey: ["dashboard-servers"],
 		queryFn: async () => {
 			if (!session?.user) {

@@ -11,6 +11,7 @@ import { api, components } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action } from "./_generated/server";
 import { authComponent } from "./betterAuth";
+import { getOrSetCache } from "./cache";
 
 const discordApi = (token: string) =>
 	Effect.gen(function* () {
@@ -160,8 +161,15 @@ export const getUserServers = action({
 		}
 
 		// Fetch user's Discord servers using the API client
+		// Cache the result for 5 minutes to reduce API calls
+		const cacheKey = `discord:guilds:${sessionUserId}`;
 		const client = await Effect.runPromise(discordApi(token));
-		const discordGuilds = await Effect.runPromise(client.listMyGuilds());
+		const cachedGuildsEffect = getOrSetCache(
+			cacheKey,
+			() => client.listMyGuilds(),
+			300, // 5 minutes TTL
+		);
+		const discordGuilds = await Effect.runPromise(cachedGuildsEffect);
 
 		// Filter to servers user can manage (ManageGuild, Administrator, or Owner)
 		const manageableServers = discordGuilds.filter((guild) => {

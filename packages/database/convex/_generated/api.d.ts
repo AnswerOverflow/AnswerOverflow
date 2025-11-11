@@ -11,6 +11,7 @@
 import type * as attachments from "../attachments.js";
 import type * as auth from "../auth.js";
 import type * as betterAuth from "../betterAuth.js";
+import type * as cache from "../cache.js";
 import type * as channels from "../channels.js";
 import type * as dashboard from "../dashboard.js";
 import type * as dashboard_mutations from "../dashboard_mutations.js";
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   attachments: typeof attachments;
   auth: typeof auth;
   betterAuth: typeof betterAuth;
+  cache: typeof cache;
   channels: typeof channels;
   dashboard: typeof dashboard;
   dashboard_mutations: typeof dashboard_mutations;
