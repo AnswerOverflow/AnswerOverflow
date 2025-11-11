@@ -18,7 +18,6 @@ export const updateServerPreferencesFlags = mutation({
 	},
 	handler: async (ctx, args) => {
 		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-		console.log("discordAccountId", discordAccountId);
 
 		const server = await ctx.db.get(args.serverId);
 		if (!server) {
@@ -29,33 +28,61 @@ export const updateServerPreferencesFlags = mutation({
 		const _authorizedUser: AuthorizedUser<CanEditServer> =
 			await assertCanEditServer(ctx, server.discordId, discordAccountId);
 
-		// Get or create preferences
-		let preferences = server.preferencesId
-			? await ctx.db.get(server.preferencesId)
-			: null;
-		console.log("preferences", server.preferencesId);
+		// Check for existing preferences using unique() to enforce schema-level uniqueness
+		// unique() returns undefined if no document exists, throws if multiple exist
+		let preferences: Awaited<
+			ReturnType<typeof ctx.db.get<"serverPreferences">>
+		> | null = null;
+		try {
+			preferences =
+				(await ctx.db
+					.query("serverPreferences")
+					.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
+					.unique()) ?? null;
+		} catch {
+			// unique() throws if multiple documents exist - this enforces uniqueness at the database level
+			throw new Error(
+				`Multiple server preferences found for server ${args.serverId}. This indicates a data integrity issue.`,
+			);
+		}
 
 		if (!preferences) {
+			// Create new preferences
 			const preferencesId = await ctx.db.insert("serverPreferences", {
 				serverId: args.serverId,
 				...args.flags,
 			});
+
+			// Update server to reference preferences
 			await ctx.db.patch(args.serverId, { preferencesId });
-			preferences = await ctx.db.get(preferencesId);
+
+			// Re-query using unique() to get the created preferences (handles race conditions and enforces uniqueness)
+			try {
+				preferences =
+					(await ctx.db
+						.query("serverPreferences")
+						.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
+						.unique()) ?? null;
+			} catch {
+				// If multiple documents exist, this is a data integrity issue
+				throw new Error(
+					`Multiple server preferences found for server ${args.serverId}. This indicates a data integrity issue.`,
+				);
+			}
+
+			// If still not found (shouldn't happen), try direct get as fallback
+			if (!preferences) {
+				preferences = await ctx.db.get(preferencesId);
+			}
 		} else {
-			console.log("patching preferences", preferences._id);
-			await ctx.db.replace(preferences._id, {
-				...preferences,
-				considerAllMessagesPublicEnabled: false,
-			});
+			// Update existing preferences
+			await ctx.db.patch(preferences._id, args.flags);
 			preferences = await ctx.db.get(preferences._id);
 		}
 
 		if (!preferences) {
 			throw new Error("Failed to update server preferences");
 		}
-
-		console.log("preferences", preferences);
 
 		return preferences;
 	},
@@ -99,15 +126,27 @@ export const updateChannelSettingsFlags = mutation({
 		const _authorizedUser: AuthorizedUser<CanEditServer> =
 			await assertCanEditServer(ctx, server.discordId, discordAccountId);
 
-		// Get or create settings
-		let settings = await ctx.db
-			.query("channelSettings")
-			.withIndex("by_channelId", (q) => q.eq("channelId", args.channelId))
-			.first();
+		// Check for existing settings using unique() to enforce schema-level uniqueness
+		// unique() returns undefined if no document exists, throws if multiple exist
+		let settings: Awaited<
+			ReturnType<typeof ctx.db.get<"channelSettings">>
+		> | null = null;
+		try {
+			settings =
+				(await ctx.db
+					.query("channelSettings")
+					.withIndex("by_channelId", (q) => q.eq("channelId", args.channelId))
+					.unique()) ?? null;
+		} catch {
+			// unique() throws if multiple documents exist - this enforces uniqueness at the database level
+			throw new Error(
+				`Multiple channel settings found for channel ${args.channelId}. This indicates a data integrity issue.`,
+			);
+		}
 
 		if (!settings) {
 			// Create new settings
-			await ctx.db.insert("channelSettings", {
+			const settingsId = await ctx.db.insert("channelSettings", {
 				channelId: args.channelId,
 				indexingEnabled: false,
 				markSolutionEnabled: false,
@@ -116,10 +155,25 @@ export const updateChannelSettingsFlags = mutation({
 				forumGuidelinesConsentEnabled: false,
 				...args.flags,
 			});
-			settings = await ctx.db
-				.query("channelSettings")
-				.withIndex("by_channelId", (q) => q.eq("channelId", args.channelId))
-				.first();
+
+			// Re-query using unique() to get the created settings (handles race conditions and enforces uniqueness)
+			try {
+				settings =
+					(await ctx.db
+						.query("channelSettings")
+						.withIndex("by_channelId", (q) => q.eq("channelId", args.channelId))
+						.unique()) ?? null;
+			} catch {
+				// If multiple documents exist, this is a data integrity issue
+				throw new Error(
+					`Multiple channel settings found for channel ${args.channelId}. This indicates a data integrity issue.`,
+				);
+			}
+
+			// If still not found (shouldn't happen), try direct get as fallback
+			if (!settings) {
+				settings = await ctx.db.get(settingsId);
+			}
 		} else {
 			// Update existing settings
 			await ctx.db.patch(settings._id, args.flags);

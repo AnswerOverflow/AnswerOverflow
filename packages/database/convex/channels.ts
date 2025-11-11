@@ -205,7 +205,18 @@ export const createChannel = mutation({
 		await ctx.db.insert("channels", args.channel);
 
 		if (args.settings) {
-			await ctx.db.insert("channelSettings", args.settings);
+			// Check for existing settings to prevent duplicates
+			const existingSettings = await ctx.db
+				.query("channelSettings")
+				.withIndex("by_channelId", (q) => q.eq("channelId", args.channel.id))
+				.first();
+
+			if (!existingSettings) {
+				await ctx.db.insert("channelSettings", args.settings);
+			} else {
+				// Update existing settings if they already exist
+				await ctx.db.patch(existingSettings._id, args.settings);
+			}
 		}
 
 		return args.channel.id;
@@ -226,7 +237,18 @@ export const createManyChannels = mutation({
 		for (const item of args.channels) {
 			await ctx.db.insert("channels", item.channel);
 			if (item.settings) {
-				await ctx.db.insert("channelSettings", item.settings);
+				// Check for existing settings to prevent duplicates
+				const existingSettings = await ctx.db
+					.query("channelSettings")
+					.withIndex("by_channelId", (q) => q.eq("channelId", item.channel.id))
+					.first();
+
+				if (!existingSettings) {
+					await ctx.db.insert("channelSettings", item.settings);
+				} else {
+					// Update existing settings if they already exist
+					await ctx.db.patch(existingSettings._id, item.settings);
+				}
 			}
 			ids.push(item.channel.id);
 		}
@@ -363,7 +385,18 @@ export const upsertManyChannels = mutation({
 				// Create new channel
 				await ctx.db.insert("channels", item.create);
 				if (item.settings) {
-					await ctx.db.insert("channelSettings", item.settings);
+					// Check for existing settings to prevent duplicates
+					const existingSettings = await ctx.db
+						.query("channelSettings")
+						.withIndex("by_channelId", (q) => q.eq("channelId", item.create.id))
+						.first();
+
+					if (!existingSettings) {
+						await ctx.db.insert("channelSettings", item.settings);
+					} else {
+						// Update existing settings if they already exist
+						await ctx.db.patch(existingSettings._id, item.settings);
+					}
 				}
 			}
 
