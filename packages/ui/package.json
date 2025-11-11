@@ -91,6 +91,7 @@
 		"@types/react-dom": "^19.1.7",
 		"@vitest/ui": "^4.0.8",
 		"happy-dom": "^20.0.10",
+		"next": "^16.0.0",
 		"remark-parse": "^11.0.0",
 		"remark-rehype": "^11.1.2",
 		"tailwindcss": "^4.1.11",
@@ -102,6 +103,8 @@
 		"./postcss.config": "./postcss.config.mjs",
 		"./lib/*": "./src/lib/*.ts",
 		"./components/*": "./src/components/*.tsx",
+		"./components/navbar": "./src/components/navbar/index.tsx",
+		"./components/answer-overflow-logo": "./src/components/answer-overflow-logo.tsx",
 		"./hooks/*": "./src/hooks/*.ts",
 		"./markdown": "./src/markdown/index.tsx"
 	}

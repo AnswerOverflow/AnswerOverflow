@@ -2,7 +2,6 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import type { Id } from "@packages/database/convex/_generated/dataModel";
-import { Button } from "@packages/ui/components/button";
 import {
 	Card,
 	CardContent,
@@ -11,12 +10,9 @@ import {
 	CardTitle,
 } from "@packages/ui/components/card";
 import { Label } from "@packages/ui/components/label";
-import { ServerIcon } from "@packages/ui/components/server-icon";
 import { Switch } from "@packages/ui/components/switch";
 import { useMutation, useQuery } from "convex/react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
-import { SettingsNav } from "./components/settings-nav";
 
 function ToggleServerFlag({
 	title,
@@ -91,8 +87,12 @@ export default function ServerSettingsPage() {
 
 	if (!dashboardData) {
 		return (
-			<main className="max-w-7xl mx-auto p-6 lg:p-8">
-				<div className="text-muted-foreground">Loading server settings...</div>
+			<main className="p-6 lg:p-8 mx-auto ">
+				<div className="max-w-[2000px] w-full">
+					<div className="text-muted-foreground">
+						Loading server settings...
+					</div>
+				</div>
 			</main>
 		);
 	}
@@ -120,61 +120,41 @@ export default function ServerSettingsPage() {
 	};
 
 	return (
-		<main className="max-w-7xl mx-auto p-6 lg:p-8">
-			<div className="mb-8">
-				<Button variant="ghost" asChild>
-					<Link href="/dashboard">← Back to Servers</Link>
-				</Button>
-			</div>
+		<main className="p-6 lg:p-8 mx-auto">
+			<div className="max-w-[2000px] w-full">
+				<div className="mx-auto max-w-[800px] w-full">
+					<div className="space-y-6">
+						<ToggleServerFlag
+							title="Consider All Messages Public"
+							description="All messages in the server will be considered public and displayed on the web."
+							flagKey="considerAllMessagesPublicEnabled"
+							checked={preferences.considerAllMessagesPublicEnabled ?? false}
+							onChange={(checked) =>
+								handleServerToggle("considerAllMessagesPublicEnabled", checked)
+							}
+						/>
 
-			<div className="mb-8 flex items-center gap-4">
-				<ServerIcon
-					server={{
-						discordId: server.discordId,
-						name: server.name,
-						icon: server.icon ?? undefined,
-					}}
-					size={64}
-				/>
-				<div>
-					<h1 className="text-3xl font-bold">{server.name}</h1>
+						<ToggleServerFlag
+							title="Anonymize Messages"
+							description="Replace Discord usernames with pseudonyms. Names will randomize on page refresh."
+							flagKey="anonymizeMessagesEnabled"
+							checked={preferences.anonymizeMessagesEnabled ?? false}
+							onChange={(checked) =>
+								handleServerToggle("anonymizeMessagesEnabled", checked)
+							}
+						/>
+
+						<ToggleServerFlag
+							title="Read the Rules Consent"
+							description="Add a consent prompt to the server rules to mark new users as consenting to publicly display their messages."
+							flagKey="readTheRulesConsentEnabled"
+							checked={preferences.readTheRulesConsentEnabled ?? false}
+							onChange={(checked) =>
+								handleServerToggle("readTheRulesConsentEnabled", checked)
+							}
+						/>
+					</div>
 				</div>
-			</div>
-
-			<div className="mb-8">
-				<SettingsNav />
-			</div>
-
-			<div className="space-y-6">
-				<ToggleServerFlag
-					title="Consider All Messages Public"
-					description="All messages in the server will be considered public and displayed on the web."
-					flagKey="considerAllMessagesPublicEnabled"
-					checked={preferences.considerAllMessagesPublicEnabled ?? false}
-					onChange={(checked) =>
-						handleServerToggle("considerAllMessagesPublicEnabled", checked)
-					}
-				/>
-
-				<ToggleServerFlag
-					title="Anonymize Messages"
-					description="Replace Discord usernames with pseudonyms. Names will randomize on page refresh."
-					flagKey="anonymizeMessagesEnabled"
-					checked={preferences.anonymizeMessagesEnabled ?? false}
-					onChange={(checked) =>
-						handleServerToggle("anonymizeMessagesEnabled", checked)
-					}
-				/>
-
-				<ToggleServerFlag
-					title="Read the Rules Consent"
-					description="Add a consent prompt to the server rules to mark new users as consenting to publicly display their messages."
-					flagKey="readTheRulesConsentEnabled"
-					checked={preferences.readTheRulesConsentEnabled ?? false}
-					onChange={(checked) =>
-						handleServerToggle("readTheRulesConsentEnabled", checked)
-					}
-				/>
 			</div>
 		</main>
 	);
