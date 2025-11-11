@@ -1,2 +1,100 @@
 - there's probably a bug in our onUpdate implementation where null should be part of live data, depends how convex handles onUpdate when the first value is null
 - we need to figure out the right pattern for calling internal actions (i.e delete message, create, etc from the discord bot)
+- we need to bring in typelytics
+
+
+slop:
+
+### Discord Bot (High Priority)
+**Commands:**
+- Quick Action command — context menu to redirect messages to help channels
+- Consent command — slash command for managing consent
+
+**Handlers:**
+- Leave server button handler — handles leaving server interactions
+- Consent button handler — handles consent button interactions
+
+**Event Listeners:**
+- Forum post guidelines consent — handles forum post consent flow
+- On question ask — triggers when questions are asked
+- Read the rules consent — handles read-the-rules consent flow
+
+**Jobs/Scheduled Tasks:**
+- Sitemap generator — generates sitemaps for SEO
+- Stats reporter — reports status to Vestaboard
+- Status update — updates Discord bot status
+
+**Parity Listeners:**
+- Cache parity — syncs cache between systems
+- Channel parity — syncs channel data
+- Guild parity — syncs guild/server data
+- Message parity — syncs message data
+- User parity — syncs user data
+
+### Dashboard App
+
+**Pages:**
+- Integrations page — manage integrations
+- Settings page — full settings implementation
+- Onboarding flow — user onboarding pages
+
+**Components:**
+- Domain component — domain management
+- Home component — dashboard home
+- Navbar component — navigation bar
+- Tier access only component — access control
+- Loading spinner component — loading states
+
+**API Integration:**
+- TRPC routes — API routes (may need Convex adaptation)
+- Stripe webhook — payment processing
+
+### Main Site App
+
+**Pages:**
+- Contributors page
+- Cookies page
+- EULA page
+- Empty state page
+- Posts listing page
+- Pricing pages (with slug support)
+- Privacy policy page
+- Terms of Service page
+- About page
+- App-auth page (auto sign-in)
+
+**Features:**
+- Domain-specific routes — multi-tenant routing
+- Sitemap generation — XML sitemaps
+- OG image generation — Open Graph images
+- Robots.txt handling — SEO robots file
+
+### Packages
+
+** Analytics Package:**
+- Typelytics integration
+
+**Env Package:**
+- Environment variable schemas and validation
+- Shared client/server env configs
+
+**Utils Package:**
+- ID utilities (random ID generation)
+- Select utilities (pick/omit)
+- Sitemap utilities
+- Type utilities
+
+### Current Status
+
+**Completed:**
+- Basic Discord bot structure with commands (mark solution, leaderboard, manage account)
+- Basic dashboard structure
+- Basic main site structure
+- Database package (Convex-based)
+- UI package (markdown rendering, components)
+- Observability package
+
+**In Progress/Partial:**
+- Discord bot has some handlers but missing many events
+- Dashboard has basic structure but missing many pages
+- Main site has core routes but missing many pages
