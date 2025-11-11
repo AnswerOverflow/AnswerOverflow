@@ -24,5 +24,8 @@
 		"apps/*",
 		"packages/*"
 	],
-	"packageManager": "bun@1.2.19"
+	"packageManager": "bun@1.2.19",
+	"overrides": {
+		"@effect/platform": "^0.93.0"
+	}
 }

@@ -189,8 +189,8 @@ class DatabaseFake {
 			const writes = this._writes[i];
 			if (writes) {
 				const write = writes[id];
-				if (write !== undefined) {
-					return write;
+			if (write !== undefined) {
+				return write;
 				}
 			}
 		}
@@ -422,7 +422,7 @@ class DatabaseFake {
 			const writes = this._writes[i];
 			if (writes) {
 				for (const id of Object.keys(writes).filter(isInTable)) {
-					ids.add(id);
+				ids.add(id);
 				}
 			}
 		}
@@ -872,12 +872,12 @@ function validateIndexRangeExpression(
 				if (fieldIndex > 0) {
 					const prevField = fields[fieldIndex - 1];
 					if (prevField && filter.fieldPath === prevField) {
-						state = "done";
-						continue;
-					}
-					throw new Error(
-						`Incorrect field used in \`withIndex\`, ` +
-							`\`.gt\` and \`.lt\` must operate on the same field, ` +
+					state = "done";
+					continue;
+				}
+				throw new Error(
+					`Incorrect field used in \`withIndex\`, ` +
+						`\`.gt\` and \`.lt\` must operate on the same field, ` +
 							`expected "${prevField}", got "${filter.fieldPath}"`,
 					);
 				}
@@ -891,9 +891,9 @@ function validateIndexRangeExpression(
 				if (filterIndex > 0) {
 					const prevFilter = source.range[filterIndex - 1];
 					if (prevFilter) {
-						throw new Error(
-							`Incorrect operator used in \`withIndex\`, ` +
-								`cannot chain \`.${filter.type.toLowerCase()}()\` ` +
+				throw new Error(
+					`Incorrect operator used in \`withIndex\`, ` +
+						`cannot chain \`.${filter.type.toLowerCase()}()\` ` +
 								`after \`.${prevFilter.type.toLowerCase()}()\``,
 						);
 					}

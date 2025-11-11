@@ -1,28 +1,43 @@
 "use node";
 
 import { createClerkClient } from "@clerk/backend";
-import * as Schema from "effect/Schema";
+import {
+	FetchHttpClient,
+	HttpClient,
+	HttpClientRequest,
+} from "@effect/platform";
+import { make } from "@packages/discord-api/generated";
+import { Effect } from "effect";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action } from "./_generated/server";
 
+const discordApi = (token: string) =>
+	Effect.gen(function* () {
+		const httpClient = yield* HttpClient.HttpClient;
+		return make(httpClient, {
+			transformClient(client) {
+				return Effect.succeed(
+					client.pipe(
+						HttpClient.mapRequest((req) =>
+							HttpClientRequest.prependUrl(
+								HttpClientRequest.setHeader(
+									req,
+									"Authorization",
+									`Bearer ${token}`,
+								),
+								"https://discord.com/api/v10",
+							),
+						),
+					),
+				);
+			},
+		});
+	}).pipe(Effect.provide(FetchHttpClient.layer));
+
 const clerkClient = createClerkClient({
 	secretKey: process.env.CLERK_SECRET_KEY,
 });
-
-// Discord API schema
-const DiscordGuildSchema = Schema.Struct({
-	id: Schema.String,
-	name: Schema.String,
-	icon: Schema.NullOr(Schema.String),
-	owner: Schema.Boolean,
-	permissions: Schema.String, // BigInt as string
-	features: Schema.Array(Schema.String),
-});
-
-const DiscordGuildArraySchema = Schema.Array(DiscordGuildSchema);
-
-type DiscordGuild = Schema.Schema.Type<typeof DiscordGuildSchema>;
 
 type ServerWithMetadata = {
 	discordId: string;
@@ -76,24 +91,9 @@ export const getUserServers = action({
 			throw new Error("Discord token not found");
 		}
 
-		// Fetch user's Discord servers
-		const discordResponse = await fetch(
-			"https://discord.com/api/v10/users/@me/guilds",
-			{
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			},
-		);
-
-		if (!discordResponse.ok) {
-			throw new Error(`Discord API error: ${discordResponse.statusText}`);
-		}
-
-		const jsonData = await discordResponse.json();
-		const discordGuilds = Schema.decodeUnknownSync(DiscordGuildArraySchema)(
-			jsonData,
-		);
+		// Fetch user's Discord servers using the API client
+		const client = await Effect.runPromise(discordApi(token));
+		const discordGuilds = await Effect.runPromise(client.listMyGuilds());
 
 		// Filter to servers user can manage (ManageGuild, Administrator, or Owner)
 		const manageableServers = discordGuilds.filter((guild) => {
@@ -130,7 +130,7 @@ export const getUserServers = action({
 				return {
 					discordId: guild.id,
 					name: guild.name,
-					icon: guild.icon,
+					icon: guild.icon ?? null,
 					owner: guild.owner,
 					permissions: guild.permissions,
 					highestRole,

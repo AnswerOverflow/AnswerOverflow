@@ -18,7 +18,7 @@
 	},
 	"dependencies": {
 		"@clerk/backend": "^1.27.0",
-		"@effect/platform": "^0.90.1",
+		"@effect/platform": "^0.93.0",
 		"convex": "^1.25.0",
 		"convex-helpers": "^0.1.101",
 		"effect": "^3.17.7",
