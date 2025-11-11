@@ -143,7 +143,7 @@ export default function ServerSettingsPage({
 	const { server, channels } = dashboardData;
 	const preferences = server.preferences;
 	const selectedChannel = selectedChannelId
-		? channels.find((c) => c.id === selectedChannelId)
+		? channels.find((c: { id: string }) => c.id === selectedChannelId)
 		: (channels[0] ?? null);
 
 	const handleServerToggle = async (
@@ -269,7 +269,7 @@ export default function ServerSettingsPage({
 								</CardHeader>
 								<CardContent>
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-										{channels.map((channel) => {
+										{channels.map((channel: { id: string; name: string; type: number }) => {
 											const channelTypeName =
 												channel.type === 15
 													? "Forum"

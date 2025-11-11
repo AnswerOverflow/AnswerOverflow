@@ -11,7 +11,7 @@ import {
 } from "./shared";
 
 /**
- * Get the authenticated user's Discord account ID from their Clerk identity
+ * Get the authenticated user's Discord account ID from their BetterAuth identity
  * Returns null if not authenticated or no Discord account linked
  */
 export async function getDiscordAccountIdFromAuth(
@@ -22,7 +22,7 @@ export async function getDiscordAccountIdFromAuth(
 		return null;
 	}
 
-	// Clerk stores OAuth provider accounts in identity.providerData
+	// BetterAuth stores OAuth provider accounts in identity.providerData
 	// Look for Discord provider
 	const providerData = identity.providerData;
 	if (!providerData || !Array.isArray(providerData)) {
@@ -34,7 +34,7 @@ export async function getDiscordAccountIdFromAuth(
 			return false;
 		}
 		const providerObj = provider as Record<string, unknown>;
-		return providerObj.provider === "oauth_discord";
+		return providerObj.provider === "discord";
 	});
 
 	if (

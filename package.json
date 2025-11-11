@@ -27,5 +27,8 @@
 	"packageManager": "bun@1.2.19",
 	"overrides": {
 		"@effect/platform": "^0.93.0"
+	},
+	"dependencies": {
+		"better-auth": "1.3.27"
 	}
 }

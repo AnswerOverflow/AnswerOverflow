@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@clerk/clerk-react";
 import { api } from "@packages/database/convex/_generated/api";
 import { Button } from "@packages/ui/components/button";
 import {
@@ -14,9 +13,10 @@ import { ServerIcon } from "@packages/ui/components/server-icon";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import Link from "next/link";
+import { authClient } from "../../lib/auth-client";
 
 export default function DashboardHome() {
-	const { isLoaded, isSignedIn } = useAuth();
+	const { data: session, isPending } = authClient.useSession();
 	const getUserServers = useAction(api.dashboard.getUserServers);
 
 	const {
@@ -26,15 +26,15 @@ export default function DashboardHome() {
 	} = useQuery({
 		queryKey: ["dashboard-servers"],
 		queryFn: async () => {
-			if (!isSignedIn) {
+			if (!session?.user) {
 				throw new Error("Not authenticated");
 			}
 			return await getUserServers({});
 		},
-		enabled: isLoaded && isSignedIn,
+		enabled: !isPending && !!session?.user,
 	});
 
-	if (!isLoaded || isLoading) {
+	if (isPending || isLoading) {
 		return (
 			<main className="max-w-6xl mx-auto p-8">
 				<h1 className="text-3xl font-bold mb-6">Your Servers</h1>

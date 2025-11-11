@@ -1,6 +1,7 @@
 import { httpRouter } from "convex/server";
 import type { Id } from "./_generated/dataModel";
 import { httpAction } from "./_generated/server";
+import { authComponent, createAuth } from "./betterAuth";
 
 const http = httpRouter();
 
@@ -47,5 +48,7 @@ http.route({
 		}
 	}),
 });
+
+authComponent.registerRoutes(http, createAuth);
 
 export default http;

@@ -34,16 +34,16 @@ export const serverSchema = v.object({
 	preferencesId: v.optional(v.id("serverPreferences")),
 });
 
-// Users table for Clerk authentication
+// Users table for BetterAuth authentication
 export const userSchema = v.object({
-	clerkId: v.string(), // Clerk user ID
+	clerkId: v.string(), // BetterAuth user ID (kept as clerkId for backward compatibility)
 	name: v.optional(v.string()),
 	email: v.optional(v.string()),
 	emailVerified: v.optional(v.number()),
 	image: v.optional(v.string()),
 });
 
-// Discord accounts (separate from Clerk users)
+// Discord accounts (separate from BetterAuth users)
 export const discordAccountSchema = v.object({
 	id: v.string(), // Discord snowflake ID
 	name: v.string(),
@@ -52,7 +52,7 @@ export const discordAccountSchema = v.object({
 
 export const userServerSettingsSchema = v.object({
 	serverId: v.id("servers"),
-	userId: v.string(), // Discord account ID (snowflake), not Clerk user ID
+	userId: v.string(), // Discord account ID (snowflake), not BetterAuth user ID
 	permissions: v.number(), // Bitfield of permissions for the user in the server, this comes from Discord and is not allowed to be modified by the user
 	canPubliclyDisplayMessages: v.boolean(),
 	messageIndexingDisabled: v.boolean(),

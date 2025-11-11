@@ -1,3 +1,7 @@
+---
+alwaysApply: true
+---
+
 # Convex Function Architecture Rules
 
 ## No Cross-Function Calls
@@ -5,6 +9,7 @@
 **NEVER use `ctx.runQuery`, `ctx.runMutation`, or `ctx.runAction` to call other Convex functions from queries, mutations, or actions.**
 
 Instead:
+
 1. Extract shared logic into regular functions in `shared.ts`
 2. Have Convex functions (queries/mutations/actions) call these shared functions directly
 3. If a query/mutation/action needs to exist as a standalone API endpoint, it should call the shared function internally
@@ -12,22 +17,26 @@ Instead:
 ### Example Pattern
 
 **❌ Avoid:**
+
 ```typescript
 // In messages.ts
 export const someMutation = mutation({
   handler: async (ctx, args) => {
-    const server = await ctx.runQuery(api.servers.publicGetServerByDiscordId, { discordId });
+    const server = await ctx.runQuery(api.servers.publicGetServerByDiscordId, {
+      discordId,
+    });
     // ...
   },
 });
 ```
 
 **✅ Prefer:**
+
 ```typescript
 // In shared.ts
 export async function getServerByDiscordId(
   ctx: QueryCtx | MutationCtx,
-  discordId: string,
+  discordId: string
 ) {
   return await ctx.db
     .query("servers")
@@ -61,7 +70,9 @@ Actions **MUST** use `ctx.runQuery` to call queries when they need database acce
 export const getUserServers = action({
   handler: async (ctx) => {
     // Actions can't access ctx.db, so they must use ctx.runQuery
-    const server = await ctx.runQuery(api.servers.publicGetServerByDiscordId, { discordId });
+    const server = await ctx.runQuery(api.servers.publicGetServerByDiscordId, {
+      discordId,
+    });
     // ...
   },
 });
@@ -79,4 +90,3 @@ export const getUserServers = action({
 - Makes code more testable and reusable
 - Prevents unnecessary function call overhead
 - Improves code organization and maintainability
-

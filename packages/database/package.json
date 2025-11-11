@@ -14,12 +14,13 @@
 		"dev": "convex dev",
 		"typecheck": "tsc -p convex/tsconfig.json --noEmit & tsc -p tsconfig.json --noEmit & wait",
 		"clean": "rm -rf node_modules .turbo",
-		"test": "vitest"
+		"test": "vitest run",
+		"test:watch": "vitest"
 	},
 	"dependencies": {
-		"@clerk/backend": "^1.27.0",
+		"@convex-dev/better-auth": "^0.9.7",
 		"@effect/platform": "^0.93.0",
-		"convex": "^1.25.0",
+		"convex": "^1.29.0",
 		"convex-helpers": "^0.1.101",
 		"effect": "^3.17.7",
 		"openai": "^4.45.0"

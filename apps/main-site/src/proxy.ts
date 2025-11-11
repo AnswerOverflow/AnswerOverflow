@@ -1,19 +1,25 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import type { NextFetchEvent, NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-const isProtectedRoute = createRouteMatcher(["/notes(.*)"]);
+const isProtectedRoute = (pathname: string) => {
+	return pathname.startsWith("/notes");
+};
 
-const middleware = clerkMiddleware(async (auth, req) => {
-	if (isProtectedRoute(req)) {
-		await auth.protect();
+export default function proxy(request: NextRequest, event: NextFetchEvent) {
+	const { pathname } = request.nextUrl;
+
+	if (isProtectedRoute(pathname)) {
+		// Check for BetterAuth session cookie
+		const sessionCookie = request.cookies.get("better-auth.session_token");
+		if (!sessionCookie) {
+			// Redirect to sign in if not authenticated
+			const signInUrl = new URL("/api/auth/sign-in", request.url);
+			signInUrl.searchParams.set("redirect", pathname);
+			return NextResponse.redirect(signInUrl);
+		}
 	}
 
 	return NextResponse.next();
-});
-
-export default function proxy(request: NextRequest, event: NextFetchEvent) {
-	return middleware(request, event);
 }
 
 export const config = {

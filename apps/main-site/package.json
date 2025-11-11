@@ -11,8 +11,6 @@
 		"clean": "rm -rf .next .turbo node_modules"
 	},
 	"dependencies": {
-		"@clerk/clerk-react": "^5.32.1",
-		"@clerk/nextjs": "^6.23.0",
 		"@convex-dev/react-query": "^0.0.0-alpha.11",
 		"@headlessui/react": "^2.0.3",
 		"@heroicons/react": "^2.1.3",

@@ -8,7 +8,8 @@
 		".": "./index.ts"
 	},
 	"scripts": {
-		"test": "vitest",
+		"test": "vitest run",
+		"test:watch": "vitest",
 		"test:once": "vitest run",
 		"test:debug": "vitest --inspect-brk --no-file-parallelism",
 		"test:coverage": "vitest run --coverage",

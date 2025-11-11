@@ -1,6 +1,5 @@
 "use node";
 
-import { createClerkClient } from "@clerk/backend";
 import {
 	FetchHttpClient,
 	HttpClient,
@@ -8,9 +7,10 @@ import {
 } from "@effect/platform";
 import { make } from "@packages/discord-api/generated";
 import { Effect } from "effect";
-import { api } from "./_generated/api";
+import { api, components, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action } from "./_generated/server";
+import { authComponent, createAuth } from "./betterAuth";
 
 const discordApi = (token: string) =>
 	Effect.gen(function* () {
@@ -34,10 +34,6 @@ const discordApi = (token: string) =>
 			},
 		});
 	}).pipe(Effect.provide(FetchHttpClient.layer));
-
-const clerkClient = createClerkClient({
-	secretKey: process.env.CLERK_SECRET_KEY,
-});
 
 type ServerWithMetadata = {
 	discordId: string;
@@ -63,30 +59,46 @@ function hasPermission(permissions: bigint, permission: bigint): boolean {
 export const getUserServers = action({
 	args: {},
 	handler: async (ctx): Promise<ServerWithMetadata[]> => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (identity === null || identity.email === undefined) {
+		const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
+		const session = await auth.api.getSession({ headers });
+
+		if (!session?.user) {
 			throw new Error("Not authenticated");
 		}
 
-		// Get Clerk user
-		const userList = await clerkClient.users.getUserList({
-			emailAddress: [identity.email],
-		});
-		if (userList.totalCount > 1) {
-			throw new Error("Multiple users found for email");
-		}
-		const user = userList.data[0];
-		if (!user) {
-			throw new Error("User not found");
-		}
-
-		// Get Discord OAuth token
-		const response = await clerkClient.users.getUserOauthAccessToken(
-			user.id,
-			"discord",
+		// Get Discord OAuth account from BetterAuth database
+		// Use the BetterAuth component's internal API to get accounts
+		// Component queries are internal, so we call them directly
+		const accounts = await ctx.runQuery(
+			components.betterAuth.adapter.findMany,
+			{
+				model: "account",
+				where: [
+					{
+						field: "userId",
+						operator: "eq",
+						value: session.user.id,
+					},
+				],
+				paginationOpts: {
+					cursor: null,
+					numItems: 100,
+				},
+			},
 		);
 
-		const token = response.data.at(0)?.token;
+		const discordAccount = accounts.find(
+			(account: { providerId: string; accessToken?: string | null }) =>
+				account.providerId === "discord",
+		);
+
+		if (!discordAccount) {
+			throw new Error("Discord account not linked");
+		}
+
+		// Get Discord OAuth token from BetterAuth
+		// BetterAuth stores OAuth tokens in the account
+		const token = discordAccount.accessToken;
 		if (!token) {
 			throw new Error("Discord token not found");
 		}
