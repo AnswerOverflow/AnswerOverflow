@@ -1,6 +1,6 @@
 "use client";
 
-import type * as React from "react";
+import * as React from "react";
 import { ChevronDown, Plus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../button";

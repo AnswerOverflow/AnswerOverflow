@@ -134,6 +134,7 @@ export const getUserServers = action({
 			providerId: string;
 			accessToken: string | null;
 			userId: string;
+			accountId?: string; // Discord user ID (provider account ID)
 		};
 
 		const accounts: AccountResult[] = Array.isArray(accountsResult)
@@ -159,6 +160,15 @@ export const getUserServers = action({
 		if (!token) {
 			throw new Error("Discord token not found");
 		}
+
+		// Get Discord account ID (user's Discord snowflake ID)
+		if (
+			!("accountId" in discordAccount) ||
+			typeof discordAccount.accountId !== "string"
+		) {
+			throw new Error("Discord account ID not found");
+		}
+		const discordAccountId = discordAccount.accountId;
 
 		// Fetch user's Discord servers using the API client
 		// Cache the result for 5 minutes to reduce API calls
@@ -187,6 +197,53 @@ export const getUserServers = action({
 			serverDiscordIds.map((discordId) =>
 				ctx.runQuery(api.servers.publicGetServerByDiscordId, { discordId }),
 			),
+		);
+
+		// Sync user server settings with permissions from Discord API
+		// This ensures the reactive query has data to work with
+		const backendAccessToken = process.env.BACKEND_ACCESS_TOKEN;
+		if (!backendAccessToken) {
+			throw new Error("BACKEND_ACCESS_TOKEN not configured");
+		}
+
+		await Promise.all(
+			manageableServers.map(async (guild, idx) => {
+				const aoServer = aoServers[idx];
+				if (!aoServer) return; // Skip if server doesn't exist in AO
+
+				// Convert permissions string to number (Discord API returns permissions as string)
+				const permissionsNumber = Number(guild.permissions);
+
+				// Get existing user server settings
+				const existingSettings = await ctx.runQuery(
+					api.user_server_settings.findUserServerSettingsById,
+					{
+						backendAccessToken,
+						userId: discordAccountId,
+						serverId: aoServer._id,
+					},
+				);
+
+				// Prepare settings - preserve existing values or use defaults
+				const settings = {
+					serverId: aoServer._id,
+					userId: discordAccountId,
+					permissions: permissionsNumber, // Sync permissions from Discord API
+					canPubliclyDisplayMessages:
+						existingSettings?.canPubliclyDisplayMessages ?? false,
+					messageIndexingDisabled:
+						existingSettings?.messageIndexingDisabled ?? false,
+					apiKey: existingSettings?.apiKey,
+					apiCallsUsed: existingSettings?.apiCallsUsed ?? 0,
+				};
+
+				// Upsert user server settings with synced permissions
+				// Use publicInternalMutation which requires backendAccessToken
+				await ctx.runMutation(
+					api.user_server_settings.upsertUserServerSettings,
+					{ backendAccessToken, settings },
+				);
+			}),
 		);
 
 		// Combine Discord guild data with AO server data

@@ -13,8 +13,8 @@ import { Input } from "@packages/ui/components/input";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
-import { useQueryState } from "nuqs";
 import Link from "next/link";
+import { useQueryState } from "nuqs";
 import { ServerCard } from "../../components/server-card";
 import { authClient } from "../../lib/auth-client";
 
@@ -38,6 +38,7 @@ export default function DashboardHome() {
 			return await getUserServers({});
 		},
 		enabled: !isPending && !!session?.user,
+		refetchOnWindowFocus: true,
 	});
 
 	const filteredServers =

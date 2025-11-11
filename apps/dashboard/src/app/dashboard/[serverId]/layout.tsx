@@ -7,8 +7,7 @@ import {
 	DashboardSidebar,
 	type ServerSelectServer,
 } from "@packages/ui/components/navbar";
-import { useQuery as useReactQuery } from "@tanstack/react-query";
-import { useAction } from "convex/react";
+import { useQuery } from "convex/react";
 import { useParams } from "next/navigation";
 import { authClient } from "../../../lib/auth-client";
 
@@ -22,19 +21,12 @@ export default function DashboardServerLayout({
 
 	const { data: session, isPending: isSessionPending } =
 		authClient.useSession();
-	const getUserServers = useAction(api.dashboard.getUserServers);
 
-	// Fetch servers for dropdown
-	const { data: servers, isPending: isServersPending } = useReactQuery({
-		queryKey: ["dashboard-servers"],
-		queryFn: async () => {
-			if (!session?.user) {
-				throw new Error("Not authenticated");
-			}
-			return await getUserServers({});
-		},
-		enabled: !isSessionPending && !!session?.user,
-	});
+	// Fetch servers for dropdown using reactive query based on user server settings
+	const servers = useQuery(
+		api.dashboard_queries.getUserServersForDropdown,
+		isSessionPending || !session?.user ? "skip" : {},
+	);
 
 	const serversForDropdown: ServerSelectServer[] =
 		servers?.map((server) => ({
@@ -51,7 +43,7 @@ export default function DashboardServerLayout({
 				servers: serversForDropdown,
 				getServerHref: (id: string) => `/dashboard/${id}`,
 				addNewHref: "/onboarding",
-				isLoading: isSessionPending || isServersPending,
+				isLoading: isSessionPending || servers === undefined,
 			}
 		: undefined;
 
