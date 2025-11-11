@@ -186,9 +186,12 @@ class DatabaseFake {
 		}
 
 		for (let i = this._writes.length - 1; i >= 0; i--) {
-			const write = this._writes[i][id];
-			if (write !== undefined) {
-				return write;
+			const writes = this._writes[i];
+			if (writes) {
+				const write = writes[id];
+				if (write !== undefined) {
+					return write;
+				}
 			}
 		}
 
@@ -220,7 +223,10 @@ class DatabaseFake {
 		if (this._writes.length === 0) {
 			throw new Error(`Write outside of transaction ${id}`);
 		}
-		this._writes[this._writes.length - 1][id] = newValue;
+		const lastWrites = this._writes[this._writes.length - 1];
+		if (lastWrites) {
+			lastWrites[id] = newValue;
+		}
 	}
 
 	insert<Table extends TableName>(table: Table, value: any) {
@@ -413,8 +419,11 @@ class DatabaseFake {
 		const isInTable = (id: string) => tableNameFromId(id) === tableName;
 		const ids = new Set(Object.keys(this._documents).filter(isInTable));
 		for (let i = 0; i < this._writes.length; i++) {
-			for (const id of Object.keys(this._writes[i]).filter(isInTable)) {
-				ids.add(id);
+			const writes = this._writes[i];
+			if (writes) {
+				for (const id of Object.keys(writes).filter(isInTable)) {
+					ids.add(id);
+				}
 			}
 		}
 		for (const id of ids) {
@@ -442,7 +451,14 @@ class DatabaseFake {
 				break;
 			}
 			case "IndexRange": {
-				const [tableName, indexName] = source.indexName.split(".");
+				const parts = source.indexName.split(".");
+				if (parts.length < 2) {
+					throw new Error(`Invalid index name: ${source.indexName}`);
+				}
+				const [tableName, indexName] = parts;
+				if (!tableName || !indexName) {
+					throw new Error(`Invalid index name: ${source.indexName}`);
+				}
 				order = source.order ?? "asc";
 				let fields;
 				if (indexName === "by_creation_time") {
@@ -451,7 +467,13 @@ class DatabaseFake {
 					fields = ["_id"];
 				} else {
 					const indexes = this._schema?.tables.get(tableName)?.indexes;
-					const index = indexes?.find(
+					if (!indexes) {
+						throw new Error(
+							`Cannot use index "${indexName}" for table "${tableName}" because ` +
+								`the table is not declared in the schema.`,
+						);
+					}
+					const index = indexes.find(
 						({ indexDescriptor }: { indexDescriptor: string }) =>
 							indexDescriptor === indexName,
 					);
@@ -477,7 +499,11 @@ class DatabaseFake {
 				break;
 			}
 			case "Search": {
-				const [tableName] = source.indexName.split(".");
+				const parts = source.indexName.split(".");
+				const tableName = parts[0];
+				if (!tableName) {
+					throw new Error(`Invalid index name: ${source.indexName}`);
+				}
 				this._iterateDocs(tableName, (doc) => {
 					if (
 						source.filters.every((filter) => evaluateSearchFilter(doc, filter))
@@ -533,14 +559,27 @@ class DatabaseFake {
 		limit: number,
 	) {
 		const results: GenericDocument[] = [];
-		const [tableName, indexName] = tableAndIndexName.split(".");
+		const parts = tableAndIndexName.split(".");
+		if (parts.length < 2) {
+			throw new Error(`Invalid index name: ${tableAndIndexName}`);
+		}
+		const [tableName, indexName] = parts;
+		if (!tableName || !indexName) {
+			throw new Error(`Invalid index name: ${tableAndIndexName}`);
+		}
 		this._iterateDocs(tableName, (doc) => {
 			if (expressions.every((filter) => evaluateFilter(doc, filter))) {
 				results.push(doc);
 			}
 		});
 		const vectorIndexes = this._schema?.tables.get(tableName)?.vectorIndexes;
-		const vectorIndex = vectorIndexes?.find(
+		if (!vectorIndexes) {
+			throw new Error(
+				`Cannot use vector index "${indexName}" for table "${tableName}" because ` +
+					`the table is not declared in the schema.`,
+			);
+		}
+		const vectorIndex = vectorIndexes.find(
 			({ indexDescriptor }: { indexDescriptor: string }) =>
 				indexDescriptor === indexName,
 		);
@@ -759,14 +798,23 @@ function evaluateSearchFilter(
 }
 
 function cosineSimilarity(vecA: number[], vecB: number[]): number {
+	if (vecA.length !== vecB.length) {
+		throw new Error(
+			`Vectors must have the same length: ${vecA.length} vs ${vecB.length}`,
+		);
+	}
 	let dotProduct = 0.0;
 	let normA = 0.0;
 	let normB = 0.0;
 
 	for (let i = 0; i < vecA.length; i++) {
-		dotProduct += vecA[i] * vecB[i];
-		normA += vecA[i] * vecA[i];
-		normB += vecB[i] * vecB[i];
+		const a = vecA[i];
+		const b = vecB[i];
+		if (a !== undefined && b !== undefined) {
+			dotProduct += a * b;
+			normA += a * a;
+			normB += b * b;
+		}
 	}
 
 	if (normA === 0 || normB === 0) {
@@ -821,21 +869,38 @@ function validateIndexRangeExpression(
 			// Allow to operate on the previous field (gt and lt must operate on same field)
 			case "lt|gt":
 			case "gt|lt":
-				if (fieldIndex > 0 && filter.fieldPath === fields[fieldIndex - 1]) {
-					state = "done";
-					continue;
+				if (fieldIndex > 0) {
+					const prevField = fields[fieldIndex - 1];
+					if (prevField && filter.fieldPath === prevField) {
+						state = "done";
+						continue;
+					}
+					throw new Error(
+						`Incorrect field used in \`withIndex\`, ` +
+							`\`.gt\` and \`.lt\` must operate on the same field, ` +
+							`expected "${prevField}", got "${filter.fieldPath}"`,
+					);
 				}
 				throw new Error(
 					`Incorrect field used in \`withIndex\`, ` +
 						`\`.gt\` and \`.lt\` must operate on the same field, ` +
-						`expected "${fields[fieldIndex - 1]}", got "${filter.fieldPath}"`,
+						`got "${filter.fieldPath}"`,
 				);
 
 			default:
+				if (filterIndex > 0) {
+					const prevFilter = source.range[filterIndex - 1];
+					if (prevFilter) {
+						throw new Error(
+							`Incorrect operator used in \`withIndex\`, ` +
+								`cannot chain \`.${filter.type.toLowerCase()}()\` ` +
+								`after \`.${prevFilter.type.toLowerCase()}()\``,
+						);
+					}
+				}
 				throw new Error(
 					`Incorrect operator used in \`withIndex\`, ` +
-						`cannot chain \`.${filter.type.toLowerCase()}()\` ` +
-						`after \`.${source.range[filterIndex - 1].type.toLowerCase()}()\``,
+						`cannot chain \`.${filter.type.toLowerCase()}()\``,
 				);
 		}
 	}
@@ -2041,9 +2106,16 @@ function createFunctionHandle(functionPath: FunctionPath) {
 	return `function://${functionPath.componentPath};${functionPath.udfPath}`;
 }
 
-function parseFunctionHandle(handle: string) {
-	const [componentPath, udfPath] = handle.split("function://")[1].split(";");
-	return { componentPath, udfPath };
+function parseFunctionHandle(handle: string): FunctionPath {
+	const parts = handle.split("function://");
+	if (parts.length < 2 || !parts[1]) {
+		throw new Error(`Invalid function handle: ${handle}`);
+	}
+	const pathParts = parts[1].split(";");
+	if (pathParts.length < 2 || !pathParts[0] || !pathParts[1]) {
+		throw new Error(`Invalid function handle: ${handle}`);
+	}
+	return { componentPath: pathParts[0], udfPath: pathParts[1] };
 }
 
 async function getFunctionPathFromAddress(
@@ -2063,19 +2135,32 @@ async function getFunctionPathFromAddress(
 	}
 	if (functionAddress.reference !== undefined) {
 		// "_reference/childComponent/aggregate/path/to/file/functionName" -> "aggregate/path/to/file"
-		const childComponentName = functionAddress.reference.split("/")[2];
+		const referenceParts = functionAddress.reference.split("/");
+		if (referenceParts.length < 3) {
+			throw new Error(`Invalid function reference: ${functionAddress.reference}`);
+		}
+		const childComponentName = referenceParts[2];
+		if (!childComponentName) {
+			throw new Error(`Invalid function reference: ${functionAddress.reference}`);
+		}
 		let componentPath = childComponentName;
 		if (getCurrentComponentPath().length > 0) {
 			componentPath = `${getCurrentComponentPath()}/${componentPath}`;
 		}
 		// "_reference/childComponent/aggregate/path/to/file/functionName" -> "path/to/file/functionName"
-		const functionNameWithSlashes = functionAddress.reference
-			.split("/")
+		const functionNameWithSlashes = referenceParts
 			.slice(3)
 			.join("/");
+		if (!functionNameWithSlashes) {
+			throw new Error(`Invalid function reference: ${functionAddress.reference}`);
+		}
 		// "path/to/file/functionName" -> "path/to/file:functionName"
-		const filepath = functionNameWithSlashes.split("/").slice(0, -1).join("/");
-		const functionName = functionNameWithSlashes.split("/").pop();
+		const functionNameParts = functionNameWithSlashes.split("/");
+		const filepath = functionNameParts.slice(0, -1).join("/");
+		const functionName = functionNameParts[functionNameParts.length - 1];
+		if (!functionName) {
+			throw new Error(`Invalid function reference: ${functionAddress.reference}`);
+		}
 		return {
 			udfPath: `${filepath}:${functionName}`,
 			componentPath,
@@ -2124,7 +2209,11 @@ async function getFunctionFromPath<T extends RegisteredFunctionKind>(
 	type: T,
 ): Promise<RegisteredFunctions[T]> {
 	// "queries/messages:list" -> ["queries/messages", "list"]
-	const [modulePath, maybeExportName] = functionPath.udfPath.split(":");
+	const parts = functionPath.udfPath.split(":");
+	if (parts.length === 0 || !parts[0]) {
+		throw new Error(`Invalid function path: ${functionPath.udfPath}`);
+	}
+	const [modulePath, maybeExportName] = parts;
 	const exportName =
 		maybeExportName === undefined ? "default" : maybeExportName;
 

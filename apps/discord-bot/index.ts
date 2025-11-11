@@ -422,7 +422,7 @@ const program = Effect.gen(function* () {
 
 				// Update attachment records with storage IDs
 				for (const result of uploadResults) {
-					if (result.storageId) {
+					if (result.storageId && aoMessage.attachments) {
 						const attachment = aoMessage.attachments.find(
 							(a) => a.id === result.attachmentId,
 						);

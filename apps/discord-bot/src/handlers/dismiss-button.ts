@@ -92,8 +92,12 @@ export function handleDismissButtonInteraction(
 		const allowedToDismissId = parseDismissButtonId(interaction.customId);
 
 		// Get the member who clicked the button
+		if (!interaction.guild) {
+			return yield* Effect.fail(new Error("Guild not found"));
+		}
+		const guild = interaction.guild;
 		const dismisser = yield* Effect.tryPromise({
-			try: () => interaction.guild?.members.fetch(interaction.user.id),
+			try: () => guild.members.fetch(interaction.user.id),
 			catch: (error) => error,
 		});
 

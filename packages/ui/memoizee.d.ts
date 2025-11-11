@@ -1,10 +1,15 @@
-/** biome-ignore-all lint/suspicious/noExplicitAny: TODO: Fix the any */
 declare module "memoizee" {
 	function memoize<T extends (...args: any[]) => any>(
 		fn: T,
 		options?: {
-			normalizer?: (...args: Parameters<T>) => string;
+			length?: number | false;
+			maxAge?: number;
+			max?: number;
+			primitive?: boolean;
+			async?: boolean;
+			[key: string]: unknown;
 		},
 	): T;
 	export default memoize;
 }
+

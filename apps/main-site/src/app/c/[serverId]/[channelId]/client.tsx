@@ -109,18 +109,13 @@ export function ChannelPageClient(props: {
 		setIsEnabling(true);
 		try {
 			// Use live channel data if available, otherwise use props
-			const channelToUpdate = liveChannel ?? {
-				id: props.channel.id,
-				serverId: props.server._id,
-				name: props.channel.name,
-				type: props.channel.type,
-			};
+			const channelToUpdate = liveChannel ?? props.channel;
 
 			await updateChannel({
 				id: props.channel.id,
 				channel: {
 					id: channelToUpdate.id,
-					serverId: channelToUpdate.serverId,
+					serverId: channelToUpdate.serverId ?? props.server._id,
 					name: channelToUpdate.name,
 					type: channelToUpdate.type,
 					parentId: channelToUpdate.parentId,

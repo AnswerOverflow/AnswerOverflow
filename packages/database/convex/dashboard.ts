@@ -1,6 +1,7 @@
 "use node";
 
 import { createClerkClient } from "@clerk/backend";
+import * as Schema from "effect/Schema";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action } from "./_generated/server";
@@ -9,15 +10,19 @@ const clerkClient = createClerkClient({
 	secretKey: process.env.CLERK_SECRET_KEY,
 });
 
-// Discord API types
-type DiscordGuild = {
-	id: string;
-	name: string;
-	icon: string | null;
-	owner: boolean;
-	permissions: string; // BigInt as string
-	features: string[];
-};
+// Discord API schema
+const DiscordGuildSchema = Schema.Struct({
+	id: Schema.String,
+	name: Schema.String,
+	icon: Schema.NullOr(Schema.String),
+	owner: Schema.Boolean,
+	permissions: Schema.String, // BigInt as string
+	features: Schema.Array(Schema.String),
+});
+
+const DiscordGuildArraySchema = Schema.Array(DiscordGuildSchema);
+
+type DiscordGuild = Schema.Schema.Type<typeof DiscordGuildSchema>;
 
 type ServerWithMetadata = {
 	discordId: string;
@@ -85,7 +90,10 @@ export const getUserServers = action({
 			throw new Error(`Discord API error: ${discordResponse.statusText}`);
 		}
 
-		const discordGuilds: DiscordGuild[] = await discordResponse.json();
+		const jsonData = await discordResponse.json();
+		const discordGuilds = Schema.decodeUnknownSync(DiscordGuildArraySchema)(
+			jsonData,
+		);
 
 		// Filter to servers user can manage (ManageGuild, Administrator, or Owner)
 		const manageableServers = discordGuilds.filter((guild) => {

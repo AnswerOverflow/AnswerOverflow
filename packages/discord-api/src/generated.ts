@@ -8499,13 +8499,18 @@ export const make = (
 	) => (
 		request: HttpClientRequest.HttpClientRequest,
 	) => Effect.Effect<any, any> = options.transformClient
-		? (f) => (request) =>
-				Effect.flatMap(
-					Effect.flatMap(options.transformClient?.(httpClient), (client) =>
+		? (f) => (request) => {
+				const transformedClient = options.transformClient?.(httpClient);
+				if (!transformedClient) {
+					return Effect.flatMap(httpClient.execute(request), f);
+				}
+				return Effect.flatMap(
+					Effect.flatMap(transformedClient, (client) =>
 						client.execute(request),
 					),
 					f,
-				)
+				);
+			}
 		: (f) => (request) => Effect.flatMap(httpClient.execute(request), f);
 	const decodeSuccess =
 		<A, I, R>(schema: S.Schema<A, I, R>) =>

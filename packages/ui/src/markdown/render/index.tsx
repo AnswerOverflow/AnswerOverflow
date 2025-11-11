@@ -1,4 +1,5 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: TODO: Fix the any */
+// @ts-ignore - memoizee doesn't have type definitions
 import memoize from "memoizee";
 import * as R from "ramda";
 import type React from "react";
