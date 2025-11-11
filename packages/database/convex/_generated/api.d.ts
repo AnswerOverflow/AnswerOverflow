@@ -21,6 +21,8 @@ import type * as http from "../http.js";
 import type * as ignored_discord_accounts from "../ignored_discord_accounts.js";
 import type * as messages from "../messages.js";
 import type * as permissions from "../permissions.js";
+import type * as publicInternal from "../publicInternal.js";
+import type * as publicInternalTestFunctions from "../publicInternalTestFunctions.js";
 import type * as server_preferences from "../server_preferences.js";
 import type * as servers from "../servers.js";
 import type * as shared from "../shared.js";
@@ -46,6 +48,8 @@ declare const fullApi: ApiFromModules<{
   ignored_discord_accounts: typeof ignored_discord_accounts;
   messages: typeof messages;
   permissions: typeof permissions;
+  publicInternal: typeof publicInternal;
+  publicInternalTestFunctions: typeof publicInternalTestFunctions;
   server_preferences: typeof server_preferences;
   servers: typeof servers;
   shared: typeof shared;
