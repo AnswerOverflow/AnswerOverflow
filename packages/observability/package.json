@@ -1,0 +1,13 @@
+{
+  "name": "@packages/observability",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@effect/opentelemetry": "^0.59.0",
+    "@effect/platform": "^0.90.1",
+    "effect": "^3.17.7"
+  }
+}

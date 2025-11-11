@@ -24,5 +24,12 @@
 		"apps/*",
 		"packages/*"
 	],
-	"packageManager": "bun@1.2.19"
+	"packageManager": "bun@1.2.19",
+	"dependencies": {
+		"@effect/opentelemetry": "^0.59.0",
+		"@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
+		"@opentelemetry/sdk-trace-base": "^2.2.0",
+		"@opentelemetry/sdk-trace-node": "^2.2.0",
+		"@opentelemetry/sdk-trace-web": "^2.2.0"
+	}
 }

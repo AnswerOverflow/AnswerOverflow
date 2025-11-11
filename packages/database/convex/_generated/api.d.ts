@@ -18,6 +18,7 @@ import type * as discord_accounts from "../discord_accounts.js";
 import type * as http from "../http.js";
 import type * as ignored_discord_accounts from "../ignored_discord_accounts.js";
 import type * as messages from "../messages.js";
+import type * as permissions from "../permissions.js";
 import type * as server_preferences from "../server_preferences.js";
 import type * as servers from "../servers.js";
 import type * as user_server_settings from "../user_server_settings.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   ignored_discord_accounts: typeof ignored_discord_accounts;
   messages: typeof messages;
+  permissions: typeof permissions;
   server_preferences: typeof server_preferences;
   servers: typeof servers;
   user_server_settings: typeof user_server_settings;

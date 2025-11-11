@@ -3,6 +3,7 @@ import {
 	DatabaseLayer,
 	upsertMessage,
 } from "@packages/database/database";
+import { createOtelLayer } from "@packages/observability/otel";
 import type { GuildChannel } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { registerCommands } from "./src/commands/register";
@@ -547,10 +548,13 @@ const program = Effect.gen(function* () {
 	return yield* Effect.never;
 });
 
-// Run the program with the DiscordClientLayer
+// Run the program with the DiscordClientLayer and OpenTelemetry tracing
+const OtelLayer = createOtelLayer("discord-bot");
 Effect.runPromise(
 	Effect.scoped(
-		program.pipe(Effect.provide(Layer.mergeAll(DiscordLayer, DatabaseLayer))),
+		program.pipe(
+			Effect.provide(Layer.mergeAll(DiscordLayer, DatabaseLayer, OtelLayer)),
+		),
 	),
 ).catch((error) => {
 	console.error("Fatal error:", error);

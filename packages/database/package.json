@@ -1,31 +1,34 @@
 {
-	"name": "@packages/database",
-	"version": "1.0.0",
-	"exports": {
-		"./*": "./src/*.ts",
-		"./convex/*": {
-			"types": "./convex/*.d.js",
-			"default": "./convex/*.js"
-		}
-	},
-	"scripts": {
-		"with-env": "bun run --env-file=../../.env",
-		"dev": "convex dev",
-		"typecheck": "tsc -p convex/tsconfig.json --noEmit & tsc -p tsconfig.json --noEmit & wait",
-		"clean": "rm -rf node_modules .turbo",
-		"test": "vitest"
-	},
-	"dependencies": {
-		"@clerk/backend": "^1.27.0",
-		"convex": "^1.25.0",
-		"convex-helpers": "^0.1.101",
-		"effect": "^3.17.7",
-		"openai": "^4.45.0"
-	},
-	"devDependencies": {
-		"@edge-runtime/vm": "^5.0.0",
-		"@effect/vitest": "^0.25.0",
-		"@packages/convex-test": "workspace:*",
-		"vitest": "^3.2.4"
-	}
+  "name": "@packages/database",
+  "version": "1.0.0",
+  "exports": {
+    "./*": "./src/*.ts",
+    "./convex/*": {
+      "types": "./convex/*.d.js",
+      "default": "./convex/*.js"
+    }
+  },
+  "scripts": {
+    "with-env": "bun run --env-file=../../.env",
+    "dev": "convex dev",
+    "typecheck": "tsc -p convex/tsconfig.json --noEmit & tsc -p tsconfig.json --noEmit & wait",
+    "clean": "rm -rf node_modules .turbo",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@clerk/backend": "^1.27.0",
+    "@effect/opentelemetry": "^0.59.0",
+    "@effect/platform": "^0.90.1",
+    "convex": "^1.25.0",
+    "convex-helpers": "^0.1.101",
+    "effect": "^3.17.7",
+    "openai": "^4.45.0"
+  },
+  "devDependencies": {
+    "@edge-runtime/vm": "^5.0.0",
+    "@effect/vitest": "^0.25.0",
+    "@packages/convex-test": "workspace:*",
+    "@packages/observability": "workspace:*",
+    "vitest": "^3.2.4"
+  }
 }
