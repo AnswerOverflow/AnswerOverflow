@@ -5,10 +5,7 @@ import type {
 	IsAdminOrOwner,
 	IsAuthenticated,
 } from "./permissions";
-import {
-	findUserServerSettingsById,
-	getServerByDiscordId,
-} from "./shared";
+import { findUserServerSettingsById, getServerByDiscordId } from "./shared";
 
 /**
  * Get the authenticated user's Discord account ID from their BetterAuth identity

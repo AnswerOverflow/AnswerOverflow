@@ -269,27 +269,29 @@ export default function ServerSettingsPage({
 								</CardHeader>
 								<CardContent>
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-										{channels.map((channel: { id: string; name: string; type: number }) => {
-											const channelTypeName =
-												channel.type === 15
-													? "Forum"
-													: channel.type === 5
-														? "Announcement"
-														: "Text";
-											return (
-												<Button
-													key={channel.id}
-													variant={
-														selectedChannelId === channel.id
-															? "default"
-															: "outline"
-													}
-													onClick={() => setSelectedChannelId(channel.id)}
-												>
-													#{channel.name} ({channelTypeName})
-												</Button>
-											);
-										})}
+										{channels.map(
+											(channel: { id: string; name: string; type: number }) => {
+												const channelTypeName =
+													channel.type === 15
+														? "Forum"
+														: channel.type === 5
+															? "Announcement"
+															: "Text";
+												return (
+													<Button
+														key={channel.id}
+														variant={
+															selectedChannelId === channel.id
+																? "default"
+																: "outline"
+														}
+														onClick={() => setSelectedChannelId(channel.id)}
+													>
+														#{channel.name} ({channelTypeName})
+													</Button>
+												);
+											},
+										)}
 									</div>
 								</CardContent>
 							</Card>

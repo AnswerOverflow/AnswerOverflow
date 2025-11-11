@@ -5,5 +5,3 @@ const app: ReturnType<typeof defineApp> = defineApp();
 app.use(betterAuth);
 
 export default app;
-
-

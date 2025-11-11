@@ -12,4 +12,3 @@ declare module "memoizee" {
 	): T;
 	export default memoize;
 }
-

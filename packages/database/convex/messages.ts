@@ -290,7 +290,12 @@ export const findMessagesByChannelId = query({
 		after: v.optional(v.string()),
 	},
 	handler: async (ctx, args) => {
-		return await findMessagesByChannelIdShared(ctx, args.channelId, args.limit, args.after);
+		return await findMessagesByChannelIdShared(
+			ctx,
+			args.channelId,
+			args.limit,
+			args.after,
+		);
 	},
 });
 
@@ -495,7 +500,11 @@ export const findSolutionsByQuestionId = query({
 		limit: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
-		return await findSolutionsByQuestionIdShared(ctx, args.questionId, args.limit);
+		return await findSolutionsByQuestionIdShared(
+			ctx,
+			args.questionId,
+			args.limit,
+		);
 	},
 });
 

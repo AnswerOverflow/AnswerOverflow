@@ -3,7 +3,7 @@
 /**
  * Sync script to fetch the latest Discord OpenAPI specification
  * from Discord's official GitHub repository and update the local open-api.json file.
- * 
+ *
  * This script also patches the GuildFeatures schema to accept any string value,
  * not just the enum values, to handle Discord API returning features that aren't
  * yet documented in their OpenAPI spec (e.g., AUDIO_BITRATE_384_KBPS).
@@ -22,7 +22,8 @@ function patchGuildFeatures(spec: any): void {
 		// This ensures the generator creates S.String instead of a strict union
 		spec.components.schemas.GuildFeatures = {
 			type: "string",
-			description: "Guild feature flags. May include values not yet documented in the OpenAPI spec.",
+			description:
+				"Guild feature flags. May include values not yet documented in the OpenAPI spec.",
 		};
 		console.log("✅ Patched GuildFeatures to accept any string value");
 	}
@@ -40,10 +41,10 @@ async function syncOpenApiSpec() {
 		}
 
 		const spec = await response.json();
-		
+
 		// Patch GuildFeatures to be more permissive
 		patchGuildFeatures(spec);
-		
+
 		const specString = JSON.stringify(spec, null, 2);
 
 		await Bun.write(OUTPUT_FILE, specString);
@@ -59,4 +60,3 @@ async function syncOpenApiSpec() {
 }
 
 syncOpenApiSpec();
-

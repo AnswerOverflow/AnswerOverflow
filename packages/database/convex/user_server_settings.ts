@@ -18,7 +18,11 @@ export const findUserServerSettingsById = query({
 		serverId: v.id("servers"),
 	},
 	handler: async (ctx, args) => {
-		return await findUserServerSettingsByIdShared(ctx, args.userId, args.serverId);
+		return await findUserServerSettingsByIdShared(
+			ctx,
+			args.userId,
+			args.serverId,
+		);
 	},
 });
 

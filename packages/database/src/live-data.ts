@@ -29,4 +29,3 @@ export class LiveData<T> {
 		}
 	}
 }
-

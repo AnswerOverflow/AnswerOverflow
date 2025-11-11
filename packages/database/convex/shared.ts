@@ -1,11 +1,7 @@
 import type { Id } from "./_generated/dataModel";
-import type {
-	ActionCtx,
-	MutationCtx,
-	QueryCtx,
-} from "./_generated/server";
+import type { ActionCtx, MutationCtx, QueryCtx } from "./_generated/server";
 import type { Infer } from "convex/values";
-import {
+import type {
 	attachmentSchema,
 	emojiSchema,
 	messageSchema,
@@ -198,10 +194,7 @@ export async function getDiscordAccountById(
 // Messages
 // ============================================================================
 
-export async function getMessageById(
-	ctx: QueryCtx | MutationCtx,
-	id: string,
-) {
+export async function getMessageById(ctx: QueryCtx | MutationCtx, id: string) {
 	return await ctx.db
 		.query("messages")
 		.filter((q) => q.eq(q.field("id"), id))
@@ -417,4 +410,3 @@ export async function uploadAttachmentFromUrlLogic(
 		return null;
 	}
 }
-

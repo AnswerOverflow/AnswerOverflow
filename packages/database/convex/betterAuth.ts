@@ -10,7 +10,7 @@ const siteUrl = process.env.SITE_URL!;
 // Build trusted origins list - include site URL and optional dev URLs
 const getTrustedOrigins = (): string[] => {
 	const origins = [siteUrl];
-	
+
 	// In development, automatically add common localhost URLs
 	if (siteUrl.includes("localhost")) {
 		// Add main-site (port 3000) if not already included
@@ -22,15 +22,21 @@ const getTrustedOrigins = (): string[] => {
 			origins.push("http://localhost:3001");
 		}
 	}
-	
+
 	// Add development URLs if provided via env vars (allows override)
-	if (process.env.DASHBOARD_URL && !origins.includes(process.env.DASHBOARD_URL)) {
+	if (
+		process.env.DASHBOARD_URL &&
+		!origins.includes(process.env.DASHBOARD_URL)
+	) {
 		origins.push(process.env.DASHBOARD_URL);
 	}
-	if (process.env.MAIN_SITE_URL && !origins.includes(process.env.MAIN_SITE_URL)) {
+	if (
+		process.env.MAIN_SITE_URL &&
+		!origins.includes(process.env.MAIN_SITE_URL)
+	) {
 		origins.push(process.env.MAIN_SITE_URL);
 	}
-	
+
 	return origins;
 };
 
@@ -74,4 +80,3 @@ export const getCurrentUser = query({
 		return authComponent.getAuthUser(ctx);
 	},
 });
-
