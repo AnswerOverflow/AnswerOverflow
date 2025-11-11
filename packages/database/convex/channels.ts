@@ -273,7 +273,13 @@ export const updateChannel = mutation({
 			throw new Error(`Channel with id ${args.id} not found`);
 		}
 
-		await ctx.db.patch(existing._id, args.channel);
+		// Use replace instead of patch to allow removing optional fields
+		// Replace the entire document with the new channel data
+		await ctx.db.replace(existing._id, {
+			...args.channel,
+			_id: existing._id,
+			_creationTime: existing._creationTime,
+		});
 
 		if (args.settings) {
 			const existingSettings = await ctx.db

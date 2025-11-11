@@ -6,22 +6,57 @@ import type {
 	Emoji as AOEmoji,
 } from "@packages/database/convex/schema";
 import type { BaseMessageWithRelations } from "@packages/database/database";
-import type {
-	AnyThreadChannel,
-	GuildBasedChannel,
-	GuildChannel,
-	Message,
-	User,
+import {
+	type AnyThreadChannel,
+	type Channel,
+	ChannelType,
+	type ForumChannel,
+	type GuildBasedChannel,
+	type GuildChannel,
+	type Message,
+	type NewsChannel,
+	type PublicThreadChannel,
+	type TextChannel,
+	type User,
 } from "discord.js";
 
 // Channel types for root channels (forums, text, announcements)
-const ALLOWED_ROOT_CHANNEL_TYPES = new Set([0, 5, 15]); // GuildText, GuildAnnouncement, GuildForum
+const ALLOWED_ROOT_CHANNEL_TYPES = new Set([
+	ChannelType.GuildText,
+	ChannelType.GuildAnnouncement,
+	ChannelType.GuildForum,
+]); // GuildText, GuildAnnouncement, GuildForum
+const ALLOWED_THREAD_TYPES = new Set([
+	ChannelType.PublicThread,
+	ChannelType.AnnouncementThread,
+]);
 
 /**
  * Checks if a channel type is allowed for indexing (root channels only)
  */
-export function isAllowedRootChannelType(channelType: number): boolean {
+export function isAllowedRootChannelType(channelType: number) {
 	return ALLOWED_ROOT_CHANNEL_TYPES.has(channelType);
+}
+
+export function isAllowedRootChannel(
+	channel: Channel,
+): channel is TextChannel | NewsChannel | ForumChannel {
+	return isAllowedRootChannelType(channel.type);
+}
+
+export function isAllowedThreadType(channelType: number): boolean {
+	return ALLOWED_THREAD_TYPES.has(channelType);
+}
+
+export function isAllowedThreadChannel(
+	channel: Channel,
+): channel is PublicThreadChannel {
+	return isAllowedThreadType(channel.type);
+}
+export function isAllowedChannelType(channelType: number): boolean {
+	return (
+		isAllowedRootChannelType(channelType) || isAllowedThreadType(channelType)
+	);
 }
 
 /**
