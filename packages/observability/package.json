@@ -1,17 +1,17 @@
 {
-  "name": "@packages/observability",
-  "version": "1.0.0",
-  "type": "module",
-  "exports": {
-    "./*": "./src/*.ts"
-  },
-  "dependencies": {
-    "@effect/opentelemetry": "^0.59.0",
-    "@effect/platform": "^0.90.1",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
-    "@opentelemetry/sdk-trace-base": "^2.2.0",
-    "@opentelemetry/sdk-trace-node": "^2.2.0",
-    "@opentelemetry/sdk-trace-web": "^2.2.0",
-    "effect": "^3.17.7"
-  }
+	"name": "@packages/observability",
+	"version": "1.0.0",
+	"type": "module",
+	"exports": {
+		"./*": "./src/*.ts"
+	},
+	"dependencies": {
+		"@effect/opentelemetry": "^0.59.0",
+		"@effect/platform": "^0.90.1",
+		"@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
+		"@opentelemetry/sdk-trace-base": "^2.2.0",
+		"@opentelemetry/sdk-trace-node": "^2.2.0",
+		"@opentelemetry/sdk-trace-web": "^2.2.0",
+		"effect": "^3.17.7"
+	}
 }

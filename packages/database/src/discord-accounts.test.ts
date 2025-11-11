@@ -2,7 +2,7 @@
 
 import { expect, it } from "@effect/vitest";
 import { Effect } from "effect";
-import type { DiscordAccount, IgnoredDiscordAccount } from "../convex/schema";
+import type { DiscordAccount } from "../convex/schema";
 import { Database } from "./database";
 import { DatabaseTestLayer } from "./database-test";
 

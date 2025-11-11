@@ -1,23 +1,15 @@
 import { expect, it } from "@effect/vitest";
 import { Effect } from "effect";
-import {
-	assertCanEditServer,
-	assertIsAdminOrOwnerOfServer,
-	assertIsUser,
-	getDiscordAccountIdFromAuth,
-	getUserServerSettingsForServerByDiscordId,
-	isSuperUser,
-} from "../convex/auth";
+import { assertIsUser } from "../convex/auth";
 import type {
 	AuthorizedUser,
 	CanEditServer,
-	IsAdminOrOwner,
 	IsAuthenticated,
 } from "../convex/permissions";
 import { DatabaseTestLayer } from "./database-test";
 
 // Mock auth context for testing
-const createMockCtx = (discordAccountId: string | null) => {
+const _createMockCtx = (discordAccountId: string | null) => {
 	return {
 		auth: {
 			getUserIdentity: async () => {
@@ -32,11 +24,14 @@ const createMockCtx = (discordAccountId: string | null) => {
 				};
 			},
 		},
-		runQuery: async (fn: any, args: any) => {
+		// biome-ignore lint/suspicious/noExplicitAny: Test mocks need any types
+		runQuery: async (_fn: any, _args: any) => {
 			// Mock implementation - would need actual test client
 			return null;
 		},
+		// biome-ignore lint/suspicious/noExplicitAny: Test mocks need any types
 		db: {} as any,
+		// biome-ignore lint/suspicious/noExplicitAny: Test mocks need any types
 	} as any;
 };
 
@@ -110,20 +105,23 @@ it("branded types enforce type safety", () => {
 it.scoped(
 	"assertCanEditServer returns branded CanEditServer type when user has permissions",
 	() =>
+		// biome-ignore lint/correctness/useYield: No Effect operations to yield in this placeholder test
 		Effect.gen(function* () {
 			// This would need a full test setup with actual Convex test client
 			// For now, we verify the type signature is correct
 			expect(true).toBe(true);
+			return undefined;
 		}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
 it.scoped(
 	"assertIsAdminOrOwnerOfServer returns branded IsAdminOrOwner type when user is admin",
 	() =>
+		// biome-ignore lint/correctness/useYield: No Effect operations to yield in this placeholder test
 		Effect.gen(function* () {
 			// This would need a full test setup with actual Convex test client
 			// For now, we verify the type signature is correct
 			expect(true).toBe(true);
+			return undefined;
 		}).pipe(Effect.provide(DatabaseTestLayer)),
 );
-

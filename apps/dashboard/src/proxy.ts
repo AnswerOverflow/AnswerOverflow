@@ -1,6 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
 import type { NextFetchEvent, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
 
@@ -19,4 +19,3 @@ export default function proxy(request: NextRequest, event: NextFetchEvent) {
 export const config = {
 	matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };
-

@@ -17,7 +17,6 @@ import {
 
 type Message = Infer<typeof messageSchema>;
 type Attachment = Infer<typeof attachmentSchema>;
-type Emoji = Infer<typeof emojiSchema>;
 type Reaction = Infer<typeof reactionSchema>;
 
 // Helper function to check if an account is ignored
@@ -367,7 +366,7 @@ export const findMessagesByChannelId = query({
 			.withIndex("by_channelId", (q) => q.eq("channelId", args.channelId));
 
 		if (args.after) {
-			query = query.filter((q) => q.gt(q.field("id"), args.after!));
+			query = query.filter((q) => q.gt(q.field("id"), args.after));
 		}
 
 		const messages = await query.collect();

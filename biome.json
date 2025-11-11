@@ -10,7 +10,9 @@
 			"**",
 			"!**/convex/_generated/**",
 			"!**/*.css",
-			"!**/.context/**"
+			"!**/.context/**",
+			"!packages/convex-test/**",
+			"!packages/discord-api/src/generated.ts"
 		]
 	},
 	"formatter": {
@@ -21,6 +23,9 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
+			"performance": {
+				"noImgElement": "warn"
+			},
 			"suspicious": {
 				"noShadowRestrictedNames": "error",
 				"noExplicitAny": "error"

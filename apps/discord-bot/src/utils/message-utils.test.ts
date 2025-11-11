@@ -1,5 +1,5 @@
 import { expect, it } from "@effect/vitest";
-import type { Message, User } from "discord.js";
+import type { Message } from "discord.js";
 import { describe } from "vitest";
 import { isHumanMessage, removeDiscordMarkdown } from "./message-utils";
 

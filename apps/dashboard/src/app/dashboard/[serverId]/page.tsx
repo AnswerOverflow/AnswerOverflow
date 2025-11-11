@@ -26,7 +26,7 @@ import React, { use } from "react";
 function ToggleServerFlag({
 	title,
 	description,
-	flagKey,
+	flagKey: _flagKey,
 	checked,
 	onChange,
 	disabled,
@@ -64,7 +64,7 @@ function ToggleServerFlag({
 function ToggleChannelFlag({
 	title,
 	description,
-	flagKey,
+	flagKey: _flagKey,
 	checked,
 	onChange,
 	disabled,

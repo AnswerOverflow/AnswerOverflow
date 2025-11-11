@@ -1,13 +1,9 @@
 import { type Infer, v } from "convex/values";
 import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
-import {
-	discordAccountSchema,
-	type ignoredDiscordAccountSchema,
-} from "./schema";
+import { discordAccountSchema } from "./schema";
 
 type DiscordAccount = Infer<typeof discordAccountSchema>;
-type IgnoredDiscordAccount = Infer<typeof ignoredDiscordAccountSchema>;
 
 // Helper function to get default discord account (when account is ignored)
 function getDefaultDiscordAccount(data: {

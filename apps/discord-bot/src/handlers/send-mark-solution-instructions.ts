@@ -49,7 +49,7 @@ export function handleSendMarkSolutionInstructions(
 		};
 	} | null,
 	threadOwner: GuildMember,
-	question: Message | null,
+	_question: Message | null,
 ): Effect.Effect<void, unknown, Database> {
 	return Effect.gen(function* () {
 		// Check if channel settings exist and flag is enabled

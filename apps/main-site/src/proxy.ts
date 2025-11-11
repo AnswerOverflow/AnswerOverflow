@@ -18,4 +18,3 @@ export default function proxy(request: Request) {
 export const config = {
 	matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };
-

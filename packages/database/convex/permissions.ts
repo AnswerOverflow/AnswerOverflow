@@ -33,8 +33,7 @@ export type IsAuthenticated = Brand<"IsAuthenticated">;
  * Branded authorized user type that carries permission proofs.
  * The permission brand proves that the permission check was performed.
  */
-export type AuthorizedUser<P extends Brand<any>> = {
+export type AuthorizedUser<P extends Brand<string>> = {
 	readonly discordAccountId: string;
 	readonly userServerSettings: UserServerSettings | null;
 } & P;
-

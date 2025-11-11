@@ -1,6 +1,4 @@
-import { type Infer, v } from "convex/values";
-import { api, internal } from "./_generated/api";
-import type { Id } from "./_generated/dataModel";
+import { v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { assertCanEditServer, getDiscordAccountIdFromAuth } from "./auth";
 
@@ -12,8 +10,6 @@ const serverPreferencesSchema = v.object({
 	customDomain: v.optional(v.string()),
 	subpath: v.optional(v.string()),
 });
-
-type ServerPreferences = Infer<typeof serverPreferencesSchema>;
 
 export const getServerPreferencesByServerId = query({
 	args: {

@@ -1,5 +1,4 @@
 import { v } from "convex/values";
-import { api } from "./_generated/api";
 import { query } from "./_generated/server";
 import {
 	getDiscordAccountIdFromAuth,
@@ -9,7 +8,7 @@ import {
 /**
  * Get dashboard data for a server (server + channels + preferences + settings)
  * Used by dashboard UI to display and manage server settings
- * 
+ *
  * Protected query: Requires user to be authenticated and a member of the server
  */
 export const getDashboardData = query({

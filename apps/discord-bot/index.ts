@@ -556,12 +556,7 @@ Effect.runPromise(
 	Effect.scoped(
 		program.pipe(
 			Effect.provide(
-				Layer.mergeAll(
-					DiscordLayer,
-					DatabaseLayer,
-					OtelLayer,
-					LoggerLayer,
-				),
+				Layer.mergeAll(DiscordLayer, DatabaseLayer, OtelLayer, LoggerLayer),
 			),
 		),
 	),

@@ -128,7 +128,11 @@ function MessageEmbed({ embed }: { embed: Embed }) {
 			{embed.fields && embed.fields.length > 0 && (
 				<div className="mt-2 space-y-1">
 					{embed.fields.map((field, idx) => (
-						<div key={idx} className={field.inline ? "inline-block" : "block"}>
+						// biome-ignore-next-line lint/suspicious/noArrayIndexKey: Embed fields don't have unique IDs
+						<div
+							key={`${field.name}-${idx}`}
+							className={field.inline ? "inline-block" : "block"}
+						>
 							<div className="font-semibold text-sm">{field.name}</div>
 							<div className="text-sm whitespace-pre-wrap break-words">
 								{field.value}
@@ -262,7 +266,8 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 							{message.embeds && message.embeds.length > 0 && (
 								<div className="mb-3 space-y-2">
 									{message.embeds.map((embed, idx) => (
-										<MessageEmbed key={idx} embed={embed} />
+										// biome-ignore lint/suspicious/noArrayIndexKey: Embeds don't have unique IDs
+										<MessageEmbed key={`embed-${idx}`} embed={embed} />
 									))}
 								</div>
 							)}
@@ -344,6 +349,7 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 										// Group reactions by emoji
 										const emojiId = reaction.emojiId;
 										return (
+											// biome-ignore-next-line lint/suspicious/noArrayIndexKey: Using emojiId + idx for uniqueness
 											<div
 												key={`${emojiId}-${idx}`}
 												className="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-sm"

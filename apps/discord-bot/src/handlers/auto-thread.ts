@@ -62,7 +62,7 @@ export function handleAutoThread(
 		// Format thread title
 		let textTitle = `${authorName} - ${threadTitleContent}`;
 		if (textTitle.length > 47) {
-			textTitle = textTitle.slice(0, 47) + "...";
+			textTitle = `${textTitle.slice(0, 47)}...`;
 		}
 
 		// Create thread

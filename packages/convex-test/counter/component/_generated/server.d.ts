@@ -11,24 +11,24 @@
  */
 
 import {
-  ActionBuilder,
-  AnyComponents,
-  HttpActionBuilder,
-  MutationBuilder,
-  QueryBuilder,
-  GenericActionCtx,
-  GenericMutationCtx,
-  GenericQueryCtx,
-  GenericDatabaseReader,
-  GenericDatabaseWriter,
-  FunctionReference,
+	ActionBuilder,
+	AnyComponents,
+	HttpActionBuilder,
+	MutationBuilder,
+	QueryBuilder,
+	GenericActionCtx,
+	GenericMutationCtx,
+	GenericQueryCtx,
+	GenericDatabaseReader,
+	GenericDatabaseWriter,
+	FunctionReference,
 } from "convex/server";
 import type { DataModel } from "./dataModel.js";
 
 type GenericCtx =
-  | GenericActionCtx<DataModel>
-  | GenericMutationCtx<DataModel>
-  | GenericQueryCtx<DataModel>;
+	| GenericActionCtx<DataModel>
+	| GenericMutationCtx<DataModel>
+	| GenericQueryCtx<DataModel>;
 
 /**
  * Define a query in this Convex app's public API.

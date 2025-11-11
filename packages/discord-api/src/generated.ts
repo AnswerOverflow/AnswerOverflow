@@ -8501,7 +8501,7 @@ export const make = (
 	) => Effect.Effect<any, any> = options.transformClient
 		? (f) => (request) =>
 				Effect.flatMap(
-					Effect.flatMap(options.transformClient!(httpClient), (client) =>
+					Effect.flatMap(options.transformClient?.(httpClient), (client) =>
 						client.execute(request),
 					),
 					f,
@@ -8594,7 +8594,7 @@ export const make = (
 		listApplicationCommands: (applicationId, options) =>
 			HttpClientRequest.get(`/applications/${applicationId}/commands`).pipe(
 				HttpClientRequest.setUrlParams({
-					with_localizations: options?.["with_localizations"] as any,
+					with_localizations: options?.with_localizations as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -8736,15 +8736,15 @@ export const make = (
 		getEntitlements: (applicationId, options) =>
 			HttpClientRequest.get(`/applications/${applicationId}/entitlements`).pipe(
 				HttpClientRequest.setUrlParams({
-					user_id: options?.["user_id"] as any,
-					sku_ids: options?.["sku_ids"] as any,
-					guild_id: options?.["guild_id"] as any,
-					before: options?.["before"] as any,
-					after: options?.["after"] as any,
-					limit: options?.["limit"] as any,
-					exclude_ended: options?.["exclude_ended"] as any,
-					exclude_deleted: options?.["exclude_deleted"] as any,
-					only_active: options?.["only_active"] as any,
+					user_id: options?.user_id as any,
+					sku_ids: options?.sku_ids as any,
+					guild_id: options?.guild_id as any,
+					before: options?.before as any,
+					after: options?.after as any,
+					limit: options?.limit as any,
+					exclude_ended: options?.exclude_ended as any,
+					exclude_deleted: options?.exclude_deleted as any,
+					only_active: options?.only_active as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -8813,7 +8813,7 @@ export const make = (
 				`/applications/${applicationId}/guilds/${guildId}/commands`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					with_localizations: options?.["with_localizations"] as any,
+					with_localizations: options?.with_localizations as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -9047,10 +9047,10 @@ export const make = (
 		listMessages: (channelId, options) =>
 			HttpClientRequest.get(`/channels/${channelId}/messages`).pipe(
 				HttpClientRequest.setUrlParams({
-					around: options?.["around"] as any,
-					before: options?.["before"] as any,
-					after: options?.["after"] as any,
-					limit: options?.["limit"] as any,
+					around: options?.around as any,
+					before: options?.before as any,
+					after: options?.after as any,
+					limit: options?.limit as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -9090,8 +9090,8 @@ export const make = (
 		listPins: (channelId, options) =>
 			HttpClientRequest.get(`/channels/${channelId}/messages/pins`).pipe(
 				HttpClientRequest.setUrlParams({
-					before: options?.["before"] as any,
-					limit: options?.["limit"] as any,
+					before: options?.before as any,
+					limit: options?.limit as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -9199,9 +9199,9 @@ export const make = (
 				`/channels/${channelId}/messages/${messageId}/reactions/${emojiName}`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					after: options?.["after"] as any,
-					limit: options?.["limit"] as any,
-					type: options?.["type"] as any,
+					after: options?.after as any,
+					limit: options?.limit as any,
+					type: options?.type as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -9343,8 +9343,8 @@ export const make = (
 				`/channels/${channelId}/polls/${messageId}/answers/${answerId}`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					after: options?.["after"] as any,
-					limit: options?.["limit"] as any,
+					after: options?.after as any,
+					limit: options?.limit as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -9409,9 +9409,9 @@ export const make = (
 		listThreadMembers: (channelId, options) =>
 			HttpClientRequest.get(`/channels/${channelId}/thread-members`).pipe(
 				HttpClientRequest.setUrlParams({
-					with_member: options?.["with_member"] as any,
-					limit: options?.["limit"] as any,
-					after: options?.["after"] as any,
+					with_member: options?.with_member as any,
+					limit: options?.limit as any,
+					after: options?.after as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -9449,7 +9449,7 @@ export const make = (
 				`/channels/${channelId}/thread-members/${userId}`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					with_member: options?.["with_member"] as any,
+					with_member: options?.with_member as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -9503,8 +9503,8 @@ export const make = (
 				`/channels/${channelId}/threads/archived/private`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					before: options?.["before"] as any,
-					limit: options?.["limit"] as any,
+					before: options?.before as any,
+					limit: options?.limit as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -9520,8 +9520,8 @@ export const make = (
 				`/channels/${channelId}/threads/archived/public`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					before: options?.["before"] as any,
-					limit: options?.["limit"] as any,
+					before: options?.before as any,
+					limit: options?.limit as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -9535,17 +9535,17 @@ export const make = (
 		threadSearch: (channelId, options) =>
 			HttpClientRequest.get(`/channels/${channelId}/threads/search`).pipe(
 				HttpClientRequest.setUrlParams({
-					name: options?.["name"] as any,
-					slop: options?.["slop"] as any,
-					min_id: options?.["min_id"] as any,
-					max_id: options?.["max_id"] as any,
-					tag: options?.["tag"] as any,
-					tag_setting: options?.["tag_setting"] as any,
-					archived: options?.["archived"] as any,
-					sort_by: options?.["sort_by"] as any,
-					sort_order: options?.["sort_order"] as any,
-					limit: options?.["limit"] as any,
-					offset: options?.["offset"] as any,
+					name: options?.name as any,
+					slop: options?.slop as any,
+					min_id: options?.min_id as any,
+					max_id: options?.max_id as any,
+					tag: options?.tag as any,
+					tag_setting: options?.tag_setting as any,
+					archived: options?.archived as any,
+					sort_by: options?.sort_by as any,
+					sort_order: options?.sort_order as any,
+					limit: options?.limit as any,
+					offset: options?.offset as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -9573,8 +9573,8 @@ export const make = (
 				`/channels/${channelId}/users/@me/threads/archived/private`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					before: options?.["before"] as any,
-					limit: options?.["limit"] as any,
+					before: options?.before as any,
+					limit: options?.limit as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -9644,7 +9644,7 @@ export const make = (
 		getGuild: (guildId, options) =>
 			HttpClientRequest.get(`/guilds/${guildId}`).pipe(
 				HttpClientRequest.setUrlParams({
-					with_counts: options?.["with_counts"] as any,
+					with_counts: options?.with_counts as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -9681,12 +9681,12 @@ export const make = (
 		listGuildAuditLogEntries: (guildId, options) =>
 			HttpClientRequest.get(`/guilds/${guildId}/audit-logs`).pipe(
 				HttpClientRequest.setUrlParams({
-					user_id: options?.["user_id"] as any,
-					target_id: options?.["target_id"] as any,
-					action_type: options?.["action_type"] as any,
-					before: options?.["before"] as any,
-					after: options?.["after"] as any,
-					limit: options?.["limit"] as any,
+					user_id: options?.user_id as any,
+					target_id: options?.target_id as any,
+					action_type: options?.action_type as any,
+					before: options?.before as any,
+					after: options?.after as any,
+					limit: options?.limit as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -9763,9 +9763,9 @@ export const make = (
 		listGuildBans: (guildId, options) =>
 			HttpClientRequest.get(`/guilds/${guildId}/bans`).pipe(
 				HttpClientRequest.setUrlParams({
-					limit: options?.["limit"] as any,
-					before: options?.["before"] as any,
-					after: options?.["after"] as any,
+					limit: options?.limit as any,
+					before: options?.before as any,
+					after: options?.after as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -9953,8 +9953,8 @@ export const make = (
 		listGuildMembers: (guildId, options) =>
 			HttpClientRequest.get(`/guilds/${guildId}/members`).pipe(
 				HttpClientRequest.setUrlParams({
-					limit: options?.["limit"] as any,
-					after: options?.["after"] as any,
+					limit: options?.limit as any,
+					after: options?.after as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -9980,8 +9980,8 @@ export const make = (
 		searchGuildMembers: (guildId, options) =>
 			HttpClientRequest.get(`/guilds/${guildId}/members/search`).pipe(
 				HttpClientRequest.setUrlParams({
-					limit: options?.["limit"] as any,
-					query: options?.["query"] as any,
+					limit: options?.limit as any,
+					query: options?.query as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -10127,8 +10127,8 @@ export const make = (
 		previewPruneGuild: (guildId, options) =>
 			HttpClientRequest.get(`/guilds/${guildId}/prune`).pipe(
 				HttpClientRequest.setUrlParams({
-					days: options?.["days"] as any,
-					include_roles: options?.["include_roles"] as any,
+					days: options?.days as any,
+					include_roles: options?.include_roles as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -10234,7 +10234,7 @@ export const make = (
 		listGuildScheduledEvents: (guildId, options) =>
 			HttpClientRequest.get(`/guilds/${guildId}/scheduled-events`).pipe(
 				HttpClientRequest.setUrlParams({
-					with_user_count: options?.["with_user_count"] as any,
+					with_user_count: options?.with_user_count as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -10262,7 +10262,7 @@ export const make = (
 				`/guilds/${guildId}/scheduled-events/${guildScheduledEventId}`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					with_user_count: options?.["with_user_count"] as any,
+					with_user_count: options?.with_user_count as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -10305,10 +10305,10 @@ export const make = (
 				`/guilds/${guildId}/scheduled-events/${guildScheduledEventId}/users`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					with_member: options?.["with_member"] as any,
-					limit: options?.["limit"] as any,
-					before: options?.["before"] as any,
-					after: options?.["after"] as any,
+					with_member: options?.with_member as any,
+					limit: options?.limit as any,
+					before: options?.before as any,
+					after: options?.after as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -10634,7 +10634,7 @@ export const make = (
 			),
 		getGuildWidgetPng: (guildId, options) =>
 			HttpClientRequest.get(`/guilds/${guildId}/widget.png`).pipe(
-				HttpClientRequest.setUrlParams({ style: options?.["style"] as any }),
+				HttpClientRequest.setUrlParams({ style: options?.style as any }),
 				withResponse(
 					HttpClientResponse.matchStatus({
 						"429": decodeError("RatelimitedResponse", RatelimitedResponse),
@@ -10648,7 +10648,7 @@ export const make = (
 				`/interactions/${interactionId}/${interactionToken}/callback`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					with_response: options.params?.["with_response"] as any,
+					with_response: options.params?.with_response as any,
 				}),
 				HttpClientRequest.bodyUnsafeJson(options.payload),
 				withResponse(
@@ -10664,10 +10664,8 @@ export const make = (
 		inviteResolve: (code, options) =>
 			HttpClientRequest.get(`/invites/${code}`).pipe(
 				HttpClientRequest.setUrlParams({
-					with_counts: options?.["with_counts"] as any,
-					guild_scheduled_event_id: options?.[
-						"guild_scheduled_event_id"
-					] as any,
+					with_counts: options?.with_counts as any,
+					guild_scheduled_event_id: options?.guild_scheduled_event_id as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -10820,7 +10818,7 @@ export const make = (
 			),
 		getLobbyMessages: (lobbyId, options) =>
 			HttpClientRequest.get(`/lobbies/${lobbyId}/messages`).pipe(
-				HttpClientRequest.setUrlParams({ limit: options?.["limit"] as any }),
+				HttpClientRequest.setUrlParams({ limit: options?.limit as any }),
 				withResponse(
 					HttpClientResponse.matchStatus({
 						"2xx": decodeSuccess(GetLobbyMessages200),
@@ -11101,10 +11099,10 @@ export const make = (
 		listMyGuilds: (options) =>
 			HttpClientRequest.get(`/users/@me/guilds`).pipe(
 				HttpClientRequest.setUrlParams({
-					before: options?.["before"] as any,
-					after: options?.["after"] as any,
-					limit: options?.["limit"] as any,
-					with_counts: options?.["with_counts"] as any,
+					before: options?.before as any,
+					after: options?.after as any,
+					limit: options?.limit as any,
+					with_counts: options?.with_counts as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -11207,9 +11205,9 @@ export const make = (
 		executeWebhook: (webhookId, webhookToken, options) =>
 			HttpClientRequest.post(`/webhooks/${webhookId}/${webhookToken}`).pipe(
 				HttpClientRequest.setUrlParams({
-					wait: options.params?.["wait"] as any,
-					thread_id: options.params?.["thread_id"] as any,
-					with_components: options.params?.["with_components"] as any,
+					wait: options.params?.wait as any,
+					thread_id: options.params?.thread_id as any,
+					with_components: options.params?.with_components as any,
 				}),
 				HttpClientRequest.bodyUnsafeJson(options.payload),
 				withResponse(
@@ -11250,8 +11248,8 @@ export const make = (
 				`/webhooks/${webhookId}/${webhookToken}/github`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					wait: options.params?.["wait"] as any,
-					thread_id: options.params?.["thread_id"] as any,
+					wait: options.params?.wait as any,
+					thread_id: options.params?.thread_id as any,
 				}),
 				HttpClientRequest.bodyUnsafeJson(options.payload),
 				withResponse(
@@ -11268,7 +11266,7 @@ export const make = (
 				`/webhooks/${webhookId}/${webhookToken}/messages/@original`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					thread_id: options?.["thread_id"] as any,
+					thread_id: options?.thread_id as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -11284,7 +11282,7 @@ export const make = (
 				`/webhooks/${webhookId}/${webhookToken}/messages/@original`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					thread_id: options?.["thread_id"] as any,
+					thread_id: options?.thread_id as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -11300,8 +11298,8 @@ export const make = (
 				`/webhooks/${webhookId}/${webhookToken}/messages/@original`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					thread_id: options.params?.["thread_id"] as any,
-					with_components: options.params?.["with_components"] as any,
+					thread_id: options.params?.thread_id as any,
+					with_components: options.params?.with_components as any,
 				}),
 				HttpClientRequest.bodyUnsafeJson(options.payload),
 				withResponse(
@@ -11318,7 +11316,7 @@ export const make = (
 				`/webhooks/${webhookId}/${webhookToken}/messages/${messageId}`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					thread_id: options?.["thread_id"] as any,
+					thread_id: options?.thread_id as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -11334,7 +11332,7 @@ export const make = (
 				`/webhooks/${webhookId}/${webhookToken}/messages/${messageId}`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					thread_id: options?.["thread_id"] as any,
+					thread_id: options?.thread_id as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -11350,8 +11348,8 @@ export const make = (
 				`/webhooks/${webhookId}/${webhookToken}/messages/${messageId}`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					thread_id: options.params?.["thread_id"] as any,
-					with_components: options.params?.["with_components"] as any,
+					thread_id: options.params?.thread_id as any,
+					with_components: options.params?.with_components as any,
 				}),
 				HttpClientRequest.bodyUnsafeJson(options.payload),
 				withResponse(
@@ -11368,8 +11366,8 @@ export const make = (
 				`/webhooks/${webhookId}/${webhookToken}/slack`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					wait: options.params?.["wait"] as any,
-					thread_id: options.params?.["thread_id"] as any,
+					wait: options.params?.wait as any,
+					thread_id: options.params?.thread_id as any,
 				}),
 				HttpClientRequest.bodyUnsafeJson(options.payload),
 				withResponse(

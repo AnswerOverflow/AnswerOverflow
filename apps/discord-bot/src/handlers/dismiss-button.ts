@@ -93,7 +93,7 @@ export function handleDismissButtonInteraction(
 
 		// Get the member who clicked the button
 		const dismisser = yield* Effect.tryPromise({
-			try: () => interaction.guild!.members.fetch(interaction.user.id),
+			try: () => interaction.guild?.members.fetch(interaction.user.id),
 			catch: (error) => error,
 		});
 

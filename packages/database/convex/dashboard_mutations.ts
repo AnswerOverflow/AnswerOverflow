@@ -1,5 +1,4 @@
 import { v } from "convex/values";
-import { api } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { assertCanEditServer, getDiscordAccountIdFromAuth } from "./auth";
 import type { AuthorizedUser, CanEditServer } from "./permissions";

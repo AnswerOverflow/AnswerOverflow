@@ -203,7 +203,9 @@ function storeMessages(
 		);
 
 		if (allAttachments.length > 0) {
-			yield* Effect.logDebug(`Uploading ${allAttachments.length} attachments...`);
+			yield* Effect.logDebug(
+				`Uploading ${allAttachments.length} attachments...`,
+			);
 
 			// Upload attachments in batches to avoid overwhelming the system
 			const batchSize = 5;

@@ -33,7 +33,7 @@ export function handleMarkSolutionCommand(
 		}
 
 		const targetMessage = yield* Effect.tryPromise({
-			try: () => interaction.channel!.messages.fetch(interaction.targetId),
+			try: () => interaction.channel?.messages.fetch(interaction.targetId),
 			catch: (error) => error,
 		});
 

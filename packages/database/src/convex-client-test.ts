@@ -1,16 +1,16 @@
 // Build modules object using Bun's glob to bypass import.meta.glob
 
+import { readdir } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { convexTest, type TestConvex } from "@packages/convex-test";
 import type {
 	FunctionArgs,
 	FunctionReference,
 	FunctionReturnType,
 	OptionalRestArgs,
 } from "convex/server";
-import { convexTest, type TestConvex } from "@packages/convex-test";
 import { Context, Effect, Layer } from "effect";
-import { readdir } from "fs/promises";
-import { dirname, join, resolve } from "path";
-import { fileURLToPath } from "url";
 import { api, internal } from "../convex/_generated/api";
 import schema from "../convex/schema";
 import {
@@ -55,7 +55,7 @@ async function buildModules(): Promise<Record<string, () => Promise<unknown>>> {
 	const convexFiles = await findConvexFiles(convexDir);
 	const modules: Record<string, () => Promise<unknown>> = {};
 	for (const file of convexFiles) {
-		const normalizedPath = "/convex/" + file.replace(/\\/g, "/");
+		const normalizedPath = `/convex/${file.replace(/\\/g, "/")}`;
 		const fullPath = resolve(convexDir, file);
 		modules[normalizedPath] = async () => {
 			return await import(fullPath);
@@ -138,11 +138,11 @@ const createTestService = Effect.gen(function* () {
 			queryCallCounts.set(queryKey, (queryCallCounts.get(queryKey) ?? 0) + 1);
 
 			// For test client, create a refresh function that queries and calls callback
-			let currentValue: FunctionReturnType<Query> | undefined;
+			let _currentValue: FunctionReturnType<Query> | undefined;
 			const refreshValue = async () => {
 				try {
 					const newValue = await testClient.query(query, args);
-					currentValue = newValue;
+					_currentValue = newValue;
 					callback(newValue);
 				} catch {
 					// Ignore errors for now - could be enhanced to handle errors
