@@ -1,7 +1,7 @@
 import { v } from "convex/values";
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
+import { getDiscordAccountIdFromAuth } from "./auth";
 import { publicInternalMutation, publicInternalQuery } from "./publicInternal";
-import { assertCanEditServer, getDiscordAccountIdFromAuth } from "./auth";
 
 const serverPreferencesSchema = v.object({
 	serverId: v.id("servers"),
@@ -31,17 +31,11 @@ export const createServerPreferences = publicInternalMutation({
 		preferences: serverPreferencesSchema,
 	},
 	handler: async (ctx, args) => {
-		// Check authentication and authorization
-		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-
 		// Get server to get Discord ID
 		const server = await ctx.db.get(args.preferences.serverId);
 		if (!server) {
 			throw new Error("Server not found");
 		}
-
-		// Check if user can edit this server
-		await assertCanEditServer(ctx, server.discordId, discordAccountId);
 
 		// Check if preferences already exist
 		const existing = await ctx.db
@@ -100,18 +94,6 @@ export const updateServerPreferences = publicInternalMutation({
 		preferences: serverPreferencesSchema,
 	},
 	handler: async (ctx, args) => {
-		// Check authentication and authorization
-		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-
-		// Get server to get Discord ID
-		const server = await ctx.db.get(args.preferences.serverId);
-		if (!server) {
-			throw new Error("Server not found");
-		}
-
-		// Check if user can edit this server
-		await assertCanEditServer(ctx, server.discordId, discordAccountId);
-
 		const existing = await ctx.db
 			.query("serverPreferences")
 			.withIndex("by_serverId", (q) =>
@@ -157,18 +139,6 @@ export const upsertServerPreferences = publicInternalMutation({
 		preferences: serverPreferencesSchema,
 	},
 	handler: async (ctx, args) => {
-		// Check authentication and authorization
-		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-
-		// Get server to get Discord ID
-		const server = await ctx.db.get(args.preferences.serverId);
-		if (!server) {
-			throw new Error("Server not found");
-		}
-
-		// Check if user can edit this server
-		await assertCanEditServer(ctx, server.discordId, discordAccountId);
-
 		const existing = await ctx.db
 			.query("serverPreferences")
 			.withIndex("by_serverId", (q) =>
@@ -246,18 +216,6 @@ export const deleteServerPreferences = publicInternalMutation({
 		serverId: v.id("servers"),
 	},
 	handler: async (ctx, args) => {
-		// Check authentication and authorization
-		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-
-		// Get server to get Discord ID
-		const server = await ctx.db.get(args.serverId);
-		if (!server) {
-			throw new Error("Server not found");
-		}
-
-		// Check if user can edit this server
-		await assertCanEditServer(ctx, server.discordId, discordAccountId);
-
 		const preferences = await ctx.db
 			.query("serverPreferences")
 			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))

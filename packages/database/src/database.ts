@@ -902,8 +902,9 @@ export const service = Effect.gen(function* () {
 				convexApi: { api: typeof api; internal: typeof internal },
 			) =>
 				client.mutation(
-					convexApi.internal.server_preferences.upsertServerPreferencesInternal,
+					convexApi.api.server_preferences.upsertServerPreferences,
 					{
+						backendAccessToken,
 						preferences,
 					},
 				),

@@ -7,26 +7,21 @@
 		},
 		"build": {
 			"outputs": ["dist/**", ".next/**", "!.next/cache/**"],
-			"dependsOn": ["^build", "codegen"]
+			"dependsOn": ["^build"]
 		},
 		"dev": {
 			"cache": false,
-			"persistent": true,
-			"dependsOn": ["codegen"]
+			"persistent": true
 		},
 		"clean": {
 			"cache": false
 		},
 		"typecheck": {
-			"cache": true,
-			"dependsOn": ["codegen"]
+			"cache": true
 		},
 		"test": {
-			"cache": true,
-			"dependsOn": ["codegen"]
+			"cache": true
 		},
-		"lint": {
-			"dependsOn": ["codegen"]
-		}
+		"lint": {}
 	}
 }
